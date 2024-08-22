@@ -1,5 +1,5 @@
-//[[create-a-dashboard-of-panels-with-web-server-data]]
-== Create your first dashboard
+[[create-a-dashboard-of-panels-with-web-server-data]]
+== Create a simple dashboard to monitor website logs
 
 Learn the most common ways to create a dashboard from your own data.
 The tutorial will use sample data from the perspective of an analyst looking
@@ -13,7 +13,7 @@ image::images/lens_logsDashboard_8.4.0.png[Logs dashboard]
 Before you begin, you should be familiar with the <<kibana-concepts-analysts>>.
 
 [discrete]
-//[[add-the-data-and-create-the-dashboard]]
+[[add-the-data-and-create-the-dashboard]]
 === Add the data and create the dashboard
 
 Add the sample web logs data, and create and set up the dashboard.
@@ -33,7 +33,7 @@ Create the dashboard where you'll display the visualization panels.
 . Set the <<set-time-filter,time filter>> to *Last 90 days*.
 
 [float]
-//[[open-and-set-up-lens]]
+[[open-and-set-up-lens]]
 === Open the visualization editor and get familiar with the data
 
 Open the visualization editor, then make sure the correct fields appear.
@@ -60,7 +60,7 @@ To create the visualizations in this tutorial, you'll use the following fields:
 To see the most frequent values in a field, hover over the field name, then click *i*.
 
 [discrete]
-//[[view-the-number-of-website-visitors]]
+[[view-the-number-of-website-visitors]]
 === Create your first visualization
 
 Pick a field you want to analyze, such as *clientip*. To analyze only the *clientip* field, use the *Metric* visualization to display the field as a number.
@@ -90,7 +90,7 @@ In the layer pane, *Unique count of clientip* appears because the editor automat
 *[No Title]* appears in the visualization panel header. Since the visualization has its own `Unique visitors` label, you do not need to add a panel title.
 
 [discrete]
-//[[mixed-multiaxis]]
+[[mixed-multiaxis]]
 === View a metric over time
 
 There are two shortcuts you can use to view metrics over time. 
@@ -149,7 +149,7 @@ Since you removed the axis labels, add a panel title:
 image::images/lens_lineChartMetricOverTime_8.4.0.png[Line chart that displays metric data over time]
 
 [discrete]
-//[[view-the-distribution-of-visitors-by-operating-system]]
+[[view-the-distribution-of-visitors-by-operating-system]]
 === View the top values of a field
 
 Create a visualization that displays the most frequent values of *request.keyword* on your website, ranked by the unique visitors.
@@ -195,7 +195,7 @@ image::images/lens_tableTopFieldValues_7.16.png[Table that displays the top fiel
 Since the table columns are labeled, you do not need to add a panel title.
 
 [discrete]
-//[[custom-ranges]]
+[[custom-ranges]]
 === Compare a subset of documents to all documents
 
 Create a proportional visualization that helps you determine if your users transfer more bytes from documents under 10KB versus documents over 10Kb.
@@ -250,7 +250,7 @@ Add a panel title:
 . In the *Title* field, enter `Sum of bytes from large requests`, then click *Save*.
 
 [discrete]
-//[[histogram]]
+[[histogram]]
 === View the distribution of a number field
 
 The distribution of a number can help you find patterns. For example, you can analyze the website traffic per hour to find the best time for routine maintenance.
@@ -283,7 +283,7 @@ Add a panel title:
 . In the *Title* field, enter `Website traffic`, then click *Save*.
 
 [discrete]
-//[[treemap]]
+[[treemap]]
 === Create a multi-level chart
 
 *Table* and *Proportion* visualizations support multiple functions. For example, to create visualizations that break down the data by website traffic sources and user geography, apply the *Filters* and *Top values* functions.
@@ -347,7 +347,7 @@ Add a panel title:
 . In the *Title* field, enter `Page views by location and referrer`, then click *Save*.
 
 [float]
-//[[arrange-the-lens-panels]]
+[[arrange-the-lens-panels]]
 === Arrange the dashboard panels
 
 Resize and move the panels so they all appear on the dashboard without scrolling.

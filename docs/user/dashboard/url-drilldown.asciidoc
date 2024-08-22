@@ -1,4 +1,4 @@
-//[[url_templating-language]]
+[[url_templating-language]]
 === URL templating
 
 beta[]
@@ -12,7 +12,7 @@ https://github.com/elastic/kibana/issues?q={{event.value}}
 
 A Handlebars expression is a `{{`, some contents, followed by a `}}`. When the drilldown is executed, these expressions are replaced by values from the dashboard and interaction context.
 
-//[[helpers]]
+[[helpers]]
 In addition to  https://ela.st/handlebars-helpers[built-in] Handlebars helpers, you can use custom helpers.
 
 Refer to Handlebars https://ela.st/handlebars-docs#expressions[documentation] to learn about advanced use cases.
@@ -144,7 +144,7 @@ a|Escapes string using built in `encodeURIComponent` function, while keeping "@"
 
 
 [float]
-//[[url-template-variables]]
+[[url-template-variables]]
 ==== URL template variables
 
 The URL drilldown template has three sources for variables:
@@ -157,7 +157,7 @@ To ensure that the configured URL drilldown works as expected with your data, yo
 You can access the full list of variables available for the current panel and selected trigger by clicking *Add variable* in the top-right corner of a URL template input.
 
 [float]
-//[[variables-reference]]
+[[variables-reference]]
 ==== Variables reference
 
 

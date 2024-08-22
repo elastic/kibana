@@ -1,4 +1,4 @@
-//[[lens]]
+[[lens]]
 === Create visualizations with Lens
 ++++
 <titleabbrev>Lens</titleabbrev>
@@ -16,7 +16,7 @@ With *Lens*, you can:
 * Add annotations and reference lines.
 
 [float]
-//[[create-the-visualization-panel]]
+[[create-the-visualization-panel]]
 ==== Create visualizations
 
 If you're unsure about the visualization type you want to use, or how you want to display the data, drag the fields you want to visualize onto the workspace, then let *Lens* choose for you. 
@@ -54,7 +54,7 @@ Edit and delete.
 TIP: Use the **Edit visualization** flyout to make edits without having to leave the dashboard, or click **Edit in Lens** to make edits using the Lens application.
 
 [float]
-//[[change-the-fields]]
+[[change-the-fields]]
 ==== Change the fields list
 
 Change the fields list to display a different {data-source}, different time range, or add your own fields.
@@ -73,7 +73,7 @@ image:images/lens_dataViewDropDown_8.4.0.png[Dropdown menu located next to {data
 For more information about adding fields to {data-sources} and examples, refer to <<runtime-fields>>.
 
 [float]
-//[[create-custom-tables]]
+[[create-custom-tables]]
 ==== Create custom tables
 
 Tables are highly customizable, and provide you with text alignment, value formatting, coloring options, and more.
@@ -105,7 +105,7 @@ All columns that belong to the same layer pane group are sorted in the table.
 * *Color by value* &mdash; Applies color to the cell or text values. To change the color, click *Edit*. 
 
 [float]
-//[[drag-and-drop-keyboard-navigation]]
+[[drag-and-drop-keyboard-navigation]]
 ==== Create visualizations with keyboard navigation
 
 To use a keyboard instead of a mouse, use the *Lens* fully accessible and continuously improved drag system.
@@ -132,7 +132,7 @@ image::images/lens_drag_drop_3.gif[Using drag and drop to reorder]
 . To confirm the action, press Space bar. To cancel, press Esc.
 
 [float]
-//[[lens-formulas]]
+[[lens-formulas]]
 ==== Use formulas to perform math
 
 Formulas allow you to perform math on aggregated data. The most common formulas divide two values to produce a percent.
@@ -165,7 +165,7 @@ TIP: For detailed information on formulas, click image:dashboard/images/formula_
 . To accurately display the formula, select *Percent* from the *Value format* dropdown.
 
 [float]
-//[[compare-data-with-time-offsets]]
+[[compare-data-with-time-offsets]]
 ==== Compare differences over time
 
 Compare your real-time data to the results that are offset by a time increment. For example, you can compare the real-time percentage of a user CPU time spent to the results offset by one hour. 
@@ -179,7 +179,7 @@ Compare your real-time data to the results that are offset by a time increment. 
 For a time shift example, refer to <<compare-time-ranges>>.
 
 [float]
-//[[create-partition-charts-with-multiple-metrics]]
+[[create-partition-charts-with-multiple-metrics]]
 ==== Create partition charts with multiple metrics
 
 To create partition charts, such as pie charts, configure one or more *Slice by* dimensions to define the partitions, and a *Metric* dimension to define the size. 
@@ -192,7 +192,7 @@ To create partition charts with multiple metrics, use the layer settings. Multip
 . Click *X*.
 
 [float]
-//[[improve-visualization-loading-time]]
+[[improve-visualization-loading-time]]
 ==== Improve visualization loading time
 
 preview::[]
@@ -209,7 +209,7 @@ Use low sampling percentages on large datasets.
 . Click **Save**.
 
 [float]
-//[[add-annotations]]
+[[add-annotations]]
 ==== Add annotations
 
 preview::[]
@@ -283,7 +283,7 @@ Add a library annotation group to a visualization.
 . Select the annotation group you want to use.
 
 [float]
-//[[add-reference-lines]]
+[[add-reference-lines]]
 ==== Add reference lines
 
 With reference lines, you can identify specific values in your visualizations with icons, colors, and other display options. You can add reference lines to any visualization type that displays axes.
@@ -306,13 +306,13 @@ image::images/lens_referenceLine_7.16.png[Lens drag and drop focus state]
 . Specify the display options, such as *Display name* and *Icon*, then click *Close*.
 
 [float]
-//[[filter-the-data]]
+[[filter-the-data]]
 ==== Apply filters
 
 You can use the <<semi-structured-search, query bar>> to create queries that filter all the data in a visualization, or use the layer pane and legend filters to apply filters based on field values.
 
 [float]
-//[[filter-with-the-function]]
+[[filter-with-the-function]]
 ===== Apply multiple KQL filters
 
 With the *Filters* function, you can apply more than one KQL filter, and apply a KQL filter to a single layer so you can visualize filtered and unfiltered data at the same time.
@@ -326,7 +326,7 @@ With the *Filters* function, you can apply more than one KQL filter, and apply a
 To try the *Filters* function on your own, refer to <<custom-ranges,Compare a subset of documents to all documents>>.
 
 [float]
-//[[filter-with-the-advanced-option]]
+[[filter-with-the-advanced-option]]
 ===== Apply a single KQL filter
 
 With the *Filter by* advanced option, you can assign a color to each filter group in *Bar* and *Line and area* visualizations, and build complex tables. For example, to display failure rate and the overall data.
@@ -338,7 +338,7 @@ With the *Filter by* advanced option, you can assign a color to each filter grou
 . Enter the KQL filter you want to apply.
 
 [float]
-//[[filter-with-legend-filters]]
+[[filter-with-legend-filters]]
 ===== Apply legend filters
 
 Apply filters to visualizations directly from the values in the legend. *Bar*, *Line and area*, and *Proportion* visualizations support legend filters.
@@ -350,7 +350,7 @@ In the legend, click the field, then choose one of the following options:
 * *Filter out value* &mdash; Applies a filter that removes the field data from the visualization.
 
 [float]
-//[[configure-the-visualization-components]]
+[[configure-the-visualization-components]]
 ==== Configure the visualization components
 
 Each visualization type comes with a set of components that you access from the editor toolbar.
@@ -366,7 +366,7 @@ The following component menus are available:
 * *Left axis*, *Bottom axis*, and *Right axis* &mdash; Specify how you want to display the chart axes. For example, add axis labels and change the orientation and bounds.
 
 [float]
-//[[customize-visualization-legend]]
+[[customize-visualization-legend]]
 ===== Customize a visualization legend
 
 When creating or editing a visualization, you can customize the way the legend gets displayed, and the data it displays. To do that, look for the image:images/legend-icon.svg[Legend icon] icon.
@@ -422,7 +422,7 @@ image::images/statistics-in-legends.png[Additional statistics shown in the legen
 
 
 [float]
-//[[explore-lens-data-in-discover]]
+[[explore-lens-data-in-discover]]
 ==== Explore the data in Discover
 
 When your visualization includes one data view, you can open and explore the visualization data in *Discover*.
@@ -432,7 +432,7 @@ To get started, click *Explore data in Discover* in the toolbar.
 For more information about exploring your data with *Discover*, check out <<discover,Discover>>.
 
 [float]
-//[[view-data-and-requests]]
+[[view-data-and-requests]]
 ==== View the visualization data and requests
 
 To view the data included in the visualization and the requests that collected the data, use the *Inspector*.
@@ -452,7 +452,7 @@ To view the data included in the visualization and the requests that collected t
 .. To view the requests in *Console*, click *Request*, then click *Open in Console*.
 
 [float]
-//[[save-the-lens-panel]]
+[[save-the-lens-panel]]
 ==== Save and add the panel
 
 Save the panel to the *Visualize Library* and add it to the dashboard, or add it to the dashboard without saving.
@@ -480,13 +480,13 @@ To save the panel to the dashboard:
 .. Enter the *Title*, then click *Save*.
 
 [float]
-//[[lens-faq]]
+[[lens-faq]]
 === Frequently asked questions
 
 For answers to common *Lens* questions, review the following. 
 
 [discrete]
-//[[when-should-i-normalize-the-data-by-unit-or-use-a-custom-interval]]
+[[when-should-i-normalize-the-data-by-unit-or-use-a-custom-interval]]
 .*When should I normalize the data by unit or use a custom interval?*
 [%collapsible]
 ====
@@ -512,7 +512,7 @@ To create a custom interval:
 ====
 
 [discrete]
-//[[what-is-the-other-category]]
+[[what-is-the-other-category]]
 .*What data is categorized as Other?*
 [%collapsible]
 ====
@@ -525,7 +525,7 @@ To disable *Group other values as "Other"*, click a field in the layer pane, cli
 ====
 
 [discrete]
-//[[how-can-i-include-documents-without-the-field-in-the-operation]]
+[[how-can-i-include-documents-without-the-field-in-the-operation]]
 .*How do I add documents without a field?*
 [%collapsible]
 ====
@@ -539,7 +539,7 @@ which is helpful when you want to make a comparison to the whole documentation s
 ====
 
 [discrete]
-//[[when-do-i-use-runtime-fields-vs-formula]]
+[[when-do-i-use-runtime-fields-vs-formula]]
 .*When do I use runtime fields vs. formula?*
 [%collapsible]
 ====
@@ -549,7 +549,7 @@ Use formulas to compare multiple {es} aggregations that can be filtered or shift
 ====
 
 [discrete]
-//[[is-it-possible-to-have-more-than-one-Y-axis-scale]]
+[[is-it-possible-to-have-more-than-one-Y-axis-scale]]
 .*Can I add more than one y-axis scale?*
 [%collapsible]
 ====
@@ -557,7 +557,7 @@ For each y-axis, you can select *Left* and *Right*, and configure a different sc
 ====
 
 [discrete]
-//[[why-is-my-value-with-the-right-color-using-value-based-coloring]]
+[[why-is-my-value-with-the-right-color-using-value-based-coloring]]
 .*Why is my value the incorrect color when I use value-based coloring?*
 [%collapsible]
 ====
@@ -577,7 +577,7 @@ Here's a short list of few different aspects to check:
 ====
 
 [discrete]
-//[[can-i-sort-by-multiple-columns]]
+[[can-i-sort-by-multiple-columns]]
 .*How do I sort by multiple columns?*
 [%collapsible]
 ====
@@ -586,7 +586,7 @@ refer to <<explore-fields-in-your-data,Explore the fields in your data>>.
 ====
 
 [float]
-//[[why-my-field-is-missing-from-the-fields-list]]
+[[why-my-field-is-missing-from-the-fields-list]]
 .*Why is my field missing from the fields list?*
 [%collapsible]
 ====
@@ -601,7 +601,7 @@ Verify if the field appears in the *Empty fields* list. *Lens* uses heuristics t
 ====
 
 [float]
-//[[how-to-handle-gaps-in-time-series-visualizations]]
+[[how-to-handle-gaps-in-time-series-visualizations]]
 .*What do I do with gaps in time series visualizations?*
 [%collapsible]
 ====
@@ -609,7 +609,7 @@ When you create *Area* and *Line* charts with sparse time series data, open *Vis
 ====
 
 [discrete]
-//[[is-it-possible-to-change-the-scale-of-Y-axis]]
+[[is-it-possible-to-change-the-scale-of-Y-axis]]
 .*Can I statically define the y-axis scale?*
 [%collapsible]
 ====
@@ -619,7 +619,7 @@ To configure the bounds, use the menus in the editor toolbar. Bar and area chart
 ====
 
 [discrete]
-//[[is-it-possible-to-show-icons-in-datatable]]
+[[is-it-possible-to-show-icons-in-datatable]]
 .*Is it possible to display icons in data tables?*
 [%collapsible]
 ====
@@ -627,7 +627,7 @@ You can display icons with <<managing-data-views, field formatters>> in data tab
 ====
 
 [discrete]
-//[[is-it-possible-to-inspect-the-elasticsearch-queries-in-Lens]]
+[[is-it-possible-to-inspect-the-elasticsearch-queries-in-Lens]]
 .*How do I inspect {es} queries in visualizations?*
 [%collapsible]
 ====
@@ -635,7 +635,7 @@ You can inspect the requests sent by the visualization to {es} using the Inspect
 ====
 
 [discrete]
-//[[how-to-isolate-a-single-series-in-a-chart]]
+[[how-to-isolate-a-single-series-in-a-chart]]
 .*How do I isolate a single series in a chart?*
 [%collapsible]
 ====
@@ -643,7 +643,7 @@ For area, line, and bar charts, press Shift, then click the series in the legend
 ====
 
 [discrete]
-//[[is-it-possible-to-use-saved-serches-in-lens]]
+[[is-it-possible-to-use-saved-serches-in-lens]]
 .*How do I visualize saved searches?*
 [%collapsible]
 ====
@@ -651,7 +651,7 @@ Visualizing saved searches in unsupported.
 ====
 
 [discrete]
-//[[is-it-possible-to-decrease-or-increase-the-number-of-suggestions]]
+[[is-it-possible-to-decrease-or-increase-the-number-of-suggestions]]
 .*How do I change the number of suggestions?*
 [%collapsible]
 ====
@@ -659,7 +659,7 @@ Configuring the *Suggestions* is unsupported.
 ====
 
 [discrete]
-//[[is-it-possible-to-have-pagination-for-datatable]]
+[[is-it-possible-to-have-pagination-for-datatable]]
 .*Is it possible to have pagination in a data table?*
 [%collapsible]
 ====
@@ -667,7 +667,7 @@ Pagination in a data table is unsupported. To use pagination in data tables, cre
 ====
 
 [discrete]
-//[[is-it-possible-to-select-color-for-specific-bar-or-point]]
+[[is-it-possible-to-select-color-for-specific-bar-or-point]]
 .*How do I change the color for a single data point?*
 [%collapsible]
 ====
@@ -675,7 +675,7 @@ Specifying the color for a single data point, such as a single bar or line, is u
 ====
 
 [discrete]
-//[[dynamic-metric-coloring]]
+[[dynamic-metric-coloring]]
 .*How does dynamic coloring work for the metric visualization?*
 [%collapsible]
 ====

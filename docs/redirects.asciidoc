@@ -438,3 +438,13 @@ For the most up-to-date API details, refer to the
 == Add connectors to cases
 
 This content has moved. Refer to <<manage-cases-settings>>.
+
+[role="exclude", id="create-drilldowns"]
+== Create drilldowns
+
+This content has moved. Refer to <<drilldowns>>.
+
+[role="exclude", id="tsvb"]
+== Create drilldowns
+
+This content has moved. Refer to <<tsvb-panel>>.

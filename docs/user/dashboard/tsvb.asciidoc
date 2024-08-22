@@ -1,4 +1,4 @@
-//[[tsvb]]
+[[tsvb-panel]]
 === TSVB
 
 *TSVB* is a set of visualization types that you configure and display on dashboards.
@@ -16,7 +16,7 @@ With *TSVB*, you can:
 image::images/tsvb-screenshot.png[TSVB overview]
 
 [float]
-//[[tsvb-data-view-mode]]
+[[tsvb-data-view-mode]]
 ==== Open and set up TSVB
 
 Open *TSVB*, then configure the required settings. You can create *TSVB* visualizations with only {data-sources}, or {es} index strings. 
@@ -31,7 +31,7 @@ When you use only {data-sources}, you are able to:
 
 * Improve performance
 
-//[[tsvb-index-pattern-mode]]
+[[tsvb-index-pattern-mode]]
 
 IMPORTANT: Creating *TSVB* visualizations with an {es} index string is deprecated and will be removed in a future release. By default, you create *TSVB* visualizations with only {data-sources}. To use an {es} index string, contact your administrator, or go to <<advanced-options, Advanced Settings>> and set `metrics:allowStringIndices` to `true`.
 
@@ -52,7 +52,7 @@ By default, *TSVB* drops the last bucket because the time filter intersects the 
 . To view a filtered set of documents, enter <<kuery-query, KQL filters>> in the *Panel filter* field.
 
 [float]
-//[[tsvb-function-reference]]
+[[tsvb-function-reference]]
 ==== Configure the series
 
 Each *TSVB* visualization shares the same options to create a *Series*. Each series can be thought of as a separate {es} aggregation. 
@@ -93,13 +93,13 @@ To configure the value of each series, select the function, then configure the f
 . Click *Options*, then configure the inputs for the function. For example, to use a different field format, make a selection from the *Data formatter* dropdown.
 
 [float]
-//[[configure-the-visualizations]]
+[[configure-the-visualizations]]
 ==== TSVB visualization options
 
 The configuration options differ for each *TSVB* visualization.
 
 [float]
-//[[tsvb-time-series]]
+[[tsvb-time-series]]
 ===== Time Series
 
 By default, the y-axis displays the full range of data, including zero. To automatically scale the y-axis from
@@ -107,33 +107,33 @@ the minimum to maximum values of the data, click *Data > Options > Fill*, then e
 You can add annotations to the x-axis based on timestamped documents in a separate {es} index.
 
 [float]
-//[[all-chart-types-except-time-series]]
+[[all-chart-types-except-time-series]]
 ===== All chart types except Time Series
 
 The *Data timerange mode* dropdown in *Panel options* controls the timespan that *TSVB* uses to match documents.
 *Last value* is unable to match all documents, only the specific interval. *Entire timerange* matches all documents specified in the time filter.
 
 [float]
-//[[metric-topn-gauge]]
+[[metric-topn-gauge]]
 ===== Metric, Top N, and Gauge
 
 *Color rules* in *Panel options* contains conditional coloring based on the values. 
 
 [float]
-//[[topn-table]]
+[[topn-table]]
 ===== Top N and Table
 
 When you click a series, *TSVB* applies a filter based on the series name. 
 To change this behavior, click *Panel options*, then specify a URL in the *Item URL* field, which opens a URL instead of applying a filter on click. 
 
 [float]
-//[[tsvb-markdown]]
+[[tsvb-markdown]]
 ===== Markdown
 
 The *Markdown* visualization supports Markdown with Handlebar (mustache) syntax to insert dynamic data, and supports custom CSS.
 
 [float]
-//[[edit-visualizations-in-lens]]
+[[edit-visualizations-in-lens]]
 ==== Open and edit TSVB visualizations in Lens
 
 When you open *TSVB* visualizations in *Lens*, all configuration options and annotations appear in the *Lens* visualization editor.
@@ -151,7 +151,7 @@ To get started, click *Edit visualization in Lens* in the toolbar.
 For more information, check out <<lens,Create visualizations with Lens>>.
 
 [float]
-//[[view-data-and-requests-tsvb]]
+[[view-data-and-requests-tsvb]]
 ==== View the visualization data requests
 
 View the requests that collect the visualization data.
@@ -161,7 +161,7 @@ View the requests that collect the visualization data.
 . From the *Request* dropdown, select the series you want to view.
 
 [float]
-//[[save-the-tsvb-panel]]
+[[save-the-tsvb-panel]]
 ==== Save and add the panel
 
 Save the panel to the *Visualize Library* and add it to the dashboard, or add it to the dashboard without saving.
@@ -189,13 +189,13 @@ To save the panel to the dashboard:
 .. Enter the *Title*, then click *Save*.
 
 [float]
-//[[tsvb-faq]]
+[[tsvb-faq]]
 ==== Frequently asked questions
 
 For answers to frequently asked *TSVB* question, review the following. 
 
 [discrete]
-//[[how-do-i-create-dashboard-drilldowns]]
+[[how-do-i-create-dashboard-drilldowns]]
 .*How do I create dashboard drilldowns for Top N and Table visualizations?*
 [%collapsible]
 ====
@@ -220,7 +220,7 @@ For example `dashboards#/view/f193ca90-c9f4-11eb-b038-dd3270053a27`.
 ====
 
 [discrete]
-//[[how-do-i-base-drilldowns-on-data]]
+[[how-do-i-base-drilldowns-on-data]]
 .*How do I base drilldown URLs on my data?*
 [%collapsible]
 ====
@@ -244,7 +244,7 @@ Technical note: TSVB uses https://handlebarsjs.com/[Handlebars] to perform these
 ====
 
 [discrete]
-//[[why-is-my-tsvb-visualiztion-missing-data]]
+[[why-is-my-tsvb-visualiztion-missing-data]]
 .*Why is my TSVB visualization missing data?*
 [%collapsible]
 ====
@@ -259,7 +259,7 @@ current time is 9:41, *TSVB* displays only the last 10 minutes &mdash; from 9:30
 ====
 
 [discrete]
-//[[how-do-i-calculate-the-difference-between-two-data-series]]
+[[how-do-i-calculate-the-difference-between-two-data-series]]
 .*How do I calculate the difference between two data series?*
 [%collapsible]
 ====
@@ -268,7 +268,7 @@ Performing math across data series is unsupported in *TSVB*. To calculate the di
 ====
 
 [discrete]
-//[[how-do-i-compare-the-current-versus-previous-month]]
+[[how-do-i-compare-the-current-versus-previous-month]]
 .*How do I compare the current versus previous month?*
 [%collapsible]
 ====
@@ -284,7 +284,7 @@ image::images/tsvb_clone_series.png[Clone Series action]
 ====
 
 [discrete]
-//[[how-do-i-calculate-a-month-over-month-change]]
+[[how-do-i-calculate-a-month-over-month-change]]
 .*How do I calculate a month over month change?*
 [%collapsible]
 ====
@@ -297,7 +297,7 @@ For other types of month over month calculations, use <<timelion, *Timelion*>> o
 ====
 
 [discrete]
-//[[calculate-duration-start-end]]
+[[calculate-duration-start-end]]
 .*How do I calculate the duration between the start and end of an event?*
 [%collapsible]
 ====

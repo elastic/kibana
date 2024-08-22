@@ -1,4 +1,4 @@
-//[[timelion]]
+[[timelion]]
 === Timelion
 
 To use *Timelion*, you define a graph by chaining functions together, using the *Timelion*-specific syntax. 
@@ -41,7 +41,7 @@ If the value of your parameter contains spaces or commas you have to put the val
 .es(q='some query', index=logstash-*)
 
 [float]
-//[[customize-data-series-y-axis]]
+[[customize-data-series-y-axis]]
 ===== .yaxis() function
 
 {kib} supports many y-axis scales and ranges for your data series.
@@ -102,13 +102,13 @@ Open *Timelion* and change the time range.
 . Make sure the <<set-time-filter,time filter>> is *Last 7 days*.
 
 [float]
-//[[timelion-tutorial-create-time-series-visualizations]]
+[[timelion-tutorial-create-time-series-visualizations]]
 ==== Create a time series visualization
 
 To compare the real-time percentage of CPU time spent in user space to the results offset by one hour, create a time series visualization.
 
 [float]
-//[[define-the-functions]]
+[[define-the-functions]]
 ===== Define the functions
 
 To track the real-time percentage of CPU, enter the following in the *Timelion Expression* field, then click *Update*:
@@ -121,7 +121,7 @@ To track the real-time percentage of CPU, enter the following in the *Timelion E
 ----------------------------------
 
 [float]
-//[[compare-the-data]]
+[[compare-the-data]]
 ===== Compare the data
 
 To compare two data sets, add another series, and offset the data back by one hour, then click *Update*:
@@ -138,7 +138,7 @@ To compare two data sets, add another series, and offset the data back by one ho
 ----------------------------------
 
 [float]
-//[[add-label-names]]
+[[add-label-names]]
 ===== Add label names
 
 To easily distinguish between the two data sets, add label names, then click *Update*:
@@ -154,7 +154,7 @@ To easily distinguish between the two data sets, add label names, then click *Up
 ----------------------------------
 
 [float]
-//[[add-a-title]]
+[[add-a-title]]
 ===== Add a title
 
 To make is easier for unfamiliar users to understand the purpose of the visualization, add a title, then click *Update*:
@@ -174,7 +174,7 @@ To make is easier for unfamiliar users to understand the purpose of the visualiz
 ----------------------------------
 
 [float]
-//[[change-the-chart-type]]
+[[change-the-chart-type]]
 ===== Change the appearance of the chart lines
 
 To differentiate between the current hour and the last hour, change the appearance of the chart lines, then click *Update*:
@@ -195,7 +195,7 @@ To differentiate between the current hour and the last hour, change the appearan
 ----------------------------------
 
 [float]
-//[[change-the-line-colors]]
+[[change-the-line-colors]]
 ===== Change the line colors
 
 *Timelion* supports standard color names, hexadecimal values, or a color schema for grouped data.
@@ -220,7 +220,7 @@ To make the first data series stand out, change the line colors, then click *Upd
 ----------------------------------
 
 [float]
-//[[make-adjustments-to-the-legend]]
+[[make-adjustments-to-the-legend]]
 ===== Adjust the legend
 
 Move the legend to the north west position  with two columns, then click *Update*:
@@ -248,7 +248,7 @@ image::images/timelion-customize04.png[Final time series visualization]
 {nbsp}
 
 [float]
-//[[save-the-timelion-panel]]
+[[save-the-timelion-panel]]
 ===== Save and add the panel
 
 Save the panel to the *Visualize Library* and add it to the dashboard, or add it to the dashboard without saving.
@@ -276,13 +276,13 @@ To save the panel to the dashboard:
 .. Enter the *Title*, then click *Save*.
 
 [float]
-//[[timelion-tutorial-create-visualizations-with-mathematical-functions]]
+[[timelion-tutorial-create-visualizations-with-mathematical-functions]]
 === Visualize the inbound and outbound network traffic
 
 To create a visualization for inbound and outbound network traffic, use mathematical functions.
 
 [float]
-//[[mathematical-functions-define-functions]]
+[[mathematical-functions-define-functions]]
 ==== Define the functions
 
 To start tracking the inbound and outbound network traffic, enter the following in the *Timelion Expression* field, then click *Update*:
@@ -295,7 +295,7 @@ To start tracking the inbound and outbound network traffic, enter the following 
 ----------------------------------
 
 [float]
-//[[mathematical-functions-plot-change]]
+[[mathematical-functions-plot-change]]
 ==== Plot the rate of change
 
 To easily monitor the inbound traffic, plots the change in values over time, then click *Update*:
@@ -327,7 +327,7 @@ Add a similar calculation for outbound traffic, then click *Update*:
 `.multiply()` multiplies the data series by a number, the result of a data series, or a list of data series. 
 
 [float]
-//[[mathematical-functions-convert-data]]
+[[mathematical-functions-convert-data]]
 ==== Change the data metric
 
 To make the data easier to analyze, change the data metric from `bytes` to `megabytes`, then click *Update*:
@@ -350,7 +350,7 @@ To make the data easier to analyze, change the data metric from `bytes` to `mega
 <1> `.divide()` accepts the same input as `.multiply()`, then divides the data series by the defined divisor.
 
 [float]
-//[[mathematical-functions-add-labels]]
+[[mathematical-functions-add-labels]]
 ==== Customize and format the visualization
 
 Customize and format the visualization using the following functions, then click *Update*:
@@ -383,7 +383,7 @@ image::images/timelion-math05.png[Final visualization that displays inbound and 
 {nbsp}
 
 [float]
-//[[save-the-network-timelion-panel]]
+[[save-the-network-timelion-panel]]
 ===== Save and add the panel
 
 Save the panel to the *Visualize Library* and add it to the dashboard, or add it to the dashboard without saving.
@@ -411,7 +411,7 @@ To save the panel to the dashboard:
 .. Enter the *Title*, then click *Save*.
 
 [float]
-//[[timelion-tutorial-create-visualizations-withconditional-logic-and-tracking-trends]]
+[[timelion-tutorial-create-visualizations-withconditional-logic-and-tracking-trends]]
 ==== Detect outliers and discover patterns over time
 
 To easily detect outliers and discover patterns over time, modify the time series data with conditional logic and create a trend with a moving average.
@@ -427,7 +427,7 @@ With *Timelion* conditional logic, you can use the following operator values to 
 `gte`:: greater than or equal to
 
 [float]
-//[[conditional-define-functions]]
+[[conditional-define-functions]]
 ===== Define the functions
 
 To chart the maximum value of `system.memory.actual.used.bytes`, enter the following in the *Timelion Expression* field, then click *Update*:
@@ -440,7 +440,7 @@ To chart the maximum value of `system.memory.actual.used.bytes`, enter the follo
 ----------------------------------
 
 [float]
-//[[conditional-track-memory]]
+[[conditional-track-memory]]
 ===== Track used memory
 
 To track the amount of memory used, create two thresholds, then click *Update*:
@@ -480,7 +480,7 @@ To track the amount of memory used, create two thresholds, then click *Update*:
 and the severe threshold is 11.375GB (`11375000000`). If the threshold values are too high or low for your machine, adjust the values.
 
 [float]
-//[[conditional-determine-trend]]
+[[conditional-determine-trend]]
 ===== Determine the trend
 
 To determine the trend, create a new data series, then click *Update*:
@@ -520,7 +520,7 @@ To determine the trend, create a new data series, then click *Update*:
 In this example, `.mvavg(10)` creates a moving average with a window of 10 data points.
 
 [float]
-//[[conditional-format-visualization]]
+[[conditional-format-visualization]]
 ===== Customize and format the visualization
 
 Customize and format the visualization using the following functions, then click *Update*:
@@ -571,7 +571,7 @@ image::images/timelion-conditional04.png[Final visualization that displays outli
 {nbsp}
 
 [float]
-//[[save-the-outlier-timelion-panel]]
+[[save-the-outlier-timelion-panel]]
 ===== Save and add the panel
 
 Save the panel to the *Visualize Library* and add it to the dashboard, or add it to the dashboard without saving.

@@ -1,5 +1,5 @@
-//[[vega]]
-=== Vega
+[[vega]]
+=== Custom visualizations with Vega
 
 *Vega* and *Vega-Lite* are both grammars for creating custom visualizations. They are recommended for advanced users who are comfortable writing {es} queries manually.
 *Vega-Lite* is a good starting point for users who are new to both grammars, but they are not compatible.
@@ -62,7 +62,7 @@ A pre-populated line chart displays the total number of documents.
 . Make sure the <<set-time-filter,time filter>> is *Last 7 days*.
 
 [float]
-//[[vega-tutorial-create-a-stacked-area-chart]]
+[[vega-tutorial-create-a-stacked-area-chart]]
 === Tutorial: Create a stacked area chart from an {es} search query
 
 Learn how to query {es} from *Vega-Lite*, displaying the results in a stacked area chart.
@@ -531,7 +531,7 @@ The selection is controlled by a signal. To view the signal, click *Inspect* in 
 ====
 
 [float]
-//[[vega-tutorial-update-kibana-filters-from-vega]]
+[[vega-tutorial-update-kibana-filters-from-vega]]
 === Tutorial: Update {kib} filters from Vega
 
 To build an area chart using an {es} search query, edit the *Vega* spec, then add click and drag handlers to update the {kib} filters.

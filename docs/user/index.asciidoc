@@ -14,8 +14,6 @@ include::discover.asciidoc[]
 
 include::dashboard/dashboard.asciidoc[]
 
-include::dashboards/dashboards.asciidoc[]
-
 include::canvas.asciidoc[]
 
 include::{kibana-root}/docs/maps/index.asciidoc[]

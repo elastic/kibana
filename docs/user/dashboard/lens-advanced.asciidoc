@@ -1,5 +1,5 @@
-//[[create-a-dashboard-of-panels-with-ecommerce-data]]
-== Analyze time series data
+[[create-a-dashboard-of-panels-with-ecommerce-data]]
+== Create a dashboard with time series charts
 
 In this tutorial, you'll use the ecommerce sample data to analyze sales trends, but you can use any type of data to complete the tutorial.
 
@@ -11,7 +11,7 @@ image::images/lens_timeSeriesDataTutorialDashboard_8.3.png[Final dashboard with 
 Before you begin, you should be familiar with the <<kibana-concepts-analysts>>.
 
 [discrete]
-//[[add-the-data-and-create-the-dashboard-advanced]]
+[[add-the-data-and-create-the-dashboard-advanced]]
 === Add the data and create the dashboard
 
 Add the sample ecommerce data, and create and set up the dashboard.
@@ -29,7 +29,7 @@ Create the dashboard where you'll display the visualization panels.
 . On the *Dashboards* page, click *Create dashboard*.
 
 [float]
-//[[open-and-set-up-lens-advanced]]
+[[open-and-set-up-lens-advanced]]
 === Open and set up the visualization editor
 
 Open the visualization editor, then make sure the correct fields appear.
@@ -39,7 +39,7 @@ Open the visualization editor, then make sure the correct fields appear.
 . Make sure the *Kibana Sample Data eCommerce* {data-source} appears, then set the <<set-time-filter,time filter>> to *Last 30 days*.
 
 [discrete]
-//[[custom-time-interval]]
+[[custom-time-interval]]
 === Create visualizations with custom time intervals
 
 When you create visualizations with time series data, you can use the default time interval, or increase and decrease the interval. For performance reasons, the visualization editor allows you to choose the minimum time interval, but not the exact time interval. The interval limit is controlled by the <<histogram-maxbars, `histogram:maxBars`>> setting and <<set-time-filter,time range>>. 
@@ -99,7 +99,7 @@ image::images/lens_barChartCustomTimeInterval_8.3.png[Orders per day]
 . Click *Save and return*.
 
 [discrete]
-//[[add-a-data-layer-advanced]]
+[[add-a-data-layer-advanced]]
 === Analyze multiple data series
 
 You can create visualizations with multiple data series within the same time interval, even when the series have similar configurations with minor differences.
@@ -141,7 +141,7 @@ image::images/lens_lineChartMultipleDataSeries_7.16.png[Percentiles for product 
 . Click *Save and return*.
 
 [discrete]
-//[[add-a-data-layer]]
+[[add-a-data-layer]]
 === Analyze multiple visualization types
 
 With layers, you can analyze your data with multiple visualization types. When you create layered visualizations, match the data on the horizontal axis so that it uses the same scale. 
@@ -191,7 +191,7 @@ image::images/lens_mixedXYChart_7.16.png[Layer visualization type menu]
 . Click *Save and return*.
 
 [discrete]
-//[[percentage-stacked-area]]
+[[percentage-stacked-area]]
 === Compare the change in percentage over time
 
 By default, the visualization editor displays time series data with stacked charts, which show how the different document sets change over time. 
@@ -238,7 +238,7 @@ image::images/lens_areaPercentageNumberOfOrdersByCategory_8.3.png[Prices share b
 . Click *Save and return*.
 
 [discrete]
-//[[view-the-cumulative-number-of-products-sold-on-weekends]]
+[[view-the-cumulative-number-of-products-sold-on-weekends]]
 === View the cumulative number of products sold on weekends
 
 To determine the number of orders made only on Saturday and Sunday, create an area chart, then add it to the dashboard.
@@ -279,7 +279,7 @@ image::images/lens_areaChartCumulativeNumberOfSalesOnWeekend_7.16.png[Area chart
 . Click *Save and return*.
 
 [discrete]
-//[[compare-time-ranges]]
+[[compare-time-ranges]]
 === Compare time ranges
 
 With *Time shift*, you can compare the data from different time ranges. To make sure the data correctly displays, choose a multiple of the date histogram interval when you use multiple time shifts. For example, you are unable to use a *36h* time shift for one series, and a *1d* time shift for the second series if the interval is *days*.   
@@ -311,7 +311,7 @@ Time shifts can be used on any metric. The special shift *previous* will show th
 For example, if *Last 7 days* is selected in the time picker, *previous* will show data from 14 days ago to 7 days ago. This mode can't be used together with date histograms.
 
 [float]
-//[[compare-time-as-percent]]
+[[compare-time-as-percent]]
 ==== Analyze the percent change between time ranges
 
 With *Formula*, you can analyze the percent change in your data from different time ranges.
@@ -338,7 +338,7 @@ image::images/lens_percent_chage.png[Bar chart with percent change in sales betw
 . Click *Save and return*.
 
 [discrete]
-//[[view-customers-over-time-by-continents]]
+[[view-customers-over-time-by-continents]]
 === Analyze the data in a table
 
 With tables, you can view and compare the field values, which is useful for displaying the locations of customer orders.
