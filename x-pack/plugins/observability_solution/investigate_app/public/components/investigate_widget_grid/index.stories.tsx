@@ -25,9 +25,6 @@ function WithPersistedChanges(props: React.ComponentProps<typeof Component>) {
   return (
     <Component
       {...props}
-      onItemsChange={async (nextItems) => {
-        setItems(() => nextItems);
-      }}
       onItemCopy={async (item) => {
         setItems((prevItems) =>
           prevItems.concat({
