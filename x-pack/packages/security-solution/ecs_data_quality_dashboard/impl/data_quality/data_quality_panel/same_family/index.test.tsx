@@ -9,15 +9,15 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 
 import { SAME_FAMILY } from './translations';
-import { TestProviders } from '../../mock/test_providers/test_providers';
+import { TestExternalProviders } from '../../mock/test_providers/test_providers';
 import { SameFamily } from '.';
 
 describe('SameFamily', () => {
   test('it renders a badge with the expected content', () => {
     render(
-      <TestProviders>
+      <TestExternalProviders>
         <SameFamily />
-      </TestProviders>
+      </TestExternalProviders>
     );
 
     expect(screen.getByTestId('sameFamily')).toHaveTextContent(SAME_FAMILY);

@@ -6694,6 +6694,10 @@
               },
               {
                 "plugin": "enterpriseSearch",
+                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/app_search_gated_form.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
                 "path": "x-pack/plugins/enterprise_search/server/routes/app_search/crawler.ts"
               },
               {
@@ -7367,6 +7371,10 @@
               {
                 "plugin": "console",
                 "path": "src/plugins/console/server/routes/api/console/proxy/index.ts"
+              },
+              {
+                "plugin": "console",
+                "path": "src/plugins/console/server/routes/api/console/convert_request_to_language/index.ts"
               },
               {
                 "plugin": "contentManagement",

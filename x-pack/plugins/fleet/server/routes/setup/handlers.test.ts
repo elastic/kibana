@@ -49,6 +49,7 @@ describe('FleetSetupHandler', () => {
         uninstallTokenService: {
           asCurrentUser: createUninstallTokenServiceMock(),
         },
+        getAllSpaces: jest.fn(),
         agentClient: {
           asCurrentUser: agentServiceMock.createClient(),
           asInternalUser: agentServiceMock.createClient(),
@@ -136,6 +137,7 @@ describe('FleetStatusHandler', () => {
         uninstallTokenService: {
           asCurrentUser: createUninstallTokenServiceMock(),
         },
+        getAllSpaces: jest.fn(),
         agentClient: {
           asCurrentUser: agentServiceMock.createClient(),
           asInternalUser: agentServiceMock.createClient(),

@@ -142,5 +142,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         ).to.be('true');
       });
     });
+
+    describe('Serverless - Agentless CIS_AWS Create flow', () => {
+      it(`user should save agentless integration policy when there are no api or validation errors and button is not disabled`, async () => {
+        await cisIntegration.createAgentlessIntegration({
+          cloudProvider: 'aws',
+        });
+
+        expect(await cisIntegration.showSuccessfulToast('packagePolicyCreateSuccessToast')).to.be(
+          true
+        );
+      });
+    });
   });
 }

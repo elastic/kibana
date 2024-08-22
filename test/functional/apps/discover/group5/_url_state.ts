@@ -179,6 +179,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'Sep 22, 2015 @ 20:40:22.952jpg1,576',
         'Sep 22, 2015 @ 20:11:39.532png1,708',
         'Sep 22, 2015 @ 19:45:13.813php1,406',
+        'Sep 22, 2015 @ 19:40:17.903jpg1,557',
       ]);
 
       expect(await PageObjects.discover.getHitCount()).to.be(totalHitsForOneFilter);
@@ -204,6 +205,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'Sep 22, 2015 @ 18:50:22.335css1,841',
         'Sep 22, 2015 @ 18:40:32.329css1,945',
         'Sep 22, 2015 @ 18:13:35.361css1,752',
+        'Sep 22, 2015 @ 17:22:12.782css1,583',
       ];
 
       expect(await dataGrid.getRowsText()).to.eql(filteredRows);

@@ -450,7 +450,7 @@ export const ecsTestState = {
   finalMapping: { test: 'testmapping' },
   sampleChunks: [''],
   results: { test: 'testresults' },
-  logFormat: 'testlogformat',
+  samplesFormat: 'testsamplesFormat',
   ecsVersion: 'testversion',
   currentMapping: { test1: 'test1' },
   lastExecutedChain: 'testchain',

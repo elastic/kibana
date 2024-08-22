@@ -45,8 +45,14 @@ api-docs-lint-serverless: ## Run spectral API docs linter on kibana.serverless.y
 
 .PHONY: api-docs-overlay
 api-docs-overlay: ## Run spectral API docs linter on kibana.serverless.yaml
-	@npx bump overlay "output/kibana.yaml" "overlays/kibana.overlays.yaml" > "output/kibana.new.yaml"
-	@npx bump overlay "output/kibana.serverless.yaml" "overlays/kibana.overlays.serverless.yaml" > "output/kibana.serverless.new.yaml"
+	@npx bump overlay "output/kibana.serverless.yaml" "overlays/kibana.overlays.serverless.yaml" > "output/kibana.serverless.tmp1.yaml"
+	@npx bump overlay "output/kibana.serverless.tmp1.yaml" "overlays/alerting.overlays.yaml" > "output/kibana.serverless.tmp2.yaml"
+	@npx bump overlay "output/kibana.yaml" "overlays/kibana.overlays.yaml" > "output/kibana.tmp1.yaml"
+	@npx bump overlay "output/kibana.tmp1.yaml" "overlays/alerting.overlays.yaml" > "output/kibana.tmp2.yaml"
+	@npx @redocly/cli bundle output/kibana.serverless.tmp2.yaml --ext yaml -o output/kibana.serverless.new.yaml
+	@npx @redocly/cli bundle output/kibana.tmp2.yaml --ext yaml -o output/kibana.new.yaml
+	rm output/kibana.tmp*.yaml
+	rm output/kibana.serverless.tmp*.yaml
 
 help:  ## Display help
 	@awk 'BEGIN {FS = ":.*##"; printf "Usage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
