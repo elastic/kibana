@@ -99,6 +99,8 @@ packages/kbn-config-mocks @elastic/kibana-core
 packages/kbn-config-schema @elastic/kibana-core
 src/plugins/console @elastic/kibana-management
 packages/content-management/content_editor @elastic/appex-sharedux
+packages/content-management/content_insights/content_insights_public @elastic/appex-sharedux
+packages/content-management/content_insights/content_insights_server @elastic/appex-sharedux
 examples/content_management_examples @elastic/appex-sharedux
 packages/content-management/favorites/favorites_public @elastic/appex-sharedux
 packages/content-management/favorites/favorites_server @elastic/appex-sharedux

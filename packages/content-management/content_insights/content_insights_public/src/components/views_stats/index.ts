@@ -6,15 +6,4 @@
  * Side Public License, v 1.
  */
 
-import * as t from 'io-ts';
-
-const deleteInvestigationParamsSchema = t.type({
-  path: t.type({
-    id: t.string,
-  }),
-});
-
-type DeleteInvestigationParams = t.TypeOf<typeof deleteInvestigationParamsSchema.props.path>; // Parsed payload used by the backend
-
-export { deleteInvestigationParamsSchema };
-export type { DeleteInvestigationParams };
+export { ViewsStats } from './views_stats';

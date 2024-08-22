@@ -24,8 +24,8 @@ const findInvestigationsResponseSchema = t.type({
   results: t.array(investigationResponseSchema),
 });
 
-type FindInvestigationsParams = t.TypeOf<typeof findInvestigationsParamsSchema.props.query>; // Parsed payload used by the backend
-type FindInvestigationsResponse = t.OutputOf<typeof findInvestigationsResponseSchema>; // Raw response sent to the frontend
+type FindInvestigationsParams = t.TypeOf<typeof findInvestigationsParamsSchema.props.query>;
+type FindInvestigationsResponse = t.OutputOf<typeof findInvestigationsResponseSchema>;
 
 export { findInvestigationsParamsSchema, findInvestigationsResponseSchema };
 export type { FindInvestigationsParams, FindInvestigationsResponse };
