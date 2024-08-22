@@ -99,7 +99,6 @@ export function usePackagePolicySteps({
       setAgentPolicies(updatedAgentPolicies);
       updatePackagePolicy({
         policy_ids: updatedAgentPolicies.map((policy) => policy.id),
-        ...(updatedAgentPolicies.length === 0 ? { policy_id: undefined } : {}),
       });
       if (packageInfo) {
         setHasAgentPolicyError(false);

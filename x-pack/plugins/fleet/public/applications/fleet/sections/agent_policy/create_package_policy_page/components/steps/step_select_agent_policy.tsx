@@ -101,7 +101,7 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
         updateAgentPolicies([]);
       }
     };
-    if (isLoading) {
+    if (isLoading || isFirstLoad) {
       return;
     }
     const agentPolicyIds = agentPolicies.map((policy) => policy.id);
@@ -117,7 +117,7 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
       setSelectedAgentPolicyError(undefined);
       updateAgentPolicies(agentPolicies.filter((policy) => selectedPolicyIds.includes(policy.id)));
     }
-  }, [selectedPolicyIds, agentPolicies, updateAgentPolicies, isLoading]);
+  }, [selectedPolicyIds, agentPolicies, updateAgentPolicies, isLoading, isFirstLoad]);
 
   // Try to select default agent policy
   useEffect(() => {

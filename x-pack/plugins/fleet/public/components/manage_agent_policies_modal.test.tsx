@@ -167,7 +167,7 @@ describe('ManageAgentPoliciesModal', () => {
       results.getByText('Confirm').click();
     });
     expect(usePackagePolicyWithRelatedData('', {}).savePackagePolicy).toHaveBeenCalledWith({
-      policy_id: null,
+      policy_id: undefined,
       policy_ids: [],
     });
   });

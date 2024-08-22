@@ -345,7 +345,7 @@ export default function (providerContext: FtrProviderContext) {
           policy_ids: [],
         })
         .expect(200);
-      expect(response.body.item.policy_id).to.eql(undefined);
+      expect(response.body.item.policy_id).to.eql(null);
       expect(response.body.item.policy_ids).to.eql([]);
     });
 
