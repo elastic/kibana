@@ -23,6 +23,7 @@ import {
   getCloudRegion,
 } from './helpers/logs_mock_data';
 import { parseLogsScenarioOpts } from './helpers/logs_scenario_opts_parser';
+import { IndexName } from '../lib/logs/custom_logsdb_indices';
 
 // Logs Data logic
 const MESSAGE_LOG_LEVELS = [
@@ -71,6 +72,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
 
   return {
     bootstrap: async ({ logsEsClient }) => {
+      await logsEsClient.createIndex(IndexName.cloudLogs);
       if (isLogsDb) await logsEsClient.createIndexTemplate(IndexTemplateName.LogsDb);
     },
     generate: ({ range, clients: { logsEsClient } }) => {
@@ -90,9 +92,9 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
                 .deleteField('host.name')
                 .defaults({
                   ...commonLongEntryFields,
-                  hostname: 'synth-host1',
+                  hostname: 'synth-host',
                 })
-                .dataset('custom.synth.1')
+                .dataset('custom.synth')
                 .timestamp(timestamp);
             });
         });
@@ -113,9 +115,9 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
                 .defaults({
                   ...commonLongEntryFields,
                   'data_stream.type': 'cloud-logs',
-                  hostname: 'synth-host2',
+                  hostname: 'synth-host1',
                 })
-                .dataset('synth.2')
+                .dataset('synth.1')
                 .timestamp(timestamp);
             });
         });
@@ -135,11 +137,11 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
                 .deleteField('data_stream.type')
                 .defaults({
                   ...commonLongEntryFields,
-                  hostname: 'synth-host3',
+                  hostname: 'synth-host2',
                   'data_stream.type': 'cloud-logs',
                   date: moment(timestamp).toDate(),
                 })
-                .dataset('synth.3');
+                .dataset('synth.2');
             });
         });
 

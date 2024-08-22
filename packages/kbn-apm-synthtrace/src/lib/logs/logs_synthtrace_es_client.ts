@@ -14,6 +14,7 @@ import { SynthtraceEsClient, SynthtraceEsClientOptions } from '../shared/base_cl
 import { getSerializeTransform } from '../shared/get_serialize_transform';
 import { Logger } from '../utils/create_logger';
 import { indexTemplates, IndexTemplateName } from './custom_logsdb_index_templates';
+import { indexMappings, IndexName } from './custom_logsdb_indices';
 
 export type LogsSynthtraceEsClientOptions = Omit<SynthtraceEsClientOptions, 'pipeline'>;
 
@@ -24,7 +25,7 @@ export class LogsSynthtraceEsClient extends SynthtraceEsClient<LogDocument> {
       pipeline: logsPipeline(),
     });
     this.dataStreams = ['logs-*-*'];
-    this.indices = ['cloud-logs-synth.2-default', 'cloud-logs-synth.3-default'];
+    this.indices = ['cloud-logs-synth.1-default', 'cloud-logs-synth.2-default'];
   }
 
   async createIndexTemplate(name: IndexTemplateName) {
@@ -39,6 +40,21 @@ export class LogsSynthtraceEsClient extends SynthtraceEsClient<LogDocument> {
       this.logger.info(`Index template successfully created: ${name}`);
     } catch (err) {
       this.logger.error(`Index template creation failed: ${name} - ${err.message}`);
+    }
+  }
+
+  async createIndex(index: IndexName) {
+    const isIndexExisting = await this.client.indices.exists({ index });
+
+    if (isIndexExisting) return this.logger.info(`Index already exists: ${index}`);
+
+    const template = indexMappings[index];
+
+    try {
+      await this.client.indices.create(template);
+      this.logger.info(`Index successfully created: ${index}`);
+    } catch (err) {
+      this.logger.error(`Index creation failed: ${index} - ${err.message}`);
     }
   }
 }
