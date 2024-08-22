@@ -42,12 +42,11 @@ export async function regenerateItem({
   });
 
   return {
-    created: now,
+    createdAt: now,
     id: v4(),
     ...widget,
     parameters: nextParameters,
     data: widgetData,
-    user,
-    last_updated: now,
+    createdBy: user.username,
   };
 }
