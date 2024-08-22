@@ -52,6 +52,7 @@ describe('Cloud Plugin', () => {
           fullStoryOrgId: 'foo',
           scriptUrl: '/internal/cloud/100/fullstory.js',
           namespace: 'FSKibana',
+          captureOnStartup: false,
         });
       });
 
@@ -66,6 +67,7 @@ describe('Cloud Plugin', () => {
           pageVarsDebounceTimeMs: 500,
           scriptUrl: '/internal/cloud/100/fullstory.js',
           namespace: 'FSKibana',
+          captureOnStartup: false,
         });
       });
 

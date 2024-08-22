@@ -85,6 +85,8 @@ export class CloudFullStoryPlugin implements Plugin {
         `/internal/cloud/${this.initializerContext.env.packageInfo.buildNum}/fullstory.js`
       ),
       namespace: 'FSKibana',
+      // Tell FullStory to not capture from the start, and wait for the opt-in confirmation
+      captureOnStartup: false,
     });
   }
 }
