@@ -21,6 +21,7 @@ import {
   isDashboardAppInNoDataState,
 } from './no_data/dashboard_app_no_data';
 import {
+  getUrlForExpandedPanel,
   loadAndRemoveDashboardState,
   startSyncingDashboardUrlState,
 } from './url/sync_dashboard_url_state';
@@ -43,7 +44,6 @@ import type { DashboardCreationOptions } from '../dashboard_container/embeddable
 import { DashboardTopNav } from '../dashboard_top_nav';
 import { DashboardTabTitleSetter } from './tab_title_setter/dashboard_tab_title_setter';
 import { useObservabilityAIAssistantContext } from './hooks/use_observability_ai_assistant_context';
-import { getDashboardListItemLink } from './listing_page/get_dashboard_list_item_link';
 
 export interface DashboardAppProps {
   history: History;
@@ -194,18 +194,18 @@ export function DashboardApp({
    */
   useEffect(() => {
     if (!dashboardAPI) return;
-    const { stopWatchingAppStateInUrl } = startSyncingDashboardUrlState({
-      kbnUrlStateStorage,
-      dashboardAPI,
-    });
     dashboardAPI.expandedPanelId.subscribe(() => {
-      const newUrl = getDashboardListItemLink(
+      const newUrl = getUrlForExpandedPanel(
         kbnUrlStateStorage,
         savedDashboardId!,
-        dashboardAPI.viewMode.value === ViewMode.EDIT,
+        true,
         dashboardAPI.expandedPanelId.value
       );
       kbnUrlStateStorage.kbnUrlControls.update(newUrl, true);
+    });
+    const { stopWatchingAppStateInUrl } = startSyncingDashboardUrlState({
+      kbnUrlStateStorage,
+      dashboardAPI,
     });
     return () => stopWatchingAppStateInUrl();
   }, [dashboardAPI, kbnUrlStateStorage, savedDashboardId]);
