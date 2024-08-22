@@ -2389,7 +2389,7 @@ describe('The metric threshold rule type', () => {
         group: id,
         reason,
         timestamp: mockNow.toISOString(),
-        viewInAppUrl: 'http://localhost:5601',
+        viewInAppUrl: undefined,
         metric: conditions.reduce((acc, curr, ndx) => {
           set(acc, `condition${ndx}`, curr.metric);
           return acc;
@@ -2403,7 +2403,7 @@ describe('The metric threshold rule type', () => {
               }, {})
             : null,
 
-        ...(groupByKeys ? { groupByKeys } : {}),
+        groupByKeys,
 
         ...(tags ? { tags } : {}),
         ...(alertState !== 'ERROR'
@@ -2438,7 +2438,7 @@ describe('The metric threshold rule type', () => {
                         value: groupByKeys[key],
                       })),
                     }
-                : {}),
+                : { [ALERT_GROUP]: undefined }),
             }
           : {}),
         [ALERT_REASON]: reason,
