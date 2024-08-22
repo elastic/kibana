@@ -32,6 +32,6 @@ export const WEBHOOK_DEPRECATION_WARNING = i18n.translate(
   'xpack.stackConnectors.components.teams.warning.webhookDeprecation',
   {
     defaultMessage:
-      'Microsoft has deprecated the old way of configuring Webhooks. If you have not updated it yet the Webhook URL will stop working in December 2024. Please follow the documentation link to configure it again.',
+      'Microsoft Teams deprecated some methods for configuring webhooks. Follow the documentation link to create a supported webhook URL. If the URL is not updated by December 31, 2024, notifications will stop. ',
   }
 );
