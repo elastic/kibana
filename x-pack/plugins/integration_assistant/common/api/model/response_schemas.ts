@@ -16,7 +16,7 @@
 
 import { z } from 'zod';
 
-import { Docs, Mapping, Pipeline, LogFormat } from './common_attributes';
+import { Docs, Mapping, Pipeline, SamplesFormat } from './common_attributes';
 
 export type EcsMappingAPIResponse = z.infer<typeof EcsMappingAPIResponse>;
 export const EcsMappingAPIResponse = z.object({
@@ -52,7 +52,7 @@ export const CheckPipelineAPIResponse = z.object({
 export type AnalyseLogsAPIResponse = z.infer<typeof AnalyseLogsAPIResponse>;
 export const AnalyseLogsAPIResponse = z.object({
   results: z.object({
-    logFormat: LogFormat,
+    samplesFormat: SamplesFormat,
     parsedSamples: z.array(z.string()),
   }),
 });

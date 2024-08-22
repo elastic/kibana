@@ -52,6 +52,38 @@ export type Docs = z.infer<typeof Docs>;
 export const Docs = z.array(z.object({}).passthrough());
 
 /**
+ * The name of the log samples format.
+ */
+export type SamplesFormatName = z.infer<typeof SamplesFormatName>;
+export const SamplesFormatName = z.enum([
+  'ndjson',
+  'json',
+  'multiline_json',
+  'csv',
+  'structured',
+  'unstructured',
+  'unsupported',
+]);
+export type SamplesFormatNameEnum = typeof SamplesFormatName.enum;
+export const SamplesFormatNameEnum = SamplesFormatName.enum;
+
+/**
+ * Format of the provided log samples.
+ */
+export type SamplesFormat = z.infer<typeof SamplesFormat>;
+export const SamplesFormat = z.object({
+  name: SamplesFormatName,
+  /**
+   * For some formats, specifies whether the samples can be multiline.
+   */
+  multiline: z.boolean().optional(),
+  /**
+   * For a JSON format, describes how to get to the sample array from the root of the JSON.
+   */
+  json_path: z.array(z.string()).optional(),
+});
+
+/**
  * The pipeline object.
  */
 export type Pipeline = z.infer<typeof Pipeline>;
@@ -134,6 +166,10 @@ export const DataStream = z.object({
    * The documents of the dataStream.
    */
   docs: Docs,
+  /**
+   * The format of log samples in this dataStream.
+   */
+  samplesFormat: SamplesFormat,
 });
 
 /**
@@ -177,17 +213,3 @@ export const LangSmithOptions = z.object({
    */
   apiKey: z.string(),
 });
-
-export type LogFormat = z.infer<typeof LogFormat>;
-export const LogFormat = z.enum([
-  'json',
-  'ndjson',
-  'multiline_json',
-  'csv',
-  'structured',
-  'unstructured',
-  'cef',
-  'unsupported',
-]);
-export type LogFormatEnum = typeof LogFormat.enum;
-export const LogFormatEnum = LogFormat.enum;

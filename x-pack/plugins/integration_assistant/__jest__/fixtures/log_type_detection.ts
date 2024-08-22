@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LogFormat } from '../../common/api/model/common_attributes';
+import { SamplesFormatName } from '../../common/api/model/common_attributes';
 
 export const logFormatDetectionTestState = {
   lastExecutedChain: 'testchain',
@@ -14,7 +14,7 @@ export const logFormatDetectionTestState = {
   packageName: 'testPackage',
   dataStreamName: 'testDatastream',
   finalized: false,
-  logFormat: LogFormat.Values.json,
+  samplesFormat: SamplesFormatName.Values.json,
   ecsVersion: 'testVersion',
   results: { test1: 'test1' },
 };

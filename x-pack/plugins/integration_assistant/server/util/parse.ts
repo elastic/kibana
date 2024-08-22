@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LogFormat } from '../../common';
+import { SamplesFormat } from '../../common';
 
 export function decodeRawSamples(encodedContent: string): string {
   const base64encodedContent = encodedContent.split('base64,')[1];
@@ -15,55 +15,96 @@ export function decodeRawSamples(encodedContent: string): string {
 }
 
 export function parseSamples(fileContent: string): {
-  logFormat: LogFormat;
-  parsedSamples: string[];
+  samplesFormat: SamplesFormat;
+  parsedContent: string[];
+  error?: Error;
 } {
-  let parsedContent;
-  let logFormat: LogFormat = 'unsupported';
+  let parsedContent: string[];
+  let samplesFormat: SamplesFormat;
 
   try {
-    // NDJSON
-    parsedContent = fileContent
-      .split('\n')
-      .filter((line) => line.trim() !== '')
-      .map((line) => JSON.parse(line));
+    parsedContent = parseNDJSON(fileContent);
 
     // Special case for files that can be parsed as both JSON and NDJSON:
-    //   for a one-line array [] -> extract its contents
-    //   for a one-line object {} -> do nothing
-    if (
-      Array.isArray(parsedContent) &&
-      parsedContent.length === 1 &&
-      Array.isArray(parsedContent[0])
-    ) {
+    //   for a one-line array [] -> extract its contents (it's a JSON)
+    //   for a one-line object {} -> do nothing (keep as NDJSON)
+    if (parsedContent.length === 1 && Array.isArray(parsedContent[0])) {
       parsedContent = parsedContent[0];
+      samplesFormat = { name: 'json', json_path: [] };
+    } else {
+      samplesFormat = { name: 'ndjson', multiline: false };
     }
-    logFormat = 'ndjson';
   } catch (parseNDJSONError) {
     try {
-      // JSON
-      parsedContent = JSON.parse(fileContent);
-      logFormat = 'json';
+      const { entries, pathToEntries, errorNoArrayFound } = parseJSONArray(fileContent);
+      if (errorNoArrayFound) {
+        return {
+          samplesFormat: { name: 'json' },
+          parsedContent: [],
+          error: new Error('The logs sample file is not an array'),
+        };
+      }
+      parsedContent = entries;
+      samplesFormat = { name: 'json', json_path: pathToEntries };
     } catch (parseJSONError) {
-      // Multi Line JSON
-      parsedContent = fileContent
-        .split(/\n(?=\{)/) // Split at newline followed by '{'
-        .map((entry) => entry.trim()) // Remove leading/trailing whitespace
-        .filter((entry) => entry) // Remove empty entries
-        .map((entry) => {
-          try {
-            return JSON.parse(entry);
-          } catch (parseError) {
-            // All other log types
-            parsedContent = fileContent.split('\n').filter((line) => line.trim() !== '');
-            return { logFormat, parsedSamples: parsedContent };
-          }
-        })
-        .filter((entry) => entry !== null); // Remove null entries due to parse errors
-      logFormat = 'multiline_json';
-      return { logFormat, parsedSamples: parsedContent };
+      try {
+        parsedContent = parseNDJSON(fileContent, true);
+        samplesFormat = { name: 'ndjson', multiline: true };
+      } catch (parseMultilineNDJSONError) {
+        parsedContent = fileContent.split('\n').filter((line) => line.trim() !== '');
+        samplesFormat = { name: 'unsupported' };
+        return { samplesFormat, parsedContent };
+      }
     }
   }
   const jsonSamples = parsedContent.map((log: string) => JSON.stringify(log));
-  return { logFormat, parsedSamples: jsonSamples };
+  return { samplesFormat, parsedContent: jsonSamples };
 }
+
+/**
+ * Parse the logs sample file content as newiline-delimited JSON (NDJSON).
+ *
+ * This supports multiline JSON objects if passed multiline flag.
+ * Note that in that case the { character must happen at the beginning of the
+ * line if and only if it denotes the start of a new JSON object. Thus some
+ * inputs that will be parsed as NDJSON without the multiline flag will _not_ be
+ * parsed as NDJSON with the multiline flag.
+ */
+export const parseNDJSON = (fileContent: string, multiline: boolean = false): string[] => {
+  const separator = multiline ? /\n(?=\{)/ : '\n';
+
+  return fileContent
+    .split(separator) // For multiline, split at newline followed by '{'.
+    .filter((entry) => entry.trim() !== '') // Remove empty entries.
+    .map((entry) => JSON.parse(entry)); // Parse each entry as JSON.
+};
+
+/**
+ * Parse the logs sample file content as a JSON, find an array of entries there.
+ *
+ * If the JSON object can be parsed, but is not an array, we try to find a candidate
+ * among the dictionary keys (it must be identifier-like and its value must be an array).
+ *
+ * @returns Both the parsed entries and the path to the entries in the JSON object in case of
+ * success. Otherwise, an errorNoArrayFound if appropriate. If the parsing failed, raises an error.
+ */
+export const parseJSONArray = (
+  fileContent: string
+): { entries: string[]; pathToEntries: string[]; errorNoArrayFound: boolean } => {
+  const jsonContent = JSON.parse(fileContent);
+  if (Array.isArray(jsonContent)) {
+    return { entries: jsonContent, pathToEntries: [], errorNoArrayFound: false };
+  }
+  if (typeof jsonContent === 'object' && jsonContent !== null) {
+    const arrayKeys = Object.keys(jsonContent).filter((key) => Array.isArray(jsonContent[key]));
+    if (arrayKeys.length === 1) {
+      const key = arrayKeys[0];
+      return {
+        entries: jsonContent[key],
+        pathToEntries: [key],
+        errorNoArrayFound: false,
+      };
+    }
+  }
+  return { errorNoArrayFound: true, entries: [], pathToEntries: [] };
+};

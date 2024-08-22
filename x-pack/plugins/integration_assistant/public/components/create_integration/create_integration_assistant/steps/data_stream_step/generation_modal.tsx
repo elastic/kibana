@@ -25,11 +25,11 @@ import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { getLangSmithOptions } from '../../../../../common/lib/lang_smith';
-import type {
-  AnalyseLogsRequestBody,
-  CategorizationRequestBody,
-  EcsMappingRequestBody,
-  RelatedRequestBody,
+import {
+  type AnalyseLogsRequestBody,
+  type CategorizationRequestBody,
+  type EcsMappingRequestBody,
+  type RelatedRequestBody,
 } from '../../../../../../common';
 import {
   runCategorizationGraph,
@@ -141,7 +141,13 @@ export const useGeneration = ({
           durationMs: Date.now() - generationStartedAt,
         });
 
-        onComplete(relatedGraphResult.results);
+        const result = {
+          pipeline: relatedGraphResult.results.pipeline,
+          docs: relatedGraphResult.results.docs,
+          samplesFormat: analyseLogsResult.results.samplesFormat,
+        };
+
+        onComplete(result);
       } catch (e) {
         if (abortController.signal.aborted) return;
         const errorMessage = `${e.message}${

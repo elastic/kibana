@@ -60,6 +60,7 @@ export const useDeployIntegration = ({
                 inputTypes: integrationSettings.inputTypes ?? [],
                 rawSamples: integrationSettings.logsSampleParsed ?? [],
                 docs: result.docs ?? [],
+                samplesFormat: result.samplesFormat,
                 pipeline: result.pipeline,
               },
             ],
@@ -116,6 +117,7 @@ export const useDeployIntegration = ({
     notifications?.toasts,
     result?.docs,
     result?.pipeline,
+    result?.samplesFormat,
     telemetry,
   ]);
 

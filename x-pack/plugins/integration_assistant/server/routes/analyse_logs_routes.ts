@@ -48,7 +48,6 @@ export function registerAnalyseLogsRoutes(
       withAvailability(async (context, req, res): Promise<IKibanaResponse<AnalyseLogsResponse>> => {
         const { encodedRawSamples, langSmithOptions } = req.body;
         const { getStartServices, logger } = await context.integrationAssistant;
-
         const [, { actions: actionsPlugin }] = await getStartServices();
         try {
           const actionsClient = await actionsPlugin.getActionsClientWithRequest(req);
@@ -57,12 +56,9 @@ export function registerAnalyseLogsRoutes(
             : (await actionsClient.getAll()).filter(
                 (connectorItem) => connectorItem.actionTypeId === '.bedrock'
               )[0];
-
           const abortSignal = getRequestAbortedSignal(req.events.aborted$);
           const isOpenAI = connector.actionTypeId === '.gen-ai';
-
           const llmClass = isOpenAI ? ActionsClientChatOpenAI : ActionsClientSimpleChatModel;
-
           const model = new llmClass({
             actionsClient,
             connectorId: connector.id,
@@ -74,36 +70,43 @@ export function registerAnalyseLogsRoutes(
             signal: abortSignal,
             streaming: false,
           });
-
           const options = {
             callbacks: [
               new APMTracer({ projectName: langSmithOptions?.projectName ?? 'default' }, logger),
               ...getLangSmithTracer({ ...langSmithOptions, logger }),
             ],
           };
-
           const logsSampleDecoded = decodeRawSamples(encodedRawSamples);
-          const { logFormat, parsedSamples } = parseSamples(logsSampleDecoded);
+          const { error, samplesFormat, parsedContent: samples } = parseSamples(logsSampleDecoded);
 
-          // Truncate samples to 10 entries
-          const truncatedSamples = truncateSamples(parsedSamples);
-          let parseResults = { results: { logFormat, truncatedSamples } };
+          if (error) {
+            return res.badRequest({ body: error });
+          }
 
-          if (logFormat === 'unsupported') {
+          // Truncate samples to 10 entries until chunking is in place
+          const parsedSamples = truncateSamples(samples);
+          const parseResults = { results: { samplesFormat, parsedSamples } };
+
+          if (samplesFormat === null || samplesFormat.name === 'unsupported') {
             // Non JSON log samples. Could be some syslog structured / unstructured logs
             const logFormatParameters = {
-              rawSamples: truncatedSamples,
+              rawSamples: parsedSamples,
             };
             const graph = await getLogFormatDetectionGraph(model);
             const graphResults = await graph.invoke(logFormatParameters, options);
-
-            if (graphResults.results.logFormat === 'unsupported') {
+            const graphLogFormat = graphResults.results.logFormat;
+            if (
+              graphLogFormat === 'unsupported' ||
+              graphLogFormat === 'csv' ||
+              graphLogFormat === 'structured' ||
+              graphLogFormat === 'unstructured'
+            ) {
               return res.customError({
                 statusCode: 501,
-                body: { message: 'Unsupported log type' },
+                body: { message: `Unsupported log type: ${graphLogFormat}` },
               });
             }
-            parseResults = graphResults;
+            parseResults.results = graphResults.results;
           }
           return res.ok({ body: AnalyseLogsResponse.parse(parseResults) });
         } catch (e) {
