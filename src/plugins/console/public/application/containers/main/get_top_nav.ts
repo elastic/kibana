@@ -7,7 +7,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SHELL_TAB_ID, HISTORY_TAB_ID, CONFIG_TAB_ID } from './constants';
+import {
+  SHELL_TAB_ID,
+  HISTORY_TAB_ID,
+  CONFIG_TAB_ID,
+  SHELL_TOUR_STEP,
+  CONFIG_TOUR_STEP,
+  HISTORY_TOUR_STEP,
+} from './constants';
 
 interface Props {
   selectedTab: string;
@@ -29,7 +36,7 @@ export function getTopNavConfig({ selectedTab, setSelectedTab }: Props) {
       },
       testId: 'consoleShellButton',
       isSelected: selectedTab === SHELL_TAB_ID,
-      tourStep: 1,
+      tourStep: SHELL_TOUR_STEP,
     },
     {
       id: HISTORY_TAB_ID,
@@ -44,7 +51,7 @@ export function getTopNavConfig({ selectedTab, setSelectedTab }: Props) {
       },
       testId: 'consoleHistoryButton',
       isSelected: selectedTab === HISTORY_TAB_ID,
-      tourStep: 3,
+      tourStep: HISTORY_TOUR_STEP,
     },
     {
       id: CONFIG_TAB_ID,
@@ -59,7 +66,7 @@ export function getTopNavConfig({ selectedTab, setSelectedTab }: Props) {
       },
       testId: 'consoleConfigButton',
       isSelected: selectedTab === CONFIG_TAB_ID,
-      tourStep: 4,
+      tourStep: CONFIG_TOUR_STEP,
     },
   ];
 }

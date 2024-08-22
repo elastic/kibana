@@ -30,10 +30,11 @@ import { getTopNavConfig } from './get_top_nav';
 import { getTourSteps } from './get_tour_steps';
 import {
   SHELL_TAB_ID,
-  SHELL_TOUR_STEP_INDEX,
-  EDITOR_TOUR_STEP_INDEX,
+  SHELL_TOUR_STEP,
+  EDITOR_TOUR_STEP,
   TOUR_STORAGE_KEY,
   INITIAL_TOUR_CONFIG,
+  FILES_TOUR_STEP,
 } from './constants';
 
 interface MainProps {
@@ -63,8 +64,7 @@ export function Main({ isEmbeddable = false }: MainProps) {
       onFinish: () => actions.finishTour(false),
       subtitle: undefined, // Overwrite subtitle from initial tour config
       footerAction:
-        // TODO: Fix the index after adding the tour step for files
-        tourState.currentTourStep === tourStepProps.length - 1 ? (
+        tourState.currentTourStep === tourStepProps.length ? (
           <EuiButton
             color="success"
             size="s"
@@ -129,23 +129,25 @@ export function Main({ isEmbeddable = false }: MainProps) {
             <EuiSplitPanel.Inner grow={false} className="consoleTabs">
               <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
                 <EuiFlexItem>
-              <TopNavMenu
-                disabled={!done}
-                items={getTopNavConfig({
-                  selectedTab,
-                  setSelectedTab,
-                })}
-                tourStepProps={fullTourStepProps}
-              />
+                  <TopNavMenu
+                    disabled={!done}
+                    items={getTopNavConfig({
+                      selectedTab,
+                      setSelectedTab,
+                    })}
+                    tourStepProps={fullTourStepProps}
+                  />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <NavIconButton
-                    iconType="save"
-                    onClick={() => {}}
-                    ariaLabel={MAIN_PANEL_LABELS.importExportButton}
-                    dataTestSubj="consoleImportExportButton"
-                    toolTipContent={MAIN_PANEL_LABELS.importExportButton}
-                  />
+                  <EuiTourStep {...fullTourStepProps[FILES_TOUR_STEP - 1]}>
+                    <NavIconButton
+                      iconType="save"
+                      onClick={() => {}}
+                      ariaLabel={MAIN_PANEL_LABELS.importExportButton}
+                      dataTestSubj="consoleImportExportButton"
+                      toolTipContent={MAIN_PANEL_LABELS.importExportButton}
+                    />
+                  </EuiTourStep>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <NavIconButton
@@ -173,7 +175,7 @@ export function Main({ isEmbeddable = false }: MainProps) {
                 <Editor
                   loading={!done}
                   setEditorInstance={() => {}}
-                  tourStepProps={fullTourStepProps[SHELL_TOUR_STEP_INDEX]}
+                  tourStepProps={fullTourStepProps[SHELL_TOUR_STEP - 1]}
                 />
               )}
             </EuiSplitPanel.Inner>
@@ -190,7 +192,7 @@ export function Main({ isEmbeddable = false }: MainProps) {
       {/* Fixed Position Container for Tour Step */}
       <div className="tourStepFixedContainer">
         <EuiTourStep
-          {...fullTourStepProps[EDITOR_TOUR_STEP_INDEX]}
+          {...fullTourStepProps[EDITOR_TOUR_STEP - 1]}
           anchor=".tourStepFixedContainer"
         />
       </div>

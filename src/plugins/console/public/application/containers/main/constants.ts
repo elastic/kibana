@@ -10,11 +10,11 @@ export const SHELL_TAB_ID = 'shell';
 export const HISTORY_TAB_ID = 'history';
 export const CONFIG_TAB_ID = 'config';
 
-export const SHELL_TOUR_STEP_INDEX = 0;
-export const EDITOR_TOUR_STEP_INDEX = 1;
-export const HISTORY_TOUR_STEP_INDEX = 2;
-export const CONFIG_TOUR_STEP_INDEX = 3;
-export const FILES_TOUR_STEP_INDEX = 4;
+export const SHELL_TOUR_STEP = 1;
+export const EDITOR_TOUR_STEP = 2;
+export const HISTORY_TOUR_STEP = 3;
+export const CONFIG_TOUR_STEP = 4;
+export const FILES_TOUR_STEP = 5;
 
 // Key used for storing tour state in local storage
 export const TOUR_STORAGE_KEY = 'consoleTour';

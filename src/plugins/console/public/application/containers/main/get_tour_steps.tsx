@@ -83,7 +83,7 @@ export function getTourSteps() {
       }),
       content: i18n.translate('console.tour.filesStepContent', {
         defaultMessage:
-          'Fine-tune your Console’s settings and manage variables to personalize your workflow to suit your work style.',
+          'Easily export your console input requests to a file, or import those you’ve saved previously.',
       }),
       anchorPosition: 'upRight',
       'data-test-subj': 'filesTourStep',
