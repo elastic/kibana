@@ -72,6 +72,19 @@ export const DashboardViewportComponent = () => {
     };
   }, [controlGroupApi]);
 
+  const [dashboardInitialized, setDashboardInitialized] = useState(false);
+  useEffect(() => {
+    let ignore = false;
+    dashboard.untilContainerInitialized().then(() => {
+      if (!ignore) {
+        setDashboardInitialized(true);
+      }
+    });
+    return () => {
+      ignore = true;
+    };
+  }, [dashboard]);
+
   return (
     <div
       className={classNames('dshDashboardViewportWrapper', {
@@ -112,7 +125,9 @@ export const DashboardViewportComponent = () => {
       >
         {/* Wait for `viewportWidth` to actually be set before rendering the dashboard grid - 
             otherwise, there is a race condition where the panels can end up being squashed */}
-        {viewportWidth !== 0 && <DashboardGrid viewportWidth={viewportWidth} />}
+        {viewportWidth !== 0 && dashboardInitialized && (
+          <DashboardGrid viewportWidth={viewportWidth} />
+        )}
       </div>
     </div>
   );

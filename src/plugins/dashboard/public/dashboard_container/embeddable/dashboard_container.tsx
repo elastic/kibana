@@ -52,7 +52,7 @@ import { omit } from 'lodash';
 import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import { batch } from 'react-redux';
-import { BehaviorSubject, Subject, Subscription } from 'rxjs';
+import { BehaviorSubject, Subject, Subscription, first, skipWhile, switchMap } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs';
 import { v4 } from 'uuid';
 import { PublishesSettings } from '@kbn/presentation-containers/interfaces/publishes_settings';
@@ -157,9 +157,7 @@ export class DashboardContainer
   public integrationSubscriptions: Subscription = new Subscription();
   public publishingSubscription: Subscription = new Subscription();
   public diffingSubscription: Subscription = new Subscription();
-  public controlGroupApi$: PublishingSubject<ControlGroupApi | undefined> = new BehaviorSubject<
-    ControlGroupApi | undefined
-  >(undefined);
+  public controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>;
   public settings: Record<string, PublishingSubject<boolean | undefined>>;
 
   public searchSessionId?: string;
@@ -184,6 +182,9 @@ export class DashboardContainer
   public firstLoad: boolean = true;
   private hadContentfulRender = false;
   private scrollPosition?: number;
+
+  // setup
+  public untilContainerInitialized: () => Promise<void>;
 
   // cleanup
   public stopSyncingWithUnifiedSearch?: () => void;
@@ -221,18 +222,42 @@ export class DashboardContainer
     creationOptions?: DashboardCreationOptions,
     initialComponentState?: DashboardPublicState
   ) {
+    const controlGroupApi$ = new BehaviorSubject<ControlGroupApi | undefined>(undefined);
+    async function untilContainerInitialized(): Promise<void> {
+      return new Promise((resolve) => {
+        controlGroupApi$
+          .pipe(
+            skipWhile((controlGroupApi) => !controlGroupApi),
+            switchMap(async (controlGroupApi) => {
+              await controlGroupApi?.untilInitialized();
+            }),
+            first()
+          )
+          .subscribe(() => {
+            resolve();
+          });
+      });
+    }
+
     const {
       usageCollection,
       embeddable: { getEmbeddableFactory },
     } = pluginServices.getServices();
+
     super(
       {
         ...initialInput,
       },
       { embeddableLoaded: {} },
       getEmbeddableFactory,
-      parent
+      parent,
+      {
+        untilContainerInitialized,
+      }
     );
+
+    this.controlGroupApi$ = controlGroupApi$;
+    this.untilContainerInitialized = untilContainerInitialized;
 
     this.trackPanelAddMetric = usageCollection.reportUiCounter?.bind(
       usageCollection,

@@ -497,7 +497,8 @@ export const initializeDashboard = async ({
       sessionIdToRestore ??
       (existingSession && incomingEmbeddable ? existingSession : session.start());
 
-    untilDashboardReady().then((container) => {
+    untilDashboardReady().then(async (container) => {
+      await container.untilContainerInitialized();
       startDashboardSearchSessionIntegration.bind(container)(
         creationOptions?.searchSessionSettings
       );
