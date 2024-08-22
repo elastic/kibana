@@ -224,7 +224,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     [onClickValue, untransposedDataRef, isInteractive]
   );
 
-  const bucketColumns = useMemo(
+  const bucketedColumns = useMemo(
     () =>
       columnConfig.columns
         .filter((_col, index) => {
@@ -240,8 +240,8 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
 
   const isEmpty =
     firstLocalTable.rows.length === 0 ||
-    (bucketColumns.length &&
-      props.data.rows.every((row) => bucketColumns.every((col) => row[col] == null)));
+    (bucketedColumns.length &&
+      props.data.rows.every((row) => bucketedColumns.every((col) => row[col] == null)));
 
   const visibleColumns = useMemo(
     () =>
@@ -306,7 +306,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   const columns: EuiDataGridColumn[] = useMemo(
     () =>
       createGridColumns(
-        bucketColumns,
+        bucketedColumns,
         firstLocalTable,
         handleFilterClick,
         handleTransposedColumnClick,
@@ -324,7 +324,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         props.columnFilterable
       ),
     [
-      bucketColumns,
+      bucketedColumns,
       firstLocalTable,
       handleFilterClick,
       handleTransposedColumnClick,
@@ -403,7 +403,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       }
 
       const dataType = getFieldTypeFromDatatable(firstLocalTable, originalId);
-      const isBucketed = bucketColumns.some((id) => columnId);
+      const isBucketed = bucketedColumns.some((id) => id === columnId);
       const colorByTerms = shouldColorByTerms(dataType, isBucketed);
 
       const data: ColorMappingInputData = colorByTerms
@@ -450,7 +450,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     props.args.fitRowToContent,
     props.paletteService,
     firstLocalTable,
-    bucketColumns,
+    bucketedColumns,
     minMaxByColumnId,
     syncColors,
   ]);
