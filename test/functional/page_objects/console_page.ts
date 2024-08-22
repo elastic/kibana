@@ -206,6 +206,18 @@ export class ConsolePageObject extends FtrService {
     await this.testSubjects.click('sendRequestButton');
   }
 
+  public async clickCopyOutput() {
+    await this.testSubjects.click('copyOutputButton');
+  }
+
+  public async clickClearOutput() {
+    const hasClearButton = await this.testSubjects.exists('clearConsoleOutput');
+
+    if (hasClearButton) {
+      await this.testSubjects.click('clearConsoleOutput');
+    }
+  }
+
   public async collapseHelp() {
     await this.testSubjects.click('help-close-button');
   }
@@ -795,5 +807,9 @@ export class ConsolePageObject extends FtrService {
     await this.browser.execute((f: boolean) => {
       (window as any).autocomplete_trace = f;
     }, flag);
+  }
+
+  public async isOutputPanelEmptyStateVisible() {
+    return await this.testSubjects.exists('consoleOutputPanelEmptyState');
   }
 }

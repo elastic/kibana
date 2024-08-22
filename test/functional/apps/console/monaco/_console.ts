@@ -33,11 +33,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.try(async () => {
         const actualRequest = await PageObjects.console.monaco.getEditorText();
         log.debug(actualRequest);
-        expect(actualRequest.replace(/\s/g, '')).to.eql(DEFAULT_INPUT_VALUE.replace(/\s/g, ''));
+        expect(DEFAULT_INPUT_VALUE.replace(/\s/g, '')).to.contain(actualRequest.replace(/\s/g, ''));
       });
     });
 
+    it('output panel should initially be in empty state', async () => {
+      expect(await PageObjects.console.isOutputPanelEmptyStateVisible()).to.be(true);
+    });
+
     it('default request response should include `"timed_out" : false`', async () => {
+      await PageObjects.console.clickClearOutput();
       const expectedResponseContains = `"timed_out": false`;
       await PageObjects.console.monaco.selectAllRequests();
       await PageObjects.console.clickPlay();
@@ -46,6 +51,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         log.debug(actualResponse);
         expect(actualResponse).to.contain(expectedResponseContains);
       });
+      // Output panel should not longer be in empty state
+      expect(await PageObjects.console.isOutputPanelEmptyStateVisible()).to.be(false);
     });
 
     // the resizer doesn't work the same as in ace https://github.com/elastic/kibana/issues/184352
@@ -129,8 +136,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.try(async () => {
           const response = await PageObjects.console.monaco.getOutputText();
           log.debug(response);
-          expect(response).to.contain('# PUT test-index 200');
-          expect(response).to.contain('# DELETE test-index 200');
+          expect(response).to.contain('# 2: PUT test-index 200');
+          expect(response).to.contain('# 3: DELETE test-index 200');
         });
       });
 

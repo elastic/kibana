@@ -31,7 +31,8 @@
     "@kbn/cloud-plugin",
     "@kbn/core-notifications-browser",
     "@kbn/react-kibana-context-render",
-    "@kbn/react-kibana-mount"
+    "@kbn/react-kibana-mount",
+    "@kbn/ui-theme"
   ],
   "exclude": [
     "target/**/*",
