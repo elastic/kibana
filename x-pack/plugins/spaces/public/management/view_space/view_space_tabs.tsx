@@ -17,6 +17,7 @@ import { withSuspense } from '@kbn/shared-ux-utility';
 import { TAB_ID_CONTENT, TAB_ID_GENERAL, TAB_ID_ROLES } from './constants';
 import type { Space } from '../../../common';
 
+// FIXME: rename to EditSpaceTab
 export interface ViewSpaceTab {
   id: string;
   name: string;

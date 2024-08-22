@@ -65,6 +65,7 @@ const filterRolesAssignedToSpace = (roles: Role[], space: Space) => {
   );
 };
 
+// FIXME: rename to EditSpaceAssignedRoles
 export const ViewSpaceAssignedRoles: FC<Props> = ({ space, roles, features, isReadOnly }) => {
   const [showRolesPrivilegeEditor, setShowRolesPrivilegeEditor] = useState(false);
   const [roleAPIClientInitialized, setRoleAPIClientInitialized] = useState(false);

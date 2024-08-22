@@ -32,6 +32,7 @@ interface Props {
   allowSolutionVisibility: boolean;
 }
 
+// FIXME: rename to EditSpaceSettings
 export const ViewSpaceSettings: React.FC<Props> = ({ space, features, history, ...props }) => {
   const [spaceSettings, setSpaceSettings] = useState<Partial<Space>>(space);
   const [isDirty, setIsDirty] = useState(false); // track if unsaved changes have been made

@@ -16,6 +16,7 @@ import type { RolesAPIClient } from '@kbn/security-plugin-types-public';
 
 import type { SpacesManager } from '../../../spaces_manager';
 
+// FIXME: rename to EditSpaceServices
 export interface ViewSpaceServices {
   capabilities: ApplicationStart['capabilities'];
   getUrlForApp: ApplicationStart['getUrlForApp'];
@@ -30,6 +31,7 @@ export interface ViewSpaceServices {
 
 const ViewSpaceContext = createContext<ViewSpaceServices | null>(null);
 
+// FIXME: rename to EditSpaceContextProvider
 export const ViewSpaceContextProvider: FC<PropsWithChildren<ViewSpaceServices>> = ({
   children,
   ...services
@@ -37,6 +39,7 @@ export const ViewSpaceContextProvider: FC<PropsWithChildren<ViewSpaceServices>> 
   return <ViewSpaceContext.Provider value={{ ...services }}>{children}</ViewSpaceContext.Provider>;
 };
 
+// FIXME: rename to useEditSpaceServices
 export const useViewSpaceServices = (): ViewSpaceServices => {
   const context = useContext(ViewSpaceContext);
   if (!context) {

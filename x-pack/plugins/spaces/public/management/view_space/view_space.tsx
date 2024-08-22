@@ -66,6 +66,7 @@ const handleApiError = (error: Error) => {
   throw error;
 };
 
+// FIXME: rename to EditSpacePage
 // FIXME: add eventTracker
 export const ViewSpacePage: FC<PageProps> = (props) => {
   const {
