@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { encode as encodeJS, decode as decodeJS } from 'borc';
+// import { encode as encodeJS, decode as decodeJS } from 'borc';
+import { encode as encodeJS, decodeFirstSync as decodeJS } from 'cbor';
 
 export class KbnCbor {
   static encode(data: unknown) {
