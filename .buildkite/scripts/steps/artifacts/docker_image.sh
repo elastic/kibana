@@ -118,7 +118,7 @@ echo "--- Trigger image tag update"
 if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]] && [[ "${BUILDKITE_PULL_REQUEST:-false}" == "false" ]]; then
   cat << EOF | buildkite-agent pipeline upload
 steps:
- - label: "Trigger cve-slo-status pipeline for $KIBANA_IMAGE"
+  - label: "Trigger cve-slo-status pipeline for $KIBANA_IMAGE"
     trigger: cve-slo-status
     build:
       env:
