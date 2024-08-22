@@ -6,13 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPortal, EuiText, transparentize } from '@elastic/eui';
-import React, { useRef } from 'react';
+import { EuiPortal, EuiText, transparentize } from '@elastic/eui';
+import React, { useRef, useState } from 'react';
 import { GridLayoutStateManager, PanelInteractionEvent } from './types';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
 
-const scrollOnInterval = (direction: 'up' | 'down') => {
+type ScrollDirection = 'up' | 'down';
+
+const scrollOnInterval = (direction: ScrollDirection) => {
   const interval = setInterval(() => {
     window.scroll({
       top: window.scrollY + (direction === 'down' ? 100 : -100),
@@ -22,21 +24,80 @@ const scrollOnInterval = (direction: 'up' | 'down') => {
   return interval;
 };
 
-export const GridOverlay = ({
-  interactionEvent,
-  gridLayoutStateManager,
-}: {
-  interactionEvent?: PanelInteractionEvent;
-  gridLayoutStateManager: GridLayoutStateManager;
-}) => {
-  const isDraggingEvent = interactionEvent && interactionEvent.type === 'drag';
+const ScrollOnHover = ({ direction, hide }: { hide: boolean; direction: ScrollDirection }) => {
+  const [isActive, setIsActive] = useState(false);
   const scrollInterval = useRef<NodeJS.Timeout | null>(null);
-
   const stopScrollInterval = () => {
     if (scrollInterval.current) {
       clearInterval(scrollInterval.current);
     }
   };
+
+  return (
+    <div
+      onMouseEnter={() => {
+        setIsActive(true);
+        scrollInterval.current = scrollOnInterval(direction);
+      }}
+      onMouseLeave={() => {
+        setIsActive(false);
+        stopScrollInterval();
+      }}
+      css={css`
+        width: 100%;
+        position: fixed;
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+        justify-content: center;
+        opacity: ${hide ? 0 : 1};
+        transition: opacity 100ms linear;
+        padding: ${euiThemeVars.euiSizeM};
+        ${direction === 'down' ? 'bottom: 0;' : 'top: 0;'}
+      `}
+    >
+      {direction === 'up' && (
+        <div
+          css={css`
+            height: 96px;
+          `}
+        ></div>
+      )}
+      <div
+        css={css`
+          display: flex;
+          width: fit-content;
+          align-items: center;
+          background-color: ${isActive
+            ? euiThemeVars.euiColorSuccess
+            : euiThemeVars.euiColorEmptyShade};
+          height: ${euiThemeVars.euiButtonHeight};
+          line-height: ${euiThemeVars.euiButtonHeight};
+          border-radius: ${euiThemeVars.euiButtonHeight};
+          outline: ${isActive ? 'none' : euiThemeVars.euiBorderThin};
+          transition: background-color 100ms linear, color 100ms linear;
+          padding: 0 ${euiThemeVars.euiSizeL} 0 ${euiThemeVars.euiSizeL};
+          color: ${isActive ? euiThemeVars.euiColorEmptyShade : euiThemeVars.euiTextColor};
+        `}
+      >
+        <EuiText size="m">
+          <strong>Scroll {direction}</strong>
+        </EuiText>
+      </div>
+    </div>
+  );
+};
+
+export const GridOverlay = ({
+  interactionEvent,
+  gridLayoutStateManager,
+  fixedContentTopOffset,
+}: {
+  fixedContentTopOffset: number;
+  interactionEvent?: PanelInteractionEvent;
+  gridLayoutStateManager: GridLayoutStateManager;
+}) => {
+  const isDraggingEvent = interactionEvent && interactionEvent.type === 'drag';
 
   return (
     <EuiPortal>
@@ -52,72 +113,8 @@ export const GridOverlay = ({
           pointer-events: ${isDraggingEvent ? 'unset' : 'none'};
         `}
       >
-        <div
-          onMouseEnter={() => {
-            scrollInterval.current = scrollOnInterval('up');
-          }}
-          onMouseLeave={stopScrollInterval}
-          css={css`
-            position: fixed;
-            opacity: ${isDraggingEvent ? 1 : 0};
-            transition: opacity 100ms linear;
-            top: 0;
-            width: 100%;
-          `}
-        >
-          <div
-            css={css`
-              height: 96px;
-            `}
-          ></div>
-          <div
-            css={css`
-              height: 50px;
-              background-color: ${euiThemeVars.euiColorEmptyShade};
-            `}
-          >
-            <EuiFlexGroup
-              css={css`
-                width: 100%;
-                height: 100%;
-              `}
-              alignItems="center"
-              justifyContent="center"
-            >
-              <EuiFlexItem grow={false}>
-                <EuiText>Scroll up</EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </div>
-        </div>
-        <div
-          onMouseEnter={(e) => {
-            scrollInterval.current = scrollOnInterval('down');
-          }}
-          onMouseLeave={stopScrollInterval}
-          css={css`
-            position: fixed;
-            opacity: ${isDraggingEvent ? 1 : 0};
-            transition: opacity 100ms linear;
-            bottom: 0;
-            width: 100%;
-            height: 50px;
-            background-color: ${euiThemeVars.euiColorEmptyShade};
-          `}
-        >
-          <EuiFlexGroup
-            css={css`
-              width: 100%;
-              height: 100%;
-            `}
-            alignItems="center"
-            justifyContent="center"
-          >
-            <EuiFlexItem grow={false}>
-              <EuiText>Scroll down</EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </div>
+        <ScrollOnHover hide={!isDraggingEvent} direction="up" />
+        <ScrollOnHover hide={!isDraggingEvent} direction="down" />
         <div
           ref={gridLayoutStateManager.dragPreviewRef}
           css={css`
