@@ -73,7 +73,11 @@ export const GeoipTable = ({
         {...tableProps}
       />
       {showModal === 'add' && (
-        <AddDatabaseModal closeModal={() => setShowModal(null)} reloadDatabases={reloadDatabases} />
+        <AddDatabaseModal
+          closeModal={() => setShowModal(null)}
+          reloadDatabases={reloadDatabases}
+          databases={items}
+        />
       )}
     </>
   );

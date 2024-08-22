@@ -21,8 +21,9 @@ import {
   EuiSelect,
   EuiSpacer,
 } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { GeoipDatabase } from './types';
 import { useKibana } from '../../../shared_imports';
 import {
   ADD_DATABASE_MODAL_TITLE_ID,
@@ -34,20 +35,27 @@ import {
 export const AddDatabaseModal = ({
   closeModal,
   reloadDatabases,
+  databases,
 }: {
   closeModal: () => void;
   reloadDatabases: () => void;
+  databases: GeoipDatabase[];
 }) => {
   const [maxmind, setMaxmind] = useState('');
   const [databaseName, setDatabaseName] = useState('');
-  const [databaseNameError, setDatabaseNameError] = useState(false);
+  const [nameExistsError, setDatabaseExistsError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  const existingDatabaseNames = useMemo(
+    () => databases.map((database) => database.name),
+    [databases]
+  );
   const { services } = useKibana();
   const onDatabaseNameChange = (value: string) => {
     setDatabaseName(value);
+    setDatabaseExistsError(existingDatabaseNames.includes(value));
   };
-  const isValid = maxmind && databaseName;
+  const isValid = maxmind && databaseName && !nameExistsError;
 
   const onAddDatabase = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -155,19 +163,29 @@ export const AddDatabaseModal = ({
           </EuiFormRow>
         </EuiForm>
 
-        {databaseNameError && (
+        {nameExistsError && (
           <>
             <EuiSpacer />
             <EuiCallOut
               color="danger"
               title={
                 <FormattedMessage
-                  id="xpack.ingestPipelines.manageProcessors.geoip.errorCalloutTitle"
-                  defaultMessage="Error creating a geoIP database"
+                  id="xpack.ingestPipelines.manageProcessors.geoip.nameExistsErrorTitle"
+                  defaultMessage="Database already exists"
                 />
               }
               iconType="warning"
-            />
+            >
+              <p>
+                <FormattedMessage
+                  id="xpack.ingestPipelines.manageProcessors.geoip.nameExistsErrorText"
+                  defaultMessage="Database with name {name} already exists. Select a different database name."
+                  values={{
+                    name: databaseName,
+                  }}
+                />
+              </p>
+            </EuiCallOut>
           </>
         )}
       </EuiModalBody>
