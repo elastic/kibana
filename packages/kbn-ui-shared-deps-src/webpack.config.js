@@ -102,8 +102,8 @@ module.exports = {
 
   resolve: {
     extensions: ['.js', '.ts', '.tsx'],
-    mainFields: ['browser', 'main', 'module'],
-    conditionNames: ['require', 'default', 'node', 'module', 'import'],
+    mainFields: ['browser', 'main'],
+    // conditionNames: ['require', 'default', 'node', 'module', 'import'],
     alias: {
       '@elastic/eui$': '@elastic/eui/optimize/es',
       moment: MOMENT_SRC,
