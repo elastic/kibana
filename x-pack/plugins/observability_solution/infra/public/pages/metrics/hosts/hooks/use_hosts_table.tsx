@@ -302,9 +302,8 @@ export const useHostsTable = () => {
                           values={{
                             apm: (
                               <EuiLink
-                                data-test-subj="hostsViewTooltipDocumentationLink"
+                                data-test-subj="hostsViewTooltipApmDocumentationLink"
                                 href=" https://www.elastic.co/guide/en/observability/current/apm.html"
-                                target="_blank"
                               >
                                 <FormattedMessage
                                   id="xpack.infra.hostsViewPage.table.tooltip.apmHostMessage.apmDocumentationLink"
