@@ -80,6 +80,7 @@
     "@kbn/core-http-rate-limiter-internal",
     "@kbn/projects-solutions-groups",
     "@kbn/core-di-internal",
+    "@kbn/core-di-mocks",
   ],
   "exclude": [
     "target/**/*",
