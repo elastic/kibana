@@ -290,11 +290,14 @@ export const useHostsTable = () => {
                   return null;
                 }
                 return (
-                  <Popover icon="questionInCircle" data-test-subj="">
+                  <Popover
+                    icon="questionInCircle"
+                    data-test-subj="hostsView-tableRow-hasSystemMetrics-popover"
+                  >
                     <EuiText size="xs">
                       <p>
                         <FormattedMessage
-                          id="xpack.infra.hostsViewPage.table.tooltip.documentationLabel"
+                          id="xpack.infra.hostsViewPage.table.tooltip.apmHostMessage"
                           defaultMessage="This host has been detected by {apm}"
                           values={{
                             apm: (
@@ -304,7 +307,7 @@ export const useHostsTable = () => {
                                 target="_blank"
                               >
                                 <FormattedMessage
-                                  id="xpack.infra.hostsViewPage.table.tooltip.documentationLink"
+                                  id="xpack.infra.hostsViewPage.table.tooltip.apmHostMessage.apmDocumentationLink"
                                   defaultMessage="APM"
                                 />
                               </EuiLink>
@@ -314,7 +317,7 @@ export const useHostsTable = () => {
                       </p>
                       <p>
                         <EuiLink
-                          data-test-subj="learnMoreLink"
+                          data-test-subj="hostsView-tableRow-hasSystemMetrics-learnMoreLink"
                           href="https://ela.st/host-troubleshooting"
                           target="_blank"
                         >

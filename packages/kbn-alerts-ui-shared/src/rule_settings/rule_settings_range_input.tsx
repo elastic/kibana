@@ -1,25 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { memo } from 'react';
 import { EuiFormRow, EuiFormRowProps, EuiIconTip, EuiRange, EuiRangeProps } from '@elastic/eui';
 
-export interface RulesSettingsRangeProps {
+export interface RuleSettingsRangeInputProps {
   label: EuiFormRowProps['label'];
   labelPopoverText?: string;
   min: number;
   max: number;
   value: number;
+  fullWidth?: EuiRangeProps['fullWidth'];
   disabled?: EuiRangeProps['disabled'];
   onChange?: EuiRangeProps['onChange'];
 }
 
-export const RulesSettingsRange = memo((props: RulesSettingsRangeProps) => {
-  const { label, labelPopoverText, min, max, value, disabled, onChange, ...rest } = props;
+export const RuleSettingsRangeInput = memo((props: RuleSettingsRangeInputProps) => {
+  const { label, labelPopoverText, min, max, value, fullWidth, disabled, onChange, ...rest } =
+    props;
 
   const renderLabel = () => {
     return (
@@ -34,8 +37,9 @@ export const RulesSettingsRange = memo((props: RulesSettingsRangeProps) => {
   };
 
   return (
-    <EuiFormRow label={renderLabel()}>
+    <EuiFormRow label={renderLabel()} fullWidth={fullWidth}>
       <EuiRange
+        fullWidth={fullWidth}
         min={min}
         max={max}
         step={1}
