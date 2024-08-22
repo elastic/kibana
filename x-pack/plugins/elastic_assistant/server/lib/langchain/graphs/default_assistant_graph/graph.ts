@@ -35,7 +35,6 @@ export interface GetDefaultAssistantGraphParams {
   createLlmInstance: () => BaseChatModel;
   logger: Logger;
   tools: StructuredTool[];
-  responseLanguage: string;
   replacements: Replacements;
 }
 

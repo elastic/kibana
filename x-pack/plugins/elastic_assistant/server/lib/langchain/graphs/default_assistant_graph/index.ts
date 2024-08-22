@@ -24,6 +24,7 @@ import {
   openAIFunctionAgentPrompt,
   structuredChatAgentPrompt,
 } from './prompts';
+import { GraphInputs } from './types';
 import { getDefaultAssistantGraph } from './graph';
 import { invokeGraph, streamGraph } from './helpers';
 import { transformESSearchToAnonymizationFields } from '../../../../ai_assistant_data_clients/anonymization_fields/helpers';
@@ -156,11 +157,11 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     createLlmInstance,
     logger,
     tools,
-    responseLanguage,
     replacements,
   });
-  const inputs = {
+  const inputs: GraphInputs = {
     bedrockChatEnabled,
+    responseLanguage,
     conversationId,
     llmType,
     isStream,

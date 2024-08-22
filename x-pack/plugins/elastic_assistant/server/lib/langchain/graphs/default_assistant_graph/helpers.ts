@@ -16,19 +16,14 @@ import { AIMessageChunk } from '@langchain/core/messages';
 import { withAssistantSpan } from '../../tracers/apm/with_assistant_span';
 import { AGENT_NODE_TAG } from './nodes/run_agent';
 import { DEFAULT_ASSISTANT_GRAPH_ID, DefaultAssistantGraph } from './graph';
+import { GraphInputs } from './types';
 import type { OnLlmResponse, TraceOptions } from '../../executors/types';
 
 interface StreamGraphParams {
   apmTracer: APMTracer;
   assistantGraph: DefaultAssistantGraph;
   bedrockChatEnabled: boolean;
-  inputs: {
-    input: string;
-    conversationId?: string;
-    llmType?: string;
-    bedrockChatEnabled?: boolean;
-    isStream?: boolean;
-  };
+  inputs: GraphInputs;
   llmType: string | undefined;
   logger: Logger;
   onLlmResponse?: OnLlmResponse;
@@ -231,13 +226,7 @@ export const streamGraph = async ({
 interface InvokeGraphParams {
   apmTracer: APMTracer;
   assistantGraph: DefaultAssistantGraph;
-  inputs: {
-    input: string;
-    conversationId?: string;
-    llmType?: string;
-    bedrockChatEnabled?: boolean;
-    isStream?: boolean;
-  };
+  inputs: GraphInputs;
   onLlmResponse?: OnLlmResponse;
   traceOptions?: TraceOptions;
 }

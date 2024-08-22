@@ -15,6 +15,15 @@ export interface AgentStateBase {
   steps: AgentStep[];
 }
 
+export interface GraphInputs {
+  bedrockChatEnabled?: boolean;
+  conversationId?: string;
+  llmType?: string;
+  isStream?: boolean;
+  input: string;
+  responseLanguage: string;
+}
+
 export interface AgentState extends AgentStateBase {
   input: string;
   messages: BaseMessage[];
