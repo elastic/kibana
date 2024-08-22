@@ -13,33 +13,6 @@ import * as t from 'io-ts';
 import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
 
-type DurationUnit = 'm' | 'h' | 'd' | 'w' | 'M';
-
-interface Duration {
-  value: number;
-  unit: DurationUnit;
-}
-
-interface WindowSchema {
-  id: string;
-  burnRateThreshold: number;
-  maxBurnRateThreshold: number;
-  longWindow: Duration;
-  shortWindow: Duration;
-  actionGroup: string;
-}
-
-interface Dependency {
-  ruleId: string;
-  actionGroupsToSuppressOn: string[];
-}
-
-export interface SloBurnRateRuleParams {
-  sloId: string;
-  windows: WindowSchema[];
-  dependencies?: Dependency[];
-}
-
 interface SloParams {
   id?: string;
   name: string;

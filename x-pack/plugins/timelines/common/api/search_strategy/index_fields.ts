@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 const indexFieldsRequestBase = z.object({
   onlyCheckIfIndicesExist: z.boolean().optional(),
