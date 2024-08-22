@@ -119,12 +119,12 @@ Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to 
               defaultMessage="Tick the checkbox under {capabilities} in the opened CloudFormation stack review form: {acknowledge}"
               values={{
                 acknowledge: (
-                  <em>
+                  <strong>
                     <FormattedMessage
                       id="xpack.csp.agentlessForm.cloudFormation.steps.accept.acknowledge"
                       defaultMessage="I acknowledge that AWS CloudFormation might create IAM resources."
                     />
-                  </em>
+                  </strong>
                 ),
                 capabilities: (
                   <strong>

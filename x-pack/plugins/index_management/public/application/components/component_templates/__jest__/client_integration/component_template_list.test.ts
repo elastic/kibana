@@ -101,6 +101,9 @@ describe('<ComponentTemplateList />', () => {
         table.getMetaData('componentTemplatesTable');
       const descUsageCountValues = descTableCellsValues.map((row) => row[2]);
       expect(descUsageCountValues).toEqual(['1', 'Not in use']);
+
+      // Revert sorting back on Name column to not impact the rest of the tests
+      await actions.clickTableColumnSortButton(0);
     });
 
     test('Hides deprecated component templates by default', async () => {

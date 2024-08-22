@@ -200,15 +200,15 @@ export interface IndexToCheck {
 
 export type OnCheckCompleted = (param: {
   batchId: string;
+  isCheckAll: boolean;
+  isLastCheck: boolean;
   checkAllStartTime: number;
   error: string | null;
   formatBytes: (value: number | undefined) => string;
   formatNumber: (value: number | undefined) => string;
   indexName: string;
-  isLastCheck: boolean;
   partitionedFieldMetadata: PartitionedFieldMetadata | null;
   pattern: string;
-  version: string;
   requestTime?: number;
 }) => void;
 

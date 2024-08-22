@@ -112,6 +112,9 @@
     "@kbn/core-ui-settings-server-mocks",
     "@kbn/investigate-plugin",
     "@kbn/investigation-shared",
+    "@kbn/grouping",
+    "@kbn/alerts-grouping",
+    "@kbn/core-http-browser"
   ],
   "exclude": [
     "target/**/*"
