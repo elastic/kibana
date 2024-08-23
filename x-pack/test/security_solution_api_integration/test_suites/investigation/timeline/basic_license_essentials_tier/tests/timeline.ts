@@ -60,7 +60,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
         ).to.equal(0);
       });
     });
-    describe.only('resolve timeline', () => {
+    describe('resolve timeline', () => {
       before(async () => {
         await esArchiver.load(
           'x-pack/test/functional/es_archives/security_solution/timelines/7.15.0'
@@ -73,7 +73,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
         );
       });
 
-      it.only('should return outcome exactMatch when the id is unchanged', async () => {
+      it('should return outcome exactMatch when the id is unchanged', async () => {
         const resp = await supertest
           .get('/api/timeline/resolve')
           .query({ id: '8dc70950-1012-11ec-9ad3-2d7c6600c0f7' });
