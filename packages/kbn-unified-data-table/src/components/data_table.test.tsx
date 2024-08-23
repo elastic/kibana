@@ -383,7 +383,7 @@ describe('UnifiedDataTable', () => {
         expect(
           screen.queryByTestId('dataGridHeaderCellActionGroup-message')
         ).not.toBeInTheDocument();
-        userEvent.click(screen.getByRole('button', { name: 'message' }));
+        await userEvent.click(screen.getByRole('button', { name: 'message' }));
         expect(screen.getByTestId('dataGridHeaderCellActionGroup-message')).toBeInTheDocument();
         expect(screen.getByTestId('gridEditFieldButton')).toBeInTheDocument();
       },
@@ -397,7 +397,7 @@ describe('UnifiedDataTable', () => {
         expect(
           screen.queryByTestId('dataGridHeaderCellActionGroup-message')
         ).not.toBeInTheDocument();
-        userEvent.click(screen.getByRole('button', { name: 'message' }));
+        await userEvent.click(screen.getByRole('button', { name: 'message' }));
         expect(screen.getByTestId('dataGridHeaderCellActionGroup-message')).toBeInTheDocument();
         expect(screen.queryByTestId('gridEditFieldButton')).not.toBeInTheDocument();
       },
@@ -1275,10 +1275,8 @@ describe('UnifiedDataTable', () => {
         expect(getColumnHeader('message')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
         expect(getColumnHeader('extension')).toHaveStyle({ width: '50px' });
         expect(getColumnHeader('bytes')).toHaveStyle({ width: '50px' });
-        userEvent.click(getButton('message'));
-        userEvent.click(getButton('Remove column'), {
-          pointerEventsCheck: 0,
-        });
+        await userEvent.click(getButton('message'));
+        await userEvent.click(getButton('Remove column'), { pointerEventsCheck: 0 });
         await waitFor(() => {
           expect(queryColumnHeader('message')).not.toBeInTheDocument();
         });
@@ -1302,10 +1300,8 @@ describe('UnifiedDataTable', () => {
         expect(getColumnHeader('message')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
         expect(getColumnHeader('extension')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
         expect(getColumnHeader('bytes')).toHaveStyle({ width: '50px' });
-        userEvent.click(getButton('message'));
-        userEvent.click(getButton('Remove column'), {
-          pointerEventsCheck: 0,
-        });
+        await userEvent.click(getButton('message'));
+        await userEvent.click(getButton('Remove column'), { pointerEventsCheck: 0 });
         await waitFor(() => {
           expect(queryColumnHeader('message')).not.toBeInTheDocument();
         });
@@ -1328,25 +1324,21 @@ describe('UnifiedDataTable', () => {
           },
         });
         expect(getColumnHeader('@timestamp')).toHaveStyle({ width: '50px' });
-        userEvent.click(getButton('@timestamp'));
-        userEvent.click(getButton('Reset width'), {
-          pointerEventsCheck: 0,
-        });
+        await userEvent.click(getButton('@timestamp'));
+        await userEvent.click(getButton('Reset width'), { pointerEventsCheck: 0 });
         await waitFor(() => {
           expect(getColumnHeader('@timestamp')).toHaveStyle({
             width: `${defaultTimeColumnWidth}px`,
           });
         });
         expect(getColumnHeader('message')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
-        userEvent.click(getButton('message'));
+        await userEvent.click(getButton('message'));
         expect(queryButton('Reset width')).not.toBeInTheDocument();
         await waitFor(() => {
           expect(getColumnHeader('extension')).toHaveStyle({ width: '50px' });
         });
-        userEvent.click(getButton('extension'));
-        userEvent.click(getButton('Reset width'), {
-          pointerEventsCheck: 0,
-        });
+        await userEvent.click(getButton('extension'));
+        await userEvent.click(getButton('Reset width'), { pointerEventsCheck: 0 });
         await waitFor(() => {
           expect(getColumnHeader('extension')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
         });

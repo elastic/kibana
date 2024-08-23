@@ -34,7 +34,7 @@ describe('ESQLMenuPopover', () => {
   it('should open a menu when the popover is open', () => {
     renderESQLPopover();
     expect(screen.getByTestId('esql-menu-button')).toBeInTheDocument();
-    userEvent.click(screen.getByRole('button'));
+    await userEvent.click(screen.getByRole('button'));
 
     expect(screen.getByTestId('esql-examples')).toBeInTheDocument();
     expect(screen.getByTestId('esql-about')).toBeInTheDocument();

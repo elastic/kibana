@@ -67,7 +67,7 @@ describe('CopyToClipboardAction', () => {
         </TestExternalProviders>
       );
 
-      userEvent.click(screen.getByTestId('copyToClipboard'));
+      await userEvent.click(screen.getByTestId('copyToClipboard'));
 
       expect(copyToClipboard).toHaveBeenCalledWith('test comment');
       expect(addSuccessToast).toHaveBeenCalledWith({ title: 'Copied results to the clipboard' });

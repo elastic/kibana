@@ -47,7 +47,7 @@ describe('IndexCheckFields', () => {
     ['allTab', 'allTabContent'],
   ])('when clicking on %s tab', (tab, tabContent) => {
     it(`should render ${tabContent} content`, () => {
-      userEvent.click(screen.getByTestId(tab));
+      await userEvent.click(screen.getByTestId(tab));
 
       expect(screen.getByTestId(tabContent)).toBeInTheDocument();
     });

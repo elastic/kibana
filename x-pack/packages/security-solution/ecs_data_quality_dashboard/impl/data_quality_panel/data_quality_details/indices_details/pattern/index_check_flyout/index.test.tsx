@@ -86,7 +86,7 @@ describe('IndexCheckFlyout', () => {
       );
 
       const closeButton = screen.getByRole('button', { name: 'Close this dialog' });
-      userEvent.click(closeButton);
+      await userEvent.click(closeButton);
 
       expect(onClose).toHaveBeenCalled();
     });
@@ -115,7 +115,7 @@ describe('IndexCheckFlyout', () => {
       );
 
       const checkNowButton = screen.getByRole('button', { name: 'Check now' });
-      userEvent.click(checkNowButton);
+      await userEvent.click(checkNowButton);
 
       expect(checkIndex).toHaveBeenCalledWith({
         abortController: expect.any(AbortController),

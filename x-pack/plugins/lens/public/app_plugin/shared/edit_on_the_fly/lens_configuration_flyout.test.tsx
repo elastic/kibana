@@ -237,7 +237,7 @@ describe('LensEditConfigurationFlyout', () => {
       },
       { esql: 'from index1 | limit 10' }
     );
-    userEvent.click(screen.getByTestId('applyFlyoutButton'));
+    await userEvent.click(screen.getByTestId('applyFlyoutButton'));
     expect(onApplyCbSpy).toHaveBeenCalledWith({
       title: 'test',
       visualizationType: 'testVis',

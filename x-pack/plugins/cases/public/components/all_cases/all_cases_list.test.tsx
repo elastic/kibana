@@ -678,7 +678,7 @@ describe('AllCasesListGeneric', () => {
 
           await userEvent.click(await screen.findByTestId('checkboxSelectAll'));
 
-          userEvent.click(await screen.findByText('Bulk actions'));
+          await userEvent.click(await screen.findByText('Bulk actions'));
 
           await userEvent.click(await screen.findByTestId('case-bulk-action-status'), {
             pointerEventsCheck: 0,
@@ -714,7 +714,7 @@ describe('AllCasesListGeneric', () => {
 
         await userEvent.click(await screen.findByTestId('checkboxSelectAll'));
 
-        userEvent.click(await screen.findByText('Bulk actions'));
+        await userEvent.click(await screen.findByText('Bulk actions'));
 
         await userEvent.click(await screen.findByTestId('case-bulk-action-severity'), {
           pointerEventsCheck: 0,
@@ -744,7 +744,7 @@ describe('AllCasesListGeneric', () => {
 
         await userEvent.click(await screen.findByTestId('checkboxSelectAll'));
 
-        userEvent.click(await screen.findByText('Bulk actions'));
+        await userEvent.click(await screen.findByText('Bulk actions'));
 
         await userEvent.click(await screen.findByTestId('cases-bulk-action-delete'), {
           pointerEventsCheck: 0,

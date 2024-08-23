@@ -76,7 +76,7 @@ describe('AddToNewCaseAction', () => {
         </TestExternalProviders>
       );
 
-      userEvent.click(screen.getByTestId('addToNewCase'));
+      await userEvent.click(screen.getByTestId('addToNewCase'));
 
       expect(openCreateCaseFlyout).toHaveBeenCalledWith({
         comments: ['test markdown'],

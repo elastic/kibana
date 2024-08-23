@@ -62,7 +62,7 @@ describe('IlmPhaseFilter', () => {
       );
       const searchInput = screen.getByTestId('comboBoxSearchInput');
 
-      userEvent.click(searchInput);
+      await userEvent.click(searchInput);
 
       expect(screen.getByTitle('frozen')).toHaveAttribute('role', 'option');
       expect(screen.getByTitle('frozen')).toBeDisabled();
@@ -119,7 +119,7 @@ describe('IlmPhaseFilter', () => {
         expect(screen.getByPlaceholderText('Select one or more ILM phases')).toBeInTheDocument();
 
         const searchInput = screen.getByTestId('comboBoxSearchInput');
-        userEvent.click(searchInput);
+        await userEvent.click(searchInput);
         userEvent.hover(screen.getByText(option.toLowerCase()), undefined, {
           skipPointerEventsCheck: true,
         });
