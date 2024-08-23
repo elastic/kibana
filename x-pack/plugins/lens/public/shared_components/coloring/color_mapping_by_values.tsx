@@ -7,7 +7,7 @@
 
 import React, { MutableRefObject } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
+import { EuiFormRow } from '@elastic/eui';
 import {
   PaletteOutput,
   PaletteRegistry,
