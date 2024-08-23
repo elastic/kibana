@@ -8,10 +8,21 @@
 import { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import { StringWithAutocomplete } from '@langchain/core/dist/utils/types';
 import { AGENT_NODE_TAG } from './run_agent';
-import { AgentState } from '../types';
+import { AgentState, NodeParamsBase } from '../types';
+import { NodeType } from '../constants';
 
-export const RESPOND_NODE = 'respond';
-export const respond = async ({ model, state }: { model: BaseChatModel; state: AgentState }) => {
+export interface RespondParams extends NodeParamsBase {
+  state: AgentState;
+  model: BaseChatModel;
+}
+
+export async function respond({
+  logger,
+  state,
+  model,
+}: RespondParams): Promise<Partial<AgentState>> {
+  logger.debug(() => `${NodeType.RESPOND}: Node state:\n${JSON.stringify(state, null, 2)}`);
+
   if (state?.agentOutcome && 'returnValues' in state.agentOutcome) {
     const userMessage = [
       'user',
@@ -33,7 +44,8 @@ export const respond = async ({ model, state }: { model: BaseChatModel; state: A
           output: responseMessage.content,
         },
       },
+      lastNode: NodeType.RESPOND,
     };
   }
-  return state;
-};
+  return { lastNode: NodeType.RESPOND };
+}
