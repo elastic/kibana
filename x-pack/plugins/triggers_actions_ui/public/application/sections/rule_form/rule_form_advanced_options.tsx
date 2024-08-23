@@ -27,7 +27,7 @@ import {
 } from '@elastic/eui';
 import { RuleSettingsFlappingInputs } from '@kbn/alerts-ui-shared/src/rule_settings/rule_settings_flapping_inputs';
 import { RuleSettingsFlappingMessage } from '@kbn/alerts-ui-shared/src/rule_settings/rule_settings_flapping_message';
-import { RuleSpecificFlappingProperties } from '@kbn/alerting-plugin/common';
+import { Rule, Flapping } from '@kbn/alerts-ui-shared';
 import { useGetFlappingSettings } from '../../hooks/use_get_flapping_settings';
 
 const alertDelayFormRowLabel = i18n.translate(
@@ -113,7 +113,10 @@ const flappingIconTipDescription = i18n.translate(
   }
 );
 
-const clampFlappingValues = (flapping: RuleSpecificFlappingProperties) => {
+const clampFlappingValues = (flapping: Rule['flapping']) => {
+  if (!flapping) {
+    return;
+  }
   return {
     ...flapping,
     statusChangeThreshold: Math.min(flapping.lookBackWindow, flapping.statusChangeThreshold),
@@ -124,9 +127,9 @@ const INTEGER_REGEX = /^[1-9][0-9]*$/;
 
 export interface RuleFormAdvancedOptionsProps {
   alertDelay?: number;
-  flappingSettings?: RuleSpecificFlappingProperties;
+  flappingSettings?: Flapping | null;
   onAlertDelayChange: (value: string) => void;
-  onFlappingChange: (value: RuleSpecificFlappingProperties | null) => void;
+  onFlappingChange: (value: Flapping | null) => void;
   enabledFlapping?: boolean;
 }
 
@@ -139,7 +142,7 @@ export const RuleFormAdvancedOptions = (props: RuleFormAdvancedOptionsProps) => 
     onFlappingChange,
   } = props;
 
-  const cachedFlappingSettings = useRef<RuleSpecificFlappingProperties>();
+  const cachedFlappingSettings = useRef<Flapping>();
 
   const isDesktop = useIsWithinMinBreakpoint('xl');
 
@@ -160,8 +163,11 @@ export const RuleFormAdvancedOptions = (props: RuleFormAdvancedOptionsProps) => 
   );
 
   const internalOnFlappingChange = useCallback(
-    (flapping: RuleSpecificFlappingProperties) => {
+    (flapping: Flapping) => {
       const clampedValue = clampFlappingValues(flapping);
+      if (!clampedValue) {
+        return;
+      }
       onFlappingChange(clampedValue);
       cachedFlappingSettings.current = clampedValue;
     },
@@ -251,7 +257,7 @@ export const RuleFormAdvancedOptions = (props: RuleFormAdvancedOptionsProps) => 
             )}
           </EuiFlexItem>
         </EuiFlexGroup>
-        {flappingSettings && (
+        {flappingSettings && enabled && (
           <>
             <EuiSpacer size="m" />
             <EuiHorizontalRule margin="none" />
@@ -262,6 +268,9 @@ export const RuleFormAdvancedOptions = (props: RuleFormAdvancedOptionsProps) => 
   }, [isDesktop, euiTheme, spaceFlappingSettings, flappingSettings, onFlappingToggle]);
 
   const flappingFormBody = useMemo(() => {
+    if (!spaceFlappingSettings || !spaceFlappingSettings.enabled) {
+      return null;
+    }
     if (!flappingSettings) {
       return null;
     }
@@ -275,7 +284,12 @@ export const RuleFormAdvancedOptions = (props: RuleFormAdvancedOptionsProps) => 
         />
       </EuiFlexItem>
     );
-  }, [flappingSettings, onLookBackWindowChange, onStatusChangeThresholdChange]);
+  }, [
+    flappingSettings,
+    spaceFlappingSettings,
+    onLookBackWindowChange,
+    onStatusChangeThresholdChange,
+  ]);
 
   const flappingFormMessage = useMemo(() => {
     if (!spaceFlappingSettings || !spaceFlappingSettings.enabled) {

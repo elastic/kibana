@@ -16,10 +16,8 @@ const transformUpdateRuleFlapping = (flapping: Rule['flapping']) => {
   }
 
   return {
-    flapping: {
-      look_back_window: flapping.lookBackWindow,
-      status_change_threshold: flapping.statusChangeThreshold,
-    },
+    look_back_window: flapping.lookBackWindow,
+    status_change_threshold: flapping.statusChangeThreshold,
   };
 };
 
@@ -56,5 +54,5 @@ export const transformUpdateRuleBody: RewriteResponseCase<UpdateRuleBody> = ({
     };
   }),
   ...(alertDelay ? { alert_delay: alertDelay } : {}),
-  ...(flapping !== undefined ? transformUpdateRuleFlapping(flapping) : {}),
+  ...(flapping !== undefined ? { flapping: transformUpdateRuleFlapping(flapping) } : {}),
 });

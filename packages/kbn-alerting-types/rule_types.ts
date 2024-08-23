@@ -244,14 +244,7 @@ export interface Rule<Params extends RuleTypeParams = never> {
   running?: boolean | null;
   viewInAppRelativeUrl?: string;
   alertDelay?: AlertDelay | null;
-<<<<<<< HEAD
   flapping?: Flapping | null;
-=======
-  flapping?: {
-    lookBackWindow: number;
-    statusChangeThreshold: number;
-  };
->>>>>>> main
 }
 
 export type SanitizedRule<Params extends RuleTypeParams = never> = Omit<

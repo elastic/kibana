@@ -18,11 +18,6 @@ export interface RulesSettingsFlappingProperties {
   statusChangeThreshold: number;
 }
 
-export interface RuleSpecificFlappingProperties {
-  lookBackWindow: number;
-  statusChangeThreshold: number;
-}
-
 export type RulesSettingsFlapping = RulesSettingsFlappingProperties &
   RulesSettingsModificationMetadata;
 
@@ -43,16 +38,6 @@ export interface RulesSettings {
   queryDelay?: RulesSettingsQueryDelay;
 }
 
-<<<<<<< HEAD
-=======
-export {
-  MIN_LOOK_BACK_WINDOW,
-  MAX_LOOK_BACK_WINDOW,
-  MIN_STATUS_CHANGE_THRESHOLD,
-  MAX_STATUS_CHANGE_THRESHOLD,
-} from '@kbn/alerting-types';
-
->>>>>>> main
 export const MIN_QUERY_DELAY = 0;
 export const MAX_QUERY_DELAY = 60;
 

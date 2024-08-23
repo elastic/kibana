@@ -16,10 +16,8 @@ const transformCreateRuleFlapping = (flapping: Rule['flapping']) => {
   }
 
   return {
-    flapping: {
-      look_back_window: flapping.lookBackWindow,
-      status_change_threshold: flapping.statusChangeThreshold,
-    },
+    look_back_window: flapping.lookBackWindow,
+    status_change_threshold: flapping.statusChangeThreshold,
   };
 };
 
@@ -59,5 +57,5 @@ export const transformCreateRuleBody: RewriteResponseCase<CreateRuleBody> = ({
     };
   }),
   ...(alertDelay ? { alert_delay: alertDelay } : {}),
-  ...(flapping !== undefined ? transformCreateRuleFlapping(flapping) : {}),
+  ...(flapping !== undefined ? { flapping: transformCreateRuleFlapping(flapping) } : {}),
 });

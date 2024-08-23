@@ -39,10 +39,8 @@ const transformFlapping = (flapping: AsApiContract<Rule['flapping']>) => {
   }
 
   return {
-    flapping: {
-      lookBackWindow: flapping.look_back_window,
-      statusChangeThreshold: flapping.status_change_threshold,
-    },
+    lookBackWindow: flapping.look_back_window,
+    statusChangeThreshold: flapping.status_change_threshold,
   };
 };
 
@@ -90,7 +88,7 @@ export const transformRule: RewriteRequestCase<Rule> = ({
   ...(nextRun ? { nextRun } : {}),
   ...(apiKeyCreatedByUser !== undefined ? { apiKeyCreatedByUser } : {}),
   ...(alertDelay ? { alertDelay } : {}),
-  ...(flapping !== undefined ? transformFlapping(flapping) : {}),
+  ...(flapping !== undefined ? { flapping: transformFlapping(flapping) } : {}),
   ...rest,
 });
 
