@@ -37,7 +37,7 @@ export const ShortcutsPopover = ({ button, isOpen, closePopover }: ShortcutsPopo
       <EuiHorizontalRule margin="s" />
       <EuiFlexGroup gutterSize="s" direction="column">
         <ShortcutLineFlexItem
-          id="collapseAllExceptCurrent"
+          id="goToLineNumber"
           description="Go to line number"
           keys={[KEYS.keyCtrlCmd, KEYS.keyL]}
         />
@@ -54,27 +54,27 @@ export const ShortcutsPopover = ({ button, isOpen, closePopover }: ShortcutsPopo
       <EuiHorizontalRule margin="s" />
       <EuiFlexGroup gutterSize="s" direction="column">
         <ShortcutLineFlexItem
-          id="collapseAllExceptCurrent"
+          id="autoindentCurrentRequest"
           description="Auto-indent current request"
           keys={[KEYS.keyCtrlCmd, KEYS.keyI]}
         />
         <ShortcutLineFlexItem
-          id="collapseAllExceptCurrent"
+          id="jumpToNextRequestEnd"
           description="Jump to next request end"
           keys={[KEYS.keyCtrlCmd, KEYS.keyDown]}
         />
         <ShortcutLineFlexItem
-          id="collapseAllExceptCurrent"
+          id="jumpToPreviousRequestEnd"
           description="Jump to previous request end"
           keys={[KEYS.keyCtrlCmd, KEYS.keyUp]}
         />
         <ShortcutLineFlexItem
-          id="collapseAllExceptCurrent"
+          id="openDocumentation"
           description="Open documentation for current request"
           keys={[KEYS.keyCtrlCmd, KEYS.keySlash]}
         />
         <ShortcutLineFlexItem
-          id="collapseAllExceptCurrent"
+          id="runRequest"
           description="Run current request"
           keys={[KEYS.keyCtrlCmd, KEYS.keyEnter]}
         />
@@ -91,18 +91,18 @@ export const ShortcutsPopover = ({ button, isOpen, closePopover }: ShortcutsPopo
       <EuiHorizontalRule margin="s" />
       <EuiFlexGroup gutterSize="s" direction="column">
         <ShortcutLineFlexItem
-          id="collapseAllExceptCurrent"
+          id="applyCurrentAutocompleteSuggestion"
           description="Apply current or topmost term in menu"
           keys={[KEYS.keyEnter]}
           alternativeKeys={[KEYS.keyTab]}
         />
         <ShortcutLineFlexItem
-          id="collapseAllExceptCurrent"
+          id="closeAutocompleteMenu"
           description="Close autocomplete menu"
           keys={[KEYS.keyEsc]}
         />
         <ShortcutLineFlexItem
-          id="collapseAllExceptCurrent"
+          id="navigateAutocompleteMenu"
           description="Navigate items in autocomplete menu"
           keys={[KEYS.keyDown, KEYS.keyUp]}
         />
