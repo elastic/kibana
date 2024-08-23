@@ -17,6 +17,7 @@ import {
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import { InvestigationNote } from '@kbn/investigate-plugin/common';
+import { GetInvestigationResponse } from '@kbn/investigation-shared';
 import React, { useState } from 'react';
 import { useAddInvestigationNote } from '../../../../hooks/use_add_investigation_note';
 import { useDeleteInvestigationNote } from '../../../../hooks/use_delete_investigation_note';
@@ -27,16 +28,16 @@ import { TimelineMessage } from './timeline_message';
 
 export interface Props {
   investigationId: string;
-  initialNotes: InvestigationNote[];
+  investigation: GetInvestigationResponse;
 }
 
-export function InvestigationNotes({ investigationId, initialNotes }: Props) {
+export function InvestigationNotes({ investigationId, investigation }: Props) {
   const theme = useTheme();
   const [noteInput, setNoteInput] = useState('');
 
   const { data: notes, refetch } = useFetchInvestigationNotes({
     investigationId,
-    initialNotes,
+    initialNotes: investigation.notes,
   });
   const { mutateAsync: addInvestigationNote, isLoading: isAdding } = useAddInvestigationNote();
   const { mutateAsync: deleteInvestigationNote, isLoading: isDeleting } =

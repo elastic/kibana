@@ -35,7 +35,7 @@ export interface Response {
   data: GetInvestigationItemsResponse | undefined;
 }
 
-export function useFetchInvestigationNotes({ investigationId, initialItems }: Params): Response {
+export function useFetchInvestigationItems({ investigationId, initialItems }: Params): Response {
   const {
     core: {
       http,
@@ -45,7 +45,7 @@ export function useFetchInvestigationNotes({ investigationId, initialItems }: Pa
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery(
     {
-      queryKey: investigationKeys.fetchNotes({ investigationId }),
+      queryKey: investigationKeys.fetchItems({ investigationId }),
       queryFn: async ({ signal }) => {
         return await http.get<GetInvestigationItemsResponse>(
           `/api/observability/investigations/${investigationId}/items`,

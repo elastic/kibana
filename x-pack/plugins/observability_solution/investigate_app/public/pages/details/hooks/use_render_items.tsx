@@ -10,7 +10,13 @@ import { GetInvestigationResponse, InvestigationItem } from '@kbn/investigation-
 import React, { useEffect, useState } from 'react';
 import { useKibana } from '../../../hooks/use_kibana';
 
-export function useRenderItems({ investigation }: { investigation?: GetInvestigationResponse }) {
+export function useRenderItems({
+  items,
+  params,
+}: {
+  items?: InvestigationItem[];
+  params: GetInvestigationResponse['params'];
+}) {
   const {
     dependencies: {
       start: { investigate },
@@ -22,9 +28,9 @@ export function useRenderItems({ investigation }: { investigation?: GetInvestiga
   >([]);
 
   useEffect(() => {
-    async function renderItems(items: InvestigationItem[]) {
+    async function renderItems(currItems: InvestigationItem[]) {
       return await Promise.all(
-        items.map(async (item) => {
+        currItems.map(async (item) => {
           const itemDefinition = investigate.getItemDefinitionByType(item.type);
           if (!itemDefinition) {
             return Promise.resolve({
@@ -43,12 +49,8 @@ export function useRenderItems({ investigation }: { investigation?: GetInvestiga
 
           const globalParams = {
             timeRange: {
-              from: investigation
-                ? new Date(investigation.params.timeRange.from).toISOString()
-                : new Date().toISOString(),
-              to: investigation
-                ? new Date(investigation.params.timeRange.to).toISOString()
-                : new Date().toISOString(),
+              from: new Date(params.timeRange.from).toISOString(),
+              to: new Date(params.timeRange.to).toISOString(),
             },
           };
 
@@ -70,12 +72,10 @@ export function useRenderItems({ investigation }: { investigation?: GetInvestiga
       );
     }
 
-    if (investigation) {
-      renderItems(investigation.items).then((nextRenderableItems) =>
-        setRenderableItems(nextRenderableItems)
-      );
+    if (items) {
+      renderItems(items).then((nextRenderableItems) => setRenderableItems(nextRenderableItems));
     }
-  }, [investigation, investigate]);
+  }, [items, investigate, params]);
 
   return renderableItems;
 }
