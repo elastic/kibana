@@ -61,6 +61,7 @@ import { suggestUserProfilesRoute } from '../lib/detection_engine/routes/users/s
 import { registerTimelineRoutes } from '../lib/timeline/routes';
 import { getFleetManagedIndexTemplatesRoute } from '../lib/security_integrations/cribl/routes';
 import { registerEntityAnalyticsRoutes } from '../lib/entity_analytics/register_entity_analytics_routes';
+import { registerExternalRuleSourceRoutes } from '../lib/detection_engine/external_rule_sources/api/register_routes';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -81,6 +82,7 @@ export const initRoutes = (
   registerFleetIntegrationsRoutes(router);
   registerLegacyRuleActionsRoutes(router, logger);
   registerPrebuiltRulesRoutes(router);
+  registerExternalRuleSourceRoutes(router);
   registerRuleExceptionsRoutes(router);
   registerManageExceptionsRoutes(router);
   registerRuleManagementRoutes(router, config, ml, logger);

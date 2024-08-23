@@ -1,0 +1,61 @@
+openapi: 3.0.0
+info:
+  title: External Rule Source Schema
+  version: 'not applicable'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    ExternalRuleSourceInput:
+      oneOf:
+        - $ref: '#/components/schemas/GithubRuleSourceInput'
+      discriminator:
+        propertyName: type
+
+    ExternalRuleSourceOutput:
+      oneOf:
+        - $ref: '#/components/schemas/GithubRuleSourceOutput'
+      discriminator:
+        propertyName: type
+
+    GithubRuleSourceInput:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [github]
+        owner:
+          description: The owner of the GitHub repository (organization or user)
+          type: string
+        repo:
+          description: The name of the GitHub repository
+          type: string
+        token:
+          description: The GitHub token to access the repository
+          type: string
+      required:
+        - type
+        - owner
+        - repo
+        - token
+
+    GithubRuleSourceOutput:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [github]
+        id:
+          description: The unique identifier of the external rule source
+          type: string
+        owner:
+          description: The owner of the GitHub repository (organization or user)
+          type: string
+        repo:
+          description: The name of the GitHub repository
+          type: string
+      required:
+        - type
+        - id
+        - owner
+        - repo

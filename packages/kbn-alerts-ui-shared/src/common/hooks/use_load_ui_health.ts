@@ -21,7 +21,15 @@ export const useLoadUiHealth = (props: UseLoadUiHealthProps) => {
     return fetchUiHealthStatus({ http });
   };
 
-  const { data, isSuccess, isLoading, isFetching, isInitialLoading, isError, error } = useQuery({
+  const {
+    data,
+    isSuccess,
+    isLoading,
+    isFetchingRuleSources: isFetching,
+    isInitialLoading,
+    isError,
+    error,
+  } = useQuery({
     queryKey: ['useLoadUiHealth'],
     queryFn,
     refetchOnWindowFocus: false,

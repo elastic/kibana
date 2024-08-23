@@ -17,10 +17,7 @@ import { BOOTSTRAP_PREBUILT_RULES_URL } from '../../../../../../common/api/detec
 import type { BootstrapPrebuiltRulesResponse } from '../../../../../../common/api/detection_engine/prebuilt_rules/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
-import {
-  installEndpointPackage,
-  // installPrebuiltRulesPackage,
-} from '../install_prebuilt_rules_and_timelines/install_prebuilt_rules_package';
+import { installEndpointPackage } from '../install_prebuilt_rules_and_timelines/install_prebuilt_rules_package';
 import { installExternalPrebuiltRuleAssets } from '../../logic/rule_assets/install_rule_assets';
 import type { IDetectionRulesClient } from '../../../rule_management/logic/detection_rules_client/detection_rules_client_interface';
 import type { IPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
@@ -138,7 +135,6 @@ async function fetchPrebuiltRuleFilenames(
 
   for (const repository of prebuiltRuleRepositories) {
     const octokit = new Octokit({ auth: repository.token });
-
     const { data } = await octokit.request('GET /repos/{owner}/{repo}/git/trees/{tree_sha}', {
       owner: repository.username,
       repo: repository.repository,

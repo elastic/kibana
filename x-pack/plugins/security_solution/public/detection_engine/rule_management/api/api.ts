@@ -85,6 +85,23 @@ import type {
   UpdateRulesProps,
 } from '../logic/types';
 import type { BootstrapPrebuiltRulesResponse } from '../../../../common/api/detection_engine/prebuilt_rules/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.gen';
+import {
+  CREATE_EXTERNAL_RULE_SOURCE,
+  READ_EXTERNAL_RULE_SOURCES,
+  UPDATE_EXTERNAL_RULE_SOURCE,
+} from '../../../../common/api/detection_engine/external_rule_sources/urls';
+import type {
+  ReadExternalRuleSourceRequestBody,
+  ReadExternalRuleSourceResponse,
+} from '../../../../common/api/detection_engine/external_rule_sources/read_external_rule_sources/read_external_rule_source.gen';
+import type {
+  CreateExternalRuleSourceRequestBody,
+  CreateExternalRuleSourceResponse,
+} from '../../../../common/api/detection_engine/external_rule_sources/create_external_rule_source/create_external_source.gen';
+import type {
+  UpdateExternalRuleSourceRequestBody,
+  UpdateExternalRuleSourceResponse,
+} from '../../../../common/api/detection_engine/external_rule_sources/update_external_rule_source/update_external_rule_source.gen';
 
 /**
  * Create provided Rule
@@ -535,6 +552,33 @@ export const getPrePackagedRulesStatus = async ({
     method: 'GET',
     version: '2023-10-31',
     signal,
+  });
+
+export const readExternalRuleSources = async (
+  request: ReadExternalRuleSourceRequestBody
+): Promise<ReadExternalRuleSourceResponse> =>
+  KibanaServices.get().http.fetch<ReadExternalRuleSourceResponse>(READ_EXTERNAL_RULE_SOURCES, {
+    method: 'POST',
+    version: '1',
+    body: JSON.stringify(request),
+  });
+
+export const createExternalRuleSource = async (
+  ruleSource: CreateExternalRuleSourceRequestBody
+): Promise<CreateExternalRuleSourceResponse> =>
+  KibanaServices.get().http.fetch<CreateExternalRuleSourceResponse>(CREATE_EXTERNAL_RULE_SOURCE, {
+    method: 'POST',
+    version: '1',
+    body: JSON.stringify(ruleSource),
+  });
+
+export const updateExternalRuleSource = async (
+  ruleSource: UpdateExternalRuleSourceRequestBody
+): Promise<UpdateExternalRuleSourceResponse> =>
+  KibanaServices.get().http.fetch<UpdateExternalRuleSourceResponse>(UPDATE_EXTERNAL_RULE_SOURCE, {
+    method: 'POST',
+    version: '1',
+    body: JSON.stringify(ruleSource),
   });
 
 /**

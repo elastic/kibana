@@ -43,6 +43,13 @@ export const UPLOAD_VALUE_LISTS_PRIVILEGES_TOOLTIP = i18n.translate(
   }
 );
 
+export const CONFIGURE_RULE_SOURCES = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.configureRuleSourcesButton',
+  {
+    defaultMessage: 'Configure rule sources',
+  }
+);
+
 export const ADD_NEW_RULE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.addNewRuleTitle',
   {

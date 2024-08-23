@@ -28,7 +28,11 @@ export const useGetRuleTypes = () => {
     );
   };
 
-  const { isLoading, isFetching, data } = useQuery({
+  const {
+    isLoading,
+    isFetchingRuleSources: isFetching,
+    data,
+  } = useQuery({
     queryKey: ['useGetRuleTypes'],
     queryFn,
     onError,

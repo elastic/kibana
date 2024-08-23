@@ -21,7 +21,15 @@ export const useLoadUiConfig = (props: UseLoadUiConfigProps) => {
     return fetchUiConfig({ http });
   };
 
-  const { data, isSuccess, isLoading, isFetching, isInitialLoading, isError, error } = useQuery({
+  const {
+    data,
+    isSuccess,
+    isLoading,
+    isFetchingRuleSources: isFetching,
+    isInitialLoading,
+    isError,
+    error,
+  } = useQuery({
     queryKey: ['useLoadUiConfig'],
     queryFn,
     refetchOnWindowFocus: false,

@@ -37,10 +37,12 @@ import { RulesTableContextProvider } from '../../components/rules_table/rules_ta
 import { useInvalidateFetchCoverageOverviewQuery } from '../../../rule_management/api/hooks/use_fetch_coverage_overview_query';
 import { HeaderPage } from '../../../../common/components/header_page';
 import { RuleFeatureTour } from '../../components/rules_table/feature_tour/rules_feature_tour';
+import { RuleSourcesFlyout } from '../../components/rule_sources_flyout/rule_sources_flyout';
 
 const RulesPageComponent: React.FC = () => {
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
   const [isValueListFlyoutVisible, showValueListFlyout, hideValueListFlyout] = useBoolState();
+  const [isRuleSourcesFlyoutVisible, showRuleSourcesFlyout, hideRuleSourcesFlyout] = useBoolState();
   const kibanaServices = useKibana().services;
   const { navigateToApp } = kibanaServices.application;
   const invalidateFindRulesQuery = useInvalidateFindRulesQuery();
@@ -103,6 +105,7 @@ const RulesPageComponent: React.FC = () => {
       <MissingPrivilegesCallOut />
       <MlJobCompatibilityCallout />
       <ValueListsFlyout showFlyout={isValueListFlyoutVisible} onClose={hideValueListFlyout} />
+      {isRuleSourcesFlyoutVisible && <RuleSourcesFlyout onClose={hideRuleSourcesFlyout} />}
       <ImportDataModal
         checkBoxLabel={i18n.OVERWRITE_WITH_SAME_NAME}
         closeModal={hideImportModal}
@@ -130,6 +133,11 @@ const RulesPageComponent: React.FC = () => {
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <AddElasticRulesButton isDisabled={!canUserCRUD || loading} />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty iconType="advancedSettingsApp" onClick={showRuleSourcesFlyout}>
+                  {i18n.CONFIGURE_RULE_SOURCES}
+                </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiToolTip
