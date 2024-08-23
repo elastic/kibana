@@ -13,6 +13,7 @@ export interface LangModuleType {
   ID: string;
   lexerRules?: monaco.languages.IMonarchLanguage;
   languageConfiguration?: monaco.languages.LanguageConfiguration;
+  foldingRangeProvider?: monaco.languages.FoldingRangeProvider;
   getSuggestionProvider?: Function;
 }
 

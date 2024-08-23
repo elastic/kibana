@@ -13,7 +13,10 @@ export interface BaseSettings {
 
 export interface Settings extends BaseSettings {
   id: string;
+  version?: string;
   preconfigured_fields?: Array<'fleet_server_hosts'>;
   secret_storage_requirements_met?: boolean;
   output_secret_storage_requirements_met?: boolean;
+  use_space_awareness_migration_status?: 'pending' | 'success' | 'error';
+  use_space_awareness_migration_started_at?: string | null;
 }

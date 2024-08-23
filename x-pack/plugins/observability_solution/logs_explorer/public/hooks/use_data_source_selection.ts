@@ -16,6 +16,9 @@ export const useDataSourceSelection = (
   const dataSourceSelection = useSelector(logsExplorerControllerStateService, (state) => {
     return state.context.dataSourceSelection;
   });
+  const allSelection = useSelector(logsExplorerControllerStateService, (state) => {
+    return state.context.allSelection;
+  });
 
   const handleDataSourceSelectionChange: DataSourceSelectionChangeHandler = useCallback(
     (data) => {
@@ -24,5 +27,5 @@ export const useDataSourceSelection = (
     [logsExplorerControllerStateService]
   );
 
-  return { dataSourceSelection, handleDataSourceSelectionChange };
+  return { dataSourceSelection, allSelection, handleDataSourceSelectionChange };
 };

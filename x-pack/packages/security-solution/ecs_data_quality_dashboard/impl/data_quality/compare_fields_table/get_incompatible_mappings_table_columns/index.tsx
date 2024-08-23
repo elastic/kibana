@@ -23,7 +23,7 @@ export const getIncompatibleMappingsTableColumns = (): Array<
     name: i18n.FIELD,
     sortable: true,
     truncateText: false,
-    width: '25%',
+    width: '15%',
   },
   {
     field: 'type',
@@ -54,6 +54,6 @@ export const getIncompatibleMappingsTableColumns = (): Array<
     name: i18n.ECS_DESCRIPTION,
     sortable: false,
     truncateText: false,
-    width: '25%',
+    width: '35%',
   },
 ];

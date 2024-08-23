@@ -53,10 +53,7 @@ function init(window) {
       let alias = paths[testPath];
       if ('string' === typeof alias) return alias + tail;
       if (alias)
-        {return (
-          alias.location.replace(/\/*$/, '/') +
-          (tail || alias.main || alias.name)
-        );}
+        {return (alias.location.replace(/\/*$/, '/') + (tail || alias.main || alias.name));}
       if (alias === !1) return '';
       let i = testPath.lastIndexOf('/');
       if (-1 === i) break;
