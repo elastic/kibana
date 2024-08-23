@@ -25,6 +25,7 @@ import { flattenPanelTree } from '../../../../lib/flatten_panel_tree';
 import { INDEX_OPEN, IndexDetailsSection } from '../../../../../../common/constants';
 import { getIndexDetailsLink } from '../../../../services/routing';
 import { AppContext } from '../../../../app_context';
+import {DeleteIndexModal} from '../index_delete_modal';
 
 export class IndexActionsContextMenu extends Component {
   static contextType = AppContext;
@@ -417,40 +418,17 @@ export class IndexActionsContextMenu extends Component {
         </p>
       </Fragment>
     );
-
     return (
-      <EuiConfirmModal
-        title={i18n.translate(
-          'xpack.idxMgmt.indexActionsMenu.deleteIndex.confirmModal.modalTitle',
-          {
-            defaultMessage: 'Delete {selectedIndexCount, plural, one {index} other {# indices} }',
-            values: { selectedIndexCount },
-          }
-        )}
-        onCancel={() => {
-          this.confirmAction(false);
-          this.closeConfirmModal();
-        }}
-        onConfirm={() => this.closePopoverAndExecute(deleteIndices)}
-        buttonColor="danger"
-        confirmButtonDisabled={false}
-        cancelButtonText={i18n.translate(
-          'xpack.idxMgmt.indexActionsMenu.deleteIndex.confirmModal.cancelButtonText',
-          {
-            defaultMessage: 'Cancel',
-          }
-        )}
-        confirmButtonText={i18n.translate(
-          'xpack.idxMgmt.indexActionsMenu.deleteIndex.confirmModal.confirmButtonText',
-          {
-            defaultMessage: 'Delete {selectedIndexCount, plural, one {index} other {indices} }',
-            values: { selectedIndexCount },
-          }
-        )}
-      >
-        {standardIndexModalBody}
-      </EuiConfirmModal>
-    );
+    <DeleteIndexModal
+    selectedIndexCount={selectedIndexCount}
+    onCancel={() => {
+            this.confirmAction(false);
+            this.closeConfirmModal();
+          }}
+    onConfirm={() => this.closePopoverAndExecute(deleteIndices)}
+    indexNames={indexNames}
+    />)
+
   };
 
   render() {

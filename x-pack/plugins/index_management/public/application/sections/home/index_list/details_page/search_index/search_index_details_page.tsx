@@ -16,6 +16,8 @@ import {
   EuiPopover,
   EuiSpacer,
   EuiButton,
+  EuiIcon,
+  EuiText,
 } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
 import { FunctionComponent } from 'react';
@@ -26,6 +28,7 @@ import { DetailsPageLoading } from '../details_page_index_loading';
 import { DetailsPageError } from '../details_page_errors/details_page_error';
 import { useIndexDetailsFunctions } from '../../../../../hooks/use_index_details_page_index_functions';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { DeleteIndexModal } from '../../index_delete_modal';
 
 export const SearchIndexDetailsPage: FunctionComponent<
   RouteComponentProps<{ indexName: string }>
@@ -35,8 +38,8 @@ export const SearchIndexDetailsPage: FunctionComponent<
   const { isLoading, error, index, fetchIndexDetails, navigateToIndicesList } =
     useIndexDetailsFunctions(indexName, search, history);
 
-  const [showMoreOptionsPopover, setShowMoreOptionsPopover] = useState<boolean>(false);
-
+  const [isShowingMoreOptionsPopover, setShowMoreOptionsPopover] = useState<boolean>(false);
+  const [isShowingDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   useEffect(() => {
     fetchIndexDetails();
   }, [fetchIndexDetails]);
@@ -57,6 +60,7 @@ export const SearchIndexDetailsPage: FunctionComponent<
       />
     );
   }
+
   return (
     <>
       <EuiPageSection paddingSize="none">
@@ -83,7 +87,7 @@ export const SearchIndexDetailsPage: FunctionComponent<
                 <EuiFlexGroup>
                   <EuiFlexItem>
                     <EuiPopover
-                      isOpen={showMoreOptionsPopover}
+                      isOpen={isShowingMoreOptionsPopover}
                       button={
                         <EuiButtonIcon
                           data-test-subj="searchindexDetailsMoreOptionsButton"
@@ -97,17 +101,24 @@ export const SearchIndexDetailsPage: FunctionComponent<
                               defaultMessage: 'More options',
                             }
                           )}
-                          onClick={() => setShowMoreOptionsPopover(!showMoreOptionsPopover)}
+                          onClick={() => setShowMoreOptionsPopover(!isShowingMoreOptionsPopover)}
                         />
                       }
                     >
                       <EuiContextMenuPanel
                         size="s"
                         items={[
-                          <EuiContextMenuItem key="edit" icon="trash" onClick={() => {}}>
-                            {i18n.translate('xpack.idxMgmt.searchIndexDetails.deleteIndexLabel', {
-                              defaultMessage: 'Delete Index',
-                            })}
+                          <EuiContextMenuItem
+                            icon={<EuiIcon type="trash" color="danger" />}
+                            onClick={() => {
+                              setShowDeleteModal(!isShowingDeleteModal);
+                            }}
+                          >
+                            <EuiText size="s" color="danger">
+                              {i18n.translate('xpack.idxMgmt.searchIndexDetails.deleteIndexLabel', {
+                                defaultMessage: 'Delete Index',
+                              })}
+                            </EuiText>
                           </EuiContextMenuItem>,
                         ]}
                       />
@@ -120,6 +131,13 @@ export const SearchIndexDetailsPage: FunctionComponent<
         This is your very first Elasticsearch index. It stores the data you’d like to search.
       </EuiPageHeader>
       <EuiSpacer size="l" />
+      {isShowingDeleteModal && (
+        <DeleteIndexModal
+          onCancel={() => setShowDeleteModal(!isShowingDeleteModal)}
+          onConfirm={() => {}}
+          indexNames={[indexName]}
+        />
+      )}
       <div data-test-subj={`searchIndexDetailsContent`}></div>
     </>
   );
