@@ -36,7 +36,7 @@ describe('create modal', () => {
     } as Partial<NotificationsStart> as NotificationsStart,
   };
 
-  it('should prevent submission if there is a duplicate name error (unmanaged)', () => {
+  it('should prevent submission if there is a duplicate name error (unmanaged)', async () => {
     const tagClientUnmanaged = getMockTagClient({
       id: '1',
       name: 'tag1',
@@ -63,7 +63,7 @@ describe('create modal', () => {
     expect(tagClientUnmanaged.create).not.toHaveBeenCalled();
   });
 
-  it('should prevent submission if there is a duplicate name error (managed)', () => {
+  it('should prevent submission if there is a duplicate name error (managed)', async () => {
     const tagClientUnmanaged = getMockTagClient({
       id: '1',
       name: 'tag1',

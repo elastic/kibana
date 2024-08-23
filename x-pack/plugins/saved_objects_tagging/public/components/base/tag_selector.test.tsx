@@ -20,7 +20,7 @@ describe('tag selector', () => {
     onTagsSelected: jest.fn(),
   };
 
-  it('should exclude managed tags from the selection', () => {
+  it('should exclude managed tags from the selection', async () => {
     const tags = [
       { id: '1', name: 'tag1', managed: false, color: 'blue', description: 'description' },
       { id: '2', name: 'tag2', managed: true, color: 'blue', description: 'description' },
