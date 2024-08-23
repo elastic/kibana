@@ -6,92 +6,21 @@
  */
 
 import { INITIAL_REST_VERSION } from '@kbn/data-views-plugin/server/constants';
-
-import axios from 'axios';
-import fs from 'fs';
-import yaml from 'js-yaml';
-import { ToolingLog } from '@kbn/tooling-log';
-import { HostOptions, SamlSessionManager } from '@kbn/test';
-import { resolve } from 'path';
-import { REPO_ROOT } from '@kbn/repo-info';
-
-const getYamlData = (filePath: string): any => {
-  const fileContents = fs.readFileSync(filePath, 'utf8');
-  return yaml.safeLoad(fileContents);
-};
-
-const getRoleConfiguration = (role: string, filePath: string): any => {
-  const data = getYamlData(filePath);
-  if (data[role]) {
-    return data[role];
-  } else {
-    throw new Error(`Role '${role}' not found in the YAML file.`);
-  }
-};
-
-const rolesPath =
-  '../../../packages/kbn-es/src/serverless_resources/project_roles/security/roles.yml';
-
-export const getApiKeyForUser = async () => {
-  const log = new ToolingLog({ level: 'verbose', writeTo: process.stdout });
-
-  const kbnHost = process.env.KIBANA_URL || process.env.BASE_URL;
-  const kbnUrl = new URL(kbnHost!);
-
-  const hostOptions: HostOptions = {
-    protocol: kbnUrl.protocol as 'http' | 'https',
-    hostname: kbnUrl.hostname,
-    port: parseInt(kbnUrl.port, 10),
-    username: process.env.ELASTICSEARCH_USERNAME ?? '',
-    password: process.env.ELASTICSEARCH_PASSWORD ?? '',
-  };
-
-  const rolesFilename = process.env.PROXY_ORG ? `${process.env.PROXY_ORG}.json` : undefined;
-  const cloudUsersFilePath = resolve(REPO_ROOT, '.ftr', rolesFilename ?? 'role_users.json');
-
-  const samlSessionManager = new SamlSessionManager({
-    hostOptions,
-    log,
-    isCloud: process.env.CLOUD_SERVERLESS === 'true',
-    cloudUsersFilePath,
-  });
-
-  const adminCookieHeader = await samlSessionManager.getApiCredentialsForRole('admin');
-
-  let roleDescriptor = {};
-
-  const roleConfig = getRoleConfiguration('admin', rolesPath);
-
-  roleDescriptor = { ['system_indices_superuser']: roleConfig };
-
-  const response = await axios.post(
-    `${process.env.KIBANA_URL}/internal/security/api_key`,
-    {
-      name: 'myTestApiKey',
-      metadata: {},
-      role_descriptors: roleDescriptor,
-    },
-    {
-      headers: {
-        'kbn-xsrf': 'cypress-creds',
-        'x-elastic-internal-origin': 'security-solution',
-        ...adminCookieHeader,
-      },
-    }
-  );
-
-  const apiKey = response.data.encoded;
-  return apiKey;
-};
+import { getApiKeyForUser } from './api_key';
 
 export const getCommonHeaders = async (additionalHeaders: Record<string, string> = {}) => {
-  const username = process.env.ELASTICSEARCH_USERNAME || '';
-  const password = process.env.ELASTICSEARCH_PASSWORD || '';
-  const encodedCredentials = Buffer.from(`${username}:${password}`).toString('base64');
+  let auth = '';
 
-  const apiKey = await getApiKeyForUser();
-  const auth = process.env.IS_SERVERLESS ? `ApiKey ${apiKey}` : `Basic ${encodedCredentials}`;
+  if (process.env.IS_SERVERLESS === 'true') {
+    const apiKey = await getApiKeyForUser();
+    auth = `ApiKey ${apiKey}`;
+  } else {
+    const username = process.env.ELASTICSEARCH_USERNAME || '';
+    const password = process.env.ELASTICSEARCH_PASSWORD || '';
+    const encodedCredentials = Buffer.from(`${username}:${password}`).toString('base64');
 
+    auth = `Basic ${encodedCredentials}`;
+  }
   return {
     'kbn-xsrf': 'cypress-creds',
     'x-elastic-internal-origin': 'security-solution',
@@ -101,6 +30,8 @@ export const getCommonHeaders = async (additionalHeaders: Record<string, string>
 };
 
 export const getCommonHeadersWithApiVersion = async () => {
-  const header = await getCommonHeaders({ 'elastic-api-version': INITIAL_REST_VERSION });
+  const header = await getCommonHeaders({
+    'elastic-api-version': INITIAL_REST_VERSION,
+  });
   return header;
 };
