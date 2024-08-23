@@ -31,6 +31,8 @@ import {
   PostNewAgentActionResponse,
   UpdateAgentPolicyResponse,
   UpdateAgentPolicyRequest,
+  UpdatePackageResponse,
+  UpdatePackageRequest,
 } from '@kbn/fleet-plugin/common/types';
 import {
   GetUninstallTokenResponse,
@@ -331,11 +333,31 @@ export class SpaceTestApiClient {
   }
   // Package install
   async getPackage(
-    { pkgName, pkgVersion }: { pkgName: string; pkgVersion: string },
+    { pkgName, pkgVersion }: { pkgName: string; pkgVersion?: string },
     spaceId?: string
   ): Promise<GetInfoResponse> {
     const { body: res } = await this.supertest
-      .get(`${this.getBaseUrl(spaceId)}/api/fleet/epm/packages/${pkgName}/${pkgVersion}`)
+      .get(
+        pkgVersion
+          ? `${this.getBaseUrl(spaceId)}/api/fleet/epm/packages/${pkgName}/${pkgVersion}`
+          : `${this.getBaseUrl(spaceId)}/api/fleet/epm/packages/${pkgName}`
+      )
+      .expect(200);
+
+    return res;
+  }
+  async updatePackage(
+    {
+      pkgName,
+      pkgVersion,
+      data,
+    }: { pkgName: string; pkgVersion: string; data: UpdatePackageRequest['body'] },
+    spaceId?: string
+  ): Promise<UpdatePackageResponse> {
+    const { body: res } = await this.supertest
+      .put(`${this.getBaseUrl(spaceId)}/api/fleet/epm/packages/${pkgName}/${pkgVersion}`)
+      .set('kbn-xsrf', 'xxxx')
+      .send({ ...data })
       .expect(200);
 
     return res;

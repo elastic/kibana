@@ -82,12 +82,11 @@ export const setupUpgradeManagedPackagePolicies = async (
 ) => {
   appContextService
     .getLogger()
-    .debug('Running required package policies upgrades for managed policies');
+    .debug('Scheduling required package policies upgrades for managed policies');
 
   const installedPackages = await getInstallations(soClient, {
     filter: `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.install_status:installed AND ${PACKAGES_SAVED_OBJECT_TYPE}.attributes.keep_policies_up_to_date:true`,
   });
-
   for (const { attributes: installedPackage } of installedPackages.saved_objects) {
     const packagePoliciesFinder = await getPackagePoliciesNotMatchingVersion(
       soClient,
