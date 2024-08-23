@@ -27,9 +27,13 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n-react';
 import { useLinkProps, useUiTracker } from '@kbn/observability-shared-plugin/public';
-import type { TimeRange } from '@kbn/es-query';
+import { Filter, TimeRange } from '@kbn/es-query';
 import { css } from '@emotion/react';
 import type { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
+import { type HostsLocatorParams, HOSTS_LOCATOR_ID } from '@kbn/observability-shared-plugin/common';
+import { HOST_NAME_FIELD } from '../../../../../common/constants';
+import { buildCombinedAssetFilter } from '../../../../utils/filters/build';
+import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { FetcherOptions } from '../../../../hooks/use_fetcher';
 import { datemathToEpochMillis } from '../../../../utils/datemath';
 import { useSorting } from '../../../../hooks/use_sorting';
@@ -43,7 +47,7 @@ import type {
 import { PaginationControls } from './pagination';
 import { AnomalySummary } from './annomaly_summary';
 import { AnomalySeverityIndicator } from '../../../logging/log_analysis_results/anomaly_severity_indicator';
-import { useSourceContext } from '../../../../containers/metrics_source';
+import { useMetricsDataViewContext, useSourceContext } from '../../../../containers/metrics_source';
 import { createResultsUrl } from '../flyout_home';
 import {
   useWaffleViewState,
@@ -66,6 +70,7 @@ const AnomalyActionMenu = ({
   influencerField,
   influencers,
   disableShowInInventory,
+  hostName,
 }: {
   jobId: string;
   type: string;
@@ -74,11 +79,22 @@ const AnomalyActionMenu = ({
   influencerField: string;
   influencers: string[];
   disableShowInInventory?: boolean;
+  hostName?: string;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const close = useCallback(() => setIsOpen(false), [setIsOpen]);
   const handleToggleMenu = useCallback(() => setIsOpen(!isOpen), [isOpen]);
   const { onViewChange } = useWaffleViewState();
+  const { metricsView } = useMetricsDataViewContext();
+  const {
+    services: {
+      share,
+      data: {
+        query: { filterManager: filterManagerService },
+      },
+    },
+  } = useKibanaContextForPlugin();
+  const hostLocator = share.url.locators.get<HostsLocatorParams>(HOSTS_LOCATOR_ID);
 
   const showInInventory = useCallback(() => {
     const metricTypeMap: { [key in Metric]: SnapshotMetricType } = {
@@ -119,13 +135,39 @@ const AnomalyActionMenu = ({
     closeFlyout();
   }, [jobId, onViewChange, startTime, type, influencers, influencerField, closeFlyout]);
 
+  const showInHosts = useCallback(() => {
+    const newFilter = buildCombinedAssetFilter({
+      field: HOST_NAME_FIELD,
+      values: influencers,
+      dataView: metricsView?.dataViewReference,
+    });
+
+    const addHostFilter = (filter: Filter[] | Filter) => {
+      filterManagerService.removeAll();
+      filterManagerService.addFilters(filter);
+    };
+
+    if (!hostName || !closeFlyout) {
+      hostLocator?.navigate({}).then(() => addHostFilter(newFilter));
+    } else {
+      addHostFilter(newFilter);
+    }
+
+    if (closeFlyout) closeFlyout();
+  }, [closeFlyout, influencers, metricsView, hostName, hostLocator, filterManagerService]);
+
   const anomaliesUrl = useLinkProps({
     app: 'ml',
     pathname: `/explorer?_g=${createResultsUrl([jobId.toString()])}`,
   });
 
   const items = [
-    <EuiContextMenuItem key="openInAnomalyExplorer" icon="popout" {...anomaliesUrl}>
+    <EuiContextMenuItem
+      key="openInAnomalyExplorer"
+      icon="popout"
+      data-test-subj="infraAnomalyFlyoutOpenInAnomalyExplorer"
+      {...anomaliesUrl}
+    >
       <FormattedMessage
         id="xpack.infra.ml.anomalyFlyout.actions.openInAnomalyExplorer"
         defaultMessage="Open in Anomaly Explorer"
@@ -135,12 +177,31 @@ const AnomalyActionMenu = ({
 
   if (!disableShowInInventory) {
     items.push(
-      <EuiContextMenuItem key="showInInventory" icon="search" onClick={showInInventory}>
-        <FormattedMessage
-          id="xpack.infra.ml.anomalyFlyout.actions.showInInventory"
-          defaultMessage="Show in Inventory"
-        />
-      </EuiContextMenuItem>
+      influencerField === HOST_NAME_FIELD ? (
+        <EuiContextMenuItem
+          key="showInHosts"
+          icon="search"
+          data-test-subj="infraAnomalyFlyoutShowInHosts"
+          onClick={showInHosts}
+        >
+          <FormattedMessage
+            id="xpack.infra.ml.anomalyFlyout.actions.showInHosts"
+            defaultMessage="Show in Hosts"
+          />
+        </EuiContextMenuItem>
+      ) : (
+        <EuiContextMenuItem
+          key="showInInventory"
+          icon="search"
+          data-test-subj="infraAnomalyFlyoutShowInInventory"
+          onClick={showInInventory}
+        >
+          <FormattedMessage
+            id="xpack.infra.ml.anomalyFlyout.actions.showInInventory"
+            defaultMessage="Show in Inventory"
+          />
+        </EuiContextMenuItem>
+      )
     );
   }
 
@@ -440,6 +501,7 @@ export const AnomaliesTable = ({
       textOnly: true,
       truncateText: true,
       render: (influencers: string[]) => influencers.join(','),
+      'data-test-subj': 'nodeNameRow',
     },
     {
       name: i18n.translate('xpack.infra.ml.anomalyFlyout.columnActionsName', {
