@@ -6,6 +6,7 @@
  */
 
 import {
+  AllDatasetSelection,
   availableControlsPanels,
   controlPanelConfigs,
   ControlPanels,
@@ -37,7 +38,8 @@ export const getPublicStateFromContext = (
 };
 
 export const getContextFromPublicState = (
-  publicState: LogsExplorerPublicStateUpdate
+  publicState: LogsExplorerPublicStateUpdate,
+  allSelection: AllDatasetSelection
 ): LogsExplorerControllerContext => ({
   ...DEFAULT_CONTEXT,
   chart: {
@@ -47,7 +49,7 @@ export const getContextFromPublicState = (
   controlPanels: getControlPanelsFromPublicControlsState(publicState.controls),
   dataSourceSelection:
     publicState.dataSourceSelection != null
-      ? hydrateDataSourceSelection(publicState.dataSourceSelection)
+      ? hydrateDataSourceSelection(publicState.dataSourceSelection, allSelection)
       : DEFAULT_CONTEXT.dataSourceSelection,
   grid: {
     ...DEFAULT_CONTEXT.grid,
