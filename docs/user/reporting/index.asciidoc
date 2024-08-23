@@ -21,12 +21,13 @@ TIP: Anonymous users can also access the link if you have configured <<anonymous
 
 image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt49f2b5a80ec89a34/66b9e919af508f4ac182c194/share-dashboard.gif[getting a shareable link for a dashboard]
 
-
 [float]
 [[manually-generate-reports]]
 == Export as a file
 
-Create and download PDF, PNG, or CSV reports of saved searches, dashboards, visualizations, and workpads:
+NOTE: For more information on how to configure reporting in {kib}, refer to <<secure-reporting,Configure reporting in {kib}>>
+
+Create and download PDF, PNG, or CSV reports of saved searches, dashboards, visualizations, and workpads.
 
 * *PDF* &mdash; Generate and download PDF files of dashboards, visualizations, and *Canvas* workpads. PDF reports are a link:https://www.elastic.co/subscriptions[subscription feature].
 
@@ -55,17 +56,19 @@ image::user/reporting/images/shareable-container.png["Shareable Container"]
 
 . From the toolbar, click *Share*, then select the report option. 
 
-* If you are creating dashboard PDFs, select *Optimize for printing* to create printer-friendly PDFs with multiple A4 portrait pages and two visualizations per page.
+* If you are creating dashboard PDFs, select *For printing* to create printer-friendly PDFs with multiple A4 portrait pages and two visualizations per page.
 +
 NOTE: When you create a dashboard report that includes a data table or saved search, the PDF includes only the visible data.
 
 * If you are creating workpad PDFs, select *Full page layout* to create PDFs without margins that surround the workpad.
 
-. Generate the report.
+. Generate the report by clicking **Export file**, **Generate CSV**, or **Generate PDF**, depending on the object you want to export.
++
+NOTE: You can use the *Copy POST URL* option instead to generate the report from outside Kibana or from Watcher.
 
-. When the report generates, a message appears. On the message, click **Download report**.
+. A message appears, indicating that the report is in the export queue. 
 
-. To view and manage reports, open the main menu, then click *Stack Management > Reporting*.
+You can then download it from that message, or go to the *Stack Management > Reporting* page to view and access all of your reports.
 
 NOTE: In "stateful" deployments, reports are stored in {es} and managed by the `kibana-reporting` {ilm}
 ({ilm-init}) policy. By default, the policy stores reports forever. To learn more about {ilm-init} policies, refer
@@ -98,8 +101,6 @@ Create and share JSON files for workpads.
 [float]
 == Embed outside of {kib}
 
-
-
 * beta[] *Share on a website* &mdash; Download and securely share *Canvas* workpads on any website.
 
 * *Embed code* &mdash; Embed fully interactive dashboards as an iframe on web pages.
@@ -107,15 +108,6 @@ Create and share JSON files for workpads.
 [[reporting-on-cloud-resource-requirements]]
 NOTE: For Elastic Cloud deployments, {kib} instances require a minimum of 2GB RAM to generate PDF or PNG reports. To
 change {kib} sizing, {ess-console}[edit the deployment].
-
-
-[float]
-[[manually-generate-reports]]
-== Create reports
-
-For more information on how to configure reporting in {kib}, refer to <<secure-reporting,Configure reporting in {kib}>>
-
-
 
 
 [float]
@@ -150,24 +142,13 @@ For information about granting access to embedded dashboards, refer to <<kibana-
 
 . Click *Share > Embed code*.
 
-. Specify how you want to generate the code:
-
-* To display the current state, select *Snapshot*.
-
-* To display up-to-date changes, select *Saved object*.
-
-* Select the dashboard components you want to share.
-
-* To generate a shortened link, select *Short URL*.
+. Specify which parts of the dashboard you want to include: Top menu, query, time filter, and filter bar.
 
 * To automatically log in anonymous users when you have multiple authentication providers enabled, select *Public URL*.
 +
-[role="screenshot"]
-image::images/embed-code-public-url.png[Embed code share menu with Public URL option highlighted]
-+
 NOTE: *Public URL* is available only when anonymous access is configured and your anonymous service account has privileges to access what you want to embed. For more information, refer to <<anonymous-authentication,Anonymous authentication>>.
 
-. Click *Copy iFrame code*.
+. Click *Copy embed code*.
 
 --
 
