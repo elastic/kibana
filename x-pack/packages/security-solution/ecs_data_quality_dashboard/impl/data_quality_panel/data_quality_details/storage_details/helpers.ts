@@ -9,9 +9,9 @@ import type { Datum, Key, ArrayNode } from '@elastic/charts';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { orderBy } from 'lodash/fp';
 
-import { getDocsCount, getSizeInBytes } from '../../helpers';
 import { getIlmPhase } from '../indices_details/pattern/helpers';
 import { PatternRollup } from '../../types';
+import { getDocsCount, getSizeInBytes } from '../../utils/stats';
 
 export interface LegendItem {
   color: string | null;

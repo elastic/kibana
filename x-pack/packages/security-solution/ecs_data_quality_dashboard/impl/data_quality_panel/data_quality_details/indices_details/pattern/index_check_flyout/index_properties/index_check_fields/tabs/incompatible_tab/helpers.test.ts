@@ -18,7 +18,7 @@ import {
   getIncompatibleValuesFields,
   showInvalidCallout,
 } from './helpers';
-import { EMPTY_STAT } from '../../../../../../../../helpers';
+import { EMPTY_STAT } from '../../../../../../../../constants';
 import {
   DETECTION_ENGINE_RULES_MAY_NOT_MATCH,
   MAPPINGS_THAT_CONFLICT_WITH_ECS,

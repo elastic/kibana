@@ -85,14 +85,6 @@ export interface PartitionedFieldMetadata {
   sameFamily: EcsBasedFieldMetadata[];
 }
 
-export interface PartitionedFieldMetadataStats {
-  all: number;
-  custom: number;
-  ecsCompliant: number;
-  incompatible: number;
-  sameFamily: number;
-}
-
 export interface UnallowedValueRequestItem {
   allowedValues: string[];
   indexFieldName: string;

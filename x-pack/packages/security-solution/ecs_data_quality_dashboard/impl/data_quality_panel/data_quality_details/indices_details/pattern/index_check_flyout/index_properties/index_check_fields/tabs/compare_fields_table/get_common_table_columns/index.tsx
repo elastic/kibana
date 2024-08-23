@@ -11,7 +11,6 @@ import React from 'react';
 
 import { SameFamily } from '../same_family';
 import { EcsAllowedValues } from '../ecs_allowed_values';
-import { getIsInSameFamily } from '../../../../../../../../../helpers';
 import { IndexInvalidValues } from '../index_invalid_values';
 import { CodeDanger, CodeSuccess } from '../../../../../../../../../styles';
 import * as i18n from '../translations';
@@ -20,6 +19,7 @@ import type {
   EnrichedFieldMetadata,
   UnallowedValueCount,
 } from '../../../../../../../../../types';
+import { getIsInSameFamily } from '../../../../utils/get_is_in_same_family';
 
 export const EMPTY_PLACEHOLDER = '--';
 

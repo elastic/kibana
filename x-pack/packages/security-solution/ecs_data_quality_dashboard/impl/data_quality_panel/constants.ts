@@ -38,3 +38,7 @@ export const ilmPhaseOptionsStatic: EuiComboBoxOptionOption[] = [
     value: 'unmanaged',
   },
 ];
+
+export const EMPTY_STAT = '--';
+
+export const INTERNAL_API_VERSION = '1';

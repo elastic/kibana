@@ -16,8 +16,8 @@ import type {
   SortConfig,
   MeteringStatsIndex,
 } from '../../../types';
-import { getDocsCount, getSizeInBytes } from '../../../helpers';
 import { IndexSummaryTableItem } from './types';
+import { getDocsCount, getSizeInBytes } from '../../../utils/stats';
 
 export const isManaged = (
   ilmExplainRecord: IlmExplainLifecycleLifecycleExplain | undefined

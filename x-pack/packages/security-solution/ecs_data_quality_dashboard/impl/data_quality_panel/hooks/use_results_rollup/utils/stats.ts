@@ -5,16 +5,20 @@
  * 2.0.
  */
 
-import { getIndexDocsCountFromRollup } from '../../data_quality_summary/summary_actions/check_all/helpers';
-import { getIlmPhase } from '../../data_quality_details/indices_details/pattern/helpers';
-import { getAllIncompatibleMarkdownComments } from '../../data_quality_details/indices_details/pattern/index_check_flyout/index_properties/index_check_fields/tabs/incompatible_tab/helpers';
-import {
-  getSizeInBytes,
-  getTotalPatternIncompatible,
-  getTotalPatternIndicesChecked,
-  getTotalPatternSameFamily,
-} from '../../helpers';
-import type { IlmPhase, PartitionedFieldMetadata, PatternRollup } from '../../types';
+import { DataQualityCheckResult, MeteringStatsIndex, PatternRollup } from '../../../types';
+import { getTotalPatternIncompatible, getTotalPatternIndicesChecked } from '../../../utils/stats';
+
+export const getTotalPatternSameFamily = (
+  results: Record<string, DataQualityCheckResult> | undefined
+): number | undefined => {
+  if (results == null) {
+    return undefined;
+  }
+
+  const allResults = Object.values(results);
+
+  return allResults.reduce<number>((acc, { sameFamily }) => acc + (sameFamily ?? 0), 0);
+};
 
 export const getTotalIndices = (
   patternRollups: Record<string, PatternRollup>
@@ -87,82 +91,10 @@ export const getTotalIndicesChecked = (patternRollups: Record<string, PatternRol
   );
 };
 
-export const updateResultOnCheckCompleted = ({
-  error,
-  formatBytes,
-  formatNumber,
+export const getIndexId = ({
   indexName,
-  isILMAvailable,
-  partitionedFieldMetadata,
-  pattern,
-  patternRollups,
+  stats,
 }: {
-  error: string | null;
-  formatBytes: (value: number | undefined) => string;
-  formatNumber: (value: number | undefined) => string;
   indexName: string;
-  isILMAvailable: boolean;
-  partitionedFieldMetadata: PartitionedFieldMetadata | null;
-  pattern: string;
-  patternRollups: Record<string, PatternRollup>;
-}): Record<string, PatternRollup> => {
-  const patternRollup: PatternRollup | undefined = patternRollups[pattern];
-
-  if (patternRollup != null) {
-    const ilmExplain = patternRollup.ilmExplain;
-
-    const ilmPhase: IlmPhase | undefined =
-      ilmExplain != null ? getIlmPhase(ilmExplain[indexName], isILMAvailable) : undefined;
-
-    const docsCount = getIndexDocsCountFromRollup({
-      indexName,
-      patternRollup,
-    });
-
-    const patternDocsCount = patternRollup.docsCount ?? 0;
-
-    const sizeInBytes = getSizeInBytes({ indexName, stats: patternRollup.stats });
-
-    const markdownComments =
-      partitionedFieldMetadata != null
-        ? getAllIncompatibleMarkdownComments({
-            docsCount,
-            formatBytes,
-            formatNumber,
-            ilmPhase,
-            indexName,
-            isILMAvailable,
-            partitionedFieldMetadata,
-            patternDocsCount,
-            sizeInBytes,
-          })
-        : [];
-
-    const incompatible = partitionedFieldMetadata?.incompatible.length;
-    const sameFamily = partitionedFieldMetadata?.sameFamily.length;
-    const checkedAt = partitionedFieldMetadata ? Date.now() : undefined;
-
-    return {
-      ...patternRollups,
-      [pattern]: {
-        ...patternRollup,
-        results: {
-          ...(patternRollup.results ?? {}),
-          [indexName]: {
-            docsCount,
-            error,
-            ilmPhase,
-            incompatible,
-            indexName,
-            markdownComments,
-            pattern,
-            sameFamily,
-            checkedAt,
-          },
-        },
-      },
-    };
-  } else {
-    return patternRollups;
-  }
-};
+  stats: Record<string, MeteringStatsIndex> | null;
+}): string | null | undefined => stats && stats[indexName]?.uuid;
