@@ -21,7 +21,7 @@ export async function getDataStreams(options: {
   const datasetNames = types.map((type) =>
     streamPartsToIndexPattern({
       typePattern: type,
-      datasetPattern: datasetQuery ? datasetQuery : '*-*',
+      datasetPattern: datasetQuery ? `${datasetQuery}` : '*-*',
     })
   );
 

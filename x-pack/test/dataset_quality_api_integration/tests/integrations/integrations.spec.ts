@@ -55,6 +55,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           'apm',
           'endpoint',
           'system',
+          'synthetics',
         ]);
 
         expect(resp.body.integrations[0].datasets).not.empty();
