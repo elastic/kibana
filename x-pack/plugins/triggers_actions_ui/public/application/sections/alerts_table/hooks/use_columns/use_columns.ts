@@ -306,6 +306,7 @@ export const useColumns = ({
     [columns]
   );
 
+  // remove initialWidth property from the last column to extended it to meet the full page width
   const columnsWithoutInitialWidthForLastVisibleColumn = useMemo(() => {
     const lastVisibleColumns = visibleColumns[visibleColumns.length - 1];
     return columns.map((col) => {
