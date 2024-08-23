@@ -6,7 +6,7 @@
  */
 
 import type { RuleVersionSpecifier } from '../../../../../../common/api/detection_engine';
-import type { ExternalRuleAssetBlob } from '../../api/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules';
+import type { ExternalRuleAssetBlob } from './fetch_external_prebuilt_rule_assets';
 import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
 import { validatePrebuiltRuleAsset } from './prebuilt_rule_assets_validation';
 import type { ExternalRuleSourceClient } from '../../../external_rule_sources/logic/external_rule_sources_client';

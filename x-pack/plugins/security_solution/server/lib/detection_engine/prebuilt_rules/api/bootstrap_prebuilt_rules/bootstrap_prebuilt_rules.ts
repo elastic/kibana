@@ -11,7 +11,10 @@ import { BOOTSTRAP_PREBUILT_RULES_URL } from '../../../../../../common/api/detec
 import type { BootstrapPrebuiltRulesResponse } from '../../../../../../common/api/detection_engine/prebuilt_rules/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
-import { installEndpointPackage, installPrebuiltRulesPackage } from '../install_prebuilt_rules_and_timelines/install_prebuilt_rules_package';
+import {
+  installEndpointPackage,
+  installPrebuiltRulesPackage,
+} from '../install_prebuilt_rules_and_timelines/install_prebuilt_rules_package';
 import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
 import { getExternalPrebuiltRuleAssets } from '../../logic/rule_assets/fetch_external_prebuilt_rule_assets';
 import { createExternalRuleSourcesClient } from '../../../external_rule_sources/logic/external_rule_sources_client';
