@@ -5,9 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useQueryClient, useMutation } from '@tanstack/react-query';
-import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -20,7 +18,8 @@ import {
   RuleStateAttributes,
 } from '../../../common/types/latest';
 import { CSP_BENCHMARK_RULES_BULK_ACTION_ROUTE_PATH } from '../../../common/constants';
-import { CloudSecurityPostureStartServices, CspClientPluginStartDeps } from '../../types';
+import { CloudSecurityPostureStartServices } from '../../types';
+import { useKibana } from '../../common/hooks/use_kibana';
 
 export type RuleStateAttributesWithoutStates = Omit<RuleStateAttributes, 'muted'>;
 export interface RuleStateUpdateRequest {
@@ -119,12 +118,7 @@ const showChangeBenchmarkRuleStatesSuccessToast = (
 export const useChangeCspRuleState = () => {
   const { http } = useKibana().services;
 
-  const {
-    notifications,
-    analytics,
-    i18n: i18nStart,
-    theme,
-  } = useKibana<CoreStart & CspClientPluginStartDeps>().services;
+  const { notifications, analytics, i18n: i18nStart, theme } = useKibana().services;
 
   const startServices = { notifications, analytics, i18n: i18nStart, theme };
 
