@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.clickQuickSave();
     });
 
-    describe('Options List Control Editor selects relevant data views', async () => {
+    describe('Options List Control Editor selects relevant data views', () => {
       it('selects the default data view when the dashboard is blank', async () => {
         expect(await dashboardControls.optionsListEditorGetCurrentDataView(true)).to.eql(
           'logstash-*'
