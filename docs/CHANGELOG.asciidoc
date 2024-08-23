@@ -97,7 +97,26 @@ Review important information about the {kib} 7.17.x releases.
 [[release-notes-7.17.23]]
 == {kib} 7.17.23
 
-The 7.17.23 release includes the following bug fixes.
+The 7.17.23 release includes the following known issues and bug fixes.
+
+[float]
+[[known-issues-v7.17.23]]
+=== Known issues
+
+[discrete]
+[[known-187823]]
+.Connectors require update due to Microsoft Teams product retirement
+[%collapsible]
+====
+*Details* +
+The original method for configuring incoming webhooks in Microsoft Teams is being retired.
+Refer to https://devblogs.microsoft.com/microsoft365dev/retirement-of-office-365-connectors-within-microsoft-teams/[Retirement of Office 365 connectors within Microsoft Teams] and {kibana-issue}187823[#187823].
+*Impact* +
+If you used the *Incoming Webhook* app in Microsoft Teams to generate a webhook URL for a <<teams-action-type,Microsoft Teams connector>>, it will stop working in December 2024.
+*Workaround* +
+Use the *Workflows* app in Microsoft Teams to create a new webhook URL, as described in <<configuring-teams>>.
+Update your Microsoft Teams connector to use the new URL before the end of December 2024.
+====
 
 [float]
 [[fixes-v7.17.23]]
