@@ -45,7 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.clickQuickSave();
     });
 
-    describe.only('sorting', () => {
+    describe('sorting', () => {
       before(async () => {
         await dashboardControls.optionsListOpenPopover(controlId);
       });
