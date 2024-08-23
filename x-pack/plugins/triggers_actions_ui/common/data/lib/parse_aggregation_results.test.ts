@@ -561,6 +561,154 @@ describe('parseAggregationResults', () => {
     });
   });
 
+  it('correctly parses results for aggregate metric over top N multiple termFields', () => {
+    expect(
+      parseAggregationResults({
+        isCountAgg: false,
+        isGroupAgg: true,
+        esResult: {
+          took: 238,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hits: { total: 643, max_score: null, hits: [] },
+          aggregations: {
+            groupAgg: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 240,
+              buckets: [
+                {
+                  key: ['execute-action', 'action1'],
+                  doc_count: 120,
+                  metricAgg: {
+                    value: null,
+                  },
+                },
+                {
+                  key: ['execute-start', 'action2'],
+                  doc_count: 139,
+                  metricAgg: {
+                    value: null,
+                  },
+                },
+                {
+                  key: ['starting', 'action3'],
+                  doc_count: 1,
+                  metricAgg: {
+                    value: null,
+                  },
+                },
+                {
+                  key: ['recovered-instance', 'action4'],
+                  doc_count: 120,
+                  metricAgg: {
+                    value: 12837500000,
+                  },
+                },
+                {
+                  key: ['execute', 'action5'],
+                  doc_count: 139,
+                  metricAgg: {
+                    value: 137647482.0143885,
+                  },
+                },
+              ],
+            },
+          },
+        },
+        termField: ['event', 'action'],
+      })
+    ).toEqual({
+      results: [
+        {
+          group: 'execute-action,action1',
+          groups: [
+            {
+              field: 'event',
+              value: 'execute-action',
+            },
+            {
+              field: 'action',
+              value: 'action1',
+            },
+          ],
+          count: 120,
+          hits: [],
+          value: null,
+          sourceFields: {},
+        },
+        {
+          group: 'execute-start,action2',
+          groups: [
+            {
+              field: 'event',
+              value: 'execute-start',
+            },
+            {
+              field: 'action',
+              value: 'action2',
+            },
+          ],
+          count: 139,
+          hits: [],
+          value: null,
+          sourceFields: {},
+        },
+        {
+          group: 'starting,action3',
+          groups: [
+            {
+              field: 'event',
+              value: 'starting',
+            },
+            {
+              field: 'action',
+              value: 'action3',
+            },
+          ],
+          count: 1,
+          hits: [],
+          value: null,
+          sourceFields: {},
+        },
+        {
+          group: 'recovered-instance,action4',
+          groups: [
+            {
+              field: 'event',
+              value: 'recovered-instance',
+            },
+            {
+              field: 'action',
+              value: 'action4',
+            },
+          ],
+          count: 120,
+          hits: [],
+          value: 12837500000,
+          sourceFields: {},
+        },
+        {
+          group: 'execute,action5',
+          groups: [
+            {
+              field: 'event',
+              value: 'execute',
+            },
+            {
+              field: 'action',
+              value: 'action5',
+            },
+          ],
+          count: 139,
+          hits: [],
+          value: 137647482.0143885,
+          sourceFields: {},
+        },
+      ],
+      truncated: false,
+    });
+  });
+
   it('correctly parses results for aggregate metric over top N termField with topHits', () => {
     expect(
       parseAggregationResults({
