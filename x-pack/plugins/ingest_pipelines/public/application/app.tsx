@@ -31,18 +31,23 @@ import {
 } from './sections';
 import { ROUTES } from './services/navigation';
 
-export const AppWithoutRouter = () => (
-  <Routes>
-    <Route exact path={ROUTES.list} component={PipelinesList} />
-    <Route exact path={ROUTES.clone} component={PipelinesClone} />
-    <Route exact path={ROUTES.create} component={PipelinesCreate} />
-    <Route exact path={ROUTES.edit} component={PipelinesEdit} />
-    <Route exact path={ROUTES.createFromCsv} component={PipelinesCreateFromCsv} />
-    <Route exact path={ROUTES.manageProcessors} component={ManageProcessors} />
-    {/* Catch all */}
-    <Route component={PipelinesList} />
-  </Routes>
-);
+export const AppWithoutRouter = () => {
+  const { services } = useKibana();
+  return (
+    <Routes>
+      <Route exact path={ROUTES.list} component={PipelinesList} />
+      <Route exact path={ROUTES.clone} component={PipelinesClone} />
+      <Route exact path={ROUTES.create} component={PipelinesCreate} />
+      <Route exact path={ROUTES.edit} component={PipelinesEdit} />
+      <Route exact path={ROUTES.createFromCsv} component={PipelinesCreateFromCsv} />
+      {services.config.enableManageProcessors && (
+        <Route exact path={ROUTES.manageProcessors} component={ManageProcessors} />
+      )}
+      {/* Catch all */}
+      <Route component={PipelinesList} />
+    </Routes>
+  );
+};
 
 export const App: FunctionComponent = () => {
   const { apiError } = useAuthorizationContext();

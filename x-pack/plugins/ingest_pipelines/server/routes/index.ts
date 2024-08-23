@@ -31,8 +31,10 @@ export class ApiRoutes {
     registerSimulateRoute(dependencies);
     registerDocumentsRoute(dependencies);
     registerParseCsvRoute(dependencies);
-    registerListGeoipRoute(dependencies);
-    registerCreateGeoipRoute(dependencies);
-    registerDeleteGeoipRoute(dependencies);
+    if (dependencies.config.enableManageProcessors) {
+      registerListGeoipRoute(dependencies);
+      registerCreateGeoipRoute(dependencies);
+      registerDeleteGeoipRoute(dependencies);
+    }
   }
 }

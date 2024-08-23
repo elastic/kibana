@@ -38,7 +38,7 @@ export const GeoipList: React.FunctionComponent = () => {
     setDatabaseToDelete(item);
     setShowModal('delete');
   };
-  let content;
+  let content: JSX.Element;
   const addDatabaseButton = (
     <EuiButton
       fill
