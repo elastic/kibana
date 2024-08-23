@@ -56,7 +56,7 @@ export const QueryLanguageSwitcher = React.memo(function QueryLanguageSwitcher({
       size="m"
       iconType="filter"
       onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-      className="euiFormControlLayout__append kqlQueryBar__languageSwitcherButton"
+      className="kqlQueryBar__languageSwitcherButton"
       data-test-subj={'switchQueryLanguageButton'}
       aria-label={strings.getSwitchLanguageButtonText()}
       disabled={isDisabled}
