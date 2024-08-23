@@ -377,16 +377,19 @@ describe('es_query executor', () => {
           results: [
             {
               group: 'host-1',
+              groups: [{ field: 'host.name', value: 'host-1' }],
               count: 291,
               hits: [],
             },
             {
               group: 'host-2',
+              groups: [{ field: 'host.name', value: 'host-2' }],
               count: 477,
               hits: [],
             },
             {
               group: 'host-3',
+              groups: [{ field: 'host.name', value: 'host-3' }],
               count: 999,
               hits: [],
             },

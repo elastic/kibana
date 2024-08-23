@@ -8,7 +8,7 @@
 import { sha256 } from 'js-sha256';
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, Logger } from '@kbn/core/server';
-import { getEcsGroups, type Group } from '@kbn/observability-alerting-rule-utils';
+import { getEcsGroups } from '@kbn/observability-alerting-rule-utils';
 import { isGroupAggregation, UngroupedGroupId } from '@kbn/triggers-actions-ui-plugin/common';
 import {
   ALERT_EVALUATION_THRESHOLD,
@@ -180,15 +180,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
     });
 
     const id = alertId === UngroupedGroupId && !isGroupAgg ? ConditionMetAlertInstanceId : alertId;
-    const instances = alertId.split(',');
-    const groups =
-      alertId !== UngroupedGroupId && params.termField
-        ? [params.termField].flat().reduce<Group[]>((resultGroups, groupByItem, groupIndex) => {
-            resultGroups.push({ field: groupByItem, value: instances[groupIndex].trim() });
-            return resultGroups;
-          }, [])
-        : undefined;
-    const ecsGroups = groups ? getEcsGroups(groups) : {};
+    const ecsGroups = getEcsGroups(result.groups);
 
     alertsClient.report({
       id,

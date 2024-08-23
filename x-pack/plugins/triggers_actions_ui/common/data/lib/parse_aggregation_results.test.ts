@@ -127,6 +127,7 @@ describe('parseAggregationResults', () => {
       results: [
         {
           group: 'all documents',
+          groups: [],
           count: 491,
           hits: [sampleHit],
           sourceFields: {},
@@ -175,35 +176,66 @@ describe('parseAggregationResults', () => {
             },
           },
         },
+        termField: 'event',
       })
     ).toEqual({
       results: [
         {
           group: 'execute',
+          groups: [
+            {
+              field: 'event',
+              value: 'execute',
+            },
+          ],
           count: 120,
           hits: [],
           sourceFields: {},
         },
         {
           group: 'execute-start',
+          groups: [
+            {
+              field: 'event',
+              value: 'execute-start',
+            },
+          ],
           count: 120,
           hits: [],
           sourceFields: {},
         },
         {
           group: 'active-instance',
+          groups: [
+            {
+              field: 'event',
+              value: 'active-instance',
+            },
+          ],
           count: 100,
           hits: [],
           sourceFields: {},
         },
         {
           group: 'execute-action',
+          groups: [
+            {
+              field: 'event',
+              value: 'execute-action',
+            },
+          ],
           count: 100,
           hits: [],
           sourceFields: {},
         },
         {
           group: 'new-instance',
+          groups: [
+            {
+              field: 'event',
+              value: 'new-instance',
+            },
+          ],
           count: 100,
           hits: [],
           sourceFields: {},
@@ -302,35 +334,66 @@ describe('parseAggregationResults', () => {
             },
           },
         },
+        termField: 'event',
       })
     ).toEqual({
       results: [
         {
           group: 'execute',
+          groups: [
+            {
+              field: 'event',
+              value: 'execute',
+            },
+          ],
           count: 120,
           hits: [sampleHit],
           sourceFields: {},
         },
         {
           group: 'execute-start',
+          groups: [
+            {
+              field: 'event',
+              value: 'execute-start',
+            },
+          ],
           count: 120,
           hits: [sampleHit],
           sourceFields: {},
         },
         {
           group: 'active-instance',
+          groups: [
+            {
+              field: 'event',
+              value: 'active-instance',
+            },
+          ],
           count: 100,
           hits: [sampleHit],
           sourceFields: {},
         },
         {
           group: 'execute-action',
+          groups: [
+            {
+              field: 'event',
+              value: 'execute-action',
+            },
+          ],
           count: 100,
           hits: [sampleHit],
           sourceFields: {},
         },
         {
           group: 'new-instance',
+          groups: [
+            {
+              field: 'event',
+              value: 'new-instance',
+            },
+          ],
           count: 100,
           hits: [sampleHit],
           sourceFields: {},
@@ -361,6 +424,7 @@ describe('parseAggregationResults', () => {
       results: [
         {
           group: 'all documents',
+          groups: [],
           hits: [sampleHit],
           count: 643,
           value: 3578195238.095238,
@@ -425,11 +489,18 @@ describe('parseAggregationResults', () => {
             },
           },
         },
+        termField: 'event',
       })
     ).toEqual({
       results: [
         {
           group: 'execute-action',
+          groups: [
+            {
+              field: 'event',
+              value: 'execute-action',
+            },
+          ],
           count: 120,
           hits: [],
           value: null,
@@ -437,6 +508,12 @@ describe('parseAggregationResults', () => {
         },
         {
           group: 'execute-start',
+          groups: [
+            {
+              field: 'event',
+              value: 'execute-start',
+            },
+          ],
           count: 139,
           hits: [],
           value: null,
@@ -444,6 +521,12 @@ describe('parseAggregationResults', () => {
         },
         {
           group: 'starting',
+          groups: [
+            {
+              field: 'event',
+              value: 'starting',
+            },
+          ],
           count: 1,
           hits: [],
           value: null,
@@ -451,6 +534,12 @@ describe('parseAggregationResults', () => {
         },
         {
           group: 'recovered-instance',
+          groups: [
+            {
+              field: 'event',
+              value: 'recovered-instance',
+            },
+          ],
           count: 120,
           hits: [],
           value: 12837500000,
@@ -458,6 +547,12 @@ describe('parseAggregationResults', () => {
         },
         {
           group: 'execute',
+          groups: [
+            {
+              field: 'event',
+              value: 'execute',
+            },
+          ],
           count: 139,
           hits: [],
           value: 137647482.0143885,
@@ -572,11 +667,18 @@ describe('parseAggregationResults', () => {
             },
           },
         },
+        termField: ['event'],
       })
     ).toEqual({
       results: [
         {
           group: 'execute-action',
+          groups: [
+            {
+              field: 'event',
+              value: 'execute-action',
+            },
+          ],
           count: 120,
           hits: [sampleHit],
           value: null,
@@ -584,6 +686,12 @@ describe('parseAggregationResults', () => {
         },
         {
           group: 'execute-start',
+          groups: [
+            {
+              field: 'event',
+              value: 'execute-start',
+            },
+          ],
           count: 139,
           hits: [sampleHit],
           value: null,
@@ -591,6 +699,12 @@ describe('parseAggregationResults', () => {
         },
         {
           group: 'starting',
+          groups: [
+            {
+              field: 'event',
+              value: 'starting',
+            },
+          ],
           count: 1,
           hits: [sampleHit],
           value: null,
@@ -598,6 +712,12 @@ describe('parseAggregationResults', () => {
         },
         {
           group: 'recovered-instance',
+          groups: [
+            {
+              field: 'event',
+              value: 'recovered-instance',
+            },
+          ],
           count: 120,
           hits: [sampleHit],
           value: 12837500000,
@@ -605,6 +725,12 @@ describe('parseAggregationResults', () => {
         },
         {
           group: 'execute',
+          groups: [
+            {
+              field: 'event',
+              value: 'execute',
+            },
+          ],
           count: 139,
           hits: [sampleHit],
           value: 137647482.0143885,
@@ -658,23 +784,42 @@ describe('parseAggregationResults', () => {
           },
         },
         resultLimit: 3,
+        termField: ['event'],
       })
     ).toEqual({
       results: [
         {
           group: 'execute',
+          groups: [
+            {
+              field: 'event',
+              value: 'execute',
+            },
+          ],
           count: 120,
           hits: [],
           sourceFields: {},
         },
         {
           group: 'execute-start',
+          groups: [
+            {
+              field: 'event',
+              value: 'execute-start',
+            },
+          ],
           count: 120,
           hits: [],
           sourceFields: {},
         },
         {
           group: 'active-instance',
+          groups: [
+            {
+              field: 'event',
+              value: 'active-instance',
+            },
+          ],
           count: 100,
           hits: [],
           sourceFields: {},
@@ -711,6 +856,7 @@ describe('parseAggregationResults', () => {
       results: [
         {
           group: 'all documents',
+          groups: [],
           count: 491,
           hits: [sampleSourceFieldsHit],
           sourceFields: {
@@ -776,6 +922,7 @@ describe('parseAggregationResults', () => {
           },
         },
         resultLimit: 1000,
+        termField: ['host.name'],
         sourceFieldsParams: [
           { label: 'host.hostname', searchPath: 'host.hostname.keyword' },
           { label: 'host.id', searchPath: 'host.id.keyword' },
@@ -786,6 +933,12 @@ describe('parseAggregationResults', () => {
       results: [
         {
           group: 'host-1',
+          groups: [
+            {
+              field: 'host.name',
+              value: 'host-1',
+            },
+          ],
           hits: [
             sampleSourceFieldsHit,
             sampleSourceFieldsHit,
@@ -835,6 +988,7 @@ describe('parseAggregationResults', () => {
       results: [
         {
           group: 'all documents',
+          groups: [],
           count: 4,
           hits: [
             sampleEsqlSourceFieldsHit,
