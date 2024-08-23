@@ -98,7 +98,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('rule creation', async () => {
+    describe('rule creation', () => {
       const webhookConnectorName = generateUniqueKey();
       const webApiConnectorName = generateUniqueKey();
       let webApiAction: { id: string };
