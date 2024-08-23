@@ -78,6 +78,7 @@ export const AddDataPopover = () => {
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButton
+              size="s"
               href={addDataLinkHref}
               data-test-subj="infraHostsTableWithoutSystemMetricsPopoverAddMoreButton"
             >
