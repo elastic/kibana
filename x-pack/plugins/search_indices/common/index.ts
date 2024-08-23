@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-require('../../../../../../src/setup_node_env');
-module.exports = require('./schema_parser');
+export const PLUGIN_ID = 'searchIndices';
+export const PLUGIN_NAME = 'searchIndices';
