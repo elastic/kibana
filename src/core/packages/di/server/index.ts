@@ -7,7 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { CoreInjectionService } from './src/service';
-export type { InternalCoreDiServiceSetup, InternalCoreDiServiceStart } from './src/contracts';
-export { Contract, InternalDiService, InternalDiSetupService } from './src/services';
-export { toContainerModule, toServiceIdentifier } from './src/utils';
+export { Request, Response, Route, Router } from './src/services/http';
+export { CoreSetup, CoreStart, PluginInitializer } from './src/services/lifecycle';
