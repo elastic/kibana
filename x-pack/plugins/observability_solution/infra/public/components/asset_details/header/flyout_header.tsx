@@ -18,9 +18,17 @@ import {
   type EuiPageHeaderProps,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-type Props = Pick<EuiPageHeaderProps, 'tabs' | 'title' | 'rightSideItems'>;
+import { PageTitleWithPopover } from './page_title_with_popover';
+type Props = Pick<EuiPageHeaderProps, 'tabs' | 'title' | 'rightSideItems'> & {
+  hasSystemIntegration: boolean;
+};
 
-export const FlyoutHeader = ({ title, tabs = [], rightSideItems = [] }: Props) => {
+export const FlyoutHeader = ({
+  title,
+  tabs = [],
+  rightSideItems = [],
+  hasSystemIntegration,
+}: Props) => {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -39,7 +47,9 @@ export const FlyoutHeader = ({ title, tabs = [], rightSideItems = [] }: Props) =
           `}
         >
           <EuiTitle size="xs">
-            <h4>{title}</h4>
+            <h4>
+              <PageTitleWithPopover hasSystemMetrics={hasSystemIntegration} name={title ?? ''} />
+            </h4>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem
