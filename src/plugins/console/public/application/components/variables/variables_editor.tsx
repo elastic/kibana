@@ -46,20 +46,14 @@ export const VariablesEditor = (props: Props) => {
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
     Record<string, React.ReactNode>
   >({});
+  // Clear the expanded row map and dispose all the expanded rows
+  const collapseExpandedRows = () => itemIdToExpandedRowMap$.current.next({});
+
   // Subscribe to the BehaviorSubject on mount
   useEffect(() => {
     const subscription = itemIdToExpandedRowMap$.current.subscribe(setItemIdToExpandedRowMap);
     return () => subscription.unsubscribe();
   }, []);
-
-  const collapseExpandedRow = (variableId: string) => {
-    const updatedMap = itemIdToExpandedRowMap$.current.getValue();
-
-    if (updatedMap[variableId]) {
-      delete updatedMap[variableId];
-      itemIdToExpandedRowMap$.current.next({ ...updatedMap });
-    }
-  };
 
   // Always save variables when they change
   useEffect(() => {
@@ -72,11 +66,15 @@ export const VariablesEditor = (props: Props) => {
 
   const toggleDetails = (variableId: string) => {
     const currentMap = itemIdToExpandedRowMap$.current.getValue();
-    const itemIdToExpandedRowMapValues = { ...currentMap };
+    let itemIdToExpandedRowMapValues = { ...currentMap };
 
     if (itemIdToExpandedRowMapValues[variableId]) {
       delete itemIdToExpandedRowMapValues[variableId];
     } else {
+      // Always close the add variable form when editing a variable
+      setIsAddingVariable(false);
+      // We only allow one expanded row at a time
+      itemIdToExpandedRowMapValues = {};
       itemIdToExpandedRowMapValues[variableId] = (
         <VariableEditorForm
           title={i18n.translate('console.variablesPage.editVariableForm.title', {
@@ -85,10 +83,10 @@ export const VariablesEditor = (props: Props) => {
           onSubmit={(data: DevToolsVariable) => {
             const updatedVariables = utils.editVariable(data, variables);
             setVariables(updatedVariables);
-            collapseExpandedRow(variableId);
+            collapseExpandedRows();
           }}
           onCancel={() => {
-            collapseExpandedRow(variableId);
+            collapseExpandedRows();
           }}
           defaultValue={variables.find((v) => v.id === variableId)}
         />
@@ -204,7 +202,10 @@ export const VariablesEditor = (props: Props) => {
         <EuiButton
           data-test-subj="variablesAddButton"
           iconType="plusInCircle"
-          onClick={() => setIsAddingVariable(true)}
+          onClick={() => {
+            setIsAddingVariable(true);
+            collapseExpandedRows();
+          }}
           disabled={isAddingVariable}
         >
           <FormattedMessage
