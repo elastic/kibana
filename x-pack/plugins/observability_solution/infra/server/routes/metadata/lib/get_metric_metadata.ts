@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { set } from '@kbn/safer-lodash-set';
 import { get } from 'lodash';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import type { InfraMetricsClient } from '../../../lib/helpers/get_infra_metrics_client';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
 import {
   InfraMetadataAggregationBucket,
@@ -15,8 +15,8 @@ import {
 } from '../../../lib/adapters/framework';
 import { KibanaFramework } from '../../../lib/adapters/framework/kibana_framework_adapter';
 import { InfraSourceConfiguration } from '../../../lib/sources';
-import { HOST_NAME_FIELD, SYSTEM_INTEGRATION, TIMESTAMP_FIELD } from '../../../../common/constants';
-import { getFilterByIntegration } from '../../infra/lib/helpers/query';
+import { TIMESTAMP_FIELD } from '../../../../common/constants';
+import { getHasDataFromSystemIntegration } from '../../infra/lib/host/get_filtered_hosts';
 
 export interface InfraMetricsAdapterResponse {
   id: string;
@@ -31,7 +31,8 @@ export const getMetricMetadata = async (
   sourceConfiguration: InfraSourceConfiguration,
   nodeId: string,
   nodeType: InventoryItemType,
-  timeRange: { from: number; to: number }
+  timeRange: { from: number; to: number },
+  infraMetricsClient: InfraMetricsClient
 ): Promise<InfraMetricsAdapterResponse> => {
   const fields = findInventoryFields(nodeType);
   const metricQuery = {
@@ -76,31 +77,11 @@ export const getMetricMetadata = async (
     },
   };
 
-  if (nodeType === 'host') {
-    set(metricQuery, 'body.aggs', {
-      monitoredHost: {
-        filter: getFilterByIntegration(SYSTEM_INTEGRATION),
-        aggs: {
-          name: {
-            terms: {
-              field: HOST_NAME_FIELD,
-              size: 1,
-              order: {
-                _key: 'asc',
-              },
-            },
-          },
-        },
-      },
-    });
-  }
-
   const response = await framework.callWithRequest<
     {},
     {
       metrics?: InfraMetadataAggregationResponse;
       nodeName?: InfraMetadataAggregationResponse;
-      monitoredHost?: { name: InfraMetadataAggregationResponse };
     }
   >(requestContext, 'search', metricQuery);
 
@@ -116,13 +97,15 @@ export const getMetricMetadata = async (
   };
 
   if (nodeType === 'host') {
-    const hostWithSystemIntegration =
-      response.aggregations &&
-      (response.aggregations?.monitoredHost?.name?.buckets ?? []).length > 0
-        ? response.aggregations?.monitoredHost?.name.buckets[0]?.key
-        : null;
+    const hasSystemIntegration = await getHasDataFromSystemIntegration({
+      infraMetricsClient,
+      from: timeRange.from,
+      to: timeRange.to,
+      query: {
+        match: { [fields.id]: nodeId },
+      },
+    });
 
-    const hasSystemIntegration = hostWithSystemIntegration === nodeId;
     return {
       hasSystemIntegration,
       ...res,

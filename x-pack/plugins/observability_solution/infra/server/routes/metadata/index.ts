@@ -22,6 +22,7 @@ import { getMetricMetadata } from './lib/get_metric_metadata';
 import { pickFeatureName } from './lib/pick_feature_name';
 import { getCloudMetricsMetadata } from './lib/get_cloud_metric_metadata';
 import { getNodeInfo } from './lib/get_node_info';
+import { getInfraMetricsClient } from '../../lib/helpers/get_infra_metrics_client';
 
 const escapeHatch = schema.object({}, { unknowns: 'allow' });
 
@@ -44,13 +45,19 @@ export const initMetadataRoute = (libs: InfraBackendLibs) => {
 
       const soClient = (await requestContext.core).savedObjects.client;
       const { configuration } = await libs.sources.getSourceConfiguration(soClient, sourceId);
+      const infraMetricsClient = await getInfraMetricsClient({
+        request,
+        libs,
+        context: requestContext,
+      });
       const metricsMetadata = await getMetricMetadata(
         framework,
         requestContext,
         configuration,
         nodeId,
         nodeType,
-        timeRange
+        timeRange,
+        infraMetricsClient
       );
       const metricFeatures = pickFeatureName(metricsMetadata.buckets).map(nameToFeature('metrics'));
 
