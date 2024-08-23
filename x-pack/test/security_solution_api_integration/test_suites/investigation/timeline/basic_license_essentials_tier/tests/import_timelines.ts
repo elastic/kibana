@@ -9,8 +9,8 @@ import expect from '@kbn/expect';
 
 import { TIMELINE_IMPORT_URL } from '@kbn/security-solution-plugin/common/constants';
 
-import { FtrProviderContextWithSpaces } from '../../../../../../ftr_provider_context_with_spaces';
-import { deleteAllTimelines } from '../../../utils';
+import { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
+import { deleteAllTimelines } from '../../utils';
 
 export default ({ getService }: FtrProviderContextWithSpaces): void => {
   const supertest = getService('supertest');
