@@ -7,7 +7,6 @@
 
 import { filter, take } from 'rxjs';
 import pMap from 'p-map';
-import { withSpan } from '@kbn/apm-utils';
 import { SavedObjectError } from '@kbn/core-saved-objects-common';
 
 import { v4 as uuidv4 } from 'uuid';
@@ -173,22 +172,15 @@ export class TaskScheduling {
 
   public async disableWithOCC(id: string, clearStateIdsOrBoolean?: boolean) {
     try {
-      const task = await withSpan(
-        { name: 'get', type: 'task' },
-        async () => await this.store.get(id)
-      );
+      const task = await this.store.get(id);
 
-      return await withSpan(
-        { name: 'update', type: 'task' },
-        async () =>
-          await this.store.update(
-            {
-              ...task,
-              enabled: false,
-              ...(clearStateIdsOrBoolean === true ? { state: {} } : {}),
-            },
-            { validate: false }
-          )
+      return await this.store.update(
+        {
+          ...task,
+          enabled: false,
+          ...(clearStateIdsOrBoolean === true ? { state: {} } : {}),
+        },
+        { validate: false }
       );
     } catch (e) {
       if (e.statusCode === 409) {
