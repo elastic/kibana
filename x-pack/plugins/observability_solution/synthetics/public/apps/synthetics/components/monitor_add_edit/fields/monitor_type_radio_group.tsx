@@ -92,7 +92,7 @@ export const MonitorTypeRadioGroup = ({
       </EuiKeyPadMenu>
       <EuiSpacer />
       {selectedOption && (
-        <EuiPanel color="primary">
+        <EuiPanel color="primary" aria-live="polite">
           <EuiText size="s">
             <h4>{selectedOption.descriptionTitle}</h4>
           </EuiText>
