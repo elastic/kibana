@@ -5,5 +5,6 @@
  * 2.0.
  */
 
-require('../../../../../../src/setup_node_env');
-require('./content_page').generateContentPage();
+import type { IRouter } from '@kbn/core/server';
+
+export function defineRoutes(router: IRouter) {}
