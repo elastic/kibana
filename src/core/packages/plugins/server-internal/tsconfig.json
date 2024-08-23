@@ -42,6 +42,7 @@
     "@kbn/core-plugins-contracts-server",
     "@kbn/core-di",
     "@kbn/core-di-internal",
+    "@kbn/core-di-server",
   ],
   "exclude": [
     "target/**/*",
