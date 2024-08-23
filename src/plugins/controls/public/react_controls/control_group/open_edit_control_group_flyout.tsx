@@ -16,7 +16,7 @@ import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 
 import { ControlStateManager } from '../controls/types';
-import { ControlGroupEditor } from './control_group_editor';
+import { ControlGroupEditor } from './components/control_group_editor';
 import { ControlGroupApi, ControlGroupEditorState } from './types';
 
 export const openEditControlGroupFlyout = (

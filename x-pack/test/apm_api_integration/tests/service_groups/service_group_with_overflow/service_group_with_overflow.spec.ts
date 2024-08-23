@@ -33,7 +33,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       after(async () => {
         await deleteAllServiceGroups(apmApiClient);
-        apmSynthtraceEsClient.clean();
+        await apmSynthtraceEsClient.clean();
       });
 
       before(async () => {
