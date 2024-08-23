@@ -125,8 +125,7 @@ describe('snapshotControlsRuntimeState', () => {
         return { key1: 'bravo value' };
       },
     } as unknown as DefaultControlApi);
-    const snapshot = controlsManager.snapshotControlsRuntimeState();
-    expect(snapshot).toEqual({
+    expect(controlsManager.snapshotControlsRuntimeState()).toEqual({
       alpha: {
         key1: 'alpha value',
         order: 1,
@@ -138,9 +137,6 @@ describe('snapshotControlsRuntimeState', () => {
         type: 'testControl',
       },
     });
-
-    // should update initialChildControlState$ to snapshot
-    expect(controlsManager.comparators.initialChildControlState[0].value).toEqual(snapshot);
   });
 });
 
@@ -174,7 +170,7 @@ describe('getLastUsedDataViewId', () => {
   });
 });
 
-describe('comparators', () => {
+describe('resetControlsRuntimeState', () => {
   // Test edge case where adding a panel and resetting left orphaned control in children$
   test('should remove orphaned children on reset', () => {
     // baseline last saved state contains a single control
@@ -189,9 +185,8 @@ describe('comparators', () => {
     controlsManager.setControlApi('delta', {} as unknown as DefaultControlApi);
     expect(Object.keys(controlsManager.api.children$.value).length).toBe(2);
 
-    // simulate reset by calling comparator setter with last saved state
-    const setter = controlsManager.comparators.initialChildControlState[1];
-    setter(initialControlsStateLastSavedState);
+    // reset initialChildControlState
+    controlsManager.resetControlsRuntimeState(initialControlsStateLastSavedState);
     // children$ should no longer contain control removed by resetting back to original control baseline
     expect(Object.keys(controlsManager.api.children$.value).length).toBe(1);
   });

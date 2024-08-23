@@ -24,11 +24,7 @@ import { apiPublishesAsyncFilters } from '../controls/data_controls/publishes_as
 
 export type ControlGroupComparatorState = Pick<
   ControlGroupRuntimeState,
-  | 'autoApplySelections'
-  | 'chainingSystem'
-  | 'ignoreParentSettings'
-  | 'initialChildControlState'
-  | 'labelPosition'
+  'autoApplySelections' | 'chainingSystem' | 'ignoreParentSettings' | 'labelPosition'
 > & {
   controlsInOrder: ControlsInOrder;
 };
@@ -38,6 +34,7 @@ export function initializeControlGroupUnsavedChanges(
   children$: PresentationContainer['children$'],
   comparators: StateComparators<ControlGroupComparatorState>,
   snapshotControlsRuntimeState: () => ControlPanelsState,
+  resetControlsRuntimeState: (lastControlsRuntimeState: ControlPanelsState) => void,
   parentApi: unknown,
   lastSavedRuntimeState: ControlGroupRuntimeState
 ) {
@@ -47,12 +44,13 @@ export function initializeControlGroupUnsavedChanges(
       chainingSystem: lastSavedRuntimeState.chainingSystem,
       controlsInOrder: getControlsInOrder(lastSavedRuntimeState.initialChildControlState),
       ignoreParentSettings: lastSavedRuntimeState.ignoreParentSettings,
-      initialChildControlState: lastSavedRuntimeState.initialChildControlState,
       labelPosition: lastSavedRuntimeState.labelPosition,
     },
     parentApi,
     comparators
   );
+
+  let lastControlsRuntimeState = lastSavedRuntimeState.initialChildControlState;
 
   return {
     api: {
@@ -65,13 +63,15 @@ export function initializeControlGroupUnsavedChanges(
             ? omit(unsavedControlGroupState, 'controlsInOrder')
             : {};
           if (unsavedControlsState || unsavedControlGroupState?.controlsInOrder) {
-            unsavedChanges.initialChildControlState = snapshotControlsRuntimeState();
+            lastControlsRuntimeState = snapshotControlsRuntimeState();
+            unsavedChanges.initialChildControlState = lastControlsRuntimeState;
           }
           return Object.keys(unsavedChanges).length ? unsavedChanges : undefined;
         })
       ),
       asyncResetUnsavedChanges: async () => {
         controlGroupUnsavedChanges.api.resetUnsavedChanges();
+        resetControlsRuntimeState(lastControlsRuntimeState);
 
         const filtersReadyPromises: Array<Promise<void>> = [];
         Object.values(children$.value).forEach((controlApi) => {

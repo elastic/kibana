@@ -180,6 +180,28 @@ export function initControlsManager(initialControlPanelsState: ControlPanelsStat
       initialChildControlState$.next(controlsRuntimeState);
       return controlsRuntimeState;
     },
+    resetControlsRuntimeState: (resetState: ControlPanelsState) => {
+      initialChildControlState$.next(resetState);
+      controlsPanelState = {
+        ...resetState,
+      };
+      const nextControlsInOrder = getControlsInOrder(resetState);
+      controlsInOrder$.next(nextControlsInOrder);
+
+      const nextControlIds = nextControlsInOrder.map(({ id }) => id);
+      const children = { ...children$.value };
+      let modifiedChildren = false;
+      Object.keys(children).forEach((controlId) => {
+        if (!nextControlIds.includes(controlId)) {
+          // remove children that no longer exist after reset
+          delete children[controlId];
+          modifiedChildren = true;
+        }
+      });
+      if (modifiedChildren) {
+        children$.next(children);
+      }
+    },
     api: {
       getSerializedStateForChild: (childId: string) => {
         const controlPanelState = controlsPanelState[childId];
@@ -226,41 +248,10 @@ export function initControlsManager(initialControlPanelsState: ControlPanelsStat
     comparators: {
       controlsInOrder: [
         controlsInOrder$,
-        (next: ControlsInOrder) => controlsInOrder$.next(next),
+        (next: ControlsInOrder) => {}, // setter does nothing, controlsInOrder$ reset by resetControlsRuntimeState
         fastIsEqual,
       ],
-      // Control state differences tracked by controlApi comparators
-      // Control ordering differences tracked by controlsInOrder comparator
-      // initialChildControlState comparatator exists to reset controls manager to last saved state
-      initialChildControlState: [
-        initialChildControlState$,
-        (lastSavedControlPanelsState: ControlPanelsState) => {
-          initialChildControlState$.next(lastSavedControlPanelsState);
-          controlsPanelState = {
-            ...lastSavedControlPanelsState,
-          };
-          const nextControlsInOrder = getControlsInOrder(lastSavedControlPanelsState);
-          controlsInOrder$.next(nextControlsInOrder);
-
-          const nextControlIds = nextControlsInOrder.map(({ id }) => id);
-          const children = { ...children$.value };
-          let modifiedChildren = false;
-          Object.keys(children).forEach((controlId) => {
-            if (!nextControlIds.includes(controlId)) {
-              // remove children that no longer exist after reset
-              delete children[controlId];
-              modifiedChildren = true;
-            }
-          });
-          if (modifiedChildren) {
-            children$.next(children);
-          }
-        },
-        () => true,
-      ],
-    } as StateComparators<
-      Pick<ControlGroupComparatorState, 'controlsInOrder' | 'initialChildControlState'>
-    >,
+    } as StateComparators<Pick<ControlGroupComparatorState, 'controlsInOrder'>>,
   };
 }
 
