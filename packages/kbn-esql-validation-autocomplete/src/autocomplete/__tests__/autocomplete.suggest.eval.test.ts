@@ -26,13 +26,20 @@ import {
 import { uniq } from 'lodash';
 import {
   FunctionParameter,
+  FunctionReturnType,
   SupportedDataType,
   isFieldType,
+  isReturnType,
   isSupportedDataType,
 } from '../../definitions/types';
 import { fieldNameFromType } from '../../validation/validation.test';
 import { ESQLAstItem } from '@kbn/esql-ast';
 import { roundParameterTypes } from './constants';
+
+const getTypesFromParamDefs = (paramDefs: FunctionParameter[]): SupportedDataType[] =>
+  Array.from(new Set(paramDefs.map((p) => p.type))).filter(
+    isSupportedDataType
+  ) as SupportedDataType[];
 
 describe('autocomplete.suggest', () => {
   describe('eval', () => {
@@ -352,9 +359,6 @@ describe('autocomplete.suggest', () => {
     });
 
     describe('eval functions', () => {
-      const getTypesFromParamDefs = (paramDefs: FunctionParameter[]): SupportedDataType[] =>
-        Array.from(new Set(paramDefs.map((p) => p.type))).filter(isSupportedDataType);
-
       // // Test suggestions for each possible param, within each signature variation, for each function
       for (const fn of evalFunctionDefinitions) {
         // skip this fn for the moment as it's quite hard to test
@@ -452,7 +456,9 @@ describe('autocomplete.suggest', () => {
                       ),
                       ...getFunctionSignaturesByReturnType(
                         'eval',
-                        getTypesFromParamDefs(typesToSuggestNext),
+                        getTypesFromParamDefs(typesToSuggestNext).filter(
+                          isReturnType
+                        ) as FunctionReturnType[],
                         { scalar: true },
                         undefined,
                         [fn.name]
@@ -520,13 +526,7 @@ describe('autocomplete.suggest', () => {
         ],
         { triggerCharacter: ' ' }
       );
-      await assertSuggestions('from a | eval a = 1 year /', [
-        ',',
-        '| ',
-        ...getFunctionSignaturesByReturnType('eval', 'any', { builtin: true, skipAssign: true }, [
-          'time_interval',
-        ]),
-      ]);
+      await assertSuggestions('from a | eval a = 1 year /', [',', '| ', 'IS NOT NULL', 'IS NULL']);
       await assertSuggestions('from a | eval a = 1 day + 2 /', [',', '| ']);
       await assertSuggestions(
         'from a | eval 1 day + 2 /',
