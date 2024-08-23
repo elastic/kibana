@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/security-role-management-model",
+  "owner": "@elastic/kibana-security"
+}
