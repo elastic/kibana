@@ -13,6 +13,7 @@ describe('#getAllFields', () => {
     architecture: 'x86_64',
     containerized: false,
     hostname: 'host1',
+    hasSystemIntegration: true,
     ip: [
       '10.10.10.10',
       '10.10.10.10',
@@ -63,6 +64,7 @@ describe('#getAllFields', () => {
     const result: InfraMetadata = {
       id: 'host1',
       name: 'host1',
+      hasSystemIntegration: true,
       features: [
         {
           name: 'system.core',
@@ -77,6 +79,7 @@ describe('#getAllFields', () => {
     const result: InfraMetadata = {
       id: 'host1',
       name: 'host1',
+      hasSystemIntegration: true,
       features: [
         {
           name: 'system.core',
@@ -96,6 +99,7 @@ describe('#getAllFields', () => {
     const result: InfraMetadata = {
       id: 'host1',
       name: 'host1',
+      hasSystemIntegration: true,
       features: [
         {
           name: 'system.core',
@@ -117,6 +121,7 @@ describe('#getAllFields', () => {
     const result = {
       id: 'host1',
       name: 'host1',
+      hasSystemIntegration: true,
       features: [
         {
           name: 'system.core',
@@ -163,6 +168,7 @@ describe('#getAllFields', () => {
     const result: InfraMetadata = {
       id: 'host1',
       name: 'host1',
+      hasSystemIntegration: true,
       features: [
         {
           name: 'system.core',
@@ -266,6 +272,7 @@ describe('#getAllFields', () => {
     const result: InfraMetadata = {
       id: 'host1',
       name: 'host1',
+      hasSystemIntegration: true,
       features: [
         {
           name: 'system.core',
@@ -349,6 +356,7 @@ describe('#getAllFields', () => {
     const result: InfraMetadata = {
       id: 'host1',
       name: 'host1',
+      hasSystemIntegration: true,
       features: [
         {
           name: 'system.core',
