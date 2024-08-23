@@ -38,7 +38,6 @@ export {
   type PanelPackage,
   type PresentationContainer,
 } from './interfaces/presentation_container';
-export { apiPublishesDataView, type PublishesDataView } from './interfaces/publishes_data_view';
 export { apiPublishesSettings, type PublishesSettings } from './interfaces/publishes_settings';
 export {
   apiHasSerializableState,

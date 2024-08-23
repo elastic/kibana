@@ -17,7 +17,7 @@ import {
 } from '@kbn/embeddable-plugin/public';
 import { ExpressionRendererParams, useExpressionRenderer } from '@kbn/expressions-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { apiPublishesDataView, apiPublishesSettings } from '@kbn/presentation-containers';
+import { apiPublishesSettings } from '@kbn/presentation-containers';
 import {
   apiHasAppContext,
   apiHasDisableTriggers,
@@ -337,20 +337,6 @@ export const getVisualizeEmbeddableFactory: (deps: {
         linkedToLibrary: [linkedToLibrary$, (value) => linkedToLibrary$.next(value)],
       }
     );
-
-    if (apiPublishesDataView(parentApi)) {
-      parentApi.dataView$.subscribe((dataView) => {
-        if (!dataView) return;
-        const {
-          data: { searchSource },
-        } = vis$.getValue().serialize();
-        const newSearchSource = {
-          ...searchSource,
-          index: dataView,
-        };
-        api.updateVis({ data: { searchSource: newSearchSource } });
-      });
-    }
 
     const fetchSubscription = fetch$(api)
       .pipe(
