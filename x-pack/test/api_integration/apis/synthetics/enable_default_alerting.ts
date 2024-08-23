@@ -8,6 +8,7 @@ import expect from '@kbn/expect';
 import { omit } from 'lodash';
 import { HTTPFields } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
+import { DYNAMIC_SETTINGS_DEFAULTS } from '@kbn/synthetics-plugin/common/constants/settings_defaults';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
@@ -41,13 +42,19 @@ export default function ({ getService }: FtrProviderContext) {
     beforeEach(async () => {
       httpMonitorJson = _httpMonitorJson;
       await kibanaServer.savedObjects.cleanStandardList();
+      await supertest
+        .put(SYNTHETICS_API_URLS.DYNAMIC_SETTINGS)
+        .set('kbn-xsrf', 'true')
+        .send(DYNAMIC_SETTINGS_DEFAULTS)
+        .expect(200);
     });
 
     it('returns the created alerted when called', async () => {
       const apiResponse = await supertest
         .post(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING)
         .set('kbn-xsrf', 'true')
-        .send({});
+        .send()
+        .expect(200);
 
       const omitFields = [
         'id',
@@ -79,10 +86,143 @@ export default function ({ getService }: FtrProviderContext) {
       await retry.tryForTime(30 * 1000, async () => {
         const res = await supertest
           .get(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING)
+          .set('kbn-xsrf', 'true')
+          .expect(200);
+
+        expect(res.body.statusRule.ruleTypeId).eql('xpack.synthetics.alerts.monitorStatus');
+        expect(res.body.tlsRule.ruleTypeId).eql('xpack.synthetics.alerts.tls');
+      });
+    });
+
+    it('deletes (and recreates) the default rule when settings are updated', async () => {
+      const newMonitor = httpMonitorJson;
+
+      const { body: apiResponse } = await addMonitorAPI(newMonitor);
+
+      expect(apiResponse).eql(omitMonitorKeys(newMonitor));
+
+      await retry.tryForTime(30 * 1000, async () => {
+        const res = await supertest
+          .get(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING)
+          .set('kbn-xsrf', 'true')
+          .expect(200);
+
+        expect(res.body.statusRule.ruleTypeId).eql('xpack.synthetics.alerts.monitorStatus');
+        expect(res.body.tlsRule.ruleTypeId).eql('xpack.synthetics.alerts.tls');
+      });
+      const settings = await supertest
+        .put(SYNTHETICS_API_URLS.DYNAMIC_SETTINGS)
+        .set('kbn-xsrf', 'true')
+        .send({
+          defaultStatusRuleEnabled: false,
+          defaultTLSRuleEnabled: false,
+        });
+
+      expect(settings.body.defaultStatusRuleEnabled).eql(false);
+      expect(settings.body.defaultTLSRuleEnabled).eql(false);
+
+      await supertest
+        .put(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING)
+        .set('kbn-xsrf', 'true')
+        .send()
+        .expect(200);
+
+      await retry.tryForTime(30 * 1000, async () => {
+        const res = await supertest
+          .get(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING)
+          .set('kbn-xsrf', 'true')
+          .expect(200);
+
+        expect(res.body.statusRule).eql(null);
+        expect(res.body.tlsRule).eql(null);
+      });
+
+      const settings2 = await supertest
+        .put(SYNTHETICS_API_URLS.DYNAMIC_SETTINGS)
+        .set('kbn-xsrf', 'true')
+        .send({
+          defaultStatusRuleEnabled: true,
+          defaultTLSRuleEnabled: true,
+        })
+        .expect(200);
+
+      expect(settings2.body.defaultStatusRuleEnabled).eql(true);
+      expect(settings2.body.defaultTLSRuleEnabled).eql(true);
+
+      await supertest
+        .put(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING)
+        .set('kbn-xsrf', 'true')
+        .send()
+        .expect(200);
+
+      await retry.tryForTime(30 * 1000, async () => {
+        const res = await supertest
+          .get(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING)
+          .set('kbn-xsrf', 'true')
+          .expect(200);
+
+        expect(res.body.statusRule.ruleTypeId).eql('xpack.synthetics.alerts.monitorStatus');
+        expect(res.body.tlsRule.ruleTypeId).eql('xpack.synthetics.alerts.tls');
+      });
+    });
+
+    it('doesnt throw errors when rule has already been deleted', async () => {
+      const newMonitor = httpMonitorJson;
+
+      const { body: apiResponse } = await addMonitorAPI(newMonitor);
+
+      expect(apiResponse).eql(omitMonitorKeys(newMonitor));
+
+      await retry.tryForTime(30 * 1000, async () => {
+        const res = await supertest
+          .get(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING)
           .set('kbn-xsrf', 'true');
 
         expect(res.body.statusRule.ruleTypeId).eql('xpack.synthetics.alerts.monitorStatus');
         expect(res.body.tlsRule.ruleTypeId).eql('xpack.synthetics.alerts.tls');
+      });
+
+      const settings = await supertest
+        .put(SYNTHETICS_API_URLS.DYNAMIC_SETTINGS)
+        .set('kbn-xsrf', 'true')
+        .send({
+          defaultStatusRuleEnabled: false,
+          defaultTLSRuleEnabled: false,
+        });
+
+      expect(settings.body.defaultStatusRuleEnabled).eql(false);
+      expect(settings.body.defaultTLSRuleEnabled).eql(false);
+
+      await supertest
+        .put(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING)
+        .set('kbn-xsrf', 'true')
+        .send();
+
+      await retry.tryForTime(30 * 1000, async () => {
+        const res = await supertest
+          .get(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING)
+          .set('kbn-xsrf', 'true')
+          .expect(200);
+
+        expect(res.body.statusRule).eql(null);
+        expect(res.body.tlsRule).eql(null);
+      });
+
+      // call api again with the same settings, make sure its 200
+      await supertest
+        .put(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING)
+        .set('kbn-xsrf', 'true')
+        .send()
+        .expect(200);
+
+      await retry.tryForTime(30 * 1000, async () => {
+        const res = await supertest
+          .get(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING)
+          .set('kbn-xsrf', 'true')
+          .expect(200);
+
+        expect(res.body.statusRule).eql(null);
+        expect(res.body.tlsRule).eql(null);
       });
     });
   });
