@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { Octokit } from 'octokit';
 import type { RuleVersionSpecifier } from '../../../../../../common/api/detection_engine';
 import type { ExternalRuleAssetBlob } from '../../api/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules';
 import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
 import { validatePrebuiltRuleAsset } from './prebuilt_rule_assets_validation';
+import type { ExternalRuleSourceClient } from '../../../external_rule_sources/logic/external_rule_sources_client';
 
 export const fetchGithubRuleAssets = async (
   installedAssetsVersionSpecifiers: RuleVersionSpecifier[],
-  externalPrebuiltRuleBlobs: ExternalRuleAssetBlob[]
+  externalPrebuiltRuleBlobs: ExternalRuleAssetBlob[],
+  externalRuleSourceClient: ExternalRuleSourceClient
 ) => {
   const ruleBlobsToInstall: ExternalRuleAssetBlob[] = [];
   const installedRuleAssetsMap = new Map(
@@ -35,17 +36,22 @@ export const fetchGithubRuleAssets = async (
     }
   }
 
-  return fetchRuleAssetsToInstall(ruleBlobsToInstall);
+  return fetchRuleAssetsToInstall(ruleBlobsToInstall, externalRuleSourceClient);
 };
 
-const fetchRuleAssetsToInstall = async (ruleBlobsToInstall: ExternalRuleAssetBlob[]) => {
+const fetchRuleAssetsToInstall = async (
+  ruleBlobsToInstall: ExternalRuleAssetBlob[],
+  externalRuleSourceClient: ExternalRuleSourceClient
+) => {
   const batchSize = 50;
   const assetsToInstall: PrebuiltRuleAsset[] = [];
   const errors: Array<{ filename?: string; error: string }> = [];
 
   for (let i = 0; i < ruleBlobsToInstall.length; i += batchSize) {
     const batch = ruleBlobsToInstall.slice(i, i + batchSize);
-    const batchResults = await Promise.all(batch.map(fetchSingleRuleAsset));
+    const batchResults = await Promise.all(
+      batch.map((blob) => fetchSingleRuleAsset(blob, externalRuleSourceClient))
+    );
 
     batchResults.forEach((result) => {
       if (result.success) {
@@ -63,7 +69,10 @@ type FetchResult =
   | { success: true; asset: PrebuiltRuleAsset; repository_id: string }
   | { success: false; error: string; repository_id: string; filename?: string };
 
-const fetchSingleRuleAsset = async (blob: ExternalRuleAssetBlob): Promise<FetchResult> => {
+const fetchSingleRuleAsset = async (
+  blob: ExternalRuleAssetBlob,
+  externalRuleSourceClient: ExternalRuleSourceClient
+): Promise<FetchResult> => {
   const repositoryId = `${blob.repository.id}`;
 
   if (!blob.sha) {
@@ -74,12 +83,11 @@ const fetchSingleRuleAsset = async (blob: ExternalRuleAssetBlob): Promise<FetchR
     };
   }
 
-  const octokit = new Octokit({ auth: blob.repository.token });
-
   try {
+    const octokit = await externalRuleSourceClient.getAuthenticatedGithubClient(repositoryId);
     const response = await octokit.request('GET /repos/{owner}/{repo}/git/blobs/{file_sha}', {
-      owner: blob.repository.username,
-      repo: blob.repository.repository,
+      owner: blob.repository.owner,
+      repo: blob.repository.repo,
       file_sha: blob.sha,
       headers: { 'X-GitHub-Api-Version': '2022-11-28' },
     });

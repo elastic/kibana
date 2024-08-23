@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { Octokit } from 'octokit';
 import type {
   IKibanaResponse,
   ISavedObjectsImporter,
@@ -22,13 +21,9 @@ import { installExternalPrebuiltRuleAssets } from '../../logic/rule_assets/insta
 import type { IDetectionRulesClient } from '../../../rule_management/logic/detection_rules_client/detection_rules_client_interface';
 import type { IPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
 import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
-
-export interface PrebuiltRuleRepository {
-  repository: string;
-  username: string;
-  token: string;
-  id: string;
-}
+import type { ExternalRuleSourceClient } from '../../../external_rule_sources/logic/external_rule_sources_client';
+import { createExternalRuleSourcesClient } from '../../../external_rule_sources/logic/external_rule_sources_client';
+import type { ExternalRuleSourceOutput } from '../../../../../../common/api/detection_engine/external_rule_sources/model/external_rule_source.gen';
 
 export const bootstrapPrebuiltRulesRoute = (
   router: SecuritySolutionPluginRouter,
@@ -58,6 +53,9 @@ export const bootstrapPrebuiltRulesRoute = (
           const rulesClient = ctx.alerting.getRulesClient();
           const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
           const detectionRulesClient = securityContext.getDetectionRulesClient();
+          const externalRuleSourcesClient = createExternalRuleSourcesClient({
+            savedObjectsClient,
+          });
           const config = securityContext.getConfig();
 
           const results = await Promise.all([
@@ -66,7 +64,7 @@ export const bootstrapPrebuiltRulesRoute = (
           ]);
 
           const { updated, errors } = await getExternalPrebuiltRuleAssets(
-            config.prebuiltRuleRepositories as PrebuiltRuleRepository[],
+            externalRuleSourcesClient,
             savedObjectsClient,
             savedObjectsImporter,
             detectionRulesClient,
@@ -101,22 +99,30 @@ export const bootstrapPrebuiltRulesRoute = (
 };
 
 const getExternalPrebuiltRuleAssets = async (
-  prebuiltRuleRepositories: PrebuiltRuleRepository[],
+  externalRuleSourceClient: ExternalRuleSourceClient,
   savedObjectsClient: SavedObjectsClientContract,
   savedObjectsImporter: ISavedObjectsImporter,
   detectionRulesClient: IDetectionRulesClient,
   ruleObjectsClient: IPrebuiltRuleObjectsClient,
   logger: Logger
 ) => {
-  const externalPrebuiltRuleBlobs = await fetchPrebuiltRuleFilenames(prebuiltRuleRepositories);
+  const prebuiltRuleRepositories = await externalRuleSourceClient.findExternalRuleSources({
+    type: 'github',
+    page: 1,
+    perPage: 10000,
+  });
+  const externalPrebuiltRuleBlobs = await fetchPrebuiltRuleFilenames(
+    prebuiltRuleRepositories.results,
+    externalRuleSourceClient
+  );
   const installResult = await installExternalPrebuiltRuleAssets({
-    prebuiltRuleRepositories,
     externalPrebuiltRuleBlobs,
     savedObjectsClient,
     savedObjectsImporter,
     detectionRulesClient,
     ruleObjectsClient,
     logger,
+    externalRuleSourceClient,
   });
 
   return installResult;
@@ -125,19 +131,20 @@ const getExternalPrebuiltRuleAssets = async (
 export interface ExternalRuleAssetBlob {
   filename: string;
   sha?: string;
-  repository: PrebuiltRuleRepository;
+  repository: ExternalRuleSourceOutput;
 }
 
 async function fetchPrebuiltRuleFilenames(
-  prebuiltRuleRepositories: PrebuiltRuleRepository[]
+  prebuiltRuleRepositories: ExternalRuleSourceOutput[],
+  externalRuleSourceClient: ExternalRuleSourceClient
 ): Promise<ExternalRuleAssetBlob[]> {
   const allRules: ExternalRuleAssetBlob[] = [];
 
   for (const repository of prebuiltRuleRepositories) {
-    const octokit = new Octokit({ auth: repository.token });
+    const octokit = await externalRuleSourceClient.getAuthenticatedGithubClient(repository.id);
     const { data } = await octokit.request('GET /repos/{owner}/{repo}/git/trees/{tree_sha}', {
-      owner: repository.username,
-      repo: repository.repository,
+      owner: repository.owner,
+      repo: repository.repo,
       tree_sha: 'main',
       recursive: 'true',
       headers: {

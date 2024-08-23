@@ -38,6 +38,7 @@ import {
   CreateUpdateProtectionUpdatesNoteRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/endpoint/protection_updates_note/protection_updates_note.gen';
 import { DeleteAssetCriticalityRecordRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/delete_asset_criticality.gen';
+import { DeleteExternalRuleSourceRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/external_rule_sources/delete_external_rule_source/delete_external_rule_source.gen';
 import { DeleteNoteRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/delete_note/delete_note_route.gen';
 import { DeleteRuleRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/delete_rule/delete_rule_route.gen';
 import { DeleteTimelinesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/delete_timelines/delete_timelines_route.gen';
@@ -327,6 +328,17 @@ Migrations are initiated per index. While the process is neither destructive nor
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
+    },
+    /**
+     * Delete an external rule source
+     */
+    deleteExternalRuleSource(props: DeleteExternalRuleSourceProps) {
+      return supertest
+        .post('/internal/detection_engine/external_rule_sources/_delete')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
     },
     deleteNote(props: DeleteNoteProps) {
       return supertest
@@ -1138,6 +1150,9 @@ export interface CreateUpdateProtectionUpdatesNoteProps {
 }
 export interface DeleteAssetCriticalityRecordProps {
   query: DeleteAssetCriticalityRecordRequestQueryInput;
+}
+export interface DeleteExternalRuleSourceProps {
+  body: DeleteExternalRuleSourceRequestBodyInput;
 }
 export interface DeleteNoteProps {
   body: DeleteNoteRequestBodyInput;

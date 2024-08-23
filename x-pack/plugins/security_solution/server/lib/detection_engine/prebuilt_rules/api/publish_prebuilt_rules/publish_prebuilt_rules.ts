@@ -14,11 +14,12 @@ import {
   PublishPrebuiltRulesRequestBody,
   type PublishPrebuiltRulesResponse,
 } from '../../../../../../common/api/detection_engine/prebuilt_rules/publish_prebuilt_rules/publish_prebuilt_rules.gen';
+import { invariant } from '../../../../../../common/utils/invariant';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
+import { createExternalRuleSourcesClient } from '../../../external_rule_sources/logic/external_rule_sources_client';
 import { buildSiemResponse } from '../../../routes/utils';
 import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
 import { commitRulesToRepository } from './commit_rules_to_repository';
-import { invariant } from '../../../../../../common/utils/invariant';
 
 export const publishPrebuiltRulesRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
@@ -46,19 +47,19 @@ export const publishPrebuiltRulesRoute = (router: SecuritySolutionPluginRouter) 
         const siemResponse = buildSiemResponse(response);
 
         try {
-          const ctx = await context.resolve(['securitySolution', 'alerting']);
-          const securityContext = ctx.securitySolution;
-          const config = securityContext.getConfig();
+          const ctx = await context.resolve(['core', 'securitySolution', 'alerting']);
+          const externalRuleSourceClient = createExternalRuleSourcesClient({
+            savedObjectsClient: ctx.core.savedObjects.client,
+          });
 
-          if (!config.prebuiltRuleRepositories) {
-            return siemResponse.error({
-              body: 'Prebuilt rule repositories are not configured',
-              statusCode: 400,
-            });
-          }
+          const repositories = await externalRuleSourceClient.findExternalRuleSources({
+            page: 1,
+            perPage: 10000,
+            type: 'github',
+          });
 
           const repositoriesById = new Map(
-            config.prebuiltRuleRepositories.map((repository) => [repository.id, repository])
+            repositories.results.map((repository) => [repository.id, repository])
           );
 
           const rulesClient = ctx.alerting.getRulesClient();
@@ -114,6 +115,7 @@ export const publishPrebuiltRulesRoute = (router: SecuritySolutionPluginRouter) 
                 repository,
                 rules,
                 detectionRulesClient,
+                externalRuleSourceClient,
               });
             })
           );

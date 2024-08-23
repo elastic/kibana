@@ -39,6 +39,7 @@ import { useCreateRuleSourceMutation } from '../../../rule_management/api/hooks/
 import { useFetchExternalRuleSourcesQuery } from '../../../rule_management/api/hooks/external_rule_sources/use_fetch_external_rule_sources';
 import { useBootstrapPrebuiltRulesMutation } from '../../../rule_management/api/hooks/use_bootstrap_prebuilt_rules';
 import * as i18n from './translations';
+import { useDeleteRuleSourceMutation } from '../../../rule_management/api/hooks/external_rule_sources/use_delete_rule_source_mutation';
 
 interface RuleSourcesFlyoutProps {
   onClose: () => void;
@@ -118,14 +119,17 @@ interface RuleSourceItemProps {
 }
 
 const RuleSourceItem = ({ source }: RuleSourceItemProps) => {
-  const { owner, repo } = source;
+  const { owner, repo, id } = source;
   const token = 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX';
+  const htmlId = useGeneratedHtmlId();
 
-  const id = useGeneratedHtmlId();
+  const { mutateAsync: deleteRuleSource } = useDeleteRuleSourceMutation();
+
+  const handleDelete = useCallback(() => deleteRuleSource({ id }), [deleteRuleSource, id]);
 
   return (
     <EuiAccordion
-      id={id}
+      id={htmlId}
       element="fieldset"
       borders="horizontal"
       buttonProps={{
@@ -153,7 +157,9 @@ const RuleSourceItem = ({ source }: RuleSourceItemProps) => {
           </EuiText>
         </div>
       }
-      extraAction={<EuiButtonIcon aria-label="Delete" iconType="cross" color="danger" />}
+      extraAction={
+        <EuiButtonIcon aria-label="Delete" iconType="cross" color="danger" onClick={handleDelete} />
+      }
       paddingSize="l"
     >
       <EuiForm component="form">

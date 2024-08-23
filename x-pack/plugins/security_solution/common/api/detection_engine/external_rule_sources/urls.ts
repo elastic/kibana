@@ -12,3 +12,4 @@ const BASE_URL = `${INTERNAL}/external_rule_sources` as const;
 export const CREATE_EXTERNAL_RULE_SOURCE = `${BASE_URL}/_create` as const;
 export const READ_EXTERNAL_RULE_SOURCES = `${BASE_URL}/_find` as const;
 export const UPDATE_EXTERNAL_RULE_SOURCE = `${BASE_URL}/_update` as const;
+export const DELETE_EXTERNAL_RULE_SOURCE = `${BASE_URL}/_delete` as const;

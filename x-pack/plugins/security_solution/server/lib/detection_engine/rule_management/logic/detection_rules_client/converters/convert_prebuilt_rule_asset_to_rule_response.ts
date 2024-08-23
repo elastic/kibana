@@ -26,7 +26,7 @@ export const convertPrebuiltRuleAssetToRuleResponse = (
     rule_source: {
       type: 'external',
       is_customized: false,
-      external_source: prebuiltRuleAsset.external_source,
+      repository_id: prebuiltRuleAsset.repository_id,
     },
     revision: 1,
   };

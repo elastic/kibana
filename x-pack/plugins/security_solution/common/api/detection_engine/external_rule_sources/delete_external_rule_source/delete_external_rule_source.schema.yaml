@@ -1,0 +1,33 @@
+openapi: 3.0.0
+info:
+  title: Delete External Rule Source API endpoint
+  version: '1'
+paths:
+  /internal/detection_engine/external_rule_sources/_delete:
+    post:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: DeleteExternalRuleSource
+      summary: Delete External Rule Source
+      description: Delete an external rule source
+      tags:
+        - External Rule Sources API
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  description: The unique identifier of the external rule source
+                  type: string
+              required:
+                - id
+      responses:
+        200:
+          description: Indicates a successful call
+          content:
+            application/json:
+              schema:
+                description: The external rule source that was deleted
+                $ref: '../model/external_rule_source.schema.yaml#/components/schemas/ExternalRuleSourceOutput'

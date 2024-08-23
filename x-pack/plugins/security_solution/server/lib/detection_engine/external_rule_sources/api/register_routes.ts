@@ -8,9 +8,11 @@
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 
 import { createExternalRuleSource } from './create_external_rule_source/create_external_rule_source';
+import { deleteExternalRuleSource } from './delete_external_rule_source/delete_external_rule_source';
 import { readExternalRuleSource } from './read_external_rule_sources/read_external_rule_source';
 
 export const registerExternalRuleSourceRoutes = (router: SecuritySolutionPluginRouter) => {
   createExternalRuleSource(router);
   readExternalRuleSource(router);
+  deleteExternalRuleSource(router);
 };

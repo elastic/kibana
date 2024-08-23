@@ -8,20 +8,21 @@
 import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import {
-  ReadExternalRuleSourceRequestBody,
-  ReadExternalRuleSourceResponse,
-} from '../../../../../../common/api/detection_engine/external_rule_sources/read_external_rule_sources/read_external_rule_source.gen';
-import { READ_EXTERNAL_RULE_SOURCES } from '../../../../../../common/api/detection_engine/external_rule_sources/urls';
+import { DELETE_EXTERNAL_RULE_SOURCE } from '../../../../../../common/api/detection_engine/external_rule_sources/urls';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
-import { createExternalRuleSourcesClient } from '../../logic/external_rule_sources_client';
+import type { ExternalRuleSourceSOAttributes } from '../../logic/rule_repositories_type';
+import { EXTERNAL_RULE_SOURCE_SO_TYPE } from '../../logic/rule_repositories_type';
+import {
+  DeleteExternalRuleSourceRequestBody,
+  DeleteExternalRuleSourceResponse,
+} from '../../../../../../common/api/detection_engine/external_rule_sources/delete_external_rule_source/delete_external_rule_source.gen';
 
-export const readExternalRuleSource = (router: SecuritySolutionPluginRouter) => {
+export const deleteExternalRuleSource = (router: SecuritySolutionPluginRouter) => {
   router.versioned
     .post({
       access: 'internal',
-      path: READ_EXTERNAL_RULE_SOURCES,
+      path: DELETE_EXTERNAL_RULE_SOURCE,
       options: {
         tags: ['access:securitySolution'],
       },
@@ -31,7 +32,7 @@ export const readExternalRuleSource = (router: SecuritySolutionPluginRouter) => 
         version: '1',
         validate: {
           request: {
-            body: buildRouteValidationWithZod(ReadExternalRuleSourceRequestBody),
+            body: buildRouteValidationWithZod(DeleteExternalRuleSourceRequestBody),
           },
         },
       },
@@ -39,27 +40,30 @@ export const readExternalRuleSource = (router: SecuritySolutionPluginRouter) => 
         context,
         request,
         response
-      ): Promise<IKibanaResponse<ReadExternalRuleSourceResponse>> => {
+      ): Promise<IKibanaResponse<DeleteExternalRuleSourceResponse>> => {
         const siemResponse = buildSiemResponse(response);
 
         try {
           const ctx = await context.resolve(['core']);
           const savedObjectsClient = ctx.core.savedObjects.client;
 
-          const { page, perPage } = request.body;
-          const externalRuleSourcesClient = createExternalRuleSourcesClient({
-            savedObjectsClient,
-          });
-          const results = await externalRuleSourcesClient.findExternalRuleSources({
-            page,
-            perPage,
+          const { id } = request.body;
+          const ruleSource = await savedObjectsClient.get<ExternalRuleSourceSOAttributes>(
+            EXTERNAL_RULE_SOURCE_SO_TYPE,
+            id
+          );
+
+          const type = Object.keys(
+            ruleSource.attributes
+          )[0] as keyof ExternalRuleSourceSOAttributes;
+          const responseBody = DeleteExternalRuleSourceResponse.parse({
+            id: ruleSource.id,
+            type,
+            ...ruleSource.attributes[type],
           });
 
-          const responseBody = ReadExternalRuleSourceResponse.parse({
-            results: results.results,
-            total: results.total,
-            page,
-            perPage,
+          await savedObjectsClient.delete(EXTERNAL_RULE_SOURCE_SO_TYPE, id, {
+            refresh: 'wait_for',
           });
 
           return response.ok({

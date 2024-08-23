@@ -5,29 +5,23 @@
  * 2.0.
  */
 
-import { Octokit } from 'octokit';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine';
-import { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
+import type { GithubRuleSourceOutput } from '../../../../../../common/api/detection_engine/external_rule_sources/model/external_rule_source.gen';
+import type { ExternalRuleSourceClient } from '../../../external_rule_sources/logic/external_rule_sources_client';
 import type { IDetectionRulesClient } from '../../../rule_management/logic/detection_rules_client/detection_rules_client_interface';
+import { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
 
 interface CommitRulesArgs {
-  repository: {
-    repository: string;
-    username: string;
-    token: string;
-    id: string;
-  };
+  repository: GithubRuleSourceOutput;
   rules: RuleResponse[];
   detectionRulesClient: IDetectionRulesClient;
+  externalRuleSourceClient: ExternalRuleSourceClient;
 }
 
 export const commitRulesToRepository = async (args: CommitRulesArgs) => {
-  const { repository, rules, detectionRulesClient } = args;
-  const octoKitClient = new Octokit({
-    auth: repository.token,
-  });
-  const owner = repository.username;
-  const repo = repository.repository;
+  const { repository, rules, detectionRulesClient, externalRuleSourceClient } = args;
+  const octoKitClient = await externalRuleSourceClient.getAuthenticatedGithubClient(repository.id);
+  const { owner, repo } = repository;
 
   // Get the main branch commit sha
   const { data: refData } = await octoKitClient.rest.git.getRef({

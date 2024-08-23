@@ -87,6 +87,7 @@ import type {
 import type { BootstrapPrebuiltRulesResponse } from '../../../../common/api/detection_engine/prebuilt_rules/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.gen';
 import {
   CREATE_EXTERNAL_RULE_SOURCE,
+  DELETE_EXTERNAL_RULE_SOURCE,
   READ_EXTERNAL_RULE_SOURCES,
   UPDATE_EXTERNAL_RULE_SOURCE,
 } from '../../../../common/api/detection_engine/external_rule_sources/urls';
@@ -102,6 +103,10 @@ import type {
   UpdateExternalRuleSourceRequestBody,
   UpdateExternalRuleSourceResponse,
 } from '../../../../common/api/detection_engine/external_rule_sources/update_external_rule_source/update_external_rule_source.gen';
+import type {
+  DeleteExternalRuleSourceRequestBody,
+  DeleteExternalRuleSourceResponse,
+} from '../../../../common/api/detection_engine/external_rule_sources/delete_external_rule_source/delete_external_rule_source.gen';
 
 /**
  * Create provided Rule
@@ -576,6 +581,15 @@ export const updateExternalRuleSource = async (
   ruleSource: UpdateExternalRuleSourceRequestBody
 ): Promise<UpdateExternalRuleSourceResponse> =>
   KibanaServices.get().http.fetch<UpdateExternalRuleSourceResponse>(UPDATE_EXTERNAL_RULE_SOURCE, {
+    method: 'POST',
+    version: '1',
+    body: JSON.stringify(ruleSource),
+  });
+
+export const deleteExternalRuleSource = async (
+  ruleSource: DeleteExternalRuleSourceRequestBody
+): Promise<DeleteExternalRuleSourceResponse> =>
+  KibanaServices.get().http.fetch<DeleteExternalRuleSourceResponse>(DELETE_EXTERNAL_RULE_SOURCE, {
     method: 'POST',
     version: '1',
     body: JSON.stringify(ruleSource),

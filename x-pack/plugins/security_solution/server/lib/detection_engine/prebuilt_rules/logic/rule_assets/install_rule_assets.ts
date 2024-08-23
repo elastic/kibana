@@ -12,12 +12,10 @@ import type { KibanaSavedObjectType } from '@kbn/fleet-plugin/common';
 import type { RuleSource, RuleVersion } from '../../../../../../common/api/detection_engine';
 import { createPrebuiltRuleAssetsClient } from './prebuilt_rule_assets_client';
 import { fetchGithubRuleAssets } from './process_github_rule_assets';
-import type {
-  ExternalRuleAssetBlob,
-  PrebuiltRuleRepository,
-} from '../../api/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules';
+import type { ExternalRuleAssetBlob } from '../../api/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules';
 import type { IDetectionRulesClient } from '../../../rule_management/logic/detection_rules_client/detection_rules_client_interface';
 import type { IPrebuiltRuleObjectsClient } from '../rule_objects/prebuilt_rule_objects_client';
+import type { ExternalRuleSourceClient } from '../../../external_rule_sources/logic/external_rule_sources_client';
 
 type RuleId = string;
 type RepositoryId = string;
@@ -35,36 +33,31 @@ export interface InstallationResult {
 }
 
 interface InstallExternalPrebuiltRuleAssetsArgs {
-  prebuiltRuleRepositories: PrebuiltRuleRepository[];
   externalPrebuiltRuleBlobs: ExternalRuleAssetBlob[];
   savedObjectsClient: SavedObjectsClientContract;
   savedObjectsImporter: ISavedObjectsImporter;
   detectionRulesClient: IDetectionRulesClient;
   ruleObjectsClient: IPrebuiltRuleObjectsClient;
   logger: Logger;
+  externalRuleSourceClient: ExternalRuleSourceClient;
 }
 
 export const installExternalPrebuiltRuleAssets = async ({
-  prebuiltRuleRepositories,
   externalPrebuiltRuleBlobs,
   savedObjectsClient,
   savedObjectsImporter,
   detectionRulesClient,
   ruleObjectsClient,
   logger,
+  externalRuleSourceClient,
 }: InstallExternalPrebuiltRuleAssetsArgs): Promise<InstallationResult> => {
-  if (!prebuiltRuleRepositories) {
-    return {
-      updated: [],
-      errors: [],
-    };
-  }
   const ruleAssetsClient = createPrebuiltRuleAssetsClient(savedObjectsClient);
   const installedAssetsVersionSpecifiers = await ruleAssetsClient.fetchAllAssetsVersionInfo();
 
   const { assetsToInstall, errors } = await fetchGithubRuleAssets(
     installedAssetsVersionSpecifiers,
-    externalPrebuiltRuleBlobs
+    externalPrebuiltRuleBlobs,
+    externalRuleSourceClient
   );
 
   const installationResults = await installKibanaSavedObjects({
