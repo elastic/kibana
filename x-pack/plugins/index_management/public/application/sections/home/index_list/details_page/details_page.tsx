@@ -13,7 +13,7 @@ import { DetailsPageError } from './details_page_errors/details_page_error';
 import { DetailsPageContent } from './details_page_content';
 import { DetailsPageLoading } from './details_page_index_loading';
 import { DetailsPageEmptyIndexNameError } from './details_page_errors/error_empty_index_name';
-import { useIndexDetailsFunctions } from '../../../../hooks/use_index_details_page_index_functions';
+import { useIndexFunctions } from '../../../../hooks/use_index_functions';
 
 export const DetailsPage: FunctionComponent<
   RouteComponentProps<{ indexName: string; indexDetailsSection: IndexDetailsSection }>
@@ -22,8 +22,8 @@ export const DetailsPage: FunctionComponent<
   const indexName = queryParams.get('indexName') ?? '';
   const tab: IndexDetailsTabId = queryParams.get('tab') ?? IndexDetailsSection.Overview;
 
-  const { isLoading, error, index, fetchIndexDetails, navigateToIndicesList } =
-    useIndexDetailsFunctions(indexName, search, history);
+  const { isIndicesLoading, indexLoadingError, index, fetchIndexDetails, navigateToIndicesList } =
+    useIndexFunctions(indexName, search, history);
 
   useEffect(() => {
     fetchIndexDetails();
@@ -32,10 +32,10 @@ export const DetailsPage: FunctionComponent<
   if (!indexName) {
     return <DetailsPageEmptyIndexNameError />;
   }
-  if (isLoading && !index) {
+  if (isIndicesLoading && !index) {
     return <DetailsPageLoading />;
   }
-  if (error || !index) {
+  if (indexLoadingError || !index) {
     return (
       <DetailsPageError
         indexName={indexName}

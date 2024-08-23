@@ -9,7 +9,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPageTemplate, EuiText, EuiCode } from '@elastic/eui';
 
 export const DetailsPageEmptyIndexNameError: React.FC = () => {
-  console.log('here');
   return (
     <EuiPageTemplate.EmptyPrompt
       data-test-subj="indexDetailsNoIndexNameError"

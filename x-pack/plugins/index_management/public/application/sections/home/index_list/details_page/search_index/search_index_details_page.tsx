@@ -19,59 +19,40 @@ import {
   EuiIcon,
   EuiText,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { FunctionComponent } from 'react';
-import { RouteComponentProps } from 'react-router';
+import { RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { DetailsPageEmptyIndexNameError } from '../details_page_errors/error_empty_index_name';
 import { DetailsPageLoading } from '../details_page_index_loading';
 import { DetailsPageError } from '../details_page_errors/details_page_error';
-import { useIndexDetailsFunctions } from '../../../../../hooks/use_index_details_page_index_functions';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { useIndexFunctions } from '../../../../../hooks/use_index_functions';
 import { DeleteIndexModal } from '../../index_delete_modal';
-import { deleteIndices } from '../../../../../../application/services';
-import { notificationService } from '../../../../../services/notification';
 
 export const SearchIndexDetailsPage: FunctionComponent<
   RouteComponentProps<{ indexName: string }>
 > = ({ location: { search }, history }) => {
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const indexName = queryParams.get('indexName') ?? '';
-  const { isIndicesLoading, error, index, fetchIndexDetails, navigateToIndicesList } =
-    useIndexDetailsFunctions(indexName, search, history);
+  const {
+    indexLoadingError,
+    index,
+    isIndicesLoading,
+    isDeleteLoading,
+    fetchIndexDetails,
+    deleteIndex,
+    navigateToIndicesList,
+  } = useIndexFunctions(indexName, search, history);
 
   const [isShowingMoreOptionsPopover, setShowMoreOptionsPopover] = useState<boolean>(false);
   const [isShowingDeleteModal, setShowDeleteModal] = useState<boolean>(false);
-  const [isDeleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
     fetchIndexDetails();
   }, [fetchIndexDetails]);
 
   const pageTitle = <>{index?.name}</>;
-  const indexNames: string[] = useMemo(() => {
-    return [indexName];
-  }, [indexName]);
-
-  const deleteIndex = useCallback(async () => {
-    if (indexName && indexNames.length > 0) {
-      setDeleteLoading(true);
-      try {
-        await deleteIndices(indexNames);
-        setDeleteLoading(false);
-        notificationService.showSuccessToast(
-          i18n.translate('xpack.idxMgmt.searchIndexDetails.indexDeletedMessage', {
-            defaultMessage: 'The index {indexName} was deleted.',
-            values: { indexNames: indexName },
-          })
-        );
-        navigateToIndicesList();
-      } catch (error) {
-        setDeleteLoading(false);
-        notificationService.showDangerToast(error.body.message);
-      }
-    }
-  }, [navigateToIndicesList, indexName]);
 
   if (!indexName) {
     return <DetailsPageEmptyIndexNameError />;
@@ -79,7 +60,7 @@ export const SearchIndexDetailsPage: FunctionComponent<
   if ((isIndicesLoading || isDeleteLoading) && !index) {
     return <DetailsPageLoading />;
   }
-  if (error || !index) {
+  if (indexLoadingError || !index) {
     return (
       <DetailsPageError
         indexName={indexName}
@@ -106,7 +87,7 @@ export const SearchIndexDetailsPage: FunctionComponent<
       </EuiPageSection>
       <EuiSpacer size="l" />
       <EuiPageHeader
-        data-test-subj="indexDetailsHeader"
+        data-test-subj="searchIndexDetailsHeader"
         pageTitle={pageTitle}
         rightSideItems={
           isIndicesLoading || isDeleteLoading
@@ -155,14 +136,7 @@ export const SearchIndexDetailsPage: FunctionComponent<
                 </EuiFlexGroup>,
               ]
         }
-      >
-        <EuiText size="s">
-          {i18n.translate('xpack.idxMgmt.searchIndexDetails.description', {
-            defaultMessage:
-              'This is your very first Elasticsearch index. It stores the data you’d like to search.',
-          })}
-        </EuiText>
-      </EuiPageHeader>
+      ></EuiPageHeader>
       <EuiSpacer size="l" />
       {isShowingDeleteModal && (
         <DeleteIndexModal
@@ -170,10 +144,10 @@ export const SearchIndexDetailsPage: FunctionComponent<
           onConfirm={() => {
             deleteIndex();
           }}
-          indexNames={indexNames}
+          indexNames={[indexName]}
         />
       )}
-      <div data-test-subj={`searchIndexDetailsContent`}></div>
+      <div data-test-subj="searchIndexDetailsContent" />
     </>
   );
 };
