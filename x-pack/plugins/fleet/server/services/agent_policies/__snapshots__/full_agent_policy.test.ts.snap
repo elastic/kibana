@@ -180,8 +180,8 @@ Object {
       "enabled": true,
       "logs": false,
       "metrics": true,
-      "traces": false,
       "namespace": "default",
+      "traces": false,
       "use_output": "default",
     },
     "protection": Object {
@@ -259,8 +259,8 @@ Object {
       "enabled": true,
       "logs": false,
       "metrics": true,
-      "traces": false,
       "namespace": "default",
+      "traces": false,
       "use_output": "monitoring-output-id",
     },
     "protection": Object {
@@ -338,8 +338,8 @@ Object {
       "enabled": true,
       "logs": false,
       "metrics": true,
-      "traces": false,
       "namespace": "default",
+      "traces": false,
       "use_output": "monitoring-output-id",
     },
     "protection": Object {
