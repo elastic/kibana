@@ -11,7 +11,6 @@ import type { ESQLSearchResponse } from '@kbn/es-types';
 import { ESQLDataGrid } from '@kbn/esql-datagrid/public';
 import { i18n } from '@kbn/i18n';
 import { type GlobalWidgetParameters } from '@kbn/investigate-plugin/public';
-import { InvestigationItem } from '@kbn/investigation-shared';
 import type { Suggestion } from '@kbn/lens-plugin/public';
 import { useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
 import React, { useMemo } from 'react';
@@ -35,6 +34,24 @@ interface Props {
   allColumns: ESQLSearchResponse['all_columns'];
   values: ESQLSearchResponse['values'];
   dateHistogramResults?: {
+    query: string;
+    columns: ESQLSearchResponse['columns'];
+    values: ESQLSearchResponse['values'];
+    groupingExpression: string;
+  };
+}
+
+interface EsqlItemParams {
+  esql: string;
+  suggestion?: Suggestion;
+}
+
+interface EsqlItemData {
+  dataView: DataView;
+  columns: ESQLSearchResponse['columns'];
+  values: ESQLSearchResponse['values'];
+  suggestion: Suggestion;
+  dateHistoResponse?: {
     query: string;
     columns: ESQLSearchResponse['columns'];
     values: ESQLSearchResponse['values'];
@@ -210,12 +227,15 @@ export function registerEsqlItem({
   },
   services,
 }: Options) {
-  investigate.registerItemDefinition({
+  investigate.registerItemDefinition<EsqlItemParams, EsqlItemData>({
     type: 'esql',
-    generate: async (option: { item: InvestigationItem; params: GlobalWidgetParameters }) => {
+    generate: async (option: {
+      itemParams: EsqlItemParams;
+      globalParams: GlobalWidgetParameters;
+    }) => {
       const controller = new AbortController();
-      const { esql: esqlQuery, suggestion: suggestionFromParameters } = option.item.params;
-      const { timeRange } = option.params;
+      const { esql: esqlQuery, suggestion: suggestionFromParameters } = option.itemParams;
+      const { timeRange } = option.globalParams;
 
       const esql = await services.esql;
 
@@ -250,21 +270,27 @@ export function registerEsqlItem({
       });
 
       return {
-        mainResponse,
+        dataView: mainResponse.meta.dataView,
+        columns: mainResponse.query.columns,
+        values: mainResponse.query.values,
         suggestion,
         dateHistoResponse,
       };
     },
-    render: (option: { item: InvestigationItem; data: Record<string, any> }) => {
-      const { item, data = {} } = option;
+    render: (option: {
+      itemParams: EsqlItemParams;
+      globalParams: GlobalWidgetParameters;
+      data: EsqlItemData;
+    }) => {
+      const { itemParams, data } = option;
       return (
         <EsqlWidget
-          dataView={data.mainResponse.meta.dataView}
-          columns={data.mainResponse.query.columns}
+          dataView={data.dataView}
+          columns={data.columns}
           allColumns={undefined}
-          values={data.mainResponse.query.values}
+          values={data.values}
           suggestion={data.suggestion}
-          esqlQuery={item.params.esql}
+          esqlQuery={itemParams.esql}
           dateHistogramResults={data.dateHistoResponse}
         />
       );

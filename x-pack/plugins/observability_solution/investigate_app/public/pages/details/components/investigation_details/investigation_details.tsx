@@ -54,18 +54,20 @@ export function InvestigationDetails({ user, investigationId }: Props) {
             });
           }
 
-          const data = await itemDefinition.generate({
-            item,
-            params: {
-              timeRange: {
-                from: investigation
-                  ? new Date(investigation.params.timeRange.from).toISOString()
-                  : new Date().toISOString(),
-                to: investigation
-                  ? new Date(investigation.params.timeRange.to).toISOString()
-                  : new Date().toISOString(),
-              },
+          const globalParams = {
+            timeRange: {
+              from: investigation
+                ? new Date(investigation.params.timeRange.from).toISOString()
+                : new Date().toISOString(),
+              to: investigation
+                ? new Date(investigation.params.timeRange.to).toISOString()
+                : new Date().toISOString(),
             },
+          };
+
+          const data = await itemDefinition.generate({
+            itemParams: item.params,
+            globalParams,
           });
 
           return Promise.resolve({
@@ -73,7 +75,8 @@ export function InvestigationDetails({ user, investigationId }: Props) {
             loading: false,
             element: itemDefinition.render({
               data,
-              item,
+              globalParams,
+              itemParams: item.params,
             }),
           });
         })

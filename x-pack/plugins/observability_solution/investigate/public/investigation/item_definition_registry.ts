@@ -5,19 +5,22 @@
  * 2.0.
  */
 
-import { InvestigationItem } from '@kbn/investigation-shared';
 import { GlobalWidgetParameters } from '../../common/types';
 
-type ItemDefinitionData = Record<string, any>;
-type ItemDefinitionParams = Record<string, any>;
+export type ItemDefinitionData = Record<string, any>;
+export type ItemDefinitionParams = Record<string, any>;
 
-export interface ItemDefinition {
+export interface ItemDefinition<
+  Params extends ItemDefinitionParams = {},
+  Data extends ItemDefinitionData = {}
+> {
   type: string;
-  generate: (option: {
-    item: InvestigationItem;
-    params: GlobalWidgetParameters;
-  }) => Promise<ItemDefinitionData>;
-  render: (option: { data: ItemDefinitionData; item: InvestigationItem }) => React.ReactNode;
+  generate: (option: { itemParams: Params; globalParams: GlobalWidgetParameters }) => Promise<Data>;
+  render: (option: {
+    data: Data;
+    itemParams: Params;
+    globalParams: GlobalWidgetParameters;
+  }) => React.ReactNode;
 }
 
 export class ItemDefinitionRegistry {
@@ -25,7 +28,10 @@ export class ItemDefinitionRegistry {
 
   constructor() {}
 
-  public registerItem(definition: ItemDefinition) {
+  public registerItem<Params extends ItemDefinitionParams, Data extends ItemDefinitionData>(
+    definition: ItemDefinition<Params, Data>
+  ) {
+    // @ts-ignore TODO fix this type issue with generics
     this.definitions.push(definition);
   }
 

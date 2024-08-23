@@ -13,7 +13,11 @@ import type { FromSchema } from 'json-schema-to-ts';
 import type { InvestigateWidget } from '../common';
 import type { GlobalWidgetParameters, InvestigateWidgetCreate } from '../common/types';
 import type { UseInvestigationApi } from './hooks/use_investigation';
-import { ItemDefinition } from './investigation/item_definition_registry';
+import {
+  ItemDefinition,
+  ItemDefinitionData,
+  ItemDefinitionParams,
+} from './investigation/item_definition_registry';
 
 export type OnWidgetAdd = (create: InvestigateWidgetCreate) => Promise<void>;
 
@@ -64,7 +68,12 @@ export interface InvestigateStartDependencies {}
 
 export interface InvestigatePublicSetup {
   // new
-  registerItemDefinition: (itemDefinition: ItemDefinition) => void;
+  registerItemDefinition: <
+    Params extends ItemDefinitionParams = {},
+    Data extends ItemDefinitionData = {}
+  >(
+    itemDefinition: ItemDefinition<Params, Data>
+  ) => void;
   // old
   register: (callback: (registerWidget: RegisterWidget) => Promise<void>) => void;
 }

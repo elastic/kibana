@@ -8,7 +8,6 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import type { GlobalWidgetParameters } from '@kbn/investigate-plugin/public';
-import { InvestigationItem } from '@kbn/investigation-shared';
 import { useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { v4 } from 'uuid';
@@ -23,11 +22,7 @@ const embeddableClassName = css`
   }
 `;
 
-type Props = {
-  type: string;
-  config: Record<string, any>;
-  savedObjectId?: string;
-} & GlobalWidgetParameters;
+type Props = EmbeddableItemParams & GlobalWidgetParameters;
 
 type ParentApi = ReturnType<React.ComponentProps<typeof ReactEmbeddableRenderer>['getParentApi']>;
 
@@ -158,25 +153,35 @@ function EmbeddableWidget(props: Props) {
   return <LegacyEmbeddable {...props} />;
 }
 
+interface EmbeddableItemParams {
+  type: string;
+  config: Record<string, any>;
+  savedObjectId?: string;
+}
+
 export function registerEmbeddableItem({
   dependencies: {
     setup: { investigate },
   },
   services,
 }: Options) {
-  investigate.registerItemDefinition({
+  investigate.registerItemDefinition<EmbeddableItemParams, {}>({
     type: 'esql',
-    generate: async (option: { item: InvestigationItem; params: GlobalWidgetParameters }) => {
-      return {
-        timeRange: option.params.timeRange,
-      };
+    generate: async (option: {
+      itemParams: EmbeddableItemParams;
+      globalParams: GlobalWidgetParameters;
+    }) => {
+      return {};
     },
-    render: (option: { item: InvestigationItem; data: Record<string, any> }) => {
+    render: (option: {
+      itemParams: EmbeddableItemParams;
+      globalParams: GlobalWidgetParameters;
+    }) => {
       const parameters = {
-        type: option.item.params.type,
-        config: option.item.params.config,
-        savedObjectId: option.item.params.savedObjectId,
-        timeRange: option.data.timeRange,
+        type: option.itemParams.type,
+        config: option.itemParams.config,
+        savedObjectId: option.itemParams.savedObjectId,
+        timeRange: option.globalParams.timeRange,
       };
 
       return <EmbeddableWidget {...parameters} />;

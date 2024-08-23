@@ -15,7 +15,12 @@ import { GetInvestigationResponse } from '@kbn/investigation-shared';
 import type { Logger } from '@kbn/logging';
 import { useMemo } from 'react';
 import { createUseInvestigation } from './hooks/use_investigation';
-import { ItemDefinition, ItemDefinitionRegistry } from './investigation/item_definition_registry';
+import {
+  ItemDefinition,
+  ItemDefinitionData,
+  ItemDefinitionParams,
+  ItemDefinitionRegistry,
+} from './investigation/item_definition_registry';
 import type {
   ConfigSchema,
   InvestigatePublicSetup,
@@ -45,7 +50,12 @@ export class InvestigatePlugin
   setup(coreSetup: CoreSetup, pluginsSetup: InvestigateSetupDependencies): InvestigatePublicSetup {
     return {
       // new
-      registerItemDefinition: (definition: ItemDefinition) => {
+      registerItemDefinition: <
+        Params extends ItemDefinitionParams,
+        Data extends ItemDefinitionData
+      >(
+        definition: ItemDefinition<Params, Data>
+      ) => {
         this.itemDefinitionRegistry.registerItem(definition);
       },
       // old
