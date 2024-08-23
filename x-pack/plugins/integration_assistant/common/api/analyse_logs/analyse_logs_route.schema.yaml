@@ -8,7 +8,7 @@ paths:
       summary: Analyses log samples and processes them.
       operationId: AnalyseLogs
       x-codegen-enabled: false
-      description: Analyse log samples and processes them
+      description: Analyses log samples and processes them
       tags:
         - Analyse Logs API
       requestBody:
