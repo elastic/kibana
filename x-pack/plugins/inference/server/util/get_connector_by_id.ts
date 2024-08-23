@@ -26,14 +26,14 @@ export const getConnectorById = async ({
       throwIfSystemAction: true,
     });
   } catch (error) {
-    throw createInferenceRequestError(`No connector found for id ${connectorId}`, 400);
+    throw createInferenceRequestError(`No connector found for id '${connectorId}'`, 400);
   }
 
   const actionTypeId = connector.actionTypeId;
 
   if (!isSupportedConnectorType(actionTypeId)) {
     throw createInferenceRequestError(
-      `Type ${actionTypeId} not recognized as a supported connector type`,
+      `Type '${actionTypeId}' not recognized as a supported connector type`,
       400
     );
   }
