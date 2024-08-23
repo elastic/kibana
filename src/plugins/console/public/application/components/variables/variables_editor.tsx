@@ -191,6 +191,7 @@ export const VariablesEditor = (props: Props) => {
         items={variables}
         columns={columns}
         itemId="id"
+        responsiveBreakpoint={false}
         className="conVariablesTable"
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
         noItemsMessage={i18n.translate('console.variablesPage.table.noItemsMessage', {

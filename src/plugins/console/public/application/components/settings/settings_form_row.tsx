@@ -19,9 +19,9 @@ export interface DevToolsSettingsModalProps {
 export const SettingsFormRow = ({ label, labelWarning, children }: DevToolsSettingsModalProps) => {
   return (
     <EuiFormRow fullWidth>
-      <EuiFlexGroup alignItems="center">
+      <EuiFlexGroup alignItems="center" responsive={false}>
         <EuiFlexItem>
-          <EuiFlexGroup gutterSize="xs" alignItems="center">
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>{label}</EuiFlexItem>
             {labelWarning && (
               <EuiFlexItem grow={false}>
