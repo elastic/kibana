@@ -13,6 +13,7 @@ import { bootstrapPrebuiltRules } from '../api';
 import { useInvalidateFetchPrebuiltRulesInstallReviewQuery } from './prebuilt_rules/use_fetch_prebuilt_rules_install_review_query';
 import { useInvalidateFetchPrebuiltRulesStatusQuery } from './prebuilt_rules/use_fetch_prebuilt_rules_status_query';
 import { useInvalidateFetchPrebuiltRulesUpgradeReviewQuery } from './prebuilt_rules/use_fetch_prebuilt_rules_upgrade_review_query';
+import { useInvalidateFindRulesQuery } from './use_find_rules_query';
 
 export const BOOTSTRAP_PREBUILT_RULES_KEY = ['POST', BOOTSTRAP_PREBUILT_RULES_URL];
 
@@ -22,6 +23,7 @@ export const useBootstrapPrebuiltRulesMutation = (
   const invalidatePrePackagedRulesStatus = useInvalidateFetchPrebuiltRulesStatusQuery();
   const invalidatePrebuiltRulesInstallReview = useInvalidateFetchPrebuiltRulesInstallReviewQuery();
   const invalidatePrebuiltRulesUpdateReview = useInvalidateFetchPrebuiltRulesUpgradeReviewQuery();
+  const invalidateFindRulesQuery = useInvalidateFindRulesQuery();
 
   return useMutation(() => bootstrapPrebuiltRules(), {
     ...options,
@@ -37,6 +39,7 @@ export const useBootstrapPrebuiltRulesMutation = (
         // Invalidate other pre-packaged rules related queries. We need to do
         // that only in case the prebuilt rules package was installed indicating
         // that there might be new rules to install.
+        invalidateFindRulesQuery();
         invalidatePrePackagedRulesStatus();
         invalidatePrebuiltRulesInstallReview();
         invalidatePrebuiltRulesUpdateReview();
@@ -48,5 +51,3 @@ export const useBootstrapPrebuiltRulesMutation = (
     },
   });
 };
-
-Math.max(undefined ?? 3, 1);

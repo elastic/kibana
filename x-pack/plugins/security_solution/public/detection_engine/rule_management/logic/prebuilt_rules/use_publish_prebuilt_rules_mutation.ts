@@ -12,8 +12,6 @@ import type {
   PublishPrebuiltRulesResponse,
 } from '../../../../../common/api/detection_engine/prebuilt_rules/publish_prebuilt_rules/publish_prebuilt_rules.gen';
 import { useInvalidateFindRulesQuery } from '../../api/hooks/use_find_rules_query';
-import { useInvalidateFetchRuleManagementFiltersQuery } from '../../api/hooks/use_fetch_rule_management_filters_query';
-import { useInvalidateFetchRulesSnoozeSettingsQuery } from '../../api/hooks/use_fetch_rules_snooze_settings_query';
 import { publishPrebuiltRules } from '../../api/api';
 
 export const PUBLISH_PREBUILT_RULES_KEY = ['POST', 'PUBLISH_PREBUILT_RULES'];
@@ -22,8 +20,6 @@ export const usePublishPrebuiltRulesMutation = (
   options?: UseMutationOptions<PublishPrebuiltRulesResponse, Error, PublishPrebuiltRulesRequestBody>
 ) => {
   const invalidateFindRulesQuery = useInvalidateFindRulesQuery();
-  const invalidateFetchRulesSnoozeSettings = useInvalidateFetchRulesSnoozeSettingsQuery();
-  const invalidateFetchRuleManagementFilters = useInvalidateFetchRuleManagementFiltersQuery();
 
   return useMutation<PublishPrebuiltRulesResponse, Error, PublishPrebuiltRulesRequestBody>(
     (requestBody) => publishPrebuiltRules(requestBody),
@@ -32,8 +28,6 @@ export const usePublishPrebuiltRulesMutation = (
       mutationKey: PUBLISH_PREBUILT_RULES_KEY,
       onSettled: (...args) => {
         invalidateFindRulesQuery();
-        invalidateFetchRulesSnoozeSettings();
-        invalidateFetchRuleManagementFilters();
 
         if (options?.onSettled) {
           options.onSettled(...args);

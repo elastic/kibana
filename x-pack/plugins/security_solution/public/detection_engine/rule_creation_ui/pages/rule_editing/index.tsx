@@ -89,9 +89,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
 
   const { detailName: ruleId } = useParams<{ detailName: string }>();
 
-  const [activeStep, setActiveStep] = useState<RuleStep>(
-    rule.immutable ? RuleStep.ruleActions : RuleStep.defineRule
-  );
+  const [activeStep, setActiveStep] = useState<RuleStep>(RuleStep.defineRule);
   const { mutateAsync: updateRule, isLoading } = useUpdateRule();
   const [dataViewOptions, setDataViewOptions] = useState<{ [x: string]: DataViewListItem }>({});
   const [isRulePreviewVisible, setIsRulePreviewVisible] = useState(true);
@@ -222,7 +220,6 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
         'data-test-subj': 'edit-rule-define-tab',
         id: RuleStep.defineRule,
         name: ruleI18n.DEFINITION,
-        disabled: rule?.immutable,
         content: (
           <div
             style={{
@@ -269,7 +266,6 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
         'data-test-subj': 'edit-rule-about-tab',
         id: RuleStep.aboutRule,
         name: ruleI18n.ABOUT,
-        disabled: rule?.immutable,
         content: (
           <div
             style={{
@@ -301,7 +297,6 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
         'data-test-subj': 'edit-rule-schedule-tab',
         id: RuleStep.scheduleRule,
         name: ruleI18n.SCHEDULE,
-        disabled: rule?.immutable,
         content: (
           <div
             style={{
@@ -354,7 +349,6 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
       },
     ],
     [
-      rule?.immutable,
       rule?.id,
       rule?.type,
       activeStep,
@@ -446,7 +440,6 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
         key={index}
         onClick={() => onTabClick(tab)}
         isSelected={tab.id === activeStep}
-        disabled={tab.disabled}
         data-test-subj={tab['data-test-subj']}
       >
         {tab.name}

@@ -119,7 +119,7 @@ export const publishPrebuiltRulesRoute = (router: SecuritySolutionPluginRouter) 
           );
 
           const responseBody: PublishPrebuiltRulesResponse = {
-            published_rules: [],
+            published_rules: currentRules,
           };
 
           return response.ok({

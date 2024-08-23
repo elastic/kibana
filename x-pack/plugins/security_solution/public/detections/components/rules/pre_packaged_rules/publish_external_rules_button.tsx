@@ -21,6 +21,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { useBootstrapPrebuiltRulesMutation } from '../../../../detection_engine/rule_management/api/hooks';
 import { usePublishRules } from '../../../../detection_engine/rule_management/logic/prebuilt_rules/use_publish_rules';
 import type { RuleResponse, RuleSignatureId } from '../../../../../common/api/detection_engine';
 import { useRulesTableContext } from '../../../../detection_engine/rule_management_ui/components/rules_table/rules_table/rules_table_context';
@@ -45,6 +46,7 @@ export const PublishExternalRulesButton = ({
     state: { publishableRules },
   } = useRulesTableContext();
   const { mutateAsync: publishRulesRequest } = usePublishRules();
+  const { mutateAsync: bootstrapPrebuiltRules } = useBootstrapPrebuiltRulesMutation();
 
   const publishableRulesCount = publishableRules.length;
   if (publishableRulesCount === 0) {
@@ -71,6 +73,7 @@ export const PublishExternalRulesButton = ({
         revision: rule.revision,
       })),
     });
+    await bootstrapPrebuiltRules();
   };
 
   const ButtonComponent = fill ? EuiButton : EuiButtonEmpty;

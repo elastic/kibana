@@ -76,6 +76,9 @@ export const installExternalPrebuiltRuleAssets = async ({
       attributes: rule,
       references: [],
     })),
+    options: {
+      refresh: true,
+    },
   });
   const installedRulesAssetIds = new Set(installationResults.map((result) => result.id));
 
@@ -127,15 +130,15 @@ const updateInstalledRulesToNonCustomized = async ({
   // Get currently installed rules which had a new corresponding asset installed
   const installedRules = await ruleObjectsClient.fetchInstalledRulesByIds(ruleIds);
 
-  for (const rule of installedRules) {
-    const { rule_source: ruleSource, version } = rule;
-
-    const latestAssetVersion = latestAssetSpecifiers.get(rule.rule_id);
-
-    if (isCustomizedExternalRule(ruleSource) && version === latestAssetVersion) {
-      await detectionRulesClient.updateRule({ ruleUpdate: rule });
-    }
-  }
+  await Promise.all(
+    installedRules.map(async (rule) => {
+      const { rule_source: ruleSource, version } = rule;
+      const latestAssetVersion = latestAssetSpecifiers.get(rule.rule_id);
+      if (isCustomizedExternalRule(ruleSource) && version === latestAssetVersion) {
+        await detectionRulesClient.updateRule({ ruleUpdate: rule });
+      }
+    })
+  );
 };
 
 function isCustomizedExternalRule(
