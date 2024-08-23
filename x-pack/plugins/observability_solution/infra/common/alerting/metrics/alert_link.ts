@@ -157,7 +157,8 @@ export const getMetricsViewInAppUrl = ({
   if (supportedAssetType) {
     const assetId = fields[findInventoryModel(supportedAssetType).fields.id];
 
-    // Pathological case found within tests. If no assetId, just redirect.
+    // A supported asset type can still return no id. In such a case, we can't
+    // generate a valid link, so we redirect to Metrics Explorer.
     if (!assetId) {
       return metricsExplorerLocator.getRedirectUrl({});
     }
