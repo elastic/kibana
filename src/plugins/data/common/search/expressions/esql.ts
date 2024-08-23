@@ -9,20 +9,26 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import { i18n } from '@kbn/i18n';
-import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
+import type {
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+  ISearchGeneric,
+} from '@kbn/search-types';
 import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { getStartEndParams } from '@kbn/esql-utils';
-
 import { zipObject } from 'lodash';
-import { Observable, defer, throwError } from 'rxjs';
-import { catchError, map, switchMap, tap } from 'rxjs';
+import { catchError, defer, map, Observable, switchMap, tap, throwError } from 'rxjs';
 import { buildEsQuery } from '@kbn/es-query';
-import type { ISearchGeneric } from '@kbn/search-types';
-import type { ESQLSearchResponse, ESQLSearchParams } from '@kbn/es-types';
+import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import { getEsQueryConfig } from '../../es_query';
 import { getTime } from '../../query';
-import { ESQL_ASYNC_SEARCH_STRATEGY, KibanaContext, ESQL_TABLE_TYPE } from '..';
+import {
+  ESQL_ASYNC_SEARCH_STRATEGY,
+  ESQL_TABLE_TYPE,
+  isRunningResponse,
+  type KibanaContext,
+} from '..';
 import { UiSettingsCommon } from '../..';
 
 type Input = KibanaContext | null;
@@ -222,7 +228,9 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
               return throwError(() => error);
             }),
             tap({
-              next({ rawResponse, requestParams }) {
+              next(response) {
+                if (isRunningResponse(response)) return;
+                const { rawResponse, requestParams } = response;
                 logInspectorRequest()
                   .stats({
                     hits: {
