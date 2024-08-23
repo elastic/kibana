@@ -7,6 +7,7 @@
 
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { FindActionResult } from '@kbn/actions-plugin/server';
+import { DynamicSettingsAttributes } from '../../runtime_types/settings';
 import { savedObjectsAdapter } from '../../saved_objects';
 import { populateAlertActions } from '../../../common/rules/alert_actions';
 import {
@@ -19,12 +20,12 @@ import {
   SYNTHETICS_STATUS_RULE,
   SYNTHETICS_TLS_RULE,
 } from '../../../common/constants/synthetics_alerts';
-
-type DefaultRuleType = typeof SYNTHETICS_STATUS_RULE | typeof SYNTHETICS_TLS_RULE;
+import { DefaultRuleType } from '../../../common/types/default_alerts';
 export class DefaultAlertService {
   context: UptimeRequestHandlerContext;
   soClient: SavedObjectsClientContract;
   server: SyntheticsServerSetup;
+  settings?: DynamicSettingsAttributes;
 
   constructor(
     context: UptimeRequestHandlerContext,
@@ -36,7 +37,16 @@ export class DefaultAlertService {
     this.soClient = soClient;
   }
 
+  async getSettings() {
+    if (!this.settings) {
+      this.settings = await savedObjectsAdapter.getSyntheticsDynamicSettings(this.soClient);
+    }
+    return this.settings;
+  }
+
   async setupDefaultAlerts() {
+    this.settings = await this.getSettings();
+
     const [statusRule, tlsRule] = await Promise.allSettled([
       this.setupStatusRule(),
       this.setupTlsRule(),
@@ -50,12 +60,15 @@ export class DefaultAlertService {
     }
 
     return {
-      statusRule: statusRule.status === 'fulfilled' ? statusRule.value : null,
-      tlsRule: tlsRule.status === 'fulfilled' ? tlsRule.value : null,
+      statusRule: statusRule.status === 'fulfilled' && statusRule.value ? statusRule.value : null,
+      tlsRule: tlsRule.status === 'fulfilled' && tlsRule.value ? tlsRule.value : null,
     };
   }
 
   setupStatusRule() {
+    if (this.settings?.defaultStatusRuleEnabled === false) {
+      return;
+    }
     return this.createDefaultAlertIfNotExist(
       SYNTHETICS_STATUS_RULE,
       `Synthetics status internal rule`,
@@ -64,6 +77,9 @@ export class DefaultAlertService {
   }
 
   setupTlsRule() {
+    if (this.settings?.defaultTLSRuleEnabled === false) {
+      return;
+    }
     return this.createDefaultAlertIfNotExist(
       SYNTHETICS_TLS_RULE,
       `Synthetics internal TLS rule`,
@@ -78,7 +94,7 @@ export class DefaultAlertService {
       options: {
         page: 1,
         perPage: 1,
-        filter: `alert.attributes.alertTypeId:(${ruleType})`,
+        filter: `alert.attributes.alertTypeId:(${ruleType}) AND alert.attributes.tags:"SYNTHETICS_DEFAULT_ALERT"`,
       },
     });
 
@@ -88,6 +104,7 @@ export class DefaultAlertService {
     const { actions = [], systemActions = [], ...alert } = data[0];
     return { ...alert, actions: [...actions, ...systemActions], ruleTypeId: alert.alertTypeId };
   }
+
   async createDefaultAlertIfNotExist(ruleType: DefaultRuleType, name: string, interval: string) {
     const alert = await this.getExistingAlert(ruleType);
     if (alert) {
@@ -121,11 +138,30 @@ export class DefaultAlertService {
     };
   }
 
-  updateStatusRule() {
-    return this.updateDefaultAlert(SYNTHETICS_STATUS_RULE, `Synthetics status internal rule`, '1m');
+  async updateStatusRule(enabled?: boolean) {
+    if (enabled) {
+      return this.updateDefaultAlert(
+        SYNTHETICS_STATUS_RULE,
+        `Synthetics status internal rule`,
+        '1m'
+      );
+    } else {
+      const rulesClient = (await this.context.alerting)?.getRulesClient();
+      await rulesClient.bulkDeleteRules({
+        filter: `alert.attributes.alertTypeId:"${SYNTHETICS_STATUS_RULE}" AND alert.attributes.tags:"SYNTHETICS_DEFAULT_ALERT"`,
+      });
+    }
   }
-  updateTlsRule() {
-    return this.updateDefaultAlert(SYNTHETICS_TLS_RULE, `Synthetics internal TLS rule`, '1m');
+
+  async updateTlsRule(enabled?: boolean) {
+    if (enabled) {
+      return this.updateDefaultAlert(SYNTHETICS_TLS_RULE, `Synthetics internal TLS rule`, '1m');
+    } else {
+      const rulesClient = (await this.context.alerting)?.getRulesClient();
+      await rulesClient.bulkDeleteRules({
+        filter: `alert.attributes.alertTypeId:"${SYNTHETICS_TLS_RULE}" AND alert.attributes.tags:"SYNTHETICS_DEFAULT_ALERT"`,
+      });
+    }
   }
 
   async updateDefaultAlert(ruleType: DefaultRuleType, name: string, interval: string) {
@@ -195,14 +231,15 @@ export class DefaultAlertService {
 
   async getActionConnectors() {
     const actionsClient = (await this.context.actions)?.getActionsClient();
-
-    const settings = await savedObjectsAdapter.getSyntheticsDynamicSettings(this.soClient);
+    if (!this.settings) {
+      this.settings = await savedObjectsAdapter.getSyntheticsDynamicSettings(this.soClient);
+    }
     let actionConnectors: FindActionResult[] = [];
     try {
       actionConnectors = await actionsClient.getAll();
     } catch (e) {
       this.server.logger.error(e);
     }
-    return { actionConnectors, settings };
+    return { actionConnectors, settings: this.settings };
   }
 }
