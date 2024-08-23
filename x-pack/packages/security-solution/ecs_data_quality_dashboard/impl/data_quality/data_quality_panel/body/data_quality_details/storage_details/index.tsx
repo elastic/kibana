@@ -5,38 +5,23 @@
  * 2.0.
  */
 
-import type { PartialTheme, Theme } from '@elastic/charts';
 import React, { useCallback, useMemo } from 'react';
 
+import { useResultsRollupContext } from '../../../../contexts/results_rollup_context';
 import { getFlattenedBuckets } from './helpers';
 import { StorageTreemap } from '../../../storage_treemap';
-import { DEFAULT_MAX_CHART_HEIGHT, StorageTreemapContainer } from '../../../tabs/styles';
-import { PatternRollup, SelectedIndex } from '../../../../types';
+import { DEFAULT_MAX_CHART_HEIGHT } from '../../../tabs/styles';
+import { SelectedIndex } from '../../../../types';
 import { useDataQualityContext } from '../../../data_quality_context';
 import { DOCS_UNIT } from './translations';
 
 export interface Props {
-  formatBytes: (value: number | undefined) => string;
-  formatNumber: (value: number | undefined) => string;
-  ilmPhases: string[];
   onIndexSelected: ({ indexName, pattern }: SelectedIndex) => void;
-  patternRollups: Record<string, PatternRollup>;
-  patterns: string[];
-  theme?: PartialTheme;
-  baseTheme: Theme;
 }
 
-const StorageDetailsComponent: React.FC<Props> = ({
-  formatBytes,
-  formatNumber,
-  ilmPhases,
-  onIndexSelected,
-  patternRollups,
-  patterns,
-  theme,
-  baseTheme,
-}) => {
-  const { isILMAvailable } = useDataQualityContext();
+const StorageDetailsComponent: React.FC<Props> = ({ onIndexSelected }) => {
+  const { patternRollups } = useResultsRollupContext();
+  const { isILMAvailable, ilmPhases, formatBytes, formatNumber } = useDataQualityContext();
 
   const flattenedBuckets = useMemo(
     () =>
@@ -55,19 +40,16 @@ const StorageDetailsComponent: React.FC<Props> = ({
   );
 
   return (
-    <StorageTreemapContainer data-test-subj="storageDetails">
+    <div data-test-subj="storageDetails">
       <StorageTreemap
         accessor={accessor}
-        baseTheme={baseTheme}
         flattenedBuckets={flattenedBuckets}
         maxChartHeight={DEFAULT_MAX_CHART_HEIGHT}
         onIndexSelected={onIndexSelected}
         patternRollups={patternRollups}
-        patterns={patterns}
-        theme={theme}
         valueFormatter={valueFormatter}
       />
-    </StorageTreemapContainer>
+    </div>
   );
 };
 
