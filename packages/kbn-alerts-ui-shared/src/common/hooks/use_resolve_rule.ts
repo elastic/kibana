@@ -25,7 +25,15 @@ export const useResolveRule = (props: UseResolveProps) => {
     }
   };
 
-  const { data, isSuccess, isFetching, isLoading, isInitialLoading, isError, error } = useQuery({
+  const {
+    data,
+    isSuccess,
+    isFetchingRuleSources: isFetching,
+    isLoading,
+    isInitialLoading,
+    isError,
+    error,
+  } = useQuery({
     queryKey: ['useResolveRule', id],
     queryFn,
     enabled: !!id,

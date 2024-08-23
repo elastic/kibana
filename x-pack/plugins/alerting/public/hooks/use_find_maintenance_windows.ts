@@ -38,7 +38,7 @@ export const useFindMaintenanceWindows = (props?: UseFindMaintenanceWindowsProps
 
   const {
     isLoading,
-    isFetching,
+    isFetchingRuleSources: isFetching,
     data = [],
     refetch,
   } = useQuery({

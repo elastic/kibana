@@ -59,7 +59,9 @@ import {
   RuleSignatureId,
   IsRuleImmutable,
   RuleSource,
+  RuleRevision,
   RequiredFieldArray,
+  RepositoryId,
   RuleQuery,
   IndexPatternArray,
   DataViewId,
@@ -165,7 +167,7 @@ export const ResponseFields = z.object({
   updated_by: z.string(),
   created_at: z.string().datetime(),
   created_by: z.string(),
-  revision: z.number().int().min(0),
+  revision: RuleRevision,
   required_fields: RequiredFieldArray,
   execution_summary: RuleExecutionSummary.optional(),
 });
@@ -174,6 +176,7 @@ export type SharedCreateProps = z.infer<typeof SharedCreateProps>;
 export const SharedCreateProps = BaseCreateProps.merge(
   z.object({
     rule_id: RuleSignatureId.optional(),
+    respository_id: RepositoryId.optional(),
   })
 );
 

@@ -1,0 +1,56 @@
+openapi: 3.0.0
+info:
+  title: Publish Prebuilt Rules API endpoint
+  version: '1'
+paths:
+  /internal/detection_engine/prebuilt_rules/_publish:
+    post:
+      x-labels: [ess]
+      x-codegen-enabled: true
+      operationId: PublishPrebuiltRules
+      summary: Publish Prebuilt Rules
+      description: Publish any local changes to the prebuilt rules to their respective rule repositories
+      tags:
+        - Prebuilt Rules API
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                rules:
+                  type: array
+                  description: The list of rules to publish
+                  items:
+                    $ref: '#/components/schemas/RuleToPublish'
+              required:
+                - rules
+        required: true
+      responses:
+        200:
+          description: Indicates a successful call
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  published_rules:
+                    type: array
+                    description: The list of published rules
+                    items:
+                      $ref: '../../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/RuleResponse'
+                required:
+                  - packages
+
+components:
+  schemas:
+    RuleToPublish:
+      type: object
+      properties:
+        rule_id:
+          $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleSignatureId'
+        revision:
+          $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleRevision'
+      required:
+        - rule_id
+        - revision

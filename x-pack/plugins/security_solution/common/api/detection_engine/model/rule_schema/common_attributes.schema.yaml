@@ -26,6 +26,11 @@ components:
       minimum: 1
       description: The rule's version number.
 
+    RuleRevision:
+      type: integer
+      minimum: 0
+      description: The rule's revision number.
+
     QueryLanguage:
       type: string
       enum:
@@ -60,6 +65,10 @@ components:
       required:
         - type
 
+    RepositoryId:
+      type: string
+      description: The name of the repository where the rule is stored.
+
     ExternalRuleSource:
       description: Type of rule source for externally sourced rules, i.e. rules that have an external source, such as the Elastic Prebuilt rules repo.
       type: object
@@ -70,6 +79,8 @@ components:
             - external
         is_customized:
           $ref: '#/components/schemas/IsExternalRuleCustomized'
+        repository_id:
+           $ref: '#/components/schemas/RepositoryId'
       required:
         - type
         - is_customized

@@ -1,0 +1,27 @@
+openapi: 3.0.0
+info:
+  title: Create External Rule Source API endpoint
+  version: '1'
+paths:
+  /internal/detection_engine/external_rule_sources/_create:
+    post:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: CreateExternalRuleSource
+      summary: Create External Rule Source
+      description: Create a new external rule source
+      tags:
+        - External Rule Sources API
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '../model/external_rule_source.schema.yaml#/components/schemas/ExternalRuleSourceInput'
+        required: true
+      responses:
+        200:
+          description: Indicates a successful call
+          content:
+            application/json:
+              schema:
+                $ref: '../model/external_rule_source.schema.yaml#/components/schemas/ExternalRuleSourceOutput'

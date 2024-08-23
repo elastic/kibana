@@ -21,7 +21,15 @@ export const useLoadAlertingFrameworkHealth = (props: UseLoadAlertingFrameworkHe
     return fetchAlertingFrameworkHealth({ http });
   };
 
-  const { data, isSuccess, isFetching, isLoading, isInitialLoading, isError, error } = useQuery({
+  const {
+    data,
+    isSuccess,
+    isFetchingRuleSources: isFetching,
+    isLoading,
+    isInitialLoading,
+    isError,
+    error,
+  } = useQuery({
     queryKey: ['useLoadAlertingFrameworkHealth'],
     queryFn,
     refetchOnWindowFocus: false,

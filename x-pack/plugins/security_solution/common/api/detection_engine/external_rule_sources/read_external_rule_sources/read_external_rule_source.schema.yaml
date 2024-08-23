@@ -1,0 +1,66 @@
+openapi: 3.0.0
+info:
+  title: Read External Rule Sources API endpoint
+  version: '1'
+paths:
+  /internal/detection_engine/external_rule_sources/_find:
+    post:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: ReadExternalRuleSource
+      summary: Read External Rule Source
+      description: Read a new external rule source
+      tags:
+        - External Rule Sources API
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                page:
+                  description: The page number to return
+                  type: integer
+                  minimum: 1
+                  default: 1
+                perPage:
+                  description: The number of items to return per page
+                  type: integer
+                  minimum: 1
+                  maximum: 100
+                  default: 20
+                filter:
+                  type: object
+                  properties:
+                    type:
+                      description: The type of the external rule source
+                      type: string
+                    ids:
+                      description: The unique identifiers of the external rule sources
+                      type: array
+                      items:
+                        type: string
+      responses:
+        200:
+          description: Indicates a successful call
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '../model/external_rule_source.schema.yaml#/components/schemas/ExternalRuleSourceOutput'
+                  total:
+                    type: integer
+                    minimum: 0
+                  page:
+                    type: integer
+                    minimum: 1
+                  perPage:
+                    type: integer
+                    minimum: 1
+                    maximum: 100
+                required:
+                  - results

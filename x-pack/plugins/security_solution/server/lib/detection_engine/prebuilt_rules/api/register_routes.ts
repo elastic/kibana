@@ -15,6 +15,7 @@ import { reviewRuleUpgradeRoute } from './review_rule_upgrade/review_rule_upgrad
 import { performRuleInstallationRoute } from './perform_rule_installation/perform_rule_installation_route';
 import { performRuleUpgradeRoute } from './perform_rule_upgrade/perform_rule_upgrade_route';
 import { bootstrapPrebuiltRulesRoute } from './bootstrap_prebuilt_rules/bootstrap_prebuilt_rules';
+import { publishPrebuiltRulesRoute } from './publish_prebuilt_rules/publish_prebuilt_rules';
 
 export const registerPrebuiltRulesRoutes = (router: SecuritySolutionPluginRouter) => {
   // Legacy endpoints that we're going to deprecate
@@ -28,4 +29,5 @@ export const registerPrebuiltRulesRoutes = (router: SecuritySolutionPluginRouter
   reviewRuleInstallationRoute(router);
   reviewRuleUpgradeRoute(router);
   bootstrapPrebuiltRulesRoute(router);
+  publishPrebuiltRulesRoute(router);
 };

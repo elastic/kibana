@@ -193,7 +193,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     const { appClientFactory, productFeaturesService, pluginContext, config, logger } = this;
     const experimentalFeatures = config.experimentalFeatures;
 
-    initSavedObjects(core.savedObjects);
+    initSavedObjects(core.savedObjects, plugins.encryptedSavedObjects);
     initUiSettings(core.uiSettings, experimentalFeatures, config.enableUiSettingsValidations);
     productFeaturesService.init(plugins.features);
 

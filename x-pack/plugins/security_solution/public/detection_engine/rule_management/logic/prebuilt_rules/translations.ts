@@ -58,3 +58,16 @@ export const UPGRADE_RULE_FAILED = (failed: number) =>
     defaultMessage: '{failed, plural, one {# rule} other {# rules}} failed to update.',
     values: { failed },
   });
+
+export const PUBLISH_RULES_FAILED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.prebuiltRules.toast.publishRulesFailed',
+  {
+    defaultMessage: 'Rule publishing failed. Please try again.',
+  }
+);
+
+export const PUBLISH_RULES_SUCCESS = (succeeded: number) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.prebuiltRules.toast.publishRulesSuccess', {
+    defaultMessage: '{succeeded, plural, one {# rule} other {# rules}} published successfully.',
+    values: { succeeded },
+  });

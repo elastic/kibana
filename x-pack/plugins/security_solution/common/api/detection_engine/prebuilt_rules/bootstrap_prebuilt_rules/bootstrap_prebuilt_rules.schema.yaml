@@ -25,6 +25,8 @@ paths:
                     description: The list of packages that were installed or upgraded
                     items:
                       $ref: '#/components/schemas/PackageInstallStatus'
+                  repositories:
+                    $ref: '#/components/schemas/RepositoryInstallStatus'
                 required:
                   - packages
 
@@ -49,3 +51,25 @@ components:
         - name
         - version
         - status
+    RepositoryInstallStatus:
+      description: Status of repositories containing external rules
+      type: object
+      properties:
+        updated:
+          type: array
+          items:
+            type: object
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              error:
+                type: string
+              filename:
+                type: string
+            required:
+              - error
+      required:
+        - updated
+        - errors

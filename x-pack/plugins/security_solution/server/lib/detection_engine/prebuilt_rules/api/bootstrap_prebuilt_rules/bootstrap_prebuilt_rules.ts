@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { IKibanaResponse } from '@kbn/core/server';
 import { BOOTSTRAP_PREBUILT_RULES_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { BootstrapPrebuiltRulesResponse } from '../../../../../../common/api/detection_engine/prebuilt_rules/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
@@ -15,8 +15,14 @@ import {
   installEndpointPackage,
   installPrebuiltRulesPackage,
 } from '../install_prebuilt_rules_and_timelines/install_prebuilt_rules_package';
+import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
+import { getExternalPrebuiltRuleAssets } from '../../logic/rule_assets/fetch_external_prebuilt_rule_assets';
+import { createExternalRuleSourcesClient } from '../../../external_rule_sources/logic/external_rule_sources_client';
 
-export const bootstrapPrebuiltRulesRoute = (router: SecuritySolutionPluginRouter) => {
+export const bootstrapPrebuiltRulesRoute = (
+  router: SecuritySolutionPluginRouter,
+  logger: Logger
+) => {
   router.versioned
     .post({
       access: 'internal',
@@ -34,8 +40,16 @@ export const bootstrapPrebuiltRulesRoute = (router: SecuritySolutionPluginRouter
         const siemResponse = buildSiemResponse(response);
 
         try {
-          const ctx = await context.resolve(['securitySolution']);
+          const ctx = await context.resolve(['securitySolution', 'core', 'alerting']);
+          const savedObjectsClient = ctx.core.savedObjects.client;
+          const savedObjectsImporter = ctx.core.savedObjects.getImporter(savedObjectsClient);
           const securityContext = ctx.securitySolution;
+          const rulesClient = ctx.alerting.getRulesClient();
+          const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
+          const detectionRulesClient = securityContext.getDetectionRulesClient();
+          const externalRuleSourceClient = createExternalRuleSourcesClient({
+            savedObjectsClient,
+          });
           const config = securityContext.getConfig();
 
           const results = await Promise.all([
@@ -43,12 +57,25 @@ export const bootstrapPrebuiltRulesRoute = (router: SecuritySolutionPluginRouter
             installEndpointPackage(config, securityContext),
           ]);
 
+          const { updated, errors } = await getExternalPrebuiltRuleAssets({
+            externalRuleSourceClient,
+            savedObjectsClient,
+            savedObjectsImporter,
+            detectionRulesClient,
+            ruleObjectsClient,
+            logger,
+          });
+
           const responseBody: BootstrapPrebuiltRulesResponse = {
             packages: results.map((result) => ({
               name: result.package.name,
               version: result.package.version,
               status: result.status,
             })),
+            repositories: {
+              updated,
+              errors,
+            },
           };
 
           return response.ok({

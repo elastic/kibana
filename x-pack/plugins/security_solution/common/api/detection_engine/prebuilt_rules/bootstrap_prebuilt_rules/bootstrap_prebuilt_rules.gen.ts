@@ -32,10 +32,25 @@ export const PackageInstallStatus = z.object({
   status: z.enum(['installed', 'already_installed']),
 });
 
+/**
+ * Status of repositories containing external rules
+ */
+export type RepositoryInstallStatus = z.infer<typeof RepositoryInstallStatus>;
+export const RepositoryInstallStatus = z.object({
+  updated: z.array(z.object({})),
+  errors: z.array(
+    z.object({
+      error: z.string(),
+      filename: z.string().optional(),
+    })
+  ),
+});
+
 export type BootstrapPrebuiltRulesResponse = z.infer<typeof BootstrapPrebuiltRulesResponse>;
 export const BootstrapPrebuiltRulesResponse = z.object({
   /**
    * The list of packages that were installed or upgraded
    */
   packages: z.array(PackageInstallStatus),
+  repositories: RepositoryInstallStatus.optional(),
 });

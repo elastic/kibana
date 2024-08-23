@@ -7,6 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type {
+  RepositoryId,
   RuleCreateProps,
   RuleSource,
   TypeSpecificCreateProps,
@@ -54,16 +55,20 @@ export function applyRuleDefaults(rule: RuleCreateProps & { immutable?: boolean 
     ...typeSpecificParams,
     rule_id: rule.rule_id ?? uuidv4(),
     immutable,
-    rule_source: convertImmutableToRuleSource(immutable),
+    rule_source: convertImmutableToRuleSource(immutable, rule.repository_id),
     required_fields: addEcsToRequiredFields(rule.required_fields),
   };
 }
 
-const convertImmutableToRuleSource = (immutable: boolean): RuleSource => {
+const convertImmutableToRuleSource = (
+  immutable: boolean,
+  repositoryId?: RepositoryId
+): RuleSource => {
   if (immutable) {
     return {
       type: 'external',
       is_customized: false,
+      repository_id: repositoryId,
     };
   }
 

@@ -345,6 +345,7 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
         id,
         version,
         overwrite: true,
+        refresh: true,
         references: extractedReferences,
       },
     });

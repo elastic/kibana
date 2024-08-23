@@ -78,7 +78,14 @@ export const useLoadRuleTypesQuery = ({
       );
     }
   };
-  const { data, isSuccess, isFetching, isInitialLoading, isLoading, error } = useQuery({
+  const {
+    data,
+    isSuccess,
+    isFetchingRuleSources: isFetching,
+    isInitialLoading,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['loadRuleTypes'],
     queryFn,
     onError: onErrorFn,

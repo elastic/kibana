@@ -126,3 +126,10 @@ export const RELOAD_MISSING_PREPACKAGED_RULES_AND_TIMELINES = (
         'Install {missingRules} Elastic prebuilt {missingRules, plural, =1 {rule} other {rules}} and {missingTimelines} Elastic prebuilt {missingTimelines, plural, =1 {timeline} other {timelines}} ',
     }
   );
+
+export const PUBLISH_EXTERNAL_RULES = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.publishExternalRules',
+  {
+    defaultMessage: 'Publish rules',
+  }
+);
