@@ -20,8 +20,6 @@ export const useScheduleNowRiskEngineMutation = (options?: UseMutationOptions<{}
   const invalidateRiskEngineStatusQuery = useInvalidateRiskEngineStatusQuery();
   const { scheduleNowRiskEngine } = useEntityAnalyticsRoutes();
 
-  // TODO treat the error response on BE and FE
-  // | TaskManagerUnavailableResponse is it a valid error?
   return useMutation<RiskEngineScheduleNowResponse, { body: RiskEngineScheduleNowErrorResponse }>(
     () => scheduleNowRiskEngine(),
     {
