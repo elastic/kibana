@@ -27941,7 +27941,7 @@
         "label": "RegistrySearchResult",
         "description": [],
         "signature": [
-          "{ type?: \"input\" | \"integration\" | undefined; version: string; name: string; title: string; description: string; path: string; internal?: boolean | undefined; download: string; icons?: (",
+          "{ type?: \"input\" | \"integration\" | undefined; version: string; name: string; title: string; description: string; internal?: boolean | undefined; path: string; download: string; icons?: (",
           {
             "pluginId": "fleet",
             "scope": "common",
