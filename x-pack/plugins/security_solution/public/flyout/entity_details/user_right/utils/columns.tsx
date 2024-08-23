@@ -9,9 +9,9 @@ import { css } from '@emotion/react';
 import React from 'react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { DefaultFieldRenderer } from '../../field_renderers/default_renderer';
-import type { ManagedUsersTableColumns, ManagedUserTable } from './types';
-import * as i18n from './translations';
+import { DefaultFieldRenderer } from '../../../../timelines/components/field_renderers/default_renderer';
+import type { ManagedUsersTableColumns, ManagedUserTable } from '../types';
+import * as i18n from '../translations';
 import { defaultToEmptyTag } from '../../../../common/components/empty_value';
 
 const fieldColumn: EuiBasicTableColumn<ManagedUserTable> = {
@@ -40,7 +40,7 @@ export const getManagedUserTableColumns = (
     render: (value: ManagedUserTable['value'], { field }) => {
       return field && value ? (
         <DefaultFieldRenderer
-          rowItems={value.map((v) => value.toString())}
+          rowItems={value.map(() => value.toString())}
           attrName={field}
           idPrefix={contextID ? `managedUser-${contextID}` : 'managedUser'}
           isDraggable={isDraggable}

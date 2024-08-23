@@ -10,7 +10,7 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
 
-import { mockManagedUserData, mockOktaUserFields } from './__mocks__';
+import { mockManagedUserData, mockOktaUserFields } from '../mocks';
 import { ManagedUser } from './managed_user';
 
 describe('ManagedUser', () => {

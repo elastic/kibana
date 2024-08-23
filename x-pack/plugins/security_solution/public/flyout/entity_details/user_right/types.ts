@@ -6,8 +6,8 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import type { SearchTypes } from '../../../../../common/detection_engine/types';
-import type { ManagedUserHits } from '../../../../../common/search_strategy/security_solution/users/managed_details';
+import type { SearchTypes } from '../../../../common/detection_engine/types';
+import type { ManagedUserHits } from '../../../../common/search_strategy/security_solution/users/managed_details';
 
 export interface ManagedUserTable {
   value: SearchTypes[];

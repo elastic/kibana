@@ -6,8 +6,8 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import type { Integration } from '../../../../../../common/api/detection_engine/fleet_integrations';
-import { TestProviders } from '../../../../../common/mock';
+import type { Integration } from '../../../../../common/api/detection_engine';
+import { TestProviders } from '../../../../common/mock';
 import { ENTRA_ID_PACKAGE_NAME } from '../constants';
 import { useManagedUser } from './use_managed_user';
 
@@ -26,20 +26,17 @@ const mockUseIntegrations = jest.fn().mockReturnValue({
   data: [],
 });
 
-jest.mock(
-  '../../../../../detections/components/rules/related_integrations/use_integrations',
-  () => ({
-    useIntegrations: () => mockUseIntegrations(),
-  })
-);
+jest.mock('../../../../detections/components/rules/related_integrations/use_integrations', () => ({
+  useIntegrations: () => mockUseIntegrations(),
+}));
 
-jest.mock('../../../../../common/hooks/use_space_id', () => ({
+jest.mock('../../../../common/hooks/use_space_id', () => ({
   useSpaceId: () => 'test-space-id',
 }));
 
 const mockUseIsExperimentalFeatureEnabled = jest.fn().mockReturnValue(true);
 
-jest.mock('../../../../../common/hooks/use_experimental_features', () => ({
+jest.mock('../../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: () => mockUseIsExperimentalFeatureEnabled(),
 }));
 
@@ -57,7 +54,7 @@ const useSearchStrategyDefaultResponse = {
 
 const mockUseSearchStrategy = jest.fn().mockReturnValue(useSearchStrategyDefaultResponse);
 
-jest.mock('../../../../../common/containers/use_search_strategy', () => ({
+jest.mock('../../../../common/containers/use_search_strategy', () => ({
   useSearchStrategy: () => mockUseSearchStrategy(),
 }));
 
