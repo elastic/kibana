@@ -18,7 +18,10 @@ import { dataTypes } from '../../../common/constants';
 
 import { getDataStreamPrivileges } from './package_policies_to_agent_permissions';
 
-function buildDefault(enabled: { logs: boolean; metrics: boolean; traces: boolean }, namespace: string) {
+function buildDefault(
+  enabled: { logs: boolean; metrics: boolean; traces: boolean },
+  namespace: string
+) {
   let names: string[] = [];
   if (enabled.logs) {
     names = names.concat(
@@ -58,7 +61,7 @@ function buildDefault(enabled: { logs: boolean; metrics: boolean; traces: boolea
 
 export async function getMonitoringPermissions(
   soClient: SavedObjectsClientContract,
-  enabled: { logs: boolean; metrics: boolean, traces: boolean },
+  enabled: { logs: boolean; metrics: boolean; traces: boolean },
   namespace: string
 ): Promise<FullAgentPolicyOutputPermissions> {
   const installation = await getInstallation({
