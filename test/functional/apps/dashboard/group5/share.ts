@@ -154,7 +154,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('pinned filter should show up only in global state', async () => {
-          pinnedFilterIsWhenDashboardInGlobalState(mode);
+          await pinnedFilterIsWhenDashboardInGlobalState(mode);
         });
       });
 
@@ -182,7 +182,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('pinned filter should show up only in global state', async () => {
-          pinnedFilterIsWhenDashboardInGlobalState(mode);
+          await pinnedFilterIsWhenDashboardInGlobalState(mode);
         });
       });
     });
