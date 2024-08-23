@@ -12,6 +12,7 @@ import {
   MAX_FILE_SIZE,
   MAX_FILE_SIZE_BYTES,
   UI_SETTING_MAX_FILE_SIZE,
+  MAX_TIKA_FILE_SIZE_BYTES,
 } from '../../common/constants';
 import { getUiSettings } from '../kibana_services';
 
@@ -27,4 +28,12 @@ export function getMaxBytes() {
 
 export function getMaxBytesFormatted() {
   return numeral(getMaxBytes()).format(FILE_SIZE_DISPLAY_FORMAT);
+}
+
+export function getMaxTikaBytes() {
+  return MAX_TIKA_FILE_SIZE_BYTES;
+}
+
+export function getMaxTikaBytesFormatted() {
+  return numeral(getMaxTikaBytes()).format(FILE_SIZE_DISPLAY_FORMAT);
 }
