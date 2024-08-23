@@ -98,7 +98,6 @@ import { redisenterpriseMetricsSpecProvider } from './redisenterprise_metrics';
 import { santaLogsSpecProvider } from './santa_logs';
 import { sonicwallLogsSpecProvider } from './sonicwall_logs';
 import { sophosLogsSpecProvider } from './sophos_logs';
-import { squidLogsSpecProvider } from './squid_logs';
 import { stanMetricsSpecProvider } from './stan_metrics';
 import { statsdMetricsSpecProvider } from './statsd_metrics';
 import { suricataLogsSpecProvider } from './suricata_logs';
@@ -223,7 +222,6 @@ export const builtInTutorials = [
   santaLogsSpecProvider,
   sonicwallLogsSpecProvider,
   sophosLogsSpecProvider,
-  squidLogsSpecProvider,
   tomcatLogsSpecProvider,
   zscalerLogsSpecProvider,
 ];

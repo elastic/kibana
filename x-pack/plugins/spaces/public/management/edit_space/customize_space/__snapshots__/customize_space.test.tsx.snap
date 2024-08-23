@@ -3,7 +3,6 @@
 exports[`renders correctly 1`] = `
 <SectionPanel
   dataTestSubj="generalPanel"
-  title="General"
 >
   <EuiDescribedFormGroup
     description="Give your space a name that's memorable."
