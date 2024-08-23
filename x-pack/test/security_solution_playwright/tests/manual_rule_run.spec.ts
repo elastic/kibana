@@ -20,8 +20,9 @@ test.beforeAll(async ({ esArchiver }) => {
   await esArchiver.loadIfNeeded('auditbeat_single');
 });
 
-test.describe('Manual rule run', { tag: ['@ess'] }, () => {
+test.describe('Manual rule run', { tag: ['@ess', '@serverless'] }, () => {
   test.use({ storageState: '.auth/user.json' });
+
   test.beforeEach(async ({ request }) => {
     await deleteAllRules(request);
     await deleteAllSecurityDocuments(request);

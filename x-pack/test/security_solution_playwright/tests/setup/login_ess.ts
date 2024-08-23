@@ -11,8 +11,10 @@ import { test } from '../../fixtures/saml';
 export const authFile = '.auth/user.json';
 
 test('login', { tag: '@ess' }, async ({ request }) => {
+  const headers = await getCommonHeaders();
+
   await request.post(`${process.env.KIBANA_URL}/internal/security/login`, {
-    headers: getCommonHeaders(),
+    headers,
     data: {
       providerType: 'basic',
       providerName: 'basic',

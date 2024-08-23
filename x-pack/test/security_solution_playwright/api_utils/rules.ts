@@ -27,21 +27,23 @@ const indexes = [
 
 export const createRule = async (request: APIRequestContext) => {
   const data = getRuleForAlertTesting(indexes);
+  const headers = await getCommonHeadersWithApiVersion();
   const response = await request.post(DETECTION_ENGINE_RULES_URL, {
     data,
-    headers: getCommonHeadersWithApiVersion(),
+    headers,
   });
 
   return await response.json();
 };
 
 export const deleteAllRules = async (request: APIRequestContext) => {
+  const headers = await getCommonHeadersWithApiVersion();
   const response = await request.post(DETECTION_ENGINE_RULES_BULK_ACTION, {
     data: {
       query: '',
       action: 'delete',
     },
-    headers: getCommonHeadersWithApiVersion(),
+    headers,
   });
 
   return await response.json();

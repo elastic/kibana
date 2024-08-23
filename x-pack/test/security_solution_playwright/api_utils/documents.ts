@@ -10,15 +10,16 @@ import { getCommonHeaders } from './headers';
 
 export const deleteAllSecurityDocuments = async (request: APIRequestContext) => {
   const securityIndexes = `.lists-*,.items-*,.alerts-security.alerts-*`;
+  const headers = await getCommonHeaders();
 
   await request.post(`${process.env.ELASTICSEARCH_URL}/${securityIndexes}/_refresh`, {
-    headers: getCommonHeaders(),
+    headers,
   });
 
   await request.post(
     `${process.env.ELASTICSEARCH_URL}/${securityIndexes}/_delete_by_query?conflicts=proceed&scroll_size=10000&refresh`,
     {
-      headers: getCommonHeaders(),
+      headers,
       data: {
         query: {
           match_all: {},

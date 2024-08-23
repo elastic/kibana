@@ -17,12 +17,16 @@ test('serverless', { tag: '@serverless' }, async ({ samlSessionManager }) => {
   );
   const parsedUrl = new URL(process.env.KIBANA_URL!);
   const domain = parsedUrl.hostname;
+  const maxAge = 100 * 365 * 24 * 60 * 60;
 
   const authData = {
     cookies: [
       {
         name: 'sid',
         value: cookie,
+        expires: maxAge,
+        secure: false,
+        sameSite: 'Lax',
         domain,
         path: '/',
         httpOnly: true,

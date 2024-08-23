@@ -19,6 +19,7 @@ export default defineConfig({
   reporter: [['list', { printSteps: true }]],
   use: {
     trace: 'on-first-retry',
+    ignoreHTTPSErrors: true,
     baseURL: process.env.KIBANA_URL,
     bypassCSP: true,
     actionTimeout: 60000,
