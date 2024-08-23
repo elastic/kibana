@@ -19062,7 +19062,7 @@
         "label": "UnknownKeysParam",
         "description": [],
         "signature": [
-          "\"passthrough\" | \"strict\" | \"strip\""
+          "\"strict\" | \"passthrough\" | \"strip\""
         ],
         "path": "node_modules/zod/lib/types.d.ts",
         "deprecated": false,
