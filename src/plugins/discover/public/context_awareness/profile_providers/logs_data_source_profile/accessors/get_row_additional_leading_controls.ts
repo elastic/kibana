@@ -11,6 +11,8 @@ import type { DataSourceProfileProvider } from '../../../profiles';
 
 export const getRowAdditionalLeadingControls: DataSourceProfileProvider['profile']['getRowAdditionalLeadingControls'] =
   (prev) => (params) => {
+    console.log(params);
+
     const additionalControls = prev(params) || [];
 
     return [...additionalControls, createDegradedDocsControl(), createStacktraceControl()];
