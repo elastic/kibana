@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { services as kibanaFunctionalServices } from '@kbn/test-suites-src/functional/services';
 import { services as kibanaApiIntegrationServices } from '@kbn/test-suites-src/api_integration/services';
 import { services as kibanaXPackApiIntegrationServices } from '../../api_integration/services';
-import { services as commonServices } from '../../common/services';
+import { services as commonServicesPlus } from '../../common/services';
 import { ReportingFunctionalProvider } from '../../reporting_functional/services';
 
 import {
@@ -74,8 +73,7 @@ import { SloUiServiceProvider } from './slo';
 // available to your tests. If you don't specify anything here
 // only the built-in services will be available
 export const services = {
-  ...kibanaFunctionalServices,
-  ...commonServices,
+  ...commonServicesPlus,
 
   supertest: kibanaApiIntegrationServices.supertest,
   supertestWithoutAuth: kibanaXPackApiIntegrationServices.supertestWithoutAuth,
