@@ -416,6 +416,68 @@ describe('TaskScheduling', () => {
     });
   });
 
+  describe('disableWithOCC', () => {
+    const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
+    beforeEach(() => {
+      mockTaskStore.update.mockImplementation(() =>
+        Promise.resolve({ ...taskManagerMock.createTask({ id }), enabled: false })
+      );
+    });
+
+    test('resolves when the task update succeeds', async () => {
+      const task = taskManagerMock.createTask({ id });
+      mockTaskStore.get.mockResolvedValueOnce(task);
+
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+
+      const result = await taskScheduling.disableWithOCC(id);
+      expect(mockTaskStore.get).toHaveBeenCalledWith(id);
+
+      expect(mockTaskStore.update).toHaveBeenCalledWith(
+        { ...task, enabled: false },
+        { validate: false }
+      );
+
+      expect(result).toEqual({ ...task, enabled: false });
+    });
+
+    test('rejects when the task update fails', async () => {
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+
+      mockTaskStore.get.mockResolvedValueOnce(taskManagerMock.createTask({ id }));
+      mockTaskStore.update.mockRejectedValueOnce(500);
+
+      const result = taskScheduling.disableWithOCC(id);
+
+      await expect(result).rejects.toEqual(500);
+      expect(taskSchedulingOpts.logger.error).toHaveBeenCalledWith(
+        'Failed to disable the task (01ddff11-e88a-4d13-bc4e-256164e755e2)'
+      );
+    });
+
+    test('logs 409 conflict errors', async () => {
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+
+      mockTaskStore.get.mockResolvedValueOnce(taskManagerMock.createTask({ id }));
+      mockTaskStore.update.mockRejectedValueOnce({ statusCode: 409 });
+
+      await taskScheduling.disableWithOCC(id);
+
+      expect(taskSchedulingOpts.logger.debug).toHaveBeenCalledWith(
+        'Failed to disable the task (01ddff11-e88a-4d13-bc4e-256164e755e2) due to conflict (409)'
+      );
+    });
+
+    test('rejects when the task does not exist', async () => {
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+
+      mockTaskStore.get.mockRejectedValueOnce(404);
+
+      const result = taskScheduling.disableWithOCC(id);
+      await expect(result).rejects.toEqual(404);
+    });
+  });
+
   describe('bulkUpdateState', () => {
     const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
     beforeEach(() => {
