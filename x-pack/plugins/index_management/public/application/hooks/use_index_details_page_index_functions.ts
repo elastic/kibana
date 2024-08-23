@@ -13,20 +13,20 @@ import { loadIndex } from "../services";
 import { Error } from '../../shared_imports';
 
 export const useIndexDetailsFunctions = (indexName: string, search:string, history : RouteComponentProps['history']) => {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isIndicesLoading, setIsIndicesLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [index, setIndex] = useState<Index | null>();
 
   const fetchIndexDetails = useCallback(async () => {
     if (indexName) {
-      setIsLoading(true);
+      setIsIndicesLoading(true);
       try {
         const { data, error: loadingError } = await loadIndex(indexName);
-        setIsLoading(false);
+        setIsIndicesLoading(false);
         setError(loadingError);
         setIndex(data);
       } catch (e) {
-        setIsLoading(false);
+        setIsIndicesLoading(false);
         setError(e);
       }
     }
@@ -37,5 +37,5 @@ export const useIndexDetailsFunctions = (indexName: string, search:string, histo
     history.push(`/${Section.Indices}${paramsString ? '?' : ''}${paramsString}`);
   }, [history, search]);
 
-  return {isLoading, error, index, fetchIndexDetails, navigateToIndicesList}
+  return {isIndicesLoading, error, index, fetchIndexDetails, navigateToIndicesList}
 }

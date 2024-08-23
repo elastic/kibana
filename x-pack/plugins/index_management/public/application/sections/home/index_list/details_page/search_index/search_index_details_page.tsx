@@ -19,7 +19,7 @@ import {
   EuiIcon,
   EuiText,
 } from '@elastic/eui';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FunctionComponent } from 'react';
 import { RouteComponentProps } from 'react-router';
 import { i18n } from '@kbn/i18n';
@@ -29,26 +29,54 @@ import { DetailsPageError } from '../details_page_errors/details_page_error';
 import { useIndexDetailsFunctions } from '../../../../../hooks/use_index_details_page_index_functions';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DeleteIndexModal } from '../../index_delete_modal';
+import { deleteIndices } from '../../../../../../application/services';
+import { notificationService } from '../../../../../services/notification';
 
 export const SearchIndexDetailsPage: FunctionComponent<
   RouteComponentProps<{ indexName: string }>
 > = ({ location: { search }, history }) => {
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const indexName = queryParams.get('indexName') ?? '';
-  const { isLoading, error, index, fetchIndexDetails, navigateToIndicesList } =
+  const { isIndicesLoading, error, index, fetchIndexDetails, navigateToIndicesList } =
     useIndexDetailsFunctions(indexName, search, history);
 
   const [isShowingMoreOptionsPopover, setShowMoreOptionsPopover] = useState<boolean>(false);
   const [isShowingDeleteModal, setShowDeleteModal] = useState<boolean>(false);
+  const [isDeleteLoading, setDeleteLoading] = useState(false);
+
   useEffect(() => {
     fetchIndexDetails();
   }, [fetchIndexDetails]);
 
   const pageTitle = <>{index?.name}</>;
+  const indexNames: string[] = useMemo(() => {
+    return [indexName];
+  }, [indexName]);
+
+  const deleteIndex = useCallback(async () => {
+    if (indexName && indexNames.length > 0) {
+      setDeleteLoading(true);
+      try {
+        await deleteIndices(indexNames);
+        setDeleteLoading(false);
+        notificationService.showSuccessToast(
+          i18n.translate('xpack.idxMgmt.searchIndexDetails.indexDeletedMessage', {
+            defaultMessage: 'The index {indexName} was deleted.',
+            values: { indexNames: indexName },
+          })
+        );
+        navigateToIndicesList();
+      } catch (error) {
+        setDeleteLoading(false);
+        notificationService.showDangerToast(error.body.message);
+      }
+    }
+  }, [navigateToIndicesList, indexName]);
+
   if (!indexName) {
     return <DetailsPageEmptyIndexNameError />;
   }
-  if (isLoading && !index) {
+  if ((isIndicesLoading || isDeleteLoading) && !index) {
     return <DetailsPageLoading />;
   }
   if (error || !index) {
@@ -81,7 +109,7 @@ export const SearchIndexDetailsPage: FunctionComponent<
         data-test-subj="indexDetailsHeader"
         pageTitle={pageTitle}
         rightSideItems={
-          isLoading
+          isIndicesLoading || isDeleteLoading
             ? []
             : [
                 <EuiFlexGroup>
@@ -96,7 +124,7 @@ export const SearchIndexDetailsPage: FunctionComponent<
                           size="m"
                           iconType="boxesVertical"
                           aria-label={i18n.translate(
-                            'xpack.idxMgmt.searchIndexDetails.more.ariaLabel',
+                            'xpack.idxMgmt.searchIndexDetails.moreOptionsButton.ariaLabel',
                             {
                               defaultMessage: 'More options',
                             }
@@ -128,14 +156,21 @@ export const SearchIndexDetailsPage: FunctionComponent<
               ]
         }
       >
-        This is your very first Elasticsearch index. It stores the data you’d like to search.
+        <EuiText size="s">
+          {i18n.translate('xpack.idxMgmt.searchIndexDetails.description', {
+            defaultMessage:
+              'This is your very first Elasticsearch index. It stores the data you’d like to search.',
+          })}
+        </EuiText>
       </EuiPageHeader>
       <EuiSpacer size="l" />
       {isShowingDeleteModal && (
         <DeleteIndexModal
           onCancel={() => setShowDeleteModal(!isShowingDeleteModal)}
-          onConfirm={() => {}}
-          indexNames={[indexName]}
+          onConfirm={() => {
+            deleteIndex();
+          }}
+          indexNames={indexNames}
         />
       )}
       <div data-test-subj={`searchIndexDetailsContent`}></div>
