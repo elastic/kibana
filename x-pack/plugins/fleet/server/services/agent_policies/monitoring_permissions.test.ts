@@ -30,7 +30,7 @@ describe('getMonitoringPermissions', () => {
     it('should return default logs permissions if only logs are enabled', async () => {
       const permissions = await getMonitoringPermissions(
         savedObjectsClientMock.create(),
-        { logs: true, metrics: false, traces: false},
+        { logs: true, metrics: false, traces: false },
         'testnamespace123'
       );
       expect(permissions).toMatchSnapshot();
