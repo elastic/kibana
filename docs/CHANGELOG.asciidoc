@@ -100,7 +100,7 @@ For more information, refer to {kibana-pull}190590[#190590].
 [%collapsible]
 ====
 *Details* +
-One of the methods for configuring incoming webhooks in Microsoft Teams is being retired.
+The original method for configuring incoming webhooks in Microsoft Teams is being retired.
 Refer to https://devblogs.microsoft.com/microsoft365dev/retirement-of-office-365-connectors-within-microsoft-teams/[Retirement of Office 365 connectors within Microsoft Teams] and {kibana-issue}187823[#187823].
 
 *Impact* +
