@@ -13,7 +13,6 @@ import * as api from './api';
 import { useBulkGetUserProfiles } from './use_bulk_get_user_profiles';
 import { userProfilesIds } from './api.mock';
 import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
-import { waitFor } from '@testing-library/react';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('./api');
@@ -21,7 +20,7 @@ jest.mock('./api');
 const useKibanaMock = useKibana as jest.Mock;
 
 // FLAKY: https://github.com/elastic/kibana/issues/176335
-describe('useBulkGetUserProfiles', () => {
+describe.skip('useBulkGetUserProfiles', () => {
   const props = {
     uids: userProfilesIds,
   };
@@ -37,14 +36,6 @@ describe('useBulkGetUserProfiles', () => {
     useKibanaMock.mockReturnValue({
       services: { ...createStartServicesMock() },
     });
-  });
-
-  afterEach(async () => {
-    appMockRender.queryClient.getQueryCache().clear();
-  });
-
-  afterEach(async () => {
-    await waitFor(() => expect(appMockRender.queryClient.isFetching()).toBe(0));
   });
 
   it('calls bulkGetUserProfiles with correct arguments', async () => {

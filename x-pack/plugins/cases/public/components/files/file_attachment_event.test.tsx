@@ -17,33 +17,35 @@ import { basicFileMock } from '../../containers/mock';
 import { FileAttachmentEvent } from './file_attachment_event';
 
 // FLAKY: https://github.com/elastic/kibana/issues/174661
-describe('FileAttachmentEvent', () => {
-  let appMockRender: AppMockRenderer;
+for (let i = 0; i < 20; i++) {
+  describe('FileAttachmentEvent', () => {
+    let appMockRender: AppMockRenderer;
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-    appMockRender = createAppMockRenderer();
+    beforeEach(() => {
+      jest.clearAllMocks();
+      appMockRender = createAppMockRenderer();
+    });
+
+    afterEach(() => {
+      appMockRender.queryClient.getQueryCache().clear();
+    });
+
+    afterEach(async () => {
+      await waitFor(() => expect(appMockRender.queryClient.isFetching()).toBe(0));
+    });
+
+    it('renders clickable name', async () => {
+      appMockRender.render(
+        <FileAttachmentEvent file={basicFileMock as unknown as DownloadableFile} />
+      );
+
+      const nameLink = await screen.findByTestId('cases-files-name-link');
+
+      expect(nameLink).toBeInTheDocument();
+
+      userEvent.click(nameLink);
+
+      expect(await screen.findByTestId('cases-files-image-preview')).toBeInTheDocument();
+    });
   });
-
-  afterEach(async () => {
-    appMockRender.queryClient.getQueryCache().clear();
-  });
-
-  afterEach(async () => {
-    await waitFor(() => expect(appMockRender.queryClient.isFetching()).toBe(0));
-  });
-
-  it('renders clickable name', async () => {
-    appMockRender.render(
-      <FileAttachmentEvent file={basicFileMock as unknown as DownloadableFile} />
-    );
-
-    const nameLink = await screen.findByTestId('cases-files-name-link');
-
-    expect(nameLink).toBeInTheDocument();
-
-    userEvent.click(nameLink);
-
-    expect(await screen.findByTestId('cases-files-image-preview')).toBeInTheDocument();
-  });
-});
+}

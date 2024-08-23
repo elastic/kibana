@@ -17,51 +17,55 @@ import { basicFileMock } from '../../containers/mock';
 import { FilePreview } from './file_preview';
 
 // FLAKY: https://github.com/elastic/kibana/issues/182364
-describe('FilePreview', () => {
-  let appMockRender: AppMockRenderer;
+for (let i = 0; i < 20; i++) {
+  describe('FilePreview', () => {
+    let appMockRender: AppMockRenderer;
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-    appMockRender = createAppMockRenderer();
+    beforeEach(() => {
+      jest.clearAllMocks();
+      appMockRender = createAppMockRenderer();
+    });
+
+    afterEach(() => {
+      appMockRender.queryClient.getQueryCache().clear();
+    });
+
+    afterEach(async () => {
+      await waitFor(() => expect(appMockRender.queryClient.isFetching()).toBe(0));
+    });
+
+    it('FilePreview rendered correctly', async () => {
+      appMockRender.render(<FilePreview closePreview={jest.fn()} selectedFile={basicFileMock} />);
+
+      await waitFor(() =>
+        expect(appMockRender.getFilesClient().getDownloadHref).toHaveBeenCalledWith({
+          id: basicFileMock.id,
+          fileKind: constructFileKindIdByOwner(mockedTestProvidersOwner[0]),
+        })
+      );
+
+      expect(await screen.findByTestId('cases-files-image-preview')).toBeInTheDocument();
+    });
+
+    it('pressing escape calls closePreview', async () => {
+      const closePreview = jest.fn();
+
+      appMockRender.render(
+        <FilePreview closePreview={closePreview} selectedFile={basicFileMock} />
+      );
+
+      await waitFor(() =>
+        expect(appMockRender.getFilesClient().getDownloadHref).toHaveBeenCalledWith({
+          id: basicFileMock.id,
+          fileKind: constructFileKindIdByOwner(mockedTestProvidersOwner[0]),
+        })
+      );
+
+      expect(await screen.findByTestId('cases-files-image-preview')).toBeInTheDocument();
+
+      userEvent.keyboard('{esc}');
+
+      await waitFor(() => expect(closePreview).toHaveBeenCalled());
+    });
   });
-
-  afterEach(async () => {
-    appMockRender.queryClient.getQueryCache().clear();
-  });
-
-  afterEach(async () => {
-    await waitFor(() => expect(appMockRender.queryClient.isFetching()).toBe(0));
-  });
-
-  it('FilePreview rendered correctly', async () => {
-    appMockRender.render(<FilePreview closePreview={jest.fn()} selectedFile={basicFileMock} />);
-
-    await waitFor(() =>
-      expect(appMockRender.getFilesClient().getDownloadHref).toHaveBeenCalledWith({
-        id: basicFileMock.id,
-        fileKind: constructFileKindIdByOwner(mockedTestProvidersOwner[0]),
-      })
-    );
-
-    expect(await screen.findByTestId('cases-files-image-preview')).toBeInTheDocument();
-  });
-
-  it('pressing escape calls closePreview', async () => {
-    const closePreview = jest.fn();
-
-    appMockRender.render(<FilePreview closePreview={closePreview} selectedFile={basicFileMock} />);
-
-    await waitFor(() =>
-      expect(appMockRender.getFilesClient().getDownloadHref).toHaveBeenCalledWith({
-        id: basicFileMock.id,
-        fileKind: constructFileKindIdByOwner(mockedTestProvidersOwner[0]),
-      })
-    );
-
-    expect(await screen.findByTestId('cases-files-image-preview')).toBeInTheDocument();
-
-    userEvent.keyboard('{esc}');
-
-    await waitFor(() => expect(closePreview).toHaveBeenCalled());
-  });
-});
+}

@@ -16,68 +16,70 @@ import { CustomFieldTypes } from '../../../common/types/domain';
 import { FormFields } from './form_fields';
 
 // FLAKY: https://github.com/elastic/kibana/issues/188450
-describe('FormFields ', () => {
-  let appMockRender: AppMockRenderer;
-  const onSubmit = jest.fn();
+for (let i = 0; i < 20; i++) {
+  describe('FormFields ', () => {
+    let appMockRender: AppMockRenderer;
+    const onSubmit = jest.fn();
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-    appMockRender = createAppMockRenderer();
-  });
-
-  afterEach(async () => {
-    appMockRender.queryClient.getQueryCache().clear();
-  });
-
-  afterEach(async () => {
-    await waitFor(() => expect(appMockRender.queryClient.isFetching()).toBe(0));
-  });
-
-  it('renders correctly', async () => {
-    appMockRender.render(
-      <FormTestComponent onSubmit={onSubmit}>
-        <FormFields />
-      </FormTestComponent>
-    );
-
-    expect(await screen.findByTestId('custom-field-label-input')).toBeInTheDocument();
-    expect(await screen.findByTestId('custom-field-type-selector')).toBeInTheDocument();
-  });
-
-  it('disables field type selector on edit mode', async () => {
-    appMockRender.render(
-      <FormTestComponent onSubmit={onSubmit}>
-        <FormFields isEditMode />
-      </FormTestComponent>
-    );
-
-    expect(await screen.findByTestId('custom-field-type-selector')).toHaveAttribute('disabled');
-  });
-
-  it('submit data correctly', async () => {
-    appMockRender.render(
-      <FormTestComponent onSubmit={onSubmit}>
-        <FormFields />
-      </FormTestComponent>
-    );
-
-    fireEvent.change(await screen.findByTestId('custom-field-type-selector'), {
-      target: { value: CustomFieldTypes.TOGGLE },
+    beforeEach(() => {
+      jest.clearAllMocks();
+      appMockRender = createAppMockRenderer();
     });
 
-    userEvent.type(await screen.findByTestId('custom-field-label-input'), 'hello');
-    userEvent.click(await screen.findByText('Submit'));
+    afterEach(() => {
+      appMockRender.queryClient.getQueryCache().clear();
+    });
 
-    await waitFor(() => {
-      // data, isValid
-      expect(onSubmit).toBeCalledWith(
-        {
-          label: 'hello',
-          type: CustomFieldTypes.TOGGLE,
-          defaultValue: false,
-        },
-        true
+    afterEach(async () => {
+      await waitFor(() => expect(appMockRender.queryClient.isFetching()).toBe(0));
+    });
+
+    it('renders correctly', async () => {
+      appMockRender.render(
+        <FormTestComponent onSubmit={onSubmit}>
+          <FormFields />
+        </FormTestComponent>
       );
+
+      expect(await screen.findByTestId('custom-field-label-input')).toBeInTheDocument();
+      expect(await screen.findByTestId('custom-field-type-selector')).toBeInTheDocument();
+    });
+
+    it('disables field type selector on edit mode', async () => {
+      appMockRender.render(
+        <FormTestComponent onSubmit={onSubmit}>
+          <FormFields isEditMode />
+        </FormTestComponent>
+      );
+
+      expect(await screen.findByTestId('custom-field-type-selector')).toHaveAttribute('disabled');
+    });
+
+    it('submit data correctly', async () => {
+      appMockRender.render(
+        <FormTestComponent onSubmit={onSubmit}>
+          <FormFields />
+        </FormTestComponent>
+      );
+
+      fireEvent.change(await screen.findByTestId('custom-field-type-selector'), {
+        target: { value: CustomFieldTypes.TOGGLE },
+      });
+
+      userEvent.type(await screen.findByTestId('custom-field-label-input'), 'hello');
+      userEvent.click(await screen.findByText('Submit'));
+
+      await waitFor(() => {
+        // data, isValid
+        expect(onSubmit).toBeCalledWith(
+          {
+            label: 'hello',
+            type: CustomFieldTypes.TOGGLE,
+            defaultValue: false,
+          },
+          true
+        );
+      });
     });
   });
-});
+}
