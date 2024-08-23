@@ -6236,6 +6236,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/search-indices@link:x-pack/plugins/search_indices":
+  version "0.0.0"
+  uid ""
+
 "@kbn/search-inference-endpoints@link:x-pack/plugins/search_inference_endpoints":
   version "0.0.0"
   uid ""
