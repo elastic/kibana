@@ -49,7 +49,7 @@ describe('Event Filters', { tags: ['@ess', '@serverless'] }, () => {
       cy.get('body').realPress('ArrowDown').realPress('Enter');
 
       // Value input should be enabled after successfully selecting a field
-      cy.getByTestSubj(CONDITION_VALUE).get('input').should('not.have.attr', 'disabled');
+      cy.getByTestSubj(CONDITION_VALUE).find('input').should('not.have.attr', 'disabled');
 
       cy.getByTestSubj(CONDITION_VALUE).type('random.exe');
       cy.get('body').realPress('Tab');
@@ -57,18 +57,42 @@ describe('Event Filters', { tags: ['@ess', '@serverless'] }, () => {
       cy.getByTestSubj(SUBMIT_BUTTON).should('not.have.attr', 'disabled');
     });
 
-    it.skip('should be able to select field by {tab}', () => {
-      cy.getByTestSubj(CONDITION_FIELD_NAME).type('process.name');
+    it('should be able to select field by {tab} if typing narrows to one option', () => {
+      cy.getByTestSubj(CONDITION_FIELD_NAME).type('process.name.caseless');
 
       cy.get('body').realPress('Tab');
 
       // Value input should be enabled after successfully selecting a field
-      cy.getByTestSubj(CONDITION_VALUE).get('input').should('not.have.attr', 'disabled');
+      cy.getByTestSubj(CONDITION_VALUE).find('input').should('not.have.attr', 'disabled');
 
       cy.getByTestSubj(CONDITION_VALUE).type('random.exe');
       cy.get('body').realPress('Tab');
 
       cy.getByTestSubj(SUBMIT_BUTTON).should('not.have.attr', 'disabled');
+    });
+
+    it('should be able to select field by {tab} if typing leaves more than one option but there is a match', () => {
+      cy.getByTestSubj(CONDITION_FIELD_NAME).type('process.name'); // process.name, process.name.caseless, process.name.text
+
+      cy.get('body').realPress('Tab');
+
+      // Value input should be enabled after successfully selecting a field
+      cy.getByTestSubj(CONDITION_VALUE).find('input').should('not.have.attr', 'disabled');
+
+      cy.getByTestSubj(CONDITION_VALUE).type('random.exe');
+      cy.get('body').realPress('Tab');
+
+      cy.getByTestSubj(SUBMIT_BUTTON).should('not.have.attr', 'disabled');
+    });
+
+    it('should not be able to select field by {tab} if there is no exact match', () => {
+      cy.getByTestSubj(CONDITION_FIELD_NAME).type('process.name.caseles');
+
+      cy.get('body').realPress('Tab');
+
+      // Value input should be enabled after successfully selecting a field
+      cy.getByTestSubj(CONDITION_VALUE).find('input').should('have.attr', 'disabled');
+      cy.getByTestSubj(SUBMIT_BUTTON).should('have.attr', 'disabled');
     });
   });
 });
