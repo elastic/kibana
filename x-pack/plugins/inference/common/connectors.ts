@@ -11,7 +11,7 @@ export enum InferenceConnectorType {
   Gemini = '.gemini',
 }
 
-export const allSupportedConnectorTypes = Object.values(InferenceConnectorType);
+const allSupportedConnectorTypes = Object.values(InferenceConnectorType);
 
 export interface InferenceConnector {
   type: InferenceConnectorType;

@@ -10,7 +10,7 @@ import type { InferenceConnectorAdapter } from '../types';
 import { openAIAdapter } from './openai';
 
 export const getInferenceAdapter = (
-  connectorType: string
+  connectorType: InferenceConnectorType
 ): InferenceConnectorAdapter | undefined => {
   switch (connectorType) {
     case InferenceConnectorType.OpenAI:
