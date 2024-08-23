@@ -25,7 +25,7 @@ export const PanelWithTitle: React.FC<
     <EuiPanel hasBorder={hasBorder} hasShadow={hasShadow} {...props}>
       {title && (
         <EuiTitle size="xs">
-          <h3
+          <h2
             css={{
               margin: margin ?? euiTheme.size.s,
               marginBottom: 0,
@@ -33,7 +33,7 @@ export const PanelWithTitle: React.FC<
             }}
           >
             {title}
-          </h3>
+          </h2>
         </EuiTitle>
       )}
       {children}

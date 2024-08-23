@@ -57,7 +57,7 @@ export const MonitorStatusHeader = ({
       <EuiFlexGroup alignItems="center" responsive={false} wrap={false}>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
-            <h4>{labels.STATUS_LABEL}</h4>
+            <h2>{labels.STATUS_LABEL}</h2>
           </EuiTitle>
         </EuiFlexItem>
         {periodCaptionText ? (

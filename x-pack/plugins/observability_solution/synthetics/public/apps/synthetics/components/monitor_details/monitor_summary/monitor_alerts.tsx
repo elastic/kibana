@@ -54,7 +54,7 @@ export const MonitorAlerts = ({
       <EuiFlexGroup alignItems="center" gutterSize="m" wrap={true}>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
-            <h3>
+            <h2>
               {ALERTS_LABEL} (
               <div style={{ display: 'inline-block' }}>
                 <ExploratoryViewEmbeddable
@@ -83,7 +83,7 @@ export const MonitorAlerts = ({
                 />
               </div>
               )
-            </h3>
+            </h2>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow>

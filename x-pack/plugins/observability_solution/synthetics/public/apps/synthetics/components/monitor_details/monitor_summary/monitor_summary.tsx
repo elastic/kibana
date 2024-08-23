@@ -51,7 +51,7 @@ export const MonitorSummary = () => {
             <EuiFlexGroup alignItems="center" gutterSize="m">
               <EuiFlexItem grow={false}>
                 <EuiTitle size="xs">
-                  <h3>{SUMMARY_LABEL}</h3>
+                  <h2>{SUMMARY_LABEL}</h2>
                 </EuiTitle>
               </EuiFlexItem>
               <EuiFlexItem>
@@ -94,7 +94,7 @@ export const MonitorSummary = () => {
                 <EuiFlexGroup alignItems="center" gutterSize="m">
                   <EuiFlexItem grow={false}>
                     <EuiTitle size="xs">
-                      <h3>{DURATION_TREND_LABEL}</h3>
+                      <h2>{DURATION_TREND_LABEL}</h2>
                     </EuiTitle>
                   </EuiFlexItem>
                   <EuiFlexItem>
