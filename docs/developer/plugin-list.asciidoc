@@ -571,7 +571,7 @@ security and spaces filtering.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/entity_manager/README.md[entityManager]
-|This plugin provides access to observed asset data, such as information about hosts, pods, containers, services, and more.
+|This plugin provides access to observed entity data, such as information about hosts, pods, containers, services, and more.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/event_log/README.md[eventLog]
@@ -793,6 +793,10 @@ Elastic.
 |{kib-repo}blob/{branch}/x-pack/plugins/screenshotting/README.md[screenshotting]
 |This plugin provides functionality to take screenshots of the Kibana pages.
 It uses Chromium and Puppeteer underneath to run the browser in headless mode.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/search_assistant/README.md[searchAssistant]
+|This holds the Search AI Assistant which targets Search users and Serverless Elasticsearch.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/search_connectors/README.mdx[searchConnectors]

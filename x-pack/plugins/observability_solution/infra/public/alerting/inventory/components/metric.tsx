@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiLink,
   EuiPopover,
   EuiPopoverTitle,
   EuiSelect,
@@ -24,6 +25,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { debounce } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
+import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import { HOST_METRICS_DOC_HREF } from '../../../common/visualizations';
 import { useMetricsDataViewContext } from '../../../containers/metrics_source';
 import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label';
 import {
@@ -37,6 +40,7 @@ import {
 interface Props {
   metric?: { value: string; text: string };
   metrics: Array<{ value: string; text: string }>;
+  nodeType: InventoryItemType;
   errors: IErrorObject;
   onChange: (metric?: string) => void;
   onChangeCustom: (customMetric?: SnapshotCustomMetricInput) => void;
@@ -91,6 +95,7 @@ export const MetricExpression = ({
   onChange,
   onChangeCustom,
   popupPosition,
+  nodeType,
 }: Props) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [customMetricTabOpen, setCustomMetricTabOpen] = useState(metric?.value === 'custom');
@@ -312,7 +317,23 @@ export const MetricExpression = ({
           </>
         ) : (
           <EuiFormRow fullWidth>
-            <EuiFlexGroup>
+            <EuiFlexGroup direction="column" gutterSize="s">
+              {nodeType === 'host' && (
+                <EuiFlexItem>
+                  <EuiLink
+                    data-test-subj="alertFlyoutHostMetricsDocumentationLink"
+                    href={HOST_METRICS_DOC_HREF}
+                    target="_blank"
+                  >
+                    {i18n.translate(
+                      'xpack.infra.metrics.alertFlyout.expression.metric.whatAreTheseMetricsLink',
+                      {
+                        defaultMessage: 'What are these metrics?',
+                      }
+                    )}
+                  </EuiLink>
+                </EuiFlexItem>
+              )}
               <EuiFlexItem className="actOf__metricContainer">
                 <EuiComboBox
                   fullWidth
