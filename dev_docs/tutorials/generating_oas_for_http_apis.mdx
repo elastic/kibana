@@ -90,16 +90,16 @@ import { fooResource } from '../../schemas/v1';
 // Note: this response schema is instantiated lazily to avoid creating schemas that are not needed in most cases!
 const fooResourceResponse = () => {
   return schema.object({
-    id: schema.string(
-      { maxLength: 20 },
+    id: schema.string({ 
+      maxLength: 20,
       meta: { description: 'Add a description.' }
-    ),
-    name: schema.string( meta: {
-      description: 'Add a description.',
     }),
-    createdAt: schema.string( meta: {
-      description: 'Add a description.',
-      deprecated: true,  // An indicator that the property is deprecated
+    name: schema.string({ meta: { description: 'Add a description.' } }),
+    createdAt: schema.string({
+      meta: {
+        description: 'Add a description.',
+        deprecated: true,  // An indicator that the property is deprecated
+      },
     }),
   })
 }
