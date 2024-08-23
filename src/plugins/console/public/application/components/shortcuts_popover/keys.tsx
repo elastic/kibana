@@ -11,14 +11,14 @@ import { i18n } from '@kbn/i18n';
 import { EuiIcon } from '@elastic/eui';
 
 export const KEYS = {
-  keyCtrl: i18n.translate('console.shortcutKeys.keyCtrl', {
-    defaultMessage: 'Ctrl',
+  keyCtrlCmd: i18n.translate('console.shortcutKeys.keyCtrlCmd', {
+    defaultMessage: 'Ctrl/Cmd',
   }),
   keyEnter: i18n.translate('console.shortcutKeys.keyEnter', {
     defaultMessage: 'Enter',
   }),
-  keyAlt: i18n.translate('console.shortcutKeys.keyAlt', {
-    defaultMessage: 'Alt',
+  keyAltOption: i18n.translate('console.shortcutKeys.keyAltOption', {
+    defaultMessage: 'Alt/Option',
   }),
   keyOption: i18n.translate('console.shortcutKeys.keyOption', {
     defaultMessage: 'Option',

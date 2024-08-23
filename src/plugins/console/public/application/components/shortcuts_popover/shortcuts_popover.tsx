@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { EuiPopover, EuiTitle, EuiHorizontalRule, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { ShortcutLineFlexItem } from './shortcut_line';
 import { KEYS } from './keys';
 
@@ -27,68 +28,65 @@ export const ShortcutsPopover = ({ button, isOpen, closePopover }: ShortcutsPopo
       data-test-subj="consoleShortcutsPopover"
     >
       <EuiTitle size="xxs">
-        <h5>Navigation shortcuts</h5>
+        <h5>
+          {i18n.translate('console.shortcuts.navigationShortcutsSubtitle', {
+            defaultMessage: 'Navigation shortcuts',
+          })}
+        </h5>
       </EuiTitle>
       <EuiHorizontalRule margin="s" />
       <EuiFlexGroup gutterSize="s" direction="column">
         <ShortcutLineFlexItem
           id="collapseAllExceptCurrent"
-          description="Collapse all scopes except current"
-          keys={[KEYS.keyCtrl, KEYS.keyOption, KEYS.keyO]}
-        />
-        <ShortcutLineFlexItem
-          id="collapseAllExceptCurrent"
-          description="Collapse or expand current scope"
-          keys={[KEYS.keyCtrl, KEYS.keyAlt, KEYS.keyL]}
-        />
-        <ShortcutLineFlexItem
-          id="collapseAllExceptCurrent"
-          description="Expand all scopes"
-          keys={[KEYS.keyShift, KEYS.keyCtrl, KEYS.keyOption, KEYS.keyO]}
-        />
-        <ShortcutLineFlexItem
-          id="collapseAllExceptCurrent"
           description="Go to line number"
-          keys={[KEYS.keyCtrl, KEYS.keyL, KEYS.keyOption, KEYS.keyO]}
+          keys={[KEYS.keyCtrlCmd, KEYS.keyL]}
         />
       </EuiFlexGroup>
       <EuiSpacer />
 
       <EuiTitle size="xxs">
-        <h5>Request shortcuts</h5>
+        <h5>
+          {i18n.translate('console.shortcuts.requestShortcutsSubtitle', {
+            defaultMessage: 'Request shortcuts',
+          })}
+        </h5>
       </EuiTitle>
       <EuiHorizontalRule margin="s" />
       <EuiFlexGroup gutterSize="s" direction="column">
         <ShortcutLineFlexItem
           id="collapseAllExceptCurrent"
           description="Auto-indent current request"
-          keys={[KEYS.keyCtrl, KEYS.keyI]}
+          keys={[KEYS.keyCtrlCmd, KEYS.keyI]}
         />
         <ShortcutLineFlexItem
           id="collapseAllExceptCurrent"
-          description="Jump to next request"
-          keys={[KEYS.keyCtrl, KEYS.keyDown]}
+          description="Jump to next request end"
+          keys={[KEYS.keyCtrlCmd, KEYS.keyDown]}
         />
         <ShortcutLineFlexItem
           id="collapseAllExceptCurrent"
-          description="Jump to previous request"
-          keys={[KEYS.keyCtrl, KEYS.keyUp]}
+          description="Jump to previous request end"
+          keys={[KEYS.keyCtrlCmd, KEYS.keyUp]}
         />
         <ShortcutLineFlexItem
           id="collapseAllExceptCurrent"
           description="Open documentation for current request"
-          keys={[KEYS.keyCtrl, KEYS.keySlash]}
+          keys={[KEYS.keyCtrlCmd, KEYS.keySlash]}
         />
         <ShortcutLineFlexItem
           id="collapseAllExceptCurrent"
           description="Run current request"
-          keys={[KEYS.keyCtrl, KEYS.keyEnter]}
+          keys={[KEYS.keyCtrlCmd, KEYS.keyEnter]}
         />
       </EuiFlexGroup>
       <EuiSpacer />
 
       <EuiTitle size="xxs">
-        <h5>Autocomplete menu shortcuts</h5>
+        <h5>
+          {i18n.translate('console.shortcuts.autocompleteShortcutsSubtitle', {
+            defaultMessage: 'Autocomplete menu shortcuts',
+          })}
+        </h5>
       </EuiTitle>
       <EuiHorizontalRule margin="s" />
       <EuiFlexGroup gutterSize="s" direction="column">
@@ -107,16 +105,6 @@ export const ShortcutsPopover = ({ button, isOpen, closePopover }: ShortcutsPopo
           id="collapseAllExceptCurrent"
           description="Navigate items in autocomplete menu"
           keys={[KEYS.keyDown, KEYS.keyUp]}
-        />
-        <ShortcutLineFlexItem
-          id="collapseAllExceptCurrent"
-          description="Open autocomplete menu"
-          keys={[KEYS.keyCtrl, KEYS.keySpace]}
-        />
-        <ShortcutLineFlexItem
-          id="collapseAllExceptCurrent"
-          description="Switch focus to autocomplete menu"
-          keys={[KEYS.keyCtrl, KEYS.keyDown]}
         />
       </EuiFlexGroup>
     </EuiPopover>

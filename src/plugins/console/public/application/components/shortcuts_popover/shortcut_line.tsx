@@ -20,7 +20,7 @@ interface ShortcutLineFlexItemProps {
 const renderKeys = (keys: string[]) => {
   return keys.map((key, index) => (
     <span key={index}>
-      {index > 0 && ' '}
+      {index > 0 && ' + '}
       <EuiCode>{key}</EuiCode>
     </span>
   ));
@@ -47,7 +47,12 @@ export const ShortcutLineFlexItem = ({
             {renderKeys(keys)}
             {alternativeKeys && (
               <>
-                <strong> or </strong>
+                <strong>
+                  {' '}
+                  {i18n.translate('console.shortcuts.alternativeKeysOrDivider', {
+                    defaultMessage: 'or',
+                  })}{' '}
+                </strong>
                 {renderKeys(alternativeKeys)}
               </>
             )}

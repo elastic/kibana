@@ -226,6 +226,16 @@ export class ConsolePageObject extends FtrService {
     await this.testSubjects.click('consoleShortcutsButton');
   }
 
+  public async isHelpPopoverOpen() {
+    const classAttribute = await this.testSubjects.getAttribute('consoleHelpPopover', 'class');
+    return classAttribute?.includes('euiPopover-isOpen');
+  }
+
+  public async isShortcutsPopoverOpen() {
+    const classAttribute = await this.testSubjects.getAttribute('consoleShortcutsPopover', 'class');
+    return classAttribute?.includes('euiPopover-isOpen');
+  }
+
   public async openSettings() {
     await this.testSubjects.click('consoleSettingsButton');
   }
