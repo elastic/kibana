@@ -9,18 +9,14 @@
 
 import { inject, injectable } from 'inversify';
 import { schema, type TypeOf } from '@kbn/config-schema';
-import {
-  type IRouteHandler,
-  type KibanaRequest,
-  type KibanaResponseFactory,
-  ResponseToken,
-} from '@kbn/core-http-server';
+import { Response } from '@kbn/core-di-server';
+import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
 import { EchoService, type Echo } from '@kbn/dependency-injection-example-service/server';
 
 export type EchoRequest = KibanaRequest<never, never, TypeOf<typeof EchoRoute.validate.body>>;
 
 @injectable()
-export class EchoRoute implements IRouteHandler {
+export class EchoRoute {
   static method = 'post' as const;
   static path = '/api/di/echo';
   static validate = {
@@ -38,7 +34,7 @@ export class EchoRoute implements IRouteHandler {
 
   constructor(
     @inject(EchoService) private readonly service: Echo,
-    @inject(ResponseToken) private readonly response: KibanaResponseFactory
+    @inject(Response) private readonly response: KibanaResponseFactory
   ) {}
 
   handle() {

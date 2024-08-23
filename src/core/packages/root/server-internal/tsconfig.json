@@ -81,6 +81,7 @@
     "@kbn/projects-solutions-groups",
     "@kbn/core-di-internal",
     "@kbn/core-di-mocks",
+    "@kbn/core-di-server-internal",
   ],
   "exclude": [
     "target/**/*",
