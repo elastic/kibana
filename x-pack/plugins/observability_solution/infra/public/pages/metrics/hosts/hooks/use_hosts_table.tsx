@@ -108,7 +108,6 @@ const buildItemsList = (nodes: InfraAssetMetricsItem[]): HostNodeRow[] => {
       ),
       hasSystemMetrics,
       alertsCount: alertsCount ?? 0,
-      hasSystemMetrics,
     };
   });
 };
