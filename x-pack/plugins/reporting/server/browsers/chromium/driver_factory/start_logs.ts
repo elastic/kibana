@@ -11,14 +11,14 @@ import del from 'del';
 import { mkdtempSync } from 'fs';
 import { uniq } from 'lodash';
 import os from 'os';
-import { join } from 'path';
+import path, { join } from 'path';
 import { createInterface } from 'readline';
 import { getDataPath } from '@kbn/utils';
 import { fromEvent, merge, of, timer } from 'rxjs';
 import { catchError, map, reduce, takeUntil, tap } from 'rxjs/operators';
+import { ChromiumArchivePaths } from '@kbn/screenshotting-server';
 import { ReportingCore } from '../../../';
 import { LevelLogger } from '../../../lib';
-import { ChromiumArchivePaths } from '../paths';
 import { args } from './args';
 
 const paths = new ChromiumArchivePaths();
@@ -70,7 +70,7 @@ export const browserStartLogs = (
   if (!pkg) {
     throw new Error(`Unsupported platform: ${platform}-${architecture}`);
   }
-  const binaryPath = paths.getBinaryPath(pkg);
+  const binaryPath = paths.getBinaryPath(pkg, path.resolve(__dirname, '../../../../chromium'));
 
   const kbnArgs = args({
     userDataDir,

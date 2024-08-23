@@ -7,9 +7,9 @@
 
 import assert from 'assert';
 import axios from 'axios';
+import { ChromiumArchivePaths, PackageInfo } from '@kbn/screenshotting-server';
 import { createMockLevelLogger } from '../../../test_helpers';
 import { download } from '../../download/download';
-import { ChromiumArchivePaths, PackageInfo } from '../paths';
 
 /**
  * NOTE: these test cases download actual browsers. Running the suite could take
