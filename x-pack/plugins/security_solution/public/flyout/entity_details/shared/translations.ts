@@ -7,26 +7,26 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const USER = i18n.translate('xpack.securitySolution.timeline.userDetails.userLabel', {
+export const USER = i18n.translate('xpack.securitySolution.flyout.entityDetails.host.userLabel', {
   defaultMessage: 'User',
 });
 
 export const FAIL_MANAGED_USER = i18n.translate(
-  'xpack.securitySolution.timeline.userDetails.failManagedUserDescription',
+  'xpack.securitySolution.flyout.entityDetails.host.failManagedUserDescription',
   {
     defaultMessage: 'Failed to run search on user managed data',
   }
 );
 
 export const RISK_SCORE = i18n.translate(
-  'xpack.securitySolution.timeline.userDetails.riskScoreLabel',
+  'xpack.securitySolution.flyout.entityDetails.host.riskScoreLabel',
   {
     defaultMessage: 'Risk score',
   }
 );
 
 export const CLOSE_BUTTON = i18n.translate(
-  'xpack.securitySolution.timeline.userDetails.closeButton',
+  'xpack.securitySolution.flyout.entityDetails.host.closeButton',
   {
     defaultMessage: 'close',
   }
