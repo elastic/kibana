@@ -56,7 +56,7 @@ export function Main({ isEmbeddable = false }: MainProps) {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiSplitPanel.Outer grow={true} borderRadius={isEmbeddable ? 'none' : 'm'}>
-            <EuiSplitPanel.Inner grow={false}>
+            <EuiSplitPanel.Inner grow={false} className="consoleTabs">
               <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
                 <EuiFlexItem>
                   <TopNavMenu
