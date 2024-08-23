@@ -10,6 +10,7 @@ import { useEffect, useState } from 'react';
 
 import { useDataQualityContext } from '../data_quality_panel/data_quality_context';
 import { fetchMappings } from './helpers';
+import { useIsMounted } from '../use_is_mounted';
 
 export interface UseMappings {
   indexes: Record<string, IndicesGetMappingIndexMappingRecord> | null;
@@ -18,6 +19,7 @@ export interface UseMappings {
 }
 
 export const useMappings = (patternOrIndexName: string): UseMappings => {
+  const { isMountedRef } = useIsMounted();
   const [indexes, setIndexes] = useState<Record<
     string,
     IndicesGetMappingIndexMappingRecord
@@ -34,15 +36,21 @@ export const useMappings = (patternOrIndexName: string): UseMappings => {
         const response = await fetchMappings({ abortController, httpFetch, patternOrIndexName });
 
         if (!abortController.signal.aborted) {
-          setIndexes(response);
+          if (isMountedRef.current) {
+            setIndexes(response);
+          }
         }
       } catch (e) {
         if (!abortController.signal.aborted) {
-          setError(e.message);
+          if (isMountedRef.current) {
+            setError(e.message);
+          }
         }
       } finally {
         if (!abortController.signal.aborted) {
-          setLoading(false);
+          if (isMountedRef.current) {
+            setLoading(false);
+          }
         }
       }
     }
@@ -52,7 +60,7 @@ export const useMappings = (patternOrIndexName: string): UseMappings => {
     return () => {
       abortController.abort();
     };
-  }, [httpFetch, patternOrIndexName, setError]);
+  }, [httpFetch, isMountedRef, patternOrIndexName, setError]);
 
   return { indexes, error, loading };
 };

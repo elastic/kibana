@@ -37,6 +37,7 @@ interface Props {
   space: FormValues;
   editingExistingSpace: boolean;
   onChange: (space: FormValues) => void;
+  title?: string;
 }
 
 interface State {
@@ -51,14 +52,11 @@ export class CustomizeSpace extends Component<Props, State> {
   };
 
   public render() {
-    const { validator, editingExistingSpace, space } = this.props;
+    const { validator, editingExistingSpace, space, title } = this.props;
     const { name = '', description = '' } = space;
-    const panelTitle = i18n.translate('xpack.spaces.management.manageSpacePage.generalTitle', {
-      defaultMessage: 'General',
-    });
 
     return (
-      <SectionPanel title={panelTitle} dataTestSubj="generalPanel">
+      <SectionPanel title={title} dataTestSubj="generalPanel">
         <EuiDescribedFormGroup
           title={
             <EuiTitle size="xs">

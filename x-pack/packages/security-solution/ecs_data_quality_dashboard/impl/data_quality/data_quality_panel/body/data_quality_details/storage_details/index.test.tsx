@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { DARK_THEME } from '@elastic/charts';
 import numeral from '@elastic/numeral';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
@@ -14,7 +13,10 @@ import { EMPTY_STAT } from '../../../../helpers';
 import { alertIndexWithAllResults } from '../../../../mock/pattern_rollup/mock_alerts_pattern_rollup';
 import { auditbeatWithAllResults } from '../../../../mock/pattern_rollup/mock_auditbeat_pattern_rollup';
 import { packetbeatNoResults } from '../../../../mock/pattern_rollup/mock_packetbeat_pattern_rollup';
-import { TestProviders } from '../../../../mock/test_providers/test_providers';
+import {
+  TestDataQualityProviders,
+  TestExternalProviders,
+} from '../../../../mock/test_providers/test_providers';
 import { PatternRollup } from '../../../../types';
 import { Props, StorageDetails } from '.';
 
@@ -38,13 +40,7 @@ const patternRollups: Record<string, PatternRollup> = {
 const onIndexSelected = jest.fn();
 
 const defaultProps: Props = {
-  formatBytes,
-  formatNumber,
-  ilmPhases,
   onIndexSelected,
-  patternRollups,
-  patterns,
-  baseTheme: DARK_THEME,
 };
 
 describe('StorageDetails', () => {
@@ -52,9 +48,14 @@ describe('StorageDetails', () => {
     jest.clearAllMocks();
 
     render(
-      <TestProviders>
-        <StorageDetails {...defaultProps} />
-      </TestProviders>
+      <TestExternalProviders>
+        <TestDataQualityProviders
+          dataQualityContextProps={{ ilmPhases, patterns, formatBytes, formatNumber }}
+          resultsRollupContextProps={{ patternRollups }}
+        >
+          <StorageDetails {...defaultProps} />
+        </TestDataQualityProviders>
+      </TestExternalProviders>
     );
   });
 
