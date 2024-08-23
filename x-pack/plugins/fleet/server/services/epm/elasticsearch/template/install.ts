@@ -135,7 +135,7 @@ const installPreBuiltTemplates = async (
     const esClientParams = { name: templateName, body: content };
     const esClientRequestOptions = { ignore: [404] };
 
-    if (content.hasOwnProperty('template') || content.hasOwnProperty('composed_of')) {
+    if (Object.hasOwn(content, 'template') || Object.hasOwn(content, 'composed_of')) {
       // Template is v2
       return retryTransientEsErrors(
         () => esClient.indices.putIndexTemplate(esClientParams, esClientRequestOptions),

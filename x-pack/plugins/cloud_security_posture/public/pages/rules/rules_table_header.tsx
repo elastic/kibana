@@ -23,7 +23,6 @@ import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { useKibana } from '../../common/hooks/use_kibana';
 import { getFindingsDetectionRuleSearchTagsFromArrayOfRules } from '../../../common/utils/detection_rules';
 import {
@@ -107,7 +106,7 @@ export const RulesTableHeader = ({
 
   return (
     <EuiFlexGroup direction="column">
-      <EuiFlexGroup>
+      <EuiFlexGroup wrap={true}>
         <EuiFlexItem grow={1}>
           <SearchField isSearching={isSearching} searchValue={searchValue} search={search} />
         </EuiFlexItem>
@@ -294,9 +293,6 @@ const CurrentPageOfTotal = ({
       size="xs"
       iconType="arrowDown"
       iconSide="right"
-      css={css`
-        padding-bottom: ${euiThemeVars.euiSizeS};
-      `}
       data-test-subj={RULES_BULK_ACTION_BUTTON}
     >
       Bulk actions
@@ -326,7 +322,7 @@ const CurrentPageOfTotal = ({
   return (
     <EuiFlexItem grow={false}>
       <EuiSpacer size="s" />
-      <EuiFlexGroup gutterSize="s">
+      <EuiFlexGroup gutterSize="s" alignItems={'center'}>
         <EuiFlexItem grow={false}>
           <EuiText size="xs" textAlign="left" color="subdued" style={{ marginLeft: '8px' }}>
             <FormattedMessage
@@ -347,9 +343,6 @@ const CurrentPageOfTotal = ({
               onClick={setSelectAllRules}
               size="xs"
               iconType="pagesSelect"
-              css={css`
-                padding-bottom: ${euiThemeVars.euiSizeS};
-              `}
               data-test-subj={RULES_SELECT_ALL_RULES}
             >
               <FormattedMessage
@@ -363,9 +356,6 @@ const CurrentPageOfTotal = ({
               onClick={() => setSelectedRules([])}
               size="xs"
               iconType="cross"
-              css={css`
-                padding-bottom: ${euiThemeVars.euiSizeS};
-              `}
               data-test-subj={RULES_CLEAR_ALL_RULES_SELECTION}
             >
               <FormattedMessage

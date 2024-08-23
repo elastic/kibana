@@ -92,23 +92,13 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
       : []),
     <EuiContextMenuItem
       data-test-subj="PackagePolicyActionsEditItem"
-      disabled={
-        !canWriteIntegrationPolicies || !agentPolicy || (agentPolicy?.supports_agentless ?? false)
-      }
+      disabled={!canWriteIntegrationPolicies || !agentPolicy}
       icon="pencil"
       href={`${getHref('edit_integration', {
         policyId: agentPolicy?.id ?? '',
         packagePolicyId: packagePolicy.id,
       })}${from ? `?from=${from}` : ''}`}
       key="packagePolicyEdit"
-      toolTipContent={
-        (agentPolicy?.supports_agentless ?? false) && (
-          <FormattedMessage
-            id="xpack.fleet.epm.packageDetails.integrationList.editIntegrationAgentlessTooltip"
-            defaultMessage="Editing an agentless integration is not supported. Add a new integration if needed."
-          />
-        )
-      }
     >
       <FormattedMessage
         id="xpack.fleet.policyDetails.packagePoliciesTable.editActionTitle"

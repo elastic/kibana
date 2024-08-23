@@ -19,8 +19,7 @@ export default function (providerContext: FtrProviderContext) {
   const esClient = getService('es');
   const kibanaServer = getService('kibanaServer');
 
-  // Failing: See https://github.com/elastic/kibana/issues/189805
-  describe.skip('actions', async function () {
+  describe('actions', async function () {
     skipIfNoDockerRegistry(providerContext);
     const apiClient = new SpaceTestApiClient(supertest);
 
@@ -56,6 +55,8 @@ export default function (providerContext: FtrProviderContext) {
     let testSpaceAgent2: string;
 
     before(async () => {
+      await apiClient.postEnableSpaceAwareness();
+
       const [_defaultSpacePolicy1, _spaceTest1Policy1, _spaceTest1Policy2] = await Promise.all([
         apiClient.createAgentPolicy(),
         apiClient.createAgentPolicy(TEST_SPACE_1),
@@ -219,16 +220,14 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx')
           .send({ action: { type: 'UNENROLL' } })
           .expect(404);
-        expect(resInDefaultSpace.body.message).to.eql(`${testSpaceAgent1} not found in namespace`);
+        expect(resInDefaultSpace.body.message).to.eql(`Agent ${testSpaceAgent1} not found`);
 
         const resInCustomSpace = await supertest
           .post(`/s/${TEST_SPACE_1}/api/fleet/agents/${defaultSpaceAgent1}/actions`)
           .set('kbn-xsrf', 'xxxx')
           .send({ action: { type: 'UNENROLL' } })
           .expect(404);
-        expect(resInCustomSpace.body.message).to.eql(
-          `${defaultSpaceAgent1} not found in namespace`
-        );
+        expect(resInCustomSpace.body.message).to.eql(`Agent ${defaultSpaceAgent1} not found`);
       });
 
       it('should create an action with set namespace in the default space', async () => {
@@ -249,6 +248,52 @@ export default function (providerContext: FtrProviderContext) {
 
         const actionStatusInCustomSpace = await apiClient.getActionStatus(TEST_SPACE_1);
         expect(actionStatusInCustomSpace.items.length).to.eql(1);
+      });
+    });
+
+    describe('post /agents/actions/{actionId}/cancel', () => {
+      it('should return 200 and a CANCEL action if the action is in the same space', async () => {
+        // Create UPDATE_TAGS action for agents in custom space
+        await apiClient.bulkUpdateAgentTags(
+          {
+            agents: [testSpaceAgent1, testSpaceAgent2],
+            tagsToAdd: ['tag1'],
+          },
+          TEST_SPACE_1
+        );
+
+        const actionStatusInCustomSpace = await apiClient.getActionStatus(TEST_SPACE_1);
+        expect(actionStatusInCustomSpace.items.length).to.eql(1);
+
+        const res = await apiClient.cancelAction(
+          actionStatusInCustomSpace.items[0].actionId,
+          TEST_SPACE_1
+        );
+        expect(res.item.type).to.eql('CANCEL');
+      });
+
+      it('should return 404 if the action is in a different space', async () => {
+        // Create UPDATE_TAGS action for agents in custom space
+        await apiClient.bulkUpdateAgentTags(
+          {
+            agents: [testSpaceAgent1, testSpaceAgent2],
+            tagsToAdd: ['tag1'],
+          },
+          TEST_SPACE_1
+        );
+
+        const actionStatusInCustomSpace = await apiClient.getActionStatus(TEST_SPACE_1);
+        expect(actionStatusInCustomSpace.items.length).to.eql(1);
+
+        let err: Error | undefined;
+        try {
+          await apiClient.cancelAction(actionStatusInCustomSpace.items[0].actionId);
+        } catch (_err) {
+          err = _err;
+        }
+
+        expect(err).to.be.an(Error);
+        expect(err?.message).to.match(/404 "Not Found"/);
       });
     });
   });

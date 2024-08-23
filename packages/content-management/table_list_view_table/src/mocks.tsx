@@ -72,6 +72,7 @@ export const getStoryServices = (params: Params, action: ActionFn = () => {}) =>
     getTagManagementUrl: () => '',
     getTagIdsFromReferences: () => [],
     isTaggingEnabled: () => true,
+    isFavoritesEnabled: () => false,
     ...params,
   };
 
