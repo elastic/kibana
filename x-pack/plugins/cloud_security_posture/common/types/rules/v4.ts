@@ -10,15 +10,7 @@ import { CspBenchmarkRulesStates } from '@kbn/cloud-security-posture-common';
 import { ruleStateAttributes, rulesStates } from '@kbn/cloud-security-posture-common/schema';
 import { BenchmarksCisId } from '../latest';
 import { DEFAULT_BENCHMARK_RULES_PER_PAGE } from './v3';
-export type {
-  cspBenchmarkRuleMetadataSchema,
-  CspBenchmarkRuleMetadata,
-  cspBenchmarkRuleSchema,
-  CspBenchmarkRule,
-  FindCspBenchmarkRuleResponse,
-} from './v3';
-
-export type { CspBenchmarkRulesStates } from '@kbn/cloud-security-posture-common';
+export type { cspBenchmarkRuleSchema, CspBenchmarkRule, FindCspBenchmarkRuleResponse } from './v3';
 
 export type FindCspBenchmarkRuleRequest = TypeOf<typeof findCspBenchmarkRuleRequestSchema>;
 

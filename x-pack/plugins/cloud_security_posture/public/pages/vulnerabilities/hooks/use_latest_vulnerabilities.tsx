@@ -16,7 +16,8 @@ import {
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { EsHitRecord } from '@kbn/discover-utils/types';
-import { MAX_FINDINGS_TO_LOAD, VULNERABILITY_FIELDS } from '../../../common/constants';
+import { MAX_FINDINGS_TO_LOAD } from '@kbn/cloud-security-posture-common';
+import { VULNERABILITY_FIELDS } from '../../../common/constants';
 import { CspVulnerabilityFinding } from '../../../../common/schemas';
 import {
   LATEST_VULNERABILITIES_INDEX_PATTERN,

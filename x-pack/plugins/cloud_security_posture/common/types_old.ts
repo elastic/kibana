@@ -5,11 +5,11 @@
  * 2.0.
  */
 import { type TypeOf } from '@kbn/config-schema';
+import type { CspBenchmarkRuleMetadata } from '@kbn/cloud-security-posture-common';
 import { CspFinding } from './schemas/csp_finding';
 import { SUPPORTED_CLOUDBEAT_INPUTS, SUPPORTED_POLICY_TEMPLATES } from './constants';
 
 import { getComplianceDashboardSchema } from './schemas/stats';
-import type { CspBenchmarkRuleMetadata } from './types/latest';
 
 export type {
   CspFinding,

@@ -6,6 +6,13 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
+import {
+  KSPM_POLICY_TEMPLATE,
+  CSPM_POLICY_TEMPLATE,
+  STATUS_ROUTE_PATH,
+  LATEST_FINDINGS_RETENTION_POLICY,
+  CDR_MISCONFIGURATIONS_INDEX_PATTERN,
+} from '@kbn/cloud-security-posture-common';
 import type { SavedObjectsClientContract, Logger, ElasticsearchClient } from '@kbn/core/server';
 import type {
   AgentPolicyServiceInterface,
@@ -19,20 +26,15 @@ import { schema } from '@kbn/config-schema';
 import { VersionedRoute } from '@kbn/core-http-server/src/versioning/types';
 import {
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
-  STATUS_ROUTE_PATH,
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
   FINDINGS_INDEX_PATTERN,
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
   VULNERABILITIES_INDEX_PATTERN,
-  KSPM_POLICY_TEMPLATE,
-  CSPM_POLICY_TEMPLATE,
   POSTURE_TYPES,
   LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
   VULN_MGMT_POLICY_TEMPLATE,
   POSTURE_TYPE_ALL,
   LATEST_VULNERABILITIES_RETENTION_POLICY,
-  LATEST_FINDINGS_RETENTION_POLICY,
-  CDR_MISCONFIGURATIONS_INDEX_PATTERN,
 } from '../../../common/constants';
 import type {
   CspApiRequestHandlerContext,
