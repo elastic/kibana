@@ -166,16 +166,13 @@ describe('FileActionsPopoverButton', () => {
         await screen.findByTestId(`cases-files-actions-popover-button-${basicFileMock.id}`)
       );
 
-      await userEvent.click(await screen.findByTestId('cases-files-copy-hash-button'), undefined, {
-        skipPointerEventsCheck: true,
+      await userEvent.click(await screen.findByTestId('cases-files-copy-hash-button'), {
+        pointerEventsCheck: 0,
       });
-      await userEvent.click(
-        await screen.findByTestId('cases-files-copy-md5-hash-button'),
-        undefined,
-        {
-          skipPointerEventsCheck: true,
-        }
-      );
+
+      await userEvent.click(await screen.findByTestId('cases-files-copy-md5-hash-button'), {
+        pointerEventsCheck: 0,
+      });
 
       await waitFor(() => {
         expect(navigator.clipboard.writeText).toHaveBeenCalledWith(basicFileMock.hash?.md5);
@@ -191,16 +188,13 @@ describe('FileActionsPopoverButton', () => {
         await screen.findByTestId(`cases-files-actions-popover-button-${basicFileMock.id}`)
       );
 
-      await userEvent.click(await screen.findByTestId('cases-files-copy-hash-button'), undefined, {
-        skipPointerEventsCheck: true,
+      await userEvent.click(await screen.findByTestId('cases-files-copy-hash-button'), {
+        pointerEventsCheck: 0,
       });
-      await userEvent.click(
-        await screen.findByTestId('cases-files-copy-sha1-hash-button'),
-        undefined,
-        {
-          skipPointerEventsCheck: true,
-        }
-      );
+
+      await userEvent.click(await screen.findByTestId('cases-files-copy-sha1-hash-button'), {
+        pointerEventsCheck: 0,
+      });
 
       await waitFor(() => {
         expect(navigator.clipboard.writeText).toHaveBeenCalledWith(basicFileMock.hash?.sha1);
@@ -216,16 +210,13 @@ describe('FileActionsPopoverButton', () => {
         await screen.findByTestId(`cases-files-actions-popover-button-${basicFileMock.id}`)
       );
 
-      await userEvent.click(await screen.findByTestId('cases-files-copy-hash-button'), undefined, {
-        skipPointerEventsCheck: true,
+      await userEvent.click(await screen.findByTestId('cases-files-copy-hash-button'), {
+        pointerEventsCheck: 0,
       });
-      await userEvent.click(
-        await screen.findByTestId('cases-files-copy-sha256-hash-button'),
-        undefined,
-        {
-          skipPointerEventsCheck: true,
-        }
-      );
+
+      await userEvent.click(await screen.findByTestId('cases-files-copy-sha256-hash-button'), {
+        pointerEventsCheck: 0,
+      });
 
       await waitFor(() => {
         expect(navigator.clipboard.writeText).toHaveBeenCalledWith(basicFileMock.hash?.sha256);
@@ -243,8 +234,8 @@ describe('FileActionsPopoverButton', () => {
         await screen.findByTestId(`cases-files-actions-popover-button-${basicFileMock.id}`)
       );
 
-      await userEvent.click(await screen.findByTestId('cases-files-delete-button'), undefined, {
-        skipPointerEventsCheck: true,
+      await userEvent.click(await screen.findByTestId('cases-files-delete-button'), {
+        pointerEventsCheck: 0,
       });
 
       expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
@@ -259,8 +250,8 @@ describe('FileActionsPopoverButton', () => {
         await screen.findByTestId(`cases-files-actions-popover-button-${basicFileMock.id}`)
       );
 
-      await userEvent.click(await screen.findByTestId('cases-files-delete-button'), undefined, {
-        skipPointerEventsCheck: true,
+      await userEvent.click(await screen.findByTestId('cases-files-delete-button'), {
+        pointerEventsCheck: 0,
       });
 
       expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();

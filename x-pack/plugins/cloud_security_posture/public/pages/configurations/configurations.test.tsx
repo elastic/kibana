@@ -187,9 +187,7 @@ describe('<Findings />', () => {
 
       await waitFor(() => expect(screen.getByText(/2 findings/i)).toBeInTheDocument());
 
-      await userEvent.click(screen.getByTestId('addFilter'), undefined, {
-        skipPointerEventsCheck: true,
-      });
+      await userEvent.click(screen.getByTestId('addFilter'), { pointerEventsCheck: 0 });
 
       await waitFor(() =>
         expect(screen.getByTestId('filterFieldSuggestionList')).toBeInTheDocument()
@@ -215,9 +213,7 @@ describe('<Findings />', () => {
       const filterParamsInput = within(screen.getByTestId('filterParams')).getByRole('textbox');
       userEvent.paste(filterParamsInput, finding1.rule.section);
 
-      await userEvent.click(screen.getByTestId('saveFilter'), undefined, {
-        skipPointerEventsCheck: true,
-      });
+      await userEvent.click(screen.getByTestId('saveFilter'), { pointerEventsCheck: 0 });
 
       await waitFor(() => expect(screen.getByText(/1 findings/i)).toBeInTheDocument());
       expect(screen.getByText(finding1.resource.name)).toBeInTheDocument();

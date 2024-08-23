@@ -711,8 +711,8 @@ describe('Create case', () => {
       await fillFormReactTestingLib({ renderer: screen });
 
       await userEvent.click(screen.getByTestId('dropdown-connectors'));
-      await userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'), undefined, {
-        skipPointerEventsCheck: true,
+      await userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'), {
+        pointerEventsCheck: 0,
       });
 
       await waitFor(() => {
@@ -851,8 +851,8 @@ describe('Create case', () => {
       expect(screen.getByTestId('dropdown-connector-resilient-2')).toBeInTheDocument();
     });
 
-    await userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'), undefined, {
-      skipPointerEventsCheck: true,
+    await userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'), {
+      pointerEventsCheck: 0,
     });
     await userEvent.click(screen.getByTestId('create-case-submit'));
 
@@ -996,8 +996,8 @@ describe('Create case', () => {
       expect(screen.getByTestId('dropdown-connector-resilient-2')).toBeInTheDocument();
     });
 
-    await userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'), undefined, {
-      skipPointerEventsCheck: true,
+    await userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'), {
+      pointerEventsCheck: 0,
     });
 
     await userEvent.click(screen.getByTestId('create-case-submit'));

@@ -52,7 +52,7 @@ describe('IlmPhaseFilter', () => {
   });
 
   describe('when dropdown opened', () => {
-    it('shows remaining disabled options', () => {
+    it('shows remaining disabled options', async () => {
       render(
         <TestExternalProviders>
           <TestDataQualityProviders>
@@ -120,9 +120,7 @@ describe('IlmPhaseFilter', () => {
 
         const searchInput = screen.getByTestId('comboBoxSearchInput');
         await userEvent.click(searchInput);
-        userEvent.hover(screen.getByText(option.toLowerCase()), undefined, {
-          skipPointerEventsCheck: true,
-        });
+        userEvent.hover(screen.getByText(option.toLowerCase()), { pointerEventsCheck: 0 });
 
         await waitFor(() =>
           expect(screen.getByRole('tooltip')).toHaveTextContent(tooltipDescription)

@@ -80,9 +80,7 @@ describe.skip('Case Owner Selection', () => {
     expect(screen.queryByText('Observability')).not.toBeInTheDocument();
 
     await userEvent.click(await screen.findByTestId('caseOwnerSuperSelect'));
-    await userEvent.click(await screen.findByText('Observability'), undefined, {
-      skipPointerEventsCheck: true,
-    });
+    await userEvent.click(await screen.findByText('Observability'), { pointerEventsCheck: 0 });
 
     await waitFor(() => {
       // data, isValid

@@ -928,12 +928,10 @@ describe('createCommentUserActionBuilder', () => {
       expect(screen.getByLabelText('My primary 2 button')).toBeInTheDocument();
       expect(screen.queryByLabelText('My primary 3 button')).not.toBeInTheDocument();
 
-      await userEvent.click(screen.getByLabelText('My primary button'), undefined, {
-        skipPointerEventsCheck: true,
-      });
+      await userEvent.click(screen.getByLabelText('My primary button'), { pointerEventsCheck: 0 });
 
-      await userEvent.click(screen.getByLabelText('My primary 2 button'), undefined, {
-        skipPointerEventsCheck: true,
+      await userEvent.click(screen.getByLabelText('My primary 2 button'), {
+        pointerEventsCheck: 0,
       });
 
       expect(onClick).toHaveBeenCalledTimes(2);
@@ -1039,9 +1037,7 @@ describe('createCommentUserActionBuilder', () => {
 
       expect(screen.getByText('My primary 3 button')).toBeInTheDocument();
 
-      await userEvent.click(screen.getByText('My primary 3 button'), undefined, {
-        skipPointerEventsCheck: true,
-      });
+      await userEvent.click(screen.getByText('My primary 3 button'), { pointerEventsCheck: 0 });
 
       expect(onClick).toHaveBeenCalled();
     });
@@ -1098,9 +1094,7 @@ describe('createCommentUserActionBuilder', () => {
       expect(screen.queryByText('Delete attachment')).not.toBeInTheDocument();
       expect(screen.getByText('My button')).toBeInTheDocument();
 
-      await userEvent.click(screen.getByText('My button'), undefined, {
-        skipPointerEventsCheck: true,
-      });
+      await userEvent.click(screen.getByText('My button'), { pointerEventsCheck: 0 });
 
       expect(onClick).toHaveBeenCalledTimes(1);
     });
@@ -1176,12 +1170,8 @@ describe('createCommentUserActionBuilder', () => {
       expect(screen.getByText('My button 2')).toBeInTheDocument();
       expect(screen.getByText('My primary 3 button')).toBeInTheDocument();
 
-      await userEvent.click(screen.getByText('My button'), undefined, {
-        skipPointerEventsCheck: true,
-      });
-      await userEvent.click(screen.getByText('My button 2'), undefined, {
-        skipPointerEventsCheck: true,
-      });
+      await userEvent.click(screen.getByText('My button'), { pointerEventsCheck: 0 });
+      await userEvent.click(screen.getByText('My button 2'), { pointerEventsCheck: 0 });
 
       expect(onClick).toHaveBeenCalledTimes(2);
     });
@@ -1221,9 +1211,7 @@ describe('createCommentUserActionBuilder', () => {
       expect(screen.getByTestId('comment-externalReference-.test')).toBeInTheDocument();
       expect(screen.getByLabelText('My primary button')).toBeInTheDocument();
 
-      await userEvent.click(screen.getByLabelText('My primary button'), undefined, {
-        skipPointerEventsCheck: true,
-      });
+      await userEvent.click(screen.getByLabelText('My primary button'), { pointerEventsCheck: 0 });
 
       expect(onClick).toHaveBeenCalled();
     });

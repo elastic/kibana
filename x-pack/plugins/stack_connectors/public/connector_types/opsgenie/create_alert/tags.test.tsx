@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { screen, render, waitFor, act } from '@testing-library/react';
+import { screen, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Tags } from './tags';
 import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public';
@@ -121,11 +121,7 @@ describe('Tags', () => {
       expect(screen.getByText('The tags of the rule.')).toBeInTheDocument();
     });
 
-    act(() => {
-      await userEvent.click(screen.getByText('The tags of the rule.'), undefined, {
-        skipPointerEventsCheck: true,
-      });
-    });
+    await userEvent.click(screen.getByText('The tags of the rule.'), { pointerEventsCheck: 0 });
 
     await waitFor(() =>
       expect(onChange.mock.calls[0]).toMatchInlineSnapshot(`

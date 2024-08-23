@@ -373,25 +373,17 @@ describe('AlertsTable', () => {
       const renderResult = render(<AlertsTableWithProviders {...tableProps} />);
       await userEvent.click(
         renderResult.container.querySelector('.euiDataGridHeaderCell__button')!,
-        undefined,
-        {
-          skipPointerEventsCheck: true,
-        }
+        { pointerEventsCheck: 0 }
       );
 
       await waitForEuiPopoverOpen();
 
       await userEvent.click(
         renderResult.getByTestId(`dataGridHeaderCellActionGroup-${columns[0].id}`),
-        undefined,
-        {
-          skipPointerEventsCheck: true,
-        }
+        { pointerEventsCheck: 0 }
       );
 
-      await userEvent.click(renderResult.getByTitle('Sort A-Z'), undefined, {
-        skipPointerEventsCheck: true,
-      });
+      await userEvent.click(renderResult.getByTitle('Sort A-Z'), { pointerEventsCheck: 0 });
 
       expect(tableProps.onSortChange).toHaveBeenCalledWith([
         { direction: 'asc', id: 'kibana.alert.rule.name' },
@@ -402,8 +394,8 @@ describe('AlertsTable', () => {
       const renderResult = render(
         <AlertsTableWithProviders {...tableProps} pageIndex={0} pageSize={1} />
       );
-      await userEvent.click(renderResult.getByTestId('pagination-button-1'), undefined, {
-        skipPointerEventsCheck: true,
+      await userEvent.click(renderResult.getByTestId('pagination-button-1'), {
+        pointerEventsCheck: 0,
       });
 
       expect(tableProps.onPageChange).toHaveBeenCalledWith({ pageIndex: 1, pageSize: 1 });
