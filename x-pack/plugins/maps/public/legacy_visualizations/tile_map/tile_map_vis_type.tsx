@@ -5,23 +5,26 @@
  * 2.0.
  */
 
-import React, { lazy } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import { VisTypeDefinition } from '@kbn/visualizations-plugin/public';
+import { dynamic } from '@kbn/shared-ux-utility';
 import { toExpressionAst } from './to_ast';
 import { MapTypes, TileMapVisParams, TILE_MAP_VIS_TYPE } from './types';
-import { LazyWrapper } from '../../lazy_wrapper';
 
 export const title = i18n.translate('xpack.maps.tileMap.vis.title', {
   defaultMessage: 'Coordinate Map',
 });
 
 const LazyTileMapEditor = function (props: VisEditorOptionsProps) {
-  const getLazyComponent = () => {
-    return lazy(() => import('./tile_map_editor'));
-  };
-  return <LazyWrapper getLazyComponent={getLazyComponent} lazyComponentProps={props} />;
+  const Component = dynamic(async () => {
+    const { TileMapEditor } = await import('./tile_map_editor');
+    return {
+      default: TileMapEditor,
+    };
+  });
+  return <Component {...props} />;
 };
 
 export const tileMapVisType = {

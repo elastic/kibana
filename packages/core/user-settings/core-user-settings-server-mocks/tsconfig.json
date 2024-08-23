@@ -9,6 +9,7 @@
   },
   "kbn_references": [
     "@kbn/core-user-settings-server-internal",
+    "@kbn/utility-types",
   ],
   "include": [
     "**/*.ts",

@@ -11,9 +11,18 @@ export { getESQLAdHocDataview, getIndexForESQLQuery } from './utils/get_esql_adh
 export { getInitialESQLQuery } from './utils/get_initial_esql_query';
 export { getESQLWithSafeLimit } from './utils/get_esql_with_safe_limit';
 export {
-  getIndexPatternFromSQLQuery,
   getIndexPatternFromESQLQuery,
   getLimitFromESQLQuery,
   removeDropCommandsFromESQLQuery,
+  hasTransformationalCommand,
+  getTimeFieldFromESQLQuery,
 } from './utils/query_parsing_helpers';
-export { appendToESQLQuery } from './utils/append_to_query';
+export { appendToESQLQuery, appendWhereClauseToESQLQuery } from './utils/append_to_query';
+export {
+  getESQLQueryColumns,
+  getESQLQueryColumnsRaw,
+  getESQLResults,
+  formatESQLColumns,
+  getStartEndParams,
+  hasStartEndParams,
+} from './utils/run_query';

@@ -20,6 +20,7 @@ jest.mock('../lib');
 
 const config = new Config(
   true,
+  false,
   {
     version: '8.0.0',
     engines: {

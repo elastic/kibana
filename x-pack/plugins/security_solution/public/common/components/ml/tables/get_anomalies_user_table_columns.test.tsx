@@ -6,7 +6,6 @@
  */
 
 import { UsersType } from '../../../../explore/users/store/model';
-import '../../../mock/match_media';
 import { getAnomaliesUserTableColumnsCurated } from './get_anomalies_user_table_columns';
 
 import * as i18n from './translations';

@@ -17,6 +17,11 @@ import {
 export interface InternalStaticAssets {
   getHrefBase(): string;
   /**
+   * Returns true if a CDN has been configured and should be used to serve static assets.
+   * Should only be used in scenarios where different behavior has to be used when CDN is enabled or not.
+   */
+  isUsingCdn(): boolean;
+  /**
    * Intended for use by server code rendering UI or generating links to static assets
    * that will ultimately be called from the browser and must respect settings like
    * serverBasePath
@@ -65,6 +70,10 @@ export class StaticAssets implements InternalStaticAssets {
       this.assetsHrefBase = suffixPathnameToPathname(basePath.serverBasePath, shaDigest);
     }
     this.assetsServerPathBase = `/${shaDigest}`;
+  }
+
+  public isUsingCdn() {
+    return this.hasCdnHost;
   }
 
   /**

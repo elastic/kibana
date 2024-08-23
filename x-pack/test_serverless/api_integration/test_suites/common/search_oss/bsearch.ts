@@ -10,6 +10,7 @@ import request from 'superagent';
 import { inflateResponse } from '@kbn/bfetch-plugin/public/streaming';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { BFETCH_ROUTE_VERSION_LATEST } from '@kbn/bfetch-plugin/common';
+import { RoleCredentials } from '../../../../shared/services';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { painlessErrReq } from './painless_err_req';
 import { verifyErrorResponse } from './verify_error';
@@ -24,18 +25,28 @@ function parseBfetchResponse(resp: request.Response, compressed: boolean = false
 }
 
 export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const svlCommonApi = getService('svlCommonApi');
 
+  const svlUserManager = getService('svlUserManager');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  let roleAuthc: RoleCredentials;
+
   describe('bsearch', () => {
+    before(async () => {
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
+    });
+    after(async () => {
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+    });
     describe('post', () => {
       it('should return 200 a single response', async () => {
-        const resp = await supertest
+        const resp = await supertestWithoutAuth
           .post(`/internal/bsearch`)
           .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
           // TODO: API requests in Serverless require internal request headers
           .set(svlCommonApi.getInternalRequestHeader())
+          .set(roleAuthc.apiKeyHeader)
           .send({
             batch: [
               {
@@ -66,11 +77,12 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should return 200 a single response from compressed', async () => {
-        const resp = await supertest
+        const resp = await supertestWithoutAuth
           .post(`/internal/bsearch?compress=true`)
           .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
           // TODO: API requests in Serverless require internal request headers
           .set(svlCommonApi.getInternalRequestHeader())
+          .set(roleAuthc.apiKeyHeader)
           .send({
             batch: [
               {
@@ -101,11 +113,12 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should return a batch of successful responses', async () => {
-        const resp = await supertest
+        const resp = await supertestWithoutAuth
           .post(`/internal/bsearch`)
           .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
           // TODO: API requests in Serverless require internal request headers
           .set(svlCommonApi.getInternalRequestHeader())
+          .set(roleAuthc.apiKeyHeader)
           .send({
             batch: [
               {
@@ -146,11 +159,12 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should return error for not found strategy', async () => {
-        const resp = await supertest
+        const resp = await supertestWithoutAuth
           .post(`/internal/bsearch`)
           .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
           // TODO: API requests in Serverless require internal request headers
           .set(svlCommonApi.getInternalRequestHeader())
+          .set(roleAuthc.apiKeyHeader)
           .send({
             batch: [
               {
@@ -179,11 +193,12 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should return 400 when index type is provided in "es" strategy', async () => {
-        const resp = await supertest
+        const resp = await supertestWithoutAuth
           .post(`/internal/bsearch`)
           .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
           // TODO: API requests in Serverless require internal request headers
           .set(svlCommonApi.getInternalRequestHeader())
+          .set(roleAuthc.apiKeyHeader)
           .send({
             batch: [
               {
@@ -221,11 +236,12 @@ export default function ({ getService }: FtrProviderContext) {
           await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
         });
         it('should return 400 "search_phase_execution_exception" for Painless error in "es" strategy', async () => {
-          const resp = await supertest
+          const resp = await supertestWithoutAuth
             .post(`/internal/bsearch`)
             .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
             // TODO: API requests in Serverless require internal request headers
             .set(svlCommonApi.getInternalRequestHeader())
+            .set(roleAuthc.apiKeyHeader)
             .send({
               batch: [
                 {

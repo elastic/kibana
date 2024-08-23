@@ -23,11 +23,15 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
     const remoteIndexPatternString = 'ftr-remote:logstash-*';
     const localFixtures = {
       lensBasic: 'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json',
+      lensLegendStatistics:
+        'x-pack/test/functional/fixtures/kbn_archiver/lens/legend_statistics.json',
       lensDefault: 'x-pack/test/functional/fixtures/kbn_archiver/lens/default',
     };
 
     const remoteFixtures = {
       lensBasic: 'x-pack/test/functional/fixtures/kbn_archiver/lens/ccs/lens_basic.json',
+      lensLegendStatistics:
+        'x-pack/test/functional/fixtures/kbn_archiver/lens/legend_statistics.json',
       lensDefault: 'x-pack/test/functional/fixtures/kbn_archiver/lens/ccs/default',
     };
     let esNode: EsArchiver;
@@ -81,6 +85,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
     loadTestFile(require.resolve('./error_handling')); // 1m 8s
     loadTestFile(require.resolve('./lens_tagging')); // 1m 9s
     loadTestFile(require.resolve('./workspace_size'));
+    loadTestFile(require.resolve('./legend_statistics'));
     // keep these last in the group in this order because they are messing with the default saved objects
     loadTestFile(require.resolve('./lens_reporting')); // 3m
     loadTestFile(require.resolve('./rollup')); // 1m 30s

@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, FC, PropsWithChildren } from 'react';
 import { EuiCollapsibleNavBeta } from '@elastic/eui';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 const LOCAL_STORAGE_IS_COLLAPSED_KEY = 'PROJECT_NAVIGATION_COLLAPSED' as const;
 
-export const ProjectNavigation: React.FC<{
-  toggleSideNav: (isVisible: boolean) => void;
-}> = ({ children, toggleSideNav }) => {
+export const ProjectNavigation: FC<
+  PropsWithChildren<{ toggleSideNav: (isVisible: boolean) => void }>
+> = ({ children, toggleSideNav }) => {
   const isMounted = useRef(false);
   const [isCollapsed, setIsCollapsed] = useLocalStorage(LOCAL_STORAGE_IS_COLLAPSED_KEY, false);
   const onCollapseToggle = (nextIsCollapsed: boolean) => {

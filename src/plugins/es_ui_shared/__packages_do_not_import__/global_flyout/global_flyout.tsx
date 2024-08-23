@@ -14,6 +14,8 @@ import React, {
   useMemo,
   useEffect,
   useRef,
+  FC,
+  PropsWithChildren,
 } from 'react';
 import { EuiFlyout } from '@elastic/eui';
 
@@ -39,7 +41,7 @@ const DEFAULT_FLYOUT_PROPS = {
   maxWidth: 500,
 };
 
-export const GlobalFlyoutProvider: React.FC = ({ children }) => {
+export const GlobalFlyoutProvider: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const [showFlyout, setShowFlyout] = useState(false);
   const [activeContent, setActiveContent] = useState<Content<any> | undefined>(undefined);
 

@@ -13,7 +13,7 @@ import { getUniquePromptContextId } from '../../assistant_context/helpers';
 import type { PromptContext } from '../prompt_context/types';
 
 interface UseAssistantOverlay {
-  showAssistantOverlay: (show: boolean) => void;
+  showAssistantOverlay: (show: boolean, silent?: boolean) => void;
   promptContextId: string;
 }
 
@@ -68,8 +68,11 @@ export const useAssistantOverlay = (
    */
   tooltip: PromptContext['tooltip'],
 
+  /** Required to identify the availability of the Assistant for the current license level */
+  isAssistantEnabled: boolean,
+
   /**
-   * Optionally provide a map of replacements associated with the context, i.e. replacements for an insight that's provided as context
+   * Optionally provide a map of replacements associated with the context, i.e. replacements for an attack discovery that's provided as context
    */
   replacements?: Replacements | null
 ): UseAssistantOverlay => {
@@ -99,8 +102,9 @@ export const useAssistantOverlay = (
   } = useAssistantContext();
 
   // proxy show / hide calls to assistant context, using our internal prompt context id:
+  // silent:boolean doesn't show the toast notification if the conversation is not found
   const showAssistantOverlay = useCallback(
-    (showOverlay: boolean) => {
+    async (showOverlay: boolean) => {
       if (promptContextId != null) {
         assistantContextShowOverlay({
           showOverlay,

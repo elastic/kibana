@@ -30,6 +30,12 @@ export class ListingTableService extends FtrService {
     toggleButtonTestSubject: 'tagFilterPopoverButton',
   });
 
+  private readonly userPopoverToggle = this.ctx.getService('menuToggle').create({
+    name: 'User Popover',
+    menuTestSubject: 'userSelectableList',
+    toggleButtonTestSubject: 'userFilterPopoverButton',
+  });
+
   private async getSearchFilter() {
     return await this.testSubjects.find('tableListSearchBox');
   }
@@ -79,7 +85,7 @@ export class ListingTableService extends FtrService {
   }
 
   public async waitUntilTableIsLoaded() {
-    return this.retry.try(async () => {
+    await this.retry.try(async () => {
       const isLoaded = await this.find.existsByDisplayedByCssSelector(
         '[data-test-subj="itemsInMemTable"]:not(.euiBasicTable-loading)'
       );
@@ -142,6 +148,29 @@ export class ListingTableService extends FtrService {
   public async closeTagPopover(): Promise<void> {
     this.log.debug('ListingTable.closeTagPopover');
     await this.tagPopoverToggle.close();
+  }
+
+  /**
+   * Select users in the searchbar's user filter.
+   */
+  public async selectUsers(...userNames: string[]): Promise<void> {
+    await this.openUsersPopover();
+    // select users
+    for (const userName of userNames) {
+      await this.testSubjects.click(`userProfileSelectableOption-${userName}`);
+    }
+    await this.closeUsersPopover();
+    await this.waitUntilTableIsLoaded();
+  }
+
+  public async openUsersPopover(): Promise<void> {
+    this.log.debug('ListingTable.openUsersPopover');
+    await this.userPopoverToggle.open();
+  }
+
+  public async closeUsersPopover(): Promise<void> {
+    this.log.debug('ListingTable.closeUsersPopover');
+    await this.userPopoverToggle.close();
   }
 
   /**
@@ -235,6 +264,10 @@ export class ListingTableService extends FtrService {
 
       await searchFilter.type(name);
       await this.common.pressEnterKey();
+      const filterValue = await this.getSearchFilterValue();
+      if (filterValue !== name) {
+        throw new Error(`the input value has not updated properly`);
+      }
     });
 
     await this.waitUntilTableIsLoaded();

@@ -11,28 +11,24 @@ import React from 'react';
 import { SameFamily } from '../../data_quality_panel/same_family';
 import { CodeDanger, CodeSuccess } from '../../styles';
 import * as i18n from '../translations';
-import type { EnrichedFieldMetadata } from '../../types';
+import type { EcsBasedFieldMetadata } from '../../types';
 
 export const EMPTY_PLACEHOLDER = '--';
 
 export const getIncompatibleMappingsTableColumns = (): Array<
-  EuiTableFieldDataColumnType<EnrichedFieldMetadata>
+  EuiTableFieldDataColumnType<EcsBasedFieldMetadata>
 > => [
   {
     field: 'indexFieldName',
     name: i18n.FIELD,
     sortable: true,
     truncateText: false,
-    width: '25%',
+    width: '15%',
   },
   {
     field: 'type',
     name: i18n.ECS_MAPPING_TYPE_EXPECTED,
-    render: (type: string) => (
-      <CodeSuccess data-test-subj="codeSuccess">
-        {type != null ? type : EMPTY_PLACEHOLDER}
-      </CodeSuccess>
-    ),
+    render: (type: string) => <CodeSuccess data-test-subj="codeSuccess">{type}</CodeSuccess>,
     sortable: true,
     truncateText: false,
     width: '25%',
@@ -58,6 +54,6 @@ export const getIncompatibleMappingsTableColumns = (): Array<
     name: i18n.ECS_DESCRIPTION,
     sortable: false,
     truncateText: false,
-    width: '25%',
+    width: '35%',
   },
 ];

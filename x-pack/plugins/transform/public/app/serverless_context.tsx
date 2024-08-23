@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React, { createContext, useContext, useMemo } from 'react';
 import type { ExperimentalFeatures } from '../../common/config';
 
@@ -16,9 +16,11 @@ export const EnabledFeaturesContext = createContext({
   showNodeInfo: true,
 });
 
-export const EnabledFeaturesContextProvider: FC<{
-  enabledFeatures: TransformEnabledFeatures;
-}> = (props) => {
+export const EnabledFeaturesContextProvider: FC<
+  PropsWithChildren<{
+    enabledFeatures: TransformEnabledFeatures;
+  }>
+> = (props) => {
   const { children, enabledFeatures } = props;
   return (
     <EnabledFeaturesContext.Provider value={enabledFeatures}>
@@ -30,9 +32,11 @@ export const EnabledFeaturesContextProvider: FC<{
 export const ExperimentalFeaturesContext = createContext<ExperimentalFeatures>({
   ruleFormV2Enabled: false,
 });
-export const ExperimentalFeaturesContextProvider: FC<{
-  experimentalFeatures: ExperimentalFeatures;
-}> = (props) => {
+export const ExperimentalFeaturesContextProvider: FC<
+  PropsWithChildren<{
+    experimentalFeatures: ExperimentalFeatures;
+  }>
+> = (props) => {
   const { children, experimentalFeatures } = props;
   return (
     <ExperimentalFeaturesContext.Provider value={experimentalFeatures}>

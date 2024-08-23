@@ -39,6 +39,12 @@ import { DuplicateDataViewError, DataViewInsufficientAccessError } from '../erro
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 
+const createFetchFieldErrorTitle = ({ id, title }: { id?: string; title?: string }) =>
+  i18n.translate('dataViews.fetchFieldErrorTitle', {
+    defaultMessage: 'Error fetching fields for data view {title} (ID: {id})',
+    values: { id, title },
+  });
+
 /*
  * Attributes of the data view saved object
  * @public
@@ -188,6 +194,12 @@ export interface DataViewsServicePublicMethods {
    */
   find: (search: string, size?: number) => Promise<DataView[]>;
   /**
+   * Find and load lazy data views by title.
+   * @param search - Search string
+   * @param size - Number of results to return
+   */
+  findLazy: (search: string, size?: number) => Promise<DataViewLazy[]>;
+  /**
    * Get data view by id.
    * @param id - Id of the data view to get.
    * @param displayErrors - If set false, API consumer is responsible for displaying and handling errors.
@@ -282,7 +294,7 @@ export interface DataViewsServicePublicMethods {
    * @param displayErrors - If set false, API consumer is responsible for displaying and handling errors.
    */
   updateSavedObject: (
-    indexPattern: DataView,
+    indexPattern: AbstractDataView,
     saveAttempts?: number,
     ignoreErrors?: boolean,
     displayErrors?: boolean
@@ -303,6 +315,7 @@ export interface DataViewsServicePublicMethods {
   getAllDataViewLazy: () => Promise<DataViewLazy[]>;
 
   getDataViewLazy: (id: string) => Promise<DataViewLazy>;
+  getDataViewLazyFromCache: (id: string) => Promise<DataViewLazy | undefined>;
 
   createDataViewLazy: (spec: DataViewSpec) => Promise<DataViewLazy>;
 
@@ -436,6 +449,25 @@ export class DataViewsService {
   };
 
   /**
+   * Find and load lazy data views by title.
+   * @param search Search string
+   * @param size  Number of data views to return
+   * @returns DataViewLazy[]
+   */
+  findLazy = async (search: string, size: number = 10): Promise<DataViewLazy[]> => {
+    const savedObjects = await this.savedObjectsClient.find({
+      fields: ['title'],
+      search,
+      searchFields: ['title', 'name'],
+      perPage: size,
+    });
+    const getIndexPatternPromises = savedObjects.map(async (savedObject) => {
+      return await this.getDataViewLazy(savedObject.id);
+    });
+    return await Promise.all(getIndexPatternPromises);
+  };
+
+  /**
    * Gets list of index pattern ids with titles.
    * @param refresh Force refresh of index pattern list
    */
@@ -481,8 +513,10 @@ export class DataViewsService {
    */
   clearInstanceCache = (id?: string) => {
     if (id) {
+      this.dataViewLazyCache.delete(id);
       this.dataViewCache.delete(id);
     } else {
+      this.dataViewLazyCache.clear();
       this.dataViewCache.clear();
     }
   };
@@ -661,9 +695,9 @@ export class DataViewsService {
         this.onError(
           err,
           {
-            title: i18n.translate('dataViews.fetchFieldErrorTitle', {
-              defaultMessage: 'Error fetching fields for data view {title} (ID: {id})',
-              values: { id: dataView.id, title: dataView.getIndexPattern() },
+            title: createFetchFieldErrorTitle({
+              id: dataView.id,
+              title: dataView.getIndexPattern(),
             }),
           },
           dataView.getIndexPattern()
@@ -722,10 +756,7 @@ export class DataViewsService {
       this.onError(
         err,
         {
-          title: i18n.translate('dataViews.fetchFieldErrorTitle', {
-            defaultMessage: 'Error fetching fields for data view {title} (ID: {id})',
-            values: { id, title },
-          }),
+          title: createFetchFieldErrorTitle({ id, title }),
         },
         title
       );
@@ -884,10 +915,7 @@ export class DataViewsService {
           this.onError(
             err,
             {
-              title: i18n.translate('dataViews.fetchFieldErrorTitle', {
-                defaultMessage: 'Error fetching fields for data view {title} (ID: {id})',
-                values: { id: savedObject.id, title: spec.title },
-              }),
+              title: createFetchFieldErrorTitle({ id: savedObject.id, title: spec.title }),
             },
             spec.title || ''
           );
@@ -984,6 +1012,10 @@ export class DataViewsService {
       this.dataViewLazyCache.set(id, dataViewLazyPromise);
       return dataViewLazyPromise;
     }
+  };
+
+  getDataViewLazyFromCache = async (id: string) => {
+    return this.dataViewLazyCache.get(id);
   };
 
   /**
@@ -1411,7 +1443,7 @@ export class DataViewsService {
   // unsaved DataViewLazy changes will not be reflected in the returned DataView
   async toDataView(dataViewLazy: DataViewLazy) {
     // if persisted
-    if (dataViewLazy.id) {
+    if (dataViewLazy.id && dataViewLazy.isPersisted()) {
       return this.get(dataViewLazy.id);
     }
 
@@ -1435,7 +1467,7 @@ export class DataViewsService {
   // unsaved DataView changes will not be reflected in the returned DataViewLazy
   async toDataViewLazy(dataView: DataView) {
     // if persisted
-    if (dataView.id) {
+    if (dataView.id && dataView.isPersisted()) {
       const dataViewLazy = await this.getDataViewLazy(dataView.id);
       return dataViewLazy!;
     }

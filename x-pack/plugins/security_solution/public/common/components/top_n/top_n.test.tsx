@@ -10,7 +10,6 @@ import { mount } from 'enzyme';
 import React from 'react';
 import { waitFor } from '@testing-library/react';
 
-import '../../mock/match_media';
 import { TestProviders, mockIndexPattern } from '../../mock';
 
 import { allEvents, defaultOptions } from './helpers';

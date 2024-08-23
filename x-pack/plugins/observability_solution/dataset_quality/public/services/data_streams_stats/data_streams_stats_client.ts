@@ -7,28 +7,27 @@
 
 import { HttpStart } from '@kbn/core/public';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
-import { Integration } from '../../../common/data_streams_stats/integration';
 import {
   getDataStreamsDegradedDocsStatsResponseRt,
   getDataStreamsStatsResponseRt,
-  getDataStreamsEstimatedDataInBytesResponseRt,
   getIntegrationsResponseRt,
+  getNonAggregatableDatasetsRt,
+  IntegrationResponse,
+  NonAggregatableDatasets,
 } from '../../../common/api_types';
 import { DEFAULT_DATASET_TYPE } from '../../../common/constants';
 import {
   DataStreamStatServiceResponse,
   GetDataStreamsDegradedDocsStatsQuery,
   GetDataStreamsDegradedDocsStatsResponse,
-  GetDataStreamsStatsError,
   GetDataStreamsStatsQuery,
   GetDataStreamsStatsResponse,
-  GetDataStreamsEstimatedDataInBytesParams,
-  GetDataStreamsEstimatedDataInBytesResponse,
   GetIntegrationsParams,
-  IntegrationsResponse,
+  GetNonAggregatableDataStreamsParams,
 } from '../../../common/data_streams_stats';
-import { DataStreamStat } from '../../../common/data_streams_stats/data_stream_stat';
+import { Integration } from '../../../common/data_streams_stats/integration';
 import { IDataStreamsStatsClient } from './types';
+import { DatasetQualityError } from '../../../common/errors';
 
 export class DataStreamsStatsClient implements IDataStreamsStatsClient {
   constructor(private readonly http: HttpStart) {}
@@ -41,16 +40,16 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
         query: params,
       })
       .catch((error) => {
-        throw new GetDataStreamsStatsError(`Failed to fetch data streams stats: ${error}`);
+        throw new DatasetQualityError(`Failed to fetch data streams stats: ${error}`, error);
       });
 
-    const { dataStreamsStats } = decodeOrThrow(
+    const { dataStreamsStats, datasetUserPrivileges } = decodeOrThrow(
       getDataStreamsStatsResponseRt,
       (message: string) =>
-        new GetDataStreamsStatsError(`Failed to decode data streams stats response: ${message}`)
+        new DatasetQualityError(`Failed to decode data streams stats response: ${message}`)
     )(response);
 
-    return dataStreamsStats.map(DataStreamStat.create);
+    return { dataStreamsStats, datasetUserPrivileges };
   }
 
   public async getDataStreamsDegradedStats(params: GetDataStreamsDegradedDocsStatsQuery) {
@@ -65,13 +64,16 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
         }
       )
       .catch((error) => {
-        throw new GetDataStreamsStatsError(`Failed to fetch data streams degraded stats: ${error}`);
+        throw new DatasetQualityError(
+          `Failed to fetch data streams degraded stats: ${error}`,
+          error
+        );
       });
 
     const { degradedDocs } = decodeOrThrow(
       getDataStreamsDegradedDocsStatsResponseRt,
       (message: string) =>
-        new GetDataStreamsStatsError(
+        new DatasetQualityError(
           `Failed to decode data streams degraded docs stats response: ${message}`
         )
     )(response);
@@ -79,48 +81,42 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
     return degradedDocs;
   }
 
-  public async getDataStreamsEstimatedDataInBytes(
-    params: GetDataStreamsEstimatedDataInBytesParams
-  ) {
+  public async getNonAggregatableDatasets(params: GetNonAggregatableDataStreamsParams) {
     const response = await this.http
-      .get<GetDataStreamsEstimatedDataInBytesResponse>(
-        `/internal/dataset_quality/data_streams/estimated_data`,
-        {
+      .get<NonAggregatableDatasets>('/internal/dataset_quality/data_streams/non_aggregatable', {
+        query: {
           ...params,
-        }
-      )
+          type: DEFAULT_DATASET_TYPE,
+        },
+      })
       .catch((error) => {
-        throw new GetDataStreamsStatsError(
-          `Failed to fetch data streams estimated data in bytes": ${error}`
-        );
+        throw new DatasetQualityError(`Failed to fetch non aggregatable datasets: ${error}`, error);
       });
 
-    const dataStreamsEstimatedDataInBytes = decodeOrThrow(
-      getDataStreamsEstimatedDataInBytesResponseRt,
+    const nonAggregatableDatasets = decodeOrThrow(
+      getNonAggregatableDatasetsRt,
       (message: string) =>
-        new GetDataStreamsStatsError(
-          `Failed to decode data streams estimated data in bytes response: ${message}"`
-        )
+        new DatasetQualityError(`Failed to fetch non aggregatable datasets: ${message}`)
     )(response);
 
-    return dataStreamsEstimatedDataInBytes;
+    return nonAggregatableDatasets;
   }
 
   public async getIntegrations(
     params: GetIntegrationsParams['query'] = { type: DEFAULT_DATASET_TYPE }
-  ): Promise<IntegrationsResponse> {
+  ): Promise<Integration[]> {
     const response = await this.http
-      .get<GetDataStreamsStatsResponse>('/internal/dataset_quality/integrations', {
+      .get<IntegrationResponse>('/internal/dataset_quality/integrations', {
         query: params,
       })
       .catch((error) => {
-        throw new GetDataStreamsStatsError(`Failed to fetch integrations: ${error}`);
+        throw new DatasetQualityError(`Failed to fetch integrations: ${error}`, error);
       });
 
     const { integrations } = decodeOrThrow(
       getIntegrationsResponseRt,
       (message: string) =>
-        new GetDataStreamsStatsError(`Failed to decode integrations response: ${message}`)
+        new DatasetQualityError(`Failed to decode integrations response: ${message}`)
     )(response);
 
     return integrations.map(Integration.create);

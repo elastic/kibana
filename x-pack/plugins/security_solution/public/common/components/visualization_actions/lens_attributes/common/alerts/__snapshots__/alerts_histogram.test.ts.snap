@@ -168,12 +168,14 @@ Object {
       "legend": Object {
         "isVisible": true,
         "legendSize": "xlarge",
+        "legendStats": Array [
+          "currentAndLastValue",
+        ],
         "position": "right",
       },
       "preferredSeriesType": "bar_stacked",
       "title": "Empty XY chart",
       "valueLabels": "hide",
-      "valuesInLegend": true,
       "yLeftExtent": Object {
         "mode": "full",
       },
@@ -331,12 +333,14 @@ Object {
       "legend": Object {
         "isVisible": true,
         "legendSize": "xlarge",
+        "legendStats": Array [
+          "currentAndLastValue",
+        ],
         "position": "right",
       },
       "preferredSeriesType": "bar_stacked",
       "title": "Empty XY chart",
       "valueLabels": "hide",
-      "valuesInLegend": true,
       "yLeftExtent": Object {
         "mode": "full",
       },

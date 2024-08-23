@@ -139,6 +139,9 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
     stats,
   };
 
+  // Override storybookConfig mainFields instead of merging with config
+  delete storybookConfig.resolve?.mainFields;
+
   const updatedModuleRules = [];
   // clone and modify the module.rules config provided by storybook so that the default babel plugins run after the typescript preset
   for (const originalRule of storybookConfig.module?.rules ?? []) {

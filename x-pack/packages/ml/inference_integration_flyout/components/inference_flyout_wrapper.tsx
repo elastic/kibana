@@ -78,7 +78,7 @@ export interface SaveMappingOnClick {
     taskType: InferenceTaskType,
     modelConfig: ModelConfig
   ) => void;
-  isCreateInferenceApiLoading: boolean;
+  isCreateInferenceApiLoading?: boolean;
 }
 export interface DocumentationProps {
   elserv2documentationUrl?: string;

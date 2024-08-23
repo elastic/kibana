@@ -11,18 +11,10 @@
   "server": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-deprecations-server-internal",
-        "id": "def-common.InternalDeprecationsServiceStart",
+        "id": "def-server.InternalDeprecationsServiceStart",
         "type": "Interface",
         "tags": [],
         "label": "InternalDeprecationsServiceStart",
@@ -33,7 +25,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-deprecations-server-internal",
-            "id": "def-common.InternalDeprecationsServiceStart.asScopedToClient",
+            "id": "def-server.InternalDeprecationsServiceStart.asScopedToClient",
             "type": "Function",
             "tags": [],
             "label": "asScopedToClient",
@@ -44,25 +36,25 @@
               "(esClient: ",
               {
                 "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-common.IScopedClusterClient",
+                "section": "def-server.IScopedClusterClient",
                 "text": "IScopedClusterClient"
               },
               ", savedObjectsClient: ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-common.SavedObjectsClientContract",
+                "section": "def-server.SavedObjectsClientContract",
                 "text": "SavedObjectsClientContract"
               },
               ") => ",
               {
                 "pluginId": "@kbn/core-deprecations-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreDeprecationsServerPluginApi",
-                "section": "def-common.DeprecationsClient",
+                "section": "def-server.DeprecationsClient",
                 "text": "DeprecationsClient"
               }
             ],
@@ -72,7 +64,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-deprecations-server-internal",
-                "id": "def-common.InternalDeprecationsServiceStart.asScopedToClient.$1",
+                "id": "def-server.InternalDeprecationsServiceStart.asScopedToClient.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "esClient",
@@ -80,9 +72,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-elasticsearch-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                    "section": "def-common.IScopedClusterClient",
+                    "section": "def-server.IScopedClusterClient",
                     "text": "IScopedClusterClient"
                   }
                 ],
@@ -93,7 +85,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-deprecations-server-internal",
-                "id": "def-common.InternalDeprecationsServiceStart.asScopedToClient.$2",
+                "id": "def-server.InternalDeprecationsServiceStart.asScopedToClient.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "savedObjectsClient",
@@ -101,9 +93,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-common.SavedObjectsClientContract",
+                    "section": "def-server.SavedObjectsClientContract",
                     "text": "SavedObjectsClientContract"
                   }
                 ],
@@ -119,6 +111,14 @@
         "initialIsOpen": false
       }
     ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
     "enums": [],
     "misc": [],
     "objects": []

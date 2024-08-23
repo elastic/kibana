@@ -1,7 +1,7 @@
 post:
   summary: Delete agent policy by ID
   tags:
-    - Agent policies
+    - Elastic Agent policies
   operationId: delete-agent-policy
   responses:
     '200':
@@ -28,6 +28,9 @@ post:
           properties:
             agentPolicyId:
               type: string
+            force:
+              type: boolean
+              description: bypass validation checks that can prevent agent policy deletion
           required:
             - agentPolicyId
   parameters:

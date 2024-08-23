@@ -15,7 +15,10 @@
     "@kbn/typed-react-router-config",
     "@kbn/serverless",
     "@kbn/config-schema",
-    "@kbn/core-plugins-server"
+    "@kbn/core-plugins-server",
+    "@kbn/features-plugin",
+    "@kbn/config",
+    "@kbn/doc-links"
   ],
   "exclude": ["target/**/*"]
 }

@@ -112,6 +112,7 @@ describe('get()', () => {
     const result = await alertsClient.get({ id: '1', index: '.alerts-observability.apm.alerts' });
     expect(result).toMatchInlineSnapshot(`
       Object {
+        "_index": ".alerts-observability.apm.alerts",
         "kibana.alert.rule.consumer": "apm",
         "kibana.alert.rule.rule_type_id": "apm.error_rate",
         "kibana.alert.status": "active",
@@ -161,6 +162,7 @@ describe('get()', () => {
                 "should": Array [],
               },
             },
+            "runtime_mappings": undefined,
             "size": undefined,
             "sort": Array [
               Object {
@@ -346,6 +348,7 @@ describe('get()', () => {
 
       expect(result).toMatchInlineSnapshot(`
         Object {
+          "_index": ".alerts-observability.apm.alerts",
           "kibana.alert.rule.consumer": "apm",
           "kibana.alert.rule.rule_type_id": "apm.error_rate",
           "kibana.alert.status": "active",

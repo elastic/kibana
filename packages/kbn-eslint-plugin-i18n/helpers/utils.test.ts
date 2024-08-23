@@ -65,7 +65,6 @@ describe('Utils', () => {
     it('should leave special characters inside sentences alone', () => {
       expect(getTranslatableValueFromString('Hey, you.')).toBe('Hey, you.');
       expect(getTranslatableValueFromString('Hey, "you".')).toBe('Hey, "you".');
-      expect(getTranslatableValueFromString("Hey, 'you'.")).toBe("Hey, 'you'.");
       expect(getTranslatableValueFromString('     Hey, you.   ')).toBe('Hey, you.');
       expect(
         getTranslatableValueFromString(`     Hey,
@@ -84,6 +83,10 @@ describe('Utils', () => {
       expect(getTranslatableValueFromString('   Hey, this is great! Success.   ')).toBe(
         'Hey, this is great! Success.'
       );
+    });
+
+    it('should escape single quotes', () => {
+      expect(getTranslatableValueFromString("Hey, 'you'.")).toBe("Hey, \\'you\\'.");
     });
   });
 

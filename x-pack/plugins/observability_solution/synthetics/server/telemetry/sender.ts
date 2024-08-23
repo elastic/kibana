@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { exhaustMap, Subject, takeUntil, timer } from 'rxjs';
 import type { CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { TelemetryPluginStart, TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
 
@@ -26,10 +27,10 @@ export class TelemetryEventsSender {
   private readonly initialCheckDelayMs = 10 * 1000;
   private readonly checkIntervalMs = 30 * 1000;
   private readonly logger: Logger;
+  private readonly stop$ = new Subject<void>();
 
   private telemetryStart?: TelemetryPluginStart;
   private telemetrySetup?: TelemetryPluginSetup;
-  private intervalId?: NodeJS.Timeout;
   private isSending = false;
   private queuesPerChannel: { [channel: string]: TelemetryQueue<any> } = {};
   private isOptedIn?: boolean = true; // Assume true until the first check
@@ -52,16 +53,16 @@ export class TelemetryEventsSender {
     this.licenseInfo = await this.fetchLicenseInfo();
 
     this.logger.debug(`Starting local task`);
-    setTimeout(() => {
-      this.sendIfDue();
-      this.intervalId = setInterval(() => this.sendIfDue(), this.checkIntervalMs);
-    }, this.initialCheckDelayMs);
+    timer(this.initialCheckDelayMs, this.checkIntervalMs)
+      .pipe(
+        takeUntil(this.stop$),
+        exhaustMap(() => this.sendIfDue())
+      )
+      .subscribe();
   }
 
   public stop() {
-    if (this.intervalId) {
-      clearInterval(this.intervalId);
-    }
+    this.stop$.next();
   }
 
   public queueTelemetryEvents<T extends MonitorUpdateTelemetryChannel>(
@@ -139,7 +140,7 @@ export class TelemetryEventsSender {
 
       queue.clearEvents();
 
-      this.logger.debug(JSON.stringify(events));
+      this.logger.debug(() => JSON.stringify(events));
 
       await this.send(events, telemetryUrl);
     } catch (err) {
@@ -185,10 +186,12 @@ export class TelemetryEventsSender {
         },
         timeout: 5000,
       });
-      this.logger.debug(`Events sent!. Response: ${resp.status} ${JSON.stringify(resp.data)}`);
+      this.logger.debug(
+        () => `Events sent!. Response: ${resp.status} ${JSON.stringify(resp.data)}`
+      );
     } catch (err) {
       this.logger.debug(
-        `Error sending events: ${err.response.status} ${JSON.stringify(err.response.data)}`
+        () => `Error sending events: ${err.response.status} ${JSON.stringify(err.response.data)}`
       );
     }
   }

@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { parsedPidOrEntityIdParameter, parsedExecuteTimeout } from './utils';
+import { parsedKillOrSuspendParameter, parsedExecuteTimeout } from './utils';
 
 describe('Endpoint Responder - Utilities', () => {
-  describe('when using parsedPidOrEntityIdParameter()', () => {
+  describe('when using parsedKillOrSuspendParameter()', () => {
     it('should parse a pid as a number and return proper params', () => {
-      const parameters = parsedPidOrEntityIdParameter({ pid: ['123'] });
+      const parameters = parsedKillOrSuspendParameter({ pid: ['123'] });
       expect(parameters).toEqual({ pid: 123 });
     });
 
     it('should parse an entity id correctly and return proper params', () => {
-      const parameters = parsedPidOrEntityIdParameter({ entityId: ['123qwe'] });
+      const parameters = parsedKillOrSuspendParameter({ entityId: ['123qwe'] });
       expect(parameters).toEqual({ entity_id: '123qwe' });
     });
 
     it('should return entity id with empty string if no params are defined', () => {
-      const parameters = parsedPidOrEntityIdParameter({});
+      const parameters = parsedKillOrSuspendParameter({});
       expect(parameters).toEqual({ entity_id: '' });
     });
   });

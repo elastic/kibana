@@ -8,10 +8,11 @@
 import axios, { AxiosResponse } from 'axios';
 
 import { Logger } from '@kbn/core/server';
-import { isString } from 'lodash';
 import { renderMustacheStringNoEscape } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import { combineHeadersWithBasicAuthHeader } from '@kbn/actions-plugin/server/lib';
+import { buildConnectorAuth, validateConnectorAuthConfiguration } from '../../../common/auth/utils';
 import { validateAndNormalizeUrl, validateJson } from './validators';
 import {
   createServiceError,
@@ -20,12 +21,11 @@ import {
   removeSlash,
   throwDescriptiveErrorIfResponseIsNotValid,
 } from './utils';
-import {
+import type {
   CreateIncidentParams,
   ExternalServiceCredentials,
   ExternalService,
   CasesWebhookPublicConfigurationType,
-  CasesWebhookSecretConfigurationType,
   ExternalServiceIncidentResponse,
   GetIncidentResponse,
   UpdateIncidentParams,
@@ -51,34 +51,50 @@ export const createExternalService = (
     getIncidentResponseExternalTitleKey,
     getIncidentUrl,
     hasAuth,
+    authType,
     headers,
     viewIncidentUrl,
     updateIncidentJson,
     updateIncidentMethod,
     updateIncidentUrl,
+    verificationMode,
+    ca,
   } = config as CasesWebhookPublicConfigurationType;
-  const { password, user } = secrets as CasesWebhookSecretConfigurationType;
-  if (
-    !getIncidentUrl ||
-    !createIncidentUrlConfig ||
-    !viewIncidentUrl ||
-    !updateIncidentUrl ||
-    (hasAuth && (!password || !user))
-  ) {
+
+  const { basicAuth, sslOverrides } = buildConnectorAuth({
+    hasAuth,
+    authType,
+    secrets,
+    verificationMode,
+    ca,
+  });
+
+  validateConnectorAuthConfiguration({
+    hasAuth,
+    authType,
+    basicAuth,
+    sslOverrides,
+    connectorName: i18n.NAME,
+  });
+
+  if (!getIncidentUrl || !createIncidentUrlConfig || !viewIncidentUrl || !updateIncidentUrl) {
     throw Error(`[Action]${i18n.NAME}: Wrong configuration.`);
   }
 
-  const createIncidentUrl = removeSlash(createIncidentUrlConfig);
+  const headersWithBasicAuth = combineHeadersWithBasicAuthHeader({
+    username: basicAuth.auth?.username,
+    password: basicAuth.auth?.password,
+    headers,
+  });
 
   const axiosInstance = axios.create({
-    ...(hasAuth && isString(secrets.user) && isString(secrets.password)
-      ? { auth: { username: secrets.user, password: secrets.password } }
-      : {}),
     headers: {
       ['content-type']: 'application/json',
-      ...(headers != null ? headers : {}),
+      ...headersWithBasicAuth,
     },
   });
+
+  const createIncidentUrl = removeSlash(createIncidentUrlConfig);
 
   const getIncident = async (id: string): Promise<GetIncidentResponse> => {
     try {
@@ -100,6 +116,7 @@ export const createExternalService = (
         url: normalizedUrl,
         logger,
         configurationUtilities,
+        sslOverrides,
       });
 
       throwDescriptiveErrorIfResponseIsNotValid({
@@ -144,6 +161,7 @@ export const createExternalService = (
         method: createIncidentMethod,
         data: json,
         configurationUtilities,
+        sslOverrides,
       });
 
       const { status, statusText, data } = res;
@@ -227,6 +245,7 @@ export const createExternalService = (
         logger,
         data: json,
         configurationUtilities,
+        sslOverrides,
       });
 
       throwDescriptiveErrorIfResponseIsNotValid({
@@ -299,6 +318,7 @@ export const createExternalService = (
         logger,
         data: json,
         configurationUtilities,
+        sslOverrides,
       });
 
       throwDescriptiveErrorIfResponseIsNotValid({

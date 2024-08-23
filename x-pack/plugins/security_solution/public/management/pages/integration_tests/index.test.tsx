@@ -8,7 +8,6 @@
 import React from 'react';
 
 import { ManagementContainer } from '..';
-import '../../../common/mock/match_media';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { useUserPrivileges } from '../../../common/components/user_privileges';

@@ -70,7 +70,10 @@
     "@kbn/shared-ux-utility",
     "@kbn/managed-content-badge",
     "@kbn/presentation-publishing",
-    "@kbn/shared-ux-markdown"
+    "@kbn/shared-ux-markdown",
+    "@kbn/react-kibana-context-render",
+    "@kbn/react-kibana-mount",
+    "@kbn/presentation-containers"
   ],
   "exclude": [
     "target/**/*",

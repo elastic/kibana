@@ -205,6 +205,7 @@ export const executorParams: ExecutorSubActionPushParams = {
     subcategory: 'os',
     correlation_id: 'ruleId',
     correlation_display: 'Alerting',
+    additional_fields: {},
   },
   comments: [
     {
@@ -232,6 +233,7 @@ export const sirParams: PushToServiceApiParamsSIR = {
     correlation_id: 'ruleId',
     correlation_display: 'Alerting',
     priority: '1',
+    additional_fields: {},
   },
   comments: [
     {

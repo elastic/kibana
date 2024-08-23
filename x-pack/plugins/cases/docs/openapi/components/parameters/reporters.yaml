@@ -8,5 +8,4 @@ schema:
       items:
         type: string
       maxItems: 100
-      examples:
-        - [ elastic ]
+example: elastic

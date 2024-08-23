@@ -10,8 +10,12 @@ import type { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey'
 
 export type { IgnoredReason, ShouldShowFieldInTableHandler } from './utils';
 
-export interface EsHitRecord extends Omit<SearchHit, '_source'> {
-  _source?: Record<string, unknown>;
+type DiscoverSearchHit = SearchHit<Record<string, unknown>>;
+
+export interface EsHitRecord extends Omit<DiscoverSearchHit, '_index' | '_id' | '_source'> {
+  _index?: DiscoverSearchHit['_index'];
+  _id?: DiscoverSearchHit['_id'];
+  _source?: DiscoverSearchHit['_source'];
 }
 
 /**
@@ -46,3 +50,44 @@ type FormattedHitPair = readonly [
  * Pairs array for each field in the hit
  */
 export type FormattedHit = FormattedHitPair[];
+
+export interface LogDocumentOverview
+  extends LogResourceFields,
+    LogStackTraceFields,
+    LogCloudFields {
+  '@timestamp': string;
+  'log.level'?: string;
+  message?: string;
+  'error.message'?: string;
+  'event.original'?: string;
+  'trace.id'?: string;
+  'log.file.path'?: string;
+  'data_stream.namespace': string;
+  'data_stream.dataset': string;
+}
+
+export interface LogResourceFields {
+  'host.name'?: string;
+  'service.name'?: string;
+  'agent.name'?: string;
+  'orchestrator.cluster.name'?: string;
+  'orchestrator.cluster.id'?: string;
+  'orchestrator.resource.id'?: string;
+  'orchestrator.namespace'?: string;
+  'container.name'?: string;
+  'container.id'?: string;
+}
+
+export interface LogStackTraceFields {
+  'error.stack_trace'?: string;
+  'error.exception.stacktrace'?: string;
+  'error.log.stacktrace'?: string;
+}
+
+export interface LogCloudFields {
+  'cloud.provider'?: string;
+  'cloud.region'?: string;
+  'cloud.availability_zone'?: string;
+  'cloud.project.id'?: string;
+  'cloud.instance.id'?: string;
+}

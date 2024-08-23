@@ -120,17 +120,19 @@ export async function fetchEsQuery({
         ),
       },
       ...(isGroupAgg ? { topHitsSize: params.size } : {}),
+      loggerCb: (message: string) => logger.warn(message),
     }),
   });
 
   logger.debug(
-    `es query rule ${ES_QUERY_ID}:${ruleId} "${name}" query - ${JSON.stringify(sortedQuery)}`
+    () => `es query rule ${ES_QUERY_ID}:${ruleId} "${name}" query - ${JSON.stringify(sortedQuery)}`
   );
 
   const { body: searchResult } = await esClient.search(sortedQuery, { meta: true });
 
   logger.debug(
-    ` es query rule ${ES_QUERY_ID}:${ruleId} "${name}" result - ${JSON.stringify(searchResult)}`
+    () =>
+      ` es query rule ${ES_QUERY_ID}:${ruleId} "${name}" result - ${JSON.stringify(searchResult)}`
   );
 
   const link = `${publicBaseUrl}${spacePrefix}/app/management/insightsAndAlerting/triggersActions/rule/${ruleId}`;
@@ -144,6 +146,7 @@ export async function fetchEsQuery({
       sourceFieldsParams: params.sourceFields,
     }),
     link,
+    query: sortedQuery,
     index: params.index,
   };
 }

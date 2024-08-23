@@ -14,7 +14,7 @@ export async function getGlobalDiagnosis(
 ) {
   const licenseInfo = licensing.license.toJSON();
   const userWritePrivileges = await esClient.security.hasPrivileges({
-    cluster: ['manage_transform'],
+    cluster: ['manage_transform', 'manage_ingest_pipelines'],
     index: [{ names: '.slo-*', privileges: ['all'] }],
   });
   const userReadPrivileges = await esClient.security.hasPrivileges({

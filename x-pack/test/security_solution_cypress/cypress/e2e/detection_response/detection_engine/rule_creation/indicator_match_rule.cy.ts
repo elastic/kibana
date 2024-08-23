@@ -40,6 +40,7 @@ import {
   INDICATOR_INDEX_QUERY,
   INDICATOR_MAPPING,
   INDICATOR_PREFIX_OVERRIDE,
+  INTERVAL_ABBR_VALUE,
   INVESTIGATION_NOTES_MARKDOWN,
   INVESTIGATION_NOTES_TOGGLE,
   MITRE_ATTACK_DETAILS,
@@ -209,7 +210,8 @@ describe('indicator match', { tags: ['@ess', '@serverless'] }, () => {
         });
       });
 
-      describe('Indicator mapping', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/182669
+      describe.skip('Indicator mapping', () => {
         beforeEach(() => {
           const rule = getNewThreatIndicatorRule();
           visit(CREATE_RULE_URL);
@@ -478,12 +480,16 @@ describe('indicator match', { tags: ['@ess', '@serverless'] }, () => {
         });
 
         cy.get(SCHEDULE_DETAILS).within(() => {
-          getDetails(RUNS_EVERY_DETAILS).should('have.text', `${rule.interval}`);
+          getDetails(RUNS_EVERY_DETAILS)
+            .find(INTERVAL_ABBR_VALUE)
+            .should('have.text', `${rule.interval}`);
           const humanizedDuration = getHumanizedDuration(
             rule.from ?? 'now-6m',
             rule.interval ?? '5m'
           );
-          getDetails(ADDITIONAL_LOOK_BACK_DETAILS).should('have.text', `${humanizedDuration}`);
+          getDetails(ADDITIONAL_LOOK_BACK_DETAILS)
+            .find(INTERVAL_ABBR_VALUE)
+            .should('have.text', `${humanizedDuration}`);
         });
 
         waitForTheRuleToBeExecuted();

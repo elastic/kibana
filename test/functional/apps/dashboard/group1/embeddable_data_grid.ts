@@ -19,7 +19,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const dataGrid = getService('dataGrid');
 
-  describe('dashboard embeddable data grid', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/181955
+  describe.skip('dashboard embeddable data grid', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/dashboard/current/data');
@@ -48,7 +49,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.try(async function () {
         await dataGrid.clickRowToggle({ isAnchorRow: false, rowIndex: 0 });
         const detailsEl = await dataGrid.getDetailsRows();
-        const defaultMessageEl = await detailsEl[0].findByTestSubject('docTableRowDetailsTitle');
+        const defaultMessageEl = await detailsEl[0].findByTestSubject('docViewerRowDetailsTitle');
         expect(defaultMessageEl).to.be.ok();
         await dataGrid.closeFlyout();
       });

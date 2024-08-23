@@ -13,7 +13,9 @@ import { ActionsRequestHandlerContext } from '../types';
 import { verifyAccessAndContext } from './verify_access_and_context';
 
 const paramSchema = schema.object({
-  id: schema.string(),
+  id: schema.string({
+    meta: { description: 'An identifier for the connector.' },
+  }),
 });
 
 export const deleteActionRoute = (
@@ -23,6 +25,13 @@ export const deleteActionRoute = (
   router.delete(
     {
       path: `${BASE_ACTION_API_PATH}/connector/{id}`,
+      options: {
+        access: 'public',
+        summary: `Delete a connector`,
+        description: 'WARNING: When you delete a connector, it cannot be recovered.',
+        // You must have `all` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.
+        tags: ['oas-tag:connectors'],
+      },
       validate: {
         params: paramSchema,
       },

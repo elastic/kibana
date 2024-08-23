@@ -233,10 +233,14 @@ export const DualBrush: FC<DualBrushProps> = (props) => {
               ]);
           }
 
-          brushes.current[0].start = snappedWindowParameters.baselineMin;
-          brushes.current[0].end = snappedWindowParameters.baselineMax;
-          brushes.current[1].start = snappedWindowParameters.deviationMin;
-          brushes.current[1].end = snappedWindowParameters.deviationMax;
+          if (id === 'baseline') {
+            brushes.current[0].start = snappedWindowParameters.baselineMin;
+            brushes.current[0].end = snappedWindowParameters.baselineMax;
+          }
+          if (id === 'deviation') {
+            brushes.current[1].start = snappedWindowParameters.deviationMin;
+            brushes.current[1].end = snappedWindowParameters.deviationMax;
+          }
 
           if (onChange) {
             onChange(snappedWindowParameters, newBrushPx);
@@ -263,7 +267,10 @@ export const DualBrush: FC<DualBrushProps> = (props) => {
             return 'aiopsBrush' + b.id.charAt(0).toUpperCase() + b.id.slice(1);
           })
           .each((brushObject: DualBrush, i, n) => {
-            const x = d3.scaleLinear().domain([min, max]).rangeRound([0, widthRef.current]);
+            const x = d3
+              .scaleLinear()
+              .domain([minRef.current, maxRef.current])
+              .rangeRound([0, widthRef.current]);
             // Ensure brush style is applied
             brushObject.brush.extent([
               [0, BRUSH_MARGIN],

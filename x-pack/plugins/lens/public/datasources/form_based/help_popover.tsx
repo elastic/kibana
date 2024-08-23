@@ -17,10 +17,9 @@ import {
   EuiPopoverTitle,
   EuiText,
 } from '@elastic/eui';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { StartServices } from '../../types';
 import './help_popover.scss';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { I18nProvider } from '@kbn/i18n-react';
-import type { ThemeServiceStart } from '@kbn/core/public';
 
 export const HelpPopoverButton = ({
   children,
@@ -82,7 +81,7 @@ export const WrappingHelpPopover = ({
   closePopover,
   isOpen,
   title,
-  theme,
+  startServices,
 }: {
   anchorPosition?: EuiWrappingPopoverProps['anchorPosition'];
   button: EuiWrappingPopoverProps['button'];
@@ -90,28 +89,26 @@ export const WrappingHelpPopover = ({
   closePopover: EuiWrappingPopoverProps['closePopover'];
   isOpen: EuiWrappingPopoverProps['isOpen'];
   title?: string;
-  theme: ThemeServiceStart;
+  startServices: StartServices;
 }) => {
   return (
-    <KibanaThemeProvider theme$={theme.theme$}>
-      <I18nProvider>
-        <EuiWrappingPopover
-          anchorPosition={anchorPosition}
-          button={button}
-          className="lnsHelpPopover"
-          closePopover={closePopover}
-          isOpen={isOpen}
-          ownFocus
-          panelClassName="lnsHelpPopover__panel"
-          panelPaddingSize="none"
-        >
-          {title && <EuiPopoverTitle paddingSize="m">{title}</EuiPopoverTitle>}
+    <KibanaRenderContextProvider {...startServices}>
+      <EuiWrappingPopover
+        anchorPosition={anchorPosition}
+        button={button}
+        className="lnsHelpPopover"
+        closePopover={closePopover}
+        isOpen={isOpen}
+        ownFocus
+        panelClassName="lnsHelpPopover__panel"
+        panelPaddingSize="none"
+      >
+        {title && <EuiPopoverTitle paddingSize="m">{title}</EuiPopoverTitle>}
 
-          <EuiText className="lnsHelpPopover__content" size="s">
-            {children}
-          </EuiText>
-        </EuiWrappingPopover>
-      </I18nProvider>
-    </KibanaThemeProvider>
+        <EuiText className="lnsHelpPopover__content" size="s">
+          {children}
+        </EuiText>
+      </EuiWrappingPopover>
+    </KibanaRenderContextProvider>
   );
 };

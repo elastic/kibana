@@ -36,7 +36,7 @@ export const getSyntheticsCertsRoute: SyntheticsRestApiRouteFactory<
   },
   handler: async ({
     request,
-    uptimeEsClient,
+    syntheticsEsClient,
     savedObjectsClient,
     server,
     syntheticsMonitorClient,
@@ -66,7 +66,7 @@ export const getSyntheticsCertsRoute: SyntheticsRestApiRouteFactory<
 
     const data = await getSyntheticsCerts({
       ...queryParams,
-      uptimeEsClient,
+      syntheticsEsClient,
       monitorIds: enabledMonitorQueryIds,
     });
     return { data };

@@ -122,7 +122,7 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
         await this.options.tokens.invalidate(state);
       } catch (err) {
         this.logger.debug(
-          `Failed invalidating access and/or refresh tokens: ${getDetailedErrorMessage(err)}`
+          () => `Failed invalidating access and/or refresh tokens: ${getDetailedErrorMessage(err)}`
         );
         return DeauthenticationResult.failed(err);
       }

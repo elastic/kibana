@@ -10,4 +10,9 @@ import * as t from 'io-ts';
 export const sloSettingsSchema = t.type({
   useAllRemoteClusters: t.boolean,
   selectedRemoteClusters: t.array(t.string),
+  staleThresholdInHours: t.number,
+});
+
+export const sloServerlessSettingsSchema = t.type({
+  staleThresholdInHours: t.number,
 });

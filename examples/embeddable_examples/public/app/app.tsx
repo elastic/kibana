@@ -21,9 +21,11 @@ import {
   EuiTabs,
 } from '@elastic/eui';
 import { Overview } from './overview';
+import { RegisterEmbeddable } from './register_embeddable';
 import { RenderExamples } from './render_examples';
 
 const OVERVIEW_TAB_ID = 'overview';
+const REGISTER_EMBEDDABLE_TAB_ID = 'register';
 const RENDER_TAB_ID = 'render';
 
 const App = () => {
@@ -36,6 +38,10 @@ const App = () => {
   function renderTabContent() {
     if (selectedTabId === RENDER_TAB_ID) {
       return <RenderExamples />;
+    }
+
+    if (selectedTabId === REGISTER_EMBEDDABLE_TAB_ID) {
+      return <RegisterEmbeddable />;
     }
 
     return <Overview />;
@@ -55,6 +61,12 @@ const App = () => {
                 isSelected={OVERVIEW_TAB_ID === selectedTabId}
               >
                 Embeddables overview
+              </EuiTab>
+              <EuiTab
+                onClick={() => onSelectedTabChanged(REGISTER_EMBEDDABLE_TAB_ID)}
+                isSelected={REGISTER_EMBEDDABLE_TAB_ID === selectedTabId}
+              >
+                Register new embeddable type
               </EuiTab>
               <EuiTab
                 onClick={() => onSelectedTabChanged(RENDER_TAB_ID)}

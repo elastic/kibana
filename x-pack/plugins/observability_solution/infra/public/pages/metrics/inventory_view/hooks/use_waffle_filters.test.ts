@@ -6,8 +6,10 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-
+import { DataView } from '@kbn/data-views-plugin/common';
 import { useWaffleFilters, WaffleFiltersState } from './use_waffle_filters';
+import { TIMESTAMP_FIELD } from '../../../../../common/constants';
+import { ResolvedDataView } from '../../../../utils/data_view';
 
 // Mock useUrlState hook
 jest.mock('react-router-dom', () => ({
@@ -17,9 +19,25 @@ jest.mock('react-router-dom', () => ({
   }),
 }));
 
+const mockDataView = {
+  id: 'mock-id',
+  title: 'mock-title',
+  timeFieldName: TIMESTAMP_FIELD,
+  isPersisted: () => false,
+  getName: () => 'mock-data-view',
+  toSpec: () => ({}),
+} as jest.Mocked<DataView>;
+
 jest.mock('../../../../containers/metrics_source', () => ({
-  useSourceContext: () => ({
-    createDerivedIndexPattern: () => 'jestbeat-*',
+  useMetricsDataViewContext: () => ({
+    metricsView: {
+      indices: 'jestbeat-*',
+      timeFieldName: mockDataView.timeFieldName,
+      fields: mockDataView.fields,
+      dataViewReference: mockDataView,
+    } as ResolvedDataView,
+    loading: false,
+    error: undefined,
   }),
 }));
 

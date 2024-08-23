@@ -9,18 +9,10 @@
     "objects": []
   },
   "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/core-security-server-internal",
-        "id": "def-common.CoreSecurityRouteHandlerContext",
+        "id": "def-server.CoreSecurityRouteHandlerContext",
         "type": "Class",
         "tags": [],
         "label": "CoreSecurityRouteHandlerContext",
@@ -28,17 +20,17 @@
         "signature": [
           {
             "pluginId": "@kbn/core-security-server-internal",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSecurityServerInternalPluginApi",
-            "section": "def-common.CoreSecurityRouteHandlerContext",
+            "section": "def-server.CoreSecurityRouteHandlerContext",
             "text": "CoreSecurityRouteHandlerContext"
           },
           " implements ",
           {
             "pluginId": "@kbn/core-security-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSecurityServerPluginApi",
-            "section": "def-common.SecurityRequestHandlerContext",
+            "section": "def-server.SecurityRequestHandlerContext",
             "text": "SecurityRequestHandlerContext"
           }
         ],
@@ -48,7 +40,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-security-server-internal",
-            "id": "def-common.CoreSecurityRouteHandlerContext.authc",
+            "id": "def-server.CoreSecurityRouteHandlerContext.authc",
             "type": "Object",
             "tags": [],
             "label": "#authc",
@@ -56,9 +48,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.AuthcRequestHandlerContext",
+                "section": "def-server.AuthcRequestHandlerContext",
                 "text": "AuthcRequestHandlerContext"
               },
               " | undefined"
@@ -69,7 +61,28 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server-internal",
-            "id": "def-common.CoreSecurityRouteHandlerContext.Unnamed",
+            "id": "def-server.CoreSecurityRouteHandlerContext.audit",
+            "type": "Object",
+            "tags": [],
+            "label": "#audit",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-security-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-server.AuditRequestHandlerContext",
+                "text": "AuditRequestHandlerContext"
+              },
+              " | undefined"
+            ],
+            "path": "packages/core/security/core-security-server-internal/src/security_route_handler_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server-internal",
+            "id": "def-server.CoreSecurityRouteHandlerContext.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -83,7 +96,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-security-server-internal",
-                "id": "def-common.CoreSecurityRouteHandlerContext.Unnamed.$1",
+                "id": "def-server.CoreSecurityRouteHandlerContext.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "securityStart",
@@ -91,9 +104,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-security-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreSecurityServerPluginApi",
-                    "section": "def-common.SecurityServiceStart",
+                    "section": "def-server.SecurityServiceStart",
                     "text": "SecurityServiceStart"
                   }
                 ],
@@ -104,7 +117,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-security-server-internal",
-                "id": "def-common.CoreSecurityRouteHandlerContext.Unnamed.$2",
+                "id": "def-server.CoreSecurityRouteHandlerContext.Unnamed.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "request",
@@ -112,9 +125,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-common.KibanaRequest",
+                    "section": "def-server.KibanaRequest",
                     "text": "KibanaRequest"
                   },
                   "<unknown, unknown, unknown, any>"
@@ -129,7 +142,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server-internal",
-            "id": "def-common.CoreSecurityRouteHandlerContext.authc",
+            "id": "def-server.CoreSecurityRouteHandlerContext.authc",
             "type": "Object",
             "tags": [],
             "label": "authc",
@@ -137,10 +150,30 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.AuthcRequestHandlerContext",
+                "section": "def-server.AuthcRequestHandlerContext",
                 "text": "AuthcRequestHandlerContext"
+              }
+            ],
+            "path": "packages/core/security/core-security-server-internal/src/security_route_handler_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server-internal",
+            "id": "def-server.CoreSecurityRouteHandlerContext.audit",
+            "type": "Object",
+            "tags": [],
+            "label": "audit",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-security-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-server.AuditRequestHandlerContext",
+                "text": "AuditRequestHandlerContext"
               }
             ],
             "path": "packages/core/security/core-security-server-internal/src/security_route_handler_context.ts",
@@ -152,7 +185,7 @@
       },
       {
         "parentPluginId": "@kbn/core-security-server-internal",
-        "id": "def-common.SecurityService",
+        "id": "def-server.SecurityService",
         "type": "Class",
         "tags": [],
         "label": "SecurityService",
@@ -160,9 +193,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-security-server-internal",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSecurityServerInternalPluginApi",
-            "section": "def-common.SecurityService",
+            "section": "def-server.SecurityService",
             "text": "SecurityService"
           },
           " implements ",
@@ -170,17 +203,17 @@
           "<",
           {
             "pluginId": "@kbn/core-security-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSecurityServerPluginApi",
-            "section": "def-common.SecurityServiceSetup",
+            "section": "def-server.SecurityServiceSetup",
             "text": "SecurityServiceSetup"
           },
           ", ",
           {
             "pluginId": "@kbn/core-security-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSecurityServerPluginApi",
-            "section": "def-common.SecurityServiceStart",
+            "section": "def-server.SecurityServiceStart",
             "text": "SecurityServiceStart"
           },
           ">"
@@ -191,7 +224,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-security-server-internal",
-            "id": "def-common.SecurityService.Unnamed",
+            "id": "def-server.SecurityService.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -205,7 +238,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-security-server-internal",
-                "id": "def-common.SecurityService.Unnamed.$1",
+                "id": "def-server.SecurityService.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "coreContext",
@@ -223,7 +256,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server-internal",
-            "id": "def-common.SecurityService.setup",
+            "id": "def-server.SecurityService.setup",
             "type": "Function",
             "tags": [],
             "label": "setup",
@@ -232,9 +265,9 @@
               "() => ",
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.SecurityServiceSetup",
+                "section": "def-server.SecurityServiceSetup",
                 "text": "SecurityServiceSetup"
               }
             ],
@@ -246,7 +279,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server-internal",
-            "id": "def-common.SecurityService.start",
+            "id": "def-server.SecurityService.start",
             "type": "Function",
             "tags": [],
             "label": "start",
@@ -255,9 +288,9 @@
               "() => ",
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.SecurityServiceStart",
+                "section": "def-server.SecurityServiceStart",
                 "text": "SecurityServiceStart"
               }
             ],
@@ -269,7 +302,7 @@
           },
           {
             "parentPluginId": "@kbn/core-security-server-internal",
-            "id": "def-common.SecurityService.stop",
+            "id": "def-server.SecurityService.stop",
             "type": "Function",
             "tags": [],
             "label": "stop",
@@ -293,7 +326,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-security-server-internal",
-        "id": "def-common.InternalSecurityServiceSetup",
+        "id": "def-server.InternalSecurityServiceSetup",
         "type": "Type",
         "tags": [],
         "label": "InternalSecurityServiceSetup",
@@ -301,9 +334,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-security-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSecurityServerPluginApi",
-            "section": "def-common.SecurityServiceSetup",
+            "section": "def-server.SecurityServiceSetup",
             "text": "SecurityServiceSetup"
           }
         ],
@@ -314,7 +347,7 @@
       },
       {
         "parentPluginId": "@kbn/core-security-server-internal",
-        "id": "def-common.InternalSecurityServiceStart",
+        "id": "def-server.InternalSecurityServiceStart",
         "type": "Type",
         "tags": [],
         "label": "InternalSecurityServiceStart",
@@ -322,9 +355,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-security-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSecurityServerPluginApi",
-            "section": "def-common.SecurityServiceStart",
+            "section": "def-server.SecurityServiceStart",
             "text": "SecurityServiceStart"
           }
         ],
@@ -334,6 +367,14 @@
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

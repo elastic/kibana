@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as yaml from 'js-yaml';
+import { safeLoad } from 'js-yaml';
 import pMap from 'p-map';
 import type { SavedObjectsClientContract, SavedObjectsFindOptions } from '@kbn/core/server';
 import semverGte from 'semver/functions/gte';
@@ -22,7 +22,6 @@ import { buildNode as buildWildcardNode } from '@kbn/es-query/src/kuery/node_typ
 import {
   ASSETS_SAVED_OBJECT_TYPE,
   installationStatuses,
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
 } from '../../../../common/constants';
 import { isPackageLimited } from '../../../../common/services';
@@ -55,7 +54,7 @@ import * as Registry from '../registry';
 import type { PackageAsset } from '../archive/storage';
 import { getEsPackage } from '../archive/storage';
 import { normalizeKuery } from '../../saved_object';
-
+import { getPackagePolicySavedObjectType } from '../../package_policy';
 import { auditLoggingService } from '../../audit_logging';
 
 import { getFilteredSearchPackages } from '../filtered_packages';
@@ -361,7 +360,7 @@ export async function getInstalledPackageManifests(
 
   const parsedManifests = result.saved_objects.reduce<Map<string, PackageSpecManifest>>(
     (acc, asset) => {
-      acc.set(asset.attributes.asset_path, yaml.load(asset.attributes.data_utf8));
+      acc.set(asset.attributes.asset_path, safeLoad(asset.attributes.data_utf8));
       return acc;
     },
     new Map()
@@ -479,9 +478,11 @@ export const getPackageUsageStats = async ({
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
 }): Promise<PackageUsageStats> => {
+  const packagePolicySavedObjectType = await getPackagePolicySavedObjectType();
+
   const filter = normalizeKuery(
-    PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-    `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: ${pkgName}`
+    packagePolicySavedObjectType,
+    `${packagePolicySavedObjectType}.package.name: ${pkgName}`
   );
   const agentPolicyCount = new Set<string>();
   let page = 1;
@@ -491,7 +492,7 @@ export const getPackageUsageStats = async ({
     // using saved Objects client directly, instead of the `list()` method of `package_policy` service
     // in order to not cause a circular dependency (package policy service imports from this module)
     const packagePolicies = await savedObjectsClient.find<PackagePolicySOAttributes>({
-      type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      type: packagePolicySavedObjectType,
       perPage: 1000,
       page: page++,
       filter,
@@ -501,12 +502,14 @@ export const getPackageUsageStats = async ({
       auditLoggingService.writeCustomSoAuditLog({
         action: 'find',
         id: packagePolicy.id,
-        savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        savedObjectType: packagePolicySavedObjectType,
       });
     }
 
     for (let index = 0, total = packagePolicies.saved_objects.length; index < total; index++) {
-      agentPolicyCount.add(packagePolicies.saved_objects[index].attributes.policy_id);
+      packagePolicies.saved_objects[index].attributes.policy_ids.forEach((policyId) =>
+        agentPolicyCount.add(policyId)
+      );
     }
 
     hasMore = packagePolicies.saved_objects.length > 0;
@@ -660,6 +663,7 @@ export async function getInstalledPackageWithAssets(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
   logger?: Logger;
+  ignoreUnverified?: boolean;
 }) {
   const installation = await getInstallation(options);
   if (!installation) {
@@ -709,10 +713,12 @@ export async function getPackageAssetsMap({
   savedObjectsClient,
   packageInfo,
   logger,
+  ignoreUnverified,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   packageInfo: PackageInfo;
   logger: Logger;
+  ignoreUnverified?: boolean;
 }) {
   const installedPackageWithAssets = await getInstalledPackageWithAssets({
     savedObjectsClient,
@@ -723,7 +729,9 @@ export async function getPackageAssetsMap({
   let assetsMap: AssetsMap | undefined;
   if (installedPackageWithAssets?.installation.version !== packageInfo.version) {
     // Try to get from registry
-    const pkg = await Registry.getPackage(packageInfo.name, packageInfo.version);
+    const pkg = await Registry.getPackage(packageInfo.name, packageInfo.version, {
+      ignoreUnverified,
+    });
     assetsMap = pkg.assetsMap;
   } else {
     assetsMap = installedPackageWithAssets.assetsMap;

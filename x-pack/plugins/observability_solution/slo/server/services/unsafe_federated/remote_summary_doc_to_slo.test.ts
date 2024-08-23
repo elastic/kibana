@@ -28,6 +28,16 @@ describe('FromRemoteSummaryDocToSlo', () => {
             name: null,
             type: null,
           },
+          monitor: {
+            name: null,
+            config_id: null,
+          },
+          observer: {
+            name: null,
+            geo: {
+              name: null,
+            },
+          },
           slo: {
             indicator: {
               type: 'sli.kql.custom',
@@ -62,6 +72,8 @@ describe('FromRemoteSummaryDocToSlo', () => {
           status: 'NO_DATA',
           isTempDoc: true,
           spaceId: 'irrelevant',
+          summaryUpdatedAt: null,
+          latestSliTimestamp: null,
         },
         loggerMock
       );
@@ -81,6 +93,16 @@ describe('FromRemoteSummaryDocToSlo', () => {
           transaction: {
             name: null,
             type: null,
+          },
+          monitor: {
+            name: null,
+            config_id: null,
+          },
+          observer: {
+            name: null,
+            geo: {
+              name: null,
+            },
           },
           slo: {
             indicator: {
@@ -123,6 +145,8 @@ describe('FromRemoteSummaryDocToSlo', () => {
           isTempDoc: true,
           spaceId: 'irrelevant',
           kibanaUrl: 'http://kibana.com/base-path', // added in 8.14
+          summaryUpdatedAt: null,
+          latestSliTimestamp: null,
         },
         loggerMock
       );

@@ -48,15 +48,6 @@ jest.mock('../../hooks/use_selector', () => ({
   useDeepEqualSelector: () => mockGlobalState.dataTable.tableById['table-test'],
 }));
 
-window.matchMedia = jest.fn().mockImplementation((query) => {
-  return {
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: jest.fn(),
-    removeListener: jest.fn(),
-  };
-});
 const dataViewId = 'security-solution-default';
 
 export const TestCellRenderer: React.FC<DeprecatedCellValueElementProps> = ({ columnId, data }) => (

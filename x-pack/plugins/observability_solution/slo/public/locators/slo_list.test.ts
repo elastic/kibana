@@ -14,7 +14,7 @@ describe('SloListLocator', () => {
     const location = await locator.getLocation({});
     expect(location.app).toEqual('slo');
     expect(location.path).toMatchInlineSnapshot(
-      `"/slos?search=(filters:!(),groupBy:ungrouped,kqlQuery:'',lastRefresh:0,page:0,perPage:25,sort:(by:status,direction:desc),view:cardView)"`
+      `"/?search=(filters:!(),groupBy:ungrouped,kqlQuery:'',lastRefresh:0,page:0,perPage:25,sort:(by:status,direction:desc),view:cardView)"`
     );
   });
 
@@ -24,7 +24,7 @@ describe('SloListLocator', () => {
     });
     expect(location.app).toEqual('slo');
     expect(location.path).toMatchInlineSnapshot(
-      `"/slos?search=(filters:!(),groupBy:ungrouped,kqlQuery:'slo.name:%20%22Service%20Availability%22%20and%20slo.indicator.type%20:%20%22sli.kql.custom%22',lastRefresh:0,page:0,perPage:25,sort:(by:status,direction:desc),view:cardView)"`
+      `"/?search=(filters:!(),groupBy:ungrouped,kqlQuery:'slo.name:%20%22Service%20Availability%22%20and%20slo.indicator.type%20:%20%22sli.kql.custom%22',lastRefresh:0,page:0,perPage:25,sort:(by:status,direction:desc),view:cardView)"`
     );
   });
 });

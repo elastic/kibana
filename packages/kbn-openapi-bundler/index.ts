@@ -7,3 +7,4 @@
  */
 
 export * from './src/openapi_bundler';
+export * from './src/openapi_merger';

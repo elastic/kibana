@@ -19,26 +19,24 @@ import {
   consoleOutputLexerRules,
   consoleOutputLanguageConfiguration,
 } from './lexer_rules';
+import { foldingRangeProvider } from './folding_range_provider';
 
-export {
-  CONSOLE_LANG_ID,
-  CONSOLE_OUTPUT_LANG_ID,
-  CONSOLE_THEME_ID,
-  CONSOLE_OUTPUT_THEME_ID,
-} from './constants';
+export { CONSOLE_LANG_ID, CONSOLE_OUTPUT_LANG_ID, CONSOLE_THEME_ID } from './constants';
 
-export { buildConsoleTheme, buildConsoleOutputTheme } from './theme';
+export { buildConsoleTheme } from './theme';
 
 export const ConsoleLang: LangModuleType = {
   ID: CONSOLE_LANG_ID,
   lexerRules,
   languageConfiguration,
+  foldingRangeProvider,
 };
 
 export const ConsoleOutputLang: LangModuleType = {
   ID: CONSOLE_OUTPUT_LANG_ID,
   lexerRules: consoleOutputLexerRules,
   languageConfiguration: consoleOutputLanguageConfiguration,
+  foldingRangeProvider,
 };
 
 export type { ParsedRequest } from './types';

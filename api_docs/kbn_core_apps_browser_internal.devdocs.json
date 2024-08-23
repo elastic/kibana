@@ -1,26 +1,10 @@
 {
   "id": "@kbn/core-apps-browser-internal",
   "client": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/core-apps-browser-internal",
-        "id": "def-common.CoreAppsService",
+        "id": "def-public.CoreAppsService",
         "type": "Class",
         "tags": [],
         "label": "CoreAppsService",
@@ -31,7 +15,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-apps-browser-internal",
-            "id": "def-common.CoreAppsService.Unnamed",
+            "id": "def-public.CoreAppsService.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -45,7 +29,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-apps-browser-internal",
-                "id": "def-common.CoreAppsService.Unnamed.$1",
+                "id": "def-public.CoreAppsService.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "coreContext",
@@ -63,7 +47,7 @@
           },
           {
             "parentPluginId": "@kbn/core-apps-browser-internal",
-            "id": "def-common.CoreAppsService.setup",
+            "id": "def-public.CoreAppsService.setup",
             "type": "Function",
             "tags": [],
             "label": "setup",
@@ -72,9 +56,9 @@
               "({ application, http, injectedMetadata, notifications }: ",
               {
                 "pluginId": "@kbn/core-apps-browser-internal",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreAppsBrowserInternalPluginApi",
-                "section": "def-common.CoreAppsServiceSetupDeps",
+                "section": "def-public.CoreAppsServiceSetupDeps",
                 "text": "CoreAppsServiceSetupDeps"
               },
               ") => void"
@@ -85,7 +69,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-apps-browser-internal",
-                "id": "def-common.CoreAppsService.setup.$1",
+                "id": "def-public.CoreAppsService.setup.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "{ application, http, injectedMetadata, notifications }",
@@ -93,9 +77,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-apps-browser-internal",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreAppsBrowserInternalPluginApi",
-                    "section": "def-common.CoreAppsServiceSetupDeps",
+                    "section": "def-public.CoreAppsServiceSetupDeps",
                     "text": "CoreAppsServiceSetupDeps"
                   }
                 ],
@@ -109,18 +93,18 @@
           },
           {
             "parentPluginId": "@kbn/core-apps-browser-internal",
-            "id": "def-common.CoreAppsService.start",
+            "id": "def-public.CoreAppsService.start",
             "type": "Function",
             "tags": [],
             "label": "start",
             "description": [],
             "signature": [
-              "({ application, docLinks, http, notifications, uiSettings, }: ",
+              "({ application, docLinks, http, notifications, uiSettings, analytics, i18n, theme, }: ",
               {
                 "pluginId": "@kbn/core-apps-browser-internal",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreAppsBrowserInternalPluginApi",
-                "section": "def-common.CoreAppsServiceStartDeps",
+                "section": "def-public.CoreAppsServiceStartDeps",
                 "text": "CoreAppsServiceStartDeps"
               },
               ") => void"
@@ -131,17 +115,17 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-apps-browser-internal",
-                "id": "def-common.CoreAppsService.start.$1",
+                "id": "def-public.CoreAppsService.start.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    application,\n    docLinks,\n    http,\n    notifications,\n    uiSettings,\n  }",
+                "label": "{\n    application,\n    docLinks,\n    http,\n    notifications,\n    uiSettings,\n    analytics,\n    i18n,\n    theme,\n  }",
                 "description": [],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-apps-browser-internal",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreAppsBrowserInternalPluginApi",
-                    "section": "def-common.CoreAppsServiceStartDeps",
+                    "section": "def-public.CoreAppsServiceStartDeps",
                     "text": "CoreAppsServiceStartDeps"
                   }
                 ],
@@ -155,7 +139,7 @@
           },
           {
             "parentPluginId": "@kbn/core-apps-browser-internal",
-            "id": "def-common.CoreAppsService.stop",
+            "id": "def-public.CoreAppsService.stop",
             "type": "Function",
             "tags": [],
             "label": "stop",
@@ -177,7 +161,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-apps-browser-internal",
-        "id": "def-common.CoreAppsServiceSetupDeps",
+        "id": "def-public.CoreAppsServiceSetupDeps",
         "type": "Interface",
         "tags": [],
         "label": "CoreAppsServiceSetupDeps",
@@ -188,7 +172,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-apps-browser-internal",
-            "id": "def-common.CoreAppsServiceSetupDeps.application",
+            "id": "def-public.CoreAppsServiceSetupDeps.application",
             "type": "Object",
             "tags": [],
             "label": "application",
@@ -202,7 +186,7 @@
           },
           {
             "parentPluginId": "@kbn/core-apps-browser-internal",
-            "id": "def-common.CoreAppsServiceSetupDeps.http",
+            "id": "def-public.CoreAppsServiceSetupDeps.http",
             "type": "CompoundType",
             "tags": [],
             "label": "http",
@@ -211,9 +195,9 @@
               "Omit<",
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpSetup",
+                "section": "def-public.HttpSetup",
                 "text": "HttpSetup"
               },
               ", \"staticAssets\"> & { staticAssets: ",
@@ -226,7 +210,7 @@
           },
           {
             "parentPluginId": "@kbn/core-apps-browser-internal",
-            "id": "def-common.CoreAppsServiceSetupDeps.injectedMetadata",
+            "id": "def-public.CoreAppsServiceSetupDeps.injectedMetadata",
             "type": "Object",
             "tags": [],
             "label": "injectedMetadata",
@@ -240,7 +224,7 @@
           },
           {
             "parentPluginId": "@kbn/core-apps-browser-internal",
-            "id": "def-common.CoreAppsServiceSetupDeps.notifications",
+            "id": "def-public.CoreAppsServiceSetupDeps.notifications",
             "type": "Object",
             "tags": [],
             "label": "notifications",
@@ -248,9 +232,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-notifications-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-common.NotificationsSetup",
+                "section": "def-public.NotificationsSetup",
                 "text": "NotificationsSetup"
               }
             ],
@@ -263,7 +247,7 @@
       },
       {
         "parentPluginId": "@kbn/core-apps-browser-internal",
-        "id": "def-common.CoreAppsServiceStartDeps",
+        "id": "def-public.CoreAppsServiceStartDeps",
         "type": "Interface",
         "tags": [],
         "label": "CoreAppsServiceStartDeps",
@@ -274,7 +258,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-apps-browser-internal",
-            "id": "def-common.CoreAppsServiceStartDeps.application",
+            "id": "def-public.CoreAppsServiceStartDeps.application",
             "type": "Object",
             "tags": [],
             "label": "application",
@@ -288,7 +272,7 @@
           },
           {
             "parentPluginId": "@kbn/core-apps-browser-internal",
-            "id": "def-common.CoreAppsServiceStartDeps.docLinks",
+            "id": "def-public.CoreAppsServiceStartDeps.docLinks",
             "type": "Object",
             "tags": [],
             "label": "docLinks",
@@ -296,9 +280,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-doc-links-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreDocLinksBrowserPluginApi",
-                "section": "def-common.DocLinksStart",
+                "section": "def-public.DocLinksStart",
                 "text": "DocLinksStart"
               }
             ],
@@ -308,7 +292,7 @@
           },
           {
             "parentPluginId": "@kbn/core-apps-browser-internal",
-            "id": "def-common.CoreAppsServiceStartDeps.http",
+            "id": "def-public.CoreAppsServiceStartDeps.http",
             "type": "CompoundType",
             "tags": [],
             "label": "http",
@@ -317,9 +301,9 @@
               "Omit<",
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpSetup",
+                "section": "def-public.HttpSetup",
                 "text": "HttpSetup"
               },
               ", \"staticAssets\"> & { staticAssets: ",
@@ -332,7 +316,7 @@
           },
           {
             "parentPluginId": "@kbn/core-apps-browser-internal",
-            "id": "def-common.CoreAppsServiceStartDeps.notifications",
+            "id": "def-public.CoreAppsServiceStartDeps.notifications",
             "type": "Object",
             "tags": [],
             "label": "notifications",
@@ -340,9 +324,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-notifications-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-common.NotificationsStart",
+                "section": "def-public.NotificationsStart",
                 "text": "NotificationsStart"
               }
             ],
@@ -352,7 +336,7 @@
           },
           {
             "parentPluginId": "@kbn/core-apps-browser-internal",
-            "id": "def-common.CoreAppsServiceStartDeps.uiSettings",
+            "id": "def-public.CoreAppsServiceStartDeps.uiSettings",
             "type": "Object",
             "tags": [],
             "label": "uiSettings",
@@ -360,10 +344,70 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-common.IUiSettingsClient",
+                "section": "def-public.IUiSettingsClient",
                 "text": "IUiSettingsClient"
+              }
+            ],
+            "path": "packages/core/apps/core-apps-browser-internal/src/core_app.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-apps-browser-internal",
+            "id": "def-public.CoreAppsServiceStartDeps.analytics",
+            "type": "Object",
+            "tags": [],
+            "label": "analytics",
+            "description": [],
+            "signature": [
+              "{ optIn: (optInConfig: ",
+              "OptInConfig",
+              ") => void; reportEvent: <EventTypeData extends object>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
+              "Observable",
+              "<",
+              "TelemetryCounter",
+              ">; }"
+            ],
+            "path": "packages/core/apps/core-apps-browser-internal/src/core_app.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-apps-browser-internal",
+            "id": "def-public.CoreAppsServiceStartDeps.i18n",
+            "type": "Object",
+            "tags": [],
+            "label": "i18n",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-i18n-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreI18nBrowserPluginApi",
+                "section": "def-public.I18nStart",
+                "text": "I18nStart"
+              }
+            ],
+            "path": "packages/core/apps/core-apps-browser-internal/src/core_app.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-apps-browser-internal",
+            "id": "def-public.CoreAppsServiceStartDeps.theme",
+            "type": "Object",
+            "tags": [],
+            "label": "theme",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-theme-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreThemeBrowserPluginApi",
+                "section": "def-public.ThemeServiceSetup",
+                "text": "ThemeServiceSetup"
               }
             ],
             "path": "packages/core/apps/core-apps-browser-internal/src/core_app.ts",
@@ -378,7 +422,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-apps-browser-internal",
-        "id": "def-common.URL_MAX_LENGTH",
+        "id": "def-public.URL_MAX_LENGTH",
         "type": "CompoundType",
         "tags": [],
         "label": "URL_MAX_LENGTH",
@@ -394,6 +438,22 @@
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

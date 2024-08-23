@@ -28,9 +28,9 @@ import {
   MAX_DOC_FIELDS_DISPLAYED,
   SHOW_MULTIFIELDS,
   TRUNCATE_MAX_HEIGHT,
+  TRUNCATE_MAX_HEIGHT_DEFAULT_VALUE,
   SHOW_FIELD_STATISTICS,
   ROW_HEIGHT_OPTION,
-  ENABLE_ESQL,
 } from '@kbn/discover-utils';
 import { DEFAULT_ROWS_PER_PAGE, ROWS_PER_PAGE_OPTIONS } from '../common/constants';
 
@@ -208,6 +208,15 @@ export const getUiSettings: (
       type: METRIC_TYPE.CLICK,
       name: 'discover:useLegacyDataGrid',
     },
+    deprecation: {
+      message: i18n.translate(
+        'discover.advancedSettings.discover.disableDocumentExplorerDeprecation',
+        {
+          defaultMessage: 'This setting is deprecated and will be removed in Kibana 9.0.',
+        }
+      ),
+      docLinksKey: 'discoverSettings',
+    },
   },
   [MODIFY_COLUMNS_ON_SWITCH]: {
     name: i18n.translate('discover.advancedSettings.discover.modifyColumnsOnSwitchTitle', {
@@ -237,6 +246,15 @@ export const getUiSettings: (
     value: false,
     category: ['discover'],
     schema: schema.boolean(),
+    deprecation: {
+      message: i18n.translate(
+        'discover.advancedSettings.discover.readFieldsFromSourceDeprecation',
+        {
+          defaultMessage: 'This setting is deprecated and will be removed in Kibana 9.0.',
+        }
+      ),
+      docLinksKey: 'discoverSettings',
+    },
   },
   [SHOW_FIELD_STATISTICS]: {
     name: i18n.translate('discover.advancedSettings.discover.showFieldStatistics', {
@@ -301,7 +319,7 @@ export const getUiSettings: (
     name: i18n.translate('discover.advancedSettings.params.maxCellHeightTitle', {
       defaultMessage: 'Maximum cell height in the classic table',
     }),
-    value: 115,
+    value: TRUNCATE_MAX_HEIGHT_DEFAULT_VALUE,
     category: ['discover'],
     description: i18n.translate('discover.advancedSettings.params.maxCellHeightText', {
       defaultMessage:
@@ -309,26 +327,11 @@ export const getUiSettings: (
     }),
     schema: schema.number({ min: 0 }),
     requiresPageReload: true,
-  },
-  [ENABLE_ESQL]: {
-    name: i18n.translate('discover.advancedSettings.enableESQLTitle', {
-      defaultMessage: 'Enable ES|QL',
-    }),
-    value: true,
-    description: i18n.translate('discover.advancedSettings.enableESQLDescription', {
-      defaultMessage:
-        'This setting enables ES|QL in Discover. If you have feedback on this experience please reach out to us on {link}',
-      values: {
-        link:
-          `<a href="https://discuss.elastic.co/c/elastic-stack/kibana" target="_blank" rel="noopener">` +
-          i18n.translate('discover.advancedSettings.enableESQL.discussLinkText', {
-            defaultMessage: 'discuss.elastic.co/c/elastic-stack/kibana',
-          }) +
-          '</a>',
-      },
-    }),
-    requiresPageReload: true,
-    category: ['discover'],
-    schema: schema.boolean(),
+    deprecation: {
+      message: i18n.translate('discover.advancedSettings.discover.maxCellHeightDeprecation', {
+        defaultMessage: 'This setting is deprecated and will be removed in Kibana 9.0.',
+      }),
+      docLinksKey: 'discoverSettings',
+    },
   },
 });

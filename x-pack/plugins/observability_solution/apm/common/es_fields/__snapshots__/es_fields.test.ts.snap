@@ -57,6 +57,8 @@ exports[`Error CONTAINER_ID 1`] = `undefined`;
 
 exports[`Error CONTAINER_IMAGE 1`] = `undefined`;
 
+exports[`Error DATA_STEAM_TYPE 1`] = `undefined`;
+
 exports[`Error DESTINATION_ADDRESS 1`] = `undefined`;
 
 exports[`Error DEVICE_MODEL_IDENTIFIER 1`] = `undefined`;
@@ -401,6 +403,8 @@ exports[`Span CONTAINER_ID 1`] = `undefined`;
 
 exports[`Span CONTAINER_IMAGE 1`] = `undefined`;
 
+exports[`Span DATA_STEAM_TYPE 1`] = `undefined`;
+
 exports[`Span DESTINATION_ADDRESS 1`] = `undefined`;
 
 exports[`Span DEVICE_MODEL_IDENTIFIER 1`] = `undefined`;
@@ -731,6 +735,8 @@ Object {
 exports[`Transaction CONTAINER_ID 1`] = `"container1234567890abcdef"`;
 
 exports[`Transaction CONTAINER_IMAGE 1`] = `undefined`;
+
+exports[`Transaction DATA_STEAM_TYPE 1`] = `undefined`;
 
 exports[`Transaction DESTINATION_ADDRESS 1`] = `undefined`;
 

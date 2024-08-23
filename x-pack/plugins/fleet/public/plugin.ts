@@ -18,6 +18,7 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import type { IntegrationAssistantPluginStart } from '@kbn/integration-assistant-plugin/public';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 
 import type {
@@ -50,6 +51,8 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+
+import { Subject } from 'rxjs';
 
 import type { FleetAuthz } from '../common';
 import { appRoutesService, INTEGRATIONS_PLUGIN_ID, PLUGIN_ID, setupRouteService } from '../common';
@@ -85,7 +88,6 @@ import type {
 import { LazyCustomLogsAssetsExtension } from './lazy_custom_logs_assets_extension';
 import { setCustomIntegrations, setCustomIntegrationsStart } from './services/custom_integrations';
 import { getFleetDeepLinks } from './deep_links';
-import { Subject } from 'rxjs';
 
 export type { FleetConfigType } from '../common/types';
 
@@ -129,6 +131,7 @@ export interface FleetStartDeps {
   navigation: NavigationPublicPluginStart;
   customIntegrations: CustomIntegrationsStart;
   share: SharePluginStart;
+  integrationAssistant?: IntegrationAssistantPluginStart;
   cloud?: CloudStart;
   usageCollection?: UsageCollectionStart;
   guidedOnboarding?: GuidedOnboardingPluginStart;
@@ -138,6 +141,7 @@ export interface FleetStartServices extends CoreStart, Exclude<FleetStartDeps, '
   storage: Storage;
   share: SharePluginStart;
   dashboard: DashboardStart;
+  integrationAssistant?: IntegrationAssistantPluginStart;
   cloud?: CloudSetup & CloudStart;
   discover?: DiscoverStart;
   spaces?: SpacesPluginStart;
@@ -193,7 +197,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
           ...startDepsServices,
           storage: this.storage,
           cloud,
-          authz: await fleetStart.authz,
+          authz: fleetStart.authz,
         };
         const { renderApp, teardownIntegrations } = await import('./applications/integrations');
 
@@ -236,7 +240,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
           ...startDepsServices,
           storage: this.storage,
           cloud,
-          authz: await fleetStart.authz,
+          authz: fleetStart.authz,
         };
         const { renderApp, teardownFleet } = await import('./applications/fleet');
         const unmount = renderApp(startServices, params, config, kibanaVersion, extensions);

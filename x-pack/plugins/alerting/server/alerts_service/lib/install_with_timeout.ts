@@ -48,10 +48,12 @@ export const installWithTimeout = async ({
           reject(new Error(msg));
         }, timeoutMs);
 
-        firstValueFrom(pluginStop$).then(() => {
-          clearTimeout(timeoutId);
-          reject(new InstallShutdownError());
-        });
+        firstValueFrom(pluginStop$)
+          .then(() => {
+            clearTimeout(timeoutId);
+            reject(new InstallShutdownError());
+          })
+          .catch(() => reject(new InstallShutdownError()));
       });
     };
 

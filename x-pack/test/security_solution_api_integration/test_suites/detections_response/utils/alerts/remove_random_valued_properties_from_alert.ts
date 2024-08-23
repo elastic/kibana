@@ -15,6 +15,7 @@ export const removeRandomValuedPropertiesFromAlert = (alert: DetectionAlert | un
   const {
     'kibana.version': version,
     'kibana.alert.rule.execution.uuid': execUuid,
+    'kibana.alert.rule.execution.timestamp': execTimestamp,
     'kibana.alert.rule.uuid': uuid,
     '@timestamp': timestamp,
     'kibana.alert.rule.created_at': createdAt,

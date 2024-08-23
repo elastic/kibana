@@ -12,6 +12,7 @@ import type {
   RuntimeField,
   SerializedFieldFormat,
   RuntimePrimitiveTypes,
+  DataViewField,
 } from '../../shared_imports';
 import type { RuntimeFieldPainlessError } from '../../types';
 import type { PreviewController } from './preview_controller';
@@ -25,7 +26,7 @@ export interface EsDocument {
     [key: string]: unknown;
   };
   fields: {
-    [key: string]: unknown;
+    [key: string]: unknown[];
   };
   [key: string]: unknown;
 }
@@ -68,6 +69,9 @@ export interface PreviewState {
   initialPreviewComplete: boolean;
   isPreviewAvailable: boolean;
   isPanelVisible: boolean;
+  isSaving: boolean;
+  concreteFields: Array<{ name: string; type: string }>;
+  fieldMap: Record<string, DataViewField>;
 }
 
 export interface FetchDocError {

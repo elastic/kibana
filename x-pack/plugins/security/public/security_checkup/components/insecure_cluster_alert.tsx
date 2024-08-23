@@ -16,26 +16,38 @@ import {
 import React, { useState } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import type { DocLinksStart, MountPoint } from '@kbn/core/public';
+import type {
+  AnalyticsServiceStart,
+  DocLinksStart,
+  I18nStart,
+  MountPoint,
+  ThemeServiceStart,
+} from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 export const insecureClusterAlertTitle = i18n.translate(
   'xpack.security.checkup.insecureClusterTitle',
   { defaultMessage: 'Your data is not secure' }
 );
 
-export const insecureClusterAlertText = (
-  docLinks: DocLinksStart,
-  onDismiss: (persist: boolean) => void
-) =>
+interface Deps {
+  docLinks: DocLinksStart;
+  analytics: Pick<AnalyticsServiceStart, 'reportEvent'>;
+  i18n: I18nStart;
+  theme: Pick<ThemeServiceStart, 'theme$'>;
+}
+
+export const insecureClusterAlertText = (deps: Deps, onDismiss: (persist: boolean) => void) =>
   ((e) => {
+    const { docLinks, ...startServices } = deps;
     const AlertText = () => {
       const [persist, setPersist] = useState(false);
       const enableSecurityDocLink = `${docLinks.links.security.elasticsearchEnableSecurity}?blade=kibanasecuritymessage`;
 
       return (
-        <I18nProvider>
+        <KibanaRenderContextProvider {...startServices}>
           <div data-test-subj="insecureClusterAlertText">
             <EuiText size="s">
               <FormattedMessage
@@ -81,7 +93,7 @@ export const insecureClusterAlertText = (
               </EuiFlexItem>
             </EuiFlexGroup>
           </div>
-        </I18nProvider>
+        </KibanaRenderContextProvider>
       );
     };
 

@@ -38,3 +38,7 @@ export const processDeprecated = (schema: OpenAPIV3.SchemaObject): void => {
 export const deleteField = (schema: Record<any, unknown>, field: string): void => {
   delete schema[field];
 };
+
+export const isAnyType = (schema: OpenAPIV3.SchemaObject): boolean => {
+  return metaFields.META_FIELD_X_OAS_ANY in schema;
+};

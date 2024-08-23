@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { useHistory } from 'react-router-dom';
 import {
   EuiLink,
@@ -25,11 +25,11 @@ import { letBrowserHandleEvent } from './link_events';
  * https://github.com/elastic/eui/blob/master/wiki/react-router.md#react-router-51
  */
 
-interface IEuiReactRouterProps {
+type IEuiReactRouterProps = PropsWithChildren<{
   to: string;
-}
+}>;
 
-export const ReactRouterHelperForEui: React.FC<IEuiReactRouterProps> = ({ to, children }) => {
+export const ReactRouterHelperForEui: FC<IEuiReactRouterProps> = ({ to, children }) => {
   const history = useHistory();
 
   const onClick = (event: React.MouseEvent) => {

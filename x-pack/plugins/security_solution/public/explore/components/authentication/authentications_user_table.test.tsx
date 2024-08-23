@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import '../../../common/mock/match_media';
 
 import { TestProviders } from '../../../common/mock';
 import { useAuthentications } from '../../containers/authentications';

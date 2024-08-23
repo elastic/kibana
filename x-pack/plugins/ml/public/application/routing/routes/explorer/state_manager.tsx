@@ -12,7 +12,6 @@ import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { EuiThemeProvider as StyledComponentsThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { useUrlState } from '@kbn/ml-url-state';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { ML_JOB_ID } from '@kbn/ml-anomaly-utils';
@@ -217,31 +216,29 @@ export const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </MlPageHeader>
-      <StyledComponentsThemeProvider>
-        <CasesContext owner={[]} permissions={casesPermissions!}>
-          <PresentationContextProvider>
-            {jobsWithTimeRange.length === 0 ? (
-              <AnomalyDetectionEmptyState />
-            ) : (
-              <Explorer
-                {...{
-                  explorerState,
-                  overallSwimlaneData,
-                  showCharts,
-                  severity: tableSeverity.val,
-                  stoppedPartitions,
-                  invalidTimeRangeError,
-                  selectedJobsRunning,
-                  timeBuckets,
-                  timefilter,
-                  selectedCells,
-                  swimLaneSeverity,
-                }}
-              />
-            )}
-          </PresentationContextProvider>
-        </CasesContext>
-      </StyledComponentsThemeProvider>
+      <CasesContext owner={[]} permissions={casesPermissions!}>
+        <PresentationContextProvider>
+          {jobsWithTimeRange.length === 0 ? (
+            <AnomalyDetectionEmptyState />
+          ) : (
+            <Explorer
+              {...{
+                explorerState,
+                overallSwimlaneData,
+                showCharts,
+                severity: tableSeverity.val,
+                stoppedPartitions,
+                invalidTimeRangeError,
+                selectedJobsRunning,
+                timeBuckets,
+                timefilter,
+                selectedCells,
+                swimLaneSeverity,
+              }}
+            />
+          )}
+        </PresentationContextProvider>
+      </CasesContext>
     </div>
   );
 };

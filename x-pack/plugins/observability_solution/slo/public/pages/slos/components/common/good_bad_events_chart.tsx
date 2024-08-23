@@ -12,8 +12,6 @@ import {
   Position,
   ScaleType,
   Settings,
-  Tooltip,
-  TooltipType,
   XYChartElementEvent,
 } from '@elastic/charts';
 import { EuiIcon, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
@@ -23,6 +21,9 @@ import { i18n } from '@kbn/i18n';
 import { GetPreviewDataResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import React, { useRef } from 'react';
+import { useAnnotations } from '@kbn/observability-plugin/public';
+import { TimeBounds } from '../../../slo_details/types';
+import { getBrushTimeBounds } from '../../../../utils/slo/duration';
 import { useKibana } from '../../../../utils/kibana_react';
 import { openInDiscover } from '../../../../utils/slo/get_discover_link';
 
@@ -32,6 +33,7 @@ export interface Props {
   annotation?: React.ReactNode;
   isLoading?: boolean;
   bottomTitle?: string;
+  onBrushed?: (timeBounds: TimeBounds) => void;
 }
 
 export function GoodBadEventsChart({
@@ -39,6 +41,7 @@ export function GoodBadEventsChart({
   bottomTitle,
   data,
   slo,
+  onBrushed,
   isLoading = false,
 }: Props) {
   const { charts, uiSettings, discover } = useKibana().services;
@@ -48,6 +51,11 @@ export function GoodBadEventsChart({
   const handleCursorUpdate = useActiveCursor(charts.activeCursor, chartRef, {
     isDateHistogram: true,
   });
+
+  const { ObservabilityAnnotations, annotations, wrapOnBrushEnd, onAnnotationClick } =
+    useAnnotations({
+      slo,
+    });
 
   const dateFormat = uiSettings.get('dateFormat');
 
@@ -74,14 +82,14 @@ export function GoodBadEventsChart({
 
   const barClickHandler = (params: XYChartElementEvent[]) => {
     if (slo?.indicator?.type === 'sli.kql.custom') {
-      const [datanum, eventDetail] = params[0];
+      const [datum, eventDetail] = params[0];
       const isBad = eventDetail.specId === badEventId;
       const timeRange = {
-        from: moment(datanum.x).toISOString(),
-        to: moment(datanum.x).add(intervalInMilliseconds, 'ms').toISOString(),
+        from: moment(datum.x).toISOString(),
+        to: moment(datum.x).add(intervalInMilliseconds, 'ms').toISOString(),
         mode: 'absolute' as const,
       };
-      openInDiscover(discover, slo, isBad, !isBad, timeRange);
+      openInDiscover(slo, isBad, !isBad, timeRange, discover);
     }
   };
 
@@ -90,14 +98,25 @@ export function GoodBadEventsChart({
       {isLoading && <EuiLoadingChart size="m" mono data-test-subj="sliEventsChartLoading" />}
 
       {!isLoading && (
-        <Chart size={{ height: 150, width: '100%' }} ref={chartRef}>
-          <Tooltip type={TooltipType.VerticalCursor} />
+        <Chart size={{ height: 200, width: '100%' }} ref={chartRef}>
+          <ObservabilityAnnotations annotations={annotations} />
           <Settings
+            theme={{
+              chartMargins: { top: 30 },
+            }}
             baseTheme={baseTheme}
             showLegend={true}
-            showLegendExtra={false}
             legendPosition={Position.Left}
-            noResults={<EuiIcon type="visualizeApp" size="l" color="subdued" title="no results" />}
+            noResults={
+              <EuiIcon
+                type="visualizeApp"
+                size="l"
+                color="subdued"
+                title={i18n.translate('xpack.slo.goodBadEventsChart.euiIcon.noResultsLabel', {
+                  defaultMessage: 'no results',
+                })}
+              />
+            }
             onPointerUpdate={handleCursorUpdate}
             externalPointerEvents={{
               tooltip: { visible: true },
@@ -106,6 +125,10 @@ export function GoodBadEventsChart({
             pointerUpdateTrigger={'x'}
             locale={i18n.getLocale()}
             onElementClick={barClickHandler as ElementClickListener}
+            onBrushEnd={wrapOnBrushEnd((brushArea) => {
+              onBrushed?.(getBrushTimeBounds(brushArea));
+            })}
+            onAnnotationClick={onAnnotationClick}
           />
           {annotation}
           <Axis

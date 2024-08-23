@@ -392,6 +392,7 @@ describe('ConfigPanel', () => {
             a: expect.anything(),
           },
           dateRange: expect.anything(),
+          absDateRange: expect.anything(),
           filters: [],
           now: expect.anything(),
           query: undefined,
@@ -419,11 +420,7 @@ describe('ConfigPanel', () => {
       datasourceMap.testDatasource.initializeDimension = jest.fn();
       const props = getDefaultProps({ datasourceMap, visualizationMap });
 
-      const { instance } = await prepareAndMountComponent(
-        props,
-        {},
-        { sql: 'SELECT * from "foo"' }
-      );
+      const { instance } = await prepareAndMountComponent(props, {}, { esql: 'from "foo"' });
       expect(instance.find(AddLayerButton).exists()).toBe(false);
     });
   });

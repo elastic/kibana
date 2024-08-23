@@ -22,4 +22,28 @@ describe('getDefaultSecurityImplementation', () => {
       expect(user).toBeNull();
     });
   });
+
+  describe('authc.apiKeys', () => {
+    it('returns stub object', async () => {
+      const { apiKeys } = implementation.authc;
+      const areAPIKeysEnabled = await apiKeys.areAPIKeysEnabled();
+
+      expect(areAPIKeysEnabled).toBe(false);
+    });
+  });
+
+  describe('audit.asScoped', () => {
+    it('returns null', async () => {
+      const logger = implementation.audit.asScoped({} as any);
+      expect(logger.log({ message: 'something' })).toBeUndefined();
+    });
+  });
+
+  describe('audit.withoutRequest', () => {
+    it('does not log', async () => {
+      const logger = implementation.audit.withoutRequest;
+      expect(logger.enabled).toBe(false);
+      expect(logger.log({ message: 'no request' })).toBeUndefined();
+    });
+  });
 });

@@ -73,8 +73,8 @@ const kqlQuery = {
   language: 'kuery',
 };
 
-const sqlQuery = {
-  sql: 'SELECT * from test',
+const esqlQuery = {
+  esql: 'from test',
 };
 
 function wrapSearchBarInContext(testProps: any) {
@@ -94,6 +94,7 @@ function wrapSearchBarInContext(testProps: any) {
     notifications: startMock.notifications,
     http: startMock.http,
     theme: startMock.theme,
+    docLinks: startMock.docLinks,
     storage: createMockStorage(),
     data: {
       query: {
@@ -259,13 +260,13 @@ describe('SearchBar', () => {
     expect(component.find(QUERY_INPUT).length).toBeTruthy();
   });
 
-  it('Should NOT render the input query input, for sql query', () => {
+  it('Should NOT render the input query input, for es|ql query', () => {
     const component = mount(
       wrapSearchBarInContext({
         indexPatterns: [mockIndexPattern],
         screenTitle: 'test screen',
         onQuerySubmit: noop,
-        query: sqlQuery,
+        query: esqlQuery,
       })
     );
     expect(component.find(QUERY_INPUT).length).toBeFalsy();

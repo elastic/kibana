@@ -7,7 +7,7 @@
 
 import { lazy } from 'react';
 import type { PackagePolicyCreateExtensionComponent } from '@kbn/fleet-plugin/public';
-import type { FleetUiExtensionGetterOptions } from './types';
+import type { FleetUiExtensionGetterOptions } from '../../../../../common/types';
 
 export const getLazyEndpointPolicyCreateExtension = ({
   coreStart,
@@ -16,7 +16,7 @@ export const getLazyEndpointPolicyCreateExtension = ({
 }: FleetUiExtensionGetterOptions) => {
   return lazy<PackagePolicyCreateExtensionComponent>(async () => {
     const [{ withSecurityContext }, { EndpointPolicyCreateExtension }] = await Promise.all([
-      import('./components/with_security_context/with_security_context'),
+      import('../../../../../common/components/with_security_context/with_security_context'),
       import('./endpoint_policy_create_extension'),
     ]);
 

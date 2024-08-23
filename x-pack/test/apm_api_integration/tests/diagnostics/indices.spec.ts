@@ -13,7 +13,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
   const es = getService('es');
   const synthtraceKibanaClient = getService('synthtraceKibanaClient');
 
@@ -40,7 +40,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           .service({ name: 'synth-go', environment: 'production', agentName: 'go' })
           .instance('instance-a');
 
-        await synthtraceEsClient.index(
+        await apmSynthtraceEsClient.index(
           timerange(start, end)
             .interval('1m')
             .rate(30)
@@ -54,7 +54,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
       });
 
-      after(() => synthtraceEsClient.clean());
+      after(() => apmSynthtraceEsClient.clean());
 
       it('returns empty response', async () => {
         const { status, body } = await apmApiClient.adminUser({
@@ -76,7 +76,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           .service({ name: 'synth-go', environment: 'production', agentName: 'go' })
           .instance('instance-a');
 
-        await synthtraceEsClient.index(
+        await apmSynthtraceEsClient.index(
           timerange(start, end)
             .interval('1m')
             .rate(30)
@@ -94,7 +94,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         await es.indices.delete({ index: 'traces-apm-default' });
         const latestVersion = await synthtraceKibanaClient.fetchLatestApmPackageVersion();
         await synthtraceKibanaClient.installApmPackage(latestVersion);
-        await synthtraceEsClient.clean();
+        await apmSynthtraceEsClient.clean();
       });
 
       it('returns a list of items with mapping issues', async () => {
@@ -121,7 +121,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           .service({ name: 'synth-go', environment: 'production', agentName: 'go' })
           .instance('instance-a');
 
-        await synthtraceEsClient.index(
+        await apmSynthtraceEsClient.index(
           timerange(start, end)
             .interval('1m')
             .rate(30)
@@ -138,7 +138,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       after(async () => {
         const latestVersion = await synthtraceKibanaClient.fetchLatestApmPackageVersion();
         await synthtraceKibanaClient.installApmPackage(latestVersion);
-        await synthtraceEsClient.clean();
+        await apmSynthtraceEsClient.clean();
       });
 
       describe.skip('an ingest pipeline is removed', () => {

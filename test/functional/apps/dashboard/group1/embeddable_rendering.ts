@@ -154,6 +154,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.waitForRenderComplete();
 
       await PageObjects.dashboard.saveDashboard('embeddable rendering test', {
+        saveAsNew: true,
         storeTimeWithDashboard: true,
       });
     });

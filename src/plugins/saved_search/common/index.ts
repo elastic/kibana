@@ -19,6 +19,7 @@ export type {
 export enum VIEW_MODE {
   DOCUMENT_LEVEL = 'documents',
   AGGREGATED_LEVEL = 'aggregated',
+  PATTERN_LEVEL = 'patterns',
 }
 
 export {
@@ -28,3 +29,5 @@ export {
   MAX_SAVED_SEARCH_SAMPLE_SIZE,
 } from './constants';
 export { getKibanaContextFn } from './expressions/kibana_context';
+
+export { toSavedSearchAttributes } from './service/saved_searches_utils';

@@ -12,7 +12,7 @@ import type {
   QueryDslFieldAndFormat,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { ISearchRequestParams } from '@kbn/data-plugin/common';
+import type { ISearchRequestParams } from '@kbn/search-types';
 import type {
   NetworkTopNFlowCountRequestOptions,
   NetworkTopNFlowRequestOptions,

@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { AI_SEARCH_PLUGIN } from '../../../../../common/constants';
+import { SEARCH_PRODUCT_NAME } from '../../../../../common/constants';
 import { SetAiSearchChrome } from '../../../shared/kibana_chrome';
 import { EnterpriseSearchPageTemplateWrapper, PageTemplateProps } from '../../../shared/layout';
 import { useEnterpriseSearchNav } from '../../../shared/layout';
@@ -23,7 +23,7 @@ export const EnterpriseSearchAISearchPageTemplate: React.FC<PageTemplateProps> =
     <EnterpriseSearchPageTemplateWrapper
       {...pageTemplateProps}
       solutionNav={{
-        name: AI_SEARCH_PLUGIN.NAME,
+        name: SEARCH_PRODUCT_NAME,
         items: useEnterpriseSearchNav(),
       }}
       setPageChrome={pageChrome && <SetAiSearchChrome trail={pageChrome} />}

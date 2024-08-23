@@ -22,6 +22,7 @@ import {
   Tooltip,
   TooltipValue,
 } from '@elastic/charts';
+import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { useEuiTheme } from '@elastic/eui';
 import type { PaletteRegistry } from '@kbn/coloring';
@@ -409,8 +410,9 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
     ? getColumnByAccessor(splitRow[0], visData.columns)
     : undefined;
 
+  const isEsqlMode = originalVisData?.meta?.type === ESQL_TABLE_TYPE;
   const hasTooltipActions =
-    interactive && bucketAccessors.filter((a) => a !== 'metric-name').length > 0;
+    interactive && !isEsqlMode && bucketAccessors.filter((a) => a !== 'metric-name').length > 0;
 
   const tooltip: TooltipProps = {
     ...(fixedViewPort ? { boundary: fixedViewPort } : {}),
@@ -563,7 +565,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
                 legendColorPicker={props.uiState ? LegendColorPickerWrapper : undefined}
                 flatLegend={flatLegend}
                 legendSort={customLegendSort}
-                showLegendExtra={visParams.showValuesInLegend}
+                legendValues={visParams.legendStats}
                 onElementClick={([elementEvent]) => {
                   // this cast is safe because we are rendering a partition chart
                   const [layerValues] = elementEvent as PartitionElementEvent;

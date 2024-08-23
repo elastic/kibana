@@ -19,3 +19,5 @@ export * from './output';
 export * from './package_policy';
 export * from './settings';
 export * from './health_check';
+export * from './fleet_server_hosts';
+export * from './standalone_agent_api_key';

@@ -11,6 +11,7 @@ import type { PresentationLabsService } from '@kbn/presentation-util-plugin/publ
 
 export interface DashboardSettingsService {
   uiSettings: CoreStart['uiSettings'];
+  i18n: CoreStart['i18n'];
   theme: CoreStart['theme'];
   isProjectEnabledInLabs: PresentationLabsService['isProjectEnabled'];
 }

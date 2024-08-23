@@ -68,12 +68,15 @@ export const InvokeAIActionParamsSchema = schema.object({
         {
           name: schema.string(),
           description: schema.string(),
-          parameters: schema.object({
-            type: schema.string(),
-            properties: schema.object({}, { unknowns: 'allow' }),
-            additionalProperties: schema.boolean(),
-            $schema: schema.string(),
-          }),
+          parameters: schema.object(
+            {
+              type: schema.string(),
+              properties: schema.object({}, { unknowns: 'allow' }),
+              additionalProperties: schema.boolean(),
+              $schema: schema.string(),
+            },
+            { unknowns: 'allow' }
+          ),
         },
         // Not sure if this will include other properties, we should pass them if it does
         { unknowns: 'allow' }
@@ -145,7 +148,8 @@ export const RunActionResponseSchema = schema.object(
           message: schema.object(
             {
               role: schema.string(),
-              content: schema.maybe(schema.string()),
+              // nullable because message can contain function calls instead of final response when used with RAG
+              content: schema.maybe(schema.nullable(schema.string())),
             },
             { unknowns: 'ignore' }
           ),

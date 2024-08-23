@@ -94,7 +94,7 @@ export function modelSnapshotProvider(client: IScopedClusterClient, mlClient: Ml
         await cm.newCalendar(calendar);
       }
 
-      forceStartDatafeeds(
+      await forceStartDatafeeds(
         [datafeedId],
         +snapshot.model_snapshots[0].latest_record_time_stamp!,
         end

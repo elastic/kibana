@@ -15,8 +15,8 @@ import type {
   IEditorController,
   EditorRenderProps,
 } from '@kbn/visualizations-plugin/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { getUISettings, getI18n, getCoreStart, getDataViewsStart } from '../services';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { getUISettings, getCoreStart, getDataViewsStart } from '../services';
 import { VisEditor } from './components/vis_editor_lazy';
 import type { TimeseriesVisParams } from '../types';
 
@@ -31,25 +31,22 @@ export class EditorController implements IEditorController {
   ) {}
 
   async render({ timeRange, uiState, filters, query }: EditorRenderProps) {
-    const I18nContext = getI18n().Context;
     const defaultIndexPattern = (await getDataViewsStart().getDefault()) || undefined;
 
     render(
-      <I18nContext>
-        <KibanaThemeProvider theme$={getCoreStart().theme.theme$}>
-          <VisEditor
-            config={getUISettings()}
-            vis={this.vis}
-            timeRange={timeRange}
-            embeddableHandler={this.embeddableHandler}
-            eventEmitter={this.eventEmitter}
-            uiState={uiState}
-            filters={filters}
-            query={query}
-            defaultIndexPattern={defaultIndexPattern}
-          />
-        </KibanaThemeProvider>
-      </I18nContext>,
+      <KibanaRenderContextProvider {...getCoreStart()}>
+        <VisEditor
+          config={getUISettings()}
+          vis={this.vis}
+          timeRange={timeRange}
+          embeddableHandler={this.embeddableHandler}
+          eventEmitter={this.eventEmitter}
+          uiState={uiState}
+          filters={filters}
+          query={query}
+          defaultIndexPattern={defaultIndexPattern}
+        />
+      </KibanaRenderContextProvider>,
       this.el
     );
   }

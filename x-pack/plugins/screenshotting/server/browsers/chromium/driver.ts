@@ -386,7 +386,7 @@ export class HeadlessChromiumDriver {
           errorReason: 'Aborted',
           requestId,
         });
-        this.page.browser().close();
+        void this.page.browser().close();
         const error = getDisallowedOutgoingUrlError(interceptedUrl);
         this.screenshottingErrorSubject.next(error);
         logger.error(error);
@@ -438,7 +438,7 @@ export class HeadlessChromiumDriver {
       }
 
       if (!allowed || !this.allowRequest(interceptedUrl)) {
-        this.page.browser().close();
+        void this.page.browser().close();
         const error = getDisallowedOutgoingUrlError(interceptedUrl);
         this.screenshottingErrorSubject.next(error);
         logger.error(error);
@@ -464,7 +464,7 @@ export class HeadlessChromiumDriver {
     const wsEndpoint = this.page.browser().wsEndpoint();
     const { port } = parseUrl(wsEndpoint);
 
-    open(
+    await open(
       `http://localhost:${port}/devtools/inspector.html?ws=localhost:${port}/devtools/page/${targetId}`
     );
   }

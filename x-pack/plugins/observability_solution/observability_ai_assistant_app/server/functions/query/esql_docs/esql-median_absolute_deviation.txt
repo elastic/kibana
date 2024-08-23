@@ -1,31 +1,33 @@
-MEDIAN_ABSOLUTE_DEVIATION
+## MEDIAN_ABSOLUTE_DEVIATION
 
-Syntax
-MEDIAN_ABSOLUTE_DEVIATION(expression)
-Parameters
-expression
-Expression from which to return the median absolute deviation.
-DescriptionReturns the median absolute deviation, a measure of variability. It is a robust
-statistic, meaning that it is useful for describing data that may have outliers,
-or may not be normally distributed. For such data it can be more descriptive
-than standard deviation.It is calculated as the median of each data point’s deviation from the median of
-the entire sample. That is, for a random variable X, the median absolute
-deviation is median(|median(X) - X|).
-Like PERCENTILE, MEDIAN_ABSOLUTE_DEVIATION is
-      usually approximate.
-MEDIAN_ABSOLUTE_DEVIATION is also non-deterministic.
-This means you can get slightly different results using the same data.
-Example
+The `MEDIAN_ABSOLUTE_DEVIATION` function is a robust statistic that is useful for describing data that may have outliers or may not be normally distributed. It provides a measure of variability by calculating the median of each data point’s deviation from the median of the entire sample. 
+
+This function is usually approximate and non-deterministic, meaning that you can get slightly different results using the same data.
+
+### Syntax:
+
+`MEDIAN_ABSOLUTE_DEVIATION(expression)`
+
+#### Parameters:
+
+- `expression`: Expression from which to return the median absolute deviation.
+
+### Examples:
+
+Here is an example of a complete ES|QL query using the `MEDIAN_ABSOLUTE_DEVIATION` function:
+
 ```esql
 FROM employees
 | STATS MEDIAN(salary), MEDIAN_ABSOLUTE_DEVIATION(salary)
 ```
 
-The expression can use inline functions. For example, to calculate the the
-median absolute deviation of the maximum values of a multivalued column, first
-use MV_MAX to get the maximum value per row, and use the result with the
-MEDIAN_ABSOLUTE_DEVIATION function:
+In this query, the `MEDIAN_ABSOLUTE_DEVIATION` function is used to calculate the median absolute deviation of the `salary` field for the `employees` index.
+
+The `MEDIAN_ABSOLUTE_DEVIATION` function can also be used with inline functions. Here is an example where it is used with the `MV_MAX` function to calculate the median absolute deviation of the maximum values of a multivalued column:
+
 ```esql
 FROM employees
 | STATS m_a_d_max_salary_change = MEDIAN_ABSOLUTE_DEVIATION(MV_MAX(salary_change))
 ```
+
+In this query, the `MV_MAX` function is first used to get the maximum value per row of the `salary_change` field. The result is then used with the `MEDIAN_ABSOLUTE_DEVIATION` function to calculate the median absolute deviation.

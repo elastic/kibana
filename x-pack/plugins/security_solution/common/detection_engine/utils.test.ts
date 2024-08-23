@@ -13,6 +13,7 @@ import {
   normalizeThresholdField,
   isMlRule,
   isEsqlRule,
+  isSuppressionRuleInGA,
   isSuppressibleAlertRule,
   isSuppressionRuleConfiguredWithDuration,
   isSuppressionRuleConfiguredWithGroupBy,
@@ -228,16 +229,14 @@ describe('Alert Suppression Rules', () => {
   describe('isSuppressibleAlertRule', () => {
     test('should return true for a suppressible rule type', () => {
       // Rule types that support alert suppression:
+      expect(isSuppressibleAlertRule('esql')).toBe(true);
       expect(isSuppressibleAlertRule('threshold')).toBe(true);
       expect(isSuppressibleAlertRule('saved_query')).toBe(true);
       expect(isSuppressibleAlertRule('query')).toBe(true);
       expect(isSuppressibleAlertRule('threat_match')).toBe(true);
       expect(isSuppressibleAlertRule('new_terms')).toBe(true);
       expect(isSuppressibleAlertRule('eql')).toBe(true);
-
-      // Rule types that don't support alert suppression:
-      expect(isSuppressibleAlertRule('machine_learning')).toBe(false);
-      expect(isSuppressibleAlertRule('esql')).toBe(false);
+      expect(isSuppressibleAlertRule('machine_learning')).toBe(true);
     });
 
     test('should return false for an unknown rule type', () => {
@@ -247,19 +246,32 @@ describe('Alert Suppression Rules', () => {
     });
   });
 
+  describe('isSuppressionRuleInGA', () => {
+    test('should return true for rule type suppression in global availability', () => {
+      expect(isSuppressionRuleInGA('saved_query')).toBe(true);
+      expect(isSuppressionRuleInGA('query')).toBe(true);
+    });
+
+    test('should return false for rule type suppression in tech preview', () => {
+      expect(isSuppressionRuleInGA('machine_learning')).toBe(false);
+      expect(isSuppressionRuleInGA('esql')).toBe(false);
+      expect(isSuppressionRuleInGA('threshold')).toBe(false);
+      expect(isSuppressionRuleInGA('threat_match')).toBe(false);
+      expect(isSuppressionRuleInGA('new_terms')).toBe(false);
+      expect(isSuppressionRuleInGA('eql')).toBe(false);
+    });
+  });
   describe('isSuppressionRuleConfiguredWithDuration', () => {
     test('should return true for a suppressible rule type', () => {
       // Rule types that support alert suppression:
+      expect(isSuppressionRuleConfiguredWithDuration('esql')).toBe(true);
       expect(isSuppressionRuleConfiguredWithDuration('threshold')).toBe(true);
       expect(isSuppressionRuleConfiguredWithDuration('saved_query')).toBe(true);
       expect(isSuppressionRuleConfiguredWithDuration('query')).toBe(true);
       expect(isSuppressionRuleConfiguredWithDuration('threat_match')).toBe(true);
       expect(isSuppressionRuleConfiguredWithDuration('new_terms')).toBe(true);
       expect(isSuppressionRuleConfiguredWithDuration('eql')).toBe(true);
-
-      // Rule types that don't support alert suppression:
-      expect(isSuppressionRuleConfiguredWithDuration('machine_learning')).toBe(false);
-      expect(isSuppressionRuleConfiguredWithDuration('esql')).toBe(false);
+      expect(isSuppressionRuleConfiguredWithDuration('machine_learning')).toBe(true);
     });
 
     test('should return false for an unknown rule type', () => {
@@ -272,15 +284,13 @@ describe('Alert Suppression Rules', () => {
   describe('isSuppressionRuleConfiguredWithGroupBy', () => {
     test('should return true for a suppressible rule type with groupBy', () => {
       // Rule types that support alert suppression groupBy:
+      expect(isSuppressionRuleConfiguredWithGroupBy('esql')).toBe(true);
       expect(isSuppressionRuleConfiguredWithGroupBy('saved_query')).toBe(true);
       expect(isSuppressionRuleConfiguredWithGroupBy('query')).toBe(true);
       expect(isSuppressionRuleConfiguredWithGroupBy('threat_match')).toBe(true);
       expect(isSuppressionRuleConfiguredWithGroupBy('new_terms')).toBe(true);
       expect(isSuppressionRuleConfiguredWithGroupBy('eql')).toBe(true);
-
-      // Rule types that don't support alert suppression:
-      expect(isSuppressionRuleConfiguredWithGroupBy('machine_learning')).toBe(false);
-      expect(isSuppressionRuleConfiguredWithGroupBy('esql')).toBe(false);
+      expect(isSuppressionRuleConfiguredWithGroupBy('machine_learning')).toBe(true);
     });
 
     test('should return false for a threshold rule type', () => {
@@ -298,15 +308,13 @@ describe('Alert Suppression Rules', () => {
   describe('isSuppressionRuleConfiguredWithMissingFields', () => {
     test('should return true for a suppressible rule type with missing fields', () => {
       // Rule types that support alert suppression groupBy:
+      expect(isSuppressionRuleConfiguredWithMissingFields('esql')).toBe(true);
       expect(isSuppressionRuleConfiguredWithMissingFields('saved_query')).toBe(true);
       expect(isSuppressionRuleConfiguredWithMissingFields('query')).toBe(true);
       expect(isSuppressionRuleConfiguredWithMissingFields('threat_match')).toBe(true);
       expect(isSuppressionRuleConfiguredWithMissingFields('new_terms')).toBe(true);
       expect(isSuppressionRuleConfiguredWithMissingFields('eql')).toBe(true);
-
-      // Rule types that don't support alert suppression:
-      expect(isSuppressionRuleConfiguredWithMissingFields('machine_learning')).toBe(false);
-      expect(isSuppressionRuleConfiguredWithMissingFields('esql')).toBe(false);
+      expect(isSuppressionRuleConfiguredWithMissingFields('machine_learning')).toBe(true);
     });
 
     test('should return false for a threshold rule type', () => {

@@ -56,6 +56,7 @@ export const ruleExecutionStatusSchema = schema.object({
         schema.literal(ruleExecutionStatusWarningReason.MAX_EXECUTABLE_ACTIONS),
         schema.literal(ruleExecutionStatusWarningReason.MAX_ALERTS),
         schema.literal(ruleExecutionStatusWarningReason.MAX_QUEUED_ACTIONS),
+        schema.literal(ruleExecutionStatusWarningReason.EXECUTION),
       ]),
       message: schema.string(),
     })
@@ -83,6 +84,7 @@ export const ruleLastRunSchema = schema.object({
         schema.literal(ruleExecutionStatusWarningReason.MAX_EXECUTABLE_ACTIONS),
         schema.literal(ruleExecutionStatusWarningReason.MAX_ALERTS),
         schema.literal(ruleExecutionStatusWarningReason.MAX_QUEUED_ACTIONS),
+        schema.literal(ruleExecutionStatusWarningReason.EXECUTION),
       ])
     )
   ),
@@ -174,6 +176,7 @@ export const ruleDomainSchema = schema.object({
   running: schema.maybe(schema.nullable(schema.boolean())),
   viewInAppRelativeUrl: schema.maybe(schema.nullable(schema.string())),
   alertDelay: schema.maybe(alertDelaySchema),
+  legacyId: schema.maybe(schema.nullable(schema.string())),
 });
 
 /**
@@ -213,4 +216,5 @@ export const ruleSchema = schema.object({
   running: schema.maybe(schema.nullable(schema.boolean())),
   viewInAppRelativeUrl: schema.maybe(schema.nullable(schema.string())),
   alertDelay: schema.maybe(alertDelaySchema),
+  legacyId: schema.maybe(schema.nullable(schema.string())),
 });

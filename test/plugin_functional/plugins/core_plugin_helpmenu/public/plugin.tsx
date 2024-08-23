@@ -16,7 +16,7 @@ export class CoreHelpMenuPlugin
       id: 'core_help_menu',
       title: 'Help Menu Test App',
       async mount(params) {
-        const [{ chrome, http }] = await core.getStartServices();
+        const [{ chrome, http, ...startServices }] = await core.getStartServices();
 
         chrome.setHelpExtension({
           appName: 'HelpMenuTestApp',
@@ -31,7 +31,7 @@ export class CoreHelpMenuPlugin
         });
 
         const { renderApp } = await import('./application');
-        return renderApp('Help Menu Test App', params);
+        return renderApp('Help Menu Test App', params, startServices);
       },
     });
 

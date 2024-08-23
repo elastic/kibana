@@ -13,7 +13,7 @@ import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import { markdownVisDefinition } from './markdown_vis';
 import { createMarkdownVisFn } from './markdown_fn';
 import { ConfigSchema } from '../config';
-import { markdownVisRenderer } from './markdown_renderer';
+import { getMarkdownVisRenderer } from './markdown_renderer';
 
 /** @internal */
 export interface MarkdownPluginSetupDependencies {
@@ -31,7 +31,7 @@ export class MarkdownPlugin implements Plugin<void, void> {
 
   public setup(core: CoreSetup, { expressions, visualizations }: MarkdownPluginSetupDependencies) {
     visualizations.createBaseVisualization(markdownVisDefinition);
-    expressions.registerRenderer(markdownVisRenderer);
+    expressions.registerRenderer(getMarkdownVisRenderer({ getStartDeps: core.getStartServices }));
     expressions.registerFunction(createMarkdownVisFn);
   }
 

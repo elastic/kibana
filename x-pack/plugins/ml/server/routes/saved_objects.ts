@@ -78,13 +78,17 @@ export function savedObjectsRoutes(
     .get({
       path: `${ML_EXTERNAL_BASE_PATH}/saved_objects/sync`,
       access: 'public',
+      summary: 'Synchronize machine learning saved objects',
       options: {
         tags: [
           'access:ml:canCreateJob',
           'access:ml:canCreateDataFrameAnalytics',
           'access:ml:canCreateTrainedModels',
+          'oas-tag:machine learning',
         ],
       },
+      description:
+        'Synchronizes Kibana saved objects for machine learning jobs and trained models. This API runs automatically when you start Kibana and periodically thereafter.',
     })
     .addVersion(
       {

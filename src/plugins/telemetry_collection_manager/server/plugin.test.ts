@@ -94,9 +94,7 @@ describe('Telemetry Collection Manager', () => {
         cluster_uuid: 'clusterUuid',
         cluster_name: 'clusterName',
         timestamp: new Date().toISOString(),
-        cluster_stats: {
-          cluster_uuid: 'clusterUuid',
-        },
+        cluster_stats: {},
         stack_stats: {},
         version: 'version',
       };

@@ -16,7 +16,6 @@ import {
 import { OBSERVABILITY_LOGS_EXPLORER_APP_ID } from '@kbn/deeplinks-observability';
 import {
   AllDatasetsLocatorDefinition,
-  DatasetQualityLocatorDefinition,
   ObservabilityLogsExplorerLocators,
   SingleDatasetLocatorDefinition,
 } from '../common/locators';
@@ -45,7 +44,7 @@ export class ObservabilityLogsExplorerPlugin
     core: CoreSetup<ObservabilityLogsExplorerStartDeps, ObservabilityLogsExplorerPluginStart>,
     _pluginsSetup: ObservabilityLogsExplorerSetupDeps
   ) {
-    const { share } = _pluginsSetup;
+    const { discover, share } = _pluginsSetup;
     const useHash = core.uiSettings.get('state:storeInSessionStorage');
 
     core.application.register({
@@ -72,6 +71,12 @@ export class ObservabilityLogsExplorerPlugin
       },
     });
 
+    // ensure the tabs are shown when in the observability nav mode
+    discover.configureInlineTopNav('oblt', {
+      enabled: true,
+      showLogsExplorerTabs: true,
+    });
+
     // App used solely to redirect from "/app/observability-log-explorer" to "/app/observability-logs-explorer"
     core.application.register({
       id: 'observability-log-explorer',
@@ -95,11 +100,6 @@ export class ObservabilityLogsExplorerPlugin
         useHash,
       })
     );
-    const datasetQualityLocator = share.url.locators.create(
-      new DatasetQualityLocatorDefinition({
-        useHash,
-      })
-    );
 
     const dataViewLocator = share.url.locators.create(
       new DataViewLocatorDefinition({
@@ -114,7 +114,6 @@ export class ObservabilityLogsExplorerPlugin
 
     this.locators = {
       allDatasetsLocator,
-      datasetQualityLocator,
       dataViewLocator,
       singleDatasetLocator,
     };

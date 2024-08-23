@@ -157,7 +157,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
       });
     }
 
-    if (influencersFilterQuery !== undefined) {
+    if (influencersFilterQuery) {
       boolCriteria.push(influencersFilterQuery);
     }
 

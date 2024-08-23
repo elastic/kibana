@@ -42,11 +42,13 @@ run(
     }
 
     let branch: string = '';
+    let pipeline: string = '';
     if (updateGithub) {
       let isPr = false;
 
       if (process.env.BUILDKITE === 'true') {
         branch = process.env.BUILDKITE_BRANCH || '';
+        pipeline = process.env.BUILDKITE_PIPELINE_SLUG || '';
         isPr = process.env.BUILDKITE_PULL_REQUEST === 'true';
         updateGithub = process.env.REPORT_FAILED_TESTS_TO_GITHUB === 'true';
       } else {
@@ -137,7 +139,8 @@ run(
               buildUrl,
               existingIssue,
               githubApi,
-              branch
+              branch,
+              pipeline
             );
             const url = existingIssue.github.htmlUrl;
             existingIssue.github.body = newBody;
@@ -150,7 +153,7 @@ run(
             continue;
           }
 
-          const newIssue = await createFailureIssue(buildUrl, failure, githubApi, branch);
+          const newIssue = await createFailureIssue(buildUrl, failure, githubApi, branch, pipeline);
           existingIssues.addNewlyCreated(failure, newIssue);
           pushMessage('Test has not failed recently on tracked branches');
           if (updateGithub) {

@@ -35,7 +35,7 @@ export class DatatableVisualization {
       expressions.registerRenderer(() =>
         getDatatableRenderer({
           formatFactory,
-          theme: core.theme,
+          core,
           getType: core
             .getStartServices()
             .then(([_, { data: dataStart }]) => dataStart.search.aggs.types.get),

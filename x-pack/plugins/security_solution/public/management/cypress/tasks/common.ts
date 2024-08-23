@@ -45,13 +45,3 @@ export const rootRequest = <T = unknown>(
     headers: API_HEADERS,
     ...options,
   });
-
-export const disableExpandableFlyoutAdvancedSettings = () => {
-  const body = { changes: { 'securitySolution:enableExpandableFlyout': false } };
-  rootRequest({
-    method: 'POST',
-    url: 'internal/kibana/settings',
-    body,
-    headers: { 'kbn-xsrf': 'cypress-creds' },
-  });
-};

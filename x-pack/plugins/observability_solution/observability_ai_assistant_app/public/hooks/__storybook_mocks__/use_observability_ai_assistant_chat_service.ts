@@ -5,10 +5,27 @@
  * 2.0.
  */
 
+import { FunctionVisibility } from '@kbn/observability-ai-assistant-plugin/public';
+import { Subject } from 'rxjs';
+
 export function useObservabilityAIAssistantChatService() {
   return {
+    chat: () => new Subject(),
+    complete: () => new Subject(),
     getFunctions: () => {
-      return [];
+      return [
+        {
+          id: 'foo',
+          name: 'foo',
+          description: 'use this function to foo',
+          descriptionForUser: 'a function that functions',
+          visibility: FunctionVisibility.All,
+        },
+      ];
     },
+    getSystemMessage: () => {},
+    hasFunction: () => true,
+    hasRenderFunction: () => true,
+    sendAnalyticsEvent: () => {},
   };
 }

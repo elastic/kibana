@@ -14,7 +14,7 @@ import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { ToastsStart } from '@kbn/core/public';
+import { CoreStart, ToastsStart } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
@@ -25,6 +25,7 @@ import type {
   UsageCollectionStart,
 } from '@kbn/usage-collection-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { CspRouterProps } from './application/csp_router';
 import type { CloudSecurityPosturePageId } from './common/navigation/types';
 
@@ -67,6 +68,8 @@ export interface CspClientPluginStartDeps {
   licensing: LicensingPluginStart;
   share: SharePluginStart;
   storage: Storage;
+  spaces: SpacesPluginStart;
+  cloud: CloudSetup;
 
   // optional
   usageCollection?: UsageCollectionStart;
@@ -84,3 +87,8 @@ export interface CspSecuritySolutionContext {
     state?: Record<string, string | undefined>;
   }>;
 }
+
+export type CloudSecurityPostureStartServices = Pick<
+  CoreStart,
+  'notifications' | 'analytics' | 'i18n' | 'theme'
+>;

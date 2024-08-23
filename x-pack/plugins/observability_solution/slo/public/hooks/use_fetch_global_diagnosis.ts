@@ -19,11 +19,7 @@ interface SloGlobalDiagnosisResponse {
 }
 
 export interface UseFetchSloGlobalDiagnoseResponse {
-  isInitialLoading: boolean;
   isLoading: boolean;
-  isRefetching: boolean;
-  isSuccess: boolean;
-  isError: boolean;
   data: SloGlobalDiagnosisResponse | undefined;
 }
 
@@ -33,7 +29,7 @@ export function useFetchSloGlobalDiagnosis(): UseFetchSloGlobalDiagnoseResponse 
     notifications: { toasts },
   } = useKibana().services;
 
-  const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
+  const { isLoading, data } = useQuery({
     queryKey: sloKeys.globalDiagnosis(),
     queryFn: async ({ signal }) => {
       try {
@@ -65,9 +61,5 @@ export function useFetchSloGlobalDiagnosis(): UseFetchSloGlobalDiagnoseResponse 
   return {
     data,
     isLoading,
-    isInitialLoading,
-    isRefetching,
-    isSuccess,
-    isError,
   };
 }

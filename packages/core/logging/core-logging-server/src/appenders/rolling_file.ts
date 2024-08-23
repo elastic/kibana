@@ -32,6 +32,10 @@ export interface RollingFileAppenderConfig {
    * The {@link RollingStrategy | rollout strategy} to use for rolling.
    */
   strategy: RollingStrategyConfig;
+  /**
+   * The {@link RetentionPolicy | retention strategy} to use to know which files to keep.
+   */
+  retention?: RetentionPolicyConfig;
 }
 
 /**
@@ -106,6 +110,14 @@ export interface NumericRollingStrategyConfig {
   /**
    * The maximum number of files to keep. Once this number is reached, oldest
    * files will be deleted. Defaults to `7`
+   *
+   * @deprecated use retention policy instead
    */
   max: number;
+}
+
+export interface RetentionPolicyConfig {
+  maxFiles?: number;
+  maxAccumulatedFileSize?: ByteSizeValue;
+  removeOlderThan?: Duration;
 }

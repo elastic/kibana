@@ -195,9 +195,15 @@ describe('mappingFromFieldMap', () => {
           properties: {
             action: {
               type: 'keyword',
+              ignore_above: 1024,
             },
             kind: {
               type: 'keyword',
+              ignore_above: 1024,
+            },
+            original: {
+              type: 'keyword',
+              ignore_above: 1024,
             },
           },
         },
@@ -243,6 +249,9 @@ describe('mappingFromFieldMap', () => {
                 last_detected: {
                   type: 'date',
                 },
+                previous_action_group: {
+                  type: 'keyword',
+                },
                 reason: {
                   type: 'keyword',
                   fields: {
@@ -261,6 +270,9 @@ describe('mappingFromFieldMap', () => {
                     },
                     execution: {
                       properties: {
+                        timestamp: {
+                          type: 'date',
+                        },
                         uuid: {
                           type: 'keyword',
                         },
@@ -289,6 +301,9 @@ describe('mappingFromFieldMap', () => {
                       type: 'keyword',
                     },
                   },
+                },
+                severity_improving: {
+                  type: 'boolean',
                 },
                 start: {
                   type: 'date',

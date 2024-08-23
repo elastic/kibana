@@ -33,7 +33,7 @@ export function initializeZipShareableWorkpadRoute(deps: RouteInitializerDeps) {
         archive.file(SHAREABLE_RUNTIME_FILE, { name: `${SHAREABLE_RUNTIME_NAME}.js` });
 
         const result = { headers: { 'content-type': 'application/zip' }, body: archive };
-        archive.finalize();
+        await archive.finalize();
 
         return response.ok(result);
       }

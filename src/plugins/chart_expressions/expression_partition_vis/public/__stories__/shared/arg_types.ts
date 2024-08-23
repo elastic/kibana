@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Position } from '@elastic/charts';
+import { LegendValue, Position } from '@elastic/charts';
 import { ArgTypes } from '@storybook/addons';
 import { EmptySizeRatios, LegendDisplay } from '../../../common';
 import { ChartTypes } from '../../../common/types';
@@ -206,11 +206,12 @@ export const waffleArgTypes: ArgTypes = {
     control: { type: 'text', disable: true },
   },
   ...argTypes,
-  showValuesInLegend: {
-    name: `${visConfigName}.nestedLegend`,
-    description: 'Enable displaying values in the legend',
-    type: { name: 'boolean', required: false },
-    table: { type: { summary: 'boolean' }, defaultValue: { summary: false } },
-    control: { type: 'boolean' },
+  legendStats: {
+    name: `${visConfigName}.legendStats`,
+    description: 'Legend stats',
+    type: { name: 'string', required: false },
+    table: { type: { summary: 'string' }, defaultValue: { summary: undefined } },
+    options: [LegendValue.Value],
+    control: { type: 'select' },
   },
 };

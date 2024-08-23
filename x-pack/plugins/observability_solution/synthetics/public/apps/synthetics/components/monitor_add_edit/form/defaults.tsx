@@ -65,6 +65,11 @@ export const formatDefaultFormValues = (monitor?: SyntheticsMonitor) => {
     ...monitor,
   };
 
+  const schedule = monitor[ConfigKey.SCHEDULE];
+  if (schedule?.unit === 's') {
+    schedule.number = `${schedule.number}s`;
+  }
+
   // handle default monitor types from Uptime, which don't contain `ConfigKey.FORM_MONITOR_TYPE`
   if (!formMonitorType) {
     formMonitorType =

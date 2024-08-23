@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { coreMock } from '@kbn/core/public/mocks';
 import { NotificationsStart, HttpStart, OverlayStart } from '@kbn/core/public';
 import createSagaMiddleware from 'redux-saga';
 import { createStore, applyMiddleware, AnyAction } from 'redux';
@@ -36,6 +37,7 @@ export function createMockGraphStore({
   mockedDepsOverwrites?: Partial<jest.Mocked<GraphStoreDependencies>>;
   initialStateOverwrites?: Partial<GraphState>;
 }): MockedGraphEnvironment {
+  const coreStart = coreMock.createStart();
   const workspaceMock = {
     runLayout: jest.fn(),
     simpleSearch: jest.fn(),
@@ -46,6 +48,7 @@ export function createMockGraphStore({
   } as unknown as Workspace;
 
   const mockedDeps: jest.Mocked<GraphStoreDependencies> = {
+    ...coreStart,
     basePath: '',
     addBasePath: jest.fn((url: string) => url),
     changeUrl: jest.fn(),

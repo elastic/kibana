@@ -7,7 +7,6 @@
 
 export const roleMappingsAPIClientMock = {
   create: () => ({
-    checkRoleMappingFeatures: jest.fn(),
     getRoleMappings: jest.fn(),
     getRoleMapping: jest.fn(),
     saveRoleMapping: jest.fn(),

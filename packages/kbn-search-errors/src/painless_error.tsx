@@ -11,21 +11,21 @@ import { estypes } from '@elastic/elasticsearch';
 import type { ApplicationStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiSpacer, EuiText, EuiCodeBlock } from '@elastic/eui';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { AbstractDataView } from '@kbn/data-views-plugin/common';
 import type { IEsError } from './types';
 import { EsError } from './es_error';
 
 export class PainlessError extends EsError {
   private readonly applicationStart: ApplicationStart;
   private readonly painlessCause: estypes.ErrorCause;
-  private readonly dataView?: DataView;
+  private readonly dataView?: AbstractDataView;
 
   constructor(
     err: IEsError,
     openInInspector: () => void,
     painlessCause: estypes.ErrorCause,
     applicationStart: ApplicationStart,
-    dataView?: DataView
+    dataView?: AbstractDataView
   ) {
     super(
       err,

@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { Stream } from 'stream';
 import type {
   CustomHttpResponseOptions,
   HttpResponseOptions,
@@ -32,6 +31,15 @@ export interface KibanaSuccessResponseFactory {
   ): IKibanaResponse<T>;
 
   /**
+   * The request has succeeded and has led to the creation of a resource.
+   * Status code: `201`.
+   * @param options - {@link HttpResponseOptions} configures HTTP response body & headers.
+   */
+  created<T extends HttpResponsePayload | ResponseError = any>(
+    options?: HttpResponseOptions<T>
+  ): IKibanaResponse<T>;
+
+  /**
    * The request has been accepted for processing.
    * Status code: `202`.
    * @param options - {@link HttpResponseOptions} configures HTTP response body & headers.
@@ -46,6 +54,13 @@ export interface KibanaSuccessResponseFactory {
    * @param options - {@link HttpResponseOptions} configures HTTP response body & headers.
    */
   noContent(options?: HttpResponseOptions): IKibanaResponse;
+
+  /**
+   * The server indicates that there might be a mixture of responses (some tasks succeeded, some failed).
+   * Status code: `207`.
+   * @param options - {@link HttpResponseOptions} configures HTTP response body & headers.
+   */
+  multiStatus(options?: HttpResponseOptions): IKibanaResponse;
 }
 
 /**
@@ -113,10 +128,17 @@ export interface KibanaErrorResponseFactory {
   conflict(options?: ErrorHttpResponseOptions): IKibanaResponse;
 
   /**
+   * The server understands the content type of the request entity, and the syntax of the request entity is correct, but it was unable to process the contained instructions.
+   * Status code: `422`.
+   * @param options - {@link HttpResponseOptions} configures HTTP response headers, error message and other error details to pass to the client
+   */
+  unprocessableContent(options?: ErrorHttpResponseOptions): IKibanaResponse;
+
+  /**
    * Creates an error response with defined status code and payload.
    * @param options - {@link CustomHttpResponseOptions} configures HTTP response headers, error message and other error details to pass to the client
    */
-  customError(options: CustomHttpResponseOptions<ResponseError | Buffer | Stream>): IKibanaResponse;
+  customError(options: CustomHttpResponseOptions<ResponseError>): IKibanaResponse;
 }
 
 /**

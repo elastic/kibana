@@ -45,13 +45,14 @@ export interface MergedServiceDashboard extends SavedApmCustomDashboard {
   title: string;
 }
 
-export function ServiceDashboards() {
+export function ServiceDashboards({ checkForEntities = false }: { checkForEntities?: boolean }) {
   const {
     path: { serviceName },
     query: { environment, kuery, rangeFrom, rangeTo, dashboardId },
   } = useAnyOfApmParams(
     '/services/{serviceName}/dashboards',
-    '/mobile-services/{serviceName}/dashboards'
+    '/mobile-services/{serviceName}/dashboards',
+    '/logs-services/{serviceName}/dashboards'
   );
   const [dashboard, setDashboard] = useState<AwaitingDashboardAPI>();
   const [serviceDashboards, setServiceDashboards] = useState<MergedServiceDashboard[]>([]);
@@ -68,12 +69,12 @@ export function ServiceDashboards() {
           isCachable: false,
           params: {
             path: { serviceName },
-            query: { start, end },
+            query: { start, end, checkFor: checkForEntities ? 'entities' : 'services' },
           },
         });
       }
     },
-    [serviceName, start, end]
+    [serviceName, start, end, checkForEntities]
   );
 
   useEffect(() => {

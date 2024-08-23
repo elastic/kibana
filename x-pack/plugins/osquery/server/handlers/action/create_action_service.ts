@@ -23,7 +23,7 @@ export const createActionService = (osqueryContext: OsqueryAppContext) => {
 
   const create = async (
     params: CreateLiveQueryRequestBodySchema,
-    alertData?: ParsedTechnicalFields
+    alertData?: ParsedTechnicalFields & { _index: string }
   ) => {
     const error = validateLicense(licenses);
 

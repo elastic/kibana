@@ -18,13 +18,13 @@ import {
   DEFAULT_REFRESH_INTERVAL,
 } from '@kbn/logs-shared-plugin/common';
 import moment from 'moment';
+import { createPlainError, formatErrors } from '@kbn/io-ts-utils';
 import {
   getTimeRangeEndFromTime,
   getTimeRangeStartFromTime,
 } from '../../../../common/url_state_storage_service';
 import { minimalTimeKeyRT } from '../../../../common/time';
 import { datemathStringRT } from '../../../utils/datemath';
-import { createPlainError, formatErrors } from '../../../../common/runtime_types';
 import type { LogStreamQueryContext, LogStreamQueryEvent, ParsedQuery } from './types';
 import { DEFAULT_FILTERS, DEFAULT_QUERY, DEFAULT_TIMERANGE } from './defaults';
 
@@ -258,9 +258,6 @@ export const filterStateInUrlRT = rt.partial({
       query: rt.union([rt.string, rt.record(rt.string, rt.unknown)]),
     }),
     rt.strict({
-      sql: rt.string,
-    }),
-    rt.strict({
       esql: rt.string,
     }),
   ]),
@@ -279,9 +276,6 @@ export const legacyFilterStateInUrlRT = rt.union([
   rt.strict({
     language: rt.string,
     query: rt.union([rt.string, rt.record(rt.string, rt.unknown)]),
-  }),
-  rt.strict({
-    sql: rt.string,
   }),
   rt.strict({
     esql: rt.string,

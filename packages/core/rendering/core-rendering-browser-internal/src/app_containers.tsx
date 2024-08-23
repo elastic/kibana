@@ -6,15 +6,17 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { Observable } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import classNames from 'classnames';
 import { APP_WRAPPER_CLASS } from '@kbn/core-application-common';
 
-export const AppWrapper: React.FunctionComponent<{
-  chromeVisible$: Observable<boolean>;
-}> = ({ chromeVisible$, children }) => {
+export const AppWrapper: FC<
+  PropsWithChildren<{
+    chromeVisible$: Observable<boolean>;
+  }>
+> = ({ chromeVisible$, children }) => {
   const visible = useObservable(chromeVisible$);
   return (
     <div

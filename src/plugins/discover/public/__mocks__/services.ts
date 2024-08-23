@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { Observable, of } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
 import { DiscoverServices } from '../build_services';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
@@ -29,21 +29,20 @@ import {
   HIDE_ANNOUNCEMENTS,
   SEARCH_ON_PAGE_LOAD_SETTING,
 } from '@kbn/discover-utils';
-import {
-  UI_SETTINGS,
-  calculateBounds,
-  SearchSource,
-  IKibanaSearchResponse,
-} from '@kbn/data-plugin/public';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
+import { UI_SETTINGS, calculateBounds, SearchSource } from '@kbn/data-plugin/public';
 import { TopNavMenu } from '@kbn/navigation-plugin/public';
 import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
+import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { LocalStorageMock } from './local_storage_mock';
 import { createDiscoverDataViewsMock } from './data_views';
 import { SearchSourceDependencies } from '@kbn/data-plugin/common';
 import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { urlTrackerMock } from './url_tracker.mock';
+import { createElement } from 'react';
+import { createContextAwarenessMocks } from '../context_awareness/__mocks__';
 
 export function createDiscoverServicesMock(): DiscoverServices {
   const dataPlugin = dataPluginMock.createStartContract();
@@ -140,9 +139,11 @@ export function createDiscoverServicesMock(): DiscoverServices {
     ...uiSettingsMock,
   };
 
+  const { profilesManagerMock } = createContextAwarenessMocks();
   const theme = themeServiceMock.createSetupContract({ darkMode: false });
 
   corePluginMock.theme = theme;
+  corePluginMock.chrome.getActiveSolutionNavId$.mockReturnValue(new BehaviorSubject(null));
 
   return {
     core: corePluginMock,
@@ -156,7 +157,15 @@ export function createDiscoverServicesMock(): DiscoverServices {
     },
     getScopedHistory: () => scopedHistoryMock.create(),
     data: dataPlugin,
+    dataVisualizer: {
+      FieldStatisticsTable: jest.fn(() => createElement('div')),
+    },
+    aiops: {
+      getPatternAnalysisAvailable: jest.fn().mockResolvedValue(jest.fn().mockResolvedValue(true)),
+      PatternAnalysisComponent: jest.fn(() => createElement('div')),
+    },
     docLinks: docLinksServiceMock.createStartContract(),
+    embeddable: embeddablePluginMock.createStartContract(),
     capabilities: {
       visualize: {
         show: true,
@@ -232,6 +241,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
     contextLocator: { getRedirectUrl: jest.fn(() => '') },
     singleDocLocator: { getRedirectUrl: jest.fn(() => '') },
     urlTracker: urlTrackerMock,
+    profilesManager: profilesManagerMock,
     setHeaderActionMenu: jest.fn(),
   } as unknown as DiscoverServices;
 }

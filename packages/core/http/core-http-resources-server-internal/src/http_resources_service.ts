@@ -33,8 +33,6 @@ import type {
 
 import type { InternalHttpResourcesSetup } from './types';
 
-import { getApmConfig } from './get_apm_config';
-
 /**
  * @internal
  */
@@ -112,13 +110,9 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
   ): HttpResourcesServiceToolkit {
     return {
       async renderCoreApp(options: HttpResourcesRenderOptions = {}) {
-        const apmConfig = getApmConfig(request.url.pathname);
         const { uiSettings } = await context.core;
         const body = await deps.rendering.render(request, uiSettings, {
           isAnonymousPage: false,
-          vars: {
-            apmConfig,
-          },
           includeExposedConfigKeys: options.includeExposedConfigKeys,
         });
 
@@ -128,13 +122,9 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
         });
       },
       async renderAnonymousCoreApp(options: HttpResourcesRenderOptions = {}) {
-        const apmConfig = getApmConfig(request.url.pathname);
         const { uiSettings } = await context.core;
         const body = await deps.rendering.render(request, uiSettings, {
           isAnonymousPage: true,
-          vars: {
-            apmConfig,
-          },
           includeExposedConfigKeys: options.includeExposedConfigKeys,
         });
 

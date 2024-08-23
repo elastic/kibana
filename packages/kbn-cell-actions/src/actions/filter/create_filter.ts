@@ -13,7 +13,7 @@ import {
   type PhraseFilter,
   type Filter,
 } from '@kbn/es-query';
-import { DefaultActionsSupportedValue } from '../types';
+import type { DefaultActionsSupportedValue } from '../types';
 
 export const createExistsFilter = ({
   key,

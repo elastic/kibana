@@ -12,7 +12,7 @@ import {
   type WrapperComponent,
 } from '@testing-library/react-hooks';
 import { merge } from 'lodash';
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 import { Observable, of, Subject } from 'rxjs';
 import {
   MessageRole,
@@ -85,7 +85,7 @@ describe('useConversation', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    wrapper = ({ children }) => (
+    wrapper = ({ children }: PropsWithChildren<unknown>) => (
       <KibanaContextProvider services={useKibanaMockServices}>
         <ObservabilityAIAssistantAppServiceProvider value={mockService}>
           {children}

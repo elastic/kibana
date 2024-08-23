@@ -7,4 +7,4 @@
 
 export { ace } from '@kbn/es-ui-shared-plugin/public';
 
-export { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+export { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';

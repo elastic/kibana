@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useState } from 'react';
+import React, { FC, PropsWithChildren, useState } from 'react';
 
 import { useNotifyService } from '../../../services';
 import { ErrorStrings } from '../../../../i18n';
@@ -15,7 +15,7 @@ import { UploadDropzone as Component } from './upload_dropzone.component';
 
 const { WorkpadDropzone: errors } = ErrorStrings;
 
-export const UploadDropzone: FC = ({ children }) => {
+export const UploadDropzone: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const notify = useNotifyService();
   const uploadWorkpad = useImportWorkpad();
   const [isDisabled, setIsDisabled] = useState(false);

@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import type { FC } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
+  EuiFieldText,
   EuiForm,
   EuiFormRow,
-  EuiFieldText,
-  EuiTextArea,
   EuiSpacer,
+  EuiTextArea,
   EuiToolTip,
 } from '@elastic/eui';
 
 import { ContentEditorFlyoutWarningsCallOut } from './editor_flyout_warnings';
-import type { MetadataFormState, Field } from './use_metadata_form';
+import type { Field, MetadataFormState } from './use_metadata_form';
 import type { SavedObjectsReference, Services } from '../services';
 
 interface Props {
@@ -42,6 +42,7 @@ export const MetadataForm: FC<Props> = ({
   TagSelector,
   isReadonly,
   readonlyReason,
+  children,
 }) => {
   const {
     title,
@@ -135,6 +136,13 @@ export const MetadataForm: FC<Props> = ({
         <>
           <EuiSpacer />
           <TagSelector initialSelection={tags.value} onTagsSelected={setTags} fullWidth />
+        </>
+      )}
+
+      {children && (
+        <>
+          <EuiSpacer />
+          {children}
         </>
       )}
     </EuiForm>

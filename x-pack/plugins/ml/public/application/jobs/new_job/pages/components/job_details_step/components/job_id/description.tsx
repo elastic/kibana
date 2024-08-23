@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
@@ -15,7 +15,7 @@ interface Props {
   validation: Validation;
 }
 
-export const Description: FC<Props> = memo(({ children, validation }) => {
+export const Description: FC<PropsWithChildren<Props>> = memo(({ children, validation }) => {
   const title = i18n.translate('xpack.ml.newJob.wizard.jobDetailsStep.jobId.title', {
     defaultMessage: 'Job ID',
   });

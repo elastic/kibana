@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Position, ScaleType as ECScaleType } from '@elastic/charts';
+import { LegendValue, Position, ScaleType as ECScaleType } from '@elastic/charts';
 import {
   SeriesTypes,
   Column,
@@ -235,6 +235,9 @@ export const getConfiguration = (
       shouldTruncate: vis.params.truncateLegend ?? vis.type.visConfig.defaults.truncateLegend,
       maxLines: vis.params.maxLegendLines ?? vis.type.visConfig.defaults.maxLegendLines,
       showSingleSeries: true,
+      legendStats: Boolean(vis.params.labels.show ?? vis.type.visConfig.defaults.labels?.show)
+        ? [LegendValue.CurrentAndLastValue]
+        : undefined,
     },
     fittingFunction: fittingFunction
       ? fittingFunction[0].toUpperCase() + fittingFunction.slice(1)
@@ -269,7 +272,6 @@ export const getConfiguration = (
     xTitle: xAxis.title.text,
     valueLabels:
       vis.params.labels.show ?? vis.type.visConfig.defaults.labels?.show ? 'show' : 'hide',
-    valuesInLegend: Boolean(vis.params.labels.show ?? vis.type.visConfig.defaults.labels?.show),
     showCurrentTimeMarker: isTimeChart
       ? Boolean(vis.params.addTimeMarker ?? vis.type.visConfig.defaults.addTimeMarker)
       : undefined,

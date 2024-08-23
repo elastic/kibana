@@ -7,4 +7,5 @@
  */
 
 export { defineReducerStreamRoute } from './reducer_stream';
+export { defineReduxStreamRoute } from './redux_stream';
 export { defineSimpleStringStreamRoute } from './single_string_stream';

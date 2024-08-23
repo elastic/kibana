@@ -8,17 +8,10 @@
 
 import { EuiLoadingChart } from '@elastic/eui';
 import { css } from '@emotion/react';
-import {
-  EmbeddablePanel,
-  reactEmbeddableRegistryHasKey,
-  ReactEmbeddableRenderer,
-  ViewMode,
-} from '@kbn/embeddable-plugin/public';
-import { PhaseEvent } from '@kbn/presentation-publishing';
+import { EmbeddablePanel, ReactEmbeddableRenderer, ViewMode } from '@kbn/embeddable-plugin/public';
 import classNames from 'classnames';
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { DashboardPanelState } from '../../../../common';
-import { getReferencesForPanelId } from '../../../../common/dashboard_container/persistable_state/dashboard_container_references';
 import { pluginServices } from '../../../services/plugin_services';
 import { useDashboardContainer } from '../../embeddable/dashboard_container';
 
@@ -32,7 +25,6 @@ export interface Props extends DivProps {
   focusedPanelId?: string;
   key: string;
   isRenderable?: boolean;
-  onPanelStatusChange?: (info: PhaseEvent) => void;
 }
 
 export const Item = React.forwardRef<HTMLDivElement, Props>(
@@ -43,7 +35,6 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       id,
       index,
       type,
-      onPanelStatusChange,
       isRenderable = true,
       // The props below are passed from ReactGridLayoutn and need to be merged with their counterparts.
       // https://github.com/react-grid-layout/react-grid-layout/issues/1241#issuecomment-658306889
@@ -57,7 +48,6 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
     const scrollToPanelId = container.select((state) => state.componentState.scrollToPanelId);
     const highlightPanelId = container.select((state) => state.componentState.highlightPanelId);
     const useMargins = container.select((state) => state.explicitInput.useMargins);
-    const panel = container.select((state) => state.explicitInput.panels[id]);
 
     const expandPanel = expandedPanelId !== undefined && expandedPanelId === id;
     const hidePanel = expandedPanelId !== undefined && expandedPanelId !== id;
@@ -74,14 +64,15 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
 
     useLayoutEffect(() => {
       if (typeof ref !== 'function' && ref?.current) {
+        const panelRef = ref.current;
         if (scrollToPanelId === id) {
-          container.scrollToPanel(ref.current);
+          container.scrollToPanel(panelRef);
         }
         if (highlightPanelId === id) {
-          container.highlightPanel(ref.current);
+          container.highlightPanel(panelRef);
         }
 
-        ref.current.querySelectorAll('*').forEach((e) => {
+        panelRef.querySelectorAll('*').forEach((e) => {
           if (blurPanel) {
             // remove blurred panels and nested elements from tab order
             e.setAttribute('tabindex', '-1');
@@ -101,7 +92,9 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       : undefined;
 
     const renderedEmbeddable = useMemo(() => {
-      const references = getReferencesForPanelId(id, container.savedObjectReferences);
+      const {
+        embeddable: { reactEmbeddableRegistryHasKey },
+      } = pluginServices.getServices();
 
       const panelProps = {
         showBadges: true,
@@ -116,11 +109,10 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
           <ReactEmbeddableRenderer
             type={type}
             maybeId={id}
-            parentApi={container}
+            getParentApi={() => container}
             key={`${type}_${id}`}
             panelProps={panelProps}
             onApiAvailable={(api) => container.registerChildApi(api)}
-            state={{ rawState: panel.explicitInput as object, version: panel.version, references }}
           />
         );
       }
@@ -129,21 +121,11 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
         <EmbeddablePanel
           key={type}
           index={index}
-          onPanelStatusChange={onPanelStatusChange}
           embeddable={() => container.untilEmbeddableLoaded(id)}
           {...panelProps}
         />
       );
-    }, [
-      id,
-      container,
-      type,
-      index,
-      useMargins,
-      onPanelStatusChange,
-      panel.explicitInput,
-      panel.version,
-    ]);
+    }, [id, container, type, index, useMargins]);
 
     return (
       <div

@@ -6,7 +6,9 @@
  */
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 
+import type { ExperimentalFeatures } from '../../../../../../common';
 import type { BulkActionEditPayload } from '../../../../../../common/api/detection_engine/rule_management';
 
 import type { MlAuthz } from '../../../../machine_learning/authz';
@@ -20,11 +22,13 @@ import { validateBulkEditRule } from './validations';
 import { bulkEditActionToRulesClientOperation } from './action_to_rules_client_operation';
 
 export interface BulkEditRulesArguments {
+  actionsClient: ActionsClient;
   rulesClient: RulesClient;
   actions: BulkActionEditPayload[];
   filter?: string;
   ids?: string[];
   mlAuthz: MlAuthz;
+  experimentalFeatures: ExperimentalFeatures;
 }
 
 /**
@@ -35,14 +39,18 @@ export interface BulkEditRulesArguments {
  * @returns edited rules and caught errors
  */
 export const bulkEditRules = async ({
+  actionsClient,
   rulesClient,
   ids,
   actions,
   filter,
   mlAuthz,
+  experimentalFeatures,
 }: BulkEditRulesArguments) => {
   const { attributesActions, paramsActions } = splitBulkEditActions(actions);
-  const operations = attributesActions.map(bulkEditActionToRulesClientOperation).flat();
+  const operations = attributesActions
+    .map((attribute) => bulkEditActionToRulesClientOperation(actionsClient, attribute))
+    .flat();
   const result = await rulesClient.bulkEdit({
     ...(ids ? { ids } : { filter: enrichFilterWithRuleTypeMapping(filter) }),
     operations,
@@ -53,7 +61,7 @@ export const bulkEditRules = async ({
         edit: actions,
         immutable: ruleParams.immutable,
       });
-      return ruleParamsModifier(ruleParams, paramsActions);
+      return ruleParamsModifier(ruleParams, paramsActions, experimentalFeatures);
     },
   });
 

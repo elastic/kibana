@@ -55,6 +55,7 @@ export interface Props {
   }) => Promise<void>;
   customValidators?: CustomValidators;
   onCancel: () => void;
+  appendRows?: React.ReactNode;
 }
 
 const capitalize = (str: string) => `${str.charAt(0).toLocaleUpperCase()}${str.substring(1)}`;
@@ -68,6 +69,7 @@ export const ContentEditorFlyoutContent: FC<Props> = ({
   onSave,
   onCancel,
   customValidators,
+  appendRows,
 }) => {
   const { euiTheme } = useEuiTheme();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -147,7 +149,9 @@ export const ContentEditorFlyoutContent: FC<Props> = ({
           tagsReferences={item.tags}
           TagList={TagList}
           TagSelector={TagSelector}
-        />
+        >
+          {appendRows}
+        </MetadataForm>
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>

@@ -9,12 +9,12 @@ import {
   CNVM_POLICY_TEMPLATE,
   CSPM_POLICY_TEMPLATE,
   KSPM_POLICY_TEMPLATE,
-  LATEST_FINDINGS_INDEX_PATTERN,
+  CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN,
   LATEST_VULNERABILITIES_INDEX_PATTERN,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
 import { INTEGRATION_PACKAGE_NAME } from '@kbn/cloud-defend-plugin/common/constants';
 
-const CLOUD_DEFEND_HEARTBEAT_INDEX = 'metrics-cloud_defend.heartbeat';
+export const CLOUD_DEFEND_HEARTBEAT_INDEX = 'metrics-cloud_defend.heartbeat-*';
 export const CLOUD_SECURITY_TASK_TYPE = 'cloud_security';
 export const AGGREGATION_PRECISION_THRESHOLD = 40000;
 export const ASSETS_SAMPLE_GRANULARITY = '24h';
@@ -27,11 +27,11 @@ export const CLOUD_DEFEND = INTEGRATION_PACKAGE_NAME;
 
 export const METERING_CONFIGS = {
   [CSPM]: {
-    index: LATEST_FINDINGS_INDEX_PATTERN,
+    index: CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN,
     assets_identifier: 'resource.id',
   },
   [KSPM]: {
-    index: LATEST_FINDINGS_INDEX_PATTERN,
+    index: CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN,
     assets_identifier: 'agent.id',
   },
   [CNVM]: {
@@ -49,8 +49,8 @@ export const BILLABLE_ASSETS_CONFIG = {
   [CSPM]: {
     filter_attribute: 'resource.sub_type',
     values: [
-      'aws-ebs',
-      'aws-ec2',
+      // 'aws-ebs', we can't include EBS volumes until https://github.com/elastic/security-team/issues/9283 is resolved
+      // 'aws-ec2', we can't include EC2 instances until https://github.com/elastic/security-team/issues/9254 is resolved
       'aws-s3',
       'aws-rds',
       'azure-disk',
@@ -60,9 +60,9 @@ export const BILLABLE_ASSETS_CONFIG = {
       'azure-mysql-server-db',
       'azure-postgresql-server-db',
       'azure-sql-server',
+      'azure-storage-account',
       'azure-vm',
       'gcp-bigquery-dataset',
-      'gcp-bigquery-table',
       'gcp-compute-disk',
       'gcp-compute-instance',
       'gcp-sqladmin-instance',

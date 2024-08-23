@@ -11,20 +11,9 @@ import { safeLoad } from 'js-yaml';
 import { set } from '@kbn/safer-lodash-set';
 import { isPlainObject } from 'lodash';
 import { ensureValidObjectPath } from '@kbn/std';
-import { splitKey, getUnsplittableKey } from './utils';
+import { splitKey, getUnsplittableKey, replaceEnvVarRefs } from './utils';
 
 const readYaml = (path: string) => safeLoad(readFileSync(path, 'utf8'));
-
-function replaceEnvVarRefs(val: string) {
-  return val.replace(/\$\{(\w+)\}/g, (match, envVarName) => {
-    const envVarValue = process.env[envVarName];
-    if (envVarValue !== undefined) {
-      return envVarValue;
-    }
-
-    throw new Error(`Unknown environment variable referenced in config : ${envVarName}`);
-  });
-}
 
 interface YamlEntry {
   path: string[];
@@ -70,7 +59,9 @@ function processEntryValue(value: any) {
         delete value[subKey];
         set(value, [unsplitKey], processEntryValue(subVal));
       } else {
-        set(value, subKey, processEntryValue(subVal));
+        const subKeySplits = splitKey(subKey);
+        if (subKeySplits.length > 1) delete value[subKey];
+        set(value, subKeySplits, processEntryValue(subVal));
       }
     }
   } else if (typeof value === 'string') {

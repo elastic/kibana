@@ -6,11 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useCallback } from 'react';
+import { usePerformanceContext } from '@kbn/ebt-tools';
+import React, { useCallback, useMemo } from 'react';
 import { useCurrentEuiBreakpoint } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
-import { InfraWaffleMapBounds, InfraWaffleMapOptions, InfraFormatter } from '../../../../lib/lib';
+import {
+  InfraWaffleMapBounds,
+  InfraWaffleMapOptions,
+  InfraFormatter,
+} from '../../../../common/inventory/types';
 import { NoData } from '../../../../components/empty_states';
 import { InfraLoadingPanel } from '../../../../components/loading';
 import { Map } from './waffle/map';
@@ -62,10 +67,20 @@ export const NodesOverview = ({
   isAutoReloading,
 }: Props) => {
   const currentBreakpoint = useCurrentEuiBreakpoint();
-  const [{ detailsItemId }, setFlyoutUrlState] = useAssetDetailsFlyoutState();
+  const [{ detailsItemId, assetType }, setFlyoutUrlState] = useAssetDetailsFlyoutState();
+  const { onPageReady } = usePerformanceContext();
+
+  const nodeName = useMemo(
+    () => nodes.find((node) => node.path[0].value === detailsItemId)?.name,
+    [detailsItemId, nodes]
+  );
 
   const closeFlyout = useCallback(
-    () => setFlyoutUrlState({ detailsItemId: null }),
+    () =>
+      setFlyoutUrlState({
+        detailsItemId: null,
+        assetType: null,
+      }),
     [setFlyoutUrlState]
   );
 
@@ -115,6 +130,10 @@ export const NodesOverview = ({
   const bounds = autoBounds ? dataBounds : boundsOverride;
   const isStatic = ['xs', 's'].includes(currentBreakpoint!);
 
+  if (!loading) {
+    onPageReady();
+  }
+
   if (view === 'table') {
     return (
       <TableContainer>
@@ -143,9 +162,10 @@ export const NodesOverview = ({
         bottomMargin={bottomMargin}
         staticHeight={isStatic}
       />
-      {nodeType === 'host' && detailsItemId && (
+      {nodeType === assetType && detailsItemId && (
         <AssetDetailsFlyout
-          assetName={detailsItemId}
+          assetId={detailsItemId}
+          assetName={nodeName}
           assetType={nodeType}
           closeFlyout={closeFlyout}
           currentTime={currentTime}

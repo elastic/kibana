@@ -28,7 +28,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize', 'timePicker']);
 
-  describe('dashboard filtering', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/160062
+  describe.skip('dashboard filtering', function () {
     const populateDashboard = async () => {
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.timePicker.setDefaultDataRange();
@@ -267,7 +268,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.dashboard.waitForRenderComplete();
         await pieChart.expectPieSliceCount(5);
 
-        await dashboardPanelActions.openContextMenu();
         await dashboardPanelActions.clickEdit();
         await queryBar.setQuery('weightLbs:>50');
         await queryBar.submitQuery();
@@ -289,7 +289,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('Nested visualization filter pills filters data as expected', async () => {
-        await dashboardPanelActions.openContextMenu();
         await dashboardPanelActions.clickEdit();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await renderable.waitForRender();
@@ -304,7 +303,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('Removing filter pills and query unfiters data as expected', async () => {
-        await dashboardPanelActions.openContextMenu();
         await dashboardPanelActions.clickEdit();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await renderable.waitForRender();

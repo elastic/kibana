@@ -5,22 +5,24 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, FC, PropsWithChildren } from 'react';
 import {
   LogViewProvider,
   initializeFromUrl as createInitializeFromUrl,
   updateContextInUrl as createUpdateContextInUrl,
   listenForUrlChanges as createListenForUrlChanges,
 } from '@kbn/logs-shared-plugin/public';
+import { LogSourcesProvider } from '@kbn/logs-data-access-plugin/public';
 import { LogAnalysisCapabilitiesProvider } from '../../containers/logs/log_analysis';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
-import { useKbnUrlStateStorageFromRouterContext } from '../../utils/kbn_url_state_context';
+import { useKbnUrlStateStorageFromRouterContext } from '../../containers/kbn_url_state_context';
 
-export const LogsPageProviders: React.FunctionComponent = ({ children }) => {
+export const LogsPageProviders: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const {
     services: {
       notifications: { toasts: toastsService },
       logsShared,
+      logsDataAccess,
     },
   } = useKibanaContextForPlugin();
 
@@ -43,7 +45,9 @@ export const LogsPageProviders: React.FunctionComponent = ({ children }) => {
       updateContextInUrl={updateContextInUrl}
       listenForUrlChanges={listenForUrlChanges}
     >
-      <LogAnalysisCapabilitiesProvider>{children}</LogAnalysisCapabilitiesProvider>
+      <LogSourcesProvider logSourcesService={logsDataAccess.services.logSourcesService}>
+        <LogAnalysisCapabilitiesProvider>{children}</LogAnalysisCapabilitiesProvider>
+      </LogSourcesProvider>
     </LogViewProvider>
   );
 };

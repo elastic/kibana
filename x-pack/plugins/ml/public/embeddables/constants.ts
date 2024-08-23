@@ -14,4 +14,7 @@ export type AnomalyExplorerChartsEmbeddableType = typeof ANOMALY_EXPLORER_CHARTS
 export type AnomalySingleMetricViewerEmbeddableType =
   typeof ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE;
 
-export type MlEmbeddableTypes = AnomalySwimLaneEmbeddableType | AnomalyExplorerChartsEmbeddableType;
+export type MlEmbeddableTypes =
+  | AnomalySwimLaneEmbeddableType
+  | AnomalyExplorerChartsEmbeddableType
+  | AnomalySingleMetricViewerEmbeddableType;

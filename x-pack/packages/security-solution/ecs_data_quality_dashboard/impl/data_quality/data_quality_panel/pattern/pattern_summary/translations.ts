@@ -24,6 +24,6 @@ export const INDICES = i18n.translate(
 export const PATTERN_OR_INDEX_TOOLTIP = i18n.translate(
   'securitySolutionPackages.ecsDataQualityDashboard.patternSummary.patternOrIndexTooltip',
   {
-    defaultMessage: 'A pattern or specific index',
+    defaultMessage: 'Index name or pattern',
   }
 );

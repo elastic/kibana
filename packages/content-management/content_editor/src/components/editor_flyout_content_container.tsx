@@ -21,6 +21,7 @@ type CommonProps = Pick<
   | 'onCancel'
   | 'entityName'
   | 'customValidators'
+  | 'appendRows'
 >;
 
 export type Props = CommonProps;

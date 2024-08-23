@@ -14,8 +14,6 @@ import { MatchAllFilter, Query } from '../filters';
 import { fields } from '../filters/stubs';
 import { DataViewBase } from './types';
 
-jest.mock('../kuery/grammar');
-
 describe('build query', () => {
   const indexPattern: DataViewBase = {
     fields,

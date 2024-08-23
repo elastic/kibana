@@ -22,6 +22,10 @@ interface RowRenderersBrowserProps {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const StyledEuiInMemoryTable = styled(EuiInMemoryTable as any)`
   .euiTable {
+    tr:has(.isNotSelected) {
+      background-color: ${(props) => props.theme.eui.euiColorLightestShade};
+    }
+
     tr > *:last-child {
       display: none;
     }
@@ -105,6 +109,7 @@ const RowRenderersBrowserComponent = ({
       <EuiCheckbox
         id={item.id}
         onChange={handleNameClick(item)}
+        className={`${!excludedRowRendererIds.includes(item.id) ? 'isSelected' : 'isNotSelected'}`}
         checked={!excludedRowRendererIds.includes(item.id)}
       />
     ),

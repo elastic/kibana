@@ -5,32 +5,20 @@
  * 2.0.
  */
 
-import { installKibanaAssetsAndReferences } from '../../../kibana/assets/install';
+import { installKibanaAssetsAndReferencesMultispace } from '../../../kibana/assets/install';
 
 import { withPackageSpan } from '../../utils';
 
 import type { InstallContext } from '../_state_machine_package_install';
 
 export async function stepInstallKibanaAssets(context: InstallContext) {
-  const {
-    savedObjectsClient,
-    savedObjectsImporter,
-    savedObjectTagAssignmentService,
-    savedObjectTagClient,
-    logger,
-    installedPkg,
-    packageInstallContext,
-    spaceId,
-  } = context;
+  const { savedObjectsClient, logger, installedPkg, packageInstallContext, spaceId } = context;
   const { packageInfo } = packageInstallContext;
   const { name: pkgName, title: pkgTitle } = packageInfo;
 
   const kibanaAssetPromise = withPackageSpan('Install Kibana assets', () =>
-    installKibanaAssetsAndReferences({
+    installKibanaAssetsAndReferencesMultispace({
       savedObjectsClient,
-      savedObjectsImporter,
-      savedObjectTagAssignmentService,
-      savedObjectTagClient,
       pkgName,
       pkgTitle,
       packageInstallContext,

@@ -54,12 +54,13 @@ export const CodeEditorInput = ({
 
   const updateValue = useCallback(
     async (newValue: string, onUpdateFn) => {
-      const isJsonArray = Array.isArray(JSON.parse(defaultValue || '{}'));
-      const parsedValue = newValue || (isJsonArray ? '[]' : '{}');
+      let parsedValue;
 
       // Validate JSON syntax
       if (field.type === 'json') {
         try {
+          const isJsonArray = Array.isArray(JSON.parse(defaultValue || 'null'));
+          parsedValue = newValue || (isJsonArray ? '[]' : '{}');
           JSON.parse(parsedValue);
         } catch (e) {
           onUpdateFn({

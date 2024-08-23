@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import * as z from 'zod';
+import * as z from '@kbn/zod';
 import {
   BaseCreateProps,
   ResponseFields,
+  RequiredFieldInput,
   RuleSignatureId,
   TypeSpecificCreateProps,
 } from '../../model/rule_schema';
@@ -29,5 +30,13 @@ export const RuleToImport = BaseCreateProps.and(TypeSpecificCreateProps).and(
   ResponseFields.partial().extend({
     rule_id: RuleSignatureId,
     immutable: z.literal(false).default(false),
+    /*
+      Overriding `required_fields` from ResponseFields because
+      in ResponseFields `required_fields` has the output type,
+      but for importing rules, we need to use the input type.
+      Otherwise importing rules without the "ecs" property in
+      `required_fields` will fail.
+    */
+    required_fields: z.array(RequiredFieldInput).optional(),
   })
 );

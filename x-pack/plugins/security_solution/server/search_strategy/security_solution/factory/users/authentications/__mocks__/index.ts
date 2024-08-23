@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse } from '@kbn/search-types';
 import type { UserAuthenticationsRequestOptions } from '../../../../../../../common/api/search_strategy';
 import type { AuthenticationHit } from '../../../../../../../common/search_strategy';
 import {

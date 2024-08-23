@@ -119,11 +119,11 @@ async function getJoinError(joinStatus: {
   const rightFieldName = await termJoinSource.getTermField().getLabel();
   return joinStatus.keys.length === 0
     ? i18n.translate('xpack.maps.vectorLayer.joinError.noLeftFieldValuesMsg', {
-        defaultMessage: `Left field: '{leftFieldName}', did not provide any values.`,
+        defaultMessage: `Left field: ''{leftFieldName}'', did not provide any values.`,
         values: { leftFieldName },
       })
     : i18n.translate('xpack.maps.vectorLayer.joinError.noMatchesMsg', {
-        defaultMessage: `Left field values do not match right field values. Left field: '{leftFieldName}' has values: { leftFieldValues }. Right field: '{rightFieldName}' has values: { rightFieldValues }.`,
+        defaultMessage: `Left field values do not match right field values. Left field: ''{leftFieldName}'' has values: {leftFieldValues}. Right field: ''{rightFieldName}'' has values: {rightFieldValues}.`,
         values: {
           leftFieldName,
           leftFieldValues: prettyPrintArray(joinStatus.keys),

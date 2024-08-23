@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { css } from '@emotion/react';
 
@@ -61,7 +61,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ category, displayExamples = 
   );
 };
 
-const Section: FC<{ title: string }> = ({ title, children }) => {
+const Section: FC<PropsWithChildren<{ title: string }>> = ({ title, children }) => {
   return (
     <>
       <EuiText size="s">

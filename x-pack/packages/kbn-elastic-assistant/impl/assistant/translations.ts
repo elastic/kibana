@@ -7,10 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const CLEAR_CHAT = i18n.translate('xpack.elasticAssistant.assistant.clearChat', {
-  defaultMessage: 'Clear chat',
-});
-
 export const DEFAULT_ASSISTANT_TITLE = i18n.translate(
   'xpack.elasticAssistant.assistant.defaultAssistantTitle',
   {
@@ -25,13 +21,6 @@ export const SUBMIT_MESSAGE = i18n.translate('xpack.elasticAssistant.assistant.s
 export const API_ERROR = i18n.translate('xpack.elasticAssistant.assistant.apiErrorTitle', {
   defaultMessage: 'An error occurred sending your message.',
 });
-
-export const TOOLTIP_ARIA_LABEL = i18n.translate(
-  'xpack.elasticAssistant.documentationLinks.ariaLabel',
-  {
-    defaultMessage: 'Click to open Elastic Assistant documentation in a new tab',
-  }
-);
 
 export const DOCUMENTATION = i18n.translate(
   'xpack.elasticAssistant.documentationLinks.documentation',
@@ -69,3 +58,8 @@ export const WELCOME_SCREEN_DESCRIPTION = i18n.translate(
       "First things first, we'll need to set up a Generative AI Connector to get this chat experience going!",
   }
 );
+
+export const DISCLAIMER = i18n.translate('xpack.elasticAssistant.assistant.disclaimer', {
+  defaultMessage:
+    'Responses from Al systems may not always be entirely accurate, although they can seem convincing. For more information on the assistant feature and its usage, please reference the documentation.',
+});

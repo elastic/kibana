@@ -44,6 +44,7 @@ const discoverContainerWrapperCss = css`
 `;
 
 const customizationContext: DiscoverCustomizationContext = {
+  solutionNavId: null,
   displayMode: 'embedded',
   inlineTopNav: {
     enabled: false,

@@ -1,0 +1,154 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`it renders without crashing 1`] = `
+<EuiComboBox
+  async={false}
+  compressed={false}
+  dat-test-subj="remoteClusterClustersInput0"
+  fullWidth={false}
+  intl={
+    Object {
+      "$t": [Function],
+      "defaultFormats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "style": "long",
+          },
+          "hours": Object {
+            "style": "long",
+          },
+          "minutes": Object {
+            "style": "long",
+          },
+          "months": Object {
+            "style": "long",
+          },
+          "seconds": Object {
+            "style": "long",
+          },
+          "years": Object {
+            "style": "long",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "defaultLocale": "en",
+      "fallbackOnEmptyString": true,
+      "formatDate": [Function],
+      "formatDateTimeRange": [Function],
+      "formatDateToParts": [Function],
+      "formatDisplayName": [Function],
+      "formatList": [Function],
+      "formatListToParts": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatNumberToParts": [Function],
+      "formatPlural": [Function],
+      "formatRelativeTime": [Function],
+      "formatTime": [Function],
+      "formatTimeToParts": [Function],
+      "formats": Object {},
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getDisplayNames": [Function],
+        "getListFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralRules": [Function],
+        "getRelativeTimeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "onError": [Function],
+      "onWarn": [Function],
+      "timeZone": undefined,
+    }
+  }
+  isClearable={true}
+  optionMatcher={[Function]}
+  options={
+    Array [
+      Object {
+        "label": "test2",
+      },
+      Object {
+        "label": "test3",
+      },
+      Object {
+        "isGroupLabelOption": true,
+        "label": "Incompatible clusters",
+      },
+      Object {
+        "append": <EuiIconTip
+          color="inherit"
+          content={
+            <Memo(MemoizedFormattedMessage)
+              defaultMessage="This cluster is configured with the certificate based security model and does not support remote cluster privileges. Connect this cluster with the API key based security model instead to use remote cluster privileges."
+              id="xpack.security.management.editRole.remoteClusterPrivilegeForm.remoteClusterSecurityModelWarning"
+            />
+          }
+          type="warning"
+        />,
+        "disabled": true,
+        "label": "test1",
+      },
+    ]
+  }
+  selectedOptions={Array []}
+  singleSelection={false}
+  sortMatchesBy="none"
+/>
+`;

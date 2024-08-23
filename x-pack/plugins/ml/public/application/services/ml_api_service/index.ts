@@ -439,20 +439,6 @@ export function mlApiServicesProvider(httpService: HttpService) {
       });
     },
 
-    getFieldCaps({ index, fields }: { index: string; fields: string[] }) {
-      const body = JSON.stringify({
-        ...(index !== undefined ? { index } : {}),
-        ...(fields !== undefined ? { fields } : {}),
-      });
-
-      return httpService.http<any>({
-        path: `${ML_INTERNAL_BASE_PATH}/indices/field_caps`,
-        method: 'POST',
-        body,
-        version: '1',
-      });
-    },
-
     recognizeIndex({
       indexPatternTitle,
       filter,

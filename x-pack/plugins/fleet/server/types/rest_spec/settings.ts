@@ -38,3 +38,29 @@ export const PutSettingsRequestSchema = {
     prerelease_integrations_enabled: schema.maybe(schema.boolean()),
   }),
 };
+
+export const GetSpaceSettingsRequestSchema = {};
+
+export const PutSpaceSettingsRequestSchema = {
+  body: schema.object({
+    allowed_namespace_prefixes: schema.maybe(
+      schema.arrayOf(
+        schema.string({
+          validate: (v) => {
+            if (v.includes('-')) {
+              return 'Must not contain -';
+            }
+          },
+        })
+      )
+    ),
+  }),
+};
+
+export const GetEnrollmentSettingsRequestSchema = {
+  query: schema.maybe(
+    schema.object({
+      agentPolicyId: schema.maybe(schema.string()),
+    })
+  ),
+};

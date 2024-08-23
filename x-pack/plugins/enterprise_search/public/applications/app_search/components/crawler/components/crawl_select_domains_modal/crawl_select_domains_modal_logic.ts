@@ -60,6 +60,7 @@ export const CrawlSelectDomainsModalLogic = kea<
       [],
       {
         showModal: () => [],
+        // @ts-expect-error upgrade typescript v5.1.6
         onSelectDomainUrls: (_, { domainUrls }) => domainUrls,
       },
     ],

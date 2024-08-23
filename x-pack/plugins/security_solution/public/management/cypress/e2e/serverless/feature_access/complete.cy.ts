@@ -14,9 +14,16 @@ import { getEndpointManagementPageList } from '../../../screens';
 describe(
   'App Features for Security Complete PLI',
   {
-    tags: ['@serverless'],
+    tags: ['@serverless', '@skipInServerlessMKI'],
     env: {
-      ftrConfig: { productTypes: [{ product_line: 'security', product_tier: 'complete' }] },
+      ftrConfig: {
+        productTypes: [{ product_line: 'security', product_tier: 'complete' }],
+        kbnServerArgs: [
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'responseActionScanEnabled',
+          ])}`,
+        ],
+      },
     },
   },
   () => {

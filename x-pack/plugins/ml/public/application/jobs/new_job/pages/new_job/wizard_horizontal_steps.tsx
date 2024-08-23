@@ -42,30 +42,35 @@ export const WizardHorizontalSteps: FC<Props> = ({
         defaultMessage: 'Time range',
       }),
       ...createStepProps(WIZARD_STEPS.TIME_RANGE),
+      'data-test-subj': 'mlJobWizardTimeRangeStep',
     },
     {
       title: i18n.translate('xpack.ml.newJob.wizard.step.pickFieldsTitle', {
         defaultMessage: 'Choose fields',
       }),
       ...createStepProps(WIZARD_STEPS.PICK_FIELDS),
+      'data-test-subj': 'mlJobWizardPickFieldsStep',
     },
     {
       title: i18n.translate('xpack.ml.newJob.wizard.step.jobDetailsTitle', {
         defaultMessage: 'Job details',
       }),
       ...createStepProps(WIZARD_STEPS.JOB_DETAILS),
+      'data-test-subj': 'mlJobWizardJobDetailsStep',
     },
     {
       title: i18n.translate('xpack.ml.newJob.wizard.step.validationTitle', {
         defaultMessage: 'Validation',
       }),
       ...createStepProps(WIZARD_STEPS.VALIDATION),
+      'data-test-subj': 'mlJobWizardValidationStep',
     },
     {
       title: i18n.translate('xpack.ml.newJob.wizard.step.summaryTitle', {
         defaultMessage: 'Summary',
       }),
       ...createStepProps(WIZARD_STEPS.SUMMARY),
+      'data-test-subj': 'mlJobWizardSummaryStep',
     },
   ];
 
@@ -75,6 +80,7 @@ export const WizardHorizontalSteps: FC<Props> = ({
         defaultMessage: 'Configure datafeed',
       }),
       ...createStepProps(WIZARD_STEPS.ADVANCED_CONFIGURE_DATAFEED),
+      'data-test-subj': 'mlJobWizardAdvancedStep',
     });
   }
 

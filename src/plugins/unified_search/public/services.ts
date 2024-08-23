@@ -6,12 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { ThemeServiceStart, OverlayStart } from '@kbn/core/public';
+import {
+  ThemeServiceStart,
+  OverlayStart,
+  AnalyticsServiceStart,
+  I18nStart,
+} from '@kbn/core/public';
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
 
 export const [getIndexPatterns, setIndexPatterns] =
   createGetterSetter<DataViewsContract>('IndexPatterns');
+
+export const [getAnalytics, setAnalytics] = createGetterSetter<AnalyticsServiceStart>('Analytics');
+
+export const [getI18n, setI18n] = createGetterSetter<I18nStart>('I18n');
 
 export const [getTheme, setTheme] = createGetterSetter<ThemeServiceStart>('Theme');
 

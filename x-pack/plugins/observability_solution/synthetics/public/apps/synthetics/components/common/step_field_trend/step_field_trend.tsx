@@ -12,9 +12,9 @@ import moment from 'moment';
 import { AllSeries, createExploratoryViewUrl } from '@kbn/exploratory-view-plugin/public';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ClientPluginsStart } from '../../../../../plugin';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 import { JourneyStep } from '../../../../../../common/runtime_types';
-import { useSyntheticsStartPlugins } from '../../../contexts';
 
 export const getLast48Intervals = (activeStep: JourneyStep) => {
   const timestamp = activeStep['@timestamp'];
@@ -36,7 +36,7 @@ export function StepFieldTrend({
   field: string;
   step: JourneyStep;
 }) {
-  const { exploratoryView } = useSyntheticsStartPlugins();
+  const exploratoryView = useKibana<ClientPluginsStart>().services.exploratoryView;
 
   const EmbeddableExpView = exploratoryView!.ExploratoryViewEmbeddable;
 

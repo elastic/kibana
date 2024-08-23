@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { TimeRange } from '@kbn/es-query';
 import type { UseCancellableSearch } from '@kbn/ml-cancellable-search';
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
-import { ESQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
+import { ESQL_ASYNC_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import pLimit from 'p-limit';
-import { ESQL_LATEST_VERSION, appendToESQLQuery } from '@kbn/esql-utils';
+import { appendToESQLQuery, getStartEndParams } from '@kbn/esql-utils';
 import type { Column } from '../../hooks/esql/use_esql_overall_stats_data';
 import { getSafeESQLName } from '../requests/esql_utils';
 import { isFulfilled, isRejected } from '../../../common/util/promise_all_settled_utils';
@@ -22,6 +22,7 @@ interface Params {
   columns: Column[];
   esqlBaseQuery: string;
   filter?: QueryDslQueryContainer;
+  timeRange?: TimeRange;
 }
 
 export const getESQLBooleanFieldStats = async ({
@@ -29,9 +30,10 @@ export const getESQLBooleanFieldStats = async ({
   columns,
   esqlBaseQuery,
   filter,
+  timeRange,
 }: Params): Promise<Array<BooleanFieldStats | FieldStatsError | undefined>> => {
   const limiter = pLimit(MAX_CONCURRENT_REQUESTS);
-
+  const namedParams = getStartEndParams(esqlBaseQuery, timeRange);
   const booleanFields = columns
     .filter((f) => f.secondaryType === 'boolean')
     .map((field) => {
@@ -49,7 +51,7 @@ export const getESQLBooleanFieldStats = async ({
           params: {
             query,
             ...(filter ? { filter } : {}),
-            version: ESQL_LATEST_VERSION,
+            ...(namedParams.length ? { params: namedParams } : {}),
           },
         },
       };
@@ -58,7 +60,7 @@ export const getESQLBooleanFieldStats = async ({
   if (booleanFields.length > 0) {
     const booleanTopTermsResp = await Promise.allSettled(
       booleanFields.map(({ request }) =>
-        limiter(() => runRequest(request, { strategy: ESQL_SEARCH_STRATEGY }))
+        limiter(() => runRequest(request, { strategy: ESQL_ASYNC_SEARCH_STRATEGY }))
       )
     );
     if (booleanTopTermsResp) {

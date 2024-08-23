@@ -19,6 +19,7 @@ export const getDocLinksMeta = ({
 }: GetDocLinksMetaOptions): DocLinksMeta => {
   return {
     version: kibanaBranch === 'main' ? 'master' : kibanaBranch,
+    ecs_version: 'current',
     elasticWebsiteUrl: 'https://www.elastic.co/',
     elasticGithubUrl: 'https://github.com/elastic/',
     docsWebsiteUrl: 'https://docs.elastic.co/',

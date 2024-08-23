@@ -55,7 +55,7 @@ export function createOpenInSingleMetricViewerAction(
 
       if (isSingleMetricViewerEmbeddableContext(context)) {
         const { embeddable } = context;
-        const { jobIds, query$, selectedEntities, selectedDetectorIndex } = embeddable;
+        const { forecastId, jobIds, selectedEntities, selectedDetectorIndex } = embeddable;
 
         return locator.getUrl(
           {
@@ -69,9 +69,10 @@ export function createOpenInSingleMetricViewerAction(
                 value: 0,
               },
               jobIds: jobIds.getValue(),
-              query: query$?.getValue(),
+              query: {},
               entities: selectedEntities?.getValue(),
               detectorIndex: selectedDetectorIndex?.getValue(),
+              forecastId: forecastId?.getValue(),
             },
           },
           { absolute: true }
@@ -84,8 +85,8 @@ export function createOpenInSingleMetricViewerAction(
       }
       const [{ application }] = await getStartServices();
       const singleMetricViewerUrl = await this.getHref!(context);
-      if (singleMetricViewerUrl) {
-        await application.navigateToUrl(singleMetricViewerUrl!);
+      if (singleMetricViewerUrl !== undefined) {
+        await application.navigateToUrl(singleMetricViewerUrl);
       }
     },
     async isCompatible(context: EmbeddableApiContext) {

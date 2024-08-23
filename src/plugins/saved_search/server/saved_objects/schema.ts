@@ -119,3 +119,19 @@ export const SCHEMA_SEARCH_MODEL_VERSION_3 = SCHEMA_SEARCH_MODEL_VERSION_2.exten
     ])
   ),
 });
+
+export const SCHEMA_SEARCH_MODEL_VERSION_4 = SCHEMA_SEARCH_MODEL_VERSION_3.extends({
+  viewMode: schema.maybe(
+    schema.oneOf([
+      schema.literal(VIEW_MODE.DOCUMENT_LEVEL),
+      schema.literal(VIEW_MODE.PATTERN_LEVEL),
+      schema.literal(VIEW_MODE.AGGREGATED_LEVEL),
+    ])
+  ),
+});
+
+export const SCHEMA_SEARCH_MODEL_VERSION_5 = SCHEMA_SEARCH_MODEL_VERSION_4.extends({
+  density: schema.maybe(
+    schema.oneOf([schema.literal('compact'), schema.literal('normal'), schema.literal('expanded')])
+  ),
+});

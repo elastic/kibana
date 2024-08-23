@@ -35,7 +35,9 @@ export function getDedotTransform(keepFlattenedFields: boolean = false) {
       }
 
       delete target.meta;
-      target['@timestamp'] = new Date(target['@timestamp']!).toISOString();
+      if (target['@timestamp']) {
+        target['@timestamp'] = new Date(target['@timestamp']).toISOString();
+      }
 
       callback(null, target);
     },

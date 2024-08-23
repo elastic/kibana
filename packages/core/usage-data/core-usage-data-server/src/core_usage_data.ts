@@ -38,6 +38,9 @@ export interface CoreServicesUsageData {
  */
 export interface CoreEnvironmentUsageData {
   memory: {
+    arrayBuffersBytes: number;
+    residentSetSizeBytes: number;
+    externalBytes: number;
     heapTotalBytes: number;
     heapUsedBytes: number;
     /** V8 heap size limit */

@@ -10,18 +10,23 @@ import {
   MessageRole,
   type Message,
 } from '@kbn/observability-ai-assistant-plugin/common';
-import { StreamingChatResponseEvent } from '@kbn/observability-ai-assistant-plugin/common/conversation_complete';
+import { type StreamingChatResponseEvent } from '@kbn/observability-ai-assistant-plugin/common/conversation_complete';
 import { pick } from 'lodash';
 import type OpenAI from 'openai';
-import { Response } from 'supertest';
-import { createLlmProxy, LlmProxy, LlmResponseSimulator } from '../../common/create_llm_proxy';
+import { type AdHocInstruction } from '@kbn/observability-ai-assistant-plugin/common/types';
+import {
+  createLlmProxy,
+  isFunctionTitleRequest,
+  LlmProxy,
+  LlmResponseSimulator,
+} from '../../common/create_llm_proxy';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { createProxyActionConnector, deleteActionConnector } from '../../common/action_connectors';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const log = getService('log');
-
-  const PUBLIC_COMPLETE_API_URL = `/api/observability_ai_assistant/chat/complete`;
+  const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
 
   const messages: Message[] = [
     {
@@ -44,12 +49,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     let proxy: LlmProxy;
     let connectorId: string;
 
-    async function getEvents(
-      params: {
-        actions?: Array<Pick<FunctionDefinition, 'name' | 'description' | 'parameters'>>;
-        instructions?: string[];
-      },
-      cb: (conversationSimulator: LlmResponseSimulator) => Promise<void>
+    interface RequestOptions {
+      actions?: Array<Pick<FunctionDefinition, 'name' | 'description' | 'parameters'>>;
+      instructions?: AdHocInstruction[];
+      format?: 'openai' | 'default';
+    }
+
+    type ConversationSimulatorCallback = (
+      conversationSimulator: LlmResponseSimulator
+    ) => Promise<void>;
+
+    async function getResponseBody(
+      { actions, instructions, format = 'default' }: RequestOptions,
+      conversationSimulatorCallback: ConversationSimulatorCallback
     ) {
       const titleInterceptor = proxy.intercept('title', (body) => isFunctionTitleRequest(body));
 
@@ -58,28 +70,27 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         (body) => !isFunctionTitleRequest(body)
       );
 
-      const responsePromise = new Promise<Response>((resolve, reject) => {
-        supertest
-          .post(PUBLIC_COMPLETE_API_URL)
-          .set('kbn-xsrf', 'foo')
-          .send({
+      const responsePromise = observabilityAIAssistantAPIClient.adminUser({
+        endpoint: 'POST /api/observability_ai_assistant/chat/complete 2023-10-31',
+        params: {
+          query: { format },
+          body: {
             messages,
             connectorId,
             persist: true,
-            actions: params.actions,
-            instructions: params.instructions,
-          })
-          .end((err, response) => {
-            if (err) {
-              return reject(err);
-            }
-            return resolve(response);
-          });
+            actions,
+            instructions,
+          },
+        },
       });
 
-      const [conversationSimulator, titleSimulator] = await Promise.all([
-        conversationInterceptor.waitForIntercept(),
-        titleInterceptor.waitForIntercept(),
+      const [conversationSimulator, titleSimulator] = await Promise.race([
+        Promise.all([
+          conversationInterceptor.waitForIntercept(),
+          titleInterceptor.waitForIntercept(),
+        ]),
+        // make sure any request failures (like 400s) are properly propagated
+        responsePromise.then(() => []),
       ]);
 
       await titleSimulator.status(200);
@@ -87,11 +98,22 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       await titleSimulator.complete();
 
       await conversationSimulator.status(200);
-      await cb(conversationSimulator);
+      if (conversationSimulatorCallback) {
+        await conversationSimulatorCallback(conversationSimulator);
+      }
 
       const response = await responsePromise;
 
-      return String(response.body)
+      return String(response.body);
+    }
+
+    async function getEvents(
+      options: RequestOptions,
+      conversationSimulatorCallback: ConversationSimulatorCallback
+    ) {
+      const responseBody = await getResponseBody(options, conversationSimulatorCallback);
+
+      return responseBody
         .split('\n')
         .map((line) => line.trim())
         .filter(Boolean)
@@ -99,34 +121,24 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         .slice(2); // ignore context request/response, we're testing this elsewhere
     }
 
+    async function getOpenAIResponse(conversationSimulatorCallback: ConversationSimulatorCallback) {
+      const responseBody = await getResponseBody(
+        {
+          format: 'openai',
+        },
+        conversationSimulatorCallback
+      );
+
+      return responseBody;
+    }
+
     before(async () => {
       proxy = await createLlmProxy(log);
-
-      const response = await supertest
-        .post('/api/actions/connector')
-        .set('kbn-xsrf', 'foo')
-        .send({
-          name: 'OpenAI Proxy',
-          connector_type_id: '.gen-ai',
-          config: {
-            apiProvider: 'OpenAI',
-            apiUrl: `http://localhost:${proxy.getPort()}`,
-          },
-          secrets: {
-            apiKey: 'my-api-key',
-          },
-        })
-        .expect(200);
-
-      connectorId = response.body.id;
+      connectorId = await createProxyActionConnector({ supertest, log, port: proxy.getPort() });
     });
 
     after(async () => {
-      await supertest
-        .delete(`/api/actions/connector/${connectorId}`)
-        .set('kbn-xsrf', 'foo')
-        .expect(204);
-
+      await deleteActionConnector({ supertest, connectorId, log });
       proxy.close();
     });
 
@@ -185,12 +197,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
 
     describe('after adding an instruction', async () => {
-      let body: string;
+      let body: OpenAI.Chat.ChatCompletionCreateParamsNonStreaming;
 
       before(async () => {
         await getEvents(
           {
-            instructions: ['This is a random instruction'],
+            instructions: [
+              {
+                text: 'This is a random instruction',
+                instruction_type: 'user_instruction',
+              },
+            ],
           },
           async (conversationSimulator) => {
             body = conversationSimulator.body;
@@ -204,15 +221,74 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('includes the instruction in the system message', async () => {
-        const request = JSON.parse(body) as OpenAI.ChatCompletionCreateParams;
+        expect(body.messages[0].content).to.contain('This is a random instruction');
+      });
+    });
 
-        expect(request.messages[0].content).to.contain('This is a random instruction');
+    describe('with openai format', async () => {
+      let responseBody: string;
+
+      before(async () => {
+        responseBody = await getOpenAIResponse(async (conversationSimulator) => {
+          await conversationSimulator.next('Hello');
+          await conversationSimulator.complete();
+        });
+      });
+
+      function extractDataParts(lines: string[]) {
+        return lines.map((line) => {
+          // .replace is easier, but we want to verify here whether
+          // it matches the SSE syntax (`data: ...`)
+          const [, dataPart] = line.match(/^data: (.*)$/) || ['', ''];
+          return dataPart.trim();
+        });
+      }
+
+      function getLines() {
+        return responseBody.split('\n\n').filter(Boolean);
+      }
+
+      it('outputs each line an SSE-compatible format (data: ...)', () => {
+        const lines = getLines();
+
+        lines.forEach((line) => {
+          expect(line.match(/^data: /));
+        });
+      });
+
+      it('ouputs one chunk, and one [DONE] event', () => {
+        const dataParts = extractDataParts(getLines());
+
+        expect(dataParts[0]).not.to.be.empty();
+        expect(dataParts[1]).to.be('[DONE]');
+      });
+
+      it('outuputs an OpenAI-compatible chunk', () => {
+        const [dataLine] = extractDataParts(getLines());
+
+        expect(() => {
+          JSON.parse(dataLine);
+        }).not.to.throwException();
+
+        const parsedChunk = JSON.parse(dataLine);
+
+        expect(parsedChunk).to.eql({
+          model: 'unknown',
+          choices: [
+            {
+              delta: {
+                content: 'Hello',
+              },
+              finish_reason: null,
+              index: 0,
+            },
+          ],
+          object: 'chat.completion.chunk',
+          // just test that these are a string and a number
+          id: String(parsedChunk.id),
+          created: Number(parsedChunk.created),
+        });
       });
     });
   });
-}
-
-function isFunctionTitleRequest(body: string) {
-  const parsedBody = JSON.parse(body) as OpenAI.Chat.ChatCompletionCreateParamsNonStreaming;
-  return parsedBody.tools?.find((fn) => fn.function.name === 'title_conversation') !== undefined;
 }

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { FC, PropsWithChildren } from 'react';
 import React, { useCallback } from 'react';
 import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
@@ -17,10 +18,10 @@ import type { TimeRange } from '../../../store/inputs/model';
 import { inputsActions } from '../../../store/inputs';
 import { updateProviders, setFilters } from '../../../../timelines/store/actions';
 import { sourcererActions } from '../../../store/actions';
-import { SourcererScopeName } from '../../../store/sourcerer/model';
+import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import type { DataProvider } from '../../../../../common/types';
 import { TimelineId } from '../../../../../common/types/timeline';
-import { TimelineType } from '../../../../../common/api/timeline';
+import { TimelineTypeEnum } from '../../../../../common/api/timeline';
 import { useCreateTimeline } from '../../../../timelines/hooks/use_create_timeline';
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../detections/components/alerts_table/translations';
 
@@ -32,10 +33,11 @@ export interface InvestigateInTimelineButtonProps {
   keepDataView?: boolean;
   isDisabled?: boolean;
   iconType?: IconType;
+  children?: React.ReactNode;
 }
 
-export const InvestigateInTimelineButton: React.FunctionComponent<
-  InvestigateInTimelineButtonProps
+export const InvestigateInTimelineButton: FC<
+  PropsWithChildren<InvestigateInTimelineButtonProps>
 > = ({
   asEmptyButton,
   children,
@@ -56,7 +58,7 @@ export const InvestigateInTimelineButton: React.FunctionComponent<
 
   const clearTimeline = useCreateTimeline({
     timelineId: TimelineId.active,
-    timelineType: hasTemplateProviders ? TimelineType.template : TimelineType.default,
+    timelineType: hasTemplateProviders ? TimelineTypeEnum.template : TimelineTypeEnum.default,
   });
 
   const configureAndOpenTimeline = useCallback(async () => {

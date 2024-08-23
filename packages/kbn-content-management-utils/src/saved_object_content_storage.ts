@@ -64,7 +64,9 @@ function savedObjectToItem<Attributes extends object>(
     id,
     type,
     updated_at: updatedAt,
+    updated_by: updatedBy,
     created_at: createdAt,
+    created_by: createdBy,
     attributes,
     references,
     error,
@@ -77,8 +79,10 @@ function savedObjectToItem<Attributes extends object>(
     id,
     type,
     managed,
+    updatedBy,
     updatedAt,
     createdAt,
+    createdBy,
     attributes: pick(attributes, allowedSavedObjectAttributes),
     references,
     error,
@@ -373,8 +377,8 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
     }
 
     const { value: optionsToLatest, error: optionsError } = transforms.update.in.options.up<
-      Types['CreateOptions'],
-      Types['CreateOptions']
+      Types['UpdateOptions'],
+      Types['UpdateOptions']
     >(options);
     if (optionsError) {
       throw Boom.badRequest(`Invalid options. ${optionsError.message}`);

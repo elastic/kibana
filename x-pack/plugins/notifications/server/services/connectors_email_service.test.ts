@@ -21,7 +21,7 @@ describe('sendPlainTextEmail()', () => {
   });
 
   describe('calls the provided ActionsClient#bulkEnqueueExecution() with the appropriate params', () => {
-    it(`omits the 'relatedSavedObjects' field if no context is provided`, () => {
+    it(`omits the 'relatedSavedObjects' field if no context is provided`, async () => {
       const actionsClient = unsecuredActionsClientMock.create();
       actionsClient.bulkEnqueueExecution.mockResolvedValueOnce({
         errors: false,
@@ -40,7 +40,7 @@ describe('sendPlainTextEmail()', () => {
         message: 'With some contents inside.',
       };
 
-      email.sendPlainTextEmail(payload);
+      await email.sendPlainTextEmail(payload);
 
       expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
       expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledWith(REQUESTER_ID, [
@@ -55,7 +55,7 @@ describe('sendPlainTextEmail()', () => {
       ]);
     });
 
-    it(`populates the 'relatedSavedObjects' field if context is provided`, () => {
+    it(`populates the 'relatedSavedObjects' field if context is provided`, async () => {
       const actionsClient = unsecuredActionsClientMock.create();
       actionsClient.bulkEnqueueExecution.mockResolvedValueOnce({
         errors: false,
@@ -83,7 +83,7 @@ describe('sendPlainTextEmail()', () => {
         },
       };
 
-      email.sendPlainTextEmail(payload);
+      await email.sendPlainTextEmail(payload);
 
       expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
       expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledWith(REQUESTER_ID, [
@@ -168,7 +168,7 @@ describe('sendHTMLEmail()', () => {
   });
 
   describe('calls the provided ActionsClient#bulkEnqueueExecution() with the appropriate params', () => {
-    it(`omits the 'relatedSavedObjects' field if no context is provided`, () => {
+    it(`omits the 'relatedSavedObjects' field if no context is provided`, async () => {
       const actionsClient = unsecuredActionsClientMock.create();
       actionsClient.bulkEnqueueExecution.mockResolvedValueOnce({
         errors: false,
@@ -188,7 +188,7 @@ describe('sendHTMLEmail()', () => {
         messageHTML: '<html><body><span>With some contents inside.</span></body></html>',
       };
 
-      email.sendHTMLEmail(payload);
+      await email.sendHTMLEmail(payload);
 
       expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
       expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledWith(REQUESTER_ID, [
@@ -204,7 +204,7 @@ describe('sendHTMLEmail()', () => {
       ]);
     });
 
-    it(`populates the 'relatedSavedObjects' field if context is provided`, () => {
+    it(`populates the 'relatedSavedObjects' field if context is provided`, async () => {
       const actionsClient = unsecuredActionsClientMock.create();
       actionsClient.bulkEnqueueExecution.mockResolvedValueOnce({
         errors: false,
@@ -233,7 +233,7 @@ describe('sendHTMLEmail()', () => {
         },
       };
 
-      email.sendHTMLEmail(payload);
+      await email.sendHTMLEmail(payload);
 
       expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
       expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledWith(REQUESTER_ID, [

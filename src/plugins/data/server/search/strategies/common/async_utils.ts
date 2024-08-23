@@ -10,7 +10,7 @@ import {
   AsyncSearchSubmitRequest,
   AsyncSearchGetRequest,
 } from '@elastic/elasticsearch/lib/api/types';
-import { ISearchOptions } from '../../../../common';
+import { ISearchOptions } from '@kbn/search-types';
 import { SearchConfigSchema } from '../../../../config';
 
 /**

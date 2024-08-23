@@ -6,6 +6,7 @@
  */
 
 import { HttpStart } from '@kbn/core/public';
+import { decodeOrThrow } from '@kbn/io-ts-utils';
 import {
   CreateMetricsExplorerViewResponsePayload,
   createMetricsExplorerViewRequestPayloadRT,
@@ -23,7 +24,6 @@ import {
   FetchMetricsExplorerViewError,
   UpsertMetricsExplorerViewError,
 } from '../../../common/metrics_explorer_views';
-import { decodeOrThrow } from '../../../common/runtime_types';
 import { IMetricsExplorerViewsClient } from './types';
 
 export class MetricsExplorerViewsClient implements IMetricsExplorerViewsClient {

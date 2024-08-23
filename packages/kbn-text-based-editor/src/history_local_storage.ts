@@ -102,16 +102,17 @@ export const updateCachedQueries = (
   );
   let allQueries = [...queriesToStore, ...newQueries];
 
-  if (allQueries.length === maxQueriesAllowed + 1) {
+  if (allQueries.length >= maxQueriesAllowed + 1) {
     const sortedByDate = allQueries.sort((a, b) =>
       sortDates(b?.startDateMilliseconds, a?.startDateMilliseconds)
     );
 
-    // delete the last element
-    const toBeDeletedQuery = sortedByDate[maxQueriesAllowed];
-    cachedQueries.delete(toBeDeletedQuery.queryString);
-    allQueries = allQueries.filter((q) => {
-      return q.queryString !== toBeDeletedQuery.queryString;
+    // queries to store in the localstorage
+    allQueries = sortedByDate.slice(0, maxQueriesAllowed);
+    // clear and reset the queries in the cache
+    cachedQueries.clear();
+    allQueries.forEach((queryItem) => {
+      cachedQueries.set(queryItem.queryString, queryItem);
     });
   }
   localStorage.setItem(QUERY_HISTORY_ITEM_KEY, JSON.stringify(allQueries));

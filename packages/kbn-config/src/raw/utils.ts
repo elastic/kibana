@@ -19,3 +19,25 @@ export const getUnsplittableKey = (rawKey: string): string | undefined => {
   }
   return undefined;
 };
+
+export function replaceEnvVarRefs(
+  val: string,
+  env: {
+    [key: string]: string | undefined;
+  } = process.env
+) {
+  return val.replace(/\$\{(\w+)(:(\w+))?\}/g, (match, ...groups) => {
+    const envVarName = groups[0];
+    const defaultValue = groups[2];
+
+    const envVarValue = env[envVarName];
+    if (envVarValue !== undefined) {
+      return envVarValue;
+    }
+    if (defaultValue !== undefined) {
+      return defaultValue;
+    }
+
+    throw new Error(`Unknown environment variable referenced in config : ${envVarName}`);
+  });
+}

@@ -16,7 +16,7 @@ import { SkipBottomButton } from '../../application/main/components/skip_bottom_
 import { shouldLoadNextDocPatch } from './utils/should_load_next_doc_patch';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getAllowedSampleSize } from '../../utils/get_allowed_sample_size';
-import { useAppStateSelector } from '../../application/main/services/discover_app_state_container';
+import { useAppStateSelector } from '../../application/main/state_management/discover_app_state_container';
 
 const FOOTER_PADDING = { padding: 0 };
 

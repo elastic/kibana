@@ -7,7 +7,6 @@
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
-  mockedRule,
   mockTaskInstance,
   ruleType,
   RULE_ID,
@@ -18,11 +17,11 @@ import * as LegacyAlertsClientModule from '../legacy_alerts_client';
 import { alertsServiceMock } from '../../alerts_service/alerts_service.mock';
 import { ruleRunMetricsStoreMock } from '../../lib/rule_run_metrics_store.mock';
 import { alertingEventLoggerMock } from '../../lib/alerting_event_logger/alerting_event_logger.mock';
-import { DEFAULT_FLAPPING_SETTINGS, DEFAULT_QUERY_DELAY_SETTINGS } from '../../types';
+import { DEFAULT_FLAPPING_SETTINGS } from '../../types';
 import { alertsClientMock } from '../alerts_client.mock';
 import { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { legacyAlertsClientMock } from '../legacy_alerts_client.mock';
-import { initializeAlertsClient } from './initialize_alerts_client';
+import { initializeAlertsClient, RuleData } from './initialize_alerts_client';
 
 const alertingEventLogger = alertingEventLoggerMock.create();
 const ruleRunMetricsStore = ruleRunMetricsStoreMock.create();
@@ -51,8 +50,22 @@ const ruleTypeWithAlerts: jest.Mocked<UntypedNormalizedRuleType> = {
   },
 };
 
+const mockedRule: RuleData<Record<string, unknown>> = {
+  id: '1',
+  name: 'rule-name',
+  tags: ['rule-', '-tags'],
+  consumer: 'bar',
+  revision: 0,
+  params: {
+    bar: true,
+  },
+};
+
+const mockedTaskInstance = mockTaskInstance();
+
 describe('initializeAlertsClient', () => {
   test('should initialize and return alertsClient if createAlertsClient succeeds', async () => {
+    const startedAt = new Date(Date.now() + 5 * 60 * 1000);
     const spy1 = jest
       .spyOn(LegacyAlertsClientModule, 'LegacyAlertsClient')
       .mockImplementation(() => legacyAlertsClient);
@@ -62,7 +75,6 @@ describe('initializeAlertsClient', () => {
       context: {
         alertingEventLogger,
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-        queryDelaySettings: DEFAULT_QUERY_DELAY_SETTINGS,
         ruleId: RULE_ID,
         ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
         ruleRunMetricsStore,
@@ -73,7 +85,61 @@ describe('initializeAlertsClient', () => {
       maxAlerts: 100,
       rule: mockedRule,
       ruleType: ruleTypeWithAlerts,
-      taskInstance: mockTaskInstance(),
+      startedAt,
+      taskInstance: mockedTaskInstance,
+    });
+
+    expect(alertsService.createAlertsClient).toHaveBeenCalledWith({
+      logger,
+      ruleType: ruleTypeWithAlerts,
+      namespace: 'default',
+      rule: {
+        alertDelay: 0,
+        consumer: 'bar',
+        executionId: 'abc',
+        id: '1',
+        name: 'rule-name',
+        parameters: {
+          bar: true,
+        },
+        revision: 0,
+        spaceId: 'default',
+        tags: ['rule-', '-tags'],
+      },
+    });
+    expect(LegacyAlertsClientModule.LegacyAlertsClient).not.toHaveBeenCalled();
+    expect(alertsClient.initializeExecution).toHaveBeenCalledWith({
+      activeAlertsFromState: {},
+      flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+      maxAlerts: 100,
+      recoveredAlertsFromState: {},
+      ruleLabel: `test:1: 'rule-name'`,
+      startedAt,
+    });
+    spy1.mockRestore();
+  });
+
+  test('should use DEFAULT_FLAPPING_SETTINGS if flappingSettings not defined', async () => {
+    const spy1 = jest
+      .spyOn(LegacyAlertsClientModule, 'LegacyAlertsClient')
+      .mockImplementation(() => legacyAlertsClient);
+    alertsService.createAlertsClient.mockImplementationOnce(() => alertsClient);
+    await initializeAlertsClient({
+      alertsService,
+      context: {
+        alertingEventLogger,
+        ruleId: RULE_ID,
+        ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
+        ruleRunMetricsStore,
+        spaceId: 'default',
+      },
+      executionId: 'abc',
+      logger,
+      maxAlerts: 100,
+      rule: mockedRule,
+      ruleType: ruleTypeWithAlerts,
+      startedAt: mockedTaskInstance.startedAt,
+      taskInstance: mockedTaskInstance,
     });
 
     expect(alertsService.createAlertsClient).toHaveBeenCalledWith({
@@ -116,7 +182,6 @@ describe('initializeAlertsClient', () => {
       context: {
         alertingEventLogger,
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-        queryDelaySettings: DEFAULT_QUERY_DELAY_SETTINGS,
         ruleId: RULE_ID,
         ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
         ruleRunMetricsStore,
@@ -127,7 +192,8 @@ describe('initializeAlertsClient', () => {
       maxAlerts: 100,
       rule: mockedRule,
       ruleType: ruleTypeWithAlerts,
-      taskInstance: mockTaskInstance(),
+      startedAt: mockedTaskInstance.startedAt,
+      taskInstance: mockedTaskInstance,
     });
 
     expect(alertsService.createAlertsClient).toHaveBeenCalledWith({
@@ -175,7 +241,6 @@ describe('initializeAlertsClient', () => {
       context: {
         alertingEventLogger,
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-        queryDelaySettings: DEFAULT_QUERY_DELAY_SETTINGS,
         ruleId: RULE_ID,
         ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
         ruleRunMetricsStore,
@@ -186,7 +251,8 @@ describe('initializeAlertsClient', () => {
       maxAlerts: 100,
       rule: mockedRule,
       ruleType: ruleTypeWithAlerts,
-      taskInstance: mockTaskInstance(),
+      startedAt: mockedTaskInstance.startedAt,
+      taskInstance: mockedTaskInstance,
     });
 
     expect(alertsService.createAlertsClient).toHaveBeenCalledWith({

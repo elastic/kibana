@@ -9,7 +9,6 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { FileLayer } from '@elastic/ems-client';
 import { IUiSettingsClient } from '@kbn/core/public';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { FormatFactory } from '@kbn/field-formats-plugin/common';
 import {
@@ -24,13 +23,11 @@ import { emsWorldLayerId } from '../../../common/constants';
 import { ChoroplethChartProps } from './types';
 import { getEmsSuggestion } from './get_ems_suggestion';
 import { PassiveMap } from '../passive_map';
-import type { MapEmbeddableInput, MapEmbeddableOutput } from '../../embeddable';
 
 interface Props extends ChoroplethChartProps {
   formatFactory: FormatFactory;
   uiSettings: IUiSettingsClient;
   emsFileLayers: FileLayer[];
-  mapEmbeddableFactory: EmbeddableFactory<MapEmbeddableInput, MapEmbeddableOutput>;
   onRenderComplete: () => void;
 }
 
@@ -40,7 +37,6 @@ export function ChoroplethChart({
   formatFactory,
   uiSettings,
   emsFileLayers,
-  mapEmbeddableFactory,
   onRenderComplete,
 }: Props) {
   if (!args.regionAccessor || !args.valueAccessor) {
@@ -130,13 +126,7 @@ export function ChoroplethChart({
     type: LAYER_TYPE.GEOJSON_VECTOR,
   };
 
-  return (
-    <PassiveMap
-      passiveLayer={choroplethLayer}
-      factory={mapEmbeddableFactory}
-      onRenderComplete={onRenderComplete}
-    />
-  );
+  return <PassiveMap passiveLayer={choroplethLayer} onRenderComplete={onRenderComplete} />;
 }
 
 function getAccessorLabel(table: Datatable, accessor: string) {

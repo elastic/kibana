@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';
+import { OpenAISimulator } from '@kbn/actions-simulators-plugin/server/openai_simulation';
 import { Spaces, Superuser } from '../../../scenarios';
 import {
   getUrlPrefix,
@@ -25,24 +26,43 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
   const retry = getService('retry');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const configService = getService('config');
 
   describe('test telemetry', () => {
     const objectRemover = new ObjectRemover(supertest);
     const esQueryRuleId: { [key: string]: string } = {};
+    const simulator = new OpenAISimulator({
+      returnError: false,
+      proxy: {
+        config: configService.get('kbnTestServer.serverArgs'),
+      },
+    });
+    let apiUrl: string;
 
     beforeEach(async () => {
       await esTestIndexTool.destroy();
       await esTestIndexTool.setup();
     });
 
+    before(async () => {
+      apiUrl = await simulator.start();
+    });
+
     afterEach(() => objectRemover.removeAll());
 
     after(async () => {
+      simulator.close();
       await esTestIndexTool.destroy();
     });
 
-    async function createConnector(opts: { name: string; space: string; connectorTypeId: string }) {
-      const { name, space, connectorTypeId } = opts;
+    async function createConnector(opts: {
+      name: string;
+      space: string;
+      connectorTypeId: string;
+      secrets?: { apiKey: string };
+      config?: { apiProvider: string; apiUrl: string };
+    }) {
+      const { name, space, connectorTypeId, secrets, config } = opts;
       const { body: createdConnector } = await supertestWithoutAuth
         .post(`${getUrlPrefix(space)}/api/actions/connector`)
         .set('kbn-xsrf', 'foo')
@@ -50,8 +70,8 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
         .send({
           name,
           connector_type_id: connectorTypeId,
-          config: {},
-          secrets: {},
+          config: config || {},
+          secrets: secrets || {},
         })
         .expect(200);
       objectRemover.add(space, createdConnector.id, 'connector', 'actions');
@@ -89,7 +109,18 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
           space: space.id,
           connectorTypeId: 'test.excluded',
         });
-
+        const genAiConnectorId = await createConnector({
+          name: 'gen ai connector',
+          space: space.id,
+          connectorTypeId: '.gen-ai',
+          secrets: {
+            apiKey: 'genAiApiKey',
+          },
+          config: {
+            apiProvider: 'OpenAI',
+            apiUrl,
+          },
+        });
         await createRule({
           space: space.id,
           ruleOverwrites: {
@@ -112,6 +143,11 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
               },
               {
                 id: failingConnectorId,
+                group: 'default',
+                params: {},
+              },
+              {
+                id: genAiConnectorId,
                 group: 'default',
                 params: {},
               },
@@ -186,7 +222,7 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
     function verifyActionsTelemetry(telemetry: any) {
       logger.info(`actions telemetry - ${JSON.stringify(telemetry)}`);
       // total number of active connectors (used by a rule)
-      expect(telemetry.count_active_total).to.equal(7);
+      expect(telemetry.count_active_total).to.equal(10);
 
       // total number of connectors broken down by connector type
       expect(telemetry.count_by_type['test.throw']).to.equal(3);
@@ -198,6 +234,8 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
       expect(telemetry.count_by_type.__index).to.equal(1);
       expect(telemetry.count_by_type['test.index-record']).to.equal(1);
       expect(telemetry.count_by_type.__webhook).to.equal(4);
+      expect(telemetry.count_by_type['__gen-ai']).to.equal(3);
+      expect(telemetry.count_gen_ai_provider_types.OpenAI).to.equal(3);
 
       // total number of active connectors broken down by connector type
       expect(telemetry.count_active_by_type['test.throw']).to.equal(3);
@@ -284,8 +322,8 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
 
       // attached connectors stats
       expect(telemetry.connectors_per_alert.min).to.equal(0);
-      expect(telemetry.connectors_per_alert.avg).to.equal(0.8);
-      expect(telemetry.connectors_per_alert.max).to.equal(3);
+      expect(telemetry.connectors_per_alert.avg).to.equal(1);
+      expect(telemetry.connectors_per_alert.max).to.equal(4);
 
       // number of spaces with rules
       expect(telemetry.count_rules_namespaces).to.equal(3);
@@ -497,7 +535,7 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
         expect(taskState).not.to.be(undefined);
         actionsTelemetry = JSON.parse(taskState!);
         expect(actionsTelemetry.runs > 0).to.be(true);
-        expect(actionsTelemetry.count_total).to.equal(21);
+        expect(actionsTelemetry.count_total).to.equal(24);
       });
 
       verifyActionsTelemetry(actionsTelemetry);

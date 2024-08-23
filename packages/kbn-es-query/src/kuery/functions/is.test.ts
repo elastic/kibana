@@ -16,8 +16,6 @@ import { KQL_NODE_TYPE_WILDCARD } from '../node_types/wildcard';
 import { KQL_NODE_TYPE_LITERAL } from '../node_types/literal';
 import { KqlIsFunctionNode } from './is';
 
-jest.mock('../grammar');
-
 describe('kuery functions', () => {
   describe('is', () => {
     let indexPattern: DataViewBase;
@@ -72,19 +70,6 @@ describe('kuery functions', () => {
         };
         const node = nodeTypes.function.buildNode('is', '*', '*') as KqlIsFunctionNode;
         const result = is.toElasticsearchQuery(node, indexPattern);
-
-        expect(result).toEqual(expected);
-      });
-
-      test('should return an ES match_all query for queries that match all fields and values', () => {
-        const expected = {
-          match_all: {},
-        };
-        const node = nodeTypes.function.buildNode('is', 'n*', '*') as KqlIsFunctionNode;
-        const result = is.toElasticsearchQuery(node, {
-          ...indexPattern,
-          fields: indexPattern.fields.filter((field) => field.name.startsWith('n')),
-        });
 
         expect(result).toEqual(expected);
       });

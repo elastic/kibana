@@ -210,5 +210,43 @@ describe('SubActionConnector', () => {
         'Request to external service failed. Connector Id: test-id. Connector type: .test. Method: get. URL: https://example.com'
       );
     });
+
+    it('converts auth axios property to a basic auth header if provided', async () => {
+      await service.testAuth();
+
+      expect(requestMock).toHaveBeenCalledTimes(1);
+      expect(requestMock).toBeCalledWith({
+        axios: axiosInstanceMock,
+        configurationUtilities: mockedActionsConfig,
+        logger,
+        method: 'get',
+        data: {},
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Test-Header': 'test',
+          Authorization: `Basic ${Buffer.from('username:password').toString('base64')}`,
+        },
+        url: 'https://example.com',
+      });
+    });
+
+    it('does not override an authorization header if provided', async () => {
+      await service.testAuth({ headers: { Authorization: 'Bearer my_token' } });
+
+      expect(requestMock).toHaveBeenCalledTimes(1);
+      expect(requestMock).toBeCalledWith({
+        axios: axiosInstanceMock,
+        configurationUtilities: mockedActionsConfig,
+        logger,
+        method: 'get',
+        data: {},
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Test-Header': 'test',
+          Authorization: 'Bearer my_token',
+        },
+        url: 'https://example.com',
+      });
+    });
   });
 });

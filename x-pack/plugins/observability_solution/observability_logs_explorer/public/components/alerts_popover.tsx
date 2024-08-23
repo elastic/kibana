@@ -12,7 +12,7 @@ import {
   EuiContextMenuItem,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import React, { useMemo, useReducer } from 'react';
+import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { useActor } from '@xstate/react';
@@ -24,58 +24,11 @@ import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { sloFeatureId } from '@kbn/observability-shared-plugin/common';
 import { loadRuleTypes } from '@kbn/triggers-actions-ui-plugin/public';
 import useAsync from 'react-use/lib/useAsync';
+import { useBoolean } from '@kbn/react-hooks';
 import { useKibanaContextForPlugin } from '../utils/use_kibana';
 import { useObservabilityLogsExplorerPageStateContext } from '../state_machines/observability_logs_explorer/src';
 
 type ThresholdRuleTypeParams = Pick<AlertParams, 'searchConfiguration'>;
-
-interface AlertsPopoverState {
-  isPopoverOpen: boolean;
-  isAddRuleFlyoutOpen: boolean;
-  isCreateSLOFlyoutOpen: boolean;
-}
-
-type AlertsPopoverAction =
-  | {
-      type: 'togglePopover';
-      isOpen?: boolean;
-    }
-  | {
-      type: 'toggleAddRuleFlyout';
-      isOpen?: boolean;
-    }
-  | {
-      type: 'toggleCreateSLOFlyout';
-      isOpen?: boolean;
-    };
-
-function alertsPopoverReducer(state: AlertsPopoverState, action: AlertsPopoverAction) {
-  switch (action.type) {
-    case 'togglePopover':
-      return {
-        isPopoverOpen: action.isOpen ?? !state.isPopoverOpen,
-        isAddRuleFlyoutOpen: state.isAddRuleFlyoutOpen,
-        isCreateSLOFlyoutOpen: state.isCreateSLOFlyoutOpen,
-      };
-
-    case 'toggleAddRuleFlyout':
-      return {
-        isPopoverOpen: false,
-        isAddRuleFlyoutOpen: action.isOpen ?? !state.isAddRuleFlyoutOpen,
-        isCreateSLOFlyoutOpen: false,
-      };
-
-    case 'toggleCreateSLOFlyout':
-      return {
-        isPopoverOpen: false,
-        isAddRuleFlyoutOpen: false,
-        isCreateSLOFlyoutOpen: action.isOpen ?? !state.isAddRuleFlyoutOpen,
-      };
-
-    default:
-      return state;
-  }
-}
 
 const defaultQuery: Query = {
   language: 'kuery',
@@ -97,22 +50,14 @@ export const AlertsPopover = () => {
 
   const [pageState] = useActor(useObservabilityLogsExplorerPageStateContext());
 
-  const [state, dispatch] = useReducer(alertsPopoverReducer, {
-    isPopoverOpen: false,
-    isAddRuleFlyoutOpen: false,
-    isCreateSLOFlyoutOpen: false,
-  });
-
-  const togglePopover = () => dispatch({ type: 'togglePopover' });
-  const closePopover = () => dispatch({ type: 'togglePopover', isOpen: false });
-  const openAddRuleFlyout = () => dispatch({ type: 'toggleAddRuleFlyout', isOpen: true });
-  const closeAddRuleFlyout = () => dispatch({ type: 'toggleAddRuleFlyout', isOpen: false });
-  const openCreateSLOFlyout = () => dispatch({ type: 'toggleCreateSLOFlyout', isOpen: true });
-  const closeCreateSLOFlyout = () => dispatch({ type: 'toggleCreateSLOFlyout', isOpen: false });
+  const [isPopoverOpen, { toggle: togglePopover, off: closePopover }] = useBoolean();
+  const [isAddRuleFlyoutOpen, { on: openAddRuleFlyout, off: closeAddRuleFlyout }] = useBoolean();
+  const [isCreateSLOFlyoutOpen, { on: openCreateSLOFlyout, off: closeCreateSLOFlyout }] =
+    useBoolean();
 
   const addRuleFlyout = useMemo(() => {
     if (
-      state.isAddRuleFlyoutOpen &&
+      isAddRuleFlyoutOpen &&
       triggersActionsUi &&
       pageState.matches({ initialized: 'validLogsExplorerState' })
     ) {
@@ -141,13 +86,10 @@ export const AlertsPopover = () => {
         onClose: closeAddRuleFlyout,
       });
     }
-  }, [triggersActionsUi, pageState, state.isAddRuleFlyoutOpen]);
+  }, [closeAddRuleFlyout, triggersActionsUi, pageState, isAddRuleFlyoutOpen]);
 
   const createSLOFlyout = useMemo(() => {
-    if (
-      state.isCreateSLOFlyoutOpen &&
-      pageState.matches({ initialized: 'validLogsExplorerState' })
-    ) {
+    if (isCreateSLOFlyoutOpen && pageState.matches({ initialized: 'validLogsExplorerState' })) {
       const { logsExplorerState } = pageState.context;
       const dataView = hydrateDataSourceSelection(
         logsExplorerState.dataSourceSelection
@@ -178,7 +120,7 @@ export const AlertsPopover = () => {
         onClose: closeCreateSLOFlyout,
       });
     }
-  }, [slo, pageState, state.isCreateSLOFlyoutOpen]);
+  }, [isCreateSLOFlyoutOpen, pageState, slo, closeCreateSLOFlyout]);
 
   // Check whether the user has the necessary permissions to create an SLO
   const canCreateSLOs = !!application.capabilities[sloFeatureId]?.write;
@@ -252,12 +194,12 @@ export const AlertsPopover = () => {
             />
           </EuiButtonEmpty>
         }
-        isOpen={state.isPopoverOpen}
+        isOpen={isPopoverOpen}
         closePopover={closePopover}
         panelPaddingSize="none"
         anchorPosition="downLeft"
       >
-        <EuiContextMenuPanel items={items} />
+        <EuiContextMenuPanel onClick={closePopover} items={items} />
       </EuiPopover>
     </>
   );

@@ -35,7 +35,7 @@ describe('task metrics', () => {
   });
 
   it('should record passed task metrics', async () => {
-    const metric = sendMetric('test');
+    const metric = await sendMetric('test');
 
     expect(metric.name).toEqual('test');
     expect(metric.passed).toBeTruthy();
@@ -49,7 +49,7 @@ describe('task metrics', () => {
     jest.spyOn(telemetryConfiguration, 'use_async_sender', 'get').mockReturnValue(false);
 
     const trace = taskMetricsService.start('test');
-    taskMetricsService.end(trace);
+    await taskMetricsService.end(trace);
     expect(mockTelemetryEventsSender.sendAsync).toHaveBeenCalledTimes(0);
 
     expect(mockTelemetryEventsSender.sendAsync).toHaveBeenCalledTimes(0);
@@ -57,7 +57,7 @@ describe('task metrics', () => {
   });
 
   it('should record failed task metrics', async () => {
-    const metric = sendMetric('test', Error('Boom!'));
+    const metric = await sendMetric('test', Error('Boom!'));
 
     expect(metric.name).toEqual('test');
     expect(metric.passed).toBeFalsy();
@@ -67,9 +67,9 @@ describe('task metrics', () => {
     expect(metric.end_time).toBeGreaterThan(0);
   });
 
-  function sendMetric(name: string, error?: Error): TaskMetric {
+  async function sendMetric(name: string, error?: Error): Promise<TaskMetric> {
     const trace = taskMetricsService.start(name);
-    taskMetricsService.end(trace, error);
+    await taskMetricsService.end(trace, error);
 
     expect(mockTelemetryEventsSender.sendAsync).toHaveBeenCalledTimes(1);
     const events = mockTelemetryEventsSender.sendAsync.mock.calls[0][1];

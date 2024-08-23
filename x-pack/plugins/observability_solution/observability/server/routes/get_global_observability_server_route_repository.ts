@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import { EndpointOf } from '@kbn/server-route-repository';
 import { ObservabilityConfig } from '..';
+import { aiAssistantRouteRepository } from './assistant/route';
 import { rulesRouteRepository } from './rules/route';
 
 export function getObservabilityServerRouteRepository(config: ObservabilityConfig) {
   const repository = {
+    ...aiAssistantRouteRepository,
     ...rulesRouteRepository,
   };
   return repository;
@@ -18,3 +21,5 @@ export function getObservabilityServerRouteRepository(config: ObservabilityConfi
 export type ObservabilityServerRouteRepository = ReturnType<
   typeof getObservabilityServerRouteRepository
 >;
+
+export type APIEndpoint = EndpointOf<ObservabilityServerRouteRepository>;

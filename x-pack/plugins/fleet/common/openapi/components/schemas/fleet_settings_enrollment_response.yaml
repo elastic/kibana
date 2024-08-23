@@ -1,0 +1,42 @@
+title: Fleet settings response
+type: object
+properties:
+  fleet_server: 
+    type: object
+    properties:
+      policies: 
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: string
+            name:
+              type: string
+            is_managed:
+              type: boolean
+            is_default_fleet_server:
+              type: boolean
+            has_fleet_server:
+              type: boolean
+            fleet_server_host_id:
+              type: string
+            download_source_id:
+              type: string
+          required:
+            - id
+            - name
+            - is_managed
+      has_active:
+        type: boolean
+      host:
+        $ref: ./fleet_server_host.yaml
+      host_proxy:
+        $ref: ./proxies.yaml
+    required:
+      - agent_policies
+      - has_active
+  download_source:
+    $ref: ./download_sources.yaml
+required:
+  - fleet_server

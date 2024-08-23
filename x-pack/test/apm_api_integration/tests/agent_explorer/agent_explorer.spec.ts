@@ -14,7 +14,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
@@ -103,7 +103,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             'service.language.name': 'javascript',
           });
 
-        await synthtraceEsClient.index([
+        await apmSynthtraceEsClient.index([
           timerange(start, end)
             .interval('5m')
             .rate(1)
@@ -143,7 +143,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ]);
       });
 
-      after(() => synthtraceEsClient.clean());
+      after(() => apmSynthtraceEsClient.clean());
 
       it('labels.telemetry_auto_version takes precedence over agent.version for otelAgets', async () => {
         const { status, body } = await callApi();

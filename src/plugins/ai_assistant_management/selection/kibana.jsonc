@@ -7,7 +7,7 @@
     "server": true,
     "browser": true,
     "requiredPlugins": ["management"],
-    "optionalPlugins": ["home", "serverless"],
+    "optionalPlugins": ["home", "serverless", "features"],
     "requiredBundles": ["kibanaReact"],
     "configPath": [
       "aiAssistantManagementSelection"

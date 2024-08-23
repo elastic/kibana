@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Aggregators, Comparator } from '../../../../common/alerting/metrics';
+import { COMPARATORS } from '@kbn/alerting-comparators';
+import { Aggregators } from '../../../../common/alerting/metrics';
 import { MetricExpression } from '../types';
 import { generateUniqueKey } from './generate_unique_key';
 
@@ -14,7 +14,7 @@ describe('generateUniqueKey', () => {
     [
       {
         aggType: Aggregators.COUNT,
-        comparator: Comparator.LT,
+        comparator: COMPARATORS.LESS_THAN,
         threshold: [2000, 5000],
         timeSize: 15,
         timeUnit: 'm',
@@ -24,7 +24,7 @@ describe('generateUniqueKey', () => {
     [
       {
         aggType: Aggregators.CUSTOM,
-        comparator: Comparator.GT_OR_EQ,
+        comparator: COMPARATORS.GREATER_THAN_OR_EQUALS,
         threshold: [30],
         timeSize: 15,
         timeUnit: 'm',
@@ -34,7 +34,7 @@ describe('generateUniqueKey', () => {
     [
       {
         aggType: Aggregators.AVERAGE,
-        comparator: Comparator.LT_OR_EQ,
+        comparator: COMPARATORS.LESS_THAN_OR_EQUALS,
         threshold: [500],
         timeSize: 15,
         timeUnit: 'm',

@@ -34,11 +34,11 @@ const rolesManagementFeature: ElasticsearchFeatureConfig = {
   privileges: [
     {
       requiredClusterPrivileges: ['manage_security'],
-      ui: ['save'],
+      ui: ['save', 'view'],
     },
     {
       requiredClusterPrivileges: ['read_security'],
-      ui: [],
+      ui: ['view'],
     },
   ],
 };

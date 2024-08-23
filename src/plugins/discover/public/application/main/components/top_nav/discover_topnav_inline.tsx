@@ -13,7 +13,7 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { LogsExplorerTabs } from '../../../../components/logs_explorer_tabs';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useDiscoverTopNav } from './use_discover_topnav';
-import type { DiscoverStateContainer } from '../../services/discover_state';
+import type { DiscoverStateContainer } from '../../state_management/discover_state';
 
 export const DiscoverTopNavInline = ({
   stateContainer,

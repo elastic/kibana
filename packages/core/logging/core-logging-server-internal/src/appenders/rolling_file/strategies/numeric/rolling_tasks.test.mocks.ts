@@ -7,20 +7,17 @@
  */
 
 export const readdirMock = jest.fn();
-export const unlinkMock = jest.fn();
 export const renameMock = jest.fn();
 export const accessMock = jest.fn();
 
 jest.doMock('fs/promises', () => ({
   readdir: readdirMock,
-  unlink: unlinkMock,
   rename: renameMock,
   access: accessMock,
 }));
 
 export const clearAllMocks = () => {
   readdirMock.mockClear();
-  unlinkMock.mockClear();
   renameMock.mockClear();
   accessMock.mockClear();
 };

@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { coreMock } from '@kbn/core/public/mocks';
 import type { HttpSetup } from '@kbn/core/public';
 import { RiskScoreEntity } from '../../../../common/search_strategy';
 import {
@@ -26,6 +28,7 @@ import {
 
 jest.mock('../../deprecated_risk_engine/api');
 
+const startServices = coreMock.createStart();
 const mockHttp = {
   post: jest.fn(),
 } as unknown as HttpSetup;
@@ -45,6 +48,7 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
         spaceId: mockSpaceId,
         timerange: mockTimerange,
         riskScoreEntity,
+        startServices,
       });
     });
 
@@ -78,6 +82,7 @@ describe.each([[RiskScoreEntity.host], [RiskScoreEntity.user]])(
         http: mockHttp,
         spaceId: mockSpaceId,
         riskScoreEntity,
+        startServices,
       });
     });
 
@@ -146,6 +151,7 @@ describe.each([[RiskScoreEntity.host], [RiskScoreEntity.user]])(
         refetch: mockRefetch,
         riskScoreEntity,
         spaceId: mockSpaceId,
+        startServices,
       });
     });
 

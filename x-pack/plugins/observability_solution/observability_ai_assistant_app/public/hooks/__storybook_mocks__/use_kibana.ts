@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import React from 'react';
+import { Subject } from 'rxjs';
+import { useChat } from './use_chat';
+
+const ObservabilityAIAssistantMultipaneFlyoutContext = React.createContext(undefined);
+
 export function useKibana() {
   return {
     services: {
-      uiSettings: {
-        get: (setting: string) => {
-          if (setting === 'dateFormat') {
-            return 'MMM D, YYYY HH:mm';
-          }
-        },
-      },
+      application: { navigateToApp: () => {} },
       http: {
         basePath: {
           prepend: () => '',
@@ -24,6 +24,32 @@ export function useKibana() {
         toasts: {
           addSuccess: () => {},
           addError: () => {},
+        },
+      },
+      plugins: {
+        start: {
+          licensing: {
+            license$: new Subject(),
+          },
+          observabilityAIAssistant: {
+            useChat,
+            ObservabilityAIAssistantMultipaneFlyoutContext,
+          },
+          share: {
+            url: {
+              locators: {
+                get: () => {},
+              },
+            },
+          },
+          triggersActionsUi: { getAddRuleFlyout: {}, getAddConnectorFlyout: {} },
+        },
+      },
+      uiSettings: {
+        get: (setting: string) => {
+          if (setting === 'dateFormat') {
+            return 'MMM D, YYYY HH:mm';
+          }
         },
       },
     },

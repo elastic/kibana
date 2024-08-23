@@ -6,35 +6,42 @@
  * Side Public License, v 1.
  */
 
-import type {
-  ApplicationStart,
-  I18nStart,
-  IUiSettingsClient,
-  ThemeServiceSetup,
-  ToastsSetup,
-} from '@kbn/core/public';
+import * as Rx from 'rxjs';
+
+import type { ApplicationStart, CoreStart } from '@kbn/core/public';
 import { ILicense } from '@kbn/licensing-plugin/public';
 import type { LayoutParams } from '@kbn/screenshotting-plugin/common';
+
 import type { ReportingAPIClient } from '../../reporting_api_client';
+
+export type StartServices = [
+  Pick<
+    CoreStart,
+    // required for modules that render React
+    | 'analytics'
+    | 'i18n'
+    | 'theme'
+    // used extensively in Reporting share context menus and modal
+    | 'notifications'
+  >,
+  unknown,
+  unknown
+];
 
 export interface ExportModalShareOpts {
   apiClient: ReportingAPIClient;
-  uiSettings: IUiSettingsClient;
   usesUiCapabilities: boolean;
   license: ILicense;
   application: ApplicationStart;
-  theme: ThemeServiceSetup;
-  i18n: I18nStart;
+  startServices$: Rx.Observable<StartServices>;
 }
 
 export interface ExportPanelShareOpts {
   apiClient: ReportingAPIClient;
-  toasts: ToastsSetup;
-  uiSettings: IUiSettingsClient;
   usesUiCapabilities: boolean;
   license: ILicense;
   application: ApplicationStart;
-  theme: ThemeServiceSetup;
+  startServices$: Rx.Observable<StartServices>;
 }
 
 export interface ReportingSharingData {
@@ -46,6 +53,6 @@ export interface ReportingSharingData {
 
 export interface JobParamsProviderOptions {
   sharingData: ReportingSharingData;
-  shareableUrl: string;
+  shareableUrl?: string;
   objectType: string;
 }

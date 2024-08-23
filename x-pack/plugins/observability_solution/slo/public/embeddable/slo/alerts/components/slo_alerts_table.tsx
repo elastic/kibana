@@ -9,7 +9,7 @@ import { AlertConsumers } from '@kbn/rule-data-utils';
 import type { TimeRange } from '@kbn/es-query';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { AlertsTableStateProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/alerts_table_state';
-import { SloEmbeddableDeps } from '../slo_alerts_embeddable';
+import { SloEmbeddableDeps } from '../types';
 import type { SloItem } from '../types';
 import { SLO_ALERTS_TABLE_CONFIG_ID } from '../../constants';
 
@@ -98,8 +98,8 @@ export function SloAlertsTable({
 }: Props) {
   const {
     triggersActionsUi: { alertsTableConfigurationRegistry, getAlertsStateTable: AlertsStateTable },
+    observability: { observabilityRuleTypeRegistry },
   } = deps;
-
   return (
     <AlertsStateTable
       query={useSloAlertsQuery(slos, timeRange, showAllGroupByInstances)}
@@ -108,7 +108,7 @@ export function SloAlertsTable({
       featureIds={[AlertConsumers.SLO, AlertConsumers.OBSERVABILITY]}
       hideLazyLoader
       id={ALERTS_TABLE_ID}
-      pageSize={ALERTS_PER_PAGE}
+      initialPageSize={ALERTS_PER_PAGE}
       showAlertStatusWithFlapping
       onLoaded={() => {
         if (onLoaded) {
@@ -116,6 +116,7 @@ export function SloAlertsTable({
         }
       }}
       lastReloadRequestTime={lastReloadRequestTime}
+      cellContext={{ observabilityRuleTypeRegistry }}
     />
   );
 }

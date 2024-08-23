@@ -35,6 +35,9 @@ export function nodeSetupStatusRoute(server: MonitoringCore) {
       query: validateQuery,
       body: validateBody,
     },
+    options: {
+      access: 'internal',
+    },
     handler: async (req) => {
       const nodeUuid = req.params.nodeUuid;
       const skipLiveData = req.query.skipLiveData;

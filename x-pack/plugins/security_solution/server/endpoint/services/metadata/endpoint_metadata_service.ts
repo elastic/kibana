@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { uniq } from 'lodash';
 import type {
   ElasticsearchClient,
   Logger,
@@ -377,7 +377,7 @@ export class EndpointMetadataService {
     queryOptions: GetMetadataListRequestQuery
   ): Promise<Pick<MetadataListResponse, 'data' | 'total'>> {
     const endpointPolicies = await this.getAllEndpointPackagePolicies();
-    const endpointPolicyIds = endpointPolicies.map((policy) => policy.policy_id);
+    const endpointPolicyIds = uniq(endpointPolicies.flatMap((policy) => policy.policy_ids));
     const unitedIndexQuery = await buildUnitedIndexQuery(soClient, queryOptions, endpointPolicyIds);
 
     let unitedMetadataQueryResponse: SearchResponse<UnitedAgentMetadataPersistedData>;
@@ -420,7 +420,9 @@ export class EndpointMetadataService {
 
     const endpointPoliciesMap = endpointPolicies.reduce<Record<string, PackagePolicy>>(
       (acc, packagePolicy) => {
-        acc[packagePolicy.policy_id] = packagePolicy;
+        for (const policyId of packagePolicy.policy_ids) {
+          acc[policyId] = packagePolicy;
+        }
         return acc;
       },
       {}

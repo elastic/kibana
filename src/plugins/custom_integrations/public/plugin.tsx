@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 
 import {
@@ -71,7 +71,7 @@ export class CustomIntegrationsPlugin
       })),
     };
 
-    const ContextProvider: React.FC = ({ children }) => (
+    const ContextProvider: FC<PropsWithChildren<unknown>> = ({ children }) => (
       <CustomIntegrationsServicesProvider {...services}>
         {children}
       </CustomIntegrationsServicesProvider>

@@ -39,6 +39,7 @@ const BOOLEAN_OPTIONS = [
 ];
 
 const SINGLE_SELECTION = { asPlainText: true };
+
 type Warning = string | React.ReactNode;
 
 interface AutocompleteFieldMatchProps {
@@ -152,9 +153,10 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
 
       handleSpacesWarning(newValue);
       handleError(undefined);
+      handleWarning(undefined);
       onChange(newValue ?? '');
     },
-    [handleError, handleSpacesWarning, labels, onChange, optionsMemo]
+    [handleError, handleWarning, handleSpacesWarning, labels, onChange, optionsMemo]
   );
 
   const handleSearchChange = useCallback(

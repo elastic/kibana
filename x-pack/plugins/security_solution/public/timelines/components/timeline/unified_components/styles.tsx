@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import styled from 'styled-components';
+import styled, { createGlobalStyle } from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiProgress } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 
@@ -22,7 +22,7 @@ export const StyledTableFlexGroup = styled(EuiFlexGroup).attrs(({ className = ''
   }
 `;
 
-export const StyledTableFlexItem = styled(EuiFlexItem).attrs(({ className = '' }) => ({
+export const StyledUnifiedTableFlexItem = styled(EuiFlexItem).attrs(({ className = '' }) => ({
   className: `${className}`,
 }))`
   ${({ theme }) => `margin: 0 ${theme.eui.euiSizeM};`}
@@ -56,6 +56,12 @@ export const StyledMainEuiPanel = styled(EuiPanel).attrs(({ className = '' }) =>
   height: 100%;
 `;
 
+export const leadingActionsColumnStyles = `
+  .udtTimeline .euiDataGridRowCell--controlColumn:nth-child(3) .euiDataGridRowCell__content {
+    padding: 0;
+  }
+`;
+
 export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = '' }) => ({
   className: `unifiedDataTable ${className}`,
   role: 'rowgroup',
@@ -65,6 +71,14 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
   }
   .udtTimeline [data-gridcell-column-id|='openDetails'] .euiDataGridRowCell__contentByHeight {
     margin-top: 3px;
+  }
+
+  .udtTimeline
+    .euiDataGridHeaderCell.euiDataGridHeaderCell--controlColumn:not(
+      [data-gridcell-column-id='select']
+    ) {
+    padding: 0;
+    position: relative;
   }
 
   .udtTimeline .euiDataGridRowCell--controlColumn {
@@ -89,7 +103,8 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
     border-radius: 8px;
   }
 
-  .udtTimeline .euiDataGridRow:has(.buildingBlockType) {
+  .udtTimeline .euiDataGridRow:has(.buildingBlockType),
+  .udtTimeline .euiDataGridRow.buildingBlockType {
     background: repeating-linear-gradient(
       127deg,
       rgba(245, 167, 0, 0.2),
@@ -98,9 +113,12 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
       rgba(245, 167, 0, 0.05) 10px
     );
   }
-  .udtTimeline .euiDataGridRow:has(.eqlSequence) {
-    .euiDataGridRowCell--firstColumn {
-      ${({ theme }) => `border-left: 4px solid ${theme.eui.euiColorPrimary};`}
+  .udtTimeline .euiDataGridRow:has(.eqlSequence),
+  .udtTimeline .euiDataGridRow.eqlSequence {
+    .euiDataGridRowCell--firstColumn,
+    .euiDataGridRowCell--controlColumn.euiDataGridRowCell--lastColumn,
+    .udt--customRow {
+      ${({ theme }) => `border-left: 4px solid ${theme.eui.euiColorPrimary}`};
     }
     background: repeating-linear-gradient(
       127deg,
@@ -110,8 +128,11 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
       rgba(0, 107, 180, 0.05) 10px
     );
   }
-  .udtTimeline .euiDataGridRow:has(.eqlNonSequence) {
-    .euiDataGridRowCell--firstColumn {
+  .udtTimeline .euiDataGridRow:has(.eqlNonSequence),
+  .udtTimeline .euiDataGridRow.eqlNonSequence {
+    .euiDataGridRowCell--firstColumn,
+    .euiDataGridRowCell--controlColumn.euiDataGridRowCell--lastColumn,
+    .udt--customRow {
       ${({ theme }) => `border-left: 4px solid ${theme.eui.euiColorAccent};`}
     }
     background: repeating-linear-gradient(
@@ -122,11 +143,21 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
       rgba(221, 10, 115, 0.05) 10px
     );
   }
-  .udtTimeline .euiDataGridRow:has(.nonRawEvent) .euiDataGridRowCell--firstColumn {
-    ${({ theme }) => `border-left: 4px solid ${theme.eui.euiColorWarning};`}
+  .udtTimeline .euiDataGridRow:has(.nonRawEvent),
+  .udtTimeline .euiDataGridRow.nonRawEvent {
+    .euiDataGridRowCell--firstColumn,
+    .euiDataGridRowCell--controlColumn.euiDataGridRowCell--lastColumn,
+    .udt--customRow {
+      ${({ theme }) => `border-left: 4px solid ${theme.eui.euiColorWarning};`}
+    }
   }
-  .udtTimeline .euiDataGridRow:has(.rawEvent) .euiDataGridRowCell--firstColumn {
-    ${({ theme }) => `border-left: 4px solid ${theme.eui.euiColorLightShade};`}
+  .udtTimeline .euiDataGridRow:has(.rawEvent),
+  .udtTimeline .euiDataGridRow.rawEvent {
+    .euiDataGridRowCell--firstColumn,
+    .euiDataGridRowCell--controlColumn.euiDataGridRowCell--lastColumn,
+    .udt--customRow {
+      ${({ theme }) => `border-left: 4px solid ${theme.eui.euiColorLightShade};`}
+    }
   }
 
   .udtTimeline .rowCellWrapper {
@@ -144,5 +175,18 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
 
   .udtTimeline .euiDataGrid__rightControls {
     padding-right: 30px;
+  }
+
+  .udtTimeline .euiDataGrid__leftControls {
+    display: flex;
+    align-items: baseline;
+  }
+
+  ${leadingActionsColumnStyles}
+`;
+
+export const UnifiedTimelineGlobalStyles = createGlobalStyle`
+  body:has(.timeline-portal-overlay-mask) .unifiedDataTable__cellPopover {
+    z-index: 1001 !important;
   }
 `;

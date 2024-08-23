@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { FC, PropsWithChildren } from 'react';
 import React, { Fragment, useMemo } from 'react';
 import { EuiCallOut, EuiText, EuiSpacer, EuiAccordion } from '@elastic/eui';
 import type { RulePreviewLogs } from '../../../../../common/api/detection_engine';
@@ -72,7 +73,7 @@ const PreviewLogsComponent: React.FC<PreviewLogsProps> = ({ logs, hasNoiseWarnin
 export const PreviewLogs = React.memo(PreviewLogsComponent);
 PreviewLogs.displayName = 'PreviewLogs';
 
-const LogAccordion: React.FC<LogAccordionProps> = ({ logs, isError, children }) => {
+const LogAccordion: FC<PropsWithChildren<LogAccordionProps>> = ({ logs, isError, children }) => {
   const firstLog = logs[0];
   if (!(children || firstLog)) return null;
 

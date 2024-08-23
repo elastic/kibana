@@ -43,6 +43,7 @@ describe('useFetchAlertDetail', () => {
     'event.action': 'active',
     'kibana.version': '8.1.0',
     tags: [],
+    _index: 'alert-index',
   };
 
   const id = '123';
@@ -115,6 +116,7 @@ describe('useFetchAlertDetail', () => {
               "active": true,
               "fields": Object {
                 "@timestamp": "2022-01-31T18:20:57.204Z",
+                "_index": "alert-index",
                 "event.action": "active",
                 "event.kind": "signal",
                 "kibana.alert.duration.us": 13793555000,
@@ -146,6 +148,7 @@ describe('useFetchAlertDetail', () => {
             },
             "raw": Object {
               "@timestamp": "2022-01-31T18:20:57.204Z",
+              "_index": "alert-index",
               "event.action": "active",
               "event.kind": "signal",
               "kibana.alert.duration.us": 13793555000,

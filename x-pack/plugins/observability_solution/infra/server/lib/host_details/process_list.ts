@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import { TIMESTAMP_FIELD, CMDLINE_FIELD } from '../../../common/constants';
+import { TIMESTAMP_FIELD, SYSTEM_PROCESS_CMDLINE_FIELD } from '../../../common/constants';
 import { ProcessListAPIRequest, ProcessListAPIQueryAggregation } from '../../../common/http_api';
 import { ESSearchClient } from '../metrics/types';
+import type { InfraSourceConfiguration } from '../sources';
 
 const TOP_N = 10;
 
 export const getProcessList = async (
   search: ESSearchClient,
-  { hostTerm, indexPattern, to, sortBy, searchFilter }: ProcessListAPIRequest
+  sourceConfiguration: InfraSourceConfiguration,
+  { hostTerm, to, sortBy, searchFilter }: ProcessListAPIRequest
 ) => {
   const body = {
     size: 0,
@@ -67,7 +69,7 @@ export const getProcessList = async (
         aggs: {
           filteredProcs: {
             terms: {
-              field: CMDLINE_FIELD,
+              field: SYSTEM_PROCESS_CMDLINE_FIELD,
               size: TOP_N,
               order: {
                 [sortBy.name]: sortBy.isAscending ? 'asc' : 'desc',
@@ -111,7 +113,7 @@ export const getProcessList = async (
   try {
     const result = await search<{}, ProcessListAPIQueryAggregation>({
       body,
-      index: indexPattern,
+      index: sourceConfiguration.metricAlias,
     });
     const { buckets: processListBuckets } = result.aggregations!.processes.filteredProcs;
     const processList = processListBuckets.map((bucket) => {

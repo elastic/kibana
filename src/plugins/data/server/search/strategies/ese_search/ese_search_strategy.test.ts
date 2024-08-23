@@ -66,7 +66,8 @@ describe('ES search strategy', () => {
   const mockSubmitCaller = jest.fn();
   const mockDeleteCaller = jest.fn();
   const mockLogger: any = {
-    debug: () => {},
+    debug: jest.fn(),
+    error: jest.fn(),
   };
   const mockDeps = {
     uiSettingsClient: {
@@ -334,6 +335,47 @@ describe('ES search strategy', () => {
             is_running: true,
           },
         });
+
+        const params = { index: 'logstash-*', body: { query: {} } };
+        const esSearch = await enhancedEsSearchStrategyProvider(
+          mockLegacyConfig$,
+          mockSearchConfig,
+          mockLogger
+        );
+        const abortController = new AbortController();
+        const abortSignal = abortController.signal;
+
+        // Abort after an incomplete first response is returned
+        setTimeout(() => abortController.abort(), 100);
+
+        let err: KbnServerError | undefined;
+        try {
+          await esSearch.search({ params }, { abortSignal }, mockDeps).toPromise();
+        } catch (e) {
+          err = e;
+        }
+        expect(mockSubmitCaller).toBeCalled();
+        expect(err).not.toBeUndefined();
+        expect(mockDeleteCaller).toBeCalled();
+      });
+
+      it('should not throw when encountering an error deleting', async () => {
+        mockSubmitCaller.mockResolvedValueOnce({
+          ...mockAsyncResponse,
+          body: {
+            ...mockAsyncResponse.body,
+            is_running: true,
+          },
+        });
+
+        const errResponse = new errors.ResponseError({
+          body: xContentParseException,
+          statusCode: 400,
+          headers: {},
+          warnings: [],
+          meta: {} as any,
+        });
+        mockDeleteCaller.mockRejectedValueOnce(errResponse);
 
         const params = { index: 'logstash-*', body: { query: {} } };
         const esSearch = await enhancedEsSearchStrategyProvider(

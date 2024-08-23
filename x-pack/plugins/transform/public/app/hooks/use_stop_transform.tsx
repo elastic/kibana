@@ -25,7 +25,7 @@ import { ToastNotificationText } from '../components';
 import { useRefreshTransformList } from './use_refresh_transform_list';
 
 export const useStopTransforms = () => {
-  const { http, i18n: i18nStart, theme } = useAppDependencies();
+  const { http, ...startServices } = useAppDependencies();
   const refreshTransformList = useRefreshTransformList();
   const toastNotifications = useToastNotifications();
 
@@ -43,15 +43,12 @@ export const useStopTransforms = () => {
             defaultMessage: 'An error occurred called the stop transforms request.',
           }
         ),
-        text: toMountPoint(<ToastNotificationText text={getErrorMessage(error)} />, {
-          theme,
-          i18n: i18nStart,
-        }),
+        text: toMountPoint(<ToastNotificationText text={getErrorMessage(error)} />, startServices),
       }),
     onSuccess: (results) => {
       for (const transformId in results) {
         // hasOwnProperty check to ensure only properties on object itself, and not its prototypes
-        if (results.hasOwnProperty(transformId)) {
+        if (Object.hasOwn(results, transformId)) {
           if (!results[transformId].success) {
             toastNotifications.addDanger(
               i18n.translate('xpack.transform.transformList.stopTransformErrorMessage', {

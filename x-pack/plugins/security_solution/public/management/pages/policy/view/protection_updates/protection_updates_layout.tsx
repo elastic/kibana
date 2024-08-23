@@ -72,7 +72,6 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
 
     const policy = _policy as PolicyData;
     const deployedVersion = policy.inputs[0].config.policy.value.global_manifest_version;
-    const [manifestVersion, setManifestVersion] = useState(deployedVersion);
 
     const today = moment.utc();
     const defaultDate = today.clone().subtract(1, 'days');
@@ -93,11 +92,15 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
       }
     }, [fetchedNote, getNoteInProgress]);
 
-    const automaticUpdatesEnabled = manifestVersion === 'latest';
     const internalDateFormat = 'YYYY-MM-DD';
     const displayDateFormat = 'MMMM DD, YYYY';
     const formattedDate = moment.utc(deployedVersion, internalDateFormat).format(displayDateFormat);
     const cutoffDate = getControlledArtifactCutoffDate(); // Earliest selectable date
+
+    const [selectedManifestVersion, setSelectedManifestVersion] = useState(
+      deployedVersion === 'latest' ? 'latest' : selectedDate.format(internalDateFormat)
+    );
+    const automaticUpdatesEnabled = selectedManifestVersion === 'latest';
 
     const viewModeSwitchLabel = automaticUpdatesEnabled
       ? AUTOMATIC_UPDATES_CHECKBOX_LABEL
@@ -105,15 +108,31 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
 
     const saveButtonEnabled =
       (fetchedNote ? note !== fetchedNote.note : note !== '') ||
-      manifestVersion !== deployedVersion;
+      selectedManifestVersion !== deployedVersion;
 
     useEffect(() => {
+      // Prevent unsaved changes modal from showing when the user has not made any changes
+      if (
+        selectedDate.isSame(defaultDate.toISOString(), 'day') &&
+        deployedVersion !== 'latest' &&
+        !automaticUpdatesEnabled &&
+        !moment.utc(deployedVersion, internalDateFormat).isSame(selectedDate.toISOString(), 'days')
+      ) {
+        return;
+      }
       setUnsavedChanges(saveButtonEnabled);
-    }, [saveButtonEnabled, setUnsavedChanges]);
+    }, [
+      automaticUpdatesEnabled,
+      defaultDate,
+      deployedVersion,
+      saveButtonEnabled,
+      selectedDate,
+      setUnsavedChanges,
+    ]);
 
     const onSave = useCallback(() => {
       const update = cloneDeep(policy);
-      update.inputs[0].config.policy.value.global_manifest_version = manifestVersion;
+      update.inputs[0].config.policy.value.global_manifest_version = selectedManifestVersion;
       sendPolicyUpdate({ policy: update })
         .then(({ item: policyItem }) => {
           toasts.addSuccess({
@@ -173,7 +192,7 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
       }
     }, [
       policy,
-      manifestVersion,
+      selectedManifestVersion,
       sendPolicyUpdate,
       fetchedNote,
       note,
@@ -187,13 +206,13 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
         const { checked } = event.target;
 
         if (checked && !automaticUpdatesEnabled) {
-          setManifestVersion('latest');
+          setSelectedManifestVersion('latest');
           // Clear selected date on user enabling automatic updates
           if (selectedDate !== defaultDate) {
             setSelectedDate(defaultDate);
           }
         } else {
-          setManifestVersion(selectedDate.format(internalDateFormat));
+          setSelectedManifestVersion(selectedDate.format(internalDateFormat));
         }
       },
       [automaticUpdatesEnabled, selectedDate, defaultDate]
@@ -203,7 +222,7 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
       (date: Moment | null) => {
         if (date?.isAfter(cutoffDate) && date?.isSameOrBefore(defaultDate)) {
           setSelectedDate(date || defaultDate);
-          setManifestVersion(date?.format(internalDateFormat) || 'latest');
+          setSelectedManifestVersion(date?.format(internalDateFormat) || 'latest');
         }
       },
       [cutoffDate, defaultDate]

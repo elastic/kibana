@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ISearchRequestParams } from '@kbn/data-plugin/common';
+import type { ISearchRequestParams } from '@kbn/search-types';
 import { hostFieldsMap } from '@kbn/securitysolution-ecs';
 import { HostsFields } from '../../../../../../common/api/search_strategy/hosts/model/sort';
 import type { HostsRequestOptions } from '../../../../../../common/api/search_strategy';

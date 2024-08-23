@@ -17,7 +17,7 @@ import { isSavedQueryPrebuilt } from '../../routes/saved_query/utils';
 
 interface CreateDynamicQueriesParams {
   params: CreateLiveQueryRequestBodySchema;
-  alertData?: ParsedTechnicalFields;
+  alertData?: ParsedTechnicalFields & { _index: string };
   agents: string[];
   osqueryContext: OsqueryAppContext;
   error?: string;
@@ -71,7 +71,7 @@ export const createDynamicQueries = async ({
 
 export const replacedQueries = (
   query: string | undefined,
-  alertData?: ParsedTechnicalFields
+  alertData?: ParsedTechnicalFields & { _index: string }
 ): { query: string | undefined; error?: string } => {
   if (alertData && query) {
     const { result, skipped } = replaceParamsQuery(query, alertData);

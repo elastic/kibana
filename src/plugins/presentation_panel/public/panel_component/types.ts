@@ -10,7 +10,6 @@ import { PresentationContainer } from '@kbn/presentation-containers';
 import {
   HasParentApi,
   HasUniqueId,
-  PhaseEvent,
   PublishesBlockingError,
   PublishesDataLoading,
   PublishesDisabledActionIds,
@@ -41,10 +40,12 @@ export interface PresentationPanelInternalProps<
   showBadges?: boolean;
   showNotifications?: boolean;
 
+  /**
+   * Set to true to not show PanelLoader component while Panel is loading
+   */
+  hideLoader?: boolean;
   hideHeader?: boolean;
   hideInspector?: boolean;
-
-  onPanelStatusChange?: (info: PhaseEvent) => void;
 
   // TODO remove these in favour of a more generic action management system
   actionPredicate?: (actionId: string) => boolean;

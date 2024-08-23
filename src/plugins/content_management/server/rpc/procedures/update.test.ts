@@ -240,16 +240,16 @@ describe('RPC -> update()', () => {
     });
 
     describe('validation', () => {
-      test('should validate that content type definition exist', () => {
+      test('should validate that content type definition exist', async () => {
         const { ctx } = setup();
-        expect(() =>
+        await expect(() =>
           fn(ctx, { contentTypeId: 'unknown', id: '123', data: { title: 'Hello' } })
         ).rejects.toEqual(new Error('Content [unknown] is not registered.'));
       });
 
-      test('should throw if the request version is higher than the registered version', () => {
+      test('should throw if the request version is higher than the registered version', async () => {
         const { ctx } = setup();
-        expect(() =>
+        await expect(() =>
           fn(ctx, {
             contentTypeId: FOO_CONTENT_ID,
             id: '123',
@@ -261,9 +261,9 @@ describe('RPC -> update()', () => {
     });
 
     describe('object versioning', () => {
-      test('should expose a  utility to transform and validate services objects', () => {
+      test('should expose a  utility to transform and validate services objects', async () => {
         const { ctx, storage } = setup();
-        fn(ctx, {
+        await fn(ctx, {
           contentTypeId: FOO_CONTENT_ID,
           id: '123',
           version: 1,

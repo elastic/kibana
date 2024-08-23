@@ -14,11 +14,17 @@ import { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import {
   AlertInstanceContext,
   AlertInstanceState,
+  DEFAULT_FLAPPING_SETTINGS,
   RuleAlertData,
   RuleTypeParams,
   SanitizedRule,
 } from '../../types';
 import { RuleTaskInstance, RuleTypeRunnerContext } from '../../task_runner/types';
+
+export type RuleData<Params extends RuleTypeParams> = Pick<
+  SanitizedRule<Params>,
+  'id' | 'name' | 'tags' | 'consumer' | 'revision' | 'alertDelay' | 'params'
+>;
 
 interface InitializeAlertsClientOpts<Params extends RuleTypeParams> {
   alertsService: AlertsService | null;
@@ -26,8 +32,10 @@ interface InitializeAlertsClientOpts<Params extends RuleTypeParams> {
   executionId: string;
   logger: Logger;
   maxAlerts: number;
-  rule: SanitizedRule<Params>;
+  rule: RuleData<Params>;
   ruleType: UntypedNormalizedRuleType;
+  runTimestamp?: Date;
+  startedAt: Date | null;
   taskInstance: RuleTaskInstance;
 }
 
@@ -46,6 +54,8 @@ export const initializeAlertsClient = async <
   maxAlerts,
   rule,
   ruleType,
+  runTimestamp,
+  startedAt,
   taskInstance,
 }: InitializeAlertsClientOpts<Params>) => {
   const {
@@ -106,8 +116,9 @@ export const initializeAlertsClient = async <
   await alertsClient.initializeExecution({
     maxAlerts,
     ruleLabel: context.ruleLogPrefix,
-    flappingSettings: context.flappingSettings,
-    startedAt: taskInstance.startedAt!,
+    flappingSettings: context.flappingSettings ?? DEFAULT_FLAPPING_SETTINGS,
+    startedAt,
+    runTimestamp,
     activeAlertsFromState: alertRawInstances,
     recoveredAlertsFromState: alertRecoveredRawInstances,
   });

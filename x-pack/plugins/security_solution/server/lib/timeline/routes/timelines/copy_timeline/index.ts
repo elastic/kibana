@@ -11,17 +11,12 @@ import type { ConfigType } from '../../../../..';
 import { copyTimelineSchema } from '../../../../../../common/api/timeline';
 import { copyTimeline } from '../../../saved_object/timelines';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
-import type { SetupPlugins } from '../../../../../plugin';
 import { TIMELINE_COPY_URL } from '../../../../../../common/constants';
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
 import { buildFrameworkRequest } from '../../../utils/common';
 
-export const copyTimelineRoute = async (
-  router: SecuritySolutionPluginRouter,
-  _: ConfigType,
-  security: SetupPlugins['security']
-) => {
+export const copyTimelineRoute = (router: SecuritySolutionPluginRouter, _: ConfigType) => {
   router.versioned
     .post({
       path: TIMELINE_COPY_URL,
@@ -41,7 +36,7 @@ export const copyTimelineRoute = async (
         const siemResponse = buildSiemResponse(response);
 
         try {
-          const frameworkRequest = await buildFrameworkRequest(context, security, request);
+          const frameworkRequest = await buildFrameworkRequest(context, request);
           const { timeline, timelineIdToCopy } = request.body;
           const copiedTimeline = await copyTimeline(frameworkRequest, timeline, timelineIdToCopy);
 

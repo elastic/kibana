@@ -12,7 +12,7 @@ import { RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 
 import { LANDING_PAGE_PATH } from '../../dashboard_constants';
 import { pluginServices } from '../../services/plugin_services';
@@ -23,9 +23,8 @@ let bannerId: string | undefined;
 export const DashboardNoMatch = ({ history }: { history: RouteComponentProps['history'] }) => {
   const { restorePreviousUrl } = useDashboardMountContext();
   const {
-    settings: {
-      theme: { theme$ },
-    },
+    analytics,
+    settings: { i18n: i18nStart, theme },
     overlays: { banners },
     urlForwarding: { navigateToLegacyKibanaUrl },
   } = pluginServices.getServices();
@@ -55,7 +54,7 @@ export const DashboardNoMatch = ({ history }: { history: RouteComponentProps['hi
               />
             </p>
           </EuiCallOut>,
-          { theme$ }
+          { analytics, i18n: i18nStart, theme }
         )
       );
 
@@ -68,7 +67,15 @@ export const DashboardNoMatch = ({ history }: { history: RouteComponentProps['hi
 
       history.replace(LANDING_PAGE_PATH);
     }
-  }, [restorePreviousUrl, navigateToLegacyKibanaUrl, banners, theme$, history]);
+  }, [
+    restorePreviousUrl,
+    navigateToLegacyKibanaUrl,
+    banners,
+    analytics,
+    i18nStart,
+    theme,
+    history,
+  ]);
 
   return null;
 };

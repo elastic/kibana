@@ -15,16 +15,16 @@ import type {
   KibanaRequest,
   CustomRequestHandlerContext,
 } from '@kbn/core/server';
-import {
-  ISearchOptions,
-  ISearchStartSearchSource,
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
+import type {
   ISearchClient,
+  IKibanaSearchResponse,
+  IKibanaSearchRequest,
+  ISearchOptions,
   IEsSearchResponse,
   IEsSearchRequest,
-  SearchSourceService,
-} from '../../common/search';
+} from '@kbn/search-types';
+
+import { ISearchStartSearchSource, SearchSourceService } from '../../common/search';
 import { AggsSetup, AggsStart } from './aggs';
 import { SearchUsage } from './collectors/search';
 import type { IScopedSearchSessionsClient } from './session';

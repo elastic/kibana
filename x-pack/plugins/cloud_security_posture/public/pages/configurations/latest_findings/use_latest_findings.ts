@@ -7,8 +7,7 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { number } from 'io-ts';
 import { lastValueFrom } from 'rxjs';
-import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/data-plugin/common';
-import type { Pagination } from '@elastic/eui';
+import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { EsHitRecord } from '@kbn/discover-utils/types';
@@ -17,7 +16,7 @@ import { useKibana } from '../../../common/hooks/use_kibana';
 import type { FindingsBaseEsQuery } from '../../../common/types';
 import { getAggregationCount, getFindingsCountAggQuery } from '../utils/utils';
 import {
-  CSP_LATEST_FINDINGS_DATA_VIEW,
+  CDR_MISCONFIGURATIONS_INDEX_PATTERN,
   LATEST_FINDINGS_RETENTION_POLICY,
 } from '../../../../common/constants';
 import { MAX_FINDINGS_TO_LOAD } from '../../../common/constants';
@@ -30,11 +29,6 @@ interface UseFindingsOptions extends FindingsBaseEsQuery {
   sort: string[][];
   enabled: boolean;
   pageSize: number;
-}
-
-export interface FindingsGroupByNoneQuery {
-  pageIndex: Pagination['pageIndex'];
-  sort: any;
 }
 
 type LatestFindingsRequest = IKibanaSearchRequest<estypes.SearchRequest>;
@@ -54,7 +48,7 @@ export const getFindingsQuery = (
   const mutedRulesFilterQuery = buildMutedRulesFilter(rulesStates);
 
   return {
-    index: CSP_LATEST_FINDINGS_DATA_VIEW,
+    index: CDR_MISCONFIGURATIONS_INDEX_PATTERN,
     sort: getMultiFieldsSort(sort),
     size: MAX_FINDINGS_TO_LOAD,
     aggs: getFindingsCountAggQuery(),

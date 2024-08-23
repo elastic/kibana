@@ -8,8 +8,8 @@
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { DocLinksStart, ThemeServiceStart, ToastInput } from '@kbn/core/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { CoreStart, DocLinksStart, ToastInput } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import * as errors from '@kbn/reporting-common/errors';
 import { ManagementLinkFn } from '@kbn/reporting-common/types';
 import { sharedI18nTexts } from '../shared_i18n_texts';
@@ -19,17 +19,17 @@ export const getFailureToast = (
   errorText: string,
   job: JobSummary,
   getManagmenetLink: ManagementLinkFn,
-  theme: ThemeServiceStart,
-  docLinks: DocLinksStart
+  docLinks: DocLinksStart,
+  core: CoreStart
 ): ToastInput => {
   return {
     title: toMountPoint(
       <FormattedMessage
         id="xpack.reporting.publicNotifier.error.couldNotCreateReportTitle"
-        defaultMessage="Cannot create {reportType} report for '{reportObjectTitle}'."
+        defaultMessage="Cannot create {reportType} report for ''{reportObjectTitle}''."
         values={{ reportType: job.jobtype, reportObjectTitle: job.title }}
       />,
-      { theme$: theme.theme$ }
+      core
     ),
     text: toMountPoint(
       <>
@@ -60,7 +60,7 @@ export const getFailureToast = (
           />
         </p>
       </>,
-      { theme$: theme.theme$ }
+      core
     ),
     iconType: undefined,
     'data-test-subj': 'completeReportFailure',

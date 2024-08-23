@@ -12,4 +12,5 @@ export const API_MAX_RESULTS = 1000;
 export enum SUB_ACTION {
   GET_AGENT_DETAILS = 'getAgentDetails',
   HOST_ACTIONS = 'hostActions',
+  GET_AGENT_ONLINE_STATUS = 'getAgentOnlineStatus',
 }

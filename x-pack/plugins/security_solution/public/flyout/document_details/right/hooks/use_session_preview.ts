@@ -5,15 +5,21 @@
  * 2.0.
  */
 
+import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { SessionViewConfig } from '@kbn/securitysolution-data-table/common/types';
-import type { GetFieldsData } from '../../../../common/hooks/use_get_fields_data';
+import type { GetFieldsData } from '../../shared/hooks/use_get_fields_data';
 import { getField } from '../../shared/utils';
+import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
 
 export interface UseSessionPreviewParams {
   /**
    * Retrieves searchHit values for the provided field
    */
   getFieldsData: GetFieldsData;
+  /**
+   * An array of field objects with category and value
+   */
+  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[];
 }
 
 /**
@@ -21,10 +27,12 @@ export interface UseSessionPreviewParams {
  */
 export const useSessionPreview = ({
   getFieldsData,
+  dataFormattedForFieldBrowser,
 }: UseSessionPreviewParams): SessionViewConfig | null => {
-  const _id = getField(getFieldsData('_id'));
-  const index =
-    getField(getFieldsData('kibana.alert.ancestors.index')) || getField(getFieldsData('_index'));
+  const { indexName: _index, alertId: _id } = useBasicDataFromDetailsData(
+    dataFormattedForFieldBrowser
+  );
+  const index = getField(getFieldsData('kibana.alert.ancestors.index')) || _index;
   const entryLeaderEntityId = getField(getFieldsData('process.entry_leader.entity_id'));
   const entryLeaderStart = getField(getFieldsData('process.entry_leader.start'));
   const entityId = getField(getFieldsData('process.entity_id'));

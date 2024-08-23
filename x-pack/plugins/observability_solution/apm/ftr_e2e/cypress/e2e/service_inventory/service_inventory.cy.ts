@@ -91,7 +91,7 @@ describe('Service inventory', () => {
     it('with the correct environment when changing the environment', () => {
       cy.wait(mainAliasNames);
 
-      cy.getByTestSubj('environmentFilter').type('production');
+      cy.getByTestSubj('environmentFilter').type('{selectall}production');
 
       cy.contains('button', 'production').click();
 
@@ -121,9 +121,8 @@ describe('Service inventory', () => {
     it('Toggles fast filter when clicking on link', () => {
       cy.visitKibana(serviceInventoryHref);
       cy.get('[data-test-subj="tableSearchInput"]').should('not.exist');
-      cy.contains('Try the new Fast Filter').click();
+      cy.contains('Enable fast filter').click();
       cy.get('[data-test-subj="tableSearchInput"]').should('exist');
-      cy.contains('Try it').should('not.exist');
       cy.contains('opbeans-node');
       cy.contains('opbeans-java');
       cy.contains('opbeans-rum');
@@ -135,8 +134,7 @@ describe('Service inventory', () => {
       cy.contains('opbeans-node');
       cy.contains('opbeans-java');
       cy.contains('opbeans-rum');
-      cy.contains('Turn off Fast Filter').click();
-      cy.contains('Try it').should('exist');
+      cy.contains('Disable fast filter').click();
       cy.get('[data-test-subj="tableSearchInput"]').should('not.exist');
     });
   });
@@ -149,9 +147,7 @@ describe('Service inventory', () => {
     it('Should not be able to turn it on', () => {
       cy.visitKibana(serviceInventoryHref);
       cy.get('[data-test-subj="tableSearchInput"]').should('not.exist');
-      cy.contains('Try the new Fast Filter').should('not.exist');
-      cy.get('[data-test-subj="apmPopoverButton"]').click();
-      cy.contains('Please ask your administrator to turn it on by enabling it in within settings.');
+      cy.get('[data-test-subj="apmLink"]').should('be.disabled');
     });
   });
 

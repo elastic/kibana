@@ -12,6 +12,7 @@ import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import type { AlertsLocatorParams } from '@kbn/observability-plugin/common';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { SharePluginSetup } from '@kbn/share-plugin/server';
+import { publicAlertsClientMock } from '@kbn/alerting-plugin/server/alerts_client/alerts_client.mock';
 import { UMServerLibs } from '../../lib';
 import { UptimeCorePluginsSetup, UptimeServerSetup } from '../../adapters';
 import { getUptimeESMockClient } from '../../requests/test_helpers';
@@ -84,6 +85,7 @@ export const createRuleTypeMocks = (recoveredAlerts: Array<Record<string, any>> 
     getAlertStartedDate: jest.fn().mockReturnValue('2022-03-17T13:13:33.755Z'),
     getAlertUuid: jest.fn().mockReturnValue('mock-alert-uuid'),
     logger: loggerMock,
+    alertsClient: publicAlertsClientMock.create(),
   };
 
   return {

@@ -6,6 +6,7 @@
  */
 
 import { IClusterClient, Logger, SavedObjectsClientContract, FakeRequest } from '@kbn/core/server';
+import { exhaustMap, Subject, takeUntil, timer } from 'rxjs';
 import moment from 'moment';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
@@ -41,9 +42,8 @@ const WORKER_PADDING_MS = 1000;
  */
 export class ReindexWorker {
   private static workerSingleton?: ReindexWorker;
-  private continuePolling: boolean = false;
+  private readonly stop$ = new Subject<void>();
   private updateOperationLoopRunning: boolean = false;
-  private timeout?: NodeJS.Timeout;
   private inProgressOps: ReindexSavedObject[] = [];
   private readonly reindexService: ReindexService;
   private readonly log: Logger;
@@ -95,12 +95,16 @@ export class ReindexWorker {
   }
 
   /**
-   * Begins loop (1) to begin checking for in progress reindex operations.
+   * Begins loop checking for in progress reindex operations.
    */
   public start = () => {
     this.log.debug('Starting worker...');
-    this.continuePolling = true;
-    this.pollForOperations();
+    timer(0, POLL_INTERVAL)
+      .pipe(
+        takeUntil(this.stop$),
+        exhaustMap(() => this.pollForOperations())
+      )
+      .subscribe();
   };
 
   /**
@@ -108,19 +112,18 @@ export class ReindexWorker {
    */
   public stop = () => {
     this.log.debug('Stopping worker...');
-    if (this.timeout) {
-      clearTimeout(this.timeout);
-    }
-
+    this.stop$.next();
     this.updateOperationLoopRunning = false;
-    this.continuePolling = false;
   };
 
   /**
    * Should be called immediately after this server has started a new reindex operation.
    */
   public forceRefresh = () => {
-    this.refresh();
+    // We know refresh won't throw, but just in case it does in the future
+    this.refresh().catch((error) => {
+      this.log.warn(`Failed to force refresh the reindex operations: ${error}`);
+    });
   };
 
   /**
@@ -153,6 +156,8 @@ export class ReindexWorker {
           await new Promise((resolve) => setTimeout(resolve, WORKER_PADDING_MS));
         }
       }
+    } catch (error) {
+      this.log.warn(`Failed to update reindex operations: ${error}`);
     } finally {
       this.updateOperationLoopRunning = false;
     }
@@ -162,10 +167,6 @@ export class ReindexWorker {
     this.log.debug(`Polling for reindex operations`);
 
     await this.refresh();
-
-    if (this.continuePolling) {
-      this.timeout = setTimeout(this.pollForOperations, POLL_INTERVAL);
-    }
   };
 
   private getCredentialScopedReindexService = (credential: Credential) => {
@@ -194,7 +195,7 @@ export class ReindexWorker {
             firstOpInQueue.attributes.indexName
           );
           // Re-associate the credentials
-          this.credentialStore.update({
+          await this.credentialStore.update({
             reindexOp: firstOpInQueue,
             security: this.security,
             credential,
@@ -213,7 +214,7 @@ export class ReindexWorker {
     await this.updateInProgressOps();
     // If there are operations in progress and we're not already updating operations, kick off the update loop
     if (!this.updateOperationLoopRunning) {
-      this.startUpdateOperationLoop();
+      await this.startUpdateOperationLoop();
     }
   };
 
@@ -250,7 +251,7 @@ export class ReindexWorker {
     reindexOp = await swallowExceptions(service.processNextStep, this.log)(reindexOp);
 
     // Update credential store with most recent state.
-    this.credentialStore.update({ reindexOp, security: this.security, credential });
+    await this.credentialStore.update({ reindexOp, security: this.security, credential });
   };
 }
 

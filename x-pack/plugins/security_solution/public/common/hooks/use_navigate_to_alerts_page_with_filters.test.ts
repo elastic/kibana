@@ -31,7 +31,7 @@ describe('useNavigateToAlertsPageWithFilters', () => {
 
     expect(mockNavigateTo).toHaveBeenCalledWith({
       deepLinkId: SecurityPageName.alerts,
-      path: "?pageFilters=!((exclude:!f,existsSelected:!f,fieldName:'test field',selectedOptions:!('test value'),title:'test filter'))",
+      path: "?pageFilters=!((exclude:!f,existsSelected:!f,fieldName:'test field',hideActionBar:!f,selectedOptions:!('test value'),title:'test filter'))",
     });
   });
 
@@ -50,6 +50,7 @@ describe('useNavigateToAlertsPageWithFilters', () => {
         fieldName: 'test field 2',
         exclude: true,
         existsSelected: true,
+        hideActionBar: true,
       },
     ];
 
@@ -61,7 +62,7 @@ describe('useNavigateToAlertsPageWithFilters', () => {
 
     expect(mockNavigateTo).toHaveBeenCalledWith({
       deepLinkId: SecurityPageName.alerts,
-      path: "?pageFilters=!((exclude:!f,existsSelected:!f,fieldName:'test field 1',selectedOptions:!('test value 1'),title:'test filter 1'),(exclude:!t,existsSelected:!t,fieldName:'test field 2',selectedOptions:!('test value 2'),title:'test filter 2'))",
+      path: "?pageFilters=!((exclude:!f,existsSelected:!f,fieldName:'test field 1',hideActionBar:!f,selectedOptions:!('test value 1'),title:'test filter 1'),(exclude:!t,existsSelected:!t,fieldName:'test field 2',hideActionBar:!t,selectedOptions:!('test value 2'),title:'test filter 2'))",
     });
   });
 

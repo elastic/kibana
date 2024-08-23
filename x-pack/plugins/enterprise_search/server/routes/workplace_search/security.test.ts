@@ -27,8 +27,8 @@ describe('security routes', () => {
       });
     });
 
-    it('creates a request handler', () => {
-      mockRouter.callRoute({});
+    it('creates a request handler', async () => {
+      await mockRouter.callRoute({});
 
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/ws/org/security',
@@ -53,8 +53,8 @@ describe('security routes', () => {
       });
     });
 
-    it('creates a request handler', () => {
-      mockRouter.callRoute({});
+    it('creates a request handler', async () => {
+      await mockRouter.callRoute({});
 
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/ws/org/security/source_restrictions',

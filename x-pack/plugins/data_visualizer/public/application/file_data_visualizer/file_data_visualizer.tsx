@@ -5,9 +5,10 @@
  * 2.0.
  */
 import '../_index.scss';
-import type { FC } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { ResultLinks } from '../../../common/app';
 import { getCoreStart, getPluginsStart } from '../../kibana_services';
 
@@ -24,25 +25,22 @@ export type FileDataVisualizerSpec = typeof FileDataVisualizer;
 
 export const FileDataVisualizer: FC<Props> = ({ getAdditionalLinks, resultLinks }) => {
   const coreStart = getCoreStart();
-  const { data, maps, embeddable, discover, share, security, fileUpload, cloud, fieldFormats } =
-    getPluginsStart();
+  const { data, maps, embeddable, share, fileUpload, cloud, fieldFormats } = getPluginsStart();
   const services = {
     ...coreStart,
     data,
     maps,
     embeddable,
-    discover,
     share,
-    security,
     fileUpload,
     fieldFormats,
   };
 
-  const EmptyContext: FC = ({ children }) => <>{children}</>;
+  const EmptyContext: FC<PropsWithChildren<unknown>> = ({ children }) => <>{children}</>;
   const CloudContext = cloud?.CloudContextProvider || EmptyContext;
 
   return (
-    <KibanaThemeProvider theme$={coreStart.theme.theme$}>
+    <KibanaRenderContextProvider {...coreStart}>
       <KibanaContextProvider services={{ ...services }}>
         <CloudContext>
           <FileDataVisualizerView
@@ -56,7 +54,7 @@ export const FileDataVisualizer: FC<Props> = ({ getAdditionalLinks, resultLinks 
           />
         </CloudContext>
       </KibanaContextProvider>
-    </KibanaThemeProvider>
+    </KibanaRenderContextProvider>
   );
 };
 

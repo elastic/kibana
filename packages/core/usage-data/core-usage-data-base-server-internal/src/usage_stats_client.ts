@@ -12,6 +12,7 @@ import type { CoreUsageStats } from '@kbn/core-usage-data-server';
 /** @internal */
 export interface BaseIncrementOptions {
   request: KibanaRequest;
+  types?: string[]; // we might not have info on the imported types for some operations, e.g. for import we're using a readStream
 }
 
 /** @internal */
@@ -29,7 +30,6 @@ export type IncrementSavedObjectsResolveImportErrorsOptions = BaseIncrementOptio
 
 /** @internal */
 export type IncrementSavedObjectsExportOptions = BaseIncrementOptions & {
-  types?: string[];
   supportedTypes: string[];
 };
 

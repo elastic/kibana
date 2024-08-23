@@ -43,7 +43,8 @@ import { visitRuleDetailsPage } from '../../../../../tasks/rule_details';
 import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
 import { deleteExceptionLists } from '../../../../../tasks/api_calls/exceptions';
 
-describe('Manage exceptions', { tags: ['@ess', '@serverless'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/182476
+describe.skip('Manage exceptions', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
     deleteAlertsAndRules();

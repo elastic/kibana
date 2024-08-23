@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { DataSourceSelection, isDatasetSelection } from '../../common/data_source_selection';
 import { useKibanaContextForPlugin } from '../utils/use_kibana';
 
@@ -27,7 +27,7 @@ export const useEsql = ({ dataSourceSelection }: EsqlContextDeps): UseEsqlResult
     services: { uiSettings, discover },
   } = useKibanaContextForPlugin();
 
-  const isEsqlEnabled = uiSettings?.get('discover:enableESQL');
+  const isEsqlEnabled = uiSettings?.get(ENABLE_ESQL);
 
   const esqlPattern = isDatasetSelection(dataSourceSelection)
     ? dataSourceSelection.selection.dataset.name
@@ -35,7 +35,7 @@ export const useEsql = ({ dataSourceSelection }: EsqlContextDeps): UseEsqlResult
 
   const discoverLinkParams = {
     query: {
-      esql: `from ${esqlPattern} | limit 10`,
+      esql: `FROM ${esqlPattern} | LIMIT 10`,
     },
   };
 

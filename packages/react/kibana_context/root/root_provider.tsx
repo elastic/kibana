@@ -6,9 +6,15 @@
  * Side Public License, v 1.
  */
 
-import type { I18nStart } from '@kbn/core-i18n-browser';
+import React, { FC, PropsWithChildren } from 'react';
+
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
-import React, { FC } from 'react';
+import type { I18nStart } from '@kbn/core-i18n-browser';
+
+// @ts-expect-error EUI exports this component internally, but Kibana isn't picking it up its types
+import { useIsNestedEuiProvider } from '@elastic/eui/lib/components/provider/nested';
+// @ts-expect-error EUI exports this component internally, but Kibana isn't picking it up its types
+import { emitEuiProviderWarning } from '@elastic/eui/lib/services/theme/warning';
 
 import { KibanaEuiProvider, type KibanaEuiProviderProps } from './eui_provider';
 
@@ -17,7 +23,7 @@ export interface KibanaRootContextProviderProps extends KibanaEuiProviderProps {
   /** The `I18nStart` API from `CoreStart`. */
   i18n: I18nStart;
   /** The `AnalyticsServiceStart` API from `CoreStart`. */
-  analytics?: AnalyticsServiceStart;
+  analytics?: Pick<AnalyticsServiceStart, 'reportEvent'>;
 }
 
 /**
@@ -34,12 +40,23 @@ export interface KibanaRootContextProviderProps extends KibanaEuiProviderProps {
  * - Consider `KibanaThemeContextProvider` for altering the theme of a component or tree of components.
  *
  */
-export const KibanaRootContextProvider: FC<KibanaRootContextProviderProps> = ({
+export const KibanaRootContextProvider: FC<PropsWithChildren<KibanaRootContextProviderProps>> = ({
   children,
   i18n,
   ...props
-}) => (
-  <KibanaEuiProvider {...props}>
-    <i18n.Context>{children}</i18n.Context>
-  </KibanaEuiProvider>
-);
+}) => {
+  const hasEuiProvider = useIsNestedEuiProvider();
+
+  if (hasEuiProvider) {
+    emitEuiProviderWarning(
+      'KibanaRootContextProvider has likely been nested in this React tree, either by direct reference or by KibanaRenderContextProvider.  The result of this nesting is a nesting of EuiProvider, which has negative effects.  Check your React tree for nested Kibana context providers.'
+    );
+    return <i18n.Context>{children}</i18n.Context>;
+  } else {
+    return (
+      <KibanaEuiProvider {...props}>
+        <i18n.Context>{children}</i18n.Context>
+      </KibanaEuiProvider>
+    );
+  }
+};

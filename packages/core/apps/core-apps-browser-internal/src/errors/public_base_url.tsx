@@ -12,9 +12,13 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
+import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import type { I18nStart } from '@kbn/core-i18n-browser';
+import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 /** Only exported for tests */
 export const MISSING_CONFIG_STORAGE_KEY = `core.warnings.publicBaseUrlMissingDismissed`;
@@ -26,6 +30,10 @@ interface Deps {
   // Exposed for easier testing
   storage?: Storage;
   location?: Location;
+  // For KibanaRenderContextProvider
+  analytics: AnalyticsServiceStart;
+  i18n: I18nStart;
+  theme: ThemeServiceStart;
 }
 
 export const setupPublicBaseUrlConfigWarning = ({
@@ -34,6 +42,7 @@ export const setupPublicBaseUrlConfigWarning = ({
   notifications,
   storage = window.localStorage,
   location = window.location,
+  ...renderContextDeps
 }: Deps) => {
   if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
     return;
@@ -49,7 +58,7 @@ export const setupPublicBaseUrlConfigWarning = ({
       defaultMessage: 'Configuration recommended',
     }),
     text: mountReactNode(
-      <>
+      <KibanaRenderContextProvider {...renderContextDeps}>
         <p>
           <FormattedMessage
             id="core.ui.publicBaseUrlWarning.configRecommendedDescription"
@@ -87,7 +96,7 @@ export const setupPublicBaseUrlConfigWarning = ({
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </>
+      </KibanaRenderContextProvider>
     ),
   });
 };

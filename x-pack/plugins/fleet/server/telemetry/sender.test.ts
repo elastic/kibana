@@ -29,7 +29,7 @@ describe('TelemetryEventsSender', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let sender: TelemetryEventsSender;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     logger = loggingSystemMock.createLogger();
     sender = new TelemetryEventsSender(logger);
     sender['fetchClusterInfo'] = jest.fn(async () => {
@@ -41,7 +41,7 @@ describe('TelemetryEventsSender', () => {
         },
       } as InfoResponse;
     });
-    sender.start(undefined, {
+    await sender.start(undefined, {
       elasticsearch: { client: { asInternalUser: { info: jest.fn(async () => ({})) } } },
     } as any);
   });

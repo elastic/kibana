@@ -15,9 +15,11 @@ import { NEW_CHAT } from '../conversations/conversation_sidepanel/translations';
 
 export interface FlyoutNavigationProps {
   isExpanded: boolean;
+  isLoading: boolean;
   setIsExpanded?: (value: boolean) => void;
   children: React.ReactNode;
   onConversationCreate?: () => Promise<void>;
+  isAssistantEnabled: boolean;
 }
 
 const VerticalSeparator = styled.div`
@@ -34,7 +36,14 @@ const VerticalSeparator = styled.div`
  */
 
 export const FlyoutNavigation = memo<FlyoutNavigationProps>(
-  ({ isExpanded, setIsExpanded, children, onConversationCreate }) => {
+  ({
+    isLoading,
+    isExpanded,
+    setIsExpanded,
+    children,
+    onConversationCreate,
+    isAssistantEnabled,
+  }) => {
     const onToggle = useCallback(
       () => setIsExpanded && setIsExpanded(!isExpanded),
       [isExpanded, setIsExpanded]
@@ -43,9 +52,11 @@ export const FlyoutNavigation = memo<FlyoutNavigationProps>(
     const toggleButton = useMemo(
       () => (
         <EuiButtonIcon
+          disabled={isLoading || !isAssistantEnabled}
           onClick={onToggle}
           iconType={isExpanded ? 'arrowEnd' : 'arrowStart'}
           size="xs"
+          data-test-subj="aiAssistantFlyoutNavigationToggle"
           aria-label={
             isExpanded
               ? i18n.translate(
@@ -63,7 +74,7 @@ export const FlyoutNavigation = memo<FlyoutNavigationProps>(
           }
         />
       ),
-      [isExpanded, onToggle]
+      [isAssistantEnabled, isExpanded, isLoading, onToggle]
     );
 
     return (
@@ -96,6 +107,7 @@ export const FlyoutNavigation = memo<FlyoutNavigationProps>(
                       color="primary"
                       iconType="newChat"
                       onClick={onConversationCreate}
+                      disabled={isLoading || !isAssistantEnabled}
                     >
                       {NEW_CHAT}
                     </EuiButtonEmpty>

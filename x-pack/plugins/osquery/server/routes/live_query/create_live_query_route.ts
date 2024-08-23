@@ -11,6 +11,7 @@ import markdown from 'remark-parse-no-trim';
 import { some, filter } from 'lodash';
 import deepEqual from 'fast-deep-equal';
 import type { ECSMappingOrUndefined } from '@kbn/osquery-io-ts-types';
+import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import type { CreateLiveQueryRequestBodySchema } from '../../../common/api';
 import { createLiveQueryRequestBodySchema } from '../../../common/api';
 import { API_VERSIONS } from '../../../common/constants';
@@ -41,7 +42,8 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
       },
       async (context, request, response) => {
         const [coreStartServices] = await osqueryContext.getStartServices();
-        const soClient = (await context.core).savedObjects.client;
+        const coreContext = await context.core;
+        const soClient = coreContext.savedObjects.client;
 
         const {
           osquery: { writeLiveQueries, runSavedQueries },
@@ -59,7 +61,9 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
           ?.getRacClientWithRequest(request);
 
         const alertData = request.body.alert_ids?.length
-          ? await client?.get({ id: request.body.alert_ids[0] })
+          ? ((await client?.get({ id: request.body.alert_ids[0] })) as ParsedTechnicalFields & {
+              _index: string;
+            })
           : undefined;
 
         if (isInvalid) {
@@ -103,7 +107,7 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
         }
 
         try {
-          const currentUser = await osqueryContext.security.authc.getCurrentUser(request)?.username;
+          const currentUser = coreContext.security.authc.getCurrentUser()?.username;
           const { response: osqueryAction, fleetActionsCount } = await createActionHandler(
             osqueryContext,
             request.body,

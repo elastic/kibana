@@ -23,6 +23,7 @@ import type { CompleteRule, ThreatRuleParams } from '../../rule_schema';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
+import { MAX_PER_PAGE } from './threat_mapping/get_event_count';
 import type { ExperimentalFeatures } from '../../../../../common';
 
 export const indicatorMatchExecutor = async ({
@@ -81,7 +82,7 @@ export const indicatorMatchExecutor = async ({
       eventsTelemetry,
       filters: ruleParams.filters ?? [],
       inputIndex,
-      itemsPerSearch: ruleParams.itemsPerSearch ?? 9000,
+      itemsPerSearch: ruleParams.itemsPerSearch ?? MAX_PER_PAGE,
       language: ruleParams.language,
       listClient,
       outputIndex: ruleParams.outputIndex,

@@ -8,9 +8,6 @@
 import type {
   ClusterPutComponentTemplateRequest,
   IndicesPutIndexTemplateRequest,
-  IngestPutPipelineRequest,
-  IngestPipeline,
-  Metadata,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { getSLOMappingsTemplate } from '../assets/component_templates/slo_mappings_template';
@@ -23,8 +20,6 @@ import {
   SLO_DESTINATION_INDEX_NAME,
   SLO_INDEX_TEMPLATE_NAME,
   SLO_INDEX_TEMPLATE_PATTERN,
-  SLO_INGEST_PIPELINE_INDEX_NAME_PREFIX,
-  SLO_INGEST_PIPELINE_NAME,
   SLO_SUMMARY_COMPONENT_TEMPLATE_MAPPINGS_NAME,
   SLO_SUMMARY_COMPONENT_TEMPLATE_SETTINGS_NAME,
   SLO_SUMMARY_DESTINATION_INDEX_NAME,
@@ -34,14 +29,12 @@ import {
 } from '../../common/constants';
 import { getSLOIndexTemplate } from '../assets/index_templates/slo_index_templates';
 import { getSLOSummaryIndexTemplate } from '../assets/index_templates/slo_summary_index_templates';
-import { getSLOPipelineTemplate } from '../assets/ingest_templates/slo_pipeline_template';
+
 import { retryTransientEsErrors } from '../utils/retry';
 
 export interface ResourceInstaller {
   ensureCommonResourcesInstalled(): Promise<void>;
 }
-
-type IngestPipelineWithMetadata = IngestPipeline & { _meta?: Metadata };
 
 export class DefaultResourceInstaller implements ResourceInstaller {
   constructor(private esClient: ElasticsearchClient, private logger: Logger) {}
@@ -85,10 +78,6 @@ export class DefaultResourceInstaller implements ResourceInstaller {
       await this.createIndex(SLO_DESTINATION_INDEX_NAME);
       await this.createIndex(SLO_SUMMARY_DESTINATION_INDEX_NAME);
       await this.createIndex(SLO_SUMMARY_TEMP_INDEX_NAME);
-
-      await this.createOrUpdateIngestPipelineTemplate(
-        getSLOPipelineTemplate(SLO_INGEST_PIPELINE_NAME, SLO_INGEST_PIPELINE_INDEX_NAME_PREFIX)
-      );
     } catch (err) {
       this.logger.error(`Error installing resources shared for SLO: ${err.message}`);
       throw err;
@@ -121,20 +110,6 @@ export class DefaultResourceInstaller implements ResourceInstaller {
     } else {
       this.logger.info(`Installing SLO index template [${template.name}]`);
       return this.execute(() => this.esClient.indices.putIndexTemplate(template));
-    }
-  }
-
-  private async createOrUpdateIngestPipelineTemplate(template: IngestPutPipelineRequest) {
-    const currentVersion = await fetchIngestPipelineVersion(
-      template.id,
-      this.logger,
-      this.esClient
-    );
-    if (template._meta?.version && currentVersion === template._meta.version) {
-      this.logger.info(`SLO ingest pipeline found with version [${template._meta.version}]`);
-    } else {
-      this.logger.info(`Installing SLO ingest pipeline [${template.id}]`);
-      return this.execute(() => this.esClient.ingest.putPipeline(template));
     }
   }
 
@@ -193,27 +168,4 @@ async function fetchIndexTemplateVersion(
   );
 
   return getTemplateRes?.index_templates?.[0]?.index_template?._meta?.version || null;
-}
-
-async function fetchIngestPipelineVersion(
-  id: string,
-  logger: Logger,
-  esClient: ElasticsearchClient
-) {
-  const getPipelineRes = await retryTransientEsErrors<
-    Record<string, IngestPipelineWithMetadata | undefined>
-  >(
-    () =>
-      esClient.ingest.getPipeline(
-        {
-          id,
-        },
-        {
-          ignore: [404],
-        }
-      ),
-    { logger }
-  );
-
-  return getPipelineRes?.[id]?._meta?.version || null;
 }

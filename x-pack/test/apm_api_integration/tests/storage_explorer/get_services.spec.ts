@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
   const apmApiClient = getService('apmApiClient');
 
   const start = '2021-01-01T12:00:00.000Z';
@@ -84,10 +84,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           serviceC.transaction({ transactionName: 'GET /api' }).duration(1000).timestamp(timestamp)
         );
 
-      await synthtraceEsClient.index([eventsWithinTimerange, eventsOutsideOfTimerange]);
+      await apmSynthtraceEsClient.index([eventsWithinTimerange, eventsOutsideOfTimerange]);
     });
 
-    after(() => synthtraceEsClient.clean());
+    after(() => apmSynthtraceEsClient.clean());
 
     it('with no kuery, environment or index lifecycle phase set it returns services based on the terms enum API', async () => {
       const items = await getServices();

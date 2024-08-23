@@ -13,7 +13,9 @@ export type {
 } from '@kbn/data-plugin/public';
 export type { DataView, DataViewField, DataViewSpec } from '@kbn/data-views-plugin/public';
 
-export { createKibanaReactContext, toMountPoint, useKibana } from '@kbn/kibana-react-plugin/public';
+export { createKibanaReactContext, useKibana } from '@kbn/kibana-react-plugin/public';
+
+export { toMountPoint } from '@kbn/react-kibana-mount';
 
 export { CodeEditor } from '@kbn/code-editor';
 

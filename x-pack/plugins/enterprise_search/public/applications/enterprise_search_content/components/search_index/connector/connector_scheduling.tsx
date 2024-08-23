@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, FC, PropsWithChildren } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -32,7 +32,11 @@ interface SchedulePanelProps {
   description: string;
   title: string;
 }
-export const SchedulePanel: React.FC<SchedulePanelProps> = ({ title, description, children }) => {
+export const SchedulePanel: FC<PropsWithChildren<SchedulePanelProps>> = ({
+  title,
+  description,
+  children,
+}) => {
   return (
     <>
       <EuiSplitPanel.Outer>

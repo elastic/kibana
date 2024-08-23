@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { z } from 'zod';
+import type { z } from '@kbn/zod';
 
 export type SettingsSection = 'AGENT_POLICY_ADVANCED_SETTINGS';
 
 export interface SettingsConfig {
   name: string;
   title: string;
-  description: string;
+  description: string | React.ReactNode;
   learnMoreLink?: string;
   schema: z.ZodTypeAny;
   api_field: {

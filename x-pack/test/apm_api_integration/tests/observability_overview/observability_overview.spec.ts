@@ -16,7 +16,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
 
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
@@ -106,7 +106,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           .service({ name: 'synth-java', environment: 'production', agentName: 'java' })
           .instance('instance-c');
 
-        await synthtraceEsClient.index([
+        await apmSynthtraceEsClient.index([
           timerange(start, end)
             .interval('1m')
             .rate(GO_PROD_RATE)
@@ -137,7 +137,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ]);
       });
 
-      after(() => synthtraceEsClient.clean());
+      after(() => apmSynthtraceEsClient.clean());
 
       describe('compare throughput values', () => {
         let throughputValues: Awaited<ReturnType<typeof getThroughputValues>>;

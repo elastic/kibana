@@ -114,7 +114,7 @@ describe('getRuleAlertSummaryRoute', () => {
       ['notFound']
     );
 
-    expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(
+    await expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(
       `[Error: Saved object [alert/1] not found]`
     );
   });

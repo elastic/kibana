@@ -8,23 +8,30 @@
 import { useCallback, useState, useMemo, useEffect } from 'react';
 import { Action } from '@kbn/ui-actions-plugin/public';
 import { fieldSupportsBreakdown } from '@kbn/unified-histogram-plugin/public';
-
+import { useSelector } from '@xstate/react';
 import { i18n } from '@kbn/i18n';
 import { useEuiTheme } from '@elastic/eui';
 import { type DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
 import { DEFAULT_LOGS_DATA_VIEW } from '../../common/constants';
-import { indexNameToDataStreamParts } from '../../common/utils';
-import { getLensAttributes } from '../components/flyout/degraded_docs_trend/lens_attributes';
 import { useCreateDataView } from './use_create_dataview';
-import { useLinkToLogsExplorer } from './use_link_to_logs_explorer';
+import { useRedirectLink } from './use_redirect_link';
 import { useDatasetQualityFlyout } from './use_dataset_quality_flyout';
 import { useKibanaContextForPlugin } from '../utils';
+import { useDatasetDetailsTelemetry } from './use_telemetry';
+import { getLensAttributes } from '../components/dataset_quality_details/overview/document_trends/degraded_docs/lens_attributes';
 
 const exploreDataInLogsExplorerText = i18n.translate(
   'xpack.datasetQuality.flyoutChartExploreDataInLogsExplorerText',
   {
     defaultMessage: 'Explore data in Logs Explorer',
+  }
+);
+
+const exploreDataInDiscoverText = i18n.translate(
+  'xpack.datasetQuality.flyoutChartExploreDataInDiscoverText',
+  {
+    defaultMessage: 'Explore data in Discover',
   }
 );
 
@@ -47,7 +54,27 @@ export const useDegradedDocsChart = ({ dataStream }: DegradedDocsChartDeps) => {
   } = useKibanaContextForPlugin();
   const { service } = useDatasetQualityContext();
 
+  const {
+    trackDatasetDetailsBreakdownFieldChanged,
+    trackDetailsNavigated,
+    navigationTargets,
+    navigationSources,
+  } = useDatasetDetailsTelemetry();
+
   const { dataStreamStat, timeRange, breakdownField } = useDatasetQualityFlyout();
+
+  const isBreakdownFieldEcs = useSelector(
+    service,
+    (state) => state.context.flyout.isBreakdownFieldEcs
+  );
+
+  const isBreakdownFieldEcsAsserted = useSelector(service, (state) => {
+    return (
+      state.matches('flyout.initializing.assertBreakdownFieldIsEcs.done') &&
+      state.history?.matches('flyout.initializing.assertBreakdownFieldIsEcs.fetching') &&
+      isBreakdownFieldEcs !== null
+    );
+  });
 
   const [isChartLoading, setIsChartLoading] = useState<boolean | undefined>(undefined);
   const [attributes, setAttributes] = useState<ReturnType<typeof getLensAttributes> | undefined>(
@@ -62,7 +89,6 @@ export const useDegradedDocsChart = ({ dataStream }: DegradedDocsChartDeps) => {
     () => getDataViewField(dataView, breakdownField),
     [breakdownField, dataView]
   );
-  const filterQuery = `_index: ${dataStream ?? 'match-none'}`;
 
   const handleChartLoading = (isLoading: boolean) => {
     setIsChartLoading(isLoading);
@@ -79,26 +105,37 @@ export const useDegradedDocsChart = ({ dataStream }: DegradedDocsChartDeps) => {
   );
 
   useEffect(() => {
-    if (dataView) {
-      const lensAttributes = getLensAttributes({
-        color: euiTheme.colors.danger,
-        dataView,
-        query: filterQuery,
-        breakdownFieldName: breakdownDataViewField?.name,
-      });
-      setAttributes(lensAttributes);
-    }
-  }, [breakdownDataViewField?.name, dataView, euiTheme.colors.danger, filterQuery, setAttributes]);
+    if (isBreakdownFieldEcsAsserted) trackDatasetDetailsBreakdownFieldChanged();
+  }, [trackDatasetDetailsBreakdownFieldChanged, isBreakdownFieldEcsAsserted]);
+
+  useEffect(() => {
+    const dataStreamName = dataStream ?? DEFAULT_LOGS_DATA_VIEW;
+
+    const lensAttributes = getLensAttributes({
+      color: euiTheme.colors.danger,
+      dataStream: dataStreamName,
+      datasetTitle: dataStreamStat?.title ?? dataStreamName,
+      breakdownFieldName: breakdownDataViewField?.name,
+    });
+    setAttributes(lensAttributes);
+  }, [
+    breakdownDataViewField?.name,
+    euiTheme.colors.danger,
+    setAttributes,
+    dataStream,
+    dataStreamStat?.title,
+  ]);
 
   const openInLensCallback = useCallback(() => {
     if (attributes) {
+      trackDetailsNavigated(navigationTargets.Lens, navigationSources.Chart);
       lens.navigateToPrefilledEditor({
         id: '',
         timeRange,
         attributes,
       });
     }
-  }, [lens, attributes, timeRange]);
+  }, [attributes, trackDetailsNavigated, navigationTargets, navigationSources, lens, timeRange]);
 
   const getOpenInLensAction = useMemo(() => {
     return {
@@ -120,11 +157,15 @@ export const useDegradedDocsChart = ({ dataStream }: DegradedDocsChartDeps) => {
     };
   }, [openInLensCallback]);
 
-  const logsExplorerLinkProps = useLinkToLogsExplorer({
+  const redirectLinkProps = useRedirectLink({
     dataStreamStat: dataStreamStat!,
     query: { language: 'kuery', query: '_ignored:*' },
     timeRangeConfig: timeRange,
     breakdownField: breakdownDataViewField?.name,
+    telemetry: {
+      page: 'details',
+      navigationSource: navigationSources.Chart,
+    },
   });
 
   const getOpenInLogsExplorerAction = useMemo(() => {
@@ -132,23 +173,25 @@ export const useDegradedDocsChart = ({ dataStream }: DegradedDocsChartDeps) => {
       id: ACTION_EXPLORE_IN_LOGS_EXPLORER,
       type: 'link',
       getDisplayName(): string {
-        return exploreDataInLogsExplorerText;
+        return redirectLinkProps?.isLogsExplorerAvailable
+          ? exploreDataInLogsExplorerText
+          : exploreDataInDiscoverText;
       },
       getHref: async () => {
-        return logsExplorerLinkProps.href;
+        return redirectLinkProps.linkProps.href;
       },
       getIconType(): string | undefined {
-        return 'popout';
+        return 'visTable';
       },
       async isCompatible(): Promise<boolean> {
         return true;
       },
       async execute(): Promise<void> {
-        return logsExplorerLinkProps.navigate();
+        return redirectLinkProps.navigate();
       },
       order: 18,
     };
-  }, [logsExplorerLinkProps]);
+  }, [redirectLinkProps]);
 
   const extraActions: Action[] = [getOpenInLensAction, getOpenInLogsExplorerAction];
 
@@ -171,7 +214,7 @@ export const useDegradedDocsChart = ({ dataStream }: DegradedDocsChartDeps) => {
 };
 
 function getDataViewIndexPattern(dataStream: string | undefined) {
-  return dataStream ? `${indexNameToDataStreamParts(dataStream).type}-*-*` : DEFAULT_LOGS_DATA_VIEW;
+  return dataStream ?? DEFAULT_LOGS_DATA_VIEW;
 }
 
 function getDataViewField(dataView: DataView | undefined, fieldName: string | undefined) {

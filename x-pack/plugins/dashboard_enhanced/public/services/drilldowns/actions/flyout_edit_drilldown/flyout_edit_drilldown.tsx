@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import {
   tracksOverlays,
   type PresentationContainer,
@@ -32,7 +32,11 @@ import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { txtDisplayName } from './i18n';
 import { MenuItem } from './menu_item';
 import { StartDependencies } from '../../../../plugin';
-import { createDrilldownTemplatesFromSiblings, ensureNestedTriggers } from '../drilldown_shared';
+import {
+  createDrilldownTemplatesFromSiblings,
+  DRILLDOWN_MAX_WIDTH,
+  ensureNestedTriggers,
+} from '../drilldown_shared';
 
 export const OPEN_FLYOUT_EDIT_DRILLDOWN = 'OPEN_FLYOUT_EDIT_DRILLDOWN';
 
@@ -92,9 +96,10 @@ export class FlyoutEditDrilldownAction implements Action<EmbeddableApiContext> {
           templates={templates}
           onClose={close}
         />,
-        { theme$: core.theme.theme$ }
+        core
       ),
       {
+        maxWidth: DRILLDOWN_MAX_WIDTH,
         ownFocus: true,
         'data-test-subj': 'editDrilldownFlyout',
         onClose: () => {

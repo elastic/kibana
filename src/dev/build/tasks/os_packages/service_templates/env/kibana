@@ -3,3 +3,5 @@ group="kibana"
 
 KBN_PATH_CONF="/etc/kibana"
 RESTART_ON_UPGRADE="true"
+
+NODE_OPTIONS_HEAPSNAPSHOT_DEFAULT="--heapsnapshot-signal=SIGUSR2 --diagnostic-dir=/var/lib/kibana"

@@ -164,4 +164,13 @@ describe('Agent policy advanced options content', () => {
       });
     });
   });
+
+  describe('Custom Fields', () => {
+    it('should render the CustomFields component with correct props', () => {
+      usePlatinumLicense();
+      render();
+      expect(renderResult.queryByText('Custom fields')).toBeInTheDocument();
+      expect(renderResult.queryByText('This policy has no custom fields')).toBeInTheDocument();
+    });
+  });
 });

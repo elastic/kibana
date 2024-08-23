@@ -11,12 +11,11 @@ import React, { memo } from 'react';
 import type { Store, Action } from 'redux';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { AppMountParameters } from '@kbn/core/public';
 
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { CellActionsProvider } from '@kbn/cell-actions';
-import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
 import { UpsellingProvider } from '../common/components/upselling_provider';
 import { ManageUserInfo } from '../detections/components/user_info';
@@ -43,8 +42,6 @@ interface StartAppComponent {
 const StartAppComponent: FC<StartAppComponent> = ({ children, history, store, theme$ }) => {
   const services = useKibana().services;
   const {
-    i18n,
-    analytics,
     application: { capabilities },
     uiActions,
     upselling,
@@ -53,43 +50,37 @@ const StartAppComponent: FC<StartAppComponent> = ({ children, history, store, th
   const darkMode = useDarkMode();
 
   return (
-    <KibanaErrorBoundaryProvider analytics={analytics}>
-      <KibanaErrorBoundary>
-        <i18n.Context>
-          <ManageGlobalToaster>
-            <ReduxStoreProvider store={store}>
-              <KibanaThemeProvider theme$={theme$}>
-                <EuiThemeProvider darkMode={darkMode}>
-                  <MlCapabilitiesProvider>
-                    <UserPrivilegesProvider kibanaCapabilities={capabilities}>
-                      <ManageUserInfo>
-                        <NavigationProvider core={services}>
-                          <ReactQueryClientProvider>
-                            <CellActionsProvider
-                              getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
-                            >
-                              <UpsellingProvider upsellingService={upselling}>
-                                <DiscoverInTimelineContextProvider>
-                                  <AssistantProvider>
-                                    <PageRouter history={history}>{children}</PageRouter>
-                                  </AssistantProvider>
-                                </DiscoverInTimelineContextProvider>
-                              </UpsellingProvider>
-                            </CellActionsProvider>
-                          </ReactQueryClientProvider>
-                        </NavigationProvider>
-                      </ManageUserInfo>
-                    </UserPrivilegesProvider>
-                  </MlCapabilitiesProvider>
-                </EuiThemeProvider>
-              </KibanaThemeProvider>
-              <ErrorToastDispatcher />
-              <GlobalToaster />
-            </ReduxStoreProvider>
-          </ManageGlobalToaster>
-        </i18n.Context>
-      </KibanaErrorBoundary>
-    </KibanaErrorBoundaryProvider>
+    <KibanaRenderContextProvider {...services}>
+      <ManageGlobalToaster>
+        <ReduxStoreProvider store={store}>
+          <EuiThemeProvider darkMode={darkMode}>
+            <MlCapabilitiesProvider>
+              <UserPrivilegesProvider kibanaCapabilities={capabilities}>
+                <ManageUserInfo>
+                  <NavigationProvider core={services}>
+                    <ReactQueryClientProvider>
+                      <CellActionsProvider
+                        getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
+                      >
+                        <UpsellingProvider upsellingService={upselling}>
+                          <DiscoverInTimelineContextProvider>
+                            <AssistantProvider>
+                              <PageRouter history={history}>{children}</PageRouter>
+                            </AssistantProvider>
+                          </DiscoverInTimelineContextProvider>
+                        </UpsellingProvider>
+                      </CellActionsProvider>
+                    </ReactQueryClientProvider>
+                  </NavigationProvider>
+                </ManageUserInfo>
+              </UserPrivilegesProvider>
+            </MlCapabilitiesProvider>
+          </EuiThemeProvider>
+          <ErrorToastDispatcher />
+          <GlobalToaster />
+        </ReduxStoreProvider>
+      </ManageGlobalToaster>
+    </KibanaRenderContextProvider>
   );
 };
 

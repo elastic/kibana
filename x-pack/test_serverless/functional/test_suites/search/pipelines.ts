@@ -13,17 +13,14 @@ export default function ({ getPageObjects }: FtrProviderContext) {
     'svlCommonNavigation',
     'common',
     'svlIngestPipelines',
+    'svlManagementPage',
   ]);
   describe('ingest pipelines', function () {
     before(async () => {
-      await pageObjects.svlCommonPage.login();
-      await pageObjects.svlCommonNavigation.sidenav.clickLink({
-        deepLinkId: 'management:ingest_pipelines',
-      });
-    });
-
-    after(async () => {
-      await pageObjects.svlCommonPage.forceLogout();
+      await pageObjects.svlCommonPage.loginWithRole('developer');
+      await pageObjects.svlCommonNavigation.sidenav.openSection('project_settings_project_nav');
+      await pageObjects.svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management' });
+      await pageObjects.svlManagementPage.clickIngestPipelinesManagementCard();
     });
 
     it('has embedded console', async () => {

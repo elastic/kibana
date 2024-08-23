@@ -12,8 +12,8 @@ export type Start = jest.Mocked<SearchPlaygroundPluginStart>;
 const createStartMock = (): Start => {
   const startContract: Start = {
     PlaygroundProvider: jest.fn(),
-    PlaygroundToolbar: jest.fn(),
     Playground: jest.fn(),
+    PlaygroundHeaderDocs: jest.fn(),
   };
 
   return startContract;

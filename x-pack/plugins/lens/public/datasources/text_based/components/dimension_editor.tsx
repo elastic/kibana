@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import { fetchFieldsFromESQL } from '@kbn/text-based-editor';
 import type { DatasourceDimensionEditorProps, DataType } from '../../../types';
-import { FieldSelect } from './field_select';
+import { FieldSelect, type FieldOptionCompatible } from './field_select';
 import type { TextBasedPrivateState } from '../types';
-import { retrieveLayerColumnsFromCache, getColumnsFromCache } from '../fieldlist_cache';
 import { isNotNumeric, isNumeric } from '../utils';
 
 export type TextBasedDimensionEditorProps =
@@ -22,30 +22,45 @@ export type TextBasedDimensionEditorProps =
   };
 
 export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
+  const [allColumns, setAllColumns] = useState<FieldOptionCompatible[]>([]);
   const query = props.state.layers[props.layerId]?.query;
 
-  const allColumns = retrieveLayerColumnsFromCache(
-    props.state.layers[props.layerId]?.columns ?? [],
-    query
-  );
-  const allFields = query ? getColumnsFromCache(query) : [];
-  const hasNumberTypeColumns = allColumns?.some(isNumeric);
-  const fields = allFields.map((col) => {
-    return {
-      id: col.id,
-      name: col.name,
-      meta: col?.meta ?? { type: 'number' },
-      compatible:
-        props.isMetricDimension && hasNumberTypeColumns
-          ? props.filterOperations({
-              dataType: col?.meta?.type as DataType,
-              isBucketed: Boolean(isNotNumeric(col)),
-              scale: 'ordinal',
-            })
-          : true,
-    };
-  });
-  const selectedField = allColumns?.find((column) => column.columnId === props.columnId);
+  useEffect(() => {
+    // in case the columns are not in the cache, I refetch them
+    async function fetchColumns() {
+      if (query) {
+        const table = await fetchFieldsFromESQL(
+          { esql: `${query.esql} | limit 0` },
+          props.expressions
+        );
+        if (table) {
+          const hasNumberTypeColumns = table.columns?.some(isNumeric);
+          const columns = table.columns.map((col) => {
+            return {
+              id: col.id,
+              name: col.name,
+              meta: col?.meta ?? { type: 'number' },
+              compatible:
+                props.isMetricDimension && hasNumberTypeColumns
+                  ? props.filterOperations({
+                      dataType: col?.meta?.type as DataType,
+                      isBucketed: Boolean(isNotNumeric(col)),
+                      scale: 'ordinal',
+                    })
+                  : true,
+            };
+          });
+          setAllColumns(columns);
+        }
+      }
+    }
+    fetchColumns();
+  }, [props, props.expressions, query]);
+
+  const selectedField = useMemo(() => {
+    const layerColumns = props.state.layers[props.layerId].columns;
+    return layerColumns?.find((column) => column.columnId === props.columnId);
+  }, [props.columnId, props.layerId, props.state.layers]);
 
   return (
     <>
@@ -58,10 +73,10 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
         className="lnsIndexPatternDimensionEditor--padded"
       >
         <FieldSelect
-          existingFields={fields ?? []}
+          existingFields={allColumns ?? []}
           selectedField={selectedField}
           onChoose={(choice) => {
-            const meta = fields?.find((f) => f.name === choice.field)?.meta;
+            const meta = allColumns?.find((f) => f.name === choice.field)?.meta;
             const newColumn = {
               columnId: props.columnId,
               fieldName: choice.field,

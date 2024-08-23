@@ -10,6 +10,12 @@ import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/typesWith
 import type { ModelConfig } from '@kbn/inference_integration_flyout/types';
 import type { HttpService } from '../http_service';
 import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
+
+// TODO remove inference_id when esType has been updated to include it
+export interface GetInferenceEndpointsResponse extends estypes.InferenceModelConfigContainer {
+  inference_id: string;
+}
+
 export function inferenceModelsApiProvider(httpService: HttpService) {
   return {
     /**
@@ -18,17 +24,31 @@ export function inferenceModelsApiProvider(httpService: HttpService) {
      * @param taskType - Inference Task type. Either sparse_embedding or text_embedding
      * @param modelConfig - Model configuration based on service type
      */
-    createInferenceEndpoint(
+    async createInferenceEndpoint(
       inferenceId: string,
       taskType: InferenceTaskType,
       modelConfig: ModelConfig
     ) {
-      return httpService.http<estypes.InferencePutModelResponse>({
+      const result = await httpService.http<estypes.InferencePutModelResponse>({
         path: `${ML_INTERNAL_BASE_PATH}/_inference/${taskType}/${inferenceId}`,
         method: 'PUT',
         body: JSON.stringify(modelConfig),
         version: '1',
       });
+      return result;
+    },
+    /**
+     * Gets all inference endpoints
+     */
+    async getAllInferenceEndpoints() {
+      const result = await httpService.http<{
+        endpoints: GetInferenceEndpointsResponse[];
+      }>({
+        path: `${ML_INTERNAL_BASE_PATH}/_inference/all`,
+        method: 'GET',
+        version: '1',
+      });
+      return result;
     },
   };
 }

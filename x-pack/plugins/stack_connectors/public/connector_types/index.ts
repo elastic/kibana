@@ -13,6 +13,7 @@ import { getIndexConnectorType } from './es_index';
 import { getJiraConnectorType } from './jira';
 import { getOpenAIConnectorType } from './openai';
 import { getBedrockConnectorType } from './bedrock';
+import { getGeminiConnectorType } from './gemini';
 import { getOpsgenieConnectorType } from './opsgenie';
 import { getPagerDutyConnectorType } from './pagerduty';
 import { getResilientConnectorType } from './resilient';
@@ -31,6 +32,7 @@ import { getXmattersConnectorType } from './xmatters';
 import { getD3SecurityConnectorType } from './d3security';
 import { ExperimentalFeaturesService } from '../common/experimental_features_service';
 import { getSentinelOneConnectorType } from './sentinelone';
+import { getTheHiveConnectorType } from './thehive';
 import { getCrowdStrikeConnectorType } from './crowdstrike';
 
 export interface RegistrationServices {
@@ -65,10 +67,12 @@ export function registerConnectorTypes({
   connectorTypeRegistry.register(getOpsgenieConnectorType());
   connectorTypeRegistry.register(getOpenAIConnectorType());
   connectorTypeRegistry.register(getBedrockConnectorType());
+  connectorTypeRegistry.register(getGeminiConnectorType());
   connectorTypeRegistry.register(getTeamsConnectorType());
   connectorTypeRegistry.register(getTorqConnectorType());
   connectorTypeRegistry.register(getTinesConnectorType());
   connectorTypeRegistry.register(getD3SecurityConnectorType());
+  connectorTypeRegistry.register(getTheHiveConnectorType());
 
   if (ExperimentalFeaturesService.get().sentinelOneConnectorOn) {
     connectorTypeRegistry.register(getSentinelOneConnectorType());

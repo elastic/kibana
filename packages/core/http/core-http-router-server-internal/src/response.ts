@@ -24,10 +24,6 @@ import type {
 } from '@kbn/core-http-server';
 import mime from 'mime';
 
-export function isKibanaResponse(response: Record<string, any>): response is IKibanaResponse {
-  return typeof response.status === 'number' && typeof response.options === 'object';
-}
-
 /**
  * A response data object, expected to returned as a result of {@link RequestHandler} execution
  * @internal
@@ -44,8 +40,11 @@ export class KibanaResponse<T extends HttpResponsePayload | ResponseError = any>
 
 const successResponseFactory: KibanaSuccessResponseFactory = {
   ok: (options: HttpResponseOptions = {}) => new KibanaResponse(200, options.body, options),
+  created: (options: HttpResponseOptions = {}) => new KibanaResponse(201, options.body, options),
   accepted: (options: HttpResponseOptions = {}) => new KibanaResponse(202, options.body, options),
   noContent: (options: HttpResponseOptions = {}) => new KibanaResponse(204, undefined, options),
+  multiStatus: (options: HttpResponseOptions = {}) =>
+    new KibanaResponse(207, options.body, options),
 };
 
 const redirectionResponseFactory: KibanaRedirectionResponseFactory = {
@@ -67,6 +66,8 @@ const errorResponseFactory: KibanaErrorResponseFactory = {
     new KibanaResponse(404, options.body || 'Not Found', options),
   conflict: (options: ErrorHttpResponseOptions = {}) =>
     new KibanaResponse(409, options.body || 'Conflict', options),
+  unprocessableContent: (options: ErrorHttpResponseOptions = {}) =>
+    new KibanaResponse(422, options.body || 'Unprocessable Content', options),
   customError: (options: CustomHttpResponseOptions<ResponseError | Buffer | Stream>) => {
     if (!options || !options.statusCode) {
       throw new Error(

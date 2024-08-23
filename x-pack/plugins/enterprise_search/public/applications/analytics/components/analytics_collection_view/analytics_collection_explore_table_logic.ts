@@ -7,13 +7,8 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import {
-  DataView,
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
-  isRunningResponse,
-  TimeRange,
-} from '@kbn/data-plugin/common';
+import { DataView, isRunningResponse, TimeRange } from '@kbn/data-plugin/common';
+import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
 
 import { KibanaLogic } from '../../../shared/kibana/kibana_logic';
 
@@ -441,6 +436,7 @@ export const AnalyticsCollectionExploreTableLogic = kea<
     };
   },
   path: ['enterprise_search', 'analytics', 'collection', 'explore', 'table'],
+  // @ts-expect-error upgrade typescript v5.1.6
   reducers: () => ({
     isLoading: [
       false,
@@ -454,10 +450,12 @@ export const AnalyticsCollectionExploreTableLogic = kea<
         setTimeRange: () => true,
       },
     ],
+    // @ts-expect-error upgrade typescript v5.1.6
     items: [[], { setItems: (_, { items }) => items }],
     pageIndex: [
       0,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onTableChange: (_, { page }) => page?.index || 0,
         reset: () => 0,
         setSearch: () => 0,
@@ -467,22 +465,28 @@ export const AnalyticsCollectionExploreTableLogic = kea<
     pageSize: [
       BASE_PAGE_SIZE,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onTableChange: (_, { page }) => page?.size || BASE_PAGE_SIZE,
         reset: () => BASE_PAGE_SIZE,
       },
     ],
     search: [
       '',
+      // @ts-expect-error upgrade typescript v5.1.6
       { reset: () => '', setSearch: (_, { search }) => search, setSelectedTable: () => '' },
     ],
+    // @ts-expect-error upgrade typescript v5.1.6
     selectedTable: [null, { setSelectedTable: (_, { id }) => id }],
     sorting: [
       null,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onTableChange: (_, { sort = null }) => sort,
+        // @ts-expect-error upgrade typescript v5.1.6
         setSelectedTable: (_, { sorting = null }) => sorting,
       },
     ],
+    // @ts-expect-error upgrade typescript v5.1.6
     totalItemsCount: [0, { setTotalItemsCount: (_, { count }) => count }],
   }),
 });

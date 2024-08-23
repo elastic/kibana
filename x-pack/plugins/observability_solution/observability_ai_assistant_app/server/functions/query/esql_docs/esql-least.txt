@@ -1,19 +1,30 @@
-LEAST
+## LEAST
 
-Syntax
-Parameters
-first
-First of the columns to evaluate.
-rest
-The rest of the columns to evaluate.
-DescriptionReturns the minimum value from multiple columns. This is similar to
-MV_MIN except it is intended to run on multiple columns at once.
-When run on keyword or text fields, this returns the first string
-      in alphabetical order. When run on boolean columns this will return
-      false if any values are false.
-Supported types
-Example
+The `LEAST` function in ES|QL is used to return the minimum value from multiple columns. This function is similar to `MV_MIN` but is intended to run on multiple columns at once.
+
+### Syntax
+
+`LEAST(first, rest)`
+
+#### Parameters
+
+- `first`: The first column to evaluate.
+- `rest`: The rest of the columns to evaluate.
+
+### Examples
+
+Here are a couple of examples of how to use the `LEAST` function in ES|QL:
+
 ```esql
 ROW a = 10, b = 20
 | EVAL l = LEAST(a, b)
 ```
+
+In this example, the `LEAST` function is used to find the minimum value between the columns `a` and `b`.
+
+```esql
+ROW a = 10, b = 20, c = 30, d = 40
+| EVAL l = LEAST(a, b, c, d)
+```
+
+In this second example, the `LEAST` function is used to find the minimum value among four columns: `a`, `b`, `c`, and `d`.

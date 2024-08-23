@@ -7,6 +7,7 @@
 
 import type { Observable } from 'rxjs';
 
+import type { BuildFlavor } from '@kbn/config/src/types';
 import type {
   CoreStart,
   ISavedObjectsRepository,
@@ -72,7 +73,10 @@ export class SpacesClientService {
 
   private clientWrapper?: SpacesClientWrapper;
 
-  constructor(private readonly debugLogger: (message: string) => void) {}
+  constructor(
+    private readonly debugLogger: (message: string) => void,
+    private readonly buildFlavour: BuildFlavor
+  ) {}
 
   public setup({ config$ }: SetupDeps): SpacesClientServiceSetup {
     config$.subscribe((nextConfig) => {
@@ -117,7 +121,8 @@ export class SpacesClientService {
           this.debugLogger,
           this.config,
           this.repositoryFactory!(request, coreStart.savedObjects),
-          nonGlobalTypeNames
+          nonGlobalTypeNames,
+          this.buildFlavour
         );
         if (this.clientWrapper) {
           return this.clientWrapper(request, baseClient);

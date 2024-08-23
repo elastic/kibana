@@ -237,4 +237,28 @@ describe('TelemetryService', () => {
       );
     });
   });
+
+  describe('#reportAssetDashboardLoaded', () => {
+    it('should report asset details viewed in full page with properties', async () => {
+      const setupParams = getSetupParams();
+      service.setup(setupParams);
+      const telemetry = service.start();
+
+      telemetry.reportAssetDashboardLoaded({
+        assetType: 'host',
+        state: true,
+        filtered_by: ['assetId'],
+      });
+
+      expect(setupParams.analytics.reportEvent).toHaveBeenCalledTimes(1);
+      expect(setupParams.analytics.reportEvent).toHaveBeenCalledWith(
+        InfraTelemetryEventTypes.ASSET_DASHBOARD_LOADED,
+        {
+          assetType: 'host',
+          state: true,
+          filtered_by: ['assetId'],
+        }
+      );
+    });
+  });
 });

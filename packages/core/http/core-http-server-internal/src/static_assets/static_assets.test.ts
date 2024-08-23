@@ -35,6 +35,25 @@ describe('StaticAssets', () => {
     });
   });
 
+  describe('#isUsingCdn()', () => {
+    it('returns false when the CDN is not configured', () => {
+      staticAssets = new StaticAssets(args);
+      expect(staticAssets.isUsingCdn()).toBe(false);
+    });
+
+    it('returns true when the CDN is configured', () => {
+      args.cdnConfig = CdnConfig.from({ url: 'https://cdn.example.com/test' });
+      staticAssets = new StaticAssets(args);
+      expect(staticAssets.isUsingCdn()).toBe(true);
+    });
+
+    it('returns false when CDN config contains "null" URL', () => {
+      args.cdnConfig = CdnConfig.from({ url: null });
+      staticAssets = new StaticAssets(args);
+      expect(staticAssets.isUsingCdn()).toBe(false);
+    });
+  });
+
   describe('#getPluginAssetHref()', () => {
     it('returns the expected value when CDN is not configured', () => {
       staticAssets = new StaticAssets(args);

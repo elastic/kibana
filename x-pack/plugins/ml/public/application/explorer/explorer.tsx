@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -104,7 +104,7 @@ interface ExplorerPageProps {
   dataViews?: DataView[];
 }
 
-const ExplorerPage: FC<ExplorerPageProps> = ({
+const ExplorerPage: FC<PropsWithChildren<ExplorerPageProps>> = ({
   children,
   jobSelectorProps,
   noInfluencersConfigured,

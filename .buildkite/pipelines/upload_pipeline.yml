@@ -7,5 +7,7 @@ steps:
         echo "Uploading pipeline $TESTED_PIPELINE_PATH"
         buildkite-agent pipeline upload $TESTED_PIPELINE_PATH
       else
-        $TESTED_PIPELINE_PATH | buildkite-agent pipeline upload
+        $TESTED_PIPELINE_PATH > /tmp/pipeline_steps.yml
+        buildkite-agent artifact upload '/tmp/pipeline_steps.yml'
+        buildkite-agent pipeline upload '/tmp/pipeline_steps.yml'
       fi

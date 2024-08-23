@@ -6,14 +6,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { OverlayStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import type { GraphWorkspaceSavedObject } from '../../types';
 import { SAVE_DUPLICATE_REJECTED } from './constants';
 import { confirmModalPromise } from './confirm_modal_promise';
 
 export function displayDuplicateTitleConfirmModal(
   savedObject: Pick<GraphWorkspaceSavedObject, 'title'>,
-  overlays: OverlayStart
+  startServices: Pick<CoreStart, 'overlays' | 'analytics' | 'i18n' | 'theme'>
 ): Promise<boolean> {
   const confirmTitle = i18n.translate('xpack.graph.confirmModal.saveDuplicateConfirmationTitle', {
     defaultMessage: `This visualization already exists`,
@@ -32,7 +32,7 @@ export function displayDuplicateTitleConfirmModal(
   });
 
   try {
-    return confirmModalPromise(confirmMessage, confirmTitle, confirmButtonText, overlays);
+    return confirmModalPromise(confirmMessage, confirmTitle, confirmButtonText, startServices);
   } catch {
     return Promise.reject(new Error(SAVE_DUPLICATE_REJECTED));
   }

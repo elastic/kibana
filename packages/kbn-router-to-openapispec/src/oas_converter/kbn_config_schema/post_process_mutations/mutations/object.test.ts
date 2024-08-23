@@ -8,17 +8,13 @@
 
 import { schema } from '@kbn/config-schema';
 import { joi2JsonInternal } from '../../parse';
-import { createCtx } from '../context';
 import { processObject } from './object';
 
 test.each([
-  [
-    schema.object({}),
-    { type: 'object', properties: {}, additionalProperties: false, required: [] },
-  ],
+  [schema.object({}), { type: 'object', properties: {}, additionalProperties: false }],
   [
     schema.object({ never: schema.never() }),
-    { type: 'object', properties: {}, additionalProperties: false, required: [] },
+    { type: 'object', properties: {}, additionalProperties: false },
   ],
   [
     schema.object(
@@ -41,36 +37,6 @@ test.each([
   ],
 ])('processObject %#', (input, result) => {
   const parsed = joi2JsonInternal(input.getSchema());
-  processObject(createCtx(), parsed);
+  processObject(parsed);
   expect(parsed).toEqual(result);
-});
-
-test('refs', () => {
-  const fooSchema = schema.object({ n: schema.number() }, { meta: { id: 'foo' } });
-  const barSchema = schema.object({ foo: fooSchema, s: schema.string() });
-  const parsed = joi2JsonInternal(barSchema.getSchema());
-  const ctx = createCtx({ refs: true });
-
-  // Simulate us walking the schema
-  processObject(ctx, parsed.properties.foo);
-
-  processObject(ctx, parsed);
-  expect(parsed).toEqual({
-    type: 'object',
-    additionalProperties: false,
-    properties: {
-      foo: {
-        $ref: '#/components/schemas/foo',
-      },
-      s: { type: 'string' },
-    },
-    required: ['foo', 's'],
-  });
-  expect(ctx.sharedSchemas.size).toBe(1);
-  expect(ctx.sharedSchemas.get('foo')).toEqual({
-    type: 'object',
-    additionalProperties: false,
-    properties: { n: { type: 'number' } },
-    required: ['n'],
-  });
 });

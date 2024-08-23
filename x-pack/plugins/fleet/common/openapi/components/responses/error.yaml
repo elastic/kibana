@@ -9,4 +9,4 @@ content:
         error:
           type: string
         message:
-          type: string 
+          type: string

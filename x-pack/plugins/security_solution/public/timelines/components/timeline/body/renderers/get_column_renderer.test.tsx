@@ -9,7 +9,6 @@ import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
-import '../../../../../common/mock/match_media';
 import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 import { mockTimelineData } from '../../../../../common/mock';
 import { TestProviders } from '../../../../../common/mock/test_providers';

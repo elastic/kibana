@@ -344,6 +344,10 @@ export default function (providerContext: FtrProviderContext) {
             type: 'dashboard',
           },
           {
+            id: 'sample_lens',
+            type: 'lens',
+          },
+          {
             id: 'sample_visualization',
             type: 'visualization',
           },
@@ -352,8 +356,8 @@ export default function (providerContext: FtrProviderContext) {
             type: 'search',
           },
           {
-            id: 'sample_lens',
-            type: 'lens',
+            id: 'sample_ml_module',
+            type: 'ml-module',
           },
           {
             id: 'sample_security_rule',
@@ -364,20 +368,16 @@ export default function (providerContext: FtrProviderContext) {
             type: 'csp-rule-template',
           },
           {
-            id: 'sample_ml_module',
-            type: 'ml-module',
-          },
-          {
-            id: 'sample_tag',
-            type: 'tag',
-          },
-          {
             id: 'sample_osquery_pack_asset',
             type: 'osquery-pack-asset',
           },
           {
             id: 'sample_osquery_saved_query',
             type: 'osquery-saved-query',
+          },
+          {
+            id: 'sample_tag',
+            type: 'tag',
           },
         ],
         installed_es: [

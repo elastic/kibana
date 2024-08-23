@@ -23,8 +23,10 @@ interface Props extends ToolbarProps {
 export const MetricsAndGroupByToolbarItems = (props: Props) => {
   const metricOptions = useMemo(
     () =>
-      props.metricTypes.map(toMetricOpt).filter((v) => v) as Array<{ text: string; value: string }>,
-    [props.metricTypes]
+      props.metricTypes
+        .map((metric) => toMetricOpt(metric, props.nodeType))
+        .filter((v) => v) as Array<{ text: string; value: string }>,
+    [props.metricTypes, props.nodeType]
   );
 
   const groupByOptions = useMemo(
@@ -36,7 +38,6 @@ export const MetricsAndGroupByToolbarItems = (props: Props) => {
     <>
       <EuiFlexItem grow={false}>
         <WaffleMetricControls
-          fields={props.createDerivedIndexPattern().fields}
           options={metricOptions}
           metric={props.metric}
           onChange={props.changeMetric}
@@ -50,7 +51,6 @@ export const MetricsAndGroupByToolbarItems = (props: Props) => {
           groupBy={props.groupBy}
           nodeType={props.nodeType}
           onChange={props.changeGroupBy}
-          fields={props.createDerivedIndexPattern().fields}
           onChangeCustomOptions={props.changeCustomOptions}
           customOptions={props.customOptions}
         />

@@ -7,6 +7,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { RouteAccess } from '@kbn/core-http-server';
 import { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { Logger } from '@kbn/logging';
@@ -21,16 +22,23 @@ interface RouteDependencies {
   config: SavedObjectConfig;
   coreUsageData: InternalCoreUsageDataSetup;
   logger: Logger;
+  access: RouteAccess;
 }
 
 export const registerDeleteRoute = (
   router: InternalSavedObjectRouter,
-  { config, coreUsageData, logger }: RouteDependencies
+  { config, coreUsageData, logger, access }: RouteDependencies
 ) => {
   const { allowHttpApiAccess } = config;
   router.delete(
     {
       path: '/{type}/{id}',
+      options: {
+        summary: `Delete a saved object`,
+        tags: ['oas-tag:saved objects'],
+        access,
+        deprecated: true,
+      },
       validate: {
         params: schema.object({
           type: schema.string(),
@@ -41,25 +49,25 @@ export const registerDeleteRoute = (
         }),
       },
     },
-    catchAndReturnBoomErrors(async (context, req, res) => {
+    catchAndReturnBoomErrors(async (context, request, response) => {
       logWarnOnExternalRequest({
         method: 'delete',
         path: '/api/saved_objects/{type}/{id}',
-        req,
+        request,
         logger,
       });
-      const { type, id } = req.params;
-      const { force } = req.query;
+      const { type, id } = request.params;
+      const { force } = request.query;
       const { getClient, typeRegistry } = (await context.core).savedObjects;
 
       const usageStatsClient = coreUsageData.getClient();
-      usageStatsClient.incrementSavedObjectsDelete({ request: req }).catch(() => {});
+      usageStatsClient.incrementSavedObjectsDelete({ request, types: [type] }).catch(() => {});
       if (!allowHttpApiAccess) {
         throwIfTypeNotVisibleByAPI(type, typeRegistry);
       }
       const client = getClient();
       const result = await client.delete(type, id, { force });
-      return res.ok({ body: result });
+      return response.ok({ body: result });
     })
   );
 };

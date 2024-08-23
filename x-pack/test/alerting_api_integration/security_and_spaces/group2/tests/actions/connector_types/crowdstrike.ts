@@ -131,7 +131,7 @@ export default function createCrowdstrikeTests({ getService }: FtrProviderContex
         password = 'changeme',
         errorLogger = logErrorDetails,
       }: {
-        supertest: SuperTest.SuperTest<SuperTest.Test>;
+        supertest: SuperTest.Agent;
         subAction: string;
         subActionParams: Record<string, unknown>;
         expectedHttpCode?: number;

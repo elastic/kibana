@@ -258,7 +258,7 @@ export function bulkCreateTestSuiteFactory(context: FtrProviderContext) {
             const query = test.overwrite ? '?overwrite=true' : '';
             await supertest
               .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_bulk_create${query}`)
-              .auth(user?.username, user?.password)
+              .auth(user?.username!, user?.password!)
               .send(requestBody)
               .expect(test.responseStatusCode)
               .then(test.responseBody);

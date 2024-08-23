@@ -5,14 +5,4 @@
  * 2.0.
  */
 
-import type { WeekdayStr, Options } from '@kbn/rrule';
-
-export type RRuleParams = Partial<RRuleRecord> & Pick<RRuleRecord, 'dtstart' | 'tzid'>;
-
-// An iCal RRULE  to define a recurrence schedule, see https://github.com/jakubroztocil/rrule for the spec
-export type RRuleRecord = Omit<Options, 'dtstart' | 'byweekday' | 'wkst' | 'until'> & {
-  dtstart: string;
-  byweekday?: Array<WeekdayStr | string | number>;
-  wkst?: WeekdayStr;
-  until?: string;
-};
+export type { RRuleParams, RRuleRecord } from '@kbn/alerting-types';

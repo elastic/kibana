@@ -6,14 +6,17 @@
  */
 
 import { Subject, Observable } from 'rxjs';
+import { Logger } from '@kbn/core/server';
 
 import { TaskStore } from '../task_store';
 import { TaskClaim, TaskTiming } from '../task_events';
 import { TaskTypeDictionary } from '../task_type_dictionary';
 import { TaskClaimingBatches } from '../queries/task_claiming';
 import { ConcreteTaskInstance } from '../task';
-import { claimAvailableTasksDefault } from './strategy_default';
-import { CLAIM_STRATEGY_DEFAULT } from '../config';
+import { claimAvailableTasksUpdateByQuery } from './strategy_update_by_query';
+import { claimAvailableTasksMget } from './strategy_mget';
+import { CLAIM_STRATEGY_UPDATE_BY_QUERY, CLAIM_STRATEGY_MGET } from '../config';
+import { TaskPartitioner } from '../lib/task_partitioner';
 
 export interface TaskClaimerOpts {
   getCapacity: (taskType?: string | undefined) => number;
@@ -25,6 +28,8 @@ export interface TaskClaimerOpts {
   unusedTypes: string[];
   excludedTaskTypes: string[];
   taskMaxAttempts: Record<string, number>;
+  logger: Logger;
+  taskPartitioner: TaskPartitioner;
 }
 
 export interface ClaimOwnershipResult {
@@ -32,6 +37,7 @@ export interface ClaimOwnershipResult {
     tasksUpdated: number;
     tasksConflicted: number;
     tasksClaimed: number;
+    tasksLeftUnclaimed?: number;
   };
   docs: ConcreteTaskInstance[];
   timing?: TaskTiming;
@@ -39,10 +45,30 @@ export interface ClaimOwnershipResult {
 
 export type TaskClaimerFn = (opts: TaskClaimerOpts) => Observable<ClaimOwnershipResult>;
 
-export function getTaskClaimer(strategy: string): TaskClaimerFn {
+let WarnedOnInvalidClaimer = false;
+
+export function getTaskClaimer(logger: Logger, strategy: string): TaskClaimerFn {
   switch (strategy) {
-    case CLAIM_STRATEGY_DEFAULT:
-      return claimAvailableTasksDefault;
+    case CLAIM_STRATEGY_UPDATE_BY_QUERY:
+      return claimAvailableTasksUpdateByQuery;
+    case CLAIM_STRATEGY_MGET:
+      return claimAvailableTasksMget;
   }
-  throw new Error(`Unknown task claiming strategy (${strategy})`);
+
+  if (!WarnedOnInvalidClaimer) {
+    WarnedOnInvalidClaimer = true;
+    logger.warn(`Unknown task claiming strategy "${strategy}", falling back to update_by_query`);
+  }
+  return claimAvailableTasksUpdateByQuery;
+}
+
+export function getEmptyClaimOwnershipResult(): ClaimOwnershipResult {
+  return {
+    stats: {
+      tasksUpdated: 0,
+      tasksConflicted: 0,
+      tasksClaimed: 0,
+    },
+    docs: [],
+  };
 }

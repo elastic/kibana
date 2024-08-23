@@ -67,6 +67,7 @@ import type {
 import { createMockPolicyData } from '../endpoint/services/feature_usage/mocks';
 import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../common/endpoint/service/artifacts/constants';
 import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '@kbn/securitysolution-list-constants';
+import * as PolicyConfigHelpers from '../../common/endpoint/models/policy_config_helpers';
 import { disableProtections } from '../../common/endpoint/models/policy_config_helpers';
 import type { ProductFeaturesService } from '../lib/product_features_service/product_features_service';
 import { createProductFeaturesServiceMock } from '../lib/product_features_service/mocks';
@@ -322,6 +323,24 @@ describe('ingest_integration tests ', () => {
       expect(manifestManager.pushArtifacts).not.toHaveBeenCalled();
       expect(manifestManager.commit).not.toHaveBeenCalled();
     });
+
+    it('should correctly set meta.billable', async () => {
+      const isBillablePolicySpy = jest.spyOn(PolicyConfigHelpers, 'isBillablePolicy');
+      isBillablePolicySpy.mockReturnValue(false);
+      const manifestManager = buildManifestManagerMock();
+
+      let packagePolicy = await invokeCallback(manifestManager);
+      expect(isBillablePolicySpy).toHaveBeenCalled();
+      expect(packagePolicy.inputs[0].config!.policy.value.meta.billable).toBe(false);
+
+      isBillablePolicySpy.mockReset();
+      isBillablePolicySpy.mockReturnValue(true);
+      packagePolicy = await invokeCallback(manifestManager);
+      expect(isBillablePolicySpy).toHaveBeenCalled();
+      expect(packagePolicy.inputs[0].config!.policy.value.meta.billable).toBe(true);
+
+      isBillablePolicySpy.mockRestore();
+    });
   });
 
   describe('package policy post create callback', () => {
@@ -570,9 +589,7 @@ describe('ingest_integration tests ', () => {
         licenseEmitter.next(Enterprise); // set license level to enterprise
       });
 
-      const validDateYesterday = moment.utc().subtract(1, 'day');
-
-      it('should throw if endpointProtectionUpdates productFeature is disabled and user modifies global_manifest_version', () => {
+      it('should throw if endpointProtectionUpdates productFeature is disabled and user modifies global_manifest_version', async () => {
         productFeaturesService = createProductFeaturesServiceMock(
           ALL_PRODUCT_FEATURE_KEYS.filter((key) => key !== 'endpoint_protection_updates')
         );
@@ -587,7 +604,7 @@ describe('ingest_integration tests ', () => {
         );
         const policyConfig = generator.generatePolicyPackagePolicy();
         policyConfig.inputs[0]!.config!.policy.value.global_manifest_version = '2023-01-01';
-        expect(() =>
+        await expect(() =>
           callback(policyConfig, soClient, esClient, requestContextMock.convertContext(ctx), req)
         ).rejects.toThrow(
           'To modify protection updates, you must add at least Endpoint Complete to your project.'
@@ -610,21 +627,23 @@ describe('ingest_integration tests ', () => {
         },
         {
           date: '2100-10-01',
-          message: `Global manifest version cannot be in the future. Latest selectable date is ${validDateYesterday.format(
-            'MMMM DD, YYYY'
-          )} UTC time.`,
+          message: `Global manifest version cannot be in the future. Latest selectable date is ${moment
+            .utc()
+            .subtract(1, 'day')
+            .format('MMMM DD, YYYY')} UTC time.`,
         },
         {
-          date: validDateYesterday.clone().add(1, 'day').format('YYYY-MM-DD'),
-          message: `Global manifest version cannot be in the future. Latest selectable date is ${validDateYesterday.format(
-            'MMMM DD, YYYY'
-          )} UTC time.`,
+          date: moment.utc().format('YYYY-MM-DD'),
+          message: `Global manifest version cannot be in the future. Latest selectable date is ${moment
+            .utc()
+            .subtract(1, 'day')
+            .format('MMMM DD, YYYY')} UTC time.`,
         },
         {
           date: 'latest',
         },
         {
-          date: validDateYesterday.format('YYYY-MM-DD'), // Correct date
+          date: moment.utc().subtract(1, 'day').format('YYYY-MM-DD'), // Correct date
         },
       ])(
         'should return bad request for invalid endpoint package policy global manifest values',
@@ -844,6 +863,7 @@ describe('ingest_integration tests ', () => {
         mockPolicy.meta.cluster_uuid = 'updated-uuid';
         mockPolicy.meta.license_uuid = 'updated-uid';
         mockPolicy.meta.serverless = false;
+        mockPolicy.meta.billable = false;
         const logger = loggingSystemMock.create().get('ingest_integration.test');
         const callback = getPackagePolicyUpdateCallback(
           logger,
@@ -863,6 +883,7 @@ describe('ingest_integration tests ', () => {
         policyConfig.inputs[0]!.config!.policy.value.meta.cluster_uuid = 'original-uuid';
         policyConfig.inputs[0]!.config!.policy.value.meta.license_uuid = 'original-uid';
         policyConfig.inputs[0]!.config!.policy.value.meta.serverless = true;
+        policyConfig.inputs[0]!.config!.policy.value.meta.billable = true;
         const updatedPolicyConfig = await callback(
           policyConfig,
           soClient,
@@ -881,6 +902,7 @@ describe('ingest_integration tests ', () => {
         mockPolicy.meta.cluster_uuid = 'updated-uuid';
         mockPolicy.meta.license_uuid = 'updated-uid';
         mockPolicy.meta.serverless = false;
+        mockPolicy.meta.billable = false;
         const logger = loggingSystemMock.create().get('ingest_integration.test');
         const callback = getPackagePolicyUpdateCallback(
           logger,
@@ -899,6 +921,7 @@ describe('ingest_integration tests ', () => {
         policyConfig.inputs[0]!.config!.policy.value.meta.cluster_uuid = 'updated-uuid';
         policyConfig.inputs[0]!.config!.policy.value.meta.license_uuid = 'updated-uid';
         policyConfig.inputs[0]!.config!.policy.value.meta.serverless = false;
+        policyConfig.inputs[0]!.config!.policy.value.meta.billable = false;
         const updatedPolicyConfig = await callback(
           policyConfig,
           soClient,
@@ -1014,6 +1037,51 @@ describe('ingest_integration tests ', () => {
 
         expect(antivirusRegistrationIn(updatedPolicyConfig)).toBe(false);
       });
+    });
+
+    it('should correctly set meta.billable', async () => {
+      const isBillablePolicySpy = jest.spyOn(PolicyConfigHelpers, 'isBillablePolicy');
+
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const logger = loggingSystemMock.create().get('ingest_integration.test');
+      licenseEmitter.next(Enterprise);
+
+      const callback = getPackagePolicyUpdateCallback(
+        logger,
+        licenseService,
+        endpointAppContextMock.featureUsageService,
+        endpointAppContextMock.endpointMetadataService,
+        cloudService,
+        esClient,
+        productFeaturesService
+      );
+      const policyConfig = generator.generatePolicyPackagePolicy();
+
+      isBillablePolicySpy.mockReturnValue(false);
+      let updatedPolicyConfig = await callback(
+        policyConfig,
+        soClient,
+        esClient,
+        requestContextMock.convertContext(ctx),
+        req
+      );
+      expect(isBillablePolicySpy).toHaveBeenCalled();
+      expect(updatedPolicyConfig.inputs[0]!.config!.policy.value.meta.billable).toEqual(false);
+
+      isBillablePolicySpy.mockReset();
+      isBillablePolicySpy.mockReturnValue(true);
+      updatedPolicyConfig = await callback(
+        policyConfig,
+        soClient,
+        esClient,
+        requestContextMock.convertContext(ctx),
+        req
+      );
+      expect(isBillablePolicySpy).toHaveBeenCalled();
+      expect(updatedPolicyConfig.inputs[0]!.config!.policy.value.meta.billable).toEqual(true);
+
+      isBillablePolicySpy.mockRestore();
     });
   });
 

@@ -7,7 +7,9 @@
 
 import expect from '@kbn/expect';
 
+import { ProvidedType } from '@kbn/test';
 import { FtrProviderContext } from '../../ftr_provider_context';
+export type MlJobAnnotations = ProvidedType<typeof MachineLearningJobAnnotationsProvider>;
 
 export function MachineLearningJobAnnotationsProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');

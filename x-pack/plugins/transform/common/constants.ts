@@ -37,6 +37,7 @@ export const addExternalBasePath = (uri: string): string => `${EXTERNAL_API_BASE
 export const TRANSFORM_REACT_QUERY_KEYS = {
   DATA_SEARCH: 'transform.data_search',
   DATA_VIEW_EXISTS: 'transform.data_view_exists',
+  GET_DATA_VIEW_IDS_WITH_TITLE: 'transform.get_data_view_ids_with_title',
   GET_DATA_VIEW_TITLES: 'transform.get_data_view_titles',
   GET_ES_INDICES: 'transform.get_es_indices',
   GET_ES_INGEST_PIPELINES: 'transform.get_es_ingest_pipelines',
@@ -102,7 +103,7 @@ export const TRANSFORM_STATE = {
   WAITING: 'waiting',
 } as const;
 
-export type TransformState = typeof TRANSFORM_STATE[keyof typeof TRANSFORM_STATE];
+export type TransformState = (typeof TRANSFORM_STATE)[keyof typeof TRANSFORM_STATE];
 
 export const TRANSFORM_HEALTH_STATUS = {
   green: 'green',
@@ -163,14 +164,14 @@ export const TRANSFORM_MODE = {
   CONTINUOUS: 'continuous',
 } as const;
 
-export type TransformMode = typeof TRANSFORM_MODE[keyof typeof TRANSFORM_MODE];
+export type TransformMode = (typeof TRANSFORM_MODE)[keyof typeof TRANSFORM_MODE];
 
 export const TRANSFORM_FUNCTION = {
   PIVOT: 'pivot',
   LATEST: 'latest',
 } as const;
 
-export type TransformFunction = typeof TRANSFORM_FUNCTION[keyof typeof TRANSFORM_FUNCTION];
+export type TransformFunction = (typeof TRANSFORM_FUNCTION)[keyof typeof TRANSFORM_FUNCTION];
 
 // Alerting
 

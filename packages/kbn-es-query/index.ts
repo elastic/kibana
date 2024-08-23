@@ -9,6 +9,7 @@
 export type {
   BoolQuery,
   DataViewBase,
+  DataViewBaseNoFields,
   DataViewFieldBase,
   EsQueryConfig,
   EsQueryFiltersConfig,
@@ -51,7 +52,6 @@ export {
   migrateFilter,
   fromCombinedFilter,
   isOfQueryType,
-  isOfEsqlQueryType,
   isOfAggregateQueryType,
   getAggregateQueryMode,
   getLanguageDisplayName,
@@ -118,6 +118,8 @@ export {
   toElasticsearchQuery,
   escapeKuery,
   escapeQuotes,
+  getKqlFieldNames,
+  getKqlFieldNamesFromExpression,
 } from './src/kuery';
 
 export {

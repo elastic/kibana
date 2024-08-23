@@ -38,7 +38,10 @@ export class MapsEmsPlugin implements Plugin<MapsEmsPluginServerSetup> {
         isEnterprisePlus = enterprise.state === 'valid';
       }
 
-      plugins.licensing.refresh().then(updateLicenseState);
+      plugins.licensing
+        .refresh()
+        .then(updateLicenseState)
+        .catch(() => {});
       plugins.licensing.license$.subscribe(updateLicenseState);
     }
 

@@ -35,6 +35,7 @@ import { validateEndpointPackagePolicy } from './handlers/validate_endpoint_pack
 import {
   isPolicySetToEventCollectionOnly,
   ensureOnlyEventCollectionIsAllowed,
+  isBillablePolicy,
 } from '../../common/endpoint/models/policy_config_helpers';
 import type { NewPolicyData, PolicyConfig } from '../../common/endpoint/types';
 import type { LicenseService } from '../../common/license';
@@ -223,7 +224,7 @@ export const getPackagePolicyUpdateCallback = (
 
     validateEndpointPackagePolicy(endpointIntegrationData.inputs);
 
-    notifyProtectionFeatureUsage(
+    await notifyProtectionFeatureUsage(
       endpointIntegrationData,
       featureUsageService,
       endpointMetadataService
@@ -272,6 +273,8 @@ export const getPackagePolicyUpdateCallback = (
 
     updateAntivirusRegistrationEnabled(newEndpointPackagePolicy);
 
+    newEndpointPackagePolicy.meta.billable = isBillablePolicy(newEndpointPackagePolicy);
+
     return endpointIntegrationData;
   };
 };
@@ -294,7 +297,9 @@ export const getPackagePolicyPostCreateCallback = (
         exceptionsClient,
         integrationConfig.value.eventFilters,
         packagePolicy
-      );
+      ).catch((error) => {
+        logger.error(`Failed to create event filters: ${error}`);
+      });
     }
     return packagePolicy;
   };

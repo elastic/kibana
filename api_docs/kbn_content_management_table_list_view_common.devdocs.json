@@ -55,6 +55,48 @@
           },
           {
             "parentPluginId": "@kbn/content-management-table-list-view-common",
+            "id": "def-common.UserContentCommonSchema.updatedBy",
+            "type": "string",
+            "tags": [],
+            "label": "updatedBy",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/content-management/table_list_view_common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-table-list-view-common",
+            "id": "def-common.UserContentCommonSchema.createdAt",
+            "type": "string",
+            "tags": [],
+            "label": "createdAt",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/content-management/table_list_view_common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-table-list-view-common",
+            "id": "def-common.UserContentCommonSchema.createdBy",
+            "type": "string",
+            "tags": [],
+            "label": "createdBy",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/content-management/table_list_view_common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-table-list-view-common",
             "id": "def-common.UserContentCommonSchema.managed",
             "type": "CompoundType",
             "tags": [],
@@ -77,9 +119,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/content-management-content-editor",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnContentManagementContentEditorPluginApi",
-                "section": "def-common.SavedObjectsReference",
+                "section": "def-public.SavedObjectsReference",
                 "text": "SavedObjectsReference"
               },
               "[]"

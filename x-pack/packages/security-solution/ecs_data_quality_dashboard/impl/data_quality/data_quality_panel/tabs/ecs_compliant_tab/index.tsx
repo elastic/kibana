@@ -26,26 +26,18 @@ const EmptyPromptContainer = styled.div`
 
 interface Props {
   indexName: string;
-  onAddToNewCase: (markdownComments: string[]) => void;
   partitionedFieldMetadata: PartitionedFieldMetadata;
 }
 
-const EcsCompliantTabComponent: React.FC<Props> = ({
-  indexName,
-  onAddToNewCase,
-  partitionedFieldMetadata,
-}) => {
+const EcsCompliantTabComponent: React.FC<Props> = ({ indexName, partitionedFieldMetadata }) => {
   const emptyPromptBody = useMemo(() => <EmptyPromptBody body={i18n.ECS_COMPLIANT_EMPTY} />, []);
   const title = useMemo(() => <EmptyPromptTitle title={i18n.ECS_COMPLIANT_EMPTY_TITLE} />, []);
 
   return (
-    <>
+    <div data-test-subj="ecsCompliantTabContent">
       {!showMissingTimestampCallout(partitionedFieldMetadata.ecsCompliant) ? (
         <>
-          <EuiCallOut
-            size="s"
-            title={i18n.ECS_COMPLIANT_CALLOUT_TITLE(partitionedFieldMetadata.ecsCompliant.length)}
-          >
+          <EuiCallOut size="s">
             <p>
               {i18n.ECS_COMPLIANT_CALLOUT({
                 fieldCount: partitionedFieldMetadata.ecsCompliant.length,
@@ -76,7 +68,7 @@ const EcsCompliantTabComponent: React.FC<Props> = ({
           />
         </EmptyPromptContainer>
       )}
-    </>
+    </div>
   );
 };
 

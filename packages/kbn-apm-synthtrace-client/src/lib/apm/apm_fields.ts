@@ -211,6 +211,7 @@ export type ApmFields = Fields<{
       span: { id: string };
     }>;
     'url.original': string;
+    'url.domain': string;
   }> &
   ApmApplicationMetricFields &
   ExperimentalFields;

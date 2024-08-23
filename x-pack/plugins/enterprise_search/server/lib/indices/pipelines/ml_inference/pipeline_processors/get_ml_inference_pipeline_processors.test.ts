@@ -727,8 +727,8 @@ describe('fetchMlInferencePipelineProcessors lib function', () => {
   });
 
   describe('when Machine Learning is disabled in the current space', () => {
-    it('should throw an error', () => {
-      expect(() =>
+    it('should throw an error', async () => {
+      await expect(() =>
         fetchMlInferencePipelineProcessors(
           mockClient as unknown as ElasticsearchClient,
           undefined,

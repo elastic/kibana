@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo } from 'react';
 import { EuiPanel, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -18,7 +17,7 @@ import { VisualizationsSection } from '../components/visualizations_section';
 /**
  * Overview view displayed in the document details expandable flyout right section
  */
-export const OverviewTab: FC = memo(() => {
+export const OverviewTab = memo(() => {
   return (
     <EuiPanel
       hasBorder={false}

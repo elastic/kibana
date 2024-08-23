@@ -23,10 +23,9 @@ exports[`LayerControl is rendered 1`] = `
             size="xxxs"
           >
             <h2>
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="Layers"
                 id="xpack.maps.layerControl.layersTitle"
-                values={Object {}}
               />
             </h2>
           </EuiTitle>
@@ -103,10 +102,9 @@ exports[`LayerControl is rendered 1`] = `
     isDisabled={false}
     onClick={[Function]}
   >
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="Add layer"
       id="xpack.maps.layerControl.addLayerButtonLabel"
-      values={Object {}}
     />
   </EuiButton>
 </Fragment>
@@ -180,10 +178,9 @@ exports[`LayerControl isReadOnly 1`] = `
             size="xxxs"
           >
             <h2>
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="Layers"
                 id="xpack.maps.layerControl.layersTitle"
-                values={Object {}}
               />
             </h2>
           </EuiTitle>
@@ -275,10 +272,9 @@ exports[`LayerControl should disable buttons when flyout is open 1`] = `
             size="xxxs"
           >
             <h2>
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="Layers"
                 id="xpack.maps.layerControl.layersTitle"
-                values={Object {}}
               />
             </h2>
           </EuiTitle>
@@ -355,10 +351,9 @@ exports[`LayerControl should disable buttons when flyout is open 1`] = `
     isDisabled={true}
     onClick={[Function]}
   >
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="Add layer"
       id="xpack.maps.layerControl.addLayerButtonLabel"
-      values={Object {}}
     />
   </EuiButton>
 </Fragment>

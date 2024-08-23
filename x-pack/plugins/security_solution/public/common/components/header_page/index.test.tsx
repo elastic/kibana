@@ -9,7 +9,6 @@ import { euiDarkVars } from '@kbn/ui-theme';
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import '../../mock/match_media';
 import { TestProviders } from '../../mock';
 import { HeaderPage } from '.';
 import { useMountAppended } from '../../utils/use_mount_appended';

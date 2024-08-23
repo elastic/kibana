@@ -16,6 +16,7 @@ import {
   ERROR_GROUP_NAME,
   ERROR_LOG_MESSAGE,
   SERVICE_NAME,
+  TRACE_ID,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../../common/es_fields/apm';
@@ -34,6 +35,7 @@ export interface ErrorGroupMainStatisticsResponse {
     culprit: string | undefined;
     handled: boolean | undefined;
     type: string | undefined;
+    traceId: string | undefined;
   }>;
   maxCountExceeded: boolean;
 }
@@ -52,10 +54,10 @@ export async function getErrorGroupMainStatistics({
   transactionType,
   searchQuery,
 }: {
-  kuery: string;
+  kuery?: string;
   serviceName: string;
   apmEventClient: APMEventClient;
-  environment: string;
+  environment?: string;
   sortField?: string;
   sortDirection?: 'asc' | 'desc';
   start: number;
@@ -74,18 +76,22 @@ export async function getErrorGroupMainStatistics({
     ? { [maxTimestampAggKey]: sortDirection }
     : { _count: sortDirection };
 
-  const shouldQuery = searchQuery
-    ? {
-        should: [
-          ERROR_LOG_MESSAGE,
-          ERROR_EXC_MESSAGE,
-          ERROR_GROUP_NAME,
-          ERROR_EXC_TYPE,
-          ERROR_CULPRIT,
-        ].flatMap((field) => wildcardQuery(field, searchQuery)),
-        minimum_should_match: 1,
-      }
-    : {};
+  const shouldMatchSearchQuery = searchQuery
+    ? [
+        {
+          bool: {
+            should: [
+              ERROR_LOG_MESSAGE,
+              ERROR_EXC_MESSAGE,
+              ERROR_GROUP_NAME,
+              ERROR_EXC_TYPE,
+              ERROR_CULPRIT,
+            ].flatMap((field) => wildcardQuery(field, searchQuery)),
+            minimum_should_match: 1,
+          },
+        },
+      ]
+    : [];
 
   const response = await apmEventClient.search('get_error_group_main_statistics', {
     apm: {
@@ -108,8 +114,8 @@ export async function getErrorGroupMainStatistics({
             ...rangeQuery(start, end),
             ...environmentQuery(environment),
             ...kqlQuery(kuery),
+            ...shouldMatchSearchQuery,
           ],
-          ...shouldQuery,
         },
       },
       aggs: {
@@ -124,6 +130,7 @@ export async function getErrorGroupMainStatistics({
               top_hits: {
                 size: 1,
                 _source: [
+                  TRACE_ID,
                   ERROR_LOG_MESSAGE,
                   ERROR_EXC_MESSAGE,
                   ERROR_EXC_HANDLED,
@@ -158,6 +165,7 @@ export async function getErrorGroupMainStatistics({
         culprit: bucket.sample.hits.hits[0]._source.error.culprit,
         handled: bucket.sample.hits.hits[0]._source.error.exception?.[0].handled,
         type: bucket.sample.hits.hits[0]._source.error.exception?.[0].type,
+        traceId: bucket.sample.hits.hits[0]._source.trace?.id,
       };
     }) ?? [];
 

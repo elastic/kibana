@@ -26,7 +26,8 @@ const caseData: CaseUI = {
   comments: [...basicCase.comments, alertCommentWithIndices],
 };
 
-describe('Case View Page files tab', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/185046
+describe.skip('Case View Page files tab', () => {
   let appMockRender: AppMockRenderer;
 
   useGetCaseFilesMock.mockReturnValue({

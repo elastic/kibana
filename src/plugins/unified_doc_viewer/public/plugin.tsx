@@ -16,14 +16,25 @@ import { createGetterSetter, Storage } from '@kbn/kibana-utils-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { CoreStart } from '@kbn/core/public';
+import { dynamic } from '@kbn/shared-ux-utility';
+import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import { SharePluginStart } from '@kbn/share-plugin/public';
 import type { UnifiedDocViewerServices } from './types';
 
 export const [getUnifiedDocViewerServices, setUnifiedDocViewerServices] =
   createGetterSetter<UnifiedDocViewerServices>('UnifiedDocViewerServices');
 
-const DocViewerLegacyTable = React.lazy(() => import('./components/doc_viewer_table/legacy'));
-const DocViewerTable = React.lazy(() => import('./components/doc_viewer_table'));
-const SourceViewer = React.lazy(() => import('./components/doc_viewer_source'));
+const fallback = (
+  <EuiDelayRender delay={300}>
+    <EuiSkeletonText />
+  </EuiDelayRender>
+);
+
+const LazyDocViewerLegacyTable = dynamic(() => import('./components/doc_viewer_table/legacy'), {
+  fallback,
+});
+const LazyDocViewerTable = dynamic(() => import('./components/doc_viewer_table'), { fallback });
+const LazySourceViewer = dynamic(() => import('./components/doc_viewer_source'), { fallback });
 
 export interface UnifiedDocViewerSetup {
   registry: DocViewsRegistry;
@@ -36,6 +47,8 @@ export interface UnifiedDocViewerStart {
 export interface UnifiedDocViewerStartDeps {
   data: DataPublicPluginStart;
   fieldFormats: FieldFormatsStart;
+  fieldsMetadata: FieldsMetadataPublicStart;
+  share: SharePluginStart;
 }
 
 export class UnifiedDocViewerPublicPlugin
@@ -53,24 +66,15 @@ export class UnifiedDocViewerPublicPlugin
       component: (props) => {
         const { textBasedHits } = props;
         const { uiSettings } = getUnifiedDocViewerServices();
-        const DocView = isLegacyTableEnabled({
-          uiSettings,
-          isTextBasedQueryMode: Array.isArray(textBasedHits),
-        })
-          ? DocViewerLegacyTable
-          : DocViewerTable;
 
-        return (
-          <React.Suspense
-            fallback={
-              <EuiDelayRender delay={300}>
-                <EuiSkeletonText />
-              </EuiDelayRender>
-            }
-          >
-            <DocView {...props} />
-          </React.Suspense>
-        );
+        const LazyDocView = isLegacyTableEnabled({
+          uiSettings,
+          isEsqlMode: Array.isArray(textBasedHits),
+        })
+          ? LazyDocViewerLegacyTable
+          : LazyDocViewerTable;
+
+        return <LazyDocView {...props} />;
       },
     });
 
@@ -80,24 +84,17 @@ export class UnifiedDocViewerPublicPlugin
         defaultMessage: 'JSON',
       }),
       order: 20,
-      component: ({ hit, dataView, textBasedHits }) => {
+      component: ({ hit, dataView, textBasedHits, decreaseAvailableHeightBy }) => {
         return (
-          <React.Suspense
-            fallback={
-              <EuiDelayRender delay={300}>
-                <EuiSkeletonText />
-              </EuiDelayRender>
-            }
-          >
-            <SourceViewer
-              index={hit.raw._index}
-              id={hit.raw._id ?? hit.id}
-              dataView={dataView}
-              textBasedHits={textBasedHits}
-              hasLineNumbers
-              onRefresh={() => {}}
-            />
-          </React.Suspense>
+          <LazySourceViewer
+            index={hit.raw._index}
+            id={hit.raw._id ?? hit.id}
+            dataView={dataView}
+            textBasedHits={textBasedHits}
+            hasLineNumbers
+            decreaseAvailableHeightBy={decreaseAvailableHeightBy}
+            onRefresh={() => {}}
+          />
         );
       },
     });
@@ -109,12 +106,22 @@ export class UnifiedDocViewerPublicPlugin
 
   public start(core: CoreStart, deps: UnifiedDocViewerStartDeps) {
     const { analytics, uiSettings } = core;
-    const { data, fieldFormats } = deps;
+    const { data, fieldFormats, fieldsMetadata, share } = deps;
     const storage = new Storage(localStorage);
     const unifiedDocViewer = {
       registry: this.docViewsRegistry,
     };
-    const services = { analytics, data, fieldFormats, storage, uiSettings, unifiedDocViewer };
+    const services = {
+      analytics,
+      data,
+      fieldFormats,
+      fieldsMetadata,
+      storage,
+      uiSettings,
+      unifiedDocViewer,
+      share,
+      core,
+    };
     setUnifiedDocViewerServices(services);
     return unifiedDocViewer;
   }

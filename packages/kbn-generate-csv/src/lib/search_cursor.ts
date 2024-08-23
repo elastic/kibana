@@ -8,12 +8,8 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
-import type {
-  IEsSearchResponse,
-  IKibanaSearchResponse,
-  ISearchClient,
-  ISearchSource,
-} from '@kbn/data-plugin/common';
+import type { ISearchClient, IKibanaSearchResponse, IEsSearchResponse } from '@kbn/search-types';
+import type { ISearchSource } from '@kbn/data-plugin/common';
 import type { CsvExportSettings } from './get_export_settings';
 
 export interface SearchCursorClients {

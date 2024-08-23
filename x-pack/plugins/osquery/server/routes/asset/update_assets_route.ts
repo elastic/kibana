@@ -42,9 +42,10 @@ export const updateAssetsRoute = (router: IRouter, osqueryContext: OsqueryAppCon
           },
         },
       },
-      async (context, request, response) => {
-        const savedObjectsClient = (await context.core).savedObjects.client;
-        const currentUser = await osqueryContext.security.authc.getCurrentUser(request)?.username;
+      async (context, _request, response) => {
+        const coreContext = await context.core;
+        const savedObjectsClient = coreContext.savedObjects.client;
+        const currentUser = coreContext.security.authc.getCurrentUser()?.username;
 
         let installation;
 

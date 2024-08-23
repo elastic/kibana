@@ -120,11 +120,13 @@ const MonitorDetailLinkForLocation = ({
     <EuiBadge
       iconType={() => <EuiIcon size="m" type="dot" color={color} />}
       color="hollow"
-      iconOnClickAriaLabel={CLICK_LOCATION_LABEL}
-      iconOnClick={() => {
-        // Empty
-      }}
       href={monitorDetailLinkUrl ?? '/'}
+      aria-label={i18n.translate('xpack.synthetics.management.location.ariaLabel', {
+        defaultMessage: 'View details for {locationLabel} location',
+        values: {
+          locationLabel,
+        },
+      })}
     >
       {locationLabel}
     </EuiBadge>
@@ -144,7 +146,3 @@ const COLLAPSE_LOCATIONS_LABEL = i18n.translate(
     defaultMessage: 'Click to collapse locations',
   }
 );
-
-const CLICK_LOCATION_LABEL = i18n.translate('xpack.synthetics.management.location.clickMessage', {
-  defaultMessage: 'Click to view details for this location.',
-});

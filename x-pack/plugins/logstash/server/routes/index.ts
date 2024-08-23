@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { LogstashPluginRouter } from '../types';
 import { registerClusterLoadRoute } from './cluster';
 import {
@@ -15,12 +14,12 @@ import {
 } from './pipeline';
 import { registerPipelinesListRoute, registerPipelinesDeleteRoute } from './pipelines';
 
-export function registerRoutes(router: LogstashPluginRouter, security?: SecurityPluginSetup) {
+export function registerRoutes(router: LogstashPluginRouter) {
   registerClusterLoadRoute(router);
 
   registerPipelineDeleteRoute(router);
   registerPipelineLoadRoute(router);
-  registerPipelineSaveRoute(router, security);
+  registerPipelineSaveRoute(router);
 
   registerPipelinesListRoute(router);
   registerPipelinesDeleteRoute(router);

@@ -28,8 +28,10 @@ export interface AlertSummaryWidgetFullSizeProps {
   activeAlerts: Alert[];
   chartProps?: ChartProps;
   recoveredAlertCount: number;
+  timeZone: string;
   dateFormat?: string;
   hideChart?: boolean;
+  hideStats?: boolean;
   dependencyProps: DependencyProps;
 }
 
@@ -39,7 +41,9 @@ export const AlertSummaryWidgetFullSize = ({
   chartProps: { themeOverrides, onBrushEnd } = {},
   dateFormat,
   recoveredAlertCount,
+  timeZone,
   hideChart,
+  hideStats,
   dependencyProps: { baseTheme },
 }: AlertSummaryWidgetFullSizeProps) => {
   const chartData = activeAlerts.map((alert) => alert.doc_count);
@@ -55,12 +59,14 @@ export const AlertSummaryWidgetFullSize = ({
       hasShadow={false}
       paddingSize="none"
     >
-      <EuiFlexItem>
-        <AlertCounts
-          activeAlertCount={activeAlertCount}
-          recoveredAlertCount={recoveredAlertCount}
-        />
-      </EuiFlexItem>
+      {!hideStats && (
+        <EuiFlexItem data-test-subj="alertSummaryWidgetFullSizeStats">
+          <AlertCounts
+            activeAlertCount={activeAlertCount}
+            recoveredAlertCount={recoveredAlertCount}
+          />
+        </EuiFlexItem>
+      )}
       {!hideChart && (
         <div data-test-subj="alertSummaryWidgetFullSizeChartContainer">
           <EuiSpacer size="l" />
@@ -130,6 +136,7 @@ export const AlertSummaryWidgetFullSize = ({
                 point: { visible: false },
               }}
               curve={CurveType.CURVE_MONOTONE_X}
+              timeZone={timeZone}
             />
           </Chart>
         </div>

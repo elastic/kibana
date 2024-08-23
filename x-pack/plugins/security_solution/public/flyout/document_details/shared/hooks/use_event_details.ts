@@ -9,16 +9,31 @@ import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-pl
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import type { DataViewBase } from '@kbn/es-query';
+import { DEFAULT_ALERTS_INDEX, DEFAULT_PREVIEW_INDEX } from '../../../../../common/constants';
 import type { RunTimeMappings } from '../../../../../common/api/search_strategy';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
-import { getAlertIndexAlias } from '../../../../timelines/components/side_panel/event_details/helpers';
 import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useTimelineEventsDetails } from '../../../../timelines/containers/details';
-import { useGetFieldsData } from '../../../../common/hooks/use_get_fields_data';
 import type { SearchHit } from '../../../../../common/search_strategy';
-import type { GetFieldsData } from '../../../../common/hooks/use_get_fields_data';
+import type { GetFieldsData } from './use_get_fields_data';
+import { useGetFieldsData } from './use_get_fields_data';
+
+/**
+ * The referenced alert _index in the flyout uses the `.internal.` such as `.internal.alerts-security.alerts-spaceId` in the alert page flyout and .internal.preview.alerts-security.alerts-spaceId` in the rule creation preview flyout,
+ * but we always want to use their respective aliase indices rather than accessing their backing .internal. indices.
+ */
+export const getAlertIndexAlias = (
+  index: string,
+  spaceId: string = 'default'
+): string | undefined => {
+  if (index.startsWith(`.internal${DEFAULT_ALERTS_INDEX}`)) {
+    return `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
+  } else if (index.startsWith(`.internal${DEFAULT_PREVIEW_INDEX}`)) {
+    return `${DEFAULT_PREVIEW_INDEX}-${spaceId}`;
+  }
+};
 
 export interface UseEventDetailsParams {
   /**
@@ -87,10 +102,10 @@ export const useEventDetails = ({
     useTimelineEventsDetails({
       indexName: eventIndex,
       eventId: eventId ?? '',
-      runtimeMappings: sourcererDataView.runtimeMappings as RunTimeMappings,
+      runtimeMappings: sourcererDataView?.sourcererDataView?.runtimeFieldMap as RunTimeMappings,
       skip: !eventId,
     });
-  const getFieldsData = useGetFieldsData(searchHit?.fields);
+  const { getFieldsData } = useGetFieldsData({ fieldsData: searchHit?.fields });
 
   return {
     browserFields: sourcererDataView.browserFields,

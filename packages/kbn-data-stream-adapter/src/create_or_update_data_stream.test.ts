@@ -21,6 +21,7 @@ esClient.indices.putMapping.mockResolvedValue({ acknowledged: true });
 esClient.indices.putSettings.mockResolvedValue({ acknowledged: true });
 
 const simulateIndexTemplateResponse = { template: { mappings: { is_managed: true } } };
+// @ts-expect-error test data type mismatch
 esClient.indices.simulateIndexTemplate.mockResolvedValue(simulateIndexTemplateResponse);
 
 const name = 'test_data_stream';

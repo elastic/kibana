@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export { getTimeFieldRange } from './src/services/time_field_range';
 export {
   DatePickerContextProvider,
   type DatePickerDependencies,

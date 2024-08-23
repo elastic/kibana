@@ -26,7 +26,6 @@
       "observabilityShared",
       "unifiedSearch",
       "share",
-      "embeddable",
       "profilingDataAccess"
     ],
     "requiredBundles": [

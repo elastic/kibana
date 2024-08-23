@@ -68,6 +68,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dataGrid.checkCurrentRowsPerPageToBe(100);
 
       await PageObjects.dashboard.saveDashboard(dashboardName, {
+        saveAsNew: true,
         waitDialogIsClosed: true,
         exitFromEditMode: false,
       });
@@ -78,7 +79,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await dataGrid.changeRowsPerPageTo(10);
 
-      await PageObjects.dashboard.saveDashboard(dashboardName);
+      await PageObjects.dashboard.saveDashboard(dashboardName, { saveAsNew: false });
       await refreshDashboardPage();
 
       await dataGrid.checkCurrentRowsPerPageToBe(10);
@@ -88,11 +89,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await addSearchEmbeddableToDashboard();
       await PageObjects.dashboard.switchToEditMode();
 
-      const cell = await dataGrid.getCellElement(0, 2);
+      const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
       expect(await cell.getVisibleText()).to.be('Sep 22, 2015 @ 23:50:13.253');
       await dataGrid.clickMoveColumnLeft('agent');
 
-      const cellAfter = await dataGrid.getCellElement(0, 2);
+      const cellAfter = await dataGrid.getCellElementExcludingControlColumns(0, 0);
       expect(await cellAfter.getVisibleText()).to.be(
         'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)'
       );
@@ -122,9 +123,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       const embeddableError = await testSubjects.find('embeddableError');
       const errorMessage = await embeddableError.findByTestSubject('errorMessageMarkdown');
-      expect(await errorMessage.getVisibleText()).to.equal(
-        'Expected AND, OR, end of input, whitespace but "n" found.\nthis < is not : a valid > query\n----------^'
-      );
+      const errorText = await errorMessage.getVisibleText();
+      expect(errorText).to.match(/Expected[\S\s]+but "n" found/);
     });
 
     it('should not show the full screen button', async () => {

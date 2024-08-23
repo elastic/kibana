@@ -17,7 +17,12 @@ export const sum: ExpressionFunctionDefinition<'sum', unknown[], {}, ExpressionV
   fn: (values) => {
     return {
       type: 'num',
-      value: Array.isArray(values) ? values.reduce((a, b) => a + b) : values,
+      value: Array.isArray(values)
+        ? values
+            .map(Number)
+            .filter(isFinite)
+            .reduce((a, b) => a + b, 0)
+        : values,
     };
   },
 };

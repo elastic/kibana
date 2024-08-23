@@ -7,9 +7,20 @@
 import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiDescriptionList, EuiToolTip } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiDescriptionList,
+  EuiToolTip,
+  EuiLink,
+} from '@elastic/eui';
 
-export const Requirements: React.FC = memo(() => {
+import { useStartServices } from '../../../../../hooks';
+
+export const Requirements = memo(() => {
+  const { docLinks } = useStartServices();
+
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
@@ -48,13 +59,27 @@ export const Requirements: React.FC = memo(() => {
                       'xpack.fleet.epm.requirements.permissionRequireRootTooltip',
                       {
                         defaultMessage:
-                          'Elastic agent needs to be run with root or administor privileges',
+                          'Elastic agent needs to be run with root or administrator privileges',
                       }
                     )}
                   >
                     <FormattedMessage
                       id="xpack.fleet.epm.requirements.permissionRequireRootMessage"
-                      defaultMessage="root privileges"
+                      defaultMessage="{guideLink}"
+                      values={{
+                        guideLink: (
+                          <EuiLink
+                            href={docLinks.links.fleet.unprivilegedMode}
+                            target="_blank"
+                            external
+                          >
+                            <FormattedMessage
+                              id="xpack.fleet.permissionRequireRootMessage.guideLink"
+                              defaultMessage="Root privileges"
+                            />
+                          </EuiLink>
+                        ),
+                      }}
                     />
                   </EuiToolTip>
                 </>

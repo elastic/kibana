@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 import { CoreStart } from '@kbn/core/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { EmbeddableFactoryDefinition } from '../../../embeddables';
 import { Container } from '../../../containers';
 import { ContactCardEmbeddable, ContactCardEmbeddableInput } from './contact_card_embeddable';
@@ -31,7 +31,7 @@ export class ContactCardEmbeddableFactory
 
   constructor(
     protected readonly execTrigger: UiActionsStart['executeTriggerActions'],
-    private readonly overlays: CoreStart['overlays']
+    private readonly core: CoreStart
   ) {}
 
   public async isEditable() {
@@ -50,7 +50,7 @@ export class ContactCardEmbeddableFactory
 
   public getExplicitInput = (): Promise<Partial<ContactCardEmbeddableInput>> => {
     return new Promise((resolve) => {
-      const modalSession = this.overlays.openModal(
+      const modalSession = this.core.overlays.openModal(
         toMountPoint(
           <ContactCardInitializer
             onCancel={() => {
@@ -62,7 +62,8 @@ export class ContactCardEmbeddableFactory
               modalSession.close();
               resolve(input);
             }}
-          />
+          />,
+          this.core
         ),
         {
           'data-test-subj': 'createContactCardEmbeddable',

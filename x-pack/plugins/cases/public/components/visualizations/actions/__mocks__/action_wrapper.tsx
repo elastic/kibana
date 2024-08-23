@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+import type { PropsWithChildren } from 'react';
 import React from 'react';
 
 export const ActionWrapper = jest
   .fn()
-  .mockImplementation(({ children }) => <div data-test-subj="action-wrapper">{children}</div>);
+  .mockImplementation(({ children }: PropsWithChildren<unknown>) => (
+    <div data-test-subj="action-wrapper">{children}</div>
+  ));

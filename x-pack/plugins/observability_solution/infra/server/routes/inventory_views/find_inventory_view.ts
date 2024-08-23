@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createValidationFunction } from '../../../common/runtime_types';
+import { createRouteValidationFunction } from '@kbn/io-ts-utils';
 import {
   findInventoryViewResponsePayloadRT,
   inventoryViewRequestQueryRT,
@@ -22,7 +22,7 @@ export const initFindInventoryViewRoute = ({
       method: 'get',
       path: INVENTORY_VIEW_URL,
       validate: {
-        query: createValidationFunction(inventoryViewRequestQueryRT),
+        query: createRouteValidationFunction(inventoryViewRequestQueryRT),
       },
     },
     async (_requestContext, request, response) => {

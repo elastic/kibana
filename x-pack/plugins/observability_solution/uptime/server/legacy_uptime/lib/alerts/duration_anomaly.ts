@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
+import { AlertsClientError, GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 import moment from 'moment';
 import {
   KibanaRequest,
@@ -19,7 +19,8 @@ import {
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
 import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
-import { getSeverityType, type MlAnomaliesTableRecord } from '@kbn/ml-anomaly-utils';
+import type { MlAnomaliesTableRecord } from '@kbn/ml-anomaly-utils';
+import { getSeverityType } from '@kbn/ml-anomaly-utils';
 import {
   alertsLocatorID,
   AlertsLocatorParams,
@@ -136,18 +137,14 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds>
   doesSetRecoveryContext: true,
   async executor({
     params,
-    services: {
-      alertFactory,
-      alertWithLifecycle,
-      getAlertStartedDate,
-      getAlertUuid,
-      savedObjectsClient,
-      scopedClusterClient,
-    },
+    services: { alertsClient, savedObjectsClient, scopedClusterClient },
     spaceId,
     state,
     startedAt,
   }) {
+    if (!alertsClient) {
+      throw new AlertsClientError();
+    }
     const uptimeEsClient = new UptimeEsClient(
       savedObjectsClient,
       scopedClusterClient.asCurrentUser,
@@ -181,53 +178,56 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds>
         );
 
         const alertId = DURATION_ANOMALY.id + index;
-        const indexedStartedAt = getAlertStartedDate(alertId) ?? startedAt.toISOString();
-        const alertUuid = getAlertUuid(alertId);
+
+        const { start, uuid } = alertsClient?.report({
+          id: alertId,
+          actionGroup: DURATION_ANOMALY.id,
+          payload: {
+            'monitor.id': params.monitorId,
+            'url.full': summary.monitorUrl,
+            'observer.geo.name': summary.observerLocation,
+            'anomaly.start': summary.anomalyStartTimestamp,
+            'anomaly.bucket_span.minutes': summary.bucketSpan as unknown as string,
+            [ALERT_EVALUATION_VALUE]: anomaly.actualSort,
+            [ALERT_EVALUATION_THRESHOLD]: anomaly.typicalSort,
+            [ALERT_REASON]: alertReasonMessage,
+          },
+          state: {
+            ...updateState(state, false),
+            ...summary,
+          },
+        });
+
+        const indexedStartedAt = start ?? startedAt.toISOString();
         const relativeViewInAppUrl = getMonitorRouteFromMonitorId({
           monitorId: alertId,
           dateRangeEnd: 'now',
           dateRangeStart: indexedStartedAt,
         });
 
-        const alert = alertWithLifecycle({
-          id: alertId,
-          fields: {
-            'monitor.id': params.monitorId,
-            'url.full': summary.monitorUrl,
-            'observer.geo.name': summary.observerLocation,
-            'anomaly.start': summary.anomalyStartTimestamp,
-            'anomaly.bucket_span.minutes': summary.bucketSpan,
-            [ALERT_EVALUATION_VALUE]: anomaly.actualSort,
-            [ALERT_EVALUATION_THRESHOLD]: anomaly.typicalSort,
-            [ALERT_REASON]: alertReasonMessage,
+        alertsClient.setAlertData({
+          id: DURATION_ANOMALY.id,
+          context: {
+            [ALERT_DETAILS_URL]: await getAlertUrl(
+              uuid,
+              spaceId,
+              indexedStartedAt,
+              alertsLocator,
+              basePath.publicBaseUrl
+            ),
+            [ALERT_REASON_MSG]: alertReasonMessage,
+            [VIEW_IN_APP_URL]: getViewInAppUrl(basePath, spaceId, relativeViewInAppUrl),
+            ...summary,
           },
-        });
-        alert.replaceState({
-          ...updateState(state, false),
-          ...summary,
-        });
-        alert.scheduleActions(DURATION_ANOMALY.id, {
-          [ALERT_DETAILS_URL]: await getAlertUrl(
-            alertUuid,
-            spaceId,
-            indexedStartedAt,
-            alertsLocator,
-            basePath.publicBaseUrl
-          ),
-          [ALERT_REASON_MSG]: alertReasonMessage,
-          [VIEW_IN_APP_URL]: getViewInAppUrl(basePath, spaceId, relativeViewInAppUrl),
-          ...summary,
         });
       });
     }
 
-    await setRecoveredAlertsContext({
-      alertFactory,
+    await setRecoveredAlertsContext<ActionGroupIds>({
+      alertsClient,
       alertsLocator,
       basePath,
       defaultStartedAt: startedAt.toISOString(),
-      getAlertStartedDate,
-      getAlertUuid,
       spaceId,
     });
 

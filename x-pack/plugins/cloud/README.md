@@ -1,3 +1,3 @@
 # `cloud` plugin
 
-The `cloud` plugin adds Cloud-specific features to Kibana.
+The `cloud` plugin exposes Cloud-specific metadata to Kibana.

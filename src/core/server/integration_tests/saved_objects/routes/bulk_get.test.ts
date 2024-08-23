@@ -58,7 +58,9 @@ describe('POST /api/saved_objects/_bulk_get', () => {
     loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation();
 
     const config = setupConfig();
-    registerBulkGetRoute(router, { config, coreUsageData, logger });
+    const access = 'public';
+
+    registerBulkGetRoute(router, { config, coreUsageData, logger, access });
 
     await server.start();
   });
@@ -95,6 +97,7 @@ describe('POST /api/saved_objects/_bulk_get', () => {
     expect(result.body).toEqual(clientResponse);
     expect(coreUsageStatsClient.incrementSavedObjectsBulkGet).toHaveBeenCalledWith({
       request: expect.anything(),
+      types: ['index-pattern'],
     });
   });
 

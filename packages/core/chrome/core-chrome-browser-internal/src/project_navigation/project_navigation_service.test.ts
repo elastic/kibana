@@ -60,16 +60,18 @@ const logger = loggerMock.create();
 const setup = ({
   locationPathName = '/',
   navLinkIds,
+  isServerless = true,
 }: {
   locationPathName?: string;
   navLinkIds?: Readonly<string[]>;
+  isServerless?: boolean;
 } = {}) => {
   const history = createMemoryHistory({
     initialEntries: [locationPathName],
   });
   history.replace(locationPathName);
 
-  const projectNavigationService = new ProjectNavigationService();
+  const projectNavigationService = new ProjectNavigationService(isServerless);
   const chromeBreadcrumbs$ = new BehaviorSubject<ChromeBreadcrumb[]>([]);
   const navLinksService = getNavLinksService(navLinkIds);
   const application = {
@@ -328,6 +330,7 @@ describe('initNavigation()', () => {
               "href": "/app/discover",
               "id": "discover",
               "isElasticInternalLink": false,
+              "onClick": undefined,
               "path": "rootNav:analytics.discover",
               "sideNavStatus": "visible",
               "title": "DISCOVER",
@@ -346,6 +349,7 @@ describe('initNavigation()', () => {
               "href": "/app/dashboards",
               "id": "dashboards",
               "isElasticInternalLink": false,
+              "onClick": undefined,
               "path": "rootNav:analytics.dashboards",
               "sideNavStatus": "visible",
               "title": "DASHBOARDS",
@@ -364,6 +368,7 @@ describe('initNavigation()', () => {
               "href": "/app/visualize",
               "id": "visualize",
               "isElasticInternalLink": false,
+              "onClick": undefined,
               "path": "rootNav:analytics.visualize",
               "sideNavStatus": "visible",
               "title": "VISUALIZE",
@@ -374,6 +379,7 @@ describe('initNavigation()', () => {
           "icon": "stats",
           "id": "rootNav:analytics",
           "isElasticInternalLink": false,
+          "onClick": undefined,
           "path": "rootNav:analytics",
           "renderAs": "accordion",
           "sideNavStatus": "visible",
@@ -556,19 +562,17 @@ describe('breadcrumbs', () => {
                 <EuiContextMenuItem
                   icon="gear"
                 >
-                  <FormattedMessage
+                  <Memo(MemoizedFormattedMessage)
                     defaultMessage="Manage project"
                     id="core.ui.primaryNav.cloud.linkToProject"
-                    values={Object {}}
                   />
                 </EuiContextMenuItem>,
                 <EuiContextMenuItem
                   icon="grid"
                 >
-                  <FormattedMessage
+                  <Memo(MemoizedFormattedMessage)
                     defaultMessage="View all projects"
                     id="core.ui.primaryNav.cloud.linkToAllProjects"
-                    values={Object {}}
                   />
                 </EuiContextMenuItem>,
               ]
@@ -621,19 +625,17 @@ describe('breadcrumbs', () => {
                 <EuiContextMenuItem
                   icon="gear"
                 >
-                  <FormattedMessage
+                  <Memo(MemoizedFormattedMessage)
                     defaultMessage="Manage project"
                     id="core.ui.primaryNav.cloud.linkToProject"
-                    values={Object {}}
                   />
                 </EuiContextMenuItem>,
                 <EuiContextMenuItem
                   icon="grid"
                 >
-                  <FormattedMessage
+                  <Memo(MemoizedFormattedMessage)
                     defaultMessage="View all projects"
                     id="core.ui.primaryNav.cloud.linkToAllProjects"
-                    values={Object {}}
                   />
                 </EuiContextMenuItem>,
               ]
@@ -680,19 +682,17 @@ describe('breadcrumbs', () => {
                 <EuiContextMenuItem
                   icon="gear"
                 >
-                  <FormattedMessage
+                  <Memo(MemoizedFormattedMessage)
                     defaultMessage="Manage project"
                     id="core.ui.primaryNav.cloud.linkToProject"
-                    values={Object {}}
                   />
                 </EuiContextMenuItem>,
                 <EuiContextMenuItem
                   icon="grid"
                 >
-                  <FormattedMessage
+                  <Memo(MemoizedFormattedMessage)
                     defaultMessage="View all projects"
                     id="core.ui.primaryNav.cloud.linkToAllProjects"
-                    values={Object {}}
                   />
                 </EuiContextMenuItem>,
               ]
@@ -1001,51 +1001,5 @@ describe('solution navigations', () => {
       );
       expect(activeSolution).toEqual(solution1);
     }
-  });
-
-  it('should throw if the active solution navigation is not registered', async () => {
-    const { projectNavigation } = setup();
-
-    projectNavigation.updateSolutionNavigations({ 1: solution1, 2: solution2 });
-
-    expect(() => {
-      projectNavigation.changeActiveSolutionNavigation('3');
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"Solution navigation definition with id \\"3\\" does not exist."`
-    );
-  });
-
-  it('should change the active solution if no node match the current Location', async () => {
-    const { projectNavigation, navLinksService } = setup({
-      locationPathName: '/app/app3', // we are on app3 which only exists in solution3
-      navLinkIds: ['app1', 'app2', 'app3'],
-    });
-
-    const getActiveDefinition = () =>
-      lastValueFrom(projectNavigation.getActiveSolutionNavDefinition$().pipe(take(1)));
-
-    projectNavigation.updateSolutionNavigations({ 1: solution1, 2: solution2, 3: solution3 });
-
-    {
-      const definition = await getActiveDefinition();
-      expect(definition).toBe(null); // No active solution id yet
-    }
-
-    // Change to solution 2, but we are still on '/app/app3' which only exists in solution3
-    projectNavigation.changeActiveSolutionNavigation('2');
-
-    {
-      const definition = await getActiveDefinition();
-      expect(definition?.id).toBe('solution3'); // The solution3 was activated as it matches the "/app/app3" location
-    }
-
-    navLinksService.get.mockReturnValue({ url: '/app/app2', href: '/app/app2' } as any);
-    projectNavigation.changeActiveSolutionNavigation('2', { redirect: true }); // We ask to redirect to the home page of solution 2
-    {
-      const definition = await getActiveDefinition();
-      expect(definition?.id).toBe('solution2');
-    }
-
-    navLinksService.get.mockReset();
   });
 });

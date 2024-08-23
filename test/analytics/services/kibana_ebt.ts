@@ -67,7 +67,10 @@ export function KibanaEBTUIProvider({
 
   return {
     setOptIn: async (optIn) => {
-      await common.navigateToApp('home');
+      if (!(await common.isChromeVisible())) {
+        // The browser has not loaded Kibana yet. Let's open `home`.
+        await common.navigateToApp('home');
+      }
       await setOptIn(optIn);
     },
     getEvents: async (numberOfEvents, options) => {

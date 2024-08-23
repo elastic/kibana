@@ -9,7 +9,7 @@
 import type { IRouter, Logger } from '@kbn/core/server';
 import { streamFactory } from '@kbn/ml-response-stream/server';
 
-import { simpleStringStreamRequestBodySchema } from '../../common/api/simple_string_stream';
+import { simpleStringStreamRequestBodySchema } from './schemas/simple_string_stream';
 import { RESPONSE_STREAM_API_ENDPOINT } from '../../common/api';
 
 function timeout(ms: number) {
@@ -67,7 +67,7 @@ export const defineSimpleStringStreamRoute = (router: IRouter, logger: Logger) =
               await timeout(Math.floor(Math.random() * maxTimeoutMs));
 
               if (!shouldStop) {
-                pushStreamUpdate();
+                void pushStreamUpdate();
               }
             } else {
               end();
@@ -78,7 +78,7 @@ export const defineSimpleStringStreamRoute = (router: IRouter, logger: Logger) =
         }
 
         // do not call this using `await` so it will run asynchronously while we return the stream already.
-        pushStreamUpdate();
+        void pushStreamUpdate();
 
         return response.ok(responseWithHeaders);
       }

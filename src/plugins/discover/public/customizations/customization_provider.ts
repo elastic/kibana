@@ -10,7 +10,7 @@ import { createContext, useContext, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { isFunction } from 'lodash';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
-import type { DiscoverStateContainer } from '../application/main/services/discover_state';
+import type { DiscoverStateContainer } from '../application/main/state_management/discover_state';
 import type { CustomizationCallback } from './types';
 import {
   createCustomizationService,
@@ -60,4 +60,7 @@ export const useDiscoverCustomization$ = <TCustomizationId extends DiscoverCusto
 
 export const useDiscoverCustomization = <TCustomizationId extends DiscoverCustomizationId>(
   id: TCustomizationId
-) => useObservable(useDiscoverCustomization$(id));
+) => {
+  const customizationService = useContext(customizationContext);
+  return useObservable(customizationService.get$(id), customizationService.get(id));
+};

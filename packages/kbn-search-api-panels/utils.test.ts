@@ -12,8 +12,8 @@ import { getConsoleRequest } from './utils';
 describe('utils', () => {
   describe('getConsoleRequest()', () => {
     test('accepts string values', () => {
-      const consoleRequest = getConsoleRequest('ingestData');
-      expect(consoleRequest).toEqual(consoleDefinition.ingestData);
+      const consoleRequest = getConsoleRequest('buildSearchQuery');
+      expect(consoleRequest).toEqual(consoleDefinition.buildSearchQuery);
     });
 
     test('accepts function values', () => {

@@ -14,7 +14,8 @@ import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import useLifecycles from 'react-use/lib/useLifecycles';
 import useObservable from 'react-use/lib/useObservable';
@@ -85,6 +86,7 @@ const App: FC<AppProps> = ({
       lens: deps.lens,
       licenseManagement: deps.licenseManagement,
       maps: deps.maps,
+      observabilityAIAssistant: deps.observabilityAIAssistant,
       presentationUtil: deps.presentationUtil,
       savedObjectsManagement: deps.savedObjectsManagement,
       savedSearch: deps.savedSearch,
@@ -118,37 +120,35 @@ const App: FC<AppProps> = ({
 
   if (!licenseReady || !mlCapabilities) return null;
 
+  const startServices = pick(coreStart, 'analytics', 'i18n', 'theme');
   const datePickerDeps: DatePickerDependencies = {
     ...pick(services, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
     uiSettingsKeys: UI_SETTINGS,
     showFrozenDataTierChoice: !isServerless,
   };
 
-  const I18nContext = coreStart.i18n.Context;
   const ApplicationUsageTrackingProvider =
     deps.usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
 
   return (
-    <ApplicationUsageTrackingProvider>
-      <I18nContext>
-        <KibanaThemeProvider theme$={appMountParams.theme$}>
-          <KibanaContextProvider services={services}>
-            <StorageContextProvider storage={localStorage} storageKeys={ML_STORAGE_KEYS}>
-              <DatePickerContextProvider {...datePickerDeps}>
-                <EnabledFeaturesContextProvider
-                  isServerless={isServerless}
-                  mlFeatures={mlFeatures}
-                  showMLNavMenu={chromeStyle === 'classic'}
-                  experimentalFeatures={experimentalFeatures}
-                >
-                  <MlRouter pageDeps={pageDeps} />
-                </EnabledFeaturesContextProvider>
-              </DatePickerContextProvider>
-            </StorageContextProvider>
-          </KibanaContextProvider>
-        </KibanaThemeProvider>
-      </I18nContext>
-    </ApplicationUsageTrackingProvider>
+    <KibanaRenderContextProvider {...startServices}>
+      <ApplicationUsageTrackingProvider>
+        <KibanaContextProvider services={services}>
+          <StorageContextProvider storage={localStorage} storageKeys={ML_STORAGE_KEYS}>
+            <DatePickerContextProvider {...datePickerDeps}>
+              <EnabledFeaturesContextProvider
+                isServerless={isServerless}
+                mlFeatures={mlFeatures}
+                showMLNavMenu={chromeStyle === 'classic'}
+                experimentalFeatures={experimentalFeatures}
+              >
+                <MlRouter pageDeps={pageDeps} />
+              </EnabledFeaturesContextProvider>
+            </DatePickerContextProvider>
+          </StorageContextProvider>
+        </KibanaContextProvider>
+      </ApplicationUsageTrackingProvider>
+    </KibanaRenderContextProvider>
   );
 };
 

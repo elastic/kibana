@@ -17,22 +17,22 @@ import {
 
 import { retrieveMigratedLegacyActions } from './retrieve_migrated_legacy_actions';
 
-import { find } from '../../methods/find';
-import { deleteRule } from '../../methods/delete';
+import { findRules } from '../../../application/rule/methods/find/find_rules';
+import { deleteRule } from '../../../application/rule/methods/delete/delete_rule';
 
-jest.mock('../../methods/find', () => {
+jest.mock('../../../application/rule/methods/find/find_rules', () => {
   return {
-    find: jest.fn(),
+    findRules: jest.fn(),
   };
 });
 
-jest.mock('../../methods/delete', () => {
+jest.mock('../../../application/rule/methods/delete/delete_rule', () => {
   return {
     deleteRule: jest.fn(),
   };
 });
 
-const findMock = find as jest.Mock;
+const findMock = findRules as jest.Mock;
 const deleteRuleMock = deleteRule as jest.Mock;
 
 const getEmptyFindResult = () => ({

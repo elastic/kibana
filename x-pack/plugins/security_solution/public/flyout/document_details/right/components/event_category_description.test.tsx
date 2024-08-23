@@ -7,18 +7,18 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { RightPanelContext } from '../context';
+import { DocumentDetailsContext } from '../../shared/context';
 import { EVENT_CATEGORY_DESCRIPTION_TEST_ID } from './test_ids';
 import { EventCategoryDescription } from './event_category_description';
-import { mockContextValue } from '../mocks/mock_context';
+import { mockContextValue } from '../../shared/mocks/mock_context';
 import { TestProvidersComponent } from '../../../../common/mock';
 
-const renderDescription = (contextValue: RightPanelContext) =>
+const renderDescription = (contextValue: DocumentDetailsContext) =>
   render(
     <TestProvidersComponent>
-      <RightPanelContext.Provider value={contextValue}>
+      <DocumentDetailsContext.Provider value={contextValue}>
         <EventCategoryDescription />
-      </RightPanelContext.Provider>
+      </DocumentDetailsContext.Provider>
     </TestProvidersComponent>
   );
 

@@ -10,7 +10,7 @@ import {
   PACKAGES_SAVED_OBJECT_TYPE,
   MAX_TIME_COMPLETE_INSTALL,
 } from '@kbn/fleet-plugin/common/constants';
-import { skipIfNoDockerRegistry } from '../../helpers';
+import { skipIfNoDockerRegistry, isDockerRegistryEnabledOrSkipped } from '../../helpers';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { setupFleetAndAgents } from '../agents/services';
 
@@ -18,8 +18,7 @@ export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
-  const dockerServers = getService('dockerServers');
-  const server = dockerServers.get('registry');
+
   const pkgName = 'multiple_versions';
   const pkgVersion = '0.1.0';
   const pkgUpdateVersion = '0.2.0';
@@ -29,7 +28,7 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('package install', async () => {
       before(async () => {
-        if (!server.enabled) return;
+        if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
         await supertest
           .post(`/api/fleet/epm/packages/${pkgName}/0.1.0`)
           .set('kbn-xsrf', 'xxxx')
@@ -91,7 +90,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(packageAfterSetup.attributes.install_status).equal('installing');
       });
       after(async () => {
-        if (!server.enabled) return;
+        if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
         await supertest
           .delete(`/api/fleet/epm/packages/multiple_versions/0.1.0`)
           .set('kbn-xsrf', 'xxxx')
@@ -100,7 +99,7 @@ export default function (providerContext: FtrProviderContext) {
     });
     describe('package update', async () => {
       before(async () => {
-        if (!server.enabled) return;
+        if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
         await supertest
           .post(`/api/fleet/epm/packages/${pkgName}/0.1.0`)
           .set('kbn-xsrf', 'xxxx')
@@ -173,7 +172,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(packageAfterSetup.attributes.version).equal(pkgVersion);
       });
       after(async () => {
-        if (!server.enabled) return;
+        if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
         await supertest
           .delete(`/api/fleet/epm/packages/multiple_versions/0.1.0`)
           .set('kbn-xsrf', 'xxxx')

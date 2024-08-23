@@ -12,7 +12,7 @@ const cloud = {
   serverless: {
     projectId: '1234',
   },
-  projectsUrl: 'https://cloud.elastic.co/projects',
+  projectsUrl: 'https://cloud.elastic.co/projects/',
 } as CloudStart;
 
 describe('util', () => {
@@ -29,7 +29,7 @@ describe('util', () => {
 
     it('should return the correct url', () => {
       expect(getProjectFeaturesUrl(cloud)).toBe(
-        `${cloud.projectsUrl}/security/${cloud.serverless?.projectId}?open=securityProjectFeatures`
+        `${cloud.projectsUrl}security/${cloud.serverless?.projectId}?open=securityProjectFeatures`
       );
     });
   });

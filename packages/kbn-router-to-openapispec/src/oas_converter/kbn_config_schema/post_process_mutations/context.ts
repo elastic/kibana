@@ -7,42 +7,27 @@
  */
 
 import type { OpenAPIV3 } from 'openapi-types';
-import { processRef as processRefMutation } from './mutations/ref';
-import { removeSharedComponentId } from '../lib';
 
 export interface IContext {
-  sharedSchemas: Map<string, OpenAPIV3.SchemaObject>;
-  /**
-   * Attempt to convert a schema object to ref, my perform side-effect
-   *
-   * Will return the schema sans the ref meta ID if refs are disabled
-   *
-   * @note see also {@link Options['refs']}
-   */
-  processRef: (
-    schema: OpenAPIV3.SchemaObject
-  ) => OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject;
+  addSharedSchema: (id: string, schema: OpenAPIV3.SchemaObject) => void;
+  getSharedSchemas: () => { [id: string]: OpenAPIV3.SchemaObject };
 }
 
 interface Options {
   sharedSchemas?: Map<string, OpenAPIV3.SchemaObject>;
-  refs?: boolean;
 }
 
 class Context implements IContext {
-  readonly sharedSchemas: Map<string, OpenAPIV3.SchemaObject>;
-  readonly refs: boolean;
+  private readonly sharedSchemas: Map<string, OpenAPIV3.SchemaObject>;
   constructor(opts: Options) {
     this.sharedSchemas = opts.sharedSchemas ?? new Map();
-    this.refs = !!opts.refs;
   }
-  public processRef(
-    schema: OpenAPIV3.SchemaObject
-  ): OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject {
-    if (this.refs) {
-      return processRefMutation(this, schema) ?? schema;
-    }
-    return removeSharedComponentId(schema);
+  public addSharedSchema(id: string, schema: OpenAPIV3.SchemaObject): void {
+    this.sharedSchemas.set(id, schema);
+  }
+
+  public getSharedSchemas() {
+    return Object.fromEntries(this.sharedSchemas.entries());
   }
 }
 

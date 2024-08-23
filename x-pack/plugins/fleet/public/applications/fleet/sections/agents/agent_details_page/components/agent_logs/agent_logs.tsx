@@ -35,7 +35,7 @@ import { LogLevelFilter } from './filter_log_level';
 import { LogQueryBar } from './query_bar';
 import { buildQuery } from './build_query';
 import { SelectLogLevel } from './select_log_level';
-import { ViewLogsButton } from './view_logs_button';
+import { ViewLogsButton, getFormattedRange } from './view_logs_button';
 
 const WrapperFlexGroup = styled(EuiFlexGroup)`
   height: 100%;
@@ -112,9 +112,8 @@ const AgentPolicyLogsNotEnabledCallout: React.FunctionComponent<{ agentPolicy: A
 
 export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
   ({ agent, agentPolicy, state }) => {
-    const { data, application, cloud } = useStartServices();
+    const { data, application } = useStartServices();
     const { update: updateState } = AgentLogsUrlStateHelper.useTransitions();
-    const isLogsUIAvailable = !cloud?.isServerlessEnabled;
 
     // Util to convert date expressions (returned by datepicker) to timestamps (used by LogStream)
     const getDateRangeTimestamps = useCallback(
@@ -321,10 +320,9 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
                 }}
               >
                 <ViewLogsButton
-                  viewInLogs={isLogsUIAvailable}
                   logStreamQuery={logStreamQuery}
-                  startTime={state.start}
-                  endTime={state.end}
+                  startTime={getFormattedRange(state.start)}
+                  endTime={getFormattedRange(state.end)}
                 />
               </RedirectAppLinks>
             </EuiFlexItem>
@@ -342,7 +340,10 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <SelectLogLevel agent={agent} />
+          <SelectLogLevel
+            agent={agent}
+            agentPolicyLogLevel={agentPolicy?.advanced_settings?.agent_logging_level}
+          />
         </EuiFlexItem>
       </WrapperFlexGroup>
     );

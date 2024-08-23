@@ -41,29 +41,65 @@ const NotesContainer = styled(EuiFlexGroup)`
 `;
 NotesContainer.displayName = 'NotesContainer';
 
-interface Props {
+export interface NoteCardsProps {
   ariaRowindex: number;
   associateNote: AssociateNote;
+  className?: string;
   notes: TimelineResultNote[];
   showAddNote: boolean;
-  toggleShowAddNote: () => void;
+  toggleShowAddNote?: (eventId?: string) => void;
+  eventId?: string;
+  timelineId: string;
+  onCancel?: () => void;
+  showToggleEventDetailsAction?: boolean;
 }
 
 /** A view for entering and reviewing notes */
-export const NoteCards = React.memo<Props>(
-  ({ ariaRowindex, associateNote, notes, showAddNote, toggleShowAddNote }) => {
+export const NoteCards = React.memo<NoteCardsProps>(
+  ({
+    ariaRowindex,
+    associateNote,
+    className,
+    notes,
+    showAddNote,
+    toggleShowAddNote,
+    eventId,
+    timelineId,
+    onCancel,
+    showToggleEventDetailsAction = true,
+  }) => {
     const [newNote, setNewNote] = useState('');
 
     const associateNoteAndToggleShow = useCallback(
       (noteId: string) => {
         associateNote(noteId);
-        toggleShowAddNote();
+        if (!toggleShowAddNote) return;
+        if (eventId != null) {
+          toggleShowAddNote(eventId);
+        } else {
+          toggleShowAddNote();
+        }
       },
-      [associateNote, toggleShowAddNote]
+      [associateNote, toggleShowAddNote, eventId]
     );
 
+    const onCancelAddNote = useCallback(() => {
+      onCancel?.();
+      if (!toggleShowAddNote) return;
+      if (eventId != null) {
+        toggleShowAddNote(eventId);
+      } else {
+        toggleShowAddNote();
+      }
+    }, [eventId, toggleShowAddNote, onCancel]);
+
     return (
-      <NoteCardsCompContainer data-test-subj="note-cards" hasShadow={false} paddingSize="none">
+      <NoteCardsCompContainer
+        className={className}
+        data-test-subj="note-cards"
+        hasShadow={false}
+        paddingSize="none"
+      >
         {notes.length ? (
           <NotePreviewsContainer data-test-subj="note-previews-container">
             <NotesContainer
@@ -75,7 +111,11 @@ export const NoteCards = React.memo<Props>(
               <EuiScreenReaderOnly data-test-subj="screenReaderOnly">
                 <p>{i18n.YOU_ARE_VIEWING_NOTES(ariaRowindex)}</p>
               </EuiScreenReaderOnly>
-              <NotePreviews notes={notes} />
+              <NotePreviews
+                timelineId={timelineId}
+                notes={notes}
+                showToggleEventDetailsAction={showToggleEventDetailsAction}
+              />
             </NotesContainer>
           </NotePreviewsContainer>
         ) : null}
@@ -85,7 +125,7 @@ export const NoteCards = React.memo<Props>(
             <AddNote
               associateNote={associateNoteAndToggleShow}
               newNote={newNote}
-              onCancelAddNote={toggleShowAddNote}
+              onCancelAddNote={onCancelAddNote}
               updateNewNote={setNewNote}
             />
           </AddNoteContainer>

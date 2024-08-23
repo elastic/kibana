@@ -40,7 +40,7 @@ export function getUiSettings(
       name: i18n.translate('data.advancedSettings.metaFieldsTitle', {
         defaultMessage: 'Meta fields',
       }),
-      value: ['_source', '_id', '_index', '_score'],
+      value: ['_source', '_id', '_index', '_score', '_ignored'],
       description: i18n.translate('data.advancedSettings.metaFieldsText', {
         defaultMessage:
           'Fields that exist outside of _source to merge into our document when displaying it',
@@ -204,7 +204,7 @@ export function getUiSettings(
             <li><strong>{sessionId}:</strong> restricts operations to execute all search requests on the same shards.
               This has the benefit of reusing shard caches across requests.</li>
             <li><strong>{custom}:</strong> allows you to define a your own preference.
-              Use <strong>'courier:customRequestPreference'</strong> to customize your preference value.</li>
+              Use <strong>courier:customRequestPreference</strong> to customize your preference value.</li>
             <li><strong>{none}:</strong> means do not set a preference.
               This might provide better performance because requests can be spread across all shard copies.
               However, results might be inconsistent because different shards might be in different refresh states.</li>
@@ -213,6 +213,9 @@ export function getUiSettings(
           sessionId: requestPreferenceOptionLabels.sessionId,
           custom: requestPreferenceOptionLabels.custom,
           none: requestPreferenceOptionLabels.none,
+          ul: (chunks) => `<ul>${chunks}</ul>`,
+          li: (chunks) => `<li>${chunks}</li>`,
+          strong: (chunks) => `<strong>${chunks}</strong>`,
         },
       }),
       category: ['search'],
@@ -498,6 +501,7 @@ export function getUiSettings(
         defaultMessage: 'Whether the filters should have a global state (be pinned) by default',
       }),
       schema: schema.boolean(),
+      requiresPageReload: true,
     },
     [UI_SETTINGS.FILTERS_EDITOR_SUGGEST_VALUES]: {
       name: i18n.translate('data.advancedSettings.suggestFilterValuesTitle', {
@@ -510,6 +514,7 @@ export function getUiSettings(
           'Set this property to false to prevent the filter editor from suggesting values for fields.',
       }),
       schema: schema.boolean(),
+      requiresPageReload: true,
     },
     [UI_SETTINGS.AUTOCOMPLETE_VALUE_SUGGESTION_METHOD]: {
       name: i18n.translate('data.advancedSettings.autocompleteValueSuggestionMethod', {
@@ -535,6 +540,7 @@ export function getUiSettings(
       options: ['terms_enum', 'terms_agg'],
       category: ['autocomplete'],
       schema: schema.string(),
+      requiresPageReload: true,
     },
     [UI_SETTINGS.AUTOCOMPLETE_USE_TIMERANGE]: {
       name: i18n.translate('data.advancedSettings.autocompleteIgnoreTimerange', {
@@ -556,6 +562,7 @@ export function getUiSettings(
       }),
       category: ['autocomplete'],
       schema: schema.boolean(),
+      requiresPageReload: true,
     },
     [UI_SETTINGS.SEARCH_TIMEOUT]: {
       name: i18n.translate('data.advancedSettings.searchTimeout', {
@@ -569,6 +576,7 @@ export function getUiSettings(
       type: 'number',
       category: ['search'],
       schema: schema.number(),
+      requiresPageReload: true,
     },
   };
 }

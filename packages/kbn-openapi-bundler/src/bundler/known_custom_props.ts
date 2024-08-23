@@ -8,16 +8,18 @@
 
 /**
  * `x-internal: true` marks nodes the bundler must NOT include in the result bundled document. Any other values are ignored.
+ * See README for more details.
  */
 export const X_INTERNAL = 'x-internal';
 
 /**
- * `x-internal: true` marks reference nodes the bundler must inline in the result bundled document.
+ * `x-inline: true` marks reference nodes the bundler must inline in the result bundled document.
+ * See README for more details.
  */
 export const X_INLINE = 'x-inline';
 
 /**
- * `x-modify` marks nodes to be modified by the bundler. `partial` and `required` values are supported.
+ * `x-modify` marks nodes to be modified by the bundler. `partial` and `required` values are supported. See README for more details.
  *
  * - `partial` leads to removing `required` property making params under `properties` optional
  * - `required` leads to adding or extending `required` property by adding all param names under `properties`
@@ -29,3 +31,9 @@ export const X_MODIFY = 'x-modify';
  *  in result bundled document.
  */
 export const X_CODEGEN_ENABLED = 'x-codegen-enabled';
+
+/**
+ * `x-labels` allows to mark operation objects with arbitrary labels. It allows to exclude or include nodes
+ * marked with specific labels into the resulting bundle. See README for more details.
+ */
+export const X_LABELS = 'x-labels';

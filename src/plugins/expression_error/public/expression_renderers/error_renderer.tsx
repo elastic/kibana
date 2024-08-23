@@ -9,15 +9,16 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Observable } from 'rxjs';
-import { CoreTheme } from '@kbn/core/public';
+
+import { CoreSetup, CoreTheme } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
   ExpressionRenderDefinition,
   IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/common';
-import { CoreSetup } from '@kbn/core/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 import { withSuspense } from '@kbn/presentation-util-plugin/public';
 import { defaultTheme$ } from '@kbn/presentation-util-plugin/common';
 import { ErrorRendererConfig } from '../../common/types';
@@ -53,11 +54,15 @@ export const getErrorRenderer =
       });
 
       render(
-        <KibanaThemeProvider theme$={theme$}>
-          <I18nProvider>
-            <ErrorComponent onLoaded={handlers.done} {...config} parentNode={domNode} />
-          </I18nProvider>
-        </KibanaThemeProvider>,
+        <KibanaErrorBoundaryProvider analytics={undefined}>
+          <KibanaErrorBoundary>
+            <KibanaThemeProvider theme={{ theme$ }}>
+              <I18nProvider>
+                <ErrorComponent onLoaded={handlers.done} {...config} parentNode={domNode} />
+              </I18nProvider>
+            </KibanaThemeProvider>
+          </KibanaErrorBoundary>
+        </KibanaErrorBoundaryProvider>,
         domNode
       );
     },

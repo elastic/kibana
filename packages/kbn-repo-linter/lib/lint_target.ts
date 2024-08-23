@@ -56,11 +56,11 @@ export abstract class LintTarget {
     return this instanceof TsProjectLintTarget;
   }
 
-  getTsProject() {
+  getTsProject(): any {
     return this.isPackage() || this.isTsProject() ? this.tsProject : undefined;
   }
 
-  getPkg() {
+  getPkg(): any {
     return this.isPackage() ? this.pkg : undefined;
   }
 }

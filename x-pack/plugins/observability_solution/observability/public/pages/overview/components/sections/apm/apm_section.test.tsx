@@ -7,6 +7,7 @@
 
 import React from 'react';
 import * as fetcherHook from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
+import { screen } from '@elastic/eui/lib/test/rtl';
 import { render, data as dataMock } from '../../../../../utils/test_helper';
 import { CoreStart } from '@kbn/core/public';
 import { ConfigSchema, ObservabilityPublicPluginsStart } from '../../../../../plugin';
@@ -31,6 +32,14 @@ jest.mock('react-router-dom', () => ({
 const { ObservabilityAIAssistantContextualInsight } =
   observabilityAIAssistantPluginMock.createStartContract();
 
+const assertServiceStat = (description: string, stat: string) => {
+  const serviceStat = screen.getByTestSubject('apmServiceStat');
+
+  expect(serviceStat).toBeInTheDocument();
+  expect(serviceStat!.children[0]).toHaveTextContent(description);
+  expect(serviceStat!.children[1]).toHaveTextContent(stat);
+};
+
 describe('APMSection', () => {
   const bucketSize = { intervalString: '60s', bucketSize: 60, dateFormat: 'YYYY-MM-DD HH:mm' };
 
@@ -49,14 +58,13 @@ describe('APMSection', () => {
       from: '2020-10-08T06:00:00.000Z',
       to: '2020-10-08T07:00:00.000Z',
     });
-    const config = {
+    const config: ConfigSchema = {
       unsafe: {
         alertDetails: {
-          metrics: { enabled: false },
           uptime: { enabled: false },
         },
       },
-    } as ConfigSchema;
+    };
 
     jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
       appMountParameters: {} as AppMountParameters,
@@ -91,7 +99,7 @@ describe('APMSection', () => {
 
     expect(getByRole('heading')).toHaveTextContent('Services');
     expect(getByText('Show service inventory')).toBeInTheDocument();
-    expect(getByText('Services 11')).toBeInTheDocument();
+    assertServiceStat('Services', '11');
     expect(getByText('900.0 tpm')).toBeInTheDocument();
     expect(queryAllByTestId('loading')).toEqual([]);
   });
@@ -108,7 +116,7 @@ describe('APMSection', () => {
 
     expect(getByRole('heading')).toHaveTextContent('Services');
     expect(getByText('Show service inventory')).toBeInTheDocument();
-    expect(getByText('Services 11')).toBeInTheDocument();
+    assertServiceStat('Services', '11');
     expect(getByText('312.00k tpm')).toBeInTheDocument();
     expect(queryAllByTestId('loading')).toEqual([]);
   });
@@ -118,14 +126,14 @@ describe('APMSection', () => {
       status: fetcherHook.FETCH_STATUS.LOADING,
       refetch: jest.fn(),
     });
-    const { getByRole, queryAllByText, getByTestId } = render(
+    const { getByRole, queryAllByText, getByTestId, getAllByLabelText } = render(
       <APMSection bucketSize={bucketSize} />
     );
 
     expect(getByRole('heading')).toHaveTextContent('Services');
     expect(getByTestId('loading')).toBeInTheDocument();
     expect(queryAllByText('Show service inventory')).toEqual([]);
-    expect(queryAllByText('Services 11')).toEqual([]);
+    expect(getAllByLabelText('Statistic is loading').length).toEqual(2);
     expect(queryAllByText('312.00k tpm')).toEqual([]);
   });
 });

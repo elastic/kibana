@@ -8,7 +8,6 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import '../../../../../common/mock/match_media';
 import { defaultHeaders } from './default_headers';
 import { mockBrowserFields } from '../../../../../common/containers/source/mock';
 import type { Sort } from '../sort';
@@ -97,6 +96,11 @@ describe('ColumnHeaders', () => {
     });
 
     test('it renders the field browser', () => {
+      const mockCloseEditor = jest.fn();
+      mockUseFieldBrowserOptions.mockImplementation(({ editorActionsRef }) => {
+        editorActionsRef.current = { closeEditor: mockCloseEditor };
+        return {};
+      });
       const wrapper = mount(
         <TestProviders>
           <ColumnHeadersComponent {...defaultProps} />

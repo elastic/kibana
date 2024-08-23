@@ -21,12 +21,9 @@ export { getFieldTypeDescription } from './src/utils/get_field_type_description'
 export { getFieldTypeName, UNKNOWN_FIELD_TYPE_MESSAGE } from './src/utils/get_field_type_name';
 export {
   fieldNameWildcardMatcher,
+  comboBoxFieldOptionMatcher,
   getFieldSearchMatchingHighlight,
 } from './src/utils/field_name_wildcard_matcher';
 
 export { FieldIcon, type FieldIconProps, getFieldIconProps } from './src/components/field_icon';
 export { FieldDescription, type FieldDescriptionProps } from './src/components/field_description';
-export {
-  FieldDescriptionIconButton,
-  type FieldDescriptionIconButtonProps,
-} from './src/components/field_description_icon_button';

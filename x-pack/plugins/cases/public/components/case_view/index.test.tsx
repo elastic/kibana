@@ -14,7 +14,6 @@
 
 import React from 'react';
 
-import '../../common/mock/match_media';
 import type { CaseViewProps } from './types';
 import { connectorsMock } from '../../containers/mock';
 import type { SpacesApi } from '@kbn/spaces-plugin/public';

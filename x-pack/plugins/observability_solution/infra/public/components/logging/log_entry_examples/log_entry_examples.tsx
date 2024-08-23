@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
-
+import React, { FC, PropsWithChildren } from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { LogEntryExampleMessagesEmptyIndicator } from './log_entry_examples_empty_indicator';
 import { LogEntryExampleMessagesFailureIndicator } from './log_entry_examples_failure_indicator';
@@ -19,7 +18,7 @@ interface Props {
   exampleCount: number;
   onReload: () => void;
 }
-export const LogEntryExampleMessages: React.FunctionComponent<Props> = ({
+export const LogEntryExampleMessages: FC<PropsWithChildren<Props>> = ({
   isLoading,
   hasFailedLoading,
   exampleCount,

@@ -13,10 +13,10 @@ import { FunctionVisibility, type FunctionResponse } from '../../../common/funct
 import type { Message, ObservabilityAIAssistantScreenContextRequest } from '../../../common/types';
 import { filterFunctionDefinitions } from '../../../common/utils/filter_function_definitions';
 import type {
-  ChatFn,
+  FunctionCallChatFunction,
   FunctionHandler,
   FunctionHandlerRegistry,
-  RegisteredInstruction,
+  InstructionOrCallback,
   RegisterFunction,
   RegisterInstruction,
 } from '../types';
@@ -31,8 +31,10 @@ const ajv = new Ajv({
   strict: false,
 });
 
+export const GET_DATA_ON_SCREEN_FUNCTION_NAME = 'get_data_on_screen';
+
 export class ChatFunctionClient {
-  private readonly instructions: RegisteredInstruction[] = [];
+  private readonly instructions: InstructionOrCallback[] = [];
   private readonly functionRegistry: FunctionHandlerRegistry = new Map();
   private readonly validators: Map<string, ValidateFunction> = new Map();
 
@@ -46,7 +48,7 @@ export class ChatFunctionClient {
     if (allData.length) {
       this.registerFunction(
         {
-          name: 'get_data_on_screen',
+          name: GET_DATA_ON_SCREEN_FUNCTION_NAME,
           description: dedent(`Get data that is on the screen:
             ${allData.map((data) => `${data.name}: ${data.description}`).join('\n')}
           `),
@@ -105,7 +107,7 @@ export class ChatFunctionClient {
     }
   }
 
-  getInstructions(): RegisteredInstruction[] {
+  getInstructions(): InstructionOrCallback[] {
     return this.instructions;
   }
 
@@ -144,14 +146,12 @@ export class ChatFunctionClient {
     args,
     messages,
     signal,
-    connectorId,
   }: {
-    chat: ChatFn;
+    chat: FunctionCallChatFunction;
     name: string;
     args: string | undefined;
     messages: Message[];
     signal: AbortSignal;
-    connectorId: string;
   }): Promise<FunctionResponse> {
     const fn = this.functionRegistry.get(name);
 
@@ -167,7 +167,6 @@ export class ChatFunctionClient {
       {
         arguments: parsedArguments,
         messages,
-        connectorId,
         screenContexts: this.screenContexts,
         chat,
       },

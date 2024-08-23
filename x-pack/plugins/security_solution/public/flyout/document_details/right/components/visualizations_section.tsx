@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -20,7 +19,7 @@ const KEY = 'visualizations';
 /**
  * Visualizations section in overview. It contains analyzer preview and session view preview.
  */
-export const VisualizationsSection: FC = memo(() => {
+export const VisualizationsSection = memo(() => {
   const expanded = useExpandSection({ title: KEY, defaultValue: false });
 
   return (

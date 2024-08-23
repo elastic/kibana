@@ -36,6 +36,7 @@ export class UnifiedFieldListPageObject extends FtrService {
   }
 
   public async getSidebarAriaDescription(): Promise<string> {
+    await this.header.waitUntilLoadingHasFinished();
     return (
       (await (
         await this.testSubjects.find('fieldListGrouped__ariaDescription')
@@ -50,6 +51,15 @@ export class UnifiedFieldListPageObject extends FtrService {
   public async waitUntilSidebarHasLoaded() {
     await this.retry.waitFor('sidebar is loaded', async () => {
       return (await this.getSidebarAriaDescription()).length > 0;
+    });
+  }
+
+  public async waitUntilFieldlistHasCountOfFields(count: number) {
+    await this.retry.waitFor('wait until fieldlist has updated number of fields', async () => {
+      return (
+        (await this.find.allByCssSelector('#fieldListGroupedAvailableFields .kbnFieldButton'))
+          .length === count
+      );
     });
   }
 
@@ -230,6 +240,17 @@ export class UnifiedFieldListPageObject extends FtrService {
     // this method requires the field details to be open from clickFieldListItem()
     // this.testSubjects.find doesn't handle spaces in the data-test-subj value
     await this.testSubjects.click(`minus-${field}-${value}`);
+    await this.header.waitUntilLoadingHasFinished();
+  }
+
+  public async clickFieldListExistsFilter(field: string) {
+    const existsFilterTestSubj = `discoverFieldListPanelAddExistFilter-${field}`;
+    if (!(await this.testSubjects.exists(existsFilterTestSubj))) {
+      // field has to be open
+      await this.clickFieldListItem(field);
+    }
+    // this.testSubjects.find doesn't handle spaces in the data-test-subj value
+    await this.testSubjects.click(existsFilterTestSubj);
     await this.header.waitUntilLoadingHasFinished();
   }
 

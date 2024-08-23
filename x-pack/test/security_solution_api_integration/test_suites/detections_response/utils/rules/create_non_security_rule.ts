@@ -30,9 +30,7 @@ const SIMPLE_APM_RULE_DATA = {
  * Created a non security rule. Helpful in tests to verify functionality works with presence of non security rules.
  * @param supertest The supertest deps
  */
-export async function createNonSecurityRule(
-  supertest: SuperTest.SuperTest<SuperTest.Test>
-): Promise<void> {
+export async function createNonSecurityRule(supertest: SuperTest.Agent): Promise<void> {
   await supertest
     .post('/api/alerting/rule')
     .set('kbn-xsrf', 'true')

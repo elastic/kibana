@@ -67,7 +67,7 @@ export function fetchEffectFactory<T, R, S, F>(
     if (typeof onFailure === 'function') {
       onFailure?.(error);
     } else if (typeof onFailure === 'string') {
-      kibanaService.core.notifications.toasts.addError(
+      kibanaService.coreSetup.notifications.toasts.addError(
         { ...error, message: serializedError.body?.message ?? error.message },
         {
           title: onFailure,
@@ -104,7 +104,7 @@ export function fetchEffectFactory<T, R, S, F>(
         if (typeof onSuccess === 'function') {
           onSuccess(response as R);
         } else if (onSuccess && typeof onSuccess === 'string') {
-          kibanaService.core.notifications.toasts.addSuccess(onSuccess);
+          kibanaService.coreSetup.notifications.toasts.addSuccess(onSuccess);
         }
       }
     } catch (error) {

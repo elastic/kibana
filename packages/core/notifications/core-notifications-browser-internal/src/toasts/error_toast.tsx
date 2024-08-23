@@ -111,7 +111,7 @@ export function ErrorToast({
   ...startServices
 }: ErrorToastProps) {
   return (
-    <React.Fragment>
+    <KibanaRenderContextProvider {...startServices}>
       <p data-test-subj="errorToastMessage">{toastMessage}</p>
       <div className="eui-textRight">
         <EuiButton
@@ -126,7 +126,7 @@ export function ErrorToast({
           />
         </EuiButton>
       </div>
-    </React.Fragment>
+    </KibanaRenderContextProvider>
   );
 }
 

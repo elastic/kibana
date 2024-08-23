@@ -7,12 +7,11 @@
 
 import { IntegrationCardItem } from '@kbn/fleet-plugin/public';
 
-export const QUICKSTART_FLOWS = ['system-logs-virtual'];
+export const QUICKSTART_FLOWS = ['auto-detect-logs-virtual', 'kubernetes-quick-start'];
 
 export const toCustomCard = (card: IntegrationCardItem) => ({
   ...card,
   isQuickstart: QUICKSTART_FLOWS.includes(card.name),
-  showCardLabels: false,
 });
 
 export const isQuickstart = (cardName: string) => QUICKSTART_FLOWS.includes(cardName);

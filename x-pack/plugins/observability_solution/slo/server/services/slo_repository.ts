@@ -138,6 +138,11 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
       // if not present, we considered the version to be 1, e.g. not migrated.
       // We would need to call the _reset api on this SLO.
       version: storedSLO.version ?? 1,
+      // settings.preventInitialBackfill was added in 8.15.0
+      settings: {
+        ...storedSLO.settings,
+        preventInitialBackfill: storedSLO.settings?.preventInitialBackfill ?? false,
+      },
     });
 
     if (isLeft(result)) {

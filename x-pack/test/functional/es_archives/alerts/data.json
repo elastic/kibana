@@ -27,6 +27,7 @@
         "tags": [
         ],
         "throttle": null,
+        "updatedAt": "2020-06-17T15:35:38.497Z",
         "updatedBy": "elastic"
       },
       "migrationVersion": {
@@ -133,6 +134,7 @@
         "tags": [
         ],
         "throttle": null,
+        "updatedAt": "2020-09-22T15:16:07.451Z",
         "updatedBy": "elastic"
       },
       "migrationVersion": {
@@ -210,6 +212,7 @@
         "tags": [
         ],
         "throttle": null,
+        "updatedAt": "2020-06-17T15:35:38.497Z",
         "updatedBy": "elastic"
       },
       "migrationVersion": {
@@ -306,6 +309,7 @@
           "foo"
         ],
         "throttle": "1m",
+        "updatedAt": "2020-09-22T15:16:07.451Z",
         "updatedBy": null
       },
       "migrationVersion": {
@@ -372,6 +376,7 @@
         "apiKey" : null,
         "createdBy" : "elastic",
         "updatedBy" : "elastic",
+        "updatedAt" : "2021-07-27T20:42:55.896Z",
         "createdAt" : "2021-07-27T20:42:55.896Z",
         "muteAll" : false,
         "mutedInstanceIds" : [ ],
@@ -431,6 +436,7 @@
         "tags": [
         ],
         "throttle": null,
+        "updatedAt": "2020-09-22T15:16:07.451Z",
         "updatedBy": "elastic"
       },
       "migrationVersion": {
@@ -478,6 +484,7 @@
         "createdBy" : "elastic",
         "updatedBy" : "elastic",
         "createdAt" : "2021-07-27T20:42:55.896Z",
+        "updatedAt" : "2021-07-27T20:42:55.896Z",
         "muteAll" : false,
         "mutedInstanceIds" : [ ],
         "scheduledTaskId" : null,
@@ -518,6 +525,7 @@
         "createdBy" : "elastic",
         "updatedBy" : "elastic",
         "createdAt" : "2021-07-27T20:42:55.896Z",
+        "updatedAt" : "2021-07-27T20:42:55.896Z",
         "muteAll" : false,
         "mutedInstanceIds" : [ ],
         "scheduledTaskId" : null,
@@ -558,6 +566,7 @@
         "apiKey" : null,
         "createdBy" : "elastic",
         "updatedBy" : "elastic",
+        "updatedAt" : "2021-07-27T20:42:55.896Z",
         "createdAt" : "2021-07-27T20:42:55.896Z",
         "muteAll" : false,
         "mutedInstanceIds" : [ ],
@@ -598,6 +607,7 @@
         "apiKey" : null,
         "createdBy" : "elastic",
         "updatedBy" : "elastic",
+        "updatedAt" : "2021-07-27T20:42:55.896Z",
         "createdAt" : "2021-07-27T20:42:55.896Z",
         "muteAll" : false,
         "mutedInstanceIds" : [ ],
@@ -647,6 +657,7 @@
         "createdBy" : "elastic",
         "updatedBy" : "elastic",
         "createdAt" : "2021-07-27T20:42:55.896Z",
+        "updatedAt" : "2021-07-27T20:42:55.896Z",
         "muteAll" : false,
         "mutedInstanceIds" : [ ],
         "scheduledTaskId" : null,
@@ -740,6 +751,7 @@
            "createdBy":"3270256467",
            "updatedBy":"3270256467",
            "createdAt":"2022-02-16T01:24:02.121Z",
+           "updatedAt":"2021-07-27T20:42:55.896Z",
            "muteAll":true,
            "mutedInstanceIds":[
               
@@ -833,6 +845,7 @@
            "createdBy":"3270256467",
            "updatedBy":"3270256467",
            "createdAt":"2022-02-16T01:25:02.121Z",
+           "updatedAt":"2022-02-16T01:25:02.121Z",
            "muteAll":true,
            "mutedInstanceIds":[
               
@@ -875,6 +888,7 @@
         "createdBy" : "elastic",
         "updatedBy" : "elastic",
         "createdAt" : "2021-07-27T20:42:55.896Z",
+        "updatedAt": "2021-07-27T20:42:55.896Z",
         "muteAll" : false,
         "mutedInstanceIds" : [ ],
         "scheduledTaskId" : null,
@@ -926,6 +940,7 @@
         "createdBy" : "elastic",
         "updatedBy" : "elastic",
         "createdAt": "2022-03-26T16:04:50.698Z",
+        "updatedAt": "2022-03-26T16:04:50.698Z",
         "muteAll": false,
         "mutedInstanceIds": [],
         "scheduledTaskId": "776cb5c0-ad1e-11ec-ab9e-5f5932f4fad8",
@@ -1023,6 +1038,7 @@
            "createdBy":"elastic",
            "updatedBy":"elastic",
            "createdAt":"2021-07-27T20:42:55.896Z",
+           "updatedAt":"2021-07-27T20:42:55.896Z",
            "muteAll":true,
            "mutedInstanceIds":[
               
@@ -1082,6 +1098,7 @@
         "createdBy" : "elastic",
         "updatedBy" : "elastic",
         "createdAt": "2022-03-26T16:04:50.698Z",
+        "updatedAt":"2022-03-26T16:04:50.698Z",
         "muteAll": false,
         "mutedInstanceIds": [],
         "scheduledTaskId": "c8b39c29-d860-43b6-8817-b8058d80ddbc",
@@ -1133,6 +1150,7 @@
         "createdBy" : "elastic",
         "updatedBy" : "elastic",
         "createdAt": "2022-03-26T16:04:50.698Z",
+        "updatedAt": "2022-03-26T16:04:50.698Z",
         "muteAll": false,
         "mutedInstanceIds": [],
         "scheduledTaskId": "62c62b7f-8bf3-4104-a064-6247b7bda44f",
@@ -1184,6 +1202,7 @@
         "createdBy" : "elastic",
         "updatedBy" : "elastic",
         "createdAt": "2022-03-26T16:04:50.698Z",
+        "updatedAt": "2022-03-26T16:04:50.698Z",
         "muteAll": false,
         "mutedInstanceIds": [],
         "scheduledTaskId": "f0d13f4d-35ae-4554-897a-6392e97bb84c",
@@ -1225,6 +1244,7 @@
           "tags": [],
           "throttle": null,
           "updatedBy": "elastic",
+          "updatedAt": "2022-08-24T19:02:30.889Z",
           "isSnoozedUntil": "2022-08-24T19:05:49.817Z"
       },
       "migrationVersion": {
@@ -1263,6 +1283,7 @@
           "tags": [],
           "throttle": null,
           "updatedBy": "elastic",
+          "updatedAt": "2022-08-24T19:02:30.889Z",
           "isSnoozedUntil": "2022-08-24T19:05:49.817Z",
           "executionStatus": {
             "status": "ok",
@@ -1321,6 +1342,7 @@
           "tags": [],
           "throttle": null,
           "updatedBy": "elastic",
+          "updatedAt": "2022-08-24T19:02:30.889Z",
           "isSnoozedUntil": "2022-08-24T19:05:49.817Z",
           "executionStatus": {
             "status": "warning",
@@ -1394,6 +1416,7 @@
         "createdBy" : "elastic",
         "updatedBy" : "elastic",
         "createdAt": "2023-01-26T14:20:13.449Z",
+        "updatedAt": "2023-01-26T14:20:13.449Z",
         "muteAll": false,
         "mutedInstanceIds": [],
         "scheduledTaskId": "8bd01ff0-9d84-11ed-994d-f1971f849da5",
@@ -1457,6 +1480,7 @@
            "createdBy":"elastic",
            "updatedBy":"elastic",
            "createdAt":"2023-03-27T20:42:55.896Z",
+           "updatedAt":"2023-03-27T20:42:55.896Z",
            "muteAll":true,
            "mutedInstanceIds":[],
            "scheduledTaskId":null,

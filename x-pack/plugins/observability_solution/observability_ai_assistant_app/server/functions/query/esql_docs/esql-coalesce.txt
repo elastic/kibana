@@ -1,14 +1,30 @@
-COALESCE
+## COALESCE
 
-Syntax
-COALESCE(expression1 [, ..., expressionN])
-Parameters
-first
-Expression to evaluate
-rest
-Other expression to evaluate
-DescriptionReturns the first of its arguments that is not null. If all arguments are null, it returns null.Example
+The `COALESCE` function in ES|QL is used to return the first of its arguments that is not null. If all arguments are null, it returns null.
+
+### Syntax
+
+`COALESCE(first, rest)`
+
+#### Parameters
+
+- `first`: The first expression to evaluate.
+- `rest`: Other expressions to evaluate.
+
+### Examples
+
+Here are a couple of examples of how you can use the `COALESCE` function in ES|QL:
+
 ```esql
 ROW a=null, b="b"
 | EVAL COALESCE(a, b)
 ```
+
+In this example, the `COALESCE` function is used to evaluate the expressions `a` and `b`. Since `a` is null, the function returns the value of `b`, which is "b".
+
+```esql
+ROW a=null, b=null, c="c"
+| EVAL COALESCE(a, b, c)
+```
+
+In this second example, the `COALESCE` function evaluates the expressions `a`, `b`, and `c`. Since both `a` and `b` are null, the function returns the value of `c`, which is "c".

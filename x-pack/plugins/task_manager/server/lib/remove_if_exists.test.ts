@@ -38,7 +38,7 @@ describe('removeIfExists', () => {
     const error = SavedObjectsErrorHelpers.createInvalidVersionError(uuidv4());
     ts.remove.mockRejectedValue(error);
 
-    expect(removeIfExists(ts, id)).rejects.toBe(error);
+    await expect(removeIfExists(ts, id)).rejects.toBe(error);
 
     expect(ts.remove).toHaveBeenCalledWith(id);
   });

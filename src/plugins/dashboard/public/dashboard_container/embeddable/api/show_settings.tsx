@@ -8,7 +8,7 @@
 
 import React from 'react';
 
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 
 import { pluginServices } from '../../../services/plugin_services';
 import { DashboardSettings } from '../../component/settings/settings_flyout';
@@ -16,9 +16,8 @@ import { DashboardContainer, DashboardContainerContext } from '../dashboard_cont
 
 export function showSettings(this: DashboardContainer) {
   const {
-    settings: {
-      theme: { theme$ },
-    },
+    analytics,
+    settings: { i18n, theme },
     overlays,
   } = pluginServices.getServices();
 
@@ -36,7 +35,7 @@ export function showSettings(this: DashboardContainer) {
             }}
           />
         </DashboardContainerContext.Provider>,
-        { theme$ }
+        { analytics, i18n, theme }
       ),
       {
         size: 's',

@@ -13,6 +13,7 @@ import { createRoot } from '@kbn/core-test-helpers-kbn-server';
 const previouslyRegisteredTypes = [
   'action',
   'action_task_params',
+  'ad_hoc_run_params',
   'alert',
   'api_key_pending_invalidation',
   'apm-custom-dashboards',
@@ -26,6 +27,7 @@ const previouslyRegisteredTypes = [
   'application_usage_totals',
   'application_usage_transactional',
   'background-session',
+  'background-task-node',
   'canvas-element',
   'canvas-workpad',
   'canvas-workpad-template',
@@ -45,21 +47,28 @@ const previouslyRegisteredTypes = [
   'csp-rule-template',
   'csp_rule',
   'dashboard',
+  'dynamic-config-overrides', // Added in 8.16 to persist the dynamic config overrides and share it with other nodes
   'event-annotation-group',
   'endpoint:user-artifact',
   'endpoint:user-artifact-manifest',
+  'endpoint:unified-user-artifact-manifest',
   'enterprise_search_telemetry',
+  'entity-definition',
+  'entity-discovery-api-key',
   'epm-packages',
   'epm-packages-assets',
   'event_loop_delays_daily',
   'exception-list',
   'exception-list-agnostic',
+  'favorites',
   'file',
   'fileShare',
   'file-upload-telemetry',
   'file-upload-usage-collection-telemetry',
   'fleet-agent-actions',
   'fleet-agent-events',
+  'fleet-agent-policies',
+  'fleet-package-policies',
   'fleet-agents',
   'fleet-enrollment-api-keys',
   'fleet-fleet-server-host',
@@ -67,6 +76,8 @@ const previouslyRegisteredTypes = [
   'fleet-preconfiguration-deletion-record',
   'fleet-proxy',
   'fleet-uninstall-tokens',
+  'fleet-setup-lock',
+  'fleet-space-settings',
   'graph-workspace',
   'guided-setup-state',
   'guided-onboarding-guide-state',
@@ -138,9 +149,11 @@ const previouslyRegisteredTypes = [
   'upgrade-assistant-reindex-operation',
   'upgrade-assistant-telemetry',
   'uptime-dynamic-settings',
+  'synthetics-dynamic-settings',
   'uptime-synthetics-api-key',
   'url',
-  'usage-counters',
+  'usage-counter', // added in 8.16.0: richer mappings, located in .kibana_usage_counters
+  'usage-counters', // deprecated in favor of 'usage-counter'
   'visualization',
   'workplace_search_telemetry',
 ].sort();
@@ -148,9 +161,9 @@ const previouslyRegisteredTypes = [
 describe('SO type registrations', () => {
   let root: ReturnType<typeof createRoot>;
 
-  afterEach(() => {
+  afterEach(async () => {
     try {
-      root?.shutdown();
+      await root?.shutdown();
     } catch (e) {
       /* trap */
     }

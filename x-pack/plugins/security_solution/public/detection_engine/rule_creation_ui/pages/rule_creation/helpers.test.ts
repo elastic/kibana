@@ -6,6 +6,9 @@
  */
 
 import type { List } from '@kbn/securitysolution-io-ts-list-types';
+import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
+import type { ActionTypeRegistryContract } from '@kbn/alerts-ui-shared';
+
 import type { RuleCreateProps } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { Rule } from '../../../rule_management/logic';
 import {
@@ -129,9 +132,68 @@ describe('helpers', () => {
         type: 'query',
         timeline_id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
         timeline_title: 'Titled timeline',
+        related_integrations: [
+          {
+            package: 'aws',
+            integration: 'route53',
+            version: '~1.2.3',
+          },
+          {
+            package: 'system',
+            version: '^1.2.3',
+          },
+        ],
+        required_fields: [{ name: 'host.name', type: 'keyword' }],
       };
 
       expect(result).toEqual(expected);
+    });
+
+    test('filters out empty related integrations', () => {
+      const result = formatDefineStepData({
+        ...mockData,
+        relatedIntegrations: [
+          { package: '', version: '' },
+          {
+            package: 'aws',
+            integration: 'route53',
+            version: '~1.2.3',
+          },
+          { package: '', version: '' },
+          {
+            package: 'system',
+            version: '^1.2.3',
+          },
+        ],
+      });
+
+      expect(result).toMatchObject({
+        related_integrations: [
+          {
+            package: 'aws',
+            integration: 'route53',
+            version: '~1.2.3',
+          },
+          {
+            package: 'system',
+            version: '^1.2.3',
+          },
+        ],
+      });
+    });
+
+    test('filters out empty required fields', () => {
+      const result = formatDefineStepData({
+        ...mockData,
+        requiredFields: [
+          { name: 'host.name', type: 'keyword' },
+          { name: '', type: '' },
+        ],
+      });
+
+      expect(result).toMatchObject({
+        required_fields: [{ name: 'host.name', type: 'keyword' }],
+      });
     });
 
     describe('saved_query and query rule types', () => {
@@ -308,6 +370,17 @@ describe('helpers', () => {
         machine_learning_job_id: ['some_jobert_id'],
         timeline_id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
         timeline_title: 'Titled timeline',
+        related_integrations: [
+          {
+            package: 'aws',
+            integration: 'route53',
+            version: '~1.2.3',
+          },
+          {
+            package: 'system',
+            version: '^1.2.3',
+          },
+        ],
       };
 
       expect(result).toEqual(expected);
@@ -501,9 +574,47 @@ describe('helpers', () => {
         threat_index: mockStepData.threatIndex,
         index: mockStepData.index,
         threat_filters: threatFilters,
+        related_integrations: [
+          {
+            package: 'aws',
+            integration: 'route53',
+            version: '~1.2.3',
+          },
+          {
+            package: 'system',
+            version: '^1.2.3',
+          },
+        ],
+        required_fields: [{ name: 'host.name', type: 'keyword' }],
       };
 
       expect(result).toEqual(expected);
+    });
+
+    it('returns suppression fields for machine_learning rules', () => {
+      const mockStepData: DefineStepRule = {
+        ...mockData,
+        ruleType: 'machine_learning',
+        machineLearningJobId: ['some_jobert_id'],
+        anomalyThreshold: 44,
+        groupByFields: ['event.type'],
+        groupByRadioSelection: GroupByOptions.PerTimePeriod,
+        groupByDuration: { value: 10, unit: 'm' },
+      };
+      const result = formatDefineStepData(mockStepData);
+
+      const expected: DefineStepRuleJson = {
+        machine_learning_job_id: ['some_jobert_id'],
+        anomaly_threshold: 44,
+        type: 'machine_learning',
+        alert_suppression: {
+          group_by: ['event.type'],
+          duration: { value: 10, unit: 'm' },
+          missing_fields_strategy: 'suppress',
+        },
+      };
+
+      expect(result).toEqual(expect.objectContaining(expected));
     });
   });
 
@@ -625,10 +736,36 @@ describe('helpers', () => {
         tags: ['tag1', 'tag2'],
         threat: getThreatMock(),
         investigation_fields: { field_names: ['foo', 'bar'] },
+        max_signals: 100,
         setup: '# this is some setup documentation',
       };
 
       expect(result).toEqual(expected);
+    });
+
+    // Users are allowed to input 0 in the form, but value is validated in the API layer
+    test('returns formatted object with max_signals set to 0', () => {
+      const mockDataWithZeroMaxSignals: AboutStepRule = {
+        ...mockData,
+        maxSignals: 0,
+      };
+
+      const result = formatAboutStepData(mockDataWithZeroMaxSignals);
+
+      expect(result.max_signals).toEqual(0);
+    });
+
+    // Strings or empty values are replaced with undefined and overriden with the default value of 1000
+    test('returns formatted object with undefined max_signals for non-integer values inputs', () => {
+      const mockDataWithNonIntegerMaxSignals: AboutStepRule = {
+        ...mockData,
+        // @ts-expect-error
+        maxSignals: '',
+      };
+
+      const result = formatAboutStepData(mockDataWithNonIntegerMaxSignals);
+
+      expect(result.max_signals).toEqual(undefined);
     });
 
     test('returns formatted object with endpoint exceptions_list', () => {
@@ -707,6 +844,7 @@ describe('helpers', () => {
         tags: ['tag1', 'tag2'],
         threat: getThreatMock(),
         investigation_fields: { field_names: ['foo', 'bar'] },
+        max_signals: 100,
         setup: '# this is some setup documentation',
       };
 
@@ -733,6 +871,7 @@ describe('helpers', () => {
         tags: ['tag1', 'tag2'],
         threat: getThreatMock(),
         investigation_fields: { field_names: ['foo', 'bar'] },
+        max_signals: 100,
         setup: '# this is some setup documentation',
       };
 
@@ -778,6 +917,7 @@ describe('helpers', () => {
         tags: ['tag1', 'tag2'],
         threat: getThreatMock(),
         investigation_fields: { field_names: ['foo', 'bar'] },
+        max_signals: 100,
         setup: '# this is some setup documentation',
       };
 
@@ -832,6 +972,7 @@ describe('helpers', () => {
           },
         ],
         investigation_fields: { field_names: ['foo', 'bar'] },
+        max_signals: 100,
         setup: '# this is some setup documentation',
       };
 
@@ -862,6 +1003,7 @@ describe('helpers', () => {
         timestamp_override: 'event.ingest',
         timestamp_override_fallback_disabled: true,
         investigation_fields: { field_names: ['foo', 'bar'] },
+        max_signals: 100,
         setup: '# this is some setup documentation',
       };
 
@@ -893,6 +1035,7 @@ describe('helpers', () => {
         timestamp_override_fallback_disabled: undefined,
         threat: getThreatMock(),
         investigation_fields: undefined,
+        max_signals: 100,
         setup: '# this is some setup documentation',
       };
 
@@ -923,6 +1066,7 @@ describe('helpers', () => {
         threat_indicator_path: undefined,
         timestamp_override: undefined,
         timestamp_override_fallback_disabled: undefined,
+        max_signals: 100,
         setup: '# this is some setup documentation',
       };
 
@@ -953,6 +1097,7 @@ describe('helpers', () => {
         threat_indicator_path: undefined,
         timestamp_override: undefined,
         timestamp_override_fallback_disabled: undefined,
+        max_signals: 100,
         setup: '# this is some setup documentation',
       };
 
@@ -962,13 +1107,19 @@ describe('helpers', () => {
 
   describe('formatActionsStepData', () => {
     let mockData: ActionsStepRule;
+    const actionTypeRegistry = {
+      ...actionTypeRegistryMock.create(),
+      get: jest.fn((actionTypeId: string) => ({
+        isSystemAction: false,
+      })),
+    } as unknown as jest.Mocked<ActionTypeRegistryContract>;
 
     beforeEach(() => {
       mockData = mockActionsStepRule();
     });
 
     test('returns formatted object as ActionsStepRuleJson', () => {
-      const result = formatActionsStepData(mockData);
+      const result = formatActionsStepData(mockData, actionTypeRegistry);
       const expected: ActionsStepRuleJson = {
         actions: [],
         enabled: false,
@@ -992,7 +1143,7 @@ describe('helpers', () => {
         ...mockData,
         actions: [mockAction],
       };
-      const result = formatActionsStepData(mockStepData);
+      const result = formatActionsStepData(mockStepData, actionTypeRegistry);
       const expected: ActionsStepRuleJson = {
         actions: [
           {
@@ -1017,6 +1168,7 @@ describe('helpers', () => {
     let mockDefine: DefineStepRule;
     let mockSchedule: ScheduleStepRule;
     let mockActions: ActionsStepRule;
+    const actionTypeRegistry = actionTypeRegistryMock.create();
 
     beforeEach(() => {
       mockAbout = mockAboutStepRule();
@@ -1026,7 +1178,13 @@ describe('helpers', () => {
     });
 
     test('returns rule with type of query when saved_id exists but shouldLoadQueryDynamically=false', () => {
-      const result = formatRule<Rule>(mockDefine, mockAbout, mockSchedule, mockActions);
+      const result = formatRule<Rule>(
+        mockDefine,
+        mockAbout,
+        mockSchedule,
+        mockActions,
+        actionTypeRegistry
+      );
 
       expect(result.type).toEqual('query');
     });
@@ -1036,7 +1194,8 @@ describe('helpers', () => {
         { ...mockDefine, shouldLoadQueryDynamically: true },
         mockAbout,
         mockSchedule,
-        mockActions
+        mockActions,
+        actionTypeRegistry
       );
 
       expect(result.type).toEqual('saved_query');
@@ -1054,14 +1213,21 @@ describe('helpers', () => {
         mockDefineStepRuleWithoutSavedId,
         mockAbout,
         mockSchedule,
-        mockActions
+        mockActions,
+        actionTypeRegistry
       );
 
       expect(result.type).toEqual('query');
     });
 
     test('returns rule without id if ruleId does not exist', () => {
-      const result = formatRule<RuleCreateProps>(mockDefine, mockAbout, mockSchedule, mockActions);
+      const result = formatRule<RuleCreateProps>(
+        mockDefine,
+        mockAbout,
+        mockSchedule,
+        mockActions,
+        actionTypeRegistry
+      );
 
       expect(result).not.toHaveProperty<RuleCreateProps>('id');
     });

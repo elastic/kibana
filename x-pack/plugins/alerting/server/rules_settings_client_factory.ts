@@ -10,8 +10,8 @@ import {
   Logger,
   SavedObjectsServiceStart,
   SECURITY_EXTENSION_ID,
+  SecurityServiceStart,
 } from '@kbn/core/server';
-import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { RulesSettingsClient } from './rules_settings_client';
 import { RULES_SETTINGS_SAVED_OBJECT_TYPE } from '../common';
 
@@ -19,14 +19,14 @@ export interface RulesSettingsClientFactoryOpts {
   logger: Logger;
   savedObjectsService: SavedObjectsServiceStart;
   isServerless: boolean;
-  securityPluginStart?: SecurityPluginStart;
+  securityService: SecurityServiceStart;
 }
 
 export class RulesSettingsClientFactory {
   private isInitialized = false;
   private logger!: Logger;
   private savedObjectsService!: SavedObjectsServiceStart;
-  private securityPluginStart?: SecurityPluginStart;
+  private securityService!: SecurityServiceStart;
   private isServerless = false;
 
   public initialize(options: RulesSettingsClientFactoryOpts) {
@@ -36,12 +36,12 @@ export class RulesSettingsClientFactory {
     this.isInitialized = true;
     this.logger = options.logger;
     this.savedObjectsService = options.savedObjectsService;
-    this.securityPluginStart = options.securityPluginStart;
+    this.securityService = options.securityService;
     this.isServerless = options.isServerless;
   }
 
   private createRulesSettingsClient(request: KibanaRequest, withAuth: boolean) {
-    const { securityPluginStart } = this;
+    const { securityService } = this;
     const savedObjectsClient = this.savedObjectsService.getScopedClient(request, {
       includedHiddenTypes: [RULES_SETTINGS_SAVED_OBJECT_TYPE],
       ...(withAuth ? {} : { excludedExtensions: [SECURITY_EXTENSION_ID] }),
@@ -51,11 +51,8 @@ export class RulesSettingsClientFactory {
       logger: this.logger,
       savedObjectsClient,
       async getUserName() {
-        if (!securityPluginStart || !request) {
-          return null;
-        }
-        const user = securityPluginStart.authc.getCurrentUser(request);
-        return user ? user.username : null;
+        const user = securityService.authc.getCurrentUser(request);
+        return user?.username ?? null;
       },
       isServerless: this.isServerless,
     });

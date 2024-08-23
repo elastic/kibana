@@ -312,7 +312,7 @@
             "signature": [
               "Pick<Required<Partial<",
               "DiscoverServices",
-              ">>, \"history\" | \"data\" | \"uiSettings\" | \"timefilter\" | \"filterManager\"> & { urlStateStorage: ",
+              ">>, \"data\" | \"history\" | \"uiSettings\" | \"timefilter\" | \"filterManager\"> & { urlStateStorage: ",
               {
                 "pluginId": "kibanaUtils",
                 "scope": "public",
@@ -335,7 +335,9 @@
             "description": [],
             "signature": [
               "Observable",
-              "<never>"
+              "<",
+              "LogsExplorerPublicEvent",
+              ">"
             ],
             "path": "x-pack/plugins/observability_solution/logs_explorer/public/controller/types.ts",
             "deprecated": false,
@@ -655,30 +657,6 @@
         "children": [
           {
             "parentPluginId": "logsExplorer",
-            "id": "def-public.LogsExplorerCustomizations.flyout",
-            "type": "Object",
-            "tags": [],
-            "label": "flyout",
-            "description": [],
-            "signature": [
-              "{ renderContent?: ",
-              "RenderContentCustomization",
-              "<",
-              {
-                "pluginId": "logsExplorer",
-                "scope": "public",
-                "docId": "kibLogsExplorerPluginApi",
-                "section": "def-public.LogsExplorerFlyoutContentProps",
-                "text": "LogsExplorerFlyoutContentProps"
-              },
-              "> | undefined; } | undefined"
-            ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/public/customizations/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "logsExplorer",
             "id": "def-public.LogsExplorerCustomizations.events",
             "type": "Object",
             "tags": [],
@@ -693,70 +671,6 @@
                 "text": "LogsExplorerCustomizationEvents"
               },
               " | undefined"
-            ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/public/customizations/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "logsExplorer",
-        "id": "def-public.LogsExplorerFlyoutContentProps",
-        "type": "Interface",
-        "tags": [],
-        "label": "LogsExplorerFlyoutContentProps",
-        "description": [],
-        "path": "x-pack/plugins/observability_solution/logs_explorer/public/customizations/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "logsExplorer",
-            "id": "def-public.LogsExplorerFlyoutContentProps.actions",
-            "type": "Object",
-            "tags": [],
-            "label": "actions",
-            "description": [],
-            "signature": [
-              "{ addFilter: ",
-              "DocViewFilterFn",
-              " | undefined; addColumn: ((columnName: string) => void) | undefined; removeColumn: ((columnName: string) => void) | undefined; }"
-            ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/public/customizations/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "logsExplorer",
-            "id": "def-public.LogsExplorerFlyoutContentProps.dataView",
-            "type": "Object",
-            "tags": [],
-            "label": "dataView",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
-              }
-            ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/public/customizations/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "logsExplorer",
-            "id": "def-public.LogsExplorerFlyoutContentProps.doc",
-            "type": "Object",
-            "tags": [],
-            "label": "doc",
-            "description": [],
-            "signature": [
-              "LogDocument"
             ],
             "path": "x-pack/plugins/observability_solution/logs_explorer/public/customizations/types.ts",
             "deprecated": false,
@@ -2700,6 +2614,56 @@
             "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "logsExplorer",
+        "id": "def-common.singleDatasetSelectionPlainRT",
+        "type": "Object",
+        "tags": [],
+        "label": "singleDatasetSelectionPlainRT",
+        "description": [],
+        "signature": [
+          "TypeC",
+          "<{ selectionType: ",
+          "LiteralC",
+          "<\"single\">; selection: ",
+          "IntersectionC",
+          "<[",
+          "PartialC",
+          "<{ name: ",
+          "StringC",
+          "; }>, ",
+          "PartialC",
+          "<{ title: ",
+          "StringC",
+          "; }>, ",
+          "PartialC",
+          "<{ version: ",
+          "StringC",
+          "; }>, ",
+          "TypeC",
+          "<{ dataset: ",
+          "ExactC",
+          "<",
+          "IntersectionC",
+          "<[",
+          "TypeC",
+          "<{ name: ",
+          "BrandC",
+          "<",
+          "StringC",
+          ", ",
+          "IndexPatternBrand",
+          ">; }>, ",
+          "PartialC",
+          "<{ title: ",
+          "StringC",
+          "; }>]>>; }>]>; }>"
+        ],
+        "path": "x-pack/plugins/observability_solution/logs_explorer/common/data_source_selection/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {

@@ -10,8 +10,9 @@ import { i18n } from '@kbn/i18n';
 import type { IUiSettingsClient, OverlayStart } from '@kbn/core/public';
 import { asyncForEach } from '@kbn/std';
 import { EuiConfirmModalProps } from '@elastic/eui';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { StartServices } from '../../types';
 
 const confirmModalOptionsDelete = {
   confirmButtonText: i18n.translate('indexPatternManagement.editIndexPattern.deleteButton', {
@@ -36,15 +37,18 @@ interface RemoveDataViewDeps {
   uiSettings: IUiSettingsClient;
   overlays: OverlayStart;
   onDelete: () => void;
+  startServices: StartServices;
 }
 
 export const removeDataView =
-  ({ dataViews, overlays, onDelete }: RemoveDataViewDeps) =>
+  ({ dataViews, overlays, onDelete, startServices }: RemoveDataViewDeps) =>
   (dataViewArray: RemoveDataViewProps[], msg: JSX.Element) => {
-    overlays.openConfirm(toMountPoint(msg), confirmModalOptionsDelete).then(async (isConfirmed) => {
-      if (isConfirmed) {
-        await asyncForEach(dataViewArray, async ({ id }) => dataViews.delete(id));
-        onDelete();
-      }
-    });
+    overlays
+      .openConfirm(toMountPoint(msg, startServices), confirmModalOptionsDelete)
+      .then(async (isConfirmed) => {
+        if (isConfirmed) {
+          await asyncForEach(dataViewArray, async ({ id }) => dataViews.delete(id));
+          onDelete();
+        }
+      });
   };

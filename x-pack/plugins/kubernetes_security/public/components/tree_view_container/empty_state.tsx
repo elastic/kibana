@@ -31,7 +31,7 @@ export const EmptyState: React.FC = () => {
               <EuiFlexItem>
                 <EuiText size="s">
                   <EuiTitle>
-                    <h3>
+                    <h3 aria-level={2}>
                       <FormattedMessage
                         id="xpack.kubernetesSecurity.treeView.empty.title"
                         defaultMessage="No results match your search criteria"

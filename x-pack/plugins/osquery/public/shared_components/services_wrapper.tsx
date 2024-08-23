@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '../common/lib/kibana';
 
 import { queryClient } from '../query_client';
-import { KibanaThemeProvider } from '../shared_imports';
+import { KibanaRenderContextProvider } from '../shared_imports';
 import type { StartPlugins } from '../types';
 
 export interface ServicesWrapperProps {
@@ -21,13 +20,11 @@ export interface ServicesWrapperProps {
 }
 
 const ServicesWrapperComponent: React.FC<ServicesWrapperProps> = ({ services, children }) => (
-  <KibanaThemeProvider theme$={services.theme.theme$}>
+  <KibanaRenderContextProvider {...services}>
     <KibanaContextProvider services={services}>
-      <EuiErrorBoundary>
-        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-      </EuiErrorBoundary>
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     </KibanaContextProvider>
-  </KibanaThemeProvider>
+  </KibanaRenderContextProvider>
 );
 
 const ServicesWrapper = React.memo(ServicesWrapperComponent);

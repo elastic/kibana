@@ -17,11 +17,9 @@ import {
 } from '../shared_imports';
 import { APP_CLUSTER_REQUIRED_PRIVILEGES } from '../constants';
 
-export const ComponentTemplatesWithPrivileges: FunctionComponent = ({
-  children,
-}: {
+export const ComponentTemplatesWithPrivileges: FunctionComponent<{
   children?: React.ReactNode;
-}) => {
+}> = ({ children }) => {
   const { apiError } = useAuthorizationContext();
 
   if (apiError) {

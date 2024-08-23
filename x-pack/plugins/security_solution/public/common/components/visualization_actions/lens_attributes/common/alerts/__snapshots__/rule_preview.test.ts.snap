@@ -158,12 +158,14 @@ Object {
       ],
       "legend": Object {
         "isVisible": false,
+        "legendStats": Array [
+          "currentAndLastValue",
+        ],
         "position": "right",
       },
       "preferredSeriesType": "bar_stacked",
       "title": "Empty XY chart",
       "valueLabels": "hide",
-      "valuesInLegend": true,
       "yTitle": "",
     },
   },

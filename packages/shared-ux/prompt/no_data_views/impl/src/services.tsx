@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useContext } from 'react';
+import React, { FC, PropsWithChildren, useContext } from 'react';
 
 import type {
   NoDataViewsPromptServices,
@@ -19,7 +19,7 @@ const NoDataViewsPromptContext = React.createContext<NoDataViewsPromptServices |
 /**
  * Abstract external service Provider.
  */
-export const NoDataViewsPromptProvider: FC<NoDataViewsPromptServices> = ({
+export const NoDataViewsPromptProvider: FC<PropsWithChildren<NoDataViewsPromptServices>> = ({
   children,
   ...services
 }) => {
@@ -46,10 +46,9 @@ export const NoDataViewsPromptProvider: FC<NoDataViewsPromptServices> = ({
 /**
  * Kibana-specific Provider that maps to known dependency types.
  */
-export const NoDataViewsPromptKibanaProvider: FC<NoDataViewsPromptKibanaDependencies> = ({
-  children,
-  ...services
-}) => {
+export const NoDataViewsPromptKibanaProvider: FC<
+  PropsWithChildren<NoDataViewsPromptKibanaDependencies>
+> = ({ children, ...services }) => {
   const {
     share,
     coreStart: {

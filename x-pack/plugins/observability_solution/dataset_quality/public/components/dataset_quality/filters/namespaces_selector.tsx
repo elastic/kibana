@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiFilterButton,
-  EuiFilterGroup,
-  EuiPopover,
-  EuiPopoverTitle,
-  EuiSelectable,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFilterButton, EuiPopover, EuiPopoverTitle, EuiSelectable, EuiText } from '@elastic/eui';
 import React, { useState } from 'react';
 import type { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
 import { i18n } from '@kbn/i18n';
@@ -90,37 +83,35 @@ export function NamespacesSelector({
   );
 
   return (
-    <EuiFilterGroup>
-      <EuiPopover
-        button={button}
-        isOpen={isPopoverOpen}
-        closePopover={closePopover}
-        panelPaddingSize="none"
+    <EuiPopover
+      button={button}
+      isOpen={isPopoverOpen}
+      closePopover={closePopover}
+      panelPaddingSize="none"
+    >
+      <EuiSelectable
+        data-test-subj="datasetQualityNamespacesSelectable"
+        searchable
+        searchProps={{
+          placeholder: namespacesSelectorSearchPlaceholder,
+          compressed: true,
+        }}
+        aria-label={namespacesSelectorLabel}
+        options={namespaces}
+        onChange={onNamespacesChange}
+        isLoading={isLoading}
+        loadingMessage={namespacesSelectorLoading}
+        emptyMessage={namespacesSelectorNoneAvailable}
+        noMatchesMessage={namespacesSelectorNoneMatching}
+        renderOption={(option) => renderOption(option)}
       >
-        <EuiSelectable
-          data-test-subj="datasetQualityNamespacesSelectable"
-          searchable
-          searchProps={{
-            placeholder: namespacesSelectorSearchPlaceholder,
-            compressed: true,
-          }}
-          aria-label={namespacesSelectorLabel}
-          options={namespaces}
-          onChange={onNamespacesChange}
-          isLoading={isLoading}
-          loadingMessage={namespacesSelectorLoading}
-          emptyMessage={namespacesSelectorNoneAvailable}
-          noMatchesMessage={namespacesSelectorNoneMatching}
-          renderOption={(option) => renderOption(option)}
-        >
-          {(list, search) => (
-            <div style={{ width: 300 }}>
-              <EuiPopoverTitle paddingSize="s">{search}</EuiPopoverTitle>
-              {list}
-            </div>
-          )}
-        </EuiSelectable>
-      </EuiPopover>
-    </EuiFilterGroup>
+        {(list, search) => (
+          <div style={{ width: 300 }}>
+            <EuiPopoverTitle paddingSize="s">{search}</EuiPopoverTitle>
+            {list}
+          </div>
+        )}
+      </EuiSelectable>
+    </EuiPopover>
   );
 }

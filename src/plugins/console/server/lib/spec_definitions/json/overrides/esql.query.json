@@ -1,0 +1,25 @@
+{
+  "esql.query": {
+    "data_autocomplete_rules": {
+      "columnar": false,
+      "locale": "",
+      "params": [],
+      "query": ""
+    },
+    "url_params": {
+      "format": [
+        "cbor",
+        "csv",
+        "json",
+        "smile",
+        "text",
+        "tsv",
+        "yaml"
+      ],
+      "drop_null_columns": [
+        "false",
+        "true"
+      ]
+    }
+  }
+}

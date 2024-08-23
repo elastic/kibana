@@ -36,6 +36,8 @@ export const EPM_API_ROUTES = {
   INSTALL_BY_UPLOAD_PATTERN: EPM_PACKAGES_MANY,
   CUSTOM_INTEGRATIONS_PATTERN: `${EPM_API_ROOT}/custom_integrations`,
   DELETE_PATTERN: EPM_PACKAGES_ONE,
+  INSTALL_KIBANA_ASSETS_PATTERN: `${EPM_PACKAGES_ONE}/kibana_assets`,
+  DELETE_KIBANA_ASSETS_PATTERN: `${EPM_PACKAGES_ONE}/kibana_assets`,
   FILEPATH_PATTERN: `${EPM_PACKAGES_ONE}/{filePath*}`,
   CATEGORIES_PATTERN: `${EPM_API_ROOT}/categories`,
   VERIFICATION_KEY_ID: `${EPM_API_ROOT}/verification_key_id`,
@@ -105,6 +107,7 @@ export const FLEET_SERVER_HOST_API_ROUTES = {
   INFO_PATTERN: `${API_ROOT}/fleet_server_hosts/{itemId}`,
   UPDATE_PATTERN: `${API_ROOT}/fleet_server_hosts/{itemId}`,
   DELETE_PATTERN: `${API_ROOT}/fleet_server_hosts/{itemId}`,
+  POLICY_STATUS_PATTERN: `${API_ROOT}/fleet_server_policy_status`,
 };
 
 export const FLEET_PROXY_API_ROUTES = {
@@ -119,6 +122,9 @@ export const FLEET_PROXY_API_ROUTES = {
 export const SETTINGS_API_ROUTES = {
   INFO_PATTERN: `${API_ROOT}/settings`,
   UPDATE_PATTERN: `${API_ROOT}/settings`,
+  ENROLLMENT_INFO_PATTERN: `${INTERNAL_ROOT}/settings/enrollment`,
+  SPACE_INFO_PATTERN: `${API_ROOT}/space_settings`,
+  SPACE_UPDATE_PATTERN: `${API_ROOT}/space_settings`,
 };
 
 // App API routes
@@ -126,6 +132,7 @@ export const APP_API_ROUTES = {
   HEALTH_CHECK_PATTERN: `${API_ROOT}/health_check`,
   CHECK_PERMISSIONS_PATTERN: `${API_ROOT}/check-permissions`,
   GENERATE_SERVICE_TOKEN_PATTERN: `${API_ROOT}/service_tokens`,
+  AGENT_POLICIES_SPACES: `${INTERNAL_ROOT}/agent_policies_spaces`,
   // deprecated since 8.0
   GENERATE_SERVICE_TOKEN_PATTERN_DEPRECATED: `${API_ROOT}/service-tokens`,
 };
@@ -158,6 +165,7 @@ export const AGENT_API_ROUTES = {
   LIST_TAGS_PATTERN: `${API_ROOT}/agents/tags`,
   LIST_UPLOADS_PATTERN: `${API_ROOT}/agents/{agentId}/uploads`,
   GET_UPLOAD_FILE_PATTERN: `${API_ROOT}/agents/files/{fileId}/{fileName}`,
+  DELETE_UPLOAD_FILE_PATTERN: `${API_ROOT}/agents/files/{fileId}`,
 };
 
 export const ENROLLMENT_API_KEY_ROUTES = {
@@ -205,6 +213,15 @@ export const DOWNLOAD_SOURCE_API_ROUTES = {
   CREATE_PATTERN: `${API_ROOT}/agent_download_sources`,
   UPDATE_PATTERN: `${API_ROOT}/agent_download_sources/{sourceId}`,
   DELETE_PATTERN: `${API_ROOT}/agent_download_sources/{sourceId}`,
+};
+
+export const CREATE_STANDALONE_AGENT_API_KEY_ROUTE = `${INTERNAL_ROOT}/create_standalone_agent_api_key`;
+
+// Fleet debug routes
+export const FLEET_DEBUG_ROUTES = {
+  INDEX_PATTERN: `${INTERNAL_ROOT}/debug/index`,
+  SAVED_OBJECTS_PATTERN: `${INTERNAL_ROOT}/debug/saved_objects`,
+  SAVED_OBJECT_NAMES_PATTERN: `${INTERNAL_ROOT}/debug/saved_object_names`,
 };
 
 // API versioning constants

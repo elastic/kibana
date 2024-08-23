@@ -25,7 +25,7 @@ import {
 } from '../../common/http_api/latest';
 import type { InventoryView } from '../../common/inventory_views';
 import { useKibanaContextForPlugin } from './use_kibana';
-import { useUrlState } from '../utils/use_url_state';
+import { useUrlState } from './use_url_state';
 import { useSavedViewsNotifier } from './use_saved_views_notifier';
 import { useSourceContext } from '../containers/metrics_source';
 
@@ -47,7 +47,7 @@ export const useInventoryViews = (): UseInventoryViewsResult => {
   const trackMetric = useUiTracker({ app: 'infra_metrics' });
 
   const queryClient = useQueryClient();
-  const { source, updateSourceConfiguration } = useSourceContext();
+  const { source, persistSourceConfiguration } = useSourceContext();
 
   const defaultViewId = source?.configuration.inventoryDefaultView ?? '0';
 
@@ -93,7 +93,7 @@ export const useInventoryViews = (): UseInventoryViewsResult => {
     string,
     MutationContext<InventoryView>
   >({
-    mutationFn: (id) => updateSourceConfiguration({ inventoryDefaultView: id }),
+    mutationFn: (id) => persistSourceConfiguration({ inventoryDefaultView: id }),
     /**
      * To provide a quick feedback, we perform an optimistic update on the list
      * when updating the default view.

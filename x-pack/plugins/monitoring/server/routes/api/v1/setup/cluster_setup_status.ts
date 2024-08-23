@@ -35,6 +35,9 @@ export function clusterSetupStatusRoute(server: MonitoringCore) {
       query: validateQuery,
       body: validateBody,
     },
+    options: {
+      access: 'internal',
+    },
     handler: async (req) => {
       const clusterUuid = req.params.clusterUuid;
       const skipLiveData = req.query.skipLiveData;

@@ -47,7 +47,9 @@ export interface PhaseTimings {
 
 const PhaseTimingsContext = createContext<PhaseTimings>(null as any);
 
-export const PhaseTimingsProvider: FunctionComponent = ({ children }) => {
+export const PhaseTimingsProvider: FunctionComponent<{ children?: React.ReactNode }> = ({
+  children,
+}) => {
   const { deleteEnabled } = useGlobalFields();
   const [formData] = useFormData<FormInternal>({
     watch: [

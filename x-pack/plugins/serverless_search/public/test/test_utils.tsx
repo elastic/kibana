@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { ReactElement } from 'react';
+import React, { ReactElement, FC, PropsWithChildren } from 'react';
 import { render, RenderOptions } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import { coreMock } from '@kbn/core/public/mocks';
@@ -31,9 +32,9 @@ const queryClient = new QueryClient({
   },
 });
 
-const AllTheProviders: React.FC = ({ children }) => {
+const AllTheProviders: FC<PropsWithChildren<unknown>> = ({ children }) => {
   return (
-    <KibanaThemeProvider theme$={core.theme.theme$}>
+    <KibanaThemeProvider theme={core.theme}>
       <KibanaContextProvider services={{ ...core, ...services }}>
         <QueryClientProvider client={queryClient}>
           <I18nProvider>{children}</I18nProvider>

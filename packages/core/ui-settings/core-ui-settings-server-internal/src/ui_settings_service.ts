@@ -94,7 +94,7 @@ export class UiSettingsService
     registerInternalRoutes(router);
 
     // Register public routes by default unless the publicApiEnabled config setting is set to false
-    if (!config.hasOwnProperty('publicApiEnabled') || config.publicApiEnabled === true) {
+    if (!Object.hasOwn(config, 'publicApiEnabled') || config.publicApiEnabled === true) {
       registerRoutes(router);
     }
 
@@ -218,13 +218,17 @@ export class UiSettingsService
       if (!definition.schema) {
         throw new Error(`Validation schema is not provided for [${key}] UI Setting`);
       }
-      definition.schema.validate(definition.value, {}, `ui settings defaults [${key}]`);
+      if (definition.value) {
+        definition.schema.validate(definition.value, {}, `ui settings defaults [${key}]`);
+      }
     }
     for (const [key, definition] of this.uiSettingsGlobalDefaults) {
       if (!definition.schema) {
         throw new Error(`Validation schema is not provided for [${key}] Global UI Setting`);
       }
-      definition.schema.validate(definition.value, {});
+      if (definition.value) {
+        definition.schema.validate(definition.value, {});
+      }
     }
   }
 

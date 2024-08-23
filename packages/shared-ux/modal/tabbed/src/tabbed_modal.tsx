@@ -7,7 +7,10 @@
  */
 
 import React, {
+  useRef,
   useMemo,
+  useState,
+  useLayoutEffect,
   useCallback,
   Fragment,
   type ComponentProps,
@@ -25,6 +28,8 @@ import {
   EuiTab,
   type EuiTabProps,
   type CommonProps,
+  useGeneratedHtmlId,
+  EuiSpacer,
 } from '@elastic/eui';
 import {
   ModalContextProvider,
@@ -58,13 +63,52 @@ export interface IModalTabDeclaration<S = {}> extends EuiTabProps, ITabDeclarati
 export interface ITabbedModalInner extends Pick<ComponentProps<typeof EuiModal>, 'onClose'> {
   modalWidth?: number;
   modalTitle?: string;
+  anchorElement?: HTMLElement;
+  'data-test-subj'?: string;
 }
 
-const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle, modalWidth }) => {
+const TabbedModalInner: FC<ITabbedModalInner> = ({
+  onClose,
+  modalTitle,
+  modalWidth,
+  anchorElement,
+  ...props
+}) => {
   const { tabs, state, dispatch } =
     useModalContext<Array<IModalTabDeclaration<Record<string, any>>>>();
+  const { selectedTabId, defaultSelectedTabId } = state.meta;
+  const tabbedModalHTMLId = useGeneratedHtmlId();
+  const tabbedModalHeadingHTMLId = useGeneratedHtmlId();
+  const defaultTabCoordinates = useRef(new Map<string, Pick<DOMRect, 'top'>>());
+  const [translateYValue, setTranslateYValue] = useState(0);
 
-  const selectedTabId = state.meta.selectedTabId;
+  const onTabContentRender = useCallback(() => {
+    const tabbedModal = document.querySelector(`#${tabbedModalHTMLId}`) as HTMLDivElement;
+
+    if (!defaultTabCoordinates.current.get(defaultSelectedTabId)) {
+      // on initial render the modal animates into it's final position
+      // hence the need to wait till said animation has completed
+      tabbedModal.onanimationend = () => {
+        const { top } = tabbedModal.getBoundingClientRect();
+        defaultTabCoordinates.current.set(defaultSelectedTabId, { top });
+      };
+    } else {
+      let translateYOverride = 0;
+
+      if (defaultSelectedTabId !== selectedTabId) {
+        const defaultTabData = defaultTabCoordinates.current.get(defaultSelectedTabId);
+
+        const rect = tabbedModal.getBoundingClientRect();
+
+        translateYOverride = translateYValue + (defaultTabData?.top! - rect.top);
+      }
+
+      if (translateYOverride !== translateYValue) {
+        setTranslateYValue(translateYOverride);
+      }
+    }
+  }, [tabbedModalHTMLId, defaultSelectedTabId, selectedTabId, translateYValue]);
+
   const selectedTabState = useMemo(
     () => (selectedTabId ? state[selectedTabId] : {}),
     [selectedTabId, state]
@@ -91,6 +135,7 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle, modalWid
           disabled={tab.disabled}
           prepend={tab.prepend}
           append={tab.append}
+          data-test-subj={tab.id}
         >
           {tab.name}
         </EuiTab>
@@ -98,21 +143,44 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle, modalWid
     });
   }, [onSelectedTabChanged, selectedTabId, tabs]);
 
+  const modalPositionOverrideStyles: React.CSSProperties = {
+    transform: `translateY(${translateYValue}px)`,
+    transformOrigin: 'top',
+    willChange: 'transform',
+  };
+
   return (
     <EuiModal
-      onClose={onClose}
-      style={{ ...(modalWidth ? { width: modalWidth } : {}) }}
+      id={tabbedModalHTMLId}
+      onClose={() => {
+        onClose();
+        setTimeout(() => anchorElement?.focus(), 1);
+      }}
       maxWidth={true}
+      data-test-subj={props['data-test-subj']}
+      css={{
+        ...(modalWidth ? { width: modalWidth } : {}),
+        ...modalPositionOverrideStyles,
+      }}
+      aria-labelledby={tabbedModalHeadingHTMLId}
     >
       <EuiModalHeader>
-        <EuiModalHeaderTitle>{modalTitle}</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={tabbedModalHeadingHTMLId}>{modalTitle}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
         <Fragment>
           <EuiTabs>{renderTabs()}</EuiTabs>
-          {React.createElement(SelectedTabContent, {
-            state: selectedTabState,
-            dispatch,
+          <EuiSpacer size="m" />
+          {React.createElement(function RenderSelectedTabContent() {
+            useLayoutEffect(onTabContentRender, []);
+            return (
+              <SelectedTabContent
+                {...{
+                  state: selectedTabState,
+                  dispatch,
+                }}
+              />
+            );
           })}
         </Fragment>
       </EuiModalBody>

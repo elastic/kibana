@@ -1,3 +1,4 @@
 {
-  "allowedStartRules": ["start", "Literal"]
+  "allowedStartRules": ["start", "Literal"],
+  "cache": true
 }

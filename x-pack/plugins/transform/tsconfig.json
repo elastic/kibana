@@ -41,7 +41,6 @@
     "@kbn/es-query",
     "@kbn/ml-agg-utils",
     "@kbn/ml-string-hash",
-    "@kbn/ui-theme",
     "@kbn/field-types",
     "@kbn/ml-nested-property",
     "@kbn/ml-is-defined",
@@ -74,7 +73,13 @@
     "@kbn/ml-creation-wizard-utils",
     "@kbn/alerts-as-data-utils",
     "@kbn/code-editor",
-    "@kbn/rule-data-utils"
+    "@kbn/rule-data-utils",
+    "@kbn/react-kibana-context-render",
+    "@kbn/search-types",
+    "@kbn/core-elasticsearch-server-mocks",
+    "@kbn/test-jest-helpers",
+    "@kbn/monaco",
+    "@kbn/json-schemas"
   ],
   "exclude": [
     "target/**/*",

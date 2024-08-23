@@ -36,8 +36,8 @@ export class VegaBaseView {
   destroy(): Promise<void>;
   resize(dimensions?: { height: number; width: number }): Promise<void>;
 
-  _$container: any;
-  _$controls: any;
+  _container: HTMLDivElement;
+  _controls: HTMLDivElement;
   _parser: any;
   _vegaViewConfig: any;
   _serviceSettings: VegaViewParams['serviceSettings'];

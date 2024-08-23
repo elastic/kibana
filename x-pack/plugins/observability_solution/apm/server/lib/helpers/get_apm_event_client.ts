@@ -9,16 +9,16 @@ import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { APMEventClient } from './create_es_client/create_apm_event_client';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { MinimalAPMRouteHandlerResources } from '../../routes/apm_routes/register_apm_server_routes';
+import { inspectableEsQueriesMap } from '../../routes/apm_routes/register_apm_server_routes';
 
 export async function getApmEventClient({
   context,
   params,
-  config,
   getApmIndices,
   request,
 }: Pick<
   MinimalAPMRouteHandlerResources,
-  'context' | 'params' | 'config' | 'getApmIndices' | 'request'
+  'context' | 'params' | 'getApmIndices' | 'request'
 >): Promise<APMEventClient> {
   return withApmSpan('get_apm_event_client', async () => {
     const coreContext = await context.core;
@@ -36,6 +36,7 @@ export async function getApmEventClient({
       indices,
       options: {
         includeFrozen,
+        inspectableEsQueriesMap,
       },
     });
   });

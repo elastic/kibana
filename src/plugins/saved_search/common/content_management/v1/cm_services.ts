@@ -42,7 +42,11 @@ const savedSearchAttributesSchema = schema.object(
       searchSourceJSON: schema.string(),
     }),
     viewMode: schema.maybe(
-      schema.oneOf([schema.literal('documents'), schema.literal('aggregated')])
+      schema.oneOf([
+        schema.literal('documents'),
+        schema.literal('patterns'),
+        schema.literal('aggregated'),
+      ])
     ),
     hideAggregatedPreview: schema.maybe(schema.boolean()),
     rowHeight: schema.maybe(schema.number()),
@@ -67,6 +71,13 @@ const savedSearchAttributesSchema = schema.object(
         min: MIN_SAVED_SEARCH_SAMPLE_SIZE,
         max: MAX_SAVED_SEARCH_SAMPLE_SIZE,
       })
+    ),
+    density: schema.maybe(
+      schema.oneOf([
+        schema.literal('compact'),
+        schema.literal('normal'),
+        schema.literal('expanded'),
+      ])
     ),
     breakdownField: schema.maybe(schema.string()),
     visContext: schema.maybe(

@@ -18,6 +18,7 @@ import { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs
 import { waffleVisFunction } from './waffle_vis_function';
 import { PARTITION_LABELS_VALUE, PARTITION_VIS_RENDERER_NAME } from '../constants';
 import { ExecutionContext } from '@kbn/expressions-plugin/common';
+import { LegendValue } from '@elastic/charts';
 
 describe('interpreter/functions#waffleVis', () => {
   const fn = functionWrapper(waffleVisFunction());
@@ -34,7 +35,7 @@ describe('interpreter/functions#waffleVis', () => {
 
   const visConfig: WaffleVisConfig = {
     addTooltip: true,
-    showValuesInLegend: true,
+    legendStats: [LegendValue.Value],
     metricsToLabels: JSON.stringify({}),
     legendDisplay: LegendDisplay.SHOW,
     legendPosition: 'right',

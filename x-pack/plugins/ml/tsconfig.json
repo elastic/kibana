@@ -121,10 +121,13 @@
     "@kbn/ml-time-buckets",
     "@kbn/aiops-change-point-detection",
     "@kbn/inference_integration_flyout",
-    "@kbn/react-kibana-context-theme",
     "@kbn/presentation-containers",
     "@kbn/presentation-panel-plugin",
     "@kbn/shared-ux-utility",
-    "@kbn/discover-utils",
-  ],
+    "@kbn/react-kibana-context-render",
+    "@kbn/esql-utils",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/observability-ai-assistant-plugin",
+    "@kbn/json-schemas"
+  ]
 }

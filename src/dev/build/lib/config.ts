@@ -19,11 +19,17 @@ import {
 } from '@kbn/repo-packages';
 
 import { getVersionInfo, VersionInfo } from './version_info';
-import { PlatformName, PlatformArchitecture, ALL_PLATFORMS } from './platform';
+import {
+  PlatformName,
+  PlatformArchitecture,
+  ALL_PLATFORMS,
+  SERVERLESS_PLATFORMS,
+} from './platform';
 
 interface Options {
   isRelease: boolean;
   targetAllPlatforms: boolean;
+  targetServerlessPlatforms: boolean;
   versionQualifier?: string;
   dockerContextUseLocalArtifact: boolean | null;
   dockerCrossCompile: boolean;
@@ -45,6 +51,7 @@ export class Config {
 
     return new Config(
       opts.targetAllPlatforms,
+      opts.targetServerlessPlatforms,
       kibanaPackageJson,
       nodeVersion,
       REPO_ROOT,
@@ -72,6 +79,7 @@ export class Config {
 
   constructor(
     private readonly targetAllPlatforms: boolean,
+    private readonly targetServerlessPlatforms: boolean,
     private readonly pkg: KibanaPackageJson,
     private readonly nodeVersion: string,
     private readonly repoRoot: string,
@@ -164,6 +172,9 @@ export class Config {
    * specified only the platform for this OS will be returned
    */
   getTargetPlatforms() {
+    if (this.targetServerlessPlatforms) {
+      return SERVERLESS_PLATFORMS;
+    }
     if (this.targetAllPlatforms) {
       return ALL_PLATFORMS;
     }
@@ -177,6 +188,9 @@ export class Config {
    * reliably get the LICENSE file, which isn't included in the windows version
    */
   getNodePlatforms() {
+    if (this.targetServerlessPlatforms) {
+      return SERVERLESS_PLATFORMS;
+    }
     if (this.targetAllPlatforms) {
       return ALL_PLATFORMS;
     }

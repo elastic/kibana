@@ -6,14 +6,26 @@
  * Side Public License, v 1.
  */
 
+import { randomInt } from 'crypto';
 import { Fields } from '../entity';
 import { Serializable } from '../serializable';
+
+const LOGSDB_DATASET_PREFIX = 'logsdb.';
+
+interface LogsOptions {
+  isLogsDb: boolean;
+}
+
+const defaultLogsOptions: LogsOptions = {
+  isLogsDb: false,
+};
 
 export type LogDocument = Fields &
   Partial<{
     'input.type': string;
     'log.file.path'?: string;
     'service.name'?: string;
+    'service.environment'?: string;
     'data_stream.namespace': string;
     'data_stream.type': string;
     'data_stream.dataset': string;
@@ -25,11 +37,14 @@ export type LogDocument = Fields &
     'host.name'?: string;
     'container.id'?: string;
     'trace.id'?: string;
+    'transaction.id'?: string;
     'agent.id'?: string;
     'agent.name'?: string;
     'orchestrator.cluster.name'?: string;
     'orchestrator.cluster.id'?: string;
     'orchestrator.resource.id'?: string;
+    'kubernetes.pod.uid'?: string;
+    'aws.s3.bucket.name'?: string;
     'orchestrator.namespace'?: string;
     'container.name'?: string;
     'cloud.provider'?: string;
@@ -40,9 +55,23 @@ export type LogDocument = Fields &
     'error.stack_trace'?: string;
     'error.exception.stacktrace'?: string;
     'error.log.stacktrace'?: string;
+    'log.custom': Record<string, unknown>;
+    'host.geo.location': number[];
+    'host.ip': string;
+    'network.bytes': number;
+    'tls.established': boolean;
+    'event.duration': number;
+    'event.start': Date;
+    'event.end': Date;
   }>;
 
 class Log extends Serializable<LogDocument> {
+  constructor(fields: LogDocument, private logsOptions: LogsOptions) {
+    super({
+      ...fields,
+    });
+  }
+
   service(name: string) {
     this.fields['service.name'] = name;
     return this;
@@ -64,8 +93,9 @@ class Log extends Serializable<LogDocument> {
   }
 
   dataset(value: string) {
-    this.fields['data_stream.dataset'] = value;
-    this.fields['event.dataset'] = value;
+    const dataset = `${this.logsOptions.isLogsDb ? LOGSDB_DATASET_PREFIX : ''}${value}`;
+    this.fields['data_stream.dataset'] = dataset;
+    this.fields['event.dataset'] = dataset;
     return this;
   }
 
@@ -78,17 +108,35 @@ class Log extends Serializable<LogDocument> {
     this.fields.message = message;
     return this;
   }
+
+  setGeoLocation(geoCoordinates: number[]) {
+    this.fields['host.geo.location'] = geoCoordinates;
+    return this;
+  }
+
+  setHostIp(hostIp: string) {
+    this.fields['host.ip'] = hostIp;
+    return this;
+  }
+
+  timestamp(time: number) {
+    super.timestamp(time);
+    return this;
+  }
 }
 
-function create(): Log {
-  return new Log({
-    'input.type': 'logs',
-    'data_stream.namespace': 'default',
-    'data_stream.type': 'logs',
-    'data_stream.dataset': 'synth',
-    'event.dataset': 'synth',
-    'host.name': 'synth-host',
-  });
+function create(logsOptions: LogsOptions = defaultLogsOptions): Log {
+  return new Log(
+    {
+      'input.type': 'logs',
+      'data_stream.namespace': 'default',
+      'data_stream.type': 'logs',
+      'host.name': 'synth-host',
+      'network.bytes': randomInt(500, 10000),
+      'tls.established': Math.random() < 0.5,
+    },
+    logsOptions
+  ).dataset('synth');
 }
 
 export const log = {

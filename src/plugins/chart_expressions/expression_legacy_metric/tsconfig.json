@@ -23,9 +23,9 @@
     "@kbn/utility-types",
     "@kbn/kibana-utils-plugin",
     "@kbn/analytics",
-    "@kbn/kibana-react-plugin",
     "@kbn/ui-theme",
     "@kbn/chart-expressions-common",
+    "@kbn/react-kibana-context-render",
   ],
   "exclude": [
     "target/**/*",

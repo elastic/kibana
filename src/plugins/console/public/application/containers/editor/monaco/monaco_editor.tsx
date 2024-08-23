@@ -6,62 +6,116 @@
  * Side Public License, v 1.
  */
 
-import React, { CSSProperties, useCallback, useRef, useState } from 'react';
+import React, { CSSProperties, useCallback, useMemo, useRef, useState, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { CodeEditor } from '@kbn/code-editor';
 import { CONSOLE_LANG_ID, CONSOLE_THEME_ID, monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
-import { ConsoleMenu } from '../../../components';
+import { useSetInputEditor } from '../../../hooks';
+import { ContextMenu } from './components';
 import {
   useServicesContext,
   useEditorReadContext,
   useRequestActionContext,
 } from '../../../contexts';
-import { useSetInitialValue } from './use_set_initial_value';
+import {
+  useSetInitialValue,
+  useSetupAutocompletePolling,
+  useSetupAutosave,
+  useResizeCheckerUtils,
+  useKeyboardCommandsUtils,
+} from './hooks';
+import type { EditorRequest } from './types';
 import { MonacoEditorActionsProvider } from './monaco_editor_actions_provider';
-import { useSetupAutocompletePolling } from './use_setup_autocomplete_polling';
-import { useSetupAutosave } from './use_setup_autosave';
+import { getSuggestionProvider } from './monaco_editor_suggestion_provider';
 
 export interface EditorProps {
   initialTextValue: string;
 }
 
 export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
+  const context = useServicesContext();
   const {
-    services: {
-      notifications,
-      esHostService,
-      trackUiMetric,
-      http,
-      settings: settingsService,
-      autocompleteInfo,
-    },
+    services: { notifications, settings: settingsService, autocompleteInfo },
     docLinkVersion,
-  } = useServicesContext();
+    config: { isDevMode },
+  } = context;
   const { toasts } = notifications;
   const { settings } = useEditorReadContext();
+  const [editorInstance, setEditorInstace] = useState<
+    monaco.editor.IStandaloneCodeEditor | undefined
+  >();
+
+  const divRef = useRef<HTMLDivElement | null>(null);
+  const { setupResizeChecker, destroyResizeChecker } = useResizeCheckerUtils();
+  const { registerKeyboardCommands, unregisterKeyboardCommands } = useKeyboardCommandsUtils();
+
   const dispatch = useRequestActionContext();
   const actionsProvider = useRef<MonacoEditorActionsProvider | null>(null);
   const [editorActionsCss, setEditorActionsCss] = useState<CSSProperties>({});
 
-  const editorDidMountCallback = useCallback((editor: monaco.editor.IStandaloneCodeEditor) => {
-    actionsProvider.current = new MonacoEditorActionsProvider(editor, setEditorActionsCss);
-  }, []);
+  const setInputEditor = useSetInputEditor();
 
-  const getCurlCallback = useCallback(async (): Promise<string> => {
-    const curl = await actionsProvider.current?.getCurl(esHostService.getHost());
-    return curl ?? '';
-  }, [esHostService]);
+  const getRequestsCallback = useCallback(async (): Promise<EditorRequest[]> => {
+    const requests = await actionsProvider.current?.getRequests();
+    return requests ?? [];
+  }, []);
 
   const getDocumenationLink = useCallback(async () => {
     return actionsProvider.current!.getDocumentationLink(docLinkVersion);
   }, [docLinkVersion]);
 
-  const sendRequestsCallback = useCallback(async () => {
-    await actionsProvider.current?.sendRequests(toasts, dispatch, trackUiMetric, http);
-  }, [dispatch, http, toasts, trackUiMetric]);
+  const autoIndentCallback = useCallback(async () => {
+    return actionsProvider.current!.autoIndent();
+  }, []);
 
+  const sendRequestsCallback = useCallback(async () => {
+    await actionsProvider.current?.sendRequests(dispatch, context);
+  }, [dispatch, context]);
+
+  const editorDidMountCallback = useCallback(
+    (editor: monaco.editor.IStandaloneCodeEditor) => {
+      const provider = new MonacoEditorActionsProvider(editor, setEditorActionsCss, isDevMode);
+      setInputEditor(provider);
+      actionsProvider.current = provider;
+      setupResizeChecker(divRef.current!, editor);
+      setEditorInstace(editor);
+    },
+    [setupResizeChecker, setInputEditor, setEditorInstace, isDevMode]
+  );
+
+  useEffect(() => {
+    if (settings.isKeyboardShortcutsEnabled && editorInstance) {
+      registerKeyboardCommands({
+        editor: editorInstance,
+        sendRequest: sendRequestsCallback,
+        autoIndent: async () => await actionsProvider.current?.autoIndent(),
+        getDocumentationLink: getDocumenationLink,
+        moveToPreviousRequestEdge: async () =>
+          await actionsProvider.current?.moveToPreviousRequestEdge(),
+        moveToNextRequestEdge: async () => await actionsProvider.current?.moveToNextRequestEdge(),
+      });
+    } else {
+      unregisterKeyboardCommands();
+    }
+  }, [
+    editorInstance,
+    getDocumenationLink,
+    sendRequestsCallback,
+    registerKeyboardCommands,
+    unregisterKeyboardCommands,
+    settings.isKeyboardShortcutsEnabled,
+  ]);
+
+  const editorWillUnmountCallback = useCallback(() => {
+    destroyResizeChecker();
+    unregisterKeyboardCommands();
+  }, [destroyResizeChecker, unregisterKeyboardCommands]);
+
+  const suggestionProvider = useMemo(() => {
+    return getSuggestionProvider(actionsProvider);
+  }, []);
   const [value, setValue] = useState(initialTextValue);
 
   useSetInitialValue({ initialTextValue, setValue, toasts });
@@ -75,6 +129,8 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
       css={css`
         width: 100%;
       `}
+      ref={divRef}
+      data-test-subj="consoleMonacoEditorContainer"
     >
       <EuiFlexGroup
         className="conApp__editorActions"
@@ -85,7 +141,7 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
       >
         <EuiFlexItem>
           <EuiToolTip
-            content={i18n.translate('console.sendRequestButtonTooltip', {
+            content={i18n.translate('console.monaco.sendRequestButtonTooltipContent', {
               defaultMessage: 'Click to send request',
             })}
           >
@@ -93,7 +149,7 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
               color="primary"
               onClick={sendRequestsCallback}
               data-test-subj="sendRequestButton"
-              aria-label={i18n.translate('console.sendRequestButtonTooltip', {
+              aria-label={i18n.translate('console.monaco.sendRequestButtonTooltipAriaLabel', {
                 defaultMessage: 'Click to send request',
               })}
             >
@@ -102,26 +158,33 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
           </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem>
-          <ConsoleMenu
-            getCurl={getCurlCallback}
+          <ContextMenu
+            getRequests={getRequestsCallback}
             getDocumentation={getDocumenationLink}
-            autoIndent={() => {}}
+            autoIndent={autoIndentCallback}
             notifications={notifications}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
       <CodeEditor
+        dataTestSubj={'consoleMonacoEditor'}
         languageId={CONSOLE_LANG_ID}
         value={value}
         onChange={setValue}
         fullWidth={true}
         accessibilityOverlayEnabled={settings.isAccessibilityOverlayEnabled}
+        editorDidMount={editorDidMountCallback}
+        editorWillUnmount={editorWillUnmountCallback}
         options={{
           fontSize: settings.fontSize,
           wordWrap: settings.wrapMode === true ? 'on' : 'off',
           theme: CONSOLE_THEME_ID,
+          // Make the quick-fix window be fixed to the window rather than clipped by
+          // the parent content set with overflow: hidden/auto
+          fixedOverflowWidgets: true,
         }}
-        editorDidMount={editorDidMountCallback}
+        suggestionProvider={suggestionProvider}
+        enableFindAction={true}
       />
     </div>
   );

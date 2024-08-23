@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse } from '@kbn/search-types';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { getOr } from 'lodash/fp';
 import type { RiskSeverity } from '../../../../../../common/search_strategy/security_solution/risk_score/all';

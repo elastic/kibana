@@ -12,7 +12,6 @@ import { MemoryRouter } from 'react-router-dom';
 import { useKibana as mockUseKibana } from '../../common/lib/kibana/__mocks__';
 import { TestProviders } from '../../common/mock';
 import { DataQuality } from './data_quality';
-import { HOT, WARM, UNMANAGED } from './translations';
 import { useKibana } from '../../common/lib/kibana';
 
 const mockedUseKibana = mockUseKibana();
@@ -42,7 +41,7 @@ const defaultUseSourcererReturn = {
   selectedPatterns: ['auditbeat-*', 'logs-*', 'packetbeat-*'],
 };
 const mockUseSourcererDataView = jest.fn(() => defaultUseSourcererReturn);
-jest.mock('../../common/containers/sourcerer', () => ({
+jest.mock('../../sourcerer/containers', () => ({
   useSourcererDataView: () => mockUseSourcererDataView(),
 }));
 
@@ -56,7 +55,7 @@ jest.mock('../../detections/containers/detection_engine/alerts/use_signal_index'
 }));
 
 describe('DataQuality', () => {
-  const defaultIlmPhases = `${HOT}${WARM}${UNMANAGED}`;
+  const defaultIlmPhases = 'hotwarmunmanaged';
 
   beforeEach(() => {
     jest.clearAllMocks();

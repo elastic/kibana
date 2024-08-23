@@ -12,11 +12,13 @@ import { access } from 'fs/promises';
 import { resolve, dirname } from 'path';
 import { asyncForEach } from '@kbn/std';
 import { Jsonc } from '@kbn/repo-packages';
+import { getKibanaTranslationFiles, supportedLocale } from '@kbn/core-i18n-server-internal';
+import { i18n, i18nLoader } from '@kbn/i18n';
 
 import del from 'del';
 import globby from 'globby';
 
-import { mkdirp, compressTar, Task, copyAll } from '../lib';
+import { mkdirp, compressTar, Task, copyAll, write } from '../lib';
 
 export const CreateCdnAssets: Task = {
   description: 'Creating CDN assets',
@@ -31,9 +33,19 @@ export const CreateCdnAssets: Task = {
     await del(assets);
     await mkdirp(assets);
 
-    // Plugins
-
     const plugins = globby.sync([`${buildSource}/node_modules/@kbn/**/*/kibana.jsonc`]);
+
+    // translation files
+    const pluginPaths = plugins.map((plugin) => resolve(dirname(plugin)));
+    for (const locale of supportedLocale) {
+      const translationFileContent = await generateTranslationFile(locale, pluginPaths);
+      await write(
+        resolve(assets, buildSha, `translations`, `${locale}.json`),
+        translationFileContent
+      );
+    }
+
+    // Plugins static assets
     await asyncForEach(plugins, async (path) => {
       const manifest = Jsonc.parse(readFileSync(path, 'utf8')) as any;
       if (manifest?.plugin?.id) {
@@ -101,3 +113,11 @@ export const CreateCdnAssets: Task = {
     });
   },
 };
+
+async function generateTranslationFile(locale: string, pluginPaths: string[]) {
+  const translationFiles = await getKibanaTranslationFiles(locale, pluginPaths);
+  i18nLoader.registerTranslationFiles(translationFiles);
+  const translations = await i18nLoader.getTranslationsByLocale(locale);
+  i18n.init(translations);
+  return JSON.stringify(i18n.getTranslation());
+}

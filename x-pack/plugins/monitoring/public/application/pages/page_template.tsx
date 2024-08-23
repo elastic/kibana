@@ -6,7 +6,7 @@
  */
 
 import { EuiPage, EuiPageBody, EuiPageTemplate, EuiTab, EuiTabs, EuiSpacer } from '@elastic/eui';
-import React, { useContext, useState, useEffect, useCallback } from 'react';
+import React, { useContext, useState, useEffect, useCallback, FC, PropsWithChildren } from 'react';
 import { useHistory } from 'react-router-dom';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
@@ -42,7 +42,7 @@ export interface PageTemplateProps {
   product?: string;
 }
 
-export const PageTemplate: React.FC<PageTemplateProps> = ({
+export const PageTemplate: FC<PropsWithChildren<PageTemplateProps>> = ({
   title,
   pageTitle,
   tabs,

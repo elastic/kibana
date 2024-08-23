@@ -140,7 +140,7 @@ export const OutputFormKafkaPartitioning: React.FunctionComponent<{
         }
       >
         <EuiRadioGroup
-          style={{ display: 'flex', gap: 30 }}
+          style={{ flexDirection: 'row', flexWrap: 'wrap', columnGap: 30 }}
           data-test-subj={'settingsOutputsFlyout.kafkaPartitioningRadioInput'}
           options={kafkaPartitioningOptions}
           compressed

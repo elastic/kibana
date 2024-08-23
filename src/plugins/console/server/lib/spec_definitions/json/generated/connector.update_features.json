@@ -1,0 +1,15 @@
+{
+  "connector.update_features": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "_connector/{connector_id}/_features"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/update-connector-features-api.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

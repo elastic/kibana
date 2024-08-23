@@ -9,7 +9,7 @@
 import * as React from 'react';
 import { useDrilldownManager } from '../context';
 
-export const DrilldownManagerTitle: React.FC = ({ children }) => {
+export const DrilldownManagerTitle: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const drilldowns = useDrilldownManager();
   React.useEffect(() => {
     drilldowns.setTitle(children);

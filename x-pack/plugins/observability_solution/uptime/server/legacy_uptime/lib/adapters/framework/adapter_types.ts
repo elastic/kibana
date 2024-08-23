@@ -16,7 +16,7 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { PluginSetupContract } from '@kbn/features-plugin/server';
+import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { MlPluginSetup as MlSetup } from '@kbn/ml-plugin/server';
 import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -50,7 +50,7 @@ export interface UptimeServerSetup {
 }
 
 export interface UptimeCorePluginsSetup {
-  features: PluginSetupContract;
+  features: FeaturesPluginSetup;
   alerting: any;
   observability: ObservabilityPluginSetup;
   usageCollection: UsageCollectionSetup;

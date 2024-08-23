@@ -1,0 +1,63 @@
+{
+  "id": "@kbn/try-in-console",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/try-in-console",
+        "id": "def-common.TryInConsoleButton",
+        "type": "Function",
+        "tags": [],
+        "label": "TryInConsoleButton",
+        "description": [],
+        "signature": [
+          "({ request, application, consolePlugin, sharePlugin, content, showIcon, type, }: ",
+          "TryInConsoleButtonProps",
+          ") => JSX.Element | null"
+        ],
+        "path": "packages/kbn-try-in-console/components/try_in_console_button.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/try-in-console",
+            "id": "def-common.TryInConsoleButton.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  request,\n  application,\n  consolePlugin,\n  sharePlugin,\n  content = RUN_IN_CONSOLE,\n  showIcon = true,\n  type = 'emptyButton',\n}",
+            "description": [],
+            "signature": [
+              "TryInConsoleButtonProps"
+            ],
+            "path": "packages/kbn-try-in-console/components/try_in_console_button.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

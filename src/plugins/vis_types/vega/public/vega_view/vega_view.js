@@ -12,12 +12,12 @@ import { VegaBaseView } from './vega_base_view';
 export class VegaView extends VegaBaseView {
   async _initViewCustomizations() {
     // In some cases, Vega may be initialized twice... TBD
-    if (!this._$container) return;
+    if (!this._container) return;
 
     const view = new View(parse(this._parser.spec, undefined, { ast: true }), this._vegaViewConfig);
 
     if (this._parser.useResize) this.updateVegaSize(view);
-    view.initialize(this._$container.get(0), this._$controls.get(0));
+    view.initialize(this._container, this._controls);
     // resize again to take controls into account
     if (this._parser.useResize) this.updateVegaSize(view);
 

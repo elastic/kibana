@@ -42,6 +42,7 @@ export function updatedWith(
       events: [...first.events, ...second.events],
       cursor: second.cursor,
       lastCursorRequested: null,
+      agentId: first.agentId,
     };
   } else {
     return undefined;

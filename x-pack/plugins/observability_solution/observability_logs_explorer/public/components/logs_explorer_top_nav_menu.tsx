@@ -27,16 +27,19 @@ import { ConnectedDiscoverLink } from './discover_link';
 import { FeedbackLink } from './feedback_link';
 import { ConnectedOnboardingLink } from './onboarding_link';
 import { AlertsPopover } from './alerts_popover';
+import { ConnectedDatasetQualityLink } from './dataset_quality_link';
 
 export const LogsExplorerTopNavMenu = () => {
   const {
-    services: { serverless },
+    services: { chrome },
   } = useKibanaContextForPlugin();
 
-  return Boolean(serverless) ? <ServerlessTopNav /> : <StatefulTopNav />;
+  const chromeStyle = useObservable(chrome.getChromeStyle$());
+
+  return chromeStyle === 'project' ? <ProjectTopNav /> : <ClassicTopNav />;
 };
 
-const ServerlessTopNav = () => {
+const ProjectTopNav = () => {
   const { services } = useKibanaContextForPlugin();
 
   return (
@@ -68,6 +71,8 @@ const ServerlessTopNav = () => {
           <EuiHeaderLinks gutterSize="xs">
             <ConnectedDiscoverLink />
             <VerticalRule />
+            <ConnectedDatasetQualityLink />
+            <VerticalRule />
             <FeedbackLink />
             <VerticalRule />
             <AlertsPopover />
@@ -82,7 +87,7 @@ const ServerlessTopNav = () => {
   );
 };
 
-const StatefulTopNav = () => {
+const ClassicTopNav = () => {
   const {
     services: {
       appParams: { setHeaderActionMenu },
@@ -142,6 +147,8 @@ const StatefulTopNav = () => {
         <EuiHeaderSectionItem>
           <EuiHeaderLinks gutterSize="xs">
             <ConnectedDiscoverLink />
+            <VerticalRule />
+            <ConnectedDatasetQualityLink />
             <VerticalRule />
             <AlertsPopover />
             <VerticalRule />

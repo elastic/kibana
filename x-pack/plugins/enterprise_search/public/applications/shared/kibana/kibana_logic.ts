@@ -18,6 +18,8 @@ import {
   ChromeBreadcrumb,
   ScopedHistory,
   IUiSettingsClient,
+  ChromeStart,
+  SecurityServiceStart,
 } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
@@ -27,12 +29,14 @@ import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
 import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-api-panels/constants';
 import { ConnectorDefinition } from '@kbn/search-connectors-plugin/public';
+import type { SearchHomepagePluginStart } from '@kbn/search-homepage/public';
+import { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/public';
 import { SearchPlaygroundPluginStart } from '@kbn/search-playground/public';
 import { AuthenticatedUser, SecurityPluginStart } from '@kbn/security-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 
 import { ClientConfigType, ProductAccess, ProductFeatures } from '../../../../common/types';
-import { ESConfig } from '../../../plugin';
+import { ESConfig, UpdateSideNavDefinitionFn } from '../../../plugin';
 
 import { HttpLogic } from '../http';
 import { createHref, CreateHrefOptions } from '../react_router_helpers';
@@ -48,11 +52,14 @@ export interface KibanaLogicProps {
   config: ClientConfigType;
   connectorTypes?: ConnectorDefinition[];
   console?: ConsolePluginStart;
+  coreSecurity?: SecurityServiceStart;
   data?: DataPublicPluginStart;
   esConfig: ESConfig;
+  getChromeStyle$: ChromeStart['getChromeStyle$'];
   guidedOnboarding?: GuidedOnboardingPluginStart;
   history: ScopedHistory;
   indexMappingComponent?: React.FC<IndexMappingProps>;
+  isSearchHomepageEnabled: boolean;
   isSidebarEnabled: boolean;
   lens?: LensPublicStart;
   ml?: MlPluginStart;
@@ -60,6 +67,8 @@ export interface KibanaLogicProps {
   productAccess: ProductAccess;
   productFeatures: ProductFeatures;
   renderHeaderActions(HeaderActions?: FC): void;
+  searchHomepage?: SearchHomepagePluginStart;
+  searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
   searchPlayground?: SearchPlaygroundPluginStart;
   security?: SecurityPluginStart;
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
@@ -67,7 +76,7 @@ export interface KibanaLogicProps {
   setDocTitle(title: string): void;
   share?: SharePluginStart;
   uiSettings?: IUiSettingsClient;
-  user: AuthenticatedUser | null;
+  updateSideNavDefinition: UpdateSideNavDefinitionFn;
 }
 
 export interface KibanaValues {
@@ -80,10 +89,12 @@ export interface KibanaValues {
   consolePlugin: ConsolePluginStart | null;
   data: DataPublicPluginStart | null;
   esConfig: ESConfig;
+  getChromeStyle$: ChromeStart['getChromeStyle$'];
   guidedOnboarding: GuidedOnboardingPluginStart | null;
   history: ScopedHistory;
   indexMappingComponent: React.FC<IndexMappingProps> | null;
   isCloud: boolean;
+  isSearchHomepageEnabled: boolean;
   isSidebarEnabled: boolean;
   lens: LensPublicStart | null;
   ml: MlPluginStart | null;
@@ -91,6 +102,8 @@ export interface KibanaValues {
   productAccess: ProductAccess;
   productFeatures: ProductFeatures;
   renderHeaderActions(HeaderActions?: FC): void;
+  searchHomepage: SearchHomepagePluginStart | null;
+  searchInferenceEndpoints: SearchInferenceEndpointsPluginStart | null;
   searchPlayground: SearchPlaygroundPluginStart | null;
   security: SecurityPluginStart | null;
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
@@ -98,10 +111,14 @@ export interface KibanaValues {
   setDocTitle(title: string): void;
   share: SharePluginStart | null;
   uiSettings: IUiSettingsClient | null;
+  updateSideNavDefinition: UpdateSideNavDefinitionFn;
   user: AuthenticatedUser | null;
 }
 
 export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
+  actions: {
+    setUser: (user: AuthenticatedUser | null) => ({ user }),
+  },
   path: ['enterprise_search', 'kibana_logic'],
   reducers: ({ props }) => ({
     application: [props.application, {}],
@@ -113,9 +130,11 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     consolePlugin: [props.console || null, {}],
     data: [props.data || null, {}],
     esConfig: [props.esConfig || { elasticsearch_host: ELASTICSEARCH_URL_PLACEHOLDER }, {}],
+    getChromeStyle$: [props.getChromeStyle$, {}],
     guidedOnboarding: [props.guidedOnboarding || null, {}],
     history: [props.history, {}],
     indexMappingComponent: [props.indexMappingComponent || null, {}],
+    isSearchHomepageEnabled: [props.isSearchHomepageEnabled, {}],
     isSidebarEnabled: [props.isSidebarEnabled, {}],
     lens: [props.lens || null, {}],
     ml: [props.ml || null, {}],
@@ -130,6 +149,8 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     productAccess: [props.productAccess, {}],
     productFeatures: [props.productFeatures, {}],
     renderHeaderActions: [props.renderHeaderActions, {}],
+    searchHomepage: [props.searchHomepage || null, {}],
+    searchInferenceEndpoints: [props.searchInferenceEndpoints || null, {}],
     searchPlayground: [props.searchPlayground || null, {}],
     security: [props.security || null, {}],
     setBreadcrumbs: [props.setBreadcrumbs, {}],
@@ -137,7 +158,14 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     setDocTitle: [props.setDocTitle, {}],
     share: [props.share || null, {}],
     uiSettings: [props.uiSettings, {}],
-    user: [props.user || null, {}],
+    updateSideNavDefinition: [props.updateSideNavDefinition, {}],
+    user: [
+      props.user || null,
+      {
+        // @ts-expect-error upgrade typescript v5.1.6
+        setUser: (_, { user }) => user || null,
+      },
+    ],
   }),
   selectors: ({ selectors }) => ({
     isCloud: [() => [selectors.cloud], (cloud?: CloudSetup) => Boolean(cloud?.isCloudEnabled)],
@@ -147,5 +175,8 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
 export const mountKibanaLogic = (props: KibanaLogicProps) => {
   KibanaLogic(props);
   const unmount = KibanaLogic.mount();
+  props.coreSecurity?.authc.getCurrentUser()?.then((user) => {
+    KibanaLogic.actions.setUser(user);
+  });
   return unmount;
 };

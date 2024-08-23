@@ -86,7 +86,7 @@ export const getChartTheme = (isDarkMode: boolean): Theme => {
   return isDarkMode ? LEGACY_DARK_THEME : LEGACY_LIGHT_THEME;
 };
 
-export const EmptyContainer: React.FC = ({ children }) => (
+export const EmptyContainer: React.FC<{ children?: React.ReactNode }> = ({ children }) => (
   <div
     style={{
       width: '100%',
@@ -100,7 +100,7 @@ export const EmptyContainer: React.FC = ({ children }) => (
   </div>
 );
 
-export const ChartContainer: React.FC = ({ children }) => (
+export const ChartContainer: React.FC<{ children?: React.ReactNode }> = ({ children }) => (
   <div
     style={{
       width: '100%',

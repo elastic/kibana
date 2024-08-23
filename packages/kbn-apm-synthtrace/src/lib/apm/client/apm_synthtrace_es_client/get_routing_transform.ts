@@ -16,7 +16,6 @@ export function getRoutingTransform() {
       let index: string | undefined;
 
       const namespace = 'default';
-
       switch (document['processor.event']) {
         case 'transaction':
         case 'span':

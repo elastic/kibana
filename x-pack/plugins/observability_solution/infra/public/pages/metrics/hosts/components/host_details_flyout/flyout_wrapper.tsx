@@ -6,11 +6,10 @@
  */
 
 import React from 'react';
-import { useSourceContext } from '../../../../../containers/metrics_source';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import type { HostNodeRow } from '../../hooks/use_hosts_table';
 import { AssetDetails } from '../../../../../components/asset_details';
-import { commonFlyoutTabs } from '../../../../../common/asset_details_config/asset_details_tabs';
+import { hostDetailsTabs } from '../../../../../common/asset_details_config/asset_details_tabs';
 
 export interface Props {
   node: HostNodeRow;
@@ -18,10 +17,9 @@ export interface Props {
 }
 
 export const FlyoutWrapper = ({ node: { name }, closeFlyout }: Props) => {
-  const { source } = useSourceContext();
   const { parsedDateRange } = useUnifiedSearchContext();
 
-  return source ? (
+  return (
     <AssetDetails
       assetId={name}
       assetName={name}
@@ -32,13 +30,12 @@ export const FlyoutWrapper = ({ node: { name }, closeFlyout }: Props) => {
           showActionsColumn: true,
         },
       }}
-      tabs={commonFlyoutTabs}
+      tabs={hostDetailsTabs}
       links={['nodeDetails']}
       renderMode={{
         mode: 'flyout',
         closeFlyout,
       }}
-      metricAlias={source.configuration.metricAlias}
     />
-  ) : null;
+  );
 };

@@ -6,7 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse } from '@kbn/search-types';
 
 import type { Inspect, Maybe } from '../../../common';
 import type { HostItem } from '../common';

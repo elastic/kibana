@@ -61,6 +61,7 @@ export const FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_CONTENT = {
             ingested: {
               type: 'date',
               format: 'strict_date_time_no_millis||strict_date_optional_time||epoch_millis',
+              ignore_malformed: false,
             },
             agent_id_status: {
               ignore_above: 1024,

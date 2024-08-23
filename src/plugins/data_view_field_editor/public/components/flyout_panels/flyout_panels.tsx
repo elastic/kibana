@@ -54,6 +54,7 @@ export interface Props {
   gutterSize?: EuiFlexGroupProps['gutterSize'];
   /** Flag to indicate if the panels width are declared as fixed pixel width instead of percent */
   fixedPanelWidths?: boolean;
+  children: React.ReactNode;
 }
 
 export const Panels: React.FC<Props> = ({

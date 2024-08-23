@@ -23,7 +23,7 @@ export const ML_JOB_FIELD_TYPES = {
 /**
  * Union type for ML_JOB_FIELD_TYPES
  */
-export type MlJobFieldType = typeof ML_JOB_FIELD_TYPES[keyof typeof ML_JOB_FIELD_TYPES];
+export type MlJobFieldType = (typeof ML_JOB_FIELD_TYPES)[keyof typeof ML_JOB_FIELD_TYPES];
 
 /**
  * MLCATEGORY
@@ -52,4 +52,5 @@ export const OMIT_FIELDS: string[] = [
   '_version',
   '_score',
   '_tier',
+  '_ignored',
 ];

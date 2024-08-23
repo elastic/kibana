@@ -18,12 +18,12 @@ import type {
   AuthResultRedirected,
   AuthToolkit,
 } from '@kbn/core-http-server';
+import { isKibanaResponse } from '@kbn/core-http-server';
 import { AuthResultType } from '@kbn/core-http-server';
 import {
   HapiResponseAdapter,
   CoreKibanaRequest,
   lifecycleResponseFactory,
-  isKibanaResponse,
 } from '@kbn/core-http-router-server-internal';
 
 const authResult = {

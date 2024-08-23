@@ -20,7 +20,7 @@ const updateAnonymizationSubFeature: SubFeatureConfig = {
     'securitySolutionPackages.features.featureRegistry.subFeatures.assistant.description',
     {
       defaultMessage:
-        'Change the default fields that are allowed to be used by the AI Assistant and AI Insights. Anonymize any of the content for the selected fields.',
+        'Change the default fields that are allowed to be used by the AI Assistant and Attack discovery. Anonymize any of the content for the selected fields.',
     }
   ),
   privilegeGroups: [

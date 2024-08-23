@@ -16,7 +16,6 @@ import {
   DATA_COLLECTION_SETUP_STEP,
   DATE_PICKER_ABSOLUTE_TAB,
   DATE_PICKER_ABSOLUTE_TAB_SEL,
-  SECURITY_SOLUTION_FLYOUT_TOUR_SEL,
   TOAST_CLOSE_BTN,
   TOAST_CLOSE_BTN_SEL,
 } from '../screens/integrations';
@@ -132,16 +131,6 @@ export function closeToastIfVisible() {
       } else {
         cy.getBySel(TOAST_CLOSE_BTN).click();
       }
-    }
-  });
-}
-
-export function closeAlertsStepTourIfVisible() {
-  cy.get(SECURITY_SOLUTION_FLYOUT_TOUR_SEL).then(($el) => {
-    if ($el.length > 0) {
-      cy.wrap($el).within(() => {
-        cy.contains('Exit').click();
-      });
     }
   });
 }

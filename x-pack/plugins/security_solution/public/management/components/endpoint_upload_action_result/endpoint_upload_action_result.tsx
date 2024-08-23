@@ -12,7 +12,6 @@ import type { EuiTextProps } from '@elastic/eui';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import numeral from '@elastic/numeral';
-import { css } from '@emotion/react';
 import { EndpointActionFailureMessage } from '../endpoint_action_failure_message';
 import type {
   ActionDetails,
@@ -23,6 +22,7 @@ import type {
   MaybeImmutable,
 } from '../../../../common/endpoint/types';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
+import { KeyValueDisplay } from '../key_value_display';
 
 const LABELS = Object.freeze<Record<string, string>>({
   path: i18n.translate('xpack.securitySolution.endpointUploadActionResult.savedTo', {
@@ -164,28 +164,6 @@ export const EndpointUploadActionResult = memo<EndpointUploadActionResultProps>(
   }
 );
 EndpointUploadActionResult.displayName = 'EndpointUploadActionResult';
-
-export interface KeyValueDisplayProps {
-  name: string;
-  value: string;
-}
-const KeyValueDisplay = memo<KeyValueDisplayProps>(({ name, value }) => {
-  return (
-    <div
-      className="eui-textBreakWord"
-      css={css`
-        white-space: pre-wrap;
-      `}
-    >
-      <strong>
-        {name}
-        {': '}
-      </strong>
-      {value}
-    </div>
-  );
-});
-KeyValueDisplay.displayName = 'KeyValueDisplay';
 
 type HostUploadResultProps = PropsWithChildren<{
   name?: string;

@@ -5,7 +5,9 @@
       "filter_path": [],
       "human": "__flag__",
       "pretty": "__flag__",
-      "with_limited_by": "__flag__"
+      "with_limited_by": "__flag__",
+      "with_profile_uid": "__flag__",
+      "typed_keys": "__flag__"
     },
     "methods": [
       "GET",

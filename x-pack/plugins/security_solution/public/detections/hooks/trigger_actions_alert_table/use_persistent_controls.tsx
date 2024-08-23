@@ -13,11 +13,11 @@ import {
   dataTableActions,
 } from '@kbn/securitysolution-data-table';
 import type { ViewSelection, TableId } from '@kbn/securitysolution-data-table';
-import { useGetGroupSelectorStateless } from '@kbn/securitysolution-grouping/src/hooks/use_get_group_selector';
-import { getTelemetryEvent } from '@kbn/securitysolution-grouping/src/telemetry/const';
+import { useGetGroupSelectorStateless } from '@kbn/grouping/src/hooks/use_get_group_selector';
+import { getTelemetryEvent } from '@kbn/grouping/src/telemetry/const';
 import { groupIdSelector } from '../../../common/store/grouping/selectors';
-import { useSourcererDataView } from '../../../common/containers/sourcerer';
-import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { useSourcererDataView } from '../../../sourcerer/containers';
+import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { updateGroups } from '../../../common/store/grouping/actions';
 import { useKibana } from '../../../common/lib/kibana';
 import { METRIC_TYPE, track } from '../../../common/lib/telemetry';

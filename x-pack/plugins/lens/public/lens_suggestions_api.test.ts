@@ -65,7 +65,7 @@ describe('suggestionsApi', () => {
       fieldName: '',
       textBasedColumns: textBasedQueryColumns,
       query: {
-        sql: 'SELECT field1, field2 FROM "index1"',
+        esql: 'FROM "index1" | keep field1, field2',
       },
     };
     const suggestions = suggestionsApi({ context, dataView, datasourceMap, visualizationMap });
@@ -112,7 +112,7 @@ describe('suggestionsApi', () => {
       fieldName: '',
       textBasedColumns: textBasedQueryColumns,
       query: {
-        sql: 'SELECT field1, field2 FROM "index1"',
+        esql: 'FROM "index1" | keep field1, field2',
       },
     };
     const suggestions = suggestionsApi({ context, dataView, datasourceMap, visualizationMap });
@@ -161,7 +161,7 @@ describe('suggestionsApi', () => {
       fieldName: '',
       textBasedColumns: textBasedQueryColumns,
       query: {
-        sql: 'SELECT field1, field2 FROM "index1"',
+        esql: 'FROM "index1" | keep field1, field2',
       },
     };
     const suggestions = suggestionsApi({ context, dataView, datasourceMap, visualizationMap });
@@ -210,7 +210,7 @@ describe('suggestionsApi', () => {
       fieldName: '',
       textBasedColumns: textBasedQueryColumns,
       query: {
-        sql: 'SELECT field1, field2 FROM "index1"',
+        esql: 'FROM "index1" | keep field1, field2',
       },
     };
     const suggestions = suggestionsApi({
@@ -273,7 +273,7 @@ describe('suggestionsApi', () => {
       fieldName: '',
       textBasedColumns: textBasedQueryColumns,
       query: {
-        sql: 'SELECT field1, field2 FROM "index1"',
+        esql: 'FROM "index1" | keep field1, field2',
       },
     };
     const suggestions = suggestionsApi({
@@ -340,7 +340,7 @@ describe('suggestionsApi', () => {
       fieldName: '',
       textBasedColumns: textBasedQueryColumns,
       query: {
-        sql: 'SELECT field1, field2 FROM "index1"',
+        esql: 'FROM "index1" | keep field1, field2',
       },
     };
     const suggestions = suggestionsApi({

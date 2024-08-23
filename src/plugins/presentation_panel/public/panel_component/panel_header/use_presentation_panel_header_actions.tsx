@@ -114,18 +114,40 @@ export const usePresentationPanelHeaderActions = <
 
   const badgeElements = useMemo(() => {
     if (!showBadges) return [];
-    return badges?.map((badge) => (
-      <EuiBadge
-        key={badge.id}
-        className="embPanel__headerBadge"
-        iconType={badge.getIconType({ embeddable: api, trigger: panelBadgeTrigger })}
-        onClick={() => badge.execute({ embeddable: api, trigger: panelBadgeTrigger })}
-        onClickAriaLabel={badge.getDisplayName({ embeddable: api, trigger: panelBadgeTrigger })}
-        data-test-subj={`embeddablePanelBadge-${badge.id}`}
-      >
-        {badge.getDisplayName({ embeddable: api, trigger: panelBadgeTrigger })}
-      </EuiBadge>
-    ));
+    return badges?.map((badge) => {
+      const tooltipText = badge.getDisplayNameTooltip?.({
+        embeddable: api,
+        trigger: panelBadgeTrigger,
+      });
+      const badgeElement = (
+        <EuiBadge
+          key={badge.id}
+          className="embPanel__headerBadge"
+          iconType={badge.getIconType({ embeddable: api, trigger: panelBadgeTrigger })}
+          onClick={() => badge.execute({ embeddable: api, trigger: panelBadgeTrigger })}
+          onClickAriaLabel={badge.getDisplayName({ embeddable: api, trigger: panelBadgeTrigger })}
+          data-test-subj={`embeddablePanelBadge-${badge.id}`}
+          {...(tooltipText ? { 'aria-label': tooltipText } : {})}
+        >
+          {badge.MenuItem
+            ? React.createElement(badge.MenuItem, {
+                context: {
+                  embeddable: api,
+                  trigger: panelBadgeTrigger,
+                },
+              })
+            : badge.getDisplayName({ embeddable: api, trigger: panelBadgeTrigger })}
+        </EuiBadge>
+      );
+
+      return tooltipText ? (
+        <EuiToolTip key={badge.id} content={tooltipText}>
+          {badgeElement}
+        </EuiToolTip>
+      ) : (
+        badgeElement
+      );
+    });
   }, [api, badges, showBadges]);
 
   const notificationElements = useMemo(() => {

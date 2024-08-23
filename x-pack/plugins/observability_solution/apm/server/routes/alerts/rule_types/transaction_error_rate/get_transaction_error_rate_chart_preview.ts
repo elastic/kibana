@@ -97,21 +97,21 @@ export async function getTransactionErrorRateChartPreview({
         },
       },
       aggs: {
-        timeseries: {
-          date_histogram: {
-            field: '@timestamp',
-            fixed_interval: interval,
-            extended_bounds: {
-              min: start,
-              max: end,
-            },
+        series: {
+          multi_terms: {
+            terms: getGroupByTerms(allGroupByFields),
+            size: 1000,
+            order: { _count: 'desc' as const },
           },
           aggs: {
-            series: {
-              multi_terms: {
-                terms: [...getGroupByTerms(allGroupByFields)],
-                size: 1000,
-                order: { _count: 'desc' as const },
+            timeseries: {
+              date_histogram: {
+                field: '@timestamp',
+                fixed_interval: interval,
+                extended_bounds: {
+                  min: start,
+                  max: end,
+                },
               },
               aggs: {
                 outcomes: {
@@ -133,11 +133,11 @@ export async function getTransactionErrorRateChartPreview({
     return { series: [], totalGroups: 0 };
   }
 
-  const seriesDataMap = resp.aggregations.timeseries.buckets.reduce((acc, bucket) => {
-    const x = bucket.key;
-    bucket.series.buckets.forEach((seriesBucket) => {
-      const bucketKey = seriesBucket.key.join('_');
-      const y = calculateErrorRate(seriesBucket.outcomes.buckets);
+  const seriesDataMap = resp.aggregations.series.buckets.reduce((acc, bucket) => {
+    const bucketKey = bucket.key.join('_');
+    bucket.timeseries.buckets.forEach((timeseriesBucket) => {
+      const x = timeseriesBucket.key;
+      const y = calculateErrorRate(timeseriesBucket.outcomes.buckets);
 
       if (acc[bucketKey]) {
         acc[bucketKey].push({ x, y });

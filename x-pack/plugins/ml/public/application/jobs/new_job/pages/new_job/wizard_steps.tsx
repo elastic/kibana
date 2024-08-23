@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React, { Fragment, useState, useMemo, useEffect, useContext } from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -188,7 +188,10 @@ export const WizardSteps: FC<Props> = ({ currentStep, setCurrentStep }) => {
   );
 };
 
-const Title: FC<{ 'data-test-subj': string }> = ({ 'data-test-subj': dataTestSubj, children }) => {
+const Title: FC<PropsWithChildren<{ 'data-test-subj': string }>> = ({
+  'data-test-subj': dataTestSubj,
+  children,
+}) => {
   return (
     <Fragment>
       <EuiTitle size="s">

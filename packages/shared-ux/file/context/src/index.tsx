@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { createContext, useContext, type FunctionComponent } from 'react';
+import React, { createContext, useContext, type FC, type PropsWithChildren } from 'react';
 import type { BaseFilesClient as FilesClient } from '@kbn/shared-ux-file-types';
 
 export interface FilesContextValue {
@@ -31,8 +31,9 @@ interface ContextProps {
    * A files client that will be used process uploads.
    */
   client: FilesClient<any>;
+  children: React.ReactNode;
 }
-export const FilesContext: FunctionComponent<ContextProps> = ({ client, children }) => {
+export const FilesContext: FC<PropsWithChildren<ContextProps>> = ({ client, children }) => {
   return (
     <FilesContextObject.Provider
       value={{

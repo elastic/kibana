@@ -22,6 +22,7 @@ describe('<CustomCriblForm />', () => {
     namespace: 'default',
     enabled: true,
     policy_id: '',
+    policy_ids: [''],
     package: {
       name: 'cribl',
       title: 'Cribl',

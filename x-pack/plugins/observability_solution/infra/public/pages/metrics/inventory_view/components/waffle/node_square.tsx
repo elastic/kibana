@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { DispatchWithOptionalAction } from '../../../../../hooks/use_boolean';
+import { UseBooleanHandlers } from '@kbn/react-hooks';
 
 type NodeProps<T = HTMLDivElement> = React.DetailedHTMLProps<React.HTMLAttributes<T>, T> & {
   'data-test-subj'?: string;
@@ -162,7 +162,7 @@ export const NodeSquare = ({
   showBorder,
 }: {
   squareSize: number;
-  togglePopover: DispatchWithOptionalAction<boolean>;
+  togglePopover: UseBooleanHandlers['toggle'];
   showToolTip: () => void;
   hideToolTip: () => void;
   color: string;
@@ -203,6 +203,7 @@ export const NodeSquare = ({
           ) : (
             ellipsisMode && (
               <ValueInner aria-label={nodeAriaLabel}>
+                {/* eslint-disable-next-line @kbn/i18n/strings_should_be_translated_with_i18n */}
                 <Label color={color}>...</Label>
               </ValueInner>
             )

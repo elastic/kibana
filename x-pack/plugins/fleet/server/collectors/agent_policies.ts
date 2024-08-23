@@ -8,16 +8,15 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import _ from 'lodash';
 
-import {
-  AGENT_POLICY_SAVED_OBJECT_TYPE,
-  OUTPUT_SAVED_OBJECT_TYPE,
-  SO_SEARCH_LIMIT,
-} from '../../common';
+import { OUTPUT_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../common';
 import type { OutputSOAttributes, AgentPolicy } from '../types';
+import { getAgentPolicySavedObjectType } from '../services/agent_policy';
 
 export interface AgentPoliciesUsage {
   count: number;
   output_types: string[];
+  count_with_global_data_tags: number;
+  avg_number_global_data_tags_per_policy?: number;
 }
 
 export const getAgentPoliciesUsage = async (
@@ -33,9 +32,10 @@ export const getAgentPoliciesUsage = async (
 
   const outputsById = _.keyBy(outputs, 'id');
 
+  const agentPolicySavedObjectType = await getAgentPolicySavedObjectType();
   const { saved_objects: agentPolicies, total: totalAgentPolicies } =
     await soClient.find<AgentPolicy>({
-      type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+      type: agentPolicySavedObjectType,
       page: 1,
       perPage: SO_SEARCH_LIMIT,
     });
@@ -47,13 +47,33 @@ export const getAgentPoliciesUsage = async (
   });
 
   const uniqueOutputTypes = new Set(
-    Array.from(uniqueOutputIds).map((outputId) => {
-      return outputsById[outputId]?.attributes.type;
-    })
+    Array.from(uniqueOutputIds)
+      .map((outputId) => {
+        return outputsById[outputId]?.attributes.type;
+      })
+      .filter((outputType) => outputType)
+  );
+
+  const [policiesWithGlobalDataTag, totalNumberOfGlobalDataTagFields] = agentPolicies.reduce(
+    ([policiesNumber, fieldsNumber], agentPolicy) => {
+      if (agentPolicy.attributes.global_data_tags?.length ?? 0 > 0) {
+        return [
+          policiesNumber + 1,
+          fieldsNumber + (agentPolicy.attributes.global_data_tags?.length ?? 0),
+        ];
+      }
+      return [policiesNumber, fieldsNumber];
+    },
+    [0, 0]
   );
 
   return {
     count: totalAgentPolicies,
     output_types: Array.from(uniqueOutputTypes),
+    count_with_global_data_tags: policiesWithGlobalDataTag,
+    avg_number_global_data_tags_per_policy:
+      policiesWithGlobalDataTag > 0
+        ? Math.round(totalNumberOfGlobalDataTagFields / policiesWithGlobalDataTag)
+        : undefined,
   };
 };

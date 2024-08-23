@@ -47,10 +47,11 @@ export const registerHasDataViewsRoute = (router: IRouter): void => {
         validate: {
           response: {
             200: {
-              body: schema.object({
-                hasDataView: schema.boolean(),
-                hasUserDataView: schema.boolean(),
-              }),
+              body: () =>
+                schema.object({
+                  hasDataView: schema.boolean(),
+                  hasUserDataView: schema.boolean(),
+                }),
             },
           },
         },

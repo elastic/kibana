@@ -26,9 +26,13 @@ export const dashboardReadonlyBadge = {
 };
 
 export const dashboardManagedBadge = {
-  getTooltip: () =>
-    i18n.translate('dashboard.badge.managed.tooltip', {
-      defaultMessage: 'Elastic manages this dashboard. Clone it to make changes.',
+  getDuplicateButtonAriaLabel: () =>
+    i18n.translate('dashboard.managedContentPopoverFooterText', {
+      defaultMessage: 'Click here to duplicate this dashboard',
+    }),
+  getBadgeAriaLabel: () =>
+    i18n.translate('dashboard.managedContentBadge.ariaLabel', {
+      defaultMessage: 'Elastic manages this dashboard. Duplicate it to make changes.',
     }),
 };
 
@@ -189,11 +193,11 @@ export const topNavStrings = {
       defaultMessage: 'Quick save your dashboard without any prompts',
     }),
   },
-  saveAs: {
-    label: i18n.translate('dashboard.topNave.saveAsButtonAriaLabel', {
+  editModeInteractiveSave: {
+    label: i18n.translate('dashboard.topNave.editModeInteractiveSaveButtonAriaLabel', {
       defaultMessage: 'save as',
     }),
-    description: i18n.translate('dashboard.topNave.saveAsConfigDescription', {
+    description: i18n.translate('dashboard.topNave.editModeInteractiveSaveConfigDescription', {
       defaultMessage: 'Save as a new dashboard',
     }),
   },
@@ -229,11 +233,11 @@ export const topNavStrings = {
       defaultMessage: 'Open dashboard settings',
     }),
   },
-  clone: {
-    label: i18n.translate('dashboard.topNave.cloneButtonAriaLabel', {
-      defaultMessage: 'clone',
+  viewModeInteractiveSave: {
+    label: i18n.translate('dashboard.topNave.viewModeInteractiveSaveButtonAriaLabel', {
+      defaultMessage: 'duplicate',
     }),
-    description: i18n.translate('dashboard.topNave.cloneConfigDescription', {
+    description: i18n.translate('dashboard.topNave.viewModeInteractiveSaveConfigDescription', {
       defaultMessage: 'Create a copy of your dashboard',
     }),
   },

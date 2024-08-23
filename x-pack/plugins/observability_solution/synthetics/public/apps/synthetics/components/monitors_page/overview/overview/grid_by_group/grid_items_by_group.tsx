@@ -6,7 +6,7 @@
  */
 
 import { EuiFocusTrap, EuiOverlayMask, EuiPanel, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, FC, PropsWithChildren } from 'react';
 import { useSelector } from 'react-redux';
 import { get, invert, orderBy } from 'lodash';
 import styled from 'styled-components';
@@ -154,7 +154,10 @@ export const GridItemsByGroup = ({
   );
 };
 
-const WrappedPanel: React.FC<{ isFullScreen: boolean }> = ({ isFullScreen, children }) => {
+const WrappedPanel: FC<PropsWithChildren<{ isFullScreen: boolean }>> = ({
+  isFullScreen,
+  children,
+}) => {
   const ref = useRef(null);
 
   if (!isFullScreen) {

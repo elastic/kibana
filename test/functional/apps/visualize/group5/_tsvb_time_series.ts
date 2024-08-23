@@ -155,8 +155,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           it(`viz should have light class when background color is white`, async () => {
             await visualBuilder.clickPanelOptions('timeSeries');
             await visualBuilder.setBackgroundColor('#FFFFFF');
-
-            expect(await visualBuilder.checkTimeSeriesIsLight()).to.be(true);
+            await retry.try(async () => {
+              expect(await visualBuilder.checkTimeSeriesIsLight()).to.be(true);
+            });
           });
 
           after(async () => {
@@ -430,11 +431,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await visualBuilder.clickSeriesLegendItem('png');
             await visualBuilder.clickSeriesLegendItem('php');
             legendNames = await visualBuilder.getLegendNames();
-            expect(legendNames).to.eql(['jpg', 'css', 'gif']);
+            expect(legendNames).to.eql(['png', 'php']);
 
             await visualize.clickRefresh(true);
             legendNames = await visualBuilder.getLegendNames();
-            expect(legendNames).to.eql(['jpg', 'css', 'gif']);
+            expect(legendNames).to.eql(['png', 'php']);
           });
         });
 

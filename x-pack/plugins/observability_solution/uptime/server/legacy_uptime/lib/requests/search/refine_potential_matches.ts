@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { QueryContext } from './query_context';
 import { MonitorSummary, Ping } from '../../../../../common/runtime_types';
 
@@ -115,50 +116,48 @@ export const query = async (
   queryContext: QueryContext,
   potentialMatchMonitorIDs: string[]
 ): Promise<any> => {
-  const params = {
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            await queryContext.dateRangeFilter(),
-            { terms: { 'monitor.id': potentialMatchMonitorIDs } },
-          ],
-        },
+  const params: SearchRequest = {
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          await queryContext.dateRangeFilter(),
+          { terms: { 'monitor.id': potentialMatchMonitorIDs } },
+        ],
       },
-      aggs: {
-        monitor: {
-          terms: {
-            field: 'monitor.id',
-            size: potentialMatchMonitorIDs.length,
-            order: { _key: queryContext.cursorOrder() },
-          },
-          aggs: {
-            location: {
-              terms: { field: 'observer.geo.name', missing: 'N/A', size: 100 },
-              aggs: {
-                summaries: {
-                  // only match summary docs because we only want the latest *complete* check group.
-                  filter: { exists: { field: 'summary' } },
-                  aggs: {
-                    latest: {
-                      top_hits: {
-                        sort: [{ '@timestamp': 'desc' }],
-                        size: 1,
-                      },
+    },
+    aggs: {
+      monitor: {
+        terms: {
+          field: 'monitor.id',
+          size: potentialMatchMonitorIDs.length,
+          order: { _key: queryContext.cursorOrder() },
+        },
+        aggs: {
+          location: {
+            terms: { field: 'observer.geo.name', missing: 'N/A', size: 100 },
+            aggs: {
+              summaries: {
+                // only match summary docs because we only want the latest *complete* check group.
+                filter: { exists: { field: 'summary' } },
+                aggs: {
+                  latest: {
+                    top_hits: {
+                      sort: [{ '@timestamp': 'desc' }],
+                      size: 1,
                     },
                   },
                 },
-                // We want to find the latest check group, even if it's not part of a summary
-                latest_matching: {
-                  filter: queryContext.filterClause || { match_all: {} },
-                  aggs: {
-                    top: {
-                      top_hits: {
-                        _source: ['@timestamp'],
-                        sort: [{ '@timestamp': 'desc' }],
-                        size: 1,
-                      },
+              },
+              // We want to find the latest check group, even if it's not part of a summary
+              latest_matching: {
+                filter: queryContext.filterClause || { match_all: {} },
+                aggs: {
+                  top: {
+                    top_hits: {
+                      _source: ['@timestamp'],
+                      sort: [{ '@timestamp': 'desc' }],
+                      size: 1,
                     },
                   },
                 },

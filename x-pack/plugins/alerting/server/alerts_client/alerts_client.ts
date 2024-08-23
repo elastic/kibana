@@ -58,6 +58,7 @@ import {
   getLifecycleAlertsQueries,
   getMaintenanceWindowAlertsQuery,
   getContinualAlertsQuery,
+  isAlertImproving,
 } from './lib';
 import { isValidAlertIndexName } from '../alerts_service';
 import { resolveAlertConflicts } from './lib/alert_conflict_resolver';
@@ -103,6 +104,7 @@ export class AlertsClient<
   };
 
   private startedAtString: string | null = null;
+  private runTimestampString: string | undefined;
   private rule: AlertRule;
   private ruleType: UntypedNormalizedRuleType;
 
@@ -132,6 +134,9 @@ export class AlertsClient<
 
   public async initializeExecution(opts: InitializeExecutionOpts) {
     this.startedAtString = opts.startedAt ? opts.startedAt.toISOString() : null;
+    if (opts.runTimestamp) {
+      this.runTimestampString = opts.runTimestamp.toISOString();
+    }
     await this.legacyAlertsClient.initializeExecution(opts);
 
     if (!this.ruleType.alerts?.shouldWrite) {
@@ -424,9 +429,16 @@ export class AlertsClient<
       // See if there's an existing active alert document
       if (!!activeAlerts[id]) {
         if (
-          this.fetchedAlerts.data.hasOwnProperty(id) &&
+          Object.hasOwn(this.fetchedAlerts.data, id) &&
           get(this.fetchedAlerts.data[id], ALERT_STATUS) === 'active'
         ) {
+          const isImproving = isAlertImproving<
+            AlertData,
+            LegacyState,
+            LegacyContext,
+            ActionGroupIds,
+            RecoveryActionGroupId
+          >(this.fetchedAlerts.data[id], activeAlerts[id], this.ruleType.actionGroups);
           activeAlertsToIndex.push(
             buildOngoingAlert<
               AlertData,
@@ -438,6 +450,8 @@ export class AlertsClient<
               alert: this.fetchedAlerts.data[id],
               legacyAlert: activeAlerts[id],
               rule: this.rule,
+              isImproving,
+              runTimestamp: this.runTimestampString,
               timestamp: currentTime,
               payload: this.reportedAlerts[id],
               kibanaVersion: this.options.kibanaVersion,
@@ -459,6 +473,7 @@ export class AlertsClient<
             >({
               legacyAlert: activeAlerts[id],
               rule: this.rule,
+              runTimestamp: this.runTimestampString,
               timestamp: currentTime,
               payload: this.reportedAlerts[id],
               kibanaVersion: this.options.kibanaVersion,
@@ -476,7 +491,7 @@ export class AlertsClient<
     for (const id of keys(recoveredAlertsToReturn)) {
       // See if there's an existing alert document
       // If there is not, log an error because there should be
-      if (this.fetchedAlerts.data.hasOwnProperty(id)) {
+      if (Object.hasOwn(this.fetchedAlerts.data, id)) {
         recoveredAlertsToIndex.push(
           currentRecoveredAlerts[id]
             ? buildRecoveredAlert<
@@ -489,6 +504,7 @@ export class AlertsClient<
                 alert: this.fetchedAlerts.data[id],
                 legacyAlert: currentRecoveredAlerts[id],
                 rule: this.rule,
+                runTimestamp: this.runTimestampString,
                 timestamp: currentTime,
                 payload: this.reportedAlerts[id],
                 recoveryActionGroup: this.options.ruleType.recoveryActionGroup.id,
@@ -497,15 +513,10 @@ export class AlertsClient<
             : buildUpdatedRecoveredAlert<AlertData>({
                 alert: this.fetchedAlerts.data[id],
                 legacyRawAlert: recoveredAlertsToReturn[id],
+                runTimestamp: this.runTimestampString,
                 timestamp: currentTime,
                 rule: this.rule,
               })
-        );
-      } else {
-        this.options.logger.debug(
-          `Could not find alert document to update for recovered alert with id ${id} and uuid ${currentRecoveredAlerts[
-            id
-          ].getUuid()}`
         );
       }
     }

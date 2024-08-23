@@ -60,6 +60,7 @@ export const FleetAllIntegrAllRole: Role = {
           privileges: ['all'],
         },
       ],
+      cluster: ['manage_service_account'],
     },
     kibana: [
       {
@@ -89,6 +90,7 @@ export const FleetAllIntegrReadRole: Role = {
           privileges: ['all'],
         },
       ],
+      cluster: ['manage_service_account'],
     },
     kibana: [
       {
@@ -116,6 +118,7 @@ export const FleetAllIntegrNoneRole: Role = {
           privileges: ['all'],
         },
       ],
+      cluster: ['manage_service_account'],
     },
     kibana: [
       {
@@ -143,6 +146,7 @@ export const FleetAgentsReadIntegrNoneRole: Role = {
           privileges: ['all'],
         },
       ],
+      cluster: ['manage_service_account'],
     },
     kibana: [
       {
@@ -170,6 +174,7 @@ export const FleetNoneIntegrAllRole: Role = {
           privileges: ['all'],
         },
       ],
+      cluster: ['manage_service_account'],
     },
     kibana: [
       {

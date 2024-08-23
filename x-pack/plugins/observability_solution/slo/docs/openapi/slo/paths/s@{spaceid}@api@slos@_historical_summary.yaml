@@ -1,5 +1,5 @@
 post:
-  summary: Retrieves the historical summary for a list of SLOs
+  summary: Get a historical summary for SLOs
   operationId: historicalSummaryOp
   description: >
     You must have the `read` privileges for the **SLOs** feature in the

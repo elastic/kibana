@@ -34,10 +34,9 @@ exports[`should add default count metric when metrics is empty array 1`] = `
       onClick={[Function]}
       size="xs"
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Add metric"
         id="xpack.maps.metricsEditor.addMetricButtonLabel"
-        values={Object {}}
       />
     </EuiButtonEmpty>
   </EuiTextAlign>
@@ -79,10 +78,9 @@ exports[`should render metrics editor 1`] = `
       onClick={[Function]}
       size="xs"
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Add metric"
         id="xpack.maps.metricsEditor.addMetricButtonLabel"
-        values={Object {}}
       />
     </EuiButtonEmpty>
   </EuiTextAlign>

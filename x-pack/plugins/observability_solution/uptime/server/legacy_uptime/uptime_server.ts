@@ -6,7 +6,7 @@
  */
 
 import { Logger } from '@kbn/core/server';
-import { createLifecycleRuleTypeFactory, IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { getRequestValidation } from '@kbn/core-http-server';
 import { INITIAL_REST_VERSION } from '../../common/constants';
 import { DynamicSettingsSchema } from './routes/dynamic_settings';
@@ -89,6 +89,7 @@ export const initUptimeServer = (
         router.versioned
           .get({
             access: 'public',
+            description: `Get uptime settings`,
             path: routeDefinition.path,
             options: {
               tags: options?.tags,
@@ -103,7 +104,7 @@ export const initUptimeServer = (
                 },
                 response: {
                   200: {
-                    body: DynamicSettingsSchema,
+                    body: () => DynamicSettingsSchema,
                   },
                 },
               },
@@ -115,6 +116,7 @@ export const initUptimeServer = (
         router.versioned
           .put({
             access: 'public',
+            description: `Update uptime settings`,
             path: routeDefinition.path,
             options: {
               tags: options?.tags,
@@ -129,7 +131,7 @@ export const initUptimeServer = (
                 },
                 response: {
                   200: {
-                    body: DynamicSettingsSchema,
+                    body: () => DynamicSettingsSchema,
                   },
                 },
               },
@@ -151,14 +153,9 @@ export const initUptimeServer = (
   const tlsAlert = tlsAlertFactory(server, libs, plugins);
   const durationAlert = durationAnomalyAlertFactory(server, libs, plugins);
 
-  const createLifecycleRuleType = createLifecycleRuleTypeFactory({
-    ruleDataClient,
-    logger,
-  });
-
-  registerType(createLifecycleRuleType(statusAlert));
-  registerType(createLifecycleRuleType(tlsAlert));
-  registerType(createLifecycleRuleType(durationAlert));
+  registerType(statusAlert);
+  registerType(tlsAlert);
+  registerType(durationAlert);
 
   /* TLS Legacy rule supported at least through 8.0.
    * Not registered with RAC */

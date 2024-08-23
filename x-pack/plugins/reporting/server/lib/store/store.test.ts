@@ -75,73 +75,9 @@ describe('ReportingStore', () => {
         payload: {},
         meta: {},
       } as any);
-      expect(store.addReport(mockReport)).rejects.toMatchInlineSnapshot(
+      await expect(store.addReport(mockReport)).rejects.toMatchInlineSnapshot(
         `[Error: Report object from ES has missing fields!]`
       );
-    });
-
-    it('handles error creating the index', async () => {
-      // setup
-      mockEsClient.indices.exists.mockResponse(false);
-      mockEsClient.indices.create.mockRejectedValue(new Error('horrible error'));
-
-      const store = new ReportingStore(mockCore, mockLogger);
-      const mockReport = new Report({
-        _index: '.reporting-errortest',
-        jobtype: 'unknowntype',
-        payload: {},
-        meta: {},
-      } as any);
-      await expect(store.addReport(mockReport)).rejects.toMatchInlineSnapshot(
-        `[Error: horrible error]`
-      );
-    });
-
-    /* Creating the index will fail, if there were multiple jobs staged in
-     * parallel and creation completed from another Kibana instance.  Only the
-     * first request in line can successfully create it.
-     * In spite of that race condition, adding the new job in Elasticsearch is
-     * fine.
-     */
-    it('ignores index creation error if the index already exists and continues adding the report', async () => {
-      // setup
-      mockEsClient.indices.exists.mockResponse(false);
-      mockEsClient.indices.create.mockRejectedValue(new Error('devastating error'));
-
-      const store = new ReportingStore(mockCore, mockLogger);
-      const mockReport = new Report({
-        _index: '.reporting-mock',
-        jobtype: 'unknowntype',
-        payload: {},
-        meta: {},
-      } as any);
-      await expect(store.addReport(mockReport)).rejects.toMatchInlineSnapshot(
-        `[Error: devastating error]`
-      );
-    });
-
-    it('skips creating the index if already exists', async () => {
-      // setup
-      mockEsClient.indices.exists.mockResponse(false);
-      // will be triggered but ignored
-      mockEsClient.indices.create.mockRejectedValue(new Error('resource_already_exists_exception'));
-
-      const store = new ReportingStore(mockCore, mockLogger);
-      const mockReport = new Report({
-        created_by: 'user1',
-        jobtype: 'unknowntype',
-        payload: {},
-        meta: {},
-      } as any);
-      await expect(store.addReport(mockReport)).resolves.toMatchObject({
-        _primary_term: undefined,
-        _seq_no: undefined,
-        attempts: 0,
-        created_by: 'user1',
-        jobtype: 'unknowntype',
-        payload: {},
-        status: 'pending',
-      });
     });
 
     it('allows username string to be `false`', async () => {
@@ -416,38 +352,62 @@ describe('ReportingStore', () => {
   });
 
   describe('start', () => {
+    class TestReportingStore extends ReportingStore {
+      constructor(...args: ConstructorParameters<typeof ReportingStore>) {
+        super(...args);
+      }
+      public createIlmPolicy() {
+        return super.createIlmPolicy();
+      }
+    }
+
     it('creates an ILM policy for managing reporting indices if there is not already one', async () => {
       mockEsClient.ilm.getLifecycle.mockRejectedValue({ statusCode: 404 });
       mockEsClient.ilm.putLifecycle.mockResponse({} as any);
 
-      const store = new ReportingStore(mockCore, mockLogger);
+      const store = new TestReportingStore(mockCore, mockLogger);
+      const createIlmPolicySpy = jest.spyOn(store, 'createIlmPolicy');
       await store.start();
 
       expect(mockEsClient.ilm.getLifecycle).toHaveBeenCalledWith({ name: 'kibana-reporting' });
       expect(mockEsClient.ilm.putLifecycle.mock.calls[0][0]).toMatchInlineSnapshot(`
         Object {
-          "body": Object {
-            "policy": Object {
-              "phases": Object {
-                "hot": Object {
-                  "actions": Object {},
-                },
+          "name": "kibana-reporting",
+          "policy": Object {
+            "phases": Object {
+              "hot": Object {
+                "actions": Object {},
               },
             },
           },
-          "name": "kibana-reporting",
         }
       `);
+      expect(createIlmPolicySpy).toBeCalled();
     });
 
     it('does not create an ILM policy for managing reporting indices if one already exists', async () => {
       mockEsClient.ilm.getLifecycle.mockResponse({});
 
-      const store = new ReportingStore(mockCore, mockLogger);
+      const store = new TestReportingStore(mockCore, mockLogger);
+      const createIlmPolicySpy = jest.spyOn(store, 'createIlmPolicy');
       await store.start();
 
       expect(mockEsClient.ilm.getLifecycle).toHaveBeenCalledWith({ name: 'kibana-reporting' });
       expect(mockEsClient.ilm.putLifecycle).not.toHaveBeenCalled();
+      expect(createIlmPolicySpy).toBeCalled();
+    });
+
+    it('does not call ILM APIs in serverless', async () => {
+      const reportingConfig = {
+        statefulSettings: { enabled: false },
+      };
+      mockCore = await createMockReportingCore(createMockConfigSchema(reportingConfig));
+
+      const store = new TestReportingStore(mockCore, mockLogger);
+      const createIlmPolicySpy = jest.spyOn(store, 'createIlmPolicy');
+      await store.start();
+
+      expect(createIlmPolicySpy).not.toBeCalled();
     });
   });
 });

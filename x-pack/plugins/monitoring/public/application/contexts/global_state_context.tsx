@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { createContext, useState } from 'react';
+import React, { createContext, useState, FC, PropsWithChildren } from 'react';
 import type { TimeRange } from '@kbn/es-query';
 import { RefreshInterval } from '@kbn/data-plugin/public';
 import useUnmount from 'react-use/lib/useUnmount';
@@ -36,7 +36,7 @@ const REFRESH_INTERVAL_OVERRIDE = {
   value: 10000,
 };
 
-export const GlobalStateProvider: React.FC<GlobalStateProviderProps> = ({
+export const GlobalStateProvider: FC<PropsWithChildren<GlobalStateProviderProps>> = ({
   uiSettings,
   query,
   toasts,
@@ -49,7 +49,7 @@ export const GlobalStateProvider: React.FC<GlobalStateProviderProps> = ({
 
   const initialState: any = globalState.getState();
   for (const key in initialState) {
-    if (!initialState.hasOwnProperty(key)) {
+    if (!Object.hasOwn(initialState, key)) {
       continue;
     }
     localState[key] = initialState[key];

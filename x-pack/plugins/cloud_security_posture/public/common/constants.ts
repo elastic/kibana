@@ -40,11 +40,8 @@ export const DEFAULT_VISIBLE_ROWS_PER_PAGE = 25;
 
 export const LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY = 'cloudPosture:dataTable:pageSize';
 export const LOCAL_STORAGE_DATA_TABLE_COLUMNS_KEY = 'cloudPosture:dataTable:columns';
-export const LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY = 'cloudPosture:findings:pageSize';
 export const LOCAL_STORAGE_PAGE_SIZE_BENCHMARK_KEY = 'cloudPosture:benchmark:pageSize';
 export const LOCAL_STORAGE_PAGE_SIZE_RULES_KEY = 'cloudPosture:rules:pageSize';
-export const LOCAL_STORAGE_DASHBOARD_CLUSTER_SORT_KEY =
-  'cloudPosture:complianceDashboard:clusterSort';
 export const LOCAL_STORAGE_DASHBOARD_BENCHMARK_SORT_KEY =
   'cloudPosture:complianceDashboard:benchmarkSort';
 export const LOCAL_STORAGE_FINDINGS_LAST_SELECTED_TAB_KEY = 'cloudPosture:findings:lastSelectedTab';
@@ -234,8 +231,30 @@ export const DETECTION_ENGINE_ALERTS_KEY = 'detection_engine_alerts';
 export const DEFAULT_GROUPING_TABLE_HEIGHT = 512;
 
 export const FINDINGS_GROUPING_OPTIONS = {
+  NONE: 'none',
   RESOURCE_NAME: 'resource.name',
   RULE_NAME: 'rule.name',
+  RULE_SECTION: 'rule.section',
   CLOUD_ACCOUNT_NAME: 'cloud.account.name',
   ORCHESTRATOR_CLUSTER_NAME: 'orchestrator.cluster.name',
+};
+export const VULNERABILITY_FIELDS = {
+  VULNERABILITY_ID: 'vulnerability.id',
+  SCORE_BASE: 'vulnerability.score.base',
+  RESOURCE_NAME: 'resource.name',
+  RESOURCE_ID: 'resource.id',
+  SEVERITY: 'vulnerability.severity',
+  PACKAGE_NAME: 'package.name',
+  PACKAGE_VERSION: 'package.version',
+  PACKAGE_FIXED_VERSION: 'package.fixed_version',
+  CLOUD_ACCOUNT_NAME: 'cloud.account.name',
+  CLOUD_PROVIDER: 'cloud.provider',
+  DESCRIPTION: 'vulnerability.description',
+} as const;
+export const VULNERABILITY_GROUPING_OPTIONS = {
+  NONE: 'none',
+  RESOURCE_NAME: VULNERABILITY_FIELDS.RESOURCE_NAME,
+  RESOURCE_ID: VULNERABILITY_FIELDS.RESOURCE_ID,
+  CLOUD_ACCOUNT_NAME: VULNERABILITY_FIELDS.CLOUD_ACCOUNT_NAME,
+  CVE: VULNERABILITY_FIELDS.VULNERABILITY_ID,
 };

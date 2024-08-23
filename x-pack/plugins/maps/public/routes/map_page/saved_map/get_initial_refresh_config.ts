@@ -8,19 +8,19 @@
 import { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { getUiSettings } from '../../../kibana_services';
-import { SerializedMapState } from './types';
+import { ParsedMapStateJSON } from './types';
 
 export function getInitialRefreshConfig({
-  serializedMapState,
+  mapState,
   globalState = {},
 }: {
-  serializedMapState?: SerializedMapState;
+  mapState?: ParsedMapStateJSON;
   globalState: GlobalQueryStateFromUrl;
 }) {
   const uiSettings = getUiSettings();
 
-  if (serializedMapState?.refreshConfig) {
-    return serializedMapState.refreshConfig;
+  if (mapState?.refreshConfig) {
+    return mapState.refreshConfig;
   }
 
   const defaultRefreshConfig = uiSettings.get(UI_SETTINGS.TIMEPICKER_REFRESH_INTERVAL_DEFAULTS);

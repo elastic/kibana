@@ -7,10 +7,11 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
+import type { RiskScoresCalculationResponse } from '../../../../common/api/entity_analytics';
 import type { RiskScoreDataClient } from './risk_score_data_client';
-import type { CalculateAndPersistScoresParams, CalculateAndPersistScoresResponse } from '../types';
 import type { AssetCriticalityService } from '../asset_criticality/asset_criticality_service';
 import { calculateRiskScores } from './calculate_risk_scores';
+import type { CalculateAndPersistScoresParams } from '../types';
 
 export const calculateAndPersistRiskScores = async (
   params: CalculateAndPersistScoresParams & {
@@ -20,8 +21,8 @@ export const calculateAndPersistRiskScores = async (
     spaceId: string;
     riskScoreDataClient: RiskScoreDataClient;
   }
-): Promise<CalculateAndPersistScoresResponse> => {
-  const { riskScoreDataClient, spaceId, ...rest } = params;
+): Promise<RiskScoresCalculationResponse> => {
+  const { riskScoreDataClient, spaceId, returnScores, refresh, ...rest } = params;
 
   const writer = await riskScoreDataClient.getWriter({
     namespace: spaceId,
@@ -40,7 +41,9 @@ export const calculateAndPersistRiskScores = async (
     );
   }
 
-  const { errors, docs_written: scoresWritten } = await writer.bulk(scores);
+  const { errors, docs_written: scoresWritten } = await writer.bulk({ ...scores, refresh });
 
-  return { after_keys: afterKeys, errors, scores_written: scoresWritten };
+  const result = { after_keys: afterKeys, errors, scores_written: scoresWritten };
+
+  return returnScores ? { ...result, scores } : result;
 };

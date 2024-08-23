@@ -80,7 +80,7 @@ export const SourceSelection: FC = () => {
           i18n.translate(
             'xpack.ml.dataFrame.analytics.create.searchSelection.CcsErrorCallOutBody',
             {
-              defaultMessage: `The saved search '{savedSearchTitle}' uses the data view '{dataViewName}'.`,
+              defaultMessage: `The saved search ''{savedSearchTitle}'' uses the data view ''{dataViewName}''.`,
               values: {
                 savedSearchTitle: getNestedProperty(savedObject, 'attributes.title'),
                 dataViewName,

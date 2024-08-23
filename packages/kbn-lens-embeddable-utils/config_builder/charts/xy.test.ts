@@ -125,6 +125,7 @@ test('generates xy chart config', async () => {
                 "query": Object {
                   "esql": "from test | count=count() by @timestamp",
                 },
+                "timeField": undefined,
               },
             },
           },

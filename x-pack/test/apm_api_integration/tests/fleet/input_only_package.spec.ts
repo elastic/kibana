@@ -33,7 +33,7 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
   const bettertest = getBettertest(supertest);
   const config = getService('config');
   const synthtraceKibanaClient = getService('synthtraceKibanaClient');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   const API_KEY_NAME = 'apm_api_key_testing';
   const APM_AGENT_POLICY_NAME = 'apm_agent_policy_testing';
@@ -104,7 +104,7 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
 
       async function cleanAll() {
         try {
-          await synthtraceEsClient.clean();
+          await apmSynthtraceEsClient.clean();
           await es.security.invalidateApiKey({ name: API_KEY_NAME });
           await deleteAgentPolicyAndPackagePolicyByName({
             bettertest,

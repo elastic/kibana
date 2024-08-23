@@ -18,7 +18,7 @@ import {
 import {
   WithFieldEditorDependencies,
   getCommonActions,
-  spyIndexPatternGetAllFields,
+  spyIndexPatternGetByName,
   spySearchQuery,
   spySearchQueryResponse,
   TestDoc,
@@ -27,7 +27,6 @@ import {
 const defaultProps: Props = {
   onSave: () => {},
   onCancel: () => {},
-  isSavingField: false,
 };
 
 /**
@@ -35,7 +34,7 @@ const defaultProps: Props = {
  * @param fields The fields of the index pattern
  */
 export const setIndexPatternFields = (fields: Array<{ name: string; displayName: string }>) => {
-  spyIndexPatternGetAllFields.mockReturnValue(fields);
+  spyIndexPatternGetByName.mockReturnValue(fields);
 };
 
 export const getSearchCallMeta = () => {
@@ -55,7 +54,7 @@ export const getSearchCallMeta = () => {
 };
 
 export const setSearchResponse = (
-  documents: Array<{ _id: string; _index: string; _source: TestDoc }>
+  documents: Array<{ _id: string; _index: string; fields: TestDoc }>
 ) => {
   spySearchQueryResponse.mockResolvedValue({
     rawResponse: {

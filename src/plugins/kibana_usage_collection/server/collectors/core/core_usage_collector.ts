@@ -342,6 +342,20 @@ export function getCoreUsageCollector(
       },
       environment: {
         memory: {
+          arrayBuffersBytes: {
+            type: 'long',
+            _meta: {
+              description:
+                'Memory allocated for array buffers. This is also included in the external value.',
+            },
+          },
+          externalBytes: {
+            type: 'long',
+            _meta: {
+              description: 'Memory usage of C++ objects bound to JavaScript objects managed by V8.',
+            },
+          },
+          residentSetSizeBytes: { type: 'long', _meta: { description: 'Node RSS.' } },
           heapSizeLimit: { type: 'long', _meta: { description: 'Host memory heap size limit.' } },
           heapTotalBytes: {
             type: 'long',

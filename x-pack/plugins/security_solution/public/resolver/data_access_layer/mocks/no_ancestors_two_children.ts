@@ -121,11 +121,13 @@ export function noAncestorsTwoChildren(): { dataAccessLayer: DataAccessLayer; me
         timeRange,
         indexPatterns,
         limit,
+        agentId,
       }: {
         ids: string[];
         timeRange: TimeRange;
         indexPatterns: string[];
         limit: number;
+        agentId: string;
       }): Promise<SafeResolverEvent[]> {
         return [];
       },
@@ -140,6 +142,7 @@ export function noAncestorsTwoChildren(): { dataAccessLayer: DataAccessLayer; me
         indices,
         ancestors,
         descendants,
+        agentId,
       }: {
         dataId: string;
         schema: ResolverSchema;
@@ -147,6 +150,7 @@ export function noAncestorsTwoChildren(): { dataAccessLayer: DataAccessLayer; me
         indices: string[];
         ancestors: number;
         descendants: number;
+        agentId: string;
       }): Promise<ResolverNode[]> {
         const { treeResponse } = mockTreeWithNoAncestorsAnd2Children({
           originID: metadata.entityIDs.origin,
@@ -169,8 +173,10 @@ export function noAncestorsTwoChildren(): { dataAccessLayer: DataAccessLayer; me
               parent: 'process.parent.entity_id',
               ancestry: 'process.Ext.ancestry',
               name: 'process.name',
+              agentId: 'agent.id',
             },
             id: metadata.entityIDs.origin,
+            agentId: 'mockedAgentId',
           },
         ]);
       },

@@ -26,8 +26,7 @@ import { deleteAllLoadedEndpointData } from '../../../tasks/delete_all_endpoint_
 
 const AGENT_BEAT_FILE_PATH_SUFFIX = '/components/agentbeat';
 
-// FLAKY: https://github.com/elastic/kibana/issues/170563
-describe.skip('Response console', { tags: ['@ess', '@serverless'] }, () => {
+describe('Response console', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
   beforeEach(() => {
     login();
   });
@@ -45,7 +44,7 @@ describe.skip('Response console', { tags: ['@ess', '@serverless'] }, () => {
 
           return enableAllPolicyProtections(policy.id).then(() => {
             // Create and enroll a new Endpoint host
-            return createEndpointHost(policy.policy_id).then((host) => {
+            return createEndpointHost(policy.policy_ids[0]).then((host) => {
               createdHost = host as CreateAndEnrollEndpointHostResponse;
             });
           });
@@ -77,7 +76,7 @@ describe.skip('Response console', { tags: ['@ess', '@serverless'] }, () => {
       cy.contains('Action pending.').should('exist');
 
       // on success
-      cy.getByTestSubj('getProcessListTable', { timeout: 120000 }).within(() => {
+      cy.getByTestSubj('processesOutput-processListTable', { timeout: 120000 }).within(() => {
         ['USER', 'PID', 'ENTITY ID', 'COMMAND'].forEach((header) => {
           cy.contains(header);
         });

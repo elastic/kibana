@@ -17,12 +17,17 @@ import {
 describe(
   'App Features for Security Complete PLI with Endpoint Complete Addon',
   {
-    tags: ['@serverless'],
+    tags: ['@serverless', '@skipInServerlessMKI'],
     env: {
       ftrConfig: {
         productTypes: [
           { product_line: 'security', product_tier: 'complete' },
           { product_line: 'endpoint', product_tier: 'complete' },
+        ],
+        kbnServerArgs: [
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'responseActionScanEnabled',
+          ])}`,
         ],
       },
     },

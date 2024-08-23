@@ -17,10 +17,9 @@ exports[`ManageData render 1`] = `
       <h2
         id="kbnOverviewDataManage__title"
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Manage your data"
           id="kibanaOverview.manageData.sectionTitle"
-          values={Object {}}
         />
       </h2>
     </EuiTitle>

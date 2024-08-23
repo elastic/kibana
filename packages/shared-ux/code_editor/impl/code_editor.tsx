@@ -23,7 +23,13 @@ import {
   EuiFlexItem,
   useEuiTheme,
 } from '@elastic/eui';
-import { monaco } from '@kbn/monaco';
+import {
+  monaco,
+  CODE_EDITOR_LIGHT_THEME_ID,
+  CODE_EDITOR_DARK_THEME_ID,
+  CODE_EDITOR_LIGHT_THEME_TRANSPARENT_ID,
+  CODE_EDITOR_DARK_THEME_TRANSPARENT_ID,
+} from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
@@ -31,13 +37,7 @@ import './register_languages';
 import { remeasureFonts } from './remeasure_fonts';
 
 import { PlaceholderWidget } from './placeholder_widget';
-import {
-  styles,
-  DARK_THEME,
-  LIGHT_THEME,
-  DARK_THEME_TRANSPARENT,
-  LIGHT_THEME_TRANSPARENT,
-} from './editor.styles';
+import { styles } from './editor.styles';
 
 export interface CodeEditorProps {
   /** Width of editor. Defaults to 100%. */
@@ -112,6 +112,8 @@ export interface CodeEditorProps {
    */
   editorDidMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
 
+  editorWillUnmount?: () => void;
+
   /**
    * Should the editor use the dark theme
    */
@@ -153,6 +155,13 @@ export interface CodeEditorProps {
    * Enables the editor to get disabled when pressing ESC to resolve focus trapping for accessibility.
    */
   accessibilityOverlayEnabled?: boolean;
+
+  /**
+   * Enables the Search bar functionality in the editor. Disabled by default.
+   */
+  enableFindAction?: boolean;
+
+  dataTestSubj?: string;
 }
 
 export const CodeEditor: React.FC<CodeEditorProps> = ({
@@ -165,6 +174,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   overrideEditorWillMount,
   editorDidMount,
   editorWillMount,
+  editorWillUnmount,
   useDarkTheme: useDarkThemeProp,
   transparentBackground,
   suggestionProvider,
@@ -183,6 +193,8 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   }),
   fitToContent,
   accessibilityOverlayEnabled = true,
+  enableFindAction,
+  dataTestSubj,
 }) => {
   const { colorMode, euiTheme } = useEuiTheme();
   const useDarkTheme = useDarkThemeProp ?? colorMode === 'DARK';
@@ -277,6 +289,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
     return (
       <EuiToolTip
+        data-test-subj="codeEditorAccessibilityOverlay"
         display="block"
         content={
           <>
@@ -369,23 +382,22 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         }
       });
 
-      // Register themes
-      monaco.editor.defineTheme('euiColors', useDarkTheme ? DARK_THEME : LIGHT_THEME);
-      monaco.editor.defineTheme(
-        'euiColorsTransparent',
-        useDarkTheme ? DARK_THEME_TRANSPARENT : LIGHT_THEME_TRANSPARENT
-      );
+      monaco.editor.addKeybindingRule({
+        // eslint-disable-next-line no-bitwise
+        keybinding: monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyF,
+        command: enableFindAction ? 'actions.find' : null,
+      });
     },
     [
       overrideEditorWillMount,
       editorWillMount,
       languageId,
-      useDarkTheme,
       suggestionProvider,
       signatureProvider,
       hoverProvider,
       codeActions,
       languageConfiguration,
+      enableFindAction,
     ]
   );
 
@@ -446,10 +458,12 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
   const _editorWillUnmount = useCallback<NonNullable<ReactMonacoEditorProps['editorWillUnmount']>>(
     (editor) => {
+      editorWillUnmount?.();
+
       const model = editor.getModel();
       model?.dispose();
     },
-    []
+    [editorWillUnmount]
   );
 
   useEffect(() => {
@@ -474,22 +488,21 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
   const { CopyButton } = useCopy({ isCopyable, value });
 
-  useEffect(() => {
-    // Register themes when 'useDarkTheme' changes
-    monaco.editor.defineTheme('euiColors', useDarkTheme ? DARK_THEME : LIGHT_THEME);
-    monaco.editor.defineTheme(
-      'euiColorsTransparent',
-      useDarkTheme ? DARK_THEME_TRANSPARENT : LIGHT_THEME_TRANSPARENT
-    );
-  }, [useDarkTheme]);
-
-  const theme = options?.theme ?? (transparentBackground ? 'euiColorsTransparent' : 'euiColors');
+  const theme =
+    options?.theme ??
+    (transparentBackground
+      ? useDarkTheme
+        ? CODE_EDITOR_DARK_THEME_TRANSPARENT_ID
+        : CODE_EDITOR_LIGHT_THEME_TRANSPARENT_ID
+      : useDarkTheme
+      ? CODE_EDITOR_DARK_THEME_ID
+      : CODE_EDITOR_LIGHT_THEME_ID);
 
   return (
     <div
       css={styles.container}
       onKeyDown={onKeyDown}
-      data-test-subj="kibanaCodeEditor"
+      data-test-subj={dataTestSubj ?? 'kibanaCodeEditor'}
       className="kibanaCodeEditor"
     >
       {accessibilityOverlayEnabled && renderPrompt()}

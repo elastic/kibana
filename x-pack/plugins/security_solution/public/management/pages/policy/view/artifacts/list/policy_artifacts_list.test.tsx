@@ -68,6 +68,7 @@ describe('Policy details artifacts list', () => {
             canWriteArtifact={canWriteArtifact}
             getPolicyArtifactsPath={getPolicyEventFiltersPath}
             getArtifactPath={getEventFiltersListPath}
+            CardDecorator={undefined}
           />
         );
         await waitFor(() => expect(mockedApi.responseProvider.eventFiltersList).toHaveBeenCalled());

@@ -202,7 +202,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type connector: both user and password must be specified',
+                'error validating action type connector: must specify a secrets configuration',
             });
           });
       });

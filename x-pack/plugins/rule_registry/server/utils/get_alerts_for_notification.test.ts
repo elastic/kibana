@@ -245,6 +245,13 @@ describe('getAlertsForNotification', () => {
     ).toMatchInlineSnapshot(`Array []`);
   });
 
+  test('should not return recovered alerts if the activeCount is less than the rule alertDelay', () => {
+    const trackedEvents = cloneDeep([alert1]);
+    expect(
+      getAlertsForNotification(DEFAULT_FLAPPING_SETTINGS, 5, trackedEvents, [], newEventParams)
+    ).toMatchInlineSnapshot(`Array []`);
+  });
+
   test('should update active alert to look like a new alert if the activeCount is equal to the rule alertDelay', () => {
     const trackedEvents = cloneDeep([alert5]);
     expect(

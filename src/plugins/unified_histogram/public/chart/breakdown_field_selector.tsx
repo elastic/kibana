@@ -8,7 +8,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { EuiSelectableOption } from '@elastic/eui';
-import { FieldIcon, getFieldIconProps } from '@kbn/field-utils';
+import { FieldIcon, getFieldIconProps, comboBoxFieldOptionMatcher } from '@kbn/field-utils';
 import { css } from '@emotion/react';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
@@ -37,6 +37,7 @@ export const BreakdownFieldSelector = ({
       .filter(fieldSupportsBreakdown)
       .map((field) => ({
         key: field.name,
+        name: field.name,
         label: field.displayName,
         value: field.name,
         checked:
@@ -102,6 +103,7 @@ export const BreakdownFieldSelector = ({
           defaultMessage: 'Select breakdown field',
         }
       )}
+      optionMatcher={comboBoxFieldOptionMatcher}
       options={fieldOptions}
       onChange={onChange}
     />

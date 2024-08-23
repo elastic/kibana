@@ -7,12 +7,12 @@
  */
 
 import { Result } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 export const updateConnectorIndexName = async (
   client: ElasticsearchClient,
   connectorId: string,
-  indexName: string
+  indexName: string | null
 ): Promise<Result> => {
   return await client.transport.request<Result>({
     method: 'PUT',

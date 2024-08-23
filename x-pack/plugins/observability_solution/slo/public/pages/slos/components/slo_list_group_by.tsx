@@ -13,7 +13,13 @@ import type { SearchState } from '../hooks/use_url_search_state';
 import type { Option } from './slo_context_menu';
 import { ContextMenuItem, SLOContextMenu } from './slo_context_menu';
 
-export type GroupByField = 'ungrouped' | 'slo.tags' | 'status' | 'slo.indicator.type' | '_index';
+export type GroupByField =
+  | 'ungrouped'
+  | 'slo.tags'
+  | 'status'
+  | 'slo.indicator.type'
+  | 'slo.instanceId'
+  | '_index';
 export interface Props {
   onStateChange: (newState: Partial<SearchState>) => void;
   state: SearchState;
@@ -78,6 +84,16 @@ export function SloGroupBy({ onStateChange, state, loading }: Props) {
       value: 'slo.indicator.type',
       onClick: () => {
         handleChangeGroupBy('slo.indicator.type');
+      },
+    },
+    {
+      label: i18n.translate('xpack.slo.list.groupBy.sloInstanceId', {
+        defaultMessage: 'SLO instance id',
+      }),
+      checked: groupBy === 'slo.instanceId',
+      value: 'slo.instanceId',
+      onClick: () => {
+        handleChangeGroupBy('slo.instanceId');
       },
     },
   ];

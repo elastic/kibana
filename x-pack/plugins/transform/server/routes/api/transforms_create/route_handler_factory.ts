@@ -31,7 +31,9 @@ export const routeHandlerFactory: (
   PutTransformsRequestSchema,
   TransformRequestHandlerContext
 > = (routeDependencies) => async (ctx, req, res) => {
-  const { coreStart, dataViews } = routeDependencies;
+  const { getCoreStart, getDataViewsStart } = routeDependencies;
+  const coreStart = await getCoreStart();
+  const dataViews = await getDataViewsStart();
   const { transformId } = req.params;
   const { createDataView, timeFieldName } = req.query;
 

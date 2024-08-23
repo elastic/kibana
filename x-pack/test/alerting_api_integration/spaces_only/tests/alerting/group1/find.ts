@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { SuperTest, Test } from 'supertest';
+import { Agent as SuperTestAgent } from 'supertest';
 import { fromKueryExpression } from '@kbn/es-query';
 import { Spaces } from '../../../scenarios';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
@@ -14,7 +14,7 @@ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 async function createAlert(
   objectRemover: ObjectRemover,
-  supertest: SuperTest<Test>,
+  supertest: SuperTestAgent,
   overwrites = {}
 ) {
   const { body: createdAlert } = await supertest
@@ -28,7 +28,7 @@ async function createAlert(
 
 const findTestUtils = (
   describeType: 'internal' | 'public',
-  supertest: SuperTest<Test>,
+  supertest: SuperTestAgent,
   objectRemover: ObjectRemover
 ) => {
   describe(describeType, () => {
@@ -126,6 +126,7 @@ const findTestUtils = (
               monitoring: match.monitoring,
               snooze_schedule: match.snooze_schedule,
               ...(hasActiveSnoozes && { active_snoozes: activeSnoozes }),
+              is_snoozed_until: null,
             }
           : {}),
       });

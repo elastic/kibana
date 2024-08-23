@@ -103,6 +103,7 @@ class DocLinks {
   public crawlerOverview: string;
   public deployTrainedModels: string;
   public documentLevelSecurity: string;
+  public e5Model: string;
   public elasticsearchCreateIndex: string;
   public elasticsearchGettingStarted: string;
   public elasticsearchMapping: string;
@@ -114,6 +115,7 @@ class DocLinks {
   public enterpriseSearchTroubleshootSetup: string;
   public enterpriseSearchUsersAccess: string;
   public indexApi: string;
+  public inferenceApiCreate: string;
   public ingestionApis: string;
   public ingestPipelines: string;
   public kibanaSecurity: string;
@@ -124,7 +126,6 @@ class DocLinks {
   public licenseManagement: string;
   public machineLearningStart: string;
   public mlDocumentEnrichment: string;
-  public playground: string;
   public pluginsIngestAttachment: string;
   public queryDsl: string;
   public restApis: string;
@@ -139,6 +140,7 @@ class DocLinks {
   public searchTemplates: string;
   public searchUIAppSearch: string;
   public searchUIElasticsearch: string;
+  public semanticTextField: string;
   public start: string;
   public supportedNlpModels: string;
   public syncRules: string;
@@ -281,6 +283,7 @@ class DocLinks {
     this.crawlerOverview = '';
     this.deployTrainedModels = '';
     this.documentLevelSecurity = '';
+    this.e5Model = '';
     this.elasticsearchCreateIndex = '';
     this.elasticsearchGettingStarted = '';
     this.elasticsearchMapping = '';
@@ -292,6 +295,7 @@ class DocLinks {
     this.enterpriseSearchTroubleshootSetup = '';
     this.enterpriseSearchUsersAccess = '';
     this.indexApi = '';
+    this.inferenceApiCreate = '';
     this.ingestionApis = '';
     this.ingestPipelines = '';
     this.kibanaSecurity = '';
@@ -302,7 +306,6 @@ class DocLinks {
     this.licenseManagement = '';
     this.machineLearningStart = '';
     this.mlDocumentEnrichment = '';
-    this.playground = '';
     this.pluginsIngestAttachment = '';
     this.queryDsl = '';
     this.restApis = '';
@@ -317,6 +320,7 @@ class DocLinks {
     this.searchLabs = '';
     this.searchLabsRepo = '';
     this.searchTemplates = '';
+    this.semanticTextField = '';
     this.start = '';
     this.supportedNlpModels = '';
     this.syncRules = '';
@@ -461,6 +465,7 @@ class DocLinks {
     this.crawlerOverview = docLinks.links.enterpriseSearch.crawlerOverview;
     this.deployTrainedModels = docLinks.links.enterpriseSearch.deployTrainedModels;
     this.documentLevelSecurity = docLinks.links.enterpriseSearch.documentLevelSecurity;
+    this.e5Model = docLinks.links.enterpriseSearch.e5Model;
     this.elasticsearchCreateIndex = docLinks.links.elasticsearch.createIndex;
     this.elasticsearchGettingStarted = docLinks.links.elasticsearch.gettingStarted;
     this.elasticsearchMapping = docLinks.links.elasticsearch.mapping;
@@ -472,6 +477,7 @@ class DocLinks {
     this.enterpriseSearchTroubleshootSetup = docLinks.links.enterpriseSearch.troubleshootSetup;
     this.enterpriseSearchUsersAccess = docLinks.links.enterpriseSearch.usersAccess;
     this.indexApi = docLinks.links.enterpriseSearch.indexApi;
+    this.inferenceApiCreate = docLinks.links.enterpriseSearch.inferenceApiCreate;
     this.ingestionApis = docLinks.links.enterpriseSearch.ingestionApis;
     this.ingestPipelines = docLinks.links.enterpriseSearch.ingestPipelines;
     this.kibanaSecurity = docLinks.links.kibana.xpackSecurity;
@@ -482,7 +488,6 @@ class DocLinks {
     this.licenseManagement = docLinks.links.enterpriseSearch.licenseManagement;
     this.machineLearningStart = docLinks.links.enterpriseSearch.machineLearningStart;
     this.mlDocumentEnrichment = docLinks.links.enterpriseSearch.mlDocumentEnrichment;
-    this.playground = docLinks.links.enterpriseSearch.playground;
     this.pluginsIngestAttachment = docLinks.links.plugins.ingestAttachment;
     this.queryDsl = docLinks.links.query.queryDsl;
     this.restApis = docLinks.links.apis.restApis;
@@ -497,6 +502,7 @@ class DocLinks {
     this.searchLabs = docLinks.links.enterpriseSearch.searchLabs;
     this.searchLabsRepo = docLinks.links.enterpriseSearch.searchLabsRepo;
     this.searchTemplates = docLinks.links.enterpriseSearch.searchTemplates;
+    this.semanticTextField = docLinks.links.enterpriseSearch.semanticTextField;
     this.start = docLinks.links.enterpriseSearch.start;
     this.supportedNlpModels = docLinks.links.enterpriseSearch.supportedNlpModels;
     this.syncRules = docLinks.links.enterpriseSearch.syncRules;

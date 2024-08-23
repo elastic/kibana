@@ -6,7 +6,7 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import type { SuperTest, Test } from 'supertest';
+import type { Agent as SuperTestAgent } from 'supertest';
 import { ToolingLog } from '@kbn/tooling-log';
 import { ThresholdParams } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
 import { refreshSavedObjectIndices } from './refresh_index';
@@ -17,7 +17,7 @@ export async function createIndexConnector({
   indexName,
   logger,
 }: {
-  supertest: SuperTest<Test>;
+  supertest: SuperTestAgent;
   name: string;
   indexName: string;
   logger: ToolingLog;
@@ -51,7 +51,7 @@ export async function createRule<Params = ThresholdParams>({
   logger,
   esClient,
 }: {
-  supertest: SuperTest<Test>;
+  supertest: SuperTestAgent;
   ruleTypeId: string;
   name: string;
   params: Params;

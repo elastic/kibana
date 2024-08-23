@@ -11,11 +11,8 @@ import ReactDOM from 'react-dom';
 import { Router } from '@kbn/shared-ux-router';
 
 import { AppMountParameters } from '@kbn/core/public';
-import {
-  KibanaContextProvider,
-  KibanaThemeProvider,
-  toMountPoint,
-} from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view-table';
 import { VisualizeApp } from './app';
@@ -34,26 +31,23 @@ export const renderApp = (
   }
 
   const app = (
-    <KibanaThemeProvider theme$={services.theme.theme$}>
+    <KibanaRenderContextProvider {...services.core}>
       <Router history={services.history}>
         <KibanaContextProvider services={services}>
           <services.presentationUtil.ContextProvider>
-            <services.i18n.Context>
-              <TableListViewKibanaProvider
-                {...{
-                  core: services.core,
-                  toMountPoint,
-                  savedObjectsTagging: services.savedObjectsTagging,
-                  FormattedRelative,
-                }}
-              >
-                <VisualizeApp onAppLeave={onAppLeave} />
-              </TableListViewKibanaProvider>
-            </services.i18n.Context>
+            <TableListViewKibanaProvider
+              {...{
+                core: services.core,
+                savedObjectsTagging: services.savedObjectsTagging,
+                FormattedRelative,
+              }}
+            >
+              <VisualizeApp onAppLeave={onAppLeave} />
+            </TableListViewKibanaProvider>
           </services.presentationUtil.ContextProvider>
         </KibanaContextProvider>
       </Router>
-    </KibanaThemeProvider>
+    </KibanaRenderContextProvider>
   );
 
   ReactDOM.render(app, element);

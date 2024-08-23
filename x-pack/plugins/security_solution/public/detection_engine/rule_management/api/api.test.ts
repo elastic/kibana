@@ -767,6 +767,33 @@ describe('Detections Rules API', () => {
       );
     });
 
+    test('passes manual rule run payload', async () => {
+      const startDate = new Date().toISOString();
+      const endDate = new Date().toISOString();
+      await performBulkAction({
+        bulkAction: {
+          type: BulkActionTypeEnum.run,
+          ids: ['ruleId1'],
+          runPayload: { start_date: startDate, end_date: endDate },
+        },
+      });
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        '/api/detection_engine/rules/_bulk_action',
+        expect.objectContaining({
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'run',
+            ids: ['ruleId1'],
+            run: { start_date: startDate, end_date: endDate },
+          }),
+          query: {
+            dry_run: false,
+          },
+        })
+      );
+    });
+
     test('executes dry run', async () => {
       await performBulkAction({
         bulkAction: { type: BulkActionTypeEnum.disable, query: 'some query' },
@@ -871,10 +898,12 @@ describe('Detections Rules API', () => {
       expect(result).toEqual({
         '1': {
           muteAll: false,
+          name: '',
           activeSnoozes: [],
         },
         '2': {
           muteAll: false,
+          name: '',
           activeSnoozes: [],
           isSnoozedUntil: new Date('2023-04-24T19:31:46.765Z'),
         },

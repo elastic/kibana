@@ -9,12 +9,13 @@
 import { from, Observable, timer, defer, fromEvent, EMPTY } from 'rxjs';
 import { expand, map, switchMap, takeUntil, takeWhile, tap } from 'rxjs';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
-import type { IAsyncSearchOptions, IKibanaSearchResponse } from '..';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
+import type { IAsyncSearchOptions } from '..';
 import { isAbortResponse, isRunningResponse } from '..';
 
 export const pollSearch = <Response extends IKibanaSearchResponse>(
   search: () => Promise<Response>,
-  cancel?: () => void,
+  cancel?: () => Promise<void>,
   { pollInterval, abortSignal }: IAsyncSearchOptions = {}
 ): Observable<Response> => {
   const getPollInterval = (elapsedTime: number): number => {
@@ -41,8 +42,13 @@ export const pollSearch = <Response extends IKibanaSearchResponse>(
       throw new AbortError();
     }
 
+    const safeCancel = () =>
+      cancel?.().catch((e) => {
+        console.error(e); // eslint-disable-line no-console
+      });
+
     if (cancel) {
-      abortSignal?.addEventListener('abort', cancel, { once: true });
+      abortSignal?.addEventListener('abort', safeCancel, { once: true });
     }
 
     const aborted$ = (abortSignal ? fromEvent(abortSignal, 'abort') : EMPTY).pipe(

@@ -944,7 +944,7 @@
           "\nDetermine if url is outside of this Kibana install."
         ],
         "signature": [
-          "(url: string, basePath: string) => boolean | undefined"
+          "(url: string, basePath: string) => boolean"
         ],
         "path": "packages/kbn-std/src/is_internal_url.ts",
         "deprecated": false,

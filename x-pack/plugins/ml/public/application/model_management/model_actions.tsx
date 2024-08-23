@@ -15,10 +15,7 @@ import {
   DEPLOYMENT_STATE,
   TRAINED_MODEL_TYPE,
 } from '@kbn/ml-trained-models-utils';
-import {
-  ELASTIC_MODEL_TAG,
-  MODEL_STATE,
-} from '@kbn/ml-trained-models-utils/src/constants/trained_models';
+import { MODEL_STATE } from '@kbn/ml-trained-models-utils/src/constants/trained_models';
 import {
   getAnalysisType,
   type DataFrameAnalysisConfigType,
@@ -58,10 +55,9 @@ export function useModelActions({
     services: {
       application: { navigateToUrl },
       overlays,
-      theme,
-      i18n: i18nStart,
       docLinks,
       mlServices: { mlApiServices },
+      ...startServices
     },
   } = useMlKibana();
 
@@ -109,19 +105,18 @@ export function useModelActions({
   }, [mlApiServices]);
 
   const getUserConfirmation = useMemo(
-    () => getUserConfirmationProvider(overlays, theme, i18nStart),
-    [i18nStart, overlays, theme]
+    () => getUserConfirmationProvider(overlays, startServices),
+    [overlays, startServices]
   );
 
   const getUserInputModelDeploymentParams = useMemo(
     () =>
       getUserInputModelDeploymentParamsProvider(
         overlays,
-        theme,
-        i18nStart,
+        startServices,
         startModelDeploymentDocUrl
       ),
-    [overlays, theme, i18nStart, startModelDeploymentDocUrl]
+    [overlays, startServices, startModelDeploymentDocUrl]
   );
 
   const isBuiltInModel = useCallback(
@@ -334,7 +329,7 @@ export function useModelActions({
             item.deployment_ids.some(
               (dId) =>
                 Array.isArray(item.inference_apis) &&
-                !item.inference_apis.some((inference) => inference.model_id === dId)
+                !item.inference_apis.some((inference) => inference.inference_id === dId)
             )),
         enabled: (item) => !isLoading,
         onClick: async (item) => {
@@ -411,10 +406,7 @@ export function useModelActions({
         icon: 'download',
         type: 'icon',
         isPrimary: true,
-        available: (item) =>
-          canCreateTrainedModels &&
-          item.tags.includes(ELASTIC_MODEL_TAG) &&
-          item.state === MODEL_STATE.NOT_DOWNLOADED,
+        available: (item) => canCreateTrainedModels && item.state === MODEL_STATE.NOT_DOWNLOADED,
         enabled: (item) => !isLoading,
         onClick: async (item) => {
           onModelDownloadRequest(item.model_id);

@@ -7,14 +7,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { OverlayStart } from '@kbn/core/public';
-import type { VisSavedObject } from '../../types';
+import type { StartServices, VisSavedObject } from '../../types';
 import { SAVE_DUPLICATE_REJECTED } from './constants';
 import { confirmModalPromise } from './confirm_modal_promise';
 
 export function displayDuplicateTitleConfirmModal(
   savedObject: Pick<VisSavedObject, 'title'>,
-  overlays: OverlayStart
+  startServices: StartServices
 ): Promise<boolean> {
   const confirmTitle = i18n.translate(
     'visualizations.confirmModal.saveDuplicateConfirmationTitle',
@@ -36,7 +35,7 @@ export function displayDuplicateTitleConfirmModal(
   });
 
   try {
-    return confirmModalPromise(confirmMessage, confirmTitle, confirmButtonText, overlays);
+    return confirmModalPromise(confirmMessage, confirmTitle, confirmButtonText, startServices);
   } catch {
     return Promise.reject(new Error(SAVE_DUPLICATE_REJECTED));
   }

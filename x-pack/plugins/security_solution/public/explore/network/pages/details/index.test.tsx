@@ -8,9 +8,7 @@
 import React from 'react';
 import { Router, useParams } from 'react-router-dom';
 
-import '../../../../common/mock/match_media';
-
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { TestProviders } from '../../../../common/mock';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { NetworkDetails } from '.';
@@ -56,7 +54,7 @@ jest.mock('react-router-dom', () => {
 jest.mock('../../containers/details', () => ({
   useNetworkDetails: jest.fn().mockReturnValue([true, { networkDetails: {} }]),
 }));
-jest.mock('../../../../common/containers/sourcerer');
+jest.mock('../../../../sourcerer/containers');
 jest.mock('../../../../common/containers/use_global_time', () => ({
   useGlobalTime: jest.fn().mockReturnValue({
     from: '2020-07-07T08:20:18.966Z',

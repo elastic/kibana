@@ -56,7 +56,7 @@ describe(
     beforeEach(() => {
       login();
       // Create and enroll a new Endpoint host
-      return createEndpointHost(policy.policy_id).then((host) => {
+      return createEndpointHost(policy.policy_ids[0]).then((host) => {
         createdHost = host as CreateAndEnrollEndpointHostResponse;
       });
     });
@@ -84,7 +84,7 @@ describe(
       // Change agent policy and wait for action to be completed
       reAssignFleetAgentToPolicy(
         createdHost.agentId,
-        policyWithAgentTamperProtectionEnabled.policy_id
+        policyWithAgentTamperProtectionEnabled.policy_ids[0]
       ).then((hasChanged) => {
         expect(hasChanged).to.eql(true);
 
@@ -97,7 +97,7 @@ describe(
               expect(isUninstalledWithoutToken).to.eql(false);
 
               // Get the uninstall token from that agent policy
-              getUninstallToken(policyWithAgentTamperProtectionEnabled.policy_id).then(
+              getUninstallToken(policyWithAgentTamperProtectionEnabled.policy_ids[0]).then(
                 (uninstallToken) => {
                   // Try to uninstall agent from host using the retrieved uninstall token
                   uninstallAgentFromHost(createdHost.hostname, uninstallToken.body.item.token).then(

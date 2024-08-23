@@ -6,7 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { CoreStart } from '@kbn/core/public';
+import type {
+  AnalyticsServiceStart,
+  CoreStart,
+  I18nStart,
+  ThemeServiceStart,
+} from '@kbn/core/public';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import {
   RANDOM_NUMBER_ROUTE_PATH,
@@ -15,7 +20,14 @@ import {
   INTERNAL_GET_MESSAGE_BY_ID_ROUTE,
 } from '../common';
 
+interface StartServices {
+  analytics: Pick<AnalyticsServiceStart, 'reportEvent'>;
+  i18n: I18nStart;
+  theme: Pick<ThemeServiceStart, 'theme$'>;
+}
+
 export interface Services {
+  startServices: StartServices;
   fetchRandomNumber: () => Promise<number | IHttpFetchError>;
   fetchRandomNumberBetween: (max: number) => Promise<number | IHttpFetchError>;
   postMessage: (message: string, id: string) => Promise<undefined | IHttpFetchError>;
@@ -24,7 +36,11 @@ export interface Services {
 }
 
 export function getServices(core: CoreStart): Services {
+  const { analytics, i18n, theme } = core;
+  const startServices = { analytics, i18n, theme };
+
   return {
+    startServices,
     addSuccessToast: (message: string) => core.notifications.toasts.addSuccess(message),
     fetchRandomNumber: async () => {
       try {

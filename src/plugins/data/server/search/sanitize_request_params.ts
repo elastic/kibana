@@ -7,7 +7,7 @@
  */
 
 import type { ConnectionRequestParams } from '@elastic/transport';
-import type { SanitizedConnectionRequestParams } from '../../common';
+import type { SanitizedConnectionRequestParams } from '@kbn/search-types';
 
 export function sanitizeRequestParams(
   requestParams: ConnectionRequestParams

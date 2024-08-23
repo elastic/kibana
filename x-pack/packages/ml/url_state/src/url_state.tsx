@@ -14,6 +14,7 @@ import React, {
   useRef,
   useEffect,
   type FC,
+  type PropsWithChildren,
 } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { isEqual } from 'lodash';
@@ -28,6 +29,16 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 export interface Dictionary<TValue> {
   [id: string]: TValue;
+}
+
+export interface ListingPageUrlState {
+  pageSize: number;
+  pageIndex: number;
+  sortField: string;
+  sortDirection: string;
+  queryText?: string;
+  showPerPageOptions?: boolean;
+  showAll?: boolean;
 }
 
 export type Accessor = '_a' | '_g';
@@ -91,7 +102,7 @@ export const urlStateStore = createContext<UrlState>({
 
 export const { Provider } = urlStateStore;
 
-export const UrlStateProvider: FC = ({ children }) => {
+export const UrlStateProvider: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const history = useHistory();
   const { search: searchString } = useLocation();
 
@@ -113,7 +124,7 @@ export const UrlStateProvider: FC = ({ children }) => {
       const urlState = parseUrlState(prevSearchString);
       const parsedQueryString = parse(prevSearchString, { sort: false });
 
-      if (!Object.prototype.hasOwnProperty.call(urlState, accessor)) {
+      if (!Object.hasOwn(urlState, accessor)) {
         urlState[accessor] = {};
       }
 
@@ -240,7 +251,7 @@ export class PageUrlStateService<T> {
   }
 }
 
-interface PageUrlState {
+export interface PageUrlState {
   pageKey: string;
   pageUrlState: object;
 }

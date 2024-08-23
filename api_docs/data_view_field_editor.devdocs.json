@@ -558,6 +558,14 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
+              " | ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewLazy",
+                "text": "DataViewLazy"
+              },
               "; }"
             ],
             "path": "src/plugins/data_view_field_editor/public/open_delete_modal.tsx",
@@ -649,6 +657,14 @@
                 "docId": "kibDataViewsPluginApi",
                 "section": "def-common.DataView",
                 "text": "DataView"
+              },
+              " | ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewLazy",
+                "text": "DataViewLazy"
               },
               "; }"
             ],
@@ -1019,7 +1035,9 @@
               "section": "def-public.OpenFieldEditorOptions",
               "text": "OpenFieldEditorOptions"
             },
-            ") => () => void"
+            ") => Promise<",
+            "CloseEditor",
+            ">"
           ],
           "path": "src/plugins/data_view_field_editor/public/types.ts",
           "deprecated": false,
@@ -1067,7 +1085,9 @@
               "section": "def-public.OpenFieldDeleteModalOptions",
               "text": "OpenFieldDeleteModalOptions"
             },
-            ") => () => void"
+            ") => Promise<",
+            "CloseEditor",
+            ">"
           ],
           "path": "src/plugins/data_view_field_editor/public/types.ts",
           "deprecated": false,

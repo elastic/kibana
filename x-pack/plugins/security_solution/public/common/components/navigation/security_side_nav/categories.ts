@@ -18,7 +18,7 @@ export const CATEGORIES: SeparatorLinkCategory[] = [
     linkIds: [
       SecurityPageName.rulesLanding,
       SecurityPageName.alerts,
-      SecurityPageName.aiInsights,
+      SecurityPageName.attackDiscovery,
       SecurityPageName.cloudSecurityPostureFindings,
       SecurityPageName.case,
     ],

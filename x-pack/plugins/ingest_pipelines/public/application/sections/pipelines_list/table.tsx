@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useState, useMemo } from 'react';
+import React, { FunctionComponent, useState, useMemo, useEffect } from 'react';
+import qs from 'query-string';
 import { i18n } from '@kbn/i18n';
+import { isEmpty, omit } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
+
 import {
   EuiInMemoryTable,
   EuiLink,
@@ -27,6 +30,7 @@ import {
 } from '@elastic/eui';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
+import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 import { Pipeline } from '../../../../common/types';
 import { useKibana } from '../../../shared_imports';
 
@@ -60,6 +64,46 @@ const managedFilterLabel = i18n.translate('xpack.ingestPipelines.list.table.mana
   defaultMessage: 'Managed',
 });
 
+const defaultFilterOptions: EuiSelectableOption[] = [
+  { key: 'managed', label: managedFilterLabel, 'data-test-subj': 'managedFilter' },
+  {
+    key: 'deprecated',
+    label: deprecatedFilterLabel,
+    checked: 'off',
+    'data-test-subj': 'deprecatedFilter',
+  },
+];
+
+const PAGE_SIZE_OPTIONS = [10, 20, 50];
+
+interface FilterQueryParams {
+  [key: string]: 'unset' | 'on' | 'off';
+}
+
+export function serializeFilterOptions(options: EuiSelectableOption[]) {
+  return options.reduce((list, option) => {
+    return {
+      ...list,
+      [option.key as string]: option.checked ?? 'unset',
+    };
+  }, {}) as FilterQueryParams;
+}
+
+export function deserializeFilterOptions(options: FilterQueryParams) {
+  return defaultFilterOptions.map((filter: EuiSelectableOption) => {
+    const filterKey = filter.key ? filter.key : '';
+    return {
+      // Ignore checked property when setting as we are going to handle that separately
+      ...omit(filter, ['checked']),
+      ...(options[filterKey] === 'unset' ? {} : { checked: options[filterKey] }),
+    };
+  }) as EuiSelectableOption[];
+}
+
+function isDefaultFilterOptions(options: FilterQueryParams) {
+  return options.managed === 'unset' && options.deprecated === 'off';
+}
+
 export const PipelineTable: FunctionComponent<Props> = ({
   pipelines,
   isLoading,
@@ -68,15 +112,27 @@ export const PipelineTable: FunctionComponent<Props> = ({
   onClonePipelineClick,
   onDeletePipelineClick,
 }) => {
-  const [filterOptions, setFilterOptions] = useState<EuiSelectableOption[]>([
-    { key: 'managed', label: managedFilterLabel },
-    { key: 'deprecated', label: deprecatedFilterLabel, checked: 'off' },
-  ]);
+  const [queryText, setQueryText] = useState<string>('');
+  const [filterOptions, setFilterOptions] = useState<EuiSelectableOption[]>(defaultFilterOptions);
+
   const { history } = useKibana().services;
   const [selection, setSelection] = useState<Pipeline[]>([]);
 
+  const { pageSize, sorting, onTableChange } = useEuiTablePersist<Pipeline>({
+    tableId: 'ingestPipelines',
+    initialPageSize: 10,
+    initialSort: { field: 'name', direction: 'asc' },
+    pageSizeOptions: PAGE_SIZE_OPTIONS,
+  });
+
   const filteredPipelines = useMemo(() => {
-    return (pipelines || []).filter((pipeline) => {
+    // Filter pipelines list by whatever the user entered in the search bar
+    const pipelinesAfterSearch = (pipelines || []).filter((pipeline) => {
+      return pipeline.name.toLowerCase().includes(queryText.toLowerCase());
+    });
+
+    // Then filter those results down with the selected options from the filter dropdown
+    return pipelinesAfterSearch.filter((pipeline) => {
       const deprecatedFilter = filterOptions.find(({ key }) => key === 'deprecated')?.checked;
       const managedFilter = filterOptions.find(({ key }) => key === 'managed')?.checked;
       return !(
@@ -86,7 +142,56 @@ export const PipelineTable: FunctionComponent<Props> = ({
         (managedFilter === 'on' && !pipeline.isManaged)
       );
     });
-  }, [pipelines, filterOptions]);
+  }, [pipelines, filterOptions, queryText]);
+
+  // This effect will run once only to update the initial state of the filters
+  // and queryText based on whatever is set in the query params.
+  useEffect(() => {
+    const {
+      queryText: searchQuery,
+      deprecated,
+      managed,
+    } = qs.parse(history?.location?.search || '');
+
+    if (searchQuery) {
+      setQueryText(searchQuery as string);
+    }
+    if (deprecated && managed) {
+      setFilterOptions(
+        deserializeFilterOptions({
+          deprecated,
+          managed,
+        } as FilterQueryParams)
+      );
+    }
+  }, [history]);
+
+  useEffect(() => {
+    const serializedFilterOptions = serializeFilterOptions(filterOptions);
+    const isQueryEmpty = isEmpty(queryText);
+    const isDefaultFilters = isDefaultFilterOptions(serializedFilterOptions);
+    const isDefaultFilterConfiguration = isQueryEmpty && isDefaultFilters;
+
+    // When the default filters are set, clear them up from the url
+    if (isDefaultFilterConfiguration) {
+      history.push('');
+    } else {
+      // Otherwise, we can go ahead and update the query params with whatever
+      // the user has set.
+      history.push({
+        pathname: '',
+        search:
+          '?' +
+          qs.stringify(
+            {
+              ...(!isQueryEmpty ? { queryText } : {}),
+              ...(!isDefaultFilters ? serializedFilterOptions : {}),
+            },
+            { strict: false, arrayFormat: 'index' }
+          ),
+      });
+    }
+  }, [history, queryText, filterOptions]);
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const onButtonClick = () => {
@@ -100,6 +205,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
     <EuiFilterButton
       iconType="arrowDown"
       badgeColor="success"
+      data-test-subj="filtersDropdown"
       onClick={onButtonClick}
       isSelected={isPopoverOpen}
       numFilters={filterOptions.filter((item) => item.checked !== 'off').length}
@@ -115,7 +221,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
   const tableProps: EuiInMemoryTableProps<Pipeline> = {
     itemId: 'name',
     'data-test-subj': 'pipelinesTable',
-    sorting: { sort: { field: 'name', direction: 'asc' } },
+    sorting,
     selection: {
       onSelectionChange: setSelection,
     },
@@ -130,6 +236,12 @@ export const PipelineTable: FunctionComponent<Props> = ({
       };
     },
     search: {
+      query: queryText,
+      onChange: ({ queryText: searchText, error }) => {
+        if (!error) {
+          setQueryText(searchText);
+        }
+      },
       toolsLeft:
         selection.length > 0 ? (
           <EuiButton
@@ -194,9 +306,10 @@ export const PipelineTable: FunctionComponent<Props> = ({
       ],
     },
     pagination: {
-      initialPageSize: 10,
-      pageSizeOptions: [10, 20, 50],
+      initialPageSize: pageSize,
+      pageSizeOptions: PAGE_SIZE_OPTIONS,
     },
+    onTableChange,
     columns: [
       {
         width: '25%',
@@ -205,17 +318,22 @@ export const PipelineTable: FunctionComponent<Props> = ({
           defaultMessage: 'Name',
         }),
         sortable: true,
-        render: (name: string) => (
-          <EuiLink
-            data-test-subj="pipelineDetailsLink"
-            {...reactRouterNavigate(history, {
-              pathname: '/',
-              search: `pipeline=${encodeURIComponent(name)}`,
-            })}
-          >
-            {name}
-          </EuiLink>
-        ),
+        render: (name: string) => {
+          const currentSearch = history.location.search;
+          const prependSearch = isEmpty(currentSearch) ? '?' : `${currentSearch}&`;
+
+          return (
+            <EuiLink
+              data-test-subj="pipelineDetailsLink"
+              {...reactRouterNavigate(history, {
+                pathname: '',
+                search: `${prependSearch}pipeline=${encodeURIComponent(name)}`,
+              })}
+            >
+              {name}
+            </EuiLink>
+          );
+        },
       },
       {
         width: '100px',

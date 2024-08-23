@@ -6,7 +6,6 @@
  */
 
 import { useSelector } from '@xstate/react';
-import { useMemo } from 'react';
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
 import { useKibanaContextForPlugin } from '../utils';
 
@@ -19,39 +18,52 @@ export const useDatasetQualityFlyout = () => {
 
   const {
     dataset: dataStreamStat,
-    datasetSettings: dataStreamSettings,
+    dataStreamSettings,
     datasetDetails: dataStreamDetails,
     insightsTimeRange,
     breakdownField,
-  } = useSelector(service, (state) => state.context.flyout);
+    isNonAggregatable,
+    integration,
+  } = useSelector(service, (state) => state.context.flyout) ?? {};
+
   const { timeRange } = useSelector(service, (state) => state.context.filters);
 
-  const dataStreamDetailsLoading = useSelector(service, (state) =>
-    state.matches('flyout.initializing.dataStreamDetails.fetching')
-  );
-  const dataStreamSettingsLoading = useSelector(service, (state) =>
-    state.matches('flyout.initializing.dataStreamSettings.fetching')
+  const loadingState = useSelector(service, (state) => ({
+    dataStreamDetailsLoading: state.matches('flyout.initializing.dataStreamDetails.fetching'),
+    dataStreamSettingsLoading: state.matches('flyout.initializing.dataStreamSettings.fetching'),
+    datasetIntegrationDashboardLoading: state.matches(
+      'flyout.initializing.dataStreamSettings.initializeIntegrations.integrationDashboards.fetching'
+    ),
+    datasetIntegrationDone: state.matches(
+      'flyout.initializing.dataStreamSettings.initializeIntegrations.integrationDetails.done'
+    ),
+  }));
+
+  const canUserAccessDashboards = useSelector(
+    service,
+    (state) =>
+      !state.matches(
+        'flyout.initializing.dataStreamSettings.initializeIntegrations.integrationDashboards.unauthorized'
+      )
   );
 
-  const datasetIntegrationsLoading = useSelector(service, (state) =>
-    state.matches('flyout.initializing.integrationDashboards.fetching')
+  const canUserViewIntegrations = useSelector(
+    service,
+    (state) => state.context.datasetUserPrivileges.canViewIntegrations
   );
-
-  const loadingState = useMemo(() => {
-    return {
-      dataStreamDetailsLoading,
-      dataStreamSettingsLoading,
-      datasetIntegrationsLoading,
-    };
-  }, [dataStreamDetailsLoading, dataStreamSettingsLoading, datasetIntegrationsLoading]);
 
   return {
     dataStreamStat,
     dataStreamSettings,
     dataStreamDetails,
+    isNonAggregatable,
+    integration,
     fieldFormats,
     timeRange: insightsTimeRange ?? timeRange,
     breakdownField,
     loadingState,
+    flyoutLoading: !dataStreamStat,
+    canUserAccessDashboards,
+    canUserViewIntegrations,
   };
 };

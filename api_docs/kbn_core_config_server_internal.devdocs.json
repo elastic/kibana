@@ -10,18 +10,10 @@
   },
   "server": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/core-config-server-internal",
-        "id": "def-common.coreDeprecationProvider",
+        "id": "def-server.coreDeprecationProvider",
         "type": "Function",
         "tags": [],
         "label": "coreDeprecationProvider",
@@ -30,9 +22,9 @@
           "() => ",
           {
             "pluginId": "@kbn/config",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnConfigPluginApi",
-            "section": "def-common.ConfigDeprecation",
+            "section": "def-server.ConfigDeprecation",
             "text": "ConfigDeprecation"
           },
           "[]"
@@ -46,17 +38,27 @@
       },
       {
         "parentPluginId": "@kbn/core-config-server-internal",
-        "id": "def-common.ensureValidConfiguration",
+        "id": "def-server.ensureValidConfiguration",
         "type": "Function",
-        "tags": [],
+        "tags": [
+          "private"
+        ],
         "label": "ensureValidConfiguration",
-        "description": [],
+        "description": [
+          "\nValidate the entire Kibana configuration object, including the detection of extra keys."
+        ],
         "signature": [
           "(configService: ",
-          "ConfigService",
+          "IConfigService",
           ", params: ",
-          "ConfigValidateParameters",
-          " | undefined) => Promise<void>"
+          {
+            "pluginId": "@kbn/core-config-server-internal",
+            "scope": "server",
+            "docId": "kibKbnCoreConfigServerInternalPluginApi",
+            "section": "def-server.EnsureValidConfigurationParameters",
+            "text": "EnsureValidConfigurationParameters"
+          },
+          ") => Promise<void>"
         ],
         "path": "packages/core/config/core-config-server-internal/src/ensure_valid_configuration.ts",
         "deprecated": false,
@@ -64,13 +66,15 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-config-server-internal",
-            "id": "def-common.ensureValidConfiguration.$1",
+            "id": "def-server.ensureValidConfiguration.$1",
             "type": "Object",
             "tags": [],
             "label": "configService",
-            "description": [],
+            "description": [
+              "The {@link IConfigService } instance that has the raw configuration preloaded."
+            ],
             "signature": [
-              "ConfigService"
+              "IConfigService"
             ],
             "path": "packages/core/config/core-config-server-internal/src/ensure_valid_configuration.ts",
             "deprecated": false,
@@ -79,25 +83,86 @@
           },
           {
             "parentPluginId": "@kbn/core-config-server-internal",
-            "id": "def-common.ensureValidConfiguration.$2",
+            "id": "def-server.ensureValidConfiguration.$2",
             "type": "Object",
             "tags": [],
             "label": "params",
-            "description": [],
+            "description": [
+              "{@link EnsureValidConfigurationParameters | Options} to enable/disable extra edge-cases."
+            ],
             "signature": [
-              "ConfigValidateParameters",
-              " | undefined"
+              {
+                "pluginId": "@kbn/core-config-server-internal",
+                "scope": "server",
+                "docId": "kibKbnCoreConfigServerInternalPluginApi",
+                "section": "def-server.EnsureValidConfigurationParameters",
+                "text": "EnsureValidConfigurationParameters"
+              }
             ],
             "path": "packages/core/config/core-config-server-internal/src/ensure_valid_configuration.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": false
+            "isRequired": true
           }
         ],
         "returnComment": [],
         "initialIsOpen": false
       }
     ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-config-server-internal",
+        "id": "def-server.EnsureValidConfigurationParameters",
+        "type": "Interface",
+        "tags": [
+          "private"
+        ],
+        "label": "EnsureValidConfigurationParameters",
+        "description": [
+          "\nParameters for the helper {@link ensureValidConfiguration}\n"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-config-server-internal",
+            "scope": "server",
+            "docId": "kibKbnCoreConfigServerInternalPluginApi",
+            "section": "def-server.EnsureValidConfigurationParameters",
+            "text": "EnsureValidConfigurationParameters"
+          },
+          " extends ",
+          "ConfigValidateParameters"
+        ],
+        "path": "packages/core/config/core-config-server-internal/src/ensure_valid_configuration.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-config-server-internal",
+            "id": "def-server.EnsureValidConfigurationParameters.stripUnknownKeys",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "stripUnknownKeys",
+            "description": [
+              "\nSet to `true` to ignore any unknown keys and discard them from the final validated config object."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/core/config/core-config-server-internal/src/ensure_valid_configuration.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
     "interfaces": [],
     "enums": [],
     "misc": [],

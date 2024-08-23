@@ -14,8 +14,10 @@ import {
 import {
   allOrAnyString,
   allOrAnyStringOrArray,
+  dateRangeSchema,
   dateType,
-  summarySchema,
+  errorBudgetSchema,
+  statusSchema,
 } from '../../schema/common';
 
 const fetchHistoricalSummaryParamsSchema = t.type({
@@ -31,18 +33,21 @@ const fetchHistoricalSummaryParamsSchema = t.type({
           groupBy: allOrAnyStringOrArray,
           revision: t.number,
         }),
-        t.partial({ remoteName: t.string }),
+        t.partial({
+          remoteName: t.string,
+          range: dateRangeSchema,
+        }),
       ])
     ),
   }),
 });
 
-const historicalSummarySchema = t.intersection([
-  t.type({
-    date: dateType,
-  }),
-  summarySchema,
-]);
+const historicalSummarySchema = t.type({
+  date: dateType,
+  status: statusSchema,
+  sliValue: t.number,
+  errorBudget: errorBudgetSchema,
+});
 
 const fetchHistoricalSummaryResponseSchema = t.array(
   t.type({

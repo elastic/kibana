@@ -31,7 +31,7 @@ import { refreshSavedObjectIndices } from '../../refresh_index';
  */
 export const installPrebuiltRulesAndTimelines = async (
   es: Client,
-  supertest: SuperTest.SuperTest<SuperTest.Test>
+  supertest: SuperTest.Agent
 ): Promise<InstallPrebuiltRulesAndTimelinesResponse> => {
   const response = await supertest
     .put(PREBUILT_RULES_URL)

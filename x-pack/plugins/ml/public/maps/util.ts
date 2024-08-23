@@ -85,7 +85,7 @@ export const TYPICAL_STYLE = {
   },
 };
 
-export type MlAnomalyLayersType = typeof ML_ANOMALY_LAYERS[keyof typeof ML_ANOMALY_LAYERS];
+export type MlAnomalyLayersType = (typeof ML_ANOMALY_LAYERS)[keyof typeof ML_ANOMALY_LAYERS];
 
 // Must reverse coordinates here. Map expects [lon, lat] - anomalies are stored as [lat, lon] for lat_lon jobs
 function getCoordinates(latLonString: string): number[] {
@@ -98,7 +98,7 @@ function getCoordinates(latLonString: string): number[] {
 export function getInitialAnomaliesLayers(jobId: string) {
   const initialLayers = [];
   for (const layer in ML_ANOMALY_LAYERS) {
-    if (ML_ANOMALY_LAYERS.hasOwnProperty(layer)) {
+    if (Object.hasOwn(ML_ANOMALY_LAYERS, layer)) {
       initialLayers.push({
         id: htmlIdGenerator()(),
         type: LAYER_TYPE.GEOJSON_VECTOR,
@@ -119,7 +119,7 @@ export function getInitialAnomaliesLayers(jobId: string) {
 export function getInitialSourceIndexFieldLayers(sourceIndexWithGeoFields: SourceIndexGeoFields) {
   const initialLayers = [] as unknown as LayerDescriptor[] & SerializableRecord;
   for (const index in sourceIndexWithGeoFields) {
-    if (sourceIndexWithGeoFields.hasOwnProperty(index)) {
+    if (Object.hasOwn(sourceIndexWithGeoFields, index)) {
       const { dataViewId, geoFields } = sourceIndexWithGeoFields[index];
 
       geoFields.forEach((geoField) => {

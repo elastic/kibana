@@ -35,7 +35,7 @@ function addToVariables(
   if (isColumnItem(oldArg) && isColumnItem(newArg)) {
     const newVariable: ESQLVariable = {
       name: newArg.name,
-      type: 'number' /* fallback to number */,
+      type: 'double' /* fallback to number */,
       location: newArg.location,
     };
     // Now workout the exact type
@@ -107,7 +107,7 @@ function addVariableFromAssignment(
     const rightHandSideArgType = getAssignRightHandSideType(assignOperation.args[1], fields);
     addToVariableOccurrencies(variables, {
       name: assignOperation.args[0].name,
-      type: rightHandSideArgType || 'number' /* fallback to number */,
+      type: (rightHandSideArgType as string) || 'double' /* fallback to number */,
       location: assignOperation.args[0].location,
     });
   }
@@ -125,7 +125,7 @@ function addVariableFromExpression(
       queryString,
       expressionOperation.location
     );
-    const expressionType = 'number';
+    const expressionType = 'double';
     addToVariableOccurrencies(variables, {
       name: forwardThinkingVariableName,
       type: expressionType,
@@ -134,6 +134,21 @@ function addVariableFromExpression(
   }
 }
 
+export const collectVariablesFromList = (
+  list: ESQLAstItem[],
+  fields: Map<string, ESQLRealField>,
+  queryString: string,
+  variables: Map<string, ESQLVariable[]>
+) => {
+  for (const arg of list) {
+    if (isAssignment(arg)) {
+      addVariableFromAssignment(arg, variables, fields);
+    } else if (isExpression(arg)) {
+      addVariableFromExpression(arg, queryString, variables);
+    }
+  }
+};
+
 export function collectVariables(
   commands: ESQLCommand[],
   fields: Map<string, ESQLRealField>,
@@ -141,28 +156,14 @@ export function collectVariables(
 ): Map<string, ESQLVariable[]> {
   const variables = new Map<string, ESQLVariable[]>();
   for (const command of commands) {
-    if (['row', 'eval', 'stats'].includes(command.name)) {
-      for (const arg of command.args) {
-        if (isAssignment(arg)) {
-          addVariableFromAssignment(arg, variables, fields);
-        }
-        if (isExpression(arg)) {
-          addVariableFromExpression(arg, queryString, variables);
-        }
-      }
-      if (command.name === 'stats') {
+    if (['row', 'eval', 'stats', 'inlinestats', 'metrics'].includes(command.name)) {
+      collectVariablesFromList(command.args, fields, queryString, variables);
+      if (command.name === 'stats' || command.name === 'inlinestats') {
         const commandOptionsWithAssignment = command.args.filter(
           (arg) => isOptionItem(arg) && arg.name === 'by'
         ) as ESQLCommandOption[];
         for (const commandOption of commandOptionsWithAssignment) {
-          for (const optArg of commandOption.args) {
-            if (isAssignment(optArg)) {
-              addVariableFromAssignment(optArg, variables, fields);
-            }
-            if (isExpression(optArg)) {
-              addVariableFromExpression(optArg, queryString, variables);
-            }
-          }
+          collectVariablesFromList(commandOption.args, fields, queryString, variables);
         }
       }
     }

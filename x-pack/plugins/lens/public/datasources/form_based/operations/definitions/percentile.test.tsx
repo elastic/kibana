@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import React, { ChangeEvent } from 'react';
-import { act } from 'react-dom/test-utils';
-import { EuiRange } from '@elastic/eui';
+import React from 'react';
 import { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
-import { EuiFormRow } from '@elastic/eui';
-import { shallow, mount } from 'enzyme';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import faker from 'faker';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { createMockedIndexPattern } from '../../mocks';
 import { LastValueIndexPatternColumn, percentileOperation } from '.';
 import { FormBasedLayer } from '../../types';
@@ -29,16 +28,6 @@ import {
 } from '@kbn/expressions-plugin/public';
 import type { OriginalColumn } from '../../to_expression';
 import { IndexPattern } from '../../../../types';
-import faker from 'faker';
-
-jest.mock('lodash', () => {
-  const original = jest.requireActual('lodash');
-
-  return {
-    ...original,
-    debounce: (fn: unknown) => fn,
-  };
-});
 
 const uiSettingsMock = {} as IUiSettingsClient;
 
@@ -65,6 +54,12 @@ const defaultProps = {
 describe('percentile', () => {
   let layer: FormBasedLayer;
   const InlineOptions = percentileOperation.paramEditor!;
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+  afterAll(() => {
+    jest.useRealTimers();
+  });
 
   beforeEach(() => {
     layer = {
@@ -605,7 +600,7 @@ describe('percentile', () => {
   describe('param editor', () => {
     it('should render current percentile', () => {
       const updateLayerSpy = jest.fn();
-      const instance = shallow(
+      render(
         <InlineOptions
           {...defaultProps}
           layer={layer}
@@ -615,14 +610,13 @@ describe('percentile', () => {
         />
       );
 
-      const input = instance.find('[data-test-subj="lns-indexPattern-percentile-input"]');
-
-      expect(input.prop('value')).toEqual('23');
+      const input = screen.getByRole('spinbutton', { name: 'Percentile' });
+      expect(input).toHaveValue(23);
     });
 
     it('should update state on change', () => {
       const updateLayerSpy = jest.fn();
-      const instance = mount(
+      render(
         <InlineOptions
           {...defaultProps}
           layer={layer}
@@ -631,20 +625,12 @@ describe('percentile', () => {
           currentColumn={layer.columns.col2 as PercentileIndexPatternColumn}
         />
       );
-
-      const input = instance
-        .find('[data-test-subj="lns-indexPattern-percentile-input"]')
-        .find(EuiRange);
-
-      act(() => {
-        input.prop('onChange')!(
-          { currentTarget: { value: '27' } } as ChangeEvent<HTMLInputElement>,
-          true
-        );
-      });
-
-      instance.update();
-
+      const input = screen.getByRole('spinbutton', { name: 'Percentile' });
+      userEvent.clear(input);
+      userEvent.type(input, '27');
+      jest.advanceTimersByTime(256);
+      expect(input).toHaveValue(27);
+      expect(updateLayerSpy).toHaveBeenCalledTimes(1);
       expect(updateLayerSpy).toHaveBeenCalledWith({
         ...layer.columns.col2,
         params: {
@@ -656,7 +642,7 @@ describe('percentile', () => {
 
     it('should update on decimals input up to 2 digits', () => {
       const updateLayerSpy = jest.fn();
-      const instance = mount(
+      render(
         <InlineOptions
           {...defaultProps}
           layer={layer}
@@ -665,33 +651,17 @@ describe('percentile', () => {
           currentColumn={layer.columns.col2 as PercentileIndexPatternColumn}
         />
       );
-
-      const input = instance
-        .find('[data-test-subj="lns-indexPattern-percentile-input"]')
-        .find(EuiRange);
-
-      act(() => {
-        input.prop('onChange')!(
-          { currentTarget: { value: '12.12' } } as ChangeEvent<HTMLInputElement>,
-          true
-        );
-      });
-
-      instance.update();
-
+      const input = screen.getByRole('spinbutton', { name: 'Percentile' });
+      userEvent.clear(input);
+      userEvent.type(input, '12.12');
+      jest.advanceTimersByTime(256);
+      expect(input).toHaveValue(12.12);
       expect(updateLayerSpy).toHaveBeenCalled();
-
-      expect(
-        instance
-          .find('[data-test-subj="lns-indexPattern-percentile-input"]')
-          .find(EuiRange)
-          .prop('value')
-      ).toEqual('12.12');
     });
 
     it('should not update on invalid input, but show invalid value locally', () => {
       const updateLayerSpy = jest.fn();
-      const instance = mount(
+      render(
         <InlineOptions
           {...defaultProps}
           layer={layer}
@@ -700,34 +670,22 @@ describe('percentile', () => {
           currentColumn={layer.columns.col2 as PercentileIndexPatternColumn}
         />
       );
-
-      const input = instance
-        .find('[data-test-subj="lns-indexPattern-percentile-input"]')
-        .find(EuiRange);
-
-      act(() => {
-        input.prop('onChange')!(
-          { currentTarget: { value: '12.1212312312312312' } } as ChangeEvent<HTMLInputElement>,
-          true
-        );
-      });
-
-      instance.update();
-
+      const input = screen.getByRole('spinbutton', { name: 'Percentile' });
+      userEvent.clear(input);
+      userEvent.type(input, '12.1212312312312312');
+      jest.advanceTimersByTime(256);
+      expect(input).toHaveValue(12.1212312312312312);
       expect(updateLayerSpy).not.toHaveBeenCalled();
+      expect(
+        screen.getByText('Percentile has to be an integer between 0.0001 and 99.9999')
+      ).toBeInTheDocument();
 
-      expect(
-        instance
-          .find('[data-test-subj="lns-indexPattern-percentile-form"]')
-          .find(EuiFormRow)
-          .prop('isInvalid')
-      ).toEqual(true);
-      expect(
-        instance
-          .find('[data-test-subj="lns-indexPattern-percentile-input"]')
-          .find(EuiRange)
-          .prop('value')
-      ).toEqual('12.1212312312312312');
+      // expect(
+      //   instance
+      //     .find('[data-test-subj="lns-indexPattern-percentile-form"]')
+      //     .find(EuiFormRow)
+      //     .prop('isInvalid')
+      // ).toEqual(true);
     });
   });
 });

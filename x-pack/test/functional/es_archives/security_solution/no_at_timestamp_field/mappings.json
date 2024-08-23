@@ -1,7 +1,7 @@
 {
   "type": "index",
   "value": {
-    "index": "no_at_timestamp_field",
+    "index": "auditbeat-no_at_timestamp_field",
     "mappings": {
       "dynamic": "strict",
       "properties": {

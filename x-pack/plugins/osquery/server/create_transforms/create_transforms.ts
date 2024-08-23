@@ -21,12 +21,12 @@ export const initializeTransform = async (
   esClient: ElasticsearchClient,
   transform: TransformPutTransformRequest,
   logger: Logger
-) =>
-  createTransformIfNotExists(esClient, transform, logger).then((succeeded) => {
-    if (succeeded) {
-      startTransformIfNotStarted(esClient, transform.transform_id, logger);
-    }
-  });
+) => {
+  const succeeded = await createTransformIfNotExists(esClient, transform, logger);
+  if (succeeded) {
+    await startTransformIfNotStarted(esClient, transform.transform_id, logger);
+  }
+};
 
 /**
  * Checks if a transform exists, And if not creates it

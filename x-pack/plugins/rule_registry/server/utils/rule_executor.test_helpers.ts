@@ -53,6 +53,7 @@ export const createDefaultAlertExecutorOptions = <
   maintenanceWindowIds?: string[];
 }): RuleExecutorOptions<Params, State, InstanceState, InstanceContext, ActionGroupIds> => ({
   startedAt,
+  startedAtOverridden: false,
   rule: {
     id: alertId,
     updatedBy: null,
@@ -85,9 +86,9 @@ export const createDefaultAlertExecutorOptions = <
     scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
     shouldWriteAlerts: () => shouldWriteAlerts,
     shouldStopExecution: () => false,
-    searchSourceClient: searchSourceCommonMock,
+    getSearchSourceClient: async () => searchSourceCommonMock,
     share: {} as SharePluginStart,
-    dataViews: dataViewPluginMocks.createStartContract(),
+    getDataViews: async () => dataViewPluginMocks.createStartContract(),
   },
   state,
   previousStartedAt: null,

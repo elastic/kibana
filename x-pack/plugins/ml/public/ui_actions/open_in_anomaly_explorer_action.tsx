@@ -16,8 +16,8 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import { ML_APP_LOCATOR } from '../../common/constants/locator';
 import type { ExplorerAppState } from '../../common/types/locator';
 import type { AppStateSelectedCells } from '../application/explorer/explorer_utils';
+import type { AnomalyChartsApi, AnomalyChartsEmbeddableApi } from '../embeddables';
 import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '../embeddables';
-import type { AnomalyChartsEmbeddableApi } from '../embeddables/anomaly_charts/types';
 import type { AnomalySwimLaneEmbeddableApi } from '../embeddables/anomaly_swimlane/types';
 import { isSwimLaneEmbeddableContext } from '../embeddables/anomaly_swimlane/types';
 import type { MlCoreSetup } from '../plugin';
@@ -41,9 +41,9 @@ export interface OpenInAnomalyExplorerAnomalyChartsActionContext extends Embedda
 
 export const OPEN_IN_ANOMALY_EXPLORER_ACTION = 'openInAnomalyExplorerAction';
 
-export function isAnomalyChartsEmbeddableContext(
-  arg: unknown
-): arg is OpenInAnomalyExplorerAnomalyChartsActionContext {
+export function isAnomalyChartsEmbeddableContext(arg: unknown): arg is {
+  embeddable: AnomalyChartsApi;
+} {
   return (
     isPopulatedObject(arg, ['embeddable']) &&
     apiIsOfType(arg.embeddable, ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE)
@@ -97,10 +97,12 @@ export function createOpenInExplorerAction(
         });
       } else if (isAnomalyChartsEmbeddableContext(context)) {
         const { embeddable } = context;
-        const { jobIds, entityFields } = embeddable;
+        const { jobIds$, selectedEntities$ } = embeddable;
 
+        const jobIds = jobIds$?.getValue() ?? [];
         let mlExplorerFilter: ExplorerAppState['mlExplorerFilter'] | undefined;
-        const entityFieldsValue = entityFields.getValue();
+        const entityFieldsValue = selectedEntities$?.getValue();
+
         if (
           Array.isArray(entityFieldsValue) &&
           entityFieldsValue.length === 1 &&
@@ -132,7 +134,7 @@ export function createOpenInExplorerAction(
         return locator.getUrl({
           page: 'explorer',
           pageState: {
-            jobIds: jobIds.getValue(),
+            jobIds,
             timeRange: getEmbeddableTimeRange(embeddable),
             // @ts-ignore QueryDslQueryContainer is not compatible with SerializableRecord
             ...(mlExplorerFilter ? ({ mlExplorerFilter } as SerializableRecord) : {}),

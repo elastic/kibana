@@ -65,6 +65,7 @@ export const IgnoredQueriesLogic = kea<MakeLogicType<IgnoredQueriesValues, Ignor
     ignoredQueries: [
       [],
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onIgnoredQueriesLoad: (_, { ignoredQueries }) => ignoredQueries,
       },
     ],
@@ -77,7 +78,9 @@ export const IgnoredQueriesLogic = kea<MakeLogicType<IgnoredQueriesValues, Ignor
         },
       },
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onIgnoredQueriesLoad: (_, { meta }) => meta,
+        // @ts-expect-error upgrade typescript v5.1.6
         onPaginate: (state, { newPageIndex }) => updateMetaPageIndex(state, newPageIndex),
       },
     ],
@@ -127,7 +130,7 @@ export const IgnoredQueriesLogic = kea<MakeLogicType<IgnoredQueriesValues, Ignor
           ]),
         });
 
-        if (response.results[0].hasOwnProperty('error')) {
+        if (Object.hasOwn(response.results[0], 'error')) {
           throw (response.results[0] as SuggestionUpdateError).error;
         }
 

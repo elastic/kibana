@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { render } from '@testing-library/react';
 
@@ -27,6 +28,7 @@ const MESSAGE = 'This rule is attempting to query data but...';
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const mockGetComments = jest.fn(() => []);
 const mockHttp = httpServiceMock.createStartContract({ basePath: '/test' });
+const mockNavigationToApp = jest.fn();
 const mockAssistantAvailability: AssistantAvailability = {
   hasAssistantPrivilege: false,
   hasConnectorsAllPrivilege: true,
@@ -47,7 +49,7 @@ const queryClient = new QueryClient({
   },
 });
 
-const ContextWrapper: React.FC = ({ children }) => (
+const ContextWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <QueryClientProvider client={queryClient}>
     <AssistantProvider
       actionTypeRegistry={actionTypeRegistry}
@@ -60,7 +62,9 @@ const ContextWrapper: React.FC = ({ children }) => (
       }}
       getComments={mockGetComments}
       http={mockHttp}
+      navigateToApp={mockNavigationToApp}
       baseConversations={BASE_SECURITY_CONVERSATIONS}
+      currentAppId={'security'}
     >
       {children}
     </AssistantProvider>

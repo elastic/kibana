@@ -9,6 +9,8 @@ import React, { useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
 import type { HostEcs, OsEcs } from '@kbn/securitysolution-ecs';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import type { CriticalityLevelWithUnassigned } from '../../../../../common/entity_analytics/asset_criticality/types';
 import { HostsFields } from '../../../../../common/api/search_strategy/hosts/model/sort';
 import type {
   Columns,
@@ -27,7 +29,10 @@ import type {
   HostsSortField,
 } from '../../../../../common/search_strategy/security_solution/hosts';
 import type { Direction, RiskSeverity } from '../../../../../common/search_strategy';
-import { SecurityPageName } from '../../../../../common/constants';
+import {
+  ENABLE_ASSET_CRITICALITY_SETTING,
+  SecurityPageName,
+} from '../../../../../common/constants';
 import { HostsTableType } from '../../store/model';
 import { useNavigateTo } from '../../../../common/lib/kibana/hooks';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
@@ -53,7 +58,8 @@ export type HostsTableColumns = [
   Columns<HostItem['lastSeen']>,
   Columns<OsEcs['name']>,
   Columns<OsEcs['version']>,
-  Columns<RiskSeverity>?
+  Columns<RiskSeverity>?,
+  Columns<CriticalityLevelWithUnassigned>?
 ];
 
 const rowItems: ItemsPerRow[] = [
@@ -153,15 +159,22 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
     [dispatch, navigateTo, type]
   );
 
+  const [isAssetCriticalityEnabled] = useUiSetting$<boolean>(ENABLE_ASSET_CRITICALITY_SETTING);
+
   const hostsColumns = useMemo(
     () =>
       getHostsColumns(
         isPlatinumOrTrialLicense && hasEntityAnalyticsCapability,
-        dispatchSeverityUpdate
+        dispatchSeverityUpdate,
+        isAssetCriticalityEnabled
       ),
-    [dispatchSeverityUpdate, isPlatinumOrTrialLicense, hasEntityAnalyticsCapability]
+    [
+      dispatchSeverityUpdate,
+      isPlatinumOrTrialLicense,
+      hasEntityAnalyticsCapability,
+      isAssetCriticalityEnabled,
+    ]
   );
-
   const sorting = useMemo(() => getSorting(sortField, direction), [sortField, direction]);
 
   return (

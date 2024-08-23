@@ -8,8 +8,8 @@
 import { CoreSetup } from '@kbn/core/public';
 import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+jest.mock('@kbn/react-kibana-mount', () => {
+  const original = jest.requireActual('@kbn/react-kibana-mount');
 
   return {
     ...original,

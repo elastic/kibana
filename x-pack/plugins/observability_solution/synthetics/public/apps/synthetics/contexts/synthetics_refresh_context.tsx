@@ -5,10 +5,19 @@
  * 2.0.
  */
 
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  FC,
+} from 'react';
 import { useSelector } from 'react-redux';
 import { useEvent } from 'react-use';
 import moment from 'moment';
+import { Subject } from 'rxjs';
 import { selectRefreshInterval, selectRefreshPaused } from '../state';
 
 interface SyntheticsRefreshContext {
@@ -25,7 +34,9 @@ const defaultContext: SyntheticsRefreshContext = {
 
 export const SyntheticsRefreshContext = createContext(defaultContext);
 
-export const SyntheticsRefreshContextProvider: React.FC = ({ children }) => {
+export const SyntheticsRefreshContextProvider: FC<{
+  reload$?: Subject<boolean>;
+}> = ({ children, reload$ }) => {
   const [lastRefresh, setLastRefresh] = useState<number>(Date.now());
 
   const refreshPaused = useSelector(selectRefreshPaused);
@@ -41,6 +52,13 @@ export const SyntheticsRefreshContextProvider: React.FC = ({ children }) => {
       refreshApp();
     }
   }, [refreshApp, refreshPaused]);
+
+  useEffect(() => {
+    const subscription = reload$?.subscribe(() => {
+      refreshApp();
+    });
+    return () => subscription?.unsubscribe();
+  }, [reload$, refreshApp]);
 
   const value = useMemo(() => {
     return {

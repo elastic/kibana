@@ -13,19 +13,22 @@ import type {
   Logger,
 } from '@kbn/core/server';
 
-import { SearchNotebooksPluginSetup, SearchNotebooksPluginStart } from './types';
-import { defineRoutes } from './routes';
 import { SearchNotebooksConfig } from './config';
+import { defineRoutes } from './routes';
+import { SearchNotebooksPluginSetup, SearchNotebooksPluginStart, NotebooksCache } from './types';
+import { createNotebooksCache } from './utils';
 
 export class SearchNotebooksPlugin
   implements Plugin<SearchNotebooksPluginSetup, SearchNotebooksPluginStart>
 {
   private readonly config: SearchNotebooksConfig;
   private readonly logger: Logger;
+  private readonly notebooksCache: NotebooksCache;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<SearchNotebooksConfig>();
     this.logger = initializerContext.logger.get();
+    this.notebooksCache = createNotebooksCache();
   }
 
   public setup(core: CoreSetup) {
@@ -35,7 +38,12 @@ export class SearchNotebooksPlugin
     const router = core.http.createRouter();
 
     // Register server side APIs
-    defineRoutes(router, this.logger);
+    defineRoutes({
+      config: this.config,
+      logger: this.logger,
+      notebooksCache: this.notebooksCache,
+      router,
+    });
 
     return {};
   }

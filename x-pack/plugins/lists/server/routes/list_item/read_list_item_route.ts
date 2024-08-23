@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import {
+  ReadListItemRequestQuery,
+  ReadListItemResponse,
+} from '@kbn/securitysolution-lists-common/api';
 
 import type { ListsPluginRouter } from '../../types';
-import {
-  readListItemArrayResponse,
-  readListItemRequestQuery,
-  readListItemResponse,
-} from '../../../common/api';
-import { buildRouteValidation, buildSiemResponse } from '../utils';
+import { buildSiemResponse } from '../utils';
 import { getListClient } from '..';
 
 export const readListItemRoute = (router: ListsPluginRouter): void => {
@@ -31,7 +30,7 @@ export const readListItemRoute = (router: ListsPluginRouter): void => {
       {
         validate: {
           request: {
-            query: buildRouteValidation(readListItemRequestQuery),
+            query: buildRouteValidationWithZod(ReadListItemRequestQuery),
           },
         },
         version: '2023-10-31',
@@ -41,48 +40,42 @@ export const readListItemRoute = (router: ListsPluginRouter): void => {
         try {
           const { id, list_id: listId, value } = request.query;
           const lists = await getListClient(context);
+
           if (id != null) {
             const listItem = await lists.getListItem({ id });
+
             if (listItem == null) {
               return siemResponse.error({
                 body: `list item id: "${id}" does not exist`,
                 statusCode: 404,
               });
-            } else {
-              const [validated, errors] = validate(listItem, readListItemResponse);
-              if (errors != null) {
-                return siemResponse.error({ body: errors, statusCode: 500 });
-              } else {
-                return response.ok({ body: validated ?? {} });
-              }
             }
+
+            return response.ok({ body: ReadListItemResponse.parse(listItem) });
           } else if (listId != null && value != null) {
             const list = await lists.getList({ id: listId });
+
             if (list == null) {
               return siemResponse.error({
                 body: `list id: "${listId}" does not exist`,
                 statusCode: 404,
               });
-            } else {
-              const listItem = await lists.getListItemByValue({
-                listId,
-                type: list.type,
-                value,
-              });
-              if (listItem.length === 0) {
-                return siemResponse.error({
-                  body: `list_id: "${listId}" item of ${value} does not exist`,
-                  statusCode: 404,
-                });
-              } else {
-                const [validated, errors] = validate(listItem, readListItemArrayResponse);
-                if (errors != null) {
-                  return siemResponse.error({ body: errors, statusCode: 500 });
-                } else {
-                  return response.ok({ body: validated ?? {} });
-                }
-              }
             }
+
+            const listItem = await lists.getListItemByValue({
+              listId,
+              type: list.type,
+              value,
+            });
+
+            if (listItem.length === 0) {
+              return siemResponse.error({
+                body: `list_id: "${listId}" item of ${value} does not exist`,
+                statusCode: 404,
+              });
+            }
+
+            return response.ok({ body: ReadListItemResponse.parse(listItem) });
           } else {
             return siemResponse.error({
               body: 'Either "list_id" or "id" needs to be defined in the request',

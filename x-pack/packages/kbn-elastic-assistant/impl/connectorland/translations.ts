@@ -10,24 +10,14 @@ import { i18n } from '@kbn/i18n';
 export const LOAD_ACTIONS_ERROR_MESSAGE = i18n.translate(
   'xpack.elasticAssistant.connectors.useLoadActionTypes.errorMessage',
   {
-    defaultMessage:
-      'Welcome to your Elastic AI Assistant! I am your 100% open-source portal into your Elastic Life. ',
+    defaultMessage: 'An error occurred loading the Kibana Actions. ',
   }
 );
 
 export const LOAD_CONNECTORS_ERROR_MESSAGE = i18n.translate(
   'xpack.elasticAssistant.connectors.useLoadConnectors.errorMessage',
   {
-    defaultMessage:
-      'Welcome to your Elastic AI Assistant! I am your 100% open-source portal into your Elastic Life. ',
-  }
-);
-
-export const WELCOME_SECURITY = i18n.translate(
-  'xpack.elasticAssistant.content.prompts.welcome.welcomeSecurityPrompt',
-  {
-    defaultMessage:
-      'Welcome to your Elastic AI Assistant! I am your 100% open-source portal into Elastic Security. ',
+    defaultMessage: 'An error occurred loading the Kibana Connectors. ',
   }
 );
 
@@ -52,17 +42,17 @@ export const ADD_NEW_CONNECTOR = i18n.translate(
   }
 );
 
-export const INLINE_CONNECTOR_LABEL = i18n.translate(
-  'xpack.elasticAssistant.assistant.connectors.connectorSelectorInline.connectorLabel',
+export const ADD_CONNECTOR = i18n.translate(
+  'xpack.elasticAssistant.assistant.connectors.connectorSelector.addConnectorButtonLabel',
   {
-    defaultMessage: 'Connector:',
+    defaultMessage: 'Add connector',
   }
 );
 
 export const INLINE_CONNECTOR_PLACEHOLDER = i18n.translate(
   'xpack.elasticAssistant.assistant.connectors.connectorSelectorInline.connectorPlaceholder',
   {
-    defaultMessage: 'Select a Connector',
+    defaultMessage: 'Select a connector',
   }
 );
 
@@ -91,41 +81,6 @@ export const ADD_CONNECTOR_MISSING_PRIVILEGES_DESCRIPTION = i18n.translate(
   'xpack.elasticAssistant.assistant.connectors.addConnectorButton.missingPrivilegesDescription',
   {
     defaultMessage: 'Please contact your administrator to enable a Generative AI Connector.',
-  }
-);
-
-export const CONNECTOR_SETUP_USER_YOU = i18n.translate(
-  'xpack.elasticAssistant.assistant.connectors.setup.userYouTitle',
-  {
-    defaultMessage: 'You',
-  }
-);
-
-export const CONNECTOR_SETUP_USER_ASSISTANT = i18n.translate(
-  'xpack.elasticAssistant.assistant.connectors.setup.userAssistantTitle',
-  {
-    defaultMessage: 'Assistant',
-  }
-);
-
-export const CONNECTOR_SETUP_TIMESTAMP_AT = i18n.translate(
-  'xpack.elasticAssistant.assistant.connectors.setup.timestampAtTitle',
-  {
-    defaultMessage: 'at',
-  }
-);
-
-export const CONNECTOR_SETUP_SKIP = i18n.translate(
-  'xpack.elasticAssistant.assistant.connectors.setup.skipTitle',
-  {
-    defaultMessage: 'Click to skip...',
-  }
-);
-
-export const CONNECTOR_SETUP_COMPLETE = i18n.translate(
-  'xpack.elasticAssistant.assistant.connectors.setup.complete',
-  {
-    defaultMessage: 'Connector setup complete!',
   }
 );
 

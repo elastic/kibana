@@ -7,19 +7,42 @@
 
 import type { CoreSecurityDelegateContract } from '@kbn/core-security-server';
 import type { CoreUserProfileDelegateContract } from '@kbn/core-user-profile-server';
+import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 
 import type { InternalAuthenticationServiceStart } from './authentication';
 import type { UserProfileServiceStartInternal } from './user_profile';
 
 export const buildSecurityApi = ({
   getAuthc,
+  audit,
 }: {
   getAuthc: () => InternalAuthenticationServiceStart;
+  audit: AuditServiceSetup;
 }): CoreSecurityDelegateContract => {
   return {
     authc: {
       getCurrentUser: (request) => {
         return getAuthc().getCurrentUser(request);
+      },
+      apiKeys: {
+        areAPIKeysEnabled: () => getAuthc().apiKeys.areAPIKeysEnabled(),
+        areCrossClusterAPIKeysEnabled: () => getAuthc().apiKeys.areAPIKeysEnabled(),
+        grantAsInternalUser: (request, createParams) =>
+          getAuthc().apiKeys.grantAsInternalUser(request, createParams),
+        create: (request, createParams) => getAuthc().apiKeys.create(request, createParams),
+        update: (request, updateParams) => getAuthc().apiKeys.update(request, updateParams),
+        validate: (apiKeyParams) => getAuthc().apiKeys.validate(apiKeyParams),
+        invalidate: (request, params) => getAuthc().apiKeys.invalidate(request, params),
+        invalidateAsInternalUser: (params) => getAuthc().apiKeys.invalidateAsInternalUser(params),
+      },
+    },
+    audit: {
+      asScoped(request) {
+        return audit.asScoped(request);
+      },
+      withoutRequest: {
+        log: audit.withoutRequest.log,
+        enabled: audit.withoutRequest.enabled,
       },
     },
   };

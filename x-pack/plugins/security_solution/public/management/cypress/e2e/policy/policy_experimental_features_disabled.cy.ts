@@ -6,7 +6,7 @@
  */
 
 import type { PolicyData } from '../../../../../common/endpoint/types';
-import { disableExpandableFlyoutAdvancedSettings, loadPage } from '../../tasks/common';
+import { loadPage } from '../../tasks/common';
 
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { login } from '../../tasks/login';
@@ -16,14 +16,7 @@ import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../task
 describe.skip(
   'Disabled experimental features on: ',
   {
-    tags: [
-      '@ess',
-      '@serverless',
-      // Not supported in serverless!
-      // The `disableExpandableFlyoutAdvancedSettings()` fails because the API
-      // `internal/kibana/settings` is not accessible in serverless
-      '@brokenInServerless',
-    ],
+    tags: ['@ess', '@serverless'],
   },
   () => {
     describe('Policy list', () => {
@@ -32,7 +25,6 @@ describe.skip(
 
         beforeEach(() => {
           login();
-          disableExpandableFlyoutAdvancedSettings();
         });
 
         before(() => {
@@ -71,7 +63,6 @@ describe.skip(
 
         beforeEach(() => {
           login();
-          disableExpandableFlyoutAdvancedSettings();
         });
 
         before(() => {

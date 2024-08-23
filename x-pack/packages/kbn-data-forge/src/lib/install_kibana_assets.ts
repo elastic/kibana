@@ -10,7 +10,9 @@ import fs from 'fs';
 import FormData from 'form-data';
 import axios, { AxiosBasicCredentials } from 'axios';
 import { isError } from 'lodash';
+import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 import { ToolingLog } from '@kbn/tooling-log';
+import https from 'https';
 
 export async function installKibanaAssets(
   filePath: string,
@@ -26,6 +28,16 @@ export async function installKibanaAssets(
     const formData = new FormData();
     formData.append('file', fileStream);
 
+    const isHTTPS = new URL(kibanaUrl).protocol === 'https:';
+    const httpsAgent = isHTTPS
+      ? new https.Agent({
+          ca: fs.readFileSync(KBN_CERT_PATH),
+          key: fs.readFileSync(KBN_KEY_PATH),
+          // hard-coded set to false like in packages/kbn-cli-dev-mode/src/base_path_proxy_server.ts
+          rejectUnauthorized: false,
+        })
+      : undefined;
+
     // Send the saved objects to Kibana using the _import API
     const response = await axios.post(
       `${kibanaUrl}/api/saved_objects/_import?overwrite=true`,
@@ -36,6 +48,7 @@ export async function installKibanaAssets(
           'kbn-xsrf': 'true',
         },
         auth: userPassObject,
+        httpsAgent,
       }
     );
 

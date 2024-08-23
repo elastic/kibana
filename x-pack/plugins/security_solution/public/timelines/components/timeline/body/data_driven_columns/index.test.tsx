@@ -10,7 +10,6 @@ import { shallow } from 'enzyme';
 import React from 'react';
 
 import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer';
-import '../../../../../common/mock/match_media';
 import { mockTimelineData } from '../../../../../common/mock';
 import { defaultHeaders } from '../column_headers/default_headers';
 import { getDefaultControlColumn } from '../control_columns';

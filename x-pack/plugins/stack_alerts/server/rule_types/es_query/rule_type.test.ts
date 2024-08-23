@@ -10,6 +10,7 @@ import type { Writable } from '@kbn/utility-types';
 import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import { RuleExecutorServicesMock, alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { getRuleType } from './rule_type';
 import { EsQueryRuleParams, EsQueryRuleState } from './rule_type_params';
 import { ActionContext } from './action_context';
@@ -633,6 +634,7 @@ describe('ruleType', () => {
       toSpec: () => {
         return { id: 'test-id', title: 'test-title', timeFieldName: 'timestamp', fields: [] };
       },
+      getTimeField: () => dataViewMock.fields[1],
     };
     const defaultParams: OnlySearchSourceRuleParams = {
       size: 100,
@@ -675,10 +677,13 @@ describe('ruleType', () => {
       const searchResult: ESSearchResponse<unknown, {}> = generateResults([]);
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
-      (ruleServices.dataViews.create as jest.Mock).mockResolvedValueOnce({
-        ...dataViewMock.toSpec(),
-        toSpec: () => dataViewMock.toSpec(),
-        toMinimalSpec: () => dataViewMock.toSpec(),
+      ruleServices.getDataViews = jest.fn().mockResolvedValueOnce({
+        ...dataViewPluginMocks.createStartContract(),
+        create: jest.fn().mockResolvedValueOnce({
+          ...dataViewMock.toSpec(),
+          toSpec: () => dataViewMock.toSpec(),
+          toMinimalSpec: () => dataViewMock.toSpec(),
+        }),
       });
       (searchSourceInstanceMock.getField as jest.Mock).mockImplementation((name: string) => {
         if (name === 'index') {
@@ -701,12 +706,12 @@ describe('ruleType', () => {
 
       (searchSourceInstanceMock.getField as jest.Mock).mockImplementationOnce((name: string) => {
         if (name === 'index') {
-          return { dataViewMock, timeFieldName: undefined };
+          return { dataViewMock, getTimeField: () => undefined, id: 1234 };
         }
       });
 
       await expect(invokeExecutor({ params, ruleServices })).rejects.toThrow(
-        'Invalid data view without timeFieldName.'
+        'Data view with ID 1234 no longer contains a time field.'
       );
     });
 
@@ -714,10 +719,14 @@ describe('ruleType', () => {
       const params = { ...defaultParams, thresholdComparator: Comparator.GT_OR_EQ, threshold: [3] };
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
-      (ruleServices.dataViews.create as jest.Mock).mockResolvedValueOnce({
-        ...dataViewMock.toSpec(),
-        toSpec: () => dataViewMock.toSpec(),
-        toMinimalSpec: () => dataViewMock.toSpec(),
+      ruleServices.getDataViews = jest.fn().mockResolvedValueOnce({
+        ...dataViewPluginMocks.createStartContract(),
+        create: jest.fn().mockResolvedValueOnce({
+          ...dataViewMock.toSpec(),
+          toSpec: () => dataViewMock.toSpec(),
+          getTimeField: () => dataViewMock.fields[1],
+          toMinimalSpec: () => dataViewMock.toSpec(),
+        }),
       });
       (searchSourceInstanceMock.getField as jest.Mock).mockImplementation((name: string) => {
         if (name === 'index') {
@@ -905,6 +914,7 @@ async function invokeExecutor({
   return await ruleType.executor({
     executionId: uuidv4(),
     startedAt: new Date(),
+    startedAtOverridden: false,
     previousStartedAt: new Date(),
     services: ruleServices as unknown as RuleExecutorServices<
       EsQueryRuleState,

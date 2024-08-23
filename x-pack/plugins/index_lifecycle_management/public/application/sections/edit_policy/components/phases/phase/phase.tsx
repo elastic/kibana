@@ -36,6 +36,7 @@ interface Props {
    * Settings that should always be visible on the phase when it is enabled.
    */
   topLevelSettings?: React.ReactNode;
+  children?: React.ReactNode;
 }
 
 export const Phase: FunctionComponent<Props> = ({ children, topLevelSettings, phase }) => {

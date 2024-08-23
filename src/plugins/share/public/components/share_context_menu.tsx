@@ -42,7 +42,7 @@ export interface ShareContextMenuProps {
   objectTypeTitle?: string;
   disabledShareUrl?: boolean;
 }
-
+// Needed for Canvas
 export class ShareContextMenu extends Component<ShareContextMenuProps> {
   public render() {
     const { panels, initialPanelId } = this.getPanels();
@@ -128,10 +128,9 @@ export class ShareContextMenu extends Component<ShareContextMenuProps> {
       });
     }
 
-    this.props.shareMenuItems.forEach(({ shareMenuItem, panel }) => {
+    this.props.shareMenuItems.forEach(({ shareMenuItem }) => {
       const panelId = panels.length + 1;
       panels.push({
-        ...panel,
         id: panelId,
       });
       menuItems.push({

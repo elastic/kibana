@@ -590,7 +590,7 @@ export class DataRecognizer {
       }
     }
     // merge all the save results
-    this._updateResults(results, saveResults);
+    await this._updateResults(results, saveResults);
     return results;
   }
 
@@ -647,8 +647,8 @@ export class DataRecognizer {
   // returns a id based on a data view name
   private async _getIndexPatternId(name: string): Promise<string | undefined> {
     try {
-      const dataViews = await this._dataViewsService.find(name);
-      return dataViews.find((d) => d.title === name)?.id;
+      const dataViews = await this._dataViewsService.findLazy(name);
+      return dataViews.find((d) => d.getIndexPattern() === name)?.id;
     } catch (error) {
       mlLog.warn(`Error loading data views, ${error}`);
       return;

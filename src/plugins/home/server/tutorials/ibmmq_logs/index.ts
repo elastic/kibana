@@ -32,7 +32,8 @@ export function ibmmqLogsSpecProvider(context: TutorialContext): TutorialSchema 
       defaultMessage: 'Collect and parse logs from IBM MQ with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.ibmmqLogs.longDescription', {
-      defaultMessage: 'Collect IBM MQ logs with Filebeat. \
+      defaultMessage:
+        'Collect IBM MQ logs with Filebeat. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-ibmmq.html',

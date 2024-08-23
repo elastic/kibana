@@ -50,7 +50,7 @@ describe('useCopyIDAction', () => {
         />,
         "key": "cases-action-copy-id",
         "name": <EuiTextColor>
-          Copy Case ID
+          Copy case ID
         </EuiTextColor>,
         "onClick": [Function],
       }
@@ -84,7 +84,7 @@ describe('useCopyIDAction', () => {
     await waitFor(() => {
       expect(onActionSuccess).toHaveBeenCalled();
       expect(appMockRender.coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
-        title: 'Copied Case ID to clipboard',
+        title: 'Copied case ID to clipboard',
         className: 'eui-textBreakWord',
       });
     });

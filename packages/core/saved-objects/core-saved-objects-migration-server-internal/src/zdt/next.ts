@@ -57,7 +57,7 @@ export const nextActionMap = (context: MigratorContext) => {
   const client = context.elasticsearchClient;
   return {
     INIT: (state: InitState) =>
-      Actions.init({
+      Actions.fetchIndices({
         client,
         indices: [`${context.indexPrefix}_*`],
       }),
@@ -205,7 +205,7 @@ export const next = (context: MigratorContext) => {
       // instead of the union.
       const nextAction = map[state.controlState] as (
         state: State
-      ) => ReturnType<typeof map[AllActionStates]>;
+      ) => ReturnType<(typeof map)[AllActionStates]>;
       return delay(nextAction(state));
     }
   };

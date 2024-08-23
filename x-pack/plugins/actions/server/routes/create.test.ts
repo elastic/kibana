@@ -172,7 +172,7 @@ describe('createActionRoute', () => {
       }
     );
 
-    expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
+    await expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
   });
 
   test('validates body to prevent empty strings', async () => {

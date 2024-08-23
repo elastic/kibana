@@ -23,6 +23,13 @@ export const getConnectorRoute = (
   router.get(
     {
       path: `${BASE_ACTION_API_PATH}/connector/{id}`,
+      options: {
+        access: 'public',
+        summary: `Get connector information`,
+        tags: ['oas-tag:connectors'],
+        // description:
+        //   'You must have `read` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.',
+      },
       validate: {
         params: getConnectorParamsSchemaV1,
       },

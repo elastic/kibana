@@ -1,5 +1,5 @@
 post:
-  summary: Rotate the encryption key for encrypted saved objects.
+  summary: Rotate a key for encrypted saved objects
   operationId: rotateEncryptionKey
   description: |
     Superuser role required.

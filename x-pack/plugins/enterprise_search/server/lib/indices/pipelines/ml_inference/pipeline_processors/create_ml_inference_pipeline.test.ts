@@ -78,7 +78,7 @@ describe('createMlInferencePipeline lib function', () => {
     );
   });
 
-  it('should throw an error without creating the pipeline if it already exists', () => {
+  it('should throw an error without creating the pipeline if it already exists', async () => {
     mockClient.ingest.getPipeline.mockImplementation(() =>
       Promise.resolve({
         [inferencePipelineGeneratedName]: {},
@@ -91,7 +91,7 @@ describe('createMlInferencePipeline lib function', () => {
       mockClient as unknown as ElasticsearchClient
     );
 
-    expect(actualResult).rejects.toThrow(Error);
+    await expect(actualResult).rejects.toThrow(Error);
     expect(mockClient.ingest.putPipeline).not.toHaveBeenCalled();
   });
 });

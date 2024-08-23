@@ -9,12 +9,8 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { lastValueFrom } from 'rxjs';
 import type { Logger } from '@kbn/core/server';
-import {
-  ES_SEARCH_STRATEGY,
-  type IEsSearchResponse,
-  type ISearchSource,
-  type SearchRequest,
-} from '@kbn/data-plugin/common';
+import type { IEsSearchResponse } from '@kbn/search-types';
+import { ES_SEARCH_STRATEGY, type ISearchSource } from '@kbn/data-plugin/common';
 import { SearchCursor, type SearchCursorClients, type SearchCursorSettings } from './search_cursor';
 import { i18nTexts } from './i18n_texts';
 
@@ -32,8 +28,12 @@ export class SearchCursorScroll extends SearchCursor {
   // The first search query begins the scroll context in ES
   public async initialize() {}
 
-  private async scan(searchBody: SearchRequest) {
+  private async scan(searchBody: estypes.SearchRequest) {
     const { includeFrozen, maxConcurrentShardRequests, scroll, taskInstanceFields } = this.settings;
+
+    // maxConcurrentShardRequests=0 is not supported
+    const effectiveMaxConcurrentShardRequests =
+      maxConcurrentShardRequests > 0 ? maxConcurrentShardRequests : undefined;
 
     const searchParamsScan = {
       params: {
@@ -42,7 +42,7 @@ export class SearchCursorScroll extends SearchCursor {
         scroll: scroll.duration(taskInstanceFields),
         size: scroll.size,
         ignore_throttled: includeFrozen ? false : undefined, // "true" will cause deprecation warnings logged in ES
-        max_concurrent_shard_requests: maxConcurrentShardRequests,
+        max_concurrent_shard_requests: effectiveMaxConcurrentShardRequests,
       },
     };
 

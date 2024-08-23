@@ -32,7 +32,7 @@ function createEvents(
  * requested.
  */
 export function handleEvents(
-  ruleRegistry: RuleRegistryPluginStartContract
+  getRuleRegistry: () => Promise<RuleRegistryPluginStartContract>
 ): RequestHandler<
   unknown,
   TypeOf<typeof validateEvents.query>,
@@ -44,6 +44,7 @@ export function handleEvents(
       body,
     } = req;
     const eventsClient = (await context.core).elasticsearch.client;
+    const ruleRegistry = await getRuleRegistry();
     const alertsClient = await ruleRegistry.getRacClientWithRequest(req);
     const shouldExcludeColdAndFrozenTiers = await (
       await context.core
@@ -54,6 +55,7 @@ export function handleEvents(
       indexPatterns: body.indexPatterns,
       timeRange: body.timeRange,
       shouldExcludeColdAndFrozenTiers,
+      agentId: body.agentId,
     });
     const results = await eventsQuery.search(eventsClient, body, alertsClient);
     return res.ok({

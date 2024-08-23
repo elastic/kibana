@@ -6,20 +6,25 @@
  * Side Public License, v 1.
  */
 
-import { serviceContractMock } from './service_contract.mock';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type {
+  UserSettingsService,
+  InternalUserSettingsServiceSetup,
+} from '@kbn/core-user-settings-server-internal';
 
-const createSetupContractMock = () => {
+const createSetupContractMock = (): jest.Mocked<InternalUserSettingsServiceSetup> => {
   return {
-    setUserProfileSettings: jest.fn(),
     getUserSettingDarkMode: jest.fn(),
   };
 };
 
-const createMock = () => {
-  const mocked = serviceContractMock();
-  mocked.setup.mockReturnValue(createSetupContractMock());
-  // mocked.start.mockReturnValue(createStartContractMock());
-  return mocked;
+const createMock = (): jest.Mocked<PublicMethodsOf<UserSettingsService>> => {
+  const mock = {
+    setup: jest.fn(),
+    start: jest.fn(),
+  };
+  mock.setup.mockReturnValue(createSetupContractMock());
+  return mock;
 };
 
 export const userSettingsServiceMock = {

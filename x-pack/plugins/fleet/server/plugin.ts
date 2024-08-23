@@ -23,6 +23,7 @@ import type {
   PluginInitializerContext,
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
+  SecurityServiceStart,
   ServiceStatus,
 } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES, SavedObjectsClient, ServiceStatusLevels } from '@kbn/core/server';
@@ -40,7 +41,8 @@ import type {
   SecurityPluginSetup,
   SecurityPluginStart,
 } from '@kbn/security-plugin/server';
-import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { FieldsMetadataServerSetup } from '@kbn/fields-metadata-plugin/server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -76,7 +78,7 @@ import {
 } from './services/security';
 
 import {
-  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
   ASSETS_SAVED_OBJECT_TYPE,
   DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
   FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
@@ -86,6 +88,7 @@ import {
   PLUGIN_ID,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
   FLEET_PROXY_SAVED_OBJECT_TYPE,
+  SPACE_SETTINGS_SAVED_OBJECT_TYPE,
 } from './constants';
 import { registerEncryptedSavedObjects, registerSavedObjects } from './saved_objects';
 import { registerRoutes } from './routes';
@@ -115,6 +118,7 @@ import type { PackagePolicyService } from './services/package_policy_service';
 import { PackagePolicyServiceImpl } from './services/package_policy';
 import { registerFleetUsageLogger, startFleetUsageLogger } from './services/fleet_usage_logger';
 import { CheckDeletedFilesTask } from './tasks/check_deleted_files_task';
+import { UnenrollInactiveAgentsTask } from './tasks/unenroll_inactive_agents_task';
 import {
   UninstallTokenService,
   type UninstallTokenServiceInterface,
@@ -125,6 +129,7 @@ import { PolicyWatcher } from './services/agent_policy_watch';
 import { getPackageSpecTagId } from './services/epm/kibana/assets/tag_assets';
 import { FleetMetricsTask } from './services/metrics/fleet_metrics_task';
 import { fetchAgentMetrics } from './services/metrics/fetch_agent_metrics';
+import { registerIntegrationFieldsExtractor } from './services/register_integration_fields_extractor';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -135,6 +140,7 @@ export interface FleetSetupDeps {
   spaces?: SpacesPluginStart;
   telemetry?: TelemetryPluginSetup;
   taskManager: TaskManagerSetupContract;
+  fieldsMetadata: FieldsMetadataServerSetup;
 }
 
 export interface FleetStartDeps {
@@ -145,6 +151,7 @@ export interface FleetStartDeps {
   telemetry?: TelemetryPluginStart;
   savedObjectsTagging: SavedObjectTaggingStart;
   taskManager: TaskManagerStartContract;
+  spaces: SpacesPluginStart;
 }
 
 export interface FleetAppContext {
@@ -152,6 +159,7 @@ export interface FleetAppContext {
   data: DataPluginStart;
   encryptedSavedObjectsStart?: EncryptedSavedObjectsPluginStart;
   encryptedSavedObjectsSetup?: EncryptedSavedObjectsPluginSetup;
+  securityCoreStart: SecurityServiceStart;
   securitySetup: SecurityPluginSetup;
   securityStart: SecurityPluginStart;
   config$?: Observable<FleetConfigType>;
@@ -171,13 +179,14 @@ export interface FleetAppContext {
   messageSigningService: MessageSigningServiceInterface;
   auditLogger?: AuditLogger;
   uninstallTokenService: UninstallTokenServiceInterface;
+  unenrollInactiveAgentsTask: UnenrollInactiveAgentsTask;
 }
 
 export type FleetSetupContract = void;
 
 const allSavedObjectTypes = [
   OUTPUT_SAVED_OBJECT_TYPE,
-  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGES_SAVED_OBJECT_TYPE,
   ASSETS_SAVED_OBJECT_TYPE,
@@ -185,6 +194,7 @@ const allSavedObjectTypes = [
   DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
   FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
   FLEET_PROXY_SAVED_OBJECT_TYPE,
+  SPACE_SETTINGS_SAVED_OBJECT_TYPE,
 ];
 
 /**
@@ -250,6 +260,7 @@ export class FleetPlugin
   private kibanaInstanceId: FleetAppContext['kibanaInstanceId'];
   private httpSetup?: HttpServiceSetup;
   private securitySetup!: SecurityPluginSetup;
+  private spacesPluginsStart?: SpacesPluginStart;
   private encryptedSavedObjectsSetup?: EncryptedSavedObjectsPluginSetup;
   private readonly telemetryEventsSender: TelemetryEventsSender;
   private readonly fleetStatus$: BehaviorSubject<ServiceStatus>;
@@ -257,6 +268,7 @@ export class FleetPlugin
   private fleetUsageSender?: FleetUsageSender;
   private checkDeletedFilesTask?: CheckDeletedFilesTask;
   private fleetMetricsTask?: FleetMetricsTask;
+  private unenrollInactiveAgentsTask?: UnenrollInactiveAgentsTask;
 
   private agentService?: AgentService;
   private packageService?: PackageService;
@@ -279,7 +291,7 @@ export class FleetPlugin
     });
   }
 
-  public setup(core: CoreSetup, deps: FleetSetupDeps) {
+  public setup(core: CoreSetup<FleetStartDeps, FleetStartContract>, deps: FleetSetupDeps) {
     this.httpSetup = core.http;
     this.encryptedSavedObjectsSetup = deps.encryptedSavedObjects;
     this.cloud = deps.cloud;
@@ -288,10 +300,14 @@ export class FleetPlugin
 
     core.status.set(this.fleetStatus$.asObservable());
 
-    registerSavedObjects(core.savedObjects);
+    const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental ?? []);
+    const requireAllSpaces = experimentalFeatures.useSpaceAwareness ? false : true;
+
+    registerSavedObjects(core.savedObjects, {
+      useSpaceAwareness: experimentalFeatures.useSpaceAwareness,
+    });
     registerEncryptedSavedObjects(deps.encryptedSavedObjects);
 
-    const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental ?? []);
     // Register feature
     if (deps.features) {
       deps.features.registerKibanaFeature({
@@ -325,7 +341,7 @@ export class FleetPlugin
           ? [
               {
                 name: 'Agents',
-                requireAllSpaces: true,
+                requireAllSpaces,
                 privilegeGroups: [
                   {
                     groupType: 'mutually_exclusive',
@@ -359,7 +375,7 @@ export class FleetPlugin
               },
               {
                 name: 'Agent policies',
-                requireAllSpaces: true,
+                requireAllSpaces,
                 privilegeGroups: [
                   {
                     groupType: 'mutually_exclusive',
@@ -396,7 +412,7 @@ export class FleetPlugin
               },
               {
                 name: 'Settings',
-                requireAllSpaces: true,
+                requireAllSpaces,
                 privilegeGroups: [
                   {
                     groupType: 'mutually_exclusive',
@@ -434,7 +450,7 @@ export class FleetPlugin
           all: {
             api: [`${PLUGIN_ID}-read`, `${PLUGIN_ID}-all`],
             app: [PLUGIN_ID],
-            requireAllSpaces: true,
+            requireAllSpaces,
             catalogue: ['fleet'],
             savedObject: {
               all: allSavedObjectTypes,
@@ -446,7 +462,7 @@ export class FleetPlugin
             api: [`${PLUGIN_ID}-read`],
             app: [PLUGIN_ID],
             catalogue: ['fleet'],
-            requireAllSpaces: true,
+            requireAllSpaces,
             savedObject: {
               all: [],
               read: allSavedObjectTypes,
@@ -506,6 +522,7 @@ export class FleetPlugin
             .getSavedObjects()
             .getScopedClient(request, { excludedExtensions: [SECURITY_EXTENSION_ID] });
 
+        const spacesPluginsStart = this.spacesPluginsStart;
         return {
           get agentClient() {
             const agentService = plugin.setupAgentService(esClient.asInternalUser, soClient);
@@ -513,6 +530,18 @@ export class FleetPlugin
             return {
               asCurrentUser: agentService.asScoped(request),
               asInternalUser: agentService.asInternalUser,
+            };
+          },
+          get uninstallTokenService() {
+            const uninstallTokenService = new UninstallTokenService(
+              appContextService.getEncryptedSavedObjectsStart()!.getClient({
+                includedHiddenTypes: [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE],
+              }),
+              appContextService.getInternalUserSOClientForSpaceId(soClient.getCurrentNamespace())
+            );
+
+            return {
+              asCurrentUser: uninstallTokenService,
             };
           },
           get packagePolicyService() {
@@ -531,7 +560,9 @@ export class FleetPlugin
           get spaceId() {
             return deps.spaces?.spacesService?.getSpaceId(request) ?? DEFAULT_SPACE_ID;
           },
-
+          getAllSpaces() {
+            return spacesPluginsStart!.spacesService.createSpacesClient(request).getAll();
+          },
           get limitedToPackages() {
             if (routeAuthz && routeAuthz.granted) {
               return routeAuthz.scopeDataToPackages;
@@ -571,9 +602,18 @@ export class FleetPlugin
       taskManager: deps.taskManager,
       logFactory: this.initializerContext.logger,
     });
+    this.unenrollInactiveAgentsTask = new UnenrollInactiveAgentsTask({
+      core,
+      taskManager: deps.taskManager,
+      logFactory: this.initializerContext.logger,
+    });
+
+    // Register fields metadata extractor
+    registerIntegrationFieldsExtractor({ core, fieldsMetadata: deps.fieldsMetadata });
   }
 
   public start(core: CoreStart, plugins: FleetStartDeps): FleetStartContract {
+    this.spacesPluginsStart = plugins.spaces;
     const messageSigningService = new MessageSigningService(
       this.initializerContext.logger,
       plugins.encryptedSavedObjects.getClient({
@@ -591,6 +631,7 @@ export class FleetPlugin
       data: plugins.data,
       encryptedSavedObjectsStart: plugins.encryptedSavedObjects,
       encryptedSavedObjectsSetup: this.encryptedSavedObjectsSetup,
+      securityCoreStart: core.security,
       securitySetup: this.securitySetup,
       securityStart: plugins.security,
       configInitialValue: this.configInitialValue,
@@ -611,14 +652,18 @@ export class FleetPlugin
       bulkActionsResolver: this.bulkActionsResolver!,
       messageSigningService,
       uninstallTokenService,
+      unenrollInactiveAgentsTask: this.unenrollInactiveAgentsTask!,
     });
     licenseService.start(plugins.licensing.license$);
-    this.telemetryEventsSender.start(plugins.telemetry, core);
-    this.bulkActionsResolver?.start(plugins.taskManager);
-    this.fleetUsageSender?.start(plugins.taskManager);
-    this.checkDeletedFilesTask?.start({ taskManager: plugins.taskManager });
-    startFleetUsageLogger(plugins.taskManager);
-    this.fleetMetricsTask?.start(plugins.taskManager, core.elasticsearch.client.asInternalUser);
+    this.telemetryEventsSender.start(plugins.telemetry, core).catch(() => {});
+    this.bulkActionsResolver?.start(plugins.taskManager).catch(() => {});
+    this.fleetUsageSender?.start(plugins.taskManager).catch(() => {});
+    this.checkDeletedFilesTask?.start({ taskManager: plugins.taskManager }).catch(() => {});
+    this.unenrollInactiveAgentsTask?.start({ taskManager: plugins.taskManager }).catch(() => {});
+    startFleetUsageLogger(plugins.taskManager).catch(() => {});
+    this.fleetMetricsTask
+      ?.start(plugins.taskManager, core.elasticsearch.client.asInternalUser)
+      .catch(() => {});
 
     const logger = appContextService.getLogger();
 
@@ -651,18 +696,24 @@ export class FleetPlugin
           )
           .toPromise();
 
+        const randomIntFromInterval = (min: number, max: number) => {
+          return Math.floor(Math.random() * (max - min + 1) + min);
+        };
+
         // Retry Fleet setup w/ backoff
         await backOff(
           async () => {
             await setupFleet(
               new SavedObjectsClient(core.savedObjects.createInternalRepository()),
-              core.elasticsearch.client.asInternalUser
+              core.elasticsearch.client.asInternalUser,
+              { useLock: true }
             );
           },
           {
             numOfAttempts: setupAttempts,
+            delayFirstAttempt: true,
             // 1s initial backoff
-            startingDelay: 1000,
+            startingDelay: randomIntFromInterval(100, 1000),
             // 5m max backoff
             maxDelay: 60000 * 5,
             timeMultiple: 2,
@@ -686,7 +737,7 @@ export class FleetPlugin
         );
 
         // initialize (generate/encrypt/validate) Uninstall Tokens asynchronously
-        this.initializeUninstallTokens();
+        this.initializeUninstallTokens().catch(() => {});
 
         this.fleetStatus$.next({
           level: ServiceStatusLevels.available,

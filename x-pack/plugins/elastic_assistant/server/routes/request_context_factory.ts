@@ -56,7 +56,7 @@ export class RequestContextFactory implements IRequestContextFactory {
     const getSpaceId = (): string =>
       startPlugins.spaces?.spacesService?.getSpaceId(request) || DEFAULT_NAMESPACE_STRING;
 
-    const getCurrentUser = () => startPlugins.security?.authc.getCurrentUser(request);
+    const getCurrentUser = () => coreContext.security.authc.getCurrentUser();
 
     return {
       core: coreContext,
@@ -80,6 +80,24 @@ export class RequestContextFactory implements IRequestContextFactory {
       },
 
       telemetry: core.analytics,
+
+      getAIAssistantKnowledgeBaseDataClient: memoize(() => {
+        const currentUser = getCurrentUser();
+        return this.assistantService.createAIAssistantKnowledgeBaseDataClient({
+          spaceId: getSpaceId(),
+          logger: this.logger,
+          currentUser,
+        });
+      }),
+
+      getAttackDiscoveryDataClient: memoize(() => {
+        const currentUser = getCurrentUser();
+        return this.assistantService.createAttackDiscoveryDataClient({
+          spaceId: getSpaceId(),
+          logger: this.logger,
+          currentUser,
+        });
+      }),
 
       getAIAssistantPromptsDataClient: memoize(() => {
         const currentUser = getCurrentUser();

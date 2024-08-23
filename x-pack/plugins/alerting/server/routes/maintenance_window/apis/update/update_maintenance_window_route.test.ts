@@ -75,6 +75,7 @@ describe('updateMaintenanceWindowRoute', () => {
     });
 
     expect(res.ok).toHaveBeenLastCalledWith({
+      // @ts-expect-error upgrade typescript v5.1.6
       body: rewritePartialMaintenanceBodyRes(mockMaintenanceWindow),
     });
   });
@@ -115,7 +116,7 @@ describe('updateMaintenanceWindowRoute', () => {
         body: updateParams,
       }
     );
-    expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: Failure]`);
+    await expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: Failure]`);
   });
 
   test('ensures only platinum license can access API', async () => {
@@ -129,6 +130,6 @@ describe('updateMaintenanceWindowRoute', () => {
     });
     const [, handler] = router.post.mock.calls[0];
     const [context, req, res] = mockHandlerArguments({ maintenanceWindowClient }, { body: {} });
-    expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: Failure]`);
+    await expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: Failure]`);
   });
 });

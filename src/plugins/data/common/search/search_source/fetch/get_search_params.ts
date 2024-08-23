@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { ISearchRequestParams } from '@kbn/search-types';
 import { UI_SETTINGS } from '../../../constants';
 import { GetConfigFn } from '../../../types';
-import { ISearchRequestParams } from '../..';
 import type { SearchRequest } from './types';
 
 const sessionId = Date.now();
@@ -38,12 +37,15 @@ export function getSearchParamsFromRequest(
   const searchParams = getSearchParams(getConfig);
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { track_total_hits, ...body } = searchRequest.body;
+  const dataView = typeof searchRequest.index !== 'string' ? searchRequest.index : undefined;
+  const index = dataView?.title ?? `${searchRequest.index}`;
 
   return {
-    index: searchRequest.index.title || searchRequest.index,
+    index,
     body,
+    // @ts-ignore
     track_total_hits,
-    ...(searchRequest.index?.allowHidden && { expand_wildcards: 'all' }),
+    ...(dataView?.getAllowHidden() && { expand_wildcards: 'all' }),
     ...searchParams,
   };
 }

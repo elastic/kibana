@@ -26,11 +26,12 @@ const SAVED_QUERY_ATTRS_CONFIG = schema.object({
   timefilter: schema.maybe(schema.any()),
 });
 
-const savedQueryResponseSchema = schema.object({
-  id: schema.string(),
-  attributes: SAVED_QUERY_ATTRS_CONFIG,
-  namespaces: schema.maybe(schema.arrayOf(schema.string())),
-});
+const savedQueryResponseSchema = () =>
+  schema.object({
+    id: schema.string(),
+    attributes: SAVED_QUERY_ATTRS_CONFIG,
+    namespaces: schema.maybe(schema.arrayOf(schema.string())),
+  });
 
 const access = 'internal';
 const version = '1';
@@ -50,9 +51,10 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
         },
         response: {
           200: {
-            body: schema.object({
-              isDuplicate: schema.boolean(),
-            }),
+            body: () =>
+              schema.object({
+                isDuplicate: schema.boolean(),
+              }),
           },
         },
       },
@@ -157,7 +159,7 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
         request: {},
         response: {
           200: {
-            body: schema.number(),
+            body: () => schema.number(),
           },
         },
       },
@@ -187,10 +189,11 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
         },
         response: {
           200: {
-            body: schema.object({
-              total: schema.number(),
-              savedQueries: schema.arrayOf(savedQueryResponseSchema),
-            }),
+            body: () =>
+              schema.object({
+                total: schema.number(),
+                savedQueries: schema.arrayOf(savedQueryResponseSchema()),
+              }),
           },
         },
       },
@@ -216,7 +219,7 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
         },
         response: {
           200: {
-            body: schema.never(),
+            body: () => schema.never(),
           },
         },
       },

@@ -257,7 +257,7 @@ export class MonitoringPlugin
 
   stop() {
     if (this.cluster && this.cluster.close) {
-      this.cluster.close();
+      this.cluster.close().catch(() => {});
     }
     if (this.licenseService && this.licenseService.stop) {
       this.licenseService.stop();

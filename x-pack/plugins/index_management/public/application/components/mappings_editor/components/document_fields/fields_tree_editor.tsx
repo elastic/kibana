@@ -5,25 +5,23 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback } from 'react';
 import { EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { useCallback, useMemo } from 'react';
 
-import { useMappingsState, useDispatch } from '../../mappings_state_context';
-import { FieldsList, CreateField } from './fields';
+import { useDispatch, useMappingsState } from '../../mappings_state_context';
+import { CreateField, FieldsList, SemanticTextInfo } from './fields';
 
 interface Props {
   onCancelAddingNewFields?: () => void;
   isAddingFields?: boolean;
-  isSemanticTextEnabled?: boolean;
-  indexName?: string;
+  semanticTextInfo?: SemanticTextInfo;
 }
 
 export const DocumentFieldsTreeEditor = ({
   onCancelAddingNewFields,
   isAddingFields,
-  isSemanticTextEnabled = false,
-  indexName,
+  semanticTextInfo,
 }: Props) => {
   const dispatch = useDispatch();
   const {
@@ -53,8 +51,7 @@ export const DocumentFieldsTreeEditor = ({
         isRootLevelField
         onCancelAddingNewFields={onCancelAddingNewFields}
         isAddingFields={isAddingFields}
-        isSemanticTextEnabled={isSemanticTextEnabled}
-        indexName={indexName}
+        semanticTextInfo={semanticTextInfo}
       />
     );
   };

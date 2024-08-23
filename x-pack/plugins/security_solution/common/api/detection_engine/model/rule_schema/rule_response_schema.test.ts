@@ -241,3 +241,37 @@ describe('investigation_fields', () => {
     );
   });
 });
+
+describe('rule_source', () => {
+  test('it should validate a rule with "rule_source" set to internal', () => {
+    const payload = getRulesSchemaMock();
+    payload.rule_source = {
+      type: 'internal',
+    };
+
+    const result = RuleResponse.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
+  });
+
+  test('it should validate a rule with "rule_source" set to external', () => {
+    const payload = getRulesSchemaMock();
+    payload.rule_source = {
+      type: 'external',
+      is_customized: true,
+    };
+
+    const result = RuleResponse.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
+  });
+
+  test('it should validate a rule with "rule_source" set to undefined', () => {
+    const payload = getRulesSchemaMock();
+    payload.rule_source = undefined;
+
+    const result = RuleResponse.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
+  });
+});

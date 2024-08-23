@@ -6,16 +6,15 @@
  * Side Public License, v 1.
  */
 import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
-import { apiPublishesUnsavedChanges, PublishesUnsavedChanges } from '@kbn/presentation-publishing';
-import deepEqual from 'fast-deep-equal';
-import { cloneDeep, omit } from 'lodash';
+import { childrenUnsavedChanges$ } from '@kbn/presentation-containers';
+import { omit } from 'lodash';
 import { AnyAction, Middleware } from 'redux';
 import { combineLatest, debounceTime, Observable, of, startWith, switchMap } from 'rxjs';
-import { distinctUntilChanged, map } from 'rxjs';
 import { DashboardContainer, DashboardCreationOptions } from '../..';
 import { DashboardContainerInput } from '../../../../common';
 import { CHANGE_CHECK_DEBOUNCE } from '../../../dashboard_constants';
 import { pluginServices } from '../../../services/plugin_services';
+import { UnsavedPanelState } from '../../types';
 import { dashboardContainerReducers } from '../dashboard_container_reducers';
 import { isKeyEqualAsync, unsavedChangesDiffingFunctions } from './dashboard_diffing_functions';
 
@@ -84,32 +83,6 @@ export function startDiffingDashboardState(
   creationOptions?: DashboardCreationOptions
 ) {
   /**
-   *  Create an observable stream of unsaved changes from all react embeddable children
-   */
-  const reactEmbeddableUnsavedChanges = this.children$.pipe(
-    map((children) => Object.keys(children)),
-    distinctUntilChanged(deepEqual),
-    debounceTime(CHANGE_CHECK_DEBOUNCE),
-
-    // children may change, so make sure we subscribe/unsubscribe with switchMap
-    switchMap((newChildIds: string[]) => {
-      if (newChildIds.length === 0) return of([]);
-      const childrenThatPublishUnsavedChanges = Object.entries(this.children$.value).filter(
-        ([childId, child]) => apiPublishesUnsavedChanges(child)
-      ) as Array<[string, PublishesUnsavedChanges]>;
-
-      if (childrenThatPublishUnsavedChanges.length === 0) return of([]);
-
-      return combineLatest(
-        childrenThatPublishUnsavedChanges.map(([childId, child]) =>
-          child.unsavedChanges.pipe(map((unsavedChanges) => ({ childId, unsavedChanges })))
-        )
-      );
-    }),
-    map((children) => children.filter((child) => Boolean(child.unsavedChanges)))
-  );
-
-  /**
    * Create an observable stream that checks for unsaved changes in the Dashboard state
    * and the state of all of its legacy embeddable children.
    */
@@ -117,18 +90,17 @@ export function startDiffingDashboardState(
     startWith(null),
     debounceTime(CHANGE_CHECK_DEBOUNCE),
     switchMap(() => {
-      return new Observable<Partial<DashboardContainerInput>>((observer) => {
+      return (async () => {
         const {
           explicitInput: currentInput,
           componentState: { lastSavedInput },
         } = this.getState();
-        getDashboardUnsavedChanges
-          .bind(this)(lastSavedInput, currentInput)
-          .then((unsavedChanges) => {
-            if (observer.closed) return;
-            observer.next(unsavedChanges);
-          });
-      });
+        const unsavedChanges = await getDashboardUnsavedChanges.bind(this)(
+          lastSavedInput,
+          currentInput
+        );
+        return unsavedChanges;
+      })();
     })
   );
 
@@ -138,14 +110,14 @@ export function startDiffingDashboardState(
   this.diffingSubscription.add(
     combineLatest([
       dashboardUnsavedChanges,
-      reactEmbeddableUnsavedChanges,
+      childrenUnsavedChanges$(this.children$),
       this.controlGroup?.unsavedChanges ??
         (of(undefined) as Observable<PersistableControlGroupInput | undefined>),
-    ]).subscribe(([dashboardChanges, reactEmbeddableChanges, controlGroupChanges]) => {
+    ]).subscribe(([dashboardChanges, unsavedPanelState, controlGroupChanges]) => {
       // calculate unsaved changes
       const hasUnsavedChanges =
         Object.keys(omit(dashboardChanges, keysNotConsideredUnsavedChanges)).length > 0 ||
-        reactEmbeddableChanges.length > 0 ||
+        unsavedPanelState !== undefined ||
         controlGroupChanges !== undefined;
       if (hasUnsavedChanges !== this.getState().componentState.hasUnsavedChanges) {
         this.dispatch.setHasUnsavedChanges(hasUnsavedChanges);
@@ -155,7 +127,7 @@ export function startDiffingDashboardState(
       if (creationOptions?.useSessionStorageIntegration) {
         backupUnsavedChanges.bind(this)(
           dashboardChanges,
-          reactEmbeddableChanges,
+          unsavedPanelState ? unsavedPanelState : {},
           controlGroupChanges
         );
       }
@@ -209,36 +181,19 @@ export async function getDashboardUnsavedChanges(
 function backupUnsavedChanges(
   this: DashboardContainer,
   dashboardChanges: Partial<DashboardContainerInput>,
-  reactEmbeddableChanges: Array<{
-    childId: string;
-    unsavedChanges: object | undefined;
-  }>,
+  reactEmbeddableChanges: UnsavedPanelState,
   controlGroupChanges: PersistableControlGroupInput | undefined
 ) {
   const { dashboardBackup } = pluginServices.getServices();
-
-  // apply all unsaved state from react embeddables to the unsaved changes object.
-  let hasAnyReactEmbeddableUnsavedChanges = false;
-  const currentPanels = cloneDeep(dashboardChanges.panels ?? this.getInput().panels);
-  for (const { childId, unsavedChanges: childUnsavedChanges } of reactEmbeddableChanges) {
-    if (!childUnsavedChanges) continue;
-    const panelStateToBackup = {
-      ...currentPanels[childId],
-      ...(dashboardChanges.panels?.[childId] ?? {}),
-      explicitInput: {
-        ...currentPanels[childId]?.explicitInput,
-        ...(dashboardChanges.panels?.[childId]?.explicitInput ?? {}),
-        ...childUnsavedChanges,
-      },
-    };
-    hasAnyReactEmbeddableUnsavedChanges = true;
-    currentPanels[childId] = panelStateToBackup;
-  }
   const dashboardStateToBackup = omit(dashboardChanges, keysToOmitFromSessionStorage);
 
-  dashboardBackup.setState(this.getDashboardSavedObjectId(), {
-    ...dashboardStateToBackup,
-    panels: hasAnyReactEmbeddableUnsavedChanges ? currentPanels : dashboardChanges.panels,
-    controlGroupInput: controlGroupChanges,
-  });
+  dashboardBackup.setState(
+    this.getDashboardSavedObjectId(),
+    {
+      ...dashboardStateToBackup,
+      panels: dashboardChanges.panels,
+      controlGroupInput: controlGroupChanges,
+    },
+    reactEmbeddableChanges
+  );
 }

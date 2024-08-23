@@ -43,6 +43,8 @@ export const translation = composeSelectors(cameraStateSelector, cameraSelectors
 
 export const detectedBounds = composeSelectors(dataStateSelector, dataSelectors.detectedBounds);
 
+export const agentId = composeSelectors(dataStateSelector, dataSelectors.agentId);
+
 export const overriddenTimeBounds = composeSelectors(
   dataStateSelector,
   dataSelectors.overriddenTimeBounds

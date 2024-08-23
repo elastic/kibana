@@ -17,6 +17,9 @@ import { HoverActionsConfig } from './components/hover_actions';
 import { LastUpdatedAtProps } from './components/last_updated';
 import { LoadingPanelProps } from './components/loading';
 export interface TimelinesUIStart {
+  /**
+   * @deprecated Use cell-actions package instead
+   */
   getHoverActions: () => HoverActionsConfig;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   getTimelineReducer: () => any;

@@ -48,7 +48,7 @@ export class SearchExamplesPlugin
     this.logger.debug('search_examples: Setup');
     const router = core.http.createRouter<DataRequestHandlerContext>();
 
-    core.getStartServices().then(([_, depsStart]) => {
+    void core.getStartServices().then(([_, depsStart]) => {
       const myStrategy = mySearchStrategyProvider(depsStart.data);
       const fibonacciStrategy = fibonacciStrategyProvider();
       deps.data.search.registerSearchStrategy('myStrategy', myStrategy);

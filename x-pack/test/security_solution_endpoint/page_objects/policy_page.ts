@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { getPolicySettingsFormTestSubjects } from '@kbn/security-solution-plugin/public/management/pages/policy/view/policy_settings_form/mocks';
-import { FtrProviderContext } from '../ftr_provider_context';
+import { FtrProviderContext } from '../configs/ftr_provider_context';
 
 export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'header']);

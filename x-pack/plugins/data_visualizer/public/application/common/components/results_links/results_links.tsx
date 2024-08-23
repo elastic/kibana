@@ -19,6 +19,7 @@ import { isDefined } from '@kbn/ml-is-defined';
 import type { ResultLinks } from '../../../../../common/app';
 import type { LinkCardProps } from '../link_card/link_card';
 import { useDataVisualizerKibana } from '../../../kibana_context';
+import type { CombinedField } from '../combined_fields/types';
 
 type LinkType = 'file' | 'index';
 
@@ -44,7 +45,7 @@ export interface ResultLink {
 }
 
 interface Props {
-  fieldStats: FindFileStructureResponse['field_stats'];
+  results: FindFileStructureResponse;
   index: string;
   dataViewId: string;
   timeFieldName?: string;
@@ -52,6 +53,7 @@ interface Props {
   showFilebeatFlyout(): void;
   getAdditionalLinks?: GetAdditionalLinks;
   resultLinks?: ResultLinks;
+  combinedFields: CombinedField[];
 }
 
 interface GlobalState {
@@ -62,7 +64,7 @@ interface GlobalState {
 const RECHECK_DELAY_MS = 3000;
 
 export const ResultsLinks: FC<Props> = ({
-  fieldStats,
+  results,
   index,
   dataViewId,
   timeFieldName,
@@ -70,15 +72,16 @@ export const ResultsLinks: FC<Props> = ({
   showFilebeatFlyout,
   getAdditionalLinks,
   resultLinks,
+  combinedFields,
 }) => {
   const {
     services: {
       fileUpload,
+      share: { url },
       application: { getUrlForApp, capabilities },
-      discover,
     },
   } = useDataVisualizerKibana();
-
+  const fieldStats = results.field_stats;
   const [duration, setDuration] = useState({
     from: 'now-30m',
     to: 'now',
@@ -88,6 +91,7 @@ export const ResultsLinks: FC<Props> = ({
   const [discoverLink, setDiscoverLink] = useState('');
   const [indexManagementLink, setIndexManagementLink] = useState('');
   const [dataViewsManagementLink, setDataViewsManagementLink] = useState('');
+  const [playgroundLink, setPlaygroundLink] = useState('');
   const [asyncHrefCards, setAsyncHrefCards] = useState<LinkCardProps[]>();
 
   useEffect(() => {
@@ -96,12 +100,14 @@ export const ResultsLinks: FC<Props> = ({
     const getDiscoverUrl = async (): Promise<void> => {
       const isDiscoverAvailable = capabilities.discover?.show ?? false;
       if (!isDiscoverAvailable) return;
-      if (!discover.locator) {
+      const discoverLocator = url.locators.get('DISCOVER_APP_LOCATOR');
+
+      if (!discoverLocator) {
         // eslint-disable-next-line no-console
         console.error('Discover locator not available');
         return;
       }
-      const discoverUrl = await discover.locator.getUrl({
+      const discoverUrl = await discoverLocator.getUrl({
         indexPatternId: dataViewId,
         timeRange: globalState?.time ? globalState.time : undefined,
       });
@@ -114,13 +120,13 @@ export const ResultsLinks: FC<Props> = ({
     if (Array.isArray(getAdditionalLinks)) {
       Promise.all(
         getAdditionalLinks.map(async (asyncCardGetter) => {
-          const results = await asyncCardGetter({
+          const cardResults = await asyncCardGetter({
             dataViewId,
             globalState,
           });
-          if (Array.isArray(results)) {
+          if (Array.isArray(cardResults)) {
             return await Promise.all(
-              results.map(async (c) => ({
+              cardResults.map(async (c) => ({
                 ...c,
                 canDisplay: await c.canDisplay(),
                 href: await c.getUrl(),
@@ -138,6 +144,12 @@ export const ResultsLinks: FC<Props> = ({
     }
 
     if (!unmounted) {
+      const playgroundLocator = url.locators.get('PLAYGROUND_LOCATOR_ID');
+
+      if (playgroundLocator !== undefined) {
+        playgroundLocator.getUrl({ 'default-index': index }).then(setPlaygroundLink);
+      }
+
       setIndexManagementLink(
         getUrlForApp('management', { path: '/data/index_management/indices' })
       );
@@ -155,7 +167,7 @@ export const ResultsLinks: FC<Props> = ({
       unmounted = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dataViewId, discover, JSON.stringify(globalState)]);
+  }, [dataViewId, url, JSON.stringify(globalState)]);
 
   useEffect(() => {
     updateTimeValues();
@@ -178,7 +190,7 @@ export const ResultsLinks: FC<Props> = ({
       fieldStats &&
       typeof fieldStats === 'object' &&
       timeFieldName !== undefined &&
-      fieldStats.hasOwnProperty(timeFieldName) &&
+      Object.hasOwn(fieldStats, timeFieldName) &&
       fieldStats[timeFieldName].earliest !== undefined &&
       fieldStats[timeFieldName].latest !== undefined
     ) {
@@ -226,7 +238,6 @@ export const ResultsLinks: FC<Props> = ({
           />
         </EuiFlexItem>
       )}
-
       {indexManagementLink && (
         <EuiFlexItem>
           <EuiCard
@@ -243,7 +254,6 @@ export const ResultsLinks: FC<Props> = ({
           />
         </EuiFlexItem>
       )}
-
       {dataViewsManagementLink && (
         <EuiFlexItem>
           <EuiCard
@@ -260,7 +270,6 @@ export const ResultsLinks: FC<Props> = ({
           />
         </EuiFlexItem>
       )}
-
       {resultLinks?.fileBeat?.enabled === false ? null : (
         <EuiFlexItem>
           <EuiCard
@@ -278,6 +287,24 @@ export const ResultsLinks: FC<Props> = ({
           />
         </EuiFlexItem>
       )}
+
+      {playgroundLink ? (
+        <EuiFlexItem>
+          <EuiCard
+            hasBorder
+            icon={<EuiIcon size="xxl" type={`logoEnterpriseSearch`} />}
+            data-test-subj="fileDataVisFilebeatConfigLink"
+            title={
+              <FormattedMessage
+                id="xpack.dataVisualizer.file.resultsLinks.playground"
+                defaultMessage="Playground"
+              />
+            }
+            description=""
+            href={playgroundLink}
+          />
+        </EuiFlexItem>
+      ) : null}
 
       {Array.isArray(asyncHrefCards) &&
         asyncHrefCards.map((link) => (

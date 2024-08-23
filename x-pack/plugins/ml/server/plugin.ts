@@ -27,7 +27,6 @@ import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import type { CasesServerSetup } from '@kbn/cases-plugin/server';
 import type { PluginsSetup, PluginsStart, RouteInitialization } from './types';
 import type { MlCapabilities } from '../common/types/capabilities';
-import { jsonSchemaRoutes } from './routes/json_schema';
 import { notificationsRoutes } from './routes/notifications';
 import {
   type MlFeatures,
@@ -45,7 +44,6 @@ import { dataRecognizer } from './routes/modules';
 import { dataVisualizerRoutes } from './routes/data_visualizer';
 import { fieldsService } from './routes/fields_service';
 import { filtersRoutes } from './routes/filters';
-import { indicesRoutes } from './routes/indices';
 import { jobAuditMessagesRoutes } from './routes/job_audit_messages';
 import { jobRoutes } from './routes/anomaly_detectors';
 import { jobServiceRoutes } from './routes/job_service';
@@ -133,6 +131,10 @@ export class MlServerPlugin
       category: DEFAULT_APP_CATEGORIES.kibana,
       app: [PLUGIN_ID, 'kibana'],
       catalogue: [PLUGIN_ID, `${PLUGIN_ID}_file_data_visualizer`],
+      privilegesTooltip: i18n.translate('xpack.ml.featureRegistry.privilegesTooltip', {
+        defaultMessage:
+          'Granting All or Read feature privilege for Machine Learning will also grant the equivalent feature privileges to certain types of Kibana saved objects, namely index patterns, dashboards, saved searches and visualizations as well as machine learning job, trained model and module saved objects.',
+      }),
       management: {
         insightsAndAlerting: ['jobsListLink', 'triggersActions'],
       },
@@ -263,7 +265,6 @@ export class MlServerPlugin
     modelManagementRoutes(routeInit);
     dataVisualizerRoutes(routeInit);
     fieldsService(routeInit);
-    indicesRoutes(routeInit);
     managementRoutes(routeInit);
     savedObjectsRoutes(routeInit, {
       getSpaces,
@@ -275,7 +276,6 @@ export class MlServerPlugin
       resolveMlCapabilities,
     });
     notificationsRoutes(routeInit);
-    jsonSchemaRoutes(routeInit);
     alertingRoutes(routeInit, sharedServicesProviders);
 
     initMlServerLog({ log: this.log });
@@ -338,10 +338,16 @@ export class MlServerPlugin
         this.security,
         this.spacesPlugin !== undefined
       );
-      initializeJobs().finally(() => {
-        this.setMlReady();
+      initializeJobs()
+        .catch((err) => {
+          this.log.debug(`Error initializing jobs`, err);
+        })
+        .finally(() => {
+          this.setMlReady();
+        });
+      this.savedObjectsSyncService.scheduleSyncTask(plugins.taskManager, coreStart).catch((err) => {
+        this.log.debug(`Error scheduling saved objects sync task`, err);
       });
-      this.savedObjectsSyncService.scheduleSyncTask(plugins.taskManager, coreStart);
     });
   }
 

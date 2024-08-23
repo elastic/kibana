@@ -9,13 +9,16 @@
 import { getTopNavLinks } from './get_top_nav_links';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { DiscoverServices } from '../../../../build_services';
-import { DiscoverStateContainer } from '../../services/discover_state';
+import { DiscoverStateContainer } from '../../state_management/discover_state';
 
 const services = {
   capabilities: {
     discover: {
       save: true,
     },
+  },
+  uiSettings: {
+    get: jest.fn(() => true),
   },
 } as unknown as DiscoverServices;
 
@@ -27,12 +30,23 @@ test('getTopNavLinks result', () => {
     onOpenInspector: jest.fn(),
     services,
     state,
-    isTextBased: false,
+    isEsqlMode: false,
     adHocDataViews: [],
     topNavCustomization: undefined,
+    shouldShowESQLToDataViewTransitionModal: false,
   });
   expect(topNavLinks).toMatchInlineSnapshot(`
     Array [
+      Object {
+        "color": "text",
+        "emphasize": true,
+        "fill": false,
+        "id": "esql",
+        "label": "Try ES|QL",
+        "run": [Function],
+        "testId": "select-text-based-language-btn",
+        "tooltip": "ES|QL is Elastic's powerful new piped query language.",
+      },
       Object {
         "description": "New Search",
         "id": "new",
@@ -80,12 +94,23 @@ test('getTopNavLinks result for ES|QL mode', () => {
     onOpenInspector: jest.fn(),
     services,
     state,
-    isTextBased: true,
+    isEsqlMode: true,
     adHocDataViews: [],
     topNavCustomization: undefined,
+    shouldShowESQLToDataViewTransitionModal: false,
   });
   expect(topNavLinks).toMatchInlineSnapshot(`
     Array [
+      Object {
+        "color": "text",
+        "emphasize": true,
+        "fill": false,
+        "id": "esql",
+        "label": "Switch to classic",
+        "run": [Function],
+        "testId": "switch-to-dataviews",
+        "tooltip": "Switch to KQL or Lucene syntax.",
+      },
       Object {
         "description": "New Search",
         "id": "new",

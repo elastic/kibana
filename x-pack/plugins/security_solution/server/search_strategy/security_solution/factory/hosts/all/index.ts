@@ -7,8 +7,11 @@
 
 import { getOr } from 'lodash/fp';
 
-import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse } from '@kbn/search-types';
 import type { IScopedClusterClient } from '@kbn/core/server';
+import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import _ from 'lodash';
+import type { AssetCriticalityRecord } from '../../../../../../common/api/entity_analytics';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 import type {
   HostAggEsItem,
@@ -32,6 +35,8 @@ import { formatHostEdgesData, HOSTS_FIELDS } from './helpers';
 
 import type { EndpointAppContext } from '../../../../../endpoint/types';
 import { buildRiskScoreQuery } from '../../risk_score/all/query.risk_score.dsl';
+import { buildAssetCriticalityQuery } from '../../asset_criticality/query.asset_criticality.dsl';
+import { getAssetCriticalityIndex } from '../../../../../../common/entity_analytics/asset_criticality';
 
 export const allHosts: SecuritySolutionFactory<HostsQueries.hosts> = {
   buildDsl: (options) => {
@@ -97,29 +102,23 @@ async function enhanceEdges(
   esClient: IScopedClusterClient,
   isNewRiskScoreModuleInstalled: boolean
 ): Promise<HostsEdges[]> {
-  const hostRiskData = await getHostRiskData(
-    esClient,
-    spaceId,
-    hostNames,
-    isNewRiskScoreModuleInstalled
-  );
-  const hostsRiskByHostName: Record<string, string> | undefined = hostRiskData?.hits.hits.reduce(
-    (acc, hit) => ({
-      ...acc,
-      [hit._source?.host.name ?? '']: hit._source?.host?.risk?.calculated_level,
-    }),
-    {}
-  );
+  const [riskByHostName, criticalityByHostName] = await Promise.all([
+    getHostRiskData(esClient, spaceId, hostNames, isNewRiskScoreModuleInstalled).then(
+      buildRecordFromAggs('host.name', 'host.risk.calculated_level')
+    ),
+    getHostCriticalityData(esClient, hostNames).then(
+      buildRecordFromAggs('id_value', 'criticality_level')
+    ),
+  ]);
 
-  return hostsRiskByHostName
-    ? edges.map(({ node, cursor }) => ({
-        node: {
-          ...node,
-          risk: hostsRiskByHostName[node._id ?? ''],
-        },
-        cursor,
-      }))
-    : edges;
+  return edges.map(({ node, cursor }) => ({
+    node: {
+      ...node,
+      risk: riskByHostName?.[node._id ?? ''],
+      criticality: criticalityByHostName?.[node._id ?? ''],
+    },
+    cursor,
+  }));
 }
 
 export async function getHostRiskData(
@@ -145,3 +144,33 @@ export async function getHostRiskData(
     return undefined;
   }
 }
+
+export async function getHostCriticalityData(esClient: IScopedClusterClient, hostNames: string[]) {
+  try {
+    const criticalityResponse = await esClient.asCurrentUser.search<AssetCriticalityRecord>(
+      buildAssetCriticalityQuery({
+        defaultIndex: [getAssetCriticalityIndex('default')], // TODO:(@tiansivive) move to constant or import from somewhere else
+        filterQuery: { terms: { id_value: hostNames } },
+      })
+    );
+    return criticalityResponse;
+  } catch (error) {
+    if (error?.meta?.body?.error?.type !== 'index_not_found_exception') {
+      throw error;
+    }
+    return undefined;
+  }
+}
+
+const buildRecordFromAggs =
+  (key: string, path: string) =>
+  <T>(
+    data: SearchResponse<T, Record<string, AggregationsAggregate>> | undefined
+  ): Record<string, string> | undefined =>
+    data?.hits.hits.reduce(
+      (acc, hit) => ({
+        ...acc,
+        [_.get(hit._source, key) || '']: _.get(hit._source, path),
+      }),
+      {}
+    );

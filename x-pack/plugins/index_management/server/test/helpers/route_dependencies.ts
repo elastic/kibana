@@ -14,7 +14,9 @@ export const routeDependencies: Omit<RouteDependencies, 'router'> = {
     isSecurityEnabled: jest.fn().mockReturnValue(true),
     isLegacyTemplatesEnabled: true,
     isIndexStatsEnabled: true,
-    isDataStreamsStorageColumnEnabled: true,
+    isDataStreamStatsEnabled: true,
+    enableMappingsSourceFieldSection: true,
+    enableTogglingDataRetention: true,
   },
   indexDataEnricher: new IndexDataEnricher(),
   lib: {

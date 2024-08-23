@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IEsSearchRequest } from '@kbn/data-plugin/common';
+import type { IEsSearchRequest } from '@kbn/search-types';
 import type {
   ActionsStrategyResponse,
   ActionsRequestOptions,

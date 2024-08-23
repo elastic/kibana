@@ -8,7 +8,7 @@
 
 import type { ConnectionRequestParams } from '@elastic/transport';
 import { SqlGetAsyncResponse } from '@elastic/elasticsearch/lib/api/types';
-import { IKibanaSearchResponse } from '../../../../common';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
 import { sanitizeRequestParams } from '../../sanitize_request_params';
 
 /**

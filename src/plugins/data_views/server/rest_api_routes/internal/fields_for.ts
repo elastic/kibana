@@ -114,10 +114,11 @@ export const validate: VersionedRouteValidation<any, any, any> = {
   },
   response: {
     200: {
-      body: schema.object({
-        fields: schema.arrayOf(FieldDescriptorSchema),
-        indices: schema.arrayOf(schema.string()),
-      }),
+      body: () =>
+        schema.object({
+          fields: schema.arrayOf(FieldDescriptorSchema),
+          indices: schema.arrayOf(schema.string()),
+        }),
     },
   },
 };
@@ -206,7 +207,7 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
     }
   };
 
-export const registerFieldForWildcard = async (
+export const registerFieldForWildcard = (
   router: IRouter,
   getStartServices: StartServicesAccessor<
     DataViewsServerPluginStartDependencies,

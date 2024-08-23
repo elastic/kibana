@@ -7,7 +7,6 @@
 
 import { IS_SERVERLESS, CLOUD_SERVERLESS } from '../env_var_names_constants';
 import { getDataTestSubjectSelector } from '../helpers/common';
-import { GLOBAL_FILTERS_CONTAINER } from './date_picker';
 
 export const ADD_EXCEPTION_BTN = '[data-test-subj="add-exception-menu-item"]';
 
@@ -51,15 +50,13 @@ export const EMPTY_ALERT_TABLE = '[data-test-subj="alertsStateTableEmptyState"]'
 
 export const EXPAND_ALERT_BTN = '[data-test-subj="expand-event"]';
 
-export const TAKE_ACTION_BTN = '[data-test-subj="take-action-dropdown-btn"]';
+export const TAKE_ACTION_BTN = '[data-test-subj="securitySolutionFlyoutFooterDropdownButton"]';
 
 export const TAKE_ACTION_MENU = '[data-test-subj="takeActionPanelMenu"]';
 
 export const CLOSE_FLYOUT = '[data-test-subj="euiFlyoutCloseButton"]';
 
 export const MARK_ALERT_ACKNOWLEDGED_BTN = '[data-test-subj="acknowledged-alert-status"]';
-
-export const ALERTS_REFRESH_BTN = `${GLOBAL_FILTERS_CONTAINER} [data-test-subj="querySubmitButton"]`;
 
 export const ALERTS_HISTOGRAM_PANEL_LOADER = '[data-test-subj="loadingPanelAlertsHistogram"]';
 
@@ -74,8 +71,6 @@ export const TIMESTAMP_COLUMN = '[data-test-subj="dataGridHeaderCell-@timestamp"
 export const MESSAGE = '[data-test-subj="formatted-field-message"]';
 
 export const SELECTED_ALERTS = '[data-test-subj="selectedShowBulkActionsButton"]';
-
-export const SELECT_AGGREGATION_CHART = '[data-test-subj="chart-select-table"]';
 
 export const SEND_ALERT_TO_TIMELINE_BTN = '[data-test-subj="send-alert-to-timeline-button"]';
 
@@ -134,6 +129,33 @@ export const ACTIONS_EXPAND_BUTTON = '[data-test-subj="euiDataGridCellExpandButt
 export const SHOW_TOP_N_HEADER =
   '[data-test-subj="topN-container"] [data-test-subj="header-section-title"]';
 
+export const SESSION_VIEWER_BUTTON = '[data-test-subj="session-view-button"]';
+
+export const OVERLAY_CONTAINER = '[data-test-subj="overlayContainer"]';
+
+/**
+ * Alerts KPIs
+ */
+
+export const ALERT_CHARTS_TOGGLE_BUTTON = getDataTestSubjectSelector('query-toggle-header');
+
+export const SELECT_OVERVIEW_CHARTS = getDataTestSubjectSelector('chart-select-charts');
+
+export const ALERT_SUMMARY_CHARTS = getDataTestSubjectSelector('alerts-charts-panel');
+
+export const ALERT_SUMMARY_SEVERITY_DONUT_CHART =
+  getDataTestSubjectSelector('severity-level-donut');
+
+export const ALERT_SUMMARY_RULES_TABLE = getDataTestSubjectSelector('alerts-by-rule-panel');
+
+export const ALERT_SUMMARY_PROGRESS_BAR_CHARTS = getDataTestSubjectSelector(
+  'alerts-progress-bar-panel'
+);
+
+export const ALERT_SUMMARY_CHARTS_COLLAPSED = getDataTestSubjectSelector('chart-collapse');
+
+export const ALERTS_HISTOGRAM = getDataTestSubjectSelector('alerts-histogram-panel');
+
 export const ALERTS_HISTOGRAM_LEGEND =
   '[data-test-subj="alerts-histogram-panel"] .echLegendItem__action';
 
@@ -149,12 +171,13 @@ export const LEGEND_ACTIONS = {
   COPY: (ruleName: string) => `[data-test-subj="legend-${ruleName}-embeddable_copyToClipboard"]`,
 };
 
-export const SESSION_VIEWER_BUTTON = '[data-test-subj="session-view-button"]';
+export const ALERT_COUNT_TABLE = getDataTestSubjectSelector('alertsCountPanel');
 
-export const OVERLAY_CONTAINER = '[data-test-subj="overlayContainer"]';
+export const SELECT_COUNTS_TABLE = '[data-test-subj="chart-select-table"]';
 
-export const ALERT_SUMMARY_SEVERITY_DONUT_CHART =
-  getDataTestSubjectSelector('severity-level-donut');
+export const SELECT_TREEMAP = getDataTestSubjectSelector('chart-select-treemap');
+
+export const ALERT_TREEMAP = getDataTestSubjectSelector('treemapPanel');
 
 export const ALERT_TAGGING_CONTEXT_MENU_ITEM = '[data-test-subj="alert-tags-context-menu-item"]';
 
@@ -183,7 +206,7 @@ export const ALERT_TABLE_EVENT_RENDERED_VIEW_OPTION = '[data-test-subj="eventRen
 export const ALERT_RENDERER_HOST_NAME =
   '[data-test-subj="alertFieldBadge"] [data-test-subj="render-content-host.name"]';
 
-export const HOVER_ACTIONS_CONTAINER = getDataTestSubjectSelector('hover-actions-container');
+export const HOVER_ACTIONS_CONTAINER = getDataTestSubjectSelector('hoverActionsPopover');
 
 export const SECURITY_SOLUTION_USERS_AVATAR = (user: string) =>
   `[data-test-subj="securitySolutionUsersAvatar-${user}"]`;
@@ -228,7 +251,8 @@ export const FILTER_BY_ASSIGNEES_BUTTON = '[data-test-subj="filter-popover-butto
 export const ALERT_DETAILS_ASSIGN_BUTTON =
   '[data-test-subj="securitySolutionFlyoutHeaderAssigneesAddButton"]';
 
-export const ALERT_DETAILS_TAKE_ACTION_BUTTON = '[data-test-subj="take-action-dropdown-btn"]';
+export const ALERT_DETAILS_TAKE_ACTION_BUTTON =
+  '[data-test-subj="securitySolutionFlyoutFooterDropdownButton"]';
 
 export const USER_COLUMN = '[data-gridcell-column-id="user.name"]';
 export const TOOLTIP = '[data-test-subj="message-tool-tip"]';

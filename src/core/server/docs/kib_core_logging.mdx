@@ -18,7 +18,8 @@ tags: ['kibana','dev', 'contributor', 'api docs']
 - [Appenders](#appenders)
   - [Rolling File Appender](#rolling-file-appender)
     - [Triggering Policies](#triggering-policies)
-    - [Rolling strategies](#rolling-strategies)
+    - [Rolling Strategies](#rolling-strategies)
+    - [Retention Policies](#retention-policies)
 - [Configuration](#configuration)
 - [Usage](#usage)
 - [Logging config migration](#logging-config-migration)
@@ -270,15 +271,13 @@ The default value is `true`.
 
 #### Rolling strategies
 
-The rolling strategy determines how the rollover should occur: both the naming of the rolled files,
-and their retention policy.
+The rolling strategy determines how the naming of the rolled file should be performed.
 
 There is currently one strategy supported: `numeric`.
 
 ##### NumericRollingStrategy
 
-This strategy will suffix the file with a given pattern when rolling,
-and will retains a fixed amount of rolled files.
+This strategy will suffix the file with a given pattern when rolling.
 
 ```yaml
 logging:
@@ -291,7 +290,8 @@ logging:
       strategy:
         type: numeric
         pattern: '-%i'
-        max: 2
+      retention:
+        maxFiles: 2
       layout:
         type: pattern
 ```
@@ -322,6 +322,86 @@ The default value is `-%i`
 The maximum number of files to keep. Once this number is reached, oldest files will be deleted.
 
 The default value is `7`
+
+**deprecated**: Please use a retention policy instead.
+
+#### Retention Policies
+
+The retention policy defines when the rolled files must be deleted.
+
+##### maxFiles
+
+Retention policy that will keep, at max, the defined number of files (ordered from the most recent to the oldest one)
+and delete the others. 
+
+This is the same behavior as what was previously achieved via the deprecated `strategy.max` field.
+
+**Example**: Appender configured to keep `5` rolled files:
+```yaml
+logging:
+  appenders:
+    rolling-file:
+      type: rolling-file
+      fileName: /var/logs/kibana.log
+      layout:
+        type: pattern
+      policy:
+        // ...
+      strategy:
+        // ...
+      retention:
+        maxFiles: 5
+```
+
+##### maxAccumulatedFileSize
+
+Retention policy based on the size on disk used by the rolled files. Size count will be
+performed from the most recent file to the oldest one, and will delete all files
+(including the one breaching the threshold) over the limit. Only the size from the rolled files is taken into 
+account (the active file is ignored).
+
+*Note:* The field supports the following optional suffixes: `b`, `kb`, `mb`, `gb` and `tb` (case-insensitive). The default suffix is `b`
+
+**Example**: Appender configured to keep 5GB of rolled logs at maximum:
+```yaml
+logging:
+  appenders:
+    rolling-file:
+      type: rolling-file
+      fileName: /var/logs/kibana.log
+      layout:
+        type: pattern
+      policy:
+        // ...
+      strategy:
+        // ...
+      retention:
+        maxAccumulatedFileSize: "5GB"
+```
+
+##### removeOlderThan
+
+Retention policy based on the time (modification date - `mtime`) the files were rolled, and that will delete all files
+that are older than the specified duration.
+
+*Note:* The field supports the following optional suffixes: `ms`, `s`, `m`, `h`, `d`, `w`, `M` and `Y`. The default suffix is `ms`.
+
+**Example**: Appender configured to delete rolled files after 30 days:
+```yaml
+logging:
+  appenders:
+    rolling-file:
+      type: rolling-file
+      fileName: /var/logs/kibana.log
+      layout:
+        type: pattern
+      policy:
+        // ...
+      strategy:
+        // ...
+      retention:
+        removeOlderThan: "30d"
+```
 
 ### Rewrite Appender
 

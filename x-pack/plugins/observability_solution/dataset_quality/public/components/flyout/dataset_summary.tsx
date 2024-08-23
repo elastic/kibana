@@ -10,9 +10,9 @@ import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { DataStreamDetails, DataStreamSettings } from '../../../common/data_streams_stats';
 import {
-  flyoutDatasetCreatedOnText,
+  datasetCreatedOnText,
   flyoutDatasetDetailsText,
-  flyoutDatasetLastActivityText,
+  datasetLastActivityText,
 } from '../../../common/translations';
 import { FieldsList, FieldsListLoading } from './fields_list';
 
@@ -46,12 +46,12 @@ export function DatasetSummary({
       title={flyoutDatasetDetailsText}
       fields={[
         {
-          fieldTitle: flyoutDatasetLastActivityText,
+          fieldTitle: datasetLastActivityText,
           fieldValue: formattedLastActivity,
           isLoading: dataStreamDetailsLoading,
         },
         {
-          fieldTitle: flyoutDatasetCreatedOnText,
+          fieldTitle: datasetCreatedOnText,
           fieldValue: formattedCreatedOn,
           isLoading: dataStreamSettingsLoading,
         },

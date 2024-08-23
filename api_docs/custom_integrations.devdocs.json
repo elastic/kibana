@@ -253,7 +253,7 @@
           "label": "ContextProvider",
           "description": [],
           "signature": [
-            "React.FunctionComponent<{}>"
+            "React.FunctionComponent<{ children?: React.ReactNode; }>"
           ],
           "path": "src/plugins/custom_integrations/public/types.ts",
           "deprecated": false,

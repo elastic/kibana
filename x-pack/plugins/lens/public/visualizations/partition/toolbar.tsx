@@ -16,9 +16,10 @@ import {
   EuiHorizontalRule,
   EuiButtonGroup,
 } from '@elastic/eui';
-import type { Position } from '@elastic/charts';
+import { LegendValue, Position } from '@elastic/charts';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
-import { useDebouncedValue } from '@kbn/visualization-ui-components';
+import { useDebouncedValue } from '@kbn/visualization-utils';
+import { type PartitionLegendValue } from '@kbn/visualizations-plugin/common/constants';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import { PartitionChartsMeta } from './partition_charts_meta';
 import { PieVisualizationState, SharedPieLayerState } from '../../../common/types';
@@ -26,7 +27,16 @@ import { LegendDisplay } from '../../../common/constants';
 import { VisualizationToolbarProps } from '../../types';
 import { ToolbarPopover, LegendSettingsPopover } from '../../shared_components';
 import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
-import { shouldShowValuesInLegend } from './render_helpers';
+import { getLegendStats } from './render_helpers';
+
+const partitionLegendValues = [
+  {
+    value: LegendValue.Value,
+    label: i18n.translate('xpack.lens.shared.legendValues.value', {
+      defaultMessage: 'Value',
+    }),
+  },
+];
 
 const legendOptions: Array<{
   value: SharedPieLayerState['legendDisplay'];
@@ -133,11 +143,12 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
     [onStateChange]
   );
 
-  const onValueInLegendChange = useCallback(() => {
-    onStateChange({
-      showValuesInLegend: !shouldShowValuesInLegend(layer, state.shape),
-    });
-  }, [layer, state.shape, onStateChange]);
+  const onLegendStatsChange = useCallback(
+    (legendStats) => {
+      onStateChange({ legendStats });
+    },
+    [onStateChange]
+  );
 
   const onEmptySizeRatioChange = useCallback(
     (sizeId) => {
@@ -241,15 +252,17 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
           </EuiFormRow>
         </ToolbarPopover>
       ) : null}
-      <LegendSettingsPopover
+      <LegendSettingsPopover<PartitionLegendValue>
         legendOptions={legendOptions}
         mode={layer.legendDisplay}
         onDisplayChange={onLegendDisplayChange}
-        valueInLegend={shouldShowValuesInLegend(layer, state.shape)}
-        renderValueInLegendSwitch={
-          'showValues' in PartitionChartsMeta[state.shape]?.legend ?? false
+        legendStats={getLegendStats(layer, state.shape)}
+        allowedLegendStats={
+          PartitionChartsMeta[state.shape]?.legend.defaultLegendStats
+            ? partitionLegendValues
+            : undefined
         }
-        onValueInLegendChange={onValueInLegendChange}
+        onLegendStatsChange={onLegendStatsChange}
         position={layer.legendPosition}
         onPositionChange={onLegendPositionChange}
         renderNestedLegendSwitch={

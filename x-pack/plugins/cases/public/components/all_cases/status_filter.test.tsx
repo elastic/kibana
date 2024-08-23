@@ -36,22 +36,24 @@ describe('StatusFilter', () => {
   it('should render', async () => {
     render(<StatusFilter {...defaultProps} />);
 
-    expect(await screen.findByTestId('options-filter-popover-button-status')).toBeInTheDocument();
     expect(await screen.findByTestId('options-filter-popover-button-status')).not.toBeDisabled();
 
-    userEvent.click(await screen.findByRole('button', { name: 'Status' }));
+    userEvent.click(await screen.findByTestId('options-filter-popover-button-status'));
+
     await waitForEuiPopoverOpen();
 
-    expect(await screen.findByRole('option', { name: LABELS.open })).toBeInTheDocument();
-    expect(await screen.findByRole('option', { name: LABELS.inProgress })).toBeInTheDocument();
-    expect(await screen.findByRole('option', { name: LABELS.closed })).toBeInTheDocument();
-    expect((await screen.findAllByRole('option')).length).toBe(3);
+    const options = await screen.findAllByRole('option');
+
+    expect(options.length).toBe(3);
+    expect(options[0]).toHaveTextContent(LABELS.open);
+    expect(options[1]).toHaveTextContent(LABELS.inProgress);
+    expect(options[2]).toHaveTextContent(LABELS.closed);
   });
 
   it('should call onStatusChanged when changing status to open', async () => {
     render(<StatusFilter {...defaultProps} />);
 
-    userEvent.click(await screen.findByRole('button', { name: 'Status' }));
+    userEvent.click(await screen.findByTestId('options-filter-popover-button-status'));
     await waitForEuiPopoverOpen();
     userEvent.click(await screen.findByRole('option', { name: LABELS.open }));
 
@@ -66,11 +68,14 @@ describe('StatusFilter', () => {
   it('should not render hidden statuses', async () => {
     render(<StatusFilter {...defaultProps} hiddenStatuses={[CaseStatuses.closed]} />);
 
-    userEvent.click(await screen.findByRole('button', { name: 'Status' }));
+    userEvent.click(await screen.findByTestId('options-filter-popover-button-status'));
+
     await waitForEuiPopoverOpen();
 
-    expect(await screen.findAllByRole('option')).toHaveLength(2);
-    expect(await screen.findByRole('option', { name: LABELS.open })).toBeInTheDocument();
-    expect(await screen.findByRole('option', { name: LABELS.inProgress })).toBeInTheDocument();
+    const options = await screen.findAllByRole('option');
+
+    expect(options.length).toBe(2);
+    expect(options[0]).toHaveTextContent(LABELS.open);
+    expect(options[1]).toHaveTextContent(LABELS.inProgress);
   });
 });

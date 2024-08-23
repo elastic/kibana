@@ -48,18 +48,21 @@ describe('fetcher test', () => {
   const schemaIDParent = {
     id: 'id',
     parent: 'parent',
+    agentId: 'agent.id',
   };
 
   const schemaIDParentAncestry = {
     id: 'id',
     parent: 'parent',
     ancestry: 'ancestry',
+    agentId: 'agent.id',
   };
 
   const schemaIDParentName = {
     id: 'id',
     parent: 'parent',
     name: 'name',
+    agentId: 'agent.id',
   };
 
   let client: jest.Mocked<IScopedClusterClient>;
@@ -78,6 +81,7 @@ describe('fetcher test', () => {
         return [];
       });
       const options: TreeOptions = {
+        agentId: 'agent-1',
         descendantLevels: 1,
         descendants: 5,
         ancestors: 0,
@@ -88,6 +92,7 @@ describe('fetcher test', () => {
         schema: {
           id: '',
           parent: '',
+          agentId: '',
         },
         indexPatterns: [''],
         nodes: ['a'],
@@ -98,6 +103,7 @@ describe('fetcher test', () => {
 
     it('exists the loop when the options specify no descendants', async () => {
       const options: TreeOptions = {
+        agentId: 'agent-1',
         descendantLevels: 0,
         descendants: 0,
         ancestors: 0,
@@ -108,6 +114,7 @@ describe('fetcher test', () => {
         schema: {
           id: '',
           parent: '',
+          agentId: '',
         },
         indexPatterns: [''],
         nodes: ['a'],
@@ -119,14 +126,14 @@ describe('fetcher test', () => {
 
     it('returns the correct results without the ancestry defined', async () => {
       /**
-        .
-        └── 0
-            ├── 1
-            │   └── 2
-            └── 3
-                ├── 4
-                └── 5
-        */
+       .
+       └── 0
+       ├── 1
+       │   └── 2
+       └── 3
+       ├── 4
+       └── 5
+       */
       const level1 = [
         {
           id: '1',
@@ -161,6 +168,7 @@ describe('fetcher test', () => {
           return level2;
         });
       const options: TreeOptions = {
+        agentId: 'agent-1',
         descendantLevels: 2,
         descendants: 5,
         ancestors: 0,
@@ -186,6 +194,7 @@ describe('fetcher test', () => {
         return [];
       });
       const options: TreeOptions = {
+        agentId: 'agent-1',
         descendantLevels: 0,
         descendants: 0,
         ancestors: 5,
@@ -196,6 +205,7 @@ describe('fetcher test', () => {
         schema: {
           id: '',
           parent: '',
+          agentId: '',
         },
         indexPatterns: [''],
         nodes: ['a'],
@@ -209,6 +219,7 @@ describe('fetcher test', () => {
         throw new Error('should not have called this');
       });
       const options: TreeOptions = {
+        agentId: 'agent-1',
         descendantLevels: 0,
         descendants: 0,
         ancestors: 0,
@@ -219,6 +230,7 @@ describe('fetcher test', () => {
         schema: {
           id: '',
           parent: '',
+          agentId: '',
         },
         indexPatterns: [''],
         nodes: ['a'],
@@ -247,6 +259,7 @@ describe('fetcher test', () => {
           ];
         });
       const options: TreeOptions = {
+        agentId: 'agent-1',
         descendantLevels: 0,
         descendants: 0,
         ancestors: 2,
@@ -290,6 +303,7 @@ describe('fetcher test', () => {
           ];
         });
       const options: TreeOptions = {
+        agentId: 'agent-1',
         descendantLevels: 0,
         descendants: 0,
         ancestors: 2,
@@ -340,6 +354,7 @@ describe('fetcher test', () => {
           return [node1, node2];
         });
       const options: TreeOptions = {
+        agentId: 'agent-1',
         descendantLevels: 0,
         descendants: 0,
         ancestors: 3,
@@ -361,11 +376,11 @@ describe('fetcher test', () => {
   describe('retrieving leaf nodes', () => {
     it('correctly identifies the leaf nodes in a response without the ancestry field', () => {
       /**
-        .
-        └── 0
-            ├── 1
-            ├── 2
-            └── 3
+       .
+       └── 0
+       ├── 1
+       ├── 2
+       └── 3
        */
       const results = [
         {
@@ -381,16 +396,20 @@ describe('fetcher test', () => {
           parent: '0',
         },
       ];
-      const leaves = getLeafNodes(results, ['0'], { id: 'id', parent: 'parent' });
+      const leaves = getLeafNodes(results, ['0'], {
+        id: 'id',
+        parent: 'parent',
+        agentId: 'agent.id',
+      });
       expect(leaves).toStrictEqual(['1', '2', '3']);
     });
 
     it('correctly ignores nodes without the proper fields', () => {
       /**
-        .
-        └── 0
-            ├── 1
-            ├── 2
+       .
+       └── 0
+       ├── 1
+       ├── 2
        */
       const results = [
         {
@@ -406,7 +425,11 @@ describe('fetcher test', () => {
           parentNotReal: '0',
         },
       ];
-      const leaves = getLeafNodes(results, ['0'], { id: 'id', parent: 'parent' });
+      const leaves = getLeafNodes(results, ['0'], {
+        id: 'id',
+        parent: 'parent',
+        agentId: 'agent.id',
+      });
       expect(leaves).toStrictEqual(['1', '2']);
     });
 
@@ -425,17 +448,21 @@ describe('fetcher test', () => {
           parent: '0',
         },
       ];
-      const leaves = getLeafNodes(results, ['0'], { id: 'id', parent: 'parent' });
+      const leaves = getLeafNodes(results, ['0'], {
+        id: 'id',
+        parent: 'parent',
+        agentId: 'agent.id',
+      });
       expect(leaves).toStrictEqual([]);
     });
 
     describe('with the ancestry field defined', () => {
       it('correctly identifies the leaf nodes in a response with the ancestry field', () => {
         /**
-          .
-          ├── 1
-          │   └── 2
-          └── 3
+         .
+         ├── 1
+         │   └── 2
+         └── 3
          */
         const results = [
           {
@@ -458,16 +485,17 @@ describe('fetcher test', () => {
           id: 'id',
           parent: 'parent',
           ancestry: 'ancestry',
+          agentId: 'agent.id',
         });
         expect(leaves).toStrictEqual(['2']);
       });
 
       it('falls back to using parent field if it cannot find the ancestry field', () => {
         /**
-          .
-          ├── 1
-          │   └── 2
-          └── 3
+         .
+         ├── 1
+         │   └── 2
+         └── 3
          */
         const results = [
           {
@@ -488,19 +516,20 @@ describe('fetcher test', () => {
           id: 'id',
           parent: 'parent',
           ancestry: 'ancestry',
+          agentId: 'agent.id',
         });
         expect(leaves).toStrictEqual(['1', '3']);
       });
 
       it('correctly identifies the leaf nodes with a tree with multiple leaves', () => {
         /**
-          .
-          └── 0
-              ├── 1
-              │   └── 2
-              └── 3
-                  ├── 4
-                  └── 5
+         .
+         └── 0
+         ├── 1
+         │   └── 2
+         └── 3
+         ├── 4
+         └── 5
          */
         const results = [
           {
@@ -533,23 +562,24 @@ describe('fetcher test', () => {
           id: 'id',
           parent: 'parent',
           ancestry: 'ancestry',
+          agentId: 'agent.id',
         });
         expect(leaves).toStrictEqual(['2', '4', '5']);
       });
 
       it('correctly identifies the leaf nodes with multiple queried nodes', () => {
         /**
-          .
-          ├── 0
-          │   ├── 1
-          │   │   └── 2
-          │   └── 3
-          │       ├── 4
-          │       └── 5
-          └── a
-              └── b
-                  ├── c
-                  └── d
+         .
+         ├── 0
+         │   ├── 1
+         │   │   └── 2
+         │   └── 3
+         │       ├── 4
+         │       └── 5
+         └── a
+         └── b
+         ├── c
+         └── d
          */
         const results = [
           {
@@ -597,21 +627,22 @@ describe('fetcher test', () => {
           id: 'id',
           parent: 'parent',
           ancestry: 'ancestry',
+          agentId: 'agent.id',
         });
         expect(leaves).toStrictEqual(['2', '4', '5', 'c', 'd']);
       });
 
       it('correctly identifies the leaf nodes with an unbalanced tree', () => {
         /**
-          .
-          ├── 0
-          │   ├── 1
-          │   │   └── 2
-          │   └── 3
-          │       ├── 4
-          │       └── 5
-          └── a
-              └── b
+         .
+         ├── 0
+         │   ├── 1
+         │   │   └── 2
+         │   └── 3
+         │       ├── 4
+         │       └── 5
+         └── a
+         └── b
          */
         const results = [
           {
@@ -649,6 +680,7 @@ describe('fetcher test', () => {
           id: 'id',
           parent: 'parent',
           ancestry: 'ancestry',
+          agentId: 'agent.id',
         });
         // the reason b is not identified here is because the ancestry array
         // size is 2, which means that if b had a descendant, then it would have been found
@@ -661,32 +693,41 @@ describe('fetcher test', () => {
 
   describe('getIDField', () => {
     it('returns undefined if the field does not exist', () => {
-      expect(getIDField({}, { id: 'a', parent: 'b' })).toBeUndefined();
+      expect(getIDField({}, { id: 'a', parent: 'b', agentId: 'c' })).toBeUndefined();
     });
 
     it('returns the first value if the field is an array', () => {
-      expect(getIDField({ 'a.b': ['1', '2'] }, { id: 'a.b', parent: 'b' })).toStrictEqual('1');
+      expect(
+        getIDField({ 'a.b': ['1', '2'] }, { id: 'a.b', parent: 'b', agentId: 'c' })
+      ).toStrictEqual('1');
     });
   });
 
   describe('getParentField', () => {
     it('returns undefined if the field does not exist', () => {
-      expect(getParentField({}, { id: 'a', parent: 'b' })).toBeUndefined();
+      expect(getParentField({}, { id: 'a', parent: 'b', agentId: 'c' })).toBeUndefined();
     });
 
     it('returns the first value if the field is an array', () => {
-      expect(getParentField({ 'a.b': ['1', '2'] }, { id: 'z', parent: 'a.b' })).toStrictEqual('1');
+      expect(
+        getParentField({ 'a.b': ['1', '2'] }, { id: 'z', parent: 'a.b', agentId: 'c' })
+      ).toStrictEqual('1');
     });
   });
 
   describe('getAncestryAsArray', () => {
     it('returns an empty array if the field does not exist', () => {
-      expect(getAncestryAsArray({}, { id: 'a', parent: 'b', ancestry: 'z' })).toStrictEqual([]);
+      expect(
+        getAncestryAsArray({}, { id: 'a', parent: 'b', ancestry: 'z', agentId: 'c' })
+      ).toStrictEqual([]);
     });
 
     it('returns the full array if the field exists', () => {
       expect(
-        getAncestryAsArray({ 'a.b': ['1', '2'] }, { id: 'z', parent: 'f', ancestry: 'a.b' })
+        getAncestryAsArray(
+          { 'a.b': ['1', '2'] },
+          { id: 'z', parent: 'f', ancestry: 'a.b', agentId: 'c' }
+        )
       ).toStrictEqual(['1', '2']);
     });
 
@@ -694,7 +735,7 @@ describe('fetcher test', () => {
       expect(
         getAncestryAsArray(
           { 'aParent.bParent': ['1', '2'], ancestry: [] },
-          { id: 'z', parent: 'aParent.bParent', ancestry: 'ancestry' }
+          { id: 'z', parent: 'aParent.bParent', ancestry: 'ancestry', agentId: 'agent.id' }
         )
       ).toStrictEqual(['1']);
     });
@@ -703,9 +744,107 @@ describe('fetcher test', () => {
       expect(
         getAncestryAsArray(
           { 'aParent.bParent': '1' },
-          { id: 'z', parent: 'aParent.bParent', ancestry: 'ancestry' }
+          { id: 'z', parent: 'aParent.bParent', ancestry: 'ancestry', agentId: 'agent.id' }
         )
       ).toStrictEqual(['1']);
+    });
+  });
+
+  describe('agentIds', () => {
+    it('returns the correct results with different agentIds', async () => {
+      /**
+       .
+       └── 0 (agent-1)
+       │   ├── 1 (agent-1)
+       │   │   └── 2 (agent-1)
+       │   └── 3 (agent-2)
+       │       ├── 4 (agent-2)
+       │       └── 5 (agent-2)
+       */
+      const level1Agent1 = [
+        {
+          id: '1',
+          parent: '0',
+          'agent.id': 'agent-1',
+        },
+      ];
+      const level1Agent2 = [
+        {
+          id: '3',
+          parent: '0',
+          'agent.id': 'agent-2',
+        },
+      ];
+      const level2Agent1 = [
+        {
+          id: '2',
+          parent: '1',
+          'agent.id': 'agent-1',
+        },
+      ];
+      const level2Agent2 = [
+        {
+          id: '4',
+          parent: '3',
+          'agent.id': 'agent-2',
+        },
+        {
+          id: '5',
+          parent: '3',
+          'agent.id': 'agent-2',
+        },
+      ];
+
+      DescendantsQuery.prototype.search = jest
+        .fn()
+        .mockImplementationOnce(async () => {
+          return level1Agent1;
+        })
+        .mockImplementationOnce(async () => {
+          return level2Agent1;
+        })
+        .mockImplementationOnce(async () => {
+          return level1Agent2;
+        })
+        .mockImplementationOnce(async () => {
+          return level2Agent2;
+        });
+
+      const optionsAgent1: TreeOptions = {
+        agentId: 'agent-1',
+        descendantLevels: 2,
+        descendants: 5,
+        ancestors: 0,
+        timeRange: {
+          from: '',
+          to: '',
+        },
+        schema: schemaIDParent,
+        indexPatterns: [''],
+        nodes: ['0'],
+      };
+
+      const optionsAgent2: TreeOptions = {
+        agentId: 'agent-2',
+        descendantLevels: 2,
+        descendants: 5,
+        ancestors: 0,
+        timeRange: {
+          from: '',
+          to: '',
+        },
+        schema: schemaIDParent,
+        indexPatterns: [''],
+        nodes: ['0'],
+      };
+
+      const fetcher = new Fetcher(client);
+      expect(await fetcher.tree(optionsAgent1)).toEqual(
+        formatResponse([...level1Agent1, ...level2Agent1], schemaIDParent)
+      );
+      expect(await fetcher.tree(optionsAgent2)).toEqual(
+        formatResponse([...level1Agent2, ...level2Agent2], schemaIDParent)
+      );
     });
   });
 });

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { PropsWithChildren } from 'react';
 import React, { useContext, useEffect, useMemo, useState, type FC } from 'react';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { AnomalyTimelineStateService } from './anomaly_timeline_state_service';
@@ -52,7 +53,7 @@ export function useAnomalyExplorerContext() {
 /**
  * Anomaly Explorer Context Provider.
  */
-export const AnomalyExplorerContextProvider: FC = ({ children }) => {
+export const AnomalyExplorerContextProvider: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const [, , anomalyExplorerUrlStateService] = useExplorerUrlState();
 
   const timefilter = useTimefilter();

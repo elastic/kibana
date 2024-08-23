@@ -6,7 +6,7 @@
  */
 
 import './toolbar_popover.scss';
-import React, { useState } from 'react';
+import React, { PropsWithChildren, useState } from 'react';
 import { EuiFlexItem, EuiPopover, EuiPopoverProps, EuiPopoverTitle, IconType } from '@elastic/eui';
 import { ToolbarButton, ToolbarButtonProps } from '@kbn/shared-ux-button-toolbar';
 import { EuiIconLegend } from '@kbn/chart-icons';
@@ -41,7 +41,7 @@ export type ToolbarPopoverProps = Partial<EuiPopoverProps> & {
   handleClose?: () => void;
 };
 
-export const ToolbarPopover: React.FunctionComponent<ToolbarPopoverProps> = ({
+export const ToolbarPopover: React.FC<PropsWithChildren<ToolbarPopoverProps>> = ({
   children,
   title,
   type,

@@ -24,13 +24,13 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { FC, ReactNode, useState } from 'react';
+import React, { FC, PropsWithChildren, ReactNode, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DocumentDiffMode } from './types';
 
 export interface ComparisonControlsProps {
   isPlainRecord?: boolean;
-  selectedDocs: string[];
+  selectedDocIds: string[];
   showDiff: boolean | undefined;
   diffMode: DocumentDiffMode | undefined;
   showDiffDecorations: boolean | undefined;
@@ -47,7 +47,7 @@ export interface ComparisonControlsProps {
 
 export const ComparisonControls = ({
   isPlainRecord,
-  selectedDocs,
+  selectedDocIds,
   showDiff,
   diffMode,
   showDiffDecorations,
@@ -72,13 +72,13 @@ export const ComparisonControls = ({
               <FormattedMessage
                 id="unifiedDataTable.comparingResults"
                 defaultMessage="Comparing {documentCount} results"
-                values={{ documentCount: selectedDocs.length }}
+                values={{ documentCount: selectedDocIds.length }}
               />
             ) : (
               <FormattedMessage
                 id="unifiedDataTable.comparingDocuments"
                 defaultMessage="Comparing {documentCount} documents"
-                values={{ documentCount: selectedDocs.length }}
+                values={{ documentCount: selectedDocIds.length }}
               />
             )}
           </strong>
@@ -368,10 +368,12 @@ const enableShowDiffTooltip = i18n.translate('unifiedDataTable.enableShowDiff', 
 });
 
 const DiffModeEntry: FC<
-  Pick<ComparisonControlsProps, 'diffMode' | 'setDiffMode'> & {
-    entryDiffMode: DocumentDiffMode;
-    disabled?: boolean;
-  }
+  PropsWithChildren<
+    Pick<ComparisonControlsProps, 'diffMode' | 'setDiffMode'> & {
+      entryDiffMode: DocumentDiffMode;
+      disabled?: boolean;
+    }
+  >
 > = ({ children, entryDiffMode, diffMode, disabled, setDiffMode }) => {
   const { euiTheme } = useEuiTheme();
 

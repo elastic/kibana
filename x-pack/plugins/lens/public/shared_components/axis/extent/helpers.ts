@@ -6,6 +6,8 @@
  */
 
 import type { Datatable } from '@kbn/expressions-plugin/common';
+import { i18n } from '@kbn/i18n';
+import { YScaleType, XScaleType } from '@kbn/expression-xy-plugin/common';
 import type { DatasourcePublicAPI } from '../../../types';
 import type { UnifiedAxisExtentConfig } from './types';
 
@@ -24,6 +26,21 @@ export function validateZeroInclusivityExtent(extent?: {
     extent.upperBound != null &&
     extent.lowerBound <= 0 &&
     extent.upperBound >= 0
+  );
+}
+
+/**
+ * Returns true if the provided extent includes 0
+ * @param extent
+ * @returns boolean
+ */
+export function validateLogarithmicExtent(extent?: { lowerBound?: number; upperBound?: number }) {
+  return (
+    extent &&
+    extent.lowerBound != null &&
+    extent.upperBound != null &&
+    ((extent.lowerBound < 0 && extent.upperBound < 0) ||
+      (extent.lowerBound > 0 && extent.upperBound > 0))
   );
 }
 
@@ -86,9 +103,39 @@ export function getDataBounds(
   }
 }
 
-export function validateExtent(shouldIncludeZero: boolean, extent?: UnifiedAxisExtentConfig) {
-  return {
-    inclusiveZeroError: shouldIncludeZero && !validateZeroInclusivityExtent(extent),
-    boundaryError: !validateAxisDomain(extent),
-  };
+export function validateExtent(
+  hasBarOrArea: boolean,
+  extent: UnifiedAxisExtentConfig,
+  scaleType?: YScaleType | XScaleType
+): {
+  helpMsg?: string;
+  errorMsg?: string;
+} {
+  if (!validateAxisDomain(extent)) {
+    return {
+      errorMsg: i18n.translate('xpack.lens.axisExtent.boundaryError', {
+        defaultMessage: 'Lower bound should be less than upper bound',
+      }),
+    };
+  }
+
+  if (scaleType === 'log') {
+    const key = validateLogarithmicExtent(extent) ? 'helpMsg' : 'errorMsg';
+    return {
+      [key]: i18n.translate('xpack.lens.axisExtent.logExcludeZero', {
+        defaultMessage: 'Logarithmic bounds must not contain zero',
+      }),
+    };
+  }
+
+  if (hasBarOrArea) {
+    const key = validateZeroInclusivityExtent(extent) ? 'helpMsg' : 'errorMsg';
+    return {
+      [key]: i18n.translate('xpack.lens.axisExtent.inclusiveZero', {
+        defaultMessage: 'Bounds must contain zero',
+      }),
+    };
+  }
+
+  return {};
 }

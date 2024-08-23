@@ -7,7 +7,6 @@
 
 import React from 'react';
 
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { LogStream, LogStreamProps } from '@kbn/logs-shared-plugin/public';
 
 /*
@@ -35,9 +34,5 @@ export const EntSearchLogStream: React.FC<Props> = ({
   if (!endTimestamp) endTimestamp = Date.now();
   if (!startTimestamp) startTimestamp = endTimestamp - hoursAgo * 60 * 60 * 1000;
 
-  return (
-    <EuiThemeProvider>
-      <LogStream startTimestamp={startTimestamp} endTimestamp={endTimestamp} {...props} />
-    </EuiThemeProvider>
-  );
+  return <LogStream startTimestamp={startTimestamp} endTimestamp={endTimestamp} {...props} />;
 };

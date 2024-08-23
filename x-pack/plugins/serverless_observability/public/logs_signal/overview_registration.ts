@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ISearchGeneric } from '@kbn/data-plugin/public';
+import type { ISearchGeneric } from '@kbn/search-types';
 import type {
   DataHandler,
   InfraLogsHasDataResponse,

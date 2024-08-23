@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { ReactElement } from 'react';
-import React, { useMemo } from 'react';
+import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -16,6 +16,7 @@ import { useTheme } from 'styled-components';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 
 import { useStartServices } from '../hooks';
+import { useDismissableTour } from '../hooks/use_dismissable_tour';
 
 export const AddAgentHelpPopover = ({
   button,
@@ -28,19 +29,16 @@ export const AddAgentHelpPopover = ({
   offset?: number;
   closePopover: NoArgCallback<void>;
 }) => {
-  const { docLinks, uiSettings } = useStartServices();
+  const { docLinks } = useStartServices();
   const theme = useTheme() as EuiTheme;
   const optionalProps: { offset?: number } = {};
-  const hideAnnouncements: boolean = useMemo(
-    () => uiSettings.get('hideAnnouncements'),
-    [uiSettings]
-  );
+  const addAgentTour = useDismissableTour('ADD_AGENT_POPOVER');
 
   if (offset !== undefined) {
     optionalProps.offset = offset; // offset being present in props sets it to 0 so only add if specified
   }
 
-  return hideAnnouncements ? (
+  return addAgentTour.isHidden ? (
     button
   ) : (
     <EuiTourStep
@@ -67,7 +65,7 @@ export const AddAgentHelpPopover = ({
       zIndex={theme.eui.euiZLevel1 - 1} // put popover behind any modals that happen to be open
       isStepOpen={isOpen}
       minWidth={300}
-      onFinish={() => {}}
+      onFinish={addAgentTour.dismiss}
       step={1}
       stepsTotal={1}
       title={
@@ -82,6 +80,7 @@ export const AddAgentHelpPopover = ({
       footerAction={
         <EuiLink
           onClick={() => {
+            addAgentTour.dismiss();
             closePopover();
           }}
         >

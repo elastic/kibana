@@ -8,6 +8,9 @@
 import { addItemsToArray, deleteItemsFromArray, ruleParamsModifier } from './rule_params_modifier';
 import { BulkActionEditTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
 import type { RuleAlertType } from '../../../rule_schema';
+import type { ExperimentalFeatures } from '../../../../../../common';
+
+const mockExperimentalFeatures = {} as ExperimentalFeatures;
 
 describe('addItemsToArray', () => {
   test('should add single item to array', () => {
@@ -45,22 +48,30 @@ describe('ruleParamsModifier', () => {
   } as RuleAlertType['params'];
 
   test('should increment version if rule is custom (immutable === false)', () => {
-    const { modifiedParams } = ruleParamsModifier(ruleParamsMock, [
-      {
-        type: BulkActionEditTypeEnum.add_index_patterns,
-        value: ['my-index-*'],
-      },
-    ]);
+    const { modifiedParams } = ruleParamsModifier(
+      ruleParamsMock,
+      [
+        {
+          type: BulkActionEditTypeEnum.add_index_patterns,
+          value: ['my-index-*'],
+        },
+      ],
+      mockExperimentalFeatures
+    );
     expect(modifiedParams).toHaveProperty('version', ruleParamsMock.version + 1);
   });
 
   test('should not increment version if rule is prebuilt (immutable === true)', () => {
-    const { modifiedParams } = ruleParamsModifier({ ...ruleParamsMock, immutable: true }, [
-      {
-        type: BulkActionEditTypeEnum.add_index_patterns,
-        value: ['my-index-*'],
-      },
-    ]);
+    const { modifiedParams } = ruleParamsModifier(
+      { ...ruleParamsMock, immutable: true },
+      [
+        {
+          type: BulkActionEditTypeEnum.add_index_patterns,
+          value: ['my-index-*'],
+        },
+      ],
+      mockExperimentalFeatures
+    );
     expect(modifiedParams).toHaveProperty('version', ruleParamsMock.version);
   });
 
@@ -133,7 +144,8 @@ describe('ruleParamsModifier', () => {
                 type: BulkActionEditTypeEnum.add_index_patterns,
                 value: indexPatternsToAdd,
               },
-            ]
+            ],
+            mockExperimentalFeatures
           );
           expect(modifiedParams).toHaveProperty('index', resultingIndexPatterns);
           expect(isParamsUpdateSkipped).toBe(isUpdateSkipped);
@@ -197,7 +209,8 @@ describe('ruleParamsModifier', () => {
                 type: BulkActionEditTypeEnum.delete_index_patterns,
                 value: indexPatternsToDelete,
               },
-            ]
+            ],
+            mockExperimentalFeatures
           );
           expect(modifiedParams).toHaveProperty('index', resultingIndexPatterns);
           expect(isParamsUpdateSkipped).toBe(isUpdateSkipped);
@@ -252,7 +265,8 @@ describe('ruleParamsModifier', () => {
                 type: BulkActionEditTypeEnum.set_index_patterns,
                 value: indexPatternsToOverwrite,
               },
-            ]
+            ],
+            mockExperimentalFeatures
           );
           expect(modifiedParams).toHaveProperty('index', resultingIndexPatterns);
           expect(isParamsUpdateSkipped).toBe(isUpdateSkipped);
@@ -270,7 +284,8 @@ describe('ruleParamsModifier', () => {
             type: BulkActionEditTypeEnum.delete_index_patterns,
             value: ['index-2-*'],
           },
-        ]
+        ],
+        mockExperimentalFeatures
       );
       expect(modifiedParams).not.toHaveProperty('index');
       expect(isParamsUpdateSkipped).toBe(true);
@@ -285,7 +300,8 @@ describe('ruleParamsModifier', () => {
             value: ['index'],
             overwrite_data_views: true,
           },
-        ]
+        ],
+        mockExperimentalFeatures
       );
       expect(modifiedParams).toHaveProperty('dataViewId', undefined);
       expect(isParamsUpdateSkipped).toBe(false);
@@ -300,7 +316,8 @@ describe('ruleParamsModifier', () => {
             value: ['index'],
             overwrite_data_views: true,
           },
-        ]
+        ],
+        mockExperimentalFeatures
       );
       expect(modifiedParams).toHaveProperty('dataViewId', undefined);
       expect(isParamsUpdateSkipped).toBe(false);
@@ -315,7 +332,8 @@ describe('ruleParamsModifier', () => {
             value: ['index'],
             overwrite_data_views: true,
           },
-        ]
+        ],
+        mockExperimentalFeatures
       );
       expect(modifiedParams).toHaveProperty('dataViewId', undefined);
       expect(modifiedParams).toHaveProperty('index', ['test-*']);
@@ -331,7 +349,8 @@ describe('ruleParamsModifier', () => {
             value: ['index'],
             overwrite_data_views: true,
           },
-        ]
+        ],
+        mockExperimentalFeatures
       );
       expect(modifiedParams).toHaveProperty('dataViewId', undefined);
       expect(modifiedParams).toHaveProperty('index', undefined);
@@ -340,12 +359,16 @@ describe('ruleParamsModifier', () => {
 
     test('should throw error on adding index pattern if rule is of machine learning type', () => {
       expect(() =>
-        ruleParamsModifier({ type: 'machine_learning' } as RuleAlertType['params'], [
-          {
-            type: BulkActionEditTypeEnum.add_index_patterns,
-            value: ['my-index-*'],
-          },
-        ])
+        ruleParamsModifier(
+          { type: 'machine_learning' } as RuleAlertType['params'],
+          [
+            {
+              type: BulkActionEditTypeEnum.add_index_patterns,
+              value: ['my-index-*'],
+            },
+          ],
+          mockExperimentalFeatures
+        )
       ).toThrow(
         "Index patterns can't be added. Machine learning rule doesn't have index patterns property"
       );
@@ -353,12 +376,16 @@ describe('ruleParamsModifier', () => {
 
     test('should throw error on deleting index pattern if rule is of machine learning type', () => {
       expect(() =>
-        ruleParamsModifier({ type: 'machine_learning' } as RuleAlertType['params'], [
-          {
-            type: BulkActionEditTypeEnum.delete_index_patterns,
-            value: ['my-index-*'],
-          },
-        ])
+        ruleParamsModifier(
+          { type: 'machine_learning' } as RuleAlertType['params'],
+          [
+            {
+              type: BulkActionEditTypeEnum.delete_index_patterns,
+              value: ['my-index-*'],
+            },
+          ],
+          mockExperimentalFeatures
+        )
       ).toThrow(
         "Index patterns can't be deleted. Machine learning rule doesn't have index patterns property"
       );
@@ -366,12 +393,16 @@ describe('ruleParamsModifier', () => {
 
     test('should throw error on overwriting index pattern if rule is of machine learning type', () => {
       expect(() =>
-        ruleParamsModifier({ type: 'machine_learning' } as RuleAlertType['params'], [
-          {
-            type: BulkActionEditTypeEnum.set_index_patterns,
-            value: ['my-index-*'],
-          },
-        ])
+        ruleParamsModifier(
+          { type: 'machine_learning' } as RuleAlertType['params'],
+          [
+            {
+              type: BulkActionEditTypeEnum.set_index_patterns,
+              value: ['my-index-*'],
+            },
+          ],
+          mockExperimentalFeatures
+        )
       ).toThrow(
         "Index patterns can't be overwritten. Machine learning rule doesn't have index patterns property"
       );
@@ -379,51 +410,342 @@ describe('ruleParamsModifier', () => {
 
     test('should throw error on adding index pattern if rule is of ES|QL type', () => {
       expect(() =>
-        ruleParamsModifier({ type: 'esql' } as RuleAlertType['params'], [
-          {
-            type: BulkActionEditTypeEnum.add_index_patterns,
-            value: ['my-index-*'],
-          },
-        ])
+        ruleParamsModifier(
+          { type: 'esql' } as RuleAlertType['params'],
+          [
+            {
+              type: BulkActionEditTypeEnum.add_index_patterns,
+              value: ['my-index-*'],
+            },
+          ],
+          mockExperimentalFeatures
+        )
       ).toThrow("Index patterns can't be added. ES|QL rule doesn't have index patterns property");
     });
 
     test('should throw error on deleting index pattern if rule is of ES|QL type', () => {
       expect(() =>
-        ruleParamsModifier({ type: 'esql' } as RuleAlertType['params'], [
-          {
-            type: BulkActionEditTypeEnum.delete_index_patterns,
-            value: ['my-index-*'],
-          },
-        ])
+        ruleParamsModifier(
+          { type: 'esql' } as RuleAlertType['params'],
+          [
+            {
+              type: BulkActionEditTypeEnum.delete_index_patterns,
+              value: ['my-index-*'],
+            },
+          ],
+          mockExperimentalFeatures
+        )
       ).toThrow("Index patterns can't be deleted. ES|QL rule doesn't have index patterns property");
     });
 
     test('should throw error on overwriting index pattern if rule is of ES|QL type', () => {
       expect(() =>
-        ruleParamsModifier({ type: 'esql' } as RuleAlertType['params'], [
-          {
-            type: BulkActionEditTypeEnum.set_index_patterns,
-            value: ['my-index-*'],
-          },
-        ])
+        ruleParamsModifier(
+          { type: 'esql' } as RuleAlertType['params'],
+          [
+            {
+              type: BulkActionEditTypeEnum.set_index_patterns,
+              value: ['my-index-*'],
+            },
+          ],
+          mockExperimentalFeatures
+        )
       ).toThrow(
         "Index patterns can't be overwritten. ES|QL rule doesn't have index patterns property"
       );
     });
   });
 
+  describe('investigation_fields', () => {
+    describe('add_investigation_fields action', () => {
+      test.each([
+        [
+          '3 existing investigation fields + 2 of them = 3 investigation fields',
+          {
+            existingInvestigationFields: { field_names: ['field-1', 'field-2', 'field-3'] },
+            investigationFieldsToAdd: { field_names: ['field-2', 'field-3'] },
+            resultingInvestigationFields: { field_names: ['field-1', 'field-2', 'field-3'] },
+            isParamsUpdateSkipped: true,
+          },
+        ],
+        [
+          '3 existing investigation fields + 2 other investigation fields (none of them) = 5 investigation fields',
+          {
+            existingInvestigationFields: { field_names: ['field-1', 'field-2', 'field-3'] },
+            investigationFieldsToAdd: { field_names: ['field-4', 'field-5'] },
+            resultingInvestigationFields: {
+              field_names: ['field-1', 'field-2', 'field-3', 'field-4', 'field-5'],
+            },
+            isParamsUpdateSkipped: false,
+          },
+        ],
+        [
+          '3 existing investigation fields + 1 of them + 2 other investigation fields (none of them) = 5 investigation fields',
+          {
+            existingInvestigationFields: { field_names: ['field-1', 'field-2', 'field-3'] },
+            investigationFieldsToAdd: { field_names: ['field-3', 'field-4', 'field-5'] },
+            resultingInvestigationFields: {
+              field_names: ['field-1', 'field-2', 'field-3', 'field-4', 'field-5'],
+            },
+            isParamsUpdateSkipped: false,
+          },
+        ],
+        [
+          '3 existing investigation fields + 0 investigation fields = 3 investigation fields',
+          {
+            existingInvestigationFields: { field_names: ['field-1', 'field-2', 'field-3'] },
+            investigationFieldsToAdd: { field_names: [] },
+            resultingInvestigationFields: { field_names: ['field-1', 'field-2', 'field-3'] },
+            isParamsUpdateSkipped: true,
+          },
+        ],
+        [
+          '`undefined` existing investigation fields + 1 investigation field = 1 investigation field',
+          {
+            existingInvestigationFields: undefined,
+            investigationFieldsToAdd: { field_names: ['field-1'] },
+            resultingInvestigationFields: { field_names: ['field-1'] },
+            isParamsUpdateSkipped: false,
+          },
+        ],
+        [
+          '`undefined` existing investigation fields + 1 investigation field = 1 investigation field',
+          {
+            existingInvestigationFields: undefined,
+            investigationFieldsToAdd: { field_names: ['field-1'] },
+            resultingInvestigationFields: { field_names: ['field-1'] },
+            isParamsUpdateSkipped: false,
+          },
+        ],
+        [
+          '3 existing `legacy` investigation fields + 2 other investigation fields (none of them) = 5 investigation fields',
+          {
+            existingInvestigationFields: ['field-1', 'field-2', 'field-3'],
+            investigationFieldsToAdd: { field_names: ['field-4', 'field-5'] },
+            resultingInvestigationFields: {
+              field_names: ['field-1', 'field-2', 'field-3', 'field-4', 'field-5'],
+            },
+            isParamsUpdateSkipped: false,
+          },
+        ],
+      ])(
+        'should add investigation fields to rule, case:"%s"',
+        (
+          caseName,
+          {
+            existingInvestigationFields,
+            investigationFieldsToAdd,
+            resultingInvestigationFields,
+            isParamsUpdateSkipped,
+          }
+        ) => {
+          const { modifiedParams, isParamsUpdateSkipped: isUpdateSkipped } = ruleParamsModifier(
+            {
+              ...ruleParamsMock,
+              investigationFields: existingInvestigationFields,
+            } as RuleAlertType['params'],
+            [
+              {
+                type: BulkActionEditTypeEnum.add_investigation_fields,
+                value: investigationFieldsToAdd,
+              },
+            ],
+            mockExperimentalFeatures
+          );
+          expect(modifiedParams).toHaveProperty(
+            'investigationFields',
+            resultingInvestigationFields
+          );
+          expect(isParamsUpdateSkipped).toBe(isUpdateSkipped);
+        }
+      );
+    });
+
+    describe('delete_investigation_fields action', () => {
+      test.each([
+        [
+          '3 existing investigation fields - 2 of them = 1 investigation field',
+          {
+            existingInvestigationFields: { field_names: ['field-1', 'field-2', 'field-3'] },
+            investigationFieldsToDelete: { field_names: ['field-2', 'field-3'] },
+            resultingInvestigationFields: { field_names: ['field-1'] },
+            isParamsUpdateSkipped: false,
+          },
+        ],
+        [
+          '3 existing investigation fields - 2 other investigation fields (none of them) = 3 investigation fields',
+          {
+            existingInvestigationFields: { field_names: ['field-1', 'field-2', 'field-3'] },
+            investigationFieldsToDelete: { field_names: ['field-4', 'field-5'] },
+            resultingInvestigationFields: { field_names: ['field-1', 'field-2', 'field-3'] },
+            isParamsUpdateSkipped: true,
+          },
+        ],
+        [
+          '3 existing investigation fields - 1 of them - 2 other investigation fields (none of them) = 2 investigation fields',
+          {
+            existingInvestigationFields: { field_names: ['field-1', 'field-2', 'field-3'] },
+            investigationFieldsToDelete: { field_names: ['field-3', 'field-4', 'field-5'] },
+            resultingInvestigationFields: { field_names: ['field-1', 'field-2'] },
+            isParamsUpdateSkipped: false,
+          },
+        ],
+        [
+          '3 existing investigation fields - 0 investigation fields = 3 investigation fields',
+          {
+            existingInvestigationFields: { field_names: ['field-1', 'field-2', 'field-3'] },
+            investigationFieldsToDelete: { field_names: [] },
+            resultingInvestigationFields: { field_names: ['field-1', 'field-2', 'field-3'] },
+            isParamsUpdateSkipped: true,
+          },
+        ],
+        [
+          '`undefined` existing investigation fields - 2 of them = `undeinfed` investigation fields',
+          {
+            existingInvestigationFields: undefined,
+            investigationFieldsToDelete: { field_names: ['field-2', 'field-3'] },
+            resultingInvestigationFields: undefined,
+            isParamsUpdateSkipped: true,
+          },
+        ],
+        [
+          '3 existing `legacy` investigation fields - 2 of them = 1 investigation field',
+          {
+            existingInvestigationFields: ['field-1', 'field-2', 'field-3'],
+            investigationFieldsToDelete: { field_names: ['field-2', 'field-3'] },
+            resultingInvestigationFields: { field_names: ['field-1'] },
+            isParamsUpdateSkipped: false,
+          },
+        ],
+      ])(
+        'should delete investigation fields from rule, case:"%s"',
+        (
+          caseName,
+          {
+            existingInvestigationFields,
+            investigationFieldsToDelete,
+            resultingInvestigationFields,
+            isParamsUpdateSkipped,
+          }
+        ) => {
+          const { modifiedParams, isParamsUpdateSkipped: isUpdateSkipped } = ruleParamsModifier(
+            {
+              ...ruleParamsMock,
+              investigationFields: existingInvestigationFields,
+            } as RuleAlertType['params'],
+            [
+              {
+                type: BulkActionEditTypeEnum.delete_investigation_fields,
+                value: investigationFieldsToDelete,
+              },
+            ],
+            mockExperimentalFeatures
+          );
+          expect(modifiedParams).toHaveProperty(
+            'investigationFields',
+            resultingInvestigationFields
+          );
+          expect(isParamsUpdateSkipped).toBe(isUpdateSkipped);
+        }
+      );
+    });
+
+    describe('set_investigation_fields action', () => {
+      test.each([
+        [
+          '3 existing investigation fields overwritten with 2 of them = 2 existing investigation fields',
+          {
+            existingInvestigationFields: { field_names: ['field-1', 'field-2', 'field-3'] },
+            investigationFieldsToOverwrite: { field_names: ['field-2', 'field-3'] },
+            resultingInvestigationFields: { field_names: ['field-2', 'field-3'] },
+            isParamsUpdateSkipped: false,
+          },
+        ],
+        [
+          '3 existing investigation fields overwritten with 2 other investigation fields = 2 other investigation fields',
+          {
+            existingInvestigationFields: { field_names: ['field-1', 'field-2', 'field-3'] },
+            investigationFieldsToOverwrite: { field_names: ['field-4', 'field-5'] },
+            resultingInvestigationFields: { field_names: ['field-4', 'field-5'] },
+            isParamsUpdateSkipped: false,
+          },
+        ],
+        [
+          '3 existing investigation fields overwritten with 1 of them + 2 other investigation fields = 1 existing investigation field + 2 other investigation fields',
+          {
+            existingInvestigationFields: { field_names: ['field-1', 'field-2', 'field-3'] },
+            investigationFieldsToOverwrite: { field_names: ['field-3', 'field-4', 'field-5'] },
+            resultingInvestigationFields: { field_names: ['field-3', 'field-4', 'field-5'] },
+            isParamsUpdateSkipped: false,
+          },
+        ],
+        [
+          '`undefined` existing investigation fields overwritten with 2 of them = 2 existing investigation fields',
+          {
+            existingInvestigationFields: undefined,
+            investigationFieldsToOverwrite: { field_names: ['field-2', 'field-3'] },
+            resultingInvestigationFields: { field_names: ['field-2', 'field-3'] },
+            isParamsUpdateSkipped: false,
+          },
+        ],
+        [
+          '3 existing `legacy` investigation fields overwritten with 1 of them + 2 other investigation fields = 1 existing investigation field + 2 other investigation fields',
+          {
+            existingInvestigationFields: ['field-1', 'field-2', 'field-3'],
+            investigationFieldsToOverwrite: { field_names: ['field-3', 'field-4', 'field-5'] },
+            resultingInvestigationFields: { field_names: ['field-3', 'field-4', 'field-5'] },
+            isParamsUpdateSkipped: false,
+          },
+        ],
+      ])(
+        'should overwrite investigation fields in rule, case:"%s"',
+        (
+          caseName,
+          {
+            existingInvestigationFields,
+            investigationFieldsToOverwrite,
+            resultingInvestigationFields,
+            isParamsUpdateSkipped,
+          }
+        ) => {
+          const { modifiedParams, isParamsUpdateSkipped: isUpdateSkipped } = ruleParamsModifier(
+            {
+              ...ruleParamsMock,
+              investigationFields: existingInvestigationFields,
+            } as RuleAlertType['params'],
+            [
+              {
+                type: BulkActionEditTypeEnum.set_investigation_fields,
+                value: investigationFieldsToOverwrite,
+              },
+            ],
+            mockExperimentalFeatures
+          );
+          expect(modifiedParams).toHaveProperty(
+            'investigationFields',
+            resultingInvestigationFields
+          );
+          expect(isParamsUpdateSkipped).toBe(isUpdateSkipped);
+        }
+      );
+    });
+  });
+
   describe('timeline', () => {
     test('should set timeline', () => {
-      const { modifiedParams, isParamsUpdateSkipped } = ruleParamsModifier(ruleParamsMock, [
-        {
-          type: BulkActionEditTypeEnum.set_timeline,
-          value: {
-            timeline_id: '91832785-286d-4ebe-b884-1a208d111a70',
-            timeline_title: 'Test timeline',
+      const { modifiedParams, isParamsUpdateSkipped } = ruleParamsModifier(
+        ruleParamsMock,
+        [
+          {
+            type: BulkActionEditTypeEnum.set_timeline,
+            value: {
+              timeline_id: '91832785-286d-4ebe-b884-1a208d111a70',
+              timeline_title: 'Test timeline',
+            },
           },
-        },
-      ]);
+        ],
+        mockExperimentalFeatures
+      );
 
       expect(modifiedParams.timelineId).toBe('91832785-286d-4ebe-b884-1a208d111a70');
       expect(modifiedParams.timelineTitle).toBe('Test timeline');
@@ -436,15 +758,19 @@ describe('ruleParamsModifier', () => {
       const INTERVAL_IN_MINUTES = 5;
       const LOOKBACK_IN_MINUTES = 1;
       const FROM_IN_SECONDS = (INTERVAL_IN_MINUTES + LOOKBACK_IN_MINUTES) * 60;
-      const { modifiedParams, isParamsUpdateSkipped } = ruleParamsModifier(ruleParamsMock, [
-        {
-          type: BulkActionEditTypeEnum.set_schedule,
-          value: {
-            interval: `${INTERVAL_IN_MINUTES}m`,
-            lookback: `${LOOKBACK_IN_MINUTES}m`,
+      const { modifiedParams, isParamsUpdateSkipped } = ruleParamsModifier(
+        ruleParamsMock,
+        [
+          {
+            type: BulkActionEditTypeEnum.set_schedule,
+            value: {
+              interval: `${INTERVAL_IN_MINUTES}m`,
+              lookback: `${LOOKBACK_IN_MINUTES}m`,
+            },
           },
-        },
-      ]);
+        ],
+        mockExperimentalFeatures
+      );
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((modifiedParams as any).interval).toBeUndefined();

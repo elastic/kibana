@@ -1,0 +1,79 @@
+- input: journald
+  template_path: journald.yml.hbs
+  title: |
+    {{ data_stream_title }}
+  description: |
+    {{ data_stream_description }}
+  vars:
+    - name: include_matches
+      type: text
+      title: Include Matches
+      multi: true
+      show_user: true
+      description: >-
+        A list of filter expressions used to select the logs to read (e.g. `_SYSTEMD_UNIT=vault.service`). Defaults to all logs. See [include_matches](https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-input-journald.html#filebeat-input-journald-include-matches) for details.
+    - name: backoff
+      type: text
+      title: Backoff Duration
+      multi: false
+      show_user: false
+      default: "1s"
+      description: >-
+        The number of seconds to wait before trying to read again from journals.
+    - name: max_backoff
+      type: text
+      title: Max Backoff Duration
+      multi: false
+      show_user: false
+      default: "60s"
+      description: >-
+        The maximum number of seconds to wait before attempting to read again from journals.
+    - name: seek
+      type: text
+      title: Start Position
+      multi: false
+      show_user: false
+      description: >-
+        The position to start reading the journal from. See [seek](https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-input-journald.html#filebeat-input-journald-seek) for details.
+    - name: cursor_seek_fallback
+      type: text
+      title: Start Position Fallback
+      multi: false
+      show_user: false
+      description: >-
+        The position to start reading the journal from if no cursor information is available. See [cursor_seek_fallback](https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-input-journald.html#filebeat-input-journald-cursor_seek_fallback) for details.
+    - name: since
+      type: text
+      title: Start Since
+      multi: false
+      show_user: false
+      description: >-
+        A time offset from the current time to start reading from. Example: "-24h"
+    - name: units
+      type: text
+      title: Units
+      multi: true
+      show_user: false
+      description: >-
+        Iterate only the entries of the units specified in this option. The iterated entries include messages from the units, messages about the units by authorized daemons and coredumps. However, it does not match systemd user units.
+    - name: syslog_identifiers
+      type: text
+      title: Syslog Identifiers
+      multi: true
+      show_user: false
+      description: >-
+        Read only the entries with the selected syslog identifiers.
+    - name: transports
+      type: text
+      title: Included Transport Types
+      multi: true
+      show_user: false
+      description: >-
+        Collect the messages using the specified transports. See [transports](https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-input-journald.html#filebeat-input-journald-transports) for more details.
+    - name: paths
+      type: text
+      title: Journal paths
+      multi: true
+      show_user: false
+      description: >-
+        List of journals to read from. Defaults to the system journal.

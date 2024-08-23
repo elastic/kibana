@@ -18,6 +18,8 @@ import {
 import { ViewMode } from '@kbn/embeddable-plugin/common';
 import { observabilityFeatureId } from '@kbn/observability-shared-plugin/public';
 import styled from 'styled-components';
+import { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
+import { useEBTTelemetry } from '../hooks/use_ebt_telemetry';
 import { AllSeries } from '../../../..';
 import { AppDataType, ReportViewType } from '../types';
 import { OperationTypeComponent } from '../series_editor/columns/operation_type_select';
@@ -61,6 +63,7 @@ export interface ExploratoryEmbeddableComponentProps extends ExploratoryEmbeddab
   lens: LensPublicStart;
   dataViewState: DataViewState;
   lensFormulaHelper?: FormulaPublicApi;
+  analytics?: AnalyticsServiceSetup;
 }
 
 // eslint-disable-next-line import/no-default-export
@@ -88,6 +91,7 @@ export default function Embeddable(props: ExploratoryEmbeddableComponentProps) {
     lineHeight = 32,
     searchSessionId,
     onLoad,
+    analytics,
   } = props;
   const LensComponent = lens?.EmbeddableComponent;
   const LensSaveModalComponent = lens?.SaveModalComponent;
@@ -102,6 +106,15 @@ export default function Embeddable(props: ExploratoryEmbeddableComponentProps) {
   const attributesJSON = useEmbeddableAttributes(props);
 
   const timeRange = customTimeRange ?? series?.time;
+
+  const { reportEvent } = useEBTTelemetry({
+    analytics,
+    queryName: series
+      ? `${series.dataType}_${series.name}`
+      : typeof title === 'string'
+      ? title
+      : 'Exp View embeddable query',
+  });
 
   const actions = useActions({
     withActions,
@@ -198,7 +211,10 @@ export default function Embeddable(props: ExploratoryEmbeddableComponentProps) {
         extraActions={actions}
         viewMode={ViewMode.VIEW}
         searchSessionId={searchSessionId}
-        onLoad={onLoad}
+        onLoad={(loading, inspectorAdapters) => {
+          reportEvent(inspectorAdapters);
+          onLoad?.(loading);
+        }}
       />
       {isSaveOpen && attributesJSON && (
         <LensSaveModalComponent

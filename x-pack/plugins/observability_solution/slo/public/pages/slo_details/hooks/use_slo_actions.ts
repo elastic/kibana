@@ -16,6 +16,7 @@ import { useKibana } from '../../../utils/kibana_react';
 import {
   createRemoteSloDeleteUrl,
   createRemoteSloEditUrl,
+  createRemoteSloResetUrl,
 } from '../../../utils/slo/remote_slo_urls';
 
 export const useSloActions = ({
@@ -42,6 +43,7 @@ export const useSloActions = ({
       sloEditUrl: '',
       handleNavigateToRules: () => {},
       remoteDeleteUrl: undefined,
+      remoteResetUrl: undefined,
       sloDetailsUrl: '',
     };
   }
@@ -76,6 +78,7 @@ export const useSloActions = ({
   );
 
   const remoteDeleteUrl = createRemoteSloDeleteUrl(slo, spaceId);
+  const remoteResetUrl = createRemoteSloResetUrl(slo, spaceId);
 
   const sloEditUrl = slo.remote
     ? createRemoteSloEditUrl(slo, spaceId)
@@ -85,6 +88,7 @@ export const useSloActions = ({
     sloEditUrl,
     handleNavigateToRules,
     remoteDeleteUrl,
+    remoteResetUrl,
     sloDetailsUrl: http.basePath.prepend(detailsUrl),
   };
 };

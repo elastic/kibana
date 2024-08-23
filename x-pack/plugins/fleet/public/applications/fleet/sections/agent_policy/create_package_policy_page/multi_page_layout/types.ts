@@ -22,7 +22,7 @@ export interface MultiPageStep {
 }
 
 export interface MultiPageStepLayoutProps {
-  fleetServerHosts: string[];
+  fleetServerHost: string;
   fleetProxy?: FleetProxy;
   downloadSource?: DownloadSource;
   agentPolicy?: AgentPolicy;

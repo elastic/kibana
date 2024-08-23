@@ -10,9 +10,9 @@ import { EuiFlexGroup, EuiFlexItem, type EuiAccordionProps } from '@elastic/eui'
 import type { TimeRange } from '@kbn/es-query';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
+import { useBoolean } from '@kbn/react-hooks';
 import { usePluginConfig } from '../../../../../containers/plugin_config_context';
 import { AlertFlyout } from '../../../../../alerting/inventory/components/alert_flyout';
-import { useBoolean } from '../../../../../hooks/use_boolean';
 import { AlertsSectionTitle } from '../section_titles';
 import { useAssetDetailsRenderPropsContext } from '../../../hooks/use_asset_details_render_props';
 import { Section } from '../../../components/section';
@@ -21,6 +21,8 @@ import { type AlertsCount } from '../../../../../hooks/use_alerts_count';
 import { AlertsOverview } from '../../../../shared/alerts/alerts_overview';
 import { CreateAlertRuleButton } from '../../../../shared/alerts/links/create_alert_rule_button';
 import { LinkToAlertsPage } from '../../../../shared/alerts/links/link_to_alerts_page';
+import { useIntegrationCheck } from '../../../hooks/use_integration_check';
+import { INTEGRATIONS } from '../../../constants';
 
 export const AlertsSummaryContent = ({
   assetId,
@@ -47,6 +49,10 @@ export const AlertsSummaryContent = ({
   };
 
   const assetIdField = findInventoryFields(assetType).id;
+  const isDockerContainer = useIntegrationCheck({ dependsOn: INTEGRATIONS.docker });
+  const showCreateRuleFeature =
+    featureFlags.inventoryThresholdAlertRuleEnabled &&
+    (assetType !== 'container' || isDockerContainer);
 
   return (
     <>
@@ -59,7 +65,7 @@ export const AlertsSummaryContent = ({
         initialTriggerValue={collapsibleStatus}
         extraAction={
           <EuiFlexGroup alignItems="center" responsive={false}>
-            {featureFlags.inventoryThresholdAlertRuleEnabled && (
+            {showCreateRuleFeature && (
               <EuiFlexItem grow={false}>
                 <CreateAlertRuleButton
                   onClick={toggleAlertFlyout}
@@ -71,15 +77,20 @@ export const AlertsSummaryContent = ({
               <LinkToAlertsPage
                 kuery={`${assetIdField}:"${assetId}"`}
                 dateRange={dateRange}
-                data-test-subj="nfraAssetDetailsAlertsTabAlertsShowAllButton"
+                data-test-subj="infraAssetDetailsAlertsTabAlertsShowAllButton"
               />
             </EuiFlexItem>
           </EuiFlexGroup>
         }
       >
-        <AlertsOverview onLoaded={onLoaded} dateRange={dateRange} assetId={assetId} />
+        <AlertsOverview
+          onLoaded={onLoaded}
+          dateRange={dateRange}
+          assetId={assetId}
+          assetType={assetType}
+        />
       </Section>
-      {featureFlags.inventoryThresholdAlertRuleEnabled && (
+      {showCreateRuleFeature && (
         <AlertFlyout
           filter={`${assetIdField}: "${assetId}"`}
           nodeType={assetType}

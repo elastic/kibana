@@ -6,7 +6,7 @@
  */
 
 import { ADD_AGENT_BUTTON, AGENT_FLYOUT } from '../screens/fleet';
-import { cleanupAgentPolicies, deleteFleetServerDocs, deleteAgentDocs } from '../tasks/cleanup';
+import { cleanupAgentPolicies, deleteAgentDocs } from '../tasks/cleanup';
 import { createAgentDoc } from '../tasks/agents';
 import { setFleetServerHost } from '../tasks/fleet_server';
 import { FLEET, navigateTo } from '../tasks/navigation';
@@ -18,7 +18,6 @@ import { login } from '../tasks/login';
 const FLEET_SERVER_POLICY_ID = 'fleet-server-policy';
 
 function cleanUp() {
-  deleteFleetServerDocs(true);
   deleteAgentDocs(true);
   cleanupAgentPolicies();
 }
@@ -52,14 +51,6 @@ describe('Fleet add agent flyout', () => {
         cy.task('insertDocs', {
           index: '.fleet-agents',
           docs: [createAgentDoc('agent1', policyId, 'online', kibanaVersion)],
-        });
-        cy.task('insertDocs', {
-          index: '.fleet-servers',
-          docs: [
-            {
-              '@timestamp': new Date().toISOString(),
-            },
-          ],
         });
         setFleetServerHost();
       });

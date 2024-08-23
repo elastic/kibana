@@ -30,7 +30,7 @@ import { NotObscuredByBottomBar } from '..';
 import { StepConfigurePackagePolicy, StepDefinePackagePolicy } from '../../../components';
 import { prepareInputPackagePolicyDataset } from '../../../services/prepare_input_pkg_policy_dataset';
 
-const ExpandableAdvancedSettings: React.FC = ({ children }) => {
+const ExpandableAdvancedSettings: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(false);
 
   return (
@@ -94,6 +94,7 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
     description: '',
     namespace: '',
     policy_id: '',
+    policy_ids: [''],
     enabled: true,
     inputs: [],
   });

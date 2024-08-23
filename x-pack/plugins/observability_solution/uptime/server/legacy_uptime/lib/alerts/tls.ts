@@ -6,7 +6,7 @@
  */
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
+import { AlertsClientError, GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 import moment from 'moment';
 import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
 import { schema } from '@kbn/config-schema';
@@ -20,6 +20,7 @@ import { LocatorPublic } from '@kbn/share-plugin/common';
 import { ALERT_REASON, ALERT_UUID } from '@kbn/rule-data-utils';
 import { asyncForEach } from '@kbn/std';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { uptimeRuleFieldMap } from '../../../../common/rules/uptime_rule_field_map';
 import { formatFilterString } from './status_check';
 import { UptimeAlertTypeFactory } from './types';
 import {
@@ -149,19 +150,15 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
   doesSetRecoveryContext: true,
   async executor({
     params,
-    services: {
-      alertFactory,
-      alertWithLifecycle,
-      getAlertStartedDate,
-      getAlertUuid,
-      savedObjectsClient,
-      scopedClusterClient,
-    },
+    services: { alertsClient, savedObjectsClient, scopedClusterClient },
     spaceId,
     startedAt,
     state,
     rule,
   }) {
+    if (!alertsClient) {
+      throw new AlertsClientError();
+    }
     const { share, basePath } = _server;
     const alertsLocator: LocatorPublic<AlertsLocatorParams> | undefined =
       share.url.locators.get(alertsLocatorID);
@@ -215,53 +212,55 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
         }
 
         const alertId = `${cert.common_name}-${cert.issuer?.replace(/\s/g, '_')}-${cert.sha256}`;
-        const alertUuid = getAlertUuid(alertId);
-        const indexedStartedAt = getAlertStartedDate(alertId) ?? startedAt.toISOString();
 
-        const alertInstance = alertWithLifecycle({
+        const { uuid, start } = alertsClient.report({
           id: alertId,
-          fields: {
+          actionGroup: TLS.id,
+          state: {
+            ...updateState(state, foundCerts),
+            ...summary,
+          },
+        });
+
+        const indexedStartedAt = start ?? startedAt.toISOString();
+
+        alertsClient.setAlertData({
+          id: alertId,
+          context: {
+            [ALERT_DETAILS_URL]: await getAlertUrl(
+              uuid,
+              spaceId,
+              indexedStartedAt,
+              alertsLocator,
+              basePath.publicBaseUrl
+            ),
+            ...summary,
+          },
+          payload: {
             'tls.server.x509.subject.common_name': cert.common_name,
             'tls.server.x509.issuer.common_name': cert.issuer,
             'tls.server.x509.not_after': cert.not_after,
             'tls.server.x509.not_before': cert.not_before,
             'tls.server.hash.sha256': cert.sha256,
             [ALERT_REASON]: generateAlertMessage(TlsTranslations.defaultActionMessage, summary),
-            [ALERT_UUID]: alertUuid,
+            [ALERT_UUID]: uuid,
           },
-        });
-
-        alertInstance.replaceState({
-          ...updateState(state, foundCerts),
-          ...summary,
-        });
-
-        alertInstance.scheduleActions(TLS.id, {
-          [ALERT_DETAILS_URL]: await getAlertUrl(
-            alertUuid,
-            spaceId,
-            indexedStartedAt,
-            alertsLocator,
-            basePath.publicBaseUrl
-          ),
-          ...summary,
         });
       });
     }
 
-    await setRecoveredAlertsContext({
-      alertFactory,
+    await setRecoveredAlertsContext<ActionGroupIds>({
+      alertsClient,
       alertsLocator,
       basePath,
       defaultStartedAt: startedAt.toISOString(),
-      getAlertStartedDate,
-      getAlertUuid,
       spaceId,
     });
 
     return { state: updateState(state, foundCerts) };
   },
   alerts: UptimeRuleTypeAlertDefinition,
+  fieldsForAAD: Object.keys(uptimeRuleFieldMap),
   getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
     observabilityPaths.ruleDetails(rule.id),
 });

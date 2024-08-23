@@ -17,12 +17,14 @@ import type {
   ESQLSource,
   ESQLTimeInterval,
 } from '@kbn/esql-ast';
+import { ESQLInlineCast, ESQLParamLiteral } from '@kbn/esql-ast/src/types';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import { builtinFunctions } from '../definitions/builtin';
 import { commandDefinitions } from '../definitions/commands';
-import { evalFunctionsDefinitions } from '../definitions/functions';
+import { evalFunctionDefinitions } from '../definitions/functions';
+import { groupingFunctionDefinitions } from '../definitions/grouping';
 import { getFunctionSignatures } from '../definitions/helpers';
-import { chronoLiterals, timeLiterals } from '../definitions/literals';
+import { timeUnits } from '../definitions/literals';
 import {
   byOption,
   metadataOption,
@@ -31,15 +33,17 @@ import {
   withOption,
   appendSeparatorOption,
 } from '../definitions/options';
-import type {
+import {
   CommandDefinition,
   CommandOptionsDefinition,
-  FunctionArgSignature,
+  FunctionParameter,
   FunctionDefinition,
-  SignatureArgType,
+  FunctionParameterType,
+  FunctionReturnType,
 } from '../definitions/types';
 import type { ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
 import { removeMarkerArgFromArgsList } from './context';
+import { isNumericDecimalType } from './esql_types';
 import type { ReasonTypes } from './types';
 
 export function nonNullable<T>(v: T): v is NonNullable<T> {
@@ -71,6 +75,10 @@ export function isColumnItem(arg: ESQLAstItem): arg is ESQLColumn {
 
 export function isLiteralItem(arg: ESQLAstItem): arg is ESQLLiteral {
   return isSingleItem(arg) && arg.type === 'literal';
+}
+
+export function isInlineCastItem(arg: ESQLAstItem): arg is ESQLInlineCast {
+  return isSingleItem(arg) && arg.type === 'inlineCast';
 }
 
 export function isTimeIntervalItem(arg: ESQLAstItem): arg is ESQLTimeInterval {
@@ -119,7 +127,7 @@ export function isComma(char: string) {
 }
 
 export function isSourceCommand({ label }: { label: string }) {
-  return ['from', 'row', 'show'].includes(String(label));
+  return ['FROM', 'ROW', 'SHOW', 'METRICS'].includes(label);
 }
 
 let fnLookups: Map<string, FunctionDefinition> | undefined;
@@ -128,7 +136,11 @@ let commandLookups: Map<string, CommandDefinition> | undefined;
 function buildFunctionLookup() {
   if (!fnLookups) {
     fnLookups = builtinFunctions
-      .concat(evalFunctionsDefinitions, statsAggregationFunctionDefinitions)
+      .concat(
+        evalFunctionDefinitions,
+        statsAggregationFunctionDefinitions,
+        groupingFunctionDefinitions
+      )
       .reduce((memo, def) => {
         memo.set(def.name, def);
         if (def.alias) {
@@ -209,22 +221,46 @@ export function getCommandOption(optionName: CommandOptionsDefinition['name']) {
   );
 }
 
-function compareLiteralType(argTypes: string, item: ESQLLiteral) {
+function compareLiteralType(argType: string, item: ESQLLiteral) {
+  if (item.literalType === 'null') {
+    return true;
+  }
+
+  if (item.literalType === 'decimal' && isNumericDecimalType(argType)) {
+    return true;
+  }
+
+  if (item.literalType === 'string' && (argType === 'text' || argType === 'keyword')) {
+    return true;
+  }
+
   if (item.literalType !== 'string') {
-    return argTypes === item.literalType;
+    if (argType === item.literalType) {
+      return true;
+    }
+    return false;
   }
-  if (argTypes === 'chrono_literal') {
-    return chronoLiterals.some(({ name }) => name === item.text);
-  }
-  return argTypes === item.literalType;
+
+  // date-type parameters accept string literals because of ES auto-casting
+  return ['string', 'date', 'date', 'date_period'].includes(argType);
 }
 
-export function getColumnHit(
-  columnName: string,
-  { fields, variables }: Pick<ReferenceMaps, 'fields' | 'variables'>,
-  position?: number
+/**
+ * This function returns the variable or field matching a column
+ */
+export function lookupColumn(
+  column: ESQLColumn,
+  { fields, variables }: Pick<ReferenceMaps, 'fields' | 'variables'>
 ): ESQLRealField | ESQLVariable | undefined {
-  return fields.get(columnName) || variables.get(columnName)?.[0];
+  const columnName = getQuotedColumnName(column);
+  return (
+    fields.get(columnName) ||
+    variables.get(columnName)?.[0] ||
+    // It's possible columnName has backticks "`fieldName`"
+    // so we need to access the original name as well
+    fields.get(column.name) ||
+    variables.get(column.name)?.[0]
+  );
 }
 
 const ARRAY_REGEXP = /\[\]$/;
@@ -233,11 +269,27 @@ export function isArrayType(type: string) {
   return ARRAY_REGEXP.test(type);
 }
 
+const arrayToSingularMap: Map<FunctionParameterType, FunctionParameterType> = new Map([
+  ['double[]', 'double'],
+  ['unsigned_long[]', 'unsigned_long'],
+  ['long[]', 'long'],
+  ['integer[]', 'integer'],
+  ['counter_integer[]', 'counter_integer'],
+  ['counter_long[]', 'counter_long'],
+  ['counter_double[]', 'counter_double'],
+  ['keyword[]', 'keyword'],
+  ['text[]', 'text'],
+  ['datetime[]', 'date'],
+  ['date_period[]', 'date_period'],
+  ['boolean[]', 'boolean'],
+  ['any[]', 'any'],
+]);
+
 /**
  * Given an array type for example `string[]` it will return `string`
  */
-export function extractSingularType(type: string) {
-  return type.replace(ARRAY_REGEXP, '');
+export function extractSingularType(type: FunctionParameterType): FunctionParameterType {
+  return arrayToSingularMap.get(type) ?? type;
 }
 
 export function createMapFromList<T extends { name: string }>(arr: T[]): Map<string, T> {
@@ -269,14 +321,18 @@ export function printFunctionSignature(arg: ESQLFunction): string {
             ...fnDef?.signatures[0],
             params: arg.args.map((innerArg) =>
               Array.isArray(innerArg)
-                ? { name: `InnerArgument[]`, type: '' }
-                : { name: innerArg.text, type: innerArg.type }
+                ? { name: `InnerArgument[]`, type: 'any' as const }
+                : // this cast isn't actually correct, but we're abusing the
+                  // getFunctionSignatures API anyways
+                  { name: innerArg.text, type: innerArg.type as FunctionParameterType }
             ),
-            returnType: '',
+            // this cast isn't actually correct, but we're abusing the
+            // getFunctionSignatures API anyways
+            returnType: '' as FunctionReturnType,
           },
         ],
       },
-      { withTypes: false }
+      { withTypes: false, capitalize: true }
     );
     return signature[0].declaration;
   }
@@ -322,7 +378,7 @@ export function getAllArrayTypes(
         types.push(subArg.literalType);
       }
       if (subArg.type === 'column') {
-        const hit = getColumnHit(subArg.name, references);
+        const hit = lookupColumn(subArg, references);
         types.push(hit?.type || 'unsupported');
       }
       if (subArg.type === 'timeInterval') {
@@ -340,7 +396,7 @@ export function getAllArrayTypes(
 }
 
 export function inKnownTimeInterval(item: ESQLTimeInterval): boolean {
-  return timeLiterals.some(({ name }) => name === item.unit.toLowerCase());
+  return timeUnits.some((unit) => unit === item.unit.toLowerCase());
 }
 
 /**
@@ -349,7 +405,7 @@ export function inKnownTimeInterval(item: ESQLTimeInterval): boolean {
  *
  * TODO - Consider merging with isEqualType to create a unified arg validation function
  */
-export function isValidLiteralOption(arg: ESQLLiteral, argDef: FunctionArgSignature) {
+export function isValidLiteralOption(arg: ESQLLiteral, argDef: FunctionParameter) {
   return (
     arg.literalType === 'string' &&
     argDef.literalOptions &&
@@ -360,22 +416,22 @@ export function isValidLiteralOption(arg: ESQLLiteral, argDef: FunctionArgSignat
 }
 
 /**
- * Checks if an AST argument is of the correct type
+ * Checks if an AST function argument is of the correct type
  * given the definition.
  */
-export function isEqualType(
+export function checkFunctionArgMatchesDefinition(
   arg: ESQLSingleAstItem,
-  argDef: SignatureArgType,
+  parameterDefinition: FunctionParameter,
   references: ReferenceMaps,
-  parentCommand?: string,
-  nameHit?: string
+  parentCommand?: string
 ) {
-  const argType = 'innerType' in argDef && argDef.innerType ? argDef.innerType : argDef.type;
-  if (argType === 'any') {
+  const argType = parameterDefinition.type;
+  if (argType === 'any' || isParam(arg)) {
     return true;
   }
   if (arg.type === 'literal') {
-    return compareLiteralType(argType, arg);
+    const matched = compareLiteralType(argType as string, arg);
+    return matched;
   }
   if (arg.type === 'function') {
     if (isSupportedFunction(arg.name, parentCommand).supported) {
@@ -389,18 +445,28 @@ export function isEqualType(
     return argType === 'time_literal' && inKnownTimeInterval(arg);
   }
   if (arg.type === 'column') {
-    if (argType === 'column') {
-      // anything goes, so avoid any effort here
-      return true;
-    }
-    const hit = getColumnHit(nameHit ?? arg.name, references);
+    const hit = lookupColumn(arg, references);
     const validHit = hit;
     if (!validHit) {
       return false;
     }
     const wrappedTypes = Array.isArray(validHit.type) ? validHit.type : [validHit.type];
     // if final type is of type any make it pass for now
-    return wrappedTypes.some((ct) => ct === 'any' || argType === ct);
+    return wrappedTypes.some(
+      (ct) =>
+        ['any', 'null'].includes(ct) ||
+        argType === ct ||
+        (ct === 'string' && ['text', 'keyword'].includes(argType as string))
+    );
+  }
+  if (arg.type === 'inlineCast') {
+    const lowerArgType = argType?.toLowerCase();
+    const lowerArgCastType = arg.castType?.toLowerCase();
+    return (
+      lowerArgType === lowerArgCastType ||
+      // for valid shorthand casts like 321.12::int or "false"::bool
+      (['int', 'bool'].includes(lowerArgCastType) && argType.startsWith(lowerArgCastType))
+    );
   }
 }
 
@@ -471,45 +537,115 @@ export function hasCCSSource(name: string) {
   return name.includes(':');
 }
 
-export function columnExists(
+/**
+ * This will return the name without any quotes.
+ *
+ * E.g. "`bytes`" will become "bytes"
+ *
+ * @param column
+ * @returns
+ */
+export const getUnquotedColumnName = (column: ESQLColumn) => column.name;
+
+/**
+ * This returns the name with any quotes that were present.
+ *
+ * E.g. "`bytes`" will be "`bytes`"
+ *
+ * @param column
+ * @returns
+ */
+export const getQuotedColumnName = (column: ESQLColumn) =>
+  column.quoted ? column.text : column.name;
+
+/**
+ * TODO - consider calling lookupColumn under the hood of this function. Seems like they should really do the same thing.
+ */
+export function getColumnExists(
   column: ESQLColumn,
   { fields, variables }: Pick<ReferenceMaps, 'fields' | 'variables'>
 ) {
-  if (fields.has(column.name) || variables.has(column.name)) {
-    return { hit: true, nameHit: column.name };
-  }
-  if (column.quoted) {
-    const originalName = column.text;
-    if (variables.has(originalName)) {
-      return { hit: true, nameHit: originalName };
+  const namesToCheck = [getUnquotedColumnName(column), getQuotedColumnName(column)];
+
+  for (const name of namesToCheck) {
+    if (fields.has(name) || variables.has(name)) {
+      return true;
+    }
+
+    // TODO — I don't see this fuzzy searching in lookupColumn... should it be there?
+    if (Boolean(fuzzySearch(name, fields.keys()) || fuzzySearch(name, variables.keys()))) {
+      return true;
     }
   }
-  if (
-    Boolean(fuzzySearch(column.name, fields.keys()) || fuzzySearch(column.name, variables.keys()))
-  ) {
-    return { hit: true, nameHit: column.name };
-  }
-  return { hit: false };
+
+  return false;
 }
 
 export function sourceExists(index: string, sources: Set<string>) {
-  if (sources.has(index)) {
+  if (sources.has(index) || index.startsWith('-')) {
     return true;
   }
   return Boolean(fuzzySearch(index, sources.keys()));
+}
+
+/**
+ * Works backward from the cursor position to determine if
+ * the final character of the previous word matches the given character.
+ */
+function characterPrecedesCurrentWord(text: string, char: string) {
+  let inCurrentWord = true;
+  for (let i = text.length - 1; i >= 0; i--) {
+    if (inCurrentWord && /\s/.test(text[i])) {
+      inCurrentWord = false;
+    }
+
+    if (!inCurrentWord && !/\s/.test(text[i])) {
+      return text[i] === char;
+    }
+  }
+}
+
+export function pipePrecedesCurrentWord(text: string) {
+  return characterPrecedesCurrentWord(text, '|');
 }
 
 export function getLastCharFromTrimmed(text: string) {
   return text[text.trimEnd().length - 1];
 }
 
+/**
+ * Are we after a comma? i.e. STATS fieldA, <here>
+ */
 export function isRestartingExpression(text: string) {
-  return getLastCharFromTrimmed(text) === ',';
+  return getLastCharFromTrimmed(text) === ',' || characterPrecedesCurrentWord(text, ',');
 }
 
+export function findPreviousWord(text: string) {
+  const words = text.split(/\s+/);
+  return words[words.length - 2];
+}
+
+export function shouldBeQuotedSource(text: string) {
+  // Based on lexer `fragment UNQUOTED_SOURCE_PART`
+  return /[:"=|,[\]\/ \t\r\n]/.test(text);
+}
 export function shouldBeQuotedText(
   text: string,
   { dashSupported }: { dashSupported?: boolean } = {}
 ) {
   return dashSupported ? /[^a-zA-Z\d_\.@-]/.test(text) : /[^a-zA-Z\d_\.@]/.test(text);
 }
+
+export const isAggFunction = (arg: ESQLFunction): boolean =>
+  getFunctionDefinition(arg.name)?.type === 'agg';
+
+export const isParam = (x: unknown): x is ESQLParamLiteral =>
+  !!x &&
+  typeof x === 'object' &&
+  (x as ESQLParamLiteral).type === 'literal' &&
+  (x as ESQLParamLiteral).literalType === 'param';
+
+/**
+ * Compares two strings in a case-insensitive manner
+ */
+export const noCaseCompare = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();

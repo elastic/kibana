@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import type { TransformListAction, TransformListRow } from '../../../../common';
 
-import { useSearchItems } from '../../../../hooks/use_search_items';
 import { useAppDependencies } from '../../../../app_dependencies';
+import { useGetDataViewsTitleIdMap } from '../../../../hooks';
 
 import {
   isDiscoverActionDisabled,
@@ -23,42 +23,36 @@ export type DiscoverAction = ReturnType<typeof useDiscoverAction>;
 export const useDiscoverAction = (forceDisable: boolean) => {
   const {
     share,
-    data: { dataViews: dataViewsContract },
     application: { capabilities },
   } = useAppDependencies();
   const isDiscoverAvailable = !!capabilities.discover?.show;
 
-  const { getDataViewIdByTitle, loadDataViews } = useSearchItems(undefined);
-
-  const [dataViewsLoaded, setDataViewsLoaded] = useState(false);
-
-  useEffect(() => {
-    async function checkDataViewAvailability() {
-      await loadDataViews(dataViewsContract);
-      setDataViewsLoaded(true);
-    }
-
-    checkDataViewAvailability();
-  }, [loadDataViews, dataViewsContract]);
+  const { data: dataViewsTitleIdMap } = useGetDataViewsTitleIdMap();
 
   const clickHandler = useCallback(
     (item: TransformListRow) => {
       const locator = share.url.locators.get(DISCOVER_APP_LOCATOR);
-      if (!locator) return;
-      const dataViewId = getDataViewIdByTitle(item.config.dest.index);
-      locator.navigateSync({
-        indexPatternId: dataViewId,
-      });
+      if (!locator || !dataViewsTitleIdMap) return;
+      const dataViewId = dataViewsTitleIdMap[item.config.dest.index];
+      if (dataViewId) {
+        locator.navigateSync({
+          indexPatternId: dataViewId,
+        });
+      }
     },
-    [getDataViewIdByTitle, share]
+    [dataViewsTitleIdMap, share]
   );
 
   const dataViewExists = useCallback(
-    (item: TransformListRow) => {
-      const dataViewId = getDataViewIdByTitle(item.config.dest.index);
+    (item: TransformListRow): boolean => {
+      if (!dataViewsTitleIdMap) {
+        return false;
+      }
+
+      const dataViewId = dataViewsTitleIdMap[item.config.dest.index];
       return dataViewId !== undefined;
     },
-    [getDataViewIdByTitle]
+    [dataViewsTitleIdMap]
   );
 
   const action: TransformListAction = useMemo(
@@ -68,14 +62,14 @@ export const useDiscoverAction = (forceDisable: boolean) => {
       },
       available: () => isDiscoverAvailable,
       enabled: (item: TransformListRow) =>
-        dataViewsLoaded && !isDiscoverActionDisabled([item], forceDisable, dataViewExists(item)),
+        !isDiscoverActionDisabled([item], forceDisable, dataViewExists(item)),
       description: discoverActionNameText,
       icon: 'visTable',
       type: 'icon',
       onClick: clickHandler,
       'data-test-subj': 'transformActionDiscover',
     }),
-    [forceDisable, dataViewExists, dataViewsLoaded, isDiscoverAvailable, clickHandler]
+    [forceDisable, dataViewExists, isDiscoverAvailable, clickHandler]
   );
 
   return { action };

@@ -26,6 +26,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const log = getService('log');
   const es = getService('es');
   const security = getService('security');
+  const browser = getService('browser');
+  const testSubjects = getService('testSubjects');
 
   describe('Ingest Pipelines', function () {
     this.tags('smoke');
@@ -60,6 +62,61 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await es.ingest.deletePipeline({ id: TEST_PIPELINE_NAME });
       });
 
+      it('adds pipeline query param when flyout is opened, and removes it when closed', async () => {
+        // Open the flyout for the first pipeline
+        await pageObjects.ingestPipelines.clickPipelineLink(0);
+
+        let url = await browser.getCurrentUrl();
+        const pipelinesList = await pageObjects.ingestPipelines.getPipelinesList();
+
+        expect(url).to.contain(`pipeline=${pipelinesList[0]}`);
+
+        await testSubjects.click('closeDetailsFlyout');
+
+        url = await browser.getCurrentUrl();
+        expect(url).not.to.contain(`pipeline=${pipelinesList[0]}`);
+      });
+
+      it('sets query params for search and filters when changed', async () => {
+        // Set the search input with a test search
+        await testSubjects.setValue('pipelineTableSearch', 'test');
+
+        // The url should now contain the queryText from the search input
+        let url = await browser.getCurrentUrl();
+        expect(url).to.contain('queryText=test');
+
+        // Select a filter
+        await testSubjects.click('filtersDropdown');
+        await testSubjects.click('managedFilter');
+
+        // Read the url again
+        url = await browser.getCurrentUrl();
+
+        // The managed filter should be in the url
+        expect(url).to.contain('managed=on');
+      });
+
+      it('removes only pipeline query param and leaves other query params if any', async () => {
+        // Set the search input with a test search
+        await testSubjects.setValue('pipelineTableSearch', 'test');
+        // Open the flyout for the first pipeline
+        await pageObjects.ingestPipelines.clickPipelineLink(0);
+
+        let url = await browser.getCurrentUrl();
+        const pipelinesList = await pageObjects.ingestPipelines.getPipelinesList();
+
+        // Url should contain both query params
+        expect(url).to.contain(`pipeline=${pipelinesList[0]}`);
+        expect(url).to.contain('queryText=test');
+
+        // Close the flyout
+        await testSubjects.click('closeDetailsFlyout');
+
+        // Url should now only have the query param for the search input
+        url = await browser.getCurrentUrl();
+        expect(url).to.contain('queryText=test');
+      });
+
       it('Displays the test pipeline in the list of pipelines', async () => {
         log.debug('Checking that the test pipeline is in the pipelines list.');
         await pageObjects.ingestPipelines.increasePipelineListPageSize();
@@ -74,6 +131,22 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const flyoutExists = await pageObjects.ingestPipelines.detailsFlyoutExists();
         expect(flyoutExists).to.be(true);
       });
+    });
+
+    it('Shows a prompt when trying to navigate away from the creation form when the form is dirty', async () => {
+      // Navigate to creation flow
+      await testSubjects.click('createPipelineDropdown');
+      await testSubjects.click('createNewPipeline');
+
+      // Fill in the form with some data
+      await testSubjects.setValue('nameField > input', 'test_name');
+      await testSubjects.setValue('descriptionField > input', 'test_description');
+
+      // Try to navigate to another page
+      await testSubjects.click('logo');
+
+      // Since the form is now dirty it should trigger a confirmation prompt
+      expect(await testSubjects.exists('navigationBlockConfirmModal')).to.be(true);
     });
 
     describe('Create pipeline', () => {

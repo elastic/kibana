@@ -130,3 +130,53 @@ test('supports unsplittable key syntax on nested list', () => {
     }
   `);
 });
+
+test('supports unsplittable key syntax on nested list with splittable subkeys', () => {
+  const config = getConfigFromFiles([fixtureFile('/unsplittable_3.yml')]);
+
+  expect(config).toMatchInlineSnapshot(`
+    Object {
+      "foo.bar": "foobar",
+      "list": Array [
+        Object {
+          "a.b": Array [
+            "foo",
+            "bar",
+          ],
+          "id": "id1",
+          "test": Object {
+            "this": Object {
+              "out": Array [
+                "foo",
+                "bar",
+              ],
+            },
+          },
+        },
+      ],
+    }
+  `);
+});
+
+test('supports var:default syntax', () => {
+  process.env.KBN_ENV_VAR1 = 'val1';
+
+  const config = getConfigFromFiles([fixtureFile('/en_var_with_defaults.yml')]);
+
+  delete process.env.KBN_ENV_VAR1;
+
+  expect(config).toMatchInlineSnapshot(`
+    Object {
+      "foo": "pre-val1-mid-default2-post",
+      "nested_list": Array [
+        Object {
+          "id": "a",
+          "values": Array [
+            "val1",
+            "default2",
+          ],
+        },
+      ],
+    }
+  `);
+});

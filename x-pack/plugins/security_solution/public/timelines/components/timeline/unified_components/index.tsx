@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { EuiDataGridProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiHideFor } from '@elastic/eui';
 import React, { useMemo, useCallback, useState, useRef } from 'react';
 import { useDispatch } from 'react-redux';
@@ -27,7 +28,6 @@ import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { withDataView } from '../../../../common/components/with_data_view';
 import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
-import type { ExpandedDetailTimeline } from '../../../../../common/types';
 import type { TimelineItem } from '../../../../../common/search_strategy';
 import { useKibana } from '../../../../common/lib/kibana';
 import { defaultHeaders } from '../body/column_headers/default_headers';
@@ -36,7 +36,6 @@ import type {
   OnChangePage,
   RowRenderer,
   SortColumnTimeline,
-  ToggleDetailPanel,
   TimelineTabs,
 } from '../../../../../common/types/timeline';
 import type { inputsModel } from '../../../../common/store';
@@ -97,6 +96,7 @@ export const HIDE_FOR_SIZES = ['xs', 's'];
 
 interface Props {
   columns: ColumnHeaderOptions[];
+  isSortEnabled?: boolean;
   rowRenderers: RowRenderer[];
   timelineId: string;
   itemsPerPage: number;
@@ -105,19 +105,19 @@ interface Props {
   events: TimelineItem[];
   refetch: inputsModel.Refetch;
   totalCount: number;
-  onEventClosed: (args: ToggleDetailPanel) => void;
-  expandedDetail: ExpandedDetailTimeline;
-  showExpandedDetails: boolean;
   onChangePage: OnChangePage;
   activeTab: TimelineTabs;
   dataLoadingState: DataLoadingState;
   updatedAt: number;
   isTextBasedQuery?: boolean;
   dataView: DataView;
+  trailingControlColumns?: EuiDataGridProps['trailingControlColumns'];
+  leadingControlColumns?: EuiDataGridProps['leadingControlColumns'];
 }
 
 const UnifiedTimelineComponent: React.FC<Props> = ({
   columns,
+  isSortEnabled,
   activeTab,
   timelineId,
   itemsPerPage,
@@ -128,13 +128,12 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
   refetch,
   dataLoadingState,
   totalCount,
-  onEventClosed,
-  showExpandedDetails,
-  expandedDetail,
   onChangePage,
   updatedAt,
   isTextBasedQuery,
   dataView,
+  trailingControlColumns,
+  leadingControlColumns,
 }) => {
   const dispatch = useDispatch();
   const unifiedFieldListContainerRef = useRef<UnifiedFieldListSidebarContainerApi>(null);
@@ -146,21 +145,23 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
       dataViews,
       dataViewFieldEditor,
       application: { capabilities },
-      data: dataPluginContract,
       uiActions,
       charts,
       docLinks,
       analytics,
-      timelineFilterManager,
+      timelineDataService,
     },
   } = useKibana();
+  const {
+    query: { filterManager: timelineFilterManager },
+  } = timelineDataService;
 
   const fieldListSidebarServices: UnifiedFieldListSidebarContainerProps['services'] = useMemo(
     () => ({
       fieldFormats,
       dataViews,
       dataViewFieldEditor,
-      data: dataPluginContract,
+      data: timelineDataService,
       uiActions,
       charts,
       core: {
@@ -173,7 +174,7 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
       fieldFormats,
       dataViews,
       dataViewFieldEditor,
-      dataPluginContract,
+      timelineDataService,
       uiActions,
       charts,
       uiSettings,
@@ -397,6 +398,7 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
                       columnIds={currentColumnIds}
                       rowRenderers={rowRenderers}
                       timelineId={timelineId}
+                      isSortEnabled={isSortEnabled}
                       itemsPerPage={itemsPerPage}
                       itemsPerPageOptions={itemsPerPageOptions}
                       sort={sortingColumns}
@@ -407,14 +409,13 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
                       onFieldEdited={onFieldEdited}
                       dataLoadingState={dataLoadingState}
                       totalCount={totalCount}
-                      onEventClosed={onEventClosed}
-                      expandedDetail={expandedDetail}
-                      showExpandedDetails={showExpandedDetails}
                       onChangePage={onChangePage}
                       activeTab={activeTab}
                       updatedAt={updatedAt}
                       isTextBasedQuery={isTextBasedQuery}
                       onFilter={onAddFilter as DocViewFilterFn}
+                      trailingControlColumns={trailingControlColumns}
+                      leadingControlColumns={leadingControlColumns}
                     />
                   </EventDetailsWidthProvider>
                 </DropOverlayWrapper>

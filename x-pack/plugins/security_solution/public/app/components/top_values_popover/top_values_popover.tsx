@@ -10,7 +10,8 @@ import { EuiWrappingPopover } from '@elastic/eui';
 import { useLocation } from 'react-router-dom';
 import { useObservable } from 'react-use';
 import { StatefulTopN } from '../../../common/components/top_n';
-import { getScopeFromPath, useSourcererDataView } from '../../../common/containers/sourcerer';
+import { getScopeFromPath } from '../../../sourcerer/containers/sourcerer_paths';
+import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useKibana } from '../../../common/lib/kibana';
 
 export const TopValuesPopover = React.memo(() => {

@@ -17,7 +17,7 @@ import { generateTrace } from './generate_trace';
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   const start = new Date('2022-01-01T00:00:00.000Z').getTime();
   const end = new Date('2022-01-01T00:15:00.000Z').getTime() - 1;
@@ -103,7 +103,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         .service({ name: 'python', environment: 'production', agentName: 'python' })
         .instance('python');
 
-      return synthtraceEsClient.index(
+      return apmSynthtraceEsClient.index(
         timerange(start, end)
           .interval('15m')
           .rate(1)
@@ -220,6 +220,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    after(() => synthtraceEsClient.clean());
+    after(() => apmSynthtraceEsClient.clean());
   });
 }

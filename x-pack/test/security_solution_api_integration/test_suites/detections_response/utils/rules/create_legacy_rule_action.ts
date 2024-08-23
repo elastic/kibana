@@ -10,7 +10,7 @@ import type SuperTest from 'supertest';
 import { UPDATE_OR_CREATE_LEGACY_ACTIONS } from '@kbn/security-solution-plugin/common/constants';
 
 export const createLegacyRuleAction = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   alertId: string,
   connectorId: string
 ): Promise<unknown> =>

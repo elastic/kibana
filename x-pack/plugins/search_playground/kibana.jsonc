@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/search-playground",
-  "owner": "@elastic/enterprise-search-frontend",
+  "owner": "@elastic/search-kibana",
   "plugin": {
     "id": "searchPlayground",
     "server": true,
@@ -14,12 +14,15 @@
       "actions",
       "encryptedSavedObjects",
       "navigation",
+      "share",
       "security",
       "stackConnectors",
       "triggersActionsUi",
     ],
     "optionalPlugins": [
-      "cloud"
+      "cloud",
+      "console",
+      "usageCollection",
     ],
     "requiredBundles": [
       "kibanaReact"

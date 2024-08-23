@@ -33,6 +33,7 @@ export class SimpleSavedObjectImpl<T = unknown> implements SimpleSavedObject<T> 
   public error: SavedObjectType<T>['error'];
   public references: SavedObjectType<T>['references'];
   public updatedAt: SavedObjectType<T>['updated_at'];
+  public updatedBy: SavedObjectType<T>['updated_by'];
   public createdAt: SavedObjectType<T>['created_at'];
   public createdBy: SavedObjectType<T>['created_by'];
   public namespaces: SavedObjectType<T>['namespaces'];
@@ -52,6 +53,7 @@ export class SimpleSavedObjectImpl<T = unknown> implements SimpleSavedObject<T> 
       managed,
       namespaces,
       updated_at: updatedAt,
+      updated_by: updatedBy,
       created_at: createdAt,
       created_by: createdBy,
     }: SavedObjectType<T>
@@ -69,6 +71,7 @@ export class SimpleSavedObjectImpl<T = unknown> implements SimpleSavedObject<T> 
     this.updatedAt = updatedAt;
     this.createdAt = createdAt;
     this.createdBy = createdBy;
+    this.updatedBy = updatedBy;
     if (error) {
       this.error = error;
     }

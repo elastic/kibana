@@ -7,12 +7,10 @@
 
 import numeral from '@elastic/numeral';
 import { EcsVersion } from '@elastic/ecs';
-import { euiThemeVars } from '@kbn/ui-theme';
 
 import { ECS_IS_A_PERMISSIVE_SCHEMA } from '../../index_properties/translations';
 import {
   getAllCustomMarkdownComments,
-  getCustomColor,
   getCustomMarkdownComment,
   showCustomCallout,
 } from './helpers';
@@ -21,7 +19,6 @@ import {
   someField,
 } from '../../../mock/enriched_field_metadata/mock_enriched_field_metadata';
 import { mockPartitionedFieldMetadata } from '../../../mock/partitioned_field_metadata/mock_partitioned_field_metadata';
-import { PartitionedFieldMetadata } from '../../../types';
 import { EMPTY_STAT } from '../../../helpers';
 
 const defaultBytesFormat = '0,0.[0]b';
@@ -35,7 +32,7 @@ const formatNumber = (value: number | undefined) =>
 describe('helpers', () => {
   describe('getCustomMarkdownComment', () => {
     test('it returns a comment for custom fields with the expected field counts and ECS version', () => {
-      expect(getCustomMarkdownComment({ enrichedFieldMetadata: [hostNameKeyword, someField] }))
+      expect(getCustomMarkdownComment({ customFieldMetadata: [hostNameKeyword, someField] }))
         .toEqual(`#### 2 Custom field mappings
 
 These fields are not defined by the Elastic Common Schema (ECS), version ${EcsVersion}.
@@ -52,21 +49,6 @@ ${ECS_IS_A_PERMISSIVE_SCHEMA}
 
     test('it returns true when `enrichedFieldMetadata` is NOT empty', () => {
       expect(showCustomCallout([someField])).toBe(true);
-    });
-  });
-
-  describe('getCustomColor', () => {
-    test('it returns the expected color when there are custom fields', () => {
-      expect(getCustomColor(mockPartitionedFieldMetadata)).toEqual(euiThemeVars.euiColorLightShade);
-    });
-
-    test('it returns the expected color when custom fields is empty', () => {
-      const noCustomFields: PartitionedFieldMetadata = {
-        ...mockPartitionedFieldMetadata,
-        custom: [], // <-- empty
-      };
-
-      expect(getCustomColor(noCustomFields)).toEqual(euiThemeVars.euiTextColor);
     });
   });
 

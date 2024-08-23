@@ -9,11 +9,11 @@
 import { combineLatest, from } from 'rxjs';
 import { map, tap, switchMap } from 'rxjs';
 import type { IUiSettingsClient, KibanaExecutionContext } from '@kbn/core/public';
+import type { IEsSearchResponse } from '@kbn/search-types';
 import {
   getSearchParamsFromRequest,
   SearchRequest,
   DataPublicPluginStart,
-  IEsSearchResponse,
 } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { search as dataPluginSearch } from '@kbn/data-plugin/public';
@@ -72,7 +72,7 @@ export class SearchAPI {
         });
 
         return from(
-          extendSearchParamsWithRuntimeFields(indexPatterns, requestParams, request.index)
+          extendSearchParamsWithRuntimeFields(indexPatterns, requestParams, `${request.index}`)
         ).pipe(
           tap((params) => {
             /** inspect request data **/

@@ -20,3 +20,11 @@ export class EndpointError<MetaType = unknown> extends Error {
     }
   }
 }
+
+/**
+ * Type guard to check if a given Error is an instance of EndpointError
+ * @param err
+ */
+export const isEndpointError = (err: Error): err is EndpointError => {
+  return err instanceof EndpointError;
+};

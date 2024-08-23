@@ -29,10 +29,10 @@ describe('saved_workspace_utils', () => {
         savedWorkspace,
         {},
         {
+          ...core,
           contentClient: {
             create: jest.fn().mockReturnValue(Promise.resolve({ item: { id: '456' } })),
           } as unknown as ContentClient,
-          overlays: core.overlays,
         }
       );
       expect(savedWorkspace.id).toBe(undefined);

@@ -7,7 +7,6 @@
  */
 
 import type { Request, ResponseToolkit } from '@hapi/hapi';
-import { once } from 'lodash';
 import apm from 'elastic-apm-node';
 import { isConfigSchema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/logging';
@@ -27,6 +26,7 @@ import type {
   VersionedRouter,
   RouteRegistrar,
 } from '@kbn/core-http-server';
+import { isZod } from '@kbn/zod';
 import { validBodyOutput, getRequestValidation } from '@kbn/core-http-server';
 import { RouteValidator } from './validator';
 import { CoreVersionedRouter } from './versioned_router';
@@ -35,6 +35,8 @@ import { kibanaResponseFactory } from './response';
 import { HapiResponseAdapter } from './response_adapter';
 import { wrapErrors } from './error_wrapper';
 import { Method } from './versioned_router/types';
+import { prepareRouteConfigValidation } from './util';
+import { stripIllegalHttp2Headers } from './strip_illegal_http2_headers';
 
 export type ContextEnhancer<
   P,
@@ -72,9 +74,9 @@ function routeSchemasFromRouteConfig<P, Q, B>(
   if (route.validate !== false) {
     const validation = getRequestValidation(route.validate);
     Object.entries(validation).forEach(([key, schema]) => {
-      if (!(isConfigSchema(schema) || typeof schema === 'function')) {
+      if (!(isConfigSchema(schema) || isZod(schema) || typeof schema === 'function')) {
         throw new Error(
-          `Expected a valid validation logic declared with '@kbn/config-schema' package or a RouteValidationFunction at key: [${key}].`
+          `Expected a valid validation logic declared with '@kbn/config-schema' package, '@kbn/zod' package or a RouteValidationFunction at key: [${key}].`
         );
       }
     });
@@ -187,9 +189,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
         handler: RequestHandler<P, Q, B, Context, Method>,
         internalOptions: { isVersioned: boolean } = { isVersioned: false }
       ) => {
-        if (typeof route.validate === 'function') {
-          route = { ...route, validate: once(route.validate) };
-        }
+        route = prepareRouteConfigValidation(route);
         const routeSchemas = routeSchemasFromRouteConfig(route, method);
 
         this.routes.push({
@@ -267,6 +267,14 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
 
     try {
       const kibanaResponse = await handler(kibanaRequest, kibanaResponseFactory);
+      if (kibanaRequest.protocol === 'http2' && kibanaResponse.options.headers) {
+        kibanaResponse.options.headers = stripIllegalHttp2Headers({
+          headers: kibanaResponse.options.headers,
+          isDev: this.options.isDev ?? false,
+          logger: this.log,
+          requestContext: `${request.route.method} ${request.route.path}`,
+        });
+      }
       return hapiResponseAdapter.handle(kibanaResponse);
     } catch (error) {
       // capture error

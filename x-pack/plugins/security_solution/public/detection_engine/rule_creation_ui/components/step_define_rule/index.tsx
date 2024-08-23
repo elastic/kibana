@@ -23,11 +23,11 @@ import React, { memo, useCallback, useState, useEffect, useMemo, useRef } from '
 
 import styled from 'styled-components';
 import { i18n as i18nCore } from '@kbn/i18n';
-import { isEqual, isEmpty, omit } from 'lodash';
-import type { FieldSpec } from '@kbn/data-views-plugin/common';
+import { isEqual, isEmpty } from 'lodash';
+import type { FieldSpec } from '@kbn/data-plugin/common';
 import usePrevious from 'react-use/lib/usePrevious';
-import type { BrowserFields } from '@kbn/timelines-plugin/common';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import { useQueryClient } from '@tanstack/react-query';
 
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import type { DataViewBase } from '@kbn/es-query';
@@ -35,9 +35,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useSetFieldValueWithCallback } from '../../../../common/utils/use_set_field_value_cb';
 import { useRuleFromTimeline } from '../../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
-import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
-import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
-import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import type { EqlOptionsSelected, FieldsEqlOptions } from '../../../../../common/search_strategy';
 import { filterRuleFieldsForType, getStepDataDataSource } from '../../pages/rule_creation/helpers';
 import type {
@@ -81,14 +78,15 @@ import {
   isQueryRule,
   isEsqlRule,
   isEqlSequenceQuery,
+  isSuppressionRuleInGA,
 } from '../../../../../common/detection_engine/utils';
 import { EqlQueryBar } from '../eql_query_bar';
 import { DataViewSelector } from '../data_view_selector';
 import { ThreatMatchInput } from '../threatmatch_input';
-import type { BrowserField } from '../../../../common/containers/source';
 import { useFetchIndex } from '../../../../common/containers/source';
 import { NewTermsFields } from '../new_terms_fields';
 import { ScheduleItem } from '../../../rule_creation/components/schedule_item_form';
+import { RequiredFields } from '../../../rule_creation/components/required_fields';
 import { DocLink } from '../../../../common/components/links_to_docs/doc_link';
 import { defaultCustomQuery } from '../../../../detections/pages/detection_engine/rules/utils';
 import { MultiSelectFieldsAutocomplete } from '../multi_select_fields';
@@ -97,14 +95,18 @@ import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common
 import { DurationInput } from '../duration_input';
 import { MINIMUM_LICENSE_FOR_SUPPRESSION } from '../../../../../common/detection_engine/constants';
 import { useUpsellingMessage } from '../../../../common/hooks/use_upselling';
+import { useAllEsqlRuleFields } from '../../hooks';
 import { useAlertSuppression } from '../../../rule_management/logic/use_alert_suppression';
+import { AiAssistant } from '../ai_assistant';
+import { RelatedIntegrations } from '../../../rule_creation/components/related_integrations';
+import { useMLRuleConfig } from '../../../../common/components/ml/hooks/use_ml_rule_config';
 
 const CommonUseField = getUseField({ component: Field });
 
 const StyledVisibleContainer = styled.div<{ isVisible: boolean }>`
   display: ${(props) => (props.isVisible ? 'block' : 'none')};
 `;
-interface StepDefineRuleProps extends RuleStepProps {
+export interface StepDefineRuleProps extends RuleStepProps {
   indicesConfig: string[];
   threatIndicesConfig: string[];
   defaultSavedQuery?: SavedQuery;
@@ -113,7 +115,6 @@ interface StepDefineRuleProps extends RuleStepProps {
   setOptionsSelected: React.Dispatch<React.SetStateAction<EqlOptionsSelected>>;
   indexPattern: DataViewBase;
   isIndexPatternLoading: boolean;
-  browserFields: BrowserFields;
   isQueryBarValid: boolean;
   setIsQueryBarValid: (valid: boolean) => void;
   setIsThreatQueryBarValid: (valid: boolean) => void;
@@ -162,38 +163,53 @@ const IntendedRuleTypeEuiFormRow = styled(RuleTypeEuiFormRow)`
 
 // eslint-disable-next-line complexity
 const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
+  dataSourceType,
+  defaultSavedQuery,
+  enableThresholdSuppression,
+  form,
+  groupByFields,
+  index,
+  indexPattern,
+  indicesConfig,
+  isIndexPatternLoading,
   isLoading,
+  isQueryBarValid,
   isUpdateView = false,
   kibanaDataViews,
-  indicesConfig,
-  threatIndicesConfig,
-  defaultSavedQuery,
-  form,
   optionsSelected,
-  setOptionsSelected,
-  indexPattern,
-  isIndexPatternLoading,
-  browserFields,
-  isQueryBarValid,
+  queryBarSavedId,
+  queryBarTitle,
+  ruleType,
   setIsQueryBarValid,
   setIsThreatQueryBarValid,
-  ruleType,
-  index,
-  threatIndex,
-  groupByFields,
-  dataSourceType,
+  setOptionsSelected,
   shouldLoadQueryDynamically,
-  queryBarTitle,
-  queryBarSavedId,
+  threatIndex,
+  threatIndicesConfig,
   thresholdFields,
-  enableThresholdSuppression,
 }) => {
+  const queryClient = useQueryClient();
+
   const { isSuppressionEnabled: isAlertSuppressionEnabled } = useAlertSuppression(ruleType);
-  const mlCapabilities = useMlCapabilities();
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
   const [indexModified, setIndexModified] = useState(false);
   const [threatIndexModified, setThreatIndexModified] = useState(false);
   const license = useLicense();
+
+  const [{ machineLearningJobId }] = useFormData<DefineStepRule>({
+    form,
+    watch: ['machineLearningJobId'],
+  });
+  const {
+    allJobsStarted,
+    hasMlAdminPermissions,
+    hasMlLicense,
+    loading: mlRuleConfigLoading,
+    mlSuppressionFields,
+  } = useMLRuleConfig({ machineLearningJobId });
+
+  const isMlSuppressionIncomplete =
+    isMlRule(ruleType) && machineLearningJobId?.length > 0 && !allJobsStarted;
 
   const esqlQueryRef = useRef<DefineStepRule['queryBar'] | undefined>(undefined);
 
@@ -201,7 +217,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 
   const isThresholdRule = getIsThresholdRule(ruleType);
   const alertSuppressionUpsellingMessage = useUpsellingMessage('alert_suppression_rule_form');
-
   const { getFields, reset, setFieldValue } = form;
 
   const setRuleTypeCallback = useSetFieldValueWithCallback({
@@ -250,12 +265,12 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     [form]
   );
 
-  const [aggFields, setAggregatableFields] = useState<BrowserField[]>([]);
+  const [aggFields, setAggregatableFields] = useState<FieldSpec[]>([]);
 
   useEffect(() => {
     const { fields } = indexPattern;
     /**
-     * Typecasting to BrowserField because fields is
+     * Typecasting to FieldSpec because fields is
      * typed as DataViewFieldBase[] which does not have
      * the 'aggregatable' property, however the type is incorrect
      *
@@ -263,18 +278,16 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
      * We will need to determine where these types are defined and
      * figure out where the discrepency is.
      */
-    setAggregatableFields(aggregatableFields(fields as BrowserField[]));
+    setAggregatableFields(aggregatableFields(fields as FieldSpec[]));
   }, [indexPattern]);
 
-  const termsAggregationFields: BrowserField[] = useMemo(
+  const termsAggregationFields: FieldSpec[] = useMemo(
     () => getTermsAggregationFields(aggFields),
     [aggFields]
   );
 
-  const [
-    threatIndexPatternsLoading,
-    { browserFields: threatBrowserFields, indexPatterns: threatIndexPatterns },
-  ] = useFetchIndex(threatIndex);
+  const [threatIndexPatternsLoading, { indexPatterns: threatIndexPatterns }] =
+    useFetchIndex(threatIndex);
 
   // reset form when rule type changes
   useEffect(() => {
@@ -430,7 +443,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       <ThreatMatchInput
         handleResetThreatIndices={handleResetThreatIndices}
         indexPatterns={indexPattern}
-        threatBrowserFields={threatBrowserFields}
         threatIndexModified={threatIndexModified}
         threatIndexPatterns={threatIndexPatterns}
         threatIndexPatternsLoading={threatIndexPatternsLoading}
@@ -442,7 +454,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       handleResetThreatIndices,
       indexPattern,
       setIsThreatQueryBarValid,
-      threatBrowserFields,
       threatIndexModified,
       threatIndexPatterns,
       threatIndexPatternsLoading,
@@ -450,64 +461,75 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   );
 
   const [{ queryBar }] = useFormData<DefineStepRule>({ form, watch: ['queryBar'] });
+
+  const { fields: esqlSuppressionFields, isLoading: isEsqlSuppressionLoading } =
+    useAllEsqlRuleFields({
+      esqlQuery: isEsqlRule(ruleType) ? (queryBar?.query?.query as string) : undefined,
+      indexPatternsFields: indexPattern.fields,
+    });
+
+  /** Suppression fields being selected is a special case for our form logic, as we can't
+   * disable these fields and leave users in a bad state that they cannot change.
+   * The exception is threshold rules, which use an existing threshold field for the same
+   * purpose and so are treated as if the field is always selected.  */
+  const areSuppressionFieldsSelected = isThresholdRule || groupByFields.length > 0;
+
   const areSuppressionFieldsDisabledBySequence =
     isEqlRule(ruleType) &&
     isEqlSequenceQuery(queryBar?.query?.query as string) &&
     groupByFields.length === 0;
 
-  /**
-   * Component that allows selection of suppression intervals disabled:
-   *  - if suppression license is not valid(i.e. less than platinum)
-   *  - or for not threshold rule - when groupBy fields not selected
-   * - Eql sequence is used
+  /** If we don't have ML field information, users can't meaningfully interact with suppression fields */
+  const areSuppressionFieldsDisabledByMlFields =
+    isMlRule(ruleType) && (mlRuleConfigLoading || !mlSuppressionFields.length);
+
+  const isThresholdSuppressionDisabled = isThresholdRule && !enableThresholdSuppression;
+
+  /** Suppression fields are generally disabled if either:
+   * - License is insufficient (i.e. less than platinum)
+   * - An EQL Sequence is used
+   * - ML Field information is not available
    */
+  const areSuppressionFieldsDisabled =
+    !isAlertSuppressionLicenseValid ||
+    areSuppressionFieldsDisabledBySequence ||
+    areSuppressionFieldsDisabledByMlFields;
+
+  const isSuppressionGroupByDisabled =
+    (areSuppressionFieldsDisabled || isEsqlSuppressionLoading) && !areSuppressionFieldsSelected;
+
+  const suppressionGroupByDisabledText = useMemo(() => {
+    if (areSuppressionFieldsDisabledBySequence) {
+      return i18n.EQL_SEQUENCE_SUPPRESSION_DISABLE_TOOLTIP;
+    } else if (areSuppressionFieldsDisabledByMlFields) {
+      return i18n.MACHINE_LEARNING_SUPPRESSION_DISABLED_LABEL;
+    } else {
+      return alertSuppressionUpsellingMessage;
+    }
+  }, [
+    alertSuppressionUpsellingMessage,
+    areSuppressionFieldsDisabledByMlFields,
+    areSuppressionFieldsDisabledBySequence,
+  ]);
+
+  const suppressionGroupByFields = useMemo(() => {
+    if (isEsqlRule(ruleType)) {
+      return esqlSuppressionFields;
+    } else if (isMlRule(ruleType)) {
+      return mlSuppressionFields;
+    } else {
+      return termsAggregationFields;
+    }
+  }, [esqlSuppressionFields, mlSuppressionFields, ruleType, termsAggregationFields]);
+
   const isGroupByChildrenDisabled =
-    areSuppressionFieldsDisabledBySequence || !isAlertSuppressionLicenseValid || isThresholdRule
-      ? false
-      : !groupByFields?.length;
-
-  /**
-   * Per rule execution radio option is disabled
-   *  - if suppression license is not valid(i.e. less than platinum)
-   *  - always disabled for threshold rule
-   *  - Eql sequence is used and suppression fields are in the default state
-   */
-  const isPerRuleExecutionDisabled =
-    areSuppressionFieldsDisabledBySequence || !isAlertSuppressionLicenseValid || isThresholdRule;
-
-  /**
-   * Per time period execution radio option is disabled
-   *  - if suppression license is not valid(i.e. less than platinum)
-   *  - disabled for threshold rule when enabled suppression is not checked
-   * - Eql sequence is used and suppression fields are in the default state
-   */
+    areSuppressionFieldsDisabled || isThresholdSuppressionDisabled || !areSuppressionFieldsSelected;
+  const isPerRuleExecutionDisabled = areSuppressionFieldsDisabled || isThresholdRule;
   const isPerTimePeriodDisabled =
-    areSuppressionFieldsDisabledBySequence ||
-    !isAlertSuppressionLicenseValid ||
-    (isThresholdRule && !enableThresholdSuppression);
-
-  /**
-   * Suppression duration is disabled when
-   *  - if suppression license is not valid(i.e. less than platinum)
-   *  - when suppression by rule execution is selected in radio button
-   *  - when threshold suppression is not enabled and no group by fields selected
-   * -  Eql sequence is used and suppression fields are in the default state
-   * */
+    areSuppressionFieldsDisabled || isThresholdSuppressionDisabled || !areSuppressionFieldsSelected;
   const isDurationDisabled =
-    areSuppressionFieldsDisabledBySequence ||
-    !isAlertSuppressionLicenseValid ||
-    (!enableThresholdSuppression && groupByFields?.length === 0);
-
-  /**
-   * Suppression missing fields is disabled when
-   *  - if suppression license is not valid(i.e. less than platinum)
-   *  - when no group by fields selected
-   * -  Eql sequence is used and suppression fields are in the default state
-   * */
-  const isMissingFieldsDisabled =
-    areSuppressionFieldsDisabledBySequence ||
-    !isAlertSuppressionLicenseValid ||
-    !groupByFields.length;
+    areSuppressionFieldsDisabled || isThresholdSuppressionDisabled || !areSuppressionFieldsSelected;
+  const isMissingFieldsDisabled = areSuppressionFieldsDisabled || !areSuppressionFieldsSelected;
 
   const GroupByChildren = useCallback(
     ({ groupByRadioSelection, groupByDurationUnit, groupByDurationValue }) => (
@@ -680,7 +702,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               <CommonUseField
                 path="index"
                 config={{
-                  ...omit(schema.index, 'label'),
+                  ...schema.index,
                   labelAppend: indexModified ? (
                     <MyLabelButton onClick={handleResetIndices} iconType="refresh">
                       {i18n.RESET_DEFAULT_INDEX}
@@ -742,6 +764,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
         path="queryBar"
         config={esqlQueryBarConfig}
         component={QueryBarDefineRule}
+        validationData={{ queryClient }}
         componentProps={{
           ...queryBarProps,
           dataTestSubj: 'detectionEngineStepDefineRuleEsqlQueryBar',
@@ -749,7 +772,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
         }}
       />
     ),
-    [queryBarProps, esqlQueryBarConfig]
+    [queryBarProps, esqlQueryBarConfig, queryClient]
   );
 
   const QueryBarMemo = useMemo(
@@ -773,7 +796,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
         component={QueryBarDefineRule}
         componentProps={
           {
-            browserFields,
             idAria: 'detectionEngineStepDefineRuleQueryBar',
             indexPattern,
             isDisabled: isLoading || shouldLoadQueryDynamically || timelineQueryLoading,
@@ -793,7 +815,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     [
       handleOpenTimelineSearch,
       shouldLoadQueryDynamically,
-      browserFields,
       indexPattern,
       isLoading,
       timelineQueryLoading,
@@ -848,10 +869,10 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     () => ({
       describedByIds: ['detectionEngineStepDefineRuleType'],
       isUpdateView,
-      hasValidLicense: hasMlLicense(mlCapabilities),
-      isMlAdmin: hasMlAdminPermissions(mlCapabilities),
+      hasValidLicense: hasMlLicense,
+      isMlAdmin: hasMlAdminPermissions,
     }),
-    [isUpdateView, mlCapabilities]
+    [hasMlAdminPermissions, hasMlLicense, isUpdateView]
   );
 
   return (
@@ -914,6 +935,10 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             </>
           </RuleTypeEuiFormRow>
 
+          {!isMlRule(ruleType) && !isQueryBarValid && (
+            <AiAssistant getFields={form.getFields} language={queryBar?.query?.language} />
+          )}
+
           {isQueryRule(ruleType) && (
             <>
               <EuiSpacer size="s" />
@@ -938,7 +963,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               </RuleTypeEuiFormRow>
             </>
           )}
-
           <RuleTypeEuiFormRow $isVisible={isMlRule(ruleType)} fullWidth>
             <>
               <UseField
@@ -1024,7 +1048,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               />
             </>
           </RuleTypeEuiFormRow>
-
           <EuiSpacer size="m" />
 
           <>
@@ -1047,19 +1070,31 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             <RuleTypeEuiFormRow
               $isVisible={isAlertSuppressionEnabled && !isThresholdRule}
               data-test-subj="alertSuppressionInput"
+              label={i18n.GROUP_BY_LABEL}
+              labelAppend={
+                <EuiText color="subdued" size="xs">
+                  {isSuppressionRuleInGA(ruleType)
+                    ? i18n.GROUP_BY_GA_LABEL_APPEND
+                    : i18n.GROUP_BY_TECH_PREVIEW_LABEL_APPEND}
+                </EuiText>
+              }
             >
-              <UseField
-                path="groupByFields"
-                component={MultiSelectFieldsAutocomplete}
-                componentProps={{
-                  browserFields: termsAggregationFields,
-                  isDisabled:
-                    !isAlertSuppressionLicenseValid || areSuppressionFieldsDisabledBySequence,
-                  disabledText: areSuppressionFieldsDisabledBySequence
-                    ? i18n.EQL_SEQUENCE_SUPPRESSION_DISABLE_TOOLTIP
-                    : alertSuppressionUpsellingMessage,
-                }}
-              />
+              <>
+                <UseField
+                  path="groupByFields"
+                  component={MultiSelectFieldsAutocomplete}
+                  componentProps={{
+                    browserFields: suppressionGroupByFields,
+                    isDisabled: isSuppressionGroupByDisabled,
+                    disabledText: suppressionGroupByDisabledText,
+                  }}
+                />
+                {isMlSuppressionIncomplete && (
+                  <EuiText size="xs" color="warning">
+                    {i18n.MACHINE_LEARNING_SUPPRESSION_INCOMPLETE_LABEL}
+                  </EuiText>
+                )}
+              </>
             </RuleTypeEuiFormRow>
 
             <IntendedRuleTypeEuiFormRow
@@ -1105,6 +1140,22 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               </UseMultiFields>
             </IntendedRuleTypeEuiFormRow>
           </>
+
+          <EuiSpacer size="l" />
+
+          {!isMlRule(ruleType) && (
+            <>
+              <RequiredFields
+                path="requiredFields"
+                indexPatternFields={indexPattern.fields}
+                isIndexPatternLoading={isIndexPatternLoading}
+              />
+              <EuiSpacer size="l" />
+            </>
+          )}
+
+          <RelatedIntegrations path="relatedIntegrations" dataTestSubj="relatedIntegrations" />
+
           <UseField
             path="timeline"
             component={PickTimeline}

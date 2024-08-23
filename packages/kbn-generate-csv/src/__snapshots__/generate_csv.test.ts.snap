@@ -271,8 +271,8 @@ exports[`CsvGenerator fields from job.searchSource.getFields() (7.12 generated) 
 `;
 
 exports[`CsvGenerator formats a search result to CSV content 1`] = `
-"date,ip,message
-\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"This is a great message!\\"
+"date,ip,message,\\"bytes_custom_label (bytes)\\"
+\\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"This is a great message!\\",100
 "
 `;
 

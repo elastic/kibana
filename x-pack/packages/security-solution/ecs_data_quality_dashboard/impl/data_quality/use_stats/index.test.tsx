@@ -6,13 +6,14 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 
 import { DataQualityProvider } from '../data_quality_panel/data_quality_context';
 import { mockStatsAuditbeatIndex } from '../mock/stats/mock_stats_packetbeat_index';
 import { ERROR_LOADING_STATS } from '../translations';
 import { useStats, UseStats } from '.';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
+import { Theme } from '@elastic/charts';
 
 const mockHttpFetch = jest.fn();
 const mockReportDataQualityIndexChecked = jest.fn();
@@ -23,23 +24,101 @@ const mockTelemetryEvents = {
 };
 const { toasts } = notificationServiceMock.createSetupContract();
 
-const ContextWrapper: React.FC = ({ children }) => (
+const ContextWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <DataQualityProvider
     httpFetch={mockHttpFetch}
     telemetryEvents={mockTelemetryEvents}
     isILMAvailable={true}
     toasts={toasts}
+    addSuccessToast={jest.fn()}
+    canUserCreateAndReadCases={jest.fn(() => true)}
+    endDate={null}
+    formatBytes={jest.fn()}
+    formatNumber={jest.fn()}
+    isAssistantEnabled={true}
+    lastChecked={'2023-03-28T22:27:28.159Z'}
+    openCreateCaseFlyout={jest.fn()}
+    patterns={['auditbeat-*']}
+    setLastChecked={jest.fn()}
+    startDate={null}
+    theme={{
+      background: {
+        color: '#000',
+      },
+    }}
+    baseTheme={
+      {
+        background: {
+          color: '#000',
+        },
+      } as Theme
+    }
+    ilmPhases={['hot', 'warm', 'unmanaged']}
+    selectedIlmPhaseOptions={[
+      {
+        label: 'Hot',
+        value: 'hot',
+      },
+      {
+        label: 'Warm',
+        value: 'warm',
+      },
+      {
+        label: 'Unmanaged',
+        value: 'unmanaged',
+      },
+    ]}
+    setSelectedIlmPhaseOptions={jest.fn()}
   >
     {children}
   </DataQualityProvider>
 );
 
-const ContextWrapperILMNotAvailable: React.FC = ({ children }) => (
+const ContextWrapperILMNotAvailable: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <DataQualityProvider
     httpFetch={mockHttpFetch}
     telemetryEvents={mockTelemetryEvents}
     isILMAvailable={false}
     toasts={toasts}
+    addSuccessToast={jest.fn()}
+    canUserCreateAndReadCases={jest.fn(() => true)}
+    endDate={null}
+    formatBytes={jest.fn()}
+    formatNumber={jest.fn()}
+    isAssistantEnabled={true}
+    lastChecked={'2023-03-28T22:27:28.159Z'}
+    openCreateCaseFlyout={jest.fn()}
+    patterns={['auditbeat-*']}
+    setLastChecked={jest.fn()}
+    startDate={null}
+    theme={{
+      background: {
+        color: '#000',
+      },
+    }}
+    baseTheme={
+      {
+        background: {
+          color: '#000',
+        },
+      } as Theme
+    }
+    ilmPhases={['hot', 'warm', 'unmanaged']}
+    selectedIlmPhaseOptions={[
+      {
+        label: 'Hot',
+        value: 'hot',
+      },
+      {
+        label: 'Warm',
+        value: 'warm',
+      },
+      {
+        label: 'Unmanaged',
+        value: 'unmanaged',
+      },
+    ]}
+    setSelectedIlmPhaseOptions={jest.fn()}
   >
     {children}
   </DataQualityProvider>

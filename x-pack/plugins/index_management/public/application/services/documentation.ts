@@ -56,6 +56,7 @@ class DocumentationService {
   private mappingSourceFields: string = '';
   private mappingSourceFieldsDisable: string = '';
   private mappingStore: string = '';
+  private mappingSubobjects: string = '';
   private mappingTermVector: string = '';
   private mappingTypesRemoval: string = '';
   private percolate: string = '';
@@ -115,6 +116,7 @@ class DocumentationService {
     this.mappingSourceFields = links.elasticsearch.mappingSourceFields;
     this.mappingSourceFieldsDisable = links.elasticsearch.mappingSourceFieldsDisable;
     this.mappingStore = links.elasticsearch.mappingStore;
+    this.mappingSubobjects = links.elasticsearch.mappingSubobjects;
     this.mappingTermVector = links.elasticsearch.mappingTermVector;
     this.mappingTypesRemoval = links.elasticsearch.mappingTypesRemoval;
     this.percolate = links.query.percolate;
@@ -327,6 +329,10 @@ class DocumentationService {
 
   public getEnabledLink() {
     return this.mappingEnabled;
+  }
+
+  public getSubobjectsLink() {
+    return this.mappingSubobjects;
   }
 
   public getRuntimeFields() {

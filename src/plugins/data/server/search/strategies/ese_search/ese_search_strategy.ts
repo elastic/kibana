@@ -11,16 +11,12 @@ import type { Logger, SharedGlobalConfig } from '@kbn/core/server';
 import { catchError, tap } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { firstValueFrom, from } from 'rxjs';
+import type { ISearchOptions, IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
 import { IAsyncSearchRequestParams } from '../..';
 import { getKbnSearchError } from '../../report_search_error';
 import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
-import type {
-  IAsyncSearchOptions,
-  IEsSearchRequest,
-  IEsSearchResponse,
-  ISearchOptions,
-} from '../../../../common';
+import type { IAsyncSearchOptions } from '../../../../common';
 import { DataViewType, isRunningResponse, pollSearch } from '../../../../common';
 import {
   getDefaultAsyncGetParams,
@@ -208,7 +204,7 @@ export const enhancedEsSearchStrategyProvider = (
      * @throws `KbnSearchError`
      */
     search: (request, options: IAsyncSearchOptions, deps) => {
-      logger.debug(`search ${JSON.stringify(request.params) || request.id}`);
+      logger.debug(() => `search ${JSON.stringify(request.params) || request.id}`);
 
       if (request.indexType === DataViewType.ROLLUP && deps.rollupsEnabled) {
         return from(rollupSearch(request, options, deps));

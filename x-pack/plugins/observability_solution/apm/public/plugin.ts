@@ -17,11 +17,13 @@ import {
   DEFAULT_APP_CATEGORIES,
   Plugin,
   PluginInitializerContext,
+  SecurityServiceStart,
 } from '@kbn/core/public';
+import { EntityManagerPublicPluginSetup } from '@kbn/entityManager-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public/plugin';
-import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
+import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { ExploratoryViewPublicSetup } from '@kbn/exploratory-view-plugin/public';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -69,6 +71,7 @@ import { map } from 'rxjs';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { ConfigSchema } from '.';
 import { registerApmRuleTypes } from './components/alerting/rule_types/register_apm_rule_types';
+import { registerEmbeddables } from './embeddable/register_embeddables';
 import {
   getApmEnrollmentFlyoutData,
   LazyApmCustomAssetsExtension,
@@ -79,6 +82,7 @@ import { getLazyAPMPolicyEditExtension } from './components/fleet_integration/la
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { APMServiceDetailLocator } from './locator/service_detail_locator';
 import { ITelemetryClient, TelemetryService } from './services/telemetry';
+import { registerServiceInventoryViewTypeContext } from './analytics/register_service_inventory_view_type_context';
 
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
 export type ApmPluginStart = void;
@@ -87,6 +91,7 @@ export interface ApmPluginSetupDeps {
   alerting?: AlertingPluginPublicSetup;
   data: DataPublicPluginSetup;
   discover?: DiscoverSetup;
+  embeddable: EmbeddableSetup;
   exploratoryView: ExploratoryViewPublicSetup;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   features: FeaturesPluginSetup;
@@ -102,9 +107,11 @@ export interface ApmPluginSetupDeps {
   uiActions: UiActionsSetup;
   profiling?: ProfilingPluginSetup;
   cloud?: CloudSetup;
+  entityManager: EntityManagerPublicPluginSetup;
 }
 
 export interface ApmServices {
+  securityService: SecurityServiceStart;
   telemetry: ITelemetryClient;
 }
 
@@ -136,7 +143,12 @@ export interface ApmPluginStartDeps {
   dashboard: DashboardStart;
   metricsDataAccess: MetricsDataPluginStart;
   uiSettings: IUiSettingsClient;
+  entityManager: EntityManagerPublicPluginSetup;
 }
+
+const applicationsTitle = i18n.translate('xpack.apm.navigation.rootTitle', {
+  defaultMessage: 'Applications',
+});
 
 const servicesTitle = i18n.translate('xpack.apm.navigation.servicesTitle', {
   defaultMessage: 'Services',
@@ -198,7 +210,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
             return [
               // APM navigation
               {
-                label: 'APM',
+                label: applicationsTitle,
                 sortKey: 400,
                 entries: [
                   {
@@ -262,6 +274,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     };
 
     this.telemetry.setup({ analytics: core.analytics });
+    registerServiceInventoryViewTypeContext(core.analytics);
 
     // Registers a status check callback for the tutorial to call and verify if the APM integration is installed on fleet.
     pluginSetupDeps.home?.tutorials.registerCustomStatusCheck(
@@ -325,6 +338,14 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     // Register APM telemetry based events
     const telemetry = this.telemetry.start();
 
+    const isCloudEnv = !!pluginSetupDeps.cloud?.isCloudEnabled;
+    const isServerlessEnv = pluginSetupDeps.cloud?.isServerlessEnabled || this.isServerlessEnv;
+    const kibanaEnvironment = {
+      isCloudEnv,
+      isServerlessEnv,
+      kibanaVersion: this.kibanaVersion,
+    };
+
     core.application.register({
       id: 'apm',
       title: 'APM',
@@ -371,21 +392,16 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
           import('./application'),
           core.getStartServices(),
         ]);
-        const isCloudEnv = !!pluginSetupDeps.cloud?.isCloudEnabled;
-        const isServerlessEnv = pluginSetupDeps.cloud?.isServerlessEnabled || this.isServerlessEnv;
         return renderApp({
           coreStart,
           pluginsSetup: pluginSetupDeps as ApmPluginSetupDeps,
           appMountParameters,
           config,
-          kibanaEnvironment: {
-            isCloudEnv,
-            isServerlessEnv,
-            kibanaVersion: this.kibanaVersion,
-          },
+          kibanaEnvironment,
           pluginsStart: pluginsStart as ApmPluginStartDeps,
           observabilityRuleTypeRegistry,
           apmServices: {
+            securityService: coreStart.security,
             telemetry,
           },
         });
@@ -393,6 +409,13 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     });
 
     registerApmRuleTypes(observabilityRuleTypeRegistry);
+    registerEmbeddables({
+      coreSetup: core,
+      pluginsSetup: plugins,
+      config,
+      kibanaEnvironment,
+      observabilityRuleTypeRegistry,
+    });
 
     const locator = plugins.share.url.locators.create(new APMServiceDetailLocator(core.uiSettings));
 

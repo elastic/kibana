@@ -83,6 +83,9 @@ beforeEach(() => {
     cors: {
       enabled: false,
     },
+    csp: {
+      disableEmbedding: true,
+    },
     cdn: {},
     shutdownTimeout: moment.duration(500, 'ms'),
   } as any;
@@ -1622,7 +1625,7 @@ describe('setup contract', () => {
         .get('/static/some_json.json')
         .expect(200);
 
-      const etag = response.get('etag');
+      const etag = response.get('etag')!;
       expect(etag).not.toBeUndefined();
 
       await supertest(innerServer.listener)

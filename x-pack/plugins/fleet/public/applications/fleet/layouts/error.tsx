@@ -22,10 +22,10 @@ const Panel = styled(EuiPanel)`
   margin-left: auto;
 `;
 
-export const ErrorLayout: React.FunctionComponent<{ isAddIntegrationsPath: boolean }> = ({
-  isAddIntegrationsPath,
-  children,
-}) => (
+export const ErrorLayout: React.FunctionComponent<{
+  children: React.ReactNode;
+  isAddIntegrationsPath: boolean;
+}> = ({ isAddIntegrationsPath, children }) => (
   <EuiErrorBoundary>
     {isAddIntegrationsPath ? (
       <WithHeaderLayout leftColumn={<DefaultPageTitle />}>{children}</WithHeaderLayout>
@@ -71,7 +71,7 @@ export const PermissionsError: React.FunctionComponent<{
               ) : (
                 <FormattedMessage
                   id="xpack.fleet.permissionDeniedErrorMessage"
-                  defaultMessage="You are not authorized to access Fleet. It requires the {roleName1} Kibana privilege for Fleet, and the {roleName2} or {roleName1} privilege for Integrations."
+                  defaultMessage="You are not authorized to access Fleet. Kibana privileges are required to access Fleet; the {roleName2} or {roleName1} privilege is required to access Integrations."
                   values={{
                     roleName1: <EuiCode>&quot;All&quot;</EuiCode>,
                     roleName2: <EuiCode>&quot;Read&quot;</EuiCode>,

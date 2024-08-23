@@ -22,6 +22,7 @@ const createMockConfig = (
     enabled: true,
     maxSpaces: 1000,
     allowFeatureVisibility: true,
+    allowSolutionVisibility: true,
   }
 ) => {
   return ConfigSchema.validate(mockConfig, { serverless: !mockConfig.allowFeatureVisibility });
@@ -42,6 +43,7 @@ describe('#getAll', () => {
         imageUrl: 'go-bots/predates/transformers',
         disabledFeatures: [],
         _reserved: true,
+        solution: 'es',
         bar: 'foo-bar', // an extra attribute that will be ignored during conversion
       },
     },
@@ -80,6 +82,7 @@ describe('#getAll', () => {
       initials: 'FB',
       imageUrl: 'go-bots/predates/transformers',
       disabledFeatures: [],
+      solution: 'es',
       _reserved: true,
     },
     {
@@ -105,10 +108,45 @@ describe('#getAll', () => {
     } as any);
     const mockConfig = createMockConfig();
 
-    const client = new SpacesClient(mockDebugLogger, mockConfig, mockCallWithRequestRepository, []);
+    const client = new SpacesClient(
+      mockDebugLogger,
+      mockConfig,
+      mockCallWithRequestRepository,
+      [],
+      'traditional'
+    );
     const actualSpaces = await client.getAll();
 
     expect(actualSpaces).toEqual(expectedSpaces);
+    expect(mockCallWithRequestRepository.find).toHaveBeenCalledWith({
+      type: 'space',
+      page: 1,
+      perPage: mockConfig.maxSpaces,
+      sortField: 'name.keyword',
+    });
+  });
+
+  test('strips solution property in serverless build', async () => {
+    const mockDebugLogger = createMockDebugLogger();
+    const [SOWithSolution] = savedObjects;
+    const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+    mockCallWithRequestRepository.find.mockResolvedValue({
+      saved_objects: [SOWithSolution],
+    } as any);
+    const mockConfig = createMockConfig();
+
+    const client = new SpacesClient(
+      mockDebugLogger,
+      mockConfig,
+      mockCallWithRequestRepository,
+      [],
+      'serverless'
+    );
+    const [actualSpace] = await client.getAll();
+    const [{ solution, ...expectedSpace }] = expectedSpaces;
+
+    expect(actualSpace.solution).toBeUndefined();
+    expect(actualSpace).toEqual(expectedSpace);
     expect(mockCallWithRequestRepository.find).toHaveBeenCalledWith({
       type: 'space',
       page: 1,
@@ -121,7 +159,13 @@ describe('#getAll', () => {
     const mockDebugLogger = createMockDebugLogger();
     const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
     const mockConfig = createMockConfig();
-    const client = new SpacesClient(mockDebugLogger, mockConfig, mockCallWithRequestRepository, []);
+    const client = new SpacesClient(
+      mockDebugLogger,
+      mockConfig,
+      mockCallWithRequestRepository,
+      [],
+      'traditional'
+    );
     await expect(
       client.getAll({ purpose: 'invalid_purpose' as GetAllSpacesPurpose })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"unsupported space purpose: invalid_purpose"`);
@@ -162,12 +206,63 @@ describe('#get', () => {
     const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
     mockCallWithRequestRepository.get.mockResolvedValue(savedObject);
 
-    const client = new SpacesClient(mockDebugLogger, mockConfig, mockCallWithRequestRepository, []);
+    const client = new SpacesClient(
+      mockDebugLogger,
+      mockConfig,
+      mockCallWithRequestRepository,
+      [],
+      'traditional'
+    );
     const id = savedObject.id;
     const actualSpace = await client.get(id);
 
     expect(actualSpace).toEqual(expectedSpace);
     expect(mockCallWithRequestRepository.get).toHaveBeenCalledWith('space', id);
+  });
+
+  test('strips solution property in serverless build', async () => {
+    const mockDebugLogger = createMockDebugLogger();
+    const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+    mockCallWithRequestRepository.get.mockResolvedValue({
+      ...savedObject,
+      attributes: { ...(savedObject.attributes as Record<string, unknown>), solution: 'es' },
+    });
+    const mockConfig = createMockConfig();
+
+    const client = new SpacesClient(
+      mockDebugLogger,
+      mockConfig,
+      mockCallWithRequestRepository,
+      [],
+      'serverless'
+    );
+    const id = savedObject.id;
+    const actualSpace = await client.get(id);
+
+    expect(actualSpace.solution).toBeUndefined();
+    expect(actualSpace).toEqual(expectedSpace);
+  });
+
+  test(`doesn't strip solution property in traditional build`, async () => {
+    const mockDebugLogger = createMockDebugLogger();
+    const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+    mockCallWithRequestRepository.get.mockResolvedValue({
+      ...savedObject,
+      attributes: { ...(savedObject.attributes as Record<string, unknown>), solution: 'es' },
+    });
+    const mockConfig = createMockConfig();
+
+    const client = new SpacesClient(
+      mockDebugLogger,
+      mockConfig,
+      mockCallWithRequestRepository,
+      [],
+      'traditional'
+    );
+    const id = savedObject.id;
+    const actualSpace = await client.get(id);
+
+    expect(actualSpace).toEqual({ ...expectedSpace, solution: 'es' });
   });
 });
 
@@ -217,9 +312,16 @@ describe('#create', () => {
       enabled: true,
       maxSpaces,
       allowFeatureVisibility: true,
+      allowSolutionVisibility: true,
     });
 
-    const client = new SpacesClient(mockDebugLogger, mockConfig, mockCallWithRequestRepository, []);
+    const client = new SpacesClient(
+      mockDebugLogger,
+      mockConfig,
+      mockCallWithRequestRepository,
+      [],
+      'traditional'
+    );
 
     const actualSpace = await client.create(spaceToCreate);
 
@@ -247,11 +349,18 @@ describe('#create', () => {
       enabled: true,
       maxSpaces,
       allowFeatureVisibility: true,
+      allowSolutionVisibility: true,
     });
 
-    const client = new SpacesClient(mockDebugLogger, mockConfig, mockCallWithRequestRepository, []);
+    const client = new SpacesClient(
+      mockDebugLogger,
+      mockConfig,
+      mockCallWithRequestRepository,
+      [],
+      'traditional'
+    );
 
-    expect(client.create(spaceToCreate)).rejects.toThrowErrorMatchingInlineSnapshot(
+    await expect(client.create(spaceToCreate)).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Unable to create Space, this exceeds the maximum number of spaces set by the xpack.spaces.maxSpaces setting"`
     );
 
@@ -261,6 +370,95 @@ describe('#create', () => {
       perPage: 0,
     });
     expect(mockCallWithRequestRepository.create).not.toHaveBeenCalled();
+  });
+
+  test('throws bad request when solution property is provided in serverless build', async () => {
+    const maxSpaces = 5;
+    const mockDebugLogger = createMockDebugLogger();
+    const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+    mockCallWithRequestRepository.create.mockResolvedValue(savedObject);
+    mockCallWithRequestRepository.find.mockResolvedValue({
+      total: maxSpaces - 1,
+    } as any);
+
+    const mockConfig = createMockConfig({
+      enabled: true,
+      maxSpaces,
+      allowFeatureVisibility: true,
+      allowSolutionVisibility: true,
+    });
+
+    const client = new SpacesClient(
+      mockDebugLogger,
+      mockConfig,
+      mockCallWithRequestRepository,
+      [],
+      'serverless'
+    );
+
+    await expect(
+      client.create({ ...spaceToCreate, solution: undefined })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Unable to create Space, solution property is forbidden in serverless"`
+    );
+
+    await expect(
+      client.create({ ...spaceToCreate, solution: 'es' })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Unable to create Space, solution property is forbidden in serverless"`
+    );
+
+    expect(mockCallWithRequestRepository.find).toHaveBeenCalledWith({
+      type: 'space',
+      page: 1,
+      perPage: 0,
+    });
+    expect(mockCallWithRequestRepository.create).not.toHaveBeenCalled();
+  });
+
+  test('creates space when solution property is provided in traditional build', async () => {
+    const maxSpaces = 5;
+    const mockDebugLogger = createMockDebugLogger();
+    const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+    mockCallWithRequestRepository.create.mockResolvedValue({
+      ...savedObject,
+      attributes: { ...(savedObject.attributes as Record<string, unknown>), solution: 'es' },
+    });
+    mockCallWithRequestRepository.find.mockResolvedValue({
+      total: maxSpaces - 1,
+    } as any);
+
+    const mockConfig = createMockConfig({
+      enabled: true,
+      maxSpaces,
+      allowFeatureVisibility: true,
+      allowSolutionVisibility: true,
+    });
+
+    const client = new SpacesClient(
+      mockDebugLogger,
+      mockConfig,
+      mockCallWithRequestRepository,
+      [],
+      'traditional'
+    );
+
+    const actualSpace = await client.create({ ...spaceToCreate, solution: 'es' });
+
+    expect(actualSpace).toEqual({ ...expectedReturnedSpace, solution: 'es' });
+
+    expect(mockCallWithRequestRepository.find).toHaveBeenCalledWith({
+      type: 'space',
+      page: 1,
+      perPage: 0,
+    });
+    expect(mockCallWithRequestRepository.create).toHaveBeenCalledWith(
+      'space',
+      { ...attributes, solution: 'es' },
+      {
+        id,
+      }
+    );
   });
 
   describe('when config.allowFeatureVisibility is disabled', () => {
@@ -277,13 +475,15 @@ describe('#create', () => {
         enabled: true,
         maxSpaces,
         allowFeatureVisibility: false,
+        allowSolutionVisibility: false,
       });
 
       const client = new SpacesClient(
         mockDebugLogger,
         mockConfig,
         mockCallWithRequestRepository,
-        []
+        [],
+        'traditional'
       );
 
       const actualSpace = await client.create(spaceToCreate);
@@ -312,19 +512,61 @@ describe('#create', () => {
         enabled: true,
         maxSpaces,
         allowFeatureVisibility: false,
+        allowSolutionVisibility: false,
       });
 
       const client = new SpacesClient(
         mockDebugLogger,
         mockConfig,
         mockCallWithRequestRepository,
-        []
+        [],
+        'traditional'
       );
 
-      expect(
+      await expect(
         client.create({ ...spaceToCreate, disabledFeatures: ['some-feature'] })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Unable to create Space, the disabledFeatures array must be empty when xpack.spaces.allowFeatureVisibility setting is disabled"`
+      );
+
+      expect(mockCallWithRequestRepository.find).toHaveBeenCalledWith({
+        type: 'space',
+        page: 1,
+        perPage: 0,
+      });
+      expect(mockCallWithRequestRepository.create).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('when config.allowSolutionVisibility is disabled', () => {
+    test(`throws bad request when creating space with solution`, async () => {
+      const maxSpaces = 5;
+      const mockDebugLogger = createMockDebugLogger();
+      const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+      mockCallWithRequestRepository.create.mockResolvedValue(savedObject);
+      mockCallWithRequestRepository.find.mockResolvedValue({
+        total: maxSpaces - 1,
+      } as any);
+
+      const mockConfig = createMockConfig({
+        enabled: true,
+        maxSpaces,
+        allowFeatureVisibility: false,
+        allowSolutionVisibility: false,
+      });
+
+      const client = new SpacesClient(
+        mockDebugLogger,
+        mockConfig,
+        mockCallWithRequestRepository,
+        [],
+        'traditional'
+      );
+
+      await expect(
+        client.create({ ...spaceToCreate, solution: 'es' })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Unable to create Space, the solution property can not be set when xpack.spaces.allowSolutionVisibility setting is disabled"`
       );
 
       expect(mockCallWithRequestRepository.find).toHaveBeenCalledWith({
@@ -377,12 +619,99 @@ describe('#update', () => {
     const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
     mockCallWithRequestRepository.get.mockResolvedValue(savedObject);
 
-    const client = new SpacesClient(mockDebugLogger, mockConfig, mockCallWithRequestRepository, []);
+    const client = new SpacesClient(
+      mockDebugLogger,
+      mockConfig,
+      mockCallWithRequestRepository,
+      [],
+      'traditional'
+    );
     const id = savedObject.id;
     const actualSpace = await client.update(id, spaceToUpdate);
 
     expect(actualSpace).toEqual(expectedReturnedSpace);
     expect(mockCallWithRequestRepository.update).toHaveBeenCalledWith('space', id, attributes);
+    expect(mockCallWithRequestRepository.get).toHaveBeenCalledWith('space', id);
+  });
+
+  test('throws bad request when solution property is provided in serverless build', async () => {
+    const mockDebugLogger = createMockDebugLogger();
+    const mockConfig = createMockConfig();
+    const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+    mockCallWithRequestRepository.get.mockResolvedValue(savedObject);
+
+    const client = new SpacesClient(
+      mockDebugLogger,
+      mockConfig,
+      mockCallWithRequestRepository,
+      [],
+      'serverless'
+    );
+    const id = savedObject.id;
+
+    await expect(
+      client.update(id, { ...spaceToUpdate, solution: undefined })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Unable to update Space, solution property is forbidden in serverless"`
+    );
+
+    await expect(
+      client.update(id, { ...spaceToUpdate, solution: 'es' })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Unable to update Space, solution property is forbidden in serverless"`
+    );
+
+    expect(mockCallWithRequestRepository.update).not.toHaveBeenCalled();
+
+    expect(mockCallWithRequestRepository.get).not.toHaveBeenCalled();
+  });
+
+  test('throws bad request when solution property is undefined in traditional build', async () => {
+    const mockDebugLogger = createMockDebugLogger();
+    const mockConfig = createMockConfig();
+    const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+    mockCallWithRequestRepository.get.mockResolvedValue(savedObject);
+
+    const client = new SpacesClient(
+      mockDebugLogger,
+      mockConfig,
+      mockCallWithRequestRepository,
+      [],
+      'traditional'
+    );
+    const id = savedObject.id;
+
+    await expect(
+      client.update(id, { ...spaceToUpdate, solution: undefined })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Unable to update Space, solution property cannot be empty"`
+    );
+
+    expect(mockCallWithRequestRepository.update).not.toHaveBeenCalled();
+
+    expect(mockCallWithRequestRepository.get).not.toHaveBeenCalled();
+  });
+
+  test('updates space with solution property using callWithRequestRepository in traditional build', async () => {
+    const mockDebugLogger = createMockDebugLogger();
+    const mockConfig = createMockConfig();
+    const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+    mockCallWithRequestRepository.get.mockResolvedValue(savedObject);
+
+    const client = new SpacesClient(
+      mockDebugLogger,
+      mockConfig,
+      mockCallWithRequestRepository,
+      [],
+      'traditional'
+    );
+    const id = savedObject.id;
+    await client.update(id, { ...spaceToUpdate, solution: 'es' });
+
+    expect(mockCallWithRequestRepository.update).toHaveBeenCalledWith('space', id, {
+      ...attributes,
+      solution: 'es',
+    });
     expect(mockCallWithRequestRepository.get).toHaveBeenCalledWith('space', id);
   });
 
@@ -393,6 +722,7 @@ describe('#update', () => {
         enabled: true,
         maxSpaces: 1000,
         allowFeatureVisibility: false,
+        allowSolutionVisibility: false,
       });
       const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
       mockCallWithRequestRepository.get.mockResolvedValue(savedObject);
@@ -401,7 +731,8 @@ describe('#update', () => {
         mockDebugLogger,
         mockConfig,
         mockCallWithRequestRepository,
-        []
+        [],
+        'traditional'
       );
       const id = savedObject.id;
       const actualSpace = await client.update(id, spaceToUpdate);
@@ -417,6 +748,7 @@ describe('#update', () => {
         enabled: true,
         maxSpaces: 1000,
         allowFeatureVisibility: false,
+        allowSolutionVisibility: false,
       });
       const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
       mockCallWithRequestRepository.get.mockResolvedValue(savedObject);
@@ -425,14 +757,47 @@ describe('#update', () => {
         mockDebugLogger,
         mockConfig,
         mockCallWithRequestRepository,
-        []
+        [],
+        'traditional'
       );
       const id = savedObject.id;
 
-      expect(
+      await expect(
         client.update(id, { ...spaceToUpdate, disabledFeatures: ['some-feature'] })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Unable to update Space, the disabledFeatures array must be empty when xpack.spaces.allowFeatureVisibility setting is disabled"`
+      );
+
+      expect(mockCallWithRequestRepository.update).not.toHaveBeenCalled();
+      expect(mockCallWithRequestRepository.get).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('when config.allowSolutionVisibility is disabled', () => {
+    test(`throws bad request when updating space with solution`, async () => {
+      const mockDebugLogger = createMockDebugLogger();
+      const mockConfig = createMockConfig({
+        enabled: true,
+        maxSpaces: 1000,
+        allowFeatureVisibility: false,
+        allowSolutionVisibility: false,
+      });
+      const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+      mockCallWithRequestRepository.get.mockResolvedValue(savedObject);
+
+      const client = new SpacesClient(
+        mockDebugLogger,
+        mockConfig,
+        mockCallWithRequestRepository,
+        [],
+        'traditional'
+      );
+      const id = savedObject.id;
+
+      await expect(
+        client.update(id, { ...spaceToUpdate, solution: 'es' })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Unable to update Space, the solution property can not be set when xpack.spaces.allowSolutionVisibility setting is disabled"`
       );
 
       expect(mockCallWithRequestRepository.update).not.toHaveBeenCalled();
@@ -473,9 +838,15 @@ describe('#delete', () => {
     const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
     mockCallWithRequestRepository.get.mockResolvedValue(reservedSavedObject);
 
-    const client = new SpacesClient(mockDebugLogger, mockConfig, mockCallWithRequestRepository, []);
+    const client = new SpacesClient(
+      mockDebugLogger,
+      mockConfig,
+      mockCallWithRequestRepository,
+      [],
+      'traditional'
+    );
 
-    expect(client.delete(id)).rejects.toThrowErrorMatchingInlineSnapshot(
+    await expect(client.delete(id)).rejects.toThrowErrorMatchingInlineSnapshot(
       `"The foo space cannot be deleted because it is reserved."`
     );
 
@@ -488,7 +859,13 @@ describe('#delete', () => {
     const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
     mockCallWithRequestRepository.get.mockResolvedValue(notReservedSavedObject);
 
-    const client = new SpacesClient(mockDebugLogger, mockConfig, mockCallWithRequestRepository, []);
+    const client = new SpacesClient(
+      mockDebugLogger,
+      mockConfig,
+      mockCallWithRequestRepository,
+      [],
+      'traditional'
+    );
 
     await client.delete(id);
 
@@ -504,7 +881,13 @@ describe('#disableLegacyUrlAliases', () => {
     const mockConfig = createMockConfig();
     const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
 
-    const client = new SpacesClient(mockDebugLogger, mockConfig, mockCallWithRequestRepository, []);
+    const client = new SpacesClient(
+      mockDebugLogger,
+      mockConfig,
+      mockCallWithRequestRepository,
+      [],
+      'traditional'
+    );
     const aliases = [
       { targetSpace: 'space1', targetType: 'foo', sourceId: '123' },
       { targetSpace: 'space2', targetType: 'bar', sourceId: '456' },

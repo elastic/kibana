@@ -12,6 +12,7 @@ const groupBySchema = t.union([
   t.literal('slo.tags'),
   t.literal('status'),
   t.literal('slo.indicator.type'),
+  t.literal('slo.instanceId'),
   t.literal('_index'),
 ]);
 
@@ -28,7 +29,7 @@ const findSLOGroupsParamsSchema = t.partial({
 
 const sloGroupWithSummaryResponseSchema = t.type({
   group: t.string,
-  groupBy: t.string,
+  groupBy: groupBySchema,
   summary: groupSummarySchema,
 });
 

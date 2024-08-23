@@ -20,6 +20,12 @@ export const getAllActionRoute = (
   router.get(
     {
       path: `${BASE_ACTION_API_PATH}`,
+      options: {
+        access: 'public',
+        summary: `Get all connectors`,
+        deprecated: true,
+        tags: ['oas-tag:connectors'],
+      },
       validate: {},
     },
     router.handleLegacyErrors(async function (context, req, res) {

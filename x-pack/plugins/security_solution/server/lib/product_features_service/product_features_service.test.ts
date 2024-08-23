@@ -40,6 +40,7 @@ const productFeature = {
 };
 const mockGetFeature = jest.fn().mockReturnValue(productFeature);
 jest.mock('@kbn/security-solution-features/product_features', () => ({
+  getAttackDiscoveryFeature: () => mockGetFeature(),
   getAssistantFeature: () => mockGetFeature(),
   getCasesFeature: () => mockGetFeature(),
   getSecurityFeature: () => mockGetFeature(),
@@ -54,8 +55,8 @@ describe('ProductFeaturesService', () => {
     const experimentalFeatures = {} as ExperimentalFeatures;
     new ProductFeaturesService(loggerMock.create(), experimentalFeatures);
 
-    expect(mockGetFeature).toHaveBeenCalledTimes(3);
-    expect(MockedProductFeatures).toHaveBeenCalledTimes(3);
+    expect(mockGetFeature).toHaveBeenCalledTimes(4);
+    expect(MockedProductFeatures).toHaveBeenCalledTimes(4);
   });
 
   it('should init all ProductFeatures when initialized', () => {
@@ -86,8 +87,10 @@ describe('ProductFeaturesService', () => {
     const mockSecurityConfig = new Map() as ProductFeaturesConfig<SecuritySubFeatureId>;
     const mockCasesConfig = new Map() as ProductFeaturesConfig<CasesSubFeatureId>;
     const mockAssistantConfig = new Map() as ProductFeaturesConfig<AssistantSubFeatureId>;
+    const mockAttackDiscoveryConfig = new Map() as ProductFeaturesConfig;
 
     const configurator: ProductFeaturesConfigurator = {
+      attackDiscovery: jest.fn(() => mockAttackDiscoveryConfig),
       security: jest.fn(() => mockSecurityConfig),
       cases: jest.fn(() => mockCasesConfig),
       securityAssistant: jest.fn(() => mockAssistantConfig),
@@ -97,6 +100,7 @@ describe('ProductFeaturesService', () => {
     expect(configurator.security).toHaveBeenCalled();
     expect(configurator.cases).toHaveBeenCalled();
     expect(configurator.securityAssistant).toHaveBeenCalled();
+    expect(configurator.attackDiscovery).toHaveBeenCalled();
 
     expect(MockedProductFeatures.mock.instances[0].setConfig).toHaveBeenCalledWith(
       mockSecurityConfig
@@ -104,6 +108,9 @@ describe('ProductFeaturesService', () => {
     expect(MockedProductFeatures.mock.instances[1].setConfig).toHaveBeenCalledWith(mockCasesConfig);
     expect(MockedProductFeatures.mock.instances[2].setConfig).toHaveBeenCalledWith(
       mockAssistantConfig
+    );
+    expect(MockedProductFeatures.mock.instances[3].setConfig).toHaveBeenCalledWith(
+      mockAttackDiscoveryConfig
     );
   });
 
@@ -127,8 +134,12 @@ describe('ProductFeaturesService', () => {
     const mockAssistantConfig = new Map([
       [ProductFeatureKey.assistant, {}],
     ]) as ProductFeaturesConfig<AssistantSubFeatureId>;
+    const mockAttackDiscoveryConfig = new Map([
+      [ProductFeatureKey.attackDiscovery, {}],
+    ]) as ProductFeaturesConfig;
 
     const configurator: ProductFeaturesConfigurator = {
+      attackDiscovery: jest.fn(() => mockAttackDiscoveryConfig),
       security: jest.fn(() => mockSecurityConfig),
       cases: jest.fn(() => mockCasesConfig),
       securityAssistant: jest.fn(() => mockAssistantConfig),
@@ -139,6 +150,7 @@ describe('ProductFeaturesService', () => {
     expect(productFeaturesService.isEnabled(ProductFeatureKey.endpointExceptions)).toEqual(true);
     expect(productFeaturesService.isEnabled(ProductFeatureKey.casesConnectors)).toEqual(true);
     expect(productFeaturesService.isEnabled(ProductFeatureKey.assistant)).toEqual(true);
+    expect(productFeaturesService.isEnabled(ProductFeatureKey.attackDiscovery)).toEqual(true);
     expect(productFeaturesService.isEnabled(ProductFeatureKey.externalRuleActions)).toEqual(false);
   });
 
@@ -192,7 +204,7 @@ describe('ProductFeaturesService', () => {
       expect(mockHttpSetup.registerOnPostAuth).toHaveBeenCalledTimes(1);
     });
 
-    it('should authorize when no tag matches', () => {
+    it('should authorize when no tag matches', async () => {
       const experimentalFeatures = {} as ExperimentalFeatures;
       const productFeaturesService = new ProductFeaturesService(
         loggerMock.create(),
@@ -200,14 +212,14 @@ describe('ProductFeaturesService', () => {
       );
       productFeaturesService.registerApiAccessControl(mockHttpSetup);
 
-      lastRegisteredFn(getReq(['access:something', 'access:securitySolution']), res, toolkit);
+      await lastRegisteredFn(getReq(['access:something', 'access:securitySolution']), res, toolkit);
 
       expect(MockedProductFeatures.mock.instances[0].isActionRegistered).not.toHaveBeenCalled();
       expect(res.notFound).not.toHaveBeenCalled();
       expect(toolkit.next).toHaveBeenCalledTimes(1);
     });
 
-    it('should check when tag matches and return not found when not action registered', () => {
+    it('should check when tag matches and return not found when not action registered', async () => {
       const experimentalFeatures = {} as ExperimentalFeatures;
       const productFeaturesService = new ProductFeaturesService(
         loggerMock.create(),
@@ -218,7 +230,7 @@ describe('ProductFeaturesService', () => {
       (MockedProductFeatures.mock.instances[0].isActionRegistered as jest.Mock).mockReturnValueOnce(
         false
       );
-      lastRegisteredFn(getReq(['access:securitySolution-foo']), res, toolkit);
+      await lastRegisteredFn(getReq(['access:securitySolution-foo']), res, toolkit);
 
       expect(MockedProductFeatures.mock.instances[0].isActionRegistered).toHaveBeenCalledWith(
         'api:securitySolution-foo'
@@ -227,7 +239,7 @@ describe('ProductFeaturesService', () => {
       expect(toolkit.next).not.toHaveBeenCalled();
     });
 
-    it('should check when tag matches and continue when action registered', () => {
+    it('should check when tag matches and continue when action registered', async () => {
       const experimentalFeatures = {} as ExperimentalFeatures;
       const productFeaturesService = new ProductFeaturesService(
         loggerMock.create(),
@@ -238,7 +250,7 @@ describe('ProductFeaturesService', () => {
       (MockedProductFeatures.mock.instances[0].isActionRegistered as jest.Mock).mockReturnValueOnce(
         true
       );
-      lastRegisteredFn(getReq(['access:securitySolution-foo']), res, toolkit);
+      await lastRegisteredFn(getReq(['access:securitySolution-foo']), res, toolkit);
 
       expect(MockedProductFeatures.mock.instances[0].isActionRegistered).toHaveBeenCalledWith(
         'api:securitySolution-foo'
@@ -247,7 +259,7 @@ describe('ProductFeaturesService', () => {
       expect(toolkit.next).toHaveBeenCalledTimes(1);
     });
 
-    it('should check when productFeature tag when it matches and return not found when not enabled', () => {
+    it('should check when productFeature tag when it matches and return not found when not enabled', async () => {
       const experimentalFeatures = {} as ExperimentalFeatures;
       const productFeaturesService = new ProductFeaturesService(
         loggerMock.create(),
@@ -257,14 +269,14 @@ describe('ProductFeaturesService', () => {
 
       productFeaturesService.isEnabled = jest.fn().mockReturnValueOnce(false);
 
-      lastRegisteredFn(getReq(['securitySolutionProductFeature:foo']), res, toolkit);
+      await lastRegisteredFn(getReq(['securitySolutionProductFeature:foo']), res, toolkit);
 
       expect(productFeaturesService.isEnabled).toHaveBeenCalledWith('foo');
       expect(res.notFound).toHaveBeenCalledTimes(1);
       expect(toolkit.next).not.toHaveBeenCalled();
     });
 
-    it('should check when productFeature tag when it matches and continue when enabled', () => {
+    it('should check when productFeature tag when it matches and continue when enabled', async () => {
       const experimentalFeatures = {} as ExperimentalFeatures;
       const productFeaturesService = new ProductFeaturesService(
         loggerMock.create(),
@@ -274,7 +286,7 @@ describe('ProductFeaturesService', () => {
 
       productFeaturesService.isEnabled = jest.fn().mockReturnValueOnce(true);
 
-      lastRegisteredFn(getReq(['securitySolutionProductFeature:foo']), res, toolkit);
+      await lastRegisteredFn(getReq(['securitySolutionProductFeature:foo']), res, toolkit);
 
       expect(productFeaturesService.isEnabled).toHaveBeenCalledWith('foo');
       expect(res.notFound).not.toHaveBeenCalled();

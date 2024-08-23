@@ -13,7 +13,7 @@ const { Palettes: strings } = LibStrings;
 /**
  * This type contains a unions of all supported palette ids.
  */
-export type PaletteID = typeof palettes[number]['id'];
+export type PaletteID = (typeof palettes)[number]['id'];
 
 /**
  * An interface representing a color palette in Canvas, with a textual label and a set of

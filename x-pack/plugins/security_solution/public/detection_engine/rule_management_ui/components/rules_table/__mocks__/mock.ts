@@ -199,6 +199,7 @@ export const mockAboutStepRule = (): AboutStepRule => ({
   note: '# this is some markdown documentation',
   setup: '# this is some setup documentation',
   investigationFields: ['foo', 'bar'],
+  maxSignals: 100,
 });
 
 export const mockActionsStepRule = (enabled = false): ActionsStepRule => ({
@@ -215,8 +216,18 @@ export const mockDefineStepRule = (): DefineStepRule => ({
   dataViewId: undefined,
   queryBar: mockQueryBar,
   threatQueryBar: mockQueryBar,
-  requiredFields: [],
-  relatedIntegrations: [],
+  requiredFields: [{ name: 'host.name', type: 'keyword' }],
+  relatedIntegrations: [
+    {
+      package: 'aws',
+      integration: 'route53',
+      version: '~1.2.3',
+    },
+    {
+      package: 'system',
+      version: '^1.2.3',
+    },
+  ],
   threatMapping: [],
   timeline: {
     id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',

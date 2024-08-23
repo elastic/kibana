@@ -57,13 +57,15 @@ export class TabifyBuckets {
     const buckets = this.buckets;
 
     if (this.objectMode) {
-      this._keys.forEach((key) => {
+      for (let i = 0; i < this._keys.length; i++) {
+        const key = this._keys[i];
         fn(buckets[key], key);
-      });
+      }
     } else {
-      buckets.forEach((bucket: AggResponseBucket) => {
+      for (let i = 0; i < buckets.length; i++) {
+        const bucket = buckets[i];
         fn(bucket, bucket.key);
-      });
+      }
     }
   }
 

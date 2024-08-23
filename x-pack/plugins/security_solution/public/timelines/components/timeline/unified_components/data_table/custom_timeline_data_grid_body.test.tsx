@@ -17,6 +17,8 @@ import type { EuiDataGridColumn } from '@elastic/eui';
 import { useStatefulRowRenderer } from '../../body/events/stateful_row_renderer/use_stateful_row_renderer';
 import { TIMELINE_EVENT_DETAIL_ROW_ID } from '../../body/constants';
 
+jest.mock('../../../../../common/hooks/use_selector');
+
 const testDataRows = structuredClone(mockTimelineData);
 
 jest.mock('../../body/events/stateful_row_renderer/use_stateful_row_renderer');

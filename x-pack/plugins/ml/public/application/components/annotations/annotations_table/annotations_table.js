@@ -692,7 +692,7 @@ class AnnotationsTableUI extends Component {
     columns.push(
       {
         align: RIGHT_ALIGNMENT,
-        width: '60px',
+        width: '65px',
         name: i18n.translate('xpack.ml.annotationsTable.actionsColumnName', {
           defaultMessage: 'Actions',
         }),

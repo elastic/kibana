@@ -30,3 +30,4 @@ export {
   createDeletePhaseActions,
 } from './phases';
 export { createRequestFlyoutActions } from './request_flyout_actions';
+export { createDeleteSearchableSnapshotActions } from './delete_searchable_snapshot_actions';

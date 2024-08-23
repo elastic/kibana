@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -29,7 +29,7 @@ export interface AppMockRenderer {
   render: UiRender;
   coreStart: CoreStart;
   queryClient: QueryClient;
-  AppWrapper: React.FC<{ children: React.ReactElement }>;
+  AppWrapper: FC<PropsWithChildren<unknown>>;
   mocked: {
     setBadge: jest.Mock;
   };
@@ -78,7 +78,7 @@ export const createAppMockRenderer = ({
       setBadge: mockedSetBadge,
     },
   };
-  const AppWrapper: React.FC<{ children: React.ReactElement }> = React.memo(({ children }) => (
+  const AppWrapper = React.memo<PropsWithChildren<unknown>>(({ children }) => (
     <KibanaRenderContextProvider {...core}>
       <KibanaContextProvider services={services}>
         <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>

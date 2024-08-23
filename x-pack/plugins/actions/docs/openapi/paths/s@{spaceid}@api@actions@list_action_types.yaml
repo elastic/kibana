@@ -1,5 +1,5 @@
 get:
-  summary: Retrieves a list of all connector types.
+  summary: Get connector types
   operationId: legacyGetConnectorTypes
   deprecated: true
   description: Deprecated in 7.13.0. Use the get all connector types API instead.
@@ -28,8 +28,7 @@ get:
                 enabledInLicense:
                   type: boolean
                   description: Indicates whether the connector is enabled in the license.
-                  examples:
-                    - true
+                  example: true
                 id:
                   type: string
                   description: The unique identifier for the connector type.

@@ -10,7 +10,6 @@
     "@kbn/core",
     "@kbn/react-kibana-mount",
     "@kbn/core-i18n-browser",
-    "@kbn/core-notifications-browser-mocks",
   ],
   "exclude": ["target/**/*"]
 }

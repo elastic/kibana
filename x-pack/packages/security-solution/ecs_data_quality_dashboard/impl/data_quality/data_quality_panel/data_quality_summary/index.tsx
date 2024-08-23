@@ -6,108 +6,75 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
-import { getErrorSummaries } from '../../helpers';
 import { StatsRollup } from '../pattern/pattern_summary/stats_rollup';
 import { SummaryActions } from './summary_actions';
-import type { OnCheckCompleted, PatternRollup } from '../../types';
+import { IlmPhaseFilter } from './ilm_phase_filter';
+import { useDataQualityContext } from '../data_quality_context';
+import { useResultsRollupContext } from '../../contexts/results_rollup_context';
 
 const MAX_SUMMARY_ACTIONS_CONTAINER_WIDTH = 400;
 const MIN_SUMMARY_ACTIONS_CONTAINER_WIDTH = 235;
 
+const StyledFlexGroup = styled(EuiFlexGroup)`
+  min-height: calc(174px - ${({ theme }) => theme.eui.euiSizeL} * 2);
+`;
+
+const StyledFlexItem = styled(EuiFlexItem)`
+  gap: ${({ theme }) => theme.eui.euiSizeL};
+`;
+
 const SummaryActionsContainerFlexItem = styled(EuiFlexItem)`
   max-width: ${MAX_SUMMARY_ACTIONS_CONTAINER_WIDTH}px;
   min-width: ${MIN_SUMMARY_ACTIONS_CONTAINER_WIDTH}px;
-  padding-right: ${({ theme }) => theme.eui.euiSizeXL};
 `;
 
-export interface Props {
-  addSuccessToast: (toast: { title: string }) => void;
-  canUserCreateAndReadCases: () => boolean;
-  formatBytes: (value: number | undefined) => string;
-  formatNumber: (value: number | undefined) => string;
-  ilmPhases: string[];
-  lastChecked: string;
-  openCreateCaseFlyout: ({
-    comments,
-    headerContent,
-  }: {
-    comments: string[];
-    headerContent?: React.ReactNode;
-  }) => void;
-  patternIndexNames: Record<string, string[]>;
-  patternRollups: Record<string, PatternRollup>;
-  patterns: string[];
-  setLastChecked: (lastChecked: string) => void;
-  totalDocsCount: number | undefined;
-  totalIncompatible: number | undefined;
-  totalIndices: number | undefined;
-  totalIndicesChecked: number | undefined;
-  totalSizeInBytes: number | undefined;
-  onCheckCompleted: OnCheckCompleted;
-}
+const StyledIlmPhaseFilterContainer = styled.div`
+  width: 100%;
+  max-width: 432px;
+  align-self: flex-end;
+`;
 
-const DataQualitySummaryComponent: React.FC<Props> = ({
-  addSuccessToast,
-  canUserCreateAndReadCases,
-  formatBytes,
-  formatNumber,
-  ilmPhases,
-  lastChecked,
-  openCreateCaseFlyout,
-  patternIndexNames,
-  patternRollups,
-  patterns,
-  setLastChecked,
-  totalDocsCount,
-  totalIncompatible,
-  totalIndices,
-  totalIndicesChecked,
-  totalSizeInBytes,
-  onCheckCompleted,
-}) => {
-  const errorSummary = useMemo(() => getErrorSummaries(patternRollups), [patternRollups]);
+const StyledRollupContainer = styled.div`
+  margin-top: auto;
+`;
+
+const DataQualitySummaryComponent: React.FC = () => {
+  const { isILMAvailable } = useDataQualityContext();
+  const { totalIndices, totalDocsCount, totalIndicesChecked, totalIncompatible, totalSizeInBytes } =
+    useResultsRollupContext();
 
   return (
-    <EuiPanel data-test-subj="dataQualitySummary" hasShadow={true}>
-      <EuiFlexGroup alignItems="flexStart" gutterSize="none" justifyContent="spaceBetween">
+    <EuiPanel paddingSize="l" data-test-subj="dataQualitySummary" hasShadow={true}>
+      <StyledFlexGroup
+        alignItems="stretch"
+        gutterSize="none"
+        justifyContent="spaceBetween"
+        wrap={true}
+      >
         <SummaryActionsContainerFlexItem grow={false}>
-          <SummaryActions
-            addSuccessToast={addSuccessToast}
-            canUserCreateAndReadCases={canUserCreateAndReadCases}
-            formatBytes={formatBytes}
-            formatNumber={formatNumber}
-            errorSummary={errorSummary}
-            ilmPhases={ilmPhases}
-            lastChecked={lastChecked}
-            onCheckCompleted={onCheckCompleted}
-            openCreateCaseFlyout={openCreateCaseFlyout}
-            patternIndexNames={patternIndexNames}
-            patterns={patterns}
-            patternRollups={patternRollups}
-            setLastChecked={setLastChecked}
-            sizeInBytes={totalSizeInBytes}
-            totalDocsCount={totalDocsCount}
-            totalIncompatible={totalIncompatible}
-            totalIndices={totalIndices}
-            totalIndicesChecked={totalIndicesChecked}
-          />
+          <SummaryActions />
         </SummaryActionsContainerFlexItem>
 
-        <EuiFlexItem grow={false}>
-          <StatsRollup
-            docsCount={totalDocsCount}
-            formatBytes={formatBytes}
-            formatNumber={formatNumber}
-            incompatible={totalIncompatible}
-            indices={totalIndices}
-            indicesChecked={totalIndicesChecked}
-            sizeInBytes={totalSizeInBytes}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        <StyledFlexItem grow={false}>
+          {isILMAvailable && (
+            <StyledIlmPhaseFilterContainer>
+              <IlmPhaseFilter />
+            </StyledIlmPhaseFilterContainer>
+          )}
+          <StyledRollupContainer>
+            <StatsRollup
+              docsCount={totalDocsCount}
+              incompatible={totalIncompatible}
+              indices={totalIndices}
+              indicesChecked={totalIndicesChecked}
+              sizeInBytes={totalSizeInBytes}
+            />
+          </StyledRollupContainer>
+        </StyledFlexItem>
+      </StyledFlexGroup>
     </EuiPanel>
   );
 };

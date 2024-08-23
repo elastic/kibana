@@ -5,26 +5,31 @@
  * 2.0.
  */
 
-import type { DocLinksStart, OverlayStart } from '@kbn/core/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 
 import React, { useCallback } from 'react';
 
 // Direct imports are important here, importing all hooks breaks unit tests
 // and increases bundle size because this is imported on first page load
+import type { FleetStartServices } from '../../../plugin';
+
 import { useStartServices } from '../../../hooks/use_core';
 import { ConfirmOpenUnverifiedModal } from '../components/confirm_open_unverified_modal';
 
+type StartServicesConfirmOpen = Pick<
+  FleetStartServices,
+  'docLinks' | 'overlays' | 'analytics' | 'i18n' | 'theme'
+>;
+
 const confirmOpenUnverified = ({
   pkgName,
-  overlays,
-  docLinks,
+  fleetServices,
 }: {
   pkgName: string;
-  overlays: OverlayStart;
-  docLinks: DocLinksStart;
+  fleetServices: StartServicesConfirmOpen;
 }): Promise<boolean> =>
   new Promise((resolve) => {
+    const { overlays, docLinks, ...startServices } = fleetServices;
     const session = overlays.openModal(
       toMountPoint(
         <ConfirmOpenUnverifiedModal
@@ -38,16 +43,17 @@ const confirmOpenUnverified = ({
             resolve(false);
           }}
           docLinks={docLinks}
-        />
+        />,
+        startServices
       )
     );
   });
 
 export const useConfirmOpenUnverified = () => {
-  const { overlays, docLinks } = useStartServices();
+  const fleetServices = useStartServices();
 
   return useCallback(
-    (pkgName: string) => confirmOpenUnverified({ pkgName, overlays, docLinks }),
-    [docLinks, overlays]
+    (pkgName: string) => confirmOpenUnverified({ pkgName, fleetServices }),
+    [fleetServices]
   );
 };

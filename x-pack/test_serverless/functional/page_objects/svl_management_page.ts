@@ -43,5 +43,21 @@ export function SvlManagementPageProvider({ getService }: FtrProviderContext) {
     async clickOrgMembersManagementCard() {
       await testSubjects.click('app-card-organization_members');
     },
+
+    // Ingest Pipelines
+    async clickIngestPipelinesManagementCard() {
+      await testSubjects.click('app-card-ingest_pipelines');
+    },
+
+    // Spaces card
+    async assertSpacesManagementCardExists() {
+      await testSubjects.existOrFail('app-card-spaces');
+    },
+    async assertSpacesManagementCardDoesNotExist() {
+      await testSubjects.missingOrFail('app-card-spaces');
+    },
+    async clickSpacesManagementCard() {
+      await testSubjects.click('app-card-spaces');
+    },
   };
 }

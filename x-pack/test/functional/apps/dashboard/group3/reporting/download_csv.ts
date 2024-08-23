@@ -39,7 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const getCsvReportData = async () => {
     await toasts.dismissAll();
     const url = await PageObjects.reporting.getReportURL(60000);
-    const res = await PageObjects.reporting.getResponse(url);
+    const res = await PageObjects.reporting.getResponse(url ?? '');
 
     expect(res.status).to.equal(200);
     expect(res.get('content-type')).to.equal('text/csv; charset=utf-8');
@@ -52,13 +52,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   const clickDownloadCsv = async () => {
-    log.debug('click "More"');
-    await dashboardPanelActions.clickContextMenuMoreItem();
-
-    const actionItemTestSubj = 'embeddablePanelAction-generateCsvReport';
-    await testSubjects.existOrFail(actionItemTestSubj); // wait for the full panel to display or else the test runner could click the wrong option!
     log.debug('click "Generate CSV"');
-    await testSubjects.click(actionItemTestSubj);
+    await dashboardPanelActions.clickContextMenuItem('embeddablePanelAction-generateCsvReport');
     await testSubjects.existOrFail('csvReportStarted'); // validate toast panel
   };
 

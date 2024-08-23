@@ -6,8 +6,9 @@
  */
 
 import { cloneDeep, getOr } from 'lodash/fp';
-import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse } from '@kbn/search-types';
 import { buildAlertFieldsRequest as buildFieldsRequest } from '@kbn/alerts-as-data-utils';
+import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { TimelineEventsQueries } from '../../../../../../common/api/search_strategy';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 import {
@@ -46,7 +47,7 @@ export const timelineEventsAll: TimelineFactory<TimelineEventsQueries.all> = {
     } = options;
     const producerBuckets = getOr([], 'aggregations.producers.buckets', response.rawResponse);
     const totalCount = response.rawResponse.hits.total || 0;
-    const hits = response.rawResponse.hits.hits;
+    const hits: SearchHit[] = getOr([], 'rawResponse.hits.hits', response);
 
     if (fieldRequested.includes('*') && hits.length > 0) {
       const fieldsReturned = hits.flatMap((hit) => Object.keys(hit.fields ?? {}));

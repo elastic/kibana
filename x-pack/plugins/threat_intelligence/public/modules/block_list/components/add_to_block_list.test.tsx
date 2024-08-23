@@ -12,7 +12,7 @@ import { BlockListProvider } from '../../indicators/containers/block_list_provid
 import { SecuritySolutionContext } from '../../../containers/security_solution_context';
 import { SecuritySolutionPluginContext } from '../../..';
 import { getSecuritySolutionContextMock } from '../../../mocks/mock_security_context';
-
+import { I18nProvider } from '@kbn/i18n-react';
 const TEST_ID = 'test';
 
 describe('<AddToBlockListContextMenu />', () => {
@@ -23,15 +23,17 @@ describe('<AddToBlockListContextMenu />', () => {
     const mockOnClick: () => void = () => window.alert('clicked!');
 
     const { getByTestId, getAllByText } = render(
-      <SecuritySolutionContext.Provider value={mockSecurityContext}>
-        <BlockListProvider>
-          <AddToBlockListContextMenu
-            data={mockIndicatorFileHashValue}
-            onClick={mockOnClick}
-            data-test-subj={TEST_ID}
-          />
-        </BlockListProvider>
-      </SecuritySolutionContext.Provider>
+      <I18nProvider>
+        <SecuritySolutionContext.Provider value={mockSecurityContext}>
+          <BlockListProvider>
+            <AddToBlockListContextMenu
+              data={mockIndicatorFileHashValue}
+              onClick={mockOnClick}
+              data-test-subj={TEST_ID}
+            />
+          </BlockListProvider>
+        </SecuritySolutionContext.Provider>
+      </I18nProvider>
     );
 
     expect(getByTestId(TEST_ID)).toBeInTheDocument();
@@ -45,15 +47,17 @@ describe('<AddToBlockListContextMenu />', () => {
     const mockOnClick: () => void = () => window.alert('clicked!');
 
     const { getByTestId } = render(
-      <SecuritySolutionContext.Provider value={mockSecurityContext}>
-        <BlockListProvider>
-          <AddToBlockListContextMenu
-            data={mockIndicatorFileHashValue}
-            onClick={mockOnClick}
-            data-test-subj={TEST_ID}
-          />
-        </BlockListProvider>
-      </SecuritySolutionContext.Provider>
+      <I18nProvider>
+        <SecuritySolutionContext.Provider value={mockSecurityContext}>
+          <BlockListProvider>
+            <AddToBlockListContextMenu
+              data={mockIndicatorFileHashValue}
+              onClick={mockOnClick}
+              data-test-subj={TEST_ID}
+            />
+          </BlockListProvider>
+        </SecuritySolutionContext.Provider>
+      </I18nProvider>
     );
 
     expect(getByTestId(TEST_ID)).toHaveAttribute('disabled');
@@ -67,15 +71,17 @@ describe('<AddToBlockListContextMenu />', () => {
     const mockOnClick: () => void = () => window.alert('clicked!');
 
     const { getByTestId } = render(
-      <SecuritySolutionContext.Provider value={mockSecurityContext}>
-        <BlockListProvider>
-          <AddToBlockListContextMenu
-            data={mockIndicatorFileHashValue}
-            onClick={mockOnClick}
-            data-test-subj={TEST_ID}
-          />
-        </BlockListProvider>
-      </SecuritySolutionContext.Provider>
+      <I18nProvider>
+        <SecuritySolutionContext.Provider value={mockSecurityContext}>
+          <BlockListProvider>
+            <AddToBlockListContextMenu
+              data={mockIndicatorFileHashValue}
+              onClick={mockOnClick}
+              data-test-subj={TEST_ID}
+            />
+          </BlockListProvider>
+        </SecuritySolutionContext.Provider>
+      </I18nProvider>
     );
 
     expect(getByTestId(TEST_ID)).toHaveAttribute('disabled');

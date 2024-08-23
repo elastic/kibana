@@ -7,44 +7,7 @@
 
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import {
-  doLogsEndpointActionDsExists,
-  doesLogsEndpointActionsIndexExist,
-} from './yes_no_data_stream';
-
-describe('Accurately answers if index template for data stream exists', () => {
-  let esClient: ElasticsearchClientMock;
-
-  beforeEach(() => {
-    esClient = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
-  });
-
-  it('Returns FALSE for a non-existent data stream index template', async () => {
-    esClient.indices.existsIndexTemplate.mockResponseImplementation(() => ({
-      body: false,
-      statusCode: 404,
-    }));
-    const doesItExist = await doLogsEndpointActionDsExists({
-      esClient,
-      logger: loggingSystemMock.create().get('host-isolation'),
-      dataStreamName: '.test-stream.name',
-    });
-    expect(doesItExist).toBeFalsy();
-  });
-
-  it('Returns TRUE for an existing index', async () => {
-    esClient.indices.existsIndexTemplate.mockResponseImplementation(() => ({
-      body: true,
-      statusCode: 200,
-    }));
-    const doesItExist = await doLogsEndpointActionDsExists({
-      esClient,
-      logger: loggingSystemMock.create().get('host-isolation'),
-      dataStreamName: '.test-stream.name',
-    });
-    expect(doesItExist).toBeTruthy();
-  });
-});
+import { doesLogsEndpointActionsIndexExist } from './yes_no_data_stream';
 
 describe('Accurately answers if index exists', () => {
   let esClient: ElasticsearchClientMock;

@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-export function remove(keystore, key) {
+export async function remove(keystore, key) {
+  await keystore.load();
   keystore.remove(key);
   keystore.save();
 }

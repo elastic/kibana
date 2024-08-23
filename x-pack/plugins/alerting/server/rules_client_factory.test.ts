@@ -14,6 +14,7 @@ import {
   loggingSystemMock,
   savedObjectsRepositoryMock,
   uiSettingsServiceMock,
+  securityServiceMock,
 } from '@kbn/core/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
@@ -27,8 +28,13 @@ import { AlertingAuthorization } from './authorization';
 import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
+import {
+  AD_HOC_RUN_SAVED_OBJECT_TYPE,
+  API_KEY_PENDING_INVALIDATION_TYPE,
+  RULE_SAVED_OBJECT_TYPE,
+} from './saved_objects';
+import { backfillClientMock } from './backfill_client/backfill_client.mock';
 import { ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
-import { RULE_SAVED_OBJECT_TYPE } from './saved_objects';
 
 jest.mock('./rules_client');
 jest.mock('./authorization/alerting_authorization');
@@ -38,10 +44,12 @@ const savedObjectsService = savedObjectsServiceMock.createInternalStartContract(
 
 const securityPluginSetup = securityMock.createSetup();
 const securityPluginStart = securityMock.createStart();
+const securityService = securityServiceMock.createStart();
 
 const alertingAuthorization = alertingAuthorizationMock.create();
 const alertingAuthorizationClientFactory = alertingAuthorizationClientFactoryMock.createFactory();
 const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
+const backfillClient = backfillClientMock.create();
 
 const rulesClientFactoryParams: jest.Mocked<RulesClientFactoryOpts> = {
   logger: loggingSystemMock.create().get(),
@@ -58,8 +66,10 @@ const rulesClientFactoryParams: jest.Mocked<RulesClientFactoryOpts> = {
   kibanaVersion: '7.10.0',
   authorization:
     alertingAuthorizationClientFactory as unknown as AlertingAuthorizationClientFactory,
+  backfillClient,
   connectorAdapterRegistry: new ConnectorAdapterRegistry(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
+  securityService: securityServiceMock.createStart(),
   getAlertIndicesAlias: jest.fn(),
   alertsService: null,
 };
@@ -80,7 +90,11 @@ beforeEach(() => {
 
 test('creates a rules client with proper constructor arguments when security is enabled', async () => {
   const factory = new RulesClientFactory();
-  factory.initialize({ securityPluginSetup, securityPluginStart, ...rulesClientFactoryParams });
+  factory.initialize({
+    securityPluginSetup,
+    securityPluginStart,
+    ...rulesClientFactoryParams,
+  });
   const request = mockRouter.createKibanaRequest();
 
   savedObjectsService.getScopedClient.mockReturnValue(savedObjectsClient);
@@ -92,7 +106,11 @@ test('creates a rules client with proper constructor arguments when security is 
 
   expect(savedObjectsService.getScopedClient).toHaveBeenCalledWith(request, {
     excludedExtensions: [SECURITY_EXTENSION_ID],
-    includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE, 'api_key_pending_invalidation'],
+    includedHiddenTypes: [
+      RULE_SAVED_OBJECT_TYPE,
+      API_KEY_PENDING_INVALIDATION_TYPE,
+      AD_HOC_RUN_SAVED_OBJECT_TYPE,
+    ],
   });
 
   expect(alertingAuthorizationClientFactory.create).toHaveBeenCalledWith(request);
@@ -125,6 +143,7 @@ test('creates a rules client with proper constructor arguments when security is 
     isSystemAction: expect.any(Function),
     getAlertIndicesAlias: expect.any(Function),
     alertsService: null,
+    backfillClient,
     uiSettings: rulesClientFactoryParams.uiSettings,
   });
 });
@@ -143,7 +162,11 @@ test('creates a rules client with proper constructor arguments', async () => {
 
   expect(savedObjectsService.getScopedClient).toHaveBeenCalledWith(request, {
     excludedExtensions: [SECURITY_EXTENSION_ID],
-    includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE, 'api_key_pending_invalidation'],
+    includedHiddenTypes: [
+      RULE_SAVED_OBJECT_TYPE,
+      API_KEY_PENDING_INVALIDATION_TYPE,
+      AD_HOC_RUN_SAVED_OBJECT_TYPE,
+    ],
   });
 
   expect(alertingAuthorizationClientFactory.create).toHaveBeenCalledWith(request);
@@ -172,6 +195,7 @@ test('creates a rules client with proper constructor arguments', async () => {
     isSystemAction: expect.any(Function),
     getAlertIndicesAlias: expect.any(Function),
     alertsService: null,
+    backfillClient,
     uiSettings: rulesClientFactoryParams.uiSettings,
   });
 });
@@ -190,13 +214,12 @@ test('getUserName() returns a name when security is enabled', async () => {
   const factory = new RulesClientFactory();
   factory.initialize({
     ...rulesClientFactoryParams,
-    securityPluginSetup,
-    securityPluginStart,
+    securityService,
   });
   factory.create(mockRouter.createKibanaRequest(), savedObjectsService);
   const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
 
-  securityPluginStart.authc.getCurrentUser.mockReturnValueOnce({
+  securityService.authc.getCurrentUser.mockReturnValueOnce({
     username: 'bob',
   } as unknown as AuthenticatedUser);
   const userNameResult = await constructorCall.getUserName();
@@ -238,6 +261,7 @@ test('createAPIKey() returns an API key when security is enabled', async () => {
   const factory = new RulesClientFactory();
   factory.initialize({
     ...rulesClientFactoryParams,
+    securityService,
     securityPluginSetup,
     securityPluginStart,
   });
@@ -268,6 +292,7 @@ test('createAPIKey() throws when security plugin createAPIKey throws an error', 
   const factory = new RulesClientFactory();
   factory.initialize({
     ...rulesClientFactoryParams,
+    securityService,
     securityPluginSetup,
     securityPluginStart,
   });

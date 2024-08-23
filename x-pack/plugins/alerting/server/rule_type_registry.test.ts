@@ -40,7 +40,6 @@ beforeEach(() => {
     licensing: licensingMock.createSetup(),
     minimumScheduleInterval: { value: '1m', enforce: false },
     inMemoryMetrics,
-    latestRuleVersion: 1,
   };
 });
 
@@ -313,6 +312,59 @@ describe('Create Lifecycle', () => {
       );
     });
 
+    test('throws if RuleType action groups contain duplicate severity levels', () => {
+      const ruleType: RuleType<
+        never,
+        never,
+        never,
+        never,
+        never,
+        'high' | 'medium' | 'low' | 'nodata',
+        'recovered',
+        {}
+      > = {
+        id: 'test',
+        name: 'Test',
+        actionGroups: [
+          {
+            id: 'high',
+            name: 'Default',
+            severity: { level: 3 },
+          },
+          {
+            id: 'medium',
+            name: 'Default',
+            severity: { level: 0 },
+          },
+          {
+            id: 'low',
+            name: 'Default',
+            severity: { level: 0 },
+          },
+          {
+            id: 'nodata',
+            name: 'Default',
+          },
+        ],
+        defaultActionGroupId: 'medium',
+        minimumLicenseRequired: 'basic',
+        isExportable: true,
+        executor: jest.fn(),
+        category: 'test',
+        producer: 'alerts',
+        validate: {
+          params: { validate: (params) => params },
+        },
+      };
+      const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
+
+      expect(() => registry.register(ruleType)).toThrowError(
+        new Error(
+          `Rule type [id="${ruleType.id}"] cannot be registered. Action group definitions cannot contain duplicate severity levels.`
+        )
+      );
+    });
+
     test('allows an RuleType to specify a custom recovery group', () => {
       const ruleType: RuleType<never, never, never, never, never, 'default', 'backToAwesome', {}> =
         {
@@ -379,6 +431,59 @@ describe('Create Lifecycle', () => {
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
       registry.register(ruleType);
       expect(registry.get('test').ruleTaskTimeout).toBe('13m');
+    });
+
+    test('allows RuleType action groups to specify severity levels', () => {
+      const actionGroups: Array<ActionGroup<'high' | 'medium' | 'low' | 'nodata'>> = [
+        {
+          id: 'high',
+          name: 'Default',
+          severity: { level: 2 },
+        },
+        {
+          id: 'medium',
+          name: 'Default',
+          severity: { level: 1 },
+        },
+        {
+          id: 'low',
+          name: 'Default',
+          severity: { level: 0 },
+        },
+        {
+          id: 'nodata',
+          name: 'Default',
+        },
+      ];
+      const ruleType: RuleType<
+        never,
+        never,
+        never,
+        never,
+        never,
+        'high' | 'medium' | 'low' | 'nodata',
+        'recovered',
+        {}
+      > = {
+        id: 'test',
+        name: 'Test',
+        actionGroups,
+        defaultActionGroupId: 'medium',
+        minimumLicenseRequired: 'basic',
+        isExportable: true,
+        executor: jest.fn(),
+        category: 'test',
+        producer: 'alerts',
+        validate: {
+          params: { validate: (params) => params },
+        },
+      };
+      const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
+      registry.register(ruleType);
+      expect(registry.get('test').actionGroups).toEqual([
+        ...actionGroups,
+        { id: 'recovered', name: 'Recovered' },
+      ]);
     });
 
     test('throws if the custom recovery group is contained in the RuleType action groups', () => {
@@ -455,6 +560,39 @@ describe('Create Lifecycle', () => {
         'alerting:test': {
           timeout: '20m',
           title: 'Test',
+        },
+      });
+    });
+
+    test('injects custom cost for certain rule types', () => {
+      const ruleType: RuleType<never, never, never, never, never, 'default', 'recovered', {}> = {
+        id: 'siem.indicatorRule',
+        name: 'Test',
+        actionGroups: [
+          {
+            id: 'default',
+            name: 'Default',
+          },
+        ],
+        defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        isExportable: true,
+        executor: jest.fn(),
+        category: 'test',
+        producer: 'alerts',
+        ruleTaskTimeout: '20m',
+        validate: {
+          params: { validate: (params) => params },
+        },
+      };
+      const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
+      registry.register(ruleType);
+      expect(taskManager.registerTaskDefinitions).toHaveBeenCalledTimes(1);
+      expect(taskManager.registerTaskDefinitions.mock.calls[0][0]).toMatchObject({
+        'alerting:siem.indicatorRule': {
+          timeout: '20m',
+          title: 'Test',
+          cost: 10,
         },
       });
     });
@@ -911,16 +1049,6 @@ describe('Create Lifecycle', () => {
       expect(() =>
         ruleTypeRegistry.ensureRuleTypeEnabled('test')
       ).toThrowErrorMatchingInlineSnapshot(`"Fail"`);
-    });
-  });
-
-  describe('getLatestRuleVersion', () => {
-    test('should return the latest rule version', async () => {
-      const ruleTypeRegistry = new RuleTypeRegistry({
-        ...ruleTypeRegistryParams,
-        latestRuleVersion: 5,
-      });
-      expect(ruleTypeRegistry.getLatestRuleVersion()).toBe(5);
     });
   });
 });

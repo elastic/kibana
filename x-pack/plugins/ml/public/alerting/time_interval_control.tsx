@@ -37,6 +37,7 @@ export const TimeIntervalControl: FC<TimeIntervalControlProps> = ({
       label={label}
       isInvalid={isInvalid}
       error={invalidTimeIntervalMessage(value ?? undefined)}
+      data-test-subj={'mlAnomalyAlertAdvancedSettingsLookbackInterval'}
     >
       <EuiFieldText
         {...fieldTextProps}

@@ -22,5 +22,5 @@ export type ComparatorDefinition<StateType, KeyType extends keyof StateType> = [
 ];
 
 export type StateComparators<StateType> = {
-  [KeyType in keyof StateType]: ComparatorDefinition<StateType, KeyType>;
+  [KeyType in keyof Required<StateType>]: ComparatorDefinition<StateType, KeyType>;
 };

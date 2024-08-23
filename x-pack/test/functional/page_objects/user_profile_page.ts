@@ -60,6 +60,14 @@ export function UserProfilePageProvider({ getService }: FtrProviderContext) {
       return await find.byCssSelector('.euiKeyPadMenu');
     },
 
+    async getProfileEmail() {
+      return await testSubjects.getVisibleText('email');
+    },
+
+    async getProfileFullname() {
+      return await testSubjects.getVisibleText('full_name');
+    },
+
     async setFullNameInputField(newFullName: string) {
       return await testSubjects.setValue('userProfileFullName', newFullName);
     },

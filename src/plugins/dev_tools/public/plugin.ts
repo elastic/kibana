@@ -60,11 +60,13 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
       order: 9010,
       category: DEFAULT_APP_CATEGORIES.management,
       mount: async (params: AppMountParameters) => {
-        const { element, history, theme$ } = params;
+        const { element, history } = params;
         element.classList.add('devAppWrapper');
 
         const [core] = await getStartServices();
         const { application, chrome, executionContext } = core;
+        const { analytics, i18n: i18nStart, theme } = core;
+        const startServices = { analytics, i18n: i18nStart, theme };
 
         this.docTitleService.setup(chrome.docTitle.change);
         this.breadcrumbService.setup(chrome.setBreadcrumbs);
@@ -81,9 +83,9 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
           application,
           chrome,
           history,
-          theme$,
           this.getSortedDevTools(),
-          appServices
+          appServices,
+          startServices
         );
       },
     });

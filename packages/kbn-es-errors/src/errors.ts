@@ -31,3 +31,17 @@ export function isResponseError(error: unknown): error is errors.ResponseError {
 export function isUnauthorizedError(error: unknown): error is UnauthorizedError {
   return isResponseError(error) && error.statusCode === 401;
 }
+
+/**
+ * Checks if the provided `error` is an {@link errors.RequestAbortedError | elasticsearch request aborted error}
+ * @public
+ */
+export function isRequestAbortedError(error: unknown): error is errors.RequestAbortedError {
+  return error instanceof errors.RequestAbortedError;
+}
+
+export function isMaximumResponseSizeExceededError(
+  error: unknown
+): error is errors.RequestAbortedError {
+  return isRequestAbortedError(error) && error.message.includes('content length');
+}

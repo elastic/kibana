@@ -173,10 +173,15 @@ export class CasesConnectorExecutor {
   }: Pick<CasesConnectorRunParams, 'alerts' | 'groupingBy'> & {
     params: CasesConnectorRunParams;
   }): GroupedAlerts[] {
-    this.logger.debug(
-      `[CasesConnector][CasesConnectorExecutor][groupAlerts] Grouping ${alerts.length} alerts`,
-      this.getLogMetadata(params, { labels: { groupingBy }, tags: ['case-connector:groupAlerts'] })
-    );
+    if (this.logger.isLevelEnabled('debug')) {
+      this.logger.debug(
+        `[CasesConnector][CasesConnectorExecutor][groupAlerts] Grouping ${alerts.length} alerts`,
+        this.getLogMetadata(params, {
+          labels: { groupingBy },
+          tags: ['case-connector:groupAlerts'],
+        })
+      );
+    }
 
     const uniqueGroupingByFields = Array.from(new Set<string>(groupingBy));
     const groupingMap = new Map<string, GroupedAlerts>();
@@ -190,19 +195,23 @@ export class CasesConnectorExecutor {
       uniqueGroupingByFields.every((groupingByField) => Boolean(get(alert, groupingByField, null)))
     );
 
-    this.logger.debug(
-      `[CasesConnector][CasesConnectorExecutor][groupAlerts] Total alerts to be grouped: ${alertsWithAllGroupingFields.length} out of ${alerts.length}`,
-      this.getLogMetadata(params, { tags: ['case-connector:groupAlerts'] })
-    );
+    if (this.logger.isLevelEnabled('debug')) {
+      this.logger.debug(
+        `[CasesConnector][CasesConnectorExecutor][groupAlerts] Total alerts to be grouped: ${alertsWithAllGroupingFields.length} out of ${alerts.length}`,
+        this.getLogMetadata(params, { tags: ['case-connector:groupAlerts'] })
+      );
+    }
 
     for (const alert of alertsWithAllGroupingFields) {
       const alertWithOnlyTheGroupingFields = pick(alert, uniqueGroupingByFields);
       const groupingKey = stringify(alertWithOnlyTheGroupingFields);
 
-      this.logger.debug(
-        `[CasesConnector][CasesConnectorExecutor][groupAlerts] Alert ${alert._id} got grouped into bucket with ID ${groupingKey}`,
-        this.getLogMetadata(params, { tags: ['case-connector:groupAlerts', groupingKey] })
-      );
+      if (this.logger.isLevelEnabled('debug')) {
+        this.logger.debug(
+          `[CasesConnector][CasesConnectorExecutor][groupAlerts] Alert ${alert._id} got grouped into bucket with ID ${groupingKey}`,
+          this.getLogMetadata(params, { tags: ['case-connector:groupAlerts', groupingKey] })
+        );
+      }
 
       if (groupingMap.has(groupingKey)) {
         groupingMap.get(groupingKey)?.alerts.push(alert);
@@ -261,10 +270,12 @@ export class CasesConnectorExecutor {
     params: CasesConnectorRunParams,
     groupedAlerts: GroupedAlerts[]
   ): Map<string, GroupedAlertsWithOracleKey> {
-    this.logger.debug(
-      `[CasesConnector][CasesConnectorExecutor][generateOracleKeys] Generating ${groupedAlerts.length} oracle keys`,
-      this.getLogMetadata(params, { tags: ['case-connector:generateOracleKeys'] })
-    );
+    if (this.logger.isLevelEnabled('debug')) {
+      this.logger.debug(
+        `[CasesConnector][CasesConnectorExecutor][generateOracleKeys] Generating ${groupedAlerts.length} oracle keys`,
+        this.getLogMetadata(params, { tags: ['case-connector:generateOracleKeys'] })
+      );
+    }
 
     const { rule, owner } = params;
 
@@ -280,21 +291,25 @@ export class CasesConnectorExecutor {
 
       const oracleKey = this.casesOracleService.getRecordId(getRecordIdParams);
 
-      this.logger.debug(
-        `[CasesConnector][CasesConnectorExecutor][generateOracleKeys] Oracle key ${oracleKey} generated`,
-        this.getLogMetadata(params, {
-          labels: { params: getRecordIdParams },
-          tags: ['case-connector:generateOracleKeys', oracleKey],
-        })
-      );
+      if (this.logger.isLevelEnabled('debug')) {
+        this.logger.debug(
+          `[CasesConnector][CasesConnectorExecutor][generateOracleKeys] Oracle key ${oracleKey} generated`,
+          this.getLogMetadata(params, {
+            labels: { params: getRecordIdParams },
+            tags: ['case-connector:generateOracleKeys', oracleKey],
+          })
+        );
+      }
 
       oracleMap.set(oracleKey, { oracleKey, grouping, alerts });
     }
 
-    this.logger.debug(
-      `[CasesConnector][CasesConnectorExecutor][generateOracleKeys] Total of oracles keys generated ${oracleMap.size}`,
-      this.getLogMetadata(params, { tags: ['case-connector:generateOracleKeys'] })
-    );
+    if (this.logger.isLevelEnabled('debug')) {
+      this.logger.debug(
+        `[CasesConnector][CasesConnectorExecutor][generateOracleKeys] Total of oracles keys generated ${oracleMap.size}`,
+        this.getLogMetadata(params, { tags: ['case-connector:generateOracleKeys'] })
+      );
+    }
 
     return oracleMap;
   }
@@ -303,11 +318,12 @@ export class CasesConnectorExecutor {
     params: CasesConnectorRunParams,
     groupedAlertsWithOracleKey: Map<string, GroupedAlertsWithOracleKey>
   ): Promise<Map<string, GroupedAlertsWithOracleRecords>> {
-    this.logger.debug(
-      `[CasesConnector][CasesConnectorExecutor][upsertOracleRecords] Upserting ${groupedAlertsWithOracleKey.size} oracle records`,
-      this.getLogMetadata(params, { tags: ['case-connector:upsertOracleRecords'] })
-    );
-
+    if (this.logger.isLevelEnabled('debug')) {
+      this.logger.debug(
+        `[CasesConnector][CasesConnectorExecutor][upsertOracleRecords] Upserting ${groupedAlertsWithOracleKey.size} oracle records`,
+        this.getLogMetadata(params, { tags: ['case-connector:upsertOracleRecords'] })
+      );
+    }
     const bulkCreateReq: BulkCreateOracleRecordRequest = [];
     const oracleRecordMap = new Map<string, GroupedAlertsWithOracleRecords>();
 
@@ -322,25 +338,29 @@ export class CasesConnectorExecutor {
 
     const ids = Array.from(groupedAlertsWithOracleKey.values()).map(({ oracleKey }) => oracleKey);
 
-    this.logger.debug(
-      `[CasesConnector][CasesConnectorExecutor][upsertOracleRecords] Getting oracle records with ids ${ids}`,
-      this.getLogMetadata(params, { tags: ['case-connector:upsertOracleRecords', ...ids] })
-    );
+    if (this.logger.isLevelEnabled('debug')) {
+      this.logger.debug(
+        `[CasesConnector][CasesConnectorExecutor][upsertOracleRecords] Getting oracle records with ids ${ids}`,
+        this.getLogMetadata(params, { tags: ['case-connector:upsertOracleRecords', ...ids] })
+      );
+    }
 
     const bulkGetRes = await this.casesOracleService.bulkGetRecords(ids);
     const [bulkGetValidRecords, bulkGetRecordsErrors] = partitionRecordsByError(bulkGetRes);
 
-    this.logger.debug(
-      `[CasesConnector][CasesConnectorExecutor][upsertOracleRecords] The total number of valid oracle records is ${bulkGetValidRecords.length} and the total number of errors while getting the records is ${bulkGetRecordsErrors.length}`,
-      this.getLogMetadata(params, {
-        labels: {
-          total: ids.length,
-          success: bulkGetValidRecords.length,
-          errors: bulkGetRecordsErrors.length,
-        },
-        tags: ['case-connector:upsertOracleRecords'],
-      })
-    );
+    if (this.logger.isLevelEnabled('debug')) {
+      this.logger.debug(
+        `[CasesConnector][CasesConnectorExecutor][upsertOracleRecords] The total number of valid oracle records is ${bulkGetValidRecords.length} and the total number of errors while getting the records is ${bulkGetRecordsErrors.length}`,
+        this.getLogMetadata(params, {
+          labels: {
+            total: ids.length,
+            success: bulkGetValidRecords.length,
+            errors: bulkGetRecordsErrors.length,
+          },
+          tags: ['case-connector:upsertOracleRecords'],
+        })
+      );
+    }
 
     addRecordToMap(bulkGetValidRecords);
 
@@ -350,16 +370,18 @@ export class CasesConnectorExecutor {
 
     const [nonFoundErrors, restOfErrors] = partitionByNonFoundErrors(bulkGetRecordsErrors);
 
-    this.logger.debug(
-      `[CasesConnector][CasesConnectorExecutor][upsertOracleRecords] The total number of non found oracle records is ${nonFoundErrors.length} and the total number of the rest of errors while getting the records is ${restOfErrors.length}`,
-      this.getLogMetadata(params, {
-        labels: {
-          nonFoundErrors: nonFoundErrors.length,
-          restOfErrors: restOfErrors.length,
-        },
-        tags: ['case-connector:upsertOracleRecords'],
-      })
-    );
+    if (this.logger.isLevelEnabled('debug')) {
+      this.logger.debug(
+        `[CasesConnector][CasesConnectorExecutor][upsertOracleRecords] The total number of non found oracle records is ${nonFoundErrors.length} and the total number of the rest of errors while getting the records is ${restOfErrors.length}`,
+        this.getLogMetadata(params, {
+          labels: {
+            nonFoundErrors: nonFoundErrors.length,
+            restOfErrors: restOfErrors.length,
+          },
+          tags: ['case-connector:upsertOracleRecords'],
+        })
+      );
+    }
 
     this.handleAndThrowErrors(restOfErrors);
 
@@ -1073,17 +1095,19 @@ export class CasesConnectorExecutor {
        * attachments.bulkCreate throws an error on errors
        */
       async (req: BulkCreateAlertsReq) => {
-        this.logger.debug(
-          `[CasesConnector][CasesConnectorExecutor][attachAlertsToCases] Attaching ${req.attachments.length} alerts to case with ID ${req.caseId}`,
-          this.getLogMetadata(params, {
-            labels: { caseId: req.caseId },
-            tags: [
-              'case-connector:attachAlertsToCases',
-              req.caseId,
-              ...(req.attachments as Array<{ alertId: string }>).map(({ alertId }) => alertId),
-            ],
-          })
-        );
+        if (this.logger.isLevelEnabled('debug')) {
+          this.logger.debug(
+            `[CasesConnector][CasesConnectorExecutor][attachAlertsToCases] Attaching ${req.attachments.length} alerts to case with ID ${req.caseId}`,
+            this.getLogMetadata(params, {
+              labels: { caseId: req.caseId },
+              tags: [
+                'case-connector:attachAlertsToCases',
+                req.caseId,
+                ...(req.attachments as Array<{ alertId: string }>).map(({ alertId }) => alertId),
+              ],
+            })
+          );
+        }
 
         await this.casesClient.attachments.bulkCreate(req);
       },

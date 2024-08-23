@@ -11,11 +11,8 @@ import {
 } from '@kbn/rule-data-utils';
 import { durationAnomalyAlertFactory } from './duration_anomaly';
 import { DURATION_ANOMALY } from '../../../../common/constants/uptime_alerts';
-import {
-  getSeverityType,
-  type MlAnomaliesTableRecord,
-  type MlAnomalyRecordDoc,
-} from '@kbn/ml-anomaly-utils';
+import { getSeverityType } from '@kbn/ml-anomaly-utils';
+import type { MlAnomaliesTableRecord, MlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils';
 import { createRuleTypeMocks, bootstrapDependencies } from './test_utils';
 import { Ping } from '../../../../common/runtime_types/ping';
 
@@ -104,6 +101,27 @@ const mockOptions = (
 ): any => {
   const { services, setContext } = createRuleTypeMocks(mockRecoveredAlerts);
 
+  services.alertsClient.report.mockImplementation((param: any) => {
+    return {
+      uuid: `uuid-${param.id}`,
+      start: new Date().toISOString(),
+      alertDoc: {},
+    };
+  });
+
+  services.alertsClient.getRecoveredAlerts.mockImplementation((param: any) => {
+    return mockRecoveredAlerts.map((alert) => ({
+      alert: {
+        getId: () => 'mock-id',
+        getUuid: () => 'mock-uuiid',
+        getState: () => alert,
+        getStart: () => new Date().toISOString(),
+        setContext,
+        context: {},
+      },
+    }));
+  });
+
   return {
     params,
     state,
@@ -158,12 +176,12 @@ describe('duration anomaly alert', () => {
       const alert = durationAnomalyAlertFactory(server, libs, plugins);
       const options = mockOptions();
       const {
-        services: { alertWithLifecycle },
+        services: { alertsClient },
       } = options;
       // @ts-ignore the executor can return `void`, but ours never does
       const state: Record<string, any> = await alert.executor(options);
       expect(mockGetAnomliesTableDataGetter).toHaveBeenCalledTimes(1);
-      expect(alertWithLifecycle).toHaveBeenCalledTimes(2);
+      expect(alertsClient.report).toHaveBeenCalledTimes(2);
       expect(mockGetAnomliesTableDataGetter).toBeCalledWith(
         ['uptime_monitor_high_latency_by_geo'],
         [],
@@ -177,14 +195,15 @@ describe('duration anomaly alert', () => {
         10,
         undefined
       );
-      const [{ value: alertInstanceMock }] = alertWithLifecycle.mock.results;
-      expect(alertInstanceMock.replaceState).toHaveBeenCalledTimes(2);
+
       const reasonMessages: string[] = [];
       mockAnomaliesResult.anomalies.forEach((anomaly, index) => {
         const slowestResponse = Math.round(anomaly.actualSort / 1000);
         const typicalResponse = Math.round(anomaly.typicalSort / 1000);
-        expect(alertWithLifecycle).toBeCalledWith({
-          fields: {
+        expect(alertsClient.report).toHaveBeenCalledWith({
+          id: `${DURATION_ANOMALY.id}${index}`,
+          actionGroup: DURATION_ANOMALY.id,
+          payload: {
             'monitor.id': options.params.monitorId,
             'url.full': mockPing.url?.full,
             'anomaly.start': mockDate,
@@ -201,27 +220,26 @@ Response times as high as ${slowestResponse} ms have been detected from location
               anomaly.entityValue
             }. Expected response time is ${typicalResponse} ms.`,
           },
-          id: `${DURATION_ANOMALY.id}${index}`,
+          state: {
+            firstCheckedAt: 'date',
+            firstTriggeredAt: undefined,
+            lastCheckedAt: 'date',
+            lastResolvedAt: undefined,
+            isTriggered: false,
+            anomalyStartTimestamp: 'date',
+            currentTriggerStarted: undefined,
+            expectedResponseTime: `${typicalResponse} ms`,
+            lastTriggeredAt: undefined,
+            monitor: monitorId,
+            monitorUrl: mockPing.url?.full,
+            observerLocation: anomaly.entityValue,
+            severity: getSeverityType(anomaly.severity),
+            severityScore: anomaly.severity,
+            slowestAnomalyResponse: `${slowestResponse} ms`,
+            bucketSpan: anomaly.source.bucket_span,
+          },
         });
 
-        expect(alertInstanceMock.replaceState).toBeCalledWith({
-          firstCheckedAt: 'date',
-          firstTriggeredAt: undefined,
-          lastCheckedAt: 'date',
-          lastResolvedAt: undefined,
-          isTriggered: false,
-          anomalyStartTimestamp: 'date',
-          currentTriggerStarted: undefined,
-          expectedResponseTime: `${typicalResponse} ms`,
-          lastTriggeredAt: undefined,
-          monitor: monitorId,
-          monitorUrl: mockPing.url?.full,
-          observerLocation: anomaly.entityValue,
-          severity: getSeverityType(anomaly.severity),
-          severityScore: anomaly.severity,
-          slowestAnomalyResponse: `${slowestResponse} ms`,
-          bucketSpan: anomaly.source.bucket_span,
-        });
         const reasonMsg = `Abnormal (${getSeverityType(
           anomaly.severity
         )} level) response time detected on uptime-monitor with url ${
@@ -233,45 +251,48 @@ Response times as high as ${slowestResponse} ms have been detected from location
 
         reasonMessages.push(reasonMsg);
       });
-      expect(alertInstanceMock.scheduleActions).toHaveBeenCalledTimes(2);
 
-      expect(alertInstanceMock.scheduleActions.mock.calls[0]).toMatchInlineSnapshot(`
+      expect(alertsClient.setAlertData.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
-          "xpack.uptime.alerts.actionGroups.durationAnomaly",
           Object {
-            "alertDetailsUrl": "mockedAlertsLocator > getLocation",
-            "anomalyStartTimestamp": "date",
-            "bucketSpan": 900,
-            "expectedResponseTime": "10 ms",
-            "monitor": "uptime-monitor",
-            "monitorUrl": "https://elastic.co",
-            "observerLocation": "harrisburg",
-            "reason": "Abnormal (minor level) response time detected on uptime-monitor with url https://elastic.co at date. Anomaly severity score is 25.
+            "context": Object {
+              "alertDetailsUrl": "mockedAlertsLocator > getLocation",
+              "anomalyStartTimestamp": "date",
+              "bucketSpan": 900,
+              "expectedResponseTime": "10 ms",
+              "monitor": "uptime-monitor",
+              "monitorUrl": "https://elastic.co",
+              "observerLocation": "harrisburg",
+              "reason": "Abnormal (minor level) response time detected on uptime-monitor with url https://elastic.co at date. Anomaly severity score is 25.
         Response times as high as 200 ms have been detected from location harrisburg. Expected response time is 10 ms.",
-            "severity": "minor",
-            "severityScore": 25,
-            "slowestAnomalyResponse": "200 ms",
-            "viewInAppUrl": "http://localhost:5601/hfe/app/uptime/monitor/eHBhY2sudXB0aW1lLmFsZXJ0cy5hY3Rpb25Hcm91cHMuZHVyYXRpb25Bbm9tYWx5MA==?dateRangeEnd=now&dateRangeStart=2022-03-17T13%3A13%3A33.755Z",
+              "severity": "minor",
+              "severityScore": 25,
+              "slowestAnomalyResponse": "200 ms",
+              "viewInAppUrl": "http://localhost:5601/hfe/app/uptime/monitor/eHBhY2sudXB0aW1lLmFsZXJ0cy5hY3Rpb25Hcm91cHMuZHVyYXRpb25Bbm9tYWx5MA==?dateRangeEnd=now&dateRangeStart=date",
+            },
+            "id": "xpack.uptime.alerts.actionGroups.durationAnomaly",
           },
         ]
       `);
-      expect(alertInstanceMock.scheduleActions.mock.calls[1]).toMatchInlineSnapshot(`
+      expect(alertsClient.setAlertData.mock.calls[1]).toMatchInlineSnapshot(`
         Array [
-          "xpack.uptime.alerts.actionGroups.durationAnomaly",
           Object {
-            "alertDetailsUrl": "mockedAlertsLocator > getLocation",
-            "anomalyStartTimestamp": "date",
-            "bucketSpan": 900,
-            "expectedResponseTime": "20 ms",
-            "monitor": "uptime-monitor",
-            "monitorUrl": "https://elastic.co",
-            "observerLocation": "fairbanks",
-            "reason": "Abnormal (warning level) response time detected on uptime-monitor with url https://elastic.co at date. Anomaly severity score is 10.
+            "context": Object {
+              "alertDetailsUrl": "mockedAlertsLocator > getLocation",
+              "anomalyStartTimestamp": "date",
+              "bucketSpan": 900,
+              "expectedResponseTime": "20 ms",
+              "monitor": "uptime-monitor",
+              "monitorUrl": "https://elastic.co",
+              "observerLocation": "fairbanks",
+              "reason": "Abnormal (warning level) response time detected on uptime-monitor with url https://elastic.co at date. Anomaly severity score is 10.
         Response times as high as 300 ms have been detected from location fairbanks. Expected response time is 20 ms.",
-            "severity": "warning",
-            "severityScore": 10,
-            "slowestAnomalyResponse": "300 ms",
-            "viewInAppUrl": "http://localhost:5601/hfe/app/uptime/monitor/eHBhY2sudXB0aW1lLmFsZXJ0cy5hY3Rpb25Hcm91cHMuZHVyYXRpb25Bbm9tYWx5MQ==?dateRangeEnd=now&dateRangeStart=2022-03-17T13%3A13%3A33.755Z",
+              "severity": "warning",
+              "severityScore": 10,
+              "slowestAnomalyResponse": "300 ms",
+              "viewInAppUrl": "http://localhost:5601/hfe/app/uptime/monitor/eHBhY2sudXB0aW1lLmFsZXJ0cy5hY3Rpb25Hcm91cHMuZHVyYXRpb25Bbm9tYWx5MQ==?dateRangeEnd=now&dateRangeStart=date",
+            },
+            "id": "xpack.uptime.alerts.actionGroups.durationAnomaly",
           },
         ]
       `);
@@ -300,11 +321,17 @@ Response times as high as ${slowestResponse} ms have been detected from location
       );
       const alert = durationAnomalyAlertFactory(server, libs, plugins);
       const options = mockOptions();
+      const {
+        services: { alertsClient },
+      } = options;
       // @ts-ignore the executor can return `void`, but ours never does
       const state: Record<string, any> = await alert.executor(options);
-      expect(options.setContext).toHaveBeenCalledTimes(2);
-      mockRecoveredAlerts.forEach((alertState) => {
-        expect(options.setContext).toHaveBeenCalledWith(alertState);
+      expect(alertsClient.setAlertData).toHaveBeenCalledTimes(4);
+      mockRecoveredAlerts.forEach((alertState, index) => {
+        expect(alertsClient.setAlertData).toHaveBeenNthCalledWith(index + 3, {
+          context: alertState,
+          id: 'mock-id',
+        });
       });
     });
   });

@@ -18,6 +18,7 @@ const HDR_HISTOGRAM_BUCKET_SIZE = 100; // 100 millis
 enum TaskClaimKeys {
   SUCCESS = 'success',
   TOTAL = 'total',
+  TOTAL_ERRORS = 'total_errors',
 }
 interface TaskClaimCounts extends JsonObject {
   [TaskClaimKeys.SUCCESS]: number;
@@ -59,6 +60,8 @@ export class TaskClaimMetricsAggregator implements ITaskMetricsAggregator<TaskCl
     const success = isOk((taskEvent as TaskRun).event);
     if (success) {
       this.counter.increment(TaskClaimKeys.SUCCESS);
+    } else {
+      this.counter.increment(TaskClaimKeys.TOTAL_ERRORS);
     }
     this.counter.increment(TaskClaimKeys.TOTAL);
 

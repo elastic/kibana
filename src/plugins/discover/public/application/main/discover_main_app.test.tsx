@@ -17,7 +17,7 @@ import { discoverServiceMock } from '../../__mocks__/services';
 import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
 import { getDiscoverStateMock } from '../../__mocks__/discover_state.mock';
-import { DiscoverMainProvider } from './services/discover_state_provider';
+import { DiscoverMainProvider } from './state_management/discover_state_provider';
 
 discoverServiceMock.data.query.timefilter.timefilter.getTime = () => {
   return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };

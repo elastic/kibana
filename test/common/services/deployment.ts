@@ -7,6 +7,7 @@
  */
 
 import { get } from 'lodash';
+import { Agent } from 'https';
 import fetch from 'node-fetch';
 import { getUrl } from '@kbn/test';
 
@@ -33,12 +34,23 @@ export class DeploymentService extends FtrService {
     const baseUrl = this.getHostPort();
     const username = this.config.get('servers.kibana.username');
     const password = this.config.get('servers.kibana.password');
+    const protocol = this.config.get('servers.kibana.protocol');
+
+    let agent: Agent | undefined;
+    if (protocol === 'https') {
+      agent = new Agent({
+        // required for self-signed certificates used for HTTPS FTR testing
+        rejectUnauthorized: false,
+      });
+    }
+
     const response = await fetch(baseUrl + '/api/stats?extended', {
       method: 'get',
       headers: {
         'Content-Type': 'application/json',
         Authorization: 'Basic ' + Buffer.from(username + ':' + password).toString('base64'),
       },
+      agent,
     });
     const data = await response.json();
     return get(data, 'usage.cloud.is_cloud_enabled', false);

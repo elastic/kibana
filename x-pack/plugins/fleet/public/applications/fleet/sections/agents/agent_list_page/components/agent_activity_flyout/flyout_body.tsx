@@ -36,6 +36,12 @@ const ButtonsFlexGroup = styled(EuiFlexGroup)`
   padding-left: 24px;
 `;
 
+const ScrollAnchor = styled.div`
+  height: 0;
+  margin: 0;
+  padding: 0;
+`;
+
 export const FlyoutBody: React.FunctionComponent<{
   isFirstLoading: boolean;
   currentActions: ActionStatus[];
@@ -57,6 +63,13 @@ export const FlyoutBody: React.FunctionComponent<{
   onChangeDateFilter,
   agentPolicies,
 }) => {
+  const scrollToTopRef = React.useRef<HTMLDivElement>(null);
+  React.useEffect(() => {
+    // Condition needed for jest tests as scrollIntoView is not implemented in jsdom
+    if (scrollToTopRef.current?.scrollIntoView) {
+      scrollToTopRef.current.scrollIntoView();
+    }
+  }, [dateFilter]);
   // Loading
   if (isFirstLoading) {
     return (
@@ -79,6 +92,7 @@ export const FlyoutBody: React.FunctionComponent<{
   if (currentActions.length === 0) {
     return (
       <FullHeightFlyoutBody>
+        <ScrollAnchor ref={scrollToTopRef} />
         <EuiFlexGroup
           direction="column"
           justifyContent={'center'}
@@ -135,6 +149,7 @@ export const FlyoutBody: React.FunctionComponent<{
 
   return (
     <FullHeightFlyoutBody>
+      <ScrollAnchor ref={scrollToTopRef} />
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
           <EuiFlexGroup direction="column">
