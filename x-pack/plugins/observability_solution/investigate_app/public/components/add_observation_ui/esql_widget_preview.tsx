@@ -8,13 +8,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { css } from '@emotion/css';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { ESQLColumn, ESQLRow } from '@kbn/es-types';
-import {
-  ESQL_WIDGET_NAME,
-  GlobalWidgetParameters,
-  InvestigateWidgetCreate,
-  OnWidgetAdd,
-  createEsqlWidget,
-} from '@kbn/investigate-plugin/public';
+import { GlobalWidgetParameters } from '@kbn/investigate-plugin/public';
+import { Item } from '@kbn/investigation-shared';
 import type { Suggestion } from '@kbn/lens-plugin/public';
 import { useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -25,21 +20,21 @@ import { EsqlWidget } from '../../widgets/esql_widget/register_esql_widget';
 import { ErrorMessage } from '../error_message';
 import { SuggestVisualizationList } from '../suggest_visualization_list';
 
-function getWidgetFromSuggestion({
+function getItemFromSuggestion({
   query,
   suggestion,
 }: {
   query: string;
   suggestion: Suggestion;
-}): InvestigateWidgetCreate {
-  return createEsqlWidget({
+}): Item {
+  return {
     title: suggestion.title,
-    type: ESQL_WIDGET_NAME,
-    parameters: {
+    type: 'esql',
+    params: {
       esql: query,
       suggestion,
     },
-  });
+  };
 }
 
 function PreviewContainer({ children }: { children: React.ReactNode }) {
@@ -64,11 +59,11 @@ function PreviewContainer({ children }: { children: React.ReactNode }) {
 
 export function EsqlWidgetPreview({
   esqlQuery,
-  onWidgetAdd,
+  onItemAdd,
   timeRange,
 }: {
   esqlQuery: string;
-  onWidgetAdd: OnWidgetAdd;
+  onItemAdd: (item: Item) => void;
 } & GlobalWidgetParameters) {
   const {
     services: { esql },
@@ -199,7 +194,7 @@ export function EsqlWidgetPreview({
         <SuggestVisualizationList
           suggestions={displayedProps.value.suggestions}
           onSuggestionClick={(suggestion) => {
-            onWidgetAdd(getWidgetFromSuggestion({ query: esqlQuery, suggestion }));
+            onItemAdd(getItemFromSuggestion({ query: esqlQuery, suggestion }));
           }}
           loading={queryResult.loading}
           onMouseLeave={() => {}}

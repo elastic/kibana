@@ -83,10 +83,7 @@ export function InvestigationItems({ investigationId, investigation }: Props) {
           from: new Date(investigation.params.timeRange.from).toISOString(),
           to: new Date(investigation.params.timeRange.to).toISOString(),
         }}
-        onWidgetAdd={(widget) => {
-          return Promise.resolve();
-          // addWidget(widget);
-        }}
+        onItemAdd={onAddItem}
       />
     </EuiFlexGroup>
   );
