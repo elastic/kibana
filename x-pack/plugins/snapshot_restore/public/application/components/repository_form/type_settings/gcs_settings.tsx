@@ -207,7 +207,6 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
         fullWidth
       >
         <EuiFormRow
-          hasEmptyLabelSpace={true}
           fullWidth
           isInvalid={Boolean(hasErrors && settingErrors.compress)}
           error={settingErrors.compress}
@@ -275,7 +274,6 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
         fullWidth
       >
         <EuiFormRow
-          hasEmptyLabelSpace={true}
           fullWidth
           isInvalid={Boolean(hasErrors && settingErrors.readonly)}
           error={settingErrors.readonly}

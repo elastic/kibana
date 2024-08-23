@@ -366,7 +366,6 @@ export function FormatSelector(props: FormatSelectorProps) {
           <EuiFormRow
             display="columnCompressed"
             hasEmptyLabelSpace
-            label=" "
             helpText={
               <EuiLink
                 href={docLinks.links.indexPatterns.fieldFormattersNumber}
