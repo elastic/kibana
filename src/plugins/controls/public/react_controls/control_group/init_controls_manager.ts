@@ -38,7 +38,6 @@ export function getControlsInOrder(initialControlPanelsState: ControlPanelsState
 }
 
 export function initControlsManager(initialControlPanelsState: ControlPanelsState) {
-  const initialChildControlState$ = new BehaviorSubject(initialControlPanelsState);
   const initialControlIds = Object.keys(initialControlPanelsState);
   const children$ = new BehaviorSubject<{ [key: string]: DefaultControlApi }>({});
   let controlsPanelState: { [panelId: string]: DefaultControlState } = {
@@ -177,11 +176,9 @@ export function initControlsManager(initialControlPanelsState: ControlPanelsStat
           };
         }
       });
-      initialChildControlState$.next(controlsRuntimeState);
       return controlsRuntimeState;
     },
     resetControlsRuntimeState: (resetState: ControlPanelsState) => {
-      initialChildControlState$.next(resetState);
       controlsPanelState = {
         ...resetState,
       };
