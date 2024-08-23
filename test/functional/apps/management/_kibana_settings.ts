@@ -26,6 +26,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
       await PageObjects.settings.removeLogstashIndexPatternIfExist();
+      await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'UTC' });
+      await browser.refresh();
     });
 
     it('should allow setting advanced settings', async function () {
@@ -94,11 +96,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // which is less than 20 characters.
         expect(globalState.length).to.be.greaterThan(20);
       });
-    });
-
-    after(async function () {
-      await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'UTC' });
-      await browser.refresh();
     });
   });
 }

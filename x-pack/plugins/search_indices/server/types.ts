@@ -5,5 +5,7 @@
  * 2.0.
  */
 
-require('../../../../../../src/setup_node_env');
-module.exports = require('./schema_worker');
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface SearchIndicesPluginSetup {}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface SearchIndicesPluginStart {}

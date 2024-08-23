@@ -638,7 +638,7 @@ export class DashboardPageControls extends FtrService {
     selectedType?: string;
   }) {
     this.log.debug(`Verifying that control types match what is expected for the selected field`);
-    asyncForEach(supportedTypes, async (type) => {
+    await asyncForEach(supportedTypes, async (type) => {
       const controlTypeItem = await this.testSubjects.find(`create__${type}`);
       expect(await controlTypeItem.isEnabled()).to.be(true);
       if (type === selectedType) {
