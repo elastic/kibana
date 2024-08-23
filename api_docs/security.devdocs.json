@@ -5243,7 +5243,7 @@
         "signature": [
           "\"getTags\" | \"pushCase\" | \"createCase\" | \"createComment\" | \"getCase\" | \"getComment\" | \"getReporters\" | \"getUserActions\" | \"findConfigurations\" | \"updateCase\" | \"updateComment\" | \"deleteCase\" | \"deleteComment\" | \"createConfiguration\" | \"updateConfiguration\""
         ],
-        "path": "x-pack/plugins/security/server/authorization/privileges/feature_privilege_builder/cases.ts",
+        "path": "x-pack/packages/security/authorization_core/src/privileges/feature_privilege_builder/cases.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6779,7 +6779,7 @@
         "tags": [],
         "label": "RawKibanaPrivileges",
         "description": [],
-        "path": "x-pack/plugins/security/common/model/raw_kibana_privileges.ts",
+        "path": "x-pack/packages/security/authorization_core/src/privileges/raw_kibana_privileges.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -6793,7 +6793,7 @@
             "signature": [
               "{ [x: string]: string[]; }"
             ],
-            "path": "x-pack/plugins/security/common/model/raw_kibana_privileges.ts",
+            "path": "x-pack/packages/security/authorization_core/src/privileges/raw_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6805,9 +6805,15 @@
             "label": "features",
             "description": [],
             "signature": [
-              "RawKibanaFeaturePrivileges"
+              {
+                "pluginId": "@kbn/security-authorization-core",
+                "scope": "server",
+                "docId": "kibKbnSecurityAuthorizationCorePluginApi",
+                "section": "def-server.RawKibanaFeaturePrivileges",
+                "text": "RawKibanaFeaturePrivileges"
+              }
             ],
-            "path": "x-pack/plugins/security/common/model/raw_kibana_privileges.ts",
+            "path": "x-pack/packages/security/authorization_core/src/privileges/raw_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6821,7 +6827,7 @@
             "signature": [
               "{ [x: string]: string[]; }"
             ],
-            "path": "x-pack/plugins/security/common/model/raw_kibana_privileges.ts",
+            "path": "x-pack/packages/security/authorization_core/src/privileges/raw_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6835,7 +6841,7 @@
             "signature": [
               "{ [x: string]: string[]; }"
             ],
-            "path": "x-pack/plugins/security/common/model/raw_kibana_privileges.ts",
+            "path": "x-pack/packages/security/authorization_core/src/privileges/raw_kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false
           }
