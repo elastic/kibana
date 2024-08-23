@@ -177,6 +177,7 @@ export function initControlsManager(initialControlPanelsState: ControlPanelsStat
           };
         }
       });
+      lastSavedControlsPanelState$.next(controlsRuntimeState);
       return controlsRuntimeState;
     },
     api: {
