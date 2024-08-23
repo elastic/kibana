@@ -8,8 +8,8 @@
 import { InvestigationRepository } from './investigation_repository';
 
 export async function deleteInvestigation(
-  id: string,
+  investigationId: string,
   repository: InvestigationRepository
 ): Promise<void> {
-  await repository.deleteById(id);
+  await repository.deleteById(investigationId);
 }

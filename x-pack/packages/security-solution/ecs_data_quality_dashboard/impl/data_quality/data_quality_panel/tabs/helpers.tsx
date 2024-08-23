@@ -5,39 +5,25 @@
  * 2.0.
  */
 
-import type {
-  FlameElementEvent,
-  HeatmapElementEvent,
-  MetricElementEvent,
-  PartialTheme,
-  PartitionElementEvent,
-  Theme,
-  WordCloudElementEvent,
-  XYChartElementEvent,
-} from '@elastic/charts';
 import { EuiBadge } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
 import React from 'react';
+import styled from 'styled-components';
 
 import { AllTab } from './all_tab';
 import { CustomTab } from './custom_tab';
-import { getCustomColor } from './custom_tab/helpers';
 import { EcsCompliantTab } from './ecs_compliant_tab';
-import { getSizeInBytes } from '../../helpers';
+import { getIncompatibleStatBadgeColor, getSizeInBytes } from '../../helpers';
 import { IncompatibleTab } from './incompatible_tab';
-import { getIncompatibleColor, getSameFamilyColor } from './incompatible_tab/helpers';
 import {
   ALL_TAB_ID,
+  CUSTOM_TAB_ID,
   ECS_COMPLIANT_TAB_ID,
   INCOMPATIBLE_TAB_ID,
   SAME_FAMILY_TAB_ID,
-  SUMMARY_TAB_ID,
 } from '../index_properties/helpers';
 import { getMarkdownComment } from '../index_properties/markdown/helpers';
 import * as i18n from '../index_properties/translations';
 import { SameFamilyTab } from './same_family_tab';
-import { SummaryTab } from './summary_tab';
-import { getFillColor } from './summary_tab/helpers';
 import type {
   EcsBasedFieldMetadata,
   IlmPhase,
@@ -59,102 +45,50 @@ export const showMissingTimestampCallout = (
   ecsBasedFieldMetadata: EcsBasedFieldMetadata[]
 ): boolean => !ecsBasedFieldMetadata.some((x) => x.name === '@timestamp');
 
-export const getEcsCompliantColor = (partitionedFieldMetadata: PartitionedFieldMetadata): string =>
-  showMissingTimestampCallout(partitionedFieldMetadata.ecsCompliant)
-    ? euiThemeVars.euiColorDanger
-    : getFillColor('ecs-compliant');
+export const getEcsCompliantBadgeColor = (
+  partitionedFieldMetadata: PartitionedFieldMetadata
+): string =>
+  showMissingTimestampCallout(partitionedFieldMetadata.ecsCompliant) ? 'danger' : 'hollow';
+
+const StyledBadge = styled(EuiBadge)`
+  text-align: right;
+  cursor: pointer;
+`;
 
 export const getTabs = ({
-  addSuccessToast,
-  addToNewCaseDisabled,
   docsCount,
   formatBytes,
   formatNumber,
-  getGroupByFieldsOnClick,
   ilmPhase,
   indexName,
-  isAssistantEnabled,
-  onAddToNewCase,
   partitionedFieldMetadata,
-  pattern,
   patternDocsCount,
-  setSelectedTabId,
   stats,
-  theme,
-  baseTheme,
 }: {
-  addSuccessToast: (toast: { title: string }) => void;
-  addToNewCaseDisabled: boolean;
   formatBytes: (value: number | undefined) => string;
   formatNumber: (value: number | undefined) => string;
   docsCount: number;
-  getGroupByFieldsOnClick: (
-    elements: Array<
-      | FlameElementEvent
-      | HeatmapElementEvent
-      | MetricElementEvent
-      | PartitionElementEvent
-      | WordCloudElementEvent
-      | XYChartElementEvent
-    >
-  ) => {
-    groupByField0: string;
-    groupByField1: string;
-  };
   ilmPhase: IlmPhase | undefined;
   indexName: string;
-  isAssistantEnabled: boolean;
-  onAddToNewCase: (markdownComments: string[]) => void;
   partitionedFieldMetadata: PartitionedFieldMetadata;
-  pattern: string;
   patternDocsCount: number;
-  setSelectedTabId: (tabId: string) => void;
   stats: Record<string, MeteringStatsIndex> | null;
-  theme?: PartialTheme;
-  baseTheme: Theme;
 }) => [
   {
-    content: (
-      <SummaryTab
-        addSuccessToast={addSuccessToast}
-        addToNewCaseDisabled={addToNewCaseDisabled}
-        formatBytes={formatBytes}
-        formatNumber={formatNumber}
-        docsCount={docsCount}
-        getGroupByFieldsOnClick={getGroupByFieldsOnClick}
-        ilmPhase={ilmPhase}
-        indexName={indexName}
-        isAssistantEnabled={isAssistantEnabled}
-        onAddToNewCase={onAddToNewCase}
-        partitionedFieldMetadata={partitionedFieldMetadata}
-        pattern={pattern}
-        patternDocsCount={patternDocsCount}
-        setSelectedTabId={setSelectedTabId}
-        sizeInBytes={getSizeInBytes({ indexName, stats })}
-        theme={theme}
-        baseTheme={baseTheme}
-      />
-    ),
-    id: SUMMARY_TAB_ID,
-    name: i18n.SUMMARY,
-  },
-  {
     append: (
-      <EuiBadge color={getIncompatibleColor()}>
+      <StyledBadge
+        color={getIncompatibleStatBadgeColor(partitionedFieldMetadata.incompatible.length)}
+      >
         {partitionedFieldMetadata.incompatible.length}
-      </EuiBadge>
+      </StyledBadge>
     ),
     content: (
       <IncompatibleTab
-        addSuccessToast={addSuccessToast}
-        addToNewCaseDisabled={addToNewCaseDisabled}
         docsCount={docsCount}
         formatBytes={formatBytes}
         formatNumber={formatNumber}
         ilmPhase={ilmPhase}
         indexName={indexName}
-        isAssistantEnabled={isAssistantEnabled}
-        onAddToNewCase={onAddToNewCase}
         partitionedFieldMetadata={partitionedFieldMetadata}
         patternDocsCount={patternDocsCount}
         sizeInBytes={getSizeInBytes({ indexName, stats })}
@@ -164,12 +98,9 @@ export const getTabs = ({
     name: i18n.INCOMPATIBLE_FIELDS,
   },
   {
-    append: (
-      <EuiBadge color={getSameFamilyColor()}>{partitionedFieldMetadata.sameFamily.length}</EuiBadge>
-    ),
+    append: <StyledBadge color="hollow">{partitionedFieldMetadata.sameFamily.length}</StyledBadge>,
     content: (
       <SameFamilyTab
-        addSuccessToast={addSuccessToast}
         docsCount={docsCount}
         formatBytes={formatBytes}
         formatNumber={formatNumber}
@@ -184,14 +115,9 @@ export const getTabs = ({
     name: i18n.SAME_FAMILY,
   },
   {
-    append: (
-      <EuiBadge color={getCustomColor(partitionedFieldMetadata)}>
-        {partitionedFieldMetadata.custom.length}
-      </EuiBadge>
-    ),
+    append: <StyledBadge color="hollow">{partitionedFieldMetadata.custom.length}</StyledBadge>,
     content: (
       <CustomTab
-        addSuccessToast={addSuccessToast}
         docsCount={docsCount}
         formatBytes={formatBytes}
         formatNumber={formatNumber}
@@ -202,14 +128,14 @@ export const getTabs = ({
         sizeInBytes={getSizeInBytes({ indexName, stats })}
       />
     ),
-    id: 'customTab',
+    id: CUSTOM_TAB_ID,
     name: i18n.CUSTOM_FIELDS,
   },
   {
     append: (
-      <EuiBadge color={getEcsCompliantColor(partitionedFieldMetadata)}>
+      <StyledBadge color={getEcsCompliantBadgeColor(partitionedFieldMetadata)}>
         {partitionedFieldMetadata.ecsCompliant.length}
-      </EuiBadge>
+      </StyledBadge>
     ),
     content: (
       <EcsCompliantTab indexName={indexName} partitionedFieldMetadata={partitionedFieldMetadata} />
@@ -218,11 +144,7 @@ export const getTabs = ({
     name: i18n.ECS_COMPLIANT_FIELDS,
   },
   {
-    append: (
-      <EuiBadge color={euiThemeVars.euiColorDarkShade}>
-        {partitionedFieldMetadata.all.length}
-      </EuiBadge>
-    ),
+    append: <StyledBadge color="hollow">{partitionedFieldMetadata.all.length}</StyledBadge>,
     content: <AllTab indexName={indexName} partitionedFieldMetadata={partitionedFieldMetadata} />,
     id: ALL_TAB_ID,
     name: i18n.ALL_FIELDS,
