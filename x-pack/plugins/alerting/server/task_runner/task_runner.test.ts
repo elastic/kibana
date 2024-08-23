@@ -2038,9 +2038,10 @@ describe('Task Runner', () => {
   });
 
   test('should disable the task when the rule is not enabled and task has been aborted at least 5 times', async () => {
-    taskRunnerFactoryInitializerParams.taskManager.bulkDisable.mockImplementation(async () => ({
-      tasks: [{ ...mockedTaskInstance, id: mockedRawRuleSO.id, enabled: false }],
-      errors: [],
+    taskRunnerFactoryInitializerParams.taskManager.disableWithOCC.mockImplementation(async () => ({
+      ...mockedTaskInstance,
+      id: mockedRawRuleSO.id,
+      enabled: false,
     }));
 
     const taskRunner = new TaskRunner({
@@ -2075,29 +2076,25 @@ describe('Task Runner', () => {
     );
     expect(loggerMeta?.tags).toEqual(['1', 'test', 'rule-run-failed', 'framework-error']);
 
-    expect(taskRunnerFactoryInitializerParams.taskManager.bulkDisable).toHaveBeenCalledTimes(1);
-    expect(taskRunnerFactoryInitializerParams.taskManager.bulkDisable).toHaveBeenCalledWith([
-      mockedRawRuleSO.id,
-    ]);
+    expect(taskRunnerFactoryInitializerParams.taskManager.disableWithOCC).toHaveBeenCalledTimes(1);
+    expect(taskRunnerFactoryInitializerParams.taskManager.disableWithOCC).toHaveBeenCalledWith(
+      mockedRawRuleSO.id
+    );
 
     expect(
-      await taskRunnerFactoryInitializerParams.taskManager.bulkDisable([mockedRawRuleSO.id])
+      await taskRunnerFactoryInitializerParams.taskManager.disableWithOCC(mockedRawRuleSO.id)
     ).toEqual({
-      errors: [],
-      tasks: [
-        {
-          ...mockedTaskInstance,
-          id: mockedRawRuleSO.id,
-          enabled: false,
-        },
-      ],
+      ...mockedTaskInstance,
+      id: mockedRawRuleSO.id,
+      enabled: false,
     });
   });
 
   test('should disable the task when the rule is not enabled and task has been aborted more than 5 times', async () => {
-    taskRunnerFactoryInitializerParams.taskManager.bulkDisable.mockImplementation(async () => ({
-      tasks: [{ ...mockedTaskInstance, id: mockedRawRuleSO.id, enabled: false }],
-      errors: [],
+    taskRunnerFactoryInitializerParams.taskManager.disableWithOCC.mockImplementation(async () => ({
+      ...mockedTaskInstance,
+      id: mockedRawRuleSO.id,
+      enabled: false,
     }));
 
     const taskRunner = new TaskRunner({
@@ -2132,22 +2129,17 @@ describe('Task Runner', () => {
     );
     expect(loggerMeta?.tags).toEqual(['1', 'test', 'rule-run-failed', 'framework-error']);
 
-    expect(taskRunnerFactoryInitializerParams.taskManager.bulkDisable).toHaveBeenCalledTimes(1);
-    expect(taskRunnerFactoryInitializerParams.taskManager.bulkDisable).toHaveBeenCalledWith([
-      mockedRawRuleSO.id,
-    ]);
+    expect(taskRunnerFactoryInitializerParams.taskManager.disableWithOCC).toHaveBeenCalledTimes(1);
+    expect(taskRunnerFactoryInitializerParams.taskManager.disableWithOCC).toHaveBeenCalledWith(
+      mockedRawRuleSO.id
+    );
 
     expect(
-      await taskRunnerFactoryInitializerParams.taskManager.bulkDisable([mockedRawRuleSO.id])
+      await taskRunnerFactoryInitializerParams.taskManager.disableWithOCC(mockedRawRuleSO.id)
     ).toEqual({
-      errors: [],
-      tasks: [
-        {
-          ...mockedTaskInstance,
-          id: mockedRawRuleSO.id,
-          enabled: false,
-        },
-      ],
+      ...mockedTaskInstance,
+      id: mockedRawRuleSO.id,
+      enabled: false,
     });
   });
 

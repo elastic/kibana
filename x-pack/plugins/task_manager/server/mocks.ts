@@ -37,6 +37,7 @@ const createStartMock = () => {
     bulkEnable: jest.fn(),
     getRegisteredTypes: jest.fn(),
     bulkUpdateState: jest.fn(),
+    disableWithOCC: jest.fn(),
   };
   return mock;
 };

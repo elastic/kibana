@@ -617,7 +617,7 @@ export class TaskRunner<
           this.taskInstance.state.taskAbortedCount &&
           this.taskInstance.state.taskAbortedCount >= MAX_TASK_ABORTED_COUNT
         ) {
-          await this.context.taskManager.bulkDisable([ruleId]);
+          await this.context.taskManager.disableWithOCC(ruleId);
         }
 
         if (apm.currentTransaction) {
@@ -773,10 +773,15 @@ export class TaskRunner<
             });
           }
 
-          if (getReasonFromError(err) === RuleExecutionStatusErrorReasons.Disabled) {
+          const currentTaskAbortedCount = originalState.taskAbortedCount || 0;
+
+          if (
+            getReasonFromError(err) === RuleExecutionStatusErrorReasons.Disabled &&
+            currentTaskAbortedCount < MAX_TASK_ABORTED_COUNT
+          ) {
             const updatedOriginalState = {
               ...originalState,
-              taskAbortedCount: (originalState.taskAbortedCount || 0) + 1,
+              taskAbortedCount: currentTaskAbortedCount + 1,
             };
 
             return updatedOriginalState;

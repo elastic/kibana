@@ -15,6 +15,7 @@ const createTaskSchedulingMock = () => {
     schedule: jest.fn(),
     runSoon: jest.fn(),
     ephemeralRunNow: jest.fn(),
+    disableWithOCC: jest.fn(),
   } as unknown as jest.Mocked<TaskScheduling>;
 };
 

@@ -7,6 +7,7 @@
 
 import { filter, take } from 'rxjs';
 import pMap from 'p-map';
+import { withSpan } from '@kbn/apm-utils';
 import { SavedObjectError } from '@kbn/core-saved-objects-common';
 
 import { v4 as uuidv4 } from 'uuid';
@@ -168,6 +169,35 @@ export class TaskScheduling {
       }),
       validate: false,
     });
+  }
+
+  public async disableWithOCC(id: string, clearStateIdsOrBoolean?: boolean) {
+    try {
+      const task = await withSpan(
+        { name: 'get', type: 'task' },
+        async () => await this.store.get(id)
+      );
+
+      return await withSpan(
+        { name: 'update', type: 'task' },
+        async () =>
+          await this.store.update(
+            {
+              ...task,
+              enabled: false,
+              ...(clearStateIdsOrBoolean === true ? { state: {} } : {}),
+            },
+            { validate: false }
+          )
+      );
+    } catch (e) {
+      if (e.statusCode === 409) {
+        this.logger.debug(`Failed to disable the task (${id}) due to conflict (409)`);
+      } else {
+        this.logger.error(`Failed to disable the task (${id})`);
+        throw e;
+      }
+    }
   }
 
   public async bulkEnable(taskIds: string[], runSoon: boolean = true) {
