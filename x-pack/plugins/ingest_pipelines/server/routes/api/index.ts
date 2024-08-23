@@ -21,4 +21,8 @@ export { registerDocumentsRoute } from './documents';
 
 export { registerParseCsvRoute } from './parse_csv';
 
-export { registerListGeoipRoute, registerCreateGeoipRoute } from './geoip_database';
+export {
+  registerListGeoipRoute,
+  registerCreateGeoipRoute,
+  registerDeleteGeoipRoute,
+} from './geoip_database';

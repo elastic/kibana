@@ -17,9 +17,10 @@ export interface GeoipDatabase {
   };
 }
 
-export const deserializeGeoipDatabase = (geoipDatabase: GeoipDatabase) => {
+export const deserializeGeoipDatabase = ({ database, id }: GeoipDatabase) => {
   return {
-    name: geoipDatabase.database.name,
+    name: database.name,
+    id,
   };
 };
 

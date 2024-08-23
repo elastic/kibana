@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { RouteDependencies } from '../../../types';
 import { API_BASE_PATH } from '../../../../common/constants';
-import { GeoipDatabase, serializeGeoipDatabase } from './deserialize_geoip_database';
+import { serializeGeoipDatabase } from './serialization';
 import { normalizeDatabaseName } from './normalize_database_name';
 
 const bodySchema = schema.object({
@@ -34,15 +34,13 @@ export const registerCreateGeoipRoute = ({
       const normalizedDatabaseName = normalizeDatabaseName(databaseName);
 
       try {
-        await clusterClient.asCurrentUser.transport.request<{
-          databases: GeoipDatabase[];
-        }>({
+        await clusterClient.asCurrentUser.transport.request({
           method: 'PUT',
           path: `/_ingest/geoip/database/${normalizedDatabaseName}`,
           body: serializedDatabase,
         });
 
-        return res.ok();
+        return res.ok({ body: { name: databaseName, id: normalizedDatabaseName } });
       } catch (error) {
         return handleEsError({ error, response: res });
       }

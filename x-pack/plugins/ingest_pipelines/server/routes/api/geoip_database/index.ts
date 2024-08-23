@@ -7,3 +7,4 @@
 
 export { registerListGeoipRoute } from './list';
 export { registerCreateGeoipRoute } from './create';
+export { registerDeleteGeoipRoute } from './delete';

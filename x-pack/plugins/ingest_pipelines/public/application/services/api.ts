@@ -156,6 +156,13 @@ export class ApiService {
       body: JSON.stringify(database),
     });
   }
+
+  public async deleteGeoipDatabase(id: string) {
+    return this.sendRequest({
+      path: `${API_BASE_PATH}/geoip_database/${id}`,
+      method: 'delete',
+    });
+  }
 }
 
 export const apiService = new ApiService();

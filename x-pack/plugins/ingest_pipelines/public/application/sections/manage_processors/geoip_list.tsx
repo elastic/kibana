@@ -5,21 +5,81 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 
-import { EuiButton, EuiPageTemplate } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiInMemoryTable,
+  EuiInMemoryTableProps,
+  EuiPageTemplate,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { SectionLoading, useKibana } from '../../../shared_imports';
+import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
+import { EmptyList } from './empty_list';
+import { GeoipDatabase } from './types';
+import { AddDatabaseModal } from './add_database_modal';
+import { DeleteDatabaseModal } from './delete_database_modal';
 import { getErrorMessage } from './get_error_message';
-import { GeoipTable } from './geoip_table';
+import { SectionLoading, useKibana } from '../../../shared_imports';
 
 export const GeoipList: React.FunctionComponent = () => {
   const { services } = useKibana();
   const { data, isLoading, error, resendRequest } = services.api.useLoadGeoipDatabases();
+  const [showModal, setShowModal] = useState<'add' | 'delete' | null>(null);
+  const [databaseToDelete, setDatabaseToDelete] = useState<GeoipDatabase | null>(null);
+  const onDatabaseDelete = (item: GeoipDatabase) => {
+    setDatabaseToDelete(item);
+    setShowModal('delete');
+  };
+  let content;
+  const addDatabaseButton = (
+    <EuiButton
+      fill
+      iconType="plusInCircle"
+      onClick={() => {
+        setShowModal('add');
+      }}
+    >
+      <FormattedMessage
+        id="xpack.ingestPipelines.manageProcessors.geoip.addDatabaseButtonLabel"
+        defaultMessage="Add database"
+      />
+    </EuiButton>
+  );
+  const tableProps: EuiInMemoryTableProps<GeoipDatabase> = {
+    columns: [
+      {
+        field: 'name',
+        name: i18n.translate('xpack.ingestPipelines.manageProcessors.geoip.list.nameColumnTitle', {
+          defaultMessage: 'Database name',
+        }),
+        sortable: true,
+      },
+      {
+        name: 'Actions',
+        actions: [
+          {
+            name: 'Delete',
+            description: 'Delete this database',
+            icon: 'trash',
+            color: 'danger',
+            onClick: onDatabaseDelete,
+            type: 'icon',
+          },
+        ],
+      },
+    ],
+    items: data ?? [],
+  };
   if (error) {
-    return (
+    content = (
       <EuiPageTemplate.EmptyPrompt
         color="danger"
         iconType="warning"
@@ -42,10 +102,8 @@ export const GeoipList: React.FunctionComponent = () => {
         }
       />
     );
-  }
-
-  if (isLoading && !data) {
-    return (
+  } else if (isLoading && !data) {
+    content = (
       <SectionLoading data-test-subj="sectionLoading">
         <FormattedMessage
           id="xpack.ingestPipelines.manageProcessors.geoip.list.loadingMessage"
@@ -53,11 +111,52 @@ export const GeoipList: React.FunctionComponent = () => {
         />
       </SectionLoading>
     );
-  }
+  } else if (data && data.length === 0) {
+    content = <EmptyList addDatabaseButton={addDatabaseButton} />;
+  } else {
+    content = (
+      <>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiTitle>
+              <h2>
+                <FormattedMessage
+                  id="xpack.ingestPipelines.manageProcessors.geoip.tableTitle"
+                  defaultMessage="GeoIP"
+                />
+              </h2>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{addDatabaseButton}</EuiFlexItem>
+        </EuiFlexGroup>
 
-  if (data && data.length === 0) {
-    // TODO empty list for geoip databases
-    return null;
+        <EuiSpacer size="l" />
+        <EuiInMemoryTable
+          css={css`
+            height: 100%;
+          `}
+          {...tableProps}
+        />
+      </>
+    );
   }
-  return <GeoipTable items={data!} reloadDatabases={resendRequest} />;
+  return (
+    <>
+      {content}
+      {showModal === 'add' && (
+        <AddDatabaseModal
+          closeModal={() => setShowModal(null)}
+          reloadDatabases={resendRequest}
+          databases={data!}
+        />
+      )}
+      {showModal === 'delete' && databaseToDelete && (
+        <DeleteDatabaseModal
+          database={databaseToDelete}
+          reloadDatabases={resendRequest}
+          closeModal={() => setShowModal(null)}
+        />
+      )}
+    </>
+  );
 };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { deserializeGeoipDatabase, GeoipDatabase } from './deserialize_geoip_database';
+import { deserializeGeoipDatabase, GeoipDatabase } from './serialization';
 import { API_BASE_PATH } from '../../../../common/constants';
 import { RouteDependencies } from '../../../types';
 

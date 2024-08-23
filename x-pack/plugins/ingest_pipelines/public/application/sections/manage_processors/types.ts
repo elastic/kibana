@@ -7,4 +7,5 @@
 
 export interface GeoipDatabase {
   name: string;
+  id: string;
 }

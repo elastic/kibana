@@ -95,3 +95,23 @@ export const addDatabaseErrorTitle = i18n.translate(
     defaultMessage: 'Error adding database',
   }
 );
+
+export const DELETE_DATABASE_MODAL_TITLE_ID = 'manageProcessorsDeleteGeoipDatabase';
+export const DELETE_DATABASE_MODAL_FORM_ID = 'manageProcessorsDeleteGeoipDatabaseForm';
+
+export const getDeleteDatabaseSuccessMessage = (databaseName: string): string => {
+  return i18n.translate(
+    'xpack.ingestPipelines.manageProcessors.geoip.deleteDatabaseSuccessMessage',
+    {
+      defaultMessage: 'Deleted database {databaseName}',
+      values: { databaseName },
+    }
+  );
+};
+
+export const deleteDatabaseErrorTitle = i18n.translate(
+  'xpack.ingestPipelines.manageProcessors.geoip.deleteDatabaseErrorTitle',
+  {
+    defaultMessage: 'Error deleting database',
+  }
+);

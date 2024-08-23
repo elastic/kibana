@@ -65,6 +65,7 @@ export const AddDatabaseModal = ({
     setIsLoading(true);
     try {
       const { error } = await services.api.createGeoipDatabase({ maxmind, databaseName });
+      setIsLoading(false);
       if (error) {
         services.notifications.toasts.addError(error, {
           title: addDatabaseErrorTitle,
@@ -75,11 +76,11 @@ export const AddDatabaseModal = ({
         closeModal();
       }
     } catch (e) {
+      setIsLoading(false);
       services.notifications.toasts.addError(e, {
         title: addDatabaseErrorTitle,
       });
     }
-    setIsLoading(false);
   };
   return (
     <EuiModal
