@@ -195,7 +195,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
       });
 
-      it('should display drilldown urls', async () => {
+      it('should display drilldown urls after field formatting is applied', async () => {
         const baseURL = 'http://elastic.co/foo/';
 
         await visualBuilder.clickPanelOptions('table');
