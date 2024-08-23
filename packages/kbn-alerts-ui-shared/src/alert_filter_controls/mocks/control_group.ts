@@ -18,6 +18,7 @@ export const getInput$Mock = jest.fn(() => controlGroupFilterStateMock$);
 
 export const getControlGroupMock = () => {
   return {
+    reload: jest.fn(),
     updateInput: jest.fn(),
     getInput$: getInput$Mock,
     openAddDataControlFlyout: jest.fn(),
