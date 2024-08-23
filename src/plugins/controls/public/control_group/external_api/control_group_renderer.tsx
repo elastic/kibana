@@ -133,8 +133,8 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupAPI, ControlG
      */
     useEffect(() => {
       if (!controlGroup) return;
-      const stateChangeSubscription = controlGroup.unsavedChanges.subscribe(() => {
-        runtimeState$.next(controlGroup.snapshotRuntimeState());
+      const stateChangeSubscription = controlGroup.unsavedChanges.subscribe((changes) => {
+        runtimeState$.next({ ...runtimeState$.getValue(), ...changes });
       });
       return () => {
         stateChangeSubscription.unsubscribe();
