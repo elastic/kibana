@@ -15,30 +15,28 @@ import type {
   RequestHandler,
   RouteConfig,
   RouteMethod,
-} from './router';
+} from '@kbn/core-http-server';
 
-export interface RouteDefinition<
+interface RouteDefinition<
   P = unknown,
   Q = unknown,
   B = unknown,
   Method extends Exclude<RouteMethod, 'options'> = Exclude<RouteMethod, 'options'>
 > extends RouteConfig<P, Q, B, Method>,
-    interfaces.Newable<IRouteHandler> {
+    interfaces.Newable<RouteHandler> {
   method: Method;
 }
 
-export interface IRouteHandler {
+interface RouteHandler {
   handle(): ReturnType<RequestHandler>;
 }
 
 export const Route: interfaces.ServiceIdentifier<
-  RouteDefinition & Exclude<interfaces.ServiceIdentifier<IRouteHandler>, keyof any>
-> = Symbol.for('Route');
+  interfaces.ServiceIdentifier<RouteHandler> & RouteDefinition
+> = Symbol('Route');
 
-export const RouterService: interfaces.ServiceIdentifier<IRouter<any>> =
-  Symbol.for('RouterService');
+export const Router: interfaces.ServiceIdentifier<IRouter<any>> = Symbol('Router');
 
-export const RequestToken: interfaces.ServiceIdentifier<KibanaRequest> = Symbol.for('Request');
+export const Request: interfaces.ServiceIdentifier<KibanaRequest> = Symbol('Request');
 
-export const ResponseToken: interfaces.ServiceIdentifier<KibanaResponseFactory> =
-  Symbol.for('Response');
+export const Response: interfaces.ServiceIdentifier<KibanaResponseFactory> = Symbol('Response');

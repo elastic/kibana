@@ -12,6 +12,7 @@
   "kbn_references": [
     "@kbn/config-schema",
     "@kbn/core-di",
+    "@kbn/core-di-server",
     "@kbn/core-http-server",
   ]
 }
