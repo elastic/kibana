@@ -42,6 +42,10 @@ import { ServiceOverviewInstancesChartAndTable } from './service_overview_instan
 import { ServiceOverviewThroughputChart } from './service_overview_throughput_chart';
 import { SloCallout } from '../../shared/slo_callout';
 import { useLocalStorage } from '../../../hooks/use_local_storage';
+import { isLogsSignal } from '../../../utils/get_signal_type';
+import { LogRateChart } from '../entities/charts/log_rate_chart';
+import { LogErrorRateChart } from '../entities/charts/log_error_rate_chart';
+import { SignalTypes } from '../../../../common/entities/types';
 /**
  * The height a chart should be if it's next to a table with 5 rows and a title.
  * Add the height of the pagination row.
@@ -50,7 +54,8 @@ export const chartHeight = 288;
 
 export function ServiceOverview() {
   const router = useApmRouter();
-  const { serviceName, fallbackToTransactions, agentName, serverlessType } = useApmServiceContext();
+  const { serviceName, fallbackToTransactions, agentName, serverlessType, serviceEntitySummary } =
+    useApmServiceContext();
 
   const setScreenContext = useApmPluginContext().observabilityAIAssistant?.service.setScreenContext;
 
@@ -221,6 +226,19 @@ export function ServiceOverview() {
               </EuiFlexGroup>
             </EuiFlexItem>
           )}
+          {serviceEntitySummary?.signalTypes &&
+          isLogsSignal(serviceEntitySummary.signalTypes as SignalTypes[]) ? (
+            <EuiFlexItem>
+              <EuiFlexGroup gutterSize="s">
+                <EuiFlexItem grow={4}>
+                  <LogRateChart height={chartHeight} />
+                </EuiFlexItem>
+                <EuiFlexItem grow={4}>
+                  <LogErrorRateChart height={chartHeight} />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          ) : null}
         </EuiFlexGroup>
       </ChartPointerEventContextProvider>
     </AnnotationsContextProvider>

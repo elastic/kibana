@@ -34,7 +34,7 @@ import { LogErrorRateChart } from '../charts/log_error_rate_chart';
 import { LogRateChart } from '../charts/log_rate_chart';
 import { AddAPMCallOut } from './add_apm_callout';
 import { useLocalStorage } from '../../../../hooks/use_local_storage';
-import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
+import { isPending } from '../../../../hooks/use_fetcher';
 /**
  * The height a chart should be if it's next to a table with 5 rows and a title.
  * Add the height of the pagination row.
@@ -43,7 +43,7 @@ import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 const chartHeight = 400;
 
 export function LogsServiceOverview() {
-  const { serviceName } = useApmServiceContext();
+  const { serviceName, serviceEntitySummary, serviceEntitySummaryStatus } = useApmServiceContext();
   const [isLogsApmCalloutEnabled, setIsLogsApmCalloutEnabled] = useLocalStorage(
     'apm.isLogsApmCalloutEnabled',
     true
@@ -55,21 +55,12 @@ export function LogsServiceOverview() {
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const { data, status } = useFetcher(
-    (callAPI) => {
-      return callAPI('GET /internal/apm/entities/services/{serviceName}/summary', {
-        params: { path: { serviceName }, query: { end, environment, start } },
-      });
-    },
-    [end, environment, serviceName, start]
-  );
-
   const { isLarge } = useBreakpoints();
   const isSingleColumn = isLarge;
 
   const rowDirection: EuiFlexGroupProps['direction'] = isSingleColumn ? 'column' : 'row';
 
-  if (isPending(status)) {
+  if (isPending(serviceEntitySummaryStatus)) {
     return (
       <div style={{ textAlign: 'center' }}>
         <EuiLoadingSpinner size="xl" />
@@ -95,7 +86,7 @@ export function LogsServiceOverview() {
             <EuiSpacer size="l" />
           </>
         ) : null}
-        {data?.entity?.hasLogMetrics === false ? (
+        {serviceEntitySummary?.entity?.hasLogMetrics === false ? (
           <>
             <EuiCallOut
               title={i18n.translate(
