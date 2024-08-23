@@ -18,7 +18,7 @@ import { dataTypes } from '../../../common/constants';
 
 import { getDataStreamPrivileges } from './package_policies_to_agent_permissions';
 
-function buildDefault(enabled: { logs: boolean; metrics: boolean }, namespace: string) {
+function buildDefault(enabled: { logs: boolean; metrics: boolean; traces: boolean }, namespace: string) {
   let names: string[] = [];
   if (enabled.logs) {
     names = names.concat(
@@ -28,6 +28,11 @@ function buildDefault(enabled: { logs: boolean; metrics: boolean }, namespace: s
   if (enabled.metrics) {
     names = names.concat(
       AGENT_POLICY_DEFAULT_MONITORING_DATASETS.map((dataset) => `metrics-${dataset}-${namespace}`)
+    );
+  }
+  if (enabled.traces) {
+    names = names.concat(
+      AGENT_POLICY_DEFAULT_MONITORING_DATASETS.map((dataset) => `traces-${dataset}-${namespace}`)
     );
   }
 
@@ -53,7 +58,7 @@ function buildDefault(enabled: { logs: boolean; metrics: boolean }, namespace: s
 
 export async function getMonitoringPermissions(
   soClient: SavedObjectsClientContract,
-  enabled: { logs: boolean; metrics: boolean },
+  enabled: { logs: boolean; metrics: boolean, traces: boolean },
   namespace: string
 ): Promise<FullAgentPolicyOutputPermissions> {
   const installation = await getInstallation({
