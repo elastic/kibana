@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { Readable } from 'node:stream';
 import { createParser } from 'eventsource-parser';
-import { Readable } from 'node:stream';
 import { Observable } from 'rxjs';
 
 export function eventSourceStreamIntoObservable(readable: Readable) {
