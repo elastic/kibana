@@ -32,7 +32,7 @@ export default function bulkUntrackByQueryTests({ getService }: FtrProviderConte
         },
         conflicts: 'proceed',
       });
-      objectRemover.removeAll();
+      await objectRemover.removeAll();
     });
 
     for (const scenario of UserAtSpaceScenarios) {
