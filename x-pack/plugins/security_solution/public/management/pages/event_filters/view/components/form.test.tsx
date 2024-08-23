@@ -342,6 +342,7 @@ describe('Event filter form', () => {
 
       // move back to global
       await userEvent.click(renderResult.getByTestId('eventFilters-form-effectedPolicies-global'));
+      // eslint-disable-next-line require-atomic-updates
       formProps.item.tags = [GLOBAL_ARTIFACT_TAG];
       rerenderWithLatestProps();
       expect(formProps.item.tags).toEqual([GLOBAL_ARTIFACT_TAG]);
@@ -353,6 +354,7 @@ describe('Event filter form', () => {
       await userEvent.click(
         renderResult.getByTestId('eventFilters-form-effectedPolicies-perPolicy')
       );
+      // eslint-disable-next-line require-atomic-updates
       formProps.item.tags = [`policy:${policyId}`];
       rerender();
       // on change called with the previous policy
