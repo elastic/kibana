@@ -5,11 +5,18 @@
  * 2.0.
  */
 
-export * from './types';
+// Careful of exporting anything from this file as any file(s) you export here will cause your page bundle size to increase.
+// If you're using functions/types/etc... internally or within integration tests it's best to import directly from their paths
+// than expose the functions/types/etc... here. You should _only_ expose functions/types/etc... that need to be shared with other plugins here.
+
+export type {
+  CspStatusCode,
+  IndexStatus,
+  IndexDetails,
+  BaseCspSetupBothPolicy,
+  BaseCspSetupStatus,
+  CspSetupStatus,
+} from './types';
 export * from './constants';
-export * from './schema/csp_finding';
-export type { CspBenchmarkRuleMetadata } from './schema/rules';
-export type { CspBenchmarkRulesStates } from './types/latest';
-/* TODO: Uncomment this in phase 3*/
-// export { showErrorToast } from './utils/show_error_toast';
-// export { buildMutedRulesFilter } from './utils/helpers';
+export type { CspFinding } from './schema/csp_finding';
+export type { CspBenchmarkRuleMetadata, CspBenchmarkRulesStates } from './schema/rules';

@@ -34,3 +34,15 @@ export const cspBenchmarkRuleMetadataSchema = schema.object({
   tags: schema.arrayOf(schema.string()),
   version: schema.string(),
 });
+
+export const ruleStateAttributes = schema.object({
+  muted: schema.boolean(),
+  benchmark_id: schema.string(),
+  benchmark_version: schema.string(),
+  rule_number: schema.string(),
+  rule_id: schema.string(),
+});
+
+export const rulesStates = schema.recordOf(schema.string(), ruleStateAttributes);
+
+export type CspBenchmarkRulesStates = TypeOf<typeof rulesStates>;

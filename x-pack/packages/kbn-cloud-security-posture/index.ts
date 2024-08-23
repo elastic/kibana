@@ -6,12 +6,3 @@
  */
 
 export * from './type';
-/* TODO: Uncomment this in phase 3*/
-// export { useMisconfigurationPreview } from './src/hooks/use_misconfiguration_preview';
-// export { useGetCspBenchmarkRulesStatesApi } from './src/hooks/use_get_benchmark_rules_state_api';
-// export { useCspSetupStatusApi } from './src/hooks/use_csp_setup_status_api';
-// export {
-//   getAggregationCount,
-//   getFindingsCountAggQuery,
-//   isIndexWithDocsAvailable,
-// } from './src/utils/utils';
