@@ -25,19 +25,25 @@ jest.mock('../../../common/lib/kibana/kibana_react', () => {
   };
 });
 
+const mockInvalidateRiskEngineStatusQuery = jest.fn();
+jest.mock('./use_risk_engine_status', () => ({
+  useInvalidateRiskEngineStatusQuery: () => mockInvalidateRiskEngineStatusQuery,
+}));
+
 const mockedScheduledResponse = { test: 'response' };
 
 describe('Schedule rule run hook', () => {
-  let result: ReturnType<typeof useScheduleNowRiskEngineMutation>;
-
   beforeEach(() => {
     mockFetch.mockClear();
+    mockInvalidateRiskEngineStatusQuery.mockClear();
   });
 
   it('schedules risk engine run by calling the API', async () => {
     mockFetch.mockResolvedValue(mockedScheduledResponse);
 
-    result = await renderMutation(() => useScheduleNowRiskEngineMutation());
+    const result: ReturnType<typeof useScheduleNowRiskEngineMutation> = await renderMutation(() =>
+      useScheduleNowRiskEngineMutation()
+    );
 
     await act(async () => {
       const res = await result.mutateAsync();
@@ -48,5 +54,14 @@ describe('Schedule rule run hook', () => {
         version: '1',
       });
     });
+  });
+
+  it('should invalidate the status API when the schedule run is called', async () => {
+    mockFetch.mockResolvedValue(mockedScheduledResponse);
+    const result: ReturnType<typeof useScheduleNowRiskEngineMutation> = await renderMutation(() =>
+      useScheduleNowRiskEngineMutation()
+    );
+    await result.mutateAsync();
+    expect(mockInvalidateRiskEngineStatusQuery).toHaveBeenCalledTimes(1);
   });
 });

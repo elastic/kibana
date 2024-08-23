@@ -9,30 +9,12 @@ import { render, fireEvent, waitFor } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { RiskEngineCallout } from './risk_engine_callout';
 
-// jest.mock('../../../../common/utils/download_blob');
-
-// jest.mock('../../../../common/lib/kibana/kibana_react', () => ({
-//   useKibana: () => ({
-//     services: {
-//       telemetry: {
-//         reportAssetCriticalityCsvImported: jest.fn(),
-//       },
-//     },
-//   }),
-// }));
-
-// describe('RiskEngineCallout', () => {
-//   it('????', () => {
-//     const { getByText } = render(<RiskEngineCallout />, {
-//       wrapper: TestProviders,
-//     });
-//   });
-// });
-
-// WRITE UNIT TEST FOR RiskEngineCallout THAT IS INSIDE /Users/machadoum/workspace/kibana/x-pack/plugins/security_solution/public/entity_analytics/components/asset_criticality_file_uploader/components/risk_engine_callout.tsx
-
-//   const { data: riskEngineStatus, isLoading: isRiskEngineStatusLoading } = useRiskEngineStatus();
-// if (!riskEngineStatus?.isNewRiskScoreModuleInstalled) {
+const THIRTY_MINUTES = 30 * 60 * 1000;
+const oneHourFromNow = () => {
+  const date = new Date();
+  date.setHours(date.getHours() + 1);
+  return date;
+};
 
 const mockUseRiskEngineStatus = jest.fn();
 jest.mock('../../../api/hooks/use_risk_engine_status', () => {
@@ -44,19 +26,19 @@ jest.mock('../../../api/hooks/use_risk_engine_status', () => {
   };
 });
 
-const OneHourFromNow = new Date();
-OneHourFromNow.setHours(OneHourFromNow.getHours() + 1);
+const mockScheduleNowRiskEngine = jest.fn();
+jest.mock('../../../api/hooks/use_schedule_now_risk_engine_mutation', () => {
+  return {
+    useScheduleNowRiskEngineMutation: () => ({
+      isLoading: false,
+      mutate: mockScheduleNowRiskEngine,
+    }),
+  };
+});
+
+jest.useFakeTimers();
 
 describe('RiskEngineCallout', () => {
-  it.skip('renders', () => {
-    mockUseRiskEngineStatus.mockReturnValue({ data: { isNewRiskScoreModuleInstalled: true } });
-    const { getByText } = render(<RiskEngineCallout />, {
-      wrapper: TestProviders,
-    });
-
-    expect(getByText('Risk score')).toBeInTheDocument();
-  });
-
   it('should show the remaining time for the next risk engine run', async () => {
     mockUseRiskEngineStatus.mockReturnValue({
       data: {
@@ -64,7 +46,7 @@ describe('RiskEngineCallout', () => {
 
         risk_engine_task_status: {
           status: 'idle',
-          runAt: OneHourFromNow.toISOString(),
+          runAt: oneHourFromNow().toISOString(),
         },
       },
     });
@@ -79,14 +61,14 @@ describe('RiskEngineCallout', () => {
     });
   });
 
-  it('should show is running status when the risk engine status is running', () => {
+  it('should show "now running" status when the risk engine status is "running"', () => {
     mockUseRiskEngineStatus.mockReturnValue({
       data: {
         isNewRiskScoreModuleInstalled: true,
 
         risk_engine_task_status: {
           status: 'running',
-          runAt: OneHourFromNow.toISOString(),
+          runAt: oneHourFromNow().toISOString(),
         },
       },
     });
@@ -98,7 +80,49 @@ describe('RiskEngineCallout', () => {
     expect(getByText('Now running')).toBeInTheDocument();
   });
 
-  it('should show is running status when the next schedule run is in the past', () => {
+  it('should show "now running" status when the next schedule run is in the past', () => {
+    mockUseRiskEngineStatus.mockReturnValue({
+      data: {
+        isNewRiskScoreModuleInstalled: true,
+
+        risk_engine_task_status: {
+          status: 'idle',
+          runAt: new Date().toISOString(), // past date
+        },
+      },
+    });
+
+    jest.advanceTimersByTime(100); // advance time
+
+    const { getByText } = render(<RiskEngineCallout />, {
+      wrapper: TestProviders,
+    });
+
+    expect(getByText('Now running')).toBeInTheDocument();
+  });
+
+  it('should update the count down time when time has passed', () => {
+    mockUseRiskEngineStatus.mockReturnValue({
+      data: {
+        isNewRiskScoreModuleInstalled: true,
+
+        risk_engine_task_status: {
+          status: 'idle',
+          runAt: oneHourFromNow(),
+        },
+      },
+    });
+
+    const { getByText } = render(<RiskEngineCallout />, {
+      wrapper: TestProviders,
+    });
+
+    expect(getByText('an hour')).toBeInTheDocument();
+    jest.advanceTimersByTime(THIRTY_MINUTES);
+    expect(getByText('30 minutes')).toBeInTheDocument();
+  });
+
+  it('should call the run risk engine api when button is clicked', () => {
     mockUseRiskEngineStatus.mockReturnValue({
       data: {
         isNewRiskScoreModuleInstalled: true,
@@ -114,33 +138,22 @@ describe('RiskEngineCallout', () => {
       wrapper: TestProviders,
     });
 
-    expect(getByText('Now running')).toBeInTheDocument();
+    fireEvent.click(getByText('Run engine now'));
+
+    expect(mockScheduleNowRiskEngine).toHaveBeenCalled();
   });
 
-  it.only('should update the count down time when time has passed', () => {
-    // TODO
+  it('should not show the callout if the risk engine is not installed', () => {
     mockUseRiskEngineStatus.mockReturnValue({
       data: {
         isNewRiskScoreModuleInstalled: true,
-
-        risk_engine_task_status: {
-          status: 'idle',
-          runAt: OneHourFromNow, // past date
-        },
       },
     });
 
-    const { getByText } = render(<RiskEngineCallout />, {
+    const { queryByTestId } = render(<RiskEngineCallout />, {
       wrapper: TestProviders,
     });
 
-    expect(getByText('na hours')).toBeInTheDocument();
-
-    // after 30min
-
-    expect(getByText('30 minutes')).toBeInTheDocument();
+    expect(queryByTestId('risk-engine-callout')).toBeNull();
   });
-
-  it.skip('should call the run risk engine api', () => {});
-  it.skip('should refetch the status when the schedule run is called', () => {});
 });

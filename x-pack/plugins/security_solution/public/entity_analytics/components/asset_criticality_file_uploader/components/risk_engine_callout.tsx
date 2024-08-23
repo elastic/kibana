@@ -29,26 +29,27 @@ const TEN_SECONDS = 10000;
 export const RiskEngineCallout: React.FC = () => {
   const { data: riskEngineStatus, isLoading: isRiskEngineStatusLoading } = useRiskEngineStatus();
   const { addSuccess, addError } = useAppToasts();
-  const scheduleNowMutation = useScheduleNowRiskEngineMutation({
-    onSuccess: () =>
-      addSuccess(
-        i18n.translate(
-          'xpack.securitySolution.entityAnalytics.assetCriticalityResultStep.riskEngine.successMessage',
-          {
-            defaultMessage: 'Risk engine run scheduled',
-          }
-        )
-      ),
-    onError: (error) =>
-      addError(error, {
-        title: i18n.translate(
-          'xpack.securitySolution.entityAnalytics.assetCriticalityResultStep.riskEngine.errorMessage',
-          {
-            defaultMessage: 'Risk engine schedule failed',
-          }
+  const { isLoading: isLoadingRiskEngineSchedule, mutate: scheduleRiskEngineMutation } =
+    useScheduleNowRiskEngineMutation({
+      onSuccess: () =>
+        addSuccess(
+          i18n.translate(
+            'xpack.securitySolution.entityAnalytics.assetCriticalityResultStep.riskEngine.successMessage',
+            {
+              defaultMessage: 'Risk engine run scheduled',
+            }
+          )
         ),
-      }),
-  });
+      onError: (error) =>
+        addError(error, {
+          title: i18n.translate(
+            'xpack.securitySolution.entityAnalytics.assetCriticalityResultStep.riskEngine.errorMessage',
+            {
+              defaultMessage: 'Risk engine schedule failed',
+            }
+          ),
+        }),
+    });
   const [nextScheduleRun, setNextScheduleRun] = useState<string | undefined>();
   const invalidateRiskEngineStatusQuery = useInvalidateRiskEngineStatusQuery();
   const { status, runAt } = riskEngineStatus?.risk_engine_task_status || {};
@@ -58,8 +59,6 @@ export const RiskEngineCallout: React.FC = () => {
     [runAt, status]
   );
 
-  console.log('isRunning', { isRunning, runAt, status });
-
   const updateCountDownText = useCallback(() => {
     if (isRunning) {
       setNextScheduleRun('Now running');
@@ -68,13 +67,9 @@ export const RiskEngineCallout: React.FC = () => {
     }
   }, [isRunning, riskEngineStatus?.risk_engine_task_status?.runAt]);
 
-  console.log({ nextScheduleRun });
-
   useEffect(() => {
-    console.log('useEffect');
     updateCountDownText();
     const intervalId = setInterval(() => {
-      console.log('setInterval called');
       updateCountDownText();
 
       if (isRunning) {
@@ -87,8 +82,8 @@ export const RiskEngineCallout: React.FC = () => {
   }, [invalidateRiskEngineStatusQuery, isRunning, updateCountDownText]);
 
   const scheduleRiskEngine = useCallback(() => {
-    scheduleNowMutation.mutate();
-  }, [scheduleNowMutation]);
+    scheduleRiskEngineMutation();
+  }, [scheduleRiskEngineMutation]);
 
   if (!riskEngineStatus?.isNewRiskScoreModuleInstalled) {
     return null;
@@ -96,6 +91,7 @@ export const RiskEngineCallout: React.FC = () => {
 
   return (
     <EuiCallOut
+      data-test-subj="risk-engine-callout"
       title={
         <FormattedMessage
           defaultMessage="Risk score"
@@ -125,7 +121,7 @@ export const RiskEngineCallout: React.FC = () => {
             iconType="play"
             size="xs"
             onClick={scheduleRiskEngine}
-            isLoading={scheduleNowMutation.isLoading || isRiskEngineStatusLoading || isRunning}
+            isLoading={isLoadingRiskEngineSchedule || isRiskEngineStatusLoading || isRunning}
           >
             <FormattedMessage
               defaultMessage="Run engine now"
