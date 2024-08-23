@@ -15,7 +15,7 @@ import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 
 // Failing: See https://github.com/elastic/kibana/issues/190270
-describe.skip('SyncAlertsToggle', () => {
+describe('SyncAlertsToggle', () => {
   let appMockRender: AppMockRenderer;
   const onSubmit = jest.fn();
   const defaultFormProps = {
@@ -29,6 +29,14 @@ describe.skip('SyncAlertsToggle', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     appMockRender = createAppMockRenderer();
+  });
+
+  afterEach(async () => {
+    appMockRender.queryClient.getQueryCache().clear();
+  });
+
+  afterEach(async () => {
+    await waitFor(() => expect(appMockRender.queryClient.isFetching()).toBe(0));
   });
 
   it('it renders', async () => {

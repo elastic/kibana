@@ -14,13 +14,21 @@ import { templatesConfigurationMock } from '../../containers/mock';
 import { TemplateSelector } from './templates';
 
 // FLAKY: https://github.com/elastic/kibana/issues/178457
-describe.skip('CustomFields', () => {
+describe('CustomFields', () => {
   let appMockRender: AppMockRenderer;
   const onTemplateChange = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
     appMockRender = createAppMockRenderer();
+  });
+
+  afterEach(async () => {
+    appMockRender.queryClient.getQueryCache().clear();
+  });
+
+  afterEach(async () => {
+    await waitFor(() => expect(appMockRender.queryClient.isFetching()).toBe(0));
   });
 
   it('renders correctly', async () => {

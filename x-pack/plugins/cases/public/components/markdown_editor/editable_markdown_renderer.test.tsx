@@ -62,7 +62,7 @@ const defaultProps = {
 };
 
 // FLAKY: https://github.com/elastic/kibana/issues/171177
-describe.skip('EditableMarkdown', () => {
+describe('EditableMarkdown', () => {
   let appMockRender: AppMockRenderer;
 
   beforeEach(() => {
@@ -72,6 +72,14 @@ describe.skip('EditableMarkdown', () => {
 
   afterEach(() => {
     sessionStorage.removeItem(draftStorageKey);
+  });
+
+  afterEach(async () => {
+    appMockRender.queryClient.getQueryCache().clear();
+  });
+
+  afterEach(async () => {
+    await waitFor(() => expect(appMockRender.queryClient.isFetching()).toBe(0));
   });
 
   it('Save button click calls onSaveContent and onChangeEditable when text area value changed', async () => {

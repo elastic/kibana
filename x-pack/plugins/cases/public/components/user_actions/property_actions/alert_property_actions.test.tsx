@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import { waitFor, screen } from '@testing-library/react';
+import { waitFor, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { AppMockRenderer } from '../../../common/mock';
 import {
@@ -18,7 +18,7 @@ import {
 import { AlertPropertyActions } from './alert_property_actions';
 
 // FLAKY: https://github.com/elastic/kibana/issues/174667
-describe.skip('AlertPropertyActions', () => {
+describe('AlertPropertyActions', () => {
   let appMock: AppMockRenderer;
 
   const props = {
@@ -30,6 +30,14 @@ describe.skip('AlertPropertyActions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     appMock = createAppMockRenderer();
+  });
+
+  afterEach(async () => {
+    appMock.queryClient.getQueryCache().clear();
+  });
+
+  afterEach(async () => {
+    await waitFor(() => expect(appMock.queryClient.isFetching()).toBe(0));
   });
 
   it('renders the correct number of actions', async () => {

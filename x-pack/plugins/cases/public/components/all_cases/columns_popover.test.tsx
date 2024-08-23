@@ -15,12 +15,20 @@ import { createAppMockRenderer } from '../../common/mock';
 import { ColumnsPopover } from './columns_popover';
 
 // FLAKY: https://github.com/elastic/kibana/issues/174682
-describe.skip('ColumnsPopover', () => {
+describe('ColumnsPopover', () => {
   let appMockRenderer: AppMockRenderer;
 
   beforeEach(() => {
     appMockRenderer = createAppMockRenderer();
     jest.clearAllMocks();
+  });
+
+  afterEach(async () => {
+    appMockRenderer.queryClient.getQueryCache().clear();
+  });
+
+  afterEach(async () => {
+    await waitFor(() => expect(appMockRenderer.queryClient.isFetching()).toBe(0));
   });
 
   const selectedColumns = [

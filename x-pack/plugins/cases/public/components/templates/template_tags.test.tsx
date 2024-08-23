@@ -16,7 +16,7 @@ import { TemplateTags } from './template_tags';
 import { showEuiComboBoxOptions } from '@elastic/eui/lib/test/rtl';
 
 // FLAKY: https://github.com/elastic/kibana/issues/189293
-describe.skip('TemplateTags', () => {
+describe('TemplateTags', () => {
   let appMockRenderer: AppMockRenderer;
   const onSubmit = jest.fn();
   const formDefaultValue = { templateTags: [] };
@@ -24,6 +24,14 @@ describe.skip('TemplateTags', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     appMockRenderer = createAppMockRenderer();
+  });
+
+  afterEach(async () => {
+    appMockRenderer.queryClient.getQueryCache().clear();
+  });
+
+  afterEach(async () => {
+    await waitFor(() => expect(appMockRenderer.queryClient.isFetching()).toBe(0));
   });
 
   it('renders template tags', async () => {

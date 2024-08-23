@@ -16,16 +16,21 @@ import { customFieldsMock, customFieldsConfigurationMock } from '../../../contai
 import userEvent from '@testing-library/user-event';
 import { CustomFieldTypes } from '../../../../common/types/domain';
 
-describe.skip('Case View Page files tab', () => {
+describe('Case View Page files tab', () => {
   const onSubmit = jest.fn();
   let appMockRender: AppMockRenderer;
 
   beforeEach(() => {
     appMockRender = createAppMockRenderer();
+    jest.clearAllMocks();
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
+  afterEach(async () => {
+    appMockRender.queryClient.getQueryCache().clear();
+  });
+
+  afterEach(async () => {
+    await waitFor(() => expect(appMockRender.queryClient.isFetching()).toBe(0));
   });
 
   it('should render the custom fields correctly', async () => {

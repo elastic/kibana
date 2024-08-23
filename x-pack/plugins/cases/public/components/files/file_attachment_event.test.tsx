@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import type { AppMockRenderer } from '../../common/mock';
@@ -17,12 +17,20 @@ import { basicFileMock } from '../../containers/mock';
 import { FileAttachmentEvent } from './file_attachment_event';
 
 // FLAKY: https://github.com/elastic/kibana/issues/174661
-describe.skip('FileAttachmentEvent', () => {
+describe('FileAttachmentEvent', () => {
   let appMockRender: AppMockRenderer;
 
   beforeEach(() => {
     jest.clearAllMocks();
     appMockRender = createAppMockRenderer();
+  });
+
+  afterEach(async () => {
+    appMockRender.queryClient.getQueryCache().clear();
+  });
+
+  afterEach(async () => {
+    await waitFor(() => expect(appMockRender.queryClient.isFetching()).toBe(0));
   });
 
   it('renders clickable name', async () => {

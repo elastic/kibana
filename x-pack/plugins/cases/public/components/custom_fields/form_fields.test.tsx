@@ -16,13 +16,21 @@ import { CustomFieldTypes } from '../../../common/types/domain';
 import { FormFields } from './form_fields';
 
 // FLAKY: https://github.com/elastic/kibana/issues/188450
-describe.skip('FormFields ', () => {
+describe('FormFields ', () => {
   let appMockRender: AppMockRenderer;
   const onSubmit = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
     appMockRender = createAppMockRenderer();
+  });
+
+  afterEach(async () => {
+    appMockRender.queryClient.getQueryCache().clear();
+  });
+
+  afterEach(async () => {
+    await waitFor(() => expect(appMockRender.queryClient.isFetching()).toBe(0));
   });
 
   it('renders correctly', async () => {

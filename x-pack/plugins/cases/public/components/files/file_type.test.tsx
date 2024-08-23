@@ -6,7 +6,7 @@
  */
 import type { JsonValue } from '@kbn/utility-types';
 import userEvent from '@testing-library/user-event';
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 
 import type { ExternalReferenceAttachmentViewProps } from '../../client/attachment_framework/types';
 import type { AppMockRenderer } from '../../common/mock';
@@ -18,7 +18,7 @@ import { getFileType } from './file_type';
 import { FILE_ATTACHMENT_TYPE } from '../../../common/constants';
 
 // FLAKY: https://github.com/elastic/kibana/issues/175841
-describe.skip('getFileType', () => {
+describe('getFileType', () => {
   const fileType = getFileType();
 
   it('invalid props return blank FileAttachmentViewObject', () => {
@@ -43,6 +43,14 @@ describe.skip('getFileType', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
+    });
+
+    afterEach(() => {
+      appMockRender.queryClient.getQueryCache().clear();
+    });
+
+    afterEach(async () => {
+      await waitFor(() => expect(appMockRender.queryClient.isFetching()).toBe(0));
     });
 
     it('event renders a clickable name if the file is an image', async () => {

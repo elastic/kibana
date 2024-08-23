@@ -19,7 +19,7 @@ import { RegisteredAttachmentsPropertyActions } from './registered_attachments_p
 import { AttachmentActionType } from '../../../client/attachment_framework/types';
 
 // Failing: See https://github.com/elastic/kibana/issues/174384
-describe.skip('RegisteredAttachmentsPropertyActions', () => {
+describe('RegisteredAttachmentsPropertyActions', () => {
   let appMock: AppMockRenderer;
 
   const props = {
@@ -32,6 +32,14 @@ describe.skip('RegisteredAttachmentsPropertyActions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     appMock = createAppMockRenderer();
+  });
+
+  afterEach(async () => {
+    appMock.queryClient.getQueryCache().clear();
+  });
+
+  afterEach(async () => {
+    await waitFor(() => expect(appMock.queryClient.isFetching()).toBe(0));
   });
 
   it('renders the correct number of actions', async () => {

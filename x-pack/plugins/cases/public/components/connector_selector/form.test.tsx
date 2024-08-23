@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import { ConnectorSelector } from './form';
 import { useKibana } from '../../common/lib/kibana';
 import type { AppMockRenderer } from '../../common/mock';
@@ -20,7 +20,7 @@ jest.mock('../../common/lib/kibana');
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 // FLAKY: https://github.com/elastic/kibana/issues/189530
-describe.skip('ConnectorSelector', () => {
+describe('ConnectorSelector', () => {
   const handleChange = jest.fn();
   const defaultProps = {
     connectors: [],
@@ -43,6 +43,14 @@ describe.skip('ConnectorSelector', () => {
       actionTypeTitle: 'test',
       iconClass: 'logoSecurity',
     });
+  });
+
+  afterEach(async () => {
+    appMock.queryClient.getQueryCache().clear();
+  });
+
+  afterEach(async () => {
+    await waitFor(() => expect(appMock.queryClient.isFetching()).toBe(0));
   });
 
   it('should render', async () => {

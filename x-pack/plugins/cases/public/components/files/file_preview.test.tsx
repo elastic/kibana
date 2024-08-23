@@ -17,12 +17,20 @@ import { basicFileMock } from '../../containers/mock';
 import { FilePreview } from './file_preview';
 
 // FLAKY: https://github.com/elastic/kibana/issues/182364
-describe.skip('FilePreview', () => {
+describe('FilePreview', () => {
   let appMockRender: AppMockRenderer;
 
   beforeEach(() => {
     jest.clearAllMocks();
     appMockRender = createAppMockRenderer();
+  });
+
+  afterEach(async () => {
+    appMockRender.queryClient.getQueryCache().clear();
+  });
+
+  afterEach(async () => {
+    await waitFor(() => expect(appMockRender.queryClient.isFetching()).toBe(0));
   });
 
   it('FilePreview rendered correctly', async () => {
