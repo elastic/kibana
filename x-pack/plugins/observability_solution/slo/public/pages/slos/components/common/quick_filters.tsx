@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { skip } from 'rxjs';
 import React, { useEffect, useState } from 'react';
 import { AwaitingControlGroupAPI, ControlGroupRenderer } from '@kbn/controls-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/common';
@@ -32,7 +33,7 @@ export function QuickFilters({
     if (!controlGroupAPI) {
       return;
     }
-    const subscription = controlGroupAPI.filters$.subscribe((newFilters = []) => {
+    const subscription = controlGroupAPI.filters$.pipe(skip(1)).subscribe((newFilters = []) => {
       if (newFilters.length === 0) {
         onStateChange({ tagsFilter: undefined, statusFilter: undefined });
       } else {
@@ -55,6 +56,7 @@ export function QuickFilters({
     <Container>
       <ControlGroupRenderer
         getCreationOptions={async (initialState, builder) => {
+          console.log('MADE IT HERE!!');
           builder.addOptionsListControl(
             initialState,
             {
