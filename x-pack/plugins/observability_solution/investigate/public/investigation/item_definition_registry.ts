@@ -10,9 +10,8 @@ import { GlobalWidgetParameters } from '../../common/types';
 
 type ItemDefinitionGenerateData = Record<string, any>;
 
-// type `data` somehow
 export interface ItemDefinition {
-  type: InvestigationItemType;
+  type: string;
   generate: (option: {
     item: InvestigationItems;
     params: GlobalWidgetParameters;
