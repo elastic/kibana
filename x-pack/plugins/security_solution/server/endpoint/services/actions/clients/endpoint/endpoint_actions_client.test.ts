@@ -11,20 +11,21 @@ import { EndpointActionsClient } from '../../..';
 import { endpointActionClientMock } from './mocks';
 import { responseActionsClientMock } from '../mocks';
 import { ENDPOINT_ACTIONS_INDEX } from '../../../../../../common/endpoint/constants';
-import type { ResponseActionRequestBody } from '../../../../../../common/endpoint/types';
+
 import { DEFAULT_EXECUTE_ACTION_TIMEOUT } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { applyEsClientSearchMock } from '../../../../mocks/utils.mock';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { BaseDataGenerator } from '../../../../../../common/endpoint/data_generators/base_data_generator';
 import { Readable } from 'stream';
 import { EndpointActionGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_action_generator';
+import type { ResponseActionsRequestBody } from '../../../../../../common/api/endpoint';
 
 describe('EndpointActionsClient', () => {
   let classConstructorOptions: ResponseActionsClientOptions;
   let endpointActionsClient: ResponseActionsClient;
 
   const getCommonResponseActionOptions = (): Pick<
-    ResponseActionRequestBody,
+    ResponseActionsRequestBody,
     'endpoint_ids' | 'case_ids'
   > => {
     return {

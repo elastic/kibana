@@ -51,7 +51,7 @@
           {
             "parentPluginId": "telemetryCollectionManager",
             "id": "def-server.StatsCollectionConfig.usageCollection",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "usageCollection",
             "description": [],
@@ -60,9 +60,11 @@
                 "pluginId": "usageCollection",
                 "scope": "server",
                 "docId": "kibUsageCollectionPluginApi",
-                "section": "def-server.UsageCollectionSetup",
-                "text": "UsageCollectionSetup"
-              }
+                "section": "def-server.ICollectorSet",
+                "text": "ICollectorSet"
+              },
+              " & ",
+              "UsageCountersServiceSetup"
             ],
             "path": "src/plugins/telemetry_collection_manager/server/types.ts",
             "deprecated": false,

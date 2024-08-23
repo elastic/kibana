@@ -7,8 +7,11 @@
 
 import { isEmpty } from 'lodash';
 import type { QueryClient } from '@tanstack/react-query';
-import { computeIsESQLQueryAggregating } from '@kbn/securitysolution-utils';
+import { isAggregatingQuery } from '@kbn/securitysolution-utils';
 
+import type { ESQLAst } from '@kbn/esql-ast';
+import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
+import { isColumnItem, isOptionItem } from '@kbn/esql-validation-autocomplete';
 import { KibanaServices } from '../../../common/lib/kibana';
 
 import type { ValidationError, ValidationFunc } from '../../../shared_imports';
@@ -21,6 +24,7 @@ export type FieldType = 'string';
 
 export enum ERROR_CODES {
   INVALID_ESQL = 'ERR_INVALID_ESQL',
+  INVALID_SYNTAX = 'ERR_INVALID_SYNTAX',
   ERR_MISSING_ID_FIELD_FROM_RESULT = 'ERR_MISSING_ID_FIELD_FROM_RESULT',
 }
 
@@ -34,11 +38,52 @@ const constructValidationError = (error: Error) => {
   };
 };
 
+const constructSyntaxError = (error: Error) => {
+  return {
+    code: ERROR_CODES.INVALID_SYNTAX,
+    message: error?.message
+      ? i18n.esqlValidationErrorMessage(error.message)
+      : i18n.ESQL_VALIDATION_UNKNOWN_ERROR,
+    error,
+  };
+};
+
+const getMetadataOption = (ast: ESQLAst) => {
+  const fromCommand = ast.find((astItem) => astItem.type === 'command' && astItem.name === 'from');
+
+  if (!fromCommand?.args) {
+    return undefined;
+  }
+
+  // Check whether the `from` command has `metadata` operator
+  for (const fromArg of fromCommand.args) {
+    if (isOptionItem(fromArg) && fromArg.name === 'metadata') {
+      return fromArg;
+    }
+  }
+
+  return undefined;
+};
+
 /**
  * checks whether query has metadata _id operator
  */
-export const computeHasMetadataOperator = (esqlQuery: string) => {
-  return /(?<!\|[\s\S.]*)\s*metadata[\s\S.]*_id[\s\S.]*/i.test(esqlQuery?.split('|')?.[0]);
+export const computeHasMetadataOperator = (ast: ESQLAst) => {
+  // Check whether the `from` command has `metadata` operator
+  const metadataOption = getMetadataOption(ast);
+  if (!metadataOption) {
+    return false;
+  }
+
+  // Check whether the `metadata` operator has `_id` argument
+  const idColumnItem = metadataOption.args.find(
+    (fromArg) => isColumnItem(fromArg) && fromArg.name === '_id'
+  );
+  if (!idColumnItem) {
+    return false;
+  }
+
+  return true;
 };
 
 /**
@@ -61,7 +106,12 @@ export const esqlValidator = async (
     const queryClient = (customData.value as { queryClient: QueryClient | undefined })?.queryClient;
 
     const services = KibanaServices.get();
-    const { isEsqlQueryAggregating, isMissingMetadataOperator } = parseEsqlQuery(query);
+    const { isEsqlQueryAggregating, isMissingMetadataOperator, errors } = parseEsqlQuery(query);
+
+    // Check if there are any syntax errors
+    if (errors.length) {
+      return constructSyntaxError(new Error(errors[0].message));
+    }
 
     if (isMissingMetadataOperator) {
       return {
@@ -97,11 +147,14 @@ export const esqlValidator = async (
  * - if it's non aggregation query it must have metadata operator
  */
 export const parseEsqlQuery = (query: string) => {
-  const isEsqlQueryAggregating = computeIsESQLQueryAggregating(query);
+  const { ast, errors } = getAstAndSyntaxErrors(query);
+
+  const isEsqlQueryAggregating = isAggregatingQuery(ast);
 
   return {
+    errors,
     isEsqlQueryAggregating,
     // non-aggregating query which does not have [metadata], is not a valid one
-    isMissingMetadataOperator: !isEsqlQueryAggregating && !computeHasMetadataOperator(query),
+    isMissingMetadataOperator: !isEsqlQueryAggregating && !computeHasMetadataOperator(ast),
   };
 };

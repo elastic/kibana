@@ -51,7 +51,8 @@ export default ({ getService }: FtrProviderContext) => {
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const path = dataPathBuilder.getPath('auditbeat/hosts');
 
-  describe('@ess @serverless @serverlessQA Threshold type rules, alert suppression', () => {
+  // NOTE: Add to second quality gate after feature is GA
+  describe('@ess @serverless Threshold type rules, alert suppression', () => {
     const { indexListOfDocuments, indexGeneratedDocuments } = dataGeneratorFactory({
       es,
       index: 'ecs_compliant',
