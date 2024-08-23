@@ -10,6 +10,7 @@ import { defer, switchMap, throwError } from 'rxjs';
 import type { ChatCompleteAPI, ChatCompletionResponse } from '../../common/chat_complete';
 import { createInferenceRequestError } from '../../common/errors';
 import type { InferenceStartDependencies } from '../types';
+import { getConnectorById } from '../util/get_connector_by_id';
 import { getInferenceAdapter } from './adapters';
 import { createInferenceExecutor, chunksIntoMessage } from './utils';
 
@@ -29,12 +30,12 @@ export function createChatCompleteApi({
   }): ChatCompletionResponse => {
     return defer(async () => {
       const actionsClient = await actions.getActionsClientWithRequest(request);
-      const connector = await actionsClient.get({ id: connectorId, throwIfSystemAction: true });
+      const connector = await getConnectorById({ connectorId, actionsClient });
       const executor = createInferenceExecutor({ actionsClient, connector });
       return { executor, connector };
     }).pipe(
       switchMap(({ executor, connector }) => {
-        const connectorType = connector.actionTypeId;
+        const connectorType = connector.type;
         const inferenceAdapter = getInferenceAdapter(connectorType);
 
         if (!inferenceAdapter) {

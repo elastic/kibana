@@ -6,7 +6,8 @@
  */
 
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
-import type { ActionsClient, ActionResult as Connector } from '@kbn/actions-plugin/server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { InferenceConnector } from '../../../common/connectors';
 
 export interface InferenceInvokeOptions {
   subAction: string;
@@ -28,13 +29,13 @@ export const createInferenceExecutor = ({
   connector,
   actionsClient,
 }: {
-  connector: Connector;
+  connector: InferenceConnector;
   actionsClient: ActionsClient;
 }): InferenceExecutor => {
   return {
     async invoke({ subAction, subActionParams }): Promise<InferenceInvokeResult> {
       return await actionsClient.execute({
-        actionId: connector.id,
+        actionId: connector.connectorId,
         params: {
           subAction,
           subActionParams,
