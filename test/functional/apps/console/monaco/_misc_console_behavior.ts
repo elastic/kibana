@@ -12,14 +12,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'console', 'header']);
+  const testSubjects = getService('testSubjects');
 
   describe('misc console behavior', function testMiscConsoleBehavior() {
     this.tags('includeFirefox');
     before(async () => {
       await browser.setWindowSize(1200, 800);
       await PageObjects.common.navigateToApp('console');
-      // Ensure that the text area can be interacted with
-      await PageObjects.console.closeHelpIfExists();
     });
 
     beforeEach(async () => {
@@ -34,6 +33,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           tabOpened = false;
           await browser.switchTab(0);
         }
+      });
+
+      it('can open and close Shortcuts popover', async () => {
+        // The popover should initially be closed
+        expect(await testSubjects.exists('consoleShortcutsPopover').to.be(false));
+
+        // Opening the popover
+        await PageObjects.console.monaco.clickShortcutsIcon();
+        expect(await testSubjects.exists('consoleShortcutsPopover').to.be(true));
+
+        // Closing the popover
+        await PageObjects.console.monaco.clickShortcutsIcon();
+        expect(await testSubjects.exists('consoleShortcutsPopover').to.be(false));
       });
 
       it('should execute the request when Ctrl+Enter is pressed', async () => {
@@ -145,6 +157,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(await PageObjects.console.monaco.getFontSize()).to.be('24px');
         });
       });
+    });
+
+    it('can open and close Help popover', async () => {
+      // The popover should initially be closed
+      expect(await testSubjects.exists('consoleHelpPopover').to.be(false));
+
+      // Opening the popover
+      await PageObjects.console.monaco.clickHelpIcon();
+      expect(await testSubjects.exists('consoleHelpPopover').to.be(true));
+
+      // Closing the popover
+      await PageObjects.console.monaco.clickHelpIcon();
+      expect(await testSubjects.exists('consoleHelpPopover').to.be(false));
     });
   });
 }

@@ -218,8 +218,12 @@ export class ConsolePageObject extends FtrService {
     }
   }
 
-  public async collapseHelp() {
-    await this.testSubjects.click('help-close-button');
+  public async clickHelpIcon() {
+    await this.testSubjects.click('consoleHelpButton');
+  }
+
+  public async clickShortcutsIcon() {
+    await this.testSubjects.click('consoleShortcutsButton');
   }
 
   public async openSettings() {
@@ -488,15 +492,6 @@ export class ConsolePageObject extends FtrService {
     const statusBadge = await this.testSubjects.find('consoleResponseStatusBadge');
     const text = await statusBadge.getVisibleText();
     return text.replace(/[^\d.]+/, '');
-  }
-
-  async closeHelpIfExists() {
-    await this.retry.try(async () => {
-      const helpPanelShown = await this.testSubjects.exists('help-close-button');
-      if (helpPanelShown) {
-        await this.collapseHelp();
-      }
-    });
   }
 
   public async collapseJsonBlock(blockNumber: number) {

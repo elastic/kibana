@@ -21,10 +21,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       log.debug('navigateTo console');
       await PageObjects.common.navigateToApp('console');
-      // blocks the close help button for several seconds so just retry until we can click it.
-      await retry.try(async () => {
-        await PageObjects.console.collapseHelp();
-      });
     });
 
     describe('with comments', async () => {

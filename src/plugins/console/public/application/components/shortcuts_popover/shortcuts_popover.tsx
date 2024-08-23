@@ -24,6 +24,7 @@ export const ShortcutsPopover = ({ button, isOpen, closePopover }: ShortcutsPopo
       isOpen={isOpen}
       closePopover={closePopover}
       anchorPosition="downRight"
+      data-test-subj="consoleShortcutsPopover"
     >
       <EuiTitle size="xxs">
         <h5>Navigation shortcuts</h5>

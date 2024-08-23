@@ -25,9 +25,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('navigateTo console');
       await PageObjects.common.navigateToApp('console');
     });
-    beforeEach(async () => {
-      await PageObjects.console.closeHelpIfExists();
-    });
 
     it('should show the default request', async () => {
       await retry.try(async () => {
@@ -166,7 +163,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.common.navigateToApp('console');
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.console.closeHelpIfExists();
         expect(await PageObjects.console.hasFolds()).to.be(true);
       });
 
@@ -199,7 +195,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await browser.refresh();
 
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.console.closeHelpIfExists();
         const request = await PageObjects.console.getRequest();
         // the request is restored from the local storage value
         expect(request).to.eql('GET _cat/indices');
