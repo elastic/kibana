@@ -11,9 +11,9 @@ import React, { useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { SecuredFeature } from '@kbn/security-role-management-model';
 
 import { SubFeatureForm } from './sub_feature_form';
-import type { SecuredFeature } from '../../../../model';
 import type { PrivilegeFormCalculator } from '../privilege_form_calculator';
 
 interface Props {
