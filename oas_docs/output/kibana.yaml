@@ -51,6 +51,10 @@ info:
     url: 'https://www.elastic.co/licensing/elastic-license'
   title: Kibana APIs
   version: 1.0.2
+  x-feedbackLink:
+    label: Feedback
+    url: >-
+      https://github.com/elastic/docs-content/issues/new?assignees=&labels=feedback%2Ccommunity&projects=&template=api-feedback.yaml&title=%5BFeedback%5D%3A+
 servers:
   - url: 'https://{kibana_url}'
     variables:
