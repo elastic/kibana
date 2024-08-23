@@ -127,7 +127,6 @@ describe('parseAggregationResults', () => {
       results: [
         {
           group: 'all documents',
-          groups: [],
           count: 491,
           hits: [sampleHit],
           sourceFields: {},
@@ -424,7 +423,6 @@ describe('parseAggregationResults', () => {
       results: [
         {
           group: 'all documents',
-          groups: [],
           hits: [sampleHit],
           count: 643,
           value: 3578195238.095238,
@@ -856,7 +854,6 @@ describe('parseAggregationResults', () => {
       results: [
         {
           group: 'all documents',
-          groups: [],
           count: 491,
           hits: [sampleSourceFieldsHit],
           sourceFields: {
@@ -988,7 +985,6 @@ describe('parseAggregationResults', () => {
       results: [
         {
           group: 'all documents',
-          groups: [],
           count: 4,
           hits: [
             sampleEsqlSourceFieldsHit,
