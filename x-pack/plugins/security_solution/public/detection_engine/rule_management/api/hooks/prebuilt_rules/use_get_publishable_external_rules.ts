@@ -6,29 +6,16 @@
  */
 
 import { useMemo } from 'react';
-import { pick } from 'lodash';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine';
 
-export interface PublishableExternalRules {
-  rule_id: string;
-  repository_id: string;
-  revision: number;
-}
-
-export const useGetPublishableExternalRules = (
-  rules: RuleResponse[]
-): PublishableExternalRules[] => {
+export const useGetPublishableExternalRules = (rules: RuleResponse[]): RuleResponse[] => {
   const publishableExternalRules = useMemo(() => {
-    return rules
-      .filter(
-        (rule) =>
-          rule.rule_source?.type === 'external' &&
-          rule.rule_source.repository_id != null &&
-          rule.rule_source.is_customized === true
-      )
-      .map((rule) =>
-        pick(rule, ['rule_id', 'repository_id', 'revision'])
-      ) as PublishableExternalRules[];
+    return rules.filter(
+      (rule) =>
+        rule.rule_source?.type === 'external' &&
+        rule.rule_source.repository_id != null &&
+        rule.rule_source.is_customized === true
+    );
   }, [rules]);
 
   return publishableExternalRules;

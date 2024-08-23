@@ -13,6 +13,10 @@ import { INTERNAL_ALERTING_API_FIND_RULES_PATH } from '@kbn/alerting-plugin/comm
 import { BASE_ACTION_API_PATH } from '@kbn/actions-plugin/common';
 import type { ActionType, AsApiContract } from '@kbn/actions-plugin/common';
 import type { ActionResult } from '@kbn/actions-plugin/server';
+import type {
+  PublishPrebuiltRulesRequestBody,
+  PublishPrebuiltRulesResponse,
+} from '../../../../common/api/detection_engine/prebuilt_rules/publish_prebuilt_rules/publish_prebuilt_rules.gen';
 import { convertRulesFilterToKQL } from '../../../../common/detection_engine/rule_management/rule_filtering';
 import type {
   UpgradeSpecificRulesRequest,
@@ -50,6 +54,7 @@ import {
   PERFORM_RULE_INSTALLATION_URL,
   PERFORM_RULE_UPGRADE_URL,
   PREBUILT_RULES_STATUS_URL,
+  PUBLISH_PREBUILT_RULES_URL,
   REVIEW_RULE_INSTALLATION_URL,
   REVIEW_RULE_UPGRADE_URL,
 } from '../../../../common/api/detection_engine/prebuilt_rules';
@@ -703,4 +708,13 @@ export const bootstrapPrebuiltRules = async (): Promise<BootstrapPrebuiltRulesRe
   KibanaServices.get().http.fetch(BOOTSTRAP_PREBUILT_RULES_URL, {
     method: 'POST',
     version: '1',
+  });
+
+export const publishPrebuiltRules = async (
+  requestBody: PublishPrebuiltRulesRequestBody
+): Promise<PublishPrebuiltRulesResponse> =>
+  KibanaServices.get().http.fetch(PUBLISH_PREBUILT_RULES_URL, {
+    method: 'POST',
+    version: '1',
+    body: JSON.stringify(requestBody),
   });

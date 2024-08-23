@@ -18,8 +18,11 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiBadge,
+  EuiText,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { usePublishRules } from '../../../../detection_engine/rule_management/logic/prebuilt_rules/use_publish_rules';
+import type { RuleResponse, RuleSignatureId } from '../../../../../common/api/detection_engine';
 import { useRulesTableContext } from '../../../../detection_engine/rule_management_ui/components/rules_table/rules_table/rules_table_context';
 import * as i18n from './translations';
 
@@ -37,13 +40,13 @@ export const PublishExternalRulesButton = ({
   showBadge = true,
 }: PublishExternalRulesButtonProps) => {
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  const [selectedRules, setSelectedRules] = useState<string[]>([]);
+  const [selectedRules, setSelectedRules] = useState<Map<RuleSignatureId, RuleResponse>>(new Map());
   const {
     state: { publishableRules },
   } = useRulesTableContext();
+  const { mutateAsync: publishRulesRequest } = usePublishRules();
 
   const publishableRulesCount = publishableRules.length;
-
   if (publishableRulesCount === 0) {
     return null;
   }
@@ -51,17 +54,23 @@ export const PublishExternalRulesButton = ({
   const openFlyout = () => setIsFlyoutVisible(true);
   const closeFlyout = () => setIsFlyoutVisible(false);
 
-  const handleRuleSelection = (ruleId: string) => {
-    setSelectedRules((prevSelected) =>
-      prevSelected.includes(ruleId)
-        ? prevSelected.filter((id) => id !== ruleId)
-        : [...prevSelected, ruleId]
-    );
-  };
+  const handleRuleSelection = (rule: RuleResponse) =>
+    setSelectedRules((prevSelected) => {
+      if (prevSelected.has(rule.rule_id)) {
+        prevSelected.delete(rule.rule_id);
+      } else {
+        prevSelected.set(rule.rule_id, rule);
+      }
+      return new Map(prevSelected);
+    });
 
-  const handlePublishSelected = () => {
-    console.log('Publishing rules:', selectedRules);
-    closeFlyout();
+  const handlePublishSelected = async () => {
+    await publishRulesRequest({
+      rules: Array.from(selectedRules.values()).map((rule) => ({
+        rule_id: rule.rule_id,
+        revision: rule.revision,
+      })),
+    });
   };
 
   const ButtonComponent = fill ? EuiButton : EuiButtonEmpty;
@@ -93,31 +102,30 @@ export const PublishExternalRulesButton = ({
         <EuiFlyout onClose={closeFlyout} aria-labelledby="flyoutTitle">
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
-              <h2 id="flyoutTitle">Publish Rules</h2>
+              <h2 id="flyoutTitle">{`Publish Rules`}</h2>
             </EuiTitle>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
             {publishableRules.map((rule) => (
-              <EuiCheckbox
-                id={rule.rule_id}
-                key={rule.rule_id}
-                label={rule.rule_id}
-                checked={selectedRules.includes(rule.rule_id)}
-                onChange={() => handleRuleSelection(rule.rule_id)}
-              />
+              <>
+                <EuiCheckbox
+                  id={rule.rule_id}
+                  key={rule.rule_id}
+                  label={<RuleLabelItem rule={rule} />}
+                  checked={selectedRules.has(rule.rule_id)}
+                  onChange={() => handleRuleSelection(rule)}
+                />
+                <EuiSpacer size="m" />
+              </>
             ))}
             <EuiSpacer />
             <EuiFlexGroup justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty onClick={closeFlyout}>Cancel</EuiButtonEmpty>
+                <EuiButtonEmpty onClick={closeFlyout}>{`Cancel`}</EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton
-                  fill
-                  onClick={handlePublishSelected}
-                  disabled={selectedRules.length === 0}
-                >
-                  Publish Selected
+                <EuiButton fill onClick={handlePublishSelected} disabled={selectedRules.size === 0}>
+                  <p>{`Publish`}</p>
                 </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -125,5 +133,32 @@ export const PublishExternalRulesButton = ({
         </EuiFlyout>
       )}
     </>
+  );
+};
+
+interface RuleLabelItemProps {
+  rule: RuleResponse;
+}
+
+const RuleLabelItem = ({ rule }: RuleLabelItemProps) => {
+  const { name, rule_id: ruleId, version, rule_source: ruleSource } = rule;
+
+  const repositoryId = ruleSource && ruleSource.type === 'external' && ruleSource.repository_id;
+  return (
+    <EuiFlexGroup key={rule.rule_id} direction="column" gutterSize="s">
+      <EuiFlexItem>
+        <EuiText>{name}</EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        {`Rule Id:`} {ruleId}
+      </EuiFlexItem>
+      <EuiFlexItem>
+        {`Upgrade to version: `}
+        {version + 1}
+      </EuiFlexItem>
+      <EuiFlexItem>
+        {`Repository Id:`} {repositoryId}
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
