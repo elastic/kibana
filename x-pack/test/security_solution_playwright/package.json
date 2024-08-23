@@ -1,8 +1,9 @@
 {
+  "author": "Elastic", 
   "name": "security_solution_playwright",
   "version": "1.0.0",
-  "main": "index.js",
-  "license": "MIT",
+  "private": true,
+  "license": "Elastic License 2.0",
   "scripts": {
     "playwright:open": "node ./scripts/start_playwright open --config-file security_solution_playwright/playwright.config.ts",
     "playwright:run": "node ./scripts/start_playwright run --config-file security_solution_playwright/playwright.config.ts",
