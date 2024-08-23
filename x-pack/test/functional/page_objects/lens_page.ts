@@ -1251,13 +1251,15 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async setPalette(paletteId: string, isLegacy: boolean) {
       await testSubjects.click('lns_colorEditing_trigger');
       // This action needs to be slowed WAY down, otherwise it will not correctly set the palette
-      await PageObjects.common.sleep(200);
+      // These three sleep are what finally fixed the issue for me.
+      // await PageObjects.common.sleep(200);
+
       await testSubjects.setEuiSwitch(
         'lns_colorMappingOrLegacyPalette_switch',
         isLegacy ? 'uncheck' : 'check'
       );
 
-      await PageObjects.common.sleep(200);
+      // await PageObjects.common.sleep(200);
 
       if (isLegacy) {
         await testSubjects.click('lns-palettePicker');
@@ -1266,9 +1268,14 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await testSubjects.click('kbnColoring_ColorMapping_PalettePicker');
         await testSubjects.click(`kbnColoring_ColorMapping_Palette-${paletteId}`);
       }
-      await PageObjects.common.sleep(200);
+
+      // If the debounced value is the root cause, they I would imagine a 1000 sleep here would fix it, but it does not
+      // maybe it needs to be after the call to `closePaletteEditor`?? idk
+      // await PageObjects.common.sleep(200);
 
       await this.closePaletteEditor();
+
+      // at this point without the sleeps, the value is set locally in the component so it looks correct
     },
 
     async closePaletteEditor() {

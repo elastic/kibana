@@ -52,7 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    it('should sync colors on dashboard for legacy default palette', async function () {
+    it('should sync colors on dashboard for legacy default palette - problem test', async function () {
       await PageObjects.dashboard.navigateToApp();
       await elasticChart.setNewChartUiDebugFlag(true);
       await PageObjects.dashboard.clickCreateDashboardPrompt();
@@ -72,6 +72,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         palette: { mode: 'legacy', id: 'default' },
       });
       await PageObjects.lens.saveAndReturn();
+      // at this point the clearing of the `colorMapping` prop on the column is reverted to the default
+      // with the new color mapping switch enabled, this is driven by is the column has `colorMapping` defined.
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       // create filtered xy chart
@@ -89,6 +91,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await filterBar.addFilter({ field: 'geo.src', operation: 'is not', value: 'CN' });
       await PageObjects.lens.saveAndReturn();
+      // Same thing happens here...
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       // create datatable vis
@@ -102,6 +105,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await PageObjects.lens.setTermsNumberOfValues(5);
       await PageObjects.lens.setTableDynamicColoring('cell');
+
+      // Oddly this call to setPalette on the Table, works fine without the sleeps...
       await PageObjects.lens.setPalette('default', true);
       await PageObjects.lens.closeDimensionEditor();
       await PageObjects.lens.configureDimension({
@@ -118,6 +123,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.dashboard.waitForRenderComplete();
 
+      // This is just pulling all the colors from the 2 xy charts and the table and ensuring all keys are assigned the same color.
+      // i.e. "CN" -> "#ccc"
       const colorMappings1 = Object.entries(
         getColorMapping(await PageObjects.dashboard.getPanelChartDebugState(0))
       );
