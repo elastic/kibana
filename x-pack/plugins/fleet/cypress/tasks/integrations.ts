@@ -38,10 +38,8 @@ export const addIntegration = ({ useExistingPolicy } = { useExistingPolicy: fals
   }
   cy.getBySel(CREATE_PACKAGE_POLICY_SAVE_BTN).should('be.enabled').click();
 
-  if (useExistingPolicy) {
-    // sometimes agent is assigned to default policy, sometimes not
-    cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
-  }
+  // sometimes agent is assigned to default policy, sometimes not
+  cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
 
   cy.getBySel(CREATE_PACKAGE_POLICY_SAVE_BTN).should('not.exist');
   clickIfVisible(FLYOUT_CLOSE_BTN_SEL);
