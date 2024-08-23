@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 
 import { Settings } from './settings';
-import { Variables } from './variables';
+import { VariablesEditor } from '../components/variables';
 import type { SenseEditor } from '../models';
 
 export interface Props {
@@ -31,7 +31,7 @@ export function Config({ editorInstance }: Props) {
           <Settings editorInstance={editorInstance} />
         </EuiFlexItem>
         <EuiFlexItem>
-          <Variables />
+          <VariablesEditor />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

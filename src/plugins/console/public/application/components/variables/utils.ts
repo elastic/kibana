@@ -6,11 +6,7 @@
  * Side Public License, v 1.
  */
 
-export interface DevToolsVariable {
-  id: string;
-  name: string;
-  value: string;
-}
+import { type DevToolsVariable } from './types';
 
 export const editVariable = (newVariable: DevToolsVariable, variables: DevToolsVariable[]) => {
   return variables.map((variable: DevToolsVariable) => {

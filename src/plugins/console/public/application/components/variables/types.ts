@@ -6,5 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { type DevToolsVariable } from './types';
-export { VariablesEditor } from './variables_editor';
+export interface DevToolsVariable {
+  id: string;
+  name: string;
+  value: string;
+}

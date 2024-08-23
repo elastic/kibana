@@ -24,16 +24,16 @@ import {
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 
-import { VariableForm } from './variable_form';
+import { VariableEditorForm } from './variables_editor_form';
 import * as utils from './utils';
-import { type DevToolsVariable } from './utils';
+import { type DevToolsVariable } from './types';
 
-export interface DevToolsVariablesFlyoutProps {
+export interface VariablesEditorViewProps {
   onSaveVariables: (newVariables: DevToolsVariable[]) => void;
   variables: [];
 }
 
-export const DevToolsVariablesFlyout = (props: DevToolsVariablesFlyoutProps) => {
+export const VariablesEditorView = (props: VariablesEditorViewProps) => {
   const isMounted = useRef(false);
   const [isAddingVariable, setIsAddingVariable] = useState(false);
   const [deleteModalForVariable, setDeleteModalForVariable] = useState<string | null>(null);
@@ -78,7 +78,7 @@ export const DevToolsVariablesFlyout = (props: DevToolsVariablesFlyoutProps) => 
       delete itemIdToExpandedRowMapValues[variableId];
     } else {
       itemIdToExpandedRowMapValues[variableId] = (
-        <VariableForm
+        <VariableEditorForm
           title={i18n.translate('console.variablesPage.editVariableForm.title', {
             defaultMessage: 'Edit variable',
           })}
@@ -195,7 +195,7 @@ export const DevToolsVariablesFlyout = (props: DevToolsVariablesFlyoutProps) => 
       />
 
       {isAddingVariable && (
-        <VariableForm onSubmit={onAddVariable} onCancel={() => setIsAddingVariable(false)} />
+        <VariableEditorForm onSubmit={onAddVariable} onCancel={() => setIsAddingVariable(false)} />
       )}
 
       <EuiSpacer size="m" />

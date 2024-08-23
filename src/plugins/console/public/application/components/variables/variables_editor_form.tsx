@@ -32,9 +32,10 @@ import {
   ValidationFuncArg,
 } from '../../../shared_imports';
 
-import { type DevToolsVariable, isValidVariableName } from './utils';
+import { type DevToolsVariable } from './types';
+import { isValidVariableName } from './utils';
 
-export interface VariableFormProps {
+export interface VariableEditorFormProps {
   onSubmit: (data: DevToolsVariable) => void;
   onCancel: () => void;
   defaultValue?: DevToolsVariable;
@@ -84,7 +85,7 @@ const fieldsConfig: Record<string, FieldConfig> = {
   },
 };
 
-export const VariableForm = (props: VariableFormProps) => {
+export const VariableEditorForm = (props: VariableEditorFormProps) => {
   const onSubmit: FormConfig['onSubmit'] = async (data, isValid) => {
     if (isValid) {
       props.onSubmit({
