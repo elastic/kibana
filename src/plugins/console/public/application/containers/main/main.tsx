@@ -30,7 +30,7 @@ interface MainProps {
 }
 
 export function Main({ isEmbeddable = false }: MainProps) {
-  const [selectedTab, setSelectedTab] = useState(CONFIG_TAB_ID);
+  const [selectedTab, setSelectedTab] = useState(SHELL_TAB_ID);
 
   const { done, error, retry } = useDataInit();
 
@@ -106,7 +106,12 @@ export function Main({ isEmbeddable = false }: MainProps) {
             </EuiSplitPanel.Inner>
             <EuiHorizontalRule margin="none" />
             <EuiSplitPanel.Inner paddingSize="xs" grow={false}>
-              <EuiButtonEmpty onClick={() => {}} iconType="editorCodeBlock" size="xs" color="text">
+              <EuiButtonEmpty
+                onClick={() => setSelectedTab(CONFIG_TAB_ID)}
+                iconType="editorCodeBlock"
+                size="xs"
+                color="text"
+              >
                 {MAIN_PANEL_LABELS.variablesButton}
               </EuiButtonEmpty>
             </EuiSplitPanel.Inner>
