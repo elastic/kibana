@@ -13,8 +13,8 @@ import React from 'react';
 interface ShortcutLineFlexItemProps {
   id: string;
   description: string;
-  keys: string[];
-  alternativeKeys?: string[];
+  keys: any[];
+  alternativeKeys?: any[];
 }
 
 const renderKeys = (keys: string[]) => {
@@ -37,7 +37,7 @@ export const ShortcutLineFlexItem = ({
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiText size="xs">
-            {i18n.translate('console.shortcutDescription' + id, {
+            {i18n.translate('console.shortcutDescription.' + id, {
               defaultMessage: description,
             })}
           </EuiText>
@@ -48,7 +48,7 @@ export const ShortcutLineFlexItem = ({
             {alternativeKeys && (
               <>
                 <strong> or </strong>
-                {renderKeys(keys)}
+                {renderKeys(alternativeKeys)}
               </>
             )}
           </EuiText>

@@ -7,24 +7,112 @@
  */
 
 import React from 'react';
-import { EuiPopover, EuiTitle } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import {
+  EuiPopover,
+  EuiTitle,
+  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonIcon,
+  EuiSpacer,
+} from '@elastic/eui';
+import { useServicesContext } from '../contexts';
 
 interface HelpPopoverProps {
   button: any;
   isOpen: boolean;
   closePopover: () => void;
+  resetTour: () => void;
 }
 
-export const HelpPopover = ({ button, isOpen, closePopover }: HelpPopoverProps) => {
+export const HelpPopover = ({ button, isOpen, closePopover, resetTour }: HelpPopoverProps) => {
+  const { docLinks } = useServicesContext();
+
   return (
-    <EuiPopover button={button} isOpen={isOpen} closePopover={closePopover} anchorPosition="downRight">
+    <EuiPopover
+      button={button}
+      isOpen={isOpen}
+      closePopover={closePopover}
+      anchorPosition="downRight"
+    >
       <EuiTitle size="xs">
-        <h4>Elastic Console</h4>
+        <h4>
+          {i18n.translate('console.helpPopover.title', {
+            defaultMessage: 'Elastic Console',
+          })}
+        </h4>
       </EuiTitle>
-      <p>
-        Our UI for interacting with Elasticsearch clusters using QueryDSL. Easily run queries,
-        manage settings, and view search results.
-      </p>
+
+      <EuiSpacer size="s" />
+
+      <EuiText style={{ width: 300 }} color="subdued" size="s">
+        <p>
+          {i18n.translate('console.helpPopover.description', {
+            defaultMessage:
+              'Our UI for interacting with Elasticsearch clusters using QueryDSL. Easily run queries, manage settings, and view search results.',
+          })}
+        </p>
+      </EuiText>
+
+      <EuiSpacer />
+
+      <EuiFlexGroup gutterSize="m" direction="column">
+        <EuiFlexItem>
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <p>
+                {i18n.translate('console.helpPopover.aboutConsoleLabel', {
+                  defaultMessage: 'About Console',
+                })}
+              </p>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                iconType="popout"
+                href={docLinks.console.guide}
+                target="_blank"
+                color="text"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+
+        <EuiFlexItem>
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <p>
+                {i18n.translate('console.helpPopover.aboutQueryDSLLabel', {
+                  defaultMessage: 'About QueryDSL',
+                })}
+              </p>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                iconType="popout"
+                href={docLinks.query.queryDsl}
+                target="_blank"
+                color="text"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+
+        <EuiFlexItem>
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <p>
+                {i18n.translate('console.helpPopover.rerunTourLabel', {
+                  defaultMessage: 'Re-run feature tour',
+                })}
+              </p>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon iconType="refresh" onClick={resetTour} color="text" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiPopover>
   );
 };

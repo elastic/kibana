@@ -114,6 +114,7 @@ export function Main({ isEmbeddable = false }: MainProps) {
                     button={helpButton}
                     isOpen={isHelpOpen}
                     closePopover={() => setIsHelpOpen(false)}
+                    resetTour={() => {}}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
