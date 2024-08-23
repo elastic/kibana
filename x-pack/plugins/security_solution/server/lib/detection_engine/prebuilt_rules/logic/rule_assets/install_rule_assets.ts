@@ -12,7 +12,7 @@ import type { KibanaSavedObjectType } from '@kbn/fleet-plugin/common';
 import type { RuleSource, RuleVersion } from '../../../../../../common/api/detection_engine';
 import { createPrebuiltRuleAssetsClient } from './prebuilt_rule_assets_client';
 import { fetchGithubRuleAssets } from './process_github_rule_assets';
-import type { ExternalRuleAssetBlob } from '../../api/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules';
+import type { ExternalRuleAssetBlob } from './fetch_external_prebuilt_rule_assets';
 import type { IDetectionRulesClient } from '../../../rule_management/logic/detection_rules_client/detection_rules_client_interface';
 import type { IPrebuiltRuleObjectsClient } from '../rule_objects/prebuilt_rule_objects_client';
 import type { ExternalRuleSourceClient } from '../../../external_rule_sources/logic/external_rule_sources_client';

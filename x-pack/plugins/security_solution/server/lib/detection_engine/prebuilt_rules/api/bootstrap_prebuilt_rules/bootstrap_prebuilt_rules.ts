@@ -5,25 +5,16 @@
  * 2.0.
  */
 
-import type {
-  IKibanaResponse,
-  ISavedObjectsImporter,
-  Logger,
-  SavedObjectsClientContract,
-} from '@kbn/core/server';
+import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { BOOTSTRAP_PREBUILT_RULES_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { BootstrapPrebuiltRulesResponse } from '../../../../../../common/api/detection_engine/prebuilt_rules/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
-import { installEndpointPackage } from '../install_prebuilt_rules_and_timelines/install_prebuilt_rules_package';
-import { installExternalPrebuiltRuleAssets } from '../../logic/rule_assets/install_rule_assets';
-import type { IDetectionRulesClient } from '../../../rule_management/logic/detection_rules_client/detection_rules_client_interface';
-import type { IPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
+import { installEndpointPackage, installPrebuiltRulesPackage } from '../install_prebuilt_rules_and_timelines/install_prebuilt_rules_package';
 import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
-import type { ExternalRuleSourceClient } from '../../../external_rule_sources/logic/external_rule_sources_client';
+import { getExternalPrebuiltRuleAssets } from '../../logic/rule_assets/fetch_external_prebuilt_rule_assets';
 import { createExternalRuleSourcesClient } from '../../../external_rule_sources/logic/external_rule_sources_client';
-import type { ExternalRuleSourceOutput } from '../../../../../../common/api/detection_engine/external_rule_sources/model/external_rule_source.gen';
 
 export const bootstrapPrebuiltRulesRoute = (
   router: SecuritySolutionPluginRouter,
@@ -53,24 +44,24 @@ export const bootstrapPrebuiltRulesRoute = (
           const rulesClient = ctx.alerting.getRulesClient();
           const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
           const detectionRulesClient = securityContext.getDetectionRulesClient();
-          const externalRuleSourcesClient = createExternalRuleSourcesClient({
+          const externalRuleSourceClient = createExternalRuleSourcesClient({
             savedObjectsClient,
           });
           const config = securityContext.getConfig();
 
           const results = await Promise.all([
-            // installPrebuiltRulesPackage(config, securityContext),
+            installPrebuiltRulesPackage(config, securityContext),
             installEndpointPackage(config, securityContext),
           ]);
 
-          const { updated, errors } = await getExternalPrebuiltRuleAssets(
-            externalRuleSourcesClient,
+          const { updated, errors } = await getExternalPrebuiltRuleAssets({
+            externalRuleSourceClient,
             savedObjectsClient,
             savedObjectsImporter,
             detectionRulesClient,
             ruleObjectsClient,
-            logger
-          );
+            logger,
+          });
 
           const responseBody: BootstrapPrebuiltRulesResponse = {
             packages: results.map((result) => ({
@@ -97,72 +88,3 @@ export const bootstrapPrebuiltRulesRoute = (
       }
     );
 };
-
-const getExternalPrebuiltRuleAssets = async (
-  externalRuleSourceClient: ExternalRuleSourceClient,
-  savedObjectsClient: SavedObjectsClientContract,
-  savedObjectsImporter: ISavedObjectsImporter,
-  detectionRulesClient: IDetectionRulesClient,
-  ruleObjectsClient: IPrebuiltRuleObjectsClient,
-  logger: Logger
-) => {
-  const prebuiltRuleRepositories = await externalRuleSourceClient.findExternalRuleSources({
-    type: 'github',
-    page: 1,
-    perPage: 10000,
-  });
-  const externalPrebuiltRuleBlobs = await fetchPrebuiltRuleFilenames(
-    prebuiltRuleRepositories.results,
-    externalRuleSourceClient
-  );
-  const installResult = await installExternalPrebuiltRuleAssets({
-    externalPrebuiltRuleBlobs,
-    savedObjectsClient,
-    savedObjectsImporter,
-    detectionRulesClient,
-    ruleObjectsClient,
-    logger,
-    externalRuleSourceClient,
-  });
-
-  return installResult;
-};
-
-export interface ExternalRuleAssetBlob {
-  filename: string;
-  sha?: string;
-  repository: ExternalRuleSourceOutput;
-}
-
-async function fetchPrebuiltRuleFilenames(
-  prebuiltRuleRepositories: ExternalRuleSourceOutput[],
-  externalRuleSourceClient: ExternalRuleSourceClient
-): Promise<ExternalRuleAssetBlob[]> {
-  const allRules: ExternalRuleAssetBlob[] = [];
-
-  for (const repository of prebuiltRuleRepositories) {
-    const octokit = await externalRuleSourceClient.getAuthenticatedGithubClient(repository.id);
-    const { data } = await octokit.request('GET /repos/{owner}/{repo}/git/trees/{tree_sha}', {
-      owner: repository.owner,
-      repo: repository.repo,
-      tree_sha: 'main',
-      recursive: 'true',
-      headers: {
-        'X-GitHub-Api-Version': '2022-11-28',
-      },
-    });
-
-    const files = data.tree
-      .filter((item) => item.type === 'blob')
-      .filter((item) => item.path && item.path.endsWith('.json'))
-      .map((item) => ({
-        filename: item.path?.replace('.json', '') ?? '',
-        sha: item.sha,
-        repository,
-      }));
-
-    allRules.push(...files);
-  }
-
-  return allRules;
-}
