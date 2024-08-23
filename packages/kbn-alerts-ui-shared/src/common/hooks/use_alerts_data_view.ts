@@ -141,7 +141,6 @@ export const useAlertsDataView = ({
 
   const {
     data: virtualDataView,
-    isLoading: isLoadingVirtualDataView,
     isFetching: isFetchingVirtualDataView,
     isError: isVirtualDataViewError,
   } = useVirtualDataViewQuery(
