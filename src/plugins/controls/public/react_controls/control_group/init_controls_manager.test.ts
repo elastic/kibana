@@ -125,7 +125,8 @@ describe('snapshotControlsRuntimeState', () => {
         return { key1: 'bravo value' };
       },
     } as unknown as DefaultControlApi);
-    expect(controlsManager.snapshotControlsRuntimeState()).toEqual({
+    const snapshot = controlsManager.snapshotControlsRuntimeState();
+    expect(snapshot).toEqual({
       alpha: {
         key1: 'alpha value',
         order: 1,
@@ -137,6 +138,9 @@ describe('snapshotControlsRuntimeState', () => {
         type: 'testControl',
       },
     });
+
+    // should update initialChildControlState$ to snapshot
+    expect(controlsManager.comparators.initialChildControlState[0].value).toEqual(snapshot);
   });
 });
 

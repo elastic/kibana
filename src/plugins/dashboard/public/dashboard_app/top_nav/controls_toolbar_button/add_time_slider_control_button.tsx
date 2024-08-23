@@ -31,7 +31,7 @@ export const AddTimeSliderControlButton = ({ closePopover, controlGroupApi, ...r
   useEffect(() => {
     const subscription = controlGroupApi.children$.subscribe((children) => {
       const nextHasTimeSliderControl = Object.values(children).some((controlApi) => {
-        return apiHasType(controlApi) && controlApi.type === 'timesliderControl';
+        return apiHasType(controlApi) && controlApi.type === TIME_SLIDER_CONTROL;
       });
       setHasTimeSliderControl(nextHasTimeSliderControl);
     });

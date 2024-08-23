@@ -38,7 +38,7 @@ export function getControlsInOrder(initialControlPanelsState: ControlPanelsState
 }
 
 export function initControlsManager(initialControlPanelsState: ControlPanelsState) {
-  const lastSavedControlsPanelState$ = new BehaviorSubject(initialControlPanelsState);
+  const initialChildControlState$ = new BehaviorSubject(initialControlPanelsState);
   const initialControlIds = Object.keys(initialControlPanelsState);
   const children$ = new BehaviorSubject<{ [key: string]: DefaultControlApi }>({});
   let controlsPanelState: { [panelId: string]: DefaultControlState } = {
@@ -177,7 +177,7 @@ export function initControlsManager(initialControlPanelsState: ControlPanelsStat
           };
         }
       });
-      lastSavedControlsPanelState$.next(controlsRuntimeState);
+      initialChildControlState$.next(controlsRuntimeState);
       return controlsRuntimeState;
     },
     api: {
@@ -233,9 +233,9 @@ export function initControlsManager(initialControlPanelsState: ControlPanelsStat
       // Control ordering differences tracked by controlsInOrder comparator
       // initialChildControlState comparatator exists to reset controls manager to last saved state
       initialChildControlState: [
-        lastSavedControlsPanelState$,
+        initialChildControlState$,
         (lastSavedControlPanelsState: ControlPanelsState) => {
-          lastSavedControlsPanelState$.next(lastSavedControlPanelsState);
+          initialChildControlState$.next(lastSavedControlPanelsState);
           controlsPanelState = {
             ...lastSavedControlPanelsState,
           };
