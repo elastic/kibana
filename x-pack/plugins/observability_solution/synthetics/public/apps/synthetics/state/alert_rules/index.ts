@@ -6,7 +6,7 @@
  */
 
 import { createReducer } from '@reduxjs/toolkit';
-import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import { DEFAULT_ALERT_RESPONSE } from '../../../../../common/types/default_alerts';
 import { IHttpSerializedFetchError } from '..';
 import {
   enableDefaultAlertingAction,
@@ -16,7 +16,7 @@ import {
 } from './actions';
 
 export interface DefaultAlertingState {
-  data?: { statusRule: Rule; tlsRule: Rule };
+  data?: DEFAULT_ALERT_RESPONSE;
   success: boolean | null;
   loading: boolean;
   error: IHttpSerializedFetchError | null;
