@@ -2286,6 +2286,24 @@
       "trackAdoption": false,
       "lifecycle": "setup",
       "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "usageCollection",
+      "id": "def-server.UsageCollectionStart",
+      "type": "Type",
+      "tags": [],
+      "label": "UsageCollectionStart",
+      "description": [
+        "Plugin's start API"
+      ],
+      "signature": [
+        "UsageCountersServiceStart"
+      ],
+      "path": "src/plugins/usage_collection/server/plugin.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "lifecycle": "start",
+      "initialIsOpen": true
     }
   },
   "common": {

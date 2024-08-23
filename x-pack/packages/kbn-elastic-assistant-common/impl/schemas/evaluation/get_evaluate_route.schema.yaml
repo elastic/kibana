@@ -1,32 +1,37 @@
 openapi: 3.0.0
 info:
   title: Get Evaluate API endpoint
-  version: '1'
+  version: "1"
 paths:
   /internal/elastic_assistant/evaluate:
     get:
       x-codegen-enabled: true
       x-labels: [ess, serverless]
       operationId: GetEvaluate
-      description: Get relevant data for performing an evaluation like available sample data, agents, and evaluators
+      description: Get relevant data for performing an evaluation like available sample data, graphs, and evaluators
       summary: Get relevant data for performing an evaluation
       tags:
         - Evaluation API
       responses:
-        '200':
+        "200":
           description: Successful response
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  agentExecutors:
+                  datasets:
+                    type: array
+                    items:
+                      type: string
+                  graphs:
                     type: array
                     items:
                       type: string
                 required:
-                  - agentExecutors
-        '400':
+                  - datasets
+                  - graphs
+        "400":
           description: Generic Error
           content:
             application/json:

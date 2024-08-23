@@ -15,7 +15,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 import { NonEmptyString } from '@kbn/openapi-common/schemas/primitives.gen';
 import { ListId } from '../model/list_common.gen';

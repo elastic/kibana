@@ -86,6 +86,14 @@
       "enabled": true
     },
     {
+      "groupName": "@elastic/ebt",
+      "matchDepNames": ["@elastic/ebt"],
+      "reviewers": ["team:kibana-core"],
+      "matchBaseBranches": ["main"],
+      "labels": ["release_note:skip", "Team:Core", "backport:skip"],
+      "enabled": true
+    },
+    {
       "groupName": "ansi-regex",
       "matchDepNames": ["ansi-regex"],
       "reviewers": ["team:kibana-core"],
@@ -434,15 +442,6 @@
       "reviewers": ["team:response-ops"],
       "matchBaseBranches": ["main"],
       "labels": ["release_note:skip", "backport:prev-minor"],
-      "minimumReleaseAge": "7 days",
-      "enabled": true
-    },
-    {
-      "groupName": "machine learning modules",
-      "matchDepNames": ["apidoc-markdown"],
-      "reviewers": ["team:ml-ui"],
-      "matchBaseBranches": ["main"],
-      "labels": ["Team:ML", "release_note:skip", "backport:all-open"],
       "minimumReleaseAge": "7 days",
       "enabled": true
     },

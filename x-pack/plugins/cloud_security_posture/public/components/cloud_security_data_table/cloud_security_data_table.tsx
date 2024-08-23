@@ -7,6 +7,7 @@
 import React, { useState, useMemo } from 'react';
 import _ from 'lodash';
 import {
+  DataGridDensity,
   UnifiedDataTableSettings,
   UnifiedDataTableSettingsColumn,
   useColumns,
@@ -362,6 +363,7 @@ export const CloudSecurityDataTable = ({
           gridStyleOverride={gridStyle}
           rowLineHeightOverride="24px"
           controlColumnIds={controlColumnIds}
+          dataGridDensityState={DataGridDensity.EXPANDED}
         />
       </div>
     </CellActionsProvider>

@@ -472,7 +472,7 @@
         "label": "InferenceAPIConfigResponse",
         "description": [],
         "signature": [
-          "{ model_id: string; task_type: \"sparse_embedding\" | \"text_embedding\"; task_settings: { model?: string | undefined; }; } & ",
+          "{ inference_id: string; task_type: \"sparse_embedding\" | \"text_embedding\"; task_settings: { model?: string | undefined; }; } & ",
           "InferenceServiceSettings"
         ],
         "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
