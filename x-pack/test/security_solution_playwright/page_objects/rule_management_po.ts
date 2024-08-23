@@ -43,15 +43,13 @@ export class RuleManagementPage {
   }
 
   async disableAutoRefresh() {
-    // await this.autoRefreshPopoverTriggerButton.waitFor({state: 'visible'});
     await this.autoRefreshPopoverTriggerButton.click();
-    // await this.autoRefreshPopoverTriggerButton.waitFor({state: 'visible'});;  // Asegura que el switch sea visible
     await this.refreshSettingsSwitch.click();
   }
 
   async manuallyRunFirstRule() {
     await this.collapsedActionBtn.first().click();
-    await expect(this.manualRuleRunActionBtn).toBeVisible(); // Asegúrate de que el botón sea visible
+    await expect(this.manualRuleRunActionBtn).toBeVisible();
     await this.manualRuleRunActionBtn.click();
     await this.modalConfirmationBtn.click();
   }

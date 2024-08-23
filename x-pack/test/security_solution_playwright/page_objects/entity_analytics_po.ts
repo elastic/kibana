@@ -42,14 +42,10 @@ export class EntityAnalyticsPage {
   }
 
   async waitForEnableHostRiskScoreToBePresent() {
-    await expect(this.enableHostRiskScoreBtn).toBeVisible({
-      timeout: 60000,
-    });
+    await expect(this.enableHostRiskScoreBtn).toBeVisible();
   }
 
   async waitForEnableUserRiskScoreToBePresent() {
-    await expect(this.enableUserRiskScoreBtn).toBeVisible({
-      timeout: 60000,
-    });
+    await expect(this.enableUserRiskScoreBtn).toBeVisible();
   }
 }

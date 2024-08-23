@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { expect } from '@playwright/test';
 import { test } from '../fixtures/es_archiver';
 import { PageFactory } from '../page_objects/page_factory';
 import { EntityAnalyticsPage } from '../page_objects/entity_analytics_po';
@@ -26,12 +27,18 @@ test.describe('Enable risk scores from dashboard', { tag: ['@serverless', '@ess'
   test('host risk enable button should redirect to entity management page', async () => {
     await entityAnalyticsPage.waitForEnableHostRiskScoreToBePresent();
     entityAnalyticsManagementPage = await entityAnalyticsPage.enableHostRisk();
-    await entityAnalyticsManagementPage.entityAnalyticsManagementPageTitleShouldBeDisplayed();
+
+    await expect(entityAnalyticsManagementPage.entityAnalyticsManagementPageTitle).toHaveText(
+      'Entity Risk Score'
+    );
   });
 
   test('user risk enable button should redirect to entity management page', async () => {
     await entityAnalyticsPage.waitForEnableUserRiskScoreToBePresent();
     entityAnalyticsManagementPage = await entityAnalyticsPage.enableUserRisk();
-    await entityAnalyticsManagementPage.entityAnalyticsManagementPageTitleShouldBeDisplayed();
+
+    await expect(entityAnalyticsManagementPage.entityAnalyticsManagementPageTitle).toHaveText(
+      'Entity Risk Score'
+    );
   });
 });

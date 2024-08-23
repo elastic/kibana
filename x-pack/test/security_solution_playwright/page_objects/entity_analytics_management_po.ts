@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Locator, Page, expect } from '@playwright/test';
+import { Locator, Page } from '@playwright/test';
 
 const PAGE_TITLE = '[data-test-subj="entityAnalyticsManagementPageTitle"]';
 
@@ -19,11 +19,5 @@ export class EntityAnalyticsManagementPage {
 
   async initialize() {
     this.entityAnalyticsManagementPageTitle = this.page.locator(PAGE_TITLE);
-  }
-
-  async entityAnalyticsManagementPageTitleShouldBeDisplayed() {
-    await expect(this.entityAnalyticsManagementPageTitle).toHaveText('Entity Risk Score', {
-      timeout: 60000,
-    });
   }
 }
