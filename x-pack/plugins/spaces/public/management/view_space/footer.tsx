@@ -42,7 +42,11 @@ export const ViewSpaceTabFooter: React.FC<Props> = ({
       {!isLoading && (
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onClickDeleteSpace} color="danger">
+            <EuiButtonEmpty
+              onClick={onClickDeleteSpace}
+              color="danger"
+              data-test-subj="delete-space-button"
+            >
               Delete space
             </EuiButtonEmpty>
           </EuiFlexItem>

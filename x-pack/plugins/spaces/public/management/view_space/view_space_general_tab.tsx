@@ -30,6 +30,7 @@ interface Props {
   features: KibanaFeature[];
   allowFeatureVisibility: boolean;
   allowSolutionVisibility: boolean;
+  reloadWindow: () => void;
 }
 
 // FIXME: rename to EditSpaceSettings
@@ -131,7 +132,7 @@ export const ViewSpaceSettings: React.FC<Props> = ({ space, features, history, .
         setIsDirty(false);
         backToSpacesList();
         if (requiresReload) {
-          window.location.reload();
+          props.reloadWindow();
         }
       } catch (error) {
         const message = error?.body?.message ?? error.toString();
@@ -145,7 +146,7 @@ export const ViewSpaceSettings: React.FC<Props> = ({ space, features, history, .
         setIsLoading(false);
       }
     },
-    [backToSpacesList, notifications.toasts, spaceSettings, spacesManager]
+    [backToSpacesList, notifications.toasts, spaceSettings, spacesManager, props]
   );
 
   const onClickSubmit = useCallback(() => {
@@ -200,8 +201,7 @@ export const ViewSpaceSettings: React.FC<Props> = ({ space, features, history, .
             title="Warning"
             data-test-subj="userImpactWarning"
           >
-            {' '}
-            The changes made will impact all users in the space.{' '}
+            The changes made will impact all users in the space.
           </EuiCallOut>
         </>
       )

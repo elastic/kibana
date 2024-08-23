@@ -72,6 +72,9 @@ export const getTabs = ({
 }: GetTabsProps): ViewSpaceTab[] => {
   const canUserViewRoles = Boolean(capabilities?.roles?.view);
   const canUserModifyRoles = Boolean(capabilities?.roles?.save);
+  const reloadWindow = () => {
+    window.location.reload();
+  };
 
   const tabsDefinition: ViewSpaceTab[] = [
     {
@@ -80,7 +83,13 @@ export const getTabs = ({
         defaultMessage: 'General settings',
       }),
       content: (
-        <SuspenseViewSpaceSettings space={space} features={features} history={history} {...props} />
+        <SuspenseViewSpaceSettings
+          space={space}
+          features={features}
+          history={history}
+          reloadWindow={reloadWindow}
+          {...props}
+        />
       ),
     },
   ];
