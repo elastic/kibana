@@ -224,6 +224,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       ruleMonitoringService: this.ruleMonitoringService,
       kibanaVersion: pluginContext.env.packageInfo.version,
       kibanaBranch: pluginContext.env.packageInfo.branch,
+      buildFlavor: pluginContext.env.packageInfo.buildFlavor,
     });
 
     productFeaturesService.registerApiAccessControl(core.http);
@@ -423,6 +424,7 @@ export class Plugin implements ISecuritySolutionPlugin {
           config,
           kibanaVersion: pluginContext.env.packageInfo.version,
           kibanaBranch: pluginContext.env.packageInfo.branch,
+          buildFlavor: pluginContext.env.packageInfo.buildFlavor,
         });
 
         const endpointFieldsStrategy = endpointFieldsProvider(

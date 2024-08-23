@@ -172,10 +172,13 @@ export class LogsSharedLogEntriesDomain implements ILogsSharedLogEntriesDomain {
     params: LogEntriesParams,
     columnOverrides?: LogViewColumnConfiguration[]
   ): Promise<{ entries: LogEntry[]; hasMoreBefore?: boolean; hasMoreAfter?: boolean }> {
-    const [, , { logViews }] = await this.libs.getStartServices();
+    const [, { logsDataAccess }, { logViews }] = await this.libs.getStartServices();
     const { savedObjects, elasticsearch } = await requestContext.core;
+    const logSourcesService = logsDataAccess.services.logSourcesServiceFactory.getLogSourcesService(
+      savedObjects.client
+    );
     const resolvedLogView = await logViews
-      .getClient(savedObjects.client, elasticsearch.client.asCurrentUser)
+      .getClient(savedObjects.client, elasticsearch.client.asCurrentUser, logSourcesService)
       .getResolvedLogView(logView);
     const columnDefinitions = columnOverrides ?? resolvedLogView.columns;
 
@@ -232,11 +235,15 @@ export class LogsSharedLogEntriesDomain implements ILogsSharedLogEntriesDomain {
     bucketSize: number,
     filterQuery?: LogEntryQuery
   ): Promise<LogEntriesSummaryBucket[]> {
-    const [, , { logViews }] = await this.libs.getStartServices();
+    const [, { logsDataAccess }, { logViews }] = await this.libs.getStartServices();
     const { savedObjects, elasticsearch } = await requestContext.core;
+    const logSourcesService = logsDataAccess.services.logSourcesServiceFactory.getLogSourcesService(
+      savedObjects.client
+    );
     const resolvedLogView = await logViews
-      .getClient(savedObjects.client, elasticsearch.client.asCurrentUser)
+      .getClient(savedObjects.client, elasticsearch.client.asCurrentUser, logSourcesService)
       .getResolvedLogView(logView);
+
     const dateRangeBuckets = await this.adapter.getContainedLogSummaryBuckets(
       requestContext,
       resolvedLogView,
@@ -257,11 +264,16 @@ export class LogsSharedLogEntriesDomain implements ILogsSharedLogEntriesDomain {
     highlightQueries: string[],
     filterQuery?: LogEntryQuery
   ): Promise<LogEntriesSummaryHighlightsBucket[][]> {
-    const [, , { logViews }] = await this.libs.getStartServices();
+    const [, { logsDataAccess }, { logViews }] = await this.libs.getStartServices();
     const { savedObjects, elasticsearch } = await requestContext.core;
+    const logSourcesService = logsDataAccess.services.logSourcesServiceFactory.getLogSourcesService(
+      savedObjects.client
+    );
+
     const resolvedLogView = await logViews
-      .getClient(savedObjects.client, elasticsearch.client.asCurrentUser)
+      .getClient(savedObjects.client, elasticsearch.client.asCurrentUser, logSourcesService)
       .getResolvedLogView(logView);
+
     const messageFormattingRules = compileFormattingRules(
       getBuiltinRules(resolvedLogView.messageField)
     );

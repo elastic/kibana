@@ -88,6 +88,7 @@ describe('getSavedSearch', () => {
         "columns": Array [
           "_source",
         ],
+        "density": undefined,
         "description": "description",
         "grid": Object {},
         "headerRowHeight": undefined,
@@ -197,6 +198,7 @@ describe('getSavedSearch', () => {
         "columns": Array [
           "_source",
         ],
+        "density": undefined,
         "description": "description",
         "grid": Object {},
         "headerRowHeight": undefined,

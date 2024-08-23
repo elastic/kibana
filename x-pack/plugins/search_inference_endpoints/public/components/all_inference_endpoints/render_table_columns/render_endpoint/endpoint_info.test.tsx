@@ -22,7 +22,7 @@ jest.mock('@kbn/ml-trained-models-utils', () => ({
 describe('RenderEndpoint component tests', () => {
   describe('with cohere service', () => {
     const mockEndpoint = {
-      model_id: 'cohere-2',
+      inference_id: 'cohere-2',
       service: 'cohere',
       service_settings: {
         similarity: 'cosine',
@@ -68,7 +68,7 @@ describe('RenderEndpoint component tests', () => {
 
   describe('with elasticsearch service', () => {
     const mockEndpoint = {
-      model_id: 'model-123',
+      inference_id: 'model-123',
       service: 'elasticsearch',
       service_settings: {
         num_allocations: 5,
@@ -102,7 +102,7 @@ describe('RenderEndpoint component tests', () => {
 
   describe('with azureaistudio service', () => {
     const mockEndpoint = {
-      model_id: 'azure-ai-1',
+      inference_id: 'azure-ai-1',
       service: 'azureaistudio',
       service_settings: {
         target: 'westus',
@@ -155,7 +155,7 @@ describe('RenderEndpoint component tests', () => {
 
   describe('with azureopenai service', () => {
     const mockEndpoint = {
-      model_id: 'azure-openai-1',
+      inference_id: 'azure-openai-1',
       service: 'azureopenai',
       service_settings: {
         resource_name: 'resource-xyz',
@@ -174,7 +174,7 @@ describe('RenderEndpoint component tests', () => {
 
   describe('with mistral service', () => {
     const mockEndpoint = {
-      model_id: 'mistral-ai-1',
+      inference_id: 'mistral-ai-1',
       service: 'mistral',
       service_settings: {
         model: 'model-xyz',
@@ -233,7 +233,7 @@ describe('RenderEndpoint component tests', () => {
 
   describe('with googleaistudio service', () => {
     const mockEndpoint = {
-      model_id: 'google-ai-1',
+      inference_id: 'google-ai-1',
       service: 'googleaistudio',
       service_settings: {
         model_id: 'model-abc',
@@ -267,7 +267,7 @@ describe('RenderEndpoint component tests', () => {
 
   describe('with amazonbedrock service', () => {
     const mockEndpoint = {
-      model_id: 'amazon-bedrock-1',
+      inference_id: 'amazon-bedrock-1',
       service: 'amazonbedrock',
       service_settings: {
         region: 'us-west-1',
@@ -287,7 +287,7 @@ describe('RenderEndpoint component tests', () => {
 
   describe('for MIT licensed models', () => {
     const mockEndpointWithMitLicensedModel = {
-      model_id: 'model-123',
+      inference_id: 'model-123',
       service: 'elasticsearch',
       service_settings: {
         num_allocations: 5,
@@ -306,7 +306,7 @@ describe('RenderEndpoint component tests', () => {
 
     it('does not render the MIT license badge if the model is not eligible', () => {
       const mockEndpointWithNonMitLicensedModel = {
-        model_id: 'model-123',
+        inference_id: 'model-123',
         service: 'elasticsearch',
         service_settings: {
           num_allocations: 5,

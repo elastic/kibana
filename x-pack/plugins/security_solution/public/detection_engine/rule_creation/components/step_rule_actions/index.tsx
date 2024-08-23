@@ -85,8 +85,6 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   const {
     services: { application },
   } = useKibana();
-  const responseActionsEnabled = useIsExperimentalFeatureEnabled('responseActionsEnabled');
-
   const displayActionsOptions = useMemo(
     () => (
       <>
@@ -120,7 +118,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
         <DisplayActionsHeader />
         {ruleId && <RuleSnoozeSection ruleId={ruleId} />}
         {displayActionsOptions}
-        {responseActionsEnabled && displayResponseActionsOptions}
+        {displayResponseActionsOptions}
         <UseField path="kibanaSiemAppUrl" component={GhostFormField} />
         <UseField path="enabled" component={GhostFormField} />
       </>
@@ -134,7 +132,6 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     application.capabilities.actions.show,
     displayActionsOptions,
     displayResponseActionsOptions,
-    responseActionsEnabled,
   ]);
 
   return (

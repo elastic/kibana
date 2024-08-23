@@ -12,8 +12,12 @@ import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-ac
 // Lowercase versions of all metrics, for when they need to be used in the middle of a sentence;
 // these may need to be translated differently depending on language, e.g. still capitalizing "CPU"
 const TranslationsLowercase = {
-  CPUUsage: i18n.translate('xpack.infra.waffle.metricOptions.cpuUsageText', {
+  CPUUsageTotal: i18n.translate('xpack.infra.waffle.metricOptions.cpuUsageTotalText', {
     defaultMessage: 'CPU usage',
+  }),
+
+  CPUUsageLegacy: i18n.translate('xpack.infra.waffle.metricOptions.cpuUsageLegacyText', {
+    defaultMessage: 'CPU usage (Legacy)',
   }),
 
   MemoryUsage: i18n.translate('xpack.infra.waffle.metricOptions.memoryUsageText', {
@@ -109,10 +113,18 @@ export const toMetricOpt = (
   nodeType?: InventoryItemType
 ): { text: string; textLC: string; value: SnapshotMetricType } | undefined => {
   switch (metric) {
+    case 'cpuV2':
+      return {
+        text: Translations.CPUUsageTotal,
+        textLC: TranslationsLowercase.CPUUsageTotal,
+        value: 'cpuV2',
+      };
     case 'cpu':
       return {
-        text: Translations.CPUUsage,
-        textLC: TranslationsLowercase.CPUUsage,
+        text: showLegacyLabel(nodeType) ? Translations.CPUUsageLegacy : Translations.CPUUsageTotal,
+        textLC: showLegacyLabel(nodeType)
+          ? TranslationsLowercase.CPUUsageLegacy
+          : TranslationsLowercase.CPUUsageTotal,
         value: 'cpu',
       };
     case 'memory':

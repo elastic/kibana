@@ -31,7 +31,7 @@ import {
   saveSourcerer,
 } from '../../../tasks/sourcerer';
 import { openTimelineUsingToggle } from '../../../tasks/security_main';
-import { waitForFleetSetup } from '../../../tasks/fleet_integrations';
+import { waitForRulesBootstrap } from '../../../tasks/fleet_integrations';
 import { SOURCERER } from '../../../screens/sourcerer';
 import { createTimeline, deleteTimelines } from '../../../tasks/api_calls/timelines';
 import { getTimelineModifiedSourcerer } from '../../../objects/timeline';
@@ -42,7 +42,7 @@ const dataViews = ['logs-*', 'metrics-*', '.kibana-event-log-*'];
 
 describe('Timeline scope', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
   before(() => {
-    waitForFleetSetup();
+    waitForRulesBootstrap();
   });
 
   beforeEach(() => {

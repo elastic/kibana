@@ -42,6 +42,7 @@ export const testIntegration: Integration = {
           },
         ],
       },
+      samplesFormat: { name: 'ndjson', multiline: false },
     },
   ],
 };

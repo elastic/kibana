@@ -7,15 +7,10 @@
 
 import { EuiCode, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
 
 import { EMPTY_PLACEHOLDER } from '../helpers';
 import { CodeSuccess } from '../../styles';
 import type { AllowedValue } from '../../types';
-
-const EcsAllowedValueFlexItem = styled(EuiFlexItem)`
-  margin-bottom: ${({ theme }) => theme.eui.euiSizeXS};
-`;
 
 interface Props {
   allowedValues: AllowedValue[] | undefined;
@@ -25,11 +20,11 @@ const EcsAllowedValuesComponent: React.FC<Props> = ({ allowedValues }) =>
   allowedValues == null ? (
     <EuiCode data-test-subj="ecsAllowedValuesEmpty">{EMPTY_PLACEHOLDER}</EuiCode>
   ) : (
-    <EuiFlexGroup data-test-subj="ecsAllowedValues" direction="column" gutterSize="none">
+    <EuiFlexGroup data-test-subj="ecsAllowedValues" direction="row" wrap={true} gutterSize="xs">
       {allowedValues.map((x, i) => (
-        <EcsAllowedValueFlexItem grow={false} key={`${x.name}_${i}`}>
+        <EuiFlexItem grow={false} key={`${x.name}_${i}`}>
           <CodeSuccess>{x.name}</CodeSuccess>
-        </EcsAllowedValueFlexItem>
+        </EuiFlexItem>
       ))}
     </EuiFlexGroup>
   );
