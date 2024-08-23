@@ -5,17 +5,14 @@
  * 2.0.
  */
 
+import { getCommonHeaders } from '../../api_utils/headers';
 import { test } from '../../fixtures/saml';
 
 export const authFile = '.auth/user.json';
 
 test('login', { tag: '@ess' }, async ({ request }) => {
   await request.post(`${process.env.KIBANA_URL}/internal/security/login`, {
-    headers: {
-      'kbn-xsrf': 'cypress-creds',
-      'x-elastic-internal-origin': 'security-solution',
-      'elastic-api-version': '2023-10-31',
-    },
+    headers: getCommonHeaders(),
     data: {
       providerType: 'basic',
       providerName: 'basic',
