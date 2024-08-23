@@ -286,7 +286,12 @@ export function getWebpackConfig(
         {
           test: /\.(woff|woff2|ttf|eot|svg|ico|png|jpg|gif|jpeg)(\?|$)/,
           type: 'asset',
-        },
+          parser: {
+            dataUrlCondition: {
+              maxSize: 8192
+            }
+          }
+        }
       ],
     },
 
