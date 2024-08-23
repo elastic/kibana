@@ -10,7 +10,6 @@ jobs:
     runs-on: ubuntu-latest
     if: |
       github.event.pull_request.merged == true
-      && !contains(github.event.pull_request.labels.*.name, 'auto-backport')
       && (
         (
           github.event.action == 'labeled' && (
@@ -19,6 +18,7 @@ jobs:
             || github.event.label.name == 'backport:current-major'
             || github.event.label.name == 'backport:all-open'
             || github.event.label.name == 'backport:version'
+            || github.event.label.name == 'auto-backport'
           )
         )
         || (github.event.action == 'closed')
