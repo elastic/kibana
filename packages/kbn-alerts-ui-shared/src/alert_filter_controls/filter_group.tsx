@@ -155,9 +155,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
   }, [filters, query]);
 
   useEffect(() => {
-    controlGroup?.updateInput({
-      chainingSystem,
-    });
+    controlGroup?.setChainingSystem(chainingSystem);
   }, [chainingSystem, controlGroup]);
 
   const handleStateUpdates = useCallback(
