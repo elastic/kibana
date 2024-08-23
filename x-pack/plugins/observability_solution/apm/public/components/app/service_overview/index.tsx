@@ -42,10 +42,11 @@ import { ServiceOverviewInstancesChartAndTable } from './service_overview_instan
 import { ServiceOverviewThroughputChart } from './service_overview_throughput_chart';
 import { SloCallout } from '../../shared/slo_callout';
 import { useLocalStorage } from '../../../hooks/use_local_storage';
-import { isLogsSignal } from '../../../utils/get_signal_type';
+import { isApmSignal, isLogsSignal } from '../../../utils/get_signal_type';
 import { LogRateChart } from '../entities/charts/log_rate_chart';
 import { LogErrorRateChart } from '../entities/charts/log_error_rate_chart';
 import { SignalTypes } from '../../../../common/entities/types';
+import { AddAPMCallOut } from '../entities/logs/add_apm_callout';
 /**
  * The height a chart should be if it's next to a table with 5 rows and a title.
  * Add the height of the pagination row.
@@ -103,6 +104,19 @@ export function ServiceOverview() {
     false
   );
 
+  const [isLogsApmCalloutEnabled, setIsLogsApmCalloutEnabled] = useLocalStorage(
+    'apm.isLogsApmCalloutEnabled',
+    true
+  );
+
+  const hasLogsSignal =
+    serviceEntitySummary?.signalTypes &&
+    isLogsSignal(serviceEntitySummary.signalTypes as SignalTypes[]);
+
+  const hasApmSignal =
+    serviceEntitySummary?.signalTypes &&
+    isApmSignal(serviceEntitySummary.signalTypes as SignalTypes[]);
+
   return (
     <AnnotationsContextProvider
       serviceName={serviceName}
@@ -110,125 +124,142 @@ export function ServiceOverview() {
       start={start}
       end={end}
     >
-      {!sloCalloutDismissed && (
-        <SloCallout
-          dismissCallout={() => {
-            setSloCalloutDismissed(true);
-          }}
-          serviceName={serviceName}
-          environment={environment}
-          transactionType={transactionType}
-        />
+      {hasApmSignal && !sloCalloutDismissed && (
+        <>
+          <SloCallout
+            dismissCallout={() => {
+              setSloCalloutDismissed(true);
+            }}
+            serviceName={serviceName}
+            environment={environment}
+            transactionType={transactionType}
+          />
+          <EuiSpacer />
+        </>
       )}
-      <EuiSpacer />
       <ChartPointerEventContextProvider>
         <EuiFlexGroup direction="column" gutterSize="s">
-          {fallbackToTransactions && (
-            <EuiFlexItem>
-              <AggregatedTransactionsBadge />
-            </EuiFlexItem>
-          )}
-          <EuiFlexItem>
-            <EuiPanel hasBorder={true}>
-              <LatencyChart height={latencyChartHeight} kuery={kuery} />
-            </EuiPanel>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFlexGroup direction={rowDirection} gutterSize="s" responsive={false}>
-              <EuiFlexItem grow={3}>
-                <ServiceOverviewThroughputChart height={nonLatencyChartHeight} kuery={kuery} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={7}>
-                <EuiPanel hasBorder={true}>
-                  <TransactionsTable
-                    kuery={kuery}
-                    environment={environment}
-                    fixedHeight={true}
-                    start={start}
-                    end={end}
-                    showPerPageOptions={false}
-                    numberOfTransactionsPerPage={5}
-                    showSparkPlots={!isSingleColumn}
-                  />
-                </EuiPanel>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFlexGroup direction={rowDirection} gutterSize="s" responsive={false}>
-              {!isRumAgent && (
-                <EuiFlexItem grow={3}>
-                  <FailedTransactionRateChart
-                    height={nonLatencyChartHeight}
-                    showAnnotations={false}
-                    kuery={kuery}
-                  />
+          {hasApmSignal ? (
+            <>
+              {fallbackToTransactions && (
+                <EuiFlexItem>
+                  <AggregatedTransactionsBadge />
                 </EuiFlexItem>
               )}
-              <EuiFlexItem grow={7}>
+              <EuiFlexItem>
                 <EuiPanel hasBorder={true}>
-                  <ServiceOverviewErrorsTable serviceName={serviceName} />
+                  <LatencyChart height={latencyChartHeight} kuery={kuery} />
                 </EuiPanel>
               </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFlexGroup direction={rowDirection} gutterSize="s" responsive={false}>
-              {isServerless ? (
-                <EuiFlexItem grow={3}>
-                  <TransactionColdstartRateChart
-                    showAnnotations={false}
-                    environment={environment}
-                    kuery={kuery}
-                  />
-                </EuiFlexItem>
-              ) : (
-                !isOpenTelemetryAgent && (
+              <EuiFlexItem>
+                <EuiFlexGroup direction={rowDirection} gutterSize="s" responsive={false}>
                   <EuiFlexItem grow={3}>
-                    <TransactionBreakdownChart
-                      showAnnotations={false}
-                      environment={environment}
-                      kuery={kuery}
-                    />
+                    <ServiceOverviewThroughputChart height={nonLatencyChartHeight} kuery={kuery} />
                   </EuiFlexItem>
-                )
-              )}
-              {!isRumAgent && (
-                <EuiFlexItem grow={7}>
-                  <EuiPanel hasBorder={true}>
-                    <ServiceOverviewDependenciesTable
-                      fixedHeight={true}
-                      showPerPageOptions={false}
-                      link={
-                        <EuiLink
-                          data-test-subj="apmServiceOverviewViewDependenciesLink"
-                          href={dependenciesLink}
-                        >
-                          {i18n.translate('xpack.apm.serviceOverview.dependenciesTableTabLink', {
-                            defaultMessage: 'View dependencies',
-                          })}
-                        </EuiLink>
-                      }
-                      showSparkPlots={!isSingleColumn}
+                  <EuiFlexItem grow={7}>
+                    <EuiPanel hasBorder={true}>
+                      <TransactionsTable
+                        kuery={kuery}
+                        environment={environment}
+                        fixedHeight={true}
+                        start={start}
+                        end={end}
+                        showPerPageOptions={false}
+                        numberOfTransactionsPerPage={5}
+                        showSparkPlots={!isSingleColumn}
+                      />
+                    </EuiPanel>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFlexGroup direction={rowDirection} gutterSize="s" responsive={false}>
+                  {!isRumAgent && (
+                    <EuiFlexItem grow={3}>
+                      <FailedTransactionRateChart
+                        height={nonLatencyChartHeight}
+                        showAnnotations={false}
+                        kuery={kuery}
+                      />
+                    </EuiFlexItem>
+                  )}
+                  <EuiFlexItem grow={7}>
+                    <EuiPanel hasBorder={true}>
+                      <ServiceOverviewErrorsTable serviceName={serviceName} />
+                    </EuiPanel>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFlexGroup direction={rowDirection} gutterSize="s" responsive={false}>
+                  {isServerless ? (
+                    <EuiFlexItem grow={3}>
+                      <TransactionColdstartRateChart
+                        showAnnotations={false}
+                        environment={environment}
+                        kuery={kuery}
+                      />
+                    </EuiFlexItem>
+                  ) : (
+                    !isOpenTelemetryAgent && (
+                      <EuiFlexItem grow={3}>
+                        <TransactionBreakdownChart
+                          showAnnotations={false}
+                          environment={environment}
+                          kuery={kuery}
+                        />
+                      </EuiFlexItem>
+                    )
+                  )}
+                  {!isRumAgent && (
+                    <EuiFlexItem grow={7}>
+                      <EuiPanel hasBorder={true}>
+                        <ServiceOverviewDependenciesTable
+                          fixedHeight={true}
+                          showPerPageOptions={false}
+                          link={
+                            <EuiLink
+                              data-test-subj="apmServiceOverviewViewDependenciesLink"
+                              href={dependenciesLink}
+                            >
+                              {i18n.translate(
+                                'xpack.apm.serviceOverview.dependenciesTableTabLink',
+                                { defaultMessage: 'View dependencies' }
+                              )}
+                            </EuiLink>
+                          }
+                          showSparkPlots={!isSingleColumn}
+                        />
+                      </EuiPanel>
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
+              </EuiFlexItem>
+              {!isRumAgent && !isServerless && (
+                <EuiFlexItem>
+                  <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
+                    <ServiceOverviewInstancesChartAndTable
+                      chartHeight={nonLatencyChartHeight}
+                      serviceName={serviceName}
                     />
-                  </EuiPanel>
+                  </EuiFlexGroup>
                 </EuiFlexItem>
               )}
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          {!isRumAgent && !isServerless && (
+            </>
+          ) : null}
+
+          {hasLogsSignal ? (
             <EuiFlexItem>
-              <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
-                <ServiceOverviewInstancesChartAndTable
-                  chartHeight={nonLatencyChartHeight}
-                  serviceName={serviceName}
-                />
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          )}
-          {serviceEntitySummary?.signalTypes &&
-          isLogsSignal(serviceEntitySummary.signalTypes as SignalTypes[]) ? (
-            <EuiFlexItem>
+              {!hasApmSignal && isLogsApmCalloutEnabled ? (
+                <>
+                  <AddAPMCallOut
+                    onClose={() => {
+                      setIsLogsApmCalloutEnabled(false);
+                    }}
+                  />
+                  <EuiSpacer size="s" />
+                </>
+              ) : null}
               <EuiFlexGroup gutterSize="s">
                 <EuiFlexItem grow={4}>
                   <LogRateChart height={chartHeight} />
