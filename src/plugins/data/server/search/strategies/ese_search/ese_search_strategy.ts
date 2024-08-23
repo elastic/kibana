@@ -8,11 +8,12 @@
 
 import type { Observable } from 'rxjs';
 import type { Logger, SharedGlobalConfig } from '@kbn/core/server';
-import { catchError, tap } from 'rxjs';
+import { catchError, map, tap } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { firstValueFrom, from } from 'rxjs';
 import type { ISearchOptions, IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
+import { decode } from 'cbor';
 import { IAsyncSearchRequestParams } from '../..';
 import { getKbnSearchError } from '../../report_search_error';
 import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
@@ -86,10 +87,26 @@ export const enhancedEsSearchStrategyProvider = (
     };
     const { body, headers } = await client.asyncSearch.get(
       { ...params, id: id! },
-      { ...options.transport, signal: options.abortSignal, meta: true }
+      {
+        ...options.transport,
+        signal: options.abortSignal,
+        meta: true,
+        asStream: true,
+        querystring: {
+          format: 'cbor',
+        },
+      }
     );
-    const response = shimHitsTotal(body.response, options);
-    return toAsyncKibanaSearchResponse({ ...body, response }, headers?.warning);
+
+    return {
+      id,
+      rawResponse: body,
+      isPartial: false,
+      isRunning: false,
+      type: 'cbor',
+      ...(headers?.warning ? { warning: headers.warning } : {}),
+      // ...getTotalLoaded(response.response),
+    };
   }
 
   async function submitAsyncSearch(
@@ -104,12 +121,24 @@ export const enhancedEsSearchStrategyProvider = (
     };
     const { body, headers, meta } = await client.asyncSearch.submit(params, {
       ...options.transport,
+      querystring: {
+        format: 'cbor',
+      },
       signal: options.abortSignal,
       meta: true,
+      asStream: true,
     });
-    const response = shimHitsTotal(body.response, options);
+
+    const chunks = [];
+    for await (const chunk of body) {
+      chunks.push(chunk);
+    }
+
+    const decoded = decode(Buffer.concat(chunks));
+    const response = shimHitsTotal(decoded.response, options);
+
     return toAsyncKibanaSearchResponse(
-      { ...body, response },
+      { ...decoded, response },
       headers?.warning,
       meta?.request?.params
     );
@@ -145,6 +174,13 @@ export const enhancedEsSearchStrategyProvider = (
     }).pipe(
       tap((response) => (id = response.id)),
       tap(searchUsageObserver(logger, usage)),
+      // if response is cbor return rawResponse
+      map((response) => {
+        if (response.type === 'cbor') {
+          return response.rawResponse;
+        }
+        return response;
+      }),
       catchError((e) => {
         throw getKbnSearchError(e);
       })

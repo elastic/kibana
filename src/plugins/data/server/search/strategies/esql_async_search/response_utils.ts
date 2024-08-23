@@ -14,18 +14,20 @@ import { sanitizeRequestParams } from '../../sanitize_request_params';
 /**
  * Get the Kibana representation of an async search response (see `IKibanaSearchResponse`).
  */
-export function toAsyncKibanaSearchResponse(
-  response: SqlGetAsyncResponse,
+export async function toAsyncKibanaSearchResponse(
+  response: any,
   warning?: string,
   requestParams?: ConnectionRequestParams
-): IKibanaSearchResponse<SqlGetAsyncResponse> {
+): Promise<IKibanaSearchResponse<SqlGetAsyncResponse>> {
+  const chunks = [];
+  for await (const chunk of response) {
+    chunks.push(chunk);
+  }
   return {
     id: response.id,
-    rawResponse: {
-      ...response,
-    },
-    isPartial: response.is_partial,
-    isRunning: response.is_running,
+    rawResponse: Buffer.concat(chunks) as any,
+    isPartial: !response.complete,
+    isRunning: !response.complete && !response.aborted,
     ...(warning ? { warning } : {}),
     ...(requestParams ? { requestParams: sanitizeRequestParams(requestParams) } : {}),
   };

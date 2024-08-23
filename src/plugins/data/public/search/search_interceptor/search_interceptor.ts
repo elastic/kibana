@@ -59,6 +59,7 @@ import type {
 } from '@kbn/search-types';
 import { createEsError, isEsError, renderSearchError } from '@kbn/search-errors';
 import type { IKibanaSearchResponse, ISearchOptions } from '@kbn/search-types';
+import { decode } from 'cbor';
 import {
   ENHANCED_ES_SEARCH_STRATEGY,
   IAsyncSearchOptions,
@@ -452,6 +453,58 @@ export class SearchInterceptor {
             ...request,
             ...searchOptions,
           }),
+          asResponse: true,
+          rawResponse: true,
+        })
+        .then(async (response) => {
+          const chunks = [];
+          for await (const chunk of response.response?.body) {
+            chunks.push(chunk);
+          }
+
+          function concatenate(uint8arrays) {
+            const totalLength = uint8arrays.reduce(
+              (total, uint8array) => total + uint8array.byteLength,
+              0
+            );
+
+            const result = new Uint8Array(totalLength);
+
+            let offset = 0;
+            uint8arrays.forEach((uint8array) => {
+              result.set(uint8array, offset);
+              offset += uint8array.byteLength;
+            });
+
+            return result;
+          }
+
+          const mergedChunks = chunks.length > 1 ? concatenate(chunks) : chunks[0];
+
+          if (mergedChunks[0] === 123) {
+            // json
+            const json = JSON.parse(Buffer.from(mergedChunks.buffer).toString());
+            return json;
+          }
+
+          const decoded = decode(mergedChunks);
+          // if cbor was returned search strategy might need to do some work before returning response
+          switch (strategy) {
+            case ENHANCED_ES_SEARCH_STRATEGY:
+              return {
+                id: decoded.id,
+                rawResponse: decoded.response,
+                isPartial: false,
+                isRunning: false,
+              };
+            default:
+              return {
+                id: decoded.id,
+                rawResponse: decoded,
+                isPartial: false,
+                isRunning: false,
+              };
+          }
         })
         .catch((e: IHttpFetchError<KibanaServerError>) => {
           if (e?.body) {
