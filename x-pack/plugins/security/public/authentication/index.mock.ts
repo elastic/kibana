@@ -34,7 +34,6 @@ export const authorizationMock = {
     },
     privileges: {
       getAll: jest.fn(),
-      getBuiltIn: jest.fn(),
     },
   }),
   createStart: (): jest.Mocked<AuthorizationServiceStart> => ({
@@ -47,7 +46,6 @@ export const authorizationMock = {
     },
     privileges: {
       getAll: jest.fn(),
-      getBuiltIn: jest.fn(),
     },
   }),
 };

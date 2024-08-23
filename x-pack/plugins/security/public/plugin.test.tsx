@@ -135,7 +135,6 @@ describe('Security Plugin', () => {
             "isRoleManagementEnabled": [Function],
             "privileges": Object {
               "getAll": [Function],
-              "getBuiltIn": [Function],
             },
             "roles": Object {
               "deleteRole": [Function],

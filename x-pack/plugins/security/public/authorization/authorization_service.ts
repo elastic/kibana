@@ -32,7 +32,6 @@ export class AuthorizationService {
       },
       privileges: {
         getAll: privilegesAPIClient.getAll.bind(privilegesAPIClient),
-        getBuiltIn: privilegesAPIClient.getBuiltIn.bind(privilegesAPIClient),
       },
     };
   }
