@@ -31,7 +31,7 @@ export function getTourSteps(docLinks) {
           })}
         </EuiText>
       ),
-      anchorPosition: 'upLeft',
+      anchorPosition: 'downLeft',
       'data-test-subj': 'shellTourStep',
       ...commonProps,
     },
@@ -55,7 +55,7 @@ export function getTourSteps(docLinks) {
           />
         </EuiText>
       ),
-      anchorPosition: 'leftUp',
+      anchorPosition: 'rightUp',
       'data-test-subj': 'editorTourStep',
       css: {
         position: 'absolute',
@@ -78,7 +78,7 @@ export function getTourSteps(docLinks) {
           })}
         </EuiText>
       ),
-      anchorPosition: 'leftUp',
+      anchorPosition: 'rightUp',
       'data-test-subj': 'historyTourStep',
       offset: 15,
       ...commonProps,
@@ -96,7 +96,7 @@ export function getTourSteps(docLinks) {
           })}
         </EuiText>
       ),
-      anchorPosition: 'leftUp',
+      anchorPosition: 'rightUp',
       'data-test-subj': 'configTourStep',
       offset: 15,
       ...commonProps,
@@ -114,7 +114,7 @@ export function getTourSteps(docLinks) {
           })}
         </EuiText>
       ),
-      anchorPosition: 'upRight',
+      anchorPosition: 'downRight',
       'data-test-subj': 'filesTourStep',
       ...commonProps,
     },

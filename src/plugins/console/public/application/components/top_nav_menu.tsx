@@ -43,7 +43,11 @@ export const TopNavMenu: FunctionComponent<Props> = ({ items, disabled, tourStep
         );
 
         if (item.tourStep) {
-          return <EuiTourStep {...tourStepProps[item.tourStep - 1]}>{tab}</EuiTourStep>;
+          return (
+            <EuiTourStep {...tourStepProps[item.tourStep - 1]} key={idx}>
+              {tab}
+            </EuiTourStep>
+          );
         }
 
         return tab;
