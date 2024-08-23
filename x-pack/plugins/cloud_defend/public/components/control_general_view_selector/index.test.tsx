@@ -116,9 +116,7 @@ describe('<ControlGeneralViewSelector />', () => {
     expect(options[2].textContent).toBe('modifyFile');
     expect(options[3].textContent).toBe('deleteFile');
 
-    act(() => {
-      await userEvent.click(options[3]); // select deleteFile
-    });
+    await userEvent.click(options[3]); // select deleteFile
 
     const updatedSelector: Selector = onChange.mock.calls[0][0];
 
@@ -146,9 +144,7 @@ describe('<ControlGeneralViewSelector />', () => {
     expect(options[0].textContent).toBe('fork');
     expect(options[1].textContent).toBe('exec');
 
-    act(() => {
-      await userEvent.click(options[1]); // select exec
-    });
+    await userEvent.click(options[1]); // select exec
 
     const updatedSelector: Selector = onChange.mock.calls[0][0];
 
@@ -172,7 +168,7 @@ describe('<ControlGeneralViewSelector />', () => {
     const conditions = getSelectorConditions('file');
     expect(options).toHaveLength(conditions.length - 1); // -1 since operation is already present
 
-    await waitFor(() => await userEvent.click(options[1])); // add second option "containerImageName"
+    await userEvent.click(options[1]); // add second option "containerImageName"
 
     // rerender and check that containerImageName is not in the list anymore
     const updatedSelector: Selector = { ...onChange.mock.calls[0][0] };
@@ -247,7 +243,7 @@ describe('<ControlGeneralViewSelector />', () => {
     );
 
     if (el) {
-      userEvent.type(el, new Array(513).join('a') + '{enter}');
+      await userEvent.type(el, new Array(513).join('a') + '{enter}');
     } else {
       throw new Error("Can't find input");
     }
@@ -270,7 +266,7 @@ describe('<ControlGeneralViewSelector />', () => {
     const el = getByTestId('cloud-defend-selectorcondition-targetFilePath').querySelector('input');
 
     if (el) {
-      userEvent.type(el, new Array(257).join('a') + '{enter}');
+      await userEvent.type(el, new Array(257).join('a') + '{enter}');
     } else {
       throw new Error("Can't find input");
     }
@@ -295,7 +291,7 @@ describe('<ControlGeneralViewSelector />', () => {
     const errorStr = i18n.errorInvalidTargetFilePath;
 
     if (el) {
-      userEvent.type(el, '/usr/bin/**{enter}');
+      await userEvent.type(el, '/usr/bin/**{enter}');
     } else {
       throw new Error("Can't find input");
     }
@@ -305,19 +301,19 @@ describe('<ControlGeneralViewSelector />', () => {
     rerender(<WrappedComponent selector={updatedSelector} />);
     expect(findByText(errorStr)).toMatchObject({});
 
-    userEvent.type(el, '/*{enter}');
+    await userEvent.type(el, '/*{enter}');
     updatedSelector = onChange.mock.calls[2][0];
     expect(updatedSelector.hasErrors).toBeFalsy();
     rerender(<WrappedComponent selector={updatedSelector} />);
     expect(findByText(errorStr)).toMatchObject({});
 
-    userEvent.type(el, 'badpath{enter}');
+    await userEvent.type(el, 'badpath{enter}');
     updatedSelector = onChange.mock.calls[3][0];
     expect(updatedSelector.hasErrors).toBeTruthy();
     rerender(<WrappedComponent selector={updatedSelector} />);
     expect(getByText(errorStr)).toBeTruthy();
 
-    userEvent.type(el, ' {enter}');
+    await userEvent.type(el, ' {enter}');
     updatedSelector = onChange.mock.calls[4][0];
     expect(updatedSelector.hasErrors).toBeTruthy();
     rerender(<WrappedComponent selector={updatedSelector} />);
@@ -345,7 +341,7 @@ describe('<ControlGeneralViewSelector />', () => {
     const regexError = i18n.errorInvalidProcessExecutable;
 
     if (el) {
-      userEvent.type(el, '/usr/bin/**{enter}');
+      await userEvent.type(el, '/usr/bin/**{enter}');
     } else {
       throw new Error("Can't find input");
     }
@@ -355,25 +351,25 @@ describe('<ControlGeneralViewSelector />', () => {
     rerender(<WrappedComponent selector={updatedSelector} />);
     expect(findByText(regexError)).toMatchObject({});
 
-    userEvent.type(el, '/*{enter}');
+    await userEvent.type(el, '/*{enter}');
     updatedSelector = onChange.mock.calls[2][0];
     expect(updatedSelector.hasErrors).toBeFalsy();
     rerender(<WrappedComponent selector={updatedSelector} />);
     expect(findByText(regexError)).toMatchObject({});
 
-    userEvent.type(el, '/usr/bin/ls{enter}');
+    await userEvent.type(el, '/usr/bin/ls{enter}');
     updatedSelector = onChange.mock.calls[3][0];
     expect(updatedSelector.hasErrors).toBeFalsy();
     rerender(<WrappedComponent selector={updatedSelector} />);
     expect(findByText(regexError)).toMatchObject({});
 
-    userEvent.type(el, 'badpath{enter}');
+    await userEvent.type(el, 'badpath{enter}');
     updatedSelector = onChange.mock.calls[4][0];
     expect(updatedSelector.hasErrors).toBeTruthy();
     rerender(<WrappedComponent selector={updatedSelector} />);
     expect(getByText(regexError)).toBeTruthy();
 
-    userEvent.type(el, ' {enter}');
+    await userEvent.type(el, ' {enter}');
     updatedSelector = onChange.mock.calls[4][0];
     expect(updatedSelector.hasErrors).toBeTruthy();
     rerender(<WrappedComponent selector={updatedSelector} />);
@@ -399,10 +395,10 @@ describe('<ControlGeneralViewSelector />', () => {
     const regexError = i18n.errorInvalidFullContainerImageName;
 
     if (el) {
-      userEvent.type(el, 'docker.io/nginx{enter}');
-      userEvent.type(el, 'docker.io/nginx-dev{enter}');
-      userEvent.type(el, 'docker.io/nginx.dev{enter}');
-      userEvent.type(el, '127.0.0.1:8080/nginx_dev{enter}');
+      await userEvent.type(el, 'docker.io/nginx{enter}');
+      await userEvent.type(el, 'docker.io/nginx-dev{enter}');
+      await userEvent.type(el, 'docker.io/nginx.dev{enter}');
+      await userEvent.type(el, '127.0.0.1:8080/nginx_dev{enter}');
     } else {
       throw new Error("Can't find input");
     }
@@ -412,7 +408,7 @@ describe('<ControlGeneralViewSelector />', () => {
 
     expect(findByText(regexError)).toMatchObject({});
 
-    userEvent.type(el, 'nginx{enter}');
+    await userEvent.type(el, 'nginx{enter}');
     updatedSelector = onChange.mock.calls[5][0];
     rerender(<WrappedComponent selector={updatedSelector} />);
 
@@ -438,7 +434,7 @@ describe('<ControlGeneralViewSelector />', () => {
     const errorStr = i18n.errorInvalidPodLabel;
 
     if (el) {
-      userEvent.type(el, 'key1:value1{enter}');
+      await userEvent.type(el, 'key1:value1{enter}');
     } else {
       throw new Error("Can't find input");
     }
@@ -448,15 +444,15 @@ describe('<ControlGeneralViewSelector />', () => {
 
     expect(findByText(errorStr)).toMatchObject({});
 
-    userEvent.type(el, 'key1:value*{enter}');
+    await userEvent.type(el, 'key1:value*{enter}');
     updatedSelector = onChange.mock.calls[2][0];
     rerender(<WrappedComponent selector={updatedSelector} />);
 
-    userEvent.type(el, 'key1*:value{enter}');
+    await userEvent.type(el, 'key1*:value{enter}');
     updatedSelector = onChange.mock.calls[3][0];
     rerender(<WrappedComponent selector={updatedSelector} />);
 
-    userEvent.type(el, '{backspace}key1{enter}');
+    await userEvent.type(el, '{backspace}key1{enter}');
     updatedSelector = onChange.mock.calls[5][0];
     rerender(<WrappedComponent selector={updatedSelector} />);
 
@@ -480,7 +476,7 @@ describe('<ControlGeneralViewSelector />', () => {
     const el = getByTestId('cloud-defend-selectorcondition-processName').querySelector('input');
 
     if (el) {
-      userEvent.type(el, new Array(17).join('a') + '{enter}');
+      await userEvent.type(el, new Array(17).join('a') + '{enter}');
     } else {
       throw new Error("Can't find input");
     }
@@ -505,7 +501,7 @@ describe('<ControlGeneralViewSelector />', () => {
     );
 
     if (el) {
-      userEvent.type(el, 'bad*imagename{enter}');
+      await userEvent.type(el, 'bad*imagename{enter}');
     } else {
       throw new Error("Can't find input");
     }

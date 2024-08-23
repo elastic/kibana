@@ -99,7 +99,7 @@ describe('When on the host isolation exceptions entry form', () => {
     it('should keep submit button disabled if only the name is entered', async () => {
       const nameInput = renderResult.getByTestId('hostIsolationExceptions-form-name-input');
 
-      userEvent.type(nameInput, 'test name');
+      await userEvent.type(nameInput, 'test name');
       await userEvent.click(
         renderResult.getByTestId('hostIsolationExceptions-form-description-input')
       );
@@ -114,7 +114,7 @@ describe('When on the host isolation exceptions entry form', () => {
       async (value: string) => {
         const ipInput = renderResult.getByTestId('hostIsolationExceptions-form-ip-input');
 
-        userEvent.type(ipInput, value);
+        await userEvent.type(ipInput, value);
         await userEvent.click(
           renderResult.getByTestId('hostIsolationExceptions-form-description-input')
         );
@@ -132,8 +132,8 @@ describe('When on the host isolation exceptions entry form', () => {
         const ipInput = renderResult.getByTestId('hostIsolationExceptions-form-ip-input');
         const nameInput = renderResult.getByTestId('hostIsolationExceptions-form-name-input');
 
-        userEvent.type(nameInput, 'test name');
-        userEvent.type(ipInput, value);
+        await userEvent.type(nameInput, 'test name');
+        await userEvent.type(ipInput, value);
 
         expect(formRowHasError('hostIsolationExceptions-form-ip-input-formRow')).toBe(false);
 
@@ -244,7 +244,7 @@ describe('When on the host isolation exceptions entry form', () => {
       await render();
       const ipInput = renderResult.getByTestId('hostIsolationExceptions-form-ip-input');
       userEvent.clear(ipInput);
-      userEvent.type(ipInput, '10.0.100.1');
+      await userEvent.type(ipInput, '10.0.100.1');
 
       expect(
         (renderResult.getByTestId('hostIsolationExceptions-form-ip-input') as HTMLInputElement)

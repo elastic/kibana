@@ -72,11 +72,9 @@ describe('When using the ArtifactListPage component', () => {
       renderWithListData = async (props) => {
         render(props);
 
-        await act(async () => {
-          await waitFor(() => {
-            expect(renderResult.getByTestId('testPage-list')).toBeTruthy();
-            expect(mockedApi.responseProvider.trustedAppsList).toHaveBeenCalled();
-          });
+        await waitFor(() => {
+          expect(renderResult.getByTestId('testPage-list')).toBeTruthy();
+          expect(mockedApi.responseProvider.trustedAppsList).toHaveBeenCalled();
         });
 
         return renderResult;
@@ -234,9 +232,7 @@ describe('When using the ArtifactListPage component', () => {
       });
 
       it('should persist filter to the URL params', async () => {
-        act(() => {
-          userEvent.type(renderResult.getByTestId('searchField'), 'fooFooFoo');
-        });
+        await userEvent.type(renderResult.getByTestId('searchField'), 'fooFooFoo');
         clickSearchButton();
 
         await waitFor(() => {
@@ -300,16 +296,12 @@ describe('When using the ArtifactListPage component', () => {
           };
         });
 
-        act(() => {
-          userEvent.type(renderResult.getByTestId('searchField'), 'fooFooFoo');
-        });
+        await userEvent.type(renderResult.getByTestId('searchField'), 'fooFooFoo');
 
         clickSearchButton();
 
-        await act(async () => {
-          await waitFor(() => {
-            expect(apiNoResultsDone).toBe(true);
-          });
+        await waitFor(() => {
+          expect(apiNoResultsDone).toBe(true);
         });
 
         await waitFor(() => {

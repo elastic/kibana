@@ -103,7 +103,7 @@ describe('EditCategory ', () => {
       expect(screen.getByTestId('categories-list')).toBeInTheDocument();
     });
 
-    userEvent.type(screen.getByRole('combobox'), `${categories[0]}{enter}`);
+    await userEvent.type(screen.getByRole('combobox'), `${categories[0]}{enter}`);
 
     await waitFor(() => {
       expect(screen.getByTestId('edit-category-submit')).not.toBeDisabled();
@@ -123,7 +123,7 @@ describe('EditCategory ', () => {
       expect(screen.getByTestId('categories-list')).toBeInTheDocument();
     });
 
-    userEvent.type(screen.getByRole('combobox'), 'new{enter}');
+    await userEvent.type(screen.getByRole('combobox'), 'new{enter}');
 
     await waitFor(() => {
       expect(screen.getByTestId('edit-category-submit')).not.toBeDisabled();
@@ -143,7 +143,7 @@ describe('EditCategory ', () => {
       expect(screen.getByTestId('categories-list')).toBeInTheDocument();
     });
 
-    userEvent.type(screen.getByRole('combobox'), 'category-with-space            {enter}');
+    await userEvent.type(screen.getByRole('combobox'), 'category-with-space            {enter}');
 
     await waitFor(() => {
       expect(screen.getByTestId('edit-category-submit')).not.toBeDisabled();
@@ -163,7 +163,7 @@ describe('EditCategory ', () => {
       expect(screen.getByTestId('categories-list')).toBeInTheDocument();
     });
 
-    userEvent.type(screen.getByRole('combobox'), 'new{enter}');
+    await userEvent.type(screen.getByRole('combobox'), 'new{enter}');
 
     await waitFor(() => {
       expect(screen.getByTestId('comboBoxInput')).toHaveTextContent('new');
@@ -210,7 +210,7 @@ describe('EditCategory ', () => {
       expect(screen.getByTestId('categories-list')).toBeInTheDocument();
     });
 
-    userEvent.type(screen.getByRole('combobox'), `${bigCategory}{enter}`);
+    await userEvent.type(screen.getByRole('combobox'), `${bigCategory}{enter}`);
 
     await waitFor(() => {
       expect(

@@ -132,7 +132,7 @@ describe('CustomFields', () => {
     const textField = customFieldsConfigurationMock[2];
     const toggleField = customFieldsConfigurationMock[3];
 
-    userEvent.type(
+    await userEvent.type(
       await screen.findByTestId(`${textField.key}-${textField.type}-create-custom-field`),
       'hello'
     );

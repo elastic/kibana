@@ -394,7 +394,7 @@ describe('static_value', () => {
           currentColumn={layer.columns.col2 as StaticValueIndexPatternColumn}
         />
       );
-      userEvent.type(screen.getByRole('spinbutton'), '{backspace}{backspace}27');
+      await userEvent.type(screen.getByRole('spinbutton'), '{backspace}{backspace}27');
       jest.advanceTimersByTime(256);
       expect(updateLayerSpy).toHaveBeenCalledTimes(1);
       expect(updateLayerSpy.mock.calls[0][0](layer)).toEqual({
@@ -424,7 +424,7 @@ describe('static_value', () => {
         />
       );
 
-      userEvent.type(screen.getByRole('spinbutton'), '{backspace}{backspace}');
+      await userEvent.type(screen.getByRole('spinbutton'), '{backspace}{backspace}');
       jest.advanceTimersByTime(256);
       expect(updateLayerSpy).not.toHaveBeenCalled();
       expect(screen.getByRole('spinbutton')).toHaveValue(null);

@@ -52,7 +52,7 @@ describe('create modal', () => {
     );
 
     const nameInput = screen.getByRole('textbox', { name: /name/i });
-    userEvent.type(nameInput, 'tag1');
+    await userEvent.type(nameInput, 'tag1');
 
     screen.findByText(duplicateTagNameErrorMessage);
 
@@ -79,7 +79,7 @@ describe('create modal', () => {
     );
 
     const nameInput = screen.getByRole('textbox', { name: /name/i });
-    userEvent.type(nameInput, 'tag1');
+    await userEvent.type(nameInput, 'tag1');
 
     screen.findByText(managedTagConflictMessage);
 

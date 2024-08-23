@@ -614,7 +614,7 @@ describe('percentile', () => {
       expect(input).toHaveValue(23);
     });
 
-    it('should update state on change', () => {
+    it('should update state on change', async () => {
       const updateLayerSpy = jest.fn();
       render(
         <InlineOptions
@@ -627,7 +627,7 @@ describe('percentile', () => {
       );
       const input = screen.getByRole('spinbutton', { name: 'Percentile' });
       userEvent.clear(input);
-      userEvent.type(input, '27');
+      await userEvent.type(input, '27');
       jest.advanceTimersByTime(256);
       expect(input).toHaveValue(27);
       expect(updateLayerSpy).toHaveBeenCalledTimes(1);
@@ -640,7 +640,7 @@ describe('percentile', () => {
       });
     });
 
-    it('should update on decimals input up to 2 digits', () => {
+    it('should update on decimals input up to 2 digits', async () => {
       const updateLayerSpy = jest.fn();
       render(
         <InlineOptions
@@ -653,13 +653,13 @@ describe('percentile', () => {
       );
       const input = screen.getByRole('spinbutton', { name: 'Percentile' });
       userEvent.clear(input);
-      userEvent.type(input, '12.12');
+      await userEvent.type(input, '12.12');
       jest.advanceTimersByTime(256);
       expect(input).toHaveValue(12.12);
       expect(updateLayerSpy).toHaveBeenCalled();
     });
 
-    it('should not update on invalid input, but show invalid value locally', () => {
+    it('should not update on invalid input, but show invalid value locally', async () => {
       const updateLayerSpy = jest.fn();
       render(
         <InlineOptions
@@ -672,7 +672,7 @@ describe('percentile', () => {
       );
       const input = screen.getByRole('spinbutton', { name: 'Percentile' });
       userEvent.clear(input);
-      userEvent.type(input, '12.1212312312312312');
+      await userEvent.type(input, '12.1212312312312312');
       jest.advanceTimersByTime(256);
       expect(input).toHaveValue(12.1212312312312312);
       expect(updateLayerSpy).not.toHaveBeenCalled();

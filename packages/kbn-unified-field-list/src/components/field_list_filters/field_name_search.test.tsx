@@ -19,7 +19,7 @@ describe('UnifiedFieldList <FieldNameSearch />', () => {
     jest.useRealTimers();
   });
 
-  it('should render correctly', () => {
+  it('should render correctly', async () => {
     const props: FieldNameSearchProps = {
       nameFilter: '',
       onChange: jest.fn(),
@@ -29,7 +29,7 @@ describe('UnifiedFieldList <FieldNameSearch />', () => {
     render(<FieldNameSearch {...props} />);
     const input = screen.getByRole('searchbox', { name: 'Search field names' });
     expect(input).toHaveAttribute('aria-describedby', 'htmlId');
-    userEvent.type(input, 'hey');
+    await userEvent.type(input, 'hey');
     jest.advanceTimersByTime(256);
     expect(props.onChange).toHaveBeenCalledWith('hey');
     expect(props.onChange).toBeCalledTimes(1);

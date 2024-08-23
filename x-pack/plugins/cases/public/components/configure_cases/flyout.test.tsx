@@ -153,7 +153,7 @@ describe('CommonFlyout ', () => {
 
       const message = 'z'.repeat(MAX_CUSTOM_FIELD_LABEL_LENGTH + 1);
 
-      userEvent.type(await screen.findByTestId('custom-field-label-input'), message);
+      await userEvent.type(await screen.findByTestId('custom-field-label-input'), message);
 
       expect(
         await screen.findByText(
@@ -517,7 +517,7 @@ describe('CommonFlyout ', () => {
       );
 
       const caseCategory = await screen.findByTestId('caseCategory');
-      userEvent.type(within(caseCategory).getByRole('combobox'), 'new {enter}');
+      await userEvent.type(within(caseCategory).getByRole('combobox'), 'new {enter}');
 
       await userEvent.click(await screen.findByTestId('common-flyout-save'));
 

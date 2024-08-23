@@ -272,7 +272,7 @@ describe('form fields', () => {
     userEvent.keyboard('{enter}');
 
     const caseCategory = await screen.findByTestId('caseCategory');
-    userEvent.type(within(caseCategory).getByRole('combobox'), 'new {enter}');
+    await userEvent.type(within(caseCategory).getByRole('combobox'), 'new {enter}');
 
     await userEvent.click(screen.getByText('Submit'));
 

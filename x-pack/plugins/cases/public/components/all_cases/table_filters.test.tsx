@@ -181,7 +181,7 @@ describe('CasesTableFilters ', () => {
   it('should call onFilterChange when search changes', async () => {
     appMockRender.render(<CasesTableFilters {...props} />);
 
-    userEvent.type(await screen.findByTestId('search-cases'), 'My search{enter}');
+    await userEvent.type(await screen.findByTestId('search-cases'), 'My search{enter}');
 
     await waitFor(() => {
       expect(onFilterChanged.mock.calls[0][0].search).toEqual('My search');
@@ -227,7 +227,7 @@ describe('CasesTableFilters ', () => {
     await userEvent.click(await screen.findByTestId('options-filter-popover-button-status'));
     await waitForEuiPopoverOpen();
 
-    userEvent.type(await screen.findByTestId('status-search-input'), 'in p');
+    await userEvent.type(await screen.findByTestId('status-search-input'), 'in p');
 
     const allOptions = screen.getAllByRole('option');
     expect(allOptions).toHaveLength(1);

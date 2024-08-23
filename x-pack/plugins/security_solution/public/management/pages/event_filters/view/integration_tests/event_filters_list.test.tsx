@@ -56,7 +56,7 @@ describe('When on the Event Filters list page', () => {
     });
 
     apiMocks.responseProvider.exceptionsFind.mockClear();
-    userEvent.type(renderResult.getByTestId('searchField'), 'fooFooFoo');
+    await userEvent.type(renderResult.getByTestId('searchField'), 'fooFooFoo');
     await userEvent.click(renderResult.getByTestId('searchButton'));
     await waitFor(() => {
       expect(apiMocks.responseProvider.exceptionsFind).toHaveBeenCalled();

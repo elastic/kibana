@@ -58,9 +58,7 @@ describe('When on the host isolation exceptions page', () => {
 
     apiMocks.responseProvider.exceptionsFind.mockClear();
 
-    act(() => {
-      userEvent.type(renderResult.getByTestId('searchField'), 'fooFooFoo');
-    });
+    await userEvent.type(renderResult.getByTestId('searchField'), 'fooFooFoo');
     act(() => {
       fireEvent.click(renderResult.getByTestId('searchButton'));
     });

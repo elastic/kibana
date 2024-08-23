@@ -134,7 +134,7 @@ describe('Category', () => {
       </FormTestComponent>
     );
 
-    userEvent.type(screen.getByRole('combobox'), `${categories[1]}{enter}`);
+    await userEvent.type(screen.getByRole('combobox'), `${categories[1]}{enter}`);
     await userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
 
     await waitFor(() => {
@@ -150,7 +150,7 @@ describe('Category', () => {
       </FormTestComponent>
     );
 
-    userEvent.type(screen.getByRole('combobox'), 'my new category{enter}');
+    await userEvent.type(screen.getByRole('combobox'), 'my new category{enter}');
     await userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
 
     await waitFor(() => {
@@ -166,7 +166,7 @@ describe('Category', () => {
       </FormTestComponent>
     );
 
-    userEvent.type(screen.getByRole('combobox'), ' {enter}');
+    await userEvent.type(screen.getByRole('combobox'), ' {enter}');
     await userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
 
     await waitFor(() => {
@@ -183,7 +183,7 @@ describe('Category', () => {
       </FormTestComponent>
     );
 
-    userEvent.type(screen.getByRole('combobox'), ' {enter}');
+    await userEvent.type(screen.getByRole('combobox'), ' {enter}');
     await userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
 
     await waitFor(() => {

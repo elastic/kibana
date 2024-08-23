@@ -46,7 +46,7 @@ describe('IncludeExcludeComponent', () => {
     expect(screen.getAllByRole('combobox').length).toEqual(2);
   });
 
-  it('should run updateParams function on update', () => {
+  it('should run updateParams function on update', async () => {
     renderIncludeExcludeRow({
       include: undefined,
       exclude: undefined,
@@ -58,14 +58,14 @@ describe('IncludeExcludeComponent', () => {
     expect(onUpdateSpy).toHaveBeenCalledTimes(1);
   });
 
-  it('should run updateParams function onCreateOption', () => {
+  it('should run updateParams function onCreateOption', async () => {
     renderIncludeExcludeRow({
       include: undefined,
       exclude: undefined,
       tableRows,
     });
     await userEvent.click(screen.getByRole('combobox', { name: 'Include values' }));
-    userEvent.type(screen.getByRole('combobox', { name: 'Include values' }), 'test.*{Enter}');
+    await userEvent.type(screen.getByRole('combobox', { name: 'Include values' }), 'test.*{Enter}');
     expect(screen.getByTestId('lens-include-terms-combobox')).toHaveTextContent('test.*');
     expect(onUpdateSpy).toHaveBeenCalledTimes(1);
   });
@@ -89,7 +89,7 @@ describe('IncludeExcludeComponent', () => {
     expect(screen.getByTestId('lens-exclude-terms-combobox')).toHaveTextContent('ABC');
   });
 
-  it('should initialize the options correctly', () => {
+  it('should initialize the options correctly', async () => {
     renderIncludeExcludeRow({
       include: undefined,
       exclude: undefined,
@@ -114,7 +114,7 @@ describe('IncludeExcludeComponent', () => {
     ).toBeInTheDocument();
   });
 
-  it('should run updateParams on the input text if pattern is selected', () => {
+  it('should run updateParams on the input text if pattern is selected', async () => {
     renderIncludeExcludeRow({
       include: ['test.*'],
       exclude: undefined,
@@ -125,7 +125,7 @@ describe('IncludeExcludeComponent', () => {
     expect(onUpdateSpy).toHaveBeenCalledWith('include', [], 'includeIsRegex', true);
   });
 
-  it('should run as multi selection if normal string is given', () => {
+  it('should run as multi selection if normal string is given', async () => {
     renderIncludeExcludeRow({
       include: undefined,
       exclude: undefined,
@@ -134,13 +134,13 @@ describe('IncludeExcludeComponent', () => {
     });
     const typedValues = ['test.*', 'ABC'];
     await userEvent.click(screen.getByRole('combobox', { name: 'Include values' }));
-    userEvent.type(
+    await userEvent.type(
       screen.getByRole('combobox', { name: 'Include values' }),
       `${typedValues[0]}{Enter}`
     );
 
     await userEvent.click(screen.getByRole('combobox', { name: 'Include values' }));
-    userEvent.type(
+    await userEvent.type(
       screen.getByRole('combobox', { name: 'Include values' }),
       `${typedValues[1]}{Enter}`
     );

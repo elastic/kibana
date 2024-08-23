@@ -112,7 +112,7 @@ describe('blocklist form', () => {
     expect(screen.queryByTestId('blocklist-form-header-description')).toBeNull();
   });
 
-  it('should show name required message after name input blur', () => {
+  it('should show name required message after name input blur', async () => {
     render();
     await userEvent.click(screen.getByTestId('blocklist-form-name-input'));
     expect(screen.queryByText(ERRORS.NAME_REQUIRED)).toBeNull();
@@ -127,9 +127,9 @@ describe('blocklist form', () => {
     expect(onChangeSpy).toHaveBeenCalledWith(expected);
   });
 
-  it('should correctly edit name', () => {
+  it('should correctly edit name', async () => {
     render();
-    userEvent.type(screen.getByTestId('blocklist-form-name-input'), 'z');
+    await userEvent.type(screen.getByTestId('blocklist-form-name-input'), 'z');
     const expected = createOnChangeArgs({
       item: createItem({ name: 'z' }),
     });
@@ -143,9 +143,9 @@ describe('blocklist form', () => {
     );
   });
 
-  it('should correctly edit description', () => {
+  it('should correctly edit description', async () => {
     render();
-    userEvent.type(screen.getByTestId('blocklist-form-description-input'), 'z');
+    await userEvent.type(screen.getByTestId('blocklist-form-description-input'), 'z');
     const expected = createOnChangeArgs({
       item: createItem({ description: 'z' }),
     });
@@ -158,7 +158,7 @@ describe('blocklist form', () => {
     expect(screen.getByTestId('blocklist-form-os-select').textContent).toEqual('Windows, ');
   });
 
-  it('should allow user to select between 3 OSs', () => {
+  it('should allow user to select between 3 OSs', async () => {
     render();
     await userEvent.click(screen.getByTestId('blocklist-form-os-select'));
     expect(screen.queryAllByRole('option').length).toEqual(3);
@@ -186,7 +186,7 @@ describe('blocklist form', () => {
     expect(screen.getByTestId('blocklist-form-field-select').textContent).toEqual('Hash, ');
   });
 
-  it('should allow all 3 fields when Windows OS is selected', () => {
+  it('should allow all 3 fields when Windows OS is selected', async () => {
     render();
     expect(screen.getByTestId('blocklist-form-os-select').textContent).toEqual('Windows, ');
 
@@ -197,7 +197,7 @@ describe('blocklist form', () => {
     expect(screen.queryByRole('option', { name: /signature/i })).toBeTruthy();
   });
 
-  it('should only allow hash and path fields when Linux OS is selected', () => {
+  it('should only allow hash and path fields when Linux OS is selected', async () => {
     render(createProps({ item: createItem({ os_types: [OperatingSystem.LINUX] }) }));
     expect(screen.getByTestId('blocklist-form-os-select').textContent).toEqual('Linux, ');
 
@@ -208,7 +208,7 @@ describe('blocklist form', () => {
     expect(screen.queryByRole('option', { name: /signature/i })).toBeNull();
   });
 
-  it('should only allow hash and path fields when Mac OS is selected', () => {
+  it('should only allow hash and path fields when Mac OS is selected', async () => {
     render(createProps({ item: createItem({ os_types: [OperatingSystem.MAC] }) }));
     expect(screen.getByTestId('blocklist-form-os-select').textContent).toEqual('Mac, ');
 
@@ -264,10 +264,10 @@ describe('blocklist form', () => {
     expect(onChangeSpy).toHaveBeenCalledWith(expected);
   });
 
-  it('should correctly edit single value', () => {
+  it('should correctly edit single value', async () => {
     render();
     const hash = 'C3AB8FF13720E8AD9047DD39466B3C8974E592C2FA383D4A3960714CAEF0C4F2';
-    userEvent.type(screen.getByRole('combobox'), `${hash}{enter}`);
+    await userEvent.type(screen.getByRole('combobox'), `${hash}{enter}`);
     const expected = createOnChangeArgs({
       item: createItem({
         entries: [createEntry('file.hash.*', [hash])],
@@ -276,13 +276,13 @@ describe('blocklist form', () => {
     expect(onChangeSpy).toHaveBeenCalledWith(expected);
   });
 
-  it('should correctly edit comma delimited value', () => {
+  it('should correctly edit comma delimited value', async () => {
     render();
     const hashes = [
       'C3AB8FF13720E8AD9047DD39466B3C8974E592C2FA383D4A3960714CAEF0C4F2',
       '4F4C17F77EC2483C49A9543B21AA75862F8F04F2D8806507E08086E21A51222C',
     ];
-    userEvent.type(screen.getByRole('combobox'), `${hashes.join(',')}{enter}`);
+    await userEvent.type(screen.getByRole('combobox'), `${hashes.join(',')}{enter}`);
     const expected = createOnChangeArgs({
       item: createItem({
         entries: [createEntry('file.hash.*', hashes)],
@@ -291,11 +291,11 @@ describe('blocklist form', () => {
     expect(onChangeSpy).toHaveBeenCalledWith(expected);
   });
 
-  it('should remove duplicate values with warning if entering multi value', () => {
+  it('should remove duplicate values with warning if entering multi value', async () => {
     render();
     const hash = 'C3AB8FF13720E8AD9047DD39466B3C8974E592C2FA383D4A3960714CAEF0C4F2';
     const hashes = [hash, hash];
-    userEvent.type(screen.getByRole('combobox'), `${hashes.join(',')}{enter}`);
+    await userEvent.type(screen.getByRole('combobox'), `${hashes.join(',')}{enter}`);
     expect(screen.queryByText(ERRORS.DUPLICATE_VALUES)).toBeTruthy();
     const expected = createOnChangeArgs({
       item: createItem({
@@ -305,7 +305,7 @@ describe('blocklist form', () => {
     expect(onChangeSpy).toHaveBeenCalledWith(expected);
   });
 
-  it('should show value required after value input blur', () => {
+  it('should show value required after value input blur', async () => {
     render(createProps({ item: createItem({ entries: [createEntry('file.hash.*', [])] }) }));
     await userEvent.click(screen.getByRole('combobox'));
     expect(screen.queryByText(ERRORS.VALUE_REQUIRED)).toBeNull();
@@ -313,7 +313,7 @@ describe('blocklist form', () => {
     expect(screen.queryByText(ERRORS.VALUE_REQUIRED)).toBeTruthy();
   });
 
-  it('should require at least one value', () => {
+  it('should require at least one value', async () => {
     render(
       createProps({
         item: createItem({
@@ -334,10 +334,10 @@ describe('blocklist form', () => {
     expect(onChangeSpy).toHaveBeenCalledWith(expected);
   });
 
-  it('should validate that hash values are valid', () => {
+  it('should validate that hash values are valid', async () => {
     render();
     const invalidHashes = ['foo', 'bar'];
-    userEvent.type(screen.getByRole('combobox'), `${invalidHashes.join(',')}{enter}`);
+    await userEvent.type(screen.getByRole('combobox'), `${invalidHashes.join(',')}{enter}`);
     expect(screen.queryByText(ERRORS.INVALID_HASH)).toBeTruthy();
     const expected = createOnChangeArgs({
       item: createItem({
@@ -347,23 +347,23 @@ describe('blocklist form', () => {
     expect(onChangeSpy).toHaveBeenCalledWith(expected);
   });
 
-  it('should warn if path values invalid', () => {
+  it('should warn if path values invalid', async () => {
     const item = createItem({
       os_types: [OperatingSystem.LINUX],
       entries: [createEntry('file.path', ['/some/valid/path'])],
     });
     render(createProps({ item }));
-    userEvent.type(screen.getByRole('combobox'), 'notavalidpath{enter}');
+    await userEvent.type(screen.getByRole('combobox'), 'notavalidpath{enter}');
     expect(screen.queryByText(ERRORS.INVALID_PATH)).toBeTruthy();
   });
 
-  it('should warn if single duplicate value entry', () => {
+  it('should warn if single duplicate value entry', async () => {
     const hash = 'C3AB8FF13720E8AD9047DD39466B3C8974E592C2FA383D4A3960714CAEF0C4F2';
     const item = createItem({
       entries: [createEntry('file.hash.*', [hash])],
     });
     render(createProps({ item }));
-    userEvent.type(screen.getByRole('combobox'), `${hash}{enter}`);
+    await userEvent.type(screen.getByRole('combobox'), `${hash}{enter}`);
     expect(screen.queryByText(ERRORS.DUPLICATE_VALUE)).toBeTruthy();
   });
 
@@ -372,7 +372,7 @@ describe('blocklist form', () => {
     expect(screen.getByTestId('blocklist-form-effectedPolicies-global')).toBeEnabled();
   });
 
-  it('should correctly edit policies', () => {
+  it('should correctly edit policies', async () => {
     const policies: PolicyData[] = [
       {
         id: 'policy-id-123',
@@ -397,7 +397,7 @@ describe('blocklist form', () => {
     expect(onChangeSpy).toHaveBeenCalledWith(expected);
   });
 
-  it('should correctly retain selected policies when toggling between global/by policy', () => {
+  it('should correctly retain selected policies when toggling between global/by policy', async () => {
     const policies: PolicyData[] = [
       {
         id: 'policy-id-123',
@@ -423,7 +423,7 @@ describe('blocklist form', () => {
     expect(onChangeSpy).toHaveBeenCalledWith(expected);
   });
 
-  it('should be valid if all required inputs complete', () => {
+  it('should be valid if all required inputs complete', async () => {
     const validItem: ArtifactFormComponentProps['item'] = {
       list_id: ENDPOINT_BLOCKLISTS_LIST_ID,
       name: 'test name',
@@ -441,7 +441,7 @@ describe('blocklist form', () => {
     };
     render(createProps({ item: validItem }));
 
-    userEvent.type(screen.getByTestId('blocklist-form-name-input'), 'z');
+    await userEvent.type(screen.getByTestId('blocklist-form-name-input'), 'z');
     const expected = createOnChangeArgs({
       isValid: true,
       item: { ...validItem, name: 'test namez' },

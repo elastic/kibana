@@ -124,7 +124,7 @@ describe('Policy details artifacts flyout', () => {
     mockedApi.responseProvider.eventFiltersList.mockImplementationOnce(() => getEmptyList());
 
     // do a search
-    userEvent.type(renderResult.getByTestId('searchField'), 'no results with this{enter}');
+    await userEvent.type(renderResult.getByTestId('searchField'), 'no results with this{enter}');
 
     await waitFor(() => {
       expect(mockedApi.responseProvider.eventFiltersList).toHaveBeenCalledWith(

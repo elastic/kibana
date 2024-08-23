@@ -67,30 +67,30 @@ describe('FormatSelector', () => {
   afterEach(() => {
     jest.useRealTimers();
   });
-  it('updates the format decimals', () => {
+  it('updates the format decimals', async () => {
     renderFormatSelector();
-    userEvent.type(screen.getByLabelText('Decimals'), '{backspace}10');
+    await userEvent.type(screen.getByLabelText('Decimals'), '{backspace}10');
     expect(props.onChange).toBeCalledWith({ id: 'bytes', params: { decimals: 10 } });
   });
-  it('updates the format decimals to upper range when input exceeds the range', () => {
+  it('updates the format decimals to upper range when input exceeds the range', async () => {
     renderFormatSelector();
-    userEvent.type(screen.getByLabelText('Decimals'), '{backspace}10');
+    await userEvent.type(screen.getByLabelText('Decimals'), '{backspace}10');
     expect(props.onChange).toBeCalledWith({ id: 'bytes', params: { decimals: 15 } });
   });
-  it('updates the format decimals to lower range when input is smaller than range', () => {
+  it('updates the format decimals to lower range when input is smaller than range', async () => {
     renderFormatSelector();
-    userEvent.type(screen.getByLabelText('Decimals'), '{backspace}-2');
+    await userEvent.type(screen.getByLabelText('Decimals'), '{backspace}-2');
     expect(props.onChange).toBeCalledWith({ id: 'bytes', params: { decimals: 0 } });
   });
-  it('updates the suffix', () => {
+  it('updates the suffix', async () => {
     renderFormatSelector();
-    userEvent.type(screen.getByTestId('indexPattern-dimension-formatSuffix'), 'GB');
+    await userEvent.type(screen.getByTestId('indexPattern-dimension-formatSuffix'), 'GB');
     jest.advanceTimersByTime(256);
     expect(props.onChange).toBeCalledWith({ id: 'bytes', params: { suffix: 'GB' } });
   });
 
   describe('Duration', () => {
-    it('hides the decimals and compact controls for humanize approximate output', () => {
+    it('hides the decimals and compact controls for humanize approximate output', async () => {
       renderFormatSelector({
         selectedColumn: {
           ...props.selectedColumn,

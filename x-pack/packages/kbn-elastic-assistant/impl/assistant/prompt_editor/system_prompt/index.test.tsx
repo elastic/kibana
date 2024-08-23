@@ -157,12 +157,12 @@ describe('SystemPrompt', () => {
 
       expect(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.ID)).toBeVisible();
 
-      userEvent.type(
+      await userEvent.type(
         within(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_SELECTOR)).getByTestId('comboBoxInput'),
         `${customPromptName}[Enter]`
       );
 
-      userEvent.type(
+      await userEvent.type(
         screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.PROMPT_TEXT),
         customPromptText
       );
@@ -204,12 +204,12 @@ describe('SystemPrompt', () => {
 
       expect(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.ID)).toBeVisible();
 
-      userEvent.type(
+      await userEvent.type(
         within(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_SELECTOR)).getByTestId('comboBoxInput'),
         `${customPromptName}[Enter]`
       );
 
-      userEvent.type(
+      await userEvent.type(
         screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.PROMPT_TEXT),
         customPromptText
       );
@@ -265,12 +265,12 @@ describe('SystemPrompt', () => {
 
       expect(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.ID)).toBeVisible();
 
-      userEvent.type(
+      await userEvent.type(
         within(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_SELECTOR)).getByTestId('comboBoxInput'),
         `${customPromptName}[Enter]`
       );
 
-      userEvent.type(
+      await userEvent.type(
         screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.PROMPT_TEXT),
         customPromptText
       );
@@ -333,7 +333,7 @@ describe('SystemPrompt', () => {
 
       expect(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.ID)).toBeVisible();
 
-      userEvent.type(
+      await userEvent.type(
         within(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_SELECTOR)).getByTestId('comboBoxInput'),
         `${mockSystemPrompt.name}[Enter]`
       );
@@ -416,7 +416,7 @@ describe('SystemPrompt', () => {
 
       expect(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.ID)).toBeVisible();
 
-      userEvent.type(
+      await userEvent.type(
         within(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_SELECTOR)).getByTestId('comboBoxInput'),
         `${mockSystemPrompt.name}[Enter]`
       );
@@ -435,7 +435,7 @@ describe('SystemPrompt', () => {
       );
 
       // add `second` conversation
-      userEvent.type(
+      await userEvent.type(
         within(screen.getByTestId(TEST_IDS.CONVERSATIONS_MULTISELECTOR)).getByTestId(
           'comboBoxInput'
         ),

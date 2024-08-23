@@ -59,7 +59,7 @@ test('SimpleTodoApp works', async () => {
 
   // add new todo
   const newTodoInput = screen.getByTestId('newTodo');
-  userEvent.type(newTodoInput, 'Learn React{enter}');
+  await userEvent.type(newTodoInput, 'Learn React{enter}');
 
   // wait for new todo to be added
   await screen.findByText('Learn React');

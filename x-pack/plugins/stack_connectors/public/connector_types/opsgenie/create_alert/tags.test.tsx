@@ -78,7 +78,7 @@ describe('Tags', () => {
 
     await userEvent.click(screen.getByTestId('comboBoxSearchInput'));
 
-    userEvent.type(screen.getByTestId('comboBoxSearchInput'), 'awesome{enter}');
+    await userEvent.type(screen.getByTestId('comboBoxSearchInput'), 'awesome{enter}');
 
     await waitFor(() =>
       expect(onChange.mock.calls[0]).toMatchInlineSnapshot(`

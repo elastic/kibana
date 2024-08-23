@@ -10,7 +10,7 @@
 import React, { memo, useEffect } from 'react';
 import { EuiCode } from '@elastic/eui';
 import userEvent from '@testing-library/user-event';
-import { act, within } from '@testing-library/react';
+import { within } from '@testing-library/react';
 import { convertToTestId } from './components/command_list';
 import { Console } from './console';
 import type {
@@ -42,7 +42,7 @@ interface ConsoleSelectorsAndActionsMock {
        */
       useKeyboard: boolean;
     }>
-  ): void;
+  ): Promise<void>;
 }
 
 export interface ConsoleTestSetup
@@ -96,8 +96,11 @@ export const getConsoleSelectorsAndActionMock = (
   const submitCommand: ConsoleSelectorsAndActionsMock['submitCommand'] = () => {
     renderResult.getByTestId(`${dataTestSubj}-inputTextSubmitButton`).click();
   };
-  const enterCommand: ConsoleSelectorsAndActionsMock['enterCommand'] = (cmd, options = {}) => {
-    enterConsoleCommand(renderResult, cmd, options);
+  const enterCommand: ConsoleSelectorsAndActionsMock['enterCommand'] = async (
+    cmd,
+    options = {}
+  ) => {
+    await enterConsoleCommand(renderResult, cmd, options);
   };
 
   return {
@@ -119,7 +122,7 @@ export const getConsoleSelectorsAndActionMock = (
  * @param useKeyboard
  * @param dataTestSubj
  */
-export const enterConsoleCommand = (
+export const enterConsoleCommand = async (
   renderResult: ReturnType<AppContextTestRender['render']>,
   cmd: string,
   {
@@ -127,21 +130,19 @@ export const enterConsoleCommand = (
     useKeyboard = false,
     dataTestSubj = 'test',
   }: Partial<{ inputOnly: boolean; useKeyboard: boolean; dataTestSubj: string }> = {}
-): void => {
+): Promise<void> => {
   const keyCaptureInput = renderResult.getByTestId(`${dataTestSubj}-keyCapture-input`);
 
-  act(() => {
-    if (useKeyboard) {
-      await userEvent.click(keyCaptureInput);
-      userEvent.keyboard(cmd);
-    } else {
-      userEvent.type(keyCaptureInput, cmd);
-    }
+  if (useKeyboard) {
+    await userEvent.click(keyCaptureInput);
+    userEvent.keyboard(cmd);
+  } else {
+    await userEvent.type(keyCaptureInput, cmd);
+  }
 
-    if (!inputOnly) {
-      userEvent.keyboard('{enter}');
-    }
-  });
+  if (!inputOnly) {
+    await userEvent.keyboard('{enter}');
+  }
 };
 
 export const getConsoleTestSetup = (): ConsoleTestSetup => {
@@ -168,8 +169,8 @@ export const getConsoleTestSetup = (): ConsoleTestSetup => {
     ));
   };
 
-  const enterCommand: ConsoleTestSetup['enterCommand'] = (cmd, options = {}) => {
-    enterConsoleCommand(renderResult, cmd, options);
+  const enterCommand: ConsoleTestSetup['enterCommand'] = async (cmd, options = {}) => {
+    await enterConsoleCommand(renderResult, cmd, options);
   };
 
   let selectors: ConsoleSelectorsAndActionsMock;

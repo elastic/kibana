@@ -147,7 +147,7 @@ const fillFormReactTestingLib = async ({
 
     for (const tag of sampleTags) {
       const tagsInput = await within(caseTags).findByTestId('comboBoxInput');
-      userEvent.type(tagsInput, `${tag}{enter}`);
+      await userEvent.type(tagsInput, `${tag}{enter}`);
     }
   }
 };
@@ -366,12 +366,12 @@ describe('Create case', () => {
 
       for (const tag of newTags) {
         const tagsInput = await within(caseTags).findByTestId('comboBoxInput');
-        userEvent.type(tagsInput, `${tag}{enter}`);
+        await userEvent.type(tagsInput, `${tag}{enter}`);
       }
 
       const categoryComboBox = within(screen.getByTestId('categories-list')).getByRole('combobox');
 
-      userEvent.type(categoryComboBox, `${newCategory}{enter}`);
+      await userEvent.type(categoryComboBox, `${newCategory}{enter}`);
 
       await userEvent.click(screen.getByTestId('create-case-submit'));
 
@@ -677,7 +677,7 @@ describe('Create case', () => {
 
       const categoryComboBox = within(screen.getByTestId('categories-list')).getByRole('combobox');
 
-      userEvent.type(categoryComboBox, `${category}{enter}`);
+      await userEvent.type(categoryComboBox, `${category}{enter}`);
 
       await userEvent.click(screen.getByTestId('create-case-submit'));
 

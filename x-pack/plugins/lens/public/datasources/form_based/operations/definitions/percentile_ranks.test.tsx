@@ -279,7 +279,7 @@ describe('percentile ranks', () => {
       expect(screen.getByLabelText('Percentile ranks value')).toHaveValue(100);
     });
 
-    it('should update state on change', () => {
+    it('should update state on change', async () => {
       const updateLayerSpy = jest.fn();
       render(
         <InlineOptions
@@ -292,7 +292,7 @@ describe('percentile ranks', () => {
       );
 
       const input = screen.getByLabelText('Percentile ranks value');
-      userEvent.type(input, '{backspace}{backspace}{backspace}103');
+      await userEvent.type(input, '{backspace}{backspace}{backspace}103');
       jest.advanceTimersByTime(256);
 
       expect(updateLayerSpy).toHaveBeenCalledWith({
@@ -304,7 +304,7 @@ describe('percentile ranks', () => {
       });
     });
 
-    it('should not update on invalid input, but show invalid value locally', () => {
+    it('should not update on invalid input, but show invalid value locally', async () => {
       const updateLayerSpy = jest.fn();
       render(
         <InlineOptions
@@ -316,14 +316,14 @@ describe('percentile ranks', () => {
         />
       );
       const input = screen.getByLabelText('Percentile ranks value');
-      userEvent.type(input, '{backspace}{backspace}{backspace}');
+      await userEvent.type(input, '{backspace}{backspace}{backspace}');
       jest.advanceTimersByTime(256);
       expect(updateLayerSpy).not.toHaveBeenCalled();
       expect(screen.getByTestId('lns-indexPattern-percentile_ranks-input')).toHaveValue(null);
       expect(screen.getByText('Percentile ranks value must be a number')).toBeInTheDocument();
     });
 
-    it('should support decimals on dimension edit', () => {
+    it('should support decimals on dimension edit', async () => {
       const updateLayerSpy = jest.fn();
       render(
         <InlineOptions
@@ -336,12 +336,12 @@ describe('percentile ranks', () => {
       );
 
       const input = screen.getByLabelText('Percentile ranks value');
-      userEvent.type(input, '{backspace}{backspace}{backspace}10.5');
+      await userEvent.type(input, '{backspace}{backspace}{backspace}10.5');
       jest.advanceTimersByTime(256);
       expect(updateLayerSpy).toHaveBeenCalled();
     });
 
-    it('should not support decimals on inline edit', () => {
+    it('should not support decimals on inline edit', async () => {
       const updateLayerSpy = jest.fn();
       const { container } = render(
         <InlineOptions
@@ -355,7 +355,7 @@ describe('percentile ranks', () => {
       );
 
       const input = screen.getByLabelText('Percentile ranks value');
-      userEvent.type(input, '{backspace}{backspace}{backspace}10.5');
+      await userEvent.type(input, '{backspace}{backspace}{backspace}10.5');
       jest.advanceTimersByTime(256);
       expect(updateLayerSpy).not.toHaveBeenCalled();
       expect(screen.getByTestId('lns-indexPattern-percentile_ranks-input')).toHaveValue(10.5);

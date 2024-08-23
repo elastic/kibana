@@ -74,7 +74,7 @@ describe('SeriesName', function () {
     });
 
     await userEvent.click(input);
-    userEvent.type(input, newName);
+    await userEvent.type(input, newName);
 
     // submit
     userEvent.keyboard('{enter}');

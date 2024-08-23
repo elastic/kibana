@@ -202,7 +202,7 @@ describe('CasesParamsFields renders', () => {
 
       await showEuiComboBoxOptions();
 
-      userEvent.type(await screen.findByTestId('comboBoxSearchInput'), 'alert.name{enter}');
+      await userEvent.type(await screen.findByTestId('comboBoxSearchInput'), 'alert.name{enter}');
 
       expect(editAction.mock.calls[0][1].groupingBy).toEqual(['alert.name']);
     });

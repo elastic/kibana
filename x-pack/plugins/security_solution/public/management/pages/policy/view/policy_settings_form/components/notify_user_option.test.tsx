@@ -88,7 +88,7 @@ describe('Policy form Notify User option component', () => {
     expect(renderResult.getByTestId('test-checkbox')).toBeDisabled();
   });
 
-  it('should be able to un-check the option', () => {
+  it('should be able to un-check the option', async () => {
     const expectedUpdatedPolicy = cloneDeep(formProps.policy);
     set(expectedUpdatedPolicy, 'windows.popup.malware.enabled', false);
     set(expectedUpdatedPolicy, 'mac.popup.malware.enabled', false);
@@ -102,7 +102,7 @@ describe('Policy form Notify User option component', () => {
     });
   });
 
-  it('should be able to check the option', () => {
+  it('should be able to check the option', async () => {
     set(formProps.policy, 'windows.popup.malware.enabled', false);
     const expectedUpdatedPolicy = cloneDeep(formProps.policy);
     set(expectedUpdatedPolicy, 'windows.popup.malware.enabled', true);
@@ -117,14 +117,14 @@ describe('Policy form Notify User option component', () => {
     });
   });
 
-  it('should be able to change the notification message', () => {
+  it('should be able to change the notification message', async () => {
     const msg = 'a';
     const expectedUpdatedPolicy = cloneDeep(formProps.policy);
     set(expectedUpdatedPolicy, 'windows.popup.malware.message', msg);
     set(expectedUpdatedPolicy, 'mac.popup.malware.message', msg);
     set(expectedUpdatedPolicy, 'linux.popup.malware.message', msg);
     render();
-    userEvent.type(renderResult.getByTestId('test-customMessage'), msg);
+    await userEvent.type(renderResult.getByTestId('test-customMessage'), msg);
 
     expect(formProps.onChange).toHaveBeenCalledWith({
       isValid: true,

@@ -437,8 +437,8 @@ describe('EditConnectorFlyout', () => {
       });
 
       userEvent.clear(getByTestId('nameInput'));
-      userEvent.type(getByTestId('nameInput'), 'My new name');
-      userEvent.type(getByTestId('test-connector-secret-text-field'), 'password');
+      await userEvent.type(getByTestId('nameInput'), 'My new name');
+      await userEvent.type(getByTestId('test-connector-secret-text-field'), 'password');
 
       await waitFor(() => {
         expect(getByTestId('nameInput')).toHaveValue('My new name');
@@ -484,15 +484,15 @@ describe('EditConnectorFlyout', () => {
       });
 
       userEvent.clear(getByTestId('test-connector-text-field'));
-      userEvent.type(getByTestId('test-connector-text-field'), 'My updated text field');
+      await userEvent.type(getByTestId('test-connector-text-field'), 'My updated text field');
 
       await waitFor(() => {
         expect(getByTestId('test-connector-text-field')).toHaveValue('My updated text field');
       });
 
       userEvent.clear(getByTestId('nameInput'));
-      userEvent.type(getByTestId('nameInput'), 'My test');
-      userEvent.type(getByTestId('test-connector-secret-text-field'), 'password');
+      await userEvent.type(getByTestId('nameInput'), 'My test');
+      await userEvent.type(getByTestId('test-connector-secret-text-field'), 'password');
 
       await waitFor(() => {
         expect(getByTestId('nameInput')).toHaveValue('My test');
@@ -521,8 +521,8 @@ describe('EditConnectorFlyout', () => {
       });
 
       userEvent.clear(getByTestId('nameInput'));
-      userEvent.type(getByTestId('nameInput'), 'My new name');
-      userEvent.type(getByTestId('test-connector-secret-text-field'), 'password');
+      await userEvent.type(getByTestId('nameInput'), 'My new name');
+      await userEvent.type(getByTestId('test-connector-secret-text-field'), 'password');
 
       await waitFor(() => {
         expect(getByTestId('nameInput')).toHaveValue('My new name');
@@ -577,7 +577,7 @@ describe('EditConnectorFlyout', () => {
       });
 
       userEvent.clear(getByTestId('nameInput'));
-      userEvent.type(getByTestId('nameInput'), 'My new name');
+      await userEvent.type(getByTestId('nameInput'), 'My new name');
 
       await waitFor(() => {
         expect(getByTestId('nameInput')).toHaveValue('My new name');

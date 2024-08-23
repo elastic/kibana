@@ -225,7 +225,7 @@ describe('TextBased Query Languages Data Panel', () => {
   it('should list all supported fields in the pattern that match the search input', async () => {
     await renderTextBasedDataPanel();
     jest.useFakeTimers();
-    userEvent.type(screen.getByRole('searchbox', { name: 'Search field names' }), 'mem');
+    await userEvent.type(screen.getByRole('searchbox', { name: 'Search field names' }), 'mem');
     act(() => jest.advanceTimersByTime(256));
     expect(screen.getByTestId('lnsFieldListPanelField')).toHaveTextContent('memory');
     jest.useRealTimers();

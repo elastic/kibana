@@ -274,7 +274,7 @@ describe('TemplateForm', () => {
     userEvent.keyboard('{enter}');
 
     const caseCategory = await screen.findByTestId('caseCategory');
-    userEvent.type(within(caseCategory).getByRole('combobox'), 'new {enter}');
+    await userEvent.type(within(caseCategory).getByRole('combobox'), 'new {enter}');
 
     await act(async () => {
       const { data, isValid } = await formState!.submit();

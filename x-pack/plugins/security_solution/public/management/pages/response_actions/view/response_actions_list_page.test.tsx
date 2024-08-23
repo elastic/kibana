@@ -202,7 +202,7 @@ describe('Response actions history page', () => {
       expect(getByTestId('pagination-button-2').getAttribute('aria-current')).toStrictEqual('true');
     });
 
-    it('should read and set command filter values from URL params', () => {
+    it('should read and set command filter values from URL params', async () => {
       const filterPrefix = 'actions-filter';
       reactTestingLibrary.act(() => {
         history.push(`${MANAGEMENT_PATH}/response_actions_history?commands=release,processes`);
@@ -228,7 +228,7 @@ describe('Response actions history page', () => {
       expect(history.location.search).toEqual('?commands=release,processes');
     });
 
-    it('should read and set hosts filter values from URL params', () => {
+    it('should read and set hosts filter values from URL params', async () => {
       mockUseGetEndpointsList.mockReturnValue({
         data: Array.from({ length: 10 }).map((_, i) => {
           return {
@@ -272,7 +272,7 @@ describe('Response actions history page', () => {
       expect(history.location.search).toEqual('?hosts=agent-id-1,agent-id-2,agent-id-4,agent-id-5');
     });
 
-    it('should read and set status filter values from URL params', () => {
+    it('should read and set status filter values from URL params', async () => {
       const filterPrefix = 'statuses-filter';
       reactTestingLibrary.act(() => {
         history.push(`${MANAGEMENT_PATH}/response_actions_history?statuses=pending,failed`);
@@ -386,7 +386,7 @@ describe('Response actions history page', () => {
       expect(expandedButtons).toEqual([0, 2, 3, 4, 5]);
     });
 
-    it('should read and set action type filter values using `types` URL params', () => {
+    it('should read and set action type filter values using `types` URL params', async () => {
       const filterPrefix = 'types-filter';
 
       reactTestingLibrary.act(() => {
@@ -413,7 +413,7 @@ describe('Response actions history page', () => {
       expect(history.location.search).toEqual('?types=automated,manual');
     });
 
-    it('should read and set agent type filter values using `agentTypes` URL params', () => {
+    it('should read and set agent type filter values using `agentTypes` URL params', async () => {
       mockedContext.setExperimentalFlag({
         responseActionsSentinelOneV1Enabled: true,
       });
@@ -441,7 +441,7 @@ describe('Response actions history page', () => {
   });
 
   describe('Set selected/set values to URL params', () => {
-    it('should set selected page number to URL params', () => {
+    it('should set selected page number to URL params', async () => {
       render();
       const { getByTestId } = renderResult;
 
@@ -449,7 +449,7 @@ describe('Response actions history page', () => {
       expect(history.location.search).toEqual('?page=2&pageSize=10');
     });
 
-    it('should set selected pageSize value to URL params', () => {
+    it('should set selected pageSize value to URL params', async () => {
       render();
       const { getByTestId } = renderResult;
 
@@ -461,62 +461,62 @@ describe('Response actions history page', () => {
       expect(history.location.search).toEqual('?page=1&pageSize=20');
     });
 
-    it('should set selected command filter options to URL params', () => {
+    it('should set selected command filter options to URL params', async () => {
       const filterPrefix = 'actions-filter';
       render();
       const { getAllByTestId, getByTestId } = renderResult;
       await userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
 
-      allFilterOptions.forEach((option) => {
+      for (const option of allFilterOptions) {
         option.style.pointerEvents = 'all';
         await userEvent.click(option);
-      });
+      }
 
       expect(history.location.search).toEqual(
         '?commands=isolate%2Crelease%2Ckill-process%2Csuspend-process%2Cprocesses%2Cget-file%2Cexecute%2Cupload%2Cscan'
       );
     });
 
-    it('should set selected hosts filter options to URL params ', () => {
+    it('should set selected hosts filter options to URL params ', async () => {
       const filterPrefix = 'hosts-filter';
       render();
       const { getAllByTestId, getByTestId } = renderResult;
       await userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
 
-      allFilterOptions.forEach((option, i) => {
+      for (const [i, option] of allFilterOptions.entries()) {
         if ([0, 1, 2].includes(i)) {
           option.style.pointerEvents = 'all';
           await userEvent.click(option);
         }
-      });
+      }
 
       expect(history.location.search).toEqual('?hosts=agent-id-0%2Cagent-id-1%2Cagent-id-2');
     });
 
-    it('should set selected status filter options to URL params ', () => {
+    it('should set selected status filter options to URL params ', async () => {
       const filterPrefix = 'statuses-filter';
       render();
       const { getAllByTestId, getByTestId } = renderResult;
       await userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
 
-      allFilterOptions.forEach((option) => {
+      for (const option of allFilterOptions) {
         option.style.pointerEvents = 'all';
         await userEvent.click(option);
-      });
+      }
 
       expect(history.location.search).toEqual('?statuses=failed%2Cpending%2Csuccessful');
     });
 
-    it('should set selected users search input strings to URL params ', () => {
+    it('should set selected users search input strings to URL params ', async () => {
       const filterPrefix = 'users-filter';
       render();
       const { getByTestId } = renderResult;
       const usersInput = getByTestId(`${testPrefix}-${filterPrefix}-search`);
-      userEvent.type(usersInput, '   , userX , userY, ,');
-      userEvent.type(usersInput, '{enter}');
+      await userEvent.type(usersInput, '   , userX , userY, ,');
+      await userEvent.type(usersInput, '{enter}');
 
       expect(history.location.search).toEqual('?users=userX%2CuserY');
     });
@@ -556,34 +556,34 @@ describe('Response actions history page', () => {
 
       const expandButtons = getAllByTestId(`${testPrefix}-expand-button`);
       // expand some rows
-      expandButtons.forEach((button, i) => {
+      for (const [i, button] of expandButtons.entries()) {
         if ([0, 1].includes(i)) {
           await userEvent.click(button);
         }
-      });
+      }
 
       // verify 2 rows are expanded and are the ones from before
       expect(history.location.search).toEqual(`?withOutputs=${actionIdsWithDetails}`);
     });
 
-    it('should set selected action type to URL params using `types`', () => {
+    it('should set selected action type to URL params using `types`', async () => {
       const filterPrefix = 'types-filter';
       render();
       const { getAllByTestId, getByTestId } = renderResult;
       await userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
 
-      allFilterOptions.forEach((option) => {
+      for (const option of allFilterOptions) {
         option.style.pointerEvents = 'all';
         if (option.title.includes('Triggered')) {
           await userEvent.click(option);
         }
-      });
+      }
 
       expect(history.location.search).toEqual('?types=automated%2Cmanual');
     });
 
-    it('should set selected agent type filter options to URL params using `agentTypes`', () => {
+    it('should set selected agent type filter options to URL params using `agentTypes`', async () => {
       mockedContext.setExperimentalFlag({
         responseActionsSentinelOneV1Enabled: true,
       });
@@ -593,29 +593,29 @@ describe('Response actions history page', () => {
       await userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
 
-      allFilterOptions.forEach((option) => {
+      for (const option of allFilterOptions) {
         option.style.pointerEvents = 'all';
         if (!option.title.includes('Triggered')) {
           await userEvent.click(option);
         }
-      });
+      }
 
       expect(history.location.search).toEqual('?agentTypes=endpoint%2Csentinel_one%2Ccrowdstrike');
     });
   });
 
   describe('Clear all selected options on a filter', () => {
-    it('should clear all selected options on `actions` filter', () => {
+    it('should clear all selected options on `actions` filter', async () => {
       const filterPrefix = 'actions-filter';
       render();
       const { getAllByTestId, getByTestId } = renderResult;
       await userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
 
-      allFilterOptions.forEach((option) => {
+      for (const option of allFilterOptions) {
         option.style.pointerEvents = 'all';
         await userEvent.click(option);
-      });
+      }
 
       expect(history.location.search).toEqual(
         '?commands=isolate%2Crelease%2Ckill-process%2Csuspend-process%2Cprocesses%2Cget-file%2Cexecute%2Cupload%2Cscan'
@@ -627,17 +627,17 @@ describe('Response actions history page', () => {
       expect(history.location.search).toEqual('');
     });
 
-    it('should clear all selected options on `hosts` filter', () => {
+    it('should clear all selected options on `hosts` filter', async () => {
       const filterPrefix = 'hosts-filter';
       render();
       const { getAllByTestId, getByTestId } = renderResult;
       await userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
 
-      allFilterOptions.forEach((option) => {
+      for (const option of allFilterOptions) {
         option.style.pointerEvents = 'all';
         await userEvent.click(option);
-      });
+      }
 
       expect(history.location.search).toEqual(
         '?hosts=agent-id-0%2Cagent-id-1%2Cagent-id-2%2Cagent-id-3%2Cagent-id-4%2Cagent-id-5%2Cagent-id-6%2Cagent-id-7%2Cagent-id-8'
@@ -649,17 +649,17 @@ describe('Response actions history page', () => {
       expect(history.location.search).toEqual('');
     });
 
-    it('should clear all selected options on `statuses` filter', () => {
+    it('should clear all selected options on `statuses` filter', async () => {
       const filterPrefix = 'statuses-filter';
       render();
       const { getAllByTestId, getByTestId } = renderResult;
       await userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
 
-      allFilterOptions.forEach((option) => {
+      for (const option of allFilterOptions) {
         option.style.pointerEvents = 'all';
         await userEvent.click(option);
-      });
+      }
 
       expect(history.location.search).toEqual('?statuses=failed%2Cpending%2Csuccessful');
 
@@ -669,7 +669,7 @@ describe('Response actions history page', () => {
       expect(history.location.search).toEqual('');
     });
 
-    it('should clear `agentTypes` and `actionTypes` selected options on `types` filter', () => {
+    it('should clear `agentTypes` and `actionTypes` selected options on `types` filter', async () => {
       mockedContext.setExperimentalFlag({
         responseActionsSentinelOneV1Enabled: true,
       });
@@ -679,10 +679,10 @@ describe('Response actions history page', () => {
       await userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
 
-      allFilterOptions.forEach((option) => {
+      for (const option of allFilterOptions) {
         option.style.pointerEvents = 'all';
         await userEvent.click(option);
-      });
+      }
 
       expect(history.location.search).toEqual(
         '?agentTypes=endpoint%2Csentinel_one%2Ccrowdstrike&types=automated%2Cmanual'

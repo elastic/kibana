@@ -286,7 +286,7 @@ describe('rule_add', () => {
 
     expect(await screen.findByTestId('ruleNameInput')).toBeInTheDocument();
 
-    userEvent.type(await screen.findByTestId('ruleNameInput'), 'my{space}rule{space}type');
+    await userEvent.type(await screen.findByTestId('ruleNameInput'), 'my{space}rule{space}type');
 
     expect(await screen.findByTestId('ruleNameInput')).toHaveValue('my rule type');
     expect(await screen.findByTestId('comboBoxSearchInput')).toHaveValue('');

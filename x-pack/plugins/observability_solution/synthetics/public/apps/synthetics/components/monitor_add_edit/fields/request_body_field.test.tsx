@@ -76,7 +76,7 @@ describe('<RequestBodyField />', () => {
 
     expect(getByLabelText('Text code editor')).toBeInTheDocument();
     const textbox = getByRole('textbox');
-    userEvent.type(textbox, '{selectall}{del}text');
+    await userEvent.type(textbox, '{selectall}{del}text');
     expect(textbox).toHaveValue('text');
 
     const xmlButton = getByText('XML').closest('button');
@@ -85,7 +85,7 @@ describe('<RequestBodyField />', () => {
     }
 
     expect(xmlButton).toHaveAttribute('aria-selected', 'true');
-    userEvent.type(textbox, 'xml');
+    await userEvent.type(textbox, 'xml');
     expect(textbox).toHaveValue('textxml');
 
     const jsonButton = getByText('JSON').closest('button');
@@ -94,7 +94,7 @@ describe('<RequestBodyField />', () => {
     }
 
     expect(jsonButton).toHaveAttribute('aria-selected', 'true');
-    userEvent.type(textbox, 'json');
+    await userEvent.type(textbox, 'json');
     expect(textbox).toHaveValue('textxmljson');
 
     const formButton = getByText('Form').closest('button');
@@ -107,7 +107,7 @@ describe('<RequestBodyField />', () => {
     expect(getByText('Key')).toBeInTheDocument();
     expect(getByText('Value')).toBeInTheDocument();
     const keyValueTextBox = getAllByRole('textbox')[0];
-    userEvent.type(keyValueTextBox, 'formfield');
+    await userEvent.type(keyValueTextBox, 'formfield');
     expect(keyValueTextBox).toHaveValue('formfield');
   });
 
@@ -116,7 +116,7 @@ describe('<RequestBodyField />', () => {
 
     expect(getByLabelText('Text code editor')).toBeInTheDocument();
     const textbox = getByRole('textbox');
-    userEvent.type(textbox, 'text');
+    await userEvent.type(textbox, 'text');
     expect(textbox).toHaveValue(defaultValue);
 
     const xmlButton = getByText('XML').closest('button');
@@ -125,7 +125,7 @@ describe('<RequestBodyField />', () => {
     }
 
     expect(xmlButton).toHaveAttribute('aria-selected', 'true');
-    userEvent.type(textbox, 'xml');
+    await userEvent.type(textbox, 'xml');
     expect(textbox).toHaveValue(defaultValue);
 
     const jsonButton = getByText('JSON').closest('button');
@@ -134,7 +134,7 @@ describe('<RequestBodyField />', () => {
     }
 
     expect(jsonButton).toHaveAttribute('aria-selected', 'true');
-    userEvent.type(textbox, 'json');
+    await userEvent.type(textbox, 'json');
     expect(textbox).toHaveValue(defaultValue);
 
     const formButton = getByText('Form').closest('button');

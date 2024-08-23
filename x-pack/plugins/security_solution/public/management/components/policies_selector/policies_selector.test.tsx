@@ -106,7 +106,7 @@ describe('Policies selector', () => {
       await userEvent.click(element.getByTestId('policiesSelectorButton'));
       await waitForEuiPopoverOpen();
 
-      userEvent.type(element.getByTestId('policiesSelectorSearch'), policy.name);
+      await userEvent.type(element.getByTestId('policiesSelectorSearch'), policy.name);
       expect(element.queryAllByText('Global entries')).toStrictEqual([]);
       expect(element.getByText(policy.name)).toHaveTextContent(policy.name);
     });
@@ -116,7 +116,7 @@ describe('Policies selector', () => {
       await userEvent.click(element.getByTestId('policiesSelectorButton'));
       await waitForEuiPopoverOpen();
 
-      userEvent.type(element.getByTestId('policiesSelectorSearch'), 'no results');
+      await userEvent.type(element.getByTestId('policiesSelectorSearch'), 'no results');
       expect(element.queryAllByText('Global entries')).toStrictEqual([]);
       expect(element.queryAllByText('Unassigned entries')).toStrictEqual([]);
       expect(element.queryAllByText(policy.name)).toStrictEqual([]);
@@ -127,7 +127,7 @@ describe('Policies selector', () => {
       await userEvent.click(element.getByTestId('policiesSelectorButton'));
       await waitForEuiPopoverOpen();
 
-      userEvent.type(element.getByTestId('policiesSelectorSearch'), '*');
+      await userEvent.type(element.getByTestId('policiesSelectorSearch'), '*');
       expect(element.queryAllByText('Global entries')).toStrictEqual([]);
       expect(element.queryAllByText('Unassigned entries')).toStrictEqual([]);
       expect(element.queryAllByText(policy.name)).toStrictEqual([]);

@@ -65,7 +65,7 @@ describe('UserActionMarkdown ', () => {
 
       userEvent.clear(screen.getByTestId('euiMarkdownEditorTextArea'));
 
-      userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), '');
+      await userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), '');
 
       await waitFor(() => {
         expect(screen.getByText('Empty comments are not allowed.')).toBeInTheDocument();
@@ -78,7 +78,7 @@ describe('UserActionMarkdown ', () => {
 
       userEvent.clear(screen.getByTestId('euiMarkdownEditorTextArea'));
 
-      userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), '  ');
+      await userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), '  ');
 
       await waitFor(() => {
         expect(screen.getByText('Empty comments are not allowed.')).toBeInTheDocument();
@@ -139,7 +139,7 @@ describe('UserActionMarkdown ', () => {
       expect(result.getByTestId('editable-markdown-form')).toBeTruthy();
 
       // append content and save
-      userEvent.type(result.container.querySelector('textarea')!, appendContent);
+      await userEvent.type(result.container.querySelector('textarea')!, appendContent);
       await userEvent.click(result.getByTestId('editable-save-markdown'));
 
       // wait for the state to update

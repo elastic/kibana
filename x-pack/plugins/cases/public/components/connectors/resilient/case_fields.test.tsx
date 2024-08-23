@@ -104,7 +104,7 @@ describe('ResilientParamsFields renders', () => {
       'comboBoxSearchInput'
     );
 
-    userEvent.type(checkbox, 'Denial of Service{enter}');
+    await userEvent.type(checkbox, 'Denial of Service{enter}');
 
     expect(screen.getByText('Denial of Service')).toBeInTheDocument();
   });
@@ -136,7 +136,7 @@ describe('ResilientParamsFields renders', () => {
       'comboBoxSearchInput'
     );
 
-    userEvent.type(checkbox, 'Denial of Service{enter}');
+    await userEvent.type(checkbox, 'Denial of Service{enter}');
 
     userEvent.selectOptions(screen.getByTestId('severitySelect'), ['4']);
 

@@ -431,7 +431,7 @@ describe('Saved query management list component', () => {
       total: 1,
       queries: generateSavedQueries(1),
     });
-    userEvent.type(screen.getByRole('combobox', { name: 'Query list' }), ' Test And Search ');
+    await userEvent.type(screen.getByRole('combobox', { name: 'Query list' }), ' Test And Search ');
     await waitFor(() => {
       expect(findSavedQueriesSpy).toHaveBeenLastCalledWith('Test And Search', 5, 1);
     });
@@ -583,7 +583,10 @@ describe('Saved query management list component', () => {
     expect(await screen.findAllByRole('option')).toHaveLength(2);
     expect(screen.getAllByRole('option')[0]).toHaveTextContent('Foo');
     expect(screen.getAllByRole('option')[0]).toHaveTextContent('Active');
-    userEvent.type(screen.getByRole('searchbox', { name: 'Query list' }), ' Test And Search ');
+    await userEvent.type(
+      screen.getByRole('searchbox', { name: 'Query list' }),
+      ' Test And Search '
+    );
     await waitFor(() => {
       expect(findSavedQueriesSpy).toHaveBeenLastCalledWith('Test And Search', 5, 1);
     });

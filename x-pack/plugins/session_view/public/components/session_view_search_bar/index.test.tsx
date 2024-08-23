@@ -44,7 +44,7 @@ describe('SessionViewSearchBar component', () => {
     expect(searchInput?.value).toEqual('ls');
 
     if (searchInput) {
-      userEvent.type(searchInput, ' -la');
+      await userEvent.type(searchInput, ' -la');
       fireEvent.keyUp(searchInput, { key: 'Enter', code: 'Enter' });
     }
 
@@ -84,7 +84,7 @@ describe('SessionViewSearchBar component', () => {
     const searchInput = renderResult.getByTestId('sessionView:searchBar').querySelector('input');
 
     if (searchInput) {
-      userEvent.type(searchInput, ' -la');
+      await userEvent.type(searchInput, ' -la');
       fireEvent.keyUp(searchInput, { key: 'Enter', code: 'Enter' });
     }
 

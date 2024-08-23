@@ -214,7 +214,7 @@ describe('EditAssigneesSelectable', () => {
       expect(result.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
     });
 
-    userEvent.type(result.getByPlaceholderText('Find a user'), 's');
+    await userEvent.type(result.getByPlaceholderText('Find a user'), 's');
 
     act(() => {
       jest.advanceTimersByTime(1000);
@@ -242,7 +242,7 @@ describe('EditAssigneesSelectable', () => {
       expect(result.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
     });
 
-    userEvent.type(result.getByPlaceholderText('Find a user'), 's');
+    await userEvent.type(result.getByPlaceholderText('Find a user'), 's');
 
     act(() => {
       jest.advanceTimersByTime(1000);
@@ -273,7 +273,7 @@ describe('EditAssigneesSelectable', () => {
       expect(result.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
     });
 
-    userEvent.type(result.getByPlaceholderText('Find a user'), 's');
+    await userEvent.type(result.getByPlaceholderText('Find a user'), 's');
 
     act(() => {
       jest.advanceTimersByTime(1000);
@@ -298,7 +298,7 @@ describe('EditAssigneesSelectable', () => {
       expect(result.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
     });
 
-    userEvent.type(result.getByPlaceholderText('Find a user'), 's');
+    await userEvent.type(result.getByPlaceholderText('Find a user'), 's');
 
     act(() => {
       jest.advanceTimersByTime(1000);
@@ -372,7 +372,7 @@ describe('EditAssigneesSelectable', () => {
       expect(result.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
     });
 
-    userEvent.type(result.getByPlaceholderText('Find a user'), 'not-exists');
+    await userEvent.type(result.getByPlaceholderText('Find a user'), 'not-exists');
 
     act(() => {
       jest.advanceTimersByTime(1000);

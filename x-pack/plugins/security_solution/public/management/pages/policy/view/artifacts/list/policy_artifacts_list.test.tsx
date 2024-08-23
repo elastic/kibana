@@ -121,7 +121,7 @@ describe('Policy details artifacts list', () => {
 
   it('should change the address location when a filter is applied', async () => {
     await render();
-    userEvent.type(renderResult.getByTestId('searchField'), 'search me{enter}');
+    await userEvent.type(renderResult.getByTestId('searchField'), 'search me{enter}');
     expect(history.location.search).toBe('?filter=search%20me');
   });
 
@@ -135,7 +135,7 @@ describe('Policy details artifacts list', () => {
         })
       )
     );
-    userEvent.type(renderResult.getByTestId('searchField'), 'search me{enter}');
+    await userEvent.type(renderResult.getByTestId('searchField'), 'search me{enter}');
     await waitFor(mockedApi.responseProvider.eventFiltersList);
     expect(mockedApi.responseProvider.eventFiltersList).toHaveBeenLastCalledWith(
       getDefaultQueryParameters(

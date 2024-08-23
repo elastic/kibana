@@ -344,7 +344,7 @@ describe('FormBasedDimensionEditor', () => {
     expect(screen.queryByTestId('indexPattern-dimension-field')).not.toBeInTheDocument();
   });
 
-  it('should not show any choices if the filter returns false', () => {
+  it('should not show any choices if the filter returns false', async () => {
     renderDimensionPanel({
       columnId: 'col2',
       filterOperations: () => false,
@@ -353,7 +353,7 @@ describe('FormBasedDimensionEditor', () => {
     expect(screen.getByText(/There aren't any options available/)).toBeInTheDocument();
   });
 
-  it('should list all field names and document as a whole in prioritized order', () => {
+  it('should list all field names and document as a whole in prioritized order', async () => {
     const { getVisibleFieldSelectOptions } = renderDimensionPanel();
 
     const comboBoxButton = screen.getAllByRole('button', { name: /open list of options/i })[0];
@@ -372,12 +372,12 @@ describe('FormBasedDimensionEditor', () => {
     expect(allOptions.slice(0, 7)).toEqual(getVisibleFieldSelectOptions());
 
     // keep hitting arrow down to scroll to the next options (react-window only renders visible options)
-    userEvent.type(comboBoxInput, '{ArrowDown}'.repeat(12));
+    await userEvent.type(comboBoxInput, '{ArrowDown}'.repeat(12));
 
     expect(getVisibleFieldSelectOptions()).toEqual(allOptions.slice(5, 16));
 
     // press again to go back to the beginning
-    userEvent.type(comboBoxInput, '{ArrowDown}');
+    await userEvent.type(comboBoxInput, '{ArrowDown}');
     expect(getVisibleFieldSelectOptions()).toEqual(allOptions.slice(0, 9));
   });
 

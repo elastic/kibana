@@ -69,18 +69,18 @@ describe('Layer Data Panel', () => {
     expect(comboboxInput).toHaveValue('bytes');
   });
 
-  it('should list all the fields', () => {
+  it('should list all the fields', async () => {
     const { comboboxInput, getAllOptions } = renderFieldSelect();
     await userEvent.click(comboboxInput);
     const options = getAllOptions();
     expect(options).toEqual(['timestamp', 'bytes', 'memory']);
   });
-  it('user can remove the value from the input', () => {
+  it('user can remove the value from the input', async () => {
     const { comboboxInput } = renderFieldSelect();
     await userEvent.click(comboboxInput);
     expect(comboboxInput).toHaveValue('bytes');
     // type into input
-    userEvent.type(comboboxInput, '{backspace}{backspace}{backspace}{backspace}{backspace}');
+    await userEvent.type(comboboxInput, '{backspace}{backspace}{backspace}{backspace}{backspace}');
     expect(comboboxInput).toHaveValue('');
   });
   describe('behavior on blur', () => {
@@ -91,24 +91,27 @@ describe('Layer Data Panel', () => {
       </div>
     );
 
-    it('when user blurs the empty input, the input receives selected field', () => {
+    it('when user blurs the empty input, the input receives selected field', async () => {
       const { comboboxInput } = renderFieldSelect(undefined, { wrapper: Wrapper });
       await userEvent.click(comboboxInput);
       expect(comboboxInput).toHaveValue('bytes');
       // type into input
-      userEvent.type(comboboxInput, '{backspace}{backspace}{backspace}{backspace}{backspace}');
+      await userEvent.type(
+        comboboxInput,
+        '{backspace}{backspace}{backspace}{backspace}{backspace}'
+      );
       expect(comboboxInput).toHaveValue('');
       await userEvent.click(
         screen.getByRole('button', { name: /testing blur by clicking outside button/i })
       );
       expect(comboboxInput).toHaveValue('bytes');
     });
-    it('when user blurs non-empty input, the value persists', () => {
+    it('when user blurs non-empty input, the value persists', async () => {
       const { comboboxInput } = renderFieldSelect(undefined, { wrapper: Wrapper });
       await userEvent.click(comboboxInput);
       expect(comboboxInput).toHaveValue('bytes');
       // type into input
-      userEvent.type(comboboxInput, '{backspace}{backspace}{backspace}');
+      await userEvent.type(comboboxInput, '{backspace}{backspace}{backspace}');
       expect(comboboxInput).toHaveValue('by');
       await userEvent.click(
         screen.getByRole('button', { name: /testing blur by clicking outside button/i })

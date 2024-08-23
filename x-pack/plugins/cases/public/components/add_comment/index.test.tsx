@@ -103,7 +103,7 @@ describe('AddComment ', () => {
     appMockRender.render(<AddComment {...addCommentProps} />);
 
     const markdown = screen.getByTestId('euiMarkdownEditorTextArea');
-    userEvent.type(markdown, sampleData.comment);
+    await userEvent.type(markdown, sampleData.comment);
 
     await userEvent.click(screen.getByTestId('submit-comment'));
 
@@ -173,7 +173,7 @@ describe('AddComment ', () => {
 
       const markdown = screen.getByTestId('euiMarkdownEditorTextArea');
 
-      userEvent.type(markdown, 'test');
+      await userEvent.type(markdown, 'test');
       userEvent.clear(markdown);
 
       await waitFor(() => {
@@ -188,7 +188,7 @@ describe('AddComment ', () => {
       const markdown = screen.getByTestId('euiMarkdownEditorTextArea');
 
       userEvent.clear(markdown);
-      userEvent.type(markdown, '  ');
+      await userEvent.type(markdown, '  ');
 
       await waitFor(() => {
         expect(screen.getByText('Empty comments are not allowed.')).toBeInTheDocument();
