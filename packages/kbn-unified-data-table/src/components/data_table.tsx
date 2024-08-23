@@ -163,9 +163,9 @@ export interface UnifiedDataTableProps {
    */
   onFilter?: DocViewFilterFn;
   /**
-   * Function triggered when a column is resized by the user
+   * Function triggered when a column is resized by the user, passes `undefined` for auto-width
    */
-  onResize?: (colSettings: { columnId: string; width: number }) => void;
+  onResize?: (colSettings: { columnId: string; width: number | undefined }) => void;
   /**
    * Function to set all columns
    */
@@ -809,6 +809,7 @@ export const UnifiedDataTable = ({
         showColumnTokens,
         headerRowHeightLines,
         customGridColumnsConfiguration,
+        onResize,
       }),
     [
       columnsMeta,
@@ -823,6 +824,7 @@ export const UnifiedDataTable = ({
       isPlainRecord,
       isSortEnabled,
       onFilter,
+      onResize,
       settings,
       showColumnTokens,
       toastNotifications,
