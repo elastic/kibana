@@ -7,11 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ContainerModule } from 'inversify';
-import { Route } from '@kbn/core-di-server';
-import { EchoRoute } from './route';
-
-export const module = new ContainerModule((bind) => {
-  bind(EchoRoute).toSelf().inRequestScope();
-  bind(Route).toConstantValue(EchoRoute);
-});
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/core/packages/di/server-internal'],
+};
