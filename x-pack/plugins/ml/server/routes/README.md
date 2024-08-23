@@ -2,7 +2,7 @@
 
 This folder contains ML API routes in Kibana.
 
-Each route handler requires `summary` and `description` properties for API documentation. Schemas for validation are also used to 
+For better API documentation, each route handler needs a `summary` and `description`. Kibana schema definitions, which are used to validate requests and responses, also appear in the documentation. To improve the documentation's clarity, it's important to include a detailed `description` for each property in these schema definitions as well.
 
 To generate an OpenAPI spec file, make sure the OAS Kibana endpoint is enabled in `kibana.dev.yml`
 
