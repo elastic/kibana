@@ -96,6 +96,11 @@ module.exports = {
       {
         test: /\.(ttf)(\?|$)/,
         type: 'asset',
+        parser: {
+          dataUrlCondition: {
+            maxSize: 8192,
+          },
+        },
       },
     ],
   },
