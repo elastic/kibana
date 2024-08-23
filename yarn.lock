@@ -1341,6 +1341,13 @@
   dependencies:
     regenerator-runtime "^0.14.0"
 
+"@babel/runtime@^7.25.0":
+  version "7.25.4"
+  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.25.4.tgz#6ef37d678428306e7d75f054d5b1bdb8cf8aa8ee"
+  integrity sha512-DSgLeL/FNcpXuzav5wfYvHCGvynXkJbn3Zvc3823AEe9nPwW9IK4UoCSS5yGymmQzN0pCPvivtgS6/8U2kkm1w==
+  dependencies:
+    regenerator-runtime "^0.14.0"
+
 "@babel/template@^7.12.7", "@babel/template@^7.24.7", "@babel/template@^7.3.3":
   version "7.24.7"
   resolved "https://registry.yarnpkg.com/@babel/template/-/template-7.24.7.tgz#02efcee317d0609d2c07117cb70ef8fb17ab7315"
@@ -1705,20 +1712,19 @@
   dependencies:
     tslib "^1.9.3"
 
-"@elastic/ebt@1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/ebt/-/ebt-1.0.0.tgz#49a3772363c0e6e180e451a4aa24e219add4a6f3"
-  integrity sha512-/M3/bW8Kk4osYWM7xx5R0ePH1xr1fLER36bkw/HY8vHlHv+WCHnyLhL1yqQdCrq+eVunAPcoGawHXgi52SV05A==
+"@elastic/ebt@1.1.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@elastic/ebt/-/ebt-1.1.1.tgz#48c46c3860e2f1937f53fb718a26e5a5a7b9c76c"
+  integrity sha512-r809op8EdzOV57Jrt+r3YObKueVEDcAwoBLaeUx/IYoJF9lLNEbI8XIVccnvNJwTxaFpc3z3qLyZye0/T5k5/w==
   dependencies:
-    "@babel/runtime" "^7.24.7"
+    "@babel/runtime" "^7.25.0"
     fp-ts "^2.3.1"
     io-ts "^2.0.5"
     lodash.get "^4.4.2"
     lodash.has "^4.5.2"
-    moment "^2.29.4"
+    moment "^2.30.1"
     node-fetch "^2.6.7"
-    rxjs "^7.5.5"
-    typescript "^5.5.4"
+    rxjs "^7.8.1"
 
 "@elastic/ecs-helpers@^2.1.1":
   version "2.1.1"
@@ -23429,6 +23435,11 @@ moment@>=2.14.0, moment@^2.10.6, moment@^2.29.4:
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.29.4.tgz#3dbe052889fe7c1b2ed966fcb3a77328964ef108"
   integrity sha512-5LC9SOxjSc2HF6vO2CyuTDNivEdoz2IvyJJGj6X8DJ0eFyfszE0QiEd+iXmBvUP3WHxSjFH/vIsA0EN00cgr8w==
 
+moment@^2.30.1:
+  version "2.30.1"
+  resolved "https://registry.yarnpkg.com/moment/-/moment-2.30.1.tgz#f8c91c07b7a786e30c59926df530b4eac96974ae"
+  integrity sha512-uEmtNhbDOrWPFS+hdjFCBfy9f2YoyzRpwcl+DqpC6taX21FzsTLQVbMV/W7PzNSX6x/bhC1zA3c2UQ5NzH6how==
+
 monaco-editor@^0.44.0:
   version "0.44.0"
   resolved "https://registry.yarnpkg.com/monaco-editor/-/monaco-editor-0.44.0.tgz#3c0fe3655923bbf7dd647057302070b5095b6c59"
@@ -27794,6 +27805,13 @@ rxjs@^7.4.0, rxjs@^7.5.5:
   dependencies:
     tslib "^2.1.0"
 
+rxjs@^7.8.1:
+  version "7.8.1"
+  resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-7.8.1.tgz#6f6f3d99ea8044291efd92e7c7fcf562c4057543"
+  integrity sha512-AA3TVj+0A2iuIoQkWEK/tqFjBq2j+6PO6Y0zJcvzLAFhEFIO3HL0vls9hWLncZbAAbK0mar7oZ4V079I/qPMxg==
+  dependencies:
+    tslib "^2.1.0"
+
 safe-array-concat@^1.1.2:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/safe-array-concat/-/safe-array-concat-1.1.2.tgz#81d77ee0c4e8b863635227c721278dd524c20edb"
@@ -30623,7 +30641,7 @@ typescript-tuple@^2.2.1:
   dependencies:
     typescript-compare "^0.0.2"
 
-typescript@5, typescript@5.1.6, typescript@^3.3.3333, typescript@^5.0.4, typescript@^5.5.4:
+typescript@5, typescript@5.1.6, typescript@^3.3.3333, typescript@^5.0.4:
   version "5.1.6"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.1.6.tgz#02f8ac202b6dad2c0dd5e0913745b47a37998274"
   integrity sha512-zaWCozRZ6DLEWAWFrVDz1H6FVXzUSfTy5FUMWsQlU8Ym5JP9eO4xkTIROFCQvhQf61z6O/G6ugw3SgAnvvm+HA==
