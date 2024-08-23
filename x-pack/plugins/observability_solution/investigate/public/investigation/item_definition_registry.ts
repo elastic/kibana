@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InvestigationItemType, InvestigationItems } from '@kbn/investigation-shared';
+import { InvestigationItems } from '@kbn/investigation-shared';
 import { GlobalWidgetParameters } from '../../common/types';
 
 type ItemDefinitionGenerateData = Record<string, any>;
@@ -35,7 +35,7 @@ export class ItemDefinitionRegistry {
     return this.definitions;
   }
 
-  public getItemDefinitionByType(type: InvestigationItemType): ItemDefinition | undefined {
+  public getItemDefinitionByType(type: string): ItemDefinition | undefined {
     return this.definitions.find((definition) => definition.type === type);
   }
 }
