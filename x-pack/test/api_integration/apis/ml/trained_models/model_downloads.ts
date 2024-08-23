@@ -51,6 +51,7 @@ export default ({ getService }: FtrProviderContext) => {
         {
           modelName: 'elser',
           hidden: true,
+          supported: false,
           version: 1,
           config: {
             input: {
@@ -72,6 +73,7 @@ export default ({ getService }: FtrProviderContext) => {
           description: 'Elastic Learned Sparse EncodeR v2',
           type: ['elastic', 'pytorch', 'text_expansion'],
           model_id: '.elser_model_2',
+          supported: true,
           ...(isIntelBased ? { default: true } : { recommended: true }),
         },
         {
@@ -87,7 +89,7 @@ export default ({ getService }: FtrProviderContext) => {
           description: 'Elastic Learned Sparse EncodeR v2, optimized for linux-x86_64',
           type: ['elastic', 'pytorch', 'text_expansion'],
           model_id: '.elser_model_2_linux-x86_64',
-          ...(isIntelBased ? { recommended: true } : {}),
+          ...(isIntelBased ? { recommended: true, supported: true } : { supported: false }),
         },
         {
           modelName: 'e5',
@@ -102,6 +104,7 @@ export default ({ getService }: FtrProviderContext) => {
           licenseUrl: 'https://huggingface.co/elastic/multilingual-e5-small',
           type: ['pytorch', 'text_embedding'],
           model_id: '.multilingual-e5-small',
+          supported: true,
           ...(isIntelBased ? { default: true } : { recommended: true }),
         },
         {
@@ -120,7 +123,7 @@ export default ({ getService }: FtrProviderContext) => {
           licenseUrl: 'https://huggingface.co/elastic/multilingual-e5-small_linux-x86_64',
           type: ['pytorch', 'text_embedding'],
           model_id: '.multilingual-e5-small_linux-x86_64',
-          ...(isIntelBased ? { recommended: true } : {}),
+          ...(isIntelBased ? { recommended: true, supported: true } : { supported: false }),
         },
       ]);
     });

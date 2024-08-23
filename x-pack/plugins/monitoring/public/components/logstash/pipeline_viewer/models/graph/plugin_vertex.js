@@ -59,7 +59,7 @@ export class PluginVertex extends Vertex {
   }
 
   get eventsPerSecond() {
-    if (!this.eventsPerMillisecond.hasOwnProperty('data')) {
+    if (!Object.hasOwn(this.eventsPerMillisecond, 'data')) {
       return this.eventsPerMillisecond * 1000;
     }
 
@@ -72,7 +72,7 @@ export class PluginVertex extends Vertex {
   }
 
   get latestEventsPerSecond() {
-    if (!this.eventsPerSecond.hasOwnProperty('data')) {
+    if (!Object.hasOwn(this.eventsPerSecond, 'data')) {
       return this.eventsPerSecond;
     }
 

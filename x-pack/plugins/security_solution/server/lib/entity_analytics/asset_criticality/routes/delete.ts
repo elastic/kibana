@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Logger } from '@kbn/core/server';
+import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import type { DeleteAssetCriticalityRecordResponse } from '../../../../../common/api/entity_analytics';
 import { DeleteAssetCriticalityRecordRequestQuery } from '../../../../../common/api/entity_analytics';
 import {
   ASSET_CRITICALITY_PUBLIC_URL,
@@ -42,7 +43,11 @@ export const assetCriticalityPublicDeleteRoute = (
           },
         },
       },
-      async (context, request, response) => {
+      async (
+        context,
+        request,
+        response
+      ): Promise<IKibanaResponse<DeleteAssetCriticalityRecordResponse>> => {
         const securitySolution = await context.securitySolution;
 
         securitySolution.getAuditLogger()?.log({
@@ -61,7 +66,7 @@ export const assetCriticalityPublicDeleteRoute = (
           await checkAndInitAssetCriticalityResources(context, logger);
 
           const assetCriticalityClient = securitySolution.getAssetCriticalityDataClient();
-          await assetCriticalityClient.delete(
+          const deletedRecord = await assetCriticalityClient.delete(
             {
               idField: request.query.id_field,
               idValue: request.query.id_value,
@@ -69,7 +74,12 @@ export const assetCriticalityPublicDeleteRoute = (
             request.query.refresh
           );
 
-          return response.ok();
+          return response.ok({
+            body: {
+              deleted: deletedRecord !== undefined,
+              record: deletedRecord,
+            },
+          });
         } catch (e) {
           const error = transformError(e);
 

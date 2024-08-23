@@ -8,13 +8,20 @@
 import expect from '@kbn/expect';
 import { eventsIndexPattern } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import { ResolverEntityIndex } from '@kbn/security-solution-plugin/common/endpoint/types';
+import TestAgent from 'supertest/lib/agent';
 import { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 
 export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const utils = getService('securitySolutionUtils');
 
   describe('@ess @serverless Resolver tests for the entity route', function () {
+    let adminSupertest: TestAgent;
+
+    before(async () => {
+      adminSupertest = await utils.createSuperTest();
+    });
+
     describe('winlogbeat tests', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/endpoint/resolver/winlogbeat');
@@ -27,7 +34,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('returns a winlogbeat sysmon event when the event matches the schema correctly', async () => {
         // this id is from the es archive
         const _id = 'sysmon-event';
-        const { body }: { body: ResolverEntityIndex } = await supertest
+        const { body }: { body: ResolverEntityIndex } = await adminSupertest
           .get(
             `/api/endpoint/resolver/entity?_id=${_id}&indices=${eventsIndexPattern}&indices=winlogbeat-7.11.0-default`
           )
@@ -50,7 +57,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('does not return a powershell event that has event.module set to powershell', async () => {
         // this id is from the es archive
         const _id = 'powershell-event';
-        const { body }: { body: ResolverEntityIndex } = await supertest
+        const { body }: { body: ResolverEntityIndex } = await adminSupertest
           .get(
             `/api/endpoint/resolver/entity?_id=${_id}&indices=${eventsIndexPattern}&indices=winlogbeat-7.11.0-default`
           )
@@ -73,7 +80,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('returns an event even if it does not have a mapping for entity_id', async () => {
         // this id is from the es archive
         const _id = 'fa7eb1546f44fd47d8868be8d74e0082e19f22df493c67a7725457978eb648ab';
-        const { body }: { body: ResolverEntityIndex } = await supertest.get(
+        const { body }: { body: ResolverEntityIndex } = await adminSupertest.get(
           `/api/endpoint/resolver/entity?_id=${_id}&indices=${eventsIndexPattern}&indices=.siem-signals-default`
         );
         expect(body).eql([
@@ -96,7 +103,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('does not return an event when it does not have the entity_id field in the document', async () => {
         // this id is from the es archive
         const _id = 'no-entity-id-field';
-        const { body }: { body: ResolverEntityIndex } = await supertest.get(
+        const { body }: { body: ResolverEntityIndex } = await adminSupertest.get(
           `/api/endpoint/resolver/entity?_id=${_id}&indices=${eventsIndexPattern}&indices=.siem-signals-default`
         );
         expect(body).to.be.empty();
@@ -105,7 +112,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('does not return an event when it does not have the process field in the document', async () => {
         // this id is from the es archive
         const _id = 'no-process-field';
-        const { body }: { body: ResolverEntityIndex } = await supertest.get(
+        const { body }: { body: ResolverEntityIndex } = await adminSupertest.get(
           `/api/endpoint/resolver/entity?_id=${_id}&indices=${eventsIndexPattern}&indices=.siem-signals-default`
         );
         expect(body).to.be.empty();

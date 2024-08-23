@@ -22,6 +22,8 @@ import { ConditionResult } from './evaluate_condition';
 import { InfraBackendLibs } from '../../infra_types';
 import { infraPluginMock } from '../../../mocks';
 import { logsSharedPluginMock } from '@kbn/logs-shared-plugin/server/mocks';
+import { createLogSourcesServiceMock } from '@kbn/logs-data-access-plugin/common/services/log_sources_service/log_sources_service.mocks';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 
 jest.mock('./evaluate_condition', () => ({ evaluateCondition: jest.fn() }));
 
@@ -115,7 +117,16 @@ const mockLibs = {
   },
   getStartServices: () => [
     null,
-    { logsShared: logsSharedPluginMock.createStartContract() },
+    {
+      logsShared: logsSharedPluginMock.createStartContract(),
+      logsDataAccess: {
+        services: {
+          logSourcesServiceFactory: {
+            getLogSourcesService: () => createLogSourcesServiceMock(),
+          },
+        },
+      },
+    },
     infraPluginMock.createStartContract(),
   ],
   configuration: createMockStaticConfiguration({}),
@@ -125,6 +136,11 @@ const mockLibs = {
   basePath: {
     publicBaseUrl: 'http://localhost:5601',
     prepend: (path: string) => path,
+  },
+  plugins: {
+    share: {
+      setup: sharePluginMock.createSetupContract(),
+    },
   },
   logger,
 } as unknown as InfraBackendLibs;

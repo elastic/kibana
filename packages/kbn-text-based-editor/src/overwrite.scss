@@ -1,14 +1,8 @@
 /* Editor styles for any layout mode */
 /* NOTE: Much of this is overriding Monaco styles so the specificity is intentional */
 
-// Radius for both the main container and the margin (container for line numbers)
-.TextBasedLangEditor .monaco-editor, .TextBasedLangEditor .monaco-editor .margin, .TextBasedLangEditor .monaco-editor .overflow-guard {
-  border-top-left-radius: $euiBorderRadius;
-  border-bottom-left-radius: $euiBorderRadius;
-}
-
 .TextBasedLangEditor .monaco-editor .monaco-hover {
-  display: none !important;
+  display: block !important;
 }
 
 .TextBasedLangEditor .monaco-editor .margin-view-overlays .line-numbers {
@@ -35,29 +29,15 @@
   @include euiTextBreakWord;
 }
 
-/* For compact mode */
-
 // All scrollable containers (e.g. main container and suggest menu)
-.TextBasedLangEditor--compact .monaco-editor .monaco-scrollable-element {
+.TextBasedLangEditor .monaco-editor .monaco-scrollable-element {
   margin-left: $euiSizeS;
 }
 
-// Suggest menu in compact mode
-.TextBasedLangEditor--compact .monaco-editor .monaco-list .monaco-scrollable-element {
+.TextBasedLangEditor .monaco-editor .monaco-list .monaco-scrollable-element {
   margin-left: 0;
 
   .monaco-list-row.focused {
     border-radius: $euiBorderRadius;
   }
-}
-
-/*  For expanded mode */
-
-.TextBasedLangEditor--expanded .monaco-editor .monaco-hover {
-  display: block !important;
-}
-
-.TextBasedLangEditor--expanded .monaco-editor, .TextBasedLangEditor--expanded .monaco-editor .margin, .TextBasedLangEditor--expanded .monaco-editor .overflow-guard {
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
 }

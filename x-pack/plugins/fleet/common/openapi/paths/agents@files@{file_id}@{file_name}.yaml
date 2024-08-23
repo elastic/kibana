@@ -12,7 +12,7 @@ parameters:
 get:
   summary: Get file uploaded by agent
   tags:
-    - Agents
+    - Elastic Agents
   responses:
     '200':
       description: OK

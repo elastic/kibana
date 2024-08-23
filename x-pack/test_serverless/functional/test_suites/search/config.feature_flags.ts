@@ -24,6 +24,7 @@ export default createTestConfig({
     `--xpack.cloud.base_url='https://cloud.elastic.co'`,
     `--xpack.cloud.organization_url='/account/members'`,
     `--xpack.security.roleManagementEnabled=true`,
+    `--xpack.spaces.maxSpaces=100`, // enables spaces UI capabilities
   ],
   // load tests in the index file
   testFiles: [require.resolve('./index.feature_flags.ts')],
