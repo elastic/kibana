@@ -1719,7 +1719,7 @@
         "): Promise<",
         "InferenceModelConfigContainer",
         ">; getAllInferenceEndpoints(): Promise<{ endpoints: ",
-        "InferenceModelConfigContainer",
+        "GetInferenceEndpointsResponse",
         "[]; }>; }; notifications: { findMessages(params: ",
         "NotificationsQueryParams",
         "): Promise<",
