@@ -8,11 +8,7 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import type { GlobalWidgetParameters } from '@kbn/investigate-plugin/public';
-import {
-  EmbeddableItem,
-  InvestigationItems,
-  embeddableItemSchema,
-} from '@kbn/investigation-shared';
+import { InvestigationItem } from '@kbn/investigation-shared';
 import { useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { v4 } from 'uuid';
@@ -27,7 +23,11 @@ const embeddableClassName = css`
   }
 `;
 
-type Props = EmbeddableItem['params'] & GlobalWidgetParameters;
+type Props = {
+  type: string;
+  config: Record<string, any>;
+  savedObjectId?: string;
+} & GlobalWidgetParameters;
 
 type ParentApi = ReturnType<React.ComponentProps<typeof ReactEmbeddableRenderer>['getParentApi']>;
 
@@ -166,16 +166,12 @@ export function registerEmbeddableItem({
 }: Options) {
   investigate.registerItemDefinition({
     type: 'esql',
-    generate: async (option: { item: InvestigationItems; params: GlobalWidgetParameters }) => {
+    generate: async (option: { item: InvestigationItem; params: GlobalWidgetParameters }) => {
       return {
         timeRange: option.params.timeRange,
       };
     },
-    render: (option: { item: InvestigationItems; data: Record<string, any> }) => {
-      if (!embeddableItemSchema.is(option.item)) {
-        return null;
-      }
-
+    render: (option: { item: InvestigationItem; data: Record<string, any> }) => {
       const parameters = {
         type: option.item.params.type,
         config: option.item.params.config,

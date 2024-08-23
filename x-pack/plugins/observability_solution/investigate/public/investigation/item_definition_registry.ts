@@ -5,21 +5,19 @@
  * 2.0.
  */
 
-import { InvestigationItems } from '@kbn/investigation-shared';
+import { InvestigationItem } from '@kbn/investigation-shared';
 import { GlobalWidgetParameters } from '../../common/types';
 
-type ItemDefinitionGenerateData = Record<string, any>;
+type ItemDefinitionData = Record<string, any>;
+type ItemDefinitionParams = Record<string, any>;
 
 export interface ItemDefinition {
   type: string;
   generate: (option: {
-    item: InvestigationItems;
+    item: InvestigationItem;
     params: GlobalWidgetParameters;
-  }) => Promise<ItemDefinitionGenerateData>;
-  render: (option: {
-    data: ItemDefinitionGenerateData;
-    item: InvestigationItems;
-  }) => React.ReactNode;
+  }) => Promise<ItemDefinitionData>;
+  render: (option: { data: ItemDefinitionData; item: InvestigationItem }) => React.ReactNode;
 }
 
 export class ItemDefinitionRegistry {
