@@ -98,8 +98,6 @@ export const ViewSpaceSettings: React.FC<Props> = ({ space, features, history, .
     setShowConfirmDeleteModal(true);
   }, []);
 
-  // TODO cancel previous request, if there is one pending
-  // TODO flush analytics
   const performSave = useCallback(
     async ({ requiresReload = false }) => {
       const { id, name, disabledFeatures } = spaceSettings;
