@@ -54,18 +54,14 @@ import type { UnwrapPromise } from '../common/utility_types';
 import { InventoryViewsServiceStart } from './services/inventory_views';
 import { MetricsExplorerViewsServiceStart } from './services/metrics_explorer_views';
 import { ITelemetryClient } from './services/telemetry';
-import type { InfraLocators } from '../common/locators';
 
-// Our own setup and start contract values
-export interface InfraClientSetupExports {
-  locators: InfraLocators;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface InfraClientSetupExports {}
 
 export interface InfraClientStartExports {
   inventoryViews: InventoryViewsServiceStart;
   metricsExplorerViews?: MetricsExplorerViewsServiceStart;
   telemetry: ITelemetryClient;
-  locators: InfraLocators;
 }
 
 export interface InfraClientSetupDeps {
