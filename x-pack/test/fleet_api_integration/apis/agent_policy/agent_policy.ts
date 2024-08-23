@@ -906,6 +906,7 @@ export default function (providerContext: FtrProviderContext) {
     describe('PUT /api/fleet/agent_policies/{agentPolicyId}', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+        await kibanaServer.savedObjects.cleanStandardList();
       });
       const createdPolicyIds: string[] = [];
       after(async () => {
@@ -1100,7 +1101,7 @@ export default function (providerContext: FtrProviderContext) {
           .put(`/api/fleet/agent_policies/${originalPolicy.id}`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            name: 'Updated name',
+            name: `Updated name ${Date.now()}`,
             description: 'Initial description',
             namespace: 'default',
           })
