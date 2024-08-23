@@ -9,21 +9,21 @@
 import React from 'react';
 import { withSuspense } from '@kbn/shared-ux-utility';
 
-export { type DevToolsVariable } from './types';
+export { type AutocompleteOptions } from './types';
 
 /**
- * The Lazily-loaded `VariablesEditorLazy` component.  Consumers should use `React.Suspense` or
+ * The Lazily-loaded `SettingsEditorLazy` component.  Consumers should use `React.Suspense` or
  * the withSuspense` HOC to load this component.
  */
-export const VariablesEditorLazy = React.lazy(() =>
-  import('./variables_editor').then(({ VariablesEditor }) => ({
-    default: VariablesEditor,
+export const SettingsEditorLazy = React.lazy(() =>
+  import('./settings_editor').then(({ SettingsEditor }) => ({
+    default: SettingsEditor,
   }))
 );
 
 /**
- * A `VariablesEditor` component that is wrapped by the `withSuspense` HOC. This component can
- * be used directly by consumers and will load the `VariablesEditorLazy` component lazily with
+ * A `SettingsEditor` component that is wrapped by the `withSuspense` HOC. This component can
+ * be used directly by consumers and will load the `SettingsEditorLazy` component lazily with
  * a predefined fallback and error boundary.
  */
-export const VariablesEditor = withSuspense(VariablesEditorLazy);
+export const SettingsEditor = withSuspense(SettingsEditorLazy);

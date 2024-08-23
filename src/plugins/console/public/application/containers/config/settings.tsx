@@ -8,11 +8,11 @@
 
 import React from 'react';
 
-import { AutocompleteOptions, DevToolsSettingsModal } from '../components';
+import { AutocompleteOptions, SettingsEditor } from '../../components/settings';
 
-import { useServicesContext, useEditorActionContext } from '../contexts';
-import { DevToolsSettings, Settings as SettingsService } from '../../services';
-import type { SenseEditor } from '../models';
+import { useServicesContext, useEditorActionContext } from '../../contexts';
+import { DevToolsSettings, Settings as SettingsService } from '../../../services';
+import type { SenseEditor } from '../../models';
 
 const getAutocompleteDiff = (
   newSettings: DevToolsSettings,
@@ -93,7 +93,7 @@ export function Settings({ editorInstance }: Props) {
   };
 
   return (
-    <DevToolsSettingsModal
+    <SettingsEditor
       onSaveSettings={onSaveSettings}
       refreshAutocompleteSettings={(selectedSettings) =>
         refreshAutocompleteSettings(settings, selectedSettings)

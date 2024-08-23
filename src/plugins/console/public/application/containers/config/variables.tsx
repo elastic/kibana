@@ -7,10 +7,10 @@
  */
 
 import React from 'react';
-import { DevToolsVariablesFlyout, DevToolsVariable } from '../components';
-import { useServicesContext } from '../contexts';
-import { StorageKeys } from '../../services';
-import { DEFAULT_VARIABLES } from '../../../common/constants';
+import { type DevToolsVariable, VariablesEditor } from '../../components/variables';
+import { useServicesContext } from '../../contexts';
+import { StorageKeys } from '../../../services';
+import { DEFAULT_VARIABLES } from '../../../../common/constants';
 
 export function Variables() {
   const {
@@ -20,8 +20,9 @@ export function Variables() {
   const onSaveVariables = (newVariables: DevToolsVariable[]) => {
     storage.set(StorageKeys.VARIABLES, newVariables);
   };
+
   return (
-    <DevToolsVariablesFlyout
+    <VariablesEditor
       onSaveVariables={onSaveVariables}
       variables={storage.get(StorageKeys.VARIABLES, DEFAULT_VARIABLES)}
     />

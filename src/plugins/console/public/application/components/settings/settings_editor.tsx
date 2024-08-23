@@ -23,11 +23,9 @@ import {
 
 import { SettingsGroup } from './settings_group';
 import { SettingsFormRow } from './settings_form_row';
-import { DevToolsSettings } from '../../services';
-import { unregisterCommands } from '../containers/editor/legacy/console_editor/keyboard_shortcuts';
-import type { SenseEditor } from '../models';
-
-export type AutocompleteOptions = 'fields' | 'indices' | 'templates';
+import { DevToolsSettings } from '../../../services';
+import { unregisterCommands } from '../../containers/editor/legacy/console_editor/keyboard_shortcuts';
+import type { SenseEditor } from '../../models';
 
 const DEBOUNCE_DELAY = 500;
 const ON_LABEL = i18n.translate('console.settingsPage.onLabel', { defaultMessage: 'On' });
@@ -60,14 +58,14 @@ const intervalOptions = PRESETS_IN_MINUTES.map((value) => ({
       : everyNMinutesTimeInterval(value),
 }));
 
-export interface DevToolsSettingsModalProps {
+export interface SettingsEditorProps {
   onSaveSettings: (newSettings: DevToolsSettings) => void;
   refreshAutocompleteSettings: (selectedSettings: DevToolsSettings['autocomplete']) => void;
   settings: DevToolsSettings;
   editorInstance: SenseEditor | null;
 }
 
-export const DevToolsSettingsModal = (props: DevToolsSettingsModalProps) => {
+export const SettingsEditor = (props: SettingsEditorProps) => {
   const isMounted = useRef(false);
 
   const [fontSize, setFontSize] = useState(props.settings.fontSize);
