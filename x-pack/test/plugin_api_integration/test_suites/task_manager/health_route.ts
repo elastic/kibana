@@ -145,7 +145,7 @@ export default function ({ getService }: FtrProviderContext) {
           as_workers: 10,
           as_cost: 20,
         },
-        claim_strategy: 'default',
+        claim_strategy: 'update_by_query',
       });
     });
 

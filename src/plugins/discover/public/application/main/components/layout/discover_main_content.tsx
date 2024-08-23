@@ -78,6 +78,17 @@ export const DiscoverMainContent = ({
           trackUiMetric(METRIC_TYPE.CLICK, DOCUMENTS_VIEW_CLICK);
         }
       }
+
+      return new Promise<VIEW_MODE>((resolve, reject) => {
+        // return a promise to report when the view mode has been updated
+        stateContainer.appState.subscribe((state) => {
+          if (state.viewMode === mode) {
+            resolve(mode);
+          } else {
+            reject(mode);
+          }
+        });
+      });
     },
     [trackUiMetric, stateContainer]
   );

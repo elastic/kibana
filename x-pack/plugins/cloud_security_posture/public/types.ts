@@ -69,6 +69,7 @@ export interface CspClientPluginStartDeps {
   share: SharePluginStart;
   storage: Storage;
   spaces: SpacesPluginStart;
+  cloud: CloudSetup;
 
   // optional
   usageCollection?: UsageCollectionStart;

@@ -209,6 +209,7 @@ export const ruleExecutionStatusSchema = schema.object({
           schema.literal(ruleExecutionStatusWarningReasonV1.MAX_EXECUTABLE_ACTIONS),
           schema.literal(ruleExecutionStatusWarningReasonV1.MAX_ALERTS),
           schema.literal(ruleExecutionStatusWarningReasonV1.MAX_QUEUED_ACTIONS),
+          schema.literal(ruleExecutionStatusWarningReasonV1.EXECUTION),
         ],
         {
           meta: {
@@ -261,6 +262,7 @@ export const ruleLastRunSchema = schema.object({
           schema.literal(ruleExecutionStatusWarningReasonV1.MAX_EXECUTABLE_ACTIONS),
           schema.literal(ruleExecutionStatusWarningReasonV1.MAX_ALERTS),
           schema.literal(ruleExecutionStatusWarningReasonV1.MAX_QUEUED_ACTIONS),
+          schema.literal(ruleExecutionStatusWarningReasonV1.EXECUTION),
         ],
         {
           meta: {
