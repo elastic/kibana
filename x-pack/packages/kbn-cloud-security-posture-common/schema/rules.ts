@@ -5,33 +5,33 @@
  * 2.0.
  */
 
-import { TypeOf, schema } from '@kbn/config-schema';
+import { type TypeOf, schema } from '@kbn/config-schema';
 import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '../constants';
+
+const { string, object, maybe, oneOf, literal, arrayOf } = schema;
 
 export type CspBenchmarkRuleMetadata = TypeOf<typeof cspBenchmarkRuleMetadataSchema>;
 
-export const cspBenchmarkRuleMetadataSchema = schema.object({
-  audit: schema.string(),
-  benchmark: schema.object({
-    name: schema.string(),
-    posture_type: schema.maybe(
-      schema.oneOf([schema.literal(CSPM_POLICY_TEMPLATE), schema.literal(KSPM_POLICY_TEMPLATE)])
-    ),
-    id: schema.string(),
-    version: schema.string(),
-    rule_number: schema.maybe(schema.string()),
+export const cspBenchmarkRuleMetadataSchema = object({
+  audit: string(),
+  benchmark: object({
+    name: string(),
+    posture_type: maybe(oneOf([literal(CSPM_POLICY_TEMPLATE), literal(KSPM_POLICY_TEMPLATE)])),
+    id: string(),
+    version: string(),
+    rule_number: maybe(string()),
   }),
-  default_value: schema.maybe(schema.string()),
-  description: schema.string(),
-  id: schema.string(),
-  impact: schema.maybe(schema.string()),
-  name: schema.string(),
-  profile_applicability: schema.string(),
-  rationale: schema.string(),
-  references: schema.maybe(schema.string()),
-  rego_rule_id: schema.string(),
-  remediation: schema.string(),
-  section: schema.string(),
-  tags: schema.arrayOf(schema.string()),
-  version: schema.string(),
+  default_value: maybe(string()),
+  description: string(),
+  id: string(),
+  impact: maybe(string()),
+  name: string(),
+  profile_applicability: string(),
+  rationale: string(),
+  references: maybe(string()),
+  rego_rule_id: string(),
+  remediation: string(),
+  section: string(),
+  tags: arrayOf(string()),
+  version: string(),
 });
