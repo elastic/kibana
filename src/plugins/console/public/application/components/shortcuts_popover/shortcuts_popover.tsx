@@ -89,7 +89,7 @@ export const ShortcutsPopover = ({ button, isOpen, closePopover }: ShortcutsPopo
       <EuiTitle size="xxs">
         <h5>Autocomplete menu shortcuts</h5>
       </EuiTitle>
-      <EuiHorizontalRule margin="m" />
+      <EuiHorizontalRule margin="s" />
       <EuiFlexGroup gutterSize="s" direction="column">
         <ShortcutLineFlexItem
           id="collapseAllExceptCurrent"

@@ -35,6 +35,7 @@ export const HelpPopover = ({ button, isOpen, closePopover, resetTour }: HelpPop
       isOpen={isOpen}
       closePopover={closePopover}
       anchorPosition="downRight"
+      buffer={[4, 4, 4, 4]}
     >
       <EuiTitle size="xs">
         <h4>
