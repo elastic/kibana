@@ -217,10 +217,11 @@ export const DetailsPageMappingsContent: FunctionComponent<{
   const updateMappings = useCallback(
     async (forceSaveMappings?: boolean) => {
       const hasSemanticText = hasSemanticTextField(state.fields);
+      let inferenceToModelIdMap = state.inferenceToModelIdMap;
       setIsUpdatingMappings(true);
       try {
         if (isSemanticTextEnabled && hasMLPermissions && hasSemanticText && !forceSaveMappings) {
-          await fetchInferenceToModelIdMap();
+          inferenceToModelIdMap = await fetchInferenceToModelIdMap();
         }
         const fields = hasSemanticText ? getStateWithCopyToFields(state).fields : state.fields;
         const denormalizedFields = deNormalize(fields);
@@ -231,8 +232,8 @@ export const DetailsPageMappingsContent: FunctionComponent<{
               .map((field) => field.inference_id)
               .filter(
                 (inferenceId: string) =>
-                  state.inferenceToModelIdMap?.[inferenceId].trainedModelId && // third-party inference models don't have trainedModelId
-                  !state.inferenceToModelIdMap?.[inferenceId].isDeployed
+                  inferenceToModelIdMap?.[inferenceId].trainedModelId && // third-party inference models don't have trainedModelId
+                  !inferenceToModelIdMap?.[inferenceId].isDeployed
               );
         setHasSavedFields(true);
         if (inferenceIdsInPendingList.length === 0) {
