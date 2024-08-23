@@ -12,6 +12,7 @@ import {
   HasSerializedChildState,
   PanelPackage,
   PresentationContainer,
+  childrenUnsavedChanges$,
 } from '@kbn/presentation-containers';
 import type { Reference } from '@kbn/content-management-utils';
 import { BehaviorSubject, first, merge } from 'rxjs';
@@ -118,7 +119,29 @@ export function initControlsManager(
     children$.next(omit(children$.value, panelId));
   }
 
+  function snapshotControlsRuntimeState() {
+    const controlsRuntimeState: ControlPanelsState = {};
+    controlsInOrder$.getValue().forEach(({ id, type }, index) => {
+      const controlApi = getControlApi(id);
+      if (controlApi && apiHasSnapshottableState(controlApi)) {
+        controlsRuntimeState[id] = {
+          order: index,
+          type,
+          ...controlApi.snapshotRuntimeState(),
+        };
+      }
+    });
+    return controlsRuntimeState;
+  }
+
+  const childrenUnsavedChangesSubscription = childrenUnsavedChanges$(children$ as PresentationContainer['children$']).subscribe(() => {
+    lastSavedControlsPanelState$.next(snapshotControlsRuntimeState());
+  });
+
   return {
+    cleanup: () => {
+      childrenUnsavedChangesSubscription.unsubscribe();
+    },
     controlsInOrder$,
     getNewControlState: () => {
       return {
@@ -170,20 +193,6 @@ export function initControlsManager(
         references,
       };
     },
-    snapshotControlsRuntimeState: () => {
-      const controlsRuntimeState: ControlPanelsState = {};
-      controlsInOrder$.getValue().forEach(({ id, type }, index) => {
-        const controlApi = getControlApi(id);
-        if (controlApi && apiHasSnapshottableState(controlApi)) {
-          controlsRuntimeState[id] = {
-            order: index,
-            type,
-            ...controlApi.snapshotRuntimeState(),
-          };
-        }
-      });
-      return controlsRuntimeState;
-    },
     api: {
       getSerializedStateForChild: (childId: string) => {
         const controlPanelState = controlsPanelState[childId];
@@ -228,14 +237,6 @@ export function initControlsManager(
       HasSerializedChildState<ControlPanelState> &
       Pick<ControlGroupApi, 'untilInitialized'>,
     comparators: {
-      controlsInOrder: [
-        controlsInOrder$,
-        (next: ControlsInOrder) => controlsInOrder$.next(next),
-        fastIsEqual,
-      ],
-      // Control state differences tracked by controlApi comparators
-      // Control ordering differences tracked by controlsInOrder comparator
-      // initialChildControlState comparatator exists to reset controls manager to last saved state
       initialChildControlState: [
         lastSavedControlsPanelState$,
         (lastSavedControlPanelsState: ControlPanelsState) => {
@@ -243,12 +244,28 @@ export function initControlsManager(
           controlsPanelState = {
             ...lastSavedControlPanelsState,
           };
-          controlsInOrder$.next(getControlsInOrder(lastSavedControlPanelsState));
+          
+          const nextControlsInOrder = getControlsInOrder(lastSavedControlPanelsState);
+          controlsInOrder$.next(nextControlsInOrder);
+
+          const nextControlIds = nextControlsInOrder.map(({ id }) => id);
+          const children = { ...children$.value };
+          let modifiedChildren = false;
+          Object.keys(children).forEach((controlId) => {
+            if (!nextControlIds.includes(controlId)) {
+              // remove children that no longer exist after reset
+              delete children[controlId];
+              modifiedChildren = true;
+            }
+          });
+          if (modifiedChildren) {
+            children$.next(children);
+          }
         },
-        () => true,
+        fastIsEqual,
       ],
     } as StateComparators<
-      Pick<ControlGroupComparatorState, 'controlsInOrder' | 'initialChildControlState'>
+      Pick<ControlGroupComparatorState, 'initialChildControlState'>
     >,
   };
 }

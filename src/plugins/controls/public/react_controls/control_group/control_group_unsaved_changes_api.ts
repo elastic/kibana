@@ -6,9 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { omit } from 'lodash';
 import {
-  childrenUnsavedChanges$,
   initializeUnsavedChanges,
   PresentationContainer,
 } from '@kbn/presentation-containers';
@@ -17,9 +15,7 @@ import {
   PublishesUnsavedChanges,
   StateComparators,
 } from '@kbn/presentation-publishing';
-import { combineLatest, map } from 'rxjs';
-import { ControlsInOrder, getControlsInOrder } from './init_controls_manager';
-import { ControlGroupRuntimeState, ControlPanelsState } from './types';
+import { ControlGroupRuntimeState } from './types';
 import { apiPublishesAsyncFilters } from '../controls/data_controls/publishes_async_filters';
 
 export type ControlGroupComparatorState = Pick<
@@ -29,15 +25,12 @@ export type ControlGroupComparatorState = Pick<
   | 'ignoreParentSettings'
   | 'initialChildControlState'
   | 'labelPosition'
-> & {
-  controlsInOrder: ControlsInOrder;
-};
+>;
 
 export function initializeControlGroupUnsavedChanges(
   applySelections: () => void,
   children$: PresentationContainer['children$'],
   comparators: StateComparators<ControlGroupComparatorState>,
-  snapshotControlsRuntimeState: () => ControlPanelsState,
   parentApi: unknown,
   lastSavedRuntimeState: ControlGroupRuntimeState
 ) {
@@ -45,7 +38,6 @@ export function initializeControlGroupUnsavedChanges(
     {
       autoApplySelections: lastSavedRuntimeState.autoApplySelections,
       chainingSystem: lastSavedRuntimeState.chainingSystem,
-      controlsInOrder: getControlsInOrder(lastSavedRuntimeState.initialChildControlState),
       ignoreParentSettings: lastSavedRuntimeState.ignoreParentSettings,
       initialChildControlState: lastSavedRuntimeState.initialChildControlState,
       labelPosition: lastSavedRuntimeState.labelPosition,
@@ -56,20 +48,7 @@ export function initializeControlGroupUnsavedChanges(
 
   return {
     api: {
-      unsavedChanges: combineLatest([
-        controlGroupUnsavedChanges.api.unsavedChanges,
-        childrenUnsavedChanges$(children$),
-      ]).pipe(
-        map(([unsavedControlGroupState, unsavedControlsState]) => {
-          const unsavedChanges: Partial<ControlGroupRuntimeState> = unsavedControlGroupState
-            ? omit(unsavedControlGroupState, 'controlsInOrder')
-            : {};
-          if (unsavedControlsState || unsavedControlGroupState?.controlsInOrder) {
-            unsavedChanges.initialChildControlState = snapshotControlsRuntimeState();
-          }
-          return Object.keys(unsavedChanges).length ? unsavedChanges : undefined;
-        })
-      ),
+      unsavedChanges: controlGroupUnsavedChanges.api.unsavedChanges,
       asyncResetUnsavedChanges: async () => {
         controlGroupUnsavedChanges.api.resetUnsavedChanges();
 

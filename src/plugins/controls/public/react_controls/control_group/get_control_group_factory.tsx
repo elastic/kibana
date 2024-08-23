@@ -112,7 +112,6 @@ export const getControlGroupEmbeddableFactory = (services: {
           ],
           labelPosition: [labelPosition$, (next: ControlStyle) => labelPosition$.next(next)],
         },
-        controlsManager.snapshotControlsRuntimeState,
         parentApi,
         lastSavedRuntimeState
       );
@@ -233,6 +232,7 @@ export const getControlGroupEmbeddableFactory = (services: {
 
           useEffect(() => {
             return () => {
+              controlsManager.cleanup();
               selectionsManager.cleanup();
               childrenDataViewsSubscription.unsubscribe();
             };
