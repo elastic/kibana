@@ -371,7 +371,6 @@ examples/developer_examples @elastic/appex-sharedux
 examples/discover_customization_examples @elastic/kibana-data-discovery
 x-pack/plugins/discover_enhanced @elastic/kibana-data-discovery
 src/plugins/discover @elastic/kibana-data-discovery
-src/plugins/discover/public/context_awareness/profile_providers/security @elastic/kibana-data-discovery @elastic/security-threat-hunting-investigations
 src/plugins/discover_shared @elastic/kibana-data-discovery @elastic/obs-ux-logs-team
 packages/kbn-discover-utils @elastic/kibana-data-discovery
 packages/kbn-doc-links @elastic/docs
@@ -880,9 +879,9 @@ packages/kbn-test-eui-helpers @elastic/kibana-visualizations
 x-pack/test/licensing_plugin/plugins/test_feature_usage @elastic/kibana-security
 packages/kbn-test-jest-helpers @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-test-subj-selector @elastic/kibana-operations @elastic/appex-qa
-x-pack/test_serverless
-test
-x-pack/test
+x-pack/test_serverless 
+test 
+x-pack/test 
 x-pack/performance @elastic/appex-qa
 x-pack/examples/testing_embedded_lens @elastic/kibana-visualizations
 packages/kbn-text-based-editor @elastic/kibana-esql
@@ -913,7 +912,7 @@ test/plugin_functional/plugins/ui_settings_plugin @elastic/kibana-core
 packages/kbn-ui-shared-deps-npm @elastic/kibana-operations
 packages/kbn-ui-shared-deps-src @elastic/kibana-operations
 packages/kbn-ui-theme @elastic/kibana-operations
-packages/kbn-unified-data-table @elastic/kibana-data-discovery @elastic/security-threat-hunting-investigations
+packages/kbn-unified-data-table @elastic/kibana-data-discovery
 packages/kbn-unified-doc-viewer @elastic/kibana-data-discovery
 examples/unified_doc_viewer @elastic/kibana-core
 src/plugins/unified_doc_viewer @elastic/kibana-data-discovery
