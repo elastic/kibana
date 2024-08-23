@@ -11,6 +11,5 @@
     "@kbn/core-mount-utils-browser",
     "@kbn/content-management-utils",
     "@kbn/utility-types",
-    "@kbn/data-views-plugin",
   ]
 }
