@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`getMonitoringPermissions With elastic agent package installed should return default logs and metrics permissions if both are enabled 1`] = `
+exports[`getMonitoringPermissions With elastic agent package installed should return default logs, metrics, traces permissions if all are enabled 1`] = `
 Object {
   "_elastic_agent_monitoring": Object {
     "indices": Array [
@@ -99,7 +99,34 @@ Object {
 }
 `;
 
-exports[`getMonitoringPermissions Without elastic agent package installed should return default logs and metrics permissions if both are enabled 1`] = `
+exports[`getMonitoringPermissions With elastic agent package installed should return default traces permissions if only traces are enabled 1`] = `
+Object {
+  "_elastic_agent_monitoring": Object {
+    "indices": Array [
+      Object {
+        "names": Array [
+          "traces-elastic_agent.metricbeat-testnamespace123",
+        ],
+        "privileges": Array [
+          "auto_configure",
+          "create_doc",
+        ],
+      },
+      Object {
+        "names": Array [
+          "traces-elastic_agent.filebeat-testnamespace123",
+        ],
+        "privileges": Array [
+          "auto_configure",
+          "create_doc",
+        ],
+      },
+    ],
+  },
+}
+`;
+
+exports[`getMonitoringPermissions Without elastic agent package installed should return default logs, metrics, traces permissions if all are enabled 1`] = `
 Object {
   "_elastic_agent_monitoring": Object {
     "indices": Array [
@@ -207,6 +234,33 @@ Object {
           "metrics-elastic_agent.pf_host_agent-testnamespace123",
           "metrics-elastic_agent.pf_elastic_collector-testnamespace123",
           "metrics-elastic_agent.pf_elastic_symbolizer-testnamespace123",
+        ],
+        "privileges": Array [
+          "auto_configure",
+          "create_doc",
+        ],
+      },
+    ],
+  },
+}
+`;
+
+exports[`getMonitoringPermissions Without elastic agent package installed should return default traces permissions if only traces are enabled 1`] = `
+Object {
+  "_elastic_agent_monitoring": Object {
+    "indices": Array [
+      Object {
+        "names": Array [
+          "traces-elastic_agent.metricbeat-testnamespace123",
+        ],
+        "privileges": Array [
+          "auto_configure",
+          "create_doc",
+        ],
+      },
+      Object {
+        "names": Array [
+          "traces-elastic_agent.filebeat-testnamespace123",
         ],
         "privileges": Array [
           "auto_configure",
