@@ -73,6 +73,9 @@ export const HelpPopover = ({ button, isOpen, closePopover, resetTour }: HelpPop
                 href={docLinks.console.guide}
                 target="_blank"
                 color="text"
+                aria-label={i18n.translate('console.helpPopover.aboutConsoleButtonAriaLabel', {
+                  defaultMessage: 'About Console link',
+                })}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -93,6 +96,9 @@ export const HelpPopover = ({ button, isOpen, closePopover, resetTour }: HelpPop
                 href={docLinks.query.queryDsl}
                 target="_blank"
                 color="text"
+                aria-label={i18n.translate('console.helpPopover.aboutQueryDSLButtonAriaLabel', {
+                  defaultMessage: 'About QueryDSL link',
+                })}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -108,7 +114,14 @@ export const HelpPopover = ({ button, isOpen, closePopover, resetTour }: HelpPop
               </p>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon iconType="refresh" onClick={resetTour} color="text" />
+              <EuiButtonIcon
+                iconType="refresh"
+                onClick={resetTour}
+                color="text"
+                aria-label={i18n.translate('console.helpPopover.rerunTourButtonAriaLabel', {
+                  defaultMessage: 'Re-run feature tour button',
+                })}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
