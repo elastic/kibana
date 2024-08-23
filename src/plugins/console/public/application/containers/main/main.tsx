@@ -21,6 +21,7 @@ import {
   EuiTourStepProps,
   EuiHorizontalRule,
 } from '@elastic/eui';
+import { useServicesContext } from '../../contexts';
 import { MAIN_PANEL_LABELS } from './i18n';
 import { NavIconButton } from './nav_icon_button';
 import { Editor } from '../editor';
@@ -43,10 +44,11 @@ interface MainProps {
 
 export function Main({ isEmbeddable = false }: MainProps) {
   const [selectedTab, setSelectedTab] = useState(SHELL_TAB_ID);
+  const { docLinks } = useServicesContext();
 
   const storageTourState = localStorage.getItem(TOUR_STORAGE_KEY);
   const initialTourState = storageTourState ? JSON.parse(storageTourState) : INITIAL_TOUR_CONFIG;
-  const [tourStepProps, actions, tourState] = useEuiTour(getTourSteps(), initialTourState);
+  const [tourStepProps, actions, tourState] = useEuiTour(getTourSteps(docLinks), initialTourState);
 
   useEffect(() => {
     localStorage.setItem(TOUR_STORAGE_KEY, JSON.stringify(tourState));
@@ -189,13 +191,10 @@ export function Main({ isEmbeddable = false }: MainProps) {
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      {/* Fixed Position Container for Tour Step */}
-      <div className="tourStepFixedContainer">
-        <EuiTourStep
-          {...fullTourStepProps[EDITOR_TOUR_STEP - 1]}
-          anchor=".tourStepFixedContainer"
-        />
-      </div>
+      {/* Empty container for Editor Tour Step */}
+      <EuiTourStep {...fullTourStepProps[EDITOR_TOUR_STEP - 1]}>
+        <div />
+      </EuiTourStep>
     </div>
   );
 }

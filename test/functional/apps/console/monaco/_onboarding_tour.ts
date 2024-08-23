@@ -16,37 +16,52 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
 
   describe('console onboarding tour', function describeIndexTests() {
+    this.tags('includeFirefox');
     before(async () => {
-      await browser.clearLocalStorage();
       log.debug('navigateTo console');
       await PageObjects.common.navigateToApp('console');
     });
 
+    beforeEach(async () => {
+      await browser.clearLocalStorage();
+      await browser.refresh();
+    });
+
+    const isTourStepOpen = async (tourStepDataSubj: string) => {
+      const classAttribute = await testSubjects.getAttribute(tourStepDataSubj, 'class');
+      return classAttribute?.includes('euiPopover-isOpen');
+    };
+
     const expectAllStepsHidden = async () => {
-      expect(await testSubjects.exists('shellTourStep')).to.be(false);
-      expect(await testSubjects.exists('editorTourStep')).to.be(false);
-      expect(await testSubjects.exists('historyTourStep')).to.be(false);
-      expect(await testSubjects.exists('configTourStep')).to.be(false);
-      expect(await testSubjects.exists('filesTourStep')).to.be(false);
+      expect(await isTourStepOpen('shellTourStep')).to.be(false);
+      expect(await isTourStepOpen('editorTourStep')).to.be(false);
+      expect(await isTourStepOpen('historyTourStep')).to.be(false);
+      expect(await isTourStepOpen('configTourStep')).to.be(false);
+      expect(await isTourStepOpen('filesTourStep')).to.be(false);
     };
 
     it('displays all five steps in the tour', async () => {
-      expect(await testSubjects.exists('shellTourStep')).to.be(true);
-      await PageObjects.console.monaco.clickNextTourStep();
+      log.debug('on Shell tour step');
+      expect(await isTourStepOpen('shellTourStep')).to.be(true);
+      await PageObjects.console.clickNextTourStep();
 
-      expect(await testSubjects.exists('editorTourStep')).to.be(true);
-      await PageObjects.console.monaco.clickNextTourStep();
+      log.debug('on Editor tour step');
+      expect(await isTourStepOpen('editorTourStep')).to.be(true);
+      await PageObjects.console.clickNextTourStep();
 
-      expect(await testSubjects.exists('historyTourStep')).to.be(true);
-      await PageObjects.console.monaco.clickNextTourStep();
+      log.debug('on History tour step');
+      expect(await isTourStepOpen('historyTourStep')).to.be(true);
+      await PageObjects.console.clickNextTourStep();
 
-      expect(await testSubjects.exists('configTourStep')).to.be(true);
-      await PageObjects.console.monaco.clickNextTourStep();
+      log.debug('on Config tour step');
+      expect(await isTourStepOpen('configTourStep')).to.be(true);
+      await PageObjects.console.clickNextTourStep();
 
-      expect(await testSubjects.exists('filesTourStep')).to.be(true);
+      log.debug('on Files tour step');
+      expect(await isTourStepOpen('filesTourStep')).to.be(true);
       // Last tour step should contain the "Complete" button
       expect(await testSubjects.exists('consoleCompleteTourButton')).to.be(true);
-      await PageObjects.console.monaco.clickCompleteTour();
+      await PageObjects.console.clickCompleteTour();
 
       // All steps should now be hidden
       await expectAllStepsHidden();
@@ -57,13 +72,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // Tour should reset after clearing local storage
       await browser.clearLocalStorage();
-      expect(await testSubjects.exists('shellTourStep')).to.be(true);
+      await browser.refresh();
+      expect(await isTourStepOpen('shellTourStep')).to.be(true);
     });
 
     it('skipping the tour hides the tour steps', async () => {
-      expect(await testSubjects.exists('shellTourStep')).to.be(true);
+      expect(await isTourStepOpen('shellTourStep')).to.be(true);
       expect(await testSubjects.exists('consoleSkipTourButton')).to.be(true);
-      await PageObjects.console.monaco.clickSkipTour();
+      await PageObjects.console.clickSkipTour();
 
       // All steps should now be hidden
       await expectAllStepsHidden();

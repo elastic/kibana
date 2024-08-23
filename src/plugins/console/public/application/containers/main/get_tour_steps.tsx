@@ -6,25 +6,31 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiStatelessTourSteps } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiStatelessTourSteps, EuiLink, EuiText } from '@elastic/eui';
 
 const commonProps = {
   stepsTotal: 5,
   maxWidth: 400,
 };
 
-export function getTourSteps() {
+export function getTourSteps(docLinks) {
   return [
     {
       step: 1,
       title: i18n.translate('console.tour.shellStepTitle', {
         defaultMessage: 'Welcome to the Console',
       }),
-      content: i18n.translate('console.tour.shellStepContent', {
-        defaultMessage:
-          'This is our UI for interacting with Elasticsearch clusters using QueryDSL. Easily run queries, manage settings, and view search results.',
-      }),
+      content: (
+        <EuiText>
+          {i18n.translate('console.tour.shellStepContent', {
+            defaultMessage:
+              'This is our UI for interacting with Elasticsearch clusters using QueryDSL. Easily run queries, manage settings, and view search results.',
+          })}
+        </EuiText>
+      ),
       anchorPosition: 'upLeft',
       'data-test-subj': 'shellTourStep',
       ...commonProps,
@@ -34,10 +40,21 @@ export function getTourSteps() {
       title: i18n.translate('console.tour.editorStepTitle', {
         defaultMessage: 'Get started querying',
       }),
-      content: i18n.translate('console.tour.editorStepContent', {
-        defaultMessage:
-          'Enter a request in this input pane, and the response will be shown in the neighboring output pane. For more details, visit our QueryDSL documentation.',
-      }),
+      content: (
+        <EuiText>
+          <FormattedMessage
+            id="console.tour.editorStepContent"
+            defaultMessage="Enter a request in this input pane, and the response will be shown in the neighboring output pane. For more details, visit {queryDslDocs}."
+            values={{
+              queryDslDocs: (
+                <EuiLink href={docLinks.query.queryDsl} target="_blank">
+                  QueryDSL documentation
+                </EuiLink>
+              ),
+            }}
+          />
+        </EuiText>
+      ),
       anchorPosition: 'leftUp',
       'data-test-subj': 'editorTourStep',
       css: {
@@ -53,10 +70,14 @@ export function getTourSteps() {
       title: i18n.translate('console.tour.historyStepTitle', {
         defaultMessage: 'Revisit past queries',
       }),
-      content: i18n.translate('console.tour.historyStepContent', {
-        defaultMessage:
-          'Enter a request in this input pane, and the response will be shown in the neighboring output pane. For more details, visit our QueryDSL documentation.',
-      }),
+      content: (
+        <EuiText>
+          {i18n.translate('console.tour.historyStepContent', {
+            defaultMessage:
+              'The history panel keeps track of your past queries, making it easy to review and rerun them.',
+          })}
+        </EuiText>
+      ),
       anchorPosition: 'leftUp',
       'data-test-subj': 'historyTourStep',
       offset: 15,
@@ -67,10 +88,14 @@ export function getTourSteps() {
       title: i18n.translate('console.tour.configStepTitle', {
         defaultMessage: 'Tailor your toolbox',
       }),
-      content: i18n.translate('console.tour.configStepContent', {
-        defaultMessage:
-          'The history panel keeps track of your past queries, making it easy to review and rerun them. ',
-      }),
+      content: (
+        <EuiText>
+          {i18n.translate('console.tour.configStepContent', {
+            defaultMessage:
+              'Fine-tune your Console’s settings and manage variables to personalize your workflow to suit your work style.',
+          })}
+        </EuiText>
+      ),
       anchorPosition: 'leftUp',
       'data-test-subj': 'configTourStep',
       offset: 15,
@@ -81,10 +106,14 @@ export function getTourSteps() {
       title: i18n.translate('console.tour.filesStepTitle', {
         defaultMessage: 'Manage Console files',
       }),
-      content: i18n.translate('console.tour.filesStepContent', {
-        defaultMessage:
-          'Easily export your console input requests to a file, or import those you’ve saved previously.',
-      }),
+      content: (
+        <EuiText>
+          {i18n.translate('console.tour.filesStepContent', {
+            defaultMessage:
+              'Easily export your console input requests to a file, or import those you’ve saved previously.',
+          })}
+        </EuiText>
+      ),
       anchorPosition: 'upRight',
       'data-test-subj': 'filesTourStep',
       ...commonProps,
