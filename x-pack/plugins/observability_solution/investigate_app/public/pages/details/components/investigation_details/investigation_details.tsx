@@ -14,6 +14,7 @@ import { InvestigateWidgetGrid } from '../../../../components/investigate_widget
 import { useFetchInvestigation } from '../../../../hooks/use_fetch_investigation';
 import { useRenderItems } from '../../hooks/use_render_items';
 import { InvestigationNotes } from '../investigation_notes/investigation_notes';
+import { AddObservationUI } from '../../../../components/add_observation_ui';
 
 interface Props {
   user: AuthenticatedUser;
@@ -33,30 +34,28 @@ export function InvestigationDetails({ user, investigationId }: Props) {
       <EuiFlexItem grow={8}>
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexGroup direction="column" gutterSize="m">
-            <EuiFlexItem>
-              <InvestigateSearchBar
-                dateRangeFrom={
-                  investigation
-                    ? new Date(investigation.params.timeRange.from).toISOString()
-                    : undefined
-                }
-                dateRangeTo={
-                  investigation
-                    ? new Date(investigation.params.timeRange.to).toISOString()
-                    : undefined
-                }
-                onQuerySubmit={async ({ dateRange }) => {
-                  // const nextDateRange = {
-                  //   from: datemath.parse(dateRange.from)!.toISOString(),
-                  //   to: datemath.parse(dateRange.to)!.toISOString(),
-                  // };
-                  // await setGlobalParameters({
-                  //   ...renderableInvestigation.parameters,
-                  //   timeRange: nextDateRange,
-                  // });
-                }}
-              />
-            </EuiFlexItem>
+            <InvestigateSearchBar
+              dateRangeFrom={
+                investigation
+                  ? new Date(investigation.params.timeRange.from).toISOString()
+                  : undefined
+              }
+              dateRangeTo={
+                investigation
+                  ? new Date(investigation.params.timeRange.to).toISOString()
+                  : undefined
+              }
+              onQuerySubmit={async ({ dateRange }) => {
+                // const nextDateRange = {
+                //   from: datemath.parse(dateRange.from)!.toISOString(),
+                //   to: datemath.parse(dateRange.to)!.toISOString(),
+                // };
+                // await setGlobalParameters({
+                //   ...renderableInvestigation.parameters,
+                //   timeRange: nextDateRange,
+                // });
+              }}
+            />
 
             <EuiFlexItem grow={false}>
               <InvestigateWidgetGrid
@@ -71,12 +70,16 @@ export function InvestigationDetails({ user, investigationId }: Props) {
             </EuiFlexItem>
           </EuiFlexGroup>
 
-          {/* <AddObservationUI
-            timeRange={investigation.params.timeRange}
-            onWidgetAdd={(widget) => {
-              return addItem(widget);
+          <AddObservationUI
+            timeRange={{
+              from: new Date(investigation.params.timeRange.from).toISOString(),
+              to: new Date(investigation.params.timeRange.to).toISOString(),
             }}
-          /> */}
+            onWidgetAdd={(widget) => {
+              return Promise.resolve();
+              // addWidget(widget);
+            }}
+          />
         </EuiFlexGroup>
       </EuiFlexItem>
 

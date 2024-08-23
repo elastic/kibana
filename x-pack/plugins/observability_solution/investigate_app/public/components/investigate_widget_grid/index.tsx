@@ -12,15 +12,15 @@ import 'react-resizable/css/styles.css';
 import { GridItem } from '../grid_item';
 import './styles.scss';
 
-export type InvestigateWidgetGridItem = InvestigationItem & {
+export type RenderedInvestigationItem = InvestigationItem & {
   loading: boolean;
   element: React.ReactNode;
 };
 
 interface InvestigateWidgetGridProps {
-  items: InvestigateWidgetGridItem[];
-  onItemCopy: (item: InvestigateWidgetGridItem) => Promise<void>;
-  onItemDelete: (item: InvestigateWidgetGridItem) => Promise<void>;
+  items: RenderedInvestigationItem[];
+  onItemCopy: (item: RenderedInvestigationItem) => Promise<void>;
+  onItemDelete: (item: RenderedInvestigationItem) => Promise<void>;
 }
 
 export function InvestigateWidgetGrid({

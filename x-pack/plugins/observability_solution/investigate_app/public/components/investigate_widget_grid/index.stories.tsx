@@ -8,7 +8,7 @@
 import { ComponentMeta, ComponentStoryObj } from '@storybook/react';
 import React, { useState } from 'react';
 import { v4 } from 'uuid';
-import { InvestigateWidgetGrid as Component, InvestigateWidgetGridItem } from '.';
+import { InvestigateWidgetGrid as Component, RenderedInvestigationItem } from '.';
 import { KibanaReactStorybookDecorator } from '../../../.storybook/storybook_decorator';
 
 const meta: ComponentMeta<typeof Component> = {
@@ -50,7 +50,7 @@ const defaultProps: ComponentStoryObj<typeof Component> = {
   ),
 };
 
-function createItem<T extends Partial<InvestigateWidgetGridItem>>(overrides: T) {
+function createItem<T extends Partial<RenderedInvestigationItem>>(overrides: T) {
   return {
     ...overrides,
     id: v4(),

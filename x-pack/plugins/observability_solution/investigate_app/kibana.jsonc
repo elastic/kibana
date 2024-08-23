@@ -21,6 +21,7 @@
       "security",
     ],
     "requiredBundles": [
+      "esql",
       "kibanaReact",
       "kibanaUtils",
       "esqlDataGrid",
