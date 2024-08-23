@@ -6,15 +6,13 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { InvestigationItem } from '@kbn/investigation-shared';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { noop } from 'lodash';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { InvestigateSearchBar } from '../../../../components/investigate_search_bar';
 import { InvestigateWidgetGrid } from '../../../../components/investigate_widget_grid';
 import { useFetchInvestigation } from '../../../../hooks/use_fetch_investigation';
-import { useKibana } from '../../../../hooks/use_kibana';
+import { useRenderItems } from '../../hooks/use_render_items';
 import { InvestigationNotes } from '../investigation_notes/investigation_notes';
 
 interface Props {
@@ -23,72 +21,8 @@ interface Props {
 }
 
 export function InvestigationDetails({ user, investigationId }: Props) {
-  const {
-    dependencies: {
-      start: { investigate },
-    },
-  } = useKibana();
   const { data: investigation } = useFetchInvestigation({ id: investigationId });
-
-  const [renderableItems, setRenderableItems] = React.useState<
-    Array<InvestigationItem & { loading: boolean; element: React.ReactNode }>
-  >([]);
-
-  useEffect(() => {
-    async function renderItems(items: InvestigationItem[]) {
-      return await Promise.all(
-        items.map(async (item) => {
-          const itemDefinition = investigate.getItemDefinitionByType(item.type);
-          if (!itemDefinition) {
-            return Promise.resolve({
-              ...item,
-              loading: false,
-              element: (
-                <div>
-                  {i18n.translate('xpack.investigateApp.renderableItems.div.notFoundLabel', {
-                    defaultMessage: 'Not found for type {type}',
-                    values: { type: item.type },
-                  })}
-                </div>
-              ),
-            });
-          }
-
-          const globalParams = {
-            timeRange: {
-              from: investigation
-                ? new Date(investigation.params.timeRange.from).toISOString()
-                : new Date().toISOString(),
-              to: investigation
-                ? new Date(investigation.params.timeRange.to).toISOString()
-                : new Date().toISOString(),
-            },
-          };
-
-          const data = await itemDefinition.generate({
-            itemParams: item.params,
-            globalParams,
-          });
-
-          return Promise.resolve({
-            ...item,
-            loading: false,
-            element: itemDefinition.render({
-              data,
-              globalParams,
-              itemParams: item.params,
-            }),
-          });
-        })
-      );
-    }
-
-    if (investigation) {
-      renderItems(investigation.items).then((nextRenderableItems) =>
-        setRenderableItems(nextRenderableItems)
-      );
-    }
-  }, [investigation]);
+  const renderableItems = useRenderItems({ investigation });
 
   if (!investigation || !renderableItems) {
     return <EuiLoadingSpinner />;
