@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { uniq } from 'lodash';
 import type {
   DataSourceProfileService,
   DocumentProfileService,
@@ -40,61 +39,62 @@ export const registerProfileProviders = ({
   const rootProfileProviders = createRootProfileProviders(providerServices);
   const dataSourceProfileProviders = createDataSourceProfileProviders(providerServices);
   const documentProfileProviders = createDocumentProfileProviders(providerServices);
-  const enabledProfileIds = uniq([
-    ...extractProfileIds(rootProfileProviders),
-    ...extractProfileIds(dataSourceProfileProviders),
-    ...extractProfileIds(documentProfileProviders),
-    ...experimentalProfileIds,
-  ]);
 
-  registerEnabledProfileProviders({
+  const enabledRootProfileProviders = rootProfileProviders.filter(
+    ({ isEnabled = true, profileId }) => isEnabled || experimentalProfileIds.includes(profileId)
+  );
+
+  const enabledDataSourceProfileProviders = dataSourceProfileProviders.filter(
+    ({ isEnabled = true, profileId }) => isEnabled || experimentalProfileIds.includes(profileId)
+  );
+
+  const enabledDocumentProfileProviders = documentProfileProviders.filter(
+    ({ isEnabled = true, profileId }) => isEnabled || experimentalProfileIds.includes(profileId)
+  );
+
+  registerProfileProvidersInternal({
     profileService: rootProfileService,
-    availableProviders: [exampleRootProfileProvider, ...rootProfileProviders],
-    enabledProfileIds,
+    providers: [...enabledRootProfileProviders],
   });
 
-  registerEnabledProfileProviders({
+  registerProfileProvidersInternal({
     profileService: dataSourceProfileService,
-    availableProviders: [exampleDataSourceProfileProvider, ...dataSourceProfileProviders],
-    enabledProfileIds,
+    providers: [...enabledDataSourceProfileProviders],
   });
 
-  registerEnabledProfileProviders({
+  registerProfileProvidersInternal({
     profileService: documentProfileService,
-    availableProviders: [exampleDocumentProfileProvider, ...documentProfileProviders],
-    enabledProfileIds,
+    providers: [...enabledDocumentProfileProviders],
   });
 };
 
-export const registerEnabledProfileProviders = <
+export const registerProfileProvidersInternal = <
   TProvider extends BaseProfileProvider<{}>,
   TService extends BaseProfileService<TProvider, {}>
 >({
   profileService,
-  availableProviders,
-  enabledProfileIds,
+  providers: availableProviders,
 }: {
   profileService: TService;
-  availableProviders: TProvider[];
-  enabledProfileIds: string[];
+  providers: TProvider[];
 }) => {
   for (const provider of availableProviders) {
-    if (enabledProfileIds.includes(provider.profileId)) {
-      profileService.registerProvider(provider);
-    }
+    profileService.registerProvider(provider);
   }
 };
 
-const extractProfileIds = (providers: Array<BaseProfileProvider<{}>>) =>
-  providers.map(({ profileId }) => profileId);
-
 const createRootProfileProviders = (_providerServices: ProfileProviderServices) =>
-  [createSecurityRootProfileProvider(_providerServices)] as RootProfileProvider[];
+  [
+    exampleRootProfileProvider,
+    createSecurityRootProfileProvider(_providerServices),
+  ] as RootProfileProvider[];
 
 const createDataSourceProfileProviders = (providerServices: ProfileProviderServices) => [
+  exampleDataSourceProfileProvider,
   ...createLogsDataSourceProfileProviders(providerServices),
 ];
 
 const createDocumentProfileProviders = (providerServices: ProfileProviderServices) => [
+  exampleDocumentProfileProvider,
   createLogDocumentProfileProvider(providerServices),
 ];

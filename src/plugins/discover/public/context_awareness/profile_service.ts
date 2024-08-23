@@ -20,6 +20,7 @@ export type ContextWithProfileId<TContext> = TContext & { profileId: string };
 export interface BaseProfileProvider<TProfile extends PartialProfile> {
   profileId: string;
   profile: ComposableProfile<TProfile>;
+  isEnabled: boolean;
 }
 
 export interface ProfileProvider<TProfile extends PartialProfile, TParams, TContext>

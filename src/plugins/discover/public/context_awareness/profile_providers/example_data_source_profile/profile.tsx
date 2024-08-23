@@ -19,6 +19,7 @@ import { DataSourceCategory, DataSourceProfileProvider } from '../../profiles';
 
 export const exampleDataSourceProfileProvider: DataSourceProfileProvider = {
   profileId: 'example-data-source-profile',
+  isEnabled: false,
   profile: {
     getCellRenderers: (prev) => () => ({
       ...prev(),

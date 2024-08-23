@@ -16,6 +16,7 @@ export const createLogsDataSourceProfileProvider = (
   services: ProfileProviderServices
 ): DataSourceProfileProvider => ({
   profileId: 'logs-data-source-profile',
+  isEnabled: true,
   profile: {
     getRowIndicatorProvider,
     getCellRenderers,
