@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiButtonEmpty, EuiLink, EuiPanel } from '@elastic/eui';
+import { EuiButtonEmpty, EuiLink, EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Attribution } from '../../../../common/descriptor_types';
 import { ILayer } from '../../../classes/layers/layer';
@@ -25,11 +25,16 @@ export function AttributionFormRow(props: Props) {
     return (
       <fieldset aria-labelledby="mapsLayerSettingsAttributionLegend">
         <div className="mapAttributionFormRow">
-          <legend id="mapsLayerSettingsAttributionLegend" className="mapAttributionFormRow__legend">
-            {i18n.translate('xpack.maps.layerSettings.attributionLegend', {
-              defaultMessage: 'Attribution',
-            })}
-          </legend>
+          <EuiTitle size="xxxs">
+            <legend
+              id="mapsLayerSettingsAttributionLegend"
+              className="mapAttributionFormRow__legend"
+            >
+              {i18n.translate('xpack.maps.layerSettings.attributionLegend', {
+                defaultMessage: 'Attribution',
+              })}
+            </legend>
+          </EuiTitle>
 
           {layerDescriptor.attribution === undefined ? (
             <div className="mapAttributionFormRow__field">
