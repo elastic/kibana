@@ -19,13 +19,6 @@ export function inferenceModelRoutes(
   { router, routeGuard }: RouteInitialization,
   cloud: CloudSetup
 ) {
-  /**
-   * @apiGroup TrainedModels
-   *
-   * @api {put} /internal/ml/_inference/:taskType/:inferenceId Create Inference Endpoint
-   * @apiName CreateInferenceEndpoint
-   * @apiDescription Create Inference Endpoint
-   */
   router.versioned
     .put({
       path: `${ML_INTERNAL_BASE_PATH}/_inference/{taskType}/{inferenceId}`,
@@ -33,6 +26,8 @@ export function inferenceModelRoutes(
       options: {
         tags: ['access:ml:canCreateInferenceEndpoint'],
       },
+      summary: 'Create an inference endpoint',
+      description: 'Create an inference endpoint',
     })
     .addVersion(
       {
@@ -64,13 +59,7 @@ export function inferenceModelRoutes(
         }
       )
     );
-  /**
-   * @apiGroup TrainedModels
-   *
-   * @api {put} /internal/ml/_inference/:taskType/:inferenceId Create Inference Endpoint
-   * @apiName CreateInferenceEndpoint
-   * @apiDescription Create Inference Endpoint
-   */
+
   router.versioned
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/_inference/all`,
@@ -78,6 +67,8 @@ export function inferenceModelRoutes(
       options: {
         tags: ['access:ml:canGetTrainedModels'],
       },
+      summary: 'Get all inference endpoints',
+      description: 'Get all inference endpoints',
     })
     .addVersion(
       {
