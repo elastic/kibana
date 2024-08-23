@@ -20,11 +20,9 @@ export {
   useForm,
   Form,
   UseField,
-} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-
-export type {
-  FieldConfig,
-  FormConfig,
+  type ValidationFuncArg,
+  type FieldConfig,
+  type FormConfig,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
 export { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';

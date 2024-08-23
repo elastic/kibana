@@ -41,6 +41,11 @@
   }
 }
 
+// Expandable cell content has a padded panel inside
+.conVariablesTable .euiTableRow-isExpandedRow .euiTableCellContent {
+  padding: 0;
+}
+
 .conApp__output, .conApp_example {
   height: 100%;
   display: flex;

@@ -6,89 +6,97 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
+import { BehaviorSubject } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { v4 as uuidv4 } from 'uuid';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   EuiTitle,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiButton,
   EuiBasicTable,
   EuiButtonIcon,
   EuiSpacer,
   EuiText,
-  EuiPanel,
-  EuiButtonEmpty,
   EuiCode,
   useGeneratedHtmlId,
   EuiConfirmModal,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 
-import {
-  useForm,
-  Form,
-  UseField,
-  TextField,
-  FieldConfig,
-  fieldValidators,
-  FormConfig,
-} from '../../../shared_imports';
-
+import { VariableForm } from './variable_form';
 import * as utils from './utils';
+import { type DevToolsVariable } from './utils';
 
 export interface DevToolsVariablesFlyoutProps {
   onSaveVariables: (newVariables: DevToolsVariable[]) => void;
   variables: [];
 }
 
-export interface DevToolsVariable {
-  id: string;
-  name: string;
-  value: string;
-}
-
-const fieldsConfig: Record<string, FieldConfig>  = {
-  variableName: {
-    label: i18n.translate('console.variablesPage.form.variableNameFieldLabel', {
-      defaultMessage: 'Variable name',
-    }),
-    // TODO: Only letters, numbers and underscores should be allowed
-    // const isInvalid = !utils.isValidVariableName(name);
-    validations: [
-      {
-        validator: fieldValidators.emptyField(
-          i18n.translate('console.variablesPage.form.variableNameRequiredLabel', {
-            defaultMessage: 'Variable name is required',
-          })
-        ),
-      },
-    ],
-  },
-  value: {
-    label: i18n.translate('console.variablesPage.form.valueFieldLabel', {
-      defaultMessage: 'Value',
-    }),
-    validations: [
-      {
-        validator: fieldValidators.emptyField(
-          i18n.translate('console.variablesPage.form.valueRequiredLabel', {
-            defaultMessage: 'Value is required',
-          })
-        ),
-      },
-    ],
-  },
-};
-
 export const DevToolsVariablesFlyout = (props: DevToolsVariablesFlyoutProps) => {
+  const isMounted = useRef(false);
   const [isAddingVariable, setIsAddingVariable] = useState(false);
   const [deleteModalForVariable, setDeleteModalForVariable] = useState<string | null>(null);
   const [variables, setVariables] = useState<DevToolsVariable[]>(props.variables);
   const deleteModalTitleId = useGeneratedHtmlId();
+
+  // Use a ref to persist the BehaviorSubject across renders
+  const itemIdToExpandedRowMap$ = useRef(new BehaviorSubject<Record<string, React.ReactNode>>({}));
+  // Subscribe to the BehaviorSubject and update local state on change
+  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, React.ReactNode>>({});
+  // Subscribe to the BehaviorSubject on mount
+  useEffect(() => {
+    const subscription = itemIdToExpandedRowMap$.current.subscribe(setItemIdToExpandedRowMap);
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const collapseExpandedRow = (variableId: string) => {
+    const updatedMap = itemIdToExpandedRowMap$.current.getValue();
+
+    if (updatedMap[variableId]) {
+      delete updatedMap[variableId];
+      itemIdToExpandedRowMap$.current.next({ ...updatedMap });
+    }
+  };
+
+  // Always save variables when they change
+  useEffect(() => {
+    if (isMounted.current) {
+      props.onSaveVariables(variables);
+    } else {
+      isMounted.current = true;
+    }
+  }, [variables]);
+
+  const toggleDetails = (variableId: string) => {
+    const currentMap = itemIdToExpandedRowMap$.current.getValue();
+    const itemIdToExpandedRowMapValues = { ...currentMap };
+
+    if (itemIdToExpandedRowMapValues[variableId]) {
+      delete itemIdToExpandedRowMapValues[variableId];
+    } else {
+      itemIdToExpandedRowMapValues[variableId] = (
+        <VariableForm
+          title={i18n.translate('console.variablesPage.editVariableForm.title', { defaultMessage: 'Edit variable' })}
+          onSubmit={(data: DevToolsVariable) => {
+            const updatedVariables = utils.editVariable(
+              data,
+              variables
+            );
+            setVariables(updatedVariables);
+            collapseExpandedRow(variableId);
+          }}
+          onCancel={() => {
+            collapseExpandedRow(variableId);
+          }}
+          defaultValue={variables.find((v) => v.id === variableId)}
+        />
+      );
+    }
+
+    // Update the BehaviorSubject with the new state
+    itemIdToExpandedRowMap$.current.next(itemIdToExpandedRowMapValues);
+  };
 
   const deleteVariable = useCallback(
     (id: string) => {
@@ -99,18 +107,10 @@ export const DevToolsVariablesFlyout = (props: DevToolsVariablesFlyoutProps) => 
     [variables, setDeleteModalForVariable]
   );
 
-  const onSubmit: FormConfig['onSubmit'] = async (data, isValid) => {
-    if (isValid) {
-      setVariables((v: DevToolsVariable[]) => [...v, {
-        ...data,
-        id: uuidv4(),
-      } as DevToolsVariable]);
-
-      setIsAddingVariable(false);
-    }
+  const onAddVariable = (data: DevToolsVariable) => {
+    setVariables((v: DevToolsVariable[]) => [...v, data]);
+    setIsAddingVariable(false);
   };
-
-  const { form } = useForm({ onSubmit });
 
   const columns: Array<EuiBasicTableColumn<DevToolsVariable>> = [
     {
@@ -136,29 +136,34 @@ export const DevToolsVariablesFlyout = (props: DevToolsVariablesFlyoutProps) => 
     {
       field: 'id',
       name: '',
-      width: '80px',
-      render: (id: string) => (
-        <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType="pencil"
-              aria-label="Edit"
-              color="primary"
-              onClick={() => {}}
-              data-test-subj="variableEditButton"
-            />
-          </EuiFlexItem>
+      width: '40px',
+      isExpander: true,
+      render: (id: string) => {
+        const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
 
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType="trash"
-              aria-label="Delete"
-              color="danger"
-              onClick={() => setDeleteModalForVariable(id)}
-              data-test-subj="variablesRemoveButton"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        return (
+          <EuiButtonIcon
+            iconType={itemIdToExpandedRowMapValues[id] ? 'arrowUp' : 'pencil'}
+            aria-label="Edit"
+            color="primary"
+            onClick={() => toggleDetails(id)}
+            data-test-subj="variableEditButton"
+          />
+        );
+      },
+    },
+    {
+      field: 'id',
+      name: '',
+      width: '40px',
+      render: (id: string) => (
+        <EuiButtonIcon
+          iconType="trash"
+          aria-label="Delete"
+          color="danger"
+          onClick={() => setDeleteModalForVariable(id)}
+          data-test-subj="variablesRemoveButton"
+        />
       ),
     },
   ];
@@ -181,74 +186,19 @@ export const DevToolsVariablesFlyout = (props: DevToolsVariablesFlyoutProps) => 
       <EuiBasicTable
         items={variables}
         columns={columns}
+        itemId="id"
+        className="conVariablesTable"
+        itemIdToExpandedRowMap={itemIdToExpandedRowMap}
         noItemsMessage={i18n.translate('console.variablesPage.table.noItemsMessage', {
           defaultMessage: 'No variables have been added yet',
         })}
       />
 
       {isAddingVariable && (
-        <>
-          <EuiPanel paddingSize="l" hasShadow={false} borderRadius="none" grow={false}>
-            <EuiTitle size="xs">
-              <h2>
-                <FormattedMessage
-                  defaultMessage="Add a new variable"
-                  id="console.variablesPage.addNewVariableTitle"
-                />
-              </h2>
-            </EuiTitle>
-            <EuiSpacer size="l" />
-
-
-            <Form form={form}>
-              <UseField
-                config={fieldsConfig.variableName}
-                path="name"
-                component={TextField}
-                componentProps={{
-                  euiFieldProps: {
-                    placeholder: i18n.translate('console.variablesPage.form.namePlaceholderLabel', {
-                      defaultMessage: 'exampleName',
-                    }),
-                    prepend: '${',
-                    append: '}',
-                  }
-                }}
-              />
-
-              <UseField
-                config={fieldsConfig.variableName}
-                path="value"
-                component={TextField}
-                componentProps={{
-                  euiFieldProps: {
-                    placeholder: i18n.translate('console.variablesPage.form.valuePlaceholderLabel', {
-                      defaultMessage: 'exampleValue',
-                    }),
-                  }
-                }}
-              />
-
-              <EuiSpacer size="l" />
-
-              <EuiFlexGroup justifyContent="flexEnd">
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    onClick={() => setIsAddingVariable(false)}
-                  >
-                    <FormattedMessage id="console.variablesPage.addNew.cancelButton" defaultMessage="Cancel" />
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-
-                <EuiFlexItem grow={false}>
-                  <EuiButton fill iconType="save" onClick={form.submit}>
-                    <FormattedMessage id="console.variablesPage.addNew.submitButton" defaultMessage="Save changes" />
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </Form>
-          </EuiPanel>
-        </>
+        <VariableForm
+          onSubmit={onAddVariable}
+          onCancel={() => setIsAddingVariable(false)}
+        />
       )}
 
       <EuiSpacer size="m" />
