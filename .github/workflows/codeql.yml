@@ -27,7 +27,7 @@ jobs:
         ref: ${{ matrix.branch }}
 
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@v2
+      uses: github/codeql-action/init@883d8588e56d1753a8a58c1c86e88976f0c23449 # v3.26.3
       with:
         languages: ${{ matrix.language }}
         config-file: ./.github/codeql/codeql-config.yml
@@ -42,7 +42,7 @@ jobs:
     #     yarn kbn bootstrap --no-validate --no-vscode
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v2
+      uses: github/codeql-action/analyze@883d8588e56d1753a8a58c1c86e88976f0c23449 # v3.26.3
       # env:
       #   NODE_OPTIONS: "--max-old-space-size=6144"
       with:
