@@ -4,7 +4,7 @@ steps:
     timeout_in_minutes: 30
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       localSsds: 1
       localSsdInterface: nvme

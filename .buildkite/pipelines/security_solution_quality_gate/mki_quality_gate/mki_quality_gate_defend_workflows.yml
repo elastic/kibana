@@ -4,7 +4,7 @@ steps:
     key: test_defend_workflows
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       enableNestedVirtualization: true
       localSsds: 1
