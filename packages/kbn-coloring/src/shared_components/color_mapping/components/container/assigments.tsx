@@ -149,7 +149,7 @@ export function AssignmentsConfig({
   return (
     <EuiPanel
       color="subdued"
-      borderRadius="none"
+      borderRadius="m"
       hasShadow={false}
       paddingSize="none"
       css={css`
@@ -227,13 +227,14 @@ export function AssignmentsConfig({
         </EuiFlexGroup>
       </div>
       {assignments.length > 0 && <EuiHorizontalRule margin="none" />}
-      <div
-        css={css`
-          padding: ${euiThemeVars.euiPanelPaddingModifiers.paddingSmall};
-          overflow: hidden;
-        `}
-      >
-        {assignments.length > 0 && (
+
+      {assignments.length > 0 && (
+        <div
+          css={css`
+            padding: ${euiThemeVars.euiPanelPaddingModifiers.paddingSmall};
+            overflow: hidden;
+          `}
+        >
           <EuiFlexGroup
             direction="row"
             alignItems="center"
@@ -308,7 +309,9 @@ export function AssignmentsConfig({
                         setShowOtherActions(false);
                         dispatch(removeAllAssignments());
                       }}
-                      color="danger"
+                      css={css`
+                        color: ${euiThemeVars.euiColorDanger};
+                      `}
                     >
                       {i18n.translate(
                         'coloring.colorMapping.container.clearAllAssignmentsButtonLabel',
@@ -322,8 +325,8 @@ export function AssignmentsConfig({
               </EuiPopover>
             )}
           </EuiFlexGroup>
-        )}
-      </div>
+        </div>
+      )}
     </EuiPanel>
   );
 }

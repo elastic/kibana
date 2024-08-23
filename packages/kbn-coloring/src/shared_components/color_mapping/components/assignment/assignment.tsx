@@ -121,7 +121,7 @@ export function Assignment({
           css={
             !disableDelete
               ? css`
-                  color: ${euiThemeVars.euiTextSubduedColor};
+                  color: ${euiThemeVars.euiTextColor};
                   transition: ${euiThemeVars.euiAnimSpeedFast} ease-in-out;
                   transition-property: color;
                   &:hover,
