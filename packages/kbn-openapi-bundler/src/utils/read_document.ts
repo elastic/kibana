@@ -43,18 +43,32 @@ async function readFile(filePath: string): Promise<unknown> {
 }
 
 async function readYamlFile(filePath: string): Promise<Record<string, unknown>> {
-  // Typing load's result to Record<string, unknown> is optimistic as we can't be sure
-  // there is object inside a yaml file. We don't have this validation layer so far
-  // but using JSON Schemas here should mitigate this problem.
-  return load(await fs.readFile(filePath, { encoding: 'utf8' })) as Record<string, unknown>;
+  const fileContent = await fs.readFile(filePath, { encoding: 'utf8' });
+  const maybeObject = load(fileContent);
+
+  if (!isPlainObjectType(maybeObject)) {
+    throw new Error(
+      `Expected ${chalk.bold(filePath)} to contain an object but got ${typeof maybeObject}`
+    );
+  }
+
+  return maybeObject;
 }
 
 async function readJsonFile(filePath: string): Promise<Record<string, unknown>> {
-  // Typing load's result to Record<string, unknown> is optimistic as we can't be sure
-  // there is object inside a yaml file. We don't have this validation layer so far
-  // but using JSON Schemas here should mitigate this problem.
-  return (await JSON.parse(await fs.readFile(filePath, { encoding: 'utf8' }))) as Record<
-    string,
-    unknown
-  >;
+  const fileContent = await fs.readFile(filePath, { encoding: 'utf8' });
+
+  try {
+    const maybeObject = JSON.parse(fileContent);
+
+    if (!isPlainObjectType(maybeObject)) {
+      throw new Error(
+        `Expected ${chalk.bold(filePath)} to contain an object but got ${typeof maybeObject}`
+      );
+    }
+
+    return maybeObject;
+  } catch {
+    throw new Error(`Unable to parse ${chalk.bold(filePath)}`);
+  }
 }
