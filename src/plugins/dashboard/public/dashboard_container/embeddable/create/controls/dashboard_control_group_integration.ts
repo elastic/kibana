@@ -74,7 +74,7 @@ export function startSyncingDashboardControlGroup(dashboard: DashboardContainer)
   // --------------------------------------------------------------------------------------
   // when control group outputs filters, force a refresh!
   // --------------------------------------------------------------------------------------
-  dashboard.integrationSubscriptions.add(
+  dashboard.publishingSubscription.add(
     controlGroupFilters$
       .pipe(
         skip(1) // skip first filter output because it will have been applied in initialize
@@ -85,7 +85,7 @@ export function startSyncingDashboardControlGroup(dashboard: DashboardContainer)
   // --------------------------------------------------------------------------------------
   // when control group outputs timeslice, dispatch timeslice
   // --------------------------------------------------------------------------------------
-  dashboard.integrationSubscriptions.add(
+  dashboard.publishingSubscription.add(
     controlGroupTimeslice$.subscribe((timeslice) => {
       dashboard.dispatch.setTimeslice(timeslice);
     })
