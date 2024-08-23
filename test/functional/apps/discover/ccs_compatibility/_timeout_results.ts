@@ -38,7 +38,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.unset('search:timeout');
     });
 
-    describe('bfetch enabled', async () => {
+    describe('bfetch enabled', () => {
       it('timeout on single shard shows warning and results with bfetch enabled', async () => {
         await PageObjects.common.navigateToApp('discover');
         await dataViews.createFromSearchBar({
@@ -91,7 +91,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('bfetch disabled', async () => {
+    describe('bfetch disabled', () => {
       before(async () => {
         await kibanaServer.uiSettings.update({ 'bfetch:disable': true });
       });
