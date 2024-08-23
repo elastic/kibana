@@ -58,8 +58,7 @@ export const commitRulesToRepository = async (args: CommitRulesArgs) => {
       });
       return {
         sha: blobData.data.sha,
-        // Remove the repositoryId prefix from the rule id so it can be used as the filename
-        path: `${prebuiltRuleAsset.rule_id.split('_')[1]}_${prebuiltRuleAsset.version}.json`,
+        path: `${prebuiltRuleAsset.rule_id}_${prebuiltRuleAsset.version}.json`,
       };
     })
   );

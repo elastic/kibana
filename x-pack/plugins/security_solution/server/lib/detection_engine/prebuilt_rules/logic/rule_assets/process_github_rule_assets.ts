@@ -94,7 +94,7 @@ const fetchSingleRuleAsset = async (
 
     const decodedContent = Buffer.from(response.data.content, 'base64').toString('utf-8');
     const rawAsset = JSON.parse(decodedContent);
-    if (`${rawAsset.rule_id}_${rawAsset.version}` !== `${repositoryId}_${blob.filename}`) {
+    if (`${rawAsset.rule_id}_${rawAsset.version}` !== `${blob.filename}`) {
       return {
         success: false,
         error: `The rule_id in the asset does not match the rule_id codified in the filename. rule_id: ${rawAsset.rule_id}, filename: ${blob.filename}`,
