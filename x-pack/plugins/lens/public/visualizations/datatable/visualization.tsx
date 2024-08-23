@@ -43,6 +43,7 @@ import {
   DEFAULT_ROW_HEIGHT,
 } from './components/constants';
 import { getColorStops, shouldColorByTerms } from '../../shared_components';
+import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
 export interface DatatableVisualizationState {
   columns: ColumnState[];
   layerId: string;
@@ -557,6 +558,15 @@ export const getDatatableVisualization = ({
       type: 'expression',
       chain: [...(datasourceExpression?.chain ?? []), ...lensCollapseFnAsts, datatableFnAst],
     };
+  },
+
+  getTelemetryEventsOnSave(state, prevState) {
+    const colorMappingEvents = state.columns.flatMap((col) => {
+      const prevColumn = prevState?.columns?.find((prevCol) => prevCol.columnId === col.columnId);
+      return getColorMappingTelemetryEvents(col.colorMapping, prevColumn?.colorMapping);
+    });
+
+    return colorMappingEvents;
   },
 
   getRenderEventCounters(state) {
