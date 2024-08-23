@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexItem, EuiFlexGroup, useEuiFontSize } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiFormLabel, useEuiFontSize } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { FieldMappingRowStatic } from './field_mapping_row_static';
@@ -32,13 +32,13 @@ const FieldMappingComponent: React.FC<FieldMappingProps> = ({
         {' '}
         <EuiFlexGroup responsive={false}>
           <EuiFlexItem>
-            <span className="euiFormLabel">{i18n.FIELD_MAPPING_FIRST_COL}</span>
+            <EuiFormLabel>{i18n.FIELD_MAPPING_FIRST_COL}</EuiFormLabel>
           </EuiFlexItem>
           <EuiFlexItem data-test-subj="case-configure-field-mappings-second-col-label">
-            <span className="euiFormLabel">{i18n.FIELD_MAPPING_SECOND_COL(actionTypeName)}</span>
+            <EuiFormLabel>{i18n.FIELD_MAPPING_SECOND_COL(actionTypeName)}</EuiFormLabel>
           </EuiFlexItem>
           <EuiFlexItem>
-            <span className="euiFormLabel">{i18n.FIELD_MAPPING_THIRD_COL}</span>
+            <EuiFormLabel>{i18n.FIELD_MAPPING_THIRD_COL}</EuiFormLabel>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
