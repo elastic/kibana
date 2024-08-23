@@ -6,17 +6,13 @@
  */
 
 import type { VFC } from 'react';
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { EuiButtonIcon, EuiCopy, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { NewChatByTitle } from '@kbn/elastic-assistant';
+import { useAssistantContext } from '@kbn/elastic-assistant';
 import { useGetFlyoutLink } from '../hooks/use_get_flyout_link';
 import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
 import { useAssistant } from '../hooks/use_assistant';
-import {
-  ALERT_SUMMARY_CONVERSATION_ID,
-  EVENT_SUMMARY_CONVERSATION_ID,
-} from '../../../../common/components/event_details/translations';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { SHARE_BUTTON_TEST_ID } from './test_ids';
 
@@ -35,10 +31,13 @@ export const HeaderActions: VFC = memo(() => {
 
   const showShareAlertButton = isAlert && alertDetailsLink;
 
-  const { showAssistant, promptContextId } = useAssistant({
-    dataFormattedForFieldBrowser,
-    isAlert,
-  });
+  const { showAssistant, showAssistantOverlay, promptContext } = useAssistant();
+  const { registerPromptContext } = useAssistantContext();
+
+  const showOverlay = useCallback(() => {
+    registerPromptContext(promptContext);
+    showAssistantOverlay(true);
+  }, [showAssistantOverlay, registerPromptContext, promptContext]);
 
   return (
     <EuiFlexGroup
@@ -50,12 +49,11 @@ export const HeaderActions: VFC = memo(() => {
     >
       {showAssistant && (
         <EuiFlexItem grow={false}>
-          <NewChatByTitle
-            conversationTitle={
-              isAlert ? ALERT_SUMMARY_CONVERSATION_ID : EVENT_SUMMARY_CONVERSATION_ID
-            }
-            promptContextId={promptContextId}
-            iconOnly
+          <EuiButtonIcon
+            data-test-subj="newChatByTitle"
+            iconType={'discuss'}
+            onClick={showOverlay}
+            color={'text'}
           />
         </EuiFlexItem>
       )}

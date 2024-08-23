@@ -207,6 +207,15 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
             prevPromptContexts,
             promptContext,
           });
+        } else if (
+          promptContext != null &&
+          prevPromptContexts[promptContext.id].suggestedUserPrompt !==
+            promptContext.suggestedUserPrompt
+        ) {
+          return updatePromptContexts({
+            prevPromptContexts,
+            promptContext,
+          });
         } else {
           return prevPromptContexts;
         }

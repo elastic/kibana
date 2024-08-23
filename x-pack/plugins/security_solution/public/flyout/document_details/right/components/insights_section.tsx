@@ -23,6 +23,7 @@ import {
   AlertsCasesTourSteps,
   SecurityStepId,
 } from '../../../../common/components/guided_onboarding_tour/tour_config';
+import { PropmptHistory } from './prompt_history';
 
 const KEY = 'insights';
 
@@ -63,6 +64,8 @@ export const InsightsSection = memo(() => {
       <CorrelationsOverview />
       <EuiSpacer size="s" />
       <PrevalenceOverview />
+      <EuiSpacer size="s" />
+      <PropmptHistory />
     </ExpandableSection>
   );
 });

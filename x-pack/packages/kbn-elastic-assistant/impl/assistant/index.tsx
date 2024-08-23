@@ -476,15 +476,22 @@ const AssistantComponent: React.FC<Props> = ({
 
   useEffect(() => {
     // Adding `conversationTitle !== selectedConversationTitle` to prevent auto-run still executing after changing selected conversation
-    if (currentConversation?.messages.length || conversationTitle !== currentConversation?.title) {
-      return;
-    }
-
-    if (autoPopulatedOnce) {
+    // if (currentConversation?.messages.length || conversationTitle !== currentConversation?.title) {
+    //   return;
+    // }
+    // console.log(conversationTitle === currentConversation?.title);
+    if (conversationTitle !== currentConversation?.title) {
       return;
     }
 
     const promptContext: PromptContext | undefined = promptContexts[promptContextId];
+    if (promptContext.suggestedUserPrompt != null) {
+      setUserPrompt(promptContext.suggestedUserPrompt);
+    }
+    if (autoPopulatedOnce) {
+      return;
+    }
+
     if (
       promptContext != null &&
       !isLoadingAnonymizationFields &&
@@ -508,10 +515,6 @@ const AssistantComponent: React.FC<Props> = ({
         };
 
         addNewSelectedPromptContext();
-      }
-
-      if (promptContext.suggestedUserPrompt != null) {
-        setUserPrompt(promptContext.suggestedUserPrompt);
       }
     }
   }, [

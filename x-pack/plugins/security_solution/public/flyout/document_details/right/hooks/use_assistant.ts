@@ -5,38 +5,10 @@
  * 2.0.
  */
 
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import { useMemo } from 'react';
+import type { PromptContext } from '@kbn/elastic-assistant';
 import { useAssistantOverlay } from '@kbn/elastic-assistant';
-import { useCallback } from 'react';
-import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
-import { getRawData } from '../../../../assistant/helpers';
-import {
-  ALERT_SUMMARY_CONTEXT_DESCRIPTION,
-  ALERT_SUMMARY_CONVERSATION_ID,
-  ALERT_SUMMARY_VIEW_CONTEXT_TOOLTIP,
-  EVENT_SUMMARY_CONTEXT_DESCRIPTION,
-  EVENT_SUMMARY_CONVERSATION_ID,
-  EVENT_SUMMARY_VIEW_CONTEXT_TOOLTIP,
-  SUMMARY_VIEW,
-} from '../../../../common/components/event_details/translations';
-import {
-  PROMPT_CONTEXT_ALERT_CATEGORY,
-  PROMPT_CONTEXT_EVENT_CATEGORY,
-  PROMPT_CONTEXTS,
-} from '../../../../assistant/content/prompt_contexts';
-
-const useAssistantNoop = () => ({ promptContextId: undefined });
-
-export interface UseAssistantParams {
-  /**
-   * An array of field objects with category and value
-   */
-  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[];
-  /**
-   * Is true if the document is an alert
-   */
-  isAlert: boolean;
-}
+import { useGetAssistantContext } from './use_get_assistant_context';
 
 export interface UseAssistantResult {
   /**
@@ -44,41 +16,43 @@ export interface UseAssistantResult {
    */
   showAssistant: boolean;
   /**
-   * Unique identifier for prompt context
+   * Function to show the assistant overlay
    */
-  promptContextId: string;
+  showAssistantOverlay: (show: boolean) => void;
+  /**
+   * The assistant prompt context
+   */
+  promptContext: PromptContext;
 }
 
 /**
- * Hook to return the assistant button visibility and prompt context id
+ * Hook to use when setting up assistant context
  */
-export const useAssistant = ({
-  dataFormattedForFieldBrowser,
-  isAlert,
-}: UseAssistantParams): UseAssistantResult => {
-  const { hasAssistantPrivilege, isAssistantEnabled } = useAssistantAvailability();
-  const useAssistantHook = hasAssistantPrivilege ? useAssistantOverlay : useAssistantNoop;
-  const getPromptContext = useCallback(
-    async () => getRawData(dataFormattedForFieldBrowser ?? []),
-    [dataFormattedForFieldBrowser]
-  );
-  const { promptContextId } = useAssistantHook(
-    isAlert ? 'alert' : 'event',
-    isAlert ? ALERT_SUMMARY_CONVERSATION_ID : EVENT_SUMMARY_CONVERSATION_ID,
-    isAlert
-      ? ALERT_SUMMARY_CONTEXT_DESCRIPTION(SUMMARY_VIEW)
-      : EVENT_SUMMARY_CONTEXT_DESCRIPTION(SUMMARY_VIEW),
+export const useAssistant = (): UseAssistantResult => {
+  const { conversationTitle, conversationId, promptContext, showAssistant, isAssistantEnabled } =
+    useGetAssistantContext();
+  const { category, description, getPromptContext, id, suggestedUserPrompt, tooltip } =
+    promptContext;
+
+  const { showAssistantOverlay } = useAssistantOverlay(
+    category,
+    conversationTitle,
+    description,
     getPromptContext,
+    id,
+    suggestedUserPrompt,
+    tooltip,
+    isAssistantEnabled,
     null,
-    isAlert
-      ? PROMPT_CONTEXTS[PROMPT_CONTEXT_ALERT_CATEGORY].suggestedUserPrompt
-      : PROMPT_CONTEXTS[PROMPT_CONTEXT_EVENT_CATEGORY].suggestedUserPrompt,
-    isAlert ? ALERT_SUMMARY_VIEW_CONTEXT_TOOLTIP : EVENT_SUMMARY_VIEW_CONTEXT_TOOLTIP,
-    isAssistantEnabled
+    conversationId
   );
 
-  return {
-    showAssistant: hasAssistantPrivilege && promptContextId !== null,
-    promptContextId: promptContextId || '',
-  };
+  return useMemo(
+    () => ({
+      showAssistant,
+      showAssistantOverlay,
+      promptContext,
+    }),
+    [showAssistant, showAssistantOverlay, promptContext]
+  );
 };

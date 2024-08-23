@@ -22,6 +22,14 @@ export const ALERT_SUMMARIZATION_PROMPT = i18n.translate(
   }
 );
 
+export const EVENT_SUMMARIZATION_PROMPT = i18n.translate(
+  'xpack.securitySolution.assistant.quickPrompts.alertSummarizationPrompt',
+  {
+    defaultMessage:
+      'As an expert in security operations and incident response, provide a breakdown of the attached event and summarize what it might mean for my organization.',
+  }
+);
+
 export const ESQL_QUERY_GENERATION_TITLE = i18n.translate(
   'xpack.securitySolution.assistant.quickPrompts.esqlQueryGenerationTitle',
   {

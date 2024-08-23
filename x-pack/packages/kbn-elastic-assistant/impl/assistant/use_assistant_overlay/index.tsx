@@ -80,7 +80,11 @@ export const useAssistantOverlay = (
   /**
    * Optionally provide a map of replacements associated with the context, i.e. replacements for an attack discovery that's provided as context
    */
-  replacements?: Replacements | null
+  replacements?: Replacements | null,
+  /**
+   * Optionally provide a conversation ID to associate the context with an existing conversation
+   */
+  conversationId?: string
 ): UseAssistantOverlay => {
   const { http } = useAssistantContext();
   const { data: connectors } = useLoadConnectors({
@@ -148,6 +152,7 @@ export const useAssistantOverlay = (
             },
             category: 'assistant',
             title: conversationTitle ?? '',
+            id: conversationId,
           });
         } catch (e) {
           /* empty */
@@ -172,6 +177,7 @@ export const useAssistantOverlay = (
       isAssistantEnabled,
       isLoading,
       promptContextId,
+      conversationId,
     ]
   );
 

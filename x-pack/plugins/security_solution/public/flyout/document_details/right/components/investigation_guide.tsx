@@ -5,10 +5,12 @@
  * 2.0.
  */
 import React, { useCallback, useMemo } from 'react';
-import { EuiButton, EuiSkeletonText, EuiCallOut } from '@elastic/eui';
+import { EuiButton, EuiSkeletonText, EuiCallOut, EuiButtonEmpty } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { useAssistantContext } from '@kbn/elastic-assistant';
+import { useGetAssistantContext } from '../hooks/use_get_assistant_context';
 import { useInvestigationGuide } from '../../shared/hooks/use_investigation_guide';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
@@ -27,7 +29,6 @@ export const InvestigationGuide: React.FC = () => {
   const { openLeftPanel } = useExpandableFlyoutApi();
   const { eventId, indexName, scopeId, dataFormattedForFieldBrowser, isPreview, isPreviewMode } =
     useDocumentDetailsContext();
-
   const { loading, error, basicAlertData, ruleNote } = useInvestigationGuide({
     dataFormattedForFieldBrowser,
   });
@@ -50,6 +51,19 @@ export const InvestigationGuide: React.FC = () => {
     () => !error && basicAlertData && basicAlertData.ruleId && ruleNote,
     [error, basicAlertData, ruleNote]
   );
+
+  const { showAssistant, promptContext, conversationTitle } =
+    useGetAssistantContext('investigation');
+  const { showAssistantOverlay, registerPromptContext } = useAssistantContext();
+
+  const showOverlay = useCallback(() => {
+    registerPromptContext(promptContext);
+    showAssistantOverlay({
+      showOverlay: true,
+      promptContextId: promptContext.id,
+      conversationTitle,
+    });
+  }, [showAssistantOverlay, promptContext, registerPromptContext, conversationTitle]);
 
   const content = useMemo(() => {
     if (isPreview) {
@@ -134,27 +148,50 @@ export const InvestigationGuide: React.FC = () => {
     }
 
     return (
-      <EuiCallOut
-        iconType="documentation"
-        size="s"
-        title={
+      <>
+        <EuiCallOut
+          iconType="documentation"
+          size="s"
+          title={
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.right.investigation.investigationGuide.noDataTitle"
+              defaultMessage="Investigation guide"
+            />
+          }
+          aria-label={i18n.translate(
+            'xpack.securitySolution.flyout.right.investigation.investigationGuide.noDataAriaLabel',
+            { defaultMessage: 'Investigation guide' }
+          )}
+        >
           <FormattedMessage
-            id="xpack.securitySolution.flyout.right.investigation.investigationGuide.noDataTitle"
-            defaultMessage="Investigation guide"
+            id="xpack.securitySolution.flyout.right.investigation.investigationGuide.noDataDescription"
+            defaultMessage="There's no investigation guide for this rule."
           />
-        }
-        aria-label={i18n.translate(
-          'xpack.securitySolution.flyout.right.investigation.investigationGuide.noDataAriaLabel',
-          { defaultMessage: 'Investigation guide' }
+        </EuiCallOut>
+        {showAssistant && (
+          <EuiButtonEmpty
+            color={'primary'}
+            data-test-subj="newChat"
+            onClick={showOverlay}
+            iconType={'discuss'}
+          >
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.right.about.reason.askAssistantButtonLabel"
+              defaultMessage="Create an investigation guide for this alert"
+            />
+          </EuiButtonEmpty>
         )}
-      >
-        <FormattedMessage
-          id="xpack.securitySolution.flyout.right.investigation.investigationGuide.noDataDescription"
-          defaultMessage="There's no investigation guide for this rule."
-        />
-      </EuiCallOut>
+      </>
     );
-  }, [loading, isPreview, isPreviewMode, goToInvestigationsTab, hasInvestigationGuide]);
+  }, [
+    loading,
+    isPreview,
+    isPreviewMode,
+    goToInvestigationsTab,
+    hasInvestigationGuide,
+    showAssistant,
+    showOverlay,
+  ]);
 
   return <div data-test-subj={INVESTIGATION_GUIDE_TEST_ID}>{content}</div>;
 };
