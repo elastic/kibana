@@ -6,19 +6,5 @@
  * Side Public License, v 1.
  */
 
-export type {
-  PrebootPlugin,
-  Plugin,
-  AsyncPlugin,
-  PluginConfigDescriptor,
-  PluginConfigSchema,
-  PluginInitializer,
-  PluginInitializerContext,
-  PluginManifest,
-  SharedGlobalConfig,
-  MakeUsageFromSchema,
-  ExposedToBrowserDescriptor,
-  DynamicConfigDescriptor,
-} from './src';
-
-export { SharedGlobalConfigKeys } from './src';
+export { Request, Response, Route, Router } from './src/services/http';
+export { CoreSetup, CoreStart, PluginInitializer } from './src/services/lifecycle';

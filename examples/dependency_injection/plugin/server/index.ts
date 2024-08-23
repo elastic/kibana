@@ -7,11 +7,10 @@
  */
 
 import { ContainerModule } from 'inversify';
-import { Route } from '@kbn/core-http-server';
+import { Route } from '@kbn/core-di-server';
 import { EchoRoute } from './route';
 
 export const module = new ContainerModule((bind) => {
   bind(EchoRoute).toSelf().inRequestScope();
-
   bind(Route).toConstantValue(EchoRoute);
 });

@@ -3887,6 +3887,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-di-server-internal@link:packages/core/di/core-di-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-di-server@link:packages/core/di/core-di-server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-di@link:packages/core/di/core-di":
   version "0.0.0"
   uid ""

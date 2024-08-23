@@ -6,19 +6,4 @@
  * Side Public License, v 1.
  */
 
-export type {
-  PrebootPlugin,
-  Plugin,
-  AsyncPlugin,
-  PluginConfigDescriptor,
-  PluginConfigSchema,
-  PluginInitializer,
-  PluginInitializerContext,
-  PluginManifest,
-  SharedGlobalConfig,
-  MakeUsageFromSchema,
-  ExposedToBrowserDescriptor,
-  DynamicConfigDescriptor,
-} from './src';
-
-export { SharedGlobalConfigKeys } from './src';
+export { http } from './src/modules/http';
