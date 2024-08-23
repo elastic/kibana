@@ -194,7 +194,6 @@ export function useMonitorListColumns({
           description: labels.EDIT_LABEL,
           icon: 'pencil' as const,
           type: 'icon' as const,
-          'aria-label': 'pizza',
           enabled: (fields) =>
             canEditSynthetics &&
             !isActionLoading(fields) &&
