@@ -135,7 +135,7 @@ export const enterConsoleCommand = async (
 
   if (useKeyboard) {
     await userEvent.click(keyCaptureInput);
-    userEvent.keyboard(cmd);
+    await userEvent.keyboard(cmd);
   } else {
     await userEvent.type(keyCaptureInput, cmd);
   }

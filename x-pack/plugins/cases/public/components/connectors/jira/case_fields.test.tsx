@@ -231,7 +231,7 @@ describe('Jira Fields', () => {
       </MockFormWrapperComponent>
     );
 
-    userEvent.selectOptions(await screen.findByTestId('issueTypeSelect'), '10007');
+    await userEvent.selectOptions(await screen.findByTestId('issueTypeSelect'), '10007');
     expect(await screen.findByTestId('issueTypeSelect')).toHaveValue('10007');
   });
 
@@ -242,7 +242,7 @@ describe('Jira Fields', () => {
       </MockFormWrapperComponent>
     );
 
-    userEvent.selectOptions(await screen.findByTestId('prioritySelect'), 'Low');
+    await userEvent.selectOptions(await screen.findByTestId('prioritySelect'), 'Low');
 
     expect(await screen.findByTestId('prioritySelect')).toHaveValue('Low');
   });
@@ -289,7 +289,7 @@ describe('Jira Fields', () => {
     const issueTypeSelect = await screen.findByTestId('issueTypeSelect');
     expect(issueTypeSelect).toBeInTheDocument();
 
-    userEvent.selectOptions(issueTypeSelect, 'Bug');
+    await userEvent.selectOptions(issueTypeSelect, 'Bug');
 
     expect(await screen.findByTestId('prioritySelect')).toBeInTheDocument();
     expect(await screen.findByTestId('search-parent-issues')).toBeInTheDocument();
@@ -301,7 +301,7 @@ describe('Jira Fields', () => {
     fireEvent.change(checkbox, {
       target: { value: 'Person Task' },
     });
-    userEvent.selectOptions(await screen.findByTestId('prioritySelect'), ['Low']);
+    await userEvent.selectOptions(await screen.findByTestId('prioritySelect'), ['Low']);
 
     expect(await screen.findByTestId('issueTypeSelect')).toHaveValue('10007');
     expect(await screen.findByTestId('prioritySelect')).toHaveValue('Low');

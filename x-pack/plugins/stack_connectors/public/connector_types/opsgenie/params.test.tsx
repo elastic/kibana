@@ -327,11 +327,12 @@ describe('OpsgenieParamFields', () => {
   it('calls editAction when changing the subAction', async () => {
     render(<OpsgenieParamFields {...defaultCreateAlertProps} />);
 
-    act(() =>
-      userEvent.selectOptions(
-        screen.getByTestId('opsgenie-subActionSelect'),
-        screen.getByText('Close alert')
-      )
+    act(
+      () =>
+        await userEvent.selectOptions(
+          screen.getByTestId('opsgenie-subActionSelect'),
+          screen.getByText('Close alert')
+        )
     );
 
     expect(editAction).toBeCalledTimes(1);

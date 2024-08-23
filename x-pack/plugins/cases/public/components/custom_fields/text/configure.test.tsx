@@ -51,7 +51,8 @@ describe('Configure ', () => {
       </FormTestComponent>
     );
 
-    userEvent.paste(await screen.findByTestId('text-custom-field-default-value'), 'Default value');
+    await userEvent.click(await screen.findByTestId('text-custom-field-default-value'));
+    await userEvent.paste('Default value');
     await userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
 
     await waitFor(() => {
@@ -73,7 +74,8 @@ describe('Configure ', () => {
     );
 
     await userEvent.click(await screen.findByTestId('text-custom-field-required'));
-    userEvent.paste(await screen.findByTestId('text-custom-field-default-value'), 'Default value');
+    await userEvent.click(await screen.findByTestId('text-custom-field-default-value'));
+    await userEvent.paste('Default value');
     await userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
 
     await waitFor(() => {

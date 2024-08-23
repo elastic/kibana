@@ -146,7 +146,7 @@ describe('ConnectorsForm ', () => {
     });
 
     const severitySelect = screen.getByTestId('severitySelect');
-    userEvent.selectOptions(screen.getByTestId('severitySelect'), ['2']);
+    await userEvent.selectOptions(screen.getByTestId('severitySelect'), ['2']);
 
     expect(severitySelect).toHaveValue('2');
     await userEvent.click(screen.getByTestId('edit-connectors-submit'));
@@ -185,7 +185,7 @@ describe('ConnectorsForm ', () => {
     });
 
     const severitySelect = screen.getByTestId('severitySelect');
-    userEvent.selectOptions(severitySelect, ['4']);
+    await userEvent.selectOptions(severitySelect, ['4']);
 
     await userEvent.click(screen.getByTestId('edit-connectors-submit'));
 

@@ -75,8 +75,9 @@ describe('Description', () => {
 
     await userEvent.click(await screen.findByTestId('description-edit-icon'));
 
-    userEvent.clear(await screen.findByTestId('euiMarkdownEditorTextArea'));
-    userEvent.paste(await screen.findByTestId('euiMarkdownEditorTextArea'), editedDescription);
+    await userEvent.clear(await screen.findByTestId('euiMarkdownEditorTextArea'));
+    await userEvent.click(await screen.findByTestId('euiMarkdownEditorTextArea'));
+    await userEvent.paste(editedDescription);
 
     await userEvent.click(await screen.findByTestId('editable-save-markdown'));
 
@@ -94,8 +95,9 @@ describe('Description', () => {
 
     await userEvent.click(await screen.findByTestId('description-edit-icon'));
 
-    userEvent.clear(await screen.findByTestId('euiMarkdownEditorTextArea'));
-    userEvent.paste(await screen.findByTestId('euiMarkdownEditorTextArea'), editedDescription);
+    await userEvent.clear(await screen.findByTestId('euiMarkdownEditorTextArea'));
+    await userEvent.click(await screen.findByTestId('euiMarkdownEditorTextArea'));
+    await userEvent.paste(editedDescription);
 
     expect(await screen.findByText(editedDescription)).toBeInTheDocument();
 
@@ -115,8 +117,9 @@ describe('Description', () => {
 
     await userEvent.click(await screen.findByTestId('description-edit-icon'));
 
-    userEvent.clear(await screen.findByTestId('euiMarkdownEditorTextArea'));
-    userEvent.paste(await screen.findByTestId('euiMarkdownEditorTextArea'), longDescription);
+    await userEvent.clear(await screen.findByTestId('euiMarkdownEditorTextArea'));
+    await userEvent.click(await screen.findByTestId('euiMarkdownEditorTextArea'));
+    await userEvent.paste(longDescription);
 
     expect(
       await screen.findByText(

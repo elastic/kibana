@@ -256,7 +256,7 @@ describe('FieldInput', () => {
     );
   });
 
-  it('should update the layer on field selection', () => {
+  it('should update the layer on field selection', async () => {
     const updateLayerSpy = jest.fn();
     renderFieldInput({
       selectedColumn: getStringBasedOperationColumn(),
@@ -267,7 +267,7 @@ describe('FieldInput', () => {
     expect(updateLayerSpy).toHaveBeenCalled();
   });
 
-  it('should not trigger when the same selected field is selected again', () => {
+  it('should not trigger when the same selected field is selected again', async () => {
     const updateLayerSpy = jest.fn();
     renderFieldInput({
       selectedColumn: getStringBasedOperationColumn(),

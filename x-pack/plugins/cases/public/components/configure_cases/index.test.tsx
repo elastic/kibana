@@ -815,12 +815,11 @@ describe('ConfigureCases', () => {
 
       expect(await screen.findByTestId('common-flyout')).toBeInTheDocument();
 
-      userEvent.paste(screen.getByTestId('custom-field-label-input'), 'New custom field');
+      await userEvent.click(screen.getByTestId('custom-field-label-input'));
+      await userEvent.paste('New custom field');
       await userEvent.click(screen.getByTestId('text-custom-field-required'));
-      userEvent.paste(
-        screen.getByTestId('text-custom-field-default-value'),
-        'This is a default value'
-      );
+      await userEvent.click(screen.getByTestId('text-custom-field-default-value'));
+      await userEvent.paste('This is a default value');
 
       await userEvent.click(screen.getByTestId('common-flyout-save'));
 
@@ -903,7 +902,8 @@ describe('ConfigureCases', () => {
 
       expect(await screen.findByTestId('common-flyout')).toBeInTheDocument();
 
-      userEvent.paste(screen.getByTestId('custom-field-label-input'), '!!');
+      await userEvent.click(screen.getByTestId('custom-field-label-input'));
+      await userEvent.paste('!!');
       await userEvent.click(screen.getByTestId('text-custom-field-required'));
       await userEvent.click(screen.getByTestId('common-flyout-save'));
 
@@ -963,7 +963,8 @@ describe('ConfigureCases', () => {
 
       expect(await screen.findByTestId('common-flyout')).toBeInTheDocument();
 
-      userEvent.paste(screen.getByTestId('custom-field-label-input'), 'Summary');
+      await userEvent.click(screen.getByTestId('custom-field-label-input'));
+      await userEvent.paste('Summary');
 
       await userEvent.click(screen.getByTestId('common-flyout-save'));
 
@@ -1040,14 +1041,14 @@ describe('ConfigureCases', () => {
 
       expect(await screen.findByTestId('common-flyout')).toBeInTheDocument();
 
-      userEvent.paste(await screen.findByTestId('template-name-input'), 'Template name');
-      userEvent.paste(
-        await screen.findByTestId('template-description-input'),
-        'Template description'
-      );
+      await userEvent.click(await screen.findByTestId('template-name-input'));
+      await userEvent.paste('Template name');
+      await userEvent.click(await screen.findByTestId('template-description-input'));
+      await userEvent.paste('Template description');
 
       const caseTitle = await screen.findByTestId('caseTitle');
-      userEvent.paste(within(caseTitle).getByTestId('input'), 'Case using template');
+      await userEvent.click(within(caseTitle).getByTestId('input'));
+      await userEvent.paste('Case using template');
 
       await userEvent.click(screen.getByTestId('common-flyout-save'));
 
@@ -1176,8 +1177,9 @@ describe('ConfigureCases', () => {
 
       expect(await screen.findByTestId('common-flyout')).toBeInTheDocument();
 
-      userEvent.clear(await screen.findByTestId('template-name-input'));
-      userEvent.paste(await screen.findByTestId('template-name-input'), 'Updated template name');
+      await userEvent.clear(await screen.findByTestId('template-name-input'));
+      await userEvent.click(await screen.findByTestId('template-name-input'));
+      await userEvent.paste('Updated template name');
 
       await userEvent.click(screen.getByTestId('common-flyout-save'));
 

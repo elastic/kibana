@@ -224,10 +224,10 @@ describe('Edit ', () => {
     await userEvent.click(
       await screen.findByTestId('case-text-custom-field-edit-button-test_key_1')
     );
-    userEvent.paste(
-      await screen.findByTestId('case-text-custom-field-form-field-test_key_1'),
-      '!!!'
+    await userEvent.click(
+      await screen.findByTestId('case-text-custom-field-form-field-test_key_1')
     );
+    await userEvent.paste('!!!');
 
     expect(
       await screen.findByTestId('case-text-custom-field-submit-button-test_key_1')
@@ -301,7 +301,9 @@ describe('Edit ', () => {
     await userEvent.click(
       await screen.findByTestId('case-text-custom-field-edit-button-test_key_1')
     );
-    userEvent.clear(await screen.findByTestId('case-text-custom-field-form-field-test_key_1'));
+    await userEvent.clear(
+      await screen.findByTestId('case-text-custom-field-form-field-test_key_1')
+    );
 
     expect(
       await screen.findByTestId('case-text-custom-field-submit-button-test_key_1')
@@ -365,10 +367,10 @@ describe('Edit ', () => {
     await userEvent.click(
       await screen.findByTestId('case-text-custom-field-edit-button-test_key_1')
     );
-    userEvent.paste(
-      await screen.findByTestId('case-text-custom-field-form-field-test_key_1'),
-      '!!!'
+    await userEvent.click(
+      await screen.findByTestId('case-text-custom-field-form-field-test_key_1')
     );
+    await userEvent.paste('!!!');
 
     expect(
       await screen.findByTestId('case-text-custom-field-submit-button-test_key_1')
@@ -406,7 +408,9 @@ describe('Edit ', () => {
     await userEvent.click(
       await screen.findByTestId('case-text-custom-field-edit-button-test_key_1')
     );
-    userEvent.clear(await screen.findByTestId('case-text-custom-field-form-field-test_key_1'));
+    await userEvent.clear(
+      await screen.findByTestId('case-text-custom-field-form-field-test_key_1')
+    );
 
     expect(await screen.findByText('My test label 1 is required.')).toBeInTheDocument();
   });
@@ -427,7 +431,9 @@ describe('Edit ', () => {
     await userEvent.click(
       await screen.findByTestId('case-text-custom-field-edit-button-test_key_1')
     );
-    userEvent.clear(await screen.findByTestId('case-text-custom-field-form-field-test_key_1'));
+    await userEvent.clear(
+      await screen.findByTestId('case-text-custom-field-form-field-test_key_1')
+    );
 
     expect(
       await screen.findByTestId('case-text-custom-field-submit-button-test_key_1')
@@ -452,11 +458,13 @@ describe('Edit ', () => {
     await userEvent.click(
       await screen.findByTestId('case-text-custom-field-edit-button-test_key_1')
     );
-    userEvent.clear(await screen.findByTestId('case-text-custom-field-form-field-test_key_1'));
-    userEvent.paste(
-      await screen.findByTestId('case-text-custom-field-form-field-test_key_1'),
-      'a'.repeat(MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH + 1)
+    await userEvent.clear(
+      await screen.findByTestId('case-text-custom-field-form-field-test_key_1')
     );
+    await userEvent.click(
+      await screen.findByTestId('case-text-custom-field-form-field-test_key_1')
+    );
+    await userEvent.paste('a'.repeat(MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH + 1));
 
     expect(
       await screen.findByText(

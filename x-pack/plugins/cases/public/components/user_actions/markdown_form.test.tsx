@@ -63,7 +63,7 @@ describe('UserActionMarkdown ', () => {
     it('Shows error message and save button disabled if current text is empty', async () => {
       appMockRenderer.render(<UserActionMarkdown {...{ ...defaultProps, isEditable: true }} />);
 
-      userEvent.clear(screen.getByTestId('euiMarkdownEditorTextArea'));
+      await userEvent.clear(screen.getByTestId('euiMarkdownEditorTextArea'));
 
       await userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), '');
 
@@ -76,7 +76,7 @@ describe('UserActionMarkdown ', () => {
     it('Shows error message and save button disabled if current text is of empty characters', async () => {
       appMockRenderer.render(<UserActionMarkdown {...{ ...defaultProps, isEditable: true }} />);
 
-      userEvent.clear(screen.getByTestId('euiMarkdownEditorTextArea'));
+      await userEvent.clear(screen.getByTestId('euiMarkdownEditorTextArea'));
 
       await userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), '  ');
 
@@ -93,7 +93,7 @@ describe('UserActionMarkdown ', () => {
 
       const markdown = screen.getByTestId('euiMarkdownEditorTextArea');
 
-      userEvent.paste(markdown, longComment);
+      await userEvent.paste(markdown, longComment);
 
       await waitFor(() => {
         expect(

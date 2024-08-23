@@ -128,7 +128,7 @@ describe('<Findings />', () => {
       await waitFor(() => expect(screen.getByText(/2 findings/i)).toBeInTheDocument());
 
       const queryInput = screen.getByTestId('queryInput');
-      userEvent.paste(queryInput, `rule.section : ${finding1.rule.section}`);
+      await userEvent.paste(queryInput, `rule.section : ${finding1.rule.section}`);
 
       const submitButton = screen.getByTestId('querySubmitButton');
       await userEvent.click(submitButton);
@@ -138,7 +138,7 @@ describe('<Findings />', () => {
       expect(screen.getByText(finding1.resource.name)).toBeInTheDocument();
       expect(screen.queryByText(finding2.resource.id)).not.toBeInTheDocument();
 
-      userEvent.clear(queryInput);
+      await userEvent.clear(queryInput);
       await userEvent.click(submitButton);
       await waitFor(() => expect(screen.getByText(/2 findings/i)).toBeInTheDocument());
     });
@@ -157,7 +157,7 @@ describe('<Findings />', () => {
       await waitFor(() => expect(screen.getByText(/2 findings/i)).toBeInTheDocument());
 
       const queryInput = screen.getByTestId('queryInput');
-      userEvent.paste(queryInput, `rule.section : Invalid`);
+      await userEvent.paste(queryInput, `rule.section : Invalid`);
 
       const submitButton = screen.getByTestId('querySubmitButton');
       await userEvent.click(submitButton);
@@ -197,8 +197,8 @@ describe('<Findings />', () => {
         screen.getByTestId('filterFieldSuggestionList')
       ).getByTestId('comboBoxSearchInput');
 
-      userEvent.paste(filterFieldSuggestionListInput, 'rule.section');
-      userEvent.keyboard('{enter}');
+      await userEvent.paste(filterFieldSuggestionListInput, 'rule.section');
+      await userEvent.keyboard('{enter}');
 
       const filterOperatorListInput = within(screen.getByTestId('filterOperatorList')).getByTestId(
         'comboBoxSearchInput'
@@ -211,7 +211,7 @@ describe('<Findings />', () => {
       fireEvent.click(filterOption);
 
       const filterParamsInput = within(screen.getByTestId('filterParams')).getByRole('textbox');
-      userEvent.paste(filterParamsInput, finding1.rule.section);
+      await userEvent.paste(filterParamsInput, finding1.rule.section);
 
       await userEvent.click(screen.getByTestId('saveFilter'), { pointerEventsCheck: 0 });
 

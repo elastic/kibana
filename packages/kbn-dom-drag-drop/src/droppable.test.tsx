@@ -88,34 +88,34 @@ describe('Droppable', () => {
           jest.runAllTimers();
         });
       },
-      startDraggingByKeyboard: () => {
+      startDraggingByKeyboard: async () => {
         draggableKeyboardHandler.focus();
-        userEvent.keyboard('{enter}');
+        await userEvent.keyboard('{enter}');
         act(() => {
           jest.runAllTimers();
         });
       },
-      dropByKeyboard: () => {
+      dropByKeyboard: async () => {
         draggableKeyboardHandler.focus();
-        userEvent.keyboard('{enter}');
+        await userEvent.keyboard('{enter}');
         act(() => {
           jest.runAllTimers();
         });
       },
-      dragOverToNextByKeyboard: () => {
-        userEvent.keyboard('{arrowright}');
+      dragOverToNextByKeyboard: async () => {
+        await userEvent.keyboard('{arrowright}');
         act(() => {
           jest.runAllTimers();
         });
       },
-      dragOverToPreviousByKeyboard: () => {
-        userEvent.keyboard('{arrowleft}');
+      dragOverToPreviousByKeyboard: async () => {
+        await userEvent.keyboard('{arrowleft}');
         act(() => {
           jest.runAllTimers();
         });
       },
-      pressModifierKey: (key: '{Shift}' | '{Alt}' | '{Ctrl}') => {
-        userEvent.keyboard(key);
+      pressModifierKey: async (key: '{Shift}' | '{Alt}' | '{Ctrl}') => {
+        await userEvent.keyboard(key);
         act(() => {
           jest.runAllTimers();
         });
@@ -212,7 +212,7 @@ describe('Droppable', () => {
   });
 
   describe('keyboard mode', () => {
-    test('drop targets get highlighted when pressing arrow keys and draggable get action class too', () => {
+    test('drop targets get highlighted when pressing arrow keys and draggable get action class too', async () => {
       const {
         droppables,
         startDraggingByKeyboard,
@@ -220,13 +220,13 @@ describe('Droppable', () => {
         dragOverToNextByKeyboard,
         draggable,
       } = renderTestComponents([{ dropTypes: ['field_add'] }, { dropTypes: ['field_add'] }]);
-      startDraggingByKeyboard();
+      await startDraggingByKeyboard();
 
       expect(draggable).toHaveClass('domDraggable', EXACT);
       expect(droppables[0]).toHaveClass('domDroppable domDroppable--active', EXACT);
       expect(droppables[1]).toHaveClass('domDroppable domDroppable--active', EXACT);
 
-      dragOverToNextByKeyboard();
+      await dragOverToNextByKeyboard();
       expect(draggable).toHaveClass(
         'domDraggable domDraggable_dragover_keyboard--move domDraggable_dragover_keyboard--copy',
         EXACT
@@ -236,18 +236,18 @@ describe('Droppable', () => {
         EXACT
       );
       expect(droppables[1]).toHaveClass('domDroppable domDroppable--active', EXACT);
-      dragOverToNextByKeyboard();
+      await dragOverToNextByKeyboard();
       expect(droppables[0]).toHaveClass('domDroppable domDroppable--active', EXACT);
       expect(droppables[1]).toHaveClass(
         'domDroppable domDroppable--active domDroppable--hover',
         EXACT
       );
-      dropByKeyboard();
+      await dropByKeyboard();
       expect(draggable).toHaveClass('domDraggable', EXACT);
       expect(droppables[0]).toHaveClass('domDroppable', EXACT);
       expect(droppables[1]).toHaveClass('domDroppable', EXACT);
     });
-    test('executes onDrop callback when drops on drop target', () => {
+    test('executes onDrop callback when drops on drop target', async () => {
       const firstDroppableOnDrop = jest.fn();
       const secondDroppableOnDrop = jest.fn();
       const { startDraggingByKeyboard, dropByKeyboard, dragOverToNextByKeyboard } =
@@ -255,21 +255,21 @@ describe('Droppable', () => {
           { dropTypes: ['field_add'], onDrop: firstDroppableOnDrop },
           { dropTypes: ['field_add'], onDrop: secondDroppableOnDrop },
         ]);
-      startDraggingByKeyboard();
+      await startDraggingByKeyboard();
       // goes to first target
-      dragOverToNextByKeyboard();
+      await dragOverToNextByKeyboard();
       // goes to second target
-      dragOverToNextByKeyboard();
+      await dragOverToNextByKeyboard();
       // drops on second target
-      dropByKeyboard();
+      await dropByKeyboard();
       expect(firstDroppableOnDrop).not.toBeCalled();
       expect(secondDroppableOnDrop).toHaveBeenCalledWith(draggableValue, 'field_add');
     });
     test('adds ghost to droppable when element is dragged over', async () => {
       const { startDraggingByKeyboard, droppables, draggable, dragOverToNextByKeyboard } =
         renderTestComponents([{ dropTypes: ['field_add'] }, { dropTypes: ['field_add'] }]);
-      startDraggingByKeyboard();
-      dragOverToNextByKeyboard();
+      await startDraggingByKeyboard();
+      await dragOverToNextByKeyboard();
       expect(droppables[0]).toHaveClass(
         'domDroppable domDroppable--active domDroppable--hover',
         EXACT
@@ -390,7 +390,7 @@ describe('Droppable', () => {
       expect(onDrop).toBeCalledWith(draggableValue, 'duplicate_compatible');
     });
     describe('keyboard mode', () => {
-      test('user can go through all the drop targets ', () => {
+      test('user can go through all the drop targets ', async () => {
         const { startDraggingByKeyboard, dragOverToNextByKeyboard, droppables, pressModifierKey } =
           renderTestComponents([
             {
@@ -406,21 +406,21 @@ describe('Droppable', () => {
               ),
             },
           ]);
-        startDraggingByKeyboard();
-        dragOverToNextByKeyboard();
+        await startDraggingByKeyboard();
+        await dragOverToNextByKeyboard();
         expect(droppables[0]).toHaveClass('domDroppable--hover');
-        pressModifierKey('{Alt}');
+        await pressModifierKey('{Alt}');
         expect(droppables[1]).toHaveClass('domDroppable--hover');
-        pressModifierKey('{Shift}');
+        await pressModifierKey('{Shift}');
         expect(droppables[2]).toHaveClass('domDroppable--hover');
-        dragOverToNextByKeyboard();
+        await dragOverToNextByKeyboard();
         expect(droppables[3]).toHaveClass('domDroppable--hover');
-        dragOverToNextByKeyboard();
+        await dragOverToNextByKeyboard();
         // we circled back to the draggable (no drop target is selected)
-        dragOverToNextByKeyboard();
+        await dragOverToNextByKeyboard();
         expect(droppables[0]).toHaveClass('domDroppable--hover');
       });
-      test('user can go through all the drop targets in reverse direction', () => {
+      test('user can go through all the drop targets in reverse direction', async () => {
         const {
           startDraggingByKeyboard,
           dragOverToPreviousByKeyboard,
@@ -436,21 +436,21 @@ describe('Droppable', () => {
             getCustomDropTarget: (dropType: string) => <div className="extraDrop">{dropType}</div>,
           },
         ]);
-        startDraggingByKeyboard();
-        dragOverToPreviousByKeyboard();
+        await startDraggingByKeyboard();
+        await dragOverToPreviousByKeyboard();
         expect(droppables[3]).toHaveClass('domDroppable--hover');
-        dragOverToPreviousByKeyboard();
+        await dragOverToPreviousByKeyboard();
         expect(droppables[0]).toHaveClass('domDroppable--hover');
-        pressModifierKey('{Alt}');
+        await pressModifierKey('{Alt}');
         expect(droppables[1]).toHaveClass('domDroppable--hover');
-        pressModifierKey('{Shift}');
+        await pressModifierKey('{Shift}');
         expect(droppables[2]).toHaveClass('domDroppable--hover');
-        dragOverToPreviousByKeyboard();
+        await dragOverToPreviousByKeyboard();
         // we circled back to the draggable (no drop target is selected)
-        dragOverToPreviousByKeyboard();
+        await dragOverToPreviousByKeyboard();
         expect(droppables[3]).toHaveClass('domDroppable--hover');
       });
-      test('user can drop on extra drop targets', () => {
+      test('user can drop on extra drop targets', async () => {
         const {
           startDraggingByKeyboard,
           dragOverToNextByKeyboard,
@@ -463,23 +463,23 @@ describe('Droppable', () => {
             getCustomDropTarget: (dropType: string) => <div className="extraDrop">{dropType}</div>,
           },
         ]);
-        startDraggingByKeyboard();
-        dragOverToNextByKeyboard();
-        dropByKeyboard();
+        await startDraggingByKeyboard();
+        await dragOverToNextByKeyboard();
+        await dropByKeyboard();
         expect(onDrop).toHaveBeenCalledWith(draggableValue, 'move_compatible');
         onDrop.mockClear();
 
-        startDraggingByKeyboard();
-        dragOverToNextByKeyboard();
-        pressModifierKey('{Alt}');
-        dropByKeyboard();
+        await startDraggingByKeyboard();
+        await dragOverToNextByKeyboard();
+        await pressModifierKey('{Alt}');
+        await dropByKeyboard();
         expect(onDrop).toHaveBeenCalledWith(draggableValue, 'duplicate_compatible');
         onDrop.mockClear();
 
-        startDraggingByKeyboard();
-        dragOverToNextByKeyboard();
-        pressModifierKey('{Shift}');
-        dropByKeyboard();
+        await startDraggingByKeyboard();
+        await dragOverToNextByKeyboard();
+        await pressModifierKey('{Shift}');
+        await dropByKeyboard();
         expect(onDrop).toHaveBeenCalledWith(draggableValue, 'swap_compatible');
       });
     });

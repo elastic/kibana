@@ -212,8 +212,9 @@ describe('CasesParamsFields renders', () => {
 
       expect(await screen.findByTestId('time-window-size-input')).toBeInTheDocument();
 
-      userEvent.clear(await screen.findByTestId('time-window-size-input'));
-      userEvent.paste(await screen.findByTestId('time-window-size-input'), '5');
+      await userEvent.clear(await screen.findByTestId('time-window-size-input'));
+      await userEvent.click(await screen.findByTestId('time-window-size-input'));
+      await userEvent.paste('5');
 
       expect(editAction.mock.calls[0][1].timeWindow).toEqual('5w');
     });

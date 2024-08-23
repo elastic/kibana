@@ -351,7 +351,7 @@ describe('ServiceNowSIRParamsFields renders', () => {
         wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
       });
 
-      userEvent.paste(await screen.findByTestId('additional_fieldsJsonEditor'), newValue);
+      await userEvent.paste(await screen.findByTestId('additional_fieldsJsonEditor'), newValue);
 
       await waitFor(() => {
         expect(editAction.mock.calls[0][1].incident.additional_fields).toEqual(newValue);

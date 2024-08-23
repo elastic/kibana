@@ -120,9 +120,9 @@ describe('blocklist form', () => {
     expect(screen.queryByText(ERRORS.NAME_REQUIRED)).toBeTruthy();
   });
 
-  it('should be invalid if no name', () => {
+  it('should be invalid if no name', async () => {
     render(createProps({ item: createItem({ name: 'test name' }) }));
-    userEvent.clear(screen.getByTestId('blocklist-form-name-input'));
+    await userEvent.clear(screen.getByTestId('blocklist-form-name-input'));
     const expected = createOnChangeArgs({ item: createItem({ name: '' }) });
     expect(onChangeSpy).toHaveBeenCalledWith(expected);
   });

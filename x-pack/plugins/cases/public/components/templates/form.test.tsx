@@ -156,19 +156,20 @@ describe('TemplateForm', () => {
       expect(formState).not.toBeUndefined();
     });
 
-    userEvent.paste(await screen.findByTestId('template-name-input'), 'Template 1');
+    await userEvent.click(await screen.findByTestId('template-name-input'));
+    await userEvent.paste('Template 1');
 
-    userEvent.paste(
-      await screen.findByTestId('template-description-input'),
-      'this is a first template'
-    );
+    await userEvent.click(await screen.findByTestId('template-description-input'));
+    await userEvent.paste('this is a first template');
 
     const templateTags = await screen.findByTestId('template-tags');
 
-    userEvent.paste(within(templateTags).getByRole('combobox'), 'foo');
-    userEvent.keyboard('{enter}');
-    userEvent.paste(within(templateTags).getByRole('combobox'), 'bar');
-    userEvent.keyboard('{enter}');
+    await userEvent.click(within(templateTags).getByRole('combobox'));
+    await userEvent.paste('foo');
+    await userEvent.keyboard('{enter}');
+    await userEvent.click(within(templateTags).getByRole('combobox'));
+    await userEvent.paste('bar');
+    await userEvent.keyboard('{enter}');
 
     await act(async () => {
       const { data, isValid } = await formState!.submit();
@@ -261,17 +262,17 @@ describe('TemplateForm', () => {
     });
 
     const caseTitle = await screen.findByTestId('caseTitle');
-    userEvent.paste(within(caseTitle).getByTestId('input'), 'Case with Template 1');
+    await userEvent.click(within(caseTitle).getByTestId('input'));
+    await userEvent.paste('Case with Template 1');
 
     const caseDescription = await screen.findByTestId('caseDescription');
-    userEvent.paste(
-      within(caseDescription).getByTestId('euiMarkdownEditorTextArea'),
-      'This is a case description'
-    );
+    await userEvent.click(within(caseDescription).getByTestId('euiMarkdownEditorTextArea'));
+    await userEvent.paste('This is a case description');
 
     const caseTags = await screen.findByTestId('caseTags');
-    userEvent.paste(within(caseTags).getByRole('combobox'), 'template-1');
-    userEvent.keyboard('{enter}');
+    await userEvent.click(within(caseTags).getByRole('combobox'));
+    await userEvent.paste('template-1');
+    await userEvent.keyboard('{enter}');
 
     const caseCategory = await screen.findByTestId('caseCategory');
     await userEvent.type(within(caseCategory).getByRole('combobox'), 'new {enter}');
@@ -452,7 +453,9 @@ describe('TemplateForm', () => {
 
     expect(await screen.findByTestId('connector-fields-sn-itsm')).toBeInTheDocument();
 
-    userEvent.selectOptions(await screen.findByTestId('categorySelect'), ['Denial of Service']);
+    await userEvent.selectOptions(await screen.findByTestId('categorySelect'), [
+      'Denial of Service',
+    ]);
 
     await act(async () => {
       const { data, isValid } = await formState!.submit();
@@ -528,9 +531,10 @@ describe('TemplateForm', () => {
       `${textField.key}-${textField.type}-create-custom-field`
     );
 
-    userEvent.clear(textCustomField);
+    await userEvent.clear(textCustomField);
 
-    userEvent.paste(textCustomField, 'My text test value 1');
+    await userEvent.click(textCustomField);
+    await userEvent.paste('My text test value 1');
 
     await userEvent.click(
       await screen.findByTestId(`${toggleField.key}-${toggleField.type}-create-custom-field`)
@@ -683,7 +687,8 @@ describe('TemplateForm', () => {
       expect(formState).not.toBeUndefined();
     });
 
-    userEvent.paste(await screen.findByTestId('template-name-input'), '');
+    await userEvent.click(await screen.findByTestId('template-name-input'));
+    await userEvent.paste('');
 
     await act(async () => {
       const { data, isValid } = await formState!.submit();
@@ -707,7 +712,8 @@ describe('TemplateForm', () => {
 
     const name = 'a'.repeat(MAX_TEMPLATE_NAME_LENGTH + 1);
 
-    userEvent.paste(await screen.findByTestId('template-name-input'), name);
+    await userEvent.click(await screen.findByTestId('template-name-input'));
+    await userEvent.paste(name);
 
     await act(async () => {
       const { data, isValid } = await formState!.submit();
@@ -731,7 +737,8 @@ describe('TemplateForm', () => {
 
     const description = 'a'.repeat(MAX_TEMPLATE_DESCRIPTION_LENGTH + 1);
 
-    userEvent.paste(await screen.findByTestId('template-description-input'), description);
+    await userEvent.click(await screen.findByTestId('template-description-input'));
+    await userEvent.paste(description);
 
     await act(async () => {
       const { data, isValid } = await formState!.submit();
@@ -757,11 +764,11 @@ describe('TemplateForm', () => {
 
     const templateTags = await screen.findByTestId('template-tags');
 
-    tagsArray.forEach((tag) => {
-      userEvent.paste(within(templateTags).getByRole('combobox'), 'template-1');
-      userEvent.keyboard('{enter}');
-    });
-
+    for (let i = 0; i < tagsArray.length; i++) {
+      await userEvent.click(within(templateTags).getByRole('combobox'));
+      await userEvent.paste('template-1');
+      await userEvent.keyboard('{enter}');
+    }
     await act(async () => {
       const { data, isValid } = await formState!.submit();
 
@@ -786,8 +793,9 @@ describe('TemplateForm', () => {
 
     const templateTags = await screen.findByTestId('template-tags');
 
-    userEvent.paste(within(templateTags).getByRole('combobox'), x);
-    userEvent.keyboard('{enter}');
+    await userEvent.click(within(templateTags).getByRole('combobox'));
+    await userEvent.paste(x);
+    await userEvent.keyboard('{enter}');
 
     await act(async () => {
       const { data, isValid } = await formState!.submit();

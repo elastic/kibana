@@ -79,7 +79,7 @@ describe('TimelineWrapper', () => {
       </TestProviders>
     );
 
-    userEvent.keyboard('{Escape}');
+    await userEvent.keyboard('{Escape}');
 
     expect(mockDispatch).toBeCalledWith(
       timelineActions.showTimeline({ id: TimelineId.test, show: false })

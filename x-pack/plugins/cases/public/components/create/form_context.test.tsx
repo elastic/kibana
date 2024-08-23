@@ -134,13 +134,15 @@ const fillFormReactTestingLib = async ({
 }) => {
   const titleInput = within(renderer.getByTestId('caseTitle')).getByTestId('input');
 
-  userEvent.paste(titleInput, sampleDataWithoutTags.title);
+  await userEvent.click(titleInput);
+  await userEvent.paste(sampleDataWithoutTags.title);
 
   const descriptionInput = within(renderer.getByTestId('caseDescription')).getByTestId(
     'euiMarkdownEditorTextArea'
   );
 
-  userEvent.paste(descriptionInput, sampleDataWithoutTags.description);
+  await userEvent.click(descriptionInput);
+  await userEvent.paste(sampleDataWithoutTags.description);
 
   if (withTags) {
     const caseTags = renderer.getByTestId('caseTags');
@@ -354,13 +356,15 @@ describe('Create case', () => {
 
       const titleInput = within(screen.getByTestId('caseTitle')).getByTestId('input');
 
-      userEvent.paste(titleInput, `${sampleDataWithoutTags.title}       `);
+      await userEvent.click(titleInput);
+      await userEvent.paste(`${sampleDataWithoutTags.title}       `);
 
       const descriptionInput = within(screen.getByTestId('caseDescription')).getByTestId(
         'euiMarkdownEditorTextArea'
       );
 
-      userEvent.paste(descriptionInput, `${sampleDataWithoutTags.description}           `);
+      await userEvent.click(descriptionInput);
+      await userEvent.paste(`${sampleDataWithoutTags.description}           `);
 
       const caseTags = screen.getByTestId('caseTags');
 
@@ -512,8 +516,9 @@ describe('Create case', () => {
         `${textField.key}-${textField.type}-create-custom-field`
       );
 
-      userEvent.clear(textCustomField);
-      userEvent.paste(textCustomField, 'My text test value 1');
+      await userEvent.clear(textCustomField);
+      await userEvent.click(textCustomField);
+      await userEvent.paste('My text test value 1');
 
       await userEvent.click(
         await screen.findByTestId(`${toggleField.key}-${toggleField.type}-create-custom-field`)
@@ -723,9 +728,10 @@ describe('Create case', () => {
         'comboBoxSearchInput'
       );
 
-      userEvent.paste(checkbox, 'Denial of Service');
-      userEvent.keyboard('{enter}');
-      userEvent.selectOptions(screen.getByTestId('severitySelect'), ['4']);
+      await userEvent.click(checkbox);
+      await userEvent.paste('Denial of Service');
+      await userEvent.keyboard('{enter}');
+      await userEvent.selectOptions(screen.getByTestId('severitySelect'), ['4']);
       await userEvent.click(screen.getByTestId('create-case-submit'));
 
       await waitFor(() => {
@@ -794,7 +800,7 @@ describe('Create case', () => {
         expect(screen.getByTestId('severitySelect')).toBeInTheDocument();
       });
 
-      userEvent.selectOptions(screen.getByTestId('severitySelect'), '4 - Low');
+      await userEvent.selectOptions(screen.getByTestId('severitySelect'), '4 - Low');
       expect(screen.getByTestId('severitySelect')).toHaveValue('4');
 
       await userEvent.click(screen.getByTestId('dropdown-connectors'));
@@ -1086,7 +1092,8 @@ describe('Create case', () => {
         expect(assigneesComboBox.getByTestId('comboBoxSearchInput')).not.toBeDisabled();
       });
 
-      userEvent.paste(assigneesComboBox.getByTestId('comboBoxSearchInput'), 'dr');
+      await userEvent.click(assigneesComboBox.getByTestId('comboBoxSearchInput'));
+      await userEvent.paste('dr');
       act(() => {
         jest.advanceTimersByTime(500);
       });

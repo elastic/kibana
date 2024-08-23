@@ -255,7 +255,7 @@ describe('CreateCaseForm', () => {
       appMockRenderer = createAppMockRenderer({ license });
       appMockRenderer.render(<CreateCaseForm {...casesFormProps} />);
 
-      userEvent.selectOptions(
+      await userEvent.selectOptions(
         await screen.findByTestId('create-case-template-select'),
         selectedTemplate.name
       );
@@ -293,7 +293,7 @@ describe('CreateCaseForm', () => {
       appMockRenderer = createAppMockRenderer({ license });
       appMockRenderer.render(<CreateCaseForm {...casesFormProps} />);
 
-      userEvent.selectOptions(
+      await userEvent.selectOptions(
         await screen.findByTestId('create-case-template-select'),
         firstTemplate.name
       );
@@ -314,7 +314,7 @@ describe('CreateCaseForm', () => {
 
       expect(title).toHaveValue(firstTemplate.caseFields?.title);
 
-      userEvent.selectOptions(
+      await userEvent.selectOptions(
         await screen.findByTestId('create-case-template-select'),
         secondTemplate.name
       );
@@ -369,7 +369,7 @@ describe('CreateCaseForm', () => {
       appMockRenderer = createAppMockRenderer({ license });
       appMockRenderer.render(<CreateCaseForm {...casesFormProps} />);
 
-      userEvent.selectOptions(
+      await userEvent.selectOptions(
         await screen.findByTestId('create-case-template-select'),
         firstTemplate.name
       );
@@ -388,7 +388,7 @@ describe('CreateCaseForm', () => {
         'first_custom_field_key-text-create-custom-field'
       );
 
-      userEvent.selectOptions(
+      await userEvent.selectOptions(
         await screen.findByTestId('create-case-template-select'),
         'No template selected'
       );

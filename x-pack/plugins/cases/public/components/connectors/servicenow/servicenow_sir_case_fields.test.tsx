@@ -162,7 +162,7 @@ describe('ServiceNowSIR Fields', () => {
     const checkboxes = ['destIp', 'sourceIp', 'malwareHash', 'malwareUrl'];
 
     checkboxes.forEach((subj) =>
-      it(`${subj.toUpperCase()}`, () => {
+      it(`${subj.toUpperCase()}`, async () => {
         appMockRenderer.render(
           <MockFormWrapperComponent fields={fields}>
             <Fields connector={connector} />
@@ -187,7 +187,7 @@ describe('ServiceNowSIR Fields', () => {
         );
 
         const select = screen.getByTestId(`${subj}Select`);
-        userEvent.selectOptions(select, '4 - Low');
+        await userEvent.selectOptions(select, '4 - Low');
 
         expect(select).toHaveValue('4');
       })
@@ -202,14 +202,14 @@ describe('ServiceNowSIR Fields', () => {
     );
 
     await userEvent.click(screen.getByTestId('destIpCheckbox'));
-    userEvent.selectOptions(screen.getByTestId('prioritySelect'), ['1']);
-    userEvent.selectOptions(screen.getByTestId('categorySelect'), ['Denial of Service']);
+    await userEvent.selectOptions(screen.getByTestId('prioritySelect'), ['1']);
+    await userEvent.selectOptions(screen.getByTestId('categorySelect'), ['Denial of Service']);
 
     await waitFor(() => {
       expect(screen.getByRole('option', { name: 'Single or distributed (DoS or DDoS)' }));
     });
 
-    userEvent.selectOptions(screen.getByTestId('subcategorySelect'), ['26']);
+    await userEvent.selectOptions(screen.getByTestId('subcategorySelect'), ['26']);
 
     expect(screen.getByTestId('destIpCheckbox')).not.toBeChecked();
     expect(screen.getByTestId('sourceIpCheckbox')).toBeChecked();
@@ -230,14 +230,14 @@ describe('ServiceNowSIR Fields', () => {
     const categorySelect = screen.getByTestId('categorySelect');
     const subcategorySelect = screen.getByTestId('subcategorySelect');
 
-    userEvent.selectOptions(categorySelect, ['Denial of Service']);
+    await userEvent.selectOptions(categorySelect, ['Denial of Service']);
 
     await waitFor(() => {
       expect(screen.getByRole('option', { name: 'Single or distributed (DoS or DDoS)' }));
     });
 
-    userEvent.selectOptions(subcategorySelect, ['26']);
-    userEvent.selectOptions(categorySelect, ['Privilege Escalation']);
+    await userEvent.selectOptions(subcategorySelect, ['26']);
+    await userEvent.selectOptions(categorySelect, ['Privilege Escalation']);
 
     await waitFor(() => {
       expect(subcategorySelect).not.toHaveValue();

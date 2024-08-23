@@ -55,7 +55,7 @@ describe('FilePreview', () => {
 
     expect(await screen.findByTestId('cases-files-image-preview')).toBeInTheDocument();
 
-    userEvent.keyboard('{esc}');
+    await userEvent.keyboard('{esc}');
 
     await waitFor(() => expect(closePreview).toHaveBeenCalled());
   });

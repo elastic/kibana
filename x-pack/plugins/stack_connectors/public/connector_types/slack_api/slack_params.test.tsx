@@ -374,7 +374,7 @@ describe('SlackParamsFields renders', () => {
 
     act(() => {
       getByTestId('slackApiChannelId').click();
-      userEvent.clear(getByTestId('slackApiChannelId'));
+      await userEvent.clear(getByTestId('slackApiChannelId'));
       fireEvent.change(getByTestId('slackApiChannelId'), {
         target: { value: 'new-channel-id' },
       });

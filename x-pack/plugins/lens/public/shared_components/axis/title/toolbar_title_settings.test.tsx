@@ -63,7 +63,7 @@ describe('Axes Title settings', () => {
     const { getAxisTitleSelect, getAxisTitleInput } = renderAxisTicksSettings({
       title: '',
     });
-    userEvent.selectOptions(getAxisTitleSelect(), 'custom');
+    await userEvent.selectOptions(getAxisTitleSelect(), 'custom');
     expect(getAxisTitleSelect()).toHaveValue('custom');
     expect(getAxisTitleInput()).toHaveValue('');
   });
@@ -75,7 +75,7 @@ describe('Axes Title settings', () => {
       title: 'Custom title',
       updateTitleState: updateTitleStateSpy,
     });
-    userEvent.selectOptions(getAxisTitleSelect(), 'auto');
+    await userEvent.selectOptions(getAxisTitleSelect(), 'auto');
     expect(getAxisTitleSelect()).toHaveValue('auto');
     expect(getAxisTitleInput()).toHaveValue('');
     await waitFor(() =>

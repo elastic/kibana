@@ -208,7 +208,7 @@ describe('When entering data into the Console input', () => {
         expect(getInputPlaceholderText()).toEqual('cmd1 --help');
       });
 
-      userEvent.keyboard('{Escape}');
+      await userEvent.keyboard('{Escape}');
 
       await waitFor(() => {
         expect(getLeftOfCursorText()).toEqual('one');
@@ -222,7 +222,7 @@ describe('When entering data into the Console input', () => {
         expect(getInputPlaceholderText()).toEqual('cmd1 --help');
       });
 
-      userEvent.keyboard('{Enter}');
+      await userEvent.keyboard('{Enter}');
 
       await waitFor(() => {
         expect(getLeftOfCursorText()).toEqual('cmd1 --help');
@@ -432,7 +432,7 @@ describe('When entering data into the Console input', () => {
         expect(getInputPlaceholderText()).toEqual('isolate');
       });
 
-      userEvent.keyboard('{Escape}');
+      await userEvent.keyboard('{Escape}');
 
       expect(getLeftOfCursorText()).toEqual('r');
       expect(getRightOfCursorText()).toEqual('elease');
@@ -457,7 +457,7 @@ describe('When entering data into the Console input', () => {
         expect(getInputPlaceholderText()).toEqual('isolate');
       });
 
-      userEvent.keyboard('{Enter}');
+      await userEvent.keyboard('{Enter}');
 
       expect(getLeftOfCursorText()).toEqual('isolate');
       expect(getRightOfCursorText()).toEqual('');

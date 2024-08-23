@@ -69,7 +69,7 @@ describe('LinksList', () => {
 
     expect(await screen.findByTestId('linksListItemRow', { exact: false })).toBeInTheDocument();
 
-    userEvent.paste(await screen.findByTestId('linksHrefInput'), 'newHref');
+    await userEvent.paste(await screen.findByTestId('linksHrefInput'), 'newHref');
 
     expect(editAction).toHaveBeenCalledWith('links', [{ href: 'newHref', text: 'foobar' }], 0);
   });
@@ -79,7 +79,7 @@ describe('LinksList', () => {
 
     expect(await screen.findByTestId('linksListItemRow', { exact: false })).toBeInTheDocument();
 
-    userEvent.paste(await screen.findByTestId('linksTextInput'), 'newText');
+    await userEvent.paste(await screen.findByTestId('linksTextInput'), 'newText');
 
     expect(editAction).toHaveBeenCalledWith('links', [{ href: 'foobar', text: 'newText' }], 0);
   });

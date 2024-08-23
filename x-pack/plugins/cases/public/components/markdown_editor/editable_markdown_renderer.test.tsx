@@ -118,8 +118,9 @@ describe('EditableMarkdown', () => {
     it('Shows error message and save button disabled if current text is empty', async () => {
       appMockRender.render(<EditableMarkdown {...defaultProps} />);
 
-      userEvent.clear(await screen.findByTestId('euiMarkdownEditorTextArea'));
-      userEvent.paste(await screen.findByTestId('euiMarkdownEditorTextArea'), '');
+      await userEvent.clear(await screen.findByTestId('euiMarkdownEditorTextArea'));
+      await userEvent.click(await screen.findByTestId('euiMarkdownEditorTextArea'));
+      await userEvent.paste('');
 
       expect(await screen.findByText('Required field')).toBeInTheDocument();
       expect(await screen.findByTestId('editable-save-markdown')).toHaveProperty('disabled');
@@ -128,8 +129,9 @@ describe('EditableMarkdown', () => {
     it('Shows error message and save button disabled if current text is of empty characters', async () => {
       appMockRender.render(<EditableMarkdown {...defaultProps} />);
 
-      userEvent.clear(await screen.findByTestId('euiMarkdownEditorTextArea'));
-      userEvent.paste(await screen.findByTestId('euiMarkdownEditorTextArea'), '  ');
+      await userEvent.clear(await screen.findByTestId('euiMarkdownEditorTextArea'));
+      await userEvent.click(await screen.findByTestId('euiMarkdownEditorTextArea'));
+      await userEvent.paste('  ');
 
       expect(await screen.findByText('Required field')).toBeInTheDocument();
       expect(await screen.findByTestId('editable-save-markdown')).toHaveProperty('disabled');
@@ -142,7 +144,8 @@ describe('EditableMarkdown', () => {
 
       const markdown = await screen.findByTestId('euiMarkdownEditorTextArea');
 
-      userEvent.paste(markdown, longComment);
+      await userEvent.click(markdown);
+      await userEvent.paste(longComment);
 
       expect(
         await screen.findByText(

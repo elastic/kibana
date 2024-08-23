@@ -54,8 +54,9 @@ describe('EditTags ', () => {
 
     await userEvent.click(await screen.findByTestId('tag-list-edit-button'));
 
-    userEvent.paste(await screen.findByRole('combobox'), `${sampleTags[0]}`);
-    userEvent.keyboard('{enter}');
+    await userEvent.click(await screen.findByRole('combobox'));
+    await userEvent.paste(`${sampleTags[0]}`);
+    await userEvent.keyboard('{enter}');
 
     await userEvent.click(await screen.findByTestId('edit-tags-submit'));
 
@@ -69,8 +70,9 @@ describe('EditTags ', () => {
 
     expect(await screen.findByTestId('edit-tags')).toBeInTheDocument();
 
-    userEvent.paste(await screen.findByRole('combobox'), 'dude');
-    userEvent.keyboard('{enter}');
+    await userEvent.click(await screen.findByRole('combobox'));
+    await userEvent.paste('dude');
+    await userEvent.keyboard('{enter}');
 
     await userEvent.click(await screen.findByTestId('edit-tags-submit'));
 
@@ -84,8 +86,9 @@ describe('EditTags ', () => {
 
     expect(await screen.findByTestId('edit-tags')).toBeInTheDocument();
 
-    userEvent.paste(await screen.findByRole('combobox'), 'dude      ');
-    userEvent.keyboard('{enter}');
+    await userEvent.click(await screen.findByRole('combobox'));
+    await userEvent.paste('dude      ');
+    await userEvent.keyboard('{enter}');
 
     await userEvent.click(await screen.findByTestId('edit-tags-submit'));
 
@@ -97,8 +100,9 @@ describe('EditTags ', () => {
 
     await userEvent.click(await screen.findByTestId('tag-list-edit-button'));
 
-    userEvent.paste(await screen.findByRole('combobox'), 'new');
-    userEvent.keyboard('{enter}');
+    await userEvent.click(await screen.findByRole('combobox'));
+    await userEvent.paste('new');
+    await userEvent.keyboard('{enter}');
 
     expect(await screen.findByTestId('comboBoxInput')).toHaveTextContent('new');
 
@@ -118,8 +122,9 @@ describe('EditTags ', () => {
 
     expect(await screen.findByTestId('edit-tags')).toBeInTheDocument();
 
-    userEvent.paste(await screen.findByRole('combobox'), ' ');
-    userEvent.keyboard('{enter}');
+    await userEvent.click(await screen.findByRole('combobox'));
+    await userEvent.paste(' ');
+    await userEvent.keyboard('{enter}');
 
     expect(await screen.findByText('A tag must contain at least one non-space character.'));
   });
@@ -133,8 +138,9 @@ describe('EditTags ', () => {
 
     expect(await screen.findByTestId('edit-tags')).toBeInTheDocument();
 
-    userEvent.paste(await screen.findByRole('combobox'), `${longTag}`);
-    userEvent.keyboard('{enter}');
+    await userEvent.click(await screen.findByRole('combobox'));
+    await userEvent.paste(`${longTag}`);
+    await userEvent.keyboard('{enter}');
 
     expect(
       await screen.findByText(

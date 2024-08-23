@@ -48,7 +48,8 @@ describe('SuggestUsersPopover', () => {
 
     await waitForEuiPopoverOpen();
 
-    userEvent.paste(await screen.findByPlaceholderText('Search users'), 'dingo');
+    await userEvent.click(await screen.findByPlaceholderText('Search users'));
+    await userEvent.paste('dingo');
     await userEvent.click(await screen.findByText('WD'));
 
     expect(onUsersChange.mock.calls[0][0]).toMatchInlineSnapshot(`
@@ -74,7 +75,8 @@ describe('SuggestUsersPopover', () => {
 
     await waitForEuiPopoverOpen();
 
-    userEvent.paste(await screen.findByPlaceholderText('Search users'), 'elastic');
+    await userEvent.click(await screen.findByPlaceholderText('Search users'));
+    await userEvent.paste('elastic');
     await userEvent.click(await screen.findByText('WD'));
     await userEvent.click(await screen.findByText('DR'));
 
@@ -116,7 +118,8 @@ describe('SuggestUsersPopover', () => {
 
     await waitForEuiPopoverOpen();
 
-    userEvent.paste(await screen.findByPlaceholderText('Search users'), 'elastic');
+    await userEvent.click(await screen.findByPlaceholderText('Search users'));
+    await userEvent.paste('elastic');
     await userEvent.click(await screen.findByText('WD'));
 
     expect(onUsersChange.mock.calls[0][0]).toMatchInlineSnapshot(`
@@ -162,7 +165,8 @@ describe('SuggestUsersPopover', () => {
 
     expect(screen.queryByText('assigned')).not.toBeInTheDocument();
 
-    userEvent.paste(await screen.findByPlaceholderText('Search users'), 'dingo');
+    await userEvent.click(await screen.findByPlaceholderText('Search users'));
+    await userEvent.paste('dingo');
     await userEvent.click(await screen.findByText('WD'));
 
     expect(await screen.findByText('1 assigned')).toBeInTheDocument();
@@ -175,7 +179,8 @@ describe('SuggestUsersPopover', () => {
 
     expect(screen.queryByText('assigned')).not.toBeInTheDocument();
 
-    userEvent.paste(await screen.findByPlaceholderText('Search users'), 'dingo');
+    await userEvent.click(await screen.findByPlaceholderText('Search users'));
+    await userEvent.paste('dingo');
     await userEvent.click(await screen.findByText('WD'));
 
     expect(await screen.findByText('1 assigned')).toBeInTheDocument();

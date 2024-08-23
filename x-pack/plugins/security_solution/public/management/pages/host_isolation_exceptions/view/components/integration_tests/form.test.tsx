@@ -243,7 +243,7 @@ describe('When on the host isolation exceptions entry form', () => {
     it('should update field with new value', async () => {
       await render();
       const ipInput = renderResult.getByTestId('hostIsolationExceptions-form-ip-input');
-      userEvent.clear(ipInput);
+      await userEvent.clear(ipInput);
       await userEvent.type(ipInput, '10.0.100.1');
 
       expect(

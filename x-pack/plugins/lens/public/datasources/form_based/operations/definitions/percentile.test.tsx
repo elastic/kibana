@@ -626,7 +626,7 @@ describe('percentile', () => {
         />
       );
       const input = screen.getByRole('spinbutton', { name: 'Percentile' });
-      userEvent.clear(input);
+      await userEvent.clear(input);
       await userEvent.type(input, '27');
       jest.advanceTimersByTime(256);
       expect(input).toHaveValue(27);
@@ -652,7 +652,7 @@ describe('percentile', () => {
         />
       );
       const input = screen.getByRole('spinbutton', { name: 'Percentile' });
-      userEvent.clear(input);
+      await userEvent.clear(input);
       await userEvent.type(input, '12.12');
       jest.advanceTimersByTime(256);
       expect(input).toHaveValue(12.12);
@@ -671,7 +671,7 @@ describe('percentile', () => {
         />
       );
       const input = screen.getByRole('spinbutton', { name: 'Percentile' });
-      userEvent.clear(input);
+      await userEvent.clear(input);
       await userEvent.type(input, '12.1212312312312312');
       jest.advanceTimersByTime(256);
       expect(input).toHaveValue(12.1212312312312312);

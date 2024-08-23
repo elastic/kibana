@@ -58,15 +58,15 @@ describe('Draggable', () => {
           jest.runAllTimers();
         });
       },
-      startDraggingByKeyboard: () => {
+      startDraggingByKeyboard: async () => {
         draggableKeyboardHandler.focus();
-        userEvent.keyboard('{enter}');
+        await userEvent.keyboard('{enter}');
         act(() => {
           jest.runAllTimers();
         });
       },
-      dragOverToNextByKeyboard: () => {
-        userEvent.keyboard('{arrowright}');
+      dragOverToNextByKeyboard: async () => {
+        await userEvent.keyboard('{arrowright}');
         act(() => {
           jest.runAllTimers();
         });
@@ -126,8 +126,8 @@ describe('Draggable', () => {
       const { startDraggingByKeyboard, dragOverToNextByKeyboard, droppable } = renderDraggable({
         dragClassName: 'dragTest',
       });
-      startDraggingByKeyboard();
-      dragOverToNextByKeyboard();
+      await startDraggingByKeyboard();
+      await dragOverToNextByKeyboard();
       expect(droppable).toHaveClass('domDroppable domDroppable--active domDroppable--hover', EXACT);
       expect(within(screen.getByTestId('domDragDropContainer')).getByText('Drag this')).toHaveClass(
         'dragTest'

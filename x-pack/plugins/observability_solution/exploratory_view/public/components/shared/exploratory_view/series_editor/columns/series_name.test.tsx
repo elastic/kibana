@@ -77,7 +77,7 @@ describe('SeriesName', function () {
     await userEvent.type(input, newName);
 
     // submit
-    userEvent.keyboard('{enter}');
+    await userEvent.keyboard('{enter}');
 
     await waitFor(() => {
       input = screen.queryByTestId('exploratoryViewSeriesNameInput') as HTMLInputElement;

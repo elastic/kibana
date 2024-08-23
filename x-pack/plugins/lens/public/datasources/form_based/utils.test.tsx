@@ -156,7 +156,7 @@ describe('indexpattern_datasource utils', () => {
       });
     });
 
-    test('if has precision error and sorting is by count ascending, show fix action and switch to rare terms', () => {
+    test('if has precision error and sorting is by count ascending, show fix action and switch to rare terms', async () => {
       framePublicAPI.activeData!.id.columns[0].meta.sourceParams!.hasPrecisionError = true;
       state.layers.id.columnOrder = ['col1', 'col2'];
       state.layers.id.columns = {

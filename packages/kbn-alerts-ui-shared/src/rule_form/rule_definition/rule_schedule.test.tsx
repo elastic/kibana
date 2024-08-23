@@ -65,7 +65,7 @@ describe('RuleSchedule', () => {
     });
   });
 
-  test('Should allow interval unit to be changed', () => {
+  test('Should allow interval unit to be changed', async () => {
     useRuleFormState.mockReturnValue({
       formData: {
         schedule: {
@@ -75,7 +75,7 @@ describe('RuleSchedule', () => {
     });
     render(<RuleSchedule />);
 
-    userEvent.selectOptions(screen.getByTestId('ruleScheduleUnitInput'), 'hours');
+    await userEvent.selectOptions(screen.getByTestId('ruleScheduleUnitInput'), 'hours');
     expect(mockOnChange).toHaveBeenCalledWith({
       type: 'setSchedule',
       payload: {

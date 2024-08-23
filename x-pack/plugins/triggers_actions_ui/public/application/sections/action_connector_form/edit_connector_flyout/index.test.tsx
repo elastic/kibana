@@ -244,7 +244,7 @@ describe('EditConnectorFlyout', () => {
       /**
        * Clear the name so the form can be invalid
        */
-      userEvent.clear(getByTestId('nameInput'));
+      await userEvent.clear(getByTestId('nameInput'));
     });
     act(() => {
       await userEvent.click(getByTestId('edit-connector-flyout-save-btn'));
@@ -436,7 +436,7 @@ describe('EditConnectorFlyout', () => {
         expect(getByTestId('test-connector-text-field')).toBeInTheDocument();
       });
 
-      userEvent.clear(getByTestId('nameInput'));
+      await userEvent.clear(getByTestId('nameInput'));
       await userEvent.type(getByTestId('nameInput'), 'My new name');
       await userEvent.type(getByTestId('test-connector-secret-text-field'), 'password');
 
@@ -483,14 +483,14 @@ describe('EditConnectorFlyout', () => {
         expect(getByTestId('test-connector-text-field')).toBeInTheDocument();
       });
 
-      userEvent.clear(getByTestId('test-connector-text-field'));
+      await userEvent.clear(getByTestId('test-connector-text-field'));
       await userEvent.type(getByTestId('test-connector-text-field'), 'My updated text field');
 
       await waitFor(() => {
         expect(getByTestId('test-connector-text-field')).toHaveValue('My updated text field');
       });
 
-      userEvent.clear(getByTestId('nameInput'));
+      await userEvent.clear(getByTestId('nameInput'));
       await userEvent.type(getByTestId('nameInput'), 'My test');
       await userEvent.type(getByTestId('test-connector-secret-text-field'), 'password');
 
@@ -520,7 +520,7 @@ describe('EditConnectorFlyout', () => {
         expect(getByTestId('test-connector-text-field')).toBeInTheDocument();
       });
 
-      userEvent.clear(getByTestId('nameInput'));
+      await userEvent.clear(getByTestId('nameInput'));
       await userEvent.type(getByTestId('nameInput'), 'My new name');
       await userEvent.type(getByTestId('test-connector-secret-text-field'), 'password');
 
@@ -576,7 +576,7 @@ describe('EditConnectorFlyout', () => {
         expect(getByTestId('test-connector-error-text-field')).toBeInTheDocument();
       });
 
-      userEvent.clear(getByTestId('nameInput'));
+      await userEvent.clear(getByTestId('nameInput'));
       await userEvent.type(getByTestId('nameInput'), 'My new name');
 
       await waitFor(() => {

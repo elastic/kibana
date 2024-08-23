@@ -50,7 +50,7 @@ describe('CustomFields', () => {
       />
     );
 
-    userEvent.selectOptions(
+    await userEvent.selectOptions(
       await screen.findByTestId('create-case-template-select'),
       selectedTemplate.key
     );
@@ -71,7 +71,7 @@ describe('CustomFields', () => {
       />
     );
 
-    userEvent.selectOptions(
+    await userEvent.selectOptions(
       await screen.findByTestId('create-case-template-select'),
       selectedTemplate.key
     );

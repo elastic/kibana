@@ -78,9 +78,11 @@ describe('CustomFieldsForm ', () => {
       expect(formState).not.toBeUndefined();
     });
 
-    userEvent.paste(await screen.findByTestId('custom-field-label-input'), 'Summary');
+    await userEvent.click(await screen.findByTestId('custom-field-label-input'));
+    await userEvent.paste('Summary');
     await userEvent.click(await screen.findByTestId('text-custom-field-required'));
-    userEvent.paste(await screen.findByTestId('text-custom-field-default-value'), 'Default value');
+    await userEvent.click(await screen.findByTestId('text-custom-field-default-value'));
+    await userEvent.paste('Default value');
 
     await act(async () => {
       const { data } = await formState!.submit();
@@ -106,7 +108,8 @@ describe('CustomFieldsForm ', () => {
       expect(formState).not.toBeUndefined();
     });
 
-    userEvent.paste(await screen.findByTestId('custom-field-label-input'), 'Summary');
+    await userEvent.click(await screen.findByTestId('custom-field-label-input'));
+    await userEvent.paste('Summary');
     await userEvent.click(await screen.findByTestId('text-custom-field-required'));
 
     await act(async () => {
@@ -132,9 +135,11 @@ describe('CustomFieldsForm ', () => {
       expect(formState).not.toBeUndefined();
     });
 
-    userEvent.paste(await screen.findByTestId('custom-field-label-input'), 'Summary');
+    await userEvent.click(await screen.findByTestId('custom-field-label-input'));
+    await userEvent.paste('Summary');
     await userEvent.click(await screen.findByTestId('text-custom-field-required'));
-    userEvent.paste(await screen.findByTestId('text-custom-field-default-value'), ' ');
+    await userEvent.click(await screen.findByTestId('text-custom-field-default-value'));
+    await userEvent.paste(' ');
 
     await act(async () => {
       const { data } = await formState!.submit();
@@ -176,7 +181,8 @@ describe('CustomFieldsForm ', () => {
       expect(formState).not.toBeUndefined();
     });
 
-    userEvent.paste(await screen.findByTestId('custom-field-label-input'), ' New');
+    await userEvent.click(await screen.findByTestId('custom-field-label-input'));
+    await userEvent.paste(' New');
 
     await act(async () => {
       const { data } = await formState!.submit();
@@ -200,7 +206,8 @@ describe('CustomFieldsForm ', () => {
       expect(formState).not.toBeUndefined();
     });
 
-    userEvent.paste(await screen.findByTestId('custom-field-label-input'), 'Summary');
+    await userEvent.click(await screen.findByTestId('custom-field-label-input'));
+    await userEvent.paste('Summary');
 
     await act(async () => {
       const { data } = await formState!.submit();

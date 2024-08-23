@@ -363,7 +363,7 @@ describe('JiraParamsFields renders', () => {
       );
 
       act(() => {
-        userEvent.selectOptions(
+        await userEvent.selectOptions(
           results.getByTestId('issueTypeSelect'),
           results.getByRole('option', { name: 'Task' })
         );
@@ -384,7 +384,7 @@ describe('JiraParamsFields renders', () => {
       });
 
       act(() => {
-        userEvent.selectOptions(
+        await userEvent.selectOptions(
           results.getByTestId('prioritySelect'),
           results.getByRole('option', { name: 'Medium' })
         );
@@ -493,8 +493,8 @@ describe('JiraParamsFields renders', () => {
       render(<JiraParamsFields {...defaultProps} />);
       const otherFields = await screen.findByTestId('otherFieldsJsonEditor');
 
-      userEvent.paste(otherFields, 'foobar');
-      userEvent.clear(otherFields);
+      await userEvent.paste(otherFields, 'foobar');
+      await userEvent.clear(otherFields);
 
       expect(editAction.mock.calls[1][1].incident.otherFields).toEqual(null);
     });

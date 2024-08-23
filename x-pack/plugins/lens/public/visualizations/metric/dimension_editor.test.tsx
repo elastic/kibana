@@ -143,7 +143,7 @@ describe('dimension editor', () => {
         if (!staticColorPicker) {
           throw new Error('Static color picker not found');
         }
-        userEvent.clear(staticColorPicker);
+        await userEvent.clear(staticColorPicker);
         await userEvent.type(staticColorPicker, color);
       };
 
@@ -246,7 +246,7 @@ describe('dimension editor', () => {
         if (customPrefixTextbox === null) {
           throw new Error('custom prefix textbox not found');
         }
-        userEvent.clear(customPrefixTextbox);
+        await userEvent.clear(customPrefixTextbox);
         await userEvent.type(customPrefixTextbox, prefix);
       };
       return {
@@ -394,14 +394,14 @@ describe('dimension editor', () => {
         />
       );
 
-      const selectCollapseBy = (collapseFn: string) => {
+      const selectCollapseBy = async (collapseFn: string) => {
         const collapseBySelect = screen.getByLabelText(/collapse by/i);
-        userEvent.selectOptions(collapseBySelect, collapseFn);
+        await userEvent.selectOptions(collapseBySelect, collapseFn);
       };
 
       const setMaxCols = async (maxCols: number) => {
         const maxColsInput = screen.getByLabelText(/layout columns/i);
-        userEvent.clear(maxColsInput);
+        await userEvent.clear(maxColsInput);
         await userEvent.type(maxColsInput, maxCols.toString());
       };
 
@@ -420,10 +420,10 @@ describe('dimension editor', () => {
       expect(screen.queryByTestId(SELECTORS.BREAKDOWN_EDITOR)).toBeInTheDocument();
     });
 
-    it('supports setting a collapse function', () => {
+    it('supports setting a collapse function', async () => {
       const { selectCollapseBy } = renderBreakdownEditor();
       const newCollapseFn = 'min';
-      selectCollapseBy(newCollapseFn);
+      await selectCollapseBy(newCollapseFn);
 
       expect(mockSetState).toHaveBeenCalledWith({ ...fullState, collapseFn: newCollapseFn });
     });

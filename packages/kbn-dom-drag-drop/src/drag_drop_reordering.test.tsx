@@ -121,51 +121,51 @@ describe('Drag and drop reordering', () => {
           jest.runAllTimers();
         });
       },
-      startDraggingByKeyboard: (index = 0) => {
+      startDraggingByKeyboard: async (index = 0) => {
         draggableKeyboardHandlers[index].focus();
-        userEvent.keyboard('{enter}');
+        await userEvent.keyboard('{enter}');
         act(() => {
           jest.runAllTimers();
         });
       },
-      dropByKeyboard: () => {
-        userEvent.keyboard('{enter}');
+      dropByKeyboard: async () => {
+        await userEvent.keyboard('{enter}');
         act(() => {
           jest.runAllTimers();
         });
       },
-      cancelByKeyboard: () => {
-        userEvent.keyboard('{esc}');
+      cancelByKeyboard: async () => {
+        await userEvent.keyboard('{esc}');
         act(() => {
           jest.runAllTimers();
         });
       },
-      reorderDownByKeyboard: () => {
-        userEvent.keyboard('{arrowdown}');
+      reorderDownByKeyboard: async () => {
+        await userEvent.keyboard('{arrowdown}');
         act(() => {
           jest.runAllTimers();
         });
       },
-      reorderUpByKeyboard: () => {
-        userEvent.keyboard('{arrowup}');
+      reorderUpByKeyboard: async () => {
+        await userEvent.keyboard('{arrowup}');
         act(() => {
           jest.runAllTimers();
         });
       },
-      dragOverToNextByKeyboard: () => {
-        userEvent.keyboard('{arrowright}');
+      dragOverToNextByKeyboard: async () => {
+        await userEvent.keyboard('{arrowright}');
         act(() => {
           jest.runAllTimers();
         });
       },
-      dragOverToPreviousByKeyboard: () => {
-        userEvent.keyboard('{arrowleft}');
+      dragOverToPreviousByKeyboard: async () => {
+        await userEvent.keyboard('{arrowleft}');
         act(() => {
           jest.runAllTimers();
         });
       },
-      pressModifierKey: (key: '{Shift}' | '{Alt}' | '{Ctrl}') => {
-        userEvent.keyboard(key);
+      pressModifierKey: async (key: '{Shift}' | '{Alt}' | '{Ctrl}') => {
+        await userEvent.keyboard(key);
         act(() => {
           jest.runAllTimers();
         });
@@ -214,14 +214,14 @@ describe('Drag and drop reordering', () => {
   });
 
   describe('keyboard mode', () => {
-    test('doesn`t run onDrop when dropping into an original position without any other movements', () => {
+    test('doesn`t run onDrop when dropping into an original position without any other movements', async () => {
       const { startDraggingByKeyboard, dropByKeyboard } = renderDragAndDropGroup();
       // 0 -> 0
-      startDraggingByKeyboard(0);
-      dropByKeyboard();
+      await startDraggingByKeyboard(0);
+      await dropByKeyboard();
       expect(onDrop).not.toBeCalled();
     });
-    test('doesn`t run onDrop when dropping into an original position after some movements', () => {
+    test('doesn`t run onDrop when dropping into an original position after some movements', async () => {
       const {
         startDraggingByKeyboard,
         dropByKeyboard,
@@ -229,23 +229,23 @@ describe('Drag and drop reordering', () => {
         reorderUpByKeyboard,
       } = renderDragAndDropGroup();
       // 1 -> 1
-      startDraggingByKeyboard(1);
-      reorderDownByKeyboard();
-      reorderUpByKeyboard();
-      dropByKeyboard();
+      await startDraggingByKeyboard(1);
+      await reorderDownByKeyboard();
+      await reorderUpByKeyboard();
+      await dropByKeyboard();
       expect(onDrop).not.toBeCalled();
     });
-    test('doesn’t run onDrop when the movement is cancelled', () => {
+    test('doesn’t run onDrop when the movement is cancelled', async () => {
       const { startDraggingByKeyboard, reorderDownByKeyboard, cancelByKeyboard } =
         renderDragAndDropGroup();
       // 1 -> x
-      startDraggingByKeyboard(0);
-      reorderDownByKeyboard();
-      reorderDownByKeyboard();
-      cancelByKeyboard();
+      await startDraggingByKeyboard(0);
+      await reorderDownByKeyboard();
+      await reorderDownByKeyboard();
+      await cancelByKeyboard();
       expect(onDrop).not.toBeCalled();
     });
-    test('runs onDrop when the element is reordered and dropped', () => {
+    test('runs onDrop when the element is reordered and dropped', async () => {
       const {
         startDraggingByKeyboard,
         dropByKeyboard,
@@ -253,24 +253,24 @@ describe('Drag and drop reordering', () => {
         reorderUpByKeyboard,
       } = renderDragAndDropGroup();
       // 0--> 2
-      startDraggingByKeyboard(0);
-      reorderDownByKeyboard();
-      reorderDownByKeyboard();
-      dropByKeyboard();
+      await startDraggingByKeyboard(0);
+      await reorderDownByKeyboard();
+      await reorderDownByKeyboard();
+      await dropByKeyboard();
       expect(onDrop).toBeCalledWith(expectLabel('0'), 'reorder');
 
       // 2 --> 0
-      startDraggingByKeyboard(2);
-      reorderUpByKeyboard();
-      reorderUpByKeyboard();
-      dropByKeyboard();
+      await startDraggingByKeyboard(2);
+      await reorderUpByKeyboard();
+      await reorderUpByKeyboard();
+      await dropByKeyboard();
       expect(onDrop).toBeCalledWith(expectLabel('2'), 'reorder');
     });
-    test('reordered elements get extra styling showing the new position from element 0 to element 2', () => {
+    test('reordered elements get extra styling showing the new position from element 0 to element 2', async () => {
       const { startDraggingByKeyboard, reorderDownByKeyboard } = renderDragAndDropGroup();
       // 0--> 2
-      startDraggingByKeyboard(0);
-      reorderDownByKeyboard();
+      await startDraggingByKeyboard(0);
+      await reorderDownByKeyboard();
       expect(screen.getAllByTestId('domDragDrop-reorderableDrag')[0]).toHaveStyle({
         transform: 'translateY(+48px)',
       });
@@ -278,7 +278,7 @@ describe('Drag and drop reordering', () => {
         transform: 'translateY(-48px)',
       });
       expect(screen.getByText('Element no1')).toHaveClass('domDroppable--hover');
-      reorderDownByKeyboard();
+      await reorderDownByKeyboard();
       expect(screen.getAllByTestId('domDragDrop-reorderableDrag')[0]).toHaveStyle({
         transform: 'translateY(+96px)',
       });
@@ -291,11 +291,11 @@ describe('Drag and drop reordering', () => {
       expect(screen.getByText('Element no2')).toHaveClass('domDroppable--hover');
     });
 
-    test('reordered elements get extra styling showing the new position from element 2 to element 0', () => {
+    test('reordered elements get extra styling showing the new position from element 2 to element 0', async () => {
       const { startDraggingByKeyboard, reorderUpByKeyboard } = renderDragAndDropGroup();
       // 2 --> 0
-      startDraggingByKeyboard(2);
-      reorderUpByKeyboard();
+      await startDraggingByKeyboard(2);
+      await reorderUpByKeyboard();
       expect(screen.getAllByTestId('domDragDrop-reorderableDrag')[2]).toHaveStyle({
         transform: 'translateY(-48px)',
       });
@@ -304,7 +304,7 @@ describe('Drag and drop reordering', () => {
       });
 
       expect(screen.getByText('Element no1')).toHaveClass('domDroppable--hover');
-      reorderUpByKeyboard();
+      await reorderUpByKeyboard();
       expect(screen.getAllByTestId('domDragDrop-reorderableDrag')[2]).toHaveStyle({
         transform: 'translateY(-96px)',
       });
@@ -317,30 +317,30 @@ describe('Drag and drop reordering', () => {
       expect(screen.getByText('Element no0')).toHaveClass('domDroppable--hover');
     });
 
-    test('reorders through all the drop targets and then stops at the last element', () => {
+    test('reorders through all the drop targets and then stops at the last element', async () => {
       const {
         startDraggingByKeyboard,
         reorderDownByKeyboard,
         cancelByKeyboard,
         reorderUpByKeyboard,
       } = renderDragAndDropGroup();
-      startDraggingByKeyboard();
-      reorderDownByKeyboard();
-      reorderDownByKeyboard();
-      reorderDownByKeyboard();
-      reorderDownByKeyboard();
+      await startDraggingByKeyboard();
+      await reorderDownByKeyboard();
+      await reorderDownByKeyboard();
+      await reorderDownByKeyboard();
+      await reorderDownByKeyboard();
 
       expect(screen.getByText('Element no2')).toHaveClass('domDroppable--hover');
-      cancelByKeyboard();
-      startDraggingByKeyboard(2);
-      reorderUpByKeyboard();
-      reorderUpByKeyboard();
-      reorderUpByKeyboard();
-      reorderUpByKeyboard();
+      await cancelByKeyboard();
+      await startDraggingByKeyboard(2);
+      await reorderUpByKeyboard();
+      await reorderUpByKeyboard();
+      await reorderUpByKeyboard();
+      await reorderUpByKeyboard();
       expect(screen.getByText('Element no0')).toHaveClass('domDroppable--hover');
     });
 
-    test('exits reordering and selects out of group target when hitting arrow left', () => {
+    test('exits reordering and selects out of group target when hitting arrow left', async () => {
       const {
         startDraggingByKeyboard,
         cancelByKeyboard,
@@ -348,12 +348,12 @@ describe('Drag and drop reordering', () => {
         dragOverToNextByKeyboard,
       } = renderDragAndDropGroup();
 
-      startDraggingByKeyboard();
-      dragOverToNextByKeyboard();
+      await startDraggingByKeyboard();
+      await dragOverToNextByKeyboard();
       expect(screen.getByText('Out of group')).toHaveClass('domDroppable--hover');
-      cancelByKeyboard();
-      startDraggingByKeyboard();
-      dragOverToPreviousByKeyboard();
+      await cancelByKeyboard();
+      await startDraggingByKeyboard();
+      await dragOverToPreviousByKeyboard();
       expect(screen.getByText('Out of group')).toHaveClass('domDroppable--hover');
     });
   });

@@ -169,7 +169,7 @@ describe('ServiceNowITSM Fields', () => {
         );
 
         const select = await screen.findByTestId(`${subj}Select`);
-        userEvent.selectOptions(select, '4 - Low');
+        await userEvent.selectOptions(select, '4 - Low');
 
         expect(select).toHaveValue('4');
       })
@@ -193,21 +193,20 @@ describe('ServiceNowITSM Fields', () => {
       [impactSelect, 'impact'],
     ];
 
-    selectables.forEach(([element]) => {
-      userEvent.selectOptions(element, ['2']);
-    });
-
+    for (const [element] of selectables) {
+      await userEvent.selectOptions(element, ['2']);
+    }
     const categorySelect = await screen.findByTestId('categorySelect');
 
     expect(await within(categorySelect).findByRole('option', { name: 'Software' }));
 
-    userEvent.selectOptions(categorySelect, ['software']);
+    await userEvent.selectOptions(categorySelect, ['software']);
 
     const subcategorySelect = await screen.findByTestId('subcategorySelect');
 
     expect(await within(subcategorySelect).findByRole('option', { name: 'Operation System' }));
 
-    userEvent.selectOptions(subcategorySelect, ['os']);
+    await userEvent.selectOptions(subcategorySelect, ['os']);
 
     expect(severitySelect).toHaveValue('2');
     expect(urgencySelect).toHaveValue('2');
@@ -227,7 +226,7 @@ describe('ServiceNowITSM Fields', () => {
 
     expect(await within(categorySelect).findByRole('option', { name: 'Software' }));
 
-    userEvent.selectOptions(categorySelect, ['software']);
+    await userEvent.selectOptions(categorySelect, ['software']);
 
     const subcategorySelect = await screen.findByTestId('subcategorySelect');
 
@@ -235,7 +234,7 @@ describe('ServiceNowITSM Fields', () => {
 
     expect(subcategorySelect).toHaveValue('os');
 
-    userEvent.selectOptions(categorySelect, ['Privilege Escalation']);
+    await userEvent.selectOptions(categorySelect, ['Privilege Escalation']);
 
     await waitFor(() => {
       expect(subcategorySelect).not.toHaveValue();

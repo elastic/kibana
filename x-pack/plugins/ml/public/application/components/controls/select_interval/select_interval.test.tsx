@@ -37,7 +37,7 @@ describe('SelectInterval', () => {
 
     // update
     act(() => {
-      userEvent.selectOptions(getByTestId('mlAnomalyIntervalControls'), getByText('1 hour'));
+      await userEvent.selectOptions(getByTestId('mlAnomalyIntervalControls'), getByText('1 hour'));
     });
 
     // assert updated state

@@ -168,7 +168,7 @@ describe('group editor preview', () => {
     expect(select).toHaveValue('@timestamp');
     expect(getCurrentTimeField(getLensAttributes())).toBe('@timestamp');
 
-    userEvent.selectOptions(select, 'other-time-field');
+    await userEvent.selectOptions(select, 'other-time-field');
 
     expect(select).toHaveValue('other-time-field');
 

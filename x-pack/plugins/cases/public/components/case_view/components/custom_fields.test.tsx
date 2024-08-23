@@ -199,10 +199,10 @@ describe('Case View Page files tab', () => {
       await screen.findByTestId(`case-text-custom-field-edit-button-${customFieldsMock[0].key}`)
     );
 
-    userEvent.paste(
-      await screen.findByTestId('case-text-custom-field-form-field-test_key_1'),
-      '!!!'
+    await userEvent.click(
+      await screen.findByTestId('case-text-custom-field-form-field-test_key_1')
     );
+    await userEvent.paste('!!!');
 
     await userEvent.click(
       await screen.findByTestId('case-text-custom-field-submit-button-test_key_1')
@@ -234,10 +234,10 @@ describe('Case View Page files tab', () => {
       await screen.findByText('This field is populated with the default value.')
     ).toBeInTheDocument();
 
-    userEvent.paste(
-      await screen.findByTestId('case-text-custom-field-form-field-test_key_1'),
-      ' updated!!'
+    await userEvent.click(
+      await screen.findByTestId('case-text-custom-field-form-field-test_key_1')
     );
+    await userEvent.paste(' updated!!');
 
     await userEvent.click(
       await screen.findByTestId('case-text-custom-field-submit-button-test_key_1')

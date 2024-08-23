@@ -80,17 +80,17 @@ describe('Template fields', () => {
       </FormTestComponent>
     );
 
-    userEvent.paste(await screen.findByTestId('template-name-input'), 'Template 1');
+    await userEvent.click(await screen.findByTestId('template-name-input'));
+    await userEvent.paste('Template 1');
 
     const templateTags = await screen.findByTestId('template-tags');
 
-    userEvent.paste(await within(templateTags).findByRole('combobox'), 'first');
-    userEvent.keyboard('{enter}');
+    await userEvent.click(await within(templateTags).findByRole('combobox'));
+    await userEvent.paste('first');
+    await userEvent.keyboard('{enter}');
 
-    userEvent.paste(
-      await screen.findByTestId('template-description-input'),
-      'this is a first template'
-    );
+    await userEvent.click(await screen.findByTestId('template-description-input'));
+    await userEvent.paste('this is a first template');
 
     await userEvent.click(screen.getByText('Submit'));
 
@@ -120,14 +120,17 @@ describe('Template fields', () => {
       </FormTestComponent>
     );
 
-    userEvent.paste(await screen.findByTestId('template-name-input'), '!!');
+    await userEvent.click(await screen.findByTestId('template-name-input'));
+    await userEvent.paste('!!');
 
     const templateTags = await screen.findByTestId('template-tags');
 
-    userEvent.paste(await within(templateTags).findByRole('combobox'), 'first');
-    userEvent.keyboard('{enter}');
+    await userEvent.click(await within(templateTags).findByRole('combobox'));
+    await userEvent.paste('first');
+    await userEvent.keyboard('{enter}');
 
-    userEvent.paste(await screen.findByTestId('template-description-input'), '..');
+    await userEvent.click(await screen.findByTestId('template-description-input'));
+    await userEvent.paste('..');
 
     await userEvent.click(screen.getByText('Submit'));
 
