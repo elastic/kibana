@@ -71,6 +71,7 @@ export const Flyout = ({
               tabs={tabEntries}
               rightSideItems={rightSideItems}
               hasSystemIntegration={!!metadata?.hasSystemIntegration}
+              assetType={asset.type}
             />
           </EuiFlyoutHeader>
           <EuiFlyoutBody>

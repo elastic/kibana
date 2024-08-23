@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { set } from '@kbn/safer-lodash-set';
 import { get } from 'lodash';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
@@ -22,7 +22,7 @@ export interface InfraMetricsAdapterResponse {
   id: string;
   name?: string;
   buckets: InfraMetadataAggregationBucket[];
-  hasSystemIntegration: boolean;
+  hasSystemIntegration?: boolean;
 }
 
 export const getMetricMetadata = async (
@@ -72,23 +72,28 @@ export const getMetricMetadata = async (
             size: 1000,
           },
         },
-        monitoredHost: {
-          filter: getFilterByIntegration(SYSTEM_INTEGRATION),
-          aggs: {
-            name: {
-              terms: {
-                field: HOST_NAME_FIELD,
-                size: 1,
-                order: {
-                  _key: 'asc',
-                },
+      },
+    },
+  };
+
+  if (nodeType === 'host') {
+    set(metricQuery, 'body.aggs', {
+      monitoredHost: {
+        filter: getFilterByIntegration(SYSTEM_INTEGRATION),
+        aggs: {
+          name: {
+            terms: {
+              field: HOST_NAME_FIELD,
+              size: 1,
+              order: {
+                _key: 'asc',
               },
             },
           },
         },
       },
-    },
-  };
+    });
+  }
 
   const response = await framework.callWithRequest<
     {},
@@ -103,17 +108,26 @@ export const getMetricMetadata = async (
     response.aggregations && response.aggregations.metrics
       ? response.aggregations.metrics.buckets
       : [];
-  const hostWithSystemIntegration =
-    response.aggregations && (response.aggregations?.monitoredHost?.name?.buckets ?? []).length > 0
-      ? response.aggregations?.monitoredHost?.name.buckets[0]?.key
-      : null;
 
-  const hasSystemIntegration = hostWithSystemIntegration === nodeId;
-
-  return {
+  const res = {
     id: nodeId,
     name: get(response, ['aggregations', 'nodeName', 'buckets', 0, 'key'], nodeId),
-    hasSystemIntegration,
     buckets,
   };
+
+  if (nodeType === 'host') {
+    const hostWithSystemIntegration =
+      response.aggregations &&
+      (response.aggregations?.monitoredHost?.name?.buckets ?? []).length > 0
+        ? response.aggregations?.monitoredHost?.name.buckets[0]?.key
+        : null;
+
+    const hasSystemIntegration = hostWithSystemIntegration === nodeId;
+    return {
+      hasSystemIntegration,
+      ...res,
+    };
+  }
+
+  return res;
 };
