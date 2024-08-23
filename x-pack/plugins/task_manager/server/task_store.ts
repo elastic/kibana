@@ -507,7 +507,9 @@ export class TaskStore {
 
   // like search(), only runs multiple searches in parallel returning the combined results
   async msearch(opts: SearchOpts[] = []): Promise<FetchResult> {
-    const queries = opts.map((opt) => ensureQueryOnlyReturnsTaskObjects(opt));
+    const queries = opts.map(({ sort = [{ 'task.runAt': 'asc' }], ...opt }) =>
+      ensureQueryOnlyReturnsTaskObjects({ sort, ...opt })
+    );
     const body = queries.flatMap((query) => [{}, query]);
 
     const result = await this.esClientWithoutRetries.msearch<SavedObjectsRawDoc['_source']>({
