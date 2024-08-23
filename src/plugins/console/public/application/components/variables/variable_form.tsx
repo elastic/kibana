@@ -41,7 +41,7 @@ export interface VariableFormProps {
   title?: string;
 }
 
-const fieldsConfig: Record<string, FieldConfig>  = {
+const fieldsConfig: Record<string, FieldConfig> = {
   variableName: {
     label: i18n.translate('console.variablesPage.form.variableNameFieldLabel', {
       defaultMessage: 'Variable name',
@@ -53,7 +53,7 @@ const fieldsConfig: Record<string, FieldConfig>  = {
             return {
               message: i18n.translate('console.variablesPage.form.variableNameRequiredLabel', {
                 defaultMessage: 'This is a required field',
-              })
+              }),
             };
           }
 
@@ -61,7 +61,7 @@ const fieldsConfig: Record<string, FieldConfig>  = {
             return {
               message: i18n.translate('console.variablesPage.form.variableNameInvalidLabel', {
                 defaultMessage: 'Only letters, numbers and underscores are allowed',
-              })
+              }),
             };
           }
         },
@@ -99,7 +99,13 @@ export const VariableForm = (props: VariableFormProps) => {
 
   return (
     <>
-      <EuiPanel paddingSize="l" hasShadow={false} borderRadius="none" grow={false} css={{ width: '100%' }}>
+      <EuiPanel
+        paddingSize="l"
+        hasShadow={false}
+        borderRadius="none"
+        grow={false}
+        css={{ width: '100%' }}
+      >
         <EuiTitle size="xs">
           <h2>
             {props.title ?? (
@@ -112,7 +118,6 @@ export const VariableForm = (props: VariableFormProps) => {
         </EuiTitle>
         <EuiSpacer size="l" />
 
-
         <Form form={form}>
           <UseField
             config={fieldsConfig.variableName}
@@ -122,10 +127,10 @@ export const VariableForm = (props: VariableFormProps) => {
               euiFieldProps: {
                 placeholder: i18n.translate('console.variablesPage.form.namePlaceholderLabel', {
                   defaultMessage: 'exampleName',
-            }),
-            prepend: '${',
+                }),
+                prepend: '${',
                 append: '}',
-            }
+              },
             }}
           />
 
@@ -137,8 +142,8 @@ export const VariableForm = (props: VariableFormProps) => {
               euiFieldProps: {
                 placeholder: i18n.translate('console.variablesPage.form.valuePlaceholderLabel', {
                   defaultMessage: 'exampleValue',
-            }),
-            }
+                }),
+              },
             }}
           />
 
@@ -146,16 +151,20 @@ export const VariableForm = (props: VariableFormProps) => {
 
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                onClick={() => props.onCancel()}
-              >
-                <FormattedMessage id="console.variablesPage.addNew.cancelButton" defaultMessage="Cancel" />
+              <EuiButtonEmpty onClick={() => props.onCancel()}>
+                <FormattedMessage
+                  id="console.variablesPage.addNew.cancelButton"
+                  defaultMessage="Cancel"
+                />
               </EuiButtonEmpty>
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
               <EuiButton fill iconType="save" onClick={form.submit}>
-                <FormattedMessage id="console.variablesPage.addNew.submitButton" defaultMessage="Save changes" />
+                <FormattedMessage
+                  id="console.variablesPage.addNew.submitButton"
+                  defaultMessage="Save changes"
+                />
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>

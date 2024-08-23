@@ -148,7 +148,21 @@ export const DevToolsSettingsModal = (props: DevToolsSettingsModalProps) => {
     } else {
       isMounted.current = true;
     }
-  }, [fontSize, wrapMode, fields, indices, templates, dataStreams, polling, pollInterval, tripleQuotes, isHistoryEnabled, isKeyboardShortcutsEnabled, isAccessibilityOverlayEnabled]);
+  }, [
+    fontSize,
+    wrapMode,
+    fields,
+    indices,
+    templates,
+    dataStreams,
+    polling,
+    pollInterval,
+    tripleQuotes,
+    isHistoryEnabled,
+    isKeyboardShortcutsEnabled,
+    isAccessibilityOverlayEnabled,
+    debouncedSaveSettings,
+  ]);
 
   const onPollingIntervalChange = useCallback((value: string) => {
     const sanitizedValue = parseInt(value, 10);
@@ -188,20 +202,35 @@ export const DevToolsSettingsModal = (props: DevToolsSettingsModalProps) => {
       <EuiSpacer size="s" />
       <EuiText color="subdued">
         <p>
-          <FormattedMessage id="console.settingsPage.pageDescription" defaultMessage="Customize the console to make it work better for you." />
+          <FormattedMessage
+            id="console.settingsPage.pageDescription"
+            defaultMessage="Customize the console to make it work better for you."
+          />
         </p>
       </EuiText>
 
       {/* GENERAL SETTINGS */}
-      <SettingsGroup title={i18n.translate('console.settingsPage.generalSettingsLabel', { defaultMessage: 'General settings' })} />
-      <SettingsFormRow label={i18n.translate('console.settingsPage.saveRequestsToHistoryLabel', { defaultMessage: 'Save requests to history' })}>
+      <SettingsGroup
+        title={i18n.translate('console.settingsPage.generalSettingsLabel', {
+          defaultMessage: 'General settings',
+        })}
+      />
+      <SettingsFormRow
+        label={i18n.translate('console.settingsPage.saveRequestsToHistoryLabel', {
+          defaultMessage: 'Save requests to history',
+        })}
+      >
         <EuiSwitch
           checked={isHistoryEnabled}
           label={isHistoryEnabled ? ON_LABEL : OFF_LABEL}
           onChange={(e) => toggleSavingToHistory(e.target.checked)}
         />
       </SettingsFormRow>
-      <SettingsFormRow label={i18n.translate('console.settingsPage.enableKeyboardShortcutsLabel', { defaultMessage: 'Keyboard shortcuts' })}>
+      <SettingsFormRow
+        label={i18n.translate('console.settingsPage.enableKeyboardShortcutsLabel', {
+          defaultMessage: 'Keyboard shortcuts',
+        })}
+      >
         <EuiSwitch
           data-test-subj="enableKeyboardShortcuts"
           label={isKeyboardShortcutsEnabled ? ON_LABEL : OFF_LABEL}
@@ -209,7 +238,11 @@ export const DevToolsSettingsModal = (props: DevToolsSettingsModalProps) => {
           onChange={(e) => toggleKeyboardShortcuts(e.target.checked)}
         />
       </SettingsFormRow>
-      <SettingsFormRow label={i18n.translate('console.settingsPage.enableAccessibilityOverlayLabel', { defaultMessage: 'Accessibility overlay' })}>
+      <SettingsFormRow
+        label={i18n.translate('console.settingsPage.enableAccessibilityOverlayLabel', {
+          defaultMessage: 'Accessibility overlay',
+        })}
+      >
         <EuiSwitch
           data-test-subj="enableA11yOverlay"
           label={isAccessibilityOverlayEnabled ? ON_LABEL : OFF_LABEL}
@@ -219,8 +252,16 @@ export const DevToolsSettingsModal = (props: DevToolsSettingsModalProps) => {
       </SettingsFormRow>
 
       {/* DISPLAY SETTINGS */}
-      <SettingsGroup title={i18n.translate('console.settingsPage.displaySettingsLabel', { defaultMessage: 'Display' })} />
-      <SettingsFormRow label={i18n.translate('console.settingsPage.fontSizeLabel', { defaultMessage: 'Font size' })}>
+      <SettingsGroup
+        title={i18n.translate('console.settingsPage.displaySettingsLabel', {
+          defaultMessage: 'Display',
+        })}
+      />
+      <SettingsFormRow
+        label={i18n.translate('console.settingsPage.fontSizeLabel', {
+          defaultMessage: 'Font size',
+        })}
+      >
         <EuiFieldNumber
           css={{ minWidth: '220px' }}
           compressed
@@ -235,7 +276,11 @@ export const DevToolsSettingsModal = (props: DevToolsSettingsModalProps) => {
           }}
         />
       </SettingsFormRow>
-      <SettingsFormRow label={i18n.translate('console.settingsPage.wrapLongLinesLabel', { defaultMessage: 'Wrap long lines' })}>
+      <SettingsFormRow
+        label={i18n.translate('console.settingsPage.wrapLongLinesLabel', {
+          defaultMessage: 'Wrap long lines',
+        })}
+      >
         <EuiSwitch
           data-test-subj="settingsWrapLines"
           label={wrapMode ? ON_LABEL : OFF_LABEL}
@@ -244,7 +289,11 @@ export const DevToolsSettingsModal = (props: DevToolsSettingsModalProps) => {
           id="wrapLines"
         />
       </SettingsFormRow>
-      <SettingsFormRow label={i18n.translate('console.settingsPage.tripleQuotesMessage', { defaultMessage: 'Triple quotes in output' })}>
+      <SettingsFormRow
+        label={i18n.translate('console.settingsPage.tripleQuotesMessage', {
+          defaultMessage: 'Triple quotes in output',
+        })}
+      >
         <EuiSwitch
           data-test-subj="tripleQuotes"
           label={tripleQuotes ? ON_LABEL : OFF_LABEL}
@@ -255,7 +304,11 @@ export const DevToolsSettingsModal = (props: DevToolsSettingsModalProps) => {
       </SettingsFormRow>
 
       {/* AUTOCOMPLETE SETTINGS */}
-      <SettingsGroup title={i18n.translate('console.settingsPage.autocompleteSettingsLabel', { defaultMessage: 'Autocomplete' })} />
+      <SettingsGroup
+        title={i18n.translate('console.settingsPage.autocompleteSettingsLabel', {
+          defaultMessage: 'Autocomplete',
+        })}
+      />
       {autoCompleteCheckboxes.map((opts) => (
         <SettingsFormRow key={opts.id} label={opts.label}>
           <EuiSwitch
@@ -271,12 +324,25 @@ export const DevToolsSettingsModal = (props: DevToolsSettingsModalProps) => {
       {(fields || indices || templates || dataStreams) && (
         <>
           <SettingsGroup
-            title={i18n.translate('console.settingsPage.autocompleteRefreshSettingsLabel', { defaultMessage: 'Autocomplete refresh' })}
-            description={i18n.translate('console.settingsPage.autocompleteRefreshSettingsDescription', { defaultMessage: 'Console refreshes autocomplete suggestions by querying Elasticsearch. Use less frequent refreshes to reduce bandwidth costs.' })}
+            title={i18n.translate('console.settingsPage.autocompleteRefreshSettingsLabel', {
+              defaultMessage: 'Autocomplete refresh',
+            })}
+            description={i18n.translate(
+              'console.settingsPage.autocompleteRefreshSettingsDescription',
+              {
+                defaultMessage:
+                  'Console refreshes autocomplete suggestions by querying Elasticsearch. Use less frequent refreshes to reduce bandwidth costs.',
+              }
+            )}
           />
           <SettingsFormRow
-            label={i18n.translate('console.settingsPage.refreshingDataLabel', { defaultMessage: 'Refresh frequency' })}
-            labelWarning={i18n.translate('console.settingsPage.refreshingDataWarningLabel', { defaultMessage: 'Console refreshes autocomplete suggestions by querying Elasticsearch. Use less frequent refreshes to reduce bandwidth costs.' })}
+            label={i18n.translate('console.settingsPage.refreshingDataLabel', {
+              defaultMessage: 'Refresh frequency',
+            })}
+            labelWarning={i18n.translate('console.settingsPage.refreshingDataWarningLabel', {
+              defaultMessage:
+                'Console refreshes autocomplete suggestions by querying Elasticsearch. Use less frequent refreshes to reduce bandwidth costs.',
+            })}
           >
             <EuiSuperSelect
               css={{ minWidth: '220px' }}
@@ -287,7 +353,11 @@ export const DevToolsSettingsModal = (props: DevToolsSettingsModalProps) => {
             />
           </SettingsFormRow>
 
-          <SettingsFormRow label={i18n.translate('console.settingsPage.manualRefreshLabel', { defaultMessage: 'Manually refresh autocomplete suggestions' })}>
+          <SettingsFormRow
+            label={i18n.translate('console.settingsPage.manualRefreshLabel', {
+              defaultMessage: 'Manually refresh autocomplete suggestions',
+            })}
+          >
             <EuiButton
               iconType="refresh"
               size="s"
@@ -300,7 +370,7 @@ export const DevToolsSettingsModal = (props: DevToolsSettingsModalProps) => {
                   indices,
                   templates,
                   dataStreams,
-              });
+                });
               }}
             >
               <FormattedMessage

@@ -19,7 +19,13 @@ export interface Props {
 
 export function Config({ editorInstance }: Props) {
   return (
-    <EuiPanel color="subdued" paddingSize="l" hasShadow={false} borderRadius="none" css={{ height: '100%' }}>
+    <EuiPanel
+      color="subdued"
+      paddingSize="l"
+      hasShadow={false}
+      borderRadius="none"
+      css={{ height: '100%' }}
+    >
       <EuiFlexGroup gutterSize="xl">
         <EuiFlexItem>
           <Settings editorInstance={editorInstance} />

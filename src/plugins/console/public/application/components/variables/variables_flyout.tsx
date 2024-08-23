@@ -43,7 +43,9 @@ export const DevToolsVariablesFlyout = (props: DevToolsVariablesFlyoutProps) => 
   // Use a ref to persist the BehaviorSubject across renders
   const itemIdToExpandedRowMap$ = useRef(new BehaviorSubject<Record<string, React.ReactNode>>({}));
   // Subscribe to the BehaviorSubject and update local state on change
-  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, React.ReactNode>>({});
+  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
+    Record<string, React.ReactNode>
+  >({});
   // Subscribe to the BehaviorSubject on mount
   useEffect(() => {
     const subscription = itemIdToExpandedRowMap$.current.subscribe(setItemIdToExpandedRowMap);
@@ -66,7 +68,7 @@ export const DevToolsVariablesFlyout = (props: DevToolsVariablesFlyoutProps) => 
     } else {
       isMounted.current = true;
     }
-  }, [variables]);
+  }, [variables, props]);
 
   const toggleDetails = (variableId: string) => {
     const currentMap = itemIdToExpandedRowMap$.current.getValue();
@@ -77,12 +79,11 @@ export const DevToolsVariablesFlyout = (props: DevToolsVariablesFlyoutProps) => 
     } else {
       itemIdToExpandedRowMapValues[variableId] = (
         <VariableForm
-          title={i18n.translate('console.variablesPage.editVariableForm.title', { defaultMessage: 'Edit variable' })}
+          title={i18n.translate('console.variablesPage.editVariableForm.title', {
+            defaultMessage: 'Edit variable',
+          })}
           onSubmit={(data: DevToolsVariable) => {
-            const updatedVariables = utils.editVariable(
-              data,
-              variables
-            );
+            const updatedVariables = utils.editVariable(data, variables);
             setVariables(updatedVariables);
             collapseExpandedRow(variableId);
           }}
@@ -119,9 +120,7 @@ export const DevToolsVariablesFlyout = (props: DevToolsVariablesFlyoutProps) => 
         defaultMessage: 'Variable name',
       }),
       render: (name: string) => {
-        return (
-          <EuiCode>{`\$\{${name}\}`}</EuiCode>
-        );
+        return <EuiCode>{`\$\{${name}\}`}</EuiCode>;
       },
     },
     {
@@ -129,9 +128,7 @@ export const DevToolsVariablesFlyout = (props: DevToolsVariablesFlyoutProps) => 
       name: i18n.translate('console.variablesPage.variablesTable.columns.valueHeader', {
         defaultMessage: 'Value',
       }),
-      render: (value: string) => (
-        <EuiCode>{value}</EuiCode>
-      ),
+      render: (value: string) => <EuiCode>{value}</EuiCode>,
     },
     {
       field: 'id',
@@ -178,7 +175,10 @@ export const DevToolsVariablesFlyout = (props: DevToolsVariablesFlyoutProps) => 
       <EuiSpacer size="s" />
       <EuiText color="subdued">
         <p>
-          <FormattedMessage id="console.variablesPage.pageDescription" defaultMessage="Define and reuse placeholders for dynamic values in your queries." />
+          <FormattedMessage
+            id="console.variablesPage.pageDescription"
+            defaultMessage="Define and reuse placeholders for dynamic values in your queries."
+          />
         </p>
       </EuiText>
       <EuiSpacer size="l" />
@@ -195,10 +195,7 @@ export const DevToolsVariablesFlyout = (props: DevToolsVariablesFlyoutProps) => 
       />
 
       {isAddingVariable && (
-        <VariableForm
-          onSubmit={onAddVariable}
-          onCancel={() => setIsAddingVariable(false)}
-        />
+        <VariableForm onSubmit={onAddVariable} onCancel={() => setIsAddingVariable(false)} />
       )}
 
       <EuiSpacer size="m" />
@@ -210,7 +207,10 @@ export const DevToolsVariablesFlyout = (props: DevToolsVariablesFlyoutProps) => 
           onClick={() => setIsAddingVariable(true)}
           disabled={isAddingVariable}
         >
-          <FormattedMessage id="console.variablesPage.addButtonLabel" defaultMessage="Add variable" />
+          <FormattedMessage
+            id="console.variablesPage.addButtonLabel"
+            defaultMessage="Add variable"
+          />
         </EuiButton>
       </div>
 
@@ -227,7 +227,10 @@ export const DevToolsVariablesFlyout = (props: DevToolsVariablesFlyoutProps) => 
           buttonColor="danger"
         >
           <p>
-            <FormattedMessage id="console.variablesPage.deleteModal.description" defaultMessage="Deleting a variable cannot be reverted." />
+            <FormattedMessage
+              id="console.variablesPage.deleteModal.description"
+              defaultMessage="Deleting a variable cannot be reverted."
+            />
           </p>
         </EuiConfirmModal>
       )}

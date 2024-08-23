@@ -8,13 +8,7 @@
 
 import React from 'react';
 
-import {
-  EuiTitle,
-  EuiSpacer,
-  EuiText,
-  EuiHorizontalRule,
-} from '@elastic/eui';
-
+import { EuiTitle, EuiSpacer, EuiText, EuiHorizontalRule } from '@elastic/eui';
 
 export interface DevToolsSettingsModalProps {
   title: string;
@@ -26,17 +20,13 @@ export const SettingsGroup = ({ title, description }: DevToolsSettingsModalProps
     <>
       <EuiSpacer size="l" />
       <EuiTitle size="xs">
-        <h2>
-          {title}
-        </h2>
+        <h2>{title}</h2>
       </EuiTitle>
       {description && (
         <>
           <EuiSpacer size="s" />
           <EuiText color="subdued">
-            <p>
-              {description}
-            </p>
+            <p>{description}</p>
           </EuiText>
         </>
       )}

@@ -8,13 +8,7 @@
 
 import React from 'react';
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiIconTip,
-} from '@elastic/eui';
-
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIconTip } from '@elastic/eui';
 
 export interface DevToolsSettingsModalProps {
   label: string;
@@ -28,9 +22,7 @@ export const SettingsFormRow = ({ label, labelWarning, children }: DevToolsSetti
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="xs" alignItems="center">
-            <EuiFlexItem grow={false}>
-              {label}
-            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{label}</EuiFlexItem>
             {labelWarning && (
               <EuiFlexItem grow={false}>
                 <EuiIconTip
@@ -44,9 +36,7 @@ export const SettingsFormRow = ({ label, labelWarning, children }: DevToolsSetti
           </EuiFlexGroup>
         </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
-          {children}
-        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{children}</EuiFlexItem>
       </EuiFlexGroup>
     </EuiFormRow>
   );

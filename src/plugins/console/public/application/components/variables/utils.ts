@@ -12,12 +12,9 @@ export interface DevToolsVariable {
   value: string;
 }
 
-export const editVariable = (
-  newVariable: DevToolsVariable,
-  variables: DevToolsVariable[]
-) => {
+export const editVariable = (newVariable: DevToolsVariable, variables: DevToolsVariable[]) => {
   return variables.map((variable: DevToolsVariable) => {
-    return variable.id === newVariable.id ? newVariable : variable
+    return variable.id === newVariable.id ? newVariable : variable;
   });
 };
 

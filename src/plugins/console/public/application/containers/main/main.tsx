@@ -102,11 +102,7 @@ export function Main({ isEmbeddable = false }: MainProps) {
                 <Editor loading={!done} setEditorInstance={() => {}} />
               )}
 
-              {selectedTab === CONFIG_TAB_ID && (
-                <Config
-                  editorInstance={null}
-                />
-              )}
+              {selectedTab === CONFIG_TAB_ID && <Config editorInstance={null} />}
             </EuiSplitPanel.Inner>
             <EuiHorizontalRule margin="none" />
             <EuiSplitPanel.Inner paddingSize="xs" grow={false}>
