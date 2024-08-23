@@ -9,13 +9,14 @@
 
 import { inject, injectable } from 'inversify';
 import type { Type } from '@kbn/config-schema';
-import { type KibanaRequest, RequestToken } from '@kbn/core-http-server';
+import { Request } from '@kbn/core-di-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
 
 export type EchoRequest = KibanaRequest<never, never, Type<string>>;
 
 @injectable()
 export class Echo {
-  constructor(@inject(RequestToken) private readonly request: EchoRequest) {}
+  constructor(@inject(Request) private readonly request: EchoRequest) {}
 
   echo() {
     return this.request.body;
