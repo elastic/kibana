@@ -14,7 +14,7 @@ import { isEqual } from 'lodash';
 import type { Observable } from 'rxjs';
 import { from, isObservable, Subject } from 'rxjs';
 import { distinctUntilChanged, flatMap, scan, shareReplay } from 'rxjs';
-import type { DeepPartial } from '../../../common/types/common';
+import type { DeepPartial } from '@kbn/utility-types';
 import { jobSelectionActionCreator } from './actions';
 import { EXPLORER_ACTION } from './explorer_constants';
 import type { ExplorerState } from './reducers';
