@@ -290,11 +290,11 @@ export class StatusRuleExecutor {
   getLocationBasedDownSummary({
     statusConfigs,
     downThreshold,
-    percent,
+    noOfLocations,
   }: {
     statusConfigs: AlertStatusMetaDataCodec[];
     downThreshold: number;
-    percent: number;
+    noOfLocations: number;
   }) {
     const sampleConfig = statusConfigs[0];
     const { ping, configId, locationId, checks } = sampleConfig;
@@ -309,16 +309,27 @@ export class StatusRuleExecutor {
       downThreshold
     );
     const locNames = statusConfigs.map((c) => c.ping.observer.geo?.name).join(', ');
+    const thresholdReason = i18n.translate(
+      'xpack.synthetics.alertRules.monitorStatus.reasonMessage.location.threshold',
+      {
+        defaultMessage: `Alert when monitor is down from {noOfLocations, number} {noOfLocations, plural, one {location} other {locations}}.`,
+        values: {
+          noOfLocations,
+          locationNames: locNames,
+        },
+      }
+    );
     baseSummary.reason = i18n.translate(
       'xpack.synthetics.alertRules.monitorStatus.reasonMessage.location',
       {
-        defaultMessage: `Monitor "{name}" is {status} from {noOfLocs, number} {noOfLocs, plural, one {location} other {locations}} ({locationNames}). Alert when down from {percent}% of monitor locations.`,
+        defaultMessage: `Monitor "{name}" is {status} from {noOfLocs, number} {noOfLocs, plural, one {location} other {locations}} ({locationNames}). {thresholdReason}`,
         values: {
-          percent,
+          noOfLocations,
           locationNames: locNames,
           noOfLocs: statusConfigs.length,
           name: baseSummary.monitorName,
           status: baseSummary.status,
+          thresholdReason,
         },
       }
     );

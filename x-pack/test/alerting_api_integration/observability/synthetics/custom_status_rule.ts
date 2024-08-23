@@ -34,7 +34,7 @@ export default function ({ getService }: FtrProviderContext) {
           window: {
             numberOfChecks: 5,
           },
-          groupByLocation: true,
+          groupBy: 'locationId',
           downThreshold: 5,
         },
       };
@@ -91,7 +91,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should trigger down for ungrouped', async () => {
-        params.condition.groupByLocation = false;
+        params.condition.groupBy = '';
         const rule = await ruleHelper.createCustomStatusRule({
           params,
           name: 'Status based on number of checks',
@@ -128,9 +128,9 @@ export default function ({ getService }: FtrProviderContext) {
         const params: StatusRuleParams = {
           condition: {
             window: {
-              numberOfLocations: 100,
+              numberOfLocations: 1,
             },
-            groupByLocation: true,
+            groupBy: 'locationId',
             downThreshold: 1,
           },
         };
@@ -163,7 +163,7 @@ export default function ({ getService }: FtrProviderContext) {
         const alert: any = response.hits.hits?.[0]._source;
         expect(alert).to.have.property('kibana.alert.status', 'active');
         expect(alert['kibana.alert.reason']).to.eql(
-          `Monitor "${monitor.name}" is down from 1 location (Dev Service). Alert when down from 100% of monitor locations.`
+          `Monitor "${monitor.name}" is down from 1 location (Dev Service). Alert when monitor is down from 1 location.`
         );
       });
 
@@ -196,7 +196,7 @@ export default function ({ getService }: FtrProviderContext) {
         const alert: any = response.hits.hits?.[0]._source;
         expect(alert).to.have.property('kibana.alert.status', 'active');
         expect(alert['kibana.alert.reason']).to.eql(
-          `Monitor "${monitor.name}" is down from 1 location (Dev Service). Alert when down from 100% of monitor locations.`
+          `Monitor "${monitor.name}" is down from 1 location (Dev Service). Alert when monitor is down from 1 location.`
         );
       });
 
@@ -228,9 +228,9 @@ export default function ({ getService }: FtrProviderContext) {
         const params: StatusRuleParams = {
           condition: {
             window: {
-              numberOfLocations: 50,
+              numberOfLocations: 0.5,
             },
-            groupByLocation: true,
+            groupBy: 'locationId',
             downThreshold: 1,
           },
         };
@@ -296,7 +296,7 @@ export default function ({ getService }: FtrProviderContext) {
                 size: 10,
               },
             },
-            groupByLocation: true,
+            groupBy: 'locationId',
             downThreshold: 5,
           },
         };

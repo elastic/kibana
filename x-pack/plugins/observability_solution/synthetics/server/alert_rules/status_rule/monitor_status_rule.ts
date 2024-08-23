@@ -122,7 +122,7 @@ export const registerSyntheticsStatusCheckRule = (
               const monitorSummary = statusRule.getLocationBasedDownSummary({
                 statusConfigs: configs,
                 downThreshold: locationThreshold,
-                percent: numberOfLocations,
+                noOfLocations: numberOfLocations,
               });
               const alertId = `${configId}_locations_based`;
               statusRule.scheduleAlert({
