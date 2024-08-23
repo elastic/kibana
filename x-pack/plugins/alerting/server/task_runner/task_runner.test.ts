@@ -1970,9 +1970,9 @@ describe('Task Runner', () => {
   });
 
   test('should set unexpected errors as framework-error', async () => {
-    jest
-      .spyOn(getExecutorServicesModule, 'getExecutorServices')
-      .mockRejectedValueOnce(new Error('test'));
+    jest.spyOn(getExecutorServicesModule, 'getExecutorServices').mockImplementation(() => {
+      throw new Error('test');
+    });
 
     const taskRunner = new TaskRunner({
       ruleType,

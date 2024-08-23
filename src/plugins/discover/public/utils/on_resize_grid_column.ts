@@ -9,13 +9,13 @@
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 
 export const onResizeGridColumn = (
-  colSettings: { columnId: string; width: number },
+  colSettings: { columnId: string; width: number | undefined },
   gridState: DiscoverGridSettings | undefined
 ): DiscoverGridSettings => {
   const grid = { ...(gridState || {}) };
   const newColumns = { ...(grid.columns || {}) };
-  newColumns[colSettings.columnId] = {
-    width: Math.round(colSettings.width),
-  };
+  newColumns[colSettings.columnId] = colSettings.width
+    ? { width: Math.round(colSettings.width) }
+    : {};
   return { ...grid, columns: newColumns };
 };

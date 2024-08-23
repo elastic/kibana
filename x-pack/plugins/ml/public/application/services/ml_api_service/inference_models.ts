@@ -10,6 +10,12 @@ import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/typesWith
 import type { ModelConfig } from '@kbn/inference_integration_flyout/types';
 import type { HttpService } from '../http_service';
 import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
+
+// TODO remove inference_id when esType has been updated to include it
+export interface GetInferenceEndpointsResponse extends estypes.InferenceModelConfigContainer {
+  inference_id: string;
+}
+
 export function inferenceModelsApiProvider(httpService: HttpService) {
   return {
     /**
@@ -36,7 +42,7 @@ export function inferenceModelsApiProvider(httpService: HttpService) {
      */
     async getAllInferenceEndpoints() {
       const result = await httpService.http<{
-        endpoints: estypes.InferenceModelConfigContainer[];
+        endpoints: GetInferenceEndpointsResponse[];
       }>({
         path: `${ML_INTERNAL_BASE_PATH}/_inference/all`,
         method: 'GET',
