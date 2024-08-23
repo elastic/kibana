@@ -252,6 +252,7 @@ export async function getFullAgentPolicy(
     {
       logs: agentPolicy.monitoring_enabled?.includes(dataTypes.Logs) ?? false,
       metrics: agentPolicy.monitoring_enabled?.includes(dataTypes.Metrics) ?? false,
+      traces: agentPolicy.monitoring_enabled?.includes(dataTypes.Traces) ?? false,
     },
     agentPolicy.namespace
   );

@@ -93,6 +93,9 @@ export async function getMonitoringPermissions(
           if (ds.type === dataTypes.Metrics && !enabled.metrics) {
             return;
           }
+          if (ds.type === dataTypes.Traces && !enabled.traces) {
+            return;
+          }
           return getDataStreamPrivileges(ds, namespace);
         })
         .filter(
