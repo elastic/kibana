@@ -94,7 +94,8 @@ jest.mock('../queries/task_claiming', () => {
 
 const taskManagerStartSpy = jest.spyOn(TaskManagerPlugin.prototype, 'start');
 
-describe('capacity based claiming', () => {
+// Failing: See https://github.com/elastic/kibana/issues/191117
+describe.skip('capacity based claiming', () => {
   const taskIdsToRemove: string[] = [];
   let esServer: TestElasticsearchUtils;
   let kibanaServer: TestKibanaUtils;

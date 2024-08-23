@@ -27,11 +27,11 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import { ControlStyle, ParentIgnoreSettings } from '../..';
+import { ControlStyle, ParentIgnoreSettings } from '../../..';
 
-import { ControlStateManager } from '../controls/types';
-import { ControlGroupStrings } from './control_group_strings';
-import { ControlGroupApi, ControlGroupEditorState } from './types';
+import { ControlStateManager } from '../../controls/types';
+import { ControlGroupStrings } from '../control_group_strings';
+import { ControlGroupApi, ControlGroupEditorState } from '../types';
 
 const CONTROL_LAYOUT_OPTIONS = [
   {
@@ -46,7 +46,7 @@ const CONTROL_LAYOUT_OPTIONS = [
   },
 ];
 
-interface EditControlGroupProps {
+interface Props {
   onCancel: () => void;
   onSave: () => void;
   onDeleteAll: () => void;
@@ -54,13 +54,7 @@ interface EditControlGroupProps {
   api: ControlGroupApi; // controls must always have a parent API
 }
 
-export const ControlGroupEditor = ({
-  onCancel,
-  onSave,
-  onDeleteAll,
-  stateManager,
-  api,
-}: EditControlGroupProps) => {
+export const ControlGroupEditor = ({ onCancel, onSave, onDeleteAll, stateManager, api }: Props) => {
   const [
     children,
     selectedLabelPosition,

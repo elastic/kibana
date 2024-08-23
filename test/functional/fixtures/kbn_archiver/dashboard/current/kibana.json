@@ -3175,3 +3175,53 @@
   "coreMigrationVersion": "8.8.0",
   "typeMigrationVersion": "8.9.0"
 }
+
+{
+  "id": "153e3302-1b37-4c45-9b11-91deec40ab47",
+  "type": "dashboard",
+  "namespaces": [
+    "default"
+  ],
+  "updated_at": "2024-08-21T20:48:22.388Z",
+  "created_at": "2024-08-21T20:46:21.250Z",
+  "version": "WzQ4MCwxXQ==",
+  "attributes": {
+    "version": 2,
+    "controlGroupInput": {
+      "controlStyle": "oneLine",
+      "chainingSystem": "HIERARCHICAL",
+      "showApplySelections": false,
+      "panelsJSON": "{\"bcb81550-0843-44ea-9020-6c1ebf3228ac\":{\"type\":\"optionsListControl\",\"order\":0,\"grow\":true,\"width\":\"medium\",\"explicitInput\":{\"id\":\"bcb81550-0843-44ea-9020-6c1ebf3228ac\",\"fieldName\":\"sound.keyword\",\"title\":\"sound.keyword\",\"grow\":true,\"width\":\"medium\",\"searchTechnique\":\"prefix\",\"enhancements\":{}}},\"15925456-9e12-4b08-b2e6-4ae6ac27114d\":{\"type\":\"rangeSliderControl\",\"order\":1,\"grow\":true,\"width\":\"medium\",\"explicitInput\":{\"fieldName\":\"weightLbs\",\"title\":\"weightLbs\",\"searchTechnique\":\"exact\",\"id\":\"15925456-9e12-4b08-b2e6-4ae6ac27114d\",\"enhancements\":{}}}}",
+      "ignoreParentSettingsJSON": "{\"ignoreFilters\":false,\"ignoreQuery\":false,\"ignoreTimerange\":false,\"ignoreValidations\":false}"
+    },
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+    },
+    "description": "",
+    "refreshInterval": {
+      "pause": true,
+      "value": 60000
+    },
+    "timeRestore": true,
+    "optionsJSON": "{\"useMargins\":true,\"syncColors\":false,\"syncCursor\":true,\"syncTooltips\":false,\"hidePanelTitles\":false}",
+    "panelsJSON": "[]",
+    "timeFrom": "2018-01-01T00:00:00.000Z",
+    "title": "control group settings test dashboard",
+    "timeTo": "2018-04-13T00:00:00.000Z"
+  },
+  "references": [
+    {
+      "name": "controlGroup_bcb81550-0843-44ea-9020-6c1ebf3228ac:optionsListDataView",
+      "type": "index-pattern",
+      "id": "a0f483a0-3dc9-11e8-8660-4d65aa086b3c"
+    },
+    {
+      "name": "controlGroup_15925456-9e12-4b08-b2e6-4ae6ac27114d:rangeSliderDataView",
+      "type": "index-pattern",
+      "id": "a0f483a0-3dc9-11e8-8660-4d65aa086b3c"
+    }
+  ],
+  "managed": false,
+  "coreMigrationVersion": "8.8.0",
+  "typeMigrationVersion": "10.2.0"
+}
