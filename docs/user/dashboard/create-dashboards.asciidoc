@@ -36,8 +36,6 @@ When you create a dashboard, you are automatically in edit mode and can make cha
 ** <<lens,**Create visualization**>>. This option is a shortcut to create a chart using **Lens**, the default visualization editor in {kib}.
 ** <<panels-editors,**Add panel**>>. Choose one of the available panels to add and configure content to your dashboard.
 ** **Add from library**. Select existing content that has already been configured and saved to the **Visualize Library**.
-+
-NOTE: When you add a saved search from *Discover* to a dashboard, the results are not aggregated.
 ** <<add-controls,**Controls**>>. Add controls to help filter the content of your dashboard.
 
 . Organize your dashboard by <<arrange-panels,organizing the various panels>>. 
@@ -68,7 +66,7 @@ TIP: When looking for a specific dashboard, you can filter them by tag or by cre
 
 . Click the dashboard *Title* you want to open.
 
-. When you open an existing dashboard, you are in view mode. To make changes to the dashboard, click *Edit* in the toolbar. 
+. Make sure that you are in **Edit** mode to be able to make changes to the dashboard. You can switch between **Edit** and **View** modes from the toolbar.
 
 . Make the changes that you need to the dashboard:
 
@@ -115,20 +113,20 @@ In the toolbar, click *Edit*, then use the following options:
 TIP: If you <<share-the-dashboard,share>> a dashboard while viewing a full screen panel, the generated link will directly open the same panel in full screen mode.
 
 [[duplicate-panels]]
-=== Duplicate panels
+=== Copy and duplicate panels
 
 To duplicate a panel and the configured functionality, use the clone and copy panel options. Cloned and copied panels replicate all of the functionality from the original panel, 
 including renaming, editing, and cloning. 
 
 [float]
 [[clone-panels]]
-==== Clone panels
+==== Duplicate panels
 
-Cloned panels appear next to the original panel, and move the other panels to provide a space on the dashboard.
+Duplicated panels appear next to the original panel, and move the other panels to provide a space on the dashboard.
 
 . In the toolbar, click *Edit*.
 
-. Open the panel menu, then select *Clone panel*. 
+. Open the panel menu, then select *Duplicate panel*. 
 
 [float]
 [[copy-to-dashboard]]
@@ -143,5 +141,11 @@ Copy panels from one dashboard to another dashboard.
 == Import dashboards
 
 You can import dashboards from the **Saved Objects** page under **Stack Management**. Refer to <<managing-saved-objects,Manage saved objects>>.
+
+When importing dashboards, you also import their related objects, such as data views and visualizations. Import options allow you to define how the import should behave with these related objects.
+
+* **Check for existing objects**: When selected, objects are not imported when another object with the same ID already exists in this space or cluster. For example, if you import a dashboard that uses a data view which already exists, the data view is not imported and the dashboard uses the existing data view instead. You can also chose to select manually which of the imported or the existing objects are kept by selecting **Request action on conflict**.
+
+* **Create new objects with random IDs**: All related objects are imported and are assigned a new ID to avoid conflicts.
 
 image:images/dashboard-import-saved-object.png[Import panel]

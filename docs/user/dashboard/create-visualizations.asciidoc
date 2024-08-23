@@ -83,7 +83,7 @@ There are also some common options that you can configure on the various types o
 [[save-to-visualize-library]]
 === Save to the Visualize Library
 
-To use a panel on multiple dashboards or *Canvas* workpads, you can save it to the *Visualize Library*. Any updates made to a shared panel is replicated to all dashboards where the panel is added.
+To use a panel on multiple dashboards, you can save it to the *Visualize Library*. Any updates made to a shared panel is replicated to all dashboards where the panel is added.
 //When panels are saved in the *Visualize Library*, image:dashboard/images/visualize-library-icon.png[Visualize Library icon] appears in the panel header.
 
 If you created the panel from a dashboard:
