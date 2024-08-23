@@ -37,16 +37,16 @@ export const AddDataPopover = () => {
   const troubleshootingLinkHref = 'https://ela.st/host-troubleshooting';
 
   const popoverContent = {
-    title: i18n.translate('xpack.infra.addDataPopover.title', {
+    title: i18n.translate('xpack.infra.addDataPopover.wantToSeeMorePopoverTitleLabel', {
       defaultMessage: 'Want to see more?',
     }),
-    content: i18n.translate('xpack.infra.addDataPopover.content', {
+    content: i18n.translate('xpack.infra.addDataPopover.understandHostPerformanceByTextLabel', {
       defaultMessage: 'Understand host performance by collecting more metrics.',
     }),
-    button: i18n.translate('xpack.infra.addDataPopover.button', {
+    button: i18n.translate('xpack.infra.addDataPopover.understandHostPerformanceByTextLabel', {
       defaultMessage: 'Add data',
     }),
-    link: i18n.translate('xpack.infra.addDataPopover.link', {
+    link: i18n.translate('xpack.infra.addDataPopover.troubleshootingLinkLabel', {
       defaultMessage: 'Troubleshooting',
     }),
   };
