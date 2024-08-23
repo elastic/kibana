@@ -11,6 +11,8 @@ import type { IntegrationSettings } from '../../types';
 import * as i18n from './translations';
 import { useActions } from '../../state';
 
+const MAX_IMPORT_PAYLOAD_BYTES = 9000000; // 9 MegaBytes
+
 interface SampleLogsInputProps {
   integrationSettings: IntegrationSettings | undefined;
 }
@@ -28,7 +30,7 @@ export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSe
         return;
       }
 
-      if (logsSampleFile.size > 9000000) {
+      if (logsSampleFile.size > MAX_IMPORT_PAYLOAD_BYTES) {
         // File size limited to 9 MegaBytes
         setSampleFileError(i18n.LOGS_SAMPLE_ERROR.LOGS_SAMPLE_FILE_TOO_LARGE);
         setIntegrationSettings({ ...integrationSettings, encodedLogSamples: undefined });
