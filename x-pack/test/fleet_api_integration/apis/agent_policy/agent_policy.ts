@@ -906,6 +906,7 @@ export default function (providerContext: FtrProviderContext) {
     describe('PUT /api/fleet/agent_policies/{agentPolicyId}', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+        await kibanaServer.savedObjects.cleanStandardList();
       });
       const createdPolicyIds: string[] = [];
       after(async () => {
@@ -954,6 +955,53 @@ export default function (providerContext: FtrProviderContext) {
         expect(newPolicy).to.eql({
           status: 'active',
           name: 'Updated name',
+          description: 'Updated description',
+          namespace: 'default',
+          is_managed: false,
+          revision: 2,
+          schema_version: FLEET_AGENT_POLICIES_SCHEMA_VERSION,
+          updated_by: 'elastic',
+          inactivity_timeout: 1209600,
+          package_policies: [],
+          is_protected: false,
+          space_ids: [],
+        });
+      });
+
+      it('should support empty space_ids', async () => {
+        const {
+          body: { item: originalPolicy },
+        } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Initial name 2',
+            space_ids: [],
+            description: 'Initial description',
+            namespace: 'default',
+          })
+          .expect(200);
+        agentPolicyId = originalPolicy.id;
+        const {
+          body: { item: updatedPolicy },
+        } = await supertest
+          .put(`/api/fleet/agent_policies/${agentPolicyId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Updated name 2',
+            space_ids: [],
+            description: 'Updated description',
+            namespace: 'default',
+            is_protected: false,
+          })
+          .expect(200);
+        createdPolicyIds.push(updatedPolicy.id);
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        const { id, updated_at, version, ...newPolicy } = updatedPolicy;
+
+        expect(newPolicy).to.eql({
+          status: 'active',
+          name: 'Updated name 2',
           description: 'Updated description',
           namespace: 'default',
           is_managed: false,
@@ -1053,7 +1101,7 @@ export default function (providerContext: FtrProviderContext) {
           .put(`/api/fleet/agent_policies/${originalPolicy.id}`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            name: 'Updated name',
+            name: `Updated name ${Date.now()}`,
             description: 'Initial description',
             namespace: 'default',
           })
