@@ -13,7 +13,11 @@ import {
   LATEST_FINDINGS_RETENTION_POLICY,
   CDR_MISCONFIGURATIONS_INDEX_PATTERN,
 } from '@kbn/cloud-security-posture-common';
-import type { CspSetupStatus, IndexStatus } from '@kbn/cloud-security-posture-common';
+import type {
+  CspSetupStatus,
+  IndexStatus,
+  CspStatusCode,
+} from '@kbn/cloud-security-posture-common';
 import type { SavedObjectsClientContract, Logger, ElasticsearchClient } from '@kbn/core/server';
 import type {
   AgentPolicyServiceInterface,
@@ -43,7 +47,7 @@ import type {
   CspRouter,
   StatusResponseInfo,
 } from '../../types';
-import type { CspStatusCode, PostureTypes } from '../../../common/types_old';
+import type { PostureTypes } from '../../../common/types_old';
 import {
   getAgentStatusesByAgentPolicies,
   getCspAgentPolicies,

@@ -36,7 +36,7 @@ import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/s
 import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
 import type { AlertingPluginSetup } from '@kbn/alerting-plugin/public/plugin';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import { CspStatusCode } from '../common/types_old';
+import { CspStatusCode } from '@kbn/cloud-security-posture-common';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CspServerPluginSetup {}
