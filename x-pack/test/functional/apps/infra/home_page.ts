@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { parse } from 'url';
 import { KUBERNETES_TOUR_STORAGE_KEY } from '@kbn/infra-plugin/public/pages/metrics/inventory_view/components/kubernetes_tour';
 import { InfraSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -269,35 +268,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await pageObjects.assetDetails.logsExists();
           });
         });
-
-        describe('APM Link Tab', () => {
-          before(async () => {
-            await pageObjects.assetDetails.clickApmTabLink();
-            await pageObjects.infraHome.waitForLoading();
-          });
-
-          it('should navigate to APM traces', async () => {
-            const url = parse(await browser.getCurrentUrl());
-            const query = decodeURIComponent(url.query ?? '');
-            const kuery = 'kuery=host.hostname:"host-1"';
-
-            await retry.tryForTime(5000, async () => {
-              expect(url.pathname).to.eql('/app/apm/traces');
-              expect(query).to.contain(kuery);
-            });
-            await returnTo(INVENTORY_PATH);
-          });
-        });
-
-        it('should show auto-refresh option', async () => {
-          const kibanaRefreshConfig = await pageObjects.timePicker.getRefreshConfig();
-          expect(kibanaRefreshConfig.interval).to.equal('5');
-          expect(kibanaRefreshConfig.units).to.equal('Seconds');
-          expect(kibanaRefreshConfig.isPaused).to.equal(true);
-        });
       });
 
-      describe('Asset Details flyout for a container', async () => {
+      describe('Asset Details flyout for a container', () => {
         before(async () => {
           await pageObjects.infraHome.goToContainer();
           await pageObjects.infraHome.goToTime(DATE_WITH_DOCKER_DATA);
@@ -377,33 +350,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           it('should render logs tab', async () => {
             await pageObjects.assetDetails.logsExists();
           });
-        });
-
-        describe('APM Link Tab', () => {
-          before(async () => {
-            await pageObjects.infraHome.clickOnNode();
-            await pageObjects.assetDetails.clickApmTabLink();
-            await pageObjects.infraHome.waitForLoading();
-          });
-
-          it('should navigate to APM traces', async () => {
-            const url = parse(await browser.getCurrentUrl());
-            const query = decodeURIComponent(url.query ?? '');
-            const kuery = 'kuery=container.id:"container-id-4"';
-
-            await retry.tryForTime(5000, async () => {
-              expect(url.pathname).to.eql('/app/apm/traces');
-              expect(query).to.contain(kuery);
-            });
-            await returnTo(INVENTORY_PATH);
-          });
-        });
-
-        it('should show auto-refresh option', async () => {
-          const kibanaRefreshConfig = await pageObjects.timePicker.getRefreshConfig();
-          expect(kibanaRefreshConfig.interval).to.equal('5');
-          expect(kibanaRefreshConfig.units).to.equal('Seconds');
-          expect(kibanaRefreshConfig.isPaused).to.equal(true);
         });
       });
 

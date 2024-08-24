@@ -577,7 +577,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await pageObjects.infraHostsView.getBetaBadgeExists();
         });
 
-        describe('Hosts table', async () => {
+        describe('Hosts table', () => {
           let hostRows: WebElementWrapper[] = [];
 
           before(async () => {
@@ -858,7 +858,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
 
           it('should correctly load the Alerts tab section when clicking on it', async () => {
-            testSubjects.existOrFail('hostsView-alerts');
+            await testSubjects.existOrFail('hostsView-alerts');
           });
 
           it('should correctly render a badge with the active alerts count', async () => {
