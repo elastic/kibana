@@ -117,6 +117,7 @@ export const VariablesEditor = (props: Props) => {
       name: i18n.translate('console.variablesPage.variablesTable.columns.variableHeader', {
         defaultMessage: 'Variable name',
       }),
+      'data-test-subj': 'variableNameCell',
       render: (name: string) => {
         return <EuiCode>{`\$\{${name}\}`}</EuiCode>;
       },
@@ -126,6 +127,7 @@ export const VariablesEditor = (props: Props) => {
       name: i18n.translate('console.variablesPage.variablesTable.columns.valueHeader', {
         defaultMessage: 'Value',
       }),
+      'data-test-subj': 'variableValueCell',
       render: (value: string) => <EuiCode>{value}</EuiCode>,
     },
     {
@@ -193,6 +195,7 @@ export const VariablesEditor = (props: Props) => {
         itemId="id"
         responsiveBreakpoint={false}
         className="conVariablesTable"
+        data-test-subj="variablesTable"
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
         noItemsMessage={i18n.translate('console.variablesPage.table.noItemsMessage', {
           defaultMessage: 'No variables have been added yet',

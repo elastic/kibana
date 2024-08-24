@@ -126,6 +126,7 @@ export const VariableEditorForm = (props: VariableEditorFormProps) => {
             component={TextField}
             componentProps={{
               euiFieldProps: {
+                'data-test-subj': 'nameField',
                 placeholder: i18n.translate('console.variablesPage.form.namePlaceholderLabel', {
                   defaultMessage: 'exampleName',
                 }),
@@ -141,6 +142,7 @@ export const VariableEditorForm = (props: VariableEditorFormProps) => {
             component={TextField}
             componentProps={{
               euiFieldProps: {
+                'data-test-subj': 'valueField',
                 placeholder: i18n.translate('console.variablesPage.form.valuePlaceholderLabel', {
                   defaultMessage: 'exampleValue',
                 }),
@@ -161,7 +163,12 @@ export const VariableEditorForm = (props: VariableEditorFormProps) => {
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
-              <EuiButton fill iconType="save" onClick={form.submit}>
+              <EuiButton
+                fill
+                iconType="save"
+                onClick={form.submit}
+                data-test-subj="addNewVariableButton"
+              >
                 <FormattedMessage
                   id="console.variablesPage.addNew.submitButton"
                   defaultMessage="Save changes"
