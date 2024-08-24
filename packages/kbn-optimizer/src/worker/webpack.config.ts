@@ -64,6 +64,7 @@ export function getWebpackConfig(
     },
 
     optimization: {
+      chunkIds: worker.dist ? 'deterministic' : 'natural',
       emitOnErrors: false,
       splitChunks: {
         maxAsyncRequests: 10,
@@ -291,7 +292,7 @@ export function getWebpackConfig(
               maxSize: 8192,
             },
           },
-        }
+        },
       ],
     },
 
