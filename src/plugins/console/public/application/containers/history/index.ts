@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { ConsoleHistory } from './console_history';
+export { History } from './history';

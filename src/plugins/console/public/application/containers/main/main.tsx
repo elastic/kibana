@@ -19,17 +19,18 @@ import {
 import { MAIN_PANEL_LABELS } from './i18n';
 import { NavIconButton } from './nav_icon_button';
 import { Editor } from '../editor';
+import { History } from '../history';
 import { TopNavMenu, SomethingWentWrongCallout } from '../../components';
 import { useDataInit } from '../../hooks';
 import { getTopNavConfig } from './get_top_nav';
-import { SHELL_TAB_ID } from './tab_ids';
+import { SHELL_TAB_ID, HISTORY_TAB_ID } from './tab_ids';
 
 interface MainProps {
   isEmbeddable?: boolean;
 }
 
 export function Main({ isEmbeddable = false }: MainProps) {
-  const [selectedTab, setSelectedTab] = useState(SHELL_TAB_ID);
+  const [selectedTab, setSelectedTab] = useState(HISTORY_TAB_ID);
 
   const { done, error, retry } = useDataInit();
 
@@ -100,6 +101,8 @@ export function Main({ isEmbeddable = false }: MainProps) {
               {selectedTab === SHELL_TAB_ID && (
                 <Editor loading={!done} setEditorInstance={() => {}} />
               )}
+
+              {selectedTab === HISTORY_TAB_ID && <History />}
             </EuiSplitPanel.Inner>
             <EuiHorizontalRule margin="none" />
             <EuiSplitPanel.Inner paddingSize="xs" grow={false}>

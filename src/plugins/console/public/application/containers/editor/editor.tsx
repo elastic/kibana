@@ -16,6 +16,7 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   EditorContentSpinner,
@@ -143,7 +144,10 @@ export const Editor = memo(({ loading, setEditorInstance }: Props) => {
                         data-test-subj="clearConsoleOutput"
                         onClick={() => dispatch({ type: 'cleanRequest', payload: undefined })}
                       >
-                        Clear this output
+                        <FormattedMessage
+                          id="console.consolePage.clearOutputButtonLabel"
+                          defaultMessage="Clear this output"
+                        />
                       </EuiButtonEmpty>
                     </EuiFlexItem>
                   ) : (
