@@ -15,3 +15,4 @@ export { WelcomePanel } from './welcome_panel';
 export { HelpPanel } from './help_panel';
 export { EditorContentSpinner } from './editor_content_spinner';
 export { OutputPanelEmptyState } from './output_panel_empty_state';
+export type { DevToolsVariable } from './variables/types';
