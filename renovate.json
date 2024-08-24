@@ -1,8 +1,8 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended", "helpers:pinGitHubActionDigests"],
+  "extends": ["config:recommended", "helpers:pinGitHubActionDigests", "helpers:pinGitHubActionDigestsToSemver"],
   "ignorePaths": ["**/__fixtures__/**", "**/fixtures/**"],
-  "enabledManagers": ["npm", "github-actions"],
+  "enabledManagers": ["npm", "github-actions", "custom.regex"],
   "baseBranches": ["main", "7.17"],
   "prConcurrentLimit": 0,
   "prHourlyLimit": 0,
@@ -21,14 +21,24 @@
       "enabled": false
     },
     {
-      "matchPackageNames": [
-        "docker.elastic.co/wolfi/chainguard-base"
-      ],
+      "groupName": "chainguard",
+      "matchPackageNames": ["docker.elastic.co/wolfi/chainguard-base"],
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Operations", "release_note:skip"],
       "enabled": true
     },
     {
-      "groupName": "GitHub actions",
+      "groupName": "operations actions",
       "matchManagers": ["github-actions"],
+      "matchPackageNames": [
+        "actions/checkout",
+        "elastic/github-actions/project-assigner",
+        "hmarr/auto-approve-action",
+        "octokit/graphql-action",
+        "sergeysova/jq-action",
+        "sourenlouv/backport"
+      ],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Operations", "backport:all-open", "release_note:skip"],
@@ -60,7 +70,7 @@
     },
     {
       "groupName": "LaunchDarkly",
-      "matchDepNames": ["launchdarkly-js-client-sdk", "@launchdarkly/node-server-sdk"],
+      "matchDepNames": ["launchdarkly-js-client-sdk", "@launchdarkly/node-server-sdk", "launchdarkly/find-code-references"],
       "reviewers": ["team:kibana-security", "team:kibana-core"],
       "matchBaseBranches": ["main"],
       "labels": ["release_note:skip", "Team:Security", "Team:Core", "backport:prev-minor"],
@@ -70,6 +80,14 @@
     {
       "groupName": "APM",
       "matchDepNames": ["elastic-apm-node", "@elastic/apm-rum", "@elastic/apm-rum-react"],
+      "reviewers": ["team:kibana-core"],
+      "matchBaseBranches": ["main"],
+      "labels": ["release_note:skip", "Team:Core", "backport:skip"],
+      "enabled": true
+    },
+    {
+      "groupName": "@elastic/ebt",
+      "matchDepNames": ["@elastic/ebt"],
       "reviewers": ["team:kibana-core"],
       "matchBaseBranches": ["main"],
       "labels": ["release_note:skip", "Team:Core", "backport:skip"],
@@ -199,6 +217,18 @@
         "xml-crypto",
         "@types/xml-crypto",
         "@kayahr/text-encoding"
+      ],
+      "reviewers": ["team:kibana-security"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Security", "release_note:skip", "backport:all-open"],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "CodeQL",
+      "matchDepNames": [
+        "github/codeql-action/analyze",
+        "github/codeql-action/init"
       ],
       "reviewers": ["team:kibana-security"],
       "matchBaseBranches": ["main"],
@@ -416,15 +446,6 @@
       "enabled": true
     },
     {
-      "groupName": "machine learning modules",
-      "matchDepNames": ["apidoc-markdown"],
-      "reviewers": ["team:ml-ui"],
-      "matchBaseBranches": ["main"],
-      "labels": ["Team:ML", "release_note:skip", "backport:all-open"],
-      "minimumReleaseAge": "7 days",
-      "enabled": true
-    },
-    {
       "groupName": "Kibana ES|QL Team",
       "matchDepNames": ["recast"],
       "reviewers": ["team:kibana-esql"],
@@ -447,6 +468,14 @@
       "reviewers": ["team:visualizations", "dej611"],
       "matchBaseBranches": ["main"],
       "labels": ["release_note:skip", "backport:all-open", "Team:Visualizations"],
+      "enabled": true
+    },
+    {
+      "groupName": "Serve swagger docs",
+      "matchDepNames": ["express", "swagger-jsdoc", "swagger-ui-express"],
+      "reviewers": ["team:obs-entities"],
+      "matchBaseBranches": ["main"],
+      "labels": ["release_note:skip", "team:obs-entities"],
       "enabled": true
     }
   ],

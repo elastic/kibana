@@ -168,7 +168,7 @@ export function _buildStatusRuntimeField(opts: {
 // pathPrefix is used by the endpoint team currently to run
 // agent queries against the endpoint metadata index
 export async function buildAgentStatusRuntimeField(
-  soClient: SavedObjectsClientContract,
+  soClient: SavedObjectsClientContract, // Deprecated, it's now using an internal client
   pathPrefix?: string
 ) {
   const config = appContextService.getConfig();
@@ -182,7 +182,7 @@ export async function buildAgentStatusRuntimeField(
   }
   const maxAgentPoliciesWithInactivityTimeout =
     config?.developer?.maxAgentPoliciesWithInactivityTimeout;
-  const inactivityTimeouts = await agentPolicyService.getInactivityTimeouts(soClient);
+  const inactivityTimeouts = await agentPolicyService.getInactivityTimeouts();
 
   return _buildStatusRuntimeField({
     inactivityTimeouts,

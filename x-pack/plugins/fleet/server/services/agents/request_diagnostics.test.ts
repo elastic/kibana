@@ -14,7 +14,12 @@ import { bulkRequestDiagnostics, requestDiagnostics } from './request_diagnostic
 
 describe('requestDiagnostics', () => {
   beforeEach(async () => {
-    appContextService.start(createAppContextStartContractMock());
+    const { soClient } = createClientMock();
+    appContextService.start(
+      createAppContextStartContractMock({}, false, {
+        withoutSpaceExtensions: soClient,
+      })
+    );
   });
 
   afterEach(() => {

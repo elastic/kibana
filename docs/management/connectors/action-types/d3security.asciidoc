@@ -8,7 +8,7 @@
 :frontmatter-tags-content-type: [how-to]
 :frontmatter-tags-user-goals: [configure]
 
-The D3 Security connector uses https://github.com/axios/axios[axios] to send a POST request to a D3 Security endpoint. The connector uses the <<execute-connector-api,run connector API>> to send the request. You can use the connector for rule actions.
+The D3 Security connector uses https://github.com/axios/axios[axios] to send a POST request to a D3 Security endpoint. You can use the connector for rule actions.
 
 To create this connector, you must first configure a webhook key in your D3 SOAR environment. For configuration tips, refer to <<configure-d3security>>.
 
@@ -35,8 +35,7 @@ Token::   The D3 Security token.
 [[d3security-action-configuration]]
 === Test connectors
 
-You can test connectors with the <<execute-connector-api,run connector API>> or
-as you're creating or editing the connector in {kib}. For example:
+You can test connectors as you're creating or editing the connector in {kib}. For example:
 
 [role="screenshot"]
 image::management/connectors/images/d3security-params-test.png[D3 Security params test]

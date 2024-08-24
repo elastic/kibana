@@ -28,3 +28,9 @@ export {
 export { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 
 export { TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
+
+export type {
+  SendRequestConfig,
+  SendRequestResponse,
+  Error,
+} from '@kbn/es-ui-shared-plugin/public';

@@ -53,10 +53,13 @@ describe('getDefaultProfileState', () => {
       },
       defaultColumns: ['messsage', 'bytes'],
       dataView: emptyDataView,
-      esqlQueryColumns: [{ id: '1', name: 'foo', meta: { type: 'string' } }],
+      esqlQueryColumns: [
+        { id: '1', name: 'foo', meta: { type: 'string' } },
+        { id: '2', name: 'bar', meta: { type: 'string' } },
+      ],
     });
     expect(appState).toEqual({
-      columns: ['foo'],
+      columns: ['foo', 'bar'],
       grid: {
         columns: {
           foo: {

@@ -85,7 +85,7 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async expectAppStateRemovedFromURL() {
-    this.retry.try(async () => {
+    await this.retry.try(async () => {
       const url = await this.browser.getCurrentUrl();
       expect(url.indexOf('_a')).to.be(-1);
     });
@@ -453,7 +453,7 @@ export class DashboardPageObject extends FtrService {
       const edit = editMode ? `?_a=(viewMode:edit)` : '';
       dashboardLocation = `/view/${id}${edit}`;
     }
-    this.common.navigateToActualUrl('dashboard', dashboardLocation, args);
+    await this.common.navigateToActualUrl('dashboard', dashboardLocation, args);
   }
 
   public async gotoDashboardListingURL({

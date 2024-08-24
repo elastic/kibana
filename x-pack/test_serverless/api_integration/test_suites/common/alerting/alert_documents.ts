@@ -72,7 +72,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     afterEach(async () => {
-      objectRemover.removeAll();
+      await objectRemover.removeAll();
     });
 
     after(async () => {
