@@ -30,12 +30,13 @@ import type {
   PackagePolicyClient,
 } from '@kbn/fleet-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { IndexDetails } from '@kbn/cloud-security-posture-common';
 import type { FleetStartContract, FleetRequestHandlerContext } from '@kbn/fleet-plugin/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
 import type { AlertingPluginSetup } from '@kbn/alerting-plugin/public/plugin';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import { CspStatusCode, IndexDetails } from '../common/types_old';
+import { CspStatusCode } from '../common/types_old';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CspServerPluginSetup {}

@@ -21,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { CDR_MISCONFIGURATIONS_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isEmpty } from 'lodash';
+import { CspFinding } from '@kbn/cloud-security-posture-common';
 import { getDatasetDisplayName } from '../../../common/utils/get_dataset_display_name';
 import { truthy } from '../../../../common/utils/helpers';
 import { CSP_MOMENT_FORMAT } from '../../../common/constants';
@@ -30,7 +31,6 @@ import {
 } from '../../../../common/constants';
 import { useDataView } from '../../../common/api/use_data_view';
 import { useKibana } from '../../../common/hooks/use_kibana';
-import { CspFinding } from '../../../../common/schemas/csp_finding';
 import {
   BenchmarkIcons,
   CodeBlock,
