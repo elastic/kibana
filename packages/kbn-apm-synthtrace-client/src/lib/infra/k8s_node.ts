@@ -9,7 +9,7 @@
 import { Entity, Fields } from '../entity';
 import { Serializable } from '../serializable';
 
-export interface K8sNodeDocument extends Fields {
+interface K8sNodeDocument extends Fields {
   'kubernetes.node.name': string;
   'kubernetes.pod.uid'?: string;
   'agent.id': string;
@@ -19,7 +19,7 @@ export interface K8sNodeDocument extends Fields {
   'event.dataset'?: string;
 }
 
-class K8sNode extends Entity<K8sNodeDocument> {
+export class K8sNode extends Entity<K8sNodeDocument> {
   metrics() {
     return new K8sNodeMetrics({
       ...this.fields,
