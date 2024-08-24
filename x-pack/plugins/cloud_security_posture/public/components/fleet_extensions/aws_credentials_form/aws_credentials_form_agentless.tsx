@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiCallOut, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiAccordion, EuiButton, EuiCallOut, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import semverCompare from 'semver/functions/compare';
 import semverValid from 'semver/functions/valid';
@@ -68,7 +68,7 @@ Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to 
           ),
         }}
       />
-      <EuiSpacer size="m" />
+      <EuiSpacer size="l" />
       <EuiText size="s" color="subdued">
         <ol>
           {isOrganization ? (
@@ -119,12 +119,12 @@ Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to 
               defaultMessage="Tick the checkbox under {capabilities} in the opened CloudFormation stack review form: {acknowledge}"
               values={{
                 acknowledge: (
-                  <em>
+                  <strong>
                     <FormattedMessage
                       id="xpack.csp.agentlessForm.cloudFormation.steps.accept.acknowledge"
                       defaultMessage="I acknowledge that AWS CloudFormation might create IAM resources."
                     />
-                  </em>
+                  </strong>
                 ),
                 capabilities: (
                   <strong>
@@ -251,8 +251,16 @@ export const AwsCredentialsFormAgentless = ({
       {awsCredentialsType === DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE &&
         showCloudCredentialsButton && (
           <>
-            <CloudFormationCloudCredentialsGuide isOrganization={isOrganization} />
             <EuiSpacer size="m" />
+            <EuiAccordion
+              id="cloudFormationAccordianInstructions"
+              data-test-subj="launchGoogleCloudFormationAccordianInstructions"
+              buttonContent={<EuiLink>Steps to Generate AWS Account Credentials</EuiLink>}
+              paddingSize="l"
+            >
+              <CloudFormationCloudCredentialsGuide isOrganization={isOrganization} />
+            </EuiAccordion>
+            <EuiSpacer size="l" />
             <EuiButton
               data-test-subj="launchCloudFormationAgentlessButton"
               target="_blank"

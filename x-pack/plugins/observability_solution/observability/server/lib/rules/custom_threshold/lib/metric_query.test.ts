@@ -69,7 +69,7 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
     );
     test('includes a range filter', () => {
       expect(
-        searchBody.query.bool.filter.find((filter) => filter.hasOwnProperty('range'))
+        searchBody.query.bool.filter.find((filter) => Object.hasOwn(filter, 'range'))
       ).toBeTruthy();
     });
 
@@ -126,7 +126,7 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
     );
     test('includes a range filter', () => {
       expect(
-        searchBody.query.bool.filter.find((filter) => filter.hasOwnProperty('range'))
+        searchBody.query.bool.filter.find((filter) => Object.hasOwn(filter, 'range'))
       ).toBeTruthy();
     });
 
@@ -238,7 +238,7 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
     );
     test('includes a range filter', () => {
       expect(
-        searchBody.query.bool.filter.find((filter) => filter.hasOwnProperty('range'))
+        searchBody.query.bool.filter.find((filter) => Object.hasOwn(filter, 'range'))
       ).toBeTruthy();
     });
 

@@ -77,7 +77,6 @@ describe('EcsGraph', () => {
     it('Runs the whole graph, with mocked outputs from the LLM.', async () => {
       // The mocked outputs are specifically crafted to trigger ALL different conditions, allowing us to test the whole graph.
       // This is why we have all the expects ensuring each function was called.
-
       const ecsGraph = await getEcsGraph(mockLlm);
       const response = await ecsGraph.invoke(mockedRequest);
       expect(response.results).toStrictEqual(ecsMappingExpectedResults);

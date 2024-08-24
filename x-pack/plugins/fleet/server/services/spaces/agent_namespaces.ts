@@ -7,12 +7,12 @@
 
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 
-import { appContextService } from '../app_context';
-
 import type { Agent } from '../../types';
 
-export function isAgentInNamespace(agent: Agent, namespace?: string) {
-  const useSpaceAwareness = appContextService.getExperimentalFeatures()?.useSpaceAwareness;
+import { isSpaceAwarenessEnabled } from './helpers';
+
+export async function isAgentInNamespace(agent: Agent, namespace?: string) {
+  const useSpaceAwareness = await isSpaceAwarenessEnabled();
   if (!useSpaceAwareness) {
     return true;
   }
@@ -31,8 +31,8 @@ export function isAgentInNamespace(agent: Agent, namespace?: string) {
   );
 }
 
-export function agentsKueryNamespaceFilter(namespace?: string) {
-  const useSpaceAwareness = appContextService.getExperimentalFeatures()?.useSpaceAwareness;
+export async function agentsKueryNamespaceFilter(namespace?: string) {
+  const useSpaceAwareness = await isSpaceAwarenessEnabled();
   if (!useSpaceAwareness || !namespace) {
     return;
   }

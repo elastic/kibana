@@ -45,7 +45,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await testHasEmbeddedConsole(pageObjects);
     });
 
-    describe('API Key creation', async () => {
+    describe('API Key creation', () => {
       beforeEach(async () => {
         // We need to reload the page between api key creations
         await svlSearchNavigation.navigateToLandingPage();
@@ -88,7 +88,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('Pipelines', async () => {
+    describe('Pipelines', () => {
       beforeEach(async () => {
         await svlSearchNavigation.navigateToLandingPage();
       });
