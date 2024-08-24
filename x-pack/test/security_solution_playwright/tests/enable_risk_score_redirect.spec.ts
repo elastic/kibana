@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { expect } from '@playwright/test';
-import { test } from '../fixtures/es_archiver';
+import { expect, test } from '@playwright/test';
 import { PageFactory } from '../page_objects/page_factory';
 import { EntityAnalyticsPage } from '../page_objects/entity_analytics_po';
 import { EntityAnalyticsManagementPage } from '../page_objects/entity_analytics_management_po';
+import { createEsArchiver } from '../fixtures/es_archiver';
 
 let entityAnalyticsPage: EntityAnalyticsPage;
 let entityAnalyticsManagementPage: EntityAnalyticsManagementPage;
 
-test.beforeAll(async ({ esArchiver }) => {
+test.beforeAll(async () => {
+  const esArchiver = await createEsArchiver();
   await esArchiver.loadIfNeeded('auditbeat_single');
 });
 

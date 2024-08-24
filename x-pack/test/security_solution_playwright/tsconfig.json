@@ -1,0 +1,7 @@
+{
+    "compilerOptions": {
+      "types": ["node", "@types/web-streams-polyfill"]
+    },
+    "include": ["src/**/*", "index.d.ts"]
+  }
+  

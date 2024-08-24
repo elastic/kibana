@@ -8,3 +8,6 @@
 declare module '@kbn/repo-info' {
   export const REPO_ROOT: string;
 }
+declare global {
+  const ReadableStream: any;
+}

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { test } from '@playwright/test';
 import { getCommonHeaders } from '../../api_utils/headers';
-import { test } from '../../fixtures/saml';
 
 export const authFile = '.auth/user.json';
 

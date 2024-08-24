@@ -6,6 +6,13 @@
  */
 
 import { defineConfig, devices } from '@playwright/test';
+import path from 'path';
+import { ReadableStream as PolyfillReadableStream } from 'web-streams-polyfill';
+import dotenv from 'dotenv';
+
+(globalThis as any).ReadableStream = PolyfillReadableStream;
+
+dotenv.config({ path: path.resolve(__dirname, './.env') });
 
 export default defineConfig({
   timeout: 60000,
