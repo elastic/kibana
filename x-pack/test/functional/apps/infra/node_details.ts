@@ -605,7 +605,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               });
               await pageObjects.header.waitUntilLoadingHasFinished();
 
-              await retry.try(async () => {
+              await retry.tryForTime(5000, async () => {
                 expect(await pageObjects.assetDetails.legacyMetricAlertCalloutExists()).to.be(true);
               });
             });
@@ -620,7 +620,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
               await pageObjects.header.waitUntilLoadingHasFinished();
 
-              await retry.try(async () => {
+              await retry.tryForTime(5000, async () => {
                 expect(await pageObjects.assetDetails.legacyMetricAlertCalloutExists()).to.be(
                   false
                 );
