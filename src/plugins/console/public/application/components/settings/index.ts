@@ -9,6 +9,7 @@
 import React from 'react';
 import { withSuspense } from '@kbn/shared-ux-utility';
 
+export { type Props } from './settings_editor';
 export { type AutocompleteOptions } from './types';
 
 /**

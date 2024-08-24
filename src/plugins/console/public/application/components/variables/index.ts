@@ -9,6 +9,7 @@
 import React from 'react';
 import { withSuspense } from '@kbn/shared-ux-utility';
 
+export { type Props } from './variables_editor';
 export { type DevToolsVariable } from './types';
 
 /**

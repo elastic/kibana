@@ -28,7 +28,7 @@ import { VariableEditorForm } from './variables_editor_form';
 import * as utils from './utils';
 import { type DevToolsVariable } from './types';
 
-interface Props {
+export interface Props {
   onSaveVariables: (newVariables: DevToolsVariable[]) => void;
   variables: [];
 }

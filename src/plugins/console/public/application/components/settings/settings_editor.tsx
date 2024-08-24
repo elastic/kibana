@@ -58,14 +58,14 @@ const intervalOptions = PRESETS_IN_MINUTES.map((value) => ({
       : everyNMinutesTimeInterval(value),
 }));
 
-export interface SettingsEditorProps {
+export interface Props {
   onSaveSettings: (newSettings: DevToolsSettings) => void;
   refreshAutocompleteSettings: (selectedSettings: DevToolsSettings['autocomplete']) => void;
   settings: DevToolsSettings;
   editorInstance: SenseEditor | null;
 }
 
-export const SettingsEditor = (props: SettingsEditorProps) => {
+export const SettingsEditor = (props: Props) => {
   const isMounted = useRef(false);
 
   const [fontSize, setFontSize] = useState(props.settings.fontSize);
