@@ -118,7 +118,7 @@ export async function queryMonitorStatusAlert(
                         },
                       },
                     },
-                    downChecks: {
+                    lastXChecks: {
                       top_hits: {
                         size: numberOfChecks,
                         sort: [

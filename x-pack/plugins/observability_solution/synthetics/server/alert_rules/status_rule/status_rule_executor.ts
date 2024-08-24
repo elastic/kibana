@@ -37,11 +37,7 @@ import {
   processMonitors,
 } from '../../saved_objects/synthetics_monitor/get_all_monitors';
 import { getConditionType, StatusRuleParams } from '../../../common/rules/status_rule';
-import {
-  ConfigKey,
-  EncryptedSyntheticsMonitorAttributes,
-  OverviewPendingStatusMetaData,
-} from '../../../common/runtime_types';
+import { ConfigKey, EncryptedSyntheticsMonitorAttributes } from '../../../common/runtime_types';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { monitorAttributes } from '../../../common/types/saved_objects';
 import { AlertConfigKey } from '../../../common/constants/monitor_management';
@@ -57,8 +53,6 @@ export interface AlertOverviewStatus extends AlertStatusResponse {
   staleDownConfigs: Record<string, StaleDownConfig>;
   monitorLocationsMap: Record<string, string[]>;
 }
-
-export type PendingConfigs = Record<string, OverviewPendingStatusMetaData>;
 
 export class StatusRuleExecutor {
   previousStartedAt: Date | null;
@@ -121,6 +115,7 @@ export class StatusRuleExecutor {
       locations: this.params?.locations,
       monitorTypes: this.params?.monitorTypes,
       monitorQueryIds: this.params?.monitorIds,
+      projects: this.params?.projects,
     });
 
     this.monitors = await getAllMonitors({
@@ -199,7 +194,7 @@ export class StatusRuleExecutor {
       const numberOfChecks = condition.window.numberOfChecks;
       from = moment()
         .subtract(maxPeriod * numberOfChecks, 'milliseconds')
-        .subtract(20, 'minutes')
+        .subtract(5, 'minutes')
         .toISOString();
       return { from, to: 'now' };
     }
@@ -460,16 +455,5 @@ export class StatusRuleExecutor {
       payload,
       context,
     });
-  }
-
-  findEarliestMonitorCreatedAt(pendingConfigsIds: string[]) {
-    // let's first find when the earliest monitor is createdAt to narrow down the query by timestamp
-    return this.monitors.reduce((earliest, monitor) => {
-      // if the monitor is not in the pendingConfigs, we don't need to consider it
-      if (!pendingConfigsIds.includes(monitor.attributes[ConfigKey.CONFIG_ID])) return earliest;
-      const monitorCreatedAt = monitor.created_at ?? monitor.updated_at;
-      const dateValue = moment(monitorCreatedAt ?? moment().subtract(1, 'day'));
-      return dateValue.isBefore(earliest) ? dateValue : earliest;
-    }, moment());
   }
 }
