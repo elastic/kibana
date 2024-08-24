@@ -65,7 +65,9 @@ export const validateResponseActionsPermissions = async (
   existingRule?: RuleAlertType | null
 ): Promise<void> => {
   if (
-    !isQueryRule(ruleUpdate.type) && !isEsqlRule(ruleUpdate.type) && !isEqlRule(ruleUpdate.type)
+    !isQueryRule(ruleUpdate.type) &&
+    !isEsqlRule(ruleUpdate.type) &&
+    !isEqlRule(ruleUpdate.type)
   ) {
     return;
   }
