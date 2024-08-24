@@ -18,8 +18,8 @@ import {
   CspBenchmarkRulesStates,
   CspFinding,
 } from '@kbn/cloud-security-posture-common';
+import type { FindingsBaseEsQuery } from '@kbn/cloud-security-posture';
 import { useKibana } from '../../../common/hooks/use_kibana';
-import type { FindingsBaseEsQuery } from '../../../common/types';
 import { getAggregationCount, getFindingsCountAggQuery } from '../utils/utils';
 import { showErrorToast } from '../../../common/utils/show_error_toast';
 import { useGetCspBenchmarkRulesStatesApi } from './use_get_benchmark_rules_state_api';

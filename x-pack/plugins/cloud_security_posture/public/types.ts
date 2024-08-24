@@ -15,8 +15,6 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { CspRouterProps } from './application/csp_router';
 import type { CloudSecurityPosturePageId } from './common/navigation/types';
 
-export type { CspClientPluginStartDeps } from '@kbn/cloud-security-posture';
-
 /**
  * The cloud security posture's public plugin setup interface.
  */

@@ -6,7 +6,6 @@
  */
 import type { Criteria } from '@elastic/eui';
 import type { Filter, Query, EsQueryConfig } from '@kbn/es-query';
-export type { FindingsBaseEsQuery } from '@kbn/cloud-security-posture';
 
 export interface FindingsBaseURLQuery {
   query: Query;
