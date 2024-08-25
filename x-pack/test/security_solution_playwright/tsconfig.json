@@ -6,7 +6,6 @@
   },
   "include": ["src/**/*", "index.d.ts"],
   "kbn_references": [
-    "@kbn/dev-cli-runner"
   ],
   "exclude": [
     "target/**/*"
