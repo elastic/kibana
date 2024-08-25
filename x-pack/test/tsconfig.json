@@ -20,6 +20,7 @@
   ],
   "exclude": [
     "security_solution_cypress/cypress/**/*",
+    "security_solution_playwright/**/*",
     "target/**/*",
     "*/plugins/**/*",
     "*/packages/**/*",
@@ -179,7 +180,6 @@
     "@kbn/cases-api-integration-test-plugin",
     "@kbn/security-solution-plugin/public/management/cypress",
     "@kbn/management-settings-ids",
-    "@kbn/mock-idp-utils",
-    "@kbn/dev-cli-runner"
+    "@kbn/mock-idp-utils"
   ]
 }
