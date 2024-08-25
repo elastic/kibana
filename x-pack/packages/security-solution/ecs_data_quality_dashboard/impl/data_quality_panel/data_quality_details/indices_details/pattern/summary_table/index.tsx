@@ -10,11 +10,11 @@ import { EuiInMemoryTable } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
 import { defaultSort } from '../../../../constants';
-import { getShowPagination } from './helpers';
 import { IndexSummaryTableItem, SortConfig } from '../../../../types';
 import { useDataQualityContext } from '../../../../data_quality_context';
 import { UseIndicesCheckCheckState } from '../../../../hooks/use_indices_check/types';
 import { MIN_PAGE_SIZE } from '../constants';
+import { getShowPagination } from './utils/get_show_pagination';
 
 export interface Props {
   getTableColumns: ({

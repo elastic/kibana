@@ -15,7 +15,7 @@ import { LoadingEmptyPrompt } from './loading_empty_prompt';
 import { PatternSummary } from './pattern_summary';
 import { RemoteClustersCallout } from './remote_clusters_callout';
 import { SummaryTable } from './summary_table';
-import { getSummaryTableColumns } from './summary_table/helpers';
+import { getSummaryTableColumns } from './summary_table/utils/columns';
 import * as i18n from './translations';
 import type { PatternRollup, SelectedIndex, SortConfig } from '../../../types';
 import { useIlmExplain } from './hooks/use_ilm_explain';

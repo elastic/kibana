@@ -16,18 +16,17 @@ import userEvent from '@testing-library/user-event';
 import { omit } from 'lodash/fp';
 import React from 'react';
 
-import { TestExternalProviders } from '../../../../mock/test_providers/test_providers';
-import { EMPTY_STAT } from '../../../../constants';
+import { TestExternalProviders } from '../../../../../mock/test_providers/test_providers';
+import { EMPTY_STAT } from '../../../../../constants';
 import {
   getIncompatibleStatColor,
-  getShowPagination,
   getSummaryTableColumns,
   getSummaryTableILMPhaseColumn,
   getSummaryTableSizeInBytesColumn,
-} from './helpers';
-import { CHECK_INDEX, VIEW_CHECK_DETAILS } from './translations';
-import { getCheckState } from '../../../../stub/get_check_state';
-import { IndexSummaryTableItem } from '../../../../types';
+} from './columns';
+import { CHECK_INDEX, VIEW_CHECK_DETAILS } from '../translations';
+import { IndexSummaryTableItem } from '../../../../../types';
+import { getCheckState } from '../../../../../stub/get_check_state';
 
 const defaultBytesFormat = '0,0.[0]b';
 const formatBytes = (value: number | undefined) =>
@@ -580,35 +579,6 @@ describe('helpers', () => {
 
         expect(screen.queryByTestId('sizeInBytes')).toBeNull();
       });
-    });
-  });
-
-  describe('getShowPagination', () => {
-    test('it returns true when `totalItemCount` is greater than `minPageSize`', () => {
-      expect(
-        getShowPagination({
-          minPageSize: 10,
-          totalItemCount: 11,
-        })
-      ).toBe(true);
-    });
-
-    test('it returns false when `totalItemCount` equals `minPageSize`', () => {
-      expect(
-        getShowPagination({
-          minPageSize: 10,
-          totalItemCount: 10,
-        })
-      ).toBe(false);
-    });
-
-    test('it returns false when `totalItemCount` is less than `minPageSize`', () => {
-      expect(
-        getShowPagination({
-          minPageSize: 10,
-          totalItemCount: 9,
-        })
-      ).toBe(false);
     });
   });
 

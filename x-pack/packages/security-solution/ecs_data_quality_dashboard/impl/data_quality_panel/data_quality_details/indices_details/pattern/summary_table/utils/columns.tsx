@@ -18,17 +18,17 @@ import moment from 'moment';
 import styled from 'styled-components';
 
 import { euiThemeVars } from '@kbn/ui-theme';
-import { IndexSummaryTableItem } from '../../../../types';
-import { EMPTY_STAT } from '../../../../constants';
-import { getIlmPhaseDescription } from '../../../../utils/get_ilm_phase_description';
-import { INCOMPATIBLE_INDEX_TOOL_TIP } from '../../../../stat_label/translations';
-import { INDEX_SIZE_TOOLTIP } from '../../../../translations';
-import * as i18n from './translations';
-import { UseIndicesCheckCheckState } from '../../../../hooks/use_indices_check/types';
-import { IndexResultBadge } from '../index_result_badge';
-import { getIndexResultToolTip } from '../index_result_badge/helpers';
-import { Stat } from '../../../../stat';
-import { getDocsCountPercent } from '../utils/stats';
+import { IndexSummaryTableItem } from '../../../../../types';
+import { EMPTY_STAT } from '../../../../../constants';
+import { getIlmPhaseDescription } from '../../../../../utils/get_ilm_phase_description';
+import { INCOMPATIBLE_INDEX_TOOL_TIP } from '../../../../../stat_label/translations';
+import { INDEX_SIZE_TOOLTIP } from '../../../../../translations';
+import * as i18n from '../translations';
+import { UseIndicesCheckCheckState } from '../../../../../hooks/use_indices_check/types';
+import { IndexResultBadge } from '../../index_result_badge';
+import { Stat } from '../../../../../stat';
+import { getDocsCountPercent } from '../../utils/stats';
+import { getIndexResultToolTip } from '../../utils/get_index_result_tooltip';
 
 const ProgressContainer = styled.div`
   width: 150px;
@@ -221,11 +221,3 @@ export const getSummaryTableColumns = ({
     width: '120px',
   },
 ];
-
-export const getShowPagination = ({
-  minPageSize,
-  totalItemCount,
-}: {
-  minPageSize: number;
-  totalItemCount: number;
-}): boolean => totalItemCount > minPageSize;

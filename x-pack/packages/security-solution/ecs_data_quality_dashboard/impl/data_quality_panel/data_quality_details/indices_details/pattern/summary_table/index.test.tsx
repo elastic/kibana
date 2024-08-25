@@ -10,7 +10,7 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 
 import { EMPTY_STAT } from '../../../../constants';
-import { getSummaryTableColumns } from './helpers';
+import { getSummaryTableColumns } from './utils/columns';
 import { mockIlmExplain } from '../../../../mock/ilm_explain/mock_ilm_explain';
 import { auditbeatWithAllResults } from '../../../../mock/pattern_rollup/mock_auditbeat_pattern_rollup';
 import { mockStats } from '../../../../mock/stats/mock_stats';
