@@ -12,6 +12,7 @@ import { DETECTION_ENGINE_RULES_BULK_ACTION } from '@kbn/security-solution-plugi
 import { ELASTICSEARCH_PASSWORD, ELASTICSEARCH_USERNAME } from '../../env_var_names_constants';
 import { deleteAllDocuments } from './elasticsearch';
 import { getSpaceUrl } from '../space';
+import { DEFAULT_ALERTS_INDEX_PATTERN } from './alerts';
 
 export const API_AUTH = Object.freeze({
   user: Cypress.env(ELASTICSEARCH_USERNAME),
@@ -58,7 +59,7 @@ export const deleteAlertsAndRules = () => {
       timeout: 300000,
     });
 
-    deleteAllDocuments(`.lists-*,.items-*,.alerts-security.alerts-*'`);
+    deleteAllDocuments(`.lists-*,.items-*,${DEFAULT_ALERTS_INDEX_PATTERN}`);
   });
 };
 
