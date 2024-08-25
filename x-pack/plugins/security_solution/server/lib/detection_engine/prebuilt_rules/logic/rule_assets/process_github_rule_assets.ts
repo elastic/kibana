@@ -94,6 +94,7 @@ const fetchSingleRuleAsset = async (
 
     const decodedContent = Buffer.from(response.data.content, 'base64').toString('utf-8');
     const rawAsset = JSON.parse(decodedContent);
+
     if (`${rawAsset.rule_id}_${rawAsset.version}` !== `${blob.filename}`) {
       return {
         success: false,
@@ -105,7 +106,6 @@ const fetchSingleRuleAsset = async (
 
     const rawAssetWithRepositoryId = {
       ...rawAsset,
-      // rule_id: `${repositoryId}_${rawAsset.rule_id}`, // append repositoryId before saving rule_id
       repository_id: repositoryId,
     };
 

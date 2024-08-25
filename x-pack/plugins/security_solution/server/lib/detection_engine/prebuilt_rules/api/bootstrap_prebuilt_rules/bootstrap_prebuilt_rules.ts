@@ -53,7 +53,7 @@ export const bootstrapPrebuiltRulesRoute = (
           const config = securityContext.getConfig();
 
           const results = await Promise.all([
-            installPrebuiltRulesPackage(config, securityContext),
+            // installPrebuiltRulesPackage(config, securityContext),
             installEndpointPackage(config, securityContext),
           ]);
 

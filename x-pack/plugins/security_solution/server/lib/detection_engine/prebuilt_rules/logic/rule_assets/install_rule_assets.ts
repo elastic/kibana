@@ -88,7 +88,7 @@ export const installExternalPrebuiltRuleAssets = async ({
       }, new Map())
   ).map(([repositoryId, ruleSpecifiers]) => ({ repositoryId, ruleSpecifiers }));
 
-  // From a list of `{repoId}_{rule_id}_{version}`, get a list of the latest version installed
+  // From a list of `{rule_id}_{version}`, get a list of the latest version installed
   // for each `{repoId}_{rule_id}` combination.
   const latestAssetSpecifiers = getLatestRuleAssetSpecifiers(installedRulesAssetIds);
 
@@ -145,15 +145,12 @@ function getLatestRuleAssetSpecifiers(ruleSet: Set<string>): Map<RuleId, RuleVer
 
   // Process each rule string in the set
   ruleSet.forEach((ruleString) => {
-    const lastUnderscoreIndex = ruleString.lastIndexOf('_');
-    if (lastUnderscoreIndex === -1) return; // Skip invalid entries
+    const [ruleId, rawVersion] = ruleString.split('_');
+    const version = Number(rawVersion);
 
-    const repoIdAndRuleId = ruleString.slice(0, lastUnderscoreIndex);
-    const version = parseInt(ruleString.slice(lastUnderscoreIndex + 1), 10);
-
-    const currentVersion = ruleMap.get(repoIdAndRuleId);
+    const currentVersion = ruleMap.get(ruleId);
     if (currentVersion === undefined || version > currentVersion) {
-      ruleMap.set(repoIdAndRuleId, version);
+      ruleMap.set(ruleId, version);
     }
   });
 
