@@ -6,6 +6,8 @@
  */
 
 import { TaskManagerPlugin, getElasticsearchAndSOAvailability } from './plugin';
+import { KibanaDiscoveryService } from './kibana_discovery_service';
+
 import { coreMock } from '@kbn/core/server/mocks';
 import { TaskManagerConfig } from './config';
 import { Subject } from 'rxjs';
@@ -36,6 +38,9 @@ jest.mock('./ephemeral_task_lifecycle', () => {
     }),
   };
 });
+
+const deleteCurrentNodeSpy = jest.spyOn(KibanaDiscoveryService.prototype, 'deleteCurrentNode');
+const discoveryIsStarted = jest.spyOn(KibanaDiscoveryService.prototype, 'isStarted');
 
 const coreStart = coreMock.createStart();
 const pluginInitializerContextParams = {
@@ -173,6 +178,25 @@ describe('TaskManagerPlugin', () => {
       expect(
         EphemeralTaskLifecycle as jest.Mock<EphemeralTaskLifecycleClass>
       ).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('stop', () => {
+    test('should remove the current from discovery service', async () => {
+      const pluginInitializerContext = coreMock.createPluginInitializerContext<TaskManagerConfig>(
+        pluginInitializerContextParams
+      );
+      pluginInitializerContext.node.roles.backgroundTasks = true;
+      const taskManagerPlugin = new TaskManagerPlugin(pluginInitializerContext);
+      taskManagerPlugin.setup(coreMock.createSetup(), { usageCollection: undefined });
+      taskManagerPlugin.start(coreStart, {
+        cloud: cloudMock.createStart(),
+      });
+
+      discoveryIsStarted.mockReturnValueOnce(true);
+      await taskManagerPlugin.stop();
+
+      expect(deleteCurrentNodeSpy).toHaveBeenCalledTimes(1);
     });
   });
 

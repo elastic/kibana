@@ -29,7 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const DASHBOARD_NAME = 'Test Range Slider Control';
 
-  describe('Range Slider Control', async () => {
+  describe('Range Slider Control', () => {
     before(async () => {
       await security.testUser.setRoles([
         'kibana_admin',
@@ -74,7 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await security.testUser.restoreDefaults();
     });
 
-    describe('create and edit', async () => {
+    describe('create and edit', () => {
       it('can create a new range slider control from a blank state', async () => {
         await dashboardControls.createControl({
           controlType: RANGE_SLIDER_CONTROL,
@@ -257,7 +257,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('validation', async () => {
+    describe('validation', () => {
       it('displays error message when upper bound selection is less than lower bound selection', async () => {
         const firstId = (await dashboardControls.getAllControlIds())[0];
         await dashboardControls.rangeSliderSetLowerBound(firstId, '500');
@@ -279,7 +279,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('interaction', async () => {
+    describe('interaction', () => {
       it('Malformed query throws an error', async () => {
         await queryBar.setQuery('AvgTicketPrice <= 300 error');
         await queryBar.submitQuery();

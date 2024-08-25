@@ -190,7 +190,7 @@ export function buildExpressionFunction<
 
     addArgument(key, value) {
       if (value !== undefined) {
-        if (!args.hasOwnProperty(key)) {
+        if (!Object.hasOwn(args, key)) {
           args[key] = [];
         }
         args[key].push(value);
@@ -199,14 +199,14 @@ export function buildExpressionFunction<
     },
 
     getArgument(key) {
-      if (!args.hasOwnProperty(key)) {
+      if (!Object.hasOwn(args, key)) {
         return;
       }
       return args[key];
     },
 
     replaceArgument(key, values) {
-      if (!args.hasOwnProperty(key)) {
+      if (!Object.hasOwn(args, key)) {
         throw new Error('Argument to replace does not exist on this function');
       }
       args[key] = values;

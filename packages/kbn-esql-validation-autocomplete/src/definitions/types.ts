@@ -31,6 +31,7 @@ export const fieldTypes = [
   'counter_long',
   'counter_double',
   'unsupported',
+  'date_nanos',
 ] as const;
 
 export type FieldType = (typeof fieldTypes)[number];
@@ -68,30 +69,42 @@ export const isSupportedDataType = (
  *
  * The fate of these is uncertain. They may be removed in the future.
  */
-type ArrayType =
-  | 'double[]'
-  | 'unsigned_long[]'
-  | 'long[]'
-  | 'integer[]'
-  | 'counter_integer[]'
-  | 'counter_long[]'
-  | 'counter_double[]'
-  | 'keyword[]'
-  | 'text[]'
-  | 'boolean[]'
-  | 'any[]'
-  | 'date[]'
-  | 'date_period[]';
+const arrayTypes = [
+  'double[]',
+  'unsigned_long[]',
+  'long[]',
+  'integer[]',
+  'counter_integer[]',
+  'counter_long[]',
+  'counter_double[]',
+  'keyword[]',
+  'text[]',
+  'boolean[]',
+  'any[]',
+  'date[]',
+  'date_period[]',
+] as const;
+
+export type ArrayType = (typeof arrayTypes)[number];
 
 /**
  * This is the type of a parameter in a function definition.
  */
-export type FunctionParameterType = Omit<SupportedDataType, 'unsupported'> | ArrayType | 'any';
+export type FunctionParameterType = Exclude<SupportedDataType, 'unsupported'> | ArrayType | 'any';
+
+export const isParameterType = (str: string | undefined): str is FunctionParameterType =>
+  typeof str !== undefined &&
+  str !== 'unsupported' &&
+  ([...dataTypes, ...arrayTypes, 'any'] as string[]).includes(str as string);
 
 /**
  * This is the return type of a function definition.
  */
-export type FunctionReturnType = Omit<SupportedDataType, 'unsupported'> | 'any' | 'void';
+export type FunctionReturnType = Exclude<SupportedDataType, 'unsupported'> | 'any' | 'void';
+
+export const isReturnType = (str: string | FunctionParameterType): str is FunctionReturnType =>
+  str !== 'unsupported' &&
+  (dataTypes.includes(str as SupportedDataType) || str === 'any' || str === 'void');
 
 export interface FunctionDefinition {
   type: 'builtin' | 'agg' | 'eval';
@@ -153,13 +166,13 @@ export interface CommandBaseDefinition {
   hidden?: boolean;
   signature: {
     multipleParams: boolean;
-    // innerType here is useful to drill down the type in case of "column"
+    // innerTypes here is useful to drill down the type in case of "column"
     // i.e. column of type string
     params: Array<{
       name: string;
       type: string;
       optional?: boolean;
-      innerType?: string;
+      innerTypes?: string[];
       values?: string[];
       valueDescriptions?: string[];
       constantOnly?: boolean;

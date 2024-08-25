@@ -141,3 +141,11 @@ x-pack/test/security_api_integration/plugins/audit_log/audit.log
 # ignore FTR temp directory
 .ftr
 role_users.json
+
+# Ignore temporary files in oas_docs
+output/kibana.serverless.tmp1.yaml
+output/kibana.serverless.tmp2.yaml
+output/kibana.tmp1.yaml
+output/kibana.tmp2.yaml
+output/kibana.new.yaml
+output/kibana.serverless.new.yaml

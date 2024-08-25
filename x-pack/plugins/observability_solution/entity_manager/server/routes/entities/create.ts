@@ -6,7 +6,12 @@
  */
 
 import { RequestHandlerContext } from '@kbn/core/server';
-import { EntityDefinition, entityDefinitionSchema } from '@kbn/entities-schema';
+import {
+  EntityDefinition,
+  entityDefinitionSchema,
+  createEntityDefinitionQuerySchema,
+  CreateEntityDefinitionQuery,
+} from '@kbn/entities-schema';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { SetupRouteOptions } from '../types';
 import { EntityIdConflict } from '../../lib/entities/errors/entity_id_conflict_error';
@@ -15,15 +20,50 @@ import { InvalidTransformError } from '../../lib/entities/errors/invalid_transfo
 import { startTransform } from '../../lib/entities/start_transform';
 import { installEntityDefinition } from '../../lib/entities/install_entity_definition';
 
+/**
+ * @openapi
+ * /internal/entities/definition:
+ *   post:
+ *     description: Install an entity definition.
+ *     tags:
+ *       - definitions
+ *     parameters:
+ *       - in: query
+ *         name: installOnly
+ *         description: If true, the definition transforms will not be started
+ *         required: false
+ *         schema:
+ *           type: boolean
+ *           default: false
+ *     requestBody:
+ *       description: The entity definition to install
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/entityDefinitionSchema'
+ *     responses:
+ *       200:
+ *         description: Success
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/entityDefinitionSchema'
+ *       409:
+ *         description: An entity definition with this ID already exists
+ *       400:
+ *         description: The entity definition cannot be installed; see the error for more details
+ */
 export function createEntityDefinitionRoute<T extends RequestHandlerContext>({
   router,
   server,
 }: SetupRouteOptions<T>) {
-  router.post<unknown, unknown, EntityDefinition>(
+  router.post<unknown, CreateEntityDefinitionQuery, EntityDefinition>(
     {
       path: '/internal/entities/definition',
       validate: {
         body: buildRouteValidationWithZod(entityDefinitionSchema.strict()),
+        query: buildRouteValidationWithZod(createEntityDefinitionQuerySchema),
       },
     },
     async (context, req, res) => {
@@ -39,7 +79,9 @@ export function createEntityDefinitionRoute<T extends RequestHandlerContext>({
           definition: req.body,
         });
 
-        await startTransform(esClient, definition, logger);
+        if (!req.query.installOnly) {
+          await startTransform(esClient, definition, logger);
+        }
 
         return res.ok({ body: definition });
       } catch (e) {

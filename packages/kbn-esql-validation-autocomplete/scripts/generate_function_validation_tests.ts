@@ -21,8 +21,9 @@ import {
   SupportedDataType,
   FunctionDefinition,
   dataTypes,
-  isSupportedDataType,
   fieldTypes,
+  isFieldType,
+  FunctionParameter,
 } from '../src/definitions/types';
 import { FUNCTION_DESCRIBE_BLOCK_NAME } from '../src/validation/function_describe_block_name';
 import { getMaxMinNumberOfParams } from '../src/validation/helpers';
@@ -991,6 +992,7 @@ const fieldTypesToConstants: Record<SupportedDataType, string> = {
   // by the ES function definitions. Just making types happy
   time_literal: '1 day',
   unsupported: '',
+  date_nanos: '1420070400000',
 };
 
 const supportedTypesAndFieldNames = fieldTypes.map((type) => ({
@@ -1109,7 +1111,7 @@ function getFieldMapping(
 
   return params.map(({ name: _name, type, constantOnly, literalOptions, ...rest }) => {
     const typeString: string = type as string;
-    if (isSupportedDataType(typeString)) {
+    if (isFieldType(typeString)) {
       if (useLiterals && literalOptions) {
         return {
           name: `"${literalOptions[0]}"`,
@@ -1154,7 +1156,7 @@ function generateIncorrectlyTypedParameters(
   signatures: FunctionDefinition['signatures'],
   currentParams: FunctionDefinition['signatures'][number]['params'],
   availableFields: Array<{ name: string; type: SupportedDataType }>
-) {
+): { wrongFieldMapping: FunctionParameter[]; expectedErrors: string[] } {
   const literalValues = {
     string: `"a"`,
     number: '5',
@@ -1259,7 +1261,7 @@ function generateIncorrectlyTypedParameters(
     })
     .filter(nonNullable);
 
-  return { wrongFieldMapping, expectedErrors };
+  return { wrongFieldMapping: wrongFieldMapping as FunctionParameter[], expectedErrors };
 }
 
 /**

@@ -336,6 +336,27 @@
       },
       {
         "parentPluginId": "@kbn/server-route-repository-utils",
+        "id": "def-common.IoTsParamsObject",
+        "type": "Type",
+        "tags": [],
+        "label": "IoTsParamsObject",
+        "description": [],
+        "signature": [
+          "Omit<",
+          "Type",
+          "<{ path?: any; query?: any; body?: any; }, { path?: any; query?: any; body?: any; }, unknown>, \"encode\" | \"asEncoder\"> & { encode: ",
+          "Encode",
+          "<any, any>; asEncoder: () => ",
+          "Encoder",
+          "<any, any>; }"
+        ],
+        "path": "packages/kbn-server-route-repository-utils/src/typings.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/server-route-repository-utils",
         "id": "def-common.ReturnOf",
         "type": "Type",
         "tags": [],
@@ -383,13 +404,21 @@
         "label": "RouteParamsRT",
         "description": [],
         "signature": [
-          "Omit<",
-          "Type",
-          "<{ path?: any; query?: any; body?: any; }, { path?: any; query?: any; body?: any; }, unknown>, \"encode\" | \"asEncoder\"> & { encode: ",
-          "Encode",
-          "<any, any>; asEncoder: () => ",
-          "Encoder",
-          "<any, any>; }"
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.IoTsParamsObject",
+            "text": "IoTsParamsObject"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ZodParamsObject",
+            "text": "ZodParamsObject"
+          }
         ],
         "path": "packages/kbn-server-route-repository-utils/src/typings.ts",
         "deprecated": false,
@@ -553,6 +582,21 @@
             "text": "RouteParamsRT"
           },
           " | undefined; handler: ({}: any) => Promise<any>; } & Record<string, any>; }"
+        ],
+        "path": "packages/kbn-server-route-repository-utils/src/typings.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/server-route-repository-utils",
+        "id": "def-common.ZodParamsObject",
+        "type": "Type",
+        "tags": [],
+        "label": "ZodParamsObject",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ path?: any; query?: any; body?: any; }, Zod.UnknownKeysParam, Zod.ZodTypeAny, { query?: any; body?: any; path?: any; }, { query?: any; body?: any; path?: any; }>"
         ],
         "path": "packages/kbn-server-route-repository-utils/src/typings.ts",
         "deprecated": false,

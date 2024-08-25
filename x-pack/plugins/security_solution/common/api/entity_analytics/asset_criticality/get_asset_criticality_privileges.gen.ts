@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import type { z } from 'zod';
+import type { z } from '@kbn/zod';
 
 import { EntityAnalyticsPrivileges } from '../common/common.gen';
 

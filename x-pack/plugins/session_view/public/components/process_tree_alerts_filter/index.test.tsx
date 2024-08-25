@@ -53,6 +53,19 @@ describe('ProcessTreeAlertsFiltersFilter component', () => {
       expect(filterCountStatus).toBeTruthy();
     });
 
+    it('should show pluralise correctly', async () => {
+      renderResult = mockedContext.render(
+        <ProcessTreeAlertsFilter {...props} totalAlertsCount={1} filteredAlertsCount={1} />
+      );
+
+      const filterCountStatus = renderResult.queryByTestId(
+        'sessionView:sessionViewAlertDetailsFilterStatus'
+      );
+
+      expect(filterCountStatus).toHaveTextContent('Showing 1 alert');
+      expect(filterCountStatus).toBeTruthy();
+    });
+
     it('should call onAlertEventCategorySelected with alert category when filter item is clicked ', () => {
       const mockAlertEventCategorySelectedEvent = jest.fn();
       renderResult = mockedContext.render(
