@@ -141,7 +141,7 @@ describe('<ControlGeneralViewSelector />', () => {
     expect(updatedOptions[1].textContent).toContain('mockExclude');
   });
 
-  it('ensures there is at least 1 selector to match', () => {
+  it('ensures there is at least 1 selector to match', async () => {
     const { getByText, getByTitle, rerender } = render(<WrappedComponent />);
 
     await userEvent.click(getByTitle('Remove mock from selection in this group'));
@@ -192,7 +192,7 @@ describe('<ControlGeneralViewSelector />', () => {
     expect(options[0].textContent).toBe('mock2');
   });
 
-  it('allows the user to enable block action (which should force alert action on)', () => {
+  it('allows the user to enable block action (which should force alert action on)', async () => {
     const { getByTestId } = render(<WrappedComponent />);
     const checkBox = getByTestId('cloud-defend-chkblockaction');
 
@@ -229,7 +229,7 @@ describe('<ControlGeneralViewSelector />', () => {
     const btnPopover = getByTestId('cloud-defend-btnresponsepopover');
     await userEvent.click(btnPopover);
 
-    await waitFor(() => await userEvent.click(getByTestId('cloud-defend-btndeleteresponse')));
+    await userEvent.click(getByTestId('cloud-defend-btndeleteresponse'));
 
     expect(onRemove.mock.calls).toHaveLength(1);
     expect(onRemove.mock.calls[0][0]).toEqual(0);
@@ -240,7 +240,7 @@ describe('<ControlGeneralViewSelector />', () => {
     const btnPopover = getByTestId('cloud-defend-btnresponsepopover');
     await userEvent.click(btnPopover);
 
-    await waitFor(() => await userEvent.click(getByTestId('cloud-defend-btndeleteresponse')));
+    await userEvent.click(getByTestId('cloud-defend-btndeleteresponse'));
 
     expect(onRemove.mock.calls).toHaveLength(0);
   });
@@ -250,7 +250,7 @@ describe('<ControlGeneralViewSelector />', () => {
     const btnPopover = getByTestId('cloud-defend-btnresponsepopover');
     await userEvent.click(btnPopover);
 
-    await waitFor(() => await userEvent.click(getByTestId('cloud-defend-btnduplicateresponse')));
+    await userEvent.click(getByTestId('cloud-defend-btnduplicateresponse'));
 
     expect(onDuplicate.mock.calls).toHaveLength(1);
     expect(onDuplicate.mock.calls[0][0]).toEqual(mockResponse);
