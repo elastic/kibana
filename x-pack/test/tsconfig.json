@@ -20,7 +20,6 @@
   ],
   "exclude": [
     "security_solution_cypress/cypress/**/*",
-    "security_solution_playwright/**/*",
     "target/**/*",
     "*/plugins/**/*",
     "*/packages/**/*",

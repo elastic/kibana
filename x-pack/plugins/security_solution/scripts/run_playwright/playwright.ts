@@ -23,13 +23,13 @@ import {
 } from '@kbn/test/src/functional_test_runner/lib';
 import pRetry from 'p-retry';
 import execa from 'execa';
-import { prefixedOutputLogger } from '@kbn/security-solution-plugin/scripts/endpoint/common/utils';
-import { createToolingLogger } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/utils';
-import {
-  parseTestFileConfig,
-  retrieveIntegrations,
-} from '@kbn/security-solution-plugin/scripts/run_cypress/utils';
-import { getFTRConfig } from '@kbn/security-solution-plugin/scripts/run_cypress/get_ftr_config';
+import { prefixedOutputLogger } from '../endpoint/common/utils';
+import { createToolingLogger } from '../../common/endpoint/data_loaders/utils';
+import { parseTestFileConfig, retrieveIntegrations } from '../run_cypress/utils';
+import { getFTRConfig } from '../run_cypress/get_ftr_config';
+import type { StartedFleetServer } from '../endpoint/common/fleet_server/fleet_server_services';
+import { startFleetServer } from '../endpoint/common/fleet_server/fleet_server_services';
+import { createKbnClient } from '../endpoint/common/stack_services';
 
 export const cli = () => {
   run(
@@ -299,7 +299,16 @@ ${JSON.stringify(playwrightConfigFile, null, 2)}
                   IS_SERVERLESS: config.get('serverless'),
                 };
 
-                const envFilePath = path.resolve(__dirname, '..', '.env');
+                const envFilePath = path.resolve(
+                  __dirname,
+                  '..',
+                  '..',
+                  '..',
+                  '..',
+                  'test',
+                  'security_solution_playwright',
+                  '.env'
+                );
 
                 const envContent = Object.entries(playwrightCustomEnv)
                   .map(([key, value]) => `${key}=${value}`)

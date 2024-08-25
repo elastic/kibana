@@ -213,5 +213,6 @@
     "@kbn/config",
     "@kbn/cbor",
     "@kbn/zod",
+    "@kbn/security-solution-plugin",
   ]
 }
