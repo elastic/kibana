@@ -68,7 +68,7 @@ describe('IndexCheckFlyout', () => {
   });
 
   describe('when flyout close is clicked', () => {
-    it('should call onClose', () => {
+    it('should call onClose', async () => {
       const onClose = jest.fn();
       render(
         <TestExternalProviders>
@@ -93,7 +93,7 @@ describe('IndexCheckFlyout', () => {
   });
 
   describe('when check now button is clicked', () => {
-    it('should call checkIndex', () => {
+    it('should call checkIndex', async () => {
       const checkIndex = jest.fn();
       render(
         <TestExternalProviders>

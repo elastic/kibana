@@ -128,7 +128,9 @@ describe('VisualizeESQL', () => {
     const setVisibilitySpy = jest.fn();
     renderComponent({}, undefined, setVisibilitySpy);
     await userEvent.click(screen.getByTestId('observabilityAiAssistantLensESQLEditButton'));
-    expect(setVisibilitySpy).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(setVisibilitySpy).toHaveBeenCalled();
+    });
   });
 
   it('should display the errors if given', async () => {

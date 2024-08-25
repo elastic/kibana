@@ -62,7 +62,7 @@ describe('<FindingsFlyout/>', () => {
   });
 
   describe('Rule Tab', () => {
-    it('displays rule text details', () => {
+    it('displays rule text details', async () => {
       const { getByText, getAllByText } = render(<TestComponent />);
       await userEvent.click(screen.getByTestId('findings_flyout_tab_rule'));
 
@@ -74,14 +74,14 @@ describe('<FindingsFlyout/>', () => {
       });
     });
 
-    it('displays missing info callout when data source is not CSP', () => {
+    it('displays missing info callout when data source is not CSP', async () => {
       const { getByText } = render(<TestComponent finding={mockWizFinding} />);
       await userEvent.click(screen.getByTestId('findings_flyout_tab_rule'));
 
       getByText('Some fields not provided by Wiz');
     });
 
-    it('does not display missing info callout when data source is CSP', () => {
+    it('does not display missing info callout when data source is CSP', async () => {
       const { queryByText } = render(<TestComponent finding={mockFindingsHit} />);
       await userEvent.click(screen.getByTestId('findings_flyout_tab_rule'));
 
@@ -91,7 +91,7 @@ describe('<FindingsFlyout/>', () => {
   });
 
   describe('Table Tab', () => {
-    it('displays resource name and id', () => {
+    it('displays resource name and id', async () => {
       const { getAllByText } = render(<TestComponent />);
       await userEvent.click(screen.getByTestId('findings_flyout_tab_table'));
 
@@ -99,7 +99,7 @@ describe('<FindingsFlyout/>', () => {
       getAllByText(mockFindingsHit.resource.id);
     });
 
-    it('does not display missing info callout for 3Ps', () => {
+    it('does not display missing info callout for 3Ps', async () => {
       const { queryByText } = render(<TestComponent finding={mockWizFinding} />);
       await userEvent.click(screen.getByTestId('findings_flyout_tab_table'));
 
@@ -109,7 +109,7 @@ describe('<FindingsFlyout/>', () => {
   });
 
   describe('JSON Tab', () => {
-    it('does not display missing info callout for 3Ps', () => {
+    it('does not display missing info callout for 3Ps', async () => {
       const { queryByText } = render(<TestComponent finding={mockWizFinding} />);
       await userEvent.click(screen.getByTestId('findings_flyout_tab_json'));
 

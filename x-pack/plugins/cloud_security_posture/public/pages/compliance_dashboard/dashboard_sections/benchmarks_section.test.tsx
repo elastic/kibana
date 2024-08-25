@@ -55,7 +55,7 @@ describe('<BenchmarksSection />', () => {
       expect(getAllByTestId(DASHBOARD_TABLE_COLUMN_SCORE_TEST_ID)[2]).toHaveTextContent('95');
     });
 
-    it('toggles sort order when clicking Posture Score', () => {
+    it('toggles sort order when clicking Posture Score', async () => {
       const { getAllByTestId, getByTestId } = renderBenchmarks(mockDashboardDataCopy);
 
       await userEvent.click(getByTestId(DASHBOARD_TABLE_HEADER_SCORE_TEST_ID));

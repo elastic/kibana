@@ -57,7 +57,7 @@ describe('CopyToClipboardAction', () => {
   });
 
   describe('when copy to clipboard is clicked', () => {
-    it('should copy the markdown comment to the clipboard and add success toast', () => {
+    it('should copy the markdown comment to the clipboard and add success toast', async () => {
       const addSuccessToast = jest.fn();
       render(
         <TestExternalProviders>

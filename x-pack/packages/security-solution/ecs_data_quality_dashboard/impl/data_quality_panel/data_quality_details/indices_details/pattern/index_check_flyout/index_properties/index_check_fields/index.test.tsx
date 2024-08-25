@@ -46,7 +46,7 @@ describe('IndexCheckFields', () => {
     ['ecsCompliantTab', 'ecsCompliantTabContent'],
     ['allTab', 'allTabContent'],
   ])('when clicking on %s tab', (tab, tabContent) => {
-    it(`should render ${tabContent} content`, () => {
+    it(`should render ${tabContent} content`, async () => {
       await userEvent.click(screen.getByTestId(tab));
 
       expect(screen.getByTestId(tabContent)).toBeInTheDocument();
