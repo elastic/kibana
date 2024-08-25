@@ -917,7 +917,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       expect(getByText('Getting Started')).toHaveAttribute(
         'href',
-        'https://ela.st/cspm-get-started'
+        'https://www.elastic.co/guide/en/security/current/cspm-get-started.html'
       );
     });
 
