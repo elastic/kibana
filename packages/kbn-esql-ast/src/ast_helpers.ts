@@ -12,6 +12,7 @@
 
 import { type Token, type ParserRuleContext, type TerminalNode } from 'antlr4';
 import {
+  IndexPatternContext,
   QualifiedNameContext,
   type ArithmeticUnaryContext,
   type DecimalValueContext,
@@ -306,6 +307,34 @@ function sanitizeSourceString(ctx: ParserRuleContext) {
   return contextText;
 }
 
+const unquoteIndexString = (indexString: string): string => {
+  const isStringQuoted = indexString[0] === '"';
+
+  if (!isStringQuoted) {
+    return indexString;
+  }
+
+  // If wrapped by triple double quotes, simply remove them.
+  if (indexString.startsWith(`"""`) && indexString.endsWith(`"""`)) {
+    return indexString.slice(3, -3);
+  }
+
+  // If wrapped by double quote, remove them and unescape the string.
+  if (indexString[indexString.length - 1] === '"') {
+    indexString = indexString.slice(1, -1);
+    indexString = indexString
+      .replace(/\\"/g, '"')
+      .replace(/\\r/g, '\r')
+      .replace(/\\n/g, '\n')
+      .replace(/\\t/g, '\t')
+      .replace(/\\\\/g, '\\');
+    return indexString;
+  }
+
+  // This should never happen, but if it does, return the original string.
+  return indexString;
+};
+
 export function sanitizeIdentifierString(ctx: ParserRuleContext) {
   const result =
     getUnquotedText(ctx)?.getText() ||
@@ -352,8 +381,27 @@ export function createSource(
   type: 'index' | 'policy' = 'index'
 ): ESQLSource {
   const text = sanitizeSourceString(ctx);
+
+  let cluster: string = '';
+  let index: string = '';
+
+  if (ctx instanceof IndexPatternContext) {
+    const clusterString = ctx.clusterString();
+    const indexString = ctx.indexString();
+
+    if (clusterString) {
+      cluster = clusterString.getText();
+    }
+    if (indexString) {
+      index = indexString.getText();
+      index = unquoteIndexString(index);
+    }
+  }
+
   return {
     type: 'source',
+    cluster,
+    index,
     name: text,
     sourceType: type,
     text,

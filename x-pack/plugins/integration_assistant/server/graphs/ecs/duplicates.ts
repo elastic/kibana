@@ -16,9 +16,8 @@ export async function handleDuplicates(
   state: EcsMappingState,
   model: ActionsClientChatOpenAI | ActionsClientSimpleChatModel
 ) {
-  const ecsDuplicatesPrompt = ECS_DUPLICATES_PROMPT;
   const outputParser = new JsonOutputParser();
-  const ecsDuplicatesGraph = ecsDuplicatesPrompt.pipe(model).pipe(outputParser);
+  const ecsDuplicatesGraph = ECS_DUPLICATES_PROMPT.pipe(model).pipe(outputParser);
 
   const currentMapping = await ecsDuplicatesGraph.invoke({
     ecs: state.ecs,
