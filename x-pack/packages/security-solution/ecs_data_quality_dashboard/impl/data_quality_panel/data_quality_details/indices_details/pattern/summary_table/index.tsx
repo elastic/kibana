@@ -9,12 +9,12 @@ import type { CriteriaWithPagination, EuiBasicTableColumn, Pagination } from '@e
 import { EuiInMemoryTable } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
+import { defaultSort } from '../../../../constants';
 import { getShowPagination } from './helpers';
-import { defaultSort, MIN_PAGE_SIZE } from '../helpers';
-import { SortConfig } from '../../../../types';
+import { IndexSummaryTableItem, SortConfig } from '../../../../types';
 import { useDataQualityContext } from '../../../../data_quality_context';
-import { IndexSummaryTableItem } from '../types';
 import { UseIndicesCheckCheckState } from '../../../../hooks/use_indices_check/types';
+import { MIN_PAGE_SIZE } from '../constants';
 
 export interface Props {
   getTableColumns: ({

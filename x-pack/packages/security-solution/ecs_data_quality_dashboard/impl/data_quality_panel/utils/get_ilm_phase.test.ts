@@ -6,16 +6,11 @@
  */
 
 import {
-  IlmExplainLifecycleLifecycleExplain,
   IlmExplainLifecycleLifecycleExplainManaged,
   IlmExplainLifecycleLifecycleExplainUnmanaged,
 } from '@elastic/elasticsearch/lib/api/types';
-import { render, screen } from '@testing-library/react';
-import React from 'react';
 
-import { TestExternalProviders } from '../../../../../../mock/test_providers/test_providers';
-import { IlmPhaseCounts } from '.';
-import { getIlmExplainPhaseCounts } from '../../../utils/ilm_explain';
+import { getIlmPhase } from './get_ilm_phase';
 
 const hot: IlmExplainLifecycleLifecycleExplainManaged = {
   index: '.ds-packetbeat-8.6.1-2023.02.04-000001',
@@ -37,6 +32,7 @@ const hot: IlmExplainLifecycleLifecycleExplainManaged = {
     modified_date_in_millis: 1675536751205,
   },
 };
+
 const warm = {
   ...hot,
   phase: 'warm',
@@ -49,6 +45,10 @@ const frozen = {
   ...hot,
   phase: 'frozen',
 };
+const other = {
+  ...hot,
+  phase: 'other', // not a valid phase
+};
 
 const managed: Record<string, IlmExplainLifecycleLifecycleExplainManaged> = {
   hot,
@@ -58,29 +58,31 @@ const managed: Record<string, IlmExplainLifecycleLifecycleExplainManaged> = {
 };
 
 const unmanaged: IlmExplainLifecycleLifecycleExplainUnmanaged = {
-  index: 'foo',
+  index: 'michael',
   managed: false,
 };
 
-const ilmExplain: Record<string, IlmExplainLifecycleLifecycleExplain> = {
-  ...managed,
-  [unmanaged.index]: unmanaged,
-};
+describe('getIlmPhase', () => {
+  const isILMAvailable = true;
+  test('it returns undefined when the `ilmExplainRecord` is undefined', () => {
+    expect(getIlmPhase(undefined, isILMAvailable)).toBeUndefined();
+  });
 
-const ilmExplainPhaseCounts = getIlmExplainPhaseCounts(ilmExplain);
-
-const pattern = 'packetbeat-*';
-
-describe('IlmPhaseCounts', () => {
-  test('it renders the expected counts', () => {
-    render(
-      <TestExternalProviders>
-        <IlmPhaseCounts ilmExplainPhaseCounts={ilmExplainPhaseCounts} pattern={pattern} />
-      </TestExternalProviders>
+  describe('when the `ilmExplainRecord` is a `IlmExplainLifecycleLifecycleExplainManaged` record', () => {
+    Object.keys(managed).forEach((phase) =>
+      test(`it returns the expected phase when 'phase' is '${phase}'`, () => {
+        expect(getIlmPhase(managed[phase], isILMAvailable)).toEqual(phase);
+      })
     );
 
-    expect(screen.getByTestId('ilmPhaseCounts')).toHaveTextContent(
-      'hot (1)unmanaged (1)warm (1)cold (1)frozen (1)'
-    );
+    test(`it returns undefined when the 'phase' is unknown`, () => {
+      expect(getIlmPhase(other, isILMAvailable)).toBeUndefined();
+    });
+  });
+
+  describe('when the `ilmExplainRecord` is a `IlmExplainLifecycleLifecycleExplainUnmanaged` record', () => {
+    test('it returns `unmanaged`', () => {
+      expect(getIlmPhase(unmanaged, isILMAvailable)).toEqual('unmanaged');
+    });
   });
 });

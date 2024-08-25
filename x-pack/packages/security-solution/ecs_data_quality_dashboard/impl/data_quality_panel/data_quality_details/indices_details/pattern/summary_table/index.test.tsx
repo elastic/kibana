@@ -18,9 +18,9 @@ import {
   TestDataQualityProviders,
   TestExternalProviders,
 } from '../../../../mock/test_providers/test_providers';
-import { getSummaryTableItems } from '../helpers';
 import { SortConfig } from '../../../../types';
 import { Props, SummaryTable } from '.';
+import { getSummaryTableItems } from '../../../../utils/get_summary_table_items';
 
 const defaultBytesFormat = '0,0.[0]b';
 const formatBytes = (value: number | undefined) =>
@@ -39,7 +39,7 @@ const indexNames = [
   '.ds-packetbeat-8.6.1-2023.02.04-000001',
 ];
 
-export const defaultSort: SortConfig = {
+const defaultSort: SortConfig = {
   sort: {
     direction: 'desc',
     field: 'docsCount',

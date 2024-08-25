@@ -6,8 +6,8 @@
  */
 
 import { PatternRollup } from '../../../types';
+import { getIlmPhase } from '../../../utils/get_ilm_phase';
 import { getDocsCount, getSizeInBytes } from '../../../utils/stats';
-import { getIlmPhase } from '../../indices_details/pattern/helpers';
 import { FlattenedBucket } from '../types';
 
 export const getFlattenedBuckets = ({
