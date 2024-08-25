@@ -354,7 +354,7 @@ describe('JiraParamsFields renders', () => {
       expect(editAction.mock.calls[0][1].incident.description).toEqual('new desc');
     });
 
-    it('updates issue type', () => {
+    it('updates issue type', async () => {
       const results = render(<JiraParamsFields {...defaultProps} />);
 
       expect(results.getByTestId('issueTypeSelect')).toBeInTheDocument();
@@ -362,12 +362,10 @@ describe('JiraParamsFields renders', () => {
         true
       );
 
-      act(() => {
-        await userEvent.selectOptions(
-          results.getByTestId('issueTypeSelect'),
-          results.getByRole('option', { name: 'Task' })
-        );
-      });
+      await userEvent.selectOptions(
+        results.getByTestId('issueTypeSelect'),
+        results.getByRole('option', { name: 'Task' })
+      );
 
       expect(editAction.mock.calls[0][1].incident.issueType).toEqual('10005');
     });
@@ -383,12 +381,10 @@ describe('JiraParamsFields renders', () => {
         );
       });
 
-      act(() => {
-        await userEvent.selectOptions(
-          results.getByTestId('prioritySelect'),
-          results.getByRole('option', { name: 'Medium' })
-        );
-      });
+      await userEvent.selectOptions(
+        results.getByTestId('prioritySelect'),
+        results.getByRole('option', { name: 'Medium' })
+      );
 
       expect(editAction.mock.calls[0][1].incident.priority).toEqual('Medium');
     });
@@ -493,7 +489,8 @@ describe('JiraParamsFields renders', () => {
       render(<JiraParamsFields {...defaultProps} />);
       const otherFields = await screen.findByTestId('otherFieldsJsonEditor');
 
-      await userEvent.paste(otherFields, 'foobar');
+      await userEvent.click(otherFields);
+      await userEvent.paste('foobar');
       await userEvent.clear(otherFields);
 
       expect(editAction.mock.calls[1][1].incident.otherFields).toEqual(null);

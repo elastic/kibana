@@ -32,7 +32,7 @@ describe('DisplayMoreOptions', () => {
     expect(screen.getByText('Hide options')).toBeInTheDocument();
   });
 
-  it('calls toggleShowingMoreOptions when clicked', () => {
+  it('calls toggleShowingMoreOptions when clicked', async () => {
     render(<DisplayMoreOptions {...options} />);
 
     await userEvent.click(screen.getByTestId('opsgenie-display-more-options'));

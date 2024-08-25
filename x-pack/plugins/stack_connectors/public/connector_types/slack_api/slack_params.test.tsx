@@ -372,14 +372,12 @@ describe('SlackParamsFields renders', () => {
     };
     const { getByTestId } = render(<WrappedComponent />);
 
-    act(() => {
-      getByTestId('slackApiChannelId').click();
-      await userEvent.clear(getByTestId('slackApiChannelId'));
-      fireEvent.change(getByTestId('slackApiChannelId'), {
-        target: { value: 'new-channel-id' },
-      });
-      userEvent.tab();
+    getByTestId('slackApiChannelId').click();
+    await userEvent.clear(getByTestId('slackApiChannelId'));
+    fireEvent.change(getByTestId('slackApiChannelId'), {
+      target: { value: 'new-channel-id' },
     });
+    userEvent.tab();
 
     await waitFor(() => {
       expect(mockEditFunc).toBeCalledWith(

@@ -93,7 +93,8 @@ describe('UserActionMarkdown ', () => {
 
       const markdown = screen.getByTestId('euiMarkdownEditorTextArea');
 
-      await userEvent.paste(markdown, longComment);
+      await userEvent.click(markdown);
+      await userEvent.paste(longComment);
 
       await waitFor(() => {
         expect(

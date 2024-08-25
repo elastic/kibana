@@ -38,7 +38,7 @@ describe('ShowMoreButton', () => {
     expect(screen.getByRole('progressbar')).toBeTruthy();
   });
 
-  it('calls onShowMoreClick on button click', () => {
+  it('calls onShowMoreClick on button click', async () => {
     appMockRender.render(<ShowMoreButton onShowMoreClick={showMoreClickMock} />);
 
     await userEvent.click(screen.getByTestId('cases-show-more-user-actions'));

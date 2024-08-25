@@ -87,7 +87,7 @@ describe('Callout', () => {
   });
 
   // use this for storage if we ever want to bring that back
-  it('onClick passes id and type', () => {
+  it('onClick passes id and type', async () => {
     appMockRenderer.render(<CallOut {...defaultProps} />);
 
     expect(screen.getByTestId('callout-onclick-md5-hex')).toBeInTheDocument();

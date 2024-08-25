@@ -18,7 +18,7 @@ const useCaseViewParamsMock = useCaseViewParams as jest.Mock;
 const useCaseViewNavigationMock = useCaseViewNavigation as jest.Mock;
 
 describe('case view alert table link', () => {
-  it('calls navigateToCaseView with the correct params', () => {
+  it('calls navigateToCaseView with the correct params', async () => {
     const appMockRenderer = createAppMockRenderer();
     const navigateToCaseView = jest.fn();
 

@@ -40,7 +40,7 @@ describe('UserList ', () => {
     window.open = open;
   });
 
-  it('triggers mailto when email icon clicked', () => {
+  it('triggers mailto when email icon clicked', async () => {
     appMockRender.render(
       <UserList
         theCase={basicCase}

@@ -106,7 +106,7 @@ describe('CreateAlert', () => {
     });
   });
 
-  it('shows the additional options when clicking the more options button', () => {
+  it('shows the additional options when clicking the more options button', async () => {
     render(<CreateAlert {...options} />);
 
     await userEvent.click(screen.getByTestId('opsgenie-display-more-options'));

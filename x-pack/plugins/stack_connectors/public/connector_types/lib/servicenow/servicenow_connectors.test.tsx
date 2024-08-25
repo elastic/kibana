@@ -288,9 +288,12 @@ describe('ServiceNowActionConnectorFields renders', () => {
         'connector-servicenow-password-form-input'
       );
 
-      await userEvent.paste(urlInput, 'https://example.com');
-      await userEvent.paste(usernameInput, 'user');
-      await userEvent.paste(passwordInput, 'pass');
+      await userEvent.click(urlInput);
+      await userEvent.paste('https://example.com');
+      await userEvent.click(usernameInput);
+      await userEvent.paste('user');
+      await userEvent.click(passwordInput);
+      await userEvent.paste('pass');
       await userEvent.click(
         await within(updateConnectorForm).findByTestId('snUpdateInstallationSubmit')
       );
@@ -345,9 +348,12 @@ describe('ServiceNowActionConnectorFields renders', () => {
         'connector-servicenow-password-form-input'
       );
 
-      await userEvent.paste(urlInput, 'https://example.com');
-      await userEvent.paste(usernameInput, 'user');
-      await userEvent.paste(passwordInput, 'pass');
+      await userEvent.click(urlInput);
+      await userEvent.paste('https://example.com');
+      await userEvent.click(usernameInput);
+      await userEvent.paste('user');
+      await userEvent.click(passwordInput);
+      await userEvent.paste('pass');
       await userEvent.click(
         await within(updateConnectorForm).findByTestId('snUpdateInstallationSubmit')
       );

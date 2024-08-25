@@ -80,7 +80,7 @@ describe('UserRepresentation', () => {
     expect(screen.queryByTestId('remove-button')).not.toBeInTheDocument();
   });
 
-  it('call onRemoveItem correctly', () => {
+  it('call onRemoveItem correctly', async () => {
     appMockRender.render(
       <RemovableItem {...defaultProps}>
         <MockComponent />

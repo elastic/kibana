@@ -45,7 +45,8 @@ describe('Credentials', () => {
       </IntlProvider>
     );
 
-    await userEvent.paste(await screen.findByTestId('additional_fieldsJsonEditor'), newValue);
+    await userEvent.click(await screen.findByTestId('additional_fieldsJsonEditor'));
+    await userEvent.paste(newValue);
 
     await waitFor(() => {
       expect(onChange).toHaveBeenCalledWith(newValue);
@@ -65,7 +66,8 @@ describe('Credentials', () => {
 
     const editor = await screen.findByTestId('additional_fieldsJsonEditor');
 
-    await userEvent.paste(editor, newValue);
+    await userEvent.click(editor);
+    await userEvent.paste(newValue);
     await userEvent.clear(editor);
 
     await waitFor(() => {

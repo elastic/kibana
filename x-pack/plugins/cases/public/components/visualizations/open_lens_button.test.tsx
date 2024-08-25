@@ -37,7 +37,7 @@ describe('OpenLensButton', () => {
     expect(screen.getByText('Open visualization')).toBeInTheDocument();
   });
 
-  it('calls navigateToPrefilledEditor correctly', () => {
+  it('calls navigateToPrefilledEditor correctly', async () => {
     const navigateToPrefilledEditor = jest.fn();
     appMockRender.coreStart.lens.navigateToPrefilledEditor = navigateToPrefilledEditor;
     // @ts-expect-error: props are correct

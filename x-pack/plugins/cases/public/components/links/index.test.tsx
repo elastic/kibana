@@ -142,7 +142,7 @@ describe('CaseDetailsLink', () => {
     expect(screen.getByLabelText(`click to visit case with title my title`)).toBeInTheDocument();
   });
 
-  test('it calls navigateToCaseViewClick on click', () => {
+  test('it calls navigateToCaseViewClick on click', async () => {
     render(<CaseDetailsLink {...props} />);
     await userEvent.click(screen.getByText('test detail name'));
     expect(navigateToCaseView).toHaveBeenCalledWith({
