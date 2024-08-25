@@ -59,8 +59,6 @@ export function initializeControlGroupUnsavedChanges(
         childrenUnsavedChanges$(children$),
       ]).pipe(
         map(([unsavedControlGroupState, unsavedControlsState]) => {
-          console.log('unsavedControlGroupState', unsavedControlGroupState);
-          console.log('unsavedControlsState', unsavedControlsState);
           const unsavedChanges: Partial<ControlGroupRuntimeState> = unsavedControlGroupState
             ? omit(unsavedControlGroupState, 'controlsInOrder')
             : {};
