@@ -12,6 +12,7 @@ import globby from 'globby';
 import pMap from 'p-map';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 import path from 'path';
+import fs from 'fs';
 
 import { EsVersion, FunctionalTestRunner, runElasticsearch, runKibanaServer } from '@kbn/test';
 
@@ -268,6 +269,14 @@ ${JSON.stringify(playwrightConfigFile, null, 2)}
                   KIBANA_PASSWORD: config.get('servers.kibana.password'),
                   IS_SERVERLESS: config.get('serverless'),
                 };
+
+                const envFilePath = path.resolve(__dirname, '..', '.env');
+
+                const envContent = Object.entries(playwrightCustomEnv)
+                  .map(([key, value]) => `${key}=${value}`)
+                  .join('\n');
+
+                fs.writeFileSync(envFilePath, envContent);
 
                 log.info(`
                 ----------------------------------------------
