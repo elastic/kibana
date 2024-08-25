@@ -210,6 +210,7 @@ ${JSON.stringify(playwrightConfigFile, null, 2)}
                 installDir: process.env.KIBANA_INSTALL_DIR,
                 ci: process.env.CI,
               };
+              let fleetServer: StartedFleetServer | undefined;
               let shutdownEs;
 
               try {
@@ -235,6 +236,34 @@ ${JSON.stringify(playwrightConfigFile, null, 2)}
                   onEarlyExit,
                   inspect: argv.inspect,
                 });
+
+                if (playwrightConfigFile.env?.WITH_FLEET_SERVER) {
+                  log.info(`Setting up fleet-server for this Cypress config`);
+
+                  const kbnClient = createKbnClient({
+                    url: baseUrl,
+                    username: config.get('servers.kibana.username'),
+                    password: config.get('servers.kibana.password'),
+                    log,
+                  });
+
+                  fleetServer = await pRetry(
+                    async () =>
+                      startFleetServer({
+                        kbnClient,
+                        logger: log,
+                        port:
+                          fleetServerPort ?? config.has('servers.fleetserver.port')
+                            ? (config.get('servers.fleetserver.port') as number)
+                            : undefined,
+                        // `force` is needed to ensure that any currently running fleet server (perhaps left
+                        // over from an interrupted run) is killed and a new one restarted
+                        force: true,
+                      }),
+                    { retries: 2, forever: false }
+                  );
+                }
+
                 await providers.loadAll();
                 const functionalTestRunner = new FunctionalTestRunner(
                   log,
@@ -312,6 +341,10 @@ ${JSON.stringify(playwrightConfigFile, null, 2)}
                 }
               } catch (error) {
                 log.error(error);
+              }
+
+              if (fleetServer) {
+                await fleetServer.stop();
               }
 
               await procs.stop('kibana');
