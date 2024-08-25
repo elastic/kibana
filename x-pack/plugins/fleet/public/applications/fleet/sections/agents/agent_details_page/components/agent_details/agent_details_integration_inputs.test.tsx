@@ -49,7 +49,7 @@ describe('AgentDetailsIntegrationInputs', () => {
     );
   };
 
-  it('renders a default health icon when the agent has no components at all', () => {
+  it('renders a default health icon when the agent has no components at all', async () => {
     const component = renderComponent();
     await userEvent.click(component.getByTestId('agentIntegrationsInputsTitle'));
     expect(
@@ -57,7 +57,7 @@ describe('AgentDetailsIntegrationInputs', () => {
     ).toBeInTheDocument();
   });
 
-  it('renders a default health icon when the package input has no match in the agent component units', () => {
+  it('renders a default health icon when the package input has no match in the agent component units', async () => {
     agent.components = [
       {
         id: 'endpoint-default',
@@ -82,7 +82,7 @@ describe('AgentDetailsIntegrationInputs', () => {
     ).toBeInTheDocument();
   });
 
-  it('renders a success health icon when the package input has a match in the agent component units', () => {
+  it('renders a success health icon when the package input has a match in the agent component units', async () => {
     agent.components = [
       {
         id: 'endpoint-default',
@@ -107,7 +107,7 @@ describe('AgentDetailsIntegrationInputs', () => {
     ).toBeInTheDocument();
   });
 
-  it('does not render when there is no units array', () => {
+  it('does not render when there is no units array', async () => {
     agent.components = [
       {
         id: 'endpoint-default',
@@ -124,7 +124,7 @@ describe('AgentDetailsIntegrationInputs', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('should not throw error when there is no components', () => {
+  it('should not throw error when there is no components', async () => {
     agent.components = undefined;
 
     const component = renderComponent();
