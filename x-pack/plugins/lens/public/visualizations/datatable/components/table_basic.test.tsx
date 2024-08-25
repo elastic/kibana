@@ -170,7 +170,7 @@ describe('DatatableComponent', () => {
     });
   });
 
-  test('it should render hide, reset, and sort actions on header even when it is in read only mode', () => {
+  test('it should render hide, reset, and sort actions on header even when it is in read only mode', async () => {
     renderDatatableComponent({ renderMode: 'view' });
     await userEvent.click(screen.getByRole('button', { name: 'a' }));
     const actionPopover = screen.getByRole('dialog');
@@ -299,7 +299,7 @@ describe('DatatableComponent', () => {
     expect(screen.getByTestId('lnsVisualizationContainer')).toHaveTextContent('No results found');
   });
 
-  test('it renders the table with the given sorting', () => {
+  test('it renders the table with the given sorting', async () => {
     renderDatatableComponent({
       args: {
         ...args,

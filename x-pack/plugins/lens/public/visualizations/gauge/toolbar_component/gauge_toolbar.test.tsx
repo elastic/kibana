@@ -39,13 +39,13 @@ describe('gauge toolbar', () => {
     jest.useRealTimers();
   });
 
-  const renderAxisTicksSettingsAndOpen = (
+  const renderAxisTicksSettingsAndOpen = async (
     propsOverrides?: Partial<VisualizationToolbarProps<GaugeVisualizationState>>
   ) => {
     const rtlRender = render(<GaugeToolbar {...defaultProps} {...propsOverrides} />);
-    const openPopover = () =>
+    const openPopover = async () =>
       await userEvent.click(screen.getByRole('button', { name: 'Appearance' }));
-    openPopover();
+    await openPopover();
     return {
       ...rtlRender,
     };

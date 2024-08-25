@@ -234,12 +234,12 @@ describe('data table dimension editor', () => {
     { flyout: 'values', isBucketed: false, dataType: 'number' },
   ])(
     'should show color by $flyout flyout when bucketing is $isBucketed with $dataType column',
-    ({ flyout, isBucketed, dataType }) => {
+    async ({ flyout, isBucketed, dataType }) => {
       state.columns[0].colorMode = 'cell';
       mockOperationForFirstColumn({ isBucketed, dataType });
       renderTableDimensionEditor();
 
-      userEvent.click(screen.getByLabelText('Edit colors'));
+      await userEvent.click(screen.getByLabelText('Edit colors'));
 
       expect(screen.getByTestId(`lns-palettePanel-${flyout}`)).toBeInTheDocument();
     }

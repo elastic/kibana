@@ -59,7 +59,7 @@ describe('Axes Title settings', () => {
     expect(getAxisTitleInput()).toBeDisabled();
   });
 
-  it('should allow custom mode on user input even with empty string', () => {
+  it('should allow custom mode on user input even with empty string', async () => {
     const { getAxisTitleSelect, getAxisTitleInput } = renderAxisTicksSettings({
       title: '',
     });

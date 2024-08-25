@@ -21,9 +21,9 @@ describe('legend size settings', () => {
     };
     return render(<LegendSizeSettings {...defaultProps} {...props} />);
   };
-  const openSelect = () => await userEvent.click(screen.getByRole('button'));
-  const chooseOption = (option: string) => {
-    openSelect();
+  const openSelect = async () => await userEvent.click(screen.getByRole('button'));
+  const chooseOption = async (option: string) => {
+    await openSelect();
     fireEvent.click(screen.getByRole('option', { name: option }));
   };
   it('renders nothing if not vertical legend', () => {
@@ -42,11 +42,11 @@ describe('legend size settings', () => {
     expect(screen.getByRole('button')).toHaveTextContent('Small');
   });
 
-  it('allows user to select a new option', () => {
+  it('allows user to select a new option', async () => {
     const onSizeChange = jest.fn();
     renderLegendSizeSettings({ onLegendSizeChange: onSizeChange });
-    chooseOption('Extra large');
-    chooseOption('Medium');
+    await chooseOption('Extra large');
+    await chooseOption('Medium');
     expect(onSizeChange).toHaveBeenNthCalledWith(1, LegendSize.EXTRA_LARGE);
     expect(onSizeChange).toHaveBeenNthCalledWith(2, undefined);
   });

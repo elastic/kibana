@@ -44,7 +44,7 @@ describe('layer settings', () => {
       >
     ) => render(<LayerSettings {...props} {...propsOverrides} />);
 
-    it('toggles multiple metrics', () => {
+    it('toggles multiple metrics', async () => {
       renderLayerSettings();
       expect(props.setState).not.toHaveBeenCalled();
       const toggle = screen.getByRole('switch');

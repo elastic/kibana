@@ -31,7 +31,7 @@ describe('Policy Advanced Settings section', () => {
   let render: (expanded?: boolean) => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
 
-  const clickShowHideButton = () => {
+  const clickShowHideButton = async () => {
     await userEvent.click(renderResult.getByTestId(testSubj.showHideButton));
   };
 

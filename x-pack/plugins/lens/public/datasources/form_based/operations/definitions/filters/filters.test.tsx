@@ -299,7 +299,7 @@ describe('filters', () => {
       },
     }));
 
-    it('should update state when changing a filter', () => {
+    it('should update state when changing a filter', async () => {
       jest.useFakeTimers();
       const updateLayerSpy = jest.fn();
       render(
@@ -359,7 +359,7 @@ describe('filters', () => {
         expect(filtersLabels).toEqual(['More than one', 'src : 2']);
       });
 
-      it('should remove filter', () => {
+      it('should remove filter', async () => {
         const updateLayerSpy = jest.fn();
         render(
           <InlineOptions

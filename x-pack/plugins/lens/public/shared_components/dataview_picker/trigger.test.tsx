@@ -31,7 +31,7 @@ describe('TriggerButton', () => {
       expect(screen.getByTitle('My title')).toBeInTheDocument();
     });
 
-    it('should call the toggle callback on click', () => {
+    it('should call the toggle callback on click', async () => {
       const toggleFn = jest.fn();
       render(
         <TriggerButton
