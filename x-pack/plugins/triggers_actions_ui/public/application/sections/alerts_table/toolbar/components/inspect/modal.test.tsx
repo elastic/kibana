@@ -36,10 +36,10 @@ describe('Modal Inspect', () => {
   const defaultProps: ModalInspectProps = {
     closeModal,
     title: 'Inspect',
-    getInspectQuery: () => ({
+    querySnapshot: {
       request: [getRequest()],
       response: [response],
-    }),
+    },
   };
 
   const renderModalInspectQuery = () => {

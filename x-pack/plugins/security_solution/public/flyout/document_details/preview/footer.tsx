@@ -13,6 +13,7 @@ import { FlyoutFooter } from '../../shared/components/flyout_footer';
 import { DocumentDetailsRightPanelKey } from '../shared/constants/panel_keys';
 import { useDocumentDetailsContext } from '../shared/context';
 import { PREVIEW_FOOTER_TEST_ID, PREVIEW_FOOTER_LINK_TEST_ID } from './test_ids';
+import { useKibana } from '../../../common/lib/kibana';
 
 /**
  * Footer at the bottom of preview panel with a link to open document details flyout
@@ -20,6 +21,7 @@ import { PREVIEW_FOOTER_TEST_ID, PREVIEW_FOOTER_LINK_TEST_ID } from './test_ids'
 export const PreviewPanelFooter = () => {
   const { eventId, indexName, scopeId } = useDocumentDetailsContext();
   const { openFlyout } = useExpandableFlyoutApi();
+  const { telemetry } = useKibana().services;
 
   const openDocumentFlyout = useCallback(() => {
     openFlyout({
@@ -32,7 +34,11 @@ export const PreviewPanelFooter = () => {
         },
       },
     });
-  }, [openFlyout, eventId, indexName, scopeId]);
+    telemetry.reportDetailsFlyoutOpened({
+      location: scopeId,
+      panel: 'right',
+    });
+  }, [openFlyout, eventId, indexName, scopeId, telemetry]);
 
   return (
     <FlyoutFooter data-test-subj={PREVIEW_FOOTER_TEST_ID}>

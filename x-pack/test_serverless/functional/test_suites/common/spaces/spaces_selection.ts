@@ -12,9 +12,11 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const svlCommonNavigation = getService('svlCommonNavigation');
   const testSubjects = getService('testSubjects');
 
-  describe('space selection', function () {
+  // Skipped due to change in QA environment for role management and spaces
+  // TODO: revisit once the change is rolled out to all environments
+  describe.skip('space selection', function () {
     before(async () => {
-      await svlCommonPage.loginWithRole('viewer');
+      await svlCommonPage.loginAsViewer();
     });
 
     it('does not have the space selection menu in header', async () => {

@@ -7,6 +7,7 @@
 
 import React, { memo } from 'react';
 import { EuiSkeletonText } from '@elastic/eui';
+import { getHostPlatform } from '../../../../../../common/lib/endpoint/utils/get_host_platform';
 import { AgentStatus } from '../../../../../../common/components/endpoint/agents/agent_status';
 import { HeaderAgentInfo } from '../header_agent_info';
 import { useGetEndpointDetails } from '../../../../../hooks';
@@ -31,7 +32,7 @@ export const HeaderEndpointInfo = memo<HeaderEndpointInfoProps>(({ endpointId })
 
   return (
     <HeaderAgentInfo
-      platform={endpointDetails.metadata.host.os.name.toLowerCase() as Platform}
+      platform={getHostPlatform(endpointDetails.metadata) as Platform}
       hostName={endpointDetails.metadata.host.name}
       lastCheckin={endpointDetails.last_checkin}
       agentType="endpoint"

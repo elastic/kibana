@@ -7,5 +7,4 @@ enum:
   - "<="
   - between
   - notBetween
-examples:
-  - ">"
+example: ">"

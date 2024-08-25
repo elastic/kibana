@@ -13,7 +13,7 @@ import { AgentStatus } from '../../../../common/components/endpoint/agents/agent
 import { OverviewDescriptionList } from '../../../../common/components/overview_description_list';
 import type { DescriptionList } from '../../../../../common/utility_types';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
-import { DefaultFieldRenderer } from '../../../../timelines/components/field_renderers/field_renderers';
+import { DefaultFieldRenderer } from '../../../../timelines/components/field_renderers/default_renderer';
 import * as i18n from './translations';
 import type { EndpointFields } from '../../../../../common/search_strategy/security_solution/hosts';
 import { HostPolicyResponseActionStatus } from '../../../../../common/search_strategy/security_solution/hosts';

@@ -7,6 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { InjectedMetadata } from '@kbn/core-injected-metadata-common-internal';
 import { KBN_LOAD_MARKS } from './events';
 import { CoreSystem } from './core_system';
 import { ApmSystem } from './apm_system';
@@ -19,12 +20,15 @@ export async function __kbnBootstrap__() {
     detail: LOAD_BOOTSTRAP_START,
   });
 
-  const injectedMetadata = JSON.parse(
+  const injectedMetadata: InjectedMetadata = JSON.parse(
     document.querySelector('kbn-injected-metadata')!.getAttribute('data')!
   );
 
   let i18nError: Error | undefined;
-  const apmSystem = new ApmSystem(injectedMetadata.vars.apmConfig, injectedMetadata.basePath);
+  const apmSystem = new ApmSystem(
+    injectedMetadata.apmConfig ?? undefined,
+    injectedMetadata.basePath
+  );
 
   await Promise.all([
     // eslint-disable-next-line no-console

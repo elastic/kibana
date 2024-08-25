@@ -61,7 +61,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await pageObjects.header.waitUntilLoadingHasFinished();
 
-        retry.try(async () => {
+        await retry.try(async () => {
           const documentTitle = await browser.getTitle();
           expect(documentTitle).to.contain('Settings - Logs - Observability - Elastic');
         });
@@ -75,6 +75,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         await pageObjects.header.waitUntilLoadingHasFinished();
+
+        await infraSourceConfigurationForm.selectIndicesPanel();
 
         const nameInput = await infraSourceConfigurationForm.getNameInput();
         await nameInput.clearValueWithKeyboard({ charByChar: true });

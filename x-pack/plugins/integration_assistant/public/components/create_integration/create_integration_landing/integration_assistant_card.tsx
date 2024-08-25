@@ -58,7 +58,7 @@ export const IntegrationAssistantCard = React.memo(() => {
         <EuiFlexItem>
           <EuiFlexGroup
             direction="column"
-            gutterSize="s"
+            gutterSize="xs"
             alignItems="flexStart"
             justifyContent="flexStart"
           >

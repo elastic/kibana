@@ -366,6 +366,7 @@ describe('Fleet - packageToPackagePolicy', () => {
         packageToPackagePolicy(
           {
             ...mockPackage,
+            // @ts-expect-error upgrade typescript v5.1.6
             installationInfo: {
               experimental_data_stream_features: [
                 {

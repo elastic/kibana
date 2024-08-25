@@ -28,7 +28,7 @@ import { useKibana, useUiSetting$ } from '../../../common/lib/kibana/kibana_reac
 import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 
 import { InspectButton, InspectButtonContainer } from '../../../common/components/inspect';
-import { ONE_WEEK_IN_HOURS } from '../../../timelines/components/side_panel/new_user_detail/constants';
+import { ONE_WEEK_IN_HOURS } from '../../../flyout/entity_details/shared/constants';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
 import { RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
@@ -55,7 +55,7 @@ export interface RiskSummaryProps<T extends RiskScoreEntity> {
   isPreviewMode?: boolean;
 }
 
-const RiskSummaryComponent = <T extends RiskScoreEntity>({
+const FlyoutRiskSummaryComponent = <T extends RiskScoreEntity>({
   riskScoreData,
   recalculatingScore,
   queryId,
@@ -287,5 +287,5 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
   );
 };
 
-export const RiskSummary = React.memo(RiskSummaryComponent);
-RiskSummary.displayName = 'RiskSummary';
+export const FlyoutRiskSummary = React.memo(FlyoutRiskSummaryComponent);
+FlyoutRiskSummary.displayName = 'RiskSummary';

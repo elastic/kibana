@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import type {
-  GetInfraMetricsRequestBodyPayload,
+  GetInfraMetricsRequestBodyPayloadClient,
   GetInfraMetricsResponsePayload,
 } from '@kbn/infra-plugin/common/http_api';
 import type { RoleCredentials } from '../../../../shared/services';
@@ -27,11 +27,11 @@ export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
 
   const fetchInfraHosts = async (
-    body: GetInfraMetricsRequestBodyPayload,
+    body: GetInfraMetricsRequestBodyPayloadClient,
     roleAuthc: RoleCredentials
   ): Promise<GetInfraMetricsResponsePayload | undefined> => {
     const response = await supertestWithoutAuth
-      .post('/api/metrics/infra')
+      .post('/api/metrics/infra/host')
       .set(svlCommonApi.getInternalRequestHeader())
       .set(roleAuthc.apiKeyHeader)
       .send(body)
@@ -39,44 +39,24 @@ export default function ({ getService }: FtrProviderContext) {
     return response.body;
   };
 
-  describe('API /metrics/infra', () => {
+  describe('API /metrics/infra/host', () => {
     let roleAuthc: RoleCredentials;
     describe('works', () => {
       describe('with host asset', () => {
         before(async () => {
-          roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+          roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
           return esArchiver.load(ARCHIVE_NAME);
         });
         after(async () => {
-          await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+          await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
           return esArchiver.unload(ARCHIVE_NAME);
         });
 
         it('received data', async () => {
           const infraHosts = await fetchInfraHosts(
             {
-              type: 'host',
               limit: 100,
-              metrics: [
-                {
-                  type: 'rx',
-                },
-                {
-                  type: 'tx',
-                },
-                {
-                  type: 'memory',
-                },
-                {
-                  type: 'cpu',
-                },
-                {
-                  type: 'diskSpaceUsage',
-                },
-                {
-                  type: 'memoryFree',
-                },
-              ],
+              metrics: ['rxV2', 'txV2', 'memory', 'cpuV2', 'diskSpaceUsage', 'memoryFree'],
               query: {
                 bool: {
                   must: [],
@@ -85,11 +65,8 @@ export default function ({ getService }: FtrProviderContext) {
                   must_not: [],
                 },
               },
-              range: {
-                from: timeRange.from,
-                to: timeRange.to,
-              },
-              sourceId: 'default',
+              from: timeRange.from,
+              to: timeRange.to,
             },
             roleAuthc
           );
@@ -115,30 +92,31 @@ export default function ({ getService }: FtrProviderContext) {
               ],
               metrics: [
                 {
-                  name: 'rx',
-                  value: 133425.6,
+                  name: 'rxV2',
+                  value: 17886.18845261874,
                 },
                 {
-                  name: 'tx',
-                  value: 135892.3,
+                  name: 'txV2',
+                  value: 18216.85858680644,
                 },
                 {
                   name: 'memory',
                   value: 0.9490000000000001,
                 },
                 {
-                  name: 'cpu',
-                  value: 1.021,
+                  name: 'cpuV2',
+                  value: 0.124,
                 },
                 {
                   name: 'diskSpaceUsage',
-                  value: 0,
+                  value: null,
                 },
                 {
                   name: 'memoryFree',
                   value: 1753829376,
                 },
               ],
+              hasSystemMetrics: true,
               name: 'serverless-host',
             });
           } else {

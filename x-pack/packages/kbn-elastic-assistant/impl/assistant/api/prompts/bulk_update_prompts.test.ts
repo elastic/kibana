@@ -49,7 +49,7 @@ describe('bulkUpdatePrompts', () => {
 
     expect(httpMock.fetch).toHaveBeenCalledWith(ELASTIC_AI_ASSISTANT_PROMPTS_URL_BULK_ACTION, {
       method: 'POST',
-      version: API_VERSIONS.internal.v1,
+      version: API_VERSIONS.public.v1,
       body: JSON.stringify({
         create: [],
         update: [],
@@ -69,7 +69,7 @@ describe('bulkUpdatePrompts', () => {
 
     expect(httpMock.fetch).toHaveBeenCalledWith(ELASTIC_AI_ASSISTANT_PROMPTS_URL_BULK_ACTION, {
       method: 'POST',
-      version: API_VERSIONS.internal.v1,
+      version: API_VERSIONS.public.v1,
       body: JSON.stringify({
         create: [prompt1, prompt2],
         update: [],
@@ -88,7 +88,7 @@ describe('bulkUpdatePrompts', () => {
 
     expect(httpMock.fetch).toHaveBeenCalledWith(ELASTIC_AI_ASSISTANT_PROMPTS_URL_BULK_ACTION, {
       method: 'POST',
-      version: API_VERSIONS.internal.v1,
+      version: API_VERSIONS.public.v1,
       body: JSON.stringify({
         update: [prompt1, prompt2],
         delete: { ids: [] },

@@ -74,7 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
     ];
 
     before(async () => {
-      roleAdmin = await svlUserManager.createApiKeyForRole('admin');
+      roleAdmin = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
     });
 
@@ -93,7 +93,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(roleAdmin);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAdmin);
     });
 
     it('should schedule actions for summary of alerts per rule run', async () => {

@@ -162,6 +162,9 @@ describe('buildAlert', () => {
           },
         ],
         immutable: false,
+        rule_source: {
+          type: 'internal',
+        },
         type: 'query',
         language: 'kuery',
         index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
@@ -357,6 +360,9 @@ describe('buildAlert', () => {
           },
         ],
         immutable: false,
+        rule_source: {
+          type: 'internal',
+        },
         type: 'query',
         language: 'kuery',
         index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],

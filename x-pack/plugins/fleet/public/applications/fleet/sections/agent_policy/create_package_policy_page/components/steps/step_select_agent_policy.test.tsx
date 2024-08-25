@@ -83,6 +83,8 @@ describe('step select agent policy', () => {
   beforeEach(() => {
     testRenderer = createFleetTestRendererMock();
     useMultipleAgentPoliciesMock.mockReturnValue({ canUseMultipleAgentPolicies: false });
+  });
+  afterEach(() => {
     updateAgentPoliciesMock.mockReset();
   });
 
@@ -105,12 +107,12 @@ describe('step select agent policy', () => {
       const select = renderResult.container.querySelector('[data-test-subj="agentPolicySelect"]');
       expect((select as any)?.value).toEqual('');
 
-      expect(renderResult.getByText('An agent policy is required.')).toBeVisible();
+      expect(renderResult.getByText('At least one agent policy is required.')).toBeVisible();
     });
   });
 
   test('should select agent policy by default if one exists', async () => {
-    useGetAgentPoliciesMock.mockReturnValueOnce({
+    useGetAgentPoliciesMock.mockReturnValue({
       data: { items: [{ id: 'policy-1', name: 'Policy 1' }] },
       error: undefined,
       isLoading: false,
@@ -178,7 +180,7 @@ describe('step select agent policy', () => {
         );
         expect((select as any)?.value).toEqual(undefined);
 
-        expect(renderResult.getByText('An agent policy is required.')).toBeVisible();
+        expect(renderResult.getByText('At least one agent policy is required.')).toBeVisible();
       });
     });
 

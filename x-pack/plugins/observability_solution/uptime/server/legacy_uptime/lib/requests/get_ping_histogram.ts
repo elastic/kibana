@@ -82,7 +82,7 @@ export const getPingHistogram: UMElasticsearchQueryFn<
   const { body: result } = await uptimeEsClient.search(params, 'getPingsOverTime');
   const buckets = result?.aggregations?.timeseries?.buckets ?? [];
 
-  const histogram = buckets.map((bucket: Pick<typeof buckets[0], 'key' | 'down' | 'up'>) => {
+  const histogram = buckets.map((bucket: Pick<(typeof buckets)[0], 'key' | 'down' | 'up'>) => {
     const x: number = bucket.key;
     const downCount = bucket.down.value || 0;
     const upCount = bucket.up.value || 0;

@@ -46,6 +46,12 @@ export const useDeployIntegration = ({
 
     (async () => {
       try {
+        if (integrationSettings.samplesFormat == null) {
+          throw new Error(
+            'Logic error: samplesFormat is required and cannot be null or undefined when creating integration.'
+          );
+        }
+
         const parameters: BuildIntegrationRequestBody = {
           integration: {
             title: integrationSettings.title ?? '',
@@ -57,10 +63,11 @@ export const useDeployIntegration = ({
                 title: integrationSettings.dataStreamTitle ?? '',
                 description: integrationSettings.dataStreamDescription ?? '',
                 name: integrationSettings.dataStreamName ?? '',
-                inputTypes: integrationSettings.inputType ? [integrationSettings.inputType] : [],
+                inputTypes: integrationSettings.inputTypes ?? [],
                 rawSamples: integrationSettings.logsSampleParsed ?? [],
                 docs: result.docs ?? [],
                 pipeline: result.pipeline,
+                samplesFormat: integrationSettings.samplesFormat,
               },
             ],
           },
@@ -88,7 +95,18 @@ export const useDeployIntegration = ({
         }
       } catch (e) {
         if (abortController.signal.aborted) return;
-        setError(`Error: ${e.body?.message ?? e.message}`);
+        const errorMessage = `${e.message}${
+          e.body ? ` (${e.body.statusCode}): ${e.body.message}` : ''
+        }`;
+
+        telemetry.reportAssistantComplete({
+          integrationName: integrationSettings.name ?? '',
+          integrationSettings,
+          connector,
+          error: errorMessage,
+        });
+
+        setError(errorMessage);
       } finally {
         setIsLoading(false);
       }

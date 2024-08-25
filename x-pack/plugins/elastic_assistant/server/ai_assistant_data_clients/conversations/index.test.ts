@@ -12,7 +12,7 @@ import { getUpdateConversationSchemaMock } from '../../__mocks__/conversations_s
 import { AIAssistantDataClientParams } from '..';
 
 const date = '2023-03-28T22:27:28.159Z';
-let logger: ReturnType<typeof loggingSystemMock['createLogger']>;
+let logger: ReturnType<(typeof loggingSystemMock)['createLogger']>;
 const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
 const mockUser1 = {

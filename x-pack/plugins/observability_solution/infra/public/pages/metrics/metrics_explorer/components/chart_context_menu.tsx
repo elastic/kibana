@@ -28,7 +28,11 @@ import {
 } from '../hooks/use_metrics_explorer_options';
 import { createTSVBLink, TSVB_WORKAROUND_INDEX_PATTERN } from './helpers/create_tsvb_link';
 import { useNodeDetailsRedirect } from '../../../link_to';
-import { HOST_FIELD, POD_FIELD, CONTAINER_FIELD } from '../../../../../common/constants';
+import {
+  HOST_NAME_FIELD,
+  KUBERNETES_POD_UID_FIELD,
+  CONTAINER_ID_FIELD,
+} from '../../../../../common/constants';
 
 export interface Props {
   options: MetricsExplorerOptions;
@@ -41,13 +45,13 @@ export interface Props {
 
 const fieldToNodeType = (groupBy: string | string[]): InventoryItemType | undefined => {
   const fields = Array.isArray(groupBy) ? groupBy : [groupBy];
-  if (fields.includes(HOST_FIELD)) {
+  if (fields.includes(HOST_NAME_FIELD)) {
     return 'host';
   }
-  if (fields.includes(POD_FIELD)) {
+  if (fields.includes(KUBERNETES_POD_UID_FIELD)) {
     return 'pod';
   }
-  if (fields.includes(CONTAINER_FIELD)) {
+  if (fields.includes(CONTAINER_ID_FIELD)) {
     return 'container';
   }
 };

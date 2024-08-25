@@ -27,16 +27,15 @@ export default function ({ getService }: FtrProviderContext) {
 
   const getRandomString: () => string = () => randomness.string({ casing: 'lower', alpha: true });
 
-  // see details: https://github.com/elastic/kibana/issues/187368
-  describe.skip('Index templates', function () {
+  describe('Index templates', function () {
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
     });
 
     after(async () => {
       await svlTemplatesApi.cleanUpTemplates(roleAuthc);
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     describe('get', () => {
@@ -136,6 +135,7 @@ export default function ({ getService }: FtrProviderContext) {
           undefined,
           false
         );
+
         const { status } = await svlTemplatesApi.createTemplate(payload, roleAuthc);
         expect(status).to.eql(200);
       });
@@ -214,12 +214,13 @@ export default function ({ getService }: FtrProviderContext) {
         const { status } = await svlTemplatesApi.createTemplate(indexTemplate, roleAuthc);
         expect(status).to.eql(200);
 
-        let { body: catTemplateResponse } = await svlTemplatesHelpers.catTemplate(templateName);
-
+        const { body: templates } = await svlTemplatesApi.getAllTemplates(roleAuthc);
         const { name, version } = indexTemplate;
         expect(
-          catTemplateResponse.find(({ name: catTemplateName }) => catTemplateName === name)?.version
-        ).to.equal(version?.toString());
+          templates.templates.find(
+            ({ name: catTemplateName }: { name: string }) => catTemplateName === name
+          )?.version
+        ).to.equal(version);
 
         // Update template with new version
         const updatedVersion = 2;
@@ -230,11 +231,13 @@ export default function ({ getService }: FtrProviderContext) {
         );
         expect(updateStatus).to.eql(200);
 
-        ({ body: catTemplateResponse } = await svlTemplatesHelpers.catTemplate(templateName));
+        const { body: templates2 } = await svlTemplatesApi.getAllTemplates(roleAuthc);
 
         expect(
-          catTemplateResponse.find(({ name: catTemplateName }) => catTemplateName === name)?.version
-        ).to.equal(updatedVersion.toString());
+          templates2.templates.find(
+            ({ name: catTemplateName }: { name: string }) => catTemplateName === name
+          )?.version
+        ).to.equal(updatedVersion);
       });
 
       it('should parse the ES error and return the cause', async () => {
@@ -267,7 +270,8 @@ export default function ({ getService }: FtrProviderContext) {
           templateName,
           roleAuthc
         );
-        expect(updateStatus).to.eql(404);
+
+        expect(updateStatus).to.eql(400);
 
         expect(body.attributes).an('object');
         // one of the item of the cause array should point to our script
@@ -292,10 +296,10 @@ export default function ({ getService }: FtrProviderContext) {
         if (createStatus !== 200)
           throw new Error(`Error creating template: ${createStatus} ${createBody.message}`);
 
-        const { body: catTemplateResponse } = await svlTemplatesHelpers.catTemplate(templateName);
+        const { body: allTemplates } = await svlTemplatesApi.getAllTemplates(roleAuthc);
 
         expect(
-          catTemplateResponse.find((template) => template.name === payload.name)?.name
+          allTemplates.templates.find(({ name }: { name: string }) => name === payload.name)?.name
         ).to.equal(templateName);
 
         const { status: deleteStatus, body: deleteBody } = await svlTemplatesApi.deleteTemplates(
@@ -308,11 +312,11 @@ export default function ({ getService }: FtrProviderContext) {
         expect(deleteBody.errors).to.be.empty();
         expect(deleteBody.templatesDeleted[0]).to.equal(templateName);
 
-        const { body: catTemplateResponse2 } = await svlTemplatesHelpers.catTemplate(templateName);
+        const { body: allTemplates2 } = await svlTemplatesApi.getAllTemplates(roleAuthc);
 
-        expect(catTemplateResponse2.find((template) => template.name === payload.name)).to.equal(
-          undefined
-        );
+        expect(
+          allTemplates2.templates.find(({ name }: { name: string }) => name === payload.name)
+        ).to.equal(undefined);
       });
     });
 

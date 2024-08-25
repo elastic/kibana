@@ -215,8 +215,6 @@ describe('React embeddables', () => {
           },
           {}
         );
-        fullApi$.next(fullApi);
-        fullApi$.complete();
         return {
           Component: () => <div> TEST DUPLICATE </div>,
           api: fullApi,
@@ -234,6 +232,7 @@ describe('React embeddables', () => {
         },
       },
     });
+
     // render a fake Dashboard to initialize react embeddables
     const FakeDashboard = () => {
       return (
@@ -244,7 +243,11 @@ describe('React embeddables', () => {
               <div style={{ width: '100%', height: '100px' }} key={panelId}>
                 <ReactEmbeddableRenderer
                   type={panel.type}
-                  onApiAvailable={(api) => dashboard.children$.next({ [panelId]: api })}
+                  onApiAvailable={(api) => {
+                    fullApi$.next(api as Api & HasSnapshottableState<{}>);
+                    fullApi$.complete();
+                    dashboard.children$.next({ [panelId]: api });
+                  }}
                   getParentApi={() => ({
                     getSerializedStateForChild: () =>
                       panel.explicitInput as unknown as SerializedPanelState<object> | undefined,

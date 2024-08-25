@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 export type IdField = z.infer<typeof IdField>;
 export const IdField = z.enum(['host.name', 'user.name']);
@@ -53,28 +53,6 @@ export const CreateAssetCriticalityRecord = AssetCriticalityRecordIdParts.merge(
   })
 );
 
-export type CreateSingleAssetCriticalityRequest = z.infer<
-  typeof CreateSingleAssetCriticalityRequest
->;
-export const CreateSingleAssetCriticalityRequest = CreateAssetCriticalityRecord.merge(
-  z.object({
-    /**
-     * If 'wait_for' the request will wait for the index refresh.
-     */
-    refresh: z.literal('wait_for').optional(),
-  })
-);
-
-export type DeleteAssetCriticalityRecord = z.infer<typeof DeleteAssetCriticalityRecord>;
-export const DeleteAssetCriticalityRecord = AssetCriticalityRecordIdParts.merge(
-  z.object({
-    /**
-     * If 'wait_for' the request will wait for the index refresh.
-     */
-    refresh: z.literal('wait_for').optional(),
-  })
-);
-
 export type AssetCriticalityRecord = z.infer<typeof AssetCriticalityRecord>;
 export const AssetCriticalityRecord = CreateAssetCriticalityRecord.merge(
   z.object({
@@ -84,24 +62,3 @@ export const AssetCriticalityRecord = CreateAssetCriticalityRecord.merge(
     '@timestamp': z.string().datetime(),
   })
 );
-
-export type AssetCriticalityBulkUploadErrorItem = z.infer<
-  typeof AssetCriticalityBulkUploadErrorItem
->;
-export const AssetCriticalityBulkUploadErrorItem = z.object({
-  message: z.string(),
-  index: z.number().int(),
-});
-
-export type AssetCriticalityBulkUploadStats = z.infer<typeof AssetCriticalityBulkUploadStats>;
-export const AssetCriticalityBulkUploadStats = z.object({
-  successful: z.number().int(),
-  failed: z.number().int(),
-  total: z.number().int(),
-});
-
-export type AssetCriticalityBulkUploadResponse = z.infer<typeof AssetCriticalityBulkUploadResponse>;
-export const AssetCriticalityBulkUploadResponse = z.object({
-  errors: z.array(AssetCriticalityBulkUploadErrorItem),
-  stats: AssetCriticalityBulkUploadStats,
-});

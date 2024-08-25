@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RiskScoresCalculationResponse } from '../../../../common/api/entity_analytics/risk_engine/calculation_route.gen';
+import type { RiskScoresCalculationResponse } from '../../../../common/api/entity_analytics';
 
 const buildResponseMock = (
   overrides: Partial<RiskScoresCalculationResponse> = {}

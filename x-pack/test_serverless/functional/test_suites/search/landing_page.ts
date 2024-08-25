@@ -19,7 +19,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('landing page', function () {
     before(async () => {
-      await pageObjects.svlCommonPage.loginWithRole('viewer');
+      await pageObjects.svlCommonPage.loginAsViewer();
     });
 
     it('has serverless side nav', async () => {
@@ -45,7 +45,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await testHasEmbeddedConsole(pageObjects);
     });
 
-    describe('API Key creation', async () => {
+    describe('API Key creation', () => {
       beforeEach(async () => {
         // We need to reload the page between api key creations
         await svlSearchNavigation.navigateToLandingPage();
@@ -88,7 +88,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('Pipelines', async () => {
+    describe('Pipelines', () => {
       beforeEach(async () => {
         await svlSearchNavigation.navigateToLandingPage();
       });

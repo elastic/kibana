@@ -17,7 +17,6 @@ import {
   getKibanaMigratorTestKit,
   startElasticsearch,
 } from '../../migrations/kibana_migrator_test_kit';
-import { delay } from '../../migrations/test_utils';
 import { getBaseMigratorParams } from '../../migrations/fixtures/zdt_base.fixtures';
 
 export const logFilePath = Path.join(__dirname, 'bulk_update.test.log');
@@ -32,7 +31,6 @@ describe('SOR - bulk_update API', () => {
 
   afterAll(async () => {
     await esServer?.stop();
-    await delay(10);
   });
 
   const getCrossVersionType = (version: 'v1' | 'v2'): SavedObjectsType => {

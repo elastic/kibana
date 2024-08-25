@@ -2,10 +2,6 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "rootDirs": [
-      ".",
-      "../test"
-    ],
     "types": [
       "node",
       "@kbn/ambient-ftr-types",
@@ -27,9 +23,7 @@
     "*/*/packages/**/*",
   ],
   "kbn_references": [
-    {
-      "path": "../test/tsconfig.json"
-    },
+    "@kbn/test-suites-xpack",
     "@kbn/expect",
     "@kbn/test",
     "@kbn/repo-info",
@@ -75,7 +69,6 @@
     "@kbn/cloud-security-posture-plugin",
     "@kbn/reporting-plugin",
     "@kbn/management-settings-ids",
-    "@kbn/fleet-plugin",
     "@kbn/apm-synthtrace",
     "@kbn/apm-synthtrace-client",
     "@kbn/reporting-export-types-csv-common",
@@ -105,5 +98,8 @@
     "@kbn/config-schema",
     "@kbn/features-plugin",
     "@kbn/observability-ai-assistant-plugin",
+    "@kbn/ml-trained-models-utils",
+    "@kbn/test-suites-src",
+    "@kbn/console-plugin",
   ]
 }

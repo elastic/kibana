@@ -116,16 +116,17 @@ export const deleteListRoute = (router: ListsPluginRouter): void => {
           }
 
           const deleted = await lists.deleteList({ id });
+
           if (deleted == null) {
             return siemResponse.error({
               body: `list id: "${id}" was not found`,
               statusCode: 404,
             });
-          } else {
-            return response.ok({
-              body: DeleteListResponse.parse(deleted),
-            });
           }
+
+          return response.ok({
+            body: DeleteListResponse.parse(deleted),
+          });
         } catch (err) {
           const error = transformError(err);
           return siemResponse.error({

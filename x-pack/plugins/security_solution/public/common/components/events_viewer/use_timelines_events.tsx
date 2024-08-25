@@ -29,13 +29,13 @@ import type {
   TimelineStrategyResponseType,
 } from '@kbn/timelines-plugin/common/search_strategy';
 import { dataTableActions, Direction, TableId } from '@kbn/securitysolution-data-table';
-import { fetchNotesByDocumentIds } from '../../../notes/store/notes.slice';
 import type { RunTimeMappings } from '../../../sourcerer/store/model';
 import { TimelineEventsQueries } from '../../../../common/search_strategy';
 import type { KueryFilterQueryKind } from '../../../../common/types';
 import type { ESQuery } from '../../../../common/typed_json';
 import type { AlertWorkflowStatus } from '../../types';
 import { getSearchTransactionName, useStartTransaction } from '../../lib/apm/use_start_transaction';
+import { useFetchNotes } from '../../../notes/hooks/use_fetch_notes';
 export type InspectResponse = Inspect & { response: string[] };
 
 export const detectionsTimelineIds = [TableId.alertsOnAlertsPage, TableId.alertsOnRuleDetailsPage];
@@ -458,14 +458,15 @@ export const useTimelineEvents = ({
     data,
   });
 
+  const { onLoad } = useFetchNotes();
+
   useEffect(() => {
     if (!timelineSearchHandler) return;
     timelineSearchHandler();
 
     // fetch notes for the events
-    const events = timelineResponse.events.map((event: TimelineItem) => event._id);
-    dispatch(fetchNotesByDocumentIds({ documentIds: events }));
-  }, [dispatch, timelineResponse.events, timelineSearchHandler]);
+    onLoad(timelineResponse.events);
+  }, [dispatch, timelineResponse.events, timelineSearchHandler, onLoad]);
 
   return [loading, timelineResponse];
 };

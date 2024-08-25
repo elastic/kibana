@@ -103,12 +103,15 @@ describe('SIEM Super Date Picker', () => {
           </ReduxStoreProvider>
         );
         wrapper
-          .find('[data-test-subj="superDatePickerToggleQuickMenuButton"]')
+          .find('button[data-test-subj="superDatePickerToggleQuickMenuButton"]')
           .first()
           .simulate('click');
         wrapper.update();
 
-        wrapper.find('button.euiQuickSelect__applyButton').first().simulate('click');
+        wrapper
+          .find('button[data-test-subj="superDatePickerQuickSelectApplyButton"]')
+          .first()
+          .simulate('click');
         wrapper.update();
       });
 
@@ -123,15 +126,14 @@ describe('SIEM Super Date Picker', () => {
 
       test('Make Sure it is Today date is an absolute date', () => {
         wrapper
-          .find('[data-test-subj="superDatePickerToggleQuickMenuButton"]')
+          .find('button[data-test-subj="superDatePickerToggleQuickMenuButton"]')
           .first()
           .simulate('click');
         wrapper.update();
 
         wrapper
-          .find('[data-test-subj="superDatePickerCommonlyUsed_Today"]')
+          .find('button[data-test-subj="superDatePickerCommonlyUsed_Today"]')
           .first()
-          .find('button')
           .simulate('click');
         wrapper.update();
         expect(store.getState().inputs.global.timerange.kind).toBe('absolute');
@@ -139,7 +141,7 @@ describe('SIEM Super Date Picker', () => {
 
       test('Make Sure it is This Week date is an absolute date', () => {
         wrapper
-          .find('[data-test-subj="superDatePickerToggleQuickMenuButton"]')
+          .find('button[data-test-subj="superDatePickerToggleQuickMenuButton"]')
           .first()
           .simulate('click');
         wrapper.update();
@@ -173,53 +175,57 @@ describe('SIEM Super Date Picker', () => {
           </ReduxStoreProvider>
         );
         wrapper
-          .find('[data-test-subj="superDatePickerToggleQuickMenuButton"]')
+          .find('button[data-test-subj="superDatePickerToggleQuickMenuButton"]')
           .first()
           .simulate('click');
         wrapper.update();
 
         wrapper
-          .find('[data-test-subj="superDatePickerCommonlyUsed_Today"]')
+          .find('button[data-test-subj="superDatePickerCommonlyUsed_Today"]')
           .first()
-          .find('button')
           .simulate('click');
         wrapper.update();
       });
 
       test('Today is in Recently used date ranges', () => {
-        expect(wrapper.find('div.euiQuickSelectPopover__section').at(1).text()).toBe('Today');
+        expect(
+          wrapper.find('div[className*="euiQuickSelectPanel__section"]').at(1).text()
+        ).toContain('Today');
       });
 
       test('Today and "Last ${x} hours" where ${x} is in hours are in Recently used date ranges', () => {
         wrapper
-          .find('[data-test-subj="superDatePickerToggleQuickMenuButton"]')
+          .find('button[data-test-subj="superDatePickerToggleQuickMenuButton"]')
           .first()
           .simulate('click');
         wrapper.update();
 
-        wrapper.find('button.euiQuickSelect__applyButton').first().simulate('click');
+        wrapper
+          .find('button[data-test-subj="superDatePickerQuickSelectApplyButton"]')
+          .first()
+          .simulate('click');
         wrapper.update();
 
-        expect(wrapper.find('div.euiQuickSelectPopover__section').at(1).text()).toMatch(
-          /^Last\s[0-9]+\s(.)+Today/
-        );
+        const ranges = wrapper.find('div[className*="euiQuickSelectPanel__section"]').at(1).text();
+        expect(ranges).toContain('Today');
+        expect(ranges).toContain('Last 24 hours');
       });
 
       test('Make sure that it does not add any duplicate if you click again on today', () => {
         wrapper
-          .find('[data-test-subj="superDatePickerToggleQuickMenuButton"]')
+          .find('button[data-test-subj="superDatePickerToggleQuickMenuButton"]')
           .first()
           .simulate('click');
         wrapper.update();
 
         wrapper
-          .find('[data-test-subj="superDatePickerCommonlyUsed_Today"]')
+          .find('button[data-test-subj="superDatePickerCommonlyUsed_Today"]')
           .first()
-          .find('button')
           .simulate('click');
         wrapper.update();
 
-        expect(wrapper.find('div.euiQuickSelectPopover__section').at(1).text()).toBe('Today');
+        const text = wrapper.find('div[className*="euiQuickSelectPanel__section"]').at(1).text();
+        expect(text.match(/Today/g)).toHaveLength(1);
       });
     });
 
@@ -236,15 +242,14 @@ describe('SIEM Super Date Picker', () => {
           </ReduxStoreProvider>
         );
         wrapper
-          .find('[data-test-subj="superDatePickerToggleQuickMenuButton"]')
+          .find('button[data-test-subj="superDatePickerToggleQuickMenuButton"]')
           .first()
           .simulate('click');
         wrapper.update();
 
         wrapper
-          .find('[data-test-subj="superDatePickerToggleRefreshButton"]')
+          .find('button[data-test-subj="superDatePickerToggleRefreshButton"]')
           .first()
-          .find('button')
           .simulate('click');
         wrapper.update();
 
@@ -266,15 +271,14 @@ describe('SIEM Super Date Picker', () => {
 
       test('Make sure we can stop the stream live', () => {
         wrapper
-          .find('[data-test-subj="superDatePickerToggleQuickMenuButton"]')
+          .find('button[data-test-subj="superDatePickerToggleQuickMenuButton"]')
           .first()
           .simulate('click');
         wrapper.update();
 
         wrapper
-          .find('[data-test-subj="superDatePickerToggleRefreshButton"]')
+          .find('button[data-test-subj="superDatePickerToggleRefreshButton"]')
           .first()
-          .find('button')
           .simulate('click');
         wrapper.update();
 

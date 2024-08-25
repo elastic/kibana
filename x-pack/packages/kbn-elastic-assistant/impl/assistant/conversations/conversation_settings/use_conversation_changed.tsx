@@ -84,7 +84,6 @@ export const useConversationChanged = ({
           };
         });
       }
-
       onSelectedConversationChange({
         ...newSelectedConversation,
         id: newSelectedConversation.id || newSelectedConversation.title,

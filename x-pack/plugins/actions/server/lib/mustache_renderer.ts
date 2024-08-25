@@ -104,7 +104,7 @@ function buildObject(key: string, value: unknown) {
 function addToStringDeep(object: unknown): void {
   // for objects, add a toString method, and then walk
   if (isNonNullObject(object)) {
-    if (!object.hasOwnProperty('toString')) {
+    if (!Object.hasOwn(object, 'toString')) {
       object.toString = () => JSON.stringify(object);
     }
     Object.values(object).forEach((value) => addToStringDeep(value));

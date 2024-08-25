@@ -36,10 +36,6 @@ export type AzureCredentialsType =
   | 'service_principal_with_client_username_and_password'
   | 'managed_identity';
 
-export type AzureCredentialsTypeFieldMap = {
-  [key in AzureCredentialsType]: string[];
-};
-
 export type Evaluation = 'passed' | 'failed' | 'NA';
 
 export type PostureTypes = 'cspm' | 'kspm' | 'vuln_mgmt' | 'all';
@@ -137,6 +133,7 @@ export interface BaseCspSetupStatus {
   vuln_mgmt: BaseCspSetupBothPolicy;
   isPluginInitialized: boolean;
   installedPackageVersion?: string | undefined;
+  hasMisconfigurationsFindings?: boolean;
 }
 
 export type CspSetupStatus = BaseCspSetupStatus;
@@ -146,8 +143,8 @@ export type BenchmarkName = CspBenchmarkRuleMetadata['benchmark']['name'];
 export type RuleSection = CspBenchmarkRuleMetadata['section'];
 
 // Fleet Integration types
-export type PostureInput = typeof SUPPORTED_CLOUDBEAT_INPUTS[number];
-export type CloudSecurityPolicyTemplate = typeof SUPPORTED_POLICY_TEMPLATES[number];
+export type PostureInput = (typeof SUPPORTED_CLOUDBEAT_INPUTS)[number];
+export type CloudSecurityPolicyTemplate = (typeof SUPPORTED_POLICY_TEMPLATES)[number];
 export type PosturePolicyTemplate = Extract<CloudSecurityPolicyTemplate, 'kspm' | 'cspm'>;
 
 export type GetComplianceDashboardRequest = TypeOf<typeof getComplianceDashboardSchema>;

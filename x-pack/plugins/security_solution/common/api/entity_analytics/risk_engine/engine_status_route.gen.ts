@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 export type RiskEngineStatus = z.infer<typeof RiskEngineStatus>;
 export const RiskEngineStatus = z.enum(['NOT_INSTALLED', 'DISABLED', 'ENABLED']);
@@ -30,3 +30,6 @@ export const RiskEngineStatusResponse = z.object({
    */
   is_max_amount_of_risk_engines_reached: z.boolean(),
 });
+
+export type GetRiskEngineStatusResponse = z.infer<typeof GetRiskEngineStatusResponse>;
+export const GetRiskEngineStatusResponse = RiskEngineStatusResponse;

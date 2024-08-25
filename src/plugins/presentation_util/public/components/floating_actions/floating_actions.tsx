@@ -64,6 +64,7 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
         setFloatingActions(
           <>
             {actions.map((action) =>
+              // @ts-expect-error upgrade typescript v5.1.6
               React.createElement(action.MenuItem, {
                 key: action.id,
                 context,

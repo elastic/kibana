@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Type } from '@kbn/config-schema';
 import type { UiCounterMetricType } from '@kbn/analytics';
 
@@ -44,6 +45,10 @@ export interface DeprecationSettings {
   docLinksKey: string;
 }
 
+export interface GetUiSettingsContext {
+  request?: KibanaRequest;
+}
+
 /**
  * UiSettings parameters defined by the plugins.
  * @public
@@ -53,6 +58,8 @@ export interface UiSettingsParams<T = unknown> {
   name?: string;
   /** default value to fall back to if a user doesn't provide any */
   value?: T;
+  /** handler to return the default value asynchronously. Supersedes the `value` prop */
+  getValue?: (context?: GetUiSettingsContext) => Promise<T>;
   /** description provided to a user in UI */
   description?: string;
   /** used to group the configured setting in the UI */

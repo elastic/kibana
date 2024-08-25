@@ -31,40 +31,55 @@ import { TIMELINES_URL } from '../../../urls/navigation';
 
 const mockTimeline = getTimeline();
 
-describe('Timeline query tab', { tags: ['@ess', '@serverless'] }, () => {
-  beforeEach(() => {
-    login();
-    visit(TIMELINES_URL);
-    deleteTimelines();
-    createTimeline(mockTimeline)
-      .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)
-      .then((timelineId: string) => {
-        cy.wrap(timelineId).as('timelineId');
-        addNoteToTimeline(mockTimeline.notes, timelineId);
-        openTimelineById(timelineId);
-        pinFirstEvent();
-        addFilter(mockTimeline.filter);
-      });
-  });
+describe(
+  'Timeline query tab',
+  {
+    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
+    env: {
+      ftrConfig: {
+        kbnServerArgs: [
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'unifiedComponentsInTimelineDisabled',
+          ])}`,
+        ],
+      },
+    },
+  },
+  () => {
+    beforeEach(() => {
+      login();
+      visit(TIMELINES_URL);
+      deleteTimelines();
+      createTimeline(mockTimeline)
+        .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)
+        .then((timelineId: string) => {
+          cy.wrap(timelineId).as('timelineId');
+          addNoteToTimeline(mockTimeline.notes, timelineId);
+          openTimelineById(timelineId);
+          pinFirstEvent();
+          addFilter(mockTimeline.filter);
+        });
+    });
 
-  it('should display the right query and filters', () => {
-    cy.get(TIMELINE_QUERY).should('have.text', `${mockTimeline.query}`);
-    cy.get(TIMELINE_FILTER(mockTimeline.filter)).should('exist');
-  });
+    it('should display the right query and filters', () => {
+      cy.get(TIMELINE_QUERY).should('have.text', `${mockTimeline.query}`);
+      cy.get(TIMELINE_FILTER(mockTimeline.filter)).should('exist');
+    });
 
-  it('should be able to add event note', () => {
-    const note = 'event note';
-    addNoteToFirstRowEvent(note);
-    cy.get(NOTE_CARD_CONTENT).should('contain', 'event note');
-  });
+    it('should be able to add event note', () => {
+      const note = 'event note';
+      addNoteToFirstRowEvent(note);
+      cy.get(NOTE_CARD_CONTENT).should('contain', 'event note');
+    });
 
-  it('should display pinned events', () => {
-    cy.get(PIN_EVENT)
-      .should('have.attr', 'aria-label')
-      .and('match', /Unpin the event in row 2/);
-  });
+    it('should display pinned events', () => {
+      cy.get(PIN_EVENT)
+        .should('have.attr', 'aria-label')
+        .and('match', /Unpin the event in row 2/);
+    });
 
-  it('should have an unlock icon', { tags: '@skipInServerless' }, () => {
-    cy.get(UNLOCKED_ICON).should('be.visible');
-  });
-});
+    it('should have an unlock icon', { tags: '@skipInServerless' }, () => {
+      cy.get(UNLOCKED_ICON).should('be.visible');
+    });
+  }
+);

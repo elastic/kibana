@@ -7,10 +7,12 @@
 
 import { EcsFlat } from '@elastic/ecs';
 import * as rt from 'io-ts';
+import { MetadataFields } from '../metadata_fields';
 
 export const fieldSourceRT = rt.keyof({
   ecs: null,
   integration: null,
+  metadata: null,
   unknown: null,
 });
 
@@ -63,6 +65,7 @@ const optionalMetadataPlainRT = rt.partial({
   short: rt.string,
   source: fieldSourceRT,
   type: rt.string,
+  documentation_url: rt.string,
 });
 
 export const partialFieldMetadataPlainRT = rt.intersection([
@@ -80,11 +83,14 @@ export const fieldAttributeRT = rt.union([
   rt.keyof(optionalMetadataPlainRT.props),
 ]);
 
+export type AnyFieldName = string & {};
+export type TMetadataFields = typeof MetadataFields;
+export type MetadataFieldName = keyof TMetadataFields;
 export type TEcsFields = typeof EcsFlat;
 export type EcsFieldName = keyof TEcsFields;
-export type IntegrationFieldName = string;
+export type IntegrationFieldName = AnyFieldName;
 
-export type FieldName = EcsFieldName | (IntegrationFieldName & {});
+export type FieldName = MetadataFieldName | EcsFieldName | IntegrationFieldName;
 export type FieldMetadataPlain = rt.TypeOf<typeof fieldMetadataPlainRT>;
 export type PartialFieldMetadataPlain = rt.TypeOf<typeof partialFieldMetadataPlainRT>;
 

@@ -7,9 +7,9 @@ paths:
     post:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
-      operationId: PerformBulkAction
-      summary: Applies a bulk action to multiple rules
-      description: The bulk action is applied to all rules that match the filter or to the list of rules by their IDs.
+      operationId: PerformRulesBulkAction
+      summary: Apply a bulk action to detection rules
+      description: Apply a bulk action, such as bulk edit, duplicate, or delete, to multiple detection rules. The bulk action is applied to all rules that match the query or to the rules listed by their IDs.
       tags:
         - Bulk API
       parameters:
@@ -78,7 +78,6 @@ components:
         - MACHINE_LEARNING_AUTH
         - MACHINE_LEARNING_INDEX_PATTERN
         - ESQL_INDEX_PATTERN
-        - INVESTIGATION_FIELDS_FEATURE
         - MANUAL_RULE_RUN_FEATURE
         - MANUAL_RULE_RUN_DISABLED_RULE
 
@@ -329,7 +328,6 @@ components:
         alerts_filter:
           $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleActionAlertsFilter'
       required:
-        - group
         - id
         - params
       additionalProperties: false
@@ -366,7 +364,7 @@ components:
           properties:
             interval:
               type: string
-              description: Interval in which the rule is executed
+              description: Interval in which the rule runs. For example, `"1h"` means the rule runs every hour.
               pattern: '^[1-9]\d*[smh]$' # any number except zero followed by one of the suffixes 's', 'm', 'h'
               example: '1h'
             lookback:

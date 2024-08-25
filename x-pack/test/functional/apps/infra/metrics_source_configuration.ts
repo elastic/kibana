@@ -31,20 +31,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const kibanaServer = getService('kibanaServer');
 
   describe('Infrastructure Source Configuration', function () {
-    before(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
-    });
-    after(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
-    });
+    before(async () => kibanaServer.savedObjects.cleanStandardList());
+    after(async () => kibanaServer.savedObjects.cleanStandardList());
 
     describe('with metrics present', () => {
-      before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
-      });
-      after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
-      });
+      before(async () =>
+        esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs')
+      );
+      after(async () =>
+        esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs')
+      );
 
       it('renders the waffle map', async () => {
         await pageObjects.common.navigateToApp('infraOps');
@@ -90,7 +86,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('renders the no indices screen when no indices match the pattern', async () => {
         await pageObjects.common.navigateToApp('infraOps');
-        await pageObjects.infraHome.getNoMetricsIndicesPrompt();
+        await pageObjects.infraHome.noDataPromptExists();
       });
 
       it('can change the metric indices to a remote cluster when connection does not exist', async () => {

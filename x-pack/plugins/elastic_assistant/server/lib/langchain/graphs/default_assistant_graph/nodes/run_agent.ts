@@ -8,53 +8,42 @@
 import { RunnableConfig } from '@langchain/core/runnables';
 import { AgentRunnableSequence } from 'langchain/dist/agents/agent';
 import { AgentState, NodeParamsBase } from '../types';
-import { AssistantDataClients } from '../../../executors/types';
+import { NodeType } from '../constants';
 
 export interface RunAgentParams extends NodeParamsBase {
-  agentRunnable: AgentRunnableSequence;
-  dataClients?: AssistantDataClients;
   state: AgentState;
   config?: RunnableConfig;
+  agentRunnable: AgentRunnableSequence;
 }
-
-export const AGENT_NODE = 'agent';
 
 export const AGENT_NODE_TAG = 'agent_run';
 
-const NO_HISTORY = '[No existing knowledge history]';
 /**
  * Node to run the agent
  *
- * @param agentRunnable - The agent to run
- * @param config - Any configuration that may've been supplied
  * @param logger - The scoped logger
- * @param dataClients - Data clients available for use
  * @param state - The current state of the graph
+ * @param config - Any configuration that may've been supplied
+ * @param agentRunnable - The agent to run
  */
-export const runAgent = async ({
-  agentRunnable,
-  config,
-  dataClients,
+export async function runAgent({
   logger,
   state,
-}: RunAgentParams) => {
-  logger.debug(() => `Node state:\n${JSON.stringify(state, null, 2)}`);
-
-  const knowledgeHistory = await dataClients?.kbDataClient?.getKnowledgeBaseDocuments({
-    kbResource: 'user',
-    required: true,
-    query: '',
-  });
+  agentRunnable,
+  config,
+}: RunAgentParams): Promise<Partial<AgentState>> {
+  logger.debug(() => `${NodeType.AGENT}: Node state:\n${JSON.stringify(state, null, 2)}`);
 
   const agentOutcome = await agentRunnable.withConfig({ tags: [AGENT_NODE_TAG] }).invoke(
     {
       ...state,
       chat_history: state.messages, // TODO: Message de-dupe with ...state spread
-      knowledge_history: JSON.stringify(knowledgeHistory?.length ? knowledgeHistory : NO_HISTORY),
     },
     config
   );
+
   return {
     agentOutcome,
+    lastNode: NodeType.AGENT,
   };
-};
+}

@@ -43,7 +43,7 @@ export const LinkedAgentCount = memo<
   }`;
 
   return count > 0 ? (
-    <EuiLink {...otherEuiLinkProps} href={getHref('agent_list', { kuery })}>
+    <EuiLink {...otherEuiLinkProps} href={getHref('agent_list', { kuery, showInactive: true })}>
       {displayValue}
     </EuiLink>
   ) : (

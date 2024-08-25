@@ -25,8 +25,8 @@ import {
 export const DEFAULT_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
 
 export type ColumnId =
-  | typeof RULE_EXECUTION_LOG_COLUMN_IDS[number]
-  | typeof CONNECTOR_EXECUTION_LOG_COLUMN_IDS[number];
+  | (typeof RULE_EXECUTION_LOG_COLUMN_IDS)[number]
+  | (typeof CONNECTOR_EXECUTION_LOG_COLUMN_IDS)[number];
 
 interface EventLogListCellRendererProps {
   columnId: ColumnId;

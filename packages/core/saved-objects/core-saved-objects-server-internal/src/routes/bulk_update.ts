@@ -37,6 +37,7 @@ export const registerBulkUpdateRoute = (
         summary: `Update saved objects`,
         tags: ['oas-tag:saved objects'],
         access,
+        deprecated: true,
       },
       validate: {
         body: schema.arrayOf(

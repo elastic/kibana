@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 import { IdentifierType, EntityRiskScoreRecord } from '../common/common.gen';
 
@@ -41,3 +41,29 @@ export const RiskScoresEntityCalculationResponse = z.object({
   success: z.boolean(),
   score: EntityRiskScoreRecord.optional(),
 });
+
+export type DeprecatedTriggerRiskScoreCalculationRequestBody = z.infer<
+  typeof DeprecatedTriggerRiskScoreCalculationRequestBody
+>;
+export const DeprecatedTriggerRiskScoreCalculationRequestBody = RiskScoresEntityCalculationRequest;
+export type DeprecatedTriggerRiskScoreCalculationRequestBodyInput = z.input<
+  typeof DeprecatedTriggerRiskScoreCalculationRequestBody
+>;
+
+export type DeprecatedTriggerRiskScoreCalculationResponse = z.infer<
+  typeof DeprecatedTriggerRiskScoreCalculationResponse
+>;
+export const DeprecatedTriggerRiskScoreCalculationResponse = RiskScoresEntityCalculationResponse;
+
+export type TriggerRiskScoreCalculationRequestBody = z.infer<
+  typeof TriggerRiskScoreCalculationRequestBody
+>;
+export const TriggerRiskScoreCalculationRequestBody = RiskScoresEntityCalculationRequest;
+export type TriggerRiskScoreCalculationRequestBodyInput = z.input<
+  typeof TriggerRiskScoreCalculationRequestBody
+>;
+
+export type TriggerRiskScoreCalculationResponse = z.infer<
+  typeof TriggerRiskScoreCalculationResponse
+>;
+export const TriggerRiskScoreCalculationResponse = RiskScoresEntityCalculationResponse;

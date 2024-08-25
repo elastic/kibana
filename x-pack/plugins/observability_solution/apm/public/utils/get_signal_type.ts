@@ -11,5 +11,5 @@ export function isApmSignal(signalTypes: SignalTypes[]) {
   return signalTypes.includes(SignalTypes.METRICS) || signalTypes.includes(SignalTypes.TRACES);
 }
 export function isLogsSignal(signalTypes: SignalTypes[]) {
-  return signalTypes.includes(SignalTypes.LOGS) && !isApmSignal(signalTypes);
+  return signalTypes.includes(SignalTypes.LOGS);
 }

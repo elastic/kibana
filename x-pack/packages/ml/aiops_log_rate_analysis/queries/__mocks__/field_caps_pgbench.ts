@@ -10,7 +10,7 @@ export const fieldCapsPgBenchMock = {
   fields: {
     // The next two fields are not in the original field caps response,
     // but are added here to test the logic to ignore fields that are not
-    // in the white list. It's based on a real world example where the mapping
+    // in the safe list. It's based on a real world example where the mapping
     // included a double mapping of text+integer.
     ignore_this_text_field: {
       text: { type: 'text', metadata_field: false, searchable: true, aggregatable: false },

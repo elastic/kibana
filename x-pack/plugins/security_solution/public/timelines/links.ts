@@ -37,8 +37,6 @@ export const links: LinkItem = {
         defaultMessage: 'Visualize and delete notes.',
       }),
       path: `${TIMELINES_PATH}/notes`,
-      skipUrlState: true,
-      hideTimeline: true,
       experimentalKey: 'securitySolutionNotesEnabled',
     },
   ],

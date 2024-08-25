@@ -456,6 +456,7 @@ describe('Test discover state actions', () => {
         "columns": Array [
           "default_column",
         ],
+        "density": undefined,
         "headerRowHeight": undefined,
         "hideAggregatedPreview": undefined,
         "hideChart": undefined,
@@ -751,6 +752,31 @@ describe('Test discover state actions', () => {
       savedSearchId: savedSearchMockWithESQL.id,
     });
     expect(persistedDataViewId).toBe(nextSavedSearch?.searchSource.getField('index')!.id);
+  });
+
+  test('transitionFromDataViewToESQL', async () => {
+    const savedSearchWithQuery = copySavedSearch(savedSearchMock);
+    const query = { query: "foo: 'bar'", language: 'kuery' };
+    const filters = [{ meta: { index: 'the-data-view-id' }, query: { match_all: {} } }];
+    savedSearchWithQuery.searchSource.setField('query', query);
+    savedSearchWithQuery.searchSource.setField('filter', filters);
+    const { state } = await getState('/', { savedSearch: savedSearchWithQuery });
+    await state.actions.transitionFromDataViewToESQL(dataViewMock);
+    expect(state.appState.getState().query).toStrictEqual({
+      esql: 'FROM the-data-view-title | LIMIT 10',
+    });
+    expect(state.appState.getState().filters).toStrictEqual([]);
+  });
+
+  test('transitionFromESQLToDataView', async () => {
+    const savedSearchWithQuery = copySavedSearch(savedSearchMock);
+    const query = {
+      esql: 'FROM the-data-view-title | LIMIT 10',
+    };
+    savedSearchWithQuery.searchSource.setField('query', query);
+    const { state } = await getState('/', { savedSearch: savedSearchWithQuery });
+    await state.actions.transitionFromESQLToDataView('the-data-view-id');
+    expect(state.appState.getState().query).toStrictEqual({ query: '', language: 'kuery' });
   });
 
   test('onChangeDataView', async () => {

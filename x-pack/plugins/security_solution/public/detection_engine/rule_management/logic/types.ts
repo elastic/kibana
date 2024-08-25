@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as z from 'zod';
+import * as z from '@kbn/zod';
 
 import type { RuleSnooze } from '@kbn/alerting-plugin/common';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
@@ -70,6 +70,7 @@ interface RuleSnoozeSettingsResponse {
    * Rule's SO id
    */
   id: string;
+  name: string;
   mute_all: boolean;
   snooze_schedule?: RuleSnooze;
   active_snoozes?: string[];

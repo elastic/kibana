@@ -4,5 +4,4 @@ description: An identifier for the alert.
 required: true
 schema:
   type: string
-  examples:
-    - 09f0c261e39e36351d75995b78bb83673774d1bc2cca9df2d15f0e5c0a99a540
+  example: 09f0c261e39e36351d75995b78bb83673774d1bc2cca9df2d15f0e5c0a99a540

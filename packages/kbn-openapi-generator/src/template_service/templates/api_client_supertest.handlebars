@@ -8,6 +8,7 @@
  {{> disclaimer}}
 
 import { ELASTIC_HTTP_VERSION_HEADER, X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
+import { replaceParams } from '@kbn/openapi-common/shared';
 import { FtrProviderContext } from 'x-pack/test/api_integration/ftr_provider_context';
 
 {{#each operations}}
@@ -50,18 +51,3 @@ export interface {{operationId}}Props {
 }
 {{/if}}
 {{/each}}
-
-/**
- * Replaces placeholders in a path string with provided param value
- *
- * @param path Path string with placeholders for params
- * @param params Object with params to replace
- * @returns Path string with params replaced
- */
-function replaceParams(path: string, params: Record<string, string | number>): string {
-  let output = path;
-  Object.entries(params).forEach(([param, value]) => {
-    output = path.replace(`{${param}}`, `${value}`);
-  });
-  return output;
-}

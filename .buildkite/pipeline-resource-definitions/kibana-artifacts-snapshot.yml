@@ -22,7 +22,6 @@ spec:
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
       allow_rebuilds: true
-      branch_configuration: main 8.15 8.14 7.17
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/artifacts.yml
@@ -44,20 +43,3 @@ spec:
           access_level: MANAGE_BUILD_AND_READ
         kibana-tech-leads:
           access_level: MANAGE_BUILD_AND_READ
-      schedules:
-        Daily build (main):
-          cronline: 0 7 * * * America/New_York
-          message: Daily build
-          branch: main
-        Daily build (8.15):
-          cronline: 0 7 * * * America/New_York
-          message: Daily build
-          branch: '8.15'
-        Daily build (8.14):
-          cronline: 0 7 * * * America/New_York
-          message: Daily build
-          branch: '8.14'
-        Daily build (7.17):
-          cronline: 0 7 * * * America/New_York
-          message: Daily build
-          branch: '7.17'

@@ -18,15 +18,15 @@ import { RRuleAttributes } from '../../r_rule/types';
 import { AlertsFilterQueryAttributes } from '../../alerts_filter_query/types';
 
 export type RuleNotifyWhenAttributes =
-  typeof ruleNotifyWhenAttributes[keyof typeof ruleNotifyWhenAttributes];
+  (typeof ruleNotifyWhenAttributes)[keyof typeof ruleNotifyWhenAttributes];
 export type RuleLastRunOutcomeValuesAttributes =
-  typeof ruleLastRunOutcomeValuesAttributes[keyof typeof ruleLastRunOutcomeValuesAttributes];
+  (typeof ruleLastRunOutcomeValuesAttributes)[keyof typeof ruleLastRunOutcomeValuesAttributes];
 export type RuleExecutionStatusValuesAttributes =
-  typeof ruleExecutionStatusValuesAttributes[keyof typeof ruleExecutionStatusValuesAttributes];
+  (typeof ruleExecutionStatusValuesAttributes)[keyof typeof ruleExecutionStatusValuesAttributes];
 export type RuleExecutionStatusErrorReasonAttributes =
-  typeof ruleExecutionStatusErrorReasonAttributes[keyof typeof ruleExecutionStatusErrorReasonAttributes];
+  (typeof ruleExecutionStatusErrorReasonAttributes)[keyof typeof ruleExecutionStatusErrorReasonAttributes];
 export type RuleExecutionStatusWarningReasonAttributes =
-  typeof ruleExecutionStatusWarningReasonAttributes[keyof typeof ruleExecutionStatusWarningReasonAttributes];
+  (typeof ruleExecutionStatusWarningReasonAttributes)[keyof typeof ruleExecutionStatusWarningReasonAttributes];
 
 export interface RuleSnoozeScheduleAttributes {
   duration: number;

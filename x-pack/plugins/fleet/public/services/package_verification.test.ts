@@ -49,7 +49,7 @@ describe('isPackageUnverified', () => {
       // @ts-ignore don't want to define all experimental features here
       mockGet.mockReturnValue({
         packageVerification: false,
-      } as ReturnType<typeof ExperimentalFeaturesService['get']>);
+      } as ReturnType<(typeof ExperimentalFeaturesService)['get']>);
     });
 
     it('Should return false for a package with no saved object', () => {
@@ -89,7 +89,7 @@ describe('isPackageUnverified', () => {
     beforeEach(() => {
       mockGet.mockReturnValue({
         packageVerification: true,
-      } as ReturnType<typeof ExperimentalFeaturesService['get']>);
+      } as ReturnType<(typeof ExperimentalFeaturesService)['get']>);
     });
     it('Should return false for a package with no saved object', () => {
       const noSoPkg = createPackage();

@@ -36,8 +36,8 @@ describe('Functions page', () => {
     const firstRowSelector = '[data-grid-row-index="0"] [data-test-subj="dataGridRowCell"]';
     cy.get(firstRowSelector).eq(1).contains('1');
     cy.get(firstRowSelector).eq(2).contains('vmlinux');
-    cy.get(firstRowSelector).eq(3).contains('0.16%');
-    cy.get(firstRowSelector).eq(4).contains('0.16%');
+    cy.get(firstRowSelector).eq(3).contains('5.46%');
+    cy.get(firstRowSelector).eq(4).contains('5.46%');
     cy.get(firstRowSelector).eq(5).contains('3.97 lbs / 1.8 kg');
     cy.get(firstRowSelector).eq(6).contains('$17.37');
     cy.get(firstRowSelector).eq(7).contains('28');
@@ -56,8 +56,8 @@ describe('Functions page', () => {
       { parentKey: 'informationRows', key: 'executable', value: 'vmlinux' },
       { parentKey: 'informationRows', key: 'function', value: 'N/A' },
       { parentKey: 'informationRows', key: 'sourceFile', value: 'N/A' },
-      { parentKey: 'impactEstimates', key: 'totalCPU', value: '0.16%' },
-      { parentKey: 'impactEstimates', key: 'selfCPU', value: '0.16%' },
+      { parentKey: 'impactEstimates', key: 'totalCPU', value: '5.46%' },
+      { parentKey: 'impactEstimates', key: 'selfCPU', value: '5.46%' },
       { parentKey: 'impactEstimates', key: 'samples', value: '28' },
       { parentKey: 'impactEstimates', key: 'selfSamples', value: '28' },
       { parentKey: 'impactEstimates', key: 'coreSeconds', value: '1.4 seconds' },
@@ -118,7 +118,7 @@ describe('Functions page', () => {
         columnIndex: 3,
         highRank: 1,
         lowRank: 389,
-        highValue: '0.16%',
+        highValue: '5.46%',
         lowValue: '0.00%',
       },
       {
@@ -126,8 +126,8 @@ describe('Functions page', () => {
         columnIndex: 4,
         highRank: 693,
         lowRank: 44,
-        highValue: '1.80%',
-        lowValue: '0.01%',
+        highValue: '60.43%',
+        lowValue: '0.19%',
       },
       {
         columnKey: 'annualizedCo2',

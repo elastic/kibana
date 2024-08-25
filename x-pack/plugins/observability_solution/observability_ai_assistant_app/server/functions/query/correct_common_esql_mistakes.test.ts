@@ -56,6 +56,18 @@ describe('correctCommonEsqlMistakes', () => {
     expectQuery({ input: `FROM logs-* | LIMIT 10`, expectedOutput: 'FROM logs-*\n| LIMIT 10' });
   });
 
+  it('replaces double quotes around columns with backticks', () => {
+    expectQuery({
+      input: `FROM logs-* | WHERE "@timestamp" <= NOW() - 15m`,
+      expectedOutput: `FROM logs-* \n| WHERE @timestamp <= NOW() - 15m`,
+    });
+
+    expectQuery({
+      input: `FROM logs-* | EVAL date_bucket = DATE_TRUNC("@timestamp", 1 hour)`,
+      expectedOutput: `FROM logs-* \n| EVAL date_bucket = DATE_TRUNC(@timestamp, 1 hour)`,
+    });
+  });
+
   it('replaces = as equal operator with ==', () => {
     expectQuery({
       input: `FROM logs-*\n| WHERE service.name = "foo"`,

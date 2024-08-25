@@ -12,7 +12,7 @@ import {
   FleetUnauthorizedError,
   type PackageClient,
 } from '@kbn/fleet-plugin/server';
-import { dump } from 'js-yaml';
+import { safeDump } from 'js-yaml';
 import { PackageDataStreamTypes } from '@kbn/fleet-plugin/common/types';
 import { getObservabilityOnboardingFlow, saveObservabilityOnboardingFlow } from '../../lib/state';
 import type { SavedObservabilityOnboardingFlow } from '../../saved_objects/observability_onboarding_status';
@@ -20,12 +20,12 @@ import { ObservabilityOnboardingFlow } from '../../saved_objects/observability_o
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
 import { getHasLogs } from './get_has_logs';
 import { getKibanaUrl } from '../../lib/get_fallback_urls';
-import { hasLogMonitoringPrivileges } from '../logs/api_key/has_log_monitoring_privileges';
-import { createShipperApiKey } from '../logs/api_key/create_shipper_api_key';
-import { createInstallApiKey } from '../logs/api_key/create_install_api_key';
 import { getAgentVersion } from '../../lib/get_agent_version';
 import { getFallbackESUrl } from '../../lib/get_fallback_urls';
 import { ElasticAgentStepPayload, InstalledIntegration, StepProgressPayloadRT } from '../types';
+import { createShipperApiKey } from '../../lib/api_key/create_shipper_api_key';
+import { createInstallApiKey } from '../../lib/api_key/create_install_api_key';
+import { hasLogMonitoringPrivileges } from '../../lib/api_key/has_log_monitoring_privileges';
 
 const updateOnboardingFlowRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'PUT /internal/observability_onboarding/flow/{onboardingId}',
@@ -218,7 +218,6 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
     }
 
     const fleetPluginStart = await plugins.fleet.start();
-    const securityPluginStart = await plugins.security.start();
 
     const [onboardingFlow, ingestApiKey, installApiKey, elasticAgentVersion] = await Promise.all([
       saveObservabilityOnboardingFlow({
@@ -229,8 +228,10 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
           progress: {},
         },
       }),
-      createShipperApiKey(client.asCurrentUser, name),
-      securityPluginStart.authc.apiKeys.create(request, createInstallApiKey(name)),
+      createShipperApiKey(client.asCurrentUser, `onboarding_ingest_${name}`),
+      (
+        await context.resolve(['core'])
+      ).core.security.authc.apiKeys.create(createInstallApiKey(`onboarding_install_${name}`)),
       getAgentVersion(fleetPluginStart, kibanaVersion),
     ]);
 
@@ -382,7 +383,8 @@ async function ensureInstalledIntegrations(
       const { pkgName, installSource } = integration;
 
       if (installSource === 'registry') {
-        const pkg = await packageClient.ensureInstalledPackage({ pkgName });
+        const installation = await packageClient.ensureInstalledPackage({ pkgName });
+        const pkg = installation.package;
         const inputs = await packageClient.getAgentPolicyInputs(pkg.name, pkg.version);
         const { packageInfo } = await packageClient.getPackage(pkg.name, pkg.version);
 
@@ -499,7 +501,7 @@ function parseIntegrationsTSV(tsv: string) {
 }
 
 const generateAgentConfig = ({ esHost, inputs = [] }: { esHost: string[]; inputs: unknown[] }) => {
-  return dump({
+  return safeDump({
     outputs: {
       default: {
         type: 'elasticsearch',

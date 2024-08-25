@@ -21,7 +21,13 @@ export const VIEW_LICENSE_OPTIONS_LINK = 'https://www.elastic.co/subscriptions';
 export const PLUGIN_ID = 'triggersActions';
 export const ALERTS_PAGE_ID = 'triggersActionsAlerts';
 export const CONNECTORS_PLUGIN_ID = 'triggersActionsConnectors';
-export * from './i18n_weekdays';
+export {
+  I18N_WEEKDAY_OPTIONS,
+  I18N_WEEKDAY_OPTIONS_DDD,
+} from '@kbn/alerts-ui-shared/src/common/constants/i18n_weekdays';
+
+// Feature flag for frontend rule specific flapping in rule flyout
+export const IS_RULE_SPECIFIC_FLAPPING_ENABLED = false;
 
 export const builtInComparators: { [key: string]: Comparator } = {
   [COMPARATORS.GREATER_THAN]: {

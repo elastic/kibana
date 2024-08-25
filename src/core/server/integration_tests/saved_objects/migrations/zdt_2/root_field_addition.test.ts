@@ -27,7 +27,7 @@ import fs from 'fs/promises';
 import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import '../jest_matchers';
 import { getKibanaMigratorTestKit, startElasticsearch } from '../kibana_migrator_test_kit';
-import { delay, parseLogFile } from '../test_utils';
+import { parseLogFile } from '../test_utils';
 import { getBaseMigratorParams, getFooType } from '../fixtures/zdt_base.fixtures';
 
 export const logFilePath = Path.join(__dirname, 'root_field_addition.test.log');
@@ -42,7 +42,6 @@ describe('ZDT upgrades - introducing new root fields', () => {
 
   afterAll(async () => {
     await esServer?.stop();
-    await delay(10);
   });
 
   const baseMappings = {

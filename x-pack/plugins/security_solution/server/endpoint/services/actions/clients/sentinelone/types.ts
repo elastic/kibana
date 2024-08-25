@@ -9,7 +9,11 @@ export interface SentinelOneKillProcessScriptArgs {
   processName: string;
 }
 
+export type SentinelOneProcessListScriptArgs = Record<string, never>;
+
 /**
  * All the possible set of arguments running SentinelOne scripts that we support for response actions
  */
-export type SentinelOneScriptArgs = SentinelOneKillProcessScriptArgs;
+export type SentinelOneScriptArgs =
+  | SentinelOneKillProcessScriptArgs
+  | SentinelOneProcessListScriptArgs;

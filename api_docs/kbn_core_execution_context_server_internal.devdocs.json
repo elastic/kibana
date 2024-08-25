@@ -9,18 +9,10 @@
     "objects": []
   },
   "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/core-execution-context-server-internal",
-        "id": "def-common.ExecutionContextService",
+        "id": "def-server.ExecutionContextService",
         "type": "Class",
         "tags": [],
         "label": "ExecutionContextService",
@@ -28,9 +20,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-execution-context-server-internal",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreExecutionContextServerInternalPluginApi",
-            "section": "def-common.ExecutionContextService",
+            "section": "def-server.ExecutionContextService",
             "text": "ExecutionContextService"
           },
           " implements ",
@@ -47,7 +39,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-execution-context-server-internal",
-            "id": "def-common.ExecutionContextService.Unnamed",
+            "id": "def-server.ExecutionContextService.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -61,7 +53,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-execution-context-server-internal",
-                "id": "def-common.ExecutionContextService.Unnamed.$1",
+                "id": "def-server.ExecutionContextService.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "coreContext",
@@ -79,7 +71,7 @@
           },
           {
             "parentPluginId": "@kbn/core-execution-context-server-internal",
-            "id": "def-common.ExecutionContextService.setup",
+            "id": "def-server.ExecutionContextService.setup",
             "type": "Function",
             "tags": [],
             "label": "setup",
@@ -96,7 +88,7 @@
           },
           {
             "parentPluginId": "@kbn/core-execution-context-server-internal",
-            "id": "def-common.ExecutionContextService.start",
+            "id": "def-server.ExecutionContextService.start",
             "type": "Function",
             "tags": [],
             "label": "start",
@@ -113,7 +105,7 @@
           },
           {
             "parentPluginId": "@kbn/core-execution-context-server-internal",
-            "id": "def-common.ExecutionContextService.stop",
+            "id": "def-server.ExecutionContextService.stop",
             "type": "Function",
             "tags": [],
             "label": "stop",
@@ -138,7 +130,7 @@
     "objects": [
       {
         "parentPluginId": "@kbn/core-execution-context-server-internal",
-        "id": "def-common.executionContextConfig",
+        "id": "def-server.executionContextConfig",
         "type": "Object",
         "tags": [],
         "label": "executionContextConfig",
@@ -149,7 +141,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-execution-context-server-internal",
-            "id": "def-common.executionContextConfig.path",
+            "id": "def-server.executionContextConfig.path",
             "type": "string",
             "tags": [],
             "label": "path",
@@ -160,7 +152,7 @@
           },
           {
             "parentPluginId": "@kbn/core-execution-context-server-internal",
-            "id": "def-common.executionContextConfig.schema",
+            "id": "def-server.executionContextConfig.schema",
             "type": "Object",
             "tags": [],
             "label": "schema",
@@ -191,5 +183,13 @@
         "initialIsOpen": false
       }
     ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }

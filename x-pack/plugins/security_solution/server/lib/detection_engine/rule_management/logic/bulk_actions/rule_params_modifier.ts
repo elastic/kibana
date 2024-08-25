@@ -198,11 +198,6 @@ const applyBulkActionEditToRuleParams = (
     }
     // investigation_fields actions
     case BulkActionEditTypeEnum.add_investigation_fields: {
-      invariant(
-        experimentalFeatures.bulkCustomHighlightedFieldsEnabled,
-        "Custom highlighted fields can't be added. Feature is disabled."
-      );
-
       if (shouldSkipInvestigationFieldsBulkAction(ruleParams.investigationFields, action)) {
         isActionSkipped = true;
         break;
@@ -219,11 +214,6 @@ const applyBulkActionEditToRuleParams = (
       break;
     }
     case BulkActionEditTypeEnum.delete_investigation_fields: {
-      invariant(
-        experimentalFeatures.bulkCustomHighlightedFieldsEnabled,
-        "Custom highlighted fields can't be deleted. Feature is disabled."
-      );
-
       if (shouldSkipInvestigationFieldsBulkAction(ruleParams.investigationFields, action)) {
         isActionSkipped = true;
         break;
@@ -246,11 +236,6 @@ const applyBulkActionEditToRuleParams = (
       break;
     }
     case BulkActionEditTypeEnum.set_investigation_fields: {
-      invariant(
-        experimentalFeatures.bulkCustomHighlightedFieldsEnabled,
-        "Custom highlighted fields can't be overwritten. Feature is disabled."
-      );
-
       if (shouldSkipInvestigationFieldsBulkAction(ruleParams.investigationFields, action)) {
         isActionSkipped = true;
         break;

@@ -13,7 +13,7 @@ import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
 import '../jest_matchers';
 import { getKibanaMigratorTestKit, startElasticsearch } from '../kibana_migrator_test_kit';
-import { delay, parseLogFile, createType } from '../test_utils';
+import { parseLogFile, createType } from '../test_utils';
 import { getBaseMigratorParams, noopMigration } from '../fixtures/zdt_base.fixtures';
 
 const logFilePath = Path.join(__dirname, 'switch_to_model_version.test.log');
@@ -28,7 +28,6 @@ describe('ZDT with v2 compat - type switching from migration to model version', 
 
   afterAll(async () => {
     await esServer?.stop();
-    await delay(10);
   });
 
   const typeBefore = createType({

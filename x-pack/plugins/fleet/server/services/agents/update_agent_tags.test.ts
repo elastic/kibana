@@ -8,6 +8,7 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
+import { isSpaceAwarenessEnabled } from '../spaces/helpers';
 import type { Agent } from '../../types';
 
 import { createClientMock } from './action.mock';
@@ -15,6 +16,7 @@ import { MAX_RETRY_COUNT } from './retry_helper';
 import { updateAgentTags } from './update_agent_tags';
 import { UpdateAgentTagsActionRunner, updateTagsBatch } from './update_agent_tags_action_runner';
 
+jest.mock('../spaces/helpers');
 jest.mock('../app_context', () => {
   const { loggerMock } = jest.requireActual('@kbn/logging-mocks');
   return {
@@ -373,5 +375,101 @@ describe('update_agent_tags', () => {
         total: 100,
       })
     );
+  });
+
+  it('should update tags for agents in the space', async () => {
+    soClient.getCurrentNamespace.mockReturnValue('default');
+    esClient.search.mockResolvedValue({
+      hits: {
+        hits: [
+          {
+            _id: 'agent1',
+            _source: {
+              tags: ['one', 'two', 'three'],
+              namespaces: ['default'],
+            },
+            fields: {
+              status: 'online',
+            },
+          },
+        ],
+      },
+    } as any);
+
+    await updateAgentTags(soClient, esClient, { agentIds: ['agent1'] }, ['one'], ['two']);
+
+    expect(esClient.updateByQuery).toHaveBeenCalledWith(
+      expect.objectContaining({
+        conflicts: 'proceed',
+        index: '.fleet-agents',
+        query: {
+          terms: { _id: ['agent1'] },
+        },
+        script: expect.objectContaining({
+          lang: 'painless',
+          params: expect.objectContaining({
+            tagsToAdd: ['one'],
+            tagsToRemove: ['two'],
+            updatedAt: expect.anything(),
+          }),
+          source: expect.anything(),
+        }),
+      })
+    );
+  });
+
+  describe('with isSpaceAwarenessEnabled return true', () => {
+    beforeEach(() => {
+      jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(true);
+    });
+
+    it('should add namespace filter to kuery in the default space', async () => {
+      soClient.getCurrentNamespace.mockReturnValue('default');
+
+      await updateAgentTags(
+        soClient,
+        esClient,
+        { kuery: 'status:healthy OR status:offline' },
+        [],
+        ['remove']
+      );
+
+      expect(UpdateAgentTagsActionRunner).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({
+          batchSize: 10000,
+          kuery:
+            '(namespaces:(default) or not namespaces:*) AND (status:healthy OR status:offline) AND (tags:remove)',
+          tagsToAdd: [],
+          tagsToRemove: ['remove'],
+        }),
+        expect.anything()
+      );
+    });
+
+    it('should add namespace filter to kuery in a custom space', async () => {
+      soClient.getCurrentNamespace.mockReturnValue('myspace');
+
+      await updateAgentTags(
+        soClient,
+        esClient,
+        { kuery: 'status:healthy OR status:offline' },
+        [],
+        ['remove']
+      );
+
+      expect(UpdateAgentTagsActionRunner).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({
+          batchSize: 10000,
+          kuery: '(namespaces:(myspace)) AND (status:healthy OR status:offline) AND (tags:remove)',
+          tagsToAdd: [],
+          tagsToRemove: ['remove'],
+        }),
+        expect.anything()
+      );
+    });
   });
 });

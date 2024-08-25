@@ -234,6 +234,11 @@ export function correctCommonEsqlMistakes(query: string): {
 
   const formattedCommands: string[] = commands.map(({ name, command }, index) => {
     let formattedCommand = command;
+
+    formattedCommand = formattedCommand
+      .replaceAll(/"@timestamp"/g, '@timestamp')
+      .replaceAll(/'@timestamp'/g, '@timestamp');
+
     switch (name) {
       case 'FROM': {
         formattedCommand = split(formattedCommand, ',')

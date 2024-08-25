@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { UserProvidedValues, UiSettingsParams } from '@kbn/core-ui-settings-common';
+import type {
+  UserProvidedValues,
+  UiSettingsParams,
+  GetUiSettingsContext,
+} from '@kbn/core-ui-settings-common';
 
 interface ValueValidation {
   valid: boolean;
@@ -29,11 +33,11 @@ export interface IUiSettingsClient {
   /**
    * Retrieves uiSettings values set by the user with fallbacks to default values if not specified.
    */
-  get: <T = any>(key: string) => Promise<T>;
+  get: <T = any>(key: string, context?: GetUiSettingsContext) => Promise<T>;
   /**
    * Retrieves a set of all uiSettings values set by the user with fallbacks to default values if not specified.
    */
-  getAll: <T = any>() => Promise<Record<string, T>>;
+  getAll: <T = any>(context?: GetUiSettingsContext) => Promise<Record<string, T>>;
   /**
    * Retrieves a set of all uiSettings values set by the user.
    */

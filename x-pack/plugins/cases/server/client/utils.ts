@@ -17,11 +17,13 @@ import { nodeBuilder, fromKueryExpression, escapeKuery } from '@kbn/es-query';
 import { spaceIdToNamespace } from '@kbn/spaces-plugin/server/lib/utils/namespace';
 
 import type {
+  CaseCustomField,
   CaseSeverity,
   CaseStatuses,
   CustomFieldsConfiguration,
   ExternalReferenceAttachmentPayload,
   TemplatesConfiguration,
+  CustomFieldTypes,
 } from '../../common/types/domain';
 import {
   ActionsAttachmentPayloadRt,
@@ -607,9 +609,9 @@ export const constructSearch = (
 };
 
 /**
- * remove deleted custom field from template
+ * remove deleted custom field from template or add newly added custom field to template
  */
-export const removeCustomFieldFromTemplates = ({
+export const transformTemplateCustomFields = ({
   templates,
   customFields,
 }: {
@@ -621,21 +623,40 @@ export const removeCustomFieldFromTemplates = ({
   }
 
   return templates.map((template) => {
-    if (!template.caseFields?.customFields || !template.caseFields?.customFields.length) {
-      return template;
-    }
+    const templateCustomFields = template.caseFields?.customFields ?? [];
 
-    if (!customFields || !customFields?.length) {
+    if (!customFields || !customFields.length) {
       return { ...template, caseFields: { ...template.caseFields, customFields: [] } };
     }
 
-    const templateCustomFields = template.caseFields.customFields.filter((templateCustomField) =>
+    // remove deleted custom field from template
+    const transformedTemplateCustomFields = templateCustomFields.filter((templateCustomField) =>
       customFields?.find((customField) => customField.key === templateCustomField.key)
     );
 
+    // add new custom fields to template
+    if (customFields.length >= transformedTemplateCustomFields.length) {
+      customFields.forEach((field) => {
+        if (
+          !transformedTemplateCustomFields.find(
+            (templateCustomField) => templateCustomField.key === field.key
+          )
+        ) {
+          const { getDefaultValue } = casesCustomFields.get(field.type) ?? {};
+          const value = getDefaultValue?.() ?? null;
+
+          transformedTemplateCustomFields.push({
+            key: field.key,
+            type: field.type as CustomFieldTypes,
+            value: field.defaultValue ?? value,
+          } as CaseCustomField);
+        }
+      });
+    }
+
     return {
       ...template,
-      caseFields: { ...template.caseFields, customFields: templateCustomFields },
+      caseFields: { ...template.caseFields, customFields: transformedTemplateCustomFields },
     };
   });
 };

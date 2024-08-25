@@ -92,7 +92,7 @@ const renderUserEntityOverview = () =>
 describe('<UserEntityOverview />', () => {
   beforeAll(() => {
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
   });
 
   describe('license is valid', () => {
@@ -198,7 +198,7 @@ describe('<UserEntityOverview />', () => {
     it('should open user preview if feature flag is true', () => {
       mockUseUserDetails.mockReturnValue([false, { userDetails: userData }]);
       mockUseRiskScore.mockReturnValue({ data: riskLevel, isAuthorized: true });
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
 
       const { getByTestId } = render(
         <TestProviders>

@@ -22,13 +22,13 @@ load("@build_bazel_rules_nodejs//:index.bzl", "node_repositories", "yarn_install
 # Setup the Node.js toolchain for the architectures we want to support
 node_repositories(
   node_repositories = {
-    "20.13.1-darwin_amd64": ("node-v20.13.1-darwin-x64.tar.gz", "node-v20.13.1-darwin-x64", "80bde95dc976b84db5ca566738c07305087ae578f5f3b05191e0e6ff54aaeaf2"),
-    "20.13.1-darwin_arm64": ("node-v20.13.1-darwin-arm64.tar.gz", "node-v20.13.1-darwin-arm64", "c30fe595f59dcd2c5158da6bf8bc251ffc85ca37304afa89db150fb3c62c4507"),
-    "20.13.1-linux_arm64": ("node-v20.13.1-linux-arm64.tar.xz", "node-v20.13.1-linux-arm64", "5a41797a5815f42e0e9e4d2185d07d5d395386dc681a5a914563586c735ae31f"),
-    "20.13.1-linux_amd64": ("node-v20.13.1-linux-x64.tar.xz", "node-v20.13.1-linux-x64", "eb449c4db6c5769c4219fdbfa1c7cbc8b367b9f8c7be1eb534dc8f6a3c80a97f"),
-    "20.13.1-windows_amd64": ("node-v20.13.1-win-x64.zip", "node-v20.13.1-win-x64", "555a55c0c7441cb90e441115c81f610fca712dd5b192034d5eaafd7c29924425"),
+    "20.15.1-darwin_amd64": ("node-v20.15.1-darwin-x64.tar.gz", "node-v20.15.1-darwin-x64", "f5379772ffae1404cfd1fcc8cf0c6c5971306b8fb2090d348019047306de39dc"),
+    "20.15.1-darwin_arm64": ("node-v20.15.1-darwin-arm64.tar.gz", "node-v20.15.1-darwin-arm64", "4743bc042f90ba5d9edf09403207290a9cdd2f6061bdccf7caaa0bbfd49f343e"),
+    "20.15.1-linux_arm64": ("node-v20.15.1-linux-arm64.tar.xz", "node-v20.15.1-linux-arm64", "c049d670df0c27ae2fd53446df79b6227ab23aff930e38daf0ab3da41c396db5"),
+    "20.15.1-linux_amd64": ("node-v20.15.1-linux-x64.tar.xz", "node-v20.15.1-linux-x64", "a854c291c7b775bedab54251e1e273cfee1adf1dba25435bc52305ef41f143ab"),
+    "20.15.1-windows_amd64": ("node-v20.15.1-win-x64.zip", "node-v20.15.1-win-x64", "ba6c3711e2c3d0638c5f7cea3c234553808a73c52a5962a6cdb47b5210b70b04"),
   },
-  node_version = "20.13.1",
+  node_version = "20.15.1",
   node_urls = [
     "https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/dist/v{version}/{filename}",
   ],
@@ -60,7 +60,6 @@ yarn_install(
     "GECKODRIVER_CDNURL": "https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache",
     "CHROMEDRIVER_CDNURL": "https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache",
     "CHROMEDRIVER_CDNBINARIESURL": "https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache",
-    "RE2_DOWNLOAD_MIRROR": "https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2",
     "CYPRESS_DOWNLOAD_MIRROR": "https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/cypress",
   }
 )

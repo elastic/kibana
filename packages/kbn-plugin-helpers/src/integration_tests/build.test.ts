@@ -96,6 +96,7 @@ it('builds a generated plugin into a viable archive', async () => {
 
   expect(files).toMatchInlineSnapshot(`
     Array [
+      "kibana/fooTestPlugin/.i18nrc.json",
       "kibana/fooTestPlugin/common/index.js",
       "kibana/fooTestPlugin/kibana.json",
       "kibana/fooTestPlugin/node_modules/.yarn-integrity",

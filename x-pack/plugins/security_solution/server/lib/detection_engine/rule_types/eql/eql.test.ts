@@ -17,8 +17,12 @@ import type { EqlRuleParams } from '../../rule_schema';
 import { getCompleteRuleMock, getEqlRuleParams } from '../../rule_schema/mocks';
 import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 import { eqlExecutor } from './eql';
+import { getDataTierFilter } from '../utils/get_data_tier_filter';
 
 jest.mock('../../routes/index/get_index_version');
+jest.mock('../utils/get_data_tier_filter', () => ({ getDataTierFilter: jest.fn() }));
+
+const getDataTierFilterMock = getDataTierFilter as jest.Mock;
 
 describe('eql_executor', () => {
   const version = '8.0.0';
@@ -43,6 +47,7 @@ describe('eql_executor', () => {
         events: [],
       },
     });
+    getDataTierFilterMock.mockResolvedValue([]);
   });
 
   describe('eqlExecutor', () => {
@@ -151,6 +156,57 @@ describe('eql_executor', () => {
         experimentalFeatures: mockExperimentalFeatures,
       });
       expect(result.userError).toEqual(true);
+    });
+
+    it('should pass frozen tier filters in eql search request', async () => {
+      getDataTierFilterMock.mockResolvedValue([
+        {
+          meta: { negate: true },
+          query: {
+            terms: {
+              _tier: ['data_cold'],
+            },
+          },
+        },
+      ]);
+
+      await eqlExecutor({
+        inputIndex: DEFAULT_INDEX_PATTERN,
+        runtimeMappings: {},
+        completeRule: eqlCompleteRule,
+        tuple,
+        ruleExecutionLogger,
+        services: alertServices,
+        version,
+        bulkCreate: jest.fn(),
+        wrapHits: jest.fn(),
+        wrapSequences: jest.fn(),
+        primaryTimestamp: '@timestamp',
+        exceptionFilter: undefined,
+        unprocessedExceptions: [],
+        wrapSuppressedHits: jest.fn(),
+        alertTimestampOverride: undefined,
+        alertWithSuppression: jest.fn(),
+        isAlertSuppressionActive: true,
+        experimentalFeatures: mockExperimentalFeatures,
+      });
+
+      const searchArgs =
+        alertServices.scopedClusterClient.asCurrentUser.eql.search.mock.calls[0][0];
+
+      expect(searchArgs).toHaveProperty(
+        'body.filter.bool.filter',
+        expect.arrayContaining([
+          {
+            bool: {
+              filter: [],
+              must: [],
+              must_not: [{ terms: { _tier: ['data_cold'] } }],
+              should: [],
+            },
+          },
+        ])
+      );
     });
   });
 });

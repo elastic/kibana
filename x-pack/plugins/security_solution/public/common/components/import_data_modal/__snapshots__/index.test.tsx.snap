@@ -295,7 +295,7 @@ Object {
                     subtitle
                   </span>
                   <button
-                    aria-label="Clear selected files"
+                    aria-label="Remove selected files"
                     class="euiButtonEmpty euiFilePicker__clearButton emotion-euiButtonDisplay-euiButtonEmpty-xs-empty-primary-euiFilePicker__clearButton"
                     type="button"
                   >
@@ -582,7 +582,7 @@ Object {
                     subtitle
                   </span>
                   <button
-                    aria-label="Clear selected files"
+                    aria-label="Remove selected files"
                     class="euiButtonEmpty euiFilePicker__clearButton emotion-euiButtonDisplay-euiButtonEmpty-xs-empty-primary-euiFilePicker__clearButton"
                     type="button"
                   >

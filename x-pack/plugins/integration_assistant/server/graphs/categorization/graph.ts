@@ -13,7 +13,7 @@ import type {
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';
 import type { CategorizationState } from '../../types';
-import { modifySamples, formatSamples } from '../../util/samples';
+import { prefixSamples, formatSamples } from '../../util/samples';
 import { handleCategorization } from './categorization';
 import { handleValidatePipeline } from '../../util/graph';
 import { handleCategorizationValidation } from './validate';
@@ -71,6 +71,10 @@ const graphState: StateGraphArgs<CategorizationState>['channels'] = {
     value: (x: object, y?: object) => y ?? x,
     default: () => ({}),
   },
+  previousError: {
+    value: (x: string, y?: string) => y ?? x,
+    default: () => '',
+  },
   pipelineResults: {
     value: (x: object[], y?: object[]) => y ?? x,
     default: () => [{}],
@@ -84,8 +88,12 @@ const graphState: StateGraphArgs<CategorizationState>['channels'] = {
     default: () => [],
   },
   invalidCategorization: {
-    value: (x: object, y?: object) => y ?? x,
-    default: () => ({}),
+    value: (x: object[], y?: object[]) => y ?? x,
+    default: () => [],
+  },
+  previousInvalidCategorization: {
+    value: (x: string, y?: string) => y ?? x,
+    default: () => '',
   },
   initialPipeline: {
     value: (x: object, y?: object) => y ?? x,
@@ -98,7 +106,7 @@ const graphState: StateGraphArgs<CategorizationState>['channels'] = {
 };
 
 function modelInput(state: CategorizationState): Partial<CategorizationState> {
-  const samples = modifySamples(state);
+  const samples = prefixSamples(state);
   const formattedSamples = formatSamples(samples);
   const initialPipeline = JSON.parse(JSON.stringify(state.currentPipeline));
   return {

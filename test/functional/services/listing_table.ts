@@ -53,14 +53,14 @@ export class ListingTableService extends FtrService {
    */
   public async setSearchFilterValue(value: string) {
     const searchFilter = await this.getSearchFilter();
-    searchFilter.type(value);
+    await searchFilter.type(value);
   }
 
   /**
    * Clears search input on landing page
    */
   public async clearSearchFilter() {
-    this.testSubjects.click('clearSearchButton');
+    await this.testSubjects.click('clearSearchButton');
   }
 
   private async getAllItemsNamesOnCurrentPage(): Promise<string[]> {
@@ -85,7 +85,7 @@ export class ListingTableService extends FtrService {
   }
 
   public async waitUntilTableIsLoaded() {
-    return this.retry.try(async () => {
+    await this.retry.try(async () => {
       const isLoaded = await this.find.existsByDisplayedByCssSelector(
         '[data-test-subj="itemsInMemTable"]:not(.euiBasicTable-loading)'
       );
@@ -264,6 +264,10 @@ export class ListingTableService extends FtrService {
 
       await searchFilter.type(name);
       await this.common.pressEnterKey();
+      const filterValue = await this.getSearchFilterValue();
+      if (filterValue !== name) {
+        throw new Error(`the input value has not updated properly`);
+      }
     });
 
     await this.waitUntilTableIsLoaded();

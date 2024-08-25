@@ -23,7 +23,7 @@ import { UPGRADE_LICENSE_MESSAGE, hasAIAssistantLicense } from '../helpers';
 export const findPromptsRoute = (router: ElasticAssistantPluginRouter, logger: Logger) => {
   router.versioned
     .get({
-      access: 'internal',
+      access: 'public',
       path: ELASTIC_AI_ASSISTANT_PROMPTS_URL_FIND,
       options: {
         tags: ['access:elasticAssistant'],
@@ -31,7 +31,7 @@ export const findPromptsRoute = (router: ElasticAssistantPluginRouter, logger: L
     })
     .addVersion(
       {
-        version: API_VERSIONS.internal.v1,
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
             query: buildRouteValidationWithZod(FindPromptsRequestQuery),

@@ -9,7 +9,7 @@
 import coerce from 'semver/functions/coerce';
 
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import { BuildFlavor } from '@kbn/config/src/types';
+import type { BuildFlavor } from '@kbn/config';
 import { i18n } from '@kbn/i18n';
 import { EMSClient } from '@elastic/ems-client';
 import { EMS_APP_NAME, EMSSettings, DEFAULT_EMS_REST_VERSION } from '../../common';

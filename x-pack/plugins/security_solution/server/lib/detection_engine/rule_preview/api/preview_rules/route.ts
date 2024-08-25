@@ -28,10 +28,10 @@ import {
 import { validateCreateRuleProps } from '../../../../../../common/api/detection_engine/rule_management';
 import { RuleExecutionStatusEnum } from '../../../../../../common/api/detection_engine/rule_monitoring';
 import type {
-  PreviewResponse,
+  RulePreviewResponse,
   RulePreviewLogs,
 } from '../../../../../../common/api/detection_engine';
-import { PreviewRulesSchema } from '../../../../../../common/api/detection_engine';
+import { RulePreviewRequestBody } from '../../../../../../common/api/detection_engine';
 
 import type { StartPlugins, SetupPlugins } from '../../../../../plugin';
 import { buildSiemResponse } from '../../../routes/utils';
@@ -92,9 +92,9 @@ export const previewRulesRoute = (
     .addVersion(
       {
         version: '2023-10-31',
-        validate: { request: { body: buildRouteValidationWithZod(PreviewRulesSchema) } },
+        validate: { request: { body: buildRouteValidationWithZod(RulePreviewRequestBody) } },
       },
-      async (context, request, response): Promise<IKibanaResponse<PreviewResponse>> => {
+      async (context, request, response): Promise<IKibanaResponse<RulePreviewResponse>> => {
         const siemResponse = buildSiemResponse(response);
         const validationErrors = validateCreateRuleProps(request.body);
         const coreContext = await context.core;
@@ -107,6 +107,7 @@ export const previewRulesRoute = (
           const searchSourceClient = await data.search.searchSource.asScoped(request);
           const savedObjectsClient = coreContext.savedObjects.client;
           const siemClient = (await context.securitySolution).getAppClient();
+          const actionsClient = (await context.actions).getActionsClient();
 
           const timeframeEnd = request.body.timeframeEnd;
           let invocationCount = request.body.invocationCount;
@@ -120,7 +121,10 @@ export const previewRulesRoute = (
             });
           }
 
-          const internalRule = convertRuleResponseToAlertingRule(applyRuleDefaults(request.body));
+          const internalRule = convertRuleResponseToAlertingRule(
+            applyRuleDefaults(request.body),
+            actionsClient
+          );
           const previewRuleParams = internalRule.params;
 
           const mlAuthz = buildMlAuthz({
@@ -279,12 +283,13 @@ export const previewRulesRoute = (
                     abortController,
                     scopedClusterClient: coreContext.elasticsearch.client,
                   }),
-                  searchSourceClient: wrapSearchSourceClient({
-                    abortController,
-                    searchSourceClient,
-                  }),
+                  getSearchSourceClient: async () =>
+                    wrapSearchSourceClient({
+                      abortController,
+                      searchSourceClient,
+                    }),
                   uiSettingsClient: coreContext.uiSettings.client,
-                  dataViews: dataViewsService,
+                  getDataViews: async () => dataViewsService,
                   share,
                 },
                 spaceId,

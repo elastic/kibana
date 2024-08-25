@@ -117,9 +117,9 @@ describe('utils', () => {
         name: 'template 1',
         templateDescription: '',
         customFields: {
-          custom_field_1: 'foobar',
-          custom_fields_2: '',
-          custom_field_3: true,
+          test_key_1: 'foobar',
+          test_key_3: '',
+          test_key_2: true,
         },
       });
 
@@ -131,7 +131,11 @@ describe('utils', () => {
             name: 'none',
             type: '.none',
           },
-          customFields: [],
+          customFields: [
+            { key: 'test_key_1', type: 'text', value: 'foobar' },
+            { key: 'test_key_3', type: 'text', value: null },
+            { key: 'test_key_2', type: 'toggle', value: true },
+          ],
           settings: {
             syncAlerts: false,
           },

@@ -27,11 +27,11 @@ export function HeaderMenu(): React.ReactElement | null {
           <EuiHeaderLinks>
             <EuiHeaderLink
               color="primary"
-              href={http.basePath.prepend('/app/integrations/browse')}
+              href={http.basePath.prepend('/app/observabilityOnboarding')}
               iconType="indexOpen"
             >
               {i18n.translate('xpack.slo.headerMenu.addData', {
-                defaultMessage: 'Add integrations',
+                defaultMessage: 'Add data',
               })}
             </EuiHeaderLink>
             {!isServerless && (
@@ -45,6 +45,15 @@ export function HeaderMenu(): React.ReactElement | null {
                 })}
               </EuiHeaderLink>
             )}
+            <EuiHeaderLink
+              color="primary"
+              href={http.basePath.prepend('/app/observability/annotations')}
+              iconType="brush"
+            >
+              {i18n.translate('xpack.slo.home.annotations', {
+                defaultMessage: 'Annotations',
+              })}
+            </EuiHeaderLink>
           </EuiHeaderLinks>
         </EuiFlexItem>
       </EuiFlexGroup>

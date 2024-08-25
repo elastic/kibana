@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { GetViewInAppRelativeUrlFnOpts, PluginSetupContract } from '@kbn/alerting-plugin/server';
 import { observabilityPaths } from '@kbn/observability-plugin/common';
+import { decodeOrThrow } from '@kbn/io-ts-utils';
 import type { InfraConfig } from '../../../../common/plugin_config_types';
 import { O11Y_AAD_FIELDS } from '../../../../common/constants';
 import { createLogThresholdExecutor, FIRED_ACTIONS } from './log_threshold_executor';
@@ -18,7 +19,6 @@ import {
   ruleParamsRT,
 } from '../../../../common/alerting/logs/log_threshold';
 import { InfraBackendLibs } from '../../infra_types';
-import { decodeOrThrow } from '../../../../common/runtime_types';
 import {
   alertDetailUrlActionVariableDescription,
   groupByKeysActionVariableDescription,
