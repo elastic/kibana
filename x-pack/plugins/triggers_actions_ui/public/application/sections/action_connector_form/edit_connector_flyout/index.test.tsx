@@ -117,16 +117,12 @@ describe('EditConnectorFlyout', () => {
     );
     expect(getByTestId('edit-connector-flyout-save-btn')).toBeDisabled();
 
-    await act(async () => {
-      await userEvent.clear(getByTestId('nameInput'));
-      await userEvent.type(getByTestId('nameInput'), 'My new name', {
-        delay: 10,
-      });
+    await userEvent.clear(getByTestId('nameInput'));
+    await userEvent.type(getByTestId('nameInput'), 'My new name', {
+      delay: 10,
     });
 
-    act(() => {
-      await userEvent.click(getByTestId('edit-connector-flyout-close-btn'));
-    });
+    await userEvent.click(getByTestId('edit-connector-flyout-close-btn'));
 
     expect(getByText('Discard unsaved changes to connector?')).toBeInTheDocument();
   });
@@ -240,15 +236,11 @@ describe('EditConnectorFlyout', () => {
       expect(getByTestId('test-connector-text-field')).toBeInTheDocument();
     });
 
-    act(() => {
-      /**
-       * Clear the name so the form can be invalid
-       */
-      await userEvent.clear(getByTestId('nameInput'));
-    });
-    act(() => {
-      await userEvent.click(getByTestId('edit-connector-flyout-save-btn'));
-    });
+    /**
+     * Clear the name so the form can be invalid
+     */
+    await userEvent.clear(getByTestId('nameInput'));
+    await userEvent.click(getByTestId('edit-connector-flyout-save-btn'));
 
     await waitFor(() => {
       expect(getByTestId('edit-connector-flyout-close-btn')).not.toBeDisabled();
@@ -395,9 +387,7 @@ describe('EditConnectorFlyout', () => {
       expect(getByTestId('configureConnectorTab')).toBeInTheDocument();
       expect(getByTestId('testConnectorTab')).toBeInTheDocument();
 
-      act(() => {
-        await userEvent.click(getByTestId('testConnectorTab'));
-      });
+      await userEvent.click(getByTestId('testConnectorTab'));
 
       await waitFor(() => {
         expect(getByTestId('test-connector-form')).toBeInTheDocument();
@@ -609,9 +599,7 @@ describe('EditConnectorFlyout', () => {
 
       expect(getByTestId('executionAwaiting')).toBeInTheDocument();
 
-      act(() => {
-        await userEvent.click(getByTestId('executeActionButton'));
-      });
+      await userEvent.click(getByTestId('executeActionButton'));
 
       await waitFor(() => {
         expect(appMockRenderer.coreStart.http.post).toHaveBeenCalledWith(
@@ -640,25 +628,19 @@ describe('EditConnectorFlyout', () => {
 
       expect(getByTestId('executionAwaiting')).toBeInTheDocument();
 
-      act(() => {
-        await userEvent.click(getByTestId('executeActionButton'));
-      });
+      await userEvent.click(getByTestId('executeActionButton'));
 
       await waitFor(() => {
         expect(getByTestId('executionSuccessfulResult')).toBeInTheDocument();
       });
 
-      act(() => {
-        await userEvent.click(getByTestId('configureConnectorTab'));
-      });
+      await userEvent.click(getByTestId('configureConnectorTab'));
 
       await waitFor(() => {
         expect(getByTestId('nameInput')).toBeInTheDocument();
       });
 
-      act(() => {
-        await userEvent.click(getByTestId('testConnectorTab'));
-      });
+      await userEvent.click(getByTestId('testConnectorTab'));
 
       await waitFor(() => {
         expect(getByTestId('test-connector-form')).toBeInTheDocument();
@@ -686,9 +668,7 @@ describe('EditConnectorFlyout', () => {
         expect(getByTestId('test-connector-form')).toBeInTheDocument();
       });
 
-      act(() => {
-        await userEvent.click(getByTestId('executeActionButton'));
-      });
+      await userEvent.click(getByTestId('executeActionButton'));
 
       await waitFor(() => {
         expect(getByTestId('executionFailureResult')).toBeInTheDocument();
@@ -710,32 +690,24 @@ describe('EditConnectorFlyout', () => {
         expect(getByTestId('test-connector-form')).toBeInTheDocument();
       });
 
-      act(() => {
-        await userEvent.click(getByTestId('executeActionButton'));
-      });
+      await userEvent.click(getByTestId('executeActionButton'));
 
       await waitFor(() => {
         expect(getByTestId('executionSuccessfulResult')).toBeInTheDocument();
       });
 
-      act(() => {
-        await userEvent.click(getByTestId('configureConnectorTab'));
-      });
+      await userEvent.click(getByTestId('configureConnectorTab'));
 
       await waitFor(() => {
         expect(getByTestId('nameInput')).toBeInTheDocument();
       });
 
-      await act(async () => {
-        await userEvent.clear(getByTestId('nameInput'));
-        await userEvent.type(getByTestId('nameInput'), 'My new name', {
-          delay: 10,
-        });
+      await userEvent.clear(getByTestId('nameInput'));
+      await userEvent.type(getByTestId('nameInput'), 'My new name', {
+        delay: 10,
       });
 
-      act(() => {
-        await userEvent.click(getByTestId('testConnectorTab'));
-      });
+      await userEvent.click(getByTestId('testConnectorTab'));
 
       await waitFor(() => {
         expect(getByTestId('test-connector-form')).toBeInTheDocument();
