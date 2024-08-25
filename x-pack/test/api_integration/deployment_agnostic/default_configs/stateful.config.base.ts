@@ -19,7 +19,6 @@ import {
   FtrConfigProviderContext,
 } from '@kbn/test';
 import path from 'path';
-// @ts-expect-error we have to check types with "allowJs: false" for now, causing this import to fail
 import { REPO_ROOT } from '@kbn/repo-info';
 import { STATEFUL_ROLES_ROOT_PATH } from '@kbn/es';
 import { DeploymentAgnosticCommonServices, services } from '../services';
