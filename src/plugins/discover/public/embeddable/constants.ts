@@ -31,6 +31,8 @@ export const EDITABLE_SAVED_SEARCH_KEYS: Readonly<Array<keyof SavedSearchAttribu
   'sampleSize',
   'rowsPerPage',
   'headerRowHeight',
+  'density',
+  'grid',
 ] as const;
 
 /** This constant refers to the dashboard panel specific state */

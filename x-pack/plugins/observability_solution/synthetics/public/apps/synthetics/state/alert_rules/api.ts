@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
+import { DEFAULT_ALERT_RESPONSE } from '../../../../../common/types/default_alerts';
 import { apiService } from '../../../../utils/api_service';
 
-export async function getDefaultAlertingAPI(): Promise<{ statusRule: Rule; tlsRule: Rule }> {
+export async function getDefaultAlertingAPI(): Promise<DEFAULT_ALERT_RESPONSE> {
   return apiService.get(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING);
 }
 
-export async function enableDefaultAlertingAPI(): Promise<{ statusRule: Rule; tlsRule: Rule }> {
+export async function enableDefaultAlertingAPI(): Promise<DEFAULT_ALERT_RESPONSE> {
   return apiService.post(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING);
 }
 
-export async function updateDefaultAlertingAPI(): Promise<Rule> {
+export async function updateDefaultAlertingAPI(): Promise<DEFAULT_ALERT_RESPONSE> {
   return apiService.put(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING);
 }

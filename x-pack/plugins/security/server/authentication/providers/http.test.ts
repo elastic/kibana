@@ -133,10 +133,10 @@ describe('HTTPAuthenticationProvider', () => {
         });
 
         await expect(provider.authenticate(request)).resolves.toEqual(
-          AuthenticationResult.succeeded({
-            ...user,
-            authentication_provider: { type: 'http', name: 'http' },
-          })
+          AuthenticationResult.succeeded(
+            { ...user, authentication_provider: { type: 'http', name: 'http' } },
+            { authHeaders: { authorization: header } }
+          )
         );
 
         expectAuthenticateCall(mockOptions.client, { headers: { authorization: header } });
@@ -160,10 +160,10 @@ describe('HTTPAuthenticationProvider', () => {
       });
 
       await expect(provider.authenticate(request)).resolves.toEqual(
-        AuthenticationResult.succeeded({
-          ...user,
-          authentication_provider: { type: 'http', name: 'http' },
-        })
+        AuthenticationResult.succeeded(
+          { ...user, authentication_provider: { type: 'http', name: 'http' } },
+          { authHeaders: { authorization: header } }
+        )
       );
 
       expectAuthenticateCall(mockOptions.client, { headers: { authorization: header } });
@@ -187,10 +187,10 @@ describe('HTTPAuthenticationProvider', () => {
       });
 
       await expect(provider.authenticate(request)).resolves.toEqual(
-        AuthenticationResult.succeeded({
-          ...user,
-          authentication_provider: { type: 'http', name: 'http' },
-        })
+        AuthenticationResult.succeeded(
+          { ...user, authentication_provider: { type: 'http', name: 'http' } },
+          { authHeaders: { authorization: header } }
+        )
       );
 
       expectAuthenticateCall(mockOptions.client, { headers: { authorization: header } });
@@ -217,10 +217,10 @@ describe('HTTPAuthenticationProvider', () => {
       });
 
       await expect(provider.authenticate(request)).resolves.toEqual(
-        AuthenticationResult.succeeded({
-          ...user,
-          authentication_provider: { type: 'http', name: 'http' },
-        })
+        AuthenticationResult.succeeded(
+          { ...user, authentication_provider: { type: 'http', name: 'http' } },
+          { authHeaders: { authorization: header } }
+        )
       );
 
       expectAuthenticateCall(mockOptions.client, { headers: { authorization: header } });

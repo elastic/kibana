@@ -36,6 +36,7 @@ export const getRenderCellValueFn = ({
   maxEntries,
   externalCustomRenderers,
   isPlainRecord,
+  isCompressed = true,
 }: {
   dataView: DataView;
   rows: DataTableRecord[] | undefined;
@@ -46,6 +47,7 @@ export const getRenderCellValueFn = ({
   maxEntries: number;
   externalCustomRenderers?: CustomCellRenderer;
   isPlainRecord?: boolean;
+  isCompressed?: boolean;
 }) => {
   return function UnifiedDataTableRenderCellValue({
     rowIndex,
@@ -95,6 +97,7 @@ export const getRenderCellValueFn = ({
             dataView={dataView}
             fieldFormats={fieldFormats}
             closePopover={closePopover}
+            isCompressed={isCompressed}
           />
         </span>
       );
@@ -134,6 +137,7 @@ export const getRenderCellValueFn = ({
           shouldShowFieldHandler={shouldShowFieldHandler}
           maxEntries={maxEntries}
           isPlainRecord={isPlainRecord}
+          isCompressed={isCompressed}
         />
       );
     }
