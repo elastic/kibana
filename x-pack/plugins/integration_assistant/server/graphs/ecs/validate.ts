@@ -6,7 +6,7 @@
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ECS_FULL } from '../../../common/ecs';
-import type { EcsMappingState } from '../../types';
+import type { EcsBaseNodeParams } from './types';
 import { ECS_RESERVED } from './constants';
 
 const valueFieldKeys = new Set(['target', 'confidence', 'date_formats', 'type']);
@@ -152,7 +152,7 @@ export function findInvalidEcsFields(currentMapping: AnyObject): string[] {
   return results;
 }
 
-export function handleValidateMappings(state: EcsMappingState): AnyObject {
+export function handleValidateMappings({ state }: EcsBaseNodeParams): AnyObject {
   const missingKeys = findMissingFields(state?.combinedSamples, state?.currentMapping);
   const duplicateFields = findDuplicateFields(state?.prefixedSamples, state?.currentMapping);
   const invalidEcsFields = findInvalidEcsFields(state?.currentMapping);

@@ -6,5 +6,10 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
+import type { Logger } from '@kbn/logging';
 
-export function defineRoutes(router: IRouter) {}
+import { registerStatusRoutes } from './status';
+
+export function defineRoutes(router: IRouter, logger: Logger) {
+  registerStatusRoutes(router, logger);
+}
