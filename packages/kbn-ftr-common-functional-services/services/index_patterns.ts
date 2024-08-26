@@ -7,13 +7,10 @@
  */
 
 import type { DataViewSpec } from '@kbn/data-plugin/common';
-import { FtrService } from './ftr_provider_context';
 
-// The fallowing two constant values live in
-// '@kbn/data-views-plugin/server/constants' and
-// '@kbn/core-http-common' respectively.
-const INITIAL_REST_VERSION = '2023-10-31' as const;
-const ELASTIC_HTTP_VERSION_HEADER = 'elastic-api-version' as const;
+import { INITIAL_REST_VERSION } from '@kbn/data-views-plugin/server/constants';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import { FtrService } from './ftr_provider_context';
 
 export class IndexPatternsService extends FtrService {
   private readonly kibanaServer = this.ctx.getService('kibanaServer');
