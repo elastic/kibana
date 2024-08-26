@@ -73,6 +73,8 @@ export async function getDerivedServiceAnnotations({
           events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
         },
         body: {
+          _source: false,
+          fields: ['@timestamp'],
           track_total_hits: false,
           size: 1,
           query: {
@@ -86,7 +88,9 @@ export async function getDerivedServiceAnnotations({
         },
       });
 
-      const firstSeen = new Date(response.hits.hits[0]._source['@timestamp']).getTime();
+      const firstSeen = new Date(
+        response.hits.hits[0].fields['@timestamp']?.[0] as string
+      ).getTime();
 
       if (!isFiniteNumber(firstSeen)) {
         throw new Error('First seen for version was unexpectedly undefined or null.');

@@ -98,7 +98,7 @@ export async function getTopDependencySpans({
             ],
           },
         },
-        _source: [
+        fields: [
           SPAN_ID,
           TRACE_ID,
           TRANSACTION_ID,
@@ -116,7 +116,7 @@ export async function getTopDependencySpans({
 
   const transactionIds = spans.map((span) => span.transaction!.id);
 
-  const transactions = (
+  const transactions: Partial<{ [key: string]: any }> = (
     await apmEventClient.search('get_transactions_for_dependency_spans', {
       apm: {
         events: [ProcessorEvent.transaction],
@@ -129,19 +129,17 @@ export async function getTopDependencySpans({
             filter: [...termsQuery(TRANSACTION_ID, ...transactionIds)],
           },
         },
-        _source: [TRANSACTION_ID, TRANSACTION_TYPE, TRANSACTION_NAME],
+        fields: [TRANSACTION_ID, TRANSACTION_TYPE, TRANSACTION_NAME],
         sort: {
           '@timestamp': 'desc',
         },
       },
     })
-  ).hits.hits.map((hit) => hit._source);
+  ).hits.hits.map((hit) => hit.fields);
 
-  const transactionsById = keyBy(transactions, (transaction) => transaction.transaction.id);
-
+  const transactionsById = keyBy(transactions, (transaction) => transaction?.['transaction.id']);
   return spans.map((span): DependencySpan => {
-    const transaction = maybe(transactionsById[span.transaction!.id]);
-
+    const transaction: Partial<Record<string, any>> = maybe(transactionsById[span.transaction!.id]);
     return {
       '@timestamp': new Date(span['@timestamp']).getTime(),
       spanId: span.span.id,
@@ -152,8 +150,8 @@ export async function getTopDependencySpans({
       traceId: span.trace.id,
       outcome: (span.event?.outcome || EventOutcome.unknown) as EventOutcome,
       transactionId: span.transaction!.id,
-      transactionType: transaction?.transaction.type,
-      transactionName: transaction?.transaction.name,
+      transactionType: (transaction?.['transaction.type'])[0],
+      transactionName: (transaction?.['transaction.name'])[0],
     };
   });
 }
