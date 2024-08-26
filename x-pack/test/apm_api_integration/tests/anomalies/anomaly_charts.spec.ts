@@ -73,7 +73,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     'fetching service anomalies with a basic license',
     { config: 'basic', archives: [] },
     function () {
-      this.tags('skipFIPS');
       it('returns a 501', async function () {
         const status = await statusOf(
           getAnomalyCharts({

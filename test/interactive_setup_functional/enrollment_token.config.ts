@@ -27,9 +27,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...manualConfigurationConfig.getAll(),
-    suiteTags: {
-      exclude: ['skipFIPS'],
-    },
     testFiles: [require.resolve('./tests/enrollment_token')],
 
     junit: {

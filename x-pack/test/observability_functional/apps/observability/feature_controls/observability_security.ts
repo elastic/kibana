@@ -24,7 +24,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
 
   describe('observability security feature controls', function () {
-    this.tags(['skipFirefox']);
+    this.tags(['skipFirefox', 'skipFIPS']);
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/cases/default');
     });

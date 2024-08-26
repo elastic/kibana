@@ -16,14 +16,10 @@ import { services } from './services';
 interface CreateTestConfigOptions {
   license: string;
   disabledPlugins?: string[];
-  suiteTags?: {
-    include?: string[];
-    exclude?: string[];
-  };
 }
 
 export function createTestConfig(name: string, options: CreateTestConfigOptions) {
-  const { license = 'trial', disabledPlugins = [], suiteTags = { exclude: [] } } = options;
+  const { license = 'trial', disabledPlugins = [] } = options;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const config = {
@@ -38,14 +34,21 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       },
     };
 
+    const isFIPSMode = process.env.FTR_ENABLE_FIPS_AGENT?.toLowerCase() === 'true';
+
+    let testFiles = [require.resolve(`../${name}/apis/`)];
+
+    if (isFIPSMode && license === 'basic') {
+      testFiles = [];
+    }
+
     return {
-      testFiles: [require.resolve(`../${name}/apis/`)],
+      testFiles,
       servers: config.xpack.api.get('servers'),
       services,
       junit: {
         reportName: 'X-Pack Saved Object API Integration Tests -- ' + name,
       },
-      suiteTags,
       esTestCluster: {
         ...config.xpack.api.get('esTestCluster'),
         license,
