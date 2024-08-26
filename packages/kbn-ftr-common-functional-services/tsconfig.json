@@ -23,7 +23,8 @@
     "@kbn/dev-cli-runner",
     "@kbn/dev-cli-errors",
     "@kbn/repo-info",
-    "@kbn/es"
+    "@kbn/es",
+    "@kbn/data-views-plugin"
   ],
   "exclude": [
     "target/**/*",
