@@ -159,7 +159,7 @@ describe('ApplicationService', () => {
 
         await act(async () => {
           await navigateToApp('app1');
-          update();
+          await update();
         });
 
         expect(currentAppIds).toEqual(['app1']);
@@ -195,15 +195,15 @@ describe('ApplicationService', () => {
 
         await act(async () => {
           await navigateToApp('app1');
-          update();
+          await update();
         });
         await act(async () => {
           await navigateToApp('app2', { path: '/nested' });
-          update();
+          await update();
         });
         await act(async () => {
           await navigateToApp('app2', { path: '/another-path' });
-          update();
+          await update();
         });
 
         expect(locations).toEqual(['/', '/app/app1', '/app/app2/nested', '/app/app2/another-path']);
@@ -625,9 +625,14 @@ describe('ApplicationService', () => {
         title: 'App1',
         mount: async ({ setHeaderActionMenu }: AppMountParameters) => {
           setHeaderActionMenu(mounter1);
-          promise.then(() => {
-            setHeaderActionMenu(mounter2);
-          });
+          promise
+            .then(() => {
+              setHeaderActionMenu(mounter2);
+            })
+            .catch((error) => {
+              // eslint-disable-next-line no-console
+              console.error('Error:', error);
+            });
           return () => undefined;
         },
       });
@@ -663,9 +668,14 @@ describe('ApplicationService', () => {
         title: 'App1',
         mount: async ({ setHeaderActionMenu }: AppMountParameters) => {
           setHeaderActionMenu(mounter1);
-          promise.then(() => {
-            setHeaderActionMenu(undefined);
-          });
+          promise
+            .then(() => {
+              setHeaderActionMenu(undefined);
+            })
+            .catch((error) => {
+              // eslint-disable-next-line no-console
+              console.error('Error:', error);
+            });
           return () => undefined;
         },
       });
