@@ -27,7 +27,7 @@ const { AUTOREFRESH_INTERVAL_SECONDS, AUTOREFRESH_IS_PAUSED } = CLIENT_DEFAULTS_
 
 export interface UiState {
   ruleFlyoutVisible: typeof SYNTHETICS_TLS_RULE | typeof SYNTHETICS_STATUS_RULE | null;
-  isRuleFlyoutNew?: boolean | null;
+  isNewRuleFlyout?: boolean | null;
   basePath: string;
   esKuery: string;
   searchText: string;
@@ -38,7 +38,7 @@ export interface UiState {
 }
 
 const initialState: UiState = {
-  isRuleFlyoutNew: false,
+  isNewRuleFlyout: false,
   ruleFlyoutVisible: null,
   basePath: '',
   esKuery: '',
@@ -56,7 +56,7 @@ export const uiReducer = createReducer(initialState, (builder) => {
     })
     .addCase(setAlertFlyoutVisible, (state, action) => {
       state.ruleFlyoutVisible = action.payload?.id ?? null;
-      state.isRuleFlyoutNew = action.payload?.isNotDefaultRule ?? null;
+      state.isNewRuleFlyout = action.payload?.isNewRuleFlyout ?? null;
     })
     .addCase(setBasePath, (state, action) => {
       state.basePath = action.payload;
