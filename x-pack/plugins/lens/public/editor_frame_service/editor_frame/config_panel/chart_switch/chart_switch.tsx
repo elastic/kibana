@@ -405,7 +405,6 @@ export const ChartSwitch = memo(function ChartSwitch({
           isPreFiltered
           data-test-subj="lnsChartSwitchList"
           searchProps={{
-            autoFocus: true,
             className: 'lnsChartSwitch__search',
             'data-test-subj': 'lnsChartSwitchSearch',
             onChange: (value) => setSearchTerm(value),
