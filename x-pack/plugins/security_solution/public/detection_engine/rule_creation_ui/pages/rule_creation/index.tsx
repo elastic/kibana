@@ -80,8 +80,9 @@ import { RulePreview } from '../../components/rule_preview';
 import { getIsRulePreviewDisabled } from '../../components/rule_preview/helpers';
 import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
 import { NextStep } from '../../components/next_step';
-import { useRuleForms, useRuleIndexPattern } from '../form';
+import { useRuleForms, useRuleFormsErrors, useRuleIndexPattern } from '../form';
 import { CustomHeaderPageMemo } from '..';
+import { SaveWithErrorsModal } from '../../components/save_with_errors_confirmation';
 
 const MyEuiPanel = styled(EuiPanel)<{
   zindex?: number;
@@ -210,6 +211,12 @@ const CreateRulePageComponent: React.FC = () => {
   const [isQueryBarValid, setIsQueryBarValid] = useState(false);
   const [isThreatQueryBarValid, setIsThreatQueryBarValid] = useState(false);
 
+  const [isSaveWithErrorsModalVisible, setIsSaveWithErrorsModalVisible] = useState(false);
+  const [enableRuleAfterConfirmation, setEnableRuleAfterConfirmation] = useState(false);
+  const [nonBlockingRuleErrors, setNonBlockingRuleErrors] = useState<string[]>([]);
+
+  const { getRuleFormsErrors } = useRuleFormsErrors();
+
   const esqlQueryForAboutStep = useEsqlQueryForAboutStep({ defineStepData, activeStep });
 
   const esqlIndex = useEsqlIndex(defineStepData.queryBar.query.query, ruleType);
@@ -328,88 +335,172 @@ const CreateRulePageComponent: React.FC = () => {
   const validateStep = useCallback(
     async (step: RuleStep) => {
       switch (step) {
-        case RuleStep.defineRule:
-          return defineStepForm.validate();
-        case RuleStep.aboutRule:
-          return aboutStepForm.validate();
-        case RuleStep.scheduleRule:
-          return scheduleStepForm.validate();
-        case RuleStep.ruleActions:
-          return actionsStepForm.validate();
+        case RuleStep.defineRule: {
+          const valid = await defineStepForm.validate();
+          const { blockingErrors, nonBlockingErrors } = getRuleFormsErrors({ defineStepForm });
+          return { valid, blockingErrors, nonBlockingErrors };
+        }
+        case RuleStep.aboutRule: {
+          const valid = await aboutStepForm.validate();
+          const { blockingErrors, nonBlockingErrors } = getRuleFormsErrors({ aboutStepForm });
+          return { valid, blockingErrors, nonBlockingErrors };
+        }
+        case RuleStep.scheduleRule: {
+          const valid = await scheduleStepForm.validate();
+          const { blockingErrors, nonBlockingErrors } = getRuleFormsErrors({ scheduleStepForm });
+          return { valid, blockingErrors, nonBlockingErrors };
+        }
+        case RuleStep.ruleActions: {
+          const valid = await actionsStepForm.validate();
+          const { blockingErrors, nonBlockingErrors } = getRuleFormsErrors({ actionsStepForm });
+          return { valid, blockingErrors, nonBlockingErrors };
+        }
       }
     },
-    [aboutStepForm, actionsStepForm, defineStepForm, scheduleStepForm]
+    [aboutStepForm, actionsStepForm, defineStepForm, getRuleFormsErrors, scheduleStepForm]
+  );
+
+  const validateEachStep = useCallback(async () => {
+    const {
+      valid: defineStepFormValid,
+      blockingErrors: defineStepBlockingErrors,
+      nonBlockingErrors: defineStepNonBlockingErrors,
+    } = await validateStep(RuleStep.defineRule);
+    const {
+      valid: aboutStepFormValid,
+      blockingErrors: aboutStepBlockingErrors,
+      nonBlockingErrors: aboutStepNonBlockingErrors,
+    } = await validateStep(RuleStep.aboutRule);
+    const {
+      valid: scheduleStepFormValid,
+      blockingErrors: scheduleStepBlockingErrors,
+      nonBlockingErrors: scheduleStepNonBlockingErrors,
+    } = await validateStep(RuleStep.scheduleRule);
+    const {
+      valid: actionsStepFormValid,
+      blockingErrors: actionsStepBlockingErrors,
+      nonBlockingErrors: actionsStepNonBlockingErrors,
+    } = await validateStep(RuleStep.ruleActions);
+    const valid =
+      defineStepFormValid && aboutStepFormValid && scheduleStepFormValid && actionsStepFormValid;
+
+    const blockingErrors = [
+      ...defineStepBlockingErrors,
+      ...aboutStepBlockingErrors,
+      ...scheduleStepBlockingErrors,
+      ...actionsStepBlockingErrors,
+    ];
+    const nonBlockingErrors = [
+      ...defineStepNonBlockingErrors,
+      ...aboutStepNonBlockingErrors,
+      ...scheduleStepNonBlockingErrors,
+      ...actionsStepNonBlockingErrors,
+    ];
+
+    return { valid, blockingErrors, nonBlockingErrors };
+  }, [validateStep]);
+
+  const isValidStep = useCallback(
+    async (step: RuleStep) => {
+      const { valid, blockingErrors } = await validateStep(step);
+      return valid || !blockingErrors.length;
+    },
+    [validateStep]
   );
 
   const editStep = useCallback(
     async (step: RuleStep) => {
-      const valid = await validateStep(activeStep);
-
+      const valid = await isValidStep(activeStep);
       if (valid) {
         goToStep(step);
       }
     },
-    [activeStep, validateStep, goToStep]
+    [isValidStep, activeStep, goToStep]
   );
 
-  const submitRule = useCallback(
-    async (step: RuleStep, enabled: boolean) => {
-      const valid = await validateStep(step);
+  const createRuleFromFormData = useCallback(
+    async (enabled: boolean) => {
+      const localDefineStepData: DefineStepRule = defineFieldsTransform({
+        ...defineStepForm.getFormData(),
+        eqlOptions: eqlOptionsSelected,
+      });
+      const localAboutStepData = aboutStepForm.getFormData();
+      const localScheduleStepData = scheduleStepForm.getFormData();
+      const localActionsStepData = actionsStepForm.getFormData();
+      const startMlJobsIfNeeded = async () => {
+        if (!isMlRule(ruleType) || !enabled) {
+          return;
+        }
+        await startMlJobs(localDefineStepData.machineLearningJobId);
+      };
+      const [, createdRule] = await Promise.all([
+        startMlJobsIfNeeded(),
+        createRule(
+          formatRule<RuleCreateProps>(
+            localDefineStepData,
+            localAboutStepData,
+            localScheduleStepData,
+            {
+              ...localActionsStepData,
+              enabled,
+            },
+            triggersActionsUi.actionTypeRegistry
+          )
+        ),
+      ]);
 
-      if (valid) {
-        const localDefineStepData: DefineStepRule = defineFieldsTransform({
-          ...defineStepForm.getFormData(),
-          eqlOptions: eqlOptionsSelected,
-        });
-        const localAboutStepData = aboutStepForm.getFormData();
-        const localScheduleStepData = scheduleStepForm.getFormData();
-        const localActionsStepData = actionsStepForm.getFormData();
-        const startMlJobsIfNeeded = async () => {
-          if (!isMlRule(ruleType) || !enabled) {
-            return;
-          }
-          await startMlJobs(localDefineStepData.machineLearningJobId);
-        };
-        const [, createdRule] = await Promise.all([
-          startMlJobsIfNeeded(),
-          createRule(
-            formatRule<RuleCreateProps>(
-              localDefineStepData,
-              localAboutStepData,
-              localScheduleStepData,
-              {
-                ...localActionsStepData,
-                enabled,
-              },
-              triggersActionsUi.actionTypeRegistry
-            )
-          ),
-        ]);
+      addSuccess(i18n.SUCCESSFULLY_CREATED_RULES(createdRule.name));
 
-        addSuccess(i18n.SUCCESSFULLY_CREATED_RULES(createdRule.name));
-
-        navigateToApp(APP_UI_ID, {
-          deepLinkId: SecurityPageName.rules,
-          path: getRuleDetailsUrl(createdRule.id),
-        });
-      }
+      navigateToApp(APP_UI_ID, {
+        deepLinkId: SecurityPageName.rules,
+        path: getRuleDetailsUrl(createdRule.id),
+      });
     },
     [
-      validateStep,
+      aboutStepForm,
+      actionsStepForm,
+      addSuccess,
+      createRule,
+      defineFieldsTransform,
       defineStepForm,
       eqlOptionsSelected,
-      aboutStepForm,
-      scheduleStepForm,
-      actionsStepForm,
-      createRule,
-      addSuccess,
       navigateToApp,
       ruleType,
+      scheduleStepForm,
       startMlJobs,
-      defineFieldsTransform,
       triggersActionsUi.actionTypeRegistry,
     ]
   );
+
+  const submitRule = useCallback(
+    async (enabled: boolean) => {
+      const { valid, blockingErrors, nonBlockingErrors } = await validateEachStep();
+      if (valid) {
+        // There are no validation errors, thus proceed to rule creation
+        createRuleFromFormData(enabled);
+        return;
+      }
+
+      if (blockingErrors.length > 0) {
+        // There are blocking validation errors, thus do not allow user to create a rule
+        return;
+      }
+      if (nonBlockingErrors.length > 0) {
+        // There are non-blocking validation errors, thus confirm that user understand that this can cause rule failures
+        setEnableRuleAfterConfirmation(enabled);
+        setNonBlockingRuleErrors(nonBlockingErrors);
+        showSaveWithErrorsModal();
+      }
+    },
+    [createRuleFromFormData, validateEachStep]
+  );
+
+  const showSaveWithErrorsModal = () => setIsSaveWithErrorsModalVisible(true);
+  const closeSaveWithErrorsModal = () => setIsSaveWithErrorsModalVisible(false);
+  const onConfirmSaveWithErrors = useCallback(async () => {
+    closeSaveWithErrorsModal();
+    await createRuleFromFormData(enableRuleAfterConfirmation);
+  }, [createRuleFromFormData, enableRuleAfterConfirmation]);
 
   const defineRuleButtonType =
     activeStep === RuleStep.defineRule ? 'active' : defineStepForm.isValid ? 'valid' : 'passive';
@@ -418,14 +509,14 @@ const CreateRulePageComponent: React.FC = () => {
     [defineRuleButtonType]
   );
   const defineRuleNextStep = useCallback(async () => {
-    const valid = await defineStepForm.validate();
+    const valid = await isValidStep(RuleStep.defineRule);
     if (valid) {
       const nextStep = getNextStep(RuleStep.defineRule);
       if (nextStep) {
         goToStep(nextStep);
       }
     }
-  }, [defineStepForm, goToStep]);
+  }, [goToStep, isValidStep]);
 
   const aboutRuleButtonType =
     activeStep === RuleStep.aboutRule ? 'active' : aboutStepForm.isValid ? 'valid' : 'passive';
@@ -434,14 +525,14 @@ const CreateRulePageComponent: React.FC = () => {
     [aboutRuleButtonType]
   );
   const aboutRuleNextStep = useCallback(async () => {
-    const valid = await aboutStepForm.validate();
+    const valid = await isValidStep(RuleStep.aboutRule);
     if (valid) {
       const nextStep = getNextStep(RuleStep.aboutRule);
       if (nextStep) {
         goToStep(nextStep);
       }
     }
-  }, [aboutStepForm, goToStep]);
+  }, [goToStep, isValidStep]);
 
   const scheduleRuleButtonType =
     activeStep === RuleStep.scheduleRule
@@ -454,14 +545,14 @@ const CreateRulePageComponent: React.FC = () => {
     [scheduleRuleButtonType]
   );
   const scheduleRuleNextStep = useCallback(async () => {
-    const valid = await scheduleStepForm.validate();
+    const valid = await isValidStep(RuleStep.scheduleRule);
     if (valid) {
       const nextStep = getNextStep(RuleStep.scheduleRule);
       if (nextStep) {
         goToStep(nextStep);
       }
     }
-  }, [scheduleStepForm, goToStep]);
+  }, [isValidStep, goToStep]);
 
   const actionsRuleButtonType =
     activeStep === RuleStep.ruleActions ? 'active' : actionsStepForm.isValid ? 'valid' : 'passive';
@@ -470,10 +561,10 @@ const CreateRulePageComponent: React.FC = () => {
     [actionsRuleButtonType]
   );
   const submitRuleDisabled = useCallback(() => {
-    submitRule(RuleStep.ruleActions, false);
+    submitRule(false);
   }, [submitRule]);
   const submitRuleEnabled = useCallback(() => {
-    submitRule(RuleStep.ruleActions, true);
+    submitRule(true);
   }, [submitRule]);
 
   const memoDefineStepReadOnly = useMemo(
@@ -559,7 +650,7 @@ const CreateRulePageComponent: React.FC = () => {
   );
   const memoDefineStepExtraAction = useMemo(
     () =>
-      defineStepForm.isValid && (
+      activeStep !== RuleStep.defineRule && (
         <EuiButtonEmpty
           data-test-subj="edit-define-rule"
           iconType="pencil"
@@ -569,7 +660,7 @@ const CreateRulePageComponent: React.FC = () => {
           {i18n.EDIT_RULE}
         </EuiButtonEmpty>
       ),
-    [defineStepForm.isValid, editStep]
+    [activeStep, editStep]
   );
 
   const memoAboutStepReadOnly = useMemo(
@@ -629,7 +720,7 @@ const CreateRulePageComponent: React.FC = () => {
   );
   const memoAboutStepExtraAction = useMemo(
     () =>
-      aboutStepForm.isValid && (
+      activeStep !== RuleStep.aboutRule && (
         <EuiButtonEmpty
           data-test-subj="edit-about-rule"
           iconType="pencil"
@@ -639,7 +730,7 @@ const CreateRulePageComponent: React.FC = () => {
           {i18n.EDIT_RULE}
         </EuiButtonEmpty>
       ),
-    [aboutStepForm.isValid, editStep]
+    [activeStep, editStep]
   );
 
   const memoStepScheduleRule = useMemo(
@@ -682,12 +773,12 @@ const CreateRulePageComponent: React.FC = () => {
   );
   const memoScheduleStepExtraAction = useMemo(
     () =>
-      scheduleStepForm.isValid && (
+      activeStep !== RuleStep.scheduleRule && (
         <EuiButtonEmpty iconType="pencil" size="xs" onClick={() => editStep(RuleStep.scheduleRule)}>
           {i18n.EDIT_RULE}
         </EuiButtonEmpty>
       ),
-    [editStep, scheduleStepForm.isValid]
+    [activeStep, editStep]
   );
 
   const memoStepRuleActions = useMemo(
@@ -762,12 +853,12 @@ const CreateRulePageComponent: React.FC = () => {
   );
   const memoActionsStepExtraAction = useMemo(
     () =>
-      actionsStepForm.isValid && (
+      activeStep !== RuleStep.ruleActions && (
         <EuiButtonEmpty iconType="pencil" size="xs" onClick={() => editStep(RuleStep.ruleActions)}>
           {i18n.EDIT_RULE}
         </EuiButtonEmpty>
       ),
-    [actionsStepForm.isValid, editStep]
+    [activeStep, editStep]
   );
 
   const onToggleCollapsedMemo = useCallback(
@@ -798,6 +889,13 @@ const CreateRulePageComponent: React.FC = () => {
 
   return (
     <>
+      {isSaveWithErrorsModalVisible && (
+        <SaveWithErrorsModal
+          errors={nonBlockingRuleErrors}
+          onCancel={closeSaveWithErrorsModal}
+          onConfirm={onConfirmSaveWithErrors}
+        />
+      )}
       <SecuritySolutionPageWrapper>
         <EuiResizableContainer>
           {(EuiResizablePanel, EuiResizableButton, { togglePanel }) => {
