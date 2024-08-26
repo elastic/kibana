@@ -25,6 +25,7 @@ export {
   getStartEndParams,
   hasStartEndParams,
   wrapByPipes,
+  isQueryWrappedByPipes,
   TextBasedLanguages,
 } from './src';
 

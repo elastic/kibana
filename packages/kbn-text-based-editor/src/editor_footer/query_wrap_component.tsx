@@ -9,7 +9,7 @@
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexItem, EuiToolTip, EuiButtonIcon } from '@elastic/eui';
-import { wrapByPipes } from '@kbn/esql-utils';
+import { wrapByPipes, isQueryWrappedByPipes } from '@kbn/esql-utils';
 
 export function QueryWrapComponent({
   code,
@@ -19,10 +19,7 @@ export function QueryWrapComponent({
   updateQuery: (qs: string) => void;
 }) {
   const isWrappedByPipes = useMemo(() => {
-    const trimmedCode = code.trim().replaceAll('\n  |', '\n|');
-    const pipes = trimmedCode.split('|');
-    const pipesWithNewLine = trimmedCode?.split('\n|');
-    return pipes?.length === pipesWithNewLine?.length;
+    return isQueryWrappedByPipes(code);
   }, [code]);
 
   return (
