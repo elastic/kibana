@@ -674,7 +674,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
   return (
     <EuiFlexGroup gutterSize="none" direction="column" data-test-subj="ruleEventLogListTable">
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup alignItems="center">
+        <EuiFlexGroup gutterSize="m" alignItems="center">
           <EuiFlexItem>
             <EuiFieldSearch
               fullWidth

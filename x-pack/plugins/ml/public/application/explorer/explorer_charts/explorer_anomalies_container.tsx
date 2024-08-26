@@ -70,7 +70,6 @@ export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = (
           <SelectSeverityUI severity={severity} onChange={setSeverity} />
         </EuiFlexItem>
       </EuiFlexGroup>
-
       <EuiSpacer size="m" />
       {Array.isArray(chartsData.seriesToPlot) &&
         chartsData.seriesToPlot.length === 0 &&
@@ -84,7 +83,6 @@ export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = (
             </h4>
           </EuiText>
         )}
-
       {showCharts && (
         <ExplorerChartsContainer
           {...{

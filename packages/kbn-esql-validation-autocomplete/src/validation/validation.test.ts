@@ -11,7 +11,13 @@ import { writeFile, readFile } from 'fs/promises';
 import { ignoreErrorsMap, validateQuery } from './validation';
 import { evalFunctionDefinitions } from '../definitions/functions';
 import { getFunctionSignatures } from '../definitions/helpers';
-import { FunctionDefinition, SupportedFieldType, supportedFieldTypes } from '../definitions/types';
+import {
+  FieldType,
+  FunctionDefinition,
+  SupportedDataType,
+  dataTypes,
+  fieldTypes as _fieldTypes,
+} from '../definitions/types';
 import { timeUnits, timeUnitsToSuggest } from '../definitions/literals';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import capitalize from 'lodash/capitalize';
@@ -29,6 +35,8 @@ import {
 } from '../__tests__/helpers';
 import { validationFromCommandTestSuite as runFromTestSuite } from './__tests__/test_suites/validation.command.from';
 import { Setup, setup } from './__tests__/helpers';
+
+const fieldTypes = _fieldTypes.filter((type) => type !== 'unsupported');
 
 const NESTING_LEVELS = 4;
 const NESTED_DEPTHS = Array(NESTING_LEVELS)
@@ -76,7 +84,7 @@ function getLiteralType(typeString: 'time_literal') {
   return `1 ${literals[typeString]}`;
 }
 
-export const fieldNameFromType = (type: SupportedFieldType) => `${camelCase(type)}Field`;
+export const fieldNameFromType = (type: FieldType) => `${camelCase(type)}Field`;
 
 function getFieldName(
   typeString: string,
@@ -127,8 +135,8 @@ function getFieldMapping(
     date: 'now()',
   };
   return params.map(({ name: _name, type, constantOnly, literalOptions, ...rest }) => {
-    const typeString: string = type;
-    if (supportedFieldTypes.includes(typeString as SupportedFieldType)) {
+    const typeString: string = type as string;
+    if (dataTypes.includes(typeString as SupportedDataType)) {
       if (useLiterals && literalOptions) {
         return {
           name: `"${literalOptions[0]}"`,
@@ -522,16 +530,16 @@ describe('validation logic', () => {
       ]);
       testErrorsAndWarnings('from index | keep `any#Char$Field`', []);
       testErrorsAndWarnings('from index | project ', [
-        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where'}",
+        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where', MATCH}",
       ]);
       testErrorsAndWarnings('from index | project textField, doubleField, dateField', [
-        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where'}",
+        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where', MATCH}",
       ]);
       testErrorsAndWarnings('from index | PROJECT textField, doubleField, dateField', [
-        "SyntaxError: mismatched input 'PROJECT' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where'}",
+        "SyntaxError: mismatched input 'PROJECT' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where', MATCH}",
       ]);
       testErrorsAndWarnings('from index | project missingField, doubleField, dateField', [
-        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where'}",
+        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where', MATCH}",
       ]);
       testErrorsAndWarnings('from index | keep k*', []);
       testErrorsAndWarnings('from index | keep *Field', []);
@@ -541,13 +549,6 @@ describe('validation logic', () => {
       testErrorsAndWarnings('from index | keep m*', ['Unknown column [m*]']);
       testErrorsAndWarnings('from index | keep *m', ['Unknown column [*m]']);
       testErrorsAndWarnings('from index | keep d*m', ['Unknown column [d*m]']);
-      testErrorsAndWarnings(
-        'from unsupported_index | keep unsupported_field',
-        [],
-        [
-          'Field [unsupported_field] cannot be retrieved, it is unsupported or not indexed; returning null',
-        ]
-      );
 
       testErrorsAndWarnings(
         `FROM index | STATS ROUND(AVG(doubleField * 1.5)), COUNT(*), MIN(doubleField * 10) | KEEP \`MIN(doubleField * 10)\``,
@@ -700,7 +701,7 @@ describe('validation logic', () => {
       // Do not try to validate the dissect pattern string
       testErrorsAndWarnings('from a_index | dissect textField "%{firstWord}"', []);
       testErrorsAndWarnings('from a_index | dissect doubleField "%{firstWord}"', [
-        'DISSECT only supports string type values, found [doubleField] of type [double]',
+        'DISSECT only supports keyword, text types values, found [doubleField] of type [double]',
       ]);
       testErrorsAndWarnings('from a_index | dissect textField "%{firstWord}" option ', [
         "SyntaxError: mismatched input '<EOF>' expecting '='",
@@ -747,11 +748,10 @@ describe('validation logic', () => {
       testErrorsAndWarnings('from a_index | grok textField %a', [
         "SyntaxError: mismatched input '%' expecting QUOTED_STRING",
       ]);
-      // @TODO: investigate
       // Do not try to validate the grok pattern string
       testErrorsAndWarnings('from a_index | grok textField "%{firstWord}"', []);
       testErrorsAndWarnings('from a_index | grok doubleField "%{firstWord}"', [
-        'GROK only supports string type values, found [doubleField] of type [double]',
+        'GROK only supports keyword, text types values, found [doubleField] of type [double]',
       ]);
       testErrorsAndWarnings('from a_index | grok textField "%{firstWord}" | keep firstWord', []);
       // testErrorsAndWarnings('from a_index | grok s* "%{a}"', [
@@ -874,7 +874,7 @@ describe('validation logic', () => {
         []
       );
 
-      for (const field of supportedFieldTypes) {
+      for (const field of fieldTypes) {
         testErrorsAndWarnings(`from a_index | where ${fieldNameFromType(field)} IS NULL`, []);
         testErrorsAndWarnings(`from a_index | where ${fieldNameFromType(field)} IS null`, []);
         testErrorsAndWarnings(`from a_index | where ${fieldNameFromType(field)} is null`, []);
@@ -937,7 +937,7 @@ describe('validation logic', () => {
       testErrorsAndWarnings('from a_index | eval a=["a", "b"]', []);
       testErrorsAndWarnings('from a_index | eval a=null', []);
 
-      for (const field of supportedFieldTypes) {
+      for (const field of fieldTypes) {
         testErrorsAndWarnings(`from a_index | eval ${fieldNameFromType(field)} IS NULL`, []);
         testErrorsAndWarnings(`from a_index | eval ${fieldNameFromType(field)} IS null`, []);
         testErrorsAndWarnings(`from a_index | eval ${fieldNameFromType(field)} is null`, []);
@@ -2951,6 +2951,11 @@ describe('validation logic', () => {
           'Argument of [date_trunc] must be [time_literal], found value [textField] type [text]',
           'Argument of [date_trunc] must be [date], found value [concat("20","22")] type [keyword]',
         ]);
+        testErrorsAndWarnings(
+          'row var = date_trunc(1 day, to_datetime("2021-01-01T00:00:00Z"))',
+          []
+        );
+        testErrorsAndWarnings('row date_trunc(1 day, to_datetime("2021-01-01T00:00:00Z"))', []);
       });
 
       describe('e', () => {
@@ -12110,8 +12115,6 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('from a_index | stats var = max(dateField)', []);
         testErrorsAndWarnings('from a_index | stats max(dateField)', []);
-        testErrorsAndWarnings('from a_index | stats var = max(datePeriodField)', []);
-        testErrorsAndWarnings('from a_index | stats max(datePeriodField)', []);
         testErrorsAndWarnings('from a_index | stats var = max(booleanField)', []);
         testErrorsAndWarnings('from a_index | stats max(booleanField)', []);
         testErrorsAndWarnings('from a_index | stats var = max(ipField)', []);
@@ -12150,14 +12153,6 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | where max(dateField) > 0', [
-          'WHERE does not support function max',
-        ]);
-
-        testErrorsAndWarnings('from a_index | where max(datePeriodField)', [
-          'WHERE does not support function max',
-        ]);
-
-        testErrorsAndWarnings('from a_index | where max(datePeriodField) > 0', [
           'WHERE does not support function max',
         ]);
 
@@ -12240,23 +12235,6 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval max(dateField) > 0', [
           'EVAL does not support function max',
         ]);
-
-        testErrorsAndWarnings('from a_index | eval var = max(datePeriodField)', [
-          'EVAL does not support function max',
-        ]);
-
-        testErrorsAndWarnings('from a_index | eval var = max(datePeriodField) > 0', [
-          'EVAL does not support function max',
-        ]);
-
-        testErrorsAndWarnings('from a_index | eval max(datePeriodField)', [
-          'EVAL does not support function max',
-        ]);
-
-        testErrorsAndWarnings('from a_index | eval max(datePeriodField) > 0', [
-          'EVAL does not support function max',
-        ]);
-
         testErrorsAndWarnings('from a_index | eval var = max(booleanField)', [
           'EVAL does not support function max',
         ]);
@@ -12292,8 +12270,86 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | stats max(null)', []);
         testErrorsAndWarnings('row nullVar = null | stats max(nullVar)', []);
         testErrorsAndWarnings('from a_index | stats max("2022")', []);
-        testErrorsAndWarnings('from a_index | stats max(concat("20", "22"))', [
-          'Argument of [max] must be [double], found value [concat("20","22")] type [keyword]',
+        testErrorsAndWarnings('from a_index | stats max(concat("20", "22"))', []);
+
+        testErrorsAndWarnings('from a_index | stats var = max(textField)', []);
+
+        testErrorsAndWarnings('from a_index | stats max(textField)', []);
+
+        testErrorsAndWarnings('from a_index | where max(textField)', [
+          'WHERE does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where max(textField) > 0', [
+          'WHERE does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = max(textField)', [
+          'EVAL does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = max(textField) > 0', [
+          'EVAL does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval max(textField)', [
+          'EVAL does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval max(textField) > 0', [
+          'EVAL does not support function max',
+        ]);
+        testErrorsAndWarnings('from a_index | stats var = max(versionField)', []);
+        testErrorsAndWarnings('from a_index | stats max(versionField)', []);
+        testErrorsAndWarnings('from a_index | stats var = max(keywordField)', []);
+        testErrorsAndWarnings('from a_index | stats max(keywordField)', []);
+
+        testErrorsAndWarnings('from a_index | where max(versionField)', [
+          'WHERE does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where max(versionField) > 0', [
+          'WHERE does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where max(keywordField)', [
+          'WHERE does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where max(keywordField) > 0', [
+          'WHERE does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = max(versionField)', [
+          'EVAL does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = max(versionField) > 0', [
+          'EVAL does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval max(versionField)', [
+          'EVAL does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval max(versionField) > 0', [
+          'EVAL does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = max(keywordField)', [
+          'EVAL does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = max(keywordField) > 0', [
+          'EVAL does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval max(keywordField)', [
+          'EVAL does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval max(keywordField) > 0', [
+          'EVAL does not support function max',
         ]);
       });
 
@@ -12459,8 +12515,6 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('from a_index | stats var = min(dateField)', []);
         testErrorsAndWarnings('from a_index | stats min(dateField)', []);
-        testErrorsAndWarnings('from a_index | stats var = min(datePeriodField)', []);
-        testErrorsAndWarnings('from a_index | stats min(datePeriodField)', []);
         testErrorsAndWarnings('from a_index | stats var = min(booleanField)', []);
         testErrorsAndWarnings('from a_index | stats min(booleanField)', []);
         testErrorsAndWarnings('from a_index | stats var = min(ipField)', []);
@@ -12501,15 +12555,6 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | where min(dateField) > 0', [
           'WHERE does not support function min',
         ]);
-
-        testErrorsAndWarnings('from a_index | where min(datePeriodField)', [
-          'WHERE does not support function min',
-        ]);
-
-        testErrorsAndWarnings('from a_index | where min(datePeriodField) > 0', [
-          'WHERE does not support function min',
-        ]);
-
         testErrorsAndWarnings('from a_index | where min(booleanField)', [
           'WHERE does not support function min',
         ]);
@@ -12590,22 +12635,6 @@ describe('validation logic', () => {
           'EVAL does not support function min',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = min(datePeriodField)', [
-          'EVAL does not support function min',
-        ]);
-
-        testErrorsAndWarnings('from a_index | eval var = min(datePeriodField) > 0', [
-          'EVAL does not support function min',
-        ]);
-
-        testErrorsAndWarnings('from a_index | eval min(datePeriodField)', [
-          'EVAL does not support function min',
-        ]);
-
-        testErrorsAndWarnings('from a_index | eval min(datePeriodField) > 0', [
-          'EVAL does not support function min',
-        ]);
-
         testErrorsAndWarnings('from a_index | eval var = min(booleanField)', [
           'EVAL does not support function min',
         ]);
@@ -12641,8 +12670,86 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | stats min(null)', []);
         testErrorsAndWarnings('row nullVar = null | stats min(nullVar)', []);
         testErrorsAndWarnings('from a_index | stats min("2022")', []);
-        testErrorsAndWarnings('from a_index | stats min(concat("20", "22"))', [
-          'Argument of [min] must be [double], found value [concat("20","22")] type [keyword]',
+        testErrorsAndWarnings('from a_index | stats min(concat("20", "22"))', []);
+
+        testErrorsAndWarnings('from a_index | stats var = min(textField)', []);
+
+        testErrorsAndWarnings('from a_index | stats min(textField)', []);
+
+        testErrorsAndWarnings('from a_index | where min(textField)', [
+          'WHERE does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where min(textField) > 0', [
+          'WHERE does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = min(textField)', [
+          'EVAL does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = min(textField) > 0', [
+          'EVAL does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval min(textField)', [
+          'EVAL does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval min(textField) > 0', [
+          'EVAL does not support function min',
+        ]);
+        testErrorsAndWarnings('from a_index | stats var = min(versionField)', []);
+        testErrorsAndWarnings('from a_index | stats min(versionField)', []);
+        testErrorsAndWarnings('from a_index | stats var = min(keywordField)', []);
+        testErrorsAndWarnings('from a_index | stats min(keywordField)', []);
+
+        testErrorsAndWarnings('from a_index | where min(versionField)', [
+          'WHERE does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where min(versionField) > 0', [
+          'WHERE does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where min(keywordField)', [
+          'WHERE does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where min(keywordField) > 0', [
+          'WHERE does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = min(versionField)', [
+          'EVAL does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = min(versionField) > 0', [
+          'EVAL does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval min(versionField)', [
+          'EVAL does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval min(versionField) > 0', [
+          'EVAL does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = min(keywordField)', [
+          'EVAL does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = min(keywordField) > 0', [
+          'EVAL does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval min(keywordField)', [
+          'EVAL does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval min(keywordField) > 0', [
+          'EVAL does not support function min',
         ]);
       });
 
@@ -14101,14 +14208,6 @@ describe('validation logic', () => {
           ]
         );
 
-        testErrorsAndWarnings('from a_index | stats by bucket(dateField, datePeriodField)', [
-          'Argument of [bucket] must be a constant, received [datePeriodField]',
-        ]);
-
-        testErrorsAndWarnings('from a_index | stats by bin(dateField, datePeriodField)', [
-          'Argument of [bin] must be a constant, received [datePeriodField]',
-        ]);
-
         testErrorsAndWarnings(
           'from a_index | stats by bucket(dateField, integerField, now(), now())',
           ['Argument of [bucket] must be a constant, received [integerField]']
@@ -14611,16 +14710,24 @@ describe('validation logic', () => {
           ]
         );
 
-        testErrorsAndWarnings('from a_index | sort bucket(dateField, datePeriodField)', [
+        testErrorsAndWarnings('from a_index | stats by bucket(dateField, textField)', [
+          'Argument of [bucket] must be a constant, received [textField]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | stats by bin(dateField, textField)', [
+          'Argument of [bin] must be a constant, received [textField]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort bucket(dateField, textField)', [
           'SORT does not support function bucket',
         ]);
 
-        testErrorsAndWarnings('from a_index | stats bucket("2022", datePeriodField)', [
-          'Argument of [bucket] must be a constant, received [datePeriodField]',
+        testErrorsAndWarnings('from a_index | stats bucket("2022", textField)', [
+          'Argument of [bucket] must be a constant, received [textField]',
         ]);
-        testErrorsAndWarnings('from a_index | stats bucket(concat("20", "22"), datePeriodField)', [
+        testErrorsAndWarnings('from a_index | stats bucket(concat("20", "22"), textField)', [
           'Argument of [bucket] must be [date], found value [concat("20","22")] type [keyword]',
-          'Argument of [bucket] must be a constant, received [datePeriodField]',
+          'Argument of [bucket] must be a constant, received [textField]',
         ]);
       });
 
@@ -15863,6 +15970,171 @@ describe('validation logic', () => {
           'row nullVar = null | eval mv_pseries_weighted_sum(nullVar, nullVar)',
           []
         );
+      });
+
+      describe('mv_percentile', () => {
+        testErrorsAndWarnings('row var = mv_percentile(5.5, 5.5)', []);
+        testErrorsAndWarnings('row mv_percentile(5.5, 5.5)', []);
+        testErrorsAndWarnings('row var = mv_percentile(to_double(true), to_double(true))', []);
+        testErrorsAndWarnings('row var = mv_percentile(5.5, 5)', []);
+        testErrorsAndWarnings('row mv_percentile(5.5, 5)', []);
+        testErrorsAndWarnings('row var = mv_percentile(to_double(true), to_integer(true))', []);
+        testErrorsAndWarnings('row var = mv_percentile(to_double(true), 5)', []);
+        testErrorsAndWarnings('row var = mv_percentile(5, 5.5)', []);
+        testErrorsAndWarnings('row mv_percentile(5, 5.5)', []);
+        testErrorsAndWarnings('row var = mv_percentile(to_integer(true), to_double(true))', []);
+        testErrorsAndWarnings('row var = mv_percentile(5, 5)', []);
+        testErrorsAndWarnings('row mv_percentile(5, 5)', []);
+        testErrorsAndWarnings('row var = mv_percentile(to_integer(true), to_integer(true))', []);
+        testErrorsAndWarnings('row var = mv_percentile(to_integer(true), 5)', []);
+        testErrorsAndWarnings('row var = mv_percentile(5, to_double(true))', []);
+        testErrorsAndWarnings('row var = mv_percentile(5, to_integer(true))', []);
+
+        testErrorsAndWarnings('row var = mv_percentile(true, true)', [
+          'Argument of [mv_percentile] must be [double], found value [true] type [boolean]',
+          'Argument of [mv_percentile] must be [double], found value [true] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | where mv_percentile(doubleField, doubleField) > 0',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | where mv_percentile(booleanField, booleanField) > 0',
+          [
+            'Argument of [mv_percentile] must be [double], found value [booleanField] type [boolean]',
+            'Argument of [mv_percentile] must be [double], found value [booleanField] type [boolean]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | where mv_percentile(doubleField, integerField) > 0',
+          []
+        );
+        testErrorsAndWarnings('from a_index | where mv_percentile(doubleField, longField) > 0', []);
+        testErrorsAndWarnings(
+          'from a_index | where mv_percentile(integerField, doubleField) > 0',
+          []
+        );
+        testErrorsAndWarnings(
+          'from a_index | where mv_percentile(integerField, integerField) > 0',
+          []
+        );
+        testErrorsAndWarnings(
+          'from a_index | where mv_percentile(integerField, longField) > 0',
+          []
+        );
+        testErrorsAndWarnings('from a_index | where mv_percentile(longField, doubleField) > 0', []);
+        testErrorsAndWarnings(
+          'from a_index | where mv_percentile(longField, integerField) > 0',
+          []
+        );
+        testErrorsAndWarnings('from a_index | where mv_percentile(longField, longField) > 0', []);
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_percentile(doubleField, doubleField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval mv_percentile(doubleField, doubleField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_percentile(to_double(booleanField), to_double(booleanField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval mv_percentile(booleanField, booleanField)', [
+          'Argument of [mv_percentile] must be [double], found value [booleanField] type [boolean]',
+          'Argument of [mv_percentile] must be [double], found value [booleanField] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_percentile(doubleField, integerField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval mv_percentile(doubleField, integerField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_percentile(to_double(booleanField), to_integer(booleanField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_percentile(doubleField, longField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval mv_percentile(doubleField, longField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_percentile(to_double(booleanField), longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_percentile(integerField, doubleField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval mv_percentile(integerField, doubleField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_percentile(to_integer(booleanField), to_double(booleanField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_percentile(integerField, integerField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval mv_percentile(integerField, integerField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_percentile(to_integer(booleanField), to_integer(booleanField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_percentile(integerField, longField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval mv_percentile(integerField, longField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_percentile(to_integer(booleanField), longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_percentile(longField, doubleField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval mv_percentile(longField, doubleField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_percentile(longField, to_double(booleanField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_percentile(longField, integerField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval mv_percentile(longField, integerField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_percentile(longField, to_integer(booleanField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval var = mv_percentile(longField, longField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_percentile(longField, longField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval mv_percentile(doubleField, doubleField, extraArg)',
+          ['Error: [mv_percentile] function expects exactly 2 arguments, got 3.']
+        );
+
+        testErrorsAndWarnings('from a_index | sort mv_percentile(doubleField, doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_percentile(null, null)', []);
+        testErrorsAndWarnings('row nullVar = null | eval mv_percentile(nullVar, nullVar)', []);
       });
     });
   });

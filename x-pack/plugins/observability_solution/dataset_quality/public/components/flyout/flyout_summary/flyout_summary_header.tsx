@@ -19,7 +19,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { flyoutSummaryText } from '../../../../common/translations';
-import { TimeRangeConfig } from '../../../state_machines/dataset_quality_controller';
+import { TimeRangeConfig } from '../../../../common/types';
 
 export function FlyoutSummaryHeader({
   timeRange,
