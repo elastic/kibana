@@ -9,7 +9,6 @@ import { once } from 'lodash';
 import React, {
   createContext,
   type Dispatch,
-  type FC,
   type PropsWithChildren,
   useCallback,
   useContext,
@@ -46,9 +45,7 @@ export interface ViewSpaceProviderProps
 
 export interface ViewSpaceServices
   extends Omit<ViewSpaceProviderProps, 'getRolesAPIClient' | 'getPrivilegesAPIClient'> {
-  invokeClient<ARG extends (clients: ViewSpaceClients) => Promise<unknown>>(
-    arg: ARG
-  ): ReturnType<ARG>;
+  invokeClient<R extends unknown>(arg: (clients: ViewSpaceClients) => Promise<R>): Promise<R>;
 }
 
 interface ViewSpaceClients {
@@ -62,24 +59,17 @@ export interface ViewSpaceStore {
   dispatch: Dispatch<IDispatchAction>;
 }
 
-const createSpaceRolesContext = once(() =>
-  createContext<ViewSpaceStore>({
-    state: {
-      roles: [],
-    },
-    dispatch: () => { },
-  })
-);
+const createSpaceRolesContext = once(() => createContext<ViewSpaceStore | null>(null));
 
 const createViewSpaceServicesContext = once(() => createContext<ViewSpaceServices | null>(null));
 
 // FIXME: rename to EditSpaceProvider
-export const ViewSpaceProvider: FC<PropsWithChildren<ViewSpaceProviderProps>> = ({
+export const ViewSpaceProvider = ({
   children,
   getRolesAPIClient,
   getPrivilegesAPIClient,
   ...services
-}) => {
+}: PropsWithChildren<ViewSpaceProviderProps>) => {
   const ViewSpaceStoreContext = createSpaceRolesContext();
   const ViewSpaceServicesContext = createViewSpaceServicesContext();
 
@@ -113,8 +103,8 @@ export const ViewSpaceProvider: FC<PropsWithChildren<ViewSpaceProviderProps>> = 
     createInitialState
   );
 
-  const invokeClient = useCallback(
-    async (...args: Parameters<ViewSpaceServices['invokeClient']>) => {
+  const invokeClient: ViewSpaceServices['invokeClient'] = useCallback(
+    async (...args) => {
       await resolveAPIClients();
 
       return args[0]({
