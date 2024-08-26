@@ -115,7 +115,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           20 * 1000
         );
 
-        synthDataset.click();
+        await synthDataset.click();
 
         await testSubjects.existOrFail(
           PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsTitle
