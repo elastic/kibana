@@ -34,7 +34,13 @@ describe('useAutoDetectTelemetry', () => {
   });
 
   it(`should report "awaiting_data" event when status is "awaitingData"`, () => {
-    renderHook(() => useAutoDetectTelemetry('awaitingData', ['integration1']));
+    const expectedIntegration = {
+      installSource: 'source1',
+      pkgName: 'pkgName1',
+      pkgVersion: 'pkgVersion1',
+      title: 'title',
+    };
+    renderHook(() => useAutoDetectTelemetry('awaitingData', [expectedIntegration]));
 
     expect(reportEventMock).toHaveBeenCalledWith(
       OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT.eventType,
@@ -42,13 +48,19 @@ describe('useAutoDetectTelemetry', () => {
         uses_legacy_onboarding_page: false,
         flow: 'auto_detect',
         step: 'awaiting_data',
-        integrations: ['integration1'],
+        integrations: [expectedIntegration],
       }
     );
   });
 
   it(`should report "data_shipped" event when status is "dataReceived"`, () => {
-    renderHook(() => useAutoDetectTelemetry('dataReceived', ['integration2']));
+    const expectedIntegration = {
+      installSource: 'source2',
+      pkgName: 'pkgName2',
+      pkgVersion: 'pkgVersion2',
+      title: 'title2',
+    };
+    renderHook(() => useAutoDetectTelemetry('dataReceived', [expectedIntegration]));
 
     // The effect runs after initial render
     expect(reportEventMock).toHaveBeenCalledWith(
@@ -57,15 +69,21 @@ describe('useAutoDetectTelemetry', () => {
         uses_legacy_onboarding_page: false,
         flow: 'auto_detect',
         step: 'data_shipped',
-        integrations: ['integration2'],
+        integrations: [expectedIntegration],
       }
     );
   });
 
   it('should not report the same event more than once', () => {
+    const expectedIntegration = {
+      installSource: 'source1',
+      pkgName: 'pkgName1',
+      pkgVersion: 'pkgVersion1',
+      title: 'title',
+    };
     const { rerender } = renderHook(
       ({ status }: { status: ObservabilityOnboardingFlowStatus }) =>
-        useAutoDetectTelemetry(status, ['integration1']),
+        useAutoDetectTelemetry(status, [expectedIntegration]),
       { initialProps: { status: 'awaitingData' } }
     );
 
@@ -75,7 +93,7 @@ describe('useAutoDetectTelemetry', () => {
         uses_legacy_onboarding_page: false,
         flow: 'auto_detect',
         step: 'awaiting_data',
-        integrations: ['integration1'],
+        integrations: [expectedIntegration],
       }
     );
 
@@ -89,7 +107,7 @@ describe('useAutoDetectTelemetry', () => {
         uses_legacy_onboarding_page: false,
         flow: 'auto_detect',
         step: 'data_shipped',
-        integrations: ['integration1'],
+        integrations: [expectedIntegration],
       }
     );
     expect(reportEventMock).toHaveBeenCalledTimes(2);

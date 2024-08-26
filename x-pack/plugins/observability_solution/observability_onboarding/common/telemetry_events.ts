@@ -7,9 +7,16 @@
 
 import { type EventTypeOpts } from '@elastic/ebt/client';
 
+interface ObservabilityOnboardingIntegrationTelemetryFields {
+  installSource: string;
+  pkgName: string;
+  pkgVersion: string;
+  title: string;
+}
+
 export const OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT: EventTypeOpts<{
   flow?: string;
-  integrations?: string[];
+  integrations?: ObservabilityOnboardingIntegrationTelemetryFields[];
   step?: string;
   step_status?: string;
   step_message?: string;
@@ -28,9 +35,25 @@ export const OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT: EventTypeOpts<{
     integrations: {
       type: 'array',
       items: {
-        type: 'keyword',
-        _meta: {
-          description: 'The integration(s) that the user is attempting to onboard.',
+        properties: {
+          installSource: {
+            type: 'keyword',
+            _meta: {
+              description:
+                'The source of the package used to create the integration. Usually "registry" or "custom".',
+            },
+          },
+          pkgName: {
+            type: 'keyword',
+            _meta: {
+              description: 'The name of the package used to create the integration.',
+            },
+          },
+          pkgVersion: {
+            type: 'keyword',
+            _meta: { description: 'The version of the package used to create the integration.' },
+          },
+          title: { type: 'keyword', _meta: { description: 'The visual name of the package.' } },
         },
       },
       _meta: {

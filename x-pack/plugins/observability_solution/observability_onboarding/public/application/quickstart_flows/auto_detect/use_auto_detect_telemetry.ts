@@ -10,9 +10,16 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ObservabilityOnboardingFlowStatus } from './get_onboarding_status';
 import { OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT } from '../../../../common/telemetry_events';
 
+interface IntegrationFields {
+  installSource: string;
+  pkgName: string;
+  pkgVersion: string;
+  title: string;
+}
+
 export function useAutoDetectTelemetry(
   status: ObservabilityOnboardingFlowStatus,
-  integrations: string[]
+  integrations: IntegrationFields[]
 ) {
   const [waitingMessageSent, setWaitingMessageSent] = useState(false);
   const [dataShippedMessageSent, setDataShippedMessageSent] = useState(false);
