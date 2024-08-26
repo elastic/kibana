@@ -158,7 +158,7 @@ describe('AlertsGrouping', () => {
             },
             {
               range: {
-                '@timestamp': {
+                'kibana.alert.time_range': {
                   gte: mockDate.from,
                   lte: mockDate.to,
                 },

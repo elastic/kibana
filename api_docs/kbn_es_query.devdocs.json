@@ -6539,7 +6539,7 @@
           " & { meta: ",
           "PhraseFilterMeta",
           "; query: { script: { script: ",
-          "InlineScript",
+          "Script",
           "; }; }; }"
         ],
         "path": "packages/kbn-es-query/src/filters/build_filters/phrase_filter.ts",
@@ -6571,7 +6571,7 @@
             "text": "RangeFilterMeta"
           },
           "; query: { script: { script: ",
-          "InlineScript",
+          "Script",
           "; }; }; }"
         ],
         "path": "packages/kbn-es-query/src/filters/build_filters/range_filter.ts",

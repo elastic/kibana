@@ -69,7 +69,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should show 10 slices in pie chart', async function () {
-      pieChart.expectPieSliceCount(10, isNewChartsLibraryEnabled);
+      await pieChart.expectPieSliceCount(10, isNewChartsLibraryEnabled);
     });
 
     it('should show correct data', async function () {

@@ -16,15 +16,14 @@ export async function handleMissingKeys(
   state: EcsMappingState,
   model: ActionsClientChatOpenAI | ActionsClientSimpleChatModel
 ) {
-  const ecsMissingPrompt = ECS_MISSING_KEYS_PROMPT;
   const outputParser = new JsonOutputParser();
-  const ecsMissingGraph = ecsMissingPrompt.pipe(model).pipe(outputParser);
+  const ecsMissingGraph = ECS_MISSING_KEYS_PROMPT.pipe(model).pipe(outputParser);
 
   const currentMapping = await ecsMissingGraph.invoke({
     ecs: state.ecs,
     current_mapping: JSON.stringify(state.currentMapping, null, 2),
     ex_answer: state.exAnswer,
-    formatted_samples: state.formattedSamples,
+    combined_samples: state.combinedSamples,
     missing_keys: state?.missingKeys,
   });
 

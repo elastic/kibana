@@ -20,7 +20,9 @@ import { camelCase, partition } from 'lodash';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import {
   FunctionParameter,
+  FunctionReturnType,
   isFieldType,
+  isReturnType,
   isSupportedDataType,
   SupportedDataType,
 } from '../definitions/types';
@@ -753,7 +755,9 @@ describe('autocomplete', () => {
               );
 
               const getTypesFromParamDefs = (paramDefs: FunctionParameter[]): SupportedDataType[] =>
-                Array.from(new Set(paramDefs.map((p) => p.type))).filter(isSupportedDataType);
+                Array.from(new Set(paramDefs.map((p) => p.type))).filter(
+                  isSupportedDataType
+                ) as SupportedDataType[];
 
               const suggestedConstants = param.literalSuggestions || param.literalOptions;
 
@@ -778,7 +782,9 @@ describe('autocomplete', () => {
                       ),
                       ...getFunctionSignaturesByReturnType(
                         'eval',
-                        getTypesFromParamDefs(acceptsFieldParamDefs),
+                        getTypesFromParamDefs(acceptsFieldParamDefs).filter(
+                          isReturnType
+                        ) as FunctionReturnType[],
                         { scalar: true },
                         undefined,
                         [fn.name]
@@ -802,7 +808,7 @@ describe('autocomplete', () => {
                       ),
                       ...getFunctionSignaturesByReturnType(
                         'eval',
-                        getTypesFromParamDefs(acceptsFieldParamDefs),
+                        getTypesFromParamDefs(acceptsFieldParamDefs) as FunctionReturnType[],
                         { scalar: true },
                         undefined,
                         [fn.name]
@@ -851,13 +857,7 @@ describe('autocomplete', () => {
         ],
         ' '
       );
-      testSuggestions('from a | eval a = 1 year /', [
-        ',',
-        '| ',
-        ...getFunctionSignaturesByReturnType('eval', 'any', { builtin: true, skipAssign: true }, [
-          'time_interval',
-        ]),
-      ]);
+      testSuggestions('from a | eval a = 1 year /', [',', '| ', 'IS NOT NULL', 'IS NULL']);
       testSuggestions('from a | eval a = 1 day + 2 /', [',', '| ']);
       testSuggestions(
         'from a | eval 1 day + 2 /',
@@ -1357,5 +1357,167 @@ describe('autocomplete', () => {
         ['keyword']
       ).map((s) => (s.text.toLowerCase().includes('null') ? s : attachTriggerCommand(s)))
     );
+    describe('field lists', () => {
+      // KEEP field
+      testSuggestions('FROM a | KEEP /', getFieldNamesByType('any').map(attachTriggerCommand));
+      testSuggestions(
+        'FROM a | KEEP d/',
+        getFieldNamesByType('any')
+          .map<PartialSuggestionWithText>((text) => ({
+            text,
+            rangeToReplace: { start: 15, end: 16 },
+          }))
+          .map(attachTriggerCommand)
+      );
+      testSuggestions(
+        'FROM a | KEEP doubleFiel/',
+        getFieldNamesByType('any').map(attachTriggerCommand)
+      );
+      testSuggestions(
+        'FROM a | KEEP doubleField/',
+        ['doubleField, ', 'doubleField | ']
+          .map((text) => ({
+            text,
+            filterText: 'doubleField',
+            rangeToReplace: { start: 15, end: 26 },
+          }))
+          .map(attachTriggerCommand)
+      );
+      testSuggestions('FROM a | KEEP doubleField /', ['| ', ',']);
+
+      // Let's get funky with the field names
+      testSuggestions(
+        'FROM a | KEEP @timestamp/',
+        ['@timestamp, ', '@timestamp | ']
+          .map((text) => ({
+            text,
+            filterText: '@timestamp',
+            rangeToReplace: { start: 15, end: 25 },
+          }))
+          .map(attachTriggerCommand),
+        undefined,
+        [[{ name: '@timestamp', type: 'date' }]]
+      );
+      testSuggestions(
+        'FROM a | KEEP foo.bar/',
+        ['foo.bar, ', 'foo.bar | ']
+          .map((text) => ({
+            text,
+            filterText: 'foo.bar',
+            rangeToReplace: { start: 15, end: 22 },
+          }))
+          .map(attachTriggerCommand),
+        undefined,
+        [[{ name: 'foo.bar', type: 'double' }]]
+      );
+
+      // @todo re-enable these tests when we can use AST to support this case
+      testSuggestions.skip('FROM a | KEEP `foo.bar`/', ['foo.bar, ', 'foo.bar | '], undefined, [
+        [{ name: 'foo.bar', type: 'double' }],
+      ]);
+      testSuggestions.skip('FROM a | KEEP `foo`.`bar`/', ['foo.bar, ', 'foo.bar | '], undefined, [
+        [{ name: 'foo.bar', type: 'double' }],
+      ]);
+      testSuggestions.skip('FROM a | KEEP `any#Char$Field`/', [
+        '`any#Char$Field`, ',
+        '`any#Char$Field` | ',
+      ]);
+
+      // Subsequent fields
+      testSuggestions(
+        'FROM a | KEEP doubleField, dateFiel/',
+        getFieldNamesByType('any')
+          .filter((s) => s !== 'doubleField')
+          .map(attachTriggerCommand)
+      );
+      testSuggestions('FROM a | KEEP doubleField, dateField/', ['dateField, ', 'dateField | ']);
+    });
+  });
+
+  describe('Replacement ranges are attached when needed', () => {
+    testSuggestions('FROM a | WHERE doubleField IS NOT N/', [
+      { text: 'IS NOT NULL', rangeToReplace: { start: 28, end: 35 } },
+      { text: 'IS NULL', rangeToReplace: { start: 35, end: 35 } },
+      '!= $0',
+      '< $0',
+      '<= $0',
+      '== $0',
+      '> $0',
+      '>= $0',
+      'IN $0',
+    ]);
+    testSuggestions('FROM a | WHERE doubleField IS N/', [
+      { text: 'IS NOT NULL', rangeToReplace: { start: 28, end: 31 } },
+      { text: 'IS NULL', rangeToReplace: { start: 28, end: 31 } },
+      { text: '!= $0', rangeToReplace: { start: 31, end: 31 } },
+      '< $0',
+      '<= $0',
+      '== $0',
+      '> $0',
+      '>= $0',
+      'IN $0',
+    ]);
+    testSuggestions('FROM a | EVAL doubleField IS NOT N/', [
+      { text: 'IS NOT NULL', rangeToReplace: { start: 27, end: 34 } },
+      'IS NULL',
+      '% $0',
+      '* $0',
+      '+ $0',
+      '- $0',
+      '/ $0',
+      '!= $0',
+      '< $0',
+      '<= $0',
+      '== $0',
+      '> $0',
+      '>= $0',
+      'IN $0',
+    ]);
+    testSuggestions('FROM a | SORT doubleField IS NOT N/', [
+      { text: 'IS NOT NULL', rangeToReplace: { start: 27, end: 34 } },
+      'IS NULL',
+      '% $0',
+      '* $0',
+      '+ $0',
+      '- $0',
+      '/ $0',
+      '!= $0',
+      '< $0',
+      '<= $0',
+      '== $0',
+      '> $0',
+      '>= $0',
+      'IN $0',
+    ]);
+    describe('dot-separated field names', () => {
+      testSuggestions(
+        'FROM a | KEEP field.nam/',
+        [{ text: 'field.name', rangeToReplace: { start: 15, end: 24 } }],
+        undefined,
+        [[{ name: 'field.name', type: 'double' }]]
+      );
+      // multi-line
+      testSuggestions(
+        'FROM a\n| KEEP field.nam/',
+        [{ text: 'field.name', rangeToReplace: { start: 15, end: 24 } }],
+        undefined,
+        [[{ name: 'field.name', type: 'double' }]]
+      );
+      // triple separator
+      testSuggestions(
+        'FROM a\n| KEEP field.name.f/',
+        [{ text: 'field.name.foo', rangeToReplace: { start: 15, end: 27 } }],
+        undefined,
+        [[{ name: 'field.name.foo', type: 'double' }]]
+      );
+      // whitespace — we can't support this case yet because
+      // we are relying on string checking instead of the AST :(
+      testSuggestions.skip(
+        'FROM a | KEEP field . n/',
+        [{ text: 'field . name', rangeToReplace: { start: 15, end: 23 } }],
+        undefined,
+        [[{ name: 'field.name', type: 'double' }]]
+      );
+    });
   });
 });

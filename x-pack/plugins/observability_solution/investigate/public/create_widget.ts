@@ -6,15 +6,13 @@
  */
 
 import { DeepPartial } from 'utility-types';
-import { InvestigateWidgetColumnSpan, InvestigateWidgetCreate } from '../common';
+import { InvestigateWidgetCreate } from '../common';
 import { GlobalWidgetParameters } from '../common/types';
 
 type MakePartial<T extends Record<string, any>, K extends keyof T> = Omit<T, K> &
   DeepPartial<Pick<T, K>>;
 
-type PredefinedKeys = 'rows' | 'columns' | 'type';
-
-type AllowedDefaultKeys = 'rows' | 'columns';
+type PredefinedKeys = 'type';
 
 export type WidgetFactory<TParameters extends Record<string, any>> = <
   T extends MakePartial<InvestigateWidgetCreate<TParameters>, PredefinedKeys>
@@ -24,15 +22,11 @@ export type WidgetFactory<TParameters extends Record<string, any>> = <
   Omit<T, 'parameters'> & { parameters: T['parameters'] & DeepPartial<GlobalWidgetParameters> };
 
 export function createWidgetFactory<TParameters extends Record<string, any>>(
-  type: string,
-  defaults?: Pick<Partial<InvestigateWidgetCreate>, AllowedDefaultKeys>
+  type: string
 ): WidgetFactory<TParameters> {
   const createWidget: WidgetFactory<TParameters> = (widgetCreate) => {
     return {
-      rows: 12,
-      columns: InvestigateWidgetColumnSpan.Four,
       type,
-      ...defaults,
       ...widgetCreate,
     };
   };
