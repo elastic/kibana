@@ -82,34 +82,32 @@ export const partitionFieldValuesSchema = schema.object({
 export type FieldsConfig = TypeOf<typeof partitionFieldValuesSchema>['fieldsConfig'];
 export type FieldConfig = TypeOf<typeof fieldConfig>;
 
-export const getCategorizerStatsSchema = schema.nullable(
-  schema.object({
-    /**
-     * Optional value to fetch the categorizer stats
-     * where results are filtered by partition_by_value = value
-     */
-    partitionByValue: schema.maybe(schema.string()),
-  })
-);
+export const getCategorizerStatsSchema = schema.object({
+  partitionByValue: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          'Optional value to fetch the categorizer stats where results are filtered by partition_by_value = value',
+      },
+    })
+  ),
+});
 
 export const getCategorizerStoppedPartitionsSchema = schema.object({
-  /**
-   * List of jobIds to fetch the categorizer partitions for
-   */
-  jobIds: schema.arrayOf(schema.string()),
-  /**
-   * Field to aggregate results by: 'job_id' or 'partition_field_value'
-   * If by job_id, will return list of jobIds with at least one partition that have stopped
-   * If by partition_field_value, it will return a list of categorizer stopped partitions for each job_id
-   */
-  fieldToBucket: schema.maybe(schema.string()),
+  jobIds: schema.arrayOf(schema.string(), {
+    meta: { description: 'List of jobIds to fetch the categorizer partitions for' },
+  }),
+  fieldToBucket: schema.maybe(
+    schema.string({
+      meta: {
+        description: `Field to aggregate results by: 'job_id' or 'partition_field_value'. If by job_id, will return list of jobIds with at least one partition that have stopped. If by partition_field_value, it will return a list of categorizer stopped partitions for each job_id`,
+      },
+    })
+  ),
 });
 
 export const getDatafeedResultsChartDataSchema = schema.object({
-  /**
-   * Job id to fetch the bucket results for
-   */
-  jobId: schema.string(),
+  jobId: schema.string({ meta: { description: 'Job id to fetch the bucket results for' } }),
   start: schema.number(),
   end: schema.number(),
 });
@@ -117,21 +115,24 @@ export const getDatafeedResultsChartDataSchema = schema.object({
 export const getAnomalyChartsSchema = schema.object({
   jobIds: schema.arrayOf(schema.string()),
   influencers: schema.arrayOf(schema.any()),
-  /**
-   * Severity threshold
-   */
-  threshold: schema.number({ defaultValue: 0, min: 0, max: 99 }),
+  threshold: schema.number({
+    defaultValue: 0,
+    min: 0,
+    max: 99,
+    meta: { description: 'Severity threshold' },
+  }),
   earliestMs: schema.number(),
   latestMs: schema.number(),
-  /**
-   * Maximum amount of series data.
-   */
-  maxResults: schema.number({ defaultValue: 6, min: 1, max: 50 }),
+  maxResults: schema.number({
+    defaultValue: 6,
+    min: 1,
+    max: 50,
+    meta: { description: 'Maximum amount of series data' },
+  }),
   influencersFilterQuery: schema.maybe(schema.any()),
-  /**
-   * Optimal number of data points per chart
-   */
-  numberOfPoints: schema.number(),
+  numberOfPoints: schema.number({
+    meta: { description: 'Optimal number of data points per chart' },
+  }),
   timeBounds: schema.object({
     min: schema.maybe(schema.number()),
     max: schema.maybe(schema.number()),
