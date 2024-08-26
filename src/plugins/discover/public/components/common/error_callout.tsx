@@ -6,7 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { EuiButton, EuiEmptyPrompt, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiCodeBlock,
+  EuiEmptyPrompt,
+  EuiIcon,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { renderSearchError } from '@kbn/search-errors';
 import { i18n } from '@kbn/i18n';
@@ -20,37 +27,46 @@ interface Props {
 
 export const ErrorCallout = ({ title, error }: Props) => {
   const { core } = useDiscoverServices();
-  const { euiTheme } = useEuiTheme();
 
   const searchErrorDisplay = renderSearchError(error);
 
+  const { euiTheme } = useEuiTheme();
+
   return (
     <EuiEmptyPrompt
-      iconType="error"
-      color="danger"
+      icon={
+        <>
+          <EuiIcon size="l" type="error" color="danger" />
+        </>
+      }
+      color="plain"
+      paddingSize="m"
+      css={css`
+        margin: ${euiTheme.size.xl} auto;
+      `}
+      hasBorder
       title={
         <h2 data-test-subj="discoverErrorCalloutTitle">{searchErrorDisplay?.title ?? title}</h2>
       }
+      titleSize="xs"
       actions={searchErrorDisplay?.actions ?? []}
       body={
-        <div
-          css={css`
-            text-align: left;
-          `}
-        >
+        <div>
           {searchErrorDisplay?.body ?? (
             <>
-              <p
+              <EuiCodeBlock
+                paddingSize="s"
+                language="json"
                 css={css`
-                  white-space: break-spaces;
-                  word-wrap: break-word;
-                  font-family: ${euiTheme.font.familyCode};
+                  text-align: left;
                 `}
-                data-test-subj="discoverErrorCalloutMessage"
               >
                 {error.message}
-              </p>
-              <EuiButton onClick={() => core.notifications.showErrorDialog({ title, error })}>
+              </EuiCodeBlock>
+              <EuiButton
+                size="s"
+                onClick={() => core.notifications.showErrorDialog({ title, error })}
+              >
                 {i18n.translate('discover.errorCalloutShowErrorMessage', {
                   defaultMessage: 'View details',
                 })}
@@ -58,6 +74,13 @@ export const ErrorCallout = ({ title, error }: Props) => {
             </>
           )}
         </div>
+      }
+      footer={
+        <>
+          <EuiButtonEmpty iconType="documentation" href="#">
+            Open ES|QL reference
+          </EuiButtonEmpty>
+        </>
       }
     />
   );

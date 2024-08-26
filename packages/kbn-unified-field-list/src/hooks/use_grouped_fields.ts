@@ -249,7 +249,7 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
         defaultNoFieldsMessage: i18n.translate(
           'unifiedFieldList.useGroupedFields.noAvailableDataLabel',
           {
-            defaultMessage: `There are no available fields that contain data.`,
+            defaultMessage: `No available fields containing data.`,
           }
         ),
       },
