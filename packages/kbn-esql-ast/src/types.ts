@@ -175,6 +175,25 @@ export interface ESQLTimeInterval extends ESQLAstBaseItem {
 export interface ESQLSource extends ESQLAstBaseItem {
   type: 'source';
   sourceType: 'index' | 'policy';
+
+  /**
+   * Represents the cluster part of the source identifier. Empty string if not
+   * present.
+   *
+   * ```
+   * FROM [<cluster>:]<index>
+   * ```
+   */
+  cluster?: string;
+
+  /**
+   * Represents the index part of the source identifier. Unescaped and unquoted.
+   *
+   * ```
+   * FROM [<cluster>:]<index>
+   * ```
+   */
+  index?: string;
 }
 
 export interface ESQLColumn extends ESQLAstBaseItem {

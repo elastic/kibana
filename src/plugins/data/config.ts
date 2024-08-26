@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { offeringBasedSchema, schema, TypeOf } from '@kbn/config-schema';
 
 export const searchSessionsConfigSchema = schema.object({
   /**
@@ -84,7 +84,23 @@ export const searchConfigSchema = schema.object({
   sessions: searchSessionsConfigSchema,
 });
 
+export const queryConfigSchema = schema.object({
+  /**
+   * Config for timefilter
+   */
+  timefilter: schema.object({
+    /**
+     * Lower limit of refresh interval (in milliseconds)
+     */
+    minRefreshInterval: offeringBasedSchema<number>({
+      serverless: schema.number({ min: 1000, defaultValue: 5000 }),
+      traditional: schema.number({ min: 1000, defaultValue: 1000 }),
+    }),
+  }),
+});
+
 export const configSchema = schema.object({
+  query: queryConfigSchema,
   search: searchConfigSchema,
   /**
    * Turns on/off limit validations for the registered uiSettings.
@@ -95,5 +111,7 @@ export const configSchema = schema.object({
 export type ConfigSchema = TypeOf<typeof configSchema>;
 
 export type SearchConfigSchema = TypeOf<typeof searchConfigSchema>;
+
+export type QueryConfigSchema = TypeOf<typeof queryConfigSchema>;
 
 export type SearchSessionsConfigSchema = TypeOf<typeof searchSessionsConfigSchema>;
