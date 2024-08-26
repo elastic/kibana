@@ -21,10 +21,10 @@ export const DOCS = i18n.translate(
   }
 );
 
-export const EXPAND = i18n.translate(
-  'securitySolutionPackages.ecsDataQualityDashboard.summaryTable.expandLabel',
+export const VIEW_CHECK_DETAILS = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.summaryTable.viewCheckDetailsLabel',
   {
-    defaultMessage: 'Expand',
+    defaultMessage: 'View check details',
   }
 );
 
@@ -122,5 +122,19 @@ export const THIS_INDEX_HAS_NOT_BEEN_CHECKED = i18n.translate(
   'securitySolutionPackages.ecsDataQualityDashboard.summaryTable.thisIndexHasNotBeenCheckedTooltip',
   {
     defaultMessage: 'This index has not been checked',
+  }
+);
+
+export const ACTIONS = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.summaryTable.actionsColumn',
+  {
+    defaultMessage: 'Actions',
+  }
+);
+
+export const CHECK_INDEX = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.summaryTable.checkIndexButton',
+  {
+    defaultMessage: 'Check index',
   }
 );

@@ -116,11 +116,11 @@ export function LogPatternAnalysisPageProvider({ getService, getPageObject }: Ft
     },
 
     async clickFilterInButton(rowIndex: number) {
-      this.clickFilterButtons('in', rowIndex);
+      await this.clickFilterButtons('in', rowIndex);
     },
 
     async clickFilterOutButton(rowIndex: number) {
-      this.clickFilterButtons('out', rowIndex);
+      await this.clickFilterButtons('out', rowIndex);
     },
 
     async clickFilterButtons(buttonType: 'in' | 'out', rowIndex: number) {
@@ -131,7 +131,7 @@ export function LogPatternAnalysisPageProvider({ getService, getPageObject }: Ft
           ? 'aiopsLogPatternsActionFilterInButton'
           : 'aiopsLogPatternsActionFilterOutButton'
       );
-      button.click();
+      await button.click();
     },
 
     async getCategoryCountFromTable(rowIndex: number) {

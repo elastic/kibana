@@ -445,14 +445,18 @@ export class Plugin
   }
 
   public start(coreStart: CoreStart, pluginsStart: ObservabilityPublicPluginsStart) {
-    const { application } = coreStart;
+    const { application, http, notifications } = coreStart;
+    const { dataViews, triggersActionsUi } = pluginsStart;
     const config = this.initContext.config.get();
-    const { alertsTableConfigurationRegistry } = pluginsStart.triggersActionsUi;
+    const { alertsTableConfigurationRegistry } = triggersActionsUi;
     this.lazyRegisterAlertsTableConfiguration().then(({ registerAlertsTableConfiguration }) => {
       return registerAlertsTableConfiguration(
         alertsTableConfigurationRegistry,
         this.observabilityRuleTypeRegistry,
-        config
+        config,
+        dataViews,
+        http,
+        notifications
       );
     });
 

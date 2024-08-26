@@ -28,6 +28,7 @@ const createSetupContractMock = () => {
     setTime: jest.fn(),
     setRefreshInterval: jest.fn(),
     getRefreshInterval: jest.fn(),
+    getMinRefreshInterval: jest.fn().mockReturnValue(1000),
     getActiveBounds: jest.fn(),
     disableAutoRefreshSelector: jest.fn(),
     disableTimeRangeSelector: jest.fn(),
