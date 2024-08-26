@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { FC, PropsWithChildren } from 'react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { parse } from '@kbn/datemath';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -15,8 +15,6 @@ import {
   AssistantProvider as ElasticAssistantProvider,
   bulkUpdateConversations,
   getUserConversations,
-  getPrompts,
-  bulkUpdatePrompts,
 } from '@kbn/elastic-assistant';
 
 import { once } from 'lodash/fp';
@@ -29,8 +27,6 @@ import { useBasePath, useKibana } from '../common/lib/kibana';
 import { useAssistantTelemetry } from './use_assistant_telemetry';
 import { getComments } from './get_comments';
 import { LOCAL_STORAGE_KEY, augmentMessageCodeBlocks } from './helpers';
-import { BASE_SECURITY_QUICK_PROMPTS } from './content/quick_prompts';
-import { BASE_SECURITY_SYSTEM_PROMPTS } from './content/prompts/system';
 import { useBaseConversations } from './use_conversation_store';
 import { PROMPT_CONTEXTS } from './content/prompt_contexts';
 import { useAssistantAvailability } from './use_assistant_availability';
@@ -116,22 +112,6 @@ export const createConversations = async (
   }
 };
 
-export const createBasePrompts = async (notifications: NotificationsStart, http: HttpSetup) => {
-  const promptsToCreate = [...BASE_SECURITY_QUICK_PROMPTS, ...BASE_SECURITY_SYSTEM_PROMPTS];
-
-  // post bulk create
-  const bulkResult = await bulkUpdatePrompts(
-    http,
-    {
-      create: promptsToCreate,
-    },
-    notifications.toasts
-  );
-  if (bulkResult && bulkResult.success) {
-    return bulkResult.attributes.results.created;
-  }
-};
-
 /**
  * This component configures the Elastic AI Assistant context provider for the Security Solution app.
  */
@@ -176,45 +156,9 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
     storage,
   ]);
 
-  const [basePromptsLoaded, setBasePromptsLoaded] = useState(false);
-
-  useEffect(() => {
-    const createSecurityPrompts = once(async () => {
-      if (
-        hasEnterpriseLicence &&
-        assistantAvailability.isAssistantEnabled &&
-        assistantAvailability.hasAssistantPrivilege
-      ) {
-        try {
-          const res = await getPrompts({
-            http,
-            toasts: notifications.toasts,
-          });
-
-          if (res.total === 0) {
-            await createBasePrompts(notifications, http);
-          }
-          // eslint-disable-next-line no-empty
-        } catch (e) {}
-      }
-
-      setBasePromptsLoaded(true);
-    });
-    createSecurityPrompts();
-  }, [
-    assistantAvailability.hasAssistantPrivilege,
-    assistantAvailability.isAssistantEnabled,
-    hasEnterpriseLicence,
-    http,
-    notifications,
-  ]);
-
   const { signalIndexName } = useSignalIndex();
   const alertsIndexPattern = signalIndexName ?? undefined;
   const toasts = useAppToasts() as unknown as IToasts; // useAppToasts is the current, non-deprecated method of getting the toasts service in the Security Solution, but it doesn't return the IToasts interface (defined by core)
-  // Because our conversations need an assigned system prompt at create time,
-  // we want to make sure the prompts are there before creating the first conversation
-  // however if there is an error fetching the prompts, we don't want to block the app
 
   return (
     <ElasticAssistantProvider
@@ -234,7 +178,7 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
       toasts={toasts}
       currentAppId={currentAppId ?? 'securitySolutionUI'}
     >
-      {basePromptsLoaded ? children : null}
+      {children}
     </ElasticAssistantProvider>
   );
 };
