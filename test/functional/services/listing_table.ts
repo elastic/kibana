@@ -53,14 +53,14 @@ export class ListingTableService extends FtrService {
    */
   public async setSearchFilterValue(value: string) {
     const searchFilter = await this.getSearchFilter();
-    searchFilter.type(value);
+    await searchFilter.type(value);
   }
 
   /**
    * Clears search input on landing page
    */
   public async clearSearchFilter() {
-    this.testSubjects.click('clearSearchButton');
+    await this.testSubjects.click('clearSearchButton');
   }
 
   private async getAllItemsNamesOnCurrentPage(): Promise<string[]> {
