@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DEFAULT_KIBANAS_PER_PARTITION } from '../config';
 import {
   createDiscoveryServiceMock,
   createFindSO,
@@ -16,7 +17,11 @@ const POD_NAME = 'test-pod';
 describe('getAllPartitions()', () => {
   const discoveryServiceMock = createDiscoveryServiceMock(POD_NAME);
   test('correctly sets allPartitions in constructor', () => {
-    const taskPartitioner = new TaskPartitioner(POD_NAME, discoveryServiceMock);
+    const taskPartitioner = new TaskPartitioner({
+      podName: POD_NAME,
+      kibanasPerPartition: DEFAULT_KIBANAS_PER_PARTITION,
+      kibanaDiscoveryService: discoveryServiceMock,
+    });
     expect(taskPartitioner.getAllPartitions()).toEqual([
       0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25,
       26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48,
@@ -39,7 +44,11 @@ describe('getPodName()', () => {
   const discoveryServiceMock = createDiscoveryServiceMock(POD_NAME);
 
   test('correctly sets podName in constructor', () => {
-    const taskPartitioner = new TaskPartitioner(POD_NAME, discoveryServiceMock);
+    const taskPartitioner = new TaskPartitioner({
+      podName: POD_NAME,
+      kibanasPerPartition: DEFAULT_KIBANAS_PER_PARTITION,
+      kibanaDiscoveryService: discoveryServiceMock,
+    });
     expect(taskPartitioner.getPodName()).toEqual('test-pod');
   });
 });
@@ -74,12 +83,20 @@ describe('getPartitions()', () => {
   });
 
   test('correctly gets the partitons for this pod', async () => {
-    const taskPartitioner = new TaskPartitioner(POD_NAME, discoveryServiceMock);
+    const taskPartitioner = new TaskPartitioner({
+      podName: POD_NAME,
+      kibanasPerPartition: DEFAULT_KIBANAS_PER_PARTITION,
+      kibanaDiscoveryService: discoveryServiceMock,
+    });
     expect(await taskPartitioner.getPartitions()).toEqual(expectedPartitions);
   });
 
   test('correctly caches the partitions on 10 second interval', async () => {
-    const taskPartitioner = new TaskPartitioner(POD_NAME, discoveryServiceMock);
+    const taskPartitioner = new TaskPartitioner({
+      podName: POD_NAME,
+      kibanasPerPartition: DEFAULT_KIBANAS_PER_PARTITION,
+      kibanaDiscoveryService: discoveryServiceMock,
+    });
     const shorterInterval = CACHE_INTERVAL / 2;
 
     await taskPartitioner.getPartitions();
@@ -94,8 +111,11 @@ describe('getPartitions()', () => {
   });
 
   test('correctly catches the error from the discovery service and returns the cached value', async () => {
-    const taskPartitioner = new TaskPartitioner(POD_NAME, discoveryServiceMock);
-
+    const taskPartitioner = new TaskPartitioner({
+      podName: POD_NAME,
+      kibanasPerPartition: DEFAULT_KIBANAS_PER_PARTITION,
+      kibanaDiscoveryService: discoveryServiceMock,
+    });
     await taskPartitioner.getPartitions();
     expect(taskPartitioner.getPodPartitions()).toEqual(expectedPartitions);
 
