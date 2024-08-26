@@ -129,10 +129,6 @@ export async function installEntityDefinition({
   }
 }
 
-// install or reinstall the provided definitions
-// - if the definition is not installed yet
-// - if the definition version changed
-// - if the definition installation is in a corrupt state
 export async function installBuiltInEntityDefinitions({
   esClient,
   soClient,
