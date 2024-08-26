@@ -12,6 +12,7 @@ import {
   removeDropCommandsFromESQLQuery,
   hasTransformationalCommand,
   getTimeFieldFromESQLQuery,
+  wrapByPipes,
 } from './query_parsing_helpers';
 
 describe('esql query helpers', () => {
@@ -173,6 +174,26 @@ describe('esql query helpers', () => {
           'from a | stats meow = avg(bytes) by bucket(event.timefield, 200, ?t_start, ?t_end)'
         )
       ).toBe('event.timefield');
+    });
+  });
+
+  describe('wrapByPipes', function () {
+    it('should return the code wrapped', function () {
+      const code = wrapByPipes('FROM index1 | KEEP field1, field2 | SORT field1', false);
+      expect(code).toEqual('FROM index1\n  | KEEP field1, field2\n  | SORT field1');
+    });
+
+    it('should return the code unwrapped', function () {
+      const code = wrapByPipes('FROM index1 \n| KEEP field1, field2 \n| SORT field1', true);
+      expect(code).toEqual('FROM index1 | KEEP field1, field2 | SORT field1');
+    });
+
+    it('should return the code unwrapped and trimmed', function () {
+      const code = wrapByPipes(
+        'FROM index1       \n| KEEP field1, field2     \n| SORT field1',
+        true
+      );
+      expect(code).toEqual('FROM index1 | KEEP field1, field2 | SORT field1');
     });
   });
 });

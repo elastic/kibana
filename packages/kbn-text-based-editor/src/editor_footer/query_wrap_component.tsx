@@ -9,7 +9,7 @@
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexItem, EuiToolTip, EuiButtonIcon } from '@elastic/eui';
-import { getWrappedInPipesCode } from '../helpers';
+import { wrapByPipes } from '@kbn/esql-utils';
 
 export function QueryWrapComponent({
   code,
@@ -18,9 +18,10 @@ export function QueryWrapComponent({
   code: string;
   updateQuery: (qs: string) => void;
 }) {
-  const isWrappedInPipes = useMemo(() => {
-    const pipes = code.split('|');
-    const pipesWithNewLine = code?.split('\n|');
+  const isWrappedByPipes = useMemo(() => {
+    const trimmedCode = code.trim().replaceAll('\n  |', '\n|');
+    const pipes = trimmedCode.split('|');
+    const pipesWithNewLine = trimmedCode?.split('\n|');
     return pipes?.length === pipesWithNewLine?.length;
   }, [code]);
 
@@ -29,7 +30,7 @@ export function QueryWrapComponent({
       <EuiToolTip
         position="top"
         content={
-          isWrappedInPipes
+          isWrappedByPipes
             ? i18n.translate(
                 'textBasedEditor.query.textBasedLanguagesEditor.disableWordWrapLabel',
                 {
@@ -42,12 +43,12 @@ export function QueryWrapComponent({
         }
       >
         <EuiButtonIcon
-          iconType={isWrappedInPipes ? 'pipeNoBreaks' : 'pipeBreaks'}
+          iconType={isWrappedByPipes ? 'pipeNoBreaks' : 'pipeBreaks'}
           color="text"
           size="xs"
           data-test-subj="TextBasedLangEditor-toggleWordWrap"
           aria-label={
-            isWrappedInPipes
+            isWrappedByPipes
               ? i18n.translate(
                   'textBasedEditor.query.textBasedLanguagesEditor.disableWordWrapLabel',
                   {
@@ -62,7 +63,7 @@ export function QueryWrapComponent({
                 )
           }
           onClick={() => {
-            const updatedCode = getWrappedInPipesCode(code, isWrappedInPipes);
+            const updatedCode = wrapByPipes(code, isWrappedByPipes);
             if (code !== updatedCode) {
               updateQuery(updatedCode);
             }

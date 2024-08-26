@@ -24,6 +24,7 @@ export {
   getTimeFieldFromESQLQuery,
   getStartEndParams,
   hasStartEndParams,
+  wrapByPipes,
   TextBasedLanguages,
 } from './src';
 

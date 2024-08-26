@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import type { ESQLSource, ESQLFunction, ESQLColumn, ESQLSingleAstItem } from '@kbn/esql-ast';
-import { getAstAndSyntaxErrors, Walker, walk } from '@kbn/esql-ast';
+import { getAstAndSyntaxErrors, Walker, walk, BasicPrettyPrinter } from '@kbn/esql-ast';
 
 const DEFAULT_ESQL_LIMIT = 1000;
 
@@ -104,4 +104,9 @@ export const getTimeFieldFromESQLQuery = (esql: string) => {
   }) as ESQLColumn;
 
   return column?.name;
+};
+
+export const wrapByPipes = (query: string, isWrapped: boolean): string => {
+  const { ast } = getAstAndSyntaxErrors(query);
+  return BasicPrettyPrinter.print(ast, { multiline: !isWrapped });
 };
