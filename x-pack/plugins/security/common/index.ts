@@ -10,7 +10,6 @@ export type {
   GetUserDisplayNameParams,
   EditUser,
   BuiltinESPrivileges,
-  RawKibanaPrivileges,
   RoleMapping,
   RoleMappingRule,
   RoleMappingAllRule,
@@ -24,6 +23,8 @@ export type {
 } from './model';
 
 export { getUserDisplayName, isRoleReserved, isRoleWithWildcardBasePrivilege } from './model';
+
+export type { RawKibanaPrivileges } from '@kbn/security-authorization-core';
 
 // Re-export types from the plugin directly to enhance the developer experience for consumers of the Security plugin.
 export type {

@@ -906,7 +906,7 @@ export default function ({ getService }: FtrProviderContext) {
         params: {},
       });
 
-      runTaskSoon({ id: longRunningTask.id });
+      await runTaskSoon({ id: longRunningTask.id });
 
       let scheduledRunAt: string;
       // ensure task is running and store scheduled runAt
