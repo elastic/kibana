@@ -994,7 +994,7 @@ describe('autocomplete', () => {
     });
 
     // FROM source
-    testSuggestions('FROM k/', ['index1 ', 'index2 '], undefined, [
+    testSuggestions('FROM k/', ['index1', 'index2'], undefined, [
       ,
       [
         { name: 'index1', hidden: false },

@@ -36,17 +36,17 @@ describe('autocomplete.suggest', () => {
       test('suggests visible indices on space', async () => {
         const { assertSuggestions } = await setup();
 
-        await assertSuggestions('from /', addTrailingSpace(visibleIndices));
-        await assertSuggestions('FROM /', addTrailingSpace(visibleIndices));
-        await assertSuggestions('from /index', addTrailingSpace(visibleIndices));
+        await assertSuggestions('from /', visibleIndices);
+        await assertSuggestions('FROM /', visibleIndices);
+        await assertSuggestions('from /index', visibleIndices);
       });
 
       test('suggests visible indices on comma', async () => {
         const { assertSuggestions } = await setup();
 
-        await assertSuggestions('FROM a,/', addTrailingSpace(visibleIndices));
-        await assertSuggestions('FROM a, /', addTrailingSpace(visibleIndices));
-        await assertSuggestions('from *,/', addTrailingSpace(visibleIndices));
+        await assertSuggestions('FROM a,/', visibleIndices);
+        await assertSuggestions('FROM a, /', visibleIndices);
+        await assertSuggestions('from *,/', visibleIndices);
       });
 
       test('can suggest integration data sources', async () => {
@@ -55,10 +55,7 @@ describe('autocomplete.suggest', () => {
           .filter(({ hidden }) => !hidden)
           .map(({ name, suggestedAs }) => suggestedAs || name)
           .sort();
-        const expectedSuggestions = addTrailingSpace(
-          visibleDataSources,
-          (s) => !integrations.find(({ name }) => name === s)
-        );
+        const expectedSuggestions = visibleDataSources;
         const { assertSuggestions, callbacks } = await setup();
         const cb = {
           ...callbacks,
