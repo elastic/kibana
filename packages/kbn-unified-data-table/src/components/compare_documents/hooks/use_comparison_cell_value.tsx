@@ -22,7 +22,7 @@ import {
 import classNames from 'classnames';
 import { isEqual, memoize } from 'lodash';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { CELL_CLASS } from '../../../utils/get_render_cell_value';
+import { CELL_CLASS } from '../../cells/get_render_cell_value';
 import type { DocumentDiffMode } from '../types';
 import { calculateDiff, CalculateDiffProps, formatDiffValue } from './calculate_diff';
 import {

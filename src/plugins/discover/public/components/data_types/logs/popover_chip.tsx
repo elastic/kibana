@@ -26,7 +26,7 @@ import { FilterOutButton } from './filter_out_button';
 import { CopyButton } from './copy_button';
 
 const DataTablePopoverCellValue = dynamic(
-  () => import('@kbn/unified-data-table/src/components/data_table_cell_value')
+  () => import('@kbn/unified-data-table/src/components/cells/data_table_cell_value')
 );
 
 interface ChipWithPopoverProps {

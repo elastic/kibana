@@ -9,7 +9,7 @@
 import { EuiCallOut, EuiDataGridCustomToolbarProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { ReactElement } from 'react';
-import { internalRenderCustomToolbar } from '../custom_toolbar/render_custom_toolbar';
+import { internalRenderCustomToolbar } from '../toolbar/render_custom_toolbar';
 
 export interface ComparisonToolbarProps {
   additionalControls: ReactElement;
