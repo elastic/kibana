@@ -111,6 +111,7 @@ const InfraMetadataRequiredRT = rt.type({
 
 const InfraMetadataOptionalRT = rt.partial({
   info: InfraMetadataInfoResponseRT,
+  hasSystemIntegration: rt.boolean,
 });
 
 export const InfraMetadataRT = rt.intersection([InfraMetadataRequiredRT, InfraMetadataOptionalRT]);
