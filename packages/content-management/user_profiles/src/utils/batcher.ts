@@ -53,7 +53,7 @@ interface BatcherMemory<Data, Query> {
  */
 export const createBatcher = <Data, Query, R = Data>(
   config: BatcherConfig<Data, Query, R>
-): Batcher<Data, Query, ReturnType<typeof config['resolver']>> => {
+): Batcher<Data, Query, ReturnType<(typeof config)['resolver']>> => {
   const mem: BatcherMemory<Data, Query> = {
     batch: new Set<Query>(),
     currentRequest: deferred<Data>(),

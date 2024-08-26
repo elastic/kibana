@@ -92,6 +92,10 @@ a| <<swimlane-action-type,{swimlane}>>
 
 | Create an incident in {swimlane}.
 
+a| <<thehive-action-type,{thehive}>>
+
+| Create cases and alerts in {thehive}.
+
 a| <<tines-action-type,Tines>>
 
 | Send events to a Tines Story.

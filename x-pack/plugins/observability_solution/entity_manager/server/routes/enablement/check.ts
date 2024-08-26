@@ -5,19 +5,43 @@
  * 2.0.
  */
 
+import semver from 'semver';
 import { RequestHandlerContext } from '@kbn/core/server';
-import { getFakeKibanaRequest } from '@kbn/security-plugin/server/authentication/api_keys/fake_kibana_request';
 import { SetupRouteOptions } from '../types';
 import { checkIfEntityDiscoveryAPIKeyIsValid, readEntityDiscoveryAPIKey } from '../../lib/auth';
 import {
   ERROR_API_KEY_NOT_FOUND,
   ERROR_API_KEY_NOT_VALID,
+  ERROR_BUILTIN_UPGRADE_REQUIRED,
   ERROR_DEFINITION_STOPPED,
   ERROR_PARTIAL_BUILTIN_INSTALLATION,
 } from '../../../common/errors';
 import { findEntityDefinitions } from '../../lib/entities/find_entity_definition';
 import { builtInDefinitions } from '../../lib/entities/built_in';
+import { getClientsFromAPIKey } from '../../lib/utils';
 
+/**
+ * @openapi
+ * /internal/entities/managed/enablement:
+ *   get:
+ *     description: Check if managed (built-in) entity discovery is enabled. Enabled entity discovery requires a valid api key and the latest version of the builtin definitions installed and running.
+ *     tags:
+ *       - management
+ *     responses:
+ *       200:
+ *         description: OK - Verify result in response body
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 enabled:
+ *                  type: boolean
+ *                  example: false
+ *                 reason:
+ *                  type: string
+ *                  example: api_key_not_found
+ */
 export function checkEntityDiscoveryEnabledRoute<T extends RequestHandlerContext>({
   router,
   server,
@@ -44,9 +68,7 @@ export function checkEntityDiscoveryEnabledRoute<T extends RequestHandlerContext
           return res.ok({ body: { enabled: false, reason: ERROR_API_KEY_NOT_VALID } });
         }
 
-        const fakeRequest = getFakeKibanaRequest({ id: apiKey.id, api_key: apiKey.apiKey });
-        const soClient = server.core.savedObjects.getScopedClient(fakeRequest);
-        const esClient = server.core.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
+        const { esClient, soClient } = getClientsFromAPIKey({ apiKey, server });
 
         const entityDiscoveryState = await Promise.all(
           builtInDefinitions.map(async (builtInDefinition) => {
@@ -56,17 +78,21 @@ export function checkEntityDiscoveryEnabledRoute<T extends RequestHandlerContext
               id: builtInDefinition.id,
             });
 
-            return definitions[0];
+            return { installedDefinition: definitions[0], builtInDefinition };
           })
         ).then((results) =>
           results.reduce(
-            (state, definition) => {
+            (state, { installedDefinition, builtInDefinition }) => {
               return {
-                installed: Boolean(state.installed && definition?.state.installed),
-                running: Boolean(state.running && definition?.state.running),
+                installed: Boolean(state.installed && installedDefinition?.state.installed),
+                running: Boolean(state.running && installedDefinition?.state.running),
+                outdated:
+                  state.outdated ||
+                  (installedDefinition &&
+                    semver.neq(installedDefinition.version, builtInDefinition.version)),
               };
             },
-            { installed: true, running: true }
+            { installed: true, running: true, outdated: false }
           )
         );
 
@@ -76,6 +102,10 @@ export function checkEntityDiscoveryEnabledRoute<T extends RequestHandlerContext
 
         if (!entityDiscoveryState.running) {
           return res.ok({ body: { enabled: false, reason: ERROR_DEFINITION_STOPPED } });
+        }
+
+        if (entityDiscoveryState.outdated) {
+          return res.ok({ body: { enabled: false, reason: ERROR_BUILTIN_UPGRADE_REQUIRED } });
         }
 
         return res.ok({ body: { enabled: true } });

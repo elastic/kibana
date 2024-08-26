@@ -126,6 +126,7 @@ export const buildDataViewMock = ({
       return dataViewFields.find((field) => field.name === timeFieldName);
     },
     getRuntimeField: () => null,
+    getAllowHidden: () => false,
     setFieldCount: jest.fn(),
   } as unknown as DataView;
 

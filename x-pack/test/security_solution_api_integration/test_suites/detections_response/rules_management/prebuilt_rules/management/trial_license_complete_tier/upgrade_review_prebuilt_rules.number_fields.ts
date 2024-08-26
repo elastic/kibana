@@ -6,6 +6,7 @@
  */
 import expect from 'expect';
 import {
+  ThreeWayDiffConflict,
   ThreeWayDiffOutcome,
   ThreeWayMergeOutcome,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
@@ -55,22 +56,18 @@ export default ({ getService }: FtrProviderContext): void => {
           ];
           await createHistoricalPrebuiltRuleAssetSavedObjects(es, updatedRuleAssetSavedObjects);
 
-          // Call the upgrade review prebuilt rules endpoint and check that there is 1 rule eligable for update but number field is NOT returned
+          // Call the upgrade review prebuilt rules endpoint and check that there is 1 rule eligible
+          // for update but number field (risk_score) is NOT returned
           const reviewResponse = await reviewPrebuiltRulesToUpgrade(supertest);
-          expect(reviewResponse.rules[0].diff.fields).toEqual({
-            version: {
-              base_version: 1,
-              current_version: 1,
-              target_version: 2,
-              merged_version: 2,
-              diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
-              merge_outcome: ThreeWayMergeOutcome.Target,
-              has_conflict: false,
-              has_update: true,
-            },
-          });
-          expect(reviewResponse.rules[0].diff.has_conflict).toBe(false);
+          expect(reviewResponse.rules[0].diff.fields.risk_score).toBeUndefined();
+
+          expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(1); // version
+          expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(0);
+          expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(0);
+
           expect(reviewResponse.stats.num_rules_to_upgrade_total).toBe(1);
+          expect(reviewResponse.stats.num_rules_with_conflicts).toBe(0);
+          expect(reviewResponse.stats.num_rules_with_non_solvable_conflicts).toBe(0);
         });
       });
 
@@ -98,30 +95,24 @@ export default ({ getService }: FtrProviderContext): void => {
 
           // Call the upgrade review prebuilt rules endpoint and check that number diff field is returned but field does not have an update
           const reviewResponse = await reviewPrebuiltRulesToUpgrade(supertest);
-          expect(reviewResponse.rules[0].diff.fields).toEqual({
-            risk_score: {
-              base_version: 1,
-              current_version: 2,
-              target_version: 1,
-              merged_version: 2,
-              diff_outcome: ThreeWayDiffOutcome.CustomizedValueNoUpdate,
-              merge_outcome: ThreeWayMergeOutcome.Current,
-              has_conflict: false,
-              has_update: false,
-            },
-            version: {
-              base_version: 1,
-              current_version: 1,
-              target_version: 2,
-              merged_version: 2,
-              diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
-              merge_outcome: ThreeWayMergeOutcome.Target,
-              has_conflict: false,
-              has_update: true,
-            },
+          expect(reviewResponse.rules[0].diff.fields.risk_score).toEqual({
+            base_version: 1,
+            current_version: 2,
+            target_version: 1,
+            merged_version: 2,
+            diff_outcome: ThreeWayDiffOutcome.CustomizedValueNoUpdate,
+            merge_outcome: ThreeWayMergeOutcome.Current,
+            conflict: ThreeWayDiffConflict.NONE,
+            has_update: false,
+            has_base_version: true,
           });
-          expect(reviewResponse.rules[0].diff.has_conflict).toBe(false);
+          expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(1);
+          expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(0);
+          expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(0);
+
           expect(reviewResponse.stats.num_rules_to_upgrade_total).toBe(1);
+          expect(reviewResponse.stats.num_rules_with_conflicts).toBe(0);
+          expect(reviewResponse.stats.num_rules_with_non_solvable_conflicts).toBe(0);
         });
       });
 
@@ -143,30 +134,25 @@ export default ({ getService }: FtrProviderContext): void => {
 
           // Call the upgrade review prebuilt rules endpoint and check that one rule is eligible for update
           const reviewResponse = await reviewPrebuiltRulesToUpgrade(supertest);
-          expect(reviewResponse.rules[0].diff.fields).toEqual({
-            risk_score: {
-              base_version: 1,
-              current_version: 1,
-              target_version: 2,
-              merged_version: 2,
-              diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
-              merge_outcome: ThreeWayMergeOutcome.Target,
-              has_conflict: false,
-              has_update: true,
-            },
-            version: {
-              base_version: 1,
-              current_version: 1,
-              target_version: 2,
-              merged_version: 2,
-              diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
-              merge_outcome: ThreeWayMergeOutcome.Target,
-              has_conflict: false,
-              has_update: true,
-            },
+          expect(reviewResponse.rules[0].diff.fields.risk_score).toEqual({
+            base_version: 1,
+            current_version: 1,
+            target_version: 2,
+            merged_version: 2,
+            diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
+            merge_outcome: ThreeWayMergeOutcome.Target,
+            conflict: ThreeWayDiffConflict.NONE,
+            has_update: true,
+            has_base_version: true,
           });
-          expect(reviewResponse.rules[0].diff.has_conflict).toBe(false);
+
+          expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(2);
+          expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(0);
+          expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(0);
+
           expect(reviewResponse.stats.num_rules_to_upgrade_total).toBe(1);
+          expect(reviewResponse.stats.num_rules_with_conflicts).toBe(0);
+          expect(reviewResponse.stats.num_rules_with_non_solvable_conflicts).toBe(0);
         });
 
         describe('when rule field has an update and a custom value that are the same - scenario ABB', () => {
@@ -193,30 +179,24 @@ export default ({ getService }: FtrProviderContext): void => {
 
             // Call the upgrade review prebuilt rules endpoint and check that one rule is eligible for update and contains number field
             const reviewResponse = await reviewPrebuiltRulesToUpgrade(supertest);
-            expect(reviewResponse.rules[0].diff.fields).toEqual({
-              risk_score: {
-                base_version: 1,
-                current_version: 2,
-                target_version: 2,
-                merged_version: 2,
-                diff_outcome: ThreeWayDiffOutcome.CustomizedValueSameUpdate,
-                merge_outcome: ThreeWayMergeOutcome.Current,
-                has_conflict: false,
-                has_update: false,
-              },
-              version: {
-                base_version: 1,
-                current_version: 1,
-                target_version: 2,
-                merged_version: 2,
-                diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
-                merge_outcome: ThreeWayMergeOutcome.Target,
-                has_conflict: false,
-                has_update: true,
-              },
+            expect(reviewResponse.rules[0].diff.fields.risk_score).toEqual({
+              base_version: 1,
+              current_version: 2,
+              target_version: 2,
+              merged_version: 2,
+              diff_outcome: ThreeWayDiffOutcome.CustomizedValueSameUpdate,
+              merge_outcome: ThreeWayMergeOutcome.Current,
+              conflict: ThreeWayDiffConflict.NONE,
+              has_update: false,
+              has_base_version: true,
             });
-            expect(reviewResponse.rules[0].diff.has_conflict).toBe(false);
+            expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(1);
+            expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(0);
+            expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(0);
+
             expect(reviewResponse.stats.num_rules_to_upgrade_total).toBe(1);
+            expect(reviewResponse.stats.num_rules_with_conflicts).toBe(0);
+            expect(reviewResponse.stats.num_rules_with_non_solvable_conflicts).toBe(0);
           });
         });
 
@@ -245,30 +225,25 @@ export default ({ getService }: FtrProviderContext): void => {
             // Call the upgrade review prebuilt rules endpoint and check that one rule is eligible for update
             // and number field update has conflict
             const reviewResponse = await reviewPrebuiltRulesToUpgrade(supertest);
-            expect(reviewResponse.rules[0].diff.fields).toEqual({
-              risk_score: {
-                base_version: 1,
-                current_version: 2,
-                target_version: 3,
-                merged_version: 2,
-                diff_outcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
-                merge_outcome: ThreeWayMergeOutcome.Conflict,
-                has_conflict: true,
-                has_update: true,
-              },
-              version: {
-                base_version: 1,
-                current_version: 1,
-                target_version: 2,
-                merged_version: 2,
-                diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
-                merge_outcome: ThreeWayMergeOutcome.Target,
-                has_conflict: false,
-                has_update: true,
-              },
+            expect(reviewResponse.rules[0].diff.fields.risk_score).toEqual({
+              base_version: 1,
+              current_version: 2,
+              target_version: 3,
+              merged_version: 2,
+              diff_outcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
+              merge_outcome: ThreeWayMergeOutcome.Current,
+              conflict: ThreeWayDiffConflict.NON_SOLVABLE,
+              has_update: true,
+              has_base_version: true,
             });
-            expect(reviewResponse.rules[0].diff.has_conflict).toBe(true);
+
+            expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(2);
+            expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(1);
+            expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(1);
+
             expect(reviewResponse.stats.num_rules_to_upgrade_total).toBe(1);
+            expect(reviewResponse.stats.num_rules_with_conflicts).toBe(1);
+            expect(reviewResponse.stats.num_rules_with_non_solvable_conflicts).toBe(1);
           });
         });
 
@@ -282,38 +257,28 @@ export default ({ getService }: FtrProviderContext): void => {
               // Clear previous rule assets
               await deleteAllPrebuiltRuleAssets(es, log);
 
-              // Customize a number field on the installed rule
-              await patchRule(supertest, log, {
-                rule_id: 'rule-1',
-                risk_score: 2,
-              });
-
-              // Increment the version of the installed rule, update a number field, and create the new rule assets
+              // Increment the version of the installed rule with the number field maintained
               const updatedRuleAssetSavedObjects = [
                 createRuleAssetSavedObject({
                   rule_id: 'rule-1',
                   version: 2,
-                  risk_score: 2,
+                  risk_score: 1,
                 }),
               ];
               await createPrebuiltRuleAssetSavedObjects(es, updatedRuleAssetSavedObjects);
 
               // Call the upgrade review prebuilt rules endpoint and check that one rule is eligible for update
-              // but does NOT contain number field
+              // but does NOT contain the risk_score number field, since -AA is treated as AAA
               const reviewResponse = await reviewPrebuiltRulesToUpgrade(supertest);
-              expect(reviewResponse.rules[0].diff.fields).toEqual({
-                version: {
-                  current_version: 1,
-                  target_version: 2,
-                  merged_version: 2,
-                  diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
-                  merge_outcome: ThreeWayMergeOutcome.Target,
-                  has_conflict: false,
-                  has_update: true,
-                },
-              });
-              expect(reviewResponse.rules[0].diff.has_conflict).toBe(false);
+              expect(reviewResponse.rules[0].diff.fields.risk_score).toBeUndefined();
+
+              expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(1);
+              expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(1);
+              expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(0);
+
               expect(reviewResponse.stats.num_rules_to_upgrade_total).toBe(1);
+              expect(reviewResponse.stats.num_rules_with_conflicts).toBe(1);
+              expect(reviewResponse.stats.num_rules_with_non_solvable_conflicts).toBe(0);
             });
           });
 
@@ -345,28 +310,23 @@ export default ({ getService }: FtrProviderContext): void => {
               // Call the upgrade review prebuilt rules endpoint and check that one rule is eligible for update
               // and number field update does not have a conflict
               const reviewResponse = await reviewPrebuiltRulesToUpgrade(supertest);
-              expect(reviewResponse.rules[0].diff.fields).toEqual({
-                risk_score: {
-                  current_version: 2,
-                  target_version: 3,
-                  merged_version: 3,
-                  diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
-                  merge_outcome: ThreeWayMergeOutcome.Target,
-                  has_conflict: false,
-                  has_update: true,
-                },
-                version: {
-                  current_version: 1,
-                  target_version: 2,
-                  merged_version: 2,
-                  diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
-                  merge_outcome: ThreeWayMergeOutcome.Target,
-                  has_conflict: false,
-                  has_update: true,
-                },
+              expect(reviewResponse.rules[0].diff.fields.risk_score).toEqual({
+                current_version: 2,
+                target_version: 3,
+                merged_version: 3,
+                diff_outcome: ThreeWayDiffOutcome.MissingBaseCanUpdate,
+                merge_outcome: ThreeWayMergeOutcome.Target,
+                conflict: ThreeWayDiffConflict.SOLVABLE,
+                has_update: true,
+                has_base_version: false,
               });
-              expect(reviewResponse.rules[0].diff.has_conflict).toBe(false);
+              expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(2);
+              expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(2);
+              expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(0);
+
               expect(reviewResponse.stats.num_rules_to_upgrade_total).toBe(1);
+              expect(reviewResponse.stats.num_rules_with_conflicts).toBe(1);
+              expect(reviewResponse.stats.num_rules_with_non_solvable_conflicts).toBe(0);
             });
           });
         });

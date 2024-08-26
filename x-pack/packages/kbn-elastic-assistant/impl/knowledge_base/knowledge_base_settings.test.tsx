@@ -40,8 +40,6 @@ jest.mock('../assistant_context', () => {
 const setUpdatedKnowledgeBaseSettings = jest.fn();
 const defaultProps = {
   knowledgeBase: {
-    isEnabledKnowledgeBase: true,
-    isEnabledRAGAlerts: false,
     latestAlerts: DEFAULT_LATEST_ALERTS,
   },
   setUpdatedKnowledgeBaseSettings,
@@ -103,6 +101,7 @@ describe('Knowledge base settings', () => {
           esql_exists: false,
           index_exists: false,
           pipeline_exists: false,
+          is_setup_available: true,
         },
         isLoading: false,
         isFetching: false,

@@ -76,7 +76,10 @@ export default ({ getService }: FtrProviderContext) => {
             const histogramActions = getHistogramActions(data);
             const histograms = histogramActions.flatMap((d) => d.payload);
             // for each significant term we should get a histogram
-            expect(histogramActions.length).to.be(significantItems.length);
+            expect(histogramActions.length).to.eql(
+              testData.expected.histogramActionsLength,
+              `Expected histogram actions length to be ${testData.expected.histogramActionsLength}, got ${histogramActions.length}`
+            );
             // each histogram should have a length of 20 items.
             histograms.forEach((h, index) => {
               expect(h.histogram.length).to.eql(

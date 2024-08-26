@@ -6,7 +6,7 @@
  */
 
 import { DynamicStructuredTool } from '@langchain/core/tools';
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import { APP_UI_ID } from '../../../../common';
 
@@ -47,6 +47,7 @@ export const ESQL_KNOWLEDGE_BASE_TOOL: AssistantTool = {
         return result.text;
       },
       tags: ['esql', 'query-generation', 'knowledge-base'],
-    });
+      // TODO: Remove after ZodAny is fixed https://github.com/langchain-ai/langchainjs/blob/main/langchain-core/src/tools.ts
+    }) as unknown as DynamicStructuredTool;
   },
 };

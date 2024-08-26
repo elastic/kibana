@@ -78,7 +78,7 @@ import { MaintenanceWindow } from '../application/maintenance_window/types';
 const date = '2023-03-28T22:27:28.159Z';
 const startedAtDate = '2023-03-28T13:00:00.000Z';
 const maxAlerts = 1000;
-let logger: ReturnType<typeof loggingSystemMock['createLogger']>;
+let logger: ReturnType<(typeof loggingSystemMock)['createLogger']>;
 const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 const alertingEventLogger = alertingEventLoggerMock.create();
 const ruleRunMetricsStore = ruleRunMetricsStoreMock.create();
@@ -287,6 +287,9 @@ const defaultExecutionOpts = {
   startedAt: null,
 };
 
+const ruleInfo = `for test.rule-type:1 'rule-name'`;
+const logTags = { tags: ['test.rule-type', '1', 'alerts-client'] };
+
 describe('Alerts Client', () => {
   let alertsClientParams: AlertsClientParams;
   let processAndLogAlertsOpts: ProcessAndLogAlertsOpts;
@@ -484,7 +487,8 @@ describe('Alerts Client', () => {
           });
 
           expect(logger.error).toHaveBeenCalledWith(
-            `Error searching for tracked alerts by UUID - search failed!`
+            `Error searching for tracked alerts by UUID ${ruleInfo} - search failed!`,
+            logTags
           );
 
           spy.mockRestore();
@@ -778,7 +782,8 @@ describe('Alerts Client', () => {
           expect(spy).toHaveBeenNthCalledWith(2, 'recoveredCurrent');
 
           expect(logger.error).toHaveBeenCalledWith(
-            "Error writing alert(2) to .alerts-test.alerts-default - alert(2) doesn't exist in active alerts"
+            `Error writing alert(2) to .alerts-test.alerts-default - alert(2) doesn't exist in active alerts ${ruleInfo}.`,
+            logTags
           );
           spy.mockRestore();
 
@@ -1346,7 +1351,8 @@ describe('Alerts Client', () => {
 
           expect(clusterClient.bulk).toHaveBeenCalled();
           expect(logger.error).toHaveBeenCalledWith(
-            `Error writing alerts: 1 successful, 0 conflicts, 2 errors: Validation Failed: 1: index is missing;2: type is missing;; failed to parse field [process.command_line] of type [wildcard] in document with id 'f0c9805be95fedbc3c99c663f7f02cc15826c122'.`
+            `Error writing alerts ${ruleInfo}: 1 successful, 0 conflicts, 2 errors: Validation Failed: 1: index is missing;2: type is missing;; failed to parse field [process.command_line] of type [wildcard] in document with id 'f0c9805be95fedbc3c99c663f7f02cc15826c122'.`,
+            { tags: ['test.rule-type', '1', 'resolve-alert-conflicts'] }
           );
         });
 
@@ -1423,7 +1429,8 @@ describe('Alerts Client', () => {
           });
 
           expect(logger.warn).toHaveBeenCalledWith(
-            `Could not update alert abc in partial-.internal.alerts-test.alerts-default-000001. Partial and restored alert indices are not supported.`
+            `Could not update alert abc in partial-.internal.alerts-test.alerts-default-000001. Partial and restored alert indices are not supported ${ruleInfo}.`,
+            logTags
           );
         });
 
@@ -1448,7 +1455,8 @@ describe('Alerts Client', () => {
 
           expect(clusterClient.bulk).toHaveBeenCalled();
           expect(logger.error).toHaveBeenCalledWith(
-            `Error writing 2 alerts to .alerts-test.alerts-default - fail`
+            `Error writing 2 alerts to .alerts-test.alerts-default ${ruleInfo} - fail`,
+            logTags
           );
         });
 
@@ -1478,7 +1486,8 @@ describe('Alerts Client', () => {
           });
 
           expect(logger.debug).toHaveBeenCalledWith(
-            `Resources registered and installed for test context but "shouldWrite" is set to false.`
+            `Resources registered and installed for test context but "shouldWrite" is set to false ${ruleInfo}.`,
+            logTags
           );
           expect(clusterClient.bulk).not.toHaveBeenCalled();
         });
@@ -2026,7 +2035,8 @@ describe('Alerts Client', () => {
           ).rejects.toBe('something went wrong!');
 
           expect(logger.warn).toHaveBeenCalledWith(
-            'Error updating alert maintenance window IDs: something went wrong!'
+            `Error updating alert maintenance window IDs for test.rule-type:1 'rule-name': something went wrong!`,
+            logTags
           );
         });
       });

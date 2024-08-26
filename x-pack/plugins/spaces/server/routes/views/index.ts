@@ -44,9 +44,10 @@ export function initSpacesViewsRoutes(deps: ViewRouteDeps) {
         // need to get reed of ../../ to make sure we will not be out of space basePath
         const normalizedRoute = new URL(route, 'https://localhost');
 
+        // preserving of the hash is important for the navigation to work correctly with default route
         return response.redirected({
           headers: {
-            location: `${basePath}${normalizedRoute.pathname}${normalizedRoute.search}`,
+            location: `${basePath}${normalizedRoute.pathname}${normalizedRoute.search}${normalizedRoute.hash}`,
           },
         });
       } catch (e) {

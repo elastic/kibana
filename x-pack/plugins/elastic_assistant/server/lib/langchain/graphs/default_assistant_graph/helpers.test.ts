@@ -96,7 +96,12 @@ describe('streamGraph', () => {
       const response = await streamGraph({
         apmTracer: mockApmTracer,
         assistantGraph: mockAssistantGraph,
-        inputs: { input: 'input' },
+        inputs: {
+          input: 'input',
+          bedrockChatEnabled: false,
+          llmType: 'openai',
+          responseLanguage: 'English',
+        },
         logger: mockLogger,
         onLlmResponse: mockOnLlmResponse,
         request: mockRequest,
@@ -175,7 +180,12 @@ describe('streamGraph', () => {
       const response = await streamGraph({
         apmTracer: mockApmTracer,
         assistantGraph: mockAssistantGraph,
-        inputs: { input: 'input' },
+        inputs: {
+          input: 'input',
+          bedrockChatEnabled: false,
+          responseLanguage: 'English',
+          llmType: 'gemini',
+        },
         logger: mockLogger,
         onLlmResponse: mockOnLlmResponse,
         request: mockRequest,

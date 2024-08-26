@@ -37,6 +37,7 @@ export interface AgentExecutorParams<T extends boolean> {
   abortSignal?: AbortSignal;
   alertsIndexPattern?: string;
   actionsClient: PublicMethodsOf<ActionsClient>;
+  bedrockChatEnabled: boolean;
   assistantTools?: AssistantTool[];
   connectorId: string;
   conversationId?: string;

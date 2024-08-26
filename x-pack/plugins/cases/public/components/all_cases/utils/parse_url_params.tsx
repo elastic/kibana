@@ -16,7 +16,7 @@ import { LEGACY_SUPPORTED_STATE_KEYS, ALL_CASES_STATE_URL_KEY } from '../constan
 import { AllCasesURLQueryParamsRt, validateSchema } from '../schema';
 import type { AllCasesURLQueryParams } from '../types';
 
-type LegacySupportedKeys = typeof LEGACY_SUPPORTED_STATE_KEYS[number];
+type LegacySupportedKeys = (typeof LEGACY_SUPPORTED_STATE_KEYS)[number];
 
 const legacyDefaultState: Record<LegacySupportedKeys, string | number | string[]> = {
   page: 1,

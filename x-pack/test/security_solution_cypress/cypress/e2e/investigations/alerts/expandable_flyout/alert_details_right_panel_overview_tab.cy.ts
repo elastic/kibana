@@ -6,10 +6,7 @@
  */
 
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
-import {
-  closeFlyout,
-  collapseDocumentDetailsExpandableFlyoutLeftSection,
-} from '../../../../tasks/expandable_flyout/alert_details_right_panel';
+import { closeFlyout } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
 import {
   createNewCaseFromExpandableFlyout,
   expandAlertAtIndexExpandableFlyout,
@@ -65,11 +62,7 @@ import { createRule } from '../../../../tasks/api_calls/rules';
 import { getNewRule } from '../../../../objects/rule';
 import { ALERTS_URL } from '../../../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
-import {
-  DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_BUTTON,
-  DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_HOST_DETAILS,
-  DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_USER_DETAILS,
-} from '../../../../screens/expandable_flyout/alert_details_left_panel_entities_tab';
+import { DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_BUTTON } from '../../../../screens/expandable_flyout/alert_details_left_panel_entities_tab';
 import {
   DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB,
   DOCUMENT_DETAILS_FLYOUT_INVESTIGATION_TAB,
@@ -238,29 +231,7 @@ describe(
         );
       });
 
-      // github.com/elastic/security-team/issues/9933
-      // Skip when feature flag 'entityAlertPreviewEnabled' is enabled
-      it('should open entities details when clicking host name and user name', () => {
-        const hostNameCell =
-          DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_TABLE_VALUE_CELL('siem-kibana');
-        cy.get(hostNameCell).and('have.text', 'siem-kibana');
-
-        cy.get(hostNameCell).click();
-        cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_HOST_DETAILS).should('exist');
-
-        collapseDocumentDetailsExpandableFlyoutLeftSection();
-
-        const userNameCell =
-          DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_TABLE_VALUE_CELL('test');
-        cy.get(userNameCell).should('have.text', 'test');
-
-        cy.get(userNameCell).click();
-        cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_USER_DETAILS).should('exist');
-      });
-
-      // github.com/elastic/security-team/issues/9933
-      // Enable when feature flag 'entityAlertPreviewEnabled' is enabled
-      it.skip('should open host preview when host name is clicked', () => {
+      it('should open host preview when host name is clicked', () => {
         toggleOverviewTabAboutSection();
 
         cy.log('should open host preview when clicked on host name');
@@ -282,9 +253,7 @@ describe(
         cy.get(HOST_PREVIEW_PANEL_FOOTER).should('not.exist');
       });
 
-      // github.com/elastic/security-team/issues/9933
-      // Enable when feature flag 'entityAlertPreviewEnabled' is enabled
-      it.skip('should open user preview when user name is clicked', () => {
+      it('should open user preview when user name is clicked', () => {
         toggleOverviewTabAboutSection();
 
         const userNameCell =
@@ -328,9 +297,7 @@ describe(
           .and('have.class', 'euiButtonGroupButton-isSelected');
       });
 
-      // github.com/elastic/security-team/issues/9933
-      // Enable when feature flag 'entityAlertPreviewEnabled' is enabled
-      it.skip('open host preview when host name is clicked', () => {
+      it('open host preview when host name is clicked', () => {
         toggleOverviewTabAboutSection();
         toggleOverviewTabInvestigationSection();
         toggleOverviewTabInsightsSection();
@@ -352,9 +319,7 @@ describe(
         cy.get(HOST_PREVIEW_PANEL_FOOTER).should('not.exist');
       });
 
-      // github.com/elastic/security-team/issues/9933
-      // Enable when feature flag 'entityAlertPreviewEnabled' is enabled
-      it.skip('open user preview when user name is clicked', () => {
+      it('open user preview when user name is clicked', () => {
         toggleOverviewTabAboutSection();
         toggleOverviewTabInvestigationSection();
         toggleOverviewTabInsightsSection();

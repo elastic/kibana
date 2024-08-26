@@ -11,6 +11,45 @@ import { getEntityDefinitionQuerySchema } from '@kbn/entities-schema';
 import { SetupRouteOptions } from '../types';
 import { findEntityDefinitions } from '../../lib/entities/find_entity_definition';
 
+/**
+ * @openapi
+ * /internal/entities/definition:
+ *   get:
+ *     description: Get all installed entity definitions.
+ *     tags:
+ *       - definitions
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           $ref: '#/components/schemas/getEntityDefinitionQuerySchema/properties/page'
+ *       - in: query
+ *         name: perPage
+ *         schema:
+ *           $ref: '#/components/schemas/getEntityDefinitionQuerySchema/properties/perPage'
+ *     responses:
+ *       200:
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 definitions:
+ *                   type: array
+ *                   items:
+ *                     allOf:
+ *                       - $ref: '#/components/schemas/entityDefinitionSchema'
+ *                       - type: object
+ *                         properties:
+ *                           state:
+ *                            type: object
+ *                            properties:
+ *                              installed:
+ *                                type: boolean
+ *                              running:
+ *                                type: boolean
+ */
 export function getEntityDefinitionRoute<T extends RequestHandlerContext>({
   router,
 }: SetupRouteOptions<T>) {
@@ -31,7 +70,7 @@ export function getEntityDefinitionRoute<T extends RequestHandlerContext>({
           page: req.query.page ?? 1,
           perPage: req.query.perPage ?? 10,
         });
-        return res.ok({ body: definitions });
+        return res.ok({ body: { definitions } });
       } catch (e) {
         return res.customError({ body: e, statusCode: 500 });
       }

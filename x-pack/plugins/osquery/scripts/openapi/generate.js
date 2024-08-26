@@ -9,12 +9,31 @@ require('../../../../../src/setup_node_env');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { generate } = require('@kbn/openapi-generator');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { resolve } = require('path');
+const { REPO_ROOT } = require('@kbn/repo-info');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { join, resolve } = require('path');
 
 const OSQUERY_ROOT = resolve(__dirname, '../..');
 
-generate({
-  rootDir: OSQUERY_ROOT,
-  sourceGlob: './**/*.schema.yaml',
-  templateName: 'zod_operation_schema',
-});
+(async () => {
+  await generate({
+    title: 'API route schemas',
+    rootDir: OSQUERY_ROOT,
+    sourceGlob: 'common/api/**/*.schema.yaml',
+    templateName: 'zod_operation_schema',
+  });
+
+  await generate({
+    title: 'API client for tests',
+    rootDir: OSQUERY_ROOT,
+    sourceGlob: 'common/api/**/*.schema.yaml',
+    templateName: 'api_client_supertest',
+    skipLinting: true,
+    bundle: {
+      outFile: join(
+        REPO_ROOT,
+        'x-pack/test/api_integration/services/security_solution_osquery_api.gen.ts'
+      ),
+    },
+  });
+})();

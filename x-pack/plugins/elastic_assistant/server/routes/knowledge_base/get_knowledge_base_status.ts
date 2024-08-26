@@ -79,11 +79,13 @@ export const getKnowledgeBaseStatusRoute = (
           const indexExists = await esStore.indexExists();
           const pipelineExists = await esStore.pipelineExists();
           const modelExists = await esStore.isModelInstalled(elserId);
+          const setupAvailable = await kbDataClient.isSetupAvailable();
 
           const body: ReadKnowledgeBaseResponse = {
             elser_exists: modelExists,
             index_exists: indexExists,
             is_setup_in_progress: kbDataClient.isSetupInProgress,
+            is_setup_available: setupAvailable,
             pipeline_exists: pipelineExists,
           };
 

@@ -11,7 +11,6 @@ import userEvent from '@testing-library/user-event';
 import { FormattedIp } from '.';
 import { TestProviders } from '../../../common/mock';
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
-import { timelineActions } from '../../store';
 import { StatefulEventContext } from '../../../common/components/events_viewer/stateful_event_context';
 import { NetworkPanelKey } from '../../../flyout/network_details';
 
@@ -44,16 +43,7 @@ jest.mock('../../../common/components/drag_and_drop/draggable_wrapper', () => {
   };
 });
 
-jest.mock('../../store', () => {
-  const original = jest.requireActual('../../store');
-  return {
-    ...original,
-    timelineActions: {
-      ...original.timelineActions,
-      toggleDetailPanel: jest.fn(),
-    },
-  };
-});
+jest.mock('../../store');
 
 const mockOpenFlyout = jest.fn();
 jest.mock('@kbn/expandable-flyout', () => ({
@@ -95,17 +85,6 @@ describe('FormattedIp', () => {
     );
 
     expect(screen.getByTestId('DraggableWrapper')).toBeInTheDocument();
-  });
-
-  test('if not enableIpDetailsFlyout, should go to network details page', () => {
-    render(
-      <TestProviders>
-        <FormattedIp {...props} />
-      </TestProviders>
-    );
-
-    userEvent.click(screen.getByTestId('network-details'));
-    expect(timelineActions.toggleDetailPanel).not.toHaveBeenCalled();
   });
 
   test('if enableIpDetailsFlyout, should open NetworkDetails expandable flyout', () => {

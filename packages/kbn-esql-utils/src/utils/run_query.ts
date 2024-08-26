@@ -14,22 +14,22 @@ import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import type { ESQLColumn, ESQLSearchResponse, ESQLSearchParams } from '@kbn/es-types';
 import { lastValueFrom } from 'rxjs';
 
-export const hasEarliestLatestParams = (query: string) => /\?earliest|\?latest/i.test(query);
+export const hasStartEndParams = (query: string) => /\?t_start|\?t_end/i.test(query);
 
-export const getEarliestLatestParams = (query: string, time?: TimeRange) => {
-  const earliestNamedParams = /\?earliest/i.test(query);
-  const latestNamedParams = /\?latest/i.test(query);
-  if (time && (earliestNamedParams || latestNamedParams)) {
+export const getStartEndParams = (query: string, time?: TimeRange) => {
+  const startNamedParams = /\?t_start/i.test(query);
+  const endNamedParams = /\?t_end/i.test(query);
+  if (time && (startNamedParams || endNamedParams)) {
     const timeParams = {
-      earliest: earliestNamedParams ? dateMath.parse(time.from)?.toISOString() : undefined,
-      latest: latestNamedParams ? dateMath.parse(time.to)?.toISOString() : undefined,
+      start: startNamedParams ? dateMath.parse(time.from)?.toISOString() : undefined,
+      end: endNamedParams ? dateMath.parse(time.to)?.toISOString() : undefined,
     };
     const namedParams = [];
-    if (timeParams?.earliest) {
-      namedParams.push({ earliest: timeParams.earliest });
+    if (timeParams?.start) {
+      namedParams.push({ t_start: timeParams.start });
     }
-    if (timeParams?.latest) {
-      namedParams.push({ latest: timeParams.latest });
+    if (timeParams?.end) {
+      namedParams.push({ t_end: timeParams.end });
     }
     return namedParams;
   }
@@ -61,7 +61,7 @@ export async function getESQLQueryColumnsRaw({
   timeRange?: TimeRange;
 }): Promise<ESQLColumn[]> {
   try {
-    const namedParams = getEarliestLatestParams(esqlQuery, timeRange);
+    const namedParams = getStartEndParams(esqlQuery, timeRange);
     const response = await lastValueFrom(
       search(
         {
@@ -135,7 +135,7 @@ export async function getESQLResults({
   response: ESQLSearchResponse;
   params: ESQLSearchParams;
 }> {
-  const namedParams = getEarliestLatestParams(esqlQuery, timeRange);
+  const namedParams = getStartEndParams(esqlQuery, timeRange);
   const result = await lastValueFrom(
     search(
       {

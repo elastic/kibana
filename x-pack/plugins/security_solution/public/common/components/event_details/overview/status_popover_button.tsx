@@ -29,6 +29,7 @@ interface StatusPopoverButtonProps {
   handleOnEventClosed: () => void;
 }
 
+// TODO: MOVE TO FLYOUT FOLDER - https://github.com/elastic/security-team/issues/7462
 export const StatusPopoverButton = React.memo<StatusPopoverButtonProps>(
   ({ eventId, contextId, enrichedFieldInfo, scopeId, handleOnEventClosed }) => {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);

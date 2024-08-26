@@ -543,7 +543,6 @@ components:
           $ref: '#/components/schemas/RuleActionFrequency'
       required:
         - action_type_id
-        - group
         - id
         - params
 

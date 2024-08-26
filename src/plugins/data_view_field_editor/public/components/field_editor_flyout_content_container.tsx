@@ -11,8 +11,9 @@ import { DocLinksStart, NotificationsStart, CoreStart } from '@kbn/core/public';
 
 import { BehaviorSubject } from 'rxjs';
 import {
-  DataViewField,
   DataView,
+  DataViewField,
+  DataViewLazy,
   DataPublicPluginStart,
   UsageCollectionStart,
   DataViewsPublicPluginStart,
@@ -37,7 +38,8 @@ export interface Props {
   /** The docLinks start service from core */
   docLinks: DocLinksStart;
   /** The index pattern where the field will be added  */
-  dataView: DataView;
+  dataView: DataViewLazy;
+  dataViewToUpdate: DataView | DataViewLazy;
   /** The Kibana field type of the field to create or edit (default: "runtime") */
   fieldTypeToProcess: InternalFieldType;
   /** Optional field to edit */
@@ -72,6 +74,7 @@ export const FieldEditorFlyoutContentContainer = ({
   docLinks,
   fieldTypeToProcess,
   dataView,
+  dataViewToUpdate,
   dataViews,
   search,
   notifications,
@@ -92,6 +95,7 @@ export const FieldEditorFlyoutContentContainer = ({
           notifications,
         },
         dataView,
+        dataViewToUpdate,
         onSave,
         fieldToEdit,
         fieldTypeToProcess,
@@ -116,8 +120,6 @@ export const FieldEditorFlyoutContentContainer = ({
       services={services}
       fieldFormatEditors={fieldFormatEditors}
       fieldFormats={fieldFormats}
-      namesNotAllowed={controller.getNamesNotAllowed()}
-      existingConcreteFields={controller.getExistingConcreteFields()}
       fieldName$={new BehaviorSubject(fieldToEdit?.name || '')}
       subfields$={new BehaviorSubject(fieldToEdit?.fields)}
     >

@@ -352,10 +352,10 @@ exports[`Authentication Host Table Component rendering it renders the host authe
     </table>
   </div>
   <div
-    class="euiFlexGroup c4 emotion-euiFlexGroup-l-flexStart-center-row"
+    class="euiFlexGroup c4 emotion-euiFlexGroup-l-center-row"
   >
     <div
-      class="euiFlexItem emotion-euiFlexItem-grow-1"
+      class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <div
         class="euiPopover emotion-euiPopover-inline-block"

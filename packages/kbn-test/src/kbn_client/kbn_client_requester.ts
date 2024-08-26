@@ -130,7 +130,7 @@ export class KbnClientRequester {
     while (true) {
       attempt += 1;
       try {
-        this.log.info(`Requesting url (redacted): [${redacted}]`);
+        this.log.debug(`Requesting url (redacted): [${redacted}]`);
         return await Axios.request(buildRequest(url, this.httpsAgent, options));
       } catch (error) {
         if (isIgnorableError(error, options.ignoreErrors)) return error.response;

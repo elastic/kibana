@@ -139,12 +139,13 @@ export function usePackagePolicySteps({
 
   const { selectedSetupTechnology } = useSetupTechnology({
     newAgentPolicy,
-    updateNewAgentPolicy,
+    setNewAgentPolicy,
     updateAgentPolicies,
     setSelectedPolicyTab,
     packageInfo,
     packagePolicy,
     isEditPage: true,
+    agentPolicies,
   });
 
   const stepSelectAgentPolicy = useMemo(

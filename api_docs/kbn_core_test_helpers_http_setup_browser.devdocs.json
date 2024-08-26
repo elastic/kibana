@@ -42,17 +42,17 @@
           ">; fatalErrors: jest.Mocked<",
           {
             "pluginId": "@kbn/core-fatal-errors-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreFatalErrorsBrowserPluginApi",
-            "section": "def-common.FatalErrorsSetup",
+            "section": "def-public.FatalErrorsSetup",
             "text": "FatalErrorsSetup"
           },
           ">; http: ",
           {
             "pluginId": "@kbn/core-http-browser-internal",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreHttpBrowserInternalPluginApi",
-            "section": "def-common.InternalHttpSetup",
+            "section": "def-public.InternalHttpSetup",
             "text": "InternalHttpSetup"
           },
           "; }"
@@ -103,9 +103,9 @@
           ">, fatalErrors: jest.Mocked<",
           {
             "pluginId": "@kbn/core-fatal-errors-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreFatalErrorsBrowserPluginApi",
-            "section": "def-common.FatalErrorsSetup",
+            "section": "def-public.FatalErrorsSetup",
             "text": "FatalErrorsSetup"
           },
           ">) => void"
@@ -159,17 +159,17 @@
               "<",
               {
                 "pluginId": "@kbn/core-fatal-errors-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreFatalErrorsBrowserPluginApi",
-                "section": "def-common.FatalErrorInfo",
+                "section": "def-public.FatalErrorInfo",
                 "text": "FatalErrorInfo"
               },
               ">, [], unknown>; } & ",
               {
                 "pluginId": "@kbn/core-fatal-errors-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreFatalErrorsBrowserPluginApi",
-                "section": "def-common.FatalErrorsSetup",
+                "section": "def-public.FatalErrorsSetup",
                 "text": "FatalErrorsSetup"
               }
             ],

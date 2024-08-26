@@ -126,9 +126,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-user-profile-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreUserProfileBrowserPluginApi",
-            "section": "def-common.GetUserProfileResponse",
+            "section": "def-public.GetUserProfileResponse",
             "text": "GetUserProfileResponse"
           },
           "<D> extends ",
@@ -640,10 +640,6 @@
                 "path": "x-pack/plugins/cloud_integrations/cloud_links/public/maybe_add_cloud_links/maybe_add_cloud_links.ts"
               },
               {
-                "plugin": "observabilityAIAssistantApp",
-                "path": "x-pack/plugins/observability_solution/observability_ai_assistant_app/public/hooks/use_current_user.ts"
-              },
-              {
                 "plugin": "cases",
                 "path": "x-pack/plugins/cases/public/common/lib/kibana/hooks.ts"
               },
@@ -690,9 +686,9 @@
               "Omit<",
               {
                 "pluginId": "@kbn/core-user-profile-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreUserProfileBrowserPluginApi",
-                "section": "def-common.UserProfileService",
+                "section": "def-public.UserProfileService",
                 "text": "UserProfileService"
               },
               ", \"getUserProfile$\"> & { userProfile$: ",
@@ -1066,9 +1062,9 @@
           "Omit<",
           {
             "pluginId": "@kbn/core-user-profile-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreUserProfileBrowserPluginApi",
-            "section": "def-common.UserProfileService",
+            "section": "def-public.UserProfileService",
             "text": "UserProfileService"
           },
           ", \"getUserProfile$\"> & { userProfile$: ",

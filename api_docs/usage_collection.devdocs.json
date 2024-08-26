@@ -483,7 +483,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "SearchResponse",
-              "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kQueryRuleset]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
               "; child: (opts: ",
               "ClientOptions",
@@ -519,6 +519,32 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "BulkResponse",
+              ">; }; capabilities: { (this: That, params?: ",
+              "TODO",
+              " | ",
+              "TODO",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "TODO",
+              ">; (this: That, params?: ",
+              "TODO",
+              " | ",
+              "TODO",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "TODO",
+              ", unknown>>; (this: That, params?: ",
+              "TODO",
+              " | ",
+              "TODO",
+              " | undefined, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "TODO",
               ">; }; cat: ",
               "default",
               "; ccr: ",
@@ -576,6 +602,8 @@
               " | undefined): Promise<",
               "ClosePointInTimeResponse",
               ">; }; cluster: ",
+              "default",
+              "; connector: ",
               "default",
               "; count: { (this: That, params?: ",
               "CountRequest",
@@ -1171,7 +1199,9 @@
               "PingRequest",
               " | undefined, options?: ",
               "TransportRequestOptions",
-              " | undefined): Promise<boolean>; }; putScript: { (this: That, params: ",
+              " | undefined): Promise<boolean>; }; profiling: ",
+              "default",
+              "; putScript: { (this: That, params: ",
               "PutScriptRequest",
               " | ",
               "PutScriptRequest",
@@ -1197,7 +1227,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "AcknowledgedResponseBase",
-              ">; }; queryRuleset: ",
+              ">; }; queryRules: ",
               "default",
               "; rankEval: { (this: That, params: ",
               "RankEvalRequest",
@@ -1443,6 +1473,8 @@
               "default",
               "; shutdown: ",
               "default",
+              "; simulate: ",
+              "default",
               "; slm: ",
               "default",
               "; snapshot: ",
@@ -1585,9 +1617,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-common.SavedObjectsClientContract",
+                "section": "def-server.SavedObjectsClientContract",
                 "text": "SavedObjectsClientContract"
               }
             ],
@@ -1734,6 +1766,170 @@
       },
       {
         "parentPluginId": "usageCollection",
+        "id": "def-server.ICollectorSet",
+        "type": "Interface",
+        "tags": [],
+        "label": "ICollectorSet",
+        "description": [
+          "\nInterface to register and manage Usage Collectors through a CollectorSet"
+        ],
+        "path": "src/plugins/usage_collection/server/collector/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "usageCollection",
+            "id": "def-server.ICollectorSet.makeUsageCollector",
+            "type": "Function",
+            "tags": [],
+            "label": "makeUsageCollector",
+            "description": [
+              "\nCreates a usage collector to collect plugin telemetry data.\nregisterCollector must be called to connect the created collector with the service."
+            ],
+            "signature": [
+              "<TFetchReturn, ExtraOptions extends object = {}>(options: ",
+              {
+                "pluginId": "usageCollection",
+                "scope": "server",
+                "docId": "kibUsageCollectionPluginApi",
+                "section": "def-server.UsageCollectorOptions",
+                "text": "UsageCollectorOptions"
+              },
+              "<TFetchReturn, ExtraOptions>) => ",
+              {
+                "pluginId": "usageCollection",
+                "scope": "server",
+                "docId": "kibUsageCollectionPluginApi",
+                "section": "def-server.ICollector",
+                "text": "ICollector"
+              },
+              "<TFetchReturn, ExtraOptions>"
+            ],
+            "path": "src/plugins/usage_collection/server/collector/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "usageCollection",
+                "id": "def-server.ICollectorSet.makeUsageCollector.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "usageCollection",
+                    "scope": "server",
+                    "docId": "kibUsageCollectionPluginApi",
+                    "section": "def-server.UsageCollectorOptions",
+                    "text": "UsageCollectorOptions"
+                  },
+                  "<TFetchReturn, ExtraOptions>"
+                ],
+                "path": "src/plugins/usage_collection/server/collector/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "usageCollection",
+            "id": "def-server.ICollectorSet.registerCollector",
+            "type": "Function",
+            "tags": [],
+            "label": "registerCollector",
+            "description": [
+              "\nRegister a usage collector or a stats collector.\nUsed to connect the created collector to telemetry."
+            ],
+            "signature": [
+              "<TFetchReturn, ExtraOptions extends object>(collector: ",
+              {
+                "pluginId": "usageCollection",
+                "scope": "server",
+                "docId": "kibUsageCollectionPluginApi",
+                "section": "def-server.ICollector",
+                "text": "ICollector"
+              },
+              "<TFetchReturn, ExtraOptions>) => void"
+            ],
+            "path": "src/plugins/usage_collection/server/collector/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "usageCollection",
+                "id": "def-server.ICollectorSet.registerCollector.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "collector",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "usageCollection",
+                    "scope": "server",
+                    "docId": "kibUsageCollectionPluginApi",
+                    "section": "def-server.ICollector",
+                    "text": "ICollector"
+                  },
+                  "<TFetchReturn, ExtraOptions>"
+                ],
+                "path": "src/plugins/usage_collection/server/collector/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "usageCollection",
+            "id": "def-server.ICollectorSet.getCollectorByType",
+            "type": "Function",
+            "tags": [],
+            "label": "getCollectorByType",
+            "description": [
+              "\nReturns a usage collector by type"
+            ],
+            "signature": [
+              "<TFetchReturn, ExtraOptions extends object>(type: string) => ",
+              {
+                "pluginId": "usageCollection",
+                "scope": "server",
+                "docId": "kibUsageCollectionPluginApi",
+                "section": "def-server.ICollector",
+                "text": "ICollector"
+              },
+              "<TFetchReturn, ExtraOptions> | undefined"
+            ],
+            "path": "src/plugins/usage_collection/server/collector/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "usageCollection",
+                "id": "def-server.ICollectorSet.getCollectorByType.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/usage_collection/server/collector/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "usageCollection",
         "id": "def-server.IUsageCounter",
         "type": "Interface",
         "tags": [],
@@ -1745,6 +1941,35 @@
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "usageCollection",
+            "id": "def-server.IUsageCounter.domainId",
+            "type": "string",
+            "tags": [],
+            "label": "domainId",
+            "description": [
+              "\nDefines a domainId (aka a namespace) under which multiple counters can be stored"
+            ],
+            "path": "src/plugins/usage_collection/server/usage_counters/usage_counter.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "usageCollection",
+            "id": "def-server.IUsageCounter.retentionPeriodDays",
+            "type": "number",
+            "tags": [],
+            "label": "retentionPeriodDays",
+            "description": [
+              "\nDefines custom retention period for the counters under this domain.\nThis is the number of days worth of counters that must be kept in the system indices.\nSee USAGE_COUNTERS_KEEP_DOCS_FOR_DAYS for default value"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/usage_collection/server/usage_counters/usage_counter.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
           {
             "parentPluginId": "usageCollection",
             "id": "def-server.IUsageCounter.incrementCounter",
@@ -1795,62 +2020,21 @@
         "description": [
           "\nThe attributes stored in the UsageCounters' SavedObjects"
         ],
+        "signature": [
+          {
+            "pluginId": "usageCollection",
+            "scope": "server",
+            "docId": "kibUsageCollectionPluginApi",
+            "section": "def-server.UsageCountersSavedObjectAttributes",
+            "text": "UsageCountersSavedObjectAttributes"
+          },
+          " extends ",
+          "AbstractCounter"
+        ],
         "path": "src/plugins/usage_collection/server/usage_counters/saved_objects.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
-          {
-            "parentPluginId": "usageCollection",
-            "id": "def-server.UsageCountersSavedObjectAttributes.domainId",
-            "type": "string",
-            "tags": [],
-            "label": "domainId",
-            "description": [
-              "The domain ID registered in the Usage Counter"
-            ],
-            "path": "src/plugins/usage_collection/server/usage_counters/saved_objects.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "usageCollection",
-            "id": "def-server.UsageCountersSavedObjectAttributes.counterName",
-            "type": "string",
-            "tags": [],
-            "label": "counterName",
-            "description": [
-              "The counter name"
-            ],
-            "path": "src/plugins/usage_collection/server/usage_counters/saved_objects.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "usageCollection",
-            "id": "def-server.UsageCountersSavedObjectAttributes.counterType",
-            "type": "string",
-            "tags": [],
-            "label": "counterType",
-            "description": [
-              "The counter type"
-            ],
-            "path": "src/plugins/usage_collection/server/usage_counters/saved_objects.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "usageCollection",
-            "id": "def-server.UsageCountersSavedObjectAttributes.source",
-            "type": "string",
-            "tags": [],
-            "label": "source",
-            "description": [
-              "The source of the event that is being counted: 'server' | 'ui'"
-            ],
-            "path": "src/plugins/usage_collection/server/usage_counters/saved_objects.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
           {
             "parentPluginId": "usageCollection",
             "id": "def-server.UsageCountersSavedObjectAttributes.count",
@@ -1882,7 +2066,7 @@
         "signature": [
           "\"boolean\" | \"keyword\" | \"text\" | \"date\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"double\""
         ],
-        "path": "packages/analytics/ebt/client/src/schema/types.ts",
+        "path": "node_modules/@elastic/ebt/client/src/schema/types.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2112,249 +2296,45 @@
     "setup": {
       "parentPluginId": "usageCollection",
       "id": "def-server.UsageCollectionSetup",
-      "type": "Interface",
+      "type": "Type",
       "tags": [],
       "label": "UsageCollectionSetup",
       "description": [
-        "Server's setup APIs exposed by the UsageCollection Service"
+        "Plugin's setup API"
+      ],
+      "signature": [
+        {
+          "pluginId": "usageCollection",
+          "scope": "server",
+          "docId": "kibUsageCollectionPluginApi",
+          "section": "def-server.ICollectorSet",
+          "text": "ICollectorSet"
+        },
+        " & ",
+        "UsageCountersServiceSetup"
       ],
       "path": "src/plugins/usage_collection/server/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
-      "children": [
-        {
-          "parentPluginId": "usageCollection",
-          "id": "def-server.UsageCollectionSetup.createUsageCounter",
-          "type": "Function",
-          "tags": [],
-          "label": "createUsageCounter",
-          "description": [
-            "\nCreates and registers a usage counter to collect daily aggregated plugin counter events"
-          ],
-          "signature": [
-            "(type: string) => ",
-            {
-              "pluginId": "usageCollection",
-              "scope": "server",
-              "docId": "kibUsageCollectionPluginApi",
-              "section": "def-server.IUsageCounter",
-              "text": "IUsageCounter"
-            }
-          ],
-          "path": "src/plugins/usage_collection/server/plugin.ts",
-          "deprecated": false,
-          "trackAdoption": false,
-          "children": [
-            {
-              "parentPluginId": "usageCollection",
-              "id": "def-server.UsageCollectionSetup.createUsageCounter.$1",
-              "type": "string",
-              "tags": [],
-              "label": "type",
-              "description": [],
-              "signature": [
-                "string"
-              ],
-              "path": "src/plugins/usage_collection/server/plugin.ts",
-              "deprecated": false,
-              "trackAdoption": false,
-              "isRequired": true
-            }
-          ],
-          "returnComment": []
-        },
-        {
-          "parentPluginId": "usageCollection",
-          "id": "def-server.UsageCollectionSetup.getUsageCounterByDomainId",
-          "type": "Function",
-          "tags": [],
-          "label": "getUsageCounterByDomainId",
-          "description": [
-            "\nReturns a usage counter by type"
-          ],
-          "signature": [
-            "(type: string) => ",
-            {
-              "pluginId": "usageCollection",
-              "scope": "server",
-              "docId": "kibUsageCollectionPluginApi",
-              "section": "def-server.IUsageCounter",
-              "text": "IUsageCounter"
-            },
-            " | undefined"
-          ],
-          "path": "src/plugins/usage_collection/server/plugin.ts",
-          "deprecated": false,
-          "trackAdoption": false,
-          "children": [
-            {
-              "parentPluginId": "usageCollection",
-              "id": "def-server.UsageCollectionSetup.getUsageCounterByDomainId.$1",
-              "type": "string",
-              "tags": [],
-              "label": "type",
-              "description": [],
-              "signature": [
-                "string"
-              ],
-              "path": "src/plugins/usage_collection/server/plugin.ts",
-              "deprecated": false,
-              "trackAdoption": false,
-              "isRequired": true
-            }
-          ],
-          "returnComment": []
-        },
-        {
-          "parentPluginId": "usageCollection",
-          "id": "def-server.UsageCollectionSetup.makeUsageCollector",
-          "type": "Function",
-          "tags": [],
-          "label": "makeUsageCollector",
-          "description": [
-            "\nCreates a usage collector to collect plugin telemetry data.\nregisterCollector must be called to connect the created collector with the service."
-          ],
-          "signature": [
-            "<TFetchReturn, ExtraOptions extends object = {}>(options: ",
-            {
-              "pluginId": "usageCollection",
-              "scope": "server",
-              "docId": "kibUsageCollectionPluginApi",
-              "section": "def-server.UsageCollectorOptions",
-              "text": "UsageCollectorOptions"
-            },
-            "<TFetchReturn, ExtraOptions>) => ",
-            {
-              "pluginId": "usageCollection",
-              "scope": "server",
-              "docId": "kibUsageCollectionPluginApi",
-              "section": "def-server.ICollector",
-              "text": "ICollector"
-            },
-            "<TFetchReturn, ExtraOptions>"
-          ],
-          "path": "src/plugins/usage_collection/server/plugin.ts",
-          "deprecated": false,
-          "trackAdoption": false,
-          "children": [
-            {
-              "parentPluginId": "usageCollection",
-              "id": "def-server.UsageCollectionSetup.makeUsageCollector.$1",
-              "type": "CompoundType",
-              "tags": [],
-              "label": "options",
-              "description": [],
-              "signature": [
-                {
-                  "pluginId": "usageCollection",
-                  "scope": "server",
-                  "docId": "kibUsageCollectionPluginApi",
-                  "section": "def-server.UsageCollectorOptions",
-                  "text": "UsageCollectorOptions"
-                },
-                "<TFetchReturn, ExtraOptions>"
-              ],
-              "path": "src/plugins/usage_collection/server/plugin.ts",
-              "deprecated": false,
-              "trackAdoption": false,
-              "isRequired": true
-            }
-          ],
-          "returnComment": []
-        },
-        {
-          "parentPluginId": "usageCollection",
-          "id": "def-server.UsageCollectionSetup.registerCollector",
-          "type": "Function",
-          "tags": [],
-          "label": "registerCollector",
-          "description": [
-            "\nRegister a usage collector or a stats collector.\nUsed to connect the created collector to telemetry."
-          ],
-          "signature": [
-            "<TFetchReturn, ExtraOptions extends object>(collector: ",
-            {
-              "pluginId": "usageCollection",
-              "scope": "server",
-              "docId": "kibUsageCollectionPluginApi",
-              "section": "def-server.ICollector",
-              "text": "ICollector"
-            },
-            "<TFetchReturn, ExtraOptions>) => void"
-          ],
-          "path": "src/plugins/usage_collection/server/plugin.ts",
-          "deprecated": false,
-          "trackAdoption": false,
-          "children": [
-            {
-              "parentPluginId": "usageCollection",
-              "id": "def-server.UsageCollectionSetup.registerCollector.$1",
-              "type": "Object",
-              "tags": [],
-              "label": "collector",
-              "description": [],
-              "signature": [
-                {
-                  "pluginId": "usageCollection",
-                  "scope": "server",
-                  "docId": "kibUsageCollectionPluginApi",
-                  "section": "def-server.ICollector",
-                  "text": "ICollector"
-                },
-                "<TFetchReturn, ExtraOptions>"
-              ],
-              "path": "src/plugins/usage_collection/server/plugin.ts",
-              "deprecated": false,
-              "trackAdoption": false,
-              "isRequired": true
-            }
-          ],
-          "returnComment": []
-        },
-        {
-          "parentPluginId": "usageCollection",
-          "id": "def-server.UsageCollectionSetup.getCollectorByType",
-          "type": "Function",
-          "tags": [],
-          "label": "getCollectorByType",
-          "description": [
-            "\nReturns a usage collector by type"
-          ],
-          "signature": [
-            "<TFetchReturn, ExtraOptions extends object>(type: string) => ",
-            {
-              "pluginId": "usageCollection",
-              "scope": "server",
-              "docId": "kibUsageCollectionPluginApi",
-              "section": "def-server.ICollector",
-              "text": "ICollector"
-            },
-            "<TFetchReturn, ExtraOptions> | undefined"
-          ],
-          "path": "src/plugins/usage_collection/server/plugin.ts",
-          "deprecated": false,
-          "trackAdoption": false,
-          "children": [
-            {
-              "parentPluginId": "usageCollection",
-              "id": "def-server.UsageCollectionSetup.getCollectorByType.$1",
-              "type": "string",
-              "tags": [],
-              "label": "type",
-              "description": [],
-              "signature": [
-                "string"
-              ],
-              "path": "src/plugins/usage_collection/server/plugin.ts",
-              "deprecated": false,
-              "trackAdoption": false,
-              "isRequired": true
-            }
-          ],
-          "returnComment": []
-        }
-      ],
       "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "usageCollection",
+      "id": "def-server.UsageCollectionStart",
+      "type": "Type",
+      "tags": [],
+      "label": "UsageCollectionStart",
+      "description": [
+        "Plugin's start API"
+      ],
+      "signature": [
+        "UsageCountersServiceStart"
+      ],
+      "path": "src/plugins/usage_collection/server/plugin.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "lifecycle": "start",
       "initialIsOpen": true
     }
   },

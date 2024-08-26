@@ -8,7 +8,7 @@
 import type * as Lib from '../../lib';
 
 export const mockValidateKibanaPrivileges = jest.fn() as jest.MockedFunction<
-  typeof Lib['validateKibanaPrivileges']
+  (typeof Lib)['validateKibanaPrivileges']
 >;
 
 jest.mock('../../lib', () => {

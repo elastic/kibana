@@ -3,26 +3,10 @@
   "client": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-user-profile-browser",
-        "id": "def-common.GetUserProfileResponse",
+        "id": "def-public.GetUserProfileResponse",
         "type": "Interface",
         "tags": [],
         "label": "GetUserProfileResponse",
@@ -30,9 +14,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-user-profile-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreUserProfileBrowserPluginApi",
-            "section": "def-common.GetUserProfileResponse",
+            "section": "def-public.GetUserProfileResponse",
             "text": "GetUserProfileResponse"
           },
           "<D> extends ",
@@ -59,7 +43,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-user-profile-browser",
-            "id": "def-common.GetUserProfileResponse.user",
+            "id": "def-public.GetUserProfileResponse.user",
             "type": "CompoundType",
             "tags": [],
             "label": "user",
@@ -93,7 +77,7 @@
       },
       {
         "parentPluginId": "@kbn/core-user-profile-browser",
-        "id": "def-common.UserProfileBulkGetParams",
+        "id": "def-public.UserProfileBulkGetParams",
         "type": "Interface",
         "tags": [],
         "label": "UserProfileBulkGetParams",
@@ -106,7 +90,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-user-profile-browser",
-            "id": "def-common.UserProfileBulkGetParams.uids",
+            "id": "def-public.UserProfileBulkGetParams.uids",
             "type": "Object",
             "tags": [],
             "label": "uids",
@@ -122,7 +106,7 @@
           },
           {
             "parentPluginId": "@kbn/core-user-profile-browser",
-            "id": "def-common.UserProfileBulkGetParams.dataPath",
+            "id": "def-public.UserProfileBulkGetParams.dataPath",
             "type": "string",
             "tags": [],
             "label": "dataPath",
@@ -141,7 +125,7 @@
       },
       {
         "parentPluginId": "@kbn/core-user-profile-browser",
-        "id": "def-common.UserProfileGetCurrentParams",
+        "id": "def-public.UserProfileGetCurrentParams",
         "type": "Interface",
         "tags": [],
         "label": "UserProfileGetCurrentParams",
@@ -154,7 +138,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-user-profile-browser",
-            "id": "def-common.UserProfileGetCurrentParams.dataPath",
+            "id": "def-public.UserProfileGetCurrentParams.dataPath",
             "type": "string",
             "tags": [],
             "label": "dataPath",
@@ -170,7 +154,7 @@
       },
       {
         "parentPluginId": "@kbn/core-user-profile-browser",
-        "id": "def-common.UserProfileService",
+        "id": "def-public.UserProfileService",
         "type": "Interface",
         "tags": [],
         "label": "UserProfileService",
@@ -181,7 +165,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-user-profile-browser",
-            "id": "def-common.UserProfileService.getUserProfile$",
+            "id": "def-public.UserProfileService.getUserProfile$",
             "type": "Function",
             "tags": [],
             "label": "getUserProfile$",
@@ -209,7 +193,7 @@
           },
           {
             "parentPluginId": "@kbn/core-user-profile-browser",
-            "id": "def-common.UserProfileService.getCurrent",
+            "id": "def-public.UserProfileService.getCurrent",
             "type": "Function",
             "tags": [],
             "label": "getCurrent",
@@ -228,17 +212,17 @@
               ">(params?: ",
               {
                 "pluginId": "@kbn/core-user-profile-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreUserProfileBrowserPluginApi",
-                "section": "def-common.UserProfileGetCurrentParams",
+                "section": "def-public.UserProfileGetCurrentParams",
                 "text": "UserProfileGetCurrentParams"
               },
               " | undefined) => Promise<",
               {
                 "pluginId": "@kbn/core-user-profile-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreUserProfileBrowserPluginApi",
-                "section": "def-common.GetUserProfileResponse",
+                "section": "def-public.GetUserProfileResponse",
                 "text": "GetUserProfileResponse"
               },
               "<D>>"
@@ -249,7 +233,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-user-profile-browser",
-                "id": "def-common.UserProfileService.getCurrent.$1",
+                "id": "def-public.UserProfileService.getCurrent.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "params",
@@ -259,9 +243,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-user-profile-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreUserProfileBrowserPluginApi",
-                    "section": "def-common.UserProfileGetCurrentParams",
+                    "section": "def-public.UserProfileGetCurrentParams",
                     "text": "UserProfileGetCurrentParams"
                   },
                   " | undefined"
@@ -276,7 +260,7 @@
           },
           {
             "parentPluginId": "@kbn/core-user-profile-browser",
-            "id": "def-common.UserProfileService.bulkGet",
+            "id": "def-public.UserProfileService.bulkGet",
             "type": "Function",
             "tags": [],
             "label": "bulkGet",
@@ -295,9 +279,9 @@
               ">(params: ",
               {
                 "pluginId": "@kbn/core-user-profile-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreUserProfileBrowserPluginApi",
-                "section": "def-common.UserProfileBulkGetParams",
+                "section": "def-public.UserProfileBulkGetParams",
                 "text": "UserProfileBulkGetParams"
               },
               ") => Promise<",
@@ -316,7 +300,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-user-profile-browser",
-                "id": "def-common.UserProfileService.bulkGet.$1",
+                "id": "def-public.UserProfileService.bulkGet.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "params",
@@ -326,9 +310,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-user-profile-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreUserProfileBrowserPluginApi",
-                    "section": "def-common.UserProfileBulkGetParams",
+                    "section": "def-public.UserProfileBulkGetParams",
                     "text": "UserProfileBulkGetParams"
                   }
                 ],
@@ -342,7 +326,7 @@
           },
           {
             "parentPluginId": "@kbn/core-user-profile-browser",
-            "id": "def-common.UserProfileService.suggest",
+            "id": "def-public.UserProfileService.suggest",
             "type": "Function",
             "tags": [],
             "label": "suggest",
@@ -361,9 +345,9 @@
               ">(path: string, params: ",
               {
                 "pluginId": "@kbn/core-user-profile-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreUserProfileBrowserPluginApi",
-                "section": "def-common.UserProfileSuggestParams",
+                "section": "def-public.UserProfileSuggestParams",
                 "text": "UserProfileSuggestParams"
               },
               ") => Promise<",
@@ -382,7 +366,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-user-profile-browser",
-                "id": "def-common.UserProfileService.suggest.$1",
+                "id": "def-public.UserProfileService.suggest.$1",
                 "type": "string",
                 "tags": [],
                 "label": "path",
@@ -399,7 +383,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-user-profile-browser",
-                "id": "def-common.UserProfileService.suggest.$2",
+                "id": "def-public.UserProfileService.suggest.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "params",
@@ -409,9 +393,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-user-profile-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreUserProfileBrowserPluginApi",
-                    "section": "def-common.UserProfileSuggestParams",
+                    "section": "def-public.UserProfileSuggestParams",
                     "text": "UserProfileSuggestParams"
                   }
                 ],
@@ -425,7 +409,7 @@
           },
           {
             "parentPluginId": "@kbn/core-user-profile-browser",
-            "id": "def-common.UserProfileService.update",
+            "id": "def-public.UserProfileService.update",
             "type": "Function",
             "tags": [],
             "label": "update",
@@ -449,7 +433,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-user-profile-browser",
-                "id": "def-common.UserProfileService.update.$1",
+                "id": "def-public.UserProfileService.update.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "data",
@@ -469,7 +453,7 @@
           },
           {
             "parentPluginId": "@kbn/core-user-profile-browser",
-            "id": "def-common.UserProfileService.partialUpdate",
+            "id": "def-public.UserProfileService.partialUpdate",
             "type": "Function",
             "tags": [],
             "label": "partialUpdate",
@@ -493,7 +477,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-user-profile-browser",
-                "id": "def-common.UserProfileService.partialUpdate.$1",
+                "id": "def-public.UserProfileService.partialUpdate.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "data",
@@ -516,7 +500,7 @@
       },
       {
         "parentPluginId": "@kbn/core-user-profile-browser",
-        "id": "def-common.UserProfileServiceSetup",
+        "id": "def-public.UserProfileServiceSetup",
         "type": "Interface",
         "tags": [],
         "label": "UserProfileServiceSetup",
@@ -529,7 +513,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-user-profile-browser",
-            "id": "def-common.UserProfileServiceSetup.registerUserProfileDelegate",
+            "id": "def-public.UserProfileServiceSetup.registerUserProfileDelegate",
             "type": "Function",
             "tags": [],
             "label": "registerUserProfileDelegate",
@@ -540,9 +524,9 @@
               "(delegate: ",
               {
                 "pluginId": "@kbn/core-user-profile-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreUserProfileBrowserPluginApi",
-                "section": "def-common.CoreUserProfileDelegateContract",
+                "section": "def-public.CoreUserProfileDelegateContract",
                 "text": "CoreUserProfileDelegateContract"
               },
               ") => void"
@@ -553,7 +537,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-user-profile-browser",
-                "id": "def-common.UserProfileServiceSetup.registerUserProfileDelegate.$1",
+                "id": "def-public.UserProfileServiceSetup.registerUserProfileDelegate.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "delegate",
@@ -561,9 +545,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-user-profile-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreUserProfileBrowserPluginApi",
-                    "section": "def-common.CoreUserProfileDelegateContract",
+                    "section": "def-public.CoreUserProfileDelegateContract",
                     "text": "CoreUserProfileDelegateContract"
                   }
                 ],
@@ -580,7 +564,7 @@
       },
       {
         "parentPluginId": "@kbn/core-user-profile-browser",
-        "id": "def-common.UserProfileSuggestParams",
+        "id": "def-public.UserProfileSuggestParams",
         "type": "Interface",
         "tags": [],
         "label": "UserProfileSuggestParams",
@@ -593,7 +577,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-user-profile-browser",
-            "id": "def-common.UserProfileSuggestParams.name",
+            "id": "def-public.UserProfileSuggestParams.name",
             "type": "string",
             "tags": [],
             "label": "name",
@@ -606,7 +590,7 @@
           },
           {
             "parentPluginId": "@kbn/core-user-profile-browser",
-            "id": "def-common.UserProfileSuggestParams.size",
+            "id": "def-public.UserProfileSuggestParams.size",
             "type": "number",
             "tags": [],
             "label": "size",
@@ -622,7 +606,7 @@
           },
           {
             "parentPluginId": "@kbn/core-user-profile-browser",
-            "id": "def-common.UserProfileSuggestParams.dataPath",
+            "id": "def-public.UserProfileSuggestParams.dataPath",
             "type": "string",
             "tags": [],
             "label": "dataPath",
@@ -644,7 +628,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-user-profile-browser",
-        "id": "def-common.CoreUserProfileDelegateContract",
+        "id": "def-public.CoreUserProfileDelegateContract",
         "type": "Type",
         "tags": [],
         "label": "CoreUserProfileDelegateContract",
@@ -653,9 +637,9 @@
           "Omit<",
           {
             "pluginId": "@kbn/core-user-profile-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreUserProfileBrowserPluginApi",
-            "section": "def-common.UserProfileService",
+            "section": "def-public.UserProfileService",
             "text": "UserProfileService"
           },
           ", \"getUserProfile$\"> & { userProfile$: ",
@@ -677,7 +661,7 @@
       },
       {
         "parentPluginId": "@kbn/core-user-profile-browser",
-        "id": "def-common.UserProfileServiceStart",
+        "id": "def-public.UserProfileServiceStart",
         "type": "Type",
         "tags": [],
         "label": "UserProfileServiceStart",
@@ -687,9 +671,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-user-profile-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreUserProfileBrowserPluginApi",
-            "section": "def-common.UserProfileService",
+            "section": "def-public.UserProfileService",
             "text": "UserProfileService"
           }
         ],
@@ -699,6 +683,22 @@
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

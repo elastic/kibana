@@ -7,4 +7,5 @@
  */
 
 export { getRowIndicatorProvider } from './get_row_indicator_provider';
+export { createGetDefaultAppState } from './get_default_app_state';
 export { getCellRenderers } from './get_cell_renderers';

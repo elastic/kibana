@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
 import {
   ITelemetryClient,
   DatasetDetailsEbtProps,

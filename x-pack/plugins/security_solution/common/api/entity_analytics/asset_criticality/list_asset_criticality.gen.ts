@@ -11,10 +11,10 @@
  *
  * info:
  *   title: Asset Criticality List Schema
- *   version: 1
+ *   version: 2023-10-31
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 import { AssetCriticalityRecord } from './common.gen';
 

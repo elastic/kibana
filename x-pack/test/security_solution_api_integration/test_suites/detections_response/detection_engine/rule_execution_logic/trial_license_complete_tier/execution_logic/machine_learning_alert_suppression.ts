@@ -88,10 +88,8 @@ export default ({ getService }: FtrProviderContext) => {
     'user.name': ['root'],
   };
 
-  // The tests described in this file rely on the
-  // 'alertSuppressionForMachineLearningRuleEnabled' feature flag, and are thus
-  // skipped in MKI
-  describe('@ess @serverless @skipInServerlessMKI Machine Learning Detection Rule - Alert Suppression', () => {
+  // NOTE: Add to second quality gate after feature is GA
+  describe('@ess @serverless Machine Learning Detection Rule - Alert Suppression', () => {
     describe('with an active ML Job', () => {
       before(async () => {
         // Order is critical here: auditbeat data must be loaded before attempting to start the ML job,
@@ -619,7 +617,6 @@ export default ({ getService }: FtrProviderContext) => {
             expect.objectContaining({
               'user.name': ['irrelevant'],
               [TIMESTAMP]: timestamp,
-              [ALERT_START]: timestamp,
             })
           );
 
@@ -637,7 +634,6 @@ export default ({ getService }: FtrProviderContext) => {
             expect.objectContaining({
               'user.name': ['irrelevant'],
               [TIMESTAMP]: timestamp,
-              [ALERT_START]: timestamp,
             })
           );
           expect(previewAlerts[1]._source).toEqual(
@@ -659,7 +655,6 @@ export default ({ getService }: FtrProviderContext) => {
                 },
               ],
               [TIMESTAMP]: timestamp,
-              [ALERT_START]: timestamp,
               [ALERT_ORIGINAL_TIME]: timestamp,
               [ALERT_SUPPRESSION_START]: timestamp,
               [ALERT_SUPPRESSION_END]: timestamp,

@@ -1,21 +1,16 @@
+# ⚠️ Updating this file? Also update the public API docs at https://github.com/elastic/security-docs/tree/main/docs/advanced-entity-analytics/api
 openapi: 3.0.0
 info:
-  version: '1'
+  version: '2023-10-31'
   title: Asset Criticality Bulk Upsert Schema
-servers:
-  - url: 'http://{kibana_host}:{port}'
-    variables:
-      kibana_host:
-        default: localhost
-      port:
-        default: '5601'
 paths:
   /api/asset_criticality/bulk:
     post:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
       operationId: BulkUpsertAssetCriticalityRecords
-      summary: Bulk upsert asset criticality data, creating or updating records as needed
+      summary: Bulk Upsert Asset Criticality Records
+      description: Bulk upsert up to 1000 asset criticality records, creating or updating them as needed.
       requestBody:
         content:
           application/json:

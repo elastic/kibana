@@ -39,7 +39,12 @@ jest.mock('../hooks', () => ({
       },
     },
   }),
-  useGetAgentPolicies: jest.fn(),
+  useGetAgentPolicies: jest.fn().mockReturnValue({
+    data: {
+      items: [] as AgentPolicy[],
+    },
+    isLoading: false,
+  }),
   useGetPackagePolicies: jest.fn().mockReturnValue({
     data: {
       items: [{ name: 'Integration 1', revision: 2, id: 'integration1', policy_ids: ['policy1'] }],

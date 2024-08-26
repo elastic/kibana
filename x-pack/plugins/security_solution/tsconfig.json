@@ -208,5 +208,10 @@
     "@kbn/core-theme-browser",
     "@kbn/integration-assistant-plugin",
     "@kbn/avc-banner",
+    "@kbn/esql-ast",
+    "@kbn/esql-validation-autocomplete",
+    "@kbn/config",
+    "@kbn/cbor",
+    "@kbn/zod",
   ]
 }

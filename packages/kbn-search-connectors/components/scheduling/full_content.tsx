@@ -216,9 +216,6 @@ export const ConnectorContentScheduling: React.FC<ConnectorContentSchedulingProp
                 hasSyncTypeChanges={hasSyncTypeChanges}
                 setHasSyncTypeChanges={setHasSyncTypeChanges}
                 disabled={isGated}
-                frequencyBlockList={
-                  type === SyncJobType.ACCESS_CONTROL || type === SyncJobType.FULL ? [] : undefined
-                }
                 scheduling={scheduling[type]}
                 onReset={() => {
                   setScheduling({

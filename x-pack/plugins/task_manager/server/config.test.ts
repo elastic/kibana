@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { configSchema } from './config';
+import { configSchema, CLAIM_STRATEGY_UPDATE_BY_QUERY, CLAIM_STRATEGY_MGET } from './config';
 
 describe('config validation', () => {
   test('task manager defaults', () => {
@@ -13,7 +13,7 @@ describe('config validation', () => {
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
         "allow_reading_invalid_state": true,
-        "claim_strategy": "default",
+        "claim_strategy": "update_by_query",
         "ephemeral_tasks": Object {
           "enabled": false,
           "request_capacity": 10,
@@ -23,7 +23,6 @@ describe('config validation', () => {
           "warn_threshold": 5000,
         },
         "max_attempts": 3,
-        "max_workers": 10,
         "metrics_reset_interval": 30000,
         "monitored_aggregated_stats_refresh_rate": 60000,
         "monitored_stats_health_verbose_log": Object {
@@ -71,7 +70,7 @@ describe('config validation', () => {
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
         "allow_reading_invalid_state": true,
-        "claim_strategy": "default",
+        "claim_strategy": "update_by_query",
         "ephemeral_tasks": Object {
           "enabled": false,
           "request_capacity": 10,
@@ -81,7 +80,6 @@ describe('config validation', () => {
           "warn_threshold": 5000,
         },
         "max_attempts": 3,
-        "max_workers": 10,
         "metrics_reset_interval": 30000,
         "monitored_aggregated_stats_refresh_rate": 60000,
         "monitored_stats_health_verbose_log": Object {
@@ -127,7 +125,7 @@ describe('config validation', () => {
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
         "allow_reading_invalid_state": true,
-        "claim_strategy": "default",
+        "claim_strategy": "update_by_query",
         "ephemeral_tasks": Object {
           "enabled": false,
           "request_capacity": 10,
@@ -137,7 +135,6 @@ describe('config validation', () => {
           "warn_threshold": 5000,
         },
         "max_attempts": 3,
-        "max_workers": 10,
         "metrics_reset_interval": 30000,
         "monitored_aggregated_stats_refresh_rate": 60000,
         "monitored_stats_health_verbose_log": Object {
@@ -244,5 +241,15 @@ describe('config validation', () => {
 
   test('any claim strategy is valid', () => {
     configSchema.validate({ claim_strategy: 'anything!' });
+  });
+
+  test('default claim strategy defaults poll interval to 3000ms', () => {
+    const result = configSchema.validate({ claim_strategy: CLAIM_STRATEGY_UPDATE_BY_QUERY });
+    expect(result.poll_interval).toEqual(3000);
+  });
+
+  test('mget claim strategy defaults poll interval to 500ms', () => {
+    const result = configSchema.validate({ claim_strategy: CLAIM_STRATEGY_MGET });
+    expect(result.poll_interval).toEqual(500);
   });
 });

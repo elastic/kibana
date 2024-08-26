@@ -305,7 +305,7 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } | undefined"
+                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/lib/types.d.ts",
                 "deprecated": false,
@@ -598,7 +598,7 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } | undefined"
+                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/lib/types.d.ts",
                 "deprecated": false,
@@ -663,7 +663,7 @@
             "label": "create",
             "description": [],
             "signature": [
-              "(params?: ({ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } & { coerce?: boolean | undefined; }) | undefined) => Zod.ZodBigInt"
+              "(params?: ({ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } & { coerce?: boolean | undefined; }) | undefined) => Zod.ZodBigInt"
             ],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
@@ -678,7 +678,7 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "({ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } & { coerce?: boolean | undefined; }) | undefined"
+                  "({ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } & { coerce?: boolean | undefined; }) | undefined"
                 ],
                 "path": "node_modules/zod/lib/types.d.ts",
                 "deprecated": false,
@@ -1366,7 +1366,7 @@
             "label": "create",
             "description": [],
             "signature": [
-              "(params?: ({ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } & { coerce?: boolean | undefined; }) | undefined) => Zod.ZodBoolean"
+              "(params?: ({ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } & { coerce?: boolean | undefined; }) | undefined) => Zod.ZodBoolean"
             ],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
@@ -1381,7 +1381,7 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "({ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } & { coerce?: boolean | undefined; }) | undefined"
+                  "({ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } & { coerce?: boolean | undefined; }) | undefined"
                 ],
                 "path": "node_modules/zod/lib/types.d.ts",
                 "deprecated": false,
@@ -1527,7 +1527,7 @@
             "label": "create",
             "description": [],
             "signature": [
-              "<T_1 extends Zod.ZodTypeAny>(type: T_1, params: { errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } & { catch: T_1[\"_output\"] | (() => T_1[\"_output\"]); }) => Zod.ZodCatch<T_1>"
+              "<T_1 extends Zod.ZodTypeAny>(type: T_1, params: { errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } & { catch: T_1[\"_output\"] | (() => T_1[\"_output\"]); }) => Zod.ZodCatch<T_1>"
             ],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
@@ -1556,7 +1556,7 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } & { catch: T_1[\"_output\"] | (() => T_1[\"_output\"]); }"
+                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } & { catch: T_1[\"_output\"] | (() => T_1[\"_output\"]); }"
                 ],
                 "path": "node_modules/zod/lib/types.d.ts",
                 "deprecated": false,
@@ -1781,7 +1781,7 @@
             "label": "create",
             "description": [],
             "signature": [
-              "(params?: ({ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } & { coerce?: boolean | undefined; }) | undefined) => Zod.ZodDate"
+              "(params?: ({ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } & { coerce?: boolean | undefined; }) | undefined) => Zod.ZodDate"
             ],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
@@ -1796,7 +1796,7 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "({ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } & { coerce?: boolean | undefined; }) | undefined"
+                  "({ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } & { coerce?: boolean | undefined; }) | undefined"
                 ],
                 "path": "node_modules/zod/lib/types.d.ts",
                 "deprecated": false,
@@ -1877,7 +1877,7 @@
             "label": "create",
             "description": [],
             "signature": [
-              "<T_1 extends Zod.ZodTypeAny>(type: T_1, params: { errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } & { default: T_1[\"_input\"] | (() => Zod.util.noUndefined<T_1[\"_input\"]>); }) => Zod.ZodDefault<T_1>"
+              "<T_1 extends Zod.ZodTypeAny>(type: T_1, params: { errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } & { default: T_1[\"_input\"] | (() => Zod.util.noUndefined<T_1[\"_input\"]>); }) => Zod.ZodDefault<T_1>"
             ],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
@@ -1906,7 +1906,7 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } & { default: T_1[\"_input\"] | (() => Zod.util.noUndefined<T_1[\"_input\"]>); }"
+                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } & { default: T_1[\"_input\"] | (() => Zod.util.noUndefined<T_1[\"_input\"]>); }"
                 ],
                 "path": "node_modules/zod/lib/types.d.ts",
                 "deprecated": false,
@@ -2203,7 +2203,7 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } | undefined"
+                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/lib/types.d.ts",
                 "deprecated": false,
@@ -2263,7 +2263,7 @@
                     "label": "ctx",
                     "description": [],
                     "signature": [
-                      "{ addIssue: (arg: Zod.IssueData) => void; path: (string | number)[]; }"
+                      "Zod.RefinementCtx"
                     ],
                     "path": "node_modules/zod/lib/types.d.ts",
                     "deprecated": false,
@@ -2293,7 +2293,7 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } | undefined"
+                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/lib/types.d.ts",
                 "deprecated": false,
@@ -2433,7 +2433,7 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } | undefined"
+                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/lib/types.d.ts",
                 "deprecated": false,
@@ -2493,7 +2493,7 @@
                     "label": "ctx",
                     "description": [],
                     "signature": [
-                      "{ addIssue: (arg: Zod.IssueData) => void; path: (string | number)[]; }"
+                      "Zod.RefinementCtx"
                     ],
                     "path": "node_modules/zod/lib/types.d.ts",
                     "deprecated": false,
@@ -2523,7 +2523,7 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } | undefined"
+                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/lib/types.d.ts",
                 "deprecated": false,
@@ -2548,6 +2548,20 @@
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodEnum.private",
+            "type": "Any",
+            "tags": [],
+            "label": "#private",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "node_modules/zod/lib/types.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
           {
             "parentPluginId": "@kbn/zod",
             "id": "def-common.ZodEnum._parse",
@@ -2644,7 +2658,7 @@
             "label": "extract",
             "description": [],
             "signature": [
-              "<ToExtract extends readonly [T[number], ...T[number][]]>(values: ToExtract) => Zod.ZodEnum<Zod.Writeable<ToExtract>>"
+              "<ToExtract extends readonly [T[number], ...T[number][]]>(values: ToExtract, newDef?: Zod.RawCreateParams) => Zod.ZodEnum<Zod.Writeable<ToExtract>>"
             ],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
@@ -2664,6 +2678,21 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodEnum.extract.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "newDef",
+                "description": [],
+                "signature": [
+                  "Zod.RawCreateParams"
+                ],
+                "path": "node_modules/zod/lib/types.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -2676,7 +2705,7 @@
             "label": "exclude",
             "description": [],
             "signature": [
-              "<ToExclude extends readonly [T[number], ...T[number][]]>(values: ToExclude) => Zod.ZodEnum<Zod.typecast<Zod.Writeable<Zod.FilterEnum<T, ToExclude[number]>>, [string, ...string[]]>>"
+              "<ToExclude extends readonly [T[number], ...T[number][]]>(values: ToExclude, newDef?: Zod.RawCreateParams) => Zod.ZodEnum<Zod.typecast<Zod.Writeable<Zod.FilterEnum<T, ToExclude[number]>>, [string, ...string[]]>>"
             ],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
@@ -2696,6 +2725,21 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodEnum.exclude.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "newDef",
+                "description": [],
+                "signature": [
+                  "Zod.RawCreateParams"
+                ],
+                "path": "node_modules/zod/lib/types.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -2869,6 +2913,38 @@
                 "trackAdoption": false
               }
             ]
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodError.assert",
+            "type": "Function",
+            "tags": [],
+            "label": "assert",
+            "description": [],
+            "signature": [
+              "(value: unknown) => asserts value is Zod.ZodError<any>"
+            ],
+            "path": "node_modules/zod/lib/ZodError.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodError.assert.$1",
+                "type": "Unknown",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "node_modules/zod/lib/ZodError.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "@kbn/zod",
@@ -3546,7 +3622,7 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } | undefined"
+                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/lib/types.d.ts",
                 "deprecated": false,
@@ -3656,7 +3732,7 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } | undefined"
+                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/lib/types.d.ts",
                 "deprecated": false,
@@ -3764,7 +3840,7 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } | undefined"
+                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/lib/types.d.ts",
                 "deprecated": false,
@@ -3900,7 +3976,7 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } | undefined"
+                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/lib/types.d.ts",
                 "deprecated": false,
@@ -3980,7 +4056,7 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } | undefined"
+                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/lib/types.d.ts",
                 "deprecated": false,
@@ -4005,6 +4081,20 @@
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodNativeEnum.private",
+            "type": "Any",
+            "tags": [],
+            "label": "#private",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "node_modules/zod/lib/types.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
           {
             "parentPluginId": "@kbn/zod",
             "id": "def-common.ZodNativeEnum._parse",
@@ -4088,7 +4178,7 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } | undefined"
+                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/lib/types.d.ts",
                 "deprecated": false,
@@ -4168,7 +4258,7 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } | undefined"
+                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/lib/types.d.ts",
                 "deprecated": false,
@@ -4248,7 +4338,7 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } | undefined"
+                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/lib/types.d.ts",
                 "deprecated": false,
@@ -4358,7 +4448,7 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } | undefined"
+                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/lib/types.d.ts",
                 "deprecated": false,
@@ -4423,7 +4513,7 @@
             "label": "create",
             "description": [],
             "signature": [
-              "(params?: ({ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } & { coerce?: boolean | undefined; }) | undefined) => Zod.ZodNumber"
+              "(params?: ({ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } & { coerce?: boolean | undefined; }) | undefined) => Zod.ZodNumber"
             ],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
@@ -4438,7 +4528,7 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "({ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } & { coerce?: boolean | undefined; }) | undefined"
+                  "({ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } & { coerce?: boolean | undefined; }) | undefined"
                 ],
                 "path": "node_modules/zod/lib/types.d.ts",
                 "deprecated": false,
@@ -5408,7 +5498,7 @@
             "label": "extend",
             "description": [],
             "signature": [
-              "<Augmentation extends Zod.ZodRawShape>(augmentation: Augmentation) => Zod.ZodObject<{ [k in keyof (Omit<T, keyof Augmentation> & Augmentation)]: (Omit<T, keyof Augmentation> & Augmentation)[k]; }, UnknownKeys, Catchall, Zod.objectOutputType<{ [k in keyof (Omit<T, keyof Augmentation> & Augmentation)]: (Omit<T, keyof Augmentation> & Augmentation)[k]; }, Catchall, UnknownKeys>, Zod.objectInputType<{ [k in keyof (Omit<T, keyof Augmentation> & Augmentation)]: (Omit<T, keyof Augmentation> & Augmentation)[k]; }, Catchall, UnknownKeys>>"
+              "<Augmentation extends Zod.ZodRawShape>(augmentation: Augmentation) => Zod.ZodObject<Zod.objectUtil.extendShape<T, Augmentation>, UnknownKeys, Catchall, Zod.objectOutputType<Zod.objectUtil.extendShape<T, Augmentation>, Catchall, UnknownKeys>, Zod.objectInputType<Zod.objectUtil.extendShape<T, Augmentation>, Catchall, UnknownKeys>>"
             ],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
@@ -5442,7 +5532,7 @@
             "label": "augment",
             "description": [],
             "signature": [
-              "<Augmentation extends Zod.ZodRawShape>(augmentation: Augmentation) => Zod.ZodObject<{ [k in keyof (Omit<T, keyof Augmentation> & Augmentation)]: (Omit<T, keyof Augmentation> & Augmentation)[k]; }, UnknownKeys, Catchall, Zod.objectOutputType<{ [k in keyof (Omit<T, keyof Augmentation> & Augmentation)]: (Omit<T, keyof Augmentation> & Augmentation)[k]; }, Catchall, UnknownKeys>, Zod.objectInputType<{ [k in keyof (Omit<T, keyof Augmentation> & Augmentation)]: (Omit<T, keyof Augmentation> & Augmentation)[k]; }, Catchall, UnknownKeys>>"
+              "<Augmentation extends Zod.ZodRawShape>(augmentation: Augmentation) => Zod.ZodObject<Zod.objectUtil.extendShape<T, Augmentation>, UnknownKeys, Catchall, Zod.objectOutputType<Zod.objectUtil.extendShape<T, Augmentation>, Catchall, UnknownKeys>, Zod.objectInputType<Zod.objectUtil.extendShape<T, Augmentation>, Catchall, UnknownKeys>>"
             ],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": true,
@@ -5476,7 +5566,7 @@
               "\nPrior to zod@1.0.12 there was a bug in the\ninferred type of merged objects. Please\nupgrade if you are experiencing issues."
             ],
             "signature": [
-              "<Incoming extends Zod.AnyZodObject, Augmentation extends Incoming[\"shape\"]>(merging: Incoming) => Zod.ZodObject<{ [k in keyof (Omit<T, keyof Augmentation> & Augmentation)]: (Omit<T, keyof Augmentation> & Augmentation)[k]; }, Incoming[\"_def\"][\"unknownKeys\"], Incoming[\"_def\"][\"catchall\"], Zod.objectOutputType<{ [k in keyof (Omit<T, keyof Augmentation> & Augmentation)]: (Omit<T, keyof Augmentation> & Augmentation)[k]; }, Incoming[\"_def\"][\"catchall\"], Incoming[\"_def\"][\"unknownKeys\"]>, Zod.objectInputType<{ [k in keyof (Omit<T, keyof Augmentation> & Augmentation)]: (Omit<T, keyof Augmentation> & Augmentation)[k]; }, Incoming[\"_def\"][\"catchall\"], Incoming[\"_def\"][\"unknownKeys\"]>>"
+              "<Incoming extends Zod.AnyZodObject, Augmentation extends Incoming[\"shape\"]>(merging: Incoming) => Zod.ZodObject<Zod.objectUtil.extendShape<T, Augmentation>, Incoming[\"_def\"][\"unknownKeys\"], Incoming[\"_def\"][\"catchall\"], Zod.objectOutputType<Zod.objectUtil.extendShape<T, Augmentation>, Incoming[\"_def\"][\"catchall\"], Incoming[\"_def\"][\"unknownKeys\"]>, Zod.objectInputType<Zod.objectUtil.extendShape<T, Augmentation>, Incoming[\"_def\"][\"catchall\"], Incoming[\"_def\"][\"unknownKeys\"]>>"
             ],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
@@ -5587,7 +5677,7 @@
             "label": "pick",
             "description": [],
             "signature": [
-              "<Mask extends { [k in keyof T]?: true | undefined; }>(mask: Mask) => Zod.ZodObject<Pick<T, Extract<keyof T, keyof Mask>>, UnknownKeys, Catchall, Zod.objectOutputType<Pick<T, Extract<keyof T, keyof Mask>>, Catchall, UnknownKeys>, Zod.objectInputType<Pick<T, Extract<keyof T, keyof Mask>>, Catchall, UnknownKeys>>"
+              "<Mask extends Zod.util.Exactly<{ [k in keyof T]?: true | undefined; }, Mask>>(mask: Mask) => Zod.ZodObject<Pick<T, Extract<keyof T, keyof Mask>>, UnknownKeys, Catchall, Zod.objectOutputType<Pick<T, Extract<keyof T, keyof Mask>>, Catchall, UnknownKeys>, Zod.objectInputType<Pick<T, Extract<keyof T, keyof Mask>>, Catchall, UnknownKeys>>"
             ],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
@@ -5619,7 +5709,7 @@
             "label": "omit",
             "description": [],
             "signature": [
-              "<Mask extends { [k in keyof T]?: true | undefined; }>(mask: Mask) => Zod.ZodObject<Omit<T, keyof Mask>, UnknownKeys, Catchall, Zod.objectOutputType<Omit<T, keyof Mask>, Catchall, UnknownKeys>, Zod.objectInputType<Omit<T, keyof Mask>, Catchall, UnknownKeys>>"
+              "<Mask extends Zod.util.Exactly<{ [k in keyof T]?: true | undefined; }, Mask>>(mask: Mask) => Zod.ZodObject<Omit<T, keyof Mask>, UnknownKeys, Catchall, Zod.objectOutputType<Omit<T, keyof Mask>, Catchall, UnknownKeys>, Zod.objectInputType<Omit<T, keyof Mask>, Catchall, UnknownKeys>>"
             ],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
@@ -5672,7 +5762,7 @@
             "label": "partial",
             "description": [],
             "signature": [
-              "{ (): Zod.ZodObject<{ [k in keyof T]: Zod.ZodOptional<T[k]>; }, UnknownKeys, Catchall, Zod.objectOutputType<{ [k in keyof T]: Zod.ZodOptional<T[k]>; }, Catchall, UnknownKeys>, Zod.objectInputType<{ [k in keyof T]: Zod.ZodOptional<T[k]>; }, Catchall, UnknownKeys>>; <Mask extends { [k in keyof T]?: true | undefined; }>(mask: Mask): Zod.ZodObject<{ [k in Zod.objectUtil.noNeverKeys<{ [k in keyof T]: k extends keyof Mask ? Zod.ZodOptional<T[k]> : T[k]; }>]: k extends keyof T ? { [k in keyof T]: k extends keyof Mask ? Zod.ZodOptional<T[k]> : T[k]; }[k] : never; }, UnknownKeys, Catchall, Zod.objectOutputType<{ [k in Zod.objectUtil.noNeverKeys<{ [k in keyof T]: k extends keyof Mask ? Zod.ZodOptional<T[k]> : T[k]; }>]: k extends keyof T ? { [k in keyof T]: k extends keyof Mask ? Zod.ZodOptional<T[k]> : T[k]; }[k] : never; }, Catchall, UnknownKeys>, Zod.objectInputType<{ [k in Zod.objectUtil.noNeverKeys<{ [k in keyof T]: k extends keyof Mask ? Zod.ZodOptional<T[k]> : T[k]; }>]: k extends keyof T ? { [k in keyof T]: k extends keyof Mask ? Zod.ZodOptional<T[k]> : T[k]; }[k] : never; }, Catchall, UnknownKeys>>; }"
+              "{ (): Zod.ZodObject<{ [k in keyof T]: Zod.ZodOptional<T[k]>; }, UnknownKeys, Catchall, Zod.objectOutputType<{ [k in keyof T]: Zod.ZodOptional<T[k]>; }, Catchall, UnknownKeys>, Zod.objectInputType<{ [k in keyof T]: Zod.ZodOptional<T[k]>; }, Catchall, UnknownKeys>>; <Mask extends Zod.util.Exactly<{ [k in keyof T]?: true | undefined; }, Mask>>(mask: Mask): Zod.ZodObject<{ [k in Zod.objectUtil.noNeverKeys<{ [k in keyof T]: k extends keyof Mask ? Zod.ZodOptional<T[k]> : T[k]; }>]: k extends keyof T ? { [k in keyof T]: k extends keyof Mask ? Zod.ZodOptional<T[k]> : T[k]; }[k] : never; }, UnknownKeys, Catchall, Zod.objectOutputType<{ [k in Zod.objectUtil.noNeverKeys<{ [k in keyof T]: k extends keyof Mask ? Zod.ZodOptional<T[k]> : T[k]; }>]: k extends keyof T ? { [k in keyof T]: k extends keyof Mask ? Zod.ZodOptional<T[k]> : T[k]; }[k] : never; }, Catchall, UnknownKeys>, Zod.objectInputType<{ [k in Zod.objectUtil.noNeverKeys<{ [k in keyof T]: k extends keyof Mask ? Zod.ZodOptional<T[k]> : T[k]; }>]: k extends keyof T ? { [k in keyof T]: k extends keyof Mask ? Zod.ZodOptional<T[k]> : T[k]; }[k] : never; }, Catchall, UnknownKeys>>; }"
             ],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
@@ -5688,7 +5778,7 @@
             "label": "partial",
             "description": [],
             "signature": [
-              "{ (): Zod.ZodObject<{ [k in keyof T]: Zod.ZodOptional<T[k]>; }, UnknownKeys, Catchall, Zod.objectOutputType<{ [k in keyof T]: Zod.ZodOptional<T[k]>; }, Catchall, UnknownKeys>, Zod.objectInputType<{ [k in keyof T]: Zod.ZodOptional<T[k]>; }, Catchall, UnknownKeys>>; <Mask extends { [k in keyof T]?: true | undefined; }>(mask: Mask): Zod.ZodObject<{ [k in Zod.objectUtil.noNeverKeys<{ [k in keyof T]: k extends keyof Mask ? Zod.ZodOptional<T[k]> : T[k]; }>]: k extends keyof T ? { [k in keyof T]: k extends keyof Mask ? Zod.ZodOptional<T[k]> : T[k]; }[k] : never; }, UnknownKeys, Catchall, Zod.objectOutputType<{ [k in Zod.objectUtil.noNeverKeys<{ [k in keyof T]: k extends keyof Mask ? Zod.ZodOptional<T[k]> : T[k]; }>]: k extends keyof T ? { [k in keyof T]: k extends keyof Mask ? Zod.ZodOptional<T[k]> : T[k]; }[k] : never; }, Catchall, UnknownKeys>, Zod.objectInputType<{ [k in Zod.objectUtil.noNeverKeys<{ [k in keyof T]: k extends keyof Mask ? Zod.ZodOptional<T[k]> : T[k]; }>]: k extends keyof T ? { [k in keyof T]: k extends keyof Mask ? Zod.ZodOptional<T[k]> : T[k]; }[k] : never; }, Catchall, UnknownKeys>>; }"
+              "{ (): Zod.ZodObject<{ [k in keyof T]: Zod.ZodOptional<T[k]>; }, UnknownKeys, Catchall, Zod.objectOutputType<{ [k in keyof T]: Zod.ZodOptional<T[k]>; }, Catchall, UnknownKeys>, Zod.objectInputType<{ [k in keyof T]: Zod.ZodOptional<T[k]>; }, Catchall, UnknownKeys>>; <Mask extends Zod.util.Exactly<{ [k in keyof T]?: true | undefined; }, Mask>>(mask: Mask): Zod.ZodObject<{ [k in Zod.objectUtil.noNeverKeys<{ [k in keyof T]: k extends keyof Mask ? Zod.ZodOptional<T[k]> : T[k]; }>]: k extends keyof T ? { [k in keyof T]: k extends keyof Mask ? Zod.ZodOptional<T[k]> : T[k]; }[k] : never; }, UnknownKeys, Catchall, Zod.objectOutputType<{ [k in Zod.objectUtil.noNeverKeys<{ [k in keyof T]: k extends keyof Mask ? Zod.ZodOptional<T[k]> : T[k]; }>]: k extends keyof T ? { [k in keyof T]: k extends keyof Mask ? Zod.ZodOptional<T[k]> : T[k]; }[k] : never; }, Catchall, UnknownKeys>, Zod.objectInputType<{ [k in Zod.objectUtil.noNeverKeys<{ [k in keyof T]: k extends keyof Mask ? Zod.ZodOptional<T[k]> : T[k]; }>]: k extends keyof T ? { [k in keyof T]: k extends keyof Mask ? Zod.ZodOptional<T[k]> : T[k]; }[k] : never; }, Catchall, UnknownKeys>>; }"
             ],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
@@ -5720,7 +5810,7 @@
             "label": "required",
             "description": [],
             "signature": [
-              "{ (): Zod.ZodObject<{ [k in keyof T]: Zod.deoptional<T[k]>; }, UnknownKeys, Catchall, Zod.objectOutputType<{ [k in keyof T]: Zod.deoptional<T[k]>; }, Catchall, UnknownKeys>, Zod.objectInputType<{ [k in keyof T]: Zod.deoptional<T[k]>; }, Catchall, UnknownKeys>>; <Mask extends { [k in keyof T]?: true | undefined; }>(mask: Mask): Zod.ZodObject<{ [k in Zod.objectUtil.noNeverKeys<{ [k in keyof T]: k extends keyof Mask ? Zod.deoptional<T[k]> : T[k]; }>]: k extends keyof T ? { [k in keyof T]: k extends keyof Mask ? Zod.deoptional<T[k]> : T[k]; }[k] : never; }, UnknownKeys, Catchall, Zod.objectOutputType<{ [k in Zod.objectUtil.noNeverKeys<{ [k in keyof T]: k extends keyof Mask ? Zod.deoptional<T[k]> : T[k]; }>]: k extends keyof T ? { [k in keyof T]: k extends keyof Mask ? Zod.deoptional<T[k]> : T[k]; }[k] : never; }, Catchall, UnknownKeys>, Zod.objectInputType<{ [k in Zod.objectUtil.noNeverKeys<{ [k in keyof T]: k extends keyof Mask ? Zod.deoptional<T[k]> : T[k]; }>]: k extends keyof T ? { [k in keyof T]: k extends keyof Mask ? Zod.deoptional<T[k]> : T[k]; }[k] : never; }, Catchall, UnknownKeys>>; }"
+              "{ (): Zod.ZodObject<{ [k in keyof T]: Zod.deoptional<T[k]>; }, UnknownKeys, Catchall, Zod.objectOutputType<{ [k in keyof T]: Zod.deoptional<T[k]>; }, Catchall, UnknownKeys>, Zod.objectInputType<{ [k in keyof T]: Zod.deoptional<T[k]>; }, Catchall, UnknownKeys>>; <Mask extends Zod.util.Exactly<{ [k in keyof T]?: true | undefined; }, Mask>>(mask: Mask): Zod.ZodObject<{ [k in Zod.objectUtil.noNeverKeys<{ [k in keyof T]: k extends keyof Mask ? Zod.deoptional<T[k]> : T[k]; }>]: k extends keyof T ? { [k in keyof T]: k extends keyof Mask ? Zod.deoptional<T[k]> : T[k]; }[k] : never; }, UnknownKeys, Catchall, Zod.objectOutputType<{ [k in Zod.objectUtil.noNeverKeys<{ [k in keyof T]: k extends keyof Mask ? Zod.deoptional<T[k]> : T[k]; }>]: k extends keyof T ? { [k in keyof T]: k extends keyof Mask ? Zod.deoptional<T[k]> : T[k]; }[k] : never; }, Catchall, UnknownKeys>, Zod.objectInputType<{ [k in Zod.objectUtil.noNeverKeys<{ [k in keyof T]: k extends keyof Mask ? Zod.deoptional<T[k]> : T[k]; }>]: k extends keyof T ? { [k in keyof T]: k extends keyof Mask ? Zod.deoptional<T[k]> : T[k]; }[k] : never; }, Catchall, UnknownKeys>>; }"
             ],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
@@ -5736,7 +5826,7 @@
             "label": "required",
             "description": [],
             "signature": [
-              "{ (): Zod.ZodObject<{ [k in keyof T]: Zod.deoptional<T[k]>; }, UnknownKeys, Catchall, Zod.objectOutputType<{ [k in keyof T]: Zod.deoptional<T[k]>; }, Catchall, UnknownKeys>, Zod.objectInputType<{ [k in keyof T]: Zod.deoptional<T[k]>; }, Catchall, UnknownKeys>>; <Mask extends { [k in keyof T]?: true | undefined; }>(mask: Mask): Zod.ZodObject<{ [k in Zod.objectUtil.noNeverKeys<{ [k in keyof T]: k extends keyof Mask ? Zod.deoptional<T[k]> : T[k]; }>]: k extends keyof T ? { [k in keyof T]: k extends keyof Mask ? Zod.deoptional<T[k]> : T[k]; }[k] : never; }, UnknownKeys, Catchall, Zod.objectOutputType<{ [k in Zod.objectUtil.noNeverKeys<{ [k in keyof T]: k extends keyof Mask ? Zod.deoptional<T[k]> : T[k]; }>]: k extends keyof T ? { [k in keyof T]: k extends keyof Mask ? Zod.deoptional<T[k]> : T[k]; }[k] : never; }, Catchall, UnknownKeys>, Zod.objectInputType<{ [k in Zod.objectUtil.noNeverKeys<{ [k in keyof T]: k extends keyof Mask ? Zod.deoptional<T[k]> : T[k]; }>]: k extends keyof T ? { [k in keyof T]: k extends keyof Mask ? Zod.deoptional<T[k]> : T[k]; }[k] : never; }, Catchall, UnknownKeys>>; }"
+              "{ (): Zod.ZodObject<{ [k in keyof T]: Zod.deoptional<T[k]>; }, UnknownKeys, Catchall, Zod.objectOutputType<{ [k in keyof T]: Zod.deoptional<T[k]>; }, Catchall, UnknownKeys>, Zod.objectInputType<{ [k in keyof T]: Zod.deoptional<T[k]>; }, Catchall, UnknownKeys>>; <Mask extends Zod.util.Exactly<{ [k in keyof T]?: true | undefined; }, Mask>>(mask: Mask): Zod.ZodObject<{ [k in Zod.objectUtil.noNeverKeys<{ [k in keyof T]: k extends keyof Mask ? Zod.deoptional<T[k]> : T[k]; }>]: k extends keyof T ? { [k in keyof T]: k extends keyof Mask ? Zod.deoptional<T[k]> : T[k]; }[k] : never; }, UnknownKeys, Catchall, Zod.objectOutputType<{ [k in Zod.objectUtil.noNeverKeys<{ [k in keyof T]: k extends keyof Mask ? Zod.deoptional<T[k]> : T[k]; }>]: k extends keyof T ? { [k in keyof T]: k extends keyof Mask ? Zod.deoptional<T[k]> : T[k]; }[k] : never; }, Catchall, UnknownKeys>, Zod.objectInputType<{ [k in Zod.objectUtil.noNeverKeys<{ [k in keyof T]: k extends keyof Mask ? Zod.deoptional<T[k]> : T[k]; }>]: k extends keyof T ? { [k in keyof T]: k extends keyof Mask ? Zod.deoptional<T[k]> : T[k]; }[k] : never; }, Catchall, UnknownKeys>>; }"
             ],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
@@ -5784,7 +5874,7 @@
             "label": "create",
             "description": [],
             "signature": [
-              "<T_1 extends Zod.ZodRawShape>(shape: T_1, params?: Zod.RawCreateParams) => Zod.ZodObject<T_1, \"strip\", Zod.ZodTypeAny, { [k_1 in keyof Zod.objectUtil.addQuestionMarks<Zod.baseObjectOutputType<T_1>, { [k in keyof Zod.baseObjectOutputType<T_1>]: undefined extends Zod.baseObjectOutputType<T_1>[k] ? never : k; }[keyof T_1]>]: Zod.objectUtil.addQuestionMarks<Zod.baseObjectOutputType<T_1>, { [k in keyof Zod.baseObjectOutputType<T_1>]: undefined extends Zod.baseObjectOutputType<T_1>[k] ? never : k; }[keyof T_1]>[k_1]; }, { [k_2 in keyof Zod.baseObjectInputType<T_1>]: Zod.baseObjectInputType<T_1>[k_2]; }>"
+              "<T_1 extends Zod.ZodRawShape>(shape: T_1, params?: Zod.RawCreateParams) => Zod.ZodObject<T_1, \"strip\", Zod.ZodTypeAny, { [k in keyof Zod.objectUtil.addQuestionMarks<Zod.baseObjectOutputType<T_1>, any>]: Zod.objectUtil.addQuestionMarks<Zod.baseObjectOutputType<T_1>, any>[k]; }, { [k_1 in keyof Zod.baseObjectInputType<T_1>]: Zod.baseObjectInputType<T_1>[k_1]; }>"
             ],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
@@ -5813,7 +5903,7 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } | undefined"
+                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/lib/types.d.ts",
                 "deprecated": false,
@@ -5829,7 +5919,7 @@
             "label": "strictCreate",
             "description": [],
             "signature": [
-              "<T_1 extends Zod.ZodRawShape>(shape: T_1, params?: Zod.RawCreateParams) => Zod.ZodObject<T_1, \"strict\", Zod.ZodTypeAny, { [k_1 in keyof Zod.objectUtil.addQuestionMarks<Zod.baseObjectOutputType<T_1>, { [k in keyof Zod.baseObjectOutputType<T_1>]: undefined extends Zod.baseObjectOutputType<T_1>[k] ? never : k; }[keyof T_1]>]: Zod.objectUtil.addQuestionMarks<Zod.baseObjectOutputType<T_1>, { [k in keyof Zod.baseObjectOutputType<T_1>]: undefined extends Zod.baseObjectOutputType<T_1>[k] ? never : k; }[keyof T_1]>[k_1]; }, { [k_2 in keyof Zod.baseObjectInputType<T_1>]: Zod.baseObjectInputType<T_1>[k_2]; }>"
+              "<T_1 extends Zod.ZodRawShape>(shape: T_1, params?: Zod.RawCreateParams) => Zod.ZodObject<T_1, \"strict\", Zod.ZodTypeAny, { [k in keyof Zod.objectUtil.addQuestionMarks<Zod.baseObjectOutputType<T_1>, any>]: Zod.objectUtil.addQuestionMarks<Zod.baseObjectOutputType<T_1>, any>[k]; }, { [k_1 in keyof Zod.baseObjectInputType<T_1>]: Zod.baseObjectInputType<T_1>[k_1]; }>"
             ],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
@@ -5858,7 +5948,7 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } | undefined"
+                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/lib/types.d.ts",
                 "deprecated": false,
@@ -5874,7 +5964,7 @@
             "label": "lazycreate",
             "description": [],
             "signature": [
-              "<T_1 extends Zod.ZodRawShape>(shape: () => T_1, params?: Zod.RawCreateParams) => Zod.ZodObject<T_1, \"strip\", Zod.ZodTypeAny, { [k_1 in keyof Zod.objectUtil.addQuestionMarks<Zod.baseObjectOutputType<T_1>, { [k in keyof Zod.baseObjectOutputType<T_1>]: undefined extends Zod.baseObjectOutputType<T_1>[k] ? never : k; }[keyof T_1]>]: Zod.objectUtil.addQuestionMarks<Zod.baseObjectOutputType<T_1>, { [k in keyof Zod.baseObjectOutputType<T_1>]: undefined extends Zod.baseObjectOutputType<T_1>[k] ? never : k; }[keyof T_1]>[k_1]; }, { [k_2 in keyof Zod.baseObjectInputType<T_1>]: Zod.baseObjectInputType<T_1>[k_2]; }>"
+              "<T_1 extends Zod.ZodRawShape>(shape: () => T_1, params?: Zod.RawCreateParams) => Zod.ZodObject<T_1, \"strip\", Zod.ZodTypeAny, { [k in keyof Zod.objectUtil.addQuestionMarks<Zod.baseObjectOutputType<T_1>, any>]: Zod.objectUtil.addQuestionMarks<Zod.baseObjectOutputType<T_1>, any>[k]; }, { [k_1 in keyof Zod.baseObjectInputType<T_1>]: Zod.baseObjectInputType<T_1>[k_1]; }>"
             ],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
@@ -5905,7 +5995,7 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } | undefined"
+                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/lib/types.d.ts",
                 "deprecated": false,
@@ -6015,7 +6105,7 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } | undefined"
+                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/lib/types.d.ts",
                 "deprecated": false,
@@ -6221,7 +6311,7 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } | undefined"
+                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/lib/types.d.ts",
                 "deprecated": false,
@@ -6240,7 +6330,7 @@
         "label": "ZodReadonly",
         "description": [],
         "signature": [
-          "Zod.ZodReadonly<T> extends Zod.ZodType<MakeReadonly<T[\"_output\"]>, Zod.ZodReadonlyDef<T>, T[\"_input\"]>"
+          "Zod.ZodReadonly<T> extends Zod.ZodType<MakeReadonly<T[\"_output\"]>, Zod.ZodReadonlyDef<T>, MakeReadonly<T[\"_input\"]>>"
         ],
         "path": "node_modules/zod/lib/types.d.ts",
         "deprecated": false,
@@ -6315,13 +6405,29 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } | undefined"
+                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/lib/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
             ]
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodReadonly.unwrap",
+            "type": "Function",
+            "tags": [],
+            "label": "unwrap",
+            "description": [],
+            "signature": [
+              "() => T"
+            ],
+            "path": "node_modules/zod/lib/types.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -6794,7 +6900,7 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } | undefined"
+                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/lib/types.d.ts",
                 "deprecated": false,
@@ -7090,6 +7196,41 @@
           },
           {
             "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodString.nanoid",
+            "type": "Function",
+            "tags": [],
+            "label": "nanoid",
+            "description": [],
+            "signature": [
+              "(message?: ",
+              "errorUtil",
+              ".ErrMessage | undefined) => Zod.ZodString"
+            ],
+            "path": "node_modules/zod/lib/types.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodString.nanoid.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "message",
+                "description": [],
+                "signature": [
+                  "errorUtil",
+                  ".ErrMessage | undefined"
+                ],
+                "path": "node_modules/zod/lib/types.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/zod",
             "id": "def-common.ZodString.cuid",
             "type": "Function",
             "tags": [],
@@ -7195,6 +7336,41 @@
           },
           {
             "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodString.base64",
+            "type": "Function",
+            "tags": [],
+            "label": "base64",
+            "description": [],
+            "signature": [
+              "(message?: ",
+              "errorUtil",
+              ".ErrMessage | undefined) => Zod.ZodString"
+            ],
+            "path": "node_modules/zod/lib/types.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodString.base64.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "message",
+                "description": [],
+                "signature": [
+                  "errorUtil",
+                  ".ErrMessage | undefined"
+                ],
+                "path": "node_modules/zod/lib/types.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/zod",
             "id": "def-common.ZodString.ip",
             "type": "Function",
             "tags": [],
@@ -7233,7 +7409,7 @@
             "label": "datetime",
             "description": [],
             "signature": [
-              "(options?: string | { message?: string | undefined; precision?: number | null | undefined; offset?: boolean | undefined; } | undefined) => Zod.ZodString"
+              "(options?: string | { message?: string | undefined; precision?: number | null | undefined; offset?: boolean | undefined; local?: boolean | undefined; } | undefined) => Zod.ZodString"
             ],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
@@ -7247,7 +7423,106 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "string | { message?: string | undefined; precision?: number | null | undefined; offset?: boolean | undefined; } | undefined"
+                  "string | { message?: string | undefined; precision?: number | null | undefined; offset?: boolean | undefined; local?: boolean | undefined; } | undefined"
+                ],
+                "path": "node_modules/zod/lib/types.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodString.date",
+            "type": "Function",
+            "tags": [],
+            "label": "date",
+            "description": [],
+            "signature": [
+              "(message?: string | undefined) => Zod.ZodString"
+            ],
+            "path": "node_modules/zod/lib/types.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodString.date.$1",
+                "type": "string",
+                "tags": [],
+                "label": "message",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "node_modules/zod/lib/types.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodString.time",
+            "type": "Function",
+            "tags": [],
+            "label": "time",
+            "description": [],
+            "signature": [
+              "(options?: string | { message?: string | undefined; precision?: number | null | undefined; } | undefined) => Zod.ZodString"
+            ],
+            "path": "node_modules/zod/lib/types.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodString.time.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "string | { message?: string | undefined; precision?: number | null | undefined; } | undefined"
+                ],
+                "path": "node_modules/zod/lib/types.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodString.duration",
+            "type": "Function",
+            "tags": [],
+            "label": "duration",
+            "description": [],
+            "signature": [
+              "(message?: ",
+              "errorUtil",
+              ".ErrMessage | undefined) => Zod.ZodString"
+            ],
+            "path": "node_modules/zod/lib/types.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodString.duration.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "message",
+                "description": [],
+                "signature": [
+                  "errorUtil",
+                  ".ErrMessage | undefined"
                 ],
                 "path": "node_modules/zod/lib/types.d.ts",
                 "deprecated": false,
@@ -7730,6 +8005,39 @@
           },
           {
             "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodString.isDate",
+            "type": "boolean",
+            "tags": [],
+            "label": "isDate",
+            "description": [],
+            "path": "node_modules/zod/lib/types.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodString.isTime",
+            "type": "boolean",
+            "tags": [],
+            "label": "isTime",
+            "description": [],
+            "path": "node_modules/zod/lib/types.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodString.isDuration",
+            "type": "boolean",
+            "tags": [],
+            "label": "isDuration",
+            "description": [],
+            "path": "node_modules/zod/lib/types.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/zod",
             "id": "def-common.ZodString.isEmail",
             "type": "boolean",
             "tags": [],
@@ -7767,6 +8075,17 @@
             "type": "boolean",
             "tags": [],
             "label": "isUUID",
+            "description": [],
+            "path": "node_modules/zod/lib/types.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodString.isNANOID",
+            "type": "boolean",
+            "tags": [],
+            "label": "isNANOID",
             "description": [],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
@@ -7818,6 +8137,17 @@
           },
           {
             "parentPluginId": "@kbn/zod",
+            "id": "def-common.ZodString.isBase64",
+            "type": "boolean",
+            "tags": [],
+            "label": "isBase64",
+            "description": [],
+            "path": "node_modules/zod/lib/types.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/zod",
             "id": "def-common.ZodString.minLength",
             "type": "CompoundType",
             "tags": [],
@@ -7852,7 +8182,7 @@
             "label": "create",
             "description": [],
             "signature": [
-              "(params?: ({ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } & { coerce?: true | undefined; }) | undefined) => Zod.ZodString"
+              "(params?: ({ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } & { coerce?: true | undefined; }) | undefined) => Zod.ZodString"
             ],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
@@ -7867,7 +8197,7 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "({ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } & { coerce?: true | undefined; }) | undefined"
+                  "({ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } & { coerce?: true | undefined; }) | undefined"
                 ],
                 "path": "node_modules/zod/lib/types.d.ts",
                 "deprecated": false,
@@ -7947,7 +8277,7 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } | undefined"
+                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/lib/types.d.ts",
                 "deprecated": false,
@@ -8087,7 +8417,7 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } | undefined"
+                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/lib/types.d.ts",
                 "deprecated": false,
@@ -12127,7 +12457,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } | undefined"
+              "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
             ],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
@@ -12156,7 +12486,7 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } | undefined"
+                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/lib/types.d.ts",
                 "deprecated": false,
@@ -12264,7 +12594,7 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } | undefined"
+                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/lib/types.d.ts",
                 "deprecated": false,
@@ -12358,7 +12688,7 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } | undefined"
+                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/lib/types.d.ts",
                 "deprecated": false,
@@ -12438,7 +12768,7 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } | undefined"
+                  "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
                 ],
                 "path": "node_modules/zod/lib/types.d.ts",
                 "deprecated": false,
@@ -12522,7 +12852,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } | undefined"
+              "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
             ],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
@@ -12568,7 +12898,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } | undefined"
+              "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
             ],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
@@ -12585,7 +12915,7 @@
         "label": "bigIntType",
         "description": [],
         "signature": [
-          "(params?: ({ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } & { coerce?: boolean | undefined; }) | undefined) => Zod.ZodBigInt"
+          "(params?: ({ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } & { coerce?: boolean | undefined; }) | undefined) => Zod.ZodBigInt"
         ],
         "path": "node_modules/zod/lib/types.d.ts",
         "deprecated": false,
@@ -12600,7 +12930,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "({ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } & { coerce?: boolean | undefined; }) | undefined"
+              "({ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } & { coerce?: boolean | undefined; }) | undefined"
             ],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
@@ -12617,7 +12947,7 @@
         "label": "booleanType",
         "description": [],
         "signature": [
-          "(params?: ({ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } & { coerce?: boolean | undefined; }) | undefined) => Zod.ZodBoolean"
+          "(params?: ({ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } & { coerce?: boolean | undefined; }) | undefined) => Zod.ZodBoolean"
         ],
         "path": "node_modules/zod/lib/types.d.ts",
         "deprecated": false,
@@ -12632,7 +12962,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "({ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } & { coerce?: boolean | undefined; }) | undefined"
+              "({ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } & { coerce?: boolean | undefined; }) | undefined"
             ],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
@@ -12649,12 +12979,11 @@
         "label": "custom",
         "description": [],
         "signature": [
-          "<T>(check?: ((data: unknown) => any) | undefined, params?: string | CustomParams | ((input: any) => CustomParams) | undefined, fatal?: boolean | undefined) => Zod.ZodType<T, Zod.ZodTypeDef, T>"
+          "(check: ((data: any) => any) | undefined, params: string | CustomParams | ((input: any) => CustomParams) | undefined, fatal: boolean | undefined) => Zod.ZodType<T, Zod.ZodTypeDef, T>"
         ],
         "path": "node_modules/zod/lib/types.d.ts",
         "deprecated": false,
         "trackAdoption": false,
-        "returnComment": [],
         "children": [
           {
             "parentPluginId": "@kbn/zod",
@@ -12664,11 +12993,12 @@
             "label": "check",
             "description": [],
             "signature": [
-              "((data: unknown) => any) | undefined"
+              "((data: any) => any) | undefined"
             ],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "isRequired": false
           },
           {
             "parentPluginId": "@kbn/zod",
@@ -12682,7 +13012,8 @@
             ],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "isRequired": false
           },
           {
             "parentPluginId": "@kbn/zod",
@@ -12696,9 +13027,84 @@
             ],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/zod",
+        "id": "def-common.datetimeRegex",
+        "type": "Function",
+        "tags": [],
+        "label": "datetimeRegex",
+        "description": [],
+        "signature": [
+          "(args: { precision?: number | null | undefined; offset?: boolean | undefined; local?: boolean | undefined; }) => RegExp"
+        ],
+        "path": "node_modules/zod/lib/types.d.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.datetimeRegex.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "args",
+            "description": [],
+            "path": "node_modules/zod/lib/types.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.datetimeRegex.$1.precision",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "precision",
+                "description": [],
+                "signature": [
+                  "number | null | undefined"
+                ],
+                "path": "node_modules/zod/lib/types.d.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.datetimeRegex.$1.offset",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "offset",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "node_modules/zod/lib/types.d.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.datetimeRegex.$1.local",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "local",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "node_modules/zod/lib/types.d.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -12709,7 +13115,7 @@
         "label": "dateType",
         "description": [],
         "signature": [
-          "(params?: ({ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } & { coerce?: boolean | undefined; }) | undefined) => Zod.ZodDate"
+          "(params?: ({ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } & { coerce?: boolean | undefined; }) | undefined) => Zod.ZodDate"
         ],
         "path": "node_modules/zod/lib/types.d.ts",
         "deprecated": false,
@@ -12724,7 +13130,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "({ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } & { coerce?: boolean | undefined; }) | undefined"
+              "({ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } & { coerce?: boolean | undefined; }) | undefined"
             ],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
@@ -12816,7 +13222,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } | undefined"
+              "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
             ],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
@@ -12876,7 +13282,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } | undefined"
+              "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
             ],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
@@ -12936,7 +13342,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } | undefined"
+              "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
             ],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
@@ -12983,7 +13389,7 @@
             "label": "issue",
             "description": [],
             "signature": [
-              "Zod.ZodInvalidTypeIssue | Zod.ZodInvalidLiteralIssue | Zod.ZodUnrecognizedKeysIssue | Zod.ZodInvalidUnionIssue | Zod.ZodInvalidUnionDiscriminatorIssue | Zod.ZodInvalidEnumValueIssue | Zod.ZodInvalidArgumentsIssue | Zod.ZodInvalidReturnTypeIssue | Zod.ZodInvalidDateIssue | Zod.ZodInvalidStringIssue | Zod.ZodTooSmallIssue | Zod.ZodTooBigIssue | Zod.ZodInvalidIntersectionTypesIssue | Zod.ZodNotMultipleOfIssue | Zod.ZodNotFiniteIssue | Zod.ZodCustomIssue"
+              "Zod.ZodCustomIssue | Zod.ZodInvalidTypeIssue | Zod.ZodInvalidLiteralIssue | Zod.ZodUnrecognizedKeysIssue | Zod.ZodInvalidUnionIssue | Zod.ZodInvalidUnionDiscriminatorIssue | Zod.ZodInvalidEnumValueIssue | Zod.ZodInvalidArgumentsIssue | Zod.ZodInvalidReturnTypeIssue | Zod.ZodInvalidDateIssue | Zod.ZodInvalidStringIssue | Zod.ZodTooSmallIssue | Zod.ZodTooBigIssue | Zod.ZodInvalidIntersectionTypesIssue | Zod.ZodNotMultipleOfIssue | Zod.ZodNotFiniteIssue"
             ],
             "path": "node_modules/zod/lib/ZodError.d.ts",
             "deprecated": false,
@@ -13046,7 +13452,7 @@
         "label": "getParsedType",
         "description": [],
         "signature": [
-          "(data: any) => \"string\" | \"number\" | \"bigint\" | \"boolean\" | \"symbol\" | \"undefined\" | \"object\" | \"function\" | \"unknown\" | \"date\" | \"integer\" | \"float\" | \"map\" | \"set\" | \"null\" | \"nan\" | \"array\" | \"promise\" | \"void\" | \"never\""
+          "(data: any) => \"string\" | \"number\" | \"bigint\" | \"boolean\" | \"symbol\" | \"undefined\" | \"object\" | \"function\" | \"unknown\" | \"date\" | \"integer\" | \"float\" | \"map\" | \"set\" | \"array\" | \"promise\" | \"null\" | \"nan\" | \"void\" | \"never\""
         ],
         "path": "node_modules/zod/lib/helpers/util.d.ts",
         "deprecated": false,
@@ -13167,7 +13573,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } | undefined"
+              "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
             ],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
@@ -13280,7 +13686,7 @@
         "label": "isValid",
         "description": [],
         "signature": [
-          "<T>(x: Zod.ParseReturnType<T>) => x is Zod.OK<T> | Zod.DIRTY<T>"
+          "<T>(x: Zod.ParseReturnType<T>) => x is Zod.OK<T>"
         ],
         "path": "node_modules/zod/lib/helpers/parseUtil.d.ts",
         "deprecated": false,
@@ -13376,7 +13782,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } | undefined"
+              "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
             ],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
@@ -13422,7 +13828,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } | undefined"
+              "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
             ],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
@@ -13514,7 +13920,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } | undefined"
+              "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
             ],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
@@ -13546,7 +13952,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } | undefined"
+              "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
             ],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
@@ -13592,7 +13998,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } | undefined"
+              "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
             ],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
@@ -13624,7 +14030,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } | undefined"
+              "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
             ],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
@@ -13670,7 +14076,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } | undefined"
+              "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
             ],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
@@ -13702,7 +14108,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } | undefined"
+              "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
             ],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
@@ -13719,7 +14125,7 @@
         "label": "numberType",
         "description": [],
         "signature": [
-          "(params?: ({ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } & { coerce?: boolean | undefined; }) | undefined) => Zod.ZodNumber"
+          "(params?: ({ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } & { coerce?: boolean | undefined; }) | undefined) => Zod.ZodNumber"
         ],
         "path": "node_modules/zod/lib/types.d.ts",
         "deprecated": false,
@@ -13734,7 +14140,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "({ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } & { coerce?: boolean | undefined; }) | undefined"
+              "({ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } & { coerce?: boolean | undefined; }) | undefined"
             ],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
@@ -13751,7 +14157,7 @@
         "label": "objectType",
         "description": [],
         "signature": [
-          "<T extends Zod.ZodRawShape>(shape: T, params?: Zod.RawCreateParams) => Zod.ZodObject<T, \"strip\", Zod.ZodTypeAny, { [k_1 in keyof Zod.objectUtil.addQuestionMarks<Zod.baseObjectOutputType<T>, { [k in keyof Zod.baseObjectOutputType<T>]: undefined extends Zod.baseObjectOutputType<T>[k] ? never : k; }[keyof T]>]: Zod.objectUtil.addQuestionMarks<Zod.baseObjectOutputType<T>, { [k in keyof Zod.baseObjectOutputType<T>]: undefined extends Zod.baseObjectOutputType<T>[k] ? never : k; }[keyof T]>[k_1]; }, { [k_2 in keyof Zod.baseObjectInputType<T>]: Zod.baseObjectInputType<T>[k_2]; }>"
+          "<T extends Zod.ZodRawShape>(shape: T, params?: Zod.RawCreateParams) => Zod.ZodObject<T, \"strip\", Zod.ZodTypeAny, { [k in keyof Zod.objectUtil.addQuestionMarks<Zod.baseObjectOutputType<T>, any>]: Zod.objectUtil.addQuestionMarks<Zod.baseObjectOutputType<T>, any>[k]; }, { [k_1 in keyof Zod.baseObjectInputType<T>]: Zod.baseObjectInputType<T>[k_1]; }>"
         ],
         "path": "node_modules/zod/lib/types.d.ts",
         "deprecated": false,
@@ -13780,7 +14186,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } | undefined"
+              "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
             ],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
@@ -13892,7 +14298,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } | undefined"
+              "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
             ],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
@@ -14016,7 +14422,7 @@
                 "label": "ctx",
                 "description": [],
                 "signature": [
-                  "{ addIssue: (arg: Zod.IssueData) => void; path: (string | number)[]; }"
+                  "Zod.RefinementCtx"
                 ],
                 "path": "node_modules/zod/lib/types.d.ts",
                 "deprecated": false,
@@ -14046,7 +14452,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } | undefined"
+              "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
             ],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
@@ -14092,7 +14498,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } | undefined"
+              "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
             ],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
@@ -14218,7 +14624,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } | undefined"
+              "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
             ],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
@@ -14235,7 +14641,7 @@
         "label": "strictObjectType",
         "description": [],
         "signature": [
-          "<T extends Zod.ZodRawShape>(shape: T, params?: Zod.RawCreateParams) => Zod.ZodObject<T, \"strict\", Zod.ZodTypeAny, { [k_1 in keyof Zod.objectUtil.addQuestionMarks<Zod.baseObjectOutputType<T>, { [k in keyof Zod.baseObjectOutputType<T>]: undefined extends Zod.baseObjectOutputType<T>[k] ? never : k; }[keyof T]>]: Zod.objectUtil.addQuestionMarks<Zod.baseObjectOutputType<T>, { [k in keyof Zod.baseObjectOutputType<T>]: undefined extends Zod.baseObjectOutputType<T>[k] ? never : k; }[keyof T]>[k_1]; }, { [k_2 in keyof Zod.baseObjectInputType<T>]: Zod.baseObjectInputType<T>[k_2]; }>"
+          "<T extends Zod.ZodRawShape>(shape: T, params?: Zod.RawCreateParams) => Zod.ZodObject<T, \"strict\", Zod.ZodTypeAny, { [k in keyof Zod.objectUtil.addQuestionMarks<Zod.baseObjectOutputType<T>, any>]: Zod.objectUtil.addQuestionMarks<Zod.baseObjectOutputType<T>, any>[k]; }, { [k_1 in keyof Zod.baseObjectInputType<T>]: Zod.baseObjectInputType<T>[k_1]; }>"
         ],
         "path": "node_modules/zod/lib/types.d.ts",
         "deprecated": false,
@@ -14264,7 +14670,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } | undefined"
+              "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
             ],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
@@ -14281,7 +14687,7 @@
         "label": "stringType",
         "description": [],
         "signature": [
-          "(params?: ({ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } & { coerce?: true | undefined; }) | undefined) => Zod.ZodString"
+          "(params?: ({ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } & { coerce?: true | undefined; }) | undefined) => Zod.ZodString"
         ],
         "path": "node_modules/zod/lib/types.d.ts",
         "deprecated": false,
@@ -14296,7 +14702,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "({ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } & { coerce?: true | undefined; }) | undefined"
+              "({ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } & { coerce?: true | undefined; }) | undefined"
             ],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
@@ -14328,7 +14734,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } | undefined"
+              "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
             ],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
@@ -14374,7 +14780,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } | undefined"
+              "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
             ],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
@@ -14406,7 +14812,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } | undefined"
+              "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
             ],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
@@ -14452,7 +14858,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } | undefined"
+              "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
             ],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
@@ -14484,7 +14890,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } | undefined"
+              "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
             ],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
@@ -14516,7 +14922,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } | undefined"
+              "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
             ],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
@@ -14619,7 +15025,7 @@
             "label": "parsedType",
             "description": [],
             "signature": [
-              "\"string\" | \"number\" | \"bigint\" | \"boolean\" | \"symbol\" | \"undefined\" | \"object\" | \"function\" | \"unknown\" | \"date\" | \"integer\" | \"float\" | \"map\" | \"set\" | \"null\" | \"nan\" | \"array\" | \"promise\" | \"void\" | \"never\""
+              "\"string\" | \"number\" | \"bigint\" | \"boolean\" | \"symbol\" | \"undefined\" | \"object\" | \"function\" | \"unknown\" | \"date\" | \"integer\" | \"float\" | \"map\" | \"set\" | \"array\" | \"promise\" | \"null\" | \"nan\" | \"void\" | \"never\""
             ],
             "path": "node_modules/zod/lib/helpers/parseUtil.d.ts",
             "deprecated": false,
@@ -14667,6 +15073,69 @@
               "any"
             ],
             "path": "node_modules/zod/lib/helpers/parseUtil.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/zod",
+        "id": "def-common.RefinementCtx",
+        "type": "Interface",
+        "tags": [],
+        "label": "RefinementCtx",
+        "description": [],
+        "signature": [
+          "Zod.RefinementCtx"
+        ],
+        "path": "node_modules/zod/lib/types.d.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.RefinementCtx.addIssue",
+            "type": "Function",
+            "tags": [],
+            "label": "addIssue",
+            "description": [],
+            "signature": [
+              "(arg: Zod.IssueData) => void"
+            ],
+            "path": "node_modules/zod/lib/types.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.RefinementCtx.addIssue.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "arg",
+                "description": [],
+                "signature": [
+                  "Zod.IssueData"
+                ],
+                "path": "node_modules/zod/lib/types.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.RefinementCtx.path",
+            "type": "Array",
+            "tags": [],
+            "label": "path",
+            "description": [],
+            "signature": [
+              "(string | number)[]"
+            ],
+            "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -15838,7 +16307,7 @@
             "label": "validation",
             "description": [],
             "signature": [
-              "\"ip\" | \"uuid\" | \"url\" | \"email\" | \"datetime\" | \"emoji\" | \"cuid\" | \"cuid2\" | \"ulid\" | \"regex\" | { includes: string; position?: number | undefined; } | { startsWith: string; } | { endsWith: string; }"
+              "\"ip\" | \"date\" | \"base64\" | \"uuid\" | \"duration\" | \"url\" | \"email\" | \"time\" | \"datetime\" | \"emoji\" | \"nanoid\" | \"cuid\" | \"cuid2\" | \"ulid\" | \"regex\" | { includes: string; position?: number | undefined; } | { startsWith: string; } | { endsWith: string; }"
             ],
             "path": "node_modules/zod/lib/ZodError.d.ts",
             "deprecated": false,
@@ -15883,7 +16352,7 @@
             "label": "expected",
             "description": [],
             "signature": [
-              "\"string\" | \"number\" | \"bigint\" | \"boolean\" | \"symbol\" | \"undefined\" | \"object\" | \"function\" | \"unknown\" | \"date\" | \"integer\" | \"float\" | \"map\" | \"set\" | \"null\" | \"nan\" | \"array\" | \"promise\" | \"void\" | \"never\""
+              "\"string\" | \"number\" | \"bigint\" | \"boolean\" | \"symbol\" | \"undefined\" | \"object\" | \"function\" | \"unknown\" | \"date\" | \"integer\" | \"float\" | \"map\" | \"set\" | \"array\" | \"promise\" | \"null\" | \"nan\" | \"void\" | \"never\""
             ],
             "path": "node_modules/zod/lib/ZodError.d.ts",
             "deprecated": false,
@@ -15897,7 +16366,7 @@
             "label": "received",
             "description": [],
             "signature": [
-              "\"string\" | \"number\" | \"bigint\" | \"boolean\" | \"symbol\" | \"undefined\" | \"object\" | \"function\" | \"unknown\" | \"date\" | \"integer\" | \"float\" | \"map\" | \"set\" | \"null\" | \"nan\" | \"array\" | \"promise\" | \"void\" | \"never\""
+              "\"string\" | \"number\" | \"bigint\" | \"boolean\" | \"symbol\" | \"undefined\" | \"object\" | \"function\" | \"unknown\" | \"date\" | \"integer\" | \"float\" | \"map\" | \"set\" | \"array\" | \"promise\" | \"null\" | \"nan\" | \"void\" | \"never\""
             ],
             "path": "node_modules/zod/lib/ZodError.d.ts",
             "deprecated": false,
@@ -17537,7 +18006,7 @@
         "label": "baseObjectInputType",
         "description": [],
         "signature": [
-          "Pick<Required<{ [k in keyof Shape]: Shape[k][\"_input\"]; }>, requiredKeys<{ [k in keyof Shape]: Shape[k][\"_input\"]; }>> & Partial<{ [k in keyof Shape]: Shape[k][\"_input\"]; }>"
+          "{ [K in requiredKeys<{ [k in keyof Shape]: Shape[k][\"_input\"]; }>]: { [k in keyof Shape]: Shape[k][\"_input\"]; }[K]; } & { [K in optionalKeys<{ [k in keyof Shape]: Shape[k][\"_input\"]; }>]?: { [k in keyof Shape]: Shape[k][\"_input\"]; }[K] | undefined; } & { [k in keyof { [k in keyof Shape]: Shape[k][\"_input\"]; }]?: unknown; }"
         ],
         "path": "node_modules/zod/lib/types.d.ts",
         "deprecated": false,
@@ -17597,7 +18066,7 @@
         "label": "CatchallInput",
         "description": [],
         "signature": [
-          "Zod.ZodTypeAny extends T ? unknown : { [k: string]: T[\"_input\"]; }"
+          "Zod.ZodType<any, Zod.ZodTypeDef, any> extends T ? unknown : { [k: string]: T[\"_input\"]; }"
         ],
         "path": "node_modules/zod/lib/types.d.ts",
         "deprecated": false,
@@ -17612,7 +18081,7 @@
         "label": "CatchallOutput",
         "description": [],
         "signature": [
-          "Zod.ZodTypeAny extends T ? unknown : { [k: string]: T[\"_output\"]; }"
+          "Zod.ZodType<any, Zod.ZodTypeDef, any> extends T ? unknown : { [k: string]: T[\"_output\"]; }"
         ],
         "path": "node_modules/zod/lib/types.d.ts",
         "deprecated": false,
@@ -17732,7 +18201,7 @@
         "label": "EnumValues",
         "description": [],
         "signature": [
-          "[string, ...string[]]"
+          "readonly [T, ...T[]]"
         ],
         "path": "node_modules/zod/lib/types.d.ts",
         "deprecated": false,
@@ -17929,7 +18398,7 @@
         "label": "IssueData",
         "description": [],
         "signature": [
-          "(Zod.util.OmitKeys<Zod.ZodInvalidTypeIssue, \"path\"> | Zod.util.OmitKeys<Zod.ZodInvalidLiteralIssue, \"path\"> | Zod.util.OmitKeys<Zod.ZodUnrecognizedKeysIssue, \"path\"> | Zod.util.OmitKeys<Zod.ZodInvalidUnionIssue, \"path\"> | Zod.util.OmitKeys<Zod.ZodInvalidUnionDiscriminatorIssue, \"path\"> | Zod.util.OmitKeys<Zod.ZodInvalidEnumValueIssue, \"path\"> | Zod.util.OmitKeys<Zod.ZodInvalidArgumentsIssue, \"path\"> | Zod.util.OmitKeys<Zod.ZodInvalidReturnTypeIssue, \"path\"> | Zod.util.OmitKeys<Zod.ZodInvalidDateIssue, \"path\"> | Zod.util.OmitKeys<Zod.ZodInvalidStringIssue, \"path\"> | Zod.util.OmitKeys<Zod.ZodTooSmallIssue, \"path\"> | Zod.util.OmitKeys<Zod.ZodTooBigIssue, \"path\"> | Zod.util.OmitKeys<Zod.ZodInvalidIntersectionTypesIssue, \"path\"> | Zod.util.OmitKeys<Zod.ZodNotMultipleOfIssue, \"path\"> | Zod.util.OmitKeys<Zod.ZodNotFiniteIssue, \"path\"> | Zod.util.OmitKeys<Zod.ZodCustomIssue, \"path\">) & { path?: (string | number)[] | undefined; fatal?: boolean | undefined; }"
+          "(Zod.util.OmitKeys<Zod.ZodCustomIssue, \"path\"> | Zod.util.OmitKeys<Zod.ZodInvalidTypeIssue, \"path\"> | Zod.util.OmitKeys<Zod.ZodInvalidLiteralIssue, \"path\"> | Zod.util.OmitKeys<Zod.ZodUnrecognizedKeysIssue, \"path\"> | Zod.util.OmitKeys<Zod.ZodInvalidUnionIssue, \"path\"> | Zod.util.OmitKeys<Zod.ZodInvalidUnionDiscriminatorIssue, \"path\"> | Zod.util.OmitKeys<Zod.ZodInvalidEnumValueIssue, \"path\"> | Zod.util.OmitKeys<Zod.ZodInvalidArgumentsIssue, \"path\"> | Zod.util.OmitKeys<Zod.ZodInvalidReturnTypeIssue, \"path\"> | Zod.util.OmitKeys<Zod.ZodInvalidDateIssue, \"path\"> | Zod.util.OmitKeys<Zod.ZodInvalidStringIssue, \"path\"> | Zod.util.OmitKeys<Zod.ZodTooSmallIssue, \"path\"> | Zod.util.OmitKeys<Zod.ZodTooBigIssue, \"path\"> | Zod.util.OmitKeys<Zod.ZodInvalidIntersectionTypesIssue, \"path\"> | Zod.util.OmitKeys<Zod.ZodNotMultipleOfIssue, \"path\"> | Zod.util.OmitKeys<Zod.ZodNotFiniteIssue, \"path\">) & { path?: (string | number)[] | undefined; fatal?: boolean | undefined; }"
         ],
         "path": "node_modules/zod/lib/ZodError.d.ts",
         "deprecated": false,
@@ -18019,7 +18488,7 @@
         "label": "objectOutputType",
         "description": [],
         "signature": [
-          "{ [k in keyof Zod.objectUtil.addQuestionMarks<Zod.baseObjectOutputType<Shape>, requiredKeys<Zod.baseObjectOutputType<Shape>>>]: Zod.objectUtil.addQuestionMarks<Zod.baseObjectOutputType<Shape>, requiredKeys<Zod.baseObjectOutputType<Shape>>>[k]; } & Zod.CatchallOutput<Catchall> & Zod.PassthroughType<UnknownKeys>"
+          "{ [k in keyof Zod.objectUtil.addQuestionMarks<Zod.baseObjectOutputType<Shape>, any>]: Zod.objectUtil.addQuestionMarks<Zod.baseObjectOutputType<Shape>, any>[k]; } & Zod.CatchallOutput<Catchall> & Zod.PassthroughType<UnknownKeys>"
         ],
         "path": "node_modules/zod/lib/types.d.ts",
         "deprecated": false,
@@ -18276,7 +18745,7 @@
         "label": "RawCreateParams",
         "description": [],
         "signature": [
-          "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } | undefined"
+          "{ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
         ],
         "path": "node_modules/zod/lib/types.d.ts",
         "deprecated": false,
@@ -18335,28 +18804,13 @@
             "label": "ctx",
             "description": [],
             "signature": [
-              "{ addIssue: (arg: Zod.IssueData) => void; path: (string | number)[]; }"
+              "Zod.RefinementCtx"
             ],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
         ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/zod",
-        "id": "def-common.RefinementCtx",
-        "type": "Type",
-        "tags": [],
-        "label": "RefinementCtx",
-        "description": [],
-        "signature": [
-          "{ addIssue: (arg: Zod.IssueData) => void; path: (string | number)[]; }"
-        ],
-        "path": "node_modules/zod/lib/types.d.ts",
-        "deprecated": false,
-        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -18382,7 +18836,7 @@
         "label": "SafeParseError",
         "description": [],
         "signature": [
-          "{ success: false; error: Zod.ZodError<Input>; }"
+          "{ success: false; error: Zod.ZodError<Input>; data?: undefined; }"
         ],
         "path": "node_modules/zod/lib/types.d.ts",
         "deprecated": false,
@@ -18412,7 +18866,7 @@
         "label": "SafeParseSuccess",
         "description": [],
         "signature": [
-          "{ success: true; data: Output; }"
+          "{ success: true; data: Output; error?: undefined; }"
         ],
         "path": "node_modules/zod/lib/types.d.ts",
         "deprecated": false,
@@ -18457,7 +18911,7 @@
         "label": "StringValidation",
         "description": [],
         "signature": [
-          "\"ip\" | \"uuid\" | \"url\" | \"email\" | \"datetime\" | \"emoji\" | \"cuid\" | \"cuid2\" | \"ulid\" | \"regex\" | { includes: string; position?: number | undefined; } | { startsWith: string; } | { endsWith: string; }"
+          "\"ip\" | \"date\" | \"base64\" | \"uuid\" | \"duration\" | \"url\" | \"email\" | \"time\" | \"datetime\" | \"emoji\" | \"nanoid\" | \"cuid\" | \"cuid2\" | \"ulid\" | \"regex\" | { includes: string; position?: number | undefined; } | { startsWith: string; } | { endsWith: string; }"
         ],
         "path": "node_modules/zod/lib/ZodError.d.ts",
         "deprecated": false,
@@ -18501,7 +18955,7 @@
             "label": "ctx",
             "description": [],
             "signature": [
-              "{ addIssue: (arg: Zod.IssueData) => void; path: (string | number)[]; }"
+              "Zod.RefinementCtx"
             ],
             "path": "node_modules/zod/lib/types.d.ts",
             "deprecated": false,
@@ -18608,7 +19062,7 @@
         "label": "UnknownKeysParam",
         "description": [],
         "signature": [
-          "\"passthrough\" | \"strict\" | \"strip\""
+          "\"strict\" | \"passthrough\" | \"strip\""
         ],
         "path": "node_modules/zod/lib/types.d.ts",
         "deprecated": false,
@@ -18683,7 +19137,7 @@
         "label": "ZodDiscriminatedUnionOption",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ [key in Discriminator]: Zod.ZodTypeAny; } & Zod.ZodRawShape, Zod.UnknownKeysParam, Zod.ZodTypeAny, { [k in keyof Zod.objectUtil.addQuestionMarks<Zod.baseObjectOutputType<{ [key in Discriminator]: Zod.ZodTypeAny; } & Zod.ZodRawShape>, requiredKeys<Zod.baseObjectOutputType<{ [key in Discriminator]: Zod.ZodTypeAny; } & Zod.ZodRawShape>>>]: Zod.objectUtil.addQuestionMarks<Zod.baseObjectOutputType<{ [key in Discriminator]: Zod.ZodTypeAny; } & Zod.ZodRawShape>, requiredKeys<Zod.baseObjectOutputType<{ [key in Discriminator]: Zod.ZodTypeAny; } & Zod.ZodRawShape>>>[k]; }, { [k in keyof Zod.baseObjectInputType<{ [key in Discriminator]: Zod.ZodTypeAny; } & Zod.ZodRawShape>]: Zod.baseObjectInputType<{ [key in Discriminator]: Zod.ZodTypeAny; } & Zod.ZodRawShape>[k]; }>"
+          "Zod.ZodObject<{ [key in Discriminator]: Zod.ZodTypeAny; } & Zod.ZodRawShape, Zod.UnknownKeysParam, Zod.ZodTypeAny, { [k in keyof Zod.objectUtil.addQuestionMarks<Zod.baseObjectOutputType<{ [key in Discriminator]: Zod.ZodTypeAny; } & Zod.ZodRawShape>, any>]: Zod.objectUtil.addQuestionMarks<Zod.baseObjectOutputType<{ [key in Discriminator]: Zod.ZodTypeAny; } & Zod.ZodRawShape>, any>[k]; }, { [k in keyof Zod.baseObjectInputType<{ [key in Discriminator]: Zod.ZodTypeAny; } & Zod.ZodRawShape>]: Zod.baseObjectInputType<{ [key in Discriminator]: Zod.ZodTypeAny; } & Zod.ZodRawShape>[k]; }>"
         ],
         "path": "node_modules/zod/lib/types.d.ts",
         "deprecated": false,
@@ -18713,7 +19167,7 @@
             "label": "issue",
             "description": [],
             "signature": [
-              "Zod.ZodInvalidTypeIssue | Zod.ZodInvalidLiteralIssue | Zod.ZodUnrecognizedKeysIssue | Zod.ZodInvalidUnionIssue | Zod.ZodInvalidUnionDiscriminatorIssue | Zod.ZodInvalidEnumValueIssue | Zod.ZodInvalidArgumentsIssue | Zod.ZodInvalidReturnTypeIssue | Zod.ZodInvalidDateIssue | Zod.ZodInvalidStringIssue | Zod.ZodTooSmallIssue | Zod.ZodTooBigIssue | Zod.ZodInvalidIntersectionTypesIssue | Zod.ZodNotMultipleOfIssue | Zod.ZodNotFiniteIssue | Zod.ZodCustomIssue"
+              "Zod.ZodCustomIssue | Zod.ZodInvalidTypeIssue | Zod.ZodInvalidLiteralIssue | Zod.ZodUnrecognizedKeysIssue | Zod.ZodInvalidUnionIssue | Zod.ZodInvalidUnionDiscriminatorIssue | Zod.ZodInvalidEnumValueIssue | Zod.ZodInvalidArgumentsIssue | Zod.ZodInvalidReturnTypeIssue | Zod.ZodInvalidDateIssue | Zod.ZodInvalidStringIssue | Zod.ZodTooSmallIssue | Zod.ZodTooBigIssue | Zod.ZodInvalidIntersectionTypesIssue | Zod.ZodNotMultipleOfIssue | Zod.ZodNotFiniteIssue"
             ],
             "path": "node_modules/zod/lib/ZodError.d.ts",
             "deprecated": false,
@@ -18744,7 +19198,7 @@
         "label": "ZodFirstPartySchemaTypes",
         "description": [],
         "signature": [
-          "Zod.ZodString | Zod.ZodBoolean | Zod.ZodNumber | Zod.ZodUnknown | Zod.ZodUndefined | Zod.ZodAny | Zod.ZodBigInt | Zod.ZodDate | Zod.ZodNull | Zod.ZodNever | Zod.ZodVoid | Zod.ZodTuple<any, any> | Zod.ZodNaN | Zod.ZodArray<any, any> | Zod.ZodObject<any, any, any, { [x: string]: any; }, { [x: string]: any; }> | Zod.ZodUnion<any> | Zod.ZodDiscriminatedUnion<any, any> | Zod.ZodIntersection<any, any> | Zod.ZodRecord<any, any> | Zod.ZodMap<any, Zod.ZodTypeAny> | Zod.ZodSet<any> | Zod.ZodFunction<any, any> | Zod.ZodLazy<any> | Zod.ZodLiteral<any> | Zod.ZodEnum<any> | Zod.ZodEffects<any, any, any> | Zod.ZodNativeEnum<any> | Zod.ZodOptional<any> | Zod.ZodNullable<any> | Zod.ZodDefault<any> | Zod.ZodCatch<any> | Zod.ZodPromise<any> | Zod.ZodBranded<any, any> | Zod.ZodPipeline<any, any>"
+          "Zod.ZodString | Zod.ZodBoolean | Zod.ZodNumber | Zod.ZodUnknown | Zod.ZodUndefined | Zod.ZodAny | Zod.ZodNull | Zod.ZodBigInt | Zod.ZodDate | Zod.ZodSymbol | Zod.ZodNever | Zod.ZodVoid | Zod.ZodTuple<any, any> | Zod.ZodNaN | Zod.ZodArray<any, any> | Zod.ZodObject<any, any, any, { [x: string]: any; }, { [x: string]: any; }> | Zod.ZodUnion<any> | Zod.ZodDiscriminatedUnion<any, any> | Zod.ZodIntersection<any, any> | Zod.ZodRecord<any, any> | Zod.ZodMap<any, Zod.ZodTypeAny> | Zod.ZodSet<any> | Zod.ZodFunction<any, any> | Zod.ZodLazy<any> | Zod.ZodLiteral<any> | Zod.ZodEnum<any> | Zod.ZodEffects<any, any, any> | Zod.ZodNativeEnum<any> | Zod.ZodOptional<any> | Zod.ZodNullable<any> | Zod.ZodDefault<any> | Zod.ZodCatch<any> | Zod.ZodPromise<any> | Zod.ZodBranded<any, any> | Zod.ZodPipeline<any, any> | Zod.ZodReadonly<any>"
         ],
         "path": "node_modules/zod/lib/types.d.ts",
         "deprecated": false,
@@ -18804,7 +19258,7 @@
         "label": "ZodIssueCode",
         "description": [],
         "signature": [
-          "\"custom\" | \"invalid_literal\" | \"invalid_type\" | \"invalid_union\" | \"unrecognized_keys\" | \"invalid_union_discriminator\" | \"invalid_arguments\" | \"invalid_return_type\" | \"invalid_string\" | \"not_multiple_of\" | \"invalid_intersection_types\" | \"invalid_date\" | \"not_finite\" | \"too_big\" | \"too_small\" | \"invalid_enum_value\""
+          "\"custom\" | \"unrecognized_keys\" | \"invalid_union\" | \"invalid_union_discriminator\" | \"invalid_arguments\" | \"invalid_return_type\" | \"invalid_string\" | \"not_multiple_of\" | \"invalid_literal\" | \"invalid_type\" | \"invalid_intersection_types\" | \"invalid_date\" | \"not_finite\" | \"too_big\" | \"too_small\" | \"invalid_enum_value\""
         ],
         "path": "node_modules/zod/lib/ZodError.d.ts",
         "deprecated": false,
@@ -18819,7 +19273,7 @@
         "label": "ZodIssueOptionalMessage",
         "description": [],
         "signature": [
-          "Zod.ZodInvalidTypeIssue | Zod.ZodInvalidLiteralIssue | Zod.ZodUnrecognizedKeysIssue | Zod.ZodInvalidUnionIssue | Zod.ZodInvalidUnionDiscriminatorIssue | Zod.ZodInvalidEnumValueIssue | Zod.ZodInvalidArgumentsIssue | Zod.ZodInvalidReturnTypeIssue | Zod.ZodInvalidDateIssue | Zod.ZodInvalidStringIssue | Zod.ZodTooSmallIssue | Zod.ZodTooBigIssue | Zod.ZodInvalidIntersectionTypesIssue | Zod.ZodNotMultipleOfIssue | Zod.ZodNotFiniteIssue | Zod.ZodCustomIssue"
+          "Zod.ZodCustomIssue | Zod.ZodInvalidTypeIssue | Zod.ZodInvalidLiteralIssue | Zod.ZodUnrecognizedKeysIssue | Zod.ZodInvalidUnionIssue | Zod.ZodInvalidUnionDiscriminatorIssue | Zod.ZodInvalidEnumValueIssue | Zod.ZodInvalidArgumentsIssue | Zod.ZodInvalidReturnTypeIssue | Zod.ZodInvalidDateIssue | Zod.ZodInvalidStringIssue | Zod.ZodTooSmallIssue | Zod.ZodTooBigIssue | Zod.ZodInvalidIntersectionTypesIssue | Zod.ZodNotMultipleOfIssue | Zod.ZodNotFiniteIssue"
         ],
         "path": "node_modules/zod/lib/ZodError.d.ts",
         "deprecated": false,
@@ -18894,7 +19348,7 @@
         "label": "ZodParsedType",
         "description": [],
         "signature": [
-          "\"string\" | \"number\" | \"bigint\" | \"boolean\" | \"symbol\" | \"undefined\" | \"object\" | \"function\" | \"unknown\" | \"date\" | \"integer\" | \"float\" | \"map\" | \"set\" | \"null\" | \"nan\" | \"array\" | \"promise\" | \"void\" | \"never\""
+          "\"string\" | \"number\" | \"bigint\" | \"boolean\" | \"symbol\" | \"undefined\" | \"object\" | \"function\" | \"unknown\" | \"date\" | \"integer\" | \"float\" | \"map\" | \"set\" | \"array\" | \"promise\" | \"null\" | \"nan\" | \"void\" | \"never\""
         ],
         "path": "node_modules/zod/lib/helpers/util.d.ts",
         "deprecated": false,
@@ -18924,7 +19378,7 @@
         "label": "ZodStringCheck",
         "description": [],
         "signature": [
-          "{ kind: \"min\"; value: number; message?: string | undefined; } | { kind: \"max\"; value: number; message?: string | undefined; } | { kind: \"length\"; value: number; message?: string | undefined; } | { kind: \"email\"; message?: string | undefined; } | { kind: \"url\"; message?: string | undefined; } | { kind: \"emoji\"; message?: string | undefined; } | { kind: \"uuid\"; message?: string | undefined; } | { kind: \"cuid\"; message?: string | undefined; } | { kind: \"includes\"; value: string; position?: number | undefined; message?: string | undefined; } | { kind: \"cuid2\"; message?: string | undefined; } | { kind: \"ulid\"; message?: string | undefined; } | { kind: \"startsWith\"; value: string; message?: string | undefined; } | { kind: \"endsWith\"; value: string; message?: string | undefined; } | { kind: \"regex\"; regex: RegExp; message?: string | undefined; } | { kind: \"trim\"; message?: string | undefined; } | { kind: \"toLowerCase\"; message?: string | undefined; } | { kind: \"toUpperCase\"; message?: string | undefined; } | { kind: \"datetime\"; offset: boolean; precision: number | null; message?: string | undefined; } | { kind: \"ip\"; version?: Zod.IpVersion | undefined; message?: string | undefined; }"
+          "{ kind: \"min\"; value: number; message?: string | undefined; } | { kind: \"max\"; value: number; message?: string | undefined; } | { kind: \"length\"; value: number; message?: string | undefined; } | { kind: \"email\"; message?: string | undefined; } | { kind: \"url\"; message?: string | undefined; } | { kind: \"emoji\"; message?: string | undefined; } | { kind: \"uuid\"; message?: string | undefined; } | { kind: \"nanoid\"; message?: string | undefined; } | { kind: \"cuid\"; message?: string | undefined; } | { kind: \"includes\"; value: string; position?: number | undefined; message?: string | undefined; } | { kind: \"cuid2\"; message?: string | undefined; } | { kind: \"ulid\"; message?: string | undefined; } | { kind: \"startsWith\"; value: string; message?: string | undefined; } | { kind: \"endsWith\"; value: string; message?: string | undefined; } | { kind: \"regex\"; regex: RegExp; message?: string | undefined; } | { kind: \"trim\"; message?: string | undefined; } | { kind: \"toLowerCase\"; message?: string | undefined; } | { kind: \"toUpperCase\"; message?: string | undefined; } | { kind: \"datetime\"; offset: boolean; local: boolean; precision: number | null; message?: string | undefined; } | { kind: \"date\"; message?: string | undefined; } | { kind: \"time\"; precision: number | null; message?: string | undefined; } | { kind: \"duration\"; message?: string | undefined; } | { kind: \"ip\"; version?: Zod.IpVersion | undefined; message?: string | undefined; } | { kind: \"base64\"; message?: string | undefined; }"
         ],
         "path": "node_modules/zod/lib/types.d.ts",
         "deprecated": false,
@@ -18986,7 +19440,7 @@
         "label": "coerce",
         "description": [],
         "signature": [
-          "{ string: (params?: ({ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } & { coerce?: true | undefined; }) | undefined) => Zod.ZodString; number: (params?: ({ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } & { coerce?: boolean | undefined; }) | undefined) => Zod.ZodNumber; boolean: (params?: ({ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } & { coerce?: boolean | undefined; }) | undefined) => Zod.ZodBoolean; bigint: (params?: ({ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } & { coerce?: boolean | undefined; }) | undefined) => Zod.ZodBigInt; date: (params?: ({ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; description?: string | undefined; } & { coerce?: boolean | undefined; }) | undefined) => Zod.ZodDate; }"
+          "{ string: (params?: ({ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } & { coerce?: true | undefined; }) | undefined) => Zod.ZodString; number: (params?: ({ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } & { coerce?: boolean | undefined; }) | undefined) => Zod.ZodNumber; boolean: (params?: ({ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } & { coerce?: boolean | undefined; }) | undefined) => Zod.ZodBoolean; bigint: (params?: ({ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } & { coerce?: boolean | undefined; }) | undefined) => Zod.ZodBigInt; date: (params?: ({ errorMap?: Zod.ZodErrorMap | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } & { coerce?: boolean | undefined; }) | undefined) => Zod.ZodDate; }"
         ],
         "path": "node_modules/zod/lib/types.d.ts",
         "deprecated": false,
@@ -19016,7 +19470,7 @@
         "label": "late",
         "description": [],
         "signature": [
-          "{ object: <T extends Zod.ZodRawShape>(shape: () => T, params?: Zod.RawCreateParams) => Zod.ZodObject<T, \"strip\", Zod.ZodTypeAny, { [k_1 in keyof Zod.objectUtil.addQuestionMarks<Zod.baseObjectOutputType<T>, { [k in keyof Zod.baseObjectOutputType<T>]: undefined extends Zod.baseObjectOutputType<T>[k] ? never : k; }[keyof T]>]: Zod.objectUtil.addQuestionMarks<Zod.baseObjectOutputType<T>, { [k in keyof Zod.baseObjectOutputType<T>]: undefined extends Zod.baseObjectOutputType<T>[k] ? never : k; }[keyof T]>[k_1]; }, { [k_2 in keyof Zod.baseObjectInputType<T>]: Zod.baseObjectInputType<T>[k_2]; }>; }"
+          "{ object: <T extends Zod.ZodRawShape>(shape: () => T, params?: Zod.RawCreateParams) => Zod.ZodObject<T, \"strip\", Zod.ZodTypeAny, { [k in keyof Zod.objectUtil.addQuestionMarks<Zod.baseObjectOutputType<T>, any>]: Zod.objectUtil.addQuestionMarks<Zod.baseObjectOutputType<T>, any>[k]; }, { [k_1 in keyof Zod.baseObjectInputType<T>]: Zod.baseObjectInputType<T>[k_1]; }>; }"
         ],
         "path": "node_modules/zod/lib/types.d.ts",
         "deprecated": false,

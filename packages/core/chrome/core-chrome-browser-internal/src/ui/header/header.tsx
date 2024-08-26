@@ -182,9 +182,6 @@ export function Header({
                   onIsLockedUpdate={onIsLockedUpdate}
                   closeNav={() => {
                     setIsNavOpen(false);
-                    if (toggleCollapsibleNavRef.current) {
-                      toggleCollapsibleNavRef.current.focus();
-                    }
                   }}
                   customNavLink$={observables.customNavLink$}
                   button={

@@ -10,6 +10,7 @@ import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/typesWith
 import type { ModelConfig } from '@kbn/inference_integration_flyout/types';
 import type { HttpService } from '../http_service';
 import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
+
 export function inferenceModelsApiProvider(httpService: HttpService) {
   return {
     /**
@@ -23,10 +24,21 @@ export function inferenceModelsApiProvider(httpService: HttpService) {
       taskType: InferenceTaskType,
       modelConfig: ModelConfig
     ) {
-      const result = await httpService.http<estypes.InferencePutModelResponse>({
+      const result = await httpService.http<estypes.InferencePutResponse>({
         path: `${ML_INTERNAL_BASE_PATH}/_inference/${taskType}/${inferenceId}`,
         method: 'PUT',
         body: JSON.stringify(modelConfig),
+        version: '1',
+      });
+      return result;
+    },
+    /**
+     * Gets all inference endpoints
+     */
+    async getAllInferenceEndpoints() {
+      const result = await httpService.http<estypes.InferenceGetResponse>({
+        path: `${ML_INTERNAL_BASE_PATH}/_inference/all`,
+        method: 'GET',
         version: '1',
       });
       return result;

@@ -43,7 +43,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     let dashboard: typeof pageObjects.cloudPostureDashboard.dashboard;
 
     before(async () => {
-      await pageObjects.svlCommonPage.loginWithRole('viewer');
+      await pageObjects.svlCommonPage.loginAsViewer();
       cspDashboard = pageObjects.cloudPostureDashboard;
       dashboard = pageObjects.cloudPostureDashboard.dashboard;
       await cspDashboard.waitForPluginInitialized();

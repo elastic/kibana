@@ -71,6 +71,7 @@ export const OAuthAuthorizeLogic = kea<MakeLogicType<OAuthAuthorizeValues, OAuth
     cachedPreAuth: [
       {} as OAuthPreAuthorization,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setServerProps: (_, serverProps) => transformServerPreAuth(serverProps),
       },
     ],

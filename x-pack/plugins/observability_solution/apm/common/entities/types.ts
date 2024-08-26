@@ -16,8 +16,8 @@ export enum SignalTypes {
 export interface EntityMetrics {
   latency: number | null;
   throughput: number | null;
-  failedTransactionRate: number;
-  logRate: number;
+  failedTransactionRate: number | null;
+  logRate: number | null;
   logErrorRate: number | null;
 }
 
@@ -27,4 +27,5 @@ export interface EntityServiceListItem {
   environments: string[];
   serviceName: string;
   agentName: AgentName;
+  hasLogMetrics: boolean;
 }

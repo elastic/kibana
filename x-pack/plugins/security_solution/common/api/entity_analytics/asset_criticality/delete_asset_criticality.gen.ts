@@ -11,12 +11,12 @@
  *
  * info:
  *   title: Asset Criticality Delete Record Schema
- *   version: 1
+ *   version: 2023-10-31
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
-import { IdField } from './common.gen';
+import { IdField, AssetCriticalityRecord } from './common.gen';
 
 export type DeleteAssetCriticalityRecordRequestQuery = z.infer<
   typeof DeleteAssetCriticalityRecordRequestQuery
@@ -39,23 +39,16 @@ export type DeleteAssetCriticalityRecordRequestQueryInput = z.input<
   typeof DeleteAssetCriticalityRecordRequestQuery
 >;
 
-export type InternalDeleteAssetCriticalityRecordRequestQuery = z.infer<
-  typeof InternalDeleteAssetCriticalityRecordRequestQuery
+export type DeleteAssetCriticalityRecordResponse = z.infer<
+  typeof DeleteAssetCriticalityRecordResponse
 >;
-export const InternalDeleteAssetCriticalityRecordRequestQuery = z.object({
+export const DeleteAssetCriticalityRecordResponse = z.object({
   /**
-   * The ID value of the asset.
+   * True if the record was deleted or false if the record did not exist.
    */
-  id_value: z.string(),
+  deleted: z.boolean(),
   /**
-   * The field representing the ID.
+   * The deleted record if it existed.
    */
-  id_field: IdField,
-  /**
-   * If 'wait_for' the request will wait for the index refresh.
-   */
-  refresh: z.literal('wait_for').optional(),
+  record: AssetCriticalityRecord.optional(),
 });
-export type InternalDeleteAssetCriticalityRecordRequestQueryInput = z.input<
-  typeof InternalDeleteAssetCriticalityRecordRequestQuery
->;

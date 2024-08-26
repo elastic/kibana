@@ -13,6 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
 import { noop } from 'lodash/fp';
 import { PromptResponse } from '@kbn/elastic-assistant-common';
+import { QueryObserverResult } from '@tanstack/react-query';
 import { Conversation } from '../../../..';
 import * as i18n from './translations';
 import * as i18nModel from '../../../connectorland/models/model_selector/translations';
@@ -37,6 +38,7 @@ export interface ConversationSettingsEditorProps {
     React.SetStateAction<ConversationsBulkActions>
   >;
   onSelectedConversationChange: (conversation?: Conversation) => void;
+  refetchConversations?: () => Promise<QueryObserverResult<Record<string, Conversation>, unknown>>;
 }
 
 /**
@@ -53,6 +55,7 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
     conversationsSettingsBulkActions,
     setConversationsSettingsBulkActions,
     onSelectedConversationChange,
+    refetchConversations,
   }) => {
     const { data: connectors, isSuccess: areConnectorsFetched } = useLoadConnectors({
       http,
@@ -276,6 +279,7 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
             conversation={selectedConversation}
             isDisabled={isDisabled}
             onSystemPromptSelectionChange={handleOnSystemPromptSelectionChange}
+            refetchConversations={refetchConversations}
             selectedPrompt={selectedSystemPrompt}
             isSettingsModalVisible={true}
             setIsSettingsModalVisible={noop} // noop, already in settings

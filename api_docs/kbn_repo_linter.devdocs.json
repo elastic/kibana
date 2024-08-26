@@ -228,15 +228,7 @@
             "label": "getTsProject",
             "description": [],
             "signature": [
-              "() => ",
-              {
-                "pluginId": "@kbn/ts-projects",
-                "scope": "common",
-                "docId": "kibKbnTsProjectsPluginApi",
-                "section": "def-common.TsProject",
-                "text": "TsProject"
-              },
-              " | undefined"
+              "() => any"
             ],
             "path": "packages/kbn-repo-linter/lib/lint_target.ts",
             "deprecated": false,
@@ -252,9 +244,7 @@
             "label": "getPkg",
             "description": [],
             "signature": [
-              "() => ",
-              "Package",
-              " | undefined"
+              "() => any"
             ],
             "path": "packages/kbn-repo-linter/lib/lint_target.ts",
             "deprecated": false,

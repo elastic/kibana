@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { EntityDefinition } from '@kbn/entities-schema';
-import { ENTITY_SCHEMA_VERSION_V1 } from '../../../../common/constants_entities';
+import { EntityDefinition, ENTITY_SCHEMA_VERSION_V1 } from '@kbn/entities-schema';
 import {
   initializePathScript,
   cleanScript,
@@ -26,7 +25,7 @@ function createMetadataPainlessScript(definition: EntityDefinition) {
   }
 
   return definition.metadata.reduce((acc, def) => {
-    const destination = def.destination || def.source;
+    const destination = def.destination;
     const optionalFieldPath = destination.replaceAll('.', '?.');
     const next = `
       if (ctx.entity?.metadata?.${optionalFieldPath} != null) {

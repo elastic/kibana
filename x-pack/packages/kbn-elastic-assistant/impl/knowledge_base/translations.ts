@@ -13,14 +13,6 @@ export const ALERTS_LABEL = i18n.translate(
     defaultMessage: 'Alerts',
   }
 );
-
-export const ASK_QUESTIONS_ABOUT = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.askQuestionsAboutLabel',
-  {
-    defaultMessage: 'Ask questions about the',
-  }
-);
-
 export const LATEST_AND_RISKIEST_OPEN_ALERTS = (alertsCount: number) =>
   i18n.translate(
     'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.latestAndRiskiestOpenAlertsLabel',
@@ -87,13 +79,12 @@ export const SETUP_KNOWLEDGE_BASE_BUTTON = i18n.translate(
   }
 );
 
-export const KNOWLEDGE_BASE_TOOLTIP = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.knowledgeBaseTooltip',
+export const SETUP_KNOWLEDGE_BASE_BUTTON_TOOLTIP = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.setupKnowledgeBaseButtonToolTip',
   {
-    defaultMessage: 'ELSER must be configured to enable the Knowledge Base',
+    defaultMessage: 'Knowledge Base unavailable, please see documentation for more details.',
   }
 );
-
 export const KNOWLEDGE_BASE_DESCRIPTION = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.knowledgeBaseDescription',
   {
@@ -110,38 +101,10 @@ export const KNOWLEDGE_BASE_DESCRIPTION_INSTALLED = (kbIndexPattern: string) =>
     }
   );
 
-export const KNOWLEDGE_BASE_INIT_BUTTON = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.initializeKnowledgeBaseButton',
-  {
-    defaultMessage: 'Initialize',
-  }
-);
-
-export const KNOWLEDGE_BASE_DELETE_BUTTON = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.deleteKnowledgeBaseButton',
-  {
-    defaultMessage: 'Delete',
-  }
-);
-
 export const KNOWLEDGE_BASE_ELSER_LABEL = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.elserLabel',
   {
     defaultMessage: 'ELSER Configured',
-  }
-);
-
-export const KNOWLEDGE_BASE_ELSER_MACHINE_LEARNING = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.elserMachineLearningDescription',
-  {
-    defaultMessage: 'Machine Learning',
-  }
-);
-
-export const KNOWLEDGE_BASE_ELSER_SEE_DOCS = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.elserSeeDocsDescription',
-  {
-    defaultMessage: 'See docs',
   }
 );
 

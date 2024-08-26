@@ -41,6 +41,7 @@ export const saveEntityDiscoveryAPIKey = async (
   await soClient.create(EntityDiscoveryApiKeyType.name, apiKey, {
     id: ENTITY_DISCOVERY_API_KEY_SO_ID,
     overwrite: true,
+    managed: true,
   });
 };
 

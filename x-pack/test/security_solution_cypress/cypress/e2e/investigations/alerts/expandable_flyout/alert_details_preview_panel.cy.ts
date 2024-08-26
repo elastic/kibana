@@ -50,9 +50,7 @@ import {
   openTableTab,
 } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
 
-// github.com/elastic/security-team/issues/9933
-// Enable when feature flag 'entityAlertPreviewEnabled' is enabled
-describe.skip(
+describe(
   'Opening alert previews from alert details flyout',
   { tags: ['@ess', '@serverless'] },
   () => {

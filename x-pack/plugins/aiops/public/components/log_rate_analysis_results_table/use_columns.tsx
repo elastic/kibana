@@ -94,7 +94,7 @@ export const LOG_RATE_ANALYSIS_RESULTS_TABLE_TYPE = {
   SIGNIFICANT_ITEMS: 'significantItems',
 } as const;
 export type LogRateAnalysisResultsTableType =
-  typeof LOG_RATE_ANALYSIS_RESULTS_TABLE_TYPE[keyof typeof LOG_RATE_ANALYSIS_RESULTS_TABLE_TYPE];
+  (typeof LOG_RATE_ANALYSIS_RESULTS_TABLE_TYPE)[keyof typeof LOG_RATE_ANALYSIS_RESULTS_TABLE_TYPE];
 
 export type ColumnNames = keyof typeof significantItemColumns | 'unique';
 
@@ -596,7 +596,7 @@ export const useColumns = (
 
     for (const columnName in columnNamesToReturn) {
       if (
-        columnNamesToReturn.hasOwnProperty(columnName) === false ||
+        Object.hasOwn(columnNamesToReturn, columnName) === false ||
         skippedColumns.includes(columnNamesToReturn[columnName as ColumnNames] as string) ||
         ((columnName === 'p-value' || columnName === 'Impact') && zeroDocsFallback)
       )

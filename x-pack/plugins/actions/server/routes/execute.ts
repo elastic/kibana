@@ -15,7 +15,9 @@ import { asHttpRequestExecutionSource } from '../lib/action_execution_source';
 import { verifyAccessAndContext } from './verify_access_and_context';
 
 const paramSchema = schema.object({
-  id: schema.string(),
+  id: schema.string({
+    meta: { description: 'An identifier for the connector.' },
+  }),
 });
 
 const bodySchema = schema.object({
@@ -43,7 +45,9 @@ export const executeActionRoute = (
         access: 'public',
         summary: `Run a connector`,
         description:
-          'You can use this API to test an action that involves interaction with Kibana services or integrations with third-party systems. You must have `read` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges. If you use an index connector, you must also have `all`, `create`, `index`, or `write` indices privileges.',
+          'You can use this API to test an action that involves interaction with Kibana services or integrations with third-party systems.',
+        // You must have `read` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges. If you use an index connector, you must also have `all`, `create`, `index`, or `write` indices privileges.
+        tags: ['oas-tag:connectors'],
       },
       validate: {
         body: bodySchema,

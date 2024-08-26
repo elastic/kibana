@@ -491,6 +491,9 @@ describe('DataViewLazy', () => {
         Object.values((await dataViewLazy.getFields({ fieldName: ['*'] })).getFieldMap()).length -
           fieldCount
       ).toEqual(2);
+      expect(Object.keys(dataViewLazy.getRuntimeFields({ fieldName: ['new_field.a'] }))).toEqual([
+        'new_field.a',
+      ]);
       expect(dataViewLazy.getRuntimeField('new_field')).toMatchSnapshot();
       expect((await dataViewLazy.toSpec(toSpecGetAllFields))!.fields!['new_field.a']).toBeDefined();
       expect((await dataViewLazy.toSpec(toSpecGetAllFields))!.fields!['new_field.b']).toBeDefined();

@@ -41,6 +41,7 @@ export type SearchEmbeddableState = Pick<
   | 'sampleSize'
   | 'viewMode'
   | 'grid'
+  | 'density'
 > & {
   rows: DataTableRecord[];
   columnsMeta: DataTableColumnsMeta | undefined;
@@ -59,7 +60,7 @@ export type SearchEmbeddableSerializedAttributes = Omit<
 
 export type SearchEmbeddableSerializedState = SerializedTitles &
   SerializedTimeRange &
-  Partial<Pick<SavedSearchAttributes, typeof EDITABLE_SAVED_SEARCH_KEYS[number]>> & {
+  Partial<Pick<SavedSearchAttributes, (typeof EDITABLE_SAVED_SEARCH_KEYS)[number]>> & {
     // by value
     attributes?: SavedSearchAttributes & { references: SavedSearch['references'] };
     // by reference

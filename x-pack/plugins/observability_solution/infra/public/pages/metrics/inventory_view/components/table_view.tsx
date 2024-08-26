@@ -52,7 +52,7 @@ export const TableView = (props: Props) => {
 
   const closePopover = () => setOpenPopoverId(null);
 
-  const columns: Array<EuiBasicTableColumn<typeof items[number]>> = [
+  const columns: Array<EuiBasicTableColumn<(typeof items)[number]>> = [
     {
       field: 'name',
       name: i18n.translate('xpack.infra.tableView.columnName.name', { defaultMessage: 'Name' }),
@@ -82,6 +82,7 @@ export const TableView = (props: Props) => {
             isOpen={openPopoverId === uniqueID}
             closePopover={closePopover}
             anchorPosition="rightCenter"
+            zIndex={0}
           >
             <NodeContextMenu
               node={item.node}

@@ -14,24 +14,23 @@
  *   version: 1
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 import { AssetsRequestQuery } from './assets_status.gen';
 
-export type ReadAssetsStatusRequestParams = z.infer<typeof ReadAssetsStatusRequestParams>;
-export const ReadAssetsStatusRequestParams = z.object({
+export type ReadAssetsStatusRequestQuery = z.infer<typeof ReadAssetsStatusRequestQuery>;
+export const ReadAssetsStatusRequestQuery = z.object({
   query: AssetsRequestQuery,
 });
-export type ReadAssetsStatusRequestParamsInput = z.input<typeof ReadAssetsStatusRequestParams>;
+export type ReadAssetsStatusRequestQueryInput = z.input<typeof ReadAssetsStatusRequestQuery>;
 
 export type ReadAssetsStatusResponse = z.infer<typeof ReadAssetsStatusResponse>;
 export const ReadAssetsStatusResponse = z.object({});
-
-export type UpdateAssetsStatusRequestParams = z.infer<typeof UpdateAssetsStatusRequestParams>;
-export const UpdateAssetsStatusRequestParams = z.object({
+export type UpdateAssetsStatusRequestQuery = z.infer<typeof UpdateAssetsStatusRequestQuery>;
+export const UpdateAssetsStatusRequestQuery = z.object({
   query: AssetsRequestQuery,
 });
-export type UpdateAssetsStatusRequestParamsInput = z.input<typeof UpdateAssetsStatusRequestParams>;
+export type UpdateAssetsStatusRequestQueryInput = z.input<typeof UpdateAssetsStatusRequestQuery>;
 
 export type UpdateAssetsStatusResponse = z.infer<typeof UpdateAssetsStatusResponse>;
 export const UpdateAssetsStatusResponse = z.object({});

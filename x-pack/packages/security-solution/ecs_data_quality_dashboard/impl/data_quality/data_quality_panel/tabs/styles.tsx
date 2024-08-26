@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiFlexItem, EuiLink } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
 export const DEFAULT_LEGEND_HEIGHT = 300; // px
@@ -23,10 +23,6 @@ export const ChartFlexItem = styled(EuiFlexItem)<{
   min-height: ${({ $minChartHeight }) => `${$minChartHeight}px`};
 `;
 
-export const CopyToClipboardButton = styled(EuiButtonEmpty)`
-  margin-left: ${({ theme }) => theme.eui.euiSizeXS};
-`;
-
 export const LegendContainer = styled.div<{
   $height?: number;
   $width?: number;
@@ -36,12 +32,4 @@ export const LegendContainer = styled.div<{
   ${({ $height }) => ($height != null ? `height: ${$height}px;` : '')}
   scrollbar-width: thin;
   ${({ $width }) => ($width != null ? `width: ${$width}px;` : '')}
-`;
-
-export const StorageTreemapContainer = styled.div`
-  padding: ${({ theme }) => theme.eui.euiSizeM};
-`;
-
-export const ChartLegendLink = styled(EuiLink)`
-  width: 100%;
 `;

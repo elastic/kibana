@@ -8,7 +8,7 @@
 import yargs from 'yargs/yargs';
 import { ToolingLog } from '@kbn/tooling-log';
 
-export const AVAILABLE_MODELS = ['gpt-3.5', 'gpt-4'] as const;
+export const AVAILABLE_MODELS = ['gpt-3.5', 'gpt-4', 'gpt-4o'] as const;
 
 /**
  * Work in progress developer script for evaluating models against datasets.
