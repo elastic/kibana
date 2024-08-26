@@ -168,7 +168,6 @@ export function InternalDashboardTopNav({
     viewMode,
     title,
     dashboardRecentlyAccessed,
-    dashboard,
   ]);
 
   /**

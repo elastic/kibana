@@ -16,7 +16,6 @@ import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import { debounceTime } from 'rxjs';
 import {
   DashboardAppNoDataPage,
   isDashboardAppInNoDataState,
@@ -72,7 +71,9 @@ export function DashboardApp({
 }: DashboardAppProps) {
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
 
-  useMount(() => (async () => setShowNoDataPage(await isDashboardAppInNoDataState()))());
+  useMount(() => {
+    (async () => setShowNoDataPage(await isDashboardAppInNoDataState()))();
+  });
   const [dashboardAPI, setDashboardAPI] = useState<AwaitingDashboardAPI>(null);
 
   /**
@@ -180,21 +181,22 @@ export function DashboardApp({
     });
   }, [
     history,
-    kbnUrlStateStorage,
-    validateOutcome,
     embedSettings,
+    validateOutcome,
     getScopedHistory,
     isScreenshotMode,
-    getScreenshotContext,
     getStateTransfer,
+    kbnUrlStateStorage,
+    getScreenshotContext,
   ]);
 
   /**
    * When the dashboard container is created, or re-created, start syncing dashboard state with the URL
    */
   useEffect(() => {
+    if (!dashboardAPI) return;
     if (!dashboardAPI || !savedDashboardId) return;
-    dashboardAPI.expandedPanelId.pipe(debounceTime(10)).subscribe(() => {
+    dashboardAPI.expandedPanelId.subscribe(() => {
       const { stopWatchingAppStateInUrl } = startSyncingDashboardUrlState({
         kbnUrlStateStorage,
         dashboardAPI,
