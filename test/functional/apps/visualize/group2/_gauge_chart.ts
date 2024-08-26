@@ -18,20 +18,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['visualize', 'visEditor', 'visChart', 'timePicker']);
 
+  async function initGaugeVis() {
+    log.debug('navigateToApp visualize');
+    await PageObjects.visualize.navigateToNewAggBasedVisualization();
+    log.debug('clickGauge');
+    await PageObjects.visualize.clickGauge();
+    await PageObjects.visualize.clickNewSearch();
+    await PageObjects.timePicker.setDefaultAbsoluteRange();
+  }
+
   describe('gauge chart', function indexPatternCreation() {
     before(async () => {
       await PageObjects.visualize.initTests();
+      await initGaugeVis();
     });
-    async function initGaugeVis() {
-      log.debug('navigateToApp visualize');
-      await PageObjects.visualize.navigateToNewAggBasedVisualization();
-      log.debug('clickGauge');
-      await PageObjects.visualize.clickGauge();
-      await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
-    }
-
-    before(initGaugeVis);
 
     it('should have inspector enabled', async function () {
       await inspector.expectIsEnabled();
