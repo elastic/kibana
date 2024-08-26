@@ -31,7 +31,7 @@ const parameters: BuildIntegrationRequestBody = {
         description: integrationSettings.dataStreamDescription!,
         name: integrationSettings.dataStreamName!,
         inputTypes: integrationSettings.inputTypes!,
-        rawSamples: integrationSettings.logsSampleParsed!,
+        rawSamples: integrationSettings.logSamples!,
         docs: results.docs!,
         pipeline: results.pipeline,
         samplesFormat: { name: 'json' },

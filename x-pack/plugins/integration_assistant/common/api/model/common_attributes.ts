@@ -22,10 +22,10 @@ export type DataStreamName = z.infer<typeof DataStreamName>;
 export const DataStreamName = z.string().min(1);
 
 /**
- * Blob containing the Base64 encoded rawSamples.
+ * String form of the input logsamples.
  */
-export type EncodedRawSamples = z.infer<typeof EncodedRawSamples>;
-export const EncodedRawSamples = z.string();
+export type LogSamples = z.infer<typeof LogSamples>;
+export const LogSamples = z.array(z.string());
 
 /**
  * String array containing the json raw samples that are used for ecs mapping.

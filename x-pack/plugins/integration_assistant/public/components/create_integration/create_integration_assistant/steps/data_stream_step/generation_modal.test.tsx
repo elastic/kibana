@@ -81,7 +81,7 @@ describe('GenerationModal', () => {
     it('should call runAnalyseLogsGraph with correct parameters', () => {
       expect(mockRunAnalyseLogsGraph).toHaveBeenCalledWith({
         ...defaultRequest,
-        encodedRawSamples: integrationSettings.encodedLogSamples ?? [],
+        logSamples: integrationSettings.logSamples ?? [],
       });
     });
 
@@ -123,7 +123,7 @@ describe('GenerationModal', () => {
         TelemetryEventType.IntegrationAssistantGenerationComplete,
         {
           sessionId: expect.any(String),
-          sampleRows: integrationSettings.logsSampleParsed?.length ?? 0,
+          sampleRows: integrationSettings.logSamples?.length ?? 0,
           actionTypeId: connector.actionTypeId,
           model: expect.anything(),
           provider: connector.apiProvider ?? 'unknown',
@@ -169,7 +169,7 @@ describe('GenerationModal', () => {
         TelemetryEventType.IntegrationAssistantGenerationComplete,
         {
           sessionId: expect.any(String),
-          sampleRows: integrationSettings.logsSampleParsed?.length ?? 0,
+          sampleRows: integrationSettings.logSamples?.length ?? 0,
           actionTypeId: connector.actionTypeId,
           model: expect.anything(),
           provider: connector.apiProvider ?? 'unknown',

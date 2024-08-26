@@ -58,7 +58,7 @@ export const useDeployIntegration = ({
                 description: integrationSettings.dataStreamDescription ?? '',
                 name: integrationSettings.dataStreamName ?? '',
                 inputTypes: integrationSettings.inputTypes ?? [],
-                rawSamples: integrationSettings.logsSampleParsed ?? [],
+                rawSamples: integrationSettings.logSamples ?? [],
                 docs: result.docs ?? [],
                 samplesFormat: result.samplesFormat ?? { name: 'json' },
                 pipeline: result.pipeline,

@@ -44,7 +44,7 @@ export interface RequestDeps {
   abortSignal: AbortSignal;
 }
 
-export const runAnalyseLogs = async (
+export const runAnalyseLogsGraph = async (
   body: AnalyseLogsRequestBody,
   { http, abortSignal }: RequestDeps
 ): Promise<AnalyseLogsResponse> =>

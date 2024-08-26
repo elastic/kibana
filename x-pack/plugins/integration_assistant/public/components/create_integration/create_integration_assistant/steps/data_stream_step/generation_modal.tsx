@@ -86,23 +86,31 @@ export const useGeneration = ({
 
     (async () => {
       try {
-        const analyseLogsRequest: AnalyseLogsRequestBody = {
-          encodedRawSamples: integrationSettings.encodedLogSamples ?? '',
-          connectorId: connector.id,
-          langSmithOptions: getLangSmithOptions(),
-        };
+        let logSamples = integrationSettings.logSamples;
+        let samplesFormat = integrationSettings.samplesFormat;
 
-        setProgress('analyseLogs');
-        const analyseLogsResult = await runAnalyseLogsGraph(analyseLogsRequest, deps);
-        if (abortController.signal.aborted) return;
-        if (isEmpty(analyseLogsResult?.results)) {
-          setError('No results from Analyse Logs Graph');
-          return;
+        if (integrationSettings.samplesFormat === undefined) {
+          const analyseLogsRequest: AnalyseLogsRequestBody = {
+            logSamples: integrationSettings.logSamples ?? [],
+            connectorId: connector.id,
+            langSmithOptions: getLangSmithOptions(),
+          };
+
+          setProgress('analyseLogs');
+          const analyseLogsResult = await runAnalyseLogsGraph(analyseLogsRequest, deps);
+          if (abortController.signal.aborted) return;
+          if (isEmpty(analyseLogsResult?.results)) {
+            setError('No results from Analyse Logs Graph');
+            return;
+          }
+          logSamples = analyseLogsResult.results.parsedSamples;
+          samplesFormat = analyseLogsResult.results.samplesFormat;
         }
+
         const ecsRequest: EcsMappingRequestBody = {
           packageName: integrationSettings.name ?? '',
           dataStreamName: integrationSettings.dataStreamName ?? '',
-          rawSamples: analyseLogsResult.results.parsedSamples ?? [],
+          rawSamples: logSamples ?? [],
           connectorId: connector.id,
           langSmithOptions: getLangSmithOptions(),
         };
@@ -144,7 +152,7 @@ export const useGeneration = ({
         const result = {
           pipeline: relatedGraphResult.results.pipeline,
           docs: relatedGraphResult.results.docs,
-          samplesFormat: analyseLogsResult.results.samplesFormat,
+          samplesFormat,
         };
 
         onComplete(result);

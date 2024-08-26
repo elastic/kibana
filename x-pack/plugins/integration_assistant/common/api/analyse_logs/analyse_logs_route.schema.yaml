@@ -18,11 +18,11 @@ paths:
             schema:
               type: object
               required:
-                - encodedRawSamples
+                - logSamples
                 - connectorId
               properties:
-                encodedRawSamples:
-                  $ref: "../model/common_attributes.schema.yaml#/components/schemas/EncodedRawSamples"
+                logSamples:
+                  $ref: "../model/common_attributes.schema.yaml#/components/schemas/LogSamples"
                 connectorId:
                   $ref: "../model/common_attributes.schema.yaml#/components/schemas/Connector"
                 langSmithOptions:

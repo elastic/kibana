@@ -108,7 +108,12 @@ export const LOGS_SAMPLE_DESCRIPTION = i18n.translate(
     defaultMessage: 'Drag and drop a file or Browse files.',
   }
 );
-
+export const LOGS_SAMPLE_DESCRIPTION_2 = i18n.translate(
+  'xpack.integrationAssistant.step.dataStream.logsSample.description2',
+  {
+    defaultMessage: 'JSON/NDJSON format',
+  }
+);
 export const LOGS_SAMPLE_ERROR = {
   CAN_NOT_READ: i18n.translate(
     'xpack.integrationAssistant.step.dataStream.logsSample.errorCanNotRead',

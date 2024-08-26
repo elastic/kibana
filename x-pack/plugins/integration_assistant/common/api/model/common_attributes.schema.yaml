@@ -16,10 +16,11 @@ components:
       minLength: 1
       description: DataStream name for the integration to be built.
 
-    EncodedRawSamples:
-      type: string
-      format: binary
-      description:  Blob containing the Base64 encoded rawSamples.
+    LogSamples:
+      type: array
+      items:
+        type: string
+      description:  String form of the input logsamples.
 
     RawSamples:
       type: array

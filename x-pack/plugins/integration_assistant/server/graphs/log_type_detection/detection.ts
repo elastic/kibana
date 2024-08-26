@@ -12,6 +12,8 @@ import { JsonOutputParser } from '@langchain/core/output_parsers';
 import type { LogFormatDetectionState } from '../../types';
 import { LOG_FORMAT_DETECTION_PROMPT } from './prompts';
 
+const MaxLogSamplesInPrompt = 5;
+
 export async function handleLogFormatDetection(
   state: LogFormatDetectionState,
   model: ActionsClientChatOpenAI | ActionsClientSimpleChatModel
@@ -19,9 +21,14 @@ export async function handleLogFormatDetection(
   const outputParser = new JsonOutputParser();
   const logFormatDetectionNode = LOG_FORMAT_DETECTION_PROMPT.pipe(model).pipe(outputParser);
 
+  const samples =
+    state.logSamples.length > MaxLogSamplesInPrompt
+      ? state.logSamples.slice(0, MaxLogSamplesInPrompt)
+      : state.logSamples;
+
   const detectedLogFormatAnswer = await logFormatDetectionNode.invoke({
     ex_answer: state.exAnswer,
-    log_samples: state.rawSamples,
+    log_samples: samples,
   });
   const logFormat = detectedLogFormatAnswer.log_type;
 

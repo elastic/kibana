@@ -21,7 +21,7 @@ const graphState: StateGraphArgs<LogFormatDetectionState>['channels'] = {
     value: (x: string, y?: string) => y ?? x,
     default: () => '',
   },
-  rawSamples: {
+  logSamples: {
     value: (x: string[], y?: string[]) => y ?? x,
     default: () => [],
   },
@@ -35,7 +35,7 @@ const graphState: StateGraphArgs<LogFormatDetectionState>['channels'] = {
   },
   samplesFormat: {
     value: (x: SamplesFormat, y?: SamplesFormat) => y ?? x,
-    default: () => ({ name: 'json' }),
+    default: () => ({ name: 'unsupported' }),
   },
   ecsVersion: {
     value: (x: string, y?: string) => y ?? x,
@@ -61,7 +61,7 @@ function modelOutput(state: LogFormatDetectionState): Partial<LogFormatDetection
     lastExecutedChain: 'modelOutput',
     results: {
       samplesFormat: state.samplesFormat,
-      parsedSamples: state.rawSamples, // TODO: Add parsed samples
+      parsedSamples: state.logSamples, // TODO: Add parsed samples
     },
   };
 }

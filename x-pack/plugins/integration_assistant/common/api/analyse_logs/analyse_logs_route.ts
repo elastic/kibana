@@ -16,12 +16,12 @@
 
 import { z } from '@kbn/zod';
 
-import { EncodedRawSamples, Connector, LangSmithOptions } from '../model/common_attributes';
+import { LogSamples, Connector, LangSmithOptions } from '../model/common_attributes';
 import { AnalyseLogsAPIResponse } from '../model/response_schemas';
 
 export type AnalyseLogsRequestBody = z.infer<typeof AnalyseLogsRequestBody>;
 export const AnalyseLogsRequestBody = z.object({
-  encodedRawSamples: EncodedRawSamples,
+  logSamples: LogSamples,
   connectorId: Connector,
   langSmithOptions: LangSmithOptions.optional(),
 });

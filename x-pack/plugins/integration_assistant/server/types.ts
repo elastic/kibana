@@ -78,7 +78,7 @@ export interface EcsMappingState {
 
 export interface LogFormatDetectionState {
   lastExecutedChain: string;
-  rawSamples: string[];
+  logSamples: string[];
   exAnswer: string;
   finalized: boolean;
   samplesFormat: SamplesFormat;

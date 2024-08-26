@@ -19,7 +19,6 @@ import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
 import { buildRouteValidationWithZod } from '../util/route_validation';
 import { withAvailability } from './with_availability';
 import { getLogFormatDetectionGraph } from '../graphs/log_type_detection/graph';
-import { decodeRawSamples, parseSamples } from '../util/parse';
 
 const MaxLogsSampleRows = 10;
 
@@ -46,7 +45,7 @@ export function registerAnalyseLogsRoutes(
         },
       },
       withAvailability(async (context, req, res): Promise<IKibanaResponse<AnalyseLogsResponse>> => {
-        const { encodedRawSamples, langSmithOptions } = req.body;
+        const { logSamples, langSmithOptions } = req.body;
         const { getStartServices, logger } = await context.integrationAssistant;
         const [, { actions: actionsPlugin }] = await getStartServices();
         try {
@@ -76,39 +75,28 @@ export function registerAnalyseLogsRoutes(
               ...getLangSmithTracer({ ...langSmithOptions, logger }),
             ],
           };
-          const logsSampleDecoded = decodeRawSamples(encodedRawSamples);
-          const { error, samplesFormat, parsedContent: samples } = parseSamples(logsSampleDecoded);
-
-          if (error) {
-            return res.badRequest({ body: error });
-          }
 
           // Truncate samples to 10 entries until chunking is in place
-          const parsedSamples = truncateSamples(samples);
-          const parseResults = { results: { samplesFormat, parsedSamples } };
+          const samples = truncateSamples(logSamples);
 
-          if (samplesFormat === null || samplesFormat.name === 'unsupported') {
-            // Non JSON log samples. Could be some syslog structured / unstructured logs
-            const logFormatParameters = {
-              rawSamples: parsedSamples,
-            };
-            const graph = await getLogFormatDetectionGraph(model);
-            const graphResults = await graph.invoke(logFormatParameters, options);
-            const graphLogFormat = graphResults.results.logFormat;
-            if (
-              graphLogFormat === 'unsupported' ||
-              graphLogFormat === 'csv' ||
-              graphLogFormat === 'structured' ||
-              graphLogFormat === 'unstructured'
-            ) {
-              return res.customError({
-                statusCode: 501,
-                body: { message: `Unsupported log type: ${graphLogFormat}` },
-              });
-            }
-            parseResults.results = graphResults.results;
+          const logFormatParameters = {
+            logSamples: samples,
+          };
+          const graph = await getLogFormatDetectionGraph(model);
+          const graphResults = await graph.invoke(logFormatParameters, options);
+          const graphLogFormat = graphResults.results.logFormat;
+          if (
+            graphLogFormat === 'unsupported' ||
+            graphLogFormat === 'csv' ||
+            graphLogFormat === 'structured' ||
+            graphLogFormat === 'unstructured'
+          ) {
+            return res.customError({
+              statusCode: 501,
+              body: { message: `Unsupported log type: ${graphLogFormat}` },
+            });
           }
-          return res.ok({ body: AnalyseLogsResponse.parse(parseResults) });
+          return res.ok({ body: AnalyseLogsResponse.parse(graphResults) });
         } catch (e) {
           return res.badRequest({ body: e });
         }
