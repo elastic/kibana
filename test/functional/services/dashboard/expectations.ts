@@ -284,11 +284,11 @@ export class DashboardExpectService extends FtrService {
   }
 
   async savedSearchRowsExist() {
-    this.testSubjects.existOrFail('docTableExpandToggleColumn');
+    await this.testSubjects.existOrFail('docTableExpandToggleColumn');
   }
 
   async savedSearchRowsMissing() {
-    this.testSubjects.missingOrFail('docTableExpandToggleColumn');
+    await this.testSubjects.missingOrFail('docTableExpandToggleColumn');
   }
 
   async dataTableRowCount(expectedCount: number) {
