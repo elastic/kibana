@@ -9,7 +9,6 @@
 import { pick } from 'lodash';
 
 import expect from '@kbn/expect';
-import { OPTIONS_LIST_CONTROL } from '@kbn/controls-plugin/common';
 
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS } from '../../../../page_objects/dashboard_page_controls';
@@ -18,8 +17,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const pieChart = getService('pieChart');
   const filterBar = getService('filterBar');
-  const dashboardAddPanel = getService('dashboardAddPanel');
-  const dashboardPanelActions = getService('dashboardPanelActions');
 
   const { dashboardControls, dashboard, header } = getPageObjects([
     'dashboardControls',
@@ -32,27 +29,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ]);
 
   describe('Dashboard options list validation', () => {
-    let controlId: string;
+    const controlId = 'cd881630-fd28-4e9c-aec5-ae9711d48369';
 
     before(async () => {
+      await dashboard.loadSavedDashboard('Test Options List Validation');
       await dashboard.ensureDashboardIsInEditMode();
-      await dashboardControls.createControl({
-        controlType: OPTIONS_LIST_CONTROL,
-        dataViewTitle: 'animals-*',
-        fieldName: 'sound.keyword',
-        title: 'Animal Sounds',
-      });
-      controlId = (await dashboardControls.getAllControlIds())[0];
-      await dashboardAddPanel.addVisualization('Rendering-Test:-animal-sounds-pie');
-      await dashboard.clickQuickSave();
-      await header.waitUntilLoadingHasFinished();
-    });
-
-    after(async () => {
-      await filterBar.removeAllFilters();
-      await dashboardControls.deleteAllControls();
-      await dashboardPanelActions.removePanelByTitle('Rendering Test: animal sounds pie');
-      await dashboard.clickQuickSave();
     });
 
     describe('Options List dashboard validation', () => {
@@ -64,9 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       after(async () => {
-        await dashboardControls.clearControlSelections(controlId);
-        await filterBar.removeAllFilters();
-        await queryBar.clickQuerySubmitButton();
+        await dashboard.clickDiscardChanges();
       });
 
       it('Can mark selections invalid with Query', async () => {

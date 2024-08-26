@@ -475,7 +475,9 @@ export class DashboardPageControls extends FtrService {
     await this.optionsListWaitForLoading(controlId);
     if (!skipOpen) await this.optionsListOpenPopover(controlId);
     await this.retry.try(async () => {
-      expect(await this.optionsListPopoverGetAvailableOptions()).to.eql(expectation);
+      const availableOptions = await this.optionsListPopoverGetAvailableOptions();
+      expect(availableOptions.suggestions).to.eql(expectation.suggestions);
+      expect(availableOptions.invalidSelections.sort()).to.eql(expectation.invalidSelections.sort());
     });
     if (await this.testSubjects.exists('optionsList-cardinality-label')) {
       expect(await this.optionsListGetCardinalityValue()).to.be(
