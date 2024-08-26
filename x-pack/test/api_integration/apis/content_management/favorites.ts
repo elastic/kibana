@@ -182,7 +182,12 @@ export default function ({ getService }: FtrProviderContext) {
         // @ts-ignore
         const favoritesStats = body[0].stats.stack_stats.kibana.plugins.favorites;
         expect(favoritesStats).to.eql({
-          dashboard: { total: 3, avg_per_user_per_space: 1, max_per_user_per_space: 1 },
+          dashboard: {
+            total: 3,
+            total_users_spaces: 3,
+            avg_per_user_per_space: 1,
+            max_per_user_per_space: 1,
+          },
         });
       });
     });

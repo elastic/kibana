@@ -15,6 +15,7 @@ import { favoritesSavedObjectName } from './favorites_saved_object';
 interface FavoritesUsage {
   [favorite_object_type: string]: {
     total: number;
+    total_users_spaces: number;
     avg_per_user_per_space: number;
     max_per_user_per_space: number;
   };
@@ -38,6 +39,13 @@ export function registerFavoritesUsageCollection({
           total: {
             type: 'long',
             _meta: { description: 'Total favorite object count in this deployment' },
+          },
+          total_users_spaces: {
+            type: 'long',
+            _meta: {
+              description:
+                'Total unique users+spaces that have favorited an object of this type in this deployment',
+            },
           },
           avg_per_user_per_space: {
             type: 'double',
@@ -121,6 +129,7 @@ export function registerFavoritesUsageCollection({
         typesBuckets.forEach((bucket) => {
           favoritesUsage[bucket.key] = {
             total: bucket.total.value,
+            total_users_spaces: bucket.doc_count,
             avg_per_user_per_space: bucket.avg.value,
             max_per_user_per_space: bucket.max.value,
           };

@@ -10,6 +10,12 @@
                 "description": "Total favorite object count in this deployment"
               }
             },
+            "total_users_spaces": {
+              "type": "long",
+              "_meta": {
+                "description": "Total unique users+spaces that have favorited an object of this type in this deployment"
+              }
+            },
             "avg_per_user_per_space": {
               "type": "double",
               "_meta": {
