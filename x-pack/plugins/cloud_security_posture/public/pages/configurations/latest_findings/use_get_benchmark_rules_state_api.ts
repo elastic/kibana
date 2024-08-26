@@ -9,8 +9,8 @@ import { useQuery } from '@tanstack/react-query';
 import {
   CSP_GET_BENCHMARK_RULES_STATE_API_CURRENT_VERSION,
   CSP_GET_BENCHMARK_RULES_STATE_ROUTE_PATH,
-  CspBenchmarkRulesStates,
 } from '@kbn/cloud-security-posture-common';
+import type { CspBenchmarkRulesStates } from '@kbn/cloud-security-posture-common';
 import { useKibana } from '../../../common/hooks/use_kibana';
 
 export const getRuleStatesKey = ['get_rules_state_key'];

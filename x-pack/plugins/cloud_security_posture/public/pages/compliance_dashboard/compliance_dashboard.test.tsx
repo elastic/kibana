@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { coreMock } from '@kbn/core/public/mocks';
-import { BaseCspSetupStatus, CspStatusCode } from '@kbn/cloud-security-posture-common';
+import type { BaseCspSetupStatus, CspStatusCode } from '@kbn/cloud-security-posture-common';
 import { render, screen } from '@testing-library/react';
 import { TestProvider } from '../../test/test_provider';
 import { ComplianceDashboard, getDefaultTab } from '.';

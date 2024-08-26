@@ -16,7 +16,7 @@ export type {
   BaseCspSetupBothPolicy,
   BaseCspSetupStatus,
   CspSetupStatus,
+  CspFinding,
 } from './types';
 export * from './constants';
-export type { CspFinding } from './schema/csp_finding';
 export type { CspBenchmarkRuleMetadata, CspBenchmarkRulesStates } from './schema/rules';

@@ -15,9 +15,8 @@ import { MAX_FINDINGS_TO_LOAD } from '@kbn/cloud-security-posture-common';
 import {
   CDR_MISCONFIGURATIONS_INDEX_PATTERN,
   LATEST_FINDINGS_RETENTION_POLICY,
-  CspBenchmarkRulesStates,
-  CspFinding,
 } from '@kbn/cloud-security-posture-common';
+import type { CspBenchmarkRulesStates, CspFinding } from '@kbn/cloud-security-posture-common';
 import type { FindingsBaseEsQuery } from '@kbn/cloud-security-posture';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import { getAggregationCount, getFindingsCountAggQuery } from '../utils/utils';
