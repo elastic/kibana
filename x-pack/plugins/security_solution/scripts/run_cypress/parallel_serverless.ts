@@ -468,7 +468,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
                   let proxyAuth: string;
                   proxyAuth = btoa(`${PROXY_CLIENT_ID}:${PROXY_SECRET}`);
                   command = `curl -X DELETE ${PROXY_URL}/projects/${project.id} -H "Authorization: Basic ${proxyAuth}"`;
-                  exec(command)
+                  exec(command);
                 }
               });
 
