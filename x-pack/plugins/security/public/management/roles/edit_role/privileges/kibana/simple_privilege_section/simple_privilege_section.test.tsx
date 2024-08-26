@@ -9,12 +9,12 @@ import type { EuiButtonGroupProps } from '@elastic/eui';
 import { EuiButtonGroup, EuiComboBox, EuiSuperSelect } from '@elastic/eui';
 import React from 'react';
 
+import type { Role } from '@kbn/security-plugin-types-common';
+import { KibanaPrivileges, SecuredFeature } from '@kbn/security-role-management-model';
 import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 
 import { SimplePrivilegeSection } from './simple_privilege_section';
 import { UnsupportedSpacePrivilegesWarning } from './unsupported_space_privileges_warning';
-import type { Role } from '../../../../../../../common';
-import { KibanaPrivileges, SecuredFeature } from '../../../../model';
 
 const buildProps = (customProps: any = {}) => {
   const features = [

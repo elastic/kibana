@@ -3835,6 +3835,10 @@
                 "path": "x-pack/plugins/rule_registry/server/routes/get_aad_fields_by_rule_type.ts"
               },
               {
+                "plugin": "@kbn/content-management-content-insights-server",
+                "path": "packages/content-management/content_insights/content_insights_server/src/register.ts"
+              },
+              {
                 "plugin": "banners",
                 "path": "x-pack/plugins/banners/server/routes/info.ts"
               },
@@ -6549,6 +6553,10 @@
                 "path": "x-pack/plugins/rule_registry/server/routes/get_alert_summary.ts"
               },
               {
+                "plugin": "@kbn/content-management-content-insights-server",
+                "path": "packages/content-management/content_insights/content_insights_server/src/register.ts"
+              },
+              {
                 "plugin": "savedObjectsTagging",
                 "path": "x-pack/plugins/saved_objects_tagging/server/routes/tags/create_tag.ts"
               },
@@ -6677,10 +6685,6 @@
                 "path": "x-pack/plugins/triggers_actions_ui/server/data/routes/indices.ts"
               },
               {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/job_service.ts"
-              },
-              {
                 "plugin": "globalSearch",
                 "path": "x-pack/plugins/global_search/server/routes/find.ts"
               },
@@ -6691,6 +6695,10 @@
               {
                 "plugin": "enterpriseSearch",
                 "path": "x-pack/plugins/enterprise_search/server/routes/app_search/adaptive_relevance.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/plugins/enterprise_search/server/routes/app_search/app_search_gated_form.ts"
               },
               {
                 "plugin": "enterpriseSearch",
@@ -7367,6 +7375,10 @@
               {
                 "plugin": "console",
                 "path": "src/plugins/console/server/routes/api/console/proxy/index.ts"
+              },
+              {
+                "plugin": "console",
+                "path": "src/plugins/console/server/routes/api/console/convert_request_to_language/index.ts"
               },
               {
                 "plugin": "contentManagement",
@@ -14383,6 +14395,10 @@
                 "path": "x-pack/plugins/cloud_security_posture/server/routes/benchmark_rules/get_states/get_states.ts"
               },
               {
+                "plugin": "dataVisualizer",
+                "path": "x-pack/plugins/data_visualizer/server/routes.ts"
+              },
+              {
                 "plugin": "ecsDataQualityDashboard",
                 "path": "x-pack/plugins/ecs_data_quality_dashboard/server/routes/get_index_mappings.ts"
               },
@@ -15954,6 +15970,10 @@
               },
               {
                 "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/routes/job_service.ts"
+              },
+              {
+                "plugin": "ml",
                 "path": "x-pack/plugins/ml/server/routes/saved_objects.ts"
               },
               {
@@ -16103,6 +16123,10 @@
               {
                 "plugin": "logsShared",
                 "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/adapters/framework/kibana_framework_adapter.ts"
+              },
+              {
+                "plugin": "fileUpload",
+                "path": "x-pack/plugins/file_upload/server/routes.ts"
               },
               {
                 "plugin": "fileUpload",
