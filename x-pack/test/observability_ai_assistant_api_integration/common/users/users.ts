@@ -9,7 +9,7 @@ import { kbnTestConfig } from '@kbn/test';
 const password = kbnTestConfig.getUrlParts().password!;
 
 export interface User {
-  username: 'elastic' | 'editor' | 'viewer';
+  username: 'elastic' | 'editor' | 'viewer' | 'secondary_editor';
   password: string;
   roles: string[];
 }
@@ -20,10 +20,16 @@ export const editorUser: User = {
   roles: ['editor'],
 };
 
+export const secondaryEditorUser: User = {
+  username: 'secondary_editor',
+  password,
+  roles: ['editor'],
+};
+
 export const viewerUser: User = {
   username: 'viewer',
   password,
   roles: ['viewer'],
 };
 
-export const allUsers = [editorUser, viewerUser];
+export const allUsers = [editorUser, secondaryEditorUser, viewerUser];

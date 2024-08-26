@@ -32,6 +32,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         .expect(200);
       expect(res.body).to.eql({});
     });
+
     describe('when managing a single entry', () => {
       const knowledgeBaseEntry = {
         id: 'my-doc-id-1',
@@ -120,6 +121,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           .expect(500);
       });
     });
+
     describe('when managing multiple entries', () => {
       before(async () => {
         await clearKnowledgeBase(es);
@@ -232,6 +234,83 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(res.body.entries.length).to.eql(1);
         expect(res.body.entries[0].id).to.eql('my_doc_a');
+      });
+    });
+
+    describe('When the LLM creates entries', () => {
+      before(async () => {
+        await clearKnowledgeBase(es);
+      });
+      afterEach(async () => {
+        await clearKnowledgeBase(es);
+      });
+
+      it('can replace an existing entry using the `doc_id`', async () => {
+        await observabilityAIAssistantAPIClient
+          .editorUser({
+            endpoint: 'POST /internal/observability_ai_assistant/functions/summarize',
+            params: {
+              body: {
+                doc_id: 'my_doc_id',
+                text: 'My content',
+                confidence: 'high',
+                is_correction: false,
+                public: false,
+                labels: {},
+              },
+            },
+          })
+          .expect(200);
+
+        const res = await observabilityAIAssistantAPIClient
+          .editorUser({
+            endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
+            params: {
+              query: {
+                query: '',
+                sortBy: 'doc_id',
+                sortDirection: 'asc',
+              },
+            },
+          })
+          .expect(200);
+
+        const id = res.body.entries[0].id;
+        expect(res.body.entries.length).to.eql(1);
+        expect(res.body.entries[0].text).to.eql('My content');
+
+        await observabilityAIAssistantAPIClient
+          .editorUser({
+            endpoint: 'POST /internal/observability_ai_assistant/functions/summarize',
+            params: {
+              body: {
+                doc_id: 'my_doc_id',
+                text: 'My content_2',
+                confidence: 'high',
+                is_correction: false,
+                public: false,
+                labels: {},
+              },
+            },
+          })
+          .expect(200);
+
+        const res2 = await observabilityAIAssistantAPIClient
+          .editorUser({
+            endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
+            params: {
+              query: {
+                query: '',
+                sortBy: 'doc_id',
+                sortDirection: 'asc',
+              },
+            },
+          })
+          .expect(200);
+
+        expect(res2.body.entries.length).to.eql(1);
+        expect(res2.body.entries[0].text).to.eql('My content_2');
+        expect(res2.body.entries[0].id).to.eql(id);
       });
     });
   });

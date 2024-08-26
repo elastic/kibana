@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { kbnTestConfig } from '@kbn/test';
 import { sortBy } from 'lodash';
 import { Message, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import { CONTEXT_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/context';
@@ -23,20 +22,13 @@ import { createProxyActionConnector, deleteActionConnector } from '../../common/
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
-  const getScopedApiClientForUsername = getService('getScopedApiClientForUsername');
-  const security = getService('security');
   const supertest = getService('supertest');
   const es = getService('es');
   const ml = getService('ml');
   const log = getService('log');
 
   describe('Knowledge base user instructions', () => {
-    const userJohn = 'john';
-
     before(async () => {
-      // create user
-      const password = kbnTestConfig.getUrlParts().password!;
-      await security.user.create(userJohn, { password, roles: ['editor'] });
       await createKnowledgeBaseModel(ml);
 
       await observabilityAIAssistantAPIClient
@@ -46,7 +38,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     after(async () => {
       await deleteKnowledgeBaseModel(ml);
-      await security.user.delete(userJohn);
       await clearKnowledgeBase(es);
       await clearConversations(es);
     });
@@ -57,24 +48,26 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         const promises = [
           {
-            username: 'editor',
+            username: 'editorUser' as const,
             isPublic: true,
           },
           {
-            username: 'editor',
+            username: 'editorUser' as const,
             isPublic: false,
           },
           {
-            username: userJohn,
+            username: 'secondaryEditorUser' as const,
             isPublic: true,
           },
           {
-            username: userJohn,
+            username: 'secondaryEditorUser' as const,
             isPublic: false,
           },
         ].map(async ({ username, isPublic }) => {
           const visibility = isPublic ? 'Public' : 'Private';
-          await getScopedApiClientForUsername(username)({
+
+          const apiClient = observabilityAIAssistantAPIClient[username];
+          await apiClient({
             endpoint: 'PUT /internal/observability_ai_assistant/kb/user_instructions',
             params: {
               body: {
@@ -89,7 +82,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         await Promise.all(promises);
       });
 
-      it('"editor" can retrieve their own private instructions and the public instruction', async () => {
+      it('"editorUser" can retrieve their own private instructions and the public instruction', async () => {
         const res = await observabilityAIAssistantAPIClient.editorUser({
           endpoint: 'GET /internal/observability_ai_assistant/kb/user_instructions',
         });
@@ -99,26 +92,26 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(sortByDocId(instructions)).to.eql(
           sortByDocId([
             {
-              doc_id: 'private-doc-from-editor',
+              id: 'private-doc-from-editorUser',
               public: false,
-              text: 'Private user instruction from "editor"',
+              text: 'Private user instruction from "editorUser"',
             },
             {
-              doc_id: 'public-doc-from-editor',
+              id: 'public-doc-from-editorUser',
               public: true,
-              text: 'Public user instruction from "editor"',
+              text: 'Public user instruction from "editorUser"',
             },
             {
-              doc_id: 'public-doc-from-john',
+              id: 'public-doc-from-secondaryEditorUser',
               public: true,
-              text: 'Public user instruction from "john"',
+              text: 'Public user instruction from "secondaryEditorUser"',
             },
           ])
         );
       });
 
-      it('"john" can retrieve their own private instructions and the public instruction', async () => {
-        const res = await getScopedApiClientForUsername(userJohn)({
+      it('"secondaryEditorUser" can retrieve their own private instructions and the public instruction', async () => {
+        const res = await observabilityAIAssistantAPIClient.secondaryEditorUser({
           endpoint: 'GET /internal/observability_ai_assistant/kb/user_instructions',
         });
         const instructions = res.body.userInstructions;
@@ -127,19 +120,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(sortByDocId(instructions)).to.eql(
           sortByDocId([
             {
-              doc_id: 'public-doc-from-editor',
+              id: 'public-doc-from-editorUser',
               public: true,
-              text: 'Public user instruction from "editor"',
+              text: 'Public user instruction from "editorUser"',
             },
             {
-              doc_id: 'public-doc-from-john',
+              id: 'public-doc-from-secondaryEditorUser',
               public: true,
-              text: 'Public user instruction from "john"',
+              text: 'Public user instruction from "secondaryEditorUser"',
             },
             {
-              doc_id: 'private-doc-from-john',
+              id: 'private-doc-from-secondaryEditorUser',
               public: false,
-              text: 'Private user instruction from "john"',
+              text: 'Private user instruction from "secondaryEditorUser"',
             },
           ])
         );
@@ -185,7 +178,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(instructions).to.eql([
           {
-            doc_id: 'doc-to-update',
+            id: 'doc-to-update',
             text: 'Updated text',
             public: false,
           },
@@ -200,10 +193,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const userInstructionText =
         'Be polite and use language that is easy to understand. Never disagree with the user.';
 
-      async function getConversationForUser(username: string) {
-        const apiClient = getScopedApiClientForUsername(username);
+      async function getConversationForUser(username: 'editorUser' | 'secondaryEditorUser') {
+        const apiClient = observabilityAIAssistantAPIClient[username];
 
-        // the user instruction is always created by "editor" user
+        // the user instruction is always created by "editorUser" user
         await observabilityAIAssistantAPIClient
           .editorUser({
             endpoint: 'PUT /internal/observability_ai_assistant/kb/user_instructions',
@@ -284,7 +277,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('adds the instruction to the system prompt', async () => {
-        const conversation = await getConversationForUser('editor');
+        const conversation = await getConversationForUser('editorUser');
         const systemMessage = conversation.messages.find(
           (message) => message.message.role === MessageRole.System
         )!;
@@ -292,7 +285,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('does not add the instruction to the context', async () => {
-        const conversation = await getConversationForUser('editor');
+        const conversation = await getConversationForUser('editorUser');
         const contextMessage = conversation.messages.find(
           (message) => message.message.name === CONTEXT_FUNCTION_NAME
         );
@@ -306,7 +299,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('does not add the instruction conversation for other users', async () => {
-        const conversation = await getConversationForUser('john');
+        const conversation = await getConversationForUser('secondaryEditorUser');
         const systemMessage = conversation.messages.find(
           (message) => message.message.role === MessageRole.System
         )!;

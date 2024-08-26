@@ -13,6 +13,7 @@ import {
   KibanaEBTUIProvider,
 } from '@kbn/test-suites-src/analytics/services/kibana_ebt';
 import {
+  secondaryEditorUser,
   editorUser,
   viewerUser,
 } from '../../observability_ai_assistant_api_integration/common/users/users';
@@ -61,9 +62,10 @@ async function getTestConfig({
           ObservabilityAIAssistantUIProvider(context),
         observabilityAIAssistantAPIClient: async (context: InheritedFtrProviderContext) => {
           return {
-            adminUser: await getScopedApiClient(kibanaServer, 'elastic'),
-            viewerUser: await getScopedApiClient(kibanaServer, viewerUser.username),
-            editorUser: await getScopedApiClient(kibanaServer, editorUser.username),
+            adminUser: getScopedApiClient(kibanaServer, 'elastic'),
+            viewerUser: getScopedApiClient(kibanaServer, viewerUser.username),
+            editorUser: getScopedApiClient(kibanaServer, editorUser.username),
+            secondaryEditorUser: getScopedApiClient(kibanaServer, secondaryEditorUser.username),
           };
         },
         kibana_ebt_server: KibanaEBTServerProvider,
