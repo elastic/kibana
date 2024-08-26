@@ -25,6 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     const rangeSliderId = '515e7b9f-4f1b-4a06-beec-763810e4951a';
 
     before(async () => {
+      await dashboard.navigateToApp();
       await dashboard.loadSavedDashboard('Test Control Group Apply Button');
       await dashboard.switchToEditMode();
       await elasticChart.setNewChartUiDebugFlag();
