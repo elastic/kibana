@@ -23,7 +23,6 @@ import {
   EuiLoadingSpinner,
   EuiIcon,
   EuiDataGridRefProps,
-  EuiDataGridInMemory,
   EuiDataGridControlColumn,
   EuiDataGridCustomBodyProps,
   EuiDataGridStyle,
@@ -31,7 +30,7 @@ import {
   EuiHorizontalRule,
   EuiDataGridToolBarVisibilityDisplaySelectorOptions,
 } from '@elastic/eui';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import {
   useDataGridColumnsCellActions,
   type UseDataGridColumnsCellActionsProps,
@@ -43,9 +42,10 @@ import { getShouldShowFieldHandler } from '@kbn/discover-utils';
 import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { KBN_FIELD_TYPES, type DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { AdditionalFieldGroups } from '@kbn/unified-field-list';
+import { getSortingCriteria } from '@kbn/sort-predicates';
 import { DATA_GRID_DENSITY_STYLE_MAP, useDataGridDensity } from '../hooks/use_data_grid_density';
 import {
   UnifiedDataTableSettings,
@@ -93,6 +93,8 @@ import {
 } from './custom_control_columns';
 
 const CONTROL_COLUMN_IDS_DEFAULT = [SELECT_ROW, OPEN_DETAILS];
+const THEME_DEFAULT = { darkMode: false };
+const VIRTUALIZATION_OPTIONS: EuiDataGridProps['virtualizationOptions'] = { overscanRowCount: 20 };
 
 export type SortOrder = [string, string];
 
@@ -101,8 +103,6 @@ export enum DataLoadingState {
   loadingMore = 'loadingMore',
   loaded = 'loaded',
 }
-
-const themeDefault = { darkMode: false };
 
 interface SortObj {
   id: string;
@@ -484,7 +484,7 @@ export const UnifiedDataTable = ({
 }: UnifiedDataTableProps) => {
   const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings, storage, data } =
     services;
-  const { darkMode } = useObservable(services.theme?.theme$ ?? of(themeDefault), themeDefault);
+  const { darkMode } = useObservable(services.theme?.theme$ ?? of(THEME_DEFAULT), THEME_DEFAULT);
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
   const [isFilterActive, setIsFilterActive] = useState(false);
   const [isCompareActive, setIsCompareActive] = useState(false);
@@ -507,20 +507,109 @@ export const UnifiedDataTable = ({
     }
   }, [isFilterActive, hasSelectedDocs, setIsFilterActive]);
 
+  const timeFieldName = dataView.timeFieldName;
+  const shouldPrependTimeFieldColumn = useCallback(
+    (activeColumns: string[]) =>
+      canPrependTimeFieldColumn(
+        activeColumns,
+        timeFieldName,
+        columnsMeta,
+        showTimeCol,
+        isPlainRecord
+      ),
+    [timeFieldName, isPlainRecord, showTimeCol, columnsMeta]
+  );
+
+  const visibleColumns = useMemo(
+    () =>
+      getVisibleColumns(displayedColumns, dataView, shouldPrependTimeFieldColumn(displayedColumns)),
+    [dataView, displayedColumns, shouldPrependTimeFieldColumn]
+  );
+
+  const sortingColumns = useMemo(
+    () =>
+      sort
+        .map(([id, direction]) => ({ id, direction }))
+        .filter(({ id }) => visibleColumns.includes(id)),
+    [sort, visibleColumns]
+  );
+
+  const comparators = useMemo(() => {
+    if (!isPlainRecord || !rows || !sortingColumns.length) {
+      return;
+    }
+
+    function getCriteriaType(field: DataViewField) {
+      switch (field.type) {
+        case KBN_FIELD_TYPES.IP:
+          return 'ip';
+        case KBN_FIELD_TYPES.GEO_SHAPE:
+        case KBN_FIELD_TYPES.NUMBER:
+          return 'number';
+        case KBN_FIELD_TYPES.DATE:
+          return 'date';
+        default:
+          return undefined;
+      }
+    }
+
+    const currentComparators: Array<(a: DataTableRecord, b: DataTableRecord) => number> = [];
+
+    for (const { id, direction } of sortingColumns) {
+      const field = dataView.fields.getByName(id);
+
+      if (!field) {
+        continue;
+      }
+
+      const sortField = getSortingCriteria(
+        getCriteriaType(field),
+        id,
+        dataView.getFormatterForField(field)
+      );
+
+      currentComparators.push((a, b) =>
+        sortField(a.flattened, b.flattened, direction as 'asc' | 'desc')
+      );
+    }
+
+    return currentComparators;
+  }, [dataView, isPlainRecord, rows, sortingColumns]);
+
+  const sortedRows = useMemo(() => {
+    if (!rows || !comparators) {
+      return rows;
+    }
+
+    return rows.slice().sort((a, b) => {
+      for (const comparator of comparators) {
+        const result = comparator(a, b);
+
+        if (result !== 0) {
+          return result;
+        }
+      }
+
+      return 0;
+    });
+  }, [comparators, rows]);
+
   const displayedRows = useMemo(() => {
-    if (!rows) {
+    if (!sortedRows) {
       return [];
     }
+
     if (!isFilterActive || !hasSelectedDocs) {
-      return rows;
+      return sortedRows;
     }
-    const rowsFiltered = rows.filter((row) => isDocSelected(row.id));
-    if (!rowsFiltered.length) {
-      // in case the selected docs are no longer part of the sample of 500, show all docs
-      return rows;
-    }
-    return rowsFiltered;
-  }, [rows, isFilterActive, hasSelectedDocs, isDocSelected]);
+
+    const rowsFiltered = sortedRows.filter((row) => isDocSelected(row.id));
+
+    return rowsFiltered.length
+      ? rowsFiltered
+      : // in case the selected docs are no longer part of the sample of 500, show all docs
+        sortedRows;
+  }, [sortedRows, isFilterActive, hasSelectedDocs, isDocSelected]);
 
   const valueToStringConverter: ValueToStringConverter = useCallback(
     (rowIndex, columnId, options) => {
@@ -709,25 +798,6 @@ export const UnifiedDataTable = ({
     [dataView, onFieldEdited, services?.dataViewFieldEditor]
   );
 
-  const timeFieldName = dataView.timeFieldName;
-  const shouldPrependTimeFieldColumn = useCallback(
-    (activeColumns: string[]) =>
-      canPrependTimeFieldColumn(
-        activeColumns,
-        timeFieldName,
-        columnsMeta,
-        showTimeCol,
-        isPlainRecord
-      ),
-    [timeFieldName, isPlainRecord, showTimeCol, columnsMeta]
-  );
-
-  const visibleColumns = useMemo(
-    () =>
-      getVisibleColumns(displayedColumns, dataView, shouldPrependTimeFieldColumn(displayedColumns)),
-    [dataView, displayedColumns, shouldPrependTimeFieldColumn]
-  );
-
   const getCellValue = useCallback<UseDataGridColumnsCellActionsProps['getCellValue']>(
     (fieldName, rowIndex) =>
       displayedRows[rowIndex % displayedRows.length].flattened[fieldName] as Serializable,
@@ -851,41 +921,33 @@ export const UnifiedDataTable = ({
   /**
    * Sorting
    */
-  const sortingColumns = useMemo(
-    () =>
-      sort
-        .map(([id, direction]) => ({ id, direction }))
-        .filter(({ id }) => visibleColumns.includes(id)),
-    [sort, visibleColumns]
-  );
-
   const onTableSort = useCallback(
     (sortingColumnsData) => {
       if (isSortEnabled) {
-        if (onSort) {
-          onSort(sortingColumnsData.map(({ id, direction }: SortObj) => [id, direction]));
-        }
+        onSort?.(sortingColumnsData.map(({ id, direction }: SortObj) => [id, direction]));
       }
     },
     [onSort, isSortEnabled]
   );
 
   const sorting = useMemo(() => {
-    if (isSortEnabled) {
-      // in ES|QL mode, sorting is disabled when in Document view
-      // ideally we want the @timestamp column to be sortable server side
-      // but it needs discussion before moving forward like this
-      if (isPlainRecord && !columns.length) {
-        return undefined;
-      }
+    if (!isSortEnabled) {
       return {
         columns: sortingColumns,
-        onSort: onTableSort,
+        onSort: () => {},
       };
     }
+
+    // in ES|QL mode, sorting is disabled when in Document view
+    // ideally we want the @timestamp column to be sortable server side
+    // but it needs discussion before moving forward like this
+    if (isPlainRecord && !columns.length) {
+      return undefined;
+    }
+
     return {
       columns: sortingColumns,
-      onSort: () => {},
+      onSort: onTableSort,
     };
   }, [isSortEnabled, sortingColumns, isPlainRecord, columns.length, onTableSort]);
 
@@ -1036,12 +1098,6 @@ export const UnifiedDataTable = ({
     onUpdateDataGridDensity,
   ]);
 
-  const inMemory = useMemo(() => {
-    return isPlainRecord && columns.length
-      ? ({ level: 'sorting' } as EuiDataGridInMemory)
-      : undefined;
-  }, [columns.length, isPlainRecord]);
-
   const toolbarVisibility = useMemo(
     () =>
       defaultColumns
@@ -1161,13 +1217,13 @@ export const UnifiedDataTable = ({
               sorting={sorting as EuiDataGridSorting}
               toolbarVisibility={toolbarVisibility}
               rowHeightsOptions={rowHeightsOptions}
-              inMemory={inMemory}
               gridStyle={gridStyle}
               renderCustomGridBody={renderCustomGridBody}
               renderCustomToolbar={renderCustomToolbarFn}
               trailingControlColumns={trailingControlColumns}
               cellContext={cellContext}
               renderCellPopover={renderCustomPopover}
+              virtualizationOptions={VIRTUALIZATION_OPTIONS}
             />
           )}
         </div>

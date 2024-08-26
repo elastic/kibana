@@ -25,6 +25,7 @@ import {
   DataSourceType,
   isDataSourceType,
 } from '../../../../../common/data_sources';
+import { sendLoadingMsg } from '../../hooks/use_saved_search_messages';
 
 /**
  * Builds a subscribe function for the AppStateContainer, that is executed when the AppState changes in URL
@@ -160,6 +161,9 @@ export const buildStateSubscribe =
         '[buildStateSubscribe] state changes triggers data fetching',
         JSON.stringify(logData, null, 2)
       );
+
+      sendLoadingMsg(dataState.data$.main$);
+      sendLoadingMsg(dataState.data$.documents$, dataState.data$.documents$.getValue());
 
       dataState.fetch();
     }

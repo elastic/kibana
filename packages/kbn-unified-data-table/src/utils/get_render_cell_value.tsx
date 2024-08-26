@@ -49,7 +49,7 @@ export const getRenderCellValueFn = ({
   isPlainRecord?: boolean;
   isCompressed?: boolean;
 }) => {
-  return function UnifiedDataTableRenderCellValue({
+  return React.memo(function UnifiedDataTableRenderCellValue({
     rowIndex,
     columnId,
     isDetails,
@@ -152,7 +152,7 @@ export const getRenderCellValueFn = ({
         }}
       />
     );
-  };
+  });
 };
 
 /**
