@@ -6279,11 +6279,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-solution-common@link:x-pack/packages/security-solution/common":
+"@kbn/security-role-management-model@link:x-pack/packages/security/role_management_model":
   version "0.0.0"
   uid ""
 
-"@kbn/security-role-management-model@link:x-pack/packages/security/role_management_model":
+"@kbn/security-solution-common@link:x-pack/packages/security-solution/common":
   version "0.0.0"
   uid ""
 
