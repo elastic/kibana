@@ -15,7 +15,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const appsMenu = getService('appsMenu');
   const managementMenu = getService('managementMenu');
 
-  describe.only('security', () => {
+  describe('security', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await PageObjects.common.navigateToApp('home');
@@ -38,10 +38,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(links.map((link) => link.text)).to.contain('Stack Management');
       });
 
-      it('should not render the "Data" section', async () => {
-        await PageObjects.common.navigateToApp('management');
-        const sections = (await managementMenu.getSections()).map((section) => section.sectionId);
-        expect(sections).to.eql(['insightsAndAlerting', 'kibana']);
+      describe('"Data" section', function () {
+        this.tags('skipFIPS');
+        it('should not render', async () => {
+          await PageObjects.common.navigateToApp('management');
+          const sections = (await managementMenu.getSections()).map((section) => section.sectionId);
+          expect(sections).to.eql(['insightsAndAlerting', 'kibana']);
+        });
       });
     });
 

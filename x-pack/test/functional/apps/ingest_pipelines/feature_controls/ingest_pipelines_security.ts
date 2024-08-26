@@ -39,7 +39,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(links.map((link) => link.text)).to.contain('Stack Management');
       });
 
-      describe('"Ingest" section', () => {
+      describe('"Ingest" section', function () {
         this.tags('skipFIPS');
         it('should not render', async () => {
           await PageObjects.common.navigateToApp('management');

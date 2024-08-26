@@ -60,7 +60,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(links.map((link) => link.text)).to.contain('Stack Management');
       });
 
-      describe('"Ingest" section with Logstash Pipelines', () => {
+      describe('"Ingest" section with Logstash Pipelines', function () {
         this.tags('skipFIPS');
         it('should render', async () => {
           await PageObjects.common.navigateToApp('management');

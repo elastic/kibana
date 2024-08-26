@@ -34,16 +34,8 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       },
     };
 
-    const isFIPSMode = process.env.FTR_ENABLE_FIPS_AGENT?.toLowerCase() === 'true';
-
-    let testFiles = [require.resolve(`../${name}/apis/`)];
-
-    if (isFIPSMode && license === 'basic') {
-      testFiles = [];
-    }
-
     return {
-      testFiles,
+      testFiles: [require.resolve(`../${name}/apis/`)],
       servers: config.xpack.api.get('servers'),
       services,
       junit: {

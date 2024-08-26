@@ -15,9 +15,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...functionalConfig.getAll(),
     testFiles: [require.resolve('..')],
-    suiteTags: {
-      exclude: ['skipFIPS'],
-    },
     junit: {
       reportName:
         'Detection Engine - Exception Workflows Integration Tests - ESS Env - Basic License',

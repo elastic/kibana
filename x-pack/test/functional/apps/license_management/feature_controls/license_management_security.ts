@@ -61,7 +61,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       describe('[SkipCloud] global dashboard with license management user and upgrade assistant : skip cloud', function () {
-        this.tags('skipCloud');
+        this.tags(['skipCloud', 'skipFIPS']);
         it('should render the "Stack" section with License Management and Upgrade Assistant', async () => {
           await PageObjects.common.navigateToApp('management');
           const sections = await managementMenu.getSections();
