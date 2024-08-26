@@ -131,7 +131,8 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('CIS_GCP Organization Credentials File', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/190779
+    describe.skip('CIS_GCP Organization Credentials File', () => {
       it('CIS_GCP Organization Credentials File workflow', async () => {
         const projectName = 'PRJ_NAME_TEST';
         const credentialFileName = 'CRED_FILE_TEST_NAME';
