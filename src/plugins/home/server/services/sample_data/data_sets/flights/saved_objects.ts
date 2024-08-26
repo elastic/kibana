@@ -141,7 +141,7 @@ export const getSavedObjects = (): SavedObject[] => [
         'Analyze mock flight data for ES-Air, Logstash Airways, Kibana Airlines and JetBeats',
       refreshInterval: {
         pause: true,
-        value: 0,
+        value: 60000,
       },
       timeRestore: true,
       optionsJSON:

@@ -47,7 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
   };
 
-  describe('Replacing controls', async () => {
+  describe('Replacing controls', () => {
     let controlId: string;
 
     before(async () => {
@@ -66,7 +66,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await security.testUser.restoreDefaults();
     });
 
-    describe('Replace options list', async () => {
+    describe('Replace options list', () => {
       beforeEach(async () => {
         await dashboardControls.clearAllControls();
         await dashboardControls.createControl({
@@ -98,7 +98,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('Replace range slider', async () => {
+    describe('Replace range slider', () => {
       beforeEach(async () => {
         await dashboardControls.clearAllControls();
         await dashboardControls.createControl({
