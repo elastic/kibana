@@ -79,8 +79,8 @@ export const WindowValueExpression = ({ ruleParams, setRuleParams }: Props) => {
         })}
       >
         <EuiPopoverTitle>
-          {i18n.translate('xpack.synthetics.windowValueExpression.percentOfLocPopoverTitleLabel', {
-            defaultMessage: 'Percentage of locations',
+          {i18n.translate('xpack.synthetics.windowValueExpression.numberOfLocPopoverTitleLabel', {
+            defaultMessage: 'Number of locations',
           })}
         </EuiPopoverTitle>
         <EuiFieldNumber
