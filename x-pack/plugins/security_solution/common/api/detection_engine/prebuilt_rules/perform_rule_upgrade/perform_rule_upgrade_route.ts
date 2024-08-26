@@ -8,13 +8,8 @@
 import { z } from '@kbn/zod';
 
 import { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';
-import { AggregatedPrebuiltRuleError, RuleFieldsToUpgrade } from '../model';
+import { AggregatedPrebuiltRuleError, PickVersionValues, RuleFieldsToUpgrade } from '../model';
 import { RuleSignatureId, RuleVersion } from '../../model';
-
-export type PickVersionValues = z.infer<typeof PickVersionValues>;
-export const PickVersionValues = z.enum(['BASE', 'CURRENT', 'TARGET', 'MERGED']);
-export type PickVersionValuesEnum = typeof PickVersionValues.enum;
-export const PickVersionValuesEnum = PickVersionValues.enum;
 
 export type RuleUpgradeSpecifier = z.infer<typeof RuleUpgradeSpecifier>;
 export const RuleUpgradeSpecifier = z.object({
