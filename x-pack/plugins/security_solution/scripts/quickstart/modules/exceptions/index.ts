@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  CreateRuleExceptionListItemsRequestBodyInput,
-  ExceptionListItemEntry,
-} from '@kbn/securitysolution-exceptions-common/api';
+import type { ExceptionListItemEntry } from '@kbn/securitysolution-exceptions-common/api';
 import type { CreateRuleExceptionListItemsProps } from '@kbn/securitysolution-exceptions-common/api/quickstart_client.gen';
 import { ListType } from '@kbn/securitysolution-lists-common/api';
 import { Client as ExceptionsClient } from '@kbn/securitysolution-exceptions-common/api/quickstart_client.gen';
