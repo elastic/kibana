@@ -6,15 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { memoize } from 'lodash';
 import { css } from '@emotion/react';
 import moment from 'moment';
 import {
-  keys,
   EuiSpacer,
-  EuiIcon,
   EuiTitle,
   EuiText,
   EuiPanel,
@@ -26,6 +24,8 @@ import {
   EuiSplitPanel,
   EuiButtonEmpty,
   EuiEmptyPrompt,
+  EuiFormFieldset,
+  EuiCheckableCard,
   EuiResizableContainer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -35,11 +35,30 @@ import { HistoryViewer } from './history_viewer_monaco';
 import { useEditorReadContext } from '../../contexts/editor_context';
 import { useRestoreRequestFromHistory } from '../../hooks';
 
-interface Props {}
-
 const CHILD_ELEMENT_PREFIX = 'historyReq';
 
-export function History({}: Props) {
+const CheckeableCardLabel = ({
+  endpoint,
+  formattedDate,
+}: {
+  endpoint: string;
+  formattedDate: string;
+}) => (
+  <EuiFlexGroup>
+    <EuiFlexItem>
+      <EuiText size="s">
+        <b>{endpoint}</b>
+      </EuiText>
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiText size="s" color="subdued">
+        {formattedDate}
+      </EuiText>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
+
+export function History() {
   const { euiTheme } = useEuiTheme();
   const {
     docLinks,
@@ -56,11 +75,7 @@ export function History({}: Props) {
     setPastRequests(history.getHistory());
   }, [history]);
 
-  const listRef = useRef<HTMLUListElement | null>(null);
-
   const [viewingReq, setViewingReq] = useState<any>(null);
-  const [selectedIndex, setSelectedIndex] = useState<number>(0);
-  const selectedReq = useRef<any>(null);
 
   const describeReq = useMemo(() => {
     const _describeReq = (req: { endpoint: string; time: string }) => {
@@ -72,7 +87,10 @@ export function History({}: Props) {
         formattedDate = date.fromNow();
       }
 
-      return `${endpoint} (${formattedDate})`;
+      return {
+        endpoint,
+        formattedDate,
+      };
     };
 
     (_describeReq as any).cache = new WeakMap();
@@ -80,21 +98,11 @@ export function History({}: Props) {
     return memoize(_describeReq);
   }, []);
 
-  const scrollIntoView = useCallback((idx: number) => {
-    const activeDescendant = listRef.current!.querySelector(`#${CHILD_ELEMENT_PREFIX}${idx}`);
-    if (activeDescendant) {
-      activeDescendant.scrollIntoView();
-    }
-  }, []);
-
   const initialize = useCallback(() => {
     const nextSelectedIndex = 0;
     (describeReq as any).cache = new WeakMap();
     setViewingReq(requests[nextSelectedIndex]);
-    selectedReq.current = requests[nextSelectedIndex];
-    setSelectedIndex(nextSelectedIndex);
-    scrollIntoView(nextSelectedIndex);
-  }, [describeReq, requests, scrollIntoView]);
+  }, [describeReq, requests]);
 
   const clear = () => {
     clearHistory();
@@ -130,7 +138,14 @@ export function History({}: Props) {
               borderRadius="none"
               hasShadow={false}
             >
-              <EuiSplitPanel.Outer grow color="subdued" css={{ height: '100%' }}>
+              <EuiSplitPanel.Outer
+                grow
+                color="subdued"
+                css={{
+                  height: '100%',
+                  paddingRight: euiTheme.size.s,
+                }}
+              >
                 <EuiSplitPanel.Inner paddingSize="none">
                   <EuiSpacer size="s" />
                   <EuiTitle>
@@ -159,13 +174,22 @@ export function History({}: Props) {
                         <EuiSpacer size="xxl" />
                         <EuiSpacer size="xxl" />
                         <EuiEmptyPrompt
-                          title={<h2>{i18n.translate('console.historyPage.emptyPromptTitle', {
-                            defaultMessage: 'No queries yet',
-                          })}</h2>}
+                          title={
+                            <h2>
+                              {i18n.translate('console.historyPage.emptyPromptTitle', {
+                                defaultMessage: 'No queries yet',
+                              })}
+                            </h2>
+                          }
                           titleSize="xs"
-                          body={<p>{i18n.translate('console.historyPage.emptyPromptBody', {
-                            defaultMessage: 'This history panel will display any past queries you’ve run for review and reuse.',
-                          })}</p>}
+                          body={
+                            <p>
+                              {i18n.translate('console.historyPage.emptyPromptBody', {
+                                defaultMessage:
+                                  'This history panel will display any past queries you’ve run for review and reuse.',
+                              })}
+                            </p>
+                          }
                           footer={
                             <>
                               <EuiTitle size="xxs">
@@ -191,79 +215,20 @@ export function History({}: Props) {
                     </EuiFlexGroup>
                   )}
 
-                  <ul
-                    ref={listRef}
-                    onKeyDown={(ev: React.KeyboardEvent) => {
-                      if (ev.key === keys.ENTER) {
-                        restoreRequestFromHistory(selectedReq.current);
-                        return;
-                      }
-
-                      let currentIdx = selectedIndex;
-
-                      if (ev.key === keys.ARROW_UP) {
-                        ev.preventDefault();
-                        --currentIdx;
-                      } else if (ev.key === keys.ARROW_DOWN) {
-                        ev.preventDefault();
-                        ++currentIdx;
-                      }
-
-                      const nextSelectedIndex = Math.min(
-                        Math.max(0, currentIdx),
-                        requests.length - 1
-                      );
-
-                      setViewingReq(requests[nextSelectedIndex]);
-                      selectedReq.current = requests[nextSelectedIndex];
-                      setSelectedIndex(nextSelectedIndex);
-                      scrollIntoView(nextSelectedIndex);
-                    }}
-                    role="listbox"
-                    className="list-group conHistory__reqs"
-                    tabIndex={0}
-                    aria-activedescendant={`${CHILD_ELEMENT_PREFIX}${selectedIndex}`}
-                    aria-label={i18n.translate('console.historyPage.requestListAriaLabel', {
-                      defaultMessage: 'History of sent requests',
-                    })}
-                  >
-                    {requests.map((req, idx) => {
-                      const reqDescription = describeReq(req);
-                      const isSelected = viewingReq === req;
-                      return (
-                        // Ignore a11y issues on li's
-                        <li
-                          key={idx}
-                          id={`${CHILD_ELEMENT_PREFIX}${idx}`}
-                          className={`list-group-item conHistory__req ${
-                            isSelected ? 'conHistory__req-selected' : ''
-                          }`}
-                          onClick={() => {
-                            setViewingReq(req);
-                            selectedReq.current = req;
-                            setSelectedIndex(idx);
-                          }}
-                          role="option"
-                          onMouseEnter={() => setViewingReq(req)}
-                          onMouseLeave={() => setViewingReq(selectedReq.current)}
-                          onDoubleClick={() => restoreRequestFromHistory(selectedReq.current)}
-                          aria-label={i18n.translate(
-                            'console.historyPage.itemOfRequestListAriaLabel',
-                            {
-                              defaultMessage: 'Request: {historyItem}',
-                              values: { historyItem: reqDescription },
-                            }
-                          )}
-                          aria-selected={isSelected}
-                        >
-                          {reqDescription}
-                          <span className="conHistory__reqIcon">
-                            <EuiIcon type="arrowRight" />
-                          </span>
-                        </li>
-                      );
-                    })}
-                  </ul>
+                  {requests.map((req, idx) => (
+                    <EuiFormFieldset key={idx}>
+                      <EuiCheckableCard
+                        id={`${CHILD_ELEMENT_PREFIX}${idx}`}
+                        label={<CheckeableCardLabel {...describeReq(req)} />}
+                        checkableType="radio"
+                        checked={viewingReq === req}
+                        onChange={() => {
+                          setViewingReq(req);
+                        }}
+                      />
+                      <EuiSpacer size="s" />
+                    </EuiFormFieldset>
+                  ))}
                 </EuiSplitPanel.Inner>
                 <EuiSplitPanel.Inner grow={false} color="subdued" paddingSize="none">
                   <EuiText>
@@ -316,8 +281,8 @@ export function History({}: Props) {
                         fill
                         color="primary"
                         iconType="plusInCircle"
-                        disabled={!selectedReq}
-                        onClick={() => restoreRequestFromHistory(selectedReq.current)}
+                        disabled={!viewingReq}
+                        onClick={() => restoreRequestFromHistory(viewingReq)}
                       >
                         {i18n.translate('console.historyPage.applyHistoryButtonLabel', {
                           defaultMessage: 'Add',
