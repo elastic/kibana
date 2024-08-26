@@ -214,11 +214,11 @@ export default function (providerContext: FtrProviderContext) {
       }
 
       it('should only update tags of agents in the same space when passing a list of agent ids', async () => {
-        verifyAgentsTags({
+        await verifyAgentsTags({
           [defaultSpaceAgent1]: ['tag1'],
           [defaultSpaceAgent2]: ['tag1'],
         });
-        verifyAgentsTags(
+        await verifyAgentsTags(
           {
             [testSpaceAgent1]: ['tag1'],
             [testSpaceAgent2]: ['tag1'],
@@ -238,11 +238,11 @@ export default function (providerContext: FtrProviderContext) {
           TEST_SPACE_1
         );
 
-        verifyAgentsTags({
+        await verifyAgentsTags({
           [defaultSpaceAgent1]: ['tag1'],
           [defaultSpaceAgent2]: ['tag1'],
         });
-        verifyAgentsTags(
+        await verifyAgentsTags(
           {
             [testSpaceAgent1]: ['tag1', 'space1'],
             [testSpaceAgent2]: ['tag1'],
@@ -263,11 +263,11 @@ export default function (providerContext: FtrProviderContext) {
           TEST_SPACE_1
         );
 
-        verifyAgentsTags({
+        await verifyAgentsTags({
           [defaultSpaceAgent1]: ['tag1'],
           [defaultSpaceAgent2]: ['tag1'],
         });
-        verifyAgentsTags(
+        await verifyAgentsTags(
           {
             [testSpaceAgent1]: ['tag1'],
             [testSpaceAgent2]: ['tag1'],
@@ -286,11 +286,11 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('should only update tags of agents in the same space when passing a kuery', async () => {
-        verifyAgentsTags({
+        await verifyAgentsTags({
           [defaultSpaceAgent1]: ['tag1'],
           [defaultSpaceAgent2]: ['tag1'],
         });
-        verifyAgentsTags(
+        await verifyAgentsTags(
           {
             [testSpaceAgent1]: ['tag1'],
             [testSpaceAgent2]: ['tag1'],
@@ -310,11 +310,11 @@ export default function (providerContext: FtrProviderContext) {
           TEST_SPACE_1
         );
 
-        verifyAgentsTags({
+        await verifyAgentsTags({
           [defaultSpaceAgent1]: ['tag1'],
           [defaultSpaceAgent2]: ['tag1'],
         });
-        verifyAgentsTags(
+        await verifyAgentsTags(
           {
             [testSpaceAgent1]: ['tag1', 'space1'],
             [testSpaceAgent2]: ['tag1', 'space1'],
@@ -335,11 +335,11 @@ export default function (providerContext: FtrProviderContext) {
           TEST_SPACE_1
         );
 
-        verifyAgentsTags({
+        await verifyAgentsTags({
           [defaultSpaceAgent1]: ['tag1'],
           [defaultSpaceAgent2]: ['tag1'],
         });
-        verifyAgentsTags(
+        await verifyAgentsTags(
           {
             [testSpaceAgent1]: ['tag1'],
             [testSpaceAgent2]: ['tag1'],
@@ -635,11 +635,11 @@ export default function (providerContext: FtrProviderContext) {
           expect(agentPolicyIds).to.eql(expected);
         }
 
-        verifyAgentsPolicies({
+        await verifyAgentsPolicies({
           [defaultSpaceAgent1]: defaultSpacePolicy1.item.id,
           [defaultSpaceAgent2]: defaultSpacePolicy2.item.id,
         });
-        verifyAgentsPolicies(
+        await verifyAgentsPolicies(
           {
             [testSpaceAgent1]: spaceTest1Policy1.item.id,
             [testSpaceAgent2]: spaceTest1Policy2.item.id,
@@ -659,11 +659,11 @@ export default function (providerContext: FtrProviderContext) {
           TEST_SPACE_1
         );
 
-        verifyAgentsPolicies({
+        await verifyAgentsPolicies({
           [defaultSpaceAgent1]: defaultSpacePolicy1.item.id,
           [defaultSpaceAgent2]: defaultSpacePolicy2.item.id,
         });
-        verifyAgentsPolicies(
+        await verifyAgentsPolicies(
           {
             [testSpaceAgent1]: spaceTest1Policy2.item.id,
             [testSpaceAgent2]: spaceTest1Policy2.item.id,

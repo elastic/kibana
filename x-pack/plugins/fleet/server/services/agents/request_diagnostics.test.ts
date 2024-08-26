@@ -28,8 +28,8 @@ describe('requestDiagnostics', () => {
 
   describe('requestDiagnostics (singular)', () => {
     it('can request diagnostics for single agent', async () => {
-      const { esClient, agentInRegularDoc } = createClientMock();
-      await requestDiagnostics(esClient, agentInRegularDoc._id);
+      const { soClient, esClient, agentInRegularDoc } = createClientMock();
+      await requestDiagnostics(esClient, soClient, agentInRegularDoc._id);
 
       expect(esClient.create).toHaveBeenCalledWith(
         expect.objectContaining({
