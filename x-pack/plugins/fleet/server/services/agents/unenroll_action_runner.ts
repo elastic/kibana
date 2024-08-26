@@ -19,6 +19,8 @@ import { invalidateAPIKeys } from '../api_keys';
 
 import { appContextService } from '../app_context';
 
+import { getCurrentNamespace } from '../spaces/get_current_namespace';
+
 import { ActionRunner } from './action_runner';
 
 import { bulkUpdateAgents } from './crud';
@@ -61,6 +63,7 @@ export async function unenrollBatch(
     revoke?: boolean;
     actionId?: string;
     total?: number;
+    spaceId?: string;
   }
 ): Promise<{ actionId: string }> {
   const hostedPolicies = await getHostedPolicies(soClient, givenAgents);
@@ -100,11 +103,14 @@ export async function unenrollBatch(
 
   const agentIds = agentsToUpdate.map((agent) => agent.id);
 
+  const spaceId = options.spaceId;
+  const namespaces = spaceId ? [spaceId] : [];
+
   if (options.revoke) {
     // Get all API keys that need to be invalidated
     await invalidateAPIKeysForAgents(agentsToUpdate);
 
-    await updateActionsForForceUnenroll(esClient, agentIds, actionId, total);
+    await updateActionsForForceUnenroll(esClient, soClient, agentIds, actionId, total);
   } else {
     // Create unenroll action for each agent
     await createAgentAction(esClient, {
@@ -113,6 +119,7 @@ export async function unenrollBatch(
       created_at: now,
       type: 'UNENROLL',
       total,
+      namespaces,
     });
   }
 
@@ -130,17 +137,20 @@ export async function unenrollBatch(
 
 export async function updateActionsForForceUnenroll(
   esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract,
   agentIds: string[],
   actionId: string,
   total: number
 ) {
   // creating an action doc so that force unenroll shows up in activity
+  const currentSpaceId = getCurrentNamespace(soClient);
   await createAgentAction(esClient, {
     id: actionId,
     agents: agentIds,
     created_at: new Date().toISOString(),
     type: 'FORCE_UNENROLL',
     total,
+    namespaces: [currentSpaceId],
   });
   await bulkCreateAgentActionResults(
     esClient,

@@ -174,7 +174,7 @@ export async function upgradeBatch(
 
   const actionId = options.actionId ?? uuidv4();
   const total = options.total ?? givenAgents.length;
-  const namespaces = spaceId ? { namespaces: [spaceId] } : {};
+  const namespaces = spaceId ? [spaceId] : [];
 
   await createAgentAction(esClient, {
     id: actionId,
@@ -185,7 +185,7 @@ export async function upgradeBatch(
     total,
     agents: agentsToUpdate.map((agent) => agent.id),
     ...rollingUpgradeOptions,
-    ...namespaces,
+    namespaces,
   });
 
   await createErrorActionResults(

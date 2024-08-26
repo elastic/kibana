@@ -433,7 +433,7 @@ async function _filterAgents(
 }> {
   const { page = 1, perPage = 20, sortField = 'enrolled_at', sortOrder = 'desc' } = options;
   const runtimeFields = await buildAgentStatusRuntimeField(soClient);
-  const currentNameSpace = getCurrentNamespace(soClient);
+  const currentSpaceId = getCurrentNamespace(soClient);
 
   let res;
   try {
@@ -445,7 +445,7 @@ async function _filterAgents(
       runtime_mappings: runtimeFields,
       fields: Object.keys(runtimeFields),
       sort: [{ [sortField]: { order: sortOrder } }],
-      query: await addNamespaceFilteringToQuery({ bool: { filter: [query] } }, currentNameSpace),
+      query: await addNamespaceFilteringToQuery({ bool: { filter: [query] } }, currentSpaceId),
       index: AGENTS_INDEX,
       ignore_unavailable: true,
     });

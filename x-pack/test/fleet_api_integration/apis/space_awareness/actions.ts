@@ -10,7 +10,12 @@ import { AGENT_POLICY_INDEX, CreateAgentPolicyResponse } from '@kbn/fleet-plugin
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { SpaceTestApiClient } from './api_helper';
-import { cleanFleetActionIndices, cleanFleetIndices, createFleetAgent } from './helpers';
+import {
+  cleanFleetActionIndices,
+  cleanFleetAgentPolicies,
+  cleanFleetIndices,
+  createFleetAgent,
+} from './helpers';
 import { setupTestSpaces, TEST_SPACE_1 } from './space_helpers';
 
 export default function (providerContext: FtrProviderContext) {
@@ -33,6 +38,7 @@ export default function (providerContext: FtrProviderContext) {
 
     beforeEach(async () => {
       await cleanFleetActionIndices(esClient);
+      await cleanFleetAgentPolicies(esClient);
     });
 
     after(async () => {
@@ -100,6 +106,7 @@ export default function (providerContext: FtrProviderContext) {
         );
         expect(actionStatusInDefaultSpace.items[0].type).to.eql('UPDATE_TAGS');
         expect(actionStatusInDefaultSpace.items[0].nbAgentsActioned).to.eql(2);
+        expect(actionStatusInDefaultSpace.items[0].nbAgentsActionCreated).to.eql(2);
         expect(actionStatusInDefaultSpace.items[0].status).to.eql('COMPLETE');
 
         const actionStatusInCustomSpace = await apiClient.getActionStatus(TEST_SPACE_1);
@@ -132,6 +139,7 @@ export default function (providerContext: FtrProviderContext) {
         );
         expect(actionStatusInCustomSpace.items[0].type).to.eql('UPDATE_TAGS');
         expect(actionStatusInCustomSpace.items[0].nbAgentsActioned).to.eql(2);
+        expect(actionStatusInCustomSpace.items[0].nbAgentsActionCreated).to.eql(2);
         expect(actionStatusInCustomSpace.items[0].status).to.eql('COMPLETE');
       });
 
@@ -174,6 +182,7 @@ export default function (providerContext: FtrProviderContext) {
           'nbAgentsFailed'
         );
         expect(actionStatusInDefaultSpace.items[0].type).to.eql('POLICY_CHANGE');
+        expect(actionStatusInDefaultSpace.items[0].nbAgentsActionCreated).to.eql(2);
         expect(actionStatusInDefaultSpace.items[0].nbAgentsActioned).to.eql(2);
 
         const actionStatusInCustomSpace = await apiClient.getActionStatus(TEST_SPACE_1);
@@ -209,6 +218,7 @@ export default function (providerContext: FtrProviderContext) {
           'nbAgentsFailed'
         );
         expect(actionStatusInCustomSpace.items[0].type).to.eql('POLICY_CHANGE');
+        expect(actionStatusInCustomSpace.items[0].nbAgentsActionCreated).to.eql(2);
         expect(actionStatusInCustomSpace.items[0].nbAgentsActioned).to.eql(2);
       });
     });
@@ -251,7 +261,7 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('post /agents/actions/{actionId}/cancel', () => {
+    describe('POST /agents/actions/{actionId}/cancel', () => {
       it('should return 200 and a CANCEL action if the action is in the same space', async () => {
         // Create UPDATE_TAGS action for agents in custom space
         await apiClient.bulkUpdateAgentTags(
