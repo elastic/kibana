@@ -22,11 +22,13 @@ export default function ({ getService }: FtrProviderContext) {
         expect(response.body).property('signature');
       });
 
-      it('returns a correct license type', async function () {
+      describe('returns a correct license type', () => {
         this.tags('getFips');
-        const response = await supertest.get('/api/licensing/info').expect(200);
+        it('should return basic', async function () {
+          const response = await supertest.get('/api/licensing/info').expect(200);
 
-        expect(response.body.license.type).to.be('basic');
+          expect(response.body.license.type).to.be('basic');
+        });
       });
     });
   });

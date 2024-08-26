@@ -13,6 +13,7 @@ export const EmailDomainsAllowed = ['example.org', 'test.com'];
 export default createTestConfig('spaces_only', {
   disabledPlugins: ['security'],
   license: 'trial',
+  suiteTags: { exclude: ['skipFIPS'] }, // suites are expecting security to be disabled
   enableActionsProxy: false,
   verificationMode: 'none',
   customizeLocalHostSsl: true,

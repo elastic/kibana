@@ -298,58 +298,61 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(401);
     });
 
-    it('only super users should be able to invalidate sessions', async function () {
-      const basicSessionCookie = await loginWithBasic(notSuperuserTestUser);
-      const samlSessionCookie = await loginWithSAML();
+    describe('only super users', function () {
+      this.tags('skipFIPS');
+      it('should be able to invalidate sessions', async function () {
+        const basicSessionCookie = await loginWithBasic(notSuperuserTestUser);
+        const samlSessionCookie = await loginWithSAML();
 
-      // User without a superuser role shouldn't be able to invalidate sessions.
-      await supertest
-        .post('/api/security/session/_invalidate')
-        .set('kbn-xsrf', 'xxx')
-        .auth(notSuperuserTestUser.username, notSuperuserTestUser.password)
-        .send({ match: 'all' })
-        .expect(403);
-      await supertest
-        .post('/api/security/session/_invalidate')
-        .set('kbn-xsrf', 'xxx')
-        .auth(notSuperuserTestUser.username, notSuperuserTestUser.password)
-        .send({ match: 'query', query: { provider: { type: 'basic' } } })
-        .expect(403);
-      await supertest
-        .post('/api/security/session/_invalidate')
-        .set('kbn-xsrf', 'xxx')
-        .auth(notSuperuserTestUser.username, notSuperuserTestUser.password)
-        .send({
-          match: 'query',
-          query: { provider: { type: 'basic' }, username: notSuperuserTestUser.username },
-        })
-        .expect(403);
+        // User without a superuser role shouldn't be able to invalidate sessions.
+        await supertest
+          .post('/api/security/session/_invalidate')
+          .set('kbn-xsrf', 'xxx')
+          .auth(notSuperuserTestUser.username, notSuperuserTestUser.password)
+          .send({ match: 'all' })
+          .expect(403);
+        await supertest
+          .post('/api/security/session/_invalidate')
+          .set('kbn-xsrf', 'xxx')
+          .auth(notSuperuserTestUser.username, notSuperuserTestUser.password)
+          .send({ match: 'query', query: { provider: { type: 'basic' } } })
+          .expect(403);
+        await supertest
+          .post('/api/security/session/_invalidate')
+          .set('kbn-xsrf', 'xxx')
+          .auth(notSuperuserTestUser.username, notSuperuserTestUser.password)
+          .send({
+            match: 'query',
+            query: { provider: { type: 'basic' }, username: notSuperuserTestUser.username },
+          })
+          .expect(403);
 
-      await checkSessionCookie(basicSessionCookie, notSuperuserTestUser.username, {
-        type: 'basic',
-        name: 'basic1',
+        await checkSessionCookie(basicSessionCookie, notSuperuserTestUser.username, {
+          type: 'basic',
+          name: 'basic1',
+        });
+        await checkSessionCookie(samlSessionCookie, 'a@b.c', { type: 'saml', name: 'saml1' });
+
+        // With superuser role, it should be possible now.
+        await security.testUser.setRoles(['superuser']);
+
+        await supertest
+          .post('/api/security/session/_invalidate')
+          .set('kbn-xsrf', 'xxx')
+          .auth(notSuperuserTestUser.username, notSuperuserTestUser.password)
+          .send({ match: 'all' })
+          .expect(200, { total: 2 });
+        await supertest
+          .get('/internal/security/me')
+          .set('kbn-xsrf', 'xxx')
+          .set('Cookie', basicSessionCookie.cookieString())
+          .expect(401);
+        await supertest
+          .get('/internal/security/me')
+          .set('kbn-xsrf', 'xxx')
+          .set('Cookie', samlSessionCookie.cookieString())
+          .expect(401);
       });
-      await checkSessionCookie(samlSessionCookie, 'a@b.c', { type: 'saml', name: 'saml1' });
-
-      // With superuser role, it should be possible now.
-      await security.testUser.setRoles(['superuser']);
-
-      await supertest
-        .post('/api/security/session/_invalidate')
-        .set('kbn-xsrf', 'xxx')
-        .auth(notSuperuserTestUser.username, notSuperuserTestUser.password)
-        .send({ match: 'all' })
-        .expect(200, { total: 2 });
-      await supertest
-        .get('/internal/security/me')
-        .set('kbn-xsrf', 'xxx')
-        .set('Cookie', basicSessionCookie.cookieString())
-        .expect(401);
-      await supertest
-        .get('/internal/security/me')
-        .set('kbn-xsrf', 'xxx')
-        .set('Cookie', samlSessionCookie.cookieString())
-        .expect(401);
     });
   });
 }

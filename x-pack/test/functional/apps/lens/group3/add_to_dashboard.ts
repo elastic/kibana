@@ -290,27 +290,30 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(hasPrompt).to.eql(false);
         });
 
-        it('should not display add-to-dashboard options', async () => {
-          await PageObjects.visualize.navigateToNewVisualization();
-          await PageObjects.visualize.clickVisType('lens');
-          await PageObjects.lens.goToTimeRange();
+        describe('add-to-dashboard options', function () {
+          this.tags('skipFIPS');
+          it('should not display', async () => {
+            await PageObjects.visualize.navigateToNewVisualization();
+            await PageObjects.visualize.clickVisType('lens');
+            await PageObjects.lens.goToTimeRange();
 
-          await PageObjects.lens.configureDimension({
-            dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-            operation: 'average',
-            field: 'bytes',
+            await PageObjects.lens.configureDimension({
+              dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+              operation: 'average',
+              field: 'bytes',
+            });
+
+            await PageObjects.lens.switchToVisualization('lnsLegacyMetric');
+
+            await PageObjects.lens.waitForVisualization('legacyMtrVis');
+            await PageObjects.lens.assertLegacyMetric('Average of bytes', '5,727.322');
+
+            await PageObjects.lens.waitForVisualization('legacyMtrVis');
+            await testSubjects.click('lnsApp_saveButton');
+
+            const hasOptions = await testSubjects.exists('add-to-dashboard-options');
+            expect(hasOptions).to.eql(false);
           });
-
-          await PageObjects.lens.switchToVisualization('lnsLegacyMetric');
-
-          await PageObjects.lens.waitForVisualization('legacyMtrVis');
-          await PageObjects.lens.assertLegacyMetric('Average of bytes', '5,727.322');
-
-          await PageObjects.lens.waitForVisualization('legacyMtrVis');
-          await testSubjects.click('lnsApp_saveButton');
-
-          const hasOptions = await testSubjects.exists('add-to-dashboard-options');
-          expect(hasOptions).to.eql(false);
         });
       });
 

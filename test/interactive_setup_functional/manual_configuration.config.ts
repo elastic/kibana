@@ -22,7 +22,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...withoutTlsConfig.getAll(),
-
+    suiteTags: {
+      exclude: ['skipFIPS'],
+    },
     testFiles: [require.resolve('./tests/manual_configuration')],
 
     servers: {

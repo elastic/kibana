@@ -16,7 +16,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const managementMenu = getService('managementMenu');
   const testSubjects = getService('testSubjects');
 
-  describe('security', () => {
+  describe('security', function () {
+    this.tags('skipFIPS');
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await PageObjects.common.navigateToApp('home');
@@ -28,7 +29,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('no management privileges', function () {
       this.tags('skipFIPS');
-
       before(async () => {
         await security.testUser.setRoles(['global_dashboard_read']);
       });

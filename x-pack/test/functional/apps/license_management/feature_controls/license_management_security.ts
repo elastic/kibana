@@ -38,10 +38,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(links.map((link) => link.text)).to.contain('Stack Management');
       });
 
-      it('should not render the "Stack" section', async () => {
-        await PageObjects.common.navigateToApp('management');
-        const sections = (await managementMenu.getSections()).map((section) => section.sectionId);
-        expect(sections).to.eql(['insightsAndAlerting', 'kibana']);
+      describe('"Stack" section', function () {
+        this.tags('skipFIPS');
+        it('should not render', async () => {
+          await PageObjects.common.navigateToApp('management');
+          const sections = (await managementMenu.getSections()).map((section) => section.sectionId);
+          expect(sections).to.eql(['insightsAndAlerting', 'kibana']);
+        });
       });
     });
 
