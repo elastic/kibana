@@ -32,7 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
       await slo.createUser();
       await slo.deleteAllSLOs();
       await sloEsClient.deleteTestSourceData();
-      loadTestData(getService);
+      await loadTestData(getService);
     });
 
     beforeEach(() => {
