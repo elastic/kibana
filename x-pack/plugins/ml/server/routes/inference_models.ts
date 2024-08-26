@@ -6,7 +6,10 @@
  */
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { schema } from '@kbn/config-schema';
-import type { InferenceModelConfig, InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  InferenceInferenceEndpoint,
+  InferenceTaskType,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import type { RouteInitialization } from '../types';
 import { createInferenceSchema } from './schemas/inference_schema';
@@ -46,7 +49,7 @@ export function inferenceModelRoutes(
             const body = await modelsProvider(client, mlClient, cloud).createInferenceEndpoint(
               inferenceId,
               taskType as InferenceTaskType,
-              request.body as InferenceModelConfig
+              request.body as InferenceInferenceEndpoint
             );
             const { syncSavedObjects } = syncSavedObjectsFactory(client, mlSavedObjectService);
             await syncSavedObjects(false);
