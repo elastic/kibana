@@ -332,7 +332,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         eventLogIndex
       );
 
-      if (plugins.cloud.serverless.projectId) {
+      if (plugins.cloud?.serverless?.projectId) {
         this.connectorUsageReportingTask = new ConnectorUsageReportingTask({
           logger: this.logger,
           eventLogIndex,
