@@ -50,7 +50,8 @@ export function getWebpackConfig(
     target: 'web',
 
     output: {
-      hashFunction: 'sha1',
+      // TODO: remove this commented line if xxhash64 is faster
+      // hashFunction: 'sha1',
       path: bundle.outputDir,
       filename: `${bundle.id}.${bundle.type}.js`,
       chunkFilename: `${bundle.id}.chunk.[id].js`,
@@ -325,6 +326,31 @@ export function getWebpackConfig(
 
   const nonDistributableConfig: webpack.Configuration = {
     mode: 'development',
+
+    // TODO: potential performance impact flags
+    output: {
+      hashFunction: 'xxhash64',
+      pathinfo: false,
+    },
+
+    experiments: {
+      cacheUnaffected: true,
+      // WHEN true is returning error
+      futureDefaults: false,
+      // TODO: enable this after converting all plugins to v5
+      // backCompat: false,
+    },
+
+    optimization: {
+      sideEffects: false,
+      providedExports: false,
+      usedExports: false,
+    },
+
+    module: {
+      unsafeCache: true,
+    },
+    //
   };
 
   const distributableConfig: webpack.Configuration = {
