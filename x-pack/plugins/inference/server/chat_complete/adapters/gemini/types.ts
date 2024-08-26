@@ -18,5 +18,5 @@ export interface GenerateContentResponseUsageMetadata {
  * usage metadata.
  */
 export type GenerateContentResponseChunk = GenerateContentResponse & {
-  usageMetadata: GenerateContentResponseUsageMetadata;
+  usageMetadata?: GenerateContentResponseUsageMetadata;
 };
