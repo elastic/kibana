@@ -13,7 +13,7 @@ import {
 } from '@kbn/langchain/server/language_models';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
-import { ANALYSE_LOGS_PATH, AnalyseLogsRequestBody, AnalyseLogsResponse } from '../../common';
+import { ANALYZE_LOGS_PATH, AnalyzeLogsRequestBody, AnalyzeLogsResponse } from '../../common';
 import { ROUTE_HANDLER_TIMEOUT } from '../constants';
 import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
 import { buildRouteValidationWithZod } from '../util/route_validation';
@@ -22,12 +22,12 @@ import { getLogFormatDetectionGraph } from '../graphs/log_type_detection/graph';
 
 const MaxLogsSampleRows = 10;
 
-export function registerAnalyseLogsRoutes(
+export function registerAnalyzeLogsRoutes(
   router: IRouter<IntegrationAssistantRouteHandlerContext>
 ) {
   router.versioned
     .post({
-      path: ANALYSE_LOGS_PATH,
+      path: ANALYZE_LOGS_PATH,
       access: 'internal',
       options: {
         timeout: {
@@ -40,11 +40,11 @@ export function registerAnalyseLogsRoutes(
         version: '1',
         validate: {
           request: {
-            body: buildRouteValidationWithZod(AnalyseLogsRequestBody),
+            body: buildRouteValidationWithZod(AnalyzeLogsRequestBody),
           },
         },
       },
-      withAvailability(async (context, req, res): Promise<IKibanaResponse<AnalyseLogsResponse>> => {
+      withAvailability(async (context, req, res): Promise<IKibanaResponse<AnalyzeLogsResponse>> => {
         const { logSamples, langSmithOptions } = req.body;
         const { getStartServices, logger } = await context.integrationAssistant;
         const [, { actions: actionsPlugin }] = await getStartServices();
@@ -96,7 +96,7 @@ export function registerAnalyseLogsRoutes(
               body: { message: `Unsupported log type: ${graphLogFormat}` },
             });
           }
-          return res.ok({ body: AnalyseLogsResponse.parse(graphResults) });
+          return res.ok({ body: AnalyzeLogsResponse.parse(graphResults) });
         } catch (e) {
           return res.badRequest({ body: e });
         }

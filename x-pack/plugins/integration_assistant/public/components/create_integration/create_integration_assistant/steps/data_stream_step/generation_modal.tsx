@@ -26,7 +26,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { getLangSmithOptions } from '../../../../../common/lib/lang_smith';
 import {
-  type AnalyseLogsRequestBody,
+  type AnalyzeLogsRequestBody,
   type CategorizationRequestBody,
   type EcsMappingRequestBody,
   type RelatedRequestBody,
@@ -35,7 +35,7 @@ import {
   runCategorizationGraph,
   runEcsGraph,
   runRelatedGraph,
-  runAnalyseLogsGraph,
+  runAnalyzeLogsGraph,
 } from '../../../../../common/lib/api';
 import { useKibana } from '../../../../../common/hooks/use_kibana';
 import type { State } from '../../state';
@@ -48,7 +48,7 @@ const ProgressOrder = ['ecs', 'categorization', 'related'];
 type ProgressItem = (typeof ProgressOrder)[number];
 
 const progressText: Record<ProgressItem, string> = {
-  analyseLogs: i18n.PROGRESS_ANALYSE_LOGS,
+  analyzeLogs: i18n.PROGRESS_ANALYZE_LOGS,
   ecs: i18n.PROGRESS_ECS_MAPPING,
   categorization: i18n.PROGRESS_CATEGORIZATION,
   related: i18n.PROGRESS_RELATED_GRAPH,
@@ -90,21 +90,21 @@ export const useGeneration = ({
         let samplesFormat = integrationSettings.samplesFormat;
 
         if (integrationSettings.samplesFormat === undefined) {
-          const analyseLogsRequest: AnalyseLogsRequestBody = {
+          const analyzeLogsRequest: AnalyzeLogsRequestBody = {
             logSamples: integrationSettings.logSamples ?? [],
             connectorId: connector.id,
             langSmithOptions: getLangSmithOptions(),
           };
 
-          setProgress('analyseLogs');
-          const analyseLogsResult = await runAnalyseLogsGraph(analyseLogsRequest, deps);
+          setProgress('analyzeLogs');
+          const analyzeLogsResult = await runAnalyzeLogsGraph(analyzeLogsRequest, deps);
           if (abortController.signal.aborted) return;
-          if (isEmpty(analyseLogsResult?.results)) {
-            setError('No results from Analyse Logs Graph');
+          if (isEmpty(analyzeLogsResult?.results)) {
+            setError('No results from Analyze Logs Graph');
             return;
           }
-          logSamples = analyseLogsResult.results.parsedSamples;
-          samplesFormat = analyseLogsResult.results.samplesFormat;
+          logSamples = analyzeLogsResult.results.parsedSamples;
+          samplesFormat = analyzeLogsResult.results.samplesFormat;
         }
 
         const ecsRequest: EcsMappingRequestBody = {

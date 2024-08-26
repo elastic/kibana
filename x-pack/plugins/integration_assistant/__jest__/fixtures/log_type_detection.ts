@@ -9,7 +9,7 @@ import { SamplesFormatName } from '../../common/api/model/common_attributes';
 
 export const logFormatDetectionTestState = {
   lastExecutedChain: 'testchain',
-  rawSamples: ['{"test1": "test1"}'],
+  logSamples: ['{"test1": "test1"}'],
   exAnswer: 'testanswer',
   packageName: 'testPackage',
   dataStreamName: 'testDatastream',

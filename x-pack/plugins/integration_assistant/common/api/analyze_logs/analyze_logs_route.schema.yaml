@@ -1,16 +1,16 @@
 openapi: 3.0.3
 info:
-  title: Auto Import Analyse Logs API endpoint
+  title: Auto Import Analyze Logs API endpoint
   version: "1"
 paths:
-  /api/integration_assistant/analyselogs:
+  /api/integration_assistant/analyzelogs:
     post:
-      summary: Analyses log samples and processes them.
-      operationId: AnalyseLogs
+      summary: Analyzes log samples and processes them.
+      operationId: AnalyzeLogs
       x-codegen-enabled: false
-      description: Analyses log samples and processes them
+      description: Analyzes log samples and processes them
       tags:
-        - Analyse Logs API
+        - Analyze Logs API
       requestBody:
         required: true
         content:
@@ -33,4 +33,4 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "../model/response_schemas.schema.yaml#/components/schemas/AnalyseLogsAPIResponse"
+                $ref: "../model/response_schemas.schema.yaml#/components/schemas/AnalyzeLogsAPIResponse"

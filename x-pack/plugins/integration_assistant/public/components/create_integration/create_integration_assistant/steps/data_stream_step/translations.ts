@@ -150,10 +150,10 @@ export const LOGS_SAMPLE_ERROR = {
 export const ANALYZING = i18n.translate('xpack.integrationAssistant.step.dataStream.analyzing', {
   defaultMessage: 'Analyzing',
 });
-export const PROGRESS_ANALYSE_LOGS = i18n.translate(
-  'xpack.integrationAssistant.step.dataStream.progress.analyseLogs',
+export const PROGRESS_ANALYZE_LOGS = i18n.translate(
+  'xpack.integrationAssistant.step.dataStream.progress.analyzeLogs',
   {
-    defaultMessage: 'Analysing Sample logs',
+    defaultMessage: 'Analyzing Sample logs',
   }
 );
 export const PROGRESS_ECS_MAPPING = i18n.translate(

@@ -49,8 +49,8 @@ export const CheckPipelineAPIResponse = z.object({
   }),
 });
 
-export type AnalyseLogsAPIResponse = z.infer<typeof AnalyseLogsAPIResponse>;
-export const AnalyseLogsAPIResponse = z.object({
+export type AnalyzeLogsAPIResponse = z.infer<typeof AnalyzeLogsAPIResponse>;
+export const AnalyzeLogsAPIResponse = z.object({
   results: z.object({
     samplesFormat: SamplesFormat,
     parsedSamples: z.array(z.string()),
