@@ -76,6 +76,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       serverlessId,
     } = config;
 
+    // eslint-disable-next-line mocha/no-sibling-hooks
     before(async () => {
       await generateData({ start, end, apmSynthtraceEsClient });
     });
