@@ -7,11 +7,12 @@
  */
 
 import { CoreStart, HttpStart } from '@kbn/core/public';
-import { DEFAULT_ASSETS_TO_IGNORE } from '../../common';
+// import { DEFAULT_ASSETS_TO_IGNORE } from '../../common';
 import { HasDataViewsResponse, IndicesViaSearchResponse } from '..';
-import { IndicesResponse, IndicesResponseModified } from '../types';
+// import { IndicesResponse, IndicesResponseModified } from '../types';
 
 export class HasData {
+  /*
   private removeAliases = (source: IndicesResponseModified): boolean => !source.item.indices;
 
   private isUserDataSource = (source: IndicesResponseModified): boolean => {
@@ -23,6 +24,7 @@ export class HasData {
 
     return true;
   };
+  */
 
   start(core: CoreStart) {
     const { http } = core;
@@ -56,7 +58,7 @@ export class HasData {
   }
 
   // ES Data
-
+  /*
   private responseToItemArray = (response: IndicesResponse): IndicesResponseModified[] => {
     const { indices = [], aliases = [] } = response;
     const source: IndicesResponseModified[] = [];
@@ -70,6 +72,7 @@ export class HasData {
 
     return source;
   };
+  */
 
   private getIndicesViaSearch = async ({
     http,
@@ -111,6 +114,7 @@ export class HasData {
         return true;
       });
 
+  /*
   private getIndices = async ({
     http,
     pattern,
@@ -131,28 +135,13 @@ export class HasData {
           return this.responseToItemArray(response);
         }
       });
+      */
 
   private checkLocalESData = (http: HttpStart): Promise<boolean> =>
-    this.getIndices({
-      http,
-      pattern: '*',
-      showAllIndices: false,
-    })
-      .then((dataSources: IndicesResponseModified[]) => {
-        return dataSources.some(this.isUserDataSource);
-      })
-      .catch(() => this.getIndicesViaSearch({ http, pattern: '*', showAllIndices: false }));
+    this.getIndicesViaSearch({ http, pattern: '*', showAllIndices: false });
 
   private checkRemoteESData = (http: HttpStart): Promise<boolean> =>
-    this.getIndices({
-      http,
-      pattern: '*:*',
-      showAllIndices: false,
-    })
-      .then((dataSources: IndicesResponseModified[]) => {
-        return !!dataSources.filter(this.removeAliases).length;
-      })
-      .catch(() => this.getIndicesViaSearch({ http, pattern: '*:*', showAllIndices: false }));
+    this.getIndicesViaSearch({ http, pattern: '*:*', showAllIndices: false });
 
   // Data Views
 
