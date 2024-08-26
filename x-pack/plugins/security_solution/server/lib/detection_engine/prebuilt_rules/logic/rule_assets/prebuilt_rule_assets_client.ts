@@ -153,7 +153,7 @@ export const createPrebuiltRuleAssetsClient = (
       return withSecuritySpan('IPrebuiltRuleAssetsClient.fetchAllAssetsVersionInfo', async () => {
         const findResult = await savedObjectsClient.find<PrebuiltRuleAsset>({
           type: PREBUILT_RULE_ASSETS_SO_TYPE,
-          fields: ['rule_id', 'version'],
+          fields: ['rule_id', 'version', 'repository_id'],
           perPage: MAX_PREBUILT_RULES_COUNT,
         });
 

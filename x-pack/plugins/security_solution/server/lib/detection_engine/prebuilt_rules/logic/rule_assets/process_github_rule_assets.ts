@@ -27,7 +27,7 @@ export const fetchGithubRuleAssets = async (
 
     const version = parseInt(versionFromFilename, 10);
 
-    const fullRuleId = `${repository.id}_${ruleId}_${versionFromFilename}`;
+    const fullRuleId = `${ruleId}_${versionFromFilename}`;
 
     const installedRule = installedRuleAssetsMap.get(fullRuleId);
 

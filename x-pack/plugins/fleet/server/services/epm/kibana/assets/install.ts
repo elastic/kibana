@@ -419,7 +419,7 @@ export async function installKibanaSavedObjects({
   kibanaAssets: ArchiveAsset[];
   savedObjectsImporter: SavedObjectsImporterContract;
   logger: Logger;
-  options?: { refresh: boolean };
+  options?: { refresh: boolean | 'wait_for' };
 }) {
   const { refresh = false } = options ?? {};
   if (!kibanaAssets.length) {
@@ -440,7 +440,7 @@ export async function installKibanaSavedObjects({
       overwrite: true,
       readStream,
       createNewCopies: false,
-      refresh: true,
+      refresh,
       managed: true,
     });
   });

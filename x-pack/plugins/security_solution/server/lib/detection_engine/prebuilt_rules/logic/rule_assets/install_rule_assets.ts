@@ -70,7 +70,7 @@ export const installExternalPrebuiltRuleAssets = async ({
       references: [],
     })),
     options: {
-      refresh: true,
+      refresh: 'wait_for',
     },
   });
   const installedRulesAssetIds = new Set(installationResults.map((result) => result.id));
