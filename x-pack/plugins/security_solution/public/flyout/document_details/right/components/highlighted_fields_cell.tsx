@@ -24,7 +24,7 @@ import {
   HIGHLIGHTED_FIELDS_CELL_TEST_ID,
   HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID,
 } from './test_ids';
-import { hasPreview, PreviewLink } from '../../shared/components/preview_link';
+import { hasPreview, PreviewLink } from '../../../shared/components/preview_link';
 
 export interface HighlightedFieldsCellProps {
   /**
@@ -83,6 +83,7 @@ export const HighlightedFieldsCell: VFC<HighlightedFieldsCellProps> = ({
                 <PreviewLink
                   field={field}
                   value={value}
+                  scopeId={scopeId}
                   data-test-subj={HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID}
                 />
               ) : hasPreview(field) ? (

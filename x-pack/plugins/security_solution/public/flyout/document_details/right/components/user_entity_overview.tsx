@@ -56,7 +56,7 @@ import {
 } from './test_ids';
 import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
 import { RiskScoreDocTooltip } from '../../../../overview/components/common';
-import { PreviewLink } from '../../shared/components/preview_link';
+import { PreviewLink } from '../../../shared/components/preview_link';
 
 const USER_ICON = 'user';
 
@@ -210,6 +210,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
               <PreviewLink
                 field={USER_NAME_FIELD_NAME}
                 value={userName}
+                scopeId={scopeId}
                 data-test-subj={ENTITIES_USER_OVERVIEW_LINK_TEST_ID}
               >
                 <EuiText

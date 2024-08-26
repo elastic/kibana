@@ -17,11 +17,28 @@ import { TestProviders } from '../../../../common/mock';
 import { NetworkPanelKey, NETWORK_PREVIEW_BANNER } from '../../../network_details';
 import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
 import { FLYOUT_TABLE_PREVIEW_LINK_FIELD_TEST_ID } from './test_ids';
+import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
 
 jest.mock('@kbn/expandable-flyout', () => ({
   useExpandableFlyoutApi: jest.fn(),
   ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
+  withExpandableFlyoutProvider: <T extends object>(Component: React.ComponentType<T>) => {
+    return (props: T) => {
+      return <Component {...props} />;
+    };
+  },
 }));
+
+const mockedTelemetry = createTelemetryServiceMock();
+jest.mock('../../../../common/lib/kibana', () => {
+  return {
+    useKibana: () => ({
+      services: {
+        telemetry: mockedTelemetry,
+      },
+    }),
+  };
+});
 
 jest.mock('../../../../common/hooks/use_experimental_features');
 const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
@@ -32,7 +49,7 @@ const panelContextValue = {
   scopeId: 'scopeId',
 } as unknown as DocumentDetailsContext;
 
-const contextId = 'test';
+const scopeId = 'scopeId';
 
 const eventId = 'TUWyf3wBFCFU0qRJTauW';
 
@@ -63,7 +80,7 @@ describe('TableFieldValueCell', () => {
         <TestProviders>
           <DocumentDetailsContext.Provider value={panelContextValue}>
             <TableFieldValueCell
-              contextId={contextId}
+              scopeId={scopeId}
               data={hostIpData}
               eventId={eventId}
               values={hostIpValues}
@@ -84,7 +101,7 @@ describe('TableFieldValueCell', () => {
         <TestProviders>
           <DocumentDetailsContext.Provider value={panelContextValue}>
             <TableFieldValueCell
-              contextId={contextId}
+              scopeId={scopeId}
               data={hostIpData}
               eventId={eventId}
               fieldFromBrowserField={undefined} // <-- no metadata
@@ -130,7 +147,7 @@ describe('TableFieldValueCell', () => {
         <TestProviders>
           <DocumentDetailsContext.Provider value={panelContextValue}>
             <TableFieldValueCell
-              contextId={contextId}
+              scopeId={scopeId}
               data={messageData}
               eventId={eventId}
               fieldFromBrowserField={messageFieldFromBrowserField}
@@ -166,7 +183,7 @@ describe('TableFieldValueCell', () => {
         <TestProviders>
           <DocumentDetailsContext.Provider value={panelContextValue}>
             <TableFieldValueCell
-              contextId={contextId}
+              scopeId={scopeId}
               data={hostIpData}
               eventId={eventId}
               fieldFromBrowserField={hostIpFieldFromBrowserField} // <-- metadata

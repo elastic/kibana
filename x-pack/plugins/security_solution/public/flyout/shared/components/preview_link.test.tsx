@@ -7,35 +7,43 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { FLYOUT_PREVIEW_LINK_TEST_ID } from './test_ids';
-import { PreviewLink } from './preview_link';
-import { DocumentDetailsContext } from '../context';
-import { TestProviders } from '../../../../common/mock';
-import { mockFlyoutApi } from '../mocks/mock_flyout_context';
+import { FLYOUT_PREVIEW_LINK_TEST_ID } from '../../document_details/shared/components/test_ids';
+import { PreviewLink, hasPreview } from './preview_link';
+import { TestProviders } from '../../../common/mock';
+import { mockFlyoutApi } from '../../document_details/shared/mocks/mock_flyout_context';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { HostPreviewPanelKey } from '../../../entity_details/host_right';
-import { HOST_PREVIEW_BANNER } from '../../right/components/host_entity_overview';
-import { UserPreviewPanelKey } from '../../../entity_details/user_right';
-import { USER_PREVIEW_BANNER } from '../../right/components/user_entity_overview';
-import { NetworkPanelKey, NETWORK_PREVIEW_BANNER } from '../../../network_details';
+import { HostPreviewPanelKey } from '../../entity_details/host_right';
+import { HOST_PREVIEW_BANNER } from '../../document_details/right/components/host_entity_overview';
+import { UserPreviewPanelKey } from '../../entity_details/user_right';
+import { USER_PREVIEW_BANNER } from '../../document_details/right/components/user_entity_overview';
+import { NetworkPanelKey, NETWORK_PREVIEW_BANNER } from '../../network_details';
+import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
+
+const mockedTelemetry = createTelemetryServiceMock();
+jest.mock('../../../common/lib/kibana', () => {
+  return {
+    useKibana: () => ({
+      services: {
+        telemetry: mockedTelemetry,
+      },
+    }),
+  };
+});
 
 jest.mock('@kbn/expandable-flyout', () => ({
   useExpandableFlyoutApi: jest.fn(),
   ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
+  withExpandableFlyoutProvider: <T extends object>(Component: React.ComponentType<T>) => {
+    return (props: T) => {
+      return <Component {...props} />;
+    };
+  },
 }));
-
-const panelContextValue = {
-  eventId: 'event id',
-  indexName: 'indexName',
-  scopeId: 'scopeId',
-} as unknown as DocumentDetailsContext;
 
 const renderPreviewLink = (field: string, value: string, dataTestSuj?: string) =>
   render(
     <TestProviders>
-      <DocumentDetailsContext.Provider value={panelContextValue}>
-        <PreviewLink field={field} value={value} data-test-subj={dataTestSuj} />
-      </DocumentDetailsContext.Provider>
+      <PreviewLink field={field} value={value} data-test-subj={dataTestSuj} scopeId={'scopeId'} />
     </TestProviders>
   );
 
@@ -52,11 +60,9 @@ describe('<PreviewLink />', () => {
   it('should render children without link if field does not have preview', () => {
     const { queryByTestId, getByTestId } = render(
       <TestProviders>
-        <DocumentDetailsContext.Provider value={panelContextValue}>
-          <PreviewLink field={'field'} value={'value'}>
-            <div data-test-subj="children">{'children'}</div>
-          </PreviewLink>
-        </DocumentDetailsContext.Provider>
+        <PreviewLink field={'field'} value={'value'} scopeId={'scopeId'}>
+          <div data-test-subj="children">{'children'}</div>
+        </PreviewLink>
       </TestProviders>
     );
 
@@ -72,7 +78,7 @@ describe('<PreviewLink />', () => {
       id: HostPreviewPanelKey,
       params: {
         hostName: 'host',
-        scopeId: panelContextValue.scopeId,
+        scopeId: 'scopeId',
         banner: HOST_PREVIEW_BANNER,
       },
     });
@@ -86,7 +92,7 @@ describe('<PreviewLink />', () => {
       id: UserPreviewPanelKey,
       params: {
         userName: 'user',
-        scopeId: panelContextValue.scopeId,
+        scopeId: 'scopeId',
         banner: USER_PREVIEW_BANNER,
       },
     });
@@ -104,5 +110,26 @@ describe('<PreviewLink />', () => {
         banner: NETWORK_PREVIEW_BANNER,
       },
     });
+  });
+});
+
+describe('hasPreview', () => {
+  it('should return true if field is host.name', () => {
+    expect(hasPreview('host.name')).toBe(true);
+  });
+
+  it('should return true if field is user.name', () => {
+    expect(hasPreview('user.name')).toBe(true);
+  });
+
+  it('should return true if field type is source.ip', () => {
+    expect(hasPreview('source.ip')).toBe(true);
+    expect(hasPreview('destination.ip')).toBe(true);
+    expect(hasPreview('host.ip')).toBe(true);
+  });
+
+  it('should return false if field is not host.name, user.name, or ip type', () => {
+    expect(hasPreview('field')).toBe(false); // non-ecs field
+    expect(hasPreview('event.category')).toBe(false); // ecs field but not ip type
   });
 });

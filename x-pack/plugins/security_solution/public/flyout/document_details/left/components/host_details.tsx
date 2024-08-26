@@ -59,7 +59,7 @@ import {
 import { useKibana } from '../../../../common/lib/kibana';
 import { ENTITY_RISK_LEVEL } from '../../../../entity_analytics/components/risk_score/translations';
 import { useHasSecurityCapability } from '../../../../helper_hooks';
-import { PreviewLink } from '../../shared/components/preview_link';
+import { PreviewLink } from '../../../shared/components/preview_link';
 import { HostPreviewPanelKey } from '../../../entity_details/host_right';
 import { HOST_PREVIEW_BANNER } from '../../right/components/host_entity_overview';
 
@@ -170,6 +170,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
                 <PreviewLink
                   field={USER_NAME_FIELD_NAME}
                   value={user}
+                  scopeId={scopeId}
                   data-test-subj={HOST_DETAILS_RELATED_USERS_LINK_TEST_ID}
                 />
               ) : (
@@ -201,6 +202,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
                   <PreviewLink
                     field={HOST_IP_FIELD_NAME}
                     value={ip}
+                    scopeId={scopeId}
                     data-test-subj={HOST_DETAILS_RELATED_USERS_IP_LINK_TEST_ID}
                   />
                 ) : (

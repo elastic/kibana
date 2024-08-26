@@ -108,7 +108,7 @@ export const getColumns: ColumnsProvider = ({ browserFields, eventId, scopeId, g
       return (
         <CellActions field={data.field} value={values} isObjectArray={data.isObjectArray}>
           <TableFieldValueCell
-            contextId={scopeId}
+            scopeId={scopeId}
             data={data as EventFieldsData}
             eventId={eventId}
             fieldFromBrowserField={fieldFromBrowserField}

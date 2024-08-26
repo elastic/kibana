@@ -56,7 +56,7 @@ import {
 import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
 import { LeftPanelInsightsTab } from '../../left';
 import { RiskScoreDocTooltip } from '../../../../overview/components/common';
-import { PreviewLink } from '../../shared/components/preview_link';
+import { PreviewLink } from '../../../shared/components/preview_link';
 
 const HOST_ICON = 'storage';
 
@@ -210,6 +210,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
               <PreviewLink
                 field={HOST_NAME_FIELD_NAME}
                 value={hostName}
+                scopeId={scopeId}
                 data-test-subj={ENTITIES_HOST_OVERVIEW_LINK_TEST_ID}
               >
                 <EuiText

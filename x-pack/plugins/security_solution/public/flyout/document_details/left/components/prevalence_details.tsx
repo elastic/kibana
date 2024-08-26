@@ -48,7 +48,7 @@ import {
 } from '../../../../common/components/event_details/use_action_cell_data_provider';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { IS_OPERATOR } from '../../../../../common/types';
-import { hasPreview, PreviewLink } from '../../shared/components/preview_link';
+import { hasPreview, PreviewLink } from '../../../shared/components/preview_link';
 import { CellActions } from '../../shared/components/cell_actions';
 
 export const PREVALENCE_TAB_ID = 'prevalence';
@@ -85,6 +85,10 @@ interface PrevalenceDetailsRow extends PrevalenceData {
    * If enabled, clicking host or user should open an entity preview
    */
   isPreviewEnabled: boolean;
+  /**
+   * Scope id to pass to the preview link
+   */
+  scopeId: string;
 }
 
 const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
@@ -118,6 +122,7 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
                   <PreviewLink
                     field={data.field}
                     value={value}
+                    scopeId={data.scopeId}
                     data-test-subj={PREVALENCE_DETAILS_TABLE_PREVIEW_LINK_CELL_TEST_ID}
                   >
                     <EuiText size="xs">{value}</EuiText>
@@ -322,7 +327,8 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
  * Prevalence table displayed in the document details expandable flyout left section under the Insights tab
  */
 export const PrevalenceDetails: React.FC = () => {
-  const { dataFormattedForFieldBrowser, investigationFields } = useDocumentDetailsContext();
+  const { dataFormattedForFieldBrowser, investigationFields, scopeId } =
+    useDocumentDetailsContext();
 
   const isPlatinumPlus = useLicense().isPlatinumPlus();
   const isPreviewEnabled = !useIsExperimentalFeatureEnabled('entityAlertPreviewDisabled');
@@ -377,8 +383,9 @@ export const PrevalenceDetails: React.FC = () => {
         to: absoluteEnd,
         isPlatinumPlus,
         isPreviewEnabled,
+        scopeId,
       })),
-    [data, absoluteStart, absoluteEnd, isPlatinumPlus, isPreviewEnabled]
+    [data, absoluteStart, absoluteEnd, isPlatinumPlus, isPreviewEnabled, scopeId]
   );
 
   const upsell = (

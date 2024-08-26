@@ -61,7 +61,7 @@ import { ENTITY_RISK_LEVEL } from '../../../../entity_analytics/components/risk_
 import { useHasSecurityCapability } from '../../../../helper_hooks';
 import { UserPreviewPanelKey } from '../../../entity_details/user_right';
 import { USER_PREVIEW_BANNER } from '../../right/components/user_entity_overview';
-import { PreviewLink } from '../../shared/components/preview_link';
+import { PreviewLink } from '../../../shared/components/preview_link';
 
 const USER_DETAILS_ID = 'entities-users-details';
 const RELATED_HOSTS_ID = 'entities-users-related-hosts';
@@ -171,6 +171,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
                 <PreviewLink
                   field={HOST_NAME_FIELD_NAME}
                   value={host}
+                  scopeId={scopeId}
                   data-test-subj={USER_DETAILS_RELATED_HOSTS_LINK_TEST_ID}
                 />
               ) : (
@@ -202,6 +203,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
                   <PreviewLink
                     field={HOST_IP_FIELD_NAME}
                     value={ip}
+                    scopeId={scopeId}
                     data-test-subj={USER_DETAILS_RELATED_HOSTS_IP_LINK_TEST_ID}
                   />
                 ) : (

@@ -15,13 +15,13 @@ import { OverflowField } from '../../../../common/components/tables/helpers';
 import { FormattedFieldValue } from '../../../../timelines/components/timeline/body/renderers/formatted_field';
 import { MESSAGE_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
 import { FLYOUT_TABLE_PREVIEW_LINK_FIELD_TEST_ID } from './test_ids';
-import { hasPreview, PreviewLink } from '../../shared/components/preview_link';
+import { hasPreview, PreviewLink } from '../../../shared/components/preview_link';
 
 export interface FieldValueCellProps {
   /**
    * Value used to create a unique identifier in children components
    */
-  contextId: string;
+  scopeId: string;
   /**
    * Datq retrieved from the row
    */
@@ -49,7 +49,7 @@ export interface FieldValueCellProps {
  */
 export const TableFieldValueCell = memo(
   ({
-    contextId,
+    scopeId,
     data,
     eventId,
     fieldFromBrowserField,
@@ -86,11 +86,12 @@ export const TableFieldValueCell = memo(
                 <PreviewLink
                   field={data.field}
                   value={value}
+                  scopeId={scopeId}
                   data-test-subj={`${FLYOUT_TABLE_PREVIEW_LINK_FIELD_TEST_ID}-${i}`}
                 />
               ) : (
                 <FormattedFieldValue
-                  contextId={`${contextId}-${eventId}-${data.field}-${i}-${value}`}
+                  contextId={`${scopeId}-${eventId}-${data.field}-${i}-${value}`}
                   eventId={eventId}
                   fieldFormat={getFieldFormat(data)}
                   fieldName={data.field}
