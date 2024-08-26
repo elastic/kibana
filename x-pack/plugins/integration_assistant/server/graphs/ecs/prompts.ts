@@ -15,14 +15,15 @@ Here is some context for you to reference for your task, read it carefully as yo
 <ecs>
 {ecs}
 </ecs>
-<combined_sample>
-{formatted_samples}
-</combined_sample>
 </context>`,
   ],
   [
     'human',
     `Looking at the combined sample from {package_name} {data_stream_name} provided above. The combined sample is a JSON object that includes all unique fields from the log samples sent by {package_name} {data_stream_name}.
+
+<combined_samples>
+{combined_samples}
+</combined_samples>
 
 Go through each value step by step and modify it with the following process:
 1. Check if the name of each key and its current value matches the description and usecase of any of the above ECS fields.
@@ -70,9 +71,9 @@ Here is some context for you to reference your task, read it carefully as you wi
 <ecs>
 {ecs}
 </ecs>
-<formatted_samples>
-{formatted_samples}
-</formatted_samples>
+<combined_samples>
+{combined_samples}
+</combined_samples>
 <current_mapping>
 {current_mapping}
 </current_mapping>
@@ -84,6 +85,7 @@ Here is some context for you to reference your task, read it carefully as you wi
 <invalid_ecs_fields>
 {invalid_ecs_fields}
 </invalid_ecs_fields>
+
 To resolve the invalid ecs fields, go through each key and value defined in the invalid fields, and modify the current mapping step by step, and ensure they follow these guidelines:
 <guidelines>
 - Update the provided current mapping object, the value should be the corresponding Elastic Common Schema field name. If no good or valid match is found the value should always be null.
@@ -111,9 +113,9 @@ Here is some context for you to reference for your task, read it carefully as yo
 <ecs>
 {ecs}
 </ecs>
-<samples>
-{formatted_samples}
-</samples>
+<combined_samples>
+{combined_samples}
+</combined_samples>
 <current_mapping>
 {current_mapping}
 </current_mapping>
@@ -126,7 +128,7 @@ Here is some context for you to reference for your task, read it carefully as yo
 {missing_keys}
 </missing_keys>
   
-Help resolve the issue by adding the missing keys, look up example values from the formatted samples, and go through each missing key step by step, resolve it by following these guidelines:
+Help resolve the issue by adding the missing keys, look up example values from the combined samples, and go through each missing key step by step, resolve it by following these guidelines:
 <guidelines>
 - Update the provided current mapping object with all the missing keys, the value should be the corresponding Elastic Common Schema field name. If no good match is found the value should always be null.
 - Do not respond with anything except the updated current mapping JSON object enclosed with 3 backticks (\`). See example response below.

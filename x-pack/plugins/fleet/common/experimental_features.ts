@@ -24,7 +24,6 @@ const _allowedExperimentalValues = {
   agentless: false,
   enableStrictKQLValidation: true,
   subfeaturePrivileges: false,
-  enablePackagesStateMachine: true,
   advancedPolicySettings: true,
   useSpaceAwareness: false,
   enableReusableIntegrationPolicies: true,
