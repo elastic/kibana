@@ -23,6 +23,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
+import { APM_HOST_TROUBLESHOOTING_LINK } from '../../../../../components/asset_details/constants';
 
 export const AddDataPopover = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -33,8 +34,6 @@ export const AddDataPopover = () => {
   const addDataLinkHref = share.url.locators
     .get<ObservabilityOnboardingLocatorParams>(OBSERVABILITY_ONBOARDING_LOCATOR)
     ?.getRedirectUrl({ category: 'logs' });
-
-  const troubleshootingLinkHref = 'https://ela.st/host-troubleshooting';
 
   const popoverContent = {
     title: i18n.translate('xpack.infra.addDataPopover.wantToSeeMorePopoverTitleLabel', {
@@ -88,7 +87,7 @@ export const AddDataPopover = () => {
           <EuiFlexItem grow={false}>
             <EuiText size="s">
               <EuiLink
-                href={troubleshootingLinkHref}
+                href={APM_HOST_TROUBLESHOOTING_LINK}
                 target="_blank"
                 data-test-subj="infraHostsTableWithoutSystemMetricsPopoverTroubleshootingLink"
                 external
