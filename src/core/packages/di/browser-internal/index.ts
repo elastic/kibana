@@ -7,17 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { inject, injectable } from 'inversify';
-import { CoreStart } from '@kbn/core-di-browser';
-import { HttpStart } from '@kbn/core-http-browser';
-
-@injectable()
-export class EchoService {
-  constructor(@inject(CoreStart('http')) private readonly http: HttpStart) {}
-
-  public async echo(message: string): Promise<string> {
-    return this.http.post<string>('/api/di/echo', {
-      body: JSON.stringify(message),
-    });
-  }
-}
+export { application } from './src/modules/application';
