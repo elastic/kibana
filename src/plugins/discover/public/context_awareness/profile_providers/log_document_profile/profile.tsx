@@ -15,7 +15,6 @@ export const createLogDocumentProfileProvider = (
   services: ProfileProviderServices
 ): DocumentProfileProvider => ({
   profileId: 'log-document-profile',
-  isEnabled: true,
   profile: {
     getDocViewer,
   },

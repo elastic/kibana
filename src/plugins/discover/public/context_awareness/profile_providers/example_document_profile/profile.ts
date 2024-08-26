@@ -11,7 +11,7 @@ import { DocumentProfileProvider, DocumentType } from '../../profiles';
 
 export const exampleDocumentProfileProvider: DocumentProfileProvider = {
   profileId: 'example-document-profile',
-  isEnabled: false,
+  isExperimental: true,
   profile: {},
   resolve: (params) => {
     if (getFieldValue(params.record, 'data_stream.type') !== 'example') {

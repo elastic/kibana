@@ -13,20 +13,51 @@ import { exampleDocumentProfileProvider } from './example_document_profile';
 import { exampleRootProfileProvider } from './example_root_pofile';
 import {
   registerProfileProviders,
-  registerProfileProvidersInternal,
+  registerEnabledProfileProviders,
 } from './register_profile_providers';
 
-describe('registerProfileProvidersInternal', () => {
+describe('registerEnabledProfileProviders', () => {
   it('should register all profile providers', async () => {
     const { rootProfileServiceMock, rootProfileProviderMock } = createContextAwarenessMocks({
       shouldRegisterProviders: false,
     });
-    registerProfileProvidersInternal({
+    registerEnabledProfileProviders({
       profileService: rootProfileServiceMock,
-      availableProviders: [rootProfileProviderMock],
+      providers: [rootProfileProviderMock],
+      enabledExperimentalProfileIds: [],
     });
     const context = await rootProfileServiceMock.resolve({ solutionNavId: null });
     expect(rootProfileServiceMock.getProfile(context)).toBe(rootProfileProviderMock.profile);
+  });
+
+  it('should not register experimental profile providers by default', async () => {
+    const { rootProfileServiceMock } = createContextAwarenessMocks({
+      shouldRegisterProviders: false,
+    });
+
+    registerEnabledProfileProviders({
+      profileService: rootProfileServiceMock,
+      providers: [exampleRootProfileProvider],
+      enabledExperimentalProfileIds: [],
+    });
+    const context = await rootProfileServiceMock.resolve({ solutionNavId: null });
+    expect(rootProfileServiceMock.getProfile(context)).not.toBe(exampleRootProfileProvider.profile);
+    expect(rootProfileServiceMock.getProfile(context)).toMatchObject({});
+  });
+
+  it('should register experimental profile providers when enabled by config', async () => {
+    const { rootProfileServiceMock, rootProfileProviderMock } = createContextAwarenessMocks({
+      shouldRegisterProviders: false,
+    });
+
+    registerEnabledProfileProviders({
+      profileService: rootProfileServiceMock,
+      providers: [exampleRootProfileProvider],
+      enabledExperimentalProfileIds: [exampleRootProfileProvider.profileId],
+    });
+    const context = await rootProfileServiceMock.resolve({ solutionNavId: null });
+    expect(rootProfileServiceMock.getProfile(context)).toBe(exampleRootProfileProvider.profile);
+    expect(rootProfileServiceMock.getProfile(context)).not.toBe(rootProfileProviderMock.profile);
   });
 });
 
@@ -40,7 +71,7 @@ describe('registerProfileProviders', () => {
       rootProfileService: rootProfileServiceMock,
       dataSourceProfileService: dataSourceProfileServiceMock,
       documentProfileService: documentProfileServiceMock,
-      experimentalProfileIds: [
+      enabledExperimentalProfileIds: [
         exampleRootProfileProvider.profileId,
         exampleDataSourceProfileProvider.profileId,
         exampleDocumentProfileProvider.profileId,
@@ -79,7 +110,7 @@ describe('registerProfileProviders', () => {
       rootProfileService: rootProfileServiceMock,
       dataSourceProfileService: dataSourceProfileServiceMock,
       documentProfileService: documentProfileServiceMock,
-      experimentalProfileIds: [],
+      enabledExperimentalProfileIds: [],
     });
     const rootContext = await rootProfileServiceMock.resolve({ solutionNavId: null });
     const dataSourceContext = await dataSourceProfileServiceMock.resolve({

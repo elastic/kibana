@@ -16,7 +16,7 @@ export const createSecurityRootProfileProvider: SecurityProfileProviderFactory<
   RootProfileProvider
 > = (services: ProfileProviderServices) => ({
   profileId: 'security-root-profile',
-  isEnabled: false,
+  isExperimental: true,
   profile: {
     getCellRenderers: (prev) => () => ({
       ...prev(),

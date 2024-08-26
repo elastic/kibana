@@ -13,7 +13,7 @@ import { RootProfileProvider, SolutionType } from '../../profiles';
 
 export const exampleRootProfileProvider: RootProfileProvider = {
   profileId: 'example-root-profile',
-  isEnabled: false,
+  isExperimental: true,
   profile: {
     getCellRenderers: (prev) => () => ({
       ...prev(),

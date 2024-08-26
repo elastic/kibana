@@ -9,7 +9,6 @@
 import type {
   DataSourceProfileService,
   DocumentProfileService,
-  RootProfileProvider,
   RootProfileService,
 } from '../profiles';
 import type { BaseProfileProvider, BaseProfileService } from '../profile_service';
@@ -28,66 +27,69 @@ export const registerProfileProviders = ({
   rootProfileService,
   dataSourceProfileService,
   documentProfileService,
-  experimentalProfileIds,
+  enabledExperimentalProfileIds,
 }: {
   rootProfileService: RootProfileService;
   dataSourceProfileService: DataSourceProfileService;
   documentProfileService: DocumentProfileService;
-  experimentalProfileIds: string[];
+  /**
+   * List of experimental profile Ids which are enabled in kibana config.
+   * */
+  enabledExperimentalProfileIds: string[];
 }) => {
   const providerServices = createProfileProviderServices();
   const rootProfileProviders = createRootProfileProviders(providerServices);
   const dataSourceProfileProviders = createDataSourceProfileProviders(providerServices);
   const documentProfileProviders = createDocumentProfileProviders(providerServices);
 
-  const enabledRootProfileProviders = rootProfileProviders.filter(
-    ({ isEnabled = true, profileId }) => isEnabled || experimentalProfileIds.includes(profileId)
-  );
-
-  const enabledDataSourceProfileProviders = dataSourceProfileProviders.filter(
-    ({ isEnabled = true, profileId }) => isEnabled || experimentalProfileIds.includes(profileId)
-  );
-
-  const enabledDocumentProfileProviders = documentProfileProviders.filter(
-    ({ isEnabled = true, profileId }) => isEnabled || experimentalProfileIds.includes(profileId)
-  );
-
-  registerProfileProvidersInternal({
+  registerEnabledProfileProviders({
     profileService: rootProfileService,
-    providers: [...enabledRootProfileProviders],
+    providers: [...rootProfileProviders],
+    enabledExperimentalProfileIds,
   });
 
-  registerProfileProvidersInternal({
+  registerEnabledProfileProviders({
     profileService: dataSourceProfileService,
-    providers: [...enabledDataSourceProfileProviders],
+    providers: [...dataSourceProfileProviders],
+    enabledExperimentalProfileIds,
   });
 
-  registerProfileProvidersInternal({
+  registerEnabledProfileProviders({
     profileService: documentProfileService,
-    providers: [...enabledDocumentProfileProviders],
+    providers: [...documentProfileProviders],
+    enabledExperimentalProfileIds,
   });
 };
 
-export const registerProfileProvidersInternal = <
+export const registerEnabledProfileProviders = <
   TProvider extends BaseProfileProvider<{}>,
   TService extends BaseProfileService<TProvider, {}>
 >({
   profileService,
   providers: availableProviders,
+  enabledExperimentalProfileIds = [],
 }: {
   profileService: TService;
   providers: TProvider[];
+  /**
+   * List of experimental profile Ids which are enabled in kibana config.
+   * */
+  enabledExperimentalProfileIds?: string[];
 }) => {
   for (const provider of availableProviders) {
-    profileService.registerProvider(provider);
+    const isProfileExperimental = provider.isExperimental ?? false;
+    const isProfileEnabled =
+      enabledExperimentalProfileIds.includes(provider.profileId) || !isProfileExperimental;
+    if (isProfileEnabled) {
+      profileService.registerProvider(provider);
+    }
   }
 };
 
-const createRootProfileProviders = (_providerServices: ProfileProviderServices) =>
-  [
-    exampleRootProfileProvider,
-    createSecurityRootProfileProvider(_providerServices),
-  ] as RootProfileProvider[];
+const createRootProfileProviders = (_providerServices: ProfileProviderServices) => [
+  exampleRootProfileProvider,
+  createSecurityRootProfileProvider(_providerServices),
+];
 
 const createDataSourceProfileProviders = (providerServices: ProfileProviderServices) => [
   exampleDataSourceProfileProvider,

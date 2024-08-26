@@ -28,7 +28,6 @@ export const createContextAwarenessMocks = ({
 }: { shouldRegisterProviders?: boolean } = {}) => {
   const rootProfileProviderMock: RootProfileProvider = {
     profileId: 'root-profile',
-    isEnabled: true,
     profile: {
       getCellRenderers: jest.fn((prev) => () => ({
         ...prev(),
@@ -45,7 +44,6 @@ export const createContextAwarenessMocks = ({
 
   const dataSourceProfileProviderMock: DataSourceProfileProvider = {
     profileId: 'data-source-profile',
-    isEnabled: true,
     profile: {
       getCellRenderers: jest.fn((prev) => () => ({
         ...prev(),
@@ -79,7 +77,6 @@ export const createContextAwarenessMocks = ({
 
   const documentProfileProviderMock: DocumentProfileProvider = {
     profileId: 'document-profile',
-    isEnabled: true,
     profile: {
       getCellRenderers: jest.fn((prev) => () => ({
         ...prev(),
