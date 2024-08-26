@@ -4,18 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers';
 import {
   PickVersionValues,
   RuleUpgradeSpecifier,
-  RuleUpgradeSpecifierFields,
   UpgradeSpecificRulesRequest,
   UpgradeAllRulesRequest,
   PerformRuleUpgradeResponseBody,
   PerformRuleUpgradeRequestBody,
 } from './perform_rule_upgrade_route';
-import { RULE_UPGRADE_SPECIFIER_FIELDS } from '../../../../../server/lib/detection_engine/prebuilt_rules/model/rule_assets/prebuilt_rule_asset';
 
 describe('Perform Rule Upgrade Route Schemas', () => {
   describe('PickVersionValues', () => {
@@ -40,14 +37,6 @@ describe('Perform Rule Upgrade Route Schemas', () => {
     });
   });
 
-  describe('RuleUpgradeSpecifierFields', () => {
-    it('accepts all upgradable fields from the Prebuilt Rule Asset', () => {
-      const upgradeSpecifierFields = new Set(Object.keys(RuleUpgradeSpecifierFields.shape));
-
-      expect(upgradeSpecifierFields).toEqual(RULE_UPGRADE_SPECIFIER_FIELDS);
-    });
-  });
-
   describe('RuleUpgradeSpecifier', () => {
     const validSpecifier = {
       rule_id: 'rule-1',
@@ -62,7 +51,7 @@ describe('Perform Rule Upgrade Route Schemas', () => {
       expect(result.data).toEqual(validSpecifier);
     });
 
-    test('validates a valid upgrade specifier with a fields property', () => {
+    test('validates a valid upgrade specifier with a valid field property', () => {
       const specifierWithFields = {
         ...validSpecifier,
         fields: {
@@ -74,6 +63,39 @@ describe('Perform Rule Upgrade Route Schemas', () => {
       const result = RuleUpgradeSpecifier.safeParse(specifierWithFields);
       expectParseSuccess(result);
       expect(result.data).toEqual(specifierWithFields);
+    });
+
+    test('rejects an upgrade specifier with an invalid fields property', () => {
+      const specifierWithFields = {
+        ...validSpecifier,
+        fields: {
+          unknown_field: {
+            pick_version: 'CURRENT',
+          },
+        },
+      };
+      const result = RuleUpgradeSpecifier.safeParse(specifierWithFields);
+      expectParseError(result);
+      expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+        `"fields: Unrecognized key(s) in object: 'unknown_field'"`
+      );
+    });
+
+    test('rejects an upgrade specifier with a field property with an invalid type', () => {
+      const specifierWithFields = {
+        ...validSpecifier,
+        fields: {
+          name: {
+            pick_version: 'CURRENT',
+            resolved_value: 'My name',
+          },
+        },
+      };
+      const result = RuleUpgradeSpecifier.safeParse(specifierWithFields);
+      expectParseError(result);
+      expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+        `"fields.name: Unrecognized key(s) in object: 'resolved_value'"`
+      );
     });
 
     test('rejects upgrade specifier with invalid pick_version rule_id', () => {
