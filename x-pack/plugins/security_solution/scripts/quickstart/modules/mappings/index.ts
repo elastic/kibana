@@ -58,9 +58,13 @@ export const generateLargeMapping = (
  * Root causes:
     illegal_argument_exception: Limit of total fields [1000] has been exceeded
  */
-export const settings: IndicesIndexSettings = {
-  'index.mapping.total_fields.limit': 3000,
-};
+export const getSettings: ({ maxFields }: { maxFields: number }) => IndicesIndexSettings = ({
+  maxFields,
+}: {
+  maxFields: number;
+}) => ({
+  'index.mapping.total_fields.limit': maxFields,
+});
 
 /**
  * Injects additional fields into a mapping. Useful for adding additional fields to the standard ECS mapping.

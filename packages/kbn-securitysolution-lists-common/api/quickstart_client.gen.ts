@@ -21,7 +21,6 @@ import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { catchAxiosErrorFormatAndThrow } from '@kbn/securitysolution-utils';
 
 import type { CreateListRequestBodyInput, CreateListResponse } from './create_list/create_list.gen';
-import type { CreateListIndexResponse } from './create_list_index/create_list_index.gen';
 import type {
   CreateListItemRequestBodyInput,
   CreateListItemResponse,
@@ -30,27 +29,29 @@ import type {
   DeleteListRequestQueryInput,
   DeleteListResponse,
 } from './delete_list/delete_list.gen';
+import type { CreateListIndexResponse } from './create_list_index/create_list_index.gen';
 import type { DeleteListIndexResponse } from './delete_list_index/delete_list_index.gen';
 import type {
   DeleteListItemRequestQueryInput,
   DeleteListItemResponse,
 } from './delete_list_item/delete_list_item.gen';
 import type { ExportListItemsRequestQueryInput } from './export_list_items/export_list_items.gen';
+import type { FindListsRequestQueryInput, FindListsResponse } from './find_lists/find_lists.gen';
 import type {
   FindListItemsRequestQueryInput,
   FindListItemsResponse,
 } from './find_list_items/find_list_items.gen';
-import type { FindListsRequestQueryInput, FindListsResponse } from './find_lists/find_lists.gen';
 import type {
   ImportListItemsRequestQueryInput,
+  ImportListItemsRequestBodyInput,
   ImportListItemsResponse,
 } from './import_list_items/import_list_items.gen';
 import type { PatchListRequestBodyInput, PatchListResponse } from './patch_list/patch_list.gen';
+import type { ReadListRequestQueryInput, ReadListResponse } from './read_list/read_list.gen';
 import type {
   PatchListItemRequestBodyInput,
   PatchListItemResponse,
 } from './patch_list_item/patch_list_item.gen';
-import type { ReadListRequestQueryInput, ReadListResponse } from './read_list/read_list.gen';
 import type { ReadListIndexResponse } from './read_list_index/read_list_index.gen';
 import type {
   ReadListItemRequestQueryInput,
@@ -214,7 +215,7 @@ You can import items to a new or existing list.
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'POST',
-
+        body: props.body,
         query: props.query,
       })
       .catch(catchAxiosErrorFormatAndThrow);
@@ -348,6 +349,7 @@ export interface FindListsProps {
 }
 export interface ImportListItemsProps {
   query: ImportListItemsRequestQueryInput;
+  body: ImportListItemsRequestBodyInput;
 }
 export interface PatchListProps {
   body: PatchListRequestBodyInput;

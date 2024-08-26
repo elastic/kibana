@@ -7,7 +7,7 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import type { NewTermsRuleCreateProps } from '../../../../../common/api/detection_engine';
-import { getEcsMapping, generateLargeMappingProperties, settings } from '../../mappings';
+import { getEcsMapping, generateLargeMappingProperties, getSettings } from '../../mappings';
 
 export const basicRule: NewTermsRuleCreateProps = {
   type: 'new_terms',
@@ -19,6 +19,7 @@ export const basicRule: NewTermsRuleCreateProps = {
   new_terms_fields: ['host.name'],
   history_window_start: 'now-7d',
   enabled: false,
+  index: ['test'],
 };
 
 /**
@@ -33,7 +34,7 @@ export const createData = async (client: Client) => {
       ...ecsMapping,
       properties: { ...ecsMapping.properties, ...generateLargeMappingProperties({ size: 100 }) },
     },
-    settings,
+    settings: getSettings({ maxFields: 5000 }),
   });
 
   const now = new Date();

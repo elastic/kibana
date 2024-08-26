@@ -30,3 +30,10 @@ export const createRulesConcurrently = async (
     )
   ).map((response) => response.data);
 };
+
+export const getBasicRuleMetadata = () => ({
+  name: 'Test rule',
+  description: 'Test rule',
+  severity: 'low' as const,
+  risk_score: 21,
+});

@@ -1,0 +1,47 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { range } from 'lodash';
+import crypto from 'crypto';
+
+export const buildLargeDocument = ({
+  numFields,
+  fieldSize,
+}: {
+  numFields: number;
+  fieldSize: number;
+}): Record<string, string> => {
+  const doc: Record<string, string> = {};
+  range(numFields).forEach((idx) => {
+    doc[`field_${idx}`] = crypto.randomBytes(fieldSize).toString('hex');
+  });
+  return doc;
+};
+
+export const addTimestampToDoc = ({
+  timestamp = new Date(),
+  doc,
+}: {
+  timestamp?: Date;
+  doc: Record<string, unknown>;
+}): Record<string, unknown> => {
+  doc['@timestamp'] = timestamp;
+  return doc;
+};
+
+export const addFieldToDoc = ({
+  fieldName,
+  fieldValue,
+  doc,
+}: {
+  fieldName: string;
+  fieldValue: unknown;
+  doc: Record<string, unknown>;
+}): Record<string, unknown> => {
+  doc[fieldName] = fieldValue;
+  return doc;
+};

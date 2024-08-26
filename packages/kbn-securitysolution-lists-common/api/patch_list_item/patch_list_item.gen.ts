@@ -17,20 +17,10 @@
 
 import { z } from 'zod';
 
-import { ListItemId, ListItemValue, ListItemMetadata } from '../model/list_common.gen';
 import { ListItem } from '../model/list_schemas.gen';
 
 export type PatchListItemRequestBody = z.infer<typeof PatchListItemRequestBody>;
-export const PatchListItemRequestBody = z.object({
-  id: ListItemId,
-  value: ListItemValue.optional(),
-  meta: ListItemMetadata.optional(),
-  _version: z.string().optional(),
-  /**
-   * Determines when changes made by the request are made visible to search
-   */
-  refresh: z.enum(['true', 'false', 'wait_for']).optional(),
-});
+export const PatchListItemRequestBody = z.object({});
 export type PatchListItemRequestBodyInput = z.input<typeof PatchListItemRequestBody>;
 
 export type PatchListItemResponse = z.infer<typeof PatchListItemResponse>;
