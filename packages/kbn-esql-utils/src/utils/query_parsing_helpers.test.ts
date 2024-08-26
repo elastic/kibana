@@ -13,6 +13,7 @@ import {
   hasTransformationalCommand,
   getTimeFieldFromESQLQuery,
   wrapByPipes,
+  isQueryWrappedByPipes,
 } from './query_parsing_helpers';
 
 describe('esql query helpers', () => {
@@ -194,6 +195,23 @@ describe('esql query helpers', () => {
         true
       );
       expect(code).toEqual('FROM index1 | KEEP field1, field2 | SORT field1');
+    });
+  });
+
+  describe('isQueryWrappedByPipes', function () {
+    it('should return false if the query is not wrapped', function () {
+      const flag = isQueryWrappedByPipes('FROM index1 | KEEP field1, field2 | SORT field1');
+      expect(flag).toBeFalsy();
+    });
+
+    it('should return true if the query is wrapped', function () {
+      const flag = isQueryWrappedByPipes('FROM index1 /n| KEEP field1, field2 /n| SORT field1');
+      expect(flag).toBeTruthy();
+    });
+
+    it('should return true if the query is wrapped and prettified', function () {
+      const flag = isQueryWrappedByPipes('FROM index1 /n  | KEEP field1, field2 /n  | SORT field1');
+      expect(flag).toBeTruthy();
     });
   });
 });
