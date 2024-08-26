@@ -12,19 +12,19 @@ import { css } from '@emotion/react';
 import * as i18n from './translations';
 
 export interface Props extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
-  handlePromptChange: (value: string) => void;
+  setUserPrompt: (value: string) => void;
   isDisabled?: boolean;
   onPromptSubmit: (value: string) => void;
   value: string;
 }
 
 export const PromptTextArea = forwardRef<HTMLTextAreaElement, Props>(
-  ({ isDisabled = false, value, onPromptSubmit, handlePromptChange }, ref) => {
+  ({ isDisabled = false, value, onPromptSubmit, setUserPrompt }, ref) => {
     const onChangeCallback = useCallback(
       (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-        handlePromptChange(event.target.value);
+        setUserPrompt(event.target.value);
       },
-      [handlePromptChange]
+      [setUserPrompt]
     );
 
     const onKeyDown = useCallback(
@@ -35,13 +35,13 @@ export const PromptTextArea = forwardRef<HTMLTextAreaElement, Props>(
 
           if (value.trim().length) {
             onPromptSubmit(event.target.value?.trim());
-            handlePromptChange('');
+            setUserPrompt('');
           } else {
             event.stopPropagation();
           }
         }
       },
-      [value, onPromptSubmit, handlePromptChange]
+      [value, onPromptSubmit, setUserPrompt]
     );
 
     return (

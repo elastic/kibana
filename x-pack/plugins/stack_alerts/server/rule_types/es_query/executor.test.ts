@@ -101,11 +101,12 @@ describe('es_query executor', () => {
       savedObjectsClient: {
         get: () => ({ attributes: { consumer: 'alerts' } }),
       },
-      searchSourceClient: searchSourceClientMock,
+      getSearchSourceClient: jest.fn().mockResolvedValue(searchSourceClientMock),
       alertsClient: mockAlertClient,
       alertWithLifecycle: jest.fn(),
       logger,
       shouldWriteAlerts: () => true,
+      getDataViews: jest.fn(),
     };
     const coreMock = {
       http: { basePath: { publicBaseUrl: 'https://localhost:5601' } },
@@ -376,16 +377,19 @@ describe('es_query executor', () => {
           results: [
             {
               group: 'host-1',
+              groups: [{ field: 'host.name', value: 'host-1' }],
               count: 291,
               hits: [],
             },
             {
               group: 'host-2',
+              groups: [{ field: 'host.name', value: 'host-2' }],
               count: 477,
               hits: [],
             },
             {
               group: 'host-3',
+              groups: [{ field: 'host.name', value: 'host-3' }],
               count: 999,
               hits: [],
             },
@@ -428,6 +432,7 @@ describe('es_query executor', () => {
           latestTimestamp: undefined,
         },
         payload: {
+          'host.name': 'host-1',
           'kibana.alert.evaluation.conditions':
             'Number of matching documents for group "host-1" is greater than or equal to 200',
           'kibana.alert.evaluation.threshold': 200,
@@ -459,6 +464,7 @@ describe('es_query executor', () => {
           latestTimestamp: undefined,
         },
         payload: {
+          'host.name': 'host-2',
           'kibana.alert.evaluation.conditions':
             'Number of matching documents for group "host-2" is greater than or equal to 200',
           'kibana.alert.evaluation.threshold': 200,
@@ -490,6 +496,7 @@ describe('es_query executor', () => {
           latestTimestamp: undefined,
         },
         payload: {
+          'host.name': 'host-3',
           'kibana.alert.evaluation.conditions':
             'Number of matching documents for group "host-3" is greater than or equal to 200',
           'kibana.alert.evaluation.threshold': 200,

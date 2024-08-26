@@ -8,6 +8,7 @@
 import { BehaviorSubject } from 'rxjs';
 import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 import { i18n } from '@kbn/i18n';
+import type { RandomSamplerStorage } from './use_random_sampler_storage';
 
 export const RANDOM_SAMPLER_PROBABILITIES = [
   0.00001, 0.00005, 0.0001, 0.0005, 0.001, 0.005, 0.01, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5,
@@ -68,12 +69,12 @@ export class RandomSampler {
   private setRandomSamplerModeInStorage: (mode: RandomSamplerOption) => void;
   private setRandomSamplerProbabilityInStorage: (prob: RandomSamplerProbability) => void;
 
-  constructor(
-    randomSamplerMode: RandomSamplerOption,
-    setRandomSamplerMode: (mode: RandomSamplerOption) => void,
-    randomSamplerProbability: RandomSamplerProbability,
-    setRandomSamplerProbability: (prob: RandomSamplerProbability) => void
-  ) {
+  constructor({
+    randomSamplerMode,
+    randomSamplerProbability,
+    setRandomSamplerMode,
+    setRandomSamplerProbability,
+  }: RandomSamplerStorage) {
     this.mode$.next(randomSamplerMode);
     this.setRandomSamplerModeInStorage = setRandomSamplerMode;
     this.probability$.next(randomSamplerProbability);
