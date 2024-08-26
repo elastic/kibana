@@ -32,7 +32,6 @@ interface GeminiMessage {
 
 export const geminiAdapter: InferenceConnectorAdapter = {
   chatComplete: ({ executor, system, messages, toolChoice, tools }) => {
-    // TODO: toolChoice
     return from(
       executor.invoke({
         subAction: 'invokeStream',
@@ -148,6 +147,7 @@ function messagesToGemini({
 }): GeminiMessage[] {
   // systemInstruction is not supported on all gemini versions
   // so for now we just always use the old trick of user message + assistant acknowledge.
+  // See https://cloud.google.com/vertex-ai/generative-ai/docs/model-reference/inference#request
   const systemMessages: GeminiMessage[] | undefined = system
     ? [
         { role: 'user', content: system },
@@ -157,7 +157,9 @@ function messagesToGemini({
 
   return [
     ...(systemMessages ? [...systemMessages] : []),
-    ...messages.map(messageToGeminiFormat()),
+    ...messages.map(messageToGeminiMapper()),
+    // Same as system instruction, forceful tool selection is only available on the latest gemini version
+    // so for now we always mimic the behavior with a user message.
     ...(toolChoice
       ? [
           {
@@ -170,7 +172,7 @@ function messagesToGemini({
   ];
 }
 
-function messageToGeminiFormat() {
+function messageToGeminiMapper() {
   return (message: Message): GeminiMessage => {
     const role = message.role;
 
