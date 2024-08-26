@@ -63,9 +63,9 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
     [onChangeSampleSize]
   );
 
-  const onChangeActiveSampleSize = useCallback<Exclude<EuiRangeProps['onChange'], undefined>>(
-    (event: any /* TODO event.target.value may be empty */) => {
-      if (!event.target.value) {
+  const onChangeActiveSampleSize = useCallback<NonNullable<EuiRangeProps['onChange']>>(
+    (event) => {
+      if (!('value' in event.target) || !event.target.value) {
         setActiveSampleSize('');
         return;
       }

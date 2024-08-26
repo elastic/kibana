@@ -240,9 +240,15 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const onMouseDownResizeHandler = useCallback<
     React.ComponentProps<typeof ResizableButton>['onMouseDownResizeHandler']
   >(
-    (mouseDownEvent: /* TODO: pageY could be missing */ any) => {
+    (mouseDownEvent) => {
+      function isMouseEvent(e: React.TouchEvent | React.MouseEvent): e is React.MouseEvent {
+        return e && 'pageY' in e;
+      }
+
       const startSize = editorHeight;
-      const startPosition = mouseDownEvent.pageY;
+      const startPosition = isMouseEvent(mouseDownEvent)
+        ? mouseDownEvent?.pageY
+        : mouseDownEvent?.touches[0].pageY;
 
       function onMouseMove(mouseMoveEvent: MouseEvent) {
         const height = startSize - startPosition + mouseMoveEvent.pageY;

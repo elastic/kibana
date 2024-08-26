@@ -63,16 +63,14 @@ export const RuleSettingsFlappingInputs = (props: RuleSettingsFlappingInputsProp
     onStatusChangeThresholdChange,
   } = props;
 
-  const internalOnLookBackWindowChange = useCallback<Exclude<EuiRangeProps['onChange'], undefined>>(
+  const internalOnLookBackWindowChange = useCallback<NonNullable<EuiRangeProps['onChange']>>(
     (e) => {
       onLookBackWindowChange(parseInt(e.currentTarget.value, 10));
     },
     [onLookBackWindowChange]
   );
 
-  const internalOnStatusChangeThresholdChange = useCallback<
-    Exclude<EuiRangeProps['onChange'], undefined>
-  >(
+  const internalOnStatusChangeThresholdChange = useCallback<NonNullable<EuiRangeProps['onChange']>>(
     (e) => {
       onStatusChangeThresholdChange(parseInt(e.currentTarget.value, 10));
     },
