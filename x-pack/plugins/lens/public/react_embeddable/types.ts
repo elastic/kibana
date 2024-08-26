@@ -190,6 +190,7 @@ export interface LensUnifiedSearchContext {
   query?: Query | AggregateQuery;
   timeRange?: TimeRange;
   timeslice?: [number, number];
+  searchSessionId?: string;
 }
 
 type LensKibanaContextProps = LensUnifiedSearchContext & {
@@ -347,5 +348,22 @@ export interface LensCustomCallbacks {
    */
   abortController?: AbortController;
 }
+/**
+ * Carefully chosen props to expose on the Lens renderer component used by
+ * other plugins
+ */
 
-export type LensRendererProps = Simplify<TypedLensSerializedState & LensCustomCallbacks & LensApi>;
+type ComponentCallbacks = LensCustomCallbacks & LensCallbacks;
+type ComponentSerializedProps = TypedLensSerializedState;
+export type LensRendererProps = Simplify<ComponentSerializedProps & ComponentCallbacks>;
+
+/**
+ * Backward compatibility types
+ */
+export type LensByValueInput = Omit<ComponentSerializedProps & ComponentCallbacks, 'savedObjectId'>;
+export type LensByReferenceInput = Pick<
+  ComponentSerializedProps & ComponentCallbacks,
+  'savedObjectId'
+>;
+export type TypedLensByValueInput = Omit<LensRendererProps, 'savedObjectId'>;
+export type LensEmbeddableInput = LensByValueInput | LensByReferenceInput;

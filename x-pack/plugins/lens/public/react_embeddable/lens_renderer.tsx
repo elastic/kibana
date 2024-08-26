@@ -6,21 +6,13 @@
  */
 
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { useSearchApi } from '@kbn/presentation-publishing';
 import React from 'react';
 import { useMemo, useRef } from 'react';
-import type { LensApi, LensRuntimeState, LensSerializedState } from './types';
+import type { LensApi, LensRendererProps, LensRuntimeState, LensSerializedState } from './types';
 import { LENS_EMBEDDABLE_TYPE } from '../../common/constants';
 
-export interface Props {
-  title?: string;
-  filters?: Filter[];
-  query?: Query;
-  timeRange?: TimeRange;
-}
-
-export function LensRenderer(props: Props) {
+export function LensRenderer(props: LensRendererProps) {
   const apiRef = useRef<LensApi | undefined>(undefined);
 
   const initialState = useMemo(() => {
@@ -56,3 +48,5 @@ export function LensRenderer(props: Props) {
     />
   );
 }
+
+export type EmbeddableComponent = React.ComponentType<LensRendererProps>;

@@ -6,7 +6,7 @@
  */
 
 import { Filter, Query, AggregateQuery } from '@kbn/es-query';
-import { initializeTimeRange } from '@kbn/presentation-publishing';
+import { getUnchangingComparator, initializeTimeRange } from '@kbn/presentation-publishing';
 import { noop } from 'lodash';
 import { buildObservableVariable } from '../helper';
 import { LensRuntimeState } from '../types';
@@ -37,6 +37,7 @@ export function initializeSearchContext(state: LensRuntimeState) {
       filters: filtersComparator,
       timeslice: timesliceComparator,
       ...timeRange.comparators,
+      searchSessionId: getUnchangingComparator<LensRuntimeState, 'searchSessionId'>(),
     },
     cleanup: noop,
     serialize: () => ({

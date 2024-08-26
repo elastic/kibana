@@ -8,7 +8,18 @@
 import { LensPlugin } from './plugin';
 
 export { isLensApi } from './react_embeddable/type_guards';
-export type { LensApi, LensSerializedState, LensRuntimeState } from './react_embeddable/types';
+export { type EmbeddableComponent } from './react_embeddable/lens_renderer';
+export type {
+  LensApi,
+  LensSerializedState,
+  LensRuntimeState,
+  LensByValueInput,
+  LensByReferenceInput,
+  TypedLensByValueInput,
+  LensEmbeddableInput,
+  LensSavedObjectAttributes,
+} from './react_embeddable/types';
+
 export type {
   XYState,
   XYReferenceLineLayerConfig,
