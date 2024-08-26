@@ -20,14 +20,12 @@ export interface InvestigateWidgetGridItem {
 
 interface InvestigateWidgetGridProps {
   items: InvestigateWidgetGridItem[];
-  onItemsChange: (items: InvestigateWidgetGridItem[]) => Promise<void>;
   onItemCopy: (item: InvestigateWidgetGridItem) => Promise<void>;
   onItemDelete: (item: InvestigateWidgetGridItem) => Promise<void>;
 }
 
 export function InvestigateWidgetGrid({
   items,
-  onItemsChange,
   onItemDelete,
   onItemCopy,
 }: InvestigateWidgetGridProps) {

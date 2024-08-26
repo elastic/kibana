@@ -54,7 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(logoutMessage).to.eql('You have logged out of Elastic.');
       });
 
-      describe('within a non-default space', async () => {
+      describe('within a non-default space', () => {
         before(async () => {
           await PageObjects.security.forceLogout();
 
