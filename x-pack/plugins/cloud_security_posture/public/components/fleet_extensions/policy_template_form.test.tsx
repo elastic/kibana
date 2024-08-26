@@ -917,7 +917,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       expect(getByText('Getting Started')).toHaveAttribute(
         'href',
-        'https://ela.st/cspm-get-started'
+        'https://www.elastic.co/guide/en/security/current/cspm-get-started.html'
       );
     });
 
@@ -934,7 +934,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       expect(getByTestId('externalLink')).toHaveAttribute(
         'href',
-        'https://ela.st/cspm-get-started'
+        'https://www.elastic.co/guide/en/security/current/cspm-get-started.html'
       );
     });
 
@@ -1224,7 +1224,10 @@ describe('<CspPolicyTemplateForm />', () => {
         <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoCspmGCP()} />
       );
 
-      expect(getByText('documentation')).toHaveAttribute('href', 'https://ela.st/cspm-get-started');
+      expect(getByText('documentation')).toHaveAttribute(
+        'href',
+        'https://www.elastic.co/guide/en/security/current/cspm-get-started-gcp.html'
+      );
     });
 
     it(`renders Google Cloud Shell forms when Setup Access is set to Google Cloud Shell`, () => {

@@ -980,6 +980,8 @@
       "@kbn/handlebars/*": ["packages/kbn-handlebars/*"],
       "@kbn/hapi-mocks": ["packages/kbn-hapi-mocks"],
       "@kbn/hapi-mocks/*": ["packages/kbn-hapi-mocks/*"],
+      "@kbn/hardening-plugin": ["test/plugin_functional/plugins/hardening"],
+      "@kbn/hardening-plugin/*": ["test/plugin_functional/plugins/hardening/*"],
       "@kbn/health-gateway-server": ["packages/kbn-health-gateway-server"],
       "@kbn/health-gateway-server/*": ["packages/kbn-health-gateway-server/*"],
       "@kbn/hello-world-plugin": ["examples/hello_world"],
