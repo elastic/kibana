@@ -202,7 +202,7 @@ export const SettingsEditor = (props: Props) => {
         <p>
           <FormattedMessage
             id="console.settingsPage.pageDescription"
-            defaultMessage="Customize the console to make it work better for you."
+            defaultMessage="Customize Console to suit your workflow."
           />
         </p>
       </EuiText>
