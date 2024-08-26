@@ -32,15 +32,17 @@ export function Overview(props) {
 
         {!isFromStandaloneCluster ? (
           <Fragment>
-            <ElasticsearchPanel
-              {...props.cluster.elasticsearch}
-              version={props.cluster.version}
-              ml={props.cluster.ml}
-              license={props.cluster.license}
-              setupMode={props.setupMode}
-              showLicenseExpiration={props.showLicenseExpiration}
-              alerts={props.alerts}
-            />
+            {props.cluster.elasticsearch.cluster_stats.nodes.count.total > 0 ? (
+              <ElasticsearchPanel
+                {...props.cluster.elasticsearch}
+                version={props.cluster.version}
+                ml={props.cluster.ml}
+                license={props.cluster.license}
+                setupMode={props.setupMode}
+                showLicenseExpiration={props.showLicenseExpiration}
+                alerts={props.alerts}
+              />
+            ) : null}
             <KibanaPanel
               {...props.cluster.kibana}
               setupMode={props.setupMode}
