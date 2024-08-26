@@ -390,7 +390,7 @@ async function searchAvailableTasks({
     searches.push({
       query,
       sort,
-      size: capacity,
+      size: capacity * SIZE_MULTIPLIER_FOR_TASK_FETCH,
       seq_no_primary_term: true,
     });
   }
