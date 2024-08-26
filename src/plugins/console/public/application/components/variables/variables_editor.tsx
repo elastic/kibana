@@ -233,8 +233,12 @@ export const VariablesEditor = (props: Props) => {
           })}
           onCancel={() => setDeleteModalForVariable(null)}
           onConfirm={() => deleteVariable(deleteModalForVariable)}
-          cancelButtonText="Cancel"
-          confirmButtonText="Delete variable"
+          cancelButtonText={i18n.translate('console.variablesPage.deleteModal.cancelButtonText', {
+            defaultMessage: 'Cancel',
+          })}
+          confirmButtonText={i18n.translate('console.variablesPage.deleteModal.confirmButtonText', {
+            defaultMessage: 'Delete variable',
+          })}
           buttonColor="danger"
         >
           <p>
