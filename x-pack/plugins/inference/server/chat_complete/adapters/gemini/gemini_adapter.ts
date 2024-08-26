@@ -10,7 +10,7 @@ import { from, map, switchMap } from 'rxjs';
 import { Readable } from 'stream';
 import type { InferenceConnectorAdapter } from '../../types';
 import { Message, MessageRole } from '../../../../common/chat_complete';
-import type { ToolOptions, ToolChoice } from '../../../../common/chat_complete/tools';
+import { ToolChoiceType, ToolOptions } from '../../../../common/chat_complete/tools';
 import type { ToolSchema, ToolSchemaType } from '../../../../common/chat_complete/tool_schema';
 import { eventSourceStreamIntoObservable } from '../../../util/event_source_stream_into_observable';
 import { processVertexStream } from './process_vertex_stream';
@@ -30,14 +30,20 @@ interface GeminiMessage {
   parts?: Gemini.Part[];
 }
 
+interface GeminiToolConfig {
+  mode: 'AUTO' | 'ANY' | 'NONE';
+  allowedFunctionNames?: string[];
+}
+
 export const geminiAdapter: InferenceConnectorAdapter = {
   chatComplete: ({ executor, system, messages, toolChoice, tools }) => {
     return from(
       executor.invoke({
         subAction: 'invokeStream',
         subActionParams: {
-          messages: messagesToGemini({ system, messages, toolChoice }),
+          messages: messagesToGemini({ system, messages }),
           tools: toolsToGemini(tools),
+          toolConfig: toolChoiceToConfig(toolChoice),
           temperature: 0,
           stopSequences: ['\n\nHuman:'],
         },
@@ -55,25 +61,49 @@ export const geminiAdapter: InferenceConnectorAdapter = {
   },
 };
 
+function toolChoiceToConfig(toolChoice: ToolOptions['toolChoice']): GeminiToolConfig | undefined {
+  if (toolChoice === ToolChoiceType.required) {
+    return {
+      mode: 'ANY',
+    };
+  } else if (toolChoice === ToolChoiceType.none) {
+    return {
+      mode: 'NONE',
+    };
+  } else if (toolChoice === ToolChoiceType.auto) {
+    return {
+      mode: 'AUTO',
+    };
+  } else if (toolChoice) {
+    return {
+      mode: 'ANY',
+      allowedFunctionNames: [toolChoice.function],
+    };
+  }
+  return undefined;
+}
+
 function toolsToGemini(tools: ToolOptions['tools']): Gemini.Tool[] {
-  return [
-    {
-      functionDeclarations: Object.entries(tools ?? {}).map(
-        ([toolName, { description, schema }]) => {
-          return {
-            name: toolName,
-            description,
-            parameters: schema
-              ? toolSchemaToGemini({ schema })
-              : {
-                  type: Gemini.FunctionDeclarationSchemaType.OBJECT,
-                  properties: {},
-                },
-          };
-        }
-      ),
-    },
-  ];
+  return tools
+    ? [
+        {
+          functionDeclarations: Object.entries(tools ?? {}).map(
+            ([toolName, { description, schema }]) => {
+              return {
+                name: toolName,
+                description,
+                parameters: schema
+                  ? toolSchemaToGemini({ schema })
+                  : {
+                      type: Gemini.FunctionDeclarationSchemaType.OBJECT,
+                      properties: {},
+                    },
+              };
+            }
+          ),
+        },
+      ]
+    : [];
 }
 
 function toolSchemaToGemini({ schema }: { schema: ToolSchema }): Gemini.FunctionDeclarationSchema {
@@ -139,11 +169,9 @@ function toolSchemaToGemini({ schema }: { schema: ToolSchema }): Gemini.Function
 function messagesToGemini({
   messages,
   system,
-  toolChoice,
 }: {
   messages: Message[];
   system?: string;
-  toolChoice?: ToolChoice;
 }): GeminiMessage[] {
   // systemInstruction is not supported on all gemini versions
   // so for now we just always use the old trick of user message + assistant acknowledge.
@@ -155,21 +183,7 @@ function messagesToGemini({
       ]
     : undefined;
 
-  return [
-    ...(systemMessages ? [...systemMessages] : []),
-    ...messages.map(messageToGeminiMapper()),
-    // Same as system instruction, forceful tool selection is only available on the latest gemini version
-    // so for now we always mimic the behavior with a user message.
-    ...(toolChoice
-      ? [
-          {
-            role: 'user' as const,
-            content: `Important: You MUST call the '${toolChoice}' tool to answer the question from the previous message.
-            You should NOT respond with text, you are ONLY allowed to call the '${toolChoice}' tool`,
-          },
-        ]
-      : []),
-  ];
+  return [...(systemMessages ? [...systemMessages] : []), ...messages.map(messageToGeminiMapper())];
 }
 
 function messageToGeminiMapper() {

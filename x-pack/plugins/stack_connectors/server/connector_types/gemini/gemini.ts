@@ -61,6 +61,12 @@ interface Payload {
     temperature: number;
     maxOutputTokens: number;
   };
+  tool_config?: {
+    function_calling_config: {
+      mode: 'AUTO' | 'ANY' | 'NONE';
+      allowed_function_names?: string[];
+    };
+  };
   safety_settings: Array<{ category: string; threshold: string }>;
 }
 
@@ -284,7 +290,7 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
     timeout,
   }: InvokeAIActionParams): Promise<InvokeAIActionResponse> {
     const res = await this.runApi({
-      body: JSON.stringify(formatGeminiPayload(messages, temperature)),
+      body: JSON.stringify(formatGeminiPayload({ messages, temperature })),
       model,
       signal,
       timeout,
@@ -302,7 +308,7 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
     tools,
   }: InvokeAIRawActionParams): Promise<InvokeAIRawActionResponse> {
     const res = await this.runApi({
-      body: JSON.stringify({ ...formatGeminiPayload(messages, temperature), tools }),
+      body: JSON.stringify({ ...formatGeminiPayload({ messages, temperature }), tools }),
       model,
       signal,
       timeout,
@@ -328,9 +334,13 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
     signal,
     timeout,
     tools,
+    toolConfig,
   }: InvokeAIActionParams): Promise<IncomingMessage> {
     return (await this.streamAPI({
-      body: JSON.stringify({ ...formatGeminiPayload(messages, temperature), tools }),
+      body: JSON.stringify({
+        ...formatGeminiPayload({ messages, temperature, toolConfig }),
+        tools,
+      }),
       model,
       stopSequences,
       signal,
@@ -340,16 +350,31 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
 }
 
 /** Format the json body to meet Gemini payload requirements */
-const formatGeminiPayload = (
-  data: Array<{ role: string; content: string; parts: MessagePart[] }>,
-  temperature: number
-): Payload => {
+const formatGeminiPayload = ({
+  messages,
+  temperature,
+  toolConfig,
+}: {
+  messages: Array<{ role: string; content: string; parts: MessagePart[] }>;
+  toolConfig?: InvokeAIActionParams['toolConfig'];
+  temperature: number;
+}): Payload => {
   const payload: Payload = {
     contents: [],
     generation_config: {
       temperature,
       maxOutputTokens: DEFAULT_TOKEN_LIMIT,
     },
+    ...(toolConfig
+      ? {
+          tool_config: {
+            function_calling_config: {
+              mode: toolConfig.mode,
+              allowed_function_names: toolConfig.allowedFunctionNames,
+            },
+          },
+        }
+      : {}),
     safety_settings: [
       {
         category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
@@ -360,7 +385,7 @@ const formatGeminiPayload = (
   };
   let previousRole: string | null = null;
 
-  for (const row of data) {
+  for (const row of messages) {
     const correctRole = row.role === 'assistant' ? 'model' : 'user';
     // if data is already preformatted by ActionsClientGeminiChatModel
     if (row.parts) {
