@@ -23,7 +23,8 @@ import { visit, visitGetStartedPage } from '../../tasks/navigation';
 describe(
   'AI Assistant Messages',
   {
-    tags: ['@ess', '@serverless'],
+    // TODO - Fix this test to work in serverless - https://github.com/elastic/kibana/pull/190152
+    tags: ['@ess', '@serverless', '@skipInServerless'],
     env: {
       ftrConfig: {
         productTypes: [
