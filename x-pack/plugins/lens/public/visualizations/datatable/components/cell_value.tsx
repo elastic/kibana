@@ -19,13 +19,13 @@ import { CellColorFn } from '../../../shared_components/coloring/get_cell_color_
 import { isLensRange } from '../../../utils';
 
 const getParsedValue = (v: unknown) => {
-  return typeof v === 'number'
-    ? v
-    : isLensRange(v)
-    ? v.toString()
-    : v === null || v === undefined
-    ? v
-    : String(v);
+if(v == null || typeof v === 'number'){
+  return v;
+}
+if(isLensRange(v)){
+  return v.toString();
+}
+return String(v);
 };
 
 export const createGridCell = (
