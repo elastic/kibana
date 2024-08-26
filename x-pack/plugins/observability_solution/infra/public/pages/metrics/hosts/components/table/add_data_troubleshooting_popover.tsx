@@ -28,6 +28,25 @@ import { useBoolean } from '@kbn/react-hooks';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { APM_HOST_TROUBLESHOOTING_LINK } from '../../../../../components/asset_details/constants';
 
+const popoverContent = {
+  title: i18n.translate('xpack.infra.addDataPopover.wantToSeeMorePopoverTitleLabel', {
+    defaultMessage: 'Want to see more?',
+  }),
+  content: i18n.translate('xpack.infra.addDataPopover.understandHostPerformanceByTextLabel', {
+    defaultMessage: 'Understand host performance by collecting more metrics.',
+  }),
+  button: i18n.translate('xpack.infra.addDataPopover.understandHostPerformanceByTextLabel', {
+    defaultMessage: 'Add data',
+  }),
+  link: i18n.translate('xpack.infra.addDataPopover.troubleshootingLinkLabel', {
+    defaultMessage: 'Troubleshooting',
+  }),
+};
+
+const badgeContent = i18n.translate('xpack.infra.addDataPopover.naBadgeLabel', {
+  defaultMessage: 'N/A',
+});
+
 export const AddDataTroubleshootingPopover = () => {
   const [isPopoverOpen, { off: closePopover, toggle: togglePopover }] = useBoolean(false);
 
@@ -37,21 +56,6 @@ export const AddDataTroubleshootingPopover = () => {
   const addDataLinkHref = share.url.locators
     .get<ObservabilityOnboardingLocatorParams>(OBSERVABILITY_ONBOARDING_LOCATOR)
     ?.getRedirectUrl({ category: 'logs' });
-
-  const popoverContent = {
-    title: i18n.translate('xpack.infra.addDataPopover.wantToSeeMorePopoverTitleLabel', {
-      defaultMessage: 'Want to see more?',
-    }),
-    content: i18n.translate('xpack.infra.addDataPopover.understandHostPerformanceByTextLabel', {
-      defaultMessage: 'Understand host performance by collecting more metrics.',
-    }),
-    button: i18n.translate('xpack.infra.addDataPopover.understandHostPerformanceByTextLabel', {
-      defaultMessage: 'Add data',
-    }),
-    link: i18n.translate('xpack.infra.addDataPopover.troubleshootingLinkLabel', {
-      defaultMessage: 'Troubleshooting',
-    }),
-  };
 
   const onButtonClick = () => togglePopover();
 
@@ -67,7 +71,7 @@ export const AddDataTroubleshootingPopover = () => {
           iconOnClick={onButtonClick}
           iconOnClickAriaLabel={popoverContent.title}
         >
-          {i18n.translate('xpack.infra.addDataPopover.naBadgeLabel', { defaultMessage: 'N/A' })}
+          {badgeContent}
         </EuiBadge>
       }
       isOpen={isPopoverOpen}
