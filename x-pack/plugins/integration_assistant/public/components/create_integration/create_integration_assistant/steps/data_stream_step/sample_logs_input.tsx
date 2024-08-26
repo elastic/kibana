@@ -151,12 +151,12 @@ export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSe
     (files: FileList | null) => {
       const logsSampleFile = files?.[0];
 
-        setSampleFileError(undefined);
-        setIntegrationSettings({
-          ...integrationSettings,
-          logsSampleParsed: undefined,
-          samplesFormat: undefined,
-        });
+      setSampleFileError(undefined);
+      setIntegrationSettings({
+        ...integrationSettings,
+        logsSampleParsed: undefined,
+        samplesFormat: undefined,
+      });
 
       if (logsSampleFile == null) {
         return;
@@ -171,6 +171,13 @@ export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSe
 
       reader.onload = function (e) {
         const fileContent = e.target?.result as string | undefined; // We can safely cast to string since we call `readAsText` to load the file.
+
+        if (fileContent === '' && e.loaded > 100000) {
+          // V8-based browsers can't handle large files and return an empty string instead of an error: https://stackoverflow.com/a/61316641
+          setSampleFileError(i18n.LOGS_SAMPLE_ERROR.TOO_LARGE_TO_PARSE);
+          return;
+        }
+
         const { error, isTruncated, logsSampleParsed, samplesFormat } =
           parseLogsContent(fileContent);
 
