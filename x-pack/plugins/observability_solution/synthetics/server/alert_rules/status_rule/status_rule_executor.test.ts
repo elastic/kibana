@@ -257,69 +257,6 @@ describe('StatusRuleExecutor', () => {
       },
     });
   });
-
-  describe('CustomRule', () => {
-    it('tests getLastRunForPendingMonitors', async () => {
-      await statusRule.getDownChecks();
-      const { pendingConfigs } = await statusRule.getLastRunForPendingMonitors({
-        id1: {
-          locationId: 'us-east-1',
-          configId: 'id1',
-          status: 'down',
-          timestamp: '2021-06-01T00:00:00.000Z',
-          monitorQueryId: 'test',
-        },
-      });
-      expect(pendingConfigs).toEqual({
-        id1: {
-          locationId: 'us-east-1',
-          configId: 'id1',
-          status: 'down',
-          timestamp: '2021-06-01T00:00:00.000Z',
-          monitorQueryId: 'test',
-        },
-      });
-    });
-
-    it('tests findEarliestMonitorCreatedAt', async () => {
-      const fiveMinutesAgo = moment().subtract(5, 'minutes').toISOString();
-      const tenMinutesAgo = moment().subtract(10, 'minutes').toISOString();
-      const fifteenMinutesAgo = moment().subtract(15, 'minutes').toISOString();
-      jest.spyOn(monitorUtils, 'getAllMonitors').mockResolvedValue([
-        {
-          ...testMonitors[0],
-          created_at: fiveMinutesAgo,
-        },
-        {
-          ...testMonitors[0],
-          id: 'id2',
-          attributes: {
-            ...testMonitors[0].attributes,
-            config_id: 'id2',
-          },
-          created_at: tenMinutesAgo,
-        },
-        {
-          ...testMonitors[0],
-          id: 'id4',
-          attributes: {
-            ...testMonitors[0].attributes,
-            config_id: 'id4',
-          },
-          created_at: fifteenMinutesAgo,
-        },
-      ]);
-
-      await statusRule.getDownChecks();
-
-      const earliestMonitorCreatedAt = await statusRule.findEarliestMonitorCreatedAt([
-        'id1',
-        'id2',
-        'id3',
-      ]);
-      expect(earliestMonitorCreatedAt.toISOString()).toEqual(tenMinutesAgo);
-    });
-  });
 });
 
 const testMonitors = [

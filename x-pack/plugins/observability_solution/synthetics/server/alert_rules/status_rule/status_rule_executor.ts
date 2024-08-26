@@ -310,7 +310,6 @@ export class StatusRuleExecutor {
         defaultMessage: `Alert when monitor is down from {noOfLocations, number} {noOfLocations, plural, one {location} other {locations}}.`,
         values: {
           noOfLocations,
-          locationNames: locNames,
         },
       }
     );
@@ -319,7 +318,6 @@ export class StatusRuleExecutor {
       {
         defaultMessage: `Monitor "{name}" is {status} from {noOfLocs, number} {noOfLocs, plural, one {location} other {locations}} ({locationNames}). {thresholdReason}`,
         values: {
-          noOfLocations,
           locationNames: locNames,
           noOfLocs: statusConfigs.length,
           name: baseSummary.monitorName,
