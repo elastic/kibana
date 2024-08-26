@@ -170,6 +170,7 @@ export const buildFieldsDefinitions = (fields: string[]): SuggestionRawDefinitio
       defaultMessage: `Field specified by the input table`,
     }),
     sortText: 'D',
+    command: TRIGGER_SUGGESTION_COMMAND,
   }));
 };
 export const buildVariablesDefinitions = (variables: string[]): SuggestionRawDefinition[] =>

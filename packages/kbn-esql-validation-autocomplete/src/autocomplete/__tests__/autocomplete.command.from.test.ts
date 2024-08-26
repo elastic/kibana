@@ -14,9 +14,6 @@ const visibleIndices = indexes
   .map(({ name, suggestedAs }) => suggestedAs || name)
   .sort();
 
-const addTrailingSpace = (strings: string[], predicate: (s: string) => boolean = (_s) => true) =>
-  strings.map((string) => (predicate(string) ? `${string} ` : string));
-
 const metadataFields = [...METADATA_FIELDS].sort();
 
 describe('autocomplete.suggest', () => {
@@ -71,7 +68,7 @@ describe('autocomplete.suggest', () => {
     });
 
     describe('... METADATA <fields>', () => {
-      const metadataFieldsSandIndex = metadataFields.filter((field) => field !== '_index');
+      const metadataFieldsAndIndex = metadataFields.filter((field) => field !== '_index');
 
       test('on <kbd>SPACE</kbd> without comma ",", suggests adding metadata', async () => {
         const { assertSuggestions } = await setup();
@@ -99,8 +96,8 @@ describe('autocomplete.suggest', () => {
       test('filters out already used metadata fields', async () => {
         const { assertSuggestions } = await setup();
 
-        await assertSuggestions('from a, b [metadata _index, /]', metadataFieldsSandIndex);
-        await assertSuggestions('from a, b metadata _index, /', metadataFieldsSandIndex);
+        await assertSuggestions('from a, b [metadata _index, /]', metadataFieldsAndIndex);
+        await assertSuggestions('from a, b metadata _index, /', metadataFieldsAndIndex);
       });
     });
   });

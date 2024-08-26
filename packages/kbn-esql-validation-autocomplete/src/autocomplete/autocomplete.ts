@@ -48,6 +48,7 @@ import {
   noCaseCompare,
   getColumnByName,
   sourceExists,
+  findFinalWord,
 } from '../shared/helpers';
 import { collectVariables, excludeVariablesFromCurrentCommand } from '../shared/variables';
 import type { ESQLPolicy, ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
@@ -675,8 +676,7 @@ async function getExpressionSuggestionsByType(
          * really be done using the AST node, but we'll have to refactor further upstream
          * to make that available. This is a quick fix to support the most common case.
          */
-        const words = innerText.split(/\s+/);
-        const lastWord = words[words.length - 1];
+        const lastWord = findFinalWord(innerText);
         if (lastWord !== '') {
           // ... | <COMMAND> <word><suggest>
 
@@ -1703,13 +1703,32 @@ async function getOptionArgsSuggestions(
   if (option.name === 'metadata') {
     const existingFields = new Set(option.args.filter(isColumnItem).map(({ name }) => name));
     const filteredMetaFields = METADATA_FIELDS.filter((name) => !existingFields.has(name));
-    if (isNewExpression) {
-      suggestions.push(...buildFieldsDefinitions(filteredMetaFields));
-    } else if (existingFields.size > 0) {
-      if (filteredMetaFields.length > 0) {
-        suggestions.push(commaCompleteItem);
+    const lastWord = findFinalWord(innerText);
+    if (lastWord) {
+      // METADATA something<suggest>
+      const isField = METADATA_FIELDS.includes(lastWord);
+      if (isField) {
+        // METADATA field<suggest>
+        suggestions.push({
+          ...pipeCompleteItem,
+          text: lastWord + ' | ',
+          filterText: lastWord,
+          command: TRIGGER_SUGGESTION_COMMAND,
+        });
+        if (filteredMetaFields.length > 1) {
+          suggestions.push({
+            ...commaCompleteItem,
+            text: lastWord + ', ',
+            filterText: lastWord,
+            command: TRIGGER_SUGGESTION_COMMAND,
+          });
+        }
+      } else {
+        suggestions.push(...buildFieldsDefinitions(filteredMetaFields));
       }
-      suggestions.push(pipeCompleteItem);
+    } else {
+      // METADATA <suggest>
+      suggestions.push(...buildFieldsDefinitions(filteredMetaFields));
     }
   }
 

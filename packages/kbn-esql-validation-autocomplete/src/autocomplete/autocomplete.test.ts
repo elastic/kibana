@@ -1346,6 +1346,7 @@ describe('autocomplete', () => {
     });
 
     // FROM source METADATA
+
     testSuggestions('FROM index1 M/', [
       ',',
       attachAsSnippet(attachTriggerCommand('METADATA $0')),
@@ -1442,87 +1443,122 @@ describe('autocomplete', () => {
         ['keyword']
       ).map((s) => (s.text.toLowerCase().includes('null') ? s : attachTriggerCommand(s)))
     );
+
     describe('field lists', () => {
-      // KEEP field
-      testSuggestions('FROM a | KEEP /', getFieldNamesByType('any').map(attachTriggerCommand));
-      testSuggestions(
-        'FROM a | KEEP d/',
-        getFieldNamesByType('any')
-          .map<PartialSuggestionWithText>((text) => ({
-            text,
-            rangeToReplace: { start: 15, end: 16 },
-          }))
-          .map(attachTriggerCommand)
-      );
-      testSuggestions(
-        'FROM a | KEEP doubleFiel/',
-        getFieldNamesByType('any').map(attachTriggerCommand)
-      );
-      testSuggestions(
-        'FROM a | KEEP doubleField/',
-        ['doubleField, ', 'doubleField | ']
-          .map((text) => ({
-            text,
-            filterText: 'doubleField',
-            rangeToReplace: { start: 15, end: 26 },
-          }))
-          .map(attachTriggerCommand)
-      );
-      testSuggestions('FROM a | KEEP doubleField /', ['| ', ',']);
-
-      // Let's get funky with the field names
-      testSuggestions(
-        'FROM a | KEEP @timestamp/',
-        ['@timestamp, ', '@timestamp | ']
-          .map((text) => ({
-            text,
-            filterText: '@timestamp',
-            rangeToReplace: { start: 15, end: 25 },
-          }))
-          .map(attachTriggerCommand),
-        undefined,
-        [[{ name: '@timestamp', type: 'date' }]]
-      );
-      testSuggestions(
-        'FROM a | KEEP foo.bar/',
-        ['foo.bar, ', 'foo.bar | ']
-          .map((text) => ({
-            text,
-            filterText: 'foo.bar',
-            rangeToReplace: { start: 15, end: 22 },
-          }))
-          .map(attachTriggerCommand),
-        undefined,
-        [[{ name: 'foo.bar', type: 'double' }]]
-      );
-
-      describe('escaped field namse', () => {
-        // This isn't actually the behavior we want, but this test is here
-        // to make sure no weird suggestions start cropping up in this case.
-        testSuggestions('FROM a | KEEP `foo.bar`/', ['foo.bar'], undefined, [
-          [{ name: 'foo.bar', type: 'double' }],
+      describe('METADATA <field>', () => {
+        // METADATA field
+        testSuggestions('FROM a METADATA /', METADATA_FIELDS.map(attachTriggerCommand));
+        testSuggestions('FROM a METADATA _i/', METADATA_FIELDS.map(attachTriggerCommand));
+        testSuggestions(
+          'FROM a METADATA _id/',
+          [
+            { filterText: '_id', text: '_id, ' },
+            { filterText: '_id', text: '_id | ' },
+          ].map(attachTriggerCommand)
+        );
+        testSuggestions(
+          'FROM a METADATA _id, _ignored/',
+          [
+            { filterText: '_ignored', text: '_ignored, ' },
+            { filterText: '_ignored', text: '_ignored | ' },
+          ].map(attachTriggerCommand)
+        );
+        // comma if there's even one more field
+        testSuggestions('FROM a METADATA _id, _ignored, _index, _source/', [
+          { filterText: '_source', text: '_source | ', command: TRIGGER_SUGGESTION_COMMAND },
+          { filterText: '_source', text: '_source, ', command: TRIGGER_SUGGESTION_COMMAND },
         ]);
-        // @todo re-enable these tests when we can use AST to support this case
-        testSuggestions.skip('FROM a | KEEP `foo.bar`/', ['foo.bar, ', 'foo.bar | '], undefined, [
-          [{ name: 'foo.bar', type: 'double' }],
-        ]);
-        testSuggestions.skip('FROM a | KEEP `foo`.`bar`/', ['foo.bar, ', 'foo.bar | '], undefined, [
-          [{ name: 'foo.bar', type: 'double' }],
-        ]);
-        testSuggestions.skip('FROM a | KEEP `any#Char$Field`/', [
-          '`any#Char$Field`, ',
-          '`any#Char$Field` | ',
+        // no comma if there are no more fields
+        testSuggestions('FROM a METADATA _id, _ignored, _index, _source, _version/', [
+          { filterText: '_version', text: '_version | ', command: TRIGGER_SUGGESTION_COMMAND },
         ]);
       });
 
-      // Subsequent fields
-      testSuggestions(
-        'FROM a | KEEP doubleField, dateFiel/',
-        getFieldNamesByType('any')
-          .filter((s) => s !== 'doubleField')
-          .map(attachTriggerCommand)
-      );
-      testSuggestions('FROM a | KEEP doubleField, dateField/', ['dateField, ', 'dateField | ']);
+      describe('KEEP <field>', () => {
+        // KEEP field
+        testSuggestions('FROM a | KEEP /', getFieldNamesByType('any').map(attachTriggerCommand));
+        testSuggestions(
+          'FROM a | KEEP d/',
+          getFieldNamesByType('any')
+            .map<PartialSuggestionWithText>((text) => ({
+              text,
+              rangeToReplace: { start: 15, end: 16 },
+            }))
+            .map(attachTriggerCommand)
+        );
+        testSuggestions(
+          'FROM a | KEEP doubleFiel/',
+          getFieldNamesByType('any').map(attachTriggerCommand)
+        );
+        testSuggestions(
+          'FROM a | KEEP doubleField/',
+          ['doubleField, ', 'doubleField | ']
+            .map((text) => ({
+              text,
+              filterText: 'doubleField',
+              rangeToReplace: { start: 15, end: 26 },
+            }))
+            .map(attachTriggerCommand)
+        );
+        testSuggestions('FROM a | KEEP doubleField /', ['| ', ',']);
+
+        // Let's get funky with the field names
+        testSuggestions(
+          'FROM a | KEEP @timestamp/',
+          ['@timestamp, ', '@timestamp | ']
+            .map((text) => ({
+              text,
+              filterText: '@timestamp',
+              rangeToReplace: { start: 15, end: 25 },
+            }))
+            .map(attachTriggerCommand),
+          undefined,
+          [[{ name: '@timestamp', type: 'date' }]]
+        );
+        testSuggestions(
+          'FROM a | KEEP foo.bar/',
+          ['foo.bar, ', 'foo.bar | ']
+            .map((text) => ({
+              text,
+              filterText: 'foo.bar',
+              rangeToReplace: { start: 15, end: 22 },
+            }))
+            .map(attachTriggerCommand),
+          undefined,
+          [[{ name: 'foo.bar', type: 'double' }]]
+        );
+
+        describe('escaped field names', () => {
+          // This isn't actually the behavior we want, but this test is here
+          // to make sure no weird suggestions start cropping up in this case.
+          testSuggestions('FROM a | KEEP `foo.bar`/', ['foo.bar'], undefined, [
+            [{ name: 'foo.bar', type: 'double' }],
+          ]);
+          // @todo re-enable these tests when we can use AST to support this case
+          testSuggestions.skip('FROM a | KEEP `foo.bar`/', ['foo.bar, ', 'foo.bar | '], undefined, [
+            [{ name: 'foo.bar', type: 'double' }],
+          ]);
+          testSuggestions.skip(
+            'FROM a | KEEP `foo`.`bar`/',
+            ['foo.bar, ', 'foo.bar | '],
+            undefined,
+            [[{ name: 'foo.bar', type: 'double' }]]
+          );
+          testSuggestions.skip('FROM a | KEEP `any#Char$Field`/', [
+            '`any#Char$Field`, ',
+            '`any#Char$Field` | ',
+          ]);
+        });
+
+        // Subsequent fields
+        testSuggestions(
+          'FROM a | KEEP doubleField, dateFiel/',
+          getFieldNamesByType('any')
+            .filter((s) => s !== 'doubleField')
+            .map(attachTriggerCommand)
+        );
+        testSuggestions('FROM a | KEEP doubleField, dateField/', ['dateField, ', 'dateField | ']);
+      });
     });
   });
 
