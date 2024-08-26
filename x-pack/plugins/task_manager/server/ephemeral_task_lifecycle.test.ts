@@ -45,6 +45,11 @@ describe('EphemeralTaskLifecycle', () => {
       definitions: new TaskTypeDictionary(taskManagerLogger),
       executionContext,
       config: {
+        discovery: {
+          active_nodes_lookback: '30s',
+          interval: 10000,
+        },
+        kibanas_per_partition: 2,
         max_attempts: 9,
         poll_interval: 6000000,
         version_conflict_threshold: 80,

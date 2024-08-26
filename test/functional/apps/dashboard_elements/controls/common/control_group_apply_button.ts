@@ -215,7 +215,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.waitForRenderComplete();
 
         await dashboard.expectUnsavedChangesBadge();
-        pieChart.expectEmptyPieChart();
+        await pieChart.expectEmptyPieChart();
       });
 
       it('hitting dashboard resets selections + unapplies timeslice', async () => {
