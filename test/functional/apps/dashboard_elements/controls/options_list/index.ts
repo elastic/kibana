@@ -47,7 +47,7 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
     await kibanaServer.savedObjects.cleanStandardList();
   };
 
-  describe('Options list control', async () => {
+  describe('Options list control', () => {
     before(setup);
     after(teardown);
 

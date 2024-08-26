@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import type {
-  ActionsClientChatOpenAI,
-  ActionsClientSimpleChatModel,
-} from '@kbn/langchain/server/language_models';
 import { END, START, StateGraph, Send } from '@langchain/langgraph';
 import type { EcsMappingState } from '../../types';
+import type { EcsGraphParams, EcsBaseNodeParams } from './types';
 import { modelInput, modelOutput, modelSubOutput } from './model';
 import { handleDuplicates } from './duplicates';
 import { handleInvalidEcs } from './invalid';
@@ -19,7 +16,7 @@ import { handleMissingKeys } from './missing';
 import { handleValidateMappings } from './validate';
 import { graphState } from './state';
 
-const handleCreateMappingChunks = async (state: EcsMappingState) => {
+const handleCreateMappingChunks = async ({ state }: EcsBaseNodeParams) => {
   // Cherrypick a shallow copy of state to pass to subgraph
   const stateParams = {
     exAnswer: state.exAnswer,
@@ -36,7 +33,7 @@ const handleCreateMappingChunks = async (state: EcsMappingState) => {
   return 'modelOutput';
 };
 
-function chainRouter(state: EcsMappingState): string {
+function chainRouter({ state }: EcsBaseNodeParams): string {
   if (Object.keys(state.duplicateFields).length > 0) {
     return 'duplicateFields';
   }
@@ -53,22 +50,22 @@ function chainRouter(state: EcsMappingState): string {
 }
 
 // This is added as a separate graph to be able to run these steps concurrently from handleCreateMappingChunks
-async function getEcsSubGraph(model: ActionsClientChatOpenAI | ActionsClientSimpleChatModel) {
+async function getEcsSubGraph({ model }: EcsGraphParams) {
   const workflow = new StateGraph({
     channels: graphState,
   })
-    .addNode('modelSubOutput', modelSubOutput)
-    .addNode('handleValidation', handleValidateMappings)
-    .addNode('handleEcsMapping', (state: EcsMappingState) => handleEcsMapping(state, model))
-    .addNode('handleDuplicates', (state: EcsMappingState) => handleDuplicates(state, model))
-    .addNode('handleMissingKeys', (state: EcsMappingState) => handleMissingKeys(state, model))
-    .addNode('handleInvalidEcs', (state: EcsMappingState) => handleInvalidEcs(state, model))
+    .addNode('modelSubOutput', (state: EcsMappingState) => modelSubOutput({ state }))
+    .addNode('handleValidation', (state: EcsMappingState) => handleValidateMappings({ state }))
+    .addNode('handleEcsMapping', (state: EcsMappingState) => handleEcsMapping({ state, model }))
+    .addNode('handleDuplicates', (state: EcsMappingState) => handleDuplicates({ state, model }))
+    .addNode('handleMissingKeys', (state: EcsMappingState) => handleMissingKeys({ state, model }))
+    .addNode('handleInvalidEcs', (state: EcsMappingState) => handleInvalidEcs({ state, model }))
     .addEdge(START, 'handleEcsMapping')
     .addEdge('handleEcsMapping', 'handleValidation')
     .addEdge('handleDuplicates', 'handleValidation')
     .addEdge('handleMissingKeys', 'handleValidation')
     .addEdge('handleInvalidEcs', 'handleValidation')
-    .addConditionalEdges('handleValidation', chainRouter, {
+    .addConditionalEdges('handleValidation', (state: EcsMappingState) => chainRouter({ state }), {
       duplicateFields: 'handleDuplicates',
       missingKeys: 'handleMissingKeys',
       invalidEcsFields: 'handleInvalidEcs',
@@ -81,17 +78,19 @@ async function getEcsSubGraph(model: ActionsClientChatOpenAI | ActionsClientSimp
   return compiledEcsSubGraph;
 }
 
-export async function getEcsGraph(model: ActionsClientChatOpenAI | ActionsClientSimpleChatModel) {
-  const subGraph = await getEcsSubGraph(model);
+export async function getEcsGraph({ model }: EcsGraphParams) {
+  const subGraph = await getEcsSubGraph({ model });
   const workflow = new StateGraph({
     channels: graphState,
   })
-    .addNode('modelInput', modelInput)
-    .addNode('modelOutput', modelOutput)
+    .addNode('modelInput', (state: EcsMappingState) => modelInput({ state }))
+    .addNode('modelOutput', (state: EcsMappingState) => modelOutput({ state }))
     .addNode('subGraph', subGraph)
     .addEdge(START, 'modelInput')
     .addEdge('subGraph', 'modelOutput')
-    .addConditionalEdges('modelInput', handleCreateMappingChunks)
+    .addConditionalEdges('modelInput', (state: EcsMappingState) =>
+      handleCreateMappingChunks({ state })
+    )
     .addEdge('modelOutput', END);
 
   const compiledEcsGraph = workflow.compile();
