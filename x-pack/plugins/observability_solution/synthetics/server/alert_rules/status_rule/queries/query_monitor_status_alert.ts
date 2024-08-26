@@ -43,9 +43,6 @@ export interface AlertStatusMetaDataCodec {
 export type StatusConfigs = Record<string, AlertStatusMetaDataCodec>;
 
 export interface AlertStatusResponse {
-  up: number;
-  down: number;
-  pending: number;
   upConfigs: StatusConfigs;
   downConfigs: StatusConfigs;
   pendingConfigs: Record<string, OverviewPendingStatusMetaData>;
@@ -103,6 +100,15 @@ export async function queryMonitorStatusAlert(
                     size: monitorLocationIds.length || 100,
                   },
                   aggs: {
+                    downChecks: {
+                      filter: {
+                        range: {
+                          'summary.down': {
+                            gte: '1',
+                          },
+                        },
+                      },
+                    },
                     totalChecks: {
                       top_hits: {
                         size: numberOfChecks,
@@ -137,9 +143,11 @@ export async function queryMonitorStatusAlert(
       const { body: result } = await esClient.search<OverviewPing, typeof params>(params);
 
       result.aggregations?.id.buckets.forEach(({ location, key: queryId }) => {
-        const locationSummaries = location.buckets.map(({ key: locationId, totalChecks }) => {
-          return { locationId, totalChecks };
-        });
+        const locationSummaries = location.buckets.map(
+          ({ key: locationId, totalChecks, downChecks }) => {
+            return { locationId, totalChecks, downChecks };
+          }
+        );
 
         // discard any locations that are not in the monitorLocationsMap for the given monitor as well as those which are
         // in monitorLocationsMap but not in listOfLocations
@@ -151,9 +159,9 @@ export async function queryMonitorStatusAlert(
           );
 
           if (locationSummary) {
-            const { totalChecks } = locationSummary;
+            const { totalChecks, downChecks } = locationSummary;
             const firstPing = totalChecks.hits.hits[0]._source;
-            const downCount = firstPing.summary?.down ?? 0;
+            const downCount = downChecks.doc_count;
             const upCount = firstPing.summary?.up ?? 0;
             const configId = firstPing.config_id;
             const monitorQueryId = firstPing.monitor.id;
@@ -215,9 +223,6 @@ export async function queryMonitorStatusAlert(
   }
 
   return {
-    up,
-    down,
-    pending: Object.values(pendingConfigs).length,
     upConfigs,
     downConfigs,
     pendingConfigs,
