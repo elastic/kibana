@@ -398,34 +398,35 @@ export const SpaceAssignedRolesTable = ({
               </EuiPopover>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              {React.createElement(EuiButtonEmpty, {
-                size: 's',
-                ...(Boolean(selectedRoles.length)
-                  ? {
-                      iconType: 'crossInCircle',
-                      onClick: setSelectedRoles.bind(null, []),
-                      children: i18n.translate(
-                        'xpack.spaces.management.spaceDetails.rolesTable.clearRolesSelection',
-                        {
-                          defaultMessage: 'Clear selection',
-                        }
-                      ),
-                    }
-                  : {
-                      iconType: 'pagesSelect',
-                      onClick: setSelectedRoles.bind(null, selectableRoles),
-                      children: i18n.translate(
-                        'xpack.spaces.management.spaceDetails.rolesTable.selectAllRoles',
-                        {
-                          defaultMessage:
-                            'Select {count, plural, one {role} other {all {count} roles}}',
-                          values: {
-                            count: selectableRoles.length,
-                          },
-                        }
-                      ),
-                    }),
-              })}
+              {Boolean(selectableRoles.length) &&
+                React.createElement(EuiButtonEmpty, {
+                  size: 's',
+                  ...(Boolean(selectedRoles.length)
+                    ? {
+                        iconType: 'crossInCircle',
+                        onClick: setSelectedRoles.bind(null, []),
+                        children: i18n.translate(
+                          'xpack.spaces.management.spaceDetails.rolesTable.clearRolesSelection',
+                          {
+                            defaultMessage: 'Clear selection',
+                          }
+                        ),
+                      }
+                    : {
+                        iconType: 'pagesSelect',
+                        onClick: setSelectedRoles.bind(null, selectableRoles),
+                        children: i18n.translate(
+                          'xpack.spaces.management.spaceDetails.rolesTable.selectAllRoles',
+                          {
+                            defaultMessage:
+                              'Select {count, plural, one {role} other {all {count} roles}}',
+                            values: {
+                              count: selectableRoles.length,
+                            },
+                          }
+                        ),
+                      }),
+                })}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
