@@ -9,6 +9,7 @@
 var ritm = require('require-in-the-middle');
 var lodashPatch = require('./lodash_template');
 var patchChildProcess = require('./child_process');
+var hardenPrototypes = require('./prototype');
 
 // the performance cost of using require-in-the-middle is atm directly related to the number of
 // registered hooks (as require is patched once for EACH hook)
@@ -39,3 +40,9 @@ new ritm.Hook(
     return module;
   }
 );
+
+// Use of the `KBN_UNSAFE_DISABLE_PROTOTYPE_HARDENING` environment variable is discouraged, and should only be set to facilitate testing
+// specific scenarios. This should never be set in production.
+if (!process.env.KBN_UNSAFE_DISABLE_PROTOTYPE_HARDENING) {
+  hardenPrototypes();
+}
