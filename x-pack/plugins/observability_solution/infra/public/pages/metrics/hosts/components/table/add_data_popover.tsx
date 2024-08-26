@@ -53,22 +53,24 @@ export const AddDataPopover = () => {
   const onButtonClick = () => setIsPopoverOpen((prevIsPopoverOpen) => !prevIsPopoverOpen);
   const closePopover = () => setIsPopoverOpen(false);
 
-  const button = (
-    <EuiBadge
-      color="hollow"
-      iconType="iInCircle"
-      iconSide="left"
-      onClick={onButtonClick}
-      onClickAriaLabel={popoverContent.title}
-      iconOnClick={onButtonClick}
-      iconOnClickAriaLabel={popoverContent.title}
-    >
-      {i18n.translate('xpack.infra.addDataPopover.naBadgeLabel', { defaultMessage: 'N/A' })}
-    </EuiBadge>
-  );
-
   return (
-    <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={closePopover}>
+    <EuiPopover
+      button={
+        <EuiBadge
+          color="hollow"
+          iconType="iInCircle"
+          iconSide="left"
+          onClick={onButtonClick}
+          onClickAriaLabel={popoverContent.title}
+          iconOnClick={onButtonClick}
+          iconOnClickAriaLabel={popoverContent.title}
+        >
+          {i18n.translate('xpack.infra.addDataPopover.naBadgeLabel', { defaultMessage: 'N/A' })}
+        </EuiBadge>
+      }
+      isOpen={isPopoverOpen}
+      closePopover={closePopover}
+    >
       <EuiPopoverTitle>{popoverContent.title}</EuiPopoverTitle>
       <EuiText size="s" style={{ width: 300 }}>
         {popoverContent.content}
