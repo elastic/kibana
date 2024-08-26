@@ -40,7 +40,7 @@ import { ColumnHeader } from '../components/table/column_header';
 import { TABLE_COLUMN_LABEL, TABLE_CONTENT_LABEL } from '../translations';
 import { METRICS_TOOLTIP } from '../../../../common/visualizations';
 import { buildCombinedAssetFilter } from '../../../../utils/filters/build';
-import { AddDataPopover } from '../components/table/add_data_popover';
+import { AddDataTroubleshootingPopover } from '../components/table/add_data_troubleshooting_popover';
 
 /**
  * Columns and items types
@@ -74,7 +74,7 @@ const buildMetricCell = (
   hasSystemMetrics?: boolean
 ) => {
   if (!hasSystemMetrics && value === 0) {
-    return <AddDataPopover />;
+    return <AddDataTroubleshootingPopover />;
   }
 
   return formatMetric(formatType, value);

@@ -25,7 +25,7 @@ import React, { useState } from 'react';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { APM_HOST_TROUBLESHOOTING_LINK } from '../../../../../components/asset_details/constants';
 
-export const AddDataPopover = () => {
+export const AddDataTroubleshootingPopover = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const {
