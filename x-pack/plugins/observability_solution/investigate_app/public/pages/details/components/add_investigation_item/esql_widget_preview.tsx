@@ -13,12 +13,12 @@ import { Item } from '@kbn/investigation-shared';
 import type { Suggestion } from '@kbn/lens-plugin/public';
 import { useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
 import React, { useEffect, useMemo, useState } from 'react';
-import { useKibana } from '../../hooks/use_kibana';
-import { getEsFilterFromOverrides } from '../../utils/get_es_filter_from_overrides';
-import { getDateHistogramResults } from '../../widgets/esql_widget/get_date_histogram_results';
-import { EsqlWidget } from '../../widgets/esql_widget/register_esql_widget';
-import { ErrorMessage } from '../error_message';
-import { SuggestVisualizationList } from '../suggest_visualization_list';
+import { useKibana } from '../../../../hooks/use_kibana';
+import { getEsFilterFromOverrides } from '../../../../utils/get_es_filter_from_overrides';
+import { getDateHistogramResults } from '../../../../widgets/esql_widget/get_date_histogram_results';
+import { EsqlWidget } from '../../../../widgets/esql_widget/register_esql_widget';
+import { ErrorMessage } from '../../../../components/error_message';
+import { SuggestVisualizationList } from '../../../../components/suggest_visualization_list';
 
 function getItemFromSuggestion({
   query,

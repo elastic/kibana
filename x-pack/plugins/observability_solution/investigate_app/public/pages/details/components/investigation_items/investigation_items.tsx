@@ -7,15 +7,15 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { GetInvestigationResponse, Item } from '@kbn/investigation-shared';
-import { noop } from 'lodash';
+import { pick } from 'lodash';
 import React from 'react';
-import { AddObservationUI } from '../../../../components/add_observation_ui';
-import { InvestigateSearchBar } from '../../../../components/investigate_search_bar';
-import { InvestigateWidgetGrid } from '../../../../components/investigate_widget_grid';
 import { useAddInvestigationItem } from '../../../../hooks/use_add_investigation_item';
 import { useDeleteInvestigationItem } from '../../../../hooks/use_delete_investigation_item';
 import { useFetchInvestigationItems } from '../../../../hooks/use_fetch_investigation_items';
 import { useRenderItems } from '../../hooks/use_render_items';
+import { AddInvestigationItem } from '../add_investigation_item/add_investigation_item';
+import { InvestigationItemsList } from '../investigation_items_list/investigation_items_list';
+import { InvestigationSearchBar } from '../investigation_search_bar/investigation_search_bar';
 
 export interface Props {
   investigationId: string;
@@ -46,7 +46,7 @@ export function InvestigationItems({ investigationId, investigation }: Props) {
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexGroup direction="column" gutterSize="m">
-        <InvestigateSearchBar
+        <InvestigationSearchBar
           dateRangeFrom={
             investigation ? new Date(investigation.params.timeRange.from).toISOString() : undefined
           }
@@ -66,19 +66,20 @@ export function InvestigationItems({ investigationId, investigation }: Props) {
         />
 
         <EuiFlexItem grow={false}>
-          <InvestigateWidgetGrid
+          <InvestigationItemsList
+            isLoading={isAdding || isDeleting}
             items={renderableItems}
             onItemCopy={async (copiedItem) => {
-              return noop(); // copyItem(copiedItem.id);
+              await onAddItem(pick(copiedItem, ['title', 'type', 'params']));
             }}
             onItemDelete={async (deletedItem) => {
-              return noop(); // deleteItem(deletedItem.id);
+              await onDeleteItem(deletedItem.id);
             }}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <AddObservationUI
+      <AddInvestigationItem
         timeRange={{
           from: new Date(investigation.params.timeRange.from).toISOString(),
           to: new Date(investigation.params.timeRange.to).toISOString(),

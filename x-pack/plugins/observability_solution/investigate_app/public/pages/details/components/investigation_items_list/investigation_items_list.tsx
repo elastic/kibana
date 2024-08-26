@@ -10,7 +10,6 @@ import React from 'react';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 import { GridItem } from '../grid_item';
-import './styles.scss';
 
 export type RenderedInvestigationItem = InvestigationItem & {
   loading: boolean;
@@ -19,12 +18,14 @@ export type RenderedInvestigationItem = InvestigationItem & {
 
 interface InvestigateWidgetGridProps {
   items: RenderedInvestigationItem[];
+  isLoading: boolean;
   onItemCopy: (item: RenderedInvestigationItem) => Promise<void>;
   onItemDelete: (item: RenderedInvestigationItem) => Promise<void>;
 }
 
-export function InvestigateWidgetGrid({
+export function InvestigationItemsList({
   items,
+  isLoading,
   onItemDelete,
   onItemCopy,
 }: InvestigateWidgetGridProps) {
@@ -40,7 +41,7 @@ export function InvestigateWidgetGrid({
             <GridItem
               id={item.id}
               title={item.title}
-              loading={item.loading}
+              loading={item.loading || isLoading}
               onCopy={() => {
                 return onItemCopy(item);
               }}

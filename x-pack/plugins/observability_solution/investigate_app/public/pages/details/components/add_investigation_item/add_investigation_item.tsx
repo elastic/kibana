@@ -22,7 +22,7 @@ const emptyPreview = css`
   padding: 36px 0px 36px 0px;
 `;
 
-export function AddObservationUI({ onItemAdd: onItemAdd, timeRange }: Props) {
+export function AddInvestigationItem({ onItemAdd: onItemAdd, timeRange }: Props) {
   const [isOpen, setIsOpen] = React.useState(false);
 
   const [query, setQuery] = React.useState({ esql: '' });
