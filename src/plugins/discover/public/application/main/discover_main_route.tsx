@@ -354,7 +354,10 @@ export function DiscoverMainRoute({
     <DiscoverCustomizationProvider value={customizationService}>
       <DiscoverMainProvider value={stateContainer}>
         <>
-          <DiscoverTopNavInline stateContainer={stateContainer} hideNavMenuItems={loading} />
+          <DiscoverTopNavInline
+            stateContainer={stateContainer}
+            hideNavMenuItems={loading || showNoDataPage}
+          />
           {mainContent}
         </>
       </DiscoverMainProvider>
