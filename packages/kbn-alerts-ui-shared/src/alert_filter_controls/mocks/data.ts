@@ -42,7 +42,6 @@ export const initialInputData: ControlGroupRuntimeState<OptionsListControlState>
     '0': {
       type: 'optionsListControl',
       order: 0,
-      grow: true,
       width: 'small',
       dataViewId: 'alert-filters-test-dv',
       fieldName: ALERT_STATUS,
@@ -57,7 +56,6 @@ export const initialInputData: ControlGroupRuntimeState<OptionsListControlState>
     '1': {
       type: 'optionsListControl',
       order: 1,
-      grow: true,
       width: 'small',
       dataViewId: 'alert-filters-test-dv',
       fieldName: ALERT_RULE_NAME,
@@ -72,7 +70,6 @@ export const initialInputData: ControlGroupRuntimeState<OptionsListControlState>
     '2': {
       type: 'optionsListControl',
       order: 2,
-      grow: true,
       width: 'small',
       dataViewId: 'alert-filters-test-dv',
       fieldName: ALERT_START,
@@ -87,7 +84,6 @@ export const initialInputData: ControlGroupRuntimeState<OptionsListControlState>
     '3': {
       type: 'optionsListControl',
       order: 3,
-      grow: true,
       width: 'small',
       dataViewId: 'alert-filters-test-dv',
       fieldName: ALERT_DURATION,
@@ -102,7 +98,6 @@ export const initialInputData: ControlGroupRuntimeState<OptionsListControlState>
     '4': {
       type: 'optionsListControl',
       order: 4,
-      grow: true,
       width: 'small',
       dataViewId: 'alert-filters-test-dv',
       fieldName: 'host.name',

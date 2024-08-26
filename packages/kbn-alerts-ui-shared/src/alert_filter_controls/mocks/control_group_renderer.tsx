@@ -16,6 +16,15 @@ import React, { useState, forwardRef, useEffect, useImperativeHandle } from 'rea
 import { TEST_IDS } from '../constants';
 import { getControlGroupMock } from './control_group';
 
+export const addOptionsListControlMock = jest
+  .fn()
+  .mockImplementation((initialState, controlState, id) => {
+    if (!initialState.initialChildControlState) {
+      initialState.initialChildControlState = {};
+    }
+    initialState.initialChildControlState[id] = controlState;
+  });
+
 export const getMockedControlGroupRenderer = (
   controlGroupApiMock: ControlGroupRendererApi | undefined
 ) => {
@@ -31,7 +40,7 @@ export const getMockedControlGroupRenderer = (
         setCreationOptionsCalled(true);
         if (getCreationOptions) {
           getCreationOptions({}, {
-            addOptionsListControl: jest.fn(),
+            addOptionsListControl: addOptionsListControlMock,
           } as unknown as ControlGroupStateBuilder);
         }
       }, [getCreationOptions, creationOptionsCalled]);

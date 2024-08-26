@@ -28,19 +28,19 @@ export {
   type ControlGroupStateBuilder,
 } from './react_controls/control_group/utils/control_group_state_builder';
 
+export {
+  ACTION_DELETE_CONTROL,
+  ControlGroupRenderer,
+  type ControlGroupRendererProps,
+} from './control_group';
+
+export type {
+  ControlGroupRendererApi,
+  ControlGroupCreationOptions,
+} from './control_group/external_api/types';
 /**
  * TODO: remove all exports below this when control group embeddable is removed
  */
-
-export type {
-  ControlOutput,
-  ControlFactory,
-  ControlEmbeddable,
-  ControlEditorProps,
-  CommonControlOutput,
-  IEditableControlFactory,
-  CanClearSelections,
-} from './types';
 
 export type {
   ControlWidth,
@@ -77,21 +77,6 @@ export {
   type RangeSliderEmbeddable,
   type RangeSliderEmbeddableInput,
 } from './range_slider';
-
-export {
-  ACTION_EDIT_CONTROL as ACTION_EDIT_LEGACY_CONTROL,
-  ACTION_DELETE_CONTROL,
-  ControlGroupRenderer,
-  type ControlGroupRendererProps,
-} from './control_group';
-
-export type {
-  ControlGroupRendererApi,
-  ControlGroupCreationOptions,
-} from './control_group/external_api/types';
-
-/** TODO: Remove this once it is no longer needed in the examples plugin */
-export { CONTROL_WIDTH_OPTIONS } from './control_group/editor/editor_constants';
 
 export function plugin() {
   return new ControlsPlugin();

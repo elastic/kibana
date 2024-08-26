@@ -14,7 +14,7 @@ import { ControlGroupRendererApi, ControlGroupRuntimeState } from '@kbn/controls
 import { OPTIONS_LIST_CONTROL } from '@kbn/controls-plugin/common';
 import { ControlGroupOutput, initialInputData, sampleOutputData } from './mocks/data';
 import {
-  // COMMON_OPTIONS_LIST_CONTROL_INPUTS,
+  COMMON_OPTIONS_LIST_CONTROL_INPUTS,
   DEFAULT_CONTROLS,
   TEST_IDS,
   URL_PARAM_KEY,
@@ -24,7 +24,10 @@ import {
   controlGroupFilterStateMock$,
   getControlGroupMock,
 } from './mocks/control_group';
-import { getMockedControlGroupRenderer } from './mocks/control_group_renderer';
+import {
+  addOptionsListControlMock,
+  getMockedControlGroupRenderer,
+} from './mocks/control_group_renderer';
 import { URL_PARAM_ARRAY_EXCEPTION_MSG } from './translations';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -38,6 +41,7 @@ const controlGroupMock = getControlGroupMock();
 
 const updateControlGroupInputMock = (newState: ControlGroupRuntimeState) => {
   act(() => {
+    controlGroupMock.snapshotRuntimeState.mockReturnValue(newState);
     controlGroupFilterStateMock$.next(newState);
   });
 };
@@ -157,7 +161,7 @@ describe(' Filter Group Component ', () => {
       });
     });
 
-    it.skip('should open flyout when clicked on ADD', async () => {
+    it('should open flyout when clicked on ADD', async () => {
       render(<TestComponent maxControls={4} />);
 
       updateControlGroupInputMock(initialInputData as ControlGroupRuntimeState);
@@ -193,7 +197,7 @@ describe(' Filter Group Component ', () => {
       });
     });
 
-    it.skip('should call controlGroupTransform which returns object WITHOUT placeholder when type != OPTION_LIST_CONTROL on opening Flyout', async () => {
+    it('should call controlGroupTransform which returns object WITHOUT placeholder when type != OPTION_LIST_CONTROL on opening Flyout', async () => {
       const returnValueWatcher = jest.fn();
       (controlGroupMock as unknown as ControlGroupRendererApi).openAddDataControlFlyout = jest
         .fn()
@@ -269,112 +273,115 @@ describe(' Filter Group Component ', () => {
       );
     });
 
-    // it.skip('should not rebuild controls while saving controls when controls are in desired order', async () => {
-    //   render(<TestComponent />);
-    //   updateControlGroupInputMock(initialInputData as ControlGroupRuntimeState);
-    //   await openContextMenu();
-    //   fireEvent.click(screen.getByTestId(TEST_IDS.CONTEXT_MENU.EDIT));
+    it('should not rebuild controls while saving controls when controls are in desired order', async () => {
+      render(<TestComponent />);
+      updateControlGroupInputMock(initialInputData as ControlGroupRuntimeState);
+      await openContextMenu();
+      fireEvent.click(screen.getByTestId(TEST_IDS.CONTEXT_MENU.EDIT));
 
-    //   // modify controls
-    //   const newInputData = {
-    //     ...initialInputData,
-    //     initialChildControlState: {
-    //       // status as persistent controls is first in the position with order as 0
-    //       '0': initialInputData.initialChildControlState['0'],
-    //       '1': initialInputData.initialChildControlState['1'],
-    //     },
-    //   } as ControlGroupRuntimeState;
+      // modify controls
+      const newInputData = {
+        ...initialInputData,
+        initialChildControlState: {
+          // status as persistent controls is first in the position with order as 0
+          '0': initialInputData.initialChildControlState['0'],
+          '1': initialInputData.initialChildControlState['1'],
+        },
+      } as ControlGroupRuntimeState;
 
-    //   updateControlGroupInputMock(newInputData);
+      updateControlGroupInputMock(newInputData);
 
-    //   // clear any previous calls to the API
-    //   controlGroupMock.addOptionsListControl.mockClear();
+      // clear any previous calls to the API
+      controlGroupMock.updateInput.mockClear();
+      addOptionsListControlMock.mockClear();
 
-    //   fireEvent.click(screen.getByTestId(TEST_IDS.SAVE_CONTROL));
+      fireEvent.click(screen.getByTestId(TEST_IDS.SAVE_CONTROL));
 
-    //   // edit model gone
-    //   await waitFor(() => expect(screen.queryAllByTestId(TEST_IDS.SAVE_CONTROL)).toHaveLength(0));
-    //   // check if upsert was called correctly
-    //   expect(controlGroupMock.addOptionsListControl.mock.calls.length).toBe(0);
-    // });
+      // edit model gone
+      await waitFor(() => expect(screen.queryAllByTestId(TEST_IDS.SAVE_CONTROL)).toHaveLength(0));
+      // check if upsert was called correctly
+      expect(addOptionsListControlMock.mock.calls.length).toBe(0);
+      expect(controlGroupMock.updateInput.mock.calls.length).toBe(0);
+    });
 
-    // it.skip('should rebuild and save controls successfully when controls are not in desired order', async () => {
-    //   render(<TestComponent />);
-    //   updateControlGroupInputMock(initialInputData as ControlGroupRuntimeState);
-    //   await openContextMenu();
-    //   fireEvent.click(screen.getByTestId(TEST_IDS.CONTEXT_MENU.EDIT));
+    it('should rebuild and save controls successfully when controls are not in desired order', async () => {
+      render(<TestComponent />);
+      updateControlGroupInputMock(initialInputData as ControlGroupRuntimeState);
+      await openContextMenu();
+      fireEvent.click(screen.getByTestId(TEST_IDS.CONTEXT_MENU.EDIT));
 
-    //   // modify controls
-    //   const newInputData = {
-    //     ...initialInputData,
-    //     initialChildControlState: {
-    //       '0': {
-    //         ...initialInputData.initialChildControlState['0'],
-    //         // status is second in position.
-    //         // this will force the rebuilding of controls
-    //         order: 1,
-    //       },
-    //       '1': {
-    //         ...initialInputData.initialChildControlState['1'],
-    //         order: 0,
-    //       },
-    //     },
-    //   } as ControlGroupRuntimeState;
+      // modify controls
+      const newInputData = {
+        ...initialInputData,
+        initialChildControlState: {
+          '0': {
+            ...initialInputData.initialChildControlState['0'],
+            // status is second in position.
+            // this will force the rebuilding of controls
+            order: 1,
+          },
+          '1': {
+            ...initialInputData.initialChildControlState['1'],
+            order: 0,
+          },
+        },
+      } as ControlGroupRuntimeState;
 
-    //   updateControlGroupInputMock(newInputData);
+      updateControlGroupInputMock(newInputData);
 
-    //   // clear any previous calls to the API
-    //   controlGroupMock.addOptionsListControl.mockClear();
+      // clear any previous calls to the API
+      controlGroupMock.updateInput.mockClear();
 
-    //   fireEvent.click(screen.getByTestId(TEST_IDS.SAVE_CONTROL));
+      fireEvent.click(screen.getByTestId(TEST_IDS.SAVE_CONTROL));
 
-    //   // edit model gone
-    //   await waitFor(() => expect(screen.queryAllByTestId(TEST_IDS.SAVE_CONTROL)).toHaveLength(0));
-    //   // check if upsert was called correctly
-    //   expect(controlGroupMock.addOptionsListControl.mock.calls.length).toBe(2);
-    //   expect(controlGroupMock.addOptionsListControl.mock.calls[0][0]).toMatchObject(
-    //     initialInputData.initialChildControlState['0']
-    //   );
-    // });
+      // edit model gone
+      await waitFor(() => expect(screen.queryAllByTestId(TEST_IDS.SAVE_CONTROL)).toHaveLength(0));
+      // check if upsert was called correctly
+      expect(controlGroupMock.updateInput.mock.calls.length).toBe(1);
+      expect(controlGroupMock.updateInput.mock.calls[0][0]).toMatchObject({
+        initialChildControlState: {
+          '0': initialInputData.initialChildControlState['0'],
+          '1': initialInputData.initialChildControlState['1'],
+        },
+      });
+    });
 
-    // it.skip('should add persistable controls back on save, if deleted', async () => {
-    //   render(<TestComponent />);
-    //   updateControlGroupInputMock(initialInputData as ControlGroupRuntimeState);
+    it('should add persistable controls back on save, if deleted', async () => {
+      render(<TestComponent />);
+      updateControlGroupInputMock(initialInputData as ControlGroupRuntimeState);
 
-    //   await openContextMenu();
-    //   fireEvent.click(screen.getByTestId(TEST_IDS.CONTEXT_MENU.EDIT));
+      await openContextMenu();
+      fireEvent.click(screen.getByTestId(TEST_IDS.CONTEXT_MENU.EDIT));
 
-    //   // modify controls
-    //   const newInputData = {
-    //     ...initialInputData,
-    //     initialChildControlState: {
-    //       // removed persitable control i.e. status at "0" key
-    //       '3': initialInputData.initialChildControlState['3'],
-    //     },
-    //   } as ControlGroupRuntimeState;
+      // modify controls
+      const newInputData = {
+        ...initialInputData,
+        initialChildControlState: {
+          // removed persitable control i.e. status at "0" key
+          '3': initialInputData.initialChildControlState['3'],
+        },
+      } as ControlGroupRuntimeState;
 
-    //   updateControlGroupInputMock(newInputData);
+      updateControlGroupInputMock(newInputData);
 
-    //   // clear any previous calls to the API
-    //   controlGroupMock.addOptionsListControl.mockClear();
+      // clear any previous calls to the API
+      controlGroupMock.updateInput.mockClear();
 
-    //   fireEvent.click(screen.getByTestId(TEST_IDS.SAVE_CONTROL));
+      fireEvent.click(screen.getByTestId(TEST_IDS.SAVE_CONTROL));
 
-    //   await waitFor(() => {
-    //     // edit model gone
-    //     expect(screen.queryAllByTestId(TEST_IDS.SAVE_CONTROL)).toHaveLength(0);
-    //     // check if upsert was called correctly
-    //     expect(controlGroupMock.addOptionsListControl.mock.calls.length).toBe(2);
-    //     expect(controlGroupMock.addOptionsListControl.mock.calls[0][0]).toMatchObject({
-    //       ...COMMON_OPTIONS_LIST_CONTROL_INPUTS,
-    //       ...DEFAULT_CONTROLS[0],
-    //     });
-
-    //     expect(controlGroupMock.addOptionsListControl.mock.calls[1][0]).toMatchObject(
-    //       initialInputData.initialChildControlState['3']
-    //     );
-    //   });
-    // });
+      await waitFor(() => {
+        // edit model gone
+        expect(screen.queryAllByTestId(TEST_IDS.SAVE_CONTROL)).toHaveLength(0);
+        // check if upsert was called correctly
+        expect(controlGroupMock.updateInput.mock.calls.length).toBe(1);
+        expect(controlGroupMock.updateInput.mock.calls[0][0]).toMatchObject({
+          initialChildControlState: {
+            '0': { ...COMMON_OPTIONS_LIST_CONTROL_INPUTS, ...DEFAULT_CONTROLS[0] },
+            '1': { ...initialInputData.initialChildControlState['3'], order: 1 },
+          },
+        });
+      });
+    });
 
     it('should have Context menu changed when pending changes', async () => {
       render(<TestComponent />);
@@ -425,9 +432,9 @@ describe(' Filter Group Component ', () => {
 
       updateControlGroupInputMock(newInputData);
 
-      // await waitFor(() => {
-      // expect(screen.getByTestId(TEST_IDS.SAVE_CHANGE_POPOVER)).toBeVisible();
-      // });
+      await waitFor(() => {
+        expect(screen.getByTestId(TEST_IDS.SAVE_CHANGE_POPOVER)).toBeVisible();
+      });
       await openContextMenu();
 
       await waitFor(() => {
@@ -447,40 +454,39 @@ describe(' Filter Group Component ', () => {
       });
     });
 
-    // it.skip('should reset controls on clicking reset', async () => {
-    //   render(<TestComponent />);
+    it('should reset controls on clicking reset', async () => {
+      render(<TestComponent />);
 
-    //   updateControlGroupInputMock(initialInputData as ControlGroupRuntimeState);
+      updateControlGroupInputMock(initialInputData as ControlGroupRuntimeState);
 
-    //   await openContextMenu();
+      await openContextMenu();
 
-    //   await waitFor(() => expect(screen.getByTestId(TEST_IDS.CONTEXT_MENU.RESET)).toBeVisible());
+      await waitFor(() => expect(screen.getByTestId(TEST_IDS.CONTEXT_MENU.RESET)).toBeVisible());
 
-    //   controlGroupMock.addOptionsListControl.mockClear();
-    //   controlGroupMock.updateInput.mockClear();
-    //   fireEvent.click(screen.getByTestId(TEST_IDS.CONTEXT_MENU.RESET));
+      controlGroupMock.updateInput.mockClear();
+      fireEvent.click(screen.getByTestId(TEST_IDS.CONTEXT_MENU.RESET));
 
-    //   // blanks the input
-    //   await waitFor(() => expect(controlGroupMock.updateInput.mock.calls.length).toBe(2));
-    //   expect(controlGroupMock.addOptionsListControl.mock.calls.length).toBe(5);
-    // });
+      // blanks the input
+      await waitFor(() => expect(controlGroupMock.updateInput.mock.calls.length).toBe(5));
+    });
 
-    // it.skip('should restore controls saved in local storage', () => {
-    //   global.localStorage.setItem(
-    //     LOCAL_STORAGE_KEY,
-    //     JSON.stringify({
-    //       ...initialInputData,
-    //       initialChildControlState: {
-    //         '0': initialInputData.initialChildControlState['0'],
-    //       },
-    //     })
-    //   );
+    it('should restore controls saved in local storage', async () => {
+      addOptionsListControlMock.mockClear();
+      global.localStorage.setItem(
+        LOCAL_STORAGE_KEY,
+        JSON.stringify({
+          ...initialInputData,
+          initialChildControlState: {
+            '0': initialInputData.initialChildControlState['0'],
+          },
+        })
+      );
 
-    //   // should create one control
-    //   //
-    //   render(<TestComponent />);
-    //   expect(controlGroupMock.addOptionsListControl.mock.calls.length).toBe(1);
-    // });
+      // should create one control
+      //
+      render(<TestComponent />);
+      expect(addOptionsListControlMock.mock.calls.length).toBe(1);
+    });
 
     it('should show/hide pending changes popover on mouseout/mouseover', async () => {
       render(<TestComponent />);
@@ -516,37 +522,6 @@ describe(' Filter Group Component ', () => {
         expect(screen.queryByTestId(TEST_IDS.SAVE_CHANGE_POPOVER)).toBeVisible();
       });
     });
-
-    it.skip('should update controlGroup with new filters and queries when valid query is supplied', async () => {
-      const validQuery = { query: { language: 'kuery', query: '' } };
-      // pass an invalid query
-      render(<TestComponent {...validQuery} />);
-
-      await waitFor(() => {
-        expect(controlGroupMock.updateInput).toHaveBeenNthCalledWith(
-          1,
-          expect.objectContaining({
-            filters: undefined,
-            query: validQuery.query,
-          })
-        );
-      });
-    });
-
-    it.skip('should not update controlGroup with new filters and queries when invalid query is supplied', async () => {
-      const invalidQuery = { query: { language: 'kuery', query: '\\' } };
-      // pass an invalid query
-      render(<TestComponent {...invalidQuery} />);
-
-      await waitFor(() => {
-        expect(controlGroupMock.updateInput).toHaveBeenCalledWith(
-          expect.objectContaining({
-            filters: [],
-            query: undefined,
-          })
-        );
-      });
-    });
   });
 
   describe('Filter Changed Banner', () => {
@@ -573,33 +548,33 @@ describe(' Filter Group Component ', () => {
       });
     });
 
-    // it.skip('should use url filters if url and stored filters are not same', async () => {
-    //   global.localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(initialInputData));
-    //   render(
-    //     <TestComponent
-    //       controlsUrlState={[
-    //         {
-    //           fieldName: 'abc',
-    //         },
-    //       ]}
-    //     />
-    //   );
-    //   updateControlGroupInputMock(initialInputData as ControlGroupRuntimeState);
-    //   expect(controlGroupMock.addOptionsListControl.mock.calls.length).toBe(2);
-    //   expect(controlGroupMock.addOptionsListControl.mock.calls[0][1]).toMatchObject({
-    //     ...COMMON_OPTIONS_LIST_CONTROL_INPUTS,
-    //     ...DEFAULT_CONTROLS[0],
-    //   });
+    it('should use url filters if url and stored filters are not same', async () => {
+      addOptionsListControlMock.mockClear();
+      global.localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(initialInputData));
 
-    //   expect(controlGroupMock.addOptionsListControl.mock.calls[1][1]).toMatchObject({
-    //     ...COMMON_OPTIONS_LIST_CONTROL_INPUTS,
-    //     fieldName: 'abc',
-    //   });
-
-    //   await waitFor(() => {
-    //     expect(screen.getByTestId(TEST_IDS.FILTERS_CHANGED_BANNER)).toBeVisible();
-    //   });
-    // });
+      render(
+        <TestComponent
+          controlsUrlState={[
+            {
+              fieldName: 'abc',
+            },
+          ]}
+        />
+      );
+      updateControlGroupInputMock(initialInputData as ControlGroupRuntimeState);
+      expect(addOptionsListControlMock.mock.calls.length).toBe(2);
+      expect(addOptionsListControlMock.mock.calls[0][1]).toMatchObject({
+        ...COMMON_OPTIONS_LIST_CONTROL_INPUTS,
+        ...DEFAULT_CONTROLS[0],
+      });
+      expect(addOptionsListControlMock.mock.calls[1][1]).toMatchObject({
+        ...COMMON_OPTIONS_LIST_CONTROL_INPUTS,
+        fieldName: 'abc',
+      });
+      await waitFor(() => {
+        expect(screen.getByTestId(TEST_IDS.FILTERS_CHANGED_BANNER)).toBeVisible();
+      });
+    });
 
     it('should ignore url params if there is an error in using them', async () => {
       const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementationOnce(jest.fn());
@@ -683,93 +658,93 @@ describe(' Filter Group Component ', () => {
     });
   });
 
-  // describe('Restore from local storage', () => {
-  //   beforeEach(() => {
-  //     jest.clearAllMocks();
-  //     global.localStorage.clear();
-  //   });
+  describe('Restore from local storage', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      global.localStorage.clear();
+    });
 
-  //   it.skip('should restore from localstorage when one of the value is exists and exclude is false', async () => {
-  //     updateControlGroupInputMock(initialInputData as ControlGroupRuntimeState);
-  //     const savedData = {
-  //       ...initialInputData,
-  //       initialChildControlState: {
-  //         ...initialInputData.initialChildControlState,
-  //         '2': {
-  //           ...initialInputData.initialChildControlState['2'],
-  //           existsSelected: true,
-  //           exclude: false,
-  //         },
-  //       },
-  //     };
+    it('should restore from localstorage when one of the value is exists and exclude is false', async () => {
+      updateControlGroupInputMock(initialInputData as ControlGroupRuntimeState);
+      const savedData = {
+        ...initialInputData,
+        initialChildControlState: {
+          ...initialInputData.initialChildControlState,
+          '2': {
+            ...initialInputData.initialChildControlState['2'],
+            existsSelected: true,
+            exclude: false,
+          },
+        },
+      };
 
-  //     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(savedData));
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(savedData));
 
-  //     render(<TestComponent />);
+      render(<TestComponent />);
 
-  //     await waitFor(() => {
-  //       expect(controlGroupMock.addOptionsListControl.mock.calls.length).toBe(5);
-  //       expect(controlGroupMock.addOptionsListControl.mock.calls[2][1]).toMatchObject(
-  //         expect.objectContaining({
-  //           existsSelected: true,
-  //           exclude: false,
-  //         })
-  //       );
-  //     });
-  //   });
+      await waitFor(() => {
+        expect(addOptionsListControlMock.mock.calls.length).toBe(5);
+        expect(addOptionsListControlMock.mock.calls[2][1]).toMatchObject(
+          expect.objectContaining({
+            existsSelected: true,
+            exclude: false,
+          })
+        );
+      });
+    });
 
-  //   it.skip('should restore from localstorage when one of the value has both exists and exclude true', async () => {
-  //     const savedData = {
-  //       ...initialInputData,
-  //       initialChildControlState: {
-  //         ...initialInputData.initialChildControlState,
-  //         '2': {
-  //           ...initialInputData.initialChildControlState['2'],
-  //           existsSelected: true,
-  //           exclude: true,
-  //         },
-  //       },
-  //     };
+    it('should restore from localstorage when one of the value has both exists and exclude true', async () => {
+      const savedData = {
+        ...initialInputData,
+        initialChildControlState: {
+          ...initialInputData.initialChildControlState,
+          '2': {
+            ...initialInputData.initialChildControlState['2'],
+            existsSelected: true,
+            exclude: true,
+          },
+        },
+      };
 
-  //     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(savedData));
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(savedData));
 
-  //     render(<TestComponent />);
+      render(<TestComponent />);
 
-  //     await waitFor(() => {
-  //       expect(controlGroupMock.addOptionsListControl.mock.calls.length).toBe(5);
-  //       expect(controlGroupMock.addOptionsListControl.mock.calls[2][1]).toMatchObject(
-  //         expect.objectContaining({
-  //           existsSelected: true,
-  //           exclude: true,
-  //         })
-  //       );
-  //     });
-  //   });
+      await waitFor(() => {
+        expect(addOptionsListControlMock.mock.calls.length).toBe(5);
+        expect(addOptionsListControlMock.mock.calls[2][1]).toMatchObject(
+          expect.objectContaining({
+            existsSelected: true,
+            exclude: true,
+          })
+        );
+      });
+    });
 
-  //   it.skip('should restore from localstorage when some value has selected options', async () => {
-  //     const savedData = {
-  //       ...initialInputData,
-  //       initialChildControlState: {
-  //         ...initialInputData.initialChildControlState,
-  //         '2': {
-  //           ...initialInputData.initialChildControlState['2'],
-  //           selectedOptions: ['abc'],
-  //         },
-  //       },
-  //     };
+    it('should restore from localstorage when some value has selected options', async () => {
+      const savedData = {
+        ...initialInputData,
+        initialChildControlState: {
+          ...initialInputData.initialChildControlState,
+          '2': {
+            ...initialInputData.initialChildControlState['2'],
+            selectedOptions: ['abc'],
+          },
+        },
+      };
 
-  //     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(savedData));
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(savedData));
 
-  //     render(<TestComponent />);
+      render(<TestComponent />);
 
-  //     await waitFor(() => {
-  //       expect(controlGroupMock.addOptionsListControl.mock.calls.length).toBe(5);
-  //       expect(controlGroupMock.addOptionsListControl.mock.calls[2][1]).toMatchObject(
-  //         expect.objectContaining({
-  //           selectedOptions: ['abc'],
-  //         })
-  //       );
-  //     });
-  //   });
-  // });
+      await waitFor(() => {
+        expect(addOptionsListControlMock.mock.calls.length).toBe(5);
+        expect(addOptionsListControlMock.mock.calls[2][1]).toMatchObject(
+          expect.objectContaining({
+            selectedOptions: ['abc'],
+          })
+        );
+      });
+    });
+  });
 });

@@ -303,11 +303,11 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
 
   const getCreationOptions: ControlGroupRendererProps['getCreationOptions'] = useCallback(
     async (
-      defaultInput: Partial<ControlGroupRuntimeState>,
+      defaultState: Partial<ControlGroupRuntimeState>,
       { addOptionsListControl }: ControlGroupStateBuilder
     ) => {
       const initialState: Partial<ControlGroupRuntimeState> = {
-        ...defaultInput,
+        ...defaultState,
         chainingSystem,
         ignoreParentSettings: {
           ignoreValidations: true,
@@ -330,7 +330,6 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
           String(idx)
         );
       });
-
       return {
         initialState,
         editorConfig: {
@@ -367,18 +366,22 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
       // reorder only if fields are in different order
       // or not same.
       const newInput = { initialChildControlState: {} };
-      for (const control of reorderedControls) {
-        controlGroupStateBuilder.addOptionsListControl(newInput, {
-          title: control.title,
-          ...COMMON_OPTIONS_LIST_CONTROL_INPUTS,
-          // option List controls will handle an invalid dataview
-          // & display an appropriate message
-          dataViewId: dataViewId ?? '',
-          selectedOptions: control.selectedOptions,
-          ...control,
-        });
-        controlGroup?.updateInput(newInput);
-      }
+      reorderedControls.forEach((control, idx) => {
+        controlGroupStateBuilder.addOptionsListControl(
+          newInput,
+          {
+            title: control.title,
+            ...COMMON_OPTIONS_LIST_CONTROL_INPUTS,
+            // option List controls will handle an invalid dataview
+            // & display an appropriate message
+            dataViewId: dataViewId ?? '',
+            selectedOptions: control.selectedOptions,
+            ...control,
+          },
+          String(idx)
+        );
+      });
+      controlGroup?.updateInput(newInput);
     }
   }, [controlGroup, dataViewId, defaultControls]);
 
