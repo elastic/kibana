@@ -10,7 +10,7 @@ import { HttpFetchQuery } from '@kbn/core/public';
 
 import { useDataQualityContext } from '../../../../../data_quality_context';
 import * as i18n from '../../../../../translations';
-import { INTERNAL_API_VERSION } from '../../../../../helpers';
+import { INTERNAL_API_VERSION } from '../../../../../constants';
 import { MeteringStatsIndex } from '../../../../../types';
 import { useIsMounted } from '../../../../../hooks/use_is_mounted';
 

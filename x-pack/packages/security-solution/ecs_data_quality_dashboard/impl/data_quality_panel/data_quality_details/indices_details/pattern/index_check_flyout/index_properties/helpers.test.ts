@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  getMappingsProperties,
-  getSortedPartitionedFieldMetadata,
-  hasAllDataFetchingCompleted,
-} from './helpers';
+import { getMappingsProperties, getSortedPartitionedFieldMetadata } from './helpers';
 import { mockIndicesGetMappingIndexMappingRecords } from '../../../../../mock/indices_get_mapping_index_mapping_record/mock_indices_get_mapping_index_mapping_record';
 import { mockMappingsProperties } from '../../../../../mock/mappings_properties/mock_mappings_properties';
 import { EcsFlatTyped } from '../../../../../constants';
@@ -248,44 +244,6 @@ describe('helpers', () => {
           indexName: 'foozle',
         })
       ).toBeNull();
-    });
-  });
-
-  describe('hasAllDataFetchingCompleted', () => {
-    test('it returns false when both the mappings and unallowed values are loading', () => {
-      expect(
-        hasAllDataFetchingCompleted({
-          loadingMappings: true,
-          loadingUnallowedValues: true,
-        })
-      ).toBe(false);
-    });
-
-    test('it returns false when mappings are loading, and unallowed values are NOT loading', () => {
-      expect(
-        hasAllDataFetchingCompleted({
-          loadingMappings: true,
-          loadingUnallowedValues: false,
-        })
-      ).toBe(false);
-    });
-
-    test('it returns false when mappings are NOT loading, and unallowed values are loading', () => {
-      expect(
-        hasAllDataFetchingCompleted({
-          loadingMappings: false,
-          loadingUnallowedValues: true,
-        })
-      ).toBe(false);
-    });
-
-    test('it returns true when both the mappings and unallowed values have finished loading', () => {
-      expect(
-        hasAllDataFetchingCompleted({
-          loadingMappings: false,
-          loadingUnallowedValues: false,
-        })
-      ).toBe(true);
     });
   });
 });

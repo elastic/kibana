@@ -45,7 +45,7 @@ import {
   getSummaryTableMarkdownRow,
   getTabCountsMarkdownComment,
 } from './helpers';
-import { EMPTY_STAT } from '../../../../../../helpers';
+import { EMPTY_STAT } from '../../../../../../constants';
 import { mockAllowedValues } from '../../../../../../mock/allowed_values/mock_allowed_values';
 import {
   eventCategory,

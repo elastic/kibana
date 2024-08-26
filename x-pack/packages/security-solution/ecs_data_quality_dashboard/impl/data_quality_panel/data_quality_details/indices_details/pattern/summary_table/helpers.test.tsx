@@ -17,7 +17,7 @@ import { omit } from 'lodash/fp';
 import React from 'react';
 
 import { TestExternalProviders } from '../../../../mock/test_providers/test_providers';
-import { EMPTY_STAT } from '../../../../helpers';
+import { EMPTY_STAT } from '../../../../constants';
 import {
   getDocsCountPercent,
   getIncompatibleStatColor,

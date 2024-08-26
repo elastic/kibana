@@ -12,13 +12,13 @@ import type {
 import { sortBy } from 'lodash/fp';
 
 import { EcsFlatTyped } from '../../../../../constants';
+import type { PartitionedFieldMetadata, UnallowedValueCount } from '../../../../../types';
 import {
   getEnrichedFieldMetadata,
   getFieldTypes,
   getMissingTimestampFieldMetadata,
   getPartitionedFieldMetadata,
-} from '../../../../../helpers';
-import type { PartitionedFieldMetadata, UnallowedValueCount } from '../../../../../types';
+} from './utils/metadata';
 
 export const ALL_TAB_ID = 'allTab';
 export const ECS_COMPLIANT_TAB_ID = 'ecsCompliantTab';
@@ -90,11 +90,3 @@ export const getMappingsProperties = ({
 
   return null;
 };
-
-export const hasAllDataFetchingCompleted = ({
-  loadingMappings,
-  loadingUnallowedValues,
-}: {
-  loadingMappings: boolean;
-  loadingUnallowedValues: boolean;
-}): boolean => loadingMappings === false && loadingUnallowedValues === false;
