@@ -105,7 +105,10 @@ export const getVisualizeEmbeddableFactory: (deps: {
       const currentVis = vis$.getValue();
       if (currentVis) currentVis.uiState.off('change', onUiStateChange);
       vis$.next(await createVisInstance(serializedVis));
-      await updateExpressionParams();
+
+      const { params, abortController } = await getExpressionParams();
+      if (params) expressionParams$.next(params);
+      expressionAbortController$.next(abortController);
     });
 
     // Track visualizations linked to a saved object in the library
@@ -121,8 +124,12 @@ export const getVisualizeEmbeddableFactory: (deps: {
     const expressionParams$ = new BehaviorSubject<ExpressionRendererParams>({
       expression: '',
     });
+
     const expressionAbortController$ = new BehaviorSubject<AbortController>(new AbortController());
-    let updateExpressionParams = async () => {};
+    let getExpressionParams: () => ReturnType<typeof getExpressionRendererProps> = async () => ({
+      params: expressionParams$.getValue(),
+      abortController: expressionAbortController$.getValue(),
+    });
 
     const {
       api: customTimeRangeApi,
@@ -382,8 +389,8 @@ export const getVisualizeEmbeddableFactory: (deps: {
             //  parent API time range from e.g. unified search
             const timeRangeToRender = customTimeRange ?? timesliceTimeRange ?? parentTimeRange;
 
-            updateExpressionParams = async () => {
-              const { params, abortController } = await getExpressionRendererProps({
+            getExpressionParams = async () => {
+              return await getExpressionRendererProps({
                 unifiedSearch,
                 vis: vis$.getValue(),
                 settings,
@@ -465,14 +472,15 @@ export const getVisualizeEmbeddableFactory: (deps: {
                   dataLoading$.next(false);
                 },
               });
-              if (params) expressionParams$.next(params);
-              expressionAbortController$.next(abortController);
             };
-            return await updateExpressionParams();
+            return await getExpressionParams();
           })();
         })
       )
-      .subscribe();
+      .subscribe(({ params, abortController }) => {
+        if (params) expressionParams$.next(params);
+        expressionAbortController$.next(abortController);
+      });
 
     return {
       api,
