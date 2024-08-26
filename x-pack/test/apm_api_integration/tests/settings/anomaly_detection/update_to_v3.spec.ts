@@ -92,9 +92,6 @@ export default function apiTest({ getService }: FtrProviderContext) {
     describe('when there are both v2 and v3 jobs', () => {
       before(async () => {
         await createV2Jobs(['production', 'development']);
-      });
-
-      before(async () => {
         await createV3Jobs(['production']);
       });
 

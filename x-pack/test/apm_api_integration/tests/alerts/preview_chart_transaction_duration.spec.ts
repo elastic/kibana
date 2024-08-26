@@ -74,7 +74,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   registry.when(`with data loaded`, { config: 'basic', archives: [] }, () => {
     // FLAKY: https://github.com/elastic/kibana/issues/176986
     // Failing: See https://github.com/elastic/kibana/issues/176989
-    describe('transaction_duration', () => {
+    describe('transaction_duration: with data loaded', () => {
       before(async () => {
         await generateLatencyData({ serviceName: 'synth-go', start, end, apmSynthtraceEsClient });
         await generateLatencyData({ serviceName: 'synth-java', start, end, apmSynthtraceEsClient });
@@ -302,7 +302,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   // FLAKY: https://github.com/elastic/kibana/issues/176989
   registry.when(`with data loaded and using KQL filter`, { config: 'basic', archives: [] }, () => {
-    describe('transaction_duration', () => {
+    describe('transaction_duration: with data loaded and using KQL filter', () => {
       before(async () => {
         await generateLatencyData({ serviceName: 'synth-go', start, end, apmSynthtraceEsClient });
         await generateLatencyData({ serviceName: 'synth-java', start, end, apmSynthtraceEsClient });
