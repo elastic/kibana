@@ -3879,6 +3879,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-di-browser-internal@link:packages/core/di/core-di-browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-di-browser@link:packages/core/di/core-di-browser":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-di-internal@link:packages/core/di/core-di-internal":
   version "0.0.0"
   uid ""

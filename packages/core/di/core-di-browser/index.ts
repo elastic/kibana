@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export type { Plugin, PluginInitializer, PluginInitializerContext } from './src';
+export { Application, ApplicationParameters } from './src/services/application';
+export { CoreSetup, CoreStart, PluginInitializer } from './src/services/lifecycle';

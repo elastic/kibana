@@ -273,6 +273,8 @@
     "@kbn/core-deprecations-server": "link:packages/core/deprecations/core-deprecations-server",
     "@kbn/core-deprecations-server-internal": "link:packages/core/deprecations/core-deprecations-server-internal",
     "@kbn/core-di": "link:packages/core/di/core-di",
+    "@kbn/core-di-browser": "link:packages/core/di/core-di-browser",
+    "@kbn/core-di-browser-internal": "link:packages/core/di/core-di-browser-internal",
     "@kbn/core-di-internal": "link:packages/core/di/core-di-internal",
     "@kbn/core-di-server": "link:packages/core/di/core-di-server",
     "@kbn/core-di-server-internal": "link:packages/core/di/core-di-server-internal",

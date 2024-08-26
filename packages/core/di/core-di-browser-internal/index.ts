@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export type { Plugin, PluginInitializer, PluginInitializerContext } from './src';
+export { application } from './src/modules/application';
