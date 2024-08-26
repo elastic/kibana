@@ -132,7 +132,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('data view mode', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/191260
+    describe.skip('data view mode', () => {
       it('should render default columns and row height', async () => {
         await PageObjects.common.navigateToActualUrl('discover', undefined, {
           ensureCurrentUrl: false,
