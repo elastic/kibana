@@ -98,7 +98,9 @@ describe('#setup()', () => {
       await service.start(startDeps);
       expect(() =>
         register(Symbol(), createApp({ id: 'app1' }))
-      ).toThrowErrorMatchingInlineSnapshot(`"Applications cannot be registered after \\"setup\\""`);
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Applications cannot be registered after \\"setup\\" (attempted to register \\"app1\\")"`
+      );
     });
 
     it('allows to register an AppUpdater for the application', async () => {
