@@ -10,7 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { filter, take, toArray } from 'rxjs';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
-import { CLAIM_STRATEGY_MGET } from '../config';
+import { CLAIM_STRATEGY_MGET, DEFAULT_KIBANAS_PER_PARTITION } from '../config';
 
 import {
   TaskStatus,
@@ -101,7 +101,11 @@ discoveryServiceMock.getActiveKibanaNodes.mockResolvedValue([
   createFindSO('test-pod-2', lastSeen),
   createFindSO('test-pod-3', lastSeen),
 ]);
-const taskPartitioner = new TaskPartitioner('test', discoveryServiceMock);
+const taskPartitioner = new TaskPartitioner({
+  podName: 'test',
+  kibanaDiscoveryService: discoveryServiceMock,
+  kibanasPerPartition: DEFAULT_KIBANAS_PER_PARTITION,
+});
 
 // needs more tests in the similar to the `strategy_default.test.ts` test suite
 describe('TaskClaiming', () => {
