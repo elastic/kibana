@@ -6,7 +6,11 @@
  */
 
 import type { CoreSetup, IRouter, RequestHandlerContext } from '@kbn/core/server';
-import { InferenceConnector, InferenceConnectorType } from '../../common/connectors';
+import {
+  InferenceConnector,
+  InferenceConnectorType,
+  isSupportedConnectorType,
+} from '../../common/connectors';
 import type { InferenceServerStart, InferenceStartDependencies } from '../types';
 
 export function registerConnectorsRoute({
@@ -32,14 +36,8 @@ export function registerConnectorsRoute({
         includeSystemActions: false,
       });
 
-      const connectorTypes: string[] = [
-        InferenceConnectorType.OpenAI,
-        InferenceConnectorType.Bedrock,
-        InferenceConnectorType.Gemini,
-      ];
-
       const connectors: InferenceConnector[] = allConnectors
-        .filter((connector) => connectorTypes.includes(connector.actionTypeId))
+        .filter((connector) => isSupportedConnectorType(connector.actionTypeId))
         .map((connector) => {
           return {
             connectorId: connector.id,
