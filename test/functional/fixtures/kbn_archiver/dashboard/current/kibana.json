@@ -3287,9 +3287,9 @@
   "namespaces": [
     "default"
   ],
-  "updated_at": "2024-08-26T14:17:06.589Z",
-  "created_at": "2024-08-26T14:17:06.589Z",
-  "version": "WzEwMywxXQ==",
+  "updated_at": "2024-08-26T15:23:33.053Z",
+  "created_at": "2024-08-26T15:22:39.194Z",
+  "version": "WzE1MTksMV0=",
   "attributes": {
     "version": 2,
     "controlGroupInput": {
@@ -3297,7 +3297,7 @@
       "controlStyle": "oneLine",
       "showApplySelections": false,
       "ignoreParentSettingsJSON": "{\"ignoreFilters\":false,\"ignoreQuery\":false,\"ignoreTimerange\":false,\"ignoreValidations\":false}",
-      "panelsJSON": "{\"cd881630-fd28-4e9c-aec5-ae9711d48369\":{\"grow\":true,\"order\":0,\"type\":\"optionsListControl\",\"width\":\"medium\",\"explicitInput\":{\"dataViewId\":\"a0f483a0-3dc9-11e8-8660-4d65aa086b3c\",\"fieldName\":\"sound.keyword\",\"searchTechnique\":\"prefix\",\"selectedOptions\":[],\"sort\":{\"by\":\"_count\",\"direction\":\"desc\"}}}}"
+      "panelsJSON": "{\"cd881630-fd28-4e9c-aec5-ae9711d48369\":{\"grow\":true,\"order\":0,\"type\":\"optionsListControl\",\"width\":\"medium\",\"explicitInput\":{\"dataViewId\":\"a0f483a0-3dc9-11e8-8660-4d65aa086b3c\",\"fieldName\":\"sound.keyword\",\"searchTechnique\":\"prefix\",\"selectedOptions\":[\"meow\",\"bark\"],\"sort\":{\"by\":\"_count\",\"direction\":\"desc\"}}}}"
     },
     "kibanaSavedObjectMeta": {
       "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"

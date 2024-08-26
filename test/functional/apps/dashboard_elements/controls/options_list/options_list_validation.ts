@@ -37,13 +37,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('Options List dashboard validation', () => {
-      before(async () => {
-        await dashboardControls.optionsListOpenPopover(controlId);
-        await dashboardControls.optionsListPopoverSelectOption('meow');
-        await dashboardControls.optionsListPopoverSelectOption('bark');
-        await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
-      });
-
       after(async () => {
         await dashboard.clickDiscardChanges();
       });
@@ -97,10 +90,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('Options List dashboard no validation', () => {
       before(async () => {
-        await dashboardControls.optionsListOpenPopover(controlId);
-        await dashboardControls.optionsListPopoverSelectOption('meow');
-        await dashboardControls.optionsListPopoverSelectOption('bark');
-        await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
         await dashboardControls.updateValidationSetting(false);
       });
 
