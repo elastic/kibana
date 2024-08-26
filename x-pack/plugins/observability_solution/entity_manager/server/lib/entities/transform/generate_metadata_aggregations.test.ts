@@ -86,7 +86,7 @@ describe('Generate Metadata Aggregations for history and latest', () => {
           filter: {
             range: {
               '@timestamp': {
-                gte: 'now-1m',
+                gte: 'now-300s',
               },
             },
           },
@@ -112,7 +112,7 @@ describe('Generate Metadata Aggregations for history and latest', () => {
           filter: {
             range: {
               '@timestamp': {
-                gte: 'now-1m',
+                gte: 'now-300s',
               },
             },
           },
@@ -138,7 +138,7 @@ describe('Generate Metadata Aggregations for history and latest', () => {
           filter: {
             range: {
               '@timestamp': {
-                gte: 'now-1m',
+                gte: 'now-300s',
               },
             },
           },
@@ -164,7 +164,7 @@ describe('Generate Metadata Aggregations for history and latest', () => {
           filter: {
             range: {
               '@timestamp': {
-                gte: 'now-1m',
+                gte: 'now-300s',
               },
             },
           },
