@@ -22,12 +22,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { SectionLoading, useKibana } from '../../../shared_imports';
+import type { GeoipDatabase } from './types';
+import { getTypeLabel } from './constants';
 import { EmptyList } from './empty_list';
-import { GeoipDatabase } from './types';
 import { AddDatabaseModal } from './add_database_modal';
 import { DeleteDatabaseModal } from './delete_database_modal';
 import { getErrorMessage } from './get_error_message';
-import { SectionLoading, useKibana } from '../../../shared_imports';
 
 export const GeoipList: React.FunctionComponent = () => {
   const { services } = useKibana();
@@ -61,6 +62,16 @@ export const GeoipList: React.FunctionComponent = () => {
           defaultMessage: 'Database name',
         }),
         sortable: true,
+      },
+      {
+        field: 'type',
+        name: i18n.translate('xpack.ingestPipelines.manageProcessors.geoip.list.typeColumnTitle', {
+          defaultMessage: 'Type',
+        }),
+        sortable: true,
+        render: (type: GeoipDatabase['type']) => {
+          return getTypeLabel(type);
+        },
       },
       {
         name: 'Actions',

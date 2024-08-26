@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { GeoipDatabase } from './types';
 
 export const ADD_DATABASE_MODAL_TITLE_ID = 'manageProcessorsAddGeoipDatabase';
 export const ADD_DATABASE_MODAL_FORM_ID = 'manageProcessorsAddGeoipDatabaseForm';
@@ -115,3 +116,19 @@ export const deleteDatabaseErrorTitle = i18n.translate(
     defaultMessage: 'Error deleting database',
   }
 );
+
+export const getTypeLabel = (type: GeoipDatabase['type']): string => {
+  switch (type) {
+    case 'maxmind': {
+      return i18n.translate('xpack.ingestPipelines.manageProcessors.geoip.list.typeMaxmindLabel', {
+        defaultMessage: 'MaxMind',
+      });
+    }
+    case 'unknown':
+    default: {
+      return i18n.translate('xpack.ingestPipelines.manageProcessors.geoip.list.typeUnknownLabel', {
+        defaultMessage: 'Unknown',
+      });
+    }
+  }
+};

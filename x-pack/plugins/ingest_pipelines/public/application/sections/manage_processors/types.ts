@@ -8,4 +8,5 @@
 export interface GeoipDatabase {
   name: string;
   id: string;
+  type: 'maxmind' | 'unknown';
 }

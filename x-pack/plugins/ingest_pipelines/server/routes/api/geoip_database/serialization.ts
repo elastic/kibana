@@ -17,10 +17,19 @@ export interface GeoipDatabase {
   };
 }
 
-export const deserializeGeoipDatabase = ({ database, id }: GeoipDatabase) => {
+const getGeoipType = ({ database }: GeoipDatabase) => {
+  if (database.maxmind && database.maxmind.account_id) {
+    return 'maxmind';
+  }
+  return 'unknown';
+};
+
+export const deserializeGeoipDatabase = (geoipDatabase: GeoipDatabase) => {
+  const { database, id } = geoipDatabase;
   return {
     name: database.name,
     id,
+    type: getGeoipType(geoipDatabase),
   };
 };
 
