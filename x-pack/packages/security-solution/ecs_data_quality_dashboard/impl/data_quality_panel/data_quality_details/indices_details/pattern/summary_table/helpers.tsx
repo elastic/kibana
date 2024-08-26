@@ -18,7 +18,8 @@ import moment from 'moment';
 import styled from 'styled-components';
 
 import { euiThemeVars } from '@kbn/ui-theme';
-import { EMPTY_STAT, getIlmPhaseDescription } from '../../../../helpers';
+import { EMPTY_STAT } from '../../../../constants';
+import { getIlmPhaseDescription } from '../../../../utils/get_ilm_phase_description';
 import { INCOMPATIBLE_INDEX_TOOL_TIP } from '../../../../stat_label/translations';
 import { INDEX_SIZE_TOOLTIP } from '../../../../translations';
 import * as i18n from './translations';

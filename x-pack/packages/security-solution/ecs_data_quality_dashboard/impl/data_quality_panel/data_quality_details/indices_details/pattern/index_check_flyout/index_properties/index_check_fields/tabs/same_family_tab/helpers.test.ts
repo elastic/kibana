@@ -13,7 +13,7 @@ import {
   getSameFamilyMarkdownComment,
   getSameFamilyMarkdownTablesComment,
 } from './helpers';
-import { EMPTY_STAT } from '../../../../../../../../helpers';
+import { EMPTY_STAT } from '../../../../../../../../constants';
 import { mockPartitionedFieldMetadata } from '../../../../../../../../mock/partitioned_field_metadata/mock_partitioned_field_metadata';
 import { mockPartitionedFieldMetadataWithSameFamily } from '../../../../../../../../mock/partitioned_field_metadata/mock_partitioned_field_metadata_with_same_family';
 
