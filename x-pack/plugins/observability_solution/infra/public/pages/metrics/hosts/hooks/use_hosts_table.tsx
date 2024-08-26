@@ -73,7 +73,7 @@ const buildMetricCell = (
   formatType: InfraAssetMetricType,
   hasSystemMetrics?: boolean
 ) => {
-  if (!hasSystemMetrics && value === 0) {
+  if (!hasSystemMetrics && value === null) {
     return <AddDataTroubleshootingPopover />;
   }
 
@@ -102,7 +102,7 @@ const buildItemsList = (nodes: InfraAssetMetricsItem[]): HostNodeRow[] => {
       ...metrics.reduce(
         (acc, curr) => ({
           ...acc,
-          [curr.name]: curr.value ?? 0,
+          [curr.name]: curr.value,
         }),
         {} as HostMetrics
       ),
@@ -117,12 +117,15 @@ const isTitleColumn = (cell: HostNodeRow[keyof HostNodeRow]): cell is HostNodeRo
 };
 
 const sortValues = (aValue: any, bValue: any, { direction }: Sorting) => {
-  if (typeof aValue === 'string' && typeof bValue === 'string') {
-    return direction === 'desc' ? bValue.localeCompare(aValue) : aValue.localeCompare(bValue);
+  const a = aValue ?? -1;
+  const b = bValue ?? -1;
+
+  if (typeof a === 'string' && typeof b === 'string') {
+    return direction === 'desc' ? b.localeCompare(a) : a.localeCompare(b);
   }
 
-  if (isNumber(aValue) && isNumber(bValue)) {
-    return direction === 'desc' ? bValue - aValue : aValue - bValue;
+  if (isNumber(a) && isNumber(b)) {
+    return direction === 'desc' ? b - a : a - b;
   }
 
   return 1;
