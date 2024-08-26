@@ -2,7 +2,7 @@
 apiVersion: backstage.io/v1alpha1
 kind: Resource
 metadata:
-  name: bk-kibana-pointer-compression
+  name: bk-kibana-codeql
   description: Run CodeQL
   links:
     - title: Pipeline link
