@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { ruleStateAttributes, cspBenchmarkRuleMetadataSchema, rulesStates } from './rules';
+export * as rulesV1 from './v1';
+export * as rulesV2 from './v2';
+export * as rulesV3 from './v3';
+export * as rulesV4 from './v4';
+export * as rulesV5 from './v5';

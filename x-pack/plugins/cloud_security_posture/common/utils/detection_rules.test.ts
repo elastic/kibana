@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CspBenchmarkRuleMetadata } from '@kbn/cloud-security-posture-common';
+import type { CspBenchmarkRuleMetadata } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import {
   convertRuleTagsToMatchAllKQL,
   convertRuleTagsToMatchAnyKQL,

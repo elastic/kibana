@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { EcsDataStream, EcsEvent } from '@elastic/ecs';
-import type { CspBenchmarkRuleMetadata } from './schema/rules';
+import type { CspBenchmarkRuleMetadata } from './schema/rules/latest';
 
 export type CspStatusCode =
   | 'indexed' // latest findings index exists and has results

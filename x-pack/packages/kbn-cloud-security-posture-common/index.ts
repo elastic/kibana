@@ -19,4 +19,3 @@ export type {
   CspFinding,
 } from './types';
 export * from './constants';
-export type { CspBenchmarkRuleMetadata, CspBenchmarkRulesStates } from './schema/rules';
