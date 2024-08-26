@@ -9,24 +9,19 @@
 
 import { ContainerModule } from 'inversify';
 import { isPromise } from '@kbn/std';
-import {
-  Application,
-  ApplicationService,
-  AppMountParametersToken,
-  IAppMount,
-} from '@kbn/core-application-browser';
-import { DiService, Global, OnSetup } from '@kbn/core-di';
+import { Application, ApplicationParameters, CoreSetup, CoreStart } from '@kbn/core-di-browser';
+import { Global, OnSetup } from '@kbn/core-di';
 
-export const applicationModule = new ContainerModule(
+export const application = new ContainerModule(
   (bind, _unbind, _isBound, _rebind, _unbindAsync, onActivation) => {
-    onActivation(Application, ({ container }, application) => {
-      container.get(ApplicationService).register({
-        ...application,
+    onActivation(Application, ({ container }, definition) => {
+      container.get(CoreSetup('application')).register({
+        ...definition,
         mount(params) {
-          const scope = container.get(DiService).fork();
-          scope.bind(AppMountParametersToken).toConstantValue(params);
-          scope.bind(Global).toConstantValue(AppMountParametersToken);
-          const unmount = scope.get<IAppMount>(application).mount();
+          const scope = container.get(CoreStart('injection')).fork();
+          scope.bind(ApplicationParameters).toConstantValue(params);
+          scope.bind(Global).toConstantValue(ApplicationParameters);
+          const unmount = scope.get(definition).mount();
 
           return isPromise(unmount)
             ? unmount.finally(() => scope.unbindAll())
@@ -40,7 +35,7 @@ export const applicationModule = new ContainerModule(
         },
       });
 
-      return application;
+      return definition;
     });
 
     bind(OnSetup).toConstantValue((container) => {

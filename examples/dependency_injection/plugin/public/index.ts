@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Application } from '@kbn/core-application-browser';
+import { Application } from '@kbn/core-di-browser';
 import { ContainerModule } from 'inversify';
 import { Main } from './main';
 import { EchoService } from './service';
@@ -15,6 +15,5 @@ import { EchoService } from './service';
 export const module = new ContainerModule((bind) => {
   bind(Main).toSelf().inRequestScope();
   bind(EchoService).toSelf().inSingletonScope();
-
   bind(Application).toConstantValue(Main);
 });

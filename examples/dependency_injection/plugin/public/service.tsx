@@ -8,12 +8,12 @@
  */
 
 import { inject, injectable } from 'inversify';
-import { HttpService } from '@kbn/core-plugins-browser';
+import { CoreStart } from '@kbn/core-di-browser';
 import { HttpStart } from '@kbn/core-http-browser';
 
 @injectable()
 export class EchoService {
-  constructor(@inject(HttpService) private readonly http: HttpStart) {}
+  constructor(@inject(CoreStart('http')) private readonly http: HttpStart) {}
 
   public echo(message: string): Promise<string> {
     return this.http.post<string>('/api/di/echo', {

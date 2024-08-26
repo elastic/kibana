@@ -34,7 +34,7 @@ import { OverlayService } from '@kbn/core-overlays-browser-internal';
 import { SavedObjectsService } from '@kbn/core-saved-objects-browser-internal';
 import { NotificationsService } from '@kbn/core-notifications-browser-internal';
 import { ChromeService } from '@kbn/core-chrome-browser-internal';
-import { ApplicationService, applicationModule } from '@kbn/core-application-browser-internal';
+import { ApplicationService } from '@kbn/core-application-browser-internal';
 import { RenderingService } from '@kbn/core-rendering-browser-internal';
 import { CoreAppsService } from '@kbn/core-apps-browser-internal';
 import type { InternalCoreSetup, InternalCoreStart } from '@kbn/core-lifecycle-browser-internal';
@@ -46,6 +46,7 @@ import { UserProfileService } from '@kbn/core-user-profile-browser-internal';
 import { version as REACT_VERSION } from 'react';
 import { muteLegacyRootWarning } from '@kbn/react-mute-legacy-root-warning';
 import { CoreInjectionService } from '@kbn/core-di-internal';
+import { application as applicationModule } from '@kbn/core-di-browser-internal';
 import { KBN_LOAD_MARKS } from './events';
 import { fetchOptionalMemoryInfo } from './fetch_optional_memory_info';
 import {

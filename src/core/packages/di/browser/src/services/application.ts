@@ -8,24 +8,19 @@
  */
 
 import type { interfaces } from 'inversify';
-import type { App } from './application';
-import type { AppMount, AppMountParameters } from './app_mount';
-import type { ApplicationSetup } from './contracts';
+import type { App, AppMount, AppMountParameters } from '@kbn/core-application-browser';
 
-export interface ApplicationDefinition<HistoryLocationState = unknown>
+interface ApplicationDefinition<HistoryLocationState = unknown>
   extends Omit<App<HistoryLocationState>, 'mount'>,
-    interfaces.Newable<IAppMount<HistoryLocationState>> {}
+    interfaces.Newable<ApplicationHandler<HistoryLocationState>> {}
 
-export interface IAppMount<HistoryLocationState = unknown> {
+interface ApplicationHandler<HistoryLocationState = unknown> {
   mount(): ReturnType<AppMount<HistoryLocationState>>;
 }
 
 export const Application: interfaces.ServiceIdentifier<
-  ApplicationDefinition & Exclude<interfaces.ServiceIdentifier<IAppMount>, keyof any>
+  ApplicationDefinition & Exclude<interfaces.ServiceIdentifier<ApplicationHandler>, keyof any>
 > = Symbol.for('Application');
 
-export const ApplicationService: interfaces.ServiceIdentifier<ApplicationSetup> =
-  Symbol.for('ApplicationService');
-
-export const AppMountParametersToken: interfaces.ServiceIdentifier<AppMountParameters> =
-  Symbol.for('AppMountParameters');
+export const ApplicationParameters: interfaces.ServiceIdentifier<AppMountParameters> =
+  Symbol.for('ApplicationParameters');

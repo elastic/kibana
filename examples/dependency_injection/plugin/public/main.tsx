@@ -11,24 +11,20 @@ import React, { ContextType } from 'react';
 import ReactDOM from 'react-dom';
 import { Context } from '@redtea/react-inversify';
 import { inject, injectable } from 'inversify';
-import {
-  type IAppMount,
-  AppMountParameters,
-  AppMountParametersToken,
-  AppUnmount,
-} from '@kbn/core-application-browser';
-import { DiService, type CoreDiServiceStart } from '@kbn/core-di';
+import { AppMountParameters, AppUnmount } from '@kbn/core-application-browser';
+import type { CoreDiServiceStart } from '@kbn/core-di';
+import { ApplicationParameters, CoreStart } from '@kbn/core-di-browser';
 import { App } from './app';
 
 @injectable()
-export class Main implements IAppMount {
+export class Main {
   public static id = 'dependencyInjectionExample';
   public static title = 'Dependency Injection Example';
   public static visibleIn = [];
 
   constructor(
-    @inject(AppMountParametersToken) private readonly params: AppMountParameters,
-    @inject(DiService) private readonly di: CoreDiServiceStart
+    @inject(ApplicationParameters) private readonly params: AppMountParameters,
+    @inject(CoreStart('injection')) private readonly di: CoreDiServiceStart
   ) {}
 
   mount(): AppUnmount {

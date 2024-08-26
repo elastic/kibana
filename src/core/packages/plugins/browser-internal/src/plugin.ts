@@ -17,13 +17,13 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core-plugins-browser';
 import { Setup, Start } from '@kbn/core-di';
-import { Contract } from '@kbn/core-di-internal';
-import { type PluginDefinition, read } from './plugin_reader';
+import { Contract, toContainerModule } from '@kbn/core-di-internal';
 import {
-  createPluginInitializerModule,
-  createPluginSetupModule,
-  createPluginStartModule,
-} from './plugin_module';
+  CoreSetup as CoreSetupService,
+  CoreStart as CoreStartService,
+  PluginInitializer as PluginInitializerService,
+} from '@kbn/core-di-browser';
+import { type PluginDefinition, read } from './plugin_reader';
 
 /**
  * Lightweight wrapper around discovered plugin that is responsible for instantiating
@@ -78,8 +78,8 @@ export class PluginWrapper<
     if (this.definition.module) {
       this.container = setupContext.injection.getContainer();
       this.container.load(this.definition.module);
-      this.container.load(createPluginInitializerModule(this.initializerContext));
-      this.container.load(createPluginSetupModule(setupContext));
+      this.container.load(toContainerModule(this.initializerContext, PluginInitializerService));
+      this.container.load(toContainerModule(setupContext, CoreSetupService));
     }
 
     return [
@@ -100,7 +100,7 @@ export class PluginWrapper<
       throw new Error(`Plugin "${this.name}" can't be started since it isn't set up.`);
     }
 
-    this.container?.load(createPluginStartModule(startContext));
+    this.container?.load(toContainerModule(startContext, CoreStartService));
     const contract = [
       this.instance?.start(startContext, plugins),
       this.container?.getNamed(Contract, Start as symbol) as TStart,

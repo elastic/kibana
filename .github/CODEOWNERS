@@ -147,6 +147,8 @@ src/core/packages/deprecations/common @elastic/kibana-core
 src/core/packages/deprecations/server @elastic/kibana-core
 src/core/packages/deprecations/server-internal @elastic/kibana-core
 src/core/packages/deprecations/server-mocks @elastic/kibana-core
+src/core/packages/di/browser @elastic/kibana-core
+src/core/packages/di/browser-internal @elastic/kibana-core
 src/core/packages/di/common @elastic/kibana-core
 src/core/packages/di/common-internal @elastic/kibana-core
 src/core/packages/di/mocks @elastic/kibana-core
