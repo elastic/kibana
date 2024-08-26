@@ -150,21 +150,20 @@ export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSe
   const onChangeLogsSample = useCallback(
     (files: FileList | null) => {
       const logsSampleFile = files?.[0];
-      if (logsSampleFile == null) {
+
         setSampleFileError(undefined);
         setIntegrationSettings({
           ...integrationSettings,
           logsSampleParsed: undefined,
           samplesFormat: undefined,
         });
+
+      if (logsSampleFile == null) {
         return;
       }
 
+      setIsParsing(true);
       const reader = new FileReader();
-
-      reader.onloadstart = function () {
-        setIsParsing(true);
-      };
 
       reader.onloadend = function () {
         setIsParsing(false);
@@ -174,13 +173,9 @@ export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSe
         const fileContent = e.target?.result as string | undefined; // We can safely cast to string since we call `readAsText` to load the file.
         const { error, isTruncated, logsSampleParsed, samplesFormat } =
           parseLogsContent(fileContent);
-        setSampleFileError(error);
+
         if (error) {
-          setIntegrationSettings({
-            ...integrationSettings,
-            logsSampleParsed: undefined,
-            samplesFormat: undefined,
-          });
+          setSampleFileError(error);
           return;
         }
 
@@ -202,20 +197,10 @@ export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSe
         } else {
           setSampleFileError(i18n.LOGS_SAMPLE_ERROR.CAN_NOT_READ);
         }
-        setIntegrationSettings({
-          ...integrationSettings,
-          logsSampleParsed: undefined,
-          samplesFormat: undefined,
-        });
       };
 
       reader.onabort = function () {
         setSampleFileError(i18n.LOGS_SAMPLE_ERROR.CAN_NOT_READ);
-        setIntegrationSettings({
-          ...integrationSettings,
-          logsSampleParsed: undefined,
-          samplesFormat: undefined,
-        });
       };
 
       reader.readAsText(logsSampleFile);
