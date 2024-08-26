@@ -288,9 +288,10 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
     temperature = 0,
     signal,
     timeout,
+    toolConfig,
   }: InvokeAIActionParams): Promise<InvokeAIActionResponse> {
     const res = await this.runApi({
-      body: JSON.stringify(formatGeminiPayload({ messages, temperature })),
+      body: JSON.stringify(formatGeminiPayload({ messages, temperature, toolConfig })),
       model,
       signal,
       timeout,
