@@ -11,7 +11,6 @@ import { schema } from '@kbn/config-schema';
 import { get, set, omit } from 'lodash';
 import { flatten } from 'flat';
 
-import type { LogMeta } from '@kbn/core/server';
 import type {
   ActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
@@ -26,14 +25,6 @@ import type { ConnectorAdapter } from '@kbn/alerting-plugin/server';
 
 import { DEFAULT_ALERTS_INDEX } from '../common/constants';
 
-// see: https://en.wikipedia.org/wiki/Unicode_control_characters
-// but don't include tabs (0x09), they're fine
-const CONTROL_CHAR_PATTERN = /[\x00-\x08]|[\x0A-\x1F]|[\x7F-\x9F]|[\u2028-\u2029]/g;
-
-// replaces control characters in string with ;, but leaves tabs
-function withoutControlCharacters(s: string): string {
-  return s.replace(CONTROL_CHAR_PATTERN, ';');
-}
 
 export type ServerLogConnectorType = ConnectorType<{}, {}, ActionParamsType>;
 export type ServerLogConnectorTypeExecutorOptions = ConnectorTypeExecutorOptions<
@@ -55,7 +46,7 @@ const ParamsSchema = schema.object({
   alerts: schema.any(),
 });
 
-export const ConnectorTypeId = '.nikita';
+export const ConnectorTypeId = '.workflow-connector';
 
 // connector type definition
 export function getConnectorType(): ServerLogConnectorType {
@@ -86,10 +77,6 @@ export const connectorAdapter: ConnectorAdapter<{ alerts: any }, { alerts: any }
   connectorTypeId: ConnectorTypeId,
   ruleActionParamsSchema: ParamsSchema,
   buildActionParams: ({ alerts, rule, params, spaceId, ruleUrl }) => {
-    console.log(JSON.stringify(params));
-    console.log('------- 9000000000------');
-    // const message = `The system has detected ${alerts.new.count} new, ${alerts.ongoing.count} ongoing, and ${alerts.recovered.count} recovered alerts.`;
-
     return {
       ...params,
       alerts,
@@ -147,7 +134,6 @@ const actions = [
     },
   },
 ];
-
 
 const processAlerts = async (alerts, actions, services) => {
   return await processAction(alerts, actions[0], services);
@@ -228,7 +214,9 @@ const conditionAlerts = async (alerts, config, services) => {
     }
   }
 
-  const processedTrueBranch = trueBranch ? await processAction(trueBranchAlerts, trueBranch, services) : [];
+  const processedTrueBranch = trueBranch
+    ? await processAction(trueBranchAlerts, trueBranch, services)
+    : [];
   const processedFalseBranch = falseBranch
     ? await processAction(falseBranchAlerts, falseBranch, services)
     : [];
@@ -238,7 +226,7 @@ const conditionAlerts = async (alerts, config, services) => {
 
 const assignAlerts = async (alerts, config) => {
   return alerts.map((alert) => {
-    const updatedAlert = { ...alert }; // Copy the alert to avoid mutation
+    const updatedAlert = { ...alert }; 
     updatedAlert['kibana.alert.workflow_assignee_ids'] = config.assignTo;
     return updatedAlert;
   });
@@ -246,8 +234,8 @@ const assignAlerts = async (alerts, config) => {
 
 const closeAlerts = async (alerts) => {
   return alerts.map((alert) => {
-    const updatedAlert = { ...alert }; // Copy the alert to avoid mutation
-    updatedAlert['kibana.alert.workflow_status'] = "closed";
+    const updatedAlert = { ...alert }; 
+    updatedAlert['kibana.alert.workflow_status'] = 'closed';
     return updatedAlert;
   });
 };
@@ -260,7 +248,6 @@ const evaluateCondition = (alert, condition) => {
   } else if (type === 'MORE') {
     return get(alert, field) > condition.value;
   }
-  // Additional condition types can be handled here (e.g., EQUAL, GREATER_THAN)
   return false;
 };
 
@@ -269,8 +256,6 @@ async function executor(
 ): Promise<ConnectorTypeExecutorResult<void>> {
   const { actionId, params, logger } = execOptions;
   try {
-    console.log('------- 123 123123 123------');
-
     const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
     await wait(15000);
     const newAlerts = params?.alerts?.all?.data;
@@ -293,12 +278,8 @@ async function executor(
 
     // Execute the bulk update
     const response = await esClient.bulk({ refresh: true, body: bulkOps });
-
-    logger.info<LogMeta>(`!!!!!! --- - - - - -System action example: Server log:`);
   } catch (err) {
-    const message = i18n.translate('xpack.stackConnectors.serverLog.errorLoggingErrorMessage', {
-      defaultMessage: 'error logging message',
-    });
+    const message = 'error';
     return {
       status: 'error',
       message,
