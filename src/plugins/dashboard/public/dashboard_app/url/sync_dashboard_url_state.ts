@@ -69,8 +69,7 @@ function getPanelsMap(appStateInUrl: SharedDashboardState): DashboardPanelMap | 
  * Loads any dashboard state from the URL, and removes the state from the URL.
  */
 export const loadAndRemoveDashboardState = (
-  kbnUrlStateStorage: IKbnUrlStateStorage,
-  dashboard?: DashboardAPI
+  kbnUrlStateStorage: IKbnUrlStateStorage
 ): Partial<DashboardContainerInput> => {
   const rawAppStateInUrl = kbnUrlStateStorage.get<SharedDashboardState>(
     DASHBOARD_STATE_STORAGE_KEY
@@ -79,17 +78,10 @@ export const loadAndRemoveDashboardState = (
 
   const panelsMap = getPanelsMap(rawAppStateInUrl);
 
-  // Update the url based on if there is an expanded panel or is minimized
-  const expandedPanelURL =
-    dashboard && dashboard.expandedPanelId.value
-      ? `${window.location.href}/${dashboard.expandedPanelId.value}`
-      : window.location.href;
-
-  const nextUrl = replaceUrlHashQuery(expandedPanelURL, (hashQuery) => {
+  const nextUrl = replaceUrlHashQuery(window.location.href, (hashQuery) => {
     delete hashQuery[DASHBOARD_STATE_STORAGE_KEY];
     return hashQuery;
   });
-
   kbnUrlStateStorage.kbnUrlControls.update(nextUrl, true);
   const partialState: Partial<DashboardContainerInput> = {
     ..._.omit(rawAppStateInUrl, ['panels', 'query']),
@@ -127,15 +119,13 @@ export const startSyncingDashboardUrlState = ({
     )}`,
   });
   const globalStateInUrl = kbnUrlStateStorage.get<QueryState>(GLOBAL_STATE_STORAGE_KEY) || {};
-
   url = setStateToKbnUrl<QueryState>(GLOBAL_STATE_STORAGE_KEY, globalStateInUrl, { useHash }, url);
   navigateToUrl(url);
   const appStateSubscription = kbnUrlStateStorage
     .change$(DASHBOARD_STATE_STORAGE_KEY)
     .pipe(debounceTime(10)) // debounce URL updates so react has time to unsubscribe when changing URLs
     .subscribe(() => {
-      // need to update this to account for the new expandedPanelId
-      const stateFromUrl = loadAndRemoveDashboardState(kbnUrlStateStorage, dashboardAPI);
+      const stateFromUrl = loadAndRemoveDashboardState(kbnUrlStateStorage);
       if (Object.keys(stateFromUrl).length === 0) return;
       dashboardAPI.updateInput(stateFromUrl);
     });
