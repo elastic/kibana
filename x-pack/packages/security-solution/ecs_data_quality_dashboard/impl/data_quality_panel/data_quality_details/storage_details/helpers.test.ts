@@ -8,7 +8,7 @@
 import numeral from '@elastic/numeral';
 import { euiThemeVars } from '@kbn/ui-theme';
 
-import { EMPTY_STAT } from '../../helpers';
+import { EMPTY_STAT } from '../../constants';
 import {
   DEFAULT_INDEX_COLOR,
   getFillColor,

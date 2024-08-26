@@ -9,8 +9,8 @@ import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 
-import { getPatternIlmPhaseDescription } from '../../../../../../helpers';
 import type { IlmExplainPhaseCounts, IlmPhase } from '../../../../../../types';
+import { getPatternIlmPhaseDescription } from './utils/get_pattern_ilm_phase_description';
 
 const PhaseCountsFlexGroup = styled(EuiFlexGroup)`
   display: inline-flex;

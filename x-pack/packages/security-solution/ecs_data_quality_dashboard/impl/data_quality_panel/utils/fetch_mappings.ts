@@ -9,7 +9,7 @@ import type { HttpHandler } from '@kbn/core-http-browser';
 import type { IndicesGetMappingIndexMappingRecord } from '@elastic/elasticsearch/lib/api/types';
 
 import * as i18n from '../translations';
-import { INTERNAL_API_VERSION } from '../helpers';
+import { INTERNAL_API_VERSION } from '../constants';
 
 export const MAPPINGS_API_ROUTE = '/internal/ecs_data_quality_dashboard/mappings';
 
