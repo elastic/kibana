@@ -94,7 +94,62 @@
                 "DatasetQualityPublicState",
                 "> | undefined; }"
               ],
-              "path": "x-pack/plugins/observability_solution/dataset_quality/public/controller/create_controller.ts",
+              "path": "x-pack/plugins/observability_solution/dataset_quality/public/controller/dataset_quality/create_controller.ts",
+              "deprecated": false,
+              "trackAdoption": false
+            }
+          ]
+        },
+        {
+          "parentPluginId": "datasetQuality",
+          "id": "def-public.DatasetQualityPluginStart.DatasetQualityDetails",
+          "type": "CompoundType",
+          "tags": [],
+          "label": "DatasetQualityDetails",
+          "description": [],
+          "signature": [
+            "React.ComponentClass<",
+            "DatasetQualityDetailsProps",
+            ", any> | React.FunctionComponent<",
+            "DatasetQualityDetailsProps",
+            ">"
+          ],
+          "path": "x-pack/plugins/observability_solution/dataset_quality/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "datasetQuality",
+          "id": "def-public.DatasetQualityPluginStart.createDatasetQualityDetailsController",
+          "type": "Function",
+          "tags": [],
+          "label": "createDatasetQualityDetailsController",
+          "description": [],
+          "signature": [
+            "({ initialState, }: { initialState: ",
+            "DatasetQualityDetailsPublicStateUpdate",
+            "; }) => Promise<",
+            "DatasetQualityDetailsController",
+            ">"
+          ],
+          "path": "x-pack/plugins/observability_solution/dataset_quality/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "datasetQuality",
+              "id": "def-public.DatasetQualityPluginStart.createDatasetQualityDetailsController.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "__0",
+              "description": [],
+              "signature": [
+                "{ initialState: ",
+                "DatasetQualityDetailsPublicStateUpdate",
+                "; }"
+              ],
+              "path": "x-pack/plugins/observability_solution/dataset_quality/public/controller/dataset_quality_details/create_controller.ts",
               "deprecated": false,
               "trackAdoption": false
             }
@@ -115,7 +170,41 @@
   },
   "common": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "datasetQuality",
+        "id": "def-common.indexNameToDataStreamParts",
+        "type": "Function",
+        "tags": [],
+        "label": "indexNameToDataStreamParts",
+        "description": [],
+        "signature": [
+          "(dataStreamName: string) => { type: \"profiling\" | \"metrics\" | \"synthetics\" | \"traces\" | \"logs\"; dataset: string; namespace: string; }"
+        ],
+        "path": "x-pack/plugins/observability_solution/dataset_quality/common/utils/dataset_name.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "datasetQuality",
+            "id": "def-common.indexNameToDataStreamParts.$1",
+            "type": "string",
+            "tags": [],
+            "label": "dataStreamName",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/observability_solution/dataset_quality/common/utils/dataset_name.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
       {
         "parentPluginId": "datasetQuality",
@@ -159,7 +248,7 @@
           "KeyofC",
           "<{ logs: null; metrics: null; traces: null; synthetics: null; profiling: null; }>; }>; }> | undefined; handler: ({}: ",
           "DatasetQualityRouteHandlerResources",
-          " & { params: { query: { type?: \"metrics\" | \"synthetics\" | \"traces\" | \"logs\" | \"profiling\" | undefined; }; }; }) => Promise<{ integrations: ({ name: string; } & { title?: string | undefined; version?: string | undefined; icons?: ({ path: string; src: string; } & { title?: string | undefined; size?: string | undefined; type?: string | undefined; })[] | undefined; datasets?: { [x: string]: string; } | undefined; })[]; }>; } & ",
+          " & { params: { query: { type?: \"profiling\" | \"metrics\" | \"synthetics\" | \"traces\" | \"logs\" | undefined; }; }; }) => Promise<{ integrations: ({ name: string; } & { title?: string | undefined; version?: string | undefined; icons?: ({ src: string; } & { path?: string | undefined; size?: string | undefined; title?: string | undefined; type?: string | undefined; })[] | undefined; datasets?: { [x: string]: string; } | undefined; })[]; }>; } & ",
           "DatasetQualityRouteCreateOptions",
           "; \"GET /internal/dataset_quality/data_streams/{dataStream}/settings\": { endpoint: \"GET /internal/dataset_quality/data_streams/{dataStream}/settings\"; params?: ",
           "TypeC",
@@ -169,7 +258,7 @@
           "StringC",
           "; }>; }> | undefined; handler: ({}: ",
           "DatasetQualityRouteHandlerResources",
-          " & { params: { path: { dataStream: string; }; }; }) => Promise<{ createdOn?: number | null | undefined; integration?: string | undefined; }>; } & ",
+          " & { params: { path: { dataStream: string; }; }; }) => Promise<{ createdOn?: number | null | undefined; integration?: string | undefined; datasetUserPrivileges?: ({ canMonitor: boolean; } & { canRead: boolean; canViewIntegrations: boolean; }) | undefined; }>; } & ",
           "DatasetQualityRouteCreateOptions",
           "; \"GET /internal/dataset_quality/data_streams/{dataStream}/details\": { endpoint: \"GET /internal/dataset_quality/data_streams/{dataStream}/details\"; params?: ",
           "TypeC",
@@ -223,7 +312,7 @@
           "StringC",
           "; }>]>; }> | undefined; handler: ({}: ",
           "DatasetQualityRouteHandlerResources",
-          " & { params: { query: { start: number; end: number; } & { type?: \"metrics\" | \"synthetics\" | \"traces\" | \"logs\" | \"profiling\" | undefined; } & { dataStream?: string | undefined; }; }; }) => Promise<{ aggregatable: boolean; datasets: string[]; }>; } & ",
+          " & { params: { query: { start: number; end: number; } & { type?: \"profiling\" | \"metrics\" | \"synthetics\" | \"traces\" | \"logs\" | undefined; } & { dataStream?: string | undefined; }; }; }) => Promise<{ aggregatable: boolean; datasets: string[]; }>; } & ",
           "DatasetQualityRouteCreateOptions",
           "; \"GET /internal/dataset_quality/data_streams/degraded_docs\": { endpoint: \"GET /internal/dataset_quality/data_streams/degraded_docs\"; params?: ",
           "TypeC",
@@ -245,7 +334,7 @@
           "StringC",
           "; }>]>; }> | undefined; handler: ({}: ",
           "DatasetQualityRouteHandlerResources",
-          " & { params: { query: { start: number; end: number; } & { type?: \"metrics\" | \"synthetics\" | \"traces\" | \"logs\" | \"profiling\" | undefined; } & { datasetQuery?: string | undefined; }; }; }) => Promise<{ degradedDocs: { dataset: string; count: number; docsCount: number; percentage: number; }[]; }>; } & ",
+          " & { params: { query: { start: number; end: number; } & { type?: \"profiling\" | \"metrics\" | \"synthetics\" | \"traces\" | \"logs\" | undefined; } & { datasetQuery?: string | undefined; }; }; }) => Promise<{ degradedDocs: { dataset: string; count: number; docsCount: number; percentage: number; }[]; }>; } & ",
           "DatasetQualityRouteCreateOptions",
           "; \"GET /internal/dataset_quality/data_streams/stats\": { endpoint: \"GET /internal/dataset_quality/data_streams/stats\"; params?: ",
           "TypeC",
@@ -261,24 +350,30 @@
           "StringC",
           "; }>]>; }> | undefined; handler: ({}: ",
           "DatasetQualityRouteHandlerResources",
-          " & { params: { query: { type?: \"metrics\" | \"synthetics\" | \"traces\" | \"logs\" | \"profiling\" | undefined; } & { datasetQuery?: string | undefined; }; }; }) => Promise<{ datasetUserPrivileges: { canMonitor: boolean; } & { canRead: boolean; canViewIntegrations: boolean; }; dataStreamsStats: ({ name: string; userPrivileges: { canMonitor: boolean; }; } & { size?: string | undefined; sizeBytes?: number | undefined; lastActivity?: number | undefined; integration?: string | undefined; totalDocs?: number | null | undefined; })[]; }>; } & ",
+          " & { params: { query: { type?: \"profiling\" | \"metrics\" | \"synthetics\" | \"traces\" | \"logs\" | undefined; } & { datasetQuery?: string | undefined; }; }; }) => Promise<{ datasetUserPrivileges: { canMonitor: boolean; } & { canRead: boolean; canViewIntegrations: boolean; }; dataStreamsStats: ({ name: string; userPrivileges: { canMonitor: boolean; }; } & { size?: string | undefined; sizeBytes?: number | undefined; lastActivity?: number | undefined; integration?: string | undefined; totalDocs?: number | null | undefined; })[]; }>; } & ",
           "DatasetQualityRouteCreateOptions",
           "; }[TEndpoint] extends { endpoint: any; params?: infer TRouteParamsRT extends ",
           {
-            "pluginId": "@kbn/server-route-repository",
-            "scope": "server",
-            "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-server.RouteParamsRT",
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.RouteParamsRT",
             "text": "RouteParamsRT"
           },
           " | undefined | undefined; handler: ({}: any) => Promise<any>; } & ",
-          "ServerRouteCreateOptions",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRouteCreateOptions",
+            "text": "ServerRouteCreateOptions"
+          },
           " ? TRouteParamsRT extends ",
           {
-            "pluginId": "@kbn/server-route-repository",
-            "scope": "server",
-            "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-server.RouteParamsRT",
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.RouteParamsRT",
             "text": "RouteParamsRT"
           },
           " ? ClientRequestParamsOfType<TRouteParamsRT> : {} : never"
@@ -314,7 +409,7 @@
           "KeyofC",
           "<{ logs: null; metrics: null; traces: null; synthetics: null; profiling: null; }>; }>; }> | undefined; handler: ({}: ",
           "DatasetQualityRouteHandlerResources",
-          " & { params: { query: { type?: \"metrics\" | \"synthetics\" | \"traces\" | \"logs\" | \"profiling\" | undefined; }; }; }) => Promise<{ integrations: ({ name: string; } & { title?: string | undefined; version?: string | undefined; icons?: ({ path: string; src: string; } & { title?: string | undefined; size?: string | undefined; type?: string | undefined; })[] | undefined; datasets?: { [x: string]: string; } | undefined; })[]; }>; } & ",
+          " & { params: { query: { type?: \"profiling\" | \"metrics\" | \"synthetics\" | \"traces\" | \"logs\" | undefined; }; }; }) => Promise<{ integrations: ({ name: string; } & { title?: string | undefined; version?: string | undefined; icons?: ({ src: string; } & { path?: string | undefined; size?: string | undefined; title?: string | undefined; type?: string | undefined; })[] | undefined; datasets?: { [x: string]: string; } | undefined; })[]; }>; } & ",
           "DatasetQualityRouteCreateOptions",
           "; \"GET /internal/dataset_quality/data_streams/{dataStream}/settings\": { endpoint: \"GET /internal/dataset_quality/data_streams/{dataStream}/settings\"; params?: ",
           "TypeC",
@@ -324,7 +419,7 @@
           "StringC",
           "; }>; }> | undefined; handler: ({}: ",
           "DatasetQualityRouteHandlerResources",
-          " & { params: { path: { dataStream: string; }; }; }) => Promise<{ createdOn?: number | null | undefined; integration?: string | undefined; }>; } & ",
+          " & { params: { path: { dataStream: string; }; }; }) => Promise<{ createdOn?: number | null | undefined; integration?: string | undefined; datasetUserPrivileges?: ({ canMonitor: boolean; } & { canRead: boolean; canViewIntegrations: boolean; }) | undefined; }>; } & ",
           "DatasetQualityRouteCreateOptions",
           "; \"GET /internal/dataset_quality/data_streams/{dataStream}/details\": { endpoint: \"GET /internal/dataset_quality/data_streams/{dataStream}/details\"; params?: ",
           "TypeC",
@@ -378,7 +473,7 @@
           "StringC",
           "; }>]>; }> | undefined; handler: ({}: ",
           "DatasetQualityRouteHandlerResources",
-          " & { params: { query: { start: number; end: number; } & { type?: \"metrics\" | \"synthetics\" | \"traces\" | \"logs\" | \"profiling\" | undefined; } & { dataStream?: string | undefined; }; }; }) => Promise<{ aggregatable: boolean; datasets: string[]; }>; } & ",
+          " & { params: { query: { start: number; end: number; } & { type?: \"profiling\" | \"metrics\" | \"synthetics\" | \"traces\" | \"logs\" | undefined; } & { dataStream?: string | undefined; }; }; }) => Promise<{ aggregatable: boolean; datasets: string[]; }>; } & ",
           "DatasetQualityRouteCreateOptions",
           "; \"GET /internal/dataset_quality/data_streams/degraded_docs\": { endpoint: \"GET /internal/dataset_quality/data_streams/degraded_docs\"; params?: ",
           "TypeC",
@@ -400,7 +495,7 @@
           "StringC",
           "; }>]>; }> | undefined; handler: ({}: ",
           "DatasetQualityRouteHandlerResources",
-          " & { params: { query: { start: number; end: number; } & { type?: \"metrics\" | \"synthetics\" | \"traces\" | \"logs\" | \"profiling\" | undefined; } & { datasetQuery?: string | undefined; }; }; }) => Promise<{ degradedDocs: { dataset: string; count: number; docsCount: number; percentage: number; }[]; }>; } & ",
+          " & { params: { query: { start: number; end: number; } & { type?: \"profiling\" | \"metrics\" | \"synthetics\" | \"traces\" | \"logs\" | undefined; } & { datasetQuery?: string | undefined; }; }; }) => Promise<{ degradedDocs: { dataset: string; count: number; docsCount: number; percentage: number; }[]; }>; } & ",
           "DatasetQualityRouteCreateOptions",
           "; \"GET /internal/dataset_quality/data_streams/stats\": { endpoint: \"GET /internal/dataset_quality/data_streams/stats\"; params?: ",
           "TypeC",
@@ -416,10 +511,16 @@
           "StringC",
           "; }>]>; }> | undefined; handler: ({}: ",
           "DatasetQualityRouteHandlerResources",
-          " & { params: { query: { type?: \"metrics\" | \"synthetics\" | \"traces\" | \"logs\" | \"profiling\" | undefined; } & { datasetQuery?: string | undefined; }; }; }) => Promise<{ datasetUserPrivileges: { canMonitor: boolean; } & { canRead: boolean; canViewIntegrations: boolean; }; dataStreamsStats: ({ name: string; userPrivileges: { canMonitor: boolean; }; } & { size?: string | undefined; sizeBytes?: number | undefined; lastActivity?: number | undefined; integration?: string | undefined; totalDocs?: number | null | undefined; })[]; }>; } & ",
+          " & { params: { query: { type?: \"profiling\" | \"metrics\" | \"synthetics\" | \"traces\" | \"logs\" | undefined; } & { datasetQuery?: string | undefined; }; }; }) => Promise<{ datasetUserPrivileges: { canMonitor: boolean; } & { canRead: boolean; canViewIntegrations: boolean; }; dataStreamsStats: ({ name: string; userPrivileges: { canMonitor: boolean; }; } & { size?: string | undefined; sizeBytes?: number | undefined; lastActivity?: number | undefined; integration?: string | undefined; totalDocs?: number | null | undefined; })[]; }>; } & ",
           "DatasetQualityRouteCreateOptions",
           "; }[TEndpoint] extends { endpoint: any; params?: any; handler: ({}: any) => Promise<infer TReturnType>; } & ",
-          "ServerRouteCreateOptions",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRouteCreateOptions",
+            "text": "ServerRouteCreateOptions"
+          },
           " ? TReturnType extends ",
           {
             "pluginId": "@kbn/core-http-server",

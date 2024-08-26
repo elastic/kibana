@@ -15,10 +15,6 @@ const yaml = require('js-yaml');
 const https = require('https');
 // eslint-disable-next-line import/no-extraneous-dependencies
 const { get, isArray, isEmpty, isNumber, isString, pick } = require('lodash');
-// eslint-disable-next-line import/no-extraneous-dependencies
-const Q = require('q');
-// eslint-disable-next-line import/no-extraneous-dependencies
-const rimraf = require('rimraf');
 const { resolve } = require('path');
 // eslint-disable-next-line import/no-extraneous-dependencies
 const tar = require('tar');
@@ -57,26 +53,31 @@ const beats = [
 
 const download = async (url, filepath) => {
   const fileStream = fs.createWriteStream(filepath);
-  const deferred = Q.defer();
+  let resolve;
+  let reject;
+  const promise = new Promise((res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
 
   fileStream
     .on('open', function () {
       https.get(url, function (res) {
         res.on('error', function (err) {
-          deferred.reject(err);
+          reject(err);
         });
 
         res.pipe(fileStream);
       });
     })
     .on('error', function (err) {
-      deferred.reject(err);
+      reject(err);
     })
     .on('finish', function () {
-      deferred.resolve(filepath);
+      resolve(filepath);
     });
 
-  return deferred.promise;
+  return promise;
 };
 
 const paramsToPick = ['category', 'description', 'example', 'name', 'type', 'format'];
@@ -137,15 +138,15 @@ const manageZipFields = async (beat, filePath, beatFields) => {
   try {
     await extract(filePath, { dir: beat.outputDir });
     console.log('building fields', beat.index);
-    const obj = yaml.load(
+    const obj = yaml.safeLoad(
       fs.readFileSync(`${beat.outputDir}/winlogbeat-${BEATS_VERSION}-windows-x86_64/fields.yml`, {
         encoding: 'utf-8',
       })
     );
     const eBeatFields = convertSchemaToHash(obj, beatFields);
     console.log('deleting files', beat.index);
-    rimraf.sync(`${beat.outputDir}/winlogbeat-${BEATS_VERSION}-windows-x86_64`);
-    rimraf.sync(beat.filePath);
+    fs.rmSync(`${beat.outputDir}/winlogbeat-${BEATS_VERSION}-windows-x86_64`, { recursive: true });
+    fs.rmSync(beat.filePath, { recursive: true });
 
     return eBeatFields;
   } catch (err) {
@@ -171,13 +172,13 @@ const manageTarFields = async (beat, filePath, beatFields) =>
           return reject(new Error(err));
         }
         console.log('building fields', beat.index);
-        const obj = yaml.load(
+        const obj = yaml.safeLoad(
           fs.readFileSync(`${beat.outputDir}/fields.yml`, { encoding: 'utf-8' })
         );
         const ebeatFields = convertSchemaToHash(obj, beatFields);
         console.log('deleting files', beat.index);
-        rimraf.sync(beat.outputDir);
-        rimraf.sync(beat.filePath);
+        fs.rmSync(beat.outputDir, { recursive: true });
+        fs.rmSync(beat.filePath, { recursive: true });
         resolve(ebeatFields);
       });
   });

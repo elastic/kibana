@@ -311,6 +311,7 @@ describe('#installArchive()', () => {
       esArgs: ['foo=true'],
       log,
       disableEsTmpDir: true,
+      resources: ['path/to/resource'],
     };
     const cluster = new Cluster({ log });
     await cluster.installArchive('bar', options);

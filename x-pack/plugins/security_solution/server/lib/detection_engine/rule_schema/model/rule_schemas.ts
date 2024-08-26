@@ -16,7 +16,7 @@ import type {
   SIGNALS_ID,
   THRESHOLD_RULE_TYPE_ID,
 } from '@kbn/securitysolution-rules';
-import * as z from 'zod';
+import * as z from '@kbn/zod';
 import type { CreateRuleData } from '@kbn/alerting-plugin/server/application/rule/methods/create';
 import type { UpdateRuleData } from '@kbn/alerting-plugin/server/application/rule/methods/update';
 import { RuleResponseAction } from '../../../../../common/api/detection_engine';
