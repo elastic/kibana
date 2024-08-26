@@ -202,7 +202,7 @@ describe('convertToPercentileRankColumns', () => {
       expect(convertToPercentileRankColumns(...input)).toBeNull();
     } else if (Array.isArray(expected)) {
       expect(convertToPercentileRankColumns(...input)).toEqual(
-        expected.map(expect.objectContaining)
+        expected.map((el) => (el === null ? null : expect.objectContaining(el)))
       );
     } else {
       expect(convertToPercentileRankColumns(...input)).toEqual(expect.objectContaining(expected));
