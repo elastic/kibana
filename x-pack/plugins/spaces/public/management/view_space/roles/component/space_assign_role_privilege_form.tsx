@@ -30,8 +30,9 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { KibanaFeature, KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { type RawKibanaPrivileges } from '@kbn/security-authorization-core';
 import type { Role } from '@kbn/security-plugin-types-common';
-import { KibanaPrivileges, type RawKibanaPrivileges } from '@kbn/security-role-management-model';
+import { KibanaPrivileges } from '@kbn/security-role-management-model';
 import { KibanaPrivilegeTable, PrivilegeFormCalculator } from '@kbn/security-ui-components';
 
 import type { Space } from '../../../../../common';
@@ -105,7 +106,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
   }, [selectedRoles, space.id]);
 
   const [roleSpacePrivilege, setRoleSpacePrivilege] = useState<KibanaRolePrivilege>(
-    !selectedRoles.length || selectedRolesCombinedPrivileges.length > 1
+    !selectedRoles.length || !selectedRolesCombinedPrivileges.length
       ? 'read'
       : selectedRolesCombinedPrivileges[0]
   );
@@ -114,12 +115,12 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
     async function fetchRequiredData(spaceId: string) {
       setFetchingDataDeps(true);
 
-      const [systemRoles, _kibanaPrivileges] = await Promise.all([
-        spacesClientsInvocator((clients) => clients.rolesClient.getRoles()),
-        spacesClientsInvocator((clients) =>
-          clients.privilegesClient.getAll({ includeActions: true, respectLicenseLevel: false })
-        ),
-      ]);
+      const [systemRoles, _kibanaPrivileges] = await spacesClientsInvocator((clients) =>
+        Promise.all([
+          clients.rolesClient.getRoles(),
+          clients.privilegesClient.getAll({ includeActions: true, respectLicenseLevel: false }),
+        ])
+      );
 
       // exclude roles that are already assigned to this space
       setSpaceUnallocatedRole(
@@ -307,6 +308,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
               <EuiCallOut
                 color="warning"
                 iconType="iInCircle"
+                data-test-subj="privilege-conflict-callout"
                 title={i18n.translate(
                   'xpack.spaces.management.spaceDetails.roles.assign.privilegeConflictMsg.title',
                   {
@@ -335,6 +337,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
           )}
         >
           <EuiButtonGroup
+            data-test-subj="privilegeSelectionSwitch"
             legend="select the privilege for the features enabled in this space"
             isDisabled={!Boolean(selectedRoles.length)}
             options={[
@@ -374,6 +377,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
         </EuiFormRow>
         {roleSpacePrivilege === 'custom' && (
           <EuiFormRow
+            data-test-subj="rolePrivilegeCustomizationForm"
             label={i18n.translate(
               'xpack.spaces.management.spaceDetails.roles.assign.privileges.customizeLabelText',
               { defaultMessage: 'Customize by feature' }
