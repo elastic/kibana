@@ -15,6 +15,8 @@ import {
   PackagePolicyInput,
   UpdatePackagePolicy,
 } from '@kbn/fleet-plugin/common';
+import type { BenchmarkRuleSelectParams } from '@kbn/cloud-security-posture-common/schema/rules/latest';
+import type { BenchmarkRuleSelectParams as BenchmarkRuleSelectParamsV1 } from '@kbn/cloud-security-posture-common/schema/rules/v4';
 import {
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
   CLOUDBEAT_VANILLA,
@@ -31,8 +33,7 @@ import type {
   AzureCredentialsType,
   RuleSection,
 } from '../types_old';
-import type { BenchmarkRuleSelectParams, BenchmarksCisId } from '../types/latest';
-import type { BenchmarkRuleSelectParams as BenchmarkRuleSelectParamsV1 } from '../types/rules/v4';
+import type { BenchmarksCisId } from '../types/latest';
 
 /**
  * @example
