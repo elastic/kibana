@@ -12,6 +12,9 @@ import { Serializable } from '../serializable';
 import { k8sContainer } from './k8s_container';
 
 interface PodDocument extends Fields {
+  'agent.id': string;
+  'host.hostname': string;
+  'host.name': string;
   'kubernetes.pod.uid': string;
   'kubernetes.node.name': string;
   'metricset.name'?: string;
@@ -40,5 +43,8 @@ export function pod(uid: string, nodeName: string) {
   return new Pod({
     'kubernetes.pod.uid': uid,
     'kubernetes.node.name': nodeName,
+    'agent.id': 'synthtrace',
+    'host.hostname': nodeName,
+    'host.name': nodeName,
   });
 }

@@ -94,7 +94,7 @@ export const MonitorTypeRadioGroup = ({
       {selectedOption && (
         <EuiPanel color="primary" aria-live="polite">
           <EuiText size="s">
-            <h4>{selectedOption.descriptionTitle}</h4>
+            <h3>{selectedOption.descriptionTitle}</h3>
           </EuiText>
           <EuiText size="s" color="subdued">
             <span>{`${selectedOption.description} `}</span>
