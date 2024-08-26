@@ -25,7 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.switchToEditMode();
     });
 
-    describe('filtering settings', async () => {
+    describe('filtering settings', () => {
       const firstOptionsListId = 'bcb81550-0843-44ea-9020-6c1ebf3228ac';
       let beforeCount: number;
 
@@ -55,7 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         beforeRange = await getRange();
       });
 
-      describe('do not apply global filters', async () => {
+      describe('do not apply global filters', () => {
         it('- filter pills', async () => {
           await filterBar.addFilter({ field: 'animal.keyword', operation: 'is', value: 'cat' });
           await dashboardControls.optionsListOpenPopover(firstOptionsListId);
@@ -105,7 +105,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('control group settings flyout closes', async () => {
+    describe('control group settings flyout closes', () => {
       it('when navigating away from dashboard', async () => {
         await dashboard.switchToEditMode();
         await dashboardControls.openControlGroupSettingsFlyout();
