@@ -347,134 +347,128 @@ export const getVisualizeEmbeddableFactory: (deps: {
 
     const fetchSubscription = fetch$(api)
       .pipe(
-        switchMap((data) => {
-          return (async () => {
-            const unifiedSearch = apiPublishesUnifiedSearch(parentApi)
-              ? {
-                  query: data.query,
-                  filters: data.filters,
+        switchMap(async (data) => {
+          const unifiedSearch = apiPublishesUnifiedSearch(parentApi)
+            ? {
+                query: data.query,
+                filters: data.filters,
+              }
+            : {};
+          const searchSessionId = apiPublishesSearchSession(parentApi) ? data.searchSessionId : '';
+          searchSessionId$.next(searchSessionId);
+          const settings = apiPublishesSettings(parentApi)
+            ? {
+                syncColors: parentApi.settings.syncColors$.getValue(),
+                syncCursor: parentApi.settings.syncCursor$.getValue(),
+                syncTooltips: parentApi.settings.syncTooltips$.getValue(),
+              }
+            : {};
+
+          dataLoading$.next(true);
+
+          const timeslice = apiPublishesTimeslice(parentApi)
+            ? parentApi.timeslice$.getValue()
+            : undefined;
+
+          const customTimeRange = customTimeRangeApi.timeRange$.getValue();
+          const parentTimeRange = apiPublishesTimeRange(parentApi) ? data.timeRange : undefined;
+          const timesliceTimeRange = timeslice
+            ? {
+                from: new Date(timeslice[0]).toISOString(),
+                to: new Date(timeslice[1]).toISOString(),
+                mode: 'absolute' as 'absolute',
+              }
+            : undefined;
+
+          // Precedence should be:
+          //  custom time range from state >
+          //  timeslice time range >
+          //  parent API time range from e.g. unified search
+          const timeRangeToRender = customTimeRange ?? timesliceTimeRange ?? parentTimeRange;
+
+          getExpressionParams = async () => {
+            return await getExpressionRendererProps({
+              unifiedSearch,
+              vis: vis$.getValue(),
+              settings,
+              disableTriggers,
+              searchSessionId,
+              parentExecutionContext: executionContext,
+              abortController: expressionAbortController$.getValue(),
+              timeRange: timeRangeToRender,
+              onRender: async (renderCount) => {
+                if (renderCount === renderCount$.getValue()) return;
+                renderCount$.next(renderCount);
+                const visInstance = vis$.getValue();
+                const visTypeName = visInstance.type.name;
+
+                let telemetryVisTypeName = visTypeName;
+                if (visTypeName === 'metrics') {
+                  telemetryVisTypeName = 'legacy_metric';
                 }
-              : {};
-            const searchSessionId = apiPublishesSearchSession(parentApi)
-              ? data.searchSessionId
-              : '';
-            searchSessionId$.next(searchSessionId);
-            const settings = apiPublishesSettings(parentApi)
-              ? {
-                  syncColors: parentApi.settings.syncColors$.getValue(),
-                  syncCursor: parentApi.settings.syncCursor$.getValue(),
-                  syncTooltips: parentApi.settings.syncTooltips$.getValue(),
+                if (visTypeName === 'pie' && visInstance.params.isDonut) {
+                  telemetryVisTypeName = 'donut';
                 }
-              : {};
-
-            dataLoading$.next(true);
-
-            const timeslice = apiPublishesTimeslice(parentApi)
-              ? parentApi.timeslice$.getValue()
-              : undefined;
-
-            const customTimeRange = customTimeRangeApi.timeRange$.getValue();
-            const parentTimeRange = apiPublishesTimeRange(parentApi) ? data.timeRange : undefined;
-            const timesliceTimeRange = timeslice
-              ? {
-                  from: new Date(timeslice[0]).toISOString(),
-                  to: new Date(timeslice[1]).toISOString(),
-                  mode: 'absolute' as 'absolute',
+                if (
+                  visTypeName === 'area' &&
+                  visInstance.params.seriesParams.some(
+                    (seriesParams: { mode: string }) => seriesParams.mode === 'stacked'
+                  )
+                ) {
+                  telemetryVisTypeName = 'area_stacked';
                 }
-              : undefined;
 
-            // Precedence should be:
-            //  custom time range from state >
-            //  timeslice time range >
-            //  parent API time range from e.g. unified search
-            const timeRangeToRender = customTimeRange ?? timesliceTimeRange ?? parentTimeRange;
+                getUsageCollection().reportUiCounter(
+                  executionContext?.type ?? '',
+                  'count',
+                  `render_agg_based_${telemetryVisTypeName}`
+                );
 
-            getExpressionParams = async () => {
-              return await getExpressionRendererProps({
-                unifiedSearch,
-                vis: vis$.getValue(),
-                settings,
-                disableTriggers,
-                searchSessionId,
-                parentExecutionContext: executionContext,
-                abortController: expressionAbortController$.getValue(),
-                timeRange: timeRangeToRender,
-                onRender: async (renderCount) => {
-                  if (renderCount === renderCount$.getValue()) return;
-                  renderCount$.next(renderCount);
-                  const visInstance = vis$.getValue();
-                  const visTypeName = visInstance.type.name;
-
-                  let telemetryVisTypeName = visTypeName;
-                  if (visTypeName === 'metrics') {
-                    telemetryVisTypeName = 'legacy_metric';
-                  }
-                  if (visTypeName === 'pie' && visInstance.params.isDonut) {
-                    telemetryVisTypeName = 'donut';
-                  }
-                  if (
-                    visTypeName === 'area' &&
-                    visInstance.params.seriesParams.some(
-                      (seriesParams: { mode: string }) => seriesParams.mode === 'stacked'
-                    )
-                  ) {
-                    telemetryVisTypeName = 'area_stacked';
-                  }
-
-                  getUsageCollection().reportUiCounter(
-                    executionContext?.type ?? '',
-                    'count',
-                    `render_agg_based_${telemetryVisTypeName}`
+                if (hasRendered$.getValue() === true) return;
+                hasRendered$.next(true);
+                hasRendered$.complete();
+              },
+              onEvent: async (event) => {
+                // Visualize doesn't respond to sizing events, so ignore.
+                if (isChartSizeEvent(event)) {
+                  return;
+                }
+                const currentVis = vis$.getValue();
+                if (!disableTriggers) {
+                  const triggerId = get(
+                    VIS_EVENT_TO_TRIGGER,
+                    event.name,
+                    VIS_EVENT_TO_TRIGGER.filter
                   );
+                  let context;
 
-                  if (hasRendered$.getValue() === true) return;
-                  hasRendered$.next(true);
-                  hasRendered$.complete();
-                },
-                onEvent: async (event) => {
-                  // Visualize doesn't respond to sizing events, so ignore.
-                  if (isChartSizeEvent(event)) {
-                    return;
-                  }
-                  const currentVis = vis$.getValue();
-                  if (!disableTriggers) {
-                    const triggerId = get(
-                      VIS_EVENT_TO_TRIGGER,
-                      event.name,
-                      VIS_EVENT_TO_TRIGGER.filter
-                    );
-                    let context;
-
-                    if (triggerId === VIS_EVENT_TO_TRIGGER.applyFilter) {
-                      context = {
-                        embeddable: api,
+                  if (triggerId === VIS_EVENT_TO_TRIGGER.applyFilter) {
+                    context = {
+                      embeddable: api,
+                      timeFieldName: currentVis.data.indexPattern?.timeFieldName!,
+                      ...event.data,
+                    };
+                  } else {
+                    context = {
+                      embeddable: api,
+                      data: {
                         timeFieldName: currentVis.data.indexPattern?.timeFieldName!,
                         ...event.data,
-                      };
-                    } else {
-                      context = {
-                        embeddable: api,
-                        data: {
-                          timeFieldName: currentVis.data.indexPattern?.timeFieldName!,
-                          ...event.data,
-                        },
-                      };
-                    }
-                    await getUiActions().getTrigger(triggerId).exec(context);
+                      },
+                    };
                   }
-                },
-                onData: (_, inspectorAdapters) => {
-                  inspectorAdapters$.next(
-                    typeof inspectorAdapters === 'function'
-                      ? inspectorAdapters()
-                      : inspectorAdapters
-                  );
-                  dataLoading$.next(false);
-                },
-              });
-            };
-            return await getExpressionParams();
-          })();
+                  await getUiActions().getTrigger(triggerId).exec(context);
+                }
+              },
+              onData: (_, inspectorAdapters) => {
+                inspectorAdapters$.next(
+                  typeof inspectorAdapters === 'function' ? inspectorAdapters() : inspectorAdapters
+                );
+                dataLoading$.next(false);
+              },
+            });
+          };
+          return await getExpressionParams();
         })
       )
       .subscribe(({ params, abortController }) => {
