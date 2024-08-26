@@ -149,8 +149,6 @@ function toolSchemaToGemini({ schema }: { schema: ToolSchema }): Gemini.Function
           description: def.description,
           enum: def.enum ? (def.enum as string[]) : def.const ? [def.const] : undefined,
         };
-      default:
-        throw new Error(`Error converting Invalid parameter type: ${def}`);
     }
   };
 
