@@ -1,0 +1,86 @@
+{
+  "id": "@kbn/shared-ux-table-persist",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/shared-ux-table-persist",
+        "id": "def-common.useEuiTablePersist",
+        "type": "Function",
+        "tags": [],
+        "label": "useEuiTablePersist",
+        "description": [
+          "\nA hook that stores and retrieves from local storage the table page size and sort criteria.\nReturns the persisting page size and sort and the onTableChange handler that should be passed\nas props to an Eui table component."
+        ],
+        "signature": [
+          "<T extends object>({ tableId, customOnTableChange, initialSort, initialPageSize, pageSizeOptions, }: ",
+          "EuiTablePersistProps",
+          "<T>) => { pageSize: number; sorting: boolean | { sort: ",
+          "PropertySort",
+          "<T>; }; onTableChange: (nextValues: ",
+          "Criteria",
+          "<T>) => void; }"
+        ],
+        "path": "packages/shared-ux/table_persist/src/use_table_persist.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-table-persist",
+            "id": "def-common.useEuiTablePersist.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  tableId,\n  customOnTableChange,\n  initialSort,\n  initialPageSize,\n  pageSizeOptions,\n}",
+            "description": [],
+            "signature": [
+              "EuiTablePersistProps",
+              "<T>"
+            ],
+            "path": "packages/shared-ux/table_persist/src/use_table_persist.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/shared-ux-table-persist",
+        "id": "def-common.DEFAULT_PAGE_SIZE_OPTIONS",
+        "type": "Array",
+        "tags": [],
+        "label": "DEFAULT_PAGE_SIZE_OPTIONS",
+        "description": [],
+        "signature": [
+          "number[]"
+        ],
+        "path": "packages/shared-ux/table_persist/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}
