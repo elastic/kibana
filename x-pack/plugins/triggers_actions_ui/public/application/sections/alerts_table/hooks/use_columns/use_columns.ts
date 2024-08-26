@@ -313,7 +313,9 @@ export const useColumns = ({
       if (col.id !== lastVisibleColumns) {
         return col;
       }
-      return (({ initialWidth, ...object }) => object)(col);
+
+      const { initialWidth, ...rest } = col;
+      return rest;
     });
   }, [columns, visibleColumns]);
 

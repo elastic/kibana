@@ -334,7 +334,7 @@ describe('useColumns', () => {
   describe('columns', () => {
     test('should changes the column list when defaultColumns has been updated', async () => {
       const localStorageAlertsTable = getStorageAlertsTableByDefaultColumns(defaultColumns);
-      const { result } = renderHook<UseColumnsArgs, UseColumnsResp>(
+      const { result, waitFor } = renderHook<UseColumnsArgs, UseColumnsResp>(
         () =>
           useColumns({
             defaultColumns,
@@ -346,9 +346,7 @@ describe('useColumns', () => {
         { wrapper }
       );
 
-      act(() => {
-        expect(result.current.columns).toMatchObject(resultColumns);
-      });
+      await waitFor(() => expect(result.current.columns).toMatchObject(resultColumns));
     });
   });
 
