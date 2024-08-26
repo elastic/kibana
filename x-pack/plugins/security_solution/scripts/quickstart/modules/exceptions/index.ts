@@ -15,20 +15,6 @@ import { Client as ExceptionsClient } from '@kbn/securitysolution-exceptions-com
 import { Client as ListsClient } from '@kbn/securitysolution-lists-common/api/quickstart_client.gen';
 import { importListItemsWrapper } from '../lists';
 
-export const test: CreateRuleExceptionListItemsRequestBodyInput['items'][0] = {
-  description: 'test',
-  type: 'simple',
-  name: 'test',
-  entries: [
-    {
-      type: 'match',
-      field: 'test',
-      value: 'test',
-      operator: 'included',
-    },
-  ],
-};
-
 export const getMatchEntry: () => ExceptionListItemEntry = () => ({
   type: 'match',
   field: 'host.name',

@@ -21,17 +21,33 @@ The API clients are designed to work with any delivery method - local, cloud, or
 
 Extracting data-generating logic into reusable modules that other people will actually use is the hardest part of sharing these scripts. To that end, it's crucial that the modules are organized as neatly as possible and extremely clear about what they do. If the modules are even slightly confusing, it will be faster for people to rebuild the same logic than to figure out how the existing scripts work.
 
-The intial set of modules will be:
+### Data
 
-- Rules
-  - <Rule Type>: Sample rules of each type and functions to generate data that trigger alerts for those rules
-- Exceptions: Sample exceptions
-- Value Lists
-  - Functions to generate value lists
-- Data Generation
-  - Mappings: ECS mapping and functions to generate other arbitrary mappings
-  - Large data: Functions to generate a lot of data quickly
-  - Frozen Tier: Functions to generate data and move it to frozen tier immediately
+Functions to create documents with various properties. Initially only has a function to create a document with an arbitrary number of fields and arbitrary amount of data in each field, but should be extended with more functions to create sets of documents with specific relationships such as X total documents with Y number of unique hosts etc.
+
+### Entity Analytics
+
+Functions to help install fake entity analytics data. Useful for testing alert enrichment based on entity analytics.
+
+### Exceptions
+
+Functions to help create exceptions with various properties. For example, one helper takes an array of values and automatically creates a value list exception item from that array - internally, it creates the value list and an exception item that references the list.
+
+### Frozen (TODO)
+
+Functions to help create frozen tier data quickly. These functions (once implemented) will take existing data and immediately move it to frozen for test purposes.
+
+### Lists
+
+Functions to help interact with the Lists APIs. The initial helper function makes it easy to import a value list from an array, since the process of attaching a file to a request (as the API expects) is not that intuitive.
+
+### Mappings
+
+Functions to help setup mappings. Provides the ECS mapping as well as helpers to generate mappings with tons of fields.
+
+### Rules
+
+Functions to help create rules along with data specific to each rule (WIP). Each sample rule defined in this folder should have an associated function to generate data that triggers alerts for the rule.
 
 ## Speed
 
@@ -83,6 +99,30 @@ const exceptionsFunctions = createdRules.map(
     )
 );
 const exceptionsResponses = await concurrentlyExec(exceptionsFunctions);
+```
+
+### Run 10 Rule Preview Requests Simultaneously
+
+```
+const previewPromises = range(50).map(
+  (idx) => () =>
+    detectionsClient.rulePreview({
+      body: {
+        ...getBasicRuleMetadata(),
+        type: 'query',
+        timeframeEnd: '2024-08-21T20:37:37.114Z',
+        invocationCount: 1,
+        from: 'now-6m',
+        interval: '5m',
+        index: [index],
+        query: '*',
+      },
+    })
+);
+
+const results = (await concurrentlyExec(previewPromises, 50)).map(
+  (result) => result.data.logs
+);
 ```
 
 ## Future Work
