@@ -217,8 +217,6 @@ export const DiffableRule = z.intersection(
   ])
 );
 
-// TODO: Add unit test to assert that types match between DiffableRules
-// and this schema
 export type DiffableRuleTypes = z.infer<typeof DiffableRuleTypes>;
 export const DiffableRuleTypes = z.union([
   DiffableCustomQueryFields.shape.type,
