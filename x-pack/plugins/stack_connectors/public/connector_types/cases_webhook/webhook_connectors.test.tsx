@@ -242,9 +242,10 @@ describe('CasesWebhookActionConnectorFields renders', () => {
       await userEvent.click(await screen.findByTestId('casesWebhookNext'));
       expect(await screen.findByText(i18n.CREATE_URL_REQUIRED)).toBeInTheDocument();
       expect(await screen.findByTestId('horizontalStep2-danger')).toBeInTheDocument();
+      await userEvent.clear(await screen.findByTestId('webhookCreateUrlText'));
       await userEvent.type(
         await screen.findByTestId('webhookCreateUrlText'),
-        `{selectall}{backspace}${config.createIncidentUrl}`,
+        config.createIncidentUrl,
         {
           delay: 10,
         }
@@ -289,9 +290,10 @@ describe('CasesWebhookActionConnectorFields renders', () => {
       ).toBeInTheDocument();
       expect(await screen.findByTestId('horizontalStep3-danger')).toBeInTheDocument();
 
+      await userEvent.clear(await screen.findByTestId('getIncidentResponseExternalTitleKeyText'));
       await userEvent.type(
         await screen.findByTestId('getIncidentResponseExternalTitleKeyText'),
-        `{selectall}{backspace}${config.getIncidentResponseExternalTitleKey}`,
+        config.getIncidentResponseExternalTitleKey,
         {
           delay: 10,
         }
@@ -493,9 +495,12 @@ describe('CasesWebhookActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await userEvent.type(await screen.findByTestId(field), `{selectall}{backspace}${value}`, {
-        delay: 10,
-      });
+      await userEvent.clear(await screen.findByTestId(field));
+      if (value !== '') {
+        await userEvent.type(await screen.findByTestId(field), value, {
+          delay: 10,
+        });
+      }
 
       await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
 

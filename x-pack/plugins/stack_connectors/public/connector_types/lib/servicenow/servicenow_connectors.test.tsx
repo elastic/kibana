@@ -461,11 +461,12 @@ describe('ServiceNowActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.type(screen.getByTestId(field), `{selectall}{backspace}${value}`, {
+      await userEvent.clear(screen.getByTestId(field));
+      if (value !== '') {
+        await userEvent.type(screen.getByTestId(field), value, {
           delay: 10,
         });
-      });
+      }
 
       await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
@@ -485,11 +486,12 @@ describe('ServiceNowActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.type(screen.getByTestId(field), `{selectall}{backspace}${value}`, {
+      await userEvent.clear(screen.getByTestId(field));
+      if (value !== '') {
+        await userEvent.type(screen.getByTestId(field), value, {
           delay: 10,
         });
-      });
+      }
 
       await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 

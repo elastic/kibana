@@ -112,19 +112,12 @@ describe('TeamsActionFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.type(
-          getByTestId('teamsWebhookUrlInput'),
-          `{selectall}{backspace}no-valid`,
-          {
-            delay: 10,
-          }
-        );
+      await userEvent.clear(getByTestId('teamsWebhookUrlInput'));
+      await userEvent.type(getByTestId('teamsWebhookUrlInput'), 'no - valid', {
+        delay: 10,
       });
 
-      await act(async () => {
-        await userEvent.click(getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(getByTestId('form-test-provide-submit'));
 
       expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
     });

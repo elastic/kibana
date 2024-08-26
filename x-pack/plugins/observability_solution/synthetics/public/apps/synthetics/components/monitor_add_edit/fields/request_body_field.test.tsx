@@ -76,7 +76,8 @@ describe('<RequestBodyField />', () => {
 
     expect(getByLabelText('Text code editor')).toBeInTheDocument();
     const textbox = getByRole('textbox');
-    await userEvent.type(textbox, '{selectall}{del}text');
+    await userEvent.clear(textbox);
+    await userEvent.type(textbox, 'text');
     expect(textbox).toHaveValue('text');
 
     const xmlButton = getByText('XML').closest('button');
