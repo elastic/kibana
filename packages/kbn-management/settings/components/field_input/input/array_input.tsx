@@ -39,7 +39,7 @@ export const ArrayInput = ({
   const onUpdate = useUpdate({ onInputChange, field });
 
   const updateValue = useCallback(
-    async (newValue: string, onUpdateFn) => {
+    async (newValue: string, onUpdateFn: typeof onUpdate) => {
       const parsedValue = newValue
         .replace(REGEX, ',')
         .split(',')

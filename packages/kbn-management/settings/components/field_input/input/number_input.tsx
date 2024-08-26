@@ -36,7 +36,7 @@ export const NumberInput = ({
   const onUpdate = useUpdate({ onInputChange, field });
 
   const updateValue = useCallback(
-    async (newValue: number, onUpdateFn) => {
+    async (newValue: number, onUpdateFn: typeof onUpdate) => {
       const validationResponse = await validateChange(field.id, newValue);
       if (validationResponse.successfulValidation && !validationResponse.valid) {
         onUpdateFn({

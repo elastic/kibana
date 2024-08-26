@@ -237,8 +237,10 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const containerRef = useRef<HTMLElement>(null);
 
   // When the editor is on full size mode, the user can resize the height of the editor.
-  const onMouseDownResizeHandler = useCallback(
-    (mouseDownEvent) => {
+  const onMouseDownResizeHandler = useCallback<
+    React.ComponentProps<typeof ResizableButton>['onMouseDownResizeHandler']
+  >(
+    (mouseDownEvent: /* TODO: pageY could be missing */ any) => {
       const startSize = editorHeight;
       const startPosition = mouseDownEvent.pageY;
 
@@ -257,7 +259,9 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     [editorHeight]
   );
 
-  const onKeyDownResizeHandler = useCallback(
+  const onKeyDownResizeHandler = useCallback<
+    React.ComponentProps<typeof ResizableButton>['onKeyDownResizeHandler']
+  >(
     (keyDownEvent) => {
       let height = editorHeight;
       if (

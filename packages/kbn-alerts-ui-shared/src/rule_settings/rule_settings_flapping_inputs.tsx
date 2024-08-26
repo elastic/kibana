@@ -7,7 +7,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiRangeProps } from '@elastic/eui';
 import {
   MIN_LOOK_BACK_WINDOW,
   MAX_LOOK_BACK_WINDOW,
@@ -63,14 +63,16 @@ export const RuleSettingsFlappingInputs = (props: RuleSettingsFlappingInputsProp
     onStatusChangeThresholdChange,
   } = props;
 
-  const internalOnLookBackWindowChange = useCallback(
+  const internalOnLookBackWindowChange = useCallback<Exclude<EuiRangeProps['onChange'], undefined>>(
     (e) => {
       onLookBackWindowChange(parseInt(e.currentTarget.value, 10));
     },
     [onLookBackWindowChange]
   );
 
-  const internalOnStatusChangeThresholdChange = useCallback(
+  const internalOnStatusChangeThresholdChange = useCallback<
+    Exclude<EuiRangeProps['onChange'], undefined>
+  >(
     (e) => {
       onStatusChangeThresholdChange(parseInt(e.currentTarget.value, 10));
     },

@@ -34,7 +34,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { CELL_CLASS } from '../utils/get_render_cell_value';
 import { defaultTimeColumnWidth } from '../constants';
-import { useColumns } from '../hooks/use_data_grid_columns';
+import { useColumns, UseColumnsProps } from '../hooks/use_data_grid_columns';
 import { capabilitiesServiceMock } from '@kbn/core-capabilities-browser-mocks';
 import { dataViewsMock } from '../../__mocks__/data_views';
 
@@ -105,7 +105,7 @@ const renderDataTable = (props: Partial<UnifiedDataTableProps>) => {
       capabilities,
       dataView: dataViewMock,
       dataViews: dataViewsMock,
-      setAppState: useCallback((state) => {
+      setAppState: useCallback<UseColumnsProps['setAppState']>((state) => {
         if (state.columns) {
           setColumns(state.columns);
         }

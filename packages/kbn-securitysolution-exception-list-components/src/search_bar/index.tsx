@@ -74,7 +74,7 @@ const SearchBarComponent: FC<SearchBarProps> = ({
   onAddExceptionClick,
 }) => {
   const handleOnSearch = useCallback(
-    ({ queryText }): void => {
+    ({ queryText }: { queryText: string }): void => {
       onSearch({ search: queryText });
     },
     [onSearch]

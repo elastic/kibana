@@ -71,7 +71,7 @@ export const CodeEditor = ({ onChange, type, isReadOnly, name, ...props }: CodeE
   }, []);
 
   const editorDidMount = useCallback(
-    (editor) => {
+    (editor: monaco.editor.IStandaloneCodeEditor) => {
       setEditorCalculatedHeight(editor);
 
       editor.onDidChangeModelContent(() => {

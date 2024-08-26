@@ -82,7 +82,7 @@ export const useSelectedDocs = (docMap: Map<string, DataTableRecord>): UseSelect
   const selectedDocsCount = selectedDocIds.length;
 
   const getCountOfFilteredSelectedDocs = useCallback(
-    (docIds) => {
+    (docIds: string[]) => {
       if (!selectedDocsCount) {
         return 0;
       }

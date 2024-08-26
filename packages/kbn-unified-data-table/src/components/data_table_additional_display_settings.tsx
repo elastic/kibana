@@ -7,7 +7,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiFormRow, EuiHorizontalRule, EuiRange } from '@elastic/eui';
+import { EuiFormRow, EuiHorizontalRule, EuiRange, EuiRangeProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 import { RowHeightSettings, RowHeightSettingsProps } from './row_height_settings';
@@ -63,8 +63,8 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
     [onChangeSampleSize]
   );
 
-  const onChangeActiveSampleSize = useCallback(
-    (event) => {
+  const onChangeActiveSampleSize = useCallback<Exclude<EuiRangeProps['onChange'], undefined>>(
+    (event: any /* TODO event.target.value may be empty */) => {
       if (!event.target.value) {
         setActiveSampleSize('');
         return;
