@@ -18,7 +18,7 @@ export default function (providerContext: FtrProviderContext) {
   const esClient = getService('es');
   const kibanaServer = getService('kibanaServer');
 
-  describe('space awareness migration', async function () {
+  describe('space awareness migration', function () {
     skipIfNoDockerRegistry(providerContext);
     const apiClient = new SpaceTestApiClient(supertest);
 
@@ -28,20 +28,8 @@ export default function (providerContext: FtrProviderContext) {
         space: TEST_SPACE_1,
       });
       await cleanFleetIndices(esClient);
-    });
 
-    after(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
-      await kibanaServer.savedObjects.cleanStandardList({
-        space: TEST_SPACE_1,
-      });
-      await cleanFleetIndices(esClient);
-    });
-
-    setupTestSpaces(providerContext);
-
-    // Create agent policies it should create a enrollment key for every keys
-    before(async () => {
+      // Create agent policies it should create a enrollment key for every keys
       const [defaultSpacePolicy1, spaceTest1Policy1] = await Promise.all([
         apiClient.createAgentPolicy(),
         apiClient.createAgentPolicy(TEST_SPACE_1),
@@ -76,6 +64,16 @@ export default function (providerContext: FtrProviderContext) {
         inputs: {},
       });
     });
+
+    after(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.savedObjects.cleanStandardList({
+        space: TEST_SPACE_1,
+      });
+      await cleanFleetIndices(esClient);
+    });
+
+    setupTestSpaces(providerContext);
 
     describe('without opt-in', () => {
       it('agent policies should not be space aware', async () => {

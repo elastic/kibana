@@ -26,29 +26,21 @@ export default function (providerContext: FtrProviderContext) {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
-    });
-    setupFleetAndAgents(providerContext);
-
-    before(async () => {
       await supertest
         .post(`/api/fleet/epm/packages/log/${LOG_INTEGRATION_VERSION}`)
         .set('kbn-xsrf', 'xxxx')
         .send({ force: true })
         .expect(200);
     });
+    setupFleetAndAgents(providerContext);
+
     after(async () => {
       await supertest
         .delete(`/api/fleet/epm/packages/log/${LOG_INTEGRATION_VERSION}`)
         .set('kbn-xsrf', 'xxxx')
         .send({ force: true })
         .expect(200);
-    });
-
-    after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
-    });
-
-    after(async () => {
       const res = await es.search({
         index: TEST_INDEX,
       });

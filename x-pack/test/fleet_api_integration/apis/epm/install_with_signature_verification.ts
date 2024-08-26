@@ -37,11 +37,11 @@ export default function (providerContext: FtrProviderContext) {
     return res?._source?.['epm-packages'] as Installation;
   };
 
-  describe('Installs verified and unverified packages', async () => {
+  describe('Installs verified and unverified packages', () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
 
-    describe('verified package', async () => {
+    describe('verified package', () => {
       after(async () => {
         if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
         await uninstallPackage('verified', '1.0.0');
@@ -53,8 +53,8 @@ export default function (providerContext: FtrProviderContext) {
         expect(installationSO?.verification_key_id).equal(TEST_KEY_ID);
       });
     });
-    describe('unverified packages', async () => {
-      describe('unverified package content', async () => {
+    describe('unverified packages', () => {
+      describe('unverified package content', () => {
         after(async () => {
           if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
           await uninstallPackage('unverified_content', '1.0.0');
@@ -74,7 +74,7 @@ export default function (providerContext: FtrProviderContext) {
           expect(installationSO?.verification_key_id).equal(TEST_KEY_ID);
         });
       });
-      describe('package verified with wrong key', async () => {
+      describe('package verified with wrong key', () => {
         after(async () => {
           if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
           await uninstallPackage('wrong_key', '1.0.0');

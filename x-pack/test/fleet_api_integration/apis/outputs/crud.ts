@@ -196,12 +196,8 @@ export default function (providerContext: FtrProviderContext) {
 
   const TEST_SPACE_ID = 'testspaceoutputs';
 
-  describe('fleet_outputs_crud', async function () {
+  describe('fleet_outputs_crud', function () {
     skipIfNoDockerRegistry(providerContext);
-    before(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
-      await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
-    });
     setupFleetAndAgents(providerContext);
 
     let defaultOutputId: string;
@@ -210,6 +206,8 @@ export default function (providerContext: FtrProviderContext) {
     let fleetServerPolicyWithCustomOutputId: string;
 
     before(async function () {
+      await kibanaServer.savedObjects.cleanStandardList();
+      await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       await enableSecrets(providerContext);
       await enableOutputSecrets();
       await kibanaServer.spaces
@@ -694,7 +692,7 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
 
-      it('should discard the shipper values when shipper is disabled', async function () {
+      it('defaultOutputId: should discard the shipper values when shipper is disabled', async function () {
         await supertest
           .put(`/api/fleet/outputs/${defaultOutputId}`)
           .set('kbn-xsrf', 'xxxx')
@@ -1352,29 +1350,6 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
 
-      it('should discard the shipper values when shipper is disabled', async function () {
-        await supertest
-          .post(`/api/fleet/outputs`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            name: 'default monitoring output 1',
-            type: 'elasticsearch',
-            hosts: ['https://test.fr'],
-            is_default_monitoring: true,
-            shipper: {
-              disk_queue_enabled: true,
-              disk_queue_path: 'path/to/disk/queue',
-              disk_queue_encryption_enabled: true,
-            },
-          })
-          .expect(200);
-        const {
-          body: { items: outputs },
-        } = await supertest.get(`/api/fleet/outputs`).expect(200);
-        const defaultOutputs = outputs.filter((o: any) => o.is_default_monitoring);
-        expect(defaultOutputs[0].shipper).to.equal(null);
-      });
-
       it('should allow to create a kafka output with the shipper values', async function () {
         await supertest
           .post(`/api/fleet/outputs`)
@@ -1694,14 +1669,14 @@ export default function (providerContext: FtrProviderContext) {
           defaultMonitoringOutputId = defaultMonitoringOutputPostResponse.item.id;
         });
 
-        it('should return a 400 when deleting a default output ', async function () {
+        it('defaultOutputIdToDelete: should return a 400 when deleting a default output ', async function () {
           await supertest
             .delete(`/api/fleet/outputs/${defaultOutputIdToDelete}`)
             .set('kbn-xsrf', 'xxxx')
             .expect(400);
         });
 
-        it('should return a 400 when deleting a default output ', async function () {
+        it('defaultMonitoringOutputId: should return a 400 when deleting a default output ', async function () {
           await supertest
             .delete(`/api/fleet/outputs/${defaultMonitoringOutputId}`)
             .set('kbn-xsrf', 'xxxx')

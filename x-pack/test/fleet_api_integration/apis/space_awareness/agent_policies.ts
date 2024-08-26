@@ -19,7 +19,7 @@ export default function (providerContext: FtrProviderContext) {
   const esClient = getService('es');
   const kibanaServer = getService('kibanaServer');
 
-  describe('agent policies', async function () {
+  describe('agent policies', function () {
     skipIfNoDockerRegistry(providerContext);
     const apiClient = new SpaceTestApiClient(supertest);
 
@@ -29,6 +29,17 @@ export default function (providerContext: FtrProviderContext) {
         space: TEST_SPACE_1,
       });
       await cleanFleetIndices(esClient);
+
+      await apiClient.postEnableSpaceAwareness();
+
+      const [_defaultSpacePolicy1, _spaceTest1Policy1, _spaceTest1Policy2] = await Promise.all([
+        apiClient.createAgentPolicy(),
+        apiClient.createAgentPolicy(TEST_SPACE_1),
+        apiClient.createAgentPolicy(TEST_SPACE_1),
+      ]);
+      defaultSpacePolicy1 = _defaultSpacePolicy1;
+      spaceTest1Policy1 = _spaceTest1Policy1;
+      spaceTest1Policy2 = _spaceTest1Policy2;
     });
 
     after(async () => {
@@ -43,18 +54,6 @@ export default function (providerContext: FtrProviderContext) {
     let defaultSpacePolicy1: CreateAgentPolicyResponse;
     let spaceTest1Policy1: CreateAgentPolicyResponse;
     let spaceTest1Policy2: CreateAgentPolicyResponse;
-    before(async () => {
-      await apiClient.postEnableSpaceAwareness();
-
-      const [_defaultSpacePolicy1, _spaceTest1Policy1, _spaceTest1Policy2] = await Promise.all([
-        apiClient.createAgentPolicy(),
-        apiClient.createAgentPolicy(TEST_SPACE_1),
-        apiClient.createAgentPolicy(TEST_SPACE_1),
-      ]);
-      defaultSpacePolicy1 = _defaultSpacePolicy1;
-      spaceTest1Policy1 = _spaceTest1Policy1;
-      spaceTest1Policy2 = _spaceTest1Policy2;
-    });
 
     describe('GET /agent_policies', () => {
       it('should return policies in a specific space', async () => {

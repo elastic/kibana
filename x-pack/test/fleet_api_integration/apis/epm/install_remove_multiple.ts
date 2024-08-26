@@ -57,7 +57,7 @@ export default function (providerContext: FtrProviderContext) {
     return Promise.all(uninstallingPackagesPromise);
   };
 
-  describe('installs and uninstalls multiple packages side effects', async () => {
+  describe('installs and uninstalls multiple packages side effects', () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
 

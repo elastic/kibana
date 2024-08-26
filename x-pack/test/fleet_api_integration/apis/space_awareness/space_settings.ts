@@ -14,7 +14,7 @@ export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
-  describe('space_settings', async function () {
+  describe('space_settings', function () {
     setupTestSpaces(providerContext);
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();

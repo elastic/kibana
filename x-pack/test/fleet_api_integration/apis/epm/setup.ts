@@ -25,7 +25,7 @@ export default function (providerContext: FtrProviderContext) {
       .send({ force: 'true' });
   };
 
-  describe('setup api', async () => {
+  describe('setup api', () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
     after(async () => {
@@ -33,7 +33,7 @@ export default function (providerContext: FtrProviderContext) {
       await uninstallPackage('multiple_versions', '0.3.0');
     });
     // FLAKY: https://github.com/elastic/kibana/issues/118479
-    describe.skip('setup performs upgrades', async () => {
+    describe.skip('setup performs upgrades', () => {
       const oldEndpointVersion = '0.13.0';
       beforeEach(async () => {
         const url = '/api/fleet/epm/packages/endpoint';

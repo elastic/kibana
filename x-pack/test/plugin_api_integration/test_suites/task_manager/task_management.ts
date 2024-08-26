@@ -52,10 +52,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('scheduling and running tasks', () => {
     beforeEach(async () => {
       // clean up before each test
-      return await supertest.delete('/api/sample_tasks').set('kbn-xsrf', 'xxx').expect(200);
-    });
-
-    beforeEach(async () => {
+      await supertest.delete('/api/sample_tasks').set('kbn-xsrf', 'xxx').expect(200);
       const exists = await es.indices.exists({ index: testHistoryIndex });
       if (exists) {
         await es.deleteByQuery({

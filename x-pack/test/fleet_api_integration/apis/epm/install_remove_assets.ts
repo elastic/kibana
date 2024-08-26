@@ -40,11 +40,11 @@ export default function (providerContext: FtrProviderContext) {
       .send({ force: true });
   };
 
-  describe('installs and uninstalls all assets', async () => {
+  describe('installs and uninstalls all assets', () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
 
-    describe('installs all assets when installing a package for the first time', async () => {
+    describe('installs all assets when installing a package for the first time', () => {
       before(async () => {
         if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
         await installPackage(pkgName, pkgVersion);
@@ -63,16 +63,17 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('uninstalls all assets when uninstalling a package', async () => {
+    describe('uninstalls all assets when uninstalling a package', () => {
       // these tests ensure that uninstall works properly so make sure that the package gets installed and uninstalled
       // and then we'll test that not artifacts are left behind.
-      before(() => {
-        if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
-        return installPackage(pkgName, pkgVersion);
-      });
-      before(() => {
-        if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
-        return uninstallPackage(pkgName, pkgVersion);
+      before(async () => {
+        if (isDockerRegistryEnabledOrSkipped(providerContext)) {
+          await installPackage(pkgName, pkgVersion);
+        }
+
+        if (isDockerRegistryEnabledOrSkipped(providerContext)) {
+          await uninstallPackage(pkgName, pkgVersion);
+        }
       });
 
       it('should have uninstalled the index templates', async function () {
@@ -294,7 +295,7 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('reinstalls all assets', async () => {
+    describe('reinstalls all assets', () => {
       before(async () => {
         if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
         await installPackage(pkgName, pkgVersion);

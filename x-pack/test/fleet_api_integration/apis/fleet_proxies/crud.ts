@@ -31,21 +31,12 @@ export default function (providerContext: FtrProviderContext) {
     return policyDocRes.hits.hits[0]?._source;
   }
 
-  describe('fleet_proxies_crud', async function () {
+  describe('fleet_proxies_crud', function () {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       await kibanaServer.savedObjects.cleanStandardList();
-    });
-    setupFleetAndAgents(providerContext);
 
-    const existingId = 'test-default-123';
-    const fleetServerHostId = 'test-fleetserver-123';
-    const policyId = 'test-policy-123';
-    const outputId = 'test-output-123';
-    let downloadSourceId: string;
-
-    before(async function () {
       await kibanaServer.savedObjects.clean({
         types: ['fleet-proxy'],
       });
@@ -106,6 +97,13 @@ export default function (providerContext: FtrProviderContext) {
         })
         .expect(200);
     });
+    setupFleetAndAgents(providerContext);
+
+    const existingId = 'test-default-123';
+    const fleetServerHostId = 'test-fleetserver-123';
+    const policyId = 'test-policy-123';
+    const outputId = 'test-output-123';
+    let downloadSourceId: string;
 
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();

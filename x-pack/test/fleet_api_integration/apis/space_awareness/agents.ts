@@ -24,7 +24,7 @@ export default function (providerContext: FtrProviderContext) {
   const esClient = getService('es');
   const kibanaServer = getService('kibanaServer');
 
-  describe('agents', async function () {
+  describe('agents', function () {
     skipIfNoDockerRegistry(providerContext);
     const apiClient = new SpaceTestApiClient(supertest);
 
@@ -34,6 +34,21 @@ export default function (providerContext: FtrProviderContext) {
         space: TEST_SPACE_1,
       });
       await cleanFleetIndices(esClient);
+
+      await apiClient.postEnableSpaceAwareness();
+      const [_defaultSpacePolicy1, _defaultSpacePolicy2, _spaceTest1Policy1, _spaceTest1Policy2] =
+        await Promise.all([
+          apiClient.createAgentPolicy(),
+          apiClient.createAgentPolicy(),
+          apiClient.createAgentPolicy(TEST_SPACE_1),
+          apiClient.createAgentPolicy(TEST_SPACE_1),
+        ]);
+      defaultSpacePolicy1 = _defaultSpacePolicy1;
+      defaultSpacePolicy2 = _defaultSpacePolicy2;
+      spaceTest1Policy1 = _spaceTest1Policy1;
+      spaceTest1Policy2 = _spaceTest1Policy2;
+
+      await createAgents();
     });
 
     after(async () => {
@@ -76,23 +91,6 @@ export default function (providerContext: FtrProviderContext) {
       testSpaceAgent2 = _testSpaceAgent2;
       testSpaceAgent3 = _testSpaceAgent3;
     }
-
-    before(async () => {
-      await apiClient.postEnableSpaceAwareness();
-      const [_defaultSpacePolicy1, _defaultSpacePolicy2, _spaceTest1Policy1, _spaceTest1Policy2] =
-        await Promise.all([
-          apiClient.createAgentPolicy(),
-          apiClient.createAgentPolicy(),
-          apiClient.createAgentPolicy(TEST_SPACE_1),
-          apiClient.createAgentPolicy(TEST_SPACE_1),
-        ]);
-      defaultSpacePolicy1 = _defaultSpacePolicy1;
-      defaultSpacePolicy2 = _defaultSpacePolicy2;
-      spaceTest1Policy1 = _spaceTest1Policy1;
-      spaceTest1Policy2 = _spaceTest1Policy2;
-
-      await createAgents();
-    });
 
     describe('GET /agent', () => {
       it('should return agents in a specific space', async () => {

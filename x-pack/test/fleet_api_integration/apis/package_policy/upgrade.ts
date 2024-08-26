@@ -54,7 +54,7 @@ export default function (providerContext: FtrProviderContext) {
     }
   };
 
-  describe('Package Policy - upgrade', async function () {
+  describe('Package Policy - upgrade', function () {
     skipIfNoDockerRegistry(providerContext);
     let agentPolicyId: string;
     let packagePolicyId: string;

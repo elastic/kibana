@@ -918,8 +918,6 @@ export default function (providerContext: FtrProviderContext) {
             .expect(200)
         );
         await Promise.all(deletedPromises);
-      });
-      after(async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       });
       let agentPolicyId: undefined | string;
@@ -1458,11 +1456,9 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('POST /api/fleet/agent_policies/_bulk_get', () => {
       let policyId: string;
-      before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
-      });
       setupFleetAndAgents(providerContext);
       before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
         const getPkRes = await getPackage('system');
 
         // we must first force install the system package to override package verification error on policy create

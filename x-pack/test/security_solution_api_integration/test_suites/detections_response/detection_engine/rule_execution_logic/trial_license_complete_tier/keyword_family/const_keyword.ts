@@ -117,7 +117,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('"threshold" rule type', async () => {
+    describe('"threshold" rule type', () => {
       it('should detect the "dataset_name_1" from "event.dataset"', async () => {
         const rule: ThresholdRuleCreateProps = {
           ...getThresholdRuleForAlertTesting(['const_keyword']),

@@ -43,7 +43,7 @@ export default function (providerContext: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    describe('get by id', async function () {
+    describe('get by id', function () {
       let agentPolicyId: string;
       let packagePolicyId: string;
       let endpointPackagePolicyId: string;
@@ -181,7 +181,7 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('POST /api/fleet/package_policies/_bulk_get', async function () {
+    describe('POST /api/fleet/package_policies/_bulk_get', function () {
       let agentPolicyId: string;
       let packagePolicyId: string;
       let endpointPackagePolicyId: string;
@@ -423,7 +423,7 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('get by kuery', async function () {
+    describe('get by kuery', function () {
       let agentPolicyId: string;
       let endpointPackagePolicyId: string;
 

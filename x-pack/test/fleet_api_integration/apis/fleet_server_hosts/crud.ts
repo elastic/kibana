@@ -16,17 +16,12 @@ export default function (providerContext: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
-  describe('fleet_fleet_server_hosts_crud', async function () {
+  describe('fleet_fleet_server_hosts_crud', function () {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       await kibanaServer.savedObjects.cleanStandardList();
-    });
-    setupFleetAndAgents(providerContext);
 
-    let defaultFleetServerHostId: string;
-
-    before(async function () {
       await kibanaServer.savedObjects.clean({
         types: ['fleet-fleet-server-host'],
       });
@@ -52,6 +47,9 @@ export default function (providerContext: FtrProviderContext) {
 
       defaultFleetServerHostId = defaultRes.item.id;
     });
+    setupFleetAndAgents(providerContext);
+
+    let defaultFleetServerHostId: string;
 
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();

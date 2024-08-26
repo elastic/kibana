@@ -18,7 +18,7 @@ export default function (providerContext: FtrProviderContext) {
   const esClient = getService('es');
   const kibanaServer = getService('kibanaServer');
 
-  describe('enrollment_settings', async function () {
+  describe('enrollment_settings', function () {
     skipIfNoDockerRegistry(providerContext);
     const apiClient = new SpaceTestApiClient(supertest);
 
@@ -29,6 +29,8 @@ export default function (providerContext: FtrProviderContext) {
           space: TEST_SPACE_1,
         });
         await cleanFleetIndices(esClient);
+        await apiClient.postEnableSpaceAwareness();
+        await apiClient.setup();
       });
 
       after(async () => {
@@ -40,11 +42,6 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       setupTestSpaces(providerContext);
-
-      before(async () => {
-        await apiClient.postEnableSpaceAwareness();
-        await apiClient.setup();
-      });
 
       describe('GET /enrollments/settings', () => {
         it('in default space it should not return an active fleet server', async () => {
@@ -66,6 +63,10 @@ export default function (providerContext: FtrProviderContext) {
           space: TEST_SPACE_1,
         });
         await cleanFleetIndices(esClient);
+        await apiClient.postEnableSpaceAwareness();
+        await apiClient.setup();
+        const testSpaceFleetServerPolicy = await apiClient.createFleetServerPolicy(TEST_SPACE_1);
+        await createFleetAgent(esClient, testSpaceFleetServerPolicy.item.id, TEST_SPACE_1);
       });
 
       after(async () => {
@@ -77,13 +78,6 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       setupTestSpaces(providerContext);
-
-      before(async () => {
-        await apiClient.postEnableSpaceAwareness();
-        await apiClient.setup();
-        const testSpaceFleetServerPolicy = await apiClient.createFleetServerPolicy(TEST_SPACE_1);
-        await createFleetAgent(esClient, testSpaceFleetServerPolicy.item.id, TEST_SPACE_1);
-      });
 
       describe('GET /enrollments/settings', () => {
         it('in default space it should return all policies and active fleet server', async () => {
@@ -105,6 +99,10 @@ export default function (providerContext: FtrProviderContext) {
           space: TEST_SPACE_1,
         });
         await cleanFleetIndices(esClient);
+        await apiClient.postEnableSpaceAwareness();
+        await apiClient.setup();
+        const defaultFleetServerPolicy = await apiClient.createFleetServerPolicy();
+        await createFleetAgent(esClient, defaultFleetServerPolicy.item.id);
       });
 
       after(async () => {
@@ -116,13 +114,6 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       setupTestSpaces(providerContext);
-
-      before(async () => {
-        await apiClient.postEnableSpaceAwareness();
-        await apiClient.setup();
-        const defaultFleetServerPolicy = await apiClient.createFleetServerPolicy();
-        await createFleetAgent(esClient, defaultFleetServerPolicy.item.id);
-      });
 
       describe('GET /enrollments/settings', () => {
         it('in default space it should return all policies and active fleet server', async () => {

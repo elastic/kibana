@@ -77,6 +77,7 @@ export const retry = async <T>({
 
       retryAttempt = retryAttempt + 1;
 
+      // eslint-disable-next-line mocha/no-empty-description
       return await test();
     },
     undefined,

@@ -29,7 +29,7 @@ export default function (providerContext: FtrProviderContext) {
       .expect(200);
   };
 
-  describe('datastreams', async () => {
+  describe('datastreams', () => {
     describe('standard integration', () => {
       const pkgName = 'datastreams';
       const pkgVersion = '0.1.0';

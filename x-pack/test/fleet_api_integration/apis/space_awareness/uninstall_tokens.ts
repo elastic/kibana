@@ -20,25 +20,9 @@ export default function (providerContext: FtrProviderContext) {
   const esClient = getService('es');
   const kibanaServer = getService('kibanaServer');
 
-  describe('uninstall tokens', async function () {
+  describe('uninstall tokens', function () {
     skipIfNoDockerRegistry(providerContext);
     const apiClient = new SpaceTestApiClient(supertest);
-
-    before(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
-      await kibanaServer.savedObjects.cleanStandardList({
-        space: TEST_SPACE_1,
-      });
-      await cleanFleetIndices(esClient);
-    });
-
-    after(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
-      await kibanaServer.savedObjects.cleanStandardList({
-        space: TEST_SPACE_1,
-      });
-      await cleanFleetIndices(esClient);
-    });
 
     setupTestSpaces(providerContext);
     let defaultSpacePolicy1: CreateAgentPolicyResponse;
@@ -46,8 +30,14 @@ export default function (providerContext: FtrProviderContext) {
     let spaceTest1Policy2: CreateAgentPolicyResponse;
     let defaultSpaceToken: UninstallTokenMetadata;
     let spaceTest1Token: UninstallTokenMetadata;
-    // Create agent policies it should create am uninstall token for every keys
+
     before(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.savedObjects.cleanStandardList({
+        space: TEST_SPACE_1,
+      });
+      await cleanFleetIndices(esClient);
+      // Create agent policies it should create am uninstall token for every keys
       await apiClient.postEnableSpaceAwareness();
       const [_defaultSpacePolicy1, _spaceTest1Policy1, _spaceTest1Policy2] = await Promise.all([
         apiClient.createAgentPolicy(),
@@ -62,6 +52,14 @@ export default function (providerContext: FtrProviderContext) {
       const defaultSpaceTokens = await apiClient.getUninstallTokens();
       defaultSpaceToken = defaultSpaceTokens.items[0];
       spaceTest1Token = space1Tokens.items[0];
+    });
+
+    after(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.savedObjects.cleanStandardList({
+        space: TEST_SPACE_1,
+      });
+      await cleanFleetIndices(esClient);
     });
 
     describe('GET /uninstall_tokens', () => {

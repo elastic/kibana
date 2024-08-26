@@ -26,11 +26,11 @@ export default function (providerContext: FtrProviderContext) {
       .send({ force: true });
   };
 
-  describe('Bulk get assets', async () => {
+  describe('Bulk get assets', () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
 
-    describe('installs all assets when installing a package for the first time', async () => {
+    describe('installs all assets when installing a package for the first time', () => {
       before(async () => {
         if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
         await installPackage(pkgName, pkgVersion);

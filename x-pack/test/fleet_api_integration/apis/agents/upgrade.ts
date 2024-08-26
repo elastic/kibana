@@ -708,9 +708,7 @@ export default function (providerContext: FtrProviderContext) {
           'fleet-server-policy',
           fleetServerVersion
         );
-      });
 
-      beforeEach(async () => {
         await es.updateByQuery({
           index: '.fleet-agents',
           body: {

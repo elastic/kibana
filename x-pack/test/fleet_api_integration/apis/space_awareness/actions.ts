@@ -19,7 +19,7 @@ export default function (providerContext: FtrProviderContext) {
   const esClient = getService('es');
   const kibanaServer = getService('kibanaServer');
 
-  describe('actions', async function () {
+  describe('actions', function () {
     skipIfNoDockerRegistry(providerContext);
     const apiClient = new SpaceTestApiClient(supertest);
 
@@ -29,6 +29,29 @@ export default function (providerContext: FtrProviderContext) {
         space: TEST_SPACE_1,
       });
       await cleanFleetIndices(esClient);
+
+      await apiClient.postEnableSpaceAwareness();
+
+      const [_defaultSpacePolicy1, _spaceTest1Policy1, _spaceTest1Policy2] = await Promise.all([
+        apiClient.createAgentPolicy(),
+        apiClient.createAgentPolicy(TEST_SPACE_1),
+        apiClient.createAgentPolicy(TEST_SPACE_1),
+      ]);
+      defaultSpacePolicy1 = _defaultSpacePolicy1;
+      spaceTest1Policy1 = _spaceTest1Policy1;
+      spaceTest1Policy2 = _spaceTest1Policy2;
+
+      const [_defaultSpaceAgent1, _defaultSpaceAgent2, _testSpaceAgent1, _testSpaceAgent2] =
+        await Promise.all([
+          createFleetAgent(esClient, defaultSpacePolicy1.item.id, 'default'),
+          createFleetAgent(esClient, defaultSpacePolicy1.item.id),
+          createFleetAgent(esClient, spaceTest1Policy1.item.id, TEST_SPACE_1),
+          createFleetAgent(esClient, spaceTest1Policy2.item.id, TEST_SPACE_1),
+        ]);
+      defaultSpaceAgent1 = _defaultSpaceAgent1;
+      defaultSpaceAgent2 = _defaultSpaceAgent2;
+      testSpaceAgent1 = _testSpaceAgent1;
+      testSpaceAgent2 = _testSpaceAgent2;
     });
 
     beforeEach(async () => {
@@ -53,31 +76,6 @@ export default function (providerContext: FtrProviderContext) {
     let defaultSpaceAgent2: string;
     let testSpaceAgent1: string;
     let testSpaceAgent2: string;
-
-    before(async () => {
-      await apiClient.postEnableSpaceAwareness();
-
-      const [_defaultSpacePolicy1, _spaceTest1Policy1, _spaceTest1Policy2] = await Promise.all([
-        apiClient.createAgentPolicy(),
-        apiClient.createAgentPolicy(TEST_SPACE_1),
-        apiClient.createAgentPolicy(TEST_SPACE_1),
-      ]);
-      defaultSpacePolicy1 = _defaultSpacePolicy1;
-      spaceTest1Policy1 = _spaceTest1Policy1;
-      spaceTest1Policy2 = _spaceTest1Policy2;
-
-      const [_defaultSpaceAgent1, _defaultSpaceAgent2, _testSpaceAgent1, _testSpaceAgent2] =
-        await Promise.all([
-          createFleetAgent(esClient, defaultSpacePolicy1.item.id, 'default'),
-          createFleetAgent(esClient, defaultSpacePolicy1.item.id),
-          createFleetAgent(esClient, spaceTest1Policy1.item.id, TEST_SPACE_1),
-          createFleetAgent(esClient, spaceTest1Policy2.item.id, TEST_SPACE_1),
-        ]);
-      defaultSpaceAgent1 = _defaultSpaceAgent1;
-      defaultSpaceAgent2 = _defaultSpaceAgent2;
-      testSpaceAgent1 = _testSpaceAgent1;
-      testSpaceAgent2 = _testSpaceAgent2;
-    });
 
     describe('GET /agents/action_status', () => {
       it('should return agent actions in the default space', async () => {

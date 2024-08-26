@@ -26,7 +26,7 @@ export default function (providerContext: FtrProviderContext) {
   const esClient = getService('es');
   const kibanaServer = getService('kibanaServer');
 
-  describe('change space agent policies', async function () {
+  describe('change space agent policies', function () {
     skipIfNoDockerRegistry(providerContext);
     const apiClient = new SpaceTestApiClient(supertest);
 
@@ -37,20 +37,7 @@ export default function (providerContext: FtrProviderContext) {
         space: TEST_SPACE_1,
       });
       await cleanFleetIndices(esClient);
-    });
 
-    after(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
-      await kibanaServer.savedObjects.cleanStandardList({
-        space: TEST_SPACE_1,
-      });
-      await cleanFleetIndices(esClient);
-    });
-
-    setupTestSpaces(providerContext);
-    let defaultSpacePolicy1: CreateAgentPolicyResponse;
-    let defaultPackagePolicy1: GetOnePackagePolicyResponse;
-    before(async () => {
       await apiClient.postEnableSpaceAwareness();
       const _policyRes = await apiClient.createAgentPolicy();
       defaultSpacePolicy1 = _policyRes;
@@ -72,6 +59,18 @@ export default function (providerContext: FtrProviderContext) {
       });
       defaultPackagePolicy1 = packagePolicyRes;
     });
+
+    after(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.savedObjects.cleanStandardList({
+        space: TEST_SPACE_1,
+      });
+      await cleanFleetIndices(esClient);
+    });
+
+    setupTestSpaces(providerContext);
+    let defaultSpacePolicy1: CreateAgentPolicyResponse;
+    let defaultPackagePolicy1: GetOnePackagePolicyResponse;
 
     describe('PUT /agent_policies/{id}', () => {
       beforeEach(async () => {

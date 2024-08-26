@@ -18,7 +18,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const retry = getService('retry');
 
-  describe('long running rule', async () => {
+  describe('long running rule', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     afterEach(async () => {

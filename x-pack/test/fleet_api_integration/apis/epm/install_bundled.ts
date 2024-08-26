@@ -56,7 +56,7 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const log = getService('log');
 
-  describe('Installing bundled packages', async () => {
+  describe('Installing bundled packages', () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
 
