@@ -87,7 +87,7 @@ import {
   getPolicyHelper,
   getSourcesHelper,
 } from '../shared/resources_helpers';
-import { ESQLCallbacks } from '../shared/types';
+import { ESQLCallbacks, ESQLSourceResult } from '../shared/types';
 import {
   getFunctionsToIgnoreForStats,
   getOverlapRange,
@@ -106,7 +106,6 @@ import {
   isReturnType,
 } from '../definitions/types';
 
-type GetSourceFn = () => Promise<SuggestionRawDefinition[]>;
 type GetDataStreamsForIntegrationFn = (
   sourceName: string
 ) => Promise<Array<{ name: string; title?: string }> | undefined>;
@@ -244,8 +243,7 @@ export async function suggest(
     queryForFields,
     resourceRetriever
   );
-  const getSources = getSourcesRetriever(resourceRetriever);
-  const getDatastreamsForIntegration = getDatastreamsForIntegrationRetriever(resourceRetriever);
+  const getSources = getSourcesHelper(resourceRetriever);
   const { getPolicies, getPolicyMetadata } = getPolicyRetriever(resourceRetriever);
 
   if (astContext.type === 'newCommand') {
@@ -267,7 +265,6 @@ export async function suggest(
       ast,
       astContext,
       getSources,
-      getDatastreamsForIntegration,
       getFieldsByType,
       getFieldsMap,
       getPolicies,
@@ -350,29 +347,15 @@ function getPolicyRetriever(resourceRetriever?: ESQLCallbacks) {
   };
 }
 
-function getSourcesRetriever(resourceRetriever?: ESQLCallbacks) {
-  const helper = getSourcesHelper(resourceRetriever);
-  return async () => {
-    const list = (await helper()) || [];
-    // hide indexes that start with .
-    return buildSourcesDefinitions(
-      list
-        .filter(({ hidden }) => !hidden)
-        .map(({ name, dataStreams, title, type }) => {
-          return { name, isIntegration: Boolean(dataStreams && dataStreams.length), title, type };
-        })
-    );
-  };
-}
-
-function getDatastreamsForIntegrationRetriever(
-  resourceRetriever?: ESQLCallbacks
-): GetDataStreamsForIntegrationFn {
-  const helper = getSourcesHelper(resourceRetriever);
-  return async (sourceName: string) => {
-    const list = (await helper()) || [];
-    return list.find(({ name }) => name === sourceName)?.dataStreams;
-  };
+function getSourceSuggestions(sources: ESQLSourceResult[]) {
+  // hide indexes that start with .
+  return buildSourcesDefinitions(
+    sources
+      .filter(({ hidden }) => !hidden)
+      .map(({ name, dataStreams, title, type }) => {
+        return { name, isIntegration: Boolean(dataStreams && dataStreams.length), title, type };
+      })
+  );
 }
 
 function findNewVariable(variables: Map<string, ESQLVariable[]>) {
@@ -550,8 +533,7 @@ async function getExpressionSuggestionsByType(
     option: ESQLCommandOption | undefined;
     node: ESQLSingleAstItem | undefined;
   },
-  getSources: GetSourceFn,
-  getDatastreamsForIntegration: GetDataStreamsForIntegrationFn,
+  getSources: () => Promise<ESQLSourceResult[]>,
   getFieldsByType: GetFieldsByTypeFn,
   getFieldsMap: GetFieldsMapFn,
   getPolicies: GetPoliciesFn,
@@ -709,16 +691,13 @@ async function getExpressionSuggestionsByType(
           if (column) {
             // now we know that the user has already entered a column,
             // so suggest comma and pipe
-            // const NON_ALPHANUMERIC_REGEXP = /[^a-zA-Z\d]/g;
-            // const textToUse = lastWord.replace(NON_ALPHANUMERIC_REGEXP, '');
-            const textToUse = lastWord;
             return [
               { ...pipeCompleteItem, text: ' | ' },
               { ...commaCompleteItem, text: ', ' },
             ].map<SuggestionRawDefinition>((s) => ({
               ...s,
-              filterText: textToUse,
-              text: textToUse + s.text,
+              filterText: lastWord,
+              text: lastWord + s.text,
               command: TRIGGER_SUGGESTION_COMMAND,
               rangeToReplace,
             }));
@@ -982,23 +961,27 @@ async function getExpressionSuggestionsByType(
         };
 
         if (index && index.text && index.text !== EDITOR_MARKER) {
-          const source = index.text.replace(EDITOR_MARKER, '');
-          const dataStreams = await getDatastreamsForIntegration(source);
-
-          if (dataStreams) {
-            // Integration name, suggest the datastreams
-            await addSuggestionsBasedOnQuote(
-              buildSourcesDefinitions(
-                dataStreams.map(({ name }) => ({ name, isIntegration: false }))
-              )
-            );
+          const sources = await getSources();
+          const sourceIdentifier = index.text.replace(EDITOR_MARKER, '');
+          const getSourceByName = (name: string) =>
+            sources.find(({ name: _name }) => _name === name);
+          const matchingSource = getSourceByName(sourceIdentifier);
+          if (matchingSource) {
+            if (matchingSource.dataStreams) {
+              // this is an integration name, suggest the datastreams
+              await addSuggestionsBasedOnQuote(
+                buildSourcesDefinitions(
+                  matchingSource.dataStreams.map(({ name }) => ({ name, isIntegration: false }))
+                )
+              );
+            }
           } else {
             // Not an integration, just a partial source name
-            await addSuggestionsBasedOnQuote(await getSources());
+            await addSuggestionsBasedOnQuote(getSourceSuggestions(sources));
           }
         } else {
           // FROM <suggest> or no index/text
-          await addSuggestionsBasedOnQuote(await getSources());
+          await addSuggestionsBasedOnQuote(getSourceSuggestions(await getSources()));
         }
       }
     }
