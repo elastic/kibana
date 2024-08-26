@@ -29,9 +29,8 @@ export const registerDeleteGeoipRoute = ({
       const { database_id: databaseID } = req.params;
 
       try {
-        await clusterClient.asCurrentUser.transport.request({
-          method: 'DELETE',
-          path: `/_ingest/geoip/database/${databaseID}`,
+        await clusterClient.asCurrentUser.ingest.deleteGeoipDatabase({
+          id: databaseID,
         });
 
         return res.ok();

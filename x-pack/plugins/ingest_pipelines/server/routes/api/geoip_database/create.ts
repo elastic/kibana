@@ -34,6 +34,7 @@ export const registerCreateGeoipRoute = ({
       const normalizedDatabaseName = normalizeDatabaseName(databaseName);
 
       try {
+        // the js client doesn't work for this API yet https://github.com/elastic/elasticsearch-specification/issues/2810
         await clusterClient.asCurrentUser.transport.request({
           method: 'PUT',
           path: `/_ingest/geoip/database/${normalizedDatabaseName}`,

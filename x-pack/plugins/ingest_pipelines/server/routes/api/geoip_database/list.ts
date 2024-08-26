@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { deserializeGeoipDatabase, GeoipDatabase } from './serialization';
+import { deserializeGeoipDatabase } from './serialization';
 import { API_BASE_PATH } from '../../../../common/constants';
 import { RouteDependencies } from '../../../types';
 
@@ -19,12 +19,7 @@ export const registerListGeoipRoute = ({
       const { client: clusterClient } = (await ctx.core).elasticsearch;
 
       try {
-        const geoipDatabases = await clusterClient.asCurrentUser.transport.request<{
-          databases: GeoipDatabase[];
-        }>({
-          method: 'GET',
-          path: `/_ingest/geoip/database`,
-        });
+        const geoipDatabases = await clusterClient.asCurrentUser.ingest.getGeoipDatabase();
 
         return res.ok({ body: geoipDatabases.databases.map(deserializeGeoipDatabase) });
       } catch (error) {
