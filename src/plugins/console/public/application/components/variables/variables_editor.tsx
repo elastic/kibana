@@ -244,7 +244,7 @@ export const VariablesEditor = (props: Props) => {
           <p>
             <FormattedMessage
               id="console.variablesPage.deleteModal.description"
-              defaultMessage="Deleting a variable cannot be reverted."
+              defaultMessage="Deleting a variable is irreversible."
             />
           </p>
         </EuiConfirmModal>
