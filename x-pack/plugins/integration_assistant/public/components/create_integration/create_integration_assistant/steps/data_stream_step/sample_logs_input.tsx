@@ -8,13 +8,13 @@
 import React, { useCallback, useState } from 'react';
 import { EuiCallOut, EuiFilePicker, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 import { isPlainObject } from 'lodash/fp';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { IntegrationSettings } from '../../types';
 import * as i18n from './translations';
 import { useActions } from '../../state';
 import type { SamplesFormat } from '../../../../../../common';
 
-const MAX_IMPORT_PAYLOAD_BYTES = 9000000; // 9 MegaBytes
-const MaxLogsSampleRows = 100;
+const MaxLogsSampleRows = 10;
 
 /**
  * Parse the logs sample file content as newiline-delimited JSON (NDJSON).
@@ -128,6 +128,7 @@ interface SampleLogsInputProps {
 }
 
 export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSettings }) => {
+  const { notifications } = useKibana().services;
   const { setIntegrationSettings } = useActions();
   const [isParsing, setIsParsing] = useState(false);
   const [sampleFileError, setSampleFileError] = useState<string>();
@@ -142,13 +143,6 @@ export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSe
           logSamples: undefined,
           samplesFormat: undefined,
         });
-        return;
-      }
-
-      if (logsSampleFile.size > MAX_IMPORT_PAYLOAD_BYTES) {
-        // File size limited to 9 MegaBytes
-        setSampleFileError(i18n.LOGS_SAMPLE_ERROR.LOGS_SAMPLE_FILE_TOO_LARGE);
-        setIntegrationSettings({ ...integrationSettings, logSamples: undefined });
         return;
       }
 
@@ -182,6 +176,7 @@ export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSe
 
         if (logSamples.length > MaxLogsSampleRows) {
           logSamples = logSamples.slice(0, MaxLogsSampleRows);
+          notifications?.toasts.addInfo(i18n.LOGS_SAMPLE_TRUNCATED(MaxLogsSampleRows));
         }
 
         setIntegrationSettings({
@@ -193,7 +188,7 @@ export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSe
       setIsParsing(true);
       reader.readAsText(logsSampleFile);
     },
-    [integrationSettings, setIntegrationSettings, setIsParsing]
+    [integrationSettings, setIntegrationSettings, notifications?.toasts, setIsParsing]
   );
   return (
     <EuiFormRow

@@ -20,8 +20,6 @@ import { buildRouteValidationWithZod } from '../util/route_validation';
 import { withAvailability } from './with_availability';
 import { getLogFormatDetectionGraph } from '../graphs/log_type_detection/graph';
 
-const MaxLogsSampleRows = 10;
-
 export function registerAnalyzeLogsRoutes(
   router: IRouter<IntegrationAssistantRouteHandlerContext>
 ) {
