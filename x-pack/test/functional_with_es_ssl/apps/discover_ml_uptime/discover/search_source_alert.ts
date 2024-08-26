@@ -63,8 +63,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     const dateNow = new Date();
     const dateToSet = new Date(dateNow);
     dateToSet.setMinutes(dateNow.getMinutes() - 10);
-    for await (const message of mockMessages) {
-      es.transport.request({
+    for (const message of mockMessages) {
+      await es.transport.request({
         path: `/${SOURCE_DATA_VIEW}/_doc`,
         method: 'POST',
         body: {
