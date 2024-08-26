@@ -46,8 +46,6 @@ export type CrowdstrikeActionsClientOptions = ResponseActionsClientOptions & {
   connectorActions: NormalizedExternalConnectorClient;
 };
 
-// Temporary comment to trigger unit tests
-
 export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
   protected readonly agentType: ResponseActionAgentType = 'crowdstrike';
   private readonly connectorActionsClient: NormalizedExternalConnectorClient;
