@@ -251,7 +251,7 @@ export class SyntheticsServices {
       certAgeThreshold: 730,
       defaultConnectors: [connectorId],
       defaultEmail: { to: [], cc: [], bcc: [] },
-      defaultRulesEnabled: true,
+      defaultStatusRuleEnabled: true,
     };
     const connector = await this.requester.request({
       path: `/api/synthetics/settings`,
