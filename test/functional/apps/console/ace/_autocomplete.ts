@@ -8,7 +8,6 @@
 
 import _ from 'lodash';
 import expect from '@kbn/expect';
-import { asyncForEach } from '@kbn/std';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -16,6 +15,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'console', 'header']);
   const find = getService('find');
+
+  async function runTemplateTest(type: string, template: string) {
+    await PageObjects.console.enterText(`{\n\t"type": "${type}"`);
+    await PageObjects.console.pressEnter();
+    await PageObjects.console.sleepForDebouncePeriod();
+    // Prompt autocomplete for 'settings'
+    await PageObjects.console.promptAutocomplete('s');
+
+    await retry.waitFor('autocomplete to be visible', () =>
+      PageObjects.console.isAutocompleteVisible()
+    );
+    await PageObjects.console.pressEnter();
+    await retry.try(async () => {
+      const request = await PageObjects.console.getRequest();
+      log.debug(request);
+      expect(request).to.contain(`${template}`);
+    });
+  }
 
   describe('console autocomplete feature', function describeIndexTests() {
     this.tags('includeFirefox');
@@ -365,47 +382,27 @@ GET _search
       });
     });
 
-    describe('with conditional templates', async () => {
-      const CONDITIONAL_TEMPLATES = [
-        {
-          type: 'fs',
-          template: `"location": "path"`,
-        },
-        {
-          type: 'url',
-          template: `"url": ""`,
-        },
-        { type: 's3', template: `"bucket": ""` },
-        {
-          type: 'azure',
-          template: `"path": ""`,
-        },
-      ];
-
+    describe('with conditional templates', () => {
       beforeEach(async () => {
         await PageObjects.console.clearTextArea();
         await PageObjects.console.enterRequest('\n POST _snapshot/test_repo');
         await PageObjects.console.pressEnter();
       });
 
-      await asyncForEach(CONDITIONAL_TEMPLATES, async ({ type, template }) => {
-        it('should insert different templates depending on the value of type', async () => {
-          await PageObjects.console.enterText(`{\n\t"type": "${type}"`);
-          await PageObjects.console.pressEnter();
-          await PageObjects.console.sleepForDebouncePeriod();
-          // Prompt autocomplete for 'settings'
-          await PageObjects.console.promptAutocomplete('s');
+      it('should insert fs template', async () => {
+        await runTemplateTest('fs', `"location": "path"`);
+      });
 
-          await retry.waitFor('autocomplete to be visible', () =>
-            PageObjects.console.isAutocompleteVisible()
-          );
-          await PageObjects.console.pressEnter();
-          await retry.try(async () => {
-            const request = await PageObjects.console.getRequest();
-            log.debug(request);
-            expect(request).to.contain(`${template}`);
-          });
-        });
+      it('should insert url template', async () => {
+        await runTemplateTest('url', `"url": ""`);
+      });
+
+      it('should insert s3 template', async () => {
+        await runTemplateTest('s3', `"bucket": ""`);
+      });
+
+      it('should insert azure template', async () => {
+        await runTemplateTest('azure', `"path": ""`);
       });
     });
   });

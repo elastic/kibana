@@ -68,11 +68,13 @@ packages/kbn-capture-oas-snapshot-cli @elastic/kibana-core
 x-pack/test/cases_api_integration/common/plugins/cases @elastic/response-ops
 packages/kbn-cases-components @elastic/response-ops
 x-pack/plugins/cases @elastic/response-ops
+packages/kbn-cbor @elastic/kibana-operations
 packages/kbn-cell-actions @elastic/security-threat-hunting-explore
 src/plugins/chart_expressions/common @elastic/kibana-visualizations
 packages/kbn-chart-icons @elastic/kibana-visualizations
 src/plugins/charts @elastic/kibana-visualizations
 packages/kbn-check-mappings-update-cli @elastic/kibana-core
+packages/kbn-check-prod-native-modules-cli @elastic/kibana-operations
 packages/kbn-ci-stats-core @elastic/kibana-operations
 packages/kbn-ci-stats-performance-metrics @elastic/kibana-operations
 packages/kbn-ci-stats-reporter @elastic/kibana-operations
@@ -741,6 +743,7 @@ packages/kbn-search-errors @elastic/kibana-data-discovery
 examples/search_examples @elastic/kibana-data-discovery
 x-pack/plugins/search_homepage @elastic/search-kibana
 packages/kbn-search-index-documents @elastic/search-kibana
+x-pack/plugins/search_indices @elastic/search-kibana
 x-pack/plugins/search_inference_endpoints @elastic/search-kibana
 x-pack/plugins/search_notebooks @elastic/search-kibana
 x-pack/plugins/search_playground @elastic/search-kibana
@@ -1398,6 +1401,7 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/plugins/enterprise_search/public/applications/shared/doc_links @elastic/platform-docs
 /x-pack/test_serverless/api_integration/test_suites/search/serverless_search @elastic/search-kibana
 /x-pack/test_serverless/functional/test_suites/search/ @elastic/search-kibana
+x-pack/test/api_integration/apis/management/index_management/inference_endpoints.ts @elastic/search-kibana
 
 # Management Experience - Deployment Management
 /x-pack/test_serverless/**/test_suites/common/index_management/ @elastic/kibana-management
