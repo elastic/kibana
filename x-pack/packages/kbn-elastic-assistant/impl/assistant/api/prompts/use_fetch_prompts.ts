@@ -36,9 +36,7 @@ export const useFetchPrompts = (payload?: UseFetchPromptsParams) => {
   const QUERY = {
     page: 1,
     per_page: 1000, // Continue use in-memory paging till the new design will be ready
-    filter: `consumer:${
-      payload?.consumer ?? '*'
-    } and not (prompt_type: "system" and is_default: true)`,
+    filter: `consumer:${payload?.consumer ?? '*'}`,
   };
 
   const CACHING_KEYS = [
