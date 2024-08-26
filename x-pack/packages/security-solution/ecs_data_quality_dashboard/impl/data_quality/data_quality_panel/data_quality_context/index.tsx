@@ -9,13 +9,38 @@ import React, { useMemo } from 'react';
 import type { PropsWithChildren } from 'react';
 import type { HttpHandler } from '@kbn/core-http-browser';
 import type { IToasts } from '@kbn/core-notifications-browser';
+import { PartialTheme, Theme } from '@elastic/charts';
+
+import { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { TelemetryEvents } from '../../types';
 
-interface DataQualityProviderProps {
+export interface DataQualityProviderProps {
   httpFetch: HttpHandler;
   isILMAvailable: boolean;
   telemetryEvents: TelemetryEvents;
   toasts: IToasts;
+  addSuccessToast: (toast: { title: string }) => void;
+  baseTheme: Theme;
+  canUserCreateAndReadCases: () => boolean;
+  endDate?: string | null;
+  formatBytes: (value: number | undefined) => string;
+  formatNumber: (value: number | undefined) => string;
+  isAssistantEnabled: boolean;
+  lastChecked: string;
+  openCreateCaseFlyout: ({
+    comments,
+    headerContent,
+  }: {
+    comments: string[];
+    headerContent?: React.ReactNode;
+  }) => void;
+  patterns: string[];
+  setLastChecked: (lastChecked: string) => void;
+  startDate?: string | null;
+  theme?: PartialTheme;
+  ilmPhases: string[];
+  selectedIlmPhaseOptions: EuiComboBoxOptionOption[];
+  setSelectedIlmPhaseOptions: (options: EuiComboBoxOptionOption[]) => void;
 }
 
 const DataQualityContext = React.createContext<DataQualityProviderProps | undefined>(undefined);
@@ -26,6 +51,22 @@ export const DataQualityProvider: React.FC<PropsWithChildren<DataQualityProvider
   toasts,
   isILMAvailable,
   telemetryEvents,
+  addSuccessToast,
+  canUserCreateAndReadCases,
+  endDate,
+  formatBytes,
+  formatNumber,
+  isAssistantEnabled,
+  lastChecked,
+  openCreateCaseFlyout,
+  patterns,
+  setLastChecked,
+  startDate,
+  theme,
+  baseTheme,
+  ilmPhases,
+  selectedIlmPhaseOptions,
+  setSelectedIlmPhaseOptions,
 }) => {
   const value = useMemo(
     () => ({
@@ -33,8 +74,45 @@ export const DataQualityProvider: React.FC<PropsWithChildren<DataQualityProvider
       toasts,
       isILMAvailable,
       telemetryEvents,
+      addSuccessToast,
+      canUserCreateAndReadCases,
+      endDate,
+      formatBytes,
+      formatNumber,
+      isAssistantEnabled,
+      lastChecked,
+      openCreateCaseFlyout,
+      patterns,
+      setLastChecked,
+      startDate,
+      theme,
+      baseTheme,
+      ilmPhases,
+      selectedIlmPhaseOptions,
+      setSelectedIlmPhaseOptions,
     }),
-    [httpFetch, toasts, isILMAvailable, telemetryEvents]
+    [
+      httpFetch,
+      toasts,
+      isILMAvailable,
+      telemetryEvents,
+      addSuccessToast,
+      canUserCreateAndReadCases,
+      endDate,
+      formatBytes,
+      formatNumber,
+      isAssistantEnabled,
+      lastChecked,
+      openCreateCaseFlyout,
+      patterns,
+      setLastChecked,
+      startDate,
+      theme,
+      baseTheme,
+      ilmPhases,
+      selectedIlmPhaseOptions,
+      setSelectedIlmPhaseOptions,
+    ]
   );
 
   return <DataQualityContext.Provider value={value}>{children}</DataQualityContext.Provider>;

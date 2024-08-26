@@ -8,7 +8,7 @@
 
 import { readFileSync, writeFileSync } from 'fs';
 import { resolve } from 'path';
-import { dump } from 'js-yaml';
+import { safeDump } from 'js-yaml';
 import { Build, Config, mkdirp } from '../../lib';
 
 export async function createOSPackageKibanaYML(config: Config, build: Build) {
@@ -24,7 +24,7 @@ export async function createOSPackageKibanaYML(config: Config, build: Build) {
     [/#pid.file:.*/g, 'pid.file: /run/kibana/kibana.pid'],
     [
       /#logging.appenders.default:.*kibana\.log\n/gs,
-      dump({
+      safeDump({
         logging: {
           appenders: {
             file: {
