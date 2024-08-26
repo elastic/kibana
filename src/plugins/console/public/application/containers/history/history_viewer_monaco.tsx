@@ -42,7 +42,7 @@ export const HistoryViewer = ({
     renderedHistoryRequest = req.method + ' ' + req.endpoint + '\n' + formattedData;
   } else {
     renderedHistoryRequest = i18n.translate('console.historyPage.monaco.noHistoryTextMessage', {
-      defaultMessage: 'No history available',
+      defaultMessage: '# No history available to display',
     });
   }
   return (

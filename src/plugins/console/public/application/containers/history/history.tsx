@@ -20,10 +20,12 @@ import {
   EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiButton,
   useEuiTheme,
   EuiSplitPanel,
   EuiButtonEmpty,
+  EuiEmptyPrompt,
   EuiResizableContainer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -40,6 +42,7 @@ const CHILD_ELEMENT_PREFIX = 'historyReq';
 export function History({}: Props) {
   const { euiTheme } = useEuiTheme();
   const {
+    docLinks,
     services: { history },
     config: { isMonacoEnabled },
   } = useServicesContext();
@@ -129,6 +132,7 @@ export function History({}: Props) {
             >
               <EuiSplitPanel.Outer grow color="subdued" css={{ height: '100%' }}>
                 <EuiSplitPanel.Inner paddingSize="none">
+                  <EuiSpacer size="s" />
                   <EuiTitle>
                     <h2>
                       <FormattedMessage
@@ -147,6 +151,45 @@ export function History({}: Props) {
                     </p>
                   </EuiText>
                   <EuiSpacer size="l" />
+
+                  {requests.length === 0 && (
+                    <EuiFlexGroup>
+                      <EuiFlexItem>
+                        <EuiSpacer size="xxl" />
+                        <EuiSpacer size="xxl" />
+                        <EuiSpacer size="xxl" />
+                        <EuiEmptyPrompt
+                          title={<h2>{i18n.translate('console.historyPage.emptyPromptTitle', {
+                            defaultMessage: 'No queries yet',
+                          })}</h2>}
+                          titleSize="xs"
+                          body={<p>{i18n.translate('console.historyPage.emptyPromptBody', {
+                            defaultMessage: 'This history panel will display any past queries you’ve run for review and reuse.',
+                          })}</p>}
+                          footer={
+                            <>
+                              <EuiTitle size="xxs">
+                                <>
+                                  <h3>
+                                    <FormattedMessage
+                                      id="console.historyPage.emptyPromptFooterLabel"
+                                      defaultMessage="Want to learn more?"
+                                    />
+                                  </h3>
+                                  <EuiLink href={docLinks.console.guide} target="_blank">
+                                    <FormattedMessage
+                                      id="console.historyPage.emptyPromptFooterLink"
+                                      defaultMessage="Read Console documentation"
+                                    />
+                                  </EuiLink>
+                                </>
+                              </EuiTitle>
+                            </>
+                          }
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  )}
 
                   <ul
                     ref={listRef}
