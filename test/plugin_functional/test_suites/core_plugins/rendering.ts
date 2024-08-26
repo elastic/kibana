@@ -123,6 +123,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'data.search.sessions.management.refreshTimeout (duration?)',
         'data.search.sessions.maxUpdateRetries (number?)',
         'data.search.sessions.notTouchedTimeout (duration?)',
+        'data.query.timefilter.minRefreshInterval (number?)',
         'data_views.scriptedFieldsEnabled (boolean?|never)',
         'data_visualizer.resultLinks.fileBeat.enabled (boolean)',
         'dev_tools.deeplinks.navLinkStatus (string?)',
