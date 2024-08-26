@@ -15,7 +15,7 @@ import type { RightPanelTabType } from './tabs';
 import { AlertHeaderTitle } from './components/alert_header_title';
 import { EventHeaderTitle } from './components/event_header_title';
 import { useDocumentDetailsContext } from '../shared/context';
-import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
+import { useBasicDataFromDetailsData } from '../shared/hooks/use_basic_data_from_details_data';
 import {
   AlertsCasesTourSteps,
   getTourAnchor,

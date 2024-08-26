@@ -33,7 +33,7 @@ describe('populateInferenceServicesProvider', () => {
       { model_id: 'model2' },
     ] as TrainedModelConfigResponse[];
 
-    client.asInternalUser.transport.request.mockResolvedValue({ models: inferenceServices });
+    client.asInternalUser.transport.request.mockResolvedValue({ endpoints: inferenceServices });
 
     jest.clearAllMocks();
   });
@@ -44,7 +44,7 @@ describe('populateInferenceServicesProvider', () => {
 
   describe('when the user has required privileges', () => {
     beforeEach(() => {
-      client.asCurrentUser.transport.request.mockResolvedValue({ models: inferenceServices });
+      client.asCurrentUser.transport.request.mockResolvedValue({ endpoints: inferenceServices });
     });
 
     test('should populate inference services for trained models', async () => {

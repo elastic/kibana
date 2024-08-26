@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FlyoutLoading } from '@kbn/security-solution-common';
-import { useManagedUser } from '../../../timelines/components/side_panel/new_user_detail/hooks/use_managed_user';
+import { useManagedUser } from '../shared/hooks/use_managed_user';
 import { useTabs } from './tabs';
 import type {
   EntityDetailsLeftPanelTab,

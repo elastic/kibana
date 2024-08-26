@@ -12,13 +12,16 @@ import { NavigationSource } from '../../../services/telemetry';
 import { useRedirectLink } from '../../../hooks';
 import { QualityPercentageIndicator } from '../../quality_indicator';
 import { DataStreamStat } from '../../../../common/data_streams_stats/data_stream_stat';
+import { TimeRangeConfig } from '../../../../common/types';
 
 export const DegradedDocsPercentageLink = ({
   isLoading,
   dataStreamStat,
+  timeRange,
 }: {
   isLoading: boolean;
   dataStreamStat: DataStreamStat;
+  timeRange: TimeRangeConfig;
 }) => {
   const {
     degradedDocs: { percentage, count },
@@ -31,6 +34,7 @@ export const DegradedDocsPercentageLink = ({
       page: 'main',
       navigationSource: NavigationSource.Table,
     },
+    timeRangeConfig: timeRange,
   });
 
   return (

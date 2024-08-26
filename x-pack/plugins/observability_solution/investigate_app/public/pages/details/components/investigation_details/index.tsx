@@ -6,26 +6,30 @@
  */
 import datemath from '@elastic/datemath';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
-import type { InvestigateWidgetCreate } from '@kbn/investigate-plugin/public';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
-import { keyBy, noop } from 'lodash';
-import React, { useEffect, useMemo, useRef } from 'react';
+import React from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { AddObservationUI } from '../../../../components/add_observation_ui';
 import { InvestigateSearchBar } from '../../../../components/investigate_search_bar';
 import { InvestigateWidgetGrid } from '../../../../components/investigate_widget_grid';
-import { useDateRange } from '../../../../hooks/use_date_range';
+import { useFetchInvestigation } from '../../../../hooks/use_fetch_investigation';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { InvestigationNotes } from '../investigation_notes/investigation_notes';
 
-function InvestigationDetailsWithUser({ user }: { user: AuthenticatedUser }) {
+function InvestigationDetailsWithUser({
+  user,
+  investigationId,
+}: {
+  user: AuthenticatedUser;
+  investigationId: string;
+}) {
   const {
     dependencies: {
       start: { investigate },
     },
   } = useKibana();
-  const widgetDefinitions = useMemo(() => investigate.getWidgetDefinitions(), [investigate]);
-  const [range, setRange] = useDateRange();
+  // const widgetDefinitions = investigate.getWidgetDefinitions();
+  const { data: investigationData } = useFetchInvestigation({ id: investigationId });
 
   const {
     addItem,
@@ -34,61 +38,12 @@ function InvestigationDetailsWithUser({ user }: { user: AuthenticatedUser }) {
     investigation,
     setGlobalParameters,
     renderableInvestigation,
-    addNote,
-    deleteNote,
   } = investigate.useInvestigation({
     user,
-    from: range.start.toISOString(),
-    to: range.end.toISOString(),
+    investigationData,
   });
 
-  const createWidget = (widgetCreate: InvestigateWidgetCreate) => {
-    return addItem(widgetCreate);
-  };
-
-  const createWidgetRef = useRef(createWidget);
-  createWidgetRef.current = createWidget;
-
-  useEffect(() => {
-    if (
-      renderableInvestigation?.parameters.timeRange.from &&
-      renderableInvestigation?.parameters.timeRange.to &&
-      range.start.toISOString() !== renderableInvestigation.parameters.timeRange.from &&
-      range.end.toISOString() !== renderableInvestigation.parameters.timeRange.to
-    ) {
-      setRange({
-        from: renderableInvestigation.parameters.timeRange.from,
-        to: renderableInvestigation.parameters.timeRange.to,
-      });
-    }
-  }, [
-    renderableInvestigation?.parameters.timeRange.from,
-    renderableInvestigation?.parameters.timeRange.to,
-    range.start,
-    range.end,
-    setRange,
-  ]);
-
-  const gridItems = useMemo(() => {
-    const widgetDefinitionsByType = keyBy(widgetDefinitions, 'type');
-
-    return renderableInvestigation?.items.map((item) => {
-      const definitionForType = widgetDefinitionsByType[item.type];
-
-      return {
-        title: item.title,
-        description: item.description ?? '',
-        id: item.id,
-        element: item.element,
-        columns: item.columns,
-        rows: item.rows,
-        chrome: definitionForType.chrome,
-        loading: item.loading,
-      };
-    });
-  }, [renderableInvestigation, widgetDefinitions]);
-
-  if (!investigation || !renderableInvestigation || !gridItems) {
+  if (!investigation || !renderableInvestigation || !investigationData) {
     return <EuiLoadingSpinner />;
   }
 
@@ -99,8 +54,16 @@ function InvestigationDetailsWithUser({ user }: { user: AuthenticatedUser }) {
           <EuiFlexGroup direction="column" gutterSize="m">
             <EuiFlexItem>
               <InvestigateSearchBar
-                rangeFrom={range.from}
-                rangeTo={range.to}
+                dateRangeFrom={
+                  investigationData
+                    ? new Date(investigationData.params.timeRange.from).toISOString()
+                    : undefined
+                }
+                dateRangeTo={
+                  investigationData
+                    ? new Date(investigationData.params.timeRange.to).toISOString()
+                    : undefined
+                }
                 onQuerySubmit={async ({ dateRange }) => {
                   const nextDateRange = {
                     from: datemath.parse(dateRange.from)!.toISOString(),
@@ -110,18 +73,13 @@ function InvestigationDetailsWithUser({ user }: { user: AuthenticatedUser }) {
                     ...renderableInvestigation.parameters,
                     timeRange: nextDateRange,
                   });
-
-                  setRange(nextDateRange);
                 }}
               />
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
               <InvestigateWidgetGrid
-                items={gridItems}
-                onItemsChange={async (nextGridItems) => {
-                  noop();
-                }}
+                items={renderableInvestigation.items}
                 onItemCopy={async (copiedItem) => {
                   return copyItem(copiedItem.id);
                 }}
@@ -135,20 +93,20 @@ function InvestigationDetailsWithUser({ user }: { user: AuthenticatedUser }) {
           <AddObservationUI
             timeRange={renderableInvestigation.parameters.timeRange}
             onWidgetAdd={(widget) => {
-              return createWidgetRef.current(widget);
+              return addItem(widget);
             }}
           />
         </EuiFlexGroup>
       </EuiFlexItem>
 
       <EuiFlexItem grow={2}>
-        <InvestigationNotes notes={investigation.notes} addNote={addNote} deleteNote={deleteNote} />
+        <InvestigationNotes investigationId={investigationId} initialNotes={investigation.notes} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 }
 
-export function InvestigationDetails({}: {}) {
+export function InvestigationDetails({ investigationId }: { investigationId: string }) {
   const {
     core: { security },
   } = useKibana();
@@ -157,5 +115,7 @@ export function InvestigationDetails({}: {}) {
     return security.authc.getCurrentUser();
   }, [security]);
 
-  return user.value ? <InvestigationDetailsWithUser user={user.value} /> : null;
+  return user.value ? (
+    <InvestigationDetailsWithUser user={user.value} investigationId={investigationId} />
+  ) : null;
 }

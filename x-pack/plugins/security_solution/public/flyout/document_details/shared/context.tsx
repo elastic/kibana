@@ -12,9 +12,9 @@ import { TableId } from '@kbn/securitysolution-data-table';
 import { FlyoutError, FlyoutLoading } from '@kbn/security-solution-common/src/flyout';
 import { useEventDetails } from './hooks/use_event_details';
 import type { SearchHit } from '../../../../common/search_strategy';
-import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
+import { useBasicDataFromDetailsData } from './hooks/use_basic_data_from_details_data';
 import type { DocumentDetailsProps } from './types';
-import type { GetFieldsData } from '../../../common/hooks/use_get_fields_data';
+import type { GetFieldsData } from './hooks/use_get_fields_data';
 import { useRuleWithFallback } from '../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 
 export interface DocumentDetailsContext {

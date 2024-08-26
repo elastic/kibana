@@ -10,7 +10,7 @@ import React, { useCallback } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FlyoutBody } from '@kbn/security-solution-common';
 import { DocumentDetailsRightPanelKey } from '../shared/constants/panel_keys';
-import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
+import { useBasicDataFromDetailsData } from '../shared/hooks/use_basic_data_from_details_data';
 import {
   EndpointIsolateSuccess,
   HostIsolationPanel,

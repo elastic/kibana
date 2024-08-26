@@ -215,6 +215,8 @@
     "@kbn/security-solution-common",
     "@kbn/esql-ast",
     "@kbn/esql-validation-autocomplete",
-    "@kbn/config"
+    "@kbn/config",
+    "@kbn/cbor",
+    "@kbn/zod",
   ]
 }

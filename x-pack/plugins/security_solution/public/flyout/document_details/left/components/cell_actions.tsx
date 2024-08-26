@@ -9,7 +9,7 @@ import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { getSourcererScopeId } from '../../../../helpers';
-import { useBasicDataFromDetailsData } from '../../../../timelines/components/side_panel/event_details/helpers';
+import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
 import { SecurityCellActionType } from '../../../../app/actions/constants';
 import {
   CellActionsMode,
