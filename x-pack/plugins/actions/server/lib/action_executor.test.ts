@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { KibanaRequest } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { ActionExecutor } from './action_executor';
@@ -229,9 +228,12 @@ const getBaseExecuteEventLogDoc = (
   };
 };
 
+const mockGetRequestBodyByte = jest.spyOn(ConnectorUsageCollector.prototype, 'getRequestBodyByte');
+
 beforeEach(() => {
   jest.resetAllMocks();
   jest.clearAllMocks();
+  mockGetRequestBodyByte.mockReturnValue(0);
   spacesMock.getSpaceId.mockReturnValue('some-namespace');
   loggerMock.get.mockImplementation(() => loggerMock);
   const mockRealm = { name: 'default_native', type: 'native' };
@@ -249,8 +251,6 @@ beforeEach(() => {
 
   getActionsAuthorizationWithRequest.mockReturnValue(authorizationMock);
 });
-
-const mockGetRequestBodyByte = jest.spyOn(ConnectorUsageCollector.prototype, 'getRequestBodyByte');
 
 describe('Action Executor', () => {
   for (const executeUnsecure of [false, true]) {
