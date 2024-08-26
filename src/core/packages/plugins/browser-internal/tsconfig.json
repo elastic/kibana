@@ -40,6 +40,7 @@
     "@kbn/core-security-browser-mocks",
     "@kbn/core-user-profile-browser-mocks",
     "@kbn/core-di",
+    "@kbn/core-di-browser",
     "@kbn/core-di-internal",
     "@kbn/core-di-mocks",
   ],
