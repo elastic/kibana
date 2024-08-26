@@ -38,7 +38,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const LINKS_PANEL_NAME = 'Some links';
 
   describe('links panel create and edit', () => {
-    describe('creation', async () => {
+    describe('creation', () => {
       before(async () => {
         await dashboard.navigateToApp();
         await dashboard.preserveCrossAppState();
@@ -95,7 +95,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardLinks.clickPanelEditorCloseButton();
       });
 
-      describe('by-value links panel', async () => {
+      describe('by-value links panel', () => {
         it('can create a new by-value links panel', async () => {
           await dashboardAddPanel.clickEditorMenuButton();
           await dashboardAddPanel.clickAddNewPanelFromUIActionLink('Links');

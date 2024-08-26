@@ -92,7 +92,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await visualize.saveVisualizationExpectSuccess('legacy url markdown');
 
-        (await find.byLinkText('abc')).click();
+        await (await find.byLinkText('abc')).click();
 
         await header.waitUntilLoadingHasFinished();
         await timePicker.setDefaultDataRange();
@@ -114,7 +114,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.navigateToApp();
         await dashboard.clickNewDashboard();
         await dashboardAddPanel.addVisualization('legacy url markdown');
-        (await find.byLinkText('abc')).click();
+        await (await find.byLinkText('abc')).click();
         await header.waitUntilLoadingHasFinished();
         await elasticChart.setNewChartUiDebugFlag(true);
         await timePicker.setDefaultDataRange();

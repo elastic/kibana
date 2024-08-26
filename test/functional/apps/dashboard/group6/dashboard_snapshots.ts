@@ -94,7 +94,7 @@ export default function ({
       expect(percentDifference).to.be.lessThan(0.029);
     });
 
-    describe('compare controls snapshot', async () => {
+    describe('compare controls snapshot', () => {
       const waitForPageReady = async () => {
         await header.waitUntilLoadingHasFinished();
         await retry.waitFor('page ready for screenshot', async () => {

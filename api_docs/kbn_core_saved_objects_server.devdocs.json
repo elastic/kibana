@@ -13336,6 +13336,8 @@
         ],
         "signature": [
           "MappingProperty",
+          " & ",
+          "MappingPropertyBase",
           " & { dynamic?: false | \"strict\" | undefined; properties?: Record<string, ",
           "MappingProperty",
           "> | undefined; }"

@@ -44,6 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
+      await common.unsetTime();
     });
 
     it('highlighting on filtering works', async function () {
@@ -87,10 +88,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await discover.waitForDiscoverAppOnScreen();
       expect(await discover.getSavedSearchTitle()).to.equal('Rendering Test: saved search');
-    });
-
-    after(async () => {
-      await common.unsetTime();
     });
   });
 }

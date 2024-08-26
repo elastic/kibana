@@ -148,7 +148,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       };
 
-      describe('test dashboard to dashboard drilldown', async () => {
+      describe('test dashboard to dashboard drilldown', () => {
         beforeEach(async () => {
           await dashboard.gotoDashboardEditMode(
             dashboardDrilldownsManage.DASHBOARD_WITH_PIE_CHART_NAME
@@ -288,7 +288,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      describe('test dashboard to dashboard drilldown with controls', async () => {
+      describe('test dashboard to dashboard drilldown with controls', () => {
         const cleanFiltersAndControls = async (dashboardName: string) => {
           await dashboard.gotoDashboardEditMode(dashboardName);
           await filterBar.removeAllFilters();
