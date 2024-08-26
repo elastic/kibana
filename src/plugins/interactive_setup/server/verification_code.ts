@@ -83,7 +83,7 @@ function secureRandomNumber(length: number) {
   while (digits.length < length) {
     const byte = crypto.randomBytes(1)[0];
     if (byte >= 250) {
-        continue;
+      continue;
     }
     digits.push(byte % 10);
   }
