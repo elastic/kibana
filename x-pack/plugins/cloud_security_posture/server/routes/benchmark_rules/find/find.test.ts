@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { CspBenchmarkRule } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import { getSortedCspBenchmarkRulesTemplates } from './utils';
-import { CspBenchmarkRule } from '../../../../common/types/latest';
 
 describe('getSortedCspBenchmarkRules', () => {
   it('sorts by metadata.benchmark.rule_number, invalid semantic version still should still get sorted and empty values should be sorted last', () => {

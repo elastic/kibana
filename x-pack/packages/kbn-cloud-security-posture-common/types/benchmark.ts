@@ -4,7 +4,4 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-// export * from './rules/v5';
-export * from '@kbn/cloud-security-posture-common/schema/rules/v5';
-export * from './benchmarks/v2';
+export type BenchmarksCisId = 'cis_k8s' | 'cis_azure' | 'cis_aws' | 'cis_eks' | 'cis_gcp';

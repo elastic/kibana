@@ -9,7 +9,7 @@ import {
   FindCspBenchmarkRuleRequest,
   FindCspBenchmarkRuleResponse,
   findCspBenchmarkRuleRequestSchema,
-} from '../../../../common/types/latest';
+} from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import {
   FindCspBenchmarkRuleRequest as FindCspBenchmarkRuleRequestV1,
   findCspBenchmarkRuleRequestSchema as findCspBenchmarkRuleRequestSchemaV1,

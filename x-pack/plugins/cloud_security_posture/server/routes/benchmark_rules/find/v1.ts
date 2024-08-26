@@ -5,10 +5,10 @@
  * 2.0.
  */
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { CspBenchmarkRule } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import { getBenchmarkFilter } from '../../../../common/utils/helpers';
 import { CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE } from '../../../../common/constants';
 import { getBenchmarkIdFromPackagePolicyId, getSortedCspBenchmarkRulesTemplates } from './utils';
-import type { CspBenchmarkRule } from '../../../../common/types/latest';
 import type {
   FindCspBenchmarkRuleRequest,
   FindCspBenchmarkRuleResponse,

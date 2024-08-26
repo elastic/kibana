@@ -12,7 +12,7 @@ import { render, screen } from '@testing-library/react';
 import { QueryClient } from '@tanstack/react-query';
 import { TestProvider } from '../../test/test_provider';
 import { type RouteComponentProps } from 'react-router-dom';
-import { PageUrlParams } from '../../../common/types/latest';
+import type { PageUrlParams } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import { createReactQueryResponse } from '../../test/fixtures/react_query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
