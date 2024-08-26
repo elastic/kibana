@@ -468,7 +468,7 @@ export class Table extends PureComponent<TableProps, TableState> {
           ]}
         />
         {queryParseError}
-        <EuiSpacer size="s" />
+        <EuiSpacer />
         {exceededResultCount && (
           <>
             <EuiText color="subdued" size="s" data-test-subj="savedObjectsTableTooManyResultsLabel">

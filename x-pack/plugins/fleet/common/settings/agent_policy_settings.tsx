@@ -124,10 +124,10 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
       'https://www.elastic.co/guide/en/fleet/current/agent-policy.html#agent-policy-http-monitoring',
     schema: z
       .object({
-        // enabled: z.boolean().describe('Enabled').default(false),
+        enabled: z.boolean().describe('Enabled').default(false),
         host: z.string().describe('Host').default('localhost'),
         port: z.number().describe('Port').min(0).max(65353).default(6791),
-        // 'buffer.enabled': z.boolean().describe('Buffer Enabled').default(false),
+        'buffer.enabled': z.boolean().describe('Buffer Enabled').default(false),
       })
       .default({}),
   },
