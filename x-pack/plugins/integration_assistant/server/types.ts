@@ -92,7 +92,7 @@ export interface RelatedState {
   finalized: boolean;
   reviewed: boolean;
   currentPipeline: object;
-  currentProcessors: object[];
+  currentProcessors?: object[];
   initialPipeline: object;
   results: object;
   lastExecutedChain: string;
