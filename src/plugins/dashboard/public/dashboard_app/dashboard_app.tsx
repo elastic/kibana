@@ -16,6 +16,7 @@ import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+import { debounceTime } from 'rxjs';
 import {
   DashboardAppNoDataPage,
   isDashboardAppInNoDataState,
@@ -192,12 +193,15 @@ export function DashboardApp({
    * When the dashboard container is created, or re-created, start syncing dashboard state with the URL
    */
   useEffect(() => {
-    if (!dashboardAPI) return;
-    const { stopWatchingAppStateInUrl } = startSyncingDashboardUrlState({
-      kbnUrlStateStorage,
-      dashboardAPI,
+    if (!dashboardAPI || !savedDashboardId) return;
+    dashboardAPI.expandedPanelId.pipe(debounceTime(10)).subscribe(() => {
+      const { stopWatchingAppStateInUrl } = startSyncingDashboardUrlState({
+        kbnUrlStateStorage,
+        dashboardAPI,
+        savedDashboardId,
+      });
+      return () => stopWatchingAppStateInUrl();
     });
-    return () => stopWatchingAppStateInUrl();
   }, [dashboardAPI, kbnUrlStateStorage, savedDashboardId]);
 
   const locator = useMemo(() => url?.locators.get(DASHBOARD_APP_LOCATOR), [url]);

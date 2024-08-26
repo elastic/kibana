@@ -22,17 +22,17 @@ export const PRINT_DASHBOARD_URL = '/print';
 export const getFullPath = (aliasId?: string, id?: string) =>
   `/app/dashboards#${createDashboardEditUrl(aliasId || id)}`;
 
-export const getFullEditPath = (id?: string, editMode?: boolean, expandedPanelId?: string) => {
-  return `/app/dashboards#${createDashboardEditUrl(id, editMode, expandedPanelId)}`;
+export const getFullEditPath = (id?: string, editMode?: boolean, expandedId?: string) => {
+  return `/app/dashboards#${createDashboardEditUrl(id, editMode, expandedId)}`;
 };
 
-export function createDashboardEditUrl(id?: string, editMode?: boolean, expandedPanelId?: string) {
+export function createDashboardEditUrl(id?: string, editMode?: boolean, expandedId?: string) {
   if (!id) {
     return `${CREATE_NEW_DASHBOARD_URL}`;
   }
   const edit = editMode ? `?${DASHBOARD_STATE_STORAGE_KEY}=(viewMode:edit)` : '';
-  const expandPanel = expandedPanelId ? `/${expandedPanelId}` : '';
-  return `${VIEW_DASHBOARD_URL}/${id}${expandPanel}${edit}`;
+  const expandedPanel = expandedId ? `/${expandedId}` : '';
+  return `${VIEW_DASHBOARD_URL}/${id}${expandedPanel}${edit}`;
 }
 
 export function createDashboardListingFilterUrl(filter: string | undefined) {
