@@ -135,14 +135,24 @@ export const AgentRequestDiagnosticsModal: React.FunctionComponent<Props> = ({
       <EuiCheckbox
         id="cpuMetricsCheckbox"
         data-test-subj="cpuMetricsCheckbox"
-        label="Collect additional CPU metrics"
+        label={
+          <FormattedMessage
+            id="xpack.fleet.requestDiagnostics.cpuMetricsCheckboxLabel"
+            defaultMessage="Collect additional CPU metrics"
+          />
+        }
         checked={cpuMetricsEnabled}
         onChange={() => setCPUMetricsEnabled(!cpuMetricsEnabled)}
       />
       <EuiCheckbox
         id="includeEventsLogCheckbox"
         data-test-subj="includeEventsLogCheckbox"
-        label="Include Events Logs (might contain sensible information)"
+        label={
+          <FormattedMessage
+            id="xpack.fleet.requestDiagnostics.includeEventsLogCheckboxLabel"
+            defaultMessage="Include Events Logs (might contain sensible information)"
+          />
+        }
         checked={includeEventsLogEnabled}
         onChange={() => setIncludeEventsLog(!includeEventsLogEnabled)}
       />
