@@ -5,21 +5,36 @@
  * 2.0.
  */
 
-import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { Observable } from 'rxjs';
 import type {
-  ChatCompleteAPI,
   ChatCompletionChunkEvent,
   ChatCompletionTokenCountEvent,
+  Message,
 } from '../../common/chat_complete';
+import type { ToolOptions } from '../../common/chat_complete/tools';
+import type { InferenceExecutor } from './utils';
 
-type Connector = Awaited<ReturnType<ActionsClient['get']>>;
-
+/**
+ * Adapter in charge of communicating with a specific inference connector
+ * and to convert inputs/outputs from/to the common chatComplete inference format.
+ *
+ * @internal
+ */
 export interface InferenceConnectorAdapter {
   chatComplete: (
-    options: Omit<Parameters<ChatCompleteAPI>[0], 'connectorId'> & {
-      actionsClient: ActionsClient;
-      connector: Connector;
-    }
-  ) => Observable<ChatCompletionChunkEvent | ChatCompletionTokenCountEvent>;
+    options: {
+      messages: Message[];
+      system?: string;
+      executor: InferenceExecutor;
+    } & ToolOptions
+  ) => Observable<InferenceConnectorAdapterChatCompleteEvent>;
 }
+
+/**
+ * Events that can be emitted by the observable returned from {@link InferenceConnectorAdapter.chatComplete}
+ *
+ * @internal
+ */
+export type InferenceConnectorAdapterChatCompleteEvent =
+  | ChatCompletionChunkEvent
+  | ChatCompletionTokenCountEvent;
