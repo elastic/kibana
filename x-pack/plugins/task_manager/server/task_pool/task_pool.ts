@@ -165,7 +165,10 @@ export class TaskPool {
                       message: VERSION_CONFLICT_MESSAGE,
                     })
               )
-              .catch((err) => this.handleFailureOfMarkAsRunning(taskRunner, err));
+              .catch((err) => {
+                this.handleFailureOfMarkAsRunning(taskRunner, err);
+                throw err;
+              });
           })
       );
     }
