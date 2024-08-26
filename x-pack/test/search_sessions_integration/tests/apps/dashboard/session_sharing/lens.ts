@@ -57,7 +57,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(byRefSessionId).not.to.eql(newByRefSessionId);
 
       // Convert to by-value
-      await dashboardPanelActions.legacyUnlinkFromLibraryByTitle(lensTitle);
+      await dashboardPanelActions.legacyUnlinkFromLibrary(lensTitle);
       await dashboard.waitForRenderComplete();
       const byValueSessionId = await dashboardPanelActions.getSearchSessionIdByTitle(lensTitle);
 

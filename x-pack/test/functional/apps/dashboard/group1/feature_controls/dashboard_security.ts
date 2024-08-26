@@ -367,7 +367,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await security.login(
+        await securityPage.login(
           'global_dashboard_read_url_create_user',
           'global_dashboard_read_url_create_user-password',
           {
@@ -458,7 +458,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await security.login(
+        await securityPage.login(
           'no_dashboard_privileges_user',
           'no_dashboard_privileges_user-password',
           {

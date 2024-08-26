@@ -38,7 +38,7 @@ export default function ({ getService, getPageObject }: FtrProviderContext) {
       await find.clickByButtonText('Rendering Test: heatmap');
       await dashboardAddPanel.closeAddPanel();
 
-      await panelActions.legacyUnlinkFromLibraryByTitle('RenderingTest:heatmap');
+      await panelActions.legacyUnlinkFromLibrary('RenderingTest:heatmap');
       await testSubjects.existOrFail('unlinkPanelSuccess');
 
       await dashboardAddPanel.clickOpenAddPanel();
@@ -49,7 +49,7 @@ export default function ({ getService, getPageObject }: FtrProviderContext) {
 
     it('save visualize panel to embeddable library', async () => {
       const newTitle = 'Rendering Test: heatmap - copy';
-      await panelActions.legacySaveToLibraryByTitle(newTitle, 'RenderingTest:heatmap');
+      await panelActions.legacySaveToLibrary(newTitle, 'RenderingTest:heatmap');
       await testSubjects.existOrFail('addPanelToLibrarySuccess');
       await panelActions.expectLinkedToLibrary(newTitle);
     });

@@ -143,7 +143,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardPanelActions.customizePanel();
         await dashboardCustomizePanel.setCustomPanelTitle('Custom title');
         await dashboardCustomizePanel.clickSaveButton();
-        await dashboardPanelActions.legacyUnlinkFromLibraryByTitle('Custom title');
+        await dashboardPanelActions.legacyUnlinkFromLibrary('Custom title');
         const [newPanelTitle] = await dashboard.getPanelTitles();
         expect(newPanelTitle).to.equal('Custom title');
       });
@@ -161,7 +161,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('unlinking a by reference panel without a custom title will keep the library title', async () => {
-        await dashboardPanelActions.legacyUnlinkFromLibraryByTitle(getVisTitle());
+        await dashboardPanelActions.legacyUnlinkFromLibrary(getVisTitle());
         const [newPanelTitle] = await dashboard.getPanelTitles();
         expect(newPanelTitle).to.equal(getVisTitle());
       });

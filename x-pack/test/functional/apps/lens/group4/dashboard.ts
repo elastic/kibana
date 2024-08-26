@@ -237,13 +237,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await find.clickByButtonText('lnsPieVis');
       await dashboardAddPanel.closeAddPanel();
 
-      await panelActions.legacyUnlinkFromLibraryByTitle('lnsPieVis');
+      await panelActions.legacyUnlinkFromLibrary('lnsPieVis');
       await testSubjects.existOrFail('unlinkPanelSuccess');
     });
 
     it('save lens panel to embeddable library', async () => {
       const newTitle = 'lnsPieVis - copy';
-      await panelActions.legacySaveToLibraryByTitle('lnsPieVis - copy', 'lnsPieVis');
+      await panelActions.legacySaveToLibrary('lnsPieVis - copy', 'lnsPieVis');
       await panelActions.expectLinkedToLibrary(newTitle);
 
       await dashboardAddPanel.clickOpenAddPanel();
