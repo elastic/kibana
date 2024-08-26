@@ -6,6 +6,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import { parseIntervalAsMillisecond } from './lib/intervals';
 
 export const MAX_WORKERS_LIMIT = 100;
 export const DEFAULT_CAPACITY = 10;
@@ -32,9 +33,12 @@ export const DEFAULT_WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW = 5;
 export const CLAIM_STRATEGY_UPDATE_BY_QUERY = 'update_by_query';
 export const CLAIM_STRATEGY_MGET = 'mget';
 
-export const DEFAULT_DISCOVERY_INTERVAL_MS = 1000 * 10;
+export const DEFAULT_DISCOVERY_INTERVAL_MS = 1000 * 10; // 10 seconds
+const MIN_DISCOVERY_INTERVAL_MS = 1000; // 1 second
+const MAX_DISCOVERY_INTERVAL_MS = 1000 * 60 * 5; // 5 minutes
 
-export const DEFAULT_ACTIVE_NODES_LOOK_BACK_S = 30;
+export const DEFAULT_ACTIVE_NODES_LOOK_BACK_DURATION = '30s';
+const FIVE_MIN_IN_MS = 5 * 60 * 1000;
 
 export const DEFAULT_KIBANAS_PER_PARTITION = 2;
 
@@ -73,16 +77,28 @@ const requestTimeoutsConfig = schema.object({
 
 export const configSchema = schema.object(
   {
-    active_nodes_lookback: schema.number({
-      defaultValue: DEFAULT_ACTIVE_NODES_LOOK_BACK_S,
-      min: 10,
-    }),
     allow_reading_invalid_state: schema.boolean({ defaultValue: true }),
     /* The number of normal cost tasks that this Kibana instance will run simultaneously */
     capacity: schema.maybe(schema.number({ min: MIN_CAPACITY, max: MAX_CAPACITY })),
-    discovery_interval: schema.number({
-      defaultValue: DEFAULT_DISCOVERY_INTERVAL_MS,
-      min: DEFAULT_DISCOVERY_INTERVAL_MS,
+    discovery: schema.object({
+      active_nodes_lookback: schema.string({
+        defaultValue: DEFAULT_ACTIVE_NODES_LOOK_BACK_DURATION,
+        validate: (duration) => {
+          try {
+            const parsedDurationMs = parseIntervalAsMillisecond(duration);
+            if (parsedDurationMs > FIVE_MIN_IN_MS) {
+              return 'active node lookback duration cannot exceed five minutes';
+            }
+          } catch (err) {
+            return 'active node lookback duration must be a valid duration string';
+          }
+        },
+      }),
+      interval: schema.number({
+        defaultValue: DEFAULT_DISCOVERY_INTERVAL_MS,
+        min: MIN_DISCOVERY_INTERVAL_MS,
+        max: MAX_DISCOVERY_INTERVAL_MS,
+      }),
     }),
     ephemeral_tasks: schema.object({
       enabled: schema.boolean({ defaultValue: false }),

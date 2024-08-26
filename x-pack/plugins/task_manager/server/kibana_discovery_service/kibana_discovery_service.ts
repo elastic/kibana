@@ -9,11 +9,11 @@ import type { ISavedObjectsRepository } from '@kbn/core/server';
 import { Logger } from '@kbn/core/server';
 import { BACKGROUND_TASK_NODE_SO_NAME } from '../saved_objects';
 import { BackgroundTaskNode } from '../saved_objects/schemas/background_task_node';
+import { TaskManagerConfig } from '../config';
 
 interface DiscoveryServiceParams {
-  activeNodesLookBack: number;
+  config: TaskManagerConfig['discovery'];
   currentNode: string;
-  discoveryInterval: number;
   savedObjectsRepository: ISavedObjectsRepository;
   logger: Logger;
 }
@@ -24,22 +24,16 @@ interface DiscoveryServiceUpsertParams {
 }
 
 export class KibanaDiscoveryService {
-  private activeNodesLookBack: number;
+  private readonly activeNodesLookBack: string;
+  private readonly discoveryInterval: number;
   private currentNode: string;
-  private discoveryInterval: number;
   private started = false;
   private savedObjectsRepository: ISavedObjectsRepository;
   private logger: Logger;
 
-  constructor({
-    activeNodesLookBack,
-    currentNode,
-    discoveryInterval,
-    savedObjectsRepository,
-    logger,
-  }: DiscoveryServiceParams) {
-    this.activeNodesLookBack = activeNodesLookBack;
-    this.discoveryInterval = discoveryInterval;
+  constructor({ config, currentNode, savedObjectsRepository, logger }: DiscoveryServiceParams) {
+    this.activeNodesLookBack = config.active_nodes_lookback;
+    this.discoveryInterval = config.interval;
     this.savedObjectsRepository = savedObjectsRepository;
     this.logger = logger;
     this.currentNode = currentNode;
@@ -102,7 +96,7 @@ export class KibanaDiscoveryService {
         type: BACKGROUND_TASK_NODE_SO_NAME,
         perPage: 10000,
         page: 1,
-        filter: `${BACKGROUND_TASK_NODE_SO_NAME}.attributes.last_seen > now-${this.activeNodesLookBack}s`,
+        filter: `${BACKGROUND_TASK_NODE_SO_NAME}.attributes.last_seen > now-${this.activeNodesLookBack}`,
       });
 
     return activeNodes;

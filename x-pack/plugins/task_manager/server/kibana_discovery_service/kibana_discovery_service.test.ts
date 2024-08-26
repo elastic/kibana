@@ -10,7 +10,7 @@ import { BACKGROUND_TASK_NODE_SO_NAME } from '../saved_objects';
 import { SavedObjectsBulkDeleteResponse, SavedObjectsUpdateResponse } from '@kbn/core/server';
 
 import { createFindResponse, createFindSO } from './mock_kibana_discovery_service';
-import { DEFAULT_ACTIVE_NODES_LOOK_BACK_S, DEFAULT_DISCOVERY_INTERVAL_MS } from '../config';
+import { DEFAULT_ACTIVE_NODES_LOOK_BACK_DURATION, DEFAULT_DISCOVERY_INTERVAL_MS } from '../config';
 
 const currentNode = 'current-node-id';
 const now = '2024-08-10T10:00:00.000Z';
@@ -40,8 +40,10 @@ describe('KibanaDiscoveryService', () => {
         savedObjectsRepository,
         logger,
         currentNode,
-        discoveryInterval: DEFAULT_DISCOVERY_INTERVAL_MS,
-        activeNodesLookBack: DEFAULT_ACTIVE_NODES_LOOK_BACK_S,
+        config: {
+          active_nodes_lookback: DEFAULT_ACTIVE_NODES_LOOK_BACK_DURATION,
+          interval: DEFAULT_DISCOVERY_INTERVAL_MS,
+        },
       });
       await kibanaDiscoveryService.start();
 
@@ -67,8 +69,10 @@ describe('KibanaDiscoveryService', () => {
         savedObjectsRepository,
         logger,
         currentNode,
-        discoveryInterval: DEFAULT_DISCOVERY_INTERVAL_MS,
-        activeNodesLookBack: DEFAULT_ACTIVE_NODES_LOOK_BACK_S,
+        config: {
+          active_nodes_lookback: DEFAULT_ACTIVE_NODES_LOOK_BACK_DURATION,
+          interval: DEFAULT_DISCOVERY_INTERVAL_MS,
+        },
       });
       await kibanaDiscoveryService.start();
       await kibanaDiscoveryService.start();
@@ -85,8 +89,10 @@ describe('KibanaDiscoveryService', () => {
         savedObjectsRepository,
         logger,
         currentNode,
-        discoveryInterval: DEFAULT_DISCOVERY_INTERVAL_MS,
-        activeNodesLookBack: DEFAULT_ACTIVE_NODES_LOOK_BACK_S,
+        config: {
+          active_nodes_lookback: DEFAULT_ACTIVE_NODES_LOOK_BACK_DURATION,
+          interval: DEFAULT_DISCOVERY_INTERVAL_MS,
+        },
       });
       await kibanaDiscoveryService.start();
 
@@ -111,8 +117,10 @@ describe('KibanaDiscoveryService', () => {
         savedObjectsRepository,
         logger,
         currentNode,
-        discoveryInterval: DEFAULT_DISCOVERY_INTERVAL_MS,
-        activeNodesLookBack: DEFAULT_ACTIVE_NODES_LOOK_BACK_S,
+        config: {
+          active_nodes_lookback: DEFAULT_ACTIVE_NODES_LOOK_BACK_DURATION,
+          interval: DEFAULT_DISCOVERY_INTERVAL_MS,
+        },
       });
       await kibanaDiscoveryService.start();
 
@@ -138,8 +146,10 @@ describe('KibanaDiscoveryService', () => {
         savedObjectsRepository,
         logger,
         currentNode,
-        discoveryInterval: DEFAULT_DISCOVERY_INTERVAL_MS,
-        activeNodesLookBack: DEFAULT_ACTIVE_NODES_LOOK_BACK_S,
+        config: {
+          active_nodes_lookback: DEFAULT_ACTIVE_NODES_LOOK_BACK_DURATION,
+          interval: DEFAULT_DISCOVERY_INTERVAL_MS,
+        },
       });
       await kibanaDiscoveryService.start();
 
@@ -181,14 +191,16 @@ describe('KibanaDiscoveryService', () => {
         savedObjectsRepository,
         logger,
         currentNode,
-        discoveryInterval: DEFAULT_DISCOVERY_INTERVAL_MS,
-        activeNodesLookBack: DEFAULT_ACTIVE_NODES_LOOK_BACK_S,
+        config: {
+          active_nodes_lookback: DEFAULT_ACTIVE_NODES_LOOK_BACK_DURATION,
+          interval: DEFAULT_DISCOVERY_INTERVAL_MS,
+        },
       });
 
       const activeNodes = await kibanaDiscoveryService.getActiveKibanaNodes();
 
       expect(savedObjectsRepository.find).toHaveBeenCalledWith({
-        filter: `${BACKGROUND_TASK_NODE_SO_NAME}.attributes.last_seen > now-${DEFAULT_ACTIVE_NODES_LOOK_BACK_S}s`,
+        filter: `${BACKGROUND_TASK_NODE_SO_NAME}.attributes.last_seen > now-${DEFAULT_ACTIVE_NODES_LOOK_BACK_DURATION}`,
         page: 1,
         perPage: 10000,
         type: BACKGROUND_TASK_NODE_SO_NAME,
@@ -205,8 +217,10 @@ describe('KibanaDiscoveryService', () => {
         savedObjectsRepository,
         logger,
         currentNode,
-        discoveryInterval: DEFAULT_DISCOVERY_INTERVAL_MS,
-        activeNodesLookBack: DEFAULT_ACTIVE_NODES_LOOK_BACK_S,
+        config: {
+          active_nodes_lookback: DEFAULT_ACTIVE_NODES_LOOK_BACK_DURATION,
+          interval: DEFAULT_DISCOVERY_INTERVAL_MS,
+        },
       });
 
       await kibanaDiscoveryService.deleteCurrentNode();
@@ -228,8 +242,10 @@ describe('KibanaDiscoveryService', () => {
         savedObjectsRepository,
         logger,
         currentNode,
-        discoveryInterval: DEFAULT_DISCOVERY_INTERVAL_MS,
-        activeNodesLookBack: DEFAULT_ACTIVE_NODES_LOOK_BACK_S,
+        config: {
+          active_nodes_lookback: DEFAULT_ACTIVE_NODES_LOOK_BACK_DURATION,
+          interval: DEFAULT_DISCOVERY_INTERVAL_MS,
+        },
       });
 
       await kibanaDiscoveryService.deleteCurrentNode();

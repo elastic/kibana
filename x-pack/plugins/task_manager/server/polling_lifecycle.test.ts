@@ -45,8 +45,10 @@ describe('TaskPollingLifecycle', () => {
   const mockTaskStore = taskStoreMock.create({});
   const taskManagerOpts = {
     config: {
-      active_nodes_lookback: 30,
-      discovery_interval: 10000,
+      discovery: {
+        active_nodes_lookback: '30s',
+        interval: 10000,
+      },
       kibanas_per_partition: 2,
       enabled: true,
       index: 'foo',

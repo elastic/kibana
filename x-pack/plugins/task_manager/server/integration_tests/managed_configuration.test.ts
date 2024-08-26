@@ -43,8 +43,10 @@ describe('managed configuration', () => {
       clock = sinon.useFakeTimers();
 
       const context = coreMock.createPluginInitializerContext<TaskManagerConfig>({
-        active_nodes_lookback: 30,
-        discovery_interval: 10000,
+        discovery: {
+          active_nodes_lookback: '30s',
+          interval: 10000,
+        },
         kibanas_per_partition: 2,
         capacity: 10,
         max_attempts: 9,
@@ -163,8 +165,10 @@ describe('managed configuration', () => {
       clock = sinon.useFakeTimers();
 
       const context = coreMock.createPluginInitializerContext<TaskManagerConfig>({
-        active_nodes_lookback: 30,
-        discovery_interval: 10000,
+        discovery: {
+          active_nodes_lookback: '30s',
+          interval: 10000,
+        },
         kibanas_per_partition: 2,
         capacity: 10,
         max_attempts: 9,
@@ -286,8 +290,10 @@ describe('managed configuration', () => {
       clock = sinon.useFakeTimers();
 
       const context = coreMock.createPluginInitializerContext<TaskManagerConfig>({
-        active_nodes_lookback: 30,
-        discovery_interval: 10000,
+        discovery: {
+          active_nodes_lookback: '30s',
+          interval: 10000,
+        },
         kibanas_per_partition: 2,
         capacity: 10,
         max_attempts: 9,

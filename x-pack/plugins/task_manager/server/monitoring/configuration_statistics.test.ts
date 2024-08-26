@@ -13,8 +13,10 @@ import { TaskManagerConfig } from '../config';
 describe('Configuration Statistics Aggregator', () => {
   test('merges the static config with the merged configs', async () => {
     const configuration: TaskManagerConfig = {
-      active_nodes_lookback: 30,
-      discovery_interval: 10000,
+      discovery: {
+        active_nodes_lookback: '30s',
+        interval: 10000,
+      },
       kibanas_per_partition: 2,
       max_attempts: 9,
       poll_interval: 6000000,

@@ -12,10 +12,12 @@ describe('config validation', () => {
     const config: Record<string, unknown> = {};
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
-        "active_nodes_lookback": 30,
         "allow_reading_invalid_state": true,
         "claim_strategy": "update_by_query",
-        "discovery_interval": 10000,
+        "discovery": Object {
+          "active_nodes_lookback": "30s",
+          "interval": 10000,
+        },
         "ephemeral_tasks": Object {
           "enabled": false,
           "request_capacity": 10,
@@ -72,10 +74,12 @@ describe('config validation', () => {
     const config: Record<string, unknown> = {};
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
-        "active_nodes_lookback": 30,
         "allow_reading_invalid_state": true,
         "claim_strategy": "update_by_query",
-        "discovery_interval": 10000,
+        "discovery": Object {
+          "active_nodes_lookback": "30s",
+          "interval": 10000,
+        },
         "ephemeral_tasks": Object {
           "enabled": false,
           "request_capacity": 10,
@@ -130,10 +134,12 @@ describe('config validation', () => {
     };
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
-        "active_nodes_lookback": 30,
         "allow_reading_invalid_state": true,
         "claim_strategy": "update_by_query",
-        "discovery_interval": 10000,
+        "discovery": Object {
+          "active_nodes_lookback": "30s",
+          "interval": 10000,
+        },
         "ephemeral_tasks": Object {
           "enabled": false,
           "request_capacity": 10,
@@ -260,5 +266,31 @@ describe('config validation', () => {
   test('mget claim strategy defaults poll interval to 500ms', () => {
     const result = configSchema.validate({ claim_strategy: CLAIM_STRATEGY_MGET });
     expect(result.poll_interval).toEqual(500);
+  });
+
+  test('discovery active_nodes_lookback must be a valid duration', () => {
+    const config: Record<string, unknown> = {
+      discovery: {
+        active_nodes_lookback: 'foo',
+      },
+    };
+    expect(() => {
+      configSchema.validate(config);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"[discovery.active_nodes_lookback]: active node lookback duration must be a valid duration string"`
+    );
+  });
+
+  test('discovery active_nodes_lookback must be less than 5m', () => {
+    const config: Record<string, unknown> = {
+      discovery: {
+        active_nodes_lookback: '301s',
+      },
+    };
+    expect(() => {
+      configSchema.validate(config);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"[discovery.active_nodes_lookback]: active node lookback duration cannot exceed five minutes"`
+    );
   });
 });

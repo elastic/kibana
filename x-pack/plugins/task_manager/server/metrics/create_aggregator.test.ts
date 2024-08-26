@@ -35,8 +35,10 @@ import { TaskOverdueMetric, TaskOverdueMetricsAggregator } from './task_overdue_
 const logger = loggingSystemMock.createLogger();
 const mockMetricsAggregator = metricsAggregatorMock.create();
 const config: TaskManagerConfig = {
-  active_nodes_lookback: 30,
-  discovery_interval: 10000,
+  discovery: {
+    active_nodes_lookback: '30s',
+    interval: 10000,
+  },
   kibanas_per_partition: 2,
   allow_reading_invalid_state: false,
   ephemeral_tasks: {

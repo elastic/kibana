@@ -259,8 +259,7 @@ export class TaskManagerPlugin
       savedObjectsRepository,
       logger: this.logger,
       currentNode: this.taskManagerId!,
-      discoveryInterval: this.config.discovery_interval,
-      activeNodesLookBack: this.config.active_nodes_lookback,
+      config: this.config.discovery,
     });
 
     if (this.shouldRunBackgroundTasks) {
