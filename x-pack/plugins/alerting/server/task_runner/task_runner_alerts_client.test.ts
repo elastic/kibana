@@ -65,7 +65,7 @@ import * as RuleRunMetricsStoreModule from '../lib/rule_run_metrics_store';
 import { legacyAlertsClientMock } from '../alerts_client/legacy_alerts_client.mock';
 import { ruleRunMetricsStoreMock } from '../lib/rule_run_metrics_store.mock';
 import { AlertsService } from '../alerts_service';
-import { ReplaySubject } from 'rxjs';
+import { ReplaySubject, Subject } from 'rxjs';
 import { IAlertsClient } from '../alerts_client/types';
 import { getDataStreamAdapter } from '../alerts_service/lib/data_stream_adapter';
 import {
@@ -180,6 +180,7 @@ describe('Task Runner', () => {
     const ruleRunMetricsStore = ruleRunMetricsStoreMock.create();
     const maintenanceWindowClient = maintenanceWindowClientMock.create();
     const connectorAdapterRegistry = new ConnectorAdapterRegistry();
+    const elasticsearchAndSOAvailability$ = new Subject<boolean>();
 
     type TaskRunnerFactoryInitializerParamsType = jest.Mocked<TaskRunnerContext> & {
       actionsPlugin: jest.Mocked<ActionsPluginStart>;
@@ -387,7 +388,10 @@ describe('Task Runner', () => {
           kibanaVersion: '8.8.0',
           elasticsearchClientPromise: Promise.resolve(clusterClient),
           dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts }),
+          elasticsearchAndSOAvailability$,
         });
+        elasticsearchAndSOAvailability$.next(true);
+
         const spy = jest
           .spyOn(alertsService, 'getContextInitializationPromise')
           .mockResolvedValue({ result: true });
@@ -446,12 +450,12 @@ describe('Task Runner', () => {
         expect(logger.debug).toHaveBeenCalledTimes(useDataStreamForAlerts ? 9 : 10);
 
         let debugCall = 1;
-        expect(logger.debug).nthCalledWith(debugCall++, `Initializing resources for AlertsService`);
         expect(logger.debug).nthCalledWith(
           debugCall++,
           'executing rule test:1 at 1970-01-01T00:00:00.000Z',
           { tags: ['1', 'test'] }
         );
+        expect(logger.debug).nthCalledWith(debugCall++, `Initializing resources for AlertsService`);
 
         if (!useDataStreamForAlerts) {
           expect(logger.debug).nthCalledWith(
@@ -516,7 +520,10 @@ describe('Task Runner', () => {
           kibanaVersion: '8.8.0',
           elasticsearchClientPromise: Promise.resolve(clusterClient),
           dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts }),
+          elasticsearchAndSOAvailability$,
         });
+        elasticsearchAndSOAvailability$.next(true);
+
         const spy = jest
           .spyOn(alertsService, 'getContextInitializationPromise')
           .mockResolvedValue({ result: true });
