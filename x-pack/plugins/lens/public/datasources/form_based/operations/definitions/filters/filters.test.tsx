@@ -39,6 +39,14 @@ const defaultProps = {
   layerId: '1',
 };
 
+// @ts-expect-error
+window['__@hello-pangea/dnd-disable-dev-warnings'] = true; // issue with enzyme & @hello-pangea/dnd throwing errors: https://github.com/hello-pangea/dnd/issues/644
+jest.mock('@kbn/unified-search-plugin/public', () => ({
+  QueryStringInput: () => {
+    return 'QueryStringInput';
+  },
+}));
+
 // mocking random id generator function
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -291,16 +299,10 @@ describe('filters', () => {
   });
 
   describe('popover param editor', () => {
-    // @ts-expect-error
-    window['__@hello-pangea/dnd-disable-dev-warnings'] = true; // issue with enzyme & @hello-pangea/dnd throwing errors: https://github.com/hello-pangea/dnd/issues/644
-    jest.mock('@kbn/unified-search-plugin/public', () => ({
-      QueryStringInput: () => {
-        return 'QueryStringInput';
-      },
-    }));
-
     it('should update state when changing a filter', async () => {
       jest.useFakeTimers();
+      // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
+      const user = userEvent.setup({ delay: null });
       const updateLayerSpy = jest.fn();
       render(
         <InlineOptions
@@ -312,7 +314,7 @@ describe('filters', () => {
         />
       );
 
-      await userEvent.click(screen.getAllByTestId('indexPattern-filters-existingFilterTrigger')[1]);
+      await user.click(screen.getAllByTestId('indexPattern-filters-existingFilterTrigger')[1]);
       fireEvent.change(screen.getByTestId('indexPattern-filters-label'), {
         target: { value: 'Dest5' },
       });
@@ -360,6 +362,9 @@ describe('filters', () => {
       });
 
       it('should remove filter', async () => {
+        // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
+        const user = userEvent.setup({ delay: null });
+        jest.useFakeTimers();
         const updateLayerSpy = jest.fn();
         render(
           <InlineOptions
@@ -371,7 +376,9 @@ describe('filters', () => {
           />
         );
 
-        await userEvent.click(screen.getByTestId('lns-customBucketContainer-remove-1'));
+        await user.click(screen.getByTestId('lns-customBucketContainer-remove-1'));
+
+        act(() => jest.advanceTimersByTime(256));
 
         expect(updateLayerSpy).toHaveBeenCalledWith({
           ...layer,

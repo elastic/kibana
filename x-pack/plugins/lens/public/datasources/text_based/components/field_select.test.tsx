@@ -60,7 +60,7 @@ describe('Layer Data Panel', () => {
       getAllOptions: () =>
         within(screen.getByRole('listbox'))
           .getAllByRole('option')
-          .map((option) => option.textContent),
+          .map((option) => within(option).getByTestId('fullText').textContent),
     };
   };
 

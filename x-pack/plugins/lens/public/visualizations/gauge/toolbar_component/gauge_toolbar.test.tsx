@@ -42,9 +42,11 @@ describe('gauge toolbar', () => {
   const renderAxisTicksSettingsAndOpen = async (
     propsOverrides?: Partial<VisualizationToolbarProps<GaugeVisualizationState>>
   ) => {
+    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
+    const user = userEvent.setup({ delay: null });
     const rtlRender = render(<GaugeToolbar {...defaultProps} {...propsOverrides} />);
     const openPopover = async () =>
-      await userEvent.click(screen.getByRole('button', { name: 'Appearance' }));
+      await user.click(screen.getByRole('button', { name: 'Appearance' }));
     await openPopover();
     return {
       ...rtlRender,
@@ -57,7 +59,7 @@ describe('gauge toolbar', () => {
   const getSubtitleSelectValue = () => screen.getByTestId('lnsToolbarGaugeLabelMinor-select');
 
   it('should reflect state in the UI for default props', async () => {
-    renderAxisTicksSettingsAndOpen();
+    await renderAxisTicksSettingsAndOpen();
     expect(getTitleLabel()).toHaveValue('');
     const titleSelect = getTitleSelectValue();
     expect(titleSelect).toHaveValue('auto');
@@ -66,7 +68,7 @@ describe('gauge toolbar', () => {
     expect(subtitleSelect).toHaveValue('none');
   });
   it('should reflect state in the UI for non-default props', async () => {
-    renderAxisTicksSettingsAndOpen({
+    await renderAxisTicksSettingsAndOpen({
       state: {
         ...defaultProps.state,
         ticksPosition: 'bands' as const,
@@ -85,8 +87,8 @@ describe('gauge toolbar', () => {
   });
 
   describe('labelMajor', () => {
-    it('labelMajor label is disabled if labelMajor is selected to be none', () => {
-      renderAxisTicksSettingsAndOpen({
+    it('labelMajor label is disabled if labelMajor is selected to be none', async () => {
+      await renderAxisTicksSettingsAndOpen({
         state: {
           ...defaultProps.state,
           labelMajorMode: 'none' as const,
@@ -97,8 +99,8 @@ describe('gauge toolbar', () => {
       const titleSelect = getTitleSelectValue();
       expect(titleSelect).toHaveValue('none');
     });
-    it('labelMajor mode switches to custom when user starts typing', () => {
-      renderAxisTicksSettingsAndOpen({
+    it('labelMajor mode switches to custom when user starts typing', async () => {
+      await renderAxisTicksSettingsAndOpen({
         state: {
           ...defaultProps.state,
           labelMajorMode: 'auto' as const,
@@ -125,8 +127,8 @@ describe('gauge toolbar', () => {
     });
   });
   describe('labelMinor', () => {
-    it('labelMinor label is enabled if labelMinor is string', () => {
-      renderAxisTicksSettingsAndOpen({
+    it('labelMinor label is enabled if labelMinor is string', async () => {
+      await renderAxisTicksSettingsAndOpen({
         state: {
           ...defaultProps.state,
           labelMinor: 'labelMinor label',
@@ -137,8 +139,8 @@ describe('gauge toolbar', () => {
       expect(subtitleSelect).toHaveValue('custom');
       expect(getSubtitleLabel()).not.toBeDisabled();
     });
-    it('labelMajor mode can switch to custom', () => {
-      renderAxisTicksSettingsAndOpen({
+    it('labelMajor mode can switch to custom', async () => {
+      await renderAxisTicksSettingsAndOpen({
         state: {
           ...defaultProps.state,
           labelMinor: '',

@@ -223,9 +223,11 @@ describe('TextBased Query Languages Data Panel', () => {
   });
 
   it('should list all supported fields in the pattern that match the search input', async () => {
+    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
+    const user = userEvent.setup({ delay: null });
     await renderTextBasedDataPanel();
     jest.useFakeTimers();
-    await userEvent.type(screen.getByRole('searchbox', { name: 'Search field names' }), 'mem');
+    await user.type(screen.getByRole('searchbox', { name: 'Search field names' }), 'mem');
     act(() => jest.advanceTimersByTime(256));
     expect(screen.getByTestId('lnsFieldListPanelField')).toHaveTextContent('memory');
     jest.useRealTimers();

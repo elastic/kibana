@@ -301,7 +301,7 @@ describe('FormBasedDimensionEditor', () => {
       const optionsList = screen.getByRole('dialog');
       return within(optionsList)
         .getAllByRole('option')
-        .map((option) => option.textContent);
+        .map((option) => within(option).getByTestId('fullText').textContent);
     };
 
     return { ...rtlRender, getVisibleFieldSelectOptions };

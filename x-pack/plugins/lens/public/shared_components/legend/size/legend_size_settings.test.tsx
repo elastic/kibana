@@ -51,9 +51,9 @@ describe('legend size settings', () => {
     expect(onSizeChange).toHaveBeenNthCalledWith(2, undefined);
   });
 
-  it('hides "auto" option if visualization not using it', () => {
+  it('hides "auto" option if visualization not using it', async () => {
     renderLegendSizeSettings({ showAutoOption: true });
-    openSelect();
+    await openSelect();
     expect(
       screen.getAllByRole('option').filter((option) => option.textContent === 'Auto')
     ).toHaveLength(1);
@@ -61,7 +61,7 @@ describe('legend size settings', () => {
     cleanup();
 
     renderLegendSizeSettings({ showAutoOption: false });
-    openSelect();
+    await openSelect();
     expect(
       screen.getAllByRole('option').filter((option) => option.textContent === 'Auto')
     ).toHaveLength(0);

@@ -615,6 +615,8 @@ describe('percentile', () => {
     });
 
     it('should update state on change', async () => {
+      // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
+      const user = userEvent.setup({ delay: null });
       const updateLayerSpy = jest.fn();
       render(
         <InlineOptions
@@ -626,8 +628,8 @@ describe('percentile', () => {
         />
       );
       const input = screen.getByRole('spinbutton', { name: 'Percentile' });
-      await userEvent.clear(input);
-      await userEvent.type(input, '27');
+      await user.clear(input);
+      await user.type(input, '27');
       jest.advanceTimersByTime(256);
       expect(input).toHaveValue(27);
       expect(updateLayerSpy).toHaveBeenCalledTimes(1);
@@ -641,6 +643,8 @@ describe('percentile', () => {
     });
 
     it('should update on decimals input up to 2 digits', async () => {
+      // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
+      const user = userEvent.setup({ delay: null });
       const updateLayerSpy = jest.fn();
       render(
         <InlineOptions
@@ -652,14 +656,16 @@ describe('percentile', () => {
         />
       );
       const input = screen.getByRole('spinbutton', { name: 'Percentile' });
-      await userEvent.clear(input);
-      await userEvent.type(input, '12.12');
+      await user.clear(input);
+      await user.type(input, '12.12');
       jest.advanceTimersByTime(256);
       expect(input).toHaveValue(12.12);
       expect(updateLayerSpy).toHaveBeenCalled();
     });
 
     it('should not update on invalid input, but show invalid value locally', async () => {
+      // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
+      const user = userEvent.setup({ delay: null });
       const updateLayerSpy = jest.fn();
       render(
         <InlineOptions
@@ -671,13 +677,13 @@ describe('percentile', () => {
         />
       );
       const input = screen.getByRole('spinbutton', { name: 'Percentile' });
-      await userEvent.clear(input);
-      await userEvent.type(input, '12.1212312312312312');
+      await user.clear(input);
+      await user.type(input, '12.1212312312312312');
       jest.advanceTimersByTime(256);
       expect(input).toHaveValue(12.1212312312312312);
       expect(updateLayerSpy).not.toHaveBeenCalled();
       expect(
-        screen.getByText('Percentile has to be an integer between 0.0001 and 99.9999')
+        screen.getByText('Only 4 numbers allowed after the decimal point.')
       ).toBeInTheDocument();
 
       // expect(

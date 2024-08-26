@@ -182,7 +182,7 @@ describe('DatatableComponent', () => {
 
   test('it invokes executeTriggerActions with correct context on click on top value', async () => {
     renderDatatableComponent({ columnFilterable: [true, true, true] });
-    userEvent.hover(screen.getAllByTestId('dataGridRowCell')[0]);
+    await userEvent.hover(screen.getAllByTestId('dataGridRowCell')[0]);
     await userEvent.click(screen.getByTestId('lensDatatableFilterOut'));
 
     expect(onDispatchEvent).toHaveBeenCalledWith({
@@ -203,7 +203,7 @@ describe('DatatableComponent', () => {
 
   test('it invokes executeTriggerActions with correct context on click on timefield', async () => {
     renderDatatableComponent({ columnFilterable: [true, true, true] });
-    userEvent.hover(screen.getAllByTestId('dataGridRowCell')[1]);
+    await userEvent.hover(screen.getAllByTestId('dataGridRowCell')[1]);
     await userEvent.click(screen.getByTestId('lensDatatableFilterFor'));
 
     expect(onDispatchEvent).toHaveBeenCalledWith({
@@ -264,7 +264,7 @@ describe('DatatableComponent', () => {
       },
     });
 
-    userEvent.hover(screen.getAllByTestId('dataGridRowCell')[0]);
+    await userEvent.hover(screen.getAllByTestId('dataGridRowCell')[0]);
     await userEvent.click(screen.getByTestId('lensDatatableFilterFor'));
 
     expect(onDispatchEvent).toHaveBeenCalledWith({
@@ -285,7 +285,7 @@ describe('DatatableComponent', () => {
 
   test('it should not invoke executeTriggerActions if interactivity is set to false', async () => {
     renderDatatableComponent({ columnFilterable: [true, true, true], interactive: false });
-    userEvent.hover(screen.getAllByTestId('dataGridRowCell')[0]);
+    await userEvent.hover(screen.getAllByTestId('dataGridRowCell')[0]);
     expect(screen.queryByTestId('lensDatatableFilterOut')).not.toBeInTheDocument();
   });
 
