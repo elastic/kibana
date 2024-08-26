@@ -21,6 +21,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
 
   describe('Goal', function describeIndexTests() {
+    // fails on MKI, see https://github.com/elastic/kibana/issues/191238
+    this.tags(['failsOnMKI']);
+
     const fixture =
       'x-pack/test_serverless/functional/fixtures/kbn_archiver/lens/open_in_lens/agg_based/goal.json';
 

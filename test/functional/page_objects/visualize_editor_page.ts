@@ -280,7 +280,7 @@ export class VisualizeEditorPageObject extends FtrService {
 
   public async setCustomLabel(label: string, index: number | string = 1) {
     const customLabel = await this.testSubjects.find(`visEditorStringInput${index}customLabel`);
-    customLabel.type(label);
+    await customLabel.type(label);
   }
 
   public async selectYAxisAggregation(agg: string, field: string, label: string, index = 1) {
