@@ -183,7 +183,7 @@ export const VariablesEditor = (props: Props) => {
         <p>
           <FormattedMessage
             id="console.variablesPage.pageDescription"
-            defaultMessage="Define and reuse placeholders for dynamic values in your queries."
+            defaultMessage="Define reusable placeholders for dynamic values in your queries."
           />
         </p>
       </EuiText>
