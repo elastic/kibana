@@ -13,6 +13,8 @@ import {
   SavedObjectsServiceStart,
 } from '@kbn/core/server';
 import { PluginStart as DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import { LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
+import { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/server';
 import {
   LogView,
   LogViewAttributes,
@@ -23,6 +25,7 @@ import {
 
 export interface LogViewsServiceStartDeps {
   dataViews: DataViewsServerPluginStart;
+  logsDataAccess: LogsDataAccessPluginStart;
   elasticsearch: ElasticsearchServiceStart;
   savedObjects: SavedObjectsServiceStart;
 }
@@ -45,6 +48,7 @@ export interface LogViewsServiceStart {
   getClient(
     savedObjectsClient: SavedObjectsClientContract,
     elasticsearchClient: ElasticsearchClient,
+    logSourcesService: Promise<LogSourcesService>,
     request?: KibanaRequest
   ): ILogViewsClient;
   getScopedClient(request: KibanaRequest): ILogViewsClient;

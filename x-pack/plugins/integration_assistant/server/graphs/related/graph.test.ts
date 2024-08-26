@@ -17,6 +17,7 @@ import {
   testPipelineError,
   testPipelineValidResult,
 } from '../../../__jest__/fixtures/related';
+import type { SimplifiedProcessors } from '../../types';
 import { mockedRequestWithPipeline } from '../../../__jest__/fixtures';
 import { handleReview } from './review';
 import { handleRelated } from './related';
@@ -27,7 +28,7 @@ import {
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';
 
-const mockLlm = new FakeLLM({
+const model = new FakeLLM({
   response: "I'll callback later.",
 }) as unknown as ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
 
@@ -40,7 +41,7 @@ jest.mock('../../util/pipeline', () => ({
 }));
 
 describe('runRelatedGraph', () => {
-  const mockClient = {
+  const client = {
     asCurrentUser: {
       indices: {
         getMapping: jest.fn(),
@@ -54,25 +55,45 @@ describe('runRelatedGraph', () => {
     const mockInvokeReview = jest.fn().mockResolvedValue(relatedReviewMockedResponse);
 
     // After this is triggered, the mock of TestPipeline will trigger the expected error, to route to error handler
-    (handleRelated as jest.Mock).mockImplementation(async () => ({
-      currentPipeline: relatedInitialPipeline,
-      currentProcessors: await mockInvokeRelated(),
-      reviewed: false,
-      finalized: false,
-      lastExecutedChain: 'related',
-    }));
+    (handleRelated as jest.Mock).mockImplementation(async () => {
+      const currentProcessors = await mockInvokeRelated();
+      const processors = {
+        type: 'related',
+        processors: currentProcessors,
+      } as SimplifiedProcessors;
+      const currentPipeline = combineProcessors(relatedInitialPipeline, processors);
+      return {
+        currentPipeline,
+        currentProcessors,
+        reviewed: false,
+        finalized: false,
+        lastExecutedChain: 'related',
+      };
+    });
     // Error pipeline returns the correct response to trigger a review.
-    (handleErrors as jest.Mock).mockImplementation(async () => ({
-      currentPipeline: relatedInitialPipeline,
-      currentProcessors: await mockInvokeError(),
-      reviewed: false,
-      finalized: false,
-      lastExecutedChain: 'error',
-    }));
+    (handleErrors as jest.Mock).mockImplementation(async () => {
+      const currentProcessors = await mockInvokeError();
+      const processors = {
+        type: 'related',
+        processors: currentProcessors,
+      } as SimplifiedProcessors;
+      const currentPipeline = combineProcessors(relatedInitialPipeline, processors);
+      return {
+        currentPipeline,
+        currentProcessors,
+        reviewed: false,
+        finalized: false,
+        lastExecutedChain: 'error',
+      };
+    });
     // After the review it should route to modelOutput and finish.
     (handleReview as jest.Mock).mockImplementation(async () => {
       const currentProcessors = await mockInvokeReview();
-      const currentPipeline = combineProcessors(relatedInitialPipeline, currentProcessors);
+      const processors = {
+        type: 'related',
+        processors: currentProcessors,
+      } as SimplifiedProcessors;
+      const currentPipeline = combineProcessors(relatedInitialPipeline, processors);
       return {
         currentProcessors,
         currentPipeline,
@@ -85,14 +106,14 @@ describe('runRelatedGraph', () => {
 
   it('Ensures that the graph compiles', async () => {
     try {
-      await getRelatedGraph(mockClient, mockLlm);
+      await getRelatedGraph({ client, model });
     } catch (error) {
-      // noop
+      throw Error(`getRelatedGraph threw an error: ${error}`);
     }
   });
 
   it('Runs the whole graph, with mocked outputs from the LLM.', async () => {
-    const relatedGraph = await getRelatedGraph(mockClient, mockLlm);
+    const relatedGraph = await getRelatedGraph({ client, model });
 
     (testPipeline as jest.Mock)
       .mockResolvedValueOnce(testPipelineValidResult)
@@ -104,8 +125,8 @@ describe('runRelatedGraph', () => {
     let response;
     try {
       response = await relatedGraph.invoke(mockedRequestWithPipeline);
-    } catch (e) {
-      // noop
+    } catch (error) {
+      throw Error(`getRelatedGraph threw an error: ${error}`);
     }
 
     expect(response.results).toStrictEqual(relatedExpectedResults);

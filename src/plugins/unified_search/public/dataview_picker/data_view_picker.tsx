@@ -76,13 +76,6 @@ export interface DataViewPickerProps {
   isDisabled?: boolean;
 }
 
-export interface DataViewPickerPropsExtended extends DataViewPickerProps {
-  /**
-   * Text based language that is currently selected; depends on the query
-   */
-  textBasedLanguage?: string;
-}
-
 export const DataViewPicker = ({
   isMissingCurrent,
   currentDataViewId,
@@ -95,10 +88,9 @@ export const DataViewPicker = ({
   trigger,
   selectableProps,
   textBasedLanguages,
-  textBasedLanguage,
   onCreateDefaultAdHocDataView,
   isDisabled,
-}: DataViewPickerPropsExtended) => {
+}: DataViewPickerProps) => {
   return (
     <ChangeDataView
       isMissingCurrent={isMissingCurrent}
@@ -113,7 +105,6 @@ export const DataViewPicker = ({
       savedDataViews={savedDataViews}
       selectableProps={selectableProps}
       textBasedLanguages={textBasedLanguages}
-      textBasedLanguage={textBasedLanguage}
       isDisabled={isDisabled}
     />
   );

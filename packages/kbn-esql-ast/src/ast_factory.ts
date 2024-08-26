@@ -30,6 +30,7 @@ import {
   type MetaCommandContext,
   type MetricsCommandContext,
   IndexPatternContext,
+  InlinestatsCommandContext,
 } from './antlr/esql_parser';
 import { default as ESQLParserListener } from './antlr/esql_parser_listener';
 import {
@@ -186,6 +187,23 @@ export class AstListener implements ESQLParserListener {
    */
   exitStatsCommand(ctx: StatsCommandContext) {
     const command = createCommand('stats', ctx);
+    this.ast.push(command);
+
+    // STATS expression is optional
+    if (ctx._stats) {
+      command.args.push(...collectAllFields(ctx.fields(0)));
+    }
+    if (ctx._grouping) {
+      command.args.push(...visitByOption(ctx, ctx._stats ? ctx.fields(1) : ctx.fields(0)));
+    }
+  }
+
+  /**
+   * Exit a parse tree produced by `esql_parser.inlinestatsCommand`.
+   * @param ctx the parse tree
+   */
+  exitInlinestatsCommand(ctx: InlinestatsCommandContext) {
+    const command = createCommand('inlinestats', ctx);
     this.ast.push(command);
 
     // STATS expression is optional

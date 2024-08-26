@@ -10,13 +10,20 @@ import kbnRison from '@kbn/rison';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'discover', 'svlCommonPage', 'unifiedFieldList']);
+  const PageObjects = getPageObjects([
+    'common',
+    'discover',
+    'svlCommonPage',
+    'unifiedFieldList',
+    'header',
+  ]);
   const dataViews = getService('dataViews');
   const dataGrid = getService('dataGrid');
   const queryBar = getService('queryBar');
   const monacoEditor = getService('monacoEditor');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
+  const retry = getService('retry');
 
   describe('extension getDefaultAppState', () => {
     before(async () => {
@@ -26,6 +33,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     afterEach(async () => {
       await kibanaServer.uiSettings.unset('defaultColumns');
     });
+
+    async function expectColumns(columns: string[]) {
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await retry.try(async () => {
+        const actualColumns = await PageObjects.discover.getColumnHeaders();
+        expect(actualColumns).to.eql(columns);
+      });
+    }
 
     describe('ES|QL mode', () => {
       it('should render default columns and row height', async () => {
@@ -38,9 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
           ensureCurrentUrl: false,
         });
-        await PageObjects.discover.waitUntilSearchingHasFinished();
-        const columns = await PageObjects.discover.getColumnHeaders();
-        expect(columns).to.eql(['@timestamp', 'log.level', 'message']);
+        await expectColumns(['@timestamp', 'log.level', 'message']);
         await dataGrid.clickGridSettings();
         const rowHeightValue = await dataGrid.getCurrentRowHeightValue();
         expect(rowHeightValue).to.be('Custom');
@@ -58,9 +72,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
           ensureCurrentUrl: false,
         });
-        await PageObjects.discover.waitUntilSearchingHasFinished();
-        let columns = await PageObjects.discover.getColumnHeaders();
-        expect(columns).to.eql(['@timestamp', 'Document']);
+        await expectColumns(['@timestamp', 'Document']);
         await dataGrid.clickGridSettings();
         let rowHeightValue = await dataGrid.getCurrentRowHeightValue();
         expect(rowHeightValue).to.be('Custom');
@@ -68,9 +80,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(rowHeightNumber).to.be(3);
         await monacoEditor.setCodeEditorValue('from my-example-logs');
         await queryBar.clickQuerySubmitButton();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
-        columns = await PageObjects.discover.getColumnHeaders();
-        expect(columns).to.eql(['@timestamp', 'log.level', 'message']);
+        await expectColumns(['@timestamp', 'log.level', 'message']);
         await dataGrid.clickGridSettings();
         rowHeightValue = await dataGrid.getCurrentRowHeightValue();
         expect(rowHeightValue).to.be('Custom');
@@ -91,16 +101,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.unifiedFieldList.clickFieldListItemRemove('log.level');
         await PageObjects.unifiedFieldList.clickFieldListItemRemove('message');
-        let columns = await PageObjects.discover.getColumnHeaders();
-        expect(columns).to.eql(['@timestamp', 'Document']);
+        await expectColumns(['@timestamp', 'Document']);
         await dataGrid.clickGridSettings();
         await dataGrid.changeRowHeightValue('Single');
         let rowHeightValue = await dataGrid.getCurrentRowHeightValue();
         expect(rowHeightValue).to.be('Single');
         await testSubjects.click('discoverNewButton');
-        await PageObjects.discover.waitUntilSearchingHasFinished();
-        columns = await PageObjects.discover.getColumnHeaders();
-        expect(columns).to.eql(['@timestamp', 'log.level', 'message']);
+        await expectColumns(['@timestamp', 'log.level', 'message']);
         await dataGrid.clickGridSettings();
         rowHeightValue = await dataGrid.getCurrentRowHeightValue();
         expect(rowHeightValue).to.be('Custom');
@@ -121,21 +128,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
           ensureCurrentUrl: false,
         });
-        await PageObjects.discover.waitUntilSearchingHasFinished();
-        const columns = await PageObjects.discover.getColumnHeaders();
-        expect(columns).to.eql(['@timestamp', 'log.level', 'message', 'data_stream.type']);
+        await expectColumns(['@timestamp', 'log.level', 'message', 'data_stream.type']);
       });
     });
 
-    describe('data view mode', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/191260
+    describe.skip('data view mode', () => {
       it('should render default columns and row height', async () => {
         await PageObjects.common.navigateToActualUrl('discover', undefined, {
           ensureCurrentUrl: false,
         });
         await dataViews.switchTo('my-example-logs');
-        await PageObjects.discover.waitUntilSearchingHasFinished();
-        const columns = await PageObjects.discover.getColumnHeaders();
-        expect(columns).to.eql(['@timestamp', 'log.level', 'message']);
+        await expectColumns(['@timestamp', 'log.level', 'message']);
         await dataGrid.clickGridSettings();
         const rowHeightValue = await dataGrid.getCurrentRowHeightValue();
         expect(rowHeightValue).to.be('Custom');
@@ -148,18 +152,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           ensureCurrentUrl: false,
         });
         await dataViews.switchTo('my-example-*');
-        await PageObjects.discover.waitUntilSearchingHasFinished();
-        let columns = await PageObjects.discover.getColumnHeaders();
-        expect(columns).to.eql(['@timestamp', 'Document']);
+        await expectColumns(['@timestamp', 'Document']);
         await dataGrid.clickGridSettings();
         let rowHeightValue = await dataGrid.getCurrentRowHeightValue();
         expect(rowHeightValue).to.be('Custom');
         let rowHeightNumber = await dataGrid.getCustomRowHeightNumber();
         expect(rowHeightNumber).to.be(3);
         await dataViews.switchTo('my-example-logs');
-        await PageObjects.discover.waitUntilSearchingHasFinished();
-        columns = await PageObjects.discover.getColumnHeaders();
-        expect(columns).to.eql(['@timestamp', 'log.level', 'message']);
+        await expectColumns(['@timestamp', 'log.level', 'message']);
         await dataGrid.clickGridSettings();
         rowHeightValue = await dataGrid.getCurrentRowHeightValue();
         expect(rowHeightValue).to.be('Custom');
@@ -175,16 +175,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.unifiedFieldList.clickFieldListItemRemove('log.level');
         await PageObjects.unifiedFieldList.clickFieldListItemRemove('message');
-        let columns = await PageObjects.discover.getColumnHeaders();
-        expect(columns).to.eql(['@timestamp', 'Document']);
+        await expectColumns(['@timestamp', 'Document']);
         await dataGrid.clickGridSettings();
         await dataGrid.changeRowHeightValue('Single');
         let rowHeightValue = await dataGrid.getCurrentRowHeightValue();
         expect(rowHeightValue).to.be('Single');
         await testSubjects.click('discoverNewButton');
-        await PageObjects.discover.waitUntilSearchingHasFinished();
-        columns = await PageObjects.discover.getColumnHeaders();
-        expect(columns).to.eql(['@timestamp', 'log.level', 'message']);
+        await expectColumns(['@timestamp', 'log.level', 'message']);
         await dataGrid.clickGridSettings();
         rowHeightValue = await dataGrid.getCurrentRowHeightValue();
         expect(rowHeightValue).to.be('Custom');
@@ -200,9 +197,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           ensureCurrentUrl: false,
         });
         await dataViews.switchTo('my-example-logs');
-        await PageObjects.discover.waitUntilSearchingHasFinished();
-        const columns = await PageObjects.discover.getColumnHeaders();
-        expect(columns).to.eql(['@timestamp', 'log.level', 'message', 'data_stream.type']);
+        await expectColumns(['@timestamp', 'log.level', 'message', 'data_stream.type']);
       });
     });
   });

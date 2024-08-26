@@ -228,7 +228,11 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
       QueryStringInputProps['indexPatterns'][number],
       DataView
     >(this.props.indexPatterns || [], (indexPattern): indexPattern is DataView => {
-      return indexPattern.hasOwnProperty('fields') && indexPattern.hasOwnProperty('title');
+      return (
+        typeof indexPattern === 'object' &&
+        Object.hasOwn(indexPattern, 'fields') &&
+        Object.hasOwn(indexPattern, 'title')
+      );
     });
     const idOrTitlePatterns = stringPatterns.map((sp) =>
       typeof sp === 'string' ? { type: 'title', value: sp } : sp

@@ -11,6 +11,7 @@ import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 
 import { CustomizeSpace } from './customize_space';
 import { SpaceValidator } from '../../lib';
+import { SectionPanel } from '../section_panel';
 
 const validator = new SpaceValidator({ shouldValidate: true });
 
@@ -27,6 +28,29 @@ test('renders correctly', () => {
     />
   );
   expect(wrapper).toMatchSnapshot();
+});
+
+test('allows title prop', () => {
+  const space = {
+    id: 'space-3',
+    name: 'Space 3',
+    initials: 'S3',
+    color: '#FEEDED',
+    customAvatarInitials: true,
+    customAvatarColor: true,
+  };
+  const changeHandler = jest.fn();
+
+  const wrapper = shallowWithIntl(
+    <CustomizeSpace
+      title="Cool Customize Space Title"
+      space={space}
+      editingExistingSpace={true}
+      validator={validator}
+      onChange={changeHandler}
+    />
+  );
+  expect(wrapper.find(SectionPanel).prop('title')).toBe('Cool Customize Space Title');
 });
 
 test('updates identifier, initials and color when name is changed', () => {

@@ -21,12 +21,6 @@ export const SETTINGS_DESCRIPTION = i18n.translate(
       'Create and manage Quick Prompts. Quick Prompts are shortcuts to common actions.',
   }
 );
-export const ADD_QUICK_PROMPT_MODAL_TITLE = i18n.translate(
-  'xpack.elasticAssistant.assistant.quickPrompts.settings.modalTitle',
-  {
-    defaultMessage: 'Quick Prompts',
-  }
-);
 
 export const QUICK_PROMPT_NAME = i18n.translate(
   'xpack.elasticAssistant.assistant.quickPrompts.settings.nameLabel',

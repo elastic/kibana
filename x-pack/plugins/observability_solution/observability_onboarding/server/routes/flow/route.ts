@@ -12,7 +12,7 @@ import {
   FleetUnauthorizedError,
   type PackageClient,
 } from '@kbn/fleet-plugin/server';
-import { dump } from 'js-yaml';
+import { safeDump } from 'js-yaml';
 import { PackageDataStreamTypes } from '@kbn/fleet-plugin/common/types';
 import { getObservabilityOnboardingFlow, saveObservabilityOnboardingFlow } from '../../lib/state';
 import type { SavedObservabilityOnboardingFlow } from '../../saved_objects/observability_onboarding_status';
@@ -383,7 +383,8 @@ async function ensureInstalledIntegrations(
       const { pkgName, installSource } = integration;
 
       if (installSource === 'registry') {
-        const pkg = await packageClient.ensureInstalledPackage({ pkgName });
+        const installation = await packageClient.ensureInstalledPackage({ pkgName });
+        const pkg = installation.package;
         const inputs = await packageClient.getAgentPolicyInputs(pkg.name, pkg.version);
         const { packageInfo } = await packageClient.getPackage(pkg.name, pkg.version);
 
@@ -500,7 +501,7 @@ function parseIntegrationsTSV(tsv: string) {
 }
 
 const generateAgentConfig = ({ esHost, inputs = [] }: { esHost: string[]; inputs: unknown[] }) => {
-  return dump({
+  return safeDump({
     outputs: {
       default: {
         type: 'elasticsearch',
