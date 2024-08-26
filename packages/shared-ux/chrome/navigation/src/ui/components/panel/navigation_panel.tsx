@@ -19,6 +19,17 @@ import classNames from 'classnames';
 
 import { usePanel } from './context';
 import { getNavPanelStyles, getPanelWrapperStyles } from './styles';
+import { PanelNavNode } from './types';
+
+const getTestSubj = (selectedNode: PanelNavNode | null): string | undefined => {
+  if (!selectedNode) return;
+
+  const deeplinkId = selectedNode.deepLink?.id;
+  return classNames(`sideNavPanel`, {
+    [`sideNavPanel-id-${selectedNode.id}`]: selectedNode.id,
+    [`sideNavPanel-deepLinkId-${deeplinkId}`]: !!deeplinkId,
+  });
+};
 
 export const NavigationPanel: FC = () => {
   const { euiTheme } = useEuiTheme();
@@ -67,7 +78,7 @@ export const NavigationPanel: FC = () => {
               hasShadow
               borderRadius="none"
               paddingSize="m"
-              data-test-subj="sideNavPanel"
+              data-test-subj={getTestSubj(selectedNode)}
             >
               {getContent()}
             </EuiPanel>
