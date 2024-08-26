@@ -103,22 +103,7 @@ export async function queryMonitorStatusAlert(
                     size: monitorLocationIds.length || 100,
                   },
                   aggs: {
-                    summaryDoc: {
-                      top_hits: {
-                        size: 1,
-                        sort: [
-                          {
-                            '@timestamp': {
-                              order: 'desc',
-                            },
-                          },
-                        ],
-                        _source: {
-                          includes: fields,
-                        },
-                      },
-                    },
-                    lastXChecks: {
+                    totalChecks: {
                       top_hits: {
                         size: numberOfChecks,
                         sort: [
@@ -129,7 +114,7 @@ export async function queryMonitorStatusAlert(
                           },
                         ],
                         _source: {
-                          includes: ['summary', '@timestamp'],
+                          includes: fields,
                         },
                       },
                     },
@@ -152,12 +137,9 @@ export async function queryMonitorStatusAlert(
       const { body: result } = await esClient.search<OverviewPing, typeof params>(params);
 
       result.aggregations?.id.buckets.forEach(({ location, key: queryId }) => {
-        const locationSummaries = location.buckets.map(
-          ({ summaryDoc, key: locationId, downChecks }) => {
-            const ping = summaryDoc.hits.hits?.[0]?._source;
-            return { locationId, ping, downChecks };
-          }
-        );
+        const locationSummaries = location.buckets.map(({ key: locationId, totalChecks }) => {
+          return { locationId, totalChecks };
+        });
 
         // discard any locations that are not in the monitorLocationsMap for the given monitor as well as those which are
         // in monitorLocationsMap but not in listOfLocations
@@ -169,21 +151,22 @@ export async function queryMonitorStatusAlert(
           );
 
           if (locationSummary) {
-            const { ping, downChecks } = locationSummary;
-            const downCount = ping.summary?.down ?? 0;
-            const upCount = ping.summary?.up ?? 0;
-            const configId = ping.config_id;
-            const monitorQueryId = ping.monitor.id;
+            const { totalChecks } = locationSummary;
+            const firstPing = totalChecks.hits.hits[0]._source;
+            const downCount = firstPing.summary?.down ?? 0;
+            const upCount = firstPing.summary?.up ?? 0;
+            const configId = firstPing.config_id;
+            const monitorQueryId = firstPing.monitor.id;
 
             const meta: AlertStatusMetaDataCodec = {
-              ping,
+              ping: firstPing,
               configId,
               monitorQueryId,
               locationId: monLocationId,
-              timestamp: ping['@timestamp'],
+              timestamp: firstPing['@timestamp'],
               checks: {
-                total: numberOfChecks,
-                down: downChecks.hits.hits.reduce(
+                total: totalChecks.hits.hits.length,
+                down: totalChecks.hits.hits.reduce(
                   (acc, curr) => acc + ((curr._source.summary.down ?? 0) > 0 ? 1 : 0),
                   0
                 ),
