@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { DARK_THEME } from '@elastic/charts';
 import numeral from '@elastic/numeral';
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
@@ -14,7 +13,10 @@ import { EMPTY_STAT } from '../../../../helpers';
 import { alertIndexWithAllResults } from '../../../../mock/pattern_rollup/mock_alerts_pattern_rollup';
 import { auditbeatWithAllResults } from '../../../../mock/pattern_rollup/mock_auditbeat_pattern_rollup';
 import { packetbeatNoResults } from '../../../../mock/pattern_rollup/mock_packetbeat_pattern_rollup';
-import { TestProviders } from '../../../../mock/test_providers/test_providers';
+import {
+  TestDataQualityProviders,
+  TestExternalProviders,
+} from '../../../../mock/test_providers/test_providers';
 import { PatternRollup } from '../../../../types';
 import { Props, IndicesDetails } from '.';
 
@@ -49,22 +51,8 @@ const patternIndexNames: Record<string, string[]> = {
 };
 
 const defaultProps: Props = {
-  addSuccessToast: jest.fn(),
-  canUserCreateAndReadCases: jest.fn(),
-  formatBytes,
-  formatNumber,
-  getGroupByFieldsOnClick: jest.fn(),
-  ilmPhases,
-  isAssistantEnabled: true,
-  openCreateCaseFlyout: jest.fn(),
-  patternIndexNames,
-  patternRollups,
-  patterns,
-  selectedIndex: null,
-  setSelectedIndex: jest.fn(),
-  baseTheme: DARK_THEME,
-  updatePatternIndexNames: jest.fn(),
-  updatePatternRollup: jest.fn(),
+  chartSelectedIndex: null,
+  setChartSelectedIndex: jest.fn(),
 };
 
 describe('IndicesDetails', () => {
@@ -72,9 +60,14 @@ describe('IndicesDetails', () => {
     jest.clearAllMocks();
 
     render(
-      <TestProviders>
-        <IndicesDetails {...defaultProps} />
-      </TestProviders>
+      <TestExternalProviders>
+        <TestDataQualityProviders
+          dataQualityContextProps={{ ilmPhases, patterns, formatBytes, formatNumber }}
+          resultsRollupContextProps={{ patternRollups, patternIndexNames }}
+        >
+          <IndicesDetails {...defaultProps} />
+        </TestDataQualityProviders>
+      </TestExternalProviders>
     );
 
     await waitFor(() => {});
@@ -85,12 +78,6 @@ describe('IndicesDetails', () => {
       test(`it renders the ${pattern} pattern`, () => {
         expect(screen.getByTestId(`${pattern}PatternPanel`)).toBeInTheDocument();
       });
-    });
-  });
-
-  describe('rendering spacers', () => {
-    test('it renders the expected number of spacers', () => {
-      expect(screen.getAllByTestId('bodyPatternSpacer')).toHaveLength(patterns.length - 1);
     });
   });
 });

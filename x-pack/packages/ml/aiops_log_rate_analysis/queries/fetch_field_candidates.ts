@@ -20,7 +20,8 @@ export const TEXT_FIELD_SAFE_LIST = ['message', 'error.message'];
 export const SUPPORTED_ES_FIELD_TYPES = [
   ES_FIELD_TYPES.KEYWORD,
   ES_FIELD_TYPES.IP,
-  ES_FIELD_TYPES.BOOLEAN,
+  // Disabled boolean support because it causes problems with the `frequent_item_sets` aggregation
+  // ES_FIELD_TYPES.BOOLEAN,
 ];
 
 export const SUPPORTED_ES_FIELD_TYPES_TEXT = [ES_FIELD_TYPES.TEXT, ES_FIELD_TYPES.MATCH_ONLY_TEXT];

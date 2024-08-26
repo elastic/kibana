@@ -6,12 +6,9 @@
  */
 export type {
   Investigation,
-  InvestigationRevision,
   InvestigateWidget,
   InvestigateWidgetCreate,
-  WorkflowBlock,
+  InvestigationNote,
 } from './types';
 
 export { mergePlainObjects } from './utils/merge_plain_objects';
-
-export { InvestigateWidgetColumnSpan } from './types';

@@ -10,7 +10,7 @@ import { EuiToolTip, EuiSwitch, EuiFormRow, useGeneratedHtmlId } from '@elastic/
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { RowRendererId } from '../../../../common/api/timeline';
+import { RowRendererValues } from '../../../../common/api/timeline';
 import type { State } from '../../../common/store';
 import { setExcludedRowRendererIds } from '../../store/actions';
 import { selectExcludedRowRendererIds } from '../../store/selectors';
@@ -40,7 +40,7 @@ export const RowRendererSwitch = React.memo(function RowRendererSwitch(
   );
 
   const isAnyRowRendererEnabled = useMemo(
-    () => Object.values(RowRendererId).some((id) => !excludedRowRendererIds.includes(id)),
+    () => RowRendererValues.some((id) => !excludedRowRendererIds.includes(id)),
     [excludedRowRendererIds]
   );
 
@@ -48,7 +48,7 @@ export const RowRendererSwitch = React.memo(function RowRendererSwitch(
     dispatch(
       setExcludedRowRendererIds({
         id: timelineId,
-        excludedRowRendererIds: Object.values(RowRendererId),
+        excludedRowRendererIds: RowRendererValues,
       })
     );
   }, [dispatch, timelineId]);

@@ -34,6 +34,8 @@ export const getUiSettings = (
         }
 
         try {
+          if (!request.auth.isAuthenticated) return DEFAULT_ROUTES.classic;
+
           const activeSpace = await spaces.spacesService.getActiveSpace(request);
 
           const solution = activeSpace?.solution ?? 'classic';

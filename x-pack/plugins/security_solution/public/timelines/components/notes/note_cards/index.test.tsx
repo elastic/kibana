@@ -10,7 +10,7 @@ import { mount } from 'enzyme';
 import '../../../../common/mock/formatted_relative';
 
 import { NoteCards } from '.';
-import { TimelineStatus } from '../../../../../common/api/timeline';
+import { TimelineStatusEnum } from '../../../../../common/api/timeline';
 import { TestProviders } from '../../../../common/mock';
 import type { TimelineResultNote } from '../../open_timeline/types';
 import { TimelineId } from '../../../../../common/types';
@@ -58,7 +58,7 @@ describe('NoteCards', () => {
     getNewNoteId: jest.fn(),
     notes: [],
     showAddNote: true,
-    status: TimelineStatus.active,
+    status: TimelineStatusEnum.active,
     toggleShowAddNote: jest.fn(),
     updateNote: jest.fn(),
     timelineId: TimelineId.test,

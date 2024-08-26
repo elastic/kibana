@@ -44,6 +44,7 @@ export const OverviewStatusSchema = schema.object({
   monitorTypes: StringOrArraySchema,
   locations: StringOrArraySchema,
   projects: StringOrArraySchema,
+  monitorQueryIds: StringOrArraySchema,
   schedules: StringOrArraySchema,
   status: StringOrArraySchema,
   scopeStatusByLocation: schema.maybe(schema.boolean()),

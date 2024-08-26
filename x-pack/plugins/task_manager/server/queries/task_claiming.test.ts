@@ -80,12 +80,12 @@ describe('TaskClaiming', () => {
       unusedTypes: [],
       taskStore: taskStoreMock.create({ taskManagerId: '' }),
       maxAttempts: 2,
-      getCapacity: () => 10,
+      getAvailableCapacity: () => 10,
       taskPartitioner,
     });
 
     expect(taskManagerLogger.warn).toHaveBeenCalledWith(
-      'Unknown task claiming strategy "non-default", falling back to default'
+      'Unknown task claiming strategy "non-default", falling back to update_by_query'
     );
   });
 
@@ -130,7 +130,7 @@ describe('TaskClaiming', () => {
       unusedTypes: [],
       taskStore: taskStoreMock.create({ taskManagerId: '' }),
       maxAttempts: 2,
-      getCapacity: () => 10,
+      getAvailableCapacity: () => 10,
       taskPartitioner,
     });
 
