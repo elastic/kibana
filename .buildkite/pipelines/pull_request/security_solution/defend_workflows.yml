@@ -9,7 +9,7 @@ steps:
     depends_on:
       - build
       - quick_checks
-    timeout_in_minutes: 60
+    timeout_in_minutes: 120
     parallelism: 20
     retry:
       automatic:
