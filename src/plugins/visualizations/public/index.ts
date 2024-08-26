@@ -75,7 +75,6 @@ export type {
   HistogramParams,
 } from '../common/expression_functions/xy_dimension';
 export { urlFor, getFullPath } from './utils/saved_visualize_utils';
-export { convertSavedObjectAttributesToReferences } from './utils/saved_visualization_references';
 
 export type { IEditorController, EditorRenderProps } from './visualize_app/types';
 
