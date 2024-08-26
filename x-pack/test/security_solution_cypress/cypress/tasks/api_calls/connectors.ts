@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { waitForRootRequest } from './common';
-
 export const createConnector = (connector: Record<string, unknown>) =>
   cy.request({
     method: 'POST',
@@ -49,7 +47,5 @@ export const bedrockConnectorAPIPayload = {
 };
 
 export const createSlackConnector = () => createConnector(slackConnectorAPIPayload);
-export const createAzureConnector = () =>
-  waitForRootRequest(createConnector(azureConnectorAPIPayload));
-export const createBedrockConnector = () =>
-  waitForRootRequest(createConnector(bedrockConnectorAPIPayload));
+export const createAzureConnector = () => createConnector(azureConnectorAPIPayload);
+export const createBedrockConnector = () => createConnector(bedrockConnectorAPIPayload);

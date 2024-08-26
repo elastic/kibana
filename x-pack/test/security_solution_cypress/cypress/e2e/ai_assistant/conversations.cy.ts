@@ -162,7 +162,7 @@ describe(
         assertConnectorSelected(bedrockConnectorAPIPayload.name);
         assertMessageSent('goodbye', true);
       });
-      // This test is flakey due to the issue linked behlow and will be skipped until it is fixed
+      // This test is flakey due to the issue linked below and will be skipped until it is fixed
       it.skip('Only allows one conversation called "New chat" at a time', () => {
         visitGetStartedPage();
         openAssistant();
