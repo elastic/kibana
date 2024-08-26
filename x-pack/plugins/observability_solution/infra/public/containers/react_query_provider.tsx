@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { QueryClient, QueryClientConfig, QueryClientProvider } from '@tanstack/react-query';
 import merge from 'lodash/merge';
 import { EuiButtonIcon } from '@elastic/eui';
@@ -36,7 +37,7 @@ export function ReactQueryProvider({ children, config = {} }: ProviderProps) {
 function HideableReactQueryDevTools() {
   const [isHidden, setIsHidden] = useState(false);
 
-  return !isHidden ? (
+  return !isHidden && process.env.NODE_ENV === 'development' ? (
     <div>
       <EuiButtonIcon
         data-test-subj="infraHideableReactQueryDevToolsButton"
@@ -44,7 +45,10 @@ function HideableReactQueryDevTools() {
         color="primary"
         style={{ zIndex: 99999, position: 'fixed', bottom: '40px', left: '40px' }}
         onClick={() => setIsHidden(!isHidden)}
-        aria-label="Disable React Query Dev Tools"
+        aria-label={i18n.translate(
+          'xpack.infra.hideableReactQueryDevTools.euiButtonIcon.disableReactQueryDevLabel',
+          { defaultMessage: 'Disable React Query Dev Tools' }
+        )}
       />
       <ReactQueryDevtools initialIsOpen={false} />
     </div>
