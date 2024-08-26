@@ -246,6 +246,7 @@ export const useDiscoverHistogram = ({
 
   useEffect(() => {
     if (!isEsqlMode) {
+      setIsSuggestionLoading(false);
       return;
     }
 

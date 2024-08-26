@@ -23,7 +23,7 @@ function createAppMountParams(hash: string): AppMountParameters {
 
 describe('forward_app', () => {
   let coreSetup: CoreSetup<{}, UrlForwardingStart>;
-  let coreStart: ReturnType<typeof coreMock['createStart']>;
+  let coreStart: ReturnType<(typeof coreMock)['createStart']>;
 
   beforeEach(() => {
     coreSetup = coreMock.createSetup({ basePath: '/base/path' });

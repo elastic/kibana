@@ -9,3 +9,4 @@ export const PLUGIN_ID = 'searchInferenceEndpoints';
 export const PLUGIN_NAME = 'InferenceEndpoints';
 
 export const INFERENCE_ENDPOINTS_QUERY_KEY = 'inferenceEndpointsQueryKey';
+export const TRAINED_MODEL_STATS_QUERY_KEY = 'trainedModelStats';

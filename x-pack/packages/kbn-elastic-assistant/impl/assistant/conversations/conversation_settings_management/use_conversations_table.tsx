@@ -15,12 +15,9 @@ import { PromptResponse } from '@kbn/elastic-assistant-common';
 import { Conversation } from '../../../assistant_context/types';
 import { AIConnector } from '../../../connectorland/connector_selector';
 import { getConnectorTypeTitle } from '../../../connectorland/helpers';
-import {
-  getConversationApiConfig,
-  getInitialDefaultSystemPrompt,
-} from '../../use_conversation/helpers';
+import { getConversationApiConfig } from '../../use_conversation/helpers';
 import * as i18n from './translations';
-import { RowActions } from '../../common/components/assistant_settings_management/row_actions';
+import { useInlineActions } from '../../common/components/assistant_settings_management/inline_actions';
 
 const emptyConversations = {};
 
@@ -38,6 +35,7 @@ export type ConversationTableItem = Conversation & {
 };
 
 export const useConversationsTable = () => {
+  const getActions = useInlineActions<ConversationTableItem>();
   const getColumns = useCallback(
     ({
       onDeleteActionClicked,
@@ -45,7 +43,7 @@ export const useConversationsTable = () => {
     }): Array<EuiBasicTableColumn<ConversationTableItem>> => {
       return [
         {
-          name: i18n.CONVERSATIONS_TABLE_COLUMN_NAME,
+          name: i18n.CONVERSATIONS_TABLE_COLUMN_TITLE,
           render: (conversation: ConversationTableItem) => (
             <EuiLink onClick={() => onEditActionClicked(conversation)}>
               {conversation.title}
@@ -87,24 +85,16 @@ export const useConversationsTable = () => {
           sortable: true,
         },
         {
-          name: i18n.CONVERSATIONS_TABLE_COLUMN_ACTIONS,
           width: '120px',
           align: 'center',
-          render: (conversation: ConversationTableItem) => {
-            const isDeletable = !conversation.isDefault;
-            return (
-              <RowActions<ConversationTableItem>
-                rowItem={conversation}
-                onDelete={isDeletable ? onDeleteActionClicked : undefined}
-                onEdit={onEditActionClicked}
-                isDeletable={isDeletable}
-              />
-            );
-          },
+          ...getActions({
+            onDelete: onDeleteActionClicked,
+            onEdit: onEditActionClicked,
+          }),
         },
       ];
     },
-    []
+    [getActions]
   );
   const getConversationsList = useCallback(
     ({
@@ -129,16 +119,8 @@ export const useConversationsTable = () => {
         const systemPrompt: PromptResponse | undefined = allSystemPrompts.find(
           ({ id }) => id === conversation.apiConfig?.defaultSystemPromptId
         );
-        const defaultSystemPrompt = getInitialDefaultSystemPrompt({
-          allSystemPrompts,
-          conversation,
-        });
 
-        const systemPromptTitle =
-          systemPrompt?.name ||
-          systemPrompt?.id ||
-          defaultSystemPrompt?.name ||
-          defaultSystemPrompt?.id;
+        const systemPromptTitle = systemPrompt?.name || systemPrompt?.id;
 
         return {
           ...conversation,

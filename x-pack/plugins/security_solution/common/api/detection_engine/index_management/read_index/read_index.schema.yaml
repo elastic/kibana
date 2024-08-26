@@ -1,14 +1,14 @@
 openapi: 3.0.0
 info:
-  title: Get alerts index name API endpoint
+  title: Read alerts index name API endpoint
   version: '2023-10-31'
 paths:
   /api/detection_engine/index:
     get:
       x-labels: [ess]
-      operationId: GetAlertsIndex
+      operationId: ReadAlertsIndex
       x-codegen-enabled: true
-      summary: Gets the alert index name if it exists
+      summary: Reads the alert index name if it exists
       tags:
         - Alert index API
       responses:
@@ -38,6 +38,7 @@ paths:
               schema:
                 $ref: '../../../model/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
         404:
+          description: Not found
           content:
             application/json:
               schema:

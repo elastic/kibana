@@ -19,7 +19,7 @@ export const createOverviewTrendsRoute: SyntheticsRestApiRouteFactory = () => ({
   },
   handler: async (routeContext): Promise<any> => {
     return withSpan('fetch trends', async () => {
-      const esClient = routeContext.uptimeEsClient;
+      const esClient = routeContext.syntheticsEsClient;
       const body = routeContext.request.body as Array<{ configId: string; locationId: string }>;
       const configs = body.reduce((acc: Record<string, string[]>, { configId, locationId }) => {
         if (!acc[configId]) {

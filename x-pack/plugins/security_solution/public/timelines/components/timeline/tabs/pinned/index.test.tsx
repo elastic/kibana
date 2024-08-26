@@ -8,6 +8,7 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 import useResizeObserver from 'use-resize-observer/polyfilled';
+import type { Dispatch } from 'redux';
 
 import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer';
 import { defaultHeaders, mockTimelineData } from '../../../../../common/mock';
@@ -24,6 +25,9 @@ import type { Props as PinnedTabContentComponentProps } from '.';
 import { PinnedTabContentComponent } from '.';
 import { Direction } from '../../../../../../common/search_strategy';
 import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import type { ExperimentalFeatures } from '../../../../../../common';
+import { allowedExperimentalValues } from '../../../../../../common';
 
 jest.mock('../../../../containers', () => ({
   useTimelineEvents: jest.fn(),
@@ -39,6 +43,9 @@ jest.mock('../../body/events', () => ({
 }));
 
 jest.mock('../../../../../sourcerer/containers');
+
+jest.mock('../../../../../common/hooks/use_experimental_features');
+const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
 
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
 jest.mock('use-resize-observer/polyfilled');
@@ -114,7 +121,17 @@ describe('PinnedTabContent', () => {
 
     (useSourcererDataView as jest.Mock).mockReturnValue(mockSourcererScope);
 
+    (useIsExperimentalFeatureEnabledMock as jest.Mock).mockImplementation(
+      (feature: keyof ExperimentalFeatures) => {
+        if (feature === 'unifiedComponentsInTimelineDisabled') {
+          return true;
+        }
+        return allowedExperimentalValues[feature];
+      }
+    );
+
     props = {
+      dispatch: {} as Dispatch,
       columns: defaultHeaders,
       timelineId: TimelineId.test,
       itemsPerPage: 5,
@@ -123,10 +140,7 @@ describe('PinnedTabContent', () => {
       rowRenderers: defaultRowRenderers,
       sort,
       pinnedEventIds: {},
-      showExpandedDetails: false,
-      onEventClosed: jest.fn(),
       eventIdToNoteIds: {},
-      expandedDetail: {},
     };
   });
 

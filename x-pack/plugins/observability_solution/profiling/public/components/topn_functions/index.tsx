@@ -32,6 +32,7 @@ interface Props {
   comparisonTopNFunctions?: TopNFunctions;
   totalSeconds: number;
   isDifferentialView: boolean;
+  showFullScreenSelector?: boolean;
   baselineScaleFactor?: number;
   comparisonScaleFactor?: number;
   onFrameClick?: (functionName: string) => void;
@@ -50,6 +51,7 @@ export const TopNFunctionsGrid = ({
   topNFunctions,
   comparisonTopNFunctions,
   totalSeconds,
+  showFullScreenSelector = true,
   isDifferentialView,
   baselineScaleFactor,
   comparisonScaleFactor,
@@ -316,7 +318,7 @@ export const TopNFunctionsGrid = ({
           showColumnSelector: false,
           showKeyboardShortcuts: !isDifferentialView,
           showDisplaySelector: !isDifferentialView,
-          showFullScreenSelector: !isDifferentialView,
+          showFullScreenSelector: showFullScreenSelector && !isDifferentialView,
           showSortSelector: false,
         }}
         virtualizationOptions={{

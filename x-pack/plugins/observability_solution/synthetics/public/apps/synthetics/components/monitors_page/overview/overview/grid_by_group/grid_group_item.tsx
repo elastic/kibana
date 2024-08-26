@@ -51,7 +51,7 @@ export const GroupGridItem = ({
   const downMonitors = groupMonitors.filter((monitor) => {
     const downConfigs = overviewStatus?.downConfigs;
     if (downConfigs) {
-      return downConfigs[`${monitor.configId}-${monitor.location?.label}`]?.status === 'down';
+      return downConfigs[`${monitor.configId}-${monitor.location?.id}`]?.status === 'down';
     }
   });
 
@@ -98,7 +98,7 @@ export const GroupGridItem = ({
         </EuiFlexGroup>
       }
       extraAction={
-        <EuiFlexGroup alignItems="center" gutterSize="s">
+        <EuiFlexGroup alignItems="center" gutterSize="m">
           <EuiFlexItem>
             <EuiButtonIcon
               data-test-subj="syntheticsGroupGridItemButton"
@@ -122,10 +122,28 @@ export const GroupGridItem = ({
           </EuiFlexItem>
 
           <EuiFlexItem>
+            <EuiBadge color="danger">
+              {i18n.translate('xpack.synthetics.groupGridItem.monitorsBadgeLabel.downCount', {
+                defaultMessage: '{downCount} Down',
+                values: { downCount: downMonitorsCount },
+              })}
+            </EuiBadge>
+          </EuiFlexItem>
+
+          <EuiFlexItem>
+            <EuiBadge color="success">
+              {i18n.translate('xpack.synthetics.groupGridItem.monitorsBadgeLabel.upCount', {
+                defaultMessage: '{upCount} Up',
+                values: { upCount: groupMonitors.length - downMonitorsCount },
+              })}
+            </EuiBadge>
+          </EuiFlexItem>
+
+          <EuiFlexItem>
             <EuiBadge color="subdued">
-              {groupMonitors.length}&nbsp;
-              {i18n.translate('xpack.synthetics.groupGridItem.monitorsBadgeLabel', {
-                defaultMessage: 'Monitors',
+              {i18n.translate('xpack.synthetics.groupGridItem.monitorsBadgeLabel.count', {
+                defaultMessage: '{count, number} {count, plural, one {monitor} other {monitors}}',
+                values: { count: groupMonitors.length },
               })}
             </EuiBadge>
           </EuiFlexItem>

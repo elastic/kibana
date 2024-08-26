@@ -8,6 +8,14 @@
 import { PREFIX } from '../../../shared/test_ids';
 import { CONTENT_TEST_ID, HEADER_TEST_ID } from './expandable_section';
 
+/* Table */
+
+const FLYOUT_TABLE_TEST_ID = `${PREFIX}Table` as const;
+export const FLYOUT_TABLE_FIELD_NAME_CELL_ICON_TEST_ID =
+  `${FLYOUT_TABLE_TEST_ID}FieldNameCellIcon` as const;
+export const FLYOUT_TABLE_FIELD_NAME_CELL_TEXT_TEST_ID =
+  `${FLYOUT_TABLE_TEST_ID}FieldNameCellText` as const;
+
 /* Header */
 
 const FLYOUT_HEADER_TEST_ID = `${PREFIX}Header` as const;

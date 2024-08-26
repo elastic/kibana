@@ -23,10 +23,11 @@ import { DegradedDocs } from '../degraded_docs_trend/degraded_docs';
 import { DataStreamDetails } from '../../../../common/api_types';
 import { DEFAULT_TIME_RANGE, DEFAULT_DATEPICKER_REFRESH } from '../../../../common/constants';
 import { useDatasetQualityContext } from '../../dataset_quality/context';
-import { FlyoutDataset, TimeRangeConfig } from '../../../state_machines/dataset_quality_controller';
 import { FlyoutSummaryHeader } from './flyout_summary_header';
 import { FlyoutSummaryKpis, FlyoutSummaryKpisLoading } from './flyout_summary_kpis';
 import { DegradedFields } from '../degraded_fields/degraded_fields';
+import { TimeRangeConfig } from '../../../../common/types';
+import { FlyoutDataset } from '../../../state_machines/dataset_quality_controller';
 
 const nonAggregatableWarningTitle = i18n.translate('xpack.datasetQuality.nonAggregatable.title', {
   defaultMessage: 'Your request may take longer to complete',
@@ -77,7 +78,9 @@ const nonAggregatableWarningDescription = (dataset: string) => (
   />
 );
 
-export function FlyoutSummary({
+// Allow for lazy loading
+// eslint-disable-next-line import/no-default-export
+export default function FlyoutSummary({
   dataStream,
   dataStreamStat,
   dataStreamDetails,

@@ -22,7 +22,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('Dataset quality home', () => {
     before(async () => {
-      await PageObjects.svlCommonPage.loginWithRole('admin');
+      await PageObjects.svlCommonPage.loginWithPrivilegedRole();
     });
 
     describe('with no datasets available', () => {
@@ -48,7 +48,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('dataset quality table exists', async () => {
-        await PageObjects.datasetQuality.navigateTo();
         await PageObjects.datasetQuality.waitUntilTableLoaded();
         await testSubjects.existOrFail(
           PageObjects.datasetQuality.testSubjectSelectors.datasetQualityTable

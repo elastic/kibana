@@ -26,7 +26,7 @@ policy_templates:
     inputs: {% for input in inputs %}
       - type: {{ input.type }}
         title: |
-          {{ input.title }}
+          {{ input.title }} : {{ input.type }}
         description: |
           {{ input.description }} {% endfor %}
 owner:

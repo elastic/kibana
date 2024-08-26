@@ -1,20 +1,24 @@
 # OpenAPI Specs Bundler for Kibana
 
-`@kbn/openapi-bundler` is a tool for transforming multiple OpenAPI specification files (source specs) into a bundled specification file(s) (target spec). The number of resulting bundles depends on a number of versions
-used in the OpenAPI specification files. The package can be used for API documentation generation purposes. This approach allows you to:
+This packages provides tooling for manipulating OpenAPI endpoint specifications. It has two tools exposes
 
-- Abstract away the knowledge of where you keep your OpenAPI specs, how many specs are there, and how to find them. Consumer should only know where result files (bundles) are located.
-- Omit internal API endpoints from the bundle.
-- Omit API endpoints that are hidden behind a feature flag and haven't been released yet.
-- Omit parts of schemas that are hidden behind a feature flag (e.g. a new property added to an existing response schema).
-- Omit custom OpenAPI attributes from the bundle, such as `x-codegen-enabled`, `x-internal`, `x-modify` and `x-labels`.
-- Include only dedicated OpenAPI operation objects (a.k.a HTTP verbs) into the result bundle by labeling them via `x-labels`
-  and using `includeLabels` bundler option, e.g. produce separate ESS and Serverless bundles
-- Transform the target schema according to the custom OpenAPI attributes, such as `x-modify`.
-- Resolve references, inline some of them and merge `allOf` object schemas for better readability. The bundled file contains only local references and paths.
-- Group OpenAPI specs by version (OpenAPI's `info.version`) and produce a separate bundle for each group
+- **OpenAPI bundler** is a tool for transforming multiple OpenAPI specification files (source specs) into a bundled specification file(s) (target spec). The number of resulting bundles depends on a number of versions
+  used in the OpenAPI specification files. The package can be used for API documentation generation purposes. This approach allows you to:
 
-## Getting started
+  - Abstract away the knowledge of where you keep your OpenAPI specs, how many specs are there, and how to find them. Consumer should only know where result files (bundles) are located.
+  - Omit internal API endpoints from the bundle.
+  - Omit API endpoints that are hidden behind a feature flag and haven't been released yet.
+  - Omit parts of schemas that are hidden behind a feature flag (e.g. a new property added to an existing response schema).
+  - Omit custom OpenAPI attributes from the bundle, such as `x-codegen-enabled`, `x-internal`, `x-modify` and `x-labels`.
+  - Include only dedicated OpenAPI operation objects (a.k.a HTTP verbs) into the result bundle by labeling them via `x-labels`
+    and using `includeLabels` bundler option, e.g. produce separate ESS and Serverless bundles
+  - Transform the target schema according to the custom OpenAPI attributes, such as `x-modify`.
+  - Resolve references, inline some of them and merge `allOf` object schemas for better readability. The bundled file contains only local references and paths.
+  - Group OpenAPI specs by version (OpenAPI's `info.version`) and produce a separate bundle for each group
+
+- **OpenAPI merger** is a tool for merging multiple OpenAPI specification files. It's useful to merge already processed specification files to produce a result bundle. **OpenAPI bundler** uses the merger under the hood to merge bundled OpenAPI specification files. Exposed externally merger is a wrapper of the bundler's merger but extended with an ability to parse JSON files and forced to produce a single result file.
+
+## Getting started with OpenAPI bundling
 
 To let this package help you with bundling your OpenAPI specifications you should have OpenAPI specification describing your API endpoint request and response schemas along with common types used in your API. Refer [@kbn/openapi-generator](../kbn-openapi-generator/README.md) and [OpenAPI 3.0.3](https://swagger.io/specification/v3/) (support for [OpenAPI 3.1.0](https://swagger.io/specification/) is planned to be added later) for more details.
 
@@ -162,6 +166,48 @@ components:
   schemas:
     securitySchemes: ...
 ```
+
+## Getting started with OpenAPI merger
+
+To let this package help you with merging OpenAPI specifications you should have valid OpenAPI specifications version `3.0.x`. OpenAPI `3.1` is not supported currently.
+
+Currently package supports only programmatic API. As the next step you need to create a JavaScript script file like below
+
+```ts
+require('../../src/setup_node_env');
+const { resolve } = require('path');
+const { merge } = require('@kbn/openapi-bundler');
+const { REPO_ROOT } = require('@kbn/repo-info');
+
+(async () => {
+  await merge({
+    sourceGlobs: [
+      `${REPO_ROOT}/my/path/to/spec1.json`,
+      `${REPO_ROOT}/my/path/to/spec2.yml`,
+      `${REPO_ROOT}/my/path/to/spec3.yaml`,
+    ],
+    outputFilePath: `${REPO_ROOT}/oas_docs/bundle.serverless.yaml`,
+    mergedSpecInfo: {
+      title: 'Kibana Serverless',
+      version: '1.0.0',
+    },
+  });
+})();
+```
+
+Finally you should be able to run OpenAPI merger via
+
+```bash
+node ./path/to/the/script.js
+```
+
+or it could be added to a `package.json` and run via `yarn`.
+
+After running the script it will log different information and write a merged OpenAPI specification to a the provided path.
+
+### Caveats
+
+Merger shows an error when it's unable to merge some OpenAPI specifications. There is a possibility that references with the same name are defined in two or more files or there are endpoints of different versions and different parameters. Additionally top level `$ref` in path items, path item's `requestBody` and each response in `responses` aren't supported.
 
 ## Multiple API versions declared via OpenAPI's `info.version`
 

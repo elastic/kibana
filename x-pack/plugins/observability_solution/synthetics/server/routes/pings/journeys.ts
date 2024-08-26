@@ -7,11 +7,11 @@
 
 import { schema } from '@kbn/config-schema';
 import { SyntheticsJourneyApiResponse } from '../../../common/runtime_types';
-import { getJourneyFailedSteps } from '../../legacy_uptime/lib/requests/get_journey_failed_steps';
+import { getJourneyFailedSteps } from '../../queries/get_journey_failed_steps';
+import { getJourneySteps } from '../../queries/get_journey_steps';
+import { getJourneyDetails } from '../../queries/get_journey_details';
 import { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
-import { getJourneyDetails } from '../../queries/get_journey_details';
-import { getJourneySteps } from '../../legacy_uptime/lib/requests/get_journey_steps';
 
 export const createJourneyRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
@@ -21,16 +21,20 @@ export const createJourneyRoute: SyntheticsRestApiRouteFactory = () => ({
       checkGroup: schema.string(),
     }),
   },
-  handler: async ({ uptimeEsClient, request, response }): Promise<SyntheticsJourneyApiResponse> => {
+  handler: async ({
+    syntheticsEsClient,
+    request,
+    response,
+  }): Promise<SyntheticsJourneyApiResponse> => {
     const { checkGroup } = request.params;
 
     const [steps, details] = await Promise.all([
       getJourneySteps({
-        uptimeEsClient,
+        syntheticsEsClient,
         checkGroup,
       }),
       getJourneyDetails({
-        uptimeEsClient,
+        syntheticsEsClient,
         checkGroup,
       }),
     ]);
@@ -51,11 +55,11 @@ export const createJourneyFailedStepsRoute: SyntheticsRestApiRouteFactory = () =
       checkGroups: schema.arrayOf(schema.string()),
     }),
   },
-  handler: async ({ uptimeEsClient, request, response }): Promise<any> => {
+  handler: async ({ syntheticsEsClient, request, response }): Promise<any> => {
     const { checkGroups } = request.query;
     try {
       const result = await getJourneyFailedSteps({
-        uptimeEsClient,
+        syntheticsEsClient,
         checkGroups,
       });
       return {

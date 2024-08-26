@@ -16,6 +16,14 @@ export const selectErrorPopoverState = createSelector(
   selectOverviewState,
   (state) => state.isErrorPopoverOpen
 );
+export const selectTrendState = createSelector(
+  selectOverviewState,
+  ({ trendsLoading, trendStats, trendsPendingStack }) => ({
+    trendStats,
+    trendsLoading,
+    trendsPendingStack,
+  })
+);
 export const selectOverviewTrends = createSelector(
   selectOverviewState,
   ({ trendStats }) => trendStats

@@ -1,14 +1,18 @@
 openapi: 3.0.0
 info:
-  title: Manage alert tags API endpoint
+  title: Set alert tags API endpoint
   version: '2023-10-31'
 paths:
   /api/detection_engine/signals/tags:
     post:
       x-labels: [serverless, ess]
-      operationId: ManageAlertTags
+      operationId: SetAlertTags
       x-codegen-enabled: true
-      summary: Manage alert tags for a one or more alerts
+      summary: Add and remove detection alert tags
+      description: |
+        And tags to detection alerts, and remove them from alerts.
+        > info
+        > You cannot add and remove the same alert tag in the same request.
       tags:
         - Alerts API
       requestBody:
@@ -22,7 +26,7 @@ paths:
                 ids:
                   $ref: '../../../model/alert.schema.yaml#/components/schemas/AlertIds'
                 tags:
-                  $ref: '#/components/schemas/ManageAlertTags'
+                  $ref: '#/components/schemas/SetAlertTags'
               required:
                 - ids
                 - tags
@@ -58,7 +62,7 @@ paths:
 
 components:
   schemas:
-    ManageAlertTags:
+    SetAlertTags:
       type: object
       properties:
         tags_to_add:

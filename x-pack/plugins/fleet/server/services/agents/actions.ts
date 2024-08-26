@@ -30,6 +30,9 @@ import { auditLoggingService } from '../audit_logging';
 
 import { getAgentIdsForAgentPolicies } from '../agent_policies/agent_policies_to_agent_ids';
 
+import { getCurrentNamespace } from '../spaces/get_current_namespace';
+import { addNamespaceFilteringToQuery } from '../spaces/query_namespaces_filtering';
+
 import { bulkUpdateAgents } from './crud';
 
 const ONE_MONTH_IN_MS = 2592000000;
@@ -52,6 +55,7 @@ export async function createAgentAction(
         ? undefined
         : newAgentAction.expiration ?? new Date(now + ONE_MONTH_IN_MS).toISOString(),
     agents: newAgentAction.agents,
+    namespaces: newAgentAction.namespaces,
     action_id: actionId,
     data: newAgentAction.data,
     type: newAgentAction.type,
@@ -182,6 +186,7 @@ export async function bulkCreateAgentActionResults(
   results: Array<{
     actionId: string;
     agentId: string;
+    namespaces?: string[];
     error?: string;
   }>
 ): Promise<void> {
@@ -194,6 +199,7 @@ export async function bulkCreateAgentActionResults(
       '@timestamp': new Date().toISOString(),
       action_id: result.actionId,
       agent_id: result.agentId,
+      namespaces: result.namespaces,
       error: result.error,
     };
 
@@ -302,21 +308,28 @@ export async function getUnenrollAgentActions(
   return result;
 }
 
-export async function cancelAgentAction(esClient: ElasticsearchClient, actionId: string) {
+export async function cancelAgentAction(
+  esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract,
+  actionId: string
+) {
+  const currentNameSpace = getCurrentNamespace(soClient);
+
   const getUpgradeActions = async () => {
+    const query = {
+      bool: {
+        filter: [
+          {
+            term: {
+              action_id: actionId,
+            },
+          },
+        ],
+      },
+    };
     const res = await esClient.search<FleetServerAgentAction>({
       index: AGENT_ACTIONS_INDEX,
-      query: {
-        bool: {
-          filter: [
-            {
-              term: {
-                action_id: actionId,
-              },
-            },
-          ],
-        },
-      },
+      query: await addNamespaceFilteringToQuery(query, currentNameSpace),
       size: SO_SEARCH_LIMIT,
     });
 
@@ -345,9 +358,12 @@ export async function cancelAgentAction(esClient: ElasticsearchClient, actionId:
   const cancelledActions: Array<{ agents: string[] }> = [];
 
   const createAction = async (action: FleetServerAgentAction) => {
+    const namespaces = currentNameSpace ? { namespaces: [currentNameSpace] } : {};
+
     await createAgentAction(esClient, {
       id: cancelActionId,
       type: 'CANCEL',
+      ...namespaces,
       agents: action.agents!,
       data: {
         target_id: action.action_id,
@@ -502,7 +518,11 @@ export interface ActionsService {
     agentId: string
   ) => Promise<Agent>;
 
-  cancelAgentAction: (esClient: ElasticsearchClient, actionId: string) => Promise<AgentAction>;
+  cancelAgentAction: (
+    esClient: ElasticsearchClient,
+    soClient: SavedObjectsClientContract,
+    actionId: string
+  ) => Promise<AgentAction>;
 
   createAgentAction: (
     esClient: ElasticsearchClient,

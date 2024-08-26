@@ -8,6 +8,7 @@
 import { useRef, useCallback } from 'react';
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { FieldValidationResults } from '@kbn/ml-category-validator';
 import type { HttpFetchOptions } from '@kbn/core/public';
@@ -28,6 +29,7 @@ export function useValidateFieldRequest() {
       timeField: string,
       timeRange: { from: number; to: number },
       queryIn: QueryDslQueryContainer,
+      runtimeMappings: MappingRuntimeFields | undefined,
       headers?: HttpFetchOptions['headers']
     ) => {
       const query = createCategorizeQuery(queryIn, timeField, timeRange);
@@ -42,10 +44,7 @@ export function useValidateFieldRequest() {
             timeField,
             start: timeRange.from,
             end: timeRange.to,
-            // only text fields are supported in pattern analysis,
-            // and it is not possible to create a text runtime field
-            // so runtimeMappings are not needed
-            runtimeMappings: undefined,
+            runtimeMappings,
             indicesOptions: undefined,
             includeExamples: false,
           }),

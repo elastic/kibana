@@ -691,4 +691,5 @@ export interface ESQLSearchParams {
   filter?: unknown;
   locale?: string;
   dropNullColumns?: boolean;
+  params?: Array<Record<string, string | undefined>>;
 }

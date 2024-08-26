@@ -22,9 +22,15 @@ interface ESQLDataGridProps {
   dataView: DataView;
   columns: DatatableColumn[];
   query: AggregateQuery;
+  /**
+   * Optional parameters
+   */
   flyoutType?: 'overlay' | 'push';
   isTableView?: boolean;
   initialColumns?: DatatableColumn[];
+  fullHeight?: boolean;
+  initialRowHeight?: number;
+  controlColumnIds?: string[]; // default: ['openDetails', 'select']
 }
 
 const DataGridLazy = withSuspense(lazy(() => import('./data_grid')));
@@ -34,6 +40,10 @@ export const ESQLDataGrid = (props: ESQLDataGridProps) => {
     const startServicesPromise = untilPluginStartServicesReady();
     return Promise.all([startServicesPromise]);
   }, []);
+
+  const getWrapper = (children: JSX.Element) => {
+    return props.fullHeight ? <div style={{ height: 500 }}>{children}</div> : <>{children}</>;
+  };
 
   const deps = value?.[0];
   if (loading || !deps) return <EuiLoadingSpinner />;
@@ -45,14 +55,15 @@ export const ESQLDataGrid = (props: ESQLDataGridProps) => {
       }}
     >
       <CellActionsProvider getTriggerCompatibleActions={deps.uiActions.getTriggerCompatibleActions}>
-        <div style={{ height: 500 }}>
+        {getWrapper(
           <DataGridLazy
             data={deps.data}
             fieldFormats={deps.fieldFormats}
             core={deps.core}
+            share={deps.share}
             {...props}
           />
-        </div>
+        )}
       </CellActionsProvider>
     </KibanaContextProvider>
   );

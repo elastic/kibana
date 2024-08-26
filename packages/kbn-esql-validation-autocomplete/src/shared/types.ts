@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import type { ESQLRealField } from '../validation/types';
+
 /** @internal **/
 type CallbackFn<Options = {}, Result = string> = (ctx?: Options) => Result[] | Promise<Result[]>;
 
@@ -18,9 +20,10 @@ export interface ESQLCallbacks {
       hidden: boolean;
       title?: string;
       dataStreams?: Array<{ name: string; title?: string }>;
+      type?: string;
     }
   >;
-  getFieldsFor?: CallbackFn<{ query: string }, { name: string; type: string }>;
+  getFieldsFor?: CallbackFn<{ query: string }, ESQLRealField>;
   getPolicies?: CallbackFn<
     {},
     { name: string; sourceIndices: string[]; matchField: string; enrichFields: string[] }

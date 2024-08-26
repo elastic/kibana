@@ -8,7 +8,6 @@
 import React, { type FunctionComponent } from 'react';
 import {
   EuiAccordion,
-  EuiIcon,
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,11 +17,11 @@ import {
 interface AccordionWithIconProps
   extends Omit<EuiAccordionProps, 'buttonContent' | 'buttonProps' | 'borders' | 'paddingSize'> {
   title: string;
-  iconType: string;
+  icon: React.ReactNode;
 }
 export const AccordionWithIcon: FunctionComponent<AccordionWithIconProps> = ({
   title,
-  iconType,
+  icon,
   children,
   ...rest
 }) => {
@@ -31,9 +30,7 @@ export const AccordionWithIcon: FunctionComponent<AccordionWithIconProps> = ({
       {...rest}
       buttonContent={
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} css={{ marginLeft: 8 }}>
-          <EuiFlexItem grow={false}>
-            <EuiIcon type={iconType} size="l" />
-          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
           <EuiFlexItem>
             <EuiTitle size="xs" css={rest.isDisabled ? { color: 'inherit' } : undefined}>
               <h3>{title}</h3>

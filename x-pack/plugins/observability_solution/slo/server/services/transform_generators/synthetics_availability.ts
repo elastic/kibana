@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import { estypes } from '@elastic/elasticsearch';
+import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
+import { DataViewsService } from '@kbn/data-views-plugin/common';
 import {
   ALL_VALUE,
-  syntheticsAvailabilityIndicatorSchema,
   occurrencesBudgetingMethodSchema,
   SyntheticsAvailabilityIndicator,
+  syntheticsAvailabilityIndicatorSchema,
 } from '@kbn/slo-schema';
-import { DataViewsService } from '@kbn/data-views-plugin/common';
 import { getElasticsearchQueryOrThrow, TransformGenerator } from '.';
 import {
+  getSLOPipelineId,
   getSLOTransformId,
   SLO_DESTINATION_INDEX_NAME,
-  SLO_INGEST_PIPELINE_NAME,
-  SYNTHETICS_INDEX_PATTERN,
   SYNTHETICS_DEFAULT_GROUPINGS,
+  SYNTHETICS_INDEX_PATTERN,
 } from '../../../common/constants';
 import { getSLOTransformTemplate } from '../../assets/transform_templates/slo_transform_template';
-import { InvalidTransformError } from '../../errors';
 import { SLODefinition } from '../../domain/models';
+import { InvalidTransformError } from '../../errors';
 import { getFilterRange } from './common';
 
 export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator {
@@ -41,7 +41,7 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
       this.buildTransformId(slo),
       this.buildDescription(slo),
       await this.buildSource(slo, slo.indicator, spaceId, dataViewService),
-      this.buildDestination(),
+      this.buildDestination(slo),
       this.buildGroupBy(slo, slo.indicator),
       this.buildAggregations(slo),
       this.buildSettings(slo, 'event.ingested'),
@@ -168,9 +168,9 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
     };
   }
 
-  private buildDestination() {
+  private buildDestination(slo: SLODefinition) {
     return {
-      pipeline: SLO_INGEST_PIPELINE_NAME,
+      pipeline: getSLOPipelineId(slo.id, slo.revision),
       index: SLO_DESTINATION_INDEX_NAME,
     };
   }

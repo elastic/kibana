@@ -122,8 +122,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     // adding a11y tests for the new data grid
     it('a11y test on single document view', async () => {
-      await testSubjects.click('docTableExpandToggleColumn');
-      await PageObjects.discover.clickDocViewerTab('doc_view_table');
+      await dataGrid.clickRowToggle();
       await a11y.testAppSnapshot();
     });
 

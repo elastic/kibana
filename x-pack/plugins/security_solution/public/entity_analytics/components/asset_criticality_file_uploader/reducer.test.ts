@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AssetCriticalityBulkUploadResponse } from '../../../../common/api/entity_analytics';
+import type { UploadAssetCriticalityRecordsResponse } from '../../../../common/api/entity_analytics';
 import type { ReducerAction, ReducerState, ValidationStepState } from './reducer';
 import { reducer } from './reducer';
 import { FileUploaderSteps } from './types';
@@ -43,7 +43,7 @@ describe('reducer', () => {
   });
 
   it('should handle "fileUploaded" action with response', () => {
-    const response: AssetCriticalityBulkUploadResponse = {
+    const response: UploadAssetCriticalityRecordsResponse = {
       errors: [],
       stats: {
         total: 10,
@@ -118,7 +118,7 @@ describe('reducer', () => {
     const action: ReducerAction = { type: 'fileError', payload: { message } };
     const nextState = reducer(
       {
-        step: 9999,
+        step: FileUploaderSteps.VALIDATION,
         isLoading: true,
         validatedFile: {
           name: '',
@@ -139,7 +139,10 @@ describe('reducer', () => {
 
   it('should handle "resetState" action', () => {
     const action: ReducerAction = { type: 'resetState' };
-    const nextState = reducer({ step: 9999, isLoading: true, validatedFile }, action);
+    const nextState = reducer(
+      { step: FileUploaderSteps.VALIDATION, isLoading: true, validatedFile },
+      action
+    );
 
     expect(nextState).toEqual(initialState);
   });

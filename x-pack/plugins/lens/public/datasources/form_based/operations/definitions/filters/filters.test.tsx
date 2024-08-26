@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
@@ -14,11 +13,12 @@ import type { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { fireEvent, render, screen } from '@testing-library/react';
 import type { FiltersIndexPatternColumn } from '.';
 import { filtersOperation } from '..';
 import type { FormBasedLayer } from '../../../types';
 import { createMockedIndexPattern } from '../../../mocks';
-import { FilterPopover } from './filter_popover';
+import userEvent from '@testing-library/user-event';
 
 const uiSettingsMock = {} as IUiSettingsClient;
 
@@ -300,8 +300,9 @@ describe('filters', () => {
     }));
 
     it('should update state when changing a filter', () => {
+      jest.useFakeTimers();
       const updateLayerSpy = jest.fn();
-      const instance = mount(
+      render(
         <InlineOptions
           {...defaultProps}
           layer={layer}
@@ -311,17 +312,12 @@ describe('filters', () => {
         />
       );
 
-      act(() => {
-        instance.find(FilterPopover).first().prop('setFilter')!({
-          input: {
-            query: 'dest : 5',
-            language: 'lucene',
-          },
-          label: 'Dest5',
-          id: 0,
-        });
+      userEvent.click(screen.getAllByTestId('indexPattern-filters-existingFilterTrigger')[1]);
+      fireEvent.change(screen.getByTestId('indexPattern-filters-label'), {
+        target: { value: 'Dest5' },
       });
-      instance.update();
+      act(() => jest.advanceTimersByTime(256));
+
       expect(updateLayerSpy).toHaveBeenCalledWith({
         ...layer,
         columns: {
@@ -330,19 +326,13 @@ describe('filters', () => {
             ...layer.columns.col1,
             params: {
               filters: [
-                {
-                  input: {
-                    query: 'dest : 5',
-                    language: 'lucene',
-                  },
-                  label: 'Dest5',
-                },
+                ...(layer.columns.col1 as FiltersIndexPatternColumn).params.filters.slice(0, 1),
                 {
                   input: {
                     language: 'kuery',
                     query: 'src : 2',
                   },
-                  label: '',
+                  label: 'Dest5',
                 },
               ],
             },
@@ -354,7 +344,7 @@ describe('filters', () => {
     describe('Modify filters', () => {
       it('should correctly show existing filters ', () => {
         const updateLayerSpy = jest.fn();
-        const instance = mount(
+        render(
           <InlineOptions
             {...defaultProps}
             layer={layer}
@@ -363,23 +353,15 @@ describe('filters', () => {
             currentColumn={layer.columns.col1 as FiltersIndexPatternColumn}
           />
         );
-        expect(
-          instance
-            .find('div[data-test-subj="indexPattern-filters-existingFilterContainer"]')
-            .at(0)
-            .text()
-        ).toEqual('More than one');
-        expect(
-          instance
-            .find('div[data-test-subj="indexPattern-filters-existingFilterContainer"]')
-            .at(1)
-            .text()
-        ).toEqual('src : 2');
+        const filtersLabels = screen
+          .getAllByTestId('indexPattern-filters-existingFilterTrigger')
+          .map((button) => button.textContent);
+        expect(filtersLabels).toEqual(['More than one', 'src : 2']);
       });
 
       it('should remove filter', () => {
         const updateLayerSpy = jest.fn();
-        const instance = mount(
+        render(
           <InlineOptions
             {...defaultProps}
             layer={layer}
@@ -389,10 +371,8 @@ describe('filters', () => {
           />
         );
 
-        instance
-          .find('[data-test-subj="lns-customBucketContainer-remove-1"]')
-          .at(0)
-          .simulate('click');
+        userEvent.click(screen.getByTestId('lns-customBucketContainer-remove-1'));
+
         expect(updateLayerSpy).toHaveBeenCalledWith({
           ...layer,
           columns: {

@@ -16,313 +16,219 @@ import { fieldCapsLargeArraysMock } from './__mocks__/field_caps_large_arrays';
 
 import { fetchIndexInfo } from './fetch_index_info';
 
-describe('fetch_index_info', () => {
-  describe('fetchFieldCandidates', () => {
-    it('returns field candidates and total hits for "my" fields', async () => {
-      const esClientFieldCapsMock = jest.fn(() => ({
-        fields: {
-          // Should end up as a field candidate
-          myIpFieldName: { ip: { aggregatable: true } },
-          // Should end up as a field candidate
-          myKeywordFieldName: { keyword: { aggregatable: true } },
-          // Should not end up as a field candidate, it's a keyword but non-aggregatable
-          myKeywordFieldNameToBeIgnored: { keyword: { aggregatable: false } },
-          // Should not end up as a field candidate since fields of type number will not be considered
-          myNumericFieldName: { number: {} },
+describe('fetchIndexInfo', () => {
+  it('returns field candidates and total hits for "my" fields', async () => {
+    const esClientFieldCapsMock = jest.fn(() => ({
+      fields: {
+        // Should end up as a field candidate
+        myIpFieldName: { ip: { aggregatable: true } },
+        // Should end up as a field candidate
+        myKeywordFieldName: { keyword: { aggregatable: true } },
+        // Should not end up as a field candidate, it's a keyword but non-aggregatable
+        myKeywordFieldNameToBeIgnored: { keyword: { aggregatable: false } },
+        // Should not end up as a field candidate since fields of type number will not be considered
+        myNumericFieldName: { number: {} },
+      },
+    }));
+    const esClientSearchMock = jest.fn((req: estypes.SearchRequest): estypes.SearchResponse => {
+      return {
+        hits: {
+          hits: [],
+          total: { value: 5000000 },
         },
-      }));
-      const esClientSearchMock = jest.fn((req: estypes.SearchRequest): estypes.SearchResponse => {
-        return {
-          hits: {
-            hits: [],
-            total: { value: 5000000 },
-          },
-        } as unknown as estypes.SearchResponse;
-      });
-
-      const esClientMock = {
-        fieldCaps: esClientFieldCapsMock,
-        search: esClientSearchMock,
-      } as unknown as ElasticsearchClient;
-
-      const { baselineTotalDocCount, deviationTotalDocCount, fieldCandidates } =
-        await fetchIndexInfo({ esClient: esClientMock, arguments: paramsSearchQueryMock });
-
-      expect(fieldCandidates).toEqual(['myIpFieldName', 'myKeywordFieldName']);
-      expect(baselineTotalDocCount).toEqual(5000000);
-      expect(deviationTotalDocCount).toEqual(5000000);
-      expect(esClientFieldCapsMock).toHaveBeenCalledTimes(1);
-      expect(esClientSearchMock).toHaveBeenCalledTimes(2);
+      } as unknown as estypes.SearchResponse;
     });
 
-    it('returns field candidates and total hits for pgBench mappings', async () => {
-      const esClientFieldCapsMock = jest.fn(() => fieldCapsPgBenchMock);
-      const esClientSearchMock = jest.fn((req: estypes.SearchRequest): estypes.SearchResponse => {
-        return {
-          hits: {
-            hits: [],
-            total: { value: 5000000 },
-          },
-        } as unknown as estypes.SearchResponse;
+    const esClientMock = {
+      fieldCaps: esClientFieldCapsMock,
+      search: esClientSearchMock,
+    } as unknown as ElasticsearchClient;
+
+    const { baselineTotalDocCount, deviationTotalDocCount, keywordFieldCandidates } =
+      await fetchIndexInfo({
+        esClient: esClientMock,
+        arguments: { ...paramsSearchQueryMock, textFieldCandidatesOverrides: [] },
       });
 
-      const esClientMock = {
-        fieldCaps: esClientFieldCapsMock,
-        search: esClientSearchMock,
-      } as unknown as ElasticsearchClient;
+    expect(keywordFieldCandidates).toEqual(['myIpFieldName', 'myKeywordFieldName']);
+    expect(baselineTotalDocCount).toEqual(5000000);
+    expect(deviationTotalDocCount).toEqual(5000000);
+    expect(esClientFieldCapsMock).toHaveBeenCalledTimes(1);
+    expect(esClientSearchMock).toHaveBeenCalledTimes(2);
+  });
 
-      const {
-        baselineTotalDocCount,
-        deviationTotalDocCount,
-        fieldCandidates,
-        textFieldCandidates,
-      } = await fetchIndexInfo({ esClient: esClientMock, arguments: paramsSearchQueryMock });
-
-      expect(fieldCandidates).toEqual([
-        '_metadata.elastic_apm_trace_id',
-        '_metadata.elastic_apm_transaction_id',
-        '_metadata.message_template',
-        '_metadata.metadata_event_dataset',
-        '_metadata.user_id',
-        'agent.ephemeral_id',
-        'agent.hostname',
-        'agent.id',
-        'agent.name',
-        'agent.type',
-        'agent.version',
-        'client.geo.city_name',
-        'client.geo.continent_name',
-        'client.geo.country_iso_code',
-        'client.geo.country_name',
-        'client.geo.region_iso_code',
-        'client.geo.region_name',
-        'client.ip',
-        'cloud.account.id',
-        'cloud.availability_zone',
-        'cloud.instance.id',
-        'cloud.instance.name',
-        'cloud.machine.type',
-        'cloud.project.id',
-        'cloud.provider',
-        'cloud.service.name',
-        'container.id',
-        'container.image.name',
-        'container.labels.annotation_io_kubernetes_container_hash',
-        'container.labels.annotation_io_kubernetes_container_restartCount',
-        'container.labels.annotation_io_kubernetes_container_terminationMessagePath',
-        'container.labels.annotation_io_kubernetes_container_terminationMessagePolicy',
-        'container.labels.annotation_io_kubernetes_pod_terminationGracePeriod',
-        'container.labels.io_kubernetes_container_logpath',
-        'container.labels.io_kubernetes_container_name',
-        'container.labels.io_kubernetes_docker_type',
-        'container.labels.io_kubernetes_pod_name',
-        'container.labels.io_kubernetes_pod_namespace',
-        'container.labels.io_kubernetes_pod_uid',
-        'container.labels.io_kubernetes_sandbox_id',
-        'container.name',
-        'container.runtime',
-        'data_stream.dataset',
-        'data_stream.namespace',
-        'data_stream.type',
-        'details',
-        'ecs.version',
-        'elasticapm_labels.span.id',
-        'elasticapm_labels.trace.id',
-        'elasticapm_labels.transaction.id',
-        'elasticapm_span_id',
-        'elasticapm_trace_id',
-        'elasticapm_transaction_id',
-        'event.category',
-        'event.dataset',
-        'event.kind',
-        'event.module',
-        'event.timezone',
-        'event.type',
-        'fileset.name',
-        'host.architecture',
-        'host.containerized',
-        'host.hostname',
-        'host.ip',
-        'host.mac',
-        'host.name',
-        'host.os.codename',
-        'host.os.family',
-        'host.os.kernel',
-        'host.os.name',
-        'host.os.platform',
-        'host.os.type',
-        'host.os.version',
-        'hostname',
-        'input.type',
-        'kubernetes.container.name',
-        'kubernetes.labels.app',
-        'kubernetes.labels.pod-template-hash',
-        'kubernetes.namespace',
-        'kubernetes.namespace_labels.kubernetes_io/metadata_name',
-        'kubernetes.namespace_uid',
-        'kubernetes.node.hostname',
-        'kubernetes.node.labels.addon_gke_io/node-local-dns-ds-ready',
-        'kubernetes.node.labels.beta_kubernetes_io/arch',
-        'kubernetes.node.labels.beta_kubernetes_io/instance-type',
-        'kubernetes.node.labels.beta_kubernetes_io/os',
-        'kubernetes.node.labels.cloud_google_com/gke-boot-disk',
-        'kubernetes.node.labels.cloud_google_com/gke-container-runtime',
-        'kubernetes.node.labels.cloud_google_com/gke-nodepool',
-        'kubernetes.node.labels.cloud_google_com/gke-os-distribution',
-        'kubernetes.node.labels.cloud_google_com/machine-family',
-        'kubernetes.node.labels.failure-domain_beta_kubernetes_io/region',
-        'kubernetes.node.labels.failure-domain_beta_kubernetes_io/zone',
-        'kubernetes.node.labels.kubernetes_io/arch',
-        'kubernetes.node.labels.kubernetes_io/hostname',
-        'kubernetes.node.labels.kubernetes_io/os',
-        'kubernetes.node.labels.node_kubernetes_io/instance-type',
-        'kubernetes.node.labels.node_type',
-        'kubernetes.node.labels.topology_kubernetes_io/region',
-        'kubernetes.node.labels.topology_kubernetes_io/zone',
-        'kubernetes.node.name',
-        'kubernetes.node.uid',
-        'kubernetes.pod.ip',
-        'kubernetes.pod.name',
-        'kubernetes.pod.uid',
-        'kubernetes.replicaset.name',
-        'labels.userId',
-        'log.file.path',
-        'log.flags',
-        'log.level',
-        'log.logger',
-        'log.origin.file.name',
-        'log.origin.function',
-        'log.original',
-        'name',
-        'postgresql.log.database',
-        'postgresql.log.query',
-        'postgresql.log.query_step',
-        'postgresql.log.timestamp',
-        'process.executable',
-        'process.name',
-        'process.thread.name',
-        'related.user',
-        'req.headers.accept',
-        'req.headers.accept-encoding',
-        'req.headers.cache-control',
-        'req.headers.connection',
-        'req.headers.content-length',
-        'req.headers.content-type',
-        'req.headers.cookie',
-        'req.headers.host',
-        'req.headers.origin',
-        'req.headers.pragma',
-        'req.headers.referer',
-        'req.headers.traceparent',
-        'req.headers.tracestate',
-        'req.headers.user-agent',
-        'req.headers.x-real-ip',
-        'req.method',
-        'req.remoteAddress',
-        'req.url',
-        'service.name',
-        'service.type',
-        'span.id',
-        'stack',
-        'stream',
-        'trace.id',
-        'transaction.id',
-        'type',
-        'user.name',
-      ]);
-      expect(textFieldCandidates).toEqual(['error.message', 'message']);
-      expect(baselineTotalDocCount).toEqual(5000000);
-      expect(deviationTotalDocCount).toEqual(5000000);
-      expect(esClientFieldCapsMock).toHaveBeenCalledTimes(1);
-      expect(esClientSearchMock).toHaveBeenCalledTimes(2);
+  it('returns field candidates and total hits for pgBench mappings', async () => {
+    const esClientFieldCapsMock = jest.fn(() => fieldCapsPgBenchMock);
+    const esClientSearchMock = jest.fn((req: estypes.SearchRequest): estypes.SearchResponse => {
+      return {
+        hits: {
+          hits: [],
+          total: { value: 5000000 },
+        },
+      } as unknown as estypes.SearchResponse;
     });
 
-    it('returns field candidates and total hits for ecommerce mappings', async () => {
-      const esClientFieldCapsMock = jest.fn(() => fieldCapsEcommerceMock);
-      const esClientSearchMock = jest.fn((req: estypes.SearchRequest): estypes.SearchResponse => {
-        return {
-          hits: {
-            hits: [],
-            total: { value: 5000000 },
-          },
-        } as unknown as estypes.SearchResponse;
-      });
+    const esClientMock = {
+      fieldCaps: esClientFieldCapsMock,
+      search: esClientSearchMock,
+    } as unknown as ElasticsearchClient;
 
-      const esClientMock = {
-        fieldCaps: esClientFieldCapsMock,
-        search: esClientSearchMock,
-      } as unknown as ElasticsearchClient;
-
-      const {
-        baselineTotalDocCount,
-        deviationTotalDocCount,
-        fieldCandidates,
-        textFieldCandidates,
-      } = await fetchIndexInfo({ esClient: esClientMock, arguments: paramsSearchQueryMock });
-
-      expect(fieldCandidates).toEqual([
-        'category.keyword',
-        'currency',
-        'customer_first_name.keyword',
-        'customer_full_name.keyword',
-        'customer_gender',
-        'customer_id',
-        'customer_last_name.keyword',
-        'customer_phone',
-        'day_of_week',
-        'email',
-        'event.dataset',
-        'geoip.city_name',
-        'geoip.continent_name',
-        'geoip.country_iso_code',
-        'geoip.region_name',
-        'manufacturer.keyword',
-        'order_id',
-        'products._id.keyword',
-        'products.category.keyword',
-        'products.manufacturer.keyword',
-        'products.product_name.keyword',
-        'products.sku',
-        'sku',
-        'type',
-        'user',
-      ]);
-      expect(textFieldCandidates).toEqual([]);
-      expect(baselineTotalDocCount).toEqual(5000000);
-      expect(deviationTotalDocCount).toEqual(5000000);
-      expect(esClientFieldCapsMock).toHaveBeenCalledTimes(1);
-      expect(esClientSearchMock).toHaveBeenCalledTimes(2);
+    const {
+      baselineTotalDocCount,
+      deviationTotalDocCount,
+      keywordFieldCandidates,
+      textFieldCandidates,
+    } = await fetchIndexInfo({
+      esClient: esClientMock,
+      arguments: { ...paramsSearchQueryMock, textFieldCandidatesOverrides: [] },
     });
 
-    it('returns field candidates and total hits for large-arrays mappings', async () => {
-      const esClientFieldCapsMock = jest.fn(() => fieldCapsLargeArraysMock);
-      const esClientSearchMock = jest.fn((req: estypes.SearchRequest): estypes.SearchResponse => {
-        return {
-          hits: {
-            hits: [],
-            total: { value: 5000000 },
-          },
-        } as unknown as estypes.SearchResponse;
-      });
+    expect(keywordFieldCandidates).toEqual([
+      'agent.name',
+      'agent.type',
+      'agent.version',
+      'client.geo.city_name',
+      'client.geo.continent_name',
+      'client.geo.country_name',
+      'client.geo.region_name',
+      'client.ip',
+      'cloud.account.id',
+      'cloud.availability_zone',
+      'cloud.instance.id',
+      'cloud.machine.type',
+      'cloud.project.id',
+      'cloud.provider',
+      'cloud.service.name',
+      'container.id',
+      'container.image.name',
+      'container.name',
+      'container.runtime',
+      'data_stream.dataset',
+      'data_stream.namespace',
+      'data_stream.type',
+      'ecs.version',
+      'event.category',
+      'event.dataset',
+      'event.kind',
+      'event.module',
+      'event.timezone',
+      'event.type',
+      'host.architecture',
+      'host.ip',
+      'host.name',
+      'host.os.family',
+      'host.os.kernel',
+      'host.os.name',
+      'host.os.platform',
+      'host.os.version',
+      'log.file.path',
+      'log.level',
+      'log.logger',
+      'log.origin.file.name',
+      'log.origin.function',
+      'process.name',
+      'service.name',
+      'service.type',
+      'user.name',
+    ]);
+    expect(textFieldCandidates).toEqual(['error.message', 'message']);
+    expect(baselineTotalDocCount).toEqual(5000000);
+    expect(deviationTotalDocCount).toEqual(5000000);
+    expect(esClientFieldCapsMock).toHaveBeenCalledTimes(1);
+    expect(esClientSearchMock).toHaveBeenCalledTimes(2);
+  });
 
-      const esClientMock = {
-        fieldCaps: esClientFieldCapsMock,
-        search: esClientSearchMock,
-      } as unknown as ElasticsearchClient;
-
-      const {
-        baselineTotalDocCount,
-        deviationTotalDocCount,
-        fieldCandidates,
-        textFieldCandidates,
-      } = await fetchIndexInfo({ esClient: esClientMock, arguments: paramsSearchQueryMock });
-
-      expect(fieldCandidates).toEqual(['items']);
-      expect(textFieldCandidates).toEqual([]);
-      expect(baselineTotalDocCount).toEqual(5000000);
-      expect(deviationTotalDocCount).toEqual(5000000);
-      expect(esClientFieldCapsMock).toHaveBeenCalledTimes(1);
-      expect(esClientSearchMock).toHaveBeenCalledTimes(2);
+  it('returns field candidates and total hits for ecommerce mappings', async () => {
+    const esClientFieldCapsMock = jest.fn(() => fieldCapsEcommerceMock);
+    const esClientSearchMock = jest.fn((req: estypes.SearchRequest): estypes.SearchResponse => {
+      return {
+        hits: {
+          hits: [],
+          total: { value: 5000000 },
+        },
+      } as unknown as estypes.SearchResponse;
     });
+
+    const esClientMock = {
+      fieldCaps: esClientFieldCapsMock,
+      search: esClientSearchMock,
+    } as unknown as ElasticsearchClient;
+
+    const {
+      baselineTotalDocCount,
+      deviationTotalDocCount,
+      keywordFieldCandidates,
+      textFieldCandidates,
+    } = await fetchIndexInfo({
+      esClient: esClientMock,
+      arguments: { ...paramsSearchQueryMock, textFieldCandidatesOverrides: [] },
+    });
+
+    expect(keywordFieldCandidates).toEqual([
+      'category.keyword',
+      'currency',
+      'customer_first_name.keyword',
+      'customer_full_name.keyword',
+      'customer_gender',
+      'customer_id',
+      'customer_last_name.keyword',
+      'customer_phone',
+      'day_of_week',
+      'email',
+      'event.dataset',
+      'geoip.city_name',
+      'geoip.continent_name',
+      'geoip.country_iso_code',
+      'geoip.region_name',
+      'manufacturer.keyword',
+      'order_id',
+      'products._id.keyword',
+      'products.category.keyword',
+      'products.manufacturer.keyword',
+      'products.product_name.keyword',
+      'products.sku',
+      'sku',
+      'type',
+      'user',
+    ]);
+    expect(textFieldCandidates).toEqual([]);
+    expect(baselineTotalDocCount).toEqual(5000000);
+    expect(deviationTotalDocCount).toEqual(5000000);
+    expect(esClientFieldCapsMock).toHaveBeenCalledTimes(1);
+    expect(esClientSearchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('returns field candidates and total hits for large-arrays mappings', async () => {
+    const esClientFieldCapsMock = jest.fn(() => fieldCapsLargeArraysMock);
+    const esClientSearchMock = jest.fn((req: estypes.SearchRequest): estypes.SearchResponse => {
+      return {
+        hits: {
+          hits: [],
+          total: { value: 5000000 },
+        },
+      } as unknown as estypes.SearchResponse;
+    });
+
+    const esClientMock = {
+      fieldCaps: esClientFieldCapsMock,
+      search: esClientSearchMock,
+    } as unknown as ElasticsearchClient;
+
+    const {
+      baselineTotalDocCount,
+      deviationTotalDocCount,
+      keywordFieldCandidates,
+      textFieldCandidates,
+    } = await fetchIndexInfo({
+      esClient: esClientMock,
+      arguments: { ...paramsSearchQueryMock, textFieldCandidatesOverrides: [] },
+    });
+
+    expect(keywordFieldCandidates).toEqual(['items']);
+    expect(textFieldCandidates).toEqual([]);
+    expect(baselineTotalDocCount).toEqual(5000000);
+    expect(deviationTotalDocCount).toEqual(5000000);
+    expect(esClientFieldCapsMock).toHaveBeenCalledTimes(1);
+    expect(esClientSearchMock).toHaveBeenCalledTimes(2);
   });
 });

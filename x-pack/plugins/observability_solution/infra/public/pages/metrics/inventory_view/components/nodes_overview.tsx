@@ -11,7 +11,11 @@ import React, { useCallback, useMemo } from 'react';
 import { useCurrentEuiBreakpoint } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
-import { InfraWaffleMapBounds, InfraWaffleMapOptions, InfraFormatter } from '../../../../lib/lib';
+import {
+  InfraWaffleMapBounds,
+  InfraWaffleMapOptions,
+  InfraFormatter,
+} from '../../../../common/inventory/types';
 import { NoData } from '../../../../components/empty_states';
 import { InfraLoadingPanel } from '../../../../components/loading';
 import { Map } from './waffle/map';

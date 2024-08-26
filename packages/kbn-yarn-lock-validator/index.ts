@@ -9,3 +9,4 @@
 export { readYarnLock } from './src/yarn_lock';
 export type { YarnLock } from './src/yarn_lock';
 export { validateDependencies } from './src/validate_yarn_lock';
+export { findProductionDependencies } from './src/find_production_dependencies';

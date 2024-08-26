@@ -136,11 +136,17 @@ export class SpacesClient implements ISpacesClient {
       );
     }
 
-    if (this.isServerless && space.hasOwnProperty('solution')) {
+    if (Boolean(space.solution) && !this.config.allowSolutionVisibility) {
+      throw Boom.badRequest(
+        'Unable to create Space, the solution property can not be set when xpack.spaces.allowSolutionVisibility setting is disabled'
+      );
+    }
+
+    if (this.isServerless && Object.hasOwn(space, 'solution')) {
       throw Boom.badRequest('Unable to create Space, solution property is forbidden in serverless');
     }
 
-    if (space.hasOwnProperty('solution') && !space.solution) {
+    if (Object.hasOwn(space, 'solution') && !space.solution) {
       throw Boom.badRequest('Unable to create Space, solution property cannot be empty');
     }
 
@@ -163,11 +169,17 @@ export class SpacesClient implements ISpacesClient {
       );
     }
 
-    if (this.isServerless && space.hasOwnProperty('solution')) {
+    if (Boolean(space.solution) && !this.config.allowSolutionVisibility) {
+      throw Boom.badRequest(
+        'Unable to update Space, the solution property can not be set when xpack.spaces.allowSolutionVisibility setting is disabled'
+      );
+    }
+
+    if (this.isServerless && Object.hasOwn(space, 'solution')) {
       throw Boom.badRequest('Unable to update Space, solution property is forbidden in serverless');
     }
 
-    if (space.hasOwnProperty('solution') && !space.solution) {
+    if (Object.hasOwn(space, 'solution') && !space.solution) {
       throw Boom.badRequest('Unable to update Space, solution property cannot be empty');
     }
 

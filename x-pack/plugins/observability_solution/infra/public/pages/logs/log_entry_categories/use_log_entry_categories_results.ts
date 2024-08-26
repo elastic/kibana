@@ -14,7 +14,7 @@ import {
   GetLogEntryCategoryDatasetsSuccessResponsePayload,
 } from '../../../../common/http_api';
 import { CategoriesSort } from '../../../../common/log_analysis';
-import { useTrackedPromise, CanceledPromiseError } from '../../../utils/use_tracked_promise';
+import { useTrackedPromise, CanceledPromiseError } from '../../../hooks/use_tracked_promise';
 import { callGetTopLogEntryCategoriesAPI } from './service_calls/get_top_log_entry_categories';
 import { callGetLogEntryCategoryDatasetsAPI } from './service_calls/get_log_entry_category_datasets';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';

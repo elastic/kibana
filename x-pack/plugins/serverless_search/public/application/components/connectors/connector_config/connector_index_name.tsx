@@ -29,7 +29,7 @@ import { ApiKeyPanel } from './api_key_panel';
 import { ConnectorIndexNameForm } from './connector_index_name_form';
 import { SyncScheduledCallOut } from './sync_scheduled_callout';
 import { docLinks } from '../../../../../common/doc_links';
-import { DEFAULT_INGESTION_PIPELINE } from '../../../constants';
+import { DEFAULT_INGESTION_PIPELINE } from '../../../../../common';
 interface ConnectorIndexNameProps {
   connector: Connector;
 }

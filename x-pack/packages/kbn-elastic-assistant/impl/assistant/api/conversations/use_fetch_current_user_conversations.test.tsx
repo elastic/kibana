@@ -47,14 +47,14 @@ describe('useFetchCurrentUserConversations', () => {
       );
       await waitForNextUpdate();
       expect(defaultProps.http.fetch).toHaveBeenCalledWith(
-        '/internal/elastic_assistant/current_user/conversations/_find',
+        '/api/security_ai_assistant/current_user/conversations/_find',
         {
           method: 'GET',
           query: {
             page: 1,
             perPage: 100,
           },
-          version: '1',
+          version: '2023-10-31',
           signal: undefined,
         }
       );

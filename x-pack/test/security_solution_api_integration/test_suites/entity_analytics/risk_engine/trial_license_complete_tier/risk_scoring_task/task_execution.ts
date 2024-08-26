@@ -104,7 +104,7 @@ export default ({ getService }: FtrProviderContext): void => {
             );
           });
 
-          it('@skipInServerlessMKI starts the latest transform', async () => {
+          it('@skipInServerlessMKI @skipInServerless starts the latest transform', async () => {
             await waitForRiskScoresToBePresent({ es, log, scoreCount: 10 });
 
             const transformStats = await es.transform.getTransformStats({

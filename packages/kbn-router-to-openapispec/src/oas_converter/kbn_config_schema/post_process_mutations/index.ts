@@ -60,9 +60,10 @@ const walkSchema = (ctx: IContext, schema: Schema): void => {
   } else {
     for (const arrayContainer of arrayContainers) {
       if (schema[arrayContainer]) {
-        schema[arrayContainer].forEach((s: OpenAPIV3.SchemaObject, idx: number) => {
+        schema[arrayContainer].forEach((s: OpenAPIV3.SchemaObject) => {
           walkSchema(ctx, s);
         });
+        mutations.processEnum(schema);
         break;
       }
     }

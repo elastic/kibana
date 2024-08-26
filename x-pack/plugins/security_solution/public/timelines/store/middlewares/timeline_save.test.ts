@@ -9,7 +9,7 @@ import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import { Direction } from '../../../../common/search_strategy';
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
-import { TimelineType, TimelineStatus } from '../../../../common/api/timeline';
+import { TimelineTypeEnum, TimelineStatusEnum } from '../../../../common/api/timeline';
 import { convertTimelineAsInput } from './timeline_save';
 import type { TimelineModel } from '../model';
 import { createMockStore, kibanaMock } from '../../../common/mock';
@@ -262,7 +262,6 @@ describe('Timeline save middleware', () => {
         },
         eventIdToNoteIds: {},
         eventType: 'all',
-        expandedDetail: {},
         excludedRowRendererIds: [],
         highlightedDropAndProviderId: '',
         historyIds: [],
@@ -311,7 +310,7 @@ describe('Timeline save middleware', () => {
         loadingEventIds: [],
         queryFields: [],
         title: 'saved',
-        timelineType: TimelineType.default,
+        timelineType: TimelineTypeEnum.default,
         templateTimelineId: null,
         templateTimelineVersion: null,
         noteIds: [],
@@ -331,7 +330,7 @@ describe('Timeline save middleware', () => {
             sortDirection: Direction.desc,
           },
         ],
-        status: TimelineStatus.active,
+        status: TimelineStatusEnum.active,
         version: 'WzM4LDFd',
         id: '11169110-fc22-11e9-8ca9-072f15ce2685',
         savedQueryId: 'my endgame timeline query',
@@ -484,9 +483,9 @@ describe('Timeline save middleware', () => {
         ],
         templateTimelineId: null,
         templateTimelineVersion: null,
-        timelineType: TimelineType.default,
+        timelineType: TimelineTypeEnum.default,
         title: 'saved',
-        status: TimelineStatus.active,
+        status: TimelineStatusEnum.active,
       });
     });
   });

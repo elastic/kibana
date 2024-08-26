@@ -25,7 +25,7 @@ const toStringArray = (input: any): string[] | null =>
   Array.isArray(input) && input.every((x) => typeof x === 'string') ? input : null;
 
 export interface BundleSpec {
-  readonly type: typeof VALID_BUNDLE_TYPES[0];
+  readonly type: (typeof VALID_BUNDLE_TYPES)[0];
   /** Unique id for this bundle */
   readonly id: string;
   /** Absolute path to the plugin source directory */

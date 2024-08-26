@@ -8,7 +8,6 @@
 import type { Status } from '../api/detection_engine';
 
 export * from './timeline';
-export * from './detail_panel';
 export * from './header_actions';
 export * from './session_view';
 export * from './bulk_actions';

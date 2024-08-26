@@ -6,7 +6,7 @@
  */
 
 import { EuiSuperDatePickerCommonRange } from '@elastic/eui';
-import { TimePickerQuickRange } from './use_kibana_ui_setting';
+import { TimePickerQuickRange } from '../hooks/use_kibana_ui_setting';
 
 export const mapKibanaQuickRangesToDatePickerRanges = (
   timepickerQuickRanges: TimePickerQuickRange[] | undefined

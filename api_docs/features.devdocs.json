@@ -1965,6 +1965,581 @@
       },
       {
         "parentPluginId": "features",
+        "id": "def-server.FeaturesPluginSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "FeaturesPluginSetup",
+        "description": [
+          "\nDescribes public Features plugin contract returned at the `setup` stage."
+        ],
+        "path": "x-pack/plugins/features/server/plugin.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "features",
+            "id": "def-server.FeaturesPluginSetup.registerKibanaFeature",
+            "type": "Function",
+            "tags": [],
+            "label": "registerKibanaFeature",
+            "description": [],
+            "signature": [
+              "(feature: ",
+              {
+                "pluginId": "features",
+                "scope": "common",
+                "docId": "kibFeaturesPluginApi",
+                "section": "def-common.KibanaFeatureConfig",
+                "text": "KibanaFeatureConfig"
+              },
+              ") => void"
+            ],
+            "path": "x-pack/plugins/features/server/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "features",
+                "id": "def-server.FeaturesPluginSetup.registerKibanaFeature.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "feature",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "features",
+                    "scope": "common",
+                    "docId": "kibFeaturesPluginApi",
+                    "section": "def-common.KibanaFeatureConfig",
+                    "text": "KibanaFeatureConfig"
+                  }
+                ],
+                "path": "x-pack/plugins/features/server/plugin.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "features",
+            "id": "def-server.FeaturesPluginSetup.registerElasticsearchFeature",
+            "type": "Function",
+            "tags": [],
+            "label": "registerElasticsearchFeature",
+            "description": [],
+            "signature": [
+              "(feature: ",
+              {
+                "pluginId": "features",
+                "scope": "common",
+                "docId": "kibFeaturesPluginApi",
+                "section": "def-common.ElasticsearchFeatureConfig",
+                "text": "ElasticsearchFeatureConfig"
+              },
+              ") => void"
+            ],
+            "path": "x-pack/plugins/features/server/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "features",
+                "id": "def-server.FeaturesPluginSetup.registerElasticsearchFeature.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "feature",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "features",
+                    "scope": "common",
+                    "docId": "kibFeaturesPluginApi",
+                    "section": "def-common.ElasticsearchFeatureConfig",
+                    "text": "ElasticsearchFeatureConfig"
+                  }
+                ],
+                "path": "x-pack/plugins/features/server/plugin.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "features",
+            "id": "def-server.FeaturesPluginSetup.getKibanaFeatures",
+            "type": "Function",
+            "tags": [
+              "deprecated"
+            ],
+            "label": "getKibanaFeatures",
+            "description": [
+              "\nCalling this function during setup will crash Kibana.\nUse start contract instead."
+            ],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "features",
+                "scope": "common",
+                "docId": "kibFeaturesPluginApi",
+                "section": "def-common.KibanaFeature",
+                "text": "KibanaFeature"
+              },
+              "[]"
+            ],
+            "path": "x-pack/plugins/features/server/plugin.ts",
+            "deprecated": true,
+            "removeBy": "8.8.0",
+            "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "spaces",
+                "path": "x-pack/plugins/spaces/server/lib/request_interceptors/on_post_auth_interceptor.ts"
+              },
+              {
+                "plugin": "spaces",
+                "path": "x-pack/plugins/spaces/server/usage_collection/spaces_usage_collector.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/server/authorization/app_authorization.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/server/authorization/authorization_service.tsx"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/plugin.test.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/plugins/cases/server/client/factory.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/server/authorization/app_authorization.test.ts"
+              },
+              {
+                "plugin": "spaces",
+                "path": "x-pack/plugins/spaces/server/lib/request_interceptors/on_post_auth_interceptor.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-role-management-model",
+                "path": "x-pack/packages/security/role_management_model/src/__fixtures__/kibana_privileges.ts"
+              },
+              {
+                "plugin": "@kbn/security-role-management-model",
+                "path": "x-pack/packages/security/role_management_model/src/__fixtures__/kibana_privileges.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/packages/security/authorization_core/src/privileges/privileges.test.ts"
+              }
+            ],
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "features",
+            "id": "def-server.FeaturesPluginSetup.getElasticsearchFeatures",
+            "type": "Function",
+            "tags": [
+              "deprecated"
+            ],
+            "label": "getElasticsearchFeatures",
+            "description": [
+              "\nCalling this function during setup will crash Kibana.\nUse start contract instead."
+            ],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "features",
+                "scope": "common",
+                "docId": "kibFeaturesPluginApi",
+                "section": "def-common.ElasticsearchFeature",
+                "text": "ElasticsearchFeature"
+              },
+              "[]"
+            ],
+            "path": "x-pack/plugins/features/server/plugin.ts",
+            "deprecated": true,
+            "removeBy": "8.8.0",
+            "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/server/authorization/authorization_service.tsx"
+              },
+              {
+                "plugin": "@kbn/security-role-management-model",
+                "path": "x-pack/packages/security/role_management_model/src/__fixtures__/kibana_privileges.ts"
+              }
+            ],
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "features",
+            "id": "def-server.FeaturesPluginSetup.enableReportingUiCapabilities",
+            "type": "Function",
+            "tags": [],
+            "label": "enableReportingUiCapabilities",
+            "description": [
+              "\nIn the future, OSS features should register their own subfeature\nprivileges. This can be done when parts of Reporting are moved to\nsrc/plugins. For now, this method exists for `reporting` to tell\n`features` to include Reporting when registering OSS features."
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/plugins/features/server/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "features",
+            "id": "def-server.FeaturesPluginSetup.featurePrivilegeIterator",
+            "type": "Function",
+            "tags": [],
+            "label": "featurePrivilegeIterator",
+            "description": [
+              "\nUtility for iterating through all privileges belonging to a specific feature.\n{@see FeaturePrivilegeIterator }"
+            ],
+            "signature": [
+              "(feature: ",
+              {
+                "pluginId": "features",
+                "scope": "common",
+                "docId": "kibFeaturesPluginApi",
+                "section": "def-common.KibanaFeature",
+                "text": "KibanaFeature"
+              },
+              ", options: ",
+              "FeaturePrivilegeIteratorOptions",
+              ") => IterableIterator<{ privilegeId: string; privilege: ",
+              {
+                "pluginId": "features",
+                "scope": "common",
+                "docId": "kibFeaturesPluginApi",
+                "section": "def-common.FeatureKibanaPrivileges",
+                "text": "FeatureKibanaPrivileges"
+              },
+              "; }>"
+            ],
+            "path": "x-pack/plugins/features/server/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "features",
+                "id": "def-server.FeaturesPluginSetup.featurePrivilegeIterator.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "feature",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "features",
+                    "scope": "common",
+                    "docId": "kibFeaturesPluginApi",
+                    "section": "def-common.KibanaFeature",
+                    "text": "KibanaFeature"
+                  }
+                ],
+                "path": "x-pack/plugins/features/server/feature_privilege_iterator/feature_privilege_iterator.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "features",
+                "id": "def-server.FeaturesPluginSetup.featurePrivilegeIterator.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "FeaturePrivilegeIteratorOptions"
+                ],
+                "path": "x-pack/plugins/features/server/feature_privilege_iterator/feature_privilege_iterator.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "features",
+            "id": "def-server.FeaturesPluginSetup.subFeaturePrivilegeIterator",
+            "type": "Function",
+            "tags": [],
+            "label": "subFeaturePrivilegeIterator",
+            "description": [
+              "\nUtility for iterating through all sub-feature privileges belonging to a specific feature.\n{@see SubFeaturePrivilegeIterator }"
+            ],
+            "signature": [
+              "(feature: ",
+              {
+                "pluginId": "features",
+                "scope": "common",
+                "docId": "kibFeaturesPluginApi",
+                "section": "def-common.KibanaFeature",
+                "text": "KibanaFeature"
+              },
+              ", licenseHasAtLeast: (licenseType: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\") => boolean | undefined) => IterableIterator<",
+              {
+                "pluginId": "features",
+                "scope": "common",
+                "docId": "kibFeaturesPluginApi",
+                "section": "def-common.SubFeaturePrivilegeConfig",
+                "text": "SubFeaturePrivilegeConfig"
+              },
+              ">"
+            ],
+            "path": "x-pack/plugins/features/server/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "features",
+                "id": "def-server.FeaturesPluginSetup.subFeaturePrivilegeIterator.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "feature",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "features",
+                    "scope": "common",
+                    "docId": "kibFeaturesPluginApi",
+                    "section": "def-common.KibanaFeature",
+                    "text": "KibanaFeature"
+                  }
+                ],
+                "path": "x-pack/plugins/features/server/feature_privilege_iterator/sub_feature_privilege_iterator.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "features",
+                "id": "def-server.FeaturesPluginSetup.subFeaturePrivilegeIterator.$2",
+                "type": "Function",
+                "tags": [],
+                "label": "licenseHasAtLeast",
+                "description": [],
+                "signature": [
+                  "(licenseType: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\") => boolean | undefined"
+                ],
+                "path": "x-pack/plugins/features/server/feature_privilege_iterator/sub_feature_privilege_iterator.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "returnComment": [],
+                "children": [
+                  {
+                    "parentPluginId": "features",
+                    "id": "def-server.FeaturesPluginSetup.subFeaturePrivilegeIterator.$2.$1",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "licenseType",
+                    "description": [],
+                    "signature": [
+                      "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
+                    ],
+                    "path": "x-pack/plugins/features/server/feature_privilege_iterator/sub_feature_privilege_iterator.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "features",
+        "id": "def-server.FeaturesPluginStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "FeaturesPluginStart",
+        "description": [],
+        "path": "x-pack/plugins/features/server/plugin.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "features",
+            "id": "def-server.FeaturesPluginStart.getElasticsearchFeatures",
+            "type": "Function",
+            "tags": [],
+            "label": "getElasticsearchFeatures",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "features",
+                "scope": "common",
+                "docId": "kibFeaturesPluginApi",
+                "section": "def-common.ElasticsearchFeature",
+                "text": "ElasticsearchFeature"
+              },
+              "[]"
+            ],
+            "path": "x-pack/plugins/features/server/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "features",
+            "id": "def-server.FeaturesPluginStart.getKibanaFeatures",
+            "type": "Function",
+            "tags": [],
+            "label": "getKibanaFeatures",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "features",
+                "scope": "common",
+                "docId": "kibFeaturesPluginApi",
+                "section": "def-common.KibanaFeature",
+                "text": "KibanaFeature"
+              },
+              "[]"
+            ],
+            "path": "x-pack/plugins/features/server/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "features",
         "id": "def-server.KibanaFeatureConfig",
         "type": "Interface",
         "tags": [],
@@ -2277,573 +2852,6 @@
             "path": "x-pack/plugins/features/common/kibana_feature.ts",
             "deprecated": false,
             "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "features",
-        "id": "def-server.PluginSetupContract",
-        "type": "Interface",
-        "tags": [],
-        "label": "PluginSetupContract",
-        "description": [
-          "\nDescribes public Features plugin contract returned at the `setup` stage."
-        ],
-        "path": "x-pack/plugins/features/server/plugin.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "features",
-            "id": "def-server.PluginSetupContract.registerKibanaFeature",
-            "type": "Function",
-            "tags": [],
-            "label": "registerKibanaFeature",
-            "description": [],
-            "signature": [
-              "(feature: ",
-              {
-                "pluginId": "features",
-                "scope": "common",
-                "docId": "kibFeaturesPluginApi",
-                "section": "def-common.KibanaFeatureConfig",
-                "text": "KibanaFeatureConfig"
-              },
-              ") => void"
-            ],
-            "path": "x-pack/plugins/features/server/plugin.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "features",
-                "id": "def-server.PluginSetupContract.registerKibanaFeature.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "feature",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "features",
-                    "scope": "common",
-                    "docId": "kibFeaturesPluginApi",
-                    "section": "def-common.KibanaFeatureConfig",
-                    "text": "KibanaFeatureConfig"
-                  }
-                ],
-                "path": "x-pack/plugins/features/server/plugin.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "features",
-            "id": "def-server.PluginSetupContract.registerElasticsearchFeature",
-            "type": "Function",
-            "tags": [],
-            "label": "registerElasticsearchFeature",
-            "description": [],
-            "signature": [
-              "(feature: ",
-              {
-                "pluginId": "features",
-                "scope": "common",
-                "docId": "kibFeaturesPluginApi",
-                "section": "def-common.ElasticsearchFeatureConfig",
-                "text": "ElasticsearchFeatureConfig"
-              },
-              ") => void"
-            ],
-            "path": "x-pack/plugins/features/server/plugin.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "features",
-                "id": "def-server.PluginSetupContract.registerElasticsearchFeature.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "feature",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "features",
-                    "scope": "common",
-                    "docId": "kibFeaturesPluginApi",
-                    "section": "def-common.ElasticsearchFeatureConfig",
-                    "text": "ElasticsearchFeatureConfig"
-                  }
-                ],
-                "path": "x-pack/plugins/features/server/plugin.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "features",
-            "id": "def-server.PluginSetupContract.getKibanaFeatures",
-            "type": "Function",
-            "tags": [
-              "deprecated"
-            ],
-            "label": "getKibanaFeatures",
-            "description": [
-              "\nCalling this function during setup will crash Kibana.\nUse start contract instead."
-            ],
-            "signature": [
-              "() => ",
-              {
-                "pluginId": "features",
-                "scope": "common",
-                "docId": "kibFeaturesPluginApi",
-                "section": "def-common.KibanaFeature",
-                "text": "KibanaFeature"
-              },
-              "[]"
-            ],
-            "path": "x-pack/plugins/features/server/plugin.ts",
-            "deprecated": true,
-            "removeBy": "8.8.0",
-            "trackAdoption": false,
-            "references": [
-              {
-                "plugin": "spaces",
-                "path": "x-pack/plugins/spaces/server/lib/request_interceptors/on_post_auth_interceptor.ts"
-              },
-              {
-                "plugin": "spaces",
-                "path": "x-pack/plugins/spaces/server/usage_collection/spaces_usage_collector.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/app_authorization.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/privileges/privileges.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/authorization_service.tsx"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/plugin.test.ts"
-              },
-              {
-                "plugin": "cases",
-                "path": "x-pack/plugins/cases/server/client/factory.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/app_authorization.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/privileges/privileges.test.ts"
-              },
-              {
-                "plugin": "spaces",
-                "path": "x-pack/plugins/spaces/server/lib/request_interceptors/on_post_auth_interceptor.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/public/management/roles/__fixtures__/kibana_privileges.ts"
-              }
-            ],
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "features",
-            "id": "def-server.PluginSetupContract.getElasticsearchFeatures",
-            "type": "Function",
-            "tags": [
-              "deprecated"
-            ],
-            "label": "getElasticsearchFeatures",
-            "description": [
-              "\nCalling this function during setup will crash Kibana.\nUse start contract instead."
-            ],
-            "signature": [
-              "() => ",
-              {
-                "pluginId": "features",
-                "scope": "common",
-                "docId": "kibFeaturesPluginApi",
-                "section": "def-common.ElasticsearchFeature",
-                "text": "ElasticsearchFeature"
-              },
-              "[]"
-            ],
-            "path": "x-pack/plugins/features/server/plugin.ts",
-            "deprecated": true,
-            "removeBy": "8.8.0",
-            "trackAdoption": false,
-            "references": [
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/authorization/authorization_service.tsx"
-              }
-            ],
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "features",
-            "id": "def-server.PluginSetupContract.enableReportingUiCapabilities",
-            "type": "Function",
-            "tags": [],
-            "label": "enableReportingUiCapabilities",
-            "description": [
-              "\nIn the future, OSS features should register their own subfeature\nprivileges. This can be done when parts of Reporting are moved to\nsrc/plugins. For now, this method exists for `reporting` to tell\n`features` to include Reporting when registering OSS features."
-            ],
-            "signature": [
-              "() => void"
-            ],
-            "path": "x-pack/plugins/features/server/plugin.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "features",
-            "id": "def-server.PluginSetupContract.featurePrivilegeIterator",
-            "type": "Function",
-            "tags": [],
-            "label": "featurePrivilegeIterator",
-            "description": [
-              "\nUtility for iterating through all privileges belonging to a specific feature.\n{@see FeaturePrivilegeIterator }"
-            ],
-            "signature": [
-              "(feature: ",
-              {
-                "pluginId": "features",
-                "scope": "common",
-                "docId": "kibFeaturesPluginApi",
-                "section": "def-common.KibanaFeature",
-                "text": "KibanaFeature"
-              },
-              ", options: ",
-              "FeaturePrivilegeIteratorOptions",
-              ") => IterableIterator<{ privilegeId: string; privilege: ",
-              {
-                "pluginId": "features",
-                "scope": "common",
-                "docId": "kibFeaturesPluginApi",
-                "section": "def-common.FeatureKibanaPrivileges",
-                "text": "FeatureKibanaPrivileges"
-              },
-              "; }>"
-            ],
-            "path": "x-pack/plugins/features/server/plugin.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "features",
-                "id": "def-server.PluginSetupContract.featurePrivilegeIterator.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "feature",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "features",
-                    "scope": "common",
-                    "docId": "kibFeaturesPluginApi",
-                    "section": "def-common.KibanaFeature",
-                    "text": "KibanaFeature"
-                  }
-                ],
-                "path": "x-pack/plugins/features/server/feature_privilege_iterator/feature_privilege_iterator.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "features",
-                "id": "def-server.PluginSetupContract.featurePrivilegeIterator.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "options",
-                "description": [],
-                "signature": [
-                  "FeaturePrivilegeIteratorOptions"
-                ],
-                "path": "x-pack/plugins/features/server/feature_privilege_iterator/feature_privilege_iterator.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "features",
-            "id": "def-server.PluginSetupContract.subFeaturePrivilegeIterator",
-            "type": "Function",
-            "tags": [],
-            "label": "subFeaturePrivilegeIterator",
-            "description": [
-              "\nUtility for iterating through all sub-feature privileges belonging to a specific feature.\n{@see SubFeaturePrivilegeIterator }"
-            ],
-            "signature": [
-              "(feature: ",
-              {
-                "pluginId": "features",
-                "scope": "common",
-                "docId": "kibFeaturesPluginApi",
-                "section": "def-common.KibanaFeature",
-                "text": "KibanaFeature"
-              },
-              ", licenseHasAtLeast: (licenseType: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\") => boolean | undefined) => IterableIterator<",
-              {
-                "pluginId": "features",
-                "scope": "common",
-                "docId": "kibFeaturesPluginApi",
-                "section": "def-common.SubFeaturePrivilegeConfig",
-                "text": "SubFeaturePrivilegeConfig"
-              },
-              ">"
-            ],
-            "path": "x-pack/plugins/features/server/plugin.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "features",
-                "id": "def-server.PluginSetupContract.subFeaturePrivilegeIterator.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "feature",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "features",
-                    "scope": "common",
-                    "docId": "kibFeaturesPluginApi",
-                    "section": "def-common.KibanaFeature",
-                    "text": "KibanaFeature"
-                  }
-                ],
-                "path": "x-pack/plugins/features/server/feature_privilege_iterator/sub_feature_privilege_iterator.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "features",
-                "id": "def-server.PluginSetupContract.subFeaturePrivilegeIterator.$2",
-                "type": "Function",
-                "tags": [],
-                "label": "licenseHasAtLeast",
-                "description": [],
-                "signature": [
-                  "(licenseType: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\") => boolean | undefined"
-                ],
-                "path": "x-pack/plugins/features/server/feature_privilege_iterator/sub_feature_privilege_iterator.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "returnComment": [],
-                "children": [
-                  {
-                    "parentPluginId": "features",
-                    "id": "def-server.PluginSetupContract.subFeaturePrivilegeIterator.$2.$1",
-                    "type": "CompoundType",
-                    "tags": [],
-                    "label": "licenseType",
-                    "description": [],
-                    "signature": [
-                      "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
-                    ],
-                    "path": "x-pack/plugins/features/server/feature_privilege_iterator/sub_feature_privilege_iterator.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              }
-            ]
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "features",
-        "id": "def-server.PluginStartContract",
-        "type": "Interface",
-        "tags": [],
-        "label": "PluginStartContract",
-        "description": [],
-        "path": "x-pack/plugins/features/server/plugin.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "features",
-            "id": "def-server.PluginStartContract.getElasticsearchFeatures",
-            "type": "Function",
-            "tags": [],
-            "label": "getElasticsearchFeatures",
-            "description": [],
-            "signature": [
-              "() => ",
-              {
-                "pluginId": "features",
-                "scope": "common",
-                "docId": "kibFeaturesPluginApi",
-                "section": "def-common.ElasticsearchFeature",
-                "text": "ElasticsearchFeature"
-              },
-              "[]"
-            ],
-            "path": "x-pack/plugins/features/server/plugin.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "features",
-            "id": "def-server.PluginStartContract.getKibanaFeatures",
-            "type": "Function",
-            "tags": [],
-            "label": "getKibanaFeatures",
-            "description": [],
-            "signature": [
-              "() => ",
-              {
-                "pluginId": "features",
-                "scope": "common",
-                "docId": "kibFeaturesPluginApi",
-                "section": "def-common.KibanaFeature",
-                "text": "KibanaFeature"
-              },
-              "[]"
-            ],
-            "path": "x-pack/plugins/features/server/plugin.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
           }
         ],
         "initialIsOpen": false

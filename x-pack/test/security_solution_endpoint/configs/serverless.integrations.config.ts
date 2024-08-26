@@ -9,13 +9,14 @@ import { resolve } from 'path';
 import { FtrConfigProviderContext } from '@kbn/test';
 import { generateConfig } from './config.base';
 import { svlServices } from '../services';
+import { svlPageObjects } from '../page_objects';
 
 // eslint-disable-next-line import/no-default-export
 export default async function (ftrConfigProviderContext: FtrConfigProviderContext) {
   const { readConfigFile } = ftrConfigProviderContext;
 
   const svlBaseConfig = await readConfigFile(
-    require.resolve('../../../test_serverless/shared/config.base.ts')
+    require.resolve('@kbn/test-suites-serverless/shared/config.base')
   );
 
   return generateConfig({
@@ -30,5 +31,6 @@ export default async function (ftrConfigProviderContext: FtrConfigProviderContex
       '--xpack.securitySolution.packagerTaskInterval=5s',
     ],
     services: svlServices,
+    pageObjects: svlPageObjects,
   });
 }

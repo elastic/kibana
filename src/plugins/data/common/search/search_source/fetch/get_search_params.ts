@@ -37,12 +37,15 @@ export function getSearchParamsFromRequest(
   const searchParams = getSearchParams(getConfig);
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { track_total_hits, ...body } = searchRequest.body;
+  const dataView = typeof searchRequest.index !== 'string' ? searchRequest.index : undefined;
+  const index = dataView?.title ?? `${searchRequest.index}`;
 
   return {
-    index: searchRequest.index.title || searchRequest.index,
+    index,
     body,
+    // @ts-ignore
     track_total_hits,
-    ...(searchRequest.index?.allowHidden && { expand_wildcards: 'all' }),
+    ...(dataView?.getAllowHidden() && { expand_wildcards: 'all' }),
     ...searchParams,
   };
 }

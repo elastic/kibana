@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlyout, EuiHeaderLinks } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -12,8 +12,15 @@ import {
   ConnectionDetailsFlyoutContent,
 } from '@kbn/cloud/connection_details';
 
+import { useUsageTracker } from '../hooks/use_usage_tracker';
+
 export const EndpointsHeaderAction = () => {
-  const [open, setOpen] = React.useState(false);
+  const usageTracker = useUsageTracker();
+  const [open, setOpen] = useState<boolean>(false);
+  const onClickEndpointsButton = useCallback(() => {
+    usageTracker.click('endpoints_and_api_keys');
+    setOpen(true);
+  }, [usageTracker]);
 
   return (
     <>
@@ -22,7 +29,7 @@ export const EndpointsHeaderAction = () => {
           <EuiButtonEmpty
             iconType="endpoint"
             size="s"
-            onClick={() => setOpen(true)}
+            onClick={onClickEndpointsButton}
             data-test-subj="searchHomepageEndpointsHeaderActionEndpointsApiKeysButton"
             data-telemetry-id="searchHomepageEndpointsHeaderActionEndpointsApiKeysButton"
           >

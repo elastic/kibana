@@ -23,22 +23,18 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('search', () => {
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
-    });
-    after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
-    });
-    before(async () => {
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       // TODO: emptyKibanaIndex fails in Serverless with
       // "index_not_found_exception: no such index [.kibana_ingest]",
       // so it was switched to `savedObjects.cleanStandardList()`
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
     });
-
     after(async () => {
       await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
+
     describe('post', () => {
       it('should return 200 when correctly formatted searches are provided', async () => {
         const resp = await supertestWithoutAuth

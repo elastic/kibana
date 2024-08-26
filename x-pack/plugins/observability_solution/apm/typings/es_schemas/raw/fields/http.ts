@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-export interface Http {
-  request?: { method: string; [key: string]: unknown };
-  response?: { status_code: number; [key: string]: unknown };
-  version?: string;
-}
+export type { Http } from '@kbn/apm-types/es_schemas_raw';

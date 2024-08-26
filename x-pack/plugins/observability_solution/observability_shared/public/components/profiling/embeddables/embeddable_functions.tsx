@@ -16,18 +16,24 @@ interface Props {
   isLoading: boolean;
   rangeFrom: number;
   rangeTo: number;
+  height?: string;
+  showFullScreenSelector?: boolean;
 }
 
 export function EmbeddableFunctions(props: Props) {
   const EmbeddableFunctionsComponent = getProfilingComponent<Props>(EMBEDDABLE_FUNCTIONS);
+  const { height } = props;
+  const heightSetting = height ? `height: ${height}` : 'min-height: 0';
+
   return (
     <div
       css={css`
         width: 100%;
+        ${heightSetting};
+        overflow: visible;
         display: flex;
         flex: 1 1 100%;
         z-index: 1;
-        min-height: 0;
       `}
     >
       {EmbeddableFunctionsComponent && <EmbeddableFunctionsComponent {...props} />}

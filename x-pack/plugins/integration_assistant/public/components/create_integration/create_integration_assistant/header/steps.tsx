@@ -6,8 +6,15 @@
  */
 
 import { EuiStepsHorizontal, type EuiStepStatus, type EuiStepsHorizontalProps } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
+
+// Custom styles for the EuiStepsHorizontal component suggested by design team
+const stepsCss = css`
+  margin-left: -66px;
+  margin-right: -59px;
+`;
 
 interface StepsProps {
   currentStep: number;
@@ -74,6 +81,6 @@ export const Steps = React.memo<StepsProps>(({ currentStep, setStep, isGeneratin
     ];
   }, [currentStep, setStep, isGenerating]);
 
-  return <EuiStepsHorizontal steps={steps} size="s" />;
+  return <EuiStepsHorizontal steps={steps} size="s" css={stepsCss} />;
 });
 Steps.displayName = 'Steps';

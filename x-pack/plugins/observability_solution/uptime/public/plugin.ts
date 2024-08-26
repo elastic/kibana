@@ -309,17 +309,20 @@ function setUptimeAppStatus(
       registerAlertRules(coreStart, pluginsStart, stackVersion, false);
       updater.next(() => ({ status: AppStatus.accessible }));
     } else {
-      const indexStatusPromise = UptimeDataHelper(coreStart).indexStatus('now-7d', 'now');
-      indexStatusPromise.then((indexStatus) => {
-        if (indexStatus.indexExists) {
-          registerUptimeRoutesWithNavigation(coreStart, pluginsStart);
-          updater.next(() => ({ status: AppStatus.accessible }));
-          registerAlertRules(coreStart, pluginsStart, stackVersion, false);
-        } else {
-          updater.next(() => ({ status: AppStatus.inaccessible }));
-          registerAlertRules(coreStart, pluginsStart, stackVersion, true);
-        }
-      });
+      const hasUptimePrivileges = coreStart.application.capabilities.uptime?.show;
+      if (hasUptimePrivileges) {
+        const indexStatusPromise = UptimeDataHelper(coreStart).indexStatus('now-7d', 'now');
+        indexStatusPromise.then((indexStatus) => {
+          if (indexStatus.indexExists) {
+            registerUptimeRoutesWithNavigation(coreStart, pluginsStart);
+            updater.next(() => ({ status: AppStatus.accessible }));
+            registerAlertRules(coreStart, pluginsStart, stackVersion, false);
+          } else {
+            updater.next(() => ({ status: AppStatus.inaccessible }));
+            registerAlertRules(coreStart, pluginsStart, stackVersion, true);
+          }
+        });
+      }
     }
   });
 }

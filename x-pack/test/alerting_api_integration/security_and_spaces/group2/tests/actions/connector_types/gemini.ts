@@ -310,7 +310,7 @@ export default function geminiTest({ getService }: FtrProviderContext) {
                         role: 'user',
                         parts: [
                           {
-                            text: 'Write the first line of a story about a magic backpack.',
+                            text: 'Hello world!',
                           },
                         ],
                       },
@@ -325,7 +325,7 @@ export default function geminiTest({ getService }: FtrProviderContext) {
               contents: [
                 {
                   role: 'user',
-                  parts: [{ text: 'Write the first line of a story about a magic backpack.' }],
+                  parts: [{ text: 'Hello world!' }],
                 },
               ],
               generation_config: { temperature: 0, maxOutputTokens: 8192 },

@@ -18,10 +18,13 @@ import {
   EuiAutoSizer,
   EuiAutoSize,
 } from '@elastic/eui';
-import { selectOverviewStatus } from '../../../../state/overview_status';
+import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../../../../../embeddables/constants';
+import { AddToDashboard } from '../../../common/components/add_to_dashboard';
+import { useOverviewStatus } from '../../hooks/use_overview_status';
 import { GridItemsByGroup } from './grid_by_group/grid_items_by_group';
 import { GroupFields } from './grid_by_group/group_fields';
 import {
+  fetchMonitorOverviewAction,
   quietFetchOverviewAction,
   refreshOverviewTrends,
   selectOverviewState,
@@ -52,7 +55,7 @@ interface ListItem {
 }
 
 export const OverviewGrid = memo(() => {
-  const { status } = useSelector(selectOverviewStatus);
+  const { status } = useOverviewStatus({ scopeStatusByLocation: true });
   const monitorsSortedByStatus: MonitorOverviewItem[] =
     useMonitorsSortedByStatus().monitorsSortedByStatus;
 
@@ -60,6 +63,7 @@ export const OverviewGrid = memo(() => {
     data: { monitors },
     flyoutConfig,
     loaded,
+    loading,
     pageState,
     groupBy: { field: groupField },
   } = useSelector(selectOverviewState);
@@ -70,6 +74,11 @@ export const OverviewGrid = memo(() => {
   const [maxItem, setMaxItem] = useState(0);
 
   const dispatch = useDispatch();
+
+  // fetch overview for all other page state changes
+  useEffect(() => {
+    dispatch(fetchMonitorOverviewAction.get(pageState));
+  }, [dispatch, pageState]);
 
   const setFlyoutConfigCallback = useCallback(
     (params: FlyoutParamProps) => dispatch(setFlyoutConfig(params)),
@@ -122,7 +131,7 @@ export const OverviewGrid = memo(() => {
     <>
       <EuiFlexGroup
         justifyContent="spaceBetween"
-        alignItems="baseline"
+        alignItems="center"
         responsive={false}
         wrap={true}
       >
@@ -133,6 +142,10 @@ export const OverviewGrid = memo(() => {
             total={status ? monitorsSortedByStatus.length : undefined}
           />
         </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <AddToDashboard type={SYNTHETICS_MONITORS_EMBEDDABLE} asButton />
+        </EuiFlexItem>
+
         <EuiFlexItem grow={false}>
           <SortFields onSortChange={() => setPage(1)} />
         </EuiFlexItem>

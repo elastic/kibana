@@ -50,29 +50,28 @@ export class ServerlessObservabilityPlugin
     setupDeps: ServerlessObservabilityPublicStartDependencies
   ): ServerlessObservabilityPublicStart {
     const { serverless, management, security } = setupDeps;
-
     const navigationTree$ = of(navigationTree);
     serverless.setProjectHome('/app/observability/landing');
     serverless.initNavigation('oblt', navigationTree$, { dataTestSubj: 'svlObservabilitySideNav' });
-
-    const extendCardNavDefinitions = serverless.getNavigationCards(
-      security.authz.isRoleManagementEnabled(),
-      {
-        observabilityAiAssistantManagement: {
-          category: appCategories.OTHER,
-          title: i18n.translate('xpack.serverlessObservability.aiAssistantManagementTitle', {
-            defaultMessage: 'AI assistant for Observability settings',
-          }),
-          description: i18n.translate(
-            'xpack.serverlessObservability.aiAssistantManagementDescription',
-            {
-              defaultMessage: 'Manage your AI assistant for Observability settings.',
-            }
-          ),
-          icon: 'sparkles',
-        },
-      }
-    );
+    const aiAssistantIsEnabled = core.application.capabilities.observabilityAIAssistant?.show;
+    const extendCardNavDefinitions = aiAssistantIsEnabled
+      ? serverless.getNavigationCards(security.authz.isRoleManagementEnabled(), {
+          observabilityAiAssistantManagement: {
+            category: appCategories.OTHER,
+            title: i18n.translate('xpack.serverlessObservability.aiAssistantManagementTitle', {
+              defaultMessage: 'AI Assistant for Observability Settings',
+            }),
+            description: i18n.translate(
+              'xpack.serverlessObservability.aiAssistantManagementDescription',
+              {
+                defaultMessage:
+                  'Manage knowledge base and control assistant behavior, including response language.',
+              }
+            ),
+            icon: 'sparkles',
+          },
+        })
+      : undefined;
     management.setupCardsNavigation({
       enabled: true,
       hideLinksTo: [appIds.RULES],

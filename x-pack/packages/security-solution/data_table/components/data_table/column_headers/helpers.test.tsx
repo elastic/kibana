@@ -229,7 +229,6 @@ describe('helpers', () => {
           columnHeaderType: 'not-filtered',
           defaultSortDirection,
           esTypes: ['date'],
-          format: '',
           id: '@timestamp',
           isSortable,
           name: '@timestamp',
@@ -245,7 +244,6 @@ describe('helpers', () => {
           columnHeaderType: 'not-filtered',
           defaultSortDirection,
           esTypes: ['ip'],
-          format: '',
           id: 'source.ip',
           isSortable,
           name: 'source.ip',
@@ -260,7 +258,6 @@ describe('helpers', () => {
           columnHeaderType: 'not-filtered',
           defaultSortDirection,
           esTypes: ['ip'],
-          format: '',
           id: 'destination.ip',
           isSortable,
           name: 'destination.ip',
@@ -285,7 +282,6 @@ describe('helpers', () => {
           columnHeaderType: 'not-filtered',
           defaultSortDirection,
           esTypes: ['date'],
-          format: '',
           id: '@timestamp',
           isSortable,
           name: '@timestamp',
@@ -336,7 +332,7 @@ describe('helpers', () => {
         const fieldName = 'test_field';
         const testField = {
           aggregatable: true,
-          format: 'date',
+          format: { id: 'date' },
           indexes: ['auditbeat', 'filebeat', 'packetbeat'],
           name: fieldName,
           searchable: true,
@@ -366,7 +362,7 @@ describe('helpers', () => {
         const fieldName = 'testFieldName';
         const testField = {
           aggregatable: true,
-          format: 'date',
+          format: { id: 'date' },
           indexes: ['auditbeat', 'filebeat', 'packetbeat'],
           name: fieldName,
           searchable: true,
@@ -396,7 +392,7 @@ describe('helpers', () => {
         const fieldName = 'test.field.splittable';
         const testField = {
           aggregatable: true,
-          format: 'date',
+          format: { id: 'date' },
           indexes: ['auditbeat', 'filebeat', 'packetbeat'],
           name: fieldName,
           searchable: true,
@@ -431,7 +427,6 @@ describe('helpers', () => {
       searchable: true,
       type: 'string',
       aggregatable: true, // <-- allow sorting when this is true
-      format: '',
     };
 
     test('it returns true for an aggregatable field', () => {

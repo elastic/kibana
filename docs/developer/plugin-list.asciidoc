@@ -470,10 +470,6 @@ The plugin exposes the static DefaultEditorController class to consume.
 |WARNING: Missing README.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/assets_data_access[assetsDataAccess]
-|WARNING: Missing README.
-
-
 |{kib-repo}blob/{branch}/x-pack/plugins/banners/README.md[banners]
 |Allow to add a header banner that will be displayed on every page of the Kibana application
 
@@ -487,7 +483,7 @@ The plugin exposes the static DefaultEditorController class to consume.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/cloud/README.md[cloud]
-|The cloud plugin adds Cloud-specific features to Kibana.
+|The cloud plugin exposes Cloud-specific metadata to Kibana.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/cloud_integrations/cloud_chat/README.md[cloudChat]
@@ -503,7 +499,8 @@ The plugin exposes the static DefaultEditorController class to consume.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/cloud_integrations/cloud_experiments/README.mdx[cloudExperiments]
-|The Cloud Experiments Service provides the necessary APIs to implement A/B testing scenarios, fetching the variations in configuration and reporting back metrics to track conversion rates of the experiments.
+|[!WARNING]
+These APIs are deprecated and should not be used as we're working on a replacement Core Feature Flags Service that will arrive soon.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/cloud_integrations/cloud_full_story/README.md[cloudFullStory]
@@ -569,8 +566,12 @@ security and spaces filtering.
 |This plugin provides Kibana user interfaces for managing the Enterprise Search solution and its products, App Search and Workplace Search.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/entities_data_access/README.md[entitiesDataAccess]
+|Exposes services to access entities data.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/entity_manager/README.md[entityManager]
-|This plugin provides access to observed asset data, such as information about hosts, pods, containers, services, and more.
+|This plugin provides access to observed entity data, such as information about hosts, pods, containers, services, and more.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/event_log/README.md[eventLog]
@@ -587,7 +588,7 @@ activities.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/fields_metadata/README.md[fieldsMetadata]
-|The @kbn/fields-metadata-plugin is designed to provide a centralized and asynchronous way to consume field metadata across Kibana. This plugin addresses the need for on-demand retrieval of field metadata from static ECS definitions and integration manifests, with the flexibility to extend to additional resolution sources in the future.
+|The @kbn/fields-metadata-plugin is designed to provide a centralized and asynchronous way to consume field metadata across Kibana. This plugin addresses the need for on-demand retrieval of field metadata from static ECS/Metadata definitions and integration manifests, with the flexibility to extend to additional resolution sources in the future.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/file_upload[fileUpload]
@@ -629,6 +630,11 @@ Index Management by running this series of requests in Console:
 |This service is exposed from the Index Management setup contract and can be used to add content to the indices list and the index details page.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/inference/README.md[inference]
+|The inference plugin is a central place to handle all interactions with the Elasticsearch Inference API and
+external LLM APIs. Its goals are:
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/infra/README.md[infra]
 |This is the home of the infra plugin, which aims to provide a solution for
 the infrastructure monitoring use-case within Kibana.
@@ -643,6 +649,10 @@ the infrastructure monitoring use-case within Kibana.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/investigate/README.md[investigate]
+|undefined
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/investigate_app/README.md[investigateApp]
 |undefined
 
 
@@ -785,12 +795,20 @@ Elastic.
 It uses Chromium and Puppeteer underneath to run the browser in headless mode.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/search_assistant/README.md[searchAssistant]
+|This holds the Search AI Assistant which targets Search users and Serverless Elasticsearch.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/search_connectors/README.mdx[searchConnectors]
 |This plugin contains common assets and endpoints for the use of connectors in Kibana. Primarily used by the enterprise_search and serverless_search plugins.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/search_homepage/README.mdx[searchHomepage]
 |The Search Homepage is a shared homepage for elasticsearch users.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/search_indices/README.mdx[searchIndices]
+|The Search Indices plugin is a shared set of pages for elasticsearch users across stack and serverless search solutions.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/search_inference_endpoints/README.md[searchInferenceEndpoints]

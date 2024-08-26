@@ -25,7 +25,7 @@ import {
   sendGetActionStatus,
 } from '../../../../hooks';
 import { AgentStatusKueryHelper, ExperimentalFeaturesService } from '../../../../services';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../../constants';
+import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../../constants';
 
 import { getKuery } from '../utils/get_kuery';
 
@@ -41,6 +41,7 @@ export function useFetchAgentsData() {
   const history = useHistory();
   const { urlParams, toUrlParams } = useUrlParams();
   const defaultKuery: string = (urlParams.kuery as string) || '';
+  const urlHasInactive = (urlParams.showInactive as string) === 'true';
 
   // Agent data states
   const [showUpgradeable, setShowUpgradeable] = useState<boolean>(false);
@@ -64,12 +65,17 @@ export function useFetchAgentsData() {
     'unhealthy',
     'updating',
     'offline',
+    ...(urlHasInactive ? ['inactive'] : []),
   ]);
 
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   const showInactive = useMemo(() => {
-    return selectedStatus.some((status) => status === 'inactive' || status === 'unenrolled');
+    return selectedStatus.some((status) => status === 'inactive') || selectedStatus.length === 0;
+  }, [selectedStatus]);
+
+  const includeUnenrolled = useMemo(() => {
+    return selectedStatus.some((status) => status === 'unenrolled') || selectedStatus.length === 0;
   }, [selectedStatus]);
 
   const setSearch = useCallback(
@@ -89,7 +95,7 @@ export function useFetchAgentsData() {
   );
 
   // filters kuery
-  const kuery = useMemo(() => {
+  let kuery = useMemo(() => {
     return getKuery({
       search,
       selectedAgentPolicies,
@@ -97,6 +103,9 @@ export function useFetchAgentsData() {
       selectedStatus,
     });
   }, [search, selectedAgentPolicies, selectedStatus, selectedTags]);
+
+  kuery =
+    includeUnenrolled && kuery ? `status:* AND (${kuery})` : includeUnenrolled ? `status:*` : kuery;
 
   const [agentsOnCurrentPage, setAgentsOnCurrentPage] = useState<Agent[]>([]);
   const [agentsStatus, setAgentsStatus] = useState<
@@ -157,7 +166,7 @@ export function useFetchAgentsData() {
               kuery: AgentStatusKueryHelper.buildKueryForInactiveAgents(),
             }),
             sendGetAgentPolicies({
-              kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.is_managed:true`,
+              kuery: `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.is_managed:true`,
               perPage: SO_SEARCH_LIMIT,
               full: false,
             }),

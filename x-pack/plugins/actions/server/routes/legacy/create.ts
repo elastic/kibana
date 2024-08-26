@@ -15,8 +15,12 @@ import { verifyAccessAndContext } from '../verify_access_and_context';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 
 export const bodySchema = schema.object({
-  name: schema.string(),
-  actionTypeId: schema.string(),
+  name: schema.string({
+    meta: { description: 'The display name for the connector.' },
+  }),
+  actionTypeId: schema.string({
+    meta: { description: 'The connector type identifier.' },
+  }),
   config: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
   secrets: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
 });
@@ -32,6 +36,8 @@ export const createActionRoute = (
       options: {
         access: 'public',
         summary: `Create a connector`,
+        tags: ['oas-tag:connectors'],
+        deprecated: true,
       },
       validate: {
         body: bodySchema,

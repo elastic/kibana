@@ -9,18 +9,10 @@
     "objects": []
   },
   "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/core-base-server-internal",
-        "id": "def-common.CriticalError",
+        "id": "def-server.CriticalError",
         "type": "Class",
         "tags": [],
         "label": "CriticalError",
@@ -28,9 +20,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-base-server-internal",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreBaseServerInternalPluginApi",
-            "section": "def-common.CriticalError",
+            "section": "def-server.CriticalError",
             "text": "CriticalError"
           },
           " extends Error"
@@ -41,7 +33,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-base-server-internal",
-            "id": "def-common.CriticalError.Unnamed",
+            "id": "def-server.CriticalError.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -55,7 +47,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-base-server-internal",
-                "id": "def-common.CriticalError.Unnamed.$1",
+                "id": "def-server.CriticalError.Unnamed.$1",
                 "type": "string",
                 "tags": [],
                 "label": "message",
@@ -70,7 +62,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-base-server-internal",
-                "id": "def-common.CriticalError.Unnamed.$2",
+                "id": "def-server.CriticalError.Unnamed.$2",
                 "type": "string",
                 "tags": [],
                 "label": "code",
@@ -85,7 +77,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-base-server-internal",
-                "id": "def-common.CriticalError.Unnamed.$3",
+                "id": "def-server.CriticalError.Unnamed.$3",
                 "type": "number",
                 "tags": [],
                 "label": "processExitCode",
@@ -100,7 +92,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-base-server-internal",
-                "id": "def-common.CriticalError.Unnamed.$4",
+                "id": "def-server.CriticalError.Unnamed.$4",
                 "type": "Object",
                 "tags": [],
                 "label": "cause",
@@ -127,7 +119,7 @@
     "objects": [
       {
         "parentPluginId": "@kbn/core-base-server-internal",
-        "id": "def-common.uuidRegexp",
+        "id": "def-server.uuidRegexp",
         "type": "Object",
         "tags": [],
         "label": "uuidRegexp",
@@ -141,5 +133,13 @@
         "initialIsOpen": false
       }
     ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }

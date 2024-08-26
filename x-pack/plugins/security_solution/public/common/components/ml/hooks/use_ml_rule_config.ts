@@ -7,10 +7,10 @@
 
 import { useMemo } from 'react';
 import type { DataViewFieldBase } from '@kbn/es-query';
+import type { FieldSpec } from '@kbn/data-plugin/common';
 
 import { getTermsAggregationFields } from '../../../../detection_engine/rule_creation_ui/components/step_define_rule/utils';
 import { useRuleFields } from '../../../../detection_engine/rule_management/logic/use_rule_fields';
-import type { BrowserField } from '../../../containers/source';
 import { useMlCapabilities } from './use_ml_capabilities';
 import { useMlRuleValidations } from './use_ml_rule_validations';
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
@@ -19,11 +19,10 @@ import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_lice
 export interface UseMlRuleConfigReturn {
   hasMlAdminPermissions: boolean;
   hasMlLicense: boolean;
+  loading: boolean;
   mlFields: DataViewFieldBase[];
-  mlFieldsLoading: boolean;
-  mlSuppressionFields: BrowserField[];
-  noMlJobsStarted: boolean;
-  someMlJobsStarted: boolean;
+  mlSuppressionFields: FieldSpec[];
+  allJobsStarted: boolean;
 }
 
 /**
@@ -37,16 +36,17 @@ export interface UseMlRuleConfigReturn {
 export const useMLRuleConfig = ({
   machineLearningJobId,
 }: {
-  machineLearningJobId: string[];
+  machineLearningJobId: string[] | undefined;
 }): UseMlRuleConfigReturn => {
   const mlCapabilities = useMlCapabilities();
-  const { someJobsStarted: someMlJobsStarted, noJobsStarted: noMlJobsStarted } =
-    useMlRuleValidations({ machineLearningJobId });
+  const { loading: validationsLoading, allJobsStarted } = useMlRuleValidations({
+    machineLearningJobId,
+  });
   const { loading: mlFieldsLoading, fields: mlFields } = useRuleFields({
     machineLearningJobId,
   });
   const mlSuppressionFields = useMemo(
-    () => getTermsAggregationFields(mlFields as BrowserField[]),
+    () => getTermsAggregationFields(mlFields as FieldSpec[]),
     [mlFields]
   );
 
@@ -54,9 +54,8 @@ export const useMLRuleConfig = ({
     hasMlAdminPermissions: hasMlAdminPermissions(mlCapabilities),
     hasMlLicense: hasMlLicense(mlCapabilities),
     mlFields,
-    mlFieldsLoading,
+    loading: validationsLoading || mlFieldsLoading,
     mlSuppressionFields,
-    noMlJobsStarted,
-    someMlJobsStarted,
+    allJobsStarted,
   };
 };

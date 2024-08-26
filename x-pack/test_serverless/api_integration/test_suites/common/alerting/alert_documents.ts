@@ -67,16 +67,16 @@ export default function ({ getService }: FtrProviderContext) {
     let ruleId: string;
 
     before(async () => {
-      roleAdmin = await svlUserManager.createApiKeyForRole('admin');
+      roleAdmin = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
     });
 
     afterEach(async () => {
-      objectRemover.removeAll();
+      await objectRemover.removeAll();
     });
 
     after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(roleAdmin);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAdmin);
     });
 
     it('should generate an alert document for an active alert', async () => {

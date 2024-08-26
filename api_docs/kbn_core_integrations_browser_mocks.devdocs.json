@@ -5,8 +5,100 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [],
-    "objects": []
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-integrations-browser-mocks",
+        "id": "def-public.IntegrationsServiceContract",
+        "type": "Type",
+        "tags": [],
+        "label": "IntegrationsServiceContract",
+        "description": [],
+        "signature": [
+          "{ start: ({ uiSettings }: ",
+          {
+            "pluginId": "@kbn/core-integrations-browser-internal",
+            "scope": "public",
+            "docId": "kibKbnCoreIntegrationsBrowserInternalPluginApi",
+            "section": "def-public.IntegrationsServiceSetupDeps",
+            "text": "IntegrationsServiceSetupDeps"
+          },
+          ") => Promise<void>; setup: () => Promise<void>; stop: () => Promise<void>; }"
+        ],
+        "path": "packages/core/integrations/core-integrations-browser-mocks/src/integrations_service.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-integrations-browser-mocks",
+        "id": "def-public.IntegrationsServiceMock",
+        "type": "Type",
+        "tags": [],
+        "label": "IntegrationsServiceMock",
+        "description": [],
+        "signature": [
+          "{ start: jest.MockInstance<Promise<void>, [",
+          {
+            "pluginId": "@kbn/core-integrations-browser-internal",
+            "scope": "public",
+            "docId": "kibKbnCoreIntegrationsBrowserInternalPluginApi",
+            "section": "def-public.IntegrationsServiceSetupDeps",
+            "text": "IntegrationsServiceSetupDeps"
+          },
+          "], unknown>; setup: jest.MockInstance<Promise<void>, [], unknown>; stop: jest.MockInstance<Promise<void>, [], unknown>; } & ",
+          {
+            "pluginId": "@kbn/core-integrations-browser-mocks",
+            "scope": "public",
+            "docId": "kibKbnCoreIntegrationsBrowserMocksPluginApi",
+            "section": "def-public.IntegrationsServiceContract",
+            "text": "IntegrationsServiceContract"
+          }
+        ],
+        "path": "packages/core/integrations/core-integrations-browser-mocks/src/integrations_service.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-integrations-browser-mocks",
+        "id": "def-public.integrationsServiceMock",
+        "type": "Object",
+        "tags": [],
+        "label": "integrationsServiceMock",
+        "description": [],
+        "path": "packages/core/integrations/core-integrations-browser-mocks/src/integrations_service.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-integrations-browser-mocks",
+            "id": "def-public.integrationsServiceMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/core-integrations-browser-mocks",
+                "scope": "public",
+                "docId": "kibKbnCoreIntegrationsBrowserMocksPluginApi",
+                "section": "def-public.IntegrationsServiceMock",
+                "text": "IntegrationsServiceMock"
+              }
+            ],
+            "path": "packages/core/integrations/core-integrations-browser-mocks/src/integrations_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
   },
   "server": {
     "classes": [],
@@ -21,99 +113,7 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [
-      {
-        "parentPluginId": "@kbn/core-integrations-browser-mocks",
-        "id": "def-common.IntegrationsServiceContract",
-        "type": "Type",
-        "tags": [],
-        "label": "IntegrationsServiceContract",
-        "description": [],
-        "signature": [
-          "{ start: ({ uiSettings }: ",
-          {
-            "pluginId": "@kbn/core-integrations-browser-internal",
-            "scope": "common",
-            "docId": "kibKbnCoreIntegrationsBrowserInternalPluginApi",
-            "section": "def-common.IntegrationsServiceSetupDeps",
-            "text": "IntegrationsServiceSetupDeps"
-          },
-          ") => Promise<void>; setup: () => Promise<void>; stop: () => Promise<void>; }"
-        ],
-        "path": "packages/core/integrations/core-integrations-browser-mocks/src/integrations_service.mock.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-integrations-browser-mocks",
-        "id": "def-common.IntegrationsServiceMock",
-        "type": "Type",
-        "tags": [],
-        "label": "IntegrationsServiceMock",
-        "description": [],
-        "signature": [
-          "{ start: jest.MockInstance<Promise<void>, [",
-          {
-            "pluginId": "@kbn/core-integrations-browser-internal",
-            "scope": "common",
-            "docId": "kibKbnCoreIntegrationsBrowserInternalPluginApi",
-            "section": "def-common.IntegrationsServiceSetupDeps",
-            "text": "IntegrationsServiceSetupDeps"
-          },
-          "], unknown>; setup: jest.MockInstance<Promise<void>, [], unknown>; stop: jest.MockInstance<Promise<void>, [], unknown>; } & ",
-          {
-            "pluginId": "@kbn/core-integrations-browser-mocks",
-            "scope": "common",
-            "docId": "kibKbnCoreIntegrationsBrowserMocksPluginApi",
-            "section": "def-common.IntegrationsServiceContract",
-            "text": "IntegrationsServiceContract"
-          }
-        ],
-        "path": "packages/core/integrations/core-integrations-browser-mocks/src/integrations_service.mock.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
-    "objects": [
-      {
-        "parentPluginId": "@kbn/core-integrations-browser-mocks",
-        "id": "def-common.integrationsServiceMock",
-        "type": "Object",
-        "tags": [],
-        "label": "integrationsServiceMock",
-        "description": [],
-        "path": "packages/core/integrations/core-integrations-browser-mocks/src/integrations_service.mock.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/core-integrations-browser-mocks",
-            "id": "def-common.integrationsServiceMock.create",
-            "type": "Function",
-            "tags": [],
-            "label": "create",
-            "description": [],
-            "signature": [
-              "() => ",
-              {
-                "pluginId": "@kbn/core-integrations-browser-mocks",
-                "scope": "common",
-                "docId": "kibKbnCoreIntegrationsBrowserMocksPluginApi",
-                "section": "def-common.IntegrationsServiceMock",
-                "text": "IntegrationsServiceMock"
-              }
-            ],
-            "path": "packages/core/integrations/core-integrations-browser-mocks/src/integrations_service.mock.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": []
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ]
+    "misc": [],
+    "objects": []
   }
 }

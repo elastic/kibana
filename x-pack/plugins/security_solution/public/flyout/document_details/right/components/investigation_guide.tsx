@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useCallback, useMemo } from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSkeletonText } from '@elastic/eui';
+import { EuiButton, EuiSkeletonText, EuiCallOut } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -46,29 +46,38 @@ export const InvestigationGuide: React.FC = () => {
     });
   }, [eventId, indexName, openLeftPanel, scopeId]);
 
-  const hasInvesigationGuide = useMemo(
+  const hasInvestigationGuide = useMemo(
     () => !error && basicAlertData && basicAlertData.ruleId && ruleNote,
     [error, basicAlertData, ruleNote]
   );
 
-  return (
-    <EuiFlexGroup direction="column" gutterSize="s" data-test-subj={INVESTIGATION_GUIDE_TEST_ID}>
-      <EuiFlexItem>
-        <EuiTitle size="xxs">
-          <h5>
+  const content = useMemo(() => {
+    if (isPreview) {
+      return (
+        <EuiCallOut
+          iconType="documentation"
+          size="s"
+          title={
             <FormattedMessage
-              id="xpack.securitySolution.flyout.right.investigation.investigationGuide.investigationGuideTitle"
+              id="xpack.securitySolution.flyout.right.investigation.investigationGuide.previewTitle"
               defaultMessage="Investigation guide"
             />
-          </h5>
-        </EuiTitle>
-      </EuiFlexItem>
-      {isPreview ? (
-        <FormattedMessage
-          id="xpack.securitySolution.flyout.right.investigation.investigationGuide.previewMessage"
-          defaultMessage="Investigation guide is not available in alert preview."
-        />
-      ) : loading ? (
+          }
+          aria-label={i18n.translate(
+            'xpack.securitySolution.flyout.right.investigation.investigationGuide.previewAriaLabel',
+            { defaultMessage: 'Investigation guide' }
+          )}
+        >
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.right.investigation.investigationGuide.previewMessage"
+            defaultMessage="Investigation guide is not available in alert preview."
+          />
+        </EuiCallOut>
+      );
+    }
+
+    if (loading) {
+      return (
         <EuiSkeletonText
           data-test-subj={INVESTIGATION_GUIDE_LOADING_TEST_ID}
           contentAriaLabel={i18n.translate(
@@ -76,38 +85,78 @@ export const InvestigationGuide: React.FC = () => {
             { defaultMessage: 'investigation guide' }
           )}
         />
-      ) : hasInvesigationGuide && isPreviewMode ? (
-        <FormattedMessage
-          id="xpack.securitySolution.flyout.right.investigation.investigationGuide.openFlyoutMessage"
-          defaultMessage="Open alert details to access investigation guides."
-        />
-      ) : hasInvesigationGuide ? (
-        <EuiFlexItem>
-          <EuiButton
-            onClick={goToInvestigationsTab}
-            iconType="documentation"
-            data-test-subj={INVESTIGATION_GUIDE_BUTTON_TEST_ID}
-            aria-label={i18n.translate(
-              'xpack.securitySolution.flyout.right.investigation.investigationGuide.investigationGuideButtonAriaLabel',
-              {
-                defaultMessage: 'Show investigation guide',
-              }
-            )}
-          >
+      );
+    }
+
+    if (hasInvestigationGuide && isPreviewMode) {
+      return (
+        <EuiCallOut
+          iconType="documentation"
+          size="s"
+          title={
             <FormattedMessage
-              id="xpack.securitySolution.flyout.right.investigation.investigationGuide.investigationGuideButtonLabel"
-              defaultMessage="Show investigation guide"
+              id="xpack.securitySolution.flyout.right.investigation.investigationGuide.openFlyoutTitle"
+              defaultMessage="Investigation guide available"
             />
-          </EuiButton>
-        </EuiFlexItem>
-      ) : (
+          }
+          aria-label={i18n.translate(
+            'xpack.securitySolution.flyout.right.investigation.investigationGuide.openFlyoutAriaLabel',
+            { defaultMessage: 'Investigation guide available' }
+          )}
+        >
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.right.investigation.investigationGuide.openFlyoutMessage"
+            defaultMessage="Open alert details to access investigation guides."
+          />
+        </EuiCallOut>
+      );
+    }
+
+    if (hasInvestigationGuide) {
+      return (
+        <EuiButton
+          onClick={goToInvestigationsTab}
+          iconType="documentation"
+          size="s"
+          fullWidth
+          data-test-subj={INVESTIGATION_GUIDE_BUTTON_TEST_ID}
+          aria-label={i18n.translate(
+            'xpack.securitySolution.flyout.right.investigation.investigationGuide.investigationGuideButtonAriaLabel',
+            { defaultMessage: 'Show investigation guide' }
+          )}
+        >
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.right.investigation.investigationGuide.investigationGuideButtonLabel"
+            defaultMessage="Show investigation guide"
+          />
+        </EuiButton>
+      );
+    }
+
+    return (
+      <EuiCallOut
+        iconType="documentation"
+        size="s"
+        title={
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.right.investigation.investigationGuide.noDataTitle"
+            defaultMessage="Investigation guide"
+          />
+        }
+        aria-label={i18n.translate(
+          'xpack.securitySolution.flyout.right.investigation.investigationGuide.noDataAriaLabel',
+          { defaultMessage: 'Investigation guide' }
+        )}
+      >
         <FormattedMessage
           id="xpack.securitySolution.flyout.right.investigation.investigationGuide.noDataDescription"
           defaultMessage="There's no investigation guide for this rule."
         />
-      )}
-    </EuiFlexGroup>
-  );
+      </EuiCallOut>
+    );
+  }, [loading, isPreview, isPreviewMode, goToInvestigationsTab, hasInvestigationGuide]);
+
+  return <div data-test-subj={INVESTIGATION_GUIDE_TEST_ID}>{content}</div>;
 };
 
 InvestigationGuide.displayName = 'InvestigationGuideButton';

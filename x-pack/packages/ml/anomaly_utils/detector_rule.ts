@@ -15,6 +15,7 @@
 export enum ML_DETECTOR_RULE_ACTION {
   SKIP_MODEL_UPDATE = 'skip_model_update',
   SKIP_RESULT = 'skip_result',
+  FORCE_TIME_SHIFT = 'force_time_shift',
 }
 
 /**
@@ -42,6 +43,20 @@ export enum ML_DETECTOR_RULE_OPERATOR {
   LESS_THAN_OR_EQUAL = 'lte',
   GREATER_THAN = 'gt',
   GREATER_THAN_OR_EQUAL = 'gte',
+}
+
+/**
+ * Enum ML_DETECTOR_RULE_PARAMS
+ */
+export enum ML_DETECTOR_RULE_PARAMS {
+  FORCE_TIME_SHIFT = 'force_time_shift',
+}
+
+/**
+ * Enum ML_DETECTOR_RULE_PARAMS_FORCE_TIME_SHIFT
+ */
+export enum ML_DETECTOR_RULE_PARAMS_FORCE_TIME_SHIFT {
+  TIME_SHIFT_AMOUNT = 'time_shift_amount',
 }
 
 /**

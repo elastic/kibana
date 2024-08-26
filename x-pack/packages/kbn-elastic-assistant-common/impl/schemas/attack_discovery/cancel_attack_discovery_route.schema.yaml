@@ -5,8 +5,9 @@ info:
 paths:
   /internal/elastic_assistant/attack_discovery/cancel/{connectorId}:
     put:
-      operationId: AttackDiscoveryCancel
       x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: AttackDiscoveryCancel
       description: Cancel relevant data for performing an attack discovery like pending requests
       summary: Cancel relevant data for performing an attack discovery
       tags:

@@ -5,41 +5,42 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
+  EuiComboBox,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
   EuiPanel,
-  EuiSelect,
 } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { InputType } from '../../../../../../common';
 import { useActions, type State } from '../../state';
 import type { IntegrationSettings } from '../../types';
 import { StepContentWrapper } from '../step_content_wrapper';
-import { SampleLogsInput } from './sample_logs_input';
 import type { OnComplete } from './generation_modal';
 import { GenerationModal } from './generation_modal';
-import { useLoadPackageNames } from './use_load_package_names';
+import { SampleLogsInput } from './sample_logs_input';
 import * as i18n from './translations';
+import { useLoadPackageNames } from './use_load_package_names';
 
-export const InputTypeOptions: Array<{ value: InputType; text: string }> = [
-  { value: 'aws_cloudwatch', text: 'AWS Cloudwatch' },
-  { value: 'aws_s3', text: 'AWS S3' },
-  { value: 'azure_blob_storage', text: 'Azure Blob Storage' },
-  { value: 'azure_eventhub', text: 'Azure Event Hub' },
-  { value: 'cel', text: 'Common Expression Language (CEL)' },
-  { value: 'cloudfoundry', text: 'Cloud Foundry' },
-  { value: 'filestream', text: 'File Stream' },
-  { value: 'gcp_pubsub', text: 'GCP Pub/Sub' },
-  { value: 'gcs', text: 'Google Cloud Storage' },
-  { value: 'http_endpoint', text: 'HTTP Endpoint' },
-  { value: 'journald', text: 'Journald' },
-  { value: 'kafka', text: 'Kafka' },
-  { value: 'tcp', text: 'TCP' },
-  { value: 'udp', text: 'UDP' },
+export const InputTypeOptions: Array<EuiComboBoxOptionOption<InputType>> = [
+  { value: 'aws-cloudwatch', label: 'AWS Cloudwatch' },
+  { value: 'aws-s3', label: 'AWS S3' },
+  { value: 'azure-blob-storage', label: 'Azure Blob Storage' },
+  { value: 'azure-eventhub', label: 'Azure Event Hub' },
+  { value: 'cel', label: 'Common Expression Language (CEL)' },
+  { value: 'cloudfoundry', label: 'Cloud Foundry' },
+  { value: 'filestream', label: 'File Stream' },
+  { value: 'gcp-pubsub', label: 'GCP Pub/Sub' },
+  { value: 'gcs', label: 'Google Cloud Storage' },
+  { value: 'http-endpoint', label: 'HTTP Endpoint' },
+  { value: 'journald', label: 'Journald' },
+  { value: 'kafka', label: 'Kafka' },
+  { value: 'tcp', label: 'TCP' },
+  { value: 'udp', label: 'UDP' },
 ];
 
 const isValidName = (name: string) => /^[a-z0-9_]+$/.test(name);
@@ -96,8 +97,8 @@ export const DataStreamStep = React.memo<DataStreamStepProps>(
           setIntegrationValues({ dataStreamTitle: e.target.value }),
         dataStreamDescription: (e: React.ChangeEvent<HTMLInputElement>) =>
           setIntegrationValues({ dataStreamDescription: e.target.value }),
-        inputType: (e: React.ChangeEvent<HTMLSelectElement>) => {
-          setIntegrationValues({ inputType: e.target.value as InputType });
+        inputTypes: (options: EuiComboBoxOptionOption[]) => {
+          setIntegrationValues({ inputTypes: options.map((option) => option.value as InputType) });
         },
       };
     }, [setIntegrationValues, setInvalidFields, packageNames]);
@@ -134,6 +135,14 @@ export const DataStreamStep = React.memo<DataStreamStepProps>(
         return i18n.NAME_ALREADY_EXISTS_ERROR;
       }
     }, [packageNames, name]);
+
+    const selectedInputTypeOptions = useMemo<Array<EuiComboBoxOptionOption<InputType>>>(
+      () =>
+        InputTypeOptions.filter((inputType) =>
+          integrationSettings?.inputTypes?.includes(inputType.value as InputType)
+        ),
+      [integrationSettings?.inputTypes]
+    );
 
     return (
       <EuiFlexGroup direction="column" gutterSize="l" data-test-subj="dataStreamStep">
@@ -205,12 +214,12 @@ export const DataStreamStep = React.memo<DataStreamStepProps>(
                   />
                 </EuiFormRow>
                 <EuiFormRow label={i18n.DATA_COLLECTION_METHOD_LABEL}>
-                  <EuiSelect
-                    name="dataCollectionMethod"
+                  <EuiComboBox
                     data-test-subj="dataCollectionMethodInput"
                     options={InputTypeOptions}
-                    value={integrationSettings?.inputType ?? ''}
-                    onChange={onChange.inputType}
+                    selectedOptions={selectedInputTypeOptions}
+                    onChange={onChange.inputTypes}
+                    fullWidth
                   />
                 </EuiFormRow>
                 <SampleLogsInput integrationSettings={integrationSettings} />

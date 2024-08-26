@@ -27,7 +27,8 @@ type StreamPartValueType = {
 export type StreamPartType =
   | ReturnType<typeof textStreamPart.parse>
   | ReturnType<typeof errorStreamPart.parse>
-  | ReturnType<typeof messageAnnotationsStreamPart.parse>;
+  | ReturnType<typeof messageAnnotationsStreamPart.parse>
+  | ReturnType<typeof bufferStreamPart.parse>;
 
 const NEWLINE = '\n'.charCodeAt(0);
 
@@ -121,7 +122,20 @@ const messageAnnotationsStreamPart = createStreamPart('8', 'message_annotations'
   return { type: 'message_annotations', value };
 });
 
-const streamParts = [textStreamPart, errorStreamPart, messageAnnotationsStreamPart] as const;
+const bufferStreamPart = createStreamPart('10', 'buffer', (value) => {
+  if (typeof value !== 'string') {
+    throw new Error('"buffer" parts expect a string value.');
+  }
+
+  return { type: 'buffer', value };
+});
+
+const streamParts = [
+  textStreamPart,
+  errorStreamPart,
+  bufferStreamPart,
+  messageAnnotationsStreamPart,
+] as const;
 
 type StreamPartMap = {
   [P in StreamParts as P['code']]: P;

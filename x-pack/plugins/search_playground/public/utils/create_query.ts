@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { RetrieverContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IndicesQuerySourceFields, QuerySourceFields } from '../types';
 
 export type IndexFields = Record<string, string[]>;
@@ -51,7 +52,7 @@ export function createQuery(
   rerankOptions: ReRankOptions = {
     rrf: true,
   }
-) {
+): { retriever: RetrieverContainer } {
   const indices = Object.keys(fieldDescriptors);
   const boolMatches = Object.keys(fields).reduce<Matches>(
     (acc, index) => {
@@ -134,10 +135,11 @@ export function createQuery(
             (x) => x.field === field
           );
 
-          if (elserField) {
+          if (elserField && elserField.sparse_vector) {
             // when another index has the same field, we don't want to duplicate the match rule
             const hasExistingSparseMatch = acc.queryMatches.find(
               (x) =>
+                // when the field is a sparse_vector field
                 x?.sparse_vector?.field === field &&
                 x?.sparse_vector?.inference_id === elserField?.model_id
             );
@@ -151,6 +153,28 @@ export function createQuery(
                 field: elserField.field,
                 inference_id: elserField.model_id,
                 query: '{query}',
+              },
+            };
+          }
+
+          if (elserField && !elserField.sparse_vector) {
+            // when the field is a rank_features field
+            const hasExistingSparseMatch = acc.queryMatches.find(
+              (x) =>
+                x?.text_expansion?.[elserField.field] &&
+                x?.sparse_vector?.inference_id === elserField?.model_id
+            );
+
+            if (hasExistingSparseMatch) {
+              return null;
+            }
+
+            return {
+              text_expansion: {
+                [elserField.field]: {
+                  model_id: elserField.model_id,
+                  model_text: '{query}',
+                },
               },
             };
           }

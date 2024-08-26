@@ -49,4 +49,6 @@ export interface VisualizeQueryResponsev1 {
 
 export type VisualizeQueryResponse = VisualizeQueryResponsev0 | VisualizeQueryResponsev1;
 
-export type VisualizeESQLFunctionArguments = FromSchema<typeof visualizeESQLFunction['parameters']>;
+export type VisualizeESQLFunctionArguments = FromSchema<
+  (typeof visualizeESQLFunction)['parameters']
+>;

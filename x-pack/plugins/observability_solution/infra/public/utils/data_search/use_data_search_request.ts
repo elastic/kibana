@@ -14,7 +14,7 @@ import type {
   ISearchOptions,
 } from '@kbn/search-types';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
-import { tapUnsubscribe, useObservable } from '../use_observable';
+import { tapUnsubscribe, useObservable } from '../../hooks/use_observable';
 import { ParsedDataSearchRequestDescriptor, ParsedKibanaSearchResponse } from './types';
 
 export type DataSearchRequestFactory<Args extends any[], Request extends IKibanaSearchRequest> = (

@@ -1032,7 +1032,8 @@ export const getMappingConflictsInfo = (field: DataViewField): FieldConflictsInf
 export const hasWrongOperatorWithWildcard = (
   items: ExceptionsBuilderReturnExceptionItem[]
 ): boolean => {
-  return items[0]?.entries.some((e) => {
+  const allEntries = items.flatMap((item) => item.entries);
+  return allEntries.some((e) => {
     if (e.type !== 'list' && 'value' in e) {
       return validateHasWildcardWithWrongOperator({
         operator: e.type,

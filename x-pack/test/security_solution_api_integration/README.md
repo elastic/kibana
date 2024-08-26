@@ -45,7 +45,7 @@ ex:
 1. Within the `test_suites` directory, create a new area folder.
 2. Introduce `ess.config` and `serverless.config` files to reference the new test files and incorporate any additional custom properties defined in the `CreateTestConfigOptions` interface.
 3. In these new configuration files, include references to the base configurations located under the config directory to inherit CI configurations, environment variables, and other settings.
-4. Append a new entry in the `ftr_configs.yml` file to enable the execution of the newly added tests within the CI pipeline.
+4. Append a new entry in the `.buildkite/ftr_security_stateful_configs.yml` / `.buildkite/ftr_security_serverless_configs.yml` file to enable the execution of the newly added tests within the CI pipeline.
 
 ## Adding tests for MKI which rely onto NON default project configuration
 

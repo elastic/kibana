@@ -36,7 +36,7 @@ export interface CountResponse {
   indices: string;
 }
 
-export class UptimeEsClient {
+export class SyntheticsEsClient {
   isDev: boolean;
   request?: KibanaRequest;
   baseESClient: ElasticsearchClient;

@@ -69,7 +69,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('displays exit full screen logo button when panel is expanded', async () => {
-      await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickExpandPanelToggle();
 
       const exists = await PageObjects.dashboard.exitFullScreenTextButtonExists();

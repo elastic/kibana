@@ -44,6 +44,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         type: 'process',
       },
       cluster_id: 'Upper case cluster id',
+      data_stream: {
+        dataset: 'cloud_security_posture.findings',
+      },
     },
     {
       '@timestamp': timeFiveHoursAgo,
@@ -61,6 +64,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         type: 'process',
       },
       cluster_id: 'Another Upper case cluster id',
+      data_stream: {
+        dataset: 'cloud_security_posture.findings',
+      },
     },
     {
       '@timestamp': timeFiveHoursAgo,
@@ -78,6 +84,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         type: 'process',
       },
       cluster_id: 'lower case cluster id',
+      data_stream: {
+        dataset: 'cloud_security_posture.findings',
+      },
     },
     {
       '@timestamp': timeFiveHoursAgo,
@@ -95,6 +104,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         type: 'process',
       },
       cluster_id: 'another lower case cluster id',
+      data_stream: {
+        dataset: 'cloud_security_posture.findings',
+      },
     },
   ];
 

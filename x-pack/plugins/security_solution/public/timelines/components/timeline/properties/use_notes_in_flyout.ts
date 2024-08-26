@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
+import type { TimelineTabs } from '../../../../../common/types';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { appSelectors } from '../../../../common/store';
 import { timelineActions } from '../../../store';
 
-interface UseNotesInFlyoutArgs {
+export interface UseNotesInFlyoutArgs {
   eventIdToNoteIds: Record<string, string[]>;
   refetch?: () => void;
   timelineId: string;
+  activeTab: TimelineTabs;
 }
 
 const EMPTY_STRING_ARRAY: string[] = [];
@@ -36,11 +38,18 @@ export const useNotesInFlyout = (args: UseNotesInFlyoutArgs) => {
     setIsNotesFlyoutVisible(true);
   }, []);
 
-  const { eventIdToNoteIds, refetch, timelineId } = args;
+  const { eventIdToNoteIds, refetch, timelineId, activeTab } = args;
 
   const getNotesByIds = useMemo(() => appSelectors.notesByIdsSelector(), []);
 
   const notesById = useDeepEqualSelector(getNotesByIds);
+
+  useEffect(() => {
+    if (activeTab) {
+      // if activeTab changes, close the notes flyout
+      closeNotesFlyout();
+    }
+  }, [activeTab, closeNotesFlyout]);
 
   const dispatch = useDispatch();
 

@@ -7,7 +7,7 @@
  */
 
 import { METRIC_TYPE } from '@kbn/analytics';
-import { Reference } from '@kbn/content-management-utils';
+import type { Reference } from '@kbn/content-management-utils';
 import type { ControlGroupContainer } from '@kbn/controls-plugin/public';
 import type { I18nStart, KibanaExecutionContext, OverlayRef } from '@kbn/core/public';
 import {
@@ -440,7 +440,6 @@ export class DashboardContainer
   // ------------------------------------------------------------------------------------------------------
   // Dashboard API
   // ------------------------------------------------------------------------------------------------------
-
   public runInteractiveSave = runInteractiveSave;
   public runQuickSave = runQuickSave;
 
@@ -527,10 +526,12 @@ export class DashboardContainer
           i: newId,
         },
         explicitInput: {
-          ...panelPackage.initialState,
           id: newId,
         },
       };
+      if (panelPackage.initialState) {
+        this.setRuntimeStateForChild(newId, panelPackage.initialState);
+      }
       this.updateInput({ panels: { ...otherPanels, [newId]: newPanel } });
       onSuccess(newId, newPanel.explicitInput.title);
       return await this.untilReactEmbeddableLoaded<ApiType>(newId);

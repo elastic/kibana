@@ -13,9 +13,10 @@ import { TopNFunctionsGrid } from '../../components/topn_functions';
 interface Props {
   data?: TopNFunctions;
   totalSeconds: number;
+  showFullScreenSelector?: boolean;
 }
 
-export function EmbeddableFunctionsGrid({ data, totalSeconds }: Props) {
+export function EmbeddableFunctionsGrid({ data, totalSeconds, showFullScreenSelector }: Props) {
   const [sortField, setSortField] = useState(TopNFunctionSortField.Rank);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [pageIndex, setPageIndex] = useState(0);
@@ -34,6 +35,7 @@ export function EmbeddableFunctionsGrid({ data, totalSeconds }: Props) {
         setSortDirection(sorting.direction);
       }}
       isEmbedded
+      showFullScreenSelector={showFullScreenSelector}
     />
   );
 }

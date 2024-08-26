@@ -44,3 +44,8 @@ export const trendStatsBatch = createAsyncAction<
   TrendTable,
   any
 >('batchTrendStats');
+
+export const trendStatsInFlight = createAction<boolean>('trendStatsInFlight');
+
+export const stackTrendStats =
+  createAction<Array<{ configId: string; locationId: string }>>('enqueueTrendStats');

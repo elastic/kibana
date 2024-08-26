@@ -22,7 +22,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback } from 'react';
 import { useDatePickerContext } from '../hooks/use_date_picker';
-import { useLoadingStateContext } from '../hooks/use_loading_state';
 import { Popover } from '../tabs/common/popover';
 
 const COMMONLY_USED_RANGES: DurationRange[] = [
@@ -64,15 +63,14 @@ const COMMONLY_USED_RANGES: DurationRange[] = [
 ];
 
 export const DatePicker = () => {
-  const { dateRange, autoRefresh, setDateRange, setAutoRefresh, onAutoRefresh } =
+  const { dateRange, autoRefresh, setDateRange, setAutoRefresh, onRefresh } =
     useDatePickerContext();
-  const { updateSearchSessionId } = useLoadingStateContext();
 
   const handleRefresh = useCallback(
     ({ start, end }: OnRefreshProps) => {
-      onAutoRefresh({ from: start, to: end });
+      onRefresh({ from: start, to: end });
     },
-    [onAutoRefresh]
+    [onRefresh]
   );
   const handleTimeChange = useCallback(
     ({ start, end, isInvalid }: OnTimeChangeProps) => {
@@ -99,8 +97,6 @@ export const DatePicker = () => {
     [dateRange.from, setAutoRefresh, setDateRange]
   );
 
-  const handleOnClick = useCallback(() => updateSearchSessionId(), [updateSearchSessionId]);
-
   return (
     <EuiFlexGroup gutterSize="xs" responsive={false} direction="column">
       <EuiFlexItem grow={false}>
@@ -110,10 +106,9 @@ export const DatePicker = () => {
           end={dateRange.to}
           isPaused={autoRefresh?.isPaused}
           onTimeChange={handleTimeChange}
-          onRefresh={autoRefresh && handleRefresh}
-          onRefreshChange={autoRefresh && handleAutoRefreshChange}
+          onRefresh={handleRefresh}
+          onRefreshChange={handleAutoRefreshChange}
           refreshInterval={autoRefresh?.interval}
-          onClick={handleOnClick}
           width="full"
         />
       </EuiFlexItem>
@@ -153,16 +148,11 @@ const AutoRefreshTroubleshootMessage = () => (
 );
 
 // Memo EuiSuperDatePicker to prevent re-renders from resetting the auto-refresh cycle
-const MemoEuiSuperDatePicker = React.memo(
-  ({ onClick, ...props }: EuiSuperDatePickerProps & { onClick?: () => void }) => (
-    <EuiSuperDatePicker
-      {...props}
-      updateButtonProps={{
-        iconOnly: true,
-        contentProps: {
-          onClick,
-        },
-      }}
-    />
-  )
-);
+const MemoEuiSuperDatePicker = React.memo((props: EuiSuperDatePickerProps) => (
+  <EuiSuperDatePicker
+    {...props}
+    updateButtonProps={{
+      iconOnly: true,
+    }}
+  />
+));

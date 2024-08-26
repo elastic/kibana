@@ -12,7 +12,7 @@ import { getFlappingSettings } from '../lib/rule_api/get_flapping_settings';
 
 interface UseGetFlappingSettingsProps {
   enabled: boolean;
-  onSuccess: (settings: RulesSettingsFlapping) => void;
+  onSuccess?: (settings: RulesSettingsFlapping) => void;
 }
 
 export const useGetFlappingSettings = (props: UseGetFlappingSettingsProps) => {
@@ -23,7 +23,7 @@ export const useGetFlappingSettings = (props: UseGetFlappingSettingsProps) => {
     return getFlappingSettings({ http });
   };
 
-  const { data, isFetching, isError, isLoadingError, isLoading } = useQuery({
+  const { data, isFetching, isError, isLoadingError, isLoading, isInitialLoading } = useQuery({
     queryKey: ['getFlappingSettings'],
     queryFn,
     onSuccess,
@@ -33,6 +33,7 @@ export const useGetFlappingSettings = (props: UseGetFlappingSettingsProps) => {
   });
 
   return {
+    isInitialLoading,
     isLoading: isLoading || isFetching,
     isError: isError || isLoadingError,
     data,

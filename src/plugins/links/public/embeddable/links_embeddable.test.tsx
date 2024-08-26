@@ -24,7 +24,7 @@ import {
 import { linksClient } from '../content_management';
 import { getMockLinksParentApi } from '../mocks';
 
-const links: Link[] = [
+const getLinks: () => Link[] = () => [
   {
     id: '001',
     order: 0,
@@ -54,7 +54,7 @@ const links: Link[] = [
   },
 ];
 
-const resolvedLinks: ResolvedLink[] = [
+const getResolvedLinks: () => ResolvedLink[] = () => [
   {
     id: '001',
     order: 0,
@@ -105,33 +105,35 @@ const references = [
 
 jest.mock('../lib/resolve_links', () => {
   return {
-    resolveLinks: jest.fn().mockResolvedValue(resolvedLinks),
+    resolveLinks: jest.fn().mockResolvedValue(getResolvedLinks()),
   };
 });
 
 jest.mock('../content_management', () => {
   return {
-    loadFromLibrary: jest.fn((savedObjectId) => {
-      return Promise.resolve({
-        attributes: {
-          title: 'links 001',
-          description: 'some links',
-          links,
-          layout: 'vertical',
-        },
-        metaInfo: {
-          sharingSavedObjectProps: {
+    linksClient: {
+      create: jest.fn().mockResolvedValue({ item: { id: '333' } }),
+      update: jest.fn().mockResolvedValue({ item: { id: '123' } }),
+      get: jest.fn((savedObjectId) => {
+        return Promise.resolve({
+          item: {
+            id: savedObjectId,
+            attributes: {
+              title: 'links 001',
+              description: 'some links',
+              links: getLinks(),
+              layout: 'vertical',
+            },
+            references,
+          },
+          meta: {
             aliasTargetId: '123',
             outcome: 'exactMatch',
             aliasPurpose: 'sharing',
             sourceId: savedObjectId,
           },
-        },
-      });
-    }),
-    linksClient: {
-      create: jest.fn().mockResolvedValue({ item: { id: '333' } }),
-      update: jest.fn().mockResolvedValue({ item: { id: '123' } }),
+        });
+      }),
     },
   };
 });
@@ -151,16 +153,18 @@ describe('getLinksEmbeddableFactory', () => {
       savedObjectId: '123',
       title: 'my links',
       description: 'just a few links',
+      hidePanelTitles: false,
     } as LinksSerializedState;
 
     const expectedRuntimeState = {
       defaultPanelTitle: 'links 001',
       defaultPanelDescription: 'some links',
       layout: 'vertical',
-      links: resolvedLinks,
+      links: getResolvedLinks(),
       description: 'just a few links',
       title: 'my links',
       savedObjectId: '123',
+      hidePanelTitles: false,
     };
 
     let parent: LinksParentApi;
@@ -172,7 +176,7 @@ describe('getLinksEmbeddableFactory', () => {
     test('deserializeState', async () => {
       const deserializedState = await factory.deserializeState({
         rawState,
-        references,
+        references: [], // no references passed because the panel is by reference
       });
       expect(deserializedState).toEqual({
         ...expectedRuntimeState,
@@ -208,7 +212,7 @@ describe('getLinksEmbeddableFactory', () => {
             savedObjectId: '123',
             title: 'my links',
             description: 'just a few links',
-            hidePanelTitles: undefined,
+            hidePanelTitles: false,
           },
           references: [],
         });
@@ -236,11 +240,11 @@ describe('getLinksEmbeddableFactory', () => {
           rawState: {
             title: 'my links',
             description: 'just a few links',
-            hidePanelTitles: undefined,
+            hidePanelTitles: false,
             attributes: {
               description: 'some links',
               title: 'links 001',
-              links,
+              links: getLinks(),
               layout: 'vertical',
             },
           },
@@ -254,21 +258,23 @@ describe('getLinksEmbeddableFactory', () => {
   describe('by value embeddable', () => {
     const rawState = {
       attributes: {
-        links,
+        links: getLinks(),
         layout: 'horizontal',
       },
       description: 'just a few links',
       title: 'my links',
+      hidePanelTitles: true,
     } as LinksSerializedState;
 
     const expectedRuntimeState = {
       defaultPanelTitle: undefined,
       defaultPanelDescription: undefined,
       layout: 'horizontal',
-      links: resolvedLinks,
+      links: getResolvedLinks(),
       description: 'just a few links',
       title: 'my links',
       savedObjectId: undefined,
+      hidePanelTitles: true,
     };
 
     let parent: LinksParentApi;
@@ -313,9 +319,9 @@ describe('getLinksEmbeddableFactory', () => {
           rawState: {
             title: 'my links',
             description: 'just a few links',
-            hidePanelTitles: undefined,
+            hidePanelTitles: true,
             attributes: {
-              links,
+              links: getLinks(),
               layout: 'horizontal',
             },
           },
@@ -342,7 +348,7 @@ describe('getLinksEmbeddableFactory', () => {
         expect(linksClient.create).toHaveBeenCalledWith({
           data: {
             title: 'some new title',
-            links,
+            links: getLinks(),
             layout: 'horizontal',
           },
           options: { references },
@@ -354,7 +360,7 @@ describe('getLinksEmbeddableFactory', () => {
             savedObjectId: '333',
             title: 'my links',
             description: 'just a few links',
-            hidePanelTitles: undefined,
+            hidePanelTitles: true,
           },
           references: [],
         });

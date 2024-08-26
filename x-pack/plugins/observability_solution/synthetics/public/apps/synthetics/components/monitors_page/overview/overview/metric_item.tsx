@@ -9,11 +9,13 @@ import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { Chart, Settings, Metric, MetricTrendShape } from '@elastic/charts';
-import { EuiPanel, EuiIconTip, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { DARK_THEME } from '@elastic/charts';
 import { useTheme } from '@kbn/observability-shared-plugin/public';
 import moment from 'moment';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+
+import { MetricItemBody } from './metric_item/metric_item_body';
 import {
   selectErrorPopoverState,
   selectOverviewTrends,
@@ -54,11 +56,20 @@ export const getColor = (
 
 export const MetricItem = ({
   monitor,
+  stats,
+  data,
   onClick,
   style,
 }: {
   monitor: MonitorOverviewItem;
   style?: React.CSSProperties;
+  data: Array<{ x: number; y: number }>;
+  stats: {
+    medianDuration: number;
+    avgDuration: number;
+    minDuration: number;
+    maxDuration: number;
+  };
   onClick: (params: { id: string; configId: string; location: string; locationId: string }) => void;
 }) => {
   const trendData = useSelector(selectOverviewTrends)[monitor.configId + monitor.location.id];
@@ -185,6 +196,7 @@ export const MetricItem = ({
                   ),
                   valueFormatter: (d: number) => formatDuration(d),
                   color: getColor(theme, monitor.isEnabled, status),
+                  body: <MetricItemBody monitor={monitor} />,
                 },
               ],
             ]}

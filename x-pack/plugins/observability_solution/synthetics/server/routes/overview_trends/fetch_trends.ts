@@ -6,9 +6,9 @@
  */
 
 import { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
-import { UptimeEsClient } from '../../lib';
+import { SyntheticsEsClient } from '../../lib';
 
-export function fetchTrends(configId: string, locationIds: string[], esClient: UptimeEsClient) {
+export function fetchTrends(configId: string, locationIds: string[], esClient: SyntheticsEsClient) {
   const query: SearchRequest = {
     size: 0,
     query: {

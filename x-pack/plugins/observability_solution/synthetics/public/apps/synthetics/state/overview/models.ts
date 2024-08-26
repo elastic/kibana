@@ -33,6 +33,8 @@ export interface MonitorOverviewState {
   error: IHttpSerializedFetchError | null;
   groupBy: GroupByState;
   trendStats: TrendTable;
+  trendsLoading: boolean;
+  trendsPendingStack: Array<{ configId: string; locationId: string }>;
 }
 
 export interface GroupByState {

@@ -22,7 +22,14 @@ export class InfraSynthtraceEsClient extends SynthtraceEsClient<InfraDocument> {
       ...options,
       pipeline: infraPipeline(),
     });
-    this.dataStreams = ['metrics-*', 'logs-*'];
+    this.dataStreams = [
+      'metrics-system*',
+      'metrics-kubernetes*',
+      'metrics-docker*',
+      'metrics-aws*',
+      'metricbeat-*',
+      'logs-*',
+    ];
   }
 }
 
@@ -60,10 +67,15 @@ function getRoutingTransform() {
         document._index = 'metrics-system.filesystem-default';
       } else if (metricset === 'diskio') {
         document._index = 'metrics-system.diskio-default';
+      } else if (metricset === 'core') {
+        document._index = 'metrics-system.core-default';
       } else if ('container.id' in document) {
+        document._index = 'metrics-docker.container-default';
         document._index = 'metrics-kubernetes.container-default';
       } else if ('kubernetes.pod.uid' in document) {
         document._index = 'metrics-kubernetes.pod-default';
+      } else if ('aws.rds.db_instance.arn' in document) {
+        document._index = 'metrics-aws.rds-default';
       } else {
         throw new Error('Cannot determine index for event');
       }
