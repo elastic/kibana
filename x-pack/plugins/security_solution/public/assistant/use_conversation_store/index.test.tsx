@@ -8,10 +8,10 @@ import { renderHook } from '@testing-library/react-hooks';
 import { useBaseConversations } from '.';
 import { useLinkAuthorized } from '../../common/links';
 import { useKibana as mockUseKibana } from '../../common/lib/kibana/__mocks__';
-import { DATA_QUALITY_DASHBOARD_CONVERSATION_ID } from '@kbn/ecs-data-quality-dashboard/impl/data_quality/data_quality_panel/tabs/summary_tab/callout_summary/translations';
 import { useKibana } from '../../common/lib/kibana';
 import { BASE_SECURITY_CONVERSATIONS } from '../content/conversations';
 import { unset } from 'lodash/fp';
+import { DATA_QUALITY_DASHBOARD_CONVERSATION_ID } from '@kbn/ecs-data-quality-dashboard';
 
 const BASE_CONVERSATIONS_WITHOUT_DATA_QUALITY = unset(
   DATA_QUALITY_DASHBOARD_CONVERSATION_ID,

@@ -7,7 +7,7 @@
 
 import * as i18n from './translations';
 
-export const getResultToolTip = (incompatible: number | undefined): string => {
+export const getPatternResultTooltip = (incompatible: number | undefined): string => {
   if (incompatible == null) {
     return i18n.SOME_UNCHECKED;
   } else if (incompatible === 0) {
@@ -16,14 +16,16 @@ export const getResultToolTip = (incompatible: number | undefined): string => {
     return i18n.SOME_FAILED;
   }
 };
+interface ShowResultProps<T> {
+  incompatible: T;
+  indices: T;
+  indicesChecked: T;
+}
 
-export const showResult = ({
-  incompatible,
-  indices,
-  indicesChecked,
-}: {
-  incompatible: number | undefined;
-  indices: number | undefined;
-  indicesChecked: number | undefined;
-}): boolean =>
-  incompatible != null && indices != null && indicesChecked != null && indices === indicesChecked;
+export const showResult = <T extends number | undefined>(
+  opts: ShowResultProps<T>
+): opts is ShowResultProps<NonNullable<T>> =>
+  opts.incompatible != null &&
+  opts.indices != null &&
+  opts.indicesChecked != null &&
+  opts.indices === opts.indicesChecked;
