@@ -59,7 +59,7 @@ export const getDetectionRules = async (
           filter: convertRuleTagsToMatchAllKQL(ruleTags),
           searchFields: ['tags'],
           page: 1,
-          perPage: 1,
+          perPage: 100, // Disable up to 100 detection rules per benchmark rule at a time
         },
       });
     })

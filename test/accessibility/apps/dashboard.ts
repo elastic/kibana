@@ -20,7 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     const dashboardName = 'Dashboard Listing A11y';
     const clonedDashboardName = 'Dashboard Listing A11y (1)';
 
-    it('dashboard', async () => {
+    it('navitate to dashboard app', async () => {
       await PageObjects.common.navigateToApp('dashboard');
       await a11y.testAppSnapshot();
     });
@@ -61,7 +61,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('Open Edit mode', async () => {
+    it('Open Edit mode again', async () => {
       await PageObjects.dashboard.switchToEditMode();
       await a11y.testAppSnapshot();
     });
@@ -86,7 +86,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('Open add panel', async () => {
+    it('Open add panel again', async () => {
       await dashboardAddPanel.clickOpenAddPanel();
       await a11y.testAppSnapshot();
     });
