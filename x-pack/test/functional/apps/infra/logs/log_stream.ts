@@ -18,8 +18,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
 
   describe('Log stream', function () {
-    describe('Legacy URL handling', async () => {
-      describe('Correctly handles legacy versions of logFilter', async () => {
+    describe('Legacy URL handling', () => {
+      describe('Correctly handles legacy versions of logFilter', () => {
         before(async () => {
           await esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/logs_and_metrics');
         });

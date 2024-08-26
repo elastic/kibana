@@ -49,7 +49,7 @@ export {
   getCommandDefinition,
   getAllCommands,
   getCommandOption,
-  lookupColumn,
+  getColumnForASTNode as lookupColumn,
   shouldBeQuotedText,
   printFunctionSignature,
   checkFunctionArgMatchesDefinition as isEqualType,
