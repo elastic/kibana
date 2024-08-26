@@ -19,7 +19,7 @@ import { isTaskManagerWorkerUtilizationStatEvent } from '../task_events';
 import { TaskLifecycleEvent } from '../polling_lifecycle';
 import { Ok } from '../lib/result_type';
 
-const POLLING_INTERVAL = 10000;
+const POLLING_INTERVAL = 5000;
 const { TaskPollingLifecycle: TaskPollingLifecycleMock } = jest.requireMock('../polling_lifecycle');
 jest.mock('../polling_lifecycle', () => {
   const actual = jest.requireActual('../polling_lifecycle');
@@ -146,7 +146,7 @@ describe('capacity based claiming', () => {
     }
   });
 
-  for (let i = 0; i < 500; i++) {
+  for (let i = 0; i < 1000; i++) {
     it(`should claim tasks to full capacity ${i}`, async () => {
       const backgroundTaskLoads: number[] = [];
       createMonitoringStatsOpts.taskPollingLifecycle?.events
