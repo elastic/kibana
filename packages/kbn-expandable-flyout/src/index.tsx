@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import type { Interpolation, Theme } from '@emotion/react';
 import { EuiFlyoutProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlyout } from '@elastic/eui';
+import { useFlyoutType } from './hooks/use_flyout_type';
 import { RenderMenu } from './components/render_menu';
 import { useSectionSizes } from './hooks/use_sections_sizes';
 import { useWindowSize } from './hooks/use_window_size';
@@ -39,19 +40,8 @@ export interface ExpandableFlyoutProps extends Omit<EuiFlyoutProps, 'onClose'> {
   /**
    * Set of properties to control if the flyout is rendered in overlay or push mode
    */
-  flyoutTypeProps?: {
-    /**
-     * 'push' or 'overlay'
-     */
-    type?: EuiFlyoutProps['type'];
-    /**
-     * Called when the user selects push, overlay or click on the reset button
-     */
-    callback?: (type: EuiFlyoutProps['type']) => void;
-    /**
-     * Disables the button group for flyout where the option shouldn't be available
-     */
-    disabled?: boolean;
+  flyoutCustomProps?: {
+    typeDisabled?: boolean;
   };
 }
 
@@ -65,22 +55,11 @@ export interface ExpandableFlyoutProps extends Omit<EuiFlyoutProps, 'onClose'> {
 export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({
   customStyles,
   registeredPanels,
-  flyoutTypeProps,
+  flyoutCustomProps,
   ...flyoutProps
 }) => {
   const windowWidth = useWindowSize();
-
-  const [flyoutType, setFlyoutType] = useState<EuiFlyoutProps['type']>(
-    flyoutTypeProps?.type || 'overlay'
-  );
-  const flyoutTypeChange = useCallback(
-    (type: EuiFlyoutProps['type']) => {
-      setFlyoutType(type);
-      if (flyoutTypeProps?.callback) flyoutTypeProps?.callback(type);
-    },
-    [flyoutTypeProps, setFlyoutType]
-  );
-
+  const { flyoutType, flyoutTypeChange } = useFlyoutType();
   const { left, right, preview } = useExpandableFlyoutState();
   const { closeFlyout } = useExpandableFlyoutApi();
 
@@ -141,7 +120,7 @@ export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({
         flyoutTypeProps={{
           type: flyoutType,
           onChange: flyoutTypeChange,
-          disabled: flyoutTypeProps?.disabled || false,
+          disabled: flyoutCustomProps?.typeDisabled || false,
         }}
       />
       <EuiFlexGroup

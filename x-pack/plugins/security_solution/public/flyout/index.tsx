@@ -7,12 +7,9 @@
 
 import React, { memo, useCallback } from 'react';
 import { ExpandableFlyout, type ExpandableFlyoutProps } from '@kbn/expandable-flyout';
-import type { EuiFlyoutProps } from '@elastic/eui';
 import { useEuiTheme } from '@elastic/eui';
 import type { NetworkExpandableFlyoutProps } from './network_details';
 import { Flyouts } from './document_details/shared/constants/flyouts';
-import { useKibana } from '../common/lib/kibana';
-import { FLYOUT_STORAGE_KEYS } from './document_details/shared/constants/local_storage';
 import {
   DocumentDetailsIsolateHostPanelKey,
   DocumentDetailsLeftPanelKey,
@@ -146,16 +143,6 @@ export const TIMELINE_ON_CLOSE_EVENT = `expandable-flyout-on-close-${Flyouts.tim
  * This flyout support push/overlay mode. The value is saved in local storage.
  */
 export const SecuritySolutionFlyout = memo(() => {
-  const { storage } = useKibana().services;
-
-  const flyoutTypeChange = useCallback(
-    (flyoutType: EuiFlyoutProps['type']) =>
-      storage.set(FLYOUT_STORAGE_KEYS.FLYOUT_PUSH_OR_OVERLAY_MODE, flyoutType),
-    [storage]
-  );
-
-  const flyoutType = storage.get(FLYOUT_STORAGE_KEYS.FLYOUT_PUSH_OR_OVERLAY_MODE);
-
   const onClose = useCallback(
     () =>
       window.dispatchEvent(
@@ -171,10 +158,6 @@ export const SecuritySolutionFlyout = memo(() => {
       registeredPanels={expandableFlyoutDocumentsPanels}
       paddingSize="none"
       onClose={onClose}
-      flyoutTypeProps={{
-        type: flyoutType,
-        callback: flyoutTypeChange,
-      }}
     />
   );
 });
@@ -206,8 +189,8 @@ export const TimelineFlyout = memo(() => {
       paddingSize="none"
       customStyles={{ 'z-index': (euiTheme.levels.flyout as number) + 2 }}
       onClose={onClose}
-      flyoutTypeProps={{
-        disabled: true,
+      flyoutCustomProps={{
+        typeDisabled: true,
       }}
     />
   );
