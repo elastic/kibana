@@ -28,7 +28,6 @@ import {
   EuiTableHeader,
   EuiTableHeaderCell,
   EuiTableHeaderCellCheckbox,
-  EuiTablePagination,
   EuiTableRow,
   EuiTableRowCell,
   EuiTableRowCellCheckbox,
@@ -49,8 +48,7 @@ import { renderBadges } from '../../../../lib/render_badges';
 import { NoMatch, DataHealth } from '../../../../components';
 import { IndexActionsContextMenu } from '../index_actions_context_menu';
 import { CreateIndexButton } from '../create_index/create_index_button';
-
-const PAGE_SIZE_OPTIONS = [10, 50, 100];
+import { IndexTablePagination, PAGE_SIZE_OPTIONS } from './index_table_pagination';
 
 const getColumnConfigs = ({
   showIndexStats,
@@ -446,26 +444,6 @@ export class IndexTable extends Component {
     });
   }
 
-  renderPager() {
-    const { pager, pageChanged, pageSizeChanged } = this.props;
-    return (
-      <EuiTablePagination
-        activePage={pager.getCurrentPageIndex()}
-        itemsPerPage={pager.itemsPerPage}
-        itemsPerPageOptions={PAGE_SIZE_OPTIONS}
-        pageCount={pager.getTotalPages()}
-        onChangeItemsPerPage={(pageSize) => {
-          this.setURLParam('pageSize', pageSize);
-          pageSizeChanged(pageSize);
-        }}
-        onChangePage={(pageIndex) => {
-          this.setURLParam('pageIndex', pageIndex);
-          pageChanged(pageIndex);
-        }}
-      />
-    );
-  }
-
   onItemSelectionChanged = (selectedIndices) => {
     this.setState({ selectedIndices });
   };
@@ -498,6 +476,8 @@ export class IndexTable extends Component {
       indicesError,
       allIndices,
       pager,
+      pageChanged,
+      pageSizeChanged,
       history,
       location,
     } = this.props;
@@ -602,7 +582,7 @@ export class IndexTable extends Component {
 
               {this.renderBanners(extensionsService)}
 
-              <EuiFlexGroup gutterSize="l" alignItems="center">
+              <EuiFlexGroup gutterSize="m" alignItems="center">
                 {atLeastOneItemSelected ? (
                   <EuiFlexItem grow={false}>
                     <Route
@@ -727,7 +707,15 @@ export class IndexTable extends Component {
 
               <EuiSpacer size="m" />
 
-              {indices.length > 0 ? this.renderPager() : null}
+              {indices.length > 0 ? (
+                <IndexTablePagination
+                  pager={pager}
+                  pageChanged={pageChanged}
+                  pageSizeChanged={pageSizeChanged}
+                  readURLParams={() => this.readURLParams()}
+                  setURLParam={(paramName, value) => this.setURLParam(paramName, value)}
+                />
+              ) : null}
             </EuiPageSection>
           );
         }}
