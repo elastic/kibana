@@ -57,9 +57,14 @@ export class HomePageObject extends FtrService {
   }
 
   async isWelcomeInterstitialDisplayed() {
-    // give the interstitial enough time to fade in
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    return await this.testSubjects.isDisplayed('homeWelcomeInterstitial', 2000);
+    // This element inherits style defined {@link https://github.com/elastic/kibana/blob/v8.14.3/src/core/public/styles/core_app/_mixins.scss#L72|here}
+    // with an animation duration set to $euiAnimSpeedExtraSlow {@see https://eui.elastic.co/#/theming/more-tokens#animation},
+    // hence we setup a delay so the interstitial has enough time to fade in
+    const animSpeedExtraSlow = 500;
+    await new Promise((resolve) => setTimeout(resolve, animSpeedExtraSlow));
+    return this.retry.try(async () => {
+      return await this.testSubjects.isDisplayed('homeWelcomeInterstitial', animSpeedExtraSlow * 4);
+    });
   }
 
   async isGuidedOnboardingLandingDisplayed() {

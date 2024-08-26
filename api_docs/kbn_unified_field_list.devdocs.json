@@ -2203,7 +2203,7 @@
                 "section": "def-public.CoreStart",
                 "text": "CoreStart"
               },
-              ", \"uiSettings\" | \"analytics\">; data: ",
+              ", \"analytics\" | \"uiSettings\">; data: ",
               {
                 "pluginId": "data",
                 "scope": "public",

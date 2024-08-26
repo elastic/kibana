@@ -13,7 +13,7 @@ import { TestProviders } from '../../../../../common/mock';
 import { EventColumnView } from './event_column_view';
 import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
-import { TimelineType } from '../../../../../../common/api/timeline';
+import { TimelineTypeEnum } from '../../../../../../common/api/timeline';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { getDefaultControlColumn } from '../control_columns';
@@ -79,7 +79,7 @@ jest.mock('../../../../../common/lib/kibana', () => {
 
 describe('EventColumnView', () => {
   useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
-  (useShallowEqualSelector as jest.Mock).mockReturnValue(TimelineType.default);
+  (useShallowEqualSelector as jest.Mock).mockReturnValue(TimelineTypeEnum.default);
   const ACTION_BUTTON_COUNT = 4;
   const leadingControlColumns = getDefaultControlColumn(ACTION_BUTTON_COUNT);
 

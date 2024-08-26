@@ -196,7 +196,6 @@ export const esqlExecutor = async ({
           maxNumberOfAlertsMultiplier: 1,
         });
 
-        addToSearchAfterReturn({ current: result, next: bulkCreateResult });
         ruleExecutionLogger.debug(
           `Created ${bulkCreateResult.createdItemsCount} alerts. Suppressed ${bulkCreateResult.suppressedItemsCount} alerts`
         );

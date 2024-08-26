@@ -8,7 +8,7 @@
 
 import { upperFirst, isFunction } from 'lodash';
 import React, { MouseEvent } from 'react';
-import { EuiToolTip, EuiButton, EuiHeaderLink, EuiBetaBadge } from '@elastic/eui';
+import { EuiToolTip, EuiButton, EuiHeaderLink, EuiBetaBadge, EuiButtonColor } from '@elastic/eui';
 import { TopNavMenuData } from './top_nav_menu_data';
 
 export function TopNavMenuItem(props: TopNavMenuData) {
@@ -48,6 +48,8 @@ export function TopNavMenuItem(props: TopNavMenuData) {
     iconSide: props.iconSide,
     'data-test-subj': props.testId,
     className: props.className,
+    color: (props.color ?? 'primary') as EuiButtonColor,
+    fill: props.fill ?? true,
   };
 
   // If the item specified a href, then override the suppress the onClick
@@ -58,11 +60,11 @@ export function TopNavMenuItem(props: TopNavMenuData) {
       : {};
 
   const btn = props.emphasize ? (
-    <EuiButton size="s" {...commonButtonProps} fill>
+    <EuiButton size="s" {...commonButtonProps}>
       {getButtonContainer()}
     </EuiButton>
   ) : (
-    <EuiHeaderLink size="s" color="primary" {...commonButtonProps} {...overrideProps}>
+    <EuiHeaderLink size="s" {...commonButtonProps} {...overrideProps}>
       {getButtonContainer()}
     </EuiHeaderLink>
   );

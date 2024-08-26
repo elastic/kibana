@@ -83,6 +83,8 @@ describe('step select agent policy', () => {
   beforeEach(() => {
     testRenderer = createFleetTestRendererMock();
     useMultipleAgentPoliciesMock.mockReturnValue({ canUseMultipleAgentPolicies: false });
+  });
+  afterEach(() => {
     updateAgentPoliciesMock.mockReset();
   });
 
@@ -110,7 +112,7 @@ describe('step select agent policy', () => {
   });
 
   test('should select agent policy by default if one exists', async () => {
-    useGetAgentPoliciesMock.mockReturnValueOnce({
+    useGetAgentPoliciesMock.mockReturnValue({
       data: { items: [{ id: 'policy-1', name: 'Policy 1' }] },
       error: undefined,
       isLoading: false,

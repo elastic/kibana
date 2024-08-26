@@ -11,7 +11,13 @@ import { writeFile, readFile } from 'fs/promises';
 import { ignoreErrorsMap, validateQuery } from './validation';
 import { evalFunctionDefinitions } from '../definitions/functions';
 import { getFunctionSignatures } from '../definitions/helpers';
-import { FunctionDefinition, SupportedFieldType, supportedFieldTypes } from '../definitions/types';
+import {
+  FieldType,
+  FunctionDefinition,
+  SupportedDataType,
+  dataTypes,
+  fieldTypes as _fieldTypes,
+} from '../definitions/types';
 import { timeUnits, timeUnitsToSuggest } from '../definitions/literals';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import capitalize from 'lodash/capitalize';
@@ -29,6 +35,8 @@ import {
 } from '../__tests__/helpers';
 import { validationFromCommandTestSuite as runFromTestSuite } from './__tests__/test_suites/validation.command.from';
 import { Setup, setup } from './__tests__/helpers';
+
+const fieldTypes = _fieldTypes.filter((type) => type !== 'unsupported');
 
 const NESTING_LEVELS = 4;
 const NESTED_DEPTHS = Array(NESTING_LEVELS)
@@ -76,7 +84,7 @@ function getLiteralType(typeString: 'time_literal') {
   return `1 ${literals[typeString]}`;
 }
 
-export const fieldNameFromType = (type: SupportedFieldType) => `${camelCase(type)}Field`;
+export const fieldNameFromType = (type: FieldType) => `${camelCase(type)}Field`;
 
 function getFieldName(
   typeString: string,
@@ -127,8 +135,8 @@ function getFieldMapping(
     date: 'now()',
   };
   return params.map(({ name: _name, type, constantOnly, literalOptions, ...rest }) => {
-    const typeString: string = type;
-    if (supportedFieldTypes.includes(typeString as SupportedFieldType)) {
+    const typeString: string = type as string;
+    if (dataTypes.includes(typeString as SupportedDataType)) {
       if (useLiterals && literalOptions) {
         return {
           name: `"${literalOptions[0]}"`,
@@ -522,16 +530,16 @@ describe('validation logic', () => {
       ]);
       testErrorsAndWarnings('from index | keep `any#Char$Field`', []);
       testErrorsAndWarnings('from index | project ', [
-        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where'}",
+        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where', MATCH}",
       ]);
       testErrorsAndWarnings('from index | project textField, doubleField, dateField', [
-        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where'}",
+        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where', MATCH}",
       ]);
       testErrorsAndWarnings('from index | PROJECT textField, doubleField, dateField', [
-        "SyntaxError: mismatched input 'PROJECT' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where'}",
+        "SyntaxError: mismatched input 'PROJECT' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where', MATCH}",
       ]);
       testErrorsAndWarnings('from index | project missingField, doubleField, dateField', [
-        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where'}",
+        "SyntaxError: mismatched input 'project' expecting {'dissect', 'drop', 'enrich', 'eval', 'grok', 'inlinestats', 'keep', 'limit', 'lookup', 'mv_expand', 'rename', 'sort', 'stats', 'where', MATCH}",
       ]);
       testErrorsAndWarnings('from index | keep k*', []);
       testErrorsAndWarnings('from index | keep *Field', []);
@@ -541,13 +549,6 @@ describe('validation logic', () => {
       testErrorsAndWarnings('from index | keep m*', ['Unknown column [m*]']);
       testErrorsAndWarnings('from index | keep *m', ['Unknown column [*m]']);
       testErrorsAndWarnings('from index | keep d*m', ['Unknown column [d*m]']);
-      testErrorsAndWarnings(
-        'from unsupported_index | keep unsupported_field',
-        [],
-        [
-          'Field [unsupported_field] cannot be retrieved, it is unsupported or not indexed; returning null',
-        ]
-      );
 
       testErrorsAndWarnings(
         `FROM index | STATS ROUND(AVG(doubleField * 1.5)), COUNT(*), MIN(doubleField * 10) | KEEP \`MIN(doubleField * 10)\``,
@@ -700,7 +701,7 @@ describe('validation logic', () => {
       // Do not try to validate the dissect pattern string
       testErrorsAndWarnings('from a_index | dissect textField "%{firstWord}"', []);
       testErrorsAndWarnings('from a_index | dissect doubleField "%{firstWord}"', [
-        'DISSECT only supports string type values, found [doubleField] of type [double]',
+        'DISSECT only supports keyword, text types values, found [doubleField] of type [double]',
       ]);
       testErrorsAndWarnings('from a_index | dissect textField "%{firstWord}" option ', [
         "SyntaxError: mismatched input '<EOF>' expecting '='",
@@ -747,11 +748,10 @@ describe('validation logic', () => {
       testErrorsAndWarnings('from a_index | grok textField %a', [
         "SyntaxError: mismatched input '%' expecting QUOTED_STRING",
       ]);
-      // @TODO: investigate
       // Do not try to validate the grok pattern string
       testErrorsAndWarnings('from a_index | grok textField "%{firstWord}"', []);
       testErrorsAndWarnings('from a_index | grok doubleField "%{firstWord}"', [
-        'GROK only supports string type values, found [doubleField] of type [double]',
+        'GROK only supports keyword, text types values, found [doubleField] of type [double]',
       ]);
       testErrorsAndWarnings('from a_index | grok textField "%{firstWord}" | keep firstWord', []);
       // testErrorsAndWarnings('from a_index | grok s* "%{a}"', [
@@ -874,7 +874,7 @@ describe('validation logic', () => {
         []
       );
 
-      for (const field of supportedFieldTypes) {
+      for (const field of fieldTypes) {
         testErrorsAndWarnings(`from a_index | where ${fieldNameFromType(field)} IS NULL`, []);
         testErrorsAndWarnings(`from a_index | where ${fieldNameFromType(field)} IS null`, []);
         testErrorsAndWarnings(`from a_index | where ${fieldNameFromType(field)} is null`, []);
@@ -937,7 +937,7 @@ describe('validation logic', () => {
       testErrorsAndWarnings('from a_index | eval a=["a", "b"]', []);
       testErrorsAndWarnings('from a_index | eval a=null', []);
 
-      for (const field of supportedFieldTypes) {
+      for (const field of fieldTypes) {
         testErrorsAndWarnings(`from a_index | eval ${fieldNameFromType(field)} IS NULL`, []);
         testErrorsAndWarnings(`from a_index | eval ${fieldNameFromType(field)} IS null`, []);
         testErrorsAndWarnings(`from a_index | eval ${fieldNameFromType(field)} is null`, []);
@@ -2463,6 +2463,46 @@ describe('validation logic', () => {
           'from a_index | eval coalesce(concat("20", "22"), concat("20", "22"))',
           []
         );
+
+        testErrorsAndWarnings(
+          'row var = coalesce(to_cartesianpoint("POINT (30 10)"), to_cartesianpoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row coalesce(to_cartesianpoint("POINT (30 10)"), to_cartesianpoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = coalesce(to_cartesianpoint(to_cartesianpoint("POINT (30 10)")), to_cartesianpoint(to_cartesianpoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = coalesce(to_cartesianshape(to_cartesianpoint("POINT (30 10)")), to_cartesianshape(to_cartesianpoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = coalesce(to_geopoint("POINT (30 10)"), to_geopoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row coalesce(to_geopoint("POINT (30 10)"), to_geopoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = coalesce(to_geopoint(to_geopoint("POINT (30 10)")), to_geopoint(to_geopoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = coalesce(to_geoshape(to_geopoint("POINT (30 10)")), to_geoshape(to_geopoint("POINT (30 10)")))',
+          []
+        );
       });
 
       describe('concat', () => {
@@ -2661,6 +2701,11 @@ describe('validation logic', () => {
             'Argument of [date_diff] must be [date], found value [concat("20","22")] type [keyword]',
           ]
         );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = date_diff(to_string(booleanField), dateField, dateField)',
+          []
+        );
       });
 
       describe('date_extract', () => {
@@ -2742,6 +2787,11 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval date_extract(textField, concat("20", "22"))', [
           'Argument of [date_extract] must be [date], found value [concat("20","22")] type [keyword]',
         ]);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = date_extract(to_string(booleanField), dateField)',
+          []
+        );
       });
 
       describe('date_format', () => {
@@ -2790,6 +2840,11 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval date_format(textField, concat("20", "22"))', [
           'Argument of [date_format] must be [date], found value [concat("20","22")] type [keyword]',
         ]);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = date_format(to_string(booleanField), dateField)',
+          []
+        );
       });
 
       describe('date_parse', () => {
@@ -2896,6 +2951,11 @@ describe('validation logic', () => {
           'Argument of [date_trunc] must be [time_literal], found value [textField] type [text]',
           'Argument of [date_trunc] must be [date], found value [concat("20","22")] type [keyword]',
         ]);
+        testErrorsAndWarnings(
+          'row var = date_trunc(1 day, to_datetime("2021-01-01T00:00:00Z"))',
+          []
+        );
+        testErrorsAndWarnings('row date_trunc(1 day, to_datetime("2021-01-01T00:00:00Z"))', []);
       });
 
       describe('e', () => {
@@ -2950,6 +3010,10 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort ends_with(keywordField, keywordField)', []);
         testErrorsAndWarnings('from a_index | eval ends_with(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval ends_with(nullVar, nullVar)', []);
+        testErrorsAndWarnings('from a_index | eval var = ends_with(keywordField, textField)', []);
+        testErrorsAndWarnings('from a_index | eval ends_with(keywordField, textField)', []);
+        testErrorsAndWarnings('from a_index | eval var = ends_with(textField, keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval ends_with(textField, keywordField)', []);
       });
 
       describe('exp', () => {
@@ -3217,6 +3281,14 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort greatest(booleanField)', []);
         testErrorsAndWarnings('from a_index | eval greatest(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval greatest(nullVar)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | where greatest(cartesianPointField, cartesianPointField) > 0',
+          [
+            'Argument of [greatest] must be [boolean], found value [cartesianPointField] type [cartesian_point]',
+            'Argument of [greatest] must be [boolean], found value [cartesianPointField] type [cartesian_point]',
+          ]
+        );
       });
 
       describe('ip_prefix', () => {
@@ -4108,6 +4180,46 @@ describe('validation logic', () => {
           'from a_index | eval mv_append(concat("20", "22"), concat("20", "22"))',
           []
         );
+
+        testErrorsAndWarnings(
+          'row var = mv_append(to_cartesianpoint("POINT (30 10)"), to_cartesianpoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row mv_append(to_cartesianpoint("POINT (30 10)"), to_cartesianpoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = mv_append(to_cartesianpoint(to_cartesianpoint("POINT (30 10)")), to_cartesianpoint(to_cartesianpoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = mv_append(to_cartesianshape(to_cartesianpoint("POINT (30 10)")), to_cartesianshape(to_cartesianpoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = mv_append(to_geopoint("POINT (30 10)"), to_geopoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row mv_append(to_geopoint("POINT (30 10)"), to_geopoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = mv_append(to_geopoint(to_geopoint("POINT (30 10)")), to_geopoint(to_geopoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = mv_append(to_geoshape(to_geopoint("POINT (30 10)")), to_geoshape(to_geopoint("POINT (30 10)")))',
+          []
+        );
       });
 
       describe('mv_avg', () => {
@@ -4344,6 +4456,23 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row nullVar = null | eval mv_count(nullVar)', []);
         testErrorsAndWarnings('from a_index | eval mv_count("2022")', []);
         testErrorsAndWarnings('from a_index | eval mv_count(concat("20", "22"))', []);
+        testErrorsAndWarnings('row var = mv_count(to_cartesianpoint("POINT (30 10)"))', []);
+        testErrorsAndWarnings('row mv_count(to_cartesianpoint("POINT (30 10)"))', []);
+
+        testErrorsAndWarnings(
+          'row var = mv_count(to_cartesianpoint(to_cartesianpoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = mv_count(to_cartesianshape(to_cartesianpoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings('row var = mv_count(to_geopoint("POINT (30 10)"))', []);
+        testErrorsAndWarnings('row mv_count(to_geopoint("POINT (30 10)"))', []);
+        testErrorsAndWarnings('row var = mv_count(to_geopoint(to_geopoint("POINT (30 10)")))', []);
+        testErrorsAndWarnings('row var = mv_count(to_geoshape(to_geopoint("POINT (30 10)")))', []);
       });
 
       describe('mv_dedupe', () => {
@@ -4480,6 +4609,23 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row nullVar = null | eval mv_dedupe(nullVar)', []);
         testErrorsAndWarnings('from a_index | eval mv_dedupe("2022")', []);
         testErrorsAndWarnings('from a_index | eval mv_dedupe(concat("20", "22"))', []);
+        testErrorsAndWarnings('row var = mv_dedupe(to_cartesianpoint("POINT (30 10)"))', []);
+        testErrorsAndWarnings('row mv_dedupe(to_cartesianpoint("POINT (30 10)"))', []);
+
+        testErrorsAndWarnings(
+          'row var = mv_dedupe(to_cartesianpoint(to_cartesianpoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = mv_dedupe(to_cartesianshape(to_cartesianpoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings('row var = mv_dedupe(to_geopoint("POINT (30 10)"))', []);
+        testErrorsAndWarnings('row mv_dedupe(to_geopoint("POINT (30 10)"))', []);
+        testErrorsAndWarnings('row var = mv_dedupe(to_geopoint(to_geopoint("POINT (30 10)")))', []);
+        testErrorsAndWarnings('row var = mv_dedupe(to_geoshape(to_geopoint("POINT (30 10)")))', []);
       });
 
       describe('mv_first', () => {
@@ -4613,6 +4759,23 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row nullVar = null | eval mv_first(nullVar)', []);
         testErrorsAndWarnings('from a_index | eval mv_first("2022")', []);
         testErrorsAndWarnings('from a_index | eval mv_first(concat("20", "22"))', []);
+        testErrorsAndWarnings('row var = mv_first(to_cartesianpoint("POINT (30 10)"))', []);
+        testErrorsAndWarnings('row mv_first(to_cartesianpoint("POINT (30 10)"))', []);
+
+        testErrorsAndWarnings(
+          'row var = mv_first(to_cartesianpoint(to_cartesianpoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = mv_first(to_cartesianshape(to_cartesianpoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings('row var = mv_first(to_geopoint("POINT (30 10)"))', []);
+        testErrorsAndWarnings('row mv_first(to_geopoint("POINT (30 10)"))', []);
+        testErrorsAndWarnings('row var = mv_first(to_geopoint(to_geopoint("POINT (30 10)")))', []);
+        testErrorsAndWarnings('row var = mv_first(to_geoshape(to_geopoint("POINT (30 10)")))', []);
       });
 
       describe('mv_last', () => {
@@ -4746,6 +4909,23 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row nullVar = null | eval mv_last(nullVar)', []);
         testErrorsAndWarnings('from a_index | eval mv_last("2022")', []);
         testErrorsAndWarnings('from a_index | eval mv_last(concat("20", "22"))', []);
+        testErrorsAndWarnings('row var = mv_last(to_cartesianpoint("POINT (30 10)"))', []);
+        testErrorsAndWarnings('row mv_last(to_cartesianpoint("POINT (30 10)"))', []);
+
+        testErrorsAndWarnings(
+          'row var = mv_last(to_cartesianpoint(to_cartesianpoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = mv_last(to_cartesianshape(to_cartesianpoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings('row var = mv_last(to_geopoint("POINT (30 10)"))', []);
+        testErrorsAndWarnings('row mv_last(to_geopoint("POINT (30 10)"))', []);
+        testErrorsAndWarnings('row var = mv_last(to_geopoint(to_geopoint("POINT (30 10)")))', []);
+        testErrorsAndWarnings('row var = mv_last(to_geoshape(to_geopoint("POINT (30 10)")))', []);
       });
 
       describe('mv_max', () => {
@@ -5319,6 +5499,41 @@ describe('validation logic', () => {
           'from a_index | eval mv_slice(concat("20", "22"), integerField, integerField)',
           []
         );
+        testErrorsAndWarnings('row var = mv_slice(to_cartesianpoint("POINT (30 10)"), 5, 5)', []);
+        testErrorsAndWarnings('row mv_slice(to_cartesianpoint("POINT (30 10)"), 5, 5)', []);
+
+        testErrorsAndWarnings(
+          'row var = mv_slice(to_cartesianpoint(to_cartesianpoint("POINT (30 10)")), to_integer(true), to_integer(true))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = mv_slice(to_cartesianshape(to_cartesianpoint("POINT (30 10)")), to_integer(true), to_integer(true))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = mv_slice(to_datetime("2021-01-01T00:00:00Z"), to_integer(true), to_integer(true))',
+          []
+        );
+
+        testErrorsAndWarnings('row var = mv_slice(to_geopoint("POINT (30 10)"), 5, 5)', []);
+        testErrorsAndWarnings('row mv_slice(to_geopoint("POINT (30 10)"), 5, 5)', []);
+
+        testErrorsAndWarnings(
+          'row var = mv_slice(to_geopoint(to_geopoint("POINT (30 10)")), to_integer(true), to_integer(true))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = mv_slice(to_geoshape(to_geopoint("POINT (30 10)")), to_integer(true), to_integer(true))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_slice(dateField, to_integer(booleanField), to_integer(booleanField))',
+          []
+        );
       });
 
       describe('mv_sort', () => {
@@ -5370,6 +5585,42 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row nullVar = null | eval mv_sort(nullVar, nullVar)', []);
         testErrorsAndWarnings('from a_index | eval mv_sort("2022", "asc")', []);
         testErrorsAndWarnings('from a_index | eval mv_sort(concat("20", "22"), "asc")', []);
+        testErrorsAndWarnings(
+          'row var = mv_sort(5, "a")',
+          [],
+          ['Invalid option ["a"] for mv_sort. Supported options: ["asc", "desc"].']
+        );
+        testErrorsAndWarnings(
+          'row mv_sort(5, "a")',
+          [],
+          ['Invalid option ["a"] for mv_sort. Supported options: ["asc", "desc"].']
+        );
+        testErrorsAndWarnings(
+          'row var = mv_sort("a", "a")',
+          [],
+          ['Invalid option ["a"] for mv_sort. Supported options: ["asc", "desc"].']
+        );
+        testErrorsAndWarnings(
+          'row mv_sort("a", "a")',
+          [],
+          ['Invalid option ["a"] for mv_sort. Supported options: ["asc", "desc"].']
+        );
+        testErrorsAndWarnings(
+          'row var = mv_sort(to_version("1.0.0"), "a")',
+          [],
+          ['Invalid option ["a"] for mv_sort. Supported options: ["asc", "desc"].']
+        );
+        testErrorsAndWarnings(
+          'row mv_sort(to_version("1.0.0"), "a")',
+          [],
+          ['Invalid option ["a"] for mv_sort. Supported options: ["asc", "desc"].']
+        );
+        testErrorsAndWarnings('from a_index | eval var = mv_sort(longField, keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_sort(longField, keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_sort(textField, keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_sort(textField, keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_sort(versionField, keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_sort(versionField, keywordField)', []);
       });
 
       describe('mv_sum', () => {
@@ -6522,6 +6773,106 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('from a_index | eval st_contains(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval st_contains(nullVar, nullVar)', []);
+
+        testErrorsAndWarnings(
+          'row var = st_contains(to_cartesianpoint("POINT (30 10)"), to_cartesianpoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row st_contains(to_cartesianpoint("POINT (30 10)"), to_cartesianpoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_contains(to_cartesianpoint(to_cartesianpoint("POINT (30 10)")), to_cartesianpoint(to_cartesianpoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_contains(to_cartesianpoint("POINT (30 10)"), to_cartesianshape("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row st_contains(to_cartesianpoint("POINT (30 10)"), to_cartesianshape("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_contains(to_cartesianpoint(to_cartesianpoint("POINT (30 10)")), to_cartesianshape(to_cartesianpoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_contains(to_cartesianshape("POINT (30 10)"), to_cartesianpoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row st_contains(to_cartesianshape("POINT (30 10)"), to_cartesianpoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_contains(to_cartesianshape(to_cartesianpoint("POINT (30 10)")), to_cartesianpoint(to_cartesianpoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_contains(to_cartesianshape(to_cartesianpoint("POINT (30 10)")), to_cartesianshape(to_cartesianpoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_contains(to_geopoint("POINT (30 10)"), to_geopoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row st_contains(to_geopoint("POINT (30 10)"), to_geopoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_contains(to_geopoint(to_geopoint("POINT (30 10)")), to_geopoint(to_geopoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_contains(to_geopoint("POINT (30 10)"), to_geoshape("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row st_contains(to_geopoint("POINT (30 10)"), to_geoshape("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_contains(to_geopoint(to_geopoint("POINT (30 10)")), to_geoshape(to_geopoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_contains(to_geoshape("POINT (30 10)"), to_geopoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row st_contains(to_geoshape("POINT (30 10)"), to_geopoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_contains(to_geoshape(to_geopoint("POINT (30 10)")), to_geopoint(to_geopoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_contains(to_geoshape(to_geopoint("POINT (30 10)")), to_geoshape(to_geopoint("POINT (30 10)")))',
+          []
+        );
       });
 
       describe('st_disjoint', () => {
@@ -6760,6 +7111,106 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('from a_index | eval st_disjoint(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval st_disjoint(nullVar, nullVar)', []);
+
+        testErrorsAndWarnings(
+          'row var = st_disjoint(to_cartesianpoint("POINT (30 10)"), to_cartesianpoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row st_disjoint(to_cartesianpoint("POINT (30 10)"), to_cartesianpoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_disjoint(to_cartesianpoint(to_cartesianpoint("POINT (30 10)")), to_cartesianpoint(to_cartesianpoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_disjoint(to_cartesianpoint("POINT (30 10)"), to_cartesianshape("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row st_disjoint(to_cartesianpoint("POINT (30 10)"), to_cartesianshape("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_disjoint(to_cartesianpoint(to_cartesianpoint("POINT (30 10)")), to_cartesianshape(to_cartesianpoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_disjoint(to_cartesianshape("POINT (30 10)"), to_cartesianpoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row st_disjoint(to_cartesianshape("POINT (30 10)"), to_cartesianpoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_disjoint(to_cartesianshape(to_cartesianpoint("POINT (30 10)")), to_cartesianpoint(to_cartesianpoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_disjoint(to_cartesianshape(to_cartesianpoint("POINT (30 10)")), to_cartesianshape(to_cartesianpoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_disjoint(to_geopoint("POINT (30 10)"), to_geopoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row st_disjoint(to_geopoint("POINT (30 10)"), to_geopoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_disjoint(to_geopoint(to_geopoint("POINT (30 10)")), to_geopoint(to_geopoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_disjoint(to_geopoint("POINT (30 10)"), to_geoshape("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row st_disjoint(to_geopoint("POINT (30 10)"), to_geoshape("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_disjoint(to_geopoint(to_geopoint("POINT (30 10)")), to_geoshape(to_geopoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_disjoint(to_geoshape("POINT (30 10)"), to_geopoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row st_disjoint(to_geoshape("POINT (30 10)"), to_geopoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_disjoint(to_geoshape(to_geopoint("POINT (30 10)")), to_geopoint(to_geopoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_disjoint(to_geoshape(to_geopoint("POINT (30 10)")), to_geoshape(to_geopoint("POINT (30 10)")))',
+          []
+        );
       });
 
       describe('st_distance', () => {
@@ -6838,6 +7289,36 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('from a_index | eval st_distance(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval st_distance(nullVar, nullVar)', []);
+
+        testErrorsAndWarnings(
+          'row var = st_distance(to_cartesianpoint("POINT (30 10)"), to_cartesianpoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row st_distance(to_cartesianpoint("POINT (30 10)"), to_cartesianpoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_distance(to_cartesianpoint(to_cartesianpoint("POINT (30 10)")), to_cartesianpoint(to_cartesianpoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_distance(to_geopoint("POINT (30 10)"), to_geopoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row st_distance(to_geopoint("POINT (30 10)"), to_geopoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_distance(to_geopoint(to_geopoint("POINT (30 10)")), to_geopoint(to_geopoint("POINT (30 10)")))',
+          []
+        );
       });
 
       describe('st_intersects', () => {
@@ -7092,6 +7573,106 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('from a_index | eval st_intersects(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval st_intersects(nullVar, nullVar)', []);
+
+        testErrorsAndWarnings(
+          'row var = st_intersects(to_cartesianpoint("POINT (30 10)"), to_cartesianpoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row st_intersects(to_cartesianpoint("POINT (30 10)"), to_cartesianpoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_intersects(to_cartesianpoint(to_cartesianpoint("POINT (30 10)")), to_cartesianpoint(to_cartesianpoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_intersects(to_cartesianpoint("POINT (30 10)"), to_cartesianshape("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row st_intersects(to_cartesianpoint("POINT (30 10)"), to_cartesianshape("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_intersects(to_cartesianpoint(to_cartesianpoint("POINT (30 10)")), to_cartesianshape(to_cartesianpoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_intersects(to_cartesianshape("POINT (30 10)"), to_cartesianpoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row st_intersects(to_cartesianshape("POINT (30 10)"), to_cartesianpoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_intersects(to_cartesianshape(to_cartesianpoint("POINT (30 10)")), to_cartesianpoint(to_cartesianpoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_intersects(to_cartesianshape(to_cartesianpoint("POINT (30 10)")), to_cartesianshape(to_cartesianpoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_intersects(to_geopoint("POINT (30 10)"), to_geopoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row st_intersects(to_geopoint("POINT (30 10)"), to_geopoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_intersects(to_geopoint(to_geopoint("POINT (30 10)")), to_geopoint(to_geopoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_intersects(to_geopoint("POINT (30 10)"), to_geoshape("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row st_intersects(to_geopoint("POINT (30 10)"), to_geoshape("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_intersects(to_geopoint(to_geopoint("POINT (30 10)")), to_geoshape(to_geopoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_intersects(to_geoshape("POINT (30 10)"), to_geopoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row st_intersects(to_geoshape("POINT (30 10)"), to_geopoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_intersects(to_geoshape(to_geopoint("POINT (30 10)")), to_geopoint(to_geopoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_intersects(to_geoshape(to_geopoint("POINT (30 10)")), to_geoshape(to_geopoint("POINT (30 10)")))',
+          []
+        );
       });
 
       describe('st_within', () => {
@@ -7328,6 +7909,106 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('from a_index | eval st_within(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval st_within(nullVar, nullVar)', []);
+
+        testErrorsAndWarnings(
+          'row var = st_within(to_cartesianpoint("POINT (30 10)"), to_cartesianpoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row st_within(to_cartesianpoint("POINT (30 10)"), to_cartesianpoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_within(to_cartesianpoint(to_cartesianpoint("POINT (30 10)")), to_cartesianpoint(to_cartesianpoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_within(to_cartesianpoint("POINT (30 10)"), to_cartesianshape("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row st_within(to_cartesianpoint("POINT (30 10)"), to_cartesianshape("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_within(to_cartesianpoint(to_cartesianpoint("POINT (30 10)")), to_cartesianshape(to_cartesianpoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_within(to_cartesianshape("POINT (30 10)"), to_cartesianpoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row st_within(to_cartesianshape("POINT (30 10)"), to_cartesianpoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_within(to_cartesianshape(to_cartesianpoint("POINT (30 10)")), to_cartesianpoint(to_cartesianpoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_within(to_cartesianshape(to_cartesianpoint("POINT (30 10)")), to_cartesianshape(to_cartesianpoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_within(to_geopoint("POINT (30 10)"), to_geopoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row st_within(to_geopoint("POINT (30 10)"), to_geopoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_within(to_geopoint(to_geopoint("POINT (30 10)")), to_geopoint(to_geopoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_within(to_geopoint("POINT (30 10)"), to_geoshape("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row st_within(to_geopoint("POINT (30 10)"), to_geoshape("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_within(to_geopoint(to_geopoint("POINT (30 10)")), to_geoshape(to_geopoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_within(to_geoshape("POINT (30 10)"), to_geopoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row st_within(to_geoshape("POINT (30 10)"), to_geopoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_within(to_geoshape(to_geopoint("POINT (30 10)")), to_geopoint(to_geopoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_within(to_geoshape(to_geopoint("POINT (30 10)")), to_geoshape(to_geopoint("POINT (30 10)")))',
+          []
+        );
       });
 
       describe('st_x', () => {
@@ -7377,6 +8058,17 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort st_x(cartesianPointField)', []);
         testErrorsAndWarnings('from a_index | eval st_x(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval st_x(nullVar)', []);
+        testErrorsAndWarnings('row var = st_x(to_cartesianpoint("POINT (30 10)"))', []);
+        testErrorsAndWarnings('row st_x(to_cartesianpoint("POINT (30 10)"))', []);
+
+        testErrorsAndWarnings(
+          'row var = st_x(to_cartesianpoint(to_cartesianpoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings('row var = st_x(to_geopoint("POINT (30 10)"))', []);
+        testErrorsAndWarnings('row st_x(to_geopoint("POINT (30 10)"))', []);
+        testErrorsAndWarnings('row var = st_x(to_geopoint(to_geopoint("POINT (30 10)")))', []);
       });
 
       describe('st_y', () => {
@@ -7426,6 +8118,17 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort st_y(cartesianPointField)', []);
         testErrorsAndWarnings('from a_index | eval st_y(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval st_y(nullVar)', []);
+        testErrorsAndWarnings('row var = st_y(to_cartesianpoint("POINT (30 10)"))', []);
+        testErrorsAndWarnings('row st_y(to_cartesianpoint("POINT (30 10)"))', []);
+
+        testErrorsAndWarnings(
+          'row var = st_y(to_cartesianpoint(to_cartesianpoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings('row var = st_y(to_geopoint("POINT (30 10)"))', []);
+        testErrorsAndWarnings('row st_y(to_geopoint("POINT (30 10)"))', []);
+        testErrorsAndWarnings('row var = st_y(to_geopoint(to_geopoint("POINT (30 10)")))', []);
       });
 
       describe('starts_with', () => {
@@ -7465,6 +8168,10 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort starts_with(keywordField, keywordField)', []);
         testErrorsAndWarnings('from a_index | eval starts_with(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval starts_with(nullVar, nullVar)', []);
+        testErrorsAndWarnings('from a_index | eval var = starts_with(keywordField, textField)', []);
+        testErrorsAndWarnings('from a_index | eval starts_with(keywordField, textField)', []);
+        testErrorsAndWarnings('from a_index | eval var = starts_with(textField, keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval starts_with(textField, keywordField)', []);
       });
 
       describe('substring', () => {
@@ -7799,6 +8506,16 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort to_cartesianpoint(cartesianPointField)', []);
         testErrorsAndWarnings('from a_index | eval to_cartesianpoint(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval to_cartesianpoint(nullVar)', []);
+        testErrorsAndWarnings(
+          'row var = to_cartesianpoint(to_cartesianpoint("POINT (30 10)"))',
+          []
+        );
+        testErrorsAndWarnings('row to_cartesianpoint(to_cartesianpoint("POINT (30 10)"))', []);
+
+        testErrorsAndWarnings(
+          'row var = to_cartesianpoint(to_cartesianpoint(to_cartesianpoint("POINT (30 10)")))',
+          []
+        );
       });
 
       describe('to_cartesianshape', () => {
@@ -7876,6 +8593,21 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort to_cartesianshape(cartesianPointField)', []);
         testErrorsAndWarnings('from a_index | eval to_cartesianshape(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval to_cartesianshape(nullVar)', []);
+        testErrorsAndWarnings(
+          'row var = to_cartesianshape(to_cartesianpoint("POINT (30 10)"))',
+          []
+        );
+        testErrorsAndWarnings('row to_cartesianshape(to_cartesianpoint("POINT (30 10)"))', []);
+
+        testErrorsAndWarnings(
+          'row var = to_cartesianshape(to_cartesianpoint(to_cartesianpoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = to_cartesianshape(to_cartesianshape(to_cartesianpoint("POINT (30 10)")))',
+          []
+        );
       });
 
       describe('to_datetime', () => {
@@ -8154,6 +8886,12 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort to_geopoint(geoPointField)', []);
         testErrorsAndWarnings('from a_index | eval to_geopoint(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval to_geopoint(nullVar)', []);
+        testErrorsAndWarnings('row var = to_geopoint(to_geopoint("POINT (30 10)"))', []);
+        testErrorsAndWarnings('row to_geopoint(to_geopoint("POINT (30 10)"))', []);
+        testErrorsAndWarnings(
+          'row var = to_geopoint(to_geopoint(to_geopoint("POINT (30 10)")))',
+          []
+        );
       });
 
       describe('to_geoshape', () => {
@@ -8211,6 +8949,16 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort to_geoshape(geoPointField)', []);
         testErrorsAndWarnings('from a_index | eval to_geoshape(null)', []);
         testErrorsAndWarnings('row nullVar = null | eval to_geoshape(nullVar)', []);
+        testErrorsAndWarnings('row var = to_geoshape(to_geopoint("POINT (30 10)"))', []);
+        testErrorsAndWarnings('row to_geoshape(to_geopoint("POINT (30 10)"))', []);
+        testErrorsAndWarnings(
+          'row var = to_geoshape(to_geopoint(to_geopoint("POINT (30 10)")))',
+          []
+        );
+        testErrorsAndWarnings(
+          'row var = to_geoshape(to_geoshape(to_geopoint("POINT (30 10)")))',
+          []
+        );
       });
 
       describe('to_integer', () => {
@@ -11367,8 +12115,6 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('from a_index | stats var = max(dateField)', []);
         testErrorsAndWarnings('from a_index | stats max(dateField)', []);
-        testErrorsAndWarnings('from a_index | stats var = max(datePeriodField)', []);
-        testErrorsAndWarnings('from a_index | stats max(datePeriodField)', []);
         testErrorsAndWarnings('from a_index | stats var = max(booleanField)', []);
         testErrorsAndWarnings('from a_index | stats max(booleanField)', []);
         testErrorsAndWarnings('from a_index | stats var = max(ipField)', []);
@@ -11407,14 +12153,6 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | where max(dateField) > 0', [
-          'WHERE does not support function max',
-        ]);
-
-        testErrorsAndWarnings('from a_index | where max(datePeriodField)', [
-          'WHERE does not support function max',
-        ]);
-
-        testErrorsAndWarnings('from a_index | where max(datePeriodField) > 0', [
           'WHERE does not support function max',
         ]);
 
@@ -11497,23 +12235,6 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval max(dateField) > 0', [
           'EVAL does not support function max',
         ]);
-
-        testErrorsAndWarnings('from a_index | eval var = max(datePeriodField)', [
-          'EVAL does not support function max',
-        ]);
-
-        testErrorsAndWarnings('from a_index | eval var = max(datePeriodField) > 0', [
-          'EVAL does not support function max',
-        ]);
-
-        testErrorsAndWarnings('from a_index | eval max(datePeriodField)', [
-          'EVAL does not support function max',
-        ]);
-
-        testErrorsAndWarnings('from a_index | eval max(datePeriodField) > 0', [
-          'EVAL does not support function max',
-        ]);
-
         testErrorsAndWarnings('from a_index | eval var = max(booleanField)', [
           'EVAL does not support function max',
         ]);
@@ -11549,8 +12270,86 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | stats max(null)', []);
         testErrorsAndWarnings('row nullVar = null | stats max(nullVar)', []);
         testErrorsAndWarnings('from a_index | stats max("2022")', []);
-        testErrorsAndWarnings('from a_index | stats max(concat("20", "22"))', [
-          'Argument of [max] must be [double], found value [concat("20","22")] type [keyword]',
+        testErrorsAndWarnings('from a_index | stats max(concat("20", "22"))', []);
+
+        testErrorsAndWarnings('from a_index | stats var = max(textField)', []);
+
+        testErrorsAndWarnings('from a_index | stats max(textField)', []);
+
+        testErrorsAndWarnings('from a_index | where max(textField)', [
+          'WHERE does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where max(textField) > 0', [
+          'WHERE does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = max(textField)', [
+          'EVAL does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = max(textField) > 0', [
+          'EVAL does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval max(textField)', [
+          'EVAL does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval max(textField) > 0', [
+          'EVAL does not support function max',
+        ]);
+        testErrorsAndWarnings('from a_index | stats var = max(versionField)', []);
+        testErrorsAndWarnings('from a_index | stats max(versionField)', []);
+        testErrorsAndWarnings('from a_index | stats var = max(keywordField)', []);
+        testErrorsAndWarnings('from a_index | stats max(keywordField)', []);
+
+        testErrorsAndWarnings('from a_index | where max(versionField)', [
+          'WHERE does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where max(versionField) > 0', [
+          'WHERE does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where max(keywordField)', [
+          'WHERE does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where max(keywordField) > 0', [
+          'WHERE does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = max(versionField)', [
+          'EVAL does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = max(versionField) > 0', [
+          'EVAL does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval max(versionField)', [
+          'EVAL does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval max(versionField) > 0', [
+          'EVAL does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = max(keywordField)', [
+          'EVAL does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = max(keywordField) > 0', [
+          'EVAL does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval max(keywordField)', [
+          'EVAL does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval max(keywordField) > 0', [
+          'EVAL does not support function max',
         ]);
       });
 
@@ -11716,8 +12515,6 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('from a_index | stats var = min(dateField)', []);
         testErrorsAndWarnings('from a_index | stats min(dateField)', []);
-        testErrorsAndWarnings('from a_index | stats var = min(datePeriodField)', []);
-        testErrorsAndWarnings('from a_index | stats min(datePeriodField)', []);
         testErrorsAndWarnings('from a_index | stats var = min(booleanField)', []);
         testErrorsAndWarnings('from a_index | stats min(booleanField)', []);
         testErrorsAndWarnings('from a_index | stats var = min(ipField)', []);
@@ -11758,15 +12555,6 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | where min(dateField) > 0', [
           'WHERE does not support function min',
         ]);
-
-        testErrorsAndWarnings('from a_index | where min(datePeriodField)', [
-          'WHERE does not support function min',
-        ]);
-
-        testErrorsAndWarnings('from a_index | where min(datePeriodField) > 0', [
-          'WHERE does not support function min',
-        ]);
-
         testErrorsAndWarnings('from a_index | where min(booleanField)', [
           'WHERE does not support function min',
         ]);
@@ -11847,22 +12635,6 @@ describe('validation logic', () => {
           'EVAL does not support function min',
         ]);
 
-        testErrorsAndWarnings('from a_index | eval var = min(datePeriodField)', [
-          'EVAL does not support function min',
-        ]);
-
-        testErrorsAndWarnings('from a_index | eval var = min(datePeriodField) > 0', [
-          'EVAL does not support function min',
-        ]);
-
-        testErrorsAndWarnings('from a_index | eval min(datePeriodField)', [
-          'EVAL does not support function min',
-        ]);
-
-        testErrorsAndWarnings('from a_index | eval min(datePeriodField) > 0', [
-          'EVAL does not support function min',
-        ]);
-
         testErrorsAndWarnings('from a_index | eval var = min(booleanField)', [
           'EVAL does not support function min',
         ]);
@@ -11898,8 +12670,86 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | stats min(null)', []);
         testErrorsAndWarnings('row nullVar = null | stats min(nullVar)', []);
         testErrorsAndWarnings('from a_index | stats min("2022")', []);
-        testErrorsAndWarnings('from a_index | stats min(concat("20", "22"))', [
-          'Argument of [min] must be [double], found value [concat("20","22")] type [keyword]',
+        testErrorsAndWarnings('from a_index | stats min(concat("20", "22"))', []);
+
+        testErrorsAndWarnings('from a_index | stats var = min(textField)', []);
+
+        testErrorsAndWarnings('from a_index | stats min(textField)', []);
+
+        testErrorsAndWarnings('from a_index | where min(textField)', [
+          'WHERE does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where min(textField) > 0', [
+          'WHERE does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = min(textField)', [
+          'EVAL does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = min(textField) > 0', [
+          'EVAL does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval min(textField)', [
+          'EVAL does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval min(textField) > 0', [
+          'EVAL does not support function min',
+        ]);
+        testErrorsAndWarnings('from a_index | stats var = min(versionField)', []);
+        testErrorsAndWarnings('from a_index | stats min(versionField)', []);
+        testErrorsAndWarnings('from a_index | stats var = min(keywordField)', []);
+        testErrorsAndWarnings('from a_index | stats min(keywordField)', []);
+
+        testErrorsAndWarnings('from a_index | where min(versionField)', [
+          'WHERE does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where min(versionField) > 0', [
+          'WHERE does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where min(keywordField)', [
+          'WHERE does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where min(keywordField) > 0', [
+          'WHERE does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = min(versionField)', [
+          'EVAL does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = min(versionField) > 0', [
+          'EVAL does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval min(versionField)', [
+          'EVAL does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval min(versionField) > 0', [
+          'EVAL does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = min(keywordField)', [
+          'EVAL does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = min(keywordField) > 0', [
+          'EVAL does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval min(keywordField)', [
+          'EVAL does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval min(keywordField) > 0', [
+          'EVAL does not support function min',
         ]);
       });
 
@@ -11960,6 +12810,71 @@ describe('validation logic', () => {
         testErrorsAndWarnings(
           'row nullVar = null | stats count_distinct(nullVar, nullVar, nullVar, nullVar, nullVar, nullVar, nullVar, nullVar)',
           []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = count_distinct(textField, integerField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats count_distinct(textField, integerField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(textField, integerField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(textField, integerField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(count_distinct(textField, integerField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)) + count_distinct(textField, integerField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(count_distinct(textField, integerField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)) + count_distinct(textField, integerField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | sort count_distinct(textField, integerField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
+          ['SORT does not support function count_distinct']
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | where count_distinct(textField, integerField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
+          ['WHERE does not support function count_distinct']
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | where count_distinct(textField, integerField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) > 0',
+          ['WHERE does not support function count_distinct']
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = count_distinct(textField, integerField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
+          ['EVAL does not support function count_distinct']
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = count_distinct(textField, integerField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) > 0',
+          ['EVAL does not support function count_distinct']
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval count_distinct(textField, integerField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField)',
+          ['EVAL does not support function count_distinct']
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval count_distinct(textField, integerField, counterIntegerField, doubleField, unsignedLongField, longField, counterLongField, counterDoubleField) > 0',
+          ['EVAL does not support function count_distinct']
         );
       });
 
@@ -13292,6 +14207,528 @@ describe('validation logic', () => {
             'Argument of [bucket] must be a constant, received [textField]',
           ]
         );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bucket(dateField, integerField, now(), now())',
+          ['Argument of [bucket] must be a constant, received [integerField]']
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bin(dateField, integerField, now(), now())',
+          ['Argument of [bin] must be a constant, received [integerField]']
+        );
+
+        testErrorsAndWarnings('from a_index | stats by bucket(doubleField, doubleField)', [
+          'Argument of [bucket] must be a constant, received [doubleField]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | stats by bin(doubleField, doubleField)', [
+          'Argument of [bin] must be a constant, received [doubleField]',
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bucket(doubleField, integerField, doubleField, doubleField)',
+          [
+            'Argument of [bucket] must be a constant, received [integerField]',
+            'Argument of [bucket] must be a constant, received [doubleField]',
+            'Argument of [bucket] must be a constant, received [doubleField]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bin(doubleField, integerField, doubleField, doubleField)',
+          [
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [doubleField]',
+            'Argument of [bin] must be a constant, received [doubleField]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bucket(doubleField, integerField, doubleField, integerField)',
+          [
+            'Argument of [bucket] must be a constant, received [integerField]',
+            'Argument of [bucket] must be a constant, received [doubleField]',
+            'Argument of [bucket] must be a constant, received [integerField]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bin(doubleField, integerField, doubleField, integerField)',
+          [
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [doubleField]',
+            'Argument of [bin] must be a constant, received [integerField]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bucket(doubleField, integerField, doubleField, longField)',
+          [
+            'Argument of [bucket] must be a constant, received [integerField]',
+            'Argument of [bucket] must be a constant, received [doubleField]',
+            'Argument of [bucket] must be a constant, received [longField]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bin(doubleField, integerField, doubleField, longField)',
+          [
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [doubleField]',
+            'Argument of [bin] must be a constant, received [longField]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bucket(doubleField, integerField, integerField, doubleField)',
+          [
+            'Argument of [bucket] must be a constant, received [integerField]',
+            'Argument of [bucket] must be a constant, received [integerField]',
+            'Argument of [bucket] must be a constant, received [doubleField]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bin(doubleField, integerField, integerField, doubleField)',
+          [
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [doubleField]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bucket(doubleField, integerField, integerField, integerField)',
+          [
+            'Argument of [bucket] must be a constant, received [integerField]',
+            'Argument of [bucket] must be a constant, received [integerField]',
+            'Argument of [bucket] must be a constant, received [integerField]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bin(doubleField, integerField, integerField, integerField)',
+          [
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [integerField]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bucket(doubleField, integerField, integerField, longField)',
+          [
+            'Argument of [bucket] must be a constant, received [integerField]',
+            'Argument of [bucket] must be a constant, received [integerField]',
+            'Argument of [bucket] must be a constant, received [longField]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bin(doubleField, integerField, integerField, longField)',
+          [
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [longField]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bucket(doubleField, integerField, longField, doubleField)',
+          [
+            'Argument of [bucket] must be a constant, received [integerField]',
+            'Argument of [bucket] must be a constant, received [longField]',
+            'Argument of [bucket] must be a constant, received [doubleField]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bin(doubleField, integerField, longField, doubleField)',
+          [
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [longField]',
+            'Argument of [bin] must be a constant, received [doubleField]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bucket(doubleField, integerField, longField, integerField)',
+          [
+            'Argument of [bucket] must be a constant, received [integerField]',
+            'Argument of [bucket] must be a constant, received [longField]',
+            'Argument of [bucket] must be a constant, received [integerField]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bin(doubleField, integerField, longField, integerField)',
+          [
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [longField]',
+            'Argument of [bin] must be a constant, received [integerField]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bucket(doubleField, integerField, longField, longField)',
+          [
+            'Argument of [bucket] must be a constant, received [integerField]',
+            'Argument of [bucket] must be a constant, received [longField]',
+            'Argument of [bucket] must be a constant, received [longField]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bin(doubleField, integerField, longField, longField)',
+          [
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [longField]',
+            'Argument of [bin] must be a constant, received [longField]',
+          ]
+        );
+
+        testErrorsAndWarnings('from a_index | stats by bucket(integerField, doubleField)', [
+          'Argument of [bucket] must be a constant, received [doubleField]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | stats by bin(integerField, doubleField)', [
+          'Argument of [bin] must be a constant, received [doubleField]',
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bucket(integerField, integerField, doubleField, doubleField)',
+          [
+            'Argument of [bucket] must be a constant, received [integerField]',
+            'Argument of [bucket] must be a constant, received [doubleField]',
+            'Argument of [bucket] must be a constant, received [doubleField]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bin(integerField, integerField, doubleField, doubleField)',
+          [
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [doubleField]',
+            'Argument of [bin] must be a constant, received [doubleField]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bucket(integerField, integerField, doubleField, integerField)',
+          [
+            'Argument of [bucket] must be a constant, received [integerField]',
+            'Argument of [bucket] must be a constant, received [doubleField]',
+            'Argument of [bucket] must be a constant, received [integerField]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bin(integerField, integerField, doubleField, integerField)',
+          [
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [doubleField]',
+            'Argument of [bin] must be a constant, received [integerField]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bucket(integerField, integerField, doubleField, longField)',
+          [
+            'Argument of [bucket] must be a constant, received [integerField]',
+            'Argument of [bucket] must be a constant, received [doubleField]',
+            'Argument of [bucket] must be a constant, received [longField]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bin(integerField, integerField, doubleField, longField)',
+          [
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [doubleField]',
+            'Argument of [bin] must be a constant, received [longField]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bucket(integerField, integerField, integerField, doubleField)',
+          [
+            'Argument of [bucket] must be a constant, received [integerField]',
+            'Argument of [bucket] must be a constant, received [integerField]',
+            'Argument of [bucket] must be a constant, received [doubleField]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bin(integerField, integerField, integerField, doubleField)',
+          [
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [doubleField]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bucket(integerField, integerField, integerField, longField)',
+          [
+            'Argument of [bucket] must be a constant, received [integerField]',
+            'Argument of [bucket] must be a constant, received [integerField]',
+            'Argument of [bucket] must be a constant, received [longField]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bin(integerField, integerField, integerField, longField)',
+          [
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [longField]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bucket(integerField, integerField, longField, doubleField)',
+          [
+            'Argument of [bucket] must be a constant, received [integerField]',
+            'Argument of [bucket] must be a constant, received [longField]',
+            'Argument of [bucket] must be a constant, received [doubleField]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bin(integerField, integerField, longField, doubleField)',
+          [
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [longField]',
+            'Argument of [bin] must be a constant, received [doubleField]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bucket(integerField, integerField, longField, integerField)',
+          [
+            'Argument of [bucket] must be a constant, received [integerField]',
+            'Argument of [bucket] must be a constant, received [longField]',
+            'Argument of [bucket] must be a constant, received [integerField]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bin(integerField, integerField, longField, integerField)',
+          [
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [longField]',
+            'Argument of [bin] must be a constant, received [integerField]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bucket(integerField, integerField, longField, longField)',
+          [
+            'Argument of [bucket] must be a constant, received [integerField]',
+            'Argument of [bucket] must be a constant, received [longField]',
+            'Argument of [bucket] must be a constant, received [longField]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bin(integerField, integerField, longField, longField)',
+          [
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [longField]',
+            'Argument of [bin] must be a constant, received [longField]',
+          ]
+        );
+
+        testErrorsAndWarnings('from a_index | stats by bucket(longField, doubleField)', [
+          'Argument of [bucket] must be a constant, received [doubleField]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | stats by bin(longField, doubleField)', [
+          'Argument of [bin] must be a constant, received [doubleField]',
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bucket(longField, integerField, doubleField, doubleField)',
+          [
+            'Argument of [bucket] must be a constant, received [integerField]',
+            'Argument of [bucket] must be a constant, received [doubleField]',
+            'Argument of [bucket] must be a constant, received [doubleField]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bin(longField, integerField, doubleField, doubleField)',
+          [
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [doubleField]',
+            'Argument of [bin] must be a constant, received [doubleField]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bucket(longField, integerField, doubleField, integerField)',
+          [
+            'Argument of [bucket] must be a constant, received [integerField]',
+            'Argument of [bucket] must be a constant, received [doubleField]',
+            'Argument of [bucket] must be a constant, received [integerField]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bin(longField, integerField, doubleField, integerField)',
+          [
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [doubleField]',
+            'Argument of [bin] must be a constant, received [integerField]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bucket(longField, integerField, doubleField, longField)',
+          [
+            'Argument of [bucket] must be a constant, received [integerField]',
+            'Argument of [bucket] must be a constant, received [doubleField]',
+            'Argument of [bucket] must be a constant, received [longField]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bin(longField, integerField, doubleField, longField)',
+          [
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [doubleField]',
+            'Argument of [bin] must be a constant, received [longField]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bucket(longField, integerField, integerField, doubleField)',
+          [
+            'Argument of [bucket] must be a constant, received [integerField]',
+            'Argument of [bucket] must be a constant, received [integerField]',
+            'Argument of [bucket] must be a constant, received [doubleField]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bin(longField, integerField, integerField, doubleField)',
+          [
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [doubleField]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bucket(longField, integerField, integerField, integerField)',
+          [
+            'Argument of [bucket] must be a constant, received [integerField]',
+            'Argument of [bucket] must be a constant, received [integerField]',
+            'Argument of [bucket] must be a constant, received [integerField]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bin(longField, integerField, integerField, integerField)',
+          [
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [integerField]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bucket(longField, integerField, integerField, longField)',
+          [
+            'Argument of [bucket] must be a constant, received [integerField]',
+            'Argument of [bucket] must be a constant, received [integerField]',
+            'Argument of [bucket] must be a constant, received [longField]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bin(longField, integerField, integerField, longField)',
+          [
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [longField]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bucket(longField, integerField, longField, doubleField)',
+          [
+            'Argument of [bucket] must be a constant, received [integerField]',
+            'Argument of [bucket] must be a constant, received [longField]',
+            'Argument of [bucket] must be a constant, received [doubleField]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bin(longField, integerField, longField, doubleField)',
+          [
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [longField]',
+            'Argument of [bin] must be a constant, received [doubleField]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bucket(longField, integerField, longField, integerField)',
+          [
+            'Argument of [bucket] must be a constant, received [integerField]',
+            'Argument of [bucket] must be a constant, received [longField]',
+            'Argument of [bucket] must be a constant, received [integerField]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bin(longField, integerField, longField, integerField)',
+          [
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [longField]',
+            'Argument of [bin] must be a constant, received [integerField]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bucket(longField, integerField, longField, longField)',
+          [
+            'Argument of [bucket] must be a constant, received [integerField]',
+            'Argument of [bucket] must be a constant, received [longField]',
+            'Argument of [bucket] must be a constant, received [longField]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats by bin(longField, integerField, longField, longField)',
+          [
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [longField]',
+            'Argument of [bin] must be a constant, received [longField]',
+          ]
+        );
+
+        testErrorsAndWarnings('from a_index | stats by bucket(dateField, textField)', [
+          'Argument of [bucket] must be a constant, received [textField]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | stats by bin(dateField, textField)', [
+          'Argument of [bin] must be a constant, received [textField]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort bucket(dateField, textField)', [
+          'SORT does not support function bucket',
+        ]);
+
+        testErrorsAndWarnings('from a_index | stats bucket("2022", textField)', [
+          'Argument of [bucket] must be a constant, received [textField]',
+        ]);
+        testErrorsAndWarnings('from a_index | stats bucket(concat("20", "22"), textField)', [
+          'Argument of [bucket] must be [date], found value [concat("20","22")] type [keyword]',
+          'Argument of [bucket] must be a constant, received [textField]',
+        ]);
       });
 
       describe('percentile', () => {
@@ -14448,6 +15885,256 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row nullVar = null | eval to_string(nullVar)', []);
         testErrorsAndWarnings('from a_index | eval to_string("2022")', []);
         testErrorsAndWarnings('from a_index | eval to_string(concat("20", "22"))', []);
+        testErrorsAndWarnings('row var = to_string(to_cartesianpoint("POINT (30 10)"))', []);
+        testErrorsAndWarnings('row to_string(to_cartesianpoint("POINT (30 10)"))', []);
+        testErrorsAndWarnings('row var = to_str(to_cartesianpoint("POINT (30 10)"))', []);
+
+        testErrorsAndWarnings(
+          'row var = to_string(to_cartesianpoint(to_cartesianpoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = to_string(to_cartesianshape(to_cartesianpoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings('row var = to_string(to_geopoint("POINT (30 10)"))', []);
+        testErrorsAndWarnings('row to_string(to_geopoint("POINT (30 10)"))', []);
+        testErrorsAndWarnings('row var = to_str(to_geopoint("POINT (30 10)"))', []);
+        testErrorsAndWarnings('row var = to_string(to_geopoint(to_geopoint("POINT (30 10)")))', []);
+        testErrorsAndWarnings('row var = to_string(to_geoshape(to_geopoint("POINT (30 10)")))', []);
+      });
+
+      describe('mv_pseries_weighted_sum', () => {
+        testErrorsAndWarnings('row var = mv_pseries_weighted_sum(5.5, 5.5)', []);
+        testErrorsAndWarnings('row mv_pseries_weighted_sum(5.5, 5.5)', []);
+        testErrorsAndWarnings(
+          'row var = mv_pseries_weighted_sum(to_double(true), to_double(true))',
+          []
+        );
+
+        testErrorsAndWarnings('row var = mv_pseries_weighted_sum(true, true)', [
+          'Argument of [mv_pseries_weighted_sum] must be [double], found value [true] type [boolean]',
+          'Argument of [mv_pseries_weighted_sum] must be [double], found value [true] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | where mv_pseries_weighted_sum(doubleField, doubleField) > 0',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | where mv_pseries_weighted_sum(booleanField, booleanField) > 0',
+          [
+            'Argument of [mv_pseries_weighted_sum] must be [double], found value [booleanField] type [boolean]',
+            'Argument of [mv_pseries_weighted_sum] must be [double], found value [booleanField] type [boolean]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_pseries_weighted_sum(doubleField, doubleField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval mv_pseries_weighted_sum(doubleField, doubleField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_pseries_weighted_sum(to_double(booleanField), to_double(booleanField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval mv_pseries_weighted_sum(booleanField, booleanField)',
+          [
+            'Argument of [mv_pseries_weighted_sum] must be [double], found value [booleanField] type [boolean]',
+            'Argument of [mv_pseries_weighted_sum] must be [double], found value [booleanField] type [boolean]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval mv_pseries_weighted_sum(doubleField, doubleField, extraArg)',
+          ['Error: [mv_pseries_weighted_sum] function expects exactly 2 arguments, got 3.']
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | sort mv_pseries_weighted_sum(doubleField, doubleField)',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval mv_pseries_weighted_sum(null, null)', []);
+        testErrorsAndWarnings(
+          'row nullVar = null | eval mv_pseries_weighted_sum(nullVar, nullVar)',
+          []
+        );
+      });
+
+      describe('mv_percentile', () => {
+        testErrorsAndWarnings('row var = mv_percentile(5.5, 5.5)', []);
+        testErrorsAndWarnings('row mv_percentile(5.5, 5.5)', []);
+        testErrorsAndWarnings('row var = mv_percentile(to_double(true), to_double(true))', []);
+        testErrorsAndWarnings('row var = mv_percentile(5.5, 5)', []);
+        testErrorsAndWarnings('row mv_percentile(5.5, 5)', []);
+        testErrorsAndWarnings('row var = mv_percentile(to_double(true), to_integer(true))', []);
+        testErrorsAndWarnings('row var = mv_percentile(to_double(true), 5)', []);
+        testErrorsAndWarnings('row var = mv_percentile(5, 5.5)', []);
+        testErrorsAndWarnings('row mv_percentile(5, 5.5)', []);
+        testErrorsAndWarnings('row var = mv_percentile(to_integer(true), to_double(true))', []);
+        testErrorsAndWarnings('row var = mv_percentile(5, 5)', []);
+        testErrorsAndWarnings('row mv_percentile(5, 5)', []);
+        testErrorsAndWarnings('row var = mv_percentile(to_integer(true), to_integer(true))', []);
+        testErrorsAndWarnings('row var = mv_percentile(to_integer(true), 5)', []);
+        testErrorsAndWarnings('row var = mv_percentile(5, to_double(true))', []);
+        testErrorsAndWarnings('row var = mv_percentile(5, to_integer(true))', []);
+
+        testErrorsAndWarnings('row var = mv_percentile(true, true)', [
+          'Argument of [mv_percentile] must be [double], found value [true] type [boolean]',
+          'Argument of [mv_percentile] must be [double], found value [true] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | where mv_percentile(doubleField, doubleField) > 0',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | where mv_percentile(booleanField, booleanField) > 0',
+          [
+            'Argument of [mv_percentile] must be [double], found value [booleanField] type [boolean]',
+            'Argument of [mv_percentile] must be [double], found value [booleanField] type [boolean]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | where mv_percentile(doubleField, integerField) > 0',
+          []
+        );
+        testErrorsAndWarnings('from a_index | where mv_percentile(doubleField, longField) > 0', []);
+        testErrorsAndWarnings(
+          'from a_index | where mv_percentile(integerField, doubleField) > 0',
+          []
+        );
+        testErrorsAndWarnings(
+          'from a_index | where mv_percentile(integerField, integerField) > 0',
+          []
+        );
+        testErrorsAndWarnings(
+          'from a_index | where mv_percentile(integerField, longField) > 0',
+          []
+        );
+        testErrorsAndWarnings('from a_index | where mv_percentile(longField, doubleField) > 0', []);
+        testErrorsAndWarnings(
+          'from a_index | where mv_percentile(longField, integerField) > 0',
+          []
+        );
+        testErrorsAndWarnings('from a_index | where mv_percentile(longField, longField) > 0', []);
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_percentile(doubleField, doubleField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval mv_percentile(doubleField, doubleField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_percentile(to_double(booleanField), to_double(booleanField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval mv_percentile(booleanField, booleanField)', [
+          'Argument of [mv_percentile] must be [double], found value [booleanField] type [boolean]',
+          'Argument of [mv_percentile] must be [double], found value [booleanField] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_percentile(doubleField, integerField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval mv_percentile(doubleField, integerField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_percentile(to_double(booleanField), to_integer(booleanField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_percentile(doubleField, longField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval mv_percentile(doubleField, longField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_percentile(to_double(booleanField), longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_percentile(integerField, doubleField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval mv_percentile(integerField, doubleField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_percentile(to_integer(booleanField), to_double(booleanField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_percentile(integerField, integerField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval mv_percentile(integerField, integerField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_percentile(to_integer(booleanField), to_integer(booleanField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_percentile(integerField, longField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval mv_percentile(integerField, longField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_percentile(to_integer(booleanField), longField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_percentile(longField, doubleField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval mv_percentile(longField, doubleField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_percentile(longField, to_double(booleanField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_percentile(longField, integerField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval mv_percentile(longField, integerField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_percentile(longField, to_integer(booleanField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval var = mv_percentile(longField, longField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_percentile(longField, longField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval mv_percentile(doubleField, doubleField, extraArg)',
+          ['Error: [mv_percentile] function expects exactly 2 arguments, got 3.']
+        );
+
+        testErrorsAndWarnings('from a_index | sort mv_percentile(doubleField, doubleField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_percentile(null, null)', []);
+        testErrorsAndWarnings('row nullVar = null | eval mv_percentile(nullVar, nullVar)', []);
       });
     });
   });

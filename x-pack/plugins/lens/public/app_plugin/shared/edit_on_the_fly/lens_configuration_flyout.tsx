@@ -153,9 +153,6 @@ export function LensEditConfigurationFlyout({
       }
     };
     getESQLGridAttrs();
-    return () => {
-      abortController.abort();
-    };
   }, [adHocDataViews, dataGridAttrs, query, startDependencies]);
 
   const attributesChanged: boolean = useMemo(() => {
@@ -239,6 +236,11 @@ export function LensEditConfigurationFlyout({
     onCancelCb,
   ]);
 
+  const textBasedMode = useMemo(
+    () => (isOfAggregateQueryType(query) ? getAggregateQueryMode(query) : undefined),
+    [query]
+  );
+
   const onApply = useCallback(() => {
     const dsStates = Object.fromEntries(
       Object.entries(datasourceStates).map(([id, ds]) => {
@@ -246,18 +248,21 @@ export function LensEditConfigurationFlyout({
         return [id, dsState];
       })
     );
-    const references = extractReferencesFromState({
-      activeDatasources: Object.keys(datasourceStates).reduce(
-        (acc, id) => ({
-          ...acc,
-          [id]: datasourceMap[id],
-        }),
-        {}
-      ),
-      datasourceStates,
-      visualizationState: visualization.state,
-      activeVisualization,
-    });
+    // as ES|QL queries are using adHoc dataviews, we don't want to pass references
+    const references = !textBasedMode
+      ? extractReferencesFromState({
+          activeDatasources: Object.keys(datasourceStates).reduce(
+            (acc, id) => ({
+              ...acc,
+              [id]: datasourceMap[id],
+            }),
+            {}
+          ),
+          datasourceStates,
+          visualizationState: visualization.state,
+          activeVisualization,
+        })
+      : [];
     const attrs = {
       ...attributes,
       state: {
@@ -289,14 +294,15 @@ export function LensEditConfigurationFlyout({
     onApplyCb?.(attrs as TypedLensByValueInput['attributes']);
     closeFlyout?.();
   }, [
-    visualization.activeId,
-    savedObjectId,
-    closeFlyout,
-    onApplyCb,
     datasourceStates,
+    textBasedMode,
     visualization.state,
+    visualization.activeId,
     activeVisualization,
     attributes,
+    savedObjectId,
+    onApplyCb,
+    closeFlyout,
     datasourceMap,
     saveByRef,
     updateByRefInput,
@@ -384,8 +390,6 @@ export function LensEditConfigurationFlyout({
     visualization.state,
     getUserMessages,
   ]);
-
-  const textBasedMode = isOfAggregateQueryType(query) ? getAggregateQueryMode(query) : undefined;
 
   if (isLoading) return null;
   // Example is the Discover editing where we dont want to render the text based editor on the panel, neither the suggestions (for now)
@@ -479,8 +483,6 @@ export function LensEditConfigurationFlyout({
                   setQuery(q);
                   prevQuery.current = q;
                 }}
-                expandCodeEditor={(status: boolean) => {}}
-                isCodeEditorExpanded
                 detectedTimestamp={adHocDataViews?.[0]?.timeFieldName}
                 hideTimeFilterInfo={hideTimeFilterInfo}
                 errors={errors}
@@ -492,7 +494,6 @@ export function LensEditConfigurationFlyout({
                       })
                     : undefined
                 }
-                hideMinimizeButton
                 editorIsInline
                 hideRunQueryText
                 onTextLangQuerySubmit={async (q, a) => {

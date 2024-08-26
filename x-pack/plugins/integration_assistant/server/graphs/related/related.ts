@@ -9,8 +9,8 @@ import type {
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';
 import { JsonOutputParser } from '@langchain/core/output_parsers';
-import type { ESProcessorItem, Pipeline } from '../../../common';
-import type { RelatedState } from '../../types';
+import type { Pipeline } from '../../../common';
+import type { RelatedState, SimplifiedProcessors, SimplifiedProcessor } from '../../types';
 import { combineProcessors } from '../../util/processors';
 import { RELATED_MAIN_PROMPT } from './prompts';
 
@@ -26,9 +26,14 @@ export async function handleRelated(
     pipeline_results: JSON.stringify(state.pipelineResults, null, 2),
     ex_answer: state.exAnswer,
     ecs: state.ecs,
-  })) as ESProcessorItem[];
+  })) as SimplifiedProcessor[];
 
-  const currentPipeline = combineProcessors(state.initialPipeline as Pipeline, currentProcessors);
+  const processors = {
+    type: 'related',
+    processors: currentProcessors,
+  } as SimplifiedProcessors;
+
+  const currentPipeline = combineProcessors(state.initialPipeline as Pipeline, processors);
 
   return {
     currentPipeline,

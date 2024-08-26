@@ -26,7 +26,6 @@ export enum ContentTabIds {
   ANOMALIES = 'anomalies',
   OSQUERY = 'osquery',
   LOGS = 'logs',
-  LINK_TO_APM = 'linkToApm',
   DASHBOARDS = 'dashboards',
 }
 
@@ -94,13 +93,8 @@ export interface RouteState {
 
 export type DataViewOrigin = 'logs' | 'metrics';
 
-export enum INTEGRATION_NAME {
+export enum IntegrationEventModules {
   kubernetesNode = 'kubernetesNode',
   kubernetesContainer = 'kubernetesContainer',
   docker = 'docker',
-}
-
-export enum ASSET_DETAILS_ASSET_TYPE {
-  container = 'container',
-  host = 'host',
 }

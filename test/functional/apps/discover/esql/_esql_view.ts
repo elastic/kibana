@@ -38,7 +38,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     enableESQL: true,
   };
 
-  describe('discover esql view', async function () {
+  describe('discover esql view', function () {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
@@ -113,11 +113,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.exists('unifiedHistogramChart')).to.be(false);
       });
 
-      it('should render the histogram for indices with no @timestamp field when the ?start, ?end params are in the query', async function () {
+      it('should render the histogram for indices with no @timestamp field when the ?t_start, ?t_end params are in the query', async function () {
         await PageObjects.discover.selectTextBaseLang();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
-        const testQuery = `from kibana_sample_data_flights | limit 10 | where timestamp >= ?start and timestamp <= ?end`;
+        const testQuery = `from kibana_sample_data_flights | limit 10 | where timestamp >= ?t_start and timestamp <= ?t_end`;
 
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
@@ -194,8 +194,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
         expect(await cell.getVisibleText()).to.be(' - ');
         expect(await dataGrid.getHeaders()).to.eql([
-          'Control column',
           'Select column',
+          'Control column',
           'Numberbytes',
           'machine.ram_range',
         ]);
@@ -253,9 +253,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.selectTextBaseLang();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
-        await PageObjects.discover.selectIndexPattern('logstash-*', false);
+        await testSubjects.click('switch-to-dataviews');
         await retry.try(async () => {
-          await testSubjects.existOrFail('unifiedSearch_switch_modal');
+          await testSubjects.existOrFail('discover-esql-to-dataview-modal');
         });
       });
 
@@ -266,19 +266,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('querySubmitButton');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
-        await PageObjects.discover.selectIndexPattern('logstash-*', false);
+        await testSubjects.click('switch-to-dataviews');
         await retry.try(async () => {
-          await testSubjects.existOrFail('unifiedSearch_switch_modal');
+          await testSubjects.existOrFail('discover-esql-to-dataview-modal');
         });
         await find.clickByCssSelector(
-          '[data-test-subj="unifiedSearch_switch_modal"] .euiModal__closeIcon'
+          '[data-test-subj="discover-esql-to-dataview-modal"] .euiModal__closeIcon'
         );
         await retry.try(async () => {
-          await testSubjects.missingOrFail('unifiedSearch_switch_modal');
+          await testSubjects.missingOrFail('discover-esql-to-dataview-modal');
         });
         await PageObjects.discover.saveSearch('esql_test');
-        await PageObjects.discover.selectIndexPattern('logstash-*');
-        await testSubjects.missingOrFail('unifiedSearch_switch_modal');
+        await testSubjects.click('switch-to-dataviews');
+        await testSubjects.missingOrFail('discover-esql-to-dataview-modal');
       });
 
       it('should show switch modal when switching to a data view while a saved search with unsaved changes is open', async () => {
@@ -291,9 +291,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('querySubmitButton');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
-        await PageObjects.discover.selectIndexPattern('logstash-*', false);
+        await testSubjects.click('switch-to-dataviews');
         await retry.try(async () => {
-          await testSubjects.existOrFail('unifiedSearch_switch_modal');
+          await testSubjects.existOrFail('discover-esql-to-dataview-modal');
         });
       });
     });
@@ -339,7 +339,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
-        await testSubjects.click('TextBasedLangEditor-expand');
         await testSubjects.click('TextBasedLangEditor-toggle-query-history-button');
         const historyItems = await esql.getHistoryItems();
         log.debug(historyItems);
@@ -362,7 +361,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
 
-        await testSubjects.click('TextBasedLangEditor-expand');
         await testSubjects.click('TextBasedLangEditor-toggle-query-history-button');
         const historyItems = await esql.getHistoryItems();
         log.debug(historyItems);
@@ -379,7 +377,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
-        await testSubjects.click('TextBasedLangEditor-expand');
         await testSubjects.click('TextBasedLangEditor-toggle-query-history-button');
         // click a history item
         await esql.clickHistoryItem(1);
@@ -405,7 +402,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
 
-        await testSubjects.click('TextBasedLangEditor-expand');
         await testSubjects.click('TextBasedLangEditor-toggle-query-history-button');
         const historyItem = await esql.getHistoryItem(0);
         await historyItem.findByTestSubject('TextBasedLangEditor-queryHistory-error');
@@ -597,7 +593,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
-        await testSubjects.click('TextBasedLangEditor-expand');
         await dataGrid.clickCellFilterForButtonExcludingControlColumns(0, 1);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
@@ -630,7 +625,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
-        await testSubjects.click('TextBasedLangEditor-expand');
         await dataGrid.clickCellFilterForButtonExcludingControlColumns(0, 1);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();

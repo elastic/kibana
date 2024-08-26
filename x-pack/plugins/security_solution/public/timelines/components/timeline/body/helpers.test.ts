@@ -6,7 +6,7 @@
  */
 
 import { eventHasNotes, eventIsPinned, getPinOnClick, getPinTooltip } from './helpers';
-import { TimelineType } from '../../../../../common/api/timeline';
+import { TimelineTypeEnum } from '../../../../../common/api/timeline';
 
 describe('helpers', () => {
   describe('eventHasNotes', () => {
@@ -26,7 +26,7 @@ describe('helpers', () => {
           isAlert: false,
           isPinned: true,
           eventHasNotes: true,
-          timelineType: TimelineType.default,
+          timelineType: TimelineTypeEnum.default,
         })
       ).toEqual('This event cannot be unpinned because it has notes');
     });
@@ -37,7 +37,7 @@ describe('helpers', () => {
           isAlert: true,
           isPinned: true,
           eventHasNotes: true,
-          timelineType: TimelineType.default,
+          timelineType: TimelineTypeEnum.default,
         })
       ).toEqual('This alert cannot be unpinned because it has notes');
     });
@@ -48,7 +48,7 @@ describe('helpers', () => {
           isAlert: false,
           isPinned: true,
           eventHasNotes: false,
-          timelineType: TimelineType.default,
+          timelineType: TimelineTypeEnum.default,
         })
       ).toEqual('Unpin event');
     });
@@ -59,7 +59,7 @@ describe('helpers', () => {
           isAlert: true,
           isPinned: true,
           eventHasNotes: false,
-          timelineType: TimelineType.default,
+          timelineType: TimelineTypeEnum.default,
         })
       ).toEqual('Unpin alert');
     });
@@ -70,7 +70,7 @@ describe('helpers', () => {
           isAlert: false,
           isPinned: false,
           eventHasNotes: true,
-          timelineType: TimelineType.default,
+          timelineType: TimelineTypeEnum.default,
         })
       ).toEqual('This event cannot be unpinned because it has notes');
     });
@@ -81,7 +81,7 @@ describe('helpers', () => {
           isAlert: true,
           isPinned: false,
           eventHasNotes: true,
-          timelineType: TimelineType.default,
+          timelineType: TimelineTypeEnum.default,
         })
       ).toEqual('This alert cannot be unpinned because it has notes');
     });
@@ -92,7 +92,7 @@ describe('helpers', () => {
           isAlert: false,
           isPinned: false,
           eventHasNotes: false,
-          timelineType: TimelineType.default,
+          timelineType: TimelineTypeEnum.default,
         })
       ).toEqual('Pin event');
     });
@@ -103,7 +103,7 @@ describe('helpers', () => {
           isAlert: true,
           isPinned: false,
           eventHasNotes: false,
-          timelineType: TimelineType.default,
+          timelineType: TimelineTypeEnum.default,
         })
       ).toEqual('Pin alert');
     });
@@ -114,7 +114,7 @@ describe('helpers', () => {
           isAlert: false,
           isPinned: false,
           eventHasNotes: false,
-          timelineType: TimelineType.template,
+          timelineType: TimelineTypeEnum.template,
         })
       ).toEqual('This event may not be pinned while editing a template timeline');
     });
@@ -125,7 +125,7 @@ describe('helpers', () => {
           isAlert: true,
           isPinned: false,
           eventHasNotes: false,
-          timelineType: TimelineType.template,
+          timelineType: TimelineTypeEnum.template,
         })
       ).toEqual('This alert may not be pinned while editing a template timeline');
     });

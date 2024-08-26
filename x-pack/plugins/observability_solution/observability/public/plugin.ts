@@ -70,6 +70,7 @@ import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public'
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
+import { InvestigatePublicStart } from '@kbn/investigate-plugin/public';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import {
   ALERTS_PATH,
@@ -161,6 +162,7 @@ export interface ObservabilityPublicPluginsStart {
   theme: CoreStart['theme'];
   dataViewFieldEditor: DataViewFieldEditorStart;
   toastNotifications: ToastsStart;
+  investigate?: InvestigatePublicStart;
 }
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
 
@@ -443,14 +445,18 @@ export class Plugin
   }
 
   public start(coreStart: CoreStart, pluginsStart: ObservabilityPublicPluginsStart) {
-    const { application } = coreStart;
+    const { application, http, notifications } = coreStart;
+    const { dataViews, triggersActionsUi } = pluginsStart;
     const config = this.initContext.config.get();
-    const { alertsTableConfigurationRegistry } = pluginsStart.triggersActionsUi;
+    const { alertsTableConfigurationRegistry } = triggersActionsUi;
     this.lazyRegisterAlertsTableConfiguration().then(({ registerAlertsTableConfiguration }) => {
       return registerAlertsTableConfiguration(
         alertsTableConfigurationRegistry,
         this.observabilityRuleTypeRegistry,
-        config
+        config,
+        dataViews,
+        http,
+        notifications
       );
     });
 
