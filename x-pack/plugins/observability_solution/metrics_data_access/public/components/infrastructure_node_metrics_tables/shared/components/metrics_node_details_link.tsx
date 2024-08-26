@@ -8,7 +8,6 @@
 import { parse } from '@kbn/datemath';
 import { EuiLink } from '@elastic/eui';
 import React from 'react';
-import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import type { InventoryItemType } from '../../../../../common/inventory_models/types';
 import { useNodeDetailsRedirect } from '../../../../pages/link_to/use_node_details_redirect';
 
@@ -28,16 +27,14 @@ export const MetricsNodeDetailsLink = ({
   timerange,
 }: MetricsNodeDetailsLinkProps) => {
   const { getNodeDetailUrl } = useNodeDetailsRedirect();
-  const linkProps = useLinkProps(
-    getNodeDetailUrl({
-      nodeType,
-      nodeId: id,
-      search: {
-        from: parse(timerange.from)?.valueOf(),
-        to: parse(timerange.to)?.valueOf(),
-      },
-    })
-  );
+  const linkProps = getNodeDetailUrl({
+    nodeType,
+    nodeId: id,
+    search: {
+      from: parse(timerange.from)?.valueOf(),
+      to: parse(timerange.to)?.valueOf(),
+    },
+  });
 
   return (
     <EuiLink data-test-subj="infraMetricsNodeDetailsLinkLink" href={linkProps.href}>
