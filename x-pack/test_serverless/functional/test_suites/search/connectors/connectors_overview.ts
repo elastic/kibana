@@ -31,7 +31,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it('has embedded dev console', async () => {
       await testHasEmbeddedConsole(pageObjects);
     });
-    describe('create and configure connector', async () => {
+    describe('create and configure connector', () => {
       it('create connector and confirm connector configuration page is loaded', async () => {
         await pageObjects.svlSearchConnectorsPage.connectorConfigurationPage.createConnector();
         await pageObjects.svlSearchConnectorsPage.connectorConfigurationPage.expectConnectorIdToMatchUrl(
@@ -59,7 +59,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectConnectorTableToExist();
       });
     });
-    describe('connector table', async () => {
+    describe('connector table', () => {
       it('confirm searchBar to exist', async () => {
         await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectSearchBarToExist();
       });
@@ -87,7 +87,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.click('clearSearchButton');
       });
     });
-    describe('delete connector', async () => {
+    describe('delete connector', () => {
       it('delete connector button exist in table', async () => {
         await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectDeleteConnectorButtonExist();
       });

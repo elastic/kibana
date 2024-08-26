@@ -55,8 +55,8 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
   };
 
   describe('Bedrock', () => {
-    after(() => {
-      objectRemover.removeAll();
+    after(async () => {
+      await objectRemover.removeAll();
     });
     describe('action creation', () => {
       const simulator = new BedrockSimulator({

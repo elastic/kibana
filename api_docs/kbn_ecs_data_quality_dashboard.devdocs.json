@@ -111,6 +111,18 @@
     "misc": [
       {
         "parentPluginId": "@kbn/ecs-data-quality-dashboard",
+        "id": "def-public.DATA_QUALITY_DASHBOARD_CONVERSATION_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DATA_QUALITY_DASHBOARD_CONVERSATION_ID",
+        "description": [],
+        "path": "x-pack/packages/security-solution/ecs_data_quality_dashboard/impl/data_quality/translations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ecs-data-quality-dashboard",
         "id": "def-public.DATA_QUALITY_PROMPT_CONTEXT_PILL_TOOLTIP",
         "type": "string",
         "tags": [],
