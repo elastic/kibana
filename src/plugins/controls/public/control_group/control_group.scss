@@ -103,6 +103,7 @@ $controlMinWidth: $euiSize * 14;
       @include euiTextTruncate;
       border-radius: $euiBorderRadius;
       padding-left: 0;
+      font-weight: 500;
     }
 
     &:not(.controlFrame__formControlLayout-clone) {

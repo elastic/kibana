@@ -54,6 +54,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  font-weight: 500;
 
   &:not(:empty) {
     line-height: $euiSizeL;
@@ -73,7 +74,7 @@
 
   .embPanel__titleText {
     @include euiTextTruncate;
-    font-weight: $euiFontWeightBold;
+    // font-weight: 500;
   }
 
   .embPanel__placeholderTitleText {
@@ -183,4 +184,17 @@
   position: absolute;
   padding-left: $euiSizeS;
   z-index: $euiZLevel1;
+}
+
+// TEMPORARY (METRIC CHART)
+.echMetricText__value {
+  font-weight: 500;
+}
+
+.echMetricText__title {
+  font-weight: 500;
+}
+
+.echMetricText__title button {
+  font-weight: 500;
 }
