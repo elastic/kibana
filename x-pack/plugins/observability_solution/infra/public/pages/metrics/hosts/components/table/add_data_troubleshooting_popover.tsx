@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import {
   EuiBadge,
   EuiButton,
@@ -16,17 +17,19 @@ import {
   EuiPopoverTitle,
   EuiText,
 } from '@elastic/eui';
+
 import {
   ObservabilityOnboardingLocatorParams,
   OBSERVABILITY_ONBOARDING_LOCATOR,
 } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import { useBoolean } from '@kbn/react-hooks';
+
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { APM_HOST_TROUBLESHOOTING_LINK } from '../../../../../components/asset_details/constants';
 
 export const AddDataTroubleshootingPopover = () => {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [isPopoverOpen, { off: closePopover, toggle: togglePopover }] = useBoolean(false);
 
   const {
     services: { share },
@@ -50,8 +53,7 @@ export const AddDataTroubleshootingPopover = () => {
     }),
   };
 
-  const onButtonClick = () => setIsPopoverOpen((prevIsPopoverOpen) => !prevIsPopoverOpen);
-  const closePopover = () => setIsPopoverOpen(false);
+  const onButtonClick = () => togglePopover();
 
   return (
     <EuiPopover
