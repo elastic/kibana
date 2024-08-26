@@ -16,7 +16,7 @@ describe('SelectInterval', () => {
     expect((getByText('1 day') as HTMLOptionElement).selected).toBeTruthy();
   });
 
-  it('calls onChange when clicked', () => {
+  it('calls onChange when clicked', async () => {
     const onChangeCb = jest.fn();
     const { getByText, getByTestId } = render(
       <SelectInterval interval={'day'} onChange={onChangeCb} />

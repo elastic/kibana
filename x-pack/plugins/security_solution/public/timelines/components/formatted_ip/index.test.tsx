@@ -91,7 +91,7 @@ describe('FormattedIp', () => {
     expect(screen.getByTestId('DraggableWrapper')).toBeInTheDocument();
   });
 
-  test('if enableIpDetailsFlyout, should open NetworkDetails expandable flyout', () => {
+  test('if enableIpDetailsFlyout, should open NetworkDetails expandable flyout', async () => {
     const context = {
       enableHostDetailsFlyout: true,
       enableIpDetailsFlyout: true,

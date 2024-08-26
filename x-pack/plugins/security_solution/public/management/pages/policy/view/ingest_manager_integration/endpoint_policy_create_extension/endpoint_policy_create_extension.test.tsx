@@ -136,7 +136,7 @@ describe('Onboarding Component new section', () => {
         ${'DataCollection'} | ${'below platinum'} | ${'should NOT see'} | ${''}
         ${'DataCollection'} | ${'platinum'}       | ${'should NOT see'} | ${''}
         ${'DataCollection'} | ${'enterprise'}     | ${'should NOT see'} | ${''}
-      `('$preset: $license users $result notes', ({ license, preset, result, text }) => {
+      `('$preset: $license users $result notes', async ({ license, preset, result, text }) => {
         const isEnterprise = license === 'enterprise';
         const isPlatinumPlus = ['platinum', 'enterprise'].includes(license);
 
@@ -223,7 +223,7 @@ describe('Onboarding Component new section', () => {
       });
     });
 
-    it('should still be able to select cloud configuration', () => {
+    it('should still be able to select cloud configuration', async () => {
       render();
       await userEvent.selectOptions(screen.getByTestId('selectIntegrationTypeId'), ['cloud']);
 

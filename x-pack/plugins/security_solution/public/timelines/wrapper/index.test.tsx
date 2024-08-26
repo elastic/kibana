@@ -58,7 +58,7 @@ describe('TimelineWrapper', () => {
     expect(getByText('Untitled timeline')).toBeInTheDocument();
   });
 
-  it('should show timeline when bottom bar button is clicked', () => {
+  it('should show timeline when bottom bar button is clicked', async () => {
     const { getByTestId } = render(
       <TestProviders>
         <TimelineWrapper {...props} />
@@ -72,7 +72,7 @@ describe('TimelineWrapper', () => {
     );
   });
 
-  it('should hide timeline when user presses keyboard esc key', () => {
+  it('should hide timeline when user presses keyboard esc key', async () => {
     render(
       <TestProviders>
         <TimelineWrapper {...props} />

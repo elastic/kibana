@@ -377,7 +377,7 @@ describe('SlackParamsFields renders', () => {
     fireEvent.change(getByTestId('slackApiChannelId'), {
       target: { value: 'new-channel-id' },
     });
-    userEvent.tab();
+    await userEvent.tab();
 
     await waitFor(() => {
       expect(mockEditFunc).toBeCalledWith(

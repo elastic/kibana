@@ -27,9 +27,7 @@ describe('When entering data into the Console input', () => {
       expect(renderResult.getByTestId('test-inputHistorySelector')).not.toBeNull();
     });
 
-    const selectable = renderResult.getByTestId('test-inputHistorySelector');
-
-    userEvent.tab({ focusTrap: selectable });
+    await userEvent.tab();
   };
 
   const getInputPlaceholderText = () => {

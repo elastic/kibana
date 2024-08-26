@@ -54,16 +54,14 @@ describe('AxesSettingsPopover', () => {
   });
 
   const renderAxisSettingsPopover = async (props: Partial<Props> = {}) => {
+    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
+    const user = userEvent.setup({ delay: null });
     const renderResult = render(<AxisSettingsPopover {...defaultProps} {...props} />);
 
-    const togglePopover = async () => {
-      await userEvent.click(screen.getByRole('button'));
-    };
-    await togglePopover();
+    await user.click(screen.getByRole('button'));
 
     return {
       renderer: renderResult,
-      togglePopover,
       orientation: new EuiButtonGroupTestHarness('lnsXY_axisOrientation_groups'),
       bounds: new EuiButtonGroupTestHarness('lnsXY_axisBounds_groups'),
     };

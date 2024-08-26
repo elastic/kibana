@@ -107,7 +107,7 @@ describe('Field Renderers', () => {
       expect(screen.queryByTestId('more-container')).not.toBeInTheDocument();
     });
 
-    test('it should render the items after overflowIndexStart in the popover', () => {
+    test('it should render the items after overflowIndexStart in the popover', async () => {
       render(
         <TestProviders>
           <DefaultFieldRendererOverflow
