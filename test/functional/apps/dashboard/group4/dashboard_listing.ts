@@ -240,14 +240,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const DASHBOARD_NAME = 'Insights Dashboard';
 
       before(async () => {
-        await PageObjects.dashboard.navigateToApp();
-        await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.dashboard.saveDashboard(DASHBOARD_NAME, {
+        await dashboard.navigateToApp();
+        await dashboard.clickNewDashboard();
+        await dashboard.saveDashboard(DASHBOARD_NAME, {
           saveAsNew: true,
           waitDialogIsClosed: false,
           exitFromEditMode: false,
         });
-        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await dashboard.gotoDashboardLandingPage();
       });
 
       it('shows the insights panel and counts the views', async () => {
@@ -267,8 +267,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(views1).to.be(1);
 
         await listingTable.clickItemLink('dashboard', DASHBOARD_NAME);
-        await PageObjects.dashboard.waitForRenderComplete();
-        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await dashboard.waitForRenderComplete();
+        await dashboard.gotoDashboardLandingPage();
         const views2 = await getViewsCount();
         expect(views2).to.be(2);
       });
