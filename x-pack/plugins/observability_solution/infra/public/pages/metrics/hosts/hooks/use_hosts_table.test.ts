@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HostNodeRow, useHostsTable } from './use_hosts_table';
+import { type HostNodeRow, useHostsTable } from './use_hosts_table';
 import { renderHook } from '@testing-library/react-hooks';
 import { InfraAssetMetricsItem } from '../../../../../common/http_api';
 import * as useUnifiedSearchHooks from './use_unified_search';
