@@ -31,7 +31,6 @@ import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
 import { ESQLRealField } from '@kbn/esql-validation-autocomplete';
 import { FieldType } from '@kbn/esql-validation-autocomplete/src/definitions/types';
-import { TRIGGER_SUGGESTION_COMMAND } from '@kbn/esql-validation-autocomplete/src/autocomplete/factories';
 import { EditorFooter } from './editor_footer';
 import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
 import {
@@ -196,7 +195,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const showSuggestionsIfEmptyQuery = useCallback(() => {
     if (editorModel.current?.getValueLength() === 0) {
       setImmediate(() => {
-        editor1.current?.trigger(undefined, TRIGGER_SUGGESTION_COMMAND.id, {});
+        editor1.current?.trigger(undefined, 'editor.action.triggerSuggest', {});
       });
     }
   }, []);
