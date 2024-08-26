@@ -1,23 +1,7 @@
 [[actions-and-connectors-api]]
 == Action and connector APIs
 
-NOTE: For the latest details, refer to {api-kibana}/group/endpoint-connectors[connector APIs].
-
 For information about the actions and connectors that {kib} supports, refer to
 <<action-types>>.
 
-include::actions-and-connectors/create.asciidoc[leveloffset=+1]
-include::actions-and-connectors/delete.asciidoc[leveloffset=+1]
-include::actions-and-connectors/get.asciidoc[leveloffset=+1]
-include::actions-and-connectors/get_all.asciidoc[leveloffset=+1]
-include::actions-and-connectors/list.asciidoc[leveloffset=+1]
-include::actions-and-connectors/execute.asciidoc[leveloffset=+1]
-include::actions-and-connectors/update.asciidoc[leveloffset=+1]
-include::actions-and-connectors/legacy/index.asciidoc[]
-include::actions-and-connectors/legacy/get.asciidoc[]
-include::actions-and-connectors/legacy/get_all.asciidoc[]
-include::actions-and-connectors/legacy/list.asciidoc[]
-include::actions-and-connectors/legacy/create.asciidoc[]
-include::actions-and-connectors/legacy/update.asciidoc[]
-include::actions-and-connectors/legacy/execute.asciidoc[]
-include::actions-and-connectors/legacy/delete.asciidoc[]
+For the latest API details, refer to {api-kibana}/group/endpoint-connectors[connector APIs].
