@@ -24,7 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      // await server.savedObjects.cleanStandardList();
+      await server.savedObjects.cleanStandardList();
     });
 
     describe('NumberOfChecks', () => {
@@ -228,7 +228,7 @@ export default function ({ getService }: FtrProviderContext) {
         const params: StatusRuleParams = {
           condition: {
             window: {
-              numberOfLocations: 0.5,
+              numberOfLocations: 1,
             },
             groupBy: 'locationId',
             downThreshold: 1,
@@ -248,7 +248,7 @@ export default function ({ getService }: FtrProviderContext) {
         const alert: any = response.hits.hits?.[0]._source;
         expect(alert).to.have.property('kibana.alert.status', 'active');
         expect(alert['kibana.alert.reason']).to.eql(
-          `Monitor "${monitor.name}" is down from 1 location (Dev Service). Alert when down from 50% of monitor locations.`
+          `Monitor "${monitor.name}" is down from 1 location (Dev Service). Alert when monitor is down from 1 location.`
         );
       });
 
@@ -270,7 +270,7 @@ export default function ({ getService }: FtrProviderContext) {
           const alert: any = response.hits.hits?.[0]._source;
           expect(alert).to.have.property('kibana.alert.status', 'active');
           expect(alert['kibana.alert.reason']).to.eql(
-            `Monitor "${monitor.name}" is down from 2 locations (Dev Service, ${pvtLoc.label}). Alert when down from 50% of monitor locations.`
+            `Monitor "${monitor.name}" is down from 2 locations (Dev Service, ${pvtLoc.label}). Alert when monitor is down from 1 location.`
           );
         });
       });
