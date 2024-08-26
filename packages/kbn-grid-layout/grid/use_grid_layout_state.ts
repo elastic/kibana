@@ -28,6 +28,7 @@ export const useGridLayoutState = ({
   const rowRefs = useRef<Array<HTMLDivElement | null>>([]);
   const dragPreviewRef = useRef<HTMLDivElement | null>(null);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const { initialLayout, gridSettings } = useMemo(() => getCreationOptions(), []);
 
   const gridLayoutStateManager = useMemo(() => {
@@ -85,6 +86,7 @@ export const useGridLayoutState = ({
         gridLayoutStateManager.runtimeSettings$.next({ ...gridSettings, columnPixelWidth });
       });
     return () => subscription.unsubscribe();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const { ref: setDimensionsRef } = useResizeObserver<HTMLDivElement>({
