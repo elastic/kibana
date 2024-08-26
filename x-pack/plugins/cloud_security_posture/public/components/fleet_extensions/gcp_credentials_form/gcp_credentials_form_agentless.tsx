@@ -252,7 +252,7 @@ export const GcpCredentialsFormAgentless = ({
         packageInfo={packageInfo}
       />
       <EuiSpacer size="s" />
-      <ReadDocumentation url={cspIntegrationDocsNavigation.cspm.getStartedPath} />
+      <ReadDocumentation url={cspIntegrationDocsNavigation.cspm.gcpGetStartedPath} />
       <EuiSpacer />
     </>
   );
