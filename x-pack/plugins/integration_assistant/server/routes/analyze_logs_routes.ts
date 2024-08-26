@@ -84,16 +84,11 @@ export function registerAnalyzeLogsRoutes(
           };
           const graph = await getLogFormatDetectionGraph(model);
           const graphResults = await graph.invoke(logFormatParameters, options);
-          const graphLogFormat = graphResults.results.logFormat;
-          if (
-            graphLogFormat === 'unsupported' ||
-            graphLogFormat === 'csv' ||
-            graphLogFormat === 'structured' ||
-            graphLogFormat === 'unstructured'
-          ) {
+          const graphLogFormat = graphResults.results.samplesFormat.name;
+          if (graphLogFormat === 'unsupported') {
             return res.customError({
               statusCode: 501,
-              body: { message: `Unsupported log type: ${graphLogFormat}` },
+              body: { message: `Unsupported log samples format` },
             });
           }
           return res.ok({ body: AnalyzeLogsResponse.parse(graphResults) });

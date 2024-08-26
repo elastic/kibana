@@ -67,13 +67,13 @@ function modelOutput(state: LogFormatDetectionState): Partial<LogFormatDetection
 }
 
 function logFormatRouter(state: LogFormatDetectionState): string {
-  // if (state.logFormat === LogFormat.STRUCTURED) {
+  // if (state.samplesFormat === LogFormat.STRUCTURED) {
   //   return 'structured';
   // }
-  // if (state.logFormat === LogFormat.UNSTRUCTURED) {
+  // if (state.samplesFormat === LogFormat.UNSTRUCTURED) {
   //   return 'unstructured';
   // }
-  // if (state.logFormat === LogFormat.CSV) {
+  // if (state.samplesFormat === LogFormat.CSV) {
   //   return 'csv';
   // }
   return 'unsupported';
