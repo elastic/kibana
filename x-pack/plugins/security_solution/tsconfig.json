@@ -213,5 +213,7 @@
     "@kbn/config",
     "@kbn/openapi-common",
     "@kbn/securitysolution-lists-common",
+    "@kbn/cbor",
+    "@kbn/zod",
   ]
 }

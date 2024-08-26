@@ -13,5 +13,6 @@
     "@kbn/tooling-log",
     "@kbn/core-http-common",
     "@kbn/securitysolution-utils",
+    "@kbn/zod",
   ]
 }

@@ -50,7 +50,6 @@ const getSemanticTextFields = (
   return Object.entries(fields).flatMap(([key, value]) => {
     const currentPath: string = path ? `${path}.${key}` : key;
     const currentField: Array<{ path: string; source: SemanticTextProperty }> =
-      // @ts-expect-error because semantic_text type isn't incorporated in API type yet
       value.type === 'semantic_text' ? [{ path: currentPath, source: value }] : [];
     if (hasProperties(value)) {
       const childSemanticTextFields: Array<{ path: string; source: SemanticTextProperty }> =
@@ -100,14 +99,14 @@ export const IndexError: React.FC<IndexErrorProps> = ({ indexName }) => {
       const semanticTextFieldsWithErrors = semanticTextFields
         .map((field) => {
           const model = endpoints.endpoints.find(
-            (endpoint) => endpoint.model_id === field.source.inference_id
+            (endpoint) => endpoint.inference_id === field.source.inference_id
           );
           if (!model) {
             return {
               error: i18n.translate(
                 'xpack.enterpriseSearch.indexOverview.indexErrors.missingModelError',
                 {
-                  defaultMessage: 'Model not found for inference endpoint {inferenceId}',
+                  defaultMessage: 'Inference endpoint {inferenceId} not found',
                   values: {
                     inferenceId: field.source.inference_id as string,
                   },
