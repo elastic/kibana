@@ -39,6 +39,7 @@ export const GridHeightSmoother = ({
       )}px`;
     });
     return () => subscription.unsubscribe();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

@@ -61,7 +61,7 @@ const ScrollOnHover = ({ direction, hide }: { hide: boolean; direction: ScrollDi
           css={css`
             height: 96px;
           `}
-        ></div>
+        />
       )}
       <div
         css={css`
