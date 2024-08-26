@@ -65,9 +65,6 @@ export function setPackageAssetsMapCache(
     ?.set(`${pkgName}:${pkgVersion}`, assetsMap);
 }
 
-/**
- *
- */
 export async function runWithCache<T = any>(cb: () => Promise<T>): Promise<T> {
   const cache = new CacheSession();
 
