@@ -1,0 +1,70 @@
+/*
+* Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+* or more contributor license agreements. Licensed under the Elastic License
+* 2.0; you may not use this file except in compliance with the Elastic License
+* 2.0.
+*/
+
+{{> disclaimer}}
+
+import type { IKibanaResponse, Logger } from '@kbn/core/server';
+import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
+import { transformError } from '@kbn/securitysolution-es-utils';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+
+{{#each imports}}
+import {
+{{#each this}}{{.}},{{/each}}
+} from "{{@key}}"
+{{/each}}
+
+
+{{#each operations}}
+export const {{camelCase operationId}}Route = (
+    router: RoutesDeps['router'],
+    logger: Logger
+) => {
+    router.versioned
+        .{{method}}({
+            access: {{#if access}} {{access}} {{else}} 'public' {{/if}},
+            path: '{{path}}',
+            options: {
+                {{#if tags}} tags: {{tags}}, {{/if}}   
+            },
+        })
+        .addVersion(
+            {
+                version: {{#if version}} {{version}} {{else}} undefined {{/if}},
+                validate: {
+                    request: {
+                        query: {{#if requestQuery}} buildRouteValidationWithZod({{operationId}}RequestQuery), {{else}} undefined, {{/if}}
+                        params: {{#if requestParams}} buildRouteValidationWithZod({{operationId}}RequestParams), {{else}} undefined, {{/if}}
+                        body: {{#if requestBody}} buildRouteValidationWithZod({{operationId}}RequestBody), {{else}} undefined, {{/if}}
+                    },
+                }
+            },
+            
+            async (
+                context,
+                request,
+                response
+            ): Promise<IKibanaResponse<{{operationId}}Response>> => {
+                const siemResponse = buildSiemResponse(response);
+    
+                try {
+                    const body: {{operationId}}Response = undefined;
+                    
+                    return response.ok({ body });
+                } catch (e) {
+                    logger.error("Error in {{operationId}}:", e);
+                    const error = transformError(e);
+                    return siemResponse.error({
+                        statusCode: error.statusCode,
+                        body: error.message,
+                    });
+                }
+            },      
+        )
+};
+{{/each}}
+

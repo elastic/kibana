@@ -28,6 +28,8 @@ export interface GeneratorConfig {
   sourceGlob: string;
   templateName: TemplateName;
   skipLinting?: boolean;
+  extension?: string;
+  outputDir?: string;
   bundle?: {
     /**
      * If provided, the OpenAPI specifications will be bundled and written to this file
@@ -37,7 +39,16 @@ export interface GeneratorConfig {
 }
 
 export const generate = async (config: GeneratorConfig) => {
-  const { title = 'API schemas', rootDir, sourceGlob, templateName, skipLinting, bundle } = config;
+  const {
+    title = 'API schemas',
+    rootDir,
+    sourceGlob,
+    templateName,
+    skipLinting,
+    bundle,
+    extension = 'gen',
+    outputDir,
+  } = config;
 
   if (!skipLinting) {
     await lint({
@@ -63,6 +74,7 @@ export const generate = async (config: GeneratorConfig) => {
       };
     })
   );
+
   // If there are no operations or components to generate, skip this file
   parsedSources = parsedSources.filter(
     ({ generationContext }) =>
@@ -73,7 +85,7 @@ export const generate = async (config: GeneratorConfig) => {
   if (bundle) {
     await fs.rm(bundle.outFile, { force: true });
   } else {
-    await removeGenArtifacts(rootDir);
+    await removeGenArtifacts(rootDir, extension);
   }
 
   console.log(`🪄   Generating new artifacts`);
@@ -111,7 +123,7 @@ export const generate = async (config: GeneratorConfig) => {
         const result = TemplateService.compileTemplate(templateName, generationContext);
 
         // Write the generation result to disk
-        await fs.writeFile(getGeneratedFilePath(sourcePath), result);
+        await fs.writeFile(getGeneratedFilePath(sourcePath, extension, outputDir), result);
       })
     );
   }
@@ -123,7 +135,7 @@ export const generate = async (config: GeneratorConfig) => {
     await formatOutput(bundle.outFile);
     await fixEslint(bundle.outFile);
   } else {
-    const generatedArtifactsGlob = resolve(rootDir, './**/*.gen.ts');
+    const generatedArtifactsGlob = resolve(rootDir, `./**/*.${extension}.ts`);
     await formatOutput(generatedArtifactsGlob);
     await fixEslint(generatedArtifactsGlob);
   }

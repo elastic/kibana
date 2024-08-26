@@ -33,6 +33,7 @@
     "openapi:bundle:detections": "node scripts/openapi/bundle_detections",
     "openapi:bundle:timeline": "node scripts/openapi/bundle_timeline",
     "openapi:bundle:entity-analytics": "node scripts/openapi/bundle_entity_analytics",
+    "openapi:generate:on-week": "node --inspect scripts/openapi/on-week",
     "openapi:bundle:endpoint-management": "node scripts/openapi/bundle_endpoint_management"
   }
 }
