@@ -136,7 +136,7 @@ export const SearchIndexDetailsPage: FunctionComponent<
                 </EuiFlexGroup>,
               ]
         }
-      ></EuiPageHeader>
+      />
       <EuiSpacer size="l" />
       {isShowingDeleteModal && (
         <DeleteIndexModal
