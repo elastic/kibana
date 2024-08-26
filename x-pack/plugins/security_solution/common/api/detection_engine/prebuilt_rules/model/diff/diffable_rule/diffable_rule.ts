@@ -57,6 +57,7 @@ import {
   TimelineTemplateReference,
   TimestampOverrideObject,
 } from './diffable_field_types';
+import { PickVersionValues } from '../../../perform_rule_upgrade/perform_rule_upgrade_route';
 
 export type DiffableCommonFields = z.infer<typeof DiffableCommonFields>;
 export const DiffableCommonFields = z.object({
@@ -260,9 +261,6 @@ export const DiffableUpgradableFields = DiffableAllFields.omit({
   author: true,
   license: true,
 });
-
-export type PickVersionValues = z.infer<typeof PickVersionValues>;
-export const PickVersionValues = z.enum(['BASE', 'CURRENT', 'TARGET', 'MERGED']);
 
 export type FieldUpgradeSpecifier<T> = z.infer<
   ReturnType<typeof fieldUpgradeSpecifier<z.ZodType<T>>>
