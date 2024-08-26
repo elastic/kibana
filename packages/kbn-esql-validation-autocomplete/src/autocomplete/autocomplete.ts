@@ -47,6 +47,7 @@ import {
   findPreviousWord,
   noCaseCompare,
   getColumnByName,
+  sourceExists,
 } from '../shared/helpers';
 import { collectVariables, excludeVariablesFromCurrentCommand } from '../shared/variables';
 import type { ESQLPolicy, ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
@@ -961,15 +962,13 @@ async function getExpressionSuggestionsByType(
         if (index && index.text && index.text !== EDITOR_MARKER) {
           const sources = await getSources();
           const sourceIdentifier = index.text.replace(EDITOR_MARKER, '');
-          const getSourceByName = (name: string) =>
-            sources.find(({ name: _name }) => _name === name);
-          const matchingSource = getSourceByName(sourceIdentifier);
-          if (matchingSource) {
-            if (matchingSource.dataStreams) {
+          if (sourceExists(sourceIdentifier, new Set(sources.map(({ name }) => name)))) {
+            const exactMatch = sources.find(({ name: _name }) => _name === sourceIdentifier);
+            if (exactMatch?.dataStreams) {
               // this is an integration name, suggest the datastreams
               addSuggestionsBasedOnQuote(
                 buildSourcesDefinitions(
-                  matchingSource.dataStreams.map(({ name }) => ({ name, isIntegration: false }))
+                  exactMatch.dataStreams.map(({ name }) => ({ name, isIntegration: false }))
                 )
               );
             } else {
