@@ -1,0 +1,619 @@
+{
+  "id": "@kbn/content-management-content-insights-public",
+  "client": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/content-management-content-insights-public",
+        "id": "def-public.ContentInsightsClient",
+        "type": "Class",
+        "tags": [],
+        "label": "ContentInsightsClient",
+        "description": [
+          "\nClient for the Content Management Insights service."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/content-management-content-insights-public",
+            "scope": "public",
+            "docId": "kibKbnContentManagementContentInsightsPublicPluginApi",
+            "section": "def-public.ContentInsightsClient",
+            "text": "ContentInsightsClient"
+          },
+          " implements ",
+          {
+            "pluginId": "@kbn/content-management-content-insights-public",
+            "scope": "public",
+            "docId": "kibKbnContentManagementContentInsightsPublicPluginApi",
+            "section": "def-public.ContentInsightsClientPublic",
+            "text": "ContentInsightsClientPublic"
+          }
+        ],
+        "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-content-insights-public",
+            "id": "def-public.ContentInsightsClient.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-management-content-insights-public",
+                "id": "def-public.ContentInsightsClient.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "deps",
+                "description": [],
+                "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/content-management-content-insights-public",
+                    "id": "def-public.ContentInsightsClient.Unnamed.$1.http",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "http",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "@kbn/core-http-browser",
+                        "scope": "public",
+                        "docId": "kibKbnCoreHttpBrowserPluginApi",
+                        "section": "def-public.HttpSetup",
+                        "text": "HttpSetup"
+                      }
+                    ],
+                    "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "@kbn/content-management-content-insights-public",
+                "id": "def-public.ContentInsightsClient.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "config",
+                "description": [],
+                "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/content-management-content-insights-public",
+                    "id": "def-public.ContentInsightsClient.Unnamed.$2.domainId",
+                    "type": "string",
+                    "tags": [],
+                    "label": "domainId",
+                    "description": [],
+                    "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/content-management-content-insights-public",
+            "id": "def-public.ContentInsightsClient.track",
+            "type": "Function",
+            "tags": [],
+            "label": "track",
+            "description": [],
+            "signature": [
+              "(id: string, eventType: \"viewed\") => void"
+            ],
+            "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-management-content-insights-public",
+                "id": "def-public.ContentInsightsClient.track.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/content-management-content-insights-public",
+                "id": "def-public.ContentInsightsClient.track.$2",
+                "type": "string",
+                "tags": [],
+                "label": "eventType",
+                "description": [],
+                "signature": [
+                  "\"viewed\""
+                ],
+                "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/content-management-content-insights-public",
+            "id": "def-public.ContentInsightsClient.getStats",
+            "type": "Function",
+            "tags": [],
+            "label": "getStats",
+            "description": [],
+            "signature": [
+              "(id: string, eventType: \"viewed\") => Promise<",
+              {
+                "pluginId": "@kbn/content-management-content-insights-server",
+                "scope": "server",
+                "docId": "kibKbnContentManagementContentInsightsServerPluginApi",
+                "section": "def-server.ContentInsightsStats",
+                "text": "ContentInsightsStats"
+              },
+              ">"
+            ],
+            "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-management-content-insights-public",
+                "id": "def-public.ContentInsightsClient.getStats.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/content-management-content-insights-public",
+                "id": "def-public.ContentInsightsClient.getStats.$2",
+                "type": "string",
+                "tags": [],
+                "label": "eventType",
+                "description": [],
+                "signature": [
+                  "\"viewed\""
+                ],
+                "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/content-management-content-insights-public",
+        "id": "def-public.ActivityView",
+        "type": "Function",
+        "tags": [],
+        "label": "ActivityView",
+        "description": [],
+        "signature": [
+          "({ item }: ",
+          {
+            "pluginId": "@kbn/content-management-content-insights-public",
+            "scope": "public",
+            "docId": "kibKbnContentManagementContentInsightsPublicPluginApi",
+            "section": "def-public.ActivityViewProps",
+            "text": "ActivityViewProps"
+          },
+          ") => JSX.Element"
+        ],
+        "path": "packages/content-management/content_insights/content_insights_public/src/components/activity_view.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-content-insights-public",
+            "id": "def-public.ActivityView.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ item }",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-management-content-insights-public",
+                "scope": "public",
+                "docId": "kibKbnContentManagementContentInsightsPublicPluginApi",
+                "section": "def-public.ActivityViewProps",
+                "text": "ActivityViewProps"
+              }
+            ],
+            "path": "packages/content-management/content_insights/content_insights_public/src/components/activity_view.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-management-content-insights-public",
+        "id": "def-public.ContentInsightsProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "ContentInsightsProvider",
+        "description": [
+          "\nAbstract external service Provider."
+        ],
+        "signature": [
+          "({ children, ...services }: React.PropsWithChildren<React.PropsWithChildren<Partial<",
+          {
+            "pluginId": "@kbn/content-management-content-insights-public",
+            "scope": "public",
+            "docId": "kibKbnContentManagementContentInsightsPublicPluginApi",
+            "section": "def-public.ContentInsightsServices",
+            "text": "ContentInsightsServices"
+          },
+          ">>>) => JSX.Element"
+        ],
+        "path": "packages/content-management/content_insights/content_insights_public/src/services.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-content-insights-public",
+            "id": "def-public.ContentInsightsProvider.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  children,\n  ...services\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<React.PropsWithChildren<Partial<",
+              {
+                "pluginId": "@kbn/content-management-content-insights-public",
+                "scope": "public",
+                "docId": "kibKbnContentManagementContentInsightsPublicPluginApi",
+                "section": "def-public.ContentInsightsServices",
+                "text": "ContentInsightsServices"
+              },
+              ">>>"
+            ],
+            "path": "packages/content-management/content_insights/content_insights_public/src/services.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-management-content-insights-public",
+        "id": "def-public.useServices",
+        "type": "Function",
+        "tags": [],
+        "label": "useServices",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "@kbn/content-management-content-insights-public",
+            "scope": "public",
+            "docId": "kibKbnContentManagementContentInsightsPublicPluginApi",
+            "section": "def-public.ContentInsightsServices",
+            "text": "ContentInsightsServices"
+          },
+          " | null"
+        ],
+        "path": "packages/content-management/content_insights/content_insights_public/src/services.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-management-content-insights-public",
+        "id": "def-public.ViewsStats",
+        "type": "Function",
+        "tags": [],
+        "label": "ViewsStats",
+        "description": [],
+        "signature": [
+          "({ item }: { item: ",
+          {
+            "pluginId": "@kbn/content-management-table-list-view-common",
+            "scope": "common",
+            "docId": "kibKbnContentManagementTableListViewCommonPluginApi",
+            "section": "def-common.UserContentCommonSchema",
+            "text": "UserContentCommonSchema"
+          },
+          "; }) => JSX.Element"
+        ],
+        "path": "packages/content-management/content_insights/content_insights_public/src/components/views_stats/views_stats.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-content-insights-public",
+            "id": "def-public.ViewsStats.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ item }",
+            "description": [],
+            "path": "packages/content-management/content_insights/content_insights_public/src/components/views_stats/views_stats.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-management-content-insights-public",
+                "id": "def-public.ViewsStats.$1.item",
+                "type": "Object",
+                "tags": [],
+                "label": "item",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/content-management-table-list-view-common",
+                    "scope": "common",
+                    "docId": "kibKbnContentManagementTableListViewCommonPluginApi",
+                    "section": "def-common.UserContentCommonSchema",
+                    "text": "UserContentCommonSchema"
+                  }
+                ],
+                "path": "packages/content-management/content_insights/content_insights_public/src/components/views_stats/views_stats.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/content-management-content-insights-public",
+        "id": "def-public.ActivityViewProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "ActivityViewProps",
+        "description": [],
+        "path": "packages/content-management/content_insights/content_insights_public/src/components/activity_view.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-content-insights-public",
+            "id": "def-public.ActivityViewProps.item",
+            "type": "Object",
+            "tags": [],
+            "label": "item",
+            "description": [],
+            "signature": [
+              "{ createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; managed?: boolean | undefined; }"
+            ],
+            "path": "packages/content-management/content_insights/content_insights_public/src/components/activity_view.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-management-content-insights-public",
+        "id": "def-public.ContentInsightsClientPublic",
+        "type": "Interface",
+        "tags": [],
+        "label": "ContentInsightsClientPublic",
+        "description": [
+          "\nPublic interface of the Content Management Insights service."
+        ],
+        "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-content-insights-public",
+            "id": "def-public.ContentInsightsClientPublic.track",
+            "type": "Function",
+            "tags": [],
+            "label": "track",
+            "description": [],
+            "signature": [
+              "(id: string, eventType: \"viewed\") => void"
+            ],
+            "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-management-content-insights-public",
+                "id": "def-public.ContentInsightsClientPublic.track.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/content-management-content-insights-public",
+                "id": "def-public.ContentInsightsClientPublic.track.$2",
+                "type": "string",
+                "tags": [],
+                "label": "eventType",
+                "description": [],
+                "signature": [
+                  "\"viewed\""
+                ],
+                "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/content-management-content-insights-public",
+            "id": "def-public.ContentInsightsClientPublic.getStats",
+            "type": "Function",
+            "tags": [],
+            "label": "getStats",
+            "description": [],
+            "signature": [
+              "(id: string, eventType: \"viewed\") => Promise<",
+              {
+                "pluginId": "@kbn/content-management-content-insights-server",
+                "scope": "server",
+                "docId": "kibKbnContentManagementContentInsightsServerPluginApi",
+                "section": "def-server.ContentInsightsStats",
+                "text": "ContentInsightsStats"
+              },
+              ">"
+            ],
+            "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-management-content-insights-public",
+                "id": "def-public.ContentInsightsClientPublic.getStats.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/content-management-content-insights-public",
+                "id": "def-public.ContentInsightsClientPublic.getStats.$2",
+                "type": "string",
+                "tags": [],
+                "label": "eventType",
+                "description": [],
+                "signature": [
+                  "\"viewed\""
+                ],
+                "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-management-content-insights-public",
+        "id": "def-public.ContentInsightsServices",
+        "type": "Interface",
+        "tags": [],
+        "label": "ContentInsightsServices",
+        "description": [
+          "\nAbstract external services for this component."
+        ],
+        "path": "packages/content-management/content_insights/content_insights_public/src/services.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-content-insights-public",
+            "id": "def-public.ContentInsightsServices.contentInsightsClient",
+            "type": "Object",
+            "tags": [],
+            "label": "contentInsightsClient",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-management-content-insights-public",
+                "scope": "public",
+                "docId": "kibKbnContentManagementContentInsightsPublicPluginApi",
+                "section": "def-public.ContentInsightsClientPublic",
+                "text": "ContentInsightsClientPublic"
+              }
+            ],
+            "path": "packages/content-management/content_insights/content_insights_public/src/services.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/content-management-content-insights-public",
+        "id": "def-public.ContentInsightsEventTypes",
+        "type": "Type",
+        "tags": [],
+        "label": "ContentInsightsEventTypes",
+        "description": [],
+        "signature": [
+          "\"viewed\""
+        ],
+        "path": "packages/content-management/content_insights/content_insights_public/src/client.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

@@ -395,9 +395,13 @@ export class TaskManagerPlugin
     };
   }
 
-  public stop() {
+  public async stop() {
     if (this.kibanaDiscoveryService?.isStarted()) {
-      this.kibanaDiscoveryService.deleteCurrentNode().catch(() => {});
+      try {
+        await this.kibanaDiscoveryService.deleteCurrentNode();
+      } catch (e) {
+        this.logger.error(`Deleting current node has failed. error: ${e.message}`);
+      }
     }
   }
 }
