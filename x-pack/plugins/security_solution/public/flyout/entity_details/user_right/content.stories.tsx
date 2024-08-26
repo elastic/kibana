@@ -10,12 +10,9 @@ import { storiesOf } from '@storybook/react';
 import { EuiFlyout } from '@elastic/eui';
 import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { StorybookProviders } from '../../../common/mock/storybook_providers';
-import {
-  mockManagedUserData,
-  mockRiskScoreState,
-} from '../../../timelines/components/side_panel/new_user_detail/__mocks__';
+import { mockRiskScoreState } from '../../shared/mocks';
+import { mockManagedUserData, mockObservedUser } from './mocks';
 import { UserPanelContent } from './content';
-import { mockObservedUser } from './mocks';
 
 const riskScoreData = { ...mockRiskScoreState, data: [] };
 

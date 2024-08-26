@@ -6,12 +6,10 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { ActionsClient } from '@kbn/actions-plugin/server';
-import { isSupportedConnectorType } from '../../common/connectors';
-import { createInferenceRequestError } from '../../common/errors';
-import { createChatCompleteApi } from '../chat_complete';
 import type { InferenceClient, InferenceStartDependencies } from '../types';
+import { createChatCompleteApi } from '../chat_complete';
 import { createOutputApi } from '../../common/output/create_output_api';
+import { getConnectorById } from '../util/get_connector_by_id';
 
 export function createInferenceClient({
   request,
@@ -21,33 +19,9 @@ export function createInferenceClient({
   return {
     chatComplete,
     output: createOutputApi(chatComplete),
-    getConnectorById: async (id: string) => {
+    getConnectorById: async (connectorId: string) => {
       const actionsClient = await actions.getActionsClientWithRequest(request);
-      let connector: Awaited<ReturnType<ActionsClient['get']>>;
-
-      try {
-        connector = await actionsClient.get({
-          id,
-          throwIfSystemAction: true,
-        });
-      } catch (error) {
-        throw createInferenceRequestError(`No connector found for id ${id}`, 400);
-      }
-
-      const actionTypeId = connector.id;
-
-      if (!isSupportedConnectorType(actionTypeId)) {
-        throw createInferenceRequestError(
-          `Type ${actionTypeId} not recognized as a supported connector type`,
-          400
-        );
-      }
-
-      return {
-        connectorId: connector.id,
-        name: connector.name,
-        type: actionTypeId,
-      };
+      return await getConnectorById({ connectorId, actionsClient });
     },
   };
 }
