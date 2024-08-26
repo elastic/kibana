@@ -26,7 +26,6 @@ import type { PolicyData } from '../../../../../../common/endpoint/types';
 import { GLOBAL_ARTIFACT_TAG } from '../../../../../../common/endpoint/service/artifacts';
 import { ListOperatorEnum, ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
-import { blocklistOperatorFieldTestCases } from '../../constants';
 
 jest.mock('../../../../../common/hooks/use_license', () => {
   const licenseServiceInstance = {
@@ -39,6 +38,58 @@ jest.mock('../../../../../common/hooks/use_license', () => {
     },
   };
 });
+
+const blocklistOperatorFieldTestCases = [
+  {
+    os: OperatingSystem.LINUX,
+    field: 'file.path',
+    fieldText: 'Path, ',
+    osText: 'Linux, ',
+    isMulti: false,
+  },
+  {
+    os: OperatingSystem.LINUX,
+    field: 'file.hash.*',
+    fieldText: 'Hash, ',
+    osText: 'Linux, ',
+    isMulti: false,
+  },
+  {
+    os: OperatingSystem.WINDOWS,
+    field: 'file.path.caseless',
+    fieldText: 'Path, ',
+    osText: 'Windows, ',
+    isMulti: false,
+  },
+  {
+    os: OperatingSystem.WINDOWS,
+    field: 'file.hash.*',
+    fieldText: 'Hash, ',
+    osText: 'Windows, ',
+    isMulti: false,
+  },
+  {
+    os: OperatingSystem.WINDOWS,
+    field: 'file.Ext.code_signature',
+    fieldText: 'Signature, ',
+    osText: 'Windows, ',
+    isMulti: true,
+  },
+  {
+    os: OperatingSystem.MAC,
+    field: 'file.path.caseless',
+    fieldText: 'Path, ',
+    osText: 'Mac, ',
+    isMulti: false,
+  },
+  {
+    os: OperatingSystem.MAC,
+    field: 'file.hash.*',
+    fieldText: 'Hash, ',
+    osText: 'Mac, ',
+    isMulti: false,
+  },
+];
 
 describe('blocklist form', () => {
   let onChangeSpy: jest.Mock;

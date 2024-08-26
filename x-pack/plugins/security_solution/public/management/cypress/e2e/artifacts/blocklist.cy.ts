@@ -138,7 +138,7 @@ describe(
         removeExceptionsList(ENDPOINT_ARTIFACT_LISTS.blocklists.id);
       });
 
-      it('Create a blocklist item with multi operator', () => {
+      it('Create a blocklist item with single operator', () => {
         openBlocklist({ create: true });
         fillOutBlocklistFlyout();
         selectSignatureField();
@@ -149,7 +149,7 @@ describe(
         validateRenderedCondition(IS_EXPECTED_CONDITION);
       });
 
-      it('Create a blocklist item with single operator', () => {
+      it('Create a blocklist item with multi operator', () => {
         openBlocklist({ create: true });
         fillOutBlocklistFlyout();
         selectSignatureField();

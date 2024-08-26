@@ -271,8 +271,11 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
       const {
         field = 'file.hash.*',
         type = ListOperatorTypeEnum.MATCH_ANY,
-        value: values = [],
+        value = [],
       } = (nextItem.entries[0] ?? {}) as BlocklistEntry;
+
+      // value can be a string when isOperator is selected
+      const values = Array.isArray(value) ? value : [value];
 
       const newValueWarnings: ItemValidationNodes = {};
       const newNameErrors: ItemValidationNodes = {};
@@ -287,21 +290,19 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
         newValueErrors.VALUE_REQUIRED = createValidationMessage(ERRORS.VALUE_REQUIRED);
       }
 
-      if (Array.isArray(values)) {
-        // error if invalid hash
-        if (field === 'file.hash.*' && values.some((value) => !isValidHash(value))) {
-          newValueErrors.INVALID_HASH = createValidationMessage(ERRORS.INVALID_HASH);
-        }
+      // error if invalid hash
+      if (field === 'file.hash.*' && values.some((v) => !isValidHash(v))) {
+        newValueErrors.INVALID_HASH = createValidationMessage(ERRORS.INVALID_HASH);
+      }
 
-        const isInvalidPath = values.some((value) => !isPathValid({ os, field, type, value }));
-        // warn if invalid path
-        if (field !== 'file.hash.*' && isInvalidPath) {
-          newValueWarnings.INVALID_PATH = createValidationMessage(ERRORS.INVALID_PATH);
-        }
-        // warn if duplicates
-        if (values.length !== uniq(values).length) {
-          newValueWarnings.DUPLICATE_VALUES = createValidationMessage(ERRORS.DUPLICATE_VALUES);
-        }
+      const isInvalidPath = values.some((v) => !isPathValid({ os, field, type, value: v }));
+      // warn if invalid path
+      if (field !== 'file.hash.*' && isInvalidPath) {
+        newValueWarnings.INVALID_PATH = createValidationMessage(ERRORS.INVALID_PATH);
+      }
+      // warn if duplicates
+      if (values.length !== uniq(values).length) {
+        newValueWarnings.DUPLICATE_VALUES = createValidationMessage(ERRORS.DUPLICATE_VALUES);
       }
 
       warningsRef.current = { ...warningsRef.current, value: newValueWarnings };
@@ -410,21 +411,11 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
 
     const generateBlocklistEntryValue = useCallback(
       (value: string | string[], newOperator: ListOperatorTypeEnum) => {
-        let result: string | string[] = [];
-
         if (newOperator === ListOperatorTypeEnum.MATCH) {
-          if (Array.isArray(value) && value.length) {
-            result = value.join(',');
-          } else {
-            result = '';
-          }
+          return { value: Array.isArray(value) ? value.join(',') : value };
         } else {
-          if (typeof value === 'string' && value.length) {
-            result = value.split(',');
-          }
+          return { value: typeof value === 'string' ? value.split(',') : value };
         }
-
-        return { value: result };
       },
       []
     );
