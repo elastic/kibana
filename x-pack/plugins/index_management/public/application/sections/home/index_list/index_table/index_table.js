@@ -582,7 +582,7 @@ export class IndexTable extends Component {
 
               {this.renderBanners(extensionsService)}
 
-              <EuiFlexGroup gutterSize="l" alignItems="center">
+              <EuiFlexGroup gutterSize="m" alignItems="center">
                 {atLeastOneItemSelected ? (
                   <EuiFlexItem grow={false}>
                     <Route
