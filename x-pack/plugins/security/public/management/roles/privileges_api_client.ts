@@ -6,8 +6,9 @@
  */
 
 import type { HttpStart } from '@kbn/core/public';
+import type { RawKibanaPrivileges } from '@kbn/security-authorization-core';
 
-import type { BuiltinESPrivileges, RawKibanaPrivileges } from '../../../common/model';
+import type { BuiltinESPrivileges } from '../../../common/model';
 
 export class PrivilegesAPIClient {
   constructor(private readonly http: HttpStart) {}
