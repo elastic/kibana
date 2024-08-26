@@ -24,8 +24,12 @@ import * as i18n from './translations';
 interface Props {
   isDisabled?: boolean;
   onQuickPromptDeleted: (quickPromptTitle: string) => void;
-  onQuickPromptSelectionChange: (quickPrompt?: PromptResponse | string) => void;
+  onQuickPromptSelectionChange: (
+    quickPrompt: PromptResponse | string,
+    selectedColor: string
+  ) => void;
   quickPrompts: PromptResponse[];
+  selectedColor: string;
   selectedQuickPrompt?: PromptResponse;
   resetSettings?: () => void;
 }
@@ -42,6 +46,7 @@ export const QuickPromptSelector: React.FC<Props> = React.memo(
     onQuickPromptDeleted,
     onQuickPromptSelectionChange,
     resetSettings,
+    selectedColor,
     selectedQuickPrompt,
   }) => {
     // Form options
@@ -80,9 +85,11 @@ export const QuickPromptSelector: React.FC<Props> = React.memo(
             ? undefined
             : quickPrompts.find((qp) => qp.name === quickPromptSelectorOption[0]?.label) ??
               quickPromptSelectorOption[0]?.label;
-        onQuickPromptSelectionChange(newQuickPrompt);
+        if (newQuickPrompt) {
+          onQuickPromptSelectionChange(newQuickPrompt, selectedColor);
+        }
       },
-      [onQuickPromptSelectionChange, resetSettings, quickPrompts]
+      [onQuickPromptSelectionChange, resetSettings, quickPrompts, selectedColor]
     );
 
     // Callback for when user types to create a new quick prompt

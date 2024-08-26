@@ -118,6 +118,12 @@ echo "--- Trigger image tag update"
 if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]] && [[ "${BUILDKITE_PULL_REQUEST:-false}" == "false" ]]; then
   cat << EOF | buildkite-agent pipeline upload
 steps:
+  - label: "Trigger cve-slo-status pipeline for $KIBANA_IMAGE"
+    trigger: cve-slo-status
+    build:
+      env:
+        CONTAINER: "$KIBANA_IMAGE"
+    soft_fail: true
   - label: ":argo: Update kibana image tag for kibana-controller using gpctl"
     branches: main
     trigger: gpctl-promote-with-e2e-tests
