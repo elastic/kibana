@@ -14,7 +14,8 @@ import {
   EuiFlexItem,
   HorizontalAlignment,
 } from '@elastic/eui';
-import { DeploymentState, InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import { isLocalModel } from '@kbn/ml-trained-models-utils/src/constants/trained_models';
 import { TaskTypes } from '../../../common/types';
 import * as i18n from '../../../common/translations';
 
@@ -57,9 +58,9 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
 
   const tableColumns: Array<EuiBasicTableColumn<InferenceEndpointUI>> = [
     {
-      field: 'deployment',
       name: '',
-      render: (deployment: DeploymentState) => <DeploymentStatus status={deployment} />,
+      render: ({ endpoint, deployment }: InferenceEndpointUI) =>
+        isLocalModel(endpoint) ? <DeploymentStatus status={deployment} /> : null,
       align: 'center' as HorizontalAlignment,
       width: '64px',
     },

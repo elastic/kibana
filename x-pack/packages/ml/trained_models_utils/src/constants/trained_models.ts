@@ -284,3 +284,9 @@ export type InferenceAPIConfigResponse = {
     model?: string;
   };
 } & InferenceServiceSettings;
+
+export function isLocalModel(
+  model: InferenceServiceSettings
+): model is LocalInferenceServiceSettings {
+  return ['elser', 'elasticsearch'].includes((model as LocalInferenceServiceSettings).service);
+}

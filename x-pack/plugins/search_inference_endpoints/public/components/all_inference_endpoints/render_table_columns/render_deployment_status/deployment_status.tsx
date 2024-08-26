@@ -52,6 +52,7 @@ export const DeploymentStatus: React.FC<DeploymentStatusProps> = ({ status }) =>
   return (
     <EuiToolTip content={tooltip}>
       <EuiIcon
+        aria-label={tooltip}
         type={type}
         data-test-subj={`table-column-deployment-${status}`}
         color={statusColor}

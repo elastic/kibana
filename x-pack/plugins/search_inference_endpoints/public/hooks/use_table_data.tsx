@@ -66,10 +66,7 @@ export const useTableData = (
           endpoint.service === ServiceProviderKeys.elasticsearch ||
           endpoint.service === ServiceProviderKeys.elser;
         const deploymentId = isElasticService ? endpoint.inference_id : undefined;
-        const deployment =
-          deploymentId && deploymentStatus?.[deploymentId]
-            ? deploymentStatus[deploymentId]
-            : undefined;
+        const deployment = (deploymentId && deploymentStatus?.[deploymentId]) || undefined;
 
         return {
           deployment,
