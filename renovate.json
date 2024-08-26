@@ -32,10 +32,10 @@
   },
   "packageRules": [
     {
-      "matchDepPatterns": [
-        ".*"
-      ],
-      "enabled": false
+      "enabled": false,
+      "matchDepNames": [
+        "/.*/"
+      ]
     },
     {
       "groupName": "devcontainer",
@@ -260,11 +260,9 @@
     {
       "groupName": "babel",
       "matchDepNames": [
-        "@types/babel__core"
-      ],
-      "matchDepPatterns": [
-        "^@babel",
-        "^babel-plugin"
+        "@types/babel__core",
+        "/^@babel/",
+        "/^babel-plugin/"
       ],
       "reviewers": [
         "team:kibana-operations"
@@ -321,9 +319,6 @@
     },
     {
       "groupName": "typescript-eslint",
-      "matchDepPatterns": [
-        "^@typescript-eslint"
-      ],
       "reviewers": [
         "team:kibana-operations"
       ],
@@ -335,13 +330,13 @@
         "release_note:skip"
       ],
       "minimumReleaseAge": "7 days",
-      "enabled": true
+      "enabled": true,
+      "matchDepNames": [
+        "/^@typescript-eslint/"
+      ]
     },
     {
       "groupName": "eslint-plugin-depend",
-      "matchDepPatterns": [
-        "eslint-plugin-depend"
-      ],
       "reviewers": [
         "team:kibana-operations"
       ],
@@ -353,15 +348,16 @@
         "release_note:skip"
       ],
       "minimumReleaseAge": "7 days",
-      "enabled": true
+      "enabled": true,
+      "matchDepNames": [
+        "/eslint-plugin-depend/"
+      ]
     },
     {
       "groupName": "polyfills",
       "matchDepNames": [
-        "core-js"
-      ],
-      "matchDepPatterns": [
-        "polyfill"
+        "core-js",
+        "/polyfill/"
       ],
       "reviewers": [
         "team:kibana-operations"
@@ -418,9 +414,6 @@
     },
     {
       "groupName": "cypress",
-      "matchDepPatterns": [
-        "cypress"
-      ],
       "reviewers": [
         "Team:apm",
         "Team: SecuritySolution"
@@ -433,7 +426,10 @@
         "ci:all-cypress-suites"
       ],
       "minimumReleaseAge": "7 days",
-      "enabled": true
+      "enabled": true,
+      "matchDepNames": [
+        "/cypress/"
+      ]
     },
     {
       "groupName": "security solution modules",
@@ -624,12 +620,6 @@
       "matchBaseBranches": [
         "main"
       ],
-      "matchDepPatterns": [
-        "^@storybook"
-      ],
-      "excludeDepNames": [
-        "@storybook/testing-react"
-      ],
       "labels": [
         "Team:Operations",
         "release_note:skip",
@@ -638,7 +628,11 @@
       ],
       "minimumReleaseAge": "7 days",
       "allowedVersions": "<7.0",
-      "enabled": true
+      "enabled": true,
+      "matchDepNames": [
+        "/^@storybook/",
+        "!@storybook/testing-react"
+      ]
     },
     {
       "groupName": "@storybook/testing-react",
@@ -812,10 +806,8 @@
     {
       "groupName": "XState",
       "matchDepNames": [
-        "xstate"
-      ],
-      "matchDepPrefixes": [
-        "@xstate/"
+        "xstate",
+        "@xstate/{/,}**"
       ],
       "reviewers": [
         "team:obs-ux-logs-team"
@@ -832,9 +824,6 @@
     },
     {
       "groupName": "OpenTelemetry modules",
-      "matchDepPrefixes": [
-        "@opentelemetry/"
-      ],
       "reviewers": [
         "team:stack-monitoring"
       ],
@@ -845,7 +834,10 @@
         "Team:Monitoring"
       ],
       "minimumReleaseAge": "7 days",
-      "enabled": true
+      "enabled": true,
+      "matchDepNames": [
+        "@opentelemetry/{/,}**"
+      ]
     },
     {
       "groupName": "csp",
