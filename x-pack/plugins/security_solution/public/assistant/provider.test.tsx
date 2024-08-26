@@ -11,6 +11,7 @@ import { httpServiceMock, type HttpSetupMock } from '@kbn/core-http-browser-mock
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { AssistantProvider, createConversations } from './provider';
 import { coreMock } from '@kbn/core/public/mocks';
+import { BASE_SECURITY_QUICK_PROMPTS } from './content/quick_prompts';
 import { useKibana as mockUseKibana } from '../common/lib/kibana/__mocks__';
 import { loadAllActions as loadConnectors } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 import { useKibana } from '../common/lib/kibana';
@@ -22,7 +23,6 @@ import {
   getPrompts,
   getUserConversations,
 } from '@kbn/elastic-assistant/impl/assistant/api';
-import { BASE_SECURITY_SYSTEM_PROMPTS } from './content/prompts/system';
 
 const mockedUseKibana = mockUseKibana();
 jest.mock('./use_assistant_availability');
@@ -270,7 +270,7 @@ describe('AssistantProvider', () => {
       page: 1,
       perPage: 5,
       total: 2,
-      data: BASE_SECURITY_SYSTEM_PROMPTS,
+      data: BASE_SECURITY_QUICK_PROMPTS,
     });
     const { getByTestId } = render(
       <AssistantProvider>
@@ -289,7 +289,7 @@ describe('AssistantProvider', () => {
       success: true,
       attributes: {
         results: {
-          created: BASE_SECURITY_SYSTEM_PROMPTS,
+          created: BASE_SECURITY_QUICK_PROMPTS,
         },
       },
     });

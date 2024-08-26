@@ -6,9 +6,10 @@
  */
 
 import { ChatPromptTemplate } from '@langchain/core/prompts';
+import { DEFAULT_SYSTEM_PROMPT } from './nodes/translations';
 
 export const openAIFunctionAgentPrompt = ChatPromptTemplate.fromMessages([
-  ['system', 'You are a helpful assistant'],
+  ['system', DEFAULT_SYSTEM_PROMPT],
   ['placeholder', '{chat_history}'],
   ['human', '{input}'],
   ['placeholder', '{agent_scratchpad}'],
@@ -17,7 +18,7 @@ export const openAIFunctionAgentPrompt = ChatPromptTemplate.fromMessages([
 export const bedrockToolCallingAgentPrompt = ChatPromptTemplate.fromMessages([
   [
     'system',
-    'You are a helpful assistant. ALWAYS use the provided tools. Use tools as often as possible, as they have access to the latest data and syntax. Always return value from ESQLKnowledgeBaseTool as is. Never return <thinking> tags in the response, but make sure to include <result> tags content in the response. Do not reflect on the quality of the returned search results in your response.',
+    `${DEFAULT_SYSTEM_PROMPT} Use tools as often as possible, as they have access to the latest data and syntax. Always return value from ESQLKnowledgeBaseTool as is. Never return <thinking> tags in the response, but make sure to include <result> tags content in the response. Do not reflect on the quality of the returned search results in your response.`,
   ],
   ['placeholder', '{chat_history}'],
   ['human', '{input}'],
@@ -27,8 +28,8 @@ export const bedrockToolCallingAgentPrompt = ChatPromptTemplate.fromMessages([
 export const geminiToolCallingAgentPrompt = ChatPromptTemplate.fromMessages([
   [
     'system',
-    'You are a helpful assistant. ALWAYS use the provided tools. Use tools as often as possible, as they have access to the latest data and syntax.\n\n' +
-      "The final response will be the only output the user sees and should be a complete answer to the user's question, as if you were responding to the user's initial question. The final response should never be empty.",
+    `${DEFAULT_SYSTEM_PROMPT} ALWAYS use the tools provided, as they have access to the latest data and syntax. ` +
+      "The final response is the only output the user sees and should be a complete answer to the user's question. Do not leave out important tool output. The final response should never be empty.",
   ],
   ['placeholder', '{chat_history}'],
   ['human', '{input}'],
