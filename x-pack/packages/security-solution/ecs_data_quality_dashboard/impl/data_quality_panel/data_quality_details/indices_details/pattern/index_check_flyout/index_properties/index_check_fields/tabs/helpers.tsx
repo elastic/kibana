@@ -9,10 +9,11 @@ import { EuiBadge } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 
+import { getSizeInBytes } from '../../../../../../../utils/stats';
+import { getIncompatibleStatBadgeColor } from '../../../../../../../utils/get_incompatible_stat_badge_color';
 import { AllTab } from './all_tab';
 import { CustomTab } from './custom_tab';
 import { EcsCompliantTab } from './ecs_compliant_tab';
-import { getIncompatibleStatBadgeColor, getSizeInBytes } from '../../../../../../../helpers';
 import { IncompatibleTab } from './incompatible_tab';
 import {
   ALL_TAB_ID,

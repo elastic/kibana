@@ -7,7 +7,7 @@
 
 export { DataQualityPanel } from './impl/data_quality_panel';
 
-export { getIlmPhaseDescription } from './impl/data_quality_panel/helpers';
+export { getIlmPhaseDescription } from './impl/data_quality_panel/utils/get_ilm_phase_description';
 
 export {
   DATA_QUALITY_PROMPT_CONTEXT_PILL,

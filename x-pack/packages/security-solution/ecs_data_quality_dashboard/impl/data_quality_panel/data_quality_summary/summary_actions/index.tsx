@@ -27,10 +27,11 @@ import {
   getSummaryTableItems,
 } from '../../data_quality_details/indices_details/pattern/helpers';
 import type { DataQualityCheckResult, IndexToCheck, PatternRollup } from '../../types';
-import { getErrorSummaries, getSizeInBytes } from '../../helpers';
 import { useDataQualityContext } from '../../data_quality_context';
 import { useResultsRollupContext } from '../../contexts/results_rollup_context';
 import { Actions } from '../../actions';
+import { getErrorSummaries } from './utils/get_error_summaries';
+import { getSizeInBytes } from '../../utils/stats';
 
 const StyledActionsContainerFlexItem = styled(EuiFlexItem)`
   margin-top: auto;

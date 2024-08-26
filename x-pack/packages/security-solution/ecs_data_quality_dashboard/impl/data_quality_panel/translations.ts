@@ -42,13 +42,6 @@ export const COLD_DESCRIPTION = i18n.translate(
   }
 );
 
-export const COLD_PATTERN_TOOLTIP = ({ indices, pattern }: { indices: number; pattern: string }) =>
-  i18n.translate('securitySolutionPackages.ecsDataQualityDashboard.coldPatternTooltip', {
-    values: { indices, pattern },
-    defaultMessage:
-      '{indices} {indices, plural, =1 {index} other {indices}} matching the {pattern} pattern {indices, plural, =1 {is} other {are}} cold. Cold indices are no longer being updated and are queried infrequently. The information still needs to be searchable, but it’s okay if those queries are slower.',
-  });
-
 export const COPIED_RESULTS_TOAST_TITLE = i18n.translate(
   'securitySolutionPackages.ecsDataQualityDashboard.toasts.copiedResultsToastTitle',
   {
@@ -166,31 +159,12 @@ export const FROZEN_DESCRIPTION = i18n.translate(
   }
 );
 
-export const FROZEN_PATTERN_TOOLTIP = ({
-  indices,
-  pattern,
-}: {
-  indices: number;
-  pattern: string;
-}) =>
-  i18n.translate('securitySolutionPackages.ecsDataQualityDashboard.frozenPatternTooltip', {
-    values: { indices, pattern },
-    defaultMessage: `{indices} {indices, plural, =1 {index} other {indices}} matching the {pattern} pattern {indices, plural, =1 {is} other {are}} frozen. Frozen indices are no longer being updated and are queried rarely. The information still needs to be searchable, but it's okay if those queries are extremely slow.`,
-  });
-
 export const HOT_DESCRIPTION = i18n.translate(
   'securitySolutionPackages.ecsDataQualityDashboard.hotDescription',
   {
     defaultMessage: 'The index is actively being updated and queried',
   }
 );
-
-export const HOT_PATTERN_TOOLTIP = ({ indices, pattern }: { indices: number; pattern: string }) =>
-  i18n.translate('securitySolutionPackages.ecsDataQualityDashboard.hotPatternTooltip', {
-    values: { indices, pattern },
-    defaultMessage:
-      '{indices} {indices, plural, =1 {index} other {indices}} matching the {pattern} pattern {indices, plural, =1 {is} other {are}} hot. Hot indices are actively being updated and queried.',
-  });
 
 /** The tooltip for the `ILM phase` combo box on the Data Quality Dashboard */
 export const INDEX_LIFECYCLE_MANAGEMENT_PHASES: string = i18n.translate(
@@ -267,31 +241,12 @@ export const UNMANAGED_DESCRIPTION = i18n.translate(
   }
 );
 
-export const UNMANAGED_PATTERN_TOOLTIP = ({
-  indices,
-  pattern,
-}: {
-  indices: number;
-  pattern: string;
-}) =>
-  i18n.translate('securitySolutionPackages.ecsDataQualityDashboard.unmanagedPatternTooltip', {
-    values: { indices, pattern },
-    defaultMessage: `{indices} {indices, plural, =1 {index} other {indices}} matching the {pattern} pattern {indices, plural, =1 {is} other {are}} unmanaged by Index Lifecycle Management (ILM)`,
-  });
-
 export const WARM_DESCRIPTION = i18n.translate(
   'securitySolutionPackages.ecsDataQualityDashboard.warmDescription',
   {
     defaultMessage: 'The index is no longer being updated but is still being queried',
   }
 );
-
-export const WARM_PATTERN_TOOLTIP = ({ indices, pattern }: { indices: number; pattern: string }) =>
-  i18n.translate('securitySolutionPackages.ecsDataQualityDashboard.warmPatternTooltip', {
-    values: { indices, pattern },
-    defaultMessage:
-      '{indices} {indices, plural, =1 {index} other {indices}} matching the {pattern} pattern {indices, plural, =1 {is} other {are}} warm. Warm indices are no longer being updated but are still being queried.',
-  });
 
 export const POST_RESULT_ERROR_TITLE = i18n.translate(
   'securitySolutionPackages.ecsDataQualityDashboard.postResultErrorTitle',

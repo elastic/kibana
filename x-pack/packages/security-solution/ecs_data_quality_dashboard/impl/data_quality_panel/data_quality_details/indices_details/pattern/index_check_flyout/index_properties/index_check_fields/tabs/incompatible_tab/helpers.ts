@@ -34,7 +34,7 @@ import {
   DOCUMENT_VALUES_ACTUAL,
   ECS_VALUES_EXPECTED,
 } from '../compare_fields_table/translations';
-import { getIsInSameFamily } from '../../../../../../../../helpers';
+import { getIsInSameFamily } from '../../../utils/get_is_in_same_family';
 
 export const getIncompatibleFieldsMarkdownComment = (incompatible: number): string =>
   getMarkdownComment({
