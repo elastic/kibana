@@ -13,7 +13,7 @@ import type {
   CspBenchmarkRule,
   RulesToUpdate,
   CspSettings,
-} from '../../../../common/types/rules/v4';
+} from '@kbn/cloud-security-posture-common/schema/rules/v4';
 import {
   convertRuleTagsToMatchAllKQL,
   generateBenchmarkRuleTags,

@@ -11,7 +11,7 @@ import {
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { CspBenchmarkRulesStates } from '@kbn/cloud-security-posture-common';
-import { CspSettings } from '../../../../common/types/rules/v4';
+import type { CspSettings } from '@kbn/cloud-security-posture-common/schema/rules/v4';
 import {
   INTERNAL_CSP_SETTINGS_SAVED_OBJECT_ID,
   INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,

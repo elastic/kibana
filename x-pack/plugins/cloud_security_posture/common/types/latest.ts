@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-// export * from './rules/v5';
-export * from '@kbn/cloud-security-posture-common/schema/rules/v5';
 export * from './benchmarks/v2';
