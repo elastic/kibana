@@ -14,6 +14,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'svlCommonNavigation',
     'common',
     'svlSearchConnectorsPage',
+    'embeddedConsole',
   ]);
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
