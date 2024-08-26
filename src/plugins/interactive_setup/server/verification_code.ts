@@ -81,11 +81,11 @@ Your verification code is: ${highlightedCode}
 function secureRandomNumber(length: number) {
   const digits = [];
   while (digits.length < length) {
-      const byte = crypto.randomBytes(1)[0];
-      if (byte >= 250) {
-          continue;
-      }
-      digits.push(byte % 10);
+    const byte = crypto.randomBytes(1)[0];
+    if (byte >= 250) {
+        continue;
+    }
+    digits.push(byte % 10);
   }
 
   return digits;
