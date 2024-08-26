@@ -30,7 +30,6 @@ import {
   AggregateName,
   AggregationsAggregate,
   AggregationsMultiBucketAggregateBase,
-  InlineScript,
   MappingRuntimeFields,
   QueryDslQueryContainer,
   SortCombinations,
@@ -826,18 +825,16 @@ export class AlertsClient {
         const result = await this.esClient.updateByQuery({
           index,
           conflicts: 'proceed',
-          body: {
-            script: {
-              source: `if (ctx._source['${ALERT_WORKFLOW_STATUS}'] != null) {
+          script: {
+            source: `if (ctx._source['${ALERT_WORKFLOW_STATUS}'] != null) {
                 ctx._source['${ALERT_WORKFLOW_STATUS}'] = '${status}'
               }
               if (ctx._source.signal != null && ctx._source.signal.status != null) {
                 ctx._source.signal.status = '${status}'
               }`,
-              lang: 'painless',
-            } as InlineScript,
-            query: fetchAndAuditResponse.authorizedQuery as Omit<QueryDslQueryContainer, 'script'>,
+            lang: 'painless',
           },
+          query: fetchAndAuditResponse.authorizedQuery as Omit<QueryDslQueryContainer, 'script'>,
           ignore_unavailable: true,
         });
         return result;
@@ -965,14 +962,12 @@ export class AlertsClient {
       await this.esClient.updateByQuery({
         index,
         conflicts: 'proceed',
-        body: {
-          script: {
-            source: painlessScript,
-            lang: 'painless',
-            params: { caseIds },
-          } as InlineScript,
-          query: esQuery,
+        script: {
+          source: painlessScript,
+          lang: 'painless',
+          params: { caseIds },
         },
+        query: esQuery,
         ignore_unavailable: true,
       });
     } catch (err) {
