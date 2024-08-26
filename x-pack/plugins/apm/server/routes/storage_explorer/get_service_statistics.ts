@@ -174,7 +174,7 @@ async function getMainServiceStatistics({
 
 export type StorageExplorerServiceStatisticsResponse = Array<{
   serviceName: string;
-  sampling: number;
+  sampling: number | string;
   environments: string[];
   size: number;
   agentName: AgentName;
@@ -233,7 +233,7 @@ export async function getServiceStatistics({
               sampledTransactionDocs / totalTransactionsPerService[serviceName],
               1
             )
-          : 0;
+          : 'N/A';
 
       return {
         ...rest,
