@@ -231,7 +231,7 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
         if ('deepLinkId' in by) {
           await testSubjects.click(`~breadcrumb-deepLinkId-${by.deepLinkId}`);
         } else {
-          (await getByVisibleText('~breadcrumb', by.text))?.click();
+          await (await getByVisibleText('~breadcrumb', by.text))?.click();
         }
       },
       getBreadcrumb(by: { deepLinkId: AppDeepLinkId } | { text: string }) {
