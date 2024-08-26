@@ -10,6 +10,11 @@ import { GetInvestigationResponse, InvestigationItem } from '@kbn/investigation-
 import React, { useEffect, useState } from 'react';
 import { useKibana } from '../../../hooks/use_kibana';
 
+export type RenderedInvestigationItem = InvestigationItem & {
+  loading: boolean;
+  element: React.ReactNode;
+};
+
 export function useRenderItems({
   items,
   params,
@@ -23,9 +28,7 @@ export function useRenderItems({
     },
   } = useKibana();
 
-  const [renderableItems, setRenderableItems] = useState<
-    Array<InvestigationItem & { loading: boolean; element: React.ReactNode }>
-  >([]);
+  const [renderableItems, setRenderableItems] = useState<RenderedInvestigationItem[]>([]);
 
   useEffect(() => {
     async function renderItems(currItems: InvestigationItem[]) {

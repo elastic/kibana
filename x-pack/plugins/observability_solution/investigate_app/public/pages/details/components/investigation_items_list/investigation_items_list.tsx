@@ -5,16 +5,11 @@
  * 2.0.
  */
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { InvestigationItem } from '@kbn/investigation-shared';
 import React from 'react';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
+import { RenderedInvestigationItem } from '../../hooks/use_render_items';
 import { GridItem } from '../grid_item';
-
-export type RenderedInvestigationItem = InvestigationItem & {
-  loading: boolean;
-  element: React.ReactNode;
-};
 
 interface InvestigateWidgetGridProps {
   items: RenderedInvestigationItem[];
