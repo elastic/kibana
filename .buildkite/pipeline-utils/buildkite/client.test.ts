@@ -25,7 +25,7 @@ describe('BuildkiteClient', () => {
         retried_in_job_id: 'id-2',
         state: 'failed',
         agent: {
-          meta_data: ['spot=true'],
+          meta_data: ['preemptible=true'],
         },
         retried: true,
         exit_status: -1,
@@ -36,7 +36,7 @@ describe('BuildkiteClient', () => {
         id: 'id-2',
         state: 'passed',
         agent: {
-          meta_data: ['spot=true'],
+          meta_data: ['preemptible=true'],
         },
         type: 'script',
       } as Job;
