@@ -76,11 +76,8 @@ export function registerAnalyzeLogsRoutes(
             ],
           };
 
-          // Truncate samples to 10 entries until chunking is in place
-          const samples = truncateSamples(logSamples);
-
           const logFormatParameters = {
-            logSamples: samples,
+            logSamples,
           };
           const graph = await getLogFormatDetectionGraph(model);
           const graphResults = await graph.invoke(logFormatParameters, options);
@@ -97,11 +94,4 @@ export function registerAnalyzeLogsRoutes(
         }
       })
     );
-}
-
-function truncateSamples(parsedSamples: string[]) {
-  if (parsedSamples.length > MaxLogsSampleRows) {
-    return parsedSamples.slice(0, MaxLogsSampleRows);
-  }
-  return parsedSamples;
 }

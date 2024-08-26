@@ -14,7 +14,7 @@ import {
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';
 
-const mockLlm = new FakeLLM({
+const mockLLM = new FakeLLM({
   response: '{ "log_type": "structured"}',
 }) as unknown as ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
 
@@ -22,7 +22,7 @@ const testState: LogFormatDetectionState = logFormatDetectionTestState;
 
 describe('Testing log type detection handler', () => {
   it('handleLogFormatDetection()', async () => {
-    const response = await handleLogFormatDetection(testState, mockLlm);
+    const response = await handleLogFormatDetection(testState, mockLLM);
     expect(response.logFormat).toStrictEqual('structured');
     expect(response.lastExecutedChain).toBe('logFormatDetection');
   });
