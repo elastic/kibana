@@ -56,20 +56,11 @@ export const getColor = (
 
 export const MetricItem = ({
   monitor,
-  stats,
-  data,
   onClick,
   style,
 }: {
   monitor: MonitorOverviewItem;
   style?: React.CSSProperties;
-  data: Array<{ x: number; y: number }>;
-  stats: {
-    medianDuration: number;
-    avgDuration: number;
-    minDuration: number;
-    maxDuration: number;
-  };
   onClick: (params: { id: string; configId: string; location: string; locationId: string }) => void;
 }) => {
   const trendData = useSelector(selectOverviewTrends)[monitor.configId + monitor.location.id];

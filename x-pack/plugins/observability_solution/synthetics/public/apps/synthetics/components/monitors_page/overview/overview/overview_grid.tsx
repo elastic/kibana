@@ -63,7 +63,6 @@ export const OverviewGrid = memo(() => {
     data: { monitors },
     flyoutConfig,
     loaded,
-    loading,
     pageState,
     groupBy: { field: groupField },
   } = useSelector(selectOverviewState);
