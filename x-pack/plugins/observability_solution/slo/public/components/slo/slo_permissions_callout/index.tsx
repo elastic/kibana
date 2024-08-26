@@ -67,12 +67,6 @@ export function SloPermissionsCallout() {
               </li>
               <li>
                 <FormattedMessage
-                  id="xpack.slo.permissionsCallout.writeClusterPermission"
-                  defaultMessage="'manage_transform' and 'manage_ingest_pipelines' cluster permissions"
-                />
-              </li>
-              <li>
-                <FormattedMessage
                   id="xpack.slo.permissionsCallout.readIndexPermission"
                   defaultMessage="'read' and 'view_index_metadata' index permissions on any index patterns you want to use for creating SLOs"
                 />
