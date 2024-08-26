@@ -191,7 +191,7 @@ export const buildSourcesDefinitions = (
 ): SuggestionRawDefinition[] =>
   sources.map(({ name, isIntegration, title, type }) => ({
     label: title ?? name,
-    text: getSafeInsertSourceText(name) + (!isIntegration ? ' ' : ''),
+    text: getSafeInsertSourceText(name),
     isSnippet: isIntegration,
     kind: isIntegration ? 'Class' : 'Issue',
     detail: isIntegration

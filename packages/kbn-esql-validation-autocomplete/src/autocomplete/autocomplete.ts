@@ -105,10 +105,8 @@ import {
   isParameterType,
   isReturnType,
 } from '../definitions/types';
+import { metadataOption } from '../definitions/options';
 
-type GetDataStreamsForIntegrationFn = (
-  sourceName: string
-) => Promise<Array<{ name: string; title?: string }> | undefined>;
 type GetFieldsByTypeFn = (
   type: string | string[],
   ignored?: string[],
@@ -969,14 +967,46 @@ async function getExpressionSuggestionsByType(
           if (matchingSource) {
             if (matchingSource.dataStreams) {
               // this is an integration name, suggest the datastreams
-              await addSuggestionsBasedOnQuote(
+              addSuggestionsBasedOnQuote(
                 buildSourcesDefinitions(
                   matchingSource.dataStreams.map(({ name }) => ({ name, isIntegration: false }))
                 )
               );
+            } else {
+              // this is a complete source name
+              const rangeToReplace = {
+                start: innerText.length - sourceIdentifier.length + 1,
+                end: innerText.length + 1,
+              };
+
+              const suggestionsToAdd: SuggestionRawDefinition[] = [
+                {
+                  ...pipeCompleteItem,
+                  filterText: sourceIdentifier,
+                  text: sourceIdentifier + ' | ',
+                  command: TRIGGER_SUGGESTION_COMMAND,
+                  rangeToReplace,
+                },
+                {
+                  ...commaCompleteItem,
+                  filterText: sourceIdentifier,
+                  text: sourceIdentifier + ', ',
+                  command: TRIGGER_SUGGESTION_COMMAND,
+                  rangeToReplace,
+                },
+                {
+                  ...buildOptionDefinition(metadataOption),
+                  filterText: sourceIdentifier,
+                  text: sourceIdentifier + ' METADATA ',
+                  asSnippet: false, // turn this off because $ could be contained within the source name
+                  rangeToReplace,
+                },
+              ];
+
+              addSuggestionsBasedOnQuote(suggestionsToAdd);
             }
           } else {
-            // Not an integration, just a partial source name
+            // Just a partial source name
             await addSuggestionsBasedOnQuote(getSourceSuggestions(sources));
           }
         } else {

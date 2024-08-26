@@ -1136,6 +1136,10 @@ describe('autocomplete', () => {
   });
 
   describe('advancing the cursor and opening the suggestion menu automatically ✨', () => {
+    /**
+     * NOTE: Monaco uses an Invoke trigger kind when the show suggestions action is triggered (e.g. accepting the "FROM" suggestion)
+     */
+
     const attachTriggerCommand = (
       s: string | PartialSuggestionWithText
     ): PartialSuggestionWithText =>
@@ -1241,24 +1245,105 @@ describe('autocomplete', () => {
     ]);
 
     // FROM source
-    //
-    // Using an Invoke trigger kind here because that's what Monaco uses when the show suggestions
-    // action is triggered (e.g. accepting the "FROM" suggestion)
-    testSuggestions(
-      'FROM /',
-      [
-        { text: 'index1 ', command: TRIGGER_SUGGESTION_COMMAND },
-        { text: 'index2 ', command: TRIGGER_SUGGESTION_COMMAND },
-      ],
-      undefined,
-      [
-        ,
+    describe('sources', () => {
+      testSuggestions(
+        'FROM /',
         [
-          { name: 'index1', hidden: false },
-          { name: 'index2', hidden: false },
+          { text: 'index1', command: TRIGGER_SUGGESTION_COMMAND },
+          { text: 'index2', command: TRIGGER_SUGGESTION_COMMAND },
         ],
-      ]
-    );
+        undefined,
+        [
+          ,
+          [
+            { name: 'index1', hidden: false },
+            { name: 'index2', hidden: false },
+          ],
+        ]
+      );
+
+      testSuggestions(
+        'FROM index/',
+        [
+          { text: 'index1', command: TRIGGER_SUGGESTION_COMMAND },
+          { text: 'index2', command: TRIGGER_SUGGESTION_COMMAND },
+        ],
+        undefined,
+        [
+          ,
+          [
+            { name: 'index1', hidden: false },
+            { name: 'index2', hidden: false },
+          ],
+        ]
+      );
+
+      testSuggestions(
+        'FROM index1/',
+        [
+          { text: 'index1 | ', filterText: 'index1', command: TRIGGER_SUGGESTION_COMMAND },
+          { text: 'index1, ', filterText: 'index1', command: TRIGGER_SUGGESTION_COMMAND },
+          { text: 'index1 METADATA ', filterText: 'index1', command: TRIGGER_SUGGESTION_COMMAND },
+        ],
+        undefined,
+        [
+          ,
+          [
+            { name: 'index1', hidden: false },
+            { name: 'index2', hidden: false },
+          ],
+        ]
+      );
+
+      // This is a source name that contains a special character
+      // meaning that Monaco by default will only set the replacement
+      // range to cover "bar" and not "foo$bar". We have to make sure
+      // we're setting it ourselves.
+      testSuggestions(
+        'FROM foo$bar/',
+        [
+          {
+            text: 'foo$bar | ',
+            filterText: 'foo$bar',
+            command: TRIGGER_SUGGESTION_COMMAND,
+            rangeToReplace: { start: 6, end: 13 },
+          },
+          {
+            text: 'foo$bar, ',
+            filterText: 'foo$bar',
+            command: TRIGGER_SUGGESTION_COMMAND,
+            rangeToReplace: { start: 6, end: 13 },
+          },
+          {
+            text: 'foo$bar METADATA ',
+            filterText: 'foo$bar',
+            asSnippet: false, // important because the text includes "$"
+            command: TRIGGER_SUGGESTION_COMMAND,
+            rangeToReplace: { start: 6, end: 13 },
+          },
+        ],
+        undefined,
+        [, [{ name: 'foo$bar', hidden: false }]]
+      );
+
+      // This is an identifier that matches multiple sources
+      testSuggestions(
+        'FROM i*/',
+        [
+          { text: 'i* | ', filterText: 'i*', command: TRIGGER_SUGGESTION_COMMAND },
+          { text: 'i*, ', filterText: 'i*', command: TRIGGER_SUGGESTION_COMMAND },
+          { text: 'i* METADATA ', filterText: 'i*', command: TRIGGER_SUGGESTION_COMMAND },
+        ],
+        undefined,
+        [
+          ,
+          [
+            { name: 'index1', hidden: false },
+            { name: 'index2', hidden: false },
+          ],
+        ]
+      );
+    });
 
     // FROM source METADATA
     testSuggestions('FROM index1 M/', [
@@ -1411,17 +1496,24 @@ describe('autocomplete', () => {
         [[{ name: 'foo.bar', type: 'double' }]]
       );
 
-      // @todo re-enable these tests when we can use AST to support this case
-      testSuggestions.skip('FROM a | KEEP `foo.bar`/', ['foo.bar, ', 'foo.bar | '], undefined, [
-        [{ name: 'foo.bar', type: 'double' }],
-      ]);
-      testSuggestions.skip('FROM a | KEEP `foo`.`bar`/', ['foo.bar, ', 'foo.bar | '], undefined, [
-        [{ name: 'foo.bar', type: 'double' }],
-      ]);
-      testSuggestions.skip('FROM a | KEEP `any#Char$Field`/', [
-        '`any#Char$Field`, ',
-        '`any#Char$Field` | ',
-      ]);
+      describe('escaped field namse', () => {
+        // This isn't actually the behavior we want, but this test is here
+        // to make sure no weird suggestions start cropping up in this case.
+        testSuggestions('FROM a | KEEP `foo.bar`/', ['foo.bar'], undefined, [
+          [{ name: 'foo.bar', type: 'double' }],
+        ]);
+        // @todo re-enable these tests when we can use AST to support this case
+        testSuggestions.skip('FROM a | KEEP `foo.bar`/', ['foo.bar, ', 'foo.bar | '], undefined, [
+          [{ name: 'foo.bar', type: 'double' }],
+        ]);
+        testSuggestions.skip('FROM a | KEEP `foo`.`bar`/', ['foo.bar, ', 'foo.bar | '], undefined, [
+          [{ name: 'foo.bar', type: 'double' }],
+        ]);
+        testSuggestions.skip('FROM a | KEEP `any#Char$Field`/', [
+          '`any#Char$Field`, ',
+          '`any#Char$Field` | ',
+        ]);
+      });
 
       // Subsequent fields
       testSuggestions(
