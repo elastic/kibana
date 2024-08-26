@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { GenerateContentResponse } from '@google/generative-ai';
+import type { GenerateContentResponse } from '@google/generative-ai';
 
 export interface GenerateContentResponseUsageMetadata {
   promptTokenCount: number;

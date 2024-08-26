@@ -15,7 +15,7 @@ describe('getInferenceAdapter', () => {
     expect(getInferenceAdapter(InferenceConnectorType.OpenAI)).toBe(openAIAdapter);
   });
 
-  it('returns undefined for Gemini type', () => {
+  it('returns the gemini adapter for Gemini type', () => {
     expect(getInferenceAdapter(InferenceConnectorType.Gemini)).toBe(geminiAdapter);
   });
 
