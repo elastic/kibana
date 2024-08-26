@@ -13,26 +13,15 @@ import type {
   InvestigateSetupDependencies,
   InvestigateStartDependencies,
   ConfigSchema,
-  OnWidgetAdd,
 } from './types';
 
-export type { InvestigatePublicSetup, InvestigatePublicStart, OnWidgetAdd };
+export type { InvestigatePublicSetup, InvestigatePublicStart };
 
-export {
-  type Investigation,
-  type InvestigateWidget,
-  type InvestigateWidgetCreate,
-  type GlobalWidgetParameters,
-} from '../common/types';
+export { type GlobalWidgetParameters } from '../common/types';
 
 export { mergePlainObjects } from '../common/utils/merge_plain_objects';
 
-export { createWidgetFactory } from './create_widget';
 export { getEsFilterFromGlobalParameters } from './util/get_es_filters_from_global_parameters';
-
-export { ESQL_WIDGET_NAME } from './esql_widget/constants';
-export { createEsqlWidget } from './esql_widget/create_esql_widget';
-export type { EsqlWidgetParameters } from './esql_widget/types';
 
 export const plugin: PluginInitializer<
   InvestigatePublicSetup,

@@ -146,30 +146,6 @@ export class InvestigateAppPlugin
       });
     });
 
-    // old
-    pluginsSetup.investigate.register((registerWidget) =>
-      Promise.all([
-        pluginsStartPromise,
-        import('./widgets/register_widgets').then((m) => m.registerWidgets),
-        getCreateEsqlService(),
-      ]).then(([pluginsStart, registerWidgets, createEsqlService]) => {
-        registerWidgets({
-          dependencies: {
-            setup: pluginsSetup,
-            start: pluginsStart,
-          },
-          services: {
-            esql: createEsqlService({
-              data: pluginsStart.data,
-              dataViews: pluginsStart.dataViews,
-              lens: pluginsStart.lens,
-            }),
-          },
-          registerWidget,
-        });
-      })
-    );
-
     return {};
   }
 

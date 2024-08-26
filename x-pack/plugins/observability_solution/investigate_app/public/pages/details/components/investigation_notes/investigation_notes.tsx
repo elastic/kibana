@@ -16,8 +16,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
-import { InvestigationNote } from '@kbn/investigate-plugin/common';
-import { GetInvestigationResponse } from '@kbn/investigation-shared';
+import { InvestigationNoteResponse, GetInvestigationResponse } from '@kbn/investigation-shared';
 import React, { useState } from 'react';
 import { useAddInvestigationNote } from '../../../../hooks/use_add_investigation_note';
 import { useDeleteInvestigationNote } from '../../../../hooks/use_delete_investigation_note';
@@ -71,7 +70,7 @@ export function InvestigationNotes({ investigationId, investigation }: Props) {
       </EuiSplitPanel.Inner>
       <EuiSplitPanel.Inner>
         <EuiFlexGroup direction="column" gutterSize="m">
-          {notes?.map((currNote: InvestigationNote) => {
+          {notes?.map((currNote: InvestigationNoteResponse) => {
             return (
               <TimelineMessage
                 key={currNote.id}
