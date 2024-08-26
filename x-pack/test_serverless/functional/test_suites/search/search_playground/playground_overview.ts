@@ -15,7 +15,12 @@ import { createLlmProxy, LlmProxy } from './utils/create_llm_proxy';
 const esArchiveIndex = 'test/api_integration/fixtures/es_archiver/index_patterns/basic_index';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const pageObjects = getPageObjects(['svlCommonPage', 'svlCommonNavigation', 'searchPlayground']);
+  const pageObjects = getPageObjects([
+    'svlCommonPage',
+    'svlCommonNavigation',
+    'searchPlayground',
+    'embeddedConsole',
+  ]);
   const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
   const supertestWithoutAuth = getService('supertestWithoutAuth');

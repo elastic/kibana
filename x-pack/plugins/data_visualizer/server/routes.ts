@@ -66,4 +66,31 @@ export function routes(coreSetup: CoreSetup<StartDeps, unknown>, logger: Logger)
         }
       }
     );
+
+  router.versioned
+    .get({
+      path: '/internal/data_visualizer/inference_services',
+      access: 'internal',
+      options: {
+        tags: ['access:fileUpload:analyzeFile'],
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: false,
+      },
+      async (context, request, response) => {
+        try {
+          const esClient = (await context.core).elasticsearch.client;
+          const { endpoints } = await esClient.asCurrentUser.inference.get({
+            inference_id: '_all',
+          });
+
+          return response.ok({ body: endpoints });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      }
+    );
 }
