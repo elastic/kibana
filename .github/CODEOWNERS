@@ -1763,6 +1763,8 @@ x-pack/plugins/observability_solution/observability_shared/public/components/pro
 
 # Shared UX
 packages/react @elastic/appex-sharedux
+test/functional/page_objects/solution_navigation.ts @elastic/appex-sharedux
+/x-pack/test_serverless/functional/page_objects/svl_common_navigation.ts @elastic/appex-sharedux
 
 # OpenAPI spec files
 /x-pack/plugins/fleet/common/openapi          @elastic/platform-docs
