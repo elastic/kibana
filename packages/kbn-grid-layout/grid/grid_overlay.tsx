@@ -8,11 +8,17 @@
 
 import { EuiPortal, EuiText, transparentize } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
 import React, { useRef, useState } from 'react';
 import { GridLayoutStateManager, PanelInteractionEvent } from './types';
 
 type ScrollDirection = 'up' | 'down';
+
+const scrollLabels: { [key in ScrollDirection]: string } = {
+  up: i18n.translate('kbnGridLayout.overlays.scrollUpLabel', { defaultMessage: 'Scroll up' }),
+  down: i18n.translate('kbnGridLayout.overlays.scrollDownLabel', { defaultMessage: 'Scroll down' }),
+};
 
 const scrollOnInterval = (direction: ScrollDirection) => {
   const interval = setInterval(() => {
@@ -81,7 +87,7 @@ const ScrollOnHover = ({ direction, hide }: { hide: boolean; direction: ScrollDi
         `}
       >
         <EuiText size="m">
-          <strong>Scroll {direction}</strong>
+          <strong>{scrollLabels[direction]}</strong>
         </EuiText>
       </div>
     </div>

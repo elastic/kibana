@@ -33,6 +33,7 @@
     "presentationPanel": "src/plugins/presentation_panel",
     "embeddableExamples": "examples/embeddable_examples",
     "esQuery": "packages/kbn-es-query/src",
+    "kbnGridLayout": "packages/kbn-grid-layout",
     "esUi": "src/plugins/es_ui_shared",
     "expandableFlyout": "packages/kbn-expandable-flyout",
     "expressionError": "src/plugins/expression_error",
