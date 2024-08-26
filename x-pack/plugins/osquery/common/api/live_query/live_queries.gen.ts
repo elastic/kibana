@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 import { FindLiveQueryRequestQuery } from './find_live_query.gen';
 import { DefaultSuccessResponse, Id } from '../model/schema/common_attributes.gen';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 import { booleanStringSchema } from './common';
 
 export const createEntityDefinitionQuerySchema = z.object({

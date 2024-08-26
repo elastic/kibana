@@ -5,16 +5,21 @@
  * 2.0.
  */
 
-import { createLiteralValueFromUndefinedRT } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
-import { MetricsUIAggregationRT } from '../inventory_models/types';
+import { createLiteralValueFromUndefinedRT } from '@kbn/io-ts-utils';
 import { afterKeyObjectRT, timeRangeRT } from './metrics_explorer';
+import { MetricsUIAggregation } from '../inventory_models/types';
+
+export interface MetricsAPIMetric {
+  id: string;
+  aggregations: MetricsUIAggregation;
+}
 
 const groupByRT = rt.union([rt.string, rt.null, rt.undefined]);
 
 export const MetricsAPIMetricRT = rt.type({
   id: rt.string,
-  aggregations: MetricsUIAggregationRT,
+  aggregations: rt.UnknownRecord,
 });
 
 export const MetricsAPIRequestRT = rt.intersection([
@@ -85,11 +90,13 @@ export const MetricsAPIResponseRT = rt.type({
   info: MetricsAPIPageInfoRT,
 });
 
+export type MetricsAPIRequest = Omit<rt.OutputOf<typeof MetricsAPIRequestRT>, 'metrics'> & {
+  metrics: MetricsAPIMetric[];
+};
+
 export type MetricsAPITimerange = rt.TypeOf<typeof timeRangeRT>;
 
 export type MetricsAPIColumnType = rt.TypeOf<typeof MetricsAPIColumnTypeRT>;
-
-export type MetricsAPIMetric = rt.TypeOf<typeof MetricsAPIMetricRT>;
 
 export type MetricsAPIPageInfo = rt.TypeOf<typeof MetricsAPIPageInfoRT>;
 
@@ -98,7 +105,5 @@ export type MetricsAPIColumn = rt.TypeOf<typeof MetricsAPIColumnRT>;
 export type MetricsAPIRow = rt.TypeOf<typeof MetricsAPIRowRT>;
 
 export type MetricsAPISeries = rt.TypeOf<typeof MetricsAPISeriesRT>;
-
-export type MetricsAPIRequest = rt.TypeOf<typeof MetricsAPIRequestRT>;
 
 export type MetricsAPIResponse = rt.TypeOf<typeof MetricsAPIResponseRT>;

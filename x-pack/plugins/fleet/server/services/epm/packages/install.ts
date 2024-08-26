@@ -482,44 +482,23 @@ async function installPackageFromRegistry({
         }`
       );
     }
-    const { enablePackagesStateMachine } = appContextService.getExperimentalFeatures();
-    if (enablePackagesStateMachine) {
-      return await installPackageWitStateMachine({
-        pkgName,
-        pkgVersion,
-        installSource,
-        installedPkg,
-        installType,
-        savedObjectsClient,
-        esClient,
-        spaceId,
-        force,
-        packageInstallContext,
-        paths,
-        verificationResult,
-        authorizationHeader,
-        ignoreMappingUpdateErrors,
-        skipDataStreamRollover,
-      });
-    } else {
-      return await installPackageCommon({
-        pkgName,
-        pkgVersion,
-        installSource,
-        installedPkg,
-        installType,
-        savedObjectsClient,
-        esClient,
-        spaceId,
-        force,
-        packageInstallContext,
-        paths,
-        verificationResult,
-        authorizationHeader,
-        ignoreMappingUpdateErrors,
-        skipDataStreamRollover,
-      });
-    }
+    return await installPackageWitStateMachine({
+      pkgName,
+      pkgVersion,
+      installSource,
+      installedPkg,
+      installType,
+      savedObjectsClient,
+      esClient,
+      spaceId,
+      force,
+      packageInstallContext,
+      paths,
+      verificationResult,
+      authorizationHeader,
+      ignoreMappingUpdateErrors,
+      skipDataStreamRollover,
+    });
   } catch (e) {
     sendEvent({
       ...telemetryEvent,
@@ -738,7 +717,7 @@ async function installPackageWitStateMachine(options: {
   let { telemetryEvent } = options;
   const logger = appContextService.getLogger();
   logger.info(
-    `Install with enablePackagesStateMachine - Starting installation of ${pkgName}@${pkgVersion} from ${installSource} `
+    `Install with state machine - Starting installation of ${pkgName}@${pkgVersion} from ${installSource} `
   );
 
   // Workaround apm issue with async spans: https://github.com/elastic/apm-agent-nodejs/issues/2611
@@ -956,6 +935,7 @@ async function installPackageByUpload({
     // update the timestamp of latest installation
     setLastUploadInstallCache();
 
+    // TODO: use installPackageWithStateMachine instead of installPackageCommon https://github.com/elastic/kibana/issues/189346
     return await installPackageCommon({
       packageInstallContext,
       pkgName,
@@ -1139,7 +1119,7 @@ export async function installCustomPackage(
     paths,
     packageInfo,
   };
-
+  // TODO: use installPackageWithStateMachine instead of installPackageCommon https://github.com/elastic/kibana/issues/189347
   return await installPackageCommon({
     packageInstallContext,
     pkgName,

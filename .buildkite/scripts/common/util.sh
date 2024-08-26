@@ -12,7 +12,7 @@ is_pr_with_label() {
 
   IFS=',' read -ra labels <<< "${GITHUB_PR_LABELS:-}"
 
-  for label in "${labels[@]}"
+  for label in "${labels[@]:-}"
   do
     if [ "$label" == "$match" ]; then
       return
