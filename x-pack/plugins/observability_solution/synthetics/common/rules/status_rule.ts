@@ -6,6 +6,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import { isEmpty } from 'lodash';
 
 export const TimeWindowSchema = schema.object({
   unit: schema.oneOf(
@@ -59,13 +60,23 @@ export type StatusRuleCondition = TypeOf<typeof StatusRuleConditionSchema>;
 
 export const getConditionType = (condition?: StatusRuleCondition) => {
   let numberOfChecks = 1;
-  const isLocationBased = condition && 'numberOfLocations' in condition.window;
-  const isTimeWindow = condition && 'time' in condition.window;
-  const isChecksBased = condition && 'numberOfChecks' in condition.window;
+  if (isEmpty(condition) || !condition?.window) {
+    return {
+      isLocationBased: false,
+      isTimeWindow: false,
+      isChecksBased: true,
+      numberOfChecks,
+      downThreshold: 1,
+      numberOfLocations: 1,
+    };
+  }
+  const conWindow = condition.window;
+  const isLocationBased = conWindow && 'numberOfLocations' in condition.window;
+  const isTimeWindow = conWindow && 'time' in condition.window;
+  const isChecksBased = conWindow && 'numberOfChecks' in condition.window;
 
   if (isChecksBased) {
-    numberOfChecks =
-      condition && 'numberOfChecks' in condition?.window ? condition.window.numberOfChecks : 1;
+    numberOfChecks = condition && 'numberOfChecks' in conWindow ? conWindow.numberOfChecks : 1;
   }
 
   if (isTimeWindow || isLocationBased) {
@@ -73,9 +84,7 @@ export const getConditionType = (condition?: StatusRuleCondition) => {
   }
 
   const numberOfLocations =
-    condition && 'numberOfLocations' in condition.window
-      ? condition.window.numberOfLocations ?? 1
-      : 1;
+    conWindow && 'numberOfLocations' in conWindow ? conWindow.numberOfLocations ?? 1 : 1;
 
   return {
     isLocationBased,

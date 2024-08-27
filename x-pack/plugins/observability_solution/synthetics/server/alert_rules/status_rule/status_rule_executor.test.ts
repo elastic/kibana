@@ -148,7 +148,7 @@ describe('StatusRuleExecutor', () => {
         status: 'down',
         timestamp: '2021-06-01T00:00:00.000Z',
         checks: {
-          total: 1,
+          downWithinXChecks: 1,
           down: 1,
         },
       },
@@ -161,7 +161,7 @@ describe('StatusRuleExecutor', () => {
         status: 'down',
         timestamp: '2021-06-01T00:00:00.000Z',
         checks: {
-          total: 1,
+          downWithinXChecks: 1,
           down: 1,
         },
       },
@@ -238,7 +238,7 @@ describe('StatusRuleExecutor', () => {
         status: 'down',
         timestamp: '2021-06-01T00:00:00.000Z',
         checks: {
-          total: 1,
+          downWithinXChecks: 1,
           down: 1,
         },
       },
@@ -251,7 +251,7 @@ describe('StatusRuleExecutor', () => {
         status: 'down',
         timestamp: '2021-06-01T00:00:00.000Z',
         checks: {
-          total: 1,
+          downWithinXChecks: 1,
           down: 1,
         },
       },

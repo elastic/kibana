@@ -6,6 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import moment from 'moment';
 import { getGeoData } from './utils';
 
 export interface DocOverrides {
@@ -35,7 +36,7 @@ export const makeUpSummary = ({
     down: 0,
     final_attempt: true,
   },
-  monitor: getMonitorData({ id: monitorId, name, status: 'up' }),
+  monitor: getMonitorData({ id: monitorId, name, status: 'up', timestamp }),
   '@timestamp': timestamp ?? '2022-12-18T09:52:04.056Z',
   config_id: configId ?? 'b9d9e146-746f-427f-bbf5-6e786b5b4e73',
   state: {
@@ -66,7 +67,7 @@ export const makeDownSummary = ({
     down: 1,
     final_attempt: true,
   },
-  monitor: getMonitorData({ id: monitorId, name, status: 'down' }),
+  monitor: getMonitorData({ id: monitorId, name, status: 'down', timestamp }),
   error: {
     message: 'received status code 200 expecting [500]',
     type: 'validate',
@@ -90,10 +91,12 @@ const getMonitorData = ({
   id,
   name,
   status,
+  timestamp,
 }: {
   id?: string;
   name?: string;
   status: 'up' | 'down';
+  timestamp?: string;
 }) => ({
   duration: {
     us: 152459,
@@ -104,8 +107,8 @@ const getMonitorData = ({
   fleet_managed: true,
   check_group: uuidv4(),
   timespan: {
-    lt: '2022-12-18T09:52:50.128Z',
-    gte: '2022-12-18T09:49:50.128Z',
+    lt: timestamp ?? '2022-12-18T09:52:50.128Z',
+    gte: timestamp ? moment(timestamp).subtract(3, 'minutes') : '2022-12-18T09:49:50.128Z',
   },
   id: id ?? 'b9d9e146-746f-427f-bbf5-6e786b5b4e73',
   type: 'http',
