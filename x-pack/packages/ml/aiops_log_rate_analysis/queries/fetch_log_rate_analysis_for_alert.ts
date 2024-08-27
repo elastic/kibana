@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import { queue } from 'async';
 import { chunk } from 'lodash';
 
@@ -16,7 +17,7 @@ import type { SignificantItem } from '@kbn/ml-agg-utils';
 import { getSampleProbability } from '@kbn/ml-random-sampler-utils';
 
 import type { AiopsLogRateAnalysisSchema } from '../api/schema';
-import { getLogRateAnalysisParametersFromAlert } from '../get_log_rate_analysis_parameters_from_alert';
+import { getIntervalFactor } from '../get_log_rate_analysis_parameters_from_alert';
 import { getSwappedWindowParameters } from '../get_swapped_window_parameters';
 import { getLogRateChange } from '../get_log_rate_change';
 import { getBaselineAndDeviationRates } from '../get_baseline_and_deviation_rates';
@@ -48,45 +49,45 @@ export async function fetchLogRateAnalysisForAlert({
   arguments: {
     index: string;
     alertStartedAt: string;
-    alertEndedAt?: string;
     alertRuleParameterTimeSize?: number;
     alertRuleParameterTimeUnit?: string;
     timefield?: string;
     searchQuery?: estypes.QueryDslQueryContainer;
   };
 }) {
-  const { alertStartedAt, alertEndedAt, timefield = '@timestamp' } = args;
+  const { alertStartedAt, timefield = '@timestamp' } = args;
+  const alertStart = moment(alertStartedAt);
 
-  const { timeRange, windowParameters } = getLogRateAnalysisParametersFromAlert({
-    alertStartedAt,
-    alertEndedAt,
-    timeSize: args.alertRuleParameterTimeSize,
-    timeUnit: args.alertRuleParameterTimeUnit,
-  });
-  const earliestMs = timeRange.min.valueOf();
-  const latestMs = timeRange.max.valueOf();
+  const intervalFactor = getIntervalFactor(
+    args.alertRuleParameterTimeSize,
+    args.alertRuleParameterTimeUnit
+  );
 
-  const rangeQuery: estypes.QueryDslQueryContainer = {
-    range: {
-      [timefield]: {
-        gte: timeRange.min.valueOf(),
-        lte: timeRange.max.valueOf(),
-        format: 'epoch_millis',
-      },
-    },
+  // The deviation time range is 1 lookback duration before the alert start.
+  // The baseline time range is 2 lookback durations before the deviation time range.
+  const windowParameters = {
+    baselineMin: alertStart
+      .clone()
+      .subtract(3 * intervalFactor, 'minutes')
+      .valueOf(),
+    baselineMax: alertStart
+      .clone()
+      .subtract(1 * intervalFactor, 'minutes')
+      .valueOf(),
+    deviationMin: alertStart
+      .clone()
+      .subtract(1 * intervalFactor, 'minutes')
+      .valueOf(),
+    deviationMax: alertStart.valueOf(),
   };
 
-  const { searchQuery = rangeQuery } = args;
-
-  if (searchQuery.bool && Array.isArray(searchQuery.bool.filter)) {
-    searchQuery.bool.filter.push(rangeQuery);
-  }
+  const { searchQuery = { match_all: {} } } = args;
 
   // Step 1: Get field candidates and total doc counts.
   const indexInfoParams: AiopsLogRateAnalysisSchema = {
     index: args.index,
-    start: earliestMs,
-    end: latestMs,
+    start: windowParameters.baselineMin,
+    end: windowParameters.deviationMax,
     searchQuery: JSON.stringify(searchQuery),
     timeFieldName: timefield,
     ...windowParameters,

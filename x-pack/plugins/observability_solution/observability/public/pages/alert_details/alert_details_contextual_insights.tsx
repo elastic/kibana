@@ -35,9 +35,6 @@ export function AlertDetailContextualInsights({ alert }: { alert: AlertData | nu
       }>('/internal/observability/assistant/alert_details_contextual_insights', {
         query: {
           alert_started_at: new Date(alert.formatted.start).toISOString(),
-          alert_ended_at: alert.formatted.end
-            ? new Date(alert.formatted.end).toISOString()
-            : undefined,
 
           // alert fields used for log rate analysis
           alert_rule_parameter_time_size: alert.formatted.fields[ALERT_RULE_PARAMETERS]

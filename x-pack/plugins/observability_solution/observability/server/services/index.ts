@@ -21,7 +21,6 @@ export const alertDetailsContextRt = t.intersection([
   }),
   t.partial({
     // alert fields used for log rate analysis
-    alert_ended_at: t.string,
     alert_rule_parameter_time_size: t.string,
     alert_rule_parameter_time_unit: t.string,
 

@@ -11,7 +11,6 @@ import { ParsedExperimentalFields } from '@kbn/rule-registry-plugin/common/parse
 export interface TopAlert<TAdditionalMetaFields extends Record<string, any> = {}> {
   fields: ParsedTechnicalFields & ParsedExperimentalFields & TAdditionalMetaFields;
   start: number;
-  end?: number;
   lastUpdated: number;
   reason: string;
   link?: string;
