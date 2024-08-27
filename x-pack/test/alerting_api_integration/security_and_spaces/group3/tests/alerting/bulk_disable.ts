@@ -533,10 +533,10 @@ export default ({ getService }: FtrProviderContext) => {
                     execution_status: response.body.rules[2].execution_status,
                     monitoring: response.body.rules[2].monitoring,
                     revision: 0,
-                    ...(response.body.rules[1].next_run
+                    ...(response.body.rules[2].next_run
                       ? { next_run: response.body.rules[2].next_run }
                       : {}),
-                    ...(response.body.rules[1].last_run
+                    ...(response.body.rules[2].last_run
                       ? { last_run: response.body.rules[2].last_run }
                       : {}),
                   },
