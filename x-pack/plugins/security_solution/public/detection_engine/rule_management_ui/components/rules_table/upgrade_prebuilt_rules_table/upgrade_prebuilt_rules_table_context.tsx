@@ -107,11 +107,12 @@ const UpgradePrebuiltRulesTableContext = createContext<UpgradePrebuiltRulesConte
 
 interface UpgradePrebuiltRulesTableContextProviderProps {
   children: React.ReactNode;
+  stateOverride?: Record<string, unknown>;
 }
 
-export const UpgradePrebuiltRulesTableContextProvider = ({
-  children,
-}: UpgradePrebuiltRulesTableContextProviderProps) => {
+export const UpgradePrebuiltRulesTableContextProvider = (
+  props: UpgradePrebuiltRulesTableContextProviderProps
+) => {
   const [loadingRules, setLoadingRules] = useState<RuleSignatureId[]>([]);
   const [selectedRules, setSelectedRules] = useState<RuleUpgradeInfoForReview[]>([]);
   const [filterOptions, setFilterOptions] = useState<UpgradePrebuiltRulesTableFilterOptions>({
@@ -246,6 +247,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
         selectedRules,
         loadingRules,
         lastUpdated: dataUpdatedAt,
+        ...props.stateOverride,
       },
       actions,
     };
@@ -263,6 +265,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     loadingRules,
     dataUpdatedAt,
     actions,
+    props.stateOverride,
   ]);
 
   const extraTabs = useMemo<EuiTabbedContentTab[]>(() => {
@@ -312,7 +315,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
             onConfirm={handleUpgradeConfirm}
           />
         )}
-        {children}
+        {props.children}
         {previewedRule && (
           <RuleDetailsFlyout
             rule={previewedRule}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { isEmpty } from 'lodash/fp';
 import {
   EuiDescriptionList,
@@ -39,8 +39,6 @@ import { AlertSuppressionLabel } from '../../../rule_creation_ui/components/desc
 import { useGetSavedQuery } from '../../../../detections/pages/detection_engine/rules/use_get_saved_query';
 import * as threatMatchI18n from '../../../../common/components/threat_match/translations';
 import * as timelinesI18n from '../../../../timelines/components/timeline/translations';
-import { useRuleIndexPattern } from '../../../rule_creation_ui/pages/form';
-import { DataSourceType } from '../../../../detections/pages/detection_engine/rules/types';
 import type { Duration } from '../../../../detections/pages/detection_engine/rules/types';
 import { convertHistoryStartToSize } from '../../../../detections/pages/detection_engine/rules/helpers';
 import { MlJobsDescription } from '../../../rule_creation/components/ml_jobs_description/ml_jobs_description';
@@ -62,11 +60,52 @@ interface SavedQueryNameProps {
   savedQueryName: string;
 }
 
-const SavedQueryName = ({ savedQueryName }: SavedQueryNameProps) => (
+export const SavedQueryName = ({ savedQueryName }: SavedQueryNameProps) => (
   <EuiText size="s" data-test-subj="savedQueryNamePropertyValue">
     {savedQueryName}
   </EuiText>
 );
+
+interface UseFetchDataViewParams {
+  index?: string[];
+  dataViewId?: string;
+}
+
+interface UseFetchDataViewReturn {
+  dataView: DataView | null;
+  error: Error | null;
+  isLoading: boolean;
+}
+
+/*
+  Fetches a DataView by its ID if `dataViewId` is provided, or creates a new DataView out of index patterns if `index` is provided.
+*/
+function useFetchDataView({ dataViewId, index }: UseFetchDataViewParams): UseFetchDataViewReturn {
+  const { data } = useKibana().services;
+
+  const [dataView, setDataView] = useState<DataView | null>(null);
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    if (dataViewId) {
+      data.dataViews
+        .get(dataViewId)
+        .then((dv) => {
+          setDataView(dv);
+        })
+        .catch(setError);
+    } else if (index) {
+      data.dataViews
+        .create({ title: index.join(','), id: index.join(','), allowNoIndex: true })
+        .then((dv) => {
+          setDataView(dv);
+        })
+        .catch(setError);
+    }
+  }, [data, dataViewId, index]);
+
+  return { dataView, error, isLoading: !dataView && !error };
+}
 
 interface FiltersProps {
   filters: Filter[];
@@ -75,14 +114,15 @@ interface FiltersProps {
   'data-test-subj'?: string;
 }
 
-const Filters = ({ filters, dataViewId, index, 'data-test-subj': dataTestSubj }: FiltersProps) => {
-  const flattenedFilters = mapAndFlattenFilters(filters);
+export const Filters = ({
+  filters,
+  dataViewId,
+  index,
+  'data-test-subj': dataTestSubj,
+}: FiltersProps) => {
+  const { dataView } = useFetchDataView({ dataViewId, index });
 
-  const { indexPattern } = useRuleIndexPattern({
-    dataSourceType: dataViewId ? DataSourceType.DataView : DataSourceType.IndexPatterns,
-    index: index ?? [],
-    dataViewId,
-  });
+  const flattenedFilters = mapAndFlattenFilters(filters);
 
   const styles = filtersStyles;
 
@@ -94,7 +134,7 @@ const Filters = ({ filters, dataViewId, index, 'data-test-subj': dataTestSubj }:
       responsive={false}
       gutterSize="xs"
     >
-      <FilterItems filters={flattenedFilters} indexPatterns={[indexPattern as DataView]} readOnly />
+      {dataView && <FilterItems filters={flattenedFilters} indexPatterns={[dataView]} readOnly />}
     </EuiFlexGroup>
   );
 };
@@ -104,7 +144,7 @@ interface QueryProps {
   'data-test-subj'?: string;
 }
 
-const Query = ({ query, 'data-test-subj': dataTestSubj = 'query' }: QueryProps) => {
+export const Query = ({ query, 'data-test-subj': dataTestSubj = 'query' }: QueryProps) => {
   const styles = queryStyles;
   return (
     <div data-test-subj={dataTestSubj} className={styles.content}>
@@ -117,7 +157,7 @@ interface IndexProps {
   index: string[];
 }
 
-const Index = ({ index }: IndexProps) => (
+export const Index = ({ index }: IndexProps) => (
   <BadgeList badges={index} data-test-subj="indexPropertyValue" />
 );
 
@@ -125,7 +165,7 @@ interface DataViewIdProps {
   dataViewId: string;
 }
 
-const DataViewId = ({ dataViewId }: DataViewIdProps) => (
+export const DataViewId = ({ dataViewId }: DataViewIdProps) => (
   <EuiText size="s" data-test-subj="dataViewIdPropertyValue">
     {dataViewId}
   </EuiText>
@@ -135,7 +175,7 @@ interface DataViewIndexPatternProps {
   dataViewId: string;
 }
 
-const DataViewIndexPattern = ({ dataViewId }: DataViewIndexPatternProps) => {
+export const DataViewIndexPattern = ({ dataViewId }: DataViewIndexPatternProps) => {
   const { data } = useKibana().services;
   const [indexPattern, setIndexPattern] = React.useState('');
   const [hasError, setHasError] = React.useState(false);
@@ -191,18 +231,19 @@ const AnomalyThreshold = ({ anomalyThreshold }: AnomalyThresholdProps) => (
 );
 
 interface MachineLearningJobListProps {
-  jobIds: string[];
+  jobIds: string | string[];
   isInteractive: boolean;
 }
 
-const MachineLearningJobList = ({ jobIds, isInteractive }: MachineLearningJobListProps) => {
+export const MachineLearningJobList = ({ jobIds, isInteractive }: MachineLearningJobListProps) => {
   const { jobs } = useSecurityJobs();
+  const jobIdsArray = Array.isArray(jobIds) ? jobIds : [jobIds];
 
   if (isInteractive) {
-    return <MlJobsDescription jobIds={jobIds} />;
+    return <MlJobsDescription jobIds={jobIdsArray} />;
   }
 
-  const relevantJobs = jobs.filter((job) => jobIds.includes(job.id));
+  const relevantJobs = jobs.filter((job) => jobIdsArray.includes(job.id));
 
   return (
     <>
@@ -542,7 +583,7 @@ const prepareDefinitionSectionListItems = (
       ),
       description: (
         <MachineLearningJobList
-          jobIds={rule.machine_learning_job_id as string[]}
+          jobIds={rule.machine_learning_job_id}
           isInteractive={isInteractive}
         />
       ),
