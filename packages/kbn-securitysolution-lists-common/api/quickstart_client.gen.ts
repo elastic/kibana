@@ -20,49 +20,49 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { catchAxiosErrorFormatAndThrow } from '@kbn/securitysolution-utils';
 
-import type { CreateListRequestBodyInput, CreateListResponse } from './create_list/create_list.gen';
+import type { CreateListIndexResponse } from './create_list_index/create_list_index.gen';
 import type {
   CreateListItemRequestBodyInput,
   CreateListItemResponse,
 } from './create_list_item/create_list_item.gen';
-import type {
-  DeleteListRequestQueryInput,
-  DeleteListResponse,
-} from './delete_list/delete_list.gen';
-import type { CreateListIndexResponse } from './create_list_index/create_list_index.gen';
+import type { CreateListRequestBodyInput, CreateListResponse } from './create_list/create_list.gen';
 import type { DeleteListIndexResponse } from './delete_list_index/delete_list_index.gen';
 import type {
   DeleteListItemRequestQueryInput,
   DeleteListItemResponse,
 } from './delete_list_item/delete_list_item.gen';
+import type {
+  DeleteListRequestQueryInput,
+  DeleteListResponse,
+} from './delete_list/delete_list.gen';
 import type { ExportListItemsRequestQueryInput } from './export_list_items/export_list_items.gen';
-import type { FindListsRequestQueryInput, FindListsResponse } from './find_lists/find_lists.gen';
 import type {
   FindListItemsRequestQueryInput,
   FindListItemsResponse,
 } from './find_list_items/find_list_items.gen';
+import type { FindListsRequestQueryInput, FindListsResponse } from './find_lists/find_lists.gen';
 import type {
   ImportListItemsRequestQueryInput,
   ImportListItemsRequestBodyInput,
   ImportListItemsResponse,
 } from './import_list_items/import_list_items.gen';
-import type { PatchListRequestBodyInput, PatchListResponse } from './patch_list/patch_list.gen';
-import type { ReadListRequestQueryInput, ReadListResponse } from './read_list/read_list.gen';
 import type {
   PatchListItemRequestBodyInput,
   PatchListItemResponse,
 } from './patch_list_item/patch_list_item.gen';
+import type { PatchListRequestBodyInput, PatchListResponse } from './patch_list/patch_list.gen';
 import type { ReadListIndexResponse } from './read_list_index/read_list_index.gen';
 import type {
   ReadListItemRequestQueryInput,
   ReadListItemResponse,
 } from './read_list_item/read_list_item.gen';
 import type { ReadListPrivilegesResponse } from './read_list_privileges/read_list_privileges.gen';
-import type { UpdateListRequestBodyInput, UpdateListResponse } from './update_list/update_list.gen';
+import type { ReadListRequestQueryInput, ReadListResponse } from './read_list/read_list.gen';
 import type {
   UpdateListItemRequestBodyInput,
   UpdateListItemResponse,
 } from './update_list_item/update_list_item.gen';
+import type { UpdateListRequestBodyInput, UpdateListResponse } from './update_list/update_list.gen';
 
 export interface ClientOptions {
   kbnClient: KbnClient;

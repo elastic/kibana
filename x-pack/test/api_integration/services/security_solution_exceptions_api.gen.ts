@@ -33,7 +33,10 @@ import { DuplicateExceptionListRequestQueryInput } from '@kbn/securitysolution-e
 import { ExportExceptionListRequestQueryInput } from '@kbn/securitysolution-exceptions-common/api/export_exception_list/export_exception_list.gen';
 import { FindExceptionListItemsRequestQueryInput } from '@kbn/securitysolution-exceptions-common/api/find_exception_list_items/find_exception_list_items.gen';
 import { FindExceptionListsRequestQueryInput } from '@kbn/securitysolution-exceptions-common/api/find_exception_lists/find_exception_lists.gen';
-import { ImportExceptionListRequestQueryInput } from '@kbn/securitysolution-exceptions-common/api/import_exceptions/import_exceptions.gen';
+import {
+  ImportExceptionListRequestQueryInput,
+  ImportExceptionListRequestBodyInput,
+} from '@kbn/securitysolution-exceptions-common/api/import_exceptions/import_exceptions.gen';
 import { ReadExceptionListRequestQueryInput } from '@kbn/securitysolution-exceptions-common/api/read_exception_list/read_exception_list.gen';
 import { ReadExceptionListItemRequestQueryInput } from '@kbn/securitysolution-exceptions-common/api/read_exception_list_item/read_exception_list_item.gen';
 import { ReadExceptionListSummaryRequestQueryInput } from '@kbn/securitysolution-exceptions-common/api/read_exception_list_summary/read_exception_list_summary.gen';
@@ -137,6 +140,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object)
         .query(props.query);
     },
     readExceptionList(props: ReadExceptionListProps) {
@@ -215,6 +219,7 @@ export interface FindExceptionListsProps {
 }
 export interface ImportExceptionListProps {
   query: ImportExceptionListRequestQueryInput;
+  body: ImportExceptionListRequestBodyInput;
 }
 export interface ReadExceptionListProps {
   query: ReadExceptionListRequestQueryInput;

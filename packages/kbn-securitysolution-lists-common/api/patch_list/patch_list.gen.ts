@@ -17,10 +17,18 @@
 
 import { z } from '@kbn/zod';
 
+import { ListId, ListName, ListDescription, ListMetadata } from '../model/list_common.gen';
 import { List } from '../model/list_schemas.gen';
 
 export type PatchListRequestBody = z.infer<typeof PatchListRequestBody>;
-export const PatchListRequestBody = z.object({});
+export const PatchListRequestBody = z.object({
+  id: ListId,
+  name: ListName.optional(),
+  description: ListDescription.optional(),
+  meta: ListMetadata.optional(),
+  version: z.number().int().min(1).optional(),
+  _version: z.string().optional(),
+});
 export type PatchListRequestBodyInput = z.input<typeof PatchListRequestBody>;
 
 export type PatchListResponse = z.infer<typeof PatchListResponse>;

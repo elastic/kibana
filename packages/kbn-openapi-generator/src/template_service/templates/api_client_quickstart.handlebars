@@ -23,7 +23,7 @@ import type {
   {{operationId}}RequestBodyInput,
   {{operationId}}Response,
 {{/each}}
-} from '{{replace sourcePath 'schema.yaml' 'gen'}}';
+} from '{{generatedPath}}';
 {{/if}}
 {{/each}}
 

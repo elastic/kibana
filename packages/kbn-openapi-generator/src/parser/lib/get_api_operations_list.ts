@@ -85,12 +85,10 @@ export function getApiOperationsList(parsedSchema: OpenApiDocument): NormalizedO
         const response = operation.responses?.['200']?.content?.['application/json']?.schema as
           | NormalizedSchemaItem
           | undefined;
-        const requestBody = (
-          operation.requestBody?.content?.['application/json']?.schema ??
-          operation.requestBody?.content?.['multipart/form-data']?.schema
+        const requestBody = (operation.requestBody?.content?.['application/json']?.schema ??
+          (operation.requestBody?.content?.['multipart/form-data']?.schema
             ? { type: 'object' }
-            : undefined
-        ) as NormalizedSchemaItem | undefined;
+            : undefined)) as NormalizedSchemaItem | undefined;
         const normalizedOperation: NormalizedOperation = {
           path,
           method,

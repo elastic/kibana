@@ -17,10 +17,20 @@
 
 import { z } from '@kbn/zod';
 
+import { ListItemId, ListId, ListItemValue, ListItemMetadata } from '../model/list_common.gen';
 import { ListItem } from '../model/list_schemas.gen';
 
 export type CreateListItemRequestBody = z.infer<typeof CreateListItemRequestBody>;
-export const CreateListItemRequestBody = z.object({});
+export const CreateListItemRequestBody = z.object({
+  id: ListItemId.optional(),
+  list_id: ListId,
+  value: ListItemValue,
+  meta: ListItemMetadata.optional(),
+  /**
+   * Determines when changes made by the request are made visible to search
+   */
+  refresh: z.enum(['true', 'false', 'wait_for']).optional(),
+});
 export type CreateListItemRequestBodyInput = z.input<typeof CreateListItemRequestBody>;
 
 export type CreateListItemResponse = z.infer<typeof CreateListItemResponse>;

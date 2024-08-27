@@ -29,6 +29,14 @@ export const AssetCriticalityCsvUploadStats = z.object({
   total: z.number().int(),
 });
 
+export type InternalUploadAssetCriticalityRecordsRequestBody = z.infer<
+  typeof InternalUploadAssetCriticalityRecordsRequestBody
+>;
+export const InternalUploadAssetCriticalityRecordsRequestBody = z.object({});
+export type InternalUploadAssetCriticalityRecordsRequestBodyInput = z.input<
+  typeof InternalUploadAssetCriticalityRecordsRequestBody
+>;
+
 export type InternalUploadAssetCriticalityRecordsResponse = z.infer<
   typeof InternalUploadAssetCriticalityRecordsResponse
 >;
@@ -36,6 +44,14 @@ export const InternalUploadAssetCriticalityRecordsResponse = z.object({
   errors: z.array(AssetCriticalityCsvUploadErrorItem),
   stats: AssetCriticalityCsvUploadStats,
 });
+
+export type UploadAssetCriticalityRecordsRequestBody = z.infer<
+  typeof UploadAssetCriticalityRecordsRequestBody
+>;
+export const UploadAssetCriticalityRecordsRequestBody = z.object({});
+export type UploadAssetCriticalityRecordsRequestBodyInput = z.input<
+  typeof UploadAssetCriticalityRecordsRequestBody
+>;
 
 export type UploadAssetCriticalityRecordsResponse = z.infer<
   typeof UploadAssetCriticalityRecordsResponse

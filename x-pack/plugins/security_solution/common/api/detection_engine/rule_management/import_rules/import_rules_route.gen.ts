@@ -41,6 +41,10 @@ export const ImportRulesRequestQuery = z.object({
 });
 export type ImportRulesRequestQueryInput = z.input<typeof ImportRulesRequestQuery>;
 
+export type ImportRulesRequestBody = z.infer<typeof ImportRulesRequestBody>;
+export const ImportRulesRequestBody = z.object({});
+export type ImportRulesRequestBodyInput = z.input<typeof ImportRulesRequestBody>;
+
 export type ImportRulesResponse = z.infer<typeof ImportRulesResponse>;
 export const ImportRulesResponse = z
   .object({

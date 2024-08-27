@@ -8,6 +8,13 @@
 import { range } from 'lodash';
 import crypto from 'crypto';
 
+/**
+ * A basic function to generate random data filling out a document. Useful for forcing
+ * Elasticsearch to handle large amounts of data in a single doc.
+ * @param numFields Number of fields to generate in each document
+ * @param fieldSize Number of bytes to generate for each field
+ * @returns Object representing the new document
+ */
 export const buildLargeDocument = ({
   numFields,
   fieldSize,

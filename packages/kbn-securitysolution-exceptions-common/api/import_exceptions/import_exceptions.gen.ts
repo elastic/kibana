@@ -58,6 +58,10 @@ list and its items are overwritten.
 });
 export type ImportExceptionListRequestQueryInput = z.input<typeof ImportExceptionListRequestQuery>;
 
+export type ImportExceptionListRequestBody = z.infer<typeof ImportExceptionListRequestBody>;
+export const ImportExceptionListRequestBody = z.object({});
+export type ImportExceptionListRequestBodyInput = z.input<typeof ImportExceptionListRequestBody>;
+
 export type ImportExceptionListResponse = z.infer<typeof ImportExceptionListResponse>;
 export const ImportExceptionListResponse = z.object({
   errors: ExceptionListsImportBulkErrorArray,

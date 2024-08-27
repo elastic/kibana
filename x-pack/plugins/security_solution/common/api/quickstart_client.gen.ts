@@ -22,10 +22,177 @@ import { catchAxiosErrorFormatAndThrow } from '@kbn/securitysolution-utils';
 
 import type { SetAlertAssigneesRequestBodyInput } from './detection_engine/alert_assignees/set_alert_assignees_route.gen';
 import type {
+  SetAlertTagsRequestBodyInput,
+  SetAlertTagsResponse,
+} from './detection_engine/alert_tags/set_alert_tags/set_alert_tags.gen';
+import type { CreateAlertsIndexResponse } from './detection_engine/index_management/create_index/create_index.gen';
+import type { DeleteAlertsIndexResponse } from './detection_engine/index_management/delete_index/delete_index.gen';
+import type { ReadAlertsIndexResponse } from './detection_engine/index_management/read_index/read_index.gen';
+import type { ReadPrivilegesResponse } from './detection_engine/index_management/read_privileges/read_privileges.gen';
+import type { BootstrapPrebuiltRulesResponse } from './detection_engine/prebuilt_rules/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.gen';
+import type { InstallPrebuiltRulesAndTimelinesResponse } from './detection_engine/prebuilt_rules/install_prebuilt_rules_and_timelines/install_prebuilt_rules_and_timelines_route.gen';
+import type { ReadPrebuiltRulesAndTimelinesStatusResponse } from './detection_engine/prebuilt_rules/read_prebuilt_rules_and_timelines_status/read_prebuilt_rules_and_timelines_status_route.gen';
+import type {
+  PerformRulesBulkActionRequestQueryInput,
+  PerformRulesBulkActionRequestBodyInput,
+  PerformRulesBulkActionResponse,
+} from './detection_engine/rule_management/bulk_actions/bulk_actions_route.gen';
+import type {
+  BulkCreateRulesRequestBodyInput,
+  BulkCreateRulesResponse,
+} from './detection_engine/rule_management/bulk_crud/bulk_create_rules/bulk_create_rules_route.gen';
+import type {
+  BulkDeleteRulesRequestBodyInput,
+  BulkDeleteRulesResponse,
+  BulkDeleteRulesPostRequestBodyInput,
+  BulkDeleteRulesPostResponse,
+} from './detection_engine/rule_management/bulk_crud/bulk_delete_rules/bulk_delete_rules_route.gen';
+import type {
+  BulkPatchRulesRequestBodyInput,
+  BulkPatchRulesResponse,
+} from './detection_engine/rule_management/bulk_crud/bulk_patch_rules/bulk_patch_rules_route.gen';
+import type {
+  BulkUpdateRulesRequestBodyInput,
+  BulkUpdateRulesResponse,
+} from './detection_engine/rule_management/bulk_crud/bulk_update_rules/bulk_update_rules_route.gen';
+import type {
+  CreateRuleRequestBodyInput,
+  CreateRuleResponse,
+} from './detection_engine/rule_management/crud/create_rule/create_rule_route.gen';
+import type {
+  DeleteRuleRequestQueryInput,
+  DeleteRuleResponse,
+} from './detection_engine/rule_management/crud/delete_rule/delete_rule_route.gen';
+import type {
+  PatchRuleRequestBodyInput,
+  PatchRuleResponse,
+} from './detection_engine/rule_management/crud/patch_rule/patch_rule_route.gen';
+import type {
+  ReadRuleRequestQueryInput,
+  ReadRuleResponse,
+} from './detection_engine/rule_management/crud/read_rule/read_rule_route.gen';
+import type {
+  UpdateRuleRequestBodyInput,
+  UpdateRuleResponse,
+} from './detection_engine/rule_management/crud/update_rule/update_rule_route.gen';
+import type {
+  ExportRulesRequestQueryInput,
+  ExportRulesRequestBodyInput,
+} from './detection_engine/rule_management/export_rules/export_rules_route.gen';
+import type {
+  FindRulesRequestQueryInput,
+  FindRulesResponse,
+} from './detection_engine/rule_management/find_rules/find_rules_route.gen';
+import type {
+  ImportRulesRequestQueryInput,
+  ImportRulesRequestBodyInput,
+  ImportRulesResponse,
+} from './detection_engine/rule_management/import_rules/import_rules_route.gen';
+import type { ReadTagsResponse } from './detection_engine/rule_management/read_tags/read_tags_route.gen';
+import type {
+  GetRuleExecutionEventsRequestQueryInput,
+  GetRuleExecutionEventsRequestParamsInput,
+  GetRuleExecutionEventsResponse,
+} from './detection_engine/rule_monitoring/rule_execution_logs/get_rule_execution_events/get_rule_execution_events_route.gen';
+import type {
+  GetRuleExecutionResultsRequestQueryInput,
+  GetRuleExecutionResultsRequestParamsInput,
+  GetRuleExecutionResultsResponse,
+} from './detection_engine/rule_monitoring/rule_execution_logs/get_rule_execution_results/get_rule_execution_results_route.gen';
+import type {
   RulePreviewRequestBodyInput,
   RulePreviewResponse,
 } from './detection_engine/rule_preview/rule_preview.gen';
+import type {
+  CreateAlertsMigrationRequestBodyInput,
+  CreateAlertsMigrationResponse,
+} from './detection_engine/signals_migration/create_signals_migration/create_signals_migration.gen';
+import type {
+  AlertsMigrationCleanupRequestBodyInput,
+  AlertsMigrationCleanupResponse,
+} from './detection_engine/signals_migration/delete_signals_migration/delete_signals_migration.gen';
+import type {
+  FinalizeAlertsMigrationRequestBodyInput,
+  FinalizeAlertsMigrationResponse,
+} from './detection_engine/signals_migration/finalize_signals_migration/finalize_signals_migration.gen';
+import type {
+  ReadAlertsMigrationStatusRequestQueryInput,
+  ReadAlertsMigrationStatusResponse,
+} from './detection_engine/signals_migration/read_signals_migration_status/read_signals_migration_status.gen';
+import type {
+  SearchAlertsRequestBodyInput,
+  SearchAlertsResponse,
+} from './detection_engine/signals/query_signals/query_signals_route.gen';
+import type {
+  SetAlertsStatusRequestBodyInput,
+  SetAlertsStatusResponse,
+} from './detection_engine/signals/set_signal_status/set_signals_status_route.gen';
 import type { SuggestUserProfilesRequestQueryInput } from './detection_engine/users/suggest_user_profiles_route.gen';
+import type {
+  EndpointGetActionsDetailsRequestParamsInput,
+  EndpointGetActionsDetailsResponse,
+} from './endpoint/actions/details/details.gen';
+import type {
+  EndpointFileDownloadRequestParamsInput,
+  EndpointFileDownloadResponse,
+} from './endpoint/actions/file_download/file_download.gen';
+import type {
+  EndpointFileInfoRequestParamsInput,
+  EndpointFileInfoResponse,
+} from './endpoint/actions/file_info/file_info.gen';
+import type {
+  EndpointGetActionsListRequestQueryInput,
+  EndpointGetActionsListResponse,
+} from './endpoint/actions/list/list.gen';
+import type {
+  EndpointExecuteActionRequestBodyInput,
+  EndpointExecuteActionResponse,
+} from './endpoint/actions/response_actions/execute/execute.gen';
+import type {
+  EndpointGetFileActionRequestBodyInput,
+  EndpointGetFileActionResponse,
+} from './endpoint/actions/response_actions/get_file/get_file.gen';
+import type {
+  EndpointIsolateRedirectRequestBodyInput,
+  EndpointIsolateRedirectResponse,
+} from './endpoint/actions/response_actions/isolate/deprecated_isolate.gen';
+import type {
+  EndpointIsolateActionRequestBodyInput,
+  EndpointIsolateActionResponse,
+} from './endpoint/actions/response_actions/isolate/isolate.gen';
+import type {
+  EndpointKillProcessActionRequestBodyInput,
+  EndpointKillProcessActionResponse,
+} from './endpoint/actions/response_actions/kill_process/kill_process.gen';
+import type {
+  EndpointGetProcessesActionRequestBodyInput,
+  EndpointGetProcessesActionResponse,
+} from './endpoint/actions/response_actions/running_procs/running_procs.gen';
+import type {
+  EndpointScanActionRequestBodyInput,
+  EndpointScanActionResponse,
+} from './endpoint/actions/response_actions/scan/scan.gen';
+import type {
+  EndpointSuspendProcessActionRequestBodyInput,
+  EndpointSuspendProcessActionResponse,
+} from './endpoint/actions/response_actions/suspend_process/suspend_process.gen';
+import type {
+  EndpointUnisolateRedirectRequestBodyInput,
+  EndpointUnisolateRedirectResponse,
+} from './endpoint/actions/response_actions/unisolate/deprecated_unisolate.gen';
+import type {
+  EndpointUnisolateActionRequestBodyInput,
+  EndpointUnisolateActionResponse,
+} from './endpoint/actions/response_actions/unisolate/unisolate.gen';
+import type {
+  EndpointUploadActionRequestBodyInput,
+  EndpointUploadActionResponse,
+} from './endpoint/actions/response_actions/upload/upload.gen';
+import type { EndpointGetActionsStateResponse } from './endpoint/actions/state/state.gen';
+import type {
+  EndpointGetActionsStatusRequestQueryInput,
+  EndpointGetActionsStatusResponse,
+} from './endpoint/actions/status/status.gen';
 import type {
   GetEndpointMetadataListRequestQueryInput,
   GetEndpointMetadataListResponse,
@@ -62,18 +229,20 @@ import type {
   DeleteAssetCriticalityRecordRequestQueryInput,
   DeleteAssetCriticalityRecordResponse,
 } from './entity_analytics/asset_criticality/delete_asset_criticality.gen';
+import type { AssetCriticalityGetPrivilegesResponse } from './entity_analytics/asset_criticality/get_asset_criticality_privileges.gen';
+import type { GetAssetCriticalityStatusResponse } from './entity_analytics/asset_criticality/get_asset_criticality_status.gen';
 import type {
   GetAssetCriticalityRecordRequestQueryInput,
   GetAssetCriticalityRecordResponse,
 } from './entity_analytics/asset_criticality/get_asset_criticality.gen';
-import type { AssetCriticalityGetPrivilegesResponse } from './entity_analytics/asset_criticality/get_asset_criticality_privileges.gen';
-import type { GetAssetCriticalityStatusResponse } from './entity_analytics/asset_criticality/get_asset_criticality_status.gen';
 import type {
   FindAssetCriticalityRecordsRequestQueryInput,
   FindAssetCriticalityRecordsResponse,
 } from './entity_analytics/asset_criticality/list_asset_criticality.gen';
 import type {
+  InternalUploadAssetCriticalityRecordsRequestBodyInput,
   InternalUploadAssetCriticalityRecordsResponse,
+  UploadAssetCriticalityRecordsRequestBodyInput,
   UploadAssetCriticalityRecordsResponse,
 } from './entity_analytics/asset_criticality/upload_asset_criticality_csv.gen';
 import type { DisableRiskEngineResponse } from './entity_analytics/risk_engine/engine_disable_route.gen';
@@ -153,172 +322,6 @@ import type {
   ResolveTimelineRequestQueryInput,
   ResolveTimelineResponse,
 } from './timeline/resolve_timeline/resolve_timeline_route.gen';
-import type {
-  SetAlertTagsRequestBodyInput,
-  SetAlertTagsResponse,
-} from './detection_engine/alert_tags/set_alert_tags/set_alert_tags.gen';
-import type { CreateAlertsIndexResponse } from './detection_engine/index_management/create_index/create_index.gen';
-import type { DeleteAlertsIndexResponse } from './detection_engine/index_management/delete_index/delete_index.gen';
-import type { ReadAlertsIndexResponse } from './detection_engine/index_management/read_index/read_index.gen';
-import type { ReadPrivilegesResponse } from './detection_engine/index_management/read_privileges/read_privileges.gen';
-import type { BootstrapPrebuiltRulesResponse } from './detection_engine/prebuilt_rules/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.gen';
-import type { InstallPrebuiltRulesAndTimelinesResponse } from './detection_engine/prebuilt_rules/install_prebuilt_rules_and_timelines/install_prebuilt_rules_and_timelines_route.gen';
-import type { ReadPrebuiltRulesAndTimelinesStatusResponse } from './detection_engine/prebuilt_rules/read_prebuilt_rules_and_timelines_status/read_prebuilt_rules_and_timelines_status_route.gen';
-import type {
-  PerformRulesBulkActionRequestQueryInput,
-  PerformRulesBulkActionRequestBodyInput,
-  PerformRulesBulkActionResponse,
-} from './detection_engine/rule_management/bulk_actions/bulk_actions_route.gen';
-import type {
-  ExportRulesRequestQueryInput,
-  ExportRulesRequestBodyInput,
-} from './detection_engine/rule_management/export_rules/export_rules_route.gen';
-import type {
-  FindRulesRequestQueryInput,
-  FindRulesResponse,
-} from './detection_engine/rule_management/find_rules/find_rules_route.gen';
-import type {
-  ImportRulesRequestQueryInput,
-  ImportRulesResponse,
-} from './detection_engine/rule_management/import_rules/import_rules_route.gen';
-import type { ReadTagsResponse } from './detection_engine/rule_management/read_tags/read_tags_route.gen';
-import type {
-  SearchAlertsRequestBodyInput,
-  SearchAlertsResponse,
-} from './detection_engine/signals/query_signals/query_signals_route.gen';
-import type {
-  SetAlertsStatusRequestBodyInput,
-  SetAlertsStatusResponse,
-} from './detection_engine/signals/set_signal_status/set_signals_status_route.gen';
-import type {
-  CreateAlertsMigrationRequestBodyInput,
-  CreateAlertsMigrationResponse,
-} from './detection_engine/signals_migration/create_signals_migration/create_signals_migration.gen';
-import type {
-  AlertsMigrationCleanupRequestBodyInput,
-  AlertsMigrationCleanupResponse,
-} from './detection_engine/signals_migration/delete_signals_migration/delete_signals_migration.gen';
-import type {
-  FinalizeAlertsMigrationRequestBodyInput,
-  FinalizeAlertsMigrationResponse,
-} from './detection_engine/signals_migration/finalize_signals_migration/finalize_signals_migration.gen';
-import type {
-  ReadAlertsMigrationStatusRequestQueryInput,
-  ReadAlertsMigrationStatusResponse,
-} from './detection_engine/signals_migration/read_signals_migration_status/read_signals_migration_status.gen';
-import type {
-  EndpointGetActionsDetailsRequestParamsInput,
-  EndpointGetActionsDetailsResponse,
-} from './endpoint/actions/details/details.gen';
-import type {
-  EndpointFileDownloadRequestParamsInput,
-  EndpointFileDownloadResponse,
-} from './endpoint/actions/file_download/file_download.gen';
-import type {
-  EndpointFileInfoRequestParamsInput,
-  EndpointFileInfoResponse,
-} from './endpoint/actions/file_info/file_info.gen';
-import type {
-  EndpointGetActionsListRequestQueryInput,
-  EndpointGetActionsListResponse,
-} from './endpoint/actions/list/list.gen';
-import type { EndpointGetActionsStateResponse } from './endpoint/actions/state/state.gen';
-import type {
-  EndpointGetActionsStatusRequestQueryInput,
-  EndpointGetActionsStatusResponse,
-} from './endpoint/actions/status/status.gen';
-import type {
-  BulkCreateRulesRequestBodyInput,
-  BulkCreateRulesResponse,
-} from './detection_engine/rule_management/bulk_crud/bulk_create_rules/bulk_create_rules_route.gen';
-import type {
-  BulkDeleteRulesRequestBodyInput,
-  BulkDeleteRulesResponse,
-  BulkDeleteRulesPostRequestBodyInput,
-  BulkDeleteRulesPostResponse,
-} from './detection_engine/rule_management/bulk_crud/bulk_delete_rules/bulk_delete_rules_route.gen';
-import type {
-  BulkPatchRulesRequestBodyInput,
-  BulkPatchRulesResponse,
-} from './detection_engine/rule_management/bulk_crud/bulk_patch_rules/bulk_patch_rules_route.gen';
-import type {
-  BulkUpdateRulesRequestBodyInput,
-  BulkUpdateRulesResponse,
-} from './detection_engine/rule_management/bulk_crud/bulk_update_rules/bulk_update_rules_route.gen';
-import type {
-  CreateRuleRequestBodyInput,
-  CreateRuleResponse,
-} from './detection_engine/rule_management/crud/create_rule/create_rule_route.gen';
-import type {
-  DeleteRuleRequestQueryInput,
-  DeleteRuleResponse,
-} from './detection_engine/rule_management/crud/delete_rule/delete_rule_route.gen';
-import type {
-  PatchRuleRequestBodyInput,
-  PatchRuleResponse,
-} from './detection_engine/rule_management/crud/patch_rule/patch_rule_route.gen';
-import type {
-  ReadRuleRequestQueryInput,
-  ReadRuleResponse,
-} from './detection_engine/rule_management/crud/read_rule/read_rule_route.gen';
-import type {
-  UpdateRuleRequestBodyInput,
-  UpdateRuleResponse,
-} from './detection_engine/rule_management/crud/update_rule/update_rule_route.gen';
-import type {
-  GetRuleExecutionEventsRequestQueryInput,
-  GetRuleExecutionEventsRequestParamsInput,
-  GetRuleExecutionEventsResponse,
-} from './detection_engine/rule_monitoring/rule_execution_logs/get_rule_execution_events/get_rule_execution_events_route.gen';
-import type {
-  GetRuleExecutionResultsRequestQueryInput,
-  GetRuleExecutionResultsRequestParamsInput,
-  GetRuleExecutionResultsResponse,
-} from './detection_engine/rule_monitoring/rule_execution_logs/get_rule_execution_results/get_rule_execution_results_route.gen';
-import type {
-  EndpointExecuteActionRequestBodyInput,
-  EndpointExecuteActionResponse,
-} from './endpoint/actions/response_actions/execute/execute.gen';
-import type {
-  EndpointGetFileActionRequestBodyInput,
-  EndpointGetFileActionResponse,
-} from './endpoint/actions/response_actions/get_file/get_file.gen';
-import type {
-  EndpointIsolateRedirectRequestBodyInput,
-  EndpointIsolateRedirectResponse,
-} from './endpoint/actions/response_actions/isolate/deprecated_isolate.gen';
-import type {
-  EndpointIsolateActionRequestBodyInput,
-  EndpointIsolateActionResponse,
-} from './endpoint/actions/response_actions/isolate/isolate.gen';
-import type {
-  EndpointKillProcessActionRequestBodyInput,
-  EndpointKillProcessActionResponse,
-} from './endpoint/actions/response_actions/kill_process/kill_process.gen';
-import type {
-  EndpointGetProcessesActionRequestBodyInput,
-  EndpointGetProcessesActionResponse,
-} from './endpoint/actions/response_actions/running_procs/running_procs.gen';
-import type {
-  EndpointScanActionRequestBodyInput,
-  EndpointScanActionResponse,
-} from './endpoint/actions/response_actions/scan/scan.gen';
-import type {
-  EndpointSuspendProcessActionRequestBodyInput,
-  EndpointSuspendProcessActionResponse,
-} from './endpoint/actions/response_actions/suspend_process/suspend_process.gen';
-import type {
-  EndpointUnisolateRedirectRequestBodyInput,
-  EndpointUnisolateRedirectResponse,
-} from './endpoint/actions/response_actions/unisolate/deprecated_unisolate.gen';
-import type {
-  EndpointUnisolateActionRequestBodyInput,
-  EndpointUnisolateActionResponse,
-} from './endpoint/actions/response_actions/unisolate/unisolate.gen';
-import type {
-  EndpointUploadActionRequestBodyInput,
-  EndpointUploadActionResponse,
-} from './endpoint/actions/response_actions/upload/upload.gen';
 
 export interface ClientOptions {
   kbnClient: KbnClient;
@@ -1277,7 +1280,7 @@ finalize it.
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'POST',
-
+        body: props.body,
         query: props.query,
       })
       .catch(catchAxiosErrorFormatAndThrow);
@@ -1338,7 +1341,7 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
-  async internalUploadAssetCriticalityRecords() {
+  async internalUploadAssetCriticalityRecords(props: InternalUploadAssetCriticalityRecordsProps) {
     this.log.info(`${new Date().toISOString()} Calling API InternalUploadAssetCriticalityRecords`);
     return this.kbnClient
       .request<InternalUploadAssetCriticalityRecordsResponse>({
@@ -1347,6 +1350,7 @@ finalize it.
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'POST',
+        body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -1722,7 +1726,7 @@ detection engine rules.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
-  async uploadAssetCriticalityRecords() {
+  async uploadAssetCriticalityRecords(props: UploadAssetCriticalityRecordsProps) {
     this.log.info(`${new Date().toISOString()} Calling API UploadAssetCriticalityRecords`);
     return this.kbnClient
       .request<UploadAssetCriticalityRecordsResponse>({
@@ -1731,6 +1735,7 @@ detection engine rules.
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'POST',
+        body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -1897,12 +1902,16 @@ export interface GetTimelinesProps {
 }
 export interface ImportRulesProps {
   query: ImportRulesRequestQueryInput;
+  body: ImportRulesRequestBodyInput;
 }
 export interface ImportTimelinesProps {
   body: ImportTimelinesRequestBodyInput;
 }
 export interface InstallPrepackedTimelinesProps {
   body: InstallPrepackedTimelinesRequestBodyInput;
+}
+export interface InternalUploadAssetCriticalityRecordsProps {
+  body: InternalUploadAssetCriticalityRecordsRequestBodyInput;
 }
 export interface PatchRuleProps {
   body: PatchRuleRequestBodyInput;
@@ -1958,4 +1967,7 @@ export interface TriggerRiskScoreCalculationProps {
 }
 export interface UpdateRuleProps {
   body: UpdateRuleRequestBodyInput;
+}
+export interface UploadAssetCriticalityRecordsProps {
+  body: UploadAssetCriticalityRecordsRequestBodyInput;
 }

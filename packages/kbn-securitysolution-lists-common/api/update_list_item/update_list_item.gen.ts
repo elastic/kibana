@@ -17,10 +17,16 @@
 
 import { z } from '@kbn/zod';
 
+import { ListItemId, ListItemValue, ListItemMetadata } from '../model/list_common.gen';
 import { ListItem } from '../model/list_schemas.gen';
 
 export type UpdateListItemRequestBody = z.infer<typeof UpdateListItemRequestBody>;
-export const UpdateListItemRequestBody = z.object({});
+export const UpdateListItemRequestBody = z.object({
+  id: ListItemId,
+  value: ListItemValue,
+  meta: ListItemMetadata.optional(),
+  _version: z.string().optional(),
+});
 export type UpdateListItemRequestBodyInput = z.input<typeof UpdateListItemRequestBody>;
 
 export type UpdateListItemResponse = z.infer<typeof UpdateListItemResponse>;
