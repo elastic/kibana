@@ -175,7 +175,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await PageObjects.lens.createLayer('annotations', ANNOTATION_GROUP_TITLE);
 
-        retry.try(async () => {
+        await retry.try(async () => {
           expect(await PageObjects.lens.getLayerCount()).to.be(2);
         });
 
@@ -191,7 +191,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           navigateToVisualize: false,
         });
 
-        retry.try(async () => {
+        await retry.try(async () => {
           expect(await PageObjects.lens.getLayerCount()).to.be(1);
         });
       });

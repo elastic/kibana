@@ -43,7 +43,7 @@ export function LogsOverviewHeader({ doc }: { doc: LogDocumentOverview }) {
   });
 
   const accordionTitle = (
-    <EuiTitle size="xs">
+    <EuiTitle size="xxs">
       <p>{contentLabel}</p>
     </EuiTitle>
   );
@@ -80,7 +80,7 @@ export function LogsOverviewHeader({ doc }: { doc: LogDocumentOverview }) {
         <EuiFlexItem grow={false}>{logLevelAndTimestamp}</EuiFlexItem>
       </EuiFlexGroup>
       <HoverActionPopover value={value} field={field} anchorPosition="downCenter" display="block">
-        <EuiCodeBlock overflowHeight={100} paddingSize="m" isCopyable language="txt" fontSize="m">
+        <EuiCodeBlock overflowHeight={100} paddingSize="s" isCopyable language="txt" fontSize="s">
           {value}
         </EuiCodeBlock>
       </HoverActionPopover>

@@ -107,6 +107,7 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
   deprecations: configDeprecationProvider,
   exposeToBrowser: {
     search: true,
+    query: true,
   },
   schema: configSchema,
 };
