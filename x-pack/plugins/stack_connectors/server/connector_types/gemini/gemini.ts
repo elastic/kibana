@@ -284,12 +284,22 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
   }
 
   public async invokeAI(
-    { messages, model, temperature = 0, signal, timeout, toolConfig }: InvokeAIActionParams,
+    {
+      messages,
+      systemInstruction,
+      model,
+      temperature = 0,
+      signal,
+      timeout,
+      toolConfig,
+    }: InvokeAIActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<InvokeAIActionResponse> {
     const res = await this.runApi(
       {
-        body: JSON.stringify(formatGeminiPayload({ messages, temperature, toolConfig })),
+        body: JSON.stringify(
+          formatGeminiPayload({ messages, temperature, toolConfig, systemInstruction })
+        ),
         model,
         signal,
         timeout,
@@ -301,12 +311,23 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
   }
 
   public async invokeAIRaw(
-    { messages, model, temperature = 0, signal, timeout, tools }: InvokeAIRawActionParams,
+    {
+      messages,
+      model,
+      temperature = 0,
+      signal,
+      timeout,
+      tools,
+      systemInstruction,
+    }: InvokeAIRawActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<InvokeAIRawActionResponse> {
     const res = await this.runApi(
       {
-        body: JSON.stringify({ ...formatGeminiPayload({ messages, temperature }), tools }),
+        body: JSON.stringify({
+          ...formatGeminiPayload({ messages, temperature, systemInstruction }),
+          tools,
+        }),
         model,
         signal,
         timeout,
@@ -329,6 +350,7 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
   public async invokeStream(
     {
       messages,
+      systemInstruction,
       model,
       stopSequences,
       temperature = 0,
@@ -341,7 +363,10 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
   ): Promise<IncomingMessage> {
     return (await this.streamAPI(
       {
-        body: JSON.stringify({ ...formatGeminiPayload(messages, temperature, toolConfig), tools }),
+        body: JSON.stringify({
+          ...formatGeminiPayload({ messages, temperature, toolConfig, systemInstruction }),
+          tools,
+        }),
         model,
         stopSequences,
         signal,
@@ -355,10 +380,12 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
 /** Format the json body to meet Gemini payload requirements */
 const formatGeminiPayload = ({
   messages,
+  systemInstruction,
   temperature,
   toolConfig,
 }: {
   messages: Array<{ role: string; content: string; parts: MessagePart[] }>;
+  systemInstruction?: string;
   toolConfig?: InvokeAIActionParams['toolConfig'];
   temperature: number;
 }): Payload => {
@@ -368,6 +395,9 @@ const formatGeminiPayload = ({
       temperature,
       maxOutputTokens: DEFAULT_TOKEN_LIMIT,
     },
+    ...(systemInstruction
+      ? { system_instruction: { role: 'user', parts: [{ text: systemInstruction }] } }
+      : {}),
     ...(toolConfig
       ? {
           tool_config: {

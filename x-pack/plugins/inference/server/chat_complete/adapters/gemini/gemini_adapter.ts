@@ -41,7 +41,8 @@ export const geminiAdapter: InferenceConnectorAdapter = {
       executor.invoke({
         subAction: 'invokeStream',
         subActionParams: {
-          messages: messagesToGemini({ system, messages }),
+          messages: messagesToGemini({ messages }),
+          systemInstruction: system,
           tools: toolsToGemini(tools),
           toolConfig: toolChoiceToConfig(toolChoice),
           temperature: 0,
@@ -164,24 +165,8 @@ function toolSchemaToGemini({ schema }: { schema: ToolSchema }): Gemini.Function
   };
 }
 
-function messagesToGemini({
-  messages,
-  system,
-}: {
-  messages: Message[];
-  system?: string;
-}): GeminiMessage[] {
-  // systemInstruction is not supported on all gemini versions
-  // so for now we just always use the old trick of user message + assistant acknowledge.
-  // See https://cloud.google.com/vertex-ai/generative-ai/docs/model-reference/inference#request
-  const systemMessages: GeminiMessage[] | undefined = system
-    ? [
-        { role: 'user', content: system },
-        { role: 'assistant', content: 'Understood.' },
-      ]
-    : undefined;
-
-  return [...(systemMessages ? [...systemMessages] : []), ...messages.map(messageToGeminiMapper())];
+function messagesToGemini({ messages }: { messages: Message[] }): GeminiMessage[] {
+  return messages.map(messageToGeminiMapper());
 }
 
 function messageToGeminiMapper() {

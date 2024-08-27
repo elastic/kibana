@@ -29,9 +29,9 @@ export function processVertexStream() {
           });
         }
 
-        const contentPart = value.candidates![0].content.parts[0];
-        const completion = contentPart.text;
-        const toolCall = contentPart.functionCall;
+        const contentPart = value.candidates?.[0].content.parts[0];
+        const completion = contentPart?.text;
+        const toolCall = contentPart?.functionCall;
 
         if (completion || toolCall) {
           subscriber.next({
