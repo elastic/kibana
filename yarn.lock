@@ -11333,10 +11333,10 @@
   dependencies:
     "@types/jest" "*"
 
-"@types/textarea-caret@^3.0.1":
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/@types/textarea-caret/-/textarea-caret-3.0.1.tgz#5afd4b1c1b3bacb001d76a1e6ef192c710709a86"
-  integrity sha512-JjrXYzk4t6dM/5nz1hHkZXmd3xSdJM6mOIDSBUrpg4xThwKNryiu4CqHx81LwUJHxEEoQWHTu4fMV4em+c5bXg==
+"@types/textarea-caret@^3.0.3":
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/@types/textarea-caret/-/textarea-caret-3.0.3.tgz#9737fbf94127e8ed3f3ae0036f06c016f17a0466"
+  integrity sha512-bsA9GdXV1wQsXyDjS5+A+czz8IAR3haH5DU+KctIoXbzobRL2NOiwF/+EbB7pofAyudMytLj4ihPtbmbJT8FWw==
 
 "@types/through@*":
   version "0.0.30"
