@@ -15,6 +15,9 @@ link:/downloads/kibana[Download Kibana] page.
 Other versions can be found on the
 link:/downloads/past-releases[Past Releases page].
 
+[NOTE]
+====
+macOS is supported for development purposes only and is not covered under the support SLA for [production-supported operating systems](https://www.elastic.co/support/matrix#kibana). 
 
 [[install-linux64]]
 ==== Download and install the Linux 64-bit package
