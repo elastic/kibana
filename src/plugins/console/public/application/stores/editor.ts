@@ -18,6 +18,7 @@ export interface Store {
   ready: boolean;
   settings: DevToolsSettings;
   currentTextObject: TextObject | null;
+  restoreRequestFromHistory: string | null;
 }
 
 export const initialValue: Store = produce<Store>(
@@ -25,6 +26,7 @@ export const initialValue: Store = produce<Store>(
     ready: false,
     settings: DEFAULT_SETTINGS,
     currentTextObject: null,
+    restoreRequestFromHistory: null,
   },
   identity
 );
@@ -32,7 +34,9 @@ export const initialValue: Store = produce<Store>(
 export type Action =
   | { type: 'setInputEditor'; payload: SenseEditor | MonacoEditorActionsProvider }
   | { type: 'setCurrentTextObject'; payload: TextObject }
-  | { type: 'updateSettings'; payload: DevToolsSettings };
+  | { type: 'updateSettings'; payload: DevToolsSettings }
+  | { type: 'setRequestToRestore'; payload: string }
+  | { type: 'clearRequestToRestore'; };
 
 export const reducer: Reducer<Store, Action> = (state, action) =>
   produce<Store>(state, (draft) => {
@@ -50,6 +54,16 @@ export const reducer: Reducer<Store, Action> = (state, action) =>
 
     if (action.type === 'setCurrentTextObject') {
       draft.currentTextObject = action.payload;
+      return;
+    }
+
+    if (action.type === 'setRequestToRestore') {
+      draft.restoreRequestFromHistory = action.payload;
+      return;
+    }
+
+    if (action.type === 'clearRequestToRestore') {
+      draft.restoreRequestFromHistory = null;
       return;
     }
 

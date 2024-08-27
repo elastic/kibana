@@ -31,9 +31,11 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useServicesContext } from '../../contexts';
+import { useEditorActionContext } from '../../contexts/editor_context';
 import { HistoryViewer } from './history_viewer_monaco';
 import { useEditorReadContext } from '../../contexts/editor_context';
-import { useRestoreRequestFromHistory } from '../../hooks';
+import { getFormattedRequest } from '../../lib';
+import { ESRequest } from '../../../types';
 
 const CHILD_ELEMENT_PREFIX = 'historyReq';
 
@@ -63,8 +65,8 @@ export function History() {
   const {
     docLinks,
     services: { history },
-    config: { isMonacoEnabled },
   } = useServicesContext();
+  const dispatch = useEditorActionContext();
 
   const { settings: readOnlySettings } = useEditorReadContext();
 
@@ -109,7 +111,12 @@ export function History() {
     initialize();
   };
 
-  const restoreRequestFromHistory = useRestoreRequestFromHistory(isMonacoEnabled);
+  const restoreRequestFromHistory = useCallback((req: ESRequest) => {
+    const formattedRequest = getFormattedRequest(req);
+    dispatch({ type: 'setRequestToRestore', payload: formattedRequest });
+    console.log('navigate to editor now: ');
+    console.log(formattedRequest);
+  }, [dispatch]);
 
   useEffect(() => {
     initialize();
@@ -282,7 +289,7 @@ export function History() {
                         color="primary"
                         iconType="plusInCircle"
                         disabled={!viewingReq}
-                        onClick={() => restoreRequestFromHistory(viewingReq)}
+                        onClick={() => restoreRequestFromHistory(viewingReq as ESRequest)}
                       >
                         {i18n.translate('console.historyPage.applyHistoryButtonLabel', {
                           defaultMessage: 'Add',
