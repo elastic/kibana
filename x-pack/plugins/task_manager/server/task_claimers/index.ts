@@ -8,6 +8,7 @@
 import { Subject, Observable } from 'rxjs';
 import { Logger } from '@kbn/core/server';
 
+import minimatch from 'minimatch';
 import { TaskStore } from '../task_store';
 import { TaskClaim, TaskTiming } from '../task_events';
 import { TaskTypeDictionary } from '../task_type_dictionary';
@@ -71,4 +72,14 @@ export function getEmptyClaimOwnershipResult(): ClaimOwnershipResult {
     },
     docs: [],
   };
+}
+
+export function isTaskTypeExcluded(excludedTaskTypePatterns: string[], taskType: string) {
+  for (const excludedTypePattern of excludedTaskTypePatterns) {
+    if (minimatch(taskType, excludedTypePattern)) {
+      return true;
+    }
+  }
+
+  return false;
 }

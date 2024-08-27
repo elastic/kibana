@@ -48,8 +48,8 @@ export default function genAiTest({ getService }: FtrProviderContext) {
   };
 
   describe('OpenAI', () => {
-    after(() => {
-      objectRemover.removeAll();
+    after(async () => {
+      await objectRemover.removeAll();
     });
     describe('action creation', () => {
       const simulator = new OpenAISimulator({
