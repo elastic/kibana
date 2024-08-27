@@ -84,7 +84,7 @@ export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandl
             ],
           };
 
-          const graph = await getEcsGraph(model);
+          const graph = await getEcsGraph({ model });
           const results = await graph.invoke(parameters, options);
 
           return res.ok({ body: EcsMappingResponse.parse(results) });

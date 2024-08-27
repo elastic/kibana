@@ -15,7 +15,7 @@ export async function plugin(pluginInitializerContext: PluginInitializerContext)
   return new ScreenshottingPlugin(pluginInitializerContext);
 }
 
-export { config } from './config';
+export { config } from '@kbn/screenshotting-server';
 export type {
   PdfScreenshotOptions,
   PdfScreenshotResult,

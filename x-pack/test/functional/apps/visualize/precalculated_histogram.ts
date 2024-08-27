@@ -54,7 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.selectField('histogram-content', 'metrics');
         await PageObjects.visEditor.clickGo();
 
-        return await PageObjects.visChart.getTableVisContent();
+        return PageObjects.visChart.getTableVisContent();
       };
 
       it('with percentiles aggregation', async () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CreateInvestigationInput, CreateInvestigationResponse } from '@kbn/investigation-shared';
+import { CreateInvestigationParams, CreateInvestigationResponse } from '@kbn/investigation-shared';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 import { InvestigationRepository } from './investigation_repository';
 
@@ -15,7 +15,7 @@ enum InvestigationStatus {
 }
 
 export async function createInvestigation(
-  params: CreateInvestigationInput,
+  params: CreateInvestigationParams,
   { repository, user }: { repository: InvestigationRepository; user: AuthenticatedUser }
 ): Promise<CreateInvestigationResponse> {
   const investigation = {
@@ -24,6 +24,7 @@ export async function createInvestigation(
     createdBy: user.username,
     status: InvestigationStatus.ongoing,
     notes: [],
+    items: [],
   };
   await repository.save(investigation);
 

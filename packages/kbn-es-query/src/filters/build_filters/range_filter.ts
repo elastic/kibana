@@ -65,7 +65,7 @@ export type ScriptedRangeFilter = Filter & {
   meta: RangeFilterMeta;
   query: {
     script: {
-      script: estypes.InlineScript;
+      script: estypes.Script;
     };
   };
 };
@@ -189,7 +189,7 @@ export const buildRangeFilter = (
  * @internal
  */
 export const getRangeScript = (field: DataViewFieldBase, params: RangeFilterParams) => {
-  const knownParams: estypes.InlineScript['params'] = mapValues(
+  const knownParams: estypes.Script['params'] = mapValues(
     pickBy(params, (val, key) => key in operators),
     (value) => (field.type === 'number' && typeof value === 'string' ? parseFloat(value) : value)
   );

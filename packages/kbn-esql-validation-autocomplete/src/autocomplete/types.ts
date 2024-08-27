@@ -27,6 +27,8 @@ export interface SuggestionRawDefinition {
   label: string;
   /* The actual text to insert into the editor */
   text: string;
+  /* Text to use for filtering the suggestions */
+  filterText?: string;
   /**
    * Should the text be inserted as a snippet?
    * That is usually used for special behaviour like moving the cursor in a specific position
