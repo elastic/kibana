@@ -172,9 +172,6 @@ export class StatusRuleExecutor {
       upConfigs: {},
       pendingConfigs: {},
       staleDownConfigs,
-      down: 0,
-      up: 0,
-      pending: 0,
       enabledMonitorQueryIds,
       monitorLocationsMap: monitorLocationMap,
     };

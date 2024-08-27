@@ -53,7 +53,7 @@ export interface MonitorSummaryStatusRule {
   monitorTags?: string[];
   downThreshold?: number;
   checks?: {
-    total: number;
+    downWithinXChecks: number;
     down: number;
   };
   timestamp: string;

@@ -108,7 +108,7 @@ describe('StatusRuleExecutor', () => {
         monitorQueryId: 'test',
         ping: {} as any,
         checks: {
-          total: 1,
+          downWithinXChecks: 1,
           down: 1,
         },
       },
@@ -120,7 +120,7 @@ describe('StatusRuleExecutor', () => {
         monitorQueryId: 'test',
         ping: {} as any,
         checks: {
-          total: 1,
+          downWithinXChecks: 1,
           down: 1,
         },
       },
@@ -132,7 +132,7 @@ describe('StatusRuleExecutor', () => {
         monitorQueryId: 'test',
         ping: {} as any,
         checks: {
-          total: 1,
+          downWithinXChecks: 1,
           down: 1,
         },
       },
@@ -198,7 +198,7 @@ describe('StatusRuleExecutor', () => {
         monitorQueryId: 'test',
         ping: {} as any,
         checks: {
-          total: 1,
+          downWithinXChecks: 1,
           down: 1,
         },
       },
@@ -210,7 +210,7 @@ describe('StatusRuleExecutor', () => {
         monitorQueryId: 'test',
         ping: {} as any,
         checks: {
-          total: 1,
+          downWithinXChecks: 1,
           down: 1,
         },
       },
@@ -222,7 +222,7 @@ describe('StatusRuleExecutor', () => {
         monitorQueryId: 'test',
         ping: {} as any,
         checks: {
-          total: 1,
+          downWithinXChecks: 1,
           down: 1,
         },
       },

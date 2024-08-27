@@ -212,7 +212,7 @@ describe('setRecoveredAlertsContext', () => {
       } as StaleDownConfig['ping'],
       timestamp: new Date().toISOString(),
       checks: {
-        total: 1,
+        downWithinXChecks: 1,
         down: 0,
       },
     },
@@ -259,7 +259,7 @@ describe('setRecoveredAlertsContext', () => {
         timestamp: new Date().toISOString(),
         isDeleted: true,
         checks: {
-          total: 1,
+          downWithinXChecks: 1,
           down: 1,
         },
       },
@@ -339,7 +339,7 @@ describe('setRecoveredAlertsContext', () => {
         timestamp: new Date().toISOString(),
         isLocationRemoved: true,
         checks: {
-          total: 1,
+          downWithinXChecks: 1,
           down: 1,
         },
       },
@@ -418,7 +418,7 @@ describe('setRecoveredAlertsContext', () => {
         timestamp: new Date().toISOString(),
         isLocationRemoved: true,
         checks: {
-          total: 1,
+          downWithinXChecks: 1,
           down: 1,
         },
       },

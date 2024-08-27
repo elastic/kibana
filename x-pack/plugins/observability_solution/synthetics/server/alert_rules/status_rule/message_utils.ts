@@ -49,7 +49,7 @@ export const getMonitorSummary = (
   dateFormat: string,
   tz: string,
   checks?: {
-    total: number;
+    downWithinXChecks: number;
     down: number;
   },
   downThreshold?: number
@@ -115,21 +115,21 @@ export const getReasonMessage = ({
   status: string;
   timestamp: string;
   checks?: {
-    total: number;
+    downWithinXChecks: number;
     down: number;
   };
 }) => {
   const checkedAt = moment(timestamp).format('LLL');
 
   return i18n.translate('xpack.synthetics.alertRules.monitorStatus.reasonMessage.new', {
-    defaultMessage: `Monitor "{name}" from {location} is {status}. Checked at {checkedAt}. Alert when {downCheck} out of last {total} checks are down.`,
+    defaultMessage: `Monitor "{name}" from {location} is {status}. Checked at {checkedAt}. Alert when {downCheck} out of last {downWithinXChecks} checks are down.`,
     values: {
       name,
       status,
       location,
       checkedAt,
       downCheck: checks?.down ?? 1,
-      total: checks?.total ?? 1,
+      downWithinXChecks: checks?.downWithinXChecks ?? 1,
     },
   });
 };
