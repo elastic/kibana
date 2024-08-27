@@ -19,17 +19,24 @@ function range(start: number, end: number) {
 export const MAX_PARTITIONS = 256;
 export const CACHE_INTERVAL = 10000;
 
+export interface TaskPartitionerConstructorOpts {
+  kibanaDiscoveryService: KibanaDiscoveryService;
+  kibanasPerPartition: number;
+  podName: string;
+}
 export class TaskPartitioner {
   private readonly allPartitions: number[];
   private readonly podName: string;
+  private readonly kibanasPerPartition: number;
   private kibanaDiscoveryService: KibanaDiscoveryService;
   private podPartitions: number[];
   private podPartitionsLastUpdated: number;
 
-  constructor(podName: string, kibanaDiscoveryService: KibanaDiscoveryService) {
+  constructor(opts: TaskPartitionerConstructorOpts) {
     this.allPartitions = range(0, MAX_PARTITIONS);
-    this.podName = podName;
-    this.kibanaDiscoveryService = kibanaDiscoveryService;
+    this.podName = opts.podName;
+    this.kibanasPerPartition = opts.kibanasPerPartition;
+    this.kibanaDiscoveryService = opts.kibanaDiscoveryService;
     this.podPartitions = [];
     this.podPartitionsLastUpdated = Date.now() - CACHE_INTERVAL;
   }
@@ -54,7 +61,12 @@ export class TaskPartitioner {
     if (now - lastUpdated >= CACHE_INTERVAL) {
       try {
         const allPodNames = await this.getAllPodNames();
-        this.podPartitions = assignPodPartitions(this.podName, allPodNames, this.allPartitions);
+        this.podPartitions = assignPodPartitions({
+          kibanasPerPartition: this.kibanasPerPartition,
+          podName: this.podName,
+          podNames: allPodNames,
+          partitions: this.allPartitions,
+        });
         this.podPartitionsLastUpdated = now;
       } catch (error) {
         // return the cached value

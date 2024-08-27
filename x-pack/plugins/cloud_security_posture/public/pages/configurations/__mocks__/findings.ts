@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CspFinding } from '../../../../common/schemas/csp_finding';
+import type { CspFinding } from '@kbn/cloud-security-posture-common';
 
 export const mockFindingsHit: CspFinding = {
   result: {

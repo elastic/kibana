@@ -149,6 +149,7 @@ export function DataViewsList({
       searchProps={{
         id: searchListInputId,
         compressed: true,
+        autoFocus: true,
         placeholder: strings.editorAndPopover.search.getSearchPlaceholder(),
         'data-test-subj': 'indexPattern-switcher--input',
         ...(selectableProps ? selectableProps.searchProps : undefined),

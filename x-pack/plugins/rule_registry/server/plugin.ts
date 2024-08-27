@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { type Subject, ReplaySubject } from 'rxjs';
-import type {
+import { type Subject, ReplaySubject, Observable, map, distinctUntilChanged } from 'rxjs';
+import {
   PluginInitializerContext,
   Plugin,
   CoreSetup,
@@ -14,6 +14,8 @@ import type {
   KibanaRequest,
   CoreStart,
   IContextProvider,
+  CoreStatus,
+  ServiceStatusLevels,
 } from '@kbn/core/server';
 
 import type {
@@ -91,6 +93,8 @@ export class RuleRegistryPlugin
   ): RuleRegistryPluginSetupContract {
     const { logger, kibanaVersion } = this;
 
+    const elasticsearchAndSOAvailability$ = getElasticsearchAndSOAvailability(core.status.core$);
+
     const startDependencies = core.getStartServices().then(([coreStart, pluginStart]) => {
       return {
         core: coreStart,
@@ -115,6 +119,7 @@ export class RuleRegistryPlugin
       frameworkAlerts: plugins.alerting.frameworkAlerts,
       pluginStop$: this.pluginStop$,
       dataStreamAdapter,
+      elasticsearchAndSOAvailability$,
     });
 
     this.ruleDataService.initializeService();
@@ -199,4 +204,15 @@ export class RuleRegistryPlugin
     this.pluginStop$.next();
     this.pluginStop$.complete();
   }
+}
+
+function getElasticsearchAndSOAvailability(core$: Observable<CoreStatus>): Observable<boolean> {
+  return core$.pipe(
+    map(
+      ({ elasticsearch, savedObjects }) =>
+        elasticsearch.level === ServiceStatusLevels.available &&
+        savedObjects.level === ServiceStatusLevels.available
+    ),
+    distinctUntilChanged()
+  );
 }
