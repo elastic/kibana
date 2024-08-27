@@ -72,11 +72,17 @@ export async function sendEmail(
   const { message, messageHTML } = content;
 
   const renderedMessage = messageHTML ?? htmlFromMarkdown(logger, message);
+  const enhancedRenderedMessage = `${getHtmlPrefix()}\n${renderedMessage}`;
 
   if (transport.service === AdditionalEmailServices.EXCHANGE) {
-    return await sendEmailWithExchange(logger, options, renderedMessage, connectorTokenClient);
+    return await sendEmailWithExchange(
+      logger,
+      options,
+      enhancedRenderedMessage,
+      connectorTokenClient
+    );
   } else {
-    return await sendEmailWithNodemailer(logger, options, renderedMessage);
+    return await sendEmailWithNodemailer(logger, options, enhancedRenderedMessage);
   }
 }
 
@@ -305,4 +311,26 @@ function getUseProxy(host?: string, proxySettings?: ProxySettings) {
     }
   }
   return !!proxySettings;
+}
+
+function getHtmlPrefix() {
+  return `
+  <style>
+  table {
+    border-collapse: collapse;
+    border:          thin solid;
+  }
+  tbody tr:nth-child(odd) {
+  /*  background-color: #e495e4; */
+  }
+
+  tbody tr:nth-child(even) {
+    background-color: #e0e0e0;
+  }
+  tbody td, thead th {
+    border: thin solid;
+    padding: 0.5em;
+  }
+  </style>
+`;
 }
