@@ -16,6 +16,7 @@ import { DoneInvokeEvent } from 'xstate';
 import type { DataTableRecord } from '@kbn/discover-utils/src/types';
 import { ControlPanels, DisplayOptions } from '../../../../common';
 import type {
+  AllDatasetSelection,
   DatasetSelection,
   DataSourceSelection,
   DataViewSelection,
@@ -25,6 +26,9 @@ export interface WithDataSourceSelection {
   dataSourceSelection: DataSourceSelection;
 }
 
+export interface WithAllSelection {
+  allSelection: AllDatasetSelection;
+}
 export interface WithControlPanelGroupAPI {
   controlGroupAPI: ControlGroupAPI;
 }
@@ -46,6 +50,7 @@ export interface WithDataTableRecord {
 }
 
 export type DefaultLogsExplorerControllerState = WithDataSourceSelection &
+  WithAllSelection &
   WithQueryState &
   WithDisplayOptions &
   WithDataTableRecord;
@@ -53,11 +58,16 @@ export type DefaultLogsExplorerControllerState = WithDataSourceSelection &
 export type LogsExplorerControllerTypeState =
   | {
       value: 'uninitialized';
-      context: WithDataSourceSelection & WithControlPanels & WithQueryState & WithDisplayOptions;
+      context: WithDataSourceSelection &
+        WithAllSelection &
+        WithControlPanels &
+        WithQueryState &
+        WithDisplayOptions;
     }
   | {
       value: 'initializingSelection';
       context: WithDataSourceSelection &
+        WithAllSelection &
         WithControlPanels &
         WithQueryState &
         WithDisplayOptions &
@@ -67,6 +77,7 @@ export type LogsExplorerControllerTypeState =
   | {
       value: 'initializingDataset';
       context: WithDataSourceSelection &
+        WithAllSelection &
         WithControlPanels &
         WithQueryState &
         WithDisplayOptions &
@@ -75,6 +86,7 @@ export type LogsExplorerControllerTypeState =
   | {
       value: 'initializingDataView';
       context: WithDataSourceSelection &
+        WithAllSelection &
         WithControlPanels &
         WithQueryState &
         WithDisplayOptions &
@@ -83,6 +95,7 @@ export type LogsExplorerControllerTypeState =
   | {
       value: 'initializingControlPanels';
       context: WithDataSourceSelection &
+        WithAllSelection &
         WithControlPanels &
         WithQueryState &
         WithDisplayOptions &
@@ -91,6 +104,7 @@ export type LogsExplorerControllerTypeState =
   | {
       value: 'initialized';
       context: WithDataSourceSelection &
+        WithAllSelection &
         WithControlPanels &
         WithQueryState &
         WithDisplayOptions &
@@ -100,6 +114,7 @@ export type LogsExplorerControllerTypeState =
   | {
       value: 'initialized.dataSourceSelection.idle';
       context: WithDataSourceSelection &
+        WithAllSelection &
         WithControlPanels &
         WithQueryState &
         WithDisplayOptions &
@@ -109,6 +124,7 @@ export type LogsExplorerControllerTypeState =
   | {
       value: 'initialized.dataSourceSelection.changingDataView';
       context: WithDataSourceSelection &
+        WithAllSelection &
         WithControlPanels &
         WithQueryState &
         WithDisplayOptions &
@@ -118,6 +134,7 @@ export type LogsExplorerControllerTypeState =
   | {
       value: 'initialized.dataSourceSelection.creatingAdHocDataView';
       context: WithDataSourceSelection &
+        WithAllSelection &
         WithControlPanels &
         WithQueryState &
         WithDisplayOptions &
@@ -127,6 +144,7 @@ export type LogsExplorerControllerTypeState =
   | {
       value: 'initialized.controlGroups.uninitialized';
       context: WithDataSourceSelection &
+        WithAllSelection &
         WithControlPanels &
         WithQueryState &
         WithDisplayOptions &
@@ -136,6 +154,7 @@ export type LogsExplorerControllerTypeState =
   | {
       value: 'initialized.controlGroups.idle';
       context: WithDataSourceSelection &
+        WithAllSelection &
         WithControlPanelGroupAPI &
         WithControlPanels &
         WithQueryState &
@@ -146,6 +165,7 @@ export type LogsExplorerControllerTypeState =
   | {
       value: 'initialized.controlGroups.updatingControlPanels';
       context: WithDataSourceSelection &
+        WithAllSelection &
         WithControlPanelGroupAPI &
         WithControlPanels &
         WithQueryState &

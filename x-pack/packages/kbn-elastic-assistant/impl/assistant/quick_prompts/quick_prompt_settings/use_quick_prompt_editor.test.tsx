@@ -6,12 +6,12 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import { useQuickPromptEditor, DEFAULT_COLOR } from './use_quick_prompt_editor';
+import { useQuickPromptEditor } from './use_quick_prompt_editor';
 import { mockAlertPromptContext } from '../../../mock/prompt_context';
 import { MOCK_QUICK_PROMPTS } from '../../../mock/quick_prompt';
 import { PromptResponse } from '@kbn/elastic-assistant-common';
 import { useAssistantContext } from '../../../assistant_context';
-
+const DEFAULT_COLOR = '#D36086';
 jest.mock('../../../assistant_context');
 // Mock functions for the tests
 const mockOnSelectedQuickPromptChange = jest.fn();
@@ -58,7 +58,7 @@ describe('useQuickPromptEditor', () => {
     );
 
     act(() => {
-      result.current.onQuickPromptSelectionChange(newPromptTitle);
+      result.current.onQuickPromptSelectionChange(newPromptTitle, DEFAULT_COLOR);
     });
 
     const newPrompt: PromptResponse = {
@@ -100,7 +100,7 @@ describe('useQuickPromptEditor', () => {
     };
 
     act(() => {
-      result.current.onQuickPromptSelectionChange(expectedPrompt);
+      result.current.onQuickPromptSelectionChange(expectedPrompt, DEFAULT_COLOR);
     });
 
     expect(mockOnSelectedQuickPromptChange).toHaveBeenCalledWith(expectedPrompt);
