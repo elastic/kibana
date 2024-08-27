@@ -14,12 +14,3 @@ export const selectAlertFlyoutVisibility = createSelector(
   uiStateSelector,
   ({ alertFlyoutVisible }) => alertFlyoutVisible
 );
-
-export const selectRefreshPaused = createSelector(
-  uiStateSelector,
-  ({ refreshPaused }) => refreshPaused
-);
-export const selectRefreshInterval = createSelector(
-  uiStateSelector,
-  ({ refreshInterval }) => refreshInterval
-);

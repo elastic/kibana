@@ -5,21 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
+import React, { useContext } from 'react';
 import { EuiAutoRefreshButton, OnRefreshChangeProps } from '@elastic/eui';
-import { CLIENT_DEFAULTS_SYNTHETICS } from '../../../../../../common/constants/synthetics/client_defaults';
-const { AUTOREFRESH_INTERVAL_SECONDS, AUTOREFRESH_IS_PAUSED } = CLIENT_DEFAULTS_SYNTHETICS;
+import { SyntheticsRefreshContext } from '../../../contexts/synthetics_refresh_context';
 
 export const AutoRefreshButton = () => {
-  const [refreshInterval, setRefreshInterval] = useLocalStorage<number>(
-    'xpack.synthetics.refreshInterval',
-    AUTOREFRESH_INTERVAL_SECONDS
-  );
-  const [refreshPaused, setRefreshPaused] = useLocalStorage<boolean>(
-    'xpack.synthetics.refreshPaused',
-    AUTOREFRESH_IS_PAUSED
-  );
+  const { refreshInterval, setRefreshInterval, refreshPaused, setRefreshPaused } =
+    useContext(SyntheticsRefreshContext);
 
   const onRefreshChange = (newProps: OnRefreshChangeProps) => {
     setRefreshPaused(newProps.isPaused);
@@ -30,7 +22,7 @@ export const AutoRefreshButton = () => {
     <EuiAutoRefreshButton
       size="m"
       isPaused={refreshPaused}
-      refreshInterval={(refreshInterval || AUTOREFRESH_INTERVAL_SECONDS) * 1000}
+      refreshInterval={refreshInterval * 1000}
       onRefreshChange={onRefreshChange}
       shortHand
     />
