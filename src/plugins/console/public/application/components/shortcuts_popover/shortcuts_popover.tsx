@@ -104,7 +104,8 @@ export const ShortcutsPopover = ({ button, isOpen, closePopover }: ShortcutsPopo
         <ShortcutLineFlexItem
           id="navigateAutocompleteMenu"
           description="Navigate items in autocomplete menu"
-          keys={[KEYS.keyDown, KEYS.keyUp]}
+          keys={[KEYS.keyDown]}
+          alternativeKeys={[KEYS.keyUp]}
         />
       </EuiFlexGroup>
     </EuiPopover>

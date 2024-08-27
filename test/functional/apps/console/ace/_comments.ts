@@ -12,7 +12,6 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
-  const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'console', 'header']);
 
   // Failing: See https://github.com/elastic/kibana/issues/138160

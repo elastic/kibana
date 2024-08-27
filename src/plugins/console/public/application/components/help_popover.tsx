@@ -52,7 +52,7 @@ export const HelpPopover = ({ button, isOpen, closePopover, resetTour }: HelpPop
         <p>
           {i18n.translate('console.helpPopover.description', {
             defaultMessage:
-              'Our UI for interacting with Elasticsearch clusters using QueryDSL. Easily run queries, manage settings, and view search results.',
+              'Use the Console UI to call Elasticsearch APIs and view their responses. Use Query DSL syntax to search your data, manage settings, and more.',
           })}
         </p>
       </EuiText>
@@ -88,7 +88,7 @@ export const HelpPopover = ({ button, isOpen, closePopover, resetTour }: HelpPop
             <EuiFlexItem grow={false}>
               <p>
                 {i18n.translate('console.helpPopover.aboutQueryDSLLabel', {
-                  defaultMessage: 'About QueryDSL',
+                  defaultMessage: 'About Query DSL',
                 })}
               </p>
             </EuiFlexItem>
