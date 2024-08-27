@@ -56,7 +56,7 @@ export default function ({ getPageObjects, getService }) {
     });
 
     it('unlink map panel from embeddable library', async () => {
-      await dashboardPanelActions.unlinkFromLibraryByTitle(mapTitle);
+      await dashboardPanelActions.unlinkFromLibrary(mapTitle);
       await testSubjects.existOrFail('unlinkPanelSuccess');
       await dashboardPanelActions.expectNotInLibrary(mapTitle);
 

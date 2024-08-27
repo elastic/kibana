@@ -57,28 +57,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should allow cloning a by ref saved search embeddable to a by value embeddable', async () => {
       await addSearchEmbeddableToDashboard();
-      let panels = await dashboard.getPanelTitles();
-      expect(panels).to.be(1);
-      await dashboardPanelActions.expectLinkedToLibrary(panels[0]);
-      await dashboardPanelActions.clonePanelByTitle(panels[0]);
+      let titles = await dashboard.getPanelTitles();
+      expect(titles.length).to.be(1);
+      await dashboardPanelActions.expectLinkedToLibrary(titles[0]);
+      await dashboardPanelActions.clonePanelByTitle(titles[0]);
       await header.waitUntilLoadingHasFinished();
       await dashboard.waitForRenderComplete();
-      panels = await dashboard.getPanelTitles();
-      expect(panels.length).to.be(2);
-      await dashboardPanelActions.expectLinkedToLibrary(panels[0]);
-      await dashboardPanelActions.expectNotLinkedToLibrary(panels[1]);
+      titles = await dashboard.getPanelTitles();
+      expect(titles.length).to.be(2);
+      await dashboardPanelActions.expectLinkedToLibrary(titles[0]);
+      await dashboardPanelActions.expectNotLinkedToLibrary(titles[1]);
     });
 
     it('should allow unlinking a by ref saved search embeddable from library', async () => {
       await addSearchEmbeddableToDashboard();
-      let panels = await dashboard.getPanelTitles();
-      expect(panels.length).to.be(1);
-      await dashboardPanelActions.expectLinkedToLibrary(panels[0]);
-      await dashboardPanelActions.unlinkFromLibraryByTitle(panels[0]);
+      let titles = await dashboard.getPanelTitles();
+      expect(titles.length).to.be(1);
+      await dashboardPanelActions.expectLinkedToLibrary(titles[0]);
+      await dashboardPanelActions.unlinkFromLibrary(titles[0]);
       await testSubjects.existOrFail('unlinkPanelSuccess');
-      panels = await dashboard.getPanelTitles();
-      expect(panels.length).to.be(1);
-      await dashboardPanelActions.expectNotLinkedToLibrary(panels[0]);
+      titles = await dashboard.getPanelTitles();
+      expect(titles.length).to.be(1);
+      await dashboardPanelActions.expectNotLinkedToLibrary(titles[0]);
     });
   });
 }
