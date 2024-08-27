@@ -521,6 +521,12 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
       const hasFailedInitialTests = hasFailedTests(initialResults);
       const hasFailedRetryTests = hasFailedTests(retryResults);
 
+      console.log({
+        hasFailedInitialTests,
+        hasFailedRetryTests,
+        failedSpecFilePaths,
+        retryResults,
+      });
       // If the initialResults had failures and failedSpecFilePaths was not populated properly return errors
       if (
         (hasFailedRetryTests && failedSpecFilePaths.length) ||
@@ -528,6 +534,7 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
       ) {
         throw createFailError('Not all tests passed');
       }
+      log.success('ALL GOOD');
     },
     {
       flags: {

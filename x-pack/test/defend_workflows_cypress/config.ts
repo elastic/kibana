@@ -20,6 +20,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   const hostIp = getLocalhostRealIp();
 
+  console.log({ services1: JSON.stringify(services, null, 2) });
   return {
     ...kibanaCommonTestsConfig.getAll(),
 
