@@ -1527,7 +1527,7 @@
     "@types/hapi__cookie": "^10.1.3",
     "@types/hapi__h2o2": "^8.3.3",
     "@types/hapi__hapi": "^20.0.9",
-    "@types/hapi__inert": "^5.2.3",
+    "@types/hapi__inert": "^5.2.10",
     "@types/has-ansi": "^3.0.0",
     "@types/he": "^1.1.1",
     "@types/history": "^4.7.9",
