@@ -770,7 +770,9 @@ export const EditRolePage: FunctionComponent<Props> = ({
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
               <EuiFlexItem grow={false}>
                 <EuiButton size="s" href={cloudOrgUrl}>
-                  Manage Members
+                  {i18n.translate('xpack.security.management.roles.manageRoleUsers', {
+                    defaultMessage: 'Manage Members',
+                  })}
                 </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>

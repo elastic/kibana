@@ -46,6 +46,7 @@
     "@kbn/core-overlays-browser",
     "@kbn/core-notifications-browser",
     "@kbn/shared-ux-utility",
+    "@kbn/core-application-common",
   ],
   "exclude": [
     "target/**/*",
