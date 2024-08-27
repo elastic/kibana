@@ -15,7 +15,7 @@ import React, {
   useMemo,
   useState,
 } from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 
 import { ReactEmbeddableRenderer, ViewMode } from '@kbn/embeddable-plugin/public';
@@ -87,7 +87,7 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupAPI, ControlG
       if (dataLoading !== dataLoading$.getValue()) dataLoading$.next(Boolean(dataLoading));
     }, [dataLoading, dataLoading$]);
 
-    const reload$ = useMemo(() => new BehaviorSubject<void>(undefined), []);
+    const reload$ = useMemo(() => new Subject<void>(), []);
 
     /**
      * Control group API set up
