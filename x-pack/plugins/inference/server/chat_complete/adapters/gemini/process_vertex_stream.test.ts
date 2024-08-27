@@ -70,7 +70,7 @@ describe('processVertexStream', () => {
           tool_calls: [
             {
               index: 0,
-              toolCallId: '',
+              toolCallId: expect.any(String),
               function: { name: 'func1', arguments: JSON.stringify({ arg1: true }) },
             },
           ],

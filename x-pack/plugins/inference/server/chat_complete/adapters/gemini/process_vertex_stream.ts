@@ -11,6 +11,7 @@ import {
   ChatCompletionTokenCountEvent,
   ChatCompletionEventType,
 } from '../../../../common/chat_complete';
+import { generateFakeToolCallId } from '../../utils';
 import type { GenerateContentResponseChunk } from './types';
 
 export function processVertexStream() {
@@ -41,7 +42,7 @@ export function processVertexStream() {
               ? [
                   {
                     index: 0,
-                    toolCallId: '',
+                    toolCallId: generateFakeToolCallId(),
                     function: { name: toolCall.name, arguments: JSON.stringify(toolCall.args) },
                   },
                 ]
