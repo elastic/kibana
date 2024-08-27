@@ -9,7 +9,7 @@ import type { Agent as SuperTestAgent } from 'supertest';
 import { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import type { IndexDetails } from '@kbn/cloud-security-posture-plugin/common/types_old';
+import type { IndexDetails } from '@kbn/cloud-security-posture-common';
 import { CLOUD_SECURITY_PLUGIN_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
 import { SecurityService } from '@kbn/test-suites-src/common/services/security/security';
 
