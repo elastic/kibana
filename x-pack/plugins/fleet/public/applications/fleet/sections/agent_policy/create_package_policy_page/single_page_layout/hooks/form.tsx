@@ -316,7 +316,11 @@ export function useOnSubmit({
       }
       if (
         agentCount !== 0 &&
-        !(isAgentlessIntegration(packageInfo) || isAgentlessPackagePolicy(packagePolicy)) &&
+        !(
+          isAgentlessIntegration(packageInfo) ||
+          isAgentlessPackagePolicy(packagePolicy) ||
+          isAgentlessAgentPolicy(overrideCreatedAgentPolicy)
+        ) &&
         formState !== 'CONFIRM'
       ) {
         setFormState('CONFIRM');
