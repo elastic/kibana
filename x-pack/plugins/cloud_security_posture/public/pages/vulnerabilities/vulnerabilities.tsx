@@ -17,10 +17,13 @@ import { DataViewContext } from '../../common/contexts/data_view_context';
 
 export const Vulnerabilities = () => {
   const dataViewQuery = useDataView(CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX);
-
   const getSetupStatus = useCspSetupStatusApi();
+  const setupStatus = getSetupStatus.data;
 
-  if (getSetupStatus?.data?.vuln_mgmt?.status !== 'indexed') return <NoVulnerabilitiesStates />;
+  const hasFindings =
+    !!setupStatus?.hasVulnerabilitiesFindings || setupStatus?.vuln_mgmt?.status !== 'indexed';
+
+  if (!hasFindings) return <NoVulnerabilitiesStates />;
 
   const dataViewContextValue = {
     dataView: dataViewQuery.data!,

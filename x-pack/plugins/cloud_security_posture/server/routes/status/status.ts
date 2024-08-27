@@ -33,6 +33,7 @@ import {
   LATEST_VULNERABILITIES_RETENTION_POLICY,
   LATEST_FINDINGS_RETENTION_POLICY,
   CDR_MISCONFIGURATIONS_INDEX_PATTERN,
+  CDR_VULNERABILITIES_INDEX_PATTERN,
 } from '../../../common/constants';
 import type {
   CspApiRequestHandlerContext,
@@ -192,6 +193,7 @@ export const getCspStatus = async ({
 }: CspStatusDependencies): Promise<CspSetupStatus> => {
   const [
     hasMisconfigurationsFindings,
+    hasVulnerabilitiesFindings,
     findingsLatestIndexStatus,
     findingsIndexStatus,
     scoreIndexStatus,
@@ -214,6 +216,12 @@ export const getCspStatus = async ({
       esClient,
       CDR_MISCONFIGURATIONS_INDEX_PATTERN,
       LATEST_FINDINGS_RETENTION_POLICY,
+      logger
+    ),
+    checkIndexHasFindings(
+      esClient,
+      CDR_VULNERABILITIES_INDEX_PATTERN,
+      LATEST_VULNERABILITIES_RETENTION_POLICY,
       logger
     ),
     checkIndexStatus(esClient, LATEST_FINDINGS_INDEX_DEFAULT_NS, logger, {
@@ -403,6 +411,7 @@ export const getCspStatus = async ({
     ...statusResponseInfo,
     installedPackageVersion: installation?.install_version,
     hasMisconfigurationsFindings,
+    hasVulnerabilitiesFindings,
   };
 
   assertResponse(response, logger);
