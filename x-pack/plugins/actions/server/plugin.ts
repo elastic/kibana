@@ -332,15 +332,13 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         eventLogIndex
       );
 
-      if (plugins.cloud?.serverless?.projectId) {
-        this.connectorUsageReportingTask = new ConnectorUsageReportingTask({
-          logger: this.logger,
-          eventLogIndex,
-          core,
-          taskManager: plugins.taskManager,
-          projectId: plugins.cloud.serverless.projectId,
-        });
-      }
+      this.connectorUsageReportingTask = new ConnectorUsageReportingTask({
+        logger: this.logger,
+        eventLogIndex,
+        core,
+        taskManager: plugins.taskManager,
+        projectId: plugins.cloud.serverless.projectId,
+      });
     }
 
     // Usage counter for telemetry

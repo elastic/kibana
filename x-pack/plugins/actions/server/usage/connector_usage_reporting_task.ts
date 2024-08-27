@@ -18,14 +18,18 @@ import https from 'https';
 import { ConnectorUsageReport } from './types';
 import { ActionsPluginsStart } from '../plugin';
 
-export const CONNECTOR_USAGE_REPORTING_TASK_SCHEDULE: IntervalSchedule = { interval: '1h' };
-export const CONNECTOR_USAGE_REPORTING_PERIOD = 3600;
+export const USAGE_API_URL = 'https://usage-api.elastic-system/api/v1/usage`';
+export const CONNECTOR_USAGE_REPORTING_TASK_SCHEDULE: IntervalSchedule = { interval: '10m' };
 export const CONNECTOR_USAGE_REPORTING_TASK_ID = 'connector_usage_reporting';
 export const CONNECTOR_USAGE_REPORTING_TASK_TYPE = `actions:${CONNECTOR_USAGE_REPORTING_TASK_ID}`;
+export const CONNECTOR_USAGE_REPORTING_TASK_TIMEOUT = 30000;
 export const CONNECTOR_USAGE_TYPE = `connector_request_body_bytes`;
+export const CONNECTOR_USAGE_REPORTING_MISSING_ID = `missing_project_id`;
+export const CONNECTOR_USAGE_REPORTING_SOURCE_ID = `task-connector-usage-report`;
+export const MAX_PUSH_ATTEMPTS = 5;
 
 export class ConnectorUsageReportingTask {
-  private readonly projectId: string;
+  private readonly projectId: string | undefined;
   private readonly logger: Logger;
   private readonly eventLogIndex: string;
 
@@ -40,7 +44,7 @@ export class ConnectorUsageReportingTask {
     eventLogIndex: string;
     core: CoreSetup<ActionsPluginsStart>;
     taskManager: TaskManagerSetupContract;
-    projectId: string;
+    projectId?: string;
   }) {
     this.projectId = projectId;
     this.logger = logger;
@@ -95,55 +99,72 @@ export class ConnectorUsageReportingTask {
       ? new Date(state.lastReportedUsageDate)
       : new Date('1970-01-01');
 
-    const from = lastReportedUsageDate;
-    const to = now;
+    let attempts: number = state.attempts || 0;
+
+    const fromDate = lastReportedUsageDate;
+    const toDate = now;
 
     let totalUsage = 0;
     try {
       totalUsage = await this.getTotalUsage({
         esClient,
-        from,
-        to,
+        fromDate,
+        toDate,
       });
     } catch (e) {
       this.logger.error(`Usage data could not be fetched. It will be retried. Error:${e.message}`);
       return {
         state: {
           lastReportedUsageDate,
-          runAt: now,
+          attempts,
         },
+        runAt: now,
       };
     }
 
-    const record: ConnectorUsageReport = this.createUsageRecord({ totalUsage, from, to });
+    const record: ConnectorUsageReport = this.createUsageRecord({ totalUsage, fromDate, toDate });
 
     try {
+      attempts = attempts + 1;
       await this.pushUsageRecord(record);
     } catch (e) {
+      if (attempts < MAX_PUSH_ATTEMPTS) {
+        this.logger.error(
+          `Usage data could not be pushed to usage-api. It will be retried (${attempts}). Error:${e.message}`
+        );
+
+        return {
+          state: {
+            lastReportedUsageDate,
+            attempts,
+          },
+          runAt: this.getDelayedRetryDate({ attempts, now }),
+        };
+      }
       this.logger.error(
-        `Usage data could not be pushed to usage-api. It will be retried. Error:${e.message}`
+        `Usage data could not be pushed to usage-api. Stopped retrying after ${attempts} attempts. Error:${e.message}`
       );
       return {
         state: {
           lastReportedUsageDate,
-          runAt: now,
+          attempts: 0,
         },
       };
     }
 
     return {
-      state: { lastReportedUsageDate: to },
+      state: { lastReportedUsageDate: toDate, attempts: 0 },
     };
   };
 
   private getTotalUsage = async ({
     esClient,
-    from,
-    to,
+    fromDate,
+    toDate,
   }: {
     esClient: ElasticsearchClient;
-    from: Date;
-    to: Date;
+    fromDate: Date;
+    toDate: Date;
   }): Promise<number> => {
     const usageResult = await esClient.search({
       index: this.eventLogIndex,
@@ -168,8 +189,8 @@ export class ConnectorUsageReportingTask {
                 {
                   range: {
                     '@timestamp': {
-                      gt: from,
-                      lte: to,
+                      gt: fromDate,
+                      lte: toDate,
                     },
                   },
                 },
@@ -188,15 +209,20 @@ export class ConnectorUsageReportingTask {
 
   private createUsageRecord = ({
     totalUsage,
-    from,
-    to,
+    fromDate,
+    toDate,
   }: {
     totalUsage: number;
-    from: Date;
-    to: Date;
+    fromDate: Date;
+    toDate: Date;
   }): ConnectorUsageReport => {
-    const fromStr = from.toISOString();
-    const toStr = to.toISOString();
+    const period = (toDate.getTime() - fromDate.getTime()) / 1000;
+    const fromStr = fromDate.toISOString();
+    const toStr = toDate.toISOString();
+
+    if (!this.projectId) {
+      this.logger.warn(`project id missing for records starting from ${toStr}`);
+    }
 
     return {
       id: `connector-request-body-bytes-${fromStr}-${toStr}`,
@@ -204,24 +230,33 @@ export class ConnectorUsageReportingTask {
       creation_timestamp: toStr,
       usage: {
         type: CONNECTOR_USAGE_TYPE,
-        period_seconds: CONNECTOR_USAGE_REPORTING_PERIOD,
+        period_seconds: period,
         quantity: totalUsage,
       },
       source: {
-        id: 'connector-request-body-bytes',
-        instance_group_id: this.projectId,
+        id: CONNECTOR_USAGE_REPORTING_SOURCE_ID,
+        instance_group_id: this.projectId || CONNECTOR_USAGE_REPORTING_MISSING_ID,
       },
     };
   };
 
   private pushUsageRecord = async (record: ConnectorUsageReport) => {
-    return axios.post(`https://usage-api.elastic-system/api/v1/usage`, record, {
+    return axios.post(USAGE_API_URL, record, {
       headers: { 'Content-Type': 'application/json' },
-      timeout: 30000,
+      timeout: CONNECTOR_USAGE_REPORTING_TASK_TIMEOUT,
       // TODO remove when CRT is added
       httpsAgent: new https.Agent({
         rejectUnauthorized: false,
       }),
     });
+  };
+
+  private getDelayedRetryDate = ({ attempts, now }: { attempts: number; now: Date }) => {
+    const baseDelay = 60 * 1000;
+    const delayByAttempts = baseDelay * attempts;
+
+    const delayedTime = now.getTime() + delayByAttempts;
+
+    return new Date(delayedTime);
   };
 }
