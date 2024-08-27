@@ -10652,10 +10652,10 @@
   resolved "https://registry.yarnpkg.com/@types/linkify-it/-/linkify-it-2.1.0.tgz#ea3dd64c4805597311790b61e872cbd1ed2cd806"
   integrity sha512-Q7DYAOi9O/+cLLhdaSvKdaumWyHbm7HAk/bFwwyTuU0arR5yyCeW5GOoqt4tJTpDRxhpx9Q8kQL6vMpuw9hDSw==
 
-"@types/loader-utils@^2.0.3":
-  version "2.0.3"
-  resolved "https://registry.yarnpkg.com/@types/loader-utils/-/loader-utils-2.0.3.tgz#fbc2337358f8f4a7dc532ac0a3646c74275edf2d"
-  integrity sha512-sDXXzZnTLXgdso54/iOpAFSDgqhVXabCvwGAt77Agadh/Xk0QYgOk520r3tpOouI098gyqGIFywx8Op1voc3vQ==
+"@types/loader-utils@^2.0.6":
+  version "2.0.6"
+  resolved "https://registry.yarnpkg.com/@types/loader-utils/-/loader-utils-2.0.6.tgz#cb1cf704c7eee4f01df8da3a90ba5929b77753df"
+  integrity sha512-cgu0Xefgq9O5FjFR78jgI6X31aPjDWCaJ6LCfRtlj6BtyVVWiXagysSYlPACwGKAzRwsFLjKXcj4iGfcVt6cLw==
   dependencies:
     "@types/node" "*"
     "@types/webpack" "^4"
