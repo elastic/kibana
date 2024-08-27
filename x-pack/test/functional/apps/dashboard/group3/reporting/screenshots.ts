@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import path from 'path';
-import { comparePdfToSnapshot } from 'pdf-visual-diff';
+import comparePdf from 'pdf-visual-compare';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 const REPORTS_FOLDER = path.resolve(__dirname, 'reports');
@@ -226,8 +226,13 @@ export default function ({
           reportData,
           REPORTS_FOLDER
         );
-        const x = await comparePdfToSnapshot(sessionReportPath, REPORTS_FOLDER, reportFileName, {
-          tolerance: 0.035,
+        baselinePath = PageObjects.reporting.getBaselineReportPath(
+          reportFileName,
+          'pdf',
+          REPORTS_FOLDER
+        );
+        const x = await comparePdf(sessionReportPath, baselinePath, {
+          compareThreshold: 0.035,
         });
         expect(x).to.be(true);
       });
