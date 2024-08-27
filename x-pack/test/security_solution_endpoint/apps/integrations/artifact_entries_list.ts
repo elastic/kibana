@@ -35,7 +35,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const esClient = getService('es');
   const supertest = getService('supertest');
-  const find = getService('find');
   const toasts = getService('toasts');
   const policyTestResources = getService('policyTestResources');
   const unzipPromisify = promisify(unzip);
@@ -52,12 +51,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       .set('kbn-xsrf', 'true');
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/187314
-  // Failing: See https://github.com/elastic/kibana/issues/187383
-  // Failing: See https://github.com/elastic/kibana/issues/188131
-  // Failing: See https://github.com/elastic/kibana/issues/188125
-  describe.skip('For each artifact list under management', function () {
-    targetTags(this, ['@ess', '@skipInServerless']);
+  describe('For each artifact list under management', function () {
+    targetTags(this, ['@ess', '@serverless']);
     this.timeout(60_000 * 5);
 
     let indexedData: IndexedHostsAndAlertsResponse;
@@ -154,9 +149,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       suffix?: string
     ) => {
       for (const formAction of actions) {
-        if (formAction.type === 'customClick') {
-          await find.clickByCssSelector(formAction.selector, testSubjects.FIND_TIME);
-        } else if (formAction.type === 'click') {
+        if (formAction.type === 'click') {
           await testSubjects.click(formAction.selector);
         } else if (formAction.type === 'input') {
           const newValue = (formAction.value || '') + (suffix ? suffix : '');
@@ -265,7 +258,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         it(`should be able to update an existing ${testData.title} entry`, async () => {
-          await createArtifact(testData);
+          await endpointArtifactsTestResources.createArtifact(testData.listId, testData.createBody);
+          await browser.refresh();
+
           await updateArtifact(testData, { policyId: policyInfo.packagePolicy.id });
 
           // Check edited artifact is in the list with new values (wait for list to be updated)
@@ -299,7 +294,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         it(`should be able to delete the existing ${testData.title} entry`, async () => {
-          await createArtifact(testData);
+          await endpointArtifactsTestResources.createArtifact(testData.listId, testData.createBody);
+          await browser.refresh();
+
           await deleteArtifact(testData);
           // We only expect one artifact to have been visible
           await testSubjects.missingOrFail(testData.delete.card);
@@ -336,7 +333,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       const testData = getCreateMultipleData();
-      it(`should get correct atifact when multiple entries are created`, async () => {
+      it(`should get correct artifact when multiple entries are created`, async () => {
         // Create first trusted app
         await createArtifact(testData, {
           policyId: firstPolicy.packagePolicy.id,
