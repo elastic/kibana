@@ -199,7 +199,6 @@ describe('duplicateRule', () => {
         consumer: rule.consumer,
         schedule: rule.schedule,
         actions: rule.actions,
-        systemActions: rule.actions,
         enabled: false, // covered in a separate test
       });
     });
@@ -250,7 +249,6 @@ describe('duplicateRule', () => {
         consumer: rule.consumer,
         schedule: rule.schedule,
         actions: rule.actions,
-        systemActions: rule.actions,
         enabled: false, // covered in a separate test
       });
     });
