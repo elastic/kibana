@@ -6,7 +6,7 @@
  */
 
 import React, { Component } from 'react';
-import { Observable, Subscription } from 'rxjs';
+import { Observable, Subscription, first, switchMap, tap } from 'rxjs';
 import {
   type ControlGroupStateBuilder,
   ControlGroupRenderer,
@@ -25,6 +25,7 @@ export interface Props {
 export class Timeslider extends Component<Props, {}> {
   private _isMounted: boolean = false;
   private readonly _subscriptions = new Subscription();
+  private dataLoading = true;
 
   componentWillUnmount() {
     this._isMounted = false;
@@ -51,16 +52,25 @@ export class Timeslider extends Component<Props, {}> {
     }
 
     this._subscriptions.add(
-      controlGroup.timeslice$.subscribe((timeslice) => {
-        this.props.setTimeslice(
-          timeslice === undefined
-            ? undefined
-            : {
-                from: timeslice[0],
-                to: timeslice[1],
-              }
-        );
-      })
+      controlGroup.timeslice$
+        .pipe(
+          tap(() => {
+            this.dataLoading = true;
+          })
+        )
+        .subscribe((timeslice) => {
+          this.props.waitForTimesliceToLoad$.pipe(first()).subscribe(() => {
+            this.dataLoading = false;
+          });
+          this.props.setTimeslice(
+            timeslice === undefined
+              ? undefined
+              : {
+                  from: timeslice[0],
+                  to: timeslice[1],
+                }
+          );
+        })
     );
   };
 
@@ -69,6 +79,7 @@ export class Timeslider extends Component<Props, {}> {
       <div className="mapTimeslider mapTimeslider--animation">
         <ControlGroupRenderer
           ref={this._onLoadComplete}
+          dataLoading={this.dataLoading}
           getCreationOptions={this._getCreationOptions}
           timeRange={this.props.timeRange}
         />

@@ -135,7 +135,7 @@ export const EditExample = () => {
               isDisabled={controlGroupAPI === undefined}
               onClick={() => {
                 if (!controlGroupAPI) return;
-                controlGroupAPI!.openAddDataControlFlyout({ controlStateTransform });
+                controlGroupAPI.openAddDataControlFlyout({ controlStateTransform });
               }}
             >
               Add control

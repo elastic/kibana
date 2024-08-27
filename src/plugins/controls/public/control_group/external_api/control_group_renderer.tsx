@@ -48,22 +48,25 @@ export interface ControlGroupRendererProps {
   filters?: Filter[];
   timeRange?: TimeRange;
   query?: Query;
+  dataLoading?: boolean;
 }
 
 export const ControlGroupRenderer = forwardRef<AwaitingControlGroupAPI, ControlGroupRendererProps>(
-  ({ getCreationOptions, filters, timeRange, query, viewMode }, ref) => {
+  ({ getCreationOptions, filters, timeRange, query, viewMode, dataLoading }, ref) => {
     const id = useMemo(() => uuidv4(), []);
     const [regenerateId, setRegenerateId] = useState(uuidv4());
-
-    const [apiLoading, setApiLoading] = useState<boolean>(true);
     const [controlGroup, setControlGroup] = useState<ControlGroupRendererApi | undefined>();
     useImperativeHandle(ref, () => controlGroup as ControlGroupRendererApi, [controlGroup]);
 
+    /**
+     * Parent API set up
+     */
     const searchApi = useSearchApi({
       filters,
       query,
       timeRange,
     });
+
     const viewMode$ = useMemo(
       () => new BehaviorSubject<ViewModeType>(viewMode ?? ViewMode.VIEW),
       // viewMode only used as initial value - changes do not effect memoized value.
@@ -74,8 +77,21 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupAPI, ControlG
       if (viewMode) viewMode$.next(viewMode);
     }, [viewMode, viewMode$]);
 
+    const dataLoading$ = useMemo(
+      () => new BehaviorSubject<boolean>(Boolean(dataLoading)),
+      // dataLoading only used as initial value - changes do not effect memoized value.
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      []
+    );
+    useEffect(() => {
+      if (dataLoading !== dataLoading$.getValue()) dataLoading$.next(Boolean(dataLoading));
+    }, [dataLoading, dataLoading$]);
+
     const reload$ = useMemo(() => new BehaviorSubject<void>(undefined), []);
 
+    /**
+     * Control group API set up
+     */
     const runtimeState$ = useMemo(
       () => new BehaviorSubject<ControlGroupRuntimeState>(getDefaultControlGroupRuntimeState()),
       []
@@ -94,7 +110,23 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupAPI, ControlG
       [runtimeState$]
     );
 
-    // onMount
+    /**
+     * To mimic `input$`, subscribe to unsaved changes and snapshot the runtime state whenever
+     * something change
+     */
+    useEffect(() => {
+      if (!controlGroup) return;
+      const stateChangeSubscription = controlGroup.unsavedChanges.subscribe((changes) => {
+        runtimeState$.next({ ...runtimeState$.getValue(), ...changes });
+      });
+      return () => {
+        stateChangeSubscription.unsubscribe();
+      };
+    }, [controlGroup, runtimeState$]);
+
+    /**
+     * On mount
+     */
     useEffect(() => {
       let cancelled = false;
       (async () => {
@@ -117,7 +149,6 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupAPI, ControlG
 
         if (!cancelled) {
           setSerializedState(state as ControlGroupSerializedState);
-          setApiLoading(false);
         }
       })();
       return () => {
@@ -127,21 +158,7 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupAPI, ControlG
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    /**
-     * To mimic `input$`, subscribe to unsaved changes and snapshot the runtime state whenever
-     * something change
-     */
-    useEffect(() => {
-      if (!controlGroup) return;
-      const stateChangeSubscription = controlGroup.unsavedChanges.subscribe((changes) => {
-        runtimeState$.next({ ...runtimeState$.getValue(), ...changes });
-      });
-      return () => {
-        stateChangeSubscription.unsubscribe();
-      };
-    }, [controlGroup, runtimeState$]);
-
-    return apiLoading ? null : (
+    return !serializedState ? null : (
       <ReactEmbeddableRenderer<
         ControlGroupSerializedState,
         ControlGroupRuntimeState,
@@ -152,6 +169,7 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupAPI, ControlG
         type={CONTROL_GROUP_TYPE}
         getParentApi={() => ({
           reload$,
+          dataLoading$,
           viewMode: viewMode$,
           query$: searchApi.query$,
           timeRange$: searchApi.timeRange$,
