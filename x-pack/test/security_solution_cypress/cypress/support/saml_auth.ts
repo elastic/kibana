@@ -48,7 +48,7 @@ export const samlAuthentication = async (
 
   const getYamlData = (filePath: string): any => {
     const fileContents = fs.readFileSync(filePath, 'utf8');
-    return yaml.load(fileContents);
+    return yaml.safeLoad(fileContents);
   };
 
   const getRoleConfiguration = (role: string, filePath: string): any => {
