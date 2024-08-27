@@ -1539,7 +1539,7 @@
     "@types/js-search": "^1.4.0",
     "@types/js-yaml": "^3.11.1",
     "@types/jsdom": "^20.0.1",
-    "@types/json-schema": "^7",
+    "@types/json-schema": "^7.0.15",
     "@types/json-stable-stringify": "^1.0.32",
     "@types/json5": "^2.2.0",
     "@types/jsonwebtoken": "^9.0.0",
