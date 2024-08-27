@@ -9,5 +9,5 @@
 
 export { CoreInjectionService } from './src/service';
 export type { InternalCoreDiServiceSetup, InternalCoreDiServiceStart } from './src/contracts';
-export { Contract, InternalDiService, InternalDiSetupService } from './src/services';
+export { Contract } from './src/modules/lifecycle';
 export { toContainerModule, toServiceIdentifier } from './src/utils';
