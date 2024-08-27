@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     const DEFAULT_WINDOW_SIZE = [1400, 900];
     const VERTICAL_16_9 = 16 / 9;
-    const outerWorkspaceDimensions = { width: 704, height: 420 };
+    const outerWorkspaceDimensions = { width: 704, height: 410 };
     let UNCONSTRAINED = outerWorkspaceDimensions.width / outerWorkspaceDimensions.height;
 
     before(async () => {
