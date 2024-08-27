@@ -8,8 +8,8 @@
 import type { FC } from 'react';
 import React, { memo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
+import { FlyoutBody } from '@kbn/security-solution-common';
 import { NetworkDetails } from './components/network_details';
-import { FlyoutBody } from '../shared/components/flyout_body';
 import type { FlowTargetSourceDest } from '../../../common/search_strategy';
 
 export interface PanelContentProps {

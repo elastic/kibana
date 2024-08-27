@@ -6,20 +6,13 @@
  */
 
 import { DoneInvokeEvent } from 'xstate';
-import {
-  Dashboard,
-  DatasetUserPrivileges,
-  NonAggregatableDatasets,
-} from '../../../../common/api_types';
+import { DatasetUserPrivileges, NonAggregatableDatasets } from '../../../../common/api_types';
 import {
   DataStreamDegradedDocsStatServiceResponse,
   DataStreamDetails,
-  DataStreamSettings,
   DataStreamStat,
   DataStreamStatServiceResponse,
   DataStreamStatType,
-  DegradedField,
-  DegradedFieldResponse,
 } from '../../../../common/data_streams_stats';
 import { Integration } from '../../../../common/data_streams_stats/integration';
 import { DegradedDocsStat } from '../../../../common/data_streams_stats/malformed_docs_stat';
@@ -29,17 +22,7 @@ import {
   TableCriteria,
   TimeRangeConfig,
 } from '../../../../common/types';
-import { DatasetTableSortField, DegradedFieldSortField } from '../../../hooks';
-
-export type FlyoutDataset = Omit<
-  DataStreamStat,
-  'type' | 'size' | 'sizeBytes' | 'lastActivity' | 'degradedDocs'
-> & { type: string };
-
-export interface DegradedFields {
-  table: TableCriteria<DegradedFieldSortField>;
-  data?: DegradedField[];
-}
+import { DatasetTableSortField } from '../../../hooks';
 
 interface FiltersCriteria {
   inactive: boolean;
@@ -52,27 +35,8 @@ interface FiltersCriteria {
   query?: string;
 }
 
-export interface DataStreamIntegrations {
-  integrationDetails?: Integration;
-  dashboards?: Dashboard[];
-}
-
 export interface WithTableOptions {
   table: TableCriteria<DatasetTableSortField>;
-}
-
-export interface WithFlyoutOptions {
-  flyout: {
-    dataset?: FlyoutDataset;
-    dataStreamSettings?: DataStreamSettings;
-    datasetDetails?: DataStreamDetails;
-    insightsTimeRange?: TimeRangeConfig;
-    breakdownField?: string;
-    degradedFields: DegradedFields;
-    isNonAggregatable?: boolean;
-    integration?: DataStreamIntegrations;
-    isBreakdownFieldEcs: boolean | null;
-  };
 }
 
 export interface WithFilters {
@@ -106,14 +70,12 @@ export interface WithIntegrations {
 export type DefaultDatasetQualityControllerState = WithTableOptions &
   WithDataStreamStats &
   WithDegradedDocs &
-  WithFlyoutOptions &
   WithDatasets &
   WithFilters &
   WithNonAggregatableDatasets &
   Partial<WithIntegrations>;
 
-type DefaultDatasetQualityStateContext = DefaultDatasetQualityControllerState &
-  Partial<WithFlyoutOptions>;
+type DefaultDatasetQualityStateContext = DefaultDatasetQualityControllerState;
 
 export type DatasetQualityControllerTypeState =
   | {
@@ -137,45 +99,7 @@ export type DatasetQualityControllerTypeState =
       context: DefaultDatasetQualityStateContext;
     }
   | {
-      value: 'flyout.initializing.dataStreamSettings.fetching';
-      context: DefaultDatasetQualityStateContext;
-    }
-  | {
-      value: 'flyout.initializing.dataStreamSettings.initializeIntegrations.integrationDashboards.fetching';
-      context: DefaultDatasetQualityStateContext;
-    }
-  | {
-      value: 'flyout.initializing.dataStreamSettings.initializeIntegrations.integrationDashboards.unauthorized';
-      context: DefaultDatasetQualityStateContext;
-    }
-  | {
-      value: 'flyout.initializing.dataStreamSettings.initializeIntegrations.integrationDetails.done';
-      context: DefaultDatasetQualityStateContext;
-    }
-  | {
-      value: 'flyout.initializing.dataStreamDetails.fetching';
-      context: DefaultDatasetQualityStateContext;
-    }
-  | {
-      value: 'flyout.initializing.dataStreamDetails.done';
-      context: DefaultDatasetQualityStateContext;
-    }
-  | {
-      value: 'flyout.initializing.assertBreakdownFieldIsEcs.fetching';
-      context: DefaultDatasetQualityStateContext;
-    }
-  | {
-      value: 'flyout.initializing.assertBreakdownFieldIsEcs.done';
-      context: DefaultDatasetQualityStateContext;
-    }
-  | {
-      value: 'flyout.initializing.dataStreamDegradedFields.fetching';
-      context: DefaultDatasetQualityStateContext;
-    }
-  | {
-      value:
-        | 'flyout.initializing.integrationDashboards.fetching'
-        | 'flyout.initializing.integrationDashboards.unauthorized';
+      value: 'nonAggregatableDatasets.fetching';
       context: DefaultDatasetQualityStateContext;
     };
 
@@ -187,27 +111,8 @@ export type DatasetQualityControllerEvent =
       dataset_criteria: TableCriteria<DatasetTableSortField>;
     }
   | {
-      type: 'UPDATE_DEGRADED_FIELDS_TABLE_CRITERIA';
-      degraded_field_criteria: TableCriteria<DegradedFieldSortField>;
-    }
-  | {
-      type: 'OPEN_FLYOUT';
-      dataset: FlyoutDataset;
-    }
-  | {
-      type: 'SELECT_NEW_DATASET';
-      dataset: FlyoutDataset;
-    }
-  | {
       type: 'UPDATE_INSIGHTS_TIME_RANGE';
       timeRange: TimeRangeConfig;
-    }
-  | {
-      type: 'BREAKDOWN_FIELD_CHANGE';
-      breakdownField: string | null;
-    }
-  | {
-      type: 'CLOSE_FLYOUT';
     }
   | {
       type: 'TOGGLE_INACTIVE_DATASETS';
@@ -244,10 +149,7 @@ export type DatasetQualityControllerEvent =
     }
   | DoneInvokeEvent<DataStreamDegradedDocsStatServiceResponse>
   | DoneInvokeEvent<NonAggregatableDatasets>
-  | DoneInvokeEvent<Dashboard[]>
   | DoneInvokeEvent<DataStreamDetails>
-  | DoneInvokeEvent<DegradedFieldResponse>
-  | DoneInvokeEvent<DataStreamSettings>
   | DoneInvokeEvent<DataStreamStatServiceResponse>
   | DoneInvokeEvent<Integration>
   | DoneInvokeEvent<boolean | null>

@@ -10,7 +10,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 
-import { EMPTY_STAT } from '../../helpers';
+import { EMPTY_STAT } from '../../constants';
 import { alertIndexWithAllResults } from '../../mock/pattern_rollup/mock_alerts_pattern_rollup';
 import { auditbeatWithAllResults } from '../../mock/pattern_rollup/mock_auditbeat_pattern_rollup';
 import { packetbeatNoResults } from '../../mock/pattern_rollup/mock_packetbeat_pattern_rollup';
@@ -26,7 +26,7 @@ import {
   getTotalIndices,
   getTotalIndicesChecked,
   getTotalSizeInBytes,
-} from '../../hooks/use_results_rollup/helpers';
+} from '../../hooks/use_results_rollup/utils/stats';
 
 const mockCopyToClipboard = jest.fn((value) => true);
 jest.mock('@elastic/eui', () => {

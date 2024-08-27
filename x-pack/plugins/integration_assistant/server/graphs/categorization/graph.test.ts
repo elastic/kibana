@@ -31,7 +31,7 @@ import {
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';
 
-const mockLlm = new FakeLLM({
+const model = new FakeLLM({
   response: "I'll callback later.",
 }) as unknown as ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
 
@@ -45,7 +45,7 @@ jest.mock('../../util/pipeline', () => ({
 }));
 
 describe('runCategorizationGraph', () => {
-  const mockClient = {
+  const client = {
     asCurrentUser: {
       ingest: {
         simulate: jest.fn(),
@@ -131,14 +131,14 @@ describe('runCategorizationGraph', () => {
 
   it('Ensures that the graph compiles', async () => {
     try {
-      await getCategorizationGraph(mockClient, mockLlm);
+      await getCategorizationGraph({ client, model });
     } catch (error) {
-      // noop
+      throw Error(`getCategorizationGraph threw an error: ${error}`);
     }
   });
 
   it('Runs the whole graph, with mocked outputs from the LLM.', async () => {
-    const categorizationGraph = await getCategorizationGraph(mockClient, mockLlm);
+    const categorizationGraph = await getCategorizationGraph({ client, model });
 
     (testPipeline as jest.Mock)
       .mockResolvedValueOnce(testPipelineValidResult)
@@ -151,8 +151,8 @@ describe('runCategorizationGraph', () => {
     let response;
     try {
       response = await categorizationGraph.invoke(mockedRequestWithPipeline);
-    } catch (e) {
-      // noop
+    } catch (error) {
+      throw Error(`getCategorizationGraph threw an error: ${error}`);
     }
 
     expect(response.results).toStrictEqual(categorizationExpectedResults);

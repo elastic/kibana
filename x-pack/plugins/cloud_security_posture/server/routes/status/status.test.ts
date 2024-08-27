@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { CSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
 import { calculateIntegrationStatus } from './status';
-import { CSPM_POLICY_TEMPLATE, VULN_MGMT_POLICY_TEMPLATE } from '../../../common/constants';
+import { VULN_MGMT_POLICY_TEMPLATE } from '../../../common/constants';
 import { Installation } from '@kbn/fleet-plugin/common';
 
 const mockInstallation: Installation = {

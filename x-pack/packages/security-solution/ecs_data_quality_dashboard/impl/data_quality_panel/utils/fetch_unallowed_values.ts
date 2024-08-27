@@ -6,7 +6,8 @@
  */
 
 import type { HttpHandler } from '@kbn/core-http-browser';
-import { INTERNAL_API_VERSION } from '../helpers';
+
+import { INTERNAL_API_VERSION } from '../constants';
 import * as i18n from '../translations';
 import type {
   Bucket,
@@ -14,8 +15,6 @@ import type {
   UnallowedValueRequestItem,
   UnallowedValueSearchResult,
 } from '../types';
-
-const UNALLOWED_VALUES_API_ROUTE = '/internal/ecs_data_quality_dashboard/unallowed_field_values';
 
 export const isBucket = (maybeBucket: unknown): maybeBucket is Bucket =>
   maybeBucket != null &&
@@ -65,6 +64,7 @@ export const getUnallowedValues = ({
   }, {});
 };
 
+const UNALLOWED_VALUES_API_ROUTE = '/internal/ecs_data_quality_dashboard/unallowed_field_values';
 export async function fetchUnallowedValues({
   abortController,
   httpFetch,

@@ -10,7 +10,7 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ExpandablePanel } from '../../../shared/components/expandable_panel';
+import { ExpandablePanel } from '@kbn/security-solution-common';
 import { useFetchThreatIntelligence } from '../hooks/use_fetch_threat_intelligence';
 import { InsightsSummaryRow } from './insights_summary_row';
 import { useDocumentDetailsContext } from '../../shared/context';

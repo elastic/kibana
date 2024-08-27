@@ -18,20 +18,20 @@ import { LocatorPublic } from '@kbn/share-plugin/common';
 import { LocatorClient } from '@kbn/shared-ux-prompt-no-data-views-types';
 import { useKibanaContextForPlugin } from '../utils';
 import { BasicDataStream, TimeRangeConfig } from '../../common/types';
-import { useRedirectLinkTelemetry } from './use_telemetry';
+import { SendTelemetryFn } from './use_redirect_link_telemetry';
 
 export const useRedirectLink = <T extends BasicDataStream>({
   dataStreamStat,
   query,
   timeRangeConfig,
   breakdownField,
-  telemetry,
+  sendTelemetry,
 }: {
   dataStreamStat: T;
   query?: Query | AggregateQuery;
   timeRangeConfig: TimeRangeConfig;
   breakdownField?: string;
-  telemetry?: Parameters<typeof useRedirectLinkTelemetry>[0]['telemetry'];
+  sendTelemetry: SendTelemetryFn;
 }) => {
   const {
     services: { share },
@@ -41,13 +41,6 @@ export const useRedirectLink = <T extends BasicDataStream>({
 
   const logsExplorerLocator =
     share.url.locators.get<SingleDatasetLocatorParams>(SINGLE_DATASET_LOCATOR_ID);
-
-  const { sendTelemetry } = useRedirectLinkTelemetry({
-    rawName: dataStreamStat.rawName,
-    isLogsExplorer: !!logsExplorerLocator,
-    telemetry,
-    query,
-  });
 
   return useMemo<{
     linkProps: RouterLinkProps;

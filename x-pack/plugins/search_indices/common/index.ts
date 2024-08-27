@@ -7,3 +7,5 @@
 
 export const PLUGIN_ID = 'searchIndices';
 export const PLUGIN_NAME = 'searchIndices';
+
+export type { IndicesStatusResponse, UserStartPrivilegesResponse } from './types';

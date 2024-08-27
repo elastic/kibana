@@ -8,6 +8,7 @@
 import { EuiHorizontalRule } from '@elastic/eui';
 
 import React from 'react';
+import { FlyoutBody } from '@kbn/security-solution-common';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { AssetCriticalityAccordion } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 
@@ -18,7 +19,6 @@ import { ManagedUser } from './components/managed_user';
 import type { ManagedUserData } from './types';
 import type { RiskScoreEntity, UserItem } from '../../../../common/search_strategy';
 import { USER_PANEL_RISK_SCORE_QUERY_ID } from '.';
-import { FlyoutBody } from '../../shared/components/flyout_body';
 import { ObservedEntity } from '../shared/components/observed_entity';
 import type { ObservedEntityData } from '../shared/components/observed_entity/types';
 import { useObservedUserItems } from './hooks/use_observed_user_items';
