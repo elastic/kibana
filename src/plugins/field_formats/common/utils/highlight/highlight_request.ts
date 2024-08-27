@@ -10,7 +10,7 @@ import { highlightTags } from './highlight_tags';
 
 const FRAGMENT_SIZE = Math.pow(2, 31) - 1; // Max allowed value for fragment_size (limit of a java int)
 
-export function getHighlightRequest(shouldHighlight: boolean) {
+export function getHighlightRequest(shouldHighlight: boolean, maxAnalyzedOffset:number=1000000) {
   if (!shouldHighlight) return;
 
   return {
@@ -20,5 +20,6 @@ export function getHighlightRequest(shouldHighlight: boolean) {
       '*': {},
     },
     fragment_size: FRAGMENT_SIZE,
+    max_analyzed_offset: maxAnalyzedOffset,
   };
 }

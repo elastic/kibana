@@ -9,6 +9,7 @@
 export const UI_SETTINGS = {
   META_FIELDS: 'metaFields',
   DOC_HIGHLIGHT: 'doc_table:highlight',
+  DOC_HIGHLIGHT_MAX_ANALYZED_OFFSET: 'doc_table:highlightMaxAnalyzedOffset',
   QUERY_STRING_OPTIONS: 'query:queryString:options',
   QUERY_ALLOW_LEADING_WILDCARDS: 'query:allowLeadingWildcards',
   SEARCH_QUERY_LANGUAGE: 'search:queryLanguage',

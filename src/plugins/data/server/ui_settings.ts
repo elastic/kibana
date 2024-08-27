@@ -60,6 +60,19 @@ export function getUiSettings(
       category: ['discover'],
       schema: schema.boolean(),
     },
+    [UI_SETTINGS.DOC_HIGHLIGHT_MAX_ANALYZED_OFFSET]: {
+      name: i18n.translate('data.advancedSettings.docTableHighlightMaxAnalyzedOffsetTitle', {
+        defaultMessage: 'Highlight max_analyzed_offset',
+      }),
+      value: 1000000,
+      description: i18n.translate('data.advancedSettings.docTableHighlightMaxAnalyzedOffsetText', {
+        defaultMessage:
+          'If this setting is set to a non-negative value, the highlighting stops at this defined maximum limit, and the rest of the text is not processed, thus not highlighted and no error is returned. ' +
+          'The max_analyzed_offset query setting does not override the index.highlight.max_analyzed_offset which prevails when it’s set to lower value than the query setting.',
+      }),
+      category: ['discover'],
+      schema: schema.number(),
+    },
     [UI_SETTINGS.QUERY_STRING_OPTIONS]: {
       name: i18n.translate('data.advancedSettings.query.queryStringOptionsTitle', {
         defaultMessage: 'Query string options',

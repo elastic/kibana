@@ -891,7 +891,7 @@ export class SearchSource {
       query: builtQuery,
       highlight:
         searchRequest.highlightAll && builtQuery
-          ? getHighlightRequest(getConfig(UI_SETTINGS.DOC_HIGHLIGHT))
+          ? getHighlightRequest(getConfig(UI_SETTINGS.DOC_HIGHLIGHT), getConfig(UI_SETTINGS.DOC_HIGHLIGHT_MAX_ANALYZED_OFFSET))
           : undefined,
       // remove _source, since everything's coming from fields API, scripted, or stored fields
       _source: fieldListProvided && !sourceFieldsProvided ? false : body._source,
