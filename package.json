@@ -1516,7 +1516,7 @@
     "@types/express": "^4.17.13",
     "@types/extract-zip": "^1.6.2",
     "@types/faker": "^5.1.5",
-    "@types/fetch-mock": "^7.3.1",
+    "@types/fetch-mock": "^7.3.8",
     "@types/file-saver": "^2.0.0",
     "@types/flat": "^5.0.5",
     "@types/flot": "^0.0.31",
