@@ -19,5 +19,5 @@ export type {
   CspFinding,
 } from './types';
 export * from './constants';
-// export { extractErrorMessage, buildMutedRulesFilter } from './utils/helpers';
-// export { showErrorToast } from './utils/show_error_toast';
+export { extractErrorMessage, buildMutedRulesFilter } from './utils/helpers';
+export { showErrorToast } from './utils/show_error_toast';
