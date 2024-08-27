@@ -7,7 +7,6 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,23 +14,25 @@ import {
   EuiPageTemplate,
   EuiSplitPanel,
   useEuiTour,
-  EuiButton,
   EuiButtonEmpty,
-  EuiTourStep,
-  EuiTourStepProps,
   EuiHorizontalRule,
 } from '@elastic/eui';
+import { getConsoleTourStepProps } from './get_console_tour_step_props';
 import { useServicesContext } from '../../contexts';
 import { MAIN_PANEL_LABELS } from './i18n';
 import { NavIconButton } from './nav_icon_button';
 import { Editor } from '../editor';
-import { TopNavMenu, SomethingWentWrongCallout } from '../../components';
+import {
+  TopNavMenu,
+  SomethingWentWrongCallout,
+  ConsoleTourStep,
+  ConsoleTourStepProps,
+} from '../../components';
 import { useDataInit } from '../../hooks';
 import { getTopNavConfig } from './get_top_nav';
 import { getTourSteps } from './get_tour_steps';
 import {
   SHELL_TAB_ID,
-  SHELL_TOUR_STEP,
   EDITOR_TOUR_STEP,
   TOUR_STORAGE_KEY,
   INITIAL_TOUR_CONFIG,
@@ -54,55 +55,11 @@ export function Main({ isEmbeddable = false }: MainProps) {
     localStorage.setItem(TOUR_STORAGE_KEY, JSON.stringify(tourState));
   }, [tourState]);
 
-  const nextTourStep = () => {
-    if (tourState.currentTourStep < 5) {
-      actions.incrementStep();
-    }
-  };
-
-  const fullTourStepProps = tourStepProps.map((step: EuiTourStepProps) => {
-    return {
-      ...step,
-      onFinish: () => actions.finishTour(false),
-      subtitle: undefined, // Overwrite subtitle from initial tour config
-      footerAction:
-        tourState.currentTourStep === tourStepProps.length ? (
-          <EuiButton
-            color="success"
-            size="s"
-            onClick={() => actions.finishTour()}
-            data-test-subj="consoleCompleteTourButton"
-          >
-            {i18n.translate('console.tour.completeTourButton', {
-              defaultMessage: 'Complete',
-            })}
-          </EuiButton>
-        ) : (
-          [
-            <EuiButtonEmpty
-              size="s"
-              color="text"
-              onClick={() => actions.finishTour()}
-              data-test-subj="consoleSkipTourButton"
-            >
-              {i18n.translate('console.tour.skipTourButton', {
-                defaultMessage: 'Skip tour',
-              })}
-            </EuiButtonEmpty>,
-            <EuiButton
-              color="success"
-              size="s"
-              onClick={nextTourStep}
-              data-test-subj="consoleNextTourStepButton"
-            >
-              {i18n.translate('console.tour.nextStepButton', {
-                defaultMessage: 'Next',
-              })}
-            </EuiButton>,
-          ]
-        ),
-    };
-  }) as EuiTourStepProps[];
+  const consoleTourStepProps: ConsoleTourStepProps[] = getConsoleTourStepProps(
+    tourStepProps,
+    actions,
+    tourState
+  );
 
   const { done, error, retry } = useDataInit();
 
@@ -137,11 +94,11 @@ export function Main({ isEmbeddable = false }: MainProps) {
                       selectedTab,
                       setSelectedTab,
                     })}
-                    tourStepProps={fullTourStepProps}
+                    tourStepProps={consoleTourStepProps}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiTourStep {...fullTourStepProps[FILES_TOUR_STEP - 1]}>
+                  <ConsoleTourStep tourStepProps={consoleTourStepProps[FILES_TOUR_STEP - 1]}>
                     <NavIconButton
                       iconType="save"
                       onClick={() => {}}
@@ -149,7 +106,7 @@ export function Main({ isEmbeddable = false }: MainProps) {
                       dataTestSubj="consoleImportExportButton"
                       toolTipContent={MAIN_PANEL_LABELS.importExportButton}
                     />
-                  </EuiTourStep>
+                  </ConsoleTourStep>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <NavIconButton
@@ -174,11 +131,7 @@ export function Main({ isEmbeddable = false }: MainProps) {
             <EuiHorizontalRule margin="none" />
             <EuiSplitPanel.Inner paddingSize="none">
               {selectedTab === SHELL_TAB_ID && (
-                <Editor
-                  loading={!done}
-                  setEditorInstance={() => {}}
-                  tourStepProps={fullTourStepProps[SHELL_TOUR_STEP - 1]}
-                />
+                <Editor loading={!done} setEditorInstance={() => {}} />
               )}
             </EuiSplitPanel.Inner>
             <EuiHorizontalRule margin="none" />
@@ -192,9 +145,9 @@ export function Main({ isEmbeddable = false }: MainProps) {
       </EuiFlexGroup>
 
       {/* Empty container for Editor Tour Step */}
-      <EuiTourStep {...fullTourStepProps[EDITOR_TOUR_STEP - 1]}>
+      <ConsoleTourStep tourStepProps={consoleTourStepProps[EDITOR_TOUR_STEP - 1]}>
         <div />
-      </EuiTourStep>
+      </ConsoleTourStep>
     </div>
   );
 }

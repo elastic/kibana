@@ -7,7 +7,8 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import { EuiTabs, EuiTab, EuiTourStep, EuiTourStepProps } from '@elastic/eui';
+import { EuiTabs, EuiTab } from '@elastic/eui';
+import { ConsoleTourStep, ConsoleTourStepProps } from './console_tour_step';
 
 export interface TopNavMenuItem {
   id: string;
@@ -22,7 +23,7 @@ export interface TopNavMenuItem {
 interface Props {
   disabled?: boolean;
   items: TopNavMenuItem[];
-  tourStepProps: EuiTourStepProps[];
+  tourStepProps: ConsoleTourStepProps[];
 }
 
 export const TopNavMenu: FunctionComponent<Props> = ({ items, disabled, tourStepProps }) => {
@@ -44,9 +45,9 @@ export const TopNavMenu: FunctionComponent<Props> = ({ items, disabled, tourStep
 
         if (item.tourStep) {
           return (
-            <EuiTourStep {...tourStepProps[item.tourStep - 1]} key={idx}>
+            <ConsoleTourStep tourStepProps={tourStepProps[item.tourStep - 1]}>
               {tab}
-            </EuiTourStep>
+            </ConsoleTourStep>
           );
         }
 

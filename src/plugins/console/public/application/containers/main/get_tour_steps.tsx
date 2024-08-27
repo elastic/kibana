@@ -10,13 +10,14 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiStatelessTourSteps, EuiLink, EuiText } from '@elastic/eui';
+import { DocLinksStart } from '@kbn/core-doc-links-browser';
 
 const commonProps = {
   stepsTotal: 5,
   maxWidth: 400,
 };
 
-export function getTourSteps(docLinks) {
+export function getTourSteps(docLinks: DocLinksStart['links']) {
   return [
     {
       step: 1,
@@ -27,7 +28,7 @@ export function getTourSteps(docLinks) {
         <EuiText>
           {i18n.translate('console.tour.shellStepContent', {
             defaultMessage:
-              'This is our UI for interacting with Elasticsearch clusters using QueryDSL. Easily run queries, manage settings, and view search results.',
+              'Use the Console UI to call Elasticsearch and Kibana APIs and view their responses. Use Query DSL syntax to search your data, manage settings, and more.',
           })}
         </EuiText>
       ),
@@ -44,7 +45,7 @@ export function getTourSteps(docLinks) {
         <EuiText>
           <FormattedMessage
             id="console.tour.editorStepContent"
-            defaultMessage="Enter a request in this input pane, and the response will be shown in the neighboring output pane. For more details, visit {queryDslDocs}."
+            defaultMessage="Enter a request in this input pane, and view the response in the adjacent output pane. For more details, visit {queryDslDocs}."
             values={{
               queryDslDocs: (
                 <EuiLink href={docLinks.query.queryDsl} target="_blank">
@@ -86,13 +87,13 @@ export function getTourSteps(docLinks) {
     {
       step: 4,
       title: i18n.translate('console.tour.configStepTitle', {
-        defaultMessage: 'Tailor your toolbox',
+        defaultMessage: 'Customize your toolbox',
       }),
       content: (
         <EuiText>
           {i18n.translate('console.tour.configStepContent', {
             defaultMessage:
-              'Fine-tune your Console’s settings and manage variables to personalize your workflow to suit your work style.',
+              'Fine-tune your Console’s settings and create variables to personalize your workflow.',
           })}
         </EuiText>
       ),
@@ -110,7 +111,7 @@ export function getTourSteps(docLinks) {
         <EuiText>
           {i18n.translate('console.tour.filesStepContent', {
             defaultMessage:
-              'Easily export your console input requests to a file, or import those you’ve saved previously.',
+              'Easily export your Console requests to a file, or import ones you’ve saved previously.',
           })}
         </EuiText>
       ),
