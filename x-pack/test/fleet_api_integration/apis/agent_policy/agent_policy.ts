@@ -9,7 +9,6 @@ import expect from '@kbn/expect';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { FLEET_AGENT_POLICIES_SCHEMA_VERSION } from '@kbn/fleet-plugin/server/constants';
 import { skipIfNoDockerRegistry, generateAgent } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 
 export default function (providerContext: FtrProviderContext) {
@@ -18,6 +17,7 @@ export default function (providerContext: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const es = getService('es');
+  const fleetAndAgents = getService('fleetAndAgents');
 
   const getPackage = async (pkgName: string) => {
     const getPkgRes = await supertest
@@ -42,9 +42,8 @@ export default function (providerContext: FtrProviderContext) {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
         await kibanaServer.savedObjects.cleanStandardList();
+        await fleetAndAgents.setup();
       });
-      setupFleetAndAgents(providerContext);
-
       it('should get list agent policies', async () => {
         await supertest.get(`/api/fleet/agent_policies`).expect(200);
       });
@@ -102,8 +101,8 @@ export default function (providerContext: FtrProviderContext) {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
         await kibanaServer.savedObjects.cleanStandardList();
+        await fleetAndAgents.setup();
       });
-      setupFleetAndAgents(providerContext);
       let packagePoliciesToDeleteIds: string[] = [];
       after(async () => {
         if (systemPkgVersion) {
@@ -476,8 +475,8 @@ export default function (providerContext: FtrProviderContext) {
     describe('POST /api/fleet/agent_policies/{agentPolicyId}/copy', () => {
       before(async () => {
         await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/fleet/agents');
+        await fleetAndAgents.setup();
       });
-      setupFleetAndAgents(providerContext);
       const createdPolicyIds: string[] = [];
       after(async () => {
         const deletedPromises = createdPolicyIds.map((agentPolicyId) =>
@@ -1460,8 +1459,8 @@ export default function (providerContext: FtrProviderContext) {
       let policyId: string;
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+        await fleetAndAgents.setup();
       });
-      setupFleetAndAgents(providerContext);
       before(async () => {
         const getPkRes = await getPackage('system');
 

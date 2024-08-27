@@ -10,13 +10,13 @@ import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { Installation } from '@kbn/fleet-plugin/server/types';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry, isDockerRegistryEnabledOrSkipped } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
 
 const TEST_KEY_ID = 'd2a182a7b0e00c14';
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const es: Client = getService('es');
   const supertest = getService('supertest');
+  const fleetAndAgents = getService('fleetAndAgents');
 
   const uninstallPackage = async (pkg: string, version: string) => {
     await supertest.delete(`/api/fleet/epm/packages/${pkg}/${version}`).set('kbn-xsrf', 'xxxx');
@@ -39,7 +39,10 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('Installs verified and unverified packages', async () => {
     skipIfNoDockerRegistry(providerContext);
-    setupFleetAndAgents(providerContext);
+
+    before(async () => {
+      await fleetAndAgents.setup();
+    });
 
     describe('verified package', async () => {
       after(async () => {

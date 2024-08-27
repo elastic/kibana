@@ -13,7 +13,6 @@ import expect from '@kbn/expect';
 import type { GetAgentsResponse } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry, generateAgent } from '../helpers';
-import { setupFleetAndAgents } from './agents/services';
 
 const AGENT_COUNT_WAIT_ATTEMPTS = 3;
 
@@ -22,6 +21,7 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const fleetAndAgents = getService('fleetAndAgents');
 
   let agentCount = 0;
   let pkgVersion: string;
@@ -30,9 +30,8 @@ export default function (providerContext: FtrProviderContext) {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await fleetAndAgents.setup();
     });
-
-    setupFleetAndAgents(providerContext);
 
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();

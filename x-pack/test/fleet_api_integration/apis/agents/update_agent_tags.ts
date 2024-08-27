@@ -7,23 +7,23 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { setupFleetAndAgents } from './services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
+  const fleetAndAgents = getService('fleetAndAgents');
 
   describe('fleet_update_agent_tags', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await fleetAndAgents.setup();
     });
     beforeEach(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/agents');
       await getService('supertest').post(`/api/fleet/setup`).set('kbn-xsrf', 'xxx').send();
     });
-    setupFleetAndAgents(providerContext);
     afterEach(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');

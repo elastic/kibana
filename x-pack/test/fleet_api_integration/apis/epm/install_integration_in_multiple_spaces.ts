@@ -10,7 +10,6 @@ import { PACKAGES_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import pRetry from 'p-retry';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry, isDockerRegistryEnabledOrSkipped } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
 
 const testSpaceId = 'fleet_test_space';
 
@@ -20,6 +19,7 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const es = getService('es');
+  const fleetAndAgents = getService('fleetAndAgents');
 
   const pkgName = 'system';
   const pkgVersion = '1.27.0';
@@ -72,9 +72,9 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('When installing system integration in multiple spaces', async () => {
     skipIfNoDockerRegistry(providerContext);
-    setupFleetAndAgents(providerContext);
 
     before(async () => {
+      await fleetAndAgents.setup();
       if (!isDockerRegistryEnabledOrSkipped(providerContext)) {
         return;
       }

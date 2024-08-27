@@ -9,8 +9,6 @@ import supertest from 'supertest';
 import { Client, HttpConnection } from '@elastic/elasticsearch';
 import { format as formatUrl } from 'url';
 
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 
 export function getSupertestWithoutAuth({ getService }: FtrProviderContext) {
@@ -32,32 +30,5 @@ export function getEsClientForAPIKey({ getService }: FtrProviderContext, esApiKe
     },
     requestTimeout: config.get('timeouts.esRequestTimeout'),
     Connection: HttpConnection,
-  });
-}
-
-export function setupFleetAndAgents(providerContext: FtrProviderContext) {
-  before(async () => {
-    // Use elastic/fleet-server service account to execute setup to verify privilege configuration
-    const es = providerContext.getService('es');
-    const { token } = await es.security.createServiceToken({
-      namespace: 'elastic',
-      service: 'fleet-server',
-    });
-    const supetestWithoutAuth = getSupertestWithoutAuth(providerContext);
-
-    await supetestWithoutAuth
-      .post(`/api/fleet/setup`)
-      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-      .set('kbn-xsrf', 'xxx')
-      .set('Authorization', `Bearer ${token.value}`)
-      .send()
-      .expect(200);
-    await supetestWithoutAuth
-      .post(`/api/fleet/agents/setup`)
-      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-      .set('kbn-xsrf', 'xxx')
-      .set('Authorization', `Bearer ${token.value}`)
-      .send({ forceRecreate: true })
-      .expect(200);
   });
 }

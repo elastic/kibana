@@ -8,7 +8,6 @@
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { runPrivilegeTests } from '../../privileges_helpers';
-import { setupFleetAndAgents } from '../agents/services';
 import { testUsers } from '../test_users';
 import { generateNAgentPolicies } from '../../helpers';
 
@@ -17,6 +16,7 @@ export default function (providerContext: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
+  const fleetAndAgents = getService('fleetAndAgents');
 
   describe('fleet_uninstall_token_privileges', () => {
     before(async () => {
@@ -28,10 +28,10 @@ export default function (providerContext: FtrProviderContext) {
     });
     before(async () => {
       await generateNAgentPolicies(supertest, 2);
+      await fleetAndAgents.setup();
     });
 
     skipIfNoDockerRegistry(providerContext);
-    setupFleetAndAgents(providerContext);
 
     const SCENARIOS = [
       {

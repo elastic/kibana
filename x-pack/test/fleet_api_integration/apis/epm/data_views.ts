@@ -8,11 +8,10 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
-
+  const fleetAndAgents = getService('fleetAndAgents');
   const supertest = getService('supertest');
 
   const testPkgs = [
@@ -45,7 +44,10 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('EPM - data views', () => {
     skipIfNoDockerRegistry(providerContext);
-    setupFleetAndAgents(providerContext);
+
+    before(async () => {
+      await fleetAndAgents.setup();
+    });
 
     afterEach(async () => {
       await Promise.all(testPkgs.map((pkg) => uninstallPackage(pkg.name, pkg.version)));

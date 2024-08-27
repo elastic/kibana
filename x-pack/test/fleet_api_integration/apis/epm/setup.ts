@@ -9,7 +9,6 @@ import expect from '@kbn/expect';
 import { GetInfoResponse, InstalledRegistry } from '@kbn/fleet-plugin/common/types';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -17,6 +16,7 @@ export default function (providerContext: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const log = getService('log');
   const es = getService('es');
+  const fleetAndAgents = getService('fleetAndAgents');
 
   const uninstallPackage = async (name: string, version: string) => {
     await supertest
@@ -27,7 +27,11 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('setup api', async () => {
     skipIfNoDockerRegistry(providerContext);
-    setupFleetAndAgents(providerContext);
+
+    before(async () => {
+      await fleetAndAgents.setup();
+    });
+
     after(async () => {
       await uninstallPackage('deprecated', '0.1.0');
       await uninstallPackage('multiple_versions', '0.3.0');

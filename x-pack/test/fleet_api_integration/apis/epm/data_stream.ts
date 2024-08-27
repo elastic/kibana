@@ -10,12 +10,12 @@ import { v4 as uuidv4 } from 'uuid';
 import { asyncForEach } from '@kbn/std';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const es = getService('es');
   const supertest = getService('supertest');
+  const fleetAndAgents = getService('fleetAndAgents');
 
   const uninstallPackage = async (name: string, version: string) => {
     await supertest.delete(`/api/fleet/epm/packages/${name}/${version}`).set('kbn-xsrf', 'xxxx');
@@ -29,7 +29,7 @@ export default function (providerContext: FtrProviderContext) {
       .expect(200);
   };
 
-  describe('datastreams', async () => {
+  describe('datastreams', () => {
     describe('standard integration', () => {
       const pkgName = 'datastreams';
       const pkgVersion = '0.1.0';
@@ -39,7 +39,10 @@ export default function (providerContext: FtrProviderContext) {
       const namespaces = ['default', 'foo', 'bar'];
 
       skipIfNoDockerRegistry(providerContext);
-      setupFleetAndAgents(providerContext);
+
+      before(async () => {
+        await fleetAndAgents.setup();
+      });
 
       const writeMetricsDoc = (namespace: string) =>
         es.transport.request(
@@ -310,7 +313,10 @@ export default function (providerContext: FtrProviderContext) {
       const namespace = 'default';
 
       skipIfNoDockerRegistry(providerContext);
-      setupFleetAndAgents(providerContext);
+
+      before(async () => {
+        await fleetAndAgents.setup();
+      });
 
       const writeMetricDoc = (body: any = {}) =>
         es.transport.request(
