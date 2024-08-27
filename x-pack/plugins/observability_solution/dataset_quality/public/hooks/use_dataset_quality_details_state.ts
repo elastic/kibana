@@ -15,7 +15,7 @@ import { BasicDataStream } from '../../common/types';
 import { useKibanaContextForPlugin } from '../utils';
 
 export const useDatasetQualityDetailsState = () => {
-  const { service } = useDatasetQualityDetailsContext();
+  const { service, telemetryClient } = useDatasetQualityDetailsContext();
 
   const {
     services: { fieldFormats },
@@ -34,6 +34,14 @@ export const useDatasetQualityDetailsState = () => {
     state.matches('initializing.checkBreakdownFieldIsEcs.done')
       ? state.context.isBreakdownFieldEcs
       : false
+  );
+
+  const isBreakdownFieldAsserted = useSelector(
+    service,
+    (state) =>
+      state.matches('initializing.checkBreakdownFieldIsEcs.done') &&
+      breakdownField &&
+      isBreakdownFieldEcs
   );
 
   const dataStreamSettings = useSelector(service, (state) =>
@@ -67,7 +75,9 @@ export const useDatasetQualityDetailsState = () => {
       )
   );
 
-  const canUserViewIntegrations = dataStreamSettings?.datasetUserPrivileges?.canViewIntegrations;
+  const canUserViewIntegrations = Boolean(
+    dataStreamSettings?.datasetUserPrivileges?.canViewIntegrations
+  );
 
   const dataStreamDetails = useSelector(service, (state) =>
     state.matches('initializing.dataStreamDetails.done')
@@ -115,6 +125,7 @@ export const useDatasetQualityDetailsState = () => {
 
   return {
     service,
+    telemetryClient,
     fieldFormats,
     isIndexNotFoundError,
     dataStream,
@@ -123,6 +134,7 @@ export const useDatasetQualityDetailsState = () => {
     dataStreamDetails,
     breakdownField,
     isBreakdownFieldEcs,
+    isBreakdownFieldAsserted,
     isNonAggregatable,
     timeRange,
     loadingState,

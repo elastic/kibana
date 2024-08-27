@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { DatasetQualityFtrProviderContext } from './config';
-import { getInitialTestLogs, getLogsForDataset } from './data';
+import { datasetNames, defaultNamespace, getInitialTestLogs, getLogsForDataset } from './data';
 
 export default function ({ getService, getPageObjects }: DatasetQualityFtrProviderContext) {
   const PageObjects = getPageObjects([
@@ -25,6 +25,8 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
   const apacheAccessDatasetName = 'apache.access';
   const apacheAccessDatasetHumanName = 'Apache access logs';
+  const regularDataStreamName = `logs-${datasetNames[0]}-${defaultNamespace}`;
+  const apacheAccessDataStreamName = `logs-${apacheAccessDatasetName}-${defaultNamespace}`;
 
   describe('Dataset quality handles user privileges', () => {
     before(async () => {
@@ -170,35 +172,39 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           );
         });
 
-        it('flyout shows insufficient privileges warning for underprivileged data stream', async () => {
-          await PageObjects.datasetQuality.openDatasetFlyout('synth.1');
+        it('Details page shows insufficient privileges warning for underprivileged data stream', async () => {
+          await PageObjects.datasetQuality.navigateToDetails({
+            dataStream: regularDataStreamName,
+          });
 
           await testSubjects.existOrFail(
             `${PageObjects.datasetQuality.testSubjectSelectors.datasetQualityInsufficientPrivileges}-Size`
           );
 
-          await PageObjects.datasetQuality.closeFlyout();
+          await PageObjects.datasetQuality.navigateTo();
         });
 
         it('"View dashboards" and "See integration" are hidden for underprivileged user', async () => {
-          await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
+          await PageObjects.datasetQuality.navigateToDetails({
+            dataStream: apacheAccessDataStreamName,
+          });
           await PageObjects.datasetQuality.openIntegrationActionsMenu();
 
           // "See Integration" is hidden
           await testSubjects.missingOrFail(
-            PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFlyoutIntegrationAction(
+            PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsIntegrationAction(
               'Overview'
             )
           );
 
           // "View Dashboards" is hidden
           await testSubjects.missingOrFail(
-            PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFlyoutIntegrationAction(
+            PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsIntegrationAction(
               'ViewDashboards'
             )
           );
 
-          await PageObjects.datasetQuality.closeFlyout();
+          await PageObjects.datasetQuality.navigateTo();
         });
       });
     });
