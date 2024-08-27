@@ -82,9 +82,9 @@ run(
         f: 'format',
       },
       examples: [
-        `node scripts/generate_depdendency_ownership_report --format json`,
-        `node scripts/generate_depdendency_ownership_report --output report.csv`,
-        `node scripts/generate_depdendency_ownership_report --format markdown --output report.md`,
+        `node scripts/generate_dependency_ownership_report --format json`,
+        `node scripts/generate_dependency_ownership_report --output report.csv`,
+        `node scripts/generate_dependency_ownership_report --format markdown --output report.md`,
       ].join(','),
       help: `
         --format, -f   The format of the report (csv, tsv, json, markdown). Default is csv
