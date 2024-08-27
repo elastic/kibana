@@ -172,6 +172,7 @@ describe('Fleet cloud preconfiguration', () => {
                 enabled: false,
                 logs: false,
                 metrics: false,
+                traces: false,
               },
               protection: {
                 enabled: false,

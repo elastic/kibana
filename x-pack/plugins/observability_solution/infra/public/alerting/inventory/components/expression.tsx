@@ -444,7 +444,8 @@ const StyledHealthCss = css`
 export const ExpressionRow: FC<PropsWithChildren<ExpressionRowProps>> = (props) => {
   const [isExpanded, toggle] = useToggle(true);
 
-  const { children, setRuleParams, expression, errors, expressionId, remove, canDelete } = props;
+  const { children, setRuleParams, expression, errors, expressionId, remove, canDelete, nodeType } =
+    props;
   const {
     metric,
     comparator = COMPARATORS.GREATER_THAN,
@@ -554,7 +555,7 @@ export const ExpressionRow: FC<PropsWithChildren<ExpressionRowProps>> = (props) 
   const ofFields = useMemo(() => {
     let myMetrics: SnapshotMetricType[] = hostSnapshotMetricTypes;
 
-    switch (props.nodeType) {
+    switch (nodeType) {
       case 'awsEC2':
         myMetrics = awsEC2SnapshotMetricTypes;
         break;
@@ -577,8 +578,8 @@ export const ExpressionRow: FC<PropsWithChildren<ExpressionRowProps>> = (props) 
         myMetrics = containerSnapshotMetricTypes;
         break;
     }
-    return myMetrics.map((myMetric) => toMetricOpt(myMetric, props.nodeType));
-  }, [props.nodeType]);
+    return myMetrics.map((myMetric) => toMetricOpt(myMetric, nodeType));
+  }, [nodeType]);
 
   return (
     <>
@@ -608,6 +609,7 @@ export const ExpressionRow: FC<PropsWithChildren<ExpressionRowProps>> = (props) 
                     text: string;
                   }>
                 }
+                nodeType={nodeType}
                 onChange={updateMetric}
                 onChangeCustom={updateCustomMetric}
                 errors={errors}

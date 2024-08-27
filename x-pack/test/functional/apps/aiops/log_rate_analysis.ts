@@ -316,7 +316,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   }
 
   // Failing: See https://github.com/elastic/kibana/issues/176387
-  describe.skip('log rate analysis', async function () {
+  describe.skip('log rate analysis', function () {
     for (const testData of logRateAnalysisTestData) {
       describe(`with '${testData.sourceIndexOrSavedSearch}'`, function () {
         before(async () => {

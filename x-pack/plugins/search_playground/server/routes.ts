@@ -59,7 +59,6 @@ export function defineRoutes({
     },
     errorHandler(logger)(async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-
       const { indices } = request.body;
 
       const fields = await fetchFields(client, indices);

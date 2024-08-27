@@ -16,8 +16,6 @@ import { OutputAPI } from '../common/output';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
-export interface ConfigSchema {}
-
 export interface InferenceSetupDependencies {
   actions: ActionsPluginSetup;
 }
