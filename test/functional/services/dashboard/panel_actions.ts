@@ -253,6 +253,7 @@ export class DashboardPanelActionsService extends FtrService {
     const header = await this.getPanelHeading(title);
     await this.clickContextMenuItem(LEGACY_UNLINK_FROM_LIBRARY_TEST_SUBJ, header);
     await this.expectNotLinkedToLibrary(title);
+    await this.testSubjects.existOrFail('unlinkPanelSuccess');
   }
 
   async unlinkFromLibrary(title = '') {
@@ -271,6 +272,7 @@ export class DashboardPanelActionsService extends FtrService {
     });
     await this.testSubjects.click('confirmSaveSavedObjectButton');
     await this.expectLinkedToLibrary(newTitle);
+    await this.testSubjects.existOrFail('addPanelToLibrarySuccess');
   }
 
   async saveToLibrary(newTitle = '', oldTitle = '') {
@@ -287,7 +289,7 @@ export class DashboardPanelActionsService extends FtrService {
   async expectExistsPanelAction(testSubject: string, title = '') {
     this.log.debug('expectExistsPanelAction', testSubject, title);
 
-    const panelWrapper = title ? await this.getPanelHeading(title) : undefined;
+    const panelWrapper = await this.getPanelHeading(title);
     await this.openContextMenu(panelWrapper);
     if (!(await this.testSubjects.exists(testSubject))) {
       if (await this.hasContextMenuMoreItem()) {
@@ -399,15 +401,25 @@ export class DashboardPanelActionsService extends FtrService {
     return await this.convertToLens(header);
   }
 
-  public async expectLinkedToLibrary(title: string) {
+  public async expectLinkedToLibrary(title = '', legacy = true) {
     this.log.debug(`expectLinkedToLibrary(${title})`);
-    await this.expectExistsPanelAction(LEGACY_UNLINK_FROM_LIBRARY_TEST_SUBJ, title);
-    await this.expectMissingPanelAction(LEGACY_SAVE_TO_LIBRARY_TEST_SUBJ, title);
+    if (legacy) {
+      await this.expectExistsPanelAction(LEGACY_UNLINK_FROM_LIBRARY_TEST_SUBJ, title);
+      await this.expectMissingPanelAction(LEGACY_SAVE_TO_LIBRARY_TEST_SUBJ, title);
+    } else {
+      await this.expectExistsPanelAction(UNLINK_FROM_LIBRARY_TEST_SUBJ, title);
+      await this.expectMissingPanelAction(SAVE_TO_LIBRARY_TEST_SUBJ, title);
+    }
   }
 
-  public async expectNotLinkedToLibrary(title?: string) {
+  public async expectNotLinkedToLibrary(title = '', legacy = true) {
     this.log.debug(`expectNotLinkedToLibrary(${title})`);
-    await this.expectExistsPanelAction(LEGACY_SAVE_TO_LIBRARY_TEST_SUBJ, title);
-    await this.expectMissingPanelAction(LEGACY_UNLINK_FROM_LIBRARY_TEST_SUBJ, title);
+    if (legacy) {
+      await this.expectExistsPanelAction(LEGACY_SAVE_TO_LIBRARY_TEST_SUBJ, title);
+      await this.expectMissingPanelAction(LEGACY_UNLINK_FROM_LIBRARY_TEST_SUBJ, title);
+    } else {
+      await this.expectExistsPanelAction(SAVE_TO_LIBRARY_TEST_SUBJ, title);
+      await this.expectMissingPanelAction(UNLINK_FROM_LIBRARY_TEST_SUBJ, title);
+    }
   }
 }

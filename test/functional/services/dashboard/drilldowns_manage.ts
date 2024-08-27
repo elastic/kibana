@@ -157,6 +157,7 @@ export function DashboardDrilldownsManageProvider({
         return Number.parseInt(await count.getVisibleText(), 10);
       } catch (e) {
         // if not found then this is 0 (we don't show badge with 0)
+        log.debug('Error:', e.message);
         return 0;
       }
     }

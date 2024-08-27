@@ -12,7 +12,6 @@ export default function ({ getService, getPageObject }: FtrProviderContext) {
   const dashboard = getPageObject('dashboard');
   const find = getService('find');
   const kibanaServer = getService('kibanaServer');
-  const testSubjects = getService('testSubjects');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const panelActions = getService('dashboardPanelActions');
   const savedObjectsFinder = getService('savedObjectsFinder');
@@ -39,7 +38,7 @@ export default function ({ getService, getPageObject }: FtrProviderContext) {
       await dashboardAddPanel.closeAddPanel();
 
       await panelActions.legacyUnlinkFromLibrary('RenderingTest:heatmap');
-      await testSubjects.existOrFail('unlinkPanelSuccess');
+      await panelActions.expectNotLinkedToLibrary('RenderingTest:heatmap');
 
       await dashboardAddPanel.clickOpenAddPanel();
       await savedObjectsFinder.filterEmbeddableNames('Rendering Test: heatmap');
@@ -50,7 +49,6 @@ export default function ({ getService, getPageObject }: FtrProviderContext) {
     it('save visualize panel to embeddable library', async () => {
       const newTitle = 'Rendering Test: heatmap - copy';
       await panelActions.legacySaveToLibrary(newTitle, 'RenderingTest:heatmap');
-      await testSubjects.existOrFail('addPanelToLibrarySuccess');
       await panelActions.expectLinkedToLibrary(newTitle);
     });
   });

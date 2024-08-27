@@ -121,8 +121,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('can unlink a panel from the library', async () => {
-          const panel = await testSubjects.find('embeddablePanelHeading-Somemorelinks');
-          await dashboardPanelActions.unlinkFromLibrary(panel);
+          await dashboardPanelActions.unlinkFromLibrary('Some more links');
           await testSubjects.existOrFail('unlinkPanelSuccess');
         });
 
