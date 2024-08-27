@@ -6,13 +6,13 @@
  */
 
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import { SamplesFormat } from '../common';
 import {
   ActionsClientChatOpenAI,
   ActionsClientBedrockChatModel,
   ActionsClientSimpleChatModel,
   ActionsClientGeminiChatModel,
 } from '@kbn/langchain/server';
+import { SamplesFormat } from '../common';
 
 export interface IntegrationAssistantPluginSetup {
   setIsAvailable: (isAvailable: boolean) => void;
