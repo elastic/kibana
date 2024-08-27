@@ -31,6 +31,26 @@ describe('getAlertsIndexRoute', () => {
     expect(response.body).toEqual({ index_name: ['alerts-security.alerts'] });
   });
 
+  test('has_read_index_privileges is true when the user has at least read privilege on index_name', async () => {
+    context.core.elasticsearch.client.asCurrentUser.security.hasPrivileges.mockResolvedValue({
+      has_all_requested: true,
+    });
+    const response = await server.inject(getReadIndexRequest(), context);
+
+    expect(response.status).toEqual(200);
+    expect(response.body.has_read_index_privilege).toEqual(true);
+  });
+
+  test("has_read_index_privileges is false when the user doesn't have read privilege on index_name", async () => {
+    context.core.elasticsearch.client.asCurrentUser.security.hasPrivileges.mockResolvedValue({
+      has_all_requested: false,
+    });
+    const response = await server.inject(getReadIndexRequest(), context);
+
+    expect(response.status).toEqual(200);
+    expect(response.body.has_read_index_privilege).toEqual(false);
+  });
+
   describe('request validation', () => {
     test('rejects invalid query params', async () => {
       await expect(

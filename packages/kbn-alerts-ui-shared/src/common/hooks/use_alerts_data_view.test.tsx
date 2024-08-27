@@ -116,7 +116,7 @@ describe('useAlertsDataView', () => {
     await waitFor(() => expect(result.current.dataView).toBe(mockDataView));
   });
 
-  it('does not fetch anything if siem and other feature ids are mixed together', async () => {
+  it('does not fetch alerts fields if siem and other feature ids are mixed together', async () => {
     const { result, waitFor } = renderHook(
       () =>
         useAlertsDataView({
@@ -134,7 +134,6 @@ describe('useAlertsDataView', () => {
         dataView: undefined,
       })
     );
-    expect(mockFetchAlertsIndexNames).toHaveBeenCalledTimes(0);
     expect(mockFetchAlertsFields).toHaveBeenCalledTimes(0);
   });
 

@@ -40,14 +40,17 @@ export const getAlertsIndexRoute = (router: IRouter<RacRequestHandlerContext>) =
           features?.split(',') ?? validFeatureIds
         );
         const coreContext = await context.core;
-        const readIndexPrivilege =
-          await coreContext.elasticsearch.client.asCurrentUser.security.hasPrivileges({
-            index: [{ names: indexName!, privileges: ['read'] }],
-          });
+        const readIndexPrivilege = !indexName?.length
+          ? false
+          : (
+              await coreContext.elasticsearch.client.asCurrentUser.security.hasPrivileges({
+                index: [{ names: indexName, privileges: ['read'] }],
+              })
+            )?.has_all_requested;
         return response.ok({
           body: {
             index_name: indexName,
-            has_read_index_privilege: readIndexPrivilege.has_all_requested,
+            has_read_index_privilege: readIndexPrivilege,
           },
         });
       } catch (exc) {
