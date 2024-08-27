@@ -1786,7 +1786,7 @@
     "svgo": "^2.8.0",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
-    "table": "^6.8.1",
+    "table": "^6.8.2",
     "tape": "^5.0.1",
     "terser": "^5.31.6",
     "terser-webpack-plugin": "^4.2.3",
