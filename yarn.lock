@@ -1852,13 +1852,13 @@
     "@types/node-jose" "1.1.10"
     node-jose "2.2.0"
 
-"@elastic/search-ui-app-search-connector@^1.20.2":
-  version "1.20.2"
-  resolved "https://registry.yarnpkg.com/@elastic/search-ui-app-search-connector/-/search-ui-app-search-connector-1.20.2.tgz#873acdb3ee7709374746a5d3665edb0b14606d8e"
-  integrity sha512-oKXCQV3woyPjn2A8nfsFyG0P5K83hcJlDV0UjjOe1sSM2nUw1nFZa22gYTLVczhVF54N3z6ZTW6ntSJkaqqfAw==
+"@elastic/search-ui-app-search-connector@^1.21.5":
+  version "1.21.5"
+  resolved "https://registry.yarnpkg.com/@elastic/search-ui-app-search-connector/-/search-ui-app-search-connector-1.21.5.tgz#5d0fda12c606dad96546a6de9822eaef007ebd22"
+  integrity sha512-8AFziRWK/cBxXlQHJ33IemUGkMDw3GNy5in14s0bA+j83noYjApMIIdmX0MA6WCUcHKgLYp4n5mY11BUy7XRPg==
   dependencies:
     "@elastic/app-search-javascript" "^8.1.2"
-    "@elastic/search-ui" "1.20.2"
+    "@elastic/search-ui" "1.21.5"
 
 "@elastic/search-ui-engines-connector@^1.20.2":
   version "1.20.2"
@@ -1872,6 +1872,16 @@
   version "1.20.2"
   resolved "https://registry.yarnpkg.com/@elastic/search-ui/-/search-ui-1.20.2.tgz#afb679b4a06ef14ce8ab4a4f3053e09c68588386"
   integrity sha512-48O0jKeMbhohxnVB6oOxT5R+x4nrwG0UWvFTCWPZJ4hKCLsPZZOWIFHziMaxhR8f0ckZCoiif+eD6FAgDW6kwA==
+  dependencies:
+    date-fns "^1.30.1"
+    deep-equal "^1.0.1"
+    history "^4.9.0"
+    qs "^6.7.0"
+
+"@elastic/search-ui@1.21.5":
+  version "1.21.5"
+  resolved "https://registry.yarnpkg.com/@elastic/search-ui/-/search-ui-1.21.5.tgz#200dc3403c6386283ff04d862bc4b4863eb219f1"
+  integrity sha512-wzhTIhSzCio6RCaSsEbRf/yHUc9LpQSNgySWlcGbvtwdPBXnDP0Cwhsci5AUOdmRPvC3K0FID2qg4yF2c0SX+g==
   dependencies:
     date-fns "^1.30.1"
     deep-equal "^1.0.1"
