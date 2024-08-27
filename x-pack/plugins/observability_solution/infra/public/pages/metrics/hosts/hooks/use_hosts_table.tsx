@@ -65,7 +65,8 @@ export type HostNodeRow = HostMetadata &
  * Helper functions
  */
 const formatMetric = (type: InfraAssetMetricType, value: number | undefined | null) => {
-  return value || value === 0 ? createInventoryMetricFormatter({ type })(value) : 'N/A';
+  const defaultValue = value ?? 0;
+  return createInventoryMetricFormatter({ type })(defaultValue);
 };
 
 const buildMetricCell = (
