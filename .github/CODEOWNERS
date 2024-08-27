@@ -1279,6 +1279,7 @@ x-pack/test/observability_ai_assistant_functional @elastic/obs-ai-assistant
 /kbn_pm/ @elastic/kibana-operations
 /x-pack/dev-tools @elastic/kibana-operations
 /catalog-info.yaml @elastic/kibana-operations @elastic/kibana-tech-leads
+/.devcontainer/ @elastic/kibana-operations
 
 # Appex QA
 /src/dev/code_coverage @elastic/appex-qa
