@@ -18,7 +18,7 @@ import {
 } from '@kbn/content-management-utils';
 import { DataViewType } from '../../../../common';
 import { MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH } from '../../../../common/constants';
-import { serializedFieldFormatSchema, fieldSpecSchema } from '../../../../common/schemas';
+import { serializedFieldFormatSchema, fieldSpecSchema } from '../../../schemas';
 
 const dataViewAttributesSchema = schema.object(
   {
