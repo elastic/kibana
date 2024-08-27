@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import supertest from 'supertest';
 import { Client, HttpConnection } from '@elastic/elasticsearch';
 import { format as formatUrl } from 'url';
 
