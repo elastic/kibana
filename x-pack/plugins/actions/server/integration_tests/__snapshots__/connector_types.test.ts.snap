@@ -4318,6 +4318,27 @@ Object {
       ],
       "type": "array",
     },
+    "systemInstruction": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
     "temperature": Object {
       "flags": Object {
         "default": [Function],
@@ -4553,6 +4574,27 @@ Object {
       ],
       "type": "array",
     },
+    "systemInstruction": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
     "temperature": Object {
       "flags": Object {
         "default": [Function],
@@ -4698,6 +4740,27 @@ Object {
         },
       ],
       "type": "array",
+    },
+    "systemInstruction": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
     },
     "temperature": Object {
       "flags": Object {
