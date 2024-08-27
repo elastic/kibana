@@ -16,7 +16,7 @@ export interface State {
   result?: {
     pipeline: Pipeline;
     docs: Docs;
-    samplesFormat?: SamplesFormat;
+    samplesFormat: SamplesFormat;
   };
 }
 
