@@ -1536,7 +1536,7 @@
     "@types/inquirer": "^7.3.1",
     "@types/jest": "^29.5.3",
     "@types/jquery": "^3.3.31",
-    "@types/js-search": "^1.4.0",
+    "@types/js-search": "^1.4.4",
     "@types/js-yaml": "^3.11.1",
     "@types/jsdom": "^20.0.1",
     "@types/json-schema": "^7",
