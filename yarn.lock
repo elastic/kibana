@@ -10485,10 +10485,10 @@
   resolved "https://registry.yarnpkg.com/@types/history/-/history-4.7.11.tgz#56588b17ae8f50c53983a524fc3cc47437969d64"
   integrity sha512-qjDJRrmvBMiTx+jyLxvLfJU7UznFuokDv4f3WRuriHKERccVpFU+8XMQUAbDzoiJCsmexxRExQeMwwCdamSKDA==
 
-"@types/hjson@^2.4.2":
-  version "2.4.2"
-  resolved "https://registry.yarnpkg.com/@types/hjson/-/hjson-2.4.2.tgz#fd0288a5b6778cda993c978e43cc978ddc8f22e9"
-  integrity sha512-MSKTfEyR8DbzJTOAY47BIJBD72ol4cu6BOw5inda0q1eEtEmurVHL4OmYB3Lxa4/DwXbWidkddvtoygbGQEDIw==
+"@types/hjson@^2.4.6":
+  version "2.4.6"
+  resolved "https://registry.yarnpkg.com/@types/hjson/-/hjson-2.4.6.tgz#1e1d730c1b92676e7d78087e25f24960ee38062b"
+  integrity sha512-tEQ4hlyKfsb9WWeueUY5eRnU2eK+KdE0eofSpQ05v9Aah4VvWwIRIid/ZN1zZZ0TfeVTRDgabKKqKZXEkfD3Sw==
 
 "@types/hoist-non-react-statics@*", "@types/hoist-non-react-statics@^3.3.0", "@types/hoist-non-react-statics@^3.3.1":
   version "3.3.1"

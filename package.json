@@ -1531,7 +1531,7 @@
     "@types/has-ansi": "^3.0.0",
     "@types/he": "^1.1.1",
     "@types/history": "^4.7.9",
-    "@types/hjson": "^2.4.2",
+    "@types/hjson": "^2.4.6",
     "@types/http-proxy": "^1.17.4",
     "@types/inquirer": "^7.3.1",
     "@types/jest": "^29.5.3",
