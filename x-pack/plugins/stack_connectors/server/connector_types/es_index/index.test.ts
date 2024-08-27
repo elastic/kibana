@@ -7,6 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { validateConfig, validateParams } from '@kbn/actions-plugin/server/lib';
+import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import {
   ActionParamsType,
@@ -27,11 +28,16 @@ const mockedLogger: jest.Mocked<Logger> = loggerMock.create();
 
 let connectorType: ESIndexConnectorType;
 let configurationUtilities: ActionsConfigurationUtilities;
+let connectorUsageCollector: ConnectorUsageCollector;
 
 beforeEach(() => {
   jest.resetAllMocks();
   configurationUtilities = actionsConfigMock.create();
   connectorType = getConnectorType();
+  connectorUsageCollector = new ConnectorUsageCollector({
+    logger: mockedLogger,
+    connectorId: 'test-connector-id',
+  });
 });
 
 describe('connector registration', () => {
@@ -185,6 +191,7 @@ describe('execute()', () => {
       services,
       configurationUtilities,
       logger: mockedLogger,
+      connectorUsageCollector,
     };
     const scopedClusterClient = elasticsearchClientMock
       .createClusterClient()
@@ -230,6 +237,7 @@ describe('execute()', () => {
       services,
       configurationUtilities,
       logger: mockedLogger,
+      connectorUsageCollector,
     };
     scopedClusterClient.bulk.mockClear();
     await connectorType.executor({
@@ -280,6 +288,7 @@ describe('execute()', () => {
       services,
       configurationUtilities,
       logger: mockedLogger,
+      connectorUsageCollector,
     };
 
     scopedClusterClient.bulk.mockClear();
@@ -324,6 +333,7 @@ describe('execute()', () => {
       services,
       configurationUtilities,
       logger: mockedLogger,
+      connectorUsageCollector,
     };
     scopedClusterClient.bulk.mockClear();
     await connectorType.executor({
@@ -656,6 +666,7 @@ describe('execute()', () => {
         services: { ...services, scopedClusterClient },
         configurationUtilities,
         logger: mockedLogger,
+        connectorUsageCollector,
       })
     ).toMatchInlineSnapshot(`
       Object {
@@ -695,6 +706,7 @@ describe('execute()', () => {
         services: { ...services, scopedClusterClient },
         configurationUtilities,
         logger: mockedLogger,
+        connectorUsageCollector,
       })
     ).toMatchInlineSnapshot(`
       Object {
@@ -757,6 +769,7 @@ describe('execute()', () => {
         services: { ...services, scopedClusterClient },
         configurationUtilities,
         logger: mockedLogger,
+        connectorUsageCollector,
       })
     ).toMatchInlineSnapshot(`
       Object {
@@ -824,6 +837,7 @@ describe('execute()', () => {
         services: { ...services, scopedClusterClient },
         configurationUtilities,
         logger: mockedLogger,
+        connectorUsageCollector,
       })
     ).toMatchInlineSnapshot(`
       Object {
