@@ -52,6 +52,8 @@ import {
   type KnowledgeBaseEntry,
   type Message,
   type AdHocInstruction,
+  KnowledgeBaseType,
+  KnowledgeBaseEntryRole,
 } from '../../../common/types';
 import { withoutTokenCountEvents } from '../../../common/utils/without_token_count_events';
 import { CONTEXT_FUNCTION_NAME } from '../../functions/context';
@@ -742,7 +744,10 @@ export class ObservabilityAIAssistantClient {
   addUserInstruction = async ({
     entry,
   }: {
-    entry: Omit<KnowledgeBaseEntry, '@timestamp'>;
+    entry: Omit<
+      KnowledgeBaseEntry,
+      '@timestamp' | 'confidence' | 'is_correction' | 'type' | 'role'
+    >;
   }): Promise<void> => {
     // for now we want to limit the number of user instructions to 1 per user
     // if a user instruction already exists for the user, we get the id and update it
@@ -761,19 +766,29 @@ export class ObservabilityAIAssistantClient {
     return this.dependencies.knowledgeBaseService.addEntry({
       namespace: this.dependencies.namespace,
       user: this.dependencies.user,
-      entry,
+      entry: {
+        ...entry,
+        confidence: 'high',
+        is_correction: false,
+        type: KnowledgeBaseType.UserInstruction,
+        labels: {},
+        role: KnowledgeBaseEntryRole.UserEntry,
+      },
     });
   };
 
   addKnowledgeBaseEntry = async ({
     entry,
   }: {
-    entry: Omit<KnowledgeBaseEntry, '@timestamp'>;
+    entry: Omit<KnowledgeBaseEntry, '@timestamp' | 'type'>;
   }): Promise<void> => {
     return this.dependencies.knowledgeBaseService.addEntry({
       namespace: this.dependencies.namespace,
       user: this.dependencies.user,
-      entry,
+      entry: {
+        ...entry,
+        type: KnowledgeBaseType.Contextual,
+      },
     });
   };
 

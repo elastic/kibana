@@ -80,7 +80,6 @@ export function registerSummarizationFunction({
             role: KnowledgeBaseEntryRole.AssistantSummarization,
             text,
             is_correction: isCorrection,
-            type: KnowledgeBaseType.Contextual,
             confidence,
             public: isPublic,
             labels: {},

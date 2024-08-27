@@ -142,7 +142,6 @@ const functionSummariseRoute = createObservabilityAIAssistantServerRoute({
         id: id ?? v4(),
         doc_id: docId,
         is_correction: isCorrection,
-        type: KnowledgeBaseType.Contextual,
         text,
         public: isPublic,
         labels,

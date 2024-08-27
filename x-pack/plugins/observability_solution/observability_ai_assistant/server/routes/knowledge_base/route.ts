@@ -13,12 +13,7 @@ import { notImplemented } from '@hapi/boom';
 import { nonEmptyStringRt, toBooleanRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
-import {
-  Instruction,
-  KnowledgeBaseEntry,
-  KnowledgeBaseEntryRole,
-  KnowledgeBaseType,
-} from '../../../common/types';
+import { Instruction, KnowledgeBaseEntry, KnowledgeBaseEntryRole } from '../../../common/types';
 
 const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
   endpoint: 'GET /internal/observability_ai_assistant/kb/status',
@@ -108,16 +103,7 @@ const saveKnowledgeBaseUserInstruction = createObservabilityAIAssistantServerRou
 
     const { id, text, public: isPublic } = resources.params.body;
     return client.addUserInstruction({
-      entry: {
-        id,
-        text,
-        public: isPublic,
-        confidence: 'high',
-        is_correction: false,
-        type: KnowledgeBaseType.UserInstruction,
-        labels: {},
-        role: KnowledgeBaseEntryRole.UserEntry,
-      },
+      entry: { id, text, public: isPublic },
     });
   },
 });
@@ -204,7 +190,6 @@ const saveKnowledgeBaseEntry = createObservabilityAIAssistantServerRoute({
         title,
         confidence: confidence ?? 'high',
         is_correction: isCorrection ?? false,
-        type: 'contextual',
         public: isPublic ?? true,
         labels: labels ?? {},
         role: (role as KnowledgeBaseEntryRole) ?? KnowledgeBaseEntryRole.UserEntry,
