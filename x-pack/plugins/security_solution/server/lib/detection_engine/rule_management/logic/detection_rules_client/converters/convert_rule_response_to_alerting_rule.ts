@@ -93,6 +93,7 @@ export const convertRuleResponseToAlertingRule = (
       note: rule.note,
       version: rule.version,
       exceptionsList: rule.exceptions_list,
+      responseActions: rule.response_actions?.map((ra) => transformRuleToAlertResponseAction(ra)),
       ...typeSpecificParams,
     },
     schedule: { interval: rule.interval },
@@ -157,9 +158,6 @@ const typeSpecificSnakeToCamel = (params: TypeSpecificCreateProps): TypeSpecific
         query: params.query ?? '',
         filters: params.filters,
         savedId: params.saved_id,
-        responseActions: params.response_actions?.map((rule) =>
-          transformRuleToAlertResponseAction(rule)
-        ),
         alertSuppression: convertObjectKeysToCamelCase(params.alert_suppression),
       };
     }
@@ -172,9 +170,6 @@ const typeSpecificSnakeToCamel = (params: TypeSpecificCreateProps): TypeSpecific
         filters: params.filters,
         savedId: params.saved_id,
         dataViewId: params.data_view_id,
-        responseActions: params.response_actions?.map((rule) =>
-          transformRuleToAlertResponseAction(rule)
-        ),
         alertSuppression: convertObjectKeysToCamelCase(params.alert_suppression),
       };
     }
