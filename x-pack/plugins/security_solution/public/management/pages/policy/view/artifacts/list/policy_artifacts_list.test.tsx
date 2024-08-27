@@ -136,15 +136,16 @@ describe('Policy details artifacts list', () => {
       )
     );
     await userEvent.type(renderResult.getByTestId('searchField'), 'search me{enter}');
-    await waitFor(mockedApi.responseProvider.eventFiltersList);
-    expect(mockedApi.responseProvider.eventFiltersList).toHaveBeenLastCalledWith(
-      getDefaultQueryParameters(
-        parsePoliciesAndFilterToKql({
-          policies: [policy.id, 'all'],
-          kuery: parseQueryFilterToKQL('search me', SEARCHABLE_FIELDS),
-        })
-      )
-    );
+    await waitFor(() => {
+      expect(mockedApi.responseProvider.eventFiltersList).toHaveBeenLastCalledWith(
+        getDefaultQueryParameters(
+          parsePoliciesAndFilterToKql({
+            policies: [policy.id, 'all'],
+            kuery: parseQueryFilterToKQL('search me', SEARCHABLE_FIELDS),
+          })
+        )
+      );
+    });
   });
 
   it('should enable the "view full details" action', async () => {

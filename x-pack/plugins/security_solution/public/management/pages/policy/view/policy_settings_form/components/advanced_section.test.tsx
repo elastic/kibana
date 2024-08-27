@@ -69,7 +69,7 @@ describe('Policy Advanced Settings section', () => {
 
     expect(renderResult.queryByTestId(testSubj.settingsContainer)).toBeNull();
 
-    clickShowHideButton();
+    await clickShowHideButton();
 
     expect(renderResult.getByTestId(testSubj.settingsContainer));
   });
@@ -128,8 +128,8 @@ describe('Policy Advanced Settings section', () => {
       useLicenseMock.mockReturnValue(licenseServiceMocked);
     });
 
-    it('should not render options that require platinum license', () => {
-      render(true);
+    it('should not render options that require platinum license', async () => {
+      await render(true);
 
       for (const advancedOption of AdvancedPolicySchema) {
         if (advancedOption.license) {
@@ -154,8 +154,8 @@ describe('Policy Advanced Settings section', () => {
       formProps.mode = 'view';
     });
 
-    it('should render with no form fields', () => {
-      render();
+    it('should render with no form fields', async () => {
+      await render();
 
       expectIsViewOnly(renderResult.getByTestId(testSubj.settingsContainer));
     });
