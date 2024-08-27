@@ -11084,10 +11084,10 @@
     hoist-non-react-statics "^3.3.0"
     redux "^4.0.0"
 
-"@types/react-router-config@^5.0.7":
-  version "5.0.7"
-  resolved "https://registry.yarnpkg.com/@types/react-router-config/-/react-router-config-5.0.7.tgz#36207a3fe08b271abee62b26993ee932d13cbb02"
-  integrity sha512-pFFVXUIydHlcJP6wJm7sDii5mD/bCmmAY0wQzq+M+uX7bqS95AQqHZWP1iNMKrWVQSuHIzj5qi9BvrtLX2/T4w==
+"@types/react-router-config@^5.0.11":
+  version "5.0.11"
+  resolved "https://registry.yarnpkg.com/@types/react-router-config/-/react-router-config-5.0.11.tgz#2761a23acc7905a66a94419ee40294a65aaa483a"
+  integrity sha512-WmSAg7WgqW7m4x8Mt4N6ZyKz0BubSj/2tVUMsAHp+Yd2AMwcSbeFq9WympT19p5heCFmF97R9eD5uUR/t4HEqw==
   dependencies:
     "@types/history" "^4.7.11"
     "@types/react" "*"
