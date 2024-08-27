@@ -11,8 +11,8 @@ import type {
   DiffableAllFields,
   RuleKqlQuery,
 } from '../../../../../../../../../common/api/detection_engine';
-import { InlineQuery } from './inline_query';
-import { SavedQuery } from './saved_query';
+import { InlineKqlQueryReadOnly } from './inline_kql_query';
+import { SavedKqlQueryReadOnly } from './saved_kql_query';
 import { assertUnreachable } from '../../../../../../../../../common/utility_types';
 
 interface KqlQueryReadOnlyProps {
@@ -23,11 +23,13 @@ interface KqlQueryReadOnlyProps {
 
 export function KqlQueryReadOnly({ kqlQuery, dataSource, ruleType }: KqlQueryReadOnlyProps) {
   if (kqlQuery.type === KqlQueryType.inline_query) {
-    return <InlineQuery kqlQuery={kqlQuery} dataSource={dataSource} />;
+    return <InlineKqlQueryReadOnly kqlQuery={kqlQuery} dataSource={dataSource} />;
   }
 
   if (kqlQuery.type === KqlQueryType.saved_query) {
-    return <SavedQuery kqlQuery={kqlQuery} dataSource={dataSource} ruleType={ruleType} />;
+    return (
+      <SavedKqlQueryReadOnly kqlQuery={kqlQuery} dataSource={dataSource} ruleType={ruleType} />
+    );
   }
 
   return assertUnreachable(kqlQuery);

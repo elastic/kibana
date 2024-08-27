@@ -86,7 +86,7 @@ interface SeverityMappingItemProps {
   severityMappingItem: SeverityMappingItemType;
 }
 
-const SeverityMappingItem = ({ severityMappingItem }: SeverityMappingItemProps) => (
+export const SeverityMappingItem = ({ severityMappingItem }: SeverityMappingItemProps) => (
   <EuiFlexGroup alignItems="center" gutterSize="s">
     <OverrideColumn>
       <EuiToolTip
@@ -132,7 +132,7 @@ interface RiskScoreMappingItemProps {
   riskScoreMappingItem: RiskScoreMappingItemType;
 }
 
-const RiskScoreMappingItem = ({ riskScoreMappingItem }: RiskScoreMappingItemProps) => (
+export const RiskScoreMappingItem = ({ riskScoreMappingItem }: RiskScoreMappingItemProps) => (
   <EuiFlexGroup alignItems="center" gutterSize="s">
     <OverrideColumn>
       <EuiToolTip
@@ -218,7 +218,7 @@ interface ThreatProps {
   threat: Threats;
 }
 
-const Threat = ({ threat }: ThreatProps) => (
+export const Threat = ({ threat }: ThreatProps) => (
   <ThreatEuiFlexGroup threat={filterEmptyThreats(threat)} data-test-subj="threatPropertyValue" />
 );
 
@@ -226,7 +226,7 @@ interface ThreatIndicatorPathProps {
   threatIndicatorPath: string;
 }
 
-const ThreatIndicatorPath = ({ threatIndicatorPath }: ThreatIndicatorPathProps) => (
+export const ThreatIndicatorPath = ({ threatIndicatorPath }: ThreatIndicatorPathProps) => (
   <EuiText size="s">{threatIndicatorPath}</EuiText>
 );
 

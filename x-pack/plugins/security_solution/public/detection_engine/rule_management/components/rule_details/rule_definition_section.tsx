@@ -292,7 +292,7 @@ interface RequiredFieldsProps {
   requiredFields: RequiredFieldArray;
 }
 
-const RequiredFields = ({ requiredFields }: RequiredFieldsProps) => {
+export const RequiredFields = ({ requiredFields }: RequiredFieldsProps) => {
   const styles = useRequiredFieldsStyles();
 
   return (
@@ -334,7 +334,7 @@ interface ThreatIndexProps {
   threatIndex: string[];
 }
 
-const ThreatIndex = ({ threatIndex }: ThreatIndexProps) => (
+export const ThreatIndex = ({ threatIndex }: ThreatIndexProps) => (
   <BadgeList badges={threatIndex} data-test-subj="threatIndexPropertyValue" />
 );
 
@@ -342,7 +342,7 @@ interface ThreatMappingProps {
   threatMapping: ThreatMappingType;
 }
 
-const ThreatMapping = ({ threatMapping }: ThreatMappingProps) => {
+export const ThreatMapping = ({ threatMapping }: ThreatMappingProps) => {
   const description = threatMapping.reduce<string>(
     (accumThreatMaps, threatMap, threatMapIndex, { length: threatMappingLength }) => {
       const matches = threatMap.entries.reduce<string>(

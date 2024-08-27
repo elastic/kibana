@@ -11,9 +11,12 @@ import { ReactQueryClientProvider } from '../../../../../../../common/containers
 // import { UpgradePrebuiltRulesTableContextProvider } from '../../../../../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/upgrade_prebuilt_rules_table_context';
 import { createKibanaServicesMock } from './utils';
 
-// const queryClient = new QueryClient
+interface StorybookProvidersProps {
+  children: React.ReactNode;
+  kibanaServicesMock?: ReturnType<typeof createKibanaServicesMock>;
+}
 
-export function StorybookProviders({ children, kibanaServicesMock }) {
+export function StorybookProviders({ children, kibanaServicesMock }: StorybookProvidersProps) {
   const KibanaReactContext = createKibanaReactContext(createKibanaServicesMock(kibanaServicesMock));
 
   return (

@@ -89,9 +89,6 @@ export const Default = Template.bind({});
 
 Default.args = {
   finalDiffableRule: {
-    // machine_learning_job_id: 'fake-ml-job-id',
     machine_learning_job_id: 'auth_high_count_logon_events',
   },
 };
-
-// Template.

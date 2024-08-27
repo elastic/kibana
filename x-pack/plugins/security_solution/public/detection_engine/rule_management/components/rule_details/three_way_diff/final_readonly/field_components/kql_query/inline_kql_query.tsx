@@ -8,53 +8,35 @@
 import React from 'react';
 import { EuiDescriptionList } from '@elastic/eui';
 import type { EuiDescriptionListProps } from '@elastic/eui';
+import type { Filter } from '@kbn/es-query';
 import { DataSourceType } from '../../../../../../../../../common/api/detection_engine';
 import type {
-  SavedKqlQuery,
-  DiffableRule,
   DiffableAllFields,
+  InlineKqlQuery,
 } from '../../../../../../../../../common/api/detection_engine';
-import { Query, SavedQueryName, Filters } from '../../../../rule_definition_section';
+import { Query, Filters } from '../../../../rule_definition_section';
 import * as descriptionStepI18n from '../../../../../../../rule_creation_ui/components/description_step/translations';
-import { useGetSavedQuery } from '../../../../../../../../detections/pages/detection_engine/rules/use_get_saved_query';
 import * as i18n from '../translations';
 import { getQueryLanguageLabel } from './utils';
 
-interface SavedQueryProps {
-  kqlQuery: SavedKqlQuery;
-  dataSource: DiffableAllFields['data_source'];
-  ruleType: DiffableRule['type'];
+interface InlineQueryProps {
+  kqlQuery: InlineKqlQuery;
+  dataSource?: DiffableAllFields['data_source'];
 }
 
-export function SavedQuery({ kqlQuery, dataSource, ruleType }: SavedQueryProps) {
-  const { savedQuery } = useGetSavedQuery({
-    savedQueryId: kqlQuery.saved_query_id,
-    ruleType,
-  });
-
-  if (!savedQuery) {
-    return null;
-  }
-
+export function InlineKqlQueryReadOnly({ kqlQuery, dataSource }: InlineQueryProps) {
   const listItems: EuiDescriptionListProps['listItems'] = [
     {
-      title: descriptionStepI18n.SAVED_QUERY_NAME_LABEL,
-      description: <SavedQueryName savedQueryName={savedQuery.attributes.title} />,
+      title: descriptionStepI18n.QUERY_LABEL,
+      description: <Query query={kqlQuery.query} />,
     },
     {
       title: i18n.LANGUAGE_LABEL,
-      description: getQueryLanguageLabel(savedQuery.attributes.query.language),
+      description: getQueryLanguageLabel(kqlQuery.language),
     },
   ];
 
-  if (typeof savedQuery.attributes.query.query === 'string') {
-    listItems.push({
-      title: descriptionStepI18n.SAVED_QUERY_LABEL,
-      description: <Query query={savedQuery.attributes.query.query} />,
-    });
-  }
-
-  if (savedQuery.attributes.filters && dataSource) {
+  if (kqlQuery.filters.length > 0 && dataSource) {
     const index =
       dataSource.type === DataSourceType.index_patterns ? dataSource.index_patterns : undefined;
 
@@ -62,9 +44,9 @@ export function SavedQuery({ kqlQuery, dataSource, ruleType }: SavedQueryProps) 
       dataSource.type === DataSourceType.data_view ? dataSource.data_view_id : undefined;
 
     listItems.push({
-      title: descriptionStepI18n.SAVED_QUERY_FILTERS_LABEL,
+      title: descriptionStepI18n.FILTERS_LABEL,
       description: (
-        <Filters filters={savedQuery.attributes.filters} index={index} dataViewId={dataViewId} />
+        <Filters filters={kqlQuery.filters as Filter[]} index={index} dataViewId={dataViewId} />
       ),
     });
   }
