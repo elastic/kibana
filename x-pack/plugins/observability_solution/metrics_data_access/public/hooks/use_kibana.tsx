@@ -14,7 +14,7 @@ import {
 } from '@kbn/kibana-react-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 
-export type PluginKibanaContextValue = CoreStart & { share: SharePluginStart };
+export type PluginKibanaContextValue = CoreStart & { share?: SharePluginStart };
 
 export const createKibanaContextForPlugin = (core: CoreStart) =>
   createKibanaReactContext<PluginKibanaContextValue>({

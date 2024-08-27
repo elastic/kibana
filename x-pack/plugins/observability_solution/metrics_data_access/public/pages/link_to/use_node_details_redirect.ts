@@ -39,7 +39,7 @@ export const useNodeDetailsRedirect = () => {
   } = useKibanaContextForPlugin();
 
   const appId = useObservable(currentAppId$);
-  const locator = share.url.locators.get<AssetDetailsLocatorParams>(ASSET_DETAILS_LOCATOR_ID);
+  const locator = share?.url.locators.get<AssetDetailsLocatorParams>(ASSET_DETAILS_LOCATOR_ID);
 
   const getNodeDetailUrl = useCallback(
     ({
