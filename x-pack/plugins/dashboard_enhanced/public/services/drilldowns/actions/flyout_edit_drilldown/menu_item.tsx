@@ -27,9 +27,7 @@ export const MenuItem = ({
       <EuiFlexItem grow={true}>{txtDisplayName}</EuiFlexItem>
       {count > 0 && (
         <EuiFlexItem grow={false}>
-          <EuiNotificationBadge data-test-subj="manageDrilldownAction__count">
-            {count}
-          </EuiNotificationBadge>
+          <EuiNotificationBadge>{count}</EuiNotificationBadge>
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

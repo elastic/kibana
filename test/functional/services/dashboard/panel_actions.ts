@@ -261,7 +261,7 @@ export class DashboardPanelActionsService extends FtrService {
     const header = await this.getPanelHeading(title);
     await this.clickContextMenuItem(UNLINK_FROM_LIBRARY_TEST_SUBJ, header);
     await this.testSubjects.existOrFail('unlinkPanelSuccess');
-    await this.expectNotLinkedToLibrary(title);
+    await this.expectNotLinkedToLibrary(title, false);
   }
 
   async legacySaveToLibrary(newTitle = '', oldTitle = '') {
@@ -285,7 +285,7 @@ export class DashboardPanelActionsService extends FtrService {
     });
     await this.testSubjects.click('confirmSaveSavedObjectButton');
     await this.testSubjects.existOrFail('addPanelToLibrarySuccess');
-    await this.expectLinkedToLibrary(newTitle);
+    await this.expectLinkedToLibrary(newTitle, false);
   }
 
   async expectExistsPanelAction(testSubject: string, title = '') {
