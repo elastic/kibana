@@ -6,7 +6,7 @@
  */
 
 import React, { Component } from 'react';
-import { Observable, Subscription, first, switchMap, tap } from 'rxjs';
+import { Observable, Subscription, switchMap, tap } from 'rxjs';
 import {
   type ControlGroupStateBuilder,
   ControlGroupRenderer,
@@ -56,20 +56,21 @@ export class Timeslider extends Component<Props, {}> {
         .pipe(
           tap(() => {
             this.dataLoading = true;
+          }),
+          switchMap((timeslice) => {
+            this.props.setTimeslice(
+              timeslice === undefined
+                ? undefined
+                : {
+                    from: timeslice[0],
+                    to: timeslice[1],
+                  }
+            );
+            return this.props.waitForTimesliceToLoad$;
           })
         )
-        .subscribe((timeslice) => {
-          this.props.waitForTimesliceToLoad$.pipe(first()).subscribe(() => {
-            this.dataLoading = false;
-          });
-          this.props.setTimeslice(
-            timeslice === undefined
-              ? undefined
-              : {
-                  from: timeslice[0],
-                  to: timeslice[1],
-                }
-          );
+        .subscribe(() => {
+          this.dataLoading = false;
         })
     );
   };
