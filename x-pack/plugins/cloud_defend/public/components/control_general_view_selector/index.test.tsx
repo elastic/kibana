@@ -339,7 +339,9 @@ describe('<ControlGeneralViewSelector />', () => {
     const errorStr = i18n.errorInvalidTargetFilePath;
 
     if (el) {
-      await user.type(el, '/usr/bin/**{enter}');
+      await user.clear(el);
+      await user.paste('/usr/bin/**');
+      await user.type(el, '{enter}');
     } else {
       throw new Error("Can't find input");
     }
@@ -392,7 +394,9 @@ describe('<ControlGeneralViewSelector />', () => {
     const regexError = i18n.errorInvalidProcessExecutable;
 
     if (el) {
-      await user.type(el, '/usr/bin/**{enter}');
+      await user.clear(el);
+      await user.paste('/usr/bin/**');
+      await user.type(el, '{enter}');
     } else {
       throw new Error("Can't find input");
     }
@@ -402,19 +406,25 @@ describe('<ControlGeneralViewSelector />', () => {
     rerender(<WrappedComponent selector={updatedSelector} />);
     expect(queryByText(regexError)).not.toBeInTheDocument();
 
-    await user.type(el, '/*{enter}');
+    await user.clear(el);
+    await user.paste('/*');
+    await user.type(el, '{enter}');
     updatedSelector = onChange.mock.calls[2][0];
     expect(updatedSelector.hasErrors).toBeFalsy();
     rerender(<WrappedComponent selector={updatedSelector} />);
     expect(queryByText(regexError)).not.toBeInTheDocument();
 
-    await user.type(el, '/usr/bin/ls{enter}');
+    await user.clear(el);
+    await user.paste('/usr/bin/ls');
+    await user.type(el, '{enter}');
     updatedSelector = onChange.mock.calls[3][0];
     expect(updatedSelector.hasErrors).toBeFalsy();
     rerender(<WrappedComponent selector={updatedSelector} />);
     expect(queryByText(regexError)).not.toBeInTheDocument();
 
-    await user.type(el, 'badpath{enter}');
+    await user.clear(el);
+    await user.paste('badpath');
+    await user.type(el, '{enter}');
     updatedSelector = onChange.mock.calls[4][0];
     expect(updatedSelector.hasErrors).toBeTruthy();
     rerender(<WrappedComponent selector={updatedSelector} />);
@@ -449,10 +459,21 @@ describe('<ControlGeneralViewSelector />', () => {
     const regexError = i18n.errorInvalidFullContainerImageName;
 
     if (el) {
-      await user.type(el, 'docker.io/nginx{enter}');
-      await user.type(el, 'docker.io/nginx-dev{enter}');
-      await user.type(el, 'docker.io/nginx.dev{enter}');
-      await user.type(el, '127.0.0.1:8080/nginx_dev{enter}');
+      await user.clear(el);
+      await user.paste('docker.io/nginx');
+      await user.type(el, '{enter}');
+
+      await user.clear(el);
+      await user.paste('docker.io/nginx-dev');
+      await user.type(el, '{enter}');
+
+      await user.clear(el);
+      await user.paste('docker.io/nginx.dev');
+      await user.type(el, '{enter}');
+
+      await user.clear(el);
+      await user.paste('docker.io/nginx_dev');
+      await user.type(el, '{enter}');
     } else {
       throw new Error("Can't find input");
     }
@@ -462,11 +483,13 @@ describe('<ControlGeneralViewSelector />', () => {
 
     expect(queryByText(regexError)).not.toBeInTheDocument();
 
-    await user.type(el, 'nginx{enter}');
+    await user.clear(el);
+    await user.paste('nginx');
+    await user.type(el, '{enter}');
     updatedSelector = onChange.mock.calls[5][0];
     rerender(<WrappedComponent selector={updatedSelector} />);
 
-    expect(getByText(regexError)).toBeTruthy();
+    expect(getByText(regexError)).toBeInTheDocument();
   });
 
   it('validates kubernetesPodLabel conditions values', async () => {
@@ -491,7 +514,9 @@ describe('<ControlGeneralViewSelector />', () => {
     const errorStr = i18n.errorInvalidPodLabel;
 
     if (el) {
-      await user.type(el, 'key1:value1{enter}');
+      await user.clear(el);
+      await user.paste('key1:value1');
+      await user.type(el, '{enter}');
     } else {
       throw new Error("Can't find input");
     }
@@ -501,15 +526,22 @@ describe('<ControlGeneralViewSelector />', () => {
 
     expect(queryByText(errorStr)).not.toBeInTheDocument();
 
-    await user.type(el, 'key1:value*{enter}');
+    await user.clear(el);
+    await user.paste('key1:value*');
+    await user.type(el, '{enter}');
     updatedSelector = onChange.mock.calls[2][0];
     rerender(<WrappedComponent selector={updatedSelector} />);
 
-    await user.type(el, 'key1*:value{enter}');
+    await user.clear(el);
+    await user.paste('key1*:value');
+    await user.type(el, '{enter}');
     updatedSelector = onChange.mock.calls[3][0];
     rerender(<WrappedComponent selector={updatedSelector} />);
 
-    await user.type(el, '{backspace}key1{enter}');
+    await user.clear(el);
+    await user.type(el, '{backspace}');
+    await user.paste('key1');
+    await user.type(el, '{enter}');
     updatedSelector = onChange.mock.calls[5][0];
     rerender(<WrappedComponent selector={updatedSelector} />);
 
