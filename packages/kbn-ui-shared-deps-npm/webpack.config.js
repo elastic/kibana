@@ -74,13 +74,11 @@ module.exports = (_, argv) => {
         'react-redux',
         'immer',
         '@tanstack/react-query',
-        '@tanstack/react-query-devtools',
         'classnames',
         'fflate',
         'fastest-levenshtein',
         'history',
         'io-ts',
-        'jquery',
         'lodash',
         'lodash/fp',
         'moment-timezone/moment-timezone',
@@ -118,7 +116,7 @@ module.exports = (_, argv) => {
       noParse: [MOMENT_SRC, WEBPACK_SRC],
       rules: [
         {
-          include: [require.resolve('jquery')],
+          include: [],
           use: [
             {
               loader: UiSharedDepsNpm.publicPathLoader,
