@@ -47,6 +47,7 @@ export const GeoipList: React.FunctionComponent = () => {
       onClick={() => {
         setShowModal('add');
       }}
+      data-test-subj="addGeoipDatabaseButton"
     >
       <FormattedMessage
         id="xpack.ingestPipelines.manageProcessors.geoip.addDatabaseButtonLabel"
@@ -55,6 +56,9 @@ export const GeoipList: React.FunctionComponent = () => {
     </EuiButton>
   );
   const tableProps: EuiInMemoryTableProps<GeoipDatabase> = {
+    rowProps: () => ({
+      'data-test-subj': 'geoipDatabaseListRow',
+    }),
     columns: [
       {
         field: 'name',
@@ -83,6 +87,7 @@ export const GeoipList: React.FunctionComponent = () => {
             color: 'danger',
             onClick: onDatabaseDelete,
             type: 'icon',
+            'data-test-subj': 'deleteGeoipDatabaseButton',
           },
         ],
       },

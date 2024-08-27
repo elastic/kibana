@@ -27,10 +27,12 @@ export const ManageProcessors: React.FunctionComponent = () => {
       <EuiPageHeader
         bottomBorder
         pageTitle={
-          <FormattedMessage
-            id="xpack.ingestPipelines.manageProcessors.pageTitle"
-            defaultMessage="Manage Processors"
-          />
+          <span data-test-subj="manageProcessorsTitle">
+            <FormattedMessage
+              id="xpack.ingestPipelines.manageProcessors.pageTitle"
+              defaultMessage="Manage Processors"
+            />
+          </span>
         }
       />
 

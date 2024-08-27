@@ -626,6 +626,20 @@ export default async function ({ readConfigFile }) {
           ],
         },
 
+        manage_processors_user: {
+          elasticsearch: {
+            cluster: ['manage'],
+          },
+          kibana: [
+            {
+              feature: {
+                advancedSettings: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+
         license_management_user: {
           elasticsearch: {
             cluster: ['manage'],

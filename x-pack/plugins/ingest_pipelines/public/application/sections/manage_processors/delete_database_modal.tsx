@@ -102,6 +102,7 @@ export const DeleteDatabaseModal = ({
               name="confirmation"
               value={confirmation}
               onChange={(e) => setConfirmation(e.target.value)}
+              data-test-subj="geoipDatabaseConfirmation"
             />
           </EuiFormRow>
         </EuiForm>
@@ -121,9 +122,10 @@ export const DeleteDatabaseModal = ({
           form={DELETE_DATABASE_MODAL_FORM_ID}
           disabled={isLoading || !isValid}
           color="danger"
+          data-test-subj="deleteGeoipDatabaseSubmit"
         >
           <FormattedMessage
-            id="xpack.ingestPipelines.manageProcessors.geoip.addModalConfirmButtonLabel"
+            id="xpack.ingestPipelines.manageProcessors.geoip.deleteModalConfirmButtonLabel"
             defaultMessage="Delete"
           />
         </EuiButton>

@@ -15,7 +15,7 @@ export const EmptyList = ({ addDatabaseButton }: { addDatabaseButton: JSX.Elemen
       iconType="database"
       iconColor="default"
       title={
-        <h2 data-test-subj="title">
+        <h2 data-test-subj="geoipEmptyListPrompt">
           <FormattedMessage
             id="xpack.ingestPipelines.manageProcessors.geoip.emptyPromptTitle"
             defaultMessage="Add your first database for GeoIP processor"

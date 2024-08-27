@@ -13,6 +13,7 @@ export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrP
   const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects(['header', 'common']);
   const aceEditor = getService('aceEditor');
+  const retry = getService('retry');
 
   return {
     async sectionHeadingText() {
@@ -112,6 +113,47 @@ export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrP
     async increasePipelineListPageSize() {
       await testSubjects.click('tablePaginationPopoverButton');
       await testSubjects.click(`tablePagination-50-rows`);
+    },
+
+    async navigateToManageProcessorsPage() {
+      await testSubjects.click('manageProcessorsLink');
+      await retry.waitFor('Manage Processors page title to be displayed', async () => {
+        return await testSubjects.isDisplayed('manageProcessorsTitle');
+      });
+    },
+
+    async geoipEmptyListPromptExists() {
+      return await testSubjects.exists('geoipEmptyListPrompt');
+    },
+
+    async openCreateDatabaseModal() {
+      await testSubjects.click('addGeoipDatabaseButton');
+    },
+
+    async fillAddDatabaseForm(maxmind: string, databaseName: string) {
+      await testSubjects.setValue('addDatabaseMaxmind', maxmind);
+      await testSubjects.setValue('addDatabaseName', databaseName);
+    },
+
+    async clickAddDatabaseButton() {
+      await testSubjects.click('addGeoipDatabaseSubmit');
+    },
+
+    async getGeoipDatabases() {
+      const databases = await testSubjects.findAll('geoipDatabaseListRow');
+
+      const getDatabaseRow = async (database: WebElementWrapper) => {
+        return await database.getVisibleText();
+      };
+
+      return await Promise.all(databases.map((database) => getDatabaseRow(database)));
+    },
+
+    async deleteDatabase(index: number) {
+      const deleteButtons = await testSubjects.findAll('deleteGeoipDatabaseButton');
+      await deleteButtons.at(index)?.click();
+      await testSubjects.setValue('geoipDatabaseConfirmation', 'delete');
+      await testSubjects.click('deleteGeoipDatabaseSubmit');
     },
   };
 }

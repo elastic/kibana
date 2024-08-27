@@ -144,6 +144,7 @@ export const AddDatabaseModal = ({
               name="maxmind"
               value={maxmind}
               onChange={(e) => setMaxmind(e.target.value)}
+              data-test-subj="addDatabaseMaxmind"
             />
           </EuiFormRow>
 
@@ -160,6 +161,7 @@ export const AddDatabaseModal = ({
               hasNoInitialSelection={true}
               value={databaseName}
               onChange={(e) => onDatabaseNameChange(e.target.value)}
+              data-test-subj="addDatabaseName"
             />
           </EuiFormRow>
         </EuiForm>
@@ -204,6 +206,7 @@ export const AddDatabaseModal = ({
           type="submit"
           form={ADD_DATABASE_MODAL_FORM_ID}
           disabled={isLoading || !isValid}
+          data-test-subj="addGeoipDatabaseSubmit"
         >
           <FormattedMessage
             id="xpack.ingestPipelines.manageProcessors.geoip.addModalConfirmButtonLabel"
