@@ -87,7 +87,7 @@ export const useAwsCredentialsForm = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setupFormat, input.type]);
 
-  const integrationLink = cspIntegrationDocsNavigation.cspm.getStartedPath;
+  const elasticDocLink = cspIntegrationDocsNavigation.cspm.awsGetStartedPath;
 
   useCloudFormationTemplate({
     packageInfo,
@@ -136,7 +136,7 @@ export const useAwsCredentialsForm = ({
     setupFormat,
     group,
     fields,
-    integrationLink,
+    elasticDocLink,
     hasCloudFormationTemplate,
     onSetupFormatChange,
   };
