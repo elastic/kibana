@@ -9,7 +9,7 @@
 import { CoreStart, HttpStart } from '@kbn/core/public';
 // import { DEFAULT_ASSETS_TO_IGNORE } from '../../common';
 import { HasDataViewsResponse, IndicesViaSearchResponse } from '..';
-// import { IndicesResponse, IndicesResponseModified } from '../types';
+import { IndicesResponse, IndicesResponseModified } from '../types';
 
 export class HasData {
   /*
@@ -58,7 +58,7 @@ export class HasData {
   }
 
   // ES Data
-  /*
+
   private responseToItemArray = (response: IndicesResponse): IndicesResponseModified[] => {
     const { indices = [], aliases = [] } = response;
     const source: IndicesResponseModified[] = [];
@@ -72,7 +72,6 @@ export class HasData {
 
     return source;
   };
-  */
 
   private getIndicesViaSearch = async ({
     http,
@@ -106,6 +105,16 @@ export class HasData {
         }),
       })
       .then((resp) => {
+        // eslint-disable-next-line no-console
+        console.log('getIndicesViaSearch', JSON.stringify(resp, null, 2));
+        http
+          .get<IndicesResponse>(`/internal/index-pattern-management/resolve_index/${pattern}`, {
+            query: showAllIndices ? { expand_wildcards: 'all' } : undefined,
+          })
+          .then((response) => {
+            // eslint-disable-next-line no-console
+            console.log('resolve_index', JSON.stringify(response, null, 2));
+          });
         // this was >= 0 - I have no idea why
         return !!(resp && resp.total > 0);
       })
