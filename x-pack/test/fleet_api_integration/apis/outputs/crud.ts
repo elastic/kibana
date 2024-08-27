@@ -14,7 +14,6 @@ import {
 import { v4 as uuidV4 } from 'uuid';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { enableSecrets, skipIfNoDockerRegistry } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -22,6 +21,7 @@ export default function (providerContext: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const es = getService('es');
+  const fleetAndAgents = getService('fleetAndAgents');
 
   let pkgVersion: string;
 
@@ -49,13 +49,13 @@ export default function (providerContext: FtrProviderContext) {
 
   const enableOutputSecrets = async () => {
     try {
-      await kibanaServer.savedObjects.update({
+      await kibanaServer.savedObjects.create({
         type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
         id: 'fleet-default-settings',
         attributes: {
           output_secret_storage_requirements_met: true,
         },
-        overwrite: false,
+        overwrite: true,
       });
     } catch (e) {
       throw e;
@@ -64,13 +64,13 @@ export default function (providerContext: FtrProviderContext) {
 
   const disableOutputSecrets = async () => {
     try {
-      await kibanaServer.savedObjects.update({
+      await kibanaServer.savedObjects.create({
         type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
         id: 'fleet-default-settings',
         attributes: {
           output_secret_storage_requirements_met: false,
         },
-        overwrite: false,
+        overwrite: true,
       });
     } catch (e) {
       throw e;
@@ -201,8 +201,8 @@ export default function (providerContext: FtrProviderContext) {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await fleetAndAgents.setup();
     });
-    setupFleetAndAgents(providerContext);
 
     let defaultOutputId: string;
     let ESOutputId: string;

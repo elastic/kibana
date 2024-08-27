@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { SavedObject } from '@kbn/core/server';
+import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import type {
   ImportExceptionsListSchema,
   ImportExceptionListItemSchema,
-  ExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 
 import type { RuleToImport } from '../../../../../../common/api/detection_engine/rule_management';
@@ -17,6 +16,7 @@ import type { ImportRuleResponse } from '../../../routes/utils';
 import { createBulkErrorObject } from '../../../routes/utils';
 import { checkRuleExceptionReferences } from './check_rule_exception_references';
 import type { IDetectionRulesClient } from '../detection_rules_client/detection_rules_client_interface';
+import { getReferencedExceptionLists } from './gather_referenced_exceptions';
 
 export type PromiseFromStreams = RuleToImport | Error;
 export interface RuleExceptionsPromiseFromStreams {
@@ -44,15 +44,15 @@ export const importRules = async ({
   rulesResponseAcc,
   overwriteRules,
   detectionRulesClient,
-  existingLists,
   allowMissingConnectorSecrets,
+  savedObjectsClient,
 }: {
   ruleChunks: PromiseFromStreams[][];
   rulesResponseAcc: ImportRuleResponse[];
   overwriteRules: boolean;
   detectionRulesClient: IDetectionRulesClient;
-  existingLists: Record<string, ExceptionListSchema>;
   allowMissingConnectorSecrets?: boolean;
+  savedObjectsClient: SavedObjectsClientContract;
 }) => {
   let importRuleResponse: ImportRuleResponse[] = [...rulesResponseAcc];
 
@@ -64,6 +64,10 @@ export const importRules = async ({
 
   while (ruleChunks.length) {
     const batchParseObjects = ruleChunks.shift() ?? [];
+    const existingLists = await getReferencedExceptionLists({
+      rules: batchParseObjects,
+      savedObjectsClient,
+    });
     const newImportRuleResponse = await Promise.all(
       batchParseObjects.reduce<Array<Promise<ImportRuleResponse>>>((accum, parsedRule) => {
         const importsWorkerPromise = new Promise<ImportRuleResponse>(async (resolve, reject) => {

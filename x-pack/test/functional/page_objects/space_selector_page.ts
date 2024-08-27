@@ -272,8 +272,8 @@ export class SpaceSelectorPageObject extends FtrService {
 
   async setSearchBoxInSpacesSelector(searchText: string) {
     const searchBox = await this.find.byCssSelector('div[role="dialog"] input[type="search"]');
-    searchBox.clearValue();
-    searchBox.type(searchText);
+    await searchBox.clearValue();
+    await searchBox.type(searchText);
     await this.common.sleep(1000);
   }
 

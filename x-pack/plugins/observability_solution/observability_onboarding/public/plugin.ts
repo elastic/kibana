@@ -33,7 +33,10 @@ import { PLUGIN_ID } from '../common';
 import { ObservabilityOnboardingLocatorDefinition } from './locators/onboarding_locator/locator_definition';
 import { ObservabilityOnboardingPluginLocators } from './locators';
 import { ConfigSchema } from '.';
-import { OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT } from '../common/telemetry_events';
+import {
+  OBSERVABILITY_ONBOARDING_FEEDBACK_TELEMETRY_EVENT,
+  OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT,
+} from '../common/telemetry_events';
 
 export type ObservabilityOnboardingPluginSetup = void;
 export type ObservabilityOnboardingPluginStart = void;
@@ -122,6 +125,7 @@ export class ObservabilityOnboardingPlugin
     };
 
     core.analytics.registerEventType(OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT);
+    core.analytics.registerEventType(OBSERVABILITY_ONBOARDING_FEEDBACK_TELEMETRY_EVENT);
 
     return {
       locators: this.locators,

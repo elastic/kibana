@@ -137,7 +137,7 @@ export const useAzureCredentialsForm = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setupFormat, input.type]);
 
-  const integrationLink = cspIntegrationDocsNavigation.cspm.getStartedPath;
+  const documentationLink = cspIntegrationDocsNavigation.cspm.azureGetStartedPath;
 
   useUpdateAzureArmTemplate({
     packageInfo,
@@ -183,7 +183,7 @@ export const useAzureCredentialsForm = ({
     setupFormat,
     group,
     fields,
-    integrationLink,
+    documentationLink,
     hasArmTemplateUrl,
     onSetupFormatChange,
   };

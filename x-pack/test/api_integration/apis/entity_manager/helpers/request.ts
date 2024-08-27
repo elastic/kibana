@@ -39,10 +39,23 @@ export const installDefinition = async (
     .expect(200);
 };
 
-export const uninstallDefinition = (supertest: Agent, id: string) => {
+export const uninstallDefinition = (supertest: Agent, id: string, deleteData = false) => {
   return supertest
     .delete(`/internal/entities/definition/${id}`)
+    .query({ deleteData })
     .set('kbn-xsrf', 'xxx')
     .send()
     .expect(200);
+};
+
+export const upgradeBuiltinDefinitions = async (
+  supertest: Agent,
+  definitions: EntityDefinition[]
+): Promise<{ success: boolean }> => {
+  const response = await supertest
+    .post('/api/entities/upgrade_builtin_definitions')
+    .set('kbn-xsrf', 'xxx')
+    .send({ definitions })
+    .expect(200);
+  return response.body;
 };

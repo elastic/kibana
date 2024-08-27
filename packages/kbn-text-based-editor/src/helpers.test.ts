@@ -249,8 +249,36 @@ describe('helpers', function () {
       };
       const indices = await getIndicesList(updatedDataViewsMock);
       expect(indices).toStrictEqual([
-        { name: '.system1', hidden: true },
-        { name: 'logs', hidden: false },
+        { name: '.system1', hidden: true, type: 'Index' },
+        { name: 'logs', hidden: false, type: 'Index' },
+      ]);
+    });
+
+    it('should type correctly the aliases', async function () {
+      const dataViewsMock = dataViewPluginMocks.createStartContract();
+      const updatedDataViewsMock = {
+        ...dataViewsMock,
+        getIndices: jest.fn().mockResolvedValue([
+          {
+            name: 'alias1',
+            title: 'system1',
+            tags: [
+              {
+                name: 'Alias',
+                type: 'alias',
+              },
+            ],
+          },
+          {
+            name: 'logs',
+            title: 'logs',
+          },
+        ]),
+      };
+      const indices = await getIndicesList(updatedDataViewsMock);
+      expect(indices).toStrictEqual([
+        { name: 'alias1', hidden: false, type: 'Alias' },
+        { name: 'logs', hidden: false, type: 'Index' },
       ]);
     });
   });
@@ -283,7 +311,7 @@ describe('helpers', function () {
         ]),
       };
       const indices = await getRemoteIndicesList(updatedDataViewsMock);
-      expect(indices).toStrictEqual([{ name: 'remote:logs', hidden: false }]);
+      expect(indices).toStrictEqual([{ name: 'remote:logs', hidden: false, type: 'Index' }]);
     });
   });
 });

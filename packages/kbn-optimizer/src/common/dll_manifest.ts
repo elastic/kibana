@@ -19,7 +19,7 @@ export interface ParsedDllManifest {
 }
 
 const hash = (s: string) => {
-  return Crypto.createHash('md5').update(s).digest('base64').replace(/=+$/, '');
+  return Crypto.createHash('sha1').update(s).digest('base64').replace(/=+$/, '');
 };
 
 export function parseDllManifest(manifest: DllManifest): ParsedDllManifest {
