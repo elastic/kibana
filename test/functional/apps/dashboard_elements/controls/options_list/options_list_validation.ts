@@ -88,7 +88,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe.skip('Options List dashboard no validation', () => {
+    describe('Options List dashboard no validation', () => {
       before(async () => {
         await dashboardControls.updateValidationSetting(false);
       });
