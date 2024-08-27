@@ -14,6 +14,7 @@ import type { Profile } from '../types';
 import type { RootContext } from './root_profile';
 
 export enum DataSourceCategory {
+  Entities = 'entities',
   Logs = 'logs',
   Default = 'default',
 }

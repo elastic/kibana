@@ -23,6 +23,7 @@ import {
   createProfileProviderServices,
   ProfileProviderServices,
 } from './profile_provider_services';
+import { createEntitiesDataSourceProfileProvider } from './entities_data_source_profile';
 
 export const registerProfileProviders = ({
   rootProfileService,
@@ -91,6 +92,7 @@ const createRootProfileProviders = (_providerServices: ProfileProviderServices) 
   [] as RootProfileProvider[];
 
 const createDataSourceProfileProviders = (providerServices: ProfileProviderServices) => [
+  createEntitiesDataSourceProfileProvider(),
   ...createLogsDataSourceProfileProviders(providerServices),
 ];
 
