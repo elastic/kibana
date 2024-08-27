@@ -24,6 +24,7 @@ import styled from 'styled-components';
 
 import type { State } from '../../../common/store';
 import { RowRendererValues } from '../../../../common/api/timeline';
+import type { RowRendererId } from '../../../../common/api/timeline';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { setExcludedRowRendererIds as dispatchSetExcludedRowRendererIds } from '../../store/actions';
 import { timelineSelectors } from '../../store';
