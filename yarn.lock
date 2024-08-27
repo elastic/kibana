@@ -11318,10 +11318,10 @@
   resolved "https://registry.yarnpkg.com/@types/tapable/-/tapable-1.0.6.tgz#a9ca4b70a18b270ccb2bc0aaafefd1d486b7ea74"
   integrity sha512-W+bw9ds02rAQaMvaLYxAbJ6cvguW/iJXNT6lTssS1ps6QdrMKttqEAMEG/b5CR8TZl3/L7/lH0ZV5nNR1LXikA==
 
-"@types/tar@^6.1.11":
-  version "6.1.11"
-  resolved "https://registry.yarnpkg.com/@types/tar/-/tar-6.1.11.tgz#48de9ccee8db37efb0d5a9f288567fc0378cb734"
-  integrity sha512-ThA1WD8aDdVU4VLuyq5NEqriwXErF5gEIJeyT6gHBWU7JtSmW2a5qjNv3/vR82O20mW+1vhmeZJfBQPT3HCugg==
+"@types/tar@^6.1.13":
+  version "6.1.13"
+  resolved "https://registry.yarnpkg.com/@types/tar/-/tar-6.1.13.tgz#9b5801c02175344101b4b91086ab2bbc8e93a9b6"
+  integrity sha512-IznnlmU5f4WcGTh2ltRu/Ijpmk8wiWXfF0VA4s+HPjHZgvFggk1YaIkbo5krX/zUCzWF8N/l4+W/LNxnvAJ8nw==
   dependencies:
     "@types/node" "*"
     minipass "^4.0.0"
