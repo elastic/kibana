@@ -101,15 +101,19 @@ export const getVisualizeEmbeddableFactory: (deps: {
     vis$.subscribe((vis) => vis.uiState.on('change', onUiStateChange));
 
     // When the serialized vis changes, update the vis instance
-    serializedVis$.subscribe(async (serializedVis) => {
-      const currentVis = vis$.getValue();
-      if (currentVis) currentVis.uiState.off('change', onUiStateChange);
-      vis$.next(await createVisInstance(serializedVis));
-
-      const { params, abortController } = await getExpressionParams();
-      if (params) expressionParams$.next(params);
-      expressionAbortController$.next(abortController);
-    });
+    serializedVis$
+      .pipe(
+        switchMap(async (serializedVis) => {
+          const vis = await createVisInstance(serializedVis);
+          const { params, abortController } = await getExpressionParams();
+          return { vis, params, abortController };
+        })
+      )
+      .subscribe(({ vis, params, abortController }) => {
+        vis$.next(vis);
+        if (params) expressionParams$.next(params);
+        expressionAbortController$.next(abortController);
+      });
 
     // Track visualizations linked to a saved object in the library
     const savedObjectId$ = new BehaviorSubject<string | undefined>(
