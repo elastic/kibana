@@ -13,7 +13,7 @@ export function getAutoDetectCommand(
 ) {
   const scriptName = 'auto_detect.sh';
   return oneLine`
-    curl ${options.scriptDownloadUrl} -so ${scriptName} &&
+    curl -s -O ${options.scriptDownloadUrl} -O ${options.confDownloadUrl} &&
     sudo bash ${scriptName}
       --id=${options.onboardingFlow.id}
       --kibana-url=${options.kibanaUrl}

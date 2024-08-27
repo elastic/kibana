@@ -92,6 +92,7 @@ ensure_argument "$elastic_agent_version" "--ea-version"
 
 known_integrations_list_string=""
 selected_known_integrations_array=()
+detected_patterns=()
 selected_known_integrations_tsv_string=""
 unknown_log_file_path_list_string=""
 unknown_log_file_pattern_list_string=""
@@ -295,21 +296,17 @@ read_open_log_file_list() {
     "^\/Users\/.+?\/Library\/Containers"
     "^\/Users\/.+?\/Library\/Caches"
     "^\/private"
-    # Excluding all patterns that correspond to known integrations
-    # that we are detecting separately
-    "^\/var\/log\/nginx"
-    "^\/var\/log\/apache2"
-    "^\/var\/log\/httpd"
-    "^\/var\/lib\/docker\/containers"
-    "^\/var\/log\/syslog"
-    "^\/var\/log\/auth.log"
-    "^\/var\/log\/system.log"
-    "^\/var\/log\/messages"
-    "^\/var\/log\/secure"
+  
     # Exclude previous installation logs
     "\/opt\/Elastic\/Agent\/"
     "\/Library\/Elastic\/Agent\/"
   )
+
+# Excluding all patterns that correspond to known integrations
+# that we are detecting separately
+ for pattern in "${detected_patterns[@]}"; do
+    exclude_patterns+=("$pattern")
+  done
 
   local list=$("$LSOF_PATH" -Fn / | grep "^n.*\.log$" | cut -c2- | sort -u)
 
@@ -326,39 +323,66 @@ detect_known_integrations() {
   # Even when there is no system logs on the host,
   # System integration will still be able to to collect metrics.
   known_integrations_list_string+="system"$'\n'
+    
+    local config_file="./integrations.conf"
+    local integration=""
+    local patterns=()
 
-  local nginx_patterns=(
-    "/var/log/nginx/access.log*"
-    "/var/log/nginx/error.log*"
-  )
-
-  for pattern in "${nginx_patterns[@]}"; do
-    if compgen -G "$pattern" > /dev/null; then
-      known_integrations_list_string+="nginx"$'\n'
-      break
+    # Debug: Check if the config file exists
+    if [[ ! -f "$config_file" ]]; then
+        echo "Config file not found: $config_file"
+        exit 1
     fi
-  done
 
-  local apache_patterns=(
-    "/var/log/apache2/access.log*"
-    "/var/log/apache2/other_vhosts_access.log*"
-    "/var/log/apache2/error.log*"
-    "/var/log/httpd/access_log*"
-    "/var/log/httpd/error_log*"
-  )
+    while IFS= read -r line; do
 
-  for pattern in "${apache_patterns[@]}"; do
-    if compgen -G "$pattern" > /dev/null; then
-      known_integrations_list_string+="apache"$'\n'
-      break
+        # Skip comments and empty lines
+        if [[ $line =~ ^\s*# || -z $line ]]; then
+            continue
+        fi
+
+        # Process section headers
+        if [[ $line =~ ^\[([a-zA-Z0-9_]+)\] ]]; then
+            # If we were processing a previous section, check patterns for the previous integration
+            if [[ -n "$integration" && ${#patterns[@]} -gt 0 ]]; then
+                for pattern in "${patterns[@]}"; do
+                    pattern=$(echo "$pattern" | xargs)  # Trim leading/trailing spaces
+                    if compgen -G "$pattern" > /dev/null; then
+                        known_integrations_list_string+="$integration"$'\n'
+                        detected_patterns+=("${patterns[@]}")
+                        break
+                    fi
+                done
+            fi
+
+            # Start a new section
+            integration="${BASH_REMATCH[1]}"
+            patterns=()
+            continue
+        fi
+
+        # Process patterns
+        if [[ $line =~ ^patterns= ]]; then
+            # Capture patterns by trimming spaces and handling multi-line patterns
+            IFS=$'\n' read -r -d '' -a patterns <<< "${line#patterns=}"
+            patterns=($(echo "${patterns[@]}" | xargs))  # Trim leading/trailing spaces
+        elif [[ -n "$integration" && -n "$line" ]]; then
+            # Capture multi-line patterns if not directly following "patterns="
+            patterns+=("$(echo "$line" | xargs)")  # Trim leading/trailing spaces
+        fi
+    done < "$config_file"
+
+    # Check patterns for the last section
+    if [[ -n "$integration" && ${#patterns[@]} -gt 0 ]]; then
+        for pattern in "${patterns[@]}"; do
+            pattern=$(echo "$pattern" | xargs)  # Trim leading/trailing spaces
+            if compgen -G "$pattern" > /dev/null; then
+                known_integrations_list_string+="$integration"$'\n'
+                detected_patterns+=("${patterns[@]}")
+                break
+            fi
+        done
     fi
-  done
-
-  if [ -S /var/run/docker.sock ]; then
-    known_integrations_list_string+="docker"$'\n'
-  elif compgen -G "/var/lib/docker/containers/*/*-json.log" > /dev/null; then
-    known_integrations_list_string+="docker"$'\n'
-  fi
 }
 
 known_integration_title() {
@@ -375,6 +399,24 @@ known_integration_title() {
       ;;
     "system")
       echo "System Logs And Metrics"
+      ;;
+    "mysql")
+      echo "Mysql Logs"
+      ;;
+    "postgresql")
+      echo "Postgresql Logs"
+      ;;
+    "redis")
+      echo "Redis Logs"
+      ;;
+    "haproxy")
+      echo "Haproxy Logs"
+      ;;
+    "rabbitmq")
+      echo "Rabbitmq Logs"
+      ;;
+    "kafka")
+      echo "Kafka Logs"
       ;;
     *)
       echo "Unknown"
