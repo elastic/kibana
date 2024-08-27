@@ -28,7 +28,7 @@ import {
   getPalette,
   AVAILABLE_PALETTES,
   NeutralPalette,
-  SPECIAL_TOKENS_STRING_CONVERTION,
+  SPECIAL_TOKENS_STRING_CONVERSION,
 } from '@kbn/coloring';
 import { getColorCategories } from '@kbn/chart-expressions-common';
 import { isDataLayer } from '../../common/utils/layer_types_guards';
@@ -53,10 +53,10 @@ type GetSeriesPropsFn = (config: {
   colorAssignments: ColorAssignments;
   columnToLabelMap: Record<string, string>;
   paletteService: PaletteRegistry;
-  syncColors?: boolean;
   yAxis?: GroupsConfiguration[number];
   xAxis?: GroupsConfiguration[number];
-  timeZone?: string;
+  syncColors: boolean;
+  timeZone: string;
   emphasizeFitting?: boolean;
   fillOpacity?: number;
   formattedDatatableInfo: DatatableWithFormatInfo;
@@ -324,7 +324,7 @@ const getColor: GetColorFn = (
   series,
   { layer, colorAssignments, paletteService, syncColors, getSeriesNameFn },
   uiState,
-  singleTable
+  isSingleTable
 ) => {
   const overwriteColor = getSeriesColor(layer, series.yAccessor as string);
   if (overwriteColor !== null) {
@@ -333,7 +333,7 @@ const getColor: GetColorFn = (
 
   const name = getSeriesNameFn(series)?.toString() || '';
 
-  const overwriteColors: Record<string, string> = uiState?.get ? uiState.get('vis.colors', {}) : {};
+  const overwriteColors: Record<string, string> = uiState?.get?.('vis.colors', {}) ?? {};
 
   if (Object.keys(overwriteColors).includes(name)) {
     return overwriteColors[name];
@@ -344,7 +344,7 @@ const getColor: GetColorFn = (
     {
       name,
       totalSeriesAtDepth: colorAssignment.totalSeriesCount,
-      rankAtDepth: colorAssignment.getRank(singleTable ? 'commonLayerId' : layer.layerId, name),
+      rankAtDepth: colorAssignment.getRank(isSingleTable ? 'commonLayerId' : layer.layerId, name),
     },
   ];
   return paletteService.get(layer.palette.name).getCategoricalColor(
@@ -493,7 +493,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
     // if colorMapping exist then we can apply it, if not let's use the legacy coloring method
     layer.colorMapping && splitColumnIds.length > 0
       ? getColorSeriesAccessorFn(
-          JSON.parse(layer.colorMapping), // the color mapping is at this point just a strinfigied JSON
+          JSON.parse(layer.colorMapping), // the color mapping is at this point just a stringified JSON
           getPalette(AVAILABLE_PALETTES, NeutralPalette),
           isDarkMode,
           {
@@ -501,7 +501,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
             categories: getColorCategories(table.rows, splitColumnIds[0]),
           },
           splitColumnIds[0],
-          SPECIAL_TOKENS_STRING_CONVERTION
+          SPECIAL_TOKENS_STRING_CONVERSION
         )
       : (series) =>
           getColor(

@@ -7,7 +7,7 @@
 
 import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
 import { Datatable } from '@kbn/expressions-plugin/public';
-import { getUniqueLabelGenerator, inferTimeField, renewIDs } from './utils';
+import { getUniqueLabelGenerator, inferTimeField, isLensRange, renewIDs } from './utils';
 
 const datatableUtilities = createDatatableUtilitiesMock();
 
@@ -185,6 +185,26 @@ describe('utils', () => {
     it('should add a counter for multiple empty labels', () => {
       const labelGenerator = getUniqueLabelGenerator();
       expect([' ', ' '].map(labelGenerator)).toEqual(['[Untitled]', '[Untitled] [1]']);
+    });
+  });
+
+  describe('isRange', () => {
+    it.each<[expected: boolean, input: unknown]>([
+      [true, { from: 0, to: 100, label: '' }],
+      [true, { from: 0, to: null, label: '' }],
+      [true, { from: null, to: 100, label: '' }],
+      [false, { from: 0, to: 100 }],
+      [false, { from: 0, to: null }],
+      [false, { from: null, to: 100 }],
+      [false, { from: 0 }],
+      [false, { to: 100 }],
+      [false, null],
+      [false, undefined],
+      [false, 123],
+      [false, 'string'],
+      [false, {}],
+    ])('should return %s for %j', (expected, input) => {
+      expect(isLensRange(input)).toBe(expected);
     });
   });
 });

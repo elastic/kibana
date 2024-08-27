@@ -12,7 +12,7 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
-  EuiText,
+  EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -50,13 +50,13 @@ export function PaletteColors({
     <>
       <EuiFlexGroup direction="column" style={{ padding: 8 }}>
         <EuiFlexItem>
-          <EuiText size="s">
-            <strong>
+          <EuiTitle size="xxxs">
+            <h6>
               {i18n.translate('coloring.colorMapping.colorPicker.paletteColorsLabel', {
                 defaultMessage: 'Palette colors',
               })}
-            </strong>
-          </EuiText>
+            </h6>
+          </EuiTitle>
           <EuiFlexGroup
             direction="row"
             gutterSize="s"
@@ -84,22 +84,25 @@ export function PaletteColors({
       <EuiHorizontalRule margin="xs" />
       <EuiFlexGroup style={{ padding: 8, paddingTop: 0 }}>
         <EuiFlexItem>
-          <EuiText size="s">
-            <strong>
+          <EuiTitle size="xxxs">
+            <h6>
               {i18n.translate('coloring.colorMapping.colorPicker.themeAwareColorsLabel', {
                 defaultMessage: 'Neutral colors',
               })}
-            </strong>
-            <EuiToolTip
-              position="bottom"
-              content={i18n.translate('coloring.colorMapping.colorPicker.themeAwareColorsTooltip', {
-                defaultMessage:
-                  'The provided neutral colors are theme-aware and will change appropriately when switching between light and dark themes.',
-              })}
-            >
-              <EuiIcon tabIndex={0} type="questionInCircle" />
-            </EuiToolTip>
-          </EuiText>
+              <EuiToolTip
+                position="bottom"
+                content={i18n.translate(
+                  'coloring.colorMapping.colorPicker.themeAwareColorsTooltip',
+                  {
+                    defaultMessage:
+                      'The provided neutral colors are theme-aware and will change appropriately when switching between light and dark themes.',
+                  }
+                )}
+              >
+                <EuiIcon tabIndex={0} type="questionInCircle" />
+              </EuiToolTip>
+            </h6>
+          </EuiTitle>
           <EuiFlexGroup
             direction="row"
             gutterSize="s"

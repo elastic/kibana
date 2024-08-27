@@ -88,7 +88,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('nick by reference', () => {
+    describe('by reference', () => {
       const VIS_LIBRARY_DESCRIPTION = 'Vis library description';
 
       let count = 0;

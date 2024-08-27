@@ -7,14 +7,7 @@
  */
 
 import React, { useState } from 'react';
-import {
-  EuiButtonEmpty,
-  EuiPopoverTitle,
-  EuiTab,
-  EuiTabs,
-  EuiTitle,
-  EuiHorizontalRule,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiPopoverTitle, EuiTab, EuiTabs, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ColorMapping } from '../../config';
 import { getPalette } from '../../palettes';
@@ -56,22 +49,14 @@ export function ColorPicker({
       >
         <EuiTabs size="m" expand>
           <EuiTab onClick={() => setTab('palette')} isSelected={tab === 'palette'}>
-            <EuiTitle size="xxxs">
-              <span>
-                {i18n.translate('coloring.colorMapping.colorPicker.paletteTabLabel', {
-                  defaultMessage: 'Colors',
-                })}
-              </span>
-            </EuiTitle>
+            {i18n.translate('coloring.colorMapping.colorPicker.paletteTabLabel', {
+              defaultMessage: 'Colors',
+            })}
           </EuiTab>
           <EuiTab onClick={() => setTab('custom')} isSelected={tab === 'custom'}>
-            <EuiTitle size="xxxs">
-              <span>
-                {i18n.translate('coloring.colorMapping.colorPicker.customTabLabel', {
-                  defaultMessage: 'Custom',
-                })}
-              </span>
-            </EuiTitle>
+            {i18n.translate('coloring.colorMapping.colorPicker.customTabLabel', {
+              defaultMessage: 'Custom',
+            })}
           </EuiTab>
         </EuiTabs>
       </EuiPopoverTitle>
