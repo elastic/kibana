@@ -32,7 +32,15 @@ export const kbComponentTemplate: ClusterComponentTemplate['component_template']
       '@timestamp': date,
       id: keyword,
       doc_id: { type: 'text', fielddata: true },
-      title: { type: 'text', fielddata: true },
+      title: {
+        type: 'text',
+        fields: {
+          keyword: {
+            type: 'keyword',
+            ignore_above: 256,
+          },
+        },
+      },
       user: {
         properties: {
           id: keyword,

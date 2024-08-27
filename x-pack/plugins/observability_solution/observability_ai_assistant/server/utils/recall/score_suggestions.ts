@@ -66,7 +66,7 @@ export async function scoreSuggestions({
 
     Documents:
     ${JSON.stringify(
-      suggestions.map(({ id, docId: title, text }) => ({ id, title, text })),
+      suggestions.map(({ id, doc_id: title, text }) => ({ id, title, text })),
       null,
       2
     )}`);

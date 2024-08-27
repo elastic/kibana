@@ -23,6 +23,10 @@ export type CreateTestConfig = ReturnType<typeof createTestConfig>;
 
 export type CreateTest = ReturnType<typeof createObservabilityAIAssistantAPIConfig>;
 
+export type ObservabilityAIAssistantApiClients = Awaited<
+  ReturnType<CreateTest['services']['observabilityAIAssistantAPIClient']>
+>;
+
 export type ObservabilityAIAssistantAPIClient = Awaited<
   ReturnType<CreateTest['services']['observabilityAIAssistantAPIClient']>
 >;

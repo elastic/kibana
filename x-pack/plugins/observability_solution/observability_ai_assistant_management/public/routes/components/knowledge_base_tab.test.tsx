@@ -81,7 +81,9 @@ describe('KnowledgeBaseTab', () => {
 
       getByTestId('knowledgeBaseEditManualEntryFlyoutSaveButton').click();
 
-      expect(createMock).toHaveBeenCalledWith({ entry: { id: 'foo', public: false, text: 'bar' } });
+      expect(createMock).toHaveBeenCalledWith({
+        entry: { id: expect.any(String), title: 'foo', public: false, text: 'bar' },
+      });
     });
 
     it('should require an id', () => {

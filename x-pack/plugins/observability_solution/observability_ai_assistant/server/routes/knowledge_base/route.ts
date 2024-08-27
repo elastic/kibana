@@ -12,7 +12,6 @@ import type {
 import { notImplemented } from '@hapi/boom';
 import { nonEmptyStringRt, toBooleanRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
-import { v4 } from 'uuid';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 import {
   Instruction,
@@ -240,9 +239,53 @@ const importKnowledgeBaseEntries = createObservabilityAIAssistantServerRoute({
   params: t.type({
     body: t.type({
       entries: t.array(
+        t.intersection([
+          t.type({
+            id: t.string,
+            text: nonEmptyStringRt,
+          }),
+          t.partial({
+            title: t.string,
+          }),
+        ])
+      ),
+    }),
+  }),
+  options: {
+    tags: ['access:ai_assistant'],
+  },
+  handler: async (resources): Promise<void> => {
+    const client = await resources.service.getClient({ request: resources.request });
+
+    if (!client) {
+      throw notImplemented();
+    }
+
+    const formattedEntries = resources.params.body.entries.map((entry) => ({
+      id: entry.id,
+      title: entry.title,
+      text: entry.text,
+      confidence: 'high' as KnowledgeBaseEntry['confidence'],
+      is_correction: false,
+      type: 'contextual' as const,
+      public: true,
+      labels: {},
+      role: KnowledgeBaseEntryRole.UserEntry,
+    }));
+
+    return await client.importKnowledgeBaseEntries({ entries: formattedEntries });
+  },
+});
+
+const importKnowledgeBaseCategoryEntries = createObservabilityAIAssistantServerRoute({
+  endpoint: 'POST /internal/observability_ai_assistant/kb/entries/category/import',
+  params: t.type({
+    body: t.type({
+      category: t.string,
+      entries: t.array(
         t.type({
-          doc_id: t.string,
-          text: nonEmptyStringRt,
+          id: t.string,
+          texts: t.array(t.string),
         })
       ),
     }),
@@ -257,18 +300,9 @@ const importKnowledgeBaseEntries = createObservabilityAIAssistantServerRoute({
       throw notImplemented();
     }
 
-    const entries = resources.params.body.entries.map((entry) => ({
-      id: v4(),
-      confidence: 'high' as KnowledgeBaseEntry['confidence'],
-      is_correction: false,
-      type: 'contextual' as const,
-      public: true,
-      labels: {},
-      role: KnowledgeBaseEntryRole.UserEntry,
-      ...entry,
-    }));
+    const { entries, category } = resources.params.body;
 
-    return await client.importKnowledgeBaseEntries({ entries });
+    return resources.service.addCategoryToKnowledgeBase(category, entries);
   },
 });
 
@@ -279,6 +313,7 @@ export const knowledgeBaseRoutes = {
   ...saveKnowledgeBaseUserInstruction,
   ...getKnowledgeBaseUserInstructions,
   ...importKnowledgeBaseEntries,
+  ...importKnowledgeBaseCategoryEntries,
   ...saveKnowledgeBaseEntry,
   ...deleteKnowledgeBaseEntry,
 };

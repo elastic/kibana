@@ -88,9 +88,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
         const instructions = res.body.userInstructions;
 
-        const sortByDocId = (data: any) => sortBy(data, 'doc_id');
-        expect(sortByDocId(instructions)).to.eql(
-          sortByDocId([
+        const sortById = (data: any) => sortBy(data, 'id');
+        expect(sortById(instructions)).to.eql(
+          sortById([
             {
               id: 'private-doc-from-editorUser',
               public: false,
@@ -116,9 +116,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
         const instructions = res.body.userInstructions;
 
-        const sortByDocId = (data: any) => sortBy(data, 'doc_id');
-        expect(sortByDocId(instructions)).to.eql(
-          sortByDocId([
+        const sortById = (data: any) => sortBy(data, 'id');
+        expect(sortById(instructions)).to.eql(
+          sortById([
             {
               id: 'public-doc-from-editorUser',
               public: true,

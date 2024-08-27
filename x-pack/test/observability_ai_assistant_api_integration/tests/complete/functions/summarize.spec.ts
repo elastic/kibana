@@ -64,7 +64,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         params: {
           query: {
             query: '',
-            sortBy: 'doc_id',
+            sortBy: 'title',
             sortDirection: 'asc',
           },
         },

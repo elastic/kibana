@@ -68,13 +68,14 @@ export function registerSummarizationFunction({
       signal
     ) => {
       // The LLM should be able to update an existing entry by providing the same doc_id
-      // if no id is provided, we generate a new one
+      // if no existing entry is found, we generate a uuid
       const id = await client.getUuidFromDocId(docId);
 
       return client
         .addKnowledgeBaseEntry({
           entry: {
             id: id ?? v4(),
+            title: docId, // use doc_id as title for now
             doc_id: docId,
             role: KnowledgeBaseEntryRole.AssistantSummarization,
             text,

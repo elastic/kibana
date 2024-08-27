@@ -326,35 +326,34 @@ export class ObservabilityAIAssistantService {
   addToKnowledgeBaseQueue(entries: KnowledgeBaseEntryRequest[]): void {
     this.init()
       .then(() => {
-        this.kbService!.queue(
-          entries.flatMap((entry) => {
-            const entryWithSystemProperties = {
-              ...entry,
-              doc_id: entry.id,
-              '@timestamp': new Date().toISOString(),
-              public: true,
-              confidence: 'high' as const,
-              type: 'contextual' as const,
-              is_correction: false,
-              labels: {
-                ...entry.labels,
-              },
-              role: KnowledgeBaseEntryRole.Elastic,
-            };
+        const operations = entries.flatMap((entry) => {
+          const entryWithSystemProperties = {
+            ...entry,
+            doc_id: entry.id,
+            '@timestamp': new Date().toISOString(),
+            public: true,
+            confidence: 'high' as const,
+            type: 'contextual' as const,
+            is_correction: false,
+            labels: {
+              ...entry.labels,
+            },
+            role: KnowledgeBaseEntryRole.Elastic,
+          };
 
-            const operations =
-              'texts' in entryWithSystemProperties
-                ? splitKbText(entryWithSystemProperties)
-                : [
-                    {
-                      type: KnowledgeBaseEntryOperationType.Index,
-                      document: entryWithSystemProperties,
-                    },
-                  ];
+          return 'texts' in entryWithSystemProperties
+            ? splitKbText(entryWithSystemProperties)
+            : [
+                {
+                  type: KnowledgeBaseEntryOperationType.Index,
+                  document: entryWithSystemProperties,
+                },
+              ];
+        });
 
-            return operations;
-          })
-        );
+        this.logger.debug(`Queuing ${operations.length} operations (${entries.length} entries)`);
+
+        this.kbService!.queue(operations);
       })
       .catch((error) => {
         this.logger.error(
