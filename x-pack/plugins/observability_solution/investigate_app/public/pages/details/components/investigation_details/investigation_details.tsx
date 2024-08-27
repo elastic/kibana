@@ -27,11 +27,11 @@ export function InvestigationDetails({ user, investigationId }: Props) {
   return (
     <EuiFlexGroup direction="row">
       <EuiFlexItem grow={8}>
-        <InvestigationItems investigationId={investigationId} investigation={investigation} />
+        <InvestigationItems investigation={investigation} />
       </EuiFlexItem>
 
       <EuiFlexItem grow={2}>
-        <InvestigationNotes investigationId={investigationId} investigation={investigation} />
+        <InvestigationNotes investigation={investigation} user={user} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
