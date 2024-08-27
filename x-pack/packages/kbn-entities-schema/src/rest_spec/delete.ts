@@ -6,14 +6,14 @@
  */
 
 import { z } from '@kbn/zod';
-import { booleanStringSchema } from './common';
+import { BooleanFromString } from '@kbn/zod-helpers';
 
 export const deleteEntityDefinitionParamsSchema = z.object({
   id: z.string(),
 });
 
 export const deleteEntityDefinitionQuerySchema = z.object({
-  deleteData: z.optional(booleanStringSchema).default(false),
+  deleteData: z.optional(BooleanFromString).default(false),
 });
 
 export type DeleteEntityDefinitionQuery = z.infer<typeof deleteEntityDefinitionQuerySchema>;

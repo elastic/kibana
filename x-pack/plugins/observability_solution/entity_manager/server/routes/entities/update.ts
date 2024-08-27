@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 import { RequestHandlerContext } from '@kbn/core/server';
 import {
   createEntityDefinitionQuerySchema,
@@ -95,13 +95,13 @@ export function updateEntityDefinitionRoute<T extends RequestHandlerContext>({
 
         if (installedDefinition.managed) {
           return res.forbidden({
-            body: { message: `Managed definition can't be updated` },
+            body: { message: `Managed definition cannot be modified` },
           });
         }
 
         if (installationInProgress(installedDefinition)) {
           return res.conflict({
-            body: { message: `Entity definition [${req.params.id}] is being installed` },
+            body: { message: `Entity definition [${req.params.id}] has changes in progress` },
           });
         }
 
