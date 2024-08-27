@@ -76,13 +76,6 @@ export const DATABASE_NAME_OPTIONS = [
   },
 ];
 
-export const invalidFormError = i18n.translate(
-  'xpack.ingestPipelines.manageProcessors.geoip.addDatabaseInvalidFormError',
-  {
-    defaultMessage: 'A MaxMind Account ID and a database are required',
-  }
-);
-
 export const getAddDatabaseSuccessMessage = (databaseName: string): string => {
   return i18n.translate('xpack.ingestPipelines.manageProcessors.geoip.addDatabaseSuccessMessage', {
     defaultMessage: 'Added database {databaseName}',

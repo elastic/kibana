@@ -13,7 +13,19 @@ import { normalizeDatabaseName } from './normalize_database_name';
 
 const bodySchema = schema.object({
   maxmind: schema.string({ maxLength: 1000 }),
-  databaseName: schema.string({ maxLength: 1000 }),
+  /*
+   * Only allow these database names, should be in sync with this file in ES
+   * https://github.com/elastic/elasticsearch/blob/f150e2c11df0fe3bef298c55bd867437e50f5f73/modules/ingest-geoip/src/main/java/org/elasticsearch/ingest/geoip/direct/DatabaseConfiguration.java#L58
+   */
+  databaseName: schema.oneOf([
+    schema.literal('GeoIP2-Anonymous-IP'),
+    schema.literal('GeoIP2-City'),
+    schema.literal('GeoIP2-Connection-Type'),
+    schema.literal('GeoIP2-Country'),
+    schema.literal('GeoIP2-Domain'),
+    schema.literal('GeoIP2-Enterprise'),
+    schema.literal('GeoIP2-ISP'),
+  ]),
 });
 
 export const registerCreateGeoipRoute = ({
