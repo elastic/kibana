@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
-import { setDefaultSpaceSolutionType } from './set_default_space_solution';
-import { ISpacesClient, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import {
   kibanaResponseFactory,
   RequestHandlerContext,
   RouteValidatorConfig,
 } from '@kbn/core/server';
+import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
+import { ISpacesClient, SpacesPluginStart } from '@kbn/spaces-plugin/server';
+
+import { setDefaultSpaceSolutionType } from './set_default_space_solution';
 
 const mockRouteContext = {
   licensing: {
@@ -62,7 +63,7 @@ const createMockSpaceService = (spaceClient: ISpacesClient) => {
     createSpacesClient: jest.fn(() => spaceClient),
   } as unknown as jest.Mocked<SpacesPluginStart['spacesService']>;
 
-  return jest.fn().mockReturnValue(mockSpaceService);
+  return jest.fn().mockResolvedValue(mockSpaceService);
 };
 
 describe('PUT /internal/cloud/solution', () => {
@@ -90,7 +91,7 @@ describe('PUT /internal/cloud/solution', () => {
 
   it('should update the solution of the default space', async () => {
     const payload = {
-      type: 'oblt',
+      type: 'observability',
     };
 
     const { routeHandler, spacesClientMock } = await setup();

@@ -12,7 +12,7 @@ import { CloudRequestHandlerContext } from './types';
 
 export interface RouteOptions {
   router: IRouter<CloudRequestHandlerContext>;
-  getSpacesService: () => SpacesPluginStart['spacesService'];
+  getSpacesService: () => Promise<SpacesPluginStart['spacesService']>;
 }
 
 export function defineRoutes(opts: RouteOptions) {

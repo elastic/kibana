@@ -7,18 +7,20 @@
 
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { RouteOptions } from '.';
+
+import { parseOnboardingSolution } from '../../common/parse_onboarding_default_solution';
 import { createLicensedRouteHandler } from './error_handler';
+import { RouteOptions } from '.';
 
 const createBodySchemaV1 = schema.object({
-  type: schema.oneOf([schema.literal('security'), schema.literal('oblt'), schema.literal('es')]),
+  type: schema.oneOf([schema.literal('security'), schema.literal('observability'), schema.literal('elasticsearch')]),
 });
 
 export const setDefaultSpaceSolutionType = ({ router, getSpacesService }: RouteOptions) => {
   router.versioned
     .put({
-      path: `/internal/cloud/solution`,
-      access: 'internal',
+      path: `/api/cloud/solution`,
+      access: 'public',
       summary: 'Save solution type in default space for instant deployment',
       options: {
         tags: ['access:cloudSpaceDefaultSolution'],
@@ -26,7 +28,7 @@ export const setDefaultSpaceSolutionType = ({ router, getSpacesService }: RouteO
     })
     .addVersion(
       {
-        version: '2024-08-14',
+        version: '2023-10-31',
         validate: {
           request: {
             body: createBodySchemaV1,
@@ -34,16 +36,16 @@ export const setDefaultSpaceSolutionType = ({ router, getSpacesService }: RouteO
         },
       },
       createLicensedRouteHandler(async (context, request, response) => {
-        const spacesClient = getSpacesService().createSpacesClient(request);
+        const spacesClient = (await getSpacesService()).createSpacesClient(request);
         const solution = request.body.type;
         try {
           const defaultSpace = await spacesClient?.get('default');
-          await spacesClient?.update('default', { ...defaultSpace, solution });
+          await spacesClient?.update('default', { ...defaultSpace, solution: parseOnboardingSolution(solution) });
         } catch (error) {
           if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
             return response.notFound();
           }
-          return response.customError(error);
+          throw error;
         }
 
         return response.ok();

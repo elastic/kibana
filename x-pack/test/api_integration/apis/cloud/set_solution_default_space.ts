@@ -6,26 +6,63 @@
  */
 
 import expect from '@kbn/expect';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { roleDiscoverAll, userDiscoverAll } from './common/users';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const security = getService('security');
 
-  describe('GET /internal/cloud/solution', () => {
-    it('set solution for default space', async () => {
+  describe('GET /api/cloud/solution', () => {
+    it('set solution for default space as a superuser', async () => {
       await supertest
-        .post('/internal/cloud/solution')
-        .set('kbn-xsrf', 'xxx')
+        .put('/api/cloud/solution')
+        .set('kbn-xsrf', 'kibana')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .send({
-          type: 'oblt',
+          type: 'observability',
         })
-        .expect(200);
+         .expect(200);
 
       const { body: defaultSpace } = await supertest
-        .get('default/api/spaces/space/default')
+        .get('/api/spaces/space/default')
         .set('kbn-xsrf', 'xxx');
 
       expect(defaultSpace.solution).to.eql('oblt');
     });
+
+    it('throw error if type not supported', async () => {
+      const { body } = await supertest
+        .put('/api/cloud/solution')
+        .set('kbn-xsrf', 'kibana')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .send({
+          type: 'miami',
+        })
+        .expect(400)
+
+        expect(body.message).to.eql(`[request body.type]: types that failed validation:\n- [request body.type.0]: expected value to equal [security]\n- [request body.type.1]: expected value to equal [observability]\n- [request body.type.2]: expected value to equal [elasticsearch]`);
+    });
+
+    it('throw error if not a super user', async () => {
+      await security.role.create(roleDiscoverAll.name, roleDiscoverAll.privileges);
+      await security.user.create(userDiscoverAll.username, userDiscoverAll);
+      const { body } = await supertestWithoutAuth
+        .put('/api/cloud/solution')
+        .set('kbn-xsrf', 'kibana')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .auth(userDiscoverAll.username, userDiscoverAll.password)
+        .send({
+          type: 'miami',
+        })
+        .expect(403)
+
+        await security.user.delete(userDiscoverAll.username)
+        await security.role.delete(roleDiscoverAll.name)
+        expect(body.message).to.eql(`Forbidden`);
+      });
   });
 }

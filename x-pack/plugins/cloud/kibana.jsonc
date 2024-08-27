@@ -12,11 +12,10 @@
     ],
     "optionalPlugins": [
       "usageCollection",
-      "spaces"
     ],
     "requiredPlugins": [
        "licensing"
-
-    ]
+    ],
+    "runtimePluginDependencies": [ "spaces" ]
   }
 }
