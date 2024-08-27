@@ -168,6 +168,8 @@ describe('CheckAll', () => {
   });
 
   test('it renders the expected button text when a check is running', async () => {
+    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
+    const user = userEvent.setup({ delay: null });
     render(
       <TestExternalProviders>
         <TestDataQualityProviders
@@ -194,13 +196,15 @@ describe('CheckAll', () => {
 
     const button = screen.getByTestId('checkAll');
 
-    await userEvent.click(button); // <-- START the check
+    await user.click(button); // <-- START the check
 
     expect(screen.getByTestId('checkAll')).toHaveTextContent(CANCEL);
   });
 
   describe('formatNumber', () => {
     test('it renders a comma-separated `value` via the `defaultNumberFormat`', async () => {
+      // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
+      const user = userEvent.setup({ delay: null });
       /** stores the result of invoking `CheckAll`'s `formatNumber` function */
       let formatNumberResult = '';
 
@@ -237,7 +241,7 @@ describe('CheckAll', () => {
 
       const button = screen.getByTestId('checkAll');
 
-      await userEvent.click(button); // <-- START the check
+      await user.click(button); // <-- START the check
 
       await waitFor(() => {
         expect(formatNumberResult).toEqual('123,456,789'); // a comma-separated `value`, because it's numeric
@@ -245,6 +249,9 @@ describe('CheckAll', () => {
     });
 
     test('it renders an empty stat placeholder when `value` is undefined', async () => {
+      // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
+      const user = userEvent.setup({ delay: null });
+
       /** stores the result of invoking `CheckAll`'s `formatNumber` function */
       let formatNumberResult = '';
 
@@ -280,7 +287,7 @@ describe('CheckAll', () => {
 
       const button = screen.getByTestId('checkAll');
 
-      await userEvent.click(button); // <-- START the check
+      await user.click(button); // <-- START the check
 
       await waitFor(() => {
         expect(formatNumberResult).toEqual(EMPTY_STAT); // a placeholder, because `value` is undefined
@@ -289,6 +296,9 @@ describe('CheckAll', () => {
   });
 
   describe('when a running check is cancelled', () => {
+    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
+    const user = userEvent.setup({ delay: null });
+
     const setCheckAllIndiciesChecked = jest.fn();
     const setCheckAllTotalIndiciesToCheck = jest.fn();
 
@@ -321,9 +331,9 @@ describe('CheckAll', () => {
 
       const button = screen.getByTestId('checkAll');
 
-      await userEvent.click(button); // <-- START the check
+      await user.click(button); // <-- START the check
 
-      await userEvent.click(button); // <-- STOP the check
+      await user.click(button); // <-- STOP the check
     });
 
     test('it invokes `setCheckAllIndiciesChecked` twice: when the check was started, and when it was cancelled', () => {
@@ -345,6 +355,9 @@ describe('CheckAll', () => {
     beforeEach(async () => {
       jest.clearAllMocks();
       jest.useFakeTimers();
+
+      // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
+      const user = userEvent.setup({ delay: null });
 
       render(
         <TestExternalProviders>
@@ -373,7 +386,7 @@ describe('CheckAll', () => {
 
       const button = screen.getByTestId('checkAll');
 
-      await userEvent.click(button); // <-- start the check
+      await user.click(button); // <-- start the check
 
       const totalIndexNames = Object.values(patternIndexNames).reduce(
         (total, indices) => total + indices.length,
