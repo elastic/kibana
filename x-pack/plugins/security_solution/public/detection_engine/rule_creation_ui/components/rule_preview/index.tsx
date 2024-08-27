@@ -18,6 +18,7 @@ import {
   EuiText,
   EuiTitle,
   EuiFormRow,
+  EuiCheckbox,
 } from '@elastic/eui';
 import moment from 'moment';
 import type { List } from '@kbn/securitysolution-io-ts-list-types';
@@ -98,6 +99,8 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
   const [timeframeStart, setTimeframeStart] = useState(moment().subtract(1, 'hour'));
   const [timeframeEnd, setTimeframeEnd] = useState(moment());
 
+  const [showElasticsearchRequests, setShowElasticsearchRequests] = useState(false);
+
   const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
 
   useEffect(() => {
@@ -140,6 +143,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
     scheduleRuleData: previewData.scheduleRuleData,
     exceptionsList,
     timeframeOptions: previewData.timeframeOptions,
+    enableLoggingRequests: showElasticsearchRequests,
   });
 
   const { startTransaction } = useStartTransaction();
@@ -261,6 +265,21 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFormRow>
+      <EuiFormRow>
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive>
+          <EuiFlexItem grow>
+            <EuiCheckbox
+              data-test-subj="showElasticsearchRequests"
+              id="showElasticsearchRequests"
+              label={'Show Elasticsearch requests, ran during rule executions'}
+              checked={showElasticsearchRequests}
+              onChange={() => {
+                setShowElasticsearchRequests(!showElasticsearchRequests);
+              }}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFormRow>
       <EuiSpacer size="l" />
       {isPreviewRequestInProgress && <LoadingHistogram />}
       {!isPreviewRequestInProgress && previewId && spaceId && (
@@ -273,7 +292,12 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
           timeframeOptions={previewData.timeframeOptions}
         />
       )}
-      <PreviewLogs logs={logs} hasNoiseWarning={hasNoiseWarning} isAborted={isAborted} />
+      <PreviewLogs
+        logs={logs}
+        hasNoiseWarning={hasNoiseWarning}
+        isAborted={isAborted}
+        showElasticsearchRequests={showElasticsearchRequests}
+      />
     </div>
   );
 };

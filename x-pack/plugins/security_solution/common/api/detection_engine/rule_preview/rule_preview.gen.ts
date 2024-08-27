@@ -15,6 +15,7 @@
  */
 
 import { z } from '@kbn/zod';
+import { BooleanFromString } from '@kbn/zod-helpers';
 
 import {
   EqlRuleCreateProps,
@@ -45,6 +46,15 @@ export const RulePreviewLogs = z.object({
   startedAt: NonEmptyString.optional(),
   requests: z.object({}).optional(),
 });
+
+export type RulePreviewRequestQuery = z.infer<typeof RulePreviewRequestQuery>;
+export const RulePreviewRequestQuery = z.object({
+  /**
+   * Enables logging and returning in response ES queries, performed during rule execution
+   */
+  enable_logging_requests: BooleanFromString.optional(),
+});
+export type RulePreviewRequestQueryInput = z.input<typeof RulePreviewRequestQuery>;
 
 export type RulePreviewRequestBody = z.infer<typeof RulePreviewRequestBody>;
 export const RulePreviewRequestBody = z.discriminatedUnion('type', [

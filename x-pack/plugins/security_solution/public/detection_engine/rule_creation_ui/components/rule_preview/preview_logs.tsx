@@ -15,6 +15,7 @@ interface PreviewLogsProps {
   logs: RulePreviewLogs[];
   hasNoiseWarning: boolean;
   isAborted: boolean;
+  showElasticsearchRequests: boolean;
 }
 
 interface SortedLogs {
@@ -43,7 +44,12 @@ const addLogs = (
   allLogs: SortedLogs[]
 ) => (logs.length ? [{ startedAt, logs, duration }, ...allLogs] : allLogs);
 
-const PreviewLogsComponent: React.FC<PreviewLogsProps> = ({ logs, hasNoiseWarning, isAborted }) => {
+const PreviewLogsComponent: React.FC<PreviewLogsProps> = ({
+  logs,
+  hasNoiseWarning,
+  isAborted,
+  showElasticsearchRequests,
+}) => {
   const sortedLogs = useMemo(
     () =>
       logs.reduce<{
@@ -66,8 +72,7 @@ const PreviewLogsComponent: React.FC<PreviewLogsProps> = ({ logs, hasNoiseWarnin
       <LogAccordion logs={sortedLogs.warnings}>
         {isAborted ? <CustomWarning message={i18n.PREVIEW_TIMEOUT_WARNING} /> : null}
       </LogAccordion>
-
-      <RequestsAccordion logs={logs} />
+      {showElasticsearchRequests ? <RequestsAccordion logs={logs} /> : null}
     </>
   );
 };

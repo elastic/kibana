@@ -31,7 +31,10 @@ import type {
   RulePreviewResponse,
   RulePreviewLogs,
 } from '../../../../../../common/api/detection_engine';
-import { RulePreviewRequestBody } from '../../../../../../common/api/detection_engine';
+import {
+  RulePreviewRequestBody,
+  RulePreviewRequestQuery,
+} from '../../../../../../common/api/detection_engine';
 
 import type { StartPlugins, SetupPlugins } from '../../../../../plugin';
 import { buildSiemResponse } from '../../../routes/utils';
@@ -92,7 +95,12 @@ export const previewRulesRoute = (
     .addVersion(
       {
         version: '2023-10-31',
-        validate: { request: { body: buildRouteValidationWithZod(RulePreviewRequestBody) } },
+        validate: {
+          request: {
+            body: buildRouteValidationWithZod(RulePreviewRequestBody),
+            query: buildRouteValidationWithZod(RulePreviewRequestQuery),
+          },
+        },
       },
       async (context, request, response): Promise<IKibanaResponse<RulePreviewResponse>> => {
         const siemResponse = buildSiemResponse(response);
@@ -270,7 +278,7 @@ export const previewRulesRoute = (
               invocationStartTime = moment();
 
               ({ state: statePreview, requests } = (await executor({
-                isLoggingRequestsEnabled: true,
+                isLoggingRequestsEnabled: request.query.enable_logging_requests,
                 executionId: uuidv4(),
                 params,
                 previousStartedAt,
