@@ -40,7 +40,7 @@ import type { ManagementState } from '../../management/types';
 import { initialSourcererState, SourcererScopeName } from '../../sourcerer/store/model';
 import { allowedExperimentalValues } from '../../../common/experimental_features';
 import { getScopePatternListSelection } from '../../sourcerer/store/helpers';
-import { mockBrowserFields, mockIndexFields, mockRuntimeMappings } from '../containers/source/mock';
+import { mockBrowserFields, mockIndexFields } from '../containers/source/mock';
 import { usersModel } from '../../explore/users/store';
 import { UsersFields } from '../../../common/search_strategy/security_solution/users/common';
 import { initialGroupingState } from '../store/grouping/reducer';
@@ -62,7 +62,6 @@ export const mockSourcererState: SourcererState = {
     fields: mockFieldMap,
     loading: false,
     patternList: [...DEFAULT_INDEX_PATTERN, `${DEFAULT_SIGNALS_INDEX}-spacename`],
-    runtimeMappings: mockRuntimeMappings,
     title: [...DEFAULT_INDEX_PATTERN, `${DEFAULT_SIGNALS_INDEX}-spacename`].join(','),
   },
 };

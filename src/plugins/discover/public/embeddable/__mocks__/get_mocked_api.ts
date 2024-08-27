@@ -17,7 +17,7 @@ import { DatatableColumnMeta } from '@kbn/expressions-plugin/common';
 import { FetchContext } from '@kbn/presentation-publishing';
 import { DiscoverGridSettings, SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
-import { SortOrder } from '@kbn/unified-data-table';
+import type { SortOrder, DataGridDensity } from '@kbn/unified-data-table';
 
 export const getMockedSearchApi = ({
   searchSource,
@@ -52,6 +52,7 @@ export const getMockedSearchApi = ({
       headerRowHeight: new BehaviorSubject<number | undefined>(savedSearch.headerRowHeight),
       rowsPerPage: new BehaviorSubject<number | undefined>(savedSearch.rowsPerPage),
       sampleSize: new BehaviorSubject<number | undefined>(savedSearch.sampleSize),
+      density: new BehaviorSubject<DataGridDensity | undefined>(savedSearch.density),
       grid: new BehaviorSubject<DiscoverGridSettings | undefined>(savedSearch.grid),
       rows: new BehaviorSubject<DataTableRecord[]>([]),
       totalHitCount: new BehaviorSubject<number | undefined>(0),

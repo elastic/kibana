@@ -101,7 +101,7 @@ export interface UpdatePackagePolicy extends NewPackagePolicy {
 // SO definition for this type is declared in server/types/interfaces
 export interface PackagePolicy extends Omit<NewPackagePolicy, 'inputs'> {
   id: string;
-  spaceId?: string;
+  spaceIds?: string[];
   inputs: PackagePolicyInput[];
   version?: string;
   agents?: number;

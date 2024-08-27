@@ -35,9 +35,7 @@ export const config: PluginConfigDescriptor = {
       enabled: true,
     },
     agentless: {
-      api: {
-        url: true,
-      },
+      enabled: true,
     },
     enableExperimental: true,
     developer: {
@@ -149,14 +147,19 @@ export const config: PluginConfigDescriptor = {
       }),
       agentless: schema.maybe(
         schema.object({
-          api: schema.object({
-            url: schema.uri({ scheme: ['http', 'https'] }),
-            tls: schema.object({
-              certificate: schema.string(),
-              key: schema.string(),
-              ca: schema.string(),
-            }),
-          }),
+          enabled: schema.boolean({ defaultValue: false }),
+          api: schema.maybe(
+            schema.object({
+              url: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
+              tls: schema.maybe(
+                schema.object({
+                  certificate: schema.maybe(schema.string()),
+                  key: schema.maybe(schema.string()),
+                  ca: schema.maybe(schema.string()),
+                })
+              ),
+            })
+          ),
         })
       ),
       packages: PreconfiguredPackagesSchema,

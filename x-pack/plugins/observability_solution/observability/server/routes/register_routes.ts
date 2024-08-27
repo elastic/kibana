@@ -10,9 +10,11 @@ import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 import { CoreSetup, KibanaRequest, Logger, RouteRegistrar } from '@kbn/core/server';
 import { RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
 import {
+  IoTsParamsObject,
   decodeRequestParams,
+  stripNullishRequestParameters,
   parseEndpoint,
-  routeValidationObject,
+  passThroughValidationObject,
 } from '@kbn/server-route-repository';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import axios from 'axios';
@@ -57,18 +59,18 @@ export function registerRoutes({ config, repository, core, logger, dependencies 
     (router[method] as RouteRegistrar<typeof method, ObservabilityRequestHandlerContext>)(
       {
         path: pathname,
-        validate: routeValidationObject,
+        validate: passThroughValidationObject,
         options,
       },
       async (context, request, response) => {
         try {
           const decodedParams = decodeRequestParams(
-            {
+            stripNullishRequestParameters({
               params: request.params,
               body: request.body,
               query: request.query,
-            },
-            params ?? t.strict({})
+            }),
+            (params as IoTsParamsObject) ?? t.strict({})
           );
 
           const data = await handler({

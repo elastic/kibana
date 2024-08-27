@@ -8,17 +8,17 @@
 import { sendGetAgentPolicies, sendGetPackagePolicies, sendGetAgents } from '../../../hooks';
 import type { Output } from '../../../types';
 import {
-  AGENT_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
 } from '../../../constants';
 
 export async function getAgentAndPolicyCountForOutput(output: Output) {
-  let agentPolicyKuery = `${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${output.id}" or ${AGENT_POLICY_SAVED_OBJECT_TYPE}.monitoring_output_id:"${output.id}"`;
+  let agentPolicyKuery = `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${output.id}" or ${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.monitoring_output_id:"${output.id}"`;
   const packagePolicyKuery = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.output_id:"${output.id}"`;
 
   if (output.is_default) {
-    agentPolicyKuery += ` or (not ${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:*)`;
+    agentPolicyKuery += ` or (not ${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:*)`;
   }
 
   const agentPolicies = await sendGetAgentPolicies({

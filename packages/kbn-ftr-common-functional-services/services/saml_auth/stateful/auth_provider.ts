@@ -17,7 +17,7 @@ import {
 
 export class StatefulAuthProvider implements AuthProvider {
   private readonly rolesDefinitionPath = resolve(REPO_ROOT, STATEFUL_ROLES_ROOT_PATH, 'roles.yml');
-  getSupportedRoleDescriptors(): any {
+  getSupportedRoleDescriptors(): Record<string, unknown> {
     return readRolesDescriptorsFromResource(this.rolesDefinitionPath);
   }
   getDefaultRole() {
