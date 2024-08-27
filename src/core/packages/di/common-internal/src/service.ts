@@ -10,8 +10,8 @@
 import { Container, type interfaces } from 'inversify';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { InternalCoreDiServiceSetup, InternalCoreDiServiceStart } from './contracts';
-import { InternalDiSetupService, InternalDiService } from './services';
-import { LifecycleModule, Plugin, PluginModule } from './modules';
+import { LifecycleModule } from './modules/lifecycle';
+import { Plugin, PluginModule } from './modules/plugin';
 
 /** @internal */
 export class CoreInjectionService {
@@ -47,7 +47,6 @@ export class CoreInjectionService {
     };
     this.root.load(new LifecycleModule());
     this.root.load(new PluginModule());
-    this.root.bind(InternalDiSetupService).toConstantValue(contract);
 
     return contract;
   }
@@ -57,8 +56,6 @@ export class CoreInjectionService {
       fork: this.fork,
       getContainer: this.getContainer,
     };
-
-    this.root.bind(InternalDiService).toConstantValue(contract);
 
     return contract;
   }
