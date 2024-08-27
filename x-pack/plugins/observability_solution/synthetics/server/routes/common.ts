@@ -147,18 +147,25 @@ export const parseArrayFilters = ({
   locationFilter?: string | string[];
   configIds?: string[];
 }) => {
+  const formatKqlFilter = (field: string, values?: string | string[]) => {
+    return values === 'All' || (Array.isArray(values) && values?.includes('All'))
+      ? undefined
+      : getKqlFilter({ field, values });
+  };
+
   const filtersStr = [
     filter,
-    getKqlFilter({ field: 'tags', values: tags }),
-    getKqlFilter({ field: 'project_id', values: projects }),
-    getKqlFilter({ field: 'type', values: monitorTypes }),
-    getKqlFilter({ field: 'locations.id', values: locationFilter }),
-    getKqlFilter({ field: 'schedule.number', values: schedules }),
-    getKqlFilter({ field: 'id', values: monitorQueryIds }),
-    getKqlFilter({ field: 'config_id', values: configIds }),
+    formatKqlFilter('tags', tags),
+    formatKqlFilter('project_id', projects),
+    formatKqlFilter('type', monitorTypes),
+    formatKqlFilter('locations.id', locationFilter),
+    formatKqlFilter('schedule.number', schedules),
+    formatKqlFilter('id', monitorQueryIds),
+    formatKqlFilter('config_id', configIds),
   ]
     .filter((f) => !!f)
     .join(' AND ');
+
   return { filtersStr, locationFilter };
 };
 
