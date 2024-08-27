@@ -400,22 +400,14 @@ const CreateRulePageComponent: React.FC = () => {
     return { valid, blockingErrors, nonBlockingErrors };
   }, [validateStep]);
 
-  const isValidStep = useCallback(
-    async (step: RuleStep) => {
-      const { valid, blockingErrors } = await validateStep(step);
-      return valid || !blockingErrors.length;
-    },
-    [validateStep]
-  );
-
   const editStep = useCallback(
     async (step: RuleStep) => {
-      const valid = await isValidStep(activeStep);
-      if (valid) {
+      const { valid, blockingErrors } = await validateStep(activeStep);
+      if (valid || !blockingErrors.length) {
         goToStep(step);
       }
     },
-    [isValidStep, activeStep, goToStep]
+    [validateStep, activeStep, goToStep]
   );
 
   const createRuleFromFormData = useCallback(
@@ -509,14 +501,11 @@ const CreateRulePageComponent: React.FC = () => {
     [defineRuleButtonType]
   );
   const defineRuleNextStep = useCallback(async () => {
-    const valid = await isValidStep(RuleStep.defineRule);
-    if (valid) {
-      const nextStep = getNextStep(RuleStep.defineRule);
-      if (nextStep) {
-        goToStep(nextStep);
-      }
+    const nextStep = getNextStep(RuleStep.defineRule);
+    if (nextStep) {
+      await editStep(nextStep);
     }
-  }, [goToStep, isValidStep]);
+  }, [editStep]);
 
   const aboutRuleButtonType =
     activeStep === RuleStep.aboutRule ? 'active' : aboutStepForm.isValid ? 'valid' : 'passive';
@@ -525,14 +514,11 @@ const CreateRulePageComponent: React.FC = () => {
     [aboutRuleButtonType]
   );
   const aboutRuleNextStep = useCallback(async () => {
-    const valid = await isValidStep(RuleStep.aboutRule);
-    if (valid) {
-      const nextStep = getNextStep(RuleStep.aboutRule);
-      if (nextStep) {
-        goToStep(nextStep);
-      }
+    const nextStep = getNextStep(RuleStep.aboutRule);
+    if (nextStep) {
+      await editStep(nextStep);
     }
-  }, [goToStep, isValidStep]);
+  }, [editStep]);
 
   const scheduleRuleButtonType =
     activeStep === RuleStep.scheduleRule
@@ -545,14 +531,11 @@ const CreateRulePageComponent: React.FC = () => {
     [scheduleRuleButtonType]
   );
   const scheduleRuleNextStep = useCallback(async () => {
-    const valid = await isValidStep(RuleStep.scheduleRule);
-    if (valid) {
-      const nextStep = getNextStep(RuleStep.scheduleRule);
-      if (nextStep) {
-        goToStep(nextStep);
-      }
+    const nextStep = getNextStep(RuleStep.scheduleRule);
+    if (nextStep) {
+      await editStep(nextStep);
     }
-  }, [isValidStep, goToStep]);
+  }, [editStep]);
 
   const actionsRuleButtonType =
     activeStep === RuleStep.ruleActions ? 'active' : actionsStepForm.isValid ? 'valid' : 'passive';
@@ -650,6 +633,7 @@ const CreateRulePageComponent: React.FC = () => {
   );
   const memoDefineStepExtraAction = useMemo(
     () =>
+      defineStepForm.isValid !== undefined &&
       activeStep !== RuleStep.defineRule && (
         <EuiButtonEmpty
           data-test-subj="edit-define-rule"
@@ -660,7 +644,7 @@ const CreateRulePageComponent: React.FC = () => {
           {i18n.EDIT_RULE}
         </EuiButtonEmpty>
       ),
-    [activeStep, editStep]
+    [activeStep, defineStepForm.isValid, editStep]
   );
 
   const memoAboutStepReadOnly = useMemo(
@@ -720,6 +704,7 @@ const CreateRulePageComponent: React.FC = () => {
   );
   const memoAboutStepExtraAction = useMemo(
     () =>
+      aboutStepForm.isValid !== undefined &&
       activeStep !== RuleStep.aboutRule && (
         <EuiButtonEmpty
           data-test-subj="edit-about-rule"
@@ -730,7 +715,7 @@ const CreateRulePageComponent: React.FC = () => {
           {i18n.EDIT_RULE}
         </EuiButtonEmpty>
       ),
-    [activeStep, editStep]
+    [aboutStepForm.isValid, activeStep, editStep]
   );
 
   const memoStepScheduleRule = useMemo(
@@ -773,12 +758,13 @@ const CreateRulePageComponent: React.FC = () => {
   );
   const memoScheduleStepExtraAction = useMemo(
     () =>
+      scheduleStepForm.isValid !== undefined &&
       activeStep !== RuleStep.scheduleRule && (
         <EuiButtonEmpty iconType="pencil" size="xs" onClick={() => editStep(RuleStep.scheduleRule)}>
           {i18n.EDIT_RULE}
         </EuiButtonEmpty>
       ),
-    [activeStep, editStep]
+    [activeStep, editStep, scheduleStepForm.isValid]
   );
 
   const memoStepRuleActions = useMemo(
@@ -853,12 +839,13 @@ const CreateRulePageComponent: React.FC = () => {
   );
   const memoActionsStepExtraAction = useMemo(
     () =>
+      actionsStepForm.isValid !== undefined &&
       activeStep !== RuleStep.ruleActions && (
         <EuiButtonEmpty iconType="pencil" size="xs" onClick={() => editStep(RuleStep.ruleActions)}>
           {i18n.EDIT_RULE}
         </EuiButtonEmpty>
       ),
-    [activeStep, editStep]
+    [actionsStepForm.isValid, activeStep, editStep]
   );
 
   const onToggleCollapsedMemo = useCallback(
