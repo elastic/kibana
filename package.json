@@ -1137,7 +1137,7 @@
     "minimatch": "^3.1.2",
     "moment": "^2.29.4",
     "moment-duration-format": "^2.3.2",
-    "moment-timezone": "^0.5.43",
+    "moment-timezone": "^0.5.45",
     "monaco-editor": "^0.44.0",
     "monaco-yaml": "^5.1.0",
     "murmurhash": "^2.0.1",
