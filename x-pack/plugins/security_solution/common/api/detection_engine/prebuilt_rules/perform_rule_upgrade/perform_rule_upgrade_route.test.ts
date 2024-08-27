@@ -6,13 +6,13 @@
  */
 import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers';
 import {
-  PickVersionValues,
   RuleUpgradeSpecifier,
   UpgradeSpecificRulesRequest,
   UpgradeAllRulesRequest,
   PerformRuleUpgradeResponseBody,
   PerformRuleUpgradeRequestBody,
 } from './perform_rule_upgrade_route';
+import { PickVersionValues } from '../model';
 
 describe('Perform Rule Upgrade Route Schemas', () => {
   describe('PickVersionValues', () => {
