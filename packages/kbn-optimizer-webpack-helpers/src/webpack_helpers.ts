@@ -16,13 +16,12 @@ export function isFailureStats(stats: webpack.Stats) {
   const { warnings } = stats.toJson({
     all: false,
     warnings: true,
-    warningsFilter: STATS_WARNINGS_FILTER,
   });
 
   return warnings && warnings.length > 0;
 }
 
-const STATS_WARNINGS_FILTER = new RegExp(
+export const STATS_WARNINGS_FILTER = new RegExp(
   [
     '(export .* was not found in)',
     '|(chunk .* \\[mini-css-extract-plugin\\]\\\nConflicting order between:)',
@@ -33,7 +32,6 @@ export function failedStatsToErrorMessage(stats: webpack.Stats) {
   const details = stats.toString({
     ...stats.compilation.createStatsOptions('minimal'),
     colors: true,
-    warningsFilter: STATS_WARNINGS_FILTER,
     errors: true,
     errorDetails: true,
     moduleTrace: true,

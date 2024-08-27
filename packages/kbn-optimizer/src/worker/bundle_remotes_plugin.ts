@@ -114,7 +114,7 @@ export class BundleRemotesPlugin {
       compilation.hooks.finishModules.tapPromise(
         'BundleRefsPlugin/finishModules',
         async (modules) => {
-          const usedBundleIds = (modules as any[])
+          const usedBundleIds = (Array.from(modules) as any[])
             .filter((m: any): m is BundleRemoteModule => m instanceof BundleRemoteModule)
             .map((m) => m.remote.bundleId);
 

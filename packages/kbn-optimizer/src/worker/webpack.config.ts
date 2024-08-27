@@ -20,6 +20,7 @@ import StatoscopeWebpackPlugin from '@statoscope/webpack-plugin';
 // @ts-expect-error
 import VisualizerPlugin from 'webpack-visualizer-plugin2';
 import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
+import { STATS_WARNINGS_FILTER } from '@kbn/optimizer-webpack-helpers';
 
 import { Bundle, BundleRemotes, WorkerConfig, parseDllManifest } from '../common';
 import { BundleRemotesPlugin } from './bundle_remotes_plugin';
@@ -322,6 +323,8 @@ export function getWebpackConfig(
       // and not for the webpack compilations performance itself
       hints: false,
     },
+
+    ignoreWarnings: [STATS_WARNINGS_FILTER],
   };
 
   const nonDistributableConfig: webpack.Configuration = {
@@ -353,6 +356,7 @@ export function getWebpackConfig(
       // usedExports: false,
       removeAvailableModules: false,
       removeEmptyChunks: false,
+      mergeDuplicateChunks: false,
     },
 
     // resolve: {

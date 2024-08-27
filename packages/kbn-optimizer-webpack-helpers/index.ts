@@ -16,6 +16,7 @@ export type {
 } from './src/webpack_helpers';
 
 export {
+  STATS_WARNINGS_FILTER,
   isFailureStats,
   failedStatsToErrorMessage,
   getModulePath,
