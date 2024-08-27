@@ -1650,7 +1650,7 @@
     "chromedriver": "^127.0.3",
     "clean-webpack-plugin": "^3.0.0",
     "cli-progress": "^3.12.0",
-    "cli-table3": "^0.6.1",
+    "cli-table3": "^0.6.5",
     "content-security-policy-parser": "^0.6.0",
     "cpy": "^8.1.1",
     "css-loader": "^3.4.2",
