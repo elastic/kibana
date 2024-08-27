@@ -11421,10 +11421,19 @@
   resolved "https://registry.yarnpkg.com/@types/uuid/-/uuid-9.0.2.tgz#ede1d1b1e451548d44919dc226253e32a6952c4b"
   integrity sha512-kNnC1GFBLuhImSnV7w4njQkUiJi0ZXUycu1rUaouPqiKlXkh77JKgdRnTAp1x5eBwcIwbtI+3otwzuIDEuDoxQ==
 
-"@types/vinyl-fs@*", "@types/vinyl-fs@^3.0.2":
+"@types/vinyl-fs@*":
   version "3.0.2"
   resolved "https://registry.yarnpkg.com/@types/vinyl-fs/-/vinyl-fs-3.0.2.tgz#cbaef5160ad7695483af0aa1b4fe67f166c18feb"
   integrity sha512-ctNcmmzbMIKooXjRkyyUCOu2Z4AyqibL+RhXoF3pb7K7j+ezItnakmpm31LymkYHSIM5ey0tjIFzTvFOTSBCGw==
+  dependencies:
+    "@types/glob-stream" "*"
+    "@types/node" "*"
+    "@types/vinyl" "*"
+
+"@types/vinyl-fs@^3.0.5":
+  version "3.0.5"
+  resolved "https://registry.yarnpkg.com/@types/vinyl-fs/-/vinyl-fs-3.0.5.tgz#b38e4baf4a37f3f9a1e999872d88fff399af16f3"
+  integrity sha512-ckYz9giHgV6U10RFuf9WsDQ3X86EFougapxHmmoxLK7e6ICQqO8CE+4V/3lBN148V5N1pb4nQMmMjyScleVsig==
   dependencies:
     "@types/glob-stream" "*"
     "@types/node" "*"

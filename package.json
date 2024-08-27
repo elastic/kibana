@@ -1613,7 +1613,7 @@
     "@types/type-detect": "^4.0.1",
     "@types/uuid": "^9.0.0",
     "@types/vinyl": "^2.0.4",
-    "@types/vinyl-fs": "^3.0.2",
+    "@types/vinyl-fs": "^3.0.5",
     "@types/watchpack": "^1.1.5",
     "@types/webpack": "^4.41.3",
     "@types/webpack-bundle-analyzer": "^4.7.0",
