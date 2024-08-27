@@ -9,8 +9,8 @@ import { FieldMap } from '@kbn/data-stream-adapter';
 export const knowledgeBaseFieldMap: FieldMap = {
   // Base fields
   '@timestamp': {
-    type: 'alias',
-    path: 'created_at',
+    type: 'date',
+    array: false,
     required: false,
   },
   id: {
