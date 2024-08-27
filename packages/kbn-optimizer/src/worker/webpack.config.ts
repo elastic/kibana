@@ -338,7 +338,7 @@ export function getWebpackConfig(
 
     output: {
       // xxhash64 or sha1: according to docs xxhash should be faster but for now sha1 looks faster
-      hashFunction: 'sha1',
+      hashFunction: 'xxhash64',
       // Setting this to false looks like it will boost performance by a little
       // pathinfo: false,
     },
@@ -346,7 +346,7 @@ export function getWebpackConfig(
     experiments: {
       cacheUnaffected: true,
       // TODO: enable this after converting all plugins to v5
-      // backCompat: false,
+      backCompat: false,
     },
 
     optimization: {
@@ -356,7 +356,7 @@ export function getWebpackConfig(
       // usedExports: false,
       removeAvailableModules: false,
       removeEmptyChunks: false,
-      mergeDuplicateChunks: false,
+      // mergeDuplicateChunks: false,
     },
 
     // resolve: {
@@ -369,7 +369,7 @@ export function getWebpackConfig(
       unsafeCache: true,
     },
     // NOTE: I'm not sure about this but it does seem like it is speeding up
-    parallelism: 5000,
+    // parallelism: 5000,
     //
   };
 
