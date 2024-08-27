@@ -385,7 +385,7 @@ class AgentPolicyService {
       {
         ...agentPolicy,
         status: 'active',
-        is_managed: (agentPolicy.is_managed || agentPolicy?.supports_agentless) ?? false,
+        is_managed: agentPolicy.is_managed ?? false,
         revision: 1,
         updated_at: new Date().toISOString(),
         updated_by: options?.user?.username || 'system',
@@ -1103,7 +1103,7 @@ class AgentPolicyService {
       kuery: `${AGENTS_PREFIX}.policy_id:${id}`,
     });
 
-    if (total > 0) {
+    if (total > 0 && !agentPolicy?.supports_agentless) {
       throw new FleetError(
         'Cannot delete an agent policy that is assigned to any active or inactive agents'
       );
@@ -1752,7 +1752,7 @@ export async function addPackageToAgentPolicy(
     ? String(packagePolicyId)
     : uuidv5(`${agentPolicy.id}-${packagePolicyName}`, UUID_V5_NAMESPACE);
 
-  await packagePolicyService.create(soClient, esClient, newPackagePolicy, {
+  await packagePolicyService.creaƒte(soClient, esClient, newPackagePolicy, {
     id,
     bumpRevision: bumpAgentPolicyRevison,
     skipEnsureInstalled: true,

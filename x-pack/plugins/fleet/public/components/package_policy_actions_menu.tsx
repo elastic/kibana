@@ -13,8 +13,6 @@ import type { AgentPolicy, InMemoryPackagePolicy } from '../types';
 import { useAgentPolicyRefresh, useAuthz, useLink, useStartServices } from '../hooks';
 import { policyHasFleetServer } from '../services';
 
-import { PLUGIN_ID, pagePathGetters } from '../constants';
-
 import { AgentEnrollmentFlyout } from './agent_enrollment_flyout';
 import { ContextMenuActions } from './context_menu_actions';
 import { DangerEuiContextMenuItem } from './danger_eui_context_menu_item';
@@ -143,12 +141,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
               onClick={() => {
                 deletePackagePoliciesPrompt([packagePolicy.id], () => {
                   setIsActionsMenuOpen(false);
-                  if (agentPolicy?.supports_agentless) {
-                    // go back to all agent policies
-                    navigateToApp(PLUGIN_ID, { path: pagePathGetters.policies_list()[1] });
-                  } else {
-                    refreshAgentPolicy();
-                  }
+                  refreshAgentPolicy();
                 });
               }}
             >
