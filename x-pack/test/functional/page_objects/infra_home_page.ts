@@ -37,7 +37,7 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
     },
 
     async getWaffleMap() {
-      await retry.try(async () => {
+      await retry.tryForTime(5000, async () => {
         const element = await testSubjects.find('waffleMap');
         if (!element) {
           throw new Error();
@@ -98,13 +98,13 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
     },
 
     async clickOnGoToNodeDetails() {
-      await retry.try(async () => {
+      await retry.tryForTime(5000, async () => {
         await testSubjects.click('viewAssetDetailsContextMenuItem');
       });
     },
 
     async clickOnNodeDetailsFlyoutOpenAsPage() {
-      await retry.try(async () => {
+      await retry.tryForTime(5000, async () => {
         await testSubjects.click('infraAssetDetailsOpenAsPageButton');
       });
     },
@@ -139,7 +139,7 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
 
       // wait for input value to echo the input before submitting
       // this ensures the React state has caught up with the events
-      await retry.try(async () => {
+      await retry.tryForTime(5000, async () => {
         const value = await input.getAttribute('value');
         expect(value).to.eql(query);
       });

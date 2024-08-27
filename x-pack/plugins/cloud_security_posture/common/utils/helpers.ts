@@ -6,6 +6,7 @@
  */
 
 import { Truthy } from 'lodash';
+import type { BaseCspSetupStatus } from '@kbn/cloud-security-posture-common';
 import {
   NewPackagePolicy,
   NewPackagePolicyInput,
@@ -25,7 +26,6 @@ import {
 import type {
   BenchmarkId,
   Score,
-  BaseCspSetupStatus,
   AwsCredentialsType,
   GcpCredentialsType,
   AzureCredentialsType,
