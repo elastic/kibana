@@ -11,7 +11,7 @@ import type {
   Version,
 } from '@kbn/object-versioning';
 
-// We export the versionned service definition from this file and not the barrel to avoid adding
+// We export the versioned service definition from this file and not the barrel to avoid adding
 // the schemas in the "public" js bundle
 
 import { serviceDefinition as v1 } from './v1/cm_services';

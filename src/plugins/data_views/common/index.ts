@@ -14,7 +14,7 @@ export {
   MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH,
 } from './constants';
 
-export { LATEST_VERSION } from './content_management/v1/constants';
+export { LATEST_VERSION } from './content_management/constants';
 
 export type { ToSpecConfig } from './fields';
 export type { IIndexPatternFieldList } from './fields';

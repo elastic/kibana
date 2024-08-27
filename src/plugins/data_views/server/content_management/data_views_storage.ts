@@ -9,9 +9,9 @@
 import { SOContentStorage } from '@kbn/content-management-utils';
 import type { Logger } from '@kbn/logging';
 
-import type { DataViewCrudTypes } from '../../common/content_management';
-import { DataViewSOType } from '../../common/content_management';
-import { cmServicesDefinition } from '../../common/content_management/cm_services';
+import { cmServicesDefinition } from './schemas/cm_services';
+import type { DataViewCrudTypes } from './schemas';
+import { DataViewSOType } from './schemas';
 
 export class DataViewsStorage extends SOContentStorage<DataViewCrudTypes> {
   constructor({

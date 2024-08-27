@@ -6,10 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { LATEST_VERSION } from './constants';
-
-export type { DataViewCrudTypes } from '../../server/content_management/schemas/v1/types';
-
-export type { DataViewContentType } from './constants';
-
-export { DataViewSOType } from './constants';
+export * from './v1';

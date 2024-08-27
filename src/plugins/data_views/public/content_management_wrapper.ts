@@ -16,7 +16,7 @@ import {
   SavedObjectsClientCommonFindArgs,
 } from '../common/types';
 
-import type { DataViewCrudTypes } from '../common/content_management';
+import type { DataViewCrudTypes } from '../server/content_management/schemas';
 
 import { DataViewSOType } from '../common/content_management';
 

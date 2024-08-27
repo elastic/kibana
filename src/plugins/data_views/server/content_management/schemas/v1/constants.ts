@@ -6,10 +6,12 @@
  * Side Public License, v 1.
  */
 
-export { LATEST_VERSION } from './constants';
+import { DATA_VIEW_SAVED_OBJECT_TYPE as DataViewSOType } from '../../../../common';
+export { DataViewSOType };
 
-export type { DataViewCrudTypes } from '../../server/content_management/schemas/v1/types';
+/**
+ * Data view saved object version.
+ */
+export const LATEST_VERSION = 1;
 
-export type { DataViewContentType } from './constants';
-
-export { DataViewSOType } from './constants';
+export type DataViewContentType = typeof DataViewSOType;

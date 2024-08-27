@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DATA_VIEW_SAVED_OBJECT_TYPE as DataViewSOType } from '../..';
+import { DATA_VIEW_SAVED_OBJECT_TYPE as DataViewSOType } from '..';
 export { DataViewSOType };
 
 /**
