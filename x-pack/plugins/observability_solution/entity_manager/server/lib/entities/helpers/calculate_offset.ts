@@ -23,13 +23,12 @@ const durationToSeconds = (dateMath: string) => {
 };
 
 export function calculateOffset(definition: EntityDefinition) {
-  const interval = durationToSeconds(definition.history.interval);
   const syncDelay = durationToSeconds(
     definition.history.settings.syncDelay || ENTITY_DEFAULT_HISTORY_SYNC_DELAY
   );
-  const frequency = durationToSeconds(
-    definition.history.settings.frequency || ENTITY_DEFAULT_HISTORY_FREQUENCY
-  );
+  const frequency =
+    durationToSeconds(definition.history.settings.frequency || ENTITY_DEFAULT_HISTORY_FREQUENCY) *
+    2;
 
-  return interval + syncDelay + frequency;
+  return syncDelay + frequency;
 }
