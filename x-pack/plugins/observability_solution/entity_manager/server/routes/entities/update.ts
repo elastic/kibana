@@ -65,7 +65,7 @@ export function updateEntityDefinitionRoute<T extends RequestHandlerContext>({
   router,
   server,
 }: SetupRouteOptions<T>) {
-  router.put<{ id: string }, CreateEntityDefinitionQuery, EntityDefinitionUpdate>(
+  router.patch<{ id: string }, CreateEntityDefinitionQuery, EntityDefinitionUpdate>(
     {
       path: '/internal/entities/definition/{id}',
       validate: {

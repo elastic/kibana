@@ -71,7 +71,7 @@ export const updateDefinition = (
 ) => {
   const { id, update, expectedCode = 200 } = params;
   return supertest
-    .put(`/internal/entities/definition/${id}`)
+    .patch(`/internal/entities/definition/${id}`)
     .set('kbn-xsrf', 'xxx')
     .send(update)
     .expect(expectedCode);
