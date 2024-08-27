@@ -1485,7 +1485,7 @@
     "@types/async": "^3.2.3",
     "@types/aws4": "^1.5.0",
     "@types/babel__core": "^7.20.5",
-    "@types/babel__generator": "^7.6.4",
+    "@types/babel__generator": "^7.6.8",
     "@types/babel__helper-plugin-utils": "^7.10.0",
     "@types/base64-js": "^1.2.5",
     "@types/byte-size": "^8.1.0",
