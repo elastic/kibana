@@ -158,7 +158,7 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
             />
           </EuiToolTip>
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <ContextMenu
             getRequests={getRequestsCallback}
             getDocumentation={getDocumenationLink}
