@@ -127,6 +127,9 @@ describe('VisualizeESQL', () => {
   it('should run the setVisibility callback if edit button is clicked', async () => {
     const setVisibilitySpy = jest.fn();
     renderComponent({}, undefined, setVisibilitySpy);
+    await waitFor(() => {
+      expect(screen.getByTestId('observabilityAiAssistantLensESQLEditButton')).toBeInTheDocument();
+    });
     await userEvent.click(screen.getByTestId('observabilityAiAssistantLensESQLEditButton'));
     await waitFor(() => {
       expect(setVisibilitySpy).toHaveBeenCalled();
