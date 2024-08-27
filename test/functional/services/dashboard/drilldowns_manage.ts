@@ -152,7 +152,7 @@ export function DashboardDrilldownsManageProvider({
       log.debug('getPanelDrilldownCount');
       const panel = (await dashboard.getDashboardPanels())[panelIndex];
       try {
-        await dashboardPanelActions.openContextMenu(panel);
+        await dashboardPanelActions.openContextMenuMorePanel(panel);
         const count = await panel.findByTestSubject('manageDrilldownAction__count');
         return Number.parseInt(await count.getVisibleText(), 10);
       } catch (e) {
