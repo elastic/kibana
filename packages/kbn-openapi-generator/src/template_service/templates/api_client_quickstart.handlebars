@@ -64,7 +64,7 @@ async {{camelCase operationId}} ({{#if (or requestQuery requestParams requestBod
 }
 
 {{#each operations}}
-{{#if (or requestQuery requestParams requestBody)}}
+{{#if (or requestQuery requestParams requestBody requestAttachment)}}
 export interface {{operationId}}Props {
   {{~#if requestQuery}}query: {{operationId}}RequestQueryInput;{{/if}}
   {{~#if requestParams}}params: {{operationId}}RequestParamsInput;{{/if}}

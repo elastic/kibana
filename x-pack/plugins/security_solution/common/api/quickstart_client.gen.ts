@@ -1907,6 +1907,9 @@ export interface ImportTimelinesProps {
 export interface InstallPrepackedTimelinesProps {
   body: InstallPrepackedTimelinesRequestBodyInput;
 }
+export interface InternalUploadAssetCriticalityRecordsProps {
+  attachment: FormData;
+}
 export interface PatchRuleProps {
   body: PatchRuleRequestBodyInput;
 }
@@ -1961,4 +1964,7 @@ export interface TriggerRiskScoreCalculationProps {
 }
 export interface UpdateRuleProps {
   body: UpdateRuleRequestBodyInput;
+}
+export interface UploadAssetCriticalityRecordsProps {
+  attachment: FormData;
 }
