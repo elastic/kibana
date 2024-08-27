@@ -76,7 +76,7 @@
   },
   "engines": {
     "node": "20.15.1",
-    "yarn": "^1.22.19"
+    "yarn": "^1.22.22"
   },
   "resolutions": {
     "**/@bazel/typescript/protobufjs": "6.11.4",
@@ -1813,5 +1813,5 @@
     "yarn-deduplicate": "^6.0.2",
     "zod-to-json-schema": "^3.23.0"
   },
-  "packageManager": "yarn@1.22.21"
+  "packageManager": "yarn@1.22.22"
 }
