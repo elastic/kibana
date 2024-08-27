@@ -39,7 +39,6 @@ export function getWebpackConfig(
 
   const commonConfig: webpack.Configuration = {
     context: bundle.contextDir,
-    cache: true,
     entry: {
       [bundle.id]: ENTRY_CREATOR,
     },
@@ -65,6 +64,7 @@ export function getWebpackConfig(
     },
 
     optimization: {
+      moduleIds: worker.dist ? 'deterministic' : 'natural',
       chunkIds: worker.dist ? 'deterministic' : 'natural',
       emitOnErrors: false,
       splitChunks: {
@@ -328,28 +328,44 @@ export function getWebpackConfig(
     mode: 'development',
 
     // TODO: potential performance impact flags
+    cache: {
+      type: 'memory',
+      cacheUnaffected: true,
+    },
+
     output: {
-      hashFunction: 'xxhash64',
-      pathinfo: false,
+      // xxhash64 or sha1: according to docs xxhash should be faster but for now sha1 looks faster
+      hashFunction: 'sha1',
+      // Setting this to false looks like it will boost performance by a little
+      // pathinfo: false,
     },
 
     experiments: {
       cacheUnaffected: true,
-      // WHEN true is returning error
-      futureDefaults: false,
       // TODO: enable this after converting all plugins to v5
       // backCompat: false,
     },
 
     optimization: {
+      // Need to test which composition makes for the best performance
       sideEffects: false,
-      providedExports: false,
-      usedExports: false,
+      // providedExports: false,
+      // usedExports: false,
+      removeAvailableModules: false,
+      removeEmptyChunks: false,
     },
 
+    // resolve: {
+    //  // Not sure if this is bringing any performance to the table
+    //  cacheWithContext: false,
+    // },
+
     module: {
+      // This was default on webpack v4
       unsafeCache: true,
     },
+    // NOTE: I'm not sure about this but it does seem like it is speeding up
+    parallelism: 5000,
     //
   };
 
