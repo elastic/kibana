@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiTablePagination } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { usePerformanceContext } from '@kbn/ebt-tools';
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useIsMutating } from '@tanstack/react-query';
 import dedent from 'dedent';
 import { groupBy as _groupBy, mapValues } from 'lodash';
@@ -14,10 +16,11 @@ import { useFetchSloList } from '../../../hooks/use_fetch_slo_list';
 import { useKibana } from '../../../utils/kibana_react';
 import { useUrlSearchState } from '../hooks/use_url_search_state';
 import { GroupView } from './grouped_slos/group_view';
-import { SlosView } from './slos_view';
 import { ToggleSLOView } from './toggle_slo_view';
+import { UngroupedView } from './ungrouped_slos/ungrouped_view';
 
 export function SloList() {
+  const { onPageReady } = usePerformanceContext();
   const { observabilityAIAssistant } = useKibana().services;
   const { state, onStateChange } = useUrlSearchState();
   const { view, page, perPage, kqlQuery, filters, tagsFilter, statusFilter, groupBy } = state;
@@ -38,7 +41,6 @@ export function SloList() {
     sortDirection: state.sort.direction,
     lastRefresh: state.lastRefresh,
   });
-  const { results = [], total = 0 } = sloList ?? {};
 
   const isDeletingSlo = Boolean(useIsMutating(['deleteSlo']));
 
@@ -50,7 +52,7 @@ export function SloList() {
     const slosByStatus = mapValues(
       _groupBy(sloList.results, (result) => result.summary.status),
       (groupResults) => groupResults.map((result) => `- ${result.name}`).join('\n')
-    ) as Record<typeof results[number]['summary']['status'], string>;
+    ) as Record<SLOWithSummaryResponse['summary']['status'], string>;
 
     return observabilityAIAssistant.service.setScreenContext({
       screenDescription: dedent(`The user is looking at a list of SLOs.
@@ -78,12 +80,18 @@ export function SloList() {
     });
   }, [sloList, observabilityAIAssistant]);
 
+  useEffect(() => {
+    if (!isLoading && sloList !== undefined) {
+      onPageReady();
+    }
+  }, [isLoading, sloList, onPageReady]);
+
   return (
     <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="sloList">
       <EuiFlexItem grow={false}>
         <ToggleSLOView
           sloList={sloList}
-          sloView={view}
+          view={view}
           onChangeView={(newView) => onStateChange({ view: newView })}
           onStateChange={onStateChange}
           state={state}
@@ -91,34 +99,16 @@ export function SloList() {
         />
       </EuiFlexItem>
       {groupBy === 'ungrouped' && (
-        <>
-          <SlosView
-            sloList={results}
-            loading={isLoading || isRefetching}
-            error={isError}
-            sloView={view}
-          />
-          {total > 0 && total > perPage ? (
-            <EuiFlexItem>
-              <EuiTablePagination
-                pageCount={Math.ceil(total / perPage)}
-                activePage={page}
-                onChangePage={(newPage) => {
-                  onStateChange({ page: newPage });
-                }}
-                itemsPerPage={perPage}
-                itemsPerPageOptions={[10, 25, 50, 100]}
-                onChangeItemsPerPage={(newPerPage) => {
-                  onStateChange({ perPage: newPerPage, page: 0 });
-                }}
-              />
-            </EuiFlexItem>
-          ) : null}
-        </>
+        <UngroupedView
+          sloList={sloList}
+          loading={isLoading || isRefetching}
+          error={isError}
+          view={view}
+        />
       )}
       {groupBy !== 'ungrouped' && (
         <GroupView
-          sloView={view}
+          view={view}
           groupBy={groupBy}
           kqlQuery={kqlQuery}
           sort={state.sort.by}

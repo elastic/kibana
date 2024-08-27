@@ -623,7 +623,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
                 <EuiIconTip
                   data-test-subj="ruleDurationWarning"
                   anchorClassName="ruleDurationWarningIcon"
-                  type="rule"
+                  type="warning"
                   color="warning"
                   content={i18n.translate(
                     'xpack.triggersActionsUI.sections.rulesList.ruleTypeExcessDurationMessage',
@@ -767,7 +767,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
                         iconType={'trash'}
                         aria-label={i18n.translate(
                           'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.deleteAriaLabel',
-                          { defaultMessage: 'Delete' }
+                          { defaultMessage: 'Delete "{name}"', values: { name: rule.name } }
                         )}
                       />
                     </EuiFlexItem>
@@ -926,6 +926,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
           itemId="id"
           columns={[selectionColumn, ...rulesListColumns]}
           sorting={{ sort }}
+          rowHeader="name"
           rowProps={rowProps}
           cellProps={(rule: RuleTableItem) => ({
             'data-test-subj': 'cell',

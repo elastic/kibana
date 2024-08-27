@@ -85,6 +85,16 @@ describe('entity risk score calculation route', () => {
     expect(response.status).toEqual(200);
   });
 
+  it('should schedule transform when risk scores are persisted ', async () => {
+    const request = buildRequest();
+
+    const response = await server.inject(request, requestContextMock.convertContext(context));
+
+    expect(mockRiskScoreService.scheduleLatestTransformNow).toHaveBeenCalled();
+
+    expect(response.status).toEqual(200);
+  });
+
   it('should call "calculateAndPersistScores" with entity filter', async () => {
     const request = buildRequest();
 

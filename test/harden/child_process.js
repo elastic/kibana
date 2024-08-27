@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
+// We must disable prototype hardening to test the pollution
+process.env.KBN_UNSAFE_DISABLE_PROTOTYPE_HARDENING = 'true';
+
 require('../../src/setup_node_env');
 
 const cp = require('child_process');
@@ -305,6 +308,50 @@ for (const name of functions) {
 
   test('spawn(command, args, options) - with custom env', (t) => {
     assertProcess(t, cp.spawn(command, [], { env: { custom: 'custom' } }), { stdout: 'custom' });
+  });
+
+  test('spawn(command, options) - prevent object prototype pollution', (t) => {
+    const pathName = path.join(__dirname, '_node_script.js');
+    const options = {};
+    const pollutedObject = {
+      env: {
+        NODE_OPTIONS: `--require ${pathName}`,
+      },
+      shell: process.argv[0],
+    };
+    // eslint-disable-next-line no-proto
+    options.__proto__['2'] = pollutedObject;
+
+    const argsArray = [];
+
+    /**
+     * Declares that 3 assertions should be run.
+     * We don't use the assertProcess function here as we need an extra assertion
+     * for the polluted prototype
+     */
+    t.plan(3);
+
+    t.deepEqual(
+      argsArray[2],
+      pollutedObject,
+      'Prototype should be polluted with the object at index 2'
+    );
+
+    const stdout = '';
+
+    const cmd = cp.spawn(command, argsArray);
+    cmd.stdout.on('data', (data) => {
+      t.equal(data.toString().trim(), stdout);
+    });
+
+    cmd.stderr.on('data', (data) => {
+      t.fail(`Unexpected data on STDERR: "${data}"`);
+    });
+
+    cmd.on('close', (code) => {
+      t.equal(code, 0);
+      t.end();
+    });
   });
 
   for (const unset of notSet) {

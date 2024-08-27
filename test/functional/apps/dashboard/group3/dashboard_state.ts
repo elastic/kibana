@@ -102,7 +102,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const overwriteColor = '#d36086';
       await PageObjects.visChart.selectNewLegendColorChoice(overwriteColor);
 
-      await PageObjects.dashboard.saveDashboard(dashboardName);
+      await PageObjects.dashboard.saveDashboard(dashboardName, { saveAsNew: false });
 
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.loadSavedDashboard(dashboardName);
@@ -185,8 +185,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.waitForRenderComplete();
     };
 
-    // FLAKY: https://github.com/elastic/kibana/issues/139762
-    describe.skip('Directly modifying url updates dashboard state', () => {
+    describe('Directly modifying url updates dashboard state', () => {
       before(async () => {
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await PageObjects.dashboard.clickNewDashboard();

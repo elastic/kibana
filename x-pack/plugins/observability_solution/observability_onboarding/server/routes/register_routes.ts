@@ -6,12 +6,15 @@
  */
 import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
+import type { IKibanaResponse } from '@kbn/core/server';
 import { CoreSetup, Logger, RouteRegistrar } from '@kbn/core/server';
 import {
+  IoTsParamsObject,
   ServerRouteRepository,
   decodeRequestParams,
+  stripNullishRequestParameters,
   parseEndpoint,
-  routeValidationObject,
+  passThroughValidationObject,
 } from '@kbn/server-route-repository';
 import * as t from 'io-ts';
 import { ObservabilityOnboardingConfig } from '..';
@@ -51,23 +54,24 @@ export function registerRoutes({
     (router[method] as RouteRegistrar<typeof method, ObservabilityOnboardingRequestHandlerContext>)(
       {
         path: pathname,
-        validate: routeValidationObject,
+        validate: passThroughValidationObject,
         options,
       },
       async (context, request, response) => {
         try {
           const decodedParams = decodeRequestParams(
-            {
+            stripNullishRequestParameters({
               params: request.params,
               body: request.body,
               query: request.query,
-            },
-            params ?? t.strict({})
+            }),
+            (params as IoTsParamsObject) ?? t.strict({})
           );
 
           const data = (await handler({
             context,
             request,
+            response,
             logger,
             params: decodedParams,
             plugins,
@@ -85,6 +89,10 @@ export function registerRoutes({
 
           if (data === undefined) {
             return response.noContent();
+          }
+
+          if (data instanceof response.noContent().constructor) {
+            return data as IKibanaResponse;
           }
 
           return response.ok({ body: data });

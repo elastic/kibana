@@ -65,49 +65,52 @@ export const FileActionsPopoverButton: React.FC<{ caseId: string; theFile: FileJ
         id: 1,
         title: i18n.COPY_FILE_HASH,
         items: [
-          {
-            name: 'MD5',
-            icon: 'copyClipboard',
-            disabled: !theFile.hash?.md5,
-            onClick: () => {
-              if (theFile.hash?.md5) {
-                navigator.clipboard.writeText(theFile.hash.md5).then(() => {
-                  closePopover();
-                  showSuccessToast(i18n.COPY_FILE_HASH_SUCCESS('md5'));
-                });
+          theFile.hash?.md5
+            ? {
+                name: 'MD5',
+                icon: 'copyClipboard',
+                onClick: () => {
+                  if (theFile.hash?.md5) {
+                    navigator.clipboard.writeText(theFile.hash.md5).then(() => {
+                      closePopover();
+                      showSuccessToast(i18n.COPY_FILE_HASH_SUCCESS('md5'));
+                    });
+                  }
+                },
+                'data-test-subj': 'cases-files-copy-md5-hash-button',
               }
-            },
-            'data-test-subj': 'cases-files-copy-md5-hash-button',
-          },
-          {
-            name: 'SHA1',
-            icon: 'copyClipboard',
-            disabled: !theFile.hash?.sha1,
-            onClick: () => {
-              if (theFile.hash?.sha1) {
-                navigator.clipboard.writeText(theFile.hash.sha1).then(() => {
-                  closePopover();
-                  showSuccessToast(i18n.COPY_FILE_HASH_SUCCESS('sha1'));
-                });
+            : null,
+          theFile.hash?.sha1
+            ? {
+                name: 'SHA1',
+                icon: 'copyClipboard',
+                onClick: () => {
+                  if (theFile.hash?.sha1) {
+                    navigator.clipboard.writeText(theFile.hash.sha1).then(() => {
+                      closePopover();
+                      showSuccessToast(i18n.COPY_FILE_HASH_SUCCESS('sha1'));
+                    });
+                  }
+                },
+                'data-test-subj': 'cases-files-copy-sha1-hash-button',
               }
-            },
-            'data-test-subj': 'cases-files-copy-sha1-hash-button',
-          },
-          {
-            name: 'SHA256',
-            icon: 'copyClipboard',
-            disabled: !theFile.hash?.sha256,
-            onClick: () => {
-              if (theFile.hash?.sha256) {
-                navigator.clipboard.writeText(theFile.hash.sha256).then(() => {
-                  closePopover();
-                  showSuccessToast(i18n.COPY_FILE_HASH_SUCCESS('sha256'));
-                });
+            : null,
+          theFile.hash?.sha256
+            ? {
+                name: 'SHA256',
+                icon: 'copyClipboard',
+                onClick: () => {
+                  if (theFile.hash?.sha256) {
+                    navigator.clipboard.writeText(theFile.hash.sha256).then(() => {
+                      closePopover();
+                      showSuccessToast(i18n.COPY_FILE_HASH_SUCCESS('sha256'));
+                    });
+                  }
+                },
+                'data-test-subj': 'cases-files-copy-sha256-hash-button',
               }
-            },
-            'data-test-subj': 'cases-files-copy-sha256-hash-button',
-          },
-        ],
+            : null,
+        ].filter(Boolean) as EuiContextMenuPanelDescriptor['items'],
       },
     ];
 

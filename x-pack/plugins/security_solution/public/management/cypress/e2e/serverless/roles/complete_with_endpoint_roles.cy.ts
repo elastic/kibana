@@ -40,6 +40,11 @@ describe(
           { product_line: 'security', product_tier: 'complete' },
           { product_line: 'endpoint', product_tier: 'complete' },
         ],
+        kbnServerArgs: [
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'responseActionScanEnabled',
+          ])}`,
+        ],
       },
     },
   },
@@ -118,7 +123,8 @@ describe(
         'kill-process',
         'suspend-process',
         'get-file',
-        'upload'
+        'upload',
+        'scan'
       );
 
       const deniedResponseActions = pick(consoleHelpPanelResponseActionsTestSubj, 'execute');

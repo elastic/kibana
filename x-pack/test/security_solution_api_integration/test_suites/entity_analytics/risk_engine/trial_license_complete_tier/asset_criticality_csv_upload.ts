@@ -15,7 +15,7 @@ import {
 } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 export default ({ getService }: FtrProviderContext) => {
-  describe('@ess @serverless Entity Analytics - Asset Criticality CSV upload', () => {
+  describe('@ess @serverless @serverlessQA Entity Analytics - Asset Criticality CSV upload', () => {
     const esClient = getService('es');
     const supertest = getService('supertest');
     const assetCriticalityRoutes = assetCriticalityRouteHelpersFactory(supertest);

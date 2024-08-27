@@ -185,9 +185,10 @@ export class ManifestTask {
       const diff = newManifest.diff(oldManifest);
 
       this.logger.debug(
-        `New -vs- old manifest diff counts: ${Object.entries(diff).map(
-          ([diffType, diffItems]) => `${diffType}: ${diffItems.length}`
-        )}`
+        () =>
+          `New -vs- old manifest diff counts: ${Object.entries(diff).map(
+            ([diffType, diffItems]) => `${diffType}: ${diffItems.length}`
+          )}`
       );
 
       const persistErrors = await manifestManager.pushArtifacts(

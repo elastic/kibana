@@ -15,9 +15,9 @@ export const registerApiKeyRoutes = ({ logger, router, getSecurity }: RouteDepen
       validate: {},
     },
     async (context, request, response) => {
-      const { client } = (await context.core).elasticsearch;
-      const security = await getSecurity();
-      const user = security.authc.getCurrentUser(request);
+      const core = await context.core;
+      const { client } = core.elasticsearch;
+      const user = core.security.authc.getCurrentUser();
       if (user) {
         const apiKeys = await client.asCurrentUser.security.getApiKey({ username: user.username });
         const validKeys = apiKeys.api_keys.filter(({ invalidated }) => !invalidated);
@@ -39,6 +39,7 @@ export const registerApiKeyRoutes = ({ logger, router, getSecurity }: RouteDepen
     },
     async (context, request, response) => {
       const security = await getSecurity();
+
       const result = await security.authc.apiKeys.create(request, request.body);
       if (result) {
         const apiKey = { ...result, beats_logstash_format: `${result.id}:${result.api_key}` };

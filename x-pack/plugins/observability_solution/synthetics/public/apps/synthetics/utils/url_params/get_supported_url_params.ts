@@ -37,6 +37,7 @@ export interface SyntheticsUrlParams {
   groupBy?: MonitorOverviewState['groupBy']['field'];
   groupOrderBy?: MonitorOverviewState['groupBy']['order'];
   packagePolicyId?: string;
+  cloneId?: string;
 }
 
 const { ABSOLUTE_DATE_RANGE_START, ABSOLUTE_DATE_RANGE_END, SEARCH, FILTERS, STATUS_FILTER } =
@@ -127,6 +128,7 @@ export const getSupportedUrlParams = (params: {
     projects: parseFilters(projects),
     schedules: parseFilters(schedules),
     locationId: locationId || undefined,
+    cloneId: filteredParams.cloneId,
   };
 };
 

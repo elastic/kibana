@@ -9,14 +9,14 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { EuiFilterButton } from '@elastic/eui';
 
 import type {
-  TimelineTypeLiteralWithNull,
-  TemplateTimelineTypeLiteralWithNull,
-  TimelineStatusLiteralWithNull,
-} from '../../../../common/api/timeline';
-import {
+  TemplateTimelineType,
   TimelineStatus,
   TimelineType,
-  TemplateTimelineType,
+} from '../../../../common/api/timeline';
+import {
+  TemplateTimelineTypeEnum,
+  TimelineStatusEnum,
+  TimelineTypeEnum,
 } from '../../../../common/api/timeline';
 
 import * as i18n from './translations';
@@ -28,18 +28,18 @@ export const useTimelineStatus = ({
   elasticTemplateTimelineCount,
   customTemplateTimelineCount,
 }: {
-  timelineType: TimelineTypeLiteralWithNull;
+  timelineType: TimelineType | null;
   elasticTemplateTimelineCount?: number | null;
   customTemplateTimelineCount?: number | null;
 }): {
-  timelineStatus: TimelineStatusLiteralWithNull;
-  templateTimelineType: TemplateTimelineTypeLiteralWithNull;
+  timelineStatus: TimelineStatus | null;
+  templateTimelineType: TemplateTimelineType | null;
   templateTimelineFilter: JSX.Element[] | null;
   installPrepackagedTimelines: () => void;
 } => {
-  const [selectedTab, setSelectedTab] = useState<TemplateTimelineTypeLiteralWithNull>(null);
+  const [selectedTab, setSelectedTab] = useState<TemplateTimelineType | null>(null);
   const isTemplateFilterEnabled = useMemo(
-    () => timelineType === TimelineType.template,
+    () => timelineType === TimelineTypeEnum.template,
     [timelineType]
   );
 
@@ -52,23 +52,23 @@ export const useTimelineStatus = ({
     () =>
       templateTimelineType == null
         ? null
-        : templateTimelineType === TemplateTimelineType.elastic
-        ? TimelineStatus.immutable
-        : TimelineStatus.active,
+        : templateTimelineType === TemplateTimelineTypeEnum.elastic
+        ? TimelineStatusEnum.immutable
+        : TimelineStatusEnum.active,
     [templateTimelineType]
   );
 
   const filters = useMemo(
     () => [
       {
-        id: TemplateTimelineType.elastic,
+        id: TemplateTimelineTypeEnum.elastic,
         name: i18n.FILTER_ELASTIC_TIMELINES,
         disabled: !isTemplateFilterEnabled,
         withNext: true,
         count: elasticTemplateTimelineCount ?? undefined,
       },
       {
-        id: TemplateTimelineType.custom,
+        id: TemplateTimelineTypeEnum.custom,
         name: i18n.FILTER_CUSTOM_TIMELINES,
         disabled: !isTemplateFilterEnabled,
         withNext: false,
@@ -108,7 +108,7 @@ export const useTimelineStatus = ({
   }, [templateTimelineType, filters, isTemplateFilterEnabled, onFilterClicked]);
 
   const installPrepackagedTimelines = useCallback(async () => {
-    if (templateTimelineType !== TemplateTimelineType.custom) {
+    if (templateTimelineType !== TemplateTimelineTypeEnum.custom) {
       await installPrepackedTimelines();
     }
   }, [templateTimelineType]);

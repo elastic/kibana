@@ -5,7 +5,6 @@
  * 2.0.
  */
 import {
-  EuiBetaBadge,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -50,19 +49,6 @@ export function TryItButton({
 
   if (!showFastFilterTryCallout) {
     return null;
-  }
-
-  function TryItBadge() {
-    return (
-      <EuiFlexItem grow={false}>
-        <EuiBetaBadge
-          color="accent"
-          label={i18n.translate('xpack.apm.tryIt.betaBadgeLabel', {
-            defaultMessage: 'Try it',
-          })}
-        />
-      </EuiFlexItem>
-    );
   }
 
   function PromoLabel() {
@@ -198,7 +184,6 @@ export function TryItButton({
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
-      {isFeatureEnabled ? null : <TryItBadge />}
       <TechnicalPreviewBadge icon="beaker" />
       {isFeatureEnabled ? null : <PromoLabel />}
       <Link />

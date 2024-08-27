@@ -1,45 +1,43 @@
-EVAL
+## EVAL
 
-Syntax
-EVAL [column1 =] value1[, ..., [columnN =] valueN]
-Parameters
-columnX
-The column name.
-valueX
-The value for the column. Can be a literal, an expression, or a
-function.
-DescriptionThe EVAL processing command enables you to append new columns with calculated
-values. EVAL supports various functions for calculating values. Refer to
-Functions for more information.Examples
-```esql
+The `EVAL` command in ES|QL allows you to append new columns with calculated values to your data. It supports various functions for calculating these values. This command is particularly useful when you need to perform calculations on your data and store the results in new columns for further analysis or visualization.
+
+However, it's important to note that if the specified column already exists, the existing column will be dropped, and the new column will be appended to the table.
+
+### Examples
+
+Here are some examples of how you can use the `EVAL` command in ES|QL:
+
+1. Calculate the height of employees in feet and centimeters and store the results in new columns:
+
+    ```esql
 FROM employees
 | SORT emp_no
 | KEEP first_name, last_name, height
 | EVAL height_feet = height * 3.281, height_cm = height * 100
 ```
 
-If the specified column already exists, the existing column will be dropped, and
-the new column will be appended to the table:
-```esql
+2. Overwrite an existing column with new calculated values:
+
+    ```esql
 FROM employees
 | SORT emp_no
 | KEEP first_name, last_name, height
 | EVAL height = height * 3.281
 ```
 
-Specifying the output column name is optional. If not specified, the new column
-name is equal to the expression. The following query adds a column named
-height*3.281:
-```esql
+3. Add a new column with a name that is equal to the expression:
+
+    ```esql
 FROM employees
 | SORT emp_no
 | KEEP first_name, last_name, height
 | EVAL height * 3.281
 ```
 
-Because this name contains special characters, it needs to be
-quoted with backticks (`) when using it in subsequent commands:
-```esql
+    Since this name contains special characters, it needs to be quoted with backticks (`) when using it in subsequent commands:
+
+    ```esql
 FROM employees
 | EVAL height * 3.281
 | STATS avg_height_feet = AVG(`height * 3.281`)

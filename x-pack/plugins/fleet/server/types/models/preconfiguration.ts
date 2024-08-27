@@ -142,51 +142,74 @@ export const PreconfiguredAgentPoliciesSchema = schema.arrayOf(
     has_fleet_server: schema.maybe(schema.boolean()),
     data_output_id: schema.maybe(schema.string()),
     monitoring_output_id: schema.maybe(schema.string()),
-    package_policies: schema.arrayOf(
-      schema.oneOf([
-        schema.object({
-          id: schema.maybe(schema.oneOf([schema.string(), schema.number()])),
-          name: schema.string(),
-          package: schema.object({
-            name: schema.string({
-              validate: (value) => {
-                if (value === 'synthetics') {
-                  return i18n.translate('xpack.fleet.config.disableSynthetics', {
-                    defaultMessage:
-                      'Synthetics package is not supported via kibana.yml config. Please use Synthetics App to create monitors in private locations. https://www.elastic.co/guide/en/observability/current/synthetics-private-location.html',
-                  });
-                }
-              },
+    package_policies: schema.maybe(
+      schema.arrayOf(
+        schema.oneOf([
+          schema.object({
+            id: schema.maybe(schema.oneOf([schema.string(), schema.number()])),
+            name: schema.string(),
+            package: schema.object({
+              name: schema.string({
+                validate: (value) => {
+                  if (value === 'synthetics') {
+                    return i18n.translate('xpack.fleet.config.disableSynthetics', {
+                      defaultMessage:
+                        'Synthetics package is not supported via kibana.yml config. Please use Synthetics App to create monitors in private locations. https://www.elastic.co/guide/en/observability/current/synthetics-private-location.html',
+                    });
+                  }
+                },
+              }),
             }),
+            description: schema.maybe(schema.string()),
+            namespace: schema.maybe(PackagePolicyNamespaceSchema),
+            output_id: schema.nullable(schema.maybe(schema.string())),
+            inputs: schema.maybe(
+              schema.arrayOf(
+                schema.object({
+                  type: schema.string(),
+                  enabled: schema.maybe(schema.boolean()),
+                  keep_enabled: schema.maybe(schema.boolean()),
+                  vars: varsSchema,
+                  streams: schema.maybe(
+                    schema.arrayOf(
+                      schema.object({
+                        data_stream: schema.object({
+                          type: schema.maybe(schema.string()),
+                          dataset: schema.string(),
+                        }),
+                        enabled: schema.maybe(schema.boolean()),
+                        keep_enabled: schema.maybe(schema.boolean()),
+                        vars: varsSchema,
+                      })
+                    )
+                  ),
+                })
+              )
+            ),
           }),
-          description: schema.maybe(schema.string()),
-          namespace: schema.maybe(PackagePolicyNamespaceSchema),
-          inputs: schema.maybe(
-            schema.arrayOf(
-              schema.object({
-                type: schema.string(),
-                enabled: schema.maybe(schema.boolean()),
-                keep_enabled: schema.maybe(schema.boolean()),
-                vars: varsSchema,
-                streams: schema.maybe(
-                  schema.arrayOf(
-                    schema.object({
-                      data_stream: schema.object({
-                        type: schema.maybe(schema.string()),
-                        dataset: schema.string(),
-                      }),
-                      enabled: schema.maybe(schema.boolean()),
-                      keep_enabled: schema.maybe(schema.boolean()),
-                      vars: varsSchema,
-                    })
-                  )
-                ),
-              })
-            )
-          ),
-        }),
-        SimplifiedPackagePolicyPreconfiguredSchema,
-      ])
+          SimplifiedPackagePolicyPreconfiguredSchema,
+        ])
+      )
+    ),
+  }),
+  {
+    defaultValue: [],
+  }
+);
+
+export const PreconfiguredSpaceSettingsSchema = schema.arrayOf(
+  schema.object({
+    space_id: schema.string(),
+    allowed_namespace_prefixes: schema.nullable(
+      schema.arrayOf(
+        schema.string({
+          validate: (v) => {
+            if (v.includes('-')) {
+              return 'Must not contain -';
+            }
+          },
+        })
+      )
     ),
   }),
   {

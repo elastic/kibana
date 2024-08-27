@@ -9,7 +9,7 @@ import { FLEET_AGENT_LIST_PAGE } from '../../screens/fleet';
 
 import { createAgentDoc } from '../../tasks/agents';
 import { setupFleetServer } from '../../tasks/fleet_server';
-import { deleteFleetServerDocs, deleteAgentDocs, cleanupAgentPolicies } from '../../tasks/cleanup';
+import { deleteAgentDocs, cleanupAgentPolicies } from '../../tasks/cleanup';
 import type { CreateAgentPolicyRequest } from '../../../common/types';
 import { setUISettings } from '../../tasks/ui_settings';
 
@@ -87,7 +87,6 @@ function assertTableIsEmpty() {
 
 describe('View agents list', () => {
   before(() => {
-    deleteFleetServerDocs(true);
     deleteAgentDocs(true);
     cleanupAgentPolicies();
     setupFleetServer();
@@ -103,7 +102,6 @@ describe('View agents list', () => {
     }
   });
   after(() => {
-    deleteFleetServerDocs(true);
     deleteAgentDocs(true);
     cleanupAgentPolicies();
   });

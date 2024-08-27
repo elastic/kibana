@@ -5,12 +5,10 @@
  * 2.0.
  */
 import type { Logger, SavedObjectsFindResponse } from '@kbn/core/server';
-import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { INTERNAL_DASHBOARDS_URL } from '../../../../common/constants';
 import {
   serverMock,
   requestContextMock,
-  mockGetCurrentUser,
   requestMock,
 } from '../../detection_engine/routes/__mocks__';
 import { mockGetDashboardsResult } from '../__mocks__';
@@ -18,7 +16,6 @@ import { getDashboardsByTagsRoute } from './get_dashboards_by_tags';
 
 describe('getDashboardsByTagsRoute', () => {
   let server: ReturnType<typeof serverMock.create>;
-  let securitySetup: SecurityPluginSetup;
   const { context } = requestContextMock.createTools();
   const logger = { error: jest.fn() } as unknown as Logger;
 
@@ -36,14 +33,7 @@ describe('getDashboardsByTagsRoute', () => {
     jest.clearAllMocks();
     server = serverMock.create();
 
-    securitySetup = {
-      authc: {
-        getCurrentUser: jest.fn().mockReturnValue(mockGetCurrentUser),
-      },
-      authz: {},
-    } as unknown as SecurityPluginSetup;
-
-    getDashboardsByTagsRoute(server.router, logger, securitySetup);
+    getDashboardsByTagsRoute(server.router, logger);
   });
 
   it('should return dashboards with Security Solution tags', async () => {

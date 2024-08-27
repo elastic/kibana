@@ -49,7 +49,8 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
     return summary;
   };
 
-  describe('rules list', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/157623
+  describe.skip('rules list', function () {
     const assertRulesLength = async (length: number) => {
       return await retry.try(async () => {
         const rules = await pageObjects.triggersActionsUI.getAlertsList();

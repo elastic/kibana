@@ -5,23 +5,17 @@
  * 2.0.
  */
 
-import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import {
+  UpdateExceptionListRequestBody,
+  UpdateExceptionListResponse,
+} from '@kbn/securitysolution-exceptions-common/api';
 
 import type { ListsPluginRouter } from '../types';
-import {
-  UpdateExceptionListRequestDecoded,
-  updateExceptionListRequest,
-  updateExceptionListResponse,
-} from '../../common/api';
 
-import {
-  buildRouteValidation,
-  buildSiemResponse,
-  getErrorMessageExceptionList,
-  getExceptionListClient,
-} from './utils';
+import { buildSiemResponse, getErrorMessageExceptionList, getExceptionListClient } from './utils';
 
 export const updateExceptionListRoute = (router: ListsPluginRouter): void => {
   router.versioned
@@ -36,10 +30,7 @@ export const updateExceptionListRoute = (router: ListsPluginRouter): void => {
       {
         validate: {
           request: {
-            body: buildRouteValidation<
-              typeof updateExceptionListRequest,
-              UpdateExceptionListRequestDecoded
-            >(updateExceptionListRequest),
+            body: buildRouteValidationWithZod(UpdateExceptionListRequestBody),
           },
         },
         version: '2023-10-31',
@@ -61,39 +52,36 @@ export const updateExceptionListRoute = (router: ListsPluginRouter): void => {
             version,
           } = request.body;
           const exceptionLists = await getExceptionListClient(context);
+
           if (id == null && listId == null) {
             return siemResponse.error({
               body: 'either id or list_id need to be defined',
               statusCode: 404,
             });
-          } else {
-            const list = await exceptionLists.updateExceptionList({
-              _version,
-              description,
-              id,
-              listId,
-              meta,
-              name,
-              namespaceType,
-              osTypes,
-              tags,
-              type,
-              version,
-            });
-            if (list == null) {
-              return siemResponse.error({
-                body: getErrorMessageExceptionList({ id, listId }),
-                statusCode: 404,
-              });
-            } else {
-              const [validated, errors] = validate(list, updateExceptionListResponse);
-              if (errors != null) {
-                return siemResponse.error({ body: errors, statusCode: 500 });
-              } else {
-                return response.ok({ body: validated ?? {} });
-              }
-            }
           }
+
+          const list = await exceptionLists.updateExceptionList({
+            _version,
+            description,
+            id,
+            listId,
+            meta,
+            name,
+            namespaceType,
+            osTypes,
+            tags,
+            type,
+            version,
+          });
+
+          if (list == null) {
+            return siemResponse.error({
+              body: getErrorMessageExceptionList({ id, listId }),
+              statusCode: 404,
+            });
+          }
+
+          return response.ok({ body: UpdateExceptionListResponse.parse(list) });
         } catch (err) {
           const error = transformError(err);
           return siemResponse.error({

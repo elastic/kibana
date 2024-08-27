@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiDescriptionList, EuiLink, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiDescriptionList } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CspFinding } from '../../../../common/schemas/csp_finding';
+import type { CspFinding } from '@kbn/cloud-security-posture-common';
 import { RulesDetectionRuleCounter } from '../../rules/rules_detection_rule_counter';
-import { CisKubernetesIcons, CspFlyoutMarkdown } from './findings_flyout';
+import { BenchmarkIcons, CspFlyoutMarkdown, EMPTY_VALUE, RuleNameLink } from './findings_flyout';
 
 export const getRuleList = (
-  rule: CspFinding['rule'],
+  rule?: CspFinding['rule'],
   ruleState = 'unmuted',
   ruleFlyoutLink?: string
 ) => [
@@ -22,31 +22,28 @@ export const getRuleList = (
     title: i18n.translate('xpack.csp.findings.findingsFlyout.ruleTab.nameTitle', {
       defaultMessage: 'Name',
     }),
-    description: ruleFlyoutLink ? (
-      <EuiToolTip
-        position="top"
-        content={i18n.translate('xpack.csp.findings.findingsFlyout.ruleTab.nameTooltip', {
-          defaultMessage: 'Manage Rule',
-        })}
-      >
-        <EuiLink href={ruleFlyoutLink}>{rule.name}</EuiLink>
-      </EuiToolTip>
+    description: rule?.name ? (
+      <RuleNameLink ruleFlyoutLink={ruleFlyoutLink} ruleName={rule.name} />
     ) : (
-      rule.name
+      EMPTY_VALUE
     ),
   },
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.ruleTab.descriptionTitle', {
       defaultMessage: 'Description',
     }),
-    description: <CspFlyoutMarkdown>{rule.description}</CspFlyoutMarkdown>,
+    description: rule?.description ? (
+      <CspFlyoutMarkdown>{rule.description}</CspFlyoutMarkdown>
+    ) : (
+      EMPTY_VALUE
+    ),
   },
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.ruleTab.AlertsTitle', {
       defaultMessage: 'Alerts',
     }),
     description:
-      ruleState === 'unmuted' ? (
+      ruleState === 'unmuted' && rule?.benchmark?.name ? (
         <RulesDetectionRuleCounter benchmarkRule={rule} />
       ) : (
         <FormattedMessage
@@ -59,58 +56,73 @@ export const getRuleList = (
     title: i18n.translate('xpack.csp.findings.findingsFlyout.ruleTab.tagsTitle', {
       defaultMessage: 'Tags',
     }),
-    description: (
+    description: rule?.tags?.length ? (
       <>
         {rule.tags.map((tag) => (
           <EuiBadge key={tag}>{tag}</EuiBadge>
         ))}
       </>
+    ) : (
+      EMPTY_VALUE
     ),
   },
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.ruleTab.frameworkSourcesTitle', {
       defaultMessage: 'Framework Sources',
     }),
-    description: (
-      <CisKubernetesIcons benchmarkId={rule.benchmark.id} benchmarkName={rule.benchmark.name} />
-    ),
+    description:
+      rule?.benchmark?.id && rule?.benchmark?.name ? (
+        <BenchmarkIcons benchmarkId={rule.benchmark.id} benchmarkName={rule.benchmark.name} />
+      ) : (
+        EMPTY_VALUE
+      ),
   },
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.ruleTab.cisSectionTitle', {
-      defaultMessage: 'CIS Section',
+      defaultMessage: 'Framework Section',
     }),
-    description: rule.section,
+    description: rule?.section || EMPTY_VALUE,
   },
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.ruleTab.profileApplicabilityTitle', {
       defaultMessage: 'Profile Applicability',
     }),
-    description: <CspFlyoutMarkdown>{rule.profile_applicability}</CspFlyoutMarkdown>,
+    description: rule?.profile_applicability ? (
+      <CspFlyoutMarkdown>{rule.profile_applicability}</CspFlyoutMarkdown>
+    ) : (
+      EMPTY_VALUE
+    ),
   },
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.ruleTab.benchmarkTitle', {
       defaultMessage: 'Benchmark',
     }),
-    description: rule.benchmark.name,
+    description: rule?.benchmark?.name || EMPTY_VALUE,
   },
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.ruleTab.auditTitle', {
       defaultMessage: 'Audit',
     }),
-    description: <CspFlyoutMarkdown>{rule.audit}</CspFlyoutMarkdown>,
+    description: rule?.audit ? <CspFlyoutMarkdown>{rule.audit}</CspFlyoutMarkdown> : EMPTY_VALUE,
   },
-  ...(rule.references
-    ? [
-        {
-          title: i18n.translate('xpack.csp.findings.findingsFlyout.ruleTab.referencesTitle', {
-            defaultMessage: 'References',
-          }),
-          description: <CspFlyoutMarkdown>{rule.references}</CspFlyoutMarkdown>,
-        },
-      ]
-    : []),
+  {
+    title: i18n.translate('xpack.csp.findings.findingsFlyout.ruleTab.referencesTitle', {
+      defaultMessage: 'References',
+    }),
+    description: rule?.references ? (
+      <CspFlyoutMarkdown>{rule.references}</CspFlyoutMarkdown>
+    ) : (
+      EMPTY_VALUE
+    ),
+  },
 ];
 
-export const RuleTab = ({ data, ruleFlyoutLink }: { data: CspFinding; ruleFlyoutLink: string }) => {
+export const RuleTab = ({
+  data,
+  ruleFlyoutLink,
+}: {
+  data: CspFinding;
+  ruleFlyoutLink?: string;
+}) => {
   return <EuiDescriptionList listItems={getRuleList(data.rule, ruleFlyoutLink)} />;
 };

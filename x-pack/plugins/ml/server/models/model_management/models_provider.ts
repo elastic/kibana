@@ -10,8 +10,9 @@ import type { IScopedClusterClient } from '@kbn/core/server';
 import { JOB_MAP_NODE_TYPES, type MapElements } from '@kbn/ml-data-frame-analytics-utils';
 import { flatten } from 'lodash';
 import type {
-  InferenceModelConfig,
+  InferenceInferenceEndpoint,
   InferenceTaskType,
+  TasksTaskInfo,
   TransformGetTransformTransformSummary,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { IndexName, IndicesIndexState } from '@elastic/elasticsearch/lib/api/types';
@@ -28,7 +29,7 @@ import {
 } from '@kbn/ml-trained-models-utils';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { ElasticCuratedModelName } from '@kbn/ml-trained-models-utils';
-import type { PipelineDefinition } from '../../../common/types/trained_models';
+import type { ModelDownloadState, PipelineDefinition } from '../../../common/types/trained_models';
 import type { MlClient } from '../../lib/ml_client';
 import type { MLSavedObjectService } from '../../saved_objects';
 
@@ -104,7 +105,7 @@ export class ModelsProvider {
 
   private getNodeId(
     elementOriginalId: string,
-    nodeType: typeof JOB_MAP_NODE_TYPES[keyof typeof JOB_MAP_NODE_TYPES]
+    nodeType: (typeof JOB_MAP_NODE_TYPES)[keyof typeof JOB_MAP_NODE_TYPES]
   ): string {
     return `${elementOriginalId}-${nodeType}`;
   }
@@ -475,6 +476,7 @@ export class ModelsProvider {
       const modelDefinitionResponse = {
         ...def,
         ...(recommended ? { recommended } : {}),
+        supported: !!def.default || recommended,
         model_id: modelId,
       };
 
@@ -589,17 +591,58 @@ export class ModelsProvider {
    * Puts the requested Inference endpoint id into elasticsearch, triggering elasticsearch to create the inference endpoint id
    * @param inferenceId - Inference Endpoint Id
    * @param taskType - Inference Task type. Either sparse_embedding or text_embedding
-   * @param modelConfig - Model configuration based on service type
+   * @param inferenceConfig - Model configuration based on service type
    */
   async createInferenceEndpoint(
     inferenceId: string,
     taskType: InferenceTaskType,
-    modelConfig: InferenceModelConfig
+    inferenceConfig: InferenceInferenceEndpoint
   ) {
-    return await this._client.asCurrentUser.inference.putModel({
-      inference_id: inferenceId,
-      task_type: taskType,
-      model_config: modelConfig,
+    try {
+      const result = await this._client.asCurrentUser.inference.put(
+        {
+          inference_id: inferenceId,
+          task_type: taskType,
+          inference_config: inferenceConfig,
+        },
+        { maxRetries: 0 }
+      );
+      return result;
+    } catch (error) {
+      // Request timeouts will usually occur when the model is being downloaded/deployed
+      // Erroring out is misleading in these cases, so we return the model_id and task_type
+      if (error.name === 'TimeoutError') {
+        return {
+          model_id: inferenceConfig.service,
+          task_type: taskType,
+        };
+      } else {
+        throw error;
+      }
+    }
+  }
+
+  async getModelsDownloadStatus() {
+    const result = await this._client.asInternalUser.tasks.list({
+      actions: 'xpack/ml/model_import[n]',
+      detailed: true,
+      group_by: 'none',
     });
+
+    if (!result.tasks?.length) {
+      return {};
+    }
+
+    // Groups results by model id
+    const byModelId = (result.tasks as TasksTaskInfo[]).reduce((acc, task) => {
+      const modelId = task.description!.replace(`model_id-`, '');
+      acc[modelId] = {
+        downloaded_parts: task.status.downloaded_parts,
+        total_parts: task.status.total_parts,
+      };
+      return acc;
+    }, {} as Record<string, ModelDownloadState>);
+
+    return byModelId;
   }
 }

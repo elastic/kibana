@@ -12,22 +12,22 @@ import {
   getDataStreamsStatsResponseRt,
   getIntegrationsResponseRt,
   getNonAggregatableDatasetsRt,
+  IntegrationResponse,
+  NonAggregatableDatasets,
 } from '../../../common/api_types';
 import { DEFAULT_DATASET_TYPE } from '../../../common/constants';
 import {
   DataStreamStatServiceResponse,
   GetDataStreamsDegradedDocsStatsQuery,
   GetDataStreamsDegradedDocsStatsResponse,
-  GetDataStreamsStatsError,
   GetDataStreamsStatsQuery,
   GetDataStreamsStatsResponse,
   GetIntegrationsParams,
   GetNonAggregatableDataStreamsParams,
-  GetNonAggregatableDataStreamsResponse,
-  IntegrationsResponse,
 } from '../../../common/data_streams_stats';
 import { Integration } from '../../../common/data_streams_stats/integration';
 import { IDataStreamsStatsClient } from './types';
+import { DatasetQualityError } from '../../../common/errors';
 
 export class DataStreamsStatsClient implements IDataStreamsStatsClient {
   constructor(private readonly http: HttpStart) {}
@@ -40,16 +40,16 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
         query: params,
       })
       .catch((error) => {
-        throw new GetDataStreamsStatsError(`Failed to fetch data streams stats: ${error}`);
+        throw new DatasetQualityError(`Failed to fetch data streams stats: ${error}`, error);
       });
 
-    const { dataStreamsStats } = decodeOrThrow(
+    const { dataStreamsStats, datasetUserPrivileges } = decodeOrThrow(
       getDataStreamsStatsResponseRt,
       (message: string) =>
-        new GetDataStreamsStatsError(`Failed to decode data streams stats response: ${message}`)
+        new DatasetQualityError(`Failed to decode data streams stats response: ${message}`)
     )(response);
 
-    return dataStreamsStats;
+    return { dataStreamsStats, datasetUserPrivileges };
   }
 
   public async getDataStreamsDegradedStats(params: GetDataStreamsDegradedDocsStatsQuery) {
@@ -64,13 +64,16 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
         }
       )
       .catch((error) => {
-        throw new GetDataStreamsStatsError(`Failed to fetch data streams degraded stats: ${error}`);
+        throw new DatasetQualityError(
+          `Failed to fetch data streams degraded stats: ${error}`,
+          error
+        );
       });
 
     const { degradedDocs } = decodeOrThrow(
       getDataStreamsDegradedDocsStatsResponseRt,
       (message: string) =>
-        new GetDataStreamsStatsError(
+        new DatasetQualityError(
           `Failed to decode data streams degraded docs stats response: ${message}`
         )
     )(response);
@@ -80,23 +83,20 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
 
   public async getNonAggregatableDatasets(params: GetNonAggregatableDataStreamsParams) {
     const response = await this.http
-      .get<GetNonAggregatableDataStreamsResponse>(
-        '/internal/dataset_quality/data_streams/non_aggregatable',
-        {
-          query: {
-            ...params,
-            type: DEFAULT_DATASET_TYPE,
-          },
-        }
-      )
+      .get<NonAggregatableDatasets>('/internal/dataset_quality/data_streams/non_aggregatable', {
+        query: {
+          ...params,
+          type: DEFAULT_DATASET_TYPE,
+        },
+      })
       .catch((error) => {
-        throw new GetDataStreamsStatsError(`Failed to fetch non aggregatable datasets: ${error}`);
+        throw new DatasetQualityError(`Failed to fetch non aggregatable datasets: ${error}`, error);
       });
 
     const nonAggregatableDatasets = decodeOrThrow(
       getNonAggregatableDatasetsRt,
       (message: string) =>
-        new GetDataStreamsStatsError(`Failed to fetch non aggregatable datasets: ${message}`)
+        new DatasetQualityError(`Failed to fetch non aggregatable datasets: ${message}`)
     )(response);
 
     return nonAggregatableDatasets;
@@ -104,19 +104,19 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
 
   public async getIntegrations(
     params: GetIntegrationsParams['query'] = { type: DEFAULT_DATASET_TYPE }
-  ): Promise<IntegrationsResponse> {
+  ): Promise<Integration[]> {
     const response = await this.http
-      .get<GetDataStreamsStatsResponse>('/internal/dataset_quality/integrations', {
+      .get<IntegrationResponse>('/internal/dataset_quality/integrations', {
         query: params,
       })
       .catch((error) => {
-        throw new GetDataStreamsStatsError(`Failed to fetch integrations: ${error}`);
+        throw new DatasetQualityError(`Failed to fetch integrations: ${error}`, error);
       });
 
     const { integrations } = decodeOrThrow(
       getIntegrationsResponseRt,
       (message: string) =>
-        new GetDataStreamsStatsError(`Failed to decode integrations response: ${message}`)
+        new DatasetQualityError(`Failed to decode integrations response: ${message}`)
     )(response);
 
     return integrations.map(Integration.create);

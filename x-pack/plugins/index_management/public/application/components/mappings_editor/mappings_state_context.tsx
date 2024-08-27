@@ -60,6 +60,7 @@ export const StateProvider: React.FC<{ children?: React.ReactNode }> = ({ childr
       selectedDataTypes: [],
     },
     inferenceToModelIdMap: {},
+    mappingViewFields: { byId: {}, rootLevelFields: [], aliases: {}, maxNestedDepth: 0 },
   };
 
   const [state, dispatch] = useReducer(reducer, initialState);

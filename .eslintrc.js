@@ -295,7 +295,22 @@ module.exports = {
         'jsx-a11y/click-events-have-key-events': 'off',
       },
     },
-
+    /**
+     * FormatJS linter for i18n code.
+     * https://formatjs.io/docs/tooling/linter
+     */
+    {
+      files: [
+        'src/**/*.{js,mjs,ts,tsx}',
+        'x-pack/**/*.{js,mjs,ts,tsx}',
+        'packages/**/*.{js,mjs,ts,tsx}',
+      ],
+      plugins: ['formatjs'],
+      rules: {
+        'formatjs/enforce-default-message': ['error', 'anything'],
+        'formatjs/enforce-description': 'off',
+      },
+    },
     /**
      * Files that require dual-license headers, settings
      * are overridden below for files that require Elastic
@@ -603,7 +618,7 @@ module.exports = {
         'test/*/*.config.ts',
         'test/*/{tests,test_suites,apis,apps}/**/*',
         'test/server_integration/**/*.ts',
-        'x-pack/test/*/{tests,test_suites,apis,apps}/**/*',
+        'x-pack/test/*/{tests,test_suites,apis,apps,deployment_agnostic}/**/*',
         'x-pack/test/*/*config.*ts',
         'x-pack/test/saved_object_api_integration/*/apis/**/*',
         'x-pack/test/ui_capabilities/*/tests/**/*',
@@ -893,10 +908,6 @@ module.exports = {
           },
         ],
         'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
-        'react-hooks/exhaustive-deps': [
-          'error',
-          { additionalHooks: '^(useFetcher|useProgressiveFetcher|useBreadcrumb)$' },
-        ],
       },
     },
     {
@@ -912,6 +923,18 @@ module.exports = {
           {
             namedComponents: 'function-declaration',
             unnamedComponents: 'arrow-function',
+          },
+        ],
+      },
+    },
+    {
+      files: ['x-pack/plugins/observability_solution/**/*.{ts,tsx}'],
+      rules: {
+        'react-hooks/exhaustive-deps': [
+          'error',
+          {
+            additionalHooks:
+              '^(useAbortableAsync|useMemoWithAbortSignal|useFetcher|useProgressiveFetcher|useBreadcrumb|useAsync|useTimeRangeAsync|useAutoAbortedHttpClient)$',
           },
         ],
       },
@@ -949,17 +972,6 @@ module.exports = {
         ],
       },
     },
-    // Profiling
-    {
-      files: ['x-pack/plugins/observability_solution/profiling/**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
-        'react-hooks/exhaustive-deps': [
-          'error',
-          { additionalHooks: '^(useAsync|useTimeRangeAsync|useAutoAbortedHttpClient)$' },
-        ],
-      },
-    },
     {
       // disable imports from legacy uptime plugin
       files: [
@@ -987,6 +999,30 @@ module.exports = {
           {
             groups: ['builtin', 'external', 'internal', 'parent'],
             'newlines-between': 'always-and-inside-groups',
+          },
+        ],
+      },
+    },
+
+    /**
+     * Integration assistant overrides
+     */
+    {
+      // front end and common typescript and javascript files only
+      files: [
+        'x-pack/plugins/integration_assistant/public/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/integration_assistant/common/**/*.{js,mjs,ts,tsx}',
+      ],
+      rules: {
+        'import/no-nodejs-modules': 'error',
+        'no-duplicate-imports': 'off',
+        '@typescript-eslint/no-duplicate-imports': 'error',
+        '@typescript-eslint/consistent-type-imports': 'error',
+        'no-restricted-imports': [
+          'error',
+          {
+            // prevents UI code from importing server side code and then webpack including it when doing builds
+            patterns: ['**/server/*'],
           },
         ],
       },
@@ -1056,6 +1092,7 @@ module.exports = {
       files: [
         'x-pack/plugins/ecs_data_quality_dashboard/**/*.{ts,tsx}',
         'x-pack/plugins/elastic_assistant/**/*.{ts,tsx}',
+        'x-pack/plugins/integration_assistant/**/*.{ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant/**/*.{ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant-common/**/*.{ts,tsx}',
         'x-pack/packages/kbn-langchain/**/*.{ts,tsx}',
@@ -1070,6 +1107,7 @@ module.exports = {
       excludedFiles: [
         'x-pack/plugins/ecs_data_quality_dashboard/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/plugins/elastic_assistant/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'x-pack/plugins/integration_assistant/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant-common/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/packages/kbn-langchain/**/*.{test,mock,test_helper}.{ts,tsx}',
@@ -1090,6 +1128,7 @@ module.exports = {
       files: [
         'x-pack/plugins/ecs_data_quality_dashboard/**/*.{ts,tsx}',
         'x-pack/plugins/elastic_assistant/**/*.{ts,tsx}',
+        'x-pack/plugins/integration_assistant/**/*.{ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant/**/*.{ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant-common/**/*.{ts,tsx}',
         'x-pack/packages/kbn-langchain/**/*.{ts,tsx}',
@@ -1129,6 +1168,7 @@ module.exports = {
       files: [
         'x-pack/plugins/ecs_data_quality_dashboard/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/elastic_assistant/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/integration_assistant/**/*.{js,mjs,ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant/**/*.{js,mjs,ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant-common/**/*.{js,mjs,ts,tsx}',
         'x-pack/packages/kbn-langchain/**/*.{js,mjs,ts,tsx}',
@@ -1323,6 +1363,25 @@ module.exports = {
         'react/jsx-no-literals': 'error',
         'react/jsx-no-target-blank': 'error',
         'react/jsx-fragments': 'error',
+      },
+    },
+    {
+      files: [
+        'test/{accessibility,*functional*,*api_integration*}/apps/**/*.{js,ts}',
+        'x-pack/test/{accessibility,*functional*,*api_integration*}/apps/**/*.{js,ts}',
+        'x-pack/test_serverless/{functional,api_integration}/test_suites/**/*.{js,ts}',
+      ],
+      extends: ['plugin:mocha/recommended'],
+      plugins: ['mocha'],
+      env: {
+        mocha: true,
+      },
+      rules: {
+        'mocha/no-mocha-arrows': 'off',
+        'mocha/no-exports': 'off',
+        'mocha/no-setup-in-describe': 'off',
+        'mocha/no-nested-tests': 'off',
+        'mocha/no-skipped-tests': 'off',
       },
     },
     {

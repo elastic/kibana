@@ -127,6 +127,34 @@ describe('Save dashboard state', () => {
     );
   });
 
+  it('should update prefixes on references when save as copy is true', async () => {
+    const result = await saveDashboardState({
+      currentState: {
+        ...getSampleDashboardInput(),
+        title: 'BooFour',
+        panels: { idOne: { type: 'boop' } },
+      } as unknown as DashboardContainerInput,
+      panelReferences: [{ name: 'idOne:panel_idOne', type: 'boop', id: 'idOne' }],
+      lastSavedId: 'Boogatoonie',
+      saveOptions: { saveAsCopy: true },
+      ...allServices,
+    });
+
+    expect(result.id).toBe('newlyGeneratedId');
+    expect(allServices.contentManagement.client.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        options: expect.objectContaining({
+          references: expect.arrayContaining([
+            expect.objectContaining({
+              id: 'idOne',
+              name: expect.not.stringContaining('idOne:panel_idOne'),
+            }),
+          ]),
+        }),
+      })
+    );
+  });
+
   it('should return an error when the save fails.', async () => {
     contentManagement.client.create = jest.fn().mockRejectedValue('Whoops');
     const result = await saveDashboardState({

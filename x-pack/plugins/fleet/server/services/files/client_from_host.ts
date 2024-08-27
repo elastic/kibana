@@ -180,7 +180,7 @@ export class FleetFromHostFilesClient implements FleetFromHostFileClientInterfac
       } = fileDoc._source;
 
       const file: FleetFile = {
-        id: fileDoc._id,
+        id: fileDoc._id!,
         agents: [agentId],
         sha256: hash?.sha256 ?? '',
         created: new Date(created).toISOString(),

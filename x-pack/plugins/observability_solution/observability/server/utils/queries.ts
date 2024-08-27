@@ -83,6 +83,10 @@ export function rangeQuery(
   ];
 }
 
+export function existsQuery(field: string): QueryDslQueryContainer[] {
+  return [{ exists: { field } }];
+}
+
 export function kqlQuery(kql?: string): estypes.QueryDslQueryContainer[] {
   if (!kql) {
     return [];

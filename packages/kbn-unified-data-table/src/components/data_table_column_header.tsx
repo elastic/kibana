@@ -105,12 +105,14 @@ export const DataTableTimeColumnHeader = ({
   dataView,
   dataViewField,
   headerRowHeight = 1,
+  columnLabel,
 }: {
   dataView: DataView;
   dataViewField?: DataViewField;
   headerRowHeight?: number;
+  columnLabel?: string;
 }) => {
-  const timeFieldName = dataViewField?.customLabel ?? dataView.timeFieldName;
+  const timeFieldName = columnLabel || (dataViewField?.customLabel ?? dataView.timeFieldName);
   const primaryTimeAriaLabel = i18n.translate(
     'unifiedDataTable.tableHeader.timeFieldIconTooltipAriaLabel',
     {

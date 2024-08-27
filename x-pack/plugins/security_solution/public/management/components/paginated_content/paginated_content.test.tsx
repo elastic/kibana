@@ -60,6 +60,7 @@ describe('when using PaginatedContent', () => {
           totalItemCount: 10,
         },
         'data-test-subj': 'test',
+        CardDecorator: undefined,
         ...(additionalProps ?? {}),
       };
       renderResult = mockedContext.render(<PaginatedContent<Foo, ItemComponentType> {...props} />);

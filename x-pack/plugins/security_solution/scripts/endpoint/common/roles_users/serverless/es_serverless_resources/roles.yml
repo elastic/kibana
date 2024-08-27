@@ -53,6 +53,7 @@ viewer:
         - ".fleet-actions*"
         - "risk-score.risk-score-*"
         - ".asset-criticality.asset-criticality-*"
+        - ".ml-anomalies-*"
       privileges:
         - read
   applications:
@@ -64,6 +65,7 @@ viewer:
         - feature_siem.endpoint_list_read
         - feature_securitySolutionCases.read
         - feature_securitySolutionAssistant.all
+        - feature_securitySolutionAttackDiscovery.all
         - feature_actions.read
         - feature_builtInAlerts.read
         - feature_osquery.read
@@ -119,6 +121,10 @@ editor:
         - "read"
         - "write"
       allow_restricted_indices: false
+    - names:
+        - ".ml-anomalies-*"
+      privileges:
+        - read
   applications:
     - application: "kibana-.kibana"
       privileges:
@@ -138,6 +144,7 @@ editor:
         - feature_siem.file_operations_all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
+        - feature_securitySolutionAttackDiscovery.all
         - feature_actions.read
         - feature_builtInAlerts.all
         - feature_osquery.all
@@ -174,6 +181,7 @@ t1_analyst:
         - ".fleet-actions*"
         - risk-score.risk-score-*
         - .asset-criticality.asset-criticality-*
+        - ".ml-anomalies-*"
       privileges:
         - read
   applications:
@@ -185,6 +193,7 @@ t1_analyst:
         - feature_siem.endpoint_list_read
         - feature_securitySolutionCases.read
         - feature_securitySolutionAssistant.all
+        - feature_securitySolutionAttackDiscovery.all
         - feature_actions.read
         - feature_builtInAlerts.read
         - feature_osquery.read
@@ -222,6 +231,7 @@ t2_analyst:
         - .fleet-agents*
         - .fleet-actions*
         - risk-score.risk-score-*
+        - ".ml-anomalies-*"
       privileges:
         - read
     - names:
@@ -238,6 +248,7 @@ t2_analyst:
         - feature_siem.endpoint_list_read
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
+        - feature_securitySolutionAttackDiscovery.all
         - feature_actions.read
         - feature_builtInAlerts.read
         - feature_osquery.read
@@ -284,6 +295,7 @@ t3_analyst:
         - .fleet-agents*
         - .fleet-actions*
         - risk-score.risk-score-*
+        - ".ml-anomalies-*"
       privileges:
         - read
   applications:
@@ -303,8 +315,10 @@ t3_analyst:
         - feature_siem.process_operations_all
         - feature_siem.actions_log_management_all # Response actions history
         - feature_siem.file_operations_all
+        - feature_siem.scan_operations_all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
+        - feature_securitySolutionAttackDiscovery.all
         - feature_actions.read
         - feature_builtInAlerts.all
         - feature_osquery.all
@@ -349,6 +363,7 @@ threat_intelligence_analyst:
         - .fleet-agents*
         - .fleet-actions*
         - risk-score.risk-score-*
+        - ".ml-anomalies-*"
       privileges:
         - read
   applications:
@@ -360,6 +375,7 @@ threat_intelligence_analyst:
         - feature_siem.blocklist_all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
+        - feature_securitySolutionAttackDiscovery.all
         - feature_actions.read
         - feature_builtInAlerts.read
         - feature_osquery.all
@@ -408,6 +424,7 @@ rule_author:
         - .fleet-agents*
         - .fleet-actions*
         - risk-score.risk-score-*
+        - ".ml-anomalies-*"
       privileges:
         - read
   applications:
@@ -426,6 +443,7 @@ rule_author:
         - feature_siem.actions_log_management_read
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
+        - feature_securitySolutionAttackDiscovery.all
         - feature_actions.read
         - feature_builtInAlerts.all
         - feature_osquery.all
@@ -473,6 +491,7 @@ soc_manager:
         - .fleet-agents*
         - .fleet-actions*
         - risk-score.risk-score-*
+        - ".ml-anomalies-*"
       privileges:
         - read
   applications:
@@ -496,6 +515,7 @@ soc_manager:
         - feature_siem.scan_operations_all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
+        - feature_securitySolutionAttackDiscovery.all
         - feature_actions.all
         - feature_builtInAlerts.all
         - feature_osquery.all
@@ -534,6 +554,7 @@ detections_admin:
         - metrics-endpoint.metadata_current_*
         - .fleet-agents*
         - .fleet-actions*
+        - ".ml-anomalies-*"
       privileges:
         - read
     - names:
@@ -554,6 +575,7 @@ detections_admin:
         - feature_siem.crud_alerts
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
+        - feature_securitySolutionAttackDiscovery.all
         - feature_actions.all
         - feature_builtInAlerts.all
         - feature_dev_tools.all
@@ -592,6 +614,10 @@ platform_engineer:
       privileges:
         - read
         - write
+    - names:
+        - ".ml-anomalies-*"
+      privileges:
+        - read
   applications:
     - application: "kibana-.kibana"
       privileges:
@@ -608,6 +634,7 @@ platform_engineer:
         - feature_siem.actions_log_management_read
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
+        - feature_securitySolutionAttackDiscovery.all
         - feature_actions.all
         - feature_builtInAlerts.all
         - feature_fleet.all
@@ -643,6 +670,7 @@ endpoint_operations_analyst:
         - .lists*
         - .items*
         - risk-score.risk-score-*
+        - ".ml-anomalies-*"
       privileges:
         - read
     - names:
@@ -679,6 +707,7 @@ endpoint_operations_analyst:
         - feature_siem.scan_operations_all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
+        - feature_securitySolutionAttackDiscovery.all
         - feature_actions.all
         - feature_builtInAlerts.all
         - feature_osquery.all
@@ -711,6 +740,7 @@ endpoint_policy_manager:
         - packetbeat-*
         - winlogbeat-*
         - risk-score.risk-score-*
+        - ".ml-anomalies-*"
       privileges:
         - read
     - names:
@@ -744,6 +774,7 @@ endpoint_policy_manager:
         - feature_siem.blocklist_all # Elastic Defend Policy Management
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
+        - feature_securitySolutionAttackDiscovery.all
         - feature_actions.all
         - feature_builtInAlerts.all
         - feature_osquery.all

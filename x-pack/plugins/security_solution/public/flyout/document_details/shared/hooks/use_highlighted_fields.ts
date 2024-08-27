@@ -8,15 +8,8 @@
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { find, isEmpty } from 'lodash/fp';
 import { ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
-import {
-  CROWDSTRIKE_AGENT_ID_FIELD,
-  isAlertFromCrowdstrikeEvent,
-} from '../../../../common/utils/crowdstrike_alert_check';
-import {
-  SENTINEL_ONE_AGENT_ID_FIELD,
-  isAlertFromSentinelOneEvent,
-} from '../../../../common/utils/sentinelone_alert_check';
-import { isAlertFromEndpointEvent } from '../../../../common/utils/endpoint_alert_check';
+import { useAlertResponseActionsSupport } from '../../../../common/hooks/endpoint/use_alert_response_actions_support';
+import { isResponseActionsAlertAgentIdField } from '../../../../common/lib/endpoint';
 import {
   getEventCategoriesFromData,
   getEventFieldsToDisplay,
@@ -53,6 +46,7 @@ export const useHighlightedFields = ({
   dataFormattedForFieldBrowser,
   investigationFields,
 }: UseHighlightedFieldsParams): UseHighlightedFieldsResult => {
+  const responseActionsSupport = useAlertResponseActionsSupport(dataFormattedForFieldBrowser);
   const eventCategories = getEventCategoriesFromData(dataFormattedForFieldBrowser);
 
   const eventCodeField = find(
@@ -99,26 +93,12 @@ export const useHighlightedFields = ({
       field.id = field.legacyId;
     }
 
-    // if the field is agent.id and the event is not an endpoint event we skip it
+    // If the field is one used by a supported Response Actions agentType,
+    // but the alert field is not the one that the agentType on the alert host uses,
+    // then exit and return accumulator
     if (
-      field.id === 'agent.id' &&
-      !isAlertFromEndpointEvent({ data: dataFormattedForFieldBrowser })
-    ) {
-      return acc;
-    }
-
-    // if the field is observer.serial_number and the event is not a sentinel one event we skip it
-    if (
-      field.id === SENTINEL_ONE_AGENT_ID_FIELD &&
-      !isAlertFromSentinelOneEvent({ data: dataFormattedForFieldBrowser })
-    ) {
-      return acc;
-    }
-
-    // if the field is crowdstrike.event.DeviceId and the event is not a crowdstrike event we skip it
-    if (
-      field.id === CROWDSTRIKE_AGENT_ID_FIELD &&
-      !isAlertFromCrowdstrikeEvent({ data: dataFormattedForFieldBrowser })
+      isResponseActionsAlertAgentIdField(field.id) &&
+      responseActionsSupport.details.agentIdField !== field.id
     ) {
       return acc;
     }

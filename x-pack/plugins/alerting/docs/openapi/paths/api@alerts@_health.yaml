@@ -1,0 +1,79 @@
+get:
+  summary: Get the alerting framework health
+  operationId: legacyGetAlertingHealth
+  deprecated: true
+  description: Deprecated in 7.13.0. Use the get alerting framework health API instead.
+  tags:
+    - alerting
+  responses:
+    '200':
+      description: Indicates a successful call.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              alertingFrameworkHealth:
+                type: object
+                description: >
+                  Three substates identify the health of the alerting framework: `decryptionHealth`, `executionHealth`, and `readHealth`.
+                properties:
+                  decryptionHealth:
+                    type: object
+                    description: The timestamp and status of the alert decryption.
+                    properties:
+                      status:
+                        type: string
+                        example: ok
+                        enum:
+                         - error
+                         - ok
+                         - warn
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: "2023-01-13T01:28:00.280Z"
+                  executionHealth:
+                    type: object
+                    description: The timestamp and status of the alert execution.
+                    properties:
+                      status:
+                        type: string
+                        example: ok
+                        enum:
+                         - error
+                         - ok
+                         - warn
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: "2023-01-13T01:28:00.280Z"
+                  readHealth:
+                    type: object
+                    description: The timestamp and status of the alert reading events.
+                    properties:
+                      status:
+                        type: string
+                        example: ok
+                        enum:
+                         - error
+                         - ok
+                         - warn
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: "2023-01-13T01:28:00.280Z"
+              hasPermanentEncryptionKey:
+                type: boolean
+                description: If `false`, the encrypted saved object plugin does not have a permanent encryption key.
+                example: true
+              isSufficientlySecure:
+                type: boolean
+                description: If `false`, security is enabled but TLS is not.
+                example: true
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/401_response.yaml'

@@ -1,12 +1,23 @@
-MV_LAST
+## MV_LAST
 
-Syntax
-Parameters
-field
-Multivalue expression.
-DescriptionConverts a multivalue expression into a single valued column containing the last value. This is most useful when reading from a function that emits multivalued columns in a known order like SPLIT.  The order that multivalued fields are read from underlying storage is not guaranteed. It is frequently ascending, but don’t rely on that. If you need the maximum value use MV_MAX instead of MV_LAST. MV_MAX has optimizations for sorted values so there isn’t a performance benefit to MV_LAST.Supported types
-Example
+The `MV_LAST` function in ES|QL is used to convert a multivalue expression into a single valued column containing the last value. This function is most useful when reading from a function that emits multivalued columns in a known order like `SPLIT`. 
+
+It's important to note that the order that multivalued fields are read from underlying storage is not guaranteed. It is frequently ascending, but this should not be relied upon. If you need the maximum value, it is recommended to use `MV_MAX` instead of `MV_LAST`. `MV_MAX` has optimizations for sorted values so there isn’t a performance benefit to `MV_LAST`.
+
+### Examples
+
+Here are a couple of examples of how you can use the `MV_LAST` function in your ES|QL queries:
+
 ```esql
 ROW a="foo;bar;baz"
 | EVAL last_a = MV_LAST(SPLIT(a, ";"))
 ```
+
+In this example, the `SPLIT` function is used to split the string "foo;bar;baz" into a multivalue expression. The `MV_LAST` function is then used to select the last value from this multivalue expression.
+
+```esql
+ROW numbers="1;2;3;4;5"
+| EVAL last_number = MV_LAST(SPLIT(numbers, ";"))
+```
+
+In this second example, the `SPLIT` function is used to split the string "1;2;3;4;5" into a multivalue expression. The `MV_LAST` function is then used to select the last value from this multivalue expression.

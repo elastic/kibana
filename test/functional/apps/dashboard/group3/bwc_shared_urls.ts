@@ -103,6 +103,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('loads a saved dashboard', async function () {
         await PageObjects.dashboard.saveDashboard('saved with colors', {
+          saveAsNew: true,
           storeTimeWithDashboard: true,
         });
 

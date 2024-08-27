@@ -284,7 +284,7 @@ const SlackParamsFields: React.FunctionComponent<
         }
         fullWidth
         error={channelValidError.length > 0 ? channelValidError : errors.channels}
-        isInvalid={errors.channels?.length > 0 || channelValidError.length > 0}
+        isInvalid={Number(errors.channels?.length) > 0 || channelValidError.length > 0}
         helpText={
           channelIds.length > 0 && channelValidInfo
             ? `${channelValidInfo.id} - ${channelValidInfo.name}`

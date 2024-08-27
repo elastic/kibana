@@ -86,4 +86,5 @@ export enum SecurityPageName {
   entityAnalyticsManagement = 'entity_analytics-management',
   entityAnalyticsAssetClassification = 'entity_analytics-asset-classification',
   coverageOverview = 'coverage-overview',
+  notesManagement = 'notes-management',
 }

@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'doc_table:legacy': true,
   };
 
-  describe('discover esql grid with legacy setting', async function () {
+  describe('discover esql grid with legacy setting', function () {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
@@ -65,7 +65,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await dataGrid.clickRowToggle({ rowIndex: 0 });
 
-      await testSubjects.existOrFail('docTableDetailsFlyout');
+      await testSubjects.existOrFail('docViewerFlyout');
 
       await PageObjects.discover.saveSearch(savedSearchESQL);
 
@@ -81,7 +81,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await dataGrid.clickRowToggle({ rowIndex: 0 });
 
-      await testSubjects.existOrFail('docTableDetailsFlyout');
+      await testSubjects.existOrFail('docViewerFlyout');
 
       await dashboardPanelActions.removePanelByTitle(savedSearchESQL);
 

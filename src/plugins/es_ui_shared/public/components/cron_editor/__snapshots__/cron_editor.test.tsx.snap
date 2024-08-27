@@ -31,9 +31,10 @@ Array [
         </label>
         <div
           class="euiFormControlLayout__childrenWrapper"
+          style="--euiFormControlRightIconsCount: 1;"
         >
           <select
-            class="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--inGroup"
+            class="euiSelect emotion-euiSelect-fullWidth-inGroup"
             data-test-subj="cronFrequencySelect"
             id="generated-id"
           >
@@ -121,10 +122,11 @@ Array [
             </label>
             <div
               class="euiFormControlLayout__childrenWrapper"
+              style="--euiFormControlRightIconsCount: 1;"
             >
               <select
                 aria-label="Hour"
-                class="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--inGroup"
+                class="euiSelect emotion-euiSelect-fullWidth-inGroup"
                 data-test-subj="cronFrequencyDailyHourSelect"
               >
                 <option
@@ -277,10 +279,11 @@ Array [
             </label>
             <div
               class="euiFormControlLayout__childrenWrapper"
+              style="--euiFormControlRightIconsCount: 1;"
             >
               <select
                 aria-label="Minute"
-                class="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--inGroup"
+                class="euiSelect emotion-euiSelect-fullWidth-inGroup"
                 data-test-subj="cronFrequencyDailyMinuteSelect"
               >
                 <option
@@ -637,9 +640,10 @@ Array [
         </label>
         <div
           class="euiFormControlLayout__childrenWrapper"
+          style="--euiFormControlRightIconsCount: 1;"
         >
           <select
-            class="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--inGroup"
+            class="euiSelect emotion-euiSelect-fullWidth-inGroup"
             data-test-subj="cronFrequencySelect"
             id="generated-id"
           >
@@ -721,9 +725,10 @@ Array [
         </label>
         <div
           class="euiFormControlLayout__childrenWrapper"
+          style="--euiFormControlRightIconsCount: 1;"
         >
           <select
-            class="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--inGroup"
+            class="euiSelect emotion-euiSelect-fullWidth-inGroup"
             data-test-subj="cronFrequencyHourlyMinuteSelect"
             id="generated-id"
           >
@@ -1078,9 +1083,10 @@ exports[`CronEditor is rendered with a MINUTE frequency 1`] = `
       </label>
       <div
         class="euiFormControlLayout__childrenWrapper"
+        style="--euiFormControlRightIconsCount: 1;"
       >
         <select
-          class="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--inGroup"
+          class="euiSelect emotion-euiSelect-fullWidth-inGroup"
           data-test-subj="cronFrequencySelect"
           id="generated-id"
         >
@@ -1165,9 +1171,10 @@ Array [
         </label>
         <div
           class="euiFormControlLayout__childrenWrapper"
+          style="--euiFormControlRightIconsCount: 1;"
         >
           <select
-            class="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--inGroup"
+            class="euiSelect emotion-euiSelect-fullWidth-inGroup"
             data-test-subj="cronFrequencySelect"
             id="generated-id"
           >
@@ -1249,9 +1256,10 @@ Array [
         </label>
         <div
           class="euiFormControlLayout__childrenWrapper"
+          style="--euiFormControlRightIconsCount: 1;"
         >
           <select
-            class="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--inGroup"
+            class="euiSelect emotion-euiSelect-fullWidth-inGroup"
             data-test-subj="cronFrequencyMonthlyDateSelect"
             id="generated-id"
           >
@@ -1464,10 +1472,11 @@ Array [
             </label>
             <div
               class="euiFormControlLayout__childrenWrapper"
+              style="--euiFormControlRightIconsCount: 1;"
             >
               <select
                 aria-label="Hour"
-                class="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--inGroup"
+                class="euiSelect emotion-euiSelect-fullWidth-inGroup"
                 data-test-subj="cronFrequencyMonthlyHourSelect"
               >
                 <option
@@ -1620,10 +1629,11 @@ Array [
             </label>
             <div
               class="euiFormControlLayout__childrenWrapper"
+              style="--euiFormControlRightIconsCount: 1;"
             >
               <select
                 aria-label="Minute"
-                class="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--inGroup"
+                class="euiSelect emotion-euiSelect-fullWidth-inGroup"
                 data-test-subj="cronFrequencyMonthlyMinuteSelect"
               >
                 <option
@@ -1980,9 +1990,10 @@ Array [
         </label>
         <div
           class="euiFormControlLayout__childrenWrapper"
+          style="--euiFormControlRightIconsCount: 1;"
         >
           <select
-            class="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--inGroup"
+            class="euiSelect emotion-euiSelect-fullWidth-inGroup"
             data-test-subj="cronFrequencySelect"
             id="generated-id"
           >
@@ -2064,9 +2075,10 @@ Array [
         </label>
         <div
           class="euiFormControlLayout__childrenWrapper"
+          style="--euiFormControlRightIconsCount: 1;"
         >
           <select
-            class="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--inGroup"
+            class="euiSelect emotion-euiSelect-fullWidth-inGroup"
             data-test-subj="cronFrequencyWeeklyDaySelect"
             id="generated-id"
           >
@@ -2159,10 +2171,11 @@ Array [
             </label>
             <div
               class="euiFormControlLayout__childrenWrapper"
+              style="--euiFormControlRightIconsCount: 1;"
             >
               <select
                 aria-label="Hour"
-                class="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--inGroup"
+                class="euiSelect emotion-euiSelect-fullWidth-inGroup"
                 data-test-subj="cronFrequencyWeeklyHourSelect"
               >
                 <option
@@ -2315,10 +2328,11 @@ Array [
             </label>
             <div
               class="euiFormControlLayout__childrenWrapper"
+              style="--euiFormControlRightIconsCount: 1;"
             >
               <select
                 aria-label="Minute"
-                class="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--inGroup"
+                class="euiSelect emotion-euiSelect-fullWidth-inGroup"
                 data-test-subj="cronFrequencyWeeklyMinuteSelect"
               >
                 <option
@@ -2675,9 +2689,10 @@ Array [
         </label>
         <div
           class="euiFormControlLayout__childrenWrapper"
+          style="--euiFormControlRightIconsCount: 1;"
         >
           <select
-            class="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--inGroup"
+            class="euiSelect emotion-euiSelect-fullWidth-inGroup"
             data-test-subj="cronFrequencySelect"
             id="generated-id"
           >
@@ -2759,9 +2774,10 @@ Array [
         </label>
         <div
           class="euiFormControlLayout__childrenWrapper"
+          style="--euiFormControlRightIconsCount: 1;"
         >
           <select
-            class="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--inGroup"
+            class="euiSelect emotion-euiSelect-fullWidth-inGroup"
             data-test-subj="cronFrequencyYearlyMonthSelect"
             id="generated-id"
           >
@@ -2873,9 +2889,10 @@ Array [
         </label>
         <div
           class="euiFormControlLayout__childrenWrapper"
+          style="--euiFormControlRightIconsCount: 1;"
         >
           <select
-            class="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--inGroup"
+            class="euiSelect emotion-euiSelect-fullWidth-inGroup"
             data-test-subj="cronFrequencyYearlyDateSelect"
             id="generated-id"
           >
@@ -3088,10 +3105,11 @@ Array [
             </label>
             <div
               class="euiFormControlLayout__childrenWrapper"
+              style="--euiFormControlRightIconsCount: 1;"
             >
               <select
                 aria-label="Hour"
-                class="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--inGroup"
+                class="euiSelect emotion-euiSelect-fullWidth-inGroup"
                 data-test-subj="cronFrequencyYearlyHourSelect"
               >
                 <option
@@ -3244,10 +3262,11 @@ Array [
             </label>
             <div
               class="euiFormControlLayout__childrenWrapper"
+              style="--euiFormControlRightIconsCount: 1;"
             >
               <select
                 aria-label="Minute"
-                class="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--inGroup"
+                class="euiSelect emotion-euiSelect-fullWidth-inGroup"
                 data-test-subj="cronFrequencyYearlyMinuteSelect"
               >
                 <option

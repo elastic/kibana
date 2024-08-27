@@ -6,14 +6,12 @@
  */
 
 import { isEqual } from 'lodash';
-import React, { useCallback, useEffect, useMemo, useRef, useState, type FC } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, type FC } from 'react';
 import { EuiButton, EuiEmptyPrompt, EuiHorizontalRule, EuiPanel } from '@elastic/eui';
-import type { Moment } from 'moment';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { BarStyleAccessor } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
 
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   getWindowParametersForTrigger,
@@ -21,14 +19,16 @@ import {
   getSnappedWindowParameters,
   LOG_RATE_ANALYSIS_HIGHLIGHT_COLOR,
   LOG_RATE_ANALYSIS_TYPE,
-  type LogRateAnalysisType,
   type WindowParameters,
 } from '@kbn/aiops-log-rate-analysis';
-import type { SignificantItem } from '@kbn/ml-agg-utils';
-import { useLogRateAnalysisStateContext, type GroupTableItem } from '@kbn/aiops-components';
-
-import { useData } from '../../../hooks/use_data';
-import { useDataSource } from '../../../hooks/use_data_source';
+import {
+  clearAllRowState,
+  clearSelection,
+  setAutoRunAnalysis,
+  setInitialAnalysisStart,
+  useAppDispatch,
+  useAppSelector,
+} from '@kbn/aiops-log-rate-analysis/state';
 
 import { DocumentCountContent } from '../../document_count_content/document_count_content';
 import {
@@ -36,7 +36,7 @@ import {
   type LogRateAnalysisResultsData,
 } from '../log_rate_analysis_results';
 
-const DEFAULT_SEARCH_QUERY: estypes.QueryDslQueryContainer = { match_all: {} };
+export const DEFAULT_SEARCH_QUERY: estypes.QueryDslQueryContainer = { match_all: {} };
 const DEFAULT_SEARCH_BAR_QUERY: estypes.QueryDslQueryContainer = {
   bool: {
     filter: [],
@@ -49,26 +49,9 @@ const DEFAULT_SEARCH_BAR_QUERY: estypes.QueryDslQueryContainer = {
   },
 };
 
-export function getDocumentCountStatsSplitLabel(
-  significantItem?: SignificantItem,
-  group?: GroupTableItem
-) {
-  if (significantItem) {
-    return `${significantItem?.fieldName}:${significantItem?.fieldValue}`;
-  } else if (group) {
-    return i18n.translate('xpack.aiops.logRateAnalysis.page.documentCountStatsSplitGroupLabel', {
-      defaultMessage: 'Selected group',
-    });
-  }
-}
-
 export interface LogRateAnalysisContentProps {
-  /** Optional time range override */
-  timeRange?: { min: Moment; max: Moment };
   /** Elasticsearch query to pass to analysis endpoint */
   esSearchQuery?: estypes.QueryDslQueryContainer;
-  /** Option to make the main histogram sticky */
-  stickyHistogram?: boolean;
   /** Optional color override for the default bar color for charts */
   barColorOverride?: string;
   /** Optional color override for the highlighted bar color for charts */
@@ -82,26 +65,23 @@ export interface LogRateAnalysisContentProps {
 }
 
 export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
-  timeRange,
   esSearchQuery = DEFAULT_SEARCH_QUERY,
-  stickyHistogram,
   barColorOverride,
   barHighlightColorOverride,
   onAnalysisCompleted,
   onWindowParametersChange,
   embeddingOrigin,
 }) => {
-  const { dataView } = useDataSource();
+  const dispatch = useAppDispatch();
 
-  const [windowParameters, setWindowParameters] = useState<WindowParameters | undefined>();
-  const [isBrushCleared, setIsBrushCleared] = useState(true);
-  const [logRateAnalysisType, setLogRateAnalysisType] = useState<LogRateAnalysisType>(
-    LOG_RATE_ANALYSIS_TYPE.SPIKE
+  const isRunning = useAppSelector((s) => s.logRateAnalysisStream.isRunning);
+  const significantItems = useAppSelector((s) => s.logRateAnalysisResults.significantItems);
+  const significantItemsGroups = useAppSelector(
+    (s) => s.logRateAnalysisResults.significantItemsGroups
   );
-
-  useEffect(() => {
-    setIsBrushCleared(windowParameters === undefined);
-  }, [windowParameters]);
+  const loaded = useAppSelector((s) => s.logRateAnalysisResults.loaded);
+  const analysisType = useAppSelector((s) => s.logRateAnalysis.analysisType);
+  const windowParameters = useAppSelector((s) => s.logRateAnalysis.chartWindowParameters);
 
   // Window parameters stored in the url state use this components
   // `initialAnalysisStart` prop to set the initial params restore from url state.
@@ -132,55 +112,15 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
     [esSearchQuery]
   );
 
-  const {
-    autoRunAnalysis,
-    currentSelectedSignificantItem,
-    currentSelectedGroup,
-    setAutoRunAnalysis,
-    setInitialAnalysisStart,
-    setPinnedSignificantItem,
-    setPinnedGroup,
-    setSelectedSignificantItem,
-    setSelectedGroup,
-  } = useLogRateAnalysisStateContext();
-
-  const { documentStats, earliest, latest } = useData(
-    dataView,
-    'log_rate_analysis',
-    searchQuery,
-    undefined,
-    currentSelectedSignificantItem,
-    currentSelectedGroup,
-    undefined,
-    true,
-    timeRange
+  const { autoRunAnalysis, documentStats, earliest, latest, isBrushCleared } = useAppSelector(
+    (s) => s.logRateAnalysis
   );
 
-  const { sampleProbability, totalCount, documentCountStats, documentCountStatsCompare } =
-    documentStats;
+  const { documentCountStats } = documentStats;
 
-  function brushSelectionUpdate(
-    windowParametersUpdate: WindowParameters,
-    force: boolean,
-    logRateAnalysisTypeUpdate: LogRateAnalysisType
-  ) {
-    if (!isBrushCleared || force) {
-      setWindowParameters(windowParametersUpdate);
-    }
-    if (force) {
-      setIsBrushCleared(false);
-    }
-    setLogRateAnalysisType(logRateAnalysisTypeUpdate);
-  }
-
-  function clearSelection() {
-    setWindowParameters(undefined);
-    setPinnedSignificantItem(null);
-    setPinnedGroup(null);
-    setSelectedSignificantItem(null);
-    setSelectedGroup(null);
-    setIsBrushCleared(true);
-    setInitialAnalysisStart(undefined);
+  function clearSelectionHandler() {
+    dispatch(clearSelection());
+    dispatch(clearAllRowState());
   }
 
   const barStyle = {
@@ -196,16 +136,16 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
       ? (d, g) => {
           return g.specId === 'document_count' &&
             documentCountStats?.changePoint &&
-            d.x > documentCountStats.changePoint.startTs &&
-            d.x < documentCountStats.changePoint.endTs
+            Number(d.x) > documentCountStats.changePoint.startTs &&
+            Number(d.x) < documentCountStats.changePoint.endTs
             ? barStyle
             : null;
         }
       : undefined;
 
   const triggerAnalysisForManualSelection = useCallback(() => {
-    setAutoRunAnalysis(true);
-  }, [setAutoRunAnalysis]);
+    dispatch(setAutoRunAnalysis(true));
+  }, [dispatch]);
 
   const triggerAnalysisForChangePoint = useCallback(() => {
     if (documentCountStats) {
@@ -224,10 +164,21 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
         const wpSnap = getSnappedWindowParameters(wp, snapTimestamps);
 
         triggerAnalysisForManualSelection();
-        setInitialAnalysisStart(wpSnap);
+        dispatch(setInitialAnalysisStart(wpSnap));
       }
     }
-  }, [documentCountStats, setInitialAnalysisStart, triggerAnalysisForManualSelection]);
+  }, [documentCountStats, dispatch, triggerAnalysisForManualSelection]);
+
+  useEffect(() => {
+    if (!isRunning && loaded === 1 && onAnalysisCompleted) {
+      onAnalysisCompleted({
+        analysisType,
+        significantItems,
+        significantItemsGroups,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isRunning, loaded]);
 
   const showDocumentCountContent = documentCountStats !== undefined;
 
@@ -255,16 +206,6 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
     <EuiPanel hasBorder={false} hasShadow={false}>
       {showDocumentCountContent && (
         <DocumentCountContent
-          brushSelectionUpdateHandler={brushSelectionUpdate}
-          documentCountStats={documentCountStats}
-          documentCountStatsSplit={documentCountStatsCompare}
-          documentCountStatsSplitLabel={getDocumentCountStatsSplitLabel(
-            currentSelectedSignificantItem,
-            currentSelectedGroup
-          )}
-          isBrushCleared={isBrushCleared}
-          totalCount={totalCount}
-          sampleProbability={sampleProbability}
           barColorOverride={barColorOverride}
           barHighlightColorOverride={barHighlightColorOverride}
           barStyleAccessor={barStyleAccessor}
@@ -273,18 +214,10 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
       <EuiHorizontalRule />
       {showLogRateAnalysisResults && (
         <LogRateAnalysisResults
-          analysisType={logRateAnalysisType}
-          earliest={earliest}
-          isBrushCleared={isBrushCleared}
-          latest={latest}
-          stickyHistogram={stickyHistogram}
-          onReset={clearSelection}
-          sampleProbability={sampleProbability}
+          onReset={clearSelectionHandler}
           searchQuery={searchQuery}
-          windowParameters={windowParameters}
           barColorOverride={barColorOverride}
           barHighlightColorOverride={barHighlightColorOverride}
-          onAnalysisCompleted={onAnalysisCompleted}
           embeddingOrigin={embeddingOrigin}
         />
       )}
@@ -315,7 +248,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
               </EuiButton>{' '}
               <EuiButton
                 data-test-subj="aiopsClearSelectionBadge"
-                onClick={() => clearSelection()}
+                onClick={() => clearSelectionHandler()}
                 color="text"
               >
                 <FormattedMessage
@@ -380,7 +313,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
           data-test-subj="aiopsChangePointDetectedPrompt"
         />
       )}
-      {showDefaultEmptyPrompt && (
+      {showDocumentCountContent && showDefaultEmptyPrompt && (
         <EuiEmptyPrompt
           color="subdued"
           hasShadow={false}

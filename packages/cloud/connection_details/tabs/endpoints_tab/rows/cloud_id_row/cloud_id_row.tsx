@@ -44,7 +44,14 @@ export const CloudIdRow: React.FC<CloudIdRowProps> = ({
 
       {showCloudId && (
         <EuiFormRow
-          label={<Label learnMoreUrl={learnMoreUrl} />}
+          label={
+            <Label
+              learnMoreUrl={learnMoreUrl}
+              aria-label={i18n.translate('cloud.connectionDetails.cloudId.learnMore', {
+                defaultMessage: 'Learn more about Cloud ID',
+              })}
+            />
+          }
           helpText={i18n.translate('cloud.connectionDetails.tab.endpoints.cloudIdField.helpText', {
             defaultMessage:
               'Specific client libraries and connectors can use this unique identifier specific to Elastic Cloud.',
@@ -52,7 +59,13 @@ export const CloudIdRow: React.FC<CloudIdRowProps> = ({
           fullWidth
           data-test-subj="connectionDetailsCloudId"
         >
-          <CopyInput value={value} onCopyClick={() => onCopyClick?.()} />
+          <CopyInput
+            value={value}
+            onCopyClick={() => onCopyClick?.()}
+            aria-label={i18n.translate('cloud.connectionDetails.tab.cloudId.label', {
+              defaultMessage: 'Copy Cloud ID to clipboard',
+            })}
+          />
         </EuiFormRow>
       )}
     </>

@@ -16,7 +16,7 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import { flatKeys } from '../../../../../test/api_integration/apis/telemetry/utils';
+import { flatKeys } from '@kbn/test-suites-src/api_integration/apis/telemetry/utils';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const disableCollection = {

@@ -12,12 +12,10 @@ import type {
   UseShowRelatedAlertsByAncestryResult,
 } from './use_show_related_alerts_by_ancestry';
 import { useShowRelatedAlertsByAncestry } from './use_show_related_alerts_by_ancestry';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { licenseService } from '../../../../common/hooks/use_license';
 import { mockDataAsNestedObject } from '../mocks/mock_data_as_nested_object';
 import { useIsInvestigateInResolverActionEnabled } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
 
-jest.mock('../../../../common/hooks/use_experimental_features');
 jest.mock('../../../../common/hooks/use_license', () => {
   const licenseServiceInstance = {
     isPlatinumPlus: jest.fn(),
@@ -43,7 +41,6 @@ describe('useShowRelatedAlertsByAncestry', () => {
   >;
 
   it('should return false if Process Entity Info is not available', () => {
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
     (useIsInvestigateInResolverActionEnabled as jest.Mock).mockReturnValue(false);
     licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
     const getFieldsData = () => null;
@@ -62,27 +59,7 @@ describe('useShowRelatedAlertsByAncestry', () => {
     });
   });
 
-  it(`should return false if feature isn't enabled`, () => {
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
-    licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
-    const getFieldsData = () => 'value';
-    hookResult = renderHook(() =>
-      useShowRelatedAlertsByAncestry({
-        getFieldsData,
-        dataAsNestedObject,
-        eventId,
-        isPreview: false,
-      })
-    );
-
-    expect(hookResult.result.current).toEqual({
-      show: false,
-      documentId: 'event-id',
-    });
-  });
-
   it(`should return false if license is lower than platinum`, () => {
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
     licenseServiceMock.isPlatinumPlus.mockReturnValue(false);
     const getFieldsData = () => 'value';
     hookResult = renderHook(() =>
@@ -101,7 +78,6 @@ describe('useShowRelatedAlertsByAncestry', () => {
   });
 
   it('should return true and event id as document id by default ', () => {
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
     (useIsInvestigateInResolverActionEnabled as jest.Mock).mockReturnValue(true);
     licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
     const getFieldsData = () => 'ancestors-id';
@@ -121,7 +97,6 @@ describe('useShowRelatedAlertsByAncestry', () => {
   });
 
   it('should return true and ancestor id as document id if flyout is open in preview', () => {
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
     (useIsInvestigateInResolverActionEnabled as jest.Mock).mockReturnValue(true);
     licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
     const getFieldsData = () => 'ancestors-id';

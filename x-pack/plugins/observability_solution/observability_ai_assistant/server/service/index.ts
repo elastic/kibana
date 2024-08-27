@@ -22,40 +22,34 @@ import { ObservabilityAIAssistantClient } from './client';
 import { conversationComponentTemplate } from './conversation_component_template';
 import { kbComponentTemplate } from './kb_component_template';
 import { KnowledgeBaseEntryOperationType, KnowledgeBaseService } from './knowledge_base_service';
-import type {
-  RegistrationCallback,
-  ObservabilityAIAssistantResourceNames,
-  RespondFunctionResources,
-} from './types';
+import type { RegistrationCallback, RespondFunctionResources } from './types';
 import { splitKbText } from './util/split_kb_text';
 
 function getResourceName(resource: string) {
   return `.kibana-observability-ai-assistant-${resource}`;
 }
 
-export function createResourceNamesMap() {
-  return {
-    componentTemplate: {
-      conversations: getResourceName('component-template-conversations'),
-      kb: getResourceName('component-template-kb'),
-    },
-    aliases: {
-      conversations: getResourceName('conversations'),
-      kb: getResourceName('kb'),
-    },
-    indexPatterns: {
-      conversations: getResourceName('conversations*'),
-      kb: getResourceName('kb*'),
-    },
-    indexTemplate: {
-      conversations: getResourceName('index-template-conversations'),
-      kb: getResourceName('index-template-kb'),
-    },
-    pipelines: {
-      kb: getResourceName('kb-ingest-pipeline'),
-    },
-  };
-}
+export const resourceNames = {
+  componentTemplate: {
+    conversations: getResourceName('component-template-conversations'),
+    kb: getResourceName('component-template-kb'),
+  },
+  aliases: {
+    conversations: getResourceName('conversations'),
+    kb: getResourceName('kb'),
+  },
+  indexPatterns: {
+    conversations: getResourceName('conversations*'),
+    kb: getResourceName('kb*'),
+  },
+  indexTemplate: {
+    conversations: getResourceName('index-template-conversations'),
+    kb: getResourceName('index-template-kb'),
+  },
+  pipelines: {
+    kb: getResourceName('kb-ingest-pipeline'),
+  },
+};
 
 export const INDEX_QUEUED_DOCUMENTS_TASK_ID = 'observabilityAIAssistant:indexQueuedDocumentsTask';
 
@@ -75,8 +69,6 @@ export class ObservabilityAIAssistantService {
   private readonly logger: Logger;
   private readonly getModelId: () => Promise<string>;
   private kbService?: KnowledgeBaseService;
-
-  private readonly resourceNames: ObservabilityAIAssistantResourceNames = createResourceNamesMap();
 
   private readonly registrations: RegistrationCallback[] = [];
 
@@ -140,19 +132,18 @@ export class ObservabilityAIAssistantService {
 
       const elserModelId = await this.getModelId();
 
-      const esClient = coreStart.elasticsearch.client.asInternalUser;
-
-      await esClient.cluster.putComponentTemplate({
+      const esClient = coreStart.elasticsearch.client;
+      await esClient.asInternalUser.cluster.putComponentTemplate({
         create: false,
-        name: this.resourceNames.componentTemplate.conversations,
+        name: resourceNames.componentTemplate.conversations,
         template: conversationComponentTemplate,
       });
 
-      await esClient.indices.putIndexTemplate({
-        name: this.resourceNames.indexTemplate.conversations,
-        composed_of: [this.resourceNames.componentTemplate.conversations],
+      await esClient.asInternalUser.indices.putIndexTemplate({
+        name: resourceNames.indexTemplate.conversations,
+        composed_of: [resourceNames.componentTemplate.conversations],
         create: false,
-        index_patterns: [this.resourceNames.indexPatterns.conversations],
+        index_patterns: [resourceNames.indexPatterns.conversations],
         template: {
           settings: {
             number_of_shards: 1,
@@ -167,10 +158,10 @@ export class ObservabilityAIAssistantService {
         },
       });
 
-      const conversationAliasName = this.resourceNames.aliases.conversations;
+      const conversationAliasName = resourceNames.aliases.conversations;
 
       await createConcreteWriteIndex({
-        esClient,
+        esClient: esClient.asInternalUser,
         logger: this.logger,
         totalFieldsLimit: 10000,
         indexPatterns: {
@@ -178,19 +169,19 @@ export class ObservabilityAIAssistantService {
           pattern: `${conversationAliasName}*`,
           basePattern: `${conversationAliasName}*`,
           name: `${conversationAliasName}-000001`,
-          template: this.resourceNames.indexTemplate.conversations,
+          template: resourceNames.indexTemplate.conversations,
         },
         dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts: false }),
       });
 
-      await esClient.cluster.putComponentTemplate({
+      await esClient.asInternalUser.cluster.putComponentTemplate({
         create: false,
-        name: this.resourceNames.componentTemplate.kb,
+        name: resourceNames.componentTemplate.kb,
         template: kbComponentTemplate,
       });
 
-      await esClient.ingest.putPipeline({
-        id: this.resourceNames.pipelines.kb,
+      await esClient.asInternalUser.ingest.putPipeline({
+        id: resourceNames.pipelines.kb,
         processors: [
           {
             inference: {
@@ -210,11 +201,11 @@ export class ObservabilityAIAssistantService {
         ],
       });
 
-      await esClient.indices.putIndexTemplate({
-        name: this.resourceNames.indexTemplate.kb,
-        composed_of: [this.resourceNames.componentTemplate.kb],
+      await esClient.asInternalUser.indices.putIndexTemplate({
+        name: resourceNames.indexTemplate.kb,
+        composed_of: [resourceNames.componentTemplate.kb],
         create: false,
-        index_patterns: [this.resourceNames.indexPatterns.kb],
+        index_patterns: [resourceNames.indexPatterns.kb],
         template: {
           settings: {
             number_of_shards: 1,
@@ -224,10 +215,10 @@ export class ObservabilityAIAssistantService {
         },
       });
 
-      const kbAliasName = this.resourceNames.aliases.kb;
+      const kbAliasName = resourceNames.aliases.kb;
 
       await createConcreteWriteIndex({
-        esClient,
+        esClient: esClient.asInternalUser,
         logger: this.logger,
         totalFieldsLimit: 10000,
         indexPatterns: {
@@ -235,7 +226,7 @@ export class ObservabilityAIAssistantService {
           pattern: `${kbAliasName}*`,
           basePattern: `${kbAliasName}*`,
           name: `${kbAliasName}-000001`,
-          template: this.resourceNames.indexTemplate.kb,
+          template: resourceNames.indexTemplate.kb,
         },
         dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts: false }),
       });
@@ -243,7 +234,6 @@ export class ObservabilityAIAssistantService {
       this.kbService = new KnowledgeBaseService({
         logger: this.logger.get('kb'),
         esClient,
-        resources: this.resourceNames,
         taskManagerStart: pluginsStart.taskManager,
         getModelId: this.getModelId,
       });
@@ -290,7 +280,6 @@ export class ObservabilityAIAssistantService {
         asInternalUser: coreStart.elasticsearch.client.asInternalUser,
         asCurrentUser: coreStart.elasticsearch.client.asScoped(request).asCurrentUser,
       },
-      resources: this.resourceNames,
       logger: this.logger,
       user: user
         ? {
@@ -334,7 +323,7 @@ export class ObservabilityAIAssistantService {
     return fnClient;
   }
 
-  addToKnowledgeBase(entries: KnowledgeBaseEntryRequest[]): void {
+  addToKnowledgeBaseQueue(entries: KnowledgeBaseEntryRequest[]): void {
     this.init()
       .then(() => {
         this.kbService!.queue(
@@ -345,6 +334,7 @@ export class ObservabilityAIAssistantService {
               doc_id: entry.id,
               public: true,
               confidence: 'high' as const,
+              type: 'contextual' as const,
               is_correction: false,
               labels: {
                 ...entry.labels,
@@ -375,7 +365,7 @@ export class ObservabilityAIAssistantService {
   }
 
   addCategoryToKnowledgeBase(categoryId: string, entries: KnowledgeBaseEntryRequest[]) {
-    this.addToKnowledgeBase(
+    this.addToKnowledgeBaseQueue(
       entries.map((entry) => {
         return {
           ...entry,

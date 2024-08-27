@@ -47,12 +47,16 @@ export const submitCommand = (): void => {
 };
 
 export const waitForCommandToBeExecuted = (command: ConsoleResponseActionCommands): void => {
-  const actionResultMessage =
-    command === 'execute'
-      ? 'Command execution was successful'
-      : command === 'get-file'
-      ? 'File retrieved from the host.'
-      : 'Action completed.';
+  let actionResultMessage = 'Action completed.';
+
+  if (command === 'execute') {
+    actionResultMessage = 'Command execution was successful';
+  } else if (command === 'get-file') {
+    actionResultMessage = 'File retrieved from the host.';
+  } else if (command === 'scan') {
+    actionResultMessage = 'Scan complete';
+  }
+
   const actionPendingMessage =
     command === 'get-file' ? 'Retrieving the file from host.' : 'Action pending.';
   cy.contains(actionPendingMessage).should('exist');

@@ -27,9 +27,9 @@ export const registerIndicesRoutes = ({ router, getSecurity }: RouteDependencies
       },
     },
     async (context, request, response) => {
-      const client = (await context.core).elasticsearch.client.asCurrentUser;
-      const security = await getSecurity();
-      const user = security.authc.getCurrentUser(request);
+      const core = await context.core;
+      const client = core.elasticsearch.client.asCurrentUser;
+      const user = core.security.authc.getCurrentUser();
 
       if (!user) {
         return response.customError({

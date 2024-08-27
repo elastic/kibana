@@ -32,10 +32,10 @@ components:
       properties:
         kbResource:
           type: string
-          description: Knowledge Base resource name
+          description: Knowledge Base resource name for grouping entries, e.g. 'esql', 'lens-docs', etc
         source:
           type: string
-          description: Original text content source
+          description: Source document name or filepath
         required:
           type: boolean
           description: Whether or not this resource should always be included
@@ -120,5 +120,4 @@ components:
         text:
           type: string
           description: Knowledge Base Entry content
-
 

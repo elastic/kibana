@@ -18,7 +18,7 @@ export interface CreateTestConfigOptions {
 export function createTestConfig(options: CreateTestConfigOptions) {
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const svlSharedConfig = await readConfigFile(
-      require.resolve('../../../../test_serverless/shared/config.base.ts')
+      require.resolve('@kbn/test-suites-serverless/shared/config.base')
     );
     return {
       ...svlSharedConfig.getAll(),
@@ -43,7 +43,7 @@ export function createTestConfig(options: CreateTestConfigOptions) {
 
       mochaOpts: {
         ...svlSharedConfig.get('mochaOpts'),
-        grep: '/^(?!.*@skipInServerless).*@serverless.*/',
+        grep: '/^(?!.*(^|\\s)@skipInServerless(\\s|$)).*@serverless.*/',
       },
     };
   };

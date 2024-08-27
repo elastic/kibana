@@ -10,7 +10,7 @@ import {
   ProcessListAPIRequestRT,
   ProcessListAPIResponseRT,
 } from '@kbn/infra-plugin/common/http_api/host_details/process_list';
-import { decodeOrThrow } from '@kbn/infra-plugin/common/runtime_types';
+import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -34,7 +34,7 @@ export default function ({ getService }: FtrProviderContext) {
             hostTerm: {
               'host.name': 'gke-observability-8--observability-8--bc1afd95-nhhw',
             },
-            indexPattern: 'metrics-*,metricbeat-*',
+            sourceId: 'default',
             to: 1564432800000,
             sortBy: {
               name: 'cpu',

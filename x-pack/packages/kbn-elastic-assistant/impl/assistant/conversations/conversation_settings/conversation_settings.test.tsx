@@ -11,8 +11,8 @@ import { ConversationSettings, ConversationSettingsProps } from './conversation_
 import { TestProviders } from '../../../mock/test_providers/test_providers';
 import { alertConvo, customConvo, welcomeConvo } from '../../../mock/conversation';
 import { mockSystemPrompts } from '../../../mock/system_prompt';
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 import { mockConnectors } from '../../../mock/connectors';
+import { HttpSetup } from '@kbn/core/public';
 
 const mockConvos = {
   '1234': { ...welcomeConvo, id: '1234' },
@@ -24,18 +24,19 @@ const onSelectedConversationChange = jest.fn();
 const setConversationSettings = jest.fn();
 const setConversationsSettingsBulkActions = jest.fn();
 
-const testProps = {
+const testProps: ConversationSettingsProps = {
   allSystemPrompts: mockSystemPrompts,
+  assistantStreamingEnabled: false,
+  connectors: mockConnectors,
   conversationSettings: mockConvos,
-  defaultConnectorId: '123',
-  defaultProvider: OpenAiProviderType.OpenAi,
-  http: { basePath: { get: jest.fn() } },
+  conversationsSettingsBulkActions: {},
+  http: { basePath: { get: jest.fn() } } as unknown as HttpSetup,
   onSelectedConversationChange,
   selectedConversation: mockConvos['1234'],
+  setAssistantStreamingEnabled: jest.fn(),
   setConversationSettings,
-  conversationsSettingsBulkActions: {},
   setConversationsSettingsBulkActions,
-} as unknown as ConversationSettingsProps;
+};
 
 jest.mock('../../../connectorland/use_load_connectors', () => ({
   useLoadConnectors: () => ({
@@ -113,7 +114,6 @@ jest.mock('../../../connectorland/connector_selector', () => ({
     />
   ),
 }));
-
 describe('ConversationSettings', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -180,7 +180,10 @@ describe('ConversationSettings', () => {
     );
     fireEvent.click(getByTestId('change-new-convo'));
 
-    expect(onSelectedConversationChange).toHaveBeenCalledWith({ ...mockConvo, id: '' });
+    expect(onSelectedConversationChange).toHaveBeenCalledWith({
+      ...mockConvo,
+      id: mockConvo.title,
+    });
     expect(setConversationsSettingsBulkActions).toHaveBeenCalledWith({
       create: {
         [mockConvo.title]: { ...mockConvo, id: '' },
@@ -205,7 +208,7 @@ describe('ConversationSettings', () => {
       ...mockConvos,
       [newConvo.title]: newConvo,
     });
-    expect(onSelectedConversationChange).toHaveBeenCalledWith(newConvo);
+    expect(onSelectedConversationChange).toHaveBeenCalledWith({ ...newConvo, id: newConvo.title });
   });
   it('Deleting a conversation removes it from the convo settings', () => {
     const { getByTestId } = render(

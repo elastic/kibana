@@ -142,7 +142,7 @@ export const reportingCsvShareProvider = ({
 
       const relativePath = apiClient.getReportingPublicJobPath(
         reportType,
-        apiClient.getDecoratedJobParams(getJobParams())
+        apiClient.getDecoratedJobParams(getJobParams(true))
       );
 
       const absoluteUrl = new URL(relativePath, window.location.href).toString();

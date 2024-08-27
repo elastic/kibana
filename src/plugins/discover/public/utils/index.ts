@@ -11,3 +11,5 @@
 export async function loadSharingDataHelpers() {
   return await import('./get_sharing_data');
 }
+
+export { getSortForEmbeddable } from './sorting';

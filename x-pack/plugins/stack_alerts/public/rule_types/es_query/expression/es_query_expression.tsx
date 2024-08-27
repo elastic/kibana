@@ -29,7 +29,7 @@ import { Comparator } from '../../../../common/comparator_types';
 import { getComparatorScript } from '../../../../common';
 import { hasExpressionValidationErrors } from '../validation';
 import { buildSortedEventsQuery } from '../../../../common/build_sorted_events_query';
-import { EsQueryRuleParams, EsQueryRuleMetaData, SearchType, SourceField } from '../types';
+import { EsQueryRuleParams, EsQueryRuleMetaData, SearchType } from '../types';
 import { IndexSelectPopover } from '../../components/index_select_popover';
 import { DEFAULT_VALUES, SERVERLESS_DEFAULT_VALUES } from '../constants';
 import { RuleCommonExpressions } from '../rule_common_expressions';
@@ -244,7 +244,8 @@ export const EsQueryExpression: React.FC<
         id="queryEditor"
         data-test-subj="queryJsonEditor"
         fullWidth
-        isInvalid={(errors.esQuery.length as number) > 0}
+        // @ts-expect-error upgrade typescript v5.1.6
+        isInvalid={errors.esQuery.length > 0}
         error={errors.esQuery}
         helpText={
           <EuiLink href={docLinks.links.query.queryDsl} target="_blank">
@@ -285,7 +286,9 @@ export const EsQueryExpression: React.FC<
           }}
         />
       </EuiFormRow>
+
       <EuiSpacer size="s" />
+
       <RuleCommonExpressions
         threshold={threshold ?? DEFAULT_VALUES.THRESHOLD}
         thresholdComparator={thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR}
@@ -307,11 +310,11 @@ export const EsQueryExpression: React.FC<
           [setParam]
         )}
         onChangeSelectedGroupBy={useCallback(
-          (selectedGroupBy?: string) => setParam('groupBy', selectedGroupBy),
+          (selectedGroupBy) => setParam('groupBy', selectedGroupBy),
           [setParam]
         )}
         onChangeSelectedTermField={useCallback(
-          (selectedTermField?: string | string[]) => setParam('termField', selectedTermField),
+          (selectedTermField) => setParam('termField', selectedTermField),
           [setParam]
         )}
         onChangeSelectedTermSize={useCallback(
@@ -319,11 +322,11 @@ export const EsQueryExpression: React.FC<
           [setParam]
         )}
         onChangeThreshold={useCallback(
-          (selectedThresholds?: number[]) => setParam('threshold', selectedThresholds),
+          (selectedThresholds) => setParam('threshold', selectedThresholds),
           [setParam]
         )}
         onChangeThresholdComparator={useCallback(
-          (selectedThresholdComparator?: string) =>
+          (selectedThresholdComparator) =>
             setParam('thresholdComparator', selectedThresholdComparator),
           [setParam]
         )}
@@ -337,24 +340,27 @@ export const EsQueryExpression: React.FC<
           [setParam]
         )}
         onChangeSizeValue={useCallback(
-          (updatedValue: number) => setParam('size', updatedValue),
+          (updatedValue) => setParam('size', updatedValue),
           [setParam]
         )}
         errors={errors}
         hasValidationErrors={hasExpressionValidationErrors(currentRuleParams, isServerless)}
         onTestFetch={onTestQuery}
-        excludeHitsFromPreviousRun={excludeHitsFromPreviousRun}
+        excludeHitsFromPreviousRun={
+          excludeHitsFromPreviousRun ?? DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS
+        }
         onChangeExcludeHitsFromPreviousRun={useCallback(
-          (exclude: boolean) => setParam('excludeHitsFromPreviousRun', exclude),
+          (exclude) => setParam('excludeHitsFromPreviousRun', exclude),
           [setParam]
         )}
         canSelectMultiTerms={DEFAULT_VALUES.CAN_SELECT_MULTI_TERMS}
         onChangeSourceFields={useCallback(
-          (selectedSourceFields: SourceField[]) => setParam('sourceFields', selectedSourceFields),
+          (selectedSourceFields) => setParam('sourceFields', selectedSourceFields),
           [setParam]
         )}
         sourceFields={sourceFields}
       />
+
       <EuiSpacer />
     </Fragment>
   );

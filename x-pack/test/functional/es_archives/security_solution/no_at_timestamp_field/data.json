@@ -1,7 +1,7 @@
 {
   "type": "doc",
   "value": {
-    "index": "no_at_timestamp_field",
+    "index": "auditbeat-no_at_timestamp_field",
     "source": {
       "locale": "pt",
       "event.category": "configuration",
@@ -14,7 +14,7 @@
 {
   "type": "doc",
   "value": {
-    "index": "no_at_timestamp_field",
+    "index": "auditbeat-no_at_timestamp_field",
     "source": {
       "locale": "es",
       "event.category": "configuration",
@@ -27,7 +27,7 @@
 {
   "type": "doc",
   "value": {
-    "index": "no_at_timestamp_field",
+    "index": "auditbeat-no_at_timestamp_field",
     "source": {
       "locale": "ua",
       "event.category": "configuration",

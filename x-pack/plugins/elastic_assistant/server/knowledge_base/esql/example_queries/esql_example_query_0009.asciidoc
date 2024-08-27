@@ -1,7 +1,12 @@
-[[esql-example-queries]]
-
-The following is NOT an example of an ES|QL query:
-
-```
-Pagination is not supported
-```
+//9. Persistence via Suspicious Launch Agent or Launch Daemon with low occurrence
+//Helpful when answering questions on concatenating fields, dealing with time based searches
+//MITRE Tactics: "Persistence"
+from logs-*
+| where  @timestamp > now() - 7 day
+| where host.os.family == "macos" and event.category == "file" and event.action == "launch_daemon" and
+(Persistence.runatload == true or Persistence.keepalive == true) and process.executable is not null
+| eval args = MV_CONCAT(Persistence.args, ",")
+/* normalizing users home profile */
+| eval args = replace(args, """/Users/[a-zA-Z0-9ñ\.\-\_\$~ ]+/""", "/Users/user/")
+| stats agents = count_distinct(host.id), total = count(*) by process.name, Persistence.name, args
+| where starts_with(args, "/") and agents == 1 and total == 1

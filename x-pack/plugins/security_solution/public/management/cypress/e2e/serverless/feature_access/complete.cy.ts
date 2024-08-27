@@ -16,7 +16,14 @@ describe(
   {
     tags: ['@serverless', '@skipInServerlessMKI'],
     env: {
-      ftrConfig: { productTypes: [{ product_line: 'security', product_tier: 'complete' }] },
+      ftrConfig: {
+        productTypes: [{ product_line: 'security', product_tier: 'complete' }],
+        kbnServerArgs: [
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'responseActionScanEnabled',
+          ])}`,
+        ],
+      },
     },
   },
   () => {

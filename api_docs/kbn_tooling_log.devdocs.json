@@ -620,7 +620,7 @@
             "tags": [],
             "label": "write",
             "description": [
-              "\nCalled by ToolingLog, extends messages with the source if message includes one."
+              "\nCalled by ToolingLog, extends messages with the source and context if message include it."
             ],
             "signature": [
               "(msg: ",
@@ -1036,7 +1036,7 @@
               "level/type of message"
             ],
             "signature": [
-              "\"error\" | \"info\" | \"warning\" | \"success\" | \"debug\" | \"write\" | \"verbose\""
+              "\"error\" | \"info\" | \"warning\" | \"success\" | \"write\" | \"debug\" | \"verbose\""
             ],
             "path": "packages/kbn-tooling-log/src/message.ts",
             "deprecated": false,
@@ -1082,6 +1082,22 @@
             ],
             "signature": [
               "any[]"
+            ],
+            "path": "packages/kbn-tooling-log/src/message.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/tooling-log",
+            "id": "def-common.Message.context",
+            "type": "string",
+            "tags": [],
+            "label": "context",
+            "description": [
+              "an identifier of the logging entity"
+            ],
+            "signature": [
+              "string | undefined"
             ],
             "path": "packages/kbn-tooling-log/src/message.ts",
             "deprecated": false,
@@ -1135,6 +1151,22 @@
                 "text": "ToolingLog"
               },
               " | undefined"
+            ],
+            "path": "packages/kbn-tooling-log/src/tooling_log.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/tooling-log",
+            "id": "def-common.ToolingLogOptions.context",
+            "type": "string",
+            "tags": [],
+            "label": "context",
+            "description": [
+              "\nA string, conveniently the name of the script,\nthat will be prepended to log messages.\nCan be useful to identify which entity is emitting the log."
+            ],
+            "signature": [
+              "string | undefined"
             ],
             "path": "packages/kbn-tooling-log/src/tooling_log.ts",
             "deprecated": false,

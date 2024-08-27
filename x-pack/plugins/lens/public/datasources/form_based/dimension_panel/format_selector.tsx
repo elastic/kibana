@@ -19,7 +19,7 @@ import {
   useEuiTheme,
   EuiComboBoxOptionOption,
 } from '@elastic/eui';
-import { useDebouncedValue } from '@kbn/visualization-ui-components';
+import { useDebouncedValue } from '@kbn/visualization-utils';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   DEFAULT_DURATION_INPUT_FORMAT,

@@ -2,7 +2,8 @@ steps:
   - command: .buildkite/scripts/steps/cloud/build_and_deploy.sh
     label: 'Build and Deploy to Cloud'
     agents:
-      queue: n2-2-spot
+      machineType: n2-standard-2
+      preemptible: true
     depends_on:
       - build
       - quick_checks

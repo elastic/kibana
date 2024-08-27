@@ -16,8 +16,8 @@ import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { each, get } from 'lodash';
 import { lastValueFrom } from 'rxjs';
-import { buildBaseFilterCriteria } from '@kbn/ml-query-utils';
 import useObservable from 'react-use/lib/useObservable';
+import { buildFilterCriteria } from '../../../../common/utils/build_query_filters';
 import { useDataVisualizerKibana } from '../../kibana_context';
 import { displayError } from '../util/display_error';
 
@@ -70,7 +70,7 @@ export const getDocumentCountStatsRequest = (
   } = params;
 
   const size = 0;
-  const filterCriteria = buildBaseFilterCriteria(timeFieldName, earliestMs, latestMs, searchQuery);
+  const filterCriteria = buildFilterCriteria(timeFieldName, earliestMs, latestMs, searchQuery);
 
   const rawAggs: Record<string, estypes.AggregationsAggregationContainer> = {
     eventRate: {

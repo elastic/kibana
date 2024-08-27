@@ -10,7 +10,6 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ALERT_CASE_IDS, ValidFeatureId } from '@kbn/rule-data-utils';
 import { AlertsTableContext } from '../contexts/alerts_table_context';
 import {
-  Alerts,
   AlertsTableConfigurationRegistry,
   BulkActionsConfig,
   BulkActionsPanelConfig,
@@ -37,11 +36,12 @@ import { useBulkUntrackAlertsByQuery } from './use_bulk_untrack_alerts_by_query'
 
 interface BulkActionsProps {
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
-  alerts: Alerts;
+  alertsCount: number;
   casesConfig?: AlertsTableConfigurationRegistry['cases'];
   useBulkActionsConfig?: UseBulkActionsRegistry;
   refresh: () => void;
   featureIds?: ValidFeatureId[];
+  hideBulkActions?: boolean;
 }
 
 export interface UseBulkActions {
@@ -272,12 +272,13 @@ export const useBulkUntrackActions = ({
 };
 
 export function useBulkActions({
-  alerts,
+  alertsCount,
   casesConfig,
   query,
   refresh,
   useBulkActionsConfig = () => [],
   featureIds,
+  hideBulkActions,
 }: BulkActionsProps): UseBulkActions {
   const {
     bulkActions: [bulkActionsState, updateBulkActionsState],
@@ -302,26 +303,32 @@ export function useBulkActions({
     featureIds,
     isAllSelected: bulkActionsState.isAllSelected,
   });
+
   const initialItems = useMemo(() => {
     return [...caseBulkActions, ...(featureIds?.includes('siem') ? [] : untrackBulkActions)];
   }, [caseBulkActions, featureIds, untrackBulkActions]);
   const bulkActions = useMemo(() => {
+    if (hideBulkActions) {
+      return [];
+    }
+
     return initialItems.length
       ? addItemsToInitialPanel({
           panels: configBulkActionPanels,
           items: initialItems,
         })
       : configBulkActionPanels;
-  }, [configBulkActionPanels, initialItems]);
+  }, [configBulkActionPanels, initialItems, hideBulkActions]);
 
   const isBulkActionsColumnActive = bulkActions.length !== 0;
 
   useEffect(() => {
     updateBulkActionsState({
       action: BulkActionsVerbs.rowCountUpdate,
-      rowCount: alerts.length,
+      rowCount: alertsCount,
     });
-  }, [alerts, updateBulkActionsState]);
+  }, [alertsCount, updateBulkActionsState]);
+
   return useMemo(() => {
     return {
       isBulkActionsColumnActive,

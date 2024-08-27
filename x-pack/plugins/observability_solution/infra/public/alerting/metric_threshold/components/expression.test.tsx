@@ -10,16 +10,36 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 // We are using this inside a `jest.mock` call. Jest requires dynamic dependencies to be prefixed with `mock`
 import { coreMock as mockCoreMock } from '@kbn/core/public/mocks';
-import { Comparator } from '../../../../common/alerting/metrics';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import { MetricsExplorerMetric } from '../../../../common/http_api/metrics_explorer';
 import { Expressions } from './expression';
-import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { TIMESTAMP_FIELD } from '../../../../common/constants';
+import { ResolvedDataView } from '../../../utils/data_view';
 
-jest.mock('../../../containers/metrics_source/source', () => ({
+const mockDataView = {
+  id: 'mock-id',
+  title: 'mock-title',
+  timeFieldName: TIMESTAMP_FIELD,
+  isPersisted: () => false,
+  getName: () => 'mock-data-view',
+  toSpec: () => ({}),
+} as jest.Mocked<DataView>;
+
+jest.mock('../../../containers/metrics_source', () => ({
   withSourceProvider: () => jest.fn,
   useSourceContext: () => ({
     source: { id: 'default' },
-    createDerivedIndexPattern: () => ({ fields: [], title: 'metricbeat-*' }),
+  }),
+  useMetricsDataViewContext: () => ({
+    metricsView: {
+      indices: 'metricbeat-*',
+      timeFieldName: mockDataView.timeFieldName,
+      fields: mockDataView.fields,
+      dataViewReference: mockDataView,
+    } as ResolvedDataView,
+    loading: false,
+    error: undefined,
   }),
 }));
 
@@ -28,8 +48,6 @@ jest.mock('../../../hooks/use_kibana', () => ({
     services: mockCoreMock.createStart(),
   }),
 }));
-
-const dataViewMock = dataViewPluginMocks.createStartContract();
 
 describe('Expression', () => {
   async function setup(currentOptions: {
@@ -55,7 +73,6 @@ describe('Expression', () => {
         metadata={{
           currentOptions,
         }}
-        dataViews={dataViewMock}
       />
     );
 
@@ -85,7 +102,7 @@ describe('Expression', () => {
     expect(ruleParams.criteria).toEqual([
       {
         metric: 'system.load.1',
-        comparator: Comparator.GT,
+        comparator: COMPARATORS.GREATER_THAN,
         threshold: [],
         timeSize: 1,
         timeUnit: 'm',
@@ -93,7 +110,7 @@ describe('Expression', () => {
       },
       {
         metric: 'system.cpu.user.pct',
-        comparator: Comparator.GT,
+        comparator: COMPARATORS.GREATER_THAN,
         threshold: [],
         timeSize: 1,
         timeUnit: 'm',

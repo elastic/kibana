@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/search-playground",
-  "owner": "@elastic/enterprise-search-frontend",
+  "owner": "@elastic/search-kibana",
   "plugin": {
     "id": "searchPlayground",
     "server": true,

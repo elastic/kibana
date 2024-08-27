@@ -193,11 +193,8 @@ export const fleetGetEndpointPackagePolicyListHttpMock =
       path: PACKAGE_POLICY_API_ROUTES.LIST_PATTERN,
       method: 'get',
       handler: () => {
-        // FIXME: use new FleetPackagePolicyGenerator (#2262)
-        const generator = new EndpointDocGenerator('seed');
-
         const items = Array.from({ length: 5 }, (_, index) => {
-          const policy = generator.generatePolicyPackagePolicy();
+          const policy = new FleetPackagePolicyGenerator('seed').generateEndpointPackagePolicy();
           policy.name += ` ${index}`;
           return policy;
         });

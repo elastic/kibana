@@ -13,6 +13,8 @@ export {
   type HasRuntimeChildState,
   type HasSerializedChildState,
 } from './interfaces/child_state';
+export { childrenUnsavedChanges$ } from './interfaces/unsaved_changes/children_unsaved_changes';
+export { initializeUnsavedChanges } from './interfaces/unsaved_changes/initialize_unsaved_changes';
 export {
   apiHasSaveNotification,
   type HasSaveNotification,
@@ -27,6 +29,7 @@ export {
   apiIsPresentationContainer,
   getContainerParentFromAPI,
   listenForCompatibleApi,
+  combineCompatibleChildrenApis,
   type PanelPackage,
   type PresentationContainer,
 } from './interfaces/presentation_container';
@@ -40,4 +43,5 @@ export { tracksOverlays, type TracksOverlays } from './interfaces/tracks_overlay
 export {
   canTrackContentfulRender,
   type TrackContentfulRender,
-} from './interfaces/track_contentful_render';
+  type TracksQueryPerformance,
+} from './interfaces/performance_trackers';

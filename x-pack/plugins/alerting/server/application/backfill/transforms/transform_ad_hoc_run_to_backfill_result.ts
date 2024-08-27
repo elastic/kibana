@@ -5,39 +5,43 @@
  * 2.0.
  */
 
-import { SavedObject } from '@kbn/core/server';
+import { SavedObject, SavedObjectsBulkCreateObject } from '@kbn/core/server';
 import { AdHocRunSO } from '../../../data/ad_hoc_run/types';
 import { createBackfillError } from '../../../backfill_client/lib';
 import { ScheduleBackfillResult } from '../methods/schedule/types';
 
-export const transformAdHocRunToBackfillResult = ({
-  id,
-  attributes,
-  references,
-  error,
-}: SavedObject<AdHocRunSO>): ScheduleBackfillResult => {
+export const transformAdHocRunToBackfillResult = (
+  { id, attributes, references, error }: SavedObject<AdHocRunSO>,
+  originalSO?: SavedObjectsBulkCreateObject<AdHocRunSO>
+): ScheduleBackfillResult => {
+  const ruleId = references?.[0]?.id ?? originalSO?.references?.[0]?.id ?? 'unknown';
+  const ruleName = attributes?.rule?.name ?? originalSO?.attributes?.rule.name;
   if (error) {
-    return createBackfillError(error.error, error.message);
+    // get rule info from original SO if available since SO create errors don't return this
+    return createBackfillError(error.message, ruleId, ruleName);
   }
 
   if (!id) {
     return createBackfillError(
-      'Internal Server Error',
-      'Malformed saved object in bulkCreate response - Missing "id".'
+      'Malformed saved object in bulkCreate response - Missing "id".',
+      ruleId,
+      ruleName
     );
   }
 
   if (!attributes) {
     return createBackfillError(
-      'Internal Server Error',
-      'Malformed saved object in bulkCreate response - Missing "attributes".'
+      'Malformed saved object in bulkCreate response - Missing "attributes".',
+      ruleId,
+      ruleName
     );
   }
 
   if (!references || !references.length) {
     return createBackfillError(
-      'Internal Server Error',
-      'Malformed saved object in bulkCreate response - Missing "references".'
+      'Malformed saved object in bulkCreate response - Missing "references".',
+      ruleId,
+      ruleName
     );
   }
 

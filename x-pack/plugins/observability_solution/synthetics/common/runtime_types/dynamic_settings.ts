@@ -28,13 +28,14 @@ export const DynamicSettingsSaveCodec = t.intersection([
 
 export const DynamicSettingsCodec = t.intersection([
   t.strict({
-    heartbeatIndices: t.string,
     certAgeThreshold: t.number,
     certExpirationThreshold: t.number,
     defaultConnectors: t.array(t.string),
   }),
   t.partial({
     defaultEmail: DefaultEmailCodec,
+    defaultTLSRuleEnabled: t.boolean,
+    defaultStatusRuleEnabled: t.boolean,
   }),
 ]);
 

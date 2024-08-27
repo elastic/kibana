@@ -88,6 +88,7 @@ describe('getSavedSearch', () => {
         "columns": Array [
           "_source",
         ],
+        "density": undefined,
         "description": "description",
         "grid": Object {},
         "headerRowHeight": undefined,
@@ -123,6 +124,7 @@ describe('getSavedSearch', () => {
           "getSearchRequestBody": [MockFunction],
           "getSerializedFields": [MockFunction],
           "history": Array [],
+          "loadDataViewFields": [MockFunction],
           "onRequestStart": [MockFunction],
           "parseActiveIndexPatternFromQueryString": [MockFunction],
           "removeField": [MockFunction],
@@ -196,6 +198,7 @@ describe('getSavedSearch', () => {
         "columns": Array [
           "_source",
         ],
+        "density": undefined,
         "description": "description",
         "grid": Object {},
         "headerRowHeight": undefined,
@@ -231,6 +234,7 @@ describe('getSavedSearch', () => {
           "getSearchRequestBody": [MockFunction],
           "getSerializedFields": [MockFunction],
           "history": Array [],
+          "loadDataViewFields": [MockFunction],
           "onRequestStart": [MockFunction],
           "parseActiveIndexPatternFromQueryString": [MockFunction],
           "removeField": [MockFunction],

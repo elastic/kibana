@@ -36,7 +36,6 @@ import {
   SAVE_FILTER_BTN,
   SEARCH_OR_FILTER_CONTAINER,
   SELECT_CASE,
-  SERVER_SIDE_EVENT_COUNT,
   STAR_ICON,
   TIMELINE_DESCRIPTION_INPUT,
   TIMELINE_FIELDS_BUTTON,
@@ -89,12 +88,16 @@ import {
   BOTTOM_BAR_TIMELINE_PLUS_ICON,
   BOTTOM_BAR_CREATE_NEW_TIMELINE,
   BOTTOM_BAR_CREATE_NEW_TIMELINE_TEMPLATE,
+  TIMELINE_FLYOUT,
+  TIMELINE_FULL_SCREEN_BUTTON,
+  QUERY_EVENT_COUNT,
 } from '../screens/timeline';
 
 import { REFRESH_BUTTON, TIMELINE, TIMELINES_TAB_TEMPLATE } from '../screens/timelines';
 import { drag, drop, waitForTabToBeLoaded } from './common';
 
 import { closeFieldsBrowser, filterFieldsBrowser } from './fields_browser';
+import { TIMELINE_CONTEXT_MENU_BTN } from '../screens/alerts';
 
 const hostExistsQuery = 'host.name: *';
 
@@ -416,7 +419,7 @@ export const pinFirstEvent = (): Cypress.Chainable<JQuery<HTMLElement>> => {
 
 export const populateTimeline = () => {
   executeTimelineKQL(hostExistsQuery);
-  cy.get(SERVER_SIDE_EVENT_COUNT).should('not.have.text', '0');
+  cy.get(QUERY_EVENT_COUNT).should('not.have.text', '0');
 };
 
 const clickTimestampHoverActionOverflowButton = () => {
@@ -504,4 +507,28 @@ export const selectKqlSearchMode = () => {
   showDataProviderQueryBuilder();
   cy.get(TIMELINE_SEARCH_OR_FILTER).click();
   cy.get(TIMELINE_KQLMODE_SEARCH).click();
+};
+
+export const openTimelineEventContextMenu = (rowIndex: number = 0) => {
+  cy.get(TIMELINE_FLYOUT).within(() => {
+    const togglePopover = () => {
+      cy.get(TIMELINE_CONTEXT_MENU_BTN).eq(rowIndex).should('be.visible');
+      cy.get(TIMELINE_CONTEXT_MENU_BTN).eq(rowIndex).click();
+      cy.get(TIMELINE_CONTEXT_MENU_BTN)
+        .first()
+        .should('be.visible')
+        .then(($btnEl) => {
+          if ($btnEl.attr('data-popover-open') !== 'true') {
+            cy.log(`${TIMELINE_CONTEXT_MENU_BTN} was flaky, attempting to re-open popover`);
+            togglePopover();
+          }
+        });
+    };
+
+    togglePopover();
+  });
+};
+
+export const toggleFullScreen = () => {
+  cy.get(TIMELINE_FULL_SCREEN_BUTTON).first().click();
 };

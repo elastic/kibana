@@ -12,7 +12,8 @@ import moment from 'moment';
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
-import { useTimelineChartTheme } from '../../../utils/use_timeline_chart_theme';
+import { convertToBuiltInComparators } from '@kbn/observability-plugin/common';
+import { useTimelineChartTheme } from '../../../hooks/use_timeline_chart_theme';
 import { InventoryMetricConditions } from '../../../../common/alerting/metrics';
 import { Color } from '../../../../common/color_palette';
 import { MetricsExplorerAggregation, MetricsExplorerRow } from '../../../../common/http_api';
@@ -166,7 +167,7 @@ export const ExpressionChart: React.FC<Props> = ({
             stack={false}
           />
           <ThresholdAnnotations
-            comparator={expression.comparator}
+            comparator={convertToBuiltInComparators(expression.comparator)}
             threshold={convertedThresholds}
             sortedThresholds={criticalThresholds}
             color={Color.color1}
@@ -177,7 +178,7 @@ export const ExpressionChart: React.FC<Props> = ({
           />
           {expression.warningComparator && expression.warningThreshold && (
             <ThresholdAnnotations
-              comparator={expression.warningComparator}
+              comparator={convertToBuiltInComparators(expression.warningComparator)}
               threshold={convertedWarningThresholds}
               sortedThresholds={warningThresholds}
               color={Color.color5}
@@ -230,7 +231,10 @@ const convertMetricValue = (metric: SnapshotMetricType, value: number) => {
 };
 const converters: Record<string, (n: number) => number> = {
   cpu: (n) => Number(n) / 100,
+  cpuV2: (n) => Number(n) / 100,
   memory: (n) => Number(n) / 100,
   tx: (n) => Number(n) / 8,
   rx: (n) => Number(n) / 8,
+  rxV2: (n) => Number(n) / 8,
+  txV2: (n) => Number(n) / 8,
 };

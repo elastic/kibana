@@ -7,13 +7,14 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { GenerationInterval } from '@kbn/elastic-assistant-common';
+import moment from 'moment';
 import React, { useMemo } from 'react';
 
 import { PreferenceFormattedDate } from '../../../../../../common/components/formatted_date';
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { MAX_SECONDS_BADGE_WIDTH } from '../helpers';
 import * as i18n from '../translations';
-import type { GenerationInterval } from '../../../../../types';
 
 interface Props {
   interval: GenerationInterval;
@@ -51,7 +52,7 @@ const GenerationTimingComponent: React.FC<Props> = ({ interval }) => {
           data-test-subj="date"
           size="xs"
         >
-          <PreferenceFormattedDate value={interval.date} />
+          <PreferenceFormattedDate value={moment(interval.date).toDate()} />
         </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>

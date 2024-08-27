@@ -342,7 +342,8 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
             };
             const eventId = data[visibleRowIndex]?._id;
 
-            return <AddToTimelineButton field="_id" value={eventId} isIcon={true} />;
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            return <AddToTimelineButton field="_id" value={eventId!} isIcon={true} />;
           },
         },
       ];

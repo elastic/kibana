@@ -31,7 +31,7 @@ export const DocumentViewModeToggle = ({
   isEsqlMode: boolean;
   prepend?: ReactElement;
   stateContainer: DiscoverStateContainer;
-  setDiscoverViewMode: (viewMode: VIEW_MODE) => void;
+  setDiscoverViewMode: (viewMode: VIEW_MODE) => Promise<VIEW_MODE>;
   patternCount?: number;
   dataView: DataView;
 }) => {
@@ -63,7 +63,7 @@ export const DocumentViewModeToggle = ({
 
   useEffect(
     function checkForPatternAnalysis() {
-      if (!aiopsService) {
+      if (!aiopsService || isEsqlMode) {
         setShowPatternAnalysisTab(false);
         return;
       }
@@ -76,7 +76,7 @@ export const DocumentViewModeToggle = ({
         })
         .catch(() => setShowPatternAnalysisTabWrapper(false));
     },
-    [aiopsService, dataView, setShowPatternAnalysisTabWrapper]
+    [aiopsService, dataView, isEsqlMode, setShowPatternAnalysisTabWrapper]
   );
 
   useEffect(() => {
@@ -86,8 +86,7 @@ export const DocumentViewModeToggle = ({
     }
   }, [showPatternAnalysisTab, viewMode, setDiscoverViewMode]);
 
-  const includesNormalTabsStyle =
-    viewMode === VIEW_MODE.AGGREGATED_LEVEL || viewMode === VIEW_MODE.PATTERN_LEVEL || isLegacy;
+  const includesNormalTabsStyle = viewMode === VIEW_MODE.AGGREGATED_LEVEL || isLegacy;
 
   const containerPadding = includesNormalTabsStyle ? euiTheme.size.s : 0;
   const containerCss = css`
@@ -121,7 +120,7 @@ export const DocumentViewModeToggle = ({
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={false}>
-        {isEsqlMode || (showFieldStatisticsTab === false && showPatternAnalysisTab === false) ? (
+        {showFieldStatisticsTab === false && showPatternAnalysisTab === false ? (
           <HitsCounter mode={HitsCounterMode.standalone} stateContainer={stateContainer} />
         ) : (
           <EuiTabs size="m" css={tabsCss} data-test-subj="dscViewModeToggle" bottomBorder={false}>

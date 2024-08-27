@@ -18,7 +18,7 @@ import {
   LayoutDirection,
   Placement,
   Tooltip,
-  BrushEndListener,
+  LegendValue,
 } from '@elastic/charts';
 import { EuiTitle } from '@elastic/eui';
 import { RangeFilterParams } from '@kbn/es-query';
@@ -120,7 +120,7 @@ export const TimelionVisComponent = ({
     isDateHistogram: true,
   });
 
-  const brushEndListener = useCallback<BrushEndListener>(
+  const brushEndListener = useCallback(
     ({ x }) => {
       if (!x) {
         return;
@@ -208,7 +208,7 @@ export const TimelionVisComponent = ({
           debugState={window._echDebugStateFlag ?? false}
           onBrushEnd={brushEndListener}
           showLegend={legend.showLegend}
-          showLegendExtra={true}
+          legendValues={[LegendValue.CurrentAndLastValue]}
           legendPosition={legend.legendPosition}
           onRenderChange={onRenderChange}
           onPointerUpdate={syncCursor ? handleCursorUpdate : undefined}

@@ -6,6 +6,10 @@
  */
 
 import { EuiLink, EuiFormRow, EuiFilePicker, EuiSpacer } from '@elastic/eui';
+import type {
+  EuiFilePickerClass,
+  EuiFilePickerProps,
+} from '@elastic/eui/src/components/form/file_picker/file_picker';
 import React, { useCallback, useState, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -31,7 +35,7 @@ interface ConfigUploaderProps {
 }
 
 const ConfigUploaderComponent: React.FC<ConfigUploaderProps> = ({ onChange }) => {
-  const filePickerRef = useRef<EuiFilePicker>(null);
+  const filePickerRef = useRef<EuiFilePickerClass>(null);
   const [isInvalid, setIsInvalid] = useState<string | null>(null);
   // @ts-expect-error update types
   let fileReader;
@@ -55,13 +59,11 @@ const ConfigUploaderComponent: React.FC<ConfigUploaderProps> = ({ onChange }) =>
       setIsInvalid(null);
     } catch (error) {
       setIsInvalid(error);
-      // @ts-expect-error update types
-      filePickerRef.current?.removeFiles(new Event('fake'));
+      filePickerRef.current?.removeFiles();
     }
 
     onChange(parsedContent);
-    // @ts-expect-error update types
-    filePickerRef.current?.removeFiles(new Event('fake'));
+    filePickerRef.current?.removeFiles();
   };
 
   // @ts-expect-error update types
@@ -115,7 +117,7 @@ const ConfigUploaderComponent: React.FC<ConfigUploaderProps> = ({ onChange }) =>
         error={<>{`${isInvalid}`}</>}
       >
         <EuiFilePicker
-          ref={filePickerRef}
+          ref={filePickerRef as React.Ref<Omit<EuiFilePickerProps, 'stylesMemoizer'>>}
           id="osquery_config_picker"
           initialPromptText={i18n.translate('xpack.osquery.configUploader.initialPromptTextLabel', {
             defaultMessage: 'Select or drag and drop osquery config file',

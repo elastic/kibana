@@ -94,7 +94,7 @@ export const RestoreSnapshot: React.FunctionComponent<RouteComponentProps<MatchP
             error: i18n.translate(
               'xpack.snapshotRestore.restoreSnapshot.snapshotNotFoundErrorMessage',
               {
-                defaultMessage: `The snapshot '{snapshot}' does not exist in repository '{repository}'.`,
+                defaultMessage: `The snapshot ''{snapshot}'' does not exist in repository ''{repository}''.`,
                 values: {
                   snapshot: snapshotId,
                   repository: repositoryName,
@@ -151,7 +151,7 @@ export const RestoreSnapshot: React.FunctionComponent<RouteComponentProps<MatchP
           <span data-test-subj="pageTitle">
             <FormattedMessage
               id="xpack.snapshotRestore.restoreSnapshotTitle"
-              defaultMessage="Restore '{snapshot}'"
+              defaultMessage="Restore ''{snapshot}''"
               values={{ snapshot: snapshotId }}
             />
           </span>

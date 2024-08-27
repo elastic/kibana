@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'dashboard',
   ]);
 
-  describe('Time Slider Control', async () => {
+  describe('Time Slider Control', () => {
     before(async () => {
       await security.testUser.setRoles([
         'kibana_admin',
@@ -52,7 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await security.testUser.restoreDefaults();
     });
 
-    describe('create, edit, and delete', async () => {
+    describe('create, edit, and delete', () => {
       before(async () => {
         await dashboard.navigateToApp();
         await dashboard.preserveCrossAppState();
@@ -62,7 +62,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'Oct 22, 2018 @ 00:00:00.000',
           'Dec 3, 2018 @ 00:00:00.000'
         );
-        await dashboard.saveDashboard('test time slider control', { exitFromEditMode: false });
+        await dashboard.saveDashboard('test time slider control', {
+          exitFromEditMode: false,
+          saveAsNew: true,
+        });
       });
 
       it('can create a new time slider control from a blank state', async () => {
@@ -127,8 +130,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('panel interactions', async () => {
-      describe('saved search', async () => {
+    describe('panel interactions', () => {
+      describe('saved search', () => {
         before(async () => {
           await dashboard.navigateToApp();
           await dashboard.loadSavedDashboard('timeslider and saved search');

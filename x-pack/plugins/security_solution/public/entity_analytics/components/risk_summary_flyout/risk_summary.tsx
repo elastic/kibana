@@ -28,7 +28,7 @@ import { useKibana, useUiSetting$ } from '../../../common/lib/kibana/kibana_reac
 import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 
 import { InspectButton, InspectButtonContainer } from '../../../common/components/inspect';
-import { ONE_WEEK_IN_HOURS } from '../../../timelines/components/side_panel/new_user_detail/constants';
+import { ONE_WEEK_IN_HOURS } from '../../../flyout/entity_details/shared/constants';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
 import { RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
@@ -51,14 +51,16 @@ export interface RiskSummaryProps<T extends RiskScoreEntity> {
   riskScoreData: RiskScoreState<T>;
   recalculatingScore: boolean;
   queryId: string;
-  openDetailsPanel: (tab: EntityDetailsLeftPanelTab) => void;
+  openDetailsPanel?: (tab: EntityDetailsLeftPanelTab) => void;
+  isPreviewMode?: boolean;
 }
 
-const RiskSummaryComponent = <T extends RiskScoreEntity>({
+const FlyoutRiskSummaryComponent = <T extends RiskScoreEntity>({
   riskScoreData,
   recalculatingScore,
   queryId,
   openDetailsPanel,
+  isPreviewMode,
 }: RiskSummaryProps<T>) => {
   const { telemetry } = useKibana().services;
   const { data } = riskScoreData;
@@ -110,7 +112,7 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
         'xpack.securitySolution.flyout.entityDetails.riskSummary.casesAttachmentLabel',
         {
           defaultMessage:
-            'Risk score for {entityType, select, host {host} user {user}} {entityName}',
+            'Risk score for {entityType, select, user {user} other {host}} {entityName}',
           values: {
             entityName: entityData?.name,
             entityType: isUserRiskData(riskData) ? 'user' : 'host',
@@ -189,7 +191,9 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
           link: riskScoreData.loading
             ? undefined
             : {
-                callback: () => openDetailsPanel(EntityDetailsLeftPanelTab.RISK_INPUTS),
+                callback: openDetailsPanel
+                  ? () => openDetailsPanel(EntityDetailsLeftPanelTab.RISK_INPUTS)
+                  : undefined,
                 tooltip: (
                   <FormattedMessage
                     id="xpack.securitySolution.flyout.entityDetails.showAllRiskInputs"
@@ -197,7 +201,7 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
                   />
                 ),
               },
-          iconType: 'arrowStart',
+          iconType: !isPreviewMode ? 'arrowStart' : undefined,
         }}
         expand={{
           expandable: false,
@@ -283,5 +287,5 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
   );
 };
 
-export const RiskSummary = React.memo(RiskSummaryComponent);
-RiskSummary.displayName = 'RiskSummary';
+export const FlyoutRiskSummary = React.memo(FlyoutRiskSummaryComponent);
+FlyoutRiskSummary.displayName = 'RiskSummary';

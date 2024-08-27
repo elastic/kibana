@@ -33,7 +33,7 @@ import {
   type InfraWaffleMapBounds,
   type InventoryColorPalette,
   PALETTES,
-} from '../../../../../lib/lib';
+} from '../../../../../common/inventory/types';
 import { getColorPalette } from '../../lib/get_color_palette';
 import { convertBoundsToPercents } from '../../lib/convert_bounds_to_percents';
 import { SwatchLabel } from './swatch_label';
@@ -181,7 +181,7 @@ export const LegendControls = ({
   );
   const errors = !boundsValidRange
     ? [
-        i18n.translate('xpack.infra.legnedControls.boundRangeError', {
+        i18n.translate('xpack.infra.legendControls.boundRangeError', {
           defaultMessage: 'Minimum must be smaller than the maximum',
         }),
       ]
@@ -195,7 +195,6 @@ export const LegendControls = ({
       button={buttonComponent}
       anchorPosition="leftCenter"
       data-test-subj="legendControls"
-      // panelStyle={{ width: '100%', maxWidth: 375 }}
     >
       <EuiPopoverTitle>
         {i18n.translate('xpack.infra.legendControls.legendOptionsPopoverTitleLabel', {

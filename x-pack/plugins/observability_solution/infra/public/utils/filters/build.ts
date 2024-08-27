@@ -36,8 +36,8 @@ export const buildCombinedAssetFilter = ({
       meta: {},
     };
   }
-  const filtersFromValues = values.map((value) => buildPhraseFilter(indexField, value, dataView));
 
+  const filtersFromValues = values.map((value) => buildPhraseFilter(indexField, value, dataView));
   return buildCombinedFilter(BooleanRelation.OR, filtersFromValues, dataView);
 };
 

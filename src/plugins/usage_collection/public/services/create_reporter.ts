@@ -6,21 +6,22 @@
  * Side Public License, v 1.
  */
 
+import type { Logger } from '@kbn/logging';
 import { Reporter, Storage } from '@kbn/analytics';
 import { HttpSetup } from '@kbn/core/public';
 import { UiCounters } from '../../common/types';
 
-interface AnalyicsReporterConfig {
+interface AnalyticsReporterConfig {
   localStorage: Storage;
-  debug: boolean;
+  logger: Logger;
   fetch: HttpSetup;
 }
 
-export function createReporter(config: AnalyicsReporterConfig): Reporter {
-  const { localStorage, debug, fetch } = config;
+export function createReporter(config: AnalyticsReporterConfig): Reporter {
+  const { localStorage, logger, fetch } = config;
 
   return new Reporter({
-    debug,
+    logger,
     storage: localStorage,
     async http(report) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

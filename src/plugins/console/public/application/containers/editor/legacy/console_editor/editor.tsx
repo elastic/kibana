@@ -69,6 +69,7 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
       storage,
     },
     docLinkVersion,
+    ...startServices
   } = useServicesContext();
 
   const { settings } = useEditorReadContext();
@@ -80,7 +81,7 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
   const editorInstanceRef = useRef<senseEditor.SenseEditor | null>(null);
 
   const [textArea, setTextArea] = useState<HTMLTextAreaElement | null>(null);
-  useUIAceKeyboardMode(textArea, settings.isAccessibilityOverlayEnabled);
+  useUIAceKeyboardMode(textArea, startServices, settings.isAccessibilityOverlayEnabled);
 
   const openDocumentation = useCallback(async () => {
     const documentation = await getDocumentation(editorInstanceRef.current!, docLinkVersion);
@@ -288,7 +289,7 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
         >
           <EuiFlexItem>
             <EuiToolTip
-              content={i18n.translate('console.sendRequestButtonTooltip', {
+              content={i18n.translate('console.sendRequestButtonTooltipContent', {
                 defaultMessage: 'Click to send request',
               })}
             >
@@ -296,7 +297,7 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
                 color="primary"
                 onClick={sendCurrentRequest}
                 data-test-subj="sendRequestButton"
-                aria-label={i18n.translate('console.sendRequestButtonTooltip', {
+                aria-label={i18n.translate('console.sendRequestButtonTooltipAriaLabel', {
                   defaultMessage: 'Click to send request',
                 })}
               >

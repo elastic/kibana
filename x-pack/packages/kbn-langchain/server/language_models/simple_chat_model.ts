@@ -10,14 +10,16 @@ import {
   SimpleChatModel,
   type BaseChatModelParams,
 } from '@langchain/core/language_models/chat_models';
-import { type BaseMessage } from '@langchain/core/messages';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import { AIMessageChunk, type BaseMessage } from '@langchain/core/messages';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { Logger } from '@kbn/logging';
-import { KibanaRequest } from '@kbn/core-http-server';
 import { v4 as uuidv4 } from 'uuid';
 import { get } from 'lodash/fp';
+import { ChatGenerationChunk } from '@langchain/core/outputs';
 import { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
-import { parseBedrockStream } from '../utils/bedrock';
+import { PublicMethodsOf } from '@kbn/utility-types';
+import { parseGeminiStreamAsAsyncIterator, parseGeminiStream } from '../utils/gemini';
+import { parseBedrockStreamAsAsyncIterator, parseBedrockStream } from '../utils/bedrock';
 import { getDefaultArguments } from './constants';
 
 export const getMessageContentAndRole = (prompt: string, role = 'user') => ({
@@ -26,53 +28,64 @@ export const getMessageContentAndRole = (prompt: string, role = 'user') => ({
 });
 
 export interface CustomChatModelInput extends BaseChatModelParams {
-  actions: ActionsPluginStart;
+  actionsClient: PublicMethodsOf<ActionsClient>;
   connectorId: string;
   logger: Logger;
   llmType?: string;
   signal?: AbortSignal;
   model?: string;
   temperature?: number;
-  request: KibanaRequest;
   streaming: boolean;
+  maxTokens?: number;
+}
+
+function _formatMessages(messages: BaseMessage[]) {
+  if (!messages.length) {
+    throw new Error('No messages provided.');
+  }
+  return messages.map((message, i) => {
+    if (typeof message.content !== 'string') {
+      throw new Error('Multimodal messages are not supported.');
+    }
+    return getMessageContentAndRole(message.content, message._getType());
+  });
 }
 
 export class ActionsClientSimpleChatModel extends SimpleChatModel {
-  #actions: ActionsPluginStart;
+  #actionsClient: PublicMethodsOf<ActionsClient>;
   #connectorId: string;
   #logger: Logger;
-  #request: KibanaRequest;
   #traceId: string;
   #signal?: AbortSignal;
+  #maxTokens?: number;
   llmType: string;
   streaming: boolean;
   model?: string;
   temperature?: number;
 
   constructor({
-    actions,
+    actionsClient,
     connectorId,
     llmType,
     logger,
     model,
-    request,
     temperature,
     signal,
     streaming,
+    maxTokens,
   }: CustomChatModelInput) {
     super({});
 
-    this.#actions = actions;
+    this.#actionsClient = actionsClient;
     this.#connectorId = connectorId;
     this.#traceId = uuidv4();
     this.#logger = logger;
     this.#signal = signal;
-    this.#request = request;
+    this.#maxTokens = maxTokens;
     this.llmType = llmType ?? 'ActionsClientSimpleChatModel';
     this.model = model;
     this.temperature = temperature;
-    // only enable streaming for bedrock
-    this.streaming = streaming && llmType === 'bedrock';
+    this.streaming = streaming;
   }
 
   _llmType() {
@@ -91,27 +104,12 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
     options: this['ParsedCallOptions'],
     runManager?: CallbackManagerForLLMRun
   ): Promise<string> {
-    if (!messages.length) {
-      throw new Error('No messages provided.');
-    }
-    const formattedMessages = [];
-    if (messages.length === 2) {
-      messages.forEach((message, i) => {
-        if (typeof message.content !== 'string') {
-          throw new Error('Multimodal messages are not supported.');
-        }
-        formattedMessages.push(getMessageContentAndRole(message.content, message._getType()));
-      });
-    } else {
-      if (typeof messages[0].content !== 'string') {
-        throw new Error('Multimodal messages are not supported.');
-      }
-      formattedMessages.push(getMessageContentAndRole(messages[0].content));
-    }
+    const formattedMessages = _formatMessages(messages);
     this.#logger.debug(
-      `ActionsClientSimpleChatModel#_call\ntraceId: ${
-        this.#traceId
-      }\nassistantMessage:\n${JSON.stringify(formattedMessages)} `
+      () =>
+        `ActionsClientSimpleChatModel#_call\ntraceId: ${
+          this.#traceId
+        }\nassistantMessage:\n${JSON.stringify(formattedMessages)} `
     );
     // create a new connector request body with the assistant message:
     const requestBody = {
@@ -121,15 +119,12 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
         subActionParams: {
           model: this.model,
           messages: formattedMessages,
-          ...getDefaultArguments(this.llmType, this.temperature, options.stop),
+          ...getDefaultArguments(this.llmType, this.temperature, options.stop, this.#maxTokens),
         },
       },
     };
 
-    // create an actions client from the authenticated request context:
-    const actionsClient = await this.#actions.getActionsClientWithRequest(this.#request);
-
-    const actionResult = await actionsClient.execute(requestBody);
+    const actionResult = await this.#actionsClient.execute(requestBody);
 
     if (actionResult.status === 'error') {
       throw new Error(
@@ -149,7 +144,6 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
       return content; // per the contact of _call, return a string
     }
 
-    // Bedrock streaming
     const readable = get('data', actionResult) as Readable;
 
     if (typeof readable?.read !== 'function') {
@@ -160,31 +154,90 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
     let finalOutputIndex = -1;
     const finalOutputStartToken = '"action":"FinalAnswer","action_input":"';
     let streamingFinished = false;
-    const finalOutputStopRegex = /(?<!\\)\"/;
+    const finalOutputStopRegex = /(?<!\\)"/;
     const handleLLMNewToken = async (token: string) => {
       if (finalOutputIndex === -1) {
+        currentOutput += token;
         // Remove whitespace to simplify parsing
-        currentOutput += token.replace(/\s/g, '');
-        if (currentOutput.includes(finalOutputStartToken)) {
-          finalOutputIndex = currentOutput.indexOf(finalOutputStartToken);
+        const noWhitespaceOutput = currentOutput.replace(/\s/g, '');
+        if (noWhitespaceOutput.includes(finalOutputStartToken)) {
+          const nonStrippedToken = '"action_input": "';
+          finalOutputIndex = currentOutput.indexOf(nonStrippedToken);
+          const contentStartIndex = finalOutputIndex + nonStrippedToken.length;
+          const extraOutput = currentOutput.substring(contentStartIndex);
+          if (extraOutput.length > 0) {
+            await runManager?.handleLLMNewToken(extraOutput);
+          }
         }
       } else if (!streamingFinished) {
         const finalOutputEndIndex = token.search(finalOutputStopRegex);
         if (finalOutputEndIndex !== -1) {
           streamingFinished = true;
+          const extraOutput = token.substring(0, finalOutputEndIndex);
+          streamingFinished = true;
+          if (extraOutput.length > 0) {
+            await runManager?.handleLLMNewToken(extraOutput);
+          }
         } else {
           await runManager?.handleLLMNewToken(token);
         }
       }
     };
+    const streamParser = this.llmType === 'bedrock' ? parseBedrockStream : parseGeminiStream;
 
-    const parsed = await parseBedrockStream(
-      readable,
-      this.#logger,
-      this.#signal,
-      handleLLMNewToken
-    );
+    const parsed = await streamParser(readable, this.#logger, this.#signal, handleLLMNewToken);
 
     return parsed; // per the contact of _call, return a string
+  }
+
+  async *_streamResponseChunks(
+    messages: BaseMessage[],
+    options: this['ParsedCallOptions'],
+    runManager?: CallbackManagerForLLMRun | undefined
+  ): AsyncGenerator<ChatGenerationChunk> {
+    const formattedMessages = _formatMessages(messages);
+    this.#logger.debug(
+      () =>
+        `ActionsClientSimpleChatModel#stream\ntraceId: ${
+          this.#traceId
+        }\nassistantMessage:\n${JSON.stringify(formattedMessages)} `
+    );
+    // create a new connector request body with the assistant message:
+    const requestBody = {
+      actionId: this.#connectorId,
+      params: {
+        subAction: 'invokeStream',
+        subActionParams: {
+          model: this.model,
+          messages: formattedMessages,
+          ...getDefaultArguments(this.llmType, this.temperature, options.stop, this.#maxTokens),
+        },
+      },
+    };
+    const actionResult = await this.#actionsClient.execute(requestBody);
+
+    if (actionResult.status === 'error') {
+      throw new Error(
+        `ActionsClientSimpleChatModel: action result status is error: ${actionResult?.message} - ${actionResult?.serviceMessage}`
+      );
+    }
+
+    const readable = get('data', actionResult) as Readable;
+
+    if (typeof readable?.read !== 'function') {
+      throw new Error('Action result status is error: result is not streamable');
+    }
+
+    const streamParser =
+      this.llmType === 'bedrock'
+        ? parseBedrockStreamAsAsyncIterator
+        : parseGeminiStreamAsAsyncIterator;
+    for await (const token of streamParser(readable, this.#logger, this.#signal)) {
+      yield new ChatGenerationChunk({
+        message: new AIMessageChunk({ content: token }),
+        text: token,
+      });
+      await runManager?.handleLLMNewToken(token);
+    }
   }
 }

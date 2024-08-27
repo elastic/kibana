@@ -15,6 +15,7 @@ import {
   LOCAL_QUERY_BAR_SELECTOR,
   RISK_SCORE_ERROR_PANEL,
   RISK_SCORE_STATUS,
+  LOCAL_QUERY_BAR_SEARCH_INPUT_SELECTOR,
 } from '../../screens/entity_analytics_management';
 
 import { deleteRiskScore, installRiskScoreModule } from '../../tasks/api_calls/risk_scores';
@@ -31,7 +32,7 @@ import {
   interceptRiskInitError,
 } from '../../tasks/api_calls/risk_engine';
 import { updateDateRangeInLocalDatePickers } from '../../tasks/date_picker';
-import { fillLocalSearchBar, submitLocalSearch } from '../../tasks/search_bar';
+import { submitLocalSearch } from '../../tasks/search_bar';
 import {
   riskEngineStatusChange,
   upgradeRiskEngine,
@@ -63,12 +64,7 @@ describe(
       cy.get(PAGE_TITLE).should('have.text', 'Entity Risk Score');
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/184133
-    describe.skip('Risk preview', () => {
-      beforeEach(() => {
-        visit(ENTITY_ANALYTICS_MANAGEMENT_URL);
-      });
-
+    describe('Risk preview', () => {
       it('risk scores reacts on change in datepicker', () => {
         const START_DATE = 'Jan 18, 2019 @ 20:33:29.186';
         const END_DATE = 'Jan 19, 2019 @ 20:33:29.186';
@@ -85,8 +81,7 @@ describe(
       it('risk scores reacts on change in search bar query', () => {
         cy.get(HOST_RISK_PREVIEW_TABLE_ROWS).should('have.length', 5);
         cy.get(USER_RISK_PREVIEW_TABLE_ROWS).should('have.length', 5);
-
-        fillLocalSearchBar('host.name: "test-host1"');
+        cy.get(LOCAL_QUERY_BAR_SEARCH_INPUT_SELECTOR).type('host.name: "test-host1"');
         submitLocalSearch(LOCAL_QUERY_BAR_SELECTOR);
 
         cy.get(HOST_RISK_PREVIEW_TABLE_ROWS).should('have.length', 1);
@@ -109,10 +104,6 @@ describe(
     });
 
     describe('Risk engine', () => {
-      beforeEach(() => {
-        visit(ENTITY_ANALYTICS_MANAGEMENT_URL);
-      });
-
       it('should init, disable and enable risk engine', () => {
         cy.get(RISK_SCORE_STATUS).should('have.text', 'Off');
 

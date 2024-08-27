@@ -8,7 +8,7 @@
 import { useCallback } from 'react';
 import { Observable } from 'rxjs';
 import type { IKibanaSearchRequest } from '@kbn/search-types';
-import { useObservableState } from '../use_observable';
+import { useObservableState } from '../../hooks/use_observable';
 import { ParsedDataSearchResponseDescriptor } from './types';
 
 export const useDataSearchResponseState = <

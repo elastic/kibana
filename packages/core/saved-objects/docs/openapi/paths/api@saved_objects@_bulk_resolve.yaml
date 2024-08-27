@@ -1,8 +1,9 @@
 post:
-  summary: Retrieve multiple Kibana saved objects by identifier using any legacy URL aliases if they exist.
+  summary: Resolve saved objects
   operationId: bulkResolveSavedObjects
   deprecated: true
   description: >
+    Retrieve multiple Kibana saved objects by identifier using any legacy URL aliases if they exist.
     Under certain circumstances when Kibana is upgraded, saved object migrations may necessitate regenerating some object IDs to enable new features.
     When an object's ID is regenerated, a legacy URL alias is created for that object, preserving its old ID.
     In such a scenario, that object can be retrieved by the bulk resolve API using either its new ID or its old ID.

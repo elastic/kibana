@@ -5,10 +5,12 @@ info:
 paths:
   /api/detection_engine/rules/_bulk_create:
     post:
-      operationId: BulkCreateRules
+      x-labels: [ess]
       x-codegen-enabled: true
+      operationId: BulkCreateRules
       deprecated: true
-      description: Creates new detection rules in bulk.
+      summary: Create multiple detection rules 
+      description: Create new detection rules in bulk.
       tags:
         - Bulk API
       requestBody:

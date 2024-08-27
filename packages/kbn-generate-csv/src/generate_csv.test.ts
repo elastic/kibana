@@ -73,6 +73,7 @@ describe('CsvGenerator', () => {
 
   const mockSearchSourceService: jest.Mocked<ISearchStartSearchSource> = {
     create: jest.fn().mockReturnValue(searchSourceMock),
+    createLazy: jest.fn().mockReturnValue(searchSourceMock),
     createEmpty: jest.fn().mockReturnValue(searchSourceMock),
     telemetry: jest.fn(),
     inject: jest.fn(),

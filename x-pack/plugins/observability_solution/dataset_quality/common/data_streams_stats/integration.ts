@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DashboardType, IntegrationType } from './types';
+import { IntegrationType } from '../api_types';
 
 export class Integration {
   name: IntegrationType['name'];
@@ -13,14 +13,12 @@ export class Integration {
   version: string;
   datasets: Record<string, string>;
   icons?: IntegrationType['icons'];
-  dashboards?: DashboardType[];
 
   private constructor(integration: Integration) {
     this.name = integration.name;
     this.title = integration.title || integration.name;
     this.version = integration.version || '1.0.0';
     this.icons = integration.icons;
-    this.dashboards = integration.dashboards || [];
     this.datasets = integration.datasets || {};
   }
 
@@ -29,7 +27,6 @@ export class Integration {
       ...integration,
       title: integration.title || integration.name,
       version: integration.version || '1.0.0',
-      dashboards: integration.dashboards || [],
       datasets: integration.datasets || {},
     };
 

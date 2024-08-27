@@ -45,7 +45,7 @@
           },
           "<",
           "PanelCompatibleComponent",
-          "<ApiType, PropsType> | null>; } & { hidePanelChrome?: boolean | undefined; }) => JSX.Element"
+          "<ApiType, PropsType> | null>; } & { hidePanelChrome?: boolean | undefined; }) => JSX.Element | null"
         ],
         "path": "src/plugins/presentation_panel/public/panel_component/presentation_panel.tsx",
         "deprecated": false,

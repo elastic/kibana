@@ -7,7 +7,14 @@
 
 import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
-import { elasticUser, getCaseUsersMockResponse } from '../containers/mock';
+import {
+  customFieldsConfigurationMock,
+  customFieldsMock,
+  elasticUser,
+  getCaseUsersMockResponse,
+} from '../containers/mock';
+import type { CaseUICustomField } from '../containers/types';
+import { CustomFieldTypes } from '../../common/types/domain/custom_field/v1';
 import {
   connectorDeprecationValidator,
   convertEmptyValuesToNull,
@@ -21,6 +28,9 @@ import {
   stringifyToURL,
   parseCaseUsers,
   convertCustomFieldValue,
+  addOrReplaceField,
+  removeEmptyFields,
+  customFieldsFormSerializer,
 } from './utils';
 
 describe('Utils', () => {
@@ -526,6 +536,276 @@ describe('Utils', () => {
 
     it('returns value as it is when value is false', async () => {
       expect(convertCustomFieldValue(false)).toMatchInlineSnapshot('false');
+    });
+  });
+
+  describe('addOrReplaceField ', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('adds new custom field correctly', async () => {
+      const fieldToAdd: CaseUICustomField = {
+        key: 'my_test_key',
+        type: CustomFieldTypes.TEXT,
+        value: 'my_test_value',
+      };
+      const res = addOrReplaceField(customFieldsMock, fieldToAdd);
+      expect(res).toMatchInlineSnapshot(
+        [...customFieldsMock, fieldToAdd],
+        `
+              Array [
+                Object {
+                  "key": "test_key_1",
+                  "type": "text",
+                  "value": "My text test value 1",
+                },
+                Object {
+                  "key": "test_key_2",
+                  "type": "toggle",
+                  "value": true,
+                },
+                Object {
+                  "key": "test_key_3",
+                  "type": "text",
+                  "value": null,
+                },
+                Object {
+                  "key": "test_key_4",
+                  "type": "toggle",
+                  "value": null,
+                },
+                Object {
+                  "key": "my_test_key",
+                  "type": "text",
+                  "value": "my_test_value",
+                },
+              ]
+          `
+      );
+    });
+
+    it('updates existing custom field correctly', async () => {
+      const fieldToUpdate = {
+        ...customFieldsMock[0],
+        field: { value: ['My text test value 1!!!'] },
+      };
+
+      const res = addOrReplaceField(customFieldsMock, fieldToUpdate as CaseUICustomField);
+      expect(res).toMatchInlineSnapshot(
+        [
+          { ...fieldToUpdate },
+          { ...customFieldsMock[1] },
+          { ...customFieldsMock[2] },
+          { ...customFieldsMock[3] },
+        ],
+        `
+              Array [
+                Object {
+                  "field": Object {
+                    "value": Array [
+                      "My text test value 1!!!",
+                    ],
+                  },
+                  "key": "test_key_1",
+                  "type": "text",
+                  "value": "My text test value 1",
+                },
+                Object {
+                  "key": "test_key_2",
+                  "type": "toggle",
+                  "value": true,
+                },
+                Object {
+                  "key": "test_key_3",
+                  "type": "text",
+                  "value": null,
+                },
+                Object {
+                  "key": "test_key_4",
+                  "type": "toggle",
+                  "value": null,
+                },
+              ]
+          `
+      );
+    });
+
+    it('adds new custom field configuration correctly', async () => {
+      const fieldToAdd = {
+        key: 'my_test_key',
+        type: CustomFieldTypes.TEXT,
+        label: 'my_test_label',
+        required: true,
+      };
+      const res = addOrReplaceField(customFieldsConfigurationMock, fieldToAdd);
+      expect(res).toMatchInlineSnapshot(
+        [...customFieldsConfigurationMock, fieldToAdd],
+        `
+              Array [
+                Object {
+                  "defaultValue": "My default value",
+                  "key": "test_key_1",
+                  "label": "My test label 1",
+                  "required": true,
+                  "type": "text",
+                },
+                Object {
+                  "defaultValue": true,
+                  "key": "test_key_2",
+                  "label": "My test label 2",
+                  "required": true,
+                  "type": "toggle",
+                },
+                Object {
+                  "key": "test_key_3",
+                  "label": "My test label 3",
+                  "required": false,
+                  "type": "text",
+                },
+                Object {
+                  "key": "test_key_4",
+                  "label": "My test label 4",
+                  "required": false,
+                  "type": "toggle",
+                },
+                Object {
+                  "key": "my_test_key",
+                  "label": "my_test_label",
+                  "required": true,
+                  "type": "text",
+                },
+              ]
+          `
+      );
+    });
+
+    it('updates existing custom field config correctly', async () => {
+      const fieldToUpdate = {
+        ...customFieldsConfigurationMock[0],
+        label: `${customFieldsConfigurationMock[0].label}!!!`,
+      };
+
+      const res = addOrReplaceField(customFieldsConfigurationMock, fieldToUpdate);
+      expect(res).toMatchInlineSnapshot(
+        [
+          { ...fieldToUpdate },
+          { ...customFieldsConfigurationMock[1] },
+          { ...customFieldsConfigurationMock[2] },
+          { ...customFieldsConfigurationMock[3] },
+        ],
+        `
+              Array [
+                Object {
+                  "defaultValue": "My default value",
+                  "key": "test_key_1",
+                  "label": "My test label 1!!!",
+                  "required": true,
+                  "type": "text",
+                },
+                Object {
+                  "defaultValue": true,
+                  "key": "test_key_2",
+                  "label": "My test label 2",
+                  "required": true,
+                  "type": "toggle",
+                },
+                Object {
+                  "key": "test_key_3",
+                  "label": "My test label 3",
+                  "required": false,
+                  "type": "text",
+                },
+                Object {
+                  "key": "test_key_4",
+                  "label": "My test label 4",
+                  "required": false,
+                  "type": "toggle",
+                },
+              ]
+          `
+      );
+    });
+  });
+
+  describe('removeEmptyFields', () => {
+    it('removes empty fields', () => {
+      const res = removeEmptyFields({
+        key: '',
+        name: '',
+        templateDescription: '',
+        title: '',
+        description: '',
+        templateTags: [],
+        tags: [],
+        fields: null,
+      });
+
+      expect(res).toEqual({});
+    });
+
+    it('does not remove not empty fields', () => {
+      const res = removeEmptyFields({
+        key: 'key_1',
+        name: 'template 1',
+        templateDescription: 'description 1',
+      });
+
+      expect(res).toEqual({
+        key: 'key_1',
+        name: 'template 1',
+        templateDescription: 'description 1',
+      });
+    });
+  });
+
+  describe('customFieldsFormSerializer', () => {
+    it('transforms customFields correctly', () => {
+      const customFields = {
+        test_key_1: 'first value',
+        test_key_2: true,
+        test_key_3: 'second value',
+      };
+
+      expect(customFieldsFormSerializer(customFields, customFieldsConfigurationMock)).toEqual([
+        {
+          key: 'test_key_1',
+          type: 'text',
+          value: 'first value',
+        },
+        {
+          key: 'test_key_2',
+          type: 'toggle',
+          value: true,
+        },
+        {
+          key: 'test_key_3',
+          type: 'text',
+          value: 'second value',
+        },
+      ]);
+    });
+
+    it('returns empty array when custom fields are empty', () => {
+      expect(customFieldsFormSerializer({}, customFieldsConfigurationMock)).toEqual([]);
+    });
+
+    it('returns empty array when not custom fields in the configuration', () => {
+      const customFields = {
+        test_key_1: 'first value',
+        test_key_2: true,
+        test_key_3: 'second value',
+      };
+
+      expect(customFieldsFormSerializer(customFields, [])).toEqual([]);
+    });
+
+    it('returns empty array when custom fields do not match with configuration', () => {
+      const customFields = {
+        random_key: 'first value',
+      };
+
+      expect(customFieldsFormSerializer(customFields, customFieldsConfigurationMock)).toEqual([]);
     });
   });
 });

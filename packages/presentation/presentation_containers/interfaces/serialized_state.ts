@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Reference } from '@kbn/content-management-utils';
-import { MaybePromise } from '@kbn/utility-types';
+import type { Reference } from '@kbn/content-management-utils';
+import type { MaybePromise } from '@kbn/utility-types';
 
 /**
  * A package containing the serialized Embeddable state, with references extracted. When saving Embeddables using any
@@ -32,8 +32,12 @@ export const apiHasSerializableState = (api: unknown | null): api is HasSerializ
 
 export interface HasSnapshottableState<RuntimeState extends object = object> {
   /**
-   * Serializes all runtime state exactly as it appears. This could be used
-   * to rehydrate a component's state without needing to deserialize it.
+   * Serializes all runtime state exactly as it appears. This can be used
+   * to rehydrate a component's state without needing to serialize then deserialize it.
    */
   snapshotRuntimeState: () => RuntimeState;
 }
+
+export const apiHasSnapshottableState = (api: unknown | null): api is HasSnapshottableState => {
+  return Boolean((api as HasSnapshottableState)?.snapshotRuntimeState);
+};

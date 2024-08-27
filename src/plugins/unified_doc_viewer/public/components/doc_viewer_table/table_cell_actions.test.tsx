@@ -6,56 +6,82 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import { TableActions } from './table_cell_actions';
+import { getFieldCellActions, getFieldValueCellActions, TableRow } from './table_cell_actions';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 
 describe('TableActions', () => {
-  it('should render the panels correctly for undefined onFilter function', () => {
-    render(
-      <TableActions
-        mode="inline"
-        field="message"
-        pinned={false}
-        fieldMapping={undefined}
-        flattenedField="message"
-        onFilter={undefined}
-        onToggleColumn={jest.fn()}
-        ignoredValue={false}
-        onTogglePinned={jest.fn()}
-      />
-    );
-    expect(screen.queryByTestId('addFilterForValueButton-message')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('addFilterOutValueButton-message')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('addExistsFilterButton-message')).not.toBeInTheDocument();
-    expect(screen.getByTestId('toggleColumnButton-message')).not.toBeDisabled();
-    expect(screen.getByTestId('togglePinFilterButton-message')).not.toBeDisabled();
+  const rows: TableRow[] = [
+    {
+      action: {
+        onFilter: jest.fn(),
+        flattenedField: 'flattenedField',
+        onToggleColumn: jest.fn(),
+      },
+      field: {
+        pinned: true,
+        onTogglePinned: jest.fn(),
+        field: 'message',
+        fieldMapping: new DataViewField({
+          type: 'keyword',
+          name: 'message',
+          searchable: true,
+          aggregatable: true,
+        }),
+        fieldType: 'keyword',
+        displayName: 'message',
+        scripted: false,
+      },
+      value: {
+        ignored: undefined,
+        formattedValue: 'test',
+      },
+    },
+  ];
+
+  const Component = () => <div>Component</div>;
+  const EuiCellParams = {
+    Component,
+    rowIndex: 0,
+    colIndex: 0,
+    columnId: 'test',
+    isExpanded: false,
+  };
+
+  describe('getFieldCellActions', () => {
+    it('should render correctly for undefined functions', () => {
+      expect(
+        getFieldCellActions({ rows, filter: undefined, onToggleColumn: jest.fn() }).map((item) =>
+          item(EuiCellParams)
+        )
+      ).toMatchSnapshot();
+
+      expect(
+        getFieldCellActions({ rows, filter: undefined, onToggleColumn: undefined }).map((item) =>
+          item(EuiCellParams)
+        )
+      ).toMatchSnapshot();
+    });
+
+    it('should render the panels correctly for defined onFilter function', () => {
+      expect(
+        getFieldCellActions({ rows, filter: jest.fn(), onToggleColumn: jest.fn() }).map((item) =>
+          item(EuiCellParams)
+        )
+      ).toMatchSnapshot();
+    });
   });
 
-  it('should render the panels correctly for defined onFilter function', () => {
-    render(
-      <TableActions
-        mode="inline"
-        field="message"
-        pinned={false}
-        fieldMapping={
-          {
-            name: 'message',
-            type: 'string',
-            filterable: true,
-          } as DataViewField
-        }
-        flattenedField="message"
-        onFilter={jest.fn()}
-        onToggleColumn={jest.fn()}
-        ignoredValue={false}
-        onTogglePinned={jest.fn()}
-      />
-    );
-    expect(screen.getByTestId('addFilterForValueButton-message')).not.toBeDisabled();
-    expect(screen.getByTestId('addFilterOutValueButton-message')).not.toBeDisabled();
-    expect(screen.getByTestId('addExistsFilterButton-message')).not.toBeDisabled();
-    expect(screen.getByTestId('toggleColumnButton-message')).not.toBeDisabled();
-    expect(screen.getByTestId('togglePinFilterButton-message')).not.toBeDisabled();
+  describe('getFieldValueCellActions', () => {
+    it('should render correctly for undefined functions', () => {
+      expect(
+        getFieldValueCellActions({ rows, filter: undefined }).map((item) => item(EuiCellParams))
+      ).toMatchSnapshot();
+    });
+
+    it('should render the panels correctly for defined onFilter function', () => {
+      expect(
+        getFieldValueCellActions({ rows, filter: jest.fn() }).map((item) => item(EuiCellParams))
+      ).toMatchSnapshot();
+    });
   });
 });

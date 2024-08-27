@@ -39,11 +39,13 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
       { open: '(', close: ')' },
       { open: '[', close: ']' },
       { open: `'`, close: `'` },
+      { open: '"""', close: '"""' },
       { open: '"', close: '"' },
     ],
     surroundingPairs: [
       { open: '(', close: ')' },
       { open: `'`, close: `'` },
+      { open: '"""', close: '"""' },
       { open: '"', close: '"' },
     ],
   },
@@ -98,9 +100,10 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
           (...uris) => workerProxyService.getWorker(uris),
           callbacks
         );
-        const suggestionEntries = await astAdapter.autocomplete(model, position, context);
+        const suggestions = await astAdapter.autocomplete(model, position, context);
         return {
-          suggestions: wrapAsMonacoSuggestions(suggestionEntries.suggestions),
+          // @ts-expect-error because of range typing: https://github.com/microsoft/monaco-editor/issues/4638
+          suggestions: wrapAsMonacoSuggestions(suggestions),
         };
       },
     };

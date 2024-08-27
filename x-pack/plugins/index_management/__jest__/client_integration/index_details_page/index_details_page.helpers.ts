@@ -13,7 +13,7 @@ import {
 } from '@kbn/test-jest-helpers';
 import { HttpSetup } from '@kbn/core/public';
 import { act } from 'react-dom/test-utils';
-
+import { keys } from '@elastic/eui';
 import { IndexDetailsTabId } from '../../../common/constants';
 import { IndexDetailsPage } from '../../../public/application/sections/home/index_list/details_page';
 import { WithAppDependencies } from '../helpers';
@@ -56,6 +56,12 @@ export interface IndexDetailsPageTestBed extends TestBed {
       setSearchBarValue: (searchValue: string) => Promise<void>;
       findSearchResult: () => string;
       isSemanticTextBannerVisible: () => boolean;
+      selectSemanticTextField: (name: string, type: string) => Promise<void>;
+      isReferenceFieldVisible: () => void;
+      selectInferenceIdButtonExists: () => void;
+      openSelectInferencePopover: () => void;
+      expectDefaultInferenceModelToExists: () => void;
+      expectCustomInferenceModelToExists: (customInference: string) => void;
     };
     settings: {
       getCodeBlockContent: () => string;
@@ -101,6 +107,7 @@ export interface IndexDetailsPageTestBed extends TestBed {
       getDataStreamDetailsContent: () => string;
       reloadDataStreamDetails: () => Promise<void>;
       addDocCodeBlockExists: () => boolean;
+      indexErrorCalloutExists: () => boolean;
     };
   };
 }
@@ -190,6 +197,9 @@ export const setup = async ({
     addDocCodeBlockExists: () => {
       return exists('codeBlockControlsPanel');
     },
+    indexErrorCalloutExists: () => {
+      return exists('indexErrorCallout');
+    },
   };
 
   const mappings = {
@@ -228,7 +238,7 @@ export const setup = async ({
       component.update();
     },
     selectFilterFieldType: async (fieldType: string) => {
-      expect(testBed.exists('indexDetailsMappingsSelectFilter-text')).toBe(true);
+      expect(testBed.exists(fieldType)).toBe(true);
       await act(async () => {
         find(fieldType).simulate('click');
       });
@@ -287,12 +297,48 @@ export const setup = async ({
 
           await act(async () => {
             expect(exists('createFieldForm.addButton')).toBe(true);
+            expect(find('createFieldForm.addButton').props().disabled).toBeFalsy();
             find('createFieldForm.addButton').simulate('click');
           });
 
           component.update();
         }
       }
+    },
+    selectSemanticTextField: async (name: string, type: string) => {
+      expect(exists('comboBoxSearchInput')).toBe(true);
+
+      const { form } = testBed;
+      form.setInputValue('nameParameterInput', name);
+      form.setInputValue('comboBoxSearchInput', type);
+      await act(async () => {
+        find('comboBoxSearchInput').simulate('keydown', { key: keys.ENTER });
+      });
+      // select semantic_text field
+      await act(async () => {
+        expect(exists('fieldTypesOptions-semantic_text')).toBe(true);
+        find('fieldTypesOptions-semantic_text').simulate('click');
+        expect(exists('fieldTypesOptions-semantic_text')).toBe(false);
+      });
+    },
+    isReferenceFieldVisible: () => {
+      expect(exists('referenceFieldSelect')).toBe(true);
+    },
+    selectInferenceIdButtonExists: () => {
+      expect(exists('selectInferenceId')).toBe(true);
+      expect(exists('inferenceIdButton')).toBe(true);
+      find('inferenceIdButton').simulate('click');
+    },
+    openSelectInferencePopover: () => {
+      expect(exists('learn-how-to-create-inference-endpoints')).toBe(true);
+      expect(exists('manageInferenceEndpointButton')).toBe(true);
+    },
+    expectDefaultInferenceModelToExists: () => {
+      expect(exists('custom-inference_elser_model_2')).toBe(true);
+      expect(exists('custom-inference_e5')).toBe(true);
+    },
+    expectCustomInferenceModelToExists: (customInference: string) => {
+      expect(exists(customInference)).toBe(true);
     },
   };
 

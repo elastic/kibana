@@ -68,7 +68,9 @@
     "@kbn/serverless",
     "@kbn/task-manager-plugin",
     "@kbn/cloud-plugin",
-    "@kbn/observability-plugin"
+    "@kbn/observability-plugin",
+    "@kbn/esql-datagrid",
+    "@kbn/alerting-comparators"
   ],
   "exclude": ["target/**/*"]
 }

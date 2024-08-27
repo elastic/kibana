@@ -15,5 +15,5 @@ export const extractTitleAndCount = (title: string): [string, number] => {
       return [baseTitle, Number(count)];
     }
   }
-  return [title, 1];
+  return [title, 0];
 };

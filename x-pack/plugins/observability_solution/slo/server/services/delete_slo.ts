@@ -8,6 +8,7 @@
 import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 import { ElasticsearchClient } from '@kbn/core/server';
 import {
+  getSLOPipelineId,
   getSLOSummaryPipelineId,
   getSLOSummaryTransformId,
   getSLOTransformId,
@@ -37,6 +38,13 @@ export class DeleteSLO {
     const rollupTransformId = getSLOTransformId(slo.id, slo.revision);
     await this.transformManager.stop(rollupTransformId);
     await this.transformManager.uninstall(rollupTransformId);
+
+    await retryTransientEsErrors(() =>
+      this.esClient.ingest.deletePipeline(
+        { id: getSLOPipelineId(slo.id, slo.revision) },
+        { ignore: [404] }
+      )
+    );
 
     await retryTransientEsErrors(() =>
       this.esClient.ingest.deletePipeline(

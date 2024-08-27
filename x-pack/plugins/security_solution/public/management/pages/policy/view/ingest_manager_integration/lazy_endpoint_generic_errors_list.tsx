@@ -10,7 +10,7 @@ import type {
   PackageGenericErrorsListComponent,
   PackageGenericErrorsListProps,
 } from '@kbn/fleet-plugin/public';
-import type { FleetUiExtensionGetterOptions } from './types';
+import type { FleetUiExtensionGetterOptions } from '../../../../../common/types';
 
 export const getLazyEndpointGenericErrorsListExtension = ({
   coreStart,
@@ -19,7 +19,7 @@ export const getLazyEndpointGenericErrorsListExtension = ({
 }: FleetUiExtensionGetterOptions) => {
   return lazy<PackageGenericErrorsListComponent>(async () => {
     const [{ withSecurityContext }, { EndpointGenericErrorsList }] = await Promise.all([
-      import('./components/with_security_context/with_security_context'),
+      import('../../../../../common/components/with_security_context/with_security_context'),
       import('./endpoint_generic_errors_list'),
     ]);
 

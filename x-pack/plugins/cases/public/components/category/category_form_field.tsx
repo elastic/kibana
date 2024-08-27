@@ -15,7 +15,7 @@ import {
 import { isEmpty } from 'lodash';
 import React, { memo } from 'react';
 import { MAX_CATEGORY_LENGTH } from '../../../common/constants';
-import type { CaseUI } from '../../../common/ui';
+import type { CategoryField } from './category_component';
 import { CategoryComponent } from './category_component';
 import { CATEGORY, EMPTY_CATEGORY_VALIDATION_MSG, MAX_LENGTH_ERROR } from './translations';
 
@@ -24,8 +24,6 @@ interface Props {
   availableCategories: string[];
   formRowProps?: Partial<EuiFormRowProps>;
 }
-
-type CategoryField = CaseUI['category'] | undefined;
 
 const getCategoryConfig = (): FieldConfig<CategoryField> => ({
   defaultValue: null,
@@ -65,7 +63,7 @@ const CategoryFormFieldComponent: React.FC<Props> = ({
   formRowProps,
 }) => {
   return (
-    <UseField<CategoryField> path={'category'} config={getCategoryConfig()}>
+    <UseField<CategoryField> path="category" config={getCategoryConfig()}>
       {(field) => {
         const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
@@ -79,7 +77,7 @@ const CategoryFormFieldComponent: React.FC<Props> = ({
             label={CATEGORY}
             error={errorMessage}
             isInvalid={isInvalid}
-            data-test-subj="case-create-form-category"
+            data-test-subj="caseCategory"
             fullWidth
           >
             <CategoryComponent

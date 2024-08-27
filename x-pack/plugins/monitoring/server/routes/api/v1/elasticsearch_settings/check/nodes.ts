@@ -18,6 +18,9 @@ export function nodesSettingsCheckRoute(server: MonitoringCore) {
     method: 'get',
     path: '/api/monitoring/v1/elasticsearch_settings/check/nodes',
     validate: {},
+    options: {
+      access: 'internal',
+    },
     async handler(req) {
       try {
         const response = await checkNodesSettings(req); // needs to be try/catch to handle privilege error

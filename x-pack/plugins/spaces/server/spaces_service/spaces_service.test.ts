@@ -69,7 +69,7 @@ const createService = (serverBasePath: string = '') => {
     basePath: httpSetup.basePath,
   });
 
-  const spacesClientService = new SpacesClientService(jest.fn());
+  const spacesClientService = new SpacesClientService(jest.fn(), 'traditional');
   spacesClientService.setup({
     config$: Rx.of(spacesConfig),
   });

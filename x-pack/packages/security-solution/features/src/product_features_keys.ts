@@ -67,6 +67,16 @@ export enum ProductFeatureSecurityKey {
    * enables all rule actions
    */
   externalRuleActions = 'external_rule_actions',
+
+  /**
+   * enables Cloud Security Posture - CSPM, KSPM, CNVM
+   */
+  cloudSecurityPosture = 'cloud_security_posture',
+
+  /**
+   * enables the integration assistant
+   */
+  integrationAssistant = 'integration_assistant',
 }
 
 export enum ProductFeatureCasesKey {
@@ -83,17 +93,26 @@ export enum ProductFeatureAssistantKey {
   assistant = 'assistant',
 }
 
+export enum ProductFeatureAttackDiscoveryKey {
+  /**
+   * Enables Attack discovery
+   */
+  attackDiscovery = 'attack_discovery',
+}
+
 // Merges the two enums.
 export const ProductFeatureKey = {
   ...ProductFeatureSecurityKey,
   ...ProductFeatureCasesKey,
   ...ProductFeatureAssistantKey,
+  ...ProductFeatureAttackDiscoveryKey,
 };
 // We need to merge the value and the type and export both to replicate how enum works.
 export type ProductFeatureKeyType =
   | ProductFeatureSecurityKey
   | ProductFeatureCasesKey
-  | ProductFeatureAssistantKey;
+  | ProductFeatureAssistantKey
+  | ProductFeatureAttackDiscoveryKey;
 
 export const ALL_PRODUCT_FEATURE_KEYS = Object.freeze(Object.values(ProductFeatureKey));
 

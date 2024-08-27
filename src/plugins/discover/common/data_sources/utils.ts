@@ -25,3 +25,11 @@ export const isDataSourceType = <T extends DataSourceType>(
   dataSource: DiscoverDataSource | undefined,
   type: T
 ): dataSource is Extract<DiscoverDataSource, { type: T }> => dataSource?.type === type;
+
+export const isDataViewSource = (
+  dataSource: DiscoverDataSource | undefined
+): dataSource is DataViewDataSource => isDataSourceType(dataSource, DataSourceType.DataView);
+
+export const isEsqlSource = (
+  dataSource: DiscoverDataSource | undefined
+): dataSource is EsqlDataSource => isDataSourceType(dataSource, DataSourceType.Esql);

@@ -21,7 +21,11 @@ export function defineRoutes({ router, featureRegistry }: RouteDefinitionParams)
   router.get(
     {
       path: '/api/features',
-      options: { tags: ['access:features'] },
+      options: {
+        tags: ['access:features'],
+        access: 'public',
+        summary: `Get features`,
+      },
       validate: {
         query: schema.object({ ignoreValidLicenses: schema.boolean({ defaultValue: false }) }),
       },

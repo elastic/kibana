@@ -19,13 +19,14 @@ const DefaultEmailCodec = t.intersection([
 
 export const DynamicSettingsAttributesCodec = t.intersection([
   t.strict({
-    heartbeatIndices: t.string,
     certAgeThreshold: t.number,
     certExpirationThreshold: t.number,
     defaultConnectors: t.array(t.string),
   }),
   t.partial({
     defaultEmail: DefaultEmailCodec,
+    defaultStatusRuleEnabled: t.boolean,
+    defaultTLSRuleEnabled: t.boolean,
   }),
 ]);
 

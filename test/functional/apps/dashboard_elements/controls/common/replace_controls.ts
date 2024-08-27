@@ -47,7 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
   };
 
-  describe('Replacing controls', async () => {
+  describe('Replacing controls', () => {
     let controlId: string;
 
     before(async () => {
@@ -56,14 +56,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.gotoDashboardLandingPage();
       await dashboard.clickNewDashboard();
       await timePicker.setDefaultDataRange();
-      await dashboard.saveDashboard(DASHBOARD_NAME, { exitFromEditMode: false });
+      await dashboard.saveDashboard(DASHBOARD_NAME, {
+        exitFromEditMode: false,
+        saveAsNew: true,
+      });
     });
 
     after(async () => {
       await security.testUser.restoreDefaults();
     });
 
-    describe('Replace options list', async () => {
+    describe('Replace options list', () => {
       beforeEach(async () => {
         await dashboardControls.clearAllControls();
         await dashboardControls.createControl({
@@ -95,7 +98,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('Replace range slider', async () => {
+    describe('Replace range slider', () => {
       beforeEach(async () => {
         await dashboardControls.clearAllControls();
         await dashboardControls.createControl({

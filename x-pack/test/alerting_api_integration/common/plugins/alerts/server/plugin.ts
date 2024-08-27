@@ -17,7 +17,7 @@ import {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server/plugin';
 import { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
@@ -92,6 +92,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
         'test.patternFiringAad',
         'test.waitingRule',
         'test.patternFiringAutoRecoverFalse',
+        'test.severity',
       ],
       privileges: {
         all: {
@@ -123,6 +124,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
                 'test.patternFiringAad',
                 'test.waitingRule',
                 'test.patternFiringAutoRecoverFalse',
+                'test.severity',
               ],
             },
           },
@@ -157,6 +159,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
                 'test.patternFiringAad',
                 'test.waitingRule',
                 'test.patternFiringAutoRecoverFalse',
+                'test.severity',
               ],
             },
           },

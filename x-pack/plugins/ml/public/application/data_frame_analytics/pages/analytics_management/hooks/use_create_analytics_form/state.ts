@@ -16,7 +16,8 @@ import {
   type DataFrameAnalysisConfigType,
   type FeatureProcessor,
 } from '@kbn/ml-data-frame-analytics-utils';
-import type { DeepPartial, DeepReadonly } from '../../../../../../../common/types/common';
+import type { DeepPartial } from '@kbn/utility-types';
+import type { DeepReadonly } from '../../../../../../../common/types/common';
 import { checkPermission } from '../../../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../../../ml_nodes_check';
 
@@ -51,7 +52,7 @@ export interface State {
   disableSwitchToForm: boolean;
   form: {
     alpha: undefined | number;
-    computeFeatureInfluence: string;
+    computeFeatureInfluence: boolean;
     createDataView: boolean;
     classAssignmentObjective: undefined | string;
     dependentVariable: DependentVariable;
@@ -111,7 +112,7 @@ export interface State {
     sourceIndexNameValid: boolean;
     sourceIndexContainsNumericalFields: boolean;
     sourceIndexFieldsCheckFailed: boolean;
-    standardizationEnabled: undefined | string;
+    standardizationEnabled: undefined | boolean;
     timeFieldName: undefined | string;
     trainingPercent: number;
     useEstimatedMml: boolean;
@@ -137,7 +138,7 @@ export const getInitialState = (): State => ({
   disableSwitchToForm: false,
   form: {
     alpha: undefined,
-    computeFeatureInfluence: 'true',
+    computeFeatureInfluence: true,
     createDataView: true,
     classAssignmentObjective: undefined,
     dependentVariable: '',
@@ -197,7 +198,7 @@ export const getInitialState = (): State => ({
     sourceIndexNameValid: false,
     sourceIndexContainsNumericalFields: true,
     sourceIndexFieldsCheckFailed: false,
-    standardizationEnabled: 'true',
+    standardizationEnabled: true,
     timeFieldName: undefined,
     trainingPercent: 80,
     useEstimatedMml: true,
@@ -388,7 +389,7 @@ export function getFormStateFromJobConfig(
   const analysisConfig = analyticsJobConfig.analysis[jobType];
 
   for (const key in analysisConfig) {
-    if (analysisConfig.hasOwnProperty(key)) {
+    if (Object.hasOwn(analysisConfig, key)) {
       const camelCased = toCamelCase(key);
       // @ts-ignore
       resultState[camelCased] = analysisConfig[key];

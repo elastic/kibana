@@ -7,15 +7,10 @@
 
 import React, { useCallback, useContext, useMemo } from 'react';
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
-import { useDispatch } from 'react-redux';
 import { isString } from 'lodash/fp';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { UserPanelKey } from '../../../../../flyout/entity_details/user_right';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
-import type { ExpandedDetailType } from '../../../../../../common/types';
-import { getScopedActions, isTimelineScope } from '../../../../../helpers';
-import type { TimelineTabs } from '../../../../../../common/types/timeline';
 import { DefaultDraggable } from '../../../../../common/components/draggables';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { UserDetailsLink } from '../../../../../common/components/links';
@@ -48,12 +43,7 @@ const UserNameComponent: React.FC<Props> = ({
   title,
   value,
 }) => {
-  const dispatch = useDispatch();
   const eventContext = useContext(StatefulEventContext);
-  const isNewUserDetailsFlyoutEnable = useIsExperimentalFeatureEnabled('newUserDetailsFlyout');
-  const expandableTimelineFlyoutEnabled = useIsExperimentalFeatureEnabled(
-    'expandableTimelineFlyoutEnabled'
-  );
   const userName = `${value}`;
   const isInTimelineContext = userName && eventContext?.timelineID;
   const { openRightPanel } = useExpandableFlyoutApi();
@@ -70,61 +60,19 @@ const UserNameComponent: React.FC<Props> = ({
         return;
       }
 
-      const { timelineID, tabType } = eventContext;
+      const { timelineID } = eventContext;
 
-      const openNewFlyout = () =>
-        openRightPanel({
-          id: UserPanelKey,
-          params: {
-            userName,
-            contextID: contextId,
-            scopeId: timelineID,
-            isDraggable,
-          },
-        });
-
-      const openOldFlyout = () => {
-        const updatedExpandedDetail: ExpandedDetailType = {
-          panelView: 'userDetail',
-          params: {
-            userName,
-          },
-        };
-        const scopedActions = getScopedActions(timelineID);
-        if (scopedActions) {
-          dispatch(
-            scopedActions.toggleDetailPanel({
-              ...updatedExpandedDetail,
-              id: timelineID,
-              tabType: tabType as TimelineTabs,
-            })
-          );
-        }
-      };
-
-      if (
-        (isTimelineScope(timelineID) &&
-          isNewUserDetailsFlyoutEnable &&
-          expandableTimelineFlyoutEnabled) ||
-        isNewUserDetailsFlyoutEnable
-      ) {
-        openNewFlyout();
-      } else {
-        openOldFlyout();
-      }
+      openRightPanel({
+        id: UserPanelKey,
+        params: {
+          userName,
+          contextID: contextId,
+          scopeId: timelineID,
+          isDraggable,
+        },
+      });
     },
-    [
-      contextId,
-      dispatch,
-      eventContext,
-      expandableTimelineFlyoutEnabled,
-      isDraggable,
-      isInTimelineContext,
-      isNewUserDetailsFlyoutEnable,
-      onClick,
-      openRightPanel,
-      userName,
-    ]
+    [contextId, eventContext, isDraggable, isInTimelineContext, onClick, openRightPanel, userName]
   );
 
   // The below is explicitly defined this way as the onClick takes precedence when it and the href are both defined

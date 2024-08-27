@@ -8,11 +8,10 @@
 import type { Logger } from '@kbn/core/server';
 import { newTelemetryLogger, getPreviousDiagTaskTimestamp } from '../helpers';
 import type { ITelemetryEventsSender } from '../sender';
-import type { TelemetryEvent } from '../types';
+import { TelemetryChannel, type TelemetryEvent } from '../types';
 import type { ITelemetryReceiver } from '../receiver';
 import type { TaskExecutionPeriod } from '../task';
 import type { ITaskMetricsService } from '../task_metrics.types';
-import { TELEMETRY_CHANNEL_ENDPOINT_ALERTS } from '../constants';
 import { copyAllowlistedFields, filterList } from '../filterlists';
 
 export function createTelemetryDiagnosticsTaskConfig() {
@@ -33,12 +32,11 @@ export function createTelemetryDiagnosticsTaskConfig() {
       taskMetricsService: ITaskMetricsService,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
-      const log = newTelemetryLogger(logger.get('diagnostic'));
+      const mdc = { task_id: taskId, task_execution_period: taskExecutionPeriod };
+      const log = newTelemetryLogger(logger.get('diagnostic'), mdc);
       const trace = taskMetricsService.start(taskType);
 
-      log.l(
-        `Running task: ${taskId} [last: ${taskExecutionPeriod.last} - current: ${taskExecutionPeriod.current}]`
-      );
+      log.l('Running telemetry task');
 
       try {
         if (!taskExecutionPeriod.last) {
@@ -57,14 +55,16 @@ export function createTelemetryDiagnosticsTaskConfig() {
           );
 
           if (alerts.length === 0) {
-            log.l('no diagnostic alerts retrieved');
+            log.debug('no diagnostic alerts retrieved');
             await taskMetricsService.end(trace);
             return alertCount;
           }
 
           alertCount += alerts.length;
-          log.l(`Sending ${alerts.length} diagnostic alerts`);
-          await sender.sendOnDemand(TELEMETRY_CHANNEL_ENDPOINT_ALERTS, processedAlerts);
+          log.l('Sending diagnostic alerts', {
+            alerts_count: alerts.length,
+          });
+          sender.sendAsync(TelemetryChannel.ENDPOINT_ALERTS, processedAlerts);
         }
 
         await taskMetricsService.end(trace);

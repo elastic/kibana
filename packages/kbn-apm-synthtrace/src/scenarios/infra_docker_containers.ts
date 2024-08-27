@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { InfraDocument, infra } from '@kbn/apm-synthtrace-client';
+import { InfraDocument, infra, generateShortId } from '@kbn/apm-synthtrace-client';
 
 import { Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';
@@ -19,7 +19,10 @@ const scenario: Scenario<InfraDocument> = async (runOptions) => {
 
       const CONTAINERS = Array(numContainers)
         .fill(0)
-        .map((_, idx) => infra.dockerContainer(`container-${idx}`));
+        .map((_, idx) => {
+          const id = generateShortId();
+          return infra.dockerContainer(id);
+        });
 
       const containers = range
         .interval('30s')

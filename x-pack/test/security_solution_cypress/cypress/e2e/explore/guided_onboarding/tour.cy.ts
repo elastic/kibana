@@ -6,7 +6,6 @@
  */
 import { AlertsCasesTourSteps } from '@kbn/security-solution-plugin/public/common/components/guided_onboarding_tour/tour_config';
 
-import { disableExpandableFlyout } from '../../../tasks/api_calls/kibana_advanced_settings';
 import { navigateFromHeaderTo } from '../../../tasks/security_header';
 import { ALERTS, TIMELINES } from '../../../screens/security_header';
 import { closeAlertFlyout, expandFirstAlert } from '../../../tasks/alerts';
@@ -35,7 +34,6 @@ describe('Guided onboarding tour', { tags: ['@ess'] }, () => {
     deleteAlertsAndRules();
     createRule(getNewRule({ query: 'user.name:*' }));
     login();
-    disableExpandableFlyout();
     startAlertsCasesTour();
     visit(ALERTS_URL);
     waitForAlertsToPopulate();

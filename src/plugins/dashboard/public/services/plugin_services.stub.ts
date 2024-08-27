@@ -44,8 +44,12 @@ import { savedObjectsManagementServiceFactory } from './saved_objects_management
 import { contentManagementServiceFactory } from './content_management/content_management_service.stub';
 import { serverlessServiceFactory } from './serverless/serverless_service.stub';
 import { userProfileServiceFactory } from './user_profile/user_profile_service.stub';
+import { observabilityAIAssistantServiceStubFactory } from './observability_ai_assistant/observability_ai_assistant_service.stub';
 import { noDataPageServiceFactory } from './no_data_page/no_data_page_service.stub';
 import { uiActionsServiceFactory } from './ui_actions/ui_actions_service.stub';
+import { dashboardRecentlyAccessedServiceFactory } from './dashboard_recently_accessed/dashboard_recently_accessed.stub';
+import { dashboardFavoritesServiceFactory } from './dashboard_favorites/dashboard_favorites_service.stub';
+import { dashboardContentInsightsServiceFactory } from './dashboard_content_insights/dashboard_content_insights.stub';
 
 export const providers: PluginServiceProviders<DashboardServices> = {
   dashboardContentManagement: new PluginServiceProvider(dashboardContentManagementServiceFactory),
@@ -80,6 +84,10 @@ export const providers: PluginServiceProviders<DashboardServices> = {
   noDataPage: new PluginServiceProvider(noDataPageServiceFactory),
   uiActions: new PluginServiceProvider(uiActionsServiceFactory),
   userProfile: new PluginServiceProvider(userProfileServiceFactory),
+  observabilityAIAssistant: new PluginServiceProvider(observabilityAIAssistantServiceStubFactory),
+  dashboardRecentlyAccessed: new PluginServiceProvider(dashboardRecentlyAccessedServiceFactory),
+  dashboardContentInsights: new PluginServiceProvider(dashboardContentInsightsServiceFactory),
+  dashboardFavorites: new PluginServiceProvider(dashboardFavoritesServiceFactory),
 };
 
 export const registry = new PluginServiceRegistry<DashboardServices>(providers);

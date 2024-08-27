@@ -58,6 +58,7 @@ const getComponentFromEmbeddable = async (
 };
 
 /**
+ * @deprecated
  * Loads and renders a legacy embeddable.
  *
  * Ancestry chain must use 'key' attribute to reset DOM and state when embeddable changes

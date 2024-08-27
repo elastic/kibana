@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import {
-  Aggregators,
-  Comparator,
-} from '@kbn/observability-plugin/common/custom_threshold_rule/types';
-
+import { Aggregators } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 export const scenario3 = {
   dataView: {
     indexPattern: 'high-cardinality-data-fake_hosts.fake_hosts-*',
@@ -22,7 +19,7 @@ export const scenario3 = {
     params: {
       criteria: [
         {
-          comparator: Comparator.LT,
+          comparator: COMPARATORS.LESS_THAN,
           threshold: [5],
           timeSize: 1,
           timeUnit: 'm',

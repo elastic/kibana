@@ -9,9 +9,9 @@ import { MonitoringCollectionPlugin } from './plugin';
 
 describe('monitoring_collection plugin', () => {
   describe('setup()', () => {
-    let context: ReturnType<typeof coreMock['createPluginInitializerContext']>;
+    let context: ReturnType<(typeof coreMock)['createPluginInitializerContext']>;
     let plugin: MonitoringCollectionPlugin;
-    let coreSetup: ReturnType<typeof coreMock['createSetup']>;
+    let coreSetup: ReturnType<(typeof coreMock)['createSetup']>;
 
     beforeEach(() => {
       context = coreMock.createPluginInitializerContext();

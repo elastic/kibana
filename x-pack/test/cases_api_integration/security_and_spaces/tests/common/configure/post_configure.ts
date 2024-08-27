@@ -6,7 +6,11 @@
  */
 
 import expect from '@kbn/expect';
-import { ConnectorTypes, CustomFieldTypes } from '@kbn/cases-plugin/common/types/domain';
+import {
+  CaseSeverity,
+  ConnectorTypes,
+  CustomFieldTypes,
+} from '@kbn/cases-plugin/common/types/domain';
 import { MAX_CUSTOM_FIELD_LABEL_LENGTH } from '@kbn/cases-plugin/common/constants';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
@@ -96,6 +100,113 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const data = removeServerGeneratedPropertiesFromSavedObject(configuration);
       expect(data).to.eql(getConfigurationOutput(false, customFields));
+    });
+
+    it('should create a configuration with templates', async () => {
+      const customFields = [
+        {
+          key: 'text_field_1',
+          type: CustomFieldTypes.TEXT,
+          label: 'Text field 1',
+          required: true,
+        },
+        {
+          key: 'toggle_field_1',
+          label: '#2',
+          type: CustomFieldTypes.TOGGLE,
+          required: false,
+        },
+      ];
+
+      const templates = [
+        {
+          key: 'test_template_1',
+          name: 'First test template',
+          description: 'This is a first test template',
+          caseFields: {
+            customFields: [
+              {
+                key: 'text_field_1',
+                type: CustomFieldTypes.TEXT,
+                value: null,
+              },
+              {
+                key: 'toggle_field_1',
+                value: false,
+                type: CustomFieldTypes.TOGGLE,
+              },
+            ],
+          },
+        },
+        {
+          key: 'test_template_2',
+          name: 'Second test template',
+          description: 'This is a second test template',
+          tags: ['foo', 'bar'],
+          caseFields: {
+            title: 'Case with sample template 2',
+            description: 'case desc',
+            severity: CaseSeverity.LOW,
+            category: null,
+            tags: ['sample-4'],
+            assignees: [],
+            customFields: [
+              {
+                key: 'text_field_1',
+                type: CustomFieldTypes.TEXT,
+                value: 'this is a text field value',
+              },
+              {
+                key: 'toggle_field_1',
+                value: true,
+                type: CustomFieldTypes.TOGGLE,
+              },
+            ],
+            connector: {
+              id: 'none',
+              name: 'My Connector',
+              type: ConnectorTypes.none,
+              fields: null,
+            },
+          },
+        },
+        {
+          key: 'test_template_3',
+          name: 'Third test template',
+          description: 'This is a third test template',
+          tags: ['foobar'],
+          caseFields: {
+            title: 'Case with sample template 3',
+            tags: ['sample-3'],
+            customFields: [
+              {
+                key: 'text_field_1',
+                type: CustomFieldTypes.TEXT,
+                value: null,
+              },
+              {
+                key: 'toggle_field_1',
+                value: false,
+                type: CustomFieldTypes.TOGGLE,
+              },
+            ],
+          },
+        },
+      ];
+
+      const configuration = await createConfiguration(
+        supertest,
+        getConfigurationRequest({
+          overrides: { customFields, templates },
+        })
+      );
+
+      const data = removeServerGeneratedPropertiesFromSavedObject(configuration);
+      expect(data).to.eql({
+        ...getConfigurationOutput(false),
+        customFields,
+        templates,
+      });
     });
 
     it('should keep only the latest configuration', async () => {
@@ -403,6 +514,90 @@ export default ({ getService }: FtrProviderContext): void => {
                   label: '#2',
                   type: CustomFieldTypes.TEXT,
                   required: false,
+                },
+              ],
+            },
+          }),
+          400
+        );
+      });
+
+      it('should not create a configuration with duplicated template keys', async () => {
+        await createConfiguration(
+          supertest,
+          getConfigurationRequest({
+            overrides: {
+              templates: [
+                {
+                  key: 'test_template_1',
+                  name: 'First test template',
+                  description: 'This is a first test template',
+                  caseFields: null,
+                },
+                {
+                  key: 'test_template_1',
+                  name: 'Third test template',
+                  description: 'This is a third test template',
+                  caseFields: {
+                    title: 'Case with sample template 3',
+                    tags: ['sample-3'],
+                  },
+                },
+              ],
+            },
+          }),
+          400
+        );
+      });
+
+      it("should not create a configuration when templates have custom fields and custom fields don't exist in the configuration", async () => {
+        await createConfiguration(
+          supertest,
+          getConfigurationRequest({
+            overrides: {
+              customFields: [],
+              templates: [
+                {
+                  key: 'test_template_1',
+                  name: 'First test template',
+                  description: 'This is a first test template',
+                  caseFields: {
+                    customFields: [
+                      {
+                        key: 'random_key',
+                        type: CustomFieldTypes.TEXT,
+                        value: 'Test',
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          }),
+          400
+        );
+      });
+
+      it('should not create a configuration when templates do not have custom fields and custom fields exist in the configuration', async () => {
+        await createConfiguration(
+          supertest,
+          getConfigurationRequest({
+            overrides: {
+              customFields: [
+                {
+                  key: 'random_key',
+                  type: CustomFieldTypes.TEXT,
+                  label: 'New custom field',
+                  defaultValue: 'Test',
+                  required: true,
+                },
+              ],
+              templates: [
+                {
+                  key: 'test_template_1',
+                  name: 'First test template',
+                  description: 'This is a first test template',
+                  caseFields: null,
                 },
               ],
             },

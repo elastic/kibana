@@ -16,12 +16,12 @@ import {
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
-
 import type {
   SecuredSubFeature,
   SubFeaturePrivilege,
   SubFeaturePrivilegeGroup,
-} from '../../../../model';
+} from '@kbn/security-role-management-model';
+
 import { NO_PRIVILEGE_VALUE } from '../constants';
 import type { PrivilegeFormCalculator } from '../privilege_form_calculator';
 
@@ -36,9 +36,7 @@ interface Props {
 }
 
 export const SubFeatureForm = (props: Props) => {
-  const groupsWithPrivileges = props.subFeature
-    .getPrivilegeGroups()
-    .filter((group) => group.privileges.length > 0);
+  const groupsWithPrivileges = props.subFeature.getPrivilegeGroups();
 
   const getTooltip = () => {
     if (!props.subFeature.privilegesTooltip) {
@@ -132,7 +130,6 @@ export const SubFeatureForm = (props: Props) => {
               }}
               checked={isGranted}
               disabled={props.disabled}
-              compressed={true}
             />
           );
         })}

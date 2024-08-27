@@ -152,7 +152,7 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({
             error: i18n.translate(
               'xpack.snapshotRestore.policyDetails.policyNotFoundErrorMessage',
               {
-                defaultMessage: `The policy '{name}' does not exist.`,
+                defaultMessage: `The policy ''{name}'' does not exist.`,
                 values: {
                   name: policyName,
                 },
@@ -332,7 +332,7 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({
               >
                 <FormattedMessage
                   id="xpack.snapshotRestore.policyDetails.inProgressSnapshotLinkText"
-                  defaultMessage="'{snapshotName}' in progress"
+                  defaultMessage="''{snapshotName}'' in progress"
                   values={{ snapshotName: policyDetails.policy.inProgress.snapshotName }}
                 />
               </EuiLink>

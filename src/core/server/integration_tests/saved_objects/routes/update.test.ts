@@ -67,7 +67,8 @@ describe('PUT /api/saved_objects/{type}/{id?}', () => {
     loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation();
 
     const config = setupConfig();
-    registerUpdateRoute(router, { config, coreUsageData, logger });
+    const access = 'public';
+    registerUpdateRoute(router, { config, coreUsageData, logger, access });
 
     await server.start();
   });

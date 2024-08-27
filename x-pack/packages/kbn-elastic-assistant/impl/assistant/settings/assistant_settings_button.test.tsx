@@ -11,7 +11,7 @@ import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/c
 
 import { AssistantSettingsButton } from './assistant_settings_button';
 import { welcomeConvo } from '../../mock/conversation';
-import { CONVERSATIONS_TAB } from './assistant_settings';
+import { CONVERSATIONS_TAB } from './const';
 
 const setIsSettingsModalVisible = jest.fn();
 const onConversationSelected = jest.fn();
@@ -22,10 +22,10 @@ const testProps = {
   isSettingsModalVisible: false,
   selectedConversation: welcomeConvo,
   setIsSettingsModalVisible,
-  isFlyoutMode: false,
   onConversationSelected,
   conversations: {},
-  refetchConversationsState: jest.fn(),
+  conversationsLoaded: true,
+  refetchCurrentUserConversations: jest.fn(),
   anonymizationFields: { total: 0, page: 1, perPage: 1000, data: [] },
   refetchAnonymizationFieldsResults: jest.fn(),
 };

@@ -7,53 +7,31 @@
  */
 
 import React from 'react';
-import { useEuiTheme } from '@elastic/eui';
-import { LogFlyoutDoc } from '@kbn/discover-utils/src';
+import { LogFlyoutDoc, LogLevelBadge } from '@kbn/discover-utils/src';
 import * as constants from '../../../../common/data_types/logs/constants';
-import { ChipWithPopover } from './popover_chip';
-
-const LEVEL_DICT = {
-  error: 'danger',
-  warn: 'warning',
-  info: 'primary',
-  debug: 'accent',
-} as const;
+import { ChipPopover } from './popover_chip';
 
 interface LogLevelProps {
   level: LogFlyoutDoc['log.level'];
-  dataTestSubj?: string;
-  renderInFlyout?: boolean;
 }
 
-export function LogLevel({ level, dataTestSubj, renderInFlyout = false }: LogLevelProps) {
-  const { euiTheme } = useEuiTheme();
+export function LogLevel({ level }: LogLevelProps) {
   if (!level) return null;
-  const levelColor = LEVEL_DICT[level as keyof typeof LEVEL_DICT]
-    ? euiTheme.colors[LEVEL_DICT[level as keyof typeof LEVEL_DICT]]
-    : null;
-
-  const truncatedLogLevel = level.length > 10 ? level.substring(0, 10) + '...' : level;
-
-  if (renderInFlyout) {
-    return (
-      <ChipWithPopover
-        property={constants.LOG_LEVEL_FIELD}
-        text={truncatedLogLevel}
-        borderColor={levelColor}
-        style={{ width: 'none' }}
-        dataTestSubj={dataTestSubj}
-        shouldRenderPopover={!renderInFlyout}
-      />
-    );
-  }
 
   return (
-    <ChipWithPopover
+    <ChipPopover
       property={constants.LOG_LEVEL_FIELD}
       text={level}
-      rightSideIcon="arrowDown"
-      borderColor={levelColor}
-      style={{ width: '80px', marginTop: '-3px' }}
+      renderChip={({ handleChipClick, handleChipClickAriaLabel, chipCss }) => (
+        <LogLevelBadge
+          logLevel={level}
+          iconType="arrowDown"
+          iconSide="right"
+          onClick={handleChipClick}
+          onClickAriaLabel={handleChipClickAriaLabel}
+          css={[chipCss, { width: '80px', paddingInline: '4px' }]}
+        />
+      )}
     />
   );
 }

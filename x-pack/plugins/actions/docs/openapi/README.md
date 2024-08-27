@@ -13,15 +13,7 @@ A guide about the openApi specification can be found at [https://swagger.io/docs
 
 ## Tools
 
-It is possible to validate the docs before bundling them with the following
-command in the `x-pack/plugins/actions/docs/openapi/` folder:
-
-```
-npx swagger-cli validate entrypoint.yaml
-npx swagger-cli validate entrypoint_serverless.yaml
-```
-
-Then you can generate the `bundled` files by running the following commands:
+You can generate the `bundled` files by running the following commands:
 
 ```
 npx @redocly/cli bundle entrypoint.yaml --output bundled.yaml --ext yaml
@@ -30,9 +22,4 @@ npx @redocly/cli bundle entrypoint_serverless.yaml --output bundled_serverless.y
 npx @redocly/cli bundle entrypoint_serverless.yaml --output bundled_serverless.json --ext json
 ```
 
-You can run additional linting with the following command:
-
-```
-npx @redocly/cli lint bundled.json
-npx @redocly/cli lint bundled_serverless.json
-```
+Then join these files with the rest of the Kibana APIs per `oas_docs/README.md`

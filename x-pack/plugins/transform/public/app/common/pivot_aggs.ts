@@ -95,7 +95,7 @@ export const SORT_DIRECTION = {
   DESC: 'desc',
 } as const;
 
-export type SortDirection = typeof SORT_DIRECTION[keyof typeof SORT_DIRECTION];
+export type SortDirection = (typeof SORT_DIRECTION)[keyof typeof SORT_DIRECTION];
 
 export const SORT_MODE = {
   MIN: 'min',
@@ -119,9 +119,9 @@ const SORT_NUMERIC_FIELD_TYPES = [
   ES_FIELD_TYPES.DATE_NANOS,
 ] as const;
 
-export type SortNumericFieldType = typeof SORT_NUMERIC_FIELD_TYPES[number];
+export type SortNumericFieldType = (typeof SORT_NUMERIC_FIELD_TYPES)[number];
 
-export type SortMode = typeof SORT_MODE[keyof typeof SORT_MODE];
+export type SortMode = (typeof SORT_MODE)[keyof typeof SORT_MODE];
 
 export const TOP_METRICS_SPECIAL_SORT_FIELDS = {
   _SCORE: '_score',

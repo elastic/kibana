@@ -65,6 +65,7 @@ describe('Editor actions provider', () => {
       onDidScrollChange: jest.fn(),
       onDidChangeCursorSelection: jest.fn(),
       onDidContentSizeChange: jest.fn(),
+      onKeyUp: jest.fn(),
       getSelection: jest.fn(),
       getPosition: jest.fn(),
       getTopForLineNumber: jest.fn(),
@@ -93,7 +94,7 @@ describe('Editor actions provider', () => {
 
     const setEditorActionsCssMock = jest.fn();
 
-    editorActionsProvider = new MonacoEditorActionsProvider(editor, setEditorActionsCssMock);
+    editorActionsProvider = new MonacoEditorActionsProvider(editor, setEditorActionsCssMock, true);
   });
 
   describe('getCurl', () => {

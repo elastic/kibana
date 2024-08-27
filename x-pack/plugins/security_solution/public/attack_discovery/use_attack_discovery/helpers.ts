@@ -56,14 +56,13 @@ const getAzureApiVersionParameter = (url: string): string | undefined => {
 };
 
 export const getRequestBody = ({
-  actionTypeId,
   alertsIndexPattern,
   anonymizationFields,
-  connectorId,
+  genAiConfig,
   knowledgeBase,
+  selectedConnector,
   traceOptions,
 }: {
-  actionTypeId: string;
   alertsIndexPattern: string | undefined;
   anonymizationFields: {
     page: number;
@@ -82,14 +81,13 @@ export const getRequestBody = ({
       namespace?: string | undefined;
     }>;
   };
-  connectorId: string | undefined;
+  genAiConfig?: GenAiConfig;
   knowledgeBase: KnowledgeBaseConfig;
+  selectedConnector?: ActionConnector;
   traceOptions: TraceOptions;
 }): AttackDiscoveryPostRequestBody => ({
-  actionTypeId,
   alertsIndexPattern: alertsIndexPattern ?? '',
   anonymizationFields: anonymizationFields?.data ?? [],
-  connectorId: connectorId ?? '',
   langSmithProject: isEmpty(traceOptions?.langSmithProject)
     ? undefined
     : traceOptions?.langSmithProject,
@@ -99,4 +97,10 @@ export const getRequestBody = ({
   size: knowledgeBase.latestAlerts,
   replacements: {}, // no need to re-use replacements in the current implementation
   subAction: 'invokeAI', // non-streaming
+  apiConfig: {
+    connectorId: selectedConnector?.id ?? '',
+    actionTypeId: selectedConnector?.actionTypeId ?? '',
+    provider: genAiConfig?.apiProvider,
+    model: genAiConfig?.defaultModel,
+  },
 });

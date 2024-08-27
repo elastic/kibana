@@ -26,7 +26,9 @@ export const listTypesRoute = (
       path: `${BASE_ACTION_API_PATH}/connector_types`,
       options: {
         access: 'public',
-        description: `Get connector types`,
+        summary: `Get connector types`,
+        description: 'You do not need any Kibana feature privileges to run this API.',
+        tags: ['oas-tag:connectors'],
       },
       validate: {
         query: connectorTypesQuerySchemaV1,

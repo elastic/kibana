@@ -16,8 +16,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
   const es = getService('es');
   const esArchiver = getService('esArchiver');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/154358
-  describe.skip('migrations', () => {
+  describe('migrations', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/action_task_params');
     });

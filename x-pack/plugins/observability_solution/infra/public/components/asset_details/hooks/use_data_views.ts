@@ -9,15 +9,14 @@ import useAsync from 'react-use/lib/useAsync';
 import createContainer from 'constate';
 import { i18n } from '@kbn/i18n';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
+import { useMetricsDataViewContext } from '../../../containers/metrics_source';
 import { useLogViewReference } from '../../../hooks/use_log_view_reference';
-import { useDataView } from '../../../hooks/use_data_view';
 import { useAssetDetailsRenderPropsContext } from './use_asset_details_render_props';
 
-const useDataViews = ({ metricAlias }: { metricAlias: string }) => {
+const useDataViews = () => {
   const { asset } = useAssetDetailsRenderPropsContext();
-  const { dataView: metricsDataView, loading: metricsDataViewLoading } = useDataView({
-    index: metricAlias,
-  });
+  const { metricsView, loading: metricsDataViewLoading } = useMetricsDataViewContext();
+
   const {
     logViewReference,
     getLogsDataView,
@@ -35,11 +34,11 @@ const useDataViews = ({ metricAlias }: { metricAlias: string }) => {
 
   const { value: logsDataView, loading: logsDataViewLoading } = useAsync(
     () => getLogsDataView(logViewReference),
-    [logViewReference]
+    [logViewReference, getLogsDataView]
   );
 
   return {
-    metrics: { dataView: metricsDataView, loading: metricsDataViewLoading },
+    metrics: { dataView: metricsView?.dataViewReference, loading: metricsDataViewLoading },
     logs: {
       dataView: logsDataView,
       reference: logViewReference,

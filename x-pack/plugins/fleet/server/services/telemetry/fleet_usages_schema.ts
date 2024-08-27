@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RootSchema } from '@kbn/analytics-client';
+import type { RootSchema } from '@kbn/core/server';
 
 export const fleetAgentsSchema: RootSchema<any> = {
   agents_per_version: {
@@ -346,6 +346,20 @@ export const fleetUsagesSchema: RootSchema<any> = {
           _meta: { description: 'Output types of agent policies' },
         },
       },
+      count_with_global_data_tags: {
+        type: 'long',
+        _meta: {
+          description: 'Number of agent policies using global data tags',
+        },
+      },
+      avg_number_global_data_tags_per_policy: {
+        type: 'long',
+        _meta: {
+          description:
+            'Average number of global data tags defined per agent policy (accross policies using global data tags)',
+          optional: true,
+        },
+      },
     },
   },
   agent_checkin_status: {
@@ -432,5 +446,52 @@ export const fleetUsagesSchema: RootSchema<any> = {
   deployment_id: {
     type: 'keyword',
     _meta: { description: 'id of the deployment', optional: true },
+  },
+};
+
+export const fleetIntegrationsSchema: RootSchema<any> = {
+  total_integration_policies: {
+    type: 'long',
+    _meta: {
+      description: 'Count of total integration policies in this kibana',
+    },
+  },
+  shared_integration_policies: {
+    type: 'long',
+    _meta: {
+      description: 'Count of integration policies shared across agent policies in this kibana',
+    },
+  },
+  shared_integrations: {
+    properties: {
+      name: {
+        type: 'keyword',
+        _meta: { description: 'Name of the integration policy' },
+      },
+      pkg_name: {
+        type: 'keyword',
+        _meta: {
+          description: 'Name of the integration package installed on the integration policy',
+        },
+      },
+      pkg_version: {
+        type: 'keyword',
+        _meta: {
+          description: 'Version of the integration package installed on the integration policy',
+        },
+      },
+      shared_by_agent_policies: {
+        type: 'long',
+        _meta: {
+          description: 'Count of agent policies sharing the integration policy',
+        },
+      },
+      agents: {
+        type: 'long',
+        _meta: {
+          description: 'Number of agents installed on the integration policy',
+        },
+      },
+    },
   },
 };

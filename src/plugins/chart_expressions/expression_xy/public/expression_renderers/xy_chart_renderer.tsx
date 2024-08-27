@@ -60,9 +60,9 @@ interface XyChartRendererDeps {
   getStartDeps: GetStartDepsFn;
 }
 
-const extractCounterEvents = (
+export const extractCounterEvents = (
   originatingApp: string,
-  { layers, yAxisConfigs }: XYChartProps['args'],
+  { annotations, layers, yAxisConfigs }: XYChartProps['args'],
   canNavigateToLens: boolean,
   services: {
     getDataLayers: typeof getDataLayers;
@@ -77,7 +77,7 @@ const extractCounterEvents = (
         ? `${dataLayer.isHorizontal ? 'horizontal_bar' : 'vertical_bar'}`
         : dataLayer.seriesType;
 
-    const byTypes = layers.reduce(
+    const byTypes = layers.concat(annotations?.layers || []).reduce(
       (acc, item) => {
         if (
           !acc.mixedXY &&

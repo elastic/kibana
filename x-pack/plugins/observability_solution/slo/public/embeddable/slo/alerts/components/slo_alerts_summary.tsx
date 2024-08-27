@@ -12,7 +12,7 @@ import { calculateTimeRangeBucketSize } from '@kbn/observability-plugin/public';
 import { observabilityAlertFeatureIds } from '@kbn/observability-plugin/common';
 import { useSloAlertsQuery } from './slo_alerts_table';
 
-import { SloEmbeddableDeps } from '../slo_alerts_embeddable';
+import { SloEmbeddableDeps } from '../types';
 import { SloItem } from '../types';
 
 const DEFAULT_INTERVAL = '60s';
@@ -50,17 +50,13 @@ export function SloAlertsSummary({
       ),
     [timeRange.from, timeRange.to, timeBuckets]
   );
-  const alertSummaryTimeRange = useMemo(
-    () =>
-      getAlertSummaryTimeRange(
-        {
-          from: timeRange.from,
-          to: timeRange.to,
-        },
-        bucketSize?.intervalString ?? DEFAULT_INTERVAL,
-        bucketSize?.dateFormat ?? DEFAULT_DATE_FORMAT
-      ),
-    [timeRange.from, timeRange.to, bucketSize]
+  const alertSummaryTimeRange = getAlertSummaryTimeRange(
+    {
+      from: timeRange.from,
+      to: timeRange.to,
+    },
+    bucketSize?.intervalString ?? DEFAULT_INTERVAL,
+    bucketSize?.dateFormat ?? DEFAULT_DATE_FORMAT
   );
 
   return (

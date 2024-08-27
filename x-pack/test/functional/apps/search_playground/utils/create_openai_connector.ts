@@ -6,20 +6,23 @@
  */
 
 import type SuperTest from 'supertest';
+import { LlmProxy } from '../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
 
 export async function createOpenAIConnector({
   supertest,
   requestHeader = {},
   apiKeyHeader = {},
+  proxy,
 }: {
   supertest: SuperTest.Agent;
   requestHeader?: Record<string, string>;
   apiKeyHeader?: Record<string, string>;
+  proxy: LlmProxy;
 }): Promise<() => Promise<void>> {
   const config = {
     apiProvider: 'OpenAI',
     defaultModel: 'gpt-4',
-    apiUrl: 'http://localhost:3002',
+    apiUrl: `http://localhost:${proxy.getPort()}`,
   };
 
   const connector: { id: string } | undefined = (
@@ -28,7 +31,7 @@ export async function createOpenAIConnector({
       .set(requestHeader)
       .set(apiKeyHeader)
       .send({
-        name: 'test Open AI',
+        name: 'myConnector',
         connector_type_id: '.gen-ai',
         config,
         secrets: {

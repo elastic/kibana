@@ -9,13 +9,15 @@ import { useQuery } from '@tanstack/react-query';
 import { useKibana } from './use_kibana';
 import { APIRoutes, IndicesQuerySourceFields } from '../types';
 
+const initialData = {};
+
 export const useIndicesFields = (indices: string[] = []) => {
   const { services } = useKibana();
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isFetching } = useQuery<IndicesQuerySourceFields>({
     enabled: indices.length > 0,
     queryKey: ['fields', indices.toString()],
-    initialData: {},
+    initialData,
     queryFn: async () => {
       const response = await services.http.post<IndicesQuerySourceFields>(
         APIRoutes.POST_QUERY_SOURCE_FIELDS,
@@ -30,5 +32,5 @@ export const useIndicesFields = (indices: string[] = []) => {
     },
   });
 
-  return { fields: data!, isLoading };
+  return { fields: data, isLoading: isLoading || isFetching };
 };

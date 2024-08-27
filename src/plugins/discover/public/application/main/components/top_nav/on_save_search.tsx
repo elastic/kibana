@@ -36,7 +36,7 @@ async function saveDataSource({
     if (id) {
       services.toastNotifications.addSuccess({
         title: i18n.translate('discover.notifications.savedSearchTitle', {
-          defaultMessage: `Search '{savedSearchTitle}' was saved`,
+          defaultMessage: `Search ''{savedSearchTitle}'' was saved`,
           values: {
             savedSearchTitle: savedSearch.title,
           },
@@ -57,7 +57,7 @@ async function saveDataSource({
   function onError(error: Error) {
     services.toastNotifications.addDanger({
       title: i18n.translate('discover.notifications.notSavedSearchTitle', {
-        defaultMessage: `Search '{savedSearchTitle}' was not saved.`,
+        defaultMessage: `Search ''{savedSearchTitle}'' was not saved.`,
         values: {
           savedSearchTitle: savedSearch.title,
         },

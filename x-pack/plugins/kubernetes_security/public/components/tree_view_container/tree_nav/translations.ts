@@ -9,27 +9,27 @@ import { i18n } from '@kbn/i18n';
 
 const TREE_NAV_CLUSTER = (isPlural = false) =>
   i18n.translate('xpack.kubernetesSecurity.treeNav.cluster', {
-    defaultMessage: '{isPlural, plural, =true {clusters} other {cluster}}',
+    defaultMessage: '{isPlural, select, true {clusters} other {cluster}}',
     values: { isPlural },
   });
 const TREE_NAV_NAMESPACE = (isPlural = false) =>
   i18n.translate('xpack.kubernetesSecurity.treeNav.namespace', {
-    defaultMessage: '{isPlural, plural, =true {namespaces} other {namespace}}',
+    defaultMessage: '{isPlural, select, true {namespaces} other {namespace}}',
     values: { isPlural },
   });
 const TREE_NAV_POD = (isPlural = false) =>
   i18n.translate('xpack.kubernetesSecurity.treeNav.pod', {
-    defaultMessage: '{isPlural, plural, =true {pods} other {pod}}',
+    defaultMessage: '{isPlural, select, true {pods} other {pod}}',
     values: { isPlural },
   });
 const TREE_NAV_CONTAINER_IMAGE = (isPlural = false) =>
   i18n.translate('xpack.kubernetesSecurity.treeNav.containerImage', {
-    defaultMessage: '{isPlural, plural, =true {container images} other { container image}}',
+    defaultMessage: '{isPlural, select, true {container images} other { container image}}',
     values: { isPlural },
   });
 const TREE_NAV_NODE = (isPlural = false) =>
   i18n.translate('xpack.kubernetesSecurity.treeNav.node', {
-    defaultMessage: '{isPlural, plural, =true {nodes} other {node}}',
+    defaultMessage: '{isPlural, select, true {nodes} other {node}}',
     values: { isPlural },
   });
 

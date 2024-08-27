@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AggregationsValueCountAggregate } from '@elastic/elasticsearch/lib/api/types';
 import {
   AggregationsSumAggregate,
   AggregationsTopHitsAggregate,
@@ -13,13 +14,16 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import {
   ALL_VALUE,
   calendarAlignedTimeWindowSchema,
+  Duration,
+  DurationUnit,
   occurrencesBudgetingMethodSchema,
   timeslicesBudgetingMethodSchema,
 } from '@kbn/slo-schema';
 import { SLO_DESTINATION_INDEX_PATTERN } from '../../common/constants';
-import { Groupings, Meta, SLODefinition, Summary } from '../domain/models';
+import { DateRange, Groupings, Meta, SLODefinition, Summary } from '../domain/models';
 import { computeSLI, computeSummaryStatus, toErrorBudget } from '../domain/services';
 import { toDateRange } from '../domain/services/date_range';
+import { BurnRatesClient } from './burn_rates_client';
 import { getFlattenedGroupings } from './utils';
 import { computeTotalSlicesFromDateRange } from './utils/compute_total_slices_from_date_range';
 
@@ -44,7 +48,7 @@ export interface SummaryClient {
 }
 
 export class DefaultSummaryClient implements SummaryClient {
-  constructor(private esClient: ElasticsearchClient) {}
+  constructor(private esClient: ElasticsearchClient, private burnRatesClient: BurnRatesClient) {}
 
   async computeSummary({ slo, instanceId, remoteName }: Params): Promise<SummaryResult> {
     const dateRange = toDateRange(slo.timeWindow);
@@ -103,45 +107,25 @@ export class DefaultSummaryClient implements SummaryClient {
             },
           },
         }),
-        ...(timeslicesBudgetingMethodSchema.is(slo.budgetingMethod) && {
-          good: {
-            sum: { field: 'slo.isGoodSlice' },
-          },
-          total: {
-            value_count: { field: 'slo.isGoodSlice' },
-          },
-        }),
-        ...(occurrencesBudgetingMethodSchema.is(slo.budgetingMethod) && {
-          good: { sum: { field: 'slo.numerator' } },
-          total: { sum: { field: 'slo.denominator' } },
-        }),
+        ...buildAggs(slo),
       },
     });
 
-    const good = result.aggregations?.good?.value ?? 0;
-    const total = result.aggregations?.total?.value ?? 0;
     const source = result.aggregations?.last_doc?.hits?.hits?.[0]?._source;
     const groupings = source?.slo?.groupings;
 
-    let sliValue;
-    if (timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)) {
-      const totalSlices = computeTotalSlicesFromDateRange(
-        dateRange,
-        slo.objective.timesliceWindow!
-      );
+    const sliValue = computeSliValue(slo, dateRange, result.aggregations);
+    const errorBudget = computeErrorBudget(slo, sliValue);
 
-      sliValue = computeSLI(good, total, totalSlices);
-    } else {
-      sliValue = computeSLI(good, total);
-    }
-
-    const initialErrorBudget = 1 - slo.objective.target;
-    const consumedErrorBudget = sliValue < 0 ? 0 : (1 - sliValue) / initialErrorBudget;
-    const errorBudget = toErrorBudget(
-      initialErrorBudget,
-      consumedErrorBudget,
-      calendarAlignedTimeWindowSchema.is(slo.timeWindow) &&
-        occurrencesBudgetingMethodSchema.is(slo.budgetingMethod)
+    const burnRates = await this.burnRatesClient.calculate(
+      slo,
+      instanceId ?? ALL_VALUE,
+      [
+        { name: '5m', duration: new Duration(5, DurationUnit.Minute) },
+        { name: '1h', duration: new Duration(1, DurationUnit.Hour) },
+        { name: '1d', duration: new Duration(1, DurationUnit.Day) },
+      ],
+      remoteName
     );
 
     return {
@@ -149,11 +133,26 @@ export class DefaultSummaryClient implements SummaryClient {
         sliValue,
         errorBudget,
         status: computeSummaryStatus(slo.objective, sliValue, errorBudget),
+        fiveMinuteBurnRate: getBurnRate('5m', burnRates),
+        oneHourBurnRate: getBurnRate('1h', burnRates),
+        oneDayBurnRate: getBurnRate('1d', burnRates),
       },
       groupings: groupings ? getFlattenedGroupings({ groupBy: slo.groupBy, groupings }) : {},
       meta: getMetaFields(slo, source ?? {}),
     };
   }
+}
+
+function buildAggs(slo: SLODefinition) {
+  return timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)
+    ? {
+        good: { sum: { field: 'slo.isGoodSlice' } },
+        total: { value_count: { field: 'slo.isGoodSlice' } },
+      }
+    : {
+        good: { sum: { field: 'slo.numerator' } },
+        total: { sum: { field: 'slo.denominator' } },
+      };
 }
 
 function getMetaFields(
@@ -175,4 +174,42 @@ function getMetaFields(
     default:
       return {};
   }
+}
+
+interface BurnRateBucket {
+  good: AggregationsSumAggregate;
+  total: AggregationsSumAggregate | AggregationsValueCountAggregate;
+}
+
+function computeSliValue(
+  slo: SLODefinition,
+  dateRange: DateRange,
+  bucket: BurnRateBucket | undefined
+) {
+  const good = bucket?.good?.value ?? 0;
+  const total = bucket?.total?.value ?? 0;
+
+  if (timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)) {
+    const totalSlices = computeTotalSlicesFromDateRange(dateRange, slo.objective.timesliceWindow!);
+
+    return computeSLI(good, total, totalSlices);
+  }
+
+  return computeSLI(good, total);
+}
+
+function computeErrorBudget(slo: SLODefinition, sliValue: number) {
+  const initialErrorBudget = 1 - slo.objective.target;
+  const consumedErrorBudget = sliValue < 0 ? 0 : (1 - sliValue) / initialErrorBudget;
+
+  return toErrorBudget(
+    initialErrorBudget,
+    consumedErrorBudget,
+    calendarAlignedTimeWindowSchema.is(slo.timeWindow) &&
+      occurrencesBudgetingMethodSchema.is(slo.budgetingMethod)
+  );
+}
+
+function getBurnRate(burnRateWindow: string, burnRates: Array<{ name: string; burnRate: number }>) {
+  return burnRates.find(({ name }) => name === burnRateWindow)?.burnRate ?? 0;
 }

@@ -77,7 +77,7 @@ export class UnlinkFromLibraryAction implements Action<EmbeddableApiContext> {
       return api.canUnlinkFromLibrary();
     } else if (apiHasInPlaceLibraryTransforms(api)) {
       const canUnLink = api.canUnlinkFromLibrary ? await api.canUnlinkFromLibrary() : true;
-      return canUnLink && api.libraryId$.value !== undefined;
+      return canUnLink && Boolean(api.libraryId$.value);
     }
     throw new IncompatibleActionError();
   }

@@ -44,6 +44,7 @@ import { reactRouterNavigate, useDarkMode } from '@kbn/kibana-react-plugin/publi
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { Cluster } from '@kbn/remote-clusters-plugin/public';
 import { REMOTE_CLUSTERS_PATH } from '@kbn/remote-clusters-plugin/public';
+import { KibanaPrivileges } from '@kbn/security-role-management-model';
 import type { Space, SpacesApiUi } from '@kbn/spaces-plugin/public';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
@@ -72,7 +73,6 @@ import { useCapabilities } from '../../../components/use_capabilities';
 import type { CheckSecurityFeaturesResponse } from '../../security_features';
 import type { UserAPIClient } from '../../users';
 import type { IndicesAPIClient } from '../indices_api_client';
-import { KibanaPrivileges } from '../model';
 import type { PrivilegesAPIClient } from '../privileges_api_client';
 import type { RolesAPIClient } from '../roles_api_client';
 
@@ -211,7 +211,7 @@ function useRole(
       : Promise.resolve({
           name: '',
           description: '',
-          elasticsearch: { cluster: [], indices: [], run_as: [], remote_cluster: [] },
+          elasticsearch: { cluster: [], indices: [], run_as: [] },
           kibana: [],
           _unrecognized_applications: [],
         } as Role);
@@ -308,7 +308,7 @@ function useFeatures(
         fatalErrors.add(err);
       })
       .then((retrievedFeatures) => {
-        setFeatures(retrievedFeatures);
+        setFeatures(retrievedFeatures?.filter((feature) => !feature.hidden) ?? null);
       });
   }, [fatalErrors, getFeatures]);
 
@@ -700,7 +700,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
         notifications.toasts.addSuccess({
           title: i18n.translate(
             'xpack.security.management.editRole.customRoleSuccessfullySavedNotificationTitle',
-            { defaultMessage: 'Custom role created' }
+            { defaultMessage: 'Custom role saved' }
           ),
           text: toMountPoint(
             <>

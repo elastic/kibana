@@ -12,10 +12,9 @@ exports[`LayerWizardSelect Should render layer select after layer wizards are lo
       minWidth={false}
       onClick={[Function]}
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="All"
         id="xpack.maps.layerWizardSelect.allCategories"
-        values={Object {}}
       />
     </EuiFacetButton>
     <EuiFacetButton

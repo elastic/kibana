@@ -61,6 +61,10 @@ export class SearchSourceService {
        * creates searchsource based on serialized search source fields
        */
       create: createSearchSource(indexPatterns, dependencies),
+      createLazy: (searchSourceFields: SerializedSearchSourceFields = {}) => {
+        const fn = createSearchSource(indexPatterns, dependencies);
+        return fn(searchSourceFields, true);
+      },
       /**
        * creates an enpty search source
        */

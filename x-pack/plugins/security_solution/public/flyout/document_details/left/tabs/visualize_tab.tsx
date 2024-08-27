@@ -11,7 +11,7 @@ import type { EuiButtonGroupOptionProps } from '@elastic/eui/src/components/butt
 import { useExpandableFlyoutApi, useExpandableFlyoutState } from '@kbn/expandable-flyout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useLeftPanelContext } from '../context';
+import { useDocumentDetailsContext } from '../../shared/context';
 import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
 import { LeftPanelVisualizeTab } from '..';
 import {
@@ -51,7 +51,7 @@ const visualizeButtons: EuiButtonGroupOptionProps[] = [
  * Visualize view displayed in the document details expandable flyout left section
  */
 export const VisualizeTab = memo(() => {
-  const { eventId, indexName, scopeId } = useLeftPanelContext();
+  const { eventId, indexName, scopeId } = useDocumentDetailsContext();
   const { openLeftPanel } = useExpandableFlyoutApi();
   const panels = useExpandableFlyoutState();
   const [activeVisualizationId, setActiveVisualizationId] = useState(

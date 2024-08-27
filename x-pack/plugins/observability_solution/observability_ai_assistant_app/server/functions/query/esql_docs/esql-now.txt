@@ -1,13 +1,19 @@
-NOW
+## NOW
 
-Syntax
-NOW()
-DescriptionReturns current date and time.Example
+The `NOW` function in ES|QL returns the current date and time.
+
+### Examples
+
+Here are a couple of examples of how you can use the `NOW` function in ES|QL queries:
+
+1. To get the current date and time, you can use the `NOW` function in a `ROW` command:
+
 ```esql
 ROW current_date = NOW()
 ```
 
-To retrieve logs from the last hour:
+2. To retrieve logs from the last hour, you can use the `NOW` function in a `WHERE` clause:
+
 ```esql
 FROM sample_data
 | WHERE @timestamp > NOW() - 1 hour

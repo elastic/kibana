@@ -33,6 +33,7 @@ export function getMapsVisTypeAlias() {
     description: appDescription,
     icon: APP_ICON,
     stage: 'production' as VisualizationStage,
+    order: 40,
     appExtensions: {
       visualizations: {
         docTypes: [MAP_SAVED_OBJECT_TYPE],

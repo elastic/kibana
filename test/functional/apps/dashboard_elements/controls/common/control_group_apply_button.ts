@@ -37,7 +37,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.addVisualization('Rendering-Test:-animal-sounds-pie');
 
       // save the dashboard before adding controls
-      await dashboard.saveDashboard('Test Control Group Apply Button', { exitFromEditMode: false });
+      await dashboard.saveDashboard('Test Control Group Apply Button', {
+        exitFromEditMode: false,
+        saveAsNew: true,
+      });
       await header.waitUntilLoadingHasFinished();
       await dashboard.waitForRenderComplete();
       await dashboard.expectMissingUnsavedChangesBadge();
@@ -212,7 +215,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.waitForRenderComplete();
 
         await dashboard.expectUnsavedChangesBadge();
-        pieChart.expectEmptyPieChart();
+        await pieChart.expectEmptyPieChart();
       });
 
       it('hitting dashboard resets selections + unapplies timeslice', async () => {

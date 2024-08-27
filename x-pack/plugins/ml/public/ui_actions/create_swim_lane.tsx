@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { PresentationContainer } from '@kbn/presentation-containers';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
@@ -41,6 +42,28 @@ export function createAddSwimlanePanelAction(
         getIconType: () => PLUGIN_ICON,
       },
     ],
+    order: 40,
+    // @ts-expect-error getIconType is typed as string, but EuiIcon accepts ReactComponent for custom icons.
+    // See https://github.com/elastic/kibana/issues/184643
+    getIconType: () => (iconProps) =>
+      (
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 16 16"
+          xmlns="http://www.w3.org/2000/svg"
+          {...iconProps}
+        >
+          <path
+            d="M1 5V1H5V5H1ZM4 4V2H2V4H4ZM6 5V1H10V5H6ZM9 4V2H7V4H9ZM11 5V1H15V5H11ZM12 4H14V2H12V4ZM1 10V6H5V10H1ZM4 9V7H2V9H4ZM6 10V6H10V10H6ZM9 9V7H7V9H9ZM11 10V6H15V10H11ZM14 9V7H12V9H14ZM1 15V11H5V15H1ZM2 14H4V12H2V14ZM6 15V11H10V15H6ZM7 14H9V12H7V14ZM11 15V11H15V15H11ZM12 14H14V12H12V14Z"
+            fill="currentColor"
+          />
+          <rect width="4" height="4" transform="translate(6 1)" fill="currentColor" />
+          <rect width="4" height="4" transform="translate(11 6)" fill="currentColor" />
+          <rect width="4" height="4" transform="translate(6 6)" fill="currentColor" />
+          <rect width="4" height="4" transform="translate(1 11)" fill="currentColor" />
+        </svg>
+      ),
     getDisplayName: () =>
       i18n.translate('xpack.ml.components.jobAnomalyScoreEmbeddable.displayName', {
         defaultMessage: 'Anomaly swim lane',

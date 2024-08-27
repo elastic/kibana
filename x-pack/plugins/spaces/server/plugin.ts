@@ -6,8 +6,9 @@
  */
 
 import type { Observable } from 'rxjs';
-import { map } from 'rxjs';
+import { BehaviorSubject, combineLatest, map } from 'rxjs';
 
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type {
   CoreSetup,
   CoreStart,
@@ -15,10 +16,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import type {
-  PluginSetupContract as FeaturesPluginSetup,
-  PluginStartContract as FeaturesPluginStart,
-} from '@kbn/features-plugin/server';
+import type { FeaturesPluginSetup, FeaturesPluginStart } from '@kbn/features-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
@@ -46,6 +44,7 @@ export interface PluginsSetup {
   licensing: LicensingPluginSetup;
   usageCollection?: UsageCollectionSetup;
   home?: HomeServerPluginSetup;
+  cloud?: CloudSetup;
 }
 
 export interface PluginsStart {
@@ -120,15 +119,32 @@ export class SpacesPlugin
 
   private defaultSpaceService?: DefaultSpaceService;
 
+  private onCloud$ = new BehaviorSubject<boolean>(false);
+
   constructor(private readonly initializerContext: PluginInitializerContext) {
-    this.config$ = initializerContext.config.create<ConfigType>();
+    this.config$ = combineLatest([
+      initializerContext.config.create<ConfigType>(),
+      this.onCloud$,
+    ]).pipe(
+      map(
+        ([config, onCloud]): ConfigType => ({
+          ...config,
+          // We only allow "solution" to be set on cloud environments, not on prem
+          allowSolutionVisibility: onCloud ? config.allowSolutionVisibility : false,
+        })
+      )
+    );
     this.hasOnlyDefaultSpace$ = this.config$.pipe(map(({ maxSpaces }) => maxSpaces === 1));
     this.log = initializerContext.logger.get();
     this.spacesService = new SpacesService();
-    this.spacesClientService = new SpacesClientService((message) => this.log.debug(message));
+    this.spacesClientService = new SpacesClientService(
+      (message) => this.log.debug(message),
+      initializerContext.env.packageInfo.buildFlavor
+    );
   }
 
   public setup(core: CoreSetup<PluginsStart>, plugins: PluginsSetup): SpacesPluginSetup {
+    this.onCloud$.next(plugins.cloud !== undefined && plugins.cloud.isCloudEnabled);
     const spacesClientSetup = this.spacesClientService.setup({ config$: this.config$ });
 
     const spacesServiceSetup = this.spacesService.setup({
@@ -158,6 +174,7 @@ export class SpacesPlugin
       license$: plugins.licensing.license$,
       spacesLicense: license,
       logger: this.log,
+      solution: plugins.cloud?.onboarding?.defaultSolution,
     });
 
     initSpacesViewsRoutes({
@@ -168,16 +185,14 @@ export class SpacesPlugin
 
     const router = core.http.createRouter<SpacesRequestHandlerContext>();
 
-    initExternalSpacesApi(
-      {
-        router,
-        log: this.log,
-        getStartServices: core.getStartServices,
-        getSpacesService,
-        usageStatsServicePromise,
-      },
-      this.initializerContext.env.packageInfo.buildFlavor
-    );
+    initExternalSpacesApi({
+      router,
+      log: this.log,
+      getStartServices: core.getStartServices,
+      getSpacesService,
+      usageStatsServicePromise,
+      isServerless: this.initializerContext.env.packageInfo.buildFlavor === 'serverless',
+    });
 
     initInternalSpacesApi({
       router,

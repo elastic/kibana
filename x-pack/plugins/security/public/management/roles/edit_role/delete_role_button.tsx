@@ -91,7 +91,7 @@ export class DeleteRoleButton extends Component<Props, State> {
           ) : (
             <FormattedMessage
               id="xpack.security.management.roles.confirmDelete.serverless.removingSingleRoleDescription"
-              defaultMessage="Users with the {roleName} role assigned will lose access to the project."
+              defaultMessage="Users with the {roleName} role assigned may lose access to the project if they are not assigned any other roles."
               values={{ roleName }}
             />
           )}

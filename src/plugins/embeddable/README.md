@@ -41,6 +41,9 @@ Break your Component into a Package or another plugin to avoid circular plugin d
 #### Minimal API surface area
 Embeddable APIs are accessable to all Kibana systems and all embeddable siblings and parents. Functions and state that are internal to an embeddable including any child components should not be added to the API. Consider passing internal state to child as props or react context.
 
+#### Error handling
+Embeddables should never throw. Instead, use [PublishesBlockingError](https://github.com/elastic/kibana/blob/main/packages/presentation/presentation_publishing/interfaces/publishes_blocking_error.ts) interface to surface unrecoverable errors. When an embeddable publishes a blocking error, the parent component will display an error component instead of the embeddable Component. Be thoughtful about which errors are surfaced with the PublishesBlockingError interface. If the embeddable can still render, use less invasive error handling such as a warning toast or notifications in the embeddable Component UI.
+
 ### Examples
 
 Examples available at [/examples/embeddable_examples](https://github.com/elastic/kibana/tree/main/examples/embeddable_examples)

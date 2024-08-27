@@ -35,9 +35,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const log = getService('log');
   const es = getService('es');
-  // TODO: add a new service for pulling kibana username, similar to getService('es')
-  const config = getService('config');
-  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
+  const utils = getService('securitySolutionUtils');
 
   describe('@ess patch_rules - ESS specific logic', () => {
     describe('patch rules', () => {
@@ -80,7 +78,7 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedProperties(patchResponse.body);
-        const outputRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+        const outputRule = updateUsername(getSimpleRuleOutput(), await utils.getUsername());
 
         outputRule.actions = [
           {
@@ -139,7 +137,7 @@ export default ({ getService }: FtrProviderContext) => {
           );
         });
 
-        it('should patch a rule with a legacy investigation field and transform response', async () => {
+        it('should patch a rule with a legacy investigation field and migrate field', async () => {
           const { body } = await supertest
             .patch(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
@@ -154,12 +152,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(bodyToCompare.investigation_fields).to.eql({
             field_names: ['client.address', 'agent.name'],
           });
-          /**
-           * Confirm type on SO so that it's clear in the tests whether it's expected that
-           * the SO itself is migrated to the inteded object type, or if the transformation is
-           * happening just on the response. In this case, change should
-           * NOT include a migration on SO.
-           */
+
           const isInvestigationFieldMigratedInSo = await checkInvestigationFieldSoValue(
             undefined,
             {
@@ -168,7 +161,7 @@ export default ({ getService }: FtrProviderContext) => {
             es,
             body.id
           );
-          expect(isInvestigationFieldMigratedInSo).to.eql(false);
+          expect(isInvestigationFieldMigratedInSo).to.eql(true);
         });
 
         it('should patch a rule with a legacy investigation field - empty array - and transform response', async () => {

@@ -10,7 +10,7 @@ import { EuiFieldSearch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 const placeholder = i18n.translate('xpack.datasetQuality.filterBar.placeholder', {
-  defaultMessage: 'Filter datasets',
+  defaultMessage: 'Filter data sets',
 });
 
 export interface FilterBarComponentProps {

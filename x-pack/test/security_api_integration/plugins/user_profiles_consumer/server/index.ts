@@ -6,10 +6,7 @@
  */
 
 import type { PluginInitializer, Plugin, CoreSetup } from '@kbn/core/server';
-import {
-  PluginSetupContract as FeaturesPluginSetup,
-  PluginStartContract as FeaturesPluginStart,
-} from '@kbn/features-plugin/server';
+import { FeaturesPluginSetup, FeaturesPluginStart } from '@kbn/features-plugin/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { initRoutes } from './init_routes';

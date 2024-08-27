@@ -23,6 +23,8 @@ import {
 } from '../../../../cases_api_integration/common/lib/api';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
+const ADD_TO_EXISTING_CASE_DATA_TEST_SUBJ = 'embeddablePanelAction-embeddable_addToExistingCase';
+
 const createLogStashDataView = async (
   supertest: SuperTest.Agent
 ): Promise<{ data_view: { id: string } }> => {
@@ -63,6 +65,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const listingTable = getService('listingTable');
   const toasts = getService('toasts');
   const browser = getService('browser');
+  const dashboardPanelActions = getService('dashboardPanelActions');
 
   const createAttachmentAndNavigate = async (attachment: AttachmentRequest) => {
     const caseData = await cases.api.createCase({
@@ -235,8 +238,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         it('renders solutions selection', async () => {
           await openFlyout();
 
+          await testSubjects.click('caseOwnerSelector');
+
           for (const owner of TOTAL_OWNERS) {
-            await testSubjects.existOrFail(`${owner}RadioButton`);
+            await testSubjects.existOrFail(`${owner}OwnerOption`);
           }
 
           await closeFlyout();
@@ -397,10 +402,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await common.navigateToApp('dashboard');
         await dashboard.preserveCrossAppState();
         await dashboard.loadSavedDashboard(myDashboardName);
-
-        await testSubjects.click('embeddablePanelToggleMenuIcon');
-        await testSubjects.click('embeddablePanelMore-mainMenu');
-        await testSubjects.click('embeddablePanelAction-embeddable_addToExistingCase');
+        await dashboardPanelActions.clickContextMenuItem(ADD_TO_EXISTING_CASE_DATA_TEST_SUBJ);
         await testSubjects.click('cases-table-add-case-filter-bar');
 
         await cases.create.createCase({
@@ -432,9 +434,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await dashboard.preserveCrossAppState();
         await dashboard.loadSavedDashboard(myDashboardName);
 
-        await testSubjects.click('embeddablePanelToggleMenuIcon');
-        await testSubjects.click('embeddablePanelMore-mainMenu');
-        await testSubjects.click('embeddablePanelAction-embeddable_addToExistingCase');
+        await dashboardPanelActions.clickContextMenuItem(ADD_TO_EXISTING_CASE_DATA_TEST_SUBJ);
 
         await testSubjects.click(`cases-table-row-select-${theCase.id}`);
 

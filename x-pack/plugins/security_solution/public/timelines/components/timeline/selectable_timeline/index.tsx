@@ -20,11 +20,7 @@ import { isEmpty, debounce } from 'lodash/fp';
 import React, { memo, useCallback, useMemo, useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 
-import type {
-  TimelineTypeLiteralWithNull,
-  TimelineTypeLiteral,
-} from '../../../../../common/api/timeline';
-import { SortFieldTimeline } from '../../../../../common/api/timeline';
+import { type TimelineType, SortFieldTimelineEnum } from '../../../../../common/api/timeline';
 
 import { useGetAllTimeline } from '../../../containers/all';
 import { isUntitled } from '../../open_timeline/helpers';
@@ -68,7 +64,7 @@ const replaceTitleInOptions = (
 export interface GetSelectableOptions {
   timelines: OpenTimelineResult[];
   onlyFavorites: boolean;
-  timelineType?: TimelineTypeLiteralWithNull;
+  timelineType?: TimelineType | null;
   searchTimelineValue: string;
 }
 
@@ -86,7 +82,7 @@ export interface SelectableTimelineProps {
     timelineId: string | null,
     graphEventId?: string
   ) => void;
-  timelineType: TimelineTypeLiteral;
+  timelineType: TimelineType;
   placeholder?: string;
 }
 
@@ -279,7 +275,7 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
       },
       search: searchTimelineValue,
       sort: {
-        sortField: SortFieldTimeline.updated,
+        sortField: SortFieldTimelineEnum.updated,
         sortOrder: Direction.desc,
       },
       onlyUserFavorite: onlyFavorites,

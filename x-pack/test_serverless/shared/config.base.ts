@@ -139,6 +139,9 @@ export default async () => {
         })}`,
         '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
         `--server.publicBaseUrl=${servers.kibana.protocol}://${servers.kibana.hostname}:${servers.kibana.port}`,
+        // configure security reponse header report-to settings to mimic MKI configuration
+        `--csp.report_to=${JSON.stringify(['violations-endpoint'])}`,
+        `--permissionsPolicy.report_to=${JSON.stringify(['violations-endpoint'])}`,
       ],
     },
 
@@ -159,7 +162,7 @@ export default async () => {
       try: 120 * 1000,
       waitFor: 20 * 1000,
       esRequestTimeout: 30 * 1000,
-      kibanaReportCompletion: 60 * 1000,
+      kibanaReportCompletion: 600 * 1000,
       kibanaStabilize: 15 * 1000,
       navigateStatusPageCheck: 250,
       waitForExists: 2500,

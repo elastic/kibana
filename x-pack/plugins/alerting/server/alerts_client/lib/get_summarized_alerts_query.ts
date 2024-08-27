@@ -324,7 +324,6 @@ export const getQueryByScopedQueries = ({
       aggs: {
         alertId: {
           top_hits: {
-            size: 1,
             _source: {
               includes: [ALERT_UUID],
             },
@@ -417,7 +416,7 @@ const getHitsWithCount = <AlertData extends RuleAlertData>(
 
       const expandedSource = expandFlattenedAlert(formattedSource as object) as Alert & AlertData;
       return {
-        _id,
+        _id: _id!,
         _index,
         ...expandedSource,
       };

@@ -10,7 +10,7 @@ import { RouteDependencies } from '../plugin';
 export const registerIngestPipelineRoutes = ({ router }: RouteDependencies) => {
   router.get(
     {
-      path: '/internal/serverless_search/ingest_pipelines/',
+      path: '/internal/serverless_search/ingest_pipelines',
       validate: {},
     },
     async (context, request, response) => {

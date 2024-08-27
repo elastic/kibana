@@ -119,7 +119,7 @@ export class ReportingStore {
     return this.client;
   }
 
-  private async createIlmPolicy() {
+  protected async createIlmPolicy() {
     const client = await this.getClient();
     const ilmPolicyManager = IlmPolicyManager.create({ client });
     if (await ilmPolicyManager.doesIlmPolicyExist()) {
@@ -159,8 +159,11 @@ export class ReportingStore {
    * configured for storage of reports.
    */
   public async start() {
+    const { statefulSettings } = this.reportingCore.getConfig();
     try {
-      await this.createIlmPolicy();
+      if (statefulSettings.enabled) {
+        await this.createIlmPolicy();
+      }
     } catch (e) {
       this.logger.error('Error in start phase');
       this.logger.error(e);

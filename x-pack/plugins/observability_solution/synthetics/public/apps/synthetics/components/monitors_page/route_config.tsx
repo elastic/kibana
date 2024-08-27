@@ -14,7 +14,7 @@ import { RefreshButton } from '../common/components/refresh_button';
 import { OverviewPage } from './overview/overview_page';
 import { MonitorsPageHeader } from './management/page_header/monitors_page_header';
 import { CreateMonitorButton } from './create_monitor_button';
-import { MonitorsPageWithServiceAllowed } from './monitors_page';
+import { MonitorManagementPage } from './monitors_page';
 import { RouteProps } from '../../routes';
 import { MONITORS_ROUTE, OVERVIEW_ROUTE } from '../../../../../common/constants';
 
@@ -48,7 +48,7 @@ export const getMonitorsRoute = (
         values: { baseTitle },
       }),
       path: MONITORS_ROUTE,
-      component: MonitorsPageWithServiceAllowed,
+      component: MonitorManagementPage,
       dataTestSubj: 'syntheticsMonitorManagementPage',
       pageHeader: {
         ...sharedProps,

@@ -20,6 +20,7 @@ export const ViewDocument = ({ ping }: { ping: Ping }) => {
 
   const dataView = useSyntheticsDataView();
   const formatter = useDateFormat();
+  const formattedTimestamp = formatter(ping.timestamp);
 
   const [, hit] = useEsDocSearch({ id: ping.docId, index: SYNTHETICS_INDEX_PATTERN, dataView });
 
@@ -28,7 +29,7 @@ export const ViewDocument = ({ ping }: { ping: Ping }) => {
       <EuiButtonIcon
         data-test-subj="syntheticsViewDocumentButton"
         iconType="inspect"
-        title={INSPECT_DOCUMENT}
+        title={INSPECT_DOCUMENT(formattedTimestamp)}
         onClick={(evt: MouseEvent<HTMLButtonElement>) => {
           evt.stopPropagation();
           setIsFlyoutVisible(true);
@@ -46,7 +47,7 @@ export const ViewDocument = ({ ping }: { ping: Ping }) => {
           <EuiFlyoutHeader>
             <EuiTitle size="m">
               <h4>
-                {INDEXED_AT} {formatter(ping.timestamp)}
+                {INDEXED_AT} {formattedTimestamp}
               </h4>
             </EuiTitle>
           </EuiFlyoutHeader>
@@ -67,9 +68,8 @@ const INDEXED_AT = i18n.translate('xpack.synthetics.monitorDetails.summary.index
   defaultMessage: 'Indexed at',
 });
 
-export const INSPECT_DOCUMENT = i18n.translate(
-  'xpack.synthetics.monitorDetails.action.inspectDocument',
-  {
-    defaultMessage: 'Inspect document',
-  }
-);
+export const INSPECT_DOCUMENT = (timestamp: string) =>
+  i18n.translate('xpack.synthetics.monitorDetails.action.inspectDocument', {
+    defaultMessage: 'Inspect document timestamped {timestamp}',
+    values: { timestamp },
+  });

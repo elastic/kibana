@@ -24,7 +24,7 @@ import {
   UpdateMetricsExplorerViewAttributesRequestPayload,
 } from '../../common/http_api/latest';
 import { MetricsExplorerView } from '../../common/metrics_explorer_views';
-import { useUrlState } from '../utils/use_url_state';
+import { useUrlState } from './use_url_state';
 import { useSavedViewsNotifier } from './use_saved_views_notifier';
 import { useSourceContext } from '../containers/metrics_source';
 import { useKibanaContextForPlugin } from './use_kibana';
@@ -52,7 +52,7 @@ export const useMetricsExplorerViews = (): UseMetricsExplorerViewsResult => {
   const trackMetric = useUiTracker({ app: 'infra_metrics' });
 
   const queryClient = useQueryClient();
-  const { source, updateSourceConfiguration } = useSourceContext();
+  const { source, persistSourceConfiguration } = useSourceContext();
 
   const defaultViewId = source?.configuration.metricsExplorerDefaultView ?? '0';
 
@@ -98,7 +98,7 @@ export const useMetricsExplorerViews = (): UseMetricsExplorerViewsResult => {
     string,
     MutationContext<MetricsExplorerView>
   >({
-    mutationFn: (id) => updateSourceConfiguration({ metricsExplorerDefaultView: id }),
+    mutationFn: (id) => persistSourceConfiguration({ metricsExplorerDefaultView: id }),
     /**
      * To provide a quick feedback, we perform an optimistic update on the list
      * when updating the default view.

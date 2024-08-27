@@ -6,12 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-
-const errorMessageHeader = 'Error validating circuit breaker';
+import { errorMessageHeader } from '@kbn/alerting-types';
 
 const getCreateRuleErrorSummary = (name: string) => {
   return i18n.translate('xpack.alerting.ruleCircuitBreaker.error.createSummary', {
-    defaultMessage: `Rule '{name}' cannot be created. The maximum number of runs per minute would be exceeded.`,
+    defaultMessage: `Rule ''{name}'' cannot be created. The maximum number of runs per minute would be exceeded.`,
     values: {
       name,
     },
@@ -20,7 +19,7 @@ const getCreateRuleErrorSummary = (name: string) => {
 
 const getUpdateRuleErrorSummary = (name: string) => {
   return i18n.translate('xpack.alerting.ruleCircuitBreaker.error.updateSummary', {
-    defaultMessage: `Rule '{name}' cannot be updated. The maximum number of runs per minute would be exceeded.`,
+    defaultMessage: `Rule ''{name}'' cannot be updated. The maximum number of runs per minute would be exceeded.`,
     values: {
       name,
     },
@@ -29,7 +28,7 @@ const getUpdateRuleErrorSummary = (name: string) => {
 
 const getEnableRuleErrorSummary = (name: string) => {
   return i18n.translate('xpack.alerting.ruleCircuitBreaker.error.enableSummary', {
-    defaultMessage: `Rule '{name}' cannot be enabled. The maximum number of runs per minute would be exceeded.`,
+    defaultMessage: `Rule ''{name}'' cannot be enabled. The maximum number of runs per minute would be exceeded.`,
     values: {
       name,
     },

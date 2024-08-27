@@ -7,20 +7,12 @@
 
 import { TypeOf } from '@kbn/config-schema';
 import { Logger } from '@kbn/core/server';
-import { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import {
   ExecutorParamsSchema,
   ExecutorSubActionPushParamsSchema,
   ExternalIncidentServiceConfigurationSchema,
   ExternalIncidentServiceSecretConfigurationSchema,
 } from './schema';
-
-// config definition
-export enum CasesWebhookMethods {
-  PATCH = 'patch',
-  POST = 'post',
-  PUT = 'put',
-}
 
 // config
 export type CasesWebhookPublicConfigurationType = TypeOf<
@@ -36,21 +28,6 @@ export type CasesWebhookActionParamsType = TypeOf<typeof ExecutorParamsSchema>;
 export interface ExternalServiceCredentials {
   config: CasesWebhookPublicConfigurationType;
   secrets: CasesWebhookSecretConfigurationType;
-}
-
-export interface ExternalServiceValidation {
-  config: (
-    configObject: CasesWebhookPublicConfigurationType,
-    validatorServices: ValidatorServices
-  ) => void;
-  secrets: (
-    secrets: CasesWebhookSecretConfigurationType,
-    validatorServices: ValidatorServices
-  ) => void;
-  connector: (
-    configObject: CasesWebhookPublicConfigurationType,
-    secrets: CasesWebhookSecretConfigurationType
-  ) => string | null;
 }
 
 export interface ExternalServiceIncidentResponse {

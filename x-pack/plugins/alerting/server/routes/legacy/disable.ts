@@ -29,6 +29,11 @@ export const disableAlertRoute = (
       validate: {
         params: paramSchema,
       },
+      options: {
+        summary: 'Disable an alert',
+        tags: ['oas-tag:alerting'],
+        deprecated: true,
+      },
     },
     router.handleLegacyErrors(async function (context, req, res) {
       verifyApiAccess(licenseState);
@@ -39,7 +44,7 @@ export const disableAlertRoute = (
       const rulesClient = (await context.alerting).getRulesClient();
       const { id } = req.params;
       try {
-        await rulesClient.disable({ id });
+        await rulesClient.disableRule({ id });
         return res.noContent();
       } catch (e) {
         if (e instanceof RuleTypeDisabledError) {

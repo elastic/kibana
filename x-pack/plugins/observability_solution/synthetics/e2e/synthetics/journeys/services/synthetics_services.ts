@@ -9,8 +9,8 @@ import axios from 'axios';
 import type { Client } from '@elastic/elasticsearch';
 import { KbnClient } from '@kbn/test';
 import pMap from 'p-map';
-import { SyntheticsMonitor } from '../../../../common/runtime_types';
-import { SYNTHETICS_API_URLS } from '../../../../common/constants';
+import { SyntheticsMonitor } from '@kbn/synthetics-plugin/common/runtime_types';
+import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { journeyStart, journeySummary, step1, step2 } from './data/browser_docs';
 import { firstDownHit, getUpHit } from './data/sample_docs';
 
@@ -46,7 +46,7 @@ export class SyntheticsServices {
     try {
       await axios.put(this.kibanaUrl + SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT, undefined, {
         auth: { username: 'elastic', password: 'changeme' },
-        headers: { 'kbn-xsrf': 'true' },
+        headers: { 'kbn-xsrf': 'true', 'x-elastic-internal-origin': 'synthetics-e2e' },
       });
     } catch (e) {
       // eslint-disable-next-line no-console
@@ -75,7 +75,7 @@ export class SyntheticsServices {
         testData,
         {
           auth: { username: 'elastic', password: 'changeme' },
-          headers: { 'kbn-xsrf': 'true' },
+          headers: { 'kbn-xsrf': 'true', 'x-elastic-internal-origin': 'synthetics-e2e' },
         }
       );
       return response.data.id;
@@ -121,7 +121,7 @@ export class SyntheticsServices {
         { isDisabled: false },
         {
           auth: { username: 'elastic', password: 'changeme' },
-          headers: { 'kbn-xsrf': 'true' },
+          headers: { 'kbn-xsrf': 'true', 'x-elastic-internal-origin': 'synthetics-e2e' },
         }
       );
     } catch (e) {

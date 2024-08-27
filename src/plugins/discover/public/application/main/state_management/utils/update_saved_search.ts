@@ -69,12 +69,18 @@ export function updateSavedSearch({
     savedSearch.headerRowHeight = state.headerRowHeight;
     savedSearch.rowsPerPage = state.rowsPerPage;
     savedSearch.sampleSize = state.sampleSize;
+    savedSearch.density = state.density;
 
     if (state.viewMode) {
       savedSearch.viewMode = state.viewMode;
     }
 
-    savedSearch.breakdownField = state.breakdownField || undefined; // `undefined` instead of an empty string
+    if (typeof state.breakdownField !== 'undefined') {
+      savedSearch.breakdownField = state.breakdownField;
+    } else if (savedSearch.breakdownField) {
+      savedSearch.breakdownField = '';
+    }
+
     savedSearch.hideAggregatedPreview = state.hideAggregatedPreview;
 
     // add a flag here to identify ES|QL queries

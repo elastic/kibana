@@ -119,6 +119,10 @@ export abstract class Container<
     );
   }
 
+  public getPanelCount() {
+    return Object.keys(this.getInput().panels).length;
+  }
+
   public removePanel(id: string) {
     this.removeEmbeddable(id);
   }

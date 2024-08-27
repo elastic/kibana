@@ -281,7 +281,6 @@ export const LensTopNavMenu = ({
   initialContext,
   indexPatternService,
   currentDoc,
-  onTextBasedSavedAndExit,
   getUserMessages,
   shortUrlService,
   isCurrentStateDirty,
@@ -625,7 +624,9 @@ export const LensTopNavMenu = ({
               allowEmbed: false,
               allowShortUrl: false,
               delegatedShareUrlHandler: () => {
-                return isCurrentStateDirty ? shareableUrl! : savedObjectURL.href;
+                return isCurrentStateDirty || !currentDoc?.savedObjectId
+                  ? shareableUrl!
+                  : savedObjectURL.href;
               },
               objectId: currentDoc?.savedObjectId,
               objectType: 'lens',
@@ -636,7 +637,7 @@ export const LensTopNavMenu = ({
               },
               sharingData,
               // only want to know about changes when savedObjectURL.href
-              isDirty: isCurrentStateDirty,
+              isDirty: isCurrentStateDirty || !currentDoc?.savedObjectId,
               // disable the menu if both shortURL permission and the visualization has not been saved
               // TODO: improve here the disabling state with more specific checks
               disabledShareUrl: Boolean(!shareUrlEnabled && !currentDoc?.savedObjectId),
@@ -915,7 +916,7 @@ export const LensTopNavMenu = ({
         ? async (fieldName?: string, _uiAction: 'edit' | 'add' = 'edit') => {
             if (currentIndexPattern?.id) {
               const indexPatternInstance = await data.dataViews.get(currentIndexPattern?.id);
-              closeFieldEditor.current = dataViewFieldEditor.openEditor({
+              closeFieldEditor.current = await dataViewFieldEditor.openEditor({
                 ctx: {
                   dataView: indexPatternInstance,
                 },
@@ -1114,7 +1115,6 @@ export const LensTopNavMenu = ({
         )
       }
       textBasedLanguageModeErrors={textBasedLanguageModeErrors}
-      onTextBasedSavedAndExit={onTextBasedSavedAndExit}
       showFilterBar={true}
       data-test-subj="lnsApp_topNav"
       screenTitle={'lens'}

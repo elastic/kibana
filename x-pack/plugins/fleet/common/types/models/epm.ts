@@ -178,6 +178,14 @@ export interface RegistryImage extends PackageSpecIcon {
   path: string;
 }
 
+export interface DeploymentsModesEnablement {
+  enabled: boolean;
+}
+export interface DeploymentsModes {
+  agentless: DeploymentsModesEnablement;
+  default?: DeploymentsModesEnablement;
+}
+
 export enum RegistryPolicyTemplateKeys {
   categories = 'categories',
   data_streams = 'data_streams',
@@ -193,6 +201,7 @@ export enum RegistryPolicyTemplateKeys {
   description = 'description',
   icons = 'icons',
   screenshots = 'screenshots',
+  deployment_modes = 'deployment_modes',
 }
 interface BaseTemplate {
   [RegistryPolicyTemplateKeys.name]: string;
@@ -201,6 +210,7 @@ interface BaseTemplate {
   [RegistryPolicyTemplateKeys.icons]?: RegistryImage[];
   [RegistryPolicyTemplateKeys.screenshots]?: RegistryImage[];
   [RegistryPolicyTemplateKeys.multiple]?: boolean;
+  [RegistryPolicyTemplateKeys.deployment_modes]?: DeploymentsModes;
 }
 export interface RegistryPolicyIntegrationTemplate extends BaseTemplate {
   [RegistryPolicyTemplateKeys.categories]?: Array<PackageSpecCategory | undefined>;
@@ -424,6 +434,8 @@ export enum RegistryVarsEntryKeys {
   default = 'default',
   os = 'os',
   secret = 'secret',
+  hide_in_deployment_modes = 'hide_in_deployment_modes',
+  full_width = 'full_width',
 }
 
 // EPR types this as `[]map[string]interface{}`
@@ -445,6 +457,8 @@ export interface RegistryVarsEntry {
       default: string | string[];
     };
   };
+  [RegistryVarsEntryKeys.hide_in_deployment_modes]?: string[];
+  [RegistryVarsEntryKeys.full_width]?: boolean;
 }
 
 // Deprecated as part of the removing public references to saved object schemas
@@ -519,6 +533,10 @@ export type PackageInfo =
   | Installable<Merge<RegistryPackage, EpmPackageAdditions>>
   | Installable<Merge<ArchivePackage, EpmPackageAdditions>>;
 
+export interface PackageMetadata {
+  has_policies: true;
+}
+
 export type IntegrationCardReleaseLabel = 'beta' | 'preview' | 'ga' | 'rc';
 
 export type PackageVerificationStatus = 'verified' | 'unverified' | 'unknown';
@@ -560,7 +578,7 @@ export enum INSTALL_STATES {
   UPDATE_SO = 'update_so',
 }
 type StatesKeys = keyof typeof INSTALL_STATES;
-export type StateNames = typeof INSTALL_STATES[StatesKeys];
+export type StateNames = (typeof INSTALL_STATES)[StatesKeys];
 
 export interface LatestExecutedState<T> {
   name: T;
@@ -577,6 +595,7 @@ export interface StateContext<T> {
 
 export interface Installation {
   installed_kibana: KibanaAssetReference[];
+  additional_spaces_installed_kibana?: Record<string, KibanaAssetReference[]>;
   installed_es: EsAssetReference[];
   package_assets?: PackageAssetReference[];
   es_index_patterns: Record<string, string>;
@@ -637,6 +656,7 @@ export type AssetReference = KibanaAssetReference | EsAssetReference;
 
 export interface KibanaAssetReference {
   id: string;
+  originId?: string;
   type: KibanaSavedObjectType;
 }
 export interface EsAssetReference {

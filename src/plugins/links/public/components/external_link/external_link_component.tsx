@@ -6,9 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo, useState } from 'react';
-import useMount from 'react-use/lib/useMount';
-
+import React, { useMemo } from 'react';
 import { EuiListGroupItem } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
@@ -18,41 +16,25 @@ import {
 
 import {
   EXTERNAL_LINK_TYPE,
-  Link,
   LinksLayoutType,
   LINKS_VERTICAL_LAYOUT,
 } from '../../../common/content_management';
 import { coreServices, trackUiMetric } from '../../services/kibana_services';
-import { validateUrl } from './external_link_tools';
+import { ResolvedLink } from '../../types';
 
 export const ExternalLinkComponent = ({
   link,
   layout,
-  onRender,
 }: {
-  link: Link;
+  link: ResolvedLink;
   layout: LinksLayoutType;
-  onRender: () => void;
 }) => {
-  const [error, setError] = useState<string | undefined>();
-
-  useMount(() => {
-    onRender();
-  });
-
   const linkOptions = useMemo(() => {
     return {
       ...DEFAULT_URL_DRILLDOWN_OPTIONS,
       ...link.options,
     } as UrlDrilldownOptions;
   }, [link.options]);
-
-  const isValidUrl = useMemo(() => {
-    if (!link.destination) return false;
-    const { valid, message } = validateUrl(link.destination);
-    if (!valid) setError(message);
-    return valid;
-  }, [link.destination]);
 
   const destination = useMemo(() => {
     return link.destination && linkOptions.encodeUrl
@@ -67,20 +49,20 @@ export const ExternalLinkComponent = ({
       size="s"
       external
       color="text"
-      isDisabled={!link.destination || !isValidUrl}
+      isDisabled={Boolean(link.error)}
       className={'linksPanelLink'}
-      showToolTip={!isValidUrl}
+      showToolTip={Boolean(link.error)}
       toolTipProps={{
-        content: error,
+        content: link.error?.message,
         position: layout === LINKS_VERTICAL_LAYOUT ? 'right' : 'bottom',
         repositionOnScroll: true,
         delay: 'long',
         'data-test-subj': `${id}--tooltip`,
       }}
-      iconType={error ? 'warning' : undefined}
+      iconType={link.error ? 'warning' : undefined}
       id={id}
       label={link.label || link.destination}
-      data-test-subj={error ? `${id}--error` : `${id}`}
+      data-test-subj={link.error ? `${id}--error` : `${id}`}
       href={destination}
       onClick={async (event) => {
         if (!destination) return;

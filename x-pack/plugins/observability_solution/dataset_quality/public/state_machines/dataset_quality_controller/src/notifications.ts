@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 export const fetchDatasetStatsFailedNotifier = (toasts: IToasts, error: Error) => {
   toasts.addDanger({
     title: i18n.translate('xpack.datasetQuality.fetchDatasetStatsFailed', {
-      defaultMessage: "We couldn't get your datasets.",
+      defaultMessage: "We couldn't get your data sets.",
     }),
     text: error.message,
   });
@@ -20,16 +20,7 @@ export const fetchDatasetStatsFailedNotifier = (toasts: IToasts, error: Error) =
 export const fetchDatasetDetailsFailedNotifier = (toasts: IToasts, error: Error) => {
   toasts.addDanger({
     title: i18n.translate('xpack.datasetQuality.fetchDatasetDetailsFailed', {
-      defaultMessage: "We couldn't get your dataset details.",
-    }),
-    text: error.message,
-  });
-};
-
-export const fetchDatasetSettingsFailedNotifier = (toasts: IToasts, error: Error) => {
-  toasts.addDanger({
-    title: i18n.translate('xpack.datasetQuality.fetchDatasetSettingsFailed', {
-      defaultMessage: "Dataset settings couldn't be loaded.",
+      defaultMessage: "We couldn't get your data set details.",
     }),
     text: error.message,
   });
@@ -53,15 +44,6 @@ export const fetchNonAggregatableDatasetsFailedNotifier = (toasts: IToasts, erro
   });
 };
 
-export const fetchIntegrationDashboardsFailedNotifier = (toasts: IToasts, error: Error) => {
-  toasts.addDanger({
-    title: i18n.translate('xpack.datasetQuality.fetchIntegrationDashboardsFailed', {
-      defaultMessage: "We couldn't get your integration dashboards.",
-    }),
-    text: error.message,
-  });
-};
-
 export const fetchIntegrationsFailedNotifier = (toasts: IToasts, error: Error) => {
   toasts.addDanger({
     title: i18n.translate('xpack.datasetQuality.fetchIntegrationsFailed', {
@@ -74,6 +56,15 @@ export const fetchIntegrationsFailedNotifier = (toasts: IToasts, error: Error) =
 export const noDatasetSelected = i18n.translate(
   'xpack.datasetQuality.fetchDatasetDetailsFailed.noDatasetSelected',
   {
-    defaultMessage: 'No dataset have been selected',
+    defaultMessage: 'No data set have been selected',
   }
 );
+
+export const assertBreakdownFieldEcsFailedNotifier = (toasts: IToasts, error: Error) => {
+  toasts.addDanger({
+    title: i18n.translate('xpack.datasetQuality.assertBreakdownFieldEcsFailed', {
+      defaultMessage: "We couldn't retrieve breakdown field metadata.",
+    }),
+    text: error.message,
+  });
+};

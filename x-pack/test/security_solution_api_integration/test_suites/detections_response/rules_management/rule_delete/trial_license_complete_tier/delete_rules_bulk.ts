@@ -35,9 +35,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const securitySolutionApi = getService('securitySolutionApi');
   const log = getService('log');
   const es = getService('es');
-  // TODO: add a new service for pulling kibana username, similar to getService('es')
-  const config = getService('config');
-  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
+  const utils = getService('securitySolutionUtils');
 
   // See https://github.com/elastic/kibana/issues/130963 for discussion on deprecation
   describe('@ess @skipInServerlesMKI delete_rules_bulk', () => {
@@ -74,7 +72,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
-        const expectedRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+        const expectedRule = updateUsername(getSimpleRuleOutput(), await utils.getUsername());
 
         expect(bodyToCompare).to.eql(expectedRule);
       });
@@ -90,7 +88,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body[0]);
         const expectedRule = updateUsername(
           getSimpleRuleOutputWithoutRuleId(),
-          ELASTICSEARCH_USERNAME
+          await utils.getUsername()
         );
 
         expect(bodyToCompare).to.eql(expectedRule);
@@ -107,7 +105,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body[0]);
         const expectedRule = updateUsername(
           getSimpleRuleOutputWithoutRuleId(),
-          ELASTICSEARCH_USERNAME
+          await utils.getUsername()
         );
 
         expect(bodyToCompare).to.eql(expectedRule);
@@ -157,7 +155,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body[0]);
         const expectedRule = updateUsername(
           getSimpleRuleOutputWithoutRuleId(),
-          ELASTICSEARCH_USERNAME
+          await utils.getUsername()
         );
 
         expect([bodyToCompare, body[1]]).to.eql([
@@ -196,7 +194,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
-        const expectedRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+        const expectedRule = updateUsername(getSimpleRuleOutput(), await utils.getUsername());
         expect(bodyToCompare).to.eql(expectedRule);
       });
 
@@ -214,7 +212,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body[0]);
         const expectedRule = updateUsername(
           getSimpleRuleOutputWithoutRuleId(),
-          ELASTICSEARCH_USERNAME
+          await utils.getUsername()
         );
 
         expect(bodyToCompare).to.eql(expectedRule);
@@ -235,7 +233,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const expectedRule = updateUsername(
           getSimpleRuleOutputWithoutRuleId(),
-          ELASTICSEARCH_USERNAME
+          await utils.getUsername()
         );
 
         expect(bodyToCompare).to.eql(expectedRule);
@@ -292,7 +290,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body[0]);
         const expectedRule = updateUsername(
           getSimpleRuleOutputWithoutRuleId(),
-          ELASTICSEARCH_USERNAME
+          await utils.getUsername()
         );
         expect([bodyToCompare, body[1]]).to.eql([
           expectedRule,

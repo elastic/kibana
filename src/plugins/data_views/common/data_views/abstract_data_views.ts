@@ -134,6 +134,7 @@ export abstract class AbstractDataView {
   constructor(config: AbstractDataViewDeps) {
     const { spec = {}, fieldFormats, shortDotsEnable = false, metaFields = [] } = config;
 
+    // it's importing field attributes when a data view is imported from a spec and those attributes aren't provided in the fieldAttrs
     const extractedFieldAttrs = spec?.fields
       ? Object.entries(spec.fields).reduce((acc, [key, value]) => {
           const attrs: FieldAttrSet = {};
@@ -146,6 +147,11 @@ export abstract class AbstractDataView {
 
           if (value.customLabel) {
             attrs.customLabel = value.customLabel;
+            hasAttrs = true;
+          }
+
+          if (value.customDescription) {
+            attrs.customDescription = value.customDescription;
             hasAttrs = true;
           }
 
@@ -440,6 +446,26 @@ export abstract class AbstractDataView {
 
   upsertScriptedField(field: FieldSpec) {
     return this.upsertScriptedFieldInternal(field);
+  }
+
+  /**
+   * Only used by search source to process sorting of scripted fields
+   * @param name field name
+   * @returns DataViewFieldBase
+   */
+  getScriptedField(name: string): DataViewFieldBase | undefined {
+    // runtime fields override scripted fields
+    if (this.runtimeFieldMap[name]) {
+      return;
+    }
+
+    const field = this.scriptedFieldsMap[name];
+    if (field) {
+      return {
+        ...field,
+        scripted: true,
+      };
+    }
   }
 
   /**

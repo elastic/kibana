@@ -135,7 +135,7 @@ export const turnOffPolicyProtectionsIfNotSupported = async (
       }
     );
 
-    log.debug(`Bulk update response:\n${JSON.stringify(bulkUpdateResponse, null, 2)}`);
+    log.debug(() => `Bulk update response:\n${JSON.stringify(bulkUpdateResponse, null, 2)}`);
 
     if (bulkUpdateResponse.failedPolicies.length > 0) {
       log.error(

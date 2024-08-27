@@ -8,6 +8,7 @@
 
 // import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 import { DashboardDataService } from './types';
 
@@ -15,4 +16,8 @@ type DataServiceFactory = PluginServiceFactory<DashboardDataService>;
 
 export const dataServiceFactory: DataServiceFactory = () => ({
   ...dataPluginMock.createStartContract(),
+  dataViews: {
+    ...dataViewPluginMocks.createStartContract(),
+    defaultDataViewExists: async () => true,
+  },
 });

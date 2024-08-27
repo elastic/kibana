@@ -73,16 +73,16 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async openAdvancedEditor() {
-      this.assertAdvancedEditorSwitchExists();
+      await this.assertAdvancedEditorSwitchExists();
       await testSubjects.click('mlAnalyticsCreateJobWizardAdvancedEditorSwitch');
-      this.assertAdvancedEditorSwitchCheckState(true);
-      this.assertAdvancedEditorCodeEditorExists();
+      await this.assertAdvancedEditorSwitchCheckState(true);
+      await this.assertAdvancedEditorCodeEditorExists();
     },
 
     async closeAdvancedEditor() {
-      this.assertAdvancedEditorSwitchExists();
+      await this.assertAdvancedEditorSwitchExists();
       await testSubjects.click('mlAnalyticsCreateJobWizardAdvancedEditorSwitch');
-      this.assertAdvancedEditorSwitchCheckState(false);
+      await this.assertAdvancedEditorSwitchCheckState(false);
       await testSubjects.missingOrFail('mlAnalyticsCreateJobWizardAdvancedEditorCodeEditor');
     },
 
@@ -553,12 +553,12 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
 
     async assertValidationCalloutsExists() {
       await retry.tryForTime(4000, async () => {
-        await testSubjects.existOrFail('mlValidationCallout');
+        await testSubjects.existOrFail('~mlValidationCallout');
       });
     },
 
     async assertAllValidationCalloutsPresent(expectedNumCallouts: number) {
-      const validationCallouts = await testSubjects.findAll('mlValidationCallout');
+      const validationCallouts = await testSubjects.findAll('~mlValidationCallout');
       expect(validationCallouts.length).to.eql(expectedNumCallouts);
     },
 

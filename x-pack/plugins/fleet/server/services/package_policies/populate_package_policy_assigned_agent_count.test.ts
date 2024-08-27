@@ -54,7 +54,7 @@ describe('When using populatePackagePolicyAssignedAgentCount()', () => {
 
     packagePolicies = Array.from({ length: 15 }, (_, n) => {
       const now = new Date().toISOString();
-
+      const policyId = `agent-policy-id-${n % 2 > 0 ? 'a' : 'b'}`;
       return {
         id: `package-policy-${n}`,
         name: `Package Policy ${n}`,
@@ -63,7 +63,8 @@ describe('When using populatePackagePolicyAssignedAgentCount()', () => {
         created_by: 'elastic',
         updated_at: now,
         updated_by: 'elastic',
-        policy_id: `agent-policy-id-${n % 2 > 0 ? 'a' : 'b'}`,
+        policy_id: policyId,
+        policy_ids: [policyId],
         enabled: true,
         inputs: [],
         namespace: 'default',

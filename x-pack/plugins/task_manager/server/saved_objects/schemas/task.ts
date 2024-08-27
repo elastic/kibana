@@ -38,3 +38,7 @@ export const taskSchemaV1 = schema.object({
   ]),
   version: schema.maybe(schema.string()),
 });
+
+export const taskSchemaV2 = taskSchemaV1.extends({
+  partition: schema.maybe(schema.number()),
+});

@@ -67,7 +67,7 @@ export class DrawFeatureControl extends Component<Props, {}> {
     } catch (error) {
       getToasts().addWarning(
         i18n.translate('xpack.maps.drawFeatureControl.unableToCreateFeature', {
-          defaultMessage: `Unable to create feature, error: '{errorMsg}'.`,
+          defaultMessage: `Unable to create feature, error: ''{errorMsg}''.`,
           values: {
             errorMsg: error.message,
           },
@@ -121,7 +121,7 @@ export class DrawFeatureControl extends Component<Props, {}> {
     } catch (error) {
       getToasts().addWarning(
         i18n.translate('xpack.maps.drawFeatureControl.unableToDeleteFeature', {
-          defaultMessage: `Unable to delete feature, error: '{errorMsg}'.`,
+          defaultMessage: `Unable to delete feature, error: ''{errorMsg}''.`,
           values: {
             errorMsg: error.message,
           },

@@ -58,6 +58,10 @@ export function CasesCreateViewServiceProvider(
       category,
       owner,
     }: CreateCaseParams) {
+      if (owner) {
+        await this.setSolution(owner);
+      }
+
       await this.setTitle(title);
       await this.setDescription(description);
       await this.setTags(tag);
@@ -68,10 +72,6 @@ export function CasesCreateViewServiceProvider(
 
       if (severity !== CaseSeverity.LOW) {
         await this.setSeverity(severity);
-      }
-
-      if (owner) {
-        await this.setSolution(owner);
       }
 
       await this.submitCase();
@@ -96,7 +96,8 @@ export function CasesCreateViewServiceProvider(
     },
 
     async setSolution(owner: string) {
-      await testSubjects.click(`${owner}RadioButton`);
+      await testSubjects.click('caseOwnerSuperSelect');
+      await testSubjects.click(`${owner}OwnerOption`);
     },
 
     async setSeverity(severity: CaseSeverity) {

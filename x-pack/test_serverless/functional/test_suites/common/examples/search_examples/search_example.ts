@@ -20,27 +20,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.svlCommonPage.loginAsAdmin();
     });
 
-    describe('with bfetch', () => {
-      testSearchExample();
-    });
+    // bfetch is disabled in serverless
+    // describe('with bfetch', () => {
+    //   testSearchExample();
+    // });
 
     describe('no bfetch', () => {
-      const kibanaServer = getService('kibanaServer');
-      before(async () => {
-        await kibanaServer.uiSettings.replace({
-          'bfetch:disable': true,
-        });
-      });
-      after(async () => {
-        await kibanaServer.uiSettings.unset('bfetch:disable');
-      });
+      // No need to disable since it is disabled in serverless.yml
+      // const kibanaServer = getService('kibanaServer');
+      // before(async () => {
+      //   await kibanaServer.uiSettings.replace({
+      //     'bfetch:disable': true,
+      //   });
+      // });
+      // after(async () => {
+      //   await kibanaServer.uiSettings.unset('bfetch:disable');
+      // });
+      const appId = 'searchExamples';
 
-      testSearchExample();
-    });
-
-    const appId = 'searchExamples';
-
-    function testSearchExample() {
       before(async function () {
         await PageObjects.common.navigateToApp(appId, { insertTimestamp: false });
         await comboBox.setCustom('dataViewSelector', 'logstash-*');
@@ -98,6 +95,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const text: string = await textEl.getVisibleText();
         expect(text).to.contain('Watch out!');
       });
-    }
+    });
   });
 }

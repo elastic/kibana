@@ -44,7 +44,7 @@ export const ProfileQueryEditor = memo(() => {
 
   const dispatch = useProfilerActionContext();
 
-  const { getLicenseStatus, notifications, location } = useAppContext();
+  const { getLicenseStatus, notifications, location, ...startServices } = useAppContext();
 
   const queryParams = new URLSearchParams(location.search);
   const indexName = queryParams.get('index');
@@ -122,6 +122,7 @@ export const ProfileQueryEditor = memo(() => {
           onEditorReady={onEditorReady}
           licenseEnabled={licenseEnabled}
           initialValue={searchProfilerQuery ? searchProfilerQuery : INITIAL_EDITOR_VALUE}
+          {...startServices}
         />
       </EuiFlexItem>
 

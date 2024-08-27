@@ -56,7 +56,7 @@ export function NavControl({}: {}) {
           })
         : undefined;
     },
-    [service, hasBeenOpened]
+    [service, hasBeenOpened, notifications.toasts]
   );
 
   const [isOpen, setIsOpen] = useState(false);
@@ -67,6 +67,7 @@ export function NavControl({}: {}) {
 
   useEffect(() => {
     const conversationSubscription = service.conversations.predefinedConversation$.subscribe(() => {
+      keyRef.current = v4();
       setHasBeenOpened(true);
       setIsOpen(true);
     });

@@ -29,6 +29,17 @@ export async function retrieveFields(
   if (!callbacks || commands.length < 1) {
     return new Map();
   }
+  // Do not fetch fields, if query has only one source command and that command
+  // does not require fields.
+  if (commands.length === 1) {
+    switch (commands[0].name) {
+      case 'from':
+      case 'show':
+      case 'row': {
+        return new Map();
+      }
+    }
+  }
   if (commands[0].name === 'row') {
     return new Map();
   }

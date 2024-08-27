@@ -7,7 +7,7 @@
  */
 
 import type { PaletteOutput } from '@kbn/coloring';
-import { LayoutDirection, MetricWTrend } from '@elastic/charts';
+import { LayoutDirection, MetricStyle, MetricWTrend } from '@elastic/charts';
 import { $Values } from '@kbn/utility-types';
 import {
   Datatable,
@@ -38,6 +38,10 @@ export interface MetricArguments {
   subtitle?: string;
   secondaryPrefix?: string;
   progressDirection?: LayoutDirection;
+  titlesTextAlign: MetricStyle['titlesTextAlign'];
+  valuesTextAlign: MetricStyle['valuesTextAlign'];
+  iconAlign: MetricStyle['iconAlign'];
+  valueFontSize: MetricStyle['valueFontSize'];
   color?: string;
   icon?: string;
   palette?: PaletteOutput<CustomPaletteState>;

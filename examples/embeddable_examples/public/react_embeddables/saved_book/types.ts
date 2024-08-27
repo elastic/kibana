@@ -45,6 +45,6 @@ export interface BookRuntimeState
     Partial<BookByReferenceSerializedState>,
     SerializedTitles {}
 
-export type BookApi = DefaultEmbeddableApi<BookSerializedState> &
+export type BookApi = DefaultEmbeddableApi<BookSerializedState, BookRuntimeState> &
   HasEditCapabilities &
-  HasInPlaceLibraryTransforms;
+  HasInPlaceLibraryTransforms<BookRuntimeState>;

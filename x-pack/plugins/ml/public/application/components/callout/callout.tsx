@@ -55,7 +55,7 @@ const Message: FC<Pick<CalloutMessage, 'text' | 'url'>> = ({ text, url }) => (
 export const Callout: FC<CalloutMessage> = ({ heading, status, text, url }) => (
   <>
     <EuiCallOut
-      data-test-subj={'mlValidationCallout'}
+      data-test-subj={`mlValidationCallout ${status}`}
       // @ts-ignore
       color={statusToEuiColor(status)}
       size="s"

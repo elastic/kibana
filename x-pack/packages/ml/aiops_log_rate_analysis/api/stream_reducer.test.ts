@@ -9,19 +9,20 @@ import { significantTerms } from '@kbn/aiops-test-utils/artificial_logs/signific
 import { finalSignificantItemGroups } from '@kbn/aiops-test-utils/artificial_logs/final_significant_item_groups';
 
 import {
-  addSignificantItemsAction,
-  addSignificantItemsGroupAction,
-  resetAllAction,
-  resetGroupsAction,
-  updateLoadingStateAction,
-} from './actions';
-import { initialState, streamReducer } from './stream_reducer';
+  addSignificantItems,
+  addSignificantItemsGroup,
+  resetResults,
+  resetGroups,
+  updateLoadingState,
+  getDefaultState,
+  streamReducer,
+} from './stream_reducer';
 
 describe('streamReducer', () => {
   it('updates loading state', () => {
     const state = streamReducer(
-      initialState,
-      updateLoadingStateAction({ ccsWarning: true, loaded: 50, loadingState: 'Loaded 50%' })
+      getDefaultState(),
+      updateLoadingState({ ccsWarning: true, loaded: 50, loadingState: 'Loaded 50%' })
     );
 
     expect(state).toEqual({
@@ -37,8 +38,8 @@ describe('streamReducer', () => {
 
   it('adds significant item, then resets all state again', () => {
     const state1 = streamReducer(
-      initialState,
-      addSignificantItemsAction([
+      getDefaultState(),
+      addSignificantItems([
         {
           key: 'the-field-name:the-field-value',
           type: 'keyword',
@@ -57,26 +58,23 @@ describe('streamReducer', () => {
 
     expect(state1.significantItems).toHaveLength(1);
 
-    const state2 = streamReducer(state1, resetAllAction());
+    const state2 = streamReducer(state1, resetResults());
 
     expect(state2.significantItems).toHaveLength(0);
   });
 
   it('adds significant items and groups, then resets groups only', () => {
-    const state1 = streamReducer(initialState, addSignificantItemsAction(significantTerms));
+    const state1 = streamReducer(getDefaultState(), addSignificantItems(significantTerms));
 
     expect(state1.significantItems).toHaveLength(4);
     expect(state1.significantItemsGroups).toHaveLength(0);
 
-    const state2 = streamReducer(
-      state1,
-      addSignificantItemsGroupAction(finalSignificantItemGroups)
-    );
+    const state2 = streamReducer(state1, addSignificantItemsGroup(finalSignificantItemGroups));
 
     expect(state2.significantItems).toHaveLength(4);
     expect(state2.significantItemsGroups).toHaveLength(4);
 
-    const state3 = streamReducer(state2, resetGroupsAction());
+    const state3 = streamReducer(state2, resetGroups());
 
     expect(state3.significantItems).toHaveLength(4);
     expect(state3.significantItemsGroups).toHaveLength(0);

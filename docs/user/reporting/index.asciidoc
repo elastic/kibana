@@ -73,9 +73,15 @@ to the {es} {ref}/index-lifecycle-management.html[{ilm-init} documentation].
 
 [float]
 [[csv-limitations]]
-=== CSV reports limitations
+=== CSV report limitations
 
 include::reporting-csv-limitations.asciidoc[]
+
+[float]
+[[pdf-limitations]]
+=== PNG/PDF report limitations
+
+include::reporting-pdf-limitations.asciidoc[]
 
 [float]
 [[share-a-direct-link]]
@@ -171,3 +177,5 @@ NOTE: *Public URL* is available only when anonymous access is configured and you
 
 include::automating-report-generation.asciidoc[]
 include::reporting-troubleshooting.asciidoc[]
+include::reporting-csv-troubleshooting.asciidoc[leveloffset=+1]
+include::reporting-pdf-troubleshooting.asciidoc[leveloffset=+1]

@@ -19,6 +19,19 @@ export function isRootPrivilegesRequired(packageInfo: PackageInfo) {
   );
 }
 
+export function getRootPrivilegedDataStreams(
+  packageInfo: PackageInfo
+): Array<{ name: string; title: string }> {
+  if (packageInfo.agent?.privileges?.root) {
+    return [];
+  }
+  return (
+    packageInfo.data_streams
+      ?.filter((d) => d.agent?.privileges?.root)
+      .map((ds) => ({ name: ds.name, title: ds.title })) ?? []
+  );
+}
+
 export function getRootIntegrations(
   packagePolicies: PackagePolicy[]
 ): Array<{ name: string; title: string }> {

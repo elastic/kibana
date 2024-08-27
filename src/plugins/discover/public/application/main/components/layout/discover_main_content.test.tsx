@@ -14,7 +14,6 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { DataView } from '@kbn/data-plugin/common';
 import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import {
-  AvailableFields$,
   DataDocuments$,
   DataMain$,
   DataTotalHits$,
@@ -75,11 +74,6 @@ const mountComponent = async ({
     result: esHitsMock.map((esHit) => buildDataTableRecord(esHit, dataViewMock)),
   }) as DataDocuments$;
 
-  const availableFields$ = new BehaviorSubject({
-    fetchStatus: FetchStatus.COMPLETE,
-    fields: [] as string[],
-  }) as AvailableFields$;
-
   const totalHits$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
     result: Number(esHitsMock.length),
@@ -90,7 +84,6 @@ const mountComponent = async ({
     main$,
     documents$,
     totalHits$,
-    availableFields$,
   };
   stateContainer.dataState.data$ = savedSearchData$;
   const dataView = stateContainer.savedSearchState

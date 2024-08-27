@@ -41,7 +41,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.clickNewDashboard();
       await dashboardAddPanel.addVisualization('Rendering-Test:-animal-sounds-pie');
-      await PageObjects.dashboard.saveDashboard('legacyTest', { waitDialogIsClosed: true });
+      await PageObjects.dashboard.saveDashboard('legacyTest', {
+        waitDialogIsClosed: true,
+        saveAsNew: true,
+      });
       await PageObjects.header.waitUntilLoadingHasFinished();
       const currentUrl = await browser.getCurrentUrl();
       await log.debug(`Current url is ${currentUrl}`);
@@ -90,7 +93,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await PageObjects.visualize.saveVisualizationExpectSuccess('legacy url markdown');
 
-        (await find.byLinkText('abc')).click();
+        await (await find.byLinkText('abc')).click();
 
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.timePicker.setDefaultDataRange();
@@ -112,7 +115,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.dashboard.navigateToApp();
         await PageObjects.dashboard.clickNewDashboard();
         await dashboardAddPanel.addVisualization('legacy url markdown');
-        (await find.byLinkText('abc')).click();
+        await (await find.byLinkText('abc')).click();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await elasticChart.setNewChartUiDebugFlag(true);
         await PageObjects.timePicker.setDefaultDataRange();

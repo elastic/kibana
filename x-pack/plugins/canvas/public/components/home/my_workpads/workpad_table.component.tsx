@@ -164,7 +164,7 @@ const strings = {
     }),
   getLoadWorkpadArialLabel: (workpadName: string) =>
     i18n.translate('xpack.canvas.workpadTable.loadWorkpadArialLabel', {
-      defaultMessage: `Load workpad '{workpadName}'`,
+      defaultMessage: `Load workpad ''{workpadName}''`,
       values: {
         workpadName,
       },

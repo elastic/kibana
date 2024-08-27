@@ -277,7 +277,7 @@ export function validateServiceToken(value: string) {
   if (!value || value === '') {
     return [
       i18n.translate('xpack.fleet.settings.outputForm.serviceTokenRequiredErrorMessage', {
-        defaultMessage: 'Service Token is required',
+        defaultMessage: 'Service token is required',
       }),
     ];
   }

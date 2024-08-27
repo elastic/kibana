@@ -28,6 +28,7 @@ import {
   renderMustacheString,
 } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/types';
+import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { AdditionalEmailServices } from '../../../common';
 import { sendEmail, JSON_TRANSPORT_SERVICE, SendEmailOptions, Transport } from './send_email';
 import { portSchema } from '../lib/schemas';
@@ -370,12 +371,23 @@ async function executor(
     const message = i18n.translate('xpack.stackConnectors.email.errorSendingErrorMessage', {
       defaultMessage: 'error sending email',
     });
-    return {
+    const errorResult: ConnectorTypeExecutorResult<unknown> = {
       status: 'error',
       actionId,
       message,
       serviceMessage: err.message,
     };
+
+    // Mark 4xx and 5xx errors as user errors
+    const statusCode = err?.response?.status;
+    if (statusCode >= 400 && statusCode < 600) {
+      return {
+        ...errorResult,
+        errorSource: TaskErrorSource.USER,
+      };
+    }
+
+    return errorResult;
   }
 
   return { status: 'ok', data: result, actionId };

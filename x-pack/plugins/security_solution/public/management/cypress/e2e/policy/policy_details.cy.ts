@@ -14,7 +14,7 @@ import {
   setCustomProtectionUpdatesNote,
 } from '../../tasks/endpoint_policy';
 import { login, ROLE } from '../../tasks/login';
-import { disableExpandableFlyoutAdvancedSettings, loadPage } from '../../tasks/common';
+import { loadPage } from '../../tasks/common';
 
 describe(
   'Policy Details',
@@ -22,10 +22,8 @@ describe(
     tags: [
       '@ess',
       '@serverless',
-      // Not supported in serverless!
-      // The `disableExpandableFlyoutAdvancedSettings()` fails because the API
-      // `internal/kibana/settings` is not accessible in serverless
-      '@brokenInServerless',
+      // skipped on MKI since feature flags are not supported there
+      '@skipInServerlessMKI',
     ],
     env: {
       ftrConfig: {
@@ -63,7 +61,6 @@ describe(
 
         beforeEach(() => {
           login();
-          disableExpandableFlyoutAdvancedSettings();
           getEndpointIntegrationVersion().then((version) => {
             createAgentPolicyTask(version).then((data) => {
               indexedPolicy = data;
@@ -171,7 +168,6 @@ describe(
 
         beforeEach(() => {
           login();
-          disableExpandableFlyoutAdvancedSettings();
           getEndpointIntegrationVersion().then((version) => {
             createAgentPolicyTask(version).then((data) => {
               indexedPolicy = data;
@@ -225,7 +221,6 @@ describe(
 
         beforeEach(() => {
           login();
-          disableExpandableFlyoutAdvancedSettings();
           getEndpointIntegrationVersion().then((version) => {
             createAgentPolicyTask(version).then((data) => {
               indexedPolicy = data;
@@ -275,7 +270,6 @@ describe(
 
           beforeEach(() => {
             login(ROLE.t3_analyst);
-            disableExpandableFlyoutAdvancedSettings();
             getEndpointIntegrationVersion().then((version) => {
               createAgentPolicyTask(version).then((data) => {
                 indexedPolicy = data;
@@ -323,7 +317,6 @@ describe(
 
           beforeEach(() => {
             login(ROLE.t3_analyst);
-            disableExpandableFlyoutAdvancedSettings();
             getEndpointIntegrationVersion().then((version) => {
               createAgentPolicyTask(version).then((data) => {
                 indexedPolicy = data;
@@ -374,7 +367,6 @@ describe(
 
         beforeEach(() => {
           login();
-          disableExpandableFlyoutAdvancedSettings();
           getEndpointIntegrationVersion().then((version) => {
             createAgentPolicyTask(version).then((data) => {
               indexedPolicy = data;

@@ -84,3 +84,8 @@ const waitUntil = (subject, fn, options = {}) => {
 };
 
 Cypress.Commands.add('waitUntil', { prevSubject: 'optional' }, waitUntil);
+
+// Sets non-default space id
+Cypress.Commands.add('setCurrentSpace', (spaceId) => cy.state('currentSpaceId', spaceId));
+// Reads non-default space id
+Cypress.Commands.add('currentSpace', () => cy.state('currentSpaceId'));

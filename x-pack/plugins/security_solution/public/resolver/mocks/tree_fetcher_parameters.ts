@@ -15,5 +15,6 @@ export function mockTreeFetcherParameters(): TreeFetcherParameters {
     databaseDocumentID: '',
     indices: [],
     filters: {},
+    agentId: '',
   };
 }

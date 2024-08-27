@@ -89,10 +89,8 @@ const createEventSearchResponseMock = (): CrowdstrikeEventSearchResponseMock => 
         _id: '1-2-3',
         _index: 'logs-crowdstrike.fdr-default',
         _source: {
-          crowdstrike: {
-            event: {
-              HostName: 'Crowdstrike-1460',
-            },
+          host: {
+            name: 'Crowdstrike-1460',
           },
         },
       },

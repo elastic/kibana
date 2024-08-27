@@ -29,6 +29,7 @@ export enum RULE_PREVIEW_FROM {
 }
 
 export const PREBUILT_RULES_PACKAGE_NAME = 'security_detection_engine';
+export const ENDPOINT_PACKAGE_NAME = 'endpoint';
 
 /**
  * Rule signature id (`rule.rule_id`) of the prebuilt "Endpoint Security" rule.
@@ -47,6 +48,7 @@ export const SUPPRESSIBLE_ALERT_RULES: Type[] = [
   'new_terms',
   'threat_match',
   'eql',
+  'machine_learning',
 ];
 
 export const SUPPRESSIBLE_ALERT_RULES_GA: Type[] = ['saved_query', 'query'];

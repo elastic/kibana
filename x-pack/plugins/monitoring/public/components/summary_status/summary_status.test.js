@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { renderWithIntl } from '@kbn/test-jest-helpers';
+import { renderWithI18nProvider } from '@kbn/test-jest-helpers';
 import { SummaryStatus } from './summary_status';
 
 describe('Summary Status Component', () => {
@@ -27,7 +27,7 @@ describe('Summary Status Component', () => {
       status: 'green',
     };
 
-    expect(renderWithIntl(<SummaryStatus {...props} />)).toMatchSnapshot();
+    expect(renderWithI18nProvider(<SummaryStatus {...props} />)).toMatchSnapshot();
   });
 
   it('should allow label to be optional', () => {
@@ -46,7 +46,7 @@ describe('Summary Status Component', () => {
       status: 'yellow',
     };
 
-    expect(renderWithIntl(<SummaryStatus {...props} />)).toMatchSnapshot();
+    expect(renderWithI18nProvider(<SummaryStatus {...props} />)).toMatchSnapshot();
   });
 
   it('should allow status to be optional', () => {
@@ -65,6 +65,6 @@ describe('Summary Status Component', () => {
       ],
     };
 
-    expect(renderWithIntl(<SummaryStatus {...props} />)).toMatchSnapshot();
+    expect(renderWithI18nProvider(<SummaryStatus {...props} />)).toMatchSnapshot();
   });
 });

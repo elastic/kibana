@@ -17,38 +17,26 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { omit } from 'lodash';
-import React, { useCallback, useMemo, useState, FC, PropsWithChildren } from 'react';
+import React, { PropsWithChildren, useCallback, useMemo, useState } from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import {
   AggregationType,
-  builtInComparators,
   IErrorObject,
   OfExpression,
   ThresholdExpression,
   WhenExpression,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { DataViewBase } from '@kbn/es-query';
 import useToggle from 'react-use/lib/useToggle';
-import { Aggregators, Comparator } from '../../../../common/alerting/metrics';
+import { COMPARATORS } from '@kbn/alerting-comparators';
+import { convertToBuiltInComparators } from '@kbn/observability-plugin/common';
+import { Aggregators } from '../../../../common/alerting/metrics';
+import { useMetricsDataViewContext } from '../../../containers/metrics_source';
 import { decimalToPct, pctToDecimal } from '../../../../common/utils/corrected_percent_convert';
-import { DerivedIndexPattern } from '../../../containers/metrics_source';
 import { AGGREGATION_TYPES, MetricExpression } from '../types';
 import { CustomEquationEditor } from './custom_equation';
 import { CUSTOM_EQUATION } from '../i18n_strings';
 
-const customComparators = {
-  ...builtInComparators,
-  [Comparator.OUTSIDE_RANGE]: {
-    text: i18n.translate('xpack.infra.metrics.alertFlyout.outsideRangeLabel', {
-      defaultMessage: 'Is not between',
-    }),
-    value: Comparator.OUTSIDE_RANGE,
-    requiredValues: 2,
-  },
-};
-
 interface ExpressionRowProps {
-  fields: DerivedIndexPattern['fields'];
   expressionId: number;
   expression: MetricExpression;
   errors: IErrorObject;
@@ -56,7 +44,6 @@ interface ExpressionRowProps {
   addExpression(): void;
   remove(id: number): void;
   setRuleParams(id: number, params: MetricExpression): void;
-  dataView: DataViewBase;
 }
 
 const NegativeHorizontalMarginDiv = euiStyled.div`margin: 0 -4px;`;
@@ -69,25 +56,22 @@ const StyledHealth = euiStyled(EuiHealth)`
   margin-left: 4px;
 `;
 
-export const ExpressionRow: FC<PropsWithChildren<ExpressionRowProps>> = (props) => {
+export const ExpressionRow = ({
+  children,
+  setRuleParams,
+  expression,
+  errors,
+  expressionId,
+  remove,
+  canDelete,
+}: PropsWithChildren<ExpressionRowProps>) => {
   const [isExpanded, toggle] = useToggle(true);
-
-  const {
-    dataView,
-    children,
-    setRuleParams,
-    expression,
-    errors,
-    expressionId,
-    remove,
-    fields,
-    canDelete,
-  } = props;
+  const { metricsView } = useMetricsDataViewContext();
 
   const {
     aggType = AGGREGATION_TYPES.MAX,
     metric,
-    comparator = Comparator.GT,
+    comparator = COMPARATORS.GREATER_THAN,
     threshold = [],
     warningThreshold = [],
     warningComparator,
@@ -121,14 +105,14 @@ export const ExpressionRow: FC<PropsWithChildren<ExpressionRowProps>> = (props) 
 
   const updateComparator = useCallback(
     (c?: string) => {
-      setRuleParams(expressionId, { ...expression, comparator: c as Comparator });
+      setRuleParams(expressionId, { ...expression, comparator: c as COMPARATORS });
     },
     [expressionId, expression, setRuleParams]
   );
 
   const updateWarningComparator = useCallback(
     (c?: string) => {
-      setRuleParams(expressionId, { ...expression, warningComparator: c as Comparator });
+      setRuleParams(expressionId, { ...expression, warningComparator: c as COMPARATORS });
     },
     [expressionId, expression, setRuleParams]
   );
@@ -209,7 +193,7 @@ export const ExpressionRow: FC<PropsWithChildren<ExpressionRowProps>> = (props) 
     />
   );
 
-  const normalizedFields = fields.map((f) => ({
+  const normalizedFields = (metricsView?.fields ?? []).map((f) => ({
     normalizedType: f.type,
     name: f.name,
   }));
@@ -341,7 +325,6 @@ export const ExpressionRow: FC<PropsWithChildren<ExpressionRowProps>> = (props) 
                   aggregationTypes={aggregationType}
                   onChange={handleCustomMetricChange}
                   errors={errors}
-                  dataView={dataView}
                 />
               </EuiFlexGroup>
               <EuiSpacer size={'s'} />
@@ -380,14 +363,18 @@ const ThresholdElement: React.FC<{
     if (isMetricPct) return threshold.map((v) => decimalToPct(v));
     return threshold;
   }, [threshold, isMetricPct]);
-
+  const thresholdComparator = useCallback(() => {
+    if (!comparator) return COMPARATORS.GREATER_THAN;
+    // Check if the rule had the legacy OUTSIDE_RANGE inside its params.
+    // Then, change it on-the-fly to NOT_BETWEEN
+    return convertToBuiltInComparators(comparator);
+  }, [comparator]);
   return (
     <>
       <StyledExpression>
         <ThresholdExpression
-          thresholdComparator={comparator || Comparator.GT}
+          thresholdComparator={thresholdComparator()}
           threshold={displayedThreshold}
-          customComparators={customComparators}
           onChangeSelectedThresholdComparator={updateComparator}
           onChangeSelectedThreshold={updateThreshold}
           errors={errors}

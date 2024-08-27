@@ -14,13 +14,11 @@ export function getPlotValues({
   width,
   xMin = 0,
   xMax,
-  height,
   margins,
 }: {
   width: number;
   xMin?: number;
   xMax: number;
-  height: number;
   margins: Margins;
 }) {
   const xScale = scaleLinear()
@@ -28,7 +26,6 @@ export function getPlotValues({
     .range([margins.left, width - margins.right]);
 
   return {
-    height,
     margins,
     tickValues: xScale.ticks(7),
     width,

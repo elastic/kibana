@@ -17,10 +17,10 @@ import {
 import { getCustomMetricLabel } from '../../../../../../common/formatters/get_custom_metric_label';
 import { SnapshotCustomMetricInput } from '../../../../../../common/http_api';
 import { useSourceContext } from '../../../../../containers/metrics_source';
-import { InfraWaffleMapNode } from '../../../../../lib/lib';
+import { InfraWaffleMapNode } from '../../../../../common/inventory/types';
 import { useSnapshot } from '../../hooks/use_snaphot';
 import { createInventoryMetricFormatter } from '../../lib/create_inventory_metric_formatter';
-import { SNAPSHOT_METRIC_TRANSLATIONS } from '../../../../../../common/inventory_models/intl_strings';
+import { getSnapshotMetricTranslations } from '../../../../../../common/inventory_models/intl_strings';
 import { useWaffleOptionsContext } from '../../hooks/use_waffle_options';
 import { createFormatterForMetric } from '../../../metrics_explorer/components/helpers/create_formatter_for_metric';
 
@@ -52,26 +52,21 @@ export const ConditionalToolTip = ({ node, nodeType, currentTime }: Props) => {
       },
     },
   });
-  const { nodes, loading } = useSnapshot(
-    {
-      filterQuery: query,
-      metrics: requestMetrics,
-      groupBy: [],
-      nodeType,
-      sourceId,
-      currentTime: requestCurrentTime.current,
-      accountId: '',
-      region: '',
-    },
-    {
-      abortable: true,
-    }
-  );
+  const { nodes, loading } = useSnapshot({
+    filterQuery: query,
+    metrics: requestMetrics,
+    groupBy: [],
+    nodeType,
+    sourceId,
+    currentTime: requestCurrentTime.current,
+    accountId: '',
+    region: '',
+  });
 
   const dataNode = first(nodes);
   const metrics = (dataNode && dataNode.metrics) || [];
   return (
-    <div style={{ minWidth: 200 }} data-test-subj={`conditionalTooltipContent-${node.name}`}>
+    <div style={{ minWidth: 220 }} data-test-subj={`conditionalTooltipContent-${node.name}`}>
       <div
         style={{
           borderBottom: `${euiTheme.border.thin}`,
@@ -91,7 +86,7 @@ export const ConditionalToolTip = ({ node, nodeType, currentTime }: Props) => {
       ) : (
         metrics.map((metric) => {
           const metricName = SnapshotMetricTypeRT.is(metric.name) ? metric.name : 'custom';
-          const name = SNAPSHOT_METRIC_TRANSLATIONS[metricName] || metricName;
+          const name = getSnapshotMetricTranslations(nodeType)[metricName] || metricName;
           // if custom metric, find field and label from waffleOptionsContext result
           // because useSnapshot does not return it
           const customMetric =

@@ -26,7 +26,7 @@ export interface ReturnQueryAlerts<Hit, Aggs> {
   refetch: Func | null;
 }
 
-type AlertsQueryName = typeof ALERTS_QUERY_NAMES[keyof typeof ALERTS_QUERY_NAMES];
+type AlertsQueryName = (typeof ALERTS_QUERY_NAMES)[keyof typeof ALERTS_QUERY_NAMES];
 
 type FetchMethod = typeof fetchQueryAlerts | typeof fetchQueryRuleRegistryAlerts;
 export interface AlertsQueryParams {

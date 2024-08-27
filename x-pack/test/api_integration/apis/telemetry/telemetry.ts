@@ -25,9 +25,9 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
+import type { SecurityService } from '@kbn/test-suites-src/common/services/security/security';
 import basicClusterFixture from './fixtures/basiccluster.json';
 import multiClusterFixture from './fixtures/multicluster.json';
-import type { SecurityService } from '../../../../../test/common/services/security/security';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 function omitCacheDetails(usagePayload: Array<Record<string, unknown>>) {
@@ -40,6 +40,22 @@ function updateFixtureTimestamps(fixture: Array<Record<string, unknown>>, timest
 
 function getCacheDetails(body: UnencryptedTelemetryPayload): CacheDetails[] {
   return body.map(({ stats }) => (stats as UsageStatsPayload).cacheDetails);
+}
+
+function updateClusterUuidInLogstashStats(
+  clusterUuid: string,
+  payload: Array<Record<string, any>>
+) {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  return payload.map(({ stack_stats, ...item }) => {
+    const { logstash } = stack_stats;
+    if (logstash) {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      const { cluster_stats } = logstash;
+      cluster_stats.monitoringClusterUuid = clusterUuid;
+    }
+    return { stack_stats, ...item };
+  });
 }
 
 /**
@@ -161,7 +177,12 @@ export default function ({ getService }: FtrProviderContext) {
         expect(monitoring).length(3);
         expect(localXPack.collectionSource).to.eql('local_xpack');
 
-        expect(omitCacheDetails(monitoring)).to.eql(
+        const withoutCacheDetailsMonitoring = omitCacheDetails(monitoring);
+        const lsClusterUuidChangedMonitoring = updateClusterUuidInLogstashStats(
+          'integrationTestClusterUuid',
+          withoutCacheDetailsMonitoring
+        );
+        expect(lsClusterUuidChangedMonitoring).to.eql(
           updateFixtureTimestamps(multiClusterFixture, timestamp)
         );
       });

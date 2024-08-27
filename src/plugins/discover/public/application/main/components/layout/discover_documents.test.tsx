@@ -31,6 +31,7 @@ const customisationService = createCustomizationService();
 
 async function mountComponent(fetchStatus: FetchStatus, hits: EsHitRecord[]) {
   const services = discoverServiceMock;
+
   services.data.query.timefilter.timefilter.getTime = () => {
     return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
   };
@@ -69,6 +70,10 @@ async function mountComponent(fetchStatus: FetchStatus, hits: EsHitRecord[]) {
 }
 
 describe('Discover documents layout', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   test('render loading when loading and no documents', async () => {
     const component = await mountComponent(FetchStatus.LOADING, []);
     expect(component.find('.dscDocuments__loading').exists()).toBeTruthy();
@@ -109,15 +114,10 @@ describe('Discover documents layout', () => {
   });
 
   test('should render customisations', async () => {
-    const customControlColumnsConfiguration = () => ({
-      leadingControlColumns: [],
-      trailingControlColumns: [],
-    });
-
     const customization: DiscoverCustomization = {
       id: 'data_table',
       logsEnabled: true,
-      customControlColumnsConfiguration,
+      rowAdditionalLeadingControls: [],
     };
 
     customisationService.set(customization);
@@ -125,10 +125,28 @@ describe('Discover documents layout', () => {
     const discoverGridComponent = component.find(DiscoverGrid);
     expect(discoverGridComponent.exists()).toBeTruthy();
 
-    expect(discoverGridComponent.prop('customControlColumnsConfiguration')).toEqual(
-      customControlColumnsConfiguration
+    expect(discoverGridComponent.prop('rowAdditionalLeadingControls')).toBe(
+      customization.rowAdditionalLeadingControls
     );
     expect(discoverGridComponent.prop('externalCustomRenderers')).toBeDefined();
     expect(discoverGridComponent.prop('customGridColumnsConfiguration')).toBeDefined();
+  });
+
+  describe('context awareness', () => {
+    it('should pass cell renderers from profile', async () => {
+      customisationService.set({
+        id: 'data_table',
+        logsEnabled: true,
+      });
+      await discoverServiceMock.profilesManager.resolveRootProfile({ solutionNavId: 'test' });
+      const component = await mountComponent(FetchStatus.COMPLETE, esHitsMock);
+      const discoverGridComponent = component.find(DiscoverGrid);
+      expect(discoverGridComponent.exists()).toBeTruthy();
+      expect(Object.keys(discoverGridComponent.prop('externalCustomRenderers')!)).toEqual([
+        'content',
+        'resource',
+        'rootProfile',
+      ]);
+    });
   });
 });

@@ -7,8 +7,9 @@
 
 import expect from '@kbn/expect';
 import moment from 'moment';
-import { Comparator, MetricExpressionParams } from '@kbn/infra-plugin/common/alerting/metrics';
+import { MetricExpressionParams } from '@kbn/infra-plugin/common/alerting/metrics';
 import { getElasticsearchMetricQuery } from '@kbn/infra-plugin/server/lib/alerting/metric_threshold/lib/metric_query';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -19,7 +20,7 @@ export default function ({ getService }: FtrProviderContext) {
       aggType,
       timeUnit: 'm',
       threshold: [0],
-      comparator: Comparator.GT_OR_EQ,
+      comparator: COMPARATORS.GREATER_THAN_OR_EQUALS,
       timeSize: 5,
       ...(aggType !== 'count' ? { metric: 'test.metric' } : {}),
     } as MetricExpressionParams);

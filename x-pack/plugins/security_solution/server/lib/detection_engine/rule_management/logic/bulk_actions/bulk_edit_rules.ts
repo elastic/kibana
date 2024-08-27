@@ -6,6 +6,7 @@
  */
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 
 import type { ExperimentalFeatures } from '../../../../../../common';
 import type { BulkActionEditPayload } from '../../../../../../common/api/detection_engine/rule_management';
@@ -21,6 +22,7 @@ import { validateBulkEditRule } from './validations';
 import { bulkEditActionToRulesClientOperation } from './action_to_rules_client_operation';
 
 export interface BulkEditRulesArguments {
+  actionsClient: ActionsClient;
   rulesClient: RulesClient;
   actions: BulkActionEditPayload[];
   filter?: string;
@@ -37,6 +39,7 @@ export interface BulkEditRulesArguments {
  * @returns edited rules and caught errors
  */
 export const bulkEditRules = async ({
+  actionsClient,
   rulesClient,
   ids,
   actions,
@@ -45,7 +48,9 @@ export const bulkEditRules = async ({
   experimentalFeatures,
 }: BulkEditRulesArguments) => {
   const { attributesActions, paramsActions } = splitBulkEditActions(actions);
-  const operations = attributesActions.map(bulkEditActionToRulesClientOperation).flat();
+  const operations = attributesActions
+    .map((attribute) => bulkEditActionToRulesClientOperation(actionsClient, attribute))
+    .flat();
   const result = await rulesClient.bulkEdit({
     ...(ids ? { ids } : { filter: enrichFilterWithRuleTypeMapping(filter) }),
     operations,

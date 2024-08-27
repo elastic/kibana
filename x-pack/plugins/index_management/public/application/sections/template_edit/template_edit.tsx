@@ -177,7 +177,7 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
         title={
           <FormattedMessage
             id="xpack.idxMgmt.editTemplate.editTemplatePageTitle"
-            defaultMessage="Edit template '{name}'"
+            defaultMessage="Edit template ''{name}''"
             values={{ name: decodedTemplateName }}
           />
         }

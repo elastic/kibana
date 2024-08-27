@@ -8,7 +8,7 @@
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('Index Management APIs', function () {
+  describe('Serverless Index Management APIs', function () {
     this.tags(['esGate']);
 
     loadTestFile(require.resolve('./index_templates'));

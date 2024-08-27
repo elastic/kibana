@@ -81,7 +81,8 @@ export const transformESSearchToConversations = (
           return acc;
         }, {}),
         namespace: conversationSchema.namespace,
-        id: hit._id,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        id: hit._id!,
       };
 
       return conversation;

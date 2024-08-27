@@ -1,14 +1,35 @@
-LOCATE
+## LOCATE
 
-Syntax
-Parameters
-string
-An input string
-substring
-A substring to locate in the input string
-start
-The start index
-DescriptionReturns an integer that indicates the position of a keyword substring within another stringSupported types
-Example
-row a = "hello"
-| eval a_ll = locate(a, "ll")
+LOCATE function in ES|QL returns an integer that indicates the position of a keyword substring within another string.
+
+### Syntax
+
+`LOCATE(string, substring, start)`
+
+#### Parameters
+
+- `string`: An input string
+- `substring`: A substring to locate in the input string
+- `start`: The start index
+
+### Examples
+
+Here are a couple of examples of how you can use the LOCATE function in ES|QL:
+
+Example 1:
+
+```esql
+ROW a = "hello"
+| EVAL a_ll = LOCATE(a, "ll")
+```
+
+In this example, the LOCATE function is used to find the position of the substring "ll" in the string "hello". The result would be `3` as "ll" starts at the third position in the string "hello".
+
+Example 2:
+
+```esql
+ROW a = "Elasticsearch Query Language"
+| EVAL a_ll = LOCATE(a, "Query", 5)
+```
+
+In this example, the LOCATE function is used to find the position of the substring "Query" in the string "Elasticsearch Query Language", starting from the fifth position. The result would be `14` as "Query" starts at the fourteenth position in the string "Elasticsearch Query Language".

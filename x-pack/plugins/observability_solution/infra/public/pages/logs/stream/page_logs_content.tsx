@@ -26,6 +26,7 @@ import { useSelector } from '@xstate/react';
 import stringify from 'json-stable-stringify';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
+import { LogsDeprecationCallout } from '../../../components/logs_deprecation_callout';
 import { TimeKey } from '../../../../common/time';
 import { AutoSizer } from '../../../components/auto_sizer';
 import { LogMinimap } from '../../../components/logging/log_minimap';
@@ -233,6 +234,7 @@ export const StreamPageLogsContent = React.memo<{
 
   return (
     <>
+      <LogsDeprecationCallout />
       <WithLogTextviewUrlState />
       <WithFlyoutOptionsUrlState />
       <LogsToolbar />

@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { ENDPOINT_LIST_ID, ENDPOINT_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import {
+  FindEndpointListItemsRequestQuery,
+  FindEndpointListItemsResponse,
+} from '@kbn/securitysolution-endpoint-exceptions-common/api';
 
 import type { ListsPluginRouter } from '../types';
-import {
-  FindEndpointListItemRequestQueryDecoded,
-  findEndpointListItemRequestQuery,
-  findEndpointListItemResponse,
-} from '../../common/api';
 
-import { buildRouteValidation, buildSiemResponse, getExceptionListClient } from './utils';
+import { buildSiemResponse, getExceptionListClient } from './utils';
 
 export const findEndpointListItemRoute = (router: ListsPluginRouter): void => {
   router.versioned
@@ -31,10 +30,7 @@ export const findEndpointListItemRoute = (router: ListsPluginRouter): void => {
       {
         validate: {
           request: {
-            query: buildRouteValidation<
-              typeof findEndpointListItemRequestQuery,
-              FindEndpointListItemRequestQueryDecoded
-            >(findEndpointListItemRequestQuery),
+            query: buildRouteValidationWithZod(FindEndpointListItemsRequestQuery),
           },
         },
         version: '2023-10-31',
@@ -69,12 +65,8 @@ export const findEndpointListItemRoute = (router: ListsPluginRouter): void => {
               statusCode: 404,
             });
           }
-          const [validated, errors] = validate(exceptionListItems, findEndpointListItemResponse);
-          if (errors != null) {
-            return siemResponse.error({ body: errors, statusCode: 500 });
-          } else {
-            return response.ok({ body: validated ?? {} });
-          }
+
+          return response.ok({ body: FindEndpointListItemsResponse.parse(exceptionListItems) });
         } catch (err) {
           const error = transformError(err);
           return siemResponse.error({

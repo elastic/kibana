@@ -1,0 +1,163 @@
+data_stream:
+  dataset: {{data_stream.dataset}}
+interval: {{resource_interval}}
+
+program: {{escape_string program}}
+
+{{#if state}}
+state:
+  {{state}}
+{{/if}}
+redact.delete: {{delete_redacted_fields}}
+{{#if redact_fields}}
+redact.fields:
+{{#each redact_fields as |field|}}
+  - {{field}}
+{{/each}}
+{{/if}}
+
+{{#if regexp}}
+regexp:
+  {{regexp}}
+{{/if}}
+
+{{#if username}}
+auth.basic.user: {{username}}
+{{/if}}
+{{#if password}}
+auth.basic.password: {{password}}
+{{/if}}
+
+{{#unless username}}
+{{#unless password}}
+{{#if digest_username}}
+auth.digest.user: {{digest_username}}
+{{/if}}
+{{#if digest_password}}
+auth.digest.password: {{digest_password}}
+{{#if digest_no_reuse}}
+auth.digest.no_reuse: true
+{{/if}}
+{{/if}}
+{{/unless}}
+{{/unless}}
+
+{{#if pipeline}}
+pipeline: {{pipeline}}
+{{/if}}
+
+{{#unless username}}
+{{#unless password}}
+{{#unless digest_username}}
+{{#unless digest_password}}
+{{#if oauth_id}}
+auth.oauth2.client.id: {{oauth_id}}
+{{/if}}
+{{#if oauth_secret}}
+auth.oauth2.client.secret: {{oauth_secret}}
+{{/if}}
+{{#if oauth_token_url}}
+auth.oauth2.token_url: {{oauth_token_url}}
+{{/if}}
+{{#if oauth_provider}}
+auth.oauth2.provider: {{oauth_provider}}
+{{/if}}
+{{#if oauth_scopes}}
+auth.oauth2.scopes:
+{{#each oauth_scopes as |scope|}}
+  - {{scope}}
+{{/each}}
+{{/if}}
+{{#if oauth_google_credentials_file}}
+auth.oauth2.google.credentials_file: {{oauth_google_credentials_file}}
+{{/if}}
+{{#if oauth_google_credentials_json}}
+auth.oauth2.google.credentials_json: '{{oauth_google_credentials_json}}'
+{{/if}}
+{{#if oauth_google_jwt_file}}
+auth.oauth2.google.jwt_file: {{oauth_google_jwt_file}}
+{{/if}}
+{{#if oauth_google_jwt_json}}
+auth.oauth2.google.jwt_json: {{oauth_google_jwt_json}}
+{{/if}}
+{{#if oauth_google_delegated_account}}
+auth.oauth2.google.delegated_account: {{oauth_google_delegated_account}}
+{{/if}}
+{{#if oauth_azure_tenant_id}}
+auth.oauth2.azure.tenant_id: {{oauth_azure_tenant_id}}
+{{/if}}
+{{#if oauth_azure_resource}}
+auth.oauth2.azure.resource: {{oauth_azure_resource}}
+{{/if}}
+{{#if oauth_okta_jwk_file}}
+auth.oauth2.okta.jwk_file: {{oauth_okta_jwk_file}}
+{{/if}}
+{{#if oauth_okta_jwk_json}}
+auth.oauth2.okta.jwk_json: {{oauth_okta_jwk_json}}
+{{/if}}
+{{#if oauth_okta_jwk_pem}}
+auth.oauth2.okta.jwk_pem: {{oauth_okta_jwk_pem}}
+{{/if}}
+{{#if oauth_endpoint_params}}
+auth.oauth2.endpoint_params: 
+  {{oauth_endpoint_params}}
+{{/if}}
+{{/unless}}
+{{/unless}}
+{{/unless}}
+{{/unless}}
+
+resource.url: {{resource_url}}
+{{#if resource_ssl}}
+resource.ssl: 
+  {{resource_ssl}}
+{{/if}}
+{{#if resource_proxy_url}}
+resource.proxy_url: {{resource_proxy_url}}
+{{/if}}
+{{#if resource_retry_max_attempts}}
+resource.retry.max_attempts: {{resource_retry_max_attempts}}
+{{/if}}
+{{#if resource_retry_wait_min}}
+resource.retry.wait_min: {{resource_retry_wait_min}}
+{{/if}}
+{{#if resource_retry_wait_max}}
+resource.retry.wait_max: {{resource_retry_wait_max}}
+{{/if}}
+{{#if resource_redirect_forward_headers}}
+resource.redirect.forward_headers: {{resource_redirect_forward_headers}}
+{{/if}}
+{{#if resource_redirect_headers_ban_list}}
+resource.redirect.headers_ban_list:
+{{#each resource_redirect_headers_ban_list as |item|}}
+  - {{item}}
+{{/each}}
+{{/if}}
+{{#if resource_redirect_max_redirects}}
+resource.redirect.max_redirects: {{resource_redirect_max_redirects}}
+{{/if}}
+{{#if resource_rate_limit_limit}}
+resource.rate_limit.limit: {{resource_rate_limit_limit}}
+{{/if}}
+{{#if resource_rate_limit_burst}}
+resource.rate_limit.burst: {{resource_rate_limit_burst}}
+{{/if}}
+
+{{#if enable_request_tracer}}
+resource.tracer.filename: "../../logs/cel/http-request-trace-*.ndjson"
+resource.tracer.maxbackups: 5
+{{/if}}
+
+{{#if tags}}
+tags:
+{{#each tags as |tag|}}
+  - {{tag}}
+{{/each}}
+{{/if}}
+{{#contains "forwarded" tags}}
+publisher_pipeline.disable_host: true
+{{/contains}}
+{{#if processors}}
+processors:
+{{processors}}
+{{/if}}

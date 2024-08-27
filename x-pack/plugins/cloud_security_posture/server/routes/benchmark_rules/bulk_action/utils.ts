@@ -6,12 +6,12 @@
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { CspBenchmarkRulesStates } from '@kbn/cloud-security-posture-common';
 import type { FindResult, RulesClient } from '@kbn/alerting-plugin/server';
 import type { RuleParams } from '@kbn/alerting-plugin/server/application/rule/types';
 import type {
   CspBenchmarkRule,
   RulesToUpdate,
-  CspBenchmarkRulesStates,
   CspSettings,
 } from '../../../../common/types/rules/v4';
 import {
@@ -59,7 +59,7 @@ export const getDetectionRules = async (
           filter: convertRuleTagsToMatchAllKQL(ruleTags),
           searchFields: ['tags'],
           page: 1,
-          perPage: 1,
+          perPage: 100, // Disable up to 100 detection rules per benchmark rule at a time
         },
       });
     })

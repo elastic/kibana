@@ -9,18 +9,18 @@ import React from 'react';
 import { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { Query } from '@kbn/data-plugin/common';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { queryClient } from '@kbn/osquery-plugin/public/query_client';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act } from 'react-dom/test-utils';
-import { Aggregators, Comparator } from '../../../common/custom_threshold_rule/types';
+import { COMPARATORS } from '@kbn/alerting-comparators';
+import { Aggregators } from '../../../common/custom_threshold_rule/types';
 import { useKibana } from '../../utils/kibana_react';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import Expressions from './custom_threshold_rule_expression';
 import { AlertParams, CustomThresholdPrefillOptions } from './types';
 
 jest.mock('../../utils/kibana_react');
-jest.mock('./components/rule_condition_chart/rule_condition_chart', () => ({
+jest.mock('../rule_condition_chart/rule_condition_chart', () => ({
   RuleConditionChart: jest.fn(() => <div data-test-subj="RuleConditionChart" />),
 }));
 
@@ -42,7 +42,7 @@ describe('Expression', () => {
 
   async function setup(
     currentOptions?: CustomThresholdPrefillOptions,
-    customRuleParams?: Record<string, unknown>
+    customRuleParams?: Partial<RuleTypeParams & AlertParams>
   ) {
     const ruleParams: RuleTypeParams & AlertParams = {
       criteria: [],
@@ -61,6 +61,7 @@ describe('Expression', () => {
       currentOptions,
       adHocDataViewList: [],
     };
+    const queryClient = new QueryClient();
     const wrapper = mountWithIntl(
       <QueryClientProvider client={queryClient}>
         <Expressions
@@ -152,7 +153,7 @@ describe('Expression', () => {
             aggType: Aggregators.COUNT,
           },
         ],
-        comparator: Comparator.GT,
+        comparator: COMPARATORS.GREATER_THAN,
         threshold: [100],
         timeSize: 1,
         timeUnit: 'm',
@@ -163,7 +164,8 @@ describe('Expression', () => {
   it('should prefill the rule using the context metadata', async () => {
     const index = 'changedMockedIndex';
     const currentOptions: CustomThresholdPrefillOptions = {
-      alertOnGroupDisappear: false,
+      alertOnGroupDisappear: true,
+      alertOnNoData: true,
       groupBy: ['host.hostname'],
       searchConfiguration: {
         index,
@@ -178,7 +180,7 @@ describe('Expression', () => {
             { name: 'A', aggType: Aggregators.AVERAGE, field: 'system.load.1' },
             { name: 'B', aggType: Aggregators.CARDINALITY, field: 'system.cpu.user.pct' },
           ],
-          comparator: Comparator.LT_OR_EQ,
+          comparator: COMPARATORS.LESS_THAN_OR_EQUALS,
           equation: 'A * B',
           label: 'prefill label',
           threshold: [500],
@@ -190,7 +192,8 @@ describe('Expression', () => {
 
     const { ruleParams } = await setup(currentOptions, { searchConfiguration: undefined });
 
-    expect(ruleParams.alertOnGroupDisappear).toEqual(false);
+    expect(ruleParams.alertOnGroupDisappear).toEqual(true);
+    expect(ruleParams.alertOnNoData).toEqual(true);
     expect(ruleParams.groupBy).toEqual(['host.hostname']);
     expect((ruleParams.searchConfiguration.query as Query).query).toBe('foo');
     expect(ruleParams.searchConfiguration.index).toBe(index);
@@ -200,7 +203,7 @@ describe('Expression', () => {
           { name: 'A', aggType: Aggregators.AVERAGE, field: 'system.load.1' },
           { name: 'B', aggType: Aggregators.CARDINALITY, field: 'system.cpu.user.pct' },
         ],
-        comparator: Comparator.LT_OR_EQ,
+        comparator: COMPARATORS.LESS_THAN_OR_EQUALS,
         equation: 'A * B',
         label: 'prefill label',
         threshold: [500],
@@ -208,6 +211,68 @@ describe('Expression', () => {
         timeUnit: 'h',
       },
     ]);
+  });
+
+  it('should only set alertOnGroupDisappear to true if there is a group by field', async () => {
+    const customRuleParams: Partial<RuleTypeParams & AlertParams> = {
+      groupBy: ['host.hostname'],
+    };
+
+    const { ruleParams, wrapper } = await setup({}, customRuleParams);
+
+    act(() => {
+      wrapper
+        .find('[data-test-subj="thresholdRuleAlertOnNoDataCheckbox"]')
+        .at(1)
+        .prop('onChange')?.({
+        target: { checked: true },
+      } as React.ChangeEvent<HTMLInputElement>);
+    });
+
+    expect(ruleParams.alertOnGroupDisappear).toEqual(true);
+    expect(ruleParams.alertOnNoData).toEqual(false);
+
+    // Uncheck
+    act(() => {
+      wrapper
+        .find('[data-test-subj="thresholdRuleAlertOnNoDataCheckbox"]')
+        .at(1)
+        .prop('onChange')?.({
+        target: { checked: false },
+      } as React.ChangeEvent<HTMLInputElement>);
+    });
+
+    expect(ruleParams.alertOnGroupDisappear).toEqual(false);
+    expect(ruleParams.alertOnNoData).toEqual(false);
+  });
+
+  it('should only set alertOnNoData to true if there is no group by', async () => {
+    const { ruleParams, wrapper } = await setup();
+
+    act(() => {
+      wrapper
+        .find('[data-test-subj="thresholdRuleAlertOnNoDataCheckbox"]')
+        .at(1)
+        .prop('onChange')?.({
+        target: { checked: true },
+      } as React.ChangeEvent<HTMLInputElement>);
+    });
+
+    expect(ruleParams.alertOnGroupDisappear).toEqual(false);
+    expect(ruleParams.alertOnNoData).toEqual(true);
+
+    // Uncheck
+    act(() => {
+      wrapper
+        .find('[data-test-subj="thresholdRuleAlertOnNoDataCheckbox"]')
+        .at(1)
+        .prop('onChange')?.({
+        target: { checked: false },
+      } as React.ChangeEvent<HTMLInputElement>);
+    });
+
+    expect(ruleParams.alertOnGroupDisappear).toEqual(false);
+    expect(ruleParams.alertOnNoData).toEqual(false);
   });
 
   it('should show an error message when searchSource throws an error', async () => {

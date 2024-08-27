@@ -123,6 +123,7 @@ const AnomalyDetectionJobsHealthRuleTrigger: FC<MlAnomalyAlertTriggerProps> = ({
             defaultMessage="Include jobs or groups"
           />
         }
+        shouldUseDropdownJobCreate
       />
       <EuiSpacer size="m" />
       <JobSelectorControl
@@ -146,6 +147,7 @@ const AnomalyDetectionJobsHealthRuleTrigger: FC<MlAnomalyAlertTriggerProps> = ({
           />
         }
         options={excludeJobsOptions}
+        shouldUseDropdownJobCreate
       />
       <EuiSpacer size="m" />
       <TestsSelectionControl

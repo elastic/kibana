@@ -23,6 +23,7 @@ import {
   SERVICE_KEY,
   SERVICE_KEY_LEGACY,
   INITIAL_REST_VERSION,
+  GET_DATA_VIEW_DESCRIPTION,
 } from '../../constants';
 
 interface GetDataViewArgs {
@@ -43,7 +44,7 @@ export const getDataView = async ({
 };
 
 const getDataViewRouteFactory =
-  (path: string, serviceKey: string) =>
+  (path: string, serviceKey: string, description?: string) =>
   (
     router: IRouter,
     getStartServices: StartServicesAccessor<
@@ -52,7 +53,7 @@ const getDataViewRouteFactory =
     >,
     usageCollection?: UsageCounter
   ) => {
-    router.versioned.get({ path, access: 'public' }).addVersion(
+    router.versioned.get({ path, access: 'public', description }).addVersion(
       {
         version: INITIAL_REST_VERSION,
         validate: {
@@ -117,7 +118,8 @@ const getDataViewRouteFactory =
 
 export const registerGetDataViewRoute = getDataViewRouteFactory(
   SPECIFIC_DATA_VIEW_PATH,
-  SERVICE_KEY
+  SERVICE_KEY,
+  GET_DATA_VIEW_DESCRIPTION
 );
 
 export const registerGetDataViewRouteLegacy = getDataViewRouteFactory(

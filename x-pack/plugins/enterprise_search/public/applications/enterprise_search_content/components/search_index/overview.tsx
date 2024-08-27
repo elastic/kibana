@@ -81,7 +81,11 @@ export const SearchIndexOverview: React.FC = () => {
                   defaultMessage="Convert it to a {link}, to be self-managed on your own infrastructure. Native connectors are available only in your Elastic Cloud deployment."
                   values={{
                     link: (
-                      <EuiLink href={docLinks.buildConnector} target="_blank">
+                      <EuiLink
+                        data-test-subj="enterpriseSearchSearchIndexOverviewConnectorClientLink"
+                        href={docLinks.buildConnector}
+                        target="_blank"
+                      >
                         {i18n.translate(
                           'xpack.enterpriseSearch.content.searchIndex.nativeCloudCallout.connectorClient',
                           { defaultMessage: 'connector client' }
@@ -93,7 +97,12 @@ export const SearchIndexOverview: React.FC = () => {
               </p>
             </EuiText>
             <EuiSpacer size="s" />
-            <EuiButton color="warning" fill onClick={() => showModal()}>
+            <EuiButton
+              data-test-subj="enterpriseSearchSearchIndexOverviewConvertConnectorButton"
+              color="warning"
+              fill
+              onClick={() => showModal()}
+            >
               {i18n.translate(
                 'xpack.enterpriseSearch.content.indices.searchIndex.convertConnector.buttonLabel',
                 { defaultMessage: 'Convert connector' }
@@ -126,7 +135,7 @@ export const SearchIndexOverview: React.FC = () => {
       {isConnectorIndex(indexData) && (
         <>
           <EuiSpacer />
-          <SyncJobs />
+          <SyncJobs connector={indexData.connector} />
         </>
       )}
     </>

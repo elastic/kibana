@@ -189,7 +189,7 @@ describe('config validation', () => {
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      '"error validating action type config: Error configuring xMatters action: unable to parse url: TypeError: Invalid URL: example.com/do-something"'
+      `"error validating action type config: Error configuring xMatters action: unable to parse url: Invalid URL: example.com/do-something"`
     );
   });
 

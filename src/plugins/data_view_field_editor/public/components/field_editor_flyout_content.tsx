@@ -56,7 +56,6 @@ export interface Props {
   fieldToEdit?: Field;
   /** Optional preselected configuration for new field */
   fieldToCreate?: Field;
-  isSavingField: boolean;
   /** Handler to call when the component mounts.
    *  We will pass "up" data that the parent component might need
    */
@@ -64,13 +63,13 @@ export interface Props {
 }
 
 const isPanelVisibleSelector = (state: PreviewState) => state.isPanelVisible;
+const isSavingSelector = (state: PreviewState) => state.isSaving;
 
 const FieldEditorFlyoutContentComponent = ({
   fieldToEdit,
   fieldToCreate,
   onSave,
   onCancel,
-  isSavingField,
   onMounted,
 }: Props) => {
   const isMounted = useRef(false);
@@ -81,6 +80,7 @@ const FieldEditorFlyoutContentComponent = ({
 
   const { controller } = useFieldPreviewContext();
   const isPanelVisible = useStateSelector(controller.state$, isPanelVisibleSelector);
+  const isSavingField = useStateSelector(controller.state$, isSavingSelector);
 
   const [formState, setFormState] = useState<FieldEditorFormState>({
     isSubmitted: false,
@@ -217,7 +217,7 @@ const FieldEditorFlyoutContentComponent = ({
                   {fieldToEdit ? (
                     <FormattedMessage
                       id="indexPatternFieldEditor.editor.flyoutEditFieldTitle"
-                      defaultMessage="Edit field '{fieldName}'"
+                      defaultMessage="Edit field ''{fieldName}''"
                       values={{
                         fieldName: fieldToEdit.name,
                       }}

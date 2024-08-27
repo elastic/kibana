@@ -84,17 +84,35 @@ export interface KnowledgeBaseEntry {
   doc_id: string;
   confidence: 'low' | 'medium' | 'high';
   is_correction: boolean;
+  type?: 'user_instruction' | 'contextual';
   public: boolean;
   labels?: Record<string, string>;
   role: KnowledgeBaseEntryRole;
+  user?: {
+    name: string;
+  };
 }
 
-export interface UserInstruction {
+export interface Instruction {
   doc_id: string;
   text: string;
 }
 
-export type UserInstructionOrPlainText = string | UserInstruction;
+export interface AdHocInstruction {
+  doc_id?: string;
+  text: string;
+  instruction_type: 'user_instruction' | 'application_instruction';
+}
+
+export type InstructionOrPlainText = string | Instruction;
+
+export enum KnowledgeBaseType {
+  // user instructions are included in the system prompt regardless of the user's input
+  UserInstruction = 'user_instruction',
+
+  // contextual entries are only included in the system prompt if the user's input matches the context
+  Contextual = 'contextual',
+}
 
 export interface ObservabilityAIAssistantScreenContextRequest {
   screenDescription?: string;
@@ -106,7 +124,7 @@ export interface ObservabilityAIAssistantScreenContextRequest {
   actions?: Array<{ name: string; description: string; parameters?: CompatibleJSONSchema }>;
 }
 
-export type ScreenContextActionRespondFunction<TArguments extends unknown> = ({}: {
+export type ScreenContextActionRespondFunction<TArguments> = ({}: {
   args: TArguments;
   signal: AbortSignal;
   connectorId: string;
@@ -114,7 +132,7 @@ export type ScreenContextActionRespondFunction<TArguments extends unknown> = ({}
   messages: Message[];
 }) => Promise<FunctionResponse>;
 
-export interface ScreenContextActionDefinition<TArguments = undefined> {
+export interface ScreenContextActionDefinition<TArguments = any> {
   name: string;
   description: string;
   parameters?: CompatibleJSONSchema;
@@ -134,6 +152,6 @@ export interface ObservabilityAIAssistantScreenContext {
     description: string;
     value: any;
   }>;
-  actions?: ScreenContextActionDefinition[];
+  actions?: Array<ScreenContextActionDefinition<any>>;
   starterPrompts?: StarterPrompt[];
 }

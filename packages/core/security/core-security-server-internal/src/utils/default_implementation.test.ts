@@ -23,6 +23,15 @@ describe('getDefaultSecurityImplementation', () => {
     });
   });
 
+  describe('authc.apiKeys', () => {
+    it('returns stub object', async () => {
+      const { apiKeys } = implementation.authc;
+      const areAPIKeysEnabled = await apiKeys.areAPIKeysEnabled();
+
+      expect(areAPIKeysEnabled).toBe(false);
+    });
+  });
+
   describe('audit.asScoped', () => {
     it('returns null', async () => {
       const logger = implementation.audit.asScoped({} as any);

@@ -7,24 +7,21 @@
 
 import { i18n } from '@kbn/i18n';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
+import { useMemo } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { HostMetricTypes } from '../charts/types';
-
-interface UseChartsOptions {
-  overview?: boolean;
-}
 
 export const useHostCharts = ({
   metric,
   dataViewId,
-  options,
+  overview,
 }: {
   metric: HostMetricTypes;
   dataViewId?: string;
-  options?: UseChartsOptions;
+  overview?: boolean;
 }) => {
   const { value: charts = [], error } = useAsync(async () => {
-    const hostCharts = await getHostsCharts({ metric, options });
+    const hostCharts = await getHostsCharts({ metric, overview });
     return hostCharts.map((chart) => ({
       ...chart,
       ...(dataViewId && {
@@ -33,24 +30,24 @@ export const useHostCharts = ({
         },
       }),
     }));
-  }, [dataViewId]);
+  }, [dataViewId, metric, overview]);
 
   return { charts, error };
 };
 
 export const useKubernetesCharts = ({
   dataViewId,
-  options,
+  overview,
 }: {
   dataViewId?: string;
-  options?: UseChartsOptions;
+  overview?: boolean;
 }) => {
-  const model = findInventoryModel('host');
+  const model = useMemo(() => findInventoryModel('host'), []);
 
   const { value: charts = [], error } = useAsync(async () => {
     const { kibernetesNode } = await model.metrics.getCharts();
 
-    const items = options?.overview
+    const items = overview
       ? [kibernetesNode.xy.nodeCpuCapacity, kibernetesNode.xy.nodeMemoryCapacity]
       : [
           kibernetesNode.xy.nodeCpuCapacity,
@@ -69,7 +66,7 @@ export const useKubernetesCharts = ({
         }),
       };
     });
-  }, [dataViewId, options?.overview]);
+  }, [dataViewId, overview, model.metrics]);
 
   return { charts, error };
 };
@@ -83,10 +80,12 @@ const getSubtitleFromFormula = (value: string) =>
 
 export const useHostKpiCharts = ({
   dataViewId,
-  options,
+  seriesColor,
+  getSubtitle,
 }: {
   dataViewId?: string;
-  options?: { seriesColor: string; getSubtitle?: (formulaValue: string) => string };
+  seriesColor?: string;
+  getSubtitle?: (formulaValue: string) => string;
 }) => {
   const { value: charts = [] } = useAsync(async () => {
     const model = findInventoryModel('host');
@@ -99,33 +98,33 @@ export const useHostKpiCharts = ({
       disk.metric.diskUsage,
     ].map((chart) => ({
       ...chart,
-      seriesColor: options?.seriesColor,
+      seriesColor,
       decimals: 1,
-      subtitle: getSubtitle(options, chart),
+      subtitle: getSubtitle ? getSubtitle(chart.value) : getSubtitleFromFormula(chart.value),
       ...(dataViewId && {
         dataset: {
           index: dataViewId,
         },
       }),
     }));
-  }, [dataViewId, options?.seriesColor, options?.getSubtitle]);
+  }, [dataViewId, seriesColor, getSubtitle]);
 
   return charts;
 };
 
 const getHostsCharts = async ({
   metric,
-  options,
+  overview,
 }: {
   metric: HostMetricTypes;
-  options?: UseChartsOptions;
+  overview?: boolean;
 }) => {
   const model = findInventoryModel('host');
   const { cpu, memory, network, disk, logs } = await model.metrics.getCharts();
 
   switch (metric) {
     case 'cpu':
-      return options?.overview
+      return overview
         ? [cpu.xy.cpuUsage, cpu.xy.normalizedLoad1m]
         : [
             cpu.xy.cpuUsage,
@@ -134,13 +133,13 @@ const getHostsCharts = async ({
             cpu.xy.loadBreakdown,
           ];
     case 'memory':
-      return options?.overview
+      return overview
         ? [memory.xy.memoryUsage]
         : [memory.xy.memoryUsage, memory.xy.memoryUsageBreakdown];
     case 'network':
       return [network.xy.rxTx];
     case 'disk':
-      return options?.overview
+      return overview
         ? [disk.xy.diskUsageByMountPoint, disk.xy.diskIOReadWrite]
         : [disk.xy.diskUsageByMountPoint, disk.xy.diskIOReadWrite, disk.xy.diskThroughputReadWrite];
     case 'log':
@@ -149,12 +148,3 @@ const getHostsCharts = async ({
       return [];
   }
 };
-
-function getSubtitle(
-  options: { getSubtitle?: ((formulaValue: string) => string) | undefined } | undefined,
-  chart: { value: string }
-) {
-  return options?.getSubtitle
-    ? options?.getSubtitle(chart.value)
-    : getSubtitleFromFormula(chart.value);
-}

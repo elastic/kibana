@@ -29,28 +29,23 @@ export class SavedObjectsManagementColumnService {
 
   setup(): SavedObjectsManagementColumnServiceSetup {
     return {
-      register: (column) => {
-        if (this.columns.has(column.id)) {
-          throw new Error(`Saved Objects Management Column with id '${column.id}' already exists`);
-        }
-        this.columns.set(column.id, column);
-      },
+      register: (column) => this.register(column),
     };
   }
 
   start(spacesApi?: SpacesApi): SavedObjectsManagementColumnServiceStart {
     if (spacesApi && !spacesApi.hasOnlyDefaultSpace) {
-      registerSpacesApiColumns(this, spacesApi);
+      this.register(new ShareToSpaceSavedObjectsManagementColumn(spacesApi.ui));
     }
     return {
       getAll: () => [...this.columns.values()],
     };
   }
-}
 
-function registerSpacesApiColumns(
-  service: SavedObjectsManagementColumnService,
-  spacesApi: SpacesApi
-) {
-  service.setup().register(new ShareToSpaceSavedObjectsManagementColumn(spacesApi.ui));
+  private register(column: SavedObjectsManagementColumn) {
+    if (this.columns.has(column.id)) {
+      throw new Error(`Saved Objects Management Column with id '${column.id}' already exists`);
+    }
+    this.columns.set(column.id, column);
+  }
 }

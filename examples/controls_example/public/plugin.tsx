@@ -10,8 +10,9 @@ import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/publ
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-import img from './control_group_image.png';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { PLUGIN_ID } from './constants';
+import img from './control_group_image.png';
 
 interface SetupDeps {
   developerExamples: DeveloperExamplesSetup;
@@ -20,6 +21,7 @@ interface SetupDeps {
 export interface ControlsExampleStartDeps {
   data: DataPublicPluginStart;
   navigation: NavigationPublicPluginStart;
+  uiActions: UiActionsStart;
 }
 
 export class ControlsExamplePlugin
@@ -31,21 +33,21 @@ export class ControlsExamplePlugin
       title: 'Controls examples',
       visibleIn: [],
       async mount(params: AppMountParameters) {
-        const [, depsStart] = await core.getStartServices();
-        const { renderApp } = await import('./app');
-        return renderApp(depsStart, params);
+        const [coreStart, depsStart] = await core.getStartServices();
+        const { renderApp } = await import('./app/app');
+        return renderApp(coreStart, depsStart, params);
       },
     });
 
     developerExamples.register({
       appId: 'controlsExamples',
-      title: 'Controls as a Building Block',
-      description: `Showcases different ways to embed a control group into your app`,
+      title: 'Controls',
+      description: `Learn how to create new control types and use controls in your application`,
       image: img,
     });
   }
 
-  public start(core: CoreStart) {}
+  public start(core: CoreStart, deps: ControlsExampleStartDeps) {}
 
   public stop() {}
 }

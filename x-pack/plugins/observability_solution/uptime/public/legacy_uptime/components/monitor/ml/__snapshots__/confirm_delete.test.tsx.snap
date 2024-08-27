@@ -12,17 +12,15 @@ exports[`ML Confirm Job Delete shallow renders without errors 1`] = `
   title="Delete anomaly detection job?"
 >
   <p>
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="Are you sure you want to delete this job?"
       id="xpack.uptime.monitorDetails.ml.confirmDeleteMessage"
-      values={Object {}}
     />
   </p>
   <p>
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="Deleting a job can be time consuming. It will be deleted in the background and data may not disappear instantly."
       id="xpack.uptime.monitorDetails.ml.deleteJobWarning"
-      values={Object {}}
     />
   </p>
 </EuiConfirmModal>
@@ -40,10 +38,9 @@ exports[`ML Confirm Job Delete shallow renders without errors while loading 1`] 
   title="Delete anomaly detection job?"
 >
   <p>
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="Deleting jobs..."
       id="xpack.uptime.monitorDetails.ml.deleteMessage"
-      values={Object {}}
     />
     )
   </p>

@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { DefaultEmbeddableApi, ReactEmbeddableFactory } from './types';
 
-const registry: { [key: string]: () => Promise<ReactEmbeddableFactory<any, any>> } = {};
+const registry: { [key: string]: () => Promise<ReactEmbeddableFactory<any, any, any>> } = {};
 
 /**
  * Registers a new React embeddable factory. This should be called at plugin start time.
@@ -20,11 +20,14 @@ const registry: { [key: string]: () => Promise<ReactEmbeddableFactory<any, any>>
  */
 export const registerReactEmbeddableFactory = <
   SerializedState extends object = object,
-  Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>,
-  RuntimeState extends object = SerializedState
+  RuntimeState extends object = SerializedState,
+  Api extends DefaultEmbeddableApi<SerializedState, RuntimeState> = DefaultEmbeddableApi<
+    SerializedState,
+    RuntimeState
+  >
 >(
   type: string,
-  getFactory: () => Promise<ReactEmbeddableFactory<SerializedState, Api, RuntimeState>>
+  getFactory: () => Promise<ReactEmbeddableFactory<SerializedState, RuntimeState, Api>>
 ) => {
   if (registry[type] !== undefined)
     throw new Error(
@@ -40,11 +43,14 @@ export const reactEmbeddableRegistryHasKey = (key: string) => registry[key] !== 
 
 export const getReactEmbeddableFactory = async <
   SerializedState extends object = object,
-  Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>,
-  RuntimeState extends object = SerializedState
+  RuntimeState extends object = SerializedState,
+  Api extends DefaultEmbeddableApi<SerializedState, RuntimeState> = DefaultEmbeddableApi<
+    SerializedState,
+    RuntimeState
+  >
 >(
   key: string
-): Promise<ReactEmbeddableFactory<SerializedState, Api, RuntimeState>> => {
+): Promise<ReactEmbeddableFactory<SerializedState, RuntimeState, Api>> => {
   if (registry[key] === undefined)
     throw new Error(
       i18n.translate('embeddableApi.reactEmbeddable.factoryNotFoundError', {

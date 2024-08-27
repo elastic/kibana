@@ -21,6 +21,7 @@ const ALL_ENABLED = {
   canEnable: true,
   isEnabled: true,
   isValidApiKey: true,
+  isServiceAllowed: false,
 };
 
 export default function ({ getService }: FtrProviderContext) {
@@ -42,6 +43,8 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   describe('SyntheticsEnablement', function () {
+    // fails on MKI, see https://github.com/elastic/kibana/issues/184273
+    this.tags(['failsOnMKI']);
     const svlUserManager = getService('svlUserManager');
     const svlCommonApi = getService('svlCommonApi');
     const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -66,7 +69,7 @@ export default function ({ getService }: FtrProviderContext) {
       return supertestWithoutAuth
         .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
         .set(internalRequestHeader as unknown as Record<string, string>)
-        .set(await svlUserManager.getApiCredentialsForRole(role))
+        .set(await svlUserManager.getM2MApiCredentialsWithRoleScope(role))
         .expect(expectedStatus);
     }
 
@@ -74,7 +77,7 @@ export default function ({ getService }: FtrProviderContext) {
       return supertestWithoutAuth
         .delete(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
         .set(internalRequestHeader as unknown as Record<string, string>)
-        .set(await svlUserManager.getApiCredentialsForRole(role))
+        .set(await svlUserManager.getM2MApiCredentialsWithRoleScope(role))
         .expect(expectedStatus);
     }
 
@@ -99,6 +102,7 @@ export default function ({ getService }: FtrProviderContext) {
               isValidApiKey: false,
               // api key is not there, as it's deleted at the start of the tests
               isEnabled: false,
+              isServiceAllowed: false,
             });
           }
         });
@@ -188,6 +192,7 @@ export default function ({ getService }: FtrProviderContext) {
           canEnable: false,
           isEnabled: true,
           isValidApiKey: true,
+          isServiceAllowed: false,
         });
       });
 
@@ -201,6 +206,7 @@ export default function ({ getService }: FtrProviderContext) {
           canEnable: false,
           isEnabled: true,
           isValidApiKey: true,
+          isServiceAllowed: false,
         });
       });
     });

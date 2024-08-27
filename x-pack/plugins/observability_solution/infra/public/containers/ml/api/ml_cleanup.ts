@@ -7,8 +7,8 @@
 
 import * as rt from 'io-ts';
 import type { HttpHandler } from '@kbn/core/public';
+import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { getDatafeedId, getJobId } from '../../../../common/infra_ml';
-import { decodeOrThrow } from '../../../../common/runtime_types';
 
 interface DeleteJobsRequestArgs<JobType extends string> {
   spaceId: string;

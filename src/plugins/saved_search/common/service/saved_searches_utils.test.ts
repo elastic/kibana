@@ -47,6 +47,7 @@ describe('saved_searches_utils', () => {
             "a",
             "b",
           ],
+          "density": undefined,
           "description": "foo",
           "grid": Object {},
           "headerRowHeight": undefined,
@@ -64,6 +65,10 @@ describe('saved_searches_utils', () => {
             "dependencies": Object {
               "aggs": Object {
                 "createAggConfigs": [MockFunction],
+              },
+              "dataViews": Object {
+                "getMetaFields": [MockFunction],
+                "getShortDotsEnable": [MockFunction],
               },
               "getConfig": [MockFunction],
               "onResponse": [MockFunction],
@@ -120,6 +125,7 @@ describe('saved_searches_utils', () => {
             "c",
             "d",
           ],
+          "density": undefined,
           "description": "description",
           "grid": Object {},
           "headerRowHeight": undefined,

@@ -28,7 +28,7 @@ const mockUseSourcererDataView = jest.fn(
     dataViewId: null,
   })
 );
-jest.mock('../../containers/sourcerer', () => ({
+jest.mock('../../../sourcerer/containers', () => ({
   useSourcererDataView: () => mockUseSourcererDataView(),
 }));
 

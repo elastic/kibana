@@ -38,7 +38,7 @@ export function registerCreateRoute({ router, lib: { handleEsError } }: RouteDep
           return response.conflict({
             body: new Error(
               i18n.translate('xpack.idxMgmt.createRoute.duplicateTemplateIdErrorMessage', {
-                defaultMessage: "There is already a template with name '{name}'.",
+                defaultMessage: "There is already a template with name ''{name}''.",
                 values: {
                   name: template.name,
                 },

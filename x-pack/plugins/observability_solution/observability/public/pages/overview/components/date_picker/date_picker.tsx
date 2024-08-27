@@ -16,17 +16,7 @@ export interface TimePickerQuickRange {
   display: string;
 }
 
-export interface TimePickerRefreshInterval {
-  pause: boolean;
-  value: number;
-}
-
-export interface TimePickerTimeDefaults {
-  from: string;
-  to: string;
-}
-
-interface DatePickerProps {
+export interface DatePickerProps {
   rangeFrom?: string;
   rangeTo?: string;
   refreshPaused?: boolean;

@@ -92,7 +92,11 @@ export function DependencyDetailTemplate({ children }: Props) {
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <SpanIcon type={metadata?.spanType} subtype={metadata?.spanSubtype} />
+              <SpanIcon
+                type={metadata?.spanType}
+                subtype={metadata?.spanSubtype}
+                role="presentation"
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         ),

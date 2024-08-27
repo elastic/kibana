@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
-import { useDebouncedValue } from '@kbn/visualization-ui-components';
+import { useDebouncedValue } from '@kbn/visualization-utils';
 
 export const DEFAULT_FLOATING_COLUMNS = 1;
 
@@ -22,22 +22,22 @@ interface ColumnsNumberSettingProps {
    */
   onFloatingColumnsChange?: (value: number) => void;
   /**
-   * Indicates if legend is located outside
+   * Indicates if the component should be hidden
    */
-  isLegendOutside: boolean;
+  isHidden: boolean;
 }
 
 export const ColumnsNumberSetting = ({
   floatingColumns,
   onFloatingColumnsChange = () => {},
-  isLegendOutside,
+  isHidden,
 }: ColumnsNumberSettingProps) => {
   const { inputValue, handleInputChange } = useDebouncedValue({
     value: floatingColumns ?? DEFAULT_FLOATING_COLUMNS,
     onChange: onFloatingColumnsChange,
   });
 
-  if (isLegendOutside) return null;
+  if (isHidden) return null;
 
   return (
     <EuiFormRow

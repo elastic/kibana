@@ -57,7 +57,8 @@ export const ruleTypesRoute = (
       path: `${BASE_ALERTING_API_PATH}/rule_types`,
       options: {
         access: 'public',
-        description: `Get rule types`,
+        summary: `Get the rule types`,
+        tags: ['oas-tag:alerting'],
       },
       validate: {},
     },

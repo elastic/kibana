@@ -9,6 +9,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import type { Pagination } from '@elastic/eui';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { ArtifactEntryCardDecoratorProps } from '../../../../../components/artifact_entry_card';
 import { useAppUrl } from '../../../../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../../../../common/constants';
 import type { SearchExceptionsProps } from '../../../../../components/search_exceptions';
@@ -22,7 +23,7 @@ import type { ArtifactCardGridProps } from '../../../../../components/artifact_c
 import { ArtifactCardGrid } from '../../../../../components/artifact_card_grid';
 import { usePolicyDetailsArtifactsNavigateCallback } from '../../policy_hooks';
 import type { ImmutableObject, PolicyData } from '../../../../../../../common/endpoint/types';
-import { isGlobalPolicyEffected } from '../../../../../components/effected_policy_select/utils';
+import { isArtifactGlobal } from '../../../../../../../common/endpoint/service/artifacts';
 import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
 import { useGetLinkTo } from '../empty/use_policy_artifacts_empty_hooks';
 import type { ExceptionsListApiClient } from '../../../../../services/exceptions_list/exceptions_list_api_client';
@@ -39,6 +40,7 @@ export interface PolicyArtifactsListProps {
   labels: typeof POLICY_ARTIFACT_LIST_LABELS;
   onDeleteActionCallback: (item: ExceptionListItemSchema) => void;
   canWriteArtifact?: boolean;
+  CardDecorator: React.ComponentType<ArtifactEntryCardDecoratorProps> | undefined;
 }
 
 export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
@@ -51,6 +53,7 @@ export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
     labels,
     onDeleteActionCallback,
     canWriteArtifact = false,
+    CardDecorator,
   }) => {
     useOldUrlSearchPaginationReplace();
     const { getAppUrl } = useAppUrl();
@@ -136,7 +139,7 @@ export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
         };
         const item = artifact as ExceptionListItemSchema;
 
-        const isGlobal = isGlobalPolicyEffected(item.tags);
+        const isGlobal = isArtifactGlobal(item);
         const deleteAction = {
           icon: 'trash',
           children: labels.listRemoveActionTitle,
@@ -193,6 +196,7 @@ export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
           pagination={artifacts ? pagination : undefined}
           loading={isLoadingArtifacts || isRefetchingArtifacts}
           data-test-subj={'artifacts-collapsed-list'}
+          CardDecorator={CardDecorator}
         />
       </>
     );

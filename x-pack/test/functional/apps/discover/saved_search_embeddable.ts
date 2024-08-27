@@ -93,6 +93,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.saveDashboard('Dashboard with deleted saved search', {
         waitDialogIsClosed: true,
         exitFromEditMode: false,
+        saveAsNew: true,
       });
       await kibanaServer.savedObjects.delete({
         type: 'search',

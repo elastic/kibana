@@ -82,7 +82,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
           label={
             <FormattedMessage
               id="xpack.fleet.settings.editOutputFlyout.serviceTokenLabel"
-              defaultMessage="Service Token"
+              defaultMessage="Service token"
             />
           }
           {...inputs.serviceTokenInput.formRowProps}
@@ -105,7 +105,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
         <SecretFormRow
           fullWidth
           title={i18n.translate('xpack.fleet.settings.editOutputFlyout.serviceTokenLabel', {
-            defaultMessage: 'Service Token',
+            defaultMessage: 'Service token',
           })}
           {...inputs.serviceTokenSecretInput.formRowProps}
           cancelEdit={inputs.serviceTokenSecretInput.cancelEdit}

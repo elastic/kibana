@@ -14,11 +14,23 @@ export interface CloudDefendAssetCountAggregation {
 export interface AssetCountAggregationBucket {
   buckets: AssetCountAggregation[];
 }
+
+export interface ResourceSubtypeAggregationBucket {
+  key: string;
+  doc_count: number;
+  unique_assets: {
+    value: number;
+  };
+}
+
 export interface AssetCountAggregation {
   key_as_string: string;
   min_timestamp: MinTimestamp;
   unique_assets: {
     value: number;
+  };
+  resource_sub_type: {
+    buckets: ResourceSubtypeAggregationBucket[];
   };
 }
 

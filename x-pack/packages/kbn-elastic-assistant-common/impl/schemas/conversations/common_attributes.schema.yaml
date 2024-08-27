@@ -93,10 +93,10 @@ components:
       properties:
         connectorId:
           type: string
-          description: connector Id
+          description: connector id
         actionTypeId:
           type: string
-          description: action type Id
+          description: action type id
         defaultSystemPromptId:
           type: string
           description: defaultSystemPromptId

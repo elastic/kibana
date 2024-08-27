@@ -17,7 +17,7 @@ import {
   LegendSettingsPopover,
   ToolbarPopover,
   ValueLabelsSettings,
-  AxisTitleSettings,
+  ToolbarTitleSettings,
   AxisTicksSettings,
 } from '../../shared_components';
 import type { HeatmapVisualizationState } from './types';
@@ -60,7 +60,7 @@ export const HeatmapToolbar = memo(
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
             <ToolbarPopover
-              title={i18n.translate('xpack.lens.shared.curveLabel', {
+              title={i18n.translate('xpack.lens.shared.visualOptionsLabel', {
                 defaultMessage: 'Visual options',
               })}
               type="visualOptions"
@@ -151,9 +151,9 @@ export const HeatmapToolbar = memo(
                 buttonDataTestSubj="lnsHeatmapVerticalAxisButton"
                 panelClassName="lnsVisToolbarAxis__popover"
               >
-                <AxisTitleSettings
-                  axis="yLeft"
-                  axisTitle={state?.gridConfig.yTitle}
+                <ToolbarTitleSettings
+                  settingId="yLeft"
+                  title={state?.gridConfig.yTitle}
                   updateTitleState={({ title, visible }) => {
                     setState({
                       ...state,
@@ -164,7 +164,7 @@ export const HeatmapToolbar = memo(
                       },
                     });
                   }}
-                  isAxisTitleVisible={state?.gridConfig.isYAxisTitleVisible}
+                  isTitleVisible={state?.gridConfig.isYAxisTitleVisible}
                 />
                 <AxisTicksSettings
                   axis="yLeft"
@@ -197,9 +197,9 @@ export const HeatmapToolbar = memo(
                 isDisabled={!Boolean(state?.xAccessor)}
                 buttonDataTestSubj="lnsHeatmapHorizontalAxisButton"
               >
-                <AxisTitleSettings
-                  axis="x"
-                  axisTitle={state?.gridConfig.xTitle}
+                <ToolbarTitleSettings
+                  settingId="x"
+                  title={state?.gridConfig.xTitle}
                   updateTitleState={({ title, visible }) =>
                     setState({
                       ...state,
@@ -210,7 +210,7 @@ export const HeatmapToolbar = memo(
                       },
                     })
                   }
-                  isAxisTitleVisible={state?.gridConfig.isXAxisTitleVisible}
+                  isTitleVisible={state?.gridConfig.isXAxisTitleVisible}
                 />
                 <AxisTicksSettings
                   axis="x"

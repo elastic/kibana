@@ -28,7 +28,13 @@ export const EndpointUrlRow: React.FC<EndpointUrlProps> = ({ url, onCopyClick })
       fullWidth
       data-test-subj="connectionDetailsEsUrl"
     >
-      <CopyInput value={url} onCopyClick={() => onCopyClick?.()} />
+      <CopyInput
+        value={url}
+        onCopyClick={() => onCopyClick?.()}
+        aria-label={i18n.translate('cloud.connectionDetails.tab.endpoints.endpointField.copy', {
+          defaultMessage: 'Copy Elasticsearch endpoint to clipboard',
+        })}
+      />
     </EuiFormRow>
   );
 };

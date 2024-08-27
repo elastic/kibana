@@ -83,7 +83,7 @@ export class ConfirmDelete extends Component<Props, State> {
                   <p>
                     <FormattedMessage
                       id="xpack.security.management.roles.confirmDelete.serverless.removingRolesDescription"
-                      defaultMessage="Users with the following roles assigned will lose access to the project:"
+                      defaultMessage="Users with the following roles assigned may lose access to the project if they are not assigned any other roles:"
                     />
                   </p>
                 )}
@@ -99,7 +99,7 @@ export class ConfirmDelete extends Component<Props, State> {
                   <p>
                     <FormattedMessage
                       id="xpack.security.management.roles.confirmDelete.serverless.removingSingleRoleDescription"
-                      defaultMessage="Users with the {roleName} role assigned will lose access to the project."
+                      defaultMessage="Users with the {roleName} role assigned may lose access to the project if they are not assigned any other roles."
                       values={{ roleName: rolesToDelete[0] }}
                     />
                   </p>

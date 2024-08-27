@@ -5,19 +5,17 @@
  * 2.0.
  */
 
-import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import {
+  DeleteExceptionListItemRequestQuery,
+  DeleteExceptionListItemResponse,
+} from '@kbn/securitysolution-exceptions-common/api';
 
 import type { ListsPluginRouter } from '../types';
-import {
-  DeleteExceptionListItemRequestQueryDecoded,
-  deleteExceptionListItemRequestQuery,
-  deleteExceptionListItemResponse,
-} from '../../common/api';
 
 import {
-  buildRouteValidation,
   buildSiemResponse,
   getErrorMessageExceptionListItem,
   getExceptionListClient,
@@ -36,10 +34,7 @@ export const deleteExceptionListItemRoute = (router: ListsPluginRouter): void =>
       {
         validate: {
           request: {
-            query: buildRouteValidation<
-              typeof deleteExceptionListItemRequestQuery,
-              DeleteExceptionListItemRequestQueryDecoded
-            >(deleteExceptionListItemRequestQuery),
+            query: buildRouteValidationWithZod(DeleteExceptionListItemRequestQuery),
           },
         },
         version: '2023-10-31',
@@ -49,31 +44,28 @@ export const deleteExceptionListItemRoute = (router: ListsPluginRouter): void =>
         try {
           const exceptionLists = await getExceptionListClient(context);
           const { item_id: itemId, id, namespace_type: namespaceType } = request.query;
+
           if (itemId == null && id == null) {
             return siemResponse.error({
               body: 'Either "item_id" or "id" needs to be defined in the request',
               statusCode: 400,
             });
-          } else {
-            const deleted = await exceptionLists.deleteExceptionListItem({
-              id,
-              itemId,
-              namespaceType,
-            });
-            if (deleted == null) {
-              return siemResponse.error({
-                body: getErrorMessageExceptionListItem({ id, itemId }),
-                statusCode: 404,
-              });
-            } else {
-              const [validated, errors] = validate(deleted, deleteExceptionListItemResponse);
-              if (errors != null) {
-                return siemResponse.error({ body: errors, statusCode: 500 });
-              } else {
-                return response.ok({ body: validated ?? {} });
-              }
-            }
           }
+
+          const deleted = await exceptionLists.deleteExceptionListItem({
+            id,
+            itemId,
+            namespaceType,
+          });
+
+          if (deleted == null) {
+            return siemResponse.error({
+              body: getErrorMessageExceptionListItem({ id, itemId }),
+              statusCode: 404,
+            });
+          }
+
+          return response.ok({ body: DeleteExceptionListItemResponse.parse(deleted) });
         } catch (err) {
           const error = transformError(err);
           return siemResponse.error({

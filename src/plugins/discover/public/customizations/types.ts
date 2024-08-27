@@ -21,6 +21,10 @@ export type CustomizationCallback = (
 export type DiscoverDisplayMode = 'embedded' | 'standalone';
 
 export interface DiscoverCustomizationContext {
+  /**
+   * The current solution nav ID
+   */
+  solutionNavId: string | null;
   /*
    * Display mode in which discover is running
    */

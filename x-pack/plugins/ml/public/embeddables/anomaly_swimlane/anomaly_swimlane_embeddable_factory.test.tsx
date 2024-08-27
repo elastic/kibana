@@ -97,7 +97,11 @@ describe('getAnomalySwimLaneEmbeddableFactory', () => {
     >;
 
     render(
-      <ReactEmbeddableRenderer<AnomalySwimLaneEmbeddableState, AnomalySwimLaneEmbeddableApi>
+      <ReactEmbeddableRenderer<
+        AnomalySwimLaneEmbeddableState,
+        AnomalySwimLaneEmbeddableState,
+        AnomalySwimLaneEmbeddableApi
+      >
         maybeId={'maybe_id'}
         type={ANOMALY_SWIMLANE_EMBEDDABLE_TYPE}
         onApiAvailable={onApiAvailable}

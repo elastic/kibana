@@ -24,7 +24,7 @@ exports[`KibanaPageTemplateInner isEmpty pageHeader & children 1`] = `
 <_EuiPageTemplate
   className="kbnPageTemplate"
   grow={false}
-  minHeight="calc(100vh - var(--euiFixedHeadersOffset, 0))"
+  minHeight="calc(100vh - var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0)))"
   offset={0}
 >
   <_EuiPageHeader

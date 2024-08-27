@@ -67,7 +67,6 @@ export interface DataViewListItemEnhanced extends DataViewListItem {
 export interface DataViewsListProps {
   dataViewsList: DataViewListItemEnhanced[];
   onChangeDataView: (newId: string) => void;
-  isTextBasedLangSelected?: boolean;
   currentDataViewId?: string;
   selectableProps?: EuiSelectableProps;
   searchListInputId?: string;
@@ -76,7 +75,6 @@ export interface DataViewsListProps {
 export function DataViewsList({
   dataViewsList,
   onChangeDataView,
-  isTextBasedLangSelected,
   currentDataViewId,
   selectableProps,
   searchListInputId,
@@ -136,7 +134,7 @@ export function DataViewsList({
         key: id,
         label: name ? name : title,
         value: id,
-        checked: id === currentDataViewId && !Boolean(isTextBasedLangSelected) ? 'on' : undefined,
+        checked: id === currentDataViewId ? 'on' : undefined,
         append: isAdhoc ? (
           <EuiBadge color="hollow" data-test-subj={`dataViewItemTempBadge-${name}`}>
             {strings.editorAndPopover.adhoc.getTemporaryDataviewLabel()}
@@ -152,6 +150,7 @@ export function DataViewsList({
       searchProps={{
         id: searchListInputId,
         compressed: true,
+        autoFocus: true,
         placeholder: strings.editorAndPopover.search.getSearchPlaceholder(),
         'data-test-subj': 'indexPattern-switcher--input',
         ...(selectableProps ? selectableProps.searchProps : undefined),

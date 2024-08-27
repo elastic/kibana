@@ -1,4 +1,3 @@
 type: boolean
 description: Indicates whether the connector is used for system actions.
-examples:
-  - false
+example: false

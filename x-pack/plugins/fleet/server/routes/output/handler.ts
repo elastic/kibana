@@ -109,9 +109,9 @@ export const putOutputHandler: RequestHandler<
     await outputService.update(soClient, esClient, request.params.outputId, outputUpdate);
     const output = await outputService.get(soClient, request.params.outputId);
     if (output.is_default || output.is_default_monitoring) {
-      await agentPolicyService.bumpAllAgentPolicies(soClient, esClient);
+      await agentPolicyService.bumpAllAgentPolicies(esClient);
     } else {
-      await agentPolicyService.bumpAllAgentPoliciesForOutput(soClient, esClient, output.id);
+      await agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, output.id);
     }
 
     const body: GetOneOutputResponse = {
@@ -144,7 +144,7 @@ export const postOutputHandler: RequestHandler<
     ensureNoDuplicateSecrets(newOutput);
     const output = await outputService.create(soClient, esClient, newOutput, { id });
     if (output.is_default || output.is_default_monitoring) {
-      await agentPolicyService.bumpAllAgentPolicies(soClient, esClient);
+      await agentPolicyService.bumpAllAgentPolicies(esClient);
     }
 
     const body: GetOneOutputResponse = {

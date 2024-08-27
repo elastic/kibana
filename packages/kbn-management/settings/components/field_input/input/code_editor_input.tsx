@@ -9,7 +9,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { OnInputChangeFn, SettingType } from '@kbn/management-settings-types';
+import { SettingType } from '@kbn/management-settings-types';
 import { getFieldInputValue, useUpdate } from '@kbn/management-settings-utilities';
 
 import { debounce } from 'lodash';
@@ -53,13 +53,14 @@ export const CodeEditorInput = ({
   const onUpdate = useUpdate({ onInputChange, field });
 
   const updateValue = useCallback(
-    async (newValue: string, onUpdateFn: OnInputChangeFn<Type>) => {
-      const isJsonArray = Array.isArray(JSON.parse(defaultValue || '{}'));
-      const parsedValue = newValue || (isJsonArray ? '[]' : '{}');
+    async (newValue: string, onUpdateFn) => {
+      let parsedValue;
 
       // Validate JSON syntax
       if (field.type === 'json') {
         try {
+          const isJsonArray = Array.isArray(JSON.parse(defaultValue || 'null'));
+          parsedValue = newValue || (isJsonArray ? '[]' : '{}');
           JSON.parse(parsedValue);
         } catch (e) {
           onUpdateFn({

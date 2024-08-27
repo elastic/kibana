@@ -15,8 +15,12 @@ Date.now = jest.fn().mockReturnValue(new Date(now));
 
 const logger = loggingSystemMock.create().get();
 const config = {
+  discovery: {
+    active_nodes_lookback: '30s',
+    interval: 10000,
+  },
+  kibanas_per_partition: 2,
   enabled: true,
-  max_workers: 10,
   index: 'foo',
   max_attempts: 9,
   poll_interval: 3000,
@@ -73,6 +77,8 @@ const getStatsWithTimestamp = ({
       configuration: {
         timestamp,
         value: {
+          capacity: { config: 10, as_cost: 20, as_workers: 10 },
+          claim_strategy: 'default',
           request_capacity: 1000,
           monitored_aggregated_stats_refresh_rate: 5000,
           monitored_stats_running_average_window: 50,
@@ -84,7 +90,6 @@ const getStatsWithTimestamp = ({
             },
           },
           poll_interval: 3000,
-          max_workers: 10,
         },
         status: HealthStatus.OK,
       },
@@ -213,24 +218,29 @@ const getStatsWithTimestamp = ({
         timestamp,
         value: {
           count: 2,
+          cost: 4,
           task_types: {
             taskType1: {
               count: 1,
+              cost: 2,
               status: {
                 idle: 1,
               },
             },
             taskType2: {
               count: 1,
+              cost: 2,
               status: {
                 idle: 1,
               },
             },
           },
           non_recurring: 2,
+          non_recurring_cost: 4,
           owner_ids: 0,
           schedule: [['5m', 2]],
           overdue: 0,
+          overdue_cost: 0,
           overdue_non_recurring: 0,
           estimated_schedule_density: [
             0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,

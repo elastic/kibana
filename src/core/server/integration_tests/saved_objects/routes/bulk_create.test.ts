@@ -58,8 +58,9 @@ describe('POST /api/saved_objects/_bulk_create', () => {
     loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation();
 
     const config = setupConfig();
+    const access = 'public';
 
-    registerBulkCreateRoute(router, { config, coreUsageData, logger });
+    registerBulkCreateRoute(router, { config, coreUsageData, logger, access });
 
     await server.start();
   });

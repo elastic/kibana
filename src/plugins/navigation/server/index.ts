@@ -9,8 +9,6 @@ import type { PluginInitializerContext } from '@kbn/core/server';
 
 import { NavigationServerPlugin } from './plugin';
 
-export { config } from './config';
-
-export async function plugin(initializerContext: PluginInitializerContext) {
-  return new NavigationServerPlugin(initializerContext);
+export async function plugin(initContext: PluginInitializerContext) {
+  return new NavigationServerPlugin(initContext);
 }

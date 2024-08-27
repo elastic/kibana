@@ -69,7 +69,6 @@ export const wrapSuppressedEsqlAlerts = ({
         tuple,
         isRuleAggregating,
         index: i,
-        suppressionTerms,
       });
 
       const instanceId = objectHash([suppressionTerms, completeRule.alertId, spaceId]);

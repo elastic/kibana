@@ -36,6 +36,7 @@ export class UnifiedFieldListPageObject extends FtrService {
   }
 
   public async getSidebarAriaDescription(): Promise<string> {
+    await this.header.waitUntilLoadingHasFinished();
     return (
       (await (
         await this.testSubjects.find('fieldListGrouped__ariaDescription')
@@ -50,6 +51,15 @@ export class UnifiedFieldListPageObject extends FtrService {
   public async waitUntilSidebarHasLoaded() {
     await this.retry.waitFor('sidebar is loaded', async () => {
       return (await this.getSidebarAriaDescription()).length > 0;
+    });
+  }
+
+  public async waitUntilFieldlistHasCountOfFields(count: number) {
+    await this.retry.waitFor('wait until fieldlist has updated number of fields', async () => {
+      return (
+        (await this.find.allByCssSelector('#fieldListGroupedAvailableFields .kbnFieldButton'))
+          .length === count
+      );
     });
   }
 

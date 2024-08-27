@@ -441,3 +441,32 @@ export const ADDITIONAL_INFO_JSON_ERROR = i18n.translate(
     defaultMessage: 'The additional info field does not have a valid JSON format.',
   }
 );
+
+export const ADDITIONAL_FIELDS = i18n.translate(
+  'xpack.stackConnectors.components.servicenow.additionalFieldsTooltip',
+  {
+    defaultMessage: 'Additional fields',
+  }
+);
+
+export const ADDITIONAL_FIELDS_HELP = i18n.translate(
+  'xpack.stackConnectors.components.servicenow.additionalFieldsHelpTooltip',
+  {
+    defaultMessage: 'Additional fields help',
+  }
+);
+
+export const ADDITIONAL_FIELDS_HELP_TEXT = i18n.translate(
+  'xpack.stackConnectors.components.servicenow.additionalFieldsHelpTooltipText',
+  {
+    defaultMessage:
+      'Additional fields in JSON format as defined in the Elastic ServiceNow application',
+  }
+);
+
+export const ADDITIONAL_FIELDS_JSON_ERROR = i18n.translate(
+  'xpack.stackConnectors.components.servicenow.additionalFieldsError',
+  {
+    defaultMessage: 'No valid JSON.',
+  }
+);

@@ -35,7 +35,7 @@ export const PipelineDeleteModal = ({
               ? i18n.translate(
                   'xpack.ingestPipelines.deleteModal.successDeleteSingleNotificationMessageText',
                   {
-                    defaultMessage: "Deleted pipeline '{pipelineName}'",
+                    defaultMessage: "Deleted pipeline ''{pipelineName}''",
                     values: { pipelineName: pipelinesToDelete[0] },
                   }
                 )
@@ -65,7 +65,7 @@ export const PipelineDeleteModal = ({
                 }
               )
             : i18n.translate('xpack.ingestPipelines.deleteModal.errorNotificationMessageText', {
-                defaultMessage: "Error deleting pipeline '{name}'",
+                defaultMessage: "Error deleting pipeline ''{name}''",
                 values: { name: (errors && errors[0].name) || pipelinesToDelete[0] },
               });
           services.notifications.toasts.addDanger(errorMessage);

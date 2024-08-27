@@ -1,8 +1,8 @@
-openapi: 3.1.0
+openapi: 3.0.3
 info:
   title: Machine learning APIs
   description: Kibana APIs for the machine learning feature
-  version: "1.0.2"
+  version: "1.0.1"
   license:
     name: Elastic License 2.0
     url: https://www.elastic.co/licensing/elastic-license
@@ -14,8 +14,11 @@ servers:
 paths:
   /api/ml/saved_objects/sync:
     get:
-      summary: Synchronizes Kibana saved objects for machine learning jobs and trained models.
-      description: This API runs automatically when you start Kibana and periodically thereafter.
+      summary: Sync saved objects in the default space
+      description: >
+        Synchronizes Kibana saved objects for machine learning jobs and trained models in the default space.
+        You must have `all` privileges for the **Machine Learning** feature in the **Analytics** section of the Kibana feature privileges.
+        This API runs automatically when you start Kibana and periodically thereafter.
       operationId: mlSync
       tags:
         - ml
@@ -38,43 +41,44 @@ paths:
               schema:
                 $ref: '#/components/schemas/mlSync4xxResponse'
 
-  /s/{spaceId}/api/ml/saved_objects/sync:
-    get:
-      summary: Synchronizes Kibana saved objects for machine learning jobs and trained models.
-      description: >
-        You must have `all` privileges for the **Machine Learning** feature in the **Analytics** section of the Kibana feature privileges.
-        This API runs automatically when you start Kibana and periodically thereafter.
-      operationId: mlSyncWithSpaceId
-      tags:
-        - ml
-      parameters:
-        - $ref: '#/components/parameters/spaceParam'
-        - $ref: '#/components/parameters/simulateParam'
-      responses:
-        '200':
-          description: Indicates a successful call
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/mlSync200Response'
-              examples:
-                syncExample:
-                  $ref: '#/components/examples/mlSyncExample'
-        '401':
-          description: Authorization information is missing or invalid.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/mlSync4xxResponse'
+  # /s/{spaceId}/api/ml/saved_objects/sync:
+    # get:
+    #   summary: Sync saved objects
+    #   description: >
+    #     Synchronizes Kibana saved objects for machine learning jobs and trained models.
+    #     You must have `all` privileges for the **Machine Learning** feature in the **Analytics** section of the Kibana feature privileges.
+    #     This API runs automatically when you start Kibana and periodically thereafter.
+    #   operationId: mlSyncWithSpaceId
+    #   tags:
+    #     - ml
+    #   parameters:
+    #     - $ref: '#/components/parameters/spaceParam'
+    #     - $ref: '#/components/parameters/simulateParam'
+    #   responses:
+    #     '200':
+    #       description: Indicates a successful call
+    #       content:
+    #         application/json:
+    #           schema:
+    #             $ref: '#/components/schemas/mlSync200Response'
+    #           examples:
+    #             syncExample:
+    #               $ref: '#/components/examples/mlSyncExample'
+    #     '401':
+    #       description: Authorization information is missing or invalid.
+    #       content:
+    #         application/json:
+    #           schema:
+    #             $ref: '#/components/schemas/mlSync4xxResponse'
 components:
  parameters:
-  spaceParam:
-    in: path
-    name: spaceId
-    description: An identifier for the space. If `/s/` and the identifier are omitted from the path, the default space is used.
-    required: true
-    schema:
-      type: string
+  # spaceParam:
+  #   in: path
+  #   name: spaceId
+  #   description: An identifier for the space. If `/s/` and the identifier are omitted from the path, the default space is used.
+  #   required: true
+  #   schema:
+  #     type: string
   simulateParam:
     in: query
     name: simulate
@@ -82,16 +86,7 @@ components:
     required: false
     schema:
       type: boolean
-      examples:
-        - true
- securitySchemes:
-  basicAuth:
-    type: http
-    scheme: basic
-  apiKeyAuth:
-    type: apiKey
-    in: header
-    name: ApiKey
+    example: 'true'
  schemas:
     mlSyncResponseSuccess:
       type: boolean
@@ -188,14 +183,12 @@ components:
       properties:
         error:
           type: string
-          examples:
-            - Unauthorized
+          example: Unauthorized
         message:
           type: string 
         statusCode:
           type: integer
-          examples:
-            - 401
+          example: 401
  examples:
    mlSyncExample:
      summary: Two anomaly detection jobs required synchronization in this example.
@@ -211,6 +204,3 @@ components:
           "datafeedsAdded": {},
           "datafeedsRemoved": {}
         }
-security:
-  - basicAuth: [ ]
-  - apiKeyAuth: [ ]

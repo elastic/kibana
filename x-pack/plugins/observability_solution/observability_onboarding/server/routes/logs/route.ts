@@ -7,11 +7,13 @@
 
 import * as t from 'io-ts';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
-import { getFallbackKibanaUrl } from '../../lib/get_fallback_urls';
-import { hasLogMonitoringPrivileges } from './api_key/has_log_monitoring_privileges';
+import { getFallbackESUrl } from '../../lib/get_fallback_urls';
+import { getKibanaUrl } from '../../lib/get_fallback_urls';
+import { getAgentVersion } from '../../lib/get_agent_version';
 import { saveObservabilityOnboardingFlow } from '../../lib/state';
-import { createShipperApiKey } from './api_key/create_shipper_api_key';
+import { createShipperApiKey } from '../../lib/api_key/create_shipper_api_key';
 import { ObservabilityOnboardingFlow } from '../../saved_objects/observability_onboarding_status';
+import { hasLogMonitoringPrivileges } from '../../lib/api_key/has_log_monitoring_privileges';
 
 const logMonitoringPrivilegesRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'GET /internal/observability_onboarding/logs/setup/privileges',
@@ -37,39 +39,50 @@ const installShipperSetupRoute = createObservabilityOnboardingServerRoute({
     apiEndpoint: string;
     scriptDownloadUrl: string;
     elasticAgentVersion: string;
+    elasticsearchUrl: string[];
   }> {
-    const { core, plugins, kibanaVersion } = resources;
-    const coreStart = await core.start();
+    const {
+      core,
+      plugins,
+      kibanaVersion,
+      services: { esLegacyConfigService },
+    } = resources;
 
     const fleetPluginStart = await plugins.fleet.start();
-    const agentClient = fleetPluginStart.agentService.asInternalUser;
-
-    // If undefined, we will follow fleet's strategy to select latest available version:
-    // for serverless we will use the latest published version, for statefull we will use
-    // current Kibana version. If false, irrespective of fleet flags and logic, we are
-    // explicitly deciding to not append the current version.
-    const includeCurrentVersion = kibanaVersion.endsWith('-SNAPSHOT') ? false : undefined;
-
-    const elasticAgentVersion = await agentClient.getLatestAgentAvailableVersion(
-      includeCurrentVersion
-    );
-
-    const kibanaUrl =
-      core.setup.http.basePath.publicBaseUrl ?? // priority given to server.publicBaseUrl
-      plugins.cloud?.setup?.kibanaUrl ?? // then cloud id
-      getFallbackKibanaUrl(coreStart); // falls back to local network binding
+    const elasticAgentVersion = await getAgentVersion(fleetPluginStart, kibanaVersion);
+    const kibanaUrl = getKibanaUrl(core.setup, plugins.cloud?.setup);
     const scriptDownloadUrl = new URL(
-      coreStart.http.staticAssets.getPluginAssetHref('standalone_agent_setup.sh'),
+      core.setup.http.staticAssets.getPluginAssetHref('standalone_agent_setup.sh'),
       kibanaUrl
     ).toString();
 
     const apiEndpoint = new URL(`${kibanaUrl}/internal/observability_onboarding`).toString();
 
+    const elasticsearchUrl = plugins.cloud?.setup?.elasticsearchUrl
+      ? [plugins.cloud?.setup?.elasticsearchUrl]
+      : await getFallbackESUrl(esLegacyConfigService);
+
     return {
       apiEndpoint,
+      elasticsearchUrl,
       scriptDownloadUrl,
       elasticAgentVersion,
     };
+  },
+});
+
+const createAPIKeyRoute = createObservabilityOnboardingServerRoute({
+  endpoint: 'POST /internal/observability_onboarding/otel/api_key',
+  options: { tags: [] },
+  params: t.type({}),
+  async handler(resources): Promise<{ apiKeyEncoded: string }> {
+    const { context } = resources;
+    const {
+      elasticsearch: { client },
+    } = await context.core;
+    const { encoded: apiKeyEncoded } = await createShipperApiKey(client.asCurrentUser, 'otel logs');
+
+    return { apiKeyEncoded };
   },
 });
 
@@ -102,7 +115,10 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
     const {
       elasticsearch: { client },
     } = await context.core;
-    const { encoded: apiKeyEncoded } = await createShipperApiKey(client.asCurrentUser, name);
+    const { encoded: apiKeyEncoded } = await createShipperApiKey(
+      client.asCurrentUser,
+      `standalone_agent_logs_onboarding_${name}`
+    );
 
     const generatedState = type === 'systemLogs' ? { namespace: 'default' } : state;
     const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
@@ -124,4 +140,5 @@ export const logsOnboardingRouteRepository = {
   ...logMonitoringPrivilegesRoute,
   ...installShipperSetupRoute,
   ...createFlowRoute,
+  ...createAPIKeyRoute,
 };

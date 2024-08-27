@@ -17,18 +17,6 @@ import { ACTIONS_SEARCH_PAGE_SIZE } from '../constants';
 import { catchAndWrapError } from '../../../utils';
 import { ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN } from '../../../../../common/endpoint/constants';
 
-interface FetchActionResponsesOptions {
-  esClient: ElasticsearchClient;
-  /** List of specific action ids to filter for */
-  actionIds?: string[];
-  /** List of specific agent ids to filter for */
-  agentIds?: string[];
-}
-
-interface FetchActionResponsesResult {
-  data: Array<estypes.SearchHit<EndpointActionResponse | LogsEndpointActionResponse>>;
-}
-
 /** @private */
 const buildSearchQuery = (
   actionIds: string[] = [],
@@ -47,53 +35,39 @@ const buildSearchQuery = (
   return query;
 };
 
+interface FetchActionResponsesOptions {
+  esClient: ElasticsearchClient;
+  /** List of specific action ids to filter for */
+  actionIds?: string[];
+  /** List of specific agent ids to filter for */
+  agentIds?: string[];
+}
+
+export interface FetchActionResponsesResult<
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+  TResponseMeta extends {} = {}
+> {
+  /** Response (aka: the `ack`) sent to the fleet index */
+  fleetResponses: EndpointActionResponse[];
+  /** Responses sent by Endpoint directly to the endpoint index */
+  endpointResponses: Array<LogsEndpointActionResponse<TOutputContent, TResponseMeta>>;
+}
+
 /**
  * Fetch Response Action responses from both the Endpoint and the Fleet indexes
  */
-export const fetchActionResponses = async ({
-  esClient,
-  actionIds = [],
-  agentIds = [],
-}: FetchActionResponsesOptions): Promise<FetchActionResponsesResult> => {
-  const query = buildSearchQuery(actionIds, agentIds);
-
-  // TODO:PT refactor this method to use new `fetchFleetActionResponses()` and `fetchEndpointActionResponses()`
-
-  // Get the Action Response(s) from both the Fleet action response index and the Endpoint
-  // action response index.
-  // We query both indexes separately in order to ensure they are both queried - example if the
-  // Fleet actions responses index does not exist yet, ES would generate a `404` and would
-  // never actually query the Endpoint Actions index. With support for 3rd party response
-  // actions, we need to ensure that both indexes are queried.
+export const fetchActionResponses = async <
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+  TResponseMeta extends {} = {}
+>(
+  options: FetchActionResponsesOptions
+): Promise<FetchActionResponsesResult<TOutputContent, TResponseMeta>> => {
   const [fleetResponses, endpointResponses] = await Promise.all([
-    // Responses in Fleet index
-    esClient
-      .search<EndpointActionResponse>(
-        {
-          index: AGENT_ACTIONS_RESULTS_INDEX,
-          size: ACTIONS_SEARCH_PAGE_SIZE,
-          body: { query },
-        },
-        { ignore: [404] }
-      )
-      .catch(catchAndWrapError),
-
-    // Responses in Endpoint index
-    esClient
-      .search<LogsEndpointActionResponse>(
-        {
-          index: ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
-          size: ACTIONS_SEARCH_PAGE_SIZE,
-          body: { query },
-        },
-        { ignore: [404] }
-      )
-      .catch(catchAndWrapError),
+    fetchFleetActionResponses(options),
+    fetchEndpointActionResponses<TOutputContent, TResponseMeta>(options),
   ]);
 
-  return {
-    data: [...(fleetResponses?.hits?.hits ?? []), ...(endpointResponses?.hits?.hits ?? [])],
-  };
+  return { fleetResponses, endpointResponses };
 };
 
 /**
@@ -123,7 +97,7 @@ export const fetchEndpointActionResponses = async <
     )
     .catch(catchAndWrapError);
 
-  return searchResponse.hits.hits.map((esHit) => {
+  return (searchResponse?.hits?.hits ?? []).map((esHit) => {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return esHit._source!;
   });
@@ -151,7 +125,7 @@ export const fetchFleetActionResponses = async ({
     )
     .catch(catchAndWrapError);
 
-  return searchResponse.hits.hits.map((esHit) => {
+  return (searchResponse?.hits?.hits ?? []).map((esHit) => {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return esHit._source!;
   });

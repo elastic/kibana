@@ -39,7 +39,8 @@
       "dashboard",
       "expressions",
       "logsExplorer",
-      "licensing"
+      "licensing",
+      "navigation"
     ],
     "optionalPlugins": [
       "discover",
@@ -50,6 +51,7 @@
       "serverless",
       "guidedOnboarding",
       "observabilityAIAssistant",
+      "investigate"
     ],
     "requiredBundles": [
       "data",

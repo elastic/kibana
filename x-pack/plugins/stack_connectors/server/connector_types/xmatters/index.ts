@@ -105,7 +105,7 @@ function validateConnectorTypeConfig(
       i18n.translate('xpack.stackConnectors.xmatters.configurationErrorNoHostname', {
         defaultMessage: 'Error configuring xMatters action: unable to parse url: {err}',
         values: {
-          err,
+          err: err.message,
         },
       })
     );
@@ -210,7 +210,7 @@ function validateConnectorTypeSecrets(
         i18n.translate('xpack.stackConnectors.xmatters.invalidUrlError', {
           defaultMessage: 'Invalid secretsUrl: {err}',
           values: {
-            err,
+            err: err.toString(),
           },
         })
       );

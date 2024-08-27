@@ -238,6 +238,7 @@ export const mappingsConfigurationSchema = t.exact(
     _size: t.interface({
       enabled: t.boolean,
     }),
+    subobjects: t.boolean,
   })
 );
 

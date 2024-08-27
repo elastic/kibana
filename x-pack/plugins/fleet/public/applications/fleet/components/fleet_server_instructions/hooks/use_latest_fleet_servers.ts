@@ -30,7 +30,7 @@ export const useLatestFleetServers = (opts?: any) => {
     });
 
     const agentPolicyIds = [
-      ...new Set(packagePoliciesRes?.data?.items.map((p) => p.policy_id) ?? []),
+      ...new Set(packagePoliciesRes?.data?.items.flatMap((p) => p.policy_ids) ?? []),
     ];
 
     if (agentPolicyIds.length === 0) {

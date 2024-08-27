@@ -10,7 +10,7 @@ import React from 'react';
 import { Router } from '@kbn/shared-ux-router';
 import { waitFor } from '@testing-library/react';
 import type { Filter } from '@kbn/es-query';
-import { useSourcererDataView } from '../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../sourcerer/containers';
 import { TestProviders, createMockStore } from '../../../common/mock';
 import { inputsActions } from '../../../common/store/inputs';
 
@@ -21,7 +21,7 @@ import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 
 jest.mock('../../../common/components/empty_prompt');
-jest.mock('../../../common/containers/sourcerer');
+jest.mock('../../../sourcerer/containers');
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar

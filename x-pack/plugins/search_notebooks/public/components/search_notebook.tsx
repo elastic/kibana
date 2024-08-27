@@ -4,48 +4,31 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
-import { EuiPanel, EuiEmptyPrompt, EuiCodeBlock } from '@elastic/eui';
+import React, { useEffect } from 'react';
+import { EuiPanel } from '@elastic/eui';
 import { NotebookRenderer } from '@kbn/ipynb';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useNotebook } from '../hooks/use_notebook';
+import { useUsageTracker } from '../hooks/use_usage_tracker';
 import { LoadingPanel } from './loading_panel';
+import { SearchNotebookError } from './search_notebook_error';
 
 export interface SearchNotebookProps {
   notebookId: string;
 }
 export const SearchNotebook = ({ notebookId }: SearchNotebookProps) => {
+  const usageTracker = useUsageTracker();
   const { data, isLoading, error } = useNotebook(notebookId);
+  useEffect(() => {
+    usageTracker.count(['view-notebook', `nb-${notebookId}`]);
+  }, [usageTracker, notebookId]);
+
   if (isLoading) {
     return <LoadingPanel />;
   }
   if (!data || error) {
     return (
-      <EuiEmptyPrompt
-        iconType="warning"
-        iconColor="danger"
-        title={
-          <h2>
-            <FormattedMessage
-              id="xpack.searchNotebooks.notebook.fetchError.title"
-              defaultMessage="Error loading notebook"
-            />
-          </h2>
-        }
-        titleSize="l"
-        body={
-          <>
-            <p>
-              <FormattedMessage
-                id="xpack.searchNotebooks.notebook.fetchError.body"
-                defaultMessage="We can't fetch the notebook from Kibana due to the following error:"
-              />
-            </p>
-            <EuiCodeBlock css={{ textAlign: 'left' }}>{JSON.stringify(error)}</EuiCodeBlock>
-          </>
-        }
-      />
+      <SearchNotebookError notebookId={notebookId} usageTracker={usageTracker} error={error} />
     );
   }
   return (

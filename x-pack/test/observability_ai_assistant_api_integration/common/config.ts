@@ -10,10 +10,7 @@ import { UrlObject } from 'url';
 import { ObservabilityAIAssistantFtrConfigName } from '../configs';
 import { getApmSynthtraceEsClient } from './create_synthtrace_client';
 import { InheritedFtrProviderContext, InheritedServices } from './ftr_provider_context';
-import {
-  getScopedApiClient,
-  ObservabilityAIAssistantAPIClient,
-} from './observability_ai_assistant_api_client';
+import { getScopedApiClient } from './observability_ai_assistant_api_client';
 import { editorUser, viewerUser } from './users/users';
 
 export interface ObservabilityAIAssistantFtrConfig {
@@ -24,20 +21,13 @@ export interface ObservabilityAIAssistantFtrConfig {
 
 export type CreateTestConfig = ReturnType<typeof createTestConfig>;
 
-export interface CreateTest {
-  testFiles: string[];
-  servers: any;
-  services: InheritedServices & {
-    observabilityAIAssistantAPIClient: () => Promise<{
-      adminUser: ObservabilityAIAssistantAPIClient;
-      viewerUser: ObservabilityAIAssistantAPIClient;
-      editorUser: ObservabilityAIAssistantAPIClient;
-    }>;
-  };
-  junit: { reportName: string };
-  esTestCluster: any;
-  kbnTestServer: any;
-}
+export type CreateTest = ReturnType<typeof createObservabilityAIAssistantAPIConfig>;
+
+export type ObservabilityAIAssistantAPIClient = Awaited<
+  ReturnType<CreateTest['services']['observabilityAIAssistantAPIClient']>
+>;
+
+export type ObservabilityAIAssistantServices = Awaited<ReturnType<CreateTestConfig>>['services'];
 
 export function createObservabilityAIAssistantAPIConfig({
   config,
@@ -49,17 +39,21 @@ export function createObservabilityAIAssistantAPIConfig({
   license: 'basic' | 'trial';
   name: string;
   kibanaConfig?: Record<string, any>;
-}): Omit<CreateTest, 'testFiles'> {
+}) {
   const services = config.get('services') as InheritedServices;
   const servers = config.get('servers');
   const kibanaServer = servers.kibana as UrlObject;
   const apmSynthtraceKibanaClient = services.apmSynthtraceKibanaClient();
+  const allConfigs = config.getAll() as Record<string, any>;
 
-  const createTest: Omit<CreateTest, 'testFiles'> = {
-    ...config.getAll(),
+  return {
+    ...allConfigs,
     servers,
     services: {
       ...services,
+      getScopedApiClientForUsername: () => {
+        return (username: string) => getScopedApiClient(kibanaServer, username);
+      },
       apmSynthtraceEsClient: (context: InheritedFtrProviderContext) =>
         getApmSynthtraceEsClient(context, apmSynthtraceKibanaClient),
       observabilityAIAssistantAPIClient: async () => {
@@ -89,13 +83,9 @@ export function createObservabilityAIAssistantAPIConfig({
       ],
     },
   };
-
-  return createTest;
 }
 
-export function createTestConfig(
-  config: ObservabilityAIAssistantFtrConfig
-): ({ readConfigFile }: FtrConfigProviderContext) => Promise<CreateTest> {
+export function createTestConfig(config: ObservabilityAIAssistantFtrConfig) {
   const { license, name, kibanaConfig } = config;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
@@ -114,5 +104,3 @@ export function createTestConfig(
     };
   };
 }
-
-export type ObservabilityAIAssistantServices = Awaited<ReturnType<CreateTestConfig>>['services'];

@@ -40,6 +40,11 @@
                     "workers" : 12
                   }
                 }
+              },
+              "elasticsearch": {
+                "cluster": {
+                  "id": "1nmp"
+                }
               }
             },
             "metricset": {
@@ -94,6 +99,11 @@
                     },
                     "workers" : 1
                   }
+                }
+              },
+              "elasticsearch": {
+                "cluster": {
+                  "id": "1nmp"
                 }
               }
             },
@@ -150,6 +160,11 @@
                     "workers" : 44
                   }
                 }
+              },
+              "elasticsearch": {
+                "cluster": {
+                  "id": "1nmp"
+                }
               }
             },
             "metricset": {
@@ -204,6 +219,11 @@
                     },
                     "workers" : 12
                   }
+                }
+              },
+              "elasticsearch": {
+                "cluster": {
+                  "id": "1nmp"
                 }
               }
             },

@@ -11,6 +11,7 @@ import { EuiButton, EuiLink, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useFormContext } from 'react-hook-form';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
+import { useEnablement } from '../../../hooks';
 import { RunTestButton } from './run_test_btn';
 import { useCanEditSynthetics } from '../../../../../hooks/use_capabilities';
 import { useMonitorSave } from '../hooks/use_monitor_save';
@@ -35,15 +36,15 @@ export const ActionBar = ({
     formState: { defaultValues, isValid },
   } = useFormContext();
 
-  const [monitorPendingDeletion, setMonitorPendingDeletion] = useState<SyntheticsMonitor | null>(
-    null
-  );
+  const [monitorsPendingDeletion, setMonitorsPendingDeletion] = useState<string[]>([]);
 
   const [monitorData, setMonitorData] = useState<SyntheticsMonitor | undefined>(undefined);
 
   const { status, loading, isEdit } = useMonitorSave({ monitorData });
 
   const canEditSynthetics = useCanEditSynthetics();
+
+  const { isServiceAllowed } = useEnablement();
 
   const formSubmitter = (formData: Record<string, any>) => {
     if (isValid) {
@@ -63,7 +64,7 @@ export const ActionBar = ({
                 data-test-subj="syntheticsActionBarButton"
                 color="danger"
                 onClick={() => {
-                  setMonitorPendingDeletion(defaultValues as SyntheticsMonitor);
+                  setMonitorsPendingDeletion([monitorId]);
                 }}
                 isDisabled={!canEditSynthetics || !canUsePublicLocations}
               >
@@ -82,7 +83,10 @@ export const ActionBar = ({
           </EuiLink>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <RunTestButton canUsePublicLocations={canUsePublicLocations} />
+          <RunTestButton
+            canUsePublicLocations={canUsePublicLocations}
+            isServiceAllowed={isServiceAllowed}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false} css={{ marginLeft: 'auto' }}>
           <NoPermissionsTooltip
@@ -94,21 +98,21 @@ export const ActionBar = ({
               isLoading={loading}
               onClick={handleSubmit(formSubmitter)}
               data-test-subj="syntheticsMonitorConfigSubmitButton"
-              disabled={!canEditSynthetics || !canUsePublicLocations}
+              disabled={!canEditSynthetics || !canUsePublicLocations || !isServiceAllowed}
             >
               {isEdit ? UPDATE_MONITOR_LABEL : CREATE_MONITOR_LABEL}
             </EuiButton>
           </NoPermissionsTooltip>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {monitorPendingDeletion && (
+      {monitorsPendingDeletion.length > 0 && (
         <DeleteMonitor
-          configId={monitorId}
+          configIds={monitorsPendingDeletion}
           name={defaultValues?.[ConfigKey.NAME] ?? ''}
           reloadPage={() => {
             history.push(MONITORS_ROUTE);
           }}
-          setMonitorPendingDeletion={setMonitorPendingDeletion}
+          setMonitorPendingDeletion={setMonitorsPendingDeletion}
           isProjectMonitor={defaultValues?.[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT}
         />
       )}

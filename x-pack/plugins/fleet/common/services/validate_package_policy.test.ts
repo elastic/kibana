@@ -162,6 +162,7 @@ describe('Fleet - validatePackagePolicy()', () => {
       name: 'pkgPolicy1-1',
       namespace: 'default',
       policy_id: 'test-policy',
+      policy_ids: ['test-policy'],
       enabled: true,
       inputs: [
         {
@@ -656,6 +657,7 @@ describe('Fleet - validatePackagePolicy()', () => {
               version: '0.6.2',
             },
             policy_id: 'b25cb6e0-8347-11ec-96f9-6590c25bacf9',
+            policy_ids: ['b25cb6e0-8347-11ec-96f9-6590c25bacf9'],
           },
           {
             ...mockPackage,

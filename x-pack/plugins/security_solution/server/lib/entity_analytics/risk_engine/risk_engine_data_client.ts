@@ -8,7 +8,7 @@
 import type { Logger, ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
-import { RiskEngineStatusEnum } from '../../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
+import { RiskEngineStatusEnum } from '../../../../common/api/entity_analytics';
 import type { InitRiskEngineResult } from '../../../../common/entity_analytics/risk_engine';
 import { MAX_SPACES_COUNT, RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
 import { removeLegacyTransforms, getLegacyTransforms } from '../utils/transforms';
@@ -17,6 +17,7 @@ import {
   getConfiguration,
   initSavedObjects,
   getEnabledRiskEngineAmount,
+  deleteSavedObjects,
 } from './utils/saved_object_configuration';
 import { bulkDeleteSavedObjects } from '../../risk_score/prebuilt_saved_objects/helpers/bulk_delete_saved_objects';
 import type { RiskScoreDataClient } from '../risk_score/risk_score_data_client';
@@ -26,6 +27,11 @@ import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../audit';
 
 interface InitOpts {
   namespace: string;
+  taskManager: TaskManagerStartContract;
+  riskScoreDataClient: RiskScoreDataClient;
+}
+
+interface TearDownParams {
   taskManager: TaskManagerStartContract;
   riskScoreDataClient: RiskScoreDataClient;
 }
@@ -191,6 +197,29 @@ export class RiskEngineDataClient {
         enabled: false,
       },
     });
+  }
+
+  /**
+   * Delete all risk engine resources.
+   *
+   * It returns an array of errors that occurred during the deletion.
+   *
+   * WARNING: It will remove all data.
+   */
+  public async tearDown({ taskManager, riskScoreDataClient }: TearDownParams) {
+    const errors: Error[] = [];
+    const addError = (e: Error) => errors.push(e);
+
+    await removeRiskScoringTask({
+      namespace: this.options.namespace,
+      taskManager,
+      logger: this.options.logger,
+    }).catch(addError);
+
+    await deleteSavedObjects({ savedObjectsClient: this.options.soClient }).catch(addError);
+    const riskScoreErrors = await riskScoreDataClient.tearDown();
+
+    return errors.concat(riskScoreErrors);
   }
 
   public async disableLegacyRiskEngine({ namespace }: { namespace: string }) {

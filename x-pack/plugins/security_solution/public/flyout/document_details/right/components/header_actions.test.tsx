@@ -7,20 +7,18 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { RightPanelContext } from '../context';
+import { DocumentDetailsContext } from '../../shared/context';
 import { SHARE_BUTTON_TEST_ID, CHAT_BUTTON_TEST_ID } from './test_ids';
 import { HeaderActions } from './header_actions';
 import { useAssistant } from '../hooks/use_assistant';
 import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
 import { TestProvidersComponent } from '../../../../common/mock';
-import { useGetAlertDetailsFlyoutLink } from '../../../../timelines/components/side_panel/event_details/use_get_alert_details_flyout_link';
+import { useGetFlyoutLink } from '../hooks/use_get_flyout_link';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../hooks/use_assistant');
-jest.mock(
-  '../../../../timelines/components/side_panel/event_details/use_get_alert_details_flyout_link'
-);
+jest.mock('../hooks/use_get_flyout_link');
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
@@ -31,14 +29,14 @@ const alertUrl = 'https://example.com/alert';
 const mockContextValue = {
   dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
   getFieldsData: jest.fn().mockImplementation(mockGetFieldsData),
-} as unknown as RightPanelContext;
+} as unknown as DocumentDetailsContext;
 
-const renderHeaderActions = (contextValue: RightPanelContext) =>
+const renderHeaderActions = (contextValue: DocumentDetailsContext) =>
   render(
     <TestProvidersComponent>
-      <RightPanelContext.Provider value={contextValue}>
+      <DocumentDetailsContext.Provider value={contextValue}>
         <HeaderActions />
-      </RightPanelContext.Provider>
+      </DocumentDetailsContext.Provider>
     </TestProvidersComponent>
   );
 
@@ -53,7 +51,7 @@ describe('<HeaderAction />', () => {
 
   beforeEach(() => {
     window.location.search = '?';
-    jest.mocked(useGetAlertDetailsFlyoutLink).mockReturnValue(alertUrl);
+    jest.mocked(useGetFlyoutLink).mockReturnValue(alertUrl);
     jest.mocked(useAssistant).mockReturnValue({ showAssistant: true, promptContextId: '' });
   });
 
@@ -65,7 +63,7 @@ describe('<HeaderAction />', () => {
     });
 
     it('should not render share button in the title if alert is missing url info', () => {
-      jest.mocked(useGetAlertDetailsFlyoutLink).mockReturnValue(null);
+      jest.mocked(useGetFlyoutLink).mockReturnValue(null);
       const { queryByTestId } = renderHeaderActions(mockContextValue);
       expect(queryByTestId(SHARE_BUTTON_TEST_ID)).not.toBeInTheDocument();
     });

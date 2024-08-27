@@ -17,7 +17,7 @@ import { normalizeFieldsList, getIndices, FieldCapsList, getCommonFields } from 
 
 const validationSchema = schema.object({
   policy: schema.object({
-    name: schema.string(),
+    name: schema.string({ maxLength: 1000 }),
     type: schema.oneOf([
       schema.literal('match'),
       schema.literal('range'),

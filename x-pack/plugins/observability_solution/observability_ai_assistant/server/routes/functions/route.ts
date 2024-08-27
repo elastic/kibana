@@ -33,7 +33,7 @@ const getFunctionsRoute = createObservabilityAIAssistantServerRoute({
 
     const client = await service.getClient({ request });
 
-    const [functionClient, knowledgeBaseInstructions] = await Promise.all([
+    const [functionClient, userInstructions] = await Promise.all([
       service.getFunctionClient({
         signal: controller.signal,
         resources,
@@ -41,7 +41,7 @@ const getFunctionsRoute = createObservabilityAIAssistantServerRoute({
         screenContexts: [],
       }),
       // error is caught in client
-      client.fetchKnowledgeBaseInstructions(),
+      client.getKnowledgeBaseUserInstructions(),
     ]);
 
     const functionDefinitions = functionClient.getFunctions().map((fn) => fn.definition);
@@ -51,9 +51,9 @@ const getFunctionsRoute = createObservabilityAIAssistantServerRoute({
     return {
       functionDefinitions: functionClient.getFunctions().map((fn) => fn.definition),
       systemMessage: getSystemMessageFromInstructions({
-        registeredInstructions: functionClient.getInstructions(),
-        knowledgeBaseInstructions,
-        requestInstructions: [],
+        applicationInstructions: functionClient.getInstructions(),
+        userInstructions,
+        adHocInstructions: [],
         availableFunctionNames,
       }),
     };
@@ -65,7 +65,16 @@ const functionRecallRoute = createObservabilityAIAssistantServerRoute({
   params: t.type({
     body: t.intersection([
       t.type({
-        queries: t.array(nonEmptyStringRt),
+        queries: t.array(
+          t.intersection([
+            t.type({
+              text: t.string,
+            }),
+            t.partial({
+              boost: t.number,
+            }),
+          ])
+        ),
       }),
       t.partial({
         categories: t.array(t.string),
@@ -102,6 +111,7 @@ const functionSummariseRoute = createObservabilityAIAssistantServerRoute({
       text: nonEmptyStringRt,
       confidence: t.union([t.literal('low'), t.literal('medium'), t.literal('high')]),
       is_correction: toBooleanRt,
+      type: t.union([t.literal('user_instruction'), t.literal('contextual')]),
       public: toBooleanRt,
       labels: t.record(t.string, t.string),
     }),
@@ -120,17 +130,19 @@ const functionSummariseRoute = createObservabilityAIAssistantServerRoute({
       confidence,
       id,
       is_correction: isCorrection,
+      type,
       text,
       public: isPublic,
       labels,
     } = resources.params.body;
 
-    return client.createKnowledgeBaseEntry({
+    return client.addKnowledgeBaseEntry({
       entry: {
         confidence,
         id,
         doc_id: id,
         is_correction: isCorrection,
+        type,
         text,
         public: isPublic,
         labels,

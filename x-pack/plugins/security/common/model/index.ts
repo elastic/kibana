@@ -5,17 +5,6 @@
  * 2.0.
  */
 
-export type {
-  ApiKey,
-  RestApiKey,
-  BaseApiKey,
-  CrossClusterApiKey,
-  ApiKeyToInvalidate,
-  ApiKeyRoleDescriptors,
-  CrossClusterApiKeyAccess,
-  ApiKeyAggregations,
-  QueryApiKeyResult,
-} from './api_key';
 export type { EditUser, GetUserDisplayNameParams } from './user';
 export type { GetUserProfileResponse } from './user_profile';
 export {
@@ -32,7 +21,10 @@ export {
 } from './authenticated_user';
 export { shouldProviderUseLoginForm } from './authentication_provider';
 export type { BuiltinESPrivileges } from './builtin_es_privileges';
-export type { RawKibanaPrivileges, RawKibanaFeaturePrivileges } from './raw_kibana_privileges';
+export type {
+  RawKibanaPrivileges,
+  RawKibanaFeaturePrivileges,
+} from '@kbn/security-authorization-core';
 export {
   copyRole,
   isRoleDeprecated,
@@ -51,4 +43,9 @@ export type {
   InvalidRoleTemplate,
   RoleTemplate,
   RoleMapping,
+  RoleMappingRule,
+  RoleMappingAllRule,
+  RoleMappingAnyRule,
+  RoleMappingExceptRule,
+  RoleMappingFieldRule,
 } from './role_mapping';

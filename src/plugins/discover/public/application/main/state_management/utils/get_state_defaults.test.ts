@@ -32,6 +32,7 @@ describe('getStateDefaults', () => {
           "dataViewId": "index-pattern-with-timefield-id",
           "type": "dataView",
         },
+        "density": undefined,
         "filters": undefined,
         "grid": undefined,
         "headerRowHeight": undefined,
@@ -71,6 +72,7 @@ describe('getStateDefaults', () => {
           "dataViewId": "the-data-view-id",
           "type": "dataView",
         },
+        "density": undefined,
         "filters": undefined,
         "grid": undefined,
         "headerRowHeight": undefined,
@@ -98,14 +100,14 @@ describe('getStateDefaults', () => {
     });
     expect(actualForUndefinedViewMode.viewMode).toBeUndefined();
 
-    const actualForEsqlWithInvalidAggLevelViewMode = getStateDefaults({
+    const actualForEsqlWithAggregatedViewMode = getStateDefaults({
       services: discoverServiceMock,
       savedSearch: {
         ...savedSearchMockWithESQL,
         viewMode: VIEW_MODE.AGGREGATED_LEVEL,
       },
     });
-    expect(actualForEsqlWithInvalidAggLevelViewMode.viewMode).toBe(VIEW_MODE.DOCUMENT_LEVEL);
+    expect(actualForEsqlWithAggregatedViewMode.viewMode).toBe(VIEW_MODE.AGGREGATED_LEVEL);
 
     const actualForEsqlWithInvalidPatternLevelViewMode = getStateDefaults({
       services: discoverServiceMock,

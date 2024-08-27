@@ -142,15 +142,5 @@ describe('generateAlertId', () => {
       modifiedIdParams.completeRule.ruleParams.query = 'from packetbeat*';
       expect(id).toBe(generateAlertId(modifiedIdParams));
     });
-
-    it('creates id dependant on suppression terms', () => {
-      modifiedIdParams.suppressionTerms = [{ field: 'agent.name', value: ['test-1'] }];
-      const id1 = generateAlertId(modifiedIdParams);
-      modifiedIdParams.suppressionTerms = [{ field: 'agent.name', value: ['test-2'] }];
-      const id2 = generateAlertId(modifiedIdParams);
-
-      expect(id).not.toBe(id1);
-      expect(id1).not.toBe(id2);
-    });
   });
 });

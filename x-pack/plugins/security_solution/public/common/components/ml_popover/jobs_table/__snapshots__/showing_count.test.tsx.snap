@@ -8,7 +8,7 @@ exports[`ShowingCount renders correctly against snapshot 1`] = `
     color="subdued"
     size="xs"
   >
-    <FormattedMessage
+    <MemoizedFormattedMessage
       data-test-subj="query-message"
       defaultMessage="Showing: {filterResultsLength} {filterResultsLength, plural, one {job} other {jobs}}"
       id="xpack.securitySolution.components.mlPopup.showingLabel"

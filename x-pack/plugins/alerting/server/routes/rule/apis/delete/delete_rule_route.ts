@@ -23,10 +23,18 @@ export const deleteRuleRoute = (
       path: `${BASE_ALERTING_API_PATH}/rule/{id}`,
       options: {
         access: 'public',
-        description: `Delete a rule`,
+        summary: `Delete a rule`,
+        tags: ['oas-tag:alerting'],
       },
       validate: {
-        params: deleteRuleRequestParamsSchemaV1,
+        request: {
+          params: deleteRuleRequestParamsSchemaV1,
+        },
+        response: {
+          204: {
+            description: 'Indicates a successful call.',
+          },
+        },
       },
     },
     router.handleLegacyErrors(

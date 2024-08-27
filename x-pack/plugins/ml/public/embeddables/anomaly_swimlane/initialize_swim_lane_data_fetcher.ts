@@ -53,13 +53,9 @@ export const initializeSwimLaneDataFetcher = (
 
   const swimLaneData$ = new BehaviorSubject<OverallSwimlaneData | undefined>(undefined);
 
-  const selectedJobs$ = getJobsObservable(
-    swimLaneApi.jobIds.pipe(map((jobIds) => ({ jobIds }))),
-    anomalyDetectorService,
-    (error) => {
-      blockingError.next(error);
-    }
-  ).pipe(shareReplay(1));
+  const selectedJobs$ = getJobsObservable(swimLaneApi.jobIds, anomalyDetectorService, (error) => {
+    blockingError.next(error);
+  }).pipe(shareReplay(1));
 
   const swimLaneInput$ = combineLatest({
     jobIds: swimLaneApi.jobIds,

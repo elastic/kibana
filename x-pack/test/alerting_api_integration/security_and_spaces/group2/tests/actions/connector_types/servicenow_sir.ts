@@ -14,6 +14,7 @@ import http from 'http';
 import { getHttpProxyServer } from '@kbn/alerting-api-integration-helpers';
 import { getServiceNowServer } from '@kbn/actions-simulators-plugin/server/plugin';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
+import { MAX_ADDITIONAL_FIELDS_LENGTH } from '@kbn/stack-connectors-plugin/common/servicenow/constants';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -589,6 +590,81 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
                   'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.comments]: types that failed validation:\n - [subActionParams.comments.0.0.comment]: expected value of type [string] but got [undefined]\n - [subActionParams.comments.1]: expected value to equal [null]\n- [4.subAction]: expected value to equal [getChoices]',
               });
             });
+        });
+
+        it('throws when trying to create an incident with too many "additional_fields"', async () => {
+          const additionalFields = new Array(MAX_ADDITIONAL_FIELDS_LENGTH + 1)
+            .fill('foobar')
+            .reduce((acc, curr, idx) => {
+              acc[idx] = curr;
+              return acc;
+            }, {});
+
+          const res = await supertest
+            .post(`/api/actions/connector/${simulatedActionId}/_execute`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              params: {
+                ...mockServiceNowBasic.params,
+                subActionParams: {
+                  ...mockServiceNowBasic.params.subActionParams,
+                  incident: {
+                    ...mockServiceNowBasic.params.subActionParams.incident,
+                    additional_fields: additionalFields,
+                  },
+                  comments: [],
+                },
+              },
+            })
+            .expect(200);
+
+          expect(res.body.status).to.eql('error');
+        });
+
+        it('throws when trying to create an incident with "additional_fields" keys that are not allowed', async () => {
+          const res = await supertest
+            .post(`/api/actions/connector/${simulatedActionId}/_execute`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              params: {
+                ...mockServiceNowBasic.params,
+                subActionParams: {
+                  ...mockServiceNowBasic.params.subActionParams,
+                  incident: {
+                    ...mockServiceNowBasic.params.subActionParams.incident,
+                    additional_fields: {
+                      short_description: 'foo',
+                    },
+                  },
+                  comments: [],
+                },
+              },
+            })
+            .expect(200);
+
+          expect(res.body.status).to.eql('error');
+        });
+
+        it('does not throw when "additional_fields" is a valid JSON object send as string', async () => {
+          const res = await supertest
+            .post(`/api/actions/connector/${simulatedActionId}/_execute`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              params: {
+                ...mockServiceNowBasic.params,
+                subActionParams: {
+                  ...mockServiceNowBasic.params.subActionParams,
+                  incident: {
+                    ...mockServiceNowBasic.params.subActionParams.incident,
+                    otherFields: '{ "foo": "bar" }',
+                  },
+                  comments: [],
+                },
+              },
+            })
+            .expect(200);
+
+          expect(res.body.status).to.eql('error');
         });
 
         describe('getChoices', () => {

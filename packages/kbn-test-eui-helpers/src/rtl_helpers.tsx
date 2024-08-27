@@ -53,7 +53,7 @@ export class EuiButtonGroupTestHarness {
   }
 
   /**
-   * Returns selected value of button group
+   * Returns selected option of button group
    */
   public get selected() {
     return within(this.#buttonGroup).getByRole('button', { pressed: true });
@@ -134,5 +134,61 @@ export class EuiSuperDatePickerTestHarness {
    */
   static refresh() {
     userEvent.click(screen.getByRole('button', { name: 'Refresh' }));
+  }
+}
+
+export class EuiSelectTestHarness {
+  #testId: string;
+
+  /**
+   * Returns select or throws
+   */
+  get #selectEl() {
+    return screen.getByTestId(this.#testId);
+  }
+
+  constructor(testId: string) {
+    this.#testId = testId;
+  }
+
+  /**
+   * Returns `data-test-subj` of select
+   */
+  public get testId() {
+    return this.#testId;
+  }
+
+  /**
+   * Returns button select if found, otherwise `null`
+   */
+  public get self() {
+    return screen.queryByTestId(this.#testId);
+  }
+
+  /**
+   * Returns all options of select
+   */
+  public get options(): HTMLOptionElement[] {
+    return within(this.#selectEl).getAllByRole('option');
+  }
+
+  /**
+   * Returns selected option
+   */
+  public get selected() {
+    return (this.#selectEl as HTMLSelectElement).value;
+  }
+
+  /**
+   * Select option by value
+   */
+  public select(optionName: string | RegExp) {
+    const option = this.options.find((o) => o.value === optionName)?.value;
+
+    if (!option) {
+      throw new Error(`Option [${optionName}] not found`);
+    }
+
+    fireEvent.change(this.#selectEl, { target: { value: option } });
   }
 }

@@ -1,0 +1,14 @@
+{
+  "type": "plugin",
+  "id": "@kbn/fields-metadata-plugin",
+  "owner": "@elastic/obs-ux-logs-team",
+  "description": "Exposes services for async usage and search of fields metadata.",
+  "plugin": {
+    "id": "fieldsMetadata",
+    "server": true,
+    "browser": true,
+    "configPath": ["xpack", "fields_metadata"],
+    "requiredPlugins": [],
+    "requiredBundles": [],
+  }
+}

@@ -129,7 +129,7 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
             />
           }
           error={i18n.translate('xpack.fleet.policyDetails.policyNotFoundErrorTitle', {
-            defaultMessage: "Policy '{id}' not found",
+            defaultMessage: "Policy ''{id}'' not found",
             values: {
               id: policyId,
             },

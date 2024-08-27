@@ -8,18 +8,48 @@
 import { mountWithIntl, nextTick, shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { DataView, type FieldSpec } from '@kbn/data-views-plugin/common';
 // We are using this inside a `jest.mock` call. Jest requires dynamic dependencies to be prefixed with `mock`
 import { coreMock as mockCoreMock } from '@kbn/core/public/mocks';
-import { Comparator, InventoryMetricConditions } from '../../../../common/alerting/metrics';
-import { SnapshotCustomMetricInput } from '../../../../common/http_api/snapshot_api';
+import { COMPARATORS } from '@kbn/alerting-comparators';
+import { InventoryMetricConditions } from '../../../../common/alerting/metrics';
 import { AlertContextMeta, defaultExpression, ExpressionRow, Expressions } from './expression';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { ResolvedDataView } from '../../../utils/data_view';
+import { TIMESTAMP_FIELD } from '../../../../common/constants';
+import type { SnapshotCustomMetricInput } from '../../../../common/http_api';
 
-jest.mock('../../../containers/metrics_source/source', () => ({
+const mockDataView = {
+  id: 'mock-id',
+  title: 'mock-title',
+  timeFieldName: TIMESTAMP_FIELD,
+  fields: [
+    {
+      name: 'some.system.field',
+      type: 'bzzz',
+      searchable: true,
+      aggregatable: true,
+    },
+  ] as Partial<FieldSpec[]>,
+  isPersisted: () => false,
+  getName: () => 'mock-data-view',
+  toSpec: () => ({}),
+} as jest.Mocked<DataView>;
+
+jest.mock('../../../containers/metrics_source', () => ({
   withSourceProvider: () => jest.fn,
   useSourceContext: () => ({
     source: { id: 'default' },
-    createDerivedIndexPattern: () => ({ fields: [], title: 'metricbeat-*' }),
+  }),
+  useMetricsDataViewContext: () => ({
+    metricsView: {
+      indices: 'metricbeat-*',
+      timeFieldName: mockDataView.timeFieldName,
+      fields: mockDataView.fields,
+      dataViewReference: mockDataView,
+    } as ResolvedDataView,
+    loading: false,
+    error: undefined,
   }),
 }));
 
@@ -28,7 +58,6 @@ jest.mock('../../../hooks/use_kibana', () => ({
     services: mockCoreMock.createStart(),
   }),
 }));
-
 const exampleCustomMetric = {
   id: 'this-is-an-id',
   field: 'some.system.field',
@@ -83,7 +112,7 @@ describe('Expression', () => {
     expect(ruleParams.criteria).toEqual([
       {
         metric: 'memory',
-        comparator: Comparator.GT,
+        comparator: COMPARATORS.GREATER_THAN,
         threshold: [],
         timeSize: 1,
         timeUnit: 'm',
@@ -99,11 +128,11 @@ describe('Expression', () => {
     const ruleParams = {
       criteria: [
         {
-          metric: 'cpu',
+          metric: 'cpuV2',
           timeSize: 1,
           timeUnit: 'm',
           threshold: [10],
-          comparator: Comparator.GT,
+          comparator: COMPARATORS.GREATER_THAN,
         },
       ],
       nodeType: undefined,
@@ -145,7 +174,7 @@ describe('Expression', () => {
       expect(ruleParams.criteria).toEqual([
         {
           metric: 'custom',
-          comparator: Comparator.GT,
+          comparator: COMPARATORS.GREATER_THAN,
           threshold: [],
           timeSize: 1,
           timeUnit: 'm',
@@ -174,15 +203,6 @@ describe('ExpressionRow', () => {
           metric: [],
         }}
         expression={expression}
-        fields={[
-          {
-            name: 'some.system.field',
-            type: 'bzzz',
-            searchable: true,
-            aggregatable: true,
-            displayable: true,
-          },
-        ]}
       />
     );
 
@@ -198,7 +218,7 @@ describe('ExpressionRow', () => {
   }
   const expression = {
     metric: 'custom',
-    comparator: Comparator.GT,
+    comparator: COMPARATORS.GREATER_THAN,
     threshold: [],
     timeSize: 1,
     timeUnit: 'm',
