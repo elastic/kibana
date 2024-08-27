@@ -97,9 +97,10 @@ export const SearchIndexDetailsPage: FunctionComponent<
                   <EuiFlexItem>
                     <EuiPopover
                       isOpen={isShowingMoreOptionsPopover}
+                      closePopover={() => setShowMoreOptionsPopover(!isShowingMoreOptionsPopover)}
                       button={
                         <EuiButtonIcon
-                          data-test-subj="searchindexDetailsMoreOptionsButton"
+                          data-test-subj="searchIndexDetailsMoreOptionsButton"
                           data-telemetry-id="idxMgmt-searchIndexDetails-moreOptionsButton"
                           color="primary"
                           size="m"
@@ -116,9 +117,12 @@ export const SearchIndexDetailsPage: FunctionComponent<
                     >
                       <EuiContextMenuPanel
                         size="s"
+                        data-test-subj="searchIndexMoreOptionsMenu"
                         items={[
                           <EuiContextMenuItem
+                            key="searchIndexDeleteButton"
                             icon={<EuiIcon type="trash" color="danger" />}
+                            data-test-subj="searchIndexDeleteButton"
                             onClick={() => {
                               setShowDeleteModal(!isShowingDeleteModal);
                             }}
