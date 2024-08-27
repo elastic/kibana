@@ -61,7 +61,7 @@ export const useDeployIntegration = ({
                 inputTypes: integrationSettings.inputTypes ?? [],
                 rawSamples: integrationSettings.logSamples ?? [],
                 docs: result.docs ?? [],
-                samplesFormat: result.samplesFormat,
+                samplesFormat: result.samplesFormat ?? { name: 'json' },
                 pipeline: result.pipeline,
               },
             ],
