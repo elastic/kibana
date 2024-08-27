@@ -12,19 +12,26 @@ import { useMemo, useRef } from 'react';
 import type { LensApi, LensRendererProps, LensRuntimeState, LensSerializedState } from './types';
 import { LENS_EMBEDDABLE_TYPE } from '../../common/constants';
 
-export function LensRenderer(props: LensRendererProps) {
+export function LensRenderer({
+  title,
+  query,
+  filters,
+  withDefaultActions,
+  extraActions,
+  ...props
+}: LensRendererProps) {
   const apiRef = useRef<LensApi | undefined>(undefined);
 
   const initialState = useMemo(() => {
     const rawState: LensSerializedState = {
       attributes: {
-        title: props.title ?? '',
+        title: title ?? '',
         description: '',
         visualizationType: null,
         references: [],
         state: {
-          query: props.query || { query: '', language: 'kuery' },
-          filters: props.filters || [],
+          query: query || { query: '', language: 'kuery' },
+          filters: filters || [],
           internalReferences: [],
           datasourceStates: {},
           visualization: {},
@@ -37,6 +44,8 @@ export function LensRenderer(props: LensRendererProps) {
   }, []);
   const searchApi = useSearchApi(props);
 
+  const showPanelChrome = Boolean(withDefaultActions) || (extraActions && extraActions?.length > 0);
+
   return (
     <ReactEmbeddableRenderer<LensSerializedState, LensRuntimeState, LensApi>
       type={LENS_EMBEDDABLE_TYPE}
@@ -44,7 +53,7 @@ export function LensRenderer(props: LensRendererProps) {
       onApiAvailable={(api) => {
         apiRef.current = api;
       }}
-      hidePanelChrome={true}
+      hidePanelChrome={!showPanelChrome}
     />
   );
 }
