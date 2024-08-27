@@ -12,11 +12,8 @@ import {
   ExecuteOptions,
   ExecutionResponse,
 } from '../create_unsecured_execute_function';
-import {
-  ActionExecutorContract,
-  asNotificationExecutionSource,
-  type RelatedSavedObjects,
-} from '../lib';
+import { ActionExecutorContract, asNotificationExecutionSource } from '../lib';
+import type { RelatedSavedObjects } from '../lib';
 import { ActionTypeExecutorResult, InMemoryConnector } from '../types';
 import { asBackgroundTaskExecutionSource } from '../lib/action_execution_source';
 import { ConnectorWithExtraFindData } from '../application/connector/types';
