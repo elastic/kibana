@@ -1,2 +1,6 @@
 steps:
-  - command: echo "Placeholder"
+  - command: .buildkite/scripts/steps/codeql/codeql.sh
+    label: "Run CodeQL"
+    agents:
+      imageProject: elastic-images-qa
+      machineType: n2-standard-8
