@@ -220,6 +220,7 @@ describe('Task Runner', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
+    jest.restoreAllMocks(); // clear spy mock implementations
     logger.isLevelEnabled.mockReturnValue(true);
     jest
       .requireMock('../lib/wrap_scoped_cluster_client')
@@ -1969,7 +1970,7 @@ describe('Task Runner', () => {
   });
 
   test('should set unexpected errors as framework-error', async () => {
-    (getExecutorServicesModule.getExecutorServices as jest.Mock).mockImplementation(() => {
+    jest.spyOn(getExecutorServicesModule, 'getExecutorServices').mockImplementation(() => {
       throw new Error('test');
     });
 

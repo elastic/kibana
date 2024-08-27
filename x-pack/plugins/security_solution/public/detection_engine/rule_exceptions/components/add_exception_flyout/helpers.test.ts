@@ -10,7 +10,12 @@ import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/res
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
 import { getRulesSchemaMock } from '../../../../../common/api/detection_engine/model/rule_schema/rule_response_schema.mock';
-import { isSubmitDisabled, prepareNewItemsForSubmission, prepareToCloseAlerts } from './helpers';
+import {
+  isSubmitDisabled,
+  prepareNewItemsForSubmission,
+  prepareToCloseAlerts,
+  getSuccessToastTitle,
+} from './helpers';
 import type { Rule } from '../../../rule_management/logic/types';
 import type { AlertData } from '../../utils/types';
 
@@ -467,6 +472,20 @@ describe('add_exception_flyout#helpers', () => {
       });
 
       expect(ruleStaticIds).toEqual(['query-rule-id']);
+    });
+  });
+
+  describe('getSuccessToastTitle', () => {
+    it('returns endpoint title when list type is "endpoint"', () => {
+      expect(getSuccessToastTitle(ExceptionListTypeEnum.ENDPOINT)).toEqual(
+        'Endpoint exception added to shared exception list'
+      );
+    });
+
+    it('returns non endpoint title when list type is not "endpoint"', () => {
+      expect(getSuccessToastTitle(ExceptionListTypeEnum.DETECTION)).toEqual(
+        'Rule exception added to shared exception list'
+      );
     });
   });
 });
