@@ -197,7 +197,7 @@ export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSe
         });
       };
 
-      reader.onerror = function () {
+      const handleReaderError = function () {
         const message = reader.error?.message;
         if (message) {
           setSampleFileError(i18n.LOGS_SAMPLE_ERROR.CAN_NOT_READ_WITH_REASON(message));
@@ -206,7 +206,8 @@ export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSe
         }
       };
 
-      reader.onabort = reader.onerror;
+      reader.onerror = handleReaderError;
+      reader.onabort = handleReaderError;
 
       reader.readAsText(logsSampleFile);
     },
