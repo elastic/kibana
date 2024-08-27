@@ -1493,7 +1493,7 @@
     "@types/chroma-js": "^2.1.0",
     "@types/chromedriver": "^81.0.5",
     "@types/classnames": "^2.2.9",
-    "@types/cli-progress": "^3.11.5",
+    "@types/cli-progress": "^3.11.6",
     "@types/color": "^3.0.3",
     "@types/cytoscape": "^3.14.0",
     "@types/d3": "^3.5.43",
