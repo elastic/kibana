@@ -13,36 +13,38 @@ import type { ConnectorFieldsPreviewProps } from '../types';
 import { ConnectorCard } from '../card';
 import * as i18n from './translations';
 
+const mapTLP = (tlpValue: number | string): string => {
+  switch (tlpValue) {
+    case '0':
+      return 'CLEAR';
+    case '1':
+      return 'GREEN';
+    case '2':
+      return 'AMBER';
+    case '3':
+      return 'AMBER+STRICT';
+    case '4':
+      return 'RED';
+    default:
+      return 'AMBER';
+  }
+};
+
 const TheHiveFieldsPreviewComponent: React.FunctionComponent<
   ConnectorFieldsPreviewProps<TheHiveFieldsType>
 > = ({ fields, connector }) => {
   const { tlp } = fields ?? {};
 
-  const mapTLP = (tlp: number | string): string => {
-    switch (tlp) {
-      case "0":
-        return 'CLEAR';
-      case "1":
-        return 'GREEN';
-      case "2":
-        return 'AMBER';
-      case "3":
-        return 'AMBER+STRICT';
-      case "4":
-        return 'RED';
-      default:
-        return 'AMBER';
-    }
-  }
-
   const listItems = useMemo(
     () => [
-      ...(tlp !== null ? [
-        {
-          title: i18n.TLP_LABEL,
-          description: mapTLP(tlp),
-        },
-      ] : []),
+      ...(tlp !== null
+        ? [
+            {
+              title: i18n.TLP_LABEL,
+              description: mapTLP(tlp),
+            },
+          ]
+        : []),
     ],
     [tlp]
   );

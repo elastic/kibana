@@ -15,31 +15,30 @@ import { TheHiveTLP } from './types';
 
 const { emptyField } = fieldValidators;
 
+const tlpOptions: Array<{ text: string; value: string }> = [
+  {
+    text: 'CLEAR',
+    value: TheHiveTLP.CLEAR,
+  },
+  {
+    text: 'GREEN',
+    value: TheHiveTLP.GREEN,
+  },
+  {
+    text: 'AMBER',
+    value: TheHiveTLP.AMBER,
+  },
+  {
+    text: 'AMBER+STRICT',
+    value: TheHiveTLP.AMBER_STRICT,
+  },
+  {
+    text: 'RED',
+    value: TheHiveTLP.RED,
+  },
+];
+
 const TheHiveFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = () => {
-
-  const tlpOptions: Array<{ text: string, value: string }> = [
-    {
-      text: 'CLEAR',
-      value: TheHiveTLP.CLEAR
-    },
-    {
-      text: 'GREEN',
-      value: TheHiveTLP.GREEN
-    },
-    {
-      text: 'AMBER',
-      value: TheHiveTLP.AMBER
-    },
-    {
-      text: 'AMBER+STRICT',
-      value: TheHiveTLP.AMBER_STRICT
-    },
-    {
-      text: 'RED',
-      value: TheHiveTLP.RED
-    }
-  ];
-
   return (
     <div data-test-subj={'connector-fields-Thehive'}>
       <UseField

@@ -6,9 +6,9 @@
  */
 
 import type { Format } from './types';
-import type { ConnectorTheHiveTypeFields} from '../../../common/types/domain';
+import type { ConnectorTheHiveTypeFields } from '../../../common/types/domain';
 
-function mapSeverity(severity: string): number{
+function mapSeverity(severity: string): number {
   switch (severity) {
     case 'low':
       return 1;
@@ -24,12 +24,10 @@ function mapSeverity(severity: string): number{
 }
 
 export const format: Format = (theCase) => {
-  const {
-    tlp = null
-  } = (theCase.connector.fields as ConnectorTheHiveTypeFields['fields']) ?? {};
+  const { tlp = null } = (theCase.connector.fields as ConnectorTheHiveTypeFields['fields']) ?? {};
   return {
     tags: theCase.tags,
-    tlp: typeof tlp === 'string' ? parseInt(tlp) : tlp,
+    tlp: typeof tlp === 'string' ? parseInt(tlp, 10) : tlp,
     severity: mapSeverity(theCase.severity),
   };
 };
