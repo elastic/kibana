@@ -792,24 +792,27 @@ async function installPackageWitStateMachine(options: {
       .createTagClient({ client: savedObjectClientWithSpace });
 
     // try installing the package, if there was an error, call error handler and rethrow
-    return await _stateMachineInstallPackage({
-      savedObjectsClient,
-      savedObjectsImporter,
-      savedObjectTagAssignmentService,
-      savedObjectTagClient,
-      esClient,
-      logger,
-      installedPkg,
-      packageInstallContext,
-      installType,
-      spaceId,
-      verificationResult,
-      installSource,
-      authorizationHeader,
-      force,
-      ignoreMappingUpdateErrors,
-      skipDataStreamRollover,
-    })
+    return await _stateMachineInstallPackage(
+      {
+        savedObjectsClient,
+        savedObjectsImporter,
+        savedObjectTagAssignmentService,
+        savedObjectTagClient,
+        esClient,
+        logger,
+        installedPkg,
+        packageInstallContext,
+        installType,
+        spaceId,
+        verificationResult,
+        installSource,
+        authorizationHeader,
+        force,
+        ignoreMappingUpdateErrors,
+        skipDataStreamRollover,
+      },
+      { retryStepInstall: true }
+    )
       .then(async (assets) => {
         logger.debug(`Removing old assets from previous versions of ${pkgName}`);
         await removeOldAssets({
@@ -827,6 +830,7 @@ async function installPackageWitStateMachine(options: {
         logger.warn(`Failure to install package [${pkgName}]: [${err.toString()}]`, {
           error: { stack_trace: err.stack },
         });
+        // TODO: check this code path
         await handleInstallPackageFailure({
           savedObjectsClient,
           error: err,

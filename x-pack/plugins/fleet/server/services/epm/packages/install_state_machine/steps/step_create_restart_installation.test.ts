@@ -71,7 +71,6 @@ describe('stepCreateRestartInstallation', () => {
   afterEach(() => {
     mockedAuditLoggingService.writeCustomSoAuditLog.mockReset();
     soClient.update.mockReset();
-    // mockedCreateInstallation.mockReset();
   });
 
   it('Should call createInstallation if no installedPkg is available', async () => {

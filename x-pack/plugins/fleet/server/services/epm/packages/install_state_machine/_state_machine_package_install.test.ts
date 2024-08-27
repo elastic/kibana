@@ -22,6 +22,7 @@ import {
 import type { Installation } from '../../../../../common';
 
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common';
+import { KibanaSavedObjectType } from '../../../../types';
 
 import { appContextService } from '../../../app_context';
 import { createAppContextStartContractMock } from '../../../../mocks';
@@ -49,6 +50,7 @@ import { restartInstallation } from '../install';
 import { installIndexTemplatesAndPipelines } from '../install_index_template_pipeline';
 
 import { _stateMachineInstallPackage } from './_state_machine_package_install';
+import * as StateMachine from './state_machine';
 
 const mockedInstallIndexTemplatesAndPipelines =
   installIndexTemplatesAndPipelines as jest.MockedFunction<
@@ -92,6 +94,7 @@ describe('_stateMachineInstallPackage', () => {
       saved_objects: [],
     });
     jest.mocked(restartInstallation).mockReset();
+    mockedInstallIndexTemplatesAndPipelines.mockReset();
   });
 
   it('Handles errors from installKibanaAssets', async () => {
@@ -255,6 +258,129 @@ describe('_stateMachineInstallPackage', () => {
     expect(installIlmForDataStream).toBeCalled();
   });
 
+  describe('With flag retryStepInstall = true', () => {
+    const mockInstalledPackageSo: SavedObject<Installation> = {
+      id: 'mocked-package',
+      attributes: {
+        name: 'test-package',
+        version: '1.0.0',
+        install_status: 'installing',
+        install_version: '1.0.0',
+        install_started_at: new Date().toISOString(),
+        install_source: 'registry',
+        verification_status: 'verified',
+        installed_kibana: [] as any,
+        installed_es: [] as any,
+        es_index_patterns: {},
+      },
+      type: PACKAGES_SAVED_OBJECT_TYPE,
+      references: [],
+    };
+
+    it('If there is no latest_executed_state is SO, start from create_restart_installation', async () => {
+      const handleStateSpy = jest.spyOn(StateMachine, 'handleState');
+      mockedInstallIndexTemplatesAndPipelines.mockImplementation(async () => {
+        throw new Error('error installing index templates');
+      });
+
+      const installationPromise = _stateMachineInstallPackage(
+        {
+          savedObjectsClient: soClient,
+          // @ts-ignore
+          savedObjectsImporter: jest.fn(),
+          esClient,
+          logger: loggerMock.create(),
+          packageInstallContext: {
+            assetsMap: new Map(),
+            paths: [],
+            packageInfo: {
+              title: 'title',
+              name: 'xyz',
+              version: '4.5.6',
+              description: 'test',
+              type: 'integration',
+              categories: ['cloud', 'custom'],
+              format_version: 'string',
+              release: 'experimental',
+              conditions: { kibana: { version: 'x.y.z' } },
+              owner: { github: 'elastic/fleet' },
+            },
+          },
+          installType: 'install',
+          installSource: 'registry',
+          spaceId: DEFAULT_SPACE_ID,
+        },
+        { retryStepInstall: true }
+      );
+
+      await expect(installationPromise).rejects.toThrow('error installing index templates');
+      expect(handleStateSpy).toBeCalledWith(
+        'create_restart_installation',
+        expect.any(Object),
+        expect.any(Object)
+      );
+    });
+
+    it.only('If there is latest_executed_state is SO, start from latest failed state', async () => {
+      const handleStateSpy = jest.spyOn(StateMachine, 'handleState');
+      mockedInstallIndexTemplatesAndPipelines.mockImplementation(async () => {
+        throw new Error('error installing index templates');
+      });
+      mockedInstallKibanaAssetsAndReferences.mockResolvedValue([
+        { type: KibanaSavedObjectType.dashboard, id: 'dashboard-1' },
+      ]);
+
+      const installationPromise = _stateMachineInstallPackage(
+        {
+          savedObjectsClient: soClient,
+          // @ts-ignore
+          savedObjectsImporter: jest.fn(),
+          esClient,
+          logger: loggerMock.create(),
+          packageInstallContext: {
+            assetsMap: new Map(),
+            paths: [],
+            packageInfo: {
+              title: 'title',
+              name: 'xyz',
+              version: '4.5.6',
+              description: 'test',
+              type: 'integration',
+              categories: ['cloud', 'custom'],
+              format_version: 'string',
+              release: 'experimental',
+              conditions: { kibana: { version: 'x.y.z' } },
+              owner: { github: 'elastic/fleet' },
+            },
+          },
+          installType: 'install',
+          installSource: 'registry',
+          spaceId: DEFAULT_SPACE_ID,
+          installedPkg: {
+            ...mockInstalledPackageSo,
+            attributes: {
+              ...mockInstalledPackageSo.attributes,
+              install_started_at: new Date(Date.now() - 1000).toISOString(),
+              latest_executed_state: {
+                name: 'install_index_template_pipelines' as any,
+                error: 'Some error',
+                started_at: new Date(Date.now() - 100).toISOString(),
+              },
+            },
+          },
+        },
+        { retryStepInstall: true }
+      );
+
+      expect(handleStateSpy).toBeCalledWith(
+        'install_index_template_pipelines',
+        expect.any(Object),
+        expect.any(Object)
+      );
+      await expect(installationPromise).rejects.toThrow('error installing index templates');
+    });
+  });
+
   describe('When package is stuck in `installing`', () => {
     const mockInstalledPackageSo: SavedObject<Installation> = {
       id: 'mocked-package',
@@ -392,6 +518,11 @@ describe('_stateMachineInstallPackage', () => {
   });
 
   it('Surfaces saved object conflicts error', async () => {
+    mockedInstallIndexTemplatesAndPipelines.mockResolvedValue({
+      installedTemplates: [],
+      esReferences: [],
+    });
+
     appContextService.start(
       createAppContextStartContractMock({
         internal: {

@@ -30,6 +30,8 @@ import type {
   AssetReference,
 } from '../../../../types';
 
+import { appContextService } from '../../..';
+
 import {
   stepCreateRestartInstallation,
   stepInstallKibanaAssets,
@@ -45,7 +47,7 @@ import {
   stepSaveSystemObject,
   updateLatestExecutedState,
 } from './steps';
-import type { StateMachineDefinition } from './state_machine';
+import type { StateMachineDefinition, StateMachineStates } from './state_machine';
 import { handleState } from './state_machine';
 
 export interface InstallContext extends StateContext<StateNames> {
@@ -69,6 +71,72 @@ export interface InstallContext extends StateContext<StateNames> {
   esReferences?: EsAssetReference[];
   kibanaAssetPromise?: Promise<KibanaAssetReference[]>;
 }
+/**
+ * This data structure defines the sequence of the states and the transitions
+ */
+const statesDefinition: StateMachineStates<StateNames> = {
+  create_restart_installation: {
+    nextState: 'install_kibana_assets',
+    onTransition: stepCreateRestartInstallation,
+    onPostTransition: updateLatestExecutedState,
+  },
+  install_kibana_assets: {
+    onTransition: stepInstallKibanaAssets,
+    nextState: 'install_ilm_policies',
+    onPostTransition: updateLatestExecutedState,
+  },
+  install_ilm_policies: {
+    onTransition: stepInstallILMPolicies,
+    nextState: 'install_ml_model',
+    onPostTransition: updateLatestExecutedState,
+  },
+  install_ml_model: {
+    onTransition: stepInstallMlModel,
+    nextState: 'install_index_template_pipelines',
+    onPostTransition: updateLatestExecutedState,
+  },
+  install_index_template_pipelines: {
+    onTransition: stepInstallIndexTemplatePipelines,
+    nextState: 'remove_legacy_templates',
+    onPostTransition: updateLatestExecutedState,
+  },
+  remove_legacy_templates: {
+    onTransition: stepRemoveLegacyTemplates,
+    nextState: 'update_current_write_indices',
+    onPostTransition: updateLatestExecutedState,
+  },
+  update_current_write_indices: {
+    onTransition: stepUpdateCurrentWriteIndices,
+    nextState: 'install_transforms',
+    onPostTransition: updateLatestExecutedState,
+  },
+  install_transforms: {
+    onTransition: stepInstallTransforms,
+    nextState: 'delete_previous_pipelines',
+    onPostTransition: updateLatestExecutedState,
+  },
+  delete_previous_pipelines: {
+    onTransition: stepDeletePreviousPipelines,
+    nextState: 'save_archive_entries_from_assets_map',
+    onPostTransition: updateLatestExecutedState,
+  },
+  save_archive_entries_from_assets_map: {
+    onTransition: stepSaveArchiveEntries,
+    nextState: 'resolve_kibana_promise',
+    onPostTransition: updateLatestExecutedState,
+  },
+  resolve_kibana_promise: {
+    onTransition: stepResolveKibanaPromise,
+    nextState: 'update_so',
+    onPostTransition: updateLatestExecutedState,
+  },
+  update_so: {
+    onTransition: stepSaveSystemObject,
+    nextState: 'end',
+    onPostTransition: updateLatestExecutedState,
+  },
+};
+
 /*
  * _stateMachineInstallPackage installs packages using the generic state machine in ./state_machine
  * installStates is the data structure providing the state machine definition
@@ -77,76 +145,29 @@ export interface InstallContext extends StateContext<StateNames> {
  * After each transition `updateLatestExecutedState` is executed, it updates the executed state in the SO
  */
 export async function _stateMachineInstallPackage(
-  context: InstallContext
+  context: InstallContext,
+  options?: { retryStepInstall?: boolean }
 ): Promise<AssetReference[]> {
   const installStates: StateMachineDefinition<StateNames> = {
     context,
-    states: {
-      create_restart_installation: {
-        nextState: 'install_kibana_assets',
-        onTransition: stepCreateRestartInstallation,
-        onPostTransition: updateLatestExecutedState,
-      },
-      install_kibana_assets: {
-        onTransition: stepInstallKibanaAssets,
-        nextState: 'install_ilm_policies',
-        onPostTransition: updateLatestExecutedState,
-      },
-      install_ilm_policies: {
-        onTransition: stepInstallILMPolicies,
-        nextState: 'install_ml_model',
-        onPostTransition: updateLatestExecutedState,
-      },
-      install_ml_model: {
-        onTransition: stepInstallMlModel,
-        nextState: 'install_index_template_pipelines',
-        onPostTransition: updateLatestExecutedState,
-      },
-      install_index_template_pipelines: {
-        onTransition: stepInstallIndexTemplatePipelines,
-        nextState: 'remove_legacy_templates',
-        onPostTransition: updateLatestExecutedState,
-      },
-      remove_legacy_templates: {
-        onTransition: stepRemoveLegacyTemplates,
-        nextState: 'update_current_write_indices',
-        onPostTransition: updateLatestExecutedState,
-      },
-      update_current_write_indices: {
-        onTransition: stepUpdateCurrentWriteIndices,
-        nextState: 'install_transforms',
-        onPostTransition: updateLatestExecutedState,
-      },
-      install_transforms: {
-        onTransition: stepInstallTransforms,
-        nextState: 'delete_previous_pipelines',
-        onPostTransition: updateLatestExecutedState,
-      },
-      delete_previous_pipelines: {
-        onTransition: stepDeletePreviousPipelines,
-        nextState: 'save_archive_entries_from_assets_map',
-        onPostTransition: updateLatestExecutedState,
-      },
-      save_archive_entries_from_assets_map: {
-        onTransition: stepSaveArchiveEntries,
-        nextState: 'resolve_kibana_promise',
-        onPostTransition: updateLatestExecutedState,
-      },
-      resolve_kibana_promise: {
-        onTransition: stepResolveKibanaPromise,
-        nextState: 'update_so',
-        onPostTransition: updateLatestExecutedState,
-      },
-      update_so: {
-        onTransition: stepSaveSystemObject,
-        nextState: 'end',
-        onPostTransition: updateLatestExecutedState,
-      },
-    },
+    states: statesDefinition,
   };
+  const { installedPkg } = context;
+  const logger = appContextService.getLogger();
+
+  const initialState =
+    options?.retryStepInstall && installedPkg?.attributes?.latest_executed_state?.name
+      ? findNextState(installedPkg.attributes.latest_executed_state.name, statesDefinition)
+      : INSTALL_STATES.CREATE_RESTART_INSTALLATION;
+
+  if (options?.retryStepInstall) {
+    logger.debug('Install with retryStepInstall option');
+  }
+  logger.debug(`Initial installation state: ${initialState}`);
+
   try {
     const { installedKibanaAssetsRefs, esReferences } = await handleState(
-      INSTALL_STATES.CREATE_RESTART_INSTALLATION,
+      initialState!,
       installStates,
       installStates.context
     );
@@ -171,3 +192,7 @@ export async function _stateMachineInstallPackage(
     }
   }
 }
+
+const findNextState = (latestExecutedState: StateNames, states: StateMachineStates<StateNames>) => {
+  return states[latestExecutedState].nextState;
+};
