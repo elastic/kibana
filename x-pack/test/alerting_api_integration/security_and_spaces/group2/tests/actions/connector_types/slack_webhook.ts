@@ -9,14 +9,18 @@ import httpProxy from 'http-proxy';
 import expect from '@kbn/expect';
 import http from 'http';
 import getPort from 'get-port';
+import { IValidatedEvent } from '@kbn/event-log-plugin/server';
+
 import { getHttpProxyServer } from '@kbn/alerting-api-integration-helpers';
 import { getSlackServer } from '@kbn/actions-simulators-plugin/server/plugin';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { getEventLog } from '../../../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
 export default function slackTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const configService = getService('config');
+  const retry = getService('retry');
 
   describe('Slack webhook action', () => {
     let simulatedActionId = '';
@@ -175,6 +179,23 @@ export default function slackTest({ getService }: FtrProviderContext) {
         .expect(200);
       expect(result.status).to.eql('ok');
       expect(proxyHaveBeenCalled).to.equal(true);
+
+      const events: IValidatedEvent[] = await retry.try(async () => {
+        return await getEventLog({
+          getService,
+          spaceId: 'default',
+          type: 'action',
+          id: simulatedActionId,
+          provider: 'actions',
+          actions: new Map([
+            ['execute-start', { equal: 1 }],
+            ['execute', { equal: 1 }],
+          ]),
+        });
+      });
+
+      const executeEvent = events[1];
+      expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(18);
     });
 
     it('should handle an empty message error', async () => {
