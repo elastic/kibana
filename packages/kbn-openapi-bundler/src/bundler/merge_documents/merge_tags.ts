@@ -19,5 +19,13 @@ export function mergeTags(
 
   const merged = mergeArrays(tagsArrayOfArrays);
 
-  return merged.length > 0 ? merged : undefined;
+  if (merged.length === 0) {
+    return;
+  }
+
+  // To streamline API endpoints categorization it's expected that
+  // tags are sorted alphabetically by name
+  merged.sort((a, b) => a.name.localeCompare(b.name));
+
+  return merged;
 }

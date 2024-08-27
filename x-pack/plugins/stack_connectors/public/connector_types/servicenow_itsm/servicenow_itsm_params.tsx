@@ -131,9 +131,6 @@ const ServiceNowParamsFields: React.FunctionComponent<
 
   const actionConnectorRef = useRef(actionConnector?.id ?? '');
 
-  const showAllIncidentDetails =
-    (selectedActionGroupId && selectedActionGroupId !== ACTION_GROUP_RECOVERED) ||
-    isTestTriggerAction;
   const showOnlyCorrelationId =
     (selectedActionGroupId && selectedActionGroupId === ACTION_GROUP_RECOVERED) ||
     isTestResolveAction;
@@ -287,7 +284,16 @@ const ServiceNowParamsFields: React.FunctionComponent<
         <h3>{i18n.INCIDENT}</h3>
       </EuiTitle>
       <EuiSpacer size="m" />
-      {showAllIncidentDetails && (
+      {showOnlyCorrelationId ? (
+        <CorrelationIdField
+          index={index}
+          messageVariables={messageVariables}
+          correlationId={incident.correlation_id}
+          editSubActionProperty={editSubActionProperty}
+          isRequired={showOnlyCorrelationId}
+          errors={errors}
+        />
+      ) : (
         <>
           <EuiFormRow fullWidth label={i18n.URGENCY_LABEL}>
             <EuiSelect
@@ -466,16 +472,6 @@ const ServiceNowParamsFields: React.FunctionComponent<
             />
           )}
         </>
-      )}
-      {showOnlyCorrelationId && (
-        <CorrelationIdField
-          index={index}
-          messageVariables={messageVariables}
-          correlationId={incident.correlation_id}
-          editSubActionProperty={editSubActionProperty}
-          isRequired={showOnlyCorrelationId}
-          errors={errors}
-        />
       )}
     </>
   );

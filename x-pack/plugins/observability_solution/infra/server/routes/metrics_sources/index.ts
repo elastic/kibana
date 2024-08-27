@@ -24,12 +24,11 @@ import {
   MetricsSourceStatus,
   partialMetricsSourceConfigurationReqPayloadRT,
 } from '../../../common/metrics_sources';
-import { InfraSource, InfraSourceIndexField } from '../../lib/sources';
+import { InfraSource } from '../../lib/sources';
 import { InfraPluginRequestHandlerContext } from '../../types';
 import { getInfraMetricsClient } from '../../lib/helpers/get_infra_metrics_client';
 
 const defaultStatus = {
-  indexFields: [],
   metricIndicesExist: false,
   remoteClustersExist: false,
 };
@@ -43,40 +42,24 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
     requestContext: InfraPluginRequestHandlerContext,
     sourceId: string
   ): Promise<MetricsSourceStatus> => {
-    const [metricIndicesExistSettled, indexFieldsSettled] = await Promise.allSettled([
-      libs.sourceStatus.hasMetricIndices(requestContext, sourceId),
-      libs.fields.getFields(requestContext, sourceId, 'METRICS'),
-    ]);
+    try {
+      const hasMetricIndices = await libs.sourceStatus.hasMetricIndices(requestContext, sourceId);
+      return {
+        metricIndicesExist: hasMetricIndices,
+        remoteClustersExist: true,
+      };
+    } catch (err) {
+      logger.error(err);
 
-    /**
-     * Extract values from promises settlements
-     */
-    const indexFields = isFulfilled<InfraSourceIndexField[]>(indexFieldsSettled)
-      ? indexFieldsSettled.value
-      : defaultStatus.indexFields;
-    const metricIndicesExist = isFulfilled<boolean>(metricIndicesExistSettled)
-      ? metricIndicesExistSettled.value
-      : defaultStatus.metricIndicesExist;
-    const remoteClustersExist = hasRemoteCluster<boolean | InfraSourceIndexField[]>(
-      indexFieldsSettled,
-      metricIndicesExistSettled
-    );
+      if (err instanceof NoSuchRemoteClusterError) {
+        return defaultStatus;
+      }
 
-    /**
-     * Report gracefully handled rejections
-     */
-    if (!isFulfilled<InfraSourceIndexField[]>(indexFieldsSettled)) {
-      logger.error(indexFieldsSettled.reason);
+      return {
+        metricIndicesExist: false,
+        remoteClustersExist: true,
+      };
     }
-    if (!isFulfilled<boolean>(metricIndicesExistSettled)) {
-      logger.error(metricIndicesExistSettled.reason);
-    }
-
-    return {
-      indexFields,
-      metricIndicesExist,
-      remoteClustersExist,
-    };
   };
 
   framework.registerRoute(
@@ -223,7 +206,7 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
         query: createRouteValidationFunction(getHasDataQueryParamsRT),
       },
     },
-    async (requestContext, request, response) => {
+    async (context, request, response) => {
       try {
         const modules = castArray(request.query.modules);
 
@@ -234,10 +217,9 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
         }
 
         const infraMetricsClient = await getInfraMetricsClient({
-          framework,
           request,
-          metricsDataAccess: libs.metricsClient,
-          requestContext,
+          libs,
+          context,
         });
 
         const results = await infraMetricsClient.search({
@@ -288,12 +270,3 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
 const isFulfilled = <Type>(
   promiseSettlement: PromiseSettledResult<Type>
 ): promiseSettlement is PromiseFulfilledResult<Type> => promiseSettlement.status === 'fulfilled';
-
-const hasRemoteCluster = <Type>(...promiseSettlements: Array<PromiseSettledResult<Type>>) => {
-  const isRemoteMissing = promiseSettlements.some(
-    (settlement) =>
-      !isFulfilled<Type>(settlement) && settlement.reason instanceof NoSuchRemoteClusterError
-  );
-
-  return !isRemoteMissing;
-};

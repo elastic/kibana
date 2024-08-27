@@ -10,8 +10,10 @@ import { EuiContextMenuItem, EuiPortal } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { AgentPolicy, InMemoryPackagePolicy } from '../types';
-import { useAgentPolicyRefresh, useAuthz, useLink } from '../hooks';
+import { useAgentPolicyRefresh, useAuthz, useLink, useStartServices } from '../hooks';
 import { policyHasFleetServer } from '../services';
+
+import { PLUGIN_ID, pagePathGetters } from '../constants';
 
 import { AgentEnrollmentFlyout } from './agent_enrollment_flyout';
 import { ContextMenuActions } from './context_menu_actions';
@@ -36,6 +38,9 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
   const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState(false);
   const { getHref } = useLink();
   const authz = useAuthz();
+  const {
+    application: { navigateToApp },
+  } = useStartServices();
 
   const agentPolicy = agentPolicies.length > 0 ? agentPolicies[0] : undefined; // TODO: handle multiple agent policies
   const canWriteIntegrationPolicies = authz.integrations.writeIntegrationPolicies;
@@ -123,7 +128,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
     // </EuiContextMenuItem>,
   ];
 
-  if (!agentPolicy || !agentPolicyIsManaged) {
+  if (!agentPolicy || !agentPolicyIsManaged || agentPolicy?.supports_agentless) {
     const ContextMenuItem = canWriteIntegrationPolicies
       ? DangerEuiContextMenuItem
       : EuiContextMenuItem;
@@ -138,7 +143,12 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
               onClick={() => {
                 deletePackagePoliciesPrompt([packagePolicy.id], () => {
                   setIsActionsMenuOpen(false);
-                  refreshAgentPolicy();
+                  if (agentPolicy?.supports_agentless) {
+                    // go back to all agent policies
+                    navigateToApp(PLUGIN_ID, { path: pagePathGetters.policies_list()[1] });
+                  } else {
+                    refreshAgentPolicy();
+                  }
                 });
               }}
             >

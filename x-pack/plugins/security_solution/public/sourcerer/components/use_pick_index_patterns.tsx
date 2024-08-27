@@ -192,7 +192,7 @@ export const usePickIndexPatterns = ({
     async (newSelectedDataViewId: string, isAlerts?: boolean) => {
       if (
         kibanaDataViews.some(
-          (kdv) => kdv.id === newSelectedDataViewId && kdv.indexFields.length === 0
+          (kdv) => kdv.id === newSelectedDataViewId && Object.keys(kdv?.fields || {}).length === 0
         )
       ) {
         try {

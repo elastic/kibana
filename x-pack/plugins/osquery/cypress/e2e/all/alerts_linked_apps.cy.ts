@@ -21,7 +21,7 @@ import { RESULTS_TABLE, RESULTS_TABLE_BUTTON } from '../../screens/live_query';
 describe(
   'Alert Event Details',
   {
-    tags: ['@ess', '@serverless'],
+    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
   },
   () => {
     let ruleId: string;
@@ -69,7 +69,7 @@ describe(
     it('should be able to run live query and add to timeline', () => {
       const TIMELINE_NAME = 'Untitled timeline';
       cy.getBySel('expand-event').first().click();
-      cy.getBySel('take-action-dropdown-btn').click();
+      cy.getBySel('securitySolutionFlyoutFooterDropdownButton').click();
       cy.getBySel('osquery-action-item').click();
       cy.contains('1 agent selected.');
       selectAllAgents();

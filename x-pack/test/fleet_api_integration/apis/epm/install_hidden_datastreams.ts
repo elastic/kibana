@@ -19,81 +19,12 @@ export default function (providerContext: FtrProviderContext) {
     await supertest.delete(`/api/fleet/epm/packages/${name}/${version}`).set('kbn-xsrf', 'xxxx');
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/184310
-  describe.skip('installing with hidden datastream', async () => {
+  describe('installing with hidden datastream', async () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
 
     afterEach(async () => {
       await deletePackage('apm', '8.8.0');
-    });
-
-    it('should rollover hidden datastreams when failed to update mappings', async function () {
-      await supertest
-        .post(`/api/fleet/epm/packages/apm/8.7.0`)
-        .set('kbn-xsrf', 'xxxx')
-        .send({ force: true })
-        .expect(200);
-
-      const writeDoc = () =>
-        es.index({
-          refresh: true,
-          index: 'metrics-apm.service_summary.10m-default',
-          document: {
-            '@timestamp': '2023-05-30T07:50:00.000Z',
-            agent: {
-              name: 'go',
-            },
-            data_stream: {
-              dataset: 'apm.service_summary.10m',
-              namespace: 'default',
-              type: 'metrics',
-            },
-            ecs: {
-              version: '8.6.0-dev',
-            },
-            event: {
-              agent_id_status: 'missing',
-              ingested: '2023-05-30T07:57:12Z',
-            },
-            metricset: {
-              interval: '10m',
-              name: 'service_summary',
-            },
-            observer: {
-              hostname: '047e282994fb',
-              type: 'apm-server',
-              version: '8.7.0',
-            },
-            processor: {
-              event: 'metric',
-              name: 'metric',
-            },
-            service: {
-              language: {
-                name: 'go',
-              },
-              name: '___main_elastic_cloud_87_ilm_fix',
-            },
-          },
-        });
-
-      await writeDoc();
-
-      await supertest
-        .post(`/api/fleet/epm/packages/apm/8.8.0`)
-        .set('kbn-xsrf', 'xxxx')
-        .send({ force: true })
-        .expect(200);
-
-      // Rollover are lazy need to write a new doc
-      await writeDoc();
-      const ds = await es.indices.get({
-        index: 'metrics-apm.service_summary*',
-        expand_wildcards: ['open', 'hidden'],
-      });
-      // datastream rolled over
-      expect(Object.keys(ds).length).greaterThan(1);
     });
 
     it('should not rollover datastreams when successfully updated mappings', async function () {

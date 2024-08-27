@@ -92,7 +92,7 @@ export class Optimizer {
     );
 
     const log = new ToolingLog();
-    const has = <T extends object>(obj: T, x: any): x is keyof T => obj.hasOwnProperty(x);
+    const has = <T extends object>(obj: T, x: any): x is keyof T => Object.hasOwn(obj, x);
 
     log.setWriters([
       {

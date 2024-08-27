@@ -1613,7 +1613,7 @@
           "\nThis is a local type equivalent to {@link UiSettingsType} for flexibility."
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"image\" | \"select\" | \"json\" | \"array\" | \"markdown\""
+          "\"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"array\" | \"image\" | \"select\" | \"json\" | \"markdown\""
         ],
         "path": "packages/kbn-management/settings/types/setting_type.ts",
         "deprecated": false,

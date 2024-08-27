@@ -413,7 +413,7 @@ export class DiscoverPageObject extends FtrService {
     // add the focus to the button to make it appear
     const skipButton = await this.testSubjects.find('discoverSkipTableButton');
     // force focus on it, to make it interactable
-    skipButton.focus();
+    await skipButton.focus();
     // now click it!
     return skipButton.click();
   }
@@ -446,6 +446,19 @@ export class DiscoverPageObject extends FtrService {
   public async findFieldByNameInDocViewer(name: string) {
     const fieldSearch = await this.testSubjects.find('unifiedDocViewerFieldsSearchInput');
     await fieldSearch.type(name);
+  }
+
+  public async openFilterByFieldTypeInDocViewer() {
+    await this.testSubjects.click('unifiedDocViewerFieldsTableFieldTypeFilterToggle');
+    await this.testSubjects.existOrFail('unifiedDocViewerFieldsTableFieldTypeFilterOptions');
+  }
+
+  public async closeFilterByFieldTypeInDocViewer() {
+    await this.testSubjects.click('unifiedDocViewerFieldsTableFieldTypeFilterToggle');
+
+    await this.retry.waitFor('doc viewer filter closed', async () => {
+      return !(await this.testSubjects.exists('unifiedDocViewerFieldsTableFieldTypeFilterOptions'));
+    });
   }
 
   public async getMarks() {
@@ -508,8 +521,8 @@ export class DiscoverPageObject extends FtrService {
     return await this.testSubjects.exists('discoverNoResultsTimefilter');
   }
 
-  public showsErrorCallout() {
-    this.retry.try(async () => {
+  public async showsErrorCallout() {
+    await this.retry.try(async () => {
       await this.testSubjects.existOrFail('discoverErrorCalloutTitle');
     });
   }
@@ -571,9 +584,10 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async selectTextBaseLang() {
-    await this.testSubjects.click('discover-dataView-switch-link');
-    await this.testSubjects.click('select-text-based-language-panel');
-    await this.header.waitUntilLoadingHasFinished();
+    if (await this.testSubjects.exists('select-text-based-language-btn')) {
+      await this.testSubjects.click('select-text-based-language-btn');
+      await this.header.waitUntilLoadingHasFinished();
+    }
   }
 
   public async removeHeaderColumn(name: string) {

@@ -118,7 +118,9 @@ function initChromiumOptions(browserType: Browsers, acceptInsecureCerts: boolean
     // Bypass the media stream infobar by selecting the default device for media streams (e.g. WebRTC). Works with --use-fake-device-for-media-stream.
     'use-fake-ui-for-media-stream',
     // Do not show "Choose your search engine" dialog (> Chrome v127)
-    'disable-search-engine-choice-screen'
+    'disable-search-engine-choice-screen',
+    // Disable component updater used for Chrome Certificate Verifier
+    'disable-component-update'
   );
 
   if (process.platform === 'linux') {

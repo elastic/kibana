@@ -16,7 +16,6 @@ import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { TestProviders } from '../../../../common/mock';
 import { ChartPanels } from '.';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { LensEmbeddable } from '../../../../common/components/visualization_actions/lens_embeddable';
 import { createResetGroupByFieldAction } from '../alerts_histogram_panel/helpers';
@@ -27,6 +26,11 @@ jest.mock('../../../../sourcerer/containers');
 jest.mock('../../../../common/components/visualization_actions/lens_embeddable');
 jest.mock('../../../../common/components/page/use_refetch_by_session', () => ({
   useRefetchByRestartingSession: jest.fn().mockReturnValue({
+    session: {
+      current: {
+        start: jest.fn(),
+      },
+    },
     searchSessionId: 'mockSearchSessionId',
     refetchByRestartingSession: jest.fn(),
   }),
@@ -62,9 +66,6 @@ jest.mock('../../../../common/lib/kibana', () => {
     }),
   };
 });
-
-const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
-jest.mock('../../../../common/hooks/use_experimental_features');
 
 const mockSetToggle = jest.fn();
 const mockUseQueryToggle = useQueryToggle as jest.Mock;
@@ -149,7 +150,6 @@ const resetGroupByFields = () => {
 describe('ChartPanels', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
     mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: mockSetToggle });
 
     (useSourcererDataView as jest.Mock).mockReturnValue({
@@ -163,20 +163,7 @@ describe('ChartPanels', () => {
     });
   });
 
-  test('it renders the chart selector when alertsPageChartsEnabled is false', async () => {
-    render(
-      <TestProviders>
-        <ChartPanels {...defaultProps} />
-      </TestProviders>
-    );
-
-    await waitFor(() => {
-      expect(screen.getByTestId('chartSelect')).toBeInTheDocument();
-    });
-  });
-
-  test('it renders the chart selector tabs when alertsPageChartsEnabled is true and toggle is true', async () => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+  test('when toggle is true, renders the chart selector tabs', async () => {
     mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: mockSetToggle });
     render(
       <TestProviders>
@@ -189,8 +176,7 @@ describe('ChartPanels', () => {
     });
   });
 
-  test('it renders the chart collapse when alertsPageChartsEnabled is true and toggle is false', async () => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+  test('when toggle is false, renders the chart collapse', async () => {
     mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: mockSetToggle });
     render(
       <TestProviders>
@@ -465,7 +451,6 @@ describe('ChartPanels', () => {
       ...defaultAlertSettings,
       alertViewSelection: 'charts',
     });
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
     render(
       <TestProviders>
         <ChartPanels {...defaultProps} isLoadingIndexPattern={true} />

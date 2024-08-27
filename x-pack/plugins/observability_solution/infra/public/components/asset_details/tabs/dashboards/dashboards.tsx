@@ -29,7 +29,7 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import {
   ASSET_DETAILS_FLYOUT_LOCATOR_ID,
   ASSET_DETAILS_LOCATOR_ID,
-} from '@kbn/observability-shared-plugin/public';
+} from '@kbn/observability-shared-plugin/common';
 import { useLocation } from 'react-router-dom';
 import { decode } from '@kbn/rison';
 import { isEqual } from 'lodash';

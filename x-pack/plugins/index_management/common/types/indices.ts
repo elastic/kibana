@@ -7,7 +7,7 @@
 
 export type { Index } from '@kbn/index-management';
 
-interface IndexModule {
+export interface IndexModule {
   number_of_shards: number | string;
   codec: string;
   routing_partition_size: number;

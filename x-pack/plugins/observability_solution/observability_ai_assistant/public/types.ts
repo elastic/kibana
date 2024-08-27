@@ -18,7 +18,7 @@ import type {
   Message,
   ObservabilityAIAssistantScreenContext,
   PendingMessage,
-  UserInstructionOrPlainText,
+  AdHocInstruction,
 } from '../common/types';
 import type { TelemetryEventTypeWithPayload } from './analytics';
 import type { ObservabilityAIAssistantAPIClient } from './api';
@@ -68,7 +68,7 @@ export interface ObservabilityAIAssistantChatService {
         };
     signal: AbortSignal;
     responseLanguage?: string;
-    instructions?: UserInstructionOrPlainText[];
+    instructions?: AdHocInstruction[];
   }) => Observable<StreamingChatResponseEventWithoutError>;
   getFunctions: (options?: { contexts?: string[]; filter?: string }) => FunctionDefinition[];
   hasFunction: (name: string) => boolean;

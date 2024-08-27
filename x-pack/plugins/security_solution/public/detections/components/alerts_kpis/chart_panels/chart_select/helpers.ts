@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EuiContextMenuPanelDescriptor, EuiButtonGroupOptionProps } from '@elastic/eui';
+import type { EuiButtonGroupOptionProps } from '@elastic/eui';
 
 import * as i18n from './translations';
 
@@ -21,77 +21,6 @@ export interface ButtonProperties {
   icon: string;
   name: string;
 }
-
-export const getButtonProperties = (alertViewSelection: AlertViewSelection): ButtonProperties => {
-  const table = { 'data-test-subj': alertViewSelection, icon: 'visTable', name: i18n.TABLE };
-
-  switch (alertViewSelection) {
-    case TABLE_ID:
-      return table;
-    case TREND_ID:
-      return {
-        'data-test-subj': alertViewSelection,
-        icon: 'visBarVerticalStacked',
-        name: i18n.TREND,
-      };
-    case TREEMAP_ID:
-      return { 'data-test-subj': alertViewSelection, icon: 'grid', name: i18n.TREEMAP };
-    case CHARTS_ID:
-      return { 'data-test-subj': alertViewSelection, icon: 'visPie', name: i18n.CHARTS };
-    default:
-      return table;
-  }
-};
-
-export const getContextMenuPanels = ({
-  alertViewSelection,
-  closePopover,
-  setAlertViewSelection,
-  isAlertsPageChartsEnabled,
-}: {
-  alertViewSelection: AlertViewSelection;
-  closePopover: () => void;
-  setAlertViewSelection: (alertViewSelection: AlertViewSelection) => void;
-  isAlertsPageChartsEnabled: boolean;
-}): EuiContextMenuPanelDescriptor[] => [
-  {
-    id: 0,
-    items: [
-      {
-        ...getButtonProperties('table'),
-        onClick: () => {
-          closePopover();
-          setAlertViewSelection('table');
-        },
-      },
-      {
-        ...getButtonProperties('trend'),
-        onClick: () => {
-          closePopover();
-          setAlertViewSelection('trend');
-        },
-      },
-      {
-        ...getButtonProperties('treemap'),
-        onClick: () => {
-          closePopover();
-          setAlertViewSelection('treemap');
-        },
-      },
-      ...(isAlertsPageChartsEnabled
-        ? [
-            {
-              ...getButtonProperties('charts'),
-              onClick: () => {
-                closePopover();
-                setAlertViewSelection('charts');
-              },
-            },
-          ]
-        : []),
-    ],
-  },
-];
 
 export const getOptionProperties = (
   alertViewSelection: AlertViewSelection

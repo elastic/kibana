@@ -51,6 +51,7 @@ import {
   SuccessfulRunResult,
   TaskDefinition,
   TaskStatus,
+  DEFAULT_TIMEOUT,
 } from '../task';
 import { TaskTypeDictionary } from '../task_type_dictionary';
 import { isRetryableError, isUnrecoverableError } from './errors';
@@ -67,7 +68,7 @@ export interface TaskRunner {
   isExpired: boolean;
   expiration: Date;
   startedAt: Date | null;
-  definition: TaskDefinition;
+  definition: TaskDefinition | undefined;
   cancel: CancelFunction;
   markTaskAsRunning: () => Promise<boolean>;
   run: () => Promise<Result<SuccessfulRunResult, FailedRunResult>>;
@@ -242,7 +243,7 @@ export class TaskManagerRunner implements TaskRunner {
   /**
    * Gets the task defintion from the dictionary.
    */
-  public get definition() {
+  public get definition(): TaskDefinition | undefined {
     return this.definitions.get(this.taskType);
   }
 
@@ -267,12 +268,12 @@ export class TaskManagerRunner implements TaskRunner {
   public get timeout() {
     if (this.instance.task.schedule) {
       // recurring tasks should use timeout in task type
-      return this.definition.timeout;
+      return this.definition?.timeout ?? DEFAULT_TIMEOUT;
     }
 
     return this.instance.task.timeoutOverride
       ? this.instance.task.timeoutOverride
-      : this.definition.timeout;
+      : this.definition?.timeout ?? DEFAULT_TIMEOUT;
   }
 
   /**
@@ -313,6 +314,11 @@ export class TaskManagerRunner implements TaskRunner {
    * @returns {Promise<Result<SuccessfulRunResult, FailedRunResult>>}
    */
   public async run(): Promise<Result<SuccessfulRunResult, FailedRunResult>> {
+    const definition = this.definition;
+    if (!definition) {
+      throw new Error(`Running task ${this} failed because it has no definition`);
+    }
+
     if (!isReadyToRun(this.instance)) {
       throw new Error(
         `Running task ${this} failed as it ${
@@ -357,7 +363,7 @@ export class TaskManagerRunner implements TaskRunner {
     );
 
     try {
-      this.task = this.definition.createTaskRunner(modifiedContext);
+      this.task = definition.createTaskRunner(modifiedContext);
 
       const ctx = {
         type: 'task manager',
@@ -806,9 +812,7 @@ export class TaskManagerRunner implements TaskRunner {
   }
 
   private getMaxAttempts() {
-    return this.definition.maxAttempts !== undefined
-      ? this.definition.maxAttempts
-      : this.defaultMaxAttempts;
+    return this.definition?.maxAttempts ?? this.defaultMaxAttempts;
   }
 }
 

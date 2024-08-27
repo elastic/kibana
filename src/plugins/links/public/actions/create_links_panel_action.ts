@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { ADD_PANEL_TRIGGER, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { COMMON_EMBEDDABLE_GROUPING } from '@kbn/embeddable-plugin/public';
@@ -21,12 +20,12 @@ export const registerCreateLinksPanelAction = () => {
     getIconType: () => APP_ICON,
     order: 10,
     isCompatible: async ({ embeddable }) => {
-      return apiIsPresentationContainer(embeddable);
+      const { compatibilityCheck } = await import('./compatibility_check');
+      return compatibilityCheck(embeddable);
     },
     execute: async ({ embeddable }) => {
-      if (!apiIsPresentationContainer(embeddable)) {
-        throw new IncompatibleActionError();
-      }
+      const { compatibilityCheck } = await import('./compatibility_check');
+      if (!compatibilityCheck(embeddable)) throw new IncompatibleActionError();
       const { openEditorFlyout } = await import('../editor/open_editor_flyout');
       const runtimeState = await openEditorFlyout({
         parentDashboard: embeddable,

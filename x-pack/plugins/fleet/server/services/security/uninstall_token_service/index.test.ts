@@ -187,9 +187,11 @@ describe('UninstallTokenService', () => {
     const so = getDefaultSO(canEncrypt);
     const so2 = getDefaultSO2(canEncrypt);
 
-    agentPolicyService.fetchAllAgentPolicyIds = jest.fn(async function* () {
-      yield items || [so.attributes.policy_id, so2.attributes.policy_id];
-    });
+    agentPolicyService.fetchAllAgentPolicyIds = jest.fn().mockResolvedValue(
+      jest.fn(async function* () {
+        yield items || [so.attributes.policy_id, so2.attributes.policy_id];
+      })()
+    );
   }
 
   function setupMocks(canEncrypt: boolean = true) {

@@ -261,6 +261,7 @@ export async function runInteractiveSave(this: DashboardContainer, interactionMo
         this.saveNotification$.next();
 
         resolve(saveResult);
+
         return saveResult;
       } catch (error) {
         reject(error);

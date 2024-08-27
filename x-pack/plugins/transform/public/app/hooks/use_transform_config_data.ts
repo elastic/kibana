@@ -270,7 +270,7 @@ export const useTransformConfigData = (
     return ({ rowIndex, columnId }: { rowIndex: number; columnId: string }) => {
       const adjustedRowIndex = rowIndex - pagination.pageIndex * pagination.pageSize;
 
-      const cellValue = pageData.hasOwnProperty(adjustedRowIndex)
+      const cellValue = Object.hasOwn(pageData, adjustedRowIndex)
         ? pageData[adjustedRowIndex][columnId] ?? null
         : null;
 

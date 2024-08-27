@@ -125,7 +125,7 @@ export const useDiscoverInTimelineActions = (
             newSavedSearchId
           );
           const savedSearchState = savedSearch ? getAppStateFromSavedSearch(savedSearch) : null;
-          discoverStateContainer.current?.appState.initAndSync(savedSearch);
+          discoverStateContainer.current?.appState.initAndSync();
           await discoverStateContainer.current?.appState.replaceUrlState(
             savedSearchState?.appState ?? {}
           );

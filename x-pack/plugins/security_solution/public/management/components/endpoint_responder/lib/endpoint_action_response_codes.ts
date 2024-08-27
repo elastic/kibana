@@ -274,7 +274,7 @@ const CODES = Object.freeze({
   // SCAN CODES
   // -----------------------------------------------------------------
 
-  'ra_scan_error_scan_invalid-input': i18n.translate(
+  'ra_scan_error_invalid-input': i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.scan.invalidInput',
     { defaultMessage: 'Invalid absolute file path provided' }
   ),
@@ -288,7 +288,7 @@ const CODES = Object.freeze({
 
   // Dev:
   // scan quota exceeded failure
-  'ra_scan_error_scan-queue-quota': i18n.translate(
+  'ra_scan_error_queue-quota': i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.scan.queueQuota',
     { defaultMessage: 'Too many scans are queued' }
   ),

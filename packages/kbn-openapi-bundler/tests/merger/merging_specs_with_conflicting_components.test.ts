@@ -708,4 +708,89 @@ describe('OpenAPI Merger - merging specs with conflicting components', () => {
       Spec2_SomeCallback: expect.anything(),
     });
   });
+
+  it('prefixes discriminator mapping local references', async () => {
+    const spec1 = createOASDocument({
+      info: {
+        title: 'Spec1',
+        version: '2023-10-31',
+      },
+      paths: {
+        '/api/some_api': {
+          get: {
+            responses: {
+              '200': {
+                description: 'Successful response',
+                content: {
+                  'application/json': {
+                    schema: {
+                      oneOf: [
+                        { $ref: '#/components/schemas/Component1' },
+                        { $ref: '#/components/schemas/Component2' },
+                      ],
+                      discriminator: {
+                        propertyName: 'commonProp',
+                        mapping: {
+                          component1: '#/components/schemas/Component1',
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      components: {
+        schemas: {
+          Component1: {
+            type: 'object',
+            properties: {
+              commonProp: {
+                type: 'string',
+              },
+              extraProp1: {
+                type: 'boolean',
+              },
+            },
+          },
+          Component2: {
+            type: 'object',
+            properties: {
+              commonProp: {
+                type: 'string',
+              },
+              extraProp2: {
+                type: 'integer',
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const [mergedSpec] = Object.values(
+      await mergeSpecs({
+        1: spec1,
+      })
+    );
+
+    expect(mergedSpec.paths['/api/some_api']?.get?.responses['200']).toMatchObject({
+      content: {
+        'application/json; Elastic-Api-Version=2023-10-31': {
+          schema: expect.objectContaining({
+            discriminator: expect.objectContaining({
+              mapping: {
+                component1: '#/components/schemas/Spec1_Component1',
+              },
+            }),
+          }),
+        },
+      },
+    });
+    expect(mergedSpec.components?.schemas).toMatchObject({
+      Spec1_Component1: expect.anything(),
+    });
+  });
 });

@@ -14,7 +14,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...functionalConfig.getAll(),
-    testFiles: [require.resolve('../ess')],
+    testFiles: [require.resolve('../tests')],
     junit: {
       reportName: 'Explore - Hosts Integration Tests - ESS Env - Trial License',
     },

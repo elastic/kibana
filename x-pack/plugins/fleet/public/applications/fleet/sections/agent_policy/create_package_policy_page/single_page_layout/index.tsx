@@ -83,6 +83,7 @@ import { PostInstallGoogleCloudShellModal } from './components/cloud_security_po
 import { PostInstallAzureArmTemplateModal } from './components/cloud_security_posture/post_install_azure_arm_template_modal';
 import { RootPrivilegesCallout } from './root_callout';
 import { useAgentless } from './hooks/setup_technology';
+import { SetupTechnologySelector } from './components/setup_technology_selector';
 
 export const StepsWithLessPadding = styled(EuiSteps)`
   .euiStep__content {
@@ -349,7 +350,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       "'package-policy-create' and 'package-policy-replace-define-step' cannot both be registered as UI extensions"
     );
   }
-  const { isAgentlessEnabled } = useAgentless();
+  const { isAgentlessEnabled, isAgentlessIntegration } = useAgentless();
   const { handleSetupTechnologyChange, selectedSetupTechnology } = useSetupTechnology({
     newAgentPolicy,
     setNewAgentPolicy,
@@ -397,6 +398,19 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             submitAttempted={formState === 'INVALID'}
           />
 
+          {/* TODO move SetupTechnologySelector out of extensionView */}
+          {!extensionView && isAgentlessIntegration(packageInfo) && (
+            <SetupTechnologySelector
+              disabled={false}
+              setupTechnology={selectedSetupTechnology}
+              onSetupTechnologyChange={(value) => {
+                handleSetupTechnologyChange(value);
+                // agentless doesn't need system integration
+                setWithSysMonitoring(value === SetupTechnology.AGENT_BASED);
+              }}
+            />
+          )}
+
           {/* Only show the out-of-box configuration step if a UI extension is NOT registered */}
           {!extensionView && (
             <StepConfigurePackagePolicy
@@ -435,6 +449,9 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       extensionView,
       handleExtensionViewOnChange,
       spaceSettings?.allowedNamespacePrefixes,
+      handleSetupTechnologyChange,
+      isAgentlessIntegration,
+      selectedSetupTechnology,
     ]
   );
 

@@ -32,7 +32,7 @@ run(
       throw createFlagError('Missing alias');
     }
 
-    if (!storybookAliases.hasOwnProperty(alias)) {
+    if (!Object.hasOwn(storybookAliases, alias)) {
       throw createFlagError(`Unknown alias [${alias}]`);
     }
 

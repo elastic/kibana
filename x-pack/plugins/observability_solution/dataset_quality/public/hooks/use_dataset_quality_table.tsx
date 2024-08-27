@@ -14,7 +14,6 @@ import { DataStreamStat } from '../../common/data_streams_stats/data_stream_stat
 import { tableSummaryAllText, tableSummaryOfText } from '../../common/translations';
 import { getDatasetQualityTableColumns } from '../components/dataset_quality/table/columns';
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
-import { FlyoutDataset } from '../state_machines/dataset_quality_controller';
 import { useKibanaContextForPlugin } from '../utils';
 import { filterInactiveDatasets, isActiveDataset } from '../utils/filter_inactive_datasets';
 import { SortDirection } from '../../common/types';
@@ -30,7 +29,10 @@ const sortingOverrides: Partial<{
 
 export const useDatasetQualityTable = () => {
   const {
-    services: { fieldFormats },
+    services: {
+      fieldFormats,
+      share: { url },
+    },
   } = useKibanaContextForPlugin();
 
   const { service } = useDatasetQualityContext();
@@ -61,8 +63,6 @@ export const useDatasetQualityTable = () => {
   } = useSelector(service, (state) => state.context.filters);
   const showInactiveDatasets = inactive || !canUserMonitorDataset;
 
-  const flyout = useSelector(service, (state) => state.context.flyout);
-
   const loading = useSelector(
     service,
     (state) =>
@@ -89,33 +89,6 @@ export const useDatasetQualityTable = () => {
     [service]
   );
 
-  const closeFlyout = useCallback(() => service.send({ type: 'CLOSE_FLYOUT' }), [service]);
-  const openFlyout = useCallback(
-    (selectedDataset: FlyoutDataset) => {
-      if (flyout?.dataset?.rawName === selectedDataset.rawName) {
-        service.send({
-          type: 'CLOSE_FLYOUT',
-        });
-
-        return;
-      }
-
-      if (!flyout?.insightsTimeRange) {
-        service.send({
-          type: 'OPEN_FLYOUT',
-          dataset: selectedDataset,
-        });
-        return;
-      }
-
-      service.send({
-        type: 'SELECT_NEW_DATASET',
-        dataset: selectedDataset,
-      });
-    },
-    [flyout?.dataset?.rawName, flyout?.insightsTimeRange, service]
-  );
-
   const isActive = useCallback(
     (lastActivity: number) => isActiveDataset({ lastActivity, timeRange }),
     [timeRange]
@@ -127,25 +100,25 @@ export const useDatasetQualityTable = () => {
         fieldFormats,
         canUserMonitorDataset,
         canUserMonitorAnyDataStream,
-        selectedDataset: flyout?.dataset,
-        openFlyout,
         loadingDataStreamStats,
         loadingDegradedStats,
         showFullDatasetNames,
         isSizeStatsAvailable,
         isActiveDataset: isActive,
+        timeRange,
+        urlService: url,
       }),
     [
       fieldFormats,
       canUserMonitorDataset,
       canUserMonitorAnyDataStream,
-      flyout?.dataset,
-      openFlyout,
       loadingDataStreamStats,
       loadingDegradedStats,
       showFullDatasetNames,
       isSizeStatsAvailable,
       isActive,
+      timeRange,
+      url,
     ]
   );
 
@@ -233,8 +206,6 @@ export const useDatasetQualityTable = () => {
     columns,
     loading,
     resultsCount,
-    closeFlyout,
-    selectedDataset: flyout?.dataset,
     showInactiveDatasets,
     showFullDatasetNames,
     canUserMonitorDataset,

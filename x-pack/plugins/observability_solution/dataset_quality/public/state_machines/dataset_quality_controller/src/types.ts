@@ -6,46 +6,18 @@
  */
 
 import { DoneInvokeEvent } from 'xstate';
-import { RefreshInterval, TimeRange } from '@kbn/data-plugin/common';
-import { QualityIndicators, SortDirection } from '../../../../common/types';
-import { Dashboard, DatasetUserPrivileges } from '../../../../common/api_types';
+import { QualityIndicators, TableCriteria, TimeRangeConfig } from '../../../../common/types';
+import { DatasetUserPrivileges, NonAggregatableDatasets } from '../../../../common/api_types';
 import { Integration } from '../../../../common/data_streams_stats/integration';
-import { DatasetTableSortField, DegradedFieldSortField } from '../../../hooks';
+import { DatasetTableSortField } from '../../../hooks';
 import { DegradedDocsStat } from '../../../../common/data_streams_stats/malformed_docs_stat';
 import {
   DataStreamDegradedDocsStatServiceResponse,
-  DataStreamSettings,
   DataStreamDetails,
   DataStreamStatServiceResponse,
   DataStreamStat,
   DataStreamStatType,
-  GetNonAggregatableDataStreamsResponse,
-  DegradedField,
-  DegradedFieldResponse,
 } from '../../../../common/data_streams_stats';
-
-export type FlyoutDataset = Omit<
-  DataStreamStat,
-  'type' | 'size' | 'sizeBytes' | 'lastActivity' | 'degradedDocs'
-> & { type: string };
-
-interface TableCriteria<TSortField> {
-  page: number;
-  rowsPerPage: number;
-  sort: {
-    field: TSortField;
-    direction: SortDirection;
-  };
-}
-
-export interface DegradedFields {
-  table: TableCriteria<DegradedFieldSortField>;
-  data?: DegradedField[];
-}
-
-export type TimeRangeConfig = Pick<TimeRange, 'from' | 'to'> & {
-  refresh: RefreshInterval;
-};
 
 interface FiltersCriteria {
   inactive: boolean;
@@ -57,27 +29,8 @@ interface FiltersCriteria {
   query?: string;
 }
 
-export interface DataStreamIntegrations {
-  integrationDetails?: Integration;
-  dashboards?: Dashboard[];
-}
-
 export interface WithTableOptions {
   table: TableCriteria<DatasetTableSortField>;
-}
-
-export interface WithFlyoutOptions {
-  flyout: {
-    dataset?: FlyoutDataset;
-    datasetSettings?: DataStreamSettings;
-    datasetDetails?: DataStreamDetails;
-    insightsTimeRange?: TimeRangeConfig;
-    breakdownField?: string;
-    degradedFields: DegradedFields;
-    isNonAggregatable?: boolean;
-    integration?: DataStreamIntegrations;
-    isBreakdownFieldEcs: boolean | null;
-  };
 }
 
 export interface WithFilters {
@@ -109,14 +62,12 @@ export interface WithIntegrations {
 export type DefaultDatasetQualityControllerState = { type: string } & WithTableOptions &
   WithDataStreamStats &
   Partial<WithDegradedDocs> &
-  WithFlyoutOptions &
   WithDatasets &
   WithFilters &
   WithNonAggregatableDatasets &
   Partial<WithIntegrations>;
 
-type DefaultDatasetQualityStateContext = DefaultDatasetQualityControllerState &
-  Partial<WithFlyoutOptions>;
+type DefaultDatasetQualityStateContext = DefaultDatasetQualityControllerState;
 
 export type DatasetQualityControllerTypeState =
   | {
@@ -136,57 +87,11 @@ export type DatasetQualityControllerTypeState =
       context: DefaultDatasetQualityStateContext;
     }
   | {
-      value: 'datasets.loaded';
-      context: DefaultDatasetQualityStateContext;
-    }
-  | {
       value: 'integrations.fetching';
       context: DefaultDatasetQualityStateContext;
     }
   | {
       value: 'nonAggregatableDatasets.fetching';
-      context: DefaultDatasetQualityStateContext;
-    }
-  | {
-      value: 'flyout.initializing.dataStreamSettings.fetching';
-      context: DefaultDatasetQualityStateContext;
-    }
-  | {
-      value: 'flyout.initializing.dataStreamSettings.initializeIntegrations.integrationDashboards.fetching';
-      context: DefaultDatasetQualityStateContext;
-    }
-  | {
-      value: 'flyout.initializing.dataStreamSettings.initializeIntegrations.integrationDashboards.unauthorized';
-      context: DefaultDatasetQualityStateContext;
-    }
-  | {
-      value: 'flyout.initializing.dataStreamSettings.initializeIntegrations.integrationDetails.done';
-      context: DefaultDatasetQualityStateContext;
-    }
-  | {
-      value: 'flyout.initializing.dataStreamDetails.fetching';
-      context: DefaultDatasetQualityStateContext;
-    }
-  | {
-      value: 'flyout.initializing.dataStreamDetails.done';
-      context: DefaultDatasetQualityStateContext;
-    }
-  | {
-      value: 'flyout.initializing.assertBreakdownFieldIsEcs.fetching';
-      context: DefaultDatasetQualityStateContext;
-    }
-  | {
-      value: 'flyout.initializing.assertBreakdownFieldIsEcs.done';
-      context: DefaultDatasetQualityStateContext;
-    }
-  | {
-      value: 'flyout.initializing.dataStreamDegradedFields.fetching';
-      context: DefaultDatasetQualityStateContext;
-    }
-  | {
-      value:
-        | 'flyout.initializing.integrationDashboards.fetching'
-        | 'flyout.initializing.integrationDashboards.unauthorized';
       context: DefaultDatasetQualityStateContext;
     };
 
@@ -198,27 +103,8 @@ export type DatasetQualityControllerEvent =
       dataset_criteria: TableCriteria<DatasetTableSortField>;
     }
   | {
-      type: 'UPDATE_DEGRADED_FIELDS_TABLE_CRITERIA';
-      degraded_field_criteria: TableCriteria<DegradedFieldSortField>;
-    }
-  | {
-      type: 'OPEN_FLYOUT';
-      dataset: FlyoutDataset;
-    }
-  | {
-      type: 'SELECT_NEW_DATASET';
-      dataset: FlyoutDataset;
-    }
-  | {
       type: 'UPDATE_INSIGHTS_TIME_RANGE';
       timeRange: TimeRangeConfig;
-    }
-  | {
-      type: 'BREAKDOWN_FIELD_CHANGE';
-      breakdownField: string | null;
-    }
-  | {
-      type: 'CLOSE_FLYOUT';
     }
   | {
       type: 'TOGGLE_INACTIVE_DATASETS';
@@ -250,11 +136,8 @@ export type DatasetQualityControllerEvent =
       query: string;
     }
   | DoneInvokeEvent<DataStreamDegradedDocsStatServiceResponse>
-  | DoneInvokeEvent<GetNonAggregatableDataStreamsResponse>
-  | DoneInvokeEvent<Dashboard[]>
+  | DoneInvokeEvent<NonAggregatableDatasets>
   | DoneInvokeEvent<DataStreamDetails>
-  | DoneInvokeEvent<DegradedFieldResponse>
-  | DoneInvokeEvent<DataStreamSettings>
   | DoneInvokeEvent<DataStreamStatServiceResponse>
   | DoneInvokeEvent<Integration>
   | DoneInvokeEvent<boolean | null>

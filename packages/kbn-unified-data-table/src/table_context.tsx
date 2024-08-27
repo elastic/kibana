@@ -11,6 +11,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { ValueToStringConverter } from './types';
+import type { UseSelectedDocsState } from './hooks/use_selected_docs';
 
 export interface DataTableContext {
   expanded?: DataTableRecord | undefined;
@@ -19,11 +20,12 @@ export interface DataTableContext {
   onFilter?: DocViewFilterFn;
   dataView: DataView;
   isDarkMode: boolean;
-  selectedDocs: string[];
-  setSelectedDocs: (selected: string[]) => void;
+  selectedDocsState: UseSelectedDocsState;
   valueToStringConverter: ValueToStringConverter;
   componentsTourSteps?: Record<string, string>;
   isPlainRecord?: boolean;
+  pageIndex: number | undefined; // undefined when the pagination is disabled
+  pageSize: number | undefined;
 }
 
 const defaultContext = {} as unknown as DataTableContext;

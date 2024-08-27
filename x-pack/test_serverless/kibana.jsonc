@@ -1,6 +1,6 @@
 {
   "type": "test-helper",
   "id": "@kbn/test-suites-serverless",
-  "owner": "@elastic/appex-qa",
+  "owner": [],
   "devOnly": true
 }

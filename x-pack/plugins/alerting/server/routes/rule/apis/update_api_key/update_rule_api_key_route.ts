@@ -24,6 +24,7 @@ export const updateRuleApiKeyRoute = (
       options: {
         access: 'public',
         summary: 'Update the API key for a rule',
+        tags: ['oas-tag:alerting'],
       },
       validate: {
         request: {

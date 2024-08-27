@@ -29,6 +29,7 @@ export function SloSelector({ initialSlos, onSelected, hasError, singleSelection
       label: slo.instanceId !== ALL_VALUE ? `${slo.name} (${slo.instanceId})` : slo.name,
       value: `${slo.id}-${slo.instanceId}`,
     })) ?? [];
+
   const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
     mapSlosToOptions(initialSlos)

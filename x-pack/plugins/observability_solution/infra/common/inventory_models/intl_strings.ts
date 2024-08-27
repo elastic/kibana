@@ -6,7 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SnapshotMetricType, SnapshotMetricTypeKeys } from '@kbn/metrics-data-access-plugin/common';
+import {
+  type InventoryItemType,
+  type SnapshotMetricType,
+  SnapshotMetricTypeKeys,
+} from '@kbn/metrics-data-access-plugin/common';
 import { toMetricOpt } from '../snapshot_metric_i18n';
 
 interface Lookup {
@@ -44,10 +48,11 @@ export const fieldToName = (field: string) => {
 };
 
 const snapshotTypeKeys = Object.keys(SnapshotMetricTypeKeys) as SnapshotMetricType[];
-export const SNAPSHOT_METRIC_TRANSLATIONS = snapshotTypeKeys.reduce((result, metric) => {
-  const text = toMetricOpt(metric)?.text;
-  if (text) {
-    result[metric] = text;
-  }
-  return result;
-}, {} as Record<SnapshotMetricType, string>);
+export const getSnapshotMetricTranslations = (nodeType: InventoryItemType) =>
+  snapshotTypeKeys.reduce((result, metric) => {
+    const text = toMetricOpt(metric, nodeType)?.text;
+    if (text) {
+      result[metric] = text;
+    }
+    return result;
+  }, {} as Record<SnapshotMetricType, string>);
