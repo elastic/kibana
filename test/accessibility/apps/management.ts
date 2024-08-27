@@ -25,7 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    describe('data views', async () => {
+    describe('data views', () => {
       before(async () => {
         await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
         await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');

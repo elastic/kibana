@@ -10,6 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSkeletonTitle, EuiText } from '
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { PrivilegesWarningIconWrapper } from '../../../common';
+import { notAvailableLabel } from '../../../../../common/translations';
 
 const verticalRule = css`
   width: 1px;
@@ -95,8 +96,8 @@ export function PanelIndicator({
             <></>
           </PrivilegesWarningIconWrapper>
           {userHasPrivilege && (
-            <EuiText size="m">
-              <h3>{value}</h3>
+            <EuiText size="m" data-test-subj={`datasetQualityDetailsSummaryKpiValue-${label}`}>
+              <h3>{userHasPrivilege ? value : notAvailableLabel}</h3>
             </EuiText>
           )}
         </>

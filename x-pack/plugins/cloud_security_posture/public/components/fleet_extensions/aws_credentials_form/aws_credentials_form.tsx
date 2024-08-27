@@ -216,7 +216,7 @@ export const AwsCredentialsForm = ({
     setupFormat,
     group,
     fields,
-    integrationLink,
+    elasticDocLink,
     hasCloudFormationTemplate,
     onSetupFormatChange,
   } = useAwsCredentialsForm({
@@ -237,7 +237,7 @@ export const AwsCredentialsForm = ({
             defaultMessage="Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to set up and deploy CSPM for assessing your AWS environment's security posture. Refer to our {gettingStartedLink} guide for details."
             values={{
               gettingStartedLink: (
-                <EuiLink href={integrationLink} target="_blank">
+                <EuiLink href={elasticDocLink} target="_blank">
                   <FormattedMessage
                     id="xpack.csp.awsIntegration.gettingStarted.setupInfoContentLink"
                     defaultMessage="Getting Started"
@@ -281,7 +281,7 @@ export const AwsCredentialsForm = ({
           <EuiSpacer size="m" />
           {group.info}
           <EuiSpacer size="m" />
-          <ReadDocumentation url={integrationLink} />
+          <ReadDocumentation url={elasticDocLink} />
           <EuiSpacer size="l" />
           <AwsInputVarFields
             fields={fields}
