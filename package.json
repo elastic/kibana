@@ -1122,7 +1122,7 @@
     "langchain": "^0.2.11",
     "langsmith": "^0.1.39",
     "launchdarkly-js-client-sdk": "^3.4.0",
-    "launchdarkly-node-server-sdk": "^7.0.3",
+    "launchdarkly-node-server-sdk": "^7.0.4",
     "load-json-file": "^6.2.0",
     "lodash": "^4.17.21",
     "lru-cache": "^4.1.5",
