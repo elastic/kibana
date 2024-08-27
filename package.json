@@ -123,7 +123,7 @@
     "@elastic/react-search-ui-views": "^1.20.2",
     "@elastic/request-converter": "^8.15.3",
     "@elastic/request-crypto": "2.0.2",
-    "@elastic/search-ui": "^1.20.2",
+    "@elastic/search-ui": "^1.21.5",
     "@elastic/search-ui-app-search-connector": "^1.20.2",
     "@elastic/search-ui-engines-connector": "^1.20.2",
     "@emotion/cache": "^11.11.0",
