@@ -6,6 +6,10 @@
  */
 
 import {
+  getTotalPatternIncompatible,
+  getTotalPatternIndicesChecked,
+} from '../../../../../../utils/stats';
+import {
   ERRORS_MAY_OCCUR,
   ERRORS_CALLOUT_SUMMARY,
   MANAGE,
@@ -15,11 +19,7 @@ import {
   THE_FOLLOWING_PRIVILEGES_ARE_REQUIRED,
   VIEW_INDEX_METADATA,
 } from '../../../../../../data_quality_summary/summary_actions/check_status/errors_popover/translations';
-import {
-  EMPTY_STAT,
-  getTotalPatternIncompatible,
-  getTotalPatternIndicesChecked,
-} from '../../../../../../helpers';
+import { EMPTY_STAT } from '../../../../../../constants';
 import { SAME_FAMILY } from '../index_check_fields/tabs/compare_fields_table/same_family/translations';
 import {
   HOT,

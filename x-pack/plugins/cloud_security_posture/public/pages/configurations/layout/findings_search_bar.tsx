@@ -10,10 +10,10 @@ import { EuiThemeComputed, useEuiTheme } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { Filter } from '@kbn/es-query';
+import type { CspClientPluginStartDeps } from '@kbn/cloud-security-posture';
 import { useDataViewContext } from '../../../common/contexts/data_view_context';
 import { SecuritySolutionContext } from '../../../application/security_solution_context';
 import type { FindingsBaseURLQuery } from '../../../common/types';
-import type { CspClientPluginStartDeps } from '../../../types';
 import { PLUGIN_NAME } from '../../../../common';
 
 type SearchBarQueryProps = Pick<FindingsBaseURLQuery, 'query' | 'filters'>;

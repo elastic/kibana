@@ -7,24 +7,11 @@
 
 import numeral from '@elastic/numeral';
 
-import {
-  getTotalDocsCount,
-  getTotalIncompatible,
-  getTotalIndices,
-  getTotalIndicesChecked,
-  getTotalSameFamily,
-  updateResultOnCheckCompleted,
-} from './helpers';
-import { auditbeatWithAllResults } from '../../mock/pattern_rollup/mock_auditbeat_pattern_rollup';
-import {
-  mockPacketbeatPatternRollup,
-  packetbeatNoResults,
-  packetbeatWithSomeErrors,
-} from '../../mock/pattern_rollup/mock_packetbeat_pattern_rollup';
-import { DataQualityCheckResult, MeteringStatsIndex, PatternRollup } from '../../types';
-import { EMPTY_STAT } from '../../helpers';
-import { mockPartitionedFieldMetadata } from '../../mock/partitioned_field_metadata/mock_partitioned_field_metadata';
-import { alertIndexWithAllResults } from '../../mock/pattern_rollup/mock_alerts_pattern_rollup';
+import { getPatternRollupsWithLatestCheckResult } from './get_pattern_rollups_with_latest_check_result';
+import { mockPacketbeatPatternRollup } from '../../../mock/pattern_rollup/mock_packetbeat_pattern_rollup';
+import { MeteringStatsIndex, PatternRollup } from '../../../types';
+import { EMPTY_STAT } from '../../../constants';
+import { mockPartitionedFieldMetadata } from '../../../mock/partitioned_field_metadata/mock_partitioned_field_metadata';
 import { EcsVersion } from '@elastic/ecs';
 
 const defaultBytesFormat = '0,0.[0]b';
@@ -35,11 +22,6 @@ const defaultNumberFormat = '0,0.[000]';
 const formatNumber = (value: number | undefined) =>
   value != null ? numeral(value).format(defaultNumberFormat) : EMPTY_STAT;
 
-const patternRollups: Record<string, PatternRollup> = {
-  'auditbeat-*': auditbeatWithAllResults, // indices: 3
-  'packetbeat-*': mockPacketbeatPatternRollup, // indices: 2
-};
-
 describe('helpers', () => {
   let originalFetch: (typeof global)['fetch'];
 
@@ -49,121 +31,6 @@ describe('helpers', () => {
 
   afterAll(() => {
     global.fetch = originalFetch;
-  });
-
-  describe('getTotalSameFamily', () => {
-    const defaultDataQualityCheckResult: DataQualityCheckResult = {
-      docsCount: 26093,
-      error: null,
-      ilmPhase: 'hot',
-      incompatible: 0,
-      indexName: '.internal.alerts-security.alerts-default-000001',
-      markdownComments: ['foo', 'bar', 'baz'],
-      pattern: '.alerts-security.alerts-default',
-      sameFamily: 7,
-      checkedAt: 1706526408000,
-    };
-
-    const alertIndexWithSameFamily: PatternRollup = {
-      ...alertIndexWithAllResults,
-      results: {
-        '.internal.alerts-security.alerts-default-000001': {
-          ...defaultDataQualityCheckResult,
-        },
-      },
-    };
-
-    const withSameFamily: Record<string, PatternRollup> = {
-      '.internal.alerts-security.alerts-default-000001': alertIndexWithSameFamily,
-    };
-
-    test('it returns the expected count when patternRollups has sameFamily', () => {
-      expect(getTotalSameFamily(withSameFamily)).toEqual(7);
-    });
-
-    test('it returns undefined when patternRollups is empty', () => {
-      expect(getTotalSameFamily({})).toBeUndefined();
-    });
-
-    test('it returns zero when none of the rollups have same family', () => {
-      expect(getTotalSameFamily(patternRollups)).toEqual(0);
-    });
-  });
-
-  describe('getTotalIndices', () => {
-    test('it returns the expected total when ALL `PatternRollup`s have an `indices`', () => {
-      expect(getTotalIndices(patternRollups)).toEqual(5);
-    });
-
-    test('it returns undefined when only SOME of the `PatternRollup`s have an `indices`', () => {
-      const someIndicesAreUndefined: Record<string, PatternRollup> = {
-        'auditbeat-*': {
-          ...auditbeatWithAllResults,
-          indices: undefined, // <--
-        },
-        'packetbeat-*': mockPacketbeatPatternRollup, // indices: 2
-      };
-
-      expect(getTotalIndices(someIndicesAreUndefined)).toBeUndefined();
-    });
-  });
-
-  describe('getTotalDocsCount', () => {
-    test('it returns the expected total when ALL `PatternRollup`s have a `docsCount`', () => {
-      expect(getTotalDocsCount(patternRollups)).toEqual(
-        Number(auditbeatWithAllResults.docsCount) + Number(mockPacketbeatPatternRollup.docsCount)
-      );
-    });
-
-    test('it returns undefined when only SOME of the `PatternRollup`s have a `docsCount`', () => {
-      const someIndicesAreUndefined: Record<string, PatternRollup> = {
-        'auditbeat-*': {
-          ...auditbeatWithAllResults,
-          docsCount: undefined, // <--
-        },
-        'packetbeat-*': mockPacketbeatPatternRollup,
-      };
-
-      expect(getTotalDocsCount(someIndicesAreUndefined)).toBeUndefined();
-    });
-  });
-
-  describe('getTotalIncompatible', () => {
-    test('it returns the expected total when ALL `PatternRollup`s have `results`', () => {
-      expect(getTotalIncompatible(patternRollups)).toEqual(4);
-    });
-
-    test('it returns the expected total when only SOME of the `PatternRollup`s have `results`', () => {
-      const someResultsAreUndefined: Record<string, PatternRollup> = {
-        'auditbeat-*': auditbeatWithAllResults,
-        'packetbeat-*': packetbeatNoResults, // <-- results is undefined
-      };
-
-      expect(getTotalIncompatible(someResultsAreUndefined)).toEqual(4);
-    });
-
-    test('it returns undefined when NONE of the `PatternRollup`s have `results`', () => {
-      const someResultsAreUndefined: Record<string, PatternRollup> = {
-        'packetbeat-*': packetbeatNoResults, // <-- results is undefined
-      };
-
-      expect(getTotalIncompatible(someResultsAreUndefined)).toBeUndefined();
-    });
-  });
-
-  describe('getTotalIndicesChecked', () => {
-    test('it returns the expected total', () => {
-      expect(getTotalIndicesChecked(patternRollups)).toEqual(3);
-    });
-
-    test('it returns the expected total when errors have occurred', () => {
-      const someErrors: Record<string, PatternRollup> = {
-        'auditbeat-*': auditbeatWithAllResults, // indices: 3
-        'packetbeat-*': packetbeatWithSomeErrors, // <-- indices: 2, but one has errors
-      };
-
-      expect(getTotalIndicesChecked(someErrors)).toEqual(4);
-    });
   });
 
   describe('updateResultOnCheckCompleted', () => {
@@ -178,7 +45,7 @@ describe('helpers', () => {
 
     test('it returns the updated rollups', () => {
       expect(
-        updateResultOnCheckCompleted({
+        getPatternRollupsWithLatestCheckResult({
           error: null,
           formatBytes,
           formatNumber,
@@ -280,7 +147,7 @@ describe('helpers', () => {
       };
 
       expect(
-        updateResultOnCheckCompleted({
+        getPatternRollupsWithLatestCheckResult({
           error: null,
           formatBytes,
           formatNumber,
@@ -377,7 +244,7 @@ describe('helpers', () => {
 
     test('it returns the expected results when `partitionedFieldMetadata` is null', () => {
       expect(
-        updateResultOnCheckCompleted({
+        getPatternRollupsWithLatestCheckResult({
           error: null,
           formatBytes,
           formatNumber,
@@ -472,7 +339,7 @@ describe('helpers', () => {
       };
 
       expect(
-        updateResultOnCheckCompleted({
+        getPatternRollupsWithLatestCheckResult({
           error: null,
           formatBytes,
           formatNumber,
@@ -532,7 +399,7 @@ describe('helpers', () => {
       };
 
       expect(
-        updateResultOnCheckCompleted({
+        getPatternRollupsWithLatestCheckResult({
           error: null,
           formatBytes,
           formatNumber,

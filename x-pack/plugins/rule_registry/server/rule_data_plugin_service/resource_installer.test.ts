@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type Subject, ReplaySubject } from 'rxjs';
+import { Subject, ReplaySubject, of } from 'rxjs';
 import { ResourceInstaller } from './resource_installer';
 import { loggerMock } from '@kbn/logging-mocks';
 import { AlertConsumers } from '@kbn/rule-data-utils';
@@ -59,6 +59,7 @@ const GetDataStreamResponse: IndicesGetDataStreamResponse = {
 describe('resourceInstaller', () => {
   let pluginStop$: Subject<void>;
   let dataStreamAdapter: DataStreamAdapter;
+  const elasticsearchAndSOAvailability$ = of(true);
 
   for (const useDataStreamForAlerts of [false, true]) {
     const label = useDataStreamForAlerts ? 'data streams' : 'aliases';
@@ -87,6 +88,7 @@ describe('resourceInstaller', () => {
             frameworkAlerts: frameworkAlertsService,
             pluginStop$,
             dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
           });
           await installer.installCommonResources();
           expect(getClusterClient).not.toHaveBeenCalled();
@@ -105,6 +107,7 @@ describe('resourceInstaller', () => {
             frameworkAlerts: frameworkAlertsService,
             pluginStop$,
             dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
           });
           const indexOptions = {
             feature: AlertConsumers.LOGS,
@@ -137,6 +140,7 @@ describe('resourceInstaller', () => {
             frameworkAlerts: frameworkAlertsService,
             pluginStop$,
             dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
           });
 
           await installer.installCommonResources();
@@ -155,6 +159,33 @@ describe('resourceInstaller', () => {
           );
         });
 
+        it('should not install common resources if ES is not ready', async () => {
+          const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
+          const getClusterClient = jest.fn(() => Promise.resolve(mockClusterClient));
+          const test$ = new Subject<boolean>();
+
+          const installer = new ResourceInstaller({
+            logger: loggerMock.create(),
+            isWriteEnabled: true,
+            disabledRegistrationContexts: [],
+            getResourceName: jest.fn(),
+            getClusterClient,
+            frameworkAlerts: frameworkAlertsService,
+            pluginStop$,
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$: test$,
+          });
+
+          const install = installer.installCommonResources();
+          const timeout = new Promise((resolve) => {
+            setTimeout(resolve, 1000);
+          });
+
+          await Promise.race([install, timeout]);
+
+          expect(mockClusterClient.cluster.putComponentTemplate).not.toHaveBeenCalled();
+        });
+
         it('should install subset of common resources when framework alerts are enabled', async () => {
           const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
           const getClusterClient = jest.fn(() => Promise.resolve(mockClusterClient));
@@ -170,6 +201,7 @@ describe('resourceInstaller', () => {
             },
             pluginStop$,
             dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
           });
 
           await installer.installCommonResources();
@@ -196,6 +228,7 @@ describe('resourceInstaller', () => {
             frameworkAlerts: frameworkAlertsService,
             pluginStop$,
             dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
           });
 
           const indexOptions = {
@@ -232,6 +265,7 @@ describe('resourceInstaller', () => {
             },
             pluginStop$,
             dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
           });
 
           const indexOptions = {
@@ -281,6 +315,7 @@ describe('resourceInstaller', () => {
             frameworkAlerts: frameworkAlertsService,
             pluginStop$,
             dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
           });
 
           const indexOptions = {
@@ -347,6 +382,7 @@ describe('resourceInstaller', () => {
             },
             pluginStop$,
             dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
           });
 
           const indexOptions = {
@@ -384,6 +420,7 @@ describe('resourceInstaller', () => {
             },
             pluginStop$,
             dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
           });
 
           const indexOptions = {
@@ -426,6 +463,7 @@ describe('resourceInstaller', () => {
             },
             pluginStop$,
             dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
           });
 
           const indexOptions = {
@@ -490,6 +528,7 @@ describe('resourceInstaller', () => {
             frameworkAlerts: frameworkAlertsService,
             pluginStop$,
             dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
           };
           const indexOptions = {
             feature: AlertConsumers.OBSERVABILITY,

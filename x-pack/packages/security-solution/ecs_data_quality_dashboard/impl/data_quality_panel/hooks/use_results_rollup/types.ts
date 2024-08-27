@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { OnCheckCompleted, PatternRollup } from '../../types';
+import {
+  IlmPhase,
+  IncompatibleFieldMappingItem,
+  IncompatibleFieldValueItem,
+  OnCheckCompleted,
+  PatternRollup,
+  SameFamilyFieldItem,
+} from '../../types';
 
 export interface UseResultsRollupReturnValue {
   onCheckCompleted: OnCheckCompleted;
@@ -25,4 +32,30 @@ export interface UseResultsRollupReturnValue {
     pattern: string;
   }) => void;
   updatePatternRollup: (patternRollup: PatternRollup) => void;
+}
+
+export interface StorageResult {
+  batchId: string;
+  indexName: string;
+  indexPattern: string;
+  isCheckAll: boolean;
+  checkedAt: number;
+  docsCount: number;
+  totalFieldCount: number;
+  ecsFieldCount: number;
+  customFieldCount: number;
+  incompatibleFieldCount: number;
+  incompatibleFieldMappingItems: IncompatibleFieldMappingItem[];
+  incompatibleFieldValueItems: IncompatibleFieldValueItem[];
+  sameFamilyFieldCount: number;
+  sameFamilyFields: string[];
+  sameFamilyFieldItems: SameFamilyFieldItem[];
+  unallowedMappingFields: string[];
+  unallowedValueFields: string[];
+  sizeInBytes: number;
+  ilmPhase?: IlmPhase;
+  markdownComments: string[];
+  ecsVersion: string;
+  indexId: string;
+  error: string | null;
 }

@@ -9,7 +9,7 @@ import numeral from '@elastic/numeral';
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 
-import { EMPTY_STAT } from '../../../../../helpers';
+import { EMPTY_STAT } from '../../../../../constants';
 import { auditbeatWithAllResults } from '../../../../../mock/pattern_rollup/mock_auditbeat_pattern_rollup';
 import {
   TestDataQualityProviders,

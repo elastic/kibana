@@ -7,10 +7,10 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { EcsVersion } from '@elastic/ecs';
-
 import { isEmpty } from 'lodash/fp';
 import { IToasts } from '@kbn/core-notifications-browser';
 import { HttpHandler } from '@kbn/core-http-browser';
+
 import {
   getTotalDocsCount,
   getTotalIncompatible,
@@ -18,25 +18,22 @@ import {
   getTotalIndicesChecked,
   getTotalSameFamily,
   getTotalSizeInBytes,
-  updateResultOnCheckCompleted,
-} from './helpers';
-
+  getTotalPatternSameFamily,
+  getIndexId,
+} from './utils/stats';
+import {
+  getStorageResults,
+  postStorageResult,
+  formatStorageResult,
+  formatResultFromStorage,
+} from './utils/storage';
+import { getPatternRollupsWithLatestCheckResult } from './utils/get_pattern_rollups_with_latest_check_result';
 import type {
   DataQualityCheckResult,
   OnCheckCompleted,
   PatternRollup,
   TelemetryEvents,
 } from '../../types';
-import {
-  getDocsCount,
-  getIndexId,
-  getStorageResults,
-  getSizeInBytes,
-  getTotalPatternSameFamily,
-  postStorageResult,
-  formatStorageResult,
-  formatResultFromStorage,
-} from '../../helpers';
 import {
   getIlmPhase,
   getIndexIncompatible,
@@ -48,6 +45,7 @@ import {
 } from '../../data_quality_details/indices_details/pattern/index_check_flyout/index_properties/index_check_fields/tabs/incompatible_tab/helpers';
 import { UseResultsRollupReturnValue } from './types';
 import { useIsMounted } from '../use_is_mounted';
+import { getDocsCount, getSizeInBytes } from '../../utils/stats';
 
 interface Props {
   ilmPhases: string[];
@@ -172,7 +170,7 @@ export const useResultsRollup = ({
       isCheckAll,
     }) => {
       setPatternRollups((currentPatternRollups) => {
-        const updatedRollups = updateResultOnCheckCompleted({
+        const updatedRollups = getPatternRollupsWithLatestCheckResult({
           error,
           formatBytes,
           formatNumber,
