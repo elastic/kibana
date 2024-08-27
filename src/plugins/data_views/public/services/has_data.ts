@@ -106,7 +106,8 @@ export class HasData {
         }),
       })
       .then((resp) => {
-        return !!(resp && resp.total >= 0);
+        // this was >= 0 - I have no idea why
+        return !!(resp && resp.total > 0);
       })
       .catch((e) => {
         // eslint-disable-next-line no-console

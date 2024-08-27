@@ -87,7 +87,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       query2,
       savedSearchesRequests,
       setQuery,
-      expectedRequests = 2,
+      expectedRequests = 3,
     }: {
       type: 'ese' | 'esql';
       savedSearch: string;
