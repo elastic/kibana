@@ -19,7 +19,7 @@ import { RegisteredAttachmentsPropertyActions } from './registered_attachments_p
 import { AttachmentActionType } from '../../../client/attachment_framework/types';
 
 // Failing: See https://github.com/elastic/kibana/issues/174384
-for (let i = 0; i < 20; i++) {
+for (let i = 0; i < 50; i++) {
   describe('RegisteredAttachmentsPropertyActions', () => {
     let appMock: AppMockRenderer;
 

@@ -17,7 +17,7 @@ import { FormTestComponent } from '../../common/test_utils';
 const onSubmit = jest.fn();
 
 // FLAKY: https://github.com/elastic/kibana/issues/188951
-for (let i = 0; i < 20; i++) {
+for (let i = 0; i < 50; i++) {
   describe('Severity form field', () => {
     let appMockRender: AppMockRenderer;
 

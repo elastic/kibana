@@ -18,7 +18,7 @@ import { getFileType } from './file_type';
 import { FILE_ATTACHMENT_TYPE } from '../../../common/constants';
 
 // FLAKY: https://github.com/elastic/kibana/issues/175841
-for (let i = 0; i < 20; i++) {
+for (let i = 0; i < 50; i++) {
   describe('getFileType', () => {
     const fileType = getFileType();
 

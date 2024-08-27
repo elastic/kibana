@@ -14,7 +14,7 @@ import { templatesConfigurationMock } from '../../containers/mock';
 import { TemplateSelector } from './templates';
 
 // FLAKY: https://github.com/elastic/kibana/issues/178457
-for (let i = 0; i < 20; i++) {
+for (let i = 0; i < 50; i++) {
   describe('CustomFields', () => {
     let appMockRender: AppMockRenderer;
     const onTemplateChange = jest.fn();

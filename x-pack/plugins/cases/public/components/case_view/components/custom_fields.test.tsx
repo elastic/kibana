@@ -16,7 +16,7 @@ import { customFieldsMock, customFieldsConfigurationMock } from '../../../contai
 import userEvent from '@testing-library/user-event';
 import { CustomFieldTypes } from '../../../../common/types/domain';
 
-for (let i = 0; i < 20; i++) {
+for (let i = 0; i < 50; i++) {
   describe('Case View Page files tab', () => {
     const onSubmit = jest.fn();
     let appMockRender: AppMockRenderer;

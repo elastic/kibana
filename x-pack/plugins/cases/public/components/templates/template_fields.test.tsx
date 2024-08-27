@@ -14,7 +14,7 @@ import { FormTestComponent } from '../../common/test_utils';
 import { TemplateFields } from './template_fields';
 
 // FLAKY: https://github.com/elastic/kibana/issues/187854
-for (let i = 0; i < 20; i++) {
+for (let i = 0; i < 50; i++) {
   describe('Template fields', () => {
     let appMockRenderer: AppMockRenderer;
     const onSubmit = jest.fn();

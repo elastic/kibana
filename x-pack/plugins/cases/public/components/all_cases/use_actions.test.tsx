@@ -29,7 +29,7 @@ jest.mock('../../containers/api');
 jest.mock('../../containers/user_profiles/api');
 
 // FLAKY: https://github.com/elastic/kibana/issues/188361
-for (let i = 0; i < 20; i++) {
+for (let i = 0; i < 50; i++) {
   describe('useActions', () => {
     let appMockRender: AppMockRenderer;
 

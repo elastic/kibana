@@ -20,7 +20,7 @@ jest.mock('../../common/lib/kibana');
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 // FLAKY: https://github.com/elastic/kibana/issues/189530
-for (let i = 0; i < 20; i++) {
+for (let i = 0; i < 50; i++) {
   describe('ConnectorSelector', () => {
     const handleChange = jest.fn();
     const defaultProps = {

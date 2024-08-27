@@ -15,7 +15,7 @@ import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 
 // Failing: See https://github.com/elastic/kibana/issues/190270
-for (let i = 0; i < 20; i++) {
+for (let i = 0; i < 50; i++) {
   describe('SyncAlertsToggle', () => {
     let appMockRender: AppMockRenderer;
     const onSubmit = jest.fn();

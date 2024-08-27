@@ -27,7 +27,7 @@ const caseData: CaseUI = {
 };
 
 // FLAKY: https://github.com/elastic/kibana/issues/185046
-for (let i = 0; i < 20; i++) {
+for (let i = 0; i < 50; i++) {
   describe('Case View Page files tab', () => {
     let appMockRender: AppMockRenderer;
 

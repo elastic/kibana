@@ -16,7 +16,7 @@ import { TemplateTags } from './template_tags';
 import { showEuiComboBoxOptions } from '@elastic/eui/lib/test/rtl';
 
 // FLAKY: https://github.com/elastic/kibana/issues/189293
-for (let i = 0; i < 20; i++) {
+for (let i = 0; i < 50; i++) {
   describe('TemplateTags', () => {
     let appMockRenderer: AppMockRenderer;
     const onSubmit = jest.fn();

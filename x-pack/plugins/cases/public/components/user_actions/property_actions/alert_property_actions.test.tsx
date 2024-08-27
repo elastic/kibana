@@ -18,7 +18,7 @@ import {
 import { AlertPropertyActions } from './alert_property_actions';
 
 // FLAKY: https://github.com/elastic/kibana/issues/174667
-for (let i = 0; i < 20; i++) {
+for (let i = 0; i < 50; i++) {
   describe('AlertPropertyActions', () => {
     let appMock: AppMockRenderer;
 

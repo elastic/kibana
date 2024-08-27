@@ -18,7 +18,7 @@ import { UserCommentPropertyActions } from './user_comment_property_actions';
 import { waitFor } from '@testing-library/react';
 
 // FLAKY: https://github.com/elastic/kibana/issues/175310
-for (let i = 0; i < 20; i++) {
+for (let i = 0; i < 50; i++) {
   describe('UserCommentPropertyActions', () => {
     let appMock: AppMockRenderer;
 

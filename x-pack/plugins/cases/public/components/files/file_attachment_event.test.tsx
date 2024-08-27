@@ -17,7 +17,7 @@ import { basicFileMock } from '../../containers/mock';
 import { FileAttachmentEvent } from './file_attachment_event';
 
 // FLAKY: https://github.com/elastic/kibana/issues/174661
-for (let i = 0; i < 20; i++) {
+for (let i = 0; i < 50; i++) {
   describe('FileAttachmentEvent', () => {
     let appMockRender: AppMockRenderer;
 

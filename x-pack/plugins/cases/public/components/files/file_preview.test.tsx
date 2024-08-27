@@ -17,7 +17,7 @@ import { basicFileMock } from '../../containers/mock';
 import { FilePreview } from './file_preview';
 
 // FLAKY: https://github.com/elastic/kibana/issues/182364
-for (let i = 0; i < 20; i++) {
+for (let i = 0; i < 50; i++) {
   describe('FilePreview', () => {
     let appMockRender: AppMockRenderer;
 
