@@ -60,10 +60,12 @@ export type StatusRuleCondition = TypeOf<typeof StatusRuleConditionSchema>;
 
 export const getConditionType = (condition?: StatusRuleCondition) => {
   let numberOfChecks = 1;
+  let timeWindow: TimeWindow = { unit: 'm', size: 1 };
   if (isEmpty(condition) || !condition?.window) {
     return {
       isLocationBased: false,
       isTimeWindow: false,
+      timeWindow,
       isChecksBased: true,
       numberOfChecks,
       downThreshold: 1,
@@ -79,6 +81,10 @@ export const getConditionType = (condition?: StatusRuleCondition) => {
     numberOfChecks = condition && 'numberOfChecks' in conWindow ? conWindow.numberOfChecks : 1;
   }
 
+  if (isTimeWindow) {
+    timeWindow = condition.window.time;
+  }
+
   if (isTimeWindow || isLocationBased) {
     numberOfChecks = condition?.downThreshold ?? 1;
   }
@@ -89,6 +95,7 @@ export const getConditionType = (condition?: StatusRuleCondition) => {
   return {
     isLocationBased,
     isTimeWindow,
+    timeWindow,
     isChecksBased,
     numberOfChecks,
     numberOfLocations,

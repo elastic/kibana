@@ -57,7 +57,6 @@ export async function queryMonitorStatusAlert(
   range: { from: string; to: string },
   monitorQueryIds: string[],
   monitorLocationsMap: Record<string, string[]>,
-  monitorQueryIdToConfigIdMap: Record<string, string>,
   numberOfChecks: number
 ): Promise<AlertStatusResponse> {
   const idSize = Math.trunc(DEFAULT_MAX_ES_BUCKET_SIZE / monitorLocationIds.length || 1);

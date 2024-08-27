@@ -162,28 +162,25 @@ const handleLocationBasedAlert = ({
   // for location based we need to make sure, monitor is down for the threshold for all locations
   // lets build a map of monitors for each location
   for (const [configId, configs] of downConfigsById) {
-    const matchingLocations = configs.length;
-    if (matchingLocations >= locationsThreshold) {
-      // make sure all locations are matching down threshold as well
-      const matchingLocationsWithDownThreshold = configs.filter(
-        (config) => config.checks.down >= downThreshold
-      );
-      if (matchingLocationsWithDownThreshold.length >= locationsThreshold) {
-        const monitorSummary = statusRule.getLocationBasedDownSummary({
-          statusConfigs: configs,
-          downThreshold,
-          noOfLocations: locationsThreshold,
-        });
-        const alertId = `${configId}_locations_based`;
-        statusRule.scheduleAlert({
-          idWithLocation: `${configId}-${configs[0].locationId}`,
-          alertId,
-          monitorSummary,
-          statusConfig: configs[0],
-          downThreshold,
-        });
-      }
+    const matchingLocationsWithDownThreshold = configs.filter(
+      (config) => config.checks.down >= downThreshold
+    );
+    if (matchingLocationsWithDownThreshold.length < locationsThreshold) {
+      continue;
     }
+    const monitorSummary = statusRule.getLocationBasedDownSummary({
+      statusConfigs: configs,
+      downThreshold,
+      noOfLocations: locationsThreshold,
+    });
+    const alertId = `${configId}_locations_based`;
+    statusRule.scheduleAlert({
+      idWithLocation: `${configId}-${configs[0].locationId}`,
+      alertId,
+      monitorSummary,
+      statusConfig: configs[0],
+      downThreshold,
+    });
   }
 };
 
@@ -219,7 +216,7 @@ const handleDownMonitorThresholdAlert = ({
           downThreshold,
         });
 
-        statusRule.scheduleAlert({
+        return statusRule.scheduleAlert({
           idWithLocation,
           alertId,
           monitorSummary,
@@ -228,23 +225,30 @@ const handleDownMonitorThresholdAlert = ({
         });
       }
     });
-  } else {
-    for (const [configId, configs] of downConfigsById) {
-      const totalDownChecks = configs.reduce((acc, { checks }) => acc + checks.down, 0);
-      if (totalDownChecks >= downThreshold) {
-        const alertId = configId;
-        const monitorSummary = statusRule.getUngroupedDownSummary({
-          statusConfigs: configs,
-          downThreshold,
-        });
-        statusRule.scheduleAlert({
-          idWithLocation: configId,
-          alertId,
-          monitorSummary,
-          statusConfig: configs[0],
-          downThreshold,
-        });
-      }
+  }
+
+  for (const [configId, configs] of downConfigsById) {
+    const totalDownChecks = configs.reduce((acc, { checks }) => acc + checks.down, 0);
+    const totalDownChecksWithinXChecks = configs.reduce(
+      (acc, { checks }) => acc + checks.downWithinXChecks,
+      0
+    );
+    const isTimeWindowConditionMet = isTimeWindow && totalDownChecks >= downThreshold;
+    const isChecksConditionMet = isChecksBased && totalDownChecksWithinXChecks >= downThreshold;
+
+    if (isTimeWindowConditionMet || isChecksConditionMet) {
+      const alertId = configId;
+      const monitorSummary = statusRule.getUngroupedDownSummary({
+        statusConfigs: configs,
+        downThreshold,
+      });
+      return statusRule.scheduleAlert({
+        idWithLocation: configId,
+        alertId,
+        monitorSummary,
+        statusConfig: configs[0],
+        downThreshold,
+      });
     }
   }
 };
