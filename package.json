@@ -1602,7 +1602,7 @@
     "@types/sinon": "^7.0.13",
     "@types/source-map-support": "^0.5.3",
     "@types/stats-lite": "^2.2.0",
-    "@types/styled-components": "^5.1.0",
+    "@types/styled-components": "^5.1.34",
     "@types/supertest": "^6.0.2",
     "@types/tapable": "^1.0.6",
     "@types/tar": "^6.1.11",
