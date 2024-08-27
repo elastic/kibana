@@ -6,8 +6,20 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiButtonEmpty, EuiBadge, EuiText, EuiLoadingSpinner, EuiLink } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import {
+  EuiButtonEmpty,
+  EuiBadge,
+  EuiText,
+  EuiLoadingSpinner,
+  EuiLink,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
+  EuiButtonIcon,
+} from '@elastic/eui';
+import React, { useMemo, useState } from 'react';
 import { RulesTableEmptyColumnName } from '../rules_table_empty_column_name';
 import { SHOW_RELATED_INTEGRATIONS_SETTING } from '../../../../../../common/constants';
 import { PopoverItems } from '../../../../../common/components/popover_items';
@@ -47,6 +59,88 @@ const RuleName = ({ name, ruleId }: RuleNameProps) => {
     >
       {name}
     </EuiLink>
+  );
+};
+
+const InstallButton = ({
+  ruleId,
+  record,
+  installOneRule,
+  loadingRules,
+  isDisabled,
+}: {
+  ruleId: RuleSignatureId;
+  record: Rule;
+  installOneRule: AddPrebuiltRulesTableActions['installOneRule'];
+  loadingRules: RuleSignatureId[];
+  isDisabled: boolean;
+}) => {
+  const isRuleInstalling = loadingRules.includes(ruleId);
+  const isInstallButtonDisabled = isRuleInstalling || isDisabled;
+  const [isPopoverOpen, setPopover] = useState(false);
+
+  const onButtonClick = () => {
+    setPopover(!isPopoverOpen);
+  };
+
+  const closePopover = () => {
+    setPopover(false);
+  };
+
+  const enableOnClick = () => {
+    installOneRule(ruleId, true);
+    closePopover();
+  };
+
+  const items = [
+    <EuiContextMenuItem key="copy" icon={'play'} onClick={enableOnClick}>
+      {'Install and enable'}
+    </EuiContextMenuItem>,
+  ];
+
+  return (
+    <>
+      {isRuleInstalling ? (
+        <EuiLoadingSpinner
+          size="s"
+          data-test-subj={`installSinglePrebuiltRuleButton-loadingSpinner-${ruleId}`}
+        />
+      ) : (
+        <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="s"
+              disabled={isInstallButtonDisabled}
+              onClick={() => installOneRule(ruleId)}
+              data-test-subj={`installSinglePrebuiltRuleButton-${ruleId}`}
+              aria-label={i18n.INSTALL_RULE_BUTTON_ARIA_LABEL(record.name)}
+            >
+              {i18n.INSTALL_RULE_BUTTON}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiPopover
+              button={
+                <EuiButtonIcon
+                  display="empty"
+                  size="s"
+                  iconType="boxesVertical"
+                  aria-label="More"
+                  onClick={onButtonClick}
+                  disabled={isInstallButtonDisabled}
+                />
+              }
+              isOpen={isPopoverOpen}
+              closePopover={closePopover}
+              panelPaddingSize="s"
+              anchorPosition="downRight"
+            >
+              <EuiContextMenuPanel size="s" items={items} />
+            </EuiPopover>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
+    </>
   );
 };
 
@@ -114,25 +208,14 @@ const createInstallButtonColumn = (
   field: 'rule_id',
   name: <RulesTableEmptyColumnName name={i18n.INSTALL_RULE_BUTTON} />,
   render: (ruleId: RuleSignatureId, record: Rule) => {
-    const isRuleInstalling = loadingRules.includes(ruleId);
-    const isInstallButtonDisabled = isRuleInstalling || isDisabled;
     return (
-      <EuiButtonEmpty
-        size="s"
-        disabled={isInstallButtonDisabled}
-        onClick={() => installOneRule(ruleId)}
-        data-test-subj={`installSinglePrebuiltRuleButton-${ruleId}`}
-        aria-label={i18n.INSTALL_RULE_BUTTON_ARIA_LABEL(record.name)}
-      >
-        {isRuleInstalling ? (
-          <EuiLoadingSpinner
-            size="s"
-            data-test-subj={`installSinglePrebuiltRuleButton-loadingSpinner-${ruleId}`}
-          />
-        ) : (
-          i18n.INSTALL_RULE_BUTTON
-        )}
-      </EuiButtonEmpty>
+      <InstallButton
+        ruleId={ruleId}
+        record={record}
+        installOneRule={installOneRule}
+        loadingRules={loadingRules}
+        isDisabled={isDisabled}
+      />
     );
   },
   width: '10%',
