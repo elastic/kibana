@@ -351,11 +351,13 @@ export class ManageSpacePage extends Component<Props, State> {
   };
 
   private onSolutionViewChange = (space: Partial<Space>) => {
-    let showVisibleFeaturesPicker = false;
-    if (space.solution === 'classic' || space.solution == null) {
-      showVisibleFeaturesPicker = true;
+    if (this.props.allowFeatureVisibility) {
+      let showVisibleFeaturesPicker = false;
+      if (space.solution === 'classic' || space.solution == null) {
+        showVisibleFeaturesPicker = true;
+      }
+      this.setState((state) => ({ ...state, showVisibleFeaturesPicker }));
     }
-    this.setState((state) => ({ ...state, showVisibleFeaturesPicker }));
     this.onSpaceChange(space);
   };
 
