@@ -313,7 +313,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
           map(
             result,
             ({ timing, ...event }) => {
-              const anyTaskErrors = event.stats?.taskErrors ?? 0;
+              const anyTaskErrors = event.stats?.tasksErrors ?? 0;
               if (anyTaskErrors > 0) {
                 return asTaskPollingCycleEvent<string>(
                   asErr(

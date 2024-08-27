@@ -39,7 +39,7 @@ export interface ClaimOwnershipResult {
     tasksConflicted: number;
     tasksClaimed: number;
     tasksLeftUnclaimed?: number;
-    taskErrors?: number;
+    tasksErrors?: number;
   };
   docs: ConcreteTaskInstance[];
   timing?: TaskTiming;
