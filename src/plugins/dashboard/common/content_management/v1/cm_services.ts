@@ -57,7 +57,7 @@ export const dashboardAttributesSchema = schema.object(
     hits: schema.maybe(schema.number()),
     version: schema.maybe(schema.number()),
   },
-  { unknowns: 'forbid' }
+  { unknowns: 'forbid', meta: { id: 'dashboard_publicSchema' } }
 );
 
 export const dashboardSavedObjectSchema = savedObjectSchema(dashboardAttributesSchema);
