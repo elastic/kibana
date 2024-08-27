@@ -8,7 +8,7 @@
 import React from 'react';
 import { Ast } from '@kbn/interpreter';
 import { i18n } from '@kbn/i18n';
-import { PaletteRegistry, CUSTOM_PALETTE } from '@kbn/coloring';
+import { PaletteRegistry, CUSTOM_PALETTE, PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
 import { ThemeServiceStart } from '@kbn/core/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { IconChartDatatable } from '@kbn/chart-icons';
@@ -28,13 +28,14 @@ import { TableDimensionEditorAdditionalSection } from './components/dimension_ed
 import type { LayerType } from '../../../common/types';
 import { RowHeightMode } from '../../../common/types';
 import { getDefaultSummaryLabel } from '../../../common/expressions/datatable/summary';
-import type {
-  ColumnState,
-  SortingState,
-  PagingState,
-  CollapseExpressionFunction,
-  DatatableColumnFn,
-  DatatableExpressionFunction,
+import {
+  type ColumnState,
+  type SortingState,
+  type PagingState,
+  type CollapseExpressionFunction,
+  type DatatableColumnFn,
+  type DatatableExpressionFunction,
+  getOriginalId,
 } from '../../../common/expressions';
 import { DataTableToolbar } from './components/toolbar';
 import {
@@ -42,7 +43,13 @@ import {
   DEFAULT_HEADER_ROW_HEIGHT_LINES,
   DEFAULT_ROW_HEIGHT,
 } from './components/constants';
-import { getColorStops, shouldColorByTerms } from '../../shared_components';
+import {
+  applyPaletteParams,
+  defaultPaletteParams,
+  findMinMaxByColumnId,
+  getColorStops,
+  shouldColorByTerms,
+} from '../../shared_components';
 import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
 export interface DatatableVisualizationState {
   columns: ColumnState[];
@@ -115,6 +122,56 @@ export const getDatatableVisualization = ({
         layerType: LayerTypes.DATA,
       }
     );
+  },
+
+  onDatasourceUpdate(state, frame) {
+    const datasource = frame?.datasourceLayers?.[state.layerId];
+    const paletteMap = new Map(
+      paletteService
+        .getAll()
+        .filter((p) => !p.internal)
+        .map((p) => [p.id, p])
+    );
+
+    const hasTransposedColumn = state.columns.some(({ isTransposed }) => isTransposed);
+    const columns = state.columns.map((column) => {
+      if (column.palette) {
+        const accessor = column.columnId;
+        const currentData = frame?.activeData?.[state.layerId];
+        const { dataType, isBucketed } = datasource?.getOperationForColumnId(column.columnId) ?? {};
+        const showColorByTerms = shouldColorByTerms(dataType, isBucketed);
+        const palette = paletteMap.get(column.palette?.name ?? '');
+        const columnsToCheck = hasTransposedColumn
+          ? currentData?.columns
+              .filter(({ id }) => getOriginalId(id) === accessor)
+              .map(({ id }) => id) || []
+          : [accessor];
+        const minMaxByColumnId = findMinMaxByColumnId(columnsToCheck, currentData, getOriginalId);
+
+        if (palette && !showColorByTerms && !palette?.canDynamicColoring) {
+          const newPalette: PaletteOutput<CustomPaletteParams> = {
+            type: 'palette',
+            name: showColorByTerms ? 'default' : defaultPaletteParams.name,
+          };
+          return {
+            ...column,
+            palette: {
+              ...newPalette,
+              params: {
+                stops: applyPaletteParams(paletteService, newPalette, minMaxByColumnId[accessor]),
+              },
+            },
+          };
+        }
+      }
+
+      return column;
+    });
+
+    return {
+      ...state,
+      columns,
+    };
   },
 
   getSuggestions({
@@ -205,7 +262,7 @@ export const getDatatableVisualization = ({
   - Text-based: It relies on the isMetric flag to identify groups. It allows all type of fields
   on the Metric dimension in cases where there are no numeric columns
   **/
-  getConfiguration({ state, frame, layerId }) {
+  getConfiguration({ state, frame }) {
     const isDarkMode = kibanaTheme.getTheme().darkMode;
     const { sortedColumns, datasource } =
       getDataSourceAndSortedColumns(state, frame.datasourceLayers) || {};
