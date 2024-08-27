@@ -13,6 +13,7 @@ import { LogDocument } from '@kbn/apm-synthtrace-client/src/lib/logs';
 import { SynthtraceEsClient, SynthtraceEsClientOptions } from '../shared/base_client';
 import { getSerializeTransform } from '../shared/get_serialize_transform';
 import { Logger } from '../utils/create_logger';
+import { indexTemplates, IndexTemplateName } from './custom_logsdb_index_templates';
 
 export type LogsSynthtraceEsClientOptions = Omit<SynthtraceEsClientOptions, 'pipeline'>;
 
@@ -23,6 +24,21 @@ export class LogsSynthtraceEsClient extends SynthtraceEsClient<LogDocument> {
       pipeline: logsPipeline(),
     });
     this.dataStreams = ['logs-*-*'];
+  }
+
+  async createIndexTemplate(name: IndexTemplateName) {
+    const isTemplateExisting = await this.client.indices.existsIndexTemplate({ name });
+
+    if (isTemplateExisting) return this.logger.info(`Index template already exists: ${name}`);
+
+    const template = indexTemplates[name];
+
+    try {
+      await this.client.indices.putIndexTemplate(template);
+      this.logger.info(`Index template successfully created: ${name}`);
+    } catch (err) {
+      this.logger.error(`Index template creation failed: ${name} - ${err.message}`);
+    }
   }
 }
 

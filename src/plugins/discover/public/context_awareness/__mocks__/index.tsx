@@ -49,6 +49,27 @@ export const createContextAwarenessMocks = ({
         ...prev(),
         rootProfile: () => <>data-source-profile</>,
       })),
+      getDefaultAppState: jest.fn(() => () => ({
+        columns: [
+          {
+            name: 'message',
+            width: 100,
+          },
+          {
+            name: 'extension',
+            width: 200,
+          },
+          {
+            name: 'foo',
+            width: 300,
+          },
+          {
+            name: 'bar',
+            width: 400,
+          },
+        ],
+        rowHeight: 3,
+      })),
     },
     resolve: jest.fn(() => ({
       isMatch: true,

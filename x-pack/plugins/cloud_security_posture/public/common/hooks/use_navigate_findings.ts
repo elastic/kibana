@@ -9,7 +9,7 @@ import { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Filter } from '@kbn/es-query';
 import {
-  LATEST_FINDINGS_INDEX_PATTERN,
+  CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX,
   SECURITY_DEFAULT_DATA_VIEW_ID,
 } from '../../../common/constants';
 import { findingsNavigation } from '../navigation/constants';
@@ -77,7 +77,7 @@ const useNavigate = (pathname: string, dataViewId = SECURITY_DEFAULT_DATA_VIEW_I
 };
 
 export const useNavigateFindings = () => {
-  const { data } = useDataView(LATEST_FINDINGS_INDEX_PATTERN);
+  const { data } = useDataView(CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX);
   return useNavigate(findingsNavigation.findings_default.path, data?.id);
 };
 

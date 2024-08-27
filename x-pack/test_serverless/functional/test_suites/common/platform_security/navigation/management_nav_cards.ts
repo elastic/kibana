@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+// Note: this suite is currently only called from the feature flags test config:
+// x-pack/test_serverless/functional/test_suites/search/config.feature_flags.ts
+
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -59,6 +62,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // `--xpack.cloud.organization_url: '/account/members'`,
         expect(url).to.contain('/account/members');
       });
+
+      it('displays the spaces management card, and will navigate to the spaces management UI', async () => {
+        await pageObjects.svlManagementPage.assertSpacesManagementCardExists();
+        await pageObjects.svlManagementPage.clickSpacesManagementCard();
+
+        const url = await browser.getCurrentUrl();
+        expect(url).to.contain('/management/kibana/spaces');
+      });
     });
 
     describe('as viewer', function () {
@@ -94,6 +105,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const url = await browser.getCurrentUrl();
         // `--xpack.cloud.organization_url: '/account/members'`,
         expect(url).to.contain('/account/members');
+      });
+
+      it('should not display the spaces management card', async () => {
+        await retry.waitFor('page to be visible', async () => {
+          return await testSubjects.exists('cards-navigation-page');
+        });
+        await pageObjects.svlManagementPage.assertSpacesManagementCardDoesNotExist();
       });
 
       describe('API keys management card  - search solution', function () {

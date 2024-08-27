@@ -19,7 +19,8 @@ import type { GroupBySelection } from '../alerts_progress_bar_panel/types';
 import type { AddFilterProps } from '../common/types';
 
 const StyledFlexGroup = styled(EuiFlexGroup)`
-  @media only screen and (min-width: ${({ theme }) => theme.eui.euiBreakpoints.l});
+  @media only screen and (min-width: ${({ theme }) => theme.eui.euiBreakpoints.l}) {
+  }
 `;
 
 const StyledFlexItem = styled(EuiFlexItem)`

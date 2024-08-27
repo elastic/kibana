@@ -23,6 +23,7 @@ describe('ManagementService', () => {
   const config: ConfigType = {
     maxSpaces: 1000,
     allowFeatureVisibility: true,
+    allowSolutionVisibility: true,
   };
 
   describe('#setup', () => {
@@ -41,7 +42,7 @@ describe('ManagementService', () => {
         spacesManager: spacesManagerMock.create(),
         config,
         getRolesAPIClient: getRolesAPIClientMock,
-        solutionNavExperiment: Promise.resolve(false),
+        getPrivilegesAPIClient: jest.fn(),
         eventTracker,
       });
 
@@ -63,7 +64,7 @@ describe('ManagementService', () => {
         spacesManager: spacesManagerMock.create(),
         config,
         getRolesAPIClient: getRolesAPIClientMock,
-        solutionNavExperiment: Promise.resolve(false),
+        getPrivilegesAPIClient: jest.fn(),
         eventTracker,
       });
     });
@@ -86,7 +87,7 @@ describe('ManagementService', () => {
         spacesManager: spacesManagerMock.create(),
         config,
         getRolesAPIClient: jest.fn(),
-        solutionNavExperiment: Promise.resolve(false),
+        getPrivilegesAPIClient: jest.fn(),
         eventTracker,
       });
 

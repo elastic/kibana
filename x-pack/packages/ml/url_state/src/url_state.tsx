@@ -31,6 +31,16 @@ export interface Dictionary<TValue> {
   [id: string]: TValue;
 }
 
+export interface ListingPageUrlState {
+  pageSize: number;
+  pageIndex: number;
+  sortField: string;
+  sortDirection: string;
+  queryText?: string;
+  showPerPageOptions?: boolean;
+  showAll?: boolean;
+}
+
 export type Accessor = '_a' | '_g';
 export type SetUrlState = (
   accessor: Accessor,
@@ -114,7 +124,7 @@ export const UrlStateProvider: FC<PropsWithChildren<unknown>> = ({ children }) =
       const urlState = parseUrlState(prevSearchString);
       const parsedQueryString = parse(prevSearchString, { sort: false });
 
-      if (!Object.prototype.hasOwnProperty.call(urlState, accessor)) {
+      if (!Object.hasOwn(urlState, accessor)) {
         urlState[accessor] = {};
       }
 
@@ -241,7 +251,7 @@ export class PageUrlStateService<T> {
   }
 }
 
-interface PageUrlState {
+export interface PageUrlState {
   pageKey: string;
   pageUrlState: object;
 }

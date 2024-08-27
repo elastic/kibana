@@ -52,7 +52,7 @@ import {
 } from '../../../../common/detection_engine/utils';
 import type { TimelineResult } from '../../../../common/api/timeline';
 import { TimelineId } from '../../../../common/types/timeline';
-import { TimelineStatus, TimelineType } from '../../../../common/api/timeline';
+import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../common/api/timeline';
 import type {
   SendAlertToTimelineActionProps,
   ThresholdAggregationData,
@@ -990,7 +990,7 @@ export const sendAlertToTimelineAction = async ({
         const { timeline, notes } = formatTimelineResultToModel(
           timelineTemplate,
           true,
-          timelineTemplate.timelineType ?? TimelineType.default
+          timelineTemplate.timelineType ?? TimelineTypeEnum.default
         );
         const query = replaceTemplateFieldFromQuery(
           timeline.kqlQuery?.filterQuery?.kuery?.expression ?? '',
@@ -1056,9 +1056,9 @@ export const sendAlertToTimelineAction = async ({
               ...timeline,
               excludedRowRendererIds: [],
               title: '',
-              timelineType: TimelineType.default,
+              timelineType: TimelineTypeEnum.default,
               templateTimelineId: null,
-              status: TimelineStatus.draft,
+              status: TimelineStatusEnum.draft,
               dataProviders,
               eventType: 'all',
               filters,
@@ -1085,7 +1085,9 @@ export const sendAlertToTimelineAction = async ({
           });
         }
       }
-    } catch {
+    } catch (error) {
+      /* eslint-disable-next-line no-console */
+      console.error(error);
       updateTimelineIsLoading({ id: TimelineId.active, isLoading: false });
       return createTimeline({
         from,

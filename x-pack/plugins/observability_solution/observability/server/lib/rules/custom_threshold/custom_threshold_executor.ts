@@ -95,7 +95,8 @@ export const createCustomThresholdExecutor = ({
       executionId,
     });
 
-    const { searchSourceClient, alertsClient, uiSettingsClient } = services;
+    const { alertsClient, uiSettingsClient } = services;
+    const searchSourceClient = await services.getSearchSourceClient();
 
     if (!alertsClient) {
       throw new AlertsClientError();

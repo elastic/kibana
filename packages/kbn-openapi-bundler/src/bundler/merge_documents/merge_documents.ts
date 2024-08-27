@@ -67,7 +67,11 @@ export async function mergeDocuments(
       mergedDocument.security = mergeSecurityRequirements(documentsToMerge);
     }
 
-    mergedDocument.tags = mergeTags(documentsToMerge);
+    const mergedTags = [...(options.addTags ?? []), ...(mergeTags(documentsToMerge) ?? [])];
+
+    if (mergedTags.length) {
+      mergedDocument.tags = mergedTags;
+    }
 
     mergedByVersion.set(mergedDocument.info.version, mergedDocument);
   }

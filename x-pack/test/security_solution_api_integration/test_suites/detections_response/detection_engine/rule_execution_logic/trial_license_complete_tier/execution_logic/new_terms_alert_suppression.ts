@@ -56,7 +56,8 @@ export default ({ getService }: FtrProviderContext) => {
 
   const historicalWindowStart = '2019-10-13T05:00:04.000Z';
 
-  describe('@ess @serverless @serverlessQA New terms type rules, alert suppression', () => {
+  // NOTE: Add to second quality gate after feature is GA
+  describe('@ess @serverless New terms type rules, alert suppression', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
     });

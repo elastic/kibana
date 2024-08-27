@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ESQLDecimalLiteral, ESQLNumericLiteralType } from '@kbn/esql-ast/src/types';
+import { ESQLDecimalLiteral, ESQLLiteral, ESQLNumericLiteralType } from '@kbn/esql-ast/src/types';
+import { FunctionParameterType } from '../definitions/types';
 
 export const ESQL_COMMON_NUMERIC_TYPES = ['double', 'long', 'integer'] as const;
 export const ESQL_NUMERIC_DECIMAL_TYPES = [
@@ -47,3 +48,29 @@ export function isNumericDecimalType(type: unknown): type is ESQLDecimalLiteral 
     ESQL_NUMERIC_DECIMAL_TYPES.includes(type as (typeof ESQL_NUMERIC_DECIMAL_TYPES)[number])
   );
 }
+
+/**
+ * Compares two types, taking into account literal types
+ * @TODO strengthen typing here (remove `string`)
+ */
+export const compareTypesWithLiterals = (
+  a: ESQLLiteral['literalType'] | FunctionParameterType | string,
+  b: ESQLLiteral['literalType'] | FunctionParameterType | string
+) => {
+  if (a === b) {
+    return true;
+  }
+  if (a === 'decimal') {
+    return isNumericDecimalType(b);
+  }
+  if (b === 'decimal') {
+    return isNumericDecimalType(a);
+  }
+  if (a === 'string') {
+    return isStringType(b);
+  }
+  if (b === 'string') {
+    return isStringType(a);
+  }
+  return false;
+};

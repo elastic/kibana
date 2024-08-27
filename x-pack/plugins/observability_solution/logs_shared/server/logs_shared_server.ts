@@ -12,10 +12,12 @@ import {
   initLogEntriesSummaryRoute,
 } from './routes/log_entries';
 import { initLogViewRoutes } from './routes/log_views';
+import { initMigrateLogViewSettingsRoute } from './routes/deprecations';
 
 export const initLogsSharedServer = (libs: LogsSharedBackendLibs) => {
   initLogEntriesHighlightsRoute(libs);
   initLogEntriesSummaryRoute(libs);
   initLogEntriesSummaryHighlightsRoute(libs);
   initLogViewRoutes(libs);
+  initMigrateLogViewSettingsRoute(libs);
 };

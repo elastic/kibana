@@ -618,7 +618,7 @@ module.exports = {
         'test/*/*.config.ts',
         'test/*/{tests,test_suites,apis,apps}/**/*',
         'test/server_integration/**/*.ts',
-        'x-pack/test/*/{tests,test_suites,apis,apps}/**/*',
+        'x-pack/test/*/{tests,test_suites,apis,apps,deployment_agnostic}/**/*',
         'x-pack/test/*/*config.*ts',
         'x-pack/test/saved_object_api_integration/*/apis/**/*',
         'x-pack/test/ui_capabilities/*/tests/**/*',
@@ -1367,6 +1367,25 @@ module.exports = {
         'react/jsx-no-literals': 'error',
         'react/jsx-no-target-blank': 'error',
         'react/jsx-fragments': 'error',
+      },
+    },
+    {
+      files: [
+        'test/{accessibility,*functional*,*api_integration*}/apps/**/*.{js,ts}',
+        'x-pack/test/{accessibility,*functional*,*api_integration*}/apps/**/*.{js,ts}',
+        'x-pack/test_serverless/{functional,api_integration}/test_suites/**/*.{js,ts}',
+      ],
+      extends: ['plugin:mocha/recommended'],
+      plugins: ['mocha'],
+      env: {
+        mocha: true,
+      },
+      rules: {
+        'mocha/no-mocha-arrows': 'off',
+        'mocha/no-exports': 'off',
+        'mocha/no-setup-in-describe': 'off',
+        'mocha/no-nested-tests': 'off',
+        'mocha/no-skipped-tests': 'off',
       },
     },
     {

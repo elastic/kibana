@@ -8,7 +8,7 @@
 import type { ESQLSource, ESQLFunction, ESQLColumn, ESQLSingleAstItem } from '@kbn/esql-ast';
 import { getAstAndSyntaxErrors, Walker, walk } from '@kbn/esql-ast';
 
-const DEFAULT_ESQL_LIMIT = 500;
+const DEFAULT_ESQL_LIMIT = 1000;
 
 // retrieves the index pattern from the aggregate query for ES|QL using ast parsing
 export function getIndexPatternFromESQLQuery(esql?: string) {
@@ -40,14 +40,27 @@ export function hasTransformationalCommand(esql?: string) {
 }
 
 export function getLimitFromESQLQuery(esql: string): number {
-  const limitCommands = esql.match(new RegExp(/LIMIT\s[0-9]+/, 'ig'));
-  if (!limitCommands) {
+  const { ast } = getAstAndSyntaxErrors(esql);
+  const limitCommands = ast.filter(({ name }) => name === 'limit');
+  if (!limitCommands || !limitCommands.length) {
+    return DEFAULT_ESQL_LIMIT;
+  }
+  const limits: number[] = [];
+
+  walk(ast, {
+    visitLiteral: (node) => {
+      if (!isNaN(Number(node.value))) {
+        limits.push(Number(node.value));
+      }
+    },
+  });
+
+  if (!limits.length) {
     return DEFAULT_ESQL_LIMIT;
   }
 
-  const lastIndex = limitCommands.length - 1;
-  const split = limitCommands[lastIndex].split(' ');
-  return parseInt(split[1], 10);
+  // ES returns always the smallest limit
+  return Math.min(...limits);
 }
 
 export function removeDropCommandsFromESQLQuery(esql?: string): string {
@@ -56,7 +69,7 @@ export function removeDropCommandsFromESQLQuery(esql?: string): string {
 }
 
 /**
- * When the ?start and ?end params are used, we want to retrieve the timefield from the query.
+ * When the ?t_start and ?t_end params are used, we want to retrieve the timefield from the query.
  * @param esql:string
  * @returns string
  */
@@ -69,7 +82,9 @@ export const getTimeFieldFromESQLQuery = (esql: string) => {
   });
 
   const params = Walker.params(ast);
-  const timeNamedParam = params.find((param) => param.value === 'start' || param.value === 'end');
+  const timeNamedParam = params.find(
+    (param) => param.value === 't_start' || param.value === 't_end'
+  );
   if (!timeNamedParam || !functions.length) {
     return undefined;
   }

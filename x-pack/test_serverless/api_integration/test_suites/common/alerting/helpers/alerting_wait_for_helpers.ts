@@ -12,7 +12,7 @@ import type {
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { runRule } from './alerting_api_helper';
-import type { SupertestWithoutAuthType } from '../../../../../shared/services';
+import type { SupertestWithoutAuthProviderType } from '../../../../../shared/services';
 import { RoleCredentials } from '../../../../../shared/services';
 import { InternalRequestHeader } from '../../../../../shared/services';
 
@@ -376,7 +376,7 @@ export async function waitForNumRuleRuns({
   esClient,
   testStart,
 }: {
-  supertestWithoutAuth: SupertestWithoutAuthType;
+  supertestWithoutAuth: SupertestWithoutAuthProviderType;
   roleAuthc: RoleCredentials;
   internalReqHeader: InternalRequestHeader;
   numOfRuns: number;

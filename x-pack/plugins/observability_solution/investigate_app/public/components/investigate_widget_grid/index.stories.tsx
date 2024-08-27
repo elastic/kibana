@@ -8,10 +8,8 @@
 import { ComponentMeta, ComponentStoryObj } from '@storybook/react';
 import React, { useState } from 'react';
 import { v4 } from 'uuid';
-import { ChromeOption } from '@kbn/investigate-plugin/public';
 import { InvestigateWidgetGrid as Component, InvestigateWidgetGridItem } from '.';
 import { KibanaReactStorybookDecorator } from '../../../.storybook/storybook_decorator';
-import { TimelineUserPrompt, TimelineAssistantResponse } from '../timeline_message';
 
 const meta: ComponentMeta<typeof Component> = {
   component: Component,
@@ -27,9 +25,6 @@ function WithPersistedChanges(props: React.ComponentProps<typeof Component>) {
   return (
     <Component
       {...props}
-      onItemsChange={async (nextItems) => {
-        setItems(() => nextItems);
-      }}
       onItemCopy={async (item) => {
         setItems((prevItems) =>
           prevItems.concat({
@@ -62,7 +57,6 @@ function createItem<T extends Partial<InvestigateWidgetGridItem>>(overrides: T) 
     columns: 4,
     rows: 2,
     description: '',
-    locked: false,
     loading: false,
     overrides: [],
   };
@@ -74,20 +68,6 @@ export const InvestigateWidgetGridStory: ComponentStoryObj<typeof Component> = {
     ...defaultProps.args,
     items: [
       createItem({
-        title: '5',
-        description: '',
-        element: (
-          <TimelineUserPrompt
-            prompt="I asked for something"
-            user={{ username: 'me' }}
-            onDelete={() => {}}
-          />
-        ),
-        columns: 4,
-        rows: 2,
-        chrome: ChromeOption.disabled,
-      }),
-      createItem({
         title: '1',
         element: (
           <div style={{ backgroundColor: 'red', height: 1200, width: 1200 }}>
@@ -96,20 +76,8 @@ export const InvestigateWidgetGridStory: ComponentStoryObj<typeof Component> = {
         ),
         columns: 4,
         rows: 12,
-        locked: true,
       }),
-      createItem({
-        title: '5',
-        element: (
-          <TimelineAssistantResponse
-            content="I gave you something in response"
-            onDelete={() => {}}
-          />
-        ),
-        columns: 4,
-        rows: 2,
-        chrome: ChromeOption.disabled,
-      }),
+
       createItem({
         title: '2',
         element: <>TODO</>,

@@ -40,7 +40,11 @@
     "@kbn/shared-ux-markdown",
     "@kbn/react-kibana-context-render",
     "@kbn/presentation-containers",
-    "@kbn/presentation-publishing"
+    "@kbn/presentation-publishing",
+    "@kbn/content-management-utils",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/field-formats-plugin",
+    "@kbn/presentation-panel-plugin"
   ],
   "exclude": ["target/**/*"]
 }

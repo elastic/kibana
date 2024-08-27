@@ -26,10 +26,17 @@ export function mergeOperations(
       continue;
     }
 
+    // Adding tags before merging helps to reuse already existing functionality
+    // without changes. It imitates a case when such tags already existed in source operations.
+    const extendedTags = [
+      ...(options.addTags?.map((t) => t.name) ?? []),
+      ...(sourceOperation.tags ?? []),
+    ];
     const normalizedSourceOperation = {
       ...sourceOperation,
       ...(options.skipServers ? { servers: undefined } : { servers: sourceOperation.servers }),
       ...(options.skipSecurity ? { security: undefined } : { security: sourceOperation.security }),
+      ...(extendedTags.length > 0 ? { tags: extendedTags } : {}),
     };
 
     if (!mergedOperation || deepEqual(normalizedSourceOperation, mergedOperation)) {

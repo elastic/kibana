@@ -11,6 +11,8 @@ import type { Filter } from '@kbn/es-query';
 import { escapeDataProviderId } from '@kbn/securitysolution-t-grid';
 import { isArray, isEmpty, isString } from 'lodash/fp';
 import { useMemo } from 'react';
+import type { FieldSpec } from '@kbn/data-plugin/common';
+
 import {
   AGENT_STATUS_FIELD_NAME,
   EVENT_MODULE_FIELD_NAME,
@@ -29,7 +31,6 @@ import { EVENT_DURATION_FIELD_NAME } from '../../../../timelines/components/dura
 import { getDisplayValue } from '../../../../timelines/components/timeline/data_providers/helpers';
 import { PORT_NAMES } from '../../../../explore/network/components/port/helpers';
 import { INDICATOR_REFERENCE } from '../../../../../common/cti/constants';
-import type { BrowserField } from '../../../containers/source';
 import type { DataProvider, DataProvidersAnd, QueryOperator } from '../../../../../common/types';
 import { IS_OPERATOR } from '../../../../../common/types';
 
@@ -38,7 +39,7 @@ export interface UseActionCellDataProvider {
   eventId?: string;
   field: string;
   fieldFormat?: string;
-  fieldFromBrowserField?: Partial<BrowserField>;
+  fieldFromBrowserField?: Partial<FieldSpec>;
   fieldType?: string;
   isObjectArray?: boolean;
   linkValue?: string | null;

@@ -13,7 +13,7 @@ import { getRouterLinkProps } from '@kbn/router-utils';
 import {
   type AssetDetailsLocatorParams,
   ASSET_DETAILS_LOCATOR_ID,
-} from '@kbn/observability-shared-plugin/public';
+} from '@kbn/observability-shared-plugin/common';
 import { RouterLinkProps } from '@kbn/router-utils/src/get_router_link_props';
 import type { AssetDetailsUrlState, RouteState } from '../../components/asset_details/types';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';

@@ -27,17 +27,6 @@ type FilterOption<T extends string, K extends string = string> = EuiSelectableOp
   label: T;
 }>;
 
-export type { FilterOption as MultiSelectFilterOption };
-
-export const mapToMultiSelectOption = <T extends string>(options: T[]) => {
-  return options.map((option) => {
-    return {
-      key: option,
-      label: option,
-    };
-  });
-};
-
 const fromRawOptionsToEuiSelectableOptions = <T extends string, K extends string>(
   options: Array<FilterOption<T, K>>,
   selectedOptionKeys: string[]
