@@ -1510,7 +1510,7 @@
     "@types/deep-freeze-strict": "^1.1.0",
     "@types/diff": "^5.0.8",
     "@types/ejs": "^3.0.6",
-    "@types/enzyme": "^3.10.12",
+    "@types/enzyme": "^3.10.18",
     "@types/eslint": "^8.44.2",
     "@types/event-stream": "^4.0.5",
     "@types/express": "^4.17.13",
