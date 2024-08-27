@@ -137,7 +137,7 @@ export const VariableEditorForm = (props: VariableEditorFormProps) => {
           />
 
           <UseField
-            config={fieldsConfig.variableName}
+            config={fieldsConfig.value}
             path="value"
             component={TextField}
             componentProps={{

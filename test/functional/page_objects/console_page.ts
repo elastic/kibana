@@ -297,8 +297,6 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async setFontSizeSetting(newSize: number) {
-    await this.openSettings();
-
     // while the settings form opens/loads this may fail, so retry for a while
     await this.retry.try(async () => {
       const fontSizeInput = await this.testSubjects.find('setting-font-size-input');
