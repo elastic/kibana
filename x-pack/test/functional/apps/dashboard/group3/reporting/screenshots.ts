@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import path from 'path';
+import { comparePdfToSnapshot } from 'pdf-visual-diff';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 const REPORTS_FOLDER = path.resolve(__dirname, 'reports');
@@ -199,6 +200,40 @@ export default function ({
 
         await PageObjects.dashboard.navigateToApp();
         await PageObjects.dashboard.loadSavedDashboard('[K7.6-eCommerce] Revenue Dashboard');
+      });
+
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce_76');
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce_76.json'
+        );
+      });
+
+      it('PDF file matches the baseline image', async function () {
+        this.timeout(300000);
+
+        await PageObjects.reporting.openExportTab();
+        await testSubjects.click('printablePdfV2-radioOption');
+        await PageObjects.reporting.forceSharedItemsContainerSize({ width: 1405 });
+        await PageObjects.reporting.clickGenerateReportButton();
+        await PageObjects.reporting.removeForceSharedItemsContainerSize();
+
+        const url = await PageObjects.reporting.getReportURL(60000);
+        const reportData = await PageObjects.reporting.getRawReportData(url ?? '');
+        sessionReportPath = await PageObjects.reporting.writeSessionReport(
+          reportFileName,
+          'pdf',
+          reportData,
+          REPORTS_FOLDER
+        );
+        const x = await comparePdfToSnapshot(sessionReportPath, REPORTS_FOLDER, reportFileName, {
+          tolerance: 0.035,
+        });
+        expect(x).to.be(true);
+      });
+
+      it('PNG file matches the baseline image', async function () {
+        this.timeout(300000);
 
         await PageObjects.reporting.openExportTab();
         await testSubjects.click('pngV2-radioOption');
@@ -219,17 +254,6 @@ export default function ({
           'png',
           REPORTS_FOLDER
         );
-      });
-
-      after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce_76');
-        await kibanaServer.importExport.unload(
-          'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce_76.json'
-        );
-      });
-
-      it('PNG file matches the baseline image', async function () {
-        this.timeout(300000);
         const percentDiff = await png.compareAgainstBaseline(
           sessionReportPath,
           baselinePath,
