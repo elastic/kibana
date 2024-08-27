@@ -17,6 +17,7 @@ import {
   getTestRuleData,
   getUrlPrefix,
   ObjectRemover,
+  resetRulesSettings,
   TaskManagerDoc,
 } from '../../../../../common/lib';
 
@@ -40,6 +41,10 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
         conflicts: 'proceed',
       });
       await objectRemover.removeAll();
+    });
+
+    after(async () => {
+      await resetRulesSettings(supertestWithoutAuth, 'space1');
     });
 
     // These are the same tests from x-pack/test/alerting_api_integration/spaces_only/tests/alerting/group1/event_log.ts
