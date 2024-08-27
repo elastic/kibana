@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 export type RiskEngineScheduleNowResponse = z.infer<typeof RiskEngineScheduleNowResponse>;
 export const RiskEngineScheduleNowResponse = z.object({
