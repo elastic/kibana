@@ -48,6 +48,7 @@
     "@kbn/react-kibana-mount",
     "@kbn/shared-ux-utility",
     "@kbn/core-application-common",
+    "@kbn/security-authorization-core",
   ],
   "exclude": [
     "target/**/*",
