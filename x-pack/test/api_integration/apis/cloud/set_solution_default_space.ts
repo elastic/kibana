@@ -23,7 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'kibana')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .send({
-          type: 'observability',
+          solution_type: 'observability',
         })
          .expect(200);
 
@@ -40,7 +40,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'kibana')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .send({
-          type: 'miami',
+          solution_type: 'miami',
         })
         .expect(400)
 
@@ -56,7 +56,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .auth(userDiscoverAll.username, userDiscoverAll.password)
         .send({
-          type: 'miami',
+          solution_type: 'observability',
         })
         .expect(403)
 

@@ -91,7 +91,7 @@ describe('PUT /internal/cloud/solution', () => {
 
   it('should update the solution of the default space', async () => {
     const payload = {
-      type: 'observability',
+      solution_type: 'observability',
     };
 
     const { routeHandler, spacesClientMock } = await setup();
