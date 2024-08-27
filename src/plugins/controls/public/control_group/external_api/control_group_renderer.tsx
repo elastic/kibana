@@ -169,13 +169,13 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupAPI, ControlG
         type={CONTROL_GROUP_TYPE}
         getParentApi={() => ({
           reload$,
-          dataLoading$,
+          dataLoading: dataLoading$,
           viewMode: viewMode$,
           query$: searchApi.query$,
           timeRange$: searchApi.timeRange$,
           unifiedSearchFilters$: searchApi.filters$,
           getSerializedStateForChild: () => ({
-            rawState: serializedState!,
+            rawState: serializedState,
           }),
           getRuntimeStateForChild: () => {
             return runtimeState$.getValue();
@@ -193,6 +193,7 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupAPI, ControlG
           });
         }}
         hidePanelChrome
+        panelProps={{ hideLoader: true }}
       />
     );
   }
