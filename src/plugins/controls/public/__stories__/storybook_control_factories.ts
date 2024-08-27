@@ -10,7 +10,7 @@ import { OptionsListEmbeddableFactory } from '../options_list';
 import { RangeSliderEmbeddableFactory } from '../range_slider';
 import { TimeSliderEmbeddableFactory } from '../time_slider';
 import { ControlsServiceType } from '../services/controls/types';
-import { ControlFactory } from '..';
+import { ControlFactory } from '../types';
 
 export const populateStorybookControlFactories = (controlsServiceStub: ControlsServiceType) => {
   const optionsListFactoryStub = new OptionsListEmbeddableFactory();

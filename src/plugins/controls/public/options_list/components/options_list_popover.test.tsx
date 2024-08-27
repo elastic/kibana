@@ -13,12 +13,13 @@ import { stubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { render, RenderResult, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { ControlOutput, OptionsListEmbeddableInput } from '../..';
 import { mockOptionsListEmbeddable } from '../../../common/mocks';
 import { pluginServices } from '../../services';
 import { OptionsListEmbeddableContext } from '../embeddable/options_list_embeddable';
 import { OptionsListComponentState, OptionsListReduxState } from '../types';
 import { OptionsListPopover, OptionsListPopoverProps } from './options_list_popover';
+import { OptionsListEmbeddableInput } from '..';
+import { ControlOutput } from '../../types';
 
 describe('Options list popover', () => {
   const defaultProps = {

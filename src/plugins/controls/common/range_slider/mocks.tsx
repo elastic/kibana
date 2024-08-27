@@ -6,14 +6,10 @@
  * Side Public License, v 1.
  */
 import { RangeSliderEmbeddableInput } from '..';
-import {
-  ControlFactory,
-  ControlOutput,
-  RangeSliderEmbeddable,
-  RangeSliderEmbeddableFactory,
-} from '../../public';
+import { RangeSliderEmbeddable, RangeSliderEmbeddableFactory } from '../../public/range_slider';
 import * as rangeSliderStateModule from '../../public/range_slider/range_slider_reducers';
 import { RangeSliderComponentState } from '../../public/range_slider/types';
+import { ControlFactory, ControlOutput } from '../../public/types';
 
 export const mockRangeSliderEmbeddableInput = {
   id: 'sample options list',

@@ -15,6 +15,11 @@ export type {
   ControlStateTransform,
   ControlPanelState,
 } from './react_controls/control_group/types';
+export {
+  controlGroupStateBuilder,
+  type ControlGroupStateBuilder,
+} from './react_controls/control_group/utils/control_group_state_builder';
+
 export type {
   DataControlApi,
   DefaultDataControlState,
@@ -22,33 +27,26 @@ export type {
   DataControlServices,
 } from './react_controls/controls/data_controls/types';
 export type { OptionsListControlState } from './react_controls/controls/data_controls/options_list_control/types';
+
 export { ACTION_EDIT_CONTROL } from './react_controls/actions/edit_control_action/edit_control_action';
-export {
-  controlGroupStateBuilder,
-  type ControlGroupStateBuilder,
-} from './react_controls/control_group/utils/control_group_state_builder';
 
 export {
   ACTION_DELETE_CONTROL,
   ControlGroupRenderer,
   type ControlGroupRendererProps,
+  type AwaitingControlGroupAPI,
 } from './control_group';
 
 export type {
   ControlGroupRendererApi,
   ControlGroupCreationOptions,
 } from './control_group/external_api/types';
+
+export type { ControlWidth, ControlStyle } from '../common/types';
+
 /**
  * TODO: remove all exports below this when control group embeddable is removed
  */
-
-export type {
-  ControlWidth,
-  ControlStyle,
-  ParentIgnoreSettings,
-  ControlInput,
-  DataControlInput,
-} from '../common/types';
 
 export {
   CONTROL_GROUP_TYPE,
@@ -61,22 +59,9 @@ export {
   type ControlGroupContainer,
   ControlGroupContainerFactory,
   type ControlGroupInput,
-  type AwaitingControlGroupAPI,
   type ControlGroupOutput,
   controlGroupInputBuilder,
 } from './control_group';
-
-export {
-  OptionsListEmbeddableFactory,
-  type OptionsListEmbeddable,
-  type OptionsListEmbeddableInput,
-} from './options_list';
-
-export {
-  RangeSliderEmbeddableFactory,
-  type RangeSliderEmbeddable,
-  type RangeSliderEmbeddableInput,
-} from './range_slider';
 
 export function plugin() {
   return new ControlsPlugin();
