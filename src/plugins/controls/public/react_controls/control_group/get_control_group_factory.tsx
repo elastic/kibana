@@ -24,11 +24,12 @@ import {
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { apiPublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
-import { ControlStyle, ParentIgnoreSettings } from '../..';
+import { ControlStyle } from '../..';
 import {
   ControlGroupChainingSystem,
   CONTROL_GROUP_TYPE,
   DEFAULT_CONTROL_STYLE,
+  ParentIgnoreSettings,
 } from '../../../common';
 import { chaining$, controlFetch$, controlGroupFetch$ } from './control_fetch';
 import { initControlsManager } from './init_controls_manager';
