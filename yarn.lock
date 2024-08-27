@@ -1702,10 +1702,10 @@
   dependencies:
     "@elastic/ecs-helpers" "^2.1.1"
 
-"@elastic/ecs@^8.11.1":
-  version "8.11.1"
-  resolved "https://registry.yarnpkg.com/@elastic/ecs/-/ecs-8.11.1.tgz#81d9a7592cdc2fb75fd484a2526f1a4f2f65d24e"
-  integrity sha512-f8P6XeFBQQ4Pxag131hjqUoGonYShzZl4cMSdbdstEtipjf9sqjzKKuEdnwbFhcGLiNOrq+K81P7476C4RC/aw==
+"@elastic/ecs@^8.11.4":
+  version "8.11.4"
+  resolved "https://registry.yarnpkg.com/@elastic/ecs/-/ecs-8.11.4.tgz#d82c1b548bb96639b548129c9f0adb1f6a194d4a"
+  integrity sha512-kTAZP5Xq3+lAfILv2Cu8l+/J/XMzhhPzStyslQElOIgQXTjuIyqngwxqDKoTaZhcX3ZvTEorMvru+1+RCGYqpQ==
 
 "@elastic/elasticsearch-types@npm:@elastic/elasticsearch@^8.2.1":
   version "8.6.0"
