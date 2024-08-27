@@ -6339,6 +6339,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/security-ui-components@link:x-pack/packages/security/ui_components":
+  version "0.0.0"
+  uid ""
+
 "@kbn/securitysolution-autocomplete@link:packages/kbn-securitysolution-autocomplete":
   version "0.0.0"
   uid ""
