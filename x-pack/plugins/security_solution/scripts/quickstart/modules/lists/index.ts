@@ -24,5 +24,5 @@ export const importListItemsWrapper = ({
   const blobbyBaratheon = new Blob([listItems.join('\r\n')], { type: 'application/json' });
   const body = new FormData();
   body.append('file', blobbyBaratheon, `${listName}.${listFileType}`);
-  return listsClient.importListItems({ query: { type: listType }, body });
+  return listsClient.importListItems({ query: { type: listType }, attachment: body });
 };

@@ -45,9 +45,5 @@ Required when importing a new list that is `list_id` is not specified.
 });
 export type ImportListItemsRequestQueryInput = z.input<typeof ImportListItemsRequestQuery>;
 
-export type ImportListItemsRequestBody = z.infer<typeof ImportListItemsRequestBody>;
-export const ImportListItemsRequestBody = z.object({});
-export type ImportListItemsRequestBodyInput = z.input<typeof ImportListItemsRequestBody>;
-
 export type ImportListItemsResponse = z.infer<typeof ImportListItemsResponse>;
 export const ImportListItemsResponse = List;

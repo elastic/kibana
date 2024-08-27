@@ -85,7 +85,6 @@ import type {
 } from './detection_engine/rule_management/find_rules/find_rules_route.gen';
 import type {
   ImportRulesRequestQueryInput,
-  ImportRulesRequestBodyInput,
   ImportRulesResponse,
 } from './detection_engine/rule_management/import_rules/import_rules_route.gen';
 import type { ReadTagsResponse } from './detection_engine/rule_management/read_tags/read_tags_route.gen';
@@ -240,9 +239,7 @@ import type {
   FindAssetCriticalityRecordsResponse,
 } from './entity_analytics/asset_criticality/list_asset_criticality.gen';
 import type {
-  InternalUploadAssetCriticalityRecordsRequestBodyInput,
   InternalUploadAssetCriticalityRecordsResponse,
-  UploadAssetCriticalityRecordsRequestBodyInput,
   UploadAssetCriticalityRecordsResponse,
 } from './entity_analytics/asset_criticality/upload_asset_criticality_csv.gen';
 import type { DisableRiskEngineResponse } from './entity_analytics/risk_engine/engine_disable_route.gen';
@@ -1280,7 +1277,7 @@ finalize it.
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'POST',
-        body: props.body,
+        body: props.attachment,
         query: props.query,
       })
       .catch(catchAxiosErrorFormatAndThrow);
@@ -1341,7 +1338,7 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
-  async internalUploadAssetCriticalityRecords(props: InternalUploadAssetCriticalityRecordsProps) {
+  async internalUploadAssetCriticalityRecords() {
     this.log.info(`${new Date().toISOString()} Calling API InternalUploadAssetCriticalityRecords`);
     return this.kbnClient
       .request<InternalUploadAssetCriticalityRecordsResponse>({
@@ -1350,7 +1347,7 @@ finalize it.
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'POST',
-        body: props.body,
+        body: props.attachment,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -1726,7 +1723,7 @@ detection engine rules.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
-  async uploadAssetCriticalityRecords(props: UploadAssetCriticalityRecordsProps) {
+  async uploadAssetCriticalityRecords() {
     this.log.info(`${new Date().toISOString()} Calling API UploadAssetCriticalityRecords`);
     return this.kbnClient
       .request<UploadAssetCriticalityRecordsResponse>({
@@ -1735,7 +1732,7 @@ detection engine rules.
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'POST',
-        body: props.body,
+        body: props.attachment,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -1902,16 +1899,13 @@ export interface GetTimelinesProps {
 }
 export interface ImportRulesProps {
   query: ImportRulesRequestQueryInput;
-  body: ImportRulesRequestBodyInput;
+  attachment: FormData;
 }
 export interface ImportTimelinesProps {
   body: ImportTimelinesRequestBodyInput;
 }
 export interface InstallPrepackedTimelinesProps {
   body: InstallPrepackedTimelinesRequestBodyInput;
-}
-export interface InternalUploadAssetCriticalityRecordsProps {
-  body: InternalUploadAssetCriticalityRecordsRequestBodyInput;
 }
 export interface PatchRuleProps {
   body: PatchRuleRequestBodyInput;
@@ -1967,7 +1961,4 @@ export interface TriggerRiskScoreCalculationProps {
 }
 export interface UpdateRuleProps {
   body: UpdateRuleRequestBodyInput;
-}
-export interface UploadAssetCriticalityRecordsProps {
-  body: UploadAssetCriticalityRecordsRequestBodyInput;
 }

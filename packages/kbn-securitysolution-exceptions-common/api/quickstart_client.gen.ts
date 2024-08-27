@@ -61,7 +61,6 @@ import type {
 } from './find_exception_lists/find_exception_lists.gen';
 import type {
   ImportExceptionListRequestQueryInput,
-  ImportExceptionListRequestBodyInput,
   ImportExceptionListResponse,
 } from './import_exceptions/import_exceptions.gen';
 import type {
@@ -249,7 +248,7 @@ export class Client {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'POST',
-        body: props.body,
+        body: props.attachment,
         query: props.query,
       })
       .catch(catchAxiosErrorFormatAndThrow);
@@ -357,7 +356,7 @@ export interface FindExceptionListsProps {
 }
 export interface ImportExceptionListProps {
   query: ImportExceptionListRequestQueryInput;
-  body: ImportExceptionListRequestBodyInput;
+  attachment: FormData;
 }
 export interface ReadExceptionListProps {
   query: ReadExceptionListRequestQueryInput;

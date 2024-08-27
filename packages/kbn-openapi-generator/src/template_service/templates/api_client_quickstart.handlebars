@@ -55,7 +55,7 @@ async {{camelCase operationId}} ({{#if (or requestQuery requestParams requestBod
             [ELASTIC_HTTP_VERSION_HEADER]: '{{version}}',
         },
         method: '{{upperCase method}}',
-        {{#if requestBody}}body: props.body,{{/if}}
+        {{#if requestBody}}body: props.body,{{else if requestAttachment}}body: props.attachment,{{/if}}
         {{#if requestQuery}}query: props.query,{{/if}}
 })
 .catch(catchAxiosErrorFormatAndThrow)
@@ -69,6 +69,7 @@ export interface {{operationId}}Props {
   {{~#if requestQuery}}query: {{operationId}}RequestQueryInput;{{/if}}
   {{~#if requestParams}}params: {{operationId}}RequestParamsInput;{{/if}}
   {{~#if requestBody}}body: {{operationId}}RequestBodyInput;{{/if}}
+  {{~#if requestAttachment}}attachment: FormData;{{/if}}
 }
 {{/if}}
 {{/each}}

@@ -75,6 +75,7 @@ export interface NormalizedOperation {
   requestParams?: NormalizedSchemaItem;
   requestQuery?: NormalizedSchemaItem;
   requestBody?: NormalizedSchemaItem;
+  requestAttachment?: NormalizedSchemaItem;
   response?: NormalizedSchemaItem;
 }
 

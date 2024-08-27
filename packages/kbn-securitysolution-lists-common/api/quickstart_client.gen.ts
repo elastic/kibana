@@ -43,7 +43,6 @@ import type {
 import type { FindListsRequestQueryInput, FindListsResponse } from './find_lists/find_lists.gen';
 import type {
   ImportListItemsRequestQueryInput,
-  ImportListItemsRequestBodyInput,
   ImportListItemsResponse,
 } from './import_list_items/import_list_items.gen';
 import type {
@@ -215,7 +214,7 @@ You can import items to a new or existing list.
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'POST',
-        body: props.body,
+        body: props.attachment,
         query: props.query,
       })
       .catch(catchAxiosErrorFormatAndThrow);
@@ -349,7 +348,7 @@ export interface FindListsProps {
 }
 export interface ImportListItemsProps {
   query: ImportListItemsRequestQueryInput;
-  body: ImportListItemsRequestBodyInput;
+  attachment: FormData;
 }
 export interface PatchListProps {
   body: PatchListRequestBodyInput;

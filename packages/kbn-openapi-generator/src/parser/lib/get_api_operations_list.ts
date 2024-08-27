@@ -85,10 +85,11 @@ export function getApiOperationsList(parsedSchema: OpenApiDocument): NormalizedO
         const response = operation.responses?.['200']?.content?.['application/json']?.schema as
           | NormalizedSchemaItem
           | undefined;
-        const requestBody = (operation.requestBody?.content?.['application/json']?.schema ??
-          (operation.requestBody?.content?.['multipart/form-data']?.schema
-            ? { type: 'object' }
-            : undefined)) as NormalizedSchemaItem | undefined;
+        const requestBody = operation.requestBody?.content?.['application/json']?.schema as
+          | NormalizedSchemaItem
+          | undefined;
+        const requestAttachment = operation.requestBody?.content?.['multipart/form-data']
+          ?.schema as NormalizedSchemaItem | undefined;
         const normalizedOperation: NormalizedOperation = {
           path,
           method,
@@ -99,6 +100,7 @@ export function getApiOperationsList(parsedSchema: OpenApiDocument): NormalizedO
           requestParams,
           requestQuery,
           requestBody,
+          requestAttachment,
           response,
         };
 
