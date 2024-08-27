@@ -83,3 +83,12 @@ export function isTaskTypeExcluded(excludedTaskTypePatterns: string[], taskType:
 
   return false;
 }
+
+export function getExcludedTaskTypes(
+  definitions: TaskTypeDictionary,
+  excludedTaskTypePatterns: string[]
+) {
+  return definitions
+    .getAllTypes()
+    .filter((taskType) => isTaskTypeExcluded(excludedTaskTypePatterns, taskType));
+}

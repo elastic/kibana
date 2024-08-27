@@ -37886,6 +37886,48 @@
       "warning": []
     },
     {
+      "query": "FROM index, missingIndex",
+      "error": [
+        "Unknown index [missingIndex]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from average()",
+      "error": [
+        "Unknown index [average()]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "fRom custom_function()",
+      "error": [
+        "Unknown index [custom_function()]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "FROM indexes*",
+      "error": [
+        "Unknown index [indexes*]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from numberField",
+      "error": [
+        "Unknown index [numberField]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "FROM policy",
+      "error": [
+        "Unknown index [policy]"
+      ],
+      "warning": []
+    },
+    {
       "query": "from index metadata _id",
       "error": [],
       "warning": []
