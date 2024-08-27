@@ -22,7 +22,11 @@ import { appContextService } from '../app_context';
 
 import { listEnrollmentApiKeys } from '../api_keys';
 import { listFleetServerHosts } from '../fleet_server_host';
-import { prependAgentlessApiBasePathToEndpoint, isAgentlessApiEnabled } from '../utils/agentless';
+import {
+  prependAgentlessApiBasePathToEndpoint,
+  isAgentlessApiEnabled,
+  getDeletionEndpointPath,
+} from '../utils/agentless';
 
 class AgentlessAgentService {
   public async createAgentlessAgent(
@@ -134,6 +138,85 @@ class AgentlessAgentService {
     );
 
     logger.debug(`Created an agentless agent ${response}`);
+    return response;
+  }
+
+  public async deleteAgentlessAgent(agentlessPolicyId: string) {
+    const logger = appContextService.getLogger();
+    logger.debug(`Start deleting agentless agent for agent policy - ${agentlessPolicyId}`);
+
+    if (!isAgentlessApiEnabled) {
+      logger.error(
+        'Agentless API is not supported. Deleting agentless agent is not supported in non-cloud or non-serverless environments'
+      );
+    }
+
+    const agentlessConfig = appContextService.getConfig()?.agentless;
+    if (!agentlessConfig) {
+      logger.error('kibana.yml is currently missing Agentless API configuration');
+    }
+
+    logger.debug(`Deleting agentless agent with TLS config with certificate`);
+
+    const tlsConfig = new SslConfig(
+      sslSchema.validate({
+        enabled: true,
+        certificate: agentlessConfig?.api?.tls?.certificate,
+        key: agentlessConfig?.api?.tls?.key,
+        certificateAuthorities: agentlessConfig?.api?.tls?.ca,
+      })
+    );
+
+    const requestConfig = {
+      url: getDeletionEndpointPath(agentlessConfig, `/deployments/${agentlessPolicyId}`),
+      method: 'DELETE',
+      headers: {
+        'Content-type': 'application/json',
+      },
+      httpsAgent: new https.Agent({
+        rejectUnauthorized: tlsConfig.rejectUnauthorized,
+        cert: tlsConfig.certificate,
+        key: tlsConfig.key,
+        ca: tlsConfig.certificateAuthorities,
+      }),
+    };
+
+    logger.debug(
+      `Deleting agentless agent with request config ${JSON.stringify({
+        ...requestConfig,
+        httpsAgent: {
+          ...requestConfig.httpsAgent,
+          options: {
+            ...requestConfig.httpsAgent.options,
+            cert: requestConfig.httpsAgent.options.cert ? 'REDACTED' : undefined,
+            key: requestConfig.httpsAgent.options.key ? 'REDACTED' : undefined,
+            ca: requestConfig.httpsAgent.options.ca ? 'REDACTED' : undefined,
+          },
+        },
+      })}`
+    );
+
+    const response = await axios(requestConfig).catch((error: AxiosError) => {
+      if (!axios.isAxiosError(error)) {
+        logger.error(`Deleting agentless failed with an error ${error}`);
+      }
+      if (error.response) {
+        logger.error(
+          `DELETE Agentless Agent Response Error: ${error.response.status} - ${error.response.statusText} Deleting agentless agent failed for agent policy id ${agentlessPolicyId}.`
+        );
+      } else if (error.request) {
+        logger.error(
+          `Deleting agentless failed to receive a response from the Agentless API ${JSON.stringify(
+            error.cause
+          )}`
+        );
+      } else {
+        logger.error(
+          `Deleting agentless failed to delete the request ${JSON.stringify(error.cause)}`
+        );
+      }
+    });
+
     return response;
   }
 

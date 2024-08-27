@@ -112,6 +112,7 @@ import { createSoFindIterable } from './utils/create_so_find_iterable';
 import { isAgentlessEnabled } from './utils/agentless';
 import { validatePolicyNamespaceForSpace } from './spaces/policy_namespaces';
 import { isSpaceAwarenessEnabled } from './spaces/helpers';
+import { agentlessAgentService } from './agents/agentless_agent';
 
 const KEY_EDITABLE_FOR_MANAGED_POLICIES = ['namespace'];
 
@@ -1095,6 +1096,7 @@ class AgentPolicyService {
     if (agentPolicy.is_managed && !options?.force) {
       throw new HostedAgentPolicyRestrictionRelatedError(`Cannot delete hosted agent policy ${id}`);
     }
+
     // Prevent deleting policy when assigned agents are inactive
     const { total } = await getAgentsByKuery(esClient, soClient, {
       showInactive: true,
@@ -1107,6 +1109,11 @@ class AgentPolicyService {
       throw new FleetError(
         'Cannot delete an agent policy that is assigned to any active or inactive agents'
       );
+    }
+
+    if (agentPolicy?.supports_agentless) {
+      await agentlessAgentService.deleteAgentlessAgent(id);
+      logger.debug(`Deleted agentless policy  with single agent policy with id ${agentPolicy.id}`);
     }
 
     const packagePolicies = await packagePolicyService.findAllForAgentPolicy(soClient, id);
