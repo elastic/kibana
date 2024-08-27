@@ -105,7 +105,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await dashboardLinks.clickPanelEditorSaveButton();
           await testSubjects.exists('addObjectToDashboardSuccess');
           await testSubjects.existOrFail('links--component');
-          await dashboardPanelActions.expectNotLinkedToLibrary();
+          await dashboardPanelActions.expectNotLinkedToLibrary('', false);
 
           expect(await dashboardLinks.getNumberOfLinksInPanel()).to.equal(4);
         });
@@ -117,12 +117,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await dashboard.waitForRenderComplete();
           await dashboardPanelActions.saveToLibrary('Some more links');
-          await testSubjects.existOrFail('addPanelToLibrarySuccess');
         });
 
         it('can unlink a panel from the library', async () => {
           await dashboardPanelActions.unlinkFromLibrary('Some more links');
-          await testSubjects.existOrFail('unlinkPanelSuccess');
         });
 
         after(async () => {

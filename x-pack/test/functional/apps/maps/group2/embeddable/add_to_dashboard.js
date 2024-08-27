@@ -54,7 +54,7 @@ export default function ({ getPageObjects, getService }) {
       const panelCount = await dashboard.getPanelCount();
       expect(panelCount).to.eql(1);
 
-      await dashboardPanelActions.expectNotLinkedToLibrary('map 1');
+      await dashboardPanelActions.expectNotLinkedToLibrary('map 1', false);
       await timeToVisualize.resetNewDashboard();
     });
 
@@ -73,7 +73,7 @@ export default function ({ getPageObjects, getService }) {
       const panelCount = await dashboard.getPanelCount();
       expect(panelCount).to.eql(1);
 
-      await dashboardPanelActions.expectNotLinkedToLibrary('document example copy');
+      await dashboardPanelActions.expectNotLinkedToLibrary('document example copy', false);
       await timeToVisualize.resetNewDashboard();
     });
 
@@ -101,7 +101,7 @@ export default function ({ getPageObjects, getService }) {
       const panelCount = await dashboard.getPanelCount();
       expect(panelCount).to.eql(1);
 
-      await dashboardPanelActions.expectNotLinkedToLibrary('My New Map 2');
+      await dashboardPanelActions.expectNotLinkedToLibrary('My New Map 2', false);
     });
 
     it('should allow existing maps be added by value to an existing dashboard', async () => {
@@ -127,7 +127,7 @@ export default function ({ getPageObjects, getService }) {
       const panelCount = await dashboard.getPanelCount();
       expect(panelCount).to.eql(1);
 
-      await dashboardPanelActions.expectNotLinkedToLibrary('document example copy 2');
+      await dashboardPanelActions.expectNotLinkedToLibrary('document example copy 2', false);
     });
 
     it('should allow new map be added by reference to a new dashboard', async () => {
@@ -146,7 +146,7 @@ export default function ({ getPageObjects, getService }) {
       const panelCount = await dashboard.getPanelCount();
       expect(panelCount).to.eql(1);
 
-      await dashboardPanelActions.expectLinkedToLibrary('map 1');
+      await dashboardPanelActions.expectLinkedToLibrary('map 1', false);
 
       await timeToVisualize.resetNewDashboard();
     });
@@ -166,7 +166,7 @@ export default function ({ getPageObjects, getService }) {
       const panelCount = await dashboard.getPanelCount();
       expect(panelCount).to.eql(1);
 
-      await dashboardPanelActions.expectLinkedToLibrary('document example copy');
+      await dashboardPanelActions.expectLinkedToLibrary('document example copy', false);
       await timeToVisualize.resetNewDashboard();
     });
 
@@ -194,7 +194,7 @@ export default function ({ getPageObjects, getService }) {
       const panelCount = await dashboard.getPanelCount();
       expect(panelCount).to.eql(1);
 
-      await dashboardPanelActions.expectLinkedToLibrary('My New Map 2');
+      await dashboardPanelActions.expectLinkedToLibrary('My New Map 2', false);
     });
 
     it('should allow existing maps be added by reference to an existing dashboard', async () => {
@@ -220,7 +220,7 @@ export default function ({ getPageObjects, getService }) {
       const panelCount = await dashboard.getPanelCount();
       expect(panelCount).to.eql(1);
 
-      await dashboardPanelActions.expectLinkedToLibrary('document example copy 2');
+      await dashboardPanelActions.expectLinkedToLibrary('document example copy 2', false);
     });
   });
 }

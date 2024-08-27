@@ -160,7 +160,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await dashboard.waitForRenderComplete();
 
         await lens.assertLegacyMetric('Average of bytes', '5,727.322');
-        await dashboardPanelActions.expectLinkedToLibrary('New Lens from Modal');
+        await dashboardPanelActions.expectNotLinkedToLibrary('New Lens from Modal');
 
         const panelCount = await dashboard.getPanelCount();
         expect(panelCount).to.eql(1);
@@ -194,7 +194,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('edits to a by value visualize panel are properly applied', async () => {
-        await dashboardPanelActions.openContextMenu();
         await dashboardPanelActions.clickEdit();
         await header.waitUntilLoadingHasFinished();
         await visEditor.setMarkdownTxt(modifiedMarkdownText);
@@ -210,7 +209,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('disables save to library button without visualize save permissions', async () => {
-        await dashboardPanelActions.openContextMenu();
         await dashboardPanelActions.clickEdit();
         await header.waitUntilLoadingHasFinished();
         await testSubjects.missingOrFail('visualizeSaveButton');

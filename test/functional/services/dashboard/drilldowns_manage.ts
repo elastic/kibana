@@ -151,15 +151,9 @@ export function DashboardDrilldownsManageProvider({
     async getPanelDrilldownCount(panelIndex = 0): Promise<number> {
       log.debug('getPanelDrilldownCount');
       const panel = (await dashboard.getDashboardPanels())[panelIndex];
-      try {
-        await dashboardPanelActions.openContextMenuMorePanel(panel);
-        const count = await panel.findByTestSubject('manageDrilldownAction__count');
-        return Number.parseInt(await count.getVisibleText(), 10);
-      } catch (e) {
-        // if not found then this is 0 (we don't show badge with 0)
-        log.debug('Error:', e.message);
-        return 0;
-      }
+      await dashboardPanelActions.openContextMenuMorePanel(panel);
+      const count = await panel.findByTestSubject('manageDrilldownAction__count');
+      return Number.parseInt(await count.getVisibleText(), 10);
     }
   })();
 }
