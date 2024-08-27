@@ -1494,7 +1494,7 @@
     "@types/chromedriver": "^81.0.5",
     "@types/classnames": "^2.2.9",
     "@types/cli-progress": "^3.11.5",
-    "@types/color": "^3.0.3",
+    "@types/color": "^3.0.6",
     "@types/cytoscape": "^3.14.0",
     "@types/d3": "^3.5.43",
     "@types/d3-array": "^2.12.1",

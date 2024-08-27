@@ -10096,10 +10096,10 @@
   resolved "https://registry.yarnpkg.com/@types/color-name/-/color-name-1.1.1.tgz#1c1261bbeaa10a8055bbc5d8ab84b7b2afc846a0"
   integrity sha512-rr+OQyAjxze7GgWrSaJwydHStIhHq2lvY3BOC2Mj7KnzI7XK0Uw1TOOdI9lDoajEbSWLiYgoo4f1R51erQfhPQ==
 
-"@types/color@^3.0.3":
-  version "3.0.3"
-  resolved "https://registry.yarnpkg.com/@types/color/-/color-3.0.3.tgz#e6d8d72b7aaef4bb9fe80847c26c7c786191016d"
-  integrity sha512-X//qzJ3d3Zj82J9sC/C18ZY5f43utPbAJ6PhYt/M7uG6etcF6MRpKdN880KBy43B0BMzSfeT96MzrsNjFI3GbA==
+"@types/color@^3.0.6":
+  version "3.0.6"
+  resolved "https://registry.yarnpkg.com/@types/color/-/color-3.0.6.tgz#29c27a99d4de2975e1676712679a0bd7f646a3fb"
+  integrity sha512-NMiNcZFRUAiUUCCf7zkAelY8eV3aKqfbzyFQlXpPIEeoNDbsEHGpb854V3gzTsGKYj830I5zPuOwU/TP5/cW6A==
   dependencies:
     "@types/color-convert" "*"
 
