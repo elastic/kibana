@@ -50,10 +50,10 @@ export const StatusRuleExpression: React.FC<Props> = ({ ruleParams, setRuleParam
   );
 
   const onGroupByChange = useCallback(
-    (value: boolean) => {
+    (groupByLocation: boolean) => {
       setRuleParams('condition', {
         ...(ruleParams?.condition ?? DEFAULT_CONDITION),
-        groupBy: value ? 'locationId' : undefined,
+        groupBy: groupByLocation ? 'locationId' : 'none',
       });
     },
     [ruleParams?.condition, setRuleParams]
