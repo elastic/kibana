@@ -22,15 +22,10 @@ function extractKeys(data: AnyObject, prefix: string = ''): Set<string> {
       // Directly add the key for arrays without iterating over elements
       keys.add(fullKey);
     } else if (typeof value === 'object' && value !== null) {
-      const valueKeys = new Set(Object.keys(value));
-
-      if ([...valueFieldKeys].every((k) => valueKeys.has(k))) {
-        keys.add(fullKey);
-      } else {
-        // Recursively extract keys if the current value is a nested object
-        for (const nestedKey of extractKeys(value, fullKey)) {
-          keys.add(nestedKey);
-        }
+      keys.add(fullKey);
+      // Recursively extract keys if the current value is a nested object
+      for (const nestedKey of extractKeys(value, fullKey)) {
+        keys.add(nestedKey);
       }
     } else {
       // Add the key if the value is not an object or is null
