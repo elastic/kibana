@@ -1040,7 +1040,7 @@
     "camelcase-keys": "7.0.2",
     "canvg": "^3.0.9",
     "chalk": "^4.1.0",
-    "cheerio": "^1.0.0-rc.12",
+    "cheerio": "^1.0.0",
     "chroma-js": "^2.1.0",
     "classnames": "2.2.6",
     "color": "^4.2.3",
