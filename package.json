@@ -1662,7 +1662,7 @@
     "cypress-file-upload": "^5.0.8",
     "cypress-multi-reporters": "^1.6.4",
     "cypress-real-events": "^1.11.0",
-    "cypress-recurse": "^1.35.2",
+    "cypress-recurse": "^1.35.3",
     "date-fns": "^2.29.3",
     "debug": "^2.6.9",
     "dependency-check": "^4.1.0",
