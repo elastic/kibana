@@ -620,7 +620,7 @@ x-pack/plugins/observability_solution/observability_ai_assistant @elastic/obs-ai
 x-pack/packages/observability/alert_details @elastic/obs-ux-management-team
 x-pack/packages/observability/alerting_rule_utils @elastic/obs-ux-management-team
 x-pack/packages/observability/alerting_test_data @elastic/obs-ux-management-team
-x-pack/packages/observability/observability-utils @elastic/observability-ui
+x-pack/packages/observability/observability_utils @elastic/observability-ui
 x-pack/test/cases_api_integration/common/plugins/observability @elastic/response-ops
 x-pack/packages/observability/get_padded_alert_time_range_util @elastic/obs-ux-management-team
 x-pack/plugins/observability_solution/observability_logs_explorer @elastic/obs-ux-logs-team
