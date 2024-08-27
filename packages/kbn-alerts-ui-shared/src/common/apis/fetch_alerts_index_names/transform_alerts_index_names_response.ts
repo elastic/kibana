@@ -10,7 +10,7 @@ import { AsApiContract, RewriteRequestCase } from '@kbn/actions-types';
 
 export interface AlertsIndexNamesResponse {
   indexName: string[];
-  hasReadIndexPrivilege: boolean;
+  hasReadIndexPrivilege?: boolean;
 }
 
 export const transformAlertsIndexNamesResponse: RewriteRequestCase<AlertsIndexNamesResponse> = ({

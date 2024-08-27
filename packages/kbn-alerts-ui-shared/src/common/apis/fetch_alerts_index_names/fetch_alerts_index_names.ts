@@ -12,7 +12,7 @@ import { FetchAlertsIndexNamesParams } from './types';
 
 export const fetchAlertsIndexNames = async ({ http, featureIds }: FetchAlertsIndexNamesParams) => {
   return http
-    .get<{ index_name: string[]; has_read_index_privilege: boolean }>(
+    .get<{ index_name: string[]; has_read_index_privilege?: boolean }>(
       `${BASE_RAC_ALERTS_API_PATH}/index`,
       {
         query: { features: featureIds.join(',') },
