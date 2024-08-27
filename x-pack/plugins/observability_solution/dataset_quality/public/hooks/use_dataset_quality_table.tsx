@@ -134,6 +134,7 @@ export const useDatasetQualityTable = () => {
         showFullDatasetNames,
         isSizeStatsAvailable,
         isActiveDataset: isActive,
+        timeRange,
       }),
     [
       fieldFormats,
@@ -146,6 +147,7 @@ export const useDatasetQualityTable = () => {
       showFullDatasetNames,
       isSizeStatsAvailable,
       isActive,
+      timeRange,
     ]
   );
 

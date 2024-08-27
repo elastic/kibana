@@ -13,7 +13,7 @@ import { CodeEditor } from '@kbn/code-editor';
 import { CONSOLE_LANG_ID, CONSOLE_THEME_ID, monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import { useSetInputEditor } from '../../../hooks';
-import { ConsoleMenu } from '../../../components';
+import { ContextMenu } from './components';
 import {
   useServicesContext,
   useEditorReadContext,
@@ -26,6 +26,7 @@ import {
   useResizeCheckerUtils,
   useKeyboardCommandsUtils,
 } from './hooks';
+import type { EditorRequest } from './types';
 import { MonacoEditorActionsProvider } from './monaco_editor_actions_provider';
 import { getSuggestionProvider } from './monaco_editor_suggestion_provider';
 
@@ -36,7 +37,7 @@ export interface EditorProps {
 export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
   const context = useServicesContext();
   const {
-    services: { notifications, esHostService, settings: settingsService, autocompleteInfo },
+    services: { notifications, settings: settingsService, autocompleteInfo },
     docLinkVersion,
     config: { isDevMode },
   } = context;
@@ -55,10 +56,11 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
   const [editorActionsCss, setEditorActionsCss] = useState<CSSProperties>({});
 
   const setInputEditor = useSetInputEditor();
-  const getCurlCallback = useCallback(async (): Promise<string> => {
-    const curl = await actionsProvider.current?.getCurl(esHostService.getHost());
-    return curl ?? '';
-  }, [esHostService]);
+
+  const getRequestsCallback = useCallback(async (): Promise<EditorRequest[]> => {
+    const requests = await actionsProvider.current?.getRequests();
+    return requests ?? [];
+  }, []);
 
   const getDocumenationLink = useCallback(async () => {
     return actionsProvider.current!.getDocumentationLink(docLinkVersion);
@@ -156,9 +158,9 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
             />
           </EuiToolTip>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <ConsoleMenu
-            getCurl={getCurlCallback}
+        <EuiFlexItem>
+          <ContextMenu
+            getRequests={getRequestsCallback}
             getDocumentation={getDocumenationLink}
             autoIndent={autoIndentCallback}
             notifications={notifications}

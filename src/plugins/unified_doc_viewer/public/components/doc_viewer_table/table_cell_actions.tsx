@@ -202,38 +202,6 @@ export const FilterExist: React.FC<TableActionsProps> = ({ Component, row }) => 
   );
 };
 
-export const PinToggle: React.FC<TableActionsProps> = ({ Component, row }) => {
-  if (!row) {
-    return null;
-  }
-
-  const {
-    field: { field, pinned, onTogglePinned },
-  } = row;
-
-  // Pinned
-  const pinnedLabel = pinned
-    ? i18n.translate('unifiedDocViewer.docViews.table.unpinFieldLabel', {
-        defaultMessage: 'Unpin field',
-      })
-    : i18n.translate('unifiedDocViewer.docViews.table.pinFieldLabel', {
-        defaultMessage: 'Pin field',
-      });
-  const pinnedIconType = pinned ? 'pinFilled' : 'pin';
-
-  return (
-    <Component
-      data-test-subj={`togglePinFilterButton-${field}`}
-      iconType={pinnedIconType}
-      title={pinnedLabel}
-      flush="left"
-      onClick={() => onTogglePinned(field)}
-    >
-      {pinnedLabel}
-    </Component>
-  );
-};
-
 export const ToggleColumn: React.FC<TableActionsProps> = ({ Component, row }) => {
   if (!row) {
     return null;
@@ -293,9 +261,6 @@ export function getFieldCellActions({
           },
         ]
       : []),
-    ({ Component, rowIndex }: EuiDataGridColumnCellActionProps) => {
-      return <PinToggle row={rows[rowIndex]} Component={Component} />;
-    },
   ];
 }
 

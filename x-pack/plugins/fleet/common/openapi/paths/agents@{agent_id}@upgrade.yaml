@@ -7,7 +7,7 @@ parameters:
 post:
   summary: Upgrade agent
   tags:
-    - Agents
+    - Elastic Agents
   responses:
     '200':
       description: OK

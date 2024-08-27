@@ -16,8 +16,9 @@ import {
 } from '../../common/constants';
 import { useKibanaContextForPlugin } from '../utils';
 
-export type DegradedFieldSortField = keyof DegradedField;
+type DegradedFieldSortField = keyof DegradedField;
 
+// TODO: DELETE this hook in favour of new hook post migration
 export function useDatasetQualityDegradedField() {
   const { service } = useDatasetQualityContext();
   const {

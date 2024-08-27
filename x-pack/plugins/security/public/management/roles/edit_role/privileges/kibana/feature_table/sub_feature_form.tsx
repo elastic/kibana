@@ -16,12 +16,12 @@ import {
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
-
 import type {
   SecuredSubFeature,
   SubFeaturePrivilege,
   SubFeaturePrivilegeGroup,
-} from '../../../../model';
+} from '@kbn/security-role-management-model';
+
 import { NO_PRIVILEGE_VALUE } from '../constants';
 import type { PrivilegeFormCalculator } from '../privilege_form_calculator';
 

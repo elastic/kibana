@@ -75,6 +75,7 @@ const mockHostNode: InfraAssetMetricsItem[] = [
     ],
     name: 'host-0',
     alertsCount: 0,
+    hasSystemMetrics: true,
   },
   {
     metrics: [
@@ -113,6 +114,7 @@ const mockHostNode: InfraAssetMetricsItem[] = [
     ],
     name: 'host-1',
     alertsCount: 0,
+    hasSystemMetrics: true,
   },
 ];
 
@@ -174,6 +176,7 @@ describe('useHostTable hook', () => {
         memoryFree: 34359.738368,
         normalizedLoad1m: 239.2040001,
         alertsCount: 0,
+        hasSystemMetrics: true,
       },
       {
         name: 'host-1',
@@ -192,6 +195,7 @@ describe('useHostTable hook', () => {
         memoryFree: 9.194304,
         normalizedLoad1m: 100,
         alertsCount: 0,
+        hasSystemMetrics: true,
       },
     ];
 

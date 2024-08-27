@@ -206,6 +206,18 @@ export class ConsolePageObject extends FtrService {
     await this.testSubjects.click('sendRequestButton');
   }
 
+  public async clickCopyOutput() {
+    await this.testSubjects.click('copyOutputButton');
+  }
+
+  public async clickClearOutput() {
+    const hasClearButton = await this.testSubjects.exists('clearConsoleOutput');
+
+    if (hasClearButton) {
+      await this.testSubjects.click('clearConsoleOutput');
+    }
+  }
+
   public async collapseHelp() {
     await this.testSubjects.click('help-close-button');
   }
@@ -553,7 +565,7 @@ export class ConsolePageObject extends FtrService {
     await this.retry.try(async () => {
       const firstInnerHtml = await line.getAttribute('innerHTML');
       // The line number is not updated immediately after the click, so we need to wait for it.
-      this.common.sleep(500);
+      await this.common.sleep(500);
       line = await editor.findByCssSelector('.ace_active-line');
       const secondInnerHtml = await line.getAttribute('innerHTML');
       // The line number will change as the user types, but we want to wait until it's stable.
@@ -638,8 +650,41 @@ export class ConsolePageObject extends FtrService {
     return await this.testSubjects.exists('a11y-overlay');
   }
 
+  public async isCopyAsButtonVisible() {
+    return await this.testSubjects.exists('consoleMenuCopyAsButton');
+  }
+
   public async clickCopyAsCurlButton() {
     const button = await this.testSubjects.find('consoleMenuCopyAsCurl');
+    await button.click();
+  }
+
+  public async changeLanguageAndCopy(language: string) {
+    const openModalButton = await this.testSubjects.find('changeLanguageButton');
+    await openModalButton.click();
+
+    const changeLangButton = await this.testSubjects.find(`languageOption-${language}`);
+    await changeLangButton.click();
+
+    const submitButton = await this.testSubjects.find('copyAsLanguageSubmit');
+    await submitButton.click();
+  }
+
+  public async changeDefaultLanguage(language: string) {
+    const openModalButton = await this.testSubjects.find('changeLanguageButton');
+    await openModalButton.click();
+
+    const changeDefaultLangButton = await this.testSubjects.find(
+      `changeDefaultLanguageTo-${language}`
+    );
+    await changeDefaultLangButton.click();
+
+    const submitButton = await this.testSubjects.find('copyAsLanguageSubmit');
+    await submitButton.click();
+  }
+
+  public async clickCopyAsButton() {
+    const button = await this.testSubjects.find('consoleMenuCopyAsButton');
     await button.click();
   }
 
@@ -795,5 +840,9 @@ export class ConsolePageObject extends FtrService {
     await this.browser.execute((f: boolean) => {
       (window as any).autocomplete_trace = f;
     }, flag);
+  }
+
+  public async isOutputPanelEmptyStateVisible() {
+    return await this.testSubjects.exists('consoleOutputPanelEmptyState');
   }
 }

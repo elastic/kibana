@@ -5,16 +5,8 @@
  * 2.0.
  */
 
-import { NewChat } from '@kbn/elastic-assistant';
-import {
-  copyToClipboard,
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiEmptyPrompt,
-  EuiSpacer,
-} from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import { EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
+import React, { useMemo } from 'react';
 
 import { IncompatibleCallout } from '../callouts/incompatible_callout';
 import { CompareFieldsTable } from '../../../compare_fields_table';
@@ -29,51 +21,35 @@ import {
   showInvalidCallout,
 } from './helpers';
 import * as i18n from '../../index_properties/translations';
-import { CopyToClipboardButton } from '../styles';
 import {
   INCOMPATIBLE_FIELD_MAPPINGS_TABLE_TITLE,
   INCOMPATIBLE_FIELD_VALUES_TABLE_TITLE,
 } from './translations';
-import {
-  COPIED_RESULTS_TOAST_TITLE,
-  DATA_QUALITY_PROMPT_CONTEXT_PILL,
-  DATA_QUALITY_PROMPT_CONTEXT_PILL_TOOLTIP,
-  DATA_QUALITY_SUGGESTED_USER_PROMPT,
-} from '../../../translations';
 import type { IlmPhase, PartitionedFieldMetadata } from '../../../types';
-import { DATA_QUALITY_DASHBOARD_CONVERSATION_ID } from '../summary_tab/callout_summary/translations';
 import { useDataQualityContext } from '../../data_quality_context';
+import { StickyActions } from '../sticky_actions';
 
 interface Props {
-  addSuccessToast: (toast: { title: string }) => void;
-  addToNewCaseDisabled: boolean;
   docsCount: number;
   formatBytes: (value: number | undefined) => string;
   formatNumber: (value: number | undefined) => string;
   ilmPhase: IlmPhase | undefined;
   indexName: string;
-  isAssistantEnabled: boolean;
-  onAddToNewCase: (markdownComments: string[]) => void;
   partitionedFieldMetadata: PartitionedFieldMetadata;
   patternDocsCount: number;
   sizeInBytes: number | undefined;
 }
 
 const IncompatibleTabComponent: React.FC<Props> = ({
-  addSuccessToast,
-  addToNewCaseDisabled,
   docsCount,
   formatBytes,
   formatNumber,
   ilmPhase,
   indexName,
-  isAssistantEnabled,
-  onAddToNewCase,
   partitionedFieldMetadata,
   patternDocsCount,
   sizeInBytes,
 }) => {
-  const { isILMAvailable } = useDataQualityContext();
   const body = useMemo(() => <EmptyPromptBody body={i18n.INCOMPATIBLE_EMPTY} />, []);
   const title = useMemo(() => <EmptyPromptTitle title={i18n.INCOMPATIBLE_EMPTY_TITLE} />, []);
   const incompatibleMappings = useMemo(
@@ -84,7 +60,10 @@ const IncompatibleTabComponent: React.FC<Props> = ({
     () => getIncompatibleValues(partitionedFieldMetadata.incompatible),
     [partitionedFieldMetadata.incompatible]
   );
-  const markdownComments: string[] = useMemo(
+
+  const { isILMAvailable } = useDataQualityContext();
+
+  const markdownComment: string = useMemo(
     () =>
       getAllIncompatibleMarkdownComments({
         docsCount,
@@ -96,7 +75,7 @@ const IncompatibleTabComponent: React.FC<Props> = ({
         partitionedFieldMetadata,
         patternDocsCount,
         sizeInBytes,
-      }),
+      }).join('\n'),
     [
       docsCount,
       formatBytes,
@@ -109,55 +88,12 @@ const IncompatibleTabComponent: React.FC<Props> = ({
       sizeInBytes,
     ]
   );
-  const onClickAddToCase = useCallback(
-    () => onAddToNewCase([markdownComments.join('\n')]),
-    [markdownComments, onAddToNewCase]
-  );
-  const onCopy = useCallback(() => {
-    copyToClipboard(markdownComments.join('\n'));
-
-    addSuccessToast({
-      title: COPIED_RESULTS_TOAST_TITLE,
-    });
-  }, [addSuccessToast, markdownComments]);
-
-  const getPromptContext = useCallback(async () => markdownComments.join('\n'), [markdownComments]);
 
   return (
-    <div data-test-subj="incompatibleTab">
+    <div data-test-subj="incompatibleTabContent">
       {showInvalidCallout(partitionedFieldMetadata.incompatible) ? (
         <>
-          <IncompatibleCallout ecsBasedFieldMetadata={partitionedFieldMetadata.incompatible}>
-            <EuiFlexGroup alignItems="center" gutterSize="none">
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  aria-label={i18n.ADD_TO_NEW_CASE}
-                  disabled={addToNewCaseDisabled}
-                  onClick={onClickAddToCase}
-                >
-                  {i18n.ADD_TO_NEW_CASE}
-                </EuiButton>
-              </EuiFlexItem>
-
-              <EuiFlexItem grow={false}>
-                <CopyToClipboardButton aria-label={i18n.COPY_TO_CLIPBOARD} onClick={onCopy}>
-                  {i18n.COPY_TO_CLIPBOARD}
-                </CopyToClipboardButton>
-              </EuiFlexItem>
-
-              <EuiFlexItem grow={false}>
-                <NewChat
-                  category="data-quality-dashboard"
-                  conversationId={DATA_QUALITY_DASHBOARD_CONVERSATION_ID}
-                  description={DATA_QUALITY_PROMPT_CONTEXT_PILL(indexName)}
-                  getPromptContext={getPromptContext}
-                  suggestedUserPrompt={DATA_QUALITY_SUGGESTED_USER_PROMPT}
-                  tooltip={DATA_QUALITY_PROMPT_CONTEXT_PILL_TOOLTIP}
-                  isAssistantEnabled={isAssistantEnabled}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </IncompatibleCallout>
+          <IncompatibleCallout />
 
           <>
             {incompatibleMappings.length > 0 && (
@@ -186,6 +122,15 @@ const IncompatibleTabComponent: React.FC<Props> = ({
               </>
             )}
           </>
+
+          <EuiSpacer size="m" />
+          <StickyActions
+            markdownComment={markdownComment}
+            indexName={indexName}
+            showChatAction={true}
+            showCopyToClipboardAction={true}
+            showAddToNewCaseAction={true}
+          />
         </>
       ) : (
         <EuiEmptyPrompt

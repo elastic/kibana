@@ -6,11 +6,11 @@
  */
 
 import { entityDefinition } from '../helpers/fixtures/entity_definition';
-import { getEntitiesLatestIndexTemplateConfig } from './entities_latest_template';
+import { generateEntitiesLatestIndexTemplateConfig } from './entities_latest_template';
 
-describe('getEntitiesLatestIndexTemplateConfig(definitionId)', () => {
+describe('generateEntitiesLatestIndexTemplateConfig(definition)', () => {
   it('should generate a valid index template', () => {
-    const template = getEntitiesLatestIndexTemplateConfig(entityDefinition);
+    const template = generateEntitiesLatestIndexTemplateConfig(entityDefinition);
     expect(template).toMatchSnapshot();
   });
 });

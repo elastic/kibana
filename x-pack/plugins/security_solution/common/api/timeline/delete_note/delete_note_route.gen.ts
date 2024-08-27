@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 export type DeleteNoteRequestBody = z.infer<typeof DeleteNoteRequestBody>;
 export const DeleteNoteRequestBody = z.union([

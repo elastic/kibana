@@ -3869,7 +3869,15 @@
                 "section": "def-common.AssetDetailsLocatorParams",
                 "text": "AssetDetailsLocatorParams"
               },
-              ") => Promise<{ app: string; path: string; state: ",
+              " & { state?: ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              " | undefined; }) => Promise<{ app: string; path: string; state: ",
               {
                 "pluginId": "@kbn/utility-types",
                 "scope": "common",
@@ -3886,7 +3894,7 @@
               {
                 "parentPluginId": "observabilityShared",
                 "id": "def-common.AssetDetailsLocatorDefinition.getLocation.$1",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "params",
                 "description": [],
@@ -3897,7 +3905,16 @@
                     "docId": "kibObservabilitySharedPluginApi",
                     "section": "def-common.AssetDetailsLocatorParams",
                     "text": "AssetDetailsLocatorParams"
-                  }
+                  },
+                  " & { state?: ",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "common",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-common.SerializableRecord",
+                    "text": "SerializableRecord"
+                  },
+                  " | undefined; }"
                 ],
                 "path": "x-pack/plugins/observability_solution/observability_shared/common/locators/infra/asset_details_locator.ts",
                 "deprecated": false,
@@ -4937,27 +4954,6 @@
           },
           {
             "parentPluginId": "observabilityShared",
-            "id": "def-common.AssetDetailsLocatorParams.state",
-            "type": "Object",
-            "tags": [],
-            "label": "state",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
-              " | undefined"
-            ],
-            "path": "x-pack/plugins/observability_solution/observability_shared/common/locators/infra/asset_details_locator.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observabilityShared",
             "id": "def-common.AssetDetailsLocatorParams._a",
             "type": "Object",
             "tags": [],
@@ -4978,7 +4974,7 @@
             "label": "assetDetails",
             "description": [],
             "signature": [
-              "{ tabId?: string | undefined; dashboardId?: string | undefined; dateRange?: { from: string; to: string; } | undefined; } | undefined"
+              "{ tabId?: string | undefined; name?: string | undefined; dashboardId?: string | undefined; dateRange?: { from: string; to: string; } | undefined; alertMetric?: string | undefined; } | undefined"
             ],
             "path": "x-pack/plugins/observability_solution/observability_shared/common/locators/infra/asset_details_locator.ts",
             "deprecated": false,
@@ -5373,7 +5369,7 @@
             "label": "sort",
             "description": [],
             "signature": [
-              "{ by: string; direction: \"desc\" | \"async\"; }"
+              "{ by: string; direction: \"desc\" | \"async\"; } | undefined"
             ],
             "path": "x-pack/plugins/observability_solution/observability_shared/common/locators/infra/inventory_locator.ts",
             "deprecated": false,
@@ -5382,10 +5378,13 @@
           {
             "parentPluginId": "observabilityShared",
             "id": "def-common.InventoryLocatorParams.timelineOpen",
-            "type": "boolean",
+            "type": "CompoundType",
             "tags": [],
             "label": "timelineOpen",
             "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/observability_solution/observability_shared/common/locators/infra/inventory_locator.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5398,7 +5397,7 @@
             "label": "view",
             "description": [],
             "signature": [
-              "\"map\" | \"table\""
+              "\"map\" | \"table\" | undefined"
             ],
             "path": "x-pack/plugins/observability_solution/observability_shared/common/locators/infra/inventory_locator.ts",
             "deprecated": false,

@@ -8,15 +8,32 @@
 
 import React, { useCallback, memo, useEffect, useState } from 'react';
 import { debounce } from 'lodash';
-import { EuiProgress } from '@elastic/eui';
+import {
+  EuiProgress,
+  EuiSplitPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+} from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
 
-import { EditorContentSpinner } from '../../components';
+import {
+  EditorContentSpinner,
+  OutputPanelEmptyState,
+  NetworkRequestStatusBar,
+} from '../../components';
 import { Panel, PanelsContainer } from '..';
 import { Editor as EditorUI, EditorOutput } from './legacy/console_editor';
 import { getAutocompleteInfo, StorageKeys } from '../../../services';
-import { useEditorReadContext, useServicesContext, useRequestReadContext } from '../../contexts';
+import {
+  useEditorReadContext,
+  useServicesContext,
+  useRequestReadContext,
+  useRequestActionContext,
+} from '../../contexts';
 import type { SenseEditor } from '../../models';
 import { MonacoEditor, MonacoEditorOutput } from './monaco';
+import { getResponseWithMostSevereStatusCode } from '../../../lib/utils';
 
 const INITIAL_PANEL_WIDTH = 50;
 const PANEL_MIN_WIDTH = '100px';
@@ -33,7 +50,12 @@ export const Editor = memo(({ loading, setEditorInstance }: Props) => {
   } = useServicesContext();
 
   const { currentTextObject } = useEditorReadContext();
-  const { requestInFlight } = useRequestReadContext();
+  const {
+    requestInFlight,
+    lastResult: { data: requestData, error: requestError },
+  } = useRequestReadContext();
+
+  const dispatch = useRequestActionContext();
 
   const [fetchingMappings, setFetchingMappings] = useState(false);
 
@@ -56,6 +78,9 @@ export const Editor = memo(({ loading, setEditorInstance }: Props) => {
     }, 300),
     []
   );
+
+  const data = getResponseWithMostSevereStatusCode(requestData) ?? requestError;
+  const isLoading = loading || requestInFlight;
 
   if (!currentTextObject) return null;
 
@@ -86,13 +111,65 @@ export const Editor = memo(({ loading, setEditorInstance }: Props) => {
           style={{ height: '100%', position: 'relative', minWidth: PANEL_MIN_WIDTH }}
           initialWidth={secondPanelWidth}
         >
-          {loading ? (
-            <EditorContentSpinner />
-          ) : isMonacoEnabled ? (
-            <MonacoEditorOutput />
-          ) : (
-            <EditorOutput />
-          )}
+          <EuiSplitPanel.Outer grow borderRadius="none" hasShadow={false}>
+            <EuiSplitPanel.Inner paddingSize="none">
+              {data ? (
+                isMonacoEnabled ? (
+                  <MonacoEditorOutput />
+                ) : (
+                  <EditorOutput />
+                )
+              ) : isLoading ? (
+                <EditorContentSpinner />
+              ) : (
+                <OutputPanelEmptyState />
+              )}
+            </EuiSplitPanel.Inner>
+
+            {(data || isLoading) && (
+              <EuiSplitPanel.Inner
+                grow={false}
+                paddingSize="m"
+                css={{
+                  backgroundColor: euiThemeVars.euiFormBackgroundColor,
+                }}
+              >
+                <EuiFlexGroup gutterSize="none">
+                  {data ? (
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty
+                        size="xs"
+                        color="primary"
+                        data-test-subj="clearConsoleOutput"
+                        onClick={() => dispatch({ type: 'cleanRequest', payload: undefined })}
+                      >
+                        Clear this output
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                  ) : (
+                    <EuiFlexItem grow={false} />
+                  )}
+
+                  <EuiFlexItem>
+                    <NetworkRequestStatusBar
+                      requestInProgress={requestInFlight}
+                      requestResult={
+                        data
+                          ? {
+                              method: data.request.method.toUpperCase(),
+                              endpoint: data.request.path,
+                              statusCode: data.response.statusCode,
+                              statusText: data.response.statusText,
+                              timeElapsedMs: data.response.timeMs,
+                            }
+                          : undefined
+                      }
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiSplitPanel.Inner>
+            )}
+          </EuiSplitPanel.Outer>
         </Panel>
       </PanelsContainer>
     </>

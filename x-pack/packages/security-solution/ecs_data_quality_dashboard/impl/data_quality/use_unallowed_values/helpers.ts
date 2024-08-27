@@ -85,11 +85,16 @@ export async function fetchUnallowedValues({
       version: INTERNAL_API_VERSION,
     });
   } catch (e) {
-    throw new Error(
-      i18n.ERROR_LOADING_UNALLOWED_VALUES({
-        details: e.message,
-        indexName,
-      })
-    );
+    throw new UnallowedValuesError(indexName, e.message);
+  }
+}
+
+export class UnallowedValuesError extends Error {
+  constructor(indexName: string, details: string) {
+    const message = i18n.ERROR_LOADING_UNALLOWED_VALUES({ details, indexName });
+    super(message);
+
+    this.name = 'UnallowedValuesError';
+    this.message = message;
   }
 }

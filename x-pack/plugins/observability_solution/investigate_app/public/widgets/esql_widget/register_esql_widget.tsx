@@ -10,7 +10,10 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { ESQLDataGrid } from '@kbn/esql-datagrid/public';
 import { i18n } from '@kbn/i18n';
-import type { EsqlWidgetParameters, GlobalWidgetParameters } from '@kbn/investigate-plugin/public';
+import {
+  type EsqlWidgetParameters,
+  type GlobalWidgetParameters,
+} from '@kbn/investigate-plugin/public';
 import type { Suggestion } from '@kbn/lens-plugin/public';
 import { useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
 import React, { useMemo } from 'react';
@@ -190,7 +193,18 @@ export function EsqlWidget({
     );
   }
 
-  return <lens.EmbeddableComponent {...input} className={lensClassName} />;
+  return (
+    <EuiFlexItem
+      grow={true}
+      className={css`
+        > div {
+          height: 128px;
+        }
+      `}
+    >
+      <lens.EmbeddableComponent {...input} className={lensClassName} />
+    </EuiFlexItem>
+  );
 }
 
 export function registerEsqlWidget({

@@ -42,6 +42,7 @@ export default function (providerContext: FtrProviderContext) {
       setupTestSpaces(providerContext);
 
       before(async () => {
+        await apiClient.postEnableSpaceAwareness();
         await apiClient.setup();
       });
 
@@ -78,6 +79,7 @@ export default function (providerContext: FtrProviderContext) {
       setupTestSpaces(providerContext);
 
       before(async () => {
+        await apiClient.postEnableSpaceAwareness();
         await apiClient.setup();
         const testSpaceFleetServerPolicy = await apiClient.createFleetServerPolicy(TEST_SPACE_1);
         await createFleetAgent(esClient, testSpaceFleetServerPolicy.item.id, TEST_SPACE_1);
@@ -116,6 +118,7 @@ export default function (providerContext: FtrProviderContext) {
       setupTestSpaces(providerContext);
 
       before(async () => {
+        await apiClient.postEnableSpaceAwareness();
         await apiClient.setup();
         const defaultFleetServerPolicy = await apiClient.createFleetServerPolicy();
         await createFleetAgent(esClient, defaultFleetServerPolicy.item.id);

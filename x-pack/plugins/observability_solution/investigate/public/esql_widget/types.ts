@@ -7,7 +7,6 @@
 
 import type { IconType } from '@elastic/eui';
 import type { Ast } from '@kbn/interpreter';
-import type { InvestigateWidgetCreate } from '../../common';
 
 // copied over from the Lens plugin to prevent dependency hell
 type TableChangeType = 'initial' | 'unchanged' | 'reduced' | 'extended' | 'reorder' | 'layers';
@@ -33,5 +32,3 @@ export interface EsqlWidgetParameters {
   esql: string;
   suggestion?: Suggestion;
 }
-
-export type EsqlWidgetCreate = InvestigateWidgetCreate<EsqlWidgetParameters>;

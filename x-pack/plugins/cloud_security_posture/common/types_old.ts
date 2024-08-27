@@ -133,6 +133,7 @@ export interface BaseCspSetupStatus {
   vuln_mgmt: BaseCspSetupBothPolicy;
   isPluginInitialized: boolean;
   installedPackageVersion?: string | undefined;
+  hasMisconfigurationsFindings?: boolean;
 }
 
 export type CspSetupStatus = BaseCspSetupStatus;

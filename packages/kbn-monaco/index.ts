@@ -38,6 +38,7 @@ export {
   CONSOLE_THEME_ID,
   getParsedRequestsProvider,
   ConsoleParsedRequestsProvider,
+  createOutputParser,
 } from './src/console';
 
 export type { ParsedRequest } from './src/console';

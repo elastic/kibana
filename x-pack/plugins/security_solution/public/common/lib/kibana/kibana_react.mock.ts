@@ -61,7 +61,7 @@ import { alertingPluginMock } from '@kbn/alerting-plugin/public/mocks';
 
 const mockUiSettings: Record<string, unknown> = {
   [DEFAULT_TIME_RANGE]: { from: 'now-15m', to: 'now', mode: 'quick' },
-  [DEFAULT_REFRESH_RATE_INTERVAL]: { pause: false, value: 0 },
+  [DEFAULT_REFRESH_RATE_INTERVAL]: { pause: true, value: 5000 },
   [DEFAULT_APP_TIME_RANGE]: {
     from: DEFAULT_FROM,
     to: DEFAULT_TO,

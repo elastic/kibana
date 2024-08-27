@@ -14,13 +14,20 @@ export interface ErrorAnnotation {
 export interface ParsedRequest {
   startOffset: number;
   endOffset?: number;
-  method: string;
-  url?: string;
-  data?: Array<Record<string, unknown>>;
 }
 export interface ConsoleParserResult {
   errors: ErrorAnnotation[];
   requests: ParsedRequest[];
+}
+
+export interface OutputParsedResponse {
+  startOffset: number;
+  endOffset?: number;
+  data?: Array<Record<string, unknown>>;
+}
+export interface ConsoleOutputParserResult {
+  errors: ErrorAnnotation[];
+  responses: OutputParsedResponse[];
 }
 
 export interface ConsoleWorkerDefinition {

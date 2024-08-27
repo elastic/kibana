@@ -14,7 +14,6 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const log = getService('log');
-  const toasts = getService('toasts');
   const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'console', 'header']);
   const security = getService('security');
@@ -33,11 +32,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.try(async () => {
         const actualRequest = await PageObjects.console.monaco.getEditorText();
         log.debug(actualRequest);
-        expect(actualRequest.replace(/\s/g, '')).to.eql(DEFAULT_INPUT_VALUE.replace(/\s/g, ''));
+        expect(DEFAULT_INPUT_VALUE.replace(/\s/g, '')).to.contain(actualRequest.replace(/\s/g, ''));
       });
     });
 
+    it('output panel should initially be in empty state', async () => {
+      expect(await PageObjects.console.isOutputPanelEmptyStateVisible()).to.be(true);
+    });
+
     it('default request response should include `"timed_out" : false`', async () => {
+      await PageObjects.console.clickClearOutput();
       const expectedResponseContains = `"timed_out": false`;
       await PageObjects.console.monaco.selectAllRequests();
       await PageObjects.console.clickPlay();
@@ -46,6 +50,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         log.debug(actualResponse);
         expect(actualResponse).to.contain(expectedResponseContains);
       });
+      // Output panel should not longer be in empty state
+      expect(await PageObjects.console.isOutputPanelEmptyStateVisible()).to.be(false);
     });
 
     // the resizer doesn't work the same as in ace https://github.com/elastic/kibana/issues/184352
@@ -58,12 +64,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(initialSize.width).to.be.greaterThan(afterSize.width);
     });
 
-    it('should not send request with unsupported HTTP verbs', async () => {
+    it('should return statusCode 400 to unsupported HTTP verbs', async () => {
+      const expectedResponseContains = '"statusCode": 400';
       await PageObjects.console.monaco.clearEditorText();
       await PageObjects.console.monaco.enterText('OPTIONS /');
       await PageObjects.console.clickPlay();
       await retry.try(async () => {
-        expect(await toasts.getCount()).to.equal(1);
+        const actualResponse = await PageObjects.console.monaco.getOutputText();
+        log.debug(actualResponse);
+        expect(actualResponse).to.contain(expectedResponseContains);
+
+        expect(await PageObjects.console.hasSuccessBadge()).to.be(false);
       });
     });
 
@@ -129,8 +140,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.try(async () => {
           const response = await PageObjects.console.monaco.getOutputText();
           log.debug(response);
-          expect(response).to.contain('# PUT test-index 200');
-          expect(response).to.contain('# DELETE test-index 200');
+          expect(response).to.contain('# 2: PUT test-index 200');
+          expect(response).to.contain('# 3: DELETE test-index 200');
         });
       });
 
