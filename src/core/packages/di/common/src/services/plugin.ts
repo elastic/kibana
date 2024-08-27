@@ -10,9 +10,8 @@
 import type { interfaces } from 'inversify';
 
 /**
- * Utility type resolving the service type from a service identifier
- * @todo
+ * The service identifier for the global service references.
  */
-export type ServiceType<Identifier> = Identifier extends interfaces.ServiceIdentifier<infer T>
-  ? T
-  : never;
+export const Global = Symbol.for(
+  'Global'
+) as interfaces.ServiceIdentifier<interfaces.ServiceIdentifier>;
