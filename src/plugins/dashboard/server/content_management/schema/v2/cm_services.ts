@@ -16,7 +16,7 @@ import {
   controlGroupInputSchema as controlGroupInputSchemaV1,
   dashboardAttributesSchema as dashboardAttributesSchemaV1,
   serviceDefinition as serviceDefinitionV1,
-} from '../../../../common/content_management/v1';
+} from '../v1';
 
 export const dashboardAttributesSchema = dashboardAttributesSchemaV1.extends(
   {
