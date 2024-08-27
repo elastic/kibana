@@ -23,6 +23,9 @@ jest.useFakeTimers({ legacyFakeTimers: true });
 
 describe('Draggable', () => {
   const renderDraggable = (propsOverrides = {}) => {
+    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
+    const user = userEvent.setup({ delay: null });
+
     const rtlRender = renderWithDragDropContext(
       <>
         <Draggable
@@ -60,13 +63,13 @@ describe('Draggable', () => {
       },
       startDraggingByKeyboard: async () => {
         draggableKeyboardHandler.focus();
-        await userEvent.keyboard('{enter}');
+        await user.keyboard('{enter}');
         act(() => {
           jest.runAllTimers();
         });
       },
       dragOverToNextByKeyboard: async () => {
-        await userEvent.keyboard('{arrowright}');
+        await user.keyboard('{arrowright}');
         act(() => {
           jest.runAllTimers();
         });
