@@ -1506,7 +1506,7 @@
     "@types/d3-time": "^2.1.1",
     "@types/d3-transition": "^3.0.1",
     "@types/dagre": "^0.7.47",
-    "@types/dedent": "^0.7.0",
+    "@types/dedent": "^0.7.2",
     "@types/deep-freeze-strict": "^1.1.0",
     "@types/diff": "^5.0.8",
     "@types/ejs": "^3.0.6",
