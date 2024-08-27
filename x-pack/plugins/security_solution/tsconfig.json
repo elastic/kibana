@@ -215,6 +215,5 @@
     "@kbn/securitysolution-lists-common",
     "@kbn/cbor",
     "@kbn/zod",
-    "@kbn/security-solution-plugin",
   ]
 }
