@@ -1259,7 +1259,7 @@
     "zod": "^3.22.3"
   },
   "devDependencies": {
-    "@apidevtools/swagger-parser": "^10.0.3",
+    "@apidevtools/swagger-parser": "^10.1.0",
     "@babel/cli": "^7.24.7",
     "@babel/core": "^7.24.7",
     "@babel/eslint-parser": "^7.24.7",
