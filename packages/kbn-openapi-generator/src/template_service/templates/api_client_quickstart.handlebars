@@ -46,7 +46,7 @@ export class Client {
     * {{{description}}}
     */
 {{/if}}
-async {{camelCase operationId}} ({{#if (or requestQuery requestParams requestBody)}}props: {{operationId}}Props{{/if}}) {
+async {{camelCase operationId}} ({{#if (or requestQuery requestParams requestBody requestAttachment)}}props: {{operationId}}Props{{/if}}) {
   this.log.info(`${new Date().toISOString()} Calling API {{operationId}}`);
     return this.kbnClient
     .request{{#if response}}<{{operationId}}Response>{{/if}}({
