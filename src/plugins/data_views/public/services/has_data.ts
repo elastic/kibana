@@ -138,10 +138,20 @@ export class HasData {
       */
 
   private checkLocalESData = (http: HttpStart): Promise<boolean> =>
-    this.getIndicesViaSearch({ http, pattern: '*', showAllIndices: false });
+    // todo consider excluding DEFAULT_ASSETS_TO_IGNORE
+    this.getIndicesViaSearch({
+      http,
+      pattern: '*,-logs-enterprise_search.api-default,-logs-enterprise_search.audit-default',
+      showAllIndices: false,
+    });
 
   private checkRemoteESData = (http: HttpStart): Promise<boolean> =>
-    this.getIndicesViaSearch({ http, pattern: '*:*', showAllIndices: false });
+    // todo consider excluding DEFAULT_ASSETS_TO_IGNORE
+    this.getIndicesViaSearch({
+      http,
+      pattern: '*:*,-*:logs-enterprise_search.api-default,-*:logs-enterprise_search.audit-default',
+      showAllIndices: false,
+    });
 
   // Data Views
 
