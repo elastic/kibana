@@ -32,3 +32,17 @@ export const OnSetup = Symbol.for('OnSetup') as interfaces.ServiceIdentifier<
 export const OnStart = Symbol.for('OnStart') as interfaces.ServiceIdentifier<
   (container: interfaces.Container) => void
 >;
+
+/**
+ * Plugin's setup dependency.
+ */
+export function PluginSetup<T>(plugin: keyof any): interfaces.ServiceIdentifier<T> {
+  return Symbol.for(`plugin.setup.${String(plugin)}`);
+}
+
+/**
+ * Plugin's start dependency.
+ */
+export function PluginStart<T>(plugin: keyof any): interfaces.ServiceIdentifier<T> {
+  return Symbol.for(`plugin.start.${String(plugin)}`);
+}
