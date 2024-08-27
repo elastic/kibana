@@ -7,7 +7,6 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { interceptRequest } from '../../common/intercept_request';
 import { createAndLoginUserWithCustomRole, deleteAndLogoutUser } from './helpers';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
