@@ -9,7 +9,10 @@ import pMap from 'p-map';
 import times from 'lodash/times';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { cloneDeep, intersection } from 'lodash';
-import { FINAL_SUMMARY_FILTER, getRangeFilter } from '../../../../common/constants/client_defaults';
+import {
+  FINAL_SUMMARY_FILTER,
+  getTimespanFilter,
+} from '../../../../common/constants/client_defaults';
 import { OverviewPendingStatusMetaData, OverviewPing } from '../../../../common/runtime_types';
 import { createEsParams, SyntheticsEsClient } from '../../../lib';
 
@@ -35,7 +38,7 @@ export interface AlertStatusMetaDataCodec {
   timestamp: string;
   ping: OverviewPing;
   checks: {
-    total: number;
+    downWithinXChecks: number;
     down: number;
   };
 }
@@ -60,8 +63,6 @@ export async function queryMonitorStatusAlert(
 ): Promise<AlertStatusResponse> {
   const idSize = Math.trunc(DEFAULT_MAX_ES_BUCKET_SIZE / monitorLocationIds.length || 1);
   const pageCount = Math.ceil(monitorQueryIds.length / idSize);
-  let up = 0;
-  let down = 0;
   const upConfigs: StatusConfigs = {};
   const downConfigs: StatusConfigs = {};
   const monitorsWithoutData = new Map(Object.entries(cloneDeep(monitorLocationsMap)));
@@ -78,7 +79,7 @@ export async function queryMonitorStatusAlert(
             bool: {
               filter: [
                 FINAL_SUMMARY_FILTER,
-                getRangeFilter({ from: range.from, to: range.to }),
+                getTimespanFilter({ from: range.from, to: range.to }),
                 {
                   terms: {
                     'monitor.id': idsToQuery,
@@ -160,35 +161,33 @@ export async function queryMonitorStatusAlert(
 
           if (locationSummary) {
             const { totalChecks, downChecks } = locationSummary;
-            const firstPing = totalChecks.hits.hits[0]._source;
+            const latestPing = totalChecks.hits.hits[0]._source;
             const downCount = downChecks.doc_count;
-            const upCount = firstPing.summary?.up ?? 0;
-            const configId = firstPing.config_id;
-            const monitorQueryId = firstPing.monitor.id;
+            const upCount = latestPing.summary?.up ?? 0;
+            const configId = latestPing.config_id;
+            const monitorQueryId = latestPing.monitor.id;
 
             const meta: AlertStatusMetaDataCodec = {
-              ping: firstPing,
+              ping: latestPing,
               configId,
               monitorQueryId,
               locationId: monLocationId,
-              timestamp: firstPing['@timestamp'],
+              timestamp: latestPing['@timestamp'],
               checks: {
-                total: totalChecks.hits.hits.length,
-                down: totalChecks.hits.hits.reduce(
+                downWithinXChecks: totalChecks.hits.hits.reduce(
                   (acc, curr) => acc + ((curr._source.summary.down ?? 0) > 0 ? 1 : 0),
                   0
                 ),
+                down: downCount,
               },
             };
 
             if (downCount > 0) {
-              down += 1;
               downConfigs[`${configId}-${monLocationId}`] = {
                 ...meta,
                 status: 'down',
               };
             } else if (upCount > 0) {
-              up += 1;
               upConfigs[`${configId}-${monLocationId}`] = {
                 ...meta,
                 status: 'up',

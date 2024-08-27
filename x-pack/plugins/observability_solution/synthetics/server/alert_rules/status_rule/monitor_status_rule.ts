@@ -90,9 +90,8 @@ export const registerSyntheticsStatusCheckRule = (
 
       const isCustomRule = !isEmpty(params);
 
-      const { isLocationBased, downThreshold, numberOfLocations } = getConditionType(
-        params.condition
-      );
+      const { isLocationBased, isTimeWindow, isChecksBased, downThreshold, numberOfLocations } =
+        getConditionType(params.condition);
 
       if (isLocationBased) {
         handleLocationBasedAlert({
@@ -109,6 +108,8 @@ export const registerSyntheticsStatusCheckRule = (
           downThreshold,
           isCustomRule,
           statusRule,
+          isTimeWindow,
+          isChecksBased,
         });
       }
 
@@ -192,6 +193,8 @@ const handleDownMonitorThresholdAlert = ({
   downConfigsById,
   downThreshold,
   isCustomRule,
+  isTimeWindow,
+  isChecksBased,
   statusRule,
 }: {
   groupBy: string;
@@ -199,13 +202,17 @@ const handleDownMonitorThresholdAlert = ({
   downConfigs: StatusConfigs;
   downThreshold: number;
   isCustomRule: boolean;
+  isTimeWindow?: boolean;
+  isChecksBased?: boolean;
   statusRule: StatusRuleExecutor;
 }) => {
   const groupByLocation = groupBy === 'locationId';
   if (groupByLocation) {
     Object.entries(downConfigs).forEach(([idWithLocation, statusConfig]) => {
       const { checks } = statusConfig;
-      if (checks.down >= downThreshold) {
+      const isTimeWindowConditionMet = isTimeWindow && checks.down >= downThreshold;
+      const isChecksConditionMet = isChecksBased && checks.downWithinXChecks >= downThreshold;
+      if (isTimeWindowConditionMet || isChecksConditionMet) {
         const alertId = isCustomRule ? `${idWithLocation}_custom` : idWithLocation;
         const monitorSummary = statusRule.getMonitorDownSummary({
           statusConfig,

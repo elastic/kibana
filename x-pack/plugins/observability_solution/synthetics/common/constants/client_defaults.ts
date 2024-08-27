@@ -71,6 +71,15 @@ export const getRangeFilter = ({ from, to }: { from: string; to: string }) => ({
   },
 });
 
+export const getTimespanFilter = ({ from, to }: { from: string; to: string }) => ({
+  range: {
+    'monitor.timespan': {
+      gte: from,
+      lte: to,
+    },
+  },
+});
+
 export const SUMMARY_FILTER = { exists: { field: 'summary' } };
 
 export const getLocationFilter = ({
