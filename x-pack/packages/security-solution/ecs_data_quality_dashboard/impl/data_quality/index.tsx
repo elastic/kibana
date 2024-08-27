@@ -7,23 +7,20 @@
 
 import type { HttpHandler } from '@kbn/core-http-browser';
 import numeral from '@elastic/numeral';
-import type {
-  FlameElementEvent,
-  HeatmapElementEvent,
-  MetricElementEvent,
-  PartialTheme,
-  PartitionElementEvent,
-  Theme,
-  WordCloudElementEvent,
-  XYChartElementEvent,
-} from '@elastic/charts';
-import React, { useCallback, useMemo } from 'react';
+import type { PartialTheme, Theme } from '@elastic/charts';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import type { IToasts } from '@kbn/core-notifications-browser';
+import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { Body } from './data_quality_panel/body';
 import { DataQualityProvider } from './data_quality_panel/data_quality_context';
 import { EMPTY_STAT } from './helpers';
 import { ReportDataQualityCheckAllCompleted, ReportDataQualityIndexChecked } from './types';
+import { ResultsRollupContext } from './contexts/results_rollup_context';
+import { IndicesCheckContext } from './contexts/indices_check_context';
+import { useIndicesCheck } from './use_indices_check';
+import { useResultsRollup } from './use_results_rollup';
+import { ilmPhaseOptionsStatic } from './constants';
 
 interface Props {
   toasts: IToasts;
@@ -32,21 +29,7 @@ interface Props {
   defaultNumberFormat: string;
   defaultBytesFormat: string;
   endDate?: string | null;
-  getGroupByFieldsOnClick: (
-    elements: Array<
-      | FlameElementEvent
-      | HeatmapElementEvent
-      | MetricElementEvent
-      | PartitionElementEvent
-      | WordCloudElementEvent
-      | XYChartElementEvent
-    >
-  ) => {
-    groupByField0: string;
-    groupByField1: string;
-  };
   httpFetch: HttpHandler;
-  ilmPhases: string[];
   isAssistantEnabled: boolean;
   isILMAvailable: boolean;
   lastChecked: string;
@@ -65,6 +48,10 @@ interface Props {
   theme?: PartialTheme;
 }
 
+const defaultSelectedIlmPhaseOptions: EuiComboBoxOptionOption[] = ilmPhaseOptionsStatic.filter(
+  (option) => !option.disabled
+);
+
 /** Renders the `Data Quality` dashboard content */
 const DataQualityPanelComponent: React.FC<Props> = ({
   toasts,
@@ -73,9 +60,7 @@ const DataQualityPanelComponent: React.FC<Props> = ({
   defaultBytesFormat,
   defaultNumberFormat,
   endDate,
-  getGroupByFieldsOnClick,
   httpFetch,
-  ilmPhases,
   isAssistantEnabled,
   isILMAvailable,
   lastChecked,
@@ -87,6 +72,9 @@ const DataQualityPanelComponent: React.FC<Props> = ({
   startDate,
   theme,
 }) => {
+  const [selectedIlmPhaseOptions, setSelectedIlmPhaseOptions] = useState<EuiComboBoxOptionOption[]>(
+    defaultSelectedIlmPhaseOptions
+  );
   const formatBytes = useCallback(
     (value: number | undefined): string =>
       value != null ? numeral(value).format(defaultBytesFormat) : EMPTY_STAT,
@@ -110,6 +98,23 @@ const DataQualityPanelComponent: React.FC<Props> = ({
     },
     [toasts]
   );
+  const ilmPhases: string[] = useMemo(
+    () => selectedIlmPhaseOptions.map(({ label }) => label),
+    [selectedIlmPhaseOptions]
+  );
+
+  const resultsRollupHookReturnValue = useResultsRollup({
+    ilmPhases,
+    patterns,
+    httpFetch,
+    toasts,
+    isILMAvailable,
+    telemetryEvents,
+  });
+
+  const indicesCheckHookReturnValue = useIndicesCheck({
+    onCheckCompleted: resultsRollupHookReturnValue.onCheckCompleted,
+  });
 
   return (
     <DataQualityProvider
@@ -117,24 +122,28 @@ const DataQualityPanelComponent: React.FC<Props> = ({
       telemetryEvents={telemetryEvents}
       isILMAvailable={isILMAvailable}
       toasts={toasts}
+      addSuccessToast={addSuccessToast}
+      canUserCreateAndReadCases={canUserCreateAndReadCases}
+      endDate={endDate}
+      formatBytes={formatBytes}
+      formatNumber={formatNumber}
+      isAssistantEnabled={isAssistantEnabled}
+      lastChecked={lastChecked}
+      openCreateCaseFlyout={openCreateCaseFlyout}
+      patterns={patterns}
+      setLastChecked={setLastChecked}
+      startDate={startDate}
+      theme={theme}
+      baseTheme={baseTheme}
+      ilmPhases={ilmPhases}
+      selectedIlmPhaseOptions={selectedIlmPhaseOptions}
+      setSelectedIlmPhaseOptions={setSelectedIlmPhaseOptions}
     >
-      <Body
-        addSuccessToast={addSuccessToast}
-        canUserCreateAndReadCases={canUserCreateAndReadCases}
-        endDate={endDate}
-        formatBytes={formatBytes}
-        formatNumber={formatNumber}
-        getGroupByFieldsOnClick={getGroupByFieldsOnClick}
-        ilmPhases={ilmPhases}
-        isAssistantEnabled={isAssistantEnabled}
-        lastChecked={lastChecked}
-        openCreateCaseFlyout={openCreateCaseFlyout}
-        patterns={patterns}
-        setLastChecked={setLastChecked}
-        startDate={startDate}
-        theme={theme}
-        baseTheme={baseTheme}
-      />
+      <ResultsRollupContext.Provider value={resultsRollupHookReturnValue}>
+        <IndicesCheckContext.Provider value={indicesCheckHookReturnValue}>
+          <Body />
+        </IndicesCheckContext.Provider>
+      </ResultsRollupContext.Provider>
     </DataQualityProvider>
   );
 };

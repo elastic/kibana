@@ -9,16 +9,16 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 
 import { mockAllowedValues } from '../../mock/allowed_values/mock_allowed_values';
-import { TestProviders } from '../../mock/test_providers/test_providers';
+import { TestExternalProviders } from '../../mock/test_providers/test_providers';
 import { EcsAllowedValues } from '.';
 
 describe('EcsAllowedValues', () => {
   describe('when `allowedValues` exists', () => {
     beforeEach(() => {
       render(
-        <TestProviders>
+        <TestExternalProviders>
           <EcsAllowedValues allowedValues={mockAllowedValues} />
-        </TestProviders>
+        </TestExternalProviders>
       );
     });
 
@@ -36,9 +36,9 @@ describe('EcsAllowedValues', () => {
   describe('when `allowedValues` is undefined', () => {
     beforeEach(() => {
       render(
-        <TestProviders>
+        <TestExternalProviders>
           <EcsAllowedValues allowedValues={undefined} />
-        </TestProviders>
+        </TestExternalProviders>
       );
     });
 

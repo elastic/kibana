@@ -6,7 +6,6 @@
  */
 
 import { EcsVersion } from '@elastic/ecs';
-import { euiThemeVars } from '@kbn/ui-theme';
 
 import { FIELD, INDEX_MAPPING_TYPE } from '../../../compare_fields_table/translations';
 import {
@@ -18,7 +17,6 @@ import {
   getSummaryTableMarkdownComment,
 } from '../../index_properties/markdown/helpers';
 import * as i18n from '../../index_properties/translations';
-import { getFillColor } from '../summary_tab/helpers';
 import type { CustomFieldMetadata, IlmPhase, PartitionedFieldMetadata } from '../../../types';
 
 export const getCustomMarkdownComment = ({
@@ -39,11 +37,6 @@ ${i18n.ECS_IS_A_PERMISSIVE_SCHEMA}
 
 export const showCustomCallout = (customFieldMetadata: CustomFieldMetadata[]): boolean =>
   customFieldMetadata.length > 0;
-
-export const getCustomColor = (partitionedFieldMetadata: PartitionedFieldMetadata): string =>
-  showCustomCallout(partitionedFieldMetadata.custom)
-    ? getFillColor('custom')
-    : euiThemeVars.euiTextColor;
 
 export const getAllCustomMarkdownComments = ({
   docsCount,

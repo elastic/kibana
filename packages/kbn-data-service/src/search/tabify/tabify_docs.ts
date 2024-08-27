@@ -48,7 +48,7 @@ function flattenAccum(
   params?: TabifyDocsOptions
 ) {
   for (const k in obj) {
-    if (!obj.hasOwnProperty(k)) {
+    if (!Object.hasOwn(obj, k)) {
       continue;
     }
     const val = obj[k];
@@ -114,7 +114,7 @@ export function flattenHit(hit: Hit, indexPattern?: DataView, params?: TabifyDoc
     // merged, since we would otherwise duplicate values, since ignore_field_values and _source
     // contain the same values.
     for (const fieldName in hit.ignored_field_values) {
-      if (!hit.ignored_field_values.hasOwnProperty(fieldName)) {
+      if (!Object.hasOwn(hit.ignored_field_values, fieldName)) {
         continue;
       }
       const fieldValue = hit.ignored_field_values[fieldName];

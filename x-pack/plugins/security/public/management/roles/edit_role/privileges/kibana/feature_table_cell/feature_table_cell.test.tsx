@@ -8,11 +8,11 @@
 import { EuiIconTip } from '@elastic/eui';
 import React from 'react';
 
+import { SecuredFeature } from '@kbn/security-role-management-model';
+import { createFeature } from '@kbn/security-role-management-model/src/__fixtures__';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { FeatureTableCell } from './feature_table_cell';
-import { createFeature } from '../../../../__fixtures__/kibana_features';
-import { SecuredFeature } from '../../../../model';
 
 describe('FeatureTableCell', () => {
   it('renders the feature name', () => {

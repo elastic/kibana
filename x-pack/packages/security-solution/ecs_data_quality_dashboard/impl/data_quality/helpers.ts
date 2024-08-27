@@ -10,7 +10,6 @@ import type { IlmExplainLifecycleLifecycleExplain } from '@elastic/elasticsearch
 import { has, sortBy } from 'lodash/fp';
 import { IToasts } from '@kbn/core-notifications-browser';
 import { getIlmPhase } from './data_quality_panel/pattern/helpers';
-import { getFillColor } from './data_quality_panel/tabs/summary_tab/helpers';
 
 import * as i18n from './translations';
 
@@ -34,7 +33,6 @@ import { EcsFlatTyped } from './constants';
 
 const EMPTY_INDEX_NAMES: string[] = [];
 export const INTERNAL_API_VERSION = '1';
-
 export const getIndexNames = ({
   ilmExplain,
   ilmPhases,
@@ -401,11 +399,8 @@ export const getTotalPatternSameFamily = (
   return allResults.reduce<number>((acc, { sameFamily }) => acc + (sameFamily ?? 0), 0);
 };
 
-export const getIncompatibleStatColor = (incompatible: number | undefined): string | undefined =>
-  incompatible != null && incompatible > 0 ? getFillColor('incompatible') : undefined;
-
-export const getSameFamilyStatColor = (sameFamily: number | undefined): string | undefined =>
-  sameFamily != null && sameFamily > 0 ? getFillColor('same-family') : undefined;
+export const getIncompatibleStatBadgeColor = (incompatible: number | undefined): string =>
+  incompatible != null && incompatible > 0 ? 'danger' : 'hollow';
 
 export const getErrorSummary = ({
   error,

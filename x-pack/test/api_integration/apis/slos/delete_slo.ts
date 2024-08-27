@@ -31,7 +31,7 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       await slo.deleteAllSLOs();
       await sloEsClient.deleteTestSourceData();
-      loadTestData(getService);
+      await loadTestData(getService);
     });
 
     beforeEach(() => {

@@ -81,7 +81,6 @@ export class AddEditMonitorAPI {
 
       const syncErrorsPromise = syntheticsMonitorClient.addMonitors(
         [{ monitor: monitorWithNamespace as MonitorFields, id: newMonitorId }],
-        savedObjectsClient,
         this.allPrivateLocations ?? [],
         spaceId
       );

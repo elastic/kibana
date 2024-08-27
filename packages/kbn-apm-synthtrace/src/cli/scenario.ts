@@ -13,22 +13,19 @@ import { Logger } from '../lib/utils/create_logger';
 import { ScenarioReturnType } from '../lib/utils/with_client';
 import { RunOptions } from './utils/parse_run_cli_flags';
 
+interface EsClients {
+  apmEsClient: ApmSynthtraceEsClient;
+  logsEsClient: LogsSynthtraceEsClient;
+  infraEsClient: InfraSynthtraceEsClient;
+  assetsEsClient: AssetsSynthtraceEsClient;
+}
+
 type Generate<TFields> = (options: {
   range: Timerange;
-  clients: {
-    apmEsClient: ApmSynthtraceEsClient;
-    logsEsClient: LogsSynthtraceEsClient;
-    infraEsClient: InfraSynthtraceEsClient;
-    assetsEsClient: AssetsSynthtraceEsClient;
-  };
+  clients: EsClients;
 }) => ScenarioReturnType<TFields> | Array<ScenarioReturnType<TFields>>;
 
 export type Scenario<TFields> = (options: RunOptions & { logger: Logger }) => Promise<{
-  bootstrap?: (options: {
-    apmEsClient: ApmSynthtraceEsClient;
-    logsEsClient: LogsSynthtraceEsClient;
-    infraEsClient: InfraSynthtraceEsClient;
-    assetsEsClient: AssetsSynthtraceEsClient;
-  }) => Promise<void>;
+  bootstrap?: (options: EsClients) => Promise<void>;
   generate: Generate<TFields>;
 }>;

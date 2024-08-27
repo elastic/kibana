@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 import { runtimeMappings } from '../model/runtime_mappings';
 import { TimelineEventsQueries } from '../model/timeline_events_queries';
 import { requestPaginated } from './request_paginated';

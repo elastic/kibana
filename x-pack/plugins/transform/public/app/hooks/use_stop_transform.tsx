@@ -48,7 +48,7 @@ export const useStopTransforms = () => {
     onSuccess: (results) => {
       for (const transformId in results) {
         // hasOwnProperty check to ensure only properties on object itself, and not its prototypes
-        if (results.hasOwnProperty(transformId)) {
+        if (Object.hasOwn(results, transformId)) {
           if (!results[transformId].success) {
             toastNotifications.addDanger(
               i18n.translate('xpack.transform.transformList.stopTransformErrorMessage', {

@@ -352,5 +352,10 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
 
       return testSubjects.click(buttonSubject);
     },
+
+    // Callouts
+    async legacyMetricAlertCalloutExists() {
+      return testSubjects.exists('infraAssetDetailsLegacyMetricAlertCallout');
+    },
   };
 }

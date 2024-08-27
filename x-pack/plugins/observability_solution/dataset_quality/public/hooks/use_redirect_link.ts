@@ -16,11 +16,8 @@ import { getRouterLinkProps } from '@kbn/router-utils';
 import { RouterLinkProps } from '@kbn/router-utils/src/get_router_link_props';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { LocatorClient } from '@kbn/shared-ux-prompt-no-data-views-types';
-import { useSelector } from '@xstate/react';
-import { useDatasetQualityContext } from '../components/dataset_quality/context';
-import { TimeRangeConfig } from '../state_machines/dataset_quality_controller';
 import { useKibanaContextForPlugin } from '../utils';
-import { BasicDataStream } from '../../common/types';
+import { BasicDataStream, TimeRangeConfig } from '../../common/types';
 import { useRedirectLinkTelemetry } from './use_telemetry';
 
 export const useRedirectLink = <T extends BasicDataStream>({
@@ -32,7 +29,7 @@ export const useRedirectLink = <T extends BasicDataStream>({
 }: {
   dataStreamStat: T;
   query?: Query | AggregateQuery;
-  timeRangeConfig?: TimeRangeConfig;
+  timeRangeConfig: TimeRangeConfig;
   breakdownField?: string;
   telemetry?: Parameters<typeof useRedirectLinkTelemetry>[0]['telemetry'];
 }) => {
@@ -40,9 +37,7 @@ export const useRedirectLink = <T extends BasicDataStream>({
     services: { share },
   } = useKibanaContextForPlugin();
 
-  const { service } = useDatasetQualityContext();
-  const { timeRange } = useSelector(service, (state) => state.context.filters);
-  const { from, to } = timeRangeConfig || timeRange;
+  const { from, to } = timeRangeConfig;
 
   const logsExplorerLocator =
     share.url.locators.get<SingleDatasetLocatorParams>(SINGLE_DATASET_LOCATOR_ID);

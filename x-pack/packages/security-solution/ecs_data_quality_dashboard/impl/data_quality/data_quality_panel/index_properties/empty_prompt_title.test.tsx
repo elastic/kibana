@@ -9,16 +9,16 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 
 import { EmptyPromptTitle } from './empty_prompt_title';
-import { TestProviders } from '../../mock/test_providers/test_providers';
+import { TestExternalProviders } from '../../mock/test_providers/test_providers';
 
 describe('EmptyPromptTitle', () => {
   const title = 'What is a great title?';
 
   test('it renders the expected content', () => {
     render(
-      <TestProviders>
+      <TestExternalProviders>
         <EmptyPromptTitle title={title} />
-      </TestProviders>
+      </TestExternalProviders>
     );
 
     expect(screen.getByTestId('emptyPromptTitle')).toHaveTextContent(title);

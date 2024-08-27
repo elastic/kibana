@@ -11,6 +11,7 @@ import { useEffect, useState } from 'react';
 import { useDataQualityContext } from '../data_quality_panel/data_quality_context';
 import { INTERNAL_API_VERSION } from '../helpers';
 import * as i18n from '../translations';
+import { useIsMounted } from '../use_is_mounted';
 
 const ILM_EXPLAIN_ENDPOINT = '/internal/ecs_data_quality_dashboard/ilm_explain';
 
@@ -22,6 +23,7 @@ export interface UseIlmExplain {
 
 export const useIlmExplain = (pattern: string): UseIlmExplain => {
   const { httpFetch, isILMAvailable } = useDataQualityContext();
+  const { isMountedRef } = useIsMounted();
   const [ilmExplain, setIlmExplain] = useState<Record<
     string,
     IlmExplainLifecycleLifecycleExplain
@@ -49,14 +51,20 @@ export const useIlmExplain = (pattern: string): UseIlmExplain => {
         );
 
         if (!abortController.signal.aborted) {
-          setIlmExplain(response);
+          if (isMountedRef.current) {
+            setIlmExplain(response);
+          }
         }
       } catch (e) {
         if (!abortController.signal.aborted) {
-          setError(i18n.ERROR_LOADING_ILM_EXPLAIN(e.message));
+          if (isMountedRef.current) {
+            setError(i18n.ERROR_LOADING_ILM_EXPLAIN(e.message));
+          }
         }
       } finally {
-        setLoading(false);
+        if (isMountedRef.current) {
+          setLoading(false);
+        }
       }
     }
 
@@ -65,7 +73,7 @@ export const useIlmExplain = (pattern: string): UseIlmExplain => {
     return () => {
       abortController.abort();
     };
-  }, [httpFetch, isILMAvailable, pattern, setError]);
+  }, [httpFetch, isILMAvailable, isMountedRef, pattern, setError]);
 
   return { ilmExplain, error, loading };
 };

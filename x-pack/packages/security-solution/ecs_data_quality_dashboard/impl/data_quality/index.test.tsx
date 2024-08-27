@@ -9,76 +9,36 @@ import { DARK_THEME } from '@elastic/charts';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
-import { TestProviders } from './mock/test_providers/test_providers';
+import { TestExternalProviders } from './mock/test_providers/test_providers';
 import { DataQualityPanel } from '.';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 
 const { toasts } = notificationServiceMock.createSetupContract();
 
 describe('DataQualityPanel', () => {
-  describe('when ILM phases are provided', () => {
-    const ilmPhases: string[] = ['hot', 'warm', 'unmanaged'];
-
-    beforeEach(() => {
-      render(
-        <TestProviders>
-          <DataQualityPanel
-            canUserCreateAndReadCases={jest.fn()}
-            defaultBytesFormat={''}
-            defaultNumberFormat={''}
-            getGroupByFieldsOnClick={jest.fn()}
-            httpFetch={jest.fn()}
-            ilmPhases={ilmPhases}
-            isAssistantEnabled={true}
-            isILMAvailable={true}
-            lastChecked={''}
-            openCreateCaseFlyout={jest.fn()}
-            patterns={[]}
-            reportDataQualityIndexChecked={jest.fn()}
-            setLastChecked={jest.fn()}
-            baseTheme={DARK_THEME}
-            toasts={toasts}
-          />
-        </TestProviders>
-      );
-    });
-
-    test('it does NOT render the ILM phases empty prompt', () => {
-      expect(screen.queryByTestId('ilmPhasesEmptyPrompt')).not.toBeInTheDocument();
-    });
-
-    test('it renders the body', () => {
-      expect(screen.getByTestId('body')).toBeInTheDocument();
-    });
+  beforeEach(() => {
+    render(
+      <TestExternalProviders>
+        <DataQualityPanel
+          canUserCreateAndReadCases={jest.fn()}
+          defaultBytesFormat={''}
+          defaultNumberFormat={''}
+          httpFetch={jest.fn()}
+          isAssistantEnabled={true}
+          isILMAvailable={true}
+          lastChecked={''}
+          openCreateCaseFlyout={jest.fn()}
+          patterns={[]}
+          reportDataQualityIndexChecked={jest.fn()}
+          setLastChecked={jest.fn()}
+          baseTheme={DARK_THEME}
+          toasts={toasts}
+        />
+      </TestExternalProviders>
+    );
   });
 
-  describe('when ILM phases are NOT provided', () => {
-    test('it renders the ILM phases empty prompt', () => {
-      const ilmPhases: string[] = [];
-
-      render(
-        <TestProviders>
-          <DataQualityPanel
-            canUserCreateAndReadCases={jest.fn()}
-            defaultBytesFormat={''}
-            defaultNumberFormat={''}
-            getGroupByFieldsOnClick={jest.fn()}
-            httpFetch={jest.fn()}
-            ilmPhases={ilmPhases}
-            isAssistantEnabled={true}
-            isILMAvailable={true}
-            lastChecked={''}
-            openCreateCaseFlyout={jest.fn()}
-            patterns={[]}
-            reportDataQualityIndexChecked={jest.fn()}
-            setLastChecked={jest.fn()}
-            baseTheme={DARK_THEME}
-            toasts={toasts}
-          />
-        </TestProviders>
-      );
-
-      expect(screen.getByTestId('ilmPhasesEmptyPrompt')).toBeInTheDocument();
-    });
+  test('it renders the body', () => {
+    expect(screen.getByTestId('body')).toBeInTheDocument();
   });
 });

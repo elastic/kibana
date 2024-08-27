@@ -25,7 +25,6 @@ export const ECS_COMPLIANT_TAB_ID = 'ecsCompliantTab';
 export const CUSTOM_TAB_ID = 'customTab';
 export const INCOMPATIBLE_TAB_ID = 'incompatibleTab';
 export const SAME_FAMILY_TAB_ID = 'sameFamilyTab';
-export const SUMMARY_TAB_ID = 'summaryTab';
 
 export const EMPTY_METADATA: PartitionedFieldMetadata = {
   all: [],

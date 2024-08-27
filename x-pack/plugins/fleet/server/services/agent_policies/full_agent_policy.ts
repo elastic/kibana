@@ -25,6 +25,7 @@ import type {
   FullAgentPolicyOutput,
   FleetProxy,
   FleetServerHost,
+  AgentPolicy,
 } from '../../types';
 import type {
   FullAgentPolicyMonitoring,
@@ -67,11 +68,17 @@ async function fetchAgentPolicy(soClient: SavedObjectsClientContract, id: string
 export async function getFullAgentPolicy(
   soClient: SavedObjectsClientContract,
   id: string,
-  options?: { standalone: boolean }
+  options?: { standalone?: boolean; agentPolicy?: AgentPolicy }
 ): Promise<FullAgentPolicy | null> {
   const standalone = options?.standalone ?? false;
 
-  const agentPolicy = await fetchAgentPolicy(soClient, id);
+  let agentPolicy: AgentPolicy | null;
+  if (options?.agentPolicy?.package_policies) {
+    agentPolicy = options.agentPolicy;
+  } else {
+    agentPolicy = await fetchAgentPolicy(soClient, id);
+  }
+
   if (!agentPolicy) {
     return null;
   }
@@ -192,20 +199,50 @@ export async function getFullAgentPolicy(
     },
   };
 
-  if (agentPolicy.space_id) {
-    fullAgentPolicy.namespaces = [agentPolicy.space_id];
+  if (agentPolicy.space_ids) {
+    fullAgentPolicy.namespaces = agentPolicy.space_ids;
   }
 
-  const dataPermissions =
-    (await storedPackagePoliciesToAgentPermissions(
+  const packagePoliciesByOutputId = Object.keys(fullAgentPolicy.outputs).reduce(
+    (acc: Record<string, PackagePolicy[]>, outputId) => {
+      acc[outputId] = [];
+      return acc;
+    },
+    {}
+  );
+  (agentPolicy.package_policies || []).forEach((packagePolicy) => {
+    const packagePolicyDataOutput = packagePolicy.output_id
+      ? outputs.find((output) => output.id === packagePolicy.output_id)
+      : undefined;
+    if (packagePolicyDataOutput) {
+      packagePoliciesByOutputId[getOutputIdForAgentPolicy(packagePolicyDataOutput)].push(
+        packagePolicy
+      );
+    } else {
+      packagePoliciesByOutputId[getOutputIdForAgentPolicy(dataOutput)].push(packagePolicy);
+    }
+  });
+
+  const dataPermissionsByOutputId = Object.keys(fullAgentPolicy.outputs).reduce(
+    (acc: Record<string, FullAgentPolicyOutputPermissions>, outputId) => {
+      acc[outputId] = {};
+      return acc;
+    },
+    {}
+  );
+  for (const [outputId, packagePolicies] of Object.entries(packagePoliciesByOutputId)) {
+    const dataPermissions = await storedPackagePoliciesToAgentPermissions(
       packageInfoCache,
       agentPolicy.namespace,
-      agentPolicy.package_policies
-    )) || {};
-
-  dataPermissions._elastic_agent_checks = {
-    cluster: DEFAULT_CLUSTER_PERMISSIONS,
-  };
+      packagePolicies
+    );
+    dataPermissionsByOutputId[outputId] = {
+      _elastic_agent_checks: {
+        cluster: DEFAULT_CLUSTER_PERMISSIONS,
+      },
+      ...(dataPermissions || {}),
+    };
+  }
 
   const monitoringPermissions = await getMonitoringPermissions(
     soClient,
@@ -233,8 +270,11 @@ export async function getFullAgentPolicy(
         Object.assign(permissions, monitoringPermissions);
       }
 
-      if (outputId === getOutputIdForAgentPolicy(dataOutput)) {
-        Object.assign(permissions, dataPermissions);
+      if (
+        outputId === getOutputIdForAgentPolicy(dataOutput) ||
+        packagePoliciesByOutputId[outputId].length > 0
+      ) {
+        Object.assign(permissions, dataPermissionsByOutputId[outputId]);
       }
 
       outputPermissions[outputId] = permissions;

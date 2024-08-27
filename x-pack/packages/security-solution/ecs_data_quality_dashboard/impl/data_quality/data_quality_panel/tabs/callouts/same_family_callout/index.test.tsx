@@ -10,27 +10,19 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 
 import { FIELDS_WITH_MAPPINGS_SAME_FAMILY } from '../../../index_properties/translations';
-import { TestProviders } from '../../../../mock/test_providers/test_providers';
+import { TestExternalProviders } from '../../../../mock/test_providers/test_providers';
 import { SameFamilyCallout } from '.';
 import { mockPartitionedFieldMetadataWithSameFamily } from '../../../../mock/partitioned_field_metadata/mock_partitioned_field_metadata_with_same_family';
-
-const content = 'you are reviewing a pull request';
 
 describe('SameFamilyCallout', () => {
   beforeEach(() => {
     render(
-      <TestProviders>
+      <TestExternalProviders>
         <SameFamilyCallout
           ecsBasedFieldMetadata={mockPartitionedFieldMetadataWithSameFamily.sameFamily}
-        >
-          <div data-test-subj="children">{content}</div>
-        </SameFamilyCallout>
-      </TestProviders>
+        />
+      </TestExternalProviders>
     );
-  });
-
-  test('it renders a title with the expected count of same family field mappings', () => {
-    expect(screen.getByTestId('title')).toHaveTextContent('1 Same family field mapping');
   });
 
   test('it includes the ECS version in the main content', () => {
@@ -43,9 +35,5 @@ describe('SameFamilyCallout', () => {
     expect(screen.getByTestId('fieldsWithMappingsSameFamily')).toHaveTextContent(
       FIELDS_WITH_MAPPINGS_SAME_FAMILY
     );
-  });
-
-  test('it renders the children', () => {
-    expect(screen.getByTestId('children')).toHaveTextContent(content);
   });
 });

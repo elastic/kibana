@@ -10,7 +10,7 @@ import './feature_table_cell.scss';
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText } from '@elastic/eui';
 import React from 'react';
 
-import type { SecuredFeature } from '../../../../model';
+import type { SecuredFeature } from '@kbn/security-role-management-model';
 
 interface Props {
   feature: SecuredFeature;

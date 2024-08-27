@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { getResultToolTip, showResult } from './helpers';
+import { getPatternResultTooltip, showResult } from './helpers';
 import { ALL_PASSED, SOME_FAILED, SOME_UNCHECKED } from './translations';
 
 describe('helpers', () => {
-  describe('getResultToolTip', () => {
+  describe('getPatternResultTooltip', () => {
     test('it returns the expected tool tip when `incompatible` is undefined', () => {
-      expect(getResultToolTip(undefined)).toEqual(SOME_UNCHECKED);
+      expect(getPatternResultTooltip(undefined)).toEqual(SOME_UNCHECKED);
     });
 
     test('it returns the expected tool tip when `incompatible` is zero', () => {
-      expect(getResultToolTip(0)).toEqual(ALL_PASSED);
+      expect(getPatternResultTooltip(0)).toEqual(ALL_PASSED);
     });
 
     test('it returns the expected tool tip when `incompatible` is non-zero', () => {
-      expect(getResultToolTip(1)).toEqual(SOME_FAILED);
+      expect(getPatternResultTooltip(1)).toEqual(SOME_FAILED);
     });
   });
 

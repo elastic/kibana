@@ -1,5 +1,21 @@
 openapi: 3.0.0
-tags: []
+tags:
+  - name: Data streams
+  - name: Elastic Agents
+  - name: Elastic Agent actions
+  - name: Elastic Agent binary download sources
+  - name: Elastic Agent policies
+  - name: Elastic Agent status
+  - name: Elastic Package Manager (EPM)
+  - name: Fleet enrollment API keys
+  - name: Fleet internals
+  - name: Fleet Server hosts
+  - name: Fleet Kubernetes
+  - name: Fleet outputs
+  - name: Fleet package policies
+  - name: Fleet proxies
+  - name: Fleet service tokens
+  - name: Fleet uninstall tokens
 info:
   title: Fleet
   description: OpenAPI schema for Fleet API endpoints
@@ -75,8 +91,8 @@ paths:
     $ref: 'paths/agents@{agent_id}.yaml'
   '/agents/{agentId}/actions':
     $ref: 'paths/agents@{agent_id}@actions.yaml'
-  '/agents/{agentId}/actions/{actionId}/cancel':
-    $ref: 'paths/agents@{agent_id}@actions@{action_id}@cancel.yaml'
+  '/agents/actions/{actionId}/cancel':
+    $ref: 'paths/agents@actions@{action_id}@cancel.yaml'
   '/agents/files/{fileId}/{fileName}':
     $ref: 'paths/agents@files@{file_id}@{file_name}.yaml'
   '/agents/files/{fileId}':
@@ -183,7 +199,6 @@ paths:
     $ref: paths/uninstall_tokens.yaml
   /uninstall_tokens/{uninstallTokenId}:
     $ref: paths/uninstall_tokens@{uninstall_token_id}.yaml
-
 components:
   securitySchemes:
     basicAuth:

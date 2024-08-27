@@ -6,7 +6,6 @@
  */
 
 import { IlmExplainLifecycleLifecycleExplain } from '@elastic/elasticsearch/lib/api/types';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { omit } from 'lodash/fp';
 
 import {
@@ -19,13 +18,11 @@ import {
   getFieldTypes,
   getPatternIlmPhaseDescription,
   getIlmPhaseDescription,
-  getIncompatibleStatColor,
   getIndexNames,
   getIsInSameFamily,
   getMissingTimestampFieldMetadata,
   getPartitionedFieldMetadata,
   getPartitionedFieldMetadataStats,
-  getSameFamilyStatColor,
   getSizeInBytes,
   getTotalDocsCount,
   getTotalPatternIncompatible,
@@ -158,32 +155,6 @@ describe('helpers', () => {
       };
 
       expect(getTotalPatternSameFamily(results)).toBe(3);
-    });
-  });
-
-  describe('getSameFamilyStatColor', () => {
-    it('returns the expected color when sameFamily is greater than zero', () => {
-      const result = getSameFamilyStatColor(1);
-
-      expect(result).toEqual(euiThemeVars.euiColorLightShade);
-    });
-
-    it('returns undefined when sameFamily is 0', () => {
-      const result = getSameFamilyStatColor(0);
-
-      expect(result).toBeUndefined();
-    });
-
-    it('returns undefined when sameFamily is negative', () => {
-      const result = getSameFamilyStatColor(-1);
-
-      expect(result).toBeUndefined();
-    });
-
-    it('returns undefined when sameFamily is undefined', () => {
-      const result = getSameFamilyStatColor(undefined);
-
-      expect(result).toBeUndefined();
     });
   });
 
@@ -1205,26 +1176,6 @@ describe('helpers', () => {
 
     test('it returns the expected total when some indices in `patternRollup` have errors', () => {
       expect(getTotalPatternIndicesChecked(packetbeatWithSomeErrors)).toEqual(1);
-    });
-  });
-
-  describe('getIncompatibleStatColor', () => {
-    test('it returns the expected color when incompatible is greater than zero', () => {
-      const incompatible = 123;
-
-      expect(getIncompatibleStatColor(incompatible)).toBe('#bd271e');
-    });
-
-    test('it returns undefined when incompatible is zero', () => {
-      const incompatible = 0;
-
-      expect(getIncompatibleStatColor(incompatible)).toBeUndefined();
-    });
-
-    test('it returns undefined when incompatible is undefined', () => {
-      const incompatible = undefined;
-
-      expect(getIncompatibleStatColor(incompatible)).toBeUndefined();
     });
   });
 

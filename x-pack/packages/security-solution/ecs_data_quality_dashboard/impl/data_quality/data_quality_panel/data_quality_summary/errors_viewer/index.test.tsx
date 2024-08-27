@@ -8,7 +8,7 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
-import { TestProviders } from '../../../mock/test_providers/test_providers';
+import { TestExternalProviders } from '../../../mock/test_providers/test_providers';
 import { ERROR, INDEX, PATTERN } from './translations';
 import { ErrorSummary } from '../../../types';
 import { ErrorsViewer } from '.';
@@ -51,9 +51,9 @@ describe('ErrorsViewer', () => {
   expectedColumns.forEach(({ id, expected }, i) => {
     test(`it renders the expected '${id}' column header`, () => {
       render(
-        <TestProviders>
+        <TestExternalProviders>
           <ErrorsViewer errorSummary={[]} />
-        </TestProviders>
+        </TestExternalProviders>
       );
 
       expect(screen.getByTestId(`tableHeaderCell_${id}_${i}`)).toHaveTextContent(expected);
@@ -62,9 +62,9 @@ describe('ErrorsViewer', () => {
 
   test(`it renders the expected the errors`, () => {
     render(
-      <TestProviders>
+      <TestExternalProviders>
         <ErrorsViewer errorSummary={errorSummary} />
-      </TestProviders>
+      </TestExternalProviders>
     );
 
     expect(

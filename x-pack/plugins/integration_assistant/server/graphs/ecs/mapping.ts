@@ -16,17 +16,15 @@ export async function handleEcsMapping(
   state: EcsMappingState,
   model: ActionsClientChatOpenAI | ActionsClientSimpleChatModel
 ) {
-  const ecsMainPrompt = ECS_MAIN_PROMPT;
   const outputParser = new JsonOutputParser();
-  const ecsMainGraph = ecsMainPrompt.pipe(model).pipe(outputParser);
+  const ecsMainGraph = ECS_MAIN_PROMPT.pipe(model).pipe(outputParser);
 
   const currentMapping = await ecsMainGraph.invoke({
     ecs: state.ecs,
-    formatted_samples: state.formattedSamples,
+    combined_samples: state.combinedSamples,
     package_name: state.packageName,
     data_stream_name: state.dataStreamName,
     ex_answer: state.exAnswer,
   });
-
   return { currentMapping, lastExecutedChain: 'ecsMapping' };
 }

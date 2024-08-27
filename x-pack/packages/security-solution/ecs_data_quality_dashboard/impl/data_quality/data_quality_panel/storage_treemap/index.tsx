@@ -14,7 +14,6 @@ import type {
   MetricElementEvent,
   PartialTheme,
   PartitionElementEvent,
-  Theme,
   WordCloudElementEvent,
   XYChartElementEvent,
 } from '@elastic/charts';
@@ -29,10 +28,11 @@ import {
   getLegendItems,
   getPathToFlattenedBucketMap,
 } from '../body/data_quality_details/storage_details/helpers';
-import { ChartLegendItem } from '../../ecs_summary_donut_chart/chart_legend/chart_legend_item';
+import { ChartLegendItem } from './chart_legend_item';
 import { NoData } from './no_data';
 import { ChartFlexItem, LegendContainer } from '../tabs/styles';
 import { PatternRollup, SelectedIndex } from '../../types';
+import { useDataQualityContext } from '../data_quality_context';
 
 export const DEFAULT_MIN_CHART_HEIGHT = 240; // px
 export const LEGEND_WIDTH = 220; // px
@@ -40,14 +40,11 @@ export const LEGEND_TEXT_WITH = 120; // px
 
 export interface Props {
   accessor: 'sizeInBytes' | 'docsCount';
-  baseTheme: Theme;
   flattenedBuckets: FlattenedBucket[];
   maxChartHeight?: number;
   minChartHeight?: number;
   onIndexSelected: ({ indexName, pattern }: SelectedIndex) => void;
   patternRollups: Record<string, PatternRollup>;
-  patterns: string[];
-  theme?: PartialTheme;
   valueFormatter: (value: number) => string;
 }
 
@@ -86,16 +83,14 @@ export const getGroupByFieldsOnClick = (
 
 const StorageTreemapComponent: React.FC<Props> = ({
   accessor,
-  baseTheme,
   flattenedBuckets,
   maxChartHeight,
   minChartHeight = DEFAULT_MIN_CHART_HEIGHT,
   onIndexSelected,
   patternRollups,
-  patterns,
-  theme = {},
   valueFormatter,
 }: Props) => {
+  const { theme, baseTheme, patterns } = useDataQualityContext();
   const fillColor = useMemo(
     () => theme?.background?.color ?? baseTheme.background.color,
     [theme?.background?.color, baseTheme.background.color]
@@ -159,7 +154,7 @@ const StorageTreemapComponent: React.FC<Props> = ({
             <Settings
               baseTheme={baseTheme}
               showLegend={false}
-              theme={[treemapTheme, theme]}
+              theme={[treemapTheme, theme || {}]}
               onElementClick={onElementClick}
               locale={i18n.getLocale()}
             />

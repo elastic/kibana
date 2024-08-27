@@ -34,6 +34,16 @@ export async function fetchMappings({
       }
     );
   } catch (e) {
-    throw new Error(i18n.ERROR_LOADING_MAPPINGS({ details: e.message, patternOrIndexName }));
+    throw new MappingsError(patternOrIndexName, e.message);
+  }
+}
+
+export class MappingsError extends Error {
+  constructor(patternOrIndexName: string, details: string) {
+    const message = i18n.ERROR_LOADING_MAPPINGS({ details, patternOrIndexName });
+    super(message);
+
+    this.name = 'MappingsError';
+    this.message = message;
   }
 }

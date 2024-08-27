@@ -13,29 +13,33 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { euiDarkVars } from '@kbn/ui-theme';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
-
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { DataQualityProvider } from '../../data_quality_panel/data_quality_context';
+import { Theme } from '@elastic/charts';
 
-interface Props {
+import {
+  DataQualityProvider,
+  DataQualityProviderProps,
+} from '../../data_quality_panel/data_quality_context';
+import { ResultsRollupContext } from '../../contexts/results_rollup_context';
+import { IndicesCheckContext } from '../../contexts/indices_check_context';
+import { UseIndicesCheckReturnValue } from '../../use_indices_check/types';
+import { UseResultsRollupReturnValue } from '../../use_results_rollup/types';
+import { getMergeResultsRollupContextProps } from './utils/get_merged_results_rollup_context_props';
+import { getMergedDataQualityContextProps } from './utils/get_merged_data_quality_context_props';
+import { getMergedIndicesCheckContextProps } from './utils/get_merged_indices_check_context_props';
+
+interface TestExternalProvidersProps {
   children: React.ReactNode;
-  isILMAvailable?: boolean;
 }
 
 window.scrollTo = jest.fn();
 
 /** A utility for wrapping children in the providers required to run tests */
-export const TestProvidersComponent: React.FC<Props> = ({ children, isILMAvailable = true }) => {
-  const http = httpServiceMock.createSetupContract({ basePath: '/test' });
-  const { toasts } = notificationServiceMock.createSetupContract();
+const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ children }) => {
   const actionTypeRegistry = actionTypeRegistryMock.create();
   const mockGetComments = jest.fn(() => []);
   const mockHttp = httpServiceMock.createStartContract({ basePath: '/test' });
   const mockNavigateToApp = jest.fn();
-  const mockTelemetryEvents = {
-    reportDataQualityIndexChecked: jest.fn(),
-    reportDataQualityCheckAllCompleted: jest.fn(),
-  };
   const mockAssistantAvailability: AssistantAvailability = {
     hasAssistantPrivilege: false,
     hasConnectorsAllPrivilege: true,
@@ -75,14 +79,7 @@ export const TestProvidersComponent: React.FC<Props> = ({ children, isILMAvailab
             navigateToApp={mockNavigateToApp}
             currentAppId={'securitySolutionUI'}
           >
-            <DataQualityProvider
-              httpFetch={http.fetch}
-              toasts={toasts}
-              isILMAvailable={isILMAvailable}
-              telemetryEvents={mockTelemetryEvents}
-            >
-              {children}
-            </DataQualityProvider>
+            {children}
           </AssistantProvider>
         </QueryClientProvider>
       </ThemeProvider>
@@ -90,6 +87,90 @@ export const TestProvidersComponent: React.FC<Props> = ({ children, isILMAvailab
   );
 };
 
-TestProvidersComponent.displayName = 'TestProvidersComponent';
+TestExternalProvidersComponent.displayName = 'TestExternalProvidersComponent';
 
-export const TestProviders = React.memo(TestProvidersComponent);
+export const TestExternalProviders = React.memo(TestExternalProvidersComponent);
+
+export interface TestDataQualityProvidersProps {
+  children: React.ReactNode;
+  dataQualityContextProps?: Partial<DataQualityProviderProps>;
+  indicesCheckContextProps?: Partial<UseIndicesCheckReturnValue>;
+  resultsRollupContextProps?: Partial<UseResultsRollupReturnValue>;
+}
+
+const TestDataQualityProvidersComponent: React.FC<TestDataQualityProvidersProps> = ({
+  children,
+  dataQualityContextProps,
+  resultsRollupContextProps,
+  indicesCheckContextProps,
+}) => {
+  const http = httpServiceMock.createSetupContract({ basePath: '/test' });
+  const { toasts } = notificationServiceMock.createSetupContract();
+  const mockTelemetryEvents = {
+    reportDataQualityIndexChecked: jest.fn(),
+    reportDataQualityCheckAllCompleted: jest.fn(),
+  };
+
+  const {
+    isILMAvailable,
+    addSuccessToast,
+    canUserCreateAndReadCases,
+    endDate,
+    formatBytes,
+    formatNumber,
+    isAssistantEnabled,
+    lastChecked,
+    openCreateCaseFlyout,
+    patterns,
+    setLastChecked,
+    startDate,
+    theme,
+    baseTheme,
+    ilmPhases,
+    selectedIlmPhaseOptions,
+    setSelectedIlmPhaseOptions,
+  } = getMergedDataQualityContextProps(dataQualityContextProps);
+
+  const mergedResultsRollupContextProps =
+    getMergeResultsRollupContextProps(resultsRollupContextProps);
+
+  return (
+    <DataQualityProvider
+      httpFetch={http.fetch}
+      toasts={toasts}
+      isILMAvailable={isILMAvailable}
+      telemetryEvents={mockTelemetryEvents}
+      addSuccessToast={addSuccessToast}
+      canUserCreateAndReadCases={canUserCreateAndReadCases}
+      endDate={endDate}
+      formatBytes={formatBytes}
+      formatNumber={formatNumber}
+      isAssistantEnabled={isAssistantEnabled}
+      lastChecked={lastChecked}
+      openCreateCaseFlyout={openCreateCaseFlyout}
+      patterns={patterns}
+      setLastChecked={setLastChecked}
+      startDate={startDate}
+      theme={theme}
+      baseTheme={baseTheme as Theme}
+      ilmPhases={ilmPhases}
+      selectedIlmPhaseOptions={selectedIlmPhaseOptions}
+      setSelectedIlmPhaseOptions={setSelectedIlmPhaseOptions}
+    >
+      <ResultsRollupContext.Provider value={mergedResultsRollupContextProps}>
+        <IndicesCheckContext.Provider
+          value={getMergedIndicesCheckContextProps(
+            mergedResultsRollupContextProps.patternIndexNames,
+            indicesCheckContextProps
+          )}
+        >
+          {children}
+        </IndicesCheckContext.Provider>
+      </ResultsRollupContext.Provider>
+    </DataQualityProvider>
+  );
+};
+
+TestDataQualityProvidersComponent.displayName = 'TestDataQualityProvidersComponent';
+
+export const TestDataQualityProviders = React.memo(TestDataQualityProvidersComponent);

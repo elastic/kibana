@@ -26,8 +26,8 @@ import { debugRoutesService } from '../../../../../../common/services';
 
 import {
   OUTPUT_SAVED_OBJECT_TYPE,
-  AGENT_POLICY_SAVED_OBJECT_TYPE,
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
+  LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGES_SAVED_OBJECT_TYPE,
   DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
   FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
@@ -60,13 +60,13 @@ const fetchSavedObjects = async (type?: string, name?: string) => {
 export const SavedObjectDebugger: React.FunctionComponent = () => {
   const types = [
     {
-      value: `${AGENT_POLICY_SAVED_OBJECT_TYPE}`,
+      value: `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}`,
       text: i18n.translate('xpack.fleet.debug.savedObjectDebugger.agentPolicyLabel', {
         defaultMessage: 'Agent policy',
       }),
     },
     {
-      value: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}`,
+      value: `${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}`,
       text: i18n.translate('xpack.fleet.debug.savedObjectDebugger.packagePolicyLabel', {
         defaultMessage: 'Integration policy',
       }),

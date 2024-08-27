@@ -1406,7 +1406,7 @@ describe('TaskStore', () => {
       childEsClient.updateByQuery.mockResponse({
         hits: { hits: [], total: 0, updated: 100, version_conflicts: 0 },
       } as UpdateByQueryResponse);
-      await store.updateByQuery({ script: '' }, { max_docs: 10 });
+      await store.updateByQuery({ script: { source: '' } }, { max_docs: 10 });
       expect(childEsClient.updateByQuery).toHaveBeenCalledWith(expect.any(Object), {
         requestTimeout: 1000,
       });

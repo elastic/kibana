@@ -7,28 +7,18 @@
 
 import { EcsVersion } from '@elastic/ecs';
 import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React from 'react';
 
 import * as i18n from '../../../index_properties/translations';
 import type { EcsBasedFieldMetadata } from '../../../../types';
 
 interface Props {
-  children?: React.ReactNode;
   ecsBasedFieldMetadata: EcsBasedFieldMetadata[];
 }
 
-const SameFamilyCalloutComponent: React.FC<Props> = ({ children, ecsBasedFieldMetadata }) => {
-  const title = useMemo(
-    () => (
-      <span data-test-subj="title">
-        {i18n.SAME_FAMILY_CALLOUT_TITLE(ecsBasedFieldMetadata.length)}
-      </span>
-    ),
-    [ecsBasedFieldMetadata.length]
-  );
-
+const SameFamilyCalloutComponent: React.FC<Props> = ({ ecsBasedFieldMetadata }) => {
   return (
-    <EuiCallOut color="primary" size="s" title={title}>
+    <EuiCallOut color="primary" size="s">
       <div data-test-subj="fieldsDefinedByEcs">
         {i18n.SAME_FAMILY_CALLOUT({
           fieldCount: ecsBasedFieldMetadata.length,
@@ -41,9 +31,10 @@ const SameFamilyCalloutComponent: React.FC<Props> = ({ children, ecsBasedFieldMe
           {i18n.FIELDS_WITH_MAPPINGS_SAME_FAMILY}
         </EuiText>
       </div>
-      {children}
     </EuiCallOut>
   );
 };
+
+SameFamilyCalloutComponent.displayName = 'SameFamilyCalloutComponent';
 
 export const SameFamilyCallout = React.memo(SameFamilyCalloutComponent);

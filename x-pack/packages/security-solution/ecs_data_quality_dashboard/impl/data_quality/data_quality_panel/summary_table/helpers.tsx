@@ -8,68 +8,29 @@
 import {
   EuiBasicTableColumn,
   EuiText,
-  EuiBadge,
-  EuiButtonIcon,
-  EuiIcon,
   EuiProgress,
-  EuiScreenReaderOnly,
-  EuiStat,
   EuiToolTip,
-  RIGHT_ALIGNMENT,
+  CENTER_ALIGNMENT,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import React from 'react';
 import moment from 'moment';
 import styled from 'styled-components';
 
-import { EMPTY_STAT, getIlmPhaseDescription, getIncompatibleStatColor } from '../../helpers';
+import { euiThemeVars } from '@kbn/ui-theme';
+import { EMPTY_STAT, getIlmPhaseDescription } from '../../helpers';
 import { INCOMPATIBLE_INDEX_TOOL_TIP } from '../stat_label/translations';
 import { INDEX_SIZE_TOOLTIP } from '../../translations';
 import * as i18n from './translations';
-import type { IlmPhase } from '../../types';
-
-const STAT_TITLE_SIZE = 'xxs';
-
-const EMPTY_DESCRIPTION = ' ';
+import { IndexSummaryTableItem } from '../pattern/types';
+import { UseIndicesCheckCheckState } from '../../use_indices_check/types';
+import { IndexResultBadge } from '../index_result_badge';
+import { getIndexResultToolTip } from '../index_result_badge/helpers';
+import { Stat } from '../pattern/pattern_summary/stats_rollup/stat';
 
 const ProgressContainer = styled.div`
   width: 150px;
 `;
-
-export interface IndexSummaryTableItem {
-  docsCount: number;
-  incompatible: number | undefined;
-  indexName: string;
-  ilmPhase: IlmPhase | undefined;
-  pattern: string;
-  patternDocsCount: number;
-  sizeInBytes: number | undefined;
-  checkedAt: number | undefined;
-}
-
-export const getResultToolTip = (incompatible: number | undefined): string => {
-  if (incompatible == null) {
-    return i18n.THIS_INDEX_HAS_NOT_BEEN_CHECKED;
-  } else if (incompatible === 0) {
-    return i18n.PASSED;
-  } else {
-    return i18n.FAILED;
-  }
-};
-
-export const getResultIconColor = (
-  incompatible: number | undefined
-): 'success' | 'danger' | 'ghost' => {
-  if (incompatible == null) {
-    return 'ghost';
-  } else if (incompatible === 0) {
-    return 'success';
-  } else {
-    return 'danger';
-  }
-};
-
-export const getResultIcon = (incompatible: number | undefined): 'check' | 'cross' =>
-  incompatible === 0 ? 'check' : 'cross';
 
 export const getDocsCountPercent = ({
   docsCount,
@@ -108,14 +69,17 @@ export const getSummaryTableILMPhaseColumn = (
           name: i18n.ILM_PHASE,
           render: (_, { ilmPhase }) =>
             ilmPhase != null ? (
-              <EuiToolTip content={getIlmPhaseDescription(ilmPhase)}>
-                <EuiBadge color="hollow" data-test-subj="ilmPhase">
-                  {ilmPhase}
-                </EuiBadge>
-              </EuiToolTip>
+              <Stat
+                badgeText={ilmPhase}
+                tooltipText={getIlmPhaseDescription(ilmPhase)}
+                badgeProps={{
+                  'data-test-subj': 'ilmPhase',
+                }}
+              />
             ) : null,
           sortable: true,
           truncateText: false,
+          width: '92px',
         },
       ]
     : [];
@@ -140,61 +104,76 @@ export const getSummaryTableSizeInBytesColumn = ({
             ) : null,
           sortable: true,
           truncateText: false,
+          width: '67px',
         },
       ]
     : [];
 
+export const getIncompatibleStatColor = (incompatible: number | undefined): string | undefined =>
+  incompatible != null && incompatible > 0 ? euiThemeVars.euiColorDanger : undefined;
+
 export const getSummaryTableColumns = ({
   formatBytes,
   formatNumber,
-  itemIdToExpandedRowMap,
   isILMAvailable,
   pattern,
-  toggleExpanded,
+  onExpandAction,
+  onCheckNowAction,
+  checkState,
 }: {
   formatBytes: (value: number | undefined) => string;
   formatNumber: (value: number | undefined) => string;
-  itemIdToExpandedRowMap: Record<string, React.ReactNode>;
   isILMAvailable: boolean;
   pattern: string;
-  toggleExpanded: (indexName: string) => void;
+  onExpandAction: (indexName: string) => void;
+  onCheckNowAction: (indexName: string) => void;
+  checkState: UseIndicesCheckCheckState;
 }): Array<EuiBasicTableColumn<IndexSummaryTableItem>> => [
   {
-    align: RIGHT_ALIGNMENT,
-    isExpander: true,
-    name: (
-      <EuiScreenReaderOnly>
-        <span>{i18n.EXPAND_ROWS}</span>
-      </EuiScreenReaderOnly>
-    ),
-    render: ({ indexName }: IndexSummaryTableItem) => (
-      <EuiButtonIcon
-        aria-label={itemIdToExpandedRowMap[indexName] ? i18n.COLLAPSE : i18n.EXPAND}
-        data-toggle-button-id={getToggleButtonId({
-          indexName,
-          isExpanded: itemIdToExpandedRowMap[indexName] != null,
-          pattern,
-        })}
-        onClick={() => toggleExpanded(indexName)}
-        iconType={itemIdToExpandedRowMap[indexName] ? 'arrowDown' : 'arrowRight'}
-      />
-    ),
-    width: '40px',
+    name: i18n.ACTIONS,
+    align: CENTER_ALIGNMENT,
+    width: '65px',
+    actions: [
+      {
+        name: i18n.VIEW_CHECK_DETAILS,
+        render: (item) => {
+          return (
+            <EuiToolTip content={i18n.VIEW_CHECK_DETAILS}>
+              <EuiButtonIcon
+                iconType="expand"
+                aria-label={i18n.VIEW_CHECK_DETAILS}
+                onClick={() => onExpandAction(item.indexName)}
+              />
+            </EuiToolTip>
+          );
+        },
+      },
+      {
+        name: i18n.CHECK_INDEX,
+        render: (item) => {
+          const isChecking = checkState[item.indexName]?.isChecking ?? false;
+          return (
+            <EuiToolTip content={i18n.CHECK_INDEX}>
+              <EuiButtonIcon
+                iconType="refresh"
+                aria-label={i18n.CHECK_INDEX}
+                isLoading={isChecking}
+                onClick={() => onCheckNowAction(item.indexName)}
+              />
+            </EuiToolTip>
+          );
+        },
+      },
+    ],
   },
   {
     field: 'incompatible',
     name: i18n.RESULT,
     render: (_, { incompatible }) =>
       incompatible != null ? (
-        <EuiToolTip content={getResultToolTip(incompatible)}>
-          <EuiIcon
-            data-test-subj="resultIcon"
-            color={getResultIconColor(incompatible)}
-            type={getResultIcon(incompatible)}
-          />
-        </EuiToolTip>
+        <IndexResultBadge incompatible={incompatible} data-test-subj="resultBadge" />
       ) : (
-        <EuiToolTip content={getResultToolTip(incompatible)}>
+        <EuiToolTip content={getIndexResultToolTip(incompatible)}>
           <span data-test-subj="incompatiblePlaceholder">{EMPTY_STAT}</span>
         </EuiToolTip>
       ),
@@ -214,7 +193,6 @@ export const getSummaryTableColumns = ({
     ),
     sortable: true,
     truncateText: false,
-    width: '300px',
   },
   {
     field: 'docsCount',
@@ -233,24 +211,25 @@ export const getSummaryTableColumns = ({
     ),
     sortable: true,
     truncateText: false,
+    width: '150px',
   },
   {
     field: 'incompatible',
     name: i18n.INCOMPATIBLE_FIELDS,
     render: (_, { incompatible, indexName }) => (
-      <EuiToolTip content={INCOMPATIBLE_INDEX_TOOL_TIP(indexName)}>
-        <EuiStat
+      <EuiToolTip content={INCOMPATIBLE_INDEX_TOOL_TIP}>
+        <EuiText
+          size="xs"
           data-test-subj="incompatibleStat"
-          description={EMPTY_DESCRIPTION}
-          reverse
-          title={incompatible ?? EMPTY_STAT}
-          titleColor={getIncompatibleStatColor(incompatible)}
-          titleSize={STAT_TITLE_SIZE}
-        />
+          color={getIncompatibleStatColor(incompatible)}
+        >
+          {incompatible ?? EMPTY_STAT}
+        </EuiText>
       </EuiToolTip>
     ),
     sortable: true,
     truncateText: false,
+    width: '140px',
   },
   ...getSummaryTableILMPhaseColumn(isILMAvailable),
   ...getSummaryTableSizeInBytesColumn({ isILMAvailable, formatBytes }),
@@ -264,6 +243,7 @@ export const getSummaryTableColumns = ({
     ),
     sortable: true,
     truncateText: false,
+    width: '120px',
   },
 ];
 

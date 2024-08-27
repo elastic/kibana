@@ -41,9 +41,9 @@ function extractKeys(data: AnyObject, prefix: string = ''): Set<string> {
   return keys;
 }
 
-function findMissingFields(formattedSamples: string, ecsMapping: AnyObject): string[] {
-  const combinedSamples = JSON.parse(formattedSamples);
-  const uniqueKeysFromSamples = extractKeys(combinedSamples);
+function findMissingFields(combinedSamples: string, ecsMapping: AnyObject): string[] {
+  const parsedSamples = JSON.parse(combinedSamples);
+  const uniqueKeysFromSamples = extractKeys(parsedSamples);
   const ecsResponseKeys = extractKeys(ecsMapping);
 
   const missingKeys = [...uniqueKeysFromSamples].filter((key) => !ecsResponseKeys.has(key));
@@ -94,8 +94,8 @@ function getValueFromPath(obj: AnyObject, path: string[]): unknown {
   return path.reduce((acc, key) => (acc && acc[key] !== undefined ? acc[key] : null), obj);
 }
 
-function findDuplicateFields(samples: string[], ecsMapping: AnyObject): string[] {
-  const parsedSamples = samples.map((sample) => JSON.parse(sample));
+function findDuplicateFields(prefixedSamples: string[], ecsMapping: AnyObject): string[] {
+  const parsedSamples = prefixedSamples.map((sample) => JSON.parse(sample));
   const results: string[] = [];
   const output: Record<string, string[][]> = {};
 
@@ -123,24 +123,23 @@ function findDuplicateFields(samples: string[], ecsMapping: AnyObject): string[]
       }
     }
   }
-
   return results;
 }
 
 // Function to find invalid ECS fields
-export function findInvalidEcsFields(ecsMapping: AnyObject): string[] {
+export function findInvalidEcsFields(currentMapping: AnyObject): string[] {
   const results: string[] = [];
   const output: Record<string, string[][]> = {};
   const ecsDict = ECS_FULL;
   const ecsReserved = ECS_RESERVED;
 
-  processMapping([], ecsMapping, output);
+  processMapping([], currentMapping, output);
   const filteredOutput = Object.fromEntries(
     Object.entries(output).filter(([key, _]) => key !== null)
   );
 
   for (const [ecsValue, paths] of Object.entries(filteredOutput)) {
-    if (!Object.prototype.hasOwnProperty.call(ecsDict, ecsValue)) {
+    if (!Object.hasOwn(ecsDict, ecsValue)) {
       const field = paths.map((p) => p.join('.'));
       results.push(`Invalid ECS field mapping identified for ${ecsValue} : ${field.join(', ')}`);
     }
@@ -150,13 +149,12 @@ export function findInvalidEcsFields(ecsMapping: AnyObject): string[] {
       results.push(`Reserved ECS field mapping identified for ${ecsValue} : ${field.join(', ')}`);
     }
   }
-
   return results;
 }
 
 export function handleValidateMappings(state: EcsMappingState): AnyObject {
-  const missingKeys = findMissingFields(state?.formattedSamples, state?.currentMapping);
-  const duplicateFields = findDuplicateFields(state?.samples, state?.currentMapping);
+  const missingKeys = findMissingFields(state?.combinedSamples, state?.currentMapping);
+  const duplicateFields = findDuplicateFields(state?.prefixedSamples, state?.currentMapping);
   const invalidEcsFields = findInvalidEcsFields(state?.currentMapping);
   return {
     missingKeys,

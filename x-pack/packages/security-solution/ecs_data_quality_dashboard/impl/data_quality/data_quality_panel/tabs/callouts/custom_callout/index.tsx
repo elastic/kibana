@@ -8,34 +8,27 @@
 import { EcsVersion } from '@elastic/ecs';
 
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React from 'react';
 import type { CustomFieldMetadata } from '../../../../types';
 
 import * as i18n from '../../../index_properties/translations';
 
 interface Props {
-  children?: React.ReactNode;
   customFieldMetadata: CustomFieldMetadata[];
 }
 
-const CustomCalloutComponent: React.FC<Props> = ({ children, customFieldMetadata }) => {
-  const title = useMemo(
-    () => (
-      <span data-test-subj="title">{i18n.CUSTOM_CALLOUT_TITLE(customFieldMetadata.length)}</span>
-    ),
-    [customFieldMetadata.length]
-  );
-
+const CustomCalloutComponent: React.FC<Props> = ({ customFieldMetadata }) => {
   return (
-    <EuiCallOut color="primary" size="s" title={title}>
+    <EuiCallOut color="primary" size="s">
       <div data-test-subj="fieldsNotDefinedByEcs">
         {i18n.CUSTOM_CALLOUT({ fieldCount: customFieldMetadata.length, version: EcsVersion })}
       </div>
       <EuiSpacer size="s" />
       <div data-test-subj="ecsIsPermissive">{i18n.ECS_IS_A_PERMISSIVE_SCHEMA}</div>
-      {children}
     </EuiCallOut>
   );
 };
+
+CustomCalloutComponent.displayName = 'CustomCalloutComponent';
 
 export const CustomCallout = React.memo(CustomCalloutComponent);
