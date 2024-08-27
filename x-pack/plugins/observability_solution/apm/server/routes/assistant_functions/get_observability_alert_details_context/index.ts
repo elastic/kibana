@@ -183,20 +183,18 @@ export const getAlertDetailsContextHandler = (
         },
       });
 
-      if (significantItems.length === 0) {
+      if (logRateAnalysisType !== 'spike' || significantItems.length === 0) {
         return {
           key: 'logRateAnalysis',
           description:
-            'Log rate analysis did not identify any significant metadata or log patterns during the alert period.',
+            'Log rate analysis did not identify any significant metadata or log patterns.',
           data: [],
         };
       }
 
       return {
         key: 'logRateAnalysis',
-        description: `Statistically significant log metadata and log patterns that happened ${
-          logRateAnalysisType === 'spike' ? 'DURING the spike' : 'BEFORE the dip'
-        } in logs.`,
+        description: `Statistically significant log metadata and log message patterns occurring in the lookback period before the alert was triggered.`,
         data: significantItems,
       };
     });
@@ -224,7 +222,7 @@ export const getAlertDetailsContextHandler = (
 
       return {
         key: 'logCategories',
-        description: `Log events occurring up to 15 minutes BEFORE the alert was triggered. Filtered by the entities: ${entitiesAsString}`,
+        description: `Log events occurring up to 15 minutes before the alert was triggered. Filtered by the entities: ${entitiesAsString}`,
         data: logCategoriesWithDownstreamServiceName(logCategories, downstreamDependencies),
       };
     });
