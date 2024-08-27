@@ -28,13 +28,25 @@ export const RunActionParamsSchema = schema.object({
   raw: schema.maybe(schema.boolean()),
 });
 
+export const BedrockMessageSchema = schema.object(
+  {
+    role: schema.string(),
+    content: schema.maybe(schema.string()),
+    rawContent: schema.maybe(schema.arrayOf(schema.any())),
+  },
+  {
+    validate: (value) => {
+      if (value.content === undefined && value.rawContent === undefined) {
+        return 'Must specify either content or rawContent';
+      } else if (value.content !== undefined && value.rawContent !== undefined) {
+        return 'content and rawContent can not be used at the same time';
+      }
+    },
+  }
+);
+
 export const InvokeAIActionParamsSchema = schema.object({
-  messages: schema.arrayOf(
-    schema.object({
-      role: schema.string(),
-      content: schema.string(),
-    })
-  ),
+  messages: schema.arrayOf(BedrockMessageSchema),
   model: schema.maybe(schema.string()),
   temperature: schema.maybe(schema.number()),
   stopSequences: schema.maybe(schema.arrayOf(schema.string())),
@@ -60,12 +72,7 @@ export const InvokeAIActionResponseSchema = schema.object({
 });
 
 export const InvokeAIRawActionParamsSchema = schema.object({
-  messages: schema.arrayOf(
-    schema.object({
-      role: schema.string(),
-      content: schema.any(),
-    })
-  ),
+  messages: schema.arrayOf(BedrockMessageSchema),
   model: schema.maybe(schema.string()),
   temperature: schema.maybe(schema.number()),
   stopSequences: schema.maybe(schema.arrayOf(schema.string())),

@@ -74,21 +74,37 @@ const messagesToBedrock = (messages: Message[]): BedRockMessage[] => {
       case MessageRole.User:
         return {
           role: 'user' as const,
-          content: message.content,
-          // rawContent: [{ text: message.content,},],
+          // content: message.content,
+          rawContent: [{ type: 'text' as const, text: message.content }],
         };
       case MessageRole.Assistant:
         return {
           role: 'assistant' as const,
-          content: message.content,
-          // rawContent: [...(message.content ? [{ text: message.content }] : [])],
+          // content: message.content,
+          rawContent: [
+            ...(message.content ? [{ type: 'text' as const, text: message.content }] : []),
+            ...(message.toolCalls
+              ? message.toolCalls.map((toolCall) => {
+                  return {
+                    type: 'tool_use' as const,
+                    id: toolCall.toolCallId,
+                    name: toolCall.function.name,
+                    input: ('arguments' in toolCall.function
+                      ? toolCall.function.arguments
+                      : {}) as Record<string, unknown>,
+                  };
+                })
+              : []),
+          ],
         };
       case MessageRole.Tool:
         return {
           role: 'user' as const,
           rawContent: [
             {
-              toolResult: { toolUseId: message.toolCallId, content: message.response },
+              type: 'tool_result' as const,
+              tool_use_id: message.toolCallId,
+              content: JSON.stringify(message.response),
             },
           ],
         };

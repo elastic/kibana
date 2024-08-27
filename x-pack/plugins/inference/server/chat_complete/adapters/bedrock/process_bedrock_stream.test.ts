@@ -15,6 +15,18 @@ import { TOOL_USE_END, TOOL_USE_START } from '../simulate_function_calling/const
 import { parseInlineFunctionCalls } from '../simulate_function_calling/parse_inline_function_calls';
 import { withoutTokenCountEvents } from '../../../../../common/utils/without_token_count_events';
 
+/*
+*** {"type":"message_start","message":{"id":"msg_bdrk_012EMKX9CWPtpmbxXLG51z2t","type":"message","role":"assistant","model":"claude-3-sonnet-20240229","content":[],"stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":365,"output_tokens":1}}}
+*** {"type":"content_block_start","index":0,"content_block":{"type":"tool_use","id":"toolu_bdrk_018QcdZZxZqKuheNsHQpbUjG","name":"getOrderById","input":{}}}
+*** {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":""}}
+*** {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"{\"orderId"}}
+*** {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"\": \"XF"}}
+*** {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"GHJ5678\"}"}}
+*** {"type":"content_block_stop","index":0}
+*** {"type":"message_delta","delta":{"stop_reason":"tool_use","stop_sequence":null},"usage":{"output_tokens":60}}
+*** {"type":"message_stop","amazon-bedrock-invocationMetrics":{"inputTokenCount":365,"outputTokenCount":41,"invocationLatency":1181,"firstByteLatency":366}}
+ */
+
 describe('processBedrockStream', () => {
   const encodeChunk = (body: unknown) => {
     return {
@@ -79,130 +91,6 @@ describe('processBedrockStream', () => {
         function_call: {
           arguments: '',
           name: '',
-          trigger: MessageRole.Assistant,
-        },
-        role: MessageRole.Assistant,
-      },
-    });
-  });
-
-  it('parses function calls when no text is given', async () => {
-    expect(
-      await lastValueFrom(
-        of(
-          start(),
-          encode(TOOL_USE_START),
-          encode('```json\n'),
-          encode('{ "name": "my_tool", "input": { "my_param": "my_value" } }\n'),
-          encode('```'),
-          stop(TOOL_USE_END)
-        ).pipe(
-          processBedrockStream(),
-          parseInlineFunctionCalls({
-            logger: getLoggerMock(),
-          }),
-          withoutTokenCountEvents(),
-          concatenateChatCompletionChunks()
-        )
-      )
-    ).toEqual({
-      message: {
-        content: '',
-        function_call: {
-          arguments: JSON.stringify({ my_param: 'my_value' }),
-          name: 'my_tool',
-          trigger: MessageRole.Assistant,
-        },
-        role: MessageRole.Assistant,
-      },
-    });
-  });
-
-  it('parses function calls when they are prefaced by text', async () => {
-    expect(
-      await lastValueFrom(
-        of(
-          start(),
-          encode('This is'),
-          encode(` my text${TOOL_USE_START.substring(0, 4)}`),
-          encode(`${TOOL_USE_START.substring(4)}\n\`\`\`json\n{"name":`),
-          encode(` "my_tool", "input`),
-          encode(`": { "my_param": "my_value" } }\n`),
-          encode('```'),
-          stop(TOOL_USE_END)
-        ).pipe(
-          processBedrockStream(),
-          parseInlineFunctionCalls({
-            logger: getLoggerMock(),
-          }),
-          withoutTokenCountEvents(),
-          concatenateChatCompletionChunks()
-        )
-      )
-    ).toEqual({
-      message: {
-        content: 'This is my text',
-        function_call: {
-          arguments: JSON.stringify({ my_param: 'my_value' }),
-          name: 'my_tool',
-          trigger: MessageRole.Assistant,
-        },
-        role: MessageRole.Assistant,
-      },
-    });
-  });
-
-  it('throws an error if the JSON cannot be parsed', async () => {
-    async function fn() {
-      return lastValueFrom(
-        of(
-          start(),
-          encode(TOOL_USE_START),
-          encode('```json\n'),
-          encode('invalid json\n'),
-          encode('```'),
-          stop(TOOL_USE_END)
-        ).pipe(
-          processBedrockStream(),
-          parseInlineFunctionCalls({
-            logger: getLoggerMock(),
-          }),
-          withoutTokenCountEvents(),
-          concatenateChatCompletionChunks()
-        )
-      );
-    }
-
-    await expect(fn).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Unexpected token 'i', \\"invalid json\\" is not valid JSON"`
-    );
-  });
-
-  it('successfully invokes a function without parameters', async () => {
-    expect(
-      await lastValueFrom(
-        of(
-          start(),
-          encode(TOOL_USE_START),
-          encode('```json\n'),
-          encode('{ "name": "my_tool" }\n'),
-          encode('```'),
-          stop(TOOL_USE_END)
-        ).pipe(
-          processBedrockStream(),
-          parseInlineFunctionCalls({
-            logger: getLoggerMock(),
-          }),
-          withoutTokenCountEvents(),
-          concatenateChatCompletionChunks()
-        )
-      )
-    ).toEqual({
-      message: {
-        content: '',
-        function_call: {
-          arguments: '{}',
-          name: 'my_tool',
           trigger: MessageRole.Assistant,
         },
         role: MessageRole.Assistant,

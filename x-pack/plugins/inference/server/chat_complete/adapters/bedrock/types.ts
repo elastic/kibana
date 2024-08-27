@@ -15,10 +15,14 @@ export interface BedRockMessage {
 }
 
 export type BedRockMessagePart =
-  | { text: string }
-  | { toolUse: { toolUseId: string; name: string; input: Record<string, unknown> } }
-  | { toolResult: { toolUseId: string; content: unknown } };
-
+  | { type: 'text'; text: string }
+  | {
+      type: 'tool_use';
+      id: string;
+      name: string;
+      input: Record<string, unknown>;
+    }
+  | { type: 'tool_result'; tool_use_id: string; content: string };
 
 interface CompletionChunkBase {
   type: string;
@@ -31,22 +35,32 @@ export interface MessageStartChunk extends CompletionChunkBase {
 
 export interface ContentBlockStartChunk extends CompletionChunkBase {
   type: 'content_block_start';
-  content_block: {
-    type: 'text';
-    text: string;
-  };
+  index: number;
+  content_block:
+    | {
+        type: 'text';
+        text: string;
+      }
+    | { type: 'tool_use'; id: string; name: string; input: string };
 }
 
 export interface ContentBlockDeltaChunk extends CompletionChunkBase {
   type: 'content_block_delta';
-  delta: {
-    type: 'text_delta';
-    text: string;
-  };
+  index: number;
+  delta:
+    | {
+        type: 'text_delta';
+        text: string;
+      }
+    | {
+        type: 'input_json_delta';
+        partial_json: string;
+      };
 }
 
 export interface ContentBlockStopChunk extends CompletionChunkBase {
   type: 'content_block_stop';
+  index: number;
 }
 
 export interface MessageDeltaChunk extends CompletionChunkBase {

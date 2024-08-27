@@ -19,6 +19,7 @@ import {
   InvokeAIRawActionResponseSchema,
   StreamingResponseSchema,
   RunApiLatestResponseSchema,
+  BedrockMessageSchema,
 } from './schema';
 
 export type Config = TypeOf<typeof ConfigSchema>;
@@ -33,3 +34,4 @@ export type RunActionResponse = TypeOf<typeof RunActionResponseSchema>;
 export type StreamingResponse = TypeOf<typeof StreamingResponseSchema>;
 export type DashboardActionParams = TypeOf<typeof DashboardActionParamsSchema>;
 export type DashboardActionResponse = TypeOf<typeof DashboardActionResponseSchema>;
+export type BedRockMessage = TypeOf<typeof BedrockMessageSchema>;

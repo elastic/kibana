@@ -10,14 +10,10 @@ import { toUtf8 } from '@smithy/util-utf8';
 import {
   ChatCompletionChunkEvent,
   ChatCompletionTokenCountEvent,
+  ChatCompletionChunkToolCall,
   ChatCompletionEventType,
 } from '../../../../common/chat_complete';
-import type {
-  CompletionChunk,
-  ContentBlockDeltaChunk,
-  ContentBlockStartChunk,
-  MessageStopChunk,
-} from './types';
+import type { CompletionChunk, MessageStopChunk } from './types';
 import type { BedrockChunkMember } from './serde_eventstream_into_observable';
 
 export function processBedrockStream() {
@@ -27,10 +23,6 @@ export function processBedrockStream() {
       // before all operations have completed.
       let nextPromise = Promise.resolve();
 
-      // As soon as we see a `<function` token, we write all chunks
-      // to a buffer, that we flush as a function request if we
-      // spot the stop sequence.
-
       async function handleNext(value: BedrockChunkMember) {
         const chunkBody: CompletionChunk = parseSerdeChunkBody(value.chunk);
 
@@ -38,24 +30,47 @@ export function processBedrockStream() {
           return emitTokenCountEvent(subscriber, chunkBody);
         }
 
-        if (
-          chunkBody.type !== 'content_block_start' &&
-          chunkBody.type !== 'content_block_delta' &&
-          chunkBody.type !== 'message_delta'
-        ) {
+        let completionChunk = '';
+        let toolCallChunk: ChatCompletionChunkToolCall | undefined;
+
+        if (chunkBody.type === 'content_block_start') {
+          if (chunkBody.content_block.type === 'text') {
+            completionChunk = chunkBody.content_block.text || '';
+          } else if (chunkBody.content_block.type === 'tool_use') {
+            toolCallChunk = {
+              index: chunkBody.index,
+              toolCallId: chunkBody.content_block.id,
+              function: {
+                name: chunkBody.content_block.name,
+                // the API returns '{}' here, which can't be merged with the deltas...
+                arguments: '',
+              },
+            };
+          }
+        } else if (chunkBody.type === 'content_block_delta') {
+          if (chunkBody.delta.type === 'text_delta') {
+            completionChunk = chunkBody.delta.text || '';
+          } else if (chunkBody.delta.type === 'input_json_delta') {
+            toolCallChunk = {
+              index: chunkBody.index,
+              toolCallId: '',
+              function: {
+                name: '',
+                arguments: chunkBody.delta.partial_json,
+              },
+            };
+          }
+        } else if (chunkBody.type === 'message_delta') {
+          completionChunk = chunkBody.delta.stop_sequence || '';
+        } else {
+          // we do not handle other event types
           return;
         }
 
-        // completion: what we eventually want to emit
-        const completion =
-          chunkBody.type !== 'message_delta'
-            ? getCompletion(chunkBody)
-            : chunkBody.delta.stop_sequence || '';
-
         subscriber.next({
           type: ChatCompletionEventType.ChatCompletionChunk,
-          content: completion,
-          tool_calls: [],
+          content: completionChunk,
+          tool_calls: toolCallChunk ? [toolCallChunk] : [],
         });
       }
 
@@ -93,10 +108,6 @@ function emitTokenCountEvent(
       total: inputTokenCount + outputTokenCount,
     },
   });
-}
-
-function getCompletion(chunk: ContentBlockStartChunk | ContentBlockDeltaChunk) {
-  return chunk.type === 'content_block_start' ? chunk.content_block.text : chunk.delta.text;
 }
 
 function parseSerdeChunkBody(chunk: BedrockChunkMember['chunk']) {

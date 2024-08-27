@@ -21,7 +21,7 @@ import {
   RunActionResponseSchema,
   RunApiLatestResponseSchema,
 } from '../../../common/bedrock/schema';
-import {
+import type {
   Config,
   Secrets,
   RunActionParams,
@@ -31,6 +31,7 @@ import {
   InvokeAIRawActionParams,
   InvokeAIRawActionResponse,
   RunApiLatestResponse,
+  BedRockMessage,
 } from '../../../common/bedrock/types';
 import {
   SUB_ACTION,
@@ -378,7 +379,7 @@ const formatBedrockBody = ({
   maxTokens = DEFAULT_TOKEN_LIMIT,
   tools,
 }: {
-  messages: Array<{ role: string; content?: string }>;
+  messages: BedRockMessage[];
   stopSequences?: string[];
   temperature?: number;
   maxTokens?: number;
@@ -394,6 +395,11 @@ const formatBedrockBody = ({
   tools,
 });
 
+interface FormattedBedRockMessage {
+  role: string;
+  content: string | BedRockMessage['rawContent'];
+}
+
 /**
  * Ensures that the messages are in the correct format for the Bedrock API
  * If 2 user or 2 assistant messages are sent in a row, Bedrock throws an error
@@ -401,19 +407,32 @@ const formatBedrockBody = ({
  * @param messages
  */
 const ensureMessageFormat = (
-  messages: Array<{ role: string; content?: string }>,
+  messages: BedRockMessage[],
   systemPrompt?: string
-): { messages: Array<{ role: string; content?: string }>; system?: string } => {
+): {
+  messages: FormattedBedRockMessage[];
+  system?: string;
+} => {
   let system = systemPrompt ? systemPrompt : '';
 
-  const newMessages = messages.reduce((acc: Array<{ role: string; content?: string }>, m) => {
-    const lastMessage = acc[acc.length - 1];
+  const newMessages = messages.reduce<FormattedBedRockMessage[]>((acc, m) => {
     if (m.role === 'system') {
       system = `${system.length ? `${system}\n` : ''}${m.content}`;
       return acc;
     }
 
-    if (lastMessage && lastMessage.role === m.role) {
+    const messageRole = () => (['assistant', 'ai'].includes(m.role) ? 'assistant' : 'user');
+
+    if (m.rawContent) {
+      acc.push({
+        role: messageRole(),
+        content: m.rawContent,
+      });
+      return acc;
+    }
+
+    const lastMessage = acc[acc.length - 1];
+    if (lastMessage && lastMessage.role === m.role && typeof lastMessage.content === 'string') {
       // Bedrock only accepts assistant and user roles.
       // If 2 user or 2 assistant messages are sent in a row, combine the messages into a single message
       return [
@@ -423,11 +442,11 @@ const ensureMessageFormat = (
     }
 
     // force role outside of system to ensure it is either assistant or user
-    return [
-      ...acc,
-      { content: m.content, role: ['assistant', 'ai'].includes(m.role) ? 'assistant' : 'user' },
-    ];
+    return [...acc, { content: m.content, role: messageRole() }];
   }, []);
+
+  console.log('*** messages = ', JSON.stringify(newMessages));
+
   return system.length ? { system, messages: newMessages } : { messages: newMessages };
 };
 
