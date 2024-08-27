@@ -51,7 +51,7 @@ export const buildAnnotationsFromError = (
   return annotations;
 };
 
-export const formatScheduledRunTime = (time: string | undefined): string => {
+export const formatTimeFromNow = (time: string | undefined): string => {
   if (!time) {
     return '';
   }

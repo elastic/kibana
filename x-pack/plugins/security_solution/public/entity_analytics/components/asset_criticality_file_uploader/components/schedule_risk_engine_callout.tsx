@@ -17,7 +17,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { i18n } from '@kbn/i18n';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { formatScheduledRunTime } from '../helpers';
+import { formatTimeFromNow } from '../helpers';
 import { useScheduleNowRiskEngineMutation } from '../../../api/hooks/use_schedule_now_risk_engine_mutation';
 import {
   useInvalidateRiskEngineStatusQuery,
@@ -26,7 +26,7 @@ import {
 
 const TEN_SECONDS = 10000;
 
-export const RiskEngineCallout: React.FC = () => {
+export const ScheduleRiskEngineCallout: React.FC = () => {
   const { data: riskEngineStatus, isLoading: isRiskEngineStatusLoading } = useRiskEngineStatus();
   const { addSuccess, addError } = useAppToasts();
   const { isLoading: isLoadingRiskEngineSchedule, mutate: scheduleRiskEngineMutation } =
@@ -63,7 +63,7 @@ export const RiskEngineCallout: React.FC = () => {
     if (isRunning) {
       setNextScheduleRun('Now running');
     } else {
-      setNextScheduleRun(formatScheduledRunTime(riskEngineStatus?.risk_engine_task_status?.runAt));
+      setNextScheduleRun(formatTimeFromNow(riskEngineStatus?.risk_engine_task_status?.runAt));
     }
   }, [isRunning, riskEngineStatus?.risk_engine_task_status?.runAt]);
 

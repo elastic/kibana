@@ -7,7 +7,7 @@
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
-import { RiskEngineCallout } from './risk_engine_callout';
+import { ScheduleRiskEngineCallout } from './schedule_risk_engine_callout';
 
 const THIRTY_MINUTES = 30 * 60 * 1000;
 const oneHourFromNow = () => {
@@ -38,7 +38,7 @@ jest.mock('../../../api/hooks/use_schedule_now_risk_engine_mutation', () => {
 
 jest.useFakeTimers();
 
-describe('RiskEngineCallout', () => {
+describe('ScheduleRiskEngineCallout', () => {
   it('should show the remaining time for the next risk engine run', async () => {
     mockUseRiskEngineStatus.mockReturnValue({
       data: {
@@ -51,7 +51,7 @@ describe('RiskEngineCallout', () => {
       },
     });
 
-    const { getByText } = render(<RiskEngineCallout />, {
+    const { getByText } = render(<ScheduleRiskEngineCallout />, {
       wrapper: TestProviders,
     });
 
@@ -73,7 +73,7 @@ describe('RiskEngineCallout', () => {
       },
     });
 
-    const { getByText } = render(<RiskEngineCallout />, {
+    const { getByText } = render(<ScheduleRiskEngineCallout />, {
       wrapper: TestProviders,
     });
 
@@ -94,7 +94,7 @@ describe('RiskEngineCallout', () => {
 
     jest.advanceTimersByTime(100); // advance time
 
-    const { getByText } = render(<RiskEngineCallout />, {
+    const { getByText } = render(<ScheduleRiskEngineCallout />, {
       wrapper: TestProviders,
     });
 
@@ -113,7 +113,7 @@ describe('RiskEngineCallout', () => {
       },
     });
 
-    const { getByText } = render(<RiskEngineCallout />, {
+    const { getByText } = render(<ScheduleRiskEngineCallout />, {
       wrapper: TestProviders,
     });
 
@@ -134,7 +134,7 @@ describe('RiskEngineCallout', () => {
       },
     });
 
-    const { getByText } = render(<RiskEngineCallout />, {
+    const { getByText } = render(<ScheduleRiskEngineCallout />, {
       wrapper: TestProviders,
     });
 
@@ -150,7 +150,7 @@ describe('RiskEngineCallout', () => {
       },
     });
 
-    const { queryByTestId } = render(<RiskEngineCallout />, {
+    const { queryByTestId } = render(<ScheduleRiskEngineCallout />, {
       wrapper: TestProviders,
     });
 

@@ -19,7 +19,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import type { BulkUpsertAssetCriticalityRecordsResponse } from '../../../../../common/entity_analytics/asset_criticality/types';
 import { buildAnnotationsFromError } from '../helpers';
-import { RiskEngineCallout } from './risk_engine_callout';
+import { ScheduleRiskEngineCallout } from './schedule_risk_engine_callout';
 
 export const AssetCriticalityResultStep: React.FC<{
   result?: BulkUpsertAssetCriticalityRecordsResponse;
@@ -74,7 +74,7 @@ export const AssetCriticalityResultStep: React.FC<{
           />
         </EuiCallOut>
         <EuiSpacer size="s" />
-        <RiskEngineCallout />
+        <ScheduleRiskEngineCallout />
         <ResultStepFooter onReturn={onReturn} />
       </>
     );

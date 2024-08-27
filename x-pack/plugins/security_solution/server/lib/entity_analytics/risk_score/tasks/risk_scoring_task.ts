@@ -149,7 +149,6 @@ export const getRiskScoringTaskStatus = async ({
   taskManager: TaskManagerStartContract;
 }): Promise<RiskScoringTaskStatus> => {
   const taskId = getTaskId(namespace);
-
   const task = await taskManager.get(taskId);
 
   return {
