@@ -45,6 +45,11 @@ export const BedrockMessageSchema = schema.object(
   }
 );
 
+export const BedrockToolChoiceSchema = schema.object({
+  type: schema.oneOf([schema.literal('auto'), schema.literal('any'), schema.literal('tool')]),
+  name: schema.maybe(schema.string()),
+});
+
 export const InvokeAIActionParamsSchema = schema.object({
   messages: schema.arrayOf(BedrockMessageSchema),
   model: schema.maybe(schema.string()),
@@ -65,6 +70,7 @@ export const InvokeAIActionParamsSchema = schema.object({
       })
     )
   ),
+  toolChoice: schema.maybe(BedrockToolChoiceSchema),
 });
 
 export const InvokeAIActionResponseSchema = schema.object({
@@ -91,6 +97,7 @@ export const InvokeAIRawActionParamsSchema = schema.object({
       })
     )
   ),
+  toolChoice: schema.maybe(BedrockToolChoiceSchema),
 });
 
 export const InvokeAIRawActionResponseSchema = schema.object({}, { unknowns: 'allow' });

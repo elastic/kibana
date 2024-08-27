@@ -32,6 +32,7 @@ import type {
   InvokeAIRawActionResponse,
   RunApiLatestResponse,
   BedRockMessage,
+  BedrockToolChoice,
 } from '../../../common/bedrock/types';
 import {
   SUB_ACTION,
@@ -299,10 +300,11 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     signal,
     timeout,
     tools,
+    toolChoice,
   }: InvokeAIActionParams | InvokeAIRawActionParams): Promise<IncomingMessage> {
     const res = (await this.streamApi({
       body: JSON.stringify(
-        formatBedrockBody({ messages, stopSequences, system, temperature, tools })
+        formatBedrockBody({ messages, stopSequences, system, temperature, tools, toolChoice })
       ),
       model,
       signal,
@@ -328,10 +330,20 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     maxTokens,
     signal,
     timeout,
+    tools,
+    toolChoice,
   }: InvokeAIActionParams): Promise<InvokeAIActionResponse> {
     const res = (await this.runApi({
       body: JSON.stringify(
-        formatBedrockBody({ messages, stopSequences, system, temperature, maxTokens })
+        formatBedrockBody({
+          messages,
+          stopSequences,
+          system,
+          temperature,
+          maxTokens,
+          tools,
+          toolChoice,
+        })
       ),
       model,
       signal,
@@ -350,6 +362,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     signal,
     timeout,
     tools,
+    toolChoice,
     anthropicVersion,
   }: InvokeAIRawActionParams): Promise<InvokeAIRawActionResponse> {
     const res = await this.runApi({
@@ -360,6 +373,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
         temperature,
         max_tokens: maxTokens,
         tools,
+        tool_choice: toolChoice,
         anthropic_version: anthropicVersion,
       }),
       model,
@@ -378,6 +392,7 @@ const formatBedrockBody = ({
   system,
   maxTokens = DEFAULT_TOKEN_LIMIT,
   tools,
+  toolChoice,
 }: {
   messages: BedRockMessage[];
   stopSequences?: string[];
@@ -386,6 +401,7 @@ const formatBedrockBody = ({
   // optional system message to be sent to the API
   system?: string;
   tools?: Array<{ name: string; description: string }>;
+  toolChoice?: BedrockToolChoice;
 }) => ({
   anthropic_version: 'bedrock-2023-05-31',
   ...ensureMessageFormat(messages, system),
@@ -393,6 +409,7 @@ const formatBedrockBody = ({
   stop_sequences: stopSequences,
   temperature,
   tools,
+  tool_choice: toolChoice,
 });
 
 interface FormattedBedRockMessage {
@@ -444,8 +461,6 @@ const ensureMessageFormat = (
     // force role outside of system to ensure it is either assistant or user
     return [...acc, { content: m.content, role: messageRole() }];
   }, []);
-
-  console.log('*** messages = ', JSON.stringify(newMessages));
 
   return system.length ? { system, messages: newMessages } : { messages: newMessages };
 };

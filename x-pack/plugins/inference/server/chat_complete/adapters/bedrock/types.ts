@@ -14,6 +14,9 @@ export interface BedRockMessage {
   rawContent?: BedRockMessagePart[];
 }
 
+/**
+ * Bedrock message parts
+ */
 export type BedRockMessagePart =
   | { type: 'text'; text: string }
   | {
@@ -23,6 +26,8 @@ export type BedRockMessagePart =
       input: Record<string, unknown>;
     }
   | { type: 'tool_result'; tool_use_id: string; content: string };
+
+export type BedrockToolChoice = { type: 'auto' } | { type: 'any' } | { type: 'tool'; name: string };
 
 interface CompletionChunkBase {
   type: string;

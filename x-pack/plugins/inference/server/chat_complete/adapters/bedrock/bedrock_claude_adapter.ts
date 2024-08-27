@@ -9,10 +9,10 @@ import { filter, from, switchMap, tap } from 'rxjs';
 import { Readable } from 'stream';
 import type { InvokeAIActionParams } from '@kbn/stack-connectors-plugin/common/bedrock/types';
 import { Message, MessageRole } from '../../../../common/chat_complete';
-import type { ToolOptions } from '../../../../common/chat_complete/tools';
+import { ToolChoiceType, type ToolOptions } from '../../../../common/chat_complete/tools';
 import { createInferenceInternalError } from '../../../../common/errors';
 import { InferenceConnectorAdapter } from '../../types';
-import type { BedRockMessage } from './types';
+import type { BedRockMessage, BedrockToolChoice } from './types';
 import {
   serdeEventstreamIntoObservable,
   BedrockChunkMember,
@@ -21,11 +21,11 @@ import { processBedrockStream } from './process_bedrock_stream';
 
 export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
   chatComplete: ({ executor, system, messages, toolChoice, tools }) => {
-    // TODO: toolChoice
     const connectorInvokeRequest: InvokeAIActionParams = {
       system,
       messages: messagesToBedrock(messages),
       tools: toolsToBedrock(tools),
+      toolChoice: toolChoiceToBedrock(toolChoice),
       temperature: 0,
       stopSequences: ['\n\nHuman:'],
     };
@@ -51,6 +51,27 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
       processBedrockStream()
     );
   },
+};
+
+const toolChoiceToBedrock = (
+  toolChoice: ToolOptions['toolChoice']
+): BedrockToolChoice | undefined => {
+  if (toolChoice === ToolChoiceType.required) {
+    return {
+      type: 'any',
+    };
+  } else if (toolChoice === ToolChoiceType.auto) {
+    return {
+      type: 'auto',
+    };
+  } else if (typeof toolChoice === 'object') {
+    return {
+      type: 'tool',
+      name: toolChoice.function,
+    };
+  }
+  // ToolChoiceType.none is not supported by claude.
+  return undefined;
 };
 
 const toolsToBedrock = (tools: ToolOptions['tools']) => {
