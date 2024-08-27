@@ -79,7 +79,7 @@ export function TopNavMenu<QT extends AggregateQuery | Query = Query>(
   }
 
   function renderSearchBar(): ReactElement | null {
-    // Validate presense of all required fields
+    // Validate presence of all required fields
     if (!showSearchBar || !props.unifiedSearch) return null;
     const { AggregateQuerySearchBar } = props.unifiedSearch.ui;
     return <AggregateQuerySearchBar<QT> {...searchBarProps} />;
