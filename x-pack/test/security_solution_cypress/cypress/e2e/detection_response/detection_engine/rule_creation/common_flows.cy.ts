@@ -8,7 +8,6 @@
 import { ruleFields } from '../../../../data/detection_engine';
 import {
   ABOUT_CONTINUE_BTN,
-  ABOUT_EDIT_BUTTON,
   CUSTOM_QUERY_INPUT,
   DEFINE_CONTINUE_BUTTON,
   DEFINE_EDIT_BUTTON,
