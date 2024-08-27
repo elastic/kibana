@@ -127,10 +127,13 @@ export const LOGS_SAMPLE_ERROR = {
     }
   ),
   CAN_NOT_READ_WITH_REASON: (reason: string) =>
-    i18n.translate('xpack.integrationAssistant.step.dataStream.logsSample.errorCanNotRead', {
-      values: { reason },
-      defaultMessage: 'An error occurred when reading logs sample: {reason}',
-    }),
+    i18n.translate(
+      'xpack.integrationAssistant.step.dataStream.logsSample.errorCanNotReadWithReason',
+      {
+        values: { reason },
+        defaultMessage: 'An error occurred when reading logs sample: {reason}',
+      }
+    ),
   CAN_NOT_PARSE: i18n.translate(
     'xpack.integrationAssistant.step.dataStream.logsSample.errorCanNotParse',
     {
