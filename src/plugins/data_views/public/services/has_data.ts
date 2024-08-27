@@ -141,7 +141,7 @@ export class HasData {
     // todo consider excluding DEFAULT_ASSETS_TO_IGNORE
     this.getIndicesViaSearch({
       http,
-      pattern: '*,-logs-enterprise_search.api-default,-logs-enterprise_search.audit-default',
+      pattern: '*,-.*,-logs-enterprise_search.api-default,-logs-enterprise_search.audit-default',
       showAllIndices: false,
     });
 
@@ -149,7 +149,8 @@ export class HasData {
     // todo consider excluding DEFAULT_ASSETS_TO_IGNORE
     this.getIndicesViaSearch({
       http,
-      pattern: '*:*,-*:logs-enterprise_search.api-default,-*:logs-enterprise_search.audit-default',
+      pattern:
+        '*:*,-*:.*,-*:logs-enterprise_search.api-default,-*:logs-enterprise_search.audit-default',
       showAllIndices: false,
     });
 
