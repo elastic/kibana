@@ -14,7 +14,7 @@ export const getErrorMessage = (error: ResponseErrorBody) => {
   if (error.statusCode === 403) {
     return (
       <FormattedMessage
-        id="xpack.ingestPipelines.app.deniedPrivilegeDescription"
+        id="xpack.ingestPipelines.manageProcessors.deniedPrivilegeDescription"
         defaultMessage="To manage geoIP databases, you must have the {manage} cluster privilege."
         values={{
           manage: <EuiCode>manage</EuiCode>,
