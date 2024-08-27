@@ -35,7 +35,7 @@ export function DashboardDrilldownPanelActionsProvider({ getService }: FtrProvid
     async clickCreateDrilldown() {
       log.debug('clickCreateDrilldown');
       await this.expectExistsCreateDrilldownAction();
-      await dashboardPanelActions.clickContextMenuItem(CREATE_DRILLDOWN_DATA_TEST_SUBJ);
+      await dashboardPanelActions.clickPanelAction(CREATE_DRILLDOWN_DATA_TEST_SUBJ);
     }
 
     async expectExistsManageDrilldownsAction() {

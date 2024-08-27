@@ -87,8 +87,8 @@ export class DashboardPanelActionsService extends FtrService {
     await this.openContextMenu(header);
   }
 
-  async clickContextMenuItem(testSubject: string, parent?: WebElementWrapper) {
-    this.log.debug(`clickContextMenuItem(${testSubject})`);
+  async clickPanelAction(testSubject: string, parent?: WebElementWrapper) {
+    this.log.debug(`clickPanelAction(${testSubject})`);
 
     await this.scrollParentIntoView(parent);
     const exists = await this.testSubjects.exists(testSubject);
@@ -97,15 +97,15 @@ export class DashboardPanelActionsService extends FtrService {
     await this.testSubjects.click(testSubject);
   }
 
-  async clickContextMenuItemByTitle(testSubject: string, title = '') {
+  async clickPanelActionByTitle(testSubject: string, title = '') {
     this.log.debug(`openContextMenuByTitle(${testSubject},${title})`);
     const header = await this.getPanelHoverActions(title);
-    await this.clickContextMenuItem(testSubject, header);
+    await this.clickPanelAction(testSubject, header);
   }
 
   async navigateToEditorFromFlyout(parent?: WebElementWrapper) {
     this.log.debug('navigateToEditorFromFlyout');
-    await this.clickContextMenuItem(INLINE_EDIT_PANEL_DATA_TEST_SUBJ, parent);
+    await this.clickPanelAction(INLINE_EDIT_PANEL_DATA_TEST_SUBJ, parent);
     await this.header.waitUntilLoadingHasFinished();
     await this.testSubjects.click(EDIT_IN_LENS_EDITOR_DATA_TEST_SUBJ);
     const isConfirmModalVisible = await this.testSubjects.exists('confirmModalConfirmButton');
@@ -116,7 +116,7 @@ export class DashboardPanelActionsService extends FtrService {
 
   async clickInlineEdit() {
     this.log.debug('clickInlineEditAction');
-    await this.clickContextMenuItem(INLINE_EDIT_PANEL_DATA_TEST_SUBJ);
+    await this.clickPanelAction(INLINE_EDIT_PANEL_DATA_TEST_SUBJ);
     await this.header.waitUntilLoadingHasFinished();
     await this.common.waitForTopNavToBeVisible();
   }
@@ -152,12 +152,12 @@ export class DashboardPanelActionsService extends FtrService {
   async clickExpandPanelToggle() {
     this.log.debug(`clickExpandPanelToggle`);
     await this.openContextMenu();
-    await this.clickContextMenuItem(TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ);
+    await this.clickPanelAction(TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ);
   }
 
   async removePanel(parent?: WebElementWrapper) {
     this.log.debug('removePanel');
-    await this.clickContextMenuItem(REMOVE_PANEL_DATA_TEST_SUBJ, parent);
+    await this.clickPanelAction(REMOVE_PANEL_DATA_TEST_SUBJ, parent);
   }
 
   async removePanelByTitle(title = '') {
@@ -168,26 +168,26 @@ export class DashboardPanelActionsService extends FtrService {
 
   async customizePanel(parent?: WebElementWrapper) {
     this.log.debug('customizePanel');
-    await this.clickContextMenuItem(CUSTOMIZE_PANEL_DATA_TEST_SUBJ, parent);
+    await this.clickPanelAction(CUSTOMIZE_PANEL_DATA_TEST_SUBJ, parent);
   }
 
   async customizePanelByTitle(title = '') {
     this.log.debug('customizePanel');
     const header = await this.getPanelHoverActions(title);
-    await this.clickContextMenuItem(CUSTOMIZE_PANEL_DATA_TEST_SUBJ, header);
+    await this.clickPanelAction(CUSTOMIZE_PANEL_DATA_TEST_SUBJ, header);
   }
 
   async clonePanelByTitle(title = '') {
     this.log.debug(`clonePanel(${title})`);
     const header = await this.getPanelHoverActions(title);
-    await this.clickContextMenuItem(CLONE_PANEL_DATA_TEST_SUBJ, header);
+    await this.clickPanelAction(CLONE_PANEL_DATA_TEST_SUBJ, header);
     await this.dashboard.waitForRenderComplete();
   }
 
   async openCopyToModalByTitle(title = '') {
     this.log.debug(`copyPanelTo(${title})`);
     const header = await this.getPanelHoverActions(title);
-    await this.clickContextMenuItem(COPY_PANEL_TO_DATA_TEST_SUBJ, header);
+    await this.clickPanelAction(COPY_PANEL_TO_DATA_TEST_SUBJ, header);
   }
 
   async openInspectorByTitle(title = '') {
@@ -218,12 +218,12 @@ export class DashboardPanelActionsService extends FtrService {
 
   async openInspector(parent?: WebElementWrapper) {
     this.log.debug(`openInspector`);
-    await this.clickContextMenuItem(OPEN_INSPECTOR_TEST_SUBJ, parent);
+    await this.clickPanelAction(OPEN_INSPECTOR_TEST_SUBJ, parent);
   }
 
   async legacyUnlinkFromLibrary(parent?: WebElementWrapper) {
     this.log.debug('legacyUnlinkFromLibrary');
-    await this.clickContextMenuItem(LEGACY_UNLINK_FROM_LIBRARY_TEST_SUBJ, parent);
+    await this.clickPanelAction(LEGACY_UNLINK_FROM_LIBRARY_TEST_SUBJ, parent);
   }
 
   async legacyUnlinkFromLibraryByTitle(title = '') {
@@ -236,7 +236,7 @@ export class DashboardPanelActionsService extends FtrService {
 
   async unlinkFromLibrary(parent?: WebElementWrapper) {
     this.log.debug('unlinkFromLibrary');
-    await this.clickContextMenuItem(UNLINK_FROM_LIBRARY_TEST_SUBJ, parent);
+    await this.clickPanelAction(UNLINK_FROM_LIBRARY_TEST_SUBJ, parent);
     await this.testSubjects.waitForDeleted(
       'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION'
     );
@@ -252,7 +252,7 @@ export class DashboardPanelActionsService extends FtrService {
 
   async legacySaveToLibrary(newTitle = '', parent?: WebElementWrapper) {
     this.log.debug(`legacySaveToLibrary(${newTitle})`);
-    await this.clickContextMenuItem(LEGACY_SAVE_TO_LIBRARY_TEST_SUBJ, parent);
+    await this.clickPanelAction(LEGACY_SAVE_TO_LIBRARY_TEST_SUBJ, parent);
     await this.testSubjects.setValue('savedObjectTitle', newTitle, {
       clearWithKeyboard: true,
     });
@@ -274,7 +274,7 @@ export class DashboardPanelActionsService extends FtrService {
 
   async saveToLibrary(newTitle = '', parent?: WebElementWrapper) {
     this.log.debug('saveToLibrary');
-    await this.clickContextMenuItem(SAVE_TO_LIBRARY_TEST_SUBJ, parent);
+    await this.clickPanelAction(SAVE_TO_LIBRARY_TEST_SUBJ, parent);
     await this.testSubjects.setValue('savedObjectTitle', newTitle, {
       clearWithKeyboard: true,
     });

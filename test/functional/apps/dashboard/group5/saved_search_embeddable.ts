@@ -77,7 +77,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.dashboard.waitForRenderComplete();
 
-      await dashboardPanelActions.clickContextMenuItem(
+      await dashboardPanelActions.clickPanelAction(
         'embeddablePanelAction-ACTION_VIEW_SAVED_SEARCH'
       );
 

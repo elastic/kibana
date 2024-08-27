@@ -53,7 +53,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const clickDownloadCsv = async () => {
     log.debug('click "Generate CSV"');
-    await dashboardPanelActions.clickContextMenuItem('embeddablePanelAction-generateCsvReport');
+    await dashboardPanelActions.clickPanelAction('embeddablePanelAction-generateCsvReport');
     await testSubjects.existOrFail('csvReportStarted'); // validate toast panel
   };
 

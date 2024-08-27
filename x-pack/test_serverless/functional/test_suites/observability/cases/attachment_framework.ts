@@ -58,7 +58,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       it('adds lens visualization to a new case', async () => {
         const caseTitle = 'case created in observability from my dashboard with lens visualization';
 
-        await dashboardPanelActions.clickContextMenuItem(ADD_TO_CASE_DATA_TEST_SUBJ);
+        await dashboardPanelActions.clickPanelAction(ADD_TO_CASE_DATA_TEST_SUBJ);
 
         await retry.waitFor('wait for the modal to open', async () => {
           return (
@@ -109,7 +109,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'dashboards' });
 
-        await dashboardPanelActions.clickContextMenuItem(ADD_TO_CASE_DATA_TEST_SUBJ);
+        await dashboardPanelActions.clickPanelAction(ADD_TO_CASE_DATA_TEST_SUBJ);
         // verify that solution filter is not visible
         await testSubjects.missingOrFail('options-filter-popover-button-owner');
 

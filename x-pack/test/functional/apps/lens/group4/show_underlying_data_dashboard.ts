@@ -42,7 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         exitFromEditMode: true,
       });
 
-      await dashboardPanelActions.clickContextMenuItem(OPEN_IN_DISCOVER_DATA_TEST_SUBJ);
+      await dashboardPanelActions.clickPanelAction(OPEN_IN_DISCOVER_DATA_TEST_SUBJ);
 
       const [dashboardWindowHandle, discoverWindowHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(discoverWindowHandle);
@@ -73,7 +73,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         exitFromEditMode: true,
       });
 
-      await dashboardPanelActions.clickContextMenuItem(OPEN_IN_DISCOVER_DATA_TEST_SUBJ);
+      await dashboardPanelActions.clickPanelAction(OPEN_IN_DISCOVER_DATA_TEST_SUBJ);
 
       const [dashboardWindowHandle, discoverWindowHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(discoverWindowHandle);
@@ -119,7 +119,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardPanelActions.expectExistsPanelAction(OPEN_IN_DISCOVER_DATA_TEST_SUBJ);
       await PageObjects.dashboard.clickCancelOutOfEditMode();
 
-      await dashboardPanelActions.clickContextMenuItem(OPEN_IN_DISCOVER_DATA_TEST_SUBJ);
+      await dashboardPanelActions.clickPanelAction(OPEN_IN_DISCOVER_DATA_TEST_SUBJ);
 
       const [dashboardWindowHandle, discoverWindowHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(discoverWindowHandle);
