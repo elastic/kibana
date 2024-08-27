@@ -4943,6 +4943,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/eui-provider-dev-warning@link:test/plugin_functional/plugins/eui_provider_dev_warning":
+  version "0.0.0"
+  uid ""
+
 "@kbn/event-annotation-common@link:packages/kbn-event-annotation-common":
   version "0.0.0"
   uid ""
@@ -6287,6 +6291,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/security-solution-common@link:x-pack/packages/security-solution/common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/security-solution-distribution-bar@link:x-pack/packages/security-solution/distribution_bar":
   version "0.0.0"
   uid ""
@@ -6328,6 +6336,10 @@
   uid ""
 
 "@kbn/security-test-endpoints-plugin@link:x-pack/test/security_functional/plugins/test_endpoints":
+  version "0.0.0"
+  uid ""
+
+"@kbn/security-ui-components@link:x-pack/packages/security/ui_components":
   version "0.0.0"
   uid ""
 
@@ -23436,17 +23448,17 @@ moment-duration-format@^2.3.2:
   resolved "https://registry.yarnpkg.com/moment-duration-format/-/moment-duration-format-2.3.2.tgz#5fa2b19b941b8d277122ff3f87a12895ec0d6212"
   integrity sha512-cBMXjSW+fjOb4tyaVHuaVE/A5TqkukDWiOfxxAjY+PEqmmBQlLwn+8OzwPiG3brouXKY5Un4pBjAeB6UToXHaQ==
 
-moment-timezone@^0.5.43:
-  version "0.5.43"
-  resolved "https://registry.yarnpkg.com/moment-timezone/-/moment-timezone-0.5.43.tgz#3dd7f3d0c67f78c23cd1906b9b2137a09b3c4790"
-  integrity sha512-72j3aNyuIsDxdF1i7CEgV2FfxM1r6aaqJyLB2vwb33mXYyoyLly+F1zbWqhA3/bVIoJ4szlUoMbUnVdid32NUQ==
+moment-timezone@^0.5.45:
+  version "0.5.45"
+  resolved "https://registry.yarnpkg.com/moment-timezone/-/moment-timezone-0.5.45.tgz#cb685acd56bac10e69d93c536366eb65aa6bcf5c"
+  integrity sha512-HIWmqA86KcmCAhnMAN0wuDOARV/525R2+lOLotuGFzn4HO+FH+/645z2wx0Dt3iDv6/p61SIvKnDstISainhLQ==
   dependencies:
     moment "^2.29.4"
 
-moment@>=2.14.0, moment@^2.10.6, moment@^2.29.4:
-  version "2.29.4"
-  resolved "https://registry.yarnpkg.com/moment/-/moment-2.29.4.tgz#3dbe052889fe7c1b2ed966fcb3a77328964ef108"
-  integrity sha512-5LC9SOxjSc2HF6vO2CyuTDNivEdoz2IvyJJGj6X8DJ0eFyfszE0QiEd+iXmBvUP3WHxSjFH/vIsA0EN00cgr8w==
+moment@>=2.14.0, moment@^2.10.6, moment@^2.29.4, moment@^2.30.1:
+  version "2.30.1"
+  resolved "https://registry.yarnpkg.com/moment/-/moment-2.30.1.tgz#f8c91c07b7a786e30c59926df530b4eac96974ae"
+  integrity sha512-uEmtNhbDOrWPFS+hdjFCBfy9f2YoyzRpwcl+DqpC6taX21FzsTLQVbMV/W7PzNSX6x/bhC1zA3c2UQ5NzH6how==
 
 monaco-editor@^0.44.0:
   version "0.44.0"
