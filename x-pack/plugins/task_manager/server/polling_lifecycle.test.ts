@@ -21,7 +21,7 @@ import { FillPoolResult } from './lib/fill_pool';
 import { ElasticsearchResponseError } from './lib/identify_es_error';
 import { executionContextServiceMock } from '@kbn/core/server/mocks';
 import { TaskCost } from './task';
-import { CLAIM_STRATEGY_MGET } from './config';
+import { CLAIM_STRATEGY_MGET, DEFAULT_KIBANAS_PER_PARTITION } from './config';
 import { TaskPartitioner } from './lib/task_partitioner';
 import { KibanaDiscoveryService } from './kibana_discovery_service';
 
@@ -45,6 +45,11 @@ describe('TaskPollingLifecycle', () => {
   const mockTaskStore = taskStoreMock.create({});
   const taskManagerOpts = {
     config: {
+      discovery: {
+        active_nodes_lookback: '30s',
+        interval: 10000,
+      },
+      kibanas_per_partition: 2,
       enabled: true,
       index: 'foo',
       max_attempts: 9,
@@ -95,7 +100,11 @@ describe('TaskPollingLifecycle', () => {
     capacityConfiguration$: of(20),
     pollIntervalConfiguration$: of(100),
     executionContext,
-    taskPartitioner: new TaskPartitioner('test', {} as KibanaDiscoveryService),
+    taskPartitioner: new TaskPartitioner({
+      podName: 'test',
+      kibanaDiscoveryService: {} as KibanaDiscoveryService,
+      kibanasPerPartition: DEFAULT_KIBANAS_PER_PARTITION,
+    }),
   };
 
   beforeEach(() => {

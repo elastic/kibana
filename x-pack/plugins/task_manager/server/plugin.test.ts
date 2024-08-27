@@ -49,6 +49,11 @@ const pluginInitializerContextParams = {
   version_conflict_threshold: 80,
   request_capacity: 1000,
   allow_reading_invalid_state: false,
+  discovery: {
+    active_nodes_lookback: '30s',
+    interval: 10000,
+  },
+  kibanas_per_partition: 2,
   monitored_aggregated_stats_refresh_rate: 5000,
   monitored_stats_health_verbose_log: {
     enabled: false,
