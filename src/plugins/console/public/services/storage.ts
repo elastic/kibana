@@ -15,6 +15,7 @@ export enum StorageKeys {
   WIDTH = 'widths',
   FOLDS = 'folds',
   VARIABLES = 'variables',
+  DEFAULT_LANGUAGE = 'defaultLanguage',
 }
 
 export class Storage {

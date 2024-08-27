@@ -1,0 +1,48 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`execute Torq action execute with token happy flow 1`] = `
+Object {
+  "axios": Any<Function>,
+  "connectorUsageCollector": Object {
+    "connectorId": "test-connector-id",
+    "logger": Object {
+      "context": Array [],
+      "debug": [MockFunction] {
+        "calls": Array [
+          Array [
+            "response from Torq action \\"some-id\\": [HTTP 200] ",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      },
+      "error": [MockFunction],
+      "fatal": [MockFunction],
+      "get": [MockFunction],
+      "info": [MockFunction],
+      "isLevelEnabled": [MockFunction],
+      "log": [MockFunction],
+      "trace": [MockFunction],
+      "warn": [MockFunction],
+    },
+    "usage": Object {
+      "requestBodyBytes": 0,
+    },
+  },
+  "data": Object {
+    "msg": "some data",
+  },
+  "headers": Object {
+    "Content-Type": "application/json",
+    "X-Torq-Token": "1234",
+  },
+  "logger": Any<Object>,
+  "method": "post",
+  "url": "https://hooks.torq.io/v1/test",
+  "validateStatus": Any<Function>,
+}
+`;

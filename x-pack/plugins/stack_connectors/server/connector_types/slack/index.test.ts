@@ -9,6 +9,7 @@ import { Logger } from '@kbn/core/server';
 import {
   Services,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
+  ConnectorUsageCollector,
 } from '@kbn/actions-plugin/server/types';
 import { validateParams, validateSecrets } from '@kbn/actions-plugin/server/lib';
 import {
@@ -35,6 +36,7 @@ const mockedLogger: jest.Mocked<Logger> = loggerMock.create();
 
 let connectorType: SlackConnectorType;
 let configurationUtilities: jest.Mocked<ActionsConfigurationUtilities>;
+let connectorUsageCollector: ConnectorUsageCollector;
 
 beforeEach(() => {
   configurationUtilities = actionsConfigMock.create();
@@ -42,6 +44,10 @@ beforeEach(() => {
     async executor(options) {
       return { status: 'ok', actionId: options.actionId };
     },
+  });
+  connectorUsageCollector = new ConnectorUsageCollector({
+    logger: mockedLogger,
+    connectorId: 'test-connector-id',
   });
 });
 
@@ -181,6 +187,7 @@ describe('execute()', () => {
       params: { message: 'this invocation should succeed' },
       configurationUtilities,
       logger: mockedLogger,
+      connectorUsageCollector,
     });
     expect(response).toMatchInlineSnapshot(`
       Object {
@@ -201,6 +208,7 @@ describe('execute()', () => {
         params: { message: 'failure: this invocation should fail' },
         configurationUtilities,
         logger: mockedLogger,
+        connectorUsageCollector,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"slack mockExecutor failure: this invocation should fail"`
@@ -226,6 +234,7 @@ describe('execute()', () => {
       params: { message: 'this invocation should succeed' },
       configurationUtilities: configUtils,
       logger: mockedLogger,
+      connectorUsageCollector,
     });
     expect(mockedLogger.debug).toHaveBeenCalledWith(
       'IncomingWebhook was called with proxyUrl https://someproxyhost'
@@ -252,6 +261,7 @@ describe('execute()', () => {
       params: { message: 'this invocation should succeed' },
       configurationUtilities: configUtils,
       logger: mockedLogger,
+      connectorUsageCollector,
     });
     expect(mockedLogger.debug).not.toHaveBeenCalledWith(
       'IncomingWebhook was called with proxyUrl https://someproxyhost'
@@ -278,6 +288,7 @@ describe('execute()', () => {
       params: { message: 'this invocation should succeed' },
       configurationUtilities: configUtils,
       logger: mockedLogger,
+      connectorUsageCollector,
     });
     expect(mockedLogger.debug).toHaveBeenCalledWith(
       'IncomingWebhook was called with proxyUrl https://someproxyhost'
@@ -304,6 +315,7 @@ describe('execute()', () => {
       params: { message: 'this invocation should succeed' },
       configurationUtilities: configUtils,
       logger: mockedLogger,
+      connectorUsageCollector,
     });
     expect(mockedLogger.debug).toHaveBeenCalledWith(
       'IncomingWebhook was called with proxyUrl https://someproxyhost'
@@ -330,6 +342,7 @@ describe('execute()', () => {
       params: { message: 'this invocation should succeed' },
       configurationUtilities: configUtils,
       logger: mockedLogger,
+      connectorUsageCollector,
     });
     expect(mockedLogger.debug).not.toHaveBeenCalledWith(
       'IncomingWebhook was called with proxyUrl https://someproxyhost'

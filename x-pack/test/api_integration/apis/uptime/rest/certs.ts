@@ -47,7 +47,7 @@ export default function ({ getService }: FtrProviderContext) {
       const cnvb = now.subtract(23, 'weeks').toISOString();
       const monitorId = 'monitor1';
       before(async () => {
-        makeChecksWithStatus(
+        await makeChecksWithStatus(
           esService,
           monitorId,
           3,
@@ -77,8 +77,8 @@ export default function ({ getService }: FtrProviderContext) {
           (d: any) => d
         );
       });
-      after('unload test docs', () => {
-        esArchiver.unload('x-pack/test/functional/es_archives/uptime/blank');
+      after('unload test docs', async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/uptime/blank');
       });
 
       it('retrieves expected cert data', async () => {

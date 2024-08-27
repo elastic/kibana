@@ -9,6 +9,7 @@ import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 
 import type { AxiosError } from 'axios';
 import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
+import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { isAggregateError, NodeSystemError } from './types';
 import type {
   CrowdstrikeConfig,
@@ -96,68 +97,87 @@ export class CrowdstrikeConnector extends SubActionConnector<
     });
   }
 
-  public async executeHostActions({ alertIds, ...payload }: CrowdstrikeHostActionsParams) {
-    return this.crowdstrikeApiRequest({
-      url: this.urls.hostAction,
-      method: 'post',
-      params: {
-        action_name: payload.command,
+  public async executeHostActions(
+    { alertIds, ...payload }: CrowdstrikeHostActionsParams,
+    connectorUsageCollector: ConnectorUsageCollector
+  ) {
+    return this.crowdstrikeApiRequest(
+      {
+        url: this.urls.hostAction,
+        method: 'post',
+        params: {
+          action_name: payload.command,
+        },
+        data: {
+          ids: payload.ids,
+          ...(payload.actionParameters
+            ? {
+                action_parameters: Object.entries(payload.actionParameters).map(
+                  ([name, value]) => ({
+                    name,
+                    value,
+                  })
+                ),
+              }
+            : {}),
+        },
+        paramsSerializer,
+        responseSchema: CrowdstrikeHostActionsResponseSchema,
       },
-      data: {
-        ids: payload.ids,
-        ...(payload.actionParameters
-          ? {
-              action_parameters: Object.entries(payload.actionParameters).map(([name, value]) => ({
-                name,
-                value,
-              })),
-            }
-          : {}),
-      },
-      paramsSerializer,
-      responseSchema: CrowdstrikeHostActionsResponseSchema,
-    });
+      connectorUsageCollector
+    );
   }
 
   public async getAgentDetails(
-    payload: CrowdstrikeGetAgentsParams
+    payload: CrowdstrikeGetAgentsParams,
+    connectorUsageCollector: ConnectorUsageCollector
   ): Promise<CrowdstrikeGetAgentsResponse> {
-    return this.crowdstrikeApiRequest({
-      url: this.urls.agents,
-      method: 'GET',
-      params: {
-        ids: payload.ids,
+    return this.crowdstrikeApiRequest(
+      {
+        url: this.urls.agents,
+        method: 'GET',
+        params: {
+          ids: payload.ids,
+        },
+        paramsSerializer,
+        responseSchema: RelaxedCrowdstrikeBaseApiResponseSchema,
       },
-      paramsSerializer,
-      responseSchema: RelaxedCrowdstrikeBaseApiResponseSchema,
-    }) as Promise<CrowdstrikeGetAgentsResponse>;
+      connectorUsageCollector
+    ) as Promise<CrowdstrikeGetAgentsResponse>;
   }
 
   public async getAgentOnlineStatus(
-    payload: CrowdstrikeGetAgentsParams
+    payload: CrowdstrikeGetAgentsParams,
+    connectorUsageCollector: ConnectorUsageCollector
   ): Promise<CrowdstrikeGetAgentOnlineStatusResponse> {
-    return this.crowdstrikeApiRequest({
-      url: this.urls.agentStatus,
-      method: 'GET',
-      params: {
-        ids: payload.ids,
+    return this.crowdstrikeApiRequest(
+      {
+        url: this.urls.agentStatus,
+        method: 'GET',
+        params: {
+          ids: payload.ids,
+        },
+        paramsSerializer,
+        responseSchema: RelaxedCrowdstrikeBaseApiResponseSchema,
       },
-      paramsSerializer,
-      responseSchema: RelaxedCrowdstrikeBaseApiResponseSchema,
-    }) as Promise<CrowdstrikeGetAgentOnlineStatusResponse>;
+      connectorUsageCollector
+    ) as Promise<CrowdstrikeGetAgentOnlineStatusResponse>;
   }
 
-  private async getTokenRequest() {
-    const response = await this.request<CrowdstrikeGetTokenResponse>({
-      url: this.urls.getToken,
-      method: 'post',
-      headers: {
-        accept: 'application/json',
-        'Content-Type': 'application/x-www-form-urlencoded',
-        authorization: 'Basic ' + this.base64encodedToken,
+  private async getTokenRequest(connectorUsageCollector: ConnectorUsageCollector) {
+    const response = await this.request<CrowdstrikeGetTokenResponse>(
+      {
+        url: this.urls.getToken,
+        method: 'post',
+        headers: {
+          accept: 'application/json',
+          'Content-Type': 'application/x-www-form-urlencoded',
+          authorization: 'Basic ' + CrowdstrikeConnector.base64encodedToken,
+        },
+        responseSchema: CrowdstrikeGetTokenResponseSchema,
       },
-      responseSchema: CrowdstrikeGetTokenResponseSchema,
-    });
+      connectorUsageCollector
+    );
     const token = response.data?.access_token;
     if (token) {
       // Clear any existing timeout
@@ -173,28 +193,33 @@ export class CrowdstrikeConnector extends SubActionConnector<
 
   private async crowdstrikeApiRequest<R extends RelaxedCrowdstrikeBaseApiResponse>(
     req: SubActionRequestParams<R>,
+    connectorUsageCollector: ConnectorUsageCollector,
     retried?: boolean
   ): Promise<R> {
     try {
       if (!CrowdstrikeConnector.token) {
-        CrowdstrikeConnector.token = (await this.getTokenRequest()) as string;
+        CrowdstrikeConnector.token = (await this.getTokenRequest(
+          connectorUsageCollector
+        )) as string;
       }
 
-      const response = await this.request<R>({
-        ...req,
-        headers: {
-          ...req.headers,
-          Authorization: `Bearer ${CrowdstrikeConnector.token}`,
+      const response = await this.request<R>(
+        {
+          ...req,
+          headers: {
+            ...req.headers,
+            Authorization: `Bearer ${CrowdstrikeConnector.token}`,
+          },
         },
-      });
+        connectorUsageCollector
+      );
 
       return response.data;
     } catch (error) {
       if (error.code === 401 && !retried) {
         CrowdstrikeConnector.token = null;
-        return this.crowdstrikeApiRequest(req, true);
+        return this.crowdstrikeApiRequest(req, connectorUsageCollector, true);
       }
-
       throw new CrowdstrikeError(error.message);
     }
   }

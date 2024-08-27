@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Services } from '@kbn/actions-plugin/server/types';
+import { ConnectorUsageCollector, Services } from '@kbn/actions-plugin/server/types';
 import { validateConfig, validateParams, validateSecrets } from '@kbn/actions-plugin/server/lib';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
@@ -41,10 +41,15 @@ const mockedLogger: jest.Mocked<Logger> = loggerMock.create();
 
 let connectorType: WebhookConnectorType;
 let configurationUtilities: jest.Mocked<ActionsConfigurationUtilities>;
+let connectorUsageCollector: ConnectorUsageCollector;
 
 beforeEach(() => {
   configurationUtilities = actionsConfigMock.create();
   connectorType = getConnectorType();
+  connectorUsageCollector = new ConnectorUsageCollector({
+    logger: mockedLogger,
+    connectorId: 'test-connector-id',
+  });
 });
 
 describe('connectorType', () => {
@@ -339,46 +344,27 @@ describe('execute()', () => {
       params: { body: 'some data' },
       configurationUtilities,
       logger: mockedLogger,
+      connectorUsageCollector,
     });
 
     delete requestMock.mock.calls[0][0].configurationUtilities;
-    expect(requestMock.mock.calls[0][0]).toMatchInlineSnapshot(`
-      Object {
-        "axios": undefined,
-        "data": "some data",
-        "headers": Object {
-          "Authorization": "Basic YWJjOjEyMw==",
-          "aheader": "a value",
+    expect(requestMock.mock.calls[0][0]).toMatchSnapshot({
+      axios: undefined,
+      connectorUsageCollector: {
+        usage: {
+          requestBodyBytes: 0,
         },
-        "logger": Object {
-          "context": Array [],
-          "debug": [MockFunction] {
-            "calls": Array [
-              Array [
-                "response from webhook action \\"some-id\\": [HTTP 200] ",
-              ],
-            ],
-            "results": Array [
-              Object {
-                "type": "return",
-                "value": undefined,
-              },
-            ],
-          },
-          "error": [MockFunction],
-          "fatal": [MockFunction],
-          "get": [MockFunction],
-          "info": [MockFunction],
-          "isLevelEnabled": [MockFunction],
-          "log": [MockFunction],
-          "trace": [MockFunction],
-          "warn": [MockFunction],
-        },
-        "method": "post",
-        "sslOverrides": Object {},
-        "url": "https://abc.def/my-webhook",
-      }
-    `);
+      },
+      data: 'some data',
+      headers: {
+        Authorization: 'Basic YWJjOjEyMw==',
+        aheader: 'a value',
+      },
+      logger: expect.any(Object),
+      method: 'post',
+      sslOverrides: {},
+      url: 'https://abc.def/my-webhook',
+    });
   });
 
   test('execute with ssl adds ssl settings to sslOverrides', async () => {
@@ -400,6 +386,7 @@ describe('execute()', () => {
       params: { body: 'some data' },
       configurationUtilities,
       logger: mockedLogger,
+      connectorUsageCollector,
     });
 
     delete requestMock.mock.calls[0][0].configurationUtilities;
@@ -407,6 +394,36 @@ describe('execute()', () => {
     expect(requestMock.mock.calls[0][0]).toMatchInlineSnapshot(`
       Object {
         "axios": undefined,
+        "connectorUsageCollector": ConnectorUsageCollector {
+          "connectorId": "test-connector-id",
+          "logger": Object {
+            "context": Array [],
+            "debug": [MockFunction] {
+              "calls": Array [
+                Array [
+                  "response from webhook action \\"some-id\\": [HTTP 200] ",
+                ],
+              ],
+              "results": Array [
+                Object {
+                  "type": "return",
+                  "value": undefined,
+                },
+              ],
+            },
+            "error": [MockFunction],
+            "fatal": [MockFunction],
+            "get": [MockFunction],
+            "info": [MockFunction],
+            "isLevelEnabled": [MockFunction],
+            "log": [MockFunction],
+            "trace": [MockFunction],
+            "warn": [MockFunction],
+          },
+          "usage": Object {
+            "requestBodyBytes": 0,
+          },
+        },
         "data": "some data",
         "headers": Object {
           "aheader": "a value",
@@ -588,6 +605,7 @@ describe('execute()', () => {
       params: { body: 'some data' },
       configurationUtilities,
       logger: mockedLogger,
+      connectorUsageCollector,
     });
     expect(mockedLogger.error).toBeCalledWith(
       'error on some-id webhook event: maxContentLength size of 1000000 exceeded'
@@ -618,12 +636,43 @@ describe('execute()', () => {
       params: { body: 'some data' },
       configurationUtilities,
       logger: mockedLogger,
+      connectorUsageCollector,
     });
 
     delete requestMock.mock.calls[0][0].configurationUtilities;
     expect(requestMock.mock.calls[0][0]).toMatchInlineSnapshot(`
       Object {
         "axios": undefined,
+        "connectorUsageCollector": ConnectorUsageCollector {
+          "connectorId": "test-connector-id",
+          "logger": Object {
+            "context": Array [],
+            "debug": [MockFunction] {
+              "calls": Array [
+                Array [
+                  "response from webhook action \\"some-id\\": [HTTP 200] ",
+                ],
+              ],
+              "results": Array [
+                Object {
+                  "type": "return",
+                  "value": undefined,
+                },
+              ],
+            },
+            "error": [MockFunction],
+            "fatal": [MockFunction],
+            "get": [MockFunction],
+            "info": [MockFunction],
+            "isLevelEnabled": [MockFunction],
+            "log": [MockFunction],
+            "trace": [MockFunction],
+            "warn": [MockFunction],
+          },
+          "usage": Object {
+            "requestBodyBytes": 0,
+          },
+        },
         "data": "some data",
         "headers": Object {
           "aheader": "a value",

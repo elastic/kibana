@@ -21,6 +21,8 @@ import {
 import type { HostMetadata } from '../../../../common/endpoint/types';
 import type { Agent, PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { AgentPolicyServiceInterface } from '@kbn/fleet-plugin/server/services';
+import { createAppContextStartContractMock as fleetCreateAppContextStartContractMock } from '@kbn/fleet-plugin/server/mocks';
+import { appContextService as fleetAppContextService } from '@kbn/fleet-plugin/server/services';
 import { EndpointError } from '../../../../common/endpoint/errors';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
@@ -38,6 +40,11 @@ describe('EndpointMetadataService', () => {
     esClient = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
     soClient = savedObjectsClientMock.create();
     soClient.find = jest.fn().mockResolvedValue({ saved_objects: [] });
+    fleetAppContextService.start(
+      fleetCreateAppContextStartContractMock({}, false, {
+        withoutSpaceExtensions: soClient,
+      })
+    );
   });
 
   describe('#findHostMetadataForFleetAgents()', () => {

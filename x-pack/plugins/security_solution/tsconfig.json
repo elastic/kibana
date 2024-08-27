@@ -15,7 +15,11 @@
     "public/**/*.json",
     "../../../typings/**/*"
   ],
-  "exclude": ["target/**/*", "**/cypress/**", "public/management/cypress.config.ts"],
+  "exclude": [
+    "target/**/*",
+    "**/cypress/**",
+    "public/management/cypress.config.ts"
+  ],
   "kbn_references": [
     "@kbn/core",
     {
@@ -208,8 +212,11 @@
     "@kbn/core-theme-browser",
     "@kbn/integration-assistant-plugin",
     "@kbn/avc-banner",
+    "@kbn/security-solution-common",
     "@kbn/esql-ast",
     "@kbn/esql-validation-autocomplete",
     "@kbn/config",
+    "@kbn/cbor",
+    "@kbn/zod",
   ]
 }
