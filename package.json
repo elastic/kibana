@@ -78,6 +78,7 @@
     "**/axios": "1.7.4",
     "**/chokidar": "^3.4.3",
     "**/d3-scale/**/d3-color": "npm:@elastic/kibana-d3-color@1.4.2",
+    "**/follow-redirects": "^1.15.6",
     "**/globule/minimatch": "^3.1.2",
     "**/hoist-non-react-statics": "^3.3.2",
     "**/html-minifier/uglify-js": "^3.14.3",
