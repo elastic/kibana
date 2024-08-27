@@ -11,6 +11,7 @@ import {
   ActionsClientGeminiChatModel,
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server';
+import { SamplesFormat } from '../common';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 
 export interface IntegrationAssistantPluginSetup {
@@ -84,6 +85,16 @@ export interface EcsMappingState {
   results: object;
   samplesFormat: string;
   ecsVersion: string;
+}
+
+export interface LogFormatDetectionState {
+  lastExecutedChain: string;
+  logSamples: string[];
+  exAnswer: string;
+  finalized: boolean;
+  samplesFormat: SamplesFormat;
+  ecsVersion: string;
+  results: object;
 }
 
 export interface RelatedState {
