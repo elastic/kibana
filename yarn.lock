@@ -1804,10 +1804,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/node-crypto/-/node-crypto-1.1.1.tgz#619b70322c9cce4a7ee5fbf8f678b1baa7f06095"
   integrity sha512-F6tIk8Txdqjg8Siv60iAvXzO9ZdQI87K3sS/fh5xd2XaWK+T5ZfqeTvsT7srwG6fr6uCBfuQEJV1KBBl+JpLZA==
 
-"@elastic/node-crypto@1.2.1":
-  version "1.2.1"
-  resolved "https://registry.yarnpkg.com/@elastic/node-crypto/-/node-crypto-1.2.1.tgz#dfd9218f9b5729fa519762e6a6968aaf61b86eb0"
-  integrity sha512-RlZg+poLA2SwZZUM5RMJDJiKojlSB1mJkumIvLgXvvTCcCliC6rM0lUaNecV9pbQLIHrGlX2BrbwiuPWhv0czQ==
+"@elastic/node-crypto@1.2.2":
+  version "1.2.2"
+  resolved "https://registry.yarnpkg.com/@elastic/node-crypto/-/node-crypto-1.2.2.tgz#a5e9dc9e7133c5ce9b837e2f6e9c50a61ad9db3a"
+  integrity sha512-4bChyIVzD5Nx0lE65iRGi6Z4Iz9/zyvtjZ098TcI6wUZ2spfmKHoWjeQ47XDZpqCc9lRhxtvLszrsFZoOWVOIQ==
 
 "@elastic/numeral@^2.5.1":
   version "2.5.1"
