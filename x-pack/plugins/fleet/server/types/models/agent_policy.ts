@@ -41,11 +41,7 @@ function isInteger(n: number) {
 
 export const AgentPolicyBaseSchema = {
   id: schema.maybe(schema.string()),
-  space_ids: schema.maybe(
-    schema.arrayOf(schema.string(), {
-      minSize: 1,
-    })
-  ),
+  space_ids: schema.maybe(schema.arrayOf(schema.string())),
   name: schema.string({ minLength: 1, validate: validateNonEmptyString }),
   namespace: AgentPolicyNamespaceSchema,
   description: schema.maybe(schema.string()),
