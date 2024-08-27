@@ -1691,7 +1691,7 @@
     "expect": "^29.7.0",
     "expose-loader": "^0.7.5",
     "express": "^4.19.2",
-    "faker": "^5.1.0",
+    "@faker-js/faker": "^5.5.3",
     "fetch-mock": "^7.3.9",
     "file-loader": "^4.2.0",
     "find-cypress-specs": "^1.41.4",
