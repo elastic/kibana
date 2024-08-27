@@ -6,6 +6,18 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
+import {
+  KSPM_POLICY_TEMPLATE,
+  CSPM_POLICY_TEMPLATE,
+  STATUS_ROUTE_PATH,
+  LATEST_FINDINGS_RETENTION_POLICY,
+  CDR_MISCONFIGURATIONS_INDEX_PATTERN,
+} from '@kbn/cloud-security-posture-common';
+import type {
+  CspSetupStatus,
+  IndexStatus,
+  CspStatusCode,
+} from '@kbn/cloud-security-posture-common';
 import type { SavedObjectsClientContract, Logger, ElasticsearchClient } from '@kbn/core/server';
 import type {
   AgentPolicyServiceInterface,
@@ -19,19 +31,15 @@ import { schema } from '@kbn/config-schema';
 import { VersionedRoute } from '@kbn/core-http-server/src/versioning/types';
 import {
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
-  STATUS_ROUTE_PATH,
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
   FINDINGS_INDEX_PATTERN,
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
   VULNERABILITIES_INDEX_PATTERN,
-  KSPM_POLICY_TEMPLATE,
-  CSPM_POLICY_TEMPLATE,
   POSTURE_TYPES,
   LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
   VULN_MGMT_POLICY_TEMPLATE,
   POSTURE_TYPE_ALL,
   LATEST_VULNERABILITIES_RETENTION_POLICY,
-  LATEST_FINDINGS_RETENTION_POLICY,
 } from '../../../common/constants';
 import type {
   CspApiRequestHandlerContext,
@@ -39,12 +47,7 @@ import type {
   CspRouter,
   StatusResponseInfo,
 } from '../../types';
-import type {
-  CspSetupStatus,
-  CspStatusCode,
-  IndexStatus,
-  PostureTypes,
-} from '../../../common/types_old';
+import type { PostureTypes } from '../../../common/types_old';
 import {
   getAgentStatusesByAgentPolicies,
   getCspAgentPolicies,
@@ -142,6 +145,43 @@ const assertResponse = (resp: CspSetupStatus, logger: CspApiRequestHandlerContex
   }
 };
 
+const checkIndexHasFindings = async (
+  esClient: ElasticsearchClient,
+  index: string,
+  retentionPolicy: string,
+  logger: Logger
+) => {
+  try {
+    const response = await esClient.search({
+      index,
+      size: 0, // We only need to know if there are any hits, so we don't need to retrieve documents
+      query: {
+        bool: {
+          filter: [
+            {
+              range: {
+                '@timestamp': {
+                  gte: `now-${retentionPolicy}`,
+                  lte: 'now',
+                },
+              },
+            },
+          ],
+        },
+      },
+    });
+
+    // Check the number of hits
+    const totalHits =
+      typeof response.hits.total === 'object' ? response.hits.total.value : response.hits.total;
+
+    return !!totalHits;
+  } catch (err) {
+    logger.error(`Error checking if index ${index} has findings`);
+    logger.error(err);
+  }
+};
+
 export const getCspStatus = async ({
   logger,
   esClient,
@@ -153,6 +193,7 @@ export const getCspStatus = async ({
   isPluginInitialized,
 }: CspStatusDependencies): Promise<CspSetupStatus> => {
   const [
+    hasMisconfigurationsFindings,
     findingsLatestIndexStatus,
     findingsIndexStatus,
     scoreIndexStatus,
@@ -171,6 +212,12 @@ export const getCspStatus = async ({
     installedPackagePoliciesVulnMgmt,
     installedPolicyTemplates,
   ] = await Promise.all([
+    checkIndexHasFindings(
+      esClient,
+      CDR_MISCONFIGURATIONS_INDEX_PATTERN,
+      LATEST_FINDINGS_RETENTION_POLICY,
+      logger
+    ),
     checkIndexStatus(esClient, LATEST_FINDINGS_INDEX_DEFAULT_NS, logger, {
       postureType: POSTURE_TYPE_ALL,
       retentionTime: LATEST_VULNERABILITIES_RETENTION_POLICY,
@@ -357,6 +404,7 @@ export const getCspStatus = async ({
   const response: CspSetupStatus = {
     ...statusResponseInfo,
     installedPackageVersion: installation?.install_version,
+    hasMisconfigurationsFindings,
   };
 
   assertResponse(response, logger);

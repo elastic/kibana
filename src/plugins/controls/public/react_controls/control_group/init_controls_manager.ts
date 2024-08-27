@@ -18,9 +18,11 @@ import { BehaviorSubject, first, merge } from 'rxjs';
 import { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
 import { omit } from 'lodash';
 import { apiHasSnapshottableState } from '@kbn/presentation-containers/interfaces/serialized_state';
-import { ControlPanelsState, ControlPanelState } from './types';
+import { ControlGroupApi, ControlPanelsState, ControlPanelState } from './types';
 import { DefaultControlApi, DefaultControlState } from '../controls/types';
 import { ControlGroupComparatorState } from './control_group_unsaved_changes_api';
+import { DefaultDataControlState } from '../controls/data_controls/types';
+import { ControlWidth, DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '../../../common';
 
 export type ControlsInOrder = Array<{ id: string; type: string }>;
 
@@ -35,7 +37,10 @@ export function getControlsInOrder(initialControlPanelsState: ControlPanelsState
     .map(({ id, type }) => ({ id, type })); // filter out `order`
 }
 
-export function initControlsManager(initialControlPanelsState: ControlPanelsState) {
+export function initControlsManager(
+  initialControlPanelsState: ControlPanelsState,
+  defaultDataViewId: string | null
+) {
   const lastSavedControlsPanelState$ = new BehaviorSubject(initialControlPanelsState);
   const initialControlIds = Object.keys(initialControlPanelsState);
   const children$ = new BehaviorSubject<{ [key: string]: DefaultControlApi }>({});
@@ -45,6 +50,13 @@ export function initControlsManager(initialControlPanelsState: ControlPanelsStat
   const controlsInOrder$ = new BehaviorSubject<ControlsInOrder>(
     getControlsInOrder(initialControlPanelsState)
   );
+  const lastUsedDataViewId$ = new BehaviorSubject<string | undefined>(
+    getLastUsedDataViewId(controlsInOrder$.value, initialControlPanelsState) ??
+      defaultDataViewId ??
+      undefined
+  );
+  const lastUsedWidth$ = new BehaviorSubject<ControlWidth>(DEFAULT_CONTROL_WIDTH);
+  const lastUsedGrow$ = new BehaviorSubject<boolean>(DEFAULT_CONTROL_GROW);
 
   function untilControlLoaded(
     id: string
@@ -79,6 +91,16 @@ export function initControlsManager(initialControlPanelsState: ControlPanelsStat
     { panelType, initialState }: PanelPackage<DefaultControlState>,
     index: number
   ) {
+    if ((initialState as DefaultDataControlState)?.dataViewId) {
+      lastUsedDataViewId$.next((initialState as DefaultDataControlState).dataViewId);
+    }
+    if (initialState?.width) {
+      lastUsedWidth$.next(initialState.width);
+    }
+    if (typeof initialState?.grow === 'boolean') {
+      lastUsedGrow$.next(initialState.grow);
+    }
+
     const id = generateId();
     const nextControlsInOrder = [...controlsInOrder$.value];
     nextControlsInOrder.splice(index, 0, {
@@ -98,6 +120,13 @@ export function initControlsManager(initialControlPanelsState: ControlPanelsStat
 
   return {
     controlsInOrder$,
+    getNewControlState: () => {
+      return {
+        grow: lastUsedGrow$.value,
+        width: lastUsedWidth$.value,
+        dataViewId: lastUsedDataViewId$.value,
+      };
+    },
     getControlApi,
     setControlApi: (uuid: string, controlApi: DefaultControlApi) => {
       children$.next({
@@ -196,7 +225,8 @@ export function initControlsManager(initialControlPanelsState: ControlPanelsStat
         });
       },
     } as PresentationContainer &
-      HasSerializedChildState<ControlPanelState> & { untilInitialized: () => Promise<void> },
+      HasSerializedChildState<ControlPanelState> &
+      Pick<ControlGroupApi, 'untilInitialized'>,
     comparators: {
       controlsInOrder: [
         controlsInOrder$,
@@ -221,4 +251,22 @@ export function initControlsManager(initialControlPanelsState: ControlPanelsStat
       Pick<ControlGroupComparatorState, 'controlsInOrder' | 'initialChildControlState'>
     >,
   };
+}
+
+export function getLastUsedDataViewId(
+  controlsInOrder: ControlsInOrder,
+  initialControlPanelsState: ControlPanelsState<
+    ControlPanelState & Partial<DefaultDataControlState>
+  >
+) {
+  let dataViewId: string | undefined;
+  for (let i = controlsInOrder.length - 1; i >= 0; i--) {
+    const controlId = controlsInOrder[i].id;
+    const controlState = initialControlPanelsState[controlId];
+    if (controlState?.dataViewId) {
+      dataViewId = controlState.dataViewId;
+      break;
+    }
+  }
+  return dataViewId;
 }

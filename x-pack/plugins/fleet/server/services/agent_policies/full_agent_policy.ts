@@ -25,6 +25,7 @@ import type {
   FullAgentPolicyOutput,
   FleetProxy,
   FleetServerHost,
+  AgentPolicy,
 } from '../../types';
 import type {
   FullAgentPolicyMonitoring,
@@ -67,11 +68,17 @@ async function fetchAgentPolicy(soClient: SavedObjectsClientContract, id: string
 export async function getFullAgentPolicy(
   soClient: SavedObjectsClientContract,
   id: string,
-  options?: { standalone: boolean }
+  options?: { standalone?: boolean; agentPolicy?: AgentPolicy }
 ): Promise<FullAgentPolicy | null> {
   const standalone = options?.standalone ?? false;
 
-  const agentPolicy = await fetchAgentPolicy(soClient, id);
+  let agentPolicy: AgentPolicy | null;
+  if (options?.agentPolicy?.package_policies) {
+    agentPolicy = options.agentPolicy;
+  } else {
+    agentPolicy = await fetchAgentPolicy(soClient, id);
+  }
+
   if (!agentPolicy) {
     return null;
   }
@@ -133,12 +140,13 @@ export async function getFullAgentPolicy(
     enabled: false,
     logs: false,
     metrics: false,
+    traces: false,
   };
 
   let monitoring: FullAgentPolicyMonitoring = { ...defaultMonitoringConfig };
 
-  // If the agent policy has monitoring enabled for at least one of "logs" or "metrics", generate
-  // a monitoring config for the resulting compiled agent policy
+  // If the agent policy has monitoring enabled for at least one of "logs", "metrics", or "traces"
+  // generate a monitoring config for the resulting compiled agent policy
   if (agentPolicy.monitoring_enabled && agentPolicy.monitoring_enabled.length > 0) {
     monitoring = {
       namespace: agentPolicy.namespace,
@@ -146,6 +154,7 @@ export async function getFullAgentPolicy(
       enabled: true,
       logs: agentPolicy.monitoring_enabled.includes(dataTypes.Logs),
       metrics: agentPolicy.monitoring_enabled.includes(dataTypes.Metrics),
+      traces: agentPolicy.monitoring_enabled.includes(dataTypes.Traces),
     };
     // If the `keep_monitoring_alive` flag is set, enable monitoring but don't enable logs or metrics.
     // This allows cloud or other environments to keep the monitoring server alive without tearing it down.
@@ -154,6 +163,7 @@ export async function getFullAgentPolicy(
       enabled: true,
       logs: false,
       metrics: false,
+      traces: false,
     };
   }
 
@@ -192,8 +202,8 @@ export async function getFullAgentPolicy(
     },
   };
 
-  if (agentPolicy.space_id) {
-    fullAgentPolicy.namespaces = [agentPolicy.space_id];
+  if (agentPolicy.space_ids) {
+    fullAgentPolicy.namespaces = agentPolicy.space_ids;
   }
 
   const packagePoliciesByOutputId = Object.keys(fullAgentPolicy.outputs).reduce(
@@ -242,6 +252,7 @@ export async function getFullAgentPolicy(
     {
       logs: agentPolicy.monitoring_enabled?.includes(dataTypes.Logs) ?? false,
       metrics: agentPolicy.monitoring_enabled?.includes(dataTypes.Metrics) ?? false,
+      traces: agentPolicy.monitoring_enabled?.includes(dataTypes.Traces) ?? false,
     },
     agentPolicy.namespace
   );

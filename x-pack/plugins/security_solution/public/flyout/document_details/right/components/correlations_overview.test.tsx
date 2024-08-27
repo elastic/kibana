@@ -39,7 +39,7 @@ import {
   EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
-} from '../../../shared/components/test_ids';
+} from '@kbn/security-solution-common';
 import { useTourContext } from '../../../../common/components/guided_onboarding_tour';
 import { AlertsCasesTourSteps } from '../../../../common/components/guided_onboarding_tour/tour_config';
 
@@ -92,10 +92,7 @@ const flyoutContextValue = {
   openLeftPanel: jest.fn(),
 } as unknown as ExpandableFlyoutApi;
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn(),
-  ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
-}));
+jest.mock('@kbn/expandable-flyout');
 
 jest.mock('../../../../timelines/containers/use_timeline_data_filters', () => ({
   useTimelineDataFilters: jest.fn(),
