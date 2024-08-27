@@ -64,6 +64,7 @@ export const ErrorCallout = ({ title, error }: Props) => {
               >
                 {error.message}
               </EuiCodeBlock>
+              {/* TODO: Do not show if ES|QL mode */}
               <EuiButton
                 size="s"
                 onClick={() => core.notifications.showErrorDialog({ title, error })}
@@ -78,6 +79,7 @@ export const ErrorCallout = ({ title, error }: Props) => {
       }
       footer={
         <>
+          {/* TODO: Make this open the reference panel */}
           <EuiButtonEmpty iconType="documentation" href="#">
             Open ES|QL reference
           </EuiButtonEmpty>
