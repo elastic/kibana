@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { RiskScoreEntity } from '../../../../common/search_strategy';
@@ -15,12 +15,31 @@ import { restartRiskScoreTransforms } from './utils';
 
 jest.mock('./utils');
 
+const mockUseState = React.useState;
+jest.mock('../../../common/hooks/use_fetch', () => {
+  const originalModule = jest.requireActual('../../../common/hooks/use_fetch');
+  return {
+    ...originalModule,
+    useFetch: jest.fn().mockImplementation(() => {
+      const [isLoading, setIsLoading] = mockUseState(false);
+      return {
+        fetch: jest.fn().mockImplementation(() => setIsLoading(true)),
+        isLoading,
+      };
+    }),
+  };
+});
+
 const mockRestartRiskScoreTransforms = restartRiskScoreTransforms as jest.Mock;
 
 describe('RiskScoreRestartButton', () => {
   const mockRefetch = jest.fn();
   beforeEach(() => {
+    jest.useFakeTimers();
     jest.clearAllMocks();
+  });
+  afterEach(() => {
+    jest.useRealTimers();
   });
   describe.each([[RiskScoreEntity.host], [RiskScoreEntity.user]])('%s', (riskScoreEntity) => {
     it('Renders expected children', () => {
@@ -42,9 +61,8 @@ describe('RiskScoreRestartButton', () => {
         </TestProviders>
       );
 
-      await act(async () => {
-        await userEvent.click(screen.getByTestId(`restart_${riskScoreEntity}_risk_score`));
-      });
+      await userEvent.click(screen.getByTestId(`restart_${riskScoreEntity}_risk_score`));
+
       expect(mockRestartRiskScoreTransforms).toHaveBeenCalled();
       expect(mockRestartRiskScoreTransforms.mock.calls[0][0].riskScoreEntity).toEqual(
         riskScoreEntity
@@ -52,13 +70,18 @@ describe('RiskScoreRestartButton', () => {
     });
 
     it('Update button state while installing', async () => {
+      // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
+      const user = userEvent.setup({
+        delay: null,
+        pointerEventsCheck: 0,
+      });
       render(
         <TestProviders>
           <RiskScoreRestartButton refetch={mockRefetch} riskScoreEntity={riskScoreEntity} />
         </TestProviders>
       );
 
-      await userEvent.click(screen.getByTestId(`restart_${riskScoreEntity}_risk_score`));
+      await user.click(screen.getByTestId(`restart_${riskScoreEntity}_risk_score`));
 
       await waitFor(() => {
         expect(screen.getByTestId(`restart_${riskScoreEntity}_risk_score`)).toHaveProperty(
