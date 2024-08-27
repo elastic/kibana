@@ -7,7 +7,7 @@
 
 import React, { memo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
-import { FlyoutBody } from '../../shared/components/flyout_body';
+import { FlyoutBody } from '@kbn/security-solution-common';
 import type { DocumentDetailsRuleOverviewPanelKey } from '../shared/constants/panel_keys';
 import { RuleOverview } from './components/rule_overview';
 import { RuleFooter } from './components/footer';
