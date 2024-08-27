@@ -67,11 +67,11 @@ export const parseJSONArray = (
 /**
  * Parse the logs sample file content (json or ndjson) and return the parsed logs sample
  */
-const parseJsonLogsContent = (
+const parseLogsContent = (
   fileContent: string
 ): {
   error?: string;
-  jsonSamples: string[];
+  logSamples: string[];
   samplesFormat?: SamplesFormat;
 } => {
   let parsedContent: unknown[];
@@ -93,7 +93,7 @@ const parseJsonLogsContent = (
     try {
       const { entries, pathToEntries, errorNoArrayFound } = parseJSONArray(fileContent);
       if (errorNoArrayFound) {
-        return { error: i18n.LOGS_SAMPLE_ERROR.NOT_ARRAY, jsonSamples: [] };
+        return { error: i18n.LOGS_SAMPLE_ERROR.NOT_ARRAY, logSamples: [] };
       }
       parsedContent = entries;
       samplesFormat = { name: 'json', json_path: pathToEntries };
@@ -103,24 +103,22 @@ const parseJsonLogsContent = (
         samplesFormat = { name: 'ndjson', multiline: true };
       } catch (parseMultilineNDJSONError) {
         return {
-          error: i18n.LOGS_SAMPLE_ERROR.CAN_NOT_PARSE,
-          jsonSamples: [],
-          samplesFormat: undefined,
+          logSamples: fileContent.split('\n').filter((line) => line.trim() !== ''),
         };
       }
     }
   }
 
   if (parsedContent.length === 0) {
-    return { error: i18n.LOGS_SAMPLE_ERROR.EMPTY, jsonSamples: [] };
+    return { error: i18n.LOGS_SAMPLE_ERROR.EMPTY, logSamples: [] };
   }
 
   if (parsedContent.some((log) => !isPlainObject(log))) {
-    return { error: i18n.LOGS_SAMPLE_ERROR.NOT_OBJECT, jsonSamples: [] };
+    return { error: i18n.LOGS_SAMPLE_ERROR.NOT_OBJECT, logSamples: [] };
   }
 
-  const jsonSamples = parsedContent.map((log) => JSON.stringify(log));
-  return { jsonSamples, samplesFormat };
+  const logSamples = parsedContent.map((log) => JSON.stringify(log));
+  return { logSamples, samplesFormat };
 };
 
 interface SampleLogsInputProps {
@@ -152,36 +150,29 @@ export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSe
         if (fileContent == null) {
           return { error: i18n.LOGS_SAMPLE_ERROR.CAN_NOT_READ };
         }
-        let logSamples;
-        const { error, jsonSamples, samplesFormat } = parseJsonLogsContent(fileContent);
+        let samples;
+        const { error, logSamples, samplesFormat } = parseLogsContent(fileContent);
         setIsParsing(false);
+        samples = logSamples;
 
         if (error) {
-          if (error === i18n.LOGS_SAMPLE_ERROR.CAN_NOT_PARSE) {
-            // Non JSON Samples
-            logSamples = fileContent.split('\n').filter((line) => line.trim() !== '');
-          } else {
-            setSampleFileError(error);
-            setIntegrationSettings({
-              ...integrationSettings,
-              logSamples: undefined,
-              samplesFormat: undefined,
-            });
-            return;
-          }
-        } else {
-          // JSON Samples
-          logSamples = jsonSamples;
+          setSampleFileError(error);
+          setIntegrationSettings({
+            ...integrationSettings,
+            logSamples: undefined,
+            samplesFormat: undefined,
+          });
+          return;
         }
 
-        if (logSamples.length > MaxLogsSampleRows) {
-          logSamples = logSamples.slice(0, MaxLogsSampleRows);
+        if (samples.length > MaxLogsSampleRows) {
+          samples = samples.slice(0, MaxLogsSampleRows);
           notifications?.toasts.addInfo(i18n.LOGS_SAMPLE_TRUNCATED(MaxLogsSampleRows));
         }
 
         setIntegrationSettings({
           ...integrationSettings,
-          logSamples,
+          logSamples: samples,
           samplesFormat,
         });
       };
