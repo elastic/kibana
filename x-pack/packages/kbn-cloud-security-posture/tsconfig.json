@@ -35,6 +35,5 @@
     "@kbn/spaces-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/cloud-security-posture-common",
-    "@kbn/search-types",
   ]
 }
