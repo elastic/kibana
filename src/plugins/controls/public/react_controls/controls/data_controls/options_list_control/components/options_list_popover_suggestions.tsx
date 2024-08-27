@@ -108,7 +108,7 @@ export const OptionsListPopoverSuggestions = ({
             ? 'optionsList__selectionInvalid'
             : 'optionsList__validSuggestion',
         append:
-          !showOnlySelected && suggestion?.docCount ? (
+          !showOnlySelected && suggestion?.docCount !== undefined ? (
             <OptionsListPopoverSuggestionBadge documentCount={suggestion.docCount} />
           ) : undefined,
       } as EuiSelectableOption;
