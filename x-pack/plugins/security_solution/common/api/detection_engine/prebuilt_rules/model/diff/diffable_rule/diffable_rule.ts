@@ -81,7 +81,6 @@ export const DiffableCommonFields = z.object({
   threat: ThreatArray,
   note: InvestigationGuide,
   setup: SetupGuide,
-  investigation_fields: InvestigationFields,
   related_integrations: RelatedIntegrationArray,
   required_fields: RequiredFieldArray,
   author: RuleAuthorArray,
@@ -93,6 +92,7 @@ export const DiffableCommonFields = z.object({
   max_signals: MaxSignals,
 
   // Optional fields
+  investigation_fields: InvestigationFields.optional(),
   rule_name_override: RuleNameOverrideObject.optional(), // NOTE: new field
   timestamp_override: TimestampOverrideObject.optional(), // NOTE: new field
   timeline_template: TimelineTemplateReference.optional(), // NOTE: new field
