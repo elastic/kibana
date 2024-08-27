@@ -69,11 +69,9 @@ const QUICK_ACTION_IDS = {
 
 const allowedNotificationActions = ['ACTION_FILTERS_NOTIFICATION'];
 
-const OVER_PANEL_STYLE = `border-radius: ${euiThemeVars.euiBorderRadius};
- position: absolute;
- top: ${euiThemeVars.euiSizeXS};
+const ALL_ROUNDED_CORNERS = `border-radius: ${euiThemeVars.euiBorderRadius};
 `;
-const UNDER_PANEL_STYLE = `border-top-left-radius: ${euiThemeVars.euiBorderRadius};
+const TOP_ROUNDED_CORNERS = `border-top-left-radius: ${euiThemeVars.euiBorderRadius};
  border-top-right-radius: ${euiThemeVars.euiBorderRadius};
  border-bottom: 0 !important;
  `;
@@ -131,15 +129,19 @@ export const PresentationPanelHoverActions = ({
   const leftHoverActionsRef = useRef<HTMLDivElement | null>(null);
   const rightHoverActionsRef = useRef<HTMLDivElement | null>(null);
   const [combineHoverActions, setCombineHoverActions] = useState<boolean>(false);
+  const [borderStyles, setBorderStyles] = useState<string>(TOP_ROUNDED_CORNERS);
 
   const updateCombineHoverActions = () => {
     if (!hoverActionsRef.current || !anchorRef.current) return;
-    const anchorLeft = anchorRef.current.getBoundingClientRect().left;
+    const anchorBox = anchorRef.current.getBoundingClientRect();
+    const anchorLeft = anchorBox.left;
+    const anchorTop = anchorBox.top;
     const anchorWidth = anchorRef.current.offsetWidth;
     const hoverActionsWidth =
       (rightHoverActionsRef.current?.offsetWidth ?? 0) +
       (leftHoverActionsRef.current?.offsetWidth ?? 0) +
       parseInt(euiThemeVars.euiSize, 10) * 2;
+    const hoverActionsHeight = rightHoverActionsRef.current?.offsetHeight ?? 0;
 
     // Left align hover actions when they would get cut off by the right edge of the window
     if (anchorLeft - (hoverActionsWidth - anchorWidth) <= parseInt(euiThemeVars.euiSize, 10)) {
@@ -152,9 +154,26 @@ export const PresentationPanelHoverActions = ({
 
     if (anchorRef.current && rightHoverActionsRef.current) {
       const shouldCombine = anchorWidth < hoverActionsWidth;
+      const willGetCutOff = anchorTop < hoverActionsHeight;
 
       if (shouldCombine !== combineHoverActions) {
         setCombineHoverActions(shouldCombine);
+      }
+
+      if (willGetCutOff) {
+        hoverActionsRef.current.style.setProperty('position', 'absolute');
+        hoverActionsRef.current.style.setProperty('top', `-${euiThemeVars.euiSizeS}`);
+      } else if (shouldCombine) {
+        hoverActionsRef.current.style.setProperty('top', `-${euiThemeVars.euiSizeL}`);
+      } else {
+        hoverActionsRef.current.style.removeProperty('position');
+        hoverActionsRef.current.style.removeProperty('top');
+      }
+
+      if (shouldCombine || willGetCutOff) {
+        setBorderStyles(ALL_ROUNDED_CORNERS);
+      } else {
+        setBorderStyles(TOP_ROUNDED_CORNERS);
       }
     }
   };
@@ -452,7 +471,7 @@ export const PresentationPanelHoverActions = ({
                 className
               )}
               css={css`
-                ${UNDER_PANEL_STYLE}
+                ${borderStyles}
               `}
             >
               {dragHandle}
@@ -469,7 +488,7 @@ export const PresentationPanelHoverActions = ({
               className
             )}
             css={css`
-              ${combineHoverActions ? OVER_PANEL_STYLE : UNDER_PANEL_STYLE}
+              ${borderStyles}
             `}
           >
             {menuPanelsLoading ? (
