@@ -374,3 +374,17 @@ export const integrationVersionText = i18n.translate(
     defaultMessage: 'Version',
   }
 );
+export const fieldColumnName = i18n.translate('xpack.datasetQuality.details.degradedField.field', {
+  defaultMessage: 'Field',
+});
+
+export const countColumnName = i18n.translate('xpack.datasetQuality.details.degradedField.count', {
+  defaultMessage: 'Docs count',
+});
+
+export const lastOccurrenceColumnName = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.lastOccurrence',
+  {
+    defaultMessage: 'Last occurrence',
+  }
+);

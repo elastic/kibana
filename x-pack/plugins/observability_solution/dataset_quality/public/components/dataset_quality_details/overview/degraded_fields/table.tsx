@@ -16,12 +16,25 @@ import {
 import { useDegradedFields } from '../../../../hooks/use_degraded_fields';
 
 export const DegradedFieldTable = () => {
-  const { isLoading, pagination, renderedItems, onTableChange, sort, fieldFormats } =
-    useDegradedFields();
+  const {
+    isLoading,
+    pagination,
+    renderedItems,
+    onTableChange,
+    sort,
+    fieldFormats,
+    expandedDegradedField,
+    openDegradedFieldFlyout,
+  } = useDegradedFields();
   const dateFormatter = fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.DATE, [
     ES_FIELD_TYPES.DATE,
   ]);
-  const columns = getDegradedFieldsColumns({ dateFormatter, isLoading });
+  const columns = getDegradedFieldsColumns({
+    dateFormatter,
+    isLoading,
+    expandedDegradedField,
+    openDegradedFieldFlyout,
+  });
 
   return (
     <EuiBasicTable

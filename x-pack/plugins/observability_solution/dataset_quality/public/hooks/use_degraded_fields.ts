@@ -25,6 +25,10 @@ export function useDegradedFields() {
   } = useKibanaContextForPlugin();
 
   const degradedFields = useSelector(service, (state) => state.context.degradedFields) ?? {};
+  const expandedDegradedField = useSelector(
+    service,
+    (state) => state.context.expandedDegradedField
+  );
   const { data, table } = degradedFields;
   const { page, rowsPerPage, sort } = table;
 
@@ -66,6 +70,22 @@ export function useDegradedFields() {
     state.matches('initializing.dataStreamDegradedFields.fetching')
   );
 
+  const closeDegradedFieldFlyout = useCallback(
+    () => service.send({ type: 'CLOSE_DEGRADED_FIELD_FLYOUT' }),
+    [service]
+  );
+
+  const openDegradedFieldFlyout = useCallback(
+    (fieldName: string) => {
+      if (expandedDegradedField === fieldName) {
+        service.send({ type: 'CLOSE_DEGRADED_FIELD_FLYOUT' });
+      } else {
+        service.send({ type: 'OPEN_DEGRADED_FIELD_FLYOUT', fieldName });
+      }
+    },
+    [expandedDegradedField, service]
+  );
+
   return {
     isLoading,
     pagination,
@@ -74,5 +94,8 @@ export function useDegradedFields() {
     sort: { sort },
     fieldFormats,
     totalItemCount,
+    expandedDegradedField,
+    openDegradedFieldFlyout,
+    closeDegradedFieldFlyout,
   };
 }
