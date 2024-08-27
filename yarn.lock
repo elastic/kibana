@@ -17232,10 +17232,10 @@ eslint-plugin-react-hooks@^4.6.0:
   resolved "https://registry.yarnpkg.com/eslint-plugin-react-hooks/-/eslint-plugin-react-hooks-4.6.0.tgz#4c3e697ad95b77e93f8646aaa1630c1ba607edd3"
   integrity sha512-oFc7Itz9Qxh2x4gNHStv3BqJq54ExXmfC+a1NjAta66IAN87Wu0R/QArgIS9qKzX3dXKPI9H5crl9QchNMY9+g==
 
-eslint-plugin-react-perf@^3.3.1:
-  version "3.3.1"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-react-perf/-/eslint-plugin-react-perf-3.3.1.tgz#e52d64c1d6e9c4cb1240108cdbbe406837f1b887"
-  integrity sha512-iOx2UtEOH50TmQhezTS4jbBAj/2gbrUdX+ZM28c2K9mwTvtRX6gdnd2P4WPQrejITDsAMNTCz95zu5HcjCD0xg==
+eslint-plugin-react-perf@^3.3.2:
+  version "3.3.2"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-react-perf/-/eslint-plugin-react-perf-3.3.2.tgz#1f48045f785ba884c823c07f4183a915ce0f78ce"
+  integrity sha512-boVn4IDHAjgGoAuAQ5Zrewt8fNbMDdiR7B2AkuiSK8lrJ9FwlOZc085kCs7+8u6B+YZ+pOn+tYG00xktnGAfOw==
 
 eslint-plugin-react@^7.32.2:
   version "7.32.2"
