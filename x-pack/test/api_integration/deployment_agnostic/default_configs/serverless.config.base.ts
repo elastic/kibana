@@ -7,12 +7,13 @@
 import { FtrConfigProviderContext, Config } from '@kbn/test';
 
 import { ServerlessProjectType } from '@kbn/es';
-import { services } from '../services';
+import { DeploymentAgnosticCommonServices, services } from '../services';
 
-interface CreateTestConfigOptions {
+interface CreateTestConfigOptions<T extends DeploymentAgnosticCommonServices> {
   serverlessProject: ServerlessProjectType;
   esServerArgs?: string[];
   kbnServerArgs?: string[];
+  services?: T;
   testFiles: string[];
   junit: { reportName: string };
   suiteTags?: { include?: string[]; exclude?: string[] };
@@ -53,8 +54,17 @@ const kbnServerArgsFromController = {
   ],
 };
 
-export function createServerlessTestConfig(options: CreateTestConfigOptions) {
+export function createServerlessTestConfig<T extends DeploymentAgnosticCommonServices>(
+  options: CreateTestConfigOptions<T>
+) {
   return async ({ readConfigFile }: FtrConfigProviderContext): Promise<Config> => {
+    if (options.esServerArgs || options.kbnServerArgs) {
+      throw new Error(
+        `FTR doesn't provision custom ES/Kibana server arguments into the serverless project on MKI.
+  It may lead to unexpected test failures on Cloud. Please contact #appex-qa.`
+      );
+    }
+
     const svlSharedConfig = await readConfigFile(
       require.resolve('@kbn/test-suites-serverless/shared/config.base')
     );
@@ -63,14 +73,14 @@ export function createServerlessTestConfig(options: CreateTestConfigOptions) {
       ...svlSharedConfig.getAll(),
 
       services: {
-        ...services,
+        // services can be customized, but must extend DeploymentAgnosticCommonServices
+        ...(options.services || services),
       },
       esTestCluster: {
         ...svlSharedConfig.get('esTestCluster'),
         serverArgs: [
           ...svlSharedConfig.get('esTestCluster.serverArgs'),
           ...esServerArgsFromController[options.serverlessProject],
-          ...(options.esServerArgs ?? []),
         ],
       },
       kbnTestServer: {
@@ -79,7 +89,6 @@ export function createServerlessTestConfig(options: CreateTestConfigOptions) {
           ...svlSharedConfig.get('kbnTestServer.serverArgs'),
           ...kbnServerArgsFromController[options.serverlessProject],
           `--serverless=${options.serverlessProject}`,
-          ...(options.kbnServerArgs || []),
         ],
       },
       testFiles: options.testFiles,

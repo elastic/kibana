@@ -382,7 +382,7 @@ export const isOptimizedGroupedSearchQueryResponse = (
   response: GroupedSearchQueryResponse['aggregations']['groups']['buckets']
 ): response is OptimizedGroupedSearchQueryResponse['aggregations']['groups']['buckets'] => {
   const result = response[0];
-  return result && !result.hasOwnProperty('filtered_results');
+  return result && !Object.hasOwn(result, 'filtered_results');
 };
 
 export const isOptimizableGroupedThreshold = (

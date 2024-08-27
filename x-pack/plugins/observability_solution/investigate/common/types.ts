@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { AuthenticatedUser } from '@kbn/core/public';
 import type { DeepPartial } from 'utility-types';
 
 export interface GlobalWidgetParameters {
@@ -15,20 +14,20 @@ export interface GlobalWidgetParameters {
   };
 }
 
-export enum InvestigateWidgetColumnSpan {
-  One = 1,
-  Two = 2,
-  Three = 3,
-  Four = 4,
-}
-
 export interface Investigation {
   id: string;
-  '@timestamp': number;
-  user: AuthenticatedUser;
+  createdAt: number;
   title: string;
   items: InvestigateWidget[];
+  notes: InvestigationNote[];
   parameters: GlobalWidgetParameters;
+}
+
+export interface InvestigationNote {
+  id: string;
+  createdAt: number;
+  createdBy: string;
+  content: string;
 }
 
 export interface InvestigateWidget<
@@ -36,21 +35,17 @@ export interface InvestigateWidget<
   TData extends Record<string, any> = {}
 > {
   id: string;
-  created: number;
-  last_updated: number;
+  createdAt: number;
+  createdBy: string;
+  title: string;
   type: string;
-  user: AuthenticatedUser;
   parameters: GlobalWidgetParameters & TParameters;
   data: TData;
-  title: string;
-  description?: string;
-  columns: InvestigateWidgetColumnSpan;
-  rows: number;
 }
 
 export type InvestigateWidgetCreate<TParameters extends Record<string, any> = {}> = Pick<
   InvestigateWidget,
-  'title' | 'description' | 'columns' | 'rows' | 'type'
+  'title' | 'type'
 > & {
   parameters: DeepPartial<GlobalWidgetParameters> & TParameters;
 };

@@ -8,9 +8,8 @@
 
 import { SynthtraceGenerator } from '@kbn/apm-synthtrace-client';
 import { Readable } from 'stream';
-import { ApmSynthtraceEsClient, LogsSynthtraceEsClient } from '../../..';
+import { SynthtraceEsClient } from '../shared/base_client';
 
-export type SynthtraceEsClient = ApmSynthtraceEsClient | LogsSynthtraceEsClient;
 export type SynthGenerator<TFields> =
   // @ts-expect-error upgrade typescript v4.9.5
   | SynthtraceGenerator<TFields>
@@ -19,6 +18,7 @@ export type SynthGenerator<TFields> =
   | Readable;
 
 export const withClient = <TFields>(
+  // @ts-expect-error upgrade typescript v4.9.5
   client: SynthtraceEsClient,
   generator: SynthGenerator<TFields>
 ) => {

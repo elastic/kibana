@@ -17,4 +17,5 @@ export * from './r_rule_types';
 export * from './rule_notify_when_type';
 export * from './rule_type_types';
 export * from './rule_types';
+export * from './rule_flapping';
 export * from './search_strategy_types';

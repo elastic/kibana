@@ -593,25 +593,25 @@ describe('current status route', () => {
         pendingConfigs: {
           'id3-Asia/Pacific - Japan': {
             configId: 'id3',
-            location: 'Asia/Pacific - Japan',
+            locationId: 'Asia/Pacific - Japan',
             monitorQueryId: 'project-monitor-id',
             status: 'unknown',
           },
           'id3-Europe - Germany': {
             configId: 'id3',
-            location: 'Europe - Germany',
+            locationId: 'Europe - Germany',
             monitorQueryId: 'project-monitor-id',
             status: 'unknown',
           },
           'id4-Asia/Pacific - Japan': {
             configId: 'id4',
-            location: 'Asia/Pacific - Japan',
+            locationId: 'Asia/Pacific - Japan',
             monitorQueryId: 'id4',
             status: 'unknown',
           },
           'id4-Europe - Germany': {
             configId: 'id4',
-            location: 'Europe - Germany',
+            locationId: 'Europe - Germany',
             monitorQueryId: 'id4',
             status: 'unknown',
           },

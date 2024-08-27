@@ -15,8 +15,10 @@ import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { ObservabilitySharedPluginSetup } from '@kbn/observability-shared-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 
-import type { CreateDatasetQualityController } from './controller';
 import type { DatasetQualityProps } from './components/dataset_quality';
+import { DatasetQualityDetailsProps } from './components/dataset_quality_details';
+import type { CreateDatasetQualityController } from './controller/dataset_quality';
+import type { CreateDatasetQualityDetailsController } from './controller/dataset_quality_details';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DatasetQualityPluginSetup {}
@@ -24,6 +26,8 @@ export interface DatasetQualityPluginSetup {}
 export interface DatasetQualityPluginStart {
   DatasetQuality: ComponentType<DatasetQualityProps>;
   createDatasetQualityController: CreateDatasetQualityController;
+  DatasetQualityDetails: ComponentType<DatasetQualityDetailsProps>;
+  createDatasetQualityDetailsController: CreateDatasetQualityDetailsController;
 }
 
 export interface DatasetQualityStartDeps {

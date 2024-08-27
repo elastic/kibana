@@ -792,22 +792,28 @@ export class Embeddable
         ...viz.state.datasourceStates,
         [activeDatasourceId]: datasourceState,
       };
-      const references = extractReferencesFromState({
-        activeDatasources: Object.keys(datasourceStates).reduce(
-          (acc, datasourceId) => ({
-            ...acc,
-            [datasourceId]: this.deps.datasourceMap[datasourceId],
-          }),
-          {}
-        ),
-        datasourceStates: Object.fromEntries(
-          Object.entries(datasourceStates).map(([id, state]) => [id, { isLoading: false, state }])
-        ),
-        visualizationState,
-        activeVisualization: this.activeVisualizationId
-          ? this.deps.visualizationMap[visualizationType ?? this.activeVisualizationId]
-          : undefined,
-      });
+      const references =
+        activeDatasourceId === 'formBased'
+          ? extractReferencesFromState({
+              activeDatasources: Object.keys(datasourceStates).reduce(
+                (acc, datasourceId) => ({
+                  ...acc,
+                  [datasourceId]: this.deps.datasourceMap[datasourceId],
+                }),
+                {}
+              ),
+              datasourceStates: Object.fromEntries(
+                Object.entries(datasourceStates).map(([id, state]) => [
+                  id,
+                  { isLoading: false, state },
+                ])
+              ),
+              visualizationState,
+              activeVisualization: this.activeVisualizationId
+                ? this.deps.visualizationMap[visualizationType ?? this.activeVisualizationId]
+                : undefined,
+            })
+          : [];
       const attrs = {
         ...viz,
         state: {
