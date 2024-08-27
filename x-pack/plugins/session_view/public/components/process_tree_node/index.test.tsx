@@ -159,17 +159,22 @@ describe('ProcessTreeNode component', () => {
     });
 
     it('executes callback function when user Clicks', async () => {
+      // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
+      const user = userEvent.setup({ delay: null });
       const onProcessSelected = jest.fn();
 
       renderResult = mockedContext.render(
         <ProcessTreeNode {...props} process={processMock} onProcessSelected={onProcessSelected} />
       );
 
-      await userEvent.click(renderResult.getByTestId('sessionView:processTreeNodeRow'));
+      await user.click(renderResult.getByTestId('sessionView:processTreeNodeRow'));
       expect(onProcessSelected).toHaveBeenCalled();
     });
 
     it('does not executes callback function when user is Clicking to copy text', async () => {
+      // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
+      const user = userEvent.setup({ delay: null });
+
       const windowGetSelectionSpy = jest.spyOn(window, 'getSelection');
 
       const onProcessSelected = jest.fn();
@@ -181,7 +186,7 @@ describe('ProcessTreeNode component', () => {
       // @ts-ignore
       windowGetSelectionSpy.mockImplementation(() => ({ type: 'Range' }));
 
-      await userEvent.click(renderResult.getByTestId('sessionView:processTreeNodeRow'));
+      await user.click(renderResult.getByTestId('sessionView:processTreeNodeRow'));
       expect(onProcessSelected).not.toHaveBeenCalled();
 
       // cleanup
@@ -247,12 +252,14 @@ describe('ProcessTreeNode component', () => {
         );
       });
       it('toggle Alert Details button when Alert button is clicked', async () => {
+        // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
+        const user = userEvent.setup({ delay: null });
         renderResult = mockedContext.render(
           <ProcessTreeNode {...props} process={sessionViewAlertProcessMock} />
         );
-        await userEvent.click(renderResult.getByTestId('processTreeNodeAlertButton'));
+        await user.click(renderResult.getByTestId('processTreeNodeAlertButton'));
         expect(renderResult.queryByTestId('sessionView:sessionViewAlertDetails')).toBeTruthy();
-        await userEvent.click(renderResult.getByTestId('processTreeNodeAlertButton'));
+        await user.click(renderResult.getByTestId('processTreeNodeAlertButton'));
         expect(renderResult.queryByTestId('sessionView:sessionViewAlertDetails')).toBeFalsy();
       });
     });
@@ -289,6 +296,8 @@ describe('ProcessTreeNode component', () => {
         ).toBeTruthy();
       });
       it('toggle Child processes nodes when Child processes button is clicked', async () => {
+        // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
+        const user = userEvent.setup({ delay: null });
         const processMockWithChildren: typeof processMock = {
           ...processMock,
           getChildren: () => [childProcessMock],
@@ -300,12 +309,12 @@ describe('ProcessTreeNode component', () => {
 
         expect(renderResult.getAllByTestId('sessionView:processTreeNode')).toHaveLength(1);
 
-        await userEvent.click(
+        await user.click(
           renderResult.getByTestId('sessionView:processTreeNodeChildProcessesButton')
         );
         expect(renderResult.getAllByTestId('sessionView:processTreeNode')).toHaveLength(2);
 
-        await userEvent.click(
+        await user.click(
           renderResult.getByTestId('sessionView:processTreeNodeChildProcessesButton')
         );
         expect(renderResult.getAllByTestId('sessionView:processTreeNode')).toHaveLength(1);
