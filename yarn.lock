@@ -15189,10 +15189,10 @@ cypress-axe@^1.5.0:
   resolved "https://registry.yarnpkg.com/cypress-axe/-/cypress-axe-1.5.0.tgz#95082734583da77b51ce9b7784e14a442016c7a1"
   integrity sha512-Hy/owCjfj+25KMsecvDgo4fC/781ccL+e8p+UUYoadGVM2ogZF9XIKbiM6KI8Y3cEaSreymdD6ZzccbI2bY0lQ==
 
-cypress-data-session@^2.8.0:
-  version "2.8.0"
-  resolved "https://registry.yarnpkg.com/cypress-data-session/-/cypress-data-session-2.8.0.tgz#65795dafea449ecc78b9e5ea69d734d4f7d9cb15"
-  integrity sha512-WYx2aruBwrpNNLVxHcD7lHHbwNCSKMHRBZEsaaV8sARoyAJsohIAhzOldIUE2n02O2ICaVYYjpF2cdxFumRI0w==
+cypress-data-session@^2.8.4:
+  version "2.8.4"
+  resolved "https://registry.yarnpkg.com/cypress-data-session/-/cypress-data-session-2.8.4.tgz#b71cbc37f59986037c957f16703301fcfb01836f"
+  integrity sha512-a53WiKXcNXuGusn7IstTplGu5oKlujaFam2TbaQ/GQYV6751KKXmqbi0UJWlz9Tn2q5pF2j52QV7uOVBpnPCIQ==
   dependencies:
     cypress-plugin-config "^1.2.0"
     debug "^4.3.2"
