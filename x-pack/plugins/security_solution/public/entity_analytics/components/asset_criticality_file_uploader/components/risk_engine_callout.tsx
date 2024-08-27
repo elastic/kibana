@@ -110,7 +110,7 @@ export const RiskEngineCallout: React.FC = () => {
         <EuiFlexItem>
           <EuiText size="xs">
             <FormattedMessage
-              defaultMessage="Next engine is schedule to run in:"
+              defaultMessage="The next scheduled engine run is in:"
               id="xpack.securitySolution.entityAnalytics.assetCriticalityResultStep.riskEngine.scheduleText"
             />
             <b>{` ${nextScheduleRun}`}</b>
