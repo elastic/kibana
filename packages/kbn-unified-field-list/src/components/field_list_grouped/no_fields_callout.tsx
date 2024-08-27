@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiCallOut, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiText, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 const defaultNoFieldsMessageCopy = i18n.translate(
@@ -37,14 +37,20 @@ export const NoFieldsCallout = ({
 
   if (!fieldsExistInIndex) {
     return (
-      <EuiCallOut
+      <EuiText
         size="s"
-        color="warning"
-        title={i18n.translate('unifiedFieldList.fieldList.noFieldsCallout.noFieldsLabel', {
-          defaultMessage: 'No fields exist in this data view.',
-        })}
+        color="subdued"
+        css={css`
+          padding: ${euiTheme.size.s};
+        `}
         data-test-subj={`${dataTestSubject}-noFieldsExist`}
-      />
+      >
+        <p>
+          {i18n.translate('unifiedFieldList.fieldList.noFieldsCallout.noFieldsLabel', {
+            defaultMessage: 'No fields exist in this data view.',
+          })}
+        </p>
+      </EuiText>
     );
   }
 

@@ -57,6 +57,7 @@ export const ErrorCallout = ({ title, error }: Props) => {
               <EuiCodeBlock
                 paddingSize="s"
                 language="json"
+                isCopyable={true}
                 css={css`
                   text-align: left;
                 `}
