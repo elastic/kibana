@@ -28637,10 +28637,10 @@ snakecase-keys@^4.0.1:
     map-obj "^4.1.0"
     snake-case "^3.0.4"
 
-snakecase-keys@^8.0.0:
-  version "8.0.0"
-  resolved "https://registry.yarnpkg.com/snakecase-keys/-/snakecase-keys-8.0.0.tgz#87da70d45529b35f3f27af8c8ef02b428e705c68"
-  integrity sha512-qS7XvESuFxskrmD8/O9tOMdLdV9YTuPfNLdRJIvNJKNEZtH9XVPwmZioROwl4TsVDbOFqlQ/o7pURuF8MnjYsg==
+snakecase-keys@^8.0.1:
+  version "8.0.1"
+  resolved "https://registry.yarnpkg.com/snakecase-keys/-/snakecase-keys-8.0.1.tgz#cd75429b9b575fb79c1273334b4926bf49da2911"
+  integrity sha512-Sj51kE1zC7zh6TDlNNz0/Jn1n5HiHdoQErxO8jLtnyrkJW/M5PrI7x05uDgY3BO7OUQYKCvmeMurW6BPUdwEOw==
   dependencies:
     map-obj "^4.1.0"
     snake-case "^3.0.4"
