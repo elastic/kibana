@@ -17,7 +17,7 @@ import { MemoryRouter } from '@kbn/shared-ux-router';
 import { findingsNavigation } from '../../common/navigation/constants';
 import userEvent from '@testing-library/user-event';
 import { FilterManager } from '@kbn/data-plugin/public';
-import { CspClientPluginStartDeps } from '../../types';
+import { CspClientPluginStartDeps } from '@kbn/cloud-security-posture';
 import * as statusHandlers from '../../../server/routes/status/status.handlers.mock';
 import {
   bsearchFindingsHandler,

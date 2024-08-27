@@ -41,7 +41,7 @@ for (let i = 0; i < 50; i++) {
       );
 
       expect(await screen.findByTestId('caseSeverity')).toBeInTheDocument();
-      expect(await screen.findByTestId('case-severity-selection')).not.toHaveAttribute('disabled');
+      expect(await screen.findByTestId('case-severity-selection')).toBeEnabled();
     });
 
     // default to LOW in this test configuration
@@ -85,7 +85,7 @@ for (let i = 0; i < 50; i++) {
         </FormTestComponent>
       );
 
-      expect(await screen.findByTestId('case-severity-selection')).toHaveAttribute('disabled');
+      expect(await screen.findByTestId('case-severity-selection')).toBeDisabled();
     });
   });
 }

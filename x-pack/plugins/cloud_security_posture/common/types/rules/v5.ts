@@ -7,20 +7,13 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { DEFAULT_BENCHMARK_RULES_PER_PAGE } from './v3';
 
-export type {
-  cspBenchmarkRuleMetadataSchema,
-  CspBenchmarkRuleMetadata,
-  cspBenchmarkRuleSchema,
-  CspBenchmarkRule,
-  FindCspBenchmarkRuleResponse,
-} from './v3';
+export type { cspBenchmarkRuleSchema, CspBenchmarkRule, FindCspBenchmarkRuleResponse } from './v3';
 export type {
   PageUrlParams,
   rulesToUpdate,
   CspBenchmarkRulesBulkActionRequestSchema,
   CspBenchmarkRulesBulkActionResponse,
   RuleStateAttributes,
-  CspBenchmarkRulesStates,
   cspSettingsSchema,
   CspSettings,
   BulkActionBenchmarkRulesResponse,

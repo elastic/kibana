@@ -10,9 +10,9 @@ import { useWhichFlyout } from '../../shared/hooks/use_which_flyout';
 import { getField } from '../../shared/utils';
 import { EventKind } from '../../shared/constants/event_kinds';
 import { useDocumentDetailsContext } from '../../shared/context';
-import { FlyoutTour } from '../../shared/components/flyout_tour';
 import { getLeftSectionTourSteps } from '../../shared/utils/tour_step_config';
 import { Flyouts } from '../../shared/constants/flyouts';
+import { FlyoutTour } from '../../shared/components/flyout_tour';
 
 /**
  * Guided tour for the left panel in details flyout
