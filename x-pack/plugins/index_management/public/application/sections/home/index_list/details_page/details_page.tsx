@@ -9,11 +9,13 @@ import React, { useEffect, useMemo, FunctionComponent } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
 import { IndexDetailsSection, IndexDetailsTabId } from '../../../../../../common/constants';
-import { DetailsPageError } from './details_page_errors/details_page_error';
 import { DetailsPageContent } from './details_page_content';
-import { DetailsPageLoading } from './details_page_index_loading';
-import { DetailsPageEmptyIndexNameError } from './details_page_errors/error_empty_index_name';
 import { useIndexFunctions } from '../../../../hooks/use_index_functions';
+import {
+  DetailsPageError,
+  DetailsPageLoading,
+  DetailsPageNoIndexNameError,
+} from '../../components';
 
 export const DetailsPage: FunctionComponent<
   RouteComponentProps<{ indexName: string; indexDetailsSection: IndexDetailsSection }>
@@ -30,7 +32,7 @@ export const DetailsPage: FunctionComponent<
   }, [fetchIndexDetails]);
 
   if (!indexName) {
-    return <DetailsPageEmptyIndexNameError />;
+    return <DetailsPageNoIndexNameError />;
   }
   if (isIndicesLoading && !index) {
     return <DetailsPageLoading />;

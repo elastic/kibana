@@ -25,7 +25,7 @@ import { flattenPanelTree } from '../../../../lib/flatten_panel_tree';
 import { INDEX_OPEN, IndexDetailsSection } from '../../../../../../common/constants';
 import { getIndexDetailsLink } from '../../../../services/routing';
 import { AppContext } from '../../../../app_context';
-import { DeleteIndexModal } from '../index_delete_modal';
+import { DeleteIndexModal } from '../../components/index_delete_modal';
 
 export class IndexActionsContextMenu extends Component {
   static contextType = AppContext;

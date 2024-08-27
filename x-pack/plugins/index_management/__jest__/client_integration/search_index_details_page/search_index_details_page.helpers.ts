@@ -12,10 +12,9 @@ import {
   registerTestBed,
   TestBed,
 } from '@kbn/test-jest-helpers';
-import { SearchIndexDetailsPage } from '../../../public/application/sections/home/index_list/details_page/search_index/search_index_details_page'
+import { SearchIndexDetailsPage } from '../../../public/application/sections/home/index_list/search_index/search_index_details_page';
 import { WithAppDependencies } from '../helpers';
 import { testIndexName } from '../index_details_page/mocks';
-
 
 let routerMock: typeof reactRouterMock;
 
@@ -33,18 +32,17 @@ const getTestBedConfig = (initialEntry?: string): AsyncTestBedConfig => ({
 export interface SearchIndexDetailsPageTestBed extends TestBed {
   routerMock: typeof reactRouterMock;
   actions: {
-    moreOptionsContextMenu : {
+    moreOptionsContextMenu: {
       confirmDeleteIndex: () => Promise<void>;
       confirmDeleteIndexModalIsVisible: () => void;
       confirmMoreOptionsMenuItemsAreVisible: () => void;
       clickMoreOptionsButton: () => Promise<void>;
       clickDeleteIndexButton: () => Promise<void>;
-    },
+    };
     clickBackToIndicesList: () => void;
     isBackToIndicesListButtonExists: () => boolean;
     getHeader: () => string;
-  }
-
+  };
 }
 export const setup = async ({
   httpSetup,
@@ -68,30 +66,30 @@ export const setup = async ({
     return exists('searchIndexDetailsBackToIndicesButton');
   };
 
-  const clickBackToIndicesList = async() => {
+  const clickBackToIndicesList = async () => {
     expect(exists('searchIndexDetailsBackToIndicesButton')).toBe(true);
-    await(act(async()=>{
+    await act(async () => {
       find('searchIndexDetailsBackToIndicesButton').simulate('click');
-    }));
-    component.update()
-  }
+    });
+    component.update();
+  };
   const moreOptionsContextMenu = {
-    clickMoreOptionsButton: async() => {
+    clickMoreOptionsButton: async () => {
       expect(exists('searchIndexDetailsMoreOptionsButton')).toBe(true);
-      await(act(async()=>{
+      await act(async () => {
         find('searchIndexDetailsMoreOptionsButton').simulate('click');
-      }));
+      });
       component.update();
     },
     confirmMoreOptionsMenuItemsAreVisible: () => {
       expect(exists('searchIndexMoreOptionsMenu')).toBe(true);
       expect(exists('searchIndexDeleteButton')).toBe(true);
     },
-    clickDeleteIndexButton: async() => {
+    clickDeleteIndexButton: async () => {
       expect(exists('searchIndexDeleteButton')).toBe(true);
-      await(act(async()=>{
+      await act(async () => {
         find('searchIndexDeleteButton').simulate('click');
-      }));
+      });
       component.update();
     },
     confirmDeleteIndexModalIsVisible: () => {
@@ -102,11 +100,11 @@ export const setup = async ({
     },
     confirmDeleteIndex: async () => {
       expect(exists('confirmModalConfirmButton')).toBe(true);
-      await(act(async()=>{
+      await act(async () => {
         find('confirmModalConfirmButton').simulate('click');
-      }));
+      });
       component.update();
-    }
+    },
   };
 
   return {
@@ -117,7 +115,6 @@ export const setup = async ({
       clickBackToIndicesList,
       isBackToIndicesListButtonExists,
       getHeader,
-
-    }
-  }
-}
+    },
+  };
+};
