@@ -32,8 +32,8 @@ const history = scopedHistoryMock.create();
 const getUrlForApp = (appId: string) => appId;
 const navigateToUrl = jest.fn();
 const spacesManager = spacesManagerMock.create();
-const getRolesAPIClient = getRolesAPIClientMock();
-const getPrivilegeAPIClient = getPrivilegeAPIClientMock();
+const getRolesAPIClient = getRolesAPIClientMock;
+const getPrivilegeAPIClient = getPrivilegeAPIClientMock;
 const reloadWindow = jest.fn();
 
 const http = httpServiceMock.createStartContract();
