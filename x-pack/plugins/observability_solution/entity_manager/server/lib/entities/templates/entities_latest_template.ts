@@ -13,7 +13,7 @@ import {
   entitiesIndexPattern,
   entitiesAliasPattern,
 } from '@kbn/entities-schema';
-import { getEntityLatestIndexTemplateV1 } from '../../../../common/helpers';
+import { generateLatestIndexTemplateId } from '../helpers/generate_component_id';
 import {
   ENTITY_ENTITY_COMPONENT_TEMPLATE_V1,
   ENTITY_EVENT_COMPONENT_TEMPLATE_V1,
@@ -21,10 +21,10 @@ import {
 } from '../../../../common/constants_entities';
 import { getCustomLatestTemplateComponents } from '../../../templates/components/helpers';
 
-export const getEntitiesLatestIndexTemplateConfig = (
+export const generateEntitiesLatestIndexTemplateConfig = (
   definition: EntityDefinition
 ): IndicesPutIndexTemplateRequest => ({
-  name: getEntityLatestIndexTemplateV1(definition.id),
+  name: generateLatestIndexTemplateId(definition),
   _meta: {
     description:
       "Index template for indices managed by the Elastic Entity Model's entity discovery framework for the latest dataset",

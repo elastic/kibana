@@ -5,19 +5,14 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, EuiToolTip, EuiIcon } from '@elastic/eui';
+import { EuiTitle, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
 
-import { getResultToolTip, showResult } from './helpers';
+import { getPatternResultTooltip, showResult } from './helpers';
 import { IlmPhaseCounts } from '../../../ilm_phase_counts';
-import { getResultIcon, getResultIconColor } from '../../../summary_table/helpers';
 import * as i18n from '../translations';
 import type { IlmExplainPhaseCounts } from '../../../../types';
-
-const ResultContainer = styled.div`
-  margin-right: ${({ theme }) => theme.eui.euiSizeS};
-`;
+import { IndexResultBadge } from '../../../index_result_badge';
 
 interface Props {
   incompatible: number | undefined;
@@ -33,41 +28,46 @@ const PatternLabelComponent: React.FC<Props> = ({
   indices,
   indicesChecked,
   pattern,
-}) => (
-  <>
-    <EuiFlexGroup alignItems="center" gutterSize="none">
-      <EuiFlexItem grow={false}>
-        <ResultContainer>
-          {showResult({
-            incompatible,
-            indices,
-            indicesChecked,
-          }) && (
-            <EuiToolTip content={getResultToolTip(incompatible)}>
-              <EuiIcon
-                color={getResultIconColor(incompatible)}
-                type={getResultIcon(incompatible)}
-              />
-            </EuiToolTip>
-          )}
-        </ResultContainer>
-      </EuiFlexItem>
+}) => {
+  // this is a workaround for type guard limitation
+  // TS does not type narrow value passed to the type guard function
+  // if that value is proxied via another key like for example {incompatible: *incompatible*}
+  // so we need a reference object to pass it to the type guard
+  // and then check the keys of that object (resultOpts) for type guarded result
+  // to be properly type narrowed instead
+  const resultOpts = {
+    incompatible,
+    indices,
+    indicesChecked,
+  };
+
+  return (
+    <EuiFlexGroup gutterSize={'s'} alignItems={'center'}>
+      {showResult(resultOpts) && (
+        <EuiFlexItem grow={false}>
+          <IndexResultBadge
+            incompatible={resultOpts.incompatible}
+            tooltipText={getPatternResultTooltip(resultOpts.incompatible)}
+          />
+        </EuiFlexItem>
+      )}
 
       <EuiFlexItem grow={false}>
         <EuiToolTip content={i18n.PATTERN_OR_INDEX_TOOLTIP}>
-          <EuiTitle size="s">
+          <EuiTitle size="xxs">
             <h2>{pattern}</h2>
           </EuiTitle>
         </EuiToolTip>
       </EuiFlexItem>
-    </EuiFlexGroup>
 
-    <EuiSpacer size="xs" />
-    {ilmExplainPhaseCounts && (
-      <IlmPhaseCounts ilmExplainPhaseCounts={ilmExplainPhaseCounts} pattern={pattern} />
-    )}
-  </>
-);
+      {ilmExplainPhaseCounts && (
+        <EuiFlexItem grow={false}>
+          <IlmPhaseCounts ilmExplainPhaseCounts={ilmExplainPhaseCounts} pattern={pattern} />
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
+  );
+};
 
 PatternLabelComponent.displayName = 'PatternLabelComponent';
 

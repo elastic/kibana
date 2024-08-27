@@ -15,11 +15,11 @@ export const MAIN_PANEL_LABELS = {
   importExportButton: i18n.translate('console.importExportButtonLabel', {
     defaultMessage: 'Import/Export',
   }),
-  shortcutsButton: i18n.translate('console.shortcutsButtonAriaLabel', {
-    defaultMessage: 'Keyboard shortcuts',
-  }),
   helpButton: i18n.translate('console.helpButtonTooltipContent', {
     defaultMessage: 'Help',
+  }),
+  shortcutsButton: i18n.translate('console.shortcutsButtonAriaLabel', {
+    defaultMessage: 'Keyboard shortcuts',
   }),
   variablesButton: i18n.translate('console.variablesButton', {
     defaultMessage: 'Variables',

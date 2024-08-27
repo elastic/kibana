@@ -121,9 +121,7 @@ exports[`Table prevents hidden saved objects from being deleted 1`] = `
       ]
     }
   />
-  <EuiSpacer
-    size="s"
-  />
+  <EuiSpacer />
   <div
     data-test-subj="savedObjectsTable"
   >
@@ -355,9 +353,7 @@ exports[`Table should render normally 1`] = `
       ]
     }
   />
-  <EuiSpacer
-    size="s"
-  />
+  <EuiSpacer />
   <div
     data-test-subj="savedObjectsTable"
   >

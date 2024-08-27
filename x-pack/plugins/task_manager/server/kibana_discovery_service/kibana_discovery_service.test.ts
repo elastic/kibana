@@ -193,19 +193,5 @@ describe('KibanaDiscoveryService', () => {
         'Removed this node from the Kibana Discovery Service'
       );
     });
-
-    it('logs an error when failed', async () => {
-      savedObjectsRepository.delete.mockRejectedValue(new Error('bar'));
-
-      const kibanaDiscoveryService = new KibanaDiscoveryService({
-        savedObjectsRepository,
-        logger,
-        currentNode,
-      });
-
-      await kibanaDiscoveryService.deleteCurrentNode();
-
-      expect(logger.error).toHaveBeenCalledWith('Deleting current node has failed. error: bar');
-    });
   });
 });

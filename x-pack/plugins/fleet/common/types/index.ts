@@ -31,6 +31,7 @@ export interface FleetConfigType {
     };
   };
   agentless?: {
+    enabled: boolean;
     api: {
       url: string;
       tls: {

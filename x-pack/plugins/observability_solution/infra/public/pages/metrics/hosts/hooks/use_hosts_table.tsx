@@ -6,7 +6,13 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiBasicTableColumn, CriteriaWithPagination, EuiTableSelectionType } from '@elastic/eui';
+import {
+  EuiBasicTableColumn,
+  CriteriaWithPagination,
+  EuiTableSelectionType,
+  EuiText,
+  EuiLink,
+} from '@elastic/eui';
 import createContainer from 'constate';
 import useAsync from 'react-use/lib/useAsync';
 import { isEqual } from 'lodash';
@@ -15,6 +21,9 @@ import { CloudProvider } from '@kbn/custom-icons';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import { EuiToolTip } from '@elastic/eui';
 import { EuiBadge } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { APM_HOST_TROUBLESHOOTING_LINK } from '../../../../components/asset_details/constants';
+import { Popover } from '../../../../components/asset_details/tabs/common/popover';
 import { HOST_NAME_FIELD } from '../../../../../common/constants';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { createInventoryMetricFormatter } from '../../inventory_view/lib/create_inventory_metric_formatter';
@@ -48,6 +57,7 @@ export type HostNodeRow = HostMetadata &
   HostMetrics & {
     name: string;
     alertsCount?: number;
+    hasSystemMetrics: boolean;
   };
 
 /**
@@ -58,7 +68,7 @@ const formatMetric = (type: InfraAssetMetricType, value: number | undefined | nu
 };
 
 const buildItemsList = (nodes: InfraAssetMetricsItem[]): HostNodeRow[] => {
-  return nodes.map(({ metrics, metadata, name, alertsCount }) => {
+  return nodes.map(({ metrics, metadata, name, alertsCount, hasSystemMetrics }) => {
     const metadataKeyValue = metadata.reduce(
       (acc, curr) => ({
         ...acc,
@@ -83,7 +93,7 @@ const buildItemsList = (nodes: InfraAssetMetricsItem[]): HostNodeRow[] => {
         }),
         {} as HostMetrics
       ),
-
+      hasSystemMetrics,
       alertsCount: alertsCount ?? 0,
     };
   });
@@ -127,6 +137,7 @@ export const useHostsTable = () => {
   const { hostNodes } = useHostsViewContext();
 
   const displayAlerts = hostNodes.some((item) => 'alertsCount' in item);
+  const showApmHostTroubleshooting = hostNodes.some((item) => !item.hasSystemMetrics);
 
   const { value: formulas } = useAsync(() => inventoryModel.metrics.getFormulas());
 
@@ -267,6 +278,63 @@ export const useHostsTable = () => {
             },
           ]
         : []),
+      ...(showApmHostTroubleshooting
+        ? [
+            {
+              name: '',
+              width: '20px',
+              field: 'hasSystemMetrics',
+              sortable: false,
+              'data-test-subj': 'hostsView-tableRow-hasSystemMetrics',
+              render: (hasSystemMetrics: HostNodeRow['hasSystemMetrics']) => {
+                if (hasSystemMetrics) {
+                  return null;
+                }
+                return (
+                  <Popover
+                    icon="questionInCircle"
+                    data-test-subj="hostsView-tableRow-hasSystemMetrics-popover"
+                  >
+                    <EuiText size="xs">
+                      <p>
+                        <FormattedMessage
+                          id="xpack.infra.hostsViewPage.table.tooltip.apmHostMessage"
+                          defaultMessage="This host has been detected by {apm}"
+                          values={{
+                            apm: (
+                              <EuiLink
+                                data-test-subj="hostsViewTooltipApmDocumentationLink"
+                                href=" https://www.elastic.co/guide/en/observability/current/apm.html"
+                                target="_blank"
+                              >
+                                <FormattedMessage
+                                  id="xpack.infra.hostsViewPage.table.tooltip.apmHostMessage.apmDocumentationLink"
+                                  defaultMessage="APM"
+                                />
+                              </EuiLink>
+                            ),
+                          }}
+                        />
+                      </p>
+                      <p>
+                        <EuiLink
+                          data-test-subj="hostsView-tableRow-hasSystemMetrics-learnMoreLink"
+                          href={APM_HOST_TROUBLESHOOTING_LINK}
+                          target="_blank"
+                        >
+                          <FormattedMessage
+                            id="xpack.infra.hostsViewPage.table.tooltip.learnMoreLink"
+                            defaultMessage="Learn more"
+                          />
+                        </EuiLink>
+                      </p>
+                    </EuiText>
+                  </Popover>
+                );
+              },
+            },
+          ]
+        : []),
       {
         name: TABLE_COLUMN_LABEL.title,
         field: 'title',
@@ -385,18 +453,19 @@ export const useHostsTable = () => {
       },
     ],
     [
-      detailsItemId,
+      displayAlerts,
+      showApmHostTroubleshooting,
       formulas?.cpuUsage.value,
-      formulas?.diskUsage.value,
-      formulas?.memoryFree.value,
-      formulas?.memoryUsage.value,
       formulas?.normalizedLoad1m.value,
+      formulas?.memoryUsage.value,
+      formulas?.memoryFree.value,
+      formulas?.diskUsage.value,
       formulas?.rx.value,
       formulas?.tx.value,
-      reportHostEntryClick,
-      setProperties,
-      displayAlerts,
       metricColumnsWidth,
+      detailsItemId,
+      setProperties,
+      reportHostEntryClick,
     ]
   );
 

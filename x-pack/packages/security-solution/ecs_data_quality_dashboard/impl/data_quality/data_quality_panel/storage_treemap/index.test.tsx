@@ -20,7 +20,10 @@ import { EMPTY_STAT } from '../../helpers';
 import { alertIndexWithAllResults } from '../../mock/pattern_rollup/mock_alerts_pattern_rollup';
 import { auditbeatWithAllResults } from '../../mock/pattern_rollup/mock_auditbeat_pattern_rollup';
 import { packetbeatNoResults } from '../../mock/pattern_rollup/mock_packetbeat_pattern_rollup';
-import { TestProviders } from '../../mock/test_providers/test_providers';
+import {
+  TestDataQualityProviders,
+  TestExternalProviders,
+} from '../../mock/test_providers/test_providers';
 import type { Props } from '.';
 import { StorageTreemap } from '.';
 import { DEFAULT_MAX_CHART_HEIGHT } from '../tabs/styles';
@@ -54,8 +57,6 @@ const defaultProps: Props = {
   maxChartHeight: DEFAULT_MAX_CHART_HEIGHT,
   onIndexSelected,
   patternRollups,
-  patterns,
-  baseTheme: DARK_THEME,
   valueFormatter: formatBytes,
 };
 
@@ -73,9 +74,11 @@ describe('StorageTreemap', () => {
       jest.clearAllMocks();
 
       render(
-        <TestProviders>
-          <StorageTreemap {...defaultProps} />
-        </TestProviders>
+        <TestExternalProviders>
+          <TestDataQualityProviders dataQualityContextProps={{ patterns, baseTheme: DARK_THEME }}>
+            <StorageTreemap {...defaultProps} />
+          </TestDataQualityProviders>
+        </TestExternalProviders>
       );
     });
 
@@ -135,9 +138,11 @@ describe('StorageTreemap', () => {
 
     beforeEach(() => {
       render(
-        <TestProviders>
-          <StorageTreemap {...defaultProps} flattenedBuckets={emptyFlattenedBuckets} />
-        </TestProviders>
+        <TestExternalProviders>
+          <TestDataQualityProviders dataQualityContextProps={{ patterns, baseTheme: DARK_THEME }}>
+            <StorageTreemap {...defaultProps} flattenedBuckets={emptyFlattenedBuckets} />
+          </TestDataQualityProviders>
+        </TestExternalProviders>
       );
     });
 

@@ -17,13 +17,14 @@ export const ALL_PASSED = i18n.translate(
 export const SOME_FAILED = i18n.translate(
   'securitySolutionPackages.ecsDataQualityDashboard.patternLabel.someFailedTooltip',
   {
-    defaultMessage: 'Some indices matching this pattern failed the data quality checks',
+    defaultMessage: 'At least one index matching this pattern failed a data quality check',
   }
 );
 
 export const SOME_UNCHECKED = i18n.translate(
   'securitySolutionPackages.ecsDataQualityDashboard.patternLabel.someUncheckedTooltip',
   {
-    defaultMessage: 'Some indices matching this pattern have not been checked for data quality',
+    defaultMessage:
+      'At least one index matching this pattern has not been checked for data quality',
   }
 );

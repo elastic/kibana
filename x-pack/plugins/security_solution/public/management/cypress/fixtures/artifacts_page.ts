@@ -188,14 +188,11 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
           selector: 'eventFilters-form-description-input',
           value: 'This is the event filter description',
         },
-        {
-          type: 'click',
-          selector: 'fieldAutocompleteComboBox',
-        },
+
         {
           type: 'input',
-          customSelector: '[data-test-subj="fieldAutocompleteComboBox"] input',
-          value: '@timestamp{downArrow}{enter}',
+          selector: 'fieldAutocompleteComboBox',
+          value: '@timestamp',
         },
         {
           type: 'click',
@@ -239,12 +236,9 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
           value: 'This is the event filter description edited',
         },
         {
-          type: 'click',
+          type: 'input',
           selector: 'fieldAutocompleteComboBox',
-        },
-        {
-          type: 'click',
-          customSelector: 'button[title="agent.name"]',
+          value: '{selectAll}agent.name',
         },
         {
           type: 'input',

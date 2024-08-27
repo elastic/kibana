@@ -51,7 +51,7 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       return await noPermissionsTitle.getVisibleText();
     },
     async clickCreateConnectorButton() {
-      const createBtn = await testSubjects.find('createActionButton');
+      const createBtn = await testSubjects.find('createConnectorButton');
       const createBtnIsVisible = await createBtn.isDisplayed();
       if (createBtnIsVisible) {
         await createBtn.click();

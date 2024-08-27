@@ -5,152 +5,116 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiStat, EuiToolTip } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React from 'react';
 import styled from 'styled-components';
 
-import { EMPTY_STAT, getIncompatibleStatColor } from '../../../../helpers';
-import { StatLabel } from '../../../stat_label';
+import { EMPTY_STAT, getIncompatibleStatBadgeColor } from '../../../../helpers';
+import { useDataQualityContext } from '../../../data_quality_context';
 import * as i18n from '../../../stat_label/translations';
+import { Stat } from './stat';
 
-const IndicesStatContainer = styled.div`
-  min-width: 100px;
+const StyledStatWrapperFlexItem = styled(EuiFlexItem)`
+  padding: 0 ${({ theme }) => theme.eui.euiSize};
+  border-right: ${({ theme }) => theme.eui.euiBorderThin};
+  border-color: ${({ theme }) => theme.eui.euiBorderColor};
+
+  &:last-child {
+    padding-right: 0;
+    border-right: none;
+  }
+  &:first-child {
+    padding-left: 0;
+  }
 `;
-
-const DocsContainer = styled.div`
-  min-width: 155px;
-`;
-
-const STAT_TITLE_SIZE = 's';
 
 interface Props {
-  docsCount: number | undefined;
-  formatBytes: (value: number | undefined) => string;
-  formatNumber: (value: number | undefined) => string;
-  incompatible: number | undefined;
-  indices: number | undefined;
-  indicesChecked: number | undefined;
+  docsCount?: number;
+  incompatible?: number;
+  indices?: number;
+  indicesChecked?: number;
   pattern?: string;
-  sizeInBytes: number | undefined;
+  sizeInBytes?: number;
 }
 
 const StatsRollupComponent: React.FC<Props> = ({
   docsCount,
-  formatBytes,
-  formatNumber,
   incompatible,
   indices,
   indicesChecked,
   pattern,
   sizeInBytes,
 }) => {
-  const incompatibleDescription = useMemo(
-    () => <StatLabel line1={i18n.INCOMPATIBLE} line2={i18n.FIELDS} />,
-    []
-  );
-  const indicesCheckedDescription = useMemo(
-    () => <StatLabel line1={i18n.INDICES} line2={i18n.CHECKED} />,
-    []
-  );
-  const sizeDescription = useMemo(() => <StatLabel line2={i18n.SIZE} />, []);
-  const docsDescription = useMemo(() => <StatLabel line2={i18n.DOCS} />, []);
-  const indicesDescription = useMemo(() => <StatLabel line2={i18n.INDICES} />, []);
+  const { formatNumber, formatBytes } = useDataQualityContext();
 
   return (
     <EuiFlexGroup
       alignItems="flexEnd"
       data-test-subj="statsRollup"
-      gutterSize="s"
+      gutterSize="none"
       justifyContent="flexEnd"
     >
-      <EuiFlexItem grow={false}>
-        <EuiToolTip
-          content={
+      <StyledStatWrapperFlexItem grow={false}>
+        <Stat
+          tooltipText={
             pattern != null
-              ? i18n.INCOMPATIBLE_PATTERN_TOOL_TIP(pattern)
+              ? i18n.TOTAL_INCOMPATIBLE_PATTERN_TOOL_TIP
               : i18n.TOTAL_INCOMPATIBLE_TOOL_TIP
           }
+          badgeText={incompatible != null ? formatNumber(incompatible) : EMPTY_STAT}
+          badgeColor={getIncompatibleStatBadgeColor(incompatible)}
         >
-          <EuiStat
-            description={incompatibleDescription}
-            title={incompatible != null ? formatNumber(incompatible) : EMPTY_STAT}
-            titleColor={getIncompatibleStatColor(incompatible)}
-            titleSize={STAT_TITLE_SIZE}
-          />
-        </EuiToolTip>
-      </EuiFlexItem>
+          {i18n.INCOMPATIBLE_FIELDS}
+        </Stat>
+      </StyledStatWrapperFlexItem>
 
-      <EuiFlexItem grow={false}>
-        <IndicesStatContainer>
-          <EuiToolTip
-            content={
-              pattern != null
-                ? i18n.TOTAL_COUNT_OF_INDICES_CHECKED_MATCHING_PATTERN_TOOL_TIP(pattern)
-                : i18n.TOTAL_INDICES_CHECKED_TOOL_TIP
-            }
-          >
-            <EuiStat
-              description={indicesCheckedDescription}
-              title={indicesChecked != null ? formatNumber(indicesChecked) : EMPTY_STAT}
-              titleSize={STAT_TITLE_SIZE}
-            />
-          </EuiToolTip>
-        </IndicesStatContainer>
-      </EuiFlexItem>
+      <StyledStatWrapperFlexItem grow={false}>
+        <Stat
+          tooltipText={
+            pattern != null
+              ? i18n.TOTAL_CHECKED_INDICES_PATTERN_TOOL_TIP
+              : i18n.TOTAL_CHECKED_INDICES_TOOL_TIP
+          }
+          badgeText={indicesChecked != null ? formatNumber(indicesChecked) : EMPTY_STAT}
+        >
+          {i18n.INDICES_CHECKED}
+        </Stat>
+      </StyledStatWrapperFlexItem>
 
-      <EuiFlexItem grow={false}>
-        <IndicesStatContainer>
-          <EuiToolTip
-            content={
-              pattern != null
-                ? i18n.TOTAL_COUNT_OF_INDICES_MATCHING_PATTERN_TOOL_TIP(pattern)
-                : i18n.TOTAL_INDICES_TOOL_TIP
-            }
-          >
-            <EuiStat
-              description={indicesDescription}
-              title={indices != null ? formatNumber(indices) : 0}
-              titleSize={STAT_TITLE_SIZE}
-            />
-          </EuiToolTip>
-        </IndicesStatContainer>
-      </EuiFlexItem>
+      <StyledStatWrapperFlexItem grow={false}>
+        <Stat
+          tooltipText={
+            pattern != null ? i18n.TOTAL_INDICES_PATTERN_TOOL_TIP : i18n.TOTAL_INDICES_TOOL_TIP
+          }
+          badgeText={indices != null ? formatNumber(indices) : '0'}
+        >
+          {i18n.INDICES}
+        </Stat>
+      </StyledStatWrapperFlexItem>
 
       {sizeInBytes != null && (
-        <EuiFlexItem grow={false}>
-          <IndicesStatContainer>
-            <EuiToolTip
-              content={
-                pattern != null
-                  ? i18n.INDICES_SIZE_PATTERN_TOOL_TIP(pattern)
-                  : i18n.TOTAL_SIZE_TOOL_TIP
-              }
-            >
-              <EuiStat
-                description={sizeDescription}
-                title={sizeInBytes != null ? formatBytes(sizeInBytes) : EMPTY_STAT}
-                titleSize={STAT_TITLE_SIZE}
-              />
-            </EuiToolTip>
-          </IndicesStatContainer>
-        </EuiFlexItem>
+        <StyledStatWrapperFlexItem grow={false}>
+          <Stat
+            tooltipText={
+              pattern != null ? i18n.TOTAL_SIZE_PATTERN_TOOL_TIP : i18n.TOTAL_SIZE_TOOL_TIP
+            }
+            badgeText={sizeInBytes != null ? formatBytes(sizeInBytes) : EMPTY_STAT}
+          >
+            {i18n.SIZE}
+          </Stat>
+        </StyledStatWrapperFlexItem>
       )}
 
-      <EuiFlexItem grow={false}>
-        <DocsContainer>
-          <EuiToolTip
-            content={
-              pattern != null ? i18n.INDEX_DOCS_PATTERN_TOOL_TIP(pattern) : i18n.TOTAL_DOCS_TOOL_TIP
-            }
-          >
-            <EuiStat
-              description={docsDescription}
-              title={docsCount != null ? formatNumber(docsCount) : EMPTY_STAT}
-              titleSize={STAT_TITLE_SIZE}
-            />
-          </EuiToolTip>
-        </DocsContainer>
-      </EuiFlexItem>
+      <StyledStatWrapperFlexItem grow={false}>
+        <Stat
+          tooltipText={
+            pattern != null ? i18n.TOTAL_DOCS_PATTERN_TOOL_TIP : i18n.TOTAL_DOCS_TOOL_TIP
+          }
+          badgeText={docsCount != null ? formatNumber(docsCount) : EMPTY_STAT}
+        >
+          {i18n.DOCS}
+        </Stat>
+      </StyledStatWrapperFlexItem>
     </EuiFlexGroup>
   );
 };

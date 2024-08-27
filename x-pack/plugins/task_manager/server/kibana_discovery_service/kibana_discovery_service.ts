@@ -100,11 +100,7 @@ export class KibanaDiscoveryService {
   }
 
   public async deleteCurrentNode() {
-    try {
-      await this.savedObjectsRepository.delete(BACKGROUND_TASK_NODE_SO_NAME, this.currentNode);
-      this.logger.info('Removed this node from the Kibana Discovery Service');
-    } catch (e) {
-      this.logger.error(`Deleting current node has failed. error: ${e.message}`);
-    }
+    await this.savedObjectsRepository.delete(BACKGROUND_TASK_NODE_SO_NAME, this.currentNode);
+    this.logger.info('Removed this node from the Kibana Discovery Service');
   }
 }

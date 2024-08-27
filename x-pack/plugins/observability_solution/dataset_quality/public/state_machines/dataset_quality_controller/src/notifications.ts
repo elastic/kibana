@@ -26,15 +26,6 @@ export const fetchDatasetDetailsFailedNotifier = (toasts: IToasts, error: Error)
   });
 };
 
-export const fetchDatasetSettingsFailedNotifier = (toasts: IToasts, error: Error) => {
-  toasts.addDanger({
-    title: i18n.translate('xpack.datasetQuality.fetchDatasetSettingsFailed', {
-      defaultMessage: "Data set settings couldn't be loaded.",
-    }),
-    text: error.message,
-  });
-};
-
 export const fetchDegradedStatsFailedNotifier = (toasts: IToasts, error: Error) => {
   toasts.addDanger({
     title: i18n.translate('xpack.datasetQuality.fetchDegradedStatsFailed', {
@@ -53,35 +44,10 @@ export const fetchNonAggregatableDatasetsFailedNotifier = (toasts: IToasts, erro
   });
 };
 
-export const fetchIntegrationDashboardsFailedNotifier = (toasts: IToasts, error: Error) => {
-  toasts.addDanger({
-    title: i18n.translate('xpack.datasetQuality.fetchIntegrationDashboardsFailed', {
-      defaultMessage: "We couldn't get your integration dashboards.",
-    }),
-    text: error.message,
-  });
-};
-
 export const fetchIntegrationsFailedNotifier = (toasts: IToasts, error: Error) => {
   toasts.addDanger({
     title: i18n.translate('xpack.datasetQuality.fetchIntegrationsFailed', {
       defaultMessage: "We couldn't get your integrations.",
-    }),
-    text: error.message,
-  });
-};
-
-export const fetchDataStreamIntegrationFailedNotifier = (
-  toasts: IToasts,
-  error: Error,
-  integrationName?: string
-) => {
-  toasts.addDanger({
-    title: i18n.translate('xpack.datasetQuality.flyout.fetchIntegrationsFailed', {
-      defaultMessage: "We couldn't get {integrationName} integration info.",
-      values: {
-        integrationName,
-      },
     }),
     text: error.message,
   });
@@ -96,7 +62,7 @@ export const noDatasetSelected = i18n.translate(
 
 export const assertBreakdownFieldEcsFailedNotifier = (toasts: IToasts, error: Error) => {
   toasts.addDanger({
-    title: i18n.translate('xpack.datasetQuality. assertBreakdownFieldEcsFailed', {
+    title: i18n.translate('xpack.datasetQuality.assertBreakdownFieldEcsFailed', {
       defaultMessage: "We couldn't retrieve breakdown field metadata.",
     }),
     text: error.message,

@@ -1,0 +1,21 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "__mocks__/**/*",
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    "../../../typings/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/navigation-plugin",
+    "@kbn/config-schema",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

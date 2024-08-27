@@ -7,6 +7,7 @@
 import React, { useState, useMemo } from 'react';
 import _ from 'lodash';
 import {
+  DataGridDensity,
   UnifiedDataTableSettings,
   UnifiedDataTableSettingsColumn,
   useColumns,
@@ -258,12 +259,12 @@ export const CloudSecurityDataTable = ({
     [dataView, filterManager, setUrlQuery]
   );
 
-  const onResize = (colSettings: { columnId: string; width: number }) => {
+  const onResize = (colSettings: { columnId: string; width: number | undefined }) => {
     const grid = persistedSettings || {};
     const newColumns = { ...(grid.columns || {}) };
-    newColumns[colSettings.columnId] = {
-      width: Math.round(colSettings.width),
-    };
+    newColumns[colSettings.columnId] = colSettings.width
+      ? { width: Math.round(colSettings.width) }
+      : {};
     const newGrid = { ...grid, columns: newColumns };
     setPersistedSettings(newGrid);
   };
@@ -362,6 +363,7 @@ export const CloudSecurityDataTable = ({
           gridStyleOverride={gridStyle}
           rowLineHeightOverride="24px"
           controlColumnIds={controlColumnIds}
+          dataGridDensityState={DataGridDensity.EXPANDED}
         />
       </div>
     </CellActionsProvider>

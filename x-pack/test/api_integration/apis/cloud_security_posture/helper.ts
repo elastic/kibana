@@ -19,8 +19,8 @@ export interface RoleCredentials {
   cookieHeader: { Cookie: string };
 }
 
-export const deleteIndex = (es: Client, indexToBeDeleted: string[]) => {
-  Promise.all([
+export const deleteIndex = async (es: Client, indexToBeDeleted: string[]) => {
+  return Promise.all([
     ...indexToBeDeleted.map((indexes) =>
       es.deleteByQuery({
         index: indexes,

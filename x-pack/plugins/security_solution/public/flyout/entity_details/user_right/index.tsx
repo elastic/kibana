@@ -15,7 +15,7 @@ import { useCalculateEntityRiskScore } from '../../../entity_analytics/api/hooks
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { ManagedUserDatasetKey } from '../../../../common/search_strategy/security_solution/users/managed_details';
-import { useManagedUser } from '../../../timelines/components/side_panel/new_user_detail/hooks/use_managed_user';
+import { useManagedUser } from '../shared/hooks/use_managed_user';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { UsersType } from '../../../explore/users/store/model';
 import { getCriteriaFromUsersType } from '../../../common/components/ml/criteria/get_criteria_from_users_type';

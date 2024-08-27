@@ -10,7 +10,7 @@ import { CreateAgentPolicyResponse } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { SpaceTestApiClient } from './api_helper';
-import { cleanFleetIndices } from './helpers';
+import { cleanFleetIndices, expectToRejectWithNotFound } from './helpers';
 import { setupTestSpaces, TEST_SPACE_1 } from './space_helpers';
 
 export default function (providerContext: FtrProviderContext) {
@@ -44,6 +44,8 @@ export default function (providerContext: FtrProviderContext) {
     let spaceTest1Policy1: CreateAgentPolicyResponse;
     let spaceTest1Policy2: CreateAgentPolicyResponse;
     before(async () => {
+      await apiClient.postEnableSpaceAwareness();
+
       const [_defaultSpacePolicy1, _spaceTest1Policy1, _spaceTest1Policy2] = await Promise.all([
         apiClient.createAgentPolicy(),
         apiClient.createAgentPolicy(TEST_SPACE_1),
@@ -79,27 +81,13 @@ export default function (providerContext: FtrProviderContext) {
         await apiClient.getAgentPolicy(spaceTest1Policy1.item.id, TEST_SPACE_1);
       });
       it('should not allow to get a policy from a different space from the default space', async () => {
-        let err: Error | undefined;
-        try {
-          await apiClient.getAgentPolicy(spaceTest1Policy1.item.id);
-        } catch (_err) {
-          err = _err;
-        }
-
-        expect(err).to.be.an(Error);
-        expect(err?.message).to.match(/404 "Not Found"/);
+        await expectToRejectWithNotFound(() => apiClient.getAgentPolicy(spaceTest1Policy1.item.id));
       });
 
       it('should not allow to get an default space policy from a different space', async () => {
-        let err: Error | undefined;
-        try {
-          await apiClient.getAgentPolicy(defaultSpacePolicy1.item.id, TEST_SPACE_1);
-        } catch (_err) {
-          err = _err;
-        }
-
-        expect(err).to.be.an(Error);
-        expect(err?.message).to.match(/404 "Not Found"/);
+        await expectToRejectWithNotFound(() =>
+          apiClient.getAgentPolicy(defaultSpacePolicy1.item.id, TEST_SPACE_1)
+        );
       });
     });
   });

@@ -315,7 +315,7 @@ describe('managed configuration', () => {
         },
         worker_utilization_running_average_window: 5,
         metrics_reset_interval: 3000,
-        claim_strategy: 'unsafe_mget',
+        claim_strategy: 'mget',
         request_timeouts: {
           update_by_query: 1000,
         },

@@ -506,6 +506,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       percolate: `${ELASTICSEARCH_DOCS}query-dsl-percolate-query.html`,
       queryDsl: `${ELASTICSEARCH_DOCS}query-dsl.html`,
       queryESQL: `${ELASTICSEARCH_DOCS}esql.html`,
+      queryESQLExamples: `${ELASTICSEARCH_DOCS}esql-examples.html`,
     },
     search: {
       sessions: `${KIBANA_DOCS}search-sessions.html`,

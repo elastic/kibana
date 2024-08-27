@@ -9,16 +9,16 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 
 import { EMPTY_PLACEHOLDER } from '../helpers';
-import { TestProviders } from '../../mock/test_providers/test_providers';
+import { TestExternalProviders } from '../../mock/test_providers/test_providers';
 import { UnallowedValueCount } from '../../types';
 import { IndexInvalidValues } from '.';
 
 describe('IndexInvalidValues', () => {
   test('it renders a placeholder with the expected content when `indexInvalidValues` is empty', () => {
     render(
-      <TestProviders>
+      <TestExternalProviders>
         <IndexInvalidValues indexInvalidValues={[]} />
-      </TestProviders>
+      </TestExternalProviders>
     );
 
     expect(screen.getByTestId('emptyPlaceholder')).toHaveTextContent(EMPTY_PLACEHOLDER);
@@ -37,9 +37,9 @@ describe('IndexInvalidValues', () => {
     ];
 
     render(
-      <TestProviders>
+      <TestExternalProviders>
         <IndexInvalidValues indexInvalidValues={indexInvalidValues} />
-      </TestProviders>
+      </TestExternalProviders>
     );
 
     expect(screen.getByTestId('indexInvalidValues')).toHaveTextContent(
