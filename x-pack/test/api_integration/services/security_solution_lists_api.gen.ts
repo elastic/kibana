@@ -26,10 +26,7 @@ import { DeleteListItemRequestQueryInput } from '@kbn/securitysolution-lists-com
 import { ExportListItemsRequestQueryInput } from '@kbn/securitysolution-lists-common/api/export_list_items/export_list_items.gen';
 import { FindListItemsRequestQueryInput } from '@kbn/securitysolution-lists-common/api/find_list_items/find_list_items.gen';
 import { FindListsRequestQueryInput } from '@kbn/securitysolution-lists-common/api/find_lists/find_lists.gen';
-import {
-  ImportListItemsRequestQueryInput,
-  ImportListItemsRequestBodyInput,
-} from '@kbn/securitysolution-lists-common/api/import_list_items/import_list_items.gen';
+import { ImportListItemsRequestQueryInput } from '@kbn/securitysolution-lists-common/api/import_list_items/import_list_items.gen';
 import { PatchListRequestBodyInput } from '@kbn/securitysolution-lists-common/api/patch_list/patch_list.gen';
 import { PatchListItemRequestBodyInput } from '@kbn/securitysolution-lists-common/api/patch_list_item/patch_list_item.gen';
 import { ReadListRequestQueryInput } from '@kbn/securitysolution-lists-common/api/read_list/read_list.gen';
@@ -127,7 +124,6 @@ You can import items to a new or existing list.
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object)
         .query(props.query);
     },
     patchList(props: PatchListProps) {
@@ -218,7 +214,6 @@ export interface FindListsProps {
 }
 export interface ImportListItemsProps {
   query: ImportListItemsRequestQueryInput;
-  body: ImportListItemsRequestBodyInput;
 }
 export interface PatchListProps {
   body: PatchListRequestBodyInput;

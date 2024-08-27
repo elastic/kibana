@@ -8,7 +8,7 @@ The tools in this folder are designed to make it fast and easy to build scripts 
 Options:
 --username: User name to be used for auth against elasticsearch and kibana (Default: elastic).
 --password: User name Password (Default: changeme)
---kibana: The url to Kibana (Default: http://127.0.0.1:5601)
+--kibana: The url to Kibana (Default: http://127.0.0.1:5601). In most cases you'll want to set this URL to include the basepath as well.
 --apikey: The API key for authentication, overrides username/password - use for serverless projects
 
 `scratchpad.ts` already contains code to set up clients for Elasticsearch and Kibana. In addition it provides clients for Security Solution, Lists, and Exceptions APIs, built on top of the Kibana client. However, it does not create any rules/exceptions/lists/data - it's a blank slate for you to immediately begin creating the resources you want for testing. Please don't commit data-generating code to `scratchpad.ts`! Instead, when you have built a data-generating script that might be useful to others, please extract the useful components to the `quickstart/modules` folder and leave `scratchpad.ts` empty for the next developer.
