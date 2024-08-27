@@ -1737,10 +1737,10 @@
     semver "^7.6.2"
     topojson-client "^3.1.0"
 
-"@elastic/eslint-plugin-eui@0.0.2":
-  version "0.0.2"
-  resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
-  integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
+"@elastic/eslint-plugin-eui@0.0.3":
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.3.tgz#1e439f20d606507cff9b1bd5802627bb6355dbfd"
+  integrity sha512-FNFLPIU8eNr7EqIiz847vYGUJeD90y08CLQTfMYkuR0EqDR1iVtIL/Lwf/kBNHC462nBsM8kLh+aKj8Zq5F1GQ==
 
 "@elastic/eui@95.7.0":
   version "95.7.0"
