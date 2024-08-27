@@ -14,26 +14,7 @@ import { ToolChoiceType, ToolOptions } from '../../../../common/chat_complete/to
 import type { ToolSchema, ToolSchemaType } from '../../../../common/chat_complete/tool_schema';
 import { eventSourceStreamIntoObservable } from '../../../util/event_source_stream_into_observable';
 import { processVertexStream } from './process_vertex_stream';
-import type { GenerateContentResponseChunk } from './types';
-
-/**
- * We need to use the connector's format, not directly Gemini's...
- *
- * In practice, either use `content` that will be automatically converted to parts,
- * or use `parts` directly for advanced usages such as tool response.
- *
- * See x-pack/plugins/stack_connectors/server/connector_types/gemini/gemini.ts
- */
-interface GeminiMessage {
-  role: 'assistant' | 'user';
-  content?: string;
-  parts?: Gemini.Part[];
-}
-
-interface GeminiToolConfig {
-  mode: 'AUTO' | 'ANY' | 'NONE';
-  allowedFunctionNames?: string[];
-}
+import type { GenerateContentResponseChunk, GeminiMessage, GeminiToolConfig } from './types';
 
 export const geminiAdapter: InferenceConnectorAdapter = {
   chatComplete: ({ executor, system, messages, toolChoice, tools }) => {
@@ -166,7 +147,16 @@ function toolSchemaToGemini({ schema }: { schema: ToolSchema }): Gemini.Function
 }
 
 function messagesToGemini({ messages }: { messages: Message[] }): GeminiMessage[] {
-  return messages.map(messageToGeminiMapper());
+  return messages.map(messageToGeminiMapper()).reduce<GeminiMessage[]>((output, message) => {
+    // merging consecutive messages from the same user, as Gemini requires multi-turn messages
+    const previousMessage = output.length ? output[output.length - 1] : undefined;
+    if (previousMessage?.role === message.role) {
+      previousMessage.parts.push(...message.parts);
+    } else {
+      output.push(message);
+    }
+    return output;
+  }, []);
 }
 
 function messageToGeminiMapper() {
@@ -196,7 +186,11 @@ function messageToGeminiMapper() {
       case MessageRole.User:
         const userMessage: GeminiMessage = {
           role: 'user',
-          content: message.content,
+          parts: [
+            {
+              text: message.content,
+            },
+          ],
         };
         return userMessage;
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { GenerateContentResponse } from '@google/generative-ai';
+import type { GenerateContentResponse, Part } from '@google/generative-ai';
 
 export interface GenerateContentResponseUsageMetadata {
   promptTokenCount: number;
@@ -20,3 +20,19 @@ export interface GenerateContentResponseUsageMetadata {
 export type GenerateContentResponseChunk = GenerateContentResponse & {
   usageMetadata?: GenerateContentResponseUsageMetadata;
 };
+
+/**
+ * We need to use the connector's format, not directly Gemini's...
+ * In practice, 'parts' get mapped to 'content'
+ *
+ * See x-pack/plugins/stack_connectors/server/connector_types/gemini/gemini.ts
+ */
+export interface GeminiMessage {
+  role: 'assistant' | 'user';
+  parts: Part[];
+}
+
+export interface GeminiToolConfig {
+  mode: 'AUTO' | 'ANY' | 'NONE';
+  allowedFunctionNames?: string[];
+}

@@ -62,7 +62,7 @@ describe('geminiAdapter', () => {
         subActionParams: {
           messages: [
             {
-              content: 'question',
+              parts: [{ text: 'question' }],
               role: 'user',
             },
           ],
@@ -182,7 +182,11 @@ describe('geminiAdapter', () => {
       const { messages } = getCallParams();
       expect(messages).toEqual([
         {
-          content: 'question',
+          parts: [
+            {
+              text: 'question',
+            },
+          ],
           role: 'user',
         },
         {
@@ -194,7 +198,11 @@ describe('geminiAdapter', () => {
           role: 'assistant',
         },
         {
-          content: 'another question',
+          parts: [
+            {
+              text: 'another question',
+            },
+          ],
           role: 'user',
         },
         {
@@ -222,6 +230,74 @@ describe('geminiAdapter', () => {
             },
           ],
           role: 'user',
+        },
+      ]);
+    });
+
+    it('groups messages from the same user', () => {
+      geminiAdapter.chatComplete({
+        executor: executorMock,
+        messages: [
+          {
+            role: MessageRole.User,
+            content: 'question',
+          },
+          {
+            role: MessageRole.User,
+            content: 'another question',
+          },
+          {
+            role: MessageRole.Assistant,
+            content: 'answer',
+          },
+          {
+            role: MessageRole.Assistant,
+            content: null,
+            toolCalls: [
+              {
+                function: {
+                  name: 'my_function',
+                  arguments: {
+                    foo: 'bar',
+                  },
+                },
+                toolCallId: '0',
+              },
+            ],
+          },
+        ],
+      });
+
+      expect(executorMock.invoke).toHaveBeenCalledTimes(1);
+
+      const { messages } = getCallParams();
+      expect(messages).toEqual([
+        {
+          parts: [
+            {
+              text: 'question',
+            },
+            {
+              text: 'another question',
+            },
+          ],
+          role: 'user',
+        },
+        {
+          parts: [
+            {
+              text: 'answer',
+            },
+            {
+              functionCall: {
+                args: {
+                  foo: 'bar',
+                },
+                name: 'my_function',
+              },
+            },
+          ],
+          role: 'assistant',
         },
       ]);
     });
