@@ -26,7 +26,12 @@ describe('geminiAdapter', () => {
 
   function getCallParams() {
     const params = executorMock.invoke.mock.calls[0][0].subActionParams as Record<string, any>;
-    return { messages: params.messages, tools: params.tools, toolConfig: params.toolConfig };
+    return {
+      messages: params.messages,
+      tools: params.tools,
+      toolConfig: params.toolConfig,
+      systemInstruction: params.systemInstruction,
+    };
   }
 
   describe('#chatComplete()', () => {
@@ -219,6 +224,24 @@ describe('geminiAdapter', () => {
           role: 'user',
         },
       ]);
+    });
+
+    it('correctly format system message', () => {
+      geminiAdapter.chatComplete({
+        executor: executorMock,
+        system: 'Some system message',
+        messages: [
+          {
+            role: MessageRole.User,
+            content: 'question',
+          },
+        ],
+      });
+
+      expect(executorMock.invoke).toHaveBeenCalledTimes(1);
+
+      const { systemInstruction } = getCallParams();
+      expect(systemInstruction).toEqual('Some system message');
     });
 
     it('correctly format tool choice', () => {
