@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { render, screen, within, waitForElementToBeRemoved } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { WithServices } from './tests.helpers';
 import { TableListViewTable, type TableListViewTableProps } from '../table_list_view_table';
@@ -206,7 +206,7 @@ describe('created_by filter', () => {
 
     const userSelectablePopover = screen.getByTestId('userSelectableList');
     const popover = within(userSelectablePopover);
-    await waitForElementToBeRemoved(() => popover.getByRole('progressbar'));
+    expect(popover.queryByRole('progressbar')).not.toBeInTheDocument();
     expect(popover.getAllByTestId('userFilterEmptyMessage')[1]).toBeVisible();
   });
 });
