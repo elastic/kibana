@@ -10,7 +10,7 @@ import { EuiContextMenuItem, EuiPortal } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { AgentPolicy, InMemoryPackagePolicy } from '../types';
-import { useAgentPolicyRefresh, useAuthz, useLink, useStartServices } from '../hooks';
+import { useAgentPolicyRefresh, useAuthz, useLink } from '../hooks';
 import { policyHasFleetServer } from '../services';
 
 import { AgentEnrollmentFlyout } from './agent_enrollment_flyout';
@@ -36,9 +36,6 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
   const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState(false);
   const { getHref } = useLink();
   const authz = useAuthz();
-  const {
-    application: { navigateToApp },
-  } = useStartServices();
 
   const agentPolicy = agentPolicies.length > 0 ? agentPolicies[0] : undefined; // TODO: handle multiple agent policies
   const canWriteIntegrationPolicies = authz.integrations.writeIntegrationPolicies;
