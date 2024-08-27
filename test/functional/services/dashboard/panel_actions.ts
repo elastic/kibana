@@ -46,7 +46,7 @@ export class DashboardPanelActionsService extends FtrService {
 
   async findContextMenu(parent?: WebElementWrapper) {
     return parent
-      ? await this.testSubjects.findDescendant(OPEN_CONTEXT_MENU_ICON_DATA_TEST_SUBJ, parent)
+      ? await parent.findByTestSubject(OPEN_CONTEXT_MENU_ICON_DATA_TEST_SUBJ)
       : await this.testSubjects.find(OPEN_CONTEXT_MENU_ICON_DATA_TEST_SUBJ);
   }
 
@@ -339,9 +339,8 @@ export class DashboardPanelActionsService extends FtrService {
   async expectMissingPanelAction(testSubject: string, title = '') {
     this.log.debug('expectMissingPanelAction', testSubject, title);
     const panelWrapper = title ? await this.getPanelHoverActions(title) : undefined;
-
     const exists = panelWrapper
-      ? await this.testSubjects.descendantExists(testSubject, panelWrapper)
+      ? await panelWrapper?.findAllByTestSubject(testSubject)
       : await this.testSubjects.exists(testSubject, { allowHidden: true });
 
     if (!exists) {
