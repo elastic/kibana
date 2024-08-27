@@ -82,9 +82,11 @@ const runAddTelemetry = (
 export const AddPanelFlyout = ({
   container,
   onAddPanel,
+  modalTitleId,
 }: {
   container: PresentationContainer;
   onAddPanel?: (id: string) => void;
+  modalTitleId?: string;
 }) => {
   const legacyFactoriesBySavedObjectType: LegacyFactoryMap = useMemo(() => {
     return [...embeddableStart.getEmbeddableFactories()]
@@ -187,7 +189,7 @@ export const AddPanelFlyout = ({
     <>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2>
+          <h2 id={modalTitleId}>
             {i18n.translate('embeddableApi.addPanel.Title', { defaultMessage: 'Add from library' })}
           </h2>
         </EuiTitle>
