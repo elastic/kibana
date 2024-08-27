@@ -186,8 +186,8 @@
   z-index: $euiZLevel1;
 }
 
-// TEMPORARY (METRIC CHART)
-.echMetricText__value {
+// TEMPORARY
+.echMetricText__value, .euiDataGridHeaderCell__content {
   font-weight: 500;
 }
 
