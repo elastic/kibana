@@ -25,7 +25,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send({
           solution_type: 'observability',
         })
-         .expect(200);
+        .expect(200);
 
       const { body: defaultSpace } = await supertest
         .get('/api/spaces/space/default')
@@ -42,9 +42,11 @@ export default function ({ getService }: FtrProviderContext) {
         .send({
           solution_type: 'miami',
         })
-        .expect(400)
+        .expect(400);
 
-        expect(body.message).to.eql(`[request body.type]: types that failed validation:\n- [request body.type.0]: expected value to equal [security]\n- [request body.type.1]: expected value to equal [observability]\n- [request body.type.2]: expected value to equal [elasticsearch]`);
+      expect(body.message).to.eql(
+        `[request body.type]: types that failed validation:\n- [request body.type.0]: expected value to equal [security]\n- [request body.type.1]: expected value to equal [observability]\n- [request body.type.2]: expected value to equal [elasticsearch]`
+      );
     });
 
     it('throw error if not a super user', async () => {
@@ -58,11 +60,11 @@ export default function ({ getService }: FtrProviderContext) {
         .send({
           solution_type: 'observability',
         })
-        .expect(403)
+        .expect(403);
 
-        await security.user.delete(userDiscoverAll.username)
-        await security.role.delete(roleDiscoverAll.name)
-        expect(body.message).to.eql(`Forbidden`);
-      });
+      await security.user.delete(userDiscoverAll.username);
+      await security.role.delete(roleDiscoverAll.name);
+      expect(body.message).to.eql(`Forbidden`);
+    });
   });
 }

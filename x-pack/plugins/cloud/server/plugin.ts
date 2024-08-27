@@ -24,7 +24,6 @@ import { readInstanceSizeMb } from './env';
 import { CloudRequestHandlerContext } from './routes/types';
 import { defineRoutes } from './routes';
 
-
 interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;
 }
@@ -202,21 +201,21 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       decodedId = decodeCloudId(this.config.id, this.logger);
     }
 
-     const getSpacesService = once(async () => {
+    const getSpacesService = once(async () => {
       try {
-        const { spaces } = await core.plugins.onStart<{spaces?: SpacesPluginStart;}>('spaces');
+        const { spaces } = await core.plugins.onStart<{ spaces?: SpacesPluginStart }>('spaces');
         if (!spaces?.found) {
           throw new Error('Could not find Spaces plugin');
         }
-        return (spaces.contract as SpacesPluginStart).spacesService
+        return (spaces.contract as SpacesPluginStart).spacesService;
       } catch (error) {
         this.logger.error(`Failed to resolve spaces: ${error}`);
-        throw error
+        throw error;
       }
     });
 
     const router = core.http.createRouter<CloudRequestHandlerContext>();
-    defineRoutes({ router, getSpacesService: getSpacesService });
+    defineRoutes({ router, getSpacesService });
 
     return {
       ...this.getCloudUrls(),
@@ -248,7 +247,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
     };
   }
 
-  public  start() {
+  public start() {
     return {
       ...this.getCloudUrls(),
       isCloudEnabled: getIsCloudEnabled(this.config.id),

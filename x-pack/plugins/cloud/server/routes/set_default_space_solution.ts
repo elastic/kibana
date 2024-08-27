@@ -13,7 +13,11 @@ import { createLicensedRouteHandler } from './error_handler';
 import { RouteOptions } from '.';
 
 const createBodySchemaV1 = schema.object({
-  solution_type: schema.oneOf([schema.literal('security'), schema.literal('observability'), schema.literal('elasticsearch')]),
+  solution_type: schema.oneOf([
+    schema.literal('security'),
+    schema.literal('observability'),
+    schema.literal('elasticsearch'),
+  ]),
 });
 
 export const setDefaultSpaceSolutionType = ({ router, getSpacesService }: RouteOptions) => {
@@ -40,7 +44,10 @@ export const setDefaultSpaceSolutionType = ({ router, getSpacesService }: RouteO
         const solution = request.body.solution_type;
         try {
           const defaultSpace = await spacesClient?.get('default');
-          await spacesClient?.update('default', { ...defaultSpace, solution: parseOnboardingSolution(solution) });
+          await spacesClient?.update('default', {
+            ...defaultSpace,
+            solution: parseOnboardingSolution(solution),
+          });
         } catch (error) {
           if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
             return response.notFound();

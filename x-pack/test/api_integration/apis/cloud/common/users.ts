@@ -19,7 +19,7 @@ export const roleDiscoverAll = {
     kibana: [
       {
         feature: {
-           discover: ['all'],
+          discover: ['all'],
         },
         spaces: ['*'],
       },
