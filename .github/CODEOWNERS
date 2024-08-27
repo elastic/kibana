@@ -1344,6 +1344,7 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /.github/codeql @elastic/kibana-security
 /.github/workflows/codeql.yml @elastic/kibana-security
 /src/dev/eslint/security_eslint_rule_tests.ts @elastic/kibana-security
+/src/dev/renovate @elastic/kibana-security
 /src/core/server/integration_tests/config/check_dynamic_config.test.ts @elastic/kibana-security
 /src/plugins/telemetry/server/config/telemetry_labels.ts @elastic/kibana-security
 /packages/kbn-std/src/is_internal_url.test.ts @elastic/kibana-core @elastic/kibana-security
