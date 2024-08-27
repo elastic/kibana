@@ -6,5 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { ControlGroupRenderer } from './control_group_renderer';
 export type { AwaitingControlGroupAPI } from './types';
+export type { ControlGroupRendererProps } from './control_group_renderer';
+export { LazyControlGroupRenderer as ControlGroupRenderer } from './control_group_renderer_lazy';
