@@ -8,5 +8,5 @@
  */
 
 export type { CoreDiServiceSetup, CoreDiServiceStart } from './src/contracts';
-export { OnSetup, OnStart, Setup, Start } from './src/services/lifecycle';
+export { OnSetup, OnStart, PluginSetup, PluginStart, Setup, Start } from './src/services/lifecycle';
 export { Global } from './src/services/plugin';
