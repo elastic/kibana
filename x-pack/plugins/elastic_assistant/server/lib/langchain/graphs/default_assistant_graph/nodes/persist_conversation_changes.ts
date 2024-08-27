@@ -9,10 +9,10 @@ import {
   Replacements,
   replaceAnonymizedValuesWithOriginalValues,
 } from '@kbn/elastic-assistant-common';
-import { AgentState, NodeParamsBase } from '../types';
 import { AIAssistantConversationsDataClient } from '../../../../../ai_assistant_data_clients/conversations';
 import { getLangChainMessages } from '../../../helpers';
 import { NodeType } from '../constants';
+import { AgentState, NodeParamsBase } from '../types';
 
 export interface PersistConversationChangesParams extends NodeParamsBase {
   state: AgentState;
@@ -27,7 +27,7 @@ export async function persistConversationChanges({
   replacements = {},
 }: PersistConversationChangesParams): Promise<Partial<AgentState>> {
   logger.debug(
-    () => `${NodeType.PERSIST_CONVERSATION_CHANGES}: Node state:\n${JSON.stringify(state, null, 2)}`
+    `${NodeType.PERSIST_CONVERSATION_CHANGES}: Node state:\n${JSON.stringify(state, null, 2)}`
   );
 
   if (!state.conversation || !state.conversationId) {

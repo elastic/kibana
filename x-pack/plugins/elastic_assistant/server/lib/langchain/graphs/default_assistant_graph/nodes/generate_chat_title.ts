@@ -6,10 +6,10 @@
  */
 import { StringOutputParser } from '@langchain/core/output_parsers';
 
-import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { BaseChatModel } from '@langchain/core/language_models/chat_models';
-import { AgentState, NodeParamsBase } from '../types';
+import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { NodeType } from '../constants';
+import { AgentState, NodeParamsBase } from '../types';
 
 export const GENERATE_CHAT_TITLE_PROMPT = (responseLanguage: string, llmType?: string) =>
   llmType === 'bedrock'
@@ -58,9 +58,7 @@ export async function generateChatTitle({
   state,
   model,
 }: GenerateChatTitleParams): Promise<Partial<AgentState>> {
-  logger.debug(
-    () => `${NodeType.GENERATE_CHAT_TITLE}: Node state:\n${JSON.stringify(state, null, 2)}`
-  );
+  logger.debug(`${NodeType.GENERATE_CHAT_TITLE}: Node state:\n${JSON.stringify(state, null, 2)}`);
 
   const outputParser = new StringOutputParser();
   const graph = GENERATE_CHAT_TITLE_PROMPT(state.responseLanguage, state.llmType)

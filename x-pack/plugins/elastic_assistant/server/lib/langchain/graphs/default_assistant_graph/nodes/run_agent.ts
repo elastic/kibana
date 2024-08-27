@@ -7,8 +7,8 @@
 
 import { RunnableConfig } from '@langchain/core/runnables';
 import { AgentRunnableSequence } from 'langchain/dist/agents/agent';
-import { AgentState, NodeParamsBase } from '../types';
 import { NodeType } from '../constants';
+import { AgentState, NodeParamsBase } from '../types';
 
 export interface RunAgentParams extends NodeParamsBase {
   state: AgentState;
@@ -32,7 +32,7 @@ export async function runAgent({
   agentRunnable,
   config,
 }: RunAgentParams): Promise<Partial<AgentState>> {
-  logger.debug(() => `${NodeType.AGENT}: Node state:\n${JSON.stringify(state, null, 2)}`);
+  logger.debug(`${NodeType.AGENT}: Node state:\n${JSON.stringify(state, null, 2)}`);
 
   const agentOutcome = await agentRunnable.withConfig({ tags: [AGENT_NODE_TAG] }).invoke(
     {

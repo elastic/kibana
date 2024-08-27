@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import { StringWithAutocomplete } from '@langchain/core/dist/utils/types';
-import { AGENT_NODE_TAG } from './run_agent';
-import { AgentState, NodeParamsBase } from '../types';
+import { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import { NodeType } from '../constants';
+import { AgentState, NodeParamsBase } from '../types';
+import { AGENT_NODE_TAG } from './run_agent';
 
 export interface RespondParams extends NodeParamsBase {
   state: AgentState;
@@ -21,7 +21,7 @@ export async function respond({
   state,
   model,
 }: RespondParams): Promise<Partial<AgentState>> {
-  logger.debug(() => `${NodeType.RESPOND}: Node state:\n${JSON.stringify(state, null, 2)}`);
+  logger.debug(`${NodeType.RESPOND}: Node state:\n${JSON.stringify(state, null, 2)}`);
 
   if (state?.agentOutcome && 'returnValues' in state.agentOutcome) {
     const userMessage = [

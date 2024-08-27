@@ -6,7 +6,7 @@
  */
 
 import { NodeType } from '../constants';
-import { NodeParamsBase, AgentState } from '../types';
+import { AgentState, NodeParamsBase } from '../types';
 
 interface ModelInputParams extends NodeParamsBase {
   state: AgentState;
@@ -20,7 +20,7 @@ interface ModelInputParams extends NodeParamsBase {
  * @param state - The current state of the graph
  */
 export function modelInput({ logger, state }: ModelInputParams): Partial<AgentState> {
-  logger.debug(() => `${NodeType.MODEL_INPUT}: Node state:\n${JSON.stringify(state, null, 2)}`);
+  logger.debug(`${NodeType.MODEL_INPUT}: Node state:\n${JSON.stringify(state, null, 2)}`);
 
   const hasRespondStep = state.isStream && state.bedrockChatEnabled && state.llmType === 'bedrock';
 

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { AgentState, NodeParamsBase } from '../types';
 import { AIAssistantConversationsDataClient } from '../../../../../ai_assistant_data_clients/conversations';
 import { getLangChainMessages } from '../../../helpers';
 import { NodeType } from '../constants';
+import { AgentState, NodeParamsBase } from '../types';
 
 export interface GetPersistedConversationParams extends NodeParamsBase {
   conversationsDataClient?: AIAssistantConversationsDataClient;
@@ -21,7 +21,7 @@ export async function getPersistedConversation({
   conversationsDataClient,
 }: GetPersistedConversationParams): Promise<Partial<AgentState>> {
   logger.debug(
-    () => `${NodeType.GET_PERSISTED_CONVERSATION}: Node state:\n${JSON.stringify(state, null, 2)}`
+    `${NodeType.GET_PERSISTED_CONVERSATION}: Node state:\n${JSON.stringify(state, null, 2)}`
   );
 
   const conversation = await conversationsDataClient?.getConversation({ id: state.conversationId });

@@ -8,10 +8,10 @@
 import { RunnableConfig } from '@langchain/core/runnables';
 import { StructuredTool } from '@langchain/core/tools';
 import { ToolExecutor } from '@langchain/langgraph/prebuilt';
-import { castArray } from 'lodash';
 import { AgentAction } from 'langchain/agents';
-import { AgentState, NodeParamsBase } from '../types';
+import { castArray } from 'lodash';
 import { NodeType } from '../constants';
+import { AgentState, NodeParamsBase } from '../types';
 
 export interface ExecuteToolsParams extends NodeParamsBase {
   state: AgentState;
@@ -36,7 +36,7 @@ export async function executeTools({
   tools,
   config,
 }: ExecuteToolsParams): Promise<Partial<AgentState>> {
-  logger.debug(() => `${NodeType.TOOLS}: Node state:\n${JSON.stringify(state, null, 2)}`);
+  logger.debug(`${NodeType.TOOLS}: Node state:\n${JSON.stringify(state, null, 2)}`);
 
   const toolExecutor = new ToolExecutor({ tools });
 
