@@ -361,3 +361,4 @@ enabled:
   - x-pack/performance/journeys_e2e/apm_service_inventory.ts
   - x-pack/performance/journeys_e2e/infra_hosts_view.ts
   - x-pack/test/custom_branding/config.ts
+  - x-pack/test/api_integration/apis/cloud/config.ts

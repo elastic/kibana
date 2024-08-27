@@ -35,8 +35,9 @@ describe('Cloud Plugin', () => {
     const plugin = new CloudPlugin(initContext);
 
     const coreSetup = coreMock.createSetup();
+    const coreStart = coreMock.createStart();
     const setup = plugin.setup(coreSetup, {});
-    const start = plugin.start();
+    const start = plugin.start(coreStart, {});
 
     return { setup, start };
   };

@@ -76,7 +76,7 @@ API integration tests are intended to test _only programmatic API exposed by Kib
 To run _only_ the API integration tests:
 
 ```sh
-node scripts/functional_tests --config test/api_integration/config
+node scripts/functional_tests --config x-pack/test/api_integration/apis/cloud/config.ts
 ```
 
 #### Running SAML API integration tests

@@ -6,8 +6,10 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { SpacesPluginStart, SpacesServiceStart } from '@kbn/spaces-plugin/server';
+
 import { registerCloudDeploymentMetadataAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
 import type { CloudConfigType } from './config';
 import { registerCloudUsageCollector } from './collectors';
@@ -18,9 +20,15 @@ import { decodeCloudId, DecodedCloudId } from '../common/decode_cloud_id';
 import { parseOnboardingSolution } from '../common/parse_onboarding_default_solution';
 import { getFullCloudUrl } from '../common/utils';
 import { readInstanceSizeMb } from './env';
+import { CloudRequestHandlerContext } from './routes/types';
+import { defineRoutes } from './routes';
 
 interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;
+}
+
+interface PluginsStar {
+  spaces?: SpacesPluginStart;
 }
 
 /**
@@ -164,6 +172,7 @@ export interface CloudStart {
 export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
   private readonly config: CloudConfigType;
   private readonly logger: Logger;
+  private spacesServiceStart?: SpacesServiceStart;
 
   constructor(private readonly context: PluginInitializerContext) {
     this.config = this.context.config.get<CloudConfigType>();
@@ -196,6 +205,8 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       decodedId = decodeCloudId(this.config.id, this.logger);
     }
 
+    const router = core.http.createRouter<CloudRequestHandlerContext>();
+    defineRoutes({ router, getSpacesService: this.getSpacesService });
     return {
       ...this.getCloudUrls(),
       cloudId: this.config.id,
@@ -226,11 +237,19 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
     };
   }
 
-  public start(): CloudStart {
+  public start(core: CoreStart, { spaces }: PluginsStar): CloudStart {
+    this.spacesServiceStart = spaces?.spacesService;
     return {
       ...this.getCloudUrls(),
       isCloudEnabled: getIsCloudEnabled(this.config.id),
     };
+  }
+
+  private getSpacesService() {
+    if (!this.spacesServiceStart) {
+      throw new Error('spaces service has not been initialized!');
+    }
+    return this.spacesServiceStart;
   }
 
   private getCloudUrls() {
