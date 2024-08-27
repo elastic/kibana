@@ -120,7 +120,7 @@
     "@elastic/node-crypto": "1.2.1",
     "@elastic/numeral": "^2.5.1",
     "@elastic/react-search-ui": "^1.20.2",
-    "@elastic/react-search-ui-views": "^1.20.2",
+    "@elastic/react-search-ui-views": "^1.21.5",
     "@elastic/request-converter": "^8.15.3",
     "@elastic/request-crypto": "2.0.2",
     "@elastic/search-ui": "^1.20.2",
