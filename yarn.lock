@@ -10969,10 +10969,10 @@
   resolved "https://registry.yarnpkg.com/@types/picomatch/-/picomatch-2.3.0.tgz#75db5e75a713c5a83d5b76780c3da84a82806003"
   integrity sha512-O397rnSS9iQI4OirieAtsDqvCj4+3eY1J+EPdNTKuHuRWIfUoGyzX294o8C4KJYaLqgSrd2o60c5EqCU8Zv02g==
 
-"@types/pidusage@^2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@types/pidusage/-/pidusage-2.0.2.tgz#3f8c4b19ba7ea438a733d093661e92b60e5f88ee"
-  integrity sha512-lHgpGZjXDfjggZDLkgp4zQTYkvXq4S7RxjBjrDcPe1MBU72hESWxubutx8+AM4QkJdRxAhrQyxSA6pzHKJKlsQ==
+"@types/pidusage@^2.0.5":
+  version "2.0.5"
+  resolved "https://registry.yarnpkg.com/@types/pidusage/-/pidusage-2.0.5.tgz#ec8477720e390b78e3d88b7b522d9e2d4c7995a8"
+  integrity sha512-MIiyZI4/MK9UGUXWt0jJcCZhVw7YdhBuTOuqP/BjuLDLZ2PmmViMIQgZiWxtaMicQfAz/kMrZ5T7PKxFSkTeUA==
 
 "@types/pixelmatch@^5.2.4":
   version "5.2.4"
