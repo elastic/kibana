@@ -1532,7 +1532,7 @@
     "@types/he": "^1.1.1",
     "@types/history": "^4.7.9",
     "@types/hjson": "^2.4.2",
-    "@types/http-proxy": "^1.17.4",
+    "@types/http-proxy": "^1.17.15",
     "@types/inquirer": "^7.3.1",
     "@types/jest": "^29.5.3",
     "@types/jquery": "^3.3.31",
