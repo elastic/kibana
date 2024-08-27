@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { RenderHookResult } from '@testing-library/react-hooks';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, type RenderHookResult } from '@testing-library/react';
 import type { UseRuleDetailsParams, UseRuleDetailsResult } from './use_rule_details';
 import { useRuleDetails } from './use_rule_details';
 import { useRuleWithFallback } from '../../../detection_engine/rule_management/logic/use_rule_with_fallback';
@@ -19,7 +18,7 @@ const initialProps: UseRuleDetailsParams = {
 };
 
 describe('useRuleDetails', () => {
-  let hookResult: RenderHookResult<UseRuleDetailsParams, UseRuleDetailsResult>;
+  let hookResult: RenderHookResult<UseRuleDetailsResult, UseRuleDetailsParams>;
 
   it('should return loading as true when the rule is loading', () => {
     mockUseRuleWithFallback.mockReturnValue({

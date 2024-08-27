@@ -10,7 +10,7 @@ import type { Capabilities } from '@kbn/core/types';
 import { mockGlobalState, TestProviders } from '../mock';
 import type { ILicense, LicenseType } from '@kbn/licensing-plugin/common/types';
 import type { AppLinkItems, LinkItem, LinksPermissions } from './types';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import {
   useAppLinks,
   getAncestorLinksInfo,

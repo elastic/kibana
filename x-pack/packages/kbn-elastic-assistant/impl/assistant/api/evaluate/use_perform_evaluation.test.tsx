@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { usePerformEvaluation, UsePerformEvaluationParams } from './use_perform_evaluation';
 import { postEvaluation as _postEvaluation } from './evaluate';
 import { useMutation as _useMutation } from '@tanstack/react-query';

@@ -6,7 +6,7 @@
  */
 
 import { RiskScoreEntity } from '../../../common/entity_analytics/risk_engine';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { getRiskScoreSummaryAttributes } from './risk_score_summary';
 import { RiskSeverity } from '../../../common/search_strategy';
 import type { MetricVisualizationState } from '@kbn/lens-plugin/public';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useGetDashboard } from './use_get_dashboard';
 import { getDashboard } from './api';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';

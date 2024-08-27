@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { HostMetricTypes } from '../charts/types';
 import { useHostKpiCharts, useHostCharts, useKubernetesCharts } from './use_host_metrics_charts';
 

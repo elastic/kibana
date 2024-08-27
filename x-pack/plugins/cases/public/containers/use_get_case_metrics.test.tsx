@@ -7,7 +7,7 @@
 
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import type { SingleCaseMetricsFeature } from '../../common/ui';
 import { useGetCaseMetrics } from './use_get_case_metrics';
 import { basicCase } from './mock';

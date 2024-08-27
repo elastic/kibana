@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useExpandableFlyoutContext } from '../context';
 import { useFlyoutType } from './use_flyout_type';
 import { localStorageMock } from '../../__mocks__';

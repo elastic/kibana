@@ -7,7 +7,7 @@
 
 import { useLoadConnectors } from '@kbn/elastic-assistant';
 import { useFetchAnonymizationFields } from '@kbn/elastic-assistant/impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import React from 'react';
 
 import { useKibana } from '../../common/lib/kibana';

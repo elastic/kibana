@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { RenderHookResult } from '@testing-library/react-hooks';
-import { renderHook } from '@testing-library/react-hooks';
+import type { RenderHookResult } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import { useQuery } from '@tanstack/react-query';
 import type {
   UseAlertDocumentAnalyzerSchemaParams,
@@ -20,8 +20,8 @@ jest.mock('@tanstack/react-query');
 
 describe('useAlertPrevalenceFromProcessTree', () => {
   let hookResult: RenderHookResult<
-    UseAlertDocumentAnalyzerSchemaParams,
-    UseAlertDocumentAnalyzerSchemaResult
+    UseAlertDocumentAnalyzerSchemaResult,
+    UseAlertDocumentAnalyzerSchemaParams
   >;
 
   beforeEach(() => {

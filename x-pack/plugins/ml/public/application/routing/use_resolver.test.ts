@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { reactRenderHook } from '@testing-library/react';
 import { useMlKibana, useMlLicenseInfo } from '../contexts/kibana';
 import { usePermissionCheck } from '../capabilities/check_capabilities';
 import { useRouteResolver } from './use_resolver';
@@ -23,7 +23,7 @@ describe('useResolver', () => {
     (useMlLicenseInfo as jest.Mock<Partial<MlLicenseInfo>>).mockReturnValueOnce({
       isMlEnabled: false,
     });
-    renderHook(() => useRouteResolver('full', ['canCreateJob']));
+    reactRenderHook(() => useRouteResolver('full', ['canCreateJob']));
     expect(useMlKibana().services.application.navigateToApp).toHaveBeenCalledWith('home');
   });
 
@@ -32,7 +32,7 @@ describe('useResolver', () => {
       isMlEnabled: true,
       isMinimumLicense: false,
     });
-    renderHook(() => useRouteResolver('full', ['canCreateJob']));
+    reactRenderHook(() => useRouteResolver('full', ['canCreateJob']));
     expect(useMlKibana().services.application.navigateToApp).toHaveBeenCalledWith('home');
   });
 
@@ -42,7 +42,7 @@ describe('useResolver', () => {
       isMinimumLicense: true,
       isFullLicense: false,
     });
-    renderHook(() => useRouteResolver('full', ['canCreateJob']));
+    reactRenderHook(() => useRouteResolver('full', ['canCreateJob']));
     expect(useMlKibana().services.application.navigateToApp).toHaveBeenCalledWith('ml', {
       path: 'datavisualizer',
     });
@@ -54,7 +54,7 @@ describe('useResolver', () => {
       isMinimumLicense: true,
       isFullLicense: false,
     });
-    renderHook(() => useRouteResolver('basic', []));
+    reactRenderHook(() => useRouteResolver('basic', []));
     expect(useMlKibana().services.application.navigateToApp).not.toHaveBeenCalledWith();
     expect(useMlKibana().services.application.navigateToUrl).not.toHaveBeenCalled();
   });
@@ -63,7 +63,9 @@ describe('useResolver', () => {
   it.skip('redirects to the access denied page if some required capabilities are missing', async () => {
     (usePermissionCheck as jest.Mock<boolean[]>).mockReturnValueOnce([false]);
 
-    const { waitForNextUpdate } = renderHook(() => useRouteResolver('full', ['canGetCalendars']));
+    const { waitForNextUpdate } = reactRenderHook(() =>
+      useRouteResolver('full', ['canGetCalendars'])
+    );
     await waitForNextUpdate();
     expect(useMlKibana().services.application.navigateToUrl).toHaveBeenCalled();
   });

@@ -9,7 +9,7 @@ import React, { FC, PropsWithChildren } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useMetricsExplorerData } from './use_metrics_explorer_data';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 import {

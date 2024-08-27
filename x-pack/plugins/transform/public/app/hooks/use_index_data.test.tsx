@@ -7,8 +7,7 @@
 
 import React, { type FC, type PropsWithChildren } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render, screen, waitFor } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks';
+import { render, screen, waitFor, renderHook } from '@testing-library/react';
 
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { CoreSetup } from '@kbn/core/public';
@@ -55,7 +54,7 @@ describe('Transform: useIndexData()', () => {
       </QueryClientProvider>
     );
 
-    const { result, waitForNextUpdate } = renderHook(
+    const { result } = renderHook(
       () =>
         useIndexData(
           {
@@ -71,7 +70,7 @@ describe('Transform: useIndexData()', () => {
 
     const IndexObj: UseIndexDataReturnType = result.current;
 
-    await waitForNextUpdate();
+    await waitFor(() => null);
 
     expect(IndexObj.errorMessage).toBe('');
     expect(IndexObj.status).toBe(1);

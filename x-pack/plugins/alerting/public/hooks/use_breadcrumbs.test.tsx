@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useBreadcrumbs } from './use_breadcrumbs';
 import { MAINTENANCE_WINDOW_DEEP_LINK_IDS } from '../../common';
 import { AppMockRenderer, createAppMockRenderer } from '../lib/test_utils';

@@ -8,7 +8,7 @@
 import { loadAllActions as loadConnectors } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 import { useLoadConnectors } from './use_load_connectors';
 import { useKibana } from './use_kibana';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 
 const mockedLoadConnectors = loadConnectors as jest.Mock;

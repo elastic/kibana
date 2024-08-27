@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import type { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 
 import { useFetcher } from '@kbn/observability-shared-plugin/public';

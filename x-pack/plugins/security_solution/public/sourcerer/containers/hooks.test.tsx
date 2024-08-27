@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { act, renderHook } from '@testing-library/react-hooks';
-import { waitFor } from '@testing-library/react';
+import { waitFor, renderHook, act } from '@testing-library/react';
 import { Provider } from 'react-redux';
 
 import { useSourcererDataView } from '.';

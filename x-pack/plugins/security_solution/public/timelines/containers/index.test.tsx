@@ -6,7 +6,7 @@
  */
 
 import { DataLoadingState } from '@kbn/unified-data-table';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import type { TimelineArgs, UseTimelineEventsProps } from '.';
 import { initSortDefault, useTimelineEvents } from '.';
 import { SecurityPageName } from '../../../common/constants';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { kibanaStartMock } from '../utils/kibana_react.mock';
 import { useFetchAlertData } from './use_fetch_alert_data';
 

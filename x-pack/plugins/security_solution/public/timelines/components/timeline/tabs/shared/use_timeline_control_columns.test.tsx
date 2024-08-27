@@ -6,7 +6,7 @@
  */
 import type { EuiDataGridControlColumn } from '@elastic/eui';
 import { TestProviders } from '../../../../../common/mock';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useLicense } from '../../../../../common/hooks/use_license';
 import { useTimelineControlColumn } from './use_timeline_control_columns';
 import type { ColumnHeaderOptions } from '../../../../../../common/types/timeline/columns';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { useDeleteKnowledgeBase, UseDeleteKnowledgeBaseParams } from './use_delete_knowledge_base';
 import { deleteKnowledgeBase as _deleteKnowledgeBase } from './api';
 import { useMutation as _useMutation } from '@tanstack/react-query';

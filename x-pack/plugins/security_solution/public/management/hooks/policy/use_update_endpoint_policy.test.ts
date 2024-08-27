@@ -13,7 +13,7 @@ import type {
   UseUpdateEndpointPolicyOptions,
   UseUpdateEndpointPolicyResult,
 } from './use_update_endpoint_policy';
-import type { RenderHookResult } from '@testing-library/react-hooks/src/types';
+import type { RenderHookResult } from '@testing-library/react';
 import { useUpdateEndpointPolicy } from './use_update_endpoint_policy';
 import type { PolicyData } from '../../../../common/endpoint/types';
 import { FleetPackagePolicyGenerator } from '../../../../common/endpoint/data_generators/fleet_package_policy_generator';
@@ -37,8 +37,8 @@ describe('When using the `useFetchEndpointPolicyAgentSummary()` hook', () => {
   let apiMocks: ReturnType<typeof allFleetHttpMocks>;
   let policy: PolicyData;
   let renderHook: () => RenderHookResult<
-    UseUpdateEndpointPolicyOptions,
-    UseUpdateEndpointPolicyResult
+    UseUpdateEndpointPolicyResult,
+    UseUpdateEndpointPolicyOptions
   >;
 
   beforeEach(() => {

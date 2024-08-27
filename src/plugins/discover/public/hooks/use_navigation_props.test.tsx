@@ -8,7 +8,7 @@
  */
 
 import React, { MouseEvent } from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useNavigationProps } from './use_navigation_props';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';

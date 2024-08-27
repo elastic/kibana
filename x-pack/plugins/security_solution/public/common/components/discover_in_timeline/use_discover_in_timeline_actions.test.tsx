@@ -8,7 +8,7 @@ import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { discoverPluginMock } from '@kbn/discover-plugin/public/mocks';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
 import { useDiscoverInTimelineActions } from './use_discover_in_timeline_actions';
 import type { Filter } from '@kbn/es-query';

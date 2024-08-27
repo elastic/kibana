@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 
 import { mockCasesResult, parsedCasesItems } from './mock_data';
 import { useCaseItems } from './use_case_items';

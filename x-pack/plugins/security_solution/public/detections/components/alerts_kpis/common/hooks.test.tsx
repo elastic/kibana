@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 
 import type { GetAggregatableFields, UseInspectButtonParams } from './hooks';

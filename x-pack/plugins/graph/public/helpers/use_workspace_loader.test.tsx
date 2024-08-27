@@ -10,7 +10,7 @@ import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { createMockGraphStore } from '../state_management/mocks';
 import { Workspace } from '../types';
-import { renderHook, act, RenderHookOptions } from '@testing-library/react-hooks';
+import { reactRenderHook, act, RenderHookOptions } from '@testing-library/react';
 import { ContentClient } from '@kbn/content-management-plugin/public';
 
 jest.mock('react-router-dom', () => {
@@ -52,7 +52,7 @@ describe('use_workspace_loader', () => {
 
   it('should not redirect if outcome is exactMatch', async () => {
     await act(async () => {
-      renderHook(
+      reactRenderHook(
         () => useWorkspaceLoader(defaultProps),
         defaultProps as RenderHookOptions<UseWorkspaceLoaderProps>
       );
@@ -78,7 +78,7 @@ describe('use_workspace_loader', () => {
     } as unknown as UseWorkspaceLoaderProps;
 
     await act(async () => {
-      renderHook(
+      reactRenderHook(
         () => useWorkspaceLoader(props),
         props as RenderHookOptions<UseWorkspaceLoaderProps>
       );

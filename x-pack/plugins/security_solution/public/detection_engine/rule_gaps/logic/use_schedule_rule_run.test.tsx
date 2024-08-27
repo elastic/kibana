@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import moment from 'moment';
 import { useKibana } from '../../../common/lib/kibana';
 import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__';

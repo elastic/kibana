@@ -9,7 +9,7 @@ import type { FilesTableColumnsProps } from './use_files_table_columns';
 import { useFilesTableColumns } from './use_files_table_columns';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { basicCase } from '../../containers/mock';
 
 describe('useFilesTableColumns', () => {

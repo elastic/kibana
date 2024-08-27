@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { createLocalStorageMock } from '../../__mocks__/local_storage_mock';
 import { useRowHeight } from './use_row_height';
 import { RowHeightMode } from '../components/row_height_settings';

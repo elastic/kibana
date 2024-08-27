@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { ComposableProfile, getMergedAccessor } from '../composable_profile';
 import { useProfileAccessor } from './use_profile_accessor';
 import { getDataTableRecords } from '../../__fixtures__/real_hits';

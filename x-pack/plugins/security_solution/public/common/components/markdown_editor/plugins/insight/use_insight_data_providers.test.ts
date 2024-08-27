@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { renderHook } from '@testing-library/react-hooks';
+
+import { renderHook } from '@testing-library/react';
 import type { UseInsightDataProvidersProps, Provider } from './use_insight_data_providers';
 import type { TimelineEventsDetailsItem } from '../../../../../../common/search_strategy';
 import {

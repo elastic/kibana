@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { RenderHookResult } from '@testing-library/react-hooks';
-import { renderHook } from '@testing-library/react-hooks';
+import type { RenderHookResult } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 
 import type {
   UseShowRelatedAlertsBySessionParams,
@@ -16,8 +16,8 @@ import { useShowRelatedAlertsBySession } from './use_show_related_alerts_by_sess
 
 describe('useShowRelatedAlertsBySession', () => {
   let hookResult: RenderHookResult<
-    UseShowRelatedAlertsBySessionParams,
-    UseShowRelatedAlertsBySessionResult
+    UseShowRelatedAlertsBySessionResult,
+    UseShowRelatedAlertsBySessionParams
   >;
 
   it('should return false if getFieldsData returns null', () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 
 import type { RevertFunction } from './form_changes';
 import { useFormChanges } from './form_changes';

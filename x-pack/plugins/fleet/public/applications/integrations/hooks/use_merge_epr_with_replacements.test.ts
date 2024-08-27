@@ -8,7 +8,7 @@
 import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
 
 import type { IntegrationCategory } from '@kbn/custom-integrations-plugin/common';
-import { renderHook } from '@testing-library/react-hooks';
+import { reactRenderHook } from '@testing-library/react';
 
 import type { PackageListItem } from '../../../../common/types/models';
 
@@ -47,7 +47,7 @@ describe('useMergeEprWithReplacements', () => {
         categories: ['cloud', 'datastore'],
       },
     ]);
-    const { result } = renderHook(() =>
+    const { result } = reactRenderHook(() =>
       useMergeEprPackagesWithReplacements(eprPackages, replacements)
     );
 
@@ -85,7 +85,7 @@ describe('useMergeEprWithReplacements', () => {
       },
     ]);
 
-    const { result } = renderHook(() =>
+    const { result } = reactRenderHook(() =>
       useMergeEprPackagesWithReplacements(eprPackages, replacements)
     );
     expect(result.current).toEqual([
@@ -116,7 +116,7 @@ describe('useMergeEprWithReplacements', () => {
       },
     ]);
 
-    const { result } = renderHook(() =>
+    const { result } = reactRenderHook(() =>
       useMergeEprPackagesWithReplacements(eprPackages, replacements)
     );
     expect(result.current).toEqual([
@@ -139,7 +139,7 @@ describe('useMergeEprWithReplacements', () => {
       },
     ]);
 
-    const { result } = renderHook(() => useMergeEprPackagesWithReplacements(eprPackages, []));
+    const { result } = reactRenderHook(() => useMergeEprPackagesWithReplacements(eprPackages, []));
 
     expect(result.current).toEqual([]);
   });
@@ -192,7 +192,7 @@ describe('useMergeEprWithReplacements', () => {
       },
     ]);
 
-    const { result } = renderHook(() =>
+    const { result } = reactRenderHook(() =>
       useMergeEprPackagesWithReplacements(eprPackages, replacements)
     );
 

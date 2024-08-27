@@ -6,7 +6,7 @@
  */
 
 import { FilterQueryContextProvider, useFilterQueryUpdates } from './use_filters_query';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { dataPluginMock as mockDataPlugin } from '@kbn/data-plugin/public/mocks';
 import type { TimefilterConfig } from '@kbn/data-plugin/public/query';
 import { Timefilter } from '@kbn/data-plugin/public/query';

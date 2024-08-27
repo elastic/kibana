@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import type { RequestName } from './request_names';
 import type { OptionsParam, RequestFnParam, Result } from './use_fetch';
 import { useFetch } from './use_fetch';

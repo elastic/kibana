@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, waitFor } from '@testing-library/react';
 import { useKibana } from '../../../../common/lib/kibana';
 import { createFindAlerts } from '../services/find_alerts';
 import { useFetchAlerts, type UseAlertsQueryParams } from './use_fetch_alerts';
@@ -41,7 +41,7 @@ describe('useFetchAlerts', () => {
       sort: [{ '@timestamp': 'desc' }],
     };
 
-    const { result, waitFor } = renderHook(() => useFetchAlerts(params), {
+    const { result } = renderHook(() => useFetchAlerts(params), {
       wrapper: createReactQueryWrapper(),
     });
 
@@ -70,7 +70,7 @@ describe('useFetchAlerts', () => {
       sort: [{ '@timestamp': 'desc' }],
     };
 
-    const { result, waitFor } = renderHook(() => useFetchAlerts(params), {
+    const { result } = renderHook(() => useFetchAlerts(params), {
       wrapper: createReactQueryWrapper(),
     });
 

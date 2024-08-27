@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { useKnowledgeBaseStatus, UseKnowledgeBaseStatusParams } from './use_knowledge_base_status';
 import { getKnowledgeBaseStatus as _getKnowledgeBaseStatus } from './api';
 

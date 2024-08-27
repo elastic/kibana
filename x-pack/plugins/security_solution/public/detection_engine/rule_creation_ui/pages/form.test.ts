@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { renderHook } from '@testing-library/react-hooks';
+
+import { renderHook } from '@testing-library/react';
 
 import type { FormData, FormHook, ValidationError } from '../../../shared_imports';
 import { ERROR_CODES as ESQL_ERROR_CODES } from '../../rule_creation/logic/esql_validator';

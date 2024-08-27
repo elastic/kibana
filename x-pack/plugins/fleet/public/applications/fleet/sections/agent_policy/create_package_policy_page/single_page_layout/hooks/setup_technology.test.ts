@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
-
-import { waitFor } from '@testing-library/react';
+import { waitFor, reactRenderHook, act } from '@testing-library/react';
 
 import { createPackagePolicyMock } from '../../../../../../../../common/mocks';
 
@@ -50,7 +48,7 @@ describe('useAgentless', () => {
   });
 
   it('should not return isAgentless when agentless is not enabled', () => {
-    const { result } = renderHook(() => useAgentless());
+    const { result } = reactRenderHook(() => useAgentless());
 
     expect(result.current.isAgentlessEnabled).toBeFalsy();
     expect(result.current.isAgentlessApiEnabled).toBeFalsy();
@@ -68,7 +66,7 @@ describe('useAgentless', () => {
       agentless: false,
     } as any);
 
-    const { result } = renderHook(() => useAgentless());
+    const { result } = reactRenderHook(() => useAgentless());
 
     expect(result.current.isAgentlessEnabled).toBeFalsy();
     expect(result.current.isAgentlessApiEnabled).toBeFalsy();
@@ -89,7 +87,7 @@ describe('useAgentless', () => {
       },
     });
 
-    const { result } = renderHook(() => useAgentless());
+    const { result } = reactRenderHook(() => useAgentless());
 
     expect(result.current.isAgentlessEnabled).toBeTruthy();
     expect(result.current.isAgentlessApiEnabled).toBeTruthy();
@@ -107,7 +105,7 @@ describe('useAgentless', () => {
       },
     });
 
-    const { result } = renderHook(() => useAgentless());
+    const { result } = reactRenderHook(() => useAgentless());
 
     expect(result.current.isAgentlessEnabled).toBeTruthy();
     expect(result.current.isAgentlessApiEnabled).toBeFalsy();
@@ -126,7 +124,7 @@ describe('useAgentless', () => {
       },
     });
 
-    const { result } = renderHook(() => useAgentless());
+    const { result } = reactRenderHook(() => useAgentless());
 
     expect(result.current.isAgentlessEnabled).toBeFalsy();
     expect(result.current.isAgentlessApiEnabled).toBeFalsy();
@@ -178,7 +176,7 @@ describe('useSetupTechnology', () => {
       agentless: false,
     } as any);
 
-    const { result } = renderHook(() =>
+    const { result } = reactRenderHook(() =>
       useSetupTechnology({
         setNewAgentPolicy,
         newAgentPolicy: newAgentPolicyMock,
@@ -193,7 +191,7 @@ describe('useSetupTechnology', () => {
   });
 
   it('should fetch agentless policy if agentless feature is enabled and isServerless is true', async () => {
-    const { waitForNextUpdate } = renderHook(() =>
+    const { waitForNextUpdate } = reactRenderHook(() =>
       useSetupTechnology({
         setNewAgentPolicy,
         newAgentPolicy: newAgentPolicyMock,
@@ -222,7 +220,7 @@ describe('useSetupTechnology', () => {
         isCloudEnabled: true,
       },
     });
-    const { result } = renderHook(() =>
+    const { result } = reactRenderHook(() =>
       useSetupTechnology({
         setNewAgentPolicy,
         newAgentPolicy: newAgentPolicyMock,
@@ -251,7 +249,7 @@ describe('useSetupTechnology', () => {
         isCloudEnabled: true,
       },
     });
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result, waitForNextUpdate } = reactRenderHook(() =>
       useSetupTechnology({
         setNewAgentPolicy,
         newAgentPolicy: newAgentPolicyMock,
@@ -289,7 +287,7 @@ describe('useSetupTechnology', () => {
         isCloudEnabled: true,
       },
     });
-    const { result, rerender } = renderHook(() =>
+    const { result, rerender } = reactRenderHook(() =>
       useSetupTechnology({
         setNewAgentPolicy,
         newAgentPolicy: newAgentPolicyMock,
@@ -338,7 +336,7 @@ describe('useSetupTechnology', () => {
       },
     });
 
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result, waitForNextUpdate } = reactRenderHook(() =>
       useSetupTechnology({
         setNewAgentPolicy,
         newAgentPolicy: newAgentPolicyMock,
@@ -365,7 +363,7 @@ describe('useSetupTechnology', () => {
       },
     });
 
-    const { result } = renderHook(() =>
+    const { result } = reactRenderHook(() =>
       useSetupTechnology({
         setNewAgentPolicy,
         newAgentPolicy: newAgentPolicyMock,
@@ -380,7 +378,7 @@ describe('useSetupTechnology', () => {
   });
 
   it('should update agent policy and selected policy tab when setup technology is agentless', async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result, waitForNextUpdate } = reactRenderHook(() =>
       useSetupTechnology({
         setNewAgentPolicy,
         newAgentPolicy: newAgentPolicyMock,
@@ -401,7 +399,7 @@ describe('useSetupTechnology', () => {
   });
 
   it('should update new agent policy and selected policy tab when setup technology is agent-based', async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result, waitForNextUpdate } = reactRenderHook(() =>
       useSetupTechnology({
         setNewAgentPolicy,
         newAgentPolicy: newAgentPolicyMock,
@@ -436,7 +434,7 @@ describe('useSetupTechnology', () => {
       agentless: false,
     } as any);
 
-    const { result } = renderHook(() =>
+    const { result } = reactRenderHook(() =>
       useSetupTechnology({
         setNewAgentPolicy,
         newAgentPolicy: newAgentPolicyMock,
@@ -456,7 +454,7 @@ describe('useSetupTechnology', () => {
   });
 
   it('should not update agent policy and selected policy tab when setup technology matches the current one ', async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result, waitForNextUpdate } = reactRenderHook(() =>
       useSetupTechnology({
         setNewAgentPolicy,
         newAgentPolicy: newAgentPolicyMock,
@@ -481,7 +479,7 @@ describe('useSetupTechnology', () => {
   });
 
   it('should revert the agent policy name to the original value when switching from agentless back to agent-based', async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result, waitForNextUpdate } = reactRenderHook(() =>
       useSetupTechnology({
         setNewAgentPolicy,
         newAgentPolicy: newAgentPolicyMock,

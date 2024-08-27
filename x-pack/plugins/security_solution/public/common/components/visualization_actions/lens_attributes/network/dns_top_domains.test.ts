@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { RenderResult } from '@testing-library/react-hooks';
-import { renderHook } from '@testing-library/react-hooks';
+import type { RenderResult } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import { wrapper } from '../../mocks';
 import type { LensAttributes } from '../../types';
 

@@ -6,12 +6,11 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, renderHook } from '@testing-library/react';
 import type { UseFieldTableColumnsProps, UseFieldTableColumns } from '.';
 import { useFieldTableColumns } from '.';
 
 import { TestProviders } from '../../../../common/mock';
-import { renderHook } from '@testing-library/react-hooks';
 import { EuiInMemoryTable } from '@elastic/eui';
 import type { BrowserFieldItem } from '@kbn/triggers-actions-ui-plugin/public/types';
 

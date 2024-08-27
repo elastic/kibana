@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { renderHook } from '@testing-library/react-hooks';
-import type { RenderHookResult } from '@testing-library/react-hooks';
+import { renderHook, RenderHookResult } from '@testing-library/react';
 import type { UserSectionsSizesParams, UserSectionsSizesResult } from './use_sections_sizes';
 import { useSectionSizes } from './use_sections_sizes';
 
 describe('useSectionSizes', () => {
-  let hookResult: RenderHookResult<UserSectionsSizesParams, UserSectionsSizesResult>;
+  let hookResult: RenderHookResult<UserSectionsSizesResult, UserSectionsSizesParams>;
 
   describe('Right section', () => {
     it('should return 0 for right section if it is hidden', () => {

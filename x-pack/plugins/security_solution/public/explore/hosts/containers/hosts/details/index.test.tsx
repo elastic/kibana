@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { act, renderHook } from '@testing-library/react-hooks';
+
+import { renderHook, act } from '@testing-library/react';
 import { TestProviders } from '../../../../../common/mock';
 import { ID, useHostDetails } from '.';
 import { useSearchStrategy } from '../../../../../common/containers/use_search_strategy';

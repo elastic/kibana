@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { useKibana } from '../../common/lib/kibana';
 import { useCreateConnector } from './use_create_connector';
 

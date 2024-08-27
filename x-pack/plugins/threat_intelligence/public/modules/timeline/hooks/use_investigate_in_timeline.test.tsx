@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Renderer, renderHook, RenderHookResult } from '@testing-library/react-hooks';
+import { renderHook, RenderHookResult } from '@testing-library/react';
 import {
   useInvestigateInTimeline,
   UseInvestigateInTimelineValue,
@@ -18,7 +18,7 @@ import {
 import { TestProvidersComponent } from '../../../mocks/test_providers';
 
 describe('useInvestigateInTimeline()', () => {
-  let hookResult: RenderHookResult<{}, UseInvestigateInTimelineValue, Renderer<unknown>>;
+  let hookResult: RenderHookResult<UseInvestigateInTimelineValue, {}>;
 
   it('should return empty object if Indicator is incorrect', () => {
     const indicator: Indicator = generateMockIndicator();

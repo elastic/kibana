@@ -8,7 +8,8 @@
 import React, { ReactNode } from 'react';
 import { merge } from 'lodash';
 import { createMemoryHistory } from 'history';
-import { renderHook, act } from '@testing-library/react-hooks';
+
+import { renderHook, act } from '@testing-library/react';
 
 import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import {

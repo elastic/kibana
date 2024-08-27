@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { renderHook } from '@testing-library/react-hooks';
+
+import { renderHook } from '@testing-library/react';
 
 import { useToasts } from '../common/lib/kibana';
 import type { AppMockRenderer } from '../common/mock';

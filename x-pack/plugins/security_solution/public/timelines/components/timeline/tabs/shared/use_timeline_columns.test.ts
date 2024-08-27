@@ -7,7 +7,7 @@
 
 import { TestProviders } from '../../../../../common/mock';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useTimelineColumns } from './use_timeline_columns';
 import { defaultUdtHeaders } from '../../unified_components/default_headers';
 import { defaultHeaders } from '../../body/column_headers/default_headers';

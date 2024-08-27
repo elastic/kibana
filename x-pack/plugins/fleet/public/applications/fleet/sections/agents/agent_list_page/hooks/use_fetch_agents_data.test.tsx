@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act } from '@testing-library/react-hooks';
+import { act } from '@testing-library/react';
 
 import { useStartServices } from '../../../../hooks';
 
