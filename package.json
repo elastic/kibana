@@ -1501,7 +1501,7 @@
     "@types/d3-brush": "^3.0.0",
     "@types/d3-interpolate": "^3.0.1",
     "@types/d3-scale": "^3.3.0",
-    "@types/d3-selection": "^3.0.0",
+    "@types/d3-selection": "^3.0.10",
     "@types/d3-shape": "^2.1.0",
     "@types/d3-time": "^2.1.1",
     "@types/d3-transition": "^3.0.1",
