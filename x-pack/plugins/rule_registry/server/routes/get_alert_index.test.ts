@@ -10,14 +10,25 @@ import { getAlertsIndexRoute } from './get_alert_index';
 import { requestContextMock } from './__mocks__/request_context';
 import { getReadIndexRequest } from './__mocks__/request_responses';
 import { requestMock, serverMock } from './__mocks__/server';
+import Security from '@elastic/elasticsearch/lib/api/api/security';
+import { AsyncReturnType, SetReturnType } from 'type-fest';
 
 describe('getAlertsIndexRoute', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
+  let hasPrivileges: jest.MockedFn<
+    SetReturnType<
+      Security['hasPrivileges'],
+      Promise<Partial<AsyncReturnType<Security['hasPrivileges']>>>
+    >
+  >;
 
   beforeEach(async () => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
+    hasPrivileges = jest.mocked(
+      (await context.core).elasticsearch.client.asCurrentUser.security.hasPrivileges
+    );
 
     clients.rac.getAuthorizedAlertsIndices.mockResolvedValue(['alerts-security.alerts']);
 
@@ -32,7 +43,7 @@ describe('getAlertsIndexRoute', () => {
   });
 
   test('has_read_index_privileges is true when the user has at least read privilege on index_name', async () => {
-    context.core.elasticsearch.client.asCurrentUser.security.hasPrivileges.mockResolvedValue({
+    hasPrivileges.mockResolvedValue({
       has_all_requested: true,
     });
     const response = await server.inject(getReadIndexRequest(), context);
@@ -42,7 +53,7 @@ describe('getAlertsIndexRoute', () => {
   });
 
   test("has_read_index_privileges is false when the user doesn't have read privilege on index_name", async () => {
-    context.core.elasticsearch.client.asCurrentUser.security.hasPrivileges.mockResolvedValue({
+    hasPrivileges.mockResolvedValue({
       has_all_requested: false,
     });
     const response = await server.inject(getReadIndexRequest(), context);
