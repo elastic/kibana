@@ -8,14 +8,15 @@
 import { InferenceConnectorType } from '../../../common/connectors';
 import { getInferenceAdapter } from './get_inference_adapter';
 import { openAIAdapter } from './openai';
+import { bedrockClaudeAdapter } from './bedrock';
 
 describe('getInferenceAdapter', () => {
   it('returns the openAI adapter for OpenAI type', () => {
     expect(getInferenceAdapter(InferenceConnectorType.OpenAI)).toBe(openAIAdapter);
   });
 
-  it('returns undefined for Bedrock type', () => {
-    expect(getInferenceAdapter(InferenceConnectorType.Bedrock)).toBe(undefined);
+  it('returns the bedrock adapter for Bedrock type', () => {
+    expect(getInferenceAdapter(InferenceConnectorType.Bedrock)).toBe(bedrockClaudeAdapter);
   });
 
   it('returns undefined for Gemini type', () => {
