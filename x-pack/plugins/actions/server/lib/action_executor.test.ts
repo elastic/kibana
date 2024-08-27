@@ -252,8 +252,6 @@ beforeEach(() => {
   getActionsAuthorizationWithRequest.mockReturnValue(authorizationMock);
 });
 
-const mockGetRequestBodyByte = jest.spyOn(ConnectorUsageCollector.prototype, 'getRequestBodyByte');
-
 describe('Action Executor', () => {
   for (const executeUnsecure of [false, true]) {
     const label = executeUnsecure ? 'executes unsecured' : 'executes';
