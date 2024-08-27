@@ -14,7 +14,10 @@ import { useIsUpgradingSecurityPackages } from '../../../../rule_management/logi
 import { useInstalledSecurityJobs } from '../../../../../common/components/ml/hooks/use_installed_security_jobs';
 import { useBoolState } from '../../../../../common/hooks/use_bool_state';
 import { affectedJobIds } from '../../../../../detections/components/callouts/ml_job_compatibility_callout/affected_job_ids';
-import type { RuleUpgradeInfoForReview } from '../../../../../../common/api/detection_engine/prebuilt_rules';
+import type {
+  PickVersionValues,
+  RuleUpgradeInfoForReview,
+} from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { RuleSignatureId } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { invariant } from '../../../../../../common/utils/invariant';
 import {
@@ -35,11 +38,27 @@ import { MlJobUpgradeModal } from '../../../../../detections/components/modals/m
 import * as ruleDetailsI18n from '../../../../rule_management/components/rule_details/translations';
 import * as i18n from './translations';
 
+type FieldUpgradeState =
+  | {
+      pickVersion: PickVersionValues;
+    }
+  | { pickVersion: 'RESOLVED'; resolvedValue: unknown };
+
+interface RuleUpgradeState {
+  fields: Record<string, FieldUpgradeState>;
+}
+
+type RulesUpgradeState = Record<string, RuleUpgradeState>;
+
 export interface UpgradePrebuiltRulesTableState {
   /**
    * Rules available to be updated
    */
   rules: RuleUpgradeInfoForReview[];
+  /**
+   * Conflict resolution upgrade state
+   */
+  rulesUpgradeState: RulesUpgradeState;
   /**
    * Rules to display in table after applying filters
    */
@@ -94,6 +113,12 @@ export interface UpgradePrebuiltRulesTableActions {
   setFilterOptions: Dispatch<SetStateAction<UpgradePrebuiltRulesTableFilterOptions>>;
   selectRules: (rules: RuleUpgradeInfoForReview[]) => void;
   openRulePreview: (ruleId: string) => void;
+  setFieldPickVersion: (params: {
+    ruleId: string;
+    fieldName: string;
+    pickVersion: PickVersionValues;
+    resolvedValue: unknown;
+  }) => void;
 }
 
 export interface UpgradePrebuiltRulesContextType {
@@ -135,6 +160,28 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     refetchInterval: false, // Disable automatic refetching since request is expensive
     keepPreviousData: true, // Use this option so that the state doesn't jump between "success" and "loading" on page change
   });
+
+  const [rulesUpgradeState, setRulesUpgradeState] = useState<RulesUpgradeState>({});
+  const setFieldPickVersion = useCallback(
+    (params: {
+      ruleId: string;
+      fieldName: string;
+      pickVersion: PickVersionValues;
+      resolvedValue: unknown;
+    }) => {
+      setRulesUpgradeState((prevRulesUpgradeState) => ({
+        ...prevRulesUpgradeState,
+        [params.ruleId]: {
+          ...(prevRulesUpgradeState[params.ruleId] ?? {}),
+          fieldName: {
+            pickVersion: params.pickVersion,
+            resolvedValue: params.resolvedValue,
+          },
+        },
+      }));
+    },
+    [setRulesUpgradeState]
+  );
 
   const { mutateAsync: upgradeAllRulesRequest } = usePerformUpgradeAllRules();
   const { mutateAsync: upgradeSpecificRulesRequest } = usePerformUpgradeSpecificRules();
@@ -228,14 +275,23 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
       setFilterOptions,
       selectRules: setSelectedRules,
       openRulePreview,
+      setFieldPickVersion,
     }),
-    [refetch, upgradeOneRule, upgradeSelectedRules, upgradeAllRules, openRulePreview]
+    [
+      refetch,
+      upgradeOneRule,
+      upgradeSelectedRules,
+      upgradeAllRules,
+      openRulePreview,
+      setFieldPickVersion,
+    ]
   );
 
   const providerValue = useMemo<UpgradePrebuiltRulesContextType>(() => {
     return {
       state: {
         rules,
+        rulesUpgradeState,
         filteredRules,
         filterOptions,
         tags,
@@ -251,6 +307,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     };
   }, [
     rules,
+    rulesUpgradeState,
     filteredRules,
     filterOptions,
     tags,
