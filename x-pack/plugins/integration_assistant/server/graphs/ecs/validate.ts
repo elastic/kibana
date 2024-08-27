@@ -6,8 +6,8 @@
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ECS_FULL } from '../../../common/ecs';
-import type { EcsBaseNodeParams } from './types';
 import { ECS_RESERVED } from './constants';
+import type { EcsBaseNodeParams } from './types';
 
 const valueFieldKeys = new Set(['target', 'confidence', 'date_formats', 'type']);
 type AnyObject = Record<string, any>;
