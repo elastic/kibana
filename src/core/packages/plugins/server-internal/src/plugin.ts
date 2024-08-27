@@ -24,7 +24,7 @@ import type {
   PrebootPlugin,
 } from '@kbn/core-plugins-server';
 import type { CorePreboot, CoreSetup, CoreStart } from '@kbn/core-lifecycle-server';
-import { Setup, Start } from '@kbn/core-di';
+import { PluginSetup, PluginStart, Setup, Start } from '@kbn/core-di';
 import { Contract, toContainerModule } from '@kbn/core-di-internal';
 import {
   CoreSetup as CoreSetupService,
@@ -146,6 +146,7 @@ export class PluginWrapper<
       this.container.load(this.definition.module);
       this.container.load(toContainerModule(this.initializerContext, PluginInitializerService));
       this.container.load(toContainerModule(setupContext, CoreSetupService));
+      this.container.load(toContainerModule(plugins, PluginSetup));
     }
 
     return [
@@ -174,6 +175,7 @@ export class PluginWrapper<
     }
 
     this.container?.load(toContainerModule(startContext, CoreStartService));
+    this.container?.load(toContainerModule(plugins, PluginStart));
 
     const contract = [
       this.instance?.start(startContext, plugins),
