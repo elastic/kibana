@@ -15,13 +15,13 @@ import {
 } from '@kbn/grouping/src';
 import { useMemo } from 'react';
 import { buildEsQuery, Filter } from '@kbn/es-query';
+import { LATEST_FINDINGS_RETENTION_POLICY } from '@kbn/cloud-security-posture-common';
 import {
   FINDINGS_GROUPING_OPTIONS,
   LOCAL_STORAGE_FINDINGS_GROUPING_KEY,
 } from '../../../common/constants';
 import { useDataViewContext } from '../../../common/contexts/data_view_context';
 import { Evaluation } from '../../../../common/types_old';
-import { LATEST_FINDINGS_RETENTION_POLICY } from '../../../../common/constants';
 import {
   FindingsGroupingAggregation,
   FindingsRootGroupingAggregation,
