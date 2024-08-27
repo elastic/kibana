@@ -29,10 +29,16 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
 
   before(async () => {
     await services.cleaUp();
+  });
+
+  after(async () => {
+    await services.cleaUp();
+  });
+
+  step('setup monitor', async () => {
     const connectorId = await services.setupTestConnector();
     await services.setupSettings(connectorId.id);
 
-    await services.enableMonitorManagedViaApi();
     configId = await services.addTestMonitor('Test Monitor', {
       type: 'http',
       urls: 'https://www.google.com',
@@ -44,10 +50,6 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
       timestamp: firstCheckTime,
       configId,
     });
-  });
-
-  after(async () => {
-    await services.cleaUp();
   });
 
   step('Go to monitors page', async () => {
