@@ -29,8 +29,8 @@ import { mockDataQualityCheckResult } from '../../../mock/data_quality_check_res
 import { auditbeatWithAllResults } from '../../../mock/pattern_rollup/mock_auditbeat_pattern_rollup';
 import { mockStats } from '../../../mock/stats/mock_stats';
 import { DataQualityCheckResult } from '../../../types';
-import { getIndexNames, getTotalDocsCount } from '../../../helpers';
 import { IndexSummaryTableItem } from './types';
+import { getIndexNames, getPatternDocsCount } from './utils/stats';
 
 const hot: IlmExplainLifecycleLifecycleExplainManaged = {
   index: '.ds-packetbeat-8.6.1-2023.02.04-000001',
@@ -569,7 +569,7 @@ describe('helpers', () => {
       ilmPhases: ['hot', 'unmanaged'],
       isILMAvailable,
     });
-    const newDocsCount = getTotalDocsCount({ indexNames: newIndexNames, stats: mockStats });
+    const newDocsCount = getPatternDocsCount({ indexNames: newIndexNames, stats: mockStats });
     test('it returns false when the `patternRollup.docsCount` equals newDocsCount', () => {
       expect(
         shouldCreatePatternRollup({

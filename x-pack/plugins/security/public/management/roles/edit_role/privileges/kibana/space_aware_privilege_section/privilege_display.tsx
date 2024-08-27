@@ -11,7 +11,7 @@ import _ from 'lodash';
 import type { FC, ReactNode } from 'react';
 import React from 'react';
 
-import { NO_PRIVILEGE_VALUE } from '../constants';
+import { constants } from '@kbn/security-ui-components';
 
 interface Props extends PropsOf<typeof EuiText> {
   privilege: string | string[] | undefined;
@@ -40,7 +40,8 @@ function getDisplayValue(privilege: string | string[] | undefined) {
   let displayValue: string | ReactNode;
 
   const isPrivilegeMissing =
-    privileges.length === 0 || (privileges.length === 1 && privileges.includes(NO_PRIVILEGE_VALUE));
+    privileges.length === 0 ||
+    (privileges.length === 1 && privileges.includes(constants.NO_PRIVILEGE_VALUE));
 
   if (isPrivilegeMissing) {
     displayValue = <EuiIcon color="subdued" type={'minusInCircle'} />;

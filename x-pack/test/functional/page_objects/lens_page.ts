@@ -1397,6 +1397,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       };
     },
 
+    async hoverOverDimensionButton(index = 0) {
+      const dimensionButton = (await testSubjects.findAll('lns-dimensionTrigger'))[index];
+      await dimensionButton.moveMouseTo();
+    },
+
     async getMetricVisualizationData() {
       const tiles = await this.getMetricTiles();
       const showingBar = Boolean(await findService.existsByCssSelector('.echSingleMetricProgress'));

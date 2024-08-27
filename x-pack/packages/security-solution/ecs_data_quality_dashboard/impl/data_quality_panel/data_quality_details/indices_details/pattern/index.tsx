@@ -18,13 +18,8 @@ import {
   shouldCreateIndexNames,
   shouldCreatePatternRollup,
 } from './helpers';
-import {
-  getIndexNames,
-  getTotalDocsCount,
-  getTotalPatternIncompatible,
-  getTotalPatternIndicesChecked,
-  getTotalSizeInBytes,
-} from '../../../helpers';
+import { getTotalPatternIncompatible, getTotalPatternIndicesChecked } from '../../../utils/stats';
+import { getIndexNames, getPatternDocsCount, getPatternSizeInBytes } from './utils/stats';
 import { LoadingEmptyPrompt } from './loading_empty_prompt';
 import { PatternSummary } from './pattern_summary';
 import { RemoteClustersCallout } from './remote_clusters_callout';
@@ -152,7 +147,7 @@ const PatternComponent: React.FC<Props> = ({
 
   useEffect(() => {
     const newIndexNames = getIndexNames({ stats, ilmExplain, ilmPhases, isILMAvailable });
-    const newDocsCount = getTotalDocsCount({ indexNames: newIndexNames, stats });
+    const newDocsCount = getPatternDocsCount({ indexNames: newIndexNames, stats });
 
     if (
       shouldCreateIndexNames({
@@ -188,7 +183,7 @@ const PatternComponent: React.FC<Props> = ({
         pattern,
         results: undefined,
         sizeInBytes: isILMAvailable
-          ? getTotalSizeInBytes({
+          ? getPatternSizeInBytes({
               indexNames: getIndexNames({ stats, ilmExplain, ilmPhases, isILMAvailable }),
               stats,
             }) ?? 0

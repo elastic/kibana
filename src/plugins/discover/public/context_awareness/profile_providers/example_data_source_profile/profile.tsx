@@ -7,7 +7,7 @@
  */
 
 import { EuiBadge } from '@elastic/eui';
-import type { DataTableRecord } from '@kbn/discover-utils';
+import { getFieldValue } from '@kbn/discover-utils';
 import type { RowControlColumn } from '@kbn/unified-data-table';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
@@ -19,6 +19,7 @@ import { DataSourceCategory, DataSourceProfileProvider } from '../../profiles';
 
 export const exampleDataSourceProfileProvider: DataSourceProfileProvider = {
   profileId: 'example-data-source-profile',
+  isExperimental: true,
   profile: {
     getCellRenderers: (prev) => () => ({
       ...prev(),
@@ -136,9 +137,4 @@ export const exampleDataSourceProfileProvider: DataSourceProfileProvider = {
       context: { category: DataSourceCategory.Logs },
     };
   },
-};
-
-const getFieldValue = (record: DataTableRecord, field: string) => {
-  const value = record.flattened[field];
-  return Array.isArray(value) ? value[0] : value;
 };

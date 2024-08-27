@@ -16,8 +16,6 @@ export * as benchmarkV2 from './benchmarks/v2';
 
 // Explicit export of everything from latest
 export type {
-  cspBenchmarkRuleMetadataSchema,
-  CspBenchmarkRuleMetadata,
   CspBenchmarkRule,
   FindCspBenchmarkRuleRequest,
   FindCspBenchmarkRuleResponse,
