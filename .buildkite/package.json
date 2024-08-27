@@ -18,7 +18,7 @@
     "tslib": "*"
   },
   "devDependencies": {
-    "@types/chai": "^4.3.3",
+    "@types/chai": "^4.3.18",
     "@types/js-yaml": "^4.0.5",
     "@types/minimatch": "^3.0.5",
     "@types/mocha": "^10.0.1",
