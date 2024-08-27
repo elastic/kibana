@@ -12,6 +12,7 @@ import { MANAGEMENT_APP_LOCATOR } from '@kbn/deeplinks-management/constants';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { useKibanaContextForPlugin } from '../utils';
 import { Dashboard } from '../../common/api_types';
+import { useDatasetDetailsTelemetry } from './use_dataset_details_telemetry';
 
 export const useIntegrationActions = () => {
   const {
@@ -21,6 +22,8 @@ export const useIntegrationActions = () => {
       share,
     },
   } = useKibanaContextForPlugin();
+  const { wrapLinkPropsForTelemetry, navigationSources, navigationTargets } =
+    useDatasetDetailsTelemetry();
 
   const [isOpen, toggleIsOpen] = useToggle(false);
 
@@ -43,34 +46,51 @@ export const useIntegrationActions = () => {
   const getIntegrationOverviewLinkProps = useCallback(
     (name: string, version: string) => {
       const href = basePath.prepend(`/app/integrations/detail/${name}-${version}/overview`);
-      return getRouterLinkProps({
-        href,
-        onClick: () => {
-          return navigateToUrl(href);
-        },
-      });
+      return wrapLinkPropsForTelemetry(
+        getRouterLinkProps({
+          href,
+          onClick: () => {
+            return navigateToUrl(href);
+          },
+        }),
+        navigationTargets.Integration,
+        navigationSources.ActionMenu
+      );
     },
-    [basePath, navigateToUrl]
+    [basePath, navigateToUrl, navigationSources, navigationTargets, wrapLinkPropsForTelemetry]
   );
   const getIndexManagementLinkProps = useCallback(
     (params: { sectionId: string; appId: string }) =>
-      getRouterLinkProps({
-        href: indexManagementLocator?.getRedirectUrl(params),
-        onClick: () => {
-          return indexManagementLocator?.navigate(params);
-        },
-      }),
-    [indexManagementLocator]
+      wrapLinkPropsForTelemetry(
+        getRouterLinkProps({
+          href: indexManagementLocator?.getRedirectUrl(params),
+          onClick: () => {
+            return indexManagementLocator?.navigate(params);
+          },
+        }),
+        navigationTargets.IndexTemplate,
+        navigationSources.ActionMenu
+      ),
+    [
+      indexManagementLocator,
+      navigationSources.ActionMenu,
+      navigationTargets.IndexTemplate,
+      wrapLinkPropsForTelemetry,
+    ]
   );
   const getDashboardLinkProps = useCallback(
     (dashboard: Dashboard) =>
-      getRouterLinkProps({
-        href: dashboardLocator?.getRedirectUrl({ dashboardId: dashboard?.id } || ''),
-        onClick: () => {
-          return dashboardLocator?.navigate({ dashboardId: dashboard?.id } || '');
-        },
-      }),
-    [dashboardLocator]
+      wrapLinkPropsForTelemetry(
+        getRouterLinkProps({
+          href: dashboardLocator?.getRedirectUrl({ dashboardId: dashboard?.id } || ''),
+          onClick: () => {
+            return dashboardLocator?.navigate({ dashboardId: dashboard?.id } || '');
+          },
+        }),
+        navigationTargets.Dashboard,
+        navigationSources.ActionMenu
+      ),
+    [dashboardLocator, navigationSources, navigationTargets, wrapLinkPropsForTelemetry]
   );
 
   return {
