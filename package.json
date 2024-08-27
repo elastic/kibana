@@ -1632,7 +1632,7 @@
     "@yarnpkg/lockfile": "^1.1.0",
     "aggregate-error": "^3.1.0",
     "argsplit": "^1.0.5",
-    "autoprefixer": "^10.4.7",
+    "autoprefixer": "^10.4.20",
     "axe-core": "^4.10.0",
     "babel-jest": "^29.7.0",
     "babel-loader": "^8.2.5",
