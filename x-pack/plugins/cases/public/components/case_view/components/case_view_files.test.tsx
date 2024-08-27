@@ -26,97 +26,94 @@ const caseData: CaseUI = {
   comments: [...basicCase.comments, alertCommentWithIndices],
 };
 
-// FLAKY: https://github.com/elastic/kibana/issues/185046
-for (let i = 0; i < 50; i++) {
-  describe('Case View Page files tab', () => {
-    let appMockRender: AppMockRenderer;
+describe('Case View Page files tab', () => {
+  let appMockRender: AppMockRenderer;
 
-    useGetCaseFilesMock.mockReturnValue({
-      data: { files: [], total: 11 },
-      isLoading: false,
-    });
-
-    beforeEach(() => {
-      appMockRender = createAppMockRenderer();
-      jest.clearAllMocks();
-    });
-
-    afterEach(() => {
-      appMockRender.queryClient.getQueryCache().clear();
-    });
-
-    afterEach(async () => {
-      await waitFor(() => expect(appMockRender.queryClient.isFetching()).toBe(0));
-    });
-
-    it('should render the utility bar for the files table', async () => {
-      appMockRender.render(<CaseViewFiles caseData={caseData} />);
-
-      expect((await screen.findAllByTestId('cases-files-add')).length).toBe(2);
-      expect(await screen.findByTestId('cases-files-search')).toBeInTheDocument();
-    });
-
-    it('should render the files table', async () => {
-      appMockRender.render(<CaseViewFiles caseData={caseData} />);
-
-      expect(await screen.findByTestId('cases-files-table')).toBeInTheDocument();
-    });
-
-    it('clicking table pagination triggers calls to useGetCaseFiles', async () => {
-      appMockRender.render(<CaseViewFiles caseData={caseData} />);
-
-      expect(await screen.findByTestId('cases-files-table')).toBeInTheDocument();
-
-      userEvent.click(await screen.findByTestId('pagination-button-next'));
-
-      await waitFor(() =>
-        expect(useGetCaseFilesMock).toHaveBeenCalledWith({
-          caseId: basicCase.id,
-          page: DEFAULT_CASE_FILES_FILTERING_OPTIONS.page + 1,
-          perPage: DEFAULT_CASE_FILES_FILTERING_OPTIONS.perPage,
-        })
-      );
-    });
-
-    it('changing perPage value triggers calls to useGetCaseFiles', async () => {
-      const targetPagination = 50;
-
-      appMockRender.render(<CaseViewFiles caseData={caseData} />);
-
-      expect(await screen.findByTestId('cases-files-table')).toBeInTheDocument();
-
-      userEvent.click(screen.getByTestId('tablePaginationPopoverButton'));
-
-      const pageSizeOption = screen.getByTestId('tablePagination-50-rows');
-
-      pageSizeOption.style.pointerEvents = 'all';
-
-      userEvent.click(pageSizeOption);
-
-      await waitFor(() =>
-        expect(useGetCaseFilesMock).toHaveBeenCalledWith({
-          caseId: basicCase.id,
-          page: DEFAULT_CASE_FILES_FILTERING_OPTIONS.page,
-          perPage: targetPagination,
-        })
-      );
-    });
-
-    it('search by word triggers calls to useGetCaseFiles', async () => {
-      appMockRender.render(<CaseViewFiles caseData={caseData} />);
-
-      expect(await screen.findByTestId('cases-files-table')).toBeInTheDocument();
-
-      await userEvent.type(screen.getByTestId('cases-files-search'), 'Foobar{enter}');
-
-      await waitFor(() =>
-        expect(useGetCaseFilesMock).toHaveBeenCalledWith({
-          caseId: basicCase.id,
-          page: DEFAULT_CASE_FILES_FILTERING_OPTIONS.page,
-          perPage: DEFAULT_CASE_FILES_FILTERING_OPTIONS.perPage,
-          searchTerm: 'Foobar',
-        })
-      );
-    });
+  useGetCaseFilesMock.mockReturnValue({
+    data: { files: [], total: 11 },
+    isLoading: false,
   });
-}
+
+  beforeEach(() => {
+    appMockRender = createAppMockRenderer();
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    appMockRender.queryClient.getQueryCache().clear();
+  });
+
+  afterEach(async () => {
+    await waitFor(() => expect(appMockRender.queryClient.isFetching()).toBe(0));
+  });
+
+  it('should render the utility bar for the files table', async () => {
+    appMockRender.render(<CaseViewFiles caseData={caseData} />);
+
+    expect((await screen.findAllByTestId('cases-files-add')).length).toBe(2);
+    expect(await screen.findByTestId('cases-files-search')).toBeInTheDocument();
+  });
+
+  it('should render the files table', async () => {
+    appMockRender.render(<CaseViewFiles caseData={caseData} />);
+
+    expect(await screen.findByTestId('cases-files-table')).toBeInTheDocument();
+  });
+
+  it('clicking table pagination triggers calls to useGetCaseFiles', async () => {
+    appMockRender.render(<CaseViewFiles caseData={caseData} />);
+
+    expect(await screen.findByTestId('cases-files-table')).toBeInTheDocument();
+
+    userEvent.click(await screen.findByTestId('pagination-button-next'));
+
+    await waitFor(() =>
+      expect(useGetCaseFilesMock).toHaveBeenCalledWith({
+        caseId: basicCase.id,
+        page: DEFAULT_CASE_FILES_FILTERING_OPTIONS.page + 1,
+        perPage: DEFAULT_CASE_FILES_FILTERING_OPTIONS.perPage,
+      })
+    );
+  });
+
+  it('changing perPage value triggers calls to useGetCaseFiles', async () => {
+    const targetPagination = 50;
+
+    appMockRender.render(<CaseViewFiles caseData={caseData} />);
+
+    expect(await screen.findByTestId('cases-files-table')).toBeInTheDocument();
+
+    userEvent.click(screen.getByTestId('tablePaginationPopoverButton'));
+
+    const pageSizeOption = screen.getByTestId('tablePagination-50-rows');
+
+    pageSizeOption.style.pointerEvents = 'all';
+
+    userEvent.click(pageSizeOption);
+
+    await waitFor(() =>
+      expect(useGetCaseFilesMock).toHaveBeenCalledWith({
+        caseId: basicCase.id,
+        page: DEFAULT_CASE_FILES_FILTERING_OPTIONS.page,
+        perPage: targetPagination,
+      })
+    );
+  });
+
+  it('search by word triggers calls to useGetCaseFiles', async () => {
+    appMockRender.render(<CaseViewFiles caseData={caseData} />);
+
+    expect(await screen.findByTestId('cases-files-table')).toBeInTheDocument();
+
+    await userEvent.type(screen.getByTestId('cases-files-search'), 'Foobar{enter}');
+
+    await waitFor(() =>
+      expect(useGetCaseFilesMock).toHaveBeenCalledWith({
+        caseId: basicCase.id,
+        page: DEFAULT_CASE_FILES_FILTERING_OPTIONS.page,
+        perPage: DEFAULT_CASE_FILES_FILTERING_OPTIONS.perPage,
+        searchTerm: 'Foobar',
+      })
+    );
+  });
+});

@@ -15,125 +15,122 @@ import { FormTestComponent } from '../../common/test_utils';
 import { TemplateTags } from './template_tags';
 import { showEuiComboBoxOptions } from '@elastic/eui/lib/test/rtl';
 
-// FLAKY: https://github.com/elastic/kibana/issues/189293
-for (let i = 0; i < 50; i++) {
-  describe('TemplateTags', () => {
-    let appMockRenderer: AppMockRenderer;
-    const onSubmit = jest.fn();
-    const formDefaultValue = { templateTags: [] };
+describe('TemplateTags', () => {
+  let appMockRenderer: AppMockRenderer;
+  const onSubmit = jest.fn();
+  const formDefaultValue = { templateTags: [] };
 
-    beforeEach(() => {
-      jest.clearAllMocks();
-      appMockRenderer = createAppMockRenderer();
-    });
+  beforeEach(() => {
+    jest.clearAllMocks();
+    appMockRenderer = createAppMockRenderer();
+  });
 
-    afterEach(() => {
-      appMockRenderer.queryClient.getQueryCache().clear();
-    });
+  afterEach(() => {
+    appMockRenderer.queryClient.getQueryCache().clear();
+  });
 
-    afterEach(async () => {
-      await waitFor(() => expect(appMockRenderer.queryClient.isFetching()).toBe(0));
-    });
+  afterEach(async () => {
+    await waitFor(() => expect(appMockRenderer.queryClient.isFetching()).toBe(0));
+  });
 
-    it('renders template tags', async () => {
-      appMockRenderer.render(
-        <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
-          <TemplateTags isLoading={false} tagOptions={[]} />
-        </FormTestComponent>
+  it('renders template tags', async () => {
+    appMockRenderer.render(
+      <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
+        <TemplateTags isLoading={false} tagOptions={[]} />
+      </FormTestComponent>
+    );
+
+    expect(await screen.findByTestId('template-tags')).toBeInTheDocument();
+  });
+
+  it('renders loading state', async () => {
+    appMockRenderer.render(
+      <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
+        <TemplateTags isLoading={true} tagOptions={[]} />
+      </FormTestComponent>
+    );
+
+    expect(await screen.findByRole('progressbar')).toBeInTheDocument();
+    expect(await screen.findByLabelText('Loading')).toBeInTheDocument();
+  });
+
+  it('shows template tags options', async () => {
+    appMockRenderer.render(
+      <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
+        <TemplateTags isLoading={false} tagOptions={['foo', 'bar', 'test']} />
+      </FormTestComponent>
+    );
+
+    expect(await screen.findByTestId('template-tags')).toBeInTheDocument();
+
+    await showEuiComboBoxOptions();
+
+    expect(await screen.findByText('foo')).toBeInTheDocument();
+  });
+
+  it('shows template tags with current values', async () => {
+    appMockRenderer.render(
+      <FormTestComponent formDefaultValue={{ templateTags: ['foo', 'bar'] }} onSubmit={onSubmit}>
+        <TemplateTags isLoading={false} tagOptions={[]} />
+      </FormTestComponent>
+    );
+
+    expect(await screen.findByTestId('template-tags')).toBeInTheDocument();
+
+    expect(await screen.findByText('foo')).toBeInTheDocument();
+
+    expect(await screen.findByText('bar')).toBeInTheDocument();
+  });
+
+  it('adds template tag ', async () => {
+    appMockRenderer.render(
+      <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
+        <TemplateTags isLoading={false} tagOptions={[]} />
+      </FormTestComponent>
+    );
+
+    expect(await screen.findByTestId('template-tags')).toBeInTheDocument();
+
+    const comboBoxEle = await screen.findByRole('combobox');
+    userEvent.paste(comboBoxEle, 'test');
+    userEvent.keyboard('{enter}');
+    userEvent.paste(comboBoxEle, 'template');
+    userEvent.keyboard('{enter}');
+
+    userEvent.click(screen.getByText('Submit'));
+
+    await waitFor(() => {
+      expect(onSubmit).toBeCalledWith(
+        {
+          templateTags: ['test', 'template'],
+        },
+        true
       );
-
-      expect(await screen.findByTestId('template-tags')).toBeInTheDocument();
-    });
-
-    it('renders loading state', async () => {
-      appMockRenderer.render(
-        <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
-          <TemplateTags isLoading={true} tagOptions={[]} />
-        </FormTestComponent>
-      );
-
-      expect(await screen.findByRole('progressbar')).toBeInTheDocument();
-      expect(await screen.findByLabelText('Loading')).toBeInTheDocument();
-    });
-
-    it('shows template tags options', async () => {
-      appMockRenderer.render(
-        <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
-          <TemplateTags isLoading={false} tagOptions={['foo', 'bar', 'test']} />
-        </FormTestComponent>
-      );
-
-      expect(await screen.findByTestId('template-tags')).toBeInTheDocument();
-
-      await showEuiComboBoxOptions();
-
-      expect(await screen.findByText('foo')).toBeInTheDocument();
-    });
-
-    it('shows template tags with current values', async () => {
-      appMockRenderer.render(
-        <FormTestComponent formDefaultValue={{ templateTags: ['foo', 'bar'] }} onSubmit={onSubmit}>
-          <TemplateTags isLoading={false} tagOptions={[]} />
-        </FormTestComponent>
-      );
-
-      expect(await screen.findByTestId('template-tags')).toBeInTheDocument();
-
-      expect(await screen.findByText('foo')).toBeInTheDocument();
-
-      expect(await screen.findByText('bar')).toBeInTheDocument();
-    });
-
-    it('adds template tag ', async () => {
-      appMockRenderer.render(
-        <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
-          <TemplateTags isLoading={false} tagOptions={[]} />
-        </FormTestComponent>
-      );
-
-      expect(await screen.findByTestId('template-tags')).toBeInTheDocument();
-
-      const comboBoxEle = await screen.findByRole('combobox');
-      userEvent.paste(comboBoxEle, 'test');
-      userEvent.keyboard('{enter}');
-      userEvent.paste(comboBoxEle, 'template');
-      userEvent.keyboard('{enter}');
-
-      userEvent.click(screen.getByText('Submit'));
-
-      await waitFor(() => {
-        expect(onSubmit).toBeCalledWith(
-          {
-            templateTags: ['test', 'template'],
-          },
-          true
-        );
-      });
-    });
-
-    it('adds new template tag to existing tags', async () => {
-      appMockRenderer.render(
-        <FormTestComponent formDefaultValue={{ templateTags: ['foo', 'bar'] }} onSubmit={onSubmit}>
-          <TemplateTags isLoading={false} tagOptions={[]} />
-        </FormTestComponent>
-      );
-
-      expect(await screen.findByTestId('template-tags')).toBeInTheDocument();
-
-      const comboBoxEle = await screen.findByRole('combobox');
-      userEvent.paste(comboBoxEle, 'test');
-      userEvent.keyboard('{enter}');
-
-      userEvent.click(screen.getByText('Submit'));
-
-      await waitFor(() => {
-        expect(onSubmit).toBeCalledWith(
-          {
-            templateTags: ['foo', 'bar', 'test'],
-          },
-          true
-        );
-      });
     });
   });
-}
+
+  it('adds new template tag to existing tags', async () => {
+    appMockRenderer.render(
+      <FormTestComponent formDefaultValue={{ templateTags: ['foo', 'bar'] }} onSubmit={onSubmit}>
+        <TemplateTags isLoading={false} tagOptions={[]} />
+      </FormTestComponent>
+    );
+
+    expect(await screen.findByTestId('template-tags')).toBeInTheDocument();
+
+    const comboBoxEle = await screen.findByRole('combobox');
+    userEvent.paste(comboBoxEle, 'test');
+    userEvent.keyboard('{enter}');
+
+    userEvent.click(screen.getByText('Submit'));
+
+    await waitFor(() => {
+      expect(onSubmit).toBeCalledWith(
+        {
+          templateTags: ['foo', 'bar', 'test'],
+        },
+        true
+      );
+    });
+  });
+});

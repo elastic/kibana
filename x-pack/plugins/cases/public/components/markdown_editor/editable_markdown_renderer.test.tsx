@@ -61,179 +61,176 @@ const defaultProps = {
   editorRef,
 };
 
-// FLAKY: https://github.com/elastic/kibana/issues/171177
-for (let i = 0; i < 50; i++) {
-  describe('EditableMarkdown', () => {
-    let appMockRender: AppMockRenderer;
+describe('EditableMarkdown', () => {
+  let appMockRender: AppMockRenderer;
 
-    beforeEach(() => {
-      jest.clearAllMocks();
-      appMockRender = createAppMockRenderer();
+  beforeEach(() => {
+    jest.clearAllMocks();
+    appMockRender = createAppMockRenderer();
+  });
+
+  afterEach(() => {
+    sessionStorage.removeItem(draftStorageKey);
+  });
+
+  afterEach(() => {
+    appMockRender.queryClient.getQueryCache().clear();
+  });
+
+  afterEach(async () => {
+    await waitFor(() => expect(appMockRender.queryClient.isFetching()).toBe(0));
+  });
+
+  it('Save button click calls onSaveContent and onChangeEditable when text area value changed', async () => {
+    appMockRender.render(<EditableMarkdown {...defaultProps} />);
+
+    fireEvent.change(await screen.findByTestId('euiMarkdownEditorTextArea'), {
+      target: { value: newValue },
+    });
+
+    userEvent.click(await screen.findByTestId('editable-save-markdown'));
+
+    await waitFor(() => {
+      expect(onSaveContent).toHaveBeenCalledWith(newValue);
+      expect(onChangeEditable).toHaveBeenCalledWith(defaultProps.id);
+    });
+  });
+
+  it('Does not call onSaveContent if no change from current text', async () => {
+    appMockRender.render(<EditableMarkdown {...defaultProps} />);
+
+    userEvent.click(await screen.findByTestId('editable-save-markdown'));
+
+    await waitFor(() => {
+      expect(onChangeEditable).toHaveBeenCalledWith(defaultProps.id);
+    });
+    expect(onSaveContent).not.toHaveBeenCalled();
+  });
+
+  it('Cancel button click calls only onChangeEditable', async () => {
+    appMockRender.render(<EditableMarkdown {...defaultProps} />);
+
+    userEvent.click(await screen.findByTestId('editable-cancel-markdown'));
+
+    await waitFor(() => {
+      expect(onSaveContent).not.toHaveBeenCalled();
+      expect(onChangeEditable).toHaveBeenCalledWith(defaultProps.id);
+    });
+  });
+
+  describe('errors', () => {
+    it('Shows error message and save button disabled if current text is empty', async () => {
+      appMockRender.render(<EditableMarkdown {...defaultProps} />);
+
+      userEvent.clear(await screen.findByTestId('euiMarkdownEditorTextArea'));
+      userEvent.paste(await screen.findByTestId('euiMarkdownEditorTextArea'), '');
+
+      expect(await screen.findByText('Required field')).toBeInTheDocument();
+      expect(await screen.findByTestId('editable-save-markdown')).toHaveProperty('disabled');
+    });
+
+    it('Shows error message and save button disabled if current text is of empty characters', async () => {
+      appMockRender.render(<EditableMarkdown {...defaultProps} />);
+
+      userEvent.clear(await screen.findByTestId('euiMarkdownEditorTextArea'));
+      userEvent.paste(await screen.findByTestId('euiMarkdownEditorTextArea'), '  ');
+
+      expect(await screen.findByText('Required field')).toBeInTheDocument();
+      expect(await screen.findByTestId('editable-save-markdown')).toHaveProperty('disabled');
+    });
+
+    it('Shows error message and save button disabled if current text is too long', async () => {
+      const longComment = 'b'.repeat(maxLength + 1);
+
+      appMockRender.render(<EditableMarkdown {...defaultProps} />);
+
+      const markdown = await screen.findByTestId('euiMarkdownEditorTextArea');
+
+      userEvent.paste(markdown, longComment);
+
+      expect(
+        await screen.findByText(
+          `The length of the textarea is too long. The maximum length is ${maxLength} characters.`
+        )
+      ).toBeInTheDocument();
+      expect(await screen.findByTestId('editable-save-markdown')).toHaveProperty('disabled');
+    });
+  });
+
+  describe('draft comment ', () => {
+    beforeAll(() => {
+      jest.useFakeTimers();
     });
 
     afterEach(() => {
+      jest.clearAllTimers();
+    });
+
+    afterAll(() => {
+      jest.useRealTimers();
       sessionStorage.removeItem(draftStorageKey);
     });
 
-    afterEach(() => {
-      appMockRender.queryClient.getQueryCache().clear();
+    beforeEach(() => {
+      jest.clearAllMocks();
     });
 
-    afterEach(async () => {
-      await waitFor(() => expect(appMockRender.queryClient.isFetching()).toBe(0));
-    });
-
-    it('Save button click calls onSaveContent and onChangeEditable when text area value changed', async () => {
+    it('Save button click clears session storage', async () => {
       appMockRender.render(<EditableMarkdown {...defaultProps} />);
 
       fireEvent.change(await screen.findByTestId('euiMarkdownEditorTextArea'), {
         target: { value: newValue },
       });
 
-      userEvent.click(await screen.findByTestId('editable-save-markdown'));
+      act(() => {
+        jest.advanceTimersByTime(1000);
+      });
+
+      expect(sessionStorage.getItem(draftStorageKey)).toBe(newValue);
+
+      fireEvent.click(await screen.findByTestId(`editable-save-markdown`));
 
       await waitFor(() => {
         expect(onSaveContent).toHaveBeenCalledWith(newValue);
         expect(onChangeEditable).toHaveBeenCalledWith(defaultProps.id);
+        expect(sessionStorage.getItem(draftStorageKey)).toBe(null);
       });
     });
 
-    it('Does not call onSaveContent if no change from current text', async () => {
+    it('Cancel button click clears session storage', async () => {
       appMockRender.render(<EditableMarkdown {...defaultProps} />);
 
-      userEvent.click(await screen.findByTestId('editable-save-markdown'));
+      expect(sessionStorage.getItem(draftStorageKey)).toBe('');
+
+      fireEvent.change(await screen.findByTestId('euiMarkdownEditorTextArea'), {
+        target: { value: newValue },
+      });
+
+      act(() => {
+        jest.advanceTimersByTime(1000);
+      });
 
       await waitFor(() => {
-        expect(onChangeEditable).toHaveBeenCalledWith(defaultProps.id);
-      });
-      expect(onSaveContent).not.toHaveBeenCalled();
-    });
-
-    it('Cancel button click calls only onChangeEditable', async () => {
-      appMockRender.render(<EditableMarkdown {...defaultProps} />);
-
-      userEvent.click(await screen.findByTestId('editable-cancel-markdown'));
-
-      await waitFor(() => {
-        expect(onSaveContent).not.toHaveBeenCalled();
-        expect(onChangeEditable).toHaveBeenCalledWith(defaultProps.id);
-      });
-    });
-
-    describe('errors', () => {
-      it('Shows error message and save button disabled if current text is empty', async () => {
-        appMockRender.render(<EditableMarkdown {...defaultProps} />);
-
-        userEvent.clear(await screen.findByTestId('euiMarkdownEditorTextArea'));
-        userEvent.paste(await screen.findByTestId('euiMarkdownEditorTextArea'), '');
-
-        expect(await screen.findByText('Required field')).toBeInTheDocument();
-        expect(await screen.findByTestId('editable-save-markdown')).toHaveProperty('disabled');
-      });
-
-      it('Shows error message and save button disabled if current text is of empty characters', async () => {
-        appMockRender.render(<EditableMarkdown {...defaultProps} />);
-
-        userEvent.clear(await screen.findByTestId('euiMarkdownEditorTextArea'));
-        userEvent.paste(await screen.findByTestId('euiMarkdownEditorTextArea'), '  ');
-
-        expect(await screen.findByText('Required field')).toBeInTheDocument();
-        expect(await screen.findByTestId('editable-save-markdown')).toHaveProperty('disabled');
-      });
-
-      it('Shows error message and save button disabled if current text is too long', async () => {
-        const longComment = 'b'.repeat(maxLength + 1);
-
-        appMockRender.render(<EditableMarkdown {...defaultProps} />);
-
-        const markdown = await screen.findByTestId('euiMarkdownEditorTextArea');
-
-        userEvent.paste(markdown, longComment);
-
-        expect(
-          await screen.findByText(
-            `The length of the textarea is too long. The maximum length is ${maxLength} characters.`
-          )
-        ).toBeInTheDocument();
-        expect(await screen.findByTestId('editable-save-markdown')).toHaveProperty('disabled');
-      });
-    });
-
-    describe('draft comment ', () => {
-      beforeAll(() => {
-        jest.useFakeTimers();
-      });
-
-      afterEach(() => {
-        jest.clearAllTimers();
-      });
-
-      afterAll(() => {
-        jest.useRealTimers();
-        sessionStorage.removeItem(draftStorageKey);
-      });
-
-      beforeEach(() => {
-        jest.clearAllMocks();
-      });
-
-      it('Save button click clears session storage', async () => {
-        appMockRender.render(<EditableMarkdown {...defaultProps} />);
-
-        fireEvent.change(await screen.findByTestId('euiMarkdownEditorTextArea'), {
-          target: { value: newValue },
-        });
-
-        act(() => {
-          jest.advanceTimersByTime(1000);
-        });
-
         expect(sessionStorage.getItem(draftStorageKey)).toBe(newValue);
-
-        fireEvent.click(await screen.findByTestId(`editable-save-markdown`));
-
-        await waitFor(() => {
-          expect(onSaveContent).toHaveBeenCalledWith(newValue);
-          expect(onChangeEditable).toHaveBeenCalledWith(defaultProps.id);
-          expect(sessionStorage.getItem(draftStorageKey)).toBe(null);
-        });
       });
 
-      it('Cancel button click clears session storage', async () => {
+      fireEvent.click(await screen.findByTestId('editable-cancel-markdown'));
+
+      await waitFor(() => {
+        expect(sessionStorage.getItem(draftStorageKey)).toBe(null);
+      });
+    });
+
+    describe('existing storage key', () => {
+      beforeEach(() => {
+        sessionStorage.setItem(draftStorageKey, 'value set in storage');
+      });
+
+      it('should have session storage value same as draft comment', async () => {
         appMockRender.render(<EditableMarkdown {...defaultProps} />);
 
-        expect(sessionStorage.getItem(draftStorageKey)).toBe('');
-
-        fireEvent.change(await screen.findByTestId('euiMarkdownEditorTextArea'), {
-          target: { value: newValue },
-        });
-
-        act(() => {
-          jest.advanceTimersByTime(1000);
-        });
-
-        await waitFor(() => {
-          expect(sessionStorage.getItem(draftStorageKey)).toBe(newValue);
-        });
-
-        fireEvent.click(await screen.findByTestId('editable-cancel-markdown'));
-
-        await waitFor(() => {
-          expect(sessionStorage.getItem(draftStorageKey)).toBe(null);
-        });
-      });
-
-      describe('existing storage key', () => {
-        beforeEach(() => {
-          sessionStorage.setItem(draftStorageKey, 'value set in storage');
-        });
-
-        it('should have session storage value same as draft comment', async () => {
-          appMockRender.render(<EditableMarkdown {...defaultProps} />);
-
-          expect(await screen.findByText('value set in storage')).toBeInTheDocument();
-        });
+        expect(await screen.findByText('value set in storage')).toBeInTheDocument();
       });
     });
   });
-}
+});

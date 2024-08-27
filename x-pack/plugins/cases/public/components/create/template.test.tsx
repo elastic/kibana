@@ -13,79 +13,76 @@ import { createAppMockRenderer } from '../../common/mock';
 import { templatesConfigurationMock } from '../../containers/mock';
 import { TemplateSelector } from './templates';
 
-// FLAKY: https://github.com/elastic/kibana/issues/178457
-for (let i = 0; i < 50; i++) {
-  describe('CustomFields', () => {
-    let appMockRender: AppMockRenderer;
-    const onTemplateChange = jest.fn();
+describe('CustomFields', () => {
+  let appMockRender: AppMockRenderer;
+  const onTemplateChange = jest.fn();
 
-    beforeEach(() => {
-      jest.clearAllMocks();
-      appMockRender = createAppMockRenderer();
-    });
+  beforeEach(() => {
+    jest.clearAllMocks();
+    appMockRender = createAppMockRenderer();
+  });
 
-    afterEach(() => {
-      appMockRender.queryClient.getQueryCache().clear();
-    });
+  afterEach(() => {
+    appMockRender.queryClient.getQueryCache().clear();
+  });
 
-    afterEach(async () => {
-      await waitFor(() => expect(appMockRender.queryClient.isFetching()).toBe(0));
-    });
+  afterEach(async () => {
+    await waitFor(() => expect(appMockRender.queryClient.isFetching()).toBe(0));
+  });
 
-    it('renders correctly', async () => {
-      appMockRender.render(
-        <TemplateSelector
-          isLoading={false}
-          templates={templatesConfigurationMock}
-          onTemplateChange={onTemplateChange}
-        />
-      );
+  it('renders correctly', async () => {
+    appMockRender.render(
+      <TemplateSelector
+        isLoading={false}
+        templates={templatesConfigurationMock}
+        onTemplateChange={onTemplateChange}
+      />
+    );
 
-      expect(await screen.findByText('Template name')).toBeInTheDocument();
-      expect(await screen.findByTestId('create-case-template-select')).toBeInTheDocument();
-    });
+    expect(await screen.findByText('Template name')).toBeInTheDocument();
+    expect(await screen.findByTestId('create-case-template-select')).toBeInTheDocument();
+  });
 
-    it('selects a template correctly', async () => {
-      const selectedTemplate = templatesConfigurationMock[2];
+  it('selects a template correctly', async () => {
+    const selectedTemplate = templatesConfigurationMock[2];
 
-      appMockRender.render(
-        <TemplateSelector
-          isLoading={false}
-          templates={templatesConfigurationMock}
-          onTemplateChange={onTemplateChange}
-        />
-      );
+    appMockRender.render(
+      <TemplateSelector
+        isLoading={false}
+        templates={templatesConfigurationMock}
+        onTemplateChange={onTemplateChange}
+      />
+    );
 
-      userEvent.selectOptions(
-        await screen.findByTestId('create-case-template-select'),
-        selectedTemplate.key
-      );
+    userEvent.selectOptions(
+      await screen.findByTestId('create-case-template-select'),
+      selectedTemplate.key
+    );
 
-      await waitFor(() => {
-        expect(onTemplateChange).toHaveBeenCalledWith(selectedTemplate.caseFields);
-      });
-    });
-
-    it('shows the selected option correctly', async () => {
-      const selectedTemplate = templatesConfigurationMock[2];
-
-      appMockRender.render(
-        <TemplateSelector
-          isLoading={false}
-          templates={templatesConfigurationMock}
-          onTemplateChange={onTemplateChange}
-        />
-      );
-
-      userEvent.selectOptions(
-        await screen.findByTestId('create-case-template-select'),
-        selectedTemplate.key
-      );
-
-      expect(
-        (await screen.findByRole<HTMLOptionElement>('option', { name: selectedTemplate.name }))
-          .selected
-      ).toBe(true);
+    await waitFor(() => {
+      expect(onTemplateChange).toHaveBeenCalledWith(selectedTemplate.caseFields);
     });
   });
-}
+
+  it('shows the selected option correctly', async () => {
+    const selectedTemplate = templatesConfigurationMock[2];
+
+    appMockRender.render(
+      <TemplateSelector
+        isLoading={false}
+        templates={templatesConfigurationMock}
+        onTemplateChange={onTemplateChange}
+      />
+    );
+
+    userEvent.selectOptions(
+      await screen.findByTestId('create-case-template-select'),
+      selectedTemplate.key
+    );
+
+    expect(
+      (await screen.findByRole<HTMLOptionElement>('option', { name: selectedTemplate.name }))
+        .selected
+    ).toBe(true);
+  });
+});

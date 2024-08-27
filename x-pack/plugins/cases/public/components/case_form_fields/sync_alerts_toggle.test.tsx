@@ -14,80 +14,77 @@ import { FormTestComponent } from '../../common/test_utils';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 
-// Failing: See https://github.com/elastic/kibana/issues/190270
-for (let i = 0; i < 50; i++) {
-  describe('SyncAlertsToggle', () => {
-    let appMockRender: AppMockRenderer;
-    const onSubmit = jest.fn();
-    const defaultFormProps = {
-      onSubmit,
-      formDefaultValue: { syncAlerts: true },
-      schema: {
-        syncAlerts: schema.syncAlerts,
-      },
-    };
+describe('SyncAlertsToggle', () => {
+  let appMockRender: AppMockRenderer;
+  const onSubmit = jest.fn();
+  const defaultFormProps = {
+    onSubmit,
+    formDefaultValue: { syncAlerts: true },
+    schema: {
+      syncAlerts: schema.syncAlerts,
+    },
+  };
 
-    beforeEach(() => {
-      jest.clearAllMocks();
-      appMockRender = createAppMockRenderer();
-    });
+  beforeEach(() => {
+    jest.clearAllMocks();
+    appMockRender = createAppMockRenderer();
+  });
 
-    afterEach(() => {
-      appMockRender.queryClient.getQueryCache().clear();
-    });
+  afterEach(() => {
+    appMockRender.queryClient.getQueryCache().clear();
+  });
 
-    afterEach(async () => {
-      await waitFor(() => expect(appMockRender.queryClient.isFetching()).toBe(0));
-    });
+  afterEach(async () => {
+    await waitFor(() => expect(appMockRender.queryClient.isFetching()).toBe(0));
+  });
 
-    it('it renders', async () => {
-      appMockRender.render(
-        <FormTestComponent>
-          <SyncAlertsToggle isLoading={false} />
-        </FormTestComponent>
+  it('it renders', async () => {
+    appMockRender.render(
+      <FormTestComponent>
+        <SyncAlertsToggle isLoading={false} />
+      </FormTestComponent>
+    );
+
+    expect(await screen.findByTestId('caseSyncAlerts')).toBeInTheDocument();
+    expect(await screen.findByRole('switch')).toHaveAttribute('aria-checked', 'true');
+    expect(await screen.findByText('On')).toBeInTheDocument();
+  });
+
+  it('it toggles the switch', async () => {
+    appMockRender.render(
+      <FormTestComponent>
+        <SyncAlertsToggle isLoading={false} />
+      </FormTestComponent>
+    );
+
+    const synAlerts = await screen.findByTestId('caseSyncAlerts');
+
+    userEvent.click(within(synAlerts).getByRole('switch'));
+
+    expect(await screen.findByRole('switch')).toHaveAttribute('aria-checked', 'false');
+    expect(await screen.findByText('Off')).toBeInTheDocument();
+  });
+
+  it('calls onSubmit with correct data', async () => {
+    appMockRender.render(
+      <FormTestComponent {...defaultFormProps}>
+        <SyncAlertsToggle isLoading={false} />
+      </FormTestComponent>
+    );
+
+    const synAlerts = await screen.findByTestId('caseSyncAlerts');
+
+    userEvent.click(within(synAlerts).getByRole('switch'));
+
+    userEvent.click(screen.getByText('Submit'));
+
+    await waitFor(() => {
+      expect(onSubmit).toBeCalledWith(
+        {
+          syncAlerts: false,
+        },
+        true
       );
-
-      expect(await screen.findByTestId('caseSyncAlerts')).toBeInTheDocument();
-      expect(await screen.findByRole('switch')).toHaveAttribute('aria-checked', 'true');
-      expect(await screen.findByText('On')).toBeInTheDocument();
-    });
-
-    it('it toggles the switch', async () => {
-      appMockRender.render(
-        <FormTestComponent>
-          <SyncAlertsToggle isLoading={false} />
-        </FormTestComponent>
-      );
-
-      const synAlerts = await screen.findByTestId('caseSyncAlerts');
-
-      userEvent.click(within(synAlerts).getByRole('switch'));
-
-      expect(await screen.findByRole('switch')).toHaveAttribute('aria-checked', 'false');
-      expect(await screen.findByText('Off')).toBeInTheDocument();
-    });
-
-    it('calls onSubmit with correct data', async () => {
-      appMockRender.render(
-        <FormTestComponent {...defaultFormProps}>
-          <SyncAlertsToggle isLoading={false} />
-        </FormTestComponent>
-      );
-
-      const synAlerts = await screen.findByTestId('caseSyncAlerts');
-
-      userEvent.click(within(synAlerts).getByRole('switch'));
-
-      userEvent.click(screen.getByText('Submit'));
-
-      await waitFor(() => {
-        expect(onSubmit).toBeCalledWith(
-          {
-            syncAlerts: false,
-          },
-          true
-        );
-      });
     });
   });
-}
+});
