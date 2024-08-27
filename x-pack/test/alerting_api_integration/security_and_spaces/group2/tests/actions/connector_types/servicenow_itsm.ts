@@ -10,17 +10,20 @@ import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
 import getPort from 'get-port';
 import http from 'http';
+import { IValidatedEvent } from '@kbn/event-log-plugin/server';
 
 import { getHttpProxyServer } from '@kbn/alerting-api-integration-helpers';
 import { getServiceNowServer } from '@kbn/actions-simulators-plugin/server/plugin';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { MAX_ADDITIONAL_FIELDS_LENGTH } from '@kbn/stack-connectors-plugin/common/servicenow/constants';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { getEventLog } from '../../../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
 export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const configService = getService('config');
+  const retry = getService('retry');
 
   const mockServiceNowCommon = {
     params: {
@@ -708,6 +711,23 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
                 url: `${serviceNowSimulatorURL}/nav_to.do?uri=incident.do?sys_id=123`,
               },
             });
+
+            const events: IValidatedEvent[] = await retry.try(async () => {
+              return await getEventLog({
+                getService,
+                spaceId: 'default',
+                type: 'action',
+                id: simulatedActionId,
+                provider: 'actions',
+                actions: new Map([
+                  ['execute-start', { equal: 1 }],
+                  ['execute', { equal: 1 }],
+                ]),
+              });
+            });
+
+            const executeEvent = events[1];
+            expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(261);
           });
         });
 
@@ -755,6 +775,23 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
                 url: `${serviceNowSimulatorURL}/nav_to.do?uri=incident.do?sys_id=123`,
               },
             });
+
+            const events: IValidatedEvent[] = await retry.try(async () => {
+              return await getEventLog({
+                getService,
+                spaceId: 'default',
+                type: 'action',
+                id: simulatedActionId,
+                provider: 'actions',
+                actions: new Map([
+                  ['execute-start', { equal: 1 }],
+                  ['execute', { equal: 1 }],
+                ]),
+              });
+            });
+
+            const executeEvent = events[1];
+            expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(239);
           });
         });
 
@@ -803,6 +840,23 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
                 },
               ],
             });
+
+            const events: IValidatedEvent[] = await retry.try(async () => {
+              return await getEventLog({
+                getService,
+                spaceId: 'default',
+                type: 'action',
+                id: simulatedActionId,
+                provider: 'actions',
+                actions: new Map([
+                  ['execute-start', { gte: 2 }],
+                  ['execute', { gte: 2 }],
+                ]),
+              });
+            });
+
+            const executeEvent = events[3];
+            expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(0);
           });
         });
 
@@ -829,6 +883,22 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
               connector_id: simulatedActionId,
               data: {},
             });
+            const events: IValidatedEvent[] = await retry.try(async () => {
+              return await getEventLog({
+                getService,
+                spaceId: 'default',
+                type: 'action',
+                id: simulatedActionId,
+                provider: 'actions',
+                actions: new Map([
+                  ['execute-start', { gte: 3 }],
+                  ['execute', { gte: 3 }],
+                ]),
+              });
+            });
+
+            const executeEvent = events[5];
+            expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(0);
           });
         });
       });
