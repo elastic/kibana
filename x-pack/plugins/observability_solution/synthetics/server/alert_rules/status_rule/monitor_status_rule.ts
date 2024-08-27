@@ -159,7 +159,7 @@ const handleLocationBasedAlert = ({
   downThreshold: number;
   statusRule: StatusRuleExecutor;
 }) => {
-  // for location based we need to make sure ,monitor is down for the threshold for all locations
+  // for location based we need to make sure, monitor is down for the threshold for all locations
   // lets build a map of monitors for each location
   for (const [configId, configs] of downConfigsById) {
     const matchingLocations = configs.length;
