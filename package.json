@@ -1001,7 +1001,7 @@
     "@reduxjs/toolkit": "1.9.7",
     "@slack/webhook": "^7.0.1",
     "@smithy/eventstream-codec": "^3.1.1",
-    "@smithy/eventstream-serde-node": "^3.0.3",
+    "@smithy/eventstream-serde-node": "^3.0.5",
     "@smithy/protocol-http": "^4.0.2",
     "@smithy/signature-v4": "^3.1.1",
     "@smithy/types": "^3.2.0",
