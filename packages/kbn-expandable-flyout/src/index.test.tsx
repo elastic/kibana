@@ -110,4 +110,27 @@ describe('ExpandableFlyout', () => {
 
     expect(getByTestId(PREVIEW_SECTION_TEST_ID)).toBeInTheDocument();
   });
+
+  it('should not render flyout when right has value but does not matches registered panels', () => {
+    const state = {
+      byId: {
+        [id]: {
+          right: {
+            id: 'key1',
+          },
+          left: undefined,
+          preview: undefined,
+        },
+      },
+    };
+
+    const { queryByTestId } = render(
+      <TestProvider state={state}>
+        <ExpandableFlyout data-test-subj="my-test-flyout" registeredPanels={registeredPanels} />
+      </TestProvider>
+    );
+
+    expect(queryByTestId('my-test-flyout')).toBeNull();
+    expect(queryByTestId(RIGHT_SECTION_TEST_ID)).toBeNull();
+  });
 });

@@ -86,7 +86,8 @@ export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({
     showPreview,
   });
 
-  const hideFlyout = !left && !right && !preview?.length;
+  const hideFlyout = !(left && leftSection) && !(right && rightSection) && !preview?.length;
+
   if (hideFlyout) {
     return null;
   }
@@ -94,6 +95,7 @@ export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({
   return (
     <EuiFlyout
       {...flyoutProps}
+      data-panel-id={right?.id ?? ''}
       size={flyoutWidth}
       ownFocus={false}
       onClose={(e) => {

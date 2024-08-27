@@ -6,10 +6,12 @@
  */
 
 import {
-  CNVM_POLICY_TEMPLATE,
   CSPM_POLICY_TEMPLATE,
   KSPM_POLICY_TEMPLATE,
   CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN,
+} from '@kbn/cloud-security-posture-common';
+import {
+  CNVM_POLICY_TEMPLATE,
   LATEST_VULNERABILITIES_INDEX_PATTERN,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
 import { INTEGRATION_PACKAGE_NAME } from '@kbn/cloud-defend-plugin/common/constants';

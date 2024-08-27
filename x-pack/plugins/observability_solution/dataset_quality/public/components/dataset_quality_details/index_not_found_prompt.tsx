@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 const emptyPromptTitle = i18n.translate('xpack.datasetQuality.details.emptypromptTitle', {
@@ -23,7 +23,19 @@ const emptyPromptBody = (dataStream: string) =>
 
 export function DataStreamNotFoundPrompt({ dataStream }: { dataStream: string }) {
   const promptTitle = <h2>{emptyPromptTitle}</h2>;
-  const promptBody = <p>{emptyPromptBody(dataStream)}</p>;
+  const promptBody = (
+    <EuiText data-test-subj="datasetQualityDetailsEmptyPromptBody">
+      <p>{emptyPromptBody(dataStream)}</p>
+    </EuiText>
+  );
 
-  return <EuiEmptyPrompt iconType="error" color="danger" title={promptTitle} body={promptBody} />;
+  return (
+    <EuiEmptyPrompt
+      iconType="error"
+      color="danger"
+      title={promptTitle}
+      body={promptBody}
+      data-test-subj="datasetQualityDetailsEmptyPrompt"
+    />
+  );
 }

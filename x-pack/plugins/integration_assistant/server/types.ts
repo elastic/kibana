@@ -7,6 +7,12 @@
 
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { SamplesFormat } from '../common';
+import {
+  ActionsClientChatOpenAI,
+  ActionsClientBedrockChatModel,
+  ActionsClientSimpleChatModel,
+  ActionsClientGeminiChatModel,
+} from '@kbn/langchain/server';
 
 export interface IntegrationAssistantPluginSetup {
   setIsAvailable: (isAvailable: boolean) => void;
@@ -108,3 +114,9 @@ export interface RelatedState {
   results: object;
   lastExecutedChain: string;
 }
+
+export type ChatModels =
+  | ActionsClientChatOpenAI
+  | ActionsClientBedrockChatModel
+  | ActionsClientSimpleChatModel
+  | ActionsClientGeminiChatModel;

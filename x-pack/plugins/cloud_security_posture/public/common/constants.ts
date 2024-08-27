@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
 import type { CloudSecurityPolicyTemplate, PostureInput } from '../../common/types_old';
 import {
   CLOUDBEAT_EKS,
@@ -15,8 +16,6 @@ import {
   CLOUDBEAT_GCP,
   CLOUDBEAT_AZURE,
   CLOUDBEAT_VULN_MGMT_AWS,
-  KSPM_POLICY_TEMPLATE,
-  CSPM_POLICY_TEMPLATE,
   VULN_MGMT_POLICY_TEMPLATE,
   CLOUDBEAT_VULN_MGMT_GCP,
   CLOUDBEAT_VULN_MGMT_AZURE,
@@ -35,7 +34,6 @@ export const statusColors = {
 };
 
 export const CSP_MOMENT_FORMAT = 'MMMM D, YYYY @ HH:mm:ss.SSS';
-export const MAX_FINDINGS_TO_LOAD = 500;
 export const DEFAULT_VISIBLE_ROWS_PER_PAGE = 25;
 
 export const LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY = 'cloudPosture:dataTable:pageSize';

@@ -6,9 +6,9 @@
  */
 
 import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
+import { STATUS_API_CURRENT_VERSION, STATUS_ROUTE_PATH } from '@kbn/cloud-security-posture-common';
+import type { CspSetupStatus } from '@kbn/cloud-security-posture-common';
 import { useKibana } from '../hooks/use_kibana';
-import { type CspSetupStatus } from '../../../common/types_old';
-import { STATUS_API_CURRENT_VERSION, STATUS_ROUTE_PATH } from '../../../common/constants';
 
 const getCspSetupStatusQueryKey = 'csp_status_key';
 
