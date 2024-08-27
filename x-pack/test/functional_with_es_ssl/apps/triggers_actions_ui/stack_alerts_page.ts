@@ -74,7 +74,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('Loads the page with actions but not alerting privilege', () => {
+    describe('Loads the page with actions but not alerting privilege', function () {
+      this.tags('skipFIPS');
       beforeEach(async () => {
         await security.testUser.restoreDefaults();
         await security.testUser.setRoles(['only_actions_role']);

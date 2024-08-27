@@ -13,7 +13,8 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('Info', () => {
-    describe('GET /api/licensing/info', () => {
+    describe('GET /api/licensing/info', function () {
+      this.tags('skipFips');
       it('returns licensing information', async () => {
         const response = await supertest.get('/api/licensing/info').expect(200);
 
@@ -22,13 +23,10 @@ export default function ({ getService }: FtrProviderContext) {
         expect(response.body).property('signature');
       });
 
-      describe('returns a correct license type', function () {
-        this.tags('skipFips');
-        it('should return basic', async function () {
-          const response = await supertest.get('/api/licensing/info').expect(200);
+      it('should returns a correct license type `basic`', async function () {
+        const response = await supertest.get('/api/licensing/info').expect(200);
 
-          expect(response.body.license.type).to.be('basic');
-        });
+        expect(response.body.license.type).to.be('basic');
       });
     });
   });

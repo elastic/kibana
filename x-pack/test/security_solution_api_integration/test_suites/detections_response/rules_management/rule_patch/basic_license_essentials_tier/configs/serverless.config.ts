@@ -9,7 +9,6 @@ import { createTestConfig } from '../../../../../../config/serverless/config.bas
 
 export default createTestConfig({
   testFiles: [require.resolve('..')],
-  suiteTags: { exclude: ['skipFIPS'] },
   junit: {
     reportName:
       'Rules Management - Rule Patch Integration Tests - Serverless Env - Essentials Tier ',

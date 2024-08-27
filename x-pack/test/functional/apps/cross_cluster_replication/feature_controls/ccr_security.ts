@@ -61,6 +61,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       describe('"Data" section with CCR', function () {
+        this.tags('skipFIPS');
         it('should render', async () => {
           await PageObjects.common.navigateToApp('management');
           const sections = await managementMenu.getSections();

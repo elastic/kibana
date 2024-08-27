@@ -6,14 +6,8 @@
  */
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
-export default function ({ loadTestFile }: FtrProviderContext) {
+export default function ({ loadTestFile, getService }: FtrProviderContext) {
   describe('Detection Engine - Exception workflows APIs', function () {
-    const config = getService('config');
-    const basic = config.get('esTestCluster.license') === 'basic';
-    if (basic) {
-      this.tags('skipFIPS');
-    }
-
     loadTestFile(require.resolve('./exception_comments_ess'));
     loadTestFile(require.resolve('./exception_comments_serverless'));
     loadTestFile(require.resolve('./create_endpoint_exceptions'));

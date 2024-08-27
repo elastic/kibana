@@ -61,15 +61,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(links.map((link) => link.text)).to.contain('Stack Management');
       });
 
-      it('should render the "Ingest" section with ingest pipelines', async () => {
-        await PageObjects.common.navigateToApp('management');
-        const sections = await managementMenu.getSections();
-        // We gave the ingest pipelines user access to advanced settings to allow them to use ingest pipelines.
-        // See https://github.com/elastic/kibana/pull/102409/
-        expect(sections).to.have.length(2);
-        expect(sections[0]).to.eql({
-          sectionId: 'ingest',
-          sectionLinks: ['ingest_pipelines'],
+      describe('"Ingest" section with ingest pipelines', function () {
+        this.tags('skipFIPS');
+        it('should render', async () => {
+          await PageObjects.common.navigateToApp('management');
+          const sections = await managementMenu.getSections();
+          // We gave the ingest pipelines user access to advanced settings to allow them to use ingest pipelines.
+          // See https://github.com/elastic/kibana/pull/102409/
+          expect(sections).to.have.length(2);
+          expect(sections[0]).to.eql({
+            sectionId: 'ingest',
+            sectionLinks: ['ingest_pipelines'],
+          });
         });
       });
     });

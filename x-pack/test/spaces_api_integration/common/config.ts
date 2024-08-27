@@ -32,13 +32,8 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       },
     };
 
-    let resultTestFiles = testFiles ?? [require.resolve(`../${name}/apis/`)];
-    if (process.env.FTR_ENABLE_FIPS_AGENT?.toLowerCase() === 'true' && license === 'basic') {
-      resultTestFiles = [];
-    }
-
     return {
-      testFiles: resultTestFiles,
+      testFiles: testFiles ?? [require.resolve(`../${name}/apis/`)],
       servers: config.xpack.api.get('servers'),
       services: {
         es: config.kibana.api.get('services.es'),
