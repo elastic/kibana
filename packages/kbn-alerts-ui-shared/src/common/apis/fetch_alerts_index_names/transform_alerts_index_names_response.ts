@@ -8,7 +8,7 @@
 
 import { AsApiContract, RewriteRequestCase } from '@kbn/actions-types';
 
-interface AlertsIndexNamesResponse {
+export interface AlertsIndexNamesResponse {
   indexName: string[];
   hasReadIndexPrivilege: boolean;
 }
