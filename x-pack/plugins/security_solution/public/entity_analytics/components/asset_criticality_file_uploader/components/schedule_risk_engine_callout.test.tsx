@@ -55,7 +55,7 @@ describe('ScheduleRiskEngineCallout', () => {
       wrapper: TestProviders,
     });
 
-    expect(getByText('Next engine is schedule to run in:')).toBeInTheDocument();
+    expect(getByText('The next scheduled engine run is in:')).toBeInTheDocument();
     await waitFor(() => {
       expect(getByText('an hour')).toBeInTheDocument();
     });
@@ -146,7 +146,7 @@ describe('ScheduleRiskEngineCallout', () => {
   it('should not show the callout if the risk engine is not installed', () => {
     mockUseRiskEngineStatus.mockReturnValue({
       data: {
-        isNewRiskScoreModuleInstalled: true,
+        isNewRiskScoreModuleInstalled: false,
       },
     });
 

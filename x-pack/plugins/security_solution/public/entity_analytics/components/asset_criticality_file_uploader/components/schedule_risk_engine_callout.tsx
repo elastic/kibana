@@ -19,15 +19,13 @@ import { i18n } from '@kbn/i18n';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { formatTimeFromNow } from '../helpers';
 import { useScheduleNowRiskEngineMutation } from '../../../api/hooks/use_schedule_now_risk_engine_mutation';
-import {
-  useInvalidateRiskEngineStatusQuery,
-  useRiskEngineStatus,
-} from '../../../api/hooks/use_risk_engine_status';
+import { useRiskEngineStatus } from '../../../api/hooks/use_risk_engine_status';
 
 const TEN_SECONDS = 10000;
 
 export const ScheduleRiskEngineCallout: React.FC = () => {
-  const { data: riskEngineStatus, isLoading: isRiskEngineStatusLoading } = useRiskEngineStatus();
+  const { data: riskEngineStatus, isLoading: isRiskEngineStatusLoading } =
+    useRiskEngineStatus(TEN_SECONDS);
   const { addSuccess, addError } = useAppToasts();
   const { isLoading: isLoadingRiskEngineSchedule, mutate: scheduleRiskEngineMutation } =
     useScheduleNowRiskEngineMutation({
@@ -51,7 +49,6 @@ export const ScheduleRiskEngineCallout: React.FC = () => {
         }),
     });
   const [nextScheduleRun, setNextScheduleRun] = useState<string | undefined>();
-  const invalidateRiskEngineStatusQuery = useInvalidateRiskEngineStatusQuery();
   const { status, runAt } = riskEngineStatus?.risk_engine_task_status || {};
 
   const isRunning = useMemo(
@@ -59,27 +56,28 @@ export const ScheduleRiskEngineCallout: React.FC = () => {
     [runAt, status]
   );
 
-  const updateCountDownText = useCallback(() => {
-    if (isRunning) {
-      setNextScheduleRun('Now running');
-    } else {
-      setNextScheduleRun(formatTimeFromNow(riskEngineStatus?.risk_engine_task_status?.runAt));
-    }
-  }, [isRunning, riskEngineStatus?.risk_engine_task_status?.runAt]);
+  const getCountDownText = useCallback(
+    () =>
+      isRunning
+        ? i18n.translate(
+            'xpack.securitySolution.entityAnalytics.assetCriticalityResultStep.riskEngine.nowRunningMessage',
+            {
+              defaultMessage: 'Now running',
+            }
+          )
+        : formatTimeFromNow(riskEngineStatus?.risk_engine_task_status?.runAt),
+    [isRunning, riskEngineStatus?.risk_engine_task_status?.runAt]
+  );
 
   useEffect(() => {
-    updateCountDownText();
-    const intervalId = setInterval(() => {
-      updateCountDownText();
+    setNextScheduleRun(getCountDownText());
 
-      if (isRunning) {
-        // Periodically polls the risk engine status when the engine is running
-        invalidateRiskEngineStatusQuery();
-      }
+    const intervalId = setInterval(() => {
+      setNextScheduleRun(getCountDownText());
     }, TEN_SECONDS);
 
     return () => clearInterval(intervalId);
-  }, [invalidateRiskEngineStatusQuery, isRunning, updateCountDownText]);
+  }, [getCountDownText]);
 
   const scheduleRiskEngine = useCallback(() => {
     scheduleRiskEngineMutation();

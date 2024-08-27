@@ -36,32 +36,36 @@ export const useIsNewRiskScoreModuleInstalled = (): RiskScoreModuleStatus => {
   return { isLoading: false, installed: !!riskEngineStatus?.isNewRiskScoreModuleInstalled };
 };
 
-export const useRiskEngineStatus = () => {
+export const useRiskEngineStatus = (refetchInterval?: number) => {
   const isNewRiskScoreModuleAvailable = useIsExperimentalFeatureEnabled('riskScoringRoutesEnabled');
   const { fetchRiskEngineStatus } = useEntityAnalyticsRoutes();
-  return useQuery(FETCH_RISK_ENGINE_STATUS, async ({ signal }) => {
-    if (!isNewRiskScoreModuleAvailable) {
+  return useQuery(
+    FETCH_RISK_ENGINE_STATUS,
+    async ({ signal }) => {
+      if (!isNewRiskScoreModuleAvailable) {
+        return {
+          isUpdateAvailable: false,
+          isNewRiskScoreModuleInstalled: false,
+          isNewRiskScoreModuleAvailable,
+          risk_engine_status: null,
+          legacy_risk_engine_status: null,
+          is_max_amount_of_risk_engines_reached: false,
+          risk_engine_task_status: null,
+        };
+      }
+      const response = await fetchRiskEngineStatus({ signal });
+      const isUpdateAvailable =
+        response?.legacy_risk_engine_status === RiskEngineStatusEnum.ENABLED &&
+        response.risk_engine_status === RiskEngineStatusEnum.NOT_INSTALLED;
+      const isNewRiskScoreModuleInstalled =
+        response.risk_engine_status !== RiskEngineStatusEnum.NOT_INSTALLED;
       return {
-        isUpdateAvailable: false,
-        isNewRiskScoreModuleInstalled: false,
+        isUpdateAvailable,
+        isNewRiskScoreModuleInstalled,
         isNewRiskScoreModuleAvailable,
-        risk_engine_status: null,
-        legacy_risk_engine_status: null,
-        is_max_amount_of_risk_engines_reached: false,
-        risk_engine_task_status: null,
+        ...response,
       };
-    }
-    const response = await fetchRiskEngineStatus({ signal });
-    const isUpdateAvailable =
-      response?.legacy_risk_engine_status === RiskEngineStatusEnum.ENABLED &&
-      response.risk_engine_status === RiskEngineStatusEnum.NOT_INSTALLED;
-    const isNewRiskScoreModuleInstalled =
-      response.risk_engine_status !== RiskEngineStatusEnum.NOT_INSTALLED;
-    return {
-      isUpdateAvailable,
-      isNewRiskScoreModuleInstalled,
-      isNewRiskScoreModuleAvailable,
-      ...response,
-    };
-  });
+    },
+    { refetchInterval }
+  );
 };
