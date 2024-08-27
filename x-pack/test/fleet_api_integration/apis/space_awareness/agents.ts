@@ -29,7 +29,7 @@ export default function (providerContext: FtrProviderContext) {
   const esClient = getService('es');
   const kibanaServer = getService('kibanaServer');
 
-  describe('agents TMPDEBUGME', async function () {
+  describe('agents', async function () {
     skipIfNoDockerRegistry(providerContext);
     const apiClient = new SpaceTestApiClient(supertest);
 
@@ -177,8 +177,6 @@ export default function (providerContext: FtrProviderContext) {
           TEST_SPACE_1
         );
         await apiClient.deleteAgent(testSpaceDeleteAgent, TEST_SPACE_1);
-        // TODO: apiClient.deleteAgent does not remove the document?
-        // Without this, the calls to cleanFleetAgent in beforeEach hooks cause 409 version conflict errors.
         await esClient.delete({
           index: AGENTS_INDEX,
           id: testSpaceDeleteAgent,
