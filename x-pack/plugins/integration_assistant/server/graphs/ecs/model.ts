@@ -9,15 +9,16 @@ import { ECS_EXAMPLE_ANSWER, ECS_FIELDS } from './constants';
 import { createPipeline } from './pipeline';
 import { mergeAndChunkSamples } from './chunk';
 import type { EcsMappingState } from '../../types';
+import type { EcsBaseNodeParams } from './types';
 
-export function modelSubOutput(state: EcsMappingState): Partial<EcsMappingState> {
+export function modelSubOutput({ state }: EcsBaseNodeParams): Partial<EcsMappingState> {
   return {
     lastExecutedChain: 'ModelSubOutput',
     finalMapping: state.currentMapping,
   };
 }
 
-export function modelInput(state: EcsMappingState): Partial<EcsMappingState> {
+export function modelInput({ state }: EcsBaseNodeParams): Partial<EcsMappingState> {
   const prefixedSamples = prefixSamples(state);
   const sampleChunks = mergeAndChunkSamples(prefixedSamples, state.chunkSize);
   return {
@@ -30,7 +31,7 @@ export function modelInput(state: EcsMappingState): Partial<EcsMappingState> {
   };
 }
 
-export function modelOutput(state: EcsMappingState): Partial<EcsMappingState> {
+export function modelOutput({ state }: EcsBaseNodeParams): Partial<EcsMappingState> {
   const currentPipeline = createPipeline(state);
   return {
     finalized: true,
