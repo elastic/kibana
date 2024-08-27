@@ -113,7 +113,9 @@ export const setupOptionsListSuggestionsRoute = (
     const validationBuilder = getValidationAggregationBuilder();
 
     const suggestionAggregation: any = suggestionBuilder.buildAggregation(request) ?? {};
-    const validationAggregation: any = validationBuilder.buildAggregation(request);
+    const validationAggregation: any = ignoreValidations
+      ? {}
+      : validationBuilder.buildAggregation(request);
 
     const body: SearchRequest['body'] = {
       size: 0,
@@ -142,17 +144,14 @@ export const setupOptionsListSuggestionsRoute = (
      */
     const results = suggestionBuilder.parse(rawEsResult, request);
     const totalCardinality = results.totalCardinality;
-    const invalidSelections = validationBuilder.parse(rawEsResult, request);
+    const invalidSelections = ignoreValidations
+      ? []
+      : validationBuilder.parse(rawEsResult, request);
 
     return {
-      suggestions: ignoreValidations
-        ? [
-            ...results.suggestions,
-            ...invalidSelections.map((selection) => ({ value: selection, docCount: 0 })),
-          ]
-        : results.suggestions,
+      suggestions: results.suggestions,
       totalCardinality,
-      invalidSelections: ignoreValidations ? [] : invalidSelections,
+      invalidSelections,
     };
   };
 };
