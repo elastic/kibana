@@ -305,10 +305,9 @@ export class DashboardPanelActionsService extends FtrService {
 
     if (!exists) {
       await this.openContextMenu(panelWrapper);
-      await this.testSubjects.existOrFail(testSubject);
+      await this.testSubjects.existOrFail(testSubject, { allowHidden: true });
       await this.toggleContextMenu(panelWrapper);
     }
-    await this.toggleContextMenu(panelWrapper);
   }
 
   async expectExistsRemovePanelAction(title = '') {
@@ -337,9 +336,17 @@ export class DashboardPanelActionsService extends FtrService {
 
   async expectMissingPanelAction(testSubject: string, title = '') {
     this.log.debug('expectMissingPanelAction', testSubject, title);
-    await this.openContextMenuByTitle(title);
-    await this.testSubjects.missingOrFail(testSubject);
-    await this.toggleContextMenuByTitle(title);
+    const panelWrapper = title ? await this.getPanelHoverActions(title) : undefined;
+
+    const exists = panelWrapper
+      ? await this.testSubjects.descendantExists(testSubject, panelWrapper)
+      : await this.testSubjects.exists(testSubject, { allowHidden: true });
+
+    if (!exists) {
+      await this.openContextMenu(panelWrapper);
+      await this.testSubjects.missingOrFail(testSubject, { allowHidden: true });
+      await this.toggleContextMenu(panelWrapper);
+    }
   }
 
   async expectMissingEditPanelAction(title = '') {
