@@ -7,8 +7,13 @@
 
 import { useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
-import type { LinkDescriptor } from '@kbn/observability-shared-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
+import { RouterLinkProps, getRouterLinkProps } from '@kbn/router-utils/src/get_router_link_props';
+import { Search } from 'history';
+import {
+  type AssetDetailsLocatorParams,
+  ASSET_DETAILS_LOCATOR_ID,
+} from '@kbn/observability-shared-plugin/common';
 import type { InventoryItemType } from '../../../common/inventory_models/types';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 
@@ -18,15 +23,24 @@ interface QueryParams {
   assetName?: string;
 }
 
+export interface RouteState {
+  originAppId: string;
+  originPathname: string;
+  originSearch?: Search;
+}
+
 export const useNodeDetailsRedirect = () => {
   const location = useLocation();
   const {
     services: {
       application: { currentAppId$ },
+      share,
     },
   } = useKibanaContextForPlugin();
 
   const appId = useObservable(currentAppId$);
+  const locator = share?.url.locators.get<AssetDetailsLocatorParams>(ASSET_DETAILS_LOCATOR_ID);
+
   const getNodeDetailUrl = useCallback(
     ({
       nodeType,
@@ -36,34 +50,54 @@ export const useNodeDetailsRedirect = () => {
       nodeType: InventoryItemType;
       nodeId: string;
       search: QueryParams;
-    }): LinkDescriptor => {
+    }): RouterLinkProps => {
       const { to, from, ...rest } = search;
-
-      return {
-        app: 'metrics',
-        pathname: `link-to/${nodeType}-detail/${nodeId}`,
-        search: {
-          ...rest,
-          ...(to && from
+      const queryParams = {
+        nodeDetails:
+          Object.keys(rest).length > 0
             ? {
-                to: `${to}`,
-                from: `${from}`,
+                ...rest,
+                dateRange: {
+                  from: from ? new Date(from).toISOString() : undefined,
+                  to: to ? new Date(to).toISOString() : undefined,
+                },
               }
-            : undefined),
-          // While we don't have a shared state between all page in infra, this makes it possible to restore a page state when returning to the previous route
-          ...(location.search || location.pathname
-            ? {
-                state: JSON.stringify({
-                  originAppId: appId,
-                  originSearch: location.search,
-                  originPathname: location.pathname,
-                }),
-              }
-            : undefined),
+            : {},
+        _a: {
+          time: {
+            ...(from ? { from: new Date(from).toISOString() } : undefined),
+            ...(to ? { to: new Date(to).toISOString() } : undefined),
+            interval: '>=1m',
+          },
         },
       };
+
+      const nodeDetailsLocatorParams = {
+        ...queryParams,
+        assetType: nodeType,
+        assetId: nodeId,
+        state: {
+          ...(location.state ?? {}),
+          ...(location.key
+            ? ({
+                originAppId: appId,
+                originSearch: location.search,
+                originPathname: location.pathname,
+              } as RouteState)
+            : {}),
+        },
+      };
+
+      const nodeDetailsLinkProps = getRouterLinkProps({
+        href: locator?.getRedirectUrl(nodeDetailsLocatorParams),
+        onClick: () => {
+          locator?.navigate(nodeDetailsLocatorParams, { replace: false });
+        },
+      });
+
+      return nodeDetailsLinkProps;
     },
-    [location.pathname, appId, location.search]
+    [appId, location.key, location.pathname, location.search, location.state, locator]
   );
 
   return { getNodeDetailUrl };

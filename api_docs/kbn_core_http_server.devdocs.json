@@ -4571,6 +4571,14 @@
                 "path": "x-pack/plugins/rollup/server/routes/api/jobs/register_get_route.ts"
               },
               {
+                "plugin": "searchIndices",
+                "path": "x-pack/plugins/search_indices/server/routes/status.ts"
+              },
+              {
+                "plugin": "searchIndices",
+                "path": "x-pack/plugins/search_indices/server/routes/status.ts"
+              },
+              {
                 "plugin": "searchInferenceEndpoints",
                 "path": "x-pack/plugins/search_inference_endpoints/server/routes.ts"
               },
