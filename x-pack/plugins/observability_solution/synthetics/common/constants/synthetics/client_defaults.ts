@@ -16,7 +16,7 @@ export const CLIENT_DEFAULTS_SYNTHETICS = {
   DATE_RANGE_END: 'now',
 
   /**
-   * The application auto refreshes every 30s by default.
+   * The application auto refreshes every 60s by default.
    */
   AUTOREFRESH_INTERVAL_SECONDS: 60,
   /**
