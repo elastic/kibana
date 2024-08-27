@@ -85,7 +85,6 @@ import { xyDimension as xyDimensionExpressionFunction } from '../common/expressi
 import { visDimension as visDimensionExpressionFunction } from '../common/expression_functions/vis_dimension';
 import { range as rangeExpressionFunction } from '../common/expression_functions/range';
 import { TypesService } from './vis_types/types_service';
-import { createVisEmbeddableFromObject } from './embeddable';
 import {
   setUISettings,
   setTypes,
@@ -309,6 +308,7 @@ export class VisualizationsPlugin
          * this should be replaced to use only scoped history after moving legacy apps to browser routing
          */
         const history = createHashHistory();
+        const { createVisEmbeddableFromObject } = await import('./embeddable');
         const services: VisualizeServices = {
           ...coreStart,
           history,
@@ -333,6 +333,7 @@ export class VisualizationsPlugin
           embeddable: pluginsStart.embeddable,
           stateTransferService: pluginsStart.embeddable.getStateTransfer(),
           setActiveUrl,
+          /** @deprecated */
           createVisEmbeddableFromObject: createVisEmbeddableFromObject({ start }),
           scopedHistory: params.history,
           restorePreviousUrl,
