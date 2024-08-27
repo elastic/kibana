@@ -3,6 +3,9 @@
     "value": {
       "index": "ecs_non_compliant",
       "mappings": {
+        "_source": {
+          "mode": "synthetic"
+        },
         "properties": {
           "id": {
             "type": "keyword"

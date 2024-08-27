@@ -3,6 +3,9 @@
     "value": {
       "index": "new_terms",
       "mappings": {
+        "_source": {
+          "mode": "synthetic"
+        },
         "properties": {
           "id": {
             "type": "keyword"

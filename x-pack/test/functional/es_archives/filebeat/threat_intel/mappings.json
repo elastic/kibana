@@ -4,6 +4,9 @@
     "aliases": {},
     "index": "filebeat-8.0.0-2021.01.26-000001",
     "mappings": {
+      "_source": {
+        "mode": "synthetic"
+      },
       "_meta": {
         "beat": "filebeat",
         "version": "7.0.0"

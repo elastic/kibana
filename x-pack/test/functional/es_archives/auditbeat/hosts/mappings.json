@@ -8,6 +8,9 @@
     },
     "index": "auditbeat-8.0.0-2019.02.19-000001",
     "mappings": {
+      "_source": {
+        "mode": "synthetic"
+      },
       "_meta": {
         "beat": "auditbeat",
         "version": "8.0.0"

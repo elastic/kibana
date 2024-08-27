@@ -12,6 +12,9 @@
         "beat": "auditbeat",
         "version": "8.0.0"
       },
+      "_source": {
+        "mode": "synthetic"
+      },
       "date_detection": false,
       "dynamic_templates": [
         {
