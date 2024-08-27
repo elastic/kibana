@@ -12,7 +12,7 @@ import type { BaseCspSetupStatus, CspStatusCode } from '@kbn/cloud-security-post
 import { render, screen } from '@testing-library/react';
 import { TestProvider } from '../../test/test_provider';
 import { ComplianceDashboard, getDefaultTab } from '.';
-import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
+import { useCspSetupStatusApi } from '@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api';
 import { useLicenseManagementLocatorApi } from '../../common/api/use_license_management_locator_api';
 import { useKspmStatsApi, useCspmStatsApi } from '../../common/api/use_stats_api';
 import {
@@ -36,7 +36,7 @@ import { ComplianceDashboardDataV2 } from '../../../common/types_old';
 import { cloudPosturePages } from '../../common/navigation/constants';
 import { MemoryRouter } from 'react-router-dom';
 
-jest.mock('../../common/api/use_setup_status_api');
+jest.mock('@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api');
 jest.mock('../../common/api/use_stats_api');
 jest.mock('../../common/api/use_license_management_locator_api');
 jest.mock('../../common/hooks/use_is_subscription_status_valid');

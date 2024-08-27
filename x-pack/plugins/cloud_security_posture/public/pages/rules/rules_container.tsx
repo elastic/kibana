@@ -13,9 +13,9 @@ import type {
   PageUrlParams,
   RuleStateAttributes,
 } from '@kbn/cloud-security-posture-common/schema/rules/latest';
+import { extractErrorMessage } from '@kbn/cloud-security-posture-common';
 import { benchmarksNavigation } from '../../common/navigation/constants';
 import { buildRuleKey } from '../../../common/utils/rules_states';
-import { extractErrorMessage } from '../../../common/utils/helpers';
 import { RulesTable } from './rules_table';
 import { RulesTableHeader } from './rules_table_header';
 import { useFindCspBenchmarkRule, type RulesQuery } from './use_csp_benchmark_rules';

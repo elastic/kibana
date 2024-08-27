@@ -18,6 +18,7 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import { EsHitRecord } from '@kbn/discover-utils/types';
 import { MAX_FINDINGS_TO_LOAD } from '@kbn/cloud-security-posture-common';
 import { FindingsBaseEsQuery } from '@kbn/cloud-security-posture';
+import { showErrorToast } from '@kbn/cloud-security-posture-common';
 import { VULNERABILITY_FIELDS } from '../../../common/constants';
 import { CspVulnerabilityFinding } from '../../../../common/schemas';
 import {
@@ -25,7 +26,6 @@ import {
   LATEST_VULNERABILITIES_RETENTION_POLICY,
 } from '../../../../common/constants';
 import { useKibana } from '../../../common/hooks/use_kibana';
-import { showErrorToast } from '../../../common/utils/show_error_toast';
 import { getCaseInsensitiveSortScript } from '../utils/custom_sort_script';
 type LatestFindingsRequest = IKibanaSearchRequest<SearchRequest>;
 type LatestFindingsResponse = IKibanaSearchResponse<
