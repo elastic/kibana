@@ -49,12 +49,10 @@ export const createMetricsFn = (): TimeseriesExpressionFunctionDefinition => ({
     params: {
       types: ['string'],
       default: '"{}"',
-      help: '',
     },
     uiState: {
       types: ['string'],
       default: '"{}"',
-      help: '',
     },
   },
   async fn(

@@ -67,7 +67,7 @@ export function savedLens(): ExpressionFunctionDefinition<
       },
       palette: {
         types: ['palette'],
-        help: argHelp.palette!,
+        help: argHelp.palette,
         required: false,
       },
     },

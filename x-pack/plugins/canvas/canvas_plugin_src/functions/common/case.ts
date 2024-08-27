@@ -33,16 +33,16 @@ export function caseFn(): ExpressionFunctionDefinition<'case', any, Arguments, O
       when: {
         aliases: ['_'],
         resolve: false,
-        help: argHelp.when!,
+        help: argHelp.when,
       },
       if: {
         types: ['boolean'],
-        help: argHelp.if!,
+        help: argHelp.if,
       },
       then: {
         resolve: false,
         required: true,
-        help: argHelp.then!,
+        help: argHelp.then,
       },
     },
     fn(input, { if: condition, then, when }) {

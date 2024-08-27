@@ -91,7 +91,6 @@ export const getDatatableRenderer = (dependencies: {
   displayName: i18n.translate('xpack.lens.datatable.visualizationName', {
     defaultMessage: 'Datatable',
   }),
-  help: '',
   validate: () => undefined,
   reuseDomNode: true,
   render: async (

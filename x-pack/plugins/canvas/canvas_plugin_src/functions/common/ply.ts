@@ -30,7 +30,7 @@ export function ply(): ExpressionFunctionDefinition<'ply', Datatable, Arguments,
     args: {
       by: {
         types: ['string'],
-        help: argHelp.by!,
+        help: argHelp.by,
         multi: true,
       },
       expression: {

@@ -84,12 +84,10 @@ export const createTableVisFn = (): TableExpressionFunctionDefinition => ({
     },
     showPartialRows: {
       types: ['boolean'],
-      help: '',
       default: false,
     },
     showMetricsAtAllLevels: {
       types: ['boolean'],
-      help: '',
       default: false,
     },
     showToolbar: {
@@ -121,7 +119,6 @@ export const createTableVisFn = (): TableExpressionFunctionDefinition => ({
     },
     autoFitRowToContent: {
       types: ['boolean'],
-      help: '',
       default: false,
     },
   },

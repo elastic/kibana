@@ -411,7 +411,6 @@ describe('Execution', () => {
         const observable: ExpressionFunctionDefinition<'observable', unknown, {}, unknown> = {
           name: 'observable',
           args: {},
-          help: '',
           fn: () => arg,
         };
         const executor = createUnitTestExecutor();
@@ -439,13 +438,11 @@ describe('Execution', () => {
         executor.registerFunction({
           name: 'observable',
           args: {},
-          help: '',
           fn: () => arg,
         });
         executor.registerFunction({
           name: 'spy',
           args: {},
-          help: '',
           fn: (input) => spyFn(input),
         });
 
@@ -475,7 +472,6 @@ describe('Execution', () => {
         executor.registerFunction({
           name: 'observable',
           args: {},
-          help: '',
           fn: () => observable,
         });
 
@@ -541,7 +537,6 @@ describe('Execution', () => {
       const spy: ExpressionFunctionDefinition<'spy', unknown, {}, unknown> = {
         name: 'spy',
         args: {},
-        help: '',
         fn: jest.fn(),
       };
       const executor = createUnitTestExecutor();
@@ -571,19 +566,16 @@ describe('Execution', () => {
         executor.registerFunction({
           name: 'observable',
           args: {},
-          help: '',
           fn: () => observable$,
         });
         executor.registerFunction({
           name: 'flaky',
           args: {},
-          help: '',
           fn: (value) => flakyFn(value),
         });
         executor.registerFunction({
           name: 'spy',
           args: {},
-          help: '',
           fn: (value) => spyFn(value),
         });
 
@@ -692,7 +684,6 @@ describe('Execution', () => {
       const observable = {
         name: 'observable',
         args: {},
-        help: '',
         fn: () => of(1),
       };
       const executor = createUnitTestExecutor();
@@ -715,7 +706,6 @@ describe('Execution', () => {
         const observable = {
           name: 'observable',
           args: {},
-          help: '',
           fn: () => arg,
         };
         const executor = createUnitTestExecutor();
@@ -739,13 +729,11 @@ describe('Execution', () => {
         const observable1 = {
           name: 'observable1',
           args: {},
-          help: '',
           fn: () => arg1,
         };
         const observable2 = {
           name: 'observable2',
           args: {},
-          help: '',
           fn: () => arg2,
         };
         const max: ExpressionFunctionDefinition<
@@ -756,10 +744,9 @@ describe('Execution', () => {
         > = {
           name: 'max',
           args: {
-            val1: { help: '', types: ['number'] },
-            val2: { help: '', types: ['number'] },
+            val1: { types: ['number'] },
+            val2: { types: ['number'] },
           },
-          help: '',
           fn: (input, { val1, val2 }) => ({ type: 'num', value: Math.max(val1, val2) }),
         };
         const executor = createUnitTestExecutor();
@@ -790,7 +777,6 @@ describe('Execution', () => {
         const observable = {
           name: 'observable',
           args: {},
-          help: '',
           fn: () => arg,
         };
         const executor = createUnitTestExecutor();
@@ -833,24 +819,20 @@ describe('Execution', () => {
         executor.registerFunction({
           name: 'observable',
           args: {},
-          help: '',
           fn: () => observable$,
         });
         executor.registerFunction({
           name: 'flaky',
           args: {},
-          help: '',
           fn: (value) => flakyFn(value),
         });
         executor.registerFunction({
           name: 'spy',
           args: {
             arg: {
-              help: '',
               types: ['number'],
             },
           },
-          help: '',
           fn: (input, args) => spyFn(input, args),
         });
 
@@ -898,18 +880,15 @@ describe('Execution', () => {
         executor.registerFunction({
           name: 'observable',
           args: {},
-          help: '',
           fn: () => observable$,
         });
         executor.registerFunction({
           name: 'spy',
           args: {
             arg: {
-              help: '',
               types: ['number'],
             },
           },
-          help: '',
           fn: (input, args) => spyFn(input, args),
         });
 
@@ -938,11 +917,9 @@ describe('Execution', () => {
         name: 'requiredArg',
         args: {
           arg: {
-            help: '',
             required: true,
           },
         },
-        help: '',
         fn: jest.fn(),
       };
       const executor = createUnitTestExecutor();
@@ -982,13 +959,11 @@ describe('Execution', () => {
         name: 'validateArg',
         args: {
           arg: {
-            help: '',
             multi: true,
             options: ['valid'],
             strict: true,
           },
         },
-        help: '',
         fn: () => 'something',
       };
       executor = createUnitTestExecutor();
@@ -1039,12 +1014,10 @@ describe('Execution', () => {
         name: 'incorrectArg',
         args: {
           arg: {
-            help: '',
             required: true,
             types: ['something'],
           },
         },
-        help: '',
         fn: jest.fn(),
       };
       const executor = createUnitTestExecutor();
@@ -1224,7 +1197,6 @@ describe('Execution', () => {
       executor.registerFunction({
         name: 'throws',
         args: {},
-        help: '',
         fn: () => {
           throw new Error('foo');
         },

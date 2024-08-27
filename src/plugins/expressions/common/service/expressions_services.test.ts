@@ -89,7 +89,6 @@ describe('ExpressionsService', () => {
       service.registerFunction({
         name: '__test__',
         args: {},
-        help: '',
         fn: () => {},
       });
 
@@ -106,7 +105,6 @@ describe('ExpressionsService', () => {
       forkSetup.registerFunction({
         name: '__test__',
         args: {},
-        help: '',
         fn: () => {},
       });
 
@@ -126,7 +124,6 @@ describe('ExpressionsService', () => {
       service.registerFunction({
         name: '__test__',
         args: {},
-        help: '',
         fn: () => {
           return '123';
         },

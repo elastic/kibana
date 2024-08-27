@@ -35,11 +35,11 @@ export function ifFn(): ExpressionFunctionDefinition<
       },
       then: {
         resolve: false,
-        help: argHelp.then!,
+        help: argHelp?.then,
       },
       else: {
         resolve: false,
-        help: argHelp.else!,
+        help: argHelp?.else,
       },
     },
     fn(input, args) {

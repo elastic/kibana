@@ -99,7 +99,7 @@ export interface ExpressionsServiceSetup {
    *       types: ['number'],
    *     },
    *   },
-   *   help: '',
+   *   help: 'Sleep for given time interval',
    *   fn: async (input, args, context) => {
    *     await new Promise(r => setTimeout(r, args.time));
    *     return input;

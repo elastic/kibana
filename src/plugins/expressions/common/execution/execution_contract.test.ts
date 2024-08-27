@@ -135,7 +135,6 @@ describe('ExecutionContract', () => {
       const observable: ExpressionFunctionDefinition<'observable', unknown, {}, unknown> = {
         name: 'observable',
         args: {},
-        help: '',
         fn: () => arg,
       };
       const executor = createUnitTestExecutor();

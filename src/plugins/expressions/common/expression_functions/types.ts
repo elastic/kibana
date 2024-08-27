@@ -74,7 +74,7 @@ export interface ExpressionFunctionDefinition<
    * Specification of arguments that function supports. This list will also be
    * used for autocomplete functionality when your function is being edited.
    */
-  args: { [key in keyof Arguments]: ArgumentType<Arguments[key]> };
+  args: { [key in keyof Arguments]-?: ArgumentType<Arguments[key]> };
 
   /**
    * @todo What is this?
@@ -85,7 +85,7 @@ export interface ExpressionFunctionDefinition<
    * Help text displayed in the Expression editor. This text should be
    * internationalized.
    */
-  help: string;
+  help?: string;
 
   /**
    * The actual implementation of the function.
@@ -113,12 +113,12 @@ export interface ExpressionFunctionDefinition<
  * Type to capture every possible expression function definition.
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-export type AnyExpressionFunctionDefinition = ExpressionFunctionDefinition<
-  string,
-  any,
-  Record<string, any>,
-  any
->;
+export type AnyExpressionFunctionDefinition = Omit<
+  ExpressionFunctionDefinition<string, any, Record<string, any>, any>,
+  'args'
+> & {
+  args: Record<string, any>; // cannot satisfy generic args for multi. TS cannot decern any[] from any in `T extends (infer U)[]`
+};
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
 /**

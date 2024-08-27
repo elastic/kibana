@@ -23,32 +23,33 @@ export type ArgumentType<T> =
  * Map the type within the the generic array to a string-based
  * representation of the type.
  */
-// prettier-ignore
-type ArrayTypeToArgumentString<T> =
-  T extends Array<infer ElementType> ? TypeString<ElementType> :
-  T extends null ? 'null' :
-  never;
+type ArrayTypeToArgumentString<T> = T extends Array<infer ElementType>
+  ? TypeString<ElementType>
+  : T extends null
+  ? 'null'
+  : never;
 
 /**
  * Map the return type of the function within the generic to a
  * string-based representation of the return type.
  */
-// prettier-ignore
-type UnresolvedTypeToArgumentString<T> =
-  T extends (...args: any[]) => infer ElementType ? TypeString<ElementType> :
-  T extends null ? 'null' :
-  never;
+type UnresolvedTypeToArgumentString<T> = T extends (...args: any[]) => infer ElementType
+  ? TypeString<ElementType>
+  : T extends null
+  ? 'null'
+  : never;
 
 /**
  * Map the array-based return type of the function within the generic to a
  * string-based representation of the return type.
  */
-// prettier-ignore
-type UnresolvedArrayTypeToArgumentString<T> =
-  T extends Array<(...args: any[]) => infer ElementType> ? TypeString<ElementType> :
-  T extends (...args: any[]) => infer ElementType ? ArrayTypeToArgumentString<ElementType> :
-  T extends null ? 'null' :
-  never;
+type UnresolvedArrayTypeToArgumentString<T> = T extends Array<(...args: any[]) => infer ElementType>
+  ? TypeString<ElementType>
+  : T extends (...args: any[]) => infer ElementType
+  ? ArrayTypeToArgumentString<ElementType>
+  : T extends null
+  ? 'null'
+  : never;
 
 /** A type containing properties common to all Function Arguments. */
 interface BaseArgumentType<T> {
@@ -59,7 +60,7 @@ interface BaseArgumentType<T> {
    */
   deprecated?: boolean;
   /** Help text for the Argument to be displayed in the Expression Editor */
-  help: string;
+  help?: string;
   /** Default options for the Argument */
   options?: T[];
   /**
@@ -80,8 +81,6 @@ interface BaseArgumentType<T> {
    * as soon as all the functions list all the available options.
    */
   strict?: boolean;
-  /** Names of types that are valid values of the Argument. */
-  types?: string[];
   /** The optional default value of the Argument. */
   default?: T | string;
   /**
