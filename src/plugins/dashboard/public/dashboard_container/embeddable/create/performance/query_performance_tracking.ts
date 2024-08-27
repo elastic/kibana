@@ -8,10 +8,16 @@
 
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { PresentationContainer, TracksQueryPerformance } from '@kbn/presentation-containers';
-import { apiPublishesPhaseEvents, PublishesPhaseEvents } from '@kbn/presentation-publishing';
+import {
+  apiHasUniqueId,
+  apiPublishesPhaseEvents,
+  HasUniqueId,
+  PublishesPhaseEvents,
+} from '@kbn/presentation-publishing';
 import { combineLatest, map, of, pairwise, startWith, switchMap } from 'rxjs';
 import { DASHBOARD_LOADED_EVENT } from '../../../../dashboard_constants';
 import { pluginServices } from '../../../../services/plugin_services';
+import { gridFirstRenderTime } from '../../../component/grid/dashboard_grid';
 import { DashboardLoadType } from '../../../types';
 
 let isFirstDashboardLoadOfSession = true;
@@ -55,16 +61,28 @@ export const startQueryPerformanceTracking = (
   return dashboard.children$
     .pipe(
       switchMap((children) => {
-        const childPhaseEventTrackers: PublishesPhaseEvents[] = [];
+        const childPhaseEventTrackers: Array<PublishesPhaseEvents & HasUniqueId> = [];
         for (const child of Object.values(children)) {
-          if (apiPublishesPhaseEvents(child)) childPhaseEventTrackers.push(child);
+          if (apiPublishesPhaseEvents(child) && apiHasUniqueId(child))
+            childPhaseEventTrackers.push(child);
         }
         if (childPhaseEventTrackers.length === 0) return of([]);
-        return combineLatest(childPhaseEventTrackers.map((child) => child.phase$));
+        return combineLatest(
+          childPhaseEventTrackers.map((child) =>
+            child.phase$.pipe(map((phase) => ({ phase, id: child.uuid })))
+          )
+        );
       }),
-      map((latestPhaseEvents) =>
-        latestPhaseEvents.some((phaseEvent) => phaseEvent && phaseEvent.status !== 'rendered')
-      ),
+      map((latestPhaseEvents) => {
+        console.log(
+          latestPhaseEvents.map((event) => ({
+            eventType: event.phase?.status,
+            apiType: (dashboard.children$.getValue()[event.id] as any).type,
+            api: dashboard.children$.getValue()[event.id],
+          }))
+        );
+        return latestPhaseEvents.some((event) => event && event.phase?.status !== 'rendered');
+      }),
       startWith(false),
       pairwise()
     )
@@ -89,11 +107,15 @@ export const startQueryPerformanceTracking = (
         dashboard.firstLoad = false;
       }
       if (queryHasStarted) {
+        console.log('QUERY HAS STARTED');
         dashboard.lastLoadStartTime = now;
         return;
       }
       if (queryHasFinished) {
         const timeToData = now - (dashboard.lastLoadStartTime ?? now);
+
+        console.log('OLD time to data stat', now - (gridFirstRenderTime ?? now));
+        console.log('NEW time to data stat', timeToData);
         const completeLoadDuration =
           (dashboard.creationEndTime ?? now) - (dashboard.creationStartTime ?? now);
         reportPerformanceMetrics({
