@@ -52,9 +52,7 @@ export class DatasetQualityPlugin
 
     const createDatasetQualityController = createDatasetQualityControllerLazyFactory({
       core,
-      plugins,
       dataStreamStatsClient,
-      dataStreamDetailsClient,
     });
 
     const DatasetQualityDetails = createDatasetQualityDetails({
