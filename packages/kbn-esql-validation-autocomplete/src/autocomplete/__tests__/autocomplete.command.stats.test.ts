@@ -137,10 +137,27 @@ describe('autocomplete.suggest', () => {
       test('when typing inside function left paren', async () => {
         const { assertSuggestions } = await setup();
         const expected = [
-          ...getFieldNamesByType([...ESQL_COMMON_NUMERIC_TYPES, 'date', 'boolean', 'ip']),
+          ...getFieldNamesByType([
+            ...ESQL_COMMON_NUMERIC_TYPES,
+            'date',
+            'boolean',
+            'ip',
+            'version',
+            'text',
+            'keyword',
+          ]),
           ...getFunctionSignaturesByReturnType(
             'stats',
-            [...ESQL_COMMON_NUMERIC_TYPES, 'date', 'date_period', 'boolean', 'ip'],
+            [
+              ...ESQL_COMMON_NUMERIC_TYPES,
+              'date',
+              'date_period',
+              'boolean',
+              'ip',
+              'version',
+              'text',
+              'keyword',
+            ],
             {
               scalar: true,
             }

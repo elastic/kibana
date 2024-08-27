@@ -13,7 +13,7 @@
 // I fixed this as a drive-by, but opened an issue to do something later,
 // if needed: https://github.com/elastic/kibana/issues/144557
 
-import { type Subject, ReplaySubject } from 'rxjs';
+import { type Subject, ReplaySubject, of } from 'rxjs';
 import type { ElasticsearchClient, Logger, LogMeta } from '@kbn/core/server';
 import sinon from 'sinon';
 import expect from '@kbn/expect';
@@ -70,6 +70,7 @@ export default function createLifecycleExecutorApiTest({ getService }: FtrProvid
   describe('createLifecycleExecutor', () => {
     let ruleDataClient: IRuleDataClient;
     let pluginStop$: Subject<void>;
+    const elasticsearchAndSOAvailability$ = of(true);
 
     before(async () => {
       // First we need to setup the data service. This happens within the
@@ -89,6 +90,7 @@ export default function createLifecycleExecutorApiTest({ getService }: FtrProvid
         },
         pluginStop$,
         dataStreamAdapter,
+        elasticsearchAndSOAvailability$,
       });
 
       // This initializes the service. This happens immediately after the creation

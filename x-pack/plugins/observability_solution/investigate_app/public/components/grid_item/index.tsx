@@ -15,7 +15,6 @@ export const GRID_ITEM_HEADER_HEIGHT = 40;
 interface GridItemProps {
   id: string;
   title: string;
-  description: string;
   children: React.ReactNode;
   onCopy: () => void;
   onDelete: () => void;
@@ -57,15 +56,7 @@ const headerClassName = css`
   height: ${GRID_ITEM_HEADER_HEIGHT}px;
 `;
 
-export function GridItem({
-  id,
-  title,
-  description,
-  children,
-  onDelete,
-  onCopy,
-  loading,
-}: GridItemProps) {
+export function GridItem({ id, title, children, onDelete, onCopy, loading }: GridItemProps) {
   const theme = useTheme();
 
   const containerClassName = css`

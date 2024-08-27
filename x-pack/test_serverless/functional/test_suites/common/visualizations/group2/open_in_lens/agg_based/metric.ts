@@ -20,7 +20,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const panelActions = getService('dashboardPanelActions');
   const kibanaServer = getService('kibanaServer');
 
-  describe('Metric', function describeIndexTests() {
+  // Failing: See https://github.com/elastic/kibana/issues/191153
+  describe.skip('Metric', function describeIndexTests() {
     const fixture =
       'x-pack/test_serverless/functional/fixtures/kbn_archiver/lens/open_in_lens/agg_based/metric.json';
 

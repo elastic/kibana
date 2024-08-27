@@ -6,9 +6,9 @@
  */
 import { EuiFlexGroup, EuiFlexItem, EuiMarkdownFormat, EuiText } from '@elastic/eui';
 import { css } from '@emotion/css';
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { format } from 'date-fns';
 import { InvestigationNote } from '@kbn/investigate-plugin/common';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { formatDistance } from 'date-fns';
 import React from 'react';
 import { InvestigateTextButton } from '../../../../components/investigate_text_button';
 import { useTheme } from '../../../../hooks/use_theme';
@@ -21,10 +21,12 @@ export function TimelineMessage({
   icon,
   note,
   onDelete,
+  isDeleting,
 }: {
   icon: React.ReactNode;
   note: InvestigationNote;
   onDelete: () => void;
+  isDeleting: boolean;
 }) {
   const theme = useTheme();
   const timelineContainerClassName = css`
@@ -40,7 +42,9 @@ export function TimelineMessage({
         <EuiFlexGroup direction="row" alignItems="center" justifyContent="flexStart" gutterSize="s">
           <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiText size="xs">{format(new Date(note.createdAt), 'HH:mm')}</EuiText>
+            <EuiText size="xs">
+              {formatDistance(new Date(note.createdAt), new Date(), { addSuffix: true })}
+            </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
 
@@ -48,6 +52,7 @@ export function TimelineMessage({
           <InvestigateTextButton
             data-test-subj="investigateAppTimelineMessageButton"
             iconType="trash"
+            disabled={isDeleting}
             onClick={onDelete}
           />
         </EuiFlexItem>

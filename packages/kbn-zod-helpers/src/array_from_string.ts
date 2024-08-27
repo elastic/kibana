@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import * as z from 'zod';
+import * as z from '@kbn/zod';
 
 /**
  * This is a helper schema to convert comma separated strings to arrays. Useful

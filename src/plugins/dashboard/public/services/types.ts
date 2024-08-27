@@ -44,6 +44,7 @@ import { DashboardUiActionsService } from './ui_actions/types';
 import { ObservabilityAIAssistantService } from './observability_ai_assistant/types';
 import { DashboardUserProfileService } from './user_profile/types';
 import { DashboardRecentlyAccessedService } from './dashboard_recently_accessed/types';
+import { DashboardContentInsightsService } from './dashboard_content_insights/types';
 import { DashboardFavoritesService } from './dashboard_favorites/types';
 
 export type DashboardPluginServiceParams = KibanaPluginServiceParams<DashboardStartDependencies> & {
@@ -85,5 +86,6 @@ export interface DashboardServices {
   observabilityAIAssistant: ObservabilityAIAssistantService; // TODO: make this optional in follow up
   userProfile: DashboardUserProfileService;
   dashboardRecentlyAccessed: DashboardRecentlyAccessedService;
+  dashboardContentInsights: DashboardContentInsightsService;
   dashboardFavorites: DashboardFavoritesService;
 }

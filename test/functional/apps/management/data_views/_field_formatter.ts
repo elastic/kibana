@@ -555,7 +555,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('check formats', async () => {
+    describe('check formats', () => {
       before(async () => {
         await PageObjects.common.navigateToApp('discover', {
           hash: `/doc/${indexPatternId}/${indexTitle}?id=${testDocumentId}`,

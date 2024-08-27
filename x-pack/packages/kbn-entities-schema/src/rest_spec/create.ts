@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 export const createEntityDefinitionQuerySchema = z.object({
   installOnly: z.optional(z.coerce.boolean()).default(false),
