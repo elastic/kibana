@@ -14,6 +14,7 @@ import {
   EuiIcon,
   EuiTitle,
   EuiToolTip,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ColorMapping } from '../../config';
@@ -57,6 +58,7 @@ export function PaletteColors({
               })}
             </h6>
           </EuiTitle>
+          <EuiSpacer size="s" />
           <EuiFlexGroup
             direction="row"
             gutterSize="s"
@@ -103,6 +105,7 @@ export function PaletteColors({
               </EuiToolTip>
             </h6>
           </EuiTitle>
+          <EuiSpacer size="s" />
           <EuiFlexGroup
             direction="row"
             gutterSize="s"

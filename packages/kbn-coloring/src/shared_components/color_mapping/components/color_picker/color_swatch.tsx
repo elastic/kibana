@@ -124,9 +124,9 @@ export const ColorSwatch = ({
             css={css`
               &::after {
                 content: '';
-                color: ${colorIsDark ? 'white' : 'black'};
+                background-color: ${colorIsDark ? 'white' : 'black'};
                 // custom arrowDown svg
-                background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI3IiBoZWlnaHQ9IjQiIHZpZXdCb3g9IjAgMCA3IDQiPgogIDxwYXRoIGQ9Ik0uMTQ2LjE0N2EuNS41IDAgMCAxIC43MDggMEwzLjUgMi43OTQgNi4xNDYuMTQ3YS41LjUgMCAxIDEgLjcwOC43MDhsLTMgM2EuNS41IDAgMCAxLS43MDggMGwtMy0zYS41LjUgMCAwIDEgMC0uNzA4WiIvPgo8L3N2Zz4K');
+                mask-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI3IiBoZWlnaHQ9IjQiIHZpZXdCb3g9IjAgMCA3IDQiPgogIDxwYXRoIGQ9Ik0uMTQ2LjE0N2EuNS41IDAgMCAxIC43MDggMEwzLjUgMi43OTQgNi4xNDYuMTQ3YS41LjUgMCAxIDEgLjcwOC43MDhsLTMgM2EuNS41IDAgMCAxLS43MDggMGwtMy0zYS41LjUgMCAwIDEgMC0uNzA4WiIvPgo8L3N2Zz4K');
                 height: 4px;
                 width: 7px;
                 bottom: 6px;
