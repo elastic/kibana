@@ -11067,11 +11067,12 @@
     "@types/prop-types" "*"
     "@types/react" "*"
 
-"@types/react-recompose@^0.33.4":
-  version "0.33.4"
-  resolved "https://registry.yarnpkg.com/@types/react-recompose/-/react-recompose-0.33.4.tgz#bf47388b644c3b0a30226870e216d78564a41624"
-  integrity sha512-66LAtWIrfT5yvw01xB4jFNeYuP6b4QTdFrrkvD6OlfGaLGqMNGXSia5VJa/wV4dH4z0gU8KnveQl/4Oi2e/vIg==
+"@types/react-recompose@^0.33.6":
+  version "0.33.6"
+  resolved "https://registry.yarnpkg.com/@types/react-recompose/-/react-recompose-0.33.6.tgz#370c743aa8eb9cdbfeb23b6bd8bb07d067ea3ca5"
+  integrity sha512-sEJsTPkdMa0QuI7gtfz2+u99dbTjIr34I84DgYZR+8Fs4tdHO3Efuf2Wi0gTK4L4KkfjFh+xgB/nuuDmaWesig==
   dependencies:
+    "@types/prop-types" "*"
     "@types/react" "*"
 
 "@types/react-redux@^7.1.20":
