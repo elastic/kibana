@@ -71,12 +71,14 @@ export class DashboardPanelActionsService extends FtrService {
 
   async expectContextMenuToBeOpen() {
     this.log.debug('expectContextMenuToBeOpen');
-    await this.testSubjects.existOrFail('embeddablePanelContextMenuOpen');
+    await this.testSubjects.existOrFail('embeddablePanelContextMenuOpen', { allowHidden: true });
   }
 
   async openContextMenu(parent?: WebElementWrapper) {
     this.log.debug(`openContextMenu(${parent}`);
-    const open = await this.testSubjects.exists('embeddablePanelContextMenuOpen');
+    const open = await this.testSubjects.exists('embeddablePanelContextMenuOpen', {
+      allowHidden: true,
+    });
     if (!open) await this.toggleContextMenu(parent);
     await this.expectContextMenuToBeOpen();
   }
@@ -91,7 +93,7 @@ export class DashboardPanelActionsService extends FtrService {
     this.log.debug(`clickPanelAction(${testSubject})`);
 
     await this.scrollParentIntoView(parent);
-    const exists = await this.testSubjects.exists(testSubject);
+    const exists = await this.testSubjects.exists(testSubject, { allowHidden: true });
     if (!exists) await this.openContextMenu(parent);
     await this.testSubjects.existOrFail(testSubject);
     await this.testSubjects.click(testSubject);
