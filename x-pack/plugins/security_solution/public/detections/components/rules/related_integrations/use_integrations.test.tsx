@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, cleanup } from '@testing-library/react-hooks';
+import { renderHook, cleanup } from '@testing-library/react';
 
 import { useIntegrations } from './use_integrations';
 

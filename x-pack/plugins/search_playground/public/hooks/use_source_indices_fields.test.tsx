@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { useKibana } from './use_kibana';
 import { PlaygroundProvider } from '../providers/playground_provider';
 import React from 'react';

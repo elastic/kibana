@@ -7,7 +7,7 @@
 
 import type { HttpSetupMock } from '@kbn/core-http-browser-mocks';
 import { coreMock } from '@kbn/core/public/mocks';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { attackDiscoveryStatus, usePollApi } from './use_poll_api';
 import moment from 'moment/moment';
 import { kibanaMock } from '../../common/mock';

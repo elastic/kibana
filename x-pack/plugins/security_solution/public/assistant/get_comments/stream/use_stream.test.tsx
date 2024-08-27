@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useStream } from './use_stream';
 
 const refetchCurrentConversation = jest.fn();

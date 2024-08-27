@@ -8,7 +8,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { renderHook, WrapperComponent } from '@testing-library/react-hooks';
+import { renderHook, WrapperComponent } from '@testing-library/react';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock, esHitsMockWithSort } from '@kbn/discover-utils/src/__mocks__';
 import { useFetchMoreRecords, UseFetchMoreRecordsParams } from './use_fetch_more_records';

@@ -6,7 +6,7 @@
  */
 
 import { useFetchBulkCases } from './use_fetch_bulk_cases';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { kibanaStartMock } from '../utils/kibana_react.mock';
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();

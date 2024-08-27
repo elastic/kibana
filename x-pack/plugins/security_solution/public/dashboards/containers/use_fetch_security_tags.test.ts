@@ -6,7 +6,7 @@
  */
 
 import type { HttpStart } from '@kbn/core/public';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import {
   INTERNAL_TAGS_URL,
   SECURITY_TAG_DESCRIPTION,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { reactRenderHook } from '@testing-library/react';
 
 import { useIsPackagePolicyUpgradable } from './use_is_package_policy_upgradable';
 import { useGetPackages } from './use_request/epm';
@@ -34,7 +34,7 @@ describe('useIsPackagePolicyUpgradable', () => {
     } as any);
   });
   it('should return true with an upgradable package policy', () => {
-    const { result } = renderHook(() => useIsPackagePolicyUpgradable());
+    const { result } = reactRenderHook(() => useIsPackagePolicyUpgradable());
     const isUpgradable = result.current.isPackagePolicyUpgradable({
       package: {
         name: 'test',
@@ -45,7 +45,7 @@ describe('useIsPackagePolicyUpgradable', () => {
   });
 
   it('should return false with a non upgradable package policy', () => {
-    const { result } = renderHook(() => useIsPackagePolicyUpgradable());
+    const { result } = reactRenderHook(() => useIsPackagePolicyUpgradable());
     const isUpgradable = result.current.isPackagePolicyUpgradable({
       package: {
         name: 'test',
@@ -56,7 +56,7 @@ describe('useIsPackagePolicyUpgradable', () => {
   });
 
   it('should return false with a non installed package', () => {
-    const { result } = renderHook(() => useIsPackagePolicyUpgradable());
+    const { result } = reactRenderHook(() => useIsPackagePolicyUpgradable());
     const isUpgradable = result.current.isPackagePolicyUpgradable({
       package: {
         name: 'idonotexists',

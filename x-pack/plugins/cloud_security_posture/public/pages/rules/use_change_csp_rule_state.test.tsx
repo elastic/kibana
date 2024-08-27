@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { RuleStateAttributes } from '@kbn/cloud-security-posture-common/schema/rules/v4';

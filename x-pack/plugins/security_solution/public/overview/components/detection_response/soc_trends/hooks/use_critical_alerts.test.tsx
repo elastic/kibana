@@ -8,7 +8,7 @@
 import React from 'react';
 import type { UseCriticalAlerts } from './use_critical_alerts';
 import { useCriticalAlerts } from './use_critical_alerts';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { TestProviders } from '../../../../../common/mock';
 import * as i18n from '../translations';
 import { useQueryAlerts } from '../../../../../detections/containers/detection_engine/alerts/use_query';

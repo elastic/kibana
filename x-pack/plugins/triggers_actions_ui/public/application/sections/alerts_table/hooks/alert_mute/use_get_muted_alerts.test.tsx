@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
 import * as api from '../apis/get_rules_muted_alerts';
-import { waitFor } from '@testing-library/react';
+import { waitFor, renderHook } from '@testing-library/react';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { AppMockRenderer, createAppMockRenderer } from '../../../test_utils';
 import { useGetMutedAlerts } from './use_get_muted_alerts';

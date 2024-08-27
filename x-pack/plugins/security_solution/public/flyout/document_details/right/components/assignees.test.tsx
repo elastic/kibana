@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, act, waitFor } from '@testing-library/react';
 
 import {
   ASSIGNEES_ADD_BUTTON_TEST_ID,
@@ -89,7 +89,7 @@ describe('<Assignees />', () => {
     (useSetAlertAssignees as jest.Mock).mockReturnValue(setAlertAssigneesMock);
   });
 
-  it('should render component', () => {
+  it('should render component', async () => {
     const { getByTestId } = renderAssignees();
 
     expect(getByTestId(ASSIGNEES_TITLE_TEST_ID)).toBeInTheDocument();
@@ -121,7 +121,7 @@ describe('<Assignees />', () => {
     expect(queryByTestId(USER_AVATAR_ITEM_TEST_ID('user3'))).not.toBeInTheDocument();
   });
 
-  it('should call assignees update functionality with the right arguments', () => {
+  it('should call assignees update functionality with the right arguments', async () => {
     const assignedProfiles = [mockUserProfiles[0], mockUserProfiles[1]];
     (useBulkGetUserProfiles as jest.Mock).mockReturnValue({
       isLoading: false,
@@ -132,12 +132,26 @@ describe('<Assignees />', () => {
     const { getByTestId, getByText } = renderAssignees('test-event', assignees);
 
     // Update assignees
-    getByTestId(ASSIGNEES_ADD_BUTTON_TEST_ID).click();
-    getByText('User 1').click();
-    getByText('User 3').click();
+    act(() => {
+      getByTestId(ASSIGNEES_ADD_BUTTON_TEST_ID).click();
+    });
+
+    act(() => {
+      getByText('User 1').click();
+    });
+
+    act(() => {
+      getByText('User 3').click();
+    });
+
+    await waitFor(() => null);
 
     // Apply assignees
-    getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID).click();
+    act(() => {
+      getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID).click();
+    });
+
+    await waitFor(() => null);
 
     expect(setAlertAssigneesMock).toHaveBeenCalledWith(
       {

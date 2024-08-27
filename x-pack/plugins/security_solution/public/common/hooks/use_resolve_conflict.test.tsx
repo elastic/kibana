@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { useLocation } from 'react-router-dom';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useDeepEqualSelector } from './use_selector';
 import { useKibana } from '../lib/kibana';
 import { useResolveConflict } from './use_resolve_conflict';

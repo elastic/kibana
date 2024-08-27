@@ -8,7 +8,7 @@
  */
 
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { getExceptionListItemSchemaMock } from '../mocks/exception_list_item_schema.mock';
 import { useExceptionItemCard } from './use_exception_item_card';
 import * as i18n from './translations';

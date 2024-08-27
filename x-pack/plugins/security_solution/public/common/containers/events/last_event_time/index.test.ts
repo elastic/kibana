@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { noop } from 'lodash/fp';
 import type { UseTimelineLastEventTimeArgs } from '.';
 import { useTimelineLastEventTime } from '.';

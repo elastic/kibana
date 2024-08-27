@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 
 import { useInfiniteFindCaseUserActions } from './use_infinite_find_case_user_actions';
 import type { CaseUserActionTypeWithAll } from '../../common/ui/types';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useGetCaseUsers } from './use_get_case_users';
 import * as api from './api';
 import { useToasts } from '../common/lib/kibana';

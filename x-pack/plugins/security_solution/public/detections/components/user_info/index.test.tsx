@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { useUserInfo, ManageUserInfo } from '.';
 import type { Capabilities } from '@kbn/core/public';
 

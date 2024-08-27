@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 
 import { useGetAppInfo, UseGetAppInfo, UseGetAppInfoProps } from './use_get_app_info';
 import { getAppInfo } from './api';

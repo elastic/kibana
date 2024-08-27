@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { renderHook } from '@testing-library/react-hooks';
+
+import { renderHook } from '@testing-library/react';
 import { SecurityPageName } from '../../app/types';
 import { useNavigateToAlertsPageWithFilters } from './use_navigate_to_alerts_page_with_filters';
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { reactRenderHook, act } from '@testing-library/react';
 
 import {
   sendPostBulkAgentTagsUpdate,
@@ -41,7 +41,7 @@ describe('useUpdateTags', () => {
   it('should call onSuccess when update tags succeeds', async () => {
     mockSendPutAgentTagsUpdate.mockResolvedValueOnce({ data: {} });
 
-    const { result } = renderHook(() => useUpdateTags());
+    const { result } = reactRenderHook(() => useUpdateTags());
     await act(() => result.current.updateTags('agent1', ['tag1'], mockOnSuccess));
     expect(mockOnSuccess).toHaveBeenCalled();
     expect(useStartServices().notifications.toasts.addSuccess as jest.Mock).toHaveBeenCalledWith(
@@ -52,7 +52,7 @@ describe('useUpdateTags', () => {
   it('should call show error toast when update tags fails', async () => {
     mockSendPutAgentTagsUpdate.mockResolvedValueOnce({ error: 'error' });
 
-    const { result } = renderHook(() => useUpdateTags());
+    const { result } = reactRenderHook(() => useUpdateTags());
     await act(() => result.current.updateTags('agent1', ['tag1'], mockOnSuccess));
     expect(mockOnSuccess).not.toHaveBeenCalled();
     expect(useStartServices().notifications.toasts.addError as jest.Mock).toHaveBeenCalledWith(
@@ -64,7 +64,7 @@ describe('useUpdateTags', () => {
   it('should call onSuccess when bulk update tags succeeds', async () => {
     mockSendPostBulkAgentTagsUpdate.mockResolvedValueOnce({ data: { actionId: 'action' } });
 
-    const { result } = renderHook(() => useUpdateTags());
+    const { result } = reactRenderHook(() => useUpdateTags());
     await act(() => result.current.bulkUpdateTags('query', ['tag1'], [], mockOnSuccess));
     expect(mockOnSuccess).toHaveBeenCalled();
     expect(useStartServices().notifications.toasts.addSuccess as jest.Mock).toHaveBeenCalledWith(
@@ -75,7 +75,7 @@ describe('useUpdateTags', () => {
   it('should call show error toast when bulk update tags fails', async () => {
     mockSendPostBulkAgentTagsUpdate.mockRejectedValueOnce({ error: 'error' });
 
-    const { result } = renderHook(() => useUpdateTags());
+    const { result } = reactRenderHook(() => useUpdateTags());
     await act(() => result.current.bulkUpdateTags('query', ['tag1'], [], mockOnSuccess));
     expect(mockOnSuccess).not.toHaveBeenCalled();
     expect(useStartServices().notifications.toasts.addError as jest.Mock).toHaveBeenCalledWith(

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import * as api from './api';
 import { basicCaseId, basicFileMock } from './mock';
 import { useRefreshCaseViewPage } from '../components/case_view/use_on_refresh_case_view_page';

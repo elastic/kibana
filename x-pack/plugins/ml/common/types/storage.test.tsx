@@ -7,7 +7,8 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import { renderHook, act } from '@testing-library/react-hooks';
+
+import { reactRenderHook, act } from '@testing-library/react';
 
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { StorageContextProvider, useStorage } from '@kbn/ml-local-storage';
@@ -45,15 +46,18 @@ describe('useStorage', () => {
   });
 
   test('returns the default value', () => {
-    const { result } = renderHook(() => useStorage('ml.jobSelectorFlyout.applyTimeRange', true), {
-      wrapper: Provider,
-    });
+    const { result } = reactRenderHook(
+      () => useStorage('ml.jobSelectorFlyout.applyTimeRange', true),
+      {
+        wrapper: Provider,
+      }
+    );
 
     expect(result.current[0]).toBe(true);
   });
 
   test('returns the value from storage', () => {
-    const { result } = renderHook(() => useStorage('ml.gettingStarted.isDismissed', false), {
+    const { result } = reactRenderHook(() => useStorage('ml.gettingStarted.isDismissed', false), {
       wrapper: Provider,
     });
 
@@ -61,7 +65,7 @@ describe('useStorage', () => {
   });
 
   test('updates the storage value', async () => {
-    const { result, waitForNextUpdate } = renderHook(
+    const { result, waitForNextUpdate } = reactRenderHook(
       () => useStorage('ml.gettingStarted.isDismissed'),
       {
         wrapper: Provider,
@@ -82,7 +86,7 @@ describe('useStorage', () => {
   });
 
   test('removes the storage value', async () => {
-    const { result, waitForNextUpdate } = renderHook(
+    const { result, waitForNextUpdate } = reactRenderHook(
       () => useStorage('ml.gettingStarted.isDismissed'),
       {
         wrapper: Provider,
@@ -103,7 +107,7 @@ describe('useStorage', () => {
   });
 
   test('updates the value on storage event', async () => {
-    const { result, waitForNextUpdate } = renderHook(
+    const { result, waitForNextUpdate } = reactRenderHook(
       () => useStorage('ml.gettingStarted.isDismissed'),
       {
         wrapper: Provider,

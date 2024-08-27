@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { usePanelSideNavItems } from './use_panel_side_nav_items';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 

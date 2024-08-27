@@ -6,9 +6,8 @@
  */
 
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
 import { mount } from 'enzyme';
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import { fireEvent, render, waitFor, renderHook } from '@testing-library/react';
 import { useHistory, useParams } from 'react-router-dom';
 
 import '../../../common/mock/formatted_relative';

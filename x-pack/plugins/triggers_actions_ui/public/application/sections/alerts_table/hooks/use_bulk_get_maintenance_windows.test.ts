@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
-import { waitFor } from '@testing-library/react';
+import { waitFor, renderHook } from '@testing-library/react';
 import { MaintenanceWindowStatus } from '@kbn/alerting-plugin/common';
 import * as api from './apis/bulk_get_maintenance_windows';
 import { coreMock } from '@kbn/core/public/mocks';

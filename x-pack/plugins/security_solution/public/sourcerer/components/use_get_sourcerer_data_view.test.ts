@@ -6,7 +6,7 @@
  */
 
 import { DataView } from '@kbn/data-views-plugin/common';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useSourcererDataView } from '../containers';
 import { mockSourcererScope } from '../containers/mocks';
 import { SourcererScopeName } from '../store/model';

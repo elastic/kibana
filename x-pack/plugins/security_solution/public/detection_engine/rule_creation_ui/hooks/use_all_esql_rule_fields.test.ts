@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import type { DataViewFieldBase } from '@kbn/es-query';
 import { useQuery } from '@tanstack/react-query';
 import { useAllEsqlRuleFields } from './use_all_esql_rule_fields';

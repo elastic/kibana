@@ -9,7 +9,7 @@
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { act } from 'react-test-renderer';
 import { setTimeout } from 'timers/promises';
 import { dataViewMock } from '../../__mocks__/data_view';

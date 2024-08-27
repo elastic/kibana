@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { useQuickPromptEditor } from './use_quick_prompt_editor';
 import { mockAlertPromptContext } from '../../../mock/prompt_context';
 import { MOCK_QUICK_PROMPTS } from '../../../mock/quick_prompt';

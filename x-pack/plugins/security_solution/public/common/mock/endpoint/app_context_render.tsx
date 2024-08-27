@@ -9,18 +9,16 @@ import type { ReactPortal } from 'react';
 import React from 'react';
 import type { MemoryHistory } from 'history';
 import { createMemoryHistory } from 'history';
-import type { RenderOptions, RenderResult } from '@testing-library/react';
-import { render as reactRender } from '@testing-library/react';
+import type { RenderOptions, RenderResult, RenderHookOptions } from '@testing-library/react';
+import {
+  render as reactRender,
+  renderHook as reactRenderHook,
+  waitFor,
+} from '@testing-library/react';
 import type { Action, Reducer, Store } from 'redux';
 import { QueryClient } from '@tanstack/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { PLUGIN_ID } from '@kbn/fleet-plugin/common';
-import type { RenderHookOptions, RenderHookResult } from '@testing-library/react-hooks';
-import { renderHook as reactRenderHook } from '@testing-library/react-hooks';
-import type {
-  ReactHooksRenderer,
-  WrapperComponent,
-} from '@testing-library/react-hooks/src/types/react';
 import type { UseBaseQueryResult } from '@tanstack/react-query';
 import ReactDOM from 'react-dom';
 import type { DeepReadonly } from 'utility-types';
@@ -46,20 +44,20 @@ import { fleetGetPackageHttpMock } from '../../../management/mocks';
 import { allowedExperimentalValues } from '../../../../common/experimental_features';
 import type { EndpointPrivileges } from '../../../../common/endpoint/types';
 
-const REAL_REACT_DOM_CREATE_PORTAL = ReactDOM.createPortal;
+// const REAL_REACT_DOM_CREATE_PORTAL = ReactDOM.createPortal;
 
-/**
- * Resets the mock that is applied to `createPortal()` by default.
- * **IMPORTANT** : Make sure you call this function from a `before*()` or `after*()` callback
- *
- * @example
- *
- * // Turn off for test using Enzyme
- * beforeAll(() => resetReactDomCreatePortalMock());
- */
-export const resetReactDomCreatePortalMock = () => {
-  ReactDOM.createPortal = REAL_REACT_DOM_CREATE_PORTAL;
-};
+// /**
+//  * Resets the mock that is applied to `createPortal()` by default.
+//  * **IMPORTANT** : Make sure you call this function from a `before*()` or `after*()` callback
+//  *
+//  * @example
+//  *
+//  * // Turn off for test using Enzyme
+//  * beforeAll(() => resetReactDomCreatePortalMock());
+//  */
+// export const resetReactDomCreatePortalMock = () => {
+//   ReactDOM.createPortal = REAL_REACT_DOM_CREATE_PORTAL;
+// };
 
 beforeAll(() => {
   // Mocks the React DOM module to ensure compatibility with react-testing-library and avoid
@@ -69,8 +67,9 @@ beforeAll(() => {
   //       at appendChild (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:7183:39)
   // ```
   // @see https://github.com/facebook/react/issues/11565
-  ReactDOM.createPortal = jest.fn((...args) => {
-    REAL_REACT_DOM_CREATE_PORTAL(...args);
+  // @ts-expect-error react18 upgrade, please verify implementation works as it should
+  jest.spyOn(ReactDOM, 'createPortal').mockImplementation((...args) => {
+    jest.requireActual('react-dom').createPortal(...args);
     // Needed for react-Test-library. See:
     // https://github.com/facebook/react/issues/11565
     return args[0] as ReactPortal;
@@ -78,7 +77,7 @@ beforeAll(() => {
 });
 
 afterAll(() => {
-  resetReactDomCreatePortalMock();
+  jest.restoreAllMocks();
 });
 
 export type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
@@ -150,7 +149,7 @@ export interface AppContextTestRender {
   /**
    * Renders a hook within a mocked security solution app context
    */
-  renderHook: ReactHooksRenderer['renderHook'];
+  renderHook: typeof reactRenderHook;
 
   /**
    * A helper utility for rendering specifically hooks that wrap ReactQuery
@@ -253,14 +252,10 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     app: experimentalFeaturesReducer,
   };
 
-  const store = createMockStore(
-    undefined,
-    storeReducer,
-    undefined,
-    undefined,
-    // @ts-expect-error ts upgrade v4.7.4
-    [...managementMiddlewareFactory(coreStart, depsStart), middlewareSpy.actionSpyMiddleware]
-  );
+  const store = createMockStore(undefined, storeReducer, undefined, undefined, [
+    ...managementMiddlewareFactory(coreStart, depsStart),
+    middlewareSpy.actionSpyMiddleware,
+  ]);
 
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -300,17 +295,17 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     applyIntersectionObserverMock();
 
     return reactRender(ui, {
-      wrapper: AppWrapper,
+      wrapper: AppWrapper as RenderOptions['wrapper'],
       ...options,
     });
   };
 
-  const renderHook: ReactHooksRenderer['renderHook'] = <TProps, TResult>(
+  const renderHook = <TProps, TResult>(
     hookFn: HookRendererFunction<TProps, TResult>,
     options: RenderHookOptions<TProps> = {}
-  ): RenderHookResult<TProps, TResult> => {
-    return reactRenderHook<TProps, TResult>(hookFn, {
-      wrapper: AppWrapper as WrapperComponent<TProps>,
+  ) => {
+    return reactRenderHook<TResult, TProps>(hookFn, {
+      wrapper: AppWrapper as RenderOptions['wrapper'],
       ...options,
     });
   };
@@ -323,7 +318,7 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     waitForHook: WaitForReactHookState = 'isSuccess',
     options: RenderHookOptions<TProps> = {}
   ) => {
-    const { result: hookResult, waitFor } = renderHook<TProps, TResult>(hookFn, options);
+    const { result: hookResult } = renderHook<TProps, TResult>(hookFn, options);
 
     if (waitForHook) {
       await waitFor(() => {
@@ -395,6 +390,7 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     middlewareSpy,
     AppWrapper,
     render,
+    // @ts-ignore react18 upgrade, please verify implementation works as it should
     renderHook,
     renderReactQueryHook,
     setExperimentalFlag,

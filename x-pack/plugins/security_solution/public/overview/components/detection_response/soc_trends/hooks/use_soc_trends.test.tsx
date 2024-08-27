@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { useSocTrends } from './use_soc_trends';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { TestProviders } from '../../../../../common/mock';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import * as i18n from '../translations';

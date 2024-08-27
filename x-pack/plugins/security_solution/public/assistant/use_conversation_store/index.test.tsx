@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { renderHook } from '@testing-library/react-hooks';
+
+import { renderHook } from '@testing-library/react';
 import { useBaseConversations } from '.';
 import { useLinkAuthorized } from '../../common/links';
 import { useKibana as mockUseKibana } from '../../common/lib/kibana/__mocks__';

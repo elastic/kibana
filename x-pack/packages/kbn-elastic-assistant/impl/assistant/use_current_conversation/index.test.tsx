@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { useCurrentConversation, Props } from '.';
 import { useConversation } from '../use_conversation';
 import deepEqual from 'fast-deep-equal';

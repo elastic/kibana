@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { reactRenderHook, act } from '@testing-library/react';
 import { of, throwError } from 'rxjs';
 import { useMlNotifications, MlNotificationsContextProvider } from './ml_notifications_context';
 import { useStorage } from '@kbn/ml-local-storage';
@@ -71,7 +71,7 @@ describe('useMlNotifications', () => {
       throwError(() => new Error('Cluster is down'))
     );
 
-    renderHook(useMlNotifications, {
+    reactRenderHook(useMlNotifications, {
       wrapper: MlNotificationsContextProvider,
     });
 
@@ -100,14 +100,16 @@ describe('useMlNotifications', () => {
   });
 
   test('returns the default values', () => {
-    const { result } = renderHook(useMlNotifications, { wrapper: MlNotificationsContextProvider });
+    const { result } = reactRenderHook(useMlNotifications, {
+      wrapper: MlNotificationsContextProvider,
+    });
     expect(result.current.notificationsCounts).toEqual({ info: 0, error: 0, warning: 0 });
     expect(result.current.latestRequestedAt).toEqual(null);
     expect(result.current.lastCheckedAt).toEqual(undefined);
   });
 
   test('starts only one subscription on mount', () => {
-    const { rerender } = renderHook(useMlNotifications, {
+    const { rerender } = reactRenderHook(useMlNotifications, {
       wrapper: MlNotificationsContextProvider,
     });
 
@@ -128,7 +130,7 @@ describe('useMlNotifications', () => {
   });
 
   test('starts polling for notifications with a 1 minute interval during the last week by default ', () => {
-    const { result } = renderHook(useMlNotifications, {
+    const { result } = reactRenderHook(useMlNotifications, {
       wrapper: MlNotificationsContextProvider,
     });
 
@@ -159,7 +161,7 @@ describe('useMlNotifications', () => {
       1664551009292,
       mockSetStorageValue,
     ]);
-    const { result } = renderHook(useMlNotifications, {
+    const { result } = reactRenderHook(useMlNotifications, {
       wrapper: MlNotificationsContextProvider,
     });
 
@@ -179,7 +181,7 @@ describe('useMlNotifications', () => {
       undefined,
       mockSetStorageValue,
     ]);
-    const { result, rerender } = renderHook(useMlNotifications, {
+    const { result, rerender } = reactRenderHook(useMlNotifications, {
       wrapper: MlNotificationsContextProvider,
     });
 
@@ -210,7 +212,7 @@ describe('useMlNotifications', () => {
   });
 
   test('stops fetching notifications on leave', () => {
-    const { unmount } = renderHook(useMlNotifications, {
+    const { unmount } = reactRenderHook(useMlNotifications, {
       wrapper: MlNotificationsContextProvider,
     });
 
@@ -235,7 +237,7 @@ describe('useMlNotifications', () => {
       canGetTrainedModels: true,
     };
 
-    renderHook(useMlNotifications, {
+    reactRenderHook(useMlNotifications, {
       wrapper: MlNotificationsContextProvider,
     });
 

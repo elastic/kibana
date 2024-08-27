@@ -6,7 +6,7 @@
  */
 
 import { GENERAL_CASES_OWNER } from '../../../common/constants';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useToasts } from '../../common/lib/kibana';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';

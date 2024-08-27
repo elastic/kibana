@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { useSetFieldValueWithCallback } from './use_set_field_value_cb';
 
 const initialValue = 'initial value';

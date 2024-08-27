@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
-
 import { useCurrentWindowWidth } from '.';
-import { fireEvent } from '@testing-library/react';
+import { fireEvent, renderHook, act } from '@testing-library/react';
 
 describe('useCurrentWidthWidth', () => {
   beforeEach(() => {
