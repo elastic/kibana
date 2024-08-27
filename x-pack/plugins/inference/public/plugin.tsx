@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type {CoreSetup, CoreStart, Plugin, PluginInitializerContext} from '@kbn/core/public';
-import type {Logger} from '@kbn/logging';
-import {createOutputApi} from '../common/output/create_output_api';
-import type {GetConnectorsResponseBody} from '../common/connectors';
-import {createChatCompleteApi} from './chat_complete';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { Logger } from '@kbn/logging';
+import { createOutputApi } from '../common/output/create_output_api';
+import type { GetConnectorsResponseBody } from '../common/connectors';
+import { createChatCompleteApi } from './chat_complete';
 import type {
   ConfigSchema,
   InferencePublicSetup,
@@ -17,7 +17,6 @@ import type {
   InferenceSetupDependencies,
   InferenceStartDependencies,
 } from './types';
-import {MessageRole} from '../common/chat_complete';
 
 export class InferencePlugin
   implements
