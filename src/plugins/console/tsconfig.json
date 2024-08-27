@@ -32,7 +32,8 @@
     "@kbn/core-notifications-browser",
     "@kbn/react-kibana-context-render",
     "@kbn/react-kibana-mount",
-    "@kbn/ui-theme"
+    "@kbn/ui-theme",
+    "@kbn/core-doc-links-browser"
   ],
   "exclude": [
     "target/**/*",
