@@ -109,8 +109,8 @@
   height: $euiSizeL;
   background-color: $euiFormBackgroundColor;
   border-radius: $euiSizeXS;
-  box-shadow: 0 0 $euiSizeXS $euiSizeXS transparentize($euiShadowColor, 0.9);
-  padding-top: $euiSize * 0.1;
+  box-shadow: 0 0 $euiSizeXS $euiSizeXS transparentize($euiShadowColor, .9);
+  padding-top: $euiSize * .1;
 }
 
 .conApp__resizer {
@@ -152,10 +152,10 @@
 .console__monaco_editor__selectedRequests::before {
   content: '';
   position: absolute;
-  top: -$euiSize * 0.2;
-  bottom: -$euiSize * 0.2;
+  top: -$euiSize * .2;
+  bottom: -$euiSize * .2;
   left: -$euiSize * 3;
-  right: 0px;
+  right: 0;
   background: transparentize($euiColorPrimary, .9);
   border: $euiBorderThin;
   border-color: $euiColorPrimary;
