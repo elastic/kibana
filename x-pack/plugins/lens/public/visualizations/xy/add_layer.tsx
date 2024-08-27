@@ -104,8 +104,10 @@ export function AddLayerButton({
     (t) => isHorizontalSeries(t.id as SeriesType) === horizontalOnly
   );
 
-  const currentLayerVisType =
+  const currentLayerTypeIndex =
     availableVisTypes.findIndex((t) => t.id === getDataLayers(state.layers)?.[0]?.seriesType) || 0;
+
+  const firstLayerSubtype = getDataLayers(state.layers)?.[0]?.seriesType;
 
   return (
     <>
@@ -161,9 +163,8 @@ export function AddLayerButton({
                         toggleLayersChoice(false);
                       },
                     };
-                  } else {
-                    return dataPanel(props);
                   }
+                  return dataPanel(props);
                 }
                 return {
                   toolTipContent,
@@ -212,14 +213,12 @@ export function AddLayerButton({
             },
             {
               id: AddLayerPanelType.compatibleVisualizationTypes,
-              initialFocusedItemIndex: currentLayerVisType,
+              initialFocusedItemIndex: currentLayerTypeIndex,
               title: i18n.translate('xpack.lens.layerPanel.compatibleVisualizationTypes', {
                 defaultMessage: 'Compatible visualization types',
               }),
               width: 300,
               items: availableVisTypes.map((t) => {
-                const firstLayerSubtype = getDataLayers(state.layers)?.[0]?.seriesType;
-
                 const canInitializeWithSubtype =
                   t.subtypes?.includes(firstLayerSubtype) && !isPercentageSeries(firstLayerSubtype);
 

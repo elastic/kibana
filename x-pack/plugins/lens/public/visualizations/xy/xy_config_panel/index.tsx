@@ -667,34 +667,14 @@ export const XyToolbar = memo(function XyToolbar(
           isTitleVisible={state?.legend.isTitleVisible}
           onDisplayChange={(optionId) => {
             const newMode = legendOptions.find(({ id }) => id === optionId)!.value;
-            if (newMode === 'auto') {
-              setState({
-                ...state,
-                legend: {
-                  ...state.legend,
-                  isVisible: true,
-                  showSingleSeries: false,
-                },
-              });
-            } else if (newMode === 'show') {
-              setState({
-                ...state,
-                legend: {
-                  ...state.legend,
-                  isVisible: true,
-                  showSingleSeries: true,
-                },
-              });
-            } else if (newMode === 'hide') {
-              setState({
-                ...state,
-                legend: {
-                  ...state.legend,
-                  isVisible: false,
-                  showSingleSeries: false,
-                },
-              });
-            }
+            setState({
+              ...state,
+              legend: {
+                ...state.legend,
+                isVisible: newMode !== 'hide',
+                showSingleSeries: newMode === 'show',
+              },
+            });
           }}
           position={state?.legend.position}
           horizontalAlignment={state?.legend.horizontalAlignment}
@@ -741,19 +721,6 @@ export const XyToolbar = memo(function XyToolbar(
           allowedLegendStats={nonOrdinalXAxis ? xyLegendValues : undefined}
           legendStats={state?.legend.legendStats}
           onLegendStatsChange={(legendStats, hasConvertedToTable) => {
-            if (hasConvertedToTable) {
-              setState({
-                ...state,
-                legend: {
-                  ...state.legend,
-                  legendStats,
-                  legendSize: LegendSize.AUTO,
-                  isVisible: true,
-                  showSingleSeries: true,
-                },
-              });
-              return;
-            }
             setState({
               ...state,
               legend: {
@@ -761,6 +728,7 @@ export const XyToolbar = memo(function XyToolbar(
                 legendStats,
                 isVisible: true,
                 showSingleSeries: true,
+                ...(hasConvertedToTable ? { legendSize: LegendSize.AUTO } : {}),
               },
             });
           }}
