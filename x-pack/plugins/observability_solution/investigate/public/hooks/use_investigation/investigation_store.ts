@@ -33,12 +33,9 @@ interface InvestigationStore {
   asObservable: () => Observable<{
     investigation: StatefulInvestigation;
   }>;
-  getInvestigation: () => Promise<Readonly<StatefulInvestigation>>;
   setGlobalParameters: (globalWidgetParameters: GlobalWidgetParameters) => Promise<void>;
   setTitle: (title: string) => Promise<void>;
   destroy: () => void;
-  addNote: (note: string) => Promise<void>;
-  deleteNote: (id: string) => Promise<void>;
 }
 
 export function createInvestigationStore({
@@ -112,7 +109,6 @@ export function createInvestigationStore({
       });
     },
     asObservable: () => asObservable,
-    getInvestigation: async () => Object.freeze(observable$.value.investigation),
     destroy: () => {
       return controller.abort();
     },
@@ -150,27 +146,6 @@ export function createInvestigationStore({
     setTitle: async (title: string) => {
       return updateInvestigationInPlace((prevInvestigation) => {
         return { ...prevInvestigation, title };
-      });
-    },
-    addNote: async (note: string) => {
-      return updateInvestigationInPlace((prevInvestigation) => {
-        return {
-          ...prevInvestigation,
-          notes: prevInvestigation.notes.concat({
-            id: v4(),
-            createdAt: Date.now(),
-            createdBy: user.username,
-            content: note,
-          }),
-        };
-      });
-    },
-    deleteNote: async (id: string) => {
-      return updateInvestigationInPlace((prevInvestigation) => {
-        return {
-          ...prevInvestigation,
-          notes: prevInvestigation.notes.filter((note) => note.id !== id),
-        };
       });
     },
   };

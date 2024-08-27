@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 import { arrayOfStringsSchema } from './common';
 
 export const entityBaseSchema = z.object({

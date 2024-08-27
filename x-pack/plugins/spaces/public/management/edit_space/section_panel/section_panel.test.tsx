@@ -21,6 +21,16 @@ test('it renders without blowing up', () => {
   expect(wrapper).toMatchSnapshot();
 });
 
+test('it renders without optional title', () => {
+  const wrapper = shallowWithIntl(
+    <SectionPanel iconType="wrench">
+      <p>child</p>
+    </SectionPanel>
+  );
+
+  expect(wrapper).toMatchSnapshot();
+});
+
 test('it renders children', () => {
   const wrapper = mountWithIntl(
     <SectionPanel iconType="logoElasticsearch" title="Elasticsearch">

@@ -77,9 +77,8 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   validation,
   disabled = false,
 }) => {
-  const useSpaceAwareness = ExperimentalFeaturesService.get()?.useSpaceAwareness ?? false;
   const { docLinks } = useStartServices();
-  const { spaceId } = useFleetStatus();
+  const { spaceId, isSpaceAwarenessEnabled } = useFleetStatus();
 
   const { getAbsolutePath } = useLink();
   const AgentTamperProtectionWrapper = useUIExtension(
@@ -263,21 +262,21 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
-      {useSpaceAwareness ? (
+      {isSpaceAwarenessEnabled ? (
         <EuiDescribedFormGroup
           fullWidth
           title={
             <h3>
               <FormattedMessage
                 id="xpack.fleet.agentPolicyForm.spaceFieldLabel"
-                defaultMessage="Space"
+                defaultMessage="Spaces"
               />
             </h3>
           }
           description={
             <FormattedMessage
               id="xpack.fleet.agentPolicyForm.spaceDescription"
-              defaultMessage="Select a space for this policy or create a new one. {link}"
+              defaultMessage="Select one or more spaces for this policy or create a new one. {link}"
               values={{
                 link: (
                   <EuiLink
@@ -312,6 +311,9 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
                   : [spaceId || 'default']
               }
               onChange={(newValue) => {
+                if (newValue.length === 0) {
+                  return;
+                }
                 updateAgentPolicy({
                   space_ids: newValue,
                 });

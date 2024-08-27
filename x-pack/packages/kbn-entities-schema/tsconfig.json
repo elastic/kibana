@@ -15,5 +15,6 @@
     "node_modules",
   ],
   "kbn_references": [
+    "@kbn/zod",
   ]
 }

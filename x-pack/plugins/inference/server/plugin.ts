@@ -8,10 +8,9 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { createInferenceClient } from './inference_client';
-import { registerChatCompleteRoute } from './routes/chat_complete';
-import { registerConnectorsRoute } from './routes/connectors';
+import { registerRoutes } from './routes';
+import type { InferenceConfig } from './config';
 import type {
-  ConfigSchema,
   InferenceServerSetup,
   InferenceServerStart,
   InferenceSetupDependencies,
@@ -29,7 +28,7 @@ export class InferencePlugin
 {
   logger: Logger;
 
-  constructor(context: PluginInitializerContext<ConfigSchema>) {
+  constructor(context: PluginInitializerContext<InferenceConfig>) {
     this.logger = context.logger.get();
   }
   setup(
@@ -38,15 +37,11 @@ export class InferencePlugin
   ): InferenceServerSetup {
     const router = coreSetup.http.createRouter();
 
-    registerChatCompleteRoute({
+    registerRoutes({
       router,
       coreSetup,
     });
 
-    registerConnectorsRoute({
-      router,
-      coreSetup,
-    });
     return {};
   }
 

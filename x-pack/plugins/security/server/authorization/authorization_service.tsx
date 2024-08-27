@@ -25,6 +25,11 @@ import type {
   FeaturesPluginSetup as FeaturesPluginSetup,
   FeaturesPluginStart as FeaturesPluginStart,
 } from '@kbn/features-plugin/server';
+import {
+  Actions,
+  privilegesFactory,
+  type PrivilegesService,
+} from '@kbn/security-authorization-core';
 import type {
   AuthorizationMode,
   AuthorizationServiceSetup,
@@ -33,7 +38,6 @@ import type {
   CheckUserProfilesPrivileges,
 } from '@kbn/security-plugin-types-server';
 
-import { Actions } from './actions';
 import { initAPIAuthorization } from './api_authorization';
 import { initAppAuthorization } from './app_authorization';
 import { checkPrivilegesFactory } from './check_privileges';
@@ -41,8 +45,6 @@ import { checkPrivilegesDynamicallyWithRequestFactory } from './check_privileges
 import { checkSavedObjectsPrivilegesWithRequestFactory } from './check_saved_objects_privileges';
 import { disableUICapabilitiesFactory } from './disable_ui_capabilities';
 import { authorizationModeFactory } from './mode';
-import type { PrivilegesService } from './privileges';
-import { privilegesFactory } from './privileges';
 import { registerPrivilegesWithCluster } from './register_privileges_with_cluster';
 import { ResetSessionPage } from './reset_session_page';
 import { validateFeaturePrivileges } from './validate_feature_privileges';
@@ -53,7 +55,7 @@ import { canRedirectRequest } from '../authentication';
 import type { OnlineStatusRetryScheduler } from '../elasticsearch';
 import type { SpacesService } from '../plugin';
 
-export { Actions } from './actions';
+export { Actions } from '@kbn/security-authorization-core';
 
 interface AuthorizationServiceSetupParams {
   packageVersion: string;

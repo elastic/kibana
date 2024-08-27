@@ -31860,23 +31860,17 @@
     },
     {
       "query": "from a_index | stats max(concat(\"20\", \"22\"))",
-      "error": [
-        "Argument of [max] must be [double], found value [concat(\"20\",\"22\")] type [keyword]"
-      ],
+      "error": [],
       "warning": []
     },
     {
       "query": "from a_index | stats var = max(textField)",
-      "error": [
-        "Argument of [max] must be [double], found value [textField] type [text]"
-      ],
+      "error": [],
       "warning": []
     },
     {
       "query": "from a_index | stats max(textField)",
-      "error": [
-        "Argument of [max] must be [double], found value [textField] type [text]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -31916,6 +31910,110 @@
     },
     {
       "query": "from a_index | eval max(textField) > 0",
+      "error": [
+        "EVAL does not support function max"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = max(versionField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats max(versionField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = max(keywordField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats max(keywordField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where max(versionField)",
+      "error": [
+        "WHERE does not support function max"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where max(versionField) > 0",
+      "error": [
+        "WHERE does not support function max"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where max(keywordField)",
+      "error": [
+        "WHERE does not support function max"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where max(keywordField) > 0",
+      "error": [
+        "WHERE does not support function max"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = max(versionField)",
+      "error": [
+        "EVAL does not support function max"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = max(versionField) > 0",
+      "error": [
+        "EVAL does not support function max"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval max(versionField)",
+      "error": [
+        "EVAL does not support function max"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval max(versionField) > 0",
+      "error": [
+        "EVAL does not support function max"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = max(keywordField)",
+      "error": [
+        "EVAL does not support function max"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = max(keywordField) > 0",
+      "error": [
+        "EVAL does not support function max"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval max(keywordField)",
+      "error": [
+        "EVAL does not support function max"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval max(keywordField) > 0",
       "error": [
         "EVAL does not support function max"
       ],
@@ -32500,23 +32598,17 @@
     },
     {
       "query": "from a_index | stats min(concat(\"20\", \"22\"))",
-      "error": [
-        "Argument of [min] must be [double], found value [concat(\"20\",\"22\")] type [keyword]"
-      ],
+      "error": [],
       "warning": []
     },
     {
       "query": "from a_index | stats var = min(textField)",
-      "error": [
-        "Argument of [min] must be [double], found value [textField] type [text]"
-      ],
+      "error": [],
       "warning": []
     },
     {
       "query": "from a_index | stats min(textField)",
-      "error": [
-        "Argument of [min] must be [double], found value [textField] type [text]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -32556,6 +32648,110 @@
     },
     {
       "query": "from a_index | eval min(textField) > 0",
+      "error": [
+        "EVAL does not support function min"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = min(versionField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats min(versionField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = min(keywordField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats min(keywordField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where min(versionField)",
+      "error": [
+        "WHERE does not support function min"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where min(versionField) > 0",
+      "error": [
+        "WHERE does not support function min"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where min(keywordField)",
+      "error": [
+        "WHERE does not support function min"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where min(keywordField) > 0",
+      "error": [
+        "WHERE does not support function min"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = min(versionField)",
+      "error": [
+        "EVAL does not support function min"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = min(versionField) > 0",
+      "error": [
+        "EVAL does not support function min"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval min(versionField)",
+      "error": [
+        "EVAL does not support function min"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval min(versionField) > 0",
+      "error": [
+        "EVAL does not support function min"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = min(keywordField)",
+      "error": [
+        "EVAL does not support function min"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = min(keywordField) > 0",
+      "error": [
+        "EVAL does not support function min"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval min(keywordField)",
+      "error": [
+        "EVAL does not support function min"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval min(keywordField) > 0",
       "error": [
         "EVAL does not support function min"
       ],
@@ -37173,6 +37369,307 @@
       "warning": []
     },
     {
+      "query": "row var = mv_percentile(5.5, 5.5)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row mv_percentile(5.5, 5.5)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = mv_percentile(to_double(true), to_double(true))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = mv_percentile(5.5, 5)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row mv_percentile(5.5, 5)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = mv_percentile(to_double(true), to_integer(true))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = mv_percentile(to_double(true), 5)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = mv_percentile(5, 5.5)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row mv_percentile(5, 5.5)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = mv_percentile(to_integer(true), to_double(true))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = mv_percentile(5, 5)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row mv_percentile(5, 5)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = mv_percentile(to_integer(true), to_integer(true))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = mv_percentile(to_integer(true), 5)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = mv_percentile(5, to_double(true))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = mv_percentile(5, to_integer(true))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = mv_percentile(true, true)",
+      "error": [
+        "Argument of [mv_percentile] must be [double], found value [true] type [boolean]",
+        "Argument of [mv_percentile] must be [double], found value [true] type [boolean]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where mv_percentile(doubleField, doubleField) > 0",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where mv_percentile(booleanField, booleanField) > 0",
+      "error": [
+        "Argument of [mv_percentile] must be [double], found value [booleanField] type [boolean]",
+        "Argument of [mv_percentile] must be [double], found value [booleanField] type [boolean]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where mv_percentile(doubleField, integerField) > 0",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where mv_percentile(doubleField, longField) > 0",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where mv_percentile(integerField, doubleField) > 0",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where mv_percentile(integerField, integerField) > 0",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where mv_percentile(integerField, longField) > 0",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where mv_percentile(longField, doubleField) > 0",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where mv_percentile(longField, integerField) > 0",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where mv_percentile(longField, longField) > 0",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = mv_percentile(doubleField, doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_percentile(doubleField, doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = mv_percentile(to_double(booleanField), to_double(booleanField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_percentile(booleanField, booleanField)",
+      "error": [
+        "Argument of [mv_percentile] must be [double], found value [booleanField] type [boolean]",
+        "Argument of [mv_percentile] must be [double], found value [booleanField] type [boolean]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = mv_percentile(doubleField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_percentile(doubleField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = mv_percentile(to_double(booleanField), to_integer(booleanField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = mv_percentile(doubleField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_percentile(doubleField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = mv_percentile(to_double(booleanField), longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = mv_percentile(integerField, doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_percentile(integerField, doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = mv_percentile(to_integer(booleanField), to_double(booleanField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = mv_percentile(integerField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_percentile(integerField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = mv_percentile(to_integer(booleanField), to_integer(booleanField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = mv_percentile(integerField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_percentile(integerField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = mv_percentile(to_integer(booleanField), longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = mv_percentile(longField, doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_percentile(longField, doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = mv_percentile(longField, to_double(booleanField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = mv_percentile(longField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_percentile(longField, integerField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = mv_percentile(longField, to_integer(booleanField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = mv_percentile(longField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_percentile(longField, longField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_percentile(doubleField, doubleField, extraArg)",
+      "error": [
+        "Error: [mv_percentile] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | sort mv_percentile(doubleField, doubleField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_percentile(null, null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval mv_percentile(nullVar, nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "f",
       "error": [
         "SyntaxError: mismatched input 'f' expecting {'explain', 'from', 'meta', 'metrics', 'row', 'show'}"
@@ -37385,6 +37882,48 @@
       "error": [
         "SyntaxError: mismatched input '=' expecting <EOF>",
         "Unknown index [assignment]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "FROM index, missingIndex",
+      "error": [
+        "Unknown index [missingIndex]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from average()",
+      "error": [
+        "Unknown index [average()]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "fRom custom_function()",
+      "error": [
+        "Unknown index [custom_function()]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "FROM indexes*",
+      "error": [
+        "Unknown index [indexes*]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from numberField",
+      "error": [
+        "Unknown index [numberField]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "FROM policy",
+      "error": [
+        "Unknown index [policy]"
       ],
       "warning": []
     },
