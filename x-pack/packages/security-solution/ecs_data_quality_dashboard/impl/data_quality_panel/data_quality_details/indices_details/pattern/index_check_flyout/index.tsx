@@ -21,9 +21,10 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useEffect } from 'react';
 import moment from 'moment';
+import { getDocsCount, getSizeInBytes } from '../../../../utils/stats';
 import { useIndicesCheckContext } from '../../../../contexts/indices_check_context';
 
-import { EMPTY_STAT, getDocsCount, getSizeInBytes } from '../../../../helpers';
+import { EMPTY_STAT } from '../../../../constants';
 import { MeteringStatsIndex, PatternRollup } from '../../../../types';
 import { useDataQualityContext } from '../../../../data_quality_context';
 import { IndexProperties } from './index_properties';

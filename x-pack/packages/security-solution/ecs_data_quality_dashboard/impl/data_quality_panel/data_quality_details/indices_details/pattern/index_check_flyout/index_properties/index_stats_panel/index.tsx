@@ -13,7 +13,7 @@ import { DOCS } from '../translations';
 import { ILM_PHASE } from '../../../../../../translations';
 import { SIZE } from '../../../summary_table/translations';
 import { Stat } from '../../../../../../stat';
-import { getIlmPhaseDescription } from '../../../../../../helpers';
+import { getIlmPhaseDescription } from '../../../../../../utils/get_ilm_phase_description';
 
 const StyledFlexItem = styled(EuiFlexItem)`
   border-right: 1px solid ${({ theme }) => theme.eui.euiBorderColor};

@@ -19,7 +19,7 @@ import {
   someField,
 } from '../../../../../../../../mock/enriched_field_metadata/mock_enriched_field_metadata';
 import { mockPartitionedFieldMetadata } from '../../../../../../../../mock/partitioned_field_metadata/mock_partitioned_field_metadata';
-import { EMPTY_STAT } from '../../../../../../../../helpers';
+import { EMPTY_STAT } from '../../../../../../../../constants';
 
 const defaultBytesFormat = '0,0.[0]b';
 const formatBytes = (value: number | undefined) =>

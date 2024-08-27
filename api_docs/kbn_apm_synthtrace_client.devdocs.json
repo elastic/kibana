@@ -2724,7 +2724,9 @@
           " | ",
           "K8sContainerMetricsDocument",
           " | ",
-          "AWSRdsMetricsDocument"
+          "AWSRdsMetricsDocument",
+          " | ",
+          "K8sNodeMetricsDocument"
         ],
         "path": "packages/kbn-apm-synthtrace-client/src/lib/infra/index.ts",
         "deprecated": false,
@@ -3131,6 +3133,46 @@
                 "label": "name",
                 "description": [],
                 "path": "packages/kbn-apm-synthtrace-client/src/lib/infra/aws/rds.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/apm-synthtrace-client",
+            "id": "def-common.infra.k8sNode",
+            "type": "Function",
+            "tags": [],
+            "label": "k8sNode",
+            "description": [],
+            "signature": [
+              "(name: string, podUid: string) => ",
+              "K8sNode"
+            ],
+            "path": "packages/kbn-apm-synthtrace-client/src/lib/infra/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/apm-synthtrace-client",
+                "id": "def-common.infra.k8sNode.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "packages/kbn-apm-synthtrace-client/src/lib/infra/k8s_node.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/apm-synthtrace-client",
+                "id": "def-common.infra.k8sNode.$2",
+                "type": "string",
+                "tags": [],
+                "label": "podUid",
+                "description": [],
+                "path": "packages/kbn-apm-synthtrace-client/src/lib/infra/k8s_node.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
