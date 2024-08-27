@@ -511,6 +511,15 @@ export class ConsolePageObject extends FtrService {
     });
   }
 
+  async skipTourIfExists() {
+    await this.retry.try(async () => {
+      const tourShown = await this.testSubjects.exists('consoleSkipTourButton');
+      if (tourShown) {
+        await this.clickSkipTour();
+      }
+    });
+  }
+
   public async collapseJsonBlock(blockNumber: number) {
     const blocks = await this.find.allByCssSelector('.ace_fold-widget');
 
