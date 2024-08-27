@@ -87,9 +87,7 @@ exports[`renderCustomToolbar should render correctly with an element 1`] = `
           <EuiFlexItem
             grow={false}
           >
-            <div
-              className="unifiedDataTableToolbarControlButton"
-            >
+            <div>
               additional
             </div>
           </EuiFlexItem>
@@ -190,9 +188,7 @@ exports[`renderCustomToolbar should render successfully 1`] = `
           <EuiFlexItem
             grow={false}
           >
-            <div
-              className="unifiedDataTableToolbarControlButton"
-            >
+            <div>
               additional
             </div>
           </EuiFlexItem>

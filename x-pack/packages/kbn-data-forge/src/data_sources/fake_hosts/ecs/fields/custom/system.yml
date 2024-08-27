@@ -20,6 +20,18 @@
       level: custom
       type: float
       description: "Percentage of CPU usage by system processes"
+    - name: load.1
+      level: custom
+      type: float
+      description: "Load 1m by system processes"
+    - name: memory.actual.used.pct
+      level: custom
+      type: float
+      description: "Percentage of actual memory by system processes"
+    - name: filesystem.used.pct
+      level: custom
+      type: float
+      description: "Percentage of filesytem used by system processes"
     - name: network.name
       type: keyword
       level: custom

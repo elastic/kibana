@@ -134,7 +134,7 @@ export const esqlAsyncSearchStrategyProvider = (
      * @throws `KbnSearchError`
      */
     search: (request, options: IAsyncSearchOptions, deps) => {
-      logger.debug(`search ${JSON.stringify(request) || request.id}`);
+      logger.debug(() => `search ${JSON.stringify(request) || request.id}`);
 
       return asyncSearch(request, options, deps);
     },

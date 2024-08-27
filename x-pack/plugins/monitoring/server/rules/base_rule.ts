@@ -264,7 +264,8 @@ export class BaseRule {
     DefaultAlert
   >): Promise<any> {
     this.scopedLogger.debug(
-      `Executing alert with params: ${JSON.stringify(params)} and state: ${JSON.stringify(state)}`
+      () =>
+        `Executing alert with params: ${JSON.stringify(params)} and state: ${JSON.stringify(state)}`
     );
 
     const { alertsClient } = services;
@@ -404,7 +405,7 @@ export class BaseRule {
   }
 
   protected createGlobalStateLink(link: string, clusterUuid: string, ccs?: string) {
-    const globalState = [`cluster_uuid:${clusterUuid}`];
+    const globalState = [`cluster_uuid:'${clusterUuid}'`];
     if (ccs) {
       globalState.push(`ccs:${ccs}`);
     }

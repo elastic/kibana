@@ -33,21 +33,19 @@ import type {
   CreatePackagePolicyRouteState,
 } from '@kbn/fleet-plugin/public';
 import { isPolicyOutOfDate } from '../utils';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useGetAgentStatus } from '../../../hooks/agents/use_get_agent_status';
 import { TransformFailedCallout } from './components/transform_failed_callout';
 import type { EndpointIndexUIQueryParams } from '../types';
 import { EndpointListNavLink } from './components/endpoint_list_nav_link';
-import {
-  AgentStatus,
-  EndpointAgentStatus,
-} from '../../../../common/components/endpoint/agents/agent_status';
+import { AgentStatus } from '../../../../common/components/endpoint/agents/agent_status';
 import { EndpointDetailsFlyout } from './details';
 import * as selectors from '../store/selectors';
-import { getEndpointPendingActionsCallback, nonExistingPolicies } from '../store/selectors';
+import { nonExistingPolicies } from '../store/selectors';
 import { useEndpointSelector } from './hooks';
 import { POLICY_STATUS_TO_HEALTH_COLOR, POLICY_STATUS_TO_TEXT } from './host_constants';
 import type { CreateStructuredSelector } from '../../../../common/store';
 import type {
+  AgentStatusRecords,
   HostInfo,
   HostInfoInterface,
   Immutable,
@@ -81,13 +79,12 @@ const StyledDatePicker = styled.div`
 `;
 
 interface GetEndpointListColumnsProps {
-  agentStatusClientEnabled: boolean;
   missingPolicies: ReturnType<typeof nonExistingPolicies>;
   backToEndpointList: PolicyDetailsRouteState['backLink'];
-  getHostPendingActions: ReturnType<typeof getEndpointPendingActionsCallback>;
   queryParams: Immutable<EndpointIndexUIQueryParams>;
   search: string;
   getAppUrl: ReturnType<typeof useAppUrl>['getAppUrl'];
+  agentStatusRecords: AgentStatusRecords;
 }
 
 const columnWidths: Record<
@@ -106,13 +103,12 @@ const columnWidths: Record<
 };
 
 const getEndpointListColumns = ({
-  agentStatusClientEnabled,
   missingPolicies,
   backToEndpointList,
-  getHostPendingActions,
   queryParams,
   search,
   getAppUrl,
+  agentStatusRecords,
 }: GetEndpointListColumnsProps): Array<EuiBasicTableColumn<Immutable<HostInfo>>> => {
   const lastActiveColumnName = i18n.translate('xpack.securitySolution.endpoint.list.lastActive', {
     defaultMessage: 'Last active',
@@ -156,13 +152,10 @@ const getEndpointListColumns = ({
       }),
       sortable: true,
       render: (hostStatus: HostInfo['host_status'], endpointInfo) => {
-        // TODO: 8.15 remove `EndpointAgentStatus` when `agentStatusClientEnabled` FF is enabled and removed
-        return agentStatusClientEnabled ? (
-          <AgentStatus agentId={endpointInfo.metadata.agent.id} agentType="endpoint" />
-        ) : (
-          <EndpointAgentStatus
-            endpointHostInfo={endpointInfo}
-            pendingActions={getHostPendingActions(endpointInfo.metadata.agent.id)}
+        return (
+          <AgentStatus
+            statusInfo={agentStatusRecords[endpointInfo.metadata.agent.id]}
+            agentType="endpoint"
             data-test-subj="rowHostStatus"
           />
         );
@@ -323,8 +316,6 @@ const stateHandleDeployEndpointsClick: AgentPolicyDetailsDeployAgentAction = {
 };
 
 export const EndpointList = () => {
-  const agentStatusClientEnabled = useIsExperimentalFeatureEnabled('agentStatusClientEnabled');
-
   const history = useHistory();
   const {
     listData,
@@ -349,7 +340,6 @@ export const EndpointList = () => {
     isInitialized,
   } = useEndpointSelector(selector);
   const missingPolicies = useEndpointSelector(nonExistingPolicies);
-  const getHostPendingActions = useEndpointSelector(getEndpointPendingActionsCallback);
   const {
     canReadEndpointList,
     canAccessFleet,
@@ -509,26 +499,23 @@ export const EndpointList = () => {
     };
   }, []);
 
+  const { data: agentStatusRecords } = useGetAgentStatus(
+    listData.map((rowItem) => rowItem.metadata.agent.id),
+    'endpoint',
+    { enabled: hasListData }
+  );
+
   const columns = useMemo(
     () =>
       getEndpointListColumns({
-        agentStatusClientEnabled,
         backToEndpointList,
         getAppUrl,
         missingPolicies,
-        getHostPendingActions,
         queryParams,
         search,
+        agentStatusRecords: agentStatusRecords ?? {},
       }),
-    [
-      agentStatusClientEnabled,
-      backToEndpointList,
-      getAppUrl,
-      getHostPendingActions,
-      missingPolicies,
-      queryParams,
-      search,
-    ]
+    [agentStatusRecords, backToEndpointList, getAppUrl, missingPolicies, queryParams, search]
   );
 
   const sorting = useMemo(

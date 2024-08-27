@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
+import { EventFiltersProcessDescendantIndicator } from '../../../../components/artifact_entry_card/components/card_decorators/event_filters_process_descendant_indicator';
 import { UnsavedChangesConfirmModal } from './unsaved_changes_confirm_modal';
 import { useLicense } from '../../../../../common/hooks/use_license';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
@@ -290,6 +291,7 @@ export const PolicyTabs = React.memo(() => {
                   getArtifactPath={getEventFiltersListPath}
                   getPolicyArtifactsPath={getPolicyEventFiltersPath}
                   canWriteArtifact={canWriteEventFilters}
+                  CardDecorator={EventFiltersProcessDescendantIndicator}
                 />
               </>
             ),

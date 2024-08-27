@@ -15,10 +15,15 @@ export interface ValidationResults {
 }
 
 export const agentPolicyFormValidation = (
-  agentPolicy: Partial<NewAgentPolicy | AgentPolicy>
+  agentPolicy: Partial<NewAgentPolicy | AgentPolicy>,
+  options?: { allowedNamespacePrefixes?: string[] }
 ): ValidationResults => {
   const errors: ValidationResults = {};
-  const namespaceValidation = isValidNamespace(agentPolicy.namespace || '');
+  const namespaceValidation = isValidNamespace(
+    agentPolicy.namespace || '',
+    false,
+    options?.allowedNamespacePrefixes
+  );
 
   if (!agentPolicy.name?.trim()) {
     errors.name = [

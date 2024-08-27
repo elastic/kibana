@@ -11,7 +11,7 @@ import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
 import { EuiBetaBadge, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ExpandablePanel } from '../../../shared/components/expandable_panel';
+import { ExpandablePanel } from '@kbn/security-solution-common';
 import {
   CORRELATIONS_DETAILS_SUPPRESSED_ALERTS_SECTION_TEST_ID,
   SUPPRESSED_ALERTS_SECTION_TECHNICAL_PREVIEW_TEST_ID,
@@ -29,6 +29,10 @@ export interface SuppressedAlertsProps {
    * Value of the kibana.alert.suppression.doc_count field
    */
   alertSuppressionCount: number;
+  /**
+   * Indicate whether suppressed alert is shown in alert preview (rule creation)
+   */
+  isPreview: boolean;
 }
 
 /**
@@ -37,6 +41,7 @@ export interface SuppressedAlertsProps {
 export const SuppressedAlerts: React.FC<SuppressedAlertsProps> = ({
   dataAsNestedObject,
   alertSuppressionCount,
+  isPreview,
 }) => {
   const ruleType = get(dataAsNestedObject, ALERT_RULE_TYPE)?.[0];
 
@@ -62,7 +67,7 @@ export const SuppressedAlerts: React.FC<SuppressedAlertsProps> = ({
     </EuiFlexGroup>
   );
 
-  const headerContent = alertSuppressionCount > 0 && (
+  const headerContent = alertSuppressionCount > 0 && !isPreview && (
     <div
       data-test-subj={`${CORRELATIONS_DETAILS_SUPPRESSED_ALERTS_SECTION_TEST_ID}InvestigateInTimeline`}
     >

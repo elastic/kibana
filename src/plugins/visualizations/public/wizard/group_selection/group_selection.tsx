@@ -57,6 +57,8 @@ function GroupSelection(props: GroupSelectionProps) {
         [
           ...props.visTypesRegistry.getAliases(),
           ...props.visTypesRegistry.getByGroup(VisGroups.PROMOTED),
+          // Include so TSVB still gets displayed
+          ...props.visTypesRegistry.getByGroup(VisGroups.LEGACY),
         ].filter((visDefinition) => {
           return !visDefinition.disableCreate;
         }),
@@ -65,6 +67,7 @@ function GroupSelection(props: GroupSelectionProps) {
       ),
     [props.visTypesRegistry]
   );
+
   return (
     <>
       <EuiModalHeader>

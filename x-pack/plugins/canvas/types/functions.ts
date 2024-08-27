@@ -88,9 +88,9 @@ export type FunctionFactory<FnFactory> =
     ExpressionFunctionDefinition<Name, Input, Arguments, Awaited<Output>> :
     never;
 
-type CommonFunction = FunctionFactory<typeof commonFunctions[number]>;
-type BrowserFunction = FunctionFactory<typeof browserFunctions[number]>;
-type ServerFunction = FunctionFactory<typeof serverFunctions[number]>;
+type CommonFunction = FunctionFactory<(typeof commonFunctions)[number]>;
+type BrowserFunction = FunctionFactory<(typeof browserFunctions)[number]>;
+type ServerFunction = FunctionFactory<(typeof serverFunctions)[number]>;
 type ExternalFunction = FunctionFactory<
   ReturnType<typeof initExternalFunctions> extends Array<infer U> ? U : never
 >;

@@ -7,6 +7,7 @@
 
 import type { HttpHandler } from '@kbn/core/public';
 import { PersistedLogViewReference } from '@kbn/logs-shared-plugin/common';
+import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { IdFormat } from '../../../../../common/http_api/latest';
 
 import {
@@ -14,7 +15,6 @@ import {
   getLogEntryExamplesSuccessResponsePayloadRT,
   LOG_ANALYSIS_GET_LOG_ENTRY_RATE_EXAMPLES_PATH,
 } from '../../../../../common/http_api';
-import { decodeOrThrow } from '../../../../../common/runtime_types';
 
 interface RequestArgs {
   logViewReference: PersistedLogViewReference;

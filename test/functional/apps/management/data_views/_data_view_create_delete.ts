@@ -147,10 +147,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           return Promise.all(comparedHeaders);
         });
       });
+
+      it('should support unmatched index pattern segments', async function () {
+        await PageObjects.settings.createIndexPattern('l*,z*', '@timestamp');
+        const patternName = await PageObjects.settings.getIndexPageHeading();
+        expect(patternName).to.be('l*,z*');
+        await PageObjects.settings.removeIndexPattern();
+      });
     });
 
     describe('edit index pattern', () => {
       it('on edit click', async () => {
+        await testSubjects.click('detail-link-logstash-*');
         await PageObjects.settings.editIndexPattern('logstash-*', '@timestamp', 'Logstash Star');
 
         await retry.try(async () => {

@@ -69,7 +69,7 @@ export class KbnClientUiSettings {
     };
 
     for (const [name, { isOverridden }] of Object.entries(await this.getAll())) {
-      if (!isOverridden && !changes.hasOwnProperty(name)) {
+      if (!isOverridden && !Object.hasOwn(changes, name)) {
         changes[name] = null;
       }
     }

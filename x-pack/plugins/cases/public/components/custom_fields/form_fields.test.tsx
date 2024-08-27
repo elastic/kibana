@@ -15,7 +15,8 @@ import { FormTestComponent } from '../../common/test_utils';
 import { CustomFieldTypes } from '../../../common/types/domain';
 import { FormFields } from './form_fields';
 
-describe('FormFields ', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/188450
+describe.skip('FormFields ', () => {
   let appMockRender: AppMockRenderer;
   const onSubmit = jest.fn();
 

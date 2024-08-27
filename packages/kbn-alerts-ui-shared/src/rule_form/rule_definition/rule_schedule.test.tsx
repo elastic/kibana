@@ -13,37 +13,86 @@ import { RuleSchedule } from './rule_schedule';
 
 const mockOnChange = jest.fn();
 
+jest.mock('../hooks', () => ({
+  useRuleFormState: jest.fn(),
+  useRuleFormDispatch: jest.fn(),
+}));
+
+const { useRuleFormState, useRuleFormDispatch } = jest.requireMock('../hooks');
+
 describe('RuleSchedule', () => {
+  beforeEach(() => {
+    useRuleFormDispatch.mockReturnValue(mockOnChange);
+  });
+
   afterEach(() => {
     jest.resetAllMocks();
   });
 
   test('Renders correctly', () => {
-    render(<RuleSchedule interval={'5m'} onChange={mockOnChange} />);
+    useRuleFormState.mockReturnValue({
+      formData: {
+        schedule: {
+          interval: '5m',
+        },
+      },
+    });
+    render(<RuleSchedule />);
 
     expect(screen.getByTestId('ruleSchedule')).toBeInTheDocument();
   });
 
   test('Should allow interval number to be changed', () => {
-    render(<RuleSchedule interval={'5m'} onChange={mockOnChange} />);
+    useRuleFormState.mockReturnValue({
+      formData: {
+        schedule: {
+          interval: '5m',
+        },
+      },
+    });
+    render(<RuleSchedule />);
 
     fireEvent.change(screen.getByTestId('ruleScheduleNumberInput'), {
       target: {
         value: '10',
       },
     });
-    expect(mockOnChange).toHaveBeenCalledWith('interval', '10m');
+    expect(mockOnChange).toHaveBeenCalledWith({
+      type: 'setSchedule',
+      payload: {
+        interval: '10m',
+      },
+    });
   });
 
   test('Should allow interval unit to be changed', () => {
-    render(<RuleSchedule interval={'5m'} onChange={mockOnChange} />);
+    useRuleFormState.mockReturnValue({
+      formData: {
+        schedule: {
+          interval: '5m',
+        },
+      },
+    });
+    render(<RuleSchedule />);
 
     userEvent.selectOptions(screen.getByTestId('ruleScheduleUnitInput'), 'hours');
-    expect(mockOnChange).toHaveBeenCalledWith('interval', '5h');
+    expect(mockOnChange).toHaveBeenCalledWith({
+      type: 'setSchedule',
+      payload: {
+        interval: '5h',
+      },
+    });
   });
 
   test('Should only allow integers as inputs', async () => {
-    render(<RuleSchedule interval={'5m'} onChange={mockOnChange} />);
+    useRuleFormState.mockReturnValue({
+      formData: {
+        schedule: {
+          interval: '5m',
+        },
+      },
+    });
+    render(<RuleSchedule />);
 
     ['-', '+', 'e', 'E', '.', 'a', '01'].forEach((char) => {
       fireEvent.change(screen.getByTestId('ruleScheduleNumberInput'), {
@@ -56,30 +105,35 @@ describe('RuleSchedule', () => {
   });
 
   test('Should display error properly', () => {
-    render(
-      <RuleSchedule
-        interval={'5m'}
-        errors={{
-          interval: 'something went wrong!',
-        }}
-        onChange={mockOnChange}
-      />
-    );
+    useRuleFormState.mockReturnValue({
+      formData: {
+        schedule: {
+          interval: '5m',
+        },
+      },
+      baseErrors: {
+        interval: 'something went wrong!',
+      },
+    });
+    render(<RuleSchedule />);
 
     expect(screen.getByText('something went wrong!')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleScheduleNumberInput')).toBeInvalid();
   });
 
   test('Should enforce minimum schedule interval', () => {
-    render(
-      <RuleSchedule
-        interval={'30s'}
-        minimumScheduleInterval={{
-          enforce: true,
-          value: '1m',
-        }}
-        onChange={mockOnChange}
-      />
-    );
+    useRuleFormState.mockReturnValue({
+      formData: {
+        schedule: {
+          interval: '30s',
+        },
+      },
+      minimumScheduleInterval: {
+        enforce: true,
+        value: '1m',
+      },
+    });
+    render(<RuleSchedule />);
 
     expect(screen.getByText('Interval must be at least 1 minute.')).toBeInTheDocument();
   });

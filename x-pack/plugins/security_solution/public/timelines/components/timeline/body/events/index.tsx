@@ -49,6 +49,7 @@ interface Props {
   tabType?: TimelineTabs;
   leadingControlColumns: ControlColumnProps[];
   trailingControlColumns: ControlColumnProps[];
+  onToggleShowNotes?: (eventId?: string) => void;
 }
 
 const EventsComponent: React.FC<Props> = ({
@@ -72,6 +73,7 @@ const EventsComponent: React.FC<Props> = ({
   tabType,
   leadingControlColumns,
   trailingControlColumns,
+  onToggleShowNotes,
 }) => (
   <EventsTbody data-test-subj="events">
     {data.map((event, i) => (
@@ -100,6 +102,7 @@ const EventsComponent: React.FC<Props> = ({
         timelineId={id}
         leadingControlColumns={leadingControlColumns}
         trailingControlColumns={trailingControlColumns}
+        onToggleShowNotes={onToggleShowNotes}
       />
     ))}
   </EventsTbody>

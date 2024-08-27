@@ -10,6 +10,7 @@ import { UpdateSLOParams, UpdateSLOResponse, updateSLOResponseSchema } from '@kb
 import { asyncForEach } from '@kbn/std';
 import { isEqual, pick } from 'lodash';
 import {
+  getSLOPipelineId,
   getSLOSummaryPipelineId,
   getSLOSummaryTransformId,
   getSLOTransformId,
@@ -17,6 +18,7 @@ import {
   SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
   SLO_SUMMARY_TEMP_INDEX_NAME,
 } from '../../common/constants';
+import { getSLOPipelineTemplate } from '../assets/ingest_templates/slo_pipeline_template';
 import { getSLOSummaryPipelineTemplate } from '../assets/ingest_templates/slo_summary_pipeline_template';
 import { SLODefinition } from '../domain/models';
 import { validateSLO } from '../domain/services';
@@ -71,9 +73,20 @@ export class UpdateSLO {
     rollbackOperations.push(() => this.repository.save(originalSlo));
 
     if (!requireRevisionBump) {
-      // At this point, we still need to update the summary pipeline to include the changes (name, desc, tags, ...) in the summary index
+      // At this point, we still need to update the sli and summary pipeline to include the changes (id and revision in the rollup index) and (name, desc, tags, ...) in the summary index
 
       try {
+        await retryTransientEsErrors(
+          () => this.esClient.ingest.putPipeline(getSLOPipelineTemplate(updatedSlo)),
+          { logger: this.logger }
+        );
+        rollbackOperations.push(() =>
+          this.esClient.ingest.deletePipeline(
+            { id: getSLOPipelineId(updatedSlo.id, updatedSlo.revision) },
+            { ignore: [404] }
+          )
+        );
+
         await retryTransientEsErrors(
           () =>
             this.esClient.ingest.putPipeline(
@@ -108,6 +121,17 @@ export class UpdateSLO {
     const updatedSummaryTransformId = getSLOSummaryTransformId(updatedSlo.id, updatedSlo.revision);
 
     try {
+      await retryTransientEsErrors(
+        () => this.esClient.ingest.putPipeline(getSLOPipelineTemplate(updatedSlo)),
+        { logger: this.logger }
+      );
+      rollbackOperations.push(() =>
+        this.esClient.ingest.deletePipeline(
+          { id: getSLOPipelineId(updatedSlo.id, updatedSlo.revision) },
+          { ignore: [404] }
+        )
+      );
+
       await this.transformManager.install(updatedSlo);
       rollbackOperations.push(() => this.transformManager.uninstall(updatedRollupTransformId));
 
@@ -186,6 +210,11 @@ export class UpdateSLO {
 
       await this.esClient.ingest.deletePipeline(
         { id: getSLOSummaryPipelineId(originalSlo.id, originalSlo.revision) },
+        { ignore: [404] }
+      );
+
+      await this.esClient.ingest.deletePipeline(
+        { id: getSLOPipelineId(originalSlo.id, originalSlo.revision) },
         { ignore: [404] }
       );
     } catch (err) {

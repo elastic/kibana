@@ -917,7 +917,7 @@ function getAlwaysFiringAlertAsDataRuleType(
     validate: {
       params: paramsSchema,
     },
-    category: 'kibana',
+    category: 'management',
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
@@ -1029,6 +1029,78 @@ function getWaitingRuleType(logger: Logger) {
     },
   };
 
+  return result;
+}
+
+function getSeverityRuleType() {
+  const paramsSchema = schema.object({
+    pattern: schema.arrayOf(
+      schema.oneOf([schema.literal('low'), schema.literal('medium'), schema.literal('high')])
+    ),
+  });
+  type ParamsType = TypeOf<typeof paramsSchema>;
+  interface State extends RuleTypeState {
+    patternIndex?: number;
+  }
+  const result: RuleType<
+    ParamsType,
+    never,
+    State,
+    {},
+    {},
+    'low' | 'medium' | 'high',
+    'recovered',
+    { patternIndex: number; instancePattern: boolean[] }
+  > = {
+    id: 'test.severity',
+    name: 'Test: Rule type with severity',
+    actionGroups: [
+      { id: 'low', name: 'Low', severity: { level: 0 } },
+      { id: 'medium', name: 'Medium', severity: { level: 1 } },
+      { id: 'high', name: 'High', severity: { level: 2 } },
+    ],
+    category: 'management',
+    producer: 'alertsFixture',
+    defaultActionGroupId: 'low',
+    minimumLicenseRequired: 'basic',
+    isExportable: true,
+    doesSetRecoveryContext: true,
+    validate: { params: paramsSchema },
+    async executor(executorOptions) {
+      const { services, state, params } = executorOptions;
+      const pattern = params.pattern;
+      if (!Array.isArray(pattern)) throw new Error('pattern is not an array');
+
+      const alertsClient = services.alertsClient;
+      if (!alertsClient) {
+        throw new Error(`Expected alertsClient to be defined but it is not`);
+      }
+
+      // get the pattern index, return if past it
+      const patternIndex = state.patternIndex ?? 0;
+      if (patternIndex >= pattern.length) {
+        return { state: { patternIndex } };
+      }
+
+      alertsClient.report({ id: '*', actionGroup: pattern[patternIndex] });
+
+      // set recovery payload
+      for (const recoveredAlert of alertsClient.getRecoveredAlerts()) {
+        alertsClient.setAlertData({ id: recoveredAlert.alert.getId() });
+      }
+
+      return {
+        state: {
+          patternIndex: patternIndex + 1,
+        },
+      };
+    },
+    alerts: {
+      context: 'test.severity',
+      shouldWrite: true,
+      mappings: { fieldMap: {} },
+    },
+  };
   return result;
 }
 
@@ -1325,4 +1397,5 @@ export function defineRuleTypes(
   alerting.registerType(getPatternFiringAutoRecoverFalseRuleType());
   alerting.registerType(getPatternFiringAlertsAsDataRuleType());
   alerting.registerType(getWaitingRuleType(logger));
+  alerting.registerType(getSeverityRuleType());
 }

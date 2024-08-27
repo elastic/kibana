@@ -6,5 +6,4 @@ enum:
   - cases
   - observability
   - securitySolution
-examples:
-  - cases
+example: cases

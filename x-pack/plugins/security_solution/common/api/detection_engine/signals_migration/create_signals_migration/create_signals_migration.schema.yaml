@@ -8,7 +8,10 @@ paths:
       x-labels: [ess]
       operationId: CreateAlertsMigration
       x-codegen-enabled: true
-      summary: Initiates an alerts migration
+      summary: Initiate a detection alert migration
+      description: |
+        Initiate a migration of detection alerts.
+        Migrations are initiated per index. While the process is neither destructive nor interferes with existing data, it may be resource-intensive. As such, it is recommended that you plan your migrations accordingly.
       tags:
         - Alerts migration API
       requestBody:

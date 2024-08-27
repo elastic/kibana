@@ -8,7 +8,6 @@
 
 import _ from 'lodash';
 import expect from '@kbn/expect';
-import { asyncForEach } from '@kbn/std';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -16,6 +15,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'console', 'header']);
   const find = getService('find');
+
+  async function runTemplateTest(type: string, template: string) {
+    await PageObjects.console.monaco.enterText(`{\n\t"type": "${type}",\n`);
+    await PageObjects.console.sleepForDebouncePeriod();
+    // Prompt autocomplete for 'settings'
+    await PageObjects.console.monaco.promptAutocomplete('s');
+
+    await retry.waitFor('autocomplete to be visible', () =>
+      PageObjects.console.monaco.isAutocompleteVisible()
+    );
+    await PageObjects.console.monaco.pressEnter();
+    await retry.try(async () => {
+      const request = await PageObjects.console.monaco.getEditorText();
+      log.debug(request);
+      expect(request).to.contain(`${template}`);
+    });
+  }
 
   describe('console autocomplete feature', function describeIndexTests() {
     this.tags('includeFirefox');
@@ -261,21 +277,6 @@ GET _search
         );
         expect(await PageObjects.console.monaco.isAutocompleteVisible()).to.be.eql(true);
       });
-
-      // not fixed for monaco yet https://github.com/elastic/kibana/issues/184442
-      it.skip('should not activate auto-complete after comma following endpoint in URL', async () => {
-        await PageObjects.console.monaco.enterText('GET _search');
-
-        await PageObjects.console.sleepForDebouncePeriod();
-        log.debug('Key type ","');
-        await PageObjects.console.monaco.enterText(','); // i.e. 'GET _search,'
-
-        await PageObjects.console.sleepForDebouncePeriod();
-        log.debug('Key type Ctrl+SPACE');
-        await PageObjects.console.monaco.pressCtrlSpace();
-
-        expect(await PageObjects.console.monaco.isAutocompleteVisible()).to.be.eql(false);
-      });
     });
 
     // not implemented for monaco yet https://github.com/elastic/kibana/issues/184856
@@ -330,45 +331,53 @@ GET _search
       });
     });
 
-    describe('with conditional templates', async () => {
-      const CONDITIONAL_TEMPLATES = [
-        {
-          type: 'fs',
-          template: `"location": "path"`,
-        },
-        {
-          type: 'url',
-          template: `"url": ""`,
-        },
-        { type: 's3', template: `"bucket": ""` },
-        {
-          type: 'azure',
-          template: `"path": ""`,
-        },
-      ];
-
+    describe('with conditional templates', () => {
       beforeEach(async () => {
         await PageObjects.console.monaco.clearEditorText();
         await PageObjects.console.monaco.enterText('POST _snapshot/test_repo\n');
       });
 
-      await asyncForEach(CONDITIONAL_TEMPLATES, async ({ type, template }) => {
-        it('should insert different templates depending on the value of type', async () => {
-          await PageObjects.console.monaco.enterText(`{\n\t"type": "${type}",\n`);
-          await PageObjects.console.sleepForDebouncePeriod();
-          // Prompt autocomplete for 'settings'
-          await PageObjects.console.monaco.promptAutocomplete('s');
+      it('should insert fs template', async () => {
+        await runTemplateTest('fs', `"location": "path"`);
+      });
 
-          await retry.waitFor('autocomplete to be visible', () =>
-            PageObjects.console.monaco.isAutocompleteVisible()
-          );
-          await PageObjects.console.monaco.pressEnter();
-          await retry.try(async () => {
-            const request = await PageObjects.console.monaco.getEditorText();
-            log.debug(request);
-            expect(request).to.contain(`${template}`);
-          });
-        });
+      it('should insert url template', async () => {
+        await runTemplateTest('url', `"url": ""`);
+      });
+
+      it('should insert s3 template', async () => {
+        await runTemplateTest('s3', `"bucket": ""`);
+      });
+
+      it('should insert azure template', async () => {
+        await runTemplateTest('azure', `"path": ""`);
+      });
+    });
+
+    // FLAKY: https://github.com/elastic/kibana/issues/186935
+    describe.skip('index fields autocomplete', () => {
+      const indexName = `index_field_test-${Date.now()}-${Math.random()}`;
+
+      before(async () => {
+        await PageObjects.console.monaco.clearEditorText();
+        // create an index with only 1 field
+        await PageObjects.console.monaco.enterText(`PUT ${indexName}/_doc/1\n{\n"test":1\n}`);
+        await PageObjects.console.clickPlay();
+      });
+
+      after(async () => {
+        await PageObjects.console.monaco.clearEditorText();
+        // delete the test index
+        await PageObjects.console.monaco.enterText(`DELETE ${indexName}`);
+        await PageObjects.console.clickPlay();
+      });
+
+      it('fields autocomplete only shows fields of the index', async () => {
+        await PageObjects.console.monaco.clearEditorText();
+        await PageObjects.console.monaco.enterText('GET _search\n{\n"fields": ["');
+
+        expect(await PageObjects.console.monaco.getAutocompleteSuggestion(0)).to.be.eql('test');
+        expect(await PageObjects.console.monaco.getAutocompleteSuggestion(1)).to.be.eql(undefined);
       });
     });
   });

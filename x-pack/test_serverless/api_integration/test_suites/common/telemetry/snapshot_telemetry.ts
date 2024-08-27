@@ -12,9 +12,9 @@ import xpackRootTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/sch
 import ossPluginsTelemetrySchema from '@kbn/telemetry-plugin/schema/oss_plugins.json';
 import xpackPluginsTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_plugins.json';
 import { assertTelemetryPayload } from '@kbn/telemetry-tools';
+import type { UsageStatsPayloadTestFriendly } from '@kbn/test-suites-xpack/api_integration/services/usage_api';
 import type { RoleCredentials } from '../../../../shared/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import type { UsageStatsPayloadTestFriendly } from '../../../../../test/api_integration/services/usage_api';
 
 export default function ({ getService }: FtrProviderContext) {
   const usageApi = getService('usageAPI');
@@ -27,7 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
     let roleAuthc: RoleCredentials;
 
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       const [unencryptedPayload] = await usageApi.getTelemetryStats(
         { unencrypted: true },
         { authHeader: roleAuthc.apiKeyHeader }
@@ -36,7 +36,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     it('should pass the schema validation (ensures BWC with Classic offering)', () => {

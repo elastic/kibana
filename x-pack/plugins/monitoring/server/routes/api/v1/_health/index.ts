@@ -30,6 +30,9 @@ export function registerV1HealthRoute(server: MonitoringCore) {
     validate: {
       query: validateQuery,
     },
+    options: {
+      access: 'internal',
+    },
     async handler(req: LegacyRequest) {
       const logger = req.getLogger();
       const timeRange = {

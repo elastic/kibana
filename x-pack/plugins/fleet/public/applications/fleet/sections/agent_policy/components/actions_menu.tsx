@@ -20,6 +20,8 @@ import { FLEET_SERVER_PACKAGE } from '../../../constants';
 
 import { policyHasFleetServer, ExperimentalFeaturesService } from '../../../services';
 
+import { AgentUpgradeAgentModal } from '../../agents/components';
+
 import { AgentPolicyYamlFlyout } from './agent_policy_yaml_flyout';
 import { AgentPolicyCopyProvider } from './agent_policy_copy_provider';
 import { AgentPolicyDeleteProvider } from './agent_policy_delete_provider';
@@ -46,6 +48,7 @@ export const AgentPolicyActionMenu = memo<{
     );
     const [isUninstallCommandFlyoutOpen, setIsUninstallCommandFlyoutOpen] =
       useState<boolean>(false);
+    const [isUpgradeAgentsModalOpen, setIsUpgradeAgentsModalOpen] = useState<boolean>(false);
 
     const { agentTamperProtectionEnabled } = ExperimentalFeaturesService.get();
 
@@ -172,6 +175,24 @@ export const AgentPolicyActionMenu = memo<{
                 </AgentPolicyDeleteProvider>,
               ];
 
+          if (authz.fleet.allAgents && !agentPolicy?.is_managed) {
+            menuItems.push(
+              <EuiContextMenuItem
+                icon="refresh"
+                onClick={() => {
+                  setIsUpgradeAgentsModalOpen(true);
+                }}
+                key="upgradeAgents"
+                data-test-subj="agentPolicyActionMenuUpgradeAgentsButton"
+              >
+                <FormattedMessage
+                  id="xpack.fleet.agentPolicyActionMenu.upgradeAgentsActionText"
+                  defaultMessage="Upgrade agents on this policy"
+                />
+              </EuiContextMenuItem>
+            );
+          }
+
           if (authz.fleet.allAgents && agentTamperProtectionEnabled && !agentPolicy?.is_managed) {
             menuItems.push(
               <EuiContextMenuItem
@@ -204,6 +225,17 @@ export const AgentPolicyActionMenu = memo<{
               {isEnrollmentFlyoutOpen && (
                 <EuiPortal>
                   <AgentEnrollmentFlyout agentPolicy={agentPolicy} onClose={onClose} />
+                </EuiPortal>
+              )}
+              {isUpgradeAgentsModalOpen && (
+                <EuiPortal>
+                  <AgentUpgradeAgentModal
+                    agents={`policy_id: ${agentPolicy.id}`}
+                    agentCount={agentPolicy.agents || 0}
+                    onClose={() => {
+                      setIsUpgradeAgentsModalOpen(false);
+                    }}
+                  />
                 </EuiPortal>
               )}
               {isUninstallCommandFlyoutOpen && (

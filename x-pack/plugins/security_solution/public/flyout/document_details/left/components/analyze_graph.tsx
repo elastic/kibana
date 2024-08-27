@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
 
-import { useLeftPanelContext } from '../context';
+import { useDocumentDetailsContext } from '../../shared/context';
 import { ANALYZER_GRAPH_TEST_ID } from './test_ids';
 import { Resolver } from '../../../../resolver/view';
 import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
@@ -20,7 +20,7 @@ export const ANALYZE_GRAPH_ID = 'analyze_graph';
  * Analyzer graph view displayed in the document details expandable flyout left section under the Visualize tab
  */
 export const AnalyzeGraph: FC = () => {
-  const { eventId } = useLeftPanelContext();
+  const { eventId } = useDocumentDetailsContext();
   const scopeId = 'flyout'; // Different scope Id to distinguish flyout and data table analyzers
   const { from, to, shouldUpdate, selectedPatterns } = useTimelineDataFilters(
     isActiveTimeline(scopeId)

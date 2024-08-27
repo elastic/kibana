@@ -39,9 +39,7 @@ export default ({ getService }: FtrProviderContext) => {
   const securitySolutionApi = getService('securitySolutionApi');
   const log = getService('log');
   const es = getService('es');
-  // TODO: add a new service for pulling kibana username, similar to getService('es')
-  const config = getService('config');
-  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
+  const utils = getService('securitySolutionUtils');
 
   // See https://github.com/elastic/kibana/issues/130963 for discussion on deprecation
   describe('@ess @skipInServerless patch_rules_bulk', () => {
@@ -81,7 +79,7 @@ export default ({ getService }: FtrProviderContext) => {
           .bulkPatchRules({ body: [{ rule_id: 'rule-1', name: 'some other name' }] })
           .expect(200);
 
-        const outputRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+        const outputRule = updateUsername(getSimpleRuleOutput(), await utils.getUsername());
 
         outputRule.name = 'some other name';
         outputRule.revision = 1;
@@ -92,6 +90,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should patch two rule properties of name using the two rules rule_id', async () => {
         await createRule(supertest, log, getSimpleRule('rule-1'));
         await createRule(supertest, log, getSimpleRule('rule-2'));
+        const username = await utils.getUsername();
 
         // patch both rule names
         const { body } = await securitySolutionApi
@@ -103,12 +102,12 @@ export default ({ getService }: FtrProviderContext) => {
           })
           .expect(200);
 
-        const outputRule1 = updateUsername(getSimpleRuleOutput('rule-1'), ELASTICSEARCH_USERNAME);
+        const outputRule1 = updateUsername(getSimpleRuleOutput('rule-1'), username);
 
         outputRule1.name = 'some other name';
         outputRule1.revision = 1;
 
-        const outputRule2 = updateUsername(getSimpleRuleOutput('rule-2'), ELASTICSEARCH_USERNAME);
+        const outputRule2 = updateUsername(getSimpleRuleOutput('rule-2'), username);
 
         outputRule2.name = 'some other name';
         outputRule2.revision = 1;
@@ -127,7 +126,7 @@ export default ({ getService }: FtrProviderContext) => {
           .bulkPatchRules({ body: [{ id: createRuleBody.id, name: 'some other name' }] })
           .expect(200);
 
-        const outputRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+        const outputRule = updateUsername(getSimpleRuleOutput(), await utils.getUsername());
         outputRule.name = 'some other name';
         outputRule.revision = 1;
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
@@ -137,6 +136,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should patch two rule properties of name using the two rules id', async () => {
         const createRule1 = await createRule(supertest, log, getSimpleRule('rule-1'));
         const createRule2 = await createRule(supertest, log, getSimpleRule('rule-2'));
+        const username = await utils.getUsername();
 
         // patch both rule names
         const { body } = await securitySolutionApi
@@ -148,18 +148,12 @@ export default ({ getService }: FtrProviderContext) => {
           })
           .expect(200);
 
-        const outputRule1 = updateUsername(
-          getSimpleRuleOutputWithoutRuleId('rule-1'),
-          ELASTICSEARCH_USERNAME
-        );
+        const outputRule1 = updateUsername(getSimpleRuleOutputWithoutRuleId('rule-1'), username);
 
         outputRule1.name = 'some other name';
         outputRule1.revision = 1;
 
-        const outputRule2 = updateUsername(
-          getSimpleRuleOutputWithoutRuleId('rule-2'),
-          ELASTICSEARCH_USERNAME
-        );
+        const outputRule2 = updateUsername(getSimpleRuleOutputWithoutRuleId('rule-2'), username);
         outputRule2.name = 'some other name';
         outputRule2.revision = 1;
 
@@ -210,13 +204,11 @@ export default ({ getService }: FtrProviderContext) => {
         const sidecarActionsPostResults = await getLegacyActionSO(es);
         expect(sidecarActionsPostResults.hits.hits.length).to.eql(0);
 
+        const username = await utils.getUsername();
         // @ts-expect-error
         body.forEach((response) => {
           const bodyToCompare = removeServerGeneratedProperties(response);
-          const outputRule = updateUsername(
-            getSimpleRuleOutput(response.rule_id, false),
-            ELASTICSEARCH_USERNAME
-          );
+          const outputRule = updateUsername(getSimpleRuleOutput(response.rule_id, false), username);
 
           outputRule.actions = [
             {
@@ -244,7 +236,7 @@ export default ({ getService }: FtrProviderContext) => {
           .bulkPatchRules({ body: [{ id: createdBody.id, name: 'some other name' }] })
           .expect(200);
 
-        const outputRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+        const outputRule = updateUsername(getSimpleRuleOutput(), await utils.getUsername());
         outputRule.name = 'some other name';
         outputRule.revision = 1;
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
@@ -259,7 +251,7 @@ export default ({ getService }: FtrProviderContext) => {
           .bulkPatchRules({ body: [{ rule_id: 'rule-1', enabled: false }] })
           .expect(200);
 
-        const outputRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+        const outputRule = updateUsername(getSimpleRuleOutput(), await utils.getUsername());
 
         outputRule.enabled = false;
 
@@ -275,7 +267,7 @@ export default ({ getService }: FtrProviderContext) => {
           .bulkPatchRules({ body: [{ rule_id: 'rule-1', severity: 'low', enabled: false }] })
           .expect(200);
 
-        const outputRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+        const outputRule = updateUsername(getSimpleRuleOutput(), await utils.getUsername());
 
         outputRule.enabled = false;
         outputRule.severity = 'low';
@@ -300,7 +292,7 @@ export default ({ getService }: FtrProviderContext) => {
           .bulkPatchRules({ body: [{ rule_id: 'rule-1', name: 'some other name' }] })
           .expect(200);
 
-        const outputRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+        const outputRule = updateUsername(getSimpleRuleOutput(), await utils.getUsername());
 
         outputRule.name = 'some other name';
         outputRule.timeline_title = 'some title';
@@ -355,7 +347,7 @@ export default ({ getService }: FtrProviderContext) => {
           })
           .expect(200);
 
-        const outputRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+        const outputRule = updateUsername(getSimpleRuleOutput(), await utils.getUsername());
 
         outputRule.name = 'some other name';
         outputRule.revision = 1;
@@ -386,7 +378,7 @@ export default ({ getService }: FtrProviderContext) => {
           })
           .expect(200);
 
-        const outputRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+        const outputRule = updateUsername(getSimpleRuleOutput(), await utils.getUsername());
 
         outputRule.name = 'some other name';
         outputRule.revision = 1;
@@ -540,7 +532,7 @@ export default ({ getService }: FtrProviderContext) => {
         );
       });
 
-      it('should patch a rule with a legacy investigation field and transform field in response', async () => {
+      it('should patch a rule with a legacy investigation field and migrate field', async () => {
         // patch a simple rule's name
         const { body } = await securitySolutionApi
           .bulkPatchRules({
@@ -556,19 +548,13 @@ export default ({ getService }: FtrProviderContext) => {
         });
         expect(bodyToCompareLegacyField.name).to.eql('some other name');
 
-        /**
-         * Confirm type on SO so that it's clear in the tests whether it's expected that
-         * the SO itself is migrated to the inteded object type, or if the transformation is
-         * happening just on the response. In this case, change should
-         * NOT include a migration on SO.
-         */
         const isInvestigationFieldMigratedInSo = await checkInvestigationFieldSoValue(
           undefined,
           { field_names: ['client.address', 'agent.name'] },
           es,
           body[0].id
         );
-        expect(isInvestigationFieldMigratedInSo).to.eql(false);
+        expect(isInvestigationFieldMigratedInSo).to.eql(true);
       });
 
       it('should patch a rule with a legacy investigation field - empty array - and transform field in response', async () => {

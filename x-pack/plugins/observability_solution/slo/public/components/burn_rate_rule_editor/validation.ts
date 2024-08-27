@@ -8,9 +8,11 @@
 import { i18n } from '@kbn/i18n';
 import { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
 import { BurnRateRuleParams, Duration } from '../../typings';
+import { toMinutes } from '../../utils/slo/duration';
 
 export interface WindowResult {
   longWindow: string[];
+  shortWindow: string[];
   burnRateThreshold: string[];
 }
 
@@ -42,8 +44,12 @@ export function validateBurnRateRule(
   }
 
   if (windows) {
-    windows.forEach(({ burnRateThreshold, longWindow, maxBurnRateThreshold }) => {
-      const result = { longWindow: new Array<string>(), burnRateThreshold: new Array<string>() };
+    windows.forEach(({ burnRateThreshold, longWindow, shortWindow, maxBurnRateThreshold }) => {
+      const result = {
+        longWindow: new Array<string>(),
+        shortWindow: new Array<string>(),
+        burnRateThreshold: new Array<string>(),
+      };
       if (burnRateThreshold === undefined || maxBurnRateThreshold === undefined) {
         result.burnRateThreshold.push(BURN_RATE_THRESHOLD_REQUIRED);
       } else if (sloId && (burnRateThreshold < 0.01 || burnRateThreshold > maxBurnRateThreshold)) {
@@ -54,6 +60,13 @@ export function validateBurnRateRule(
       } else if (!isValidLongWindowDuration(longWindow)) {
         result.longWindow.push(LONG_WINDOW_DURATION_INVALID);
       }
+
+      if (shortWindow === undefined) {
+        result.shortWindow.push(SHORT_WINDOW_DURATION_REQUIRED);
+      } else if (!isValidShortWindowDuration(shortWindow, longWindow)) {
+        result.shortWindow.push(SHORT_WINDOW_DURATION_INVALID);
+      }
+
       validationResult.errors.windows.push(result);
     });
   }
@@ -72,11 +85,27 @@ const SLO_REQUIRED = i18n.translate('xpack.slo.rules.burnRate.errors.sloRequired
 
 const LONG_WINDOW_DURATION_REQUIRED = i18n.translate(
   'xpack.slo.rules.burnRate.errors.windowDurationRequired',
-  { defaultMessage: 'The lookback period is required.' }
+  { defaultMessage: 'The long lookback period is required.' }
 );
 
 const LONG_WINDOW_DURATION_INVALID = i18n.translate('xpack.slo.rules.longWindow.errorText', {
   defaultMessage: 'The lookback period must be between 1 and 72 hours.',
+});
+
+const isValidShortWindowDuration = (shortWindow: Duration, longWindow: Duration): boolean => {
+  const longWindowInMinutes = toMinutes(longWindow);
+  const shortWindowInMinutes = toMinutes(shortWindow);
+  const { unit } = shortWindow;
+  return shortWindowInMinutes >= 1 && shortWindowInMinutes <= longWindowInMinutes && unit === 'm';
+};
+
+const SHORT_WINDOW_DURATION_REQUIRED = i18n.translate(
+  'xpack.slo.rules.burnRate.errors.shortWindowDurationRequired',
+  { defaultMessage: 'The short lookback period is required.' }
+);
+
+const SHORT_WINDOW_DURATION_INVALID = i18n.translate('xpack.slo.rules.shortWindow.errorText', {
+  defaultMessage: 'The short lookback period must be lower than the long lookback period.',
 });
 
 const BURN_RATE_THRESHOLD_REQUIRED = i18n.translate(

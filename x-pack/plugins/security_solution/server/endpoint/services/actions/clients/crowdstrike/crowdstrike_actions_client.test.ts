@@ -13,9 +13,13 @@ import { ResponseActionsNotSupportedError } from '../errors';
 import type { CrowdstrikeActionsClientOptionsMock } from './mocks';
 import { CrowdstrikeMock } from './mocks';
 
-import { ENDPOINT_ACTIONS_INDEX } from '../../../../../../common/endpoint/constants';
+import {
+  ENDPOINT_ACTION_RESPONSES_INDEX,
+  ENDPOINT_ACTIONS_INDEX,
+} from '../../../../../../common/endpoint/constants';
 import { SUB_ACTION } from '@kbn/stack-connectors-plugin/common/crowdstrike/constants';
 import type { NormalizedExternalConnectorClient } from '../../..';
+
 jest.mock('../../action_details_by_id', () => {
   const originalMod = jest.requireActual('../../action_details_by_id');
 
@@ -75,6 +79,48 @@ describe('CrowdstrikeActionsClient class', () => {
     });
   });
 
+  it('should save response with error in case of actionResponse containing errors', async () => {
+    // mock execute of CS action to return error
+    const actionResponse = {
+      data: {
+        errors: [{ message: 'error message' }],
+      },
+    };
+    (connectorActionsMock.execute as jest.Mock).mockResolvedValueOnce(actionResponse);
+
+    await crowdstrikeActionsClient.isolate(
+      createCrowdstrikeIsolationOptions({ actionId: '123-345-567' })
+    );
+    expect(classConstructorOptions.esClient.index.mock.calls[1][0]).toEqual({
+      document: {
+        '@timestamp': expect.any(String),
+        agent: { id: ['1-2-3'] },
+        EndpointActions: {
+          action_id: expect.any(String),
+          completed_at: expect.any(String),
+          started_at: expect.any(String),
+          data: {
+            command: 'isolate',
+            comment: 'test comment',
+            hosts: {
+              '1-2-3': {
+                name: 'Crowdstrike-1460',
+              },
+            },
+          },
+          input_type: 'crowdstrike',
+        },
+        error: {
+          code: '500',
+          message: 'Crowdstrike action failed: error message',
+        },
+        meta: undefined,
+      },
+      index: ENDPOINT_ACTION_RESPONSES_INDEX,
+      refresh: 'wait_for',
+    });
+  });
+
   describe(`#isolate()`, () => {
     it('should send action to Crowdstrike', async () => {
       await crowdstrikeActionsClient.isolate(
@@ -87,7 +133,7 @@ describe('CrowdstrikeActionsClient class', () => {
           subActionParams: {
             actionParameters: {
               comment:
-                'Action triggered from Elastic Security by user foo for action 123-345-456: test comment',
+                'Action triggered from Elastic Security by user [foo] for action [isolate (action id: 123-345-456)]: test comment',
             },
             command: 'contain',
             ids: ['1-2-3'],
@@ -99,40 +145,61 @@ describe('CrowdstrikeActionsClient class', () => {
     it('should write action request to endpoint indexes', async () => {
       await crowdstrikeActionsClient.isolate(createCrowdstrikeIsolationOptions());
 
-      // we do not write response to es yet
-      expect(classConstructorOptions.esClient.index).toHaveBeenCalledTimes(1);
-      expect(classConstructorOptions.esClient.index).toHaveBeenNthCalledWith(
-        1,
-        {
-          document: {
-            '@timestamp': expect.any(String),
-            EndpointActions: {
-              action_id: expect.any(String),
-              data: {
-                command: 'isolate',
-                comment: 'test comment',
-                parameters: undefined,
-                hosts: {
-                  '1-2-3': {
-                    name: 'Crowdstrike-1460',
-                  },
+      expect(classConstructorOptions.esClient.index).toHaveBeenCalledTimes(2);
+      expect(classConstructorOptions.esClient.index.mock.calls[0][0]).toEqual({
+        document: {
+          '@timestamp': expect.any(String),
+          EndpointActions: {
+            action_id: expect.any(String),
+            data: {
+              command: 'isolate',
+              comment: 'test comment',
+              parameters: undefined,
+              hosts: {
+                '1-2-3': {
+                  name: 'Crowdstrike-1460',
                 },
               },
-              expiration: expect.any(String),
-              input_type: 'crowdstrike',
-              type: 'INPUT_ACTION',
             },
-            agent: { id: ['1-2-3'] },
-            meta: {
-              hostName: 'Crowdstrike-1460',
-            },
-            user: { id: 'foo' },
+            expiration: expect.any(String),
+            input_type: 'crowdstrike',
+            type: 'INPUT_ACTION',
           },
-          index: ENDPOINT_ACTIONS_INDEX,
-          refresh: 'wait_for',
+          agent: { id: ['1-2-3'] },
+          meta: {
+            hostName: 'Crowdstrike-1460',
+          },
+          user: { id: 'foo' },
         },
-        { meta: true }
-      );
+        index: ENDPOINT_ACTIONS_INDEX,
+        refresh: 'wait_for',
+      });
+      expect(classConstructorOptions.esClient.index.mock.calls[1][0]).toEqual({
+        document: {
+          '@timestamp': expect.any(String),
+          agent: { id: ['1-2-3'] },
+          EndpointActions: {
+            action_id: expect.any(String),
+            completed_at: expect.any(String),
+            started_at: expect.any(String),
+            data: {
+              command: 'isolate',
+              comment: 'test comment',
+              hosts: {
+                '1-2-3': {
+                  name: 'Crowdstrike-1460',
+                },
+                parameters: undefined,
+              },
+            },
+            input_type: 'crowdstrike',
+            error: undefined,
+            meta: undefined,
+          },
+        },
+        index: ENDPOINT_ACTION_RESPONSES_INDEX,
+        refresh: 'wait_for',
+      });
     });
 
     it('should return action details', async () => {
@@ -165,7 +232,7 @@ describe('CrowdstrikeActionsClient class', () => {
             command: 'lift_containment',
             ids: ['1-2-3'],
             comment:
-              'Action triggered from Elastic Security by user foo for action 123-345-456: test comment',
+              'Action triggered from Elastic Security by user [foo] for action [unisolate (action id: 123-345-456)]: test comment',
           },
         },
       });
@@ -174,40 +241,61 @@ describe('CrowdstrikeActionsClient class', () => {
     it('should write action request to endpoint indexes', async () => {
       await crowdstrikeActionsClient.release(createCrowdstrikeIsolationOptions());
 
-      // we do not write response to es yet
-      expect(classConstructorOptions.esClient.index).toHaveBeenCalledTimes(1);
-      expect(classConstructorOptions.esClient.index).toHaveBeenNthCalledWith(
-        1,
-        {
-          document: {
-            '@timestamp': expect.any(String),
-            EndpointActions: {
-              action_id: expect.any(String),
-              data: {
-                command: 'unisolate',
-                comment: 'test comment',
-                parameters: undefined,
-                hosts: {
-                  '1-2-3': {
-                    name: 'Crowdstrike-1460',
-                  },
+      expect(classConstructorOptions.esClient.index).toHaveBeenCalledTimes(2);
+      expect(classConstructorOptions.esClient.index.mock.calls[0][0]).toEqual({
+        document: {
+          '@timestamp': expect.any(String),
+          EndpointActions: {
+            action_id: expect.any(String),
+            data: {
+              command: 'unisolate',
+              comment: 'test comment',
+              parameters: undefined,
+              hosts: {
+                '1-2-3': {
+                  name: 'Crowdstrike-1460',
                 },
               },
-              expiration: expect.any(String),
-              input_type: 'crowdstrike',
-              type: 'INPUT_ACTION',
             },
-            agent: { id: ['1-2-3'] },
-            meta: {
-              hostName: 'Crowdstrike-1460',
-            },
-            user: { id: 'foo' },
+            expiration: expect.any(String),
+            input_type: 'crowdstrike',
+            type: 'INPUT_ACTION',
           },
-          index: ENDPOINT_ACTIONS_INDEX,
-          refresh: 'wait_for',
+          agent: { id: ['1-2-3'] },
+          meta: {
+            hostName: 'Crowdstrike-1460',
+          },
+          user: { id: 'foo' },
         },
-        { meta: true }
-      );
+        index: ENDPOINT_ACTIONS_INDEX,
+        refresh: 'wait_for',
+      });
+      expect(classConstructorOptions.esClient.index.mock.calls[1][0]).toEqual({
+        document: {
+          '@timestamp': expect.any(String),
+          agent: { id: ['1-2-3'] },
+          EndpointActions: {
+            action_id: expect.any(String),
+            completed_at: expect.any(String),
+            started_at: expect.any(String),
+            data: {
+              command: 'unisolate',
+              comment: 'test comment',
+              hosts: {
+                '1-2-3': {
+                  name: 'Crowdstrike-1460',
+                },
+              },
+              parameters: undefined,
+            },
+            input_type: 'crowdstrike',
+          },
+          error: undefined,
+          meta: undefined,
+        },
+        index: ENDPOINT_ACTION_RESPONSES_INDEX,
+        refresh: 'wait_for',
+      });
     });
 
     it('should return action details', async () => {

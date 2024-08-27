@@ -319,6 +319,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.existOrFail(`lnsFieldListPanelField-${field}`);
     },
 
+    async waitForMissingField(field: string) {
+      await testSubjects.missingOrFail(`lnsFieldListPanelField-${field}`);
+    },
+
     async waitForMissingDataViewWarning() {
       await retry.try(async () => {
         await testSubjects.existOrFail(`missing-refs-failure`);
@@ -405,7 +409,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await browser.pressKeys(reverse ? browser.keys.LEFT : browser.keys.RIGHT);
       }
       if (metaKey) {
-        this.pressMetaKey(metaKey);
+        await this.pressMetaKey(metaKey);
       }
       await browser.pressKeys(browser.keys.ENTER);
       await this.waitForLensDragDropToFinish();
@@ -438,7 +442,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await browser.pressKeys(reverse ? browser.keys.LEFT : browser.keys.RIGHT);
       }
       if (metaKey) {
-        this.pressMetaKey(metaKey);
+        await this.pressMetaKey(metaKey);
       }
       await browser.pressKeys(browser.keys.ENTER);
 
@@ -626,7 +630,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async setFilterBy(queryString: string) {
-      this.typeFilter(queryString);
+      await this.typeFilter(queryString);
       await retry.try(async () => {
         await testSubjects.click('indexPattern-filters-existingFilterTrigger');
       });
@@ -681,7 +685,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      */
     async addFilterToAgg(queryString: string) {
       await testSubjects.click('lns-newBucket-add');
-      this.typeFilter(queryString);
+      await this.typeFilter(queryString);
       // Problem here is that after typing in the queryInput a dropdown will fetch the server
       // with suggestions and show up. Depending on the cursor position and some other factors
       // pressing Enter at this point may lead to auto-complete the queryInput with random stuff from the
@@ -1031,15 +1035,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     /**
      * Changes the index pattern in the data panel
      */
-    async switchDataPanelIndexPattern(
-      dataViewTitle: string,
-      transitionFromTextBasedLanguages?: boolean
-    ) {
-      await PageObjects.unifiedSearch.switchDataView(
-        'lns-dataView-switch-link',
-        dataViewTitle,
-        transitionFromTextBasedLanguages
-      );
+    async switchDataPanelIndexPattern(dataViewTitle: string) {
+      await PageObjects.unifiedSearch.switchDataView('lns-dataView-switch-link', dataViewTitle);
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
 

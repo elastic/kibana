@@ -15,7 +15,6 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { apmEnableMultiSignal } from '@kbn/observability-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { isEmpty, sortBy } from 'lodash';
 import React, { useState, useCallback } from 'react';
@@ -25,15 +24,14 @@ import { Sort } from './sort';
 import { RefreshServiceGroupsSubscriber } from '../refresh_service_groups_subscriber';
 import { ServiceGroupSaveButton } from '../service_group_save';
 import { BetaBadge } from '../../../shared/beta_badge';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { useEntityManagerEnablementContext } from '../../../../context/entity_manager_context/use_entity_manager_enablement_context';
 
 export type ServiceGroupsSortType = 'recently_added' | 'alphabetical';
 
 const GET_STARTED_URL = 'https://www.elastic.co/guide/en/apm/get-started/current/index.html';
 
 export function ServiceGroupsList() {
-  const { core } = useApmPluginContext();
-  const isMultiSignalEnabled = core.uiSettings.get<boolean>(apmEnableMultiSignal, false);
+  const { isEntityCentricExperienceViewEnabled } = useEntityManagerEnablementContext();
 
   const [filter, setFilter] = useState('');
 
@@ -138,7 +136,7 @@ export function ServiceGroupsList() {
                         {i18n.translate('xpack.apm.serviceGroups.listDescription', {
                           defaultMessage: 'Displayed service counts reflect the last 24 hours.',
                         })}
-                        {isMultiSignalEnabled && (
+                        {isEntityCentricExperienceViewEnabled && (
                           <FormattedMessage
                             id="xpack.apm.serviceGroups.onlyApm"
                             defaultMessage="Only showing services {link}"

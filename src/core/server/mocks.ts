@@ -83,7 +83,7 @@ export function pluginInitializerContextConfigMock<T>(config: T) {
   return mock;
 }
 
-type PluginInitializerContextMock<T> = Omit<PluginInitializerContext<T>, 'config'> & {
+export type PluginInitializerContextMock<T> = Omit<PluginInitializerContext<T>, 'config'> & {
   config: MockedPluginInitializerConfig<T>;
 };
 

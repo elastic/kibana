@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 
 import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
+import { RollupDeprecationTooltip } from '@kbn/rollup';
 import { UseField } from '../../shared_imports';
 
 import { IndexPatternConfig } from '../../types';
@@ -57,6 +58,15 @@ const rollupSelectItem = (
       <EuiBadge color={euiLightVars.euiColorAccent}>
         <FormattedMessage id="indexPatternEditor.typeSelect.betaLabel" defaultMessage="Beta" />
       </EuiBadge>
+      &nbsp;
+      <RollupDeprecationTooltip>
+        <EuiBadge color="warning">
+          <FormattedMessage
+            id="indexPatternEditor.typeSelect.deprecatedBadge"
+            defaultMessage="Deprecated"
+          />
+        </EuiBadge>
+      </RollupDeprecationTooltip>
     </EuiDescriptionListTitle>
     <EuiDescriptionListDescription>
       <FormattedMessage
@@ -90,7 +100,7 @@ export const TypeField = ({ onChange }: TypeFieldProps) => {
                   {
                     value: INDEX_PATTERN_TYPE.ROLLUP,
                     inputDisplay: i18n.translate('indexPatternEditor.typeSelect.rollup', {
-                      defaultMessage: 'Rollup',
+                      defaultMessage: 'Rollup (deprecated)',
                     }),
                     dropdownDisplay: rollupSelectItem,
                   },

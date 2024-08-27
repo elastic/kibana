@@ -83,7 +83,6 @@ export const EnterpriseSearchPageTemplateWrapper: React.FC<PageTemplateProps> = 
   }, []);
   return (
     <KibanaPageTemplate
-      restrictWidth={false}
       {...pageTemplateProps}
       className={classNames('enterpriseSearchPageTemplate', className)}
       mainProps={{

@@ -148,4 +148,6 @@ export interface EmbeddableFactory<
     initialInput: TEmbeddableInput,
     parent?: IContainer
   ): Promise<TEmbeddable | ErrorEmbeddable | undefined>;
+
+  order?: number;
 }

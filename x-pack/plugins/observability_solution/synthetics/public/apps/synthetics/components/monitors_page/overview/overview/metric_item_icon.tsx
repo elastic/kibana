@@ -18,6 +18,8 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
+  EuiSpacer,
 } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
@@ -148,6 +150,21 @@ export const MetricItemIcon = ({
             </EuiFlexGroup>
           </EuiPopoverTitle>
           <div style={{ width: '300px' }}>
+            {ping?.url?.full && (
+              <>
+                {i18n.translate('xpack.synthetics.metricItemIcon.div.urlLabel', {
+                  defaultMessage: 'URL: ',
+                })}
+                <EuiLink
+                  data-test-subj="syntheticsMetricItemIconLink"
+                  href={ping.url.full}
+                  target="_blank"
+                >
+                  {ping.url.full}
+                </EuiLink>
+                <EuiSpacer size="s" />
+              </>
+            )}
             <EuiCallOut title={ping?.error?.message} color="danger" iconType="warning" />
           </div>
           <EuiPopoverFooter>
@@ -164,6 +181,23 @@ export const MetricItemIcon = ({
       </Container>
     );
   } else {
+    if (ping?.url) {
+      return (
+        <Container>
+          <EuiButtonIcon
+            title={ping.url.full}
+            color="text"
+            data-test-subj="syntheticsMetricItemIconButton"
+            href={ping.url.full}
+            iconType="link"
+            target="_blank"
+            aria-label={i18n.translate('xpack.synthetics.metricItemIcon.euiButtonIcon.monitorUrl', {
+              defaultMessage: 'Monitor url',
+            })}
+          />
+        </Container>
+      );
+    }
     return null;
   }
 };
@@ -184,8 +218,10 @@ const StyledIcon = euiStyled.div<{ boxShadow: string }>`
   gap: 10px;
   width: 32px;
   height: 32px;
-  background: #ffffff;
-  border: 1px solid #d3dae6;
+  background: ${({ theme }) =>
+    theme.darkMode ? theme.eui.euiColorDarkestShade : theme.eui.euiColorLightestShade};
+  border: 1px solid ${({ theme }) =>
+    theme.darkMode ? theme.eui.euiColorDarkShade : theme.eui.euiColorLightShade};
   ${({ boxShadow }) => boxShadow}
   border-radius: 16px;
   flex: none;

@@ -161,7 +161,7 @@ export const getOverviewEmbeddableFactory = (
                       `}
                     >
                       <GroupSloView
-                        sloView="cardView"
+                        view="cardView"
                         groupBy={groupBy}
                         groups={groups}
                         kqlQuery={kqlQuery}

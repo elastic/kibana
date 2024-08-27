@@ -49,10 +49,6 @@ export default function ({ getPageObjects }: FtrProviderContext) {
             await PageObjects.svlCommonPage.loginWithRole(role);
           });
 
-          after(async () => {
-            await PageObjects.svlCommonPage.forceLogout();
-          });
-
           describe('list features', () => {
             it('has the correct features enabled', async () => {
               await PageObjects.header.waitUntilLoadingHasFinished();

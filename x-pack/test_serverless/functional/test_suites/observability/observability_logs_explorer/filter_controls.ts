@@ -14,11 +14,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Filter controls customization', () => {
     before('initialize tests', async () => {
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
-      await PageObjects.svlCommonPage.loginWithRole('viewer');
+      await PageObjects.svlCommonPage.loginWithPrivilegedRole();
     });
 
     after('clean up archives', async () => {
-      await PageObjects.svlCommonPage.forceLogout();
       await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
     });
 

@@ -25,6 +25,7 @@ const setConversationSettings = jest.fn().mockImplementation((fn) => {
 });
 
 const testProps = {
+  connectors: [],
   conversationSettings: {
     [welcomeConvo.title]: welcomeConvo,
   },
@@ -35,6 +36,8 @@ const testProps = {
   systemPromptSettings: mockSystemPrompts,
   conversationsSettingsBulkActions: {},
   setConversationsSettingsBulkActions: jest.fn(),
+  promptsBulkActions: {},
+  setPromptsBulkActions: jest.fn(),
 };
 
 jest.mock('./system_prompt_selector/system_prompt_selector', () => ({
@@ -95,6 +98,7 @@ describe('SystemPromptSettings', () => {
     );
     fireEvent.click(getByTestId('change-sp-custom'));
     const customOption = {
+      consumer: 'test',
       content: '',
       id: 'sooper custom prompt',
       name: 'sooper custom prompt',

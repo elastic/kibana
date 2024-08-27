@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { startTracingSpan } from '../../../common/performance_tracing';
-import { decodeOrThrow } from '../../../common/runtime_types';
 import type { MlAnomalyDetectors, MlSystem } from '../../types';
 import { COMPOSITE_AGGREGATION_BATCH_SIZE } from './common';
 import {

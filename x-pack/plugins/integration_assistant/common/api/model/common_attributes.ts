@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 import { ESProcessorItem } from './processor_attributes';
 
@@ -46,6 +46,30 @@ export type Docs = z.infer<typeof Docs>;
 export const Docs = z.array(z.object({}).passthrough());
 
 /**
+ * The name of the log samples format.
+ */
+export type SamplesFormatName = z.infer<typeof SamplesFormatName>;
+export const SamplesFormatName = z.enum(['ndjson', 'json']);
+export type SamplesFormatNameEnum = typeof SamplesFormatName.enum;
+export const SamplesFormatNameEnum = SamplesFormatName.enum;
+
+/**
+ * Format of the provided log samples.
+ */
+export type SamplesFormat = z.infer<typeof SamplesFormat>;
+export const SamplesFormat = z.object({
+  name: SamplesFormatName,
+  /**
+   * For some formats, specifies whether the samples can be multiline.
+   */
+  multiline: z.boolean().optional(),
+  /**
+   * For a JSON format, describes how to get to the sample array from the root of the JSON.
+   */
+  json_path: z.array(z.string()).optional(),
+});
+
+/**
  * The pipeline object.
  */
 export type Pipeline = z.infer<typeof Pipeline>;
@@ -77,15 +101,16 @@ export const Pipeline = z.object({
  */
 export type InputType = z.infer<typeof InputType>;
 export const InputType = z.enum([
-  'aws_cloudwatch',
-  'aws_s3',
-  'azure_blob_storage',
-  'azure_eventhub',
+  'aws-cloudwatch',
+  'aws-s3',
+  'azure-blob-storage',
+  'azure-eventhub',
+  'cel',
   'cloudfoundry',
   'filestream',
-  'gcp_pubsub',
+  'gcp-pubsub',
   'gcs',
-  'http_endpoint',
+  'http-endpoint',
   'journald',
   'kafka',
   'tcp',
@@ -127,6 +152,10 @@ export const DataStream = z.object({
    * The documents of the dataStream.
    */
   docs: Docs,
+  /**
+   * The format of log samples in this dataStream.
+   */
+  samplesFormat: SamplesFormat,
 });
 
 /**
@@ -157,13 +186,16 @@ export const Integration = z.object({
 });
 
 /**
- * An array of pipeline results.
+ * The LangSmith options object.
  */
-export type PipelineResults = z.infer<typeof PipelineResults>;
-export const PipelineResults = z.array(z.object({}));
-
-/**
- * An array of errors.
- */
-export type Errors = z.infer<typeof Errors>;
-export const Errors = z.array(z.object({}));
+export type LangSmithOptions = z.infer<typeof LangSmithOptions>;
+export const LangSmithOptions = z.object({
+  /**
+   * The project name.
+   */
+  projectName: z.string(),
+  /**
+   * The apiKey to use for tracing.
+   */
+  apiKey: z.string(),
+});

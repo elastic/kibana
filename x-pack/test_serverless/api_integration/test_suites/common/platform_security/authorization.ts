@@ -33,16 +33,18 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('security/authorization', function () {
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
     });
     after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
     describe('route access', () => {
       describe('internal', () => {
         describe('disabled', () => {
-          it('get all privileges', async () => {
+          // Skipped due to change in QA environment for role management and spaces
+          // TODO: revisit once the change is rolled out to all environments
+          it.skip('get all privileges', async () => {
             const { body, status } = await supertestWithoutAuth
               .get('/api/security/privileges')
               .set(svlCommonApi.getInternalRequestHeader())
@@ -50,7 +52,9 @@ export default function ({ getService }: FtrProviderContext) {
             svlCommonApi.assertApiNotFound(body, status);
           });
 
-          it('get built-in elasticsearch privileges', async () => {
+          // Skipped due to change in QA environment for role management and spaces
+          // TODO: revisit once the change is rolled out to all environments
+          it.skip('get built-in elasticsearch privileges', async () => {
             const { body, status } = await supertestWithoutAuth
               .get('/internal/security/esPrivileges/builtin')
               .set(svlCommonApi.getInternalRequestHeader())
@@ -116,7 +120,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       before(async () => {
         // get auth header for Viewer roleAuthc
-        adminCredentials = await svlUserManager.getApiCredentialsForRole('admin');
+        adminCredentials = await svlUserManager.getM2MApiCredentialsWithRoleScope('admin');
       });
 
       it('all Dashboard and Discover sub-feature privileges are disabled', async () => {

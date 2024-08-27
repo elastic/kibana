@@ -61,6 +61,7 @@ const externals = {
   redux: '__kbnSharedDeps__.Redux',
   immer: '__kbnSharedDeps__.Immer',
   reselect: '__kbnSharedDeps__.Reselect',
+  'fastest-levenshtein': '__kbnSharedDeps__.FastestLevenshtein',
 
   /**
    * big deps which are locked to a single version
@@ -88,6 +89,7 @@ const externals = {
   tslib: '__kbnSharedDeps__.TsLib',
   uuid: '__kbnSharedDeps__.Uuid',
   '@kbn/analytics': '__kbnSharedDeps__.KbnAnalytics',
+  '@kbn/crypto-browser': '__kbnSharedDeps__.KbnCryptoBrowser',
   '@kbn/es-query': '__kbnSharedDeps__.KbnEsQuery',
   '@kbn/search-errors': '__kbnSharedDeps__.KbnSearchErrors',
   '@kbn/std': '__kbnSharedDeps__.KbnStd',

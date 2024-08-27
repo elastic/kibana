@@ -12,21 +12,21 @@ import {
   API_VERSIONS,
 } from '@kbn/elastic-assistant-common';
 import {
-  PerformBulkActionRequestBody,
-  PerformBulkActionResponse,
+  PerformAnonymizationFieldsBulkActionRequestBody,
+  PerformAnonymizationFieldsBulkActionResponse,
 } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 
 export const bulkUpdateAnonymizationFields = async (
   http: HttpSetup,
-  anonymizationFieldsActions: PerformBulkActionRequestBody,
+  anonymizationFieldsActions: PerformAnonymizationFieldsBulkActionRequestBody,
   toasts?: IToasts
 ) => {
   try {
-    const result = await http.fetch<PerformBulkActionResponse>(
+    const result = await http.fetch<PerformAnonymizationFieldsBulkActionResponse>(
       ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_BULK_ACTION,
       {
         method: 'POST',
-        version: API_VERSIONS.internal.v1,
+        version: API_VERSIONS.public.v1,
         body: JSON.stringify(anonymizationFieldsActions),
       }
     );

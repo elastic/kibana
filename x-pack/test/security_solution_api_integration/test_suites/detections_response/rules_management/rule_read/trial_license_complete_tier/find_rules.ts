@@ -23,9 +23,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const securitySolutionApi = getService('securitySolutionApi');
   const log = getService('log');
-  // TODO: add a new service for pulling kibana username, similar to getService('es')
-  const config = getService('config');
-  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
+  const utils = getService('securitySolutionUtils');
 
   describe('@ess @serverless find_rules', () => {
     beforeEach(async () => {
@@ -50,7 +48,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body } = await securitySolutionApi.findRules({ query: {} }).expect(200);
 
       body.data = [removeServerGeneratedProperties(body.data[0])];
-      const expectedRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+      const expectedRule = updateUsername(getSimpleRuleOutput(), await utils.getUsername());
 
       expect(body).to.eql({
         data: [expectedRule],
@@ -68,7 +66,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body } = await securitySolutionApi.findRules({ query: {} }).expect(200);
 
       body.data = [removeServerGeneratedProperties(body.data[0])];
-      const expectedRule = updateUsername(getComplexRuleOutput(), ELASTICSEARCH_USERNAME);
+      const expectedRule = updateUsername(getComplexRuleOutput(), await utils.getUsername());
 
       expect(body).to.eql({
         data: [expectedRule],
@@ -104,7 +102,7 @@ export default ({ getService }: FtrProviderContext): void => {
       // query the single rule from _find
       const { body } = await securitySolutionApi.findRules({ query: {} }).expect(200);
 
-      const expectedRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+      const expectedRule = updateUsername(getSimpleRuleOutput(), await utils.getUsername());
       const ruleWithActions: ReturnType<typeof getSimpleRuleOutput> = {
         ...expectedRule,
         actions: [
@@ -151,7 +149,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       // query the single rule from _find
       const { body } = await securitySolutionApi.findRules({ query: {} }).expect(200);
-      const expectedRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+      const expectedRule = updateUsername(getSimpleRuleOutput(), await utils.getUsername());
 
       const ruleWithActions: ReturnType<typeof getSimpleRuleOutput> = {
         ...expectedRule,

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { fetchConnectorById } from '..';
 
@@ -50,6 +50,14 @@ export const createConnector = async (
       method: 'PUT',
       path: `/_connector/${connectorId}/_features`,
       body: { features: input.features },
+    });
+  }
+
+  if (input.configuration) {
+    await client.transport.request({
+      method: 'PUT',
+      path: `/_connector/${connectorId}/_configuration`,
+      body: { configuration: input.configuration },
     });
   }
 

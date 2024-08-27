@@ -288,6 +288,7 @@ export function registerJobsMonitoringRuleType({
             id: alertName,
             actionGroup: ANOMALY_DETECTION_JOB_REALTIME_ISSUE,
             context,
+            // @ts-expect-error type mismatch
             payload,
           });
         });
@@ -301,6 +302,7 @@ export function registerJobsMonitoringRuleType({
           alertsClient.setAlertData({
             id: recoveredAlertId,
             context: testResult.context,
+            // @ts-expect-error type mismatch
             payload: testResult.payload,
           });
         }

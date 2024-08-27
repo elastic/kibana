@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { BuildFlavor } from '@kbn/config';
 import type { ConfigType } from '../config';
 import {
   DEFAULT_ALERTS_INDEX,
@@ -20,8 +21,15 @@ export class AppClient {
   private readonly sourcererDataViewId: string;
   private readonly kibanaVersion: string;
   private readonly kibanaBranch: string;
+  private readonly buildFlavor: BuildFlavor;
 
-  constructor(spaceId: string, config: ConfigType, kibanaVersion: string, kibanaBranch: string) {
+  constructor(
+    spaceId: string,
+    config: ConfigType,
+    kibanaVersion: string,
+    kibanaBranch: string,
+    buildFlavor: BuildFlavor
+  ) {
     const configuredSignalsIndex = config.signalsIndex;
 
     this.alertsIndex = `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
@@ -31,6 +39,7 @@ export class AppClient {
     this.spaceId = spaceId;
     this.kibanaVersion = kibanaVersion;
     this.kibanaBranch = kibanaBranch;
+    this.buildFlavor = buildFlavor;
   }
 
   public getAlertsIndex = (): string => this.alertsIndex;
@@ -40,4 +49,5 @@ export class AppClient {
   public getSpaceId = (): string => this.spaceId;
   public getKibanaVersion = (): string => this.kibanaVersion;
   public getKibanaBranch = (): string => this.kibanaBranch;
+  public getBuildFlavor = (): BuildFlavor => this.buildFlavor;
 }

@@ -13,7 +13,7 @@ export const API_VERSIONS = {
   internal: {
     v1: '1',
   },
-};
+} as const;
 
 export const PUBLIC_API_ACCESS = 'public';
 export const INTERNAL_API_ACCESS = 'internal';
@@ -22,7 +22,13 @@ export const INTERNAL_API_ACCESS = 'internal';
 export * from './common_attributes.gen';
 
 // Attack discovery Schemas
+export * from './attack_discovery/common_attributes.gen';
+export * from './attack_discovery/get_attack_discovery_route.gen';
 export * from './attack_discovery/post_attack_discovery_route.gen';
+export * from './attack_discovery/cancel_attack_discovery_route.gen';
+
+// Chat Schemas
+export * from './chat/post_chat_complete_route.gen';
 
 // Evaluation Schemas
 export * from './evaluation/post_evaluate_route.gen';
@@ -32,6 +38,7 @@ export * from './evaluation/get_evaluate_route.gen';
 export * from './capabilities/get_capabilities_route.gen';
 
 // Conversations Schemas
+export * from './conversations/append_message.gen';
 export * from './conversations/bulk_crud_conversations_route.gen';
 export * from './conversations/common_attributes.gen';
 export * from './conversations/crud_conversation_route.gen';
@@ -46,3 +53,6 @@ export * from './knowledge_base/entries/bulk_crud_knowledge_base_entries_route.g
 export * from './knowledge_base/entries/common_attributes.gen';
 export * from './knowledge_base/entries/crud_knowledge_base_entries_route.gen';
 export * from './knowledge_base/entries/find_knowledge_base_entries_route.gen';
+
+export * from './prompts/find_prompts_route.gen';
+export { PromptResponse, PromptTypeEnum } from './prompts/bulk_crud_prompts_route.gen';

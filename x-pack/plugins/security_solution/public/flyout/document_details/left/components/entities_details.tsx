@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useLeftPanelContext } from '../context';
+import { useDocumentDetailsContext } from '../../shared/context';
 import { getField } from '../../shared/utils';
 import { UserDetails } from './user_details';
 import { HostDetails } from './host_details';
@@ -20,7 +20,7 @@ export const ENTITIES_TAB_ID = 'entity';
  * Entities displayed in the document details expandable flyout left section under the Insights tab
  */
 export const EntitiesDetails: React.FC = () => {
-  const { getFieldsData, scopeId } = useLeftPanelContext();
+  const { getFieldsData, scopeId } = useDocumentDetailsContext();
   const hostName = getField(getFieldsData('host.name'));
   const userName = getField(getFieldsData('user.name'));
   const timestamp = getField(getFieldsData('@timestamp'));

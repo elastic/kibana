@@ -21,7 +21,7 @@ export const registerCreateRoute = ({
   lib: { handleEsError },
 }: RouteDependencies) => {
   const bodySchema = schema.object({
-    name: schema.string(),
+    name: schema.string({ maxLength: 1000 }),
     remoteCluster: schema.string(),
     leaderIndex: schema.string(),
     maxReadRequestOperationCount: schema.maybe(schema.number()),

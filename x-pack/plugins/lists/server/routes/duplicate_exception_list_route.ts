@@ -6,17 +6,16 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import {
+  DuplicateExceptionListRequestQuery,
+  DuplicateExceptionListResponse,
+} from '@kbn/securitysolution-exceptions-common/api';
 
 import type { ListsPluginRouter } from '../types';
-import {
-  DuplicateExceptionListRequestQueryDecoded,
-  duplicateExceptionListRequestQuery,
-  duplicateExceptionListResponse,
-} from '../../common/api';
 
-import { buildRouteValidation, buildSiemResponse, getExceptionListClient } from './utils';
+import { buildSiemResponse, getExceptionListClient } from './utils';
 
 export const duplicateExceptionsRoute = (router: ListsPluginRouter): void => {
   router.versioned
@@ -31,10 +30,7 @@ export const duplicateExceptionsRoute = (router: ListsPluginRouter): void => {
       {
         validate: {
           request: {
-            query: buildRouteValidation<
-              typeof duplicateExceptionListRequestQuery,
-              DuplicateExceptionListRequestQueryDecoded
-            >(duplicateExceptionListRequestQuery),
+            query: buildRouteValidationWithZod(DuplicateExceptionListRequestQuery),
           },
         },
         version: '2023-10-31',
@@ -83,12 +79,7 @@ export const duplicateExceptionsRoute = (router: ListsPluginRouter): void => {
             });
           }
 
-          const [validated, errors] = validate(duplicatedList, duplicateExceptionListResponse);
-          if (errors != null) {
-            return siemResponse.error({ body: errors, statusCode: 500 });
-          } else {
-            return response.ok({ body: validated ?? {} });
-          }
+          return response.ok({ body: DuplicateExceptionListResponse.parse(duplicatedList) });
         } catch (err) {
           const error = transformError(err);
           return siemResponse.error({

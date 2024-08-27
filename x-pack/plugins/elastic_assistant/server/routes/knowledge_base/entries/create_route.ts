@@ -15,7 +15,8 @@ import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/
 import {
   KnowledgeBaseEntryCreateProps,
   KnowledgeBaseEntryResponse,
-} from '@kbn/elastic-assistant-common/impl/schemas/knowledge_base/entries/common_attributes.gen';
+  Metadata,
+} from '@kbn/elastic-assistant-common/impl/schemas/knowledge_base/common_attributes.gen';
 import { ElasticAssistantPluginRouter } from '../../../types';
 import { buildResponse } from '../../utils';
 import { performChecks } from '../../helpers';
@@ -58,10 +59,8 @@ export const createKnowledgeBaseEntryRoute = (router: ElasticAssistantPluginRout
             return checkResponse;
           }
 
-          logger.debug(`Creating KB Entry:\n${JSON.stringify(request.body)}`);
-          const kbDataClient = await ctx.elasticAssistant.getAIAssistantKnowledgeBaseDataClient(
-            false
-          );
+          logger.debug(() => `Creating KB Entry:\n${JSON.stringify(request.body)}`);
+          const kbDataClient = await ctx.elasticAssistant.getAIAssistantKnowledgeBaseDataClient();
           const createResponse = await kbDataClient?.createKnowledgeBaseEntry({
             knowledgeBaseEntry: request.body,
           });

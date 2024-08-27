@@ -10,11 +10,22 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'timePicker', 'discover', 'unifiedFieldList']);
+  const PageObjects = getPageObjects([
+    'svlCommonPage',
+    'common',
+    'timePicker',
+    'discover',
+    'unifiedFieldList',
+  ]);
   const testSubjects = getService('testSubjects');
   const dataViews = getService('dataViews');
+  const dataGrid = getService('dataGrid');
 
   describe('data source profile', () => {
+    before(async () => {
+      await PageObjects.svlCommonPage.loginAsAdmin();
+    });
+
     describe('ES|QL mode', () => {
       describe('cell renderers', () => {
         it('should not render custom @timestamp or log.level', async () => {
@@ -22,8 +33,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             dataSource: { type: 'esql' },
             query: { esql: 'from my-example-* | sort @timestamp desc' },
           });
-          await PageObjects.common.navigateToApp('discover', {
-            hash: `/?_a=${state}`,
+          await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
+            ensureCurrentUrl: false,
           });
           await PageObjects.discover.waitUntilSearchingHasFinished();
           await PageObjects.unifiedFieldList.clickFieldListItemAdd('@timestamp');
@@ -39,8 +50,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             dataSource: { type: 'esql' },
             query: { esql: 'from my-example-logs | sort @timestamp desc' },
           });
-          await PageObjects.common.navigateToApp('discover', {
-            hash: `/?_a=${state}`,
+          await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
+            ensureCurrentUrl: false,
           });
           await PageObjects.discover.waitUntilSearchingHasFinished();
           await PageObjects.unifiedFieldList.clickFieldListItemAdd('@timestamp');
@@ -53,12 +64,48 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(await logLevels[2].getVisibleText()).to.be('Info');
         });
       });
+
+      describe('doc viewer extension', () => {
+        it('should not render custom doc viewer view', async () => {
+          const state = kbnRison.encode({
+            dataSource: { type: 'esql' },
+            query: { esql: 'from my-example-* | sort @timestamp desc' },
+          });
+          await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
+            ensureCurrentUrl: false,
+          });
+          await PageObjects.discover.waitUntilSearchingHasFinished();
+          await dataGrid.clickRowToggle({ rowIndex: 0 });
+          await testSubjects.existOrFail('docViewerTab-doc_view_table');
+          await testSubjects.existOrFail('docViewerTab-doc_view_source');
+          await testSubjects.missingOrFail('docViewerTab-doc_view_example');
+          expect(await testSubjects.getVisibleText('docViewerRowDetailsTitle')).to.be('Result');
+        });
+
+        it('should render custom doc viewer view', async () => {
+          const state = kbnRison.encode({
+            dataSource: { type: 'esql' },
+            query: { esql: 'from my-example-logs | sort @timestamp desc' },
+          });
+          await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
+            ensureCurrentUrl: false,
+          });
+          await PageObjects.discover.waitUntilSearchingHasFinished();
+          await dataGrid.clickRowToggle({ rowIndex: 0 });
+          await testSubjects.existOrFail('docViewerTab-doc_view_table');
+          await testSubjects.existOrFail('docViewerTab-doc_view_source');
+          await testSubjects.existOrFail('docViewerTab-doc_view_example');
+          expect(await testSubjects.getVisibleText('docViewerRowDetailsTitle')).to.be('Record #0');
+        });
+      });
     });
 
     describe('data view mode', () => {
       describe('cell renderers', () => {
         it('should not render custom @timestamp or log.level', async () => {
-          await PageObjects.common.navigateToApp('discover');
+          await PageObjects.common.navigateToActualUrl('discover', undefined, {
+            ensureCurrentUrl: false,
+          });
           await dataViews.switchTo('my-example-*');
           await PageObjects.discover.waitUntilSearchingHasFinished();
           await PageObjects.unifiedFieldList.clickFieldListItemAdd('@timestamp');
@@ -70,7 +117,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('should not render custom @timestamp but should render custom log.level', async () => {
-          await PageObjects.common.navigateToApp('discover');
+          await PageObjects.common.navigateToActualUrl('discover', undefined, {
+            ensureCurrentUrl: false,
+          });
           await dataViews.switchTo('my-example-logs');
           await PageObjects.discover.waitUntilSearchingHasFinished();
           await PageObjects.unifiedFieldList.clickFieldListItemAdd('@timestamp');
@@ -81,6 +130,36 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(logLevels).to.have.length(3);
           expect(await logLevels[0].getVisibleText()).to.be('Debug');
           expect(await logLevels[2].getVisibleText()).to.be('Info');
+        });
+      });
+
+      describe('doc viewer extension', () => {
+        it('should not render custom doc viewer view', async () => {
+          await PageObjects.common.navigateToActualUrl('discover', undefined, {
+            ensureCurrentUrl: false,
+          });
+          await dataViews.switchTo('my-example-*');
+          await PageObjects.discover.waitUntilSearchingHasFinished();
+          await dataGrid.clickRowToggle({ rowIndex: 0 });
+          await testSubjects.existOrFail('docViewerTab-doc_view_table');
+          await testSubjects.existOrFail('docViewerTab-doc_view_source');
+          await testSubjects.missingOrFail('docViewerTab-doc_view_example');
+          expect(await testSubjects.getVisibleText('docViewerRowDetailsTitle')).to.be('Document');
+        });
+
+        it('should render custom doc viewer view', async () => {
+          await PageObjects.common.navigateToActualUrl('discover', undefined, {
+            ensureCurrentUrl: false,
+          });
+          await dataViews.switchTo('my-example-logs');
+          await PageObjects.discover.waitUntilSearchingHasFinished();
+          await dataGrid.clickRowToggle({ rowIndex: 0 });
+          await testSubjects.existOrFail('docViewerTab-doc_view_table');
+          await testSubjects.existOrFail('docViewerTab-doc_view_source');
+          await testSubjects.existOrFail('docViewerTab-doc_view_example');
+          expect(await testSubjects.getVisibleText('docViewerRowDetailsTitle')).to.be(
+            'Record #my-example-logs::XdQFDpABfGznVC1bCHLo::'
+          );
         });
       });
     });

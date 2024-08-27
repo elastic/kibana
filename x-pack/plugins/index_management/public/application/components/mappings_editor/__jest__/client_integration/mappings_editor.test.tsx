@@ -28,6 +28,7 @@ describe('Mappings editor: core', () => {
   let onChangeHandler: jest.Mock = jest.fn();
   let getMappingsEditorData = getMappingsEditorDataFactory(onChangeHandler);
   let testBed: MappingsEditorTestBed;
+  const appDependencies = { plugins: { ml: { mlApi: {} } } };
 
   beforeAll(() => {
     jest.useFakeTimers({ legacyFakeTimers: true });
@@ -55,7 +56,7 @@ describe('Mappings editor: core', () => {
     };
 
     await act(async () => {
-      testBed = setup({ value: defaultMappings, onChange: onChangeHandler });
+      testBed = setup({ value: defaultMappings, onChange: onChangeHandler }, appDependencies);
     });
 
     const { component } = testBed;
@@ -95,7 +96,7 @@ describe('Mappings editor: core', () => {
       };
 
       await act(async () => {
-        testBed = setup({ onChange: onChangeHandler, value });
+        testBed = setup({ onChange: onChangeHandler, value }, appDependencies);
       });
 
       const { component, exists } = testBed;
@@ -115,7 +116,7 @@ describe('Mappings editor: core', () => {
         },
       };
       await act(async () => {
-        testBed = setup({ onChange: onChangeHandler, value });
+        testBed = setup({ onChange: onChangeHandler, value }, appDependencies);
       });
 
       const { component, exists } = testBed;
@@ -137,6 +138,7 @@ describe('Mappings editor: core', () => {
       config: {
         enableMappingsSourceFieldSection: true,
       },
+      ...appDependencies,
     };
 
     beforeEach(async () => {
@@ -295,6 +297,7 @@ describe('Mappings editor: core', () => {
       config: {
         enableMappingsSourceFieldSection: true,
       },
+      ...appDependencies,
     };
 
     beforeEach(async () => {
@@ -472,7 +475,7 @@ describe('Mappings editor: core', () => {
         },
       };
       await act(async () => {
-        testBed = setup({ onChange: onChangeHandler, value });
+        testBed = setup({ onChange: onChangeHandler, value }, appDependencies);
       });
 
       const { component, exists } = testBed;
@@ -494,7 +497,7 @@ describe('Mappings editor: core', () => {
         },
       };
       await act(async () => {
-        testBed = setup({ onChange: onChangeHandler, value });
+        testBed = setup({ onChange: onChangeHandler, value }, appDependencies);
       });
 
       const { component } = testBed;

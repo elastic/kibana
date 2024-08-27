@@ -1,6 +1,6 @@
 # Fields Metadata Plugin
 
-The `@kbn/fields-metadata-plugin` is designed to provide a centralized and asynchronous way to consume field metadata across Kibana. This plugin addresses the need for on-demand retrieval of field metadata from static ECS definitions and integration manifests, with the flexibility to extend to additional resolution sources in the future.
+The `@kbn/fields-metadata-plugin` is designed to provide a centralized and asynchronous way to consume field metadata across Kibana. This plugin addresses the need for on-demand retrieval of field metadata from static ECS/Metadata definitions and integration manifests, with the flexibility to extend to additional resolution sources in the future.
 
 ## Components and Mechanisms
 

@@ -451,6 +451,62 @@
           },
           {
             "parentPluginId": "expressionMetricVis",
+            "id": "def-common.MetricArguments.titlesTextAlign",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "titlesTextAlign",
+            "description": [],
+            "signature": [
+              "\"right\" | \"left\" | \"center\""
+            ],
+            "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_functions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionMetricVis",
+            "id": "def-common.MetricArguments.valuesTextAlign",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "valuesTextAlign",
+            "description": [],
+            "signature": [
+              "\"right\" | \"left\" | \"center\""
+            ],
+            "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_functions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionMetricVis",
+            "id": "def-common.MetricArguments.iconAlign",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "iconAlign",
+            "description": [],
+            "signature": [
+              "\"right\" | \"left\""
+            ],
+            "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_functions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionMetricVis",
+            "id": "def-common.MetricArguments.valueFontSize",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "valueFontSize",
+            "description": [],
+            "signature": [
+              "number | \"default\" | \"fit\""
+            ],
+            "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_functions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionMetricVis",
             "id": "def-common.MetricArguments.color",
             "type": "string",
             "tags": [],
@@ -740,6 +796,62 @@
             "signature": [
               "LayoutDirection",
               " | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_renderers.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionMetricVis",
+            "id": "def-common.MetricVisParam.titlesTextAlign",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "titlesTextAlign",
+            "description": [],
+            "signature": [
+              "\"right\" | \"left\" | \"center\""
+            ],
+            "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_renderers.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionMetricVis",
+            "id": "def-common.MetricVisParam.valuesTextAlign",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "valuesTextAlign",
+            "description": [],
+            "signature": [
+              "\"right\" | \"left\" | \"center\""
+            ],
+            "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_renderers.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionMetricVis",
+            "id": "def-common.MetricVisParam.iconAlign",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "iconAlign",
+            "description": [],
+            "signature": [
+              "\"right\" | \"left\""
+            ],
+            "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_renderers.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionMetricVis",
+            "id": "def-common.MetricVisParam.valueFontSize",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "valueFontSize",
+            "description": [],
+            "signature": [
+              "number | \"default\" | \"fit\""
             ],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_renderers.ts",
             "deprecated": false,

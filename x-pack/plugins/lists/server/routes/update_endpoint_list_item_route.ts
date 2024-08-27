@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { ENDPOINT_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import {
+  UpdateEndpointListItemRequestBody,
+  UpdateEndpointListItemResponse,
+} from '@kbn/securitysolution-endpoint-exceptions-common/api';
 
 import type { ListsPluginRouter } from '../types';
-import {
-  UpdateEndpointListItemRequestDecoded,
-  updateEndpointListItemRequest,
-  updateEndpointListItemResponse,
-} from '../../common/api';
 
-import { buildRouteValidation, buildSiemResponse } from './utils';
+import { buildSiemResponse } from './utils';
 
 import { getExceptionListClient } from '.';
 
@@ -33,10 +32,7 @@ export const updateEndpointListItemRoute = (router: ListsPluginRouter): void => 
       {
         validate: {
           request: {
-            body: buildRouteValidation<
-              typeof updateEndpointListItemRequest,
-              UpdateEndpointListItemRequestDecoded
-            >(updateEndpointListItemRequest),
+            body: buildRouteValidationWithZod(UpdateEndpointListItemRequestBody),
           },
         },
         version: '2023-10-31',
@@ -84,12 +80,7 @@ export const updateEndpointListItemRoute = (router: ListsPluginRouter): void => 
               });
             }
           } else {
-            const [validated, errors] = validate(exceptionListItem, updateEndpointListItemResponse);
-            if (errors != null) {
-              return siemResponse.error({ body: errors, statusCode: 500 });
-            } else {
-              return response.ok({ body: validated ?? {} });
-            }
+            return response.ok({ body: UpdateEndpointListItemResponse.parse(exceptionListItem) });
           }
         } catch (err) {
           const error = transformError(err);

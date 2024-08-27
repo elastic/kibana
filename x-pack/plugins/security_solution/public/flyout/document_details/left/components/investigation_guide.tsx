@@ -7,18 +7,18 @@
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { FlyoutLoading } from '@kbn/security-solution-common';
 import { useInvestigationGuide } from '../../shared/hooks/use_investigation_guide';
-import { useLeftPanelContext } from '../context';
+import { useDocumentDetailsContext } from '../../shared/context';
 import { INVESTIGATION_GUIDE_TEST_ID, INVESTIGATION_GUIDE_LOADING_TEST_ID } from './test_ids';
-import { InvestigationGuideView } from '../../../../common/components/event_details/investigation_guide_view';
-import { FlyoutLoading } from '../../../shared/components/flyout_loading';
+import { InvestigationGuideView } from './investigation_guide_view';
 
 /**
  * Investigation guide displayed in the left panel.
  * Renders a message saying the guide hasn't been set up or the full investigation guide.
  */
 export const InvestigationGuide: React.FC = () => {
-  const { dataFormattedForFieldBrowser, isPreview } = useLeftPanelContext();
+  const { dataFormattedForFieldBrowser, isPreview } = useDocumentDetailsContext();
 
   const { loading, error, basicAlertData, ruleNote } = useInvestigationGuide({
     dataFormattedForFieldBrowser,

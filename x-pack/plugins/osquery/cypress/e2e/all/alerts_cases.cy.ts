@@ -23,22 +23,16 @@ import {
   submitQuery,
   viewRecentCaseAndCheckResults,
 } from '../../tasks/live_query';
-import {
-  closeAlertsStepTourIfVisible,
-  generateRandomStringName,
-  interceptCaseId,
-} from '../../tasks/integrations';
+import { generateRandomStringName, interceptCaseId } from '../../tasks/integrations';
 
 describe('Alert Event Details - Cases', { tags: ['@ess', '@serverless'] }, () => {
   let ruleId: string;
   let packId: string;
   let packName: string;
   const packData = packFixture();
-  before(() => {
-    initializeDataViews();
-  });
 
   beforeEach(() => {
+    initializeDataViews();
     loadPack(packData).then((data) => {
       packId = data.saved_object_id;
       packName = data.name;
@@ -70,8 +64,7 @@ describe('Alert Event Details - Cases', { tags: ['@ess', '@serverless'] }, () =>
     it('runs osquery against alert and creates a new case', () => {
       const [caseName, caseDescription] = generateRandomStringName(2);
       cy.getBySel('expand-event').first().click();
-      closeAlertsStepTourIfVisible();
-      cy.getBySel('take-action-dropdown-btn').click();
+      cy.getBySel('securitySolutionFlyoutFooterDropdownButton').click();
       cy.getBySel('osquery-action-item').click();
       cy.contains(/^\d+ agen(t|ts) selected/);
       cy.getBySel('globalLoadingIndicator').should('not.exist');
@@ -94,19 +87,18 @@ describe('Alert Event Details - Cases', { tags: ['@ess', '@serverless'] }, () =>
   describe('Case', () => {
     let caseId: string;
 
-    before(() => {
+    beforeEach(() => {
       loadCase('securitySolution').then((data) => {
         caseId = data.id;
       });
     });
 
-    after(() => {
+    afterEach(() => {
       cleanupCase(caseId);
     });
 
     it('sees osquery results from last action and add to a case', () => {
       cy.getBySel('expand-event').first().click();
-      closeAlertsStepTourIfVisible();
       cy.getBySel('securitySolutionFlyoutResponseSectionHeader').click();
       cy.getBySel('securitySolutionFlyoutResponseButton').click();
       cy.getBySel('responseActionsViewWrapper').should('exist');

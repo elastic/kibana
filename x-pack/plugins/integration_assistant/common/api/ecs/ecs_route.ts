@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 import {
   Connector,
   DataStreamName,
+  LangSmithOptions,
   Mapping,
   PackageName,
   RawSamples,
@@ -23,6 +24,7 @@ export const EcsMappingRequestBody = z.object({
   rawSamples: RawSamples,
   mapping: Mapping.optional(),
   connectorId: Connector,
+  langSmithOptions: LangSmithOptions.optional(),
 });
 export type EcsMappingRequestBodyInput = z.input<typeof EcsMappingRequestBody>;
 

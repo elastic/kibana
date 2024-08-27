@@ -46,7 +46,7 @@ export const DefaultLayout: React.FC<Props> = memo(
       },
     ];
 
-    const CreateIntegrationCardButton = integrationAssistant?.CreateIntegrationCardButton;
+    const { CreateIntegrationCardButton } = integrationAssistant?.components ?? {};
 
     return (
       <WithHeaderLayout
@@ -81,7 +81,7 @@ export const DefaultLayout: React.FC<Props> = memo(
         rightColumn={
           CreateIntegrationCardButton ? (
             <EuiFlexItem grow={false}>
-              <CreateIntegrationCardButton href={getHref('integration_create')} />
+              <CreateIntegrationCardButton />
             </EuiFlexItem>
           ) : undefined
         }

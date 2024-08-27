@@ -701,7 +701,7 @@ describe('workspace_panel', () => {
 
       // EuiFlexItem duplicates internally the attribute, so we need to filter only the most inner one here
       expect(instance.find('[data-test-subj="workspace-error-message"]').last().text()).toEqual(
-        `i'm an error`
+        `hey there i'm an error`
       );
       expect(instance.find(expressionRendererMock)).toHaveLength(0);
       expect(getUserMessages).toHaveBeenCalledWith(['visualization', 'visualizationInEditor'], {

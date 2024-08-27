@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 import {
   Connector,
   DataStreamName,
+  LangSmithOptions,
   PackageName,
   Pipeline,
   RawSamples,
@@ -23,6 +24,7 @@ export const CategorizationRequestBody = z.object({
   rawSamples: RawSamples,
   currentPipeline: Pipeline,
   connectorId: Connector,
+  langSmithOptions: LangSmithOptions.optional(),
 });
 export type CategorizationRequestBodyInput = z.input<typeof CategorizationRequestBody>;
 

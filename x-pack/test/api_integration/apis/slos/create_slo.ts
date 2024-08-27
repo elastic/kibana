@@ -142,24 +142,15 @@ export default function ({ getService }: FtrProviderContext) {
                   ],
                 },
               },
-              runtime_mappings: {
-                'slo.id': {
-                  type: 'keyword',
-                  script: { source: `emit('${id}')` },
-                },
-                'slo.revision': { type: 'long', script: { source: 'emit(1)' } },
-              },
             },
             dest: {
               index: '.slo-observability.sli-v3.3',
-              pipeline: '.slo-observability.sli.pipeline-v3.3',
+              pipeline: `.slo-observability.sli.pipeline-${id}-1`,
             },
             frequency: '1m',
             sync: { time: { field: '@timestamp', delay: '1m' } },
             pivot: {
               group_by: {
-                'slo.id': { terms: { field: 'slo.id' } },
-                'slo.revision': { terms: { field: 'slo.revision' } },
                 'slo.groupings.tags': { terms: { field: 'tags' } },
                 '@timestamp': { date_histogram: { field: '@timestamp', fixed_interval: '1m' } },
               },

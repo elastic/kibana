@@ -24,6 +24,7 @@ import {
   serverReturnedResolverData,
 } from '../data/action';
 import type { State } from '../../../common/store/types';
+
 /**
  * A function that handles syncing ResolverTree data w/ the current entity ID.
  * This will make a request anytime the entityID changes (to something other than undefined.)
@@ -42,7 +43,7 @@ export function ResolverTreeFetcher(
   return async (id: string) => {
     // const id = 'alerts-page';
     const state = api.getState();
-    const databaseParameters = selectors.treeParametersToFetch(state.analyzer[id]);
+    let databaseParameters = selectors.treeParametersToFetch(state.analyzer[id]);
     if (selectors.treeRequestParametersToAbort(state.analyzer[id]) && lastRequestAbortController) {
       lastRequestAbortController.abort();
       // calling abort will cause an action to be fired
@@ -51,9 +52,9 @@ export function ResolverTreeFetcher(
       let entityIDToFetch: string | undefined;
       let dataSource: string | undefined;
       let dataSourceSchema: ResolverSchema | undefined;
+      let dataSourceAgentId: string | undefined;
       let result: ResolverNode[] | undefined;
       const timeRangeFilters = selectors.timeRangeFilters(state.analyzer[id]);
-
       // Inform the state that we've made the request. Without this, the middleware will try to make the request again
       // immediately.
       api.dispatch(appRequestedResolverData({ id, parameters: databaseParameters }));
@@ -63,6 +64,7 @@ export function ResolverTreeFetcher(
           indices: databaseParameters.indices,
           signal: lastRequestAbortController.signal,
         });
+
         if (matchingEntities.length < 1) {
           // If no entity_id could be found for the _id, bail out with a failure.
           api.dispatch(
@@ -73,8 +75,17 @@ export function ResolverTreeFetcher(
           );
           return;
         }
-        ({ id: entityIDToFetch, schema: dataSourceSchema, name: dataSource } = matchingEntities[0]);
+        ({
+          id: entityIDToFetch,
+          schema: dataSourceSchema,
+          name: dataSource,
+          agentId: dataSourceAgentId,
+        } = matchingEntities[0]);
 
+        databaseParameters = {
+          ...databaseParameters,
+          agentId: dataSourceAgentId ?? '',
+        };
         result = await dataAccessLayer.resolverTree({
           dataId: entityIDToFetch,
           schema: dataSourceSchema,
@@ -82,6 +93,7 @@ export function ResolverTreeFetcher(
           indices: databaseParameters.indices,
           ancestors: ancestorsRequestAmount(dataSourceSchema),
           descendants: descendantsRequestAmount(),
+          agentId: databaseParameters.agentId,
         });
 
         const resolverTree: NewResolverTree = {
@@ -96,6 +108,7 @@ export function ResolverTreeFetcher(
             indices: databaseParameters.indices,
             ancestors: ancestorsRequestAmount(dataSourceSchema),
             descendants: descendantsRequestAmount(),
+            agentId: databaseParameters.agentId,
           });
           if (unboundedTree.length > 0) {
             const timestamps = unboundedTree
@@ -143,9 +156,19 @@ export function ResolverTreeFetcher(
       } catch (error) {
         // https://developer.mozilla.org/en-US/docs/Web/API/DOMException#exception-AbortError
         if (error instanceof DOMException && error.name === 'AbortError') {
-          api.dispatch(appAbortedResolverDataRequest({ id, parameters: databaseParameters }));
+          api.dispatch(
+            appAbortedResolverDataRequest({
+              id,
+              parameters: databaseParameters,
+            })
+          );
         } else {
-          api.dispatch(serverFailedToReturnResolverData({ id, parameters: databaseParameters }));
+          api.dispatch(
+            serverFailedToReturnResolverData({
+              id,
+              parameters: databaseParameters,
+            })
+          );
         }
       }
     }

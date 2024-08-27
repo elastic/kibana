@@ -7,7 +7,7 @@
 
 import { EuiLoadingSpinner } from '@elastic/eui';
 import React, { Suspense } from 'react';
-import type { CreateIntegrationCardButtonProps } from './create_integration_card_button';
+import type { CreateIntegrationCardButtonComponent } from './types';
 
 const CreateIntegrationCardButton = React.lazy(() =>
   import('./create_integration_card_button').then((module) => ({
@@ -15,8 +15,8 @@ const CreateIntegrationCardButton = React.lazy(() =>
   }))
 );
 
-export const getCreateIntegrationCardButtonLazy = () =>
-  React.memo(function CreateIntegrationCardButtonLazy(props: CreateIntegrationCardButtonProps) {
+export const getCreateIntegrationCardButtonLazy = (): CreateIntegrationCardButtonComponent =>
+  React.memo(function CreateIntegrationCardButtonLazy(props) {
     return (
       <Suspense fallback={<EuiLoadingSpinner size="l" />}>
         <CreateIntegrationCardButton {...props} />

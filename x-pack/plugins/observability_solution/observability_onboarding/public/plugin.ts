@@ -23,7 +23,6 @@ import {
 } from '@kbn/core/public';
 import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
 import { FleetSetup, FleetStart } from '@kbn/fleet-plugin/public';
@@ -34,7 +33,10 @@ import { PLUGIN_ID } from '../common';
 import { ObservabilityOnboardingLocatorDefinition } from './locators/onboarding_locator/locator_definition';
 import { ObservabilityOnboardingPluginLocators } from './locators';
 import { ConfigSchema } from '.';
-import { OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT } from '../common/telemetry_events';
+import {
+  OBSERVABILITY_ONBOARDING_FEEDBACK_TELEMETRY_EVENT,
+  OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT,
+} from '../common/telemetry_events';
 
 export type ObservabilityOnboardingPluginSetup = void;
 export type ObservabilityOnboardingPluginStart = void;
@@ -46,7 +48,6 @@ export interface ObservabilityOnboardingPluginSetupDeps {
   discover: DiscoverSetup;
   share: SharePluginSetup;
   fleet: FleetSetup;
-  security: SecurityPluginSetup;
   cloud?: CloudSetup;
   usageCollection?: UsageCollectionSetup;
 }
@@ -58,7 +59,6 @@ export interface ObservabilityOnboardingPluginStartDeps {
   discover: DiscoverStart;
   share: SharePluginStart;
   fleet: FleetStart;
-  security: SecurityPluginStart;
   cloud?: CloudStart;
   usageCollection?: UsageCollectionStart;
   cloudExperiments?: CloudExperimentsPluginStart;
@@ -75,6 +75,7 @@ export class ObservabilityOnboardingPlugin
   constructor(private readonly ctx: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, plugins: ObservabilityOnboardingPluginSetupDeps) {
+    const stackVersion = this.ctx.env.packageInfo.version;
     const config = this.ctx.config.get<ObservabilityOnboardingConfig>();
     const {
       ui: { enabled: isObservabilityOnboardingUiEnabled },
@@ -109,6 +110,10 @@ export class ObservabilityOnboardingPlugin
             appMountParameters,
             corePlugins: corePlugins as ObservabilityOnboardingPluginStartDeps,
             config,
+            context: {
+              isServerless: Boolean(pluginSetupDeps.cloud?.isServerlessEnabled),
+              stackVersion,
+            },
           });
         },
         visibleIn: [],
@@ -120,6 +125,7 @@ export class ObservabilityOnboardingPlugin
     };
 
     core.analytics.registerEventType(OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT);
+    core.analytics.registerEventType(OBSERVABILITY_ONBOARDING_FEEDBACK_TELEMETRY_EVENT);
 
     return {
       locators: this.locators,

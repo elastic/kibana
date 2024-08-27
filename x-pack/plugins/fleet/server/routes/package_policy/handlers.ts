@@ -10,7 +10,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { RequestHandler } from '@kbn/core/server';
 
-import { groupBy, keyBy } from 'lodash';
+import { groupBy, isEmpty, isEqual, keyBy } from 'lodash';
 
 import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 
@@ -62,7 +62,12 @@ import {
 
 import type { SimplifiedPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
 
-import { isSimplifiedCreatePackagePolicyRequest, removeFieldsFromInputSchema } from './utils';
+import {
+  isSimplifiedCreatePackagePolicyRequest,
+  removeFieldsFromInputSchema,
+  renameAgentlessAgentPolicy,
+  alignInputsAndStreams,
+} from './utils';
 
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
 
@@ -231,15 +236,11 @@ export const createPackagePolicyHandler: FleetRequestHandler<
   const fleetContext = await context.fleet;
   const soClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
+  const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
   const { force, id, package: pkg, ...newPolicy } = request.body;
   const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
   let wasPackageAlreadyInstalled = false;
 
-  if ('output_id' in newPolicy) {
-    // TODO Remove deprecated APIs https://github.com/elastic/kibana/issues/121485
-    delete newPolicy.output_id;
-  }
   const spaceId = fleetContext.spaceId;
   try {
     if (!newPolicy.policy_id && (!newPolicy.policy_ids || newPolicy.policy_ids.length === 0)) {
@@ -267,6 +268,7 @@ export const createPackagePolicyHandler: FleetRequestHandler<
         package: pkg,
       } as NewPackagePolicy);
     }
+    newPackagePolicy.inputs = alignInputsAndStreams(newPackagePolicy.inputs);
 
     const installation = await getInstallation({
       savedObjectsClient: soClient,
@@ -339,7 +341,7 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
   const soClient = fleetContext.internalSoClient;
   const limitedToPackages = fleetContext.limitedToPackages;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
+  const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
   const packagePolicy = await packagePolicyService.get(soClient, request.params.packagePolicyId);
 
   if (!packagePolicy) {
@@ -357,11 +359,6 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
 
   try {
     const { force, package: pkg, ...body } = request.body;
-    // TODO Remove deprecated APIs https://github.com/elastic/kibana/issues/121485
-    if ('output_id' in body) {
-      delete body.output_id;
-    }
-
     let newData: NewPackagePolicy;
 
     if (
@@ -407,6 +404,27 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
         newData.overrides = overrides;
       }
     }
+    newData.inputs = alignInputsAndStreams(newData.inputs);
+
+    if (newData.policy_ids && newData.policy_ids.length === 0) {
+      throw new PackagePolicyRequestError('At least one agent policy id must be provided');
+    }
+
+    if (
+      newData.policy_ids &&
+      !isEmpty(packagePolicy.policy_ids) &&
+      !isEqual(newData.policy_ids, packagePolicy.policy_ids)
+    ) {
+      const agentPolicy = await agentPolicyService.get(soClient, packagePolicy.policy_ids[0]);
+      if (agentPolicy?.supports_agentless) {
+        throw new PackagePolicyRequestError(
+          'Cannot change agent policies of an agentless integration'
+        );
+      }
+    }
+
+    await renameAgentlessAgentPolicy(soClient, esClient, packagePolicy, newData.name);
+
     const updatedPackagePolicy = await packagePolicyService.update(
       soClient,
       esClient,
@@ -442,7 +460,7 @@ export const deletePackagePolicyHandler: RequestHandler<
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
+  const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
 
   try {
     const body: PostDeletePackagePoliciesResponse = await packagePolicyService.delete(
@@ -470,7 +488,7 @@ export const deleteOnePackagePolicyHandler: RequestHandler<
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
+  const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
 
   try {
     const res = await packagePolicyService.delete(
@@ -509,7 +527,7 @@ export const upgradePackagePolicyHandler: RequestHandler<
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
+  const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
   try {
     const body: UpgradePackagePolicyResponse = await packagePolicyService.upgrade(
       soClient,

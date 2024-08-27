@@ -10,15 +10,17 @@ import Boom from '@hapi/boom';
 /**
  * Throws an error if the request has custom fields with duplicated keys.
  */
-export const validateDuplicatedCustomFieldKeysInRequest = ({
-  requestCustomFields = [],
+export const validateDuplicatedKeysInRequest = ({
+  requestFields = [],
+  fieldName,
 }: {
-  requestCustomFields?: Array<{ key: string }>;
+  requestFields?: Array<{ key: string }>;
+  fieldName: string;
 }) => {
   const uniqueKeys = new Set<string>();
   const duplicatedKeys = new Set<string>();
 
-  requestCustomFields.forEach((item) => {
+  requestFields.forEach((item) => {
     if (uniqueKeys.has(item.key)) {
       duplicatedKeys.add(item.key);
     } else {
@@ -28,7 +30,7 @@ export const validateDuplicatedCustomFieldKeysInRequest = ({
 
   if (duplicatedKeys.size > 0) {
     throw Boom.badRequest(
-      `Invalid duplicated custom field keys in request: ${Array.from(duplicatedKeys.values())}`
+      `Invalid duplicated ${fieldName} keys in request: ${Array.from(duplicatedKeys.values())}`
     );
   }
 };

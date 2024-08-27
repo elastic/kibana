@@ -30,7 +30,7 @@ import { createHttpFetchError } from '@kbn/core-http-browser-mocks';
 import { HostStatus } from '../../../../../../common/endpoint/types';
 import {
   RESPONSE_ACTION_AGENT_TYPE,
-  RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD,
+  RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS,
 } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { getAgentTypeName } from '../../../../translations';
 import { ALERT_EVENT_DATA_MISSING_AGENT_ID_FIELD } from '../../../../hooks/endpoint/use_alert_response_actions_support';
@@ -107,6 +107,29 @@ describe('use responder action data hooks', () => {
 
         expect(onClickMock).not.toHaveBeenCalled();
       });
+
+      it.each([...RESPONSE_ACTION_AGENT_TYPE])(
+        'should show action disabled with tooltip for %s if agent id field is missing',
+        (agentType) => {
+          const agentTypeField = RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS[agentType][0];
+          alertDetailItemData = endpointAlertDataMock.generateAlertDetailsItemDataForAgentType(
+            agentType,
+            {
+              [agentTypeField]: undefined,
+            }
+          );
+
+          expect(renderHook().result.current).toEqual(
+            getExpectedResponderActionData({
+              isDisabled: true,
+              tooltip: ALERT_EVENT_DATA_MISSING_AGENT_ID_FIELD(
+                getAgentTypeName(agentType),
+                agentTypeField
+              ),
+            })
+          );
+        }
+      );
     });
 
     describe('and agentType is NOT Endpoint', () => {
@@ -126,28 +149,6 @@ describe('use responder action data hooks', () => {
 
         expect(wasMetadataApiCalled).toBe(false);
       });
-
-      it.each([...RESPONSE_ACTION_AGENT_TYPE])(
-        'should show action disabled with tooltip for %s if agent id field is missing',
-        (agentType) => {
-          alertDetailItemData = endpointAlertDataMock.generateAlertDetailsItemDataForAgentType(
-            agentType,
-            {
-              [RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD[agentType]]: undefined,
-            }
-          );
-
-          expect(renderHook().result.current).toEqual(
-            getExpectedResponderActionData({
-              isDisabled: true,
-              tooltip: ALERT_EVENT_DATA_MISSING_AGENT_ID_FIELD(
-                getAgentTypeName(agentType),
-                RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD[agentType]
-              ),
-            })
-          );
-        }
-      );
     });
 
     describe('and agentType IS Endpoint', () => {

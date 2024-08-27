@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
-import { useRightPanelContext } from '../context';
+import { useDocumentDetailsContext } from '../../shared/context';
 import { getSourcererScopeId } from '../../../../helpers';
 import { SecurityCellActionType } from '../../../../app/actions/constants';
 import {
@@ -39,7 +39,7 @@ interface CellActionsProps {
  * Security cell action wrapper for document details flyout
  */
 export const CellActions: FC<CellActionsProps> = ({ field, value, isObjectArray, children }) => {
-  const { scopeId, isPreview } = useRightPanelContext();
+  const { scopeId, isPreview } = useDocumentDetailsContext();
 
   const data = useMemo(() => ({ field, value }), [field, value]);
   const metadata = useMemo(() => ({ scopeId, isObjectArray }), [scopeId, isObjectArray]);

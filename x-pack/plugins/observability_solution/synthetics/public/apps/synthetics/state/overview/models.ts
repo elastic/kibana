@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { MonitorListSortField } from '../../../../../common/runtime_types/monitor_management/sort_field';
+import type { MonitorListSortField } from '../../../../../common/runtime_types/monitor_management/sort_field';
 import { ConfigKey, MonitorOverviewResult } from '../../../../../common/runtime_types';
 
 import { IHttpSerializedFetchError } from '../utils/http_error';

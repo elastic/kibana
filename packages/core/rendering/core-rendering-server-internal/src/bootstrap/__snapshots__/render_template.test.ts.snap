@@ -52,15 +52,40 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
       // make subsequent calls to failure() noop
       failure = function () {};
 
-      var err = document.createElement('h1');
-      err.style['color'] = 'white';
-      err.style['font-family'] = 'monospace';
-      err.style['text-align'] = 'center';
-      err.style['background'] = '#F44336';
-      err.style['padding'] = '25px';
-      err.innerText = document.querySelector('[data-error-message]').dataset.errorMessage;
+      var errorTitle =  document.querySelector('[data-error-message-title]').dataset.errorMessageTitle;
+      var errorText =  document.querySelector('[data-error-message-text]').dataset.errorMessageText;
+      var errorReload =  document.querySelector('[data-error-message-reload]').dataset.errorMessageReload;
 
-      document.body.innerHTML = err.outerHTML;
+      var err = document.createElement('div');
+      err.style.textAlign = 'center';
+      err.style.padding = '120px 20px';
+      err.style.fontFamily = 'Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif';
+
+      var errorTitleEl = document.createElement('h1');
+      errorTitleEl.innerText = errorTitle;
+      errorTitleEl.style.margin = '20px';
+      errorTitleEl.style.color = '#1a1c21';
+
+      var errorTextEl = document.createElement('p');
+      errorTextEl.innerText = errorText;
+      errorTextEl.style.margin = '20px';
+      errorTextEl.style.color = '#343741';
+
+      var errorReloadEl = document.createElement('button');
+      errorReloadEl.innerText = errorReload;
+      errorReloadEl.onclick = function () {
+        location.reload();
+      };
+      errorReloadEl.setAttribute('style',
+       'cursor: pointer; padding-inline: 12px; block-size: 40px; font-size: 1rem; line-height: 1.4286rem; border-radius: 6px; min-inline-size: 112px; color: rgb(255, 255, 255); background-color: rgb(0, 119, 204); outline-color: rgb(0, 0, 0); border:none'
+      );
+
+      err.appendChild(errorTitleEl);
+      err.appendChild(errorTextEl);
+      err.appendChild(errorReloadEl);
+
+      document.body.innerHTML = '';
+      document.body.appendChild(err);
     }
 
     var stylesheetTarget = document.querySelector('head meta[name=\\"add-styles-here\\"]')

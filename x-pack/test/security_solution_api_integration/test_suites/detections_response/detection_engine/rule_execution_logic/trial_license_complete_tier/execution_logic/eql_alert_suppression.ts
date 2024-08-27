@@ -64,6 +64,7 @@ export default ({ getService }: FtrProviderContext) => {
     log,
   });
 
+  // NOTE: Add to second quality gate after feature is GA
   describe('@ess @serverless Alert Suppression for EQL rules', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
@@ -109,7 +110,7 @@ export default ({ getService }: FtrProviderContext) => {
           };
           const createdRule = await createRule(supertest, log, rule);
           const alerts = await getOpenAlerts(supertest, log, es, createdRule);
-          expect(alerts.hits.hits.length).toEqual(1);
+          expect(alerts.hits.hits).toHaveLength(1);
 
           // suppression start equal to alert timestamp
           const suppressionStart = alerts.hits.hits[0]._source?.[TIMESTAMP];
@@ -210,7 +211,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           // Close the alert. Subsequent rule executions should ignore this closed alert
           // for suppression purposes.
-          const alertIds = alerts.hits.hits.map((alert) => alert._id);
+          const alertIds = alerts.hits.hits.map((alert) => alert._id!);
 
           await supertest
             .post(DETECTION_ENGINE_ALERTS_STATUS_URL)

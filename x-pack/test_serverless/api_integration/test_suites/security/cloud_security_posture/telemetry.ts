@@ -8,12 +8,12 @@
 import expect from '@kbn/expect';
 import type { Agent as SuperTestAgent } from 'supertest';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import type { FtrProviderContext } from '../../../ftr_provider_context';
 import {
   data as telemetryMockData,
   MockTelemetryFindings,
-} from '../../../../../test/cloud_security_posture_api/telemetry/data'; // eslint-disable-line @kbn/imports/no_boundary_crossing
-import { createPackagePolicy } from '../../../../../test/api_integration/apis/cloud_security_posture/helper'; // eslint-disable-line @kbn/imports/no_boundary_crossing
+} from '@kbn/test-suites-xpack/cloud_security_posture_api/telemetry/data';
+import { createPackagePolicy } from '@kbn/test-suites-xpack/api_integration/apis/cloud_security_posture/helper';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { RoleCredentials } from '../../../../shared/services';
 
 const FINDINGS_INDEX = 'logs-cloud_security_posture.findings_latest-default';
@@ -41,7 +41,7 @@ export default function ({ getService }: FtrProviderContext) {
   ): Promise<void> =>
     retry.try(async () => {
       log.debug('Check CSP plugin is initialized');
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalRequestHeader = svlCommonApi.getInternalRequestHeader();
       const response = await supertestWithoutAuthParam
         .get('/internal/cloud_security_posture/status?check=init')
@@ -79,7 +79,7 @@ export default function ({ getService }: FtrProviderContext) {
     let agentPolicyId: string;
 
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalRequestHeader = svlCommonApi.getInternalRequestHeader();
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
@@ -110,7 +110,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
     });

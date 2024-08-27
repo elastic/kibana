@@ -49,7 +49,7 @@ import {
   getDefaultPageState,
 } from '../constants/index_data_visualizer_viewer';
 import { getFieldsWithSubFields } from '../utils/get_fields_with_subfields_utils';
-import type { FieldStatisticsTableEmbeddableState } from '../embeddables/grid_embeddable/types';
+import type { FieldStatisticTableEmbeddableProps } from '../embeddables/grid_embeddable/types';
 
 const defaults = getDefaultPageState();
 
@@ -64,7 +64,7 @@ const DEFAULT_SAMPLING_OPTION: SamplingOption = {
 };
 export const useDataVisualizerGridData = (
   // Data view is required for non-ES|QL queries like kuery or lucene
-  input: Required<FieldStatisticsTableEmbeddableState, 'dataView'>,
+  input: Required<FieldStatisticTableEmbeddableProps, 'dataView'>,
   dataVisualizerListState: Required<DataVisualizerIndexBasedAppState>,
   savedRandomSamplerPreference?: RandomSamplerOption,
   onUpdate?: (params: Dictionary<unknown>) => void
@@ -207,17 +207,19 @@ export const useDataVisualizerGridData = (
 
       const tf = timefilter;
 
-      if (!buckets || !tf || !currentDataView) return;
+      if (!buckets || !tf || !currentDataView || lastRefresh === 0) return;
 
       const activeBounds = tf.getActiveBounds();
-
-      let earliest: number | undefined;
-      let latest: number | undefined;
+      let earliest: number | string | undefined;
+      let latest: number | string | undefined;
       if (activeBounds !== undefined && currentDataView.timeFieldName !== undefined) {
         earliest = activeBounds.min?.valueOf();
         latest = activeBounds.max?.valueOf();
       }
-
+      if (input.timeRange) {
+        earliest = input.timeRange.from;
+        latest = input.timeRange.to;
+      }
       const bounds = tf.getActiveBounds();
       const barTarget = uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET) ?? DEFAULT_BAR_TARGET;
       buckets.setInterval('auto');
@@ -264,23 +266,19 @@ export const useDataVisualizerGridData = (
         nonAggregatableFields,
         browserSessionSeed,
         samplingOption: { ...samplingOption, seed: browserSessionSeed.toString() },
-        componentExecutionContext,
+        embeddableExecutionContext: componentExecutionContext,
       };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
-      _timeBuckets,
-      timefilter,
       currentDataView.id,
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      JSON.stringify(searchQuery),
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      JSON.stringify(samplingOption),
-      searchSessionId,
       lastRefresh,
-      fieldsToFetch,
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      JSON.stringify({ searchQuery, samplingOption, fieldsToFetch }),
+      searchSessionId,
       browserSessionSeed,
-      componentExecutionContext,
+      input.timeRange?.from,
+      input.timeRange?.to,
     ]
   );
 
@@ -335,7 +333,6 @@ export const useDataVisualizerGridData = (
     () => overallStatsProgress.loaded * 0.2 + strategyResponse.progress.loaded * 0.8,
     [overallStatsProgress.loaded, strategyResponse.progress.loaded]
   );
-
   useEffect(() => {
     const timeUpdateSubscription = merge(
       timefilter.getTimeUpdate$(),

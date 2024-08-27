@@ -9,6 +9,7 @@ import type { Threats } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { SearchHit } from '../../../common/search_strategy';
 import { buildThreatDescription } from '../../detection_engine/rule_creation_ui/components/description_step/helpers';
 
+// TODO: MOVE TO FLYOUT FOLDER - https://github.com/elastic/security-team/issues/7462
 export const getMitreComponentParts = (searchHit?: SearchHit) => {
   const ruleParameters = searchHit?.fields
     ? searchHit?.fields['kibana.alert.rule.parameters']

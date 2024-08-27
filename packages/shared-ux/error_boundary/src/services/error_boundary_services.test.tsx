@@ -17,6 +17,7 @@ import { BadComponent } from '../../mocks';
 describe('<KibanaErrorBoundaryProvider>', () => {
   let analytics: KibanaErrorBoundaryProviderDeps['analytics'];
   beforeEach(() => {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
     analytics = analyticsServiceMock.createAnalyticsServiceStart();
   });
 

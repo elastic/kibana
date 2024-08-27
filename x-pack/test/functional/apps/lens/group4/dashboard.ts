@@ -183,9 +183,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.closeAddPanel();
 
       await retry.try(async () => {
-        await panelActions.openContextMenu();
-        await panelActions.clickContextMenuMoreItem();
-        await testSubjects.existOrFail(ACTION_TEST_SUBJ);
+        await panelActions.expectExistsPanelAction(ACTION_TEST_SUBJ);
       });
     });
 
@@ -225,9 +223,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await PageObjects.lens.saveAndReturn();
 
-      await panelActions.openContextMenu();
-      await panelActions.clickContextMenuMoreItem();
-      await testSubjects.click('embeddablePanelAction-openInspector');
+      await panelActions.openInspector();
       await inspector.openInspectorRequestsView();
       const requests = await inspector.getRequestNames();
       expect(requests.split(',').length).to.be(2);
@@ -337,8 +333,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await PageObjects.lens.save('test', true);
       // Edit the visualization now and get back to Lens editor
-      await testSubjects.click('embeddablePanelToggleMenuIcon');
-      await testSubjects.click('embeddablePanelAction-ACTION_CONFIGURE_IN_LENS');
+      await panelActions.clickInlineEdit();
       await testSubjects.click('navigateToLensEditorLink');
       // Click on Share, then Copy link and paste the link in a new tab.
       const url = await PageObjects.lens.getUrl();

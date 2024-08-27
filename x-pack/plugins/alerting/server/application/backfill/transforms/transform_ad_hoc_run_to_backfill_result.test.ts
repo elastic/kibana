@@ -136,7 +136,7 @@ describe('transformAdHocRunToBackfillResult', () => {
     });
   });
 
-  test('should return error for malformed responses', () => {
+  test('should return error for malformed responses when original create request is not provided', () => {
     expect(
       transformAdHocRunToBackfillResult(
         // missing id
@@ -155,8 +155,8 @@ describe('transformAdHocRunToBackfillResult', () => {
       )
     ).toEqual({
       error: {
-        error: 'Internal Server Error',
         message: 'Malformed saved object in bulkCreate response - Missing "id".',
+        rule: { id: '1', name: 'my rule name' },
       },
     });
     expect(
@@ -177,8 +177,8 @@ describe('transformAdHocRunToBackfillResult', () => {
       )
     ).toEqual({
       error: {
-        error: 'Internal Server Error',
         message: 'Malformed saved object in bulkCreate response - Missing "attributes".',
+        rule: { id: '1' },
       },
     });
     expect(
@@ -199,8 +199,8 @@ describe('transformAdHocRunToBackfillResult', () => {
       )
     ).toEqual({
       error: {
-        error: 'Internal Server Error',
         message: 'Malformed saved object in bulkCreate response - Missing "references".',
+        rule: { id: 'unknown', name: 'my rule name' },
       },
     });
     expect(
@@ -221,13 +221,125 @@ describe('transformAdHocRunToBackfillResult', () => {
       )
     ).toEqual({
       error: {
-        error: 'Internal Server Error',
         message: 'Malformed saved object in bulkCreate response - Missing "references".',
+        rule: { id: 'unknown', name: 'my rule name' },
       },
     });
   });
 
-  test('should pass through error if saved object error', () => {
+  test('should return error for malformed responses when original create request is provided', () => {
+    const attributes = getMockAdHocRunAttributes();
+    expect(
+      transformAdHocRunToBackfillResult(
+        // missing id
+        // @ts-expect-error
+        {
+          type: 'ad_hoc_rule_run_params',
+          namespaces: ['default'],
+          attributes,
+          references: [{ id: '1', name: 'rule', type: 'alert' }],
+          managed: false,
+          coreMigrationVersion: '8.8.0',
+          updated_at: '2024-02-07T16:05:39.296Z',
+          created_at: '2024-02-07T16:05:39.296Z',
+          version: 'WzcsMV0=',
+        },
+        {
+          type: 'ad_hoc_rule_run_params',
+          attributes,
+          references: [{ id: '1', name: 'rule', type: 'alert' }],
+        }
+      )
+    ).toEqual({
+      error: {
+        message: 'Malformed saved object in bulkCreate response - Missing "id".',
+        rule: { id: '1', name: 'my rule name' },
+      },
+    });
+    expect(
+      transformAdHocRunToBackfillResult(
+        // missing attributes
+        // @ts-expect-error
+        {
+          type: 'ad_hoc_rule_run_params',
+          id: 'abc',
+          namespaces: ['default'],
+          references: [{ id: '1', name: 'rule', type: 'alert' }],
+          managed: false,
+          coreMigrationVersion: '8.8.0',
+          updated_at: '2024-02-07T16:05:39.296Z',
+          created_at: '2024-02-07T16:05:39.296Z',
+          version: 'WzcsMV0=',
+        },
+        {
+          type: 'ad_hoc_rule_run_params',
+          attributes,
+          references: [{ id: '1', name: 'rule', type: 'alert' }],
+        }
+      )
+    ).toEqual({
+      error: {
+        message: 'Malformed saved object in bulkCreate response - Missing "attributes".',
+        rule: { id: '1', name: 'my rule name' },
+      },
+    });
+    expect(
+      transformAdHocRunToBackfillResult(
+        // missing references
+        // @ts-expect-error
+        {
+          type: 'ad_hoc_rule_run_params',
+          id: 'def',
+          namespaces: ['default'],
+          attributes,
+          managed: false,
+          coreMigrationVersion: '8.8.0',
+          updated_at: '2024-02-07T16:05:39.296Z',
+          created_at: '2024-02-07T16:05:39.296Z',
+          version: 'WzcsMV0=',
+        },
+        {
+          type: 'ad_hoc_rule_run_params',
+          attributes,
+          references: [{ id: '1', name: 'rule', type: 'alert' }],
+        }
+      )
+    ).toEqual({
+      error: {
+        message: 'Malformed saved object in bulkCreate response - Missing "references".',
+        rule: { id: '1', name: 'my rule name' },
+      },
+    });
+    expect(
+      transformAdHocRunToBackfillResult(
+        // empty references
+        {
+          type: 'ad_hoc_rule_run_params',
+          id: 'ghi',
+          namespaces: ['default'],
+          attributes,
+          references: [],
+          managed: false,
+          coreMigrationVersion: '8.8.0',
+          updated_at: '2024-02-07T16:05:39.296Z',
+          created_at: '2024-02-07T16:05:39.296Z',
+          version: 'WzcsMV0=',
+        },
+        {
+          type: 'ad_hoc_rule_run_params',
+          attributes,
+          references: [{ id: '1', name: 'rule', type: 'alert' }],
+        }
+      )
+    ).toEqual({
+      error: {
+        message: 'Malformed saved object in bulkCreate response - Missing "references".',
+        rule: { id: '1', name: 'my rule name' },
+      },
+    });
+  });
+
+  test('should pass through error if saved object error when original create request is not provided', () => {
     expect(
       transformAdHocRunToBackfillResult(
         // @ts-expect-error
@@ -243,8 +355,35 @@ describe('transformAdHocRunToBackfillResult', () => {
       )
     ).toEqual({
       error: {
-        error: 'my error',
         message: 'Unable to create',
+        rule: { id: 'unknown' },
+      },
+    });
+  });
+
+  test('should pass through error if saved object error when original create request is provided', () => {
+    expect(
+      transformAdHocRunToBackfillResult(
+        // @ts-expect-error
+        {
+          type: 'ad_hoc_rule_run_params',
+          id: '788a2784-c021-484f-a53e-0c1c63c7567c',
+          error: {
+            error: 'my error',
+            message: 'Unable to create',
+            statusCode: 404,
+          },
+        },
+        {
+          type: 'ad_hoc_rule_run_params',
+          attributes: getMockAdHocRunAttributes(),
+          references: [{ id: '1', name: 'rule', type: 'alert' }],
+        }
+      )
+    ).toEqual({
+      error: {
+        message: 'Unable to create',
+        rule: { id: '1', name: 'my rule name' },
       },
     });
   });

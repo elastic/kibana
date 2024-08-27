@@ -39,6 +39,39 @@
                 }
               }
             },
+            "filesystem": {
+              "properties": {
+                "used": {
+                  "properties": {
+                    "pct": {
+                      "type": "float"
+                    }
+                  }
+                }
+              }
+            },
+            "load": {
+              "properties": {
+                "1": {
+                  "type": "float"
+                }
+              }
+            },
+            "memory": {
+              "properties": {
+                "actual": {
+                  "properties": {
+                    "used": {
+                      "properties": {
+                        "pct": {
+                          "type": "float"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
             "network": {
               "properties": {
                 "in": {

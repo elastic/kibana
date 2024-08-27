@@ -31,7 +31,7 @@ export const ActionSuccess = memo<ActionSuccessProps>(
       return actionOutputCode ? endpointActionResponseCodes[actionOutputCode] : undefined;
     }, [_title, action.agents, action.outputs]);
 
-    return <ResultComponent {...props} title={title} />;
+    return <ResultComponent {...props} title={title} agentType={action.agentType} />;
   }
 );
 ActionSuccess.displayName = 'ActionSuccess';

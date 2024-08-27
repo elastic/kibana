@@ -80,9 +80,10 @@ class AppContextService {
     this.logger?.debug('AppContextService:registerFeatures');
     this.logger?.debug(`pluginName: ${pluginName}`);
     this.logger?.debug(
-      `features: ${Object.entries(features)
-        .map(([feature, enabled]) => `${feature}:${enabled}`)
-        .join(', ')}`
+      () =>
+        `features: ${Object.entries(features)
+          .map(([feature, enabled]) => `${feature}:${enabled}`)
+          .join(', ')}`
     );
 
     if (!this.registeredFeatures.has(pluginName)) {
@@ -107,9 +108,10 @@ class AppContextService {
     this.logger?.debug('AppContextService:getRegisteredFeatures');
     this.logger?.debug(`pluginName: ${pluginName}`);
     this.logger?.debug(
-      `features: ${Object.entries(features)
-        .map(([feature, enabled]) => `${feature}:${enabled}`)
-        .join(', ')}`
+      () =>
+        `features: ${Object.entries(features)
+          .map(([feature, enabled]) => `${feature}:${enabled}`)
+          .join(', ')}`
     );
 
     return features;

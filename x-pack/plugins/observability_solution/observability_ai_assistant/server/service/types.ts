@@ -16,7 +16,7 @@ import type {
 import type {
   Message,
   ObservabilityAIAssistantScreenContextRequest,
-  UserInstructionOrPlainText,
+  InstructionOrPlainText,
 } from '../../common/types';
 import type { ObservabilityAIAssistantRouteHandlerResources } from '../routes/types';
 import { ChatFunctionClient } from './chat_function_client';
@@ -63,17 +63,15 @@ export interface FunctionHandler {
   respond: RespondFunction<any, FunctionResponse>;
 }
 
-export type RegisteredInstruction = UserInstructionOrPlainText | RegisterInstructionCallback;
+export type InstructionOrCallback = InstructionOrPlainText | RegisterInstructionCallback;
 
 type RegisterInstructionCallback = ({
   availableFunctionNames,
 }: {
   availableFunctionNames: string[];
-}) => UserInstructionOrPlainText | UserInstructionOrPlainText[] | undefined;
+}) => InstructionOrPlainText | InstructionOrPlainText[] | undefined;
 
-export type RegisterInstruction = (
-  ...instructions: Array<UserInstructionOrPlainText | RegisterInstructionCallback>
-) => void;
+export type RegisterInstruction = (...instructions: InstructionOrCallback[]) => void;
 
 export type RegisterFunction = <
   TParameters extends CompatibleJSONSchema = any,
@@ -91,25 +89,3 @@ export type RegistrationCallback = ({}: {
   client: ObservabilityAIAssistantClient;
   functions: ChatFunctionClient;
 }) => Promise<void>;
-
-export interface ObservabilityAIAssistantResourceNames {
-  componentTemplate: {
-    conversations: string;
-    kb: string;
-  };
-  indexTemplate: {
-    conversations: string;
-    kb: string;
-  };
-  aliases: {
-    conversations: string;
-    kb: string;
-  };
-  indexPatterns: {
-    conversations: string;
-    kb: string;
-  };
-  pipelines: {
-    kb: string;
-  };
-}

@@ -14,10 +14,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiIcon,
   EuiTitle,
   EuiBadge,
-  EuiToolTip,
   EuiSwitch,
   EuiIconTip,
 } from '@elastic/eui';
@@ -108,30 +106,28 @@ export function FailedTransactionsCorrelations({ onFilter }: { onFilter: () => v
             width: '100px',
             field: 'pValue',
             name: (
-              <EuiToolTip
-                content={i18n.translate(
-                  'xpack.apm.correlations.failedTransactions.correlationsTable.pValueDescription',
+              <>
+                {i18n.translate(
+                  'xpack.apm.correlations.failedTransactions.correlationsTable.pValueLabel',
                   {
-                    defaultMessage:
-                      'The chance of getting at least this amount of field name and value for failed transactions given its prevalence in successful transactions.',
+                    defaultMessage: 'p-value',
                   }
                 )}
-              >
-                <>
-                  {i18n.translate(
-                    'xpack.apm.correlations.failedTransactions.correlationsTable.pValueLabel',
+                &nbsp;
+                <EuiIconTip
+                  size="s"
+                  color="subdued"
+                  type="questionInCircle"
+                  className="eui-alignTop"
+                  content={i18n.translate(
+                    'xpack.apm.correlations.failedTransactions.correlationsTable.pValueDescription',
                     {
-                      defaultMessage: 'p-value',
+                      defaultMessage:
+                        'The chance of getting at least this amount of field name and value for failed transactions given its prevalence in successful transactions.',
                     }
                   )}
-                  <EuiIcon
-                    size="s"
-                    color="subdued"
-                    type="questionInCircle"
-                    className="eui-alignTop"
-                  />
-                </>
-              </EuiToolTip>
+                />
+              </>
             ),
 
             render: (pValue: number) => pValue.toPrecision(3),
@@ -141,29 +137,27 @@ export function FailedTransactionsCorrelations({ onFilter }: { onFilter: () => v
             width: '100px',
             field: 'failurePercentage',
             name: (
-              <EuiToolTip
-                content={i18n.translate(
-                  'xpack.apm.correlations.failedTransactions.correlationsTable.failurePercentageDescription',
+              <>
+                {i18n.translate(
+                  'xpack.apm.correlations.failedTransactions.correlationsTable.failurePercentageLabel',
                   {
-                    defaultMessage: 'Percentage of time the term appear in failed transactions.',
+                    defaultMessage: 'Failure %',
                   }
                 )}
-              >
-                <>
-                  {i18n.translate(
-                    'xpack.apm.correlations.failedTransactions.correlationsTable.failurePercentageLabel',
+                &nbsp;
+                <EuiIconTip
+                  size="s"
+                  color="subdued"
+                  type="questionInCircle"
+                  className="eui-alignTop"
+                  content={i18n.translate(
+                    'xpack.apm.correlations.failedTransactions.correlationsTable.failurePercentageDescription',
                     {
-                      defaultMessage: 'Failure %',
+                      defaultMessage: 'Percentage of time the term appear in failed transactions.',
                     }
                   )}
-                  <EuiIcon
-                    size="s"
-                    color="subdued"
-                    type="questionInCircle"
-                    className="eui-alignTop"
-                  />
-                </>
-              </EuiToolTip>
+                />
+              </>
             ),
             render: (_, { failurePercentage }) => asPercent(failurePercentage, 1),
             sortable: true,
@@ -172,32 +166,29 @@ export function FailedTransactionsCorrelations({ onFilter }: { onFilter: () => v
             field: 'successPercentage',
             width: '100px',
             name: (
-              <EuiToolTip
-                content={i18n.translate(
-                  'xpack.apm.correlations.failedTransactions.correlationsTable.successPercentageDescription',
+              <>
+                {i18n.translate(
+                  'xpack.apm.correlations.failedTransactions.correlationsTable.successPercentageLabel',
                   {
-                    defaultMessage:
-                      'Percentage of time the term appear in successful transactions.',
+                    defaultMessage: 'Success %',
                   }
                 )}
-              >
-                <>
-                  {i18n.translate(
-                    'xpack.apm.correlations.failedTransactions.correlationsTable.successPercentageLabel',
+                &nbsp;
+                <EuiIconTip
+                  size="s"
+                  color="subdued"
+                  type="questionInCircle"
+                  className="eui-alignTop"
+                  content={i18n.translate(
+                    'xpack.apm.correlations.failedTransactions.correlationsTable.successPercentageDescription',
                     {
-                      defaultMessage: 'Success %',
+                      defaultMessage:
+                        'Percentage of time the term appear in successful transactions.',
                     }
                   )}
-                  <EuiIcon
-                    size="s"
-                    color="subdued"
-                    type="questionInCircle"
-                    className="eui-alignTop"
-                  />
-                </>
-              </EuiToolTip>
+                />
+              </>
             ),
-
             render: (_, { successPercentage }) => asPercent(successPercentage, 1),
             sortable: true,
           },
@@ -208,25 +199,28 @@ export function FailedTransactionsCorrelations({ onFilter }: { onFilter: () => v
         width: '116px',
         field: 'normalizedScore',
         name: (
-          <EuiToolTip
-            content={i18n.translate(
-              'xpack.apm.correlations.failedTransactions.correlationsTable.scoreTooltip',
+          <>
+            {i18n.translate(
+              'xpack.apm.correlations.failedTransactions.correlationsTable.scoreLabel',
               {
-                defaultMessage:
-                  'The score [0-1] of an attribute; the greater the score, the more an attribute contributes to failed transactions.',
+                defaultMessage: 'Score',
               }
             )}
-          >
-            <>
-              {i18n.translate(
-                'xpack.apm.correlations.failedTransactions.correlationsTable.scoreLabel',
+            &nbsp;
+            <EuiIconTip
+              size="s"
+              color="subdued"
+              type="questionInCircle"
+              className="eui-alignTop"
+              content={i18n.translate(
+                'xpack.apm.correlations.failedTransactions.correlationsTable.scoreTooltip',
                 {
-                  defaultMessage: 'Score',
+                  defaultMessage:
+                    'The score [0-1] of an attribute; the greater the score, the more an attribute contributes to failed transactions.',
                 }
               )}
-              <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-            </>
-          </EuiToolTip>
+            />
+          </>
         ),
         render: (_, { normalizedScore }) => {
           return <div>{asPreciseDecimal(normalizedScore, 2)}</div>;
@@ -515,6 +509,7 @@ export function FailedTransactionsCorrelations({ onFilter }: { onFilter: () => v
         {showCorrelationsTable && (
           <CorrelationsTable<FailedTransactionsCorrelation>
             columns={failedTransactionsCorrelationsColumns}
+            rowHeader="normalizedScore"
             significantTerms={correlationTerms}
             status={progress.isRunning ? FETCH_STATUS.LOADING : FETCH_STATUS.SUCCESS}
             setPinnedSignificantTerm={setPinnedSignificantTerm}

@@ -14,14 +14,20 @@ import type {
   CustomRequestHandlerContext,
 } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginsStart } from '@kbn/actions-plugin/server/plugin';
+import { MINIMUM_LICENSE_TYPE } from '../common/constants';
 import { registerRoutes } from './routes';
-import type { IntegrationAssistantPluginSetup, IntegrationAssistantPluginStart } from './types';
+import type {
+  IntegrationAssistantPluginSetup,
+  IntegrationAssistantPluginStart,
+  IntegrationAssistantPluginStartDependencies,
+} from './types';
 
 export type IntegrationAssistantRouteHandlerContext = CustomRequestHandlerContext<{
   integrationAssistant: {
     getStartServices: CoreSetup<{
       actions: ActionsPluginsStart;
     }>['getStartServices'];
+    isAvailable: () => boolean;
     logger: Logger;
   };
 }>;
@@ -30,20 +36,26 @@ export class IntegrationAssistantPlugin
   implements Plugin<IntegrationAssistantPluginSetup, IntegrationAssistantPluginStart>
 {
   private readonly logger: Logger;
+  private isAvailable: boolean;
+  private hasLicense: boolean;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
+    this.isAvailable = true;
+    this.hasLicense = false;
   }
+
   public setup(
     core: CoreSetup<{
       actions: ActionsPluginsStart;
     }>
-  ) {
+  ): IntegrationAssistantPluginSetup {
     core.http.registerRouteHandlerContext<
       IntegrationAssistantRouteHandlerContext,
       'integrationAssistant'
     >('integrationAssistant', () => ({
       getStartServices: core.getStartServices,
+      isAvailable: () => this.isAvailable && this.hasLicense,
       logger: this.logger,
     }));
     const router = core.http.createRouter<IntegrationAssistantRouteHandlerContext>();
@@ -51,11 +63,26 @@ export class IntegrationAssistantPlugin
 
     registerRoutes(router);
 
-    return {};
+    return {
+      setIsAvailable: (isAvailable: boolean) => {
+        if (!isAvailable) {
+          this.isAvailable = false;
+        }
+      },
+    };
   }
 
-  public start(core: CoreStart) {
+  public start(
+    _: CoreStart,
+    dependencies: IntegrationAssistantPluginStartDependencies
+  ): IntegrationAssistantPluginStart {
     this.logger.debug('integrationAssistant api: Started');
+    const { licensing } = dependencies;
+
+    licensing.license$.subscribe((license) => {
+      this.hasLicense = license.hasAtLeast(MINIMUM_LICENSE_TYPE);
+    });
+
     return {};
   }
 

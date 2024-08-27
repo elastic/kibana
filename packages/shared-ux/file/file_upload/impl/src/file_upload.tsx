@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EuiFilePicker } from '@elastic/eui';
 import React, { type FunctionComponent, useRef, useEffect, useMemo } from 'react';
+import type { EuiFilePickerClass } from '@elastic/eui/src/components/form/file_picker/file_picker';
 
 import type { FileJSON } from '@kbn/shared-ux-file-types';
 import { useFilesContext } from '@kbn/shared-ux-file-context';
@@ -136,7 +136,7 @@ export const FileUpload = <Kind extends string = string>({
   className,
 }: Props<Kind>): ReturnType<FunctionComponent> => {
   const { client } = useFilesContext();
-  const ref = useRef<null | EuiFilePicker>(null);
+  const ref = useRef<null | EuiFilePickerClass>(null);
   const fileKind = client.getFileKind(kindId);
   const repeatedUploads = compressed || allowRepeatedUploads;
   const uploadState = useMemo(

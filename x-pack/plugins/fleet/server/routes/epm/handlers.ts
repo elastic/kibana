@@ -11,6 +11,8 @@ import type { HttpResponseOptions } from '@kbn/core/server';
 
 import { pick } from 'lodash';
 
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../common';
+
 import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 import { generateTransformSecondaryAuthHeaders } from '../../services/api_keys/transform_api_keys';
 import { handleTransformReauthorizeAndStart } from '../../services/epm/elasticsearch/transform/reauthorize';
@@ -71,7 +73,7 @@ import {
   FleetError,
   FleetTooManyRequestsError,
 } from '../../errors';
-import { appContextService, checkAllowedPackages } from '../../services';
+import { appContextService, checkAllowedPackages, packagePolicyService } from '../../services';
 import { getPackageUsageStats } from '../../services/epm/packages/get';
 import { updatePackage } from '../../services/epm/packages/update';
 import { getGpgKeyIdOrUndefined } from '../../services/epm/packages/package_verification';
@@ -229,8 +231,23 @@ export const getInfoHandler: FleetRequestHandler<
     });
     const flattenedRes = soToInstallationInfo(res) as PackageInfo;
 
+    let metadata: any;
+    if (request.query.withMetadata) {
+      const allSpaceSoClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
+      const { total } = await packagePolicyService.list(allSpaceSoClient, {
+        kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${pkgName}`,
+        page: 1,
+        perPage: 0,
+        spaceId: '*',
+      });
+      metadata = {
+        has_policies: total > 0,
+      };
+    }
+
     const body: GetInfoResponse = {
       item: flattenedRes,
+      metadata,
     };
     return response.ok({ body });
   } catch (error) {
@@ -307,7 +324,7 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
   const fleetContext = await context.fleet;
   const savedObjectsClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
+  const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
 
   const { pkgName, pkgVersion } = request.params;
 
@@ -340,6 +357,7 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
     return await defaultFleetErrorHandler({ error: res.error, response });
   }
 };
+
 export const createCustomIntegrationHandler: FleetRequestHandler<
   undefined,
   undefined,
@@ -349,7 +367,7 @@ export const createCustomIntegrationHandler: FleetRequestHandler<
   const fleetContext = await context.fleet;
   const savedObjectsClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
+  const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
   const kibanaVersion = appContextService.getKibanaVersion();
   const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
   const spaceId = fleetContext.spaceId;
@@ -424,7 +442,7 @@ export const bulkInstallPackagesFromRegistryHandler: FleetRequestHandler<
   const savedObjectsClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const spaceId = fleetContext.spaceId;
-  const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
+  const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
   const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
 
   const bulkInstalledResponses = await bulkInstallPackages({
@@ -456,7 +474,7 @@ export const installPackageByUploadHandler: FleetRequestHandler<
   const contentType = request.headers['content-type'] as string; // from types it could also be string[] or undefined but this is checked later
   const archiveBuffer = Buffer.from(request.body);
   const spaceId = fleetContext.spaceId;
-  const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
+  const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
   const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
 
   const res = await installPackage({
@@ -560,7 +578,7 @@ export const reauthorizeTransformsHandler: FleetRequestHandler<
 
   let username;
   try {
-    const user = await appContextService.getSecurity()?.authc.getCurrentUser(request);
+    const user = appContextService.getSecurityCore().authc.getCurrentUser(request);
     if (user) {
       username = user.username;
     }
@@ -640,6 +658,7 @@ const soToInstallationInfo = (pkg: PackageListItem | PackageInfo) => {
       ...pick(pkg.savedObject, ['created_at', 'updated_at', 'namespaces', 'type']),
       installed_kibana: attributes.installed_kibana,
       installed_kibana_space_id: attributes.installed_kibana_space_id,
+      additional_spaces_installed_kibana: attributes.additional_spaces_installed_kibana,
       installed_es: attributes.installed_es,
       install_status: attributes.install_status,
       install_source: attributes.install_source,

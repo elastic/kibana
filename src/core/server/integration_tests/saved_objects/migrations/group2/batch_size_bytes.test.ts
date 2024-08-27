@@ -89,8 +89,6 @@ describe('migration v2', () => {
     if (esServer) {
       await esServer.stop();
     }
-
-    await new Promise((resolve) => setTimeout(resolve, 10000));
   });
 
   it('completes the migration even when a full batch would exceed ES http.max_content_length', async () => {

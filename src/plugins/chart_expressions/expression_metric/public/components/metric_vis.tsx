@@ -163,7 +163,7 @@ export const MetricVis = ({
   );
 
   const onWillRender = useCallback(() => {
-    const maxTileSideLength = grid.current.length * grid.current[0].length > 1 ? 200 : 300;
+    const maxTileSideLength = grid.current.length * grid.current[0]?.length > 1 ? 200 : 300;
     const event: ChartSizeEvent = {
       name: 'chartSize',
       data: {
@@ -197,8 +197,15 @@ export const MetricVis = ({
     ? getColumnByAccessor(config.dimensions.max, data.columns)?.id
     : undefined;
 
+  // For a sigle tile configuration, either no breakdown or with a collapse by, provide
+  // a fallback in case of missing data. Make sure to provide an exact "null" value to render a N/A metric.
+  // For reference, undefined will render as - instead of N/A and it is used in a breakdown scenario
+  const firstRowForNonBreakdown = (
+    data.rows.length ? data.rows : [{ [primaryMetricColumn.id]: null }]
+  ).slice(0, 1);
+
   const metricConfigs: MetricSpec['data'][number] = (
-    breakdownByColumn ? data.rows : data.rows.slice(0, 1)
+    breakdownByColumn ? data.rows : firstRowForNonBreakdown
   ).map((row, rowIdx) => {
     const value: number | string =
       row[primaryMetricColumn.id] !== null ? row[primaryMetricColumn.id] : NaN;
@@ -208,15 +215,16 @@ export const MetricVis = ({
     const subtitle = breakdownByColumn ? primaryMetricColumn.name : config.metric.subtitle;
 
     if (typeof value !== 'number') {
-      const nonNumericMetric: MetricWText = {
-        value: formatPrimaryMetric(value),
+      const nonNumericMetricBase: Omit<MetricWText, 'value'> = {
         title: String(title),
         subtitle,
         icon: config.metric?.icon ? getIcon(config.metric?.icon) : undefined,
         extra: renderSecondaryMetric(data.columns, row, config),
         color: config.metric.color ?? defaultColor,
       };
-      return nonNumericMetric;
+      return Array.isArray(value)
+        ? { ...nonNumericMetricBase, value: value.map((v) => formatPrimaryMetric(v)) }
+        : { ...nonNumericMetricBase, value: formatPrimaryMetric(value) };
     }
 
     const baseMetric: MetricWNumber = {
@@ -335,6 +343,10 @@ export const MetricVis = ({
                   barBackground: euiThemeVars.euiColorLightShade,
                   emptyBackground: euiThemeVars.euiColorEmptyShade,
                   blendingBackground: euiThemeVars.euiColorEmptyShade,
+                  titlesTextAlign: config.metric.titlesTextAlign,
+                  valuesTextAlign: config.metric.valuesTextAlign,
+                  iconAlign: config.metric.iconAlign,
+                  valueFontSize: config.metric.valueFontSize,
                 },
               },
               ...(Array.isArray(settingsThemeOverrides)

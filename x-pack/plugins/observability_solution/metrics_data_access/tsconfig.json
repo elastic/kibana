@@ -26,7 +26,6 @@
     "@kbn/core-http-server",
     "@kbn/datemath",
     "@kbn/es-types",
-    "@kbn/config-schema",
     "@kbn/es-query",
     "@kbn/kibana-react-plugin",
     "@kbn/shared-ux-page-kibana-template",
@@ -36,6 +35,7 @@
     "@kbn/core-http-request-handler-context-server",
     "@kbn/lens-embeddable-utils",
     "@kbn/react-kibana-context-render",
-    "@kbn/react-kibana-context-theme"
+    "@kbn/react-kibana-context-theme",
+    "@kbn/router-utils"
   ]
 }

@@ -18,4 +18,8 @@ export default createTestConfig({
   // include settings from project controller
   // https://github.com/elastic/project-controller/blob/main/internal/project/esproject/config/elasticsearch.yml
   esServerArgs: [],
+  kbnServerArgs: [
+    `--xpack.cloud.id='ES3_FTR_TESTS:ZmFrZS1kb21haW4uY2xkLmVsc3RjLmNvJGZha2Vwcm9qZWN0aWQuZXMkZmFrZXByb2plY3RpZC5rYg=='`,
+    `--xpack.cloud.serverless.project_id='fakeprojectid'`,
+  ],
 });

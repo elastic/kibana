@@ -61,7 +61,8 @@ export const transformElasticHitsToListItem = ({
         created_at,
         created_by,
         deserializer,
-        id: _id,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        id: _id!,
         list_id,
         // meta can be null if deleted (empty in PUT payload), since update_by_query set deleted values as null
         // return it as undefined to keep it consistent with payload

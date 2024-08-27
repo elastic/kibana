@@ -34,7 +34,7 @@ export const getActionAgentType = async (
     })
     .catch(catchAndWrapError);
 
-  if (!response?.hits?.hits[0]._source?.EndpointActions.input_type) {
+  if (!response?.hits?.hits[0]?._source?.EndpointActions.input_type) {
     throw new NotFoundError(`Action id [${actionId}] not found`, response);
   }
 

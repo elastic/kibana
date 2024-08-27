@@ -32,7 +32,7 @@ export function ApiKeyBanner({
 }: {
   hasPrivileges?: boolean;
   status: FETCH_STATUS;
-  payload?: ApiKeyPayload;
+  payload?: Partial<ApiKeyPayload>;
   error?: IHttpFetchError<ResponseErrorBody>;
 }) {
   const loadingCallout = (

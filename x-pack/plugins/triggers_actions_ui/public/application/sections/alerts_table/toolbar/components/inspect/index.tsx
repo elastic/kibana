@@ -7,8 +7,8 @@
 
 import { EuiButtonIcon } from '@elastic/eui';
 import React, { useState, memo, useCallback } from 'react';
-import { GetInspectQuery } from '../../../../../../types';
 
+import { EsQuerySnapshot } from '@kbn/alerts-ui-shared';
 import { HoverVisibilityContainer } from './hover_visibility_container';
 
 import { ModalInspectQuery } from './modal';
@@ -33,14 +33,11 @@ export const InspectButtonContainer: React.FC<InspectButtonContainerProps> = mem
 interface InspectButtonProps {
   onCloseInspect?: () => void;
   showInspectButton?: boolean;
-  getInspectQuery: GetInspectQuery;
+  querySnapshot: EsQuerySnapshot;
   inspectTitle: string;
 }
 
-const InspectButtonComponent: React.FC<InspectButtonProps> = ({
-  getInspectQuery,
-  inspectTitle,
-}) => {
+const InspectButtonComponent: React.FC<InspectButtonProps> = ({ querySnapshot, inspectTitle }) => {
   const [isShowingModal, setIsShowingModal] = useState(false);
 
   const onOpenModal = useCallback(() => {
@@ -66,7 +63,7 @@ const InspectButtonComponent: React.FC<InspectButtonProps> = ({
         <ModalInspectQuery
           closeModal={onCloseModal}
           data-test-subj="inspect-modal"
-          getInspectQuery={getInspectQuery}
+          querySnapshot={querySnapshot}
           title={inspectTitle}
         />
       )}

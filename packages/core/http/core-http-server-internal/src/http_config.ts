@@ -23,6 +23,7 @@ import {
   securityResponseHeadersSchema,
 } from './security_response_headers_config';
 import { CdnConfig } from './cdn_config';
+import { PermissionsPolicyConfigType } from './permissions_policy';
 
 const SECOND = 1000;
 
@@ -343,14 +344,16 @@ export class HttpConfig implements IHttpConfig {
   constructor(
     rawHttpConfig: HttpConfigType,
     rawCspConfig: CspConfigType,
-    rawExternalUrlConfig: ExternalUrlConfig
+    rawExternalUrlConfig: ExternalUrlConfig,
+    rawPermissionsPolicyConfig: PermissionsPolicyConfigType
   ) {
     this.autoListen = rawHttpConfig.autoListen;
     this.host = rawHttpConfig.host;
     this.port = rawHttpConfig.port;
     this.cors = rawHttpConfig.cors;
     const { securityResponseHeaders, disableEmbedding } = parseRawSecurityResponseHeadersConfig(
-      rawHttpConfig.securityResponseHeaders
+      rawHttpConfig.securityResponseHeaders,
+      rawPermissionsPolicyConfig
     );
     this.securityResponseHeaders = securityResponseHeaders;
     this.customResponseHeaders = Object.entries(rawHttpConfig.customResponseHeaders ?? {}).reduce(

@@ -10,6 +10,7 @@ import React, { useState } from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import { InfraPageTemplate } from '../../../components/shared/templates/infra_page_template';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { useParentBreadcrumbResolver } from '../../../hooks/use_parent_breadcrumb_resolver';
 import { useMetadata } from '../../../components/asset_details/hooks/use_metadata';
@@ -18,7 +19,6 @@ import { InfraLoadingPanel } from '../../../components/loading';
 import type { NavItem } from './lib/side_nav_context';
 import { NodeDetailsPage } from './components/node_details_page';
 import { useMetricsTimeContext } from './hooks/use_metrics_time';
-import { MetricsPageTemplate } from '../page_template';
 
 export const MetricDetailPage = () => {
   const {
@@ -79,7 +79,7 @@ export const MetricDetailPage = () => {
 
   if (metadataLoading && !filteredRequiredMetrics.length) {
     return (
-      <MetricsPageTemplate>
+      <InfraPageTemplate>
         <InfraLoadingPanel
           height="100vh"
           width="100%"
@@ -87,7 +87,7 @@ export const MetricDetailPage = () => {
             defaultMessage: 'Loading data',
           })}
         />
-      </MetricsPageTemplate>
+      </InfraPageTemplate>
     );
   }
 

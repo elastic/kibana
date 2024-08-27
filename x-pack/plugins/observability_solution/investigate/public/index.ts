@@ -14,22 +14,18 @@ import type {
   InvestigateStartDependencies,
   ConfigSchema,
   OnWidgetAdd,
-  WidgetRenderAPI,
 } from './types';
 
-export type { InvestigatePublicSetup, InvestigatePublicStart, OnWidgetAdd, WidgetRenderAPI };
+export type { InvestigatePublicSetup, InvestigatePublicStart, OnWidgetAdd };
 
 export {
-  type InvestigateTimeline,
+  type Investigation,
   type InvestigateWidget,
   type InvestigateWidgetCreate,
-  InvestigateWidgetColumnSpan,
   type GlobalWidgetParameters,
-  type InvestigateUser,
-  type WorkflowBlock,
 } from '../common/types';
 
-export { ChromeOption } from './types';
+export { mergePlainObjects } from '../common/utils/merge_plain_objects';
 
 export { createWidgetFactory } from './create_widget';
 export { getEsFilterFromGlobalParameters } from './util/get_es_filters_from_global_parameters';

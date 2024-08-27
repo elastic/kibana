@@ -19,6 +19,9 @@ export function enableAlertsRoute(server: MonitoringCore, npRoute: RouteDependen
     {
       path: '/api/monitoring/v1/alerts/enable',
       validate: false,
+      options: {
+        access: 'internal',
+      },
     },
     async (context, request, response) => {
       try {

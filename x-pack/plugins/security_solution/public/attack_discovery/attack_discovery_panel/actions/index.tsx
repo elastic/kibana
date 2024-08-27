@@ -7,14 +7,13 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { Replacements } from '@kbn/elastic-assistant-common';
+import type { AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
 import React from 'react';
 
 import { AlertsBadge } from './alerts_badge';
 import { MiniAttackChain } from '../../attack/mini_attack_chain';
 import { TakeAction } from './take_action';
 import * as i18n from './translations';
-import type { AttackDiscovery } from '../../types';
 
 interface Props {
   attackDiscovery: AttackDiscovery;

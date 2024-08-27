@@ -11,7 +11,7 @@ import type { RuleActionParam, ActionVariable } from '@kbn/alerting-types';
 import { IconType, RecursivePartial } from '@elastic/eui';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { TypeRegistry } from '../type_registry';
-import { RuleFormErrors } from '.';
+import { RuleFormParamsErrors } from './rule_types';
 
 export interface GenericValidationResult<T> {
   errors: Record<Extract<keyof T, string>, string[] | unknown>;
@@ -77,7 +77,7 @@ export interface ActionParamsProps<TParams> {
   actionParams: Partial<TParams>;
   index: number;
   editAction: (key: string, value: RuleActionParam, index: number) => void;
-  errors: RuleFormErrors;
+  errors: RuleFormParamsErrors;
   ruleTypeId?: string;
   messageVariables?: ActionVariable[];
   defaultMessage?: string;

@@ -6,11 +6,11 @@
  */
 import type { UseMutationOptions } from '@tanstack/react-query';
 import { useMutation } from '@tanstack/react-query';
-import type { TaskManagerUnavailableResponse } from '../../../../common/api/entity_analytics/common';
 import type {
-  RiskEngineInitErrorResponse,
-  RiskEngineInitResponse,
+  InitRiskEngineErrorResponse,
+  InitRiskEngineResponse,
 } from '../../../../common/api/entity_analytics/risk_engine/engine_init_route.gen';
+import type { TaskManagerUnavailableResponse } from '../../../../common/api/entity_analytics/common';
 import { useEntityAnalyticsRoutes } from '../api';
 import { useInvalidateRiskEngineStatusQuery } from './use_risk_engine_status';
 
@@ -21,8 +21,8 @@ export const useInitRiskEngineMutation = (options?: UseMutationOptions<{}>) => {
   const { initRiskEngine } = useEntityAnalyticsRoutes();
 
   return useMutation<
-    RiskEngineInitResponse,
-    { body: RiskEngineInitErrorResponse | TaskManagerUnavailableResponse }
+    InitRiskEngineResponse,
+    { body: InitRiskEngineErrorResponse | TaskManagerUnavailableResponse }
   >(() => initRiskEngine(), {
     ...options,
     mutationKey: INIT_RISK_ENGINE_STATUS_KEY,

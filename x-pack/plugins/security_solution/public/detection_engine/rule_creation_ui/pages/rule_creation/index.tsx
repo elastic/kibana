@@ -125,6 +125,7 @@ const CreateRulePageComponent: React.FC = () => {
   const {
     application,
     data: { dataViews },
+    triggersActionsUi,
   } = useKibana().services;
   const loading = userInfoLoading || listsConfigLoading;
   const [activeStep, setActiveStep] = useState<RuleStep>(RuleStep.defineRule);
@@ -262,7 +263,7 @@ const CreateRulePageComponent: React.FC = () => {
     };
     fetchDV();
   }, [dataViews]);
-  const { indexPattern, isIndexPatternLoading, browserFields } = useRuleIndexPattern({
+  const { indexPattern, isIndexPatternLoading } = useRuleIndexPattern({
     dataSourceType: defineStepData.dataSourceType,
     index: memoizedIndex,
     dataViewId: defineStepData.dataViewId,
@@ -379,7 +380,8 @@ const CreateRulePageComponent: React.FC = () => {
               {
                 ...localActionsStepData,
                 enabled,
-              }
+              },
+              triggersActionsUi.actionTypeRegistry
             )
           ),
         ]);
@@ -405,6 +407,7 @@ const CreateRulePageComponent: React.FC = () => {
       ruleType,
       startMlJobs,
       defineFieldsTransform,
+      triggersActionsUi.actionTypeRegistry,
     ]
   );
 
@@ -504,7 +507,6 @@ const CreateRulePageComponent: React.FC = () => {
             setOptionsSelected={setEqlOptionsSelected}
             indexPattern={indexPattern}
             isIndexPatternLoading={isIndexPatternLoading}
-            browserFields={browserFields}
             isQueryBarValid={isQueryBarValid}
             setIsQueryBarValid={setIsQueryBarValid}
             setIsThreatQueryBarValid={setIsThreatQueryBarValid}
@@ -530,7 +532,6 @@ const CreateRulePageComponent: React.FC = () => {
     ),
     [
       activeStep,
-      browserFields,
       dataViewOptions,
       defineRuleNextStep,
       defineStepData.dataSourceType,

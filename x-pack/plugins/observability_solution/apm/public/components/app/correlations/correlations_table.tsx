@@ -27,6 +27,7 @@ interface CorrelationsTableProps<T extends FieldValuePair> {
   selectedTerm?: FieldValuePair;
   onFilter?: () => void;
   columns: Array<EuiBasicTableColumn<T>>;
+  rowHeader?: string;
   onTableChange: (c: Criteria<T>) => void;
   sorting?: EuiTableSortingType<T>;
 }
@@ -40,6 +41,7 @@ export function CorrelationsTable<T extends FieldValuePair>({
   selectedTerm,
   onTableChange,
   sorting,
+  rowHeader,
 }: CorrelationsTableProps<T>) {
   const euiTheme = useTheme();
   const trackApmEvent = useUiTracker({ app: 'apm' });
@@ -85,6 +87,7 @@ export function CorrelationsTable<T extends FieldValuePair>({
       loading={status === FETCH_STATUS.LOADING}
       error={status === FETCH_STATUS.FAILURE ? errorMessage : ''}
       columns={columns}
+      rowHeader={rowHeader}
       rowProps={(term) => {
         return {
           onClick: () => {

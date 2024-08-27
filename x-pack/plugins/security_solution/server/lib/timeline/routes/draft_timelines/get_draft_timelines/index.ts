@@ -12,17 +12,12 @@ import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
 import { TIMELINE_DRAFT_URL } from '../../../../../../common/constants';
 import { buildFrameworkRequest } from '../../../utils/common';
-import type { SetupPlugins } from '../../../../../plugin';
 import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
 import { getDraftTimeline, persistTimeline } from '../../../saved_object/timelines';
 import { draftTimelineDefaults } from '../../../utils/default_timeline';
 import { getDraftTimelineSchema } from '../../../../../../common/api/timeline';
 
-export const getDraftTimelinesRoute = (
-  router: SecuritySolutionPluginRouter,
-  _: ConfigType,
-  security: SetupPlugins['security']
-) => {
+export const getDraftTimelinesRoute = (router: SecuritySolutionPluginRouter, _: ConfigType) => {
   router.versioned
     .get({
       path: TIMELINE_DRAFT_URL,
@@ -39,7 +34,7 @@ export const getDraftTimelinesRoute = (
         version: '2023-10-31',
       },
       async (context, request, response) => {
-        const frameworkRequest = await buildFrameworkRequest(context, security, request);
+        const frameworkRequest = await buildFrameworkRequest(context, request);
         const siemResponse = buildSiemResponse(response);
 
         try {

@@ -14,7 +14,7 @@ import { useApmServiceContext } from '../../../context/apm_service/use_apm_servi
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 
 import { CONTAINER_ID, SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../../common/es_fields/apm';
-import { useApmParams } from '../../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../hooks/use_time_range';
 
 export function ServiceLogs() {
@@ -22,7 +22,7 @@ export function ServiceLogs() {
 
   const {
     query: { environment, kuery, rangeFrom, rangeTo },
-  } = useApmParams('/services/{serviceName}/logs');
+  } = useAnyOfApmParams('/services/{serviceName}/logs', '/logs-services/{serviceName}/logs');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 

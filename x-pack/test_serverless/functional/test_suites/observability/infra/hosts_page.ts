@@ -45,7 +45,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await Promise.all([
         esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
       ]);
-      await pageObjects.svlCommonPage.loginWithRole('viewer');
+      await pageObjects.svlCommonPage.loginAsViewer();
       await browser.setWindowSize(1600, 1200);
     });
 
@@ -53,7 +53,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await Promise.all([
         esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
       ]);
-      await pageObjects.svlCommonPage.forceLogout();
     });
 
     describe('#Single Host Flyout', () => {
@@ -159,7 +158,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await pageObjects.infraHostsView.getBetaBadgeExists();
         });
 
-        describe('Hosts table', async () => {
+        describe('Hosts table', () => {
           let hostRows: WebElementWrapper[] = [];
 
           before(async () => {
@@ -219,7 +218,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
 
           it('should correctly load the Alerts tab section when clicking on it', async () => {
-            testSubjects.existOrFail('hostsView-alerts');
+            await testSubjects.existOrFail('hostsView-alerts');
           });
         });
       });

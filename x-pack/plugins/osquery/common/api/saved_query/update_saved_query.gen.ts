@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 import {
   SavedQueryId,
@@ -26,11 +26,6 @@ import {
   SnapshotOrUndefined,
   RemovedOrUndefined,
 } from '../model/schema/common_attributes.gen';
-
-export type UpdateSavedQueryRequestParams = z.infer<typeof UpdateSavedQueryRequestParams>;
-export const UpdateSavedQueryRequestParams = z.object({
-  id: SavedQueryId.optional(),
-});
 
 export type UpdateSavedQueryRequestBody = z.infer<typeof UpdateSavedQueryRequestBody>;
 export const UpdateSavedQueryRequestBody = z.object({
@@ -44,6 +39,3 @@ export const UpdateSavedQueryRequestBody = z.object({
   snapshot: SnapshotOrUndefined.optional(),
   removed: RemovedOrUndefined.optional(),
 });
-
-export type SuccessResponse = z.infer<typeof SuccessResponse>;
-export const SuccessResponse = z.object({});

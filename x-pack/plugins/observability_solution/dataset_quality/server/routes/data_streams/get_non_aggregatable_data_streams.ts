@@ -8,28 +8,29 @@
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { rangeQuery } from '@kbn/observability-plugin/server/utils/queries';
 import { extractIndexNameFromBackingIndex } from '../../../common/utils';
-import { DEFAULT_DATASET_TYPE } from '../../../common/constants';
 import { _IGNORED } from '../../../common/es_fields';
 import { DataStreamType } from '../../../common/types';
 import { createDatasetQualityESClient } from '../../utils';
 
 export async function getNonAggregatableDataStreams({
   esClient,
-  type = DEFAULT_DATASET_TYPE,
+  types,
   start,
   end,
   dataStream,
 }: {
   esClient: ElasticsearchClient;
-  type?: DataStreamType;
+  types: DataStreamType[];
   start: number;
   end: number;
   dataStream?: string;
 }) {
   const datasetQualityESClient = createDatasetQualityESClient(esClient);
 
+  const dataStreamTypes = types.map((type) => `${type}-*-*`).join(',');
+
   const response = await datasetQualityESClient.fieldCaps({
-    index: dataStream ?? `${type}-*`,
+    index: dataStream ?? dataStreamTypes,
     fields: [_IGNORED],
     index_filter: {
       ...rangeQuery(start, end)[0],

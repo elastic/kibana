@@ -1,0 +1,77 @@
+[[reporting-troubleshooting-csv]]
+== Troubleshooting CSV reports
+++++
+<titleabbrev>CSV</titleabbrev>
+++++
+
+[NOTE]
+============
+include::reporting-csv-limitations.asciidoc[]
+============
+
+The CSV export feature in Kibana makes queries to Elasticsearch and formats the results into CSV. This feature
+offers a solution that attempts to provide the most benefit to the most use cases. However, things could go
+wrong during export. Elasticsearch can stop responding, repeated querying can take so long that authentication
+tokens can time out, and the format of exported data can be too complex for spreadsheet applications to handle.
+Such situations are outside of the control of Kibana. If the use case becomes complex enough, it's recommended
+that you create scripts that query Elasticsearch directly, using a scripting language like Python and the
+public {es} APIs.
+
+For advice about common problems, refer to <<reporting-troubleshooting>>.
+
+[float]
+[[reporting-troubleshooting-csv-configure-scan-api]]
+=== Configuring CSV export to use the scroll API
+
+The Kibana CSV export feature collects all of the data from Elasticsearch by using multiple requests to page
+over all of the documents.
+Internally, the feature uses the {ref}/point-in-time-api.html[Point in time API and
+`search_after` parameters in the queries] to do so.
+There are some limitations related to the point in time API:
+
+1. Permissions to read data aliases alone will not work: the permissions are needed on the underlying indices or data streams.
+2. In cases where data shards are unavailable or time out, the export will be empty rather than returning partial data.
+
+Some users may benefit from using the {ref}/paginate-search-results.html#scroll-search-results[scroll API], an
+alternative to paging through the data.
+The behavior of this API does not have the limitations of point in time API, however it has its own limitations:
+
+1. Search is limited to 500 shards at the very most.
+2. In cases where the data shards are unavailable or time out, the export may return partial data.
+
+If you prefer the internal implementation of CSV export to use the scroll API, you can configure this in
+`kibana.yml`:
+
+[source,yml]
+-------------------------------------------
+xpack.reporting.csv.scroll.strategy: scroll
+-------------------------------------------
+
+For more details about CSV export settings, go to <<reporting-csv-settings>>.
+
+[float]
+[[reporting-troubleshooting-csv-socket-hangup]]
+=== Socket hangups
+
+A "socket hangup" is a generic type of error meaning that a remote service (in this case Elasticsearch or a proxy in Cloud) closed the connection.
+Kibana can't foresee when this might happen and can't force the remote service to keep the connection open.
+To work around this situation, consider lowering the size of results that come back in each request or increase the amount of time the remote services will
+allow to keep the request open.
+For example:
+
+[source,yml]
+---------------------------------------
+xpack.reporting.csv.scroll.size: 50
+xpack.reporting.csv.scroll.duration: 2m
+---------------------------------------
+
+Such changes aren't guaranteed to solve the issue, but give the functionality a better
+chance of working in this use case.
+Unfortunately, lowering the scroll size will require more requests to Elasticsearch during export, which adds more time overhead, which could unintentionally create more instances of auth token expiration errors.
+
+[float]
+[[reporting-troubleshooting-csv-token-expired]]
+=== Token expiration
+
+To avoid token expirations, use a type of authentication that doesn't expire (such as Basic auth) or run the export using scripts that query Elasticsearch directly.
+In a custom script, you have the ability to refresh the auth token as needed, such as once before each query.

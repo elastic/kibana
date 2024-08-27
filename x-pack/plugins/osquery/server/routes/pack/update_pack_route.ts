@@ -11,7 +11,7 @@ import { unset, has, difference, filter, find, map, mapKeys, uniq, some, isEmpty
 import { produce } from 'immer';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
-  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '@kbn/fleet-plugin/common';
 import type { IRouter } from '@kbn/core/server';
@@ -71,7 +71,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         );
         const agentPolicyService = osqueryContext.service.getAgentPolicyService();
         const packagePolicyService = osqueryContext.service.getPackagePolicyService();
-        const currentUser = await osqueryContext.security.authc.getCurrentUser(request)?.username;
+        const currentUser = coreContext.security.authc.getCurrentUser()?.username;
 
         // eslint-disable-next-line @typescript-eslint/naming-convention
         const { name, description, queries, enabled, policy_ids, shards = {} } = request.body;
@@ -135,7 +135,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
         const nonAgentPolicyReferences = filter(
           currentPackSO.references,
-          (reference) => reference.type !== AGENT_POLICY_SAVED_OBJECT_TYPE
+          (reference) => reference.type !== LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE
         );
         const getUpdatedReferences = () => {
           if (!policy_ids && isEmpty(shards)) {
@@ -147,7 +147,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
             ...policiesList.map((id) => ({
               id,
               name: agentPoliciesIdMap[id]?.name,
-              type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+              type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
             })),
           ];
         };
@@ -173,7 +173,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         );
 
         const currentAgentPolicyIds = map(
-          filter(currentPackSO.references, ['type', AGENT_POLICY_SAVED_OBJECT_TYPE]),
+          filter(currentPackSO.references, ['type', LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE]),
           'id'
         );
         const updatedPackSO = await savedObjectsClient.get<PackSavedObject>(

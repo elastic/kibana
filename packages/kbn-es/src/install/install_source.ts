@@ -33,6 +33,7 @@ export async function installSource({
   installPath = path.resolve(basePath, 'source'),
   log = defaultLog,
   esArgs,
+  resources,
 }: InstallSourceOptions) {
   log.info('source path: %s', chalk.bold(sourcePath));
   log.info('install path: %s', chalk.bold(installPath));
@@ -59,6 +60,7 @@ export async function installSource({
     installPath,
     log,
     esArgs,
+    resources,
   });
 }
 

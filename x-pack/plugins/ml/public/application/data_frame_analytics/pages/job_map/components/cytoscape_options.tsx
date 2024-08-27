@@ -21,7 +21,7 @@ const MAP_SHAPES = {
   TRIANGLE: 'triangle',
   ROUND_RECTANGLE: 'round-rectangle',
 } as const;
-type MapShapes = typeof MAP_SHAPES[keyof typeof MAP_SHAPES];
+type MapShapes = (typeof MAP_SHAPES)[keyof typeof MAP_SHAPES];
 
 function shapeForNode(el: cytoscape.NodeSingular, theme: EuiThemeType): MapShapes {
   const type = el.data('type');

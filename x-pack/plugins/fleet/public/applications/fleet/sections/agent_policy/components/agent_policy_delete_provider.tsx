@@ -13,7 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useHistory } from 'react-router-dom';
 
 import { SO_SEARCH_LIMIT } from '../../../../../constants';
-import { ExperimentalFeaturesService } from '../../../services';
+import { useMultipleAgentPolicies } from '../../../hooks';
 
 import {
   useStartServices,
@@ -53,7 +53,7 @@ export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({
   const { getPath } = useLink();
   const history = useHistory();
   const deleteAgentPolicyMutation = useDeleteAgentPolicyMutation();
-  const { enableReusableIntegrationPolicies } = ExperimentalFeaturesService.get();
+  const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
 
   const deleteAgentPolicyPrompt: DeleteAgentPolicy = (
     agentPolicyToDelete,
@@ -132,11 +132,11 @@ export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({
 
   const packagePoliciesWithMultiplePolicies = useMemo(() => {
     // Find if there are package policies that have multiple agent policies
-    if (packagePolicies && enableReusableIntegrationPolicies) {
+    if (packagePolicies && canUseMultipleAgentPolicies) {
       return packagePolicies.some((policy) => policy?.policy_ids.length > 1);
     }
     return false;
-  }, [enableReusableIntegrationPolicies, packagePolicies]);
+  }, [canUseMultipleAgentPolicies, packagePolicies]);
 
   const renderModal = () => {
     if (!isModalOpen) {

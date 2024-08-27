@@ -86,7 +86,7 @@ export class CasePlugin
       this.persistableStateAttachmentTypeRegistry
     );
 
-    registerCaseFileKinds(this.caseConfig.files, plugins.files);
+    registerCaseFileKinds(this.caseConfig.files, plugins.files, core.security.fips.isEnabled());
 
     this.securityPluginSetup = plugins.security;
     this.lensEmbeddableFactory = plugins.lens.lensEmbeddableFactory;
@@ -186,6 +186,7 @@ export class CasePlugin
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       securityPluginSetup: this.securityPluginSetup!,
       securityPluginStart: plugins.security,
+      securityServiceStart: core.security,
       spacesPluginStart: plugins.spaces,
       featuresPluginStart: plugins.features,
       actionsPluginStart: plugins.actions,

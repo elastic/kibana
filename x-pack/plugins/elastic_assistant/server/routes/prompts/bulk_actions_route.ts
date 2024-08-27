@@ -16,12 +16,12 @@ import {
 
 import {
   PromptResponse,
-  BulkActionSkipResult,
-  BulkCrudActionResponse,
-  BulkCrudActionResults,
+  PromptsBulkActionSkipResult,
+  PromptsBulkCrudActionResponse,
+  PromptsBulkCrudActionResults,
   BulkCrudActionSummary,
-  PerformBulkActionRequestBody,
-  PerformBulkActionResponse,
+  PerformPromptsBulkActionRequestBody,
+  PerformPromptsBulkActionResponse,
 } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { PROMPTS_TABLE_MAX_PAGE_SIZE } from '../../../common/constants';
@@ -60,9 +60,9 @@ const buildBulkResponse = (
     updated?: PromptResponse[];
     created?: PromptResponse[];
     deleted?: string[];
-    skipped?: BulkActionSkipResult[];
+    skipped?: PromptsBulkActionSkipResult[];
   }
-): IKibanaResponse<BulkCrudActionResponse> => {
+): IKibanaResponse<PromptsBulkCrudActionResponse> => {
   const numSucceeded = updated.length + created.length + deleted.length;
   const numSkipped = skipped.length;
   const numFailed = errors.length;
@@ -74,7 +74,7 @@ const buildBulkResponse = (
     total: numSucceeded + numFailed + numSkipped,
   };
 
-  const results: BulkCrudActionResults = {
+  const results: PromptsBulkCrudActionResults = {
     updated,
     created,
     deleted,
@@ -82,7 +82,7 @@ const buildBulkResponse = (
   };
 
   if (numFailed > 0) {
-    return response.custom<BulkCrudActionResponse>({
+    return response.custom<PromptsBulkCrudActionResponse>({
       headers: { 'content-type': 'application/json' },
       body: {
         message: summary.succeeded > 0 ? 'Bulk edit partially failed' : 'Bulk edit failed',
@@ -100,7 +100,7 @@ const buildBulkResponse = (
     });
   }
 
-  const responseBody: BulkCrudActionResponse = {
+  const responseBody: PromptsBulkCrudActionResponse = {
     success: true,
     prompts_count: summary.total,
     attributes: { results, summary },
@@ -112,7 +112,7 @@ const buildBulkResponse = (
 export const bulkPromptsRoute = (router: ElasticAssistantPluginRouter, logger: Logger) => {
   router.versioned
     .post({
-      access: 'internal',
+      access: 'public',
       path: ELASTIC_AI_ASSISTANT_PROMPTS_URL_BULK_ACTION,
       options: {
         tags: ['access:elasticAssistant'],
@@ -123,14 +123,18 @@ export const bulkPromptsRoute = (router: ElasticAssistantPluginRouter, logger: L
     })
     .addVersion(
       {
-        version: API_VERSIONS.internal.v1,
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            body: buildRouteValidationWithZod(PerformBulkActionRequestBody),
+            body: buildRouteValidationWithZod(PerformPromptsBulkActionRequestBody),
           },
         },
       },
-      async (context, request, response): Promise<IKibanaResponse<PerformBulkActionResponse>> => {
+      async (
+        context,
+        request,
+        response
+      ): Promise<IKibanaResponse<PerformPromptsBulkActionResponse>> => {
         const { body } = request;
         const assistantResponse = buildResponse(response);
 

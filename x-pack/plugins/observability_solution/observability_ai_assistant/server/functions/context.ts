@@ -98,7 +98,21 @@ export function registerContextFunction({
             subscriber.complete();
           })
           .catch((error) => {
-            subscriber.error(error);
+            resources.logger.error('Error in context function');
+            resources.logger.error(error);
+
+            subscriber.next(
+              createFunctionResponseMessage({
+                name: CONTEXT_FUNCTION_NAME,
+                content: `Error in context function: ${error.message}`,
+                data: {
+                  error: {
+                    message: error.message,
+                  },
+                },
+              })
+            );
+            subscriber.complete();
           });
       });
     }

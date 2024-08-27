@@ -8,6 +8,7 @@
 
 import React, { FunctionComponent, createElement } from 'react';
 import { EUI_STYLES_GLOBAL, EUI_STYLES_UTILS } from '@kbn/core-base-common';
+import { i18n } from '@kbn/i18n';
 import { RenderingMetadata } from '../types';
 import { Fonts } from './fonts';
 import { Logo } from './logo';
@@ -25,7 +26,6 @@ export const Template: FunctionComponent<Props> = ({
     stylesheetPaths,
     scriptPaths,
     injectedMetadata,
-    i18n,
     bootstrapScriptUrl,
     strictCsp,
     customBranding,
@@ -80,12 +80,18 @@ export const Template: FunctionComponent<Props> = ({
             {logo}
             <div
               className="kbnWelcomeText"
-              data-error-message={i18n('core.ui.welcomeErrorMessage', {
+              data-error-message-title={i18n.translate('core.ui.welcomeErrorMessageTitle', {
+                defaultMessage: 'Elastic did not load properly',
+              })}
+              data-error-message-text={i18n.translate('core.ui.welcomeErrorMessageText', {
                 defaultMessage:
-                  'Elastic did not load properly. Check the server output for more information.',
+                  'Please reload this page. If the issue persists, check the browser console and server logs.',
+              })}
+              data-error-message-reload={i18n.translate('core.ui.welcomeErrorReloadButton', {
+                defaultMessage: 'Reload',
               })}
             >
-              {i18n('core.ui.welcomeMessage', {
+              {i18n.translate('core.ui.welcomeMessage', {
                 defaultMessage: 'Loading Elastic',
               })}
             </div>
@@ -97,12 +103,12 @@ export const Template: FunctionComponent<Props> = ({
           {logo}
 
           <h2 className="kbnWelcomeTitle">
-            {i18n('core.ui.legacyBrowserTitle', {
+            {i18n.translate('core.ui.legacyBrowserTitle', {
               defaultMessage: 'Please upgrade your browser',
             })}
           </h2>
           <div className="kbnWelcomeText">
-            {i18n('core.ui.legacyBrowserMessage', {
+            {i18n.translate('core.ui.legacyBrowserMessage', {
               defaultMessage:
                 'This Elastic installation has strict security requirements enabled that your current browser does not meet.',
             })}

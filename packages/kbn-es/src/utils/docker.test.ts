@@ -15,6 +15,7 @@ import {
   detectRunningNodes,
   maybeCreateDockerNetwork,
   maybePullDockerImage,
+  printESImageInfo,
   resolveDockerCmd,
   resolveDockerImage,
   resolveEsArgs,
@@ -660,8 +661,14 @@ describe('runServerlessCluster()', () => {
 
     await runServerlessCluster(log, { projectType, basePath: baseEsPath });
 
-    // setupDocker execa calls then run three nodes and attach logger
-    expect(execa.mock.calls).toHaveLength(8);
+    // docker version (1)
+    // docker ps (1)
+    // docker network create (1)
+    // docker pull (1)
+    // docker inspect (1)
+    // docker run (3)
+    // docker logs (1)
+    expect(execa.mock.calls).toHaveLength(9);
   });
 
   test(`should wait for serverless nodes to return 'green' status`, async () => {
@@ -795,7 +802,63 @@ describe('runDockerContainer()', () => {
   test('should resolve', async () => {
     execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
     await expect(runDockerContainer(log, {})).resolves.toBeUndefined();
-    // setupDocker execa calls then run container
-    expect(execa.mock.calls).toHaveLength(5);
+    // docker version (1)
+    // docker ps (1)
+    // docker network create (1)
+    // docker pull (1)
+    // docker inspect (1)
+    // docker run (1)
+    expect(execa.mock.calls).toHaveLength(6);
+  });
+});
+
+describe('printESImageInfo', () => {
+  beforeEach(() => {
+    logWriter.messages.length = 0;
+  });
+
+  test('should print ES Serverless image info', async () => {
+    execa.mockImplementation(() =>
+      Promise.resolve({
+        stdout: JSON.stringify({
+          'org.opencontainers.image.revision': 'deadbeef12345678',
+          'org.opencontainers.image.source': 'https://github.com/elastic/elasticsearch-serverless',
+        }),
+      })
+    );
+
+    await printESImageInfo(
+      log,
+      'docker.elastic.co/elasticsearch-ci/elasticsearch-serverless:latest'
+    );
+
+    expect(execa.mock.calls).toHaveLength(1);
+    expect(logWriter.messages[0]).toContain(
+      `docker.elastic.co/elasticsearch-ci/elasticsearch-serverless:git-deadbeef1234`
+    );
+    expect(logWriter.messages[0]).toContain(
+      `https://github.com/elastic/elasticsearch-serverless/commit/deadbeef12345678`
+    );
+  });
+
+  test('should print ES image info', async () => {
+    execa.mockImplementation(() =>
+      Promise.resolve({
+        stdout: JSON.stringify({
+          'org.opencontainers.image.revision': 'deadbeef12345678',
+          'org.opencontainers.image.source': 'https://github.com/elastic/elasticsearch',
+        }),
+      })
+    );
+
+    await printESImageInfo(log, 'docker.elastic.co/elasticsearch/elasticsearch:8.15-SNAPSHOT');
+
+    expect(execa.mock.calls).toHaveLength(1);
+    expect(logWriter.messages[0]).toContain(
+      `docker.elastic.co/elasticsearch/elasticsearch:8.15-SNAPSHOT`
+    );
+    expect(logWriter.messages[0]).toContain(
+      `https://github.com/elastic/elasticsearch/commit/deadbeef12345678`
+    );
   });
 });

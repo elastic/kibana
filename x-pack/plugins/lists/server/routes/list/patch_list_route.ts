@@ -48,14 +48,15 @@ export const patchListRoute = (router: ListsPluginRouter): void => {
           }
 
           const list = await lists.patchList({ _version, description, id, meta, name, version });
+
           if (list == null) {
             return siemResponse.error({
               body: `list id: "${id}" not found`,
               statusCode: 404,
             });
-          } else {
-            return response.ok({ body: PatchListResponse.parse(list) });
           }
+
+          return response.ok({ body: PatchListResponse.parse(list) });
         } catch (err) {
           const error = transformError(err);
           return siemResponse.error({

@@ -8,20 +8,20 @@ import { getGroupingQuery } from '@kbn/grouping';
 import {
   GroupingAggregation,
   GroupPanelRenderer,
-  GroupStatsRenderer,
+  GetGroupStats,
   isNoneGroup,
   NamedAggregation,
   parseGroupingQuery,
 } from '@kbn/grouping/src';
 import { useMemo } from 'react';
 import { buildEsQuery, Filter } from '@kbn/es-query';
+import { LATEST_FINDINGS_RETENTION_POLICY } from '@kbn/cloud-security-posture-common';
 import {
   FINDINGS_GROUPING_OPTIONS,
   LOCAL_STORAGE_FINDINGS_GROUPING_KEY,
 } from '../../../common/constants';
 import { useDataViewContext } from '../../../common/contexts/data_view_context';
 import { Evaluation } from '../../../../common/types_old';
-import { LATEST_FINDINGS_RETENTION_POLICY } from '../../../../common/constants';
 import {
   FindingsGroupingAggregation,
   FindingsRootGroupingAggregation,
@@ -130,13 +130,13 @@ export const isFindingsRootGroupingAggregation = (
  */
 export const useLatestFindingsGrouping = ({
   groupPanelRenderer,
-  groupStatsRenderer,
+  getGroupStats,
   groupingLevel = 0,
   groupFilters = [],
   selectedGroup,
 }: {
   groupPanelRenderer?: GroupPanelRenderer<FindingsGroupingAggregation>;
-  groupStatsRenderer?: GroupStatsRenderer<FindingsGroupingAggregation>;
+  getGroupStats?: GetGroupStats<FindingsGroupingAggregation>;
   groupingLevel?: number;
   groupFilters?: Filter[];
   selectedGroup?: string;
@@ -150,6 +150,7 @@ export const useLatestFindingsGrouping = ({
     query,
     onChangeGroupsItemsPerPage,
     onChangeGroupsPage,
+    urlQuery,
     setUrlQuery,
     uniqueValue,
     isNoneSelected,
@@ -164,7 +165,7 @@ export const useLatestFindingsGrouping = ({
     getDefaultQuery,
     unit: FINDINGS_UNIT,
     groupPanelRenderer,
-    groupStatsRenderer,
+    getGroupStats,
     groupingLocalStorageKey: LOCAL_STORAGE_FINDINGS_GROUPING_KEY,
     groupingLevel,
     groupsUnit: MISCONFIGURATIONS_GROUPS_UNIT,
@@ -261,6 +262,7 @@ export const useLatestFindingsGrouping = ({
     selectedGroup,
     onChangeGroupsItemsPerPage,
     onChangeGroupsPage,
+    urlQuery,
     setUrlQuery,
     isGroupSelected: !isNoneSelected,
     isGroupLoading: !data,

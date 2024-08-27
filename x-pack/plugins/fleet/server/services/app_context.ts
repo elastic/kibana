@@ -14,6 +14,7 @@ import type {
   HttpServiceSetup,
   Logger,
   KibanaRequest,
+  SecurityServiceStart,
 } from '@kbn/core/server';
 
 import { CoreKibanaRequest } from '@kbn/core/server';
@@ -34,7 +35,10 @@ import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/
 import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 
 import type { FleetConfigType } from '../../common/types';
-import type { ExperimentalFeatures } from '../../common/experimental_features';
+import {
+  allowedExperimentalValues,
+  type ExperimentalFeatures,
+} from '../../common/experimental_features';
 import type {
   ExternalCallback,
   ExternalCallbacksStorage,
@@ -60,7 +64,8 @@ class AppContextService {
   private encryptedSavedObjectsStart: EncryptedSavedObjectsPluginStart | undefined;
   private data: DataPluginStart | undefined;
   private esClient: ElasticsearchClient | undefined;
-  private experimentalFeatures?: ExperimentalFeatures;
+  private experimentalFeatures: ExperimentalFeatures = allowedExperimentalValues;
+  private securityCoreStart: SecurityServiceStart | undefined;
   private securitySetup: SecurityPluginSetup | undefined;
   private securityStart: SecurityPluginStart | undefined;
   private config$?: Observable<FleetConfigType>;
@@ -86,6 +91,7 @@ class AppContextService {
     this.encryptedSavedObjectsStart = appContext.encryptedSavedObjectsStart;
     this.encryptedSavedObjects = appContext.encryptedSavedObjectsStart?.getClient();
     this.encryptedSavedObjectsSetup = appContext.encryptedSavedObjectsSetup;
+    this.securityCoreStart = appContext.securityCoreStart;
     this.securitySetup = appContext.securitySetup;
     this.securityStart = appContext.securityStart;
     this.savedObjects = appContext.savedObjects;
@@ -129,6 +135,10 @@ class AppContextService {
     return this.encryptedSavedObjects;
   }
 
+  public getSecurityCore() {
+    return this.securityCoreStart!;
+  }
+
   public getSecurity() {
     return this.securityStart!;
   }
@@ -161,9 +171,6 @@ class AppContextService {
   }
 
   public getExperimentalFeatures() {
-    if (!this.experimentalFeatures) {
-      throw new Error('experimentalFeatures not set.');
-    }
     return this.experimentalFeatures;
   }
 

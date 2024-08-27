@@ -19,6 +19,7 @@ import type { EnrichedFieldInfoWithValues } from '../types';
 import type { inputsModel } from '../../../store';
 import { inputsSelectors } from '../../../store';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
+import { getFieldFormat } from '../get_field_format';
 
 interface StatusPopoverButtonProps {
   eventId: string;
@@ -28,6 +29,7 @@ interface StatusPopoverButtonProps {
   handleOnEventClosed: () => void;
 }
 
+// TODO: MOVE TO FLYOUT FOLDER - https://github.com/elastic/security-team/issues/7462
 export const StatusPopoverButton = React.memo<StatusPopoverButtonProps>(
   ({ eventId, contextId, enrichedFieldInfo, scopeId, handleOnEventClosed }) => {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -69,7 +71,7 @@ export const StatusPopoverButton = React.memo<StatusPopoverButtonProps>(
           fieldName={enrichedFieldInfo.data.field}
           linkValue={enrichedFieldInfo.linkValue}
           fieldType={enrichedFieldInfo.data.type}
-          fieldFormat={enrichedFieldInfo.data.format}
+          fieldFormat={getFieldFormat(enrichedFieldInfo.data)}
           isDraggable={false}
           truncate={false}
           isButton={statusPopoverVisible}

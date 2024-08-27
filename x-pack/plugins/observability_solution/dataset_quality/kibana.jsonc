@@ -22,7 +22,8 @@
       "fleet",
       "fieldFormats",
       "dataViews",
-      "lens"
+      "lens",
+      "fieldsMetadata"
     ],
     "optionalPlugins": [],
     "requiredBundles": ["unifiedHistogram", "discover"],

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BehaviorSubject, firstValueFrom } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, Subscription } from 'rxjs';
 
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
@@ -27,6 +27,7 @@ import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { IndexManagementPluginStart } from '@kbn/index-management';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
+import { ILicense } from '@kbn/licensing-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
@@ -54,11 +55,10 @@ import {
   VECTOR_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
   INFERENCE_ENDPOINTS_PLUGIN,
+  SEMANTIC_SEARCH_PLUGIN,
 } from '../common/constants';
-import {
-  CreatIndexLocatorDefinition,
-  CreatIndexLocatorParams,
-} from '../common/locators/create_index_locator';
+import { registerLocators } from '../common/locators';
+
 import { ClientConfigType, InitialAppData } from '../common/types';
 
 import { ENGINES_PATH } from './applications/app_search/routes';
@@ -84,6 +84,7 @@ export type EnterpriseSearchPublicStart = ReturnType<EnterpriseSearchPlugin['sta
 
 interface PluginsSetup {
   cloud?: CloudSetup;
+  licensing: LicensingPluginStart;
   home?: HomePublicPluginSetup;
   searchHomepage?: SearchHomepagePluginSetup;
   security?: SecurityPluginSetup;
@@ -149,6 +150,7 @@ const relevanceLinks: AppDeepLink[] = [
         defaultMessage: 'Inference Endpoints',
       }
     ),
+    visibleIn: ['globalSearch'],
   },
 ];
 
@@ -186,6 +188,7 @@ const appSearchLinks: AppDeepLink[] = [
 
 export class EnterpriseSearchPlugin implements Plugin {
   private config: ClientConfigType;
+  private licenseSubscription: Subscription | null = null;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ClientConfigType>();
@@ -261,7 +264,8 @@ export class EnterpriseSearchPlugin implements Plugin {
     if (!config.ui?.enabled) {
       return;
     }
-    const { cloud, share } = plugins;
+    const { cloud, share, licensing } = plugins;
+
     const useSearchHomepage =
       plugins.searchHomepage && plugins.searchHomepage.isHomepageFeatureEnabled();
 
@@ -380,6 +384,27 @@ export class EnterpriseSearchPlugin implements Plugin {
     });
 
     core.application.register({
+      appRoute: SEMANTIC_SEARCH_PLUGIN.URL,
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      euiIconType: SEMANTIC_SEARCH_PLUGIN.LOGO,
+      id: SEMANTIC_SEARCH_PLUGIN.ID,
+      mount: async (params: AppMountParameters) => {
+        const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
+        const { chrome, http } = kibanaDeps.core;
+        chrome.docTitle.change(SEMANTIC_SEARCH_PLUGIN.NAME);
+
+        this.getInitialData(http);
+        const pluginData = this.getPluginData();
+
+        const { renderApp } = await import('./applications');
+        const { EnterpriseSearchSemanticSearch } = await import('./applications/semantic_search');
+
+        return renderApp(EnterpriseSearchSemanticSearch, kibanaDeps, pluginData);
+      },
+      title: SEMANTIC_SEARCH_PLUGIN.NAV_TITLE,
+    });
+
+    core.application.register({
       appRoute: AI_SEARCH_PLUGIN.URL,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       euiIconType: AI_SEARCH_PLUGIN.LOGO,
@@ -445,29 +470,33 @@ export class EnterpriseSearchPlugin implements Plugin {
       title: ANALYTICS_PLUGIN.NAME,
     });
 
-    core.application.register({
-      appRoute: INFERENCE_ENDPOINTS_PLUGIN.URL,
-      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      deepLinks: relevanceLinks,
-      euiIconType: INFERENCE_ENDPOINTS_PLUGIN.LOGO,
-      id: INFERENCE_ENDPOINTS_PLUGIN.ID,
-      mount: async (params: AppMountParameters) => {
-        const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
-        const { chrome, http } = kibanaDeps.core;
-        chrome.docTitle.change(INFERENCE_ENDPOINTS_PLUGIN.NAME);
+    this.licenseSubscription = licensing?.license$.subscribe((license: ILicense) => {
+      if (license.isActive && license.hasAtLeast('enterprise')) {
+        core.application.register({
+          appRoute: INFERENCE_ENDPOINTS_PLUGIN.URL,
+          category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+          deepLinks: relevanceLinks,
+          euiIconType: INFERENCE_ENDPOINTS_PLUGIN.LOGO,
+          id: INFERENCE_ENDPOINTS_PLUGIN.ID,
+          mount: async (params: AppMountParameters) => {
+            const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
+            const { chrome, http } = kibanaDeps.core;
+            chrome.docTitle.change(INFERENCE_ENDPOINTS_PLUGIN.NAME);
 
-        await this.getInitialData(http);
-        const pluginData = this.getPluginData();
+            await this.getInitialData(http);
+            const pluginData = this.getPluginData();
 
-        const { renderApp } = await import('./applications');
-        const { EnterpriseSearchRelevance } = await import(
-          './applications/enterprise_search_relevance'
-        );
+            const { renderApp } = await import('./applications');
+            const { EnterpriseSearchRelevance } = await import(
+              './applications/enterprise_search_relevance'
+            );
 
-        return renderApp(EnterpriseSearchRelevance, kibanaDeps, pluginData);
-      },
-      title: INFERENCE_ENDPOINTS_PLUGIN.NAME,
-      visibleIn: [],
+            return renderApp(EnterpriseSearchRelevance, kibanaDeps, pluginData);
+          },
+          title: INFERENCE_ENDPOINTS_PLUGIN.NAV_TITLE,
+          visibleIn: [],
+        });
+      }
     });
 
     core.application.register({
@@ -492,7 +521,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       visibleIn: [],
     });
 
-    share?.url.locators.create<CreatIndexLocatorParams>(new CreatIndexLocatorDefinition());
+    registerLocators(share!);
 
     if (config.canDeployEntSearch) {
       core.application.register({
@@ -645,7 +674,9 @@ export class EnterpriseSearchPlugin implements Plugin {
     return {};
   }
 
-  public stop() {}
+  public stop() {
+    this.licenseSubscription?.unsubscribe();
+  }
 
   private updateSideNavDefinition = (items: Partial<DynamicSideNavItems>) => {
     this.sideNavDynamicItems$.next({ ...this.sideNavDynamicItems$.getValue(), ...items });

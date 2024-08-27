@@ -10,7 +10,7 @@ import { render } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { REASON_DETAILS_PREVIEW_BUTTON_TEST_ID, REASON_TITLE_TEST_ID } from './test_ids';
 import { Reason, ALERT_REASON_BANNER } from './reason';
-import { RightPanelContext } from '../context';
+import { DocumentDetailsContext } from '../../shared/context';
 import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
 import { DocumentDetailsAlertReasonPanelKey } from '../../shared/constants/panel_keys';
@@ -33,10 +33,7 @@ jest.mock('../../../../common/lib/kibana', () => {
   };
 });
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn(),
-  ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
-}));
+jest.mock('@kbn/expandable-flyout');
 
 const panelContextValue = {
   eventId: 'event id',
@@ -44,15 +41,15 @@ const panelContextValue = {
   scopeId: 'scopeId',
   dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
   getFieldsData: mockGetFieldsData,
-} as unknown as RightPanelContext;
+} as unknown as DocumentDetailsContext;
 
-const renderReason = (panelContext: RightPanelContext = panelContextValue) =>
+const renderReason = (panelContext: DocumentDetailsContext = panelContextValue) =>
   render(
     <TestProviders>
       <IntlProvider locale="en">
-        <RightPanelContext.Provider value={panelContext}>
+        <DocumentDetailsContext.Provider value={panelContext}>
           <Reason />
-        </RightPanelContext.Provider>
+        </DocumentDetailsContext.Provider>
       </IntlProvider>
     </TestProviders>
   );
@@ -91,7 +88,7 @@ describe('<Reason />', () => {
     const panelContext = {
       ...panelContextValue,
       getFieldsData: () => {},
-    } as unknown as RightPanelContext;
+    } as unknown as DocumentDetailsContext;
 
     const { getByText } = renderReason(panelContext);
 

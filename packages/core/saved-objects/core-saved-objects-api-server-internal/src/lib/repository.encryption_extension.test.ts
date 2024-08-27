@@ -116,6 +116,7 @@ describe('SavedObjectsRepository Encryption Extension', () => {
 
     // create a mock saved objects encryption extension
     mockEncryptionExt = savedObjectsExtensionsMock.createEncryptionExtension();
+    mockEncryptionExt.encryptAttributes.mockImplementation((desc, attrs) => Promise.resolve(attrs));
 
     mockGetCurrentTime.mockReturnValue(mockTimestamp);
     mockGetSearchDsl.mockClear();
@@ -247,7 +248,6 @@ describe('SavedObjectsRepository Encryption Extension', () => {
         expect.objectContaining({
           ...encryptedSO,
           id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
-          attributes: undefined,
         }),
         encryptedSO.attributes // original attributes
       );

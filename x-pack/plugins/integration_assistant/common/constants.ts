@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { LicenseType } from '@kbn/licensing-plugin/common/types';
+
 // Plugin information
 export const PLUGIN_ID = 'integrationAssistant';
 
@@ -20,3 +22,6 @@ export const RELATED_GRAPH_PATH = `${INTEGRATION_ASSISTANT_BASE_PATH}/related`;
 export const CHECK_PIPELINE_PATH = `${INTEGRATION_ASSISTANT_BASE_PATH}/pipeline`;
 export const INTEGRATION_BUILDER_PATH = `${INTEGRATION_ASSISTANT_BASE_PATH}/build`;
 export const FLEET_PACKAGES_PATH = `/api/fleet/epm/packages`;
+
+// License
+export const MINIMUM_LICENSE_TYPE: LicenseType = 'enterprise';

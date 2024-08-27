@@ -8,6 +8,7 @@
 import { ElasticsearchClient, IBasePath, Logger } from '@kbn/core/server';
 import { resetSLOResponseSchema } from '@kbn/slo-schema';
 import {
+  getSLOPipelineId,
   getSLOSummaryPipelineId,
   getSLOSummaryTransformId,
   getSLOTransformId,
@@ -16,6 +17,7 @@ import {
   SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
   SLO_SUMMARY_TEMP_INDEX_NAME,
 } from '../../common/constants';
+import { getSLOPipelineTemplate } from '../assets/ingest_templates/slo_pipeline_template';
 import { getSLOSummaryPipelineTemplate } from '../assets/ingest_templates/slo_summary_pipeline_template';
 import { retryTransientEsErrors } from '../utils/retry';
 import { SLORepository } from './slo_repository';
@@ -47,8 +49,14 @@ export class ResetSLO {
     await Promise.all([this.deleteRollupData(slo.id), this.deleteSummaryData(slo.id)]);
 
     try {
+      await retryTransientEsErrors(
+        () => this.esClient.ingest.putPipeline(getSLOPipelineTemplate(slo)),
+        { logger: this.logger }
+      );
+
       await this.transformManager.install(slo);
       await this.transformManager.start(rollupTransformId);
+
       await retryTransientEsErrors(
         () =>
           this.esClient.ingest.putPipeline(
@@ -81,6 +89,11 @@ export class ResetSLO {
       await this.transformManager.uninstall(rollupTransformId);
       await this.esClient.ingest.deletePipeline(
         { id: getSLOSummaryPipelineId(slo.id, slo.revision) },
+        { ignore: [404] }
+      );
+
+      await this.esClient.ingest.deletePipeline(
+        { id: getSLOPipelineId(slo.id, slo.revision) },
         { ignore: [404] }
       );
 

@@ -8,6 +8,8 @@
 import { deepFreeze } from '@kbn/std';
 import type { SecurityPluginStart, CheckPrivilegesDynamically } from '@kbn/security-plugin/server';
 
+import { securityServiceMock, type SecurityStartMock } from '@kbn/core-security-server-mocks';
+
 import { appContextService } from '../app_context';
 import type { FleetAuthz } from '../../../common';
 
@@ -554,12 +556,13 @@ describe('When using calculateRouteAuthz()', () => {
 });
 
 describe('getAuthzFromRequest', () => {
+  let mockSecurityCore: SecurityStartMock;
   let mockSecurity: jest.MockedObjectDeep<SecurityPluginStart>;
   let checkPrivileges: jest.MockedFn<CheckPrivilegesDynamically>;
   beforeEach(() => {
     checkPrivileges = jest.fn();
+    mockSecurityCore = securityServiceMock.createStart();
     mockSecurity = {
-      authc: { getCurrentUser: jest.fn() },
       authz: {
         checkPrivilegesDynamicallyWithRequest: jest.fn().mockReturnValue(checkPrivileges),
         actions: {
@@ -576,6 +579,7 @@ describe('getAuthzFromRequest', () => {
       },
     } as unknown as jest.MockedObjectDeep<SecurityPluginStart>;
 
+    jest.mocked(appContextService.getSecurityCore).mockReturnValue(mockSecurityCore);
     jest.mocked(appContextService.getSecurity).mockReturnValue(mockSecurity);
     jest.mocked(appContextService.getSecurityLicense).mockReturnValue({
       isEnabled: () => true,

@@ -29,7 +29,7 @@ export async function runDockerGenerator(
   build: Build,
   flags: {
     architecture?: string;
-    baseImage: 'none' | 'chainguard' | 'ubi' | 'ubuntu';
+    baseImage: 'none' | 'wolfi' | 'ubi' | 'ubuntu';
     context: boolean;
     image: boolean;
     ironbank?: boolean;
@@ -42,12 +42,19 @@ export async function runDockerGenerator(
   let baseImageName = '';
   if (flags.baseImage === 'ubuntu') baseImageName = 'ubuntu:20.04';
   if (flags.baseImage === 'ubi') baseImageName = 'docker.elastic.co/ubi9/ubi-minimal:latest';
-  if (flags.baseImage === 'chainguard')
-    baseImageName = 'docker.elastic.co/wolfi/chainguard-base:20230214';
+  /**
+   * Renovate config contains a regex manager to automatically updates this Chainguard reference
+   *
+   * If this logic moves to another file or under another name, then the Renovate regex manager
+   * for automatic Chainguard updates will break.
+   */
+  if (flags.baseImage === 'wolfi')
+    baseImageName =
+      'docker.elastic.co/wolfi/chainguard-base:latest@sha256:c16d3ad6cebf387e8dd2ad769f54320c4819fbbaa21e729fad087c7ae223b4d0';
 
   let imageFlavor = '';
   if (flags.baseImage === 'ubi') imageFlavor += `-ubi`;
-  if (flags.baseImage === 'chainguard') imageFlavor += `-chainguard`;
+  if (flags.baseImage === 'wolfi' && !flags.serverless) imageFlavor += `-wolfi`;
   if (flags.ironbank) imageFlavor += '-ironbank';
   if (flags.cloud) imageFlavor += '-cloud';
   if (flags.serverless) imageFlavor += '-serverless';

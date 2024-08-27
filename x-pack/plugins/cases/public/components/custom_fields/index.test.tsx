@@ -7,7 +7,7 @@
 
 import React from 'react';
 import userEvent from '@testing-library/user-event';
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
@@ -17,8 +17,7 @@ import { MAX_CUSTOM_FIELDS_PER_CASE } from '../../../common/constants';
 import { CustomFields } from '.';
 import * as i18n from './translations';
 
-// FLAKY: https://github.com/elastic/kibana/issues/176805
-describe.skip('CustomFields', () => {
+describe('CustomFields', () => {
   let appMockRender: AppMockRenderer;
 
   const props = {
@@ -68,7 +67,9 @@ describe.skip('CustomFields', () => {
 
     userEvent.click(await screen.findByTestId('add-custom-field'));
 
-    expect(props.handleAddCustomField).toBeCalled();
+    await waitFor(() => {
+      expect(props.handleAddCustomField).toBeCalled();
+    });
   });
 
   it('calls handleEditCustomField on edit option click', async () => {
@@ -80,13 +81,9 @@ describe.skip('CustomFields', () => {
       await screen.findByTestId(`${customFieldsConfigurationMock[0].key}-custom-field-edit`)
     );
 
-    expect(props.handleEditCustomField).toBeCalledWith(customFieldsConfigurationMock[0].key);
-  });
-
-  it('shows the experimental badge', async () => {
-    appMockRender.render(<CustomFields {...props} />);
-
-    expect(await screen.findByTestId('case-experimental-badge')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(props.handleEditCustomField).toBeCalledWith(customFieldsConfigurationMock[0].key);
+    });
   });
 
   it('shows error when custom fields reaches the limit', async () => {
