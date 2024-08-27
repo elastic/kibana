@@ -9981,10 +9981,10 @@
   dependencies:
     "@babel/types" "^7.0.0"
 
-"@types/babel__helper-plugin-utils@^7.10.0":
-  version "7.10.0"
-  resolved "https://registry.yarnpkg.com/@types/babel__helper-plugin-utils/-/babel__helper-plugin-utils-7.10.0.tgz#dcd2416f9c189d5837ab2a276368cf67134efe78"
-  integrity sha512-60YtHzhQ9HAkToHVV+TB4VLzBn9lrfgrsOjiJMtbv/c1jPdekBxaByd6DMsGBzROXWoIL6U3lEFvvbu69RkUoA==
+"@types/babel__helper-plugin-utils@^7.10.3":
+  version "7.10.3"
+  resolved "https://registry.yarnpkg.com/@types/babel__helper-plugin-utils/-/babel__helper-plugin-utils-7.10.3.tgz#d2240d11dd7a24624e47e9b3f8a790839d7e90d0"
+  integrity sha512-FcLBBPXInqKfULB2nvOBskQPcnSMZ0s1Y2q76u9H1NPPWaLcTeq38xBeKfF/RBUECK333qeaqRdYoPSwW7rTNQ==
   dependencies:
     "@types/babel__core" "*"
 

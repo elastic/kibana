@@ -1486,7 +1486,7 @@
     "@types/aws4": "^1.5.0",
     "@types/babel__core": "^7.20.5",
     "@types/babel__generator": "^7.6.4",
-    "@types/babel__helper-plugin-utils": "^7.10.0",
+    "@types/babel__helper-plugin-utils": "^7.10.3",
     "@types/base64-js": "^1.2.5",
     "@types/byte-size": "^8.1.0",
     "@types/chance": "^1.0.0",
