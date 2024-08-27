@@ -1095,7 +1095,7 @@
     "handlebars": "4.7.8",
     "he": "^1.2.0",
     "history": "^4.9.0",
-    "hjson": "3.2.1",
+    "hjson": "3.2.2",
     "html2canvas": "^1.4.1",
     "http-proxy-agent": "^5.0.0",
     "https-proxy-agent": "^5.0.1",
