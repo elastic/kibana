@@ -6,5 +6,11 @@
  * Side Public License, v 1.
  */
 
-export { Contract, LifecycleModule } from './lifecycle';
-export { Plugin, PluginModule } from './plugin';
+import type { interfaces } from 'inversify';
+
+/**
+ * The service identifier for the global service references.
+ */
+export const Global = Symbol.for(
+  'Global'
+) as interfaces.ServiceIdentifier<interfaces.ServiceIdentifier>;
