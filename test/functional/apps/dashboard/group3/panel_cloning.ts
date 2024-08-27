@@ -15,7 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardAddPanel = getService('dashboardAddPanel');
   const { dashboard, header, timePicker } = getPageObjects(['dashboard', 'header', 'timePicker']);
 
-  describe.only('dashboard panel cloning', function viewEditModeTests() {
+  describe('dashboard panel cloning', function viewEditModeTests() {
     before(async function () {
       await dashboard.initTests();
       await dashboard.preserveCrossAppState();
