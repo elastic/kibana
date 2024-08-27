@@ -165,19 +165,33 @@ export const blocklistFormSelectors = {
   setSingleValue: () => {
     cy.getByTestSubj('blocklist-form-value-input').type('Elastic, Inc.');
   },
-  validateMultiValue: () => {
-    cy.getByTestSubj('blocklist-form-values-input').within(() => {
-      cy.getByTestSubj('comboBoxInput').within(() => {
-        cy.getByTestSubj('blocklist-form-values-input-Elastic');
-        cy.getByTestSubj('blocklist-form-values-input- Inc.');
+  validateMultiValue: ({ empty } = { empty: false }) => {
+    if (!empty) {
+      cy.getByTestSubj('blocklist-form-values-input').within(() => {
+        cy.getByTestSubj('comboBoxInput').within(() => {
+          cy.getByTestSubj('blocklist-form-values-input-Elastic');
+          cy.getByTestSubj('blocklist-form-values-input- Inc.');
+        });
       });
-    });
+    } else {
+      cy.getByTestSubj('blocklist-form-values-input').within(() => {
+        cy.getByTestSubj('comboBoxInput').children('span').should('not.exist');
+      });
+    }
   },
-  validateSingleValue: () => {
-    cy.getByTestSubj('blocklist-form-value-input').should('have.value', 'Elastic, Inc.');
+  validateSingleValue: (value = 'Elastic, Inc.') => {
+    cy.getByTestSubj('blocklist-form-value-input').should('have.value', value);
   },
   submitBlocklist: () => {
     cy.getByTestSubj('blocklistPage-flyout-submitButton').click();
+  },
+  expectSubmitButtonToBe: (state: 'disabled' | 'enabled') => {
+    cy.getByTestSubj('blocklistPage-flyout-submitButton').should(
+      state === 'disabled' ? 'be.disabled' : 'not.be.disabled'
+    );
+  },
+  clearMultiValueInput: () => {
+    cy.getByTestSubj('comboBoxClearButton').click();
   },
   validateSuccessPopup: (type: 'create' | 'update' | 'delete') => {
     let expectedTitle = '';

@@ -275,7 +275,7 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
       } = (nextItem.entries[0] ?? {}) as BlocklistEntry;
 
       // value can be a string when isOperator is selected
-      const values = Array.isArray(value) ? value : [value];
+      const values = Array.isArray(value) ? value : [value].filter(Boolean);
 
       const newValueWarnings: ItemValidationNodes = {};
       const newNameErrors: ItemValidationNodes = {};
@@ -414,7 +414,9 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
         if (newOperator === ListOperatorTypeEnum.MATCH) {
           return { value: Array.isArray(value) ? value.join(',') : value };
         } else {
-          return { value: typeof value === 'string' ? value.split(',') : value };
+          return {
+            value: (typeof value === 'string' ? value.split(',') : value).filter(Boolean),
+          };
         }
       },
       []

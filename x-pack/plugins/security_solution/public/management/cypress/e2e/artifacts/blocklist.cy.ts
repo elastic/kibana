@@ -34,6 +34,8 @@ const {
   validateMultiValue,
   selectHashField,
   selectOs,
+  expectSubmitButtonToBe,
+  clearMultiValueInput,
 } = blocklistFormSelectors;
 
 describe(
@@ -126,6 +128,47 @@ describe(
         selectPathField();
         expectSingleOperator('Path');
         validateMultiValue();
+      });
+
+      it('Correctly validates value input', () => {
+        openBlocklist({ create: true });
+        fillOutBlocklistFlyout();
+        selectSignatureField();
+
+        expectSubmitButtonToBe('disabled');
+
+        selectOperator('is');
+        selectOperator('is');
+        validateSingleValue('');
+        expectSubmitButtonToBe('disabled');
+
+        selectOperator('is one of');
+        selectOperator('is one of');
+        validateMultiValue({ empty: true });
+
+        selectOperator('is');
+        selectOperator('is');
+        validateSingleValue('');
+        expectSubmitButtonToBe('disabled');
+
+        setSingleValue();
+        validateSingleValue();
+        expectSubmitButtonToBe('enabled');
+
+        selectOperator('is one of');
+        validateMultiValue();
+        expectSubmitButtonToBe('enabled');
+
+        selectOperator('is one of');
+        validateMultiValue();
+        expectSubmitButtonToBe('enabled');
+
+        clearMultiValueInput();
+        expectSubmitButtonToBe('disabled');
+
+        selectOperator('is');
+        validateSingleValue('');
+        expectSubmitButtonToBe('disabled');
       });
     });
 
