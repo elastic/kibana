@@ -6,8 +6,8 @@
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ECS_FULL } from '../../../common/ecs';
-import type { EcsBaseNodeParams } from './types';
 import { ECS_RESERVED } from './constants';
+import type { EcsBaseNodeParams } from './types';
 
 const valueFieldKeys = new Set(['target', 'confidence', 'date_formats', 'type']);
 type AnyObject = Record<string, any>;
@@ -27,6 +27,8 @@ function extractKeys(data: AnyObject, prefix: string = ''): Set<string> {
       if ([...valueFieldKeys].every((k) => valueKeys.has(k))) {
         keys.add(fullKey);
       } else {
+        // Needs to be added, so that fields mapped directly under the data_stream key is detected
+        keys.add(fullKey);
         // Recursively extract keys if the current value is a nested object
         for (const nestedKey of extractKeys(value, fullKey)) {
           keys.add(nestedKey);
