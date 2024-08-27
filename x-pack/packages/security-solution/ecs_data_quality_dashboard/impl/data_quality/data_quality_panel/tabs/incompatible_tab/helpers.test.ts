@@ -7,18 +7,15 @@
 
 import numeral from '@elastic/numeral';
 import { EcsVersion } from '@elastic/ecs';
-import { euiThemeVars } from '@kbn/ui-theme';
 
 import {
   getAllIncompatibleMarkdownComments,
-  getIncompatibleColor,
   getIncompatibleFieldsMarkdownComment,
   getIncompatibleFieldsMarkdownTablesComment,
   getIncompatibleMappings,
   getIncompatibleMappingsFields,
   getIncompatibleValues,
   getIncompatibleValuesFields,
-  getSameFamilyColor,
   showInvalidCallout,
 } from './helpers';
 import { EMPTY_STAT } from '../../../helpers';
@@ -51,18 +48,6 @@ ${MAPPINGS_THAT_CONFLICT_WITH_ECS}
 
     test('it returns true when the `enrichedFieldMetadata` is NOT empty', () => {
       expect(showInvalidCallout(mockPartitionedFieldMetadata.incompatible)).toBe(true);
-    });
-  });
-
-  describe('getIncompatibleColor', () => {
-    test('it returns the expected color', () => {
-      expect(getIncompatibleColor()).toEqual(euiThemeVars.euiColorDanger);
-    });
-  });
-
-  describe('getSameFamilyColor', () => {
-    test('it returns the expected color', () => {
-      expect(getSameFamilyColor()).toEqual(euiThemeVars.euiColorLightShade);
     });
   });
 

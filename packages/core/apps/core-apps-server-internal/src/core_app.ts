@@ -29,13 +29,13 @@ import type {
 import type { InternalStaticAssets } from '@kbn/core-http-server-internal';
 import {
   combineLatest,
-  concatMap,
   firstValueFrom,
   map,
   type Observable,
   ReplaySubject,
   shareReplay,
   Subject,
+  switchMap,
   takeUntil,
   timer,
 } from 'rxjs';
@@ -238,7 +238,7 @@ export class CoreAppsService {
       // Poll for updates
       combineLatest([savedObjectsClient$, timer(0, 10_000)])
         .pipe(
-          concatMap(async ([soClient]) => {
+          switchMap(async ([soClient]) => {
             try {
               const persistedOverrides = await soClient.get<Record<string, unknown>>(
                 DYNAMIC_CONFIG_OVERRIDES_SO_TYPE,
@@ -300,7 +300,10 @@ export class CoreAppsService {
             await soClient.create(DYNAMIC_CONFIG_OVERRIDES_SO_TYPE, newGlobalOverrides, {
               id: DYNAMIC_CONFIG_OVERRIDES_SO_ID,
               overwrite: true,
+              refresh: false,
             });
+            // set it again in memory in case the timer polling the SO for updates has overridden it during this update.
+            this.configService.setDynamicConfigOverrides(req.body);
           } catch (err) {
             if (err instanceof ValidationError) {
               return res.badRequest({ body: err });

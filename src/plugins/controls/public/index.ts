@@ -19,6 +19,7 @@ export type {
   DataControlFactory,
   DataControlServices,
 } from './react_controls/controls/data_controls/types';
+export { controlGroupStateBuilder } from './react_controls/control_group/control_group_state_builder';
 
 /**
  * TODO: remove all exports below this when control group embeddable is removed

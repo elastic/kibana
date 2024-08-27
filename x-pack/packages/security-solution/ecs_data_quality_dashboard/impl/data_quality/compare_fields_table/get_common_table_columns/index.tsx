@@ -27,7 +27,7 @@ export const getCommonTableColumns = (): Array<
     name: i18n.FIELD,
     sortable: true,
     truncateText: false,
-    width: '20%',
+    width: '15%',
   },
   {
     field: 'type',
@@ -98,6 +98,6 @@ export const getCommonTableColumns = (): Array<
       ),
     sortable: false,
     truncateText: false,
-    width: '20%',
+    width: '25%',
   },
 ];

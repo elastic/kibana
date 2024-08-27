@@ -5,15 +5,19 @@
  * 2.0.
  */
 
-import { DARK_THEME } from '@elastic/charts';
 import numeral from '@elastic/numeral';
 import { render, screen } from '@testing-library/react';
 import React, { ComponentProps } from 'react';
 
 import { EMPTY_STAT } from '../../helpers';
-import { TestProviders } from '../../mock/test_providers/test_providers';
+import {
+  TestDataQualityProviders,
+  TestExternalProviders,
+} from '../../mock/test_providers/test_providers';
 import { Pattern } from '.';
+import { getCheckState } from '../../stub/get_check_state';
 
+const indexName = 'auditbeat-custom-index-1';
 const defaultBytesFormat = '0,0.[0]b';
 const formatBytes = (value: number | undefined) =>
   value != null ? numeral(value).format(defaultBytesFormat) : EMPTY_STAT;
@@ -38,23 +42,14 @@ jest.mock('../../use_ilm_explain', () => ({
   })),
 }));
 
+const ilmPhases = ['hot', 'warm', 'unmanaged'];
+
 const defaultProps: ComponentProps<typeof Pattern> = {
   pattern: '',
-  addSuccessToast: jest.fn(),
-  canUserCreateAndReadCases: jest.fn(),
-  formatBytes,
-  formatNumber,
-  getGroupByFieldsOnClick: jest.fn(),
-  ilmPhases: ['hot', 'warm', 'unmanaged'],
-  indexNames: undefined,
-  isAssistantEnabled: true,
-  openCreateCaseFlyout: jest.fn(),
   patternRollup: undefined,
-  selectedIndex: null,
-  setSelectedIndex: jest.fn(),
-  baseTheme: DARK_THEME,
-  updatePatternIndexNames: jest.fn(),
-  updatePatternRollup: jest.fn(),
+  chartSelectedIndex: null,
+  setChartSelectedIndex: jest.fn(),
+  indexNames: undefined,
 };
 
 describe('pattern', () => {
@@ -66,9 +61,20 @@ describe('pattern', () => {
     const pattern = 'remote:*'; // <-- a colon in the pattern indicates the use of cross cluster search
 
     render(
-      <TestProviders>
-        <Pattern {...defaultProps} pattern={pattern} />
-      </TestProviders>
+      <TestExternalProviders>
+        <TestDataQualityProviders
+          dataQualityContextProps={{
+            ilmPhases,
+            formatBytes,
+            formatNumber,
+          }}
+          indicesCheckContextProps={{
+            checkState: getCheckState(indexName),
+          }}
+        >
+          <Pattern {...defaultProps} pattern={pattern} />
+        </TestDataQualityProviders>
+      </TestExternalProviders>
     );
 
     expect(screen.getByTestId('remoteClustersCallout')).toBeInTheDocument();
@@ -78,9 +84,20 @@ describe('pattern', () => {
     const pattern = 'auditbeat-*'; // <-- no colon in the pattern
 
     render(
-      <TestProviders>
-        <Pattern {...defaultProps} pattern={pattern} />
-      </TestProviders>
+      <TestExternalProviders>
+        <TestDataQualityProviders
+          dataQualityContextProps={{
+            ilmPhases,
+            formatBytes,
+            formatNumber,
+          }}
+          indicesCheckContextProps={{
+            checkState: getCheckState(indexName),
+          }}
+        >
+          <Pattern {...defaultProps} pattern={pattern} />
+        </TestDataQualityProviders>
+      </TestExternalProviders>
     );
 
     expect(screen.queryByTestId('remoteClustersCallout')).not.toBeInTheDocument();

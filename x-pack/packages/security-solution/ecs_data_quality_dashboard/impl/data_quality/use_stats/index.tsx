@@ -12,6 +12,7 @@ import { useDataQualityContext } from '../data_quality_panel/data_quality_contex
 import * as i18n from '../translations';
 import { INTERNAL_API_VERSION } from '../helpers';
 import { MeteringStatsIndex } from '../types';
+import { useIsMounted } from '../use_is_mounted';
 
 const STATS_ENDPOINT = '/internal/ecs_data_quality_dashboard/stats';
 
@@ -30,6 +31,7 @@ export const useStats = ({
   pattern: string;
   startDate?: string | null;
 }): UseStats => {
+  const { isMountedRef } = useIsMounted();
   const { httpFetch, isILMAvailable } = useDataQualityContext();
   const [stats, setStats] = useState<Record<string, MeteringStatsIndex> | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -62,15 +64,21 @@ export const useStats = ({
         );
 
         if (!abortController.signal.aborted) {
-          setStats(response);
+          if (isMountedRef.current) {
+            setStats(response);
+          }
         }
       } catch (e) {
         if (!abortController.signal.aborted) {
-          setError(i18n.ERROR_LOADING_STATS(e.message));
+          if (isMountedRef.current) {
+            setError(i18n.ERROR_LOADING_STATS(e.message));
+          }
         }
       } finally {
         if (!abortController.signal.aborted) {
-          setLoading(false);
+          if (isMountedRef.current) {
+            setLoading(false);
+          }
         }
       }
     }
@@ -80,7 +88,7 @@ export const useStats = ({
     return () => {
       abortController.abort();
     };
-  }, [endDate, httpFetch, isILMAvailable, pattern, setError, startDate]);
+  }, [endDate, httpFetch, isILMAvailable, isMountedRef, pattern, setError, startDate]);
 
   return { stats, error, loading };
 };

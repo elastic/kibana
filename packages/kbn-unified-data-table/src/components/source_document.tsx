@@ -37,6 +37,7 @@ export function SourceDocument({
   fieldFormats,
   dataTestSubj = 'discoverCellDescriptionList',
   className,
+  isCompressed = true,
 }: {
   useTopLevelObjectColumns: boolean;
   row: DataTableRecord;
@@ -48,6 +49,7 @@ export function SourceDocument({
   fieldFormats: FieldFormatsStart;
   dataTestSubj?: string;
   className?: string;
+  isCompressed?: boolean;
 }) {
   const pairs: FormattedHit = useTopLevelObjectColumns
     ? getTopLevelObjectPairs(row.raw, columnId, dataView, shouldShowFieldHandler).slice(
@@ -59,7 +61,7 @@ export function SourceDocument({
   return (
     <EuiDescriptionList
       type="inline"
-      compressed
+      compressed={isCompressed}
       className={classnames('unifiedDataTable__descriptionList', CELL_CLASS, className)}
       data-test-subj={dataTestSubj}
     >

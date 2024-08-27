@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 import {
   arrayOfStringsSchema,
   keyMetricSchema,
@@ -48,6 +48,15 @@ export const entityDefinitionSchema = z.object({
       ),
     })
   ),
+  installStatus: z.optional(
+    z.union([
+      z.literal('installing'),
+      z.literal('upgrading'),
+      z.literal('installed'),
+      z.literal('failed'),
+    ])
+  ),
+  installStartedAt: z.optional(z.string()),
 });
 
 export type EntityDefinition = z.infer<typeof entityDefinitionSchema>;

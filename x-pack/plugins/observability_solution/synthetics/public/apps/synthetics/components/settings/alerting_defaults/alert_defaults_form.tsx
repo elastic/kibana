@@ -15,6 +15,7 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiSpacer,
+  EuiSwitch,
 } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -80,6 +81,50 @@ export const AlertDefaultsForm = () => {
 
   return (
     <EuiForm>
+      <EuiSpacer size="m" />
+      <EuiDescribedFormGroup
+        title={
+          <h4>
+            <FormattedMessage
+              id="xpack.synthetics.settings.defaultConnectors"
+              defaultMessage="Default rules"
+            />
+          </h4>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.synthetics.settings.defaultConnectors.description"
+            defaultMessage="Default rules are automatically created. You can disable creation of default rules here."
+          />
+        }
+      >
+        <EuiSpacer size="s" />
+        <EuiSwitch
+          label={i18n.translate('xpack.synthetics.ruleStatusDefaultsForm.euiSwitch.enabledLabel', {
+            defaultMessage: 'Status rule enabled',
+          })}
+          checked={formFields?.defaultStatusRuleEnabled ?? true}
+          onChange={() => {
+            setFormFields({
+              ...formFields,
+              defaultStatusRuleEnabled: !(formFields.defaultStatusRuleEnabled ?? true),
+            });
+          }}
+        />
+        <EuiSpacer size="m" />
+        <EuiSwitch
+          label={i18n.translate('xpack.synthetics.ruleTLSDefaultsForm.euiSwitch.enabledLabel', {
+            defaultMessage: 'TLS rule enabled',
+          })}
+          checked={formFields?.defaultTLSRuleEnabled ?? true}
+          onChange={() => {
+            setFormFields({
+              ...formFields,
+              defaultTLSRuleEnabled: !(formFields.defaultTLSRuleEnabled ?? true),
+            });
+          }}
+        />
+      </EuiDescribedFormGroup>
       <EuiSpacer size="m" />
       <EuiDescribedFormGroup
         title={

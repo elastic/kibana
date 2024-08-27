@@ -8,26 +8,14 @@
 import { EcsVersion } from '@elastic/ecs';
 
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React from 'react';
 
 import * as i18n from '../../../index_properties/translations';
 import { CalloutItem } from '../../styles';
-import type { EcsBasedFieldMetadata } from '../../../../types';
 
-interface Props {
-  children?: React.ReactNode;
-  ecsBasedFieldMetadata: EcsBasedFieldMetadata[];
-}
-
-const IncompatibleCalloutComponent: React.FC<Props> = ({ children, ecsBasedFieldMetadata }) => {
-  const fieldCount = ecsBasedFieldMetadata.length;
-  const title = useMemo(
-    () => <span data-test-subj="title">{i18n.INCOMPATIBLE_CALLOUT_TITLE(fieldCount)}</span>,
-    [fieldCount]
-  );
-
+const IncompatibleCalloutComponent: React.FC = () => {
   return (
-    <EuiCallOut color="danger" data-test-subj="incompatibleCallout" size="s" title={title}>
+    <EuiCallOut color="danger" data-test-subj="incompatibleCallout" size="s">
       <div data-test-subj="fieldsAreIncompatible">{i18n.INCOMPATIBLE_CALLOUT(EcsVersion)}</div>
       <EuiSpacer size="xs" />
       <CalloutItem data-test-subj="rulesMayNotMatch">
@@ -39,11 +27,10 @@ const IncompatibleCalloutComponent: React.FC<Props> = ({ children, ecsBasedField
       <CalloutItem data-test-subj="mappingsThatDontComply">
         {i18n.MAPPINGS_THAT_CONFLICT_WITH_ECS}
       </CalloutItem>
-      <EuiSpacer size="s" />
-      {children}
     </EuiCallOut>
   );
 };
+
 IncompatibleCalloutComponent.displayName = 'IncompatibleCalloutComponent';
 
 export const IncompatibleCallout = React.memo(IncompatibleCalloutComponent);

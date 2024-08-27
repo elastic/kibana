@@ -182,7 +182,8 @@ describe('migration v2', () => {
           errors.push(err.message);
         })
       );
-      if (i < instances.length - 1) {
+      if (i < instances.length - 2) {
+        // We wait between instances, but not after the last one
         await delay(delayInSec * 1000);
       }
     }

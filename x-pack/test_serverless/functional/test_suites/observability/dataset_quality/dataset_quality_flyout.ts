@@ -399,7 +399,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           );
         });
 
-        countColumn.sort('ascending');
+        await countColumn.sort('ascending');
 
         await retry.tryForTime(5000, async () => {
           const currentUrl = await browser.getCurrentUrl();

@@ -13,7 +13,7 @@ import type {
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';
 import type { RelatedState } from '../../types';
-import { modifySamples, formatSamples } from '../../util/samples';
+import { prefixSamples, formatSamples } from '../../util/samples';
 import { handleValidatePipeline } from '../../util/graph';
 import { handleRelated } from './related';
 import { handleErrors } from './errors';
@@ -92,7 +92,7 @@ const graphState: StateGraphArgs<RelatedState>['channels'] = {
 };
 
 function modelInput(state: RelatedState): Partial<RelatedState> {
-  const samples = modifySamples(state);
+  const samples = prefixSamples(state);
   const formattedSamples = formatSamples(samples);
   const initialPipeline = JSON.parse(JSON.stringify(state.currentPipeline));
   return {

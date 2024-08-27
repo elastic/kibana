@@ -7,7 +7,7 @@
 
 import { IToasts } from '@kbn/core-notifications-browser';
 import { DatasetQualityPluginStart } from '@kbn/dataset-quality-plugin/public';
-import { DatasetQualityController } from '@kbn/dataset-quality-plugin/public/controller';
+import { DatasetQualityController } from '@kbn/dataset-quality-plugin/public/controller/dataset_quality';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import {

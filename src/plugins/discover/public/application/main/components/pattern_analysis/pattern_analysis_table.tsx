@@ -10,7 +10,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import { type EmbeddablePatternAnalysisInput } from '@kbn/aiops-log-pattern-analysis/embeddable';
 import { pick } from 'lodash';
-import type { LogCategorizationEmbeddableProps } from '@kbn/aiops-plugin/public/components/log_categorization/log_categorization_for_embeddable/log_categorization_for_embeddable';
+import type { LogCategorizationEmbeddableProps } from '@kbn/aiops-plugin/public/components/log_categorization/log_categorization_for_embeddable/log_categorization_for_discover';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { PATTERN_ANALYSIS_LOADED } from './constants';
@@ -47,11 +47,9 @@ export const PatternAnalysisTable = (props: PatternAnalysisTableProps) => {
 
   const patternAnalysisComponentProps: LogCategorizationEmbeddableProps = useMemo(
     () => ({
-      input: Object.assign(
-        {},
-        pick(props, ['dataView', 'savedSearch', 'query', 'filters', 'switchToDocumentView']),
-        { lastReloadRequestTime }
-      ),
+      input: Object.assign({}, pick(props, ['dataView', 'savedSearch', 'switchToDocumentView']), {
+        lastReloadRequestTime,
+      }),
       renderViewModeToggle: props.renderViewModeToggle,
     }),
     [lastReloadRequestTime, props]

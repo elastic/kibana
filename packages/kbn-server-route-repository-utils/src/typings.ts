@@ -9,13 +9,14 @@
 import type { HttpFetchOptions } from '@kbn/core-http-browser';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import type {
-  RequestHandlerContext,
-  Logger,
-  RouteConfigOptions,
-  RouteMethod,
   KibanaRequest,
   KibanaResponseFactory,
+  Logger,
+  RequestHandlerContext,
+  RouteConfigOptions,
+  RouteMethod,
 } from '@kbn/core/server';
+import { z } from '@kbn/zod';
 import * as t from 'io-ts';
 import { RequiredKeys } from 'utility-types';
 
@@ -30,13 +31,21 @@ type WithoutIncompatibleMethods<T extends t.Any> = Omit<T, 'encode' | 'asEncoder
   asEncoder: () => t.Encoder<any, any>;
 };
 
-export type RouteParamsRT = WithoutIncompatibleMethods<
+export type ZodParamsObject = z.ZodObject<{
+  path?: any;
+  query?: any;
+  body?: any;
+}>;
+
+export type IoTsParamsObject = WithoutIncompatibleMethods<
   t.Type<{
     path?: any;
     query?: any;
     body?: any;
   }>
 >;
+
+export type RouteParamsRT = IoTsParamsObject | ZodParamsObject;
 
 export interface RouteState {
   [endpoint: string]: ServerRoute<any, any, any, any, any>;
@@ -82,12 +91,20 @@ type ClientRequestParamsOfType<TRouteParamsRT extends RouteParamsRT> =
     ? MaybeOptional<{
         params: t.OutputOf<TRouteParamsRT>;
       }>
+    : TRouteParamsRT extends z.Schema
+    ? MaybeOptional<{
+        params: z.TypeOf<TRouteParamsRT>;
+      }>
     : {};
 
 type DecodedRequestParamsOfType<TRouteParamsRT extends RouteParamsRT> =
   TRouteParamsRT extends t.Mixed
     ? MaybeOptional<{
         params: t.TypeOf<TRouteParamsRT>;
+      }>
+    : TRouteParamsRT extends z.Schema
+    ? MaybeOptional<{
+        params: z.TypeOf<TRouteParamsRT>;
       }>
     : {};
 

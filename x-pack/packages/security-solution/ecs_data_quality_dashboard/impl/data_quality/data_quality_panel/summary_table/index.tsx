@@ -9,31 +9,31 @@ import type { CriteriaWithPagination, EuiBasicTableColumn, Pagination } from '@e
 import { EuiInMemoryTable } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
-import type { IndexSummaryTableItem } from './helpers';
 import { getShowPagination } from './helpers';
 import { defaultSort, MIN_PAGE_SIZE } from '../pattern/helpers';
 import { SortConfig } from '../../types';
 import { useDataQualityContext } from '../data_quality_context';
+import { IndexSummaryTableItem } from '../pattern/types';
+import { UseIndicesCheckCheckState } from '../../use_indices_check/types';
 
 export interface Props {
-  formatBytes: (value: number | undefined) => string;
-  formatNumber: (value: number | undefined) => string;
   getTableColumns: ({
     formatBytes,
     formatNumber,
-    itemIdToExpandedRowMap,
+    checkState,
     isILMAvailable,
     pattern,
-    toggleExpanded,
+    onExpandAction,
+    onCheckNowAction,
   }: {
     formatBytes: (value: number | undefined) => string;
     formatNumber: (value: number | undefined) => string;
-    itemIdToExpandedRowMap: Record<string, React.ReactNode>;
+    checkState: UseIndicesCheckCheckState;
     isILMAvailable: boolean;
     pattern: string;
-    toggleExpanded: (indexName: string) => void;
+    onExpandAction: (indexName: string) => void;
+    onCheckNowAction: (indexName: string) => void;
   }) => Array<EuiBasicTableColumn<IndexSummaryTableItem>>;
-  itemIdToExpandedRowMap: Record<string, React.ReactNode>;
   items: IndexSummaryTableItem[];
   pageIndex: number;
   pageSize: number;
@@ -42,14 +42,13 @@ export interface Props {
   setPageSize: (pageSize: number) => void;
   setSorting: (sortConfig: SortConfig) => void;
   sorting: SortConfig;
-  toggleExpanded: (indexName: string) => void;
+  onExpandAction: (indexName: string) => void;
+  onCheckNowAction: (indexName: string) => void;
+  checkState: UseIndicesCheckCheckState;
 }
 
 const SummaryTableComponent: React.FC<Props> = ({
-  formatBytes,
-  formatNumber,
   getTableColumns,
-  itemIdToExpandedRowMap,
   items,
   pageIndex,
   pageSize,
@@ -58,27 +57,31 @@ const SummaryTableComponent: React.FC<Props> = ({
   setPageSize,
   setSorting,
   sorting,
-  toggleExpanded,
+  onExpandAction,
+  onCheckNowAction,
+  checkState,
 }) => {
-  const { isILMAvailable } = useDataQualityContext();
+  const { isILMAvailable, formatBytes, formatNumber } = useDataQualityContext();
   const columns = useMemo(
     () =>
       getTableColumns({
         formatBytes,
         formatNumber,
-        itemIdToExpandedRowMap,
+        checkState,
         isILMAvailable,
         pattern,
-        toggleExpanded,
+        onExpandAction,
+        onCheckNowAction,
       }),
     [
       formatBytes,
       formatNumber,
       getTableColumns,
+      checkState,
       isILMAvailable,
-      itemIdToExpandedRowMap,
+      onCheckNowAction,
+      onExpandAction,
       pattern,
-      toggleExpanded,
     ]
   );
   const getItemId = useCallback((item: IndexSummaryTableItem) => item.indexName, []);
@@ -109,7 +112,6 @@ const SummaryTableComponent: React.FC<Props> = ({
       columns={columns}
       data-test-subj="summaryTable"
       itemId={getItemId}
-      itemIdToExpandedRowMap={itemIdToExpandedRowMap}
       items={items}
       onChange={onChange}
       pagination={

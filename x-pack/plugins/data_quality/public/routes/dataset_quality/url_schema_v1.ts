@@ -8,7 +8,7 @@
 import {
   DatasetQualityFlyoutOptions,
   DatasetQualityPublicStateUpdate,
-} from '@kbn/dataset-quality-plugin/public/controller';
+} from '@kbn/dataset-quality-plugin/public/controller/dataset_quality';
 import * as rt from 'io-ts';
 import { deepCompactObject } from '../../../common/utils/deep_compact_object';
 import { datasetQualityUrlSchemaV1 } from '../../../common/url_schema';

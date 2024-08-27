@@ -22,7 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('console');
     });
 
-    describe('with comments', async () => {
+    describe('with comments', () => {
       const enterRequest = async (url: string, body: string) => {
         await PageObjects.console.monaco.clearEditorText();
         await PageObjects.console.monaco.enterText(`${url}\n${body}`);
@@ -40,6 +40,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       }
 
+      // eslint-disable-next-line mocha/no-async-describe
       describe('with single line comments', async () => {
         await runTests(
           [
@@ -84,6 +85,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
       });
 
+      // eslint-disable-next-line mocha/no-async-describe
       describe('with multiline comments', async () => {
         await runTests(
           [
@@ -111,6 +113,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
       });
 
+      // eslint-disable-next-line mocha/no-async-describe
       describe('with invalid syntax in request body', async () => {
         await runTests(
           [
@@ -126,6 +129,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
       });
 
+      // eslint-disable-next-line mocha/no-async-describe
       describe('with invalid request', async () => {
         await runTests(
           [

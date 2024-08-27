@@ -44,7 +44,6 @@ const defaultProps: Story = {
           onCopy={() => {}}
           onDelete={() => {}}
           title="My visualization"
-          description="A long description"
           {...props}
         />
       </div>

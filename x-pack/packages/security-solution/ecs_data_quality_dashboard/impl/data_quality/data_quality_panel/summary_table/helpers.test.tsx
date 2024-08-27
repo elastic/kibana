@@ -5,28 +5,31 @@
  * 2.0.
  */
 
-import { EuiScreenReaderOnly, EuiTableFieldDataColumnType } from '@elastic/eui';
+import {
+  CustomItemAction,
+  EuiTableActionsColumnType,
+  EuiTableFieldDataColumnType,
+} from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { omit } from 'lodash/fp';
 import React from 'react';
 
-import { TestProviders } from '../../mock/test_providers/test_providers';
+import { TestExternalProviders } from '../../mock/test_providers/test_providers';
 import { EMPTY_STAT } from '../../helpers';
 import {
   getDocsCountPercent,
-  getResultIcon,
-  getResultIconColor,
-  getResultToolTip,
+  getIncompatibleStatColor,
   getShowPagination,
   getSummaryTableColumns,
   getSummaryTableILMPhaseColumn,
   getSummaryTableSizeInBytesColumn,
   getToggleButtonId,
-  IndexSummaryTableItem,
 } from './helpers';
-import { COLLAPSE, EXPAND, FAILED, PASSED, THIS_INDEX_HAS_NOT_BEEN_CHECKED } from './translations';
+import { CHECK_INDEX, VIEW_CHECK_DETAILS } from './translations';
+import { IndexSummaryTableItem } from '../pattern/types';
+import { getCheckState } from '../../stub/get_check_state';
 
 const defaultBytesFormat = '0,0.[0]b';
 const formatBytes = (value: number | undefined) =>
@@ -37,48 +40,6 @@ const formatNumber = (value: number | undefined) =>
   value != null ? numeral(value).format(defaultNumberFormat) : EMPTY_STAT;
 
 describe('helpers', () => {
-  describe('getResultToolTip', () => {
-    test('it shows a "this index has not been checked" tool tip when `incompatible` is undefined', () => {
-      expect(getResultToolTip(undefined)).toEqual(THIS_INDEX_HAS_NOT_BEEN_CHECKED);
-    });
-
-    test('it returns Passed when `incompatible` is zero', () => {
-      expect(getResultToolTip(0)).toEqual(PASSED);
-    });
-
-    test('it returns Failed when `incompatible` is NOT zero', () => {
-      expect(getResultToolTip(1)).toEqual(FAILED);
-    });
-  });
-
-  describe('getResultIconColor', () => {
-    test('it returns `ghost` when `incompatible` is undefined', () => {
-      expect(getResultIconColor(undefined)).toEqual('ghost');
-    });
-
-    test('it returns `success` when `incompatible` is zero', () => {
-      expect(getResultIconColor(0)).toEqual('success');
-    });
-
-    test('it returns `danger` when `incompatible` is NOT zero', () => {
-      expect(getResultIconColor(1)).toEqual('danger');
-    });
-  });
-
-  describe('getResultIcon', () => {
-    test('it returns `cross` when `incompatible` is undefined', () => {
-      expect(getResultIcon(undefined)).toEqual('cross');
-    });
-
-    test('it returns `check` when `incompatible` is zero', () => {
-      expect(getResultIcon(0)).toEqual('check');
-    });
-
-    test('it returns `cross` when `incompatible` is NOT zero', () => {
-      expect(getResultIcon(1)).toEqual('cross');
-    });
-  });
-
   describe('getDocsCountPercent', () => {
     test('it returns an empty string when `patternDocsCount` is zero', () => {
       expect(
@@ -156,22 +117,28 @@ describe('helpers', () => {
       const columns = getSummaryTableColumns({
         formatBytes,
         formatNumber,
-        itemIdToExpandedRowMap: {},
         isILMAvailable,
         pattern: 'auditbeat-*',
-        toggleExpanded: jest.fn(),
+        onCheckNowAction: jest.fn(),
+        onExpandAction: jest.fn(),
+        checkState: getCheckState(indexName),
       }).map((x) => omit('render', x));
 
       expect(columns).toEqual([
         {
-          align: 'right',
-          isExpander: true,
-          name: (
-            <EuiScreenReaderOnly>
-              <span>{'Expand rows'}</span>
-            </EuiScreenReaderOnly>
-          ),
-          width: '40px',
+          name: 'Actions',
+          align: 'center',
+          width: '65px',
+          actions: [
+            {
+              name: 'View check details',
+              render: expect.any(Function),
+            },
+            {
+              name: 'Check index',
+              render: expect.any(Function),
+            },
+          ],
         },
         {
           field: 'incompatible',
@@ -180,94 +147,141 @@ describe('helpers', () => {
           truncateText: false,
           width: '65px',
         },
-        { field: 'indexName', name: 'Index', sortable: true, truncateText: false, width: '300px' },
-        { field: 'docsCount', name: 'Docs', sortable: true, truncateText: false },
+        { field: 'indexName', name: 'Index', sortable: true, truncateText: false },
+        { field: 'docsCount', name: 'Docs', sortable: true, truncateText: false, width: '150px' },
         {
           field: 'incompatible',
           name: 'Incompatible fields',
           sortable: true,
           truncateText: false,
+          width: '140px',
         },
-        { field: 'ilmPhase', name: 'ILM Phase', sortable: true, truncateText: false },
-        { field: 'sizeInBytes', name: 'Size', sortable: true, truncateText: false },
-        { field: 'checkedAt', name: 'Last check', sortable: true, truncateText: false },
+        {
+          field: 'ilmPhase',
+          name: 'ILM Phase',
+          sortable: true,
+          truncateText: false,
+          width: '92px',
+        },
+        { field: 'sizeInBytes', name: 'Size', sortable: true, truncateText: false, width: '67px' },
+        {
+          field: 'checkedAt',
+          name: 'Last check',
+          sortable: true,
+          truncateText: false,
+          width: '120px',
+        },
       ]);
     });
 
-    describe('expand rows render()', () => {
-      test('it renders an Expand button when the row is NOT expanded', () => {
+    describe('action columns render()', () => {
+      test('it renders check index button', () => {
         const columns = getSummaryTableColumns({
           formatBytes,
           formatNumber,
-          itemIdToExpandedRowMap: {},
           isILMAvailable,
           pattern: 'auditbeat-*',
-          toggleExpanded: jest.fn(),
+          onCheckNowAction: jest.fn(),
+          onExpandAction: jest.fn(),
+          checkState: getCheckState(indexName),
         });
-        const expandRowsRender = (columns[0] as EuiTableFieldDataColumnType<IndexSummaryTableItem>)
-          .render;
+        const checkNowRender = (
+          (columns[0] as EuiTableActionsColumnType<IndexSummaryTableItem>)
+            .actions[1] as CustomItemAction<IndexSummaryTableItem>
+        ).render;
 
         render(
-          <TestProviders>
-            {expandRowsRender != null &&
-              expandRowsRender(indexSummaryTableItem, indexSummaryTableItem)}
-          </TestProviders>
+          <TestExternalProviders>
+            {checkNowRender != null && checkNowRender(indexSummaryTableItem, true)}
+          </TestExternalProviders>
         );
 
-        expect(screen.getByLabelText(EXPAND)).toBeInTheDocument();
+        expect(screen.getByLabelText(CHECK_INDEX)).toBeInTheDocument();
       });
 
-      test('it renders a Collapse button when the row is expanded', () => {
-        const itemIdToExpandedRowMap: Record<string, React.ReactNode> = {
-          [indexName]: () => null,
-        };
+      test('it invokes the `onCheckNowAction` with the index name when the check index button is clicked', () => {
+        const onCheckNowAction = jest.fn();
 
         const columns = getSummaryTableColumns({
           formatBytes,
           formatNumber,
-          itemIdToExpandedRowMap,
           isILMAvailable,
           pattern: 'auditbeat-*',
-          toggleExpanded: jest.fn(),
+          onCheckNowAction,
+          onExpandAction: jest.fn(),
+          checkState: getCheckState(indexName),
         });
-        const expandRowsRender = (columns[0] as EuiTableFieldDataColumnType<IndexSummaryTableItem>)
-          .render;
+        const checkNowRender = (
+          (columns[0] as EuiTableActionsColumnType<IndexSummaryTableItem>)
+            .actions[1] as CustomItemAction<IndexSummaryTableItem>
+        ).render;
 
         render(
-          <TestProviders>
-            {expandRowsRender != null &&
-              expandRowsRender(indexSummaryTableItem, indexSummaryTableItem)}
-          </TestProviders>
+          <TestExternalProviders>
+            {checkNowRender != null && checkNowRender(indexSummaryTableItem, true)}
+          </TestExternalProviders>
         );
 
-        expect(screen.getByLabelText(COLLAPSE)).toBeInTheDocument();
-      });
-
-      test('it invokes the `toggleExpanded` with the index name when the button is clicked', () => {
-        const toggleExpanded = jest.fn();
-
-        const columns = getSummaryTableColumns({
-          formatBytes,
-          formatNumber,
-          itemIdToExpandedRowMap: {},
-          isILMAvailable,
-          pattern: 'auditbeat-*',
-          toggleExpanded,
-        });
-        const expandRowsRender = (columns[0] as EuiTableFieldDataColumnType<IndexSummaryTableItem>)
-          .render;
-
-        render(
-          <TestProviders>
-            {expandRowsRender != null &&
-              expandRowsRender(indexSummaryTableItem, indexSummaryTableItem)}
-          </TestProviders>
-        );
-
-        const button = screen.getByLabelText(EXPAND);
+        const button = screen.getByLabelText(CHECK_INDEX);
         userEvent.click(button);
 
-        expect(toggleExpanded).toBeCalledWith(indexName);
+        expect(onCheckNowAction).toBeCalledWith(indexSummaryTableItem.indexName);
+      });
+
+      test('it renders disabled check index with loading indicator when check state is loading', () => {
+        const columns = getSummaryTableColumns({
+          formatBytes,
+          formatNumber,
+          isILMAvailable,
+          pattern: 'auditbeat-*',
+          onCheckNowAction: jest.fn(),
+          onExpandAction: jest.fn(),
+          checkState: getCheckState(indexName, { isChecking: true }),
+        });
+
+        const checkNowRender = (
+          (columns[0] as EuiTableActionsColumnType<IndexSummaryTableItem>)
+            .actions[1] as CustomItemAction<IndexSummaryTableItem>
+        ).render;
+
+        render(
+          <TestExternalProviders>
+            {checkNowRender != null && checkNowRender(indexSummaryTableItem, true)}
+          </TestExternalProviders>
+        );
+
+        expect(screen.getByLabelText(CHECK_INDEX)).toBeDisabled();
+        expect(screen.getByLabelText('Loading')).toBeInTheDocument();
+      });
+
+      test('it invokes the `onExpandAction` with the index name when the view check details button is clicked', () => {
+        const onExpandAction = jest.fn();
+
+        const columns = getSummaryTableColumns({
+          formatBytes,
+          formatNumber,
+          isILMAvailable,
+          pattern: 'auditbeat-*',
+          onCheckNowAction: jest.fn(),
+          onExpandAction,
+          checkState: getCheckState(indexName),
+        });
+
+        const expandActionRender = (
+          (columns[0] as EuiTableActionsColumnType<IndexSummaryTableItem>)
+            .actions[0] as CustomItemAction<IndexSummaryTableItem>
+        ).render;
+
+        render(
+          <TestExternalProviders>
+            {expandActionRender != null && expandActionRender(indexSummaryTableItem, true)}
+          </TestExternalProviders>
+        );
+
+        const button = screen.getByLabelText(VIEW_CHECK_DETAILS);
+        userEvent.click(button);
+
+        expect(onExpandAction).toBeCalledWith(indexSummaryTableItem.indexName);
       });
     });
 
@@ -281,45 +295,47 @@ describe('helpers', () => {
         const columns = getSummaryTableColumns({
           formatBytes,
           formatNumber,
-          itemIdToExpandedRowMap: {},
           isILMAvailable,
           pattern: 'auditbeat-*',
-          toggleExpanded: jest.fn(),
+          onCheckNowAction: jest.fn(),
+          onExpandAction: jest.fn(),
+          checkState: getCheckState(indexName),
         });
         const incompatibleRender = (
           columns[1] as EuiTableFieldDataColumnType<IndexSummaryTableItem>
         ).render;
 
         render(
-          <TestProviders>
+          <TestExternalProviders>
             {incompatibleRender != null &&
               incompatibleRender(incompatibleIsUndefined, incompatibleIsUndefined)}
-          </TestProviders>
+          </TestExternalProviders>
         );
 
         expect(screen.getByTestId('incompatiblePlaceholder')).toHaveTextContent(EMPTY_STAT);
       });
 
-      test('it renders the expected icon when there are incompatible fields', () => {
+      test('it renders Fail badge when there are incompatible fields', () => {
         const columns = getSummaryTableColumns({
           formatBytes,
           formatNumber,
-          itemIdToExpandedRowMap: {},
           isILMAvailable,
           pattern: 'auditbeat-*',
-          toggleExpanded: jest.fn(),
+          onCheckNowAction: jest.fn(),
+          onExpandAction: jest.fn(),
+          checkState: getCheckState(indexName),
         });
         const incompatibleRender = (
           columns[1] as EuiTableFieldDataColumnType<IndexSummaryTableItem>
         ).render;
 
         render(
-          <TestProviders>
+          <TestExternalProviders>
             {incompatibleRender != null && incompatibleRender(hasIncompatible, hasIncompatible)}
-          </TestProviders>
+          </TestExternalProviders>
         );
 
-        expect(screen.getByTestId('resultIcon')).toHaveAttribute('data-euiicon-type', 'cross');
+        expect(screen.getByText('Fail')).toBeInTheDocument();
       });
 
       test('it renders the expected icon when there are zero fields', () => {
@@ -331,22 +347,23 @@ describe('helpers', () => {
         const columns = getSummaryTableColumns({
           formatBytes,
           formatNumber,
-          itemIdToExpandedRowMap: {},
           isILMAvailable,
           pattern: 'auditbeat-*',
-          toggleExpanded: jest.fn(),
+          onCheckNowAction: jest.fn(),
+          onExpandAction: jest.fn(),
+          checkState: getCheckState(indexName),
         });
         const incompatibleRender = (
           columns[1] as EuiTableFieldDataColumnType<IndexSummaryTableItem>
         ).render;
 
         render(
-          <TestProviders>
+          <TestExternalProviders>
             {incompatibleRender != null && incompatibleRender(zeroIncompatible, zeroIncompatible)}
-          </TestProviders>
+          </TestExternalProviders>
         );
 
-        expect(screen.getByTestId('resultIcon')).toHaveAttribute('data-euiicon-type', 'check');
+        expect(screen.getByText('Pass')).toBeInTheDocument();
       });
     });
 
@@ -355,19 +372,20 @@ describe('helpers', () => {
         const columns = getSummaryTableColumns({
           formatBytes,
           formatNumber,
-          itemIdToExpandedRowMap: {},
           isILMAvailable,
           pattern: 'auditbeat-*',
-          toggleExpanded: jest.fn(),
+          onCheckNowAction: jest.fn(),
+          onExpandAction: jest.fn(),
+          checkState: getCheckState(indexName),
         });
         const indexNameRender = (columns[2] as EuiTableFieldDataColumnType<IndexSummaryTableItem>)
           .render;
 
         render(
-          <TestProviders>
+          <TestExternalProviders>
             {indexNameRender != null &&
               indexNameRender(indexSummaryTableItem, indexSummaryTableItem)}
-          </TestProviders>
+          </TestExternalProviders>
         );
 
         expect(screen.getByTestId('indexName')).toHaveTextContent(indexName);
@@ -379,18 +397,19 @@ describe('helpers', () => {
         const columns = getSummaryTableColumns({
           formatBytes,
           formatNumber,
-          itemIdToExpandedRowMap: {},
           isILMAvailable,
           pattern: 'auditbeat-*',
-          toggleExpanded: jest.fn(),
+          onCheckNowAction: jest.fn(),
+          onExpandAction: jest.fn(),
+          checkState: getCheckState(indexName),
         });
         const docsCountRender = (columns[3] as EuiTableFieldDataColumnType<IndexSummaryTableItem>)
           .render;
 
         render(
-          <TestProviders>
+          <TestExternalProviders>
             {docsCountRender != null && docsCountRender(hasIncompatible, hasIncompatible)}
-          </TestProviders>
+          </TestExternalProviders>
         );
       });
 
@@ -414,19 +433,20 @@ describe('helpers', () => {
         const columns = getSummaryTableColumns({
           formatBytes,
           formatNumber,
-          itemIdToExpandedRowMap: {},
           isILMAvailable,
           pattern: 'auditbeat-*',
-          toggleExpanded: jest.fn(),
+          onCheckNowAction: jest.fn(),
+          onExpandAction: jest.fn(),
+          checkState: getCheckState(indexName),
         });
         const incompatibleRender = (
           columns[4] as EuiTableFieldDataColumnType<IndexSummaryTableItem>
         ).render;
 
         render(
-          <TestProviders>
+          <TestExternalProviders>
             {incompatibleRender != null && incompatibleRender(hasIncompatible, hasIncompatible)}
-          </TestProviders>
+          </TestExternalProviders>
         );
 
         expect(screen.getByTestId('incompatibleStat')).toHaveTextContent('1');
@@ -436,20 +456,21 @@ describe('helpers', () => {
         const columns = getSummaryTableColumns({
           formatBytes,
           formatNumber,
-          itemIdToExpandedRowMap: {},
           isILMAvailable,
           pattern: 'auditbeat-*',
-          toggleExpanded: jest.fn(),
+          onCheckNowAction: jest.fn(),
+          onExpandAction: jest.fn(),
+          checkState: getCheckState(indexName),
         });
         const incompatibleRender = (
           columns[4] as EuiTableFieldDataColumnType<IndexSummaryTableItem>
         ).render;
 
         render(
-          <TestProviders>
+          <TestExternalProviders>
             {incompatibleRender != null &&
               incompatibleRender(indexSummaryTableItem, indexSummaryTableItem)}
-          </TestProviders>
+          </TestExternalProviders>
         );
 
         expect(screen.getByTestId('incompatibleStat')).toHaveTextContent('--');
@@ -493,18 +514,19 @@ describe('helpers', () => {
         const columns = getSummaryTableColumns({
           formatBytes,
           formatNumber,
-          itemIdToExpandedRowMap: {},
           isILMAvailable,
           pattern: 'auditbeat-*',
-          toggleExpanded: jest.fn(),
+          onCheckNowAction: jest.fn(),
+          onExpandAction: jest.fn(),
+          checkState: getCheckState(indexName),
         });
         const ilmPhaseRender = (columns[5] as EuiTableFieldDataColumnType<IndexSummaryTableItem>)
           .render;
 
         render(
-          <TestProviders>
+          <TestExternalProviders>
             {ilmPhaseRender != null && ilmPhaseRender(hasIncompatible, hasIncompatible)}
-          </TestProviders>
+          </TestExternalProviders>
         );
 
         expect(screen.getByTestId('ilmPhase')).toHaveTextContent('hot');
@@ -519,18 +541,19 @@ describe('helpers', () => {
         const columns = getSummaryTableColumns({
           formatBytes,
           formatNumber,
-          itemIdToExpandedRowMap: {},
           isILMAvailable,
           pattern: 'auditbeat-*',
-          toggleExpanded: jest.fn(),
+          onCheckNowAction: jest.fn(),
+          onExpandAction: jest.fn(),
+          checkState: getCheckState(indexName),
         });
         const ilmPhaseRender = (columns[5] as EuiTableFieldDataColumnType<IndexSummaryTableItem>)
           .render;
 
         render(
-          <TestProviders>
+          <TestExternalProviders>
             {ilmPhaseRender != null && ilmPhaseRender(ilmPhaseIsUndefined, ilmPhaseIsUndefined)}
-          </TestProviders>
+          </TestExternalProviders>
         );
 
         expect(screen.queryByTestId('ilmPhase')).not.toBeInTheDocument();
@@ -544,18 +567,19 @@ describe('helpers', () => {
         const columns = getSummaryTableColumns({
           formatBytes,
           formatNumber,
-          itemIdToExpandedRowMap: {},
           isILMAvailable: false,
           pattern: 'auditbeat-*',
-          toggleExpanded: jest.fn(),
+          onCheckNowAction: jest.fn(),
+          onExpandAction: jest.fn(),
+          checkState: getCheckState(indexName),
         });
         const ilmPhaseRender = (columns[5] as EuiTableFieldDataColumnType<IndexSummaryTableItem>)
           .render;
 
         render(
-          <TestProviders>
+          <TestExternalProviders>
             {ilmPhaseRender != null && ilmPhaseRender(ilmPhaseIsUndefined, ilmPhaseIsUndefined)}
-          </TestProviders>
+          </TestExternalProviders>
         );
 
         expect(screen.queryByTestId('ilmPhase')).not.toBeInTheDocument();
@@ -567,20 +591,21 @@ describe('helpers', () => {
         const columns = getSummaryTableColumns({
           formatBytes,
           formatNumber,
-          itemIdToExpandedRowMap: {},
           isILMAvailable,
           pattern: 'auditbeat-*',
-          toggleExpanded: jest.fn(),
+          onCheckNowAction: jest.fn(),
+          onExpandAction: jest.fn(),
+          checkState: getCheckState(indexName),
         });
 
         const sizeInBytesRender = (columns[6] as EuiTableFieldDataColumnType<IndexSummaryTableItem>)
           .render;
 
         render(
-          <TestProviders>
+          <TestExternalProviders>
             {sizeInBytesRender != null &&
               sizeInBytesRender(indexSummaryTableItem, indexSummaryTableItem)}
-          </TestProviders>
+          </TestExternalProviders>
         );
 
         expect(screen.getByTestId('sizeInBytes')).toHaveTextContent('98.6MB');
@@ -591,20 +616,21 @@ describe('helpers', () => {
         const columns = getSummaryTableColumns({
           formatBytes,
           formatNumber,
-          itemIdToExpandedRowMap: {},
           isILMAvailable,
           pattern: 'auditbeat-*',
-          toggleExpanded: jest.fn(),
+          onCheckNowAction: jest.fn(),
+          onExpandAction: jest.fn(),
+          checkState: getCheckState(indexName),
         });
 
         const sizeInBytesRender = (columns[6] as EuiTableFieldDataColumnType<IndexSummaryTableItem>)
           .render;
 
         render(
-          <TestProviders>
+          <TestExternalProviders>
             {sizeInBytesRender != null &&
               sizeInBytesRender(testIndexSummaryTableItem, testIndexSummaryTableItem)}
-          </TestProviders>
+          </TestExternalProviders>
         );
 
         expect(screen.queryByTestId('sizeInBytes')).toBeNull();
@@ -638,6 +664,26 @@ describe('helpers', () => {
           totalItemCount: 9,
         })
       ).toBe(false);
+    });
+  });
+
+  describe('getIncompatibleStatColor', () => {
+    test('it returns the expected color when incompatible is greater than zero', () => {
+      const incompatible = 123;
+
+      expect(getIncompatibleStatColor(incompatible)).toBe('#bd271e');
+    });
+
+    test('it returns undefined when incompatible is zero', () => {
+      const incompatible = 0;
+
+      expect(getIncompatibleStatColor(incompatible)).toBeUndefined();
+    });
+
+    test('it returns undefined when incompatible is undefined', () => {
+      const incompatible = undefined;
+
+      expect(getIncompatibleStatColor(incompatible)).toBeUndefined();
     });
   });
 });

@@ -14,45 +14,16 @@ import {
   MAPPINGS_THAT_CONFLICT_WITH_ECS,
   PAGES_MAY_NOT_DISPLAY_EVENTS,
 } from '../../../index_properties/translations';
-import {
-  eventCategory,
-  eventCategoryWithUnallowedValues,
-  hostNameWithTextMapping,
-  sourceIpWithTextMapping,
-} from '../../../../mock/enriched_field_metadata/mock_enriched_field_metadata';
-import { TestProviders } from '../../../../mock/test_providers/test_providers';
-import { EcsBasedFieldMetadata } from '../../../../types';
+import { TestExternalProviders } from '../../../../mock/test_providers/test_providers';
 import { IncompatibleCallout } from '.';
-
-const content = 'Is your name Michael?';
-
-const eventCategoryWithWildcard: EcsBasedFieldMetadata = {
-  ...eventCategory, // `event.category` is a `keyword` per the ECS spec
-  indexFieldType: 'wildcard', // this index has a mapping of `wildcard` instead of `keyword`
-  isInSameFamily: true, // `wildcard` and `keyword` are in the same family
-  isEcsCompliant: false, // wildcard !== keyword
-};
 
 describe('IncompatibleCallout', () => {
   beforeEach(() => {
     render(
-      <TestProviders>
-        <IncompatibleCallout
-          ecsBasedFieldMetadata={[
-            eventCategoryWithWildcard, // `wildcard` and `keyword`
-            eventCategoryWithUnallowedValues, // `keyword` and `keyword`
-            hostNameWithTextMapping, // `keyword` and `text`
-            sourceIpWithTextMapping, // `ip` is not a member of any families
-          ]}
-        >
-          <div data-test-subj="children">{content}</div>
-        </IncompatibleCallout>
-      </TestProviders>
+      <TestExternalProviders>
+        <IncompatibleCallout />
+      </TestExternalProviders>
     );
-  });
-
-  test('it renders a title with the expected incompatible and family counts', () => {
-    expect(screen.getByTestId('title')).toHaveTextContent('4 incompatible fields');
   });
 
   test('it includes the ECS version in the main content', () => {
@@ -77,9 +48,5 @@ describe('IncompatibleCallout', () => {
     expect(screen.getByTestId('mappingsThatDontComply')).toHaveTextContent(
       MAPPINGS_THAT_CONFLICT_WITH_ECS
     );
-  });
-
-  test('it renders the children', () => {
-    expect(screen.getByTestId('children')).toHaveTextContent(content);
   });
 });

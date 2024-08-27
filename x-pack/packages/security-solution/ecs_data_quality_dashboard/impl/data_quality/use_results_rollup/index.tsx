@@ -9,6 +9,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { EcsVersion } from '@elastic/ecs';
 
 import { isEmpty } from 'lodash/fp';
+import { IToasts } from '@kbn/core-notifications-browser';
+import { HttpHandler } from '@kbn/core-http-browser';
 import {
   getTotalDocsCount,
   getTotalIncompatible,
@@ -19,7 +21,12 @@ import {
   updateResultOnCheckCompleted,
 } from './helpers';
 
-import type { DataQualityCheckResult, OnCheckCompleted, PatternRollup } from '../types';
+import type {
+  DataQualityCheckResult,
+  OnCheckCompleted,
+  PatternRollup,
+  TelemetryEvents,
+} from '../types';
 import {
   getDocsCount,
   getIndexId,
@@ -31,39 +38,24 @@ import {
   formatResultFromStorage,
 } from '../helpers';
 import { getIlmPhase, getIndexIncompatible } from '../data_quality_panel/pattern/helpers';
-import { useDataQualityContext } from '../data_quality_panel/data_quality_context';
 import {
   getIncompatibleMappingsFields,
   getIncompatibleValuesFields,
   getSameFamilyFields,
 } from '../data_quality_panel/tabs/incompatible_tab/helpers';
+import { UseResultsRollupReturnValue } from './types';
+import { useIsMounted } from '../use_is_mounted';
 
 interface Props {
   ilmPhases: string[];
   patterns: string[];
+  toasts: IToasts;
+  httpFetch: HttpHandler;
+  telemetryEvents: TelemetryEvents;
+  isILMAvailable: boolean;
 }
-interface UseResultsRollup {
-  onCheckCompleted: OnCheckCompleted;
-  patternIndexNames: Record<string, string[]>;
-  patternRollups: Record<string, PatternRollup>;
-  totalDocsCount: number | undefined;
-  totalIncompatible: number | undefined;
-  totalIndices: number | undefined;
-  totalIndicesChecked: number | undefined;
-  totalSameFamily: number | undefined;
-  totalSizeInBytes: number | undefined;
-  updatePatternIndexNames: ({
-    indexNames,
-    pattern,
-  }: {
-    indexNames: string[];
-    pattern: string;
-  }) => void;
-  updatePatternRollup: (patternRollup: PatternRollup) => void;
-}
-
-const useStoredPatternResults = (patterns: string[]) => {
-  const { httpFetch, toasts } = useDataQualityContext();
+const useStoredPatternResults = (patterns: string[], toasts: IToasts, httpFetch: HttpHandler) => {
+  const { isMountedRef } = useIsMounted();
   const [storedPatternResults, setStoredPatternResults] = useState<
     Array<{ pattern: string; results: Record<string, DataQualityCheckResult> }>
   >([]);
@@ -89,7 +81,9 @@ const useStoredPatternResults = (patterns: string[]) => {
       );
       const patternResults = await Promise.all(requests);
       if (patternResults?.length && !ignore) {
-        setStoredPatternResults(patternResults);
+        if (isMountedRef.current) {
+          setStoredPatternResults(patternResults);
+        }
       }
     };
 
@@ -97,17 +91,23 @@ const useStoredPatternResults = (patterns: string[]) => {
     return () => {
       ignore = true;
     };
-  }, [httpFetch, patterns, toasts]);
+  }, [httpFetch, isMountedRef, patterns, toasts]);
 
   return storedPatternResults;
 };
 
-export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRollup => {
-  const { httpFetch, toasts } = useDataQualityContext();
+export const useResultsRollup = ({
+  httpFetch,
+  toasts,
+  ilmPhases,
+  patterns,
+  isILMAvailable,
+  telemetryEvents,
+}: Props): UseResultsRollupReturnValue => {
   const [patternIndexNames, setPatternIndexNames] = useState<Record<string, string[]>>({});
   const [patternRollups, setPatternRollups] = useState<Record<string, PatternRollup>>({});
 
-  const storedPatternsResults = useStoredPatternResults(patterns);
+  const storedPatternsResults = useStoredPatternResults(patterns, toasts, httpFetch);
 
   useEffect(() => {
     if (!isEmpty(storedPatternsResults)) {
@@ -127,7 +127,6 @@ export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRoll
     }
   }, [storedPatternsResults]);
 
-  const { telemetryEvents, isILMAvailable } = useDataQualityContext();
   const updatePatternRollup = useCallback((patternRollup: PatternRollup) => {
     setPatternRollups((current) => ({
       ...current,
@@ -167,6 +166,7 @@ export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRoll
       pattern,
       requestTime,
       isLastCheck,
+      isCheckAll,
     }) => {
       setPatternRollups((currentPatternRollups) => {
         const updatedRollups = updateResultOnCheckCompleted({
@@ -198,7 +198,7 @@ export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRoll
             ilmPhase: getIlmPhase(ilmExplain?.[indexName], isILMAvailable),
             indexId,
             indexName,
-            isCheckAll: true,
+            isCheckAll,
             numberOfDocuments: getDocsCount({ indexName, stats }),
             numberOfFields: partitionedFieldMetadata.all.length,
             numberOfIncompatibleFields: getIndexIncompatible({

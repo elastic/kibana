@@ -17,6 +17,7 @@ export {
   ILM_PHASE,
   INDEX_LIFECYCLE_MANAGEMENT_PHASES,
   SELECT_ONE_OR_MORE_ILM_PHASES,
+  DATA_QUALITY_DASHBOARD_CONVERSATION_ID,
 } from './impl/data_quality/translations';
 
 export { ECS_REFERENCE_URL } from './impl/data_quality/data_quality_panel/index_properties/markdown/helpers';

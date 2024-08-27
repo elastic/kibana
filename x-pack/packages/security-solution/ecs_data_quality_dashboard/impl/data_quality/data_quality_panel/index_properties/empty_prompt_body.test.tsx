@@ -9,16 +9,16 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 
 import { EmptyPromptBody } from './empty_prompt_body';
-import { TestProviders } from '../../mock/test_providers/test_providers';
+import { TestExternalProviders } from '../../mock/test_providers/test_providers';
 
 describe('EmptyPromptBody', () => {
   const content = 'foo bar baz @baz';
 
   test('it renders the expected content', () => {
     render(
-      <TestProviders>
+      <TestExternalProviders>
         <EmptyPromptBody body={content} />
-      </TestProviders>
+      </TestExternalProviders>
     );
 
     expect(screen.getByTestId('emptyPromptBody')).toHaveTextContent(content);

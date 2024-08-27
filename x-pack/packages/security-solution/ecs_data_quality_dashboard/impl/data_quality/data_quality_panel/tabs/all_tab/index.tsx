@@ -26,10 +26,10 @@ const AllTabComponent: React.FC<Props> = ({ indexName, partitionedFieldMetadata 
   const title = useMemo(() => <EmptyPromptTitle title={i18n.ALL_EMPTY_TITLE} />, []);
 
   return (
-    <>
+    <div data-test-subj="allTabContent">
       {partitionedFieldMetadata.all.length > 0 ? (
         <>
-          <EuiCallOut size="s" title={i18n.ALL_CALLOUT_TITLE(partitionedFieldMetadata.all.length)}>
+          <EuiCallOut size="s">
             <p>{i18n.ALL_CALLOUT(EcsVersion)}</p>
           </EuiCallOut>
           <EuiSpacer />
@@ -48,7 +48,7 @@ const AllTabComponent: React.FC<Props> = ({ indexName, partitionedFieldMetadata 
           titleSize="s"
         />
       )}
-    </>
+    </div>
   );
 };
 

@@ -571,7 +571,7 @@ security and spaces filtering.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/entity_manager/README.md[entityManager]
-|This plugin provides access to observed asset data, such as information about hosts, pods, containers, services, and more.
+|This plugin provides access to observed entity data, such as information about hosts, pods, containers, services, and more.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/event_log/README.md[eventLog]
@@ -795,12 +795,20 @@ Elastic.
 It uses Chromium and Puppeteer underneath to run the browser in headless mode.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/search_assistant/README.md[searchAssistant]
+|This holds the Search AI Assistant which targets Search users and Serverless Elasticsearch.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/search_connectors/README.mdx[searchConnectors]
 |This plugin contains common assets and endpoints for the use of connectors in Kibana. Primarily used by the enterprise_search and serverless_search plugins.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/search_homepage/README.mdx[searchHomepage]
 |The Search Homepage is a shared homepage for elasticsearch users.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/search_indices/README.mdx[searchIndices]
+|The Search Indices plugin is a shared set of pages for elasticsearch users across stack and serverless search solutions.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/search_inference_endpoints/README.md[searchInferenceEndpoints]

@@ -195,7 +195,7 @@ export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {
         if ('deepLinkId' in by) {
           await testSubjects.click(`~breadcrumb-deepLinkId-${by.deepLinkId}`);
         } else {
-          (await getByVisibleText('~breadcrumb', by.text))?.click();
+          await (await getByVisibleText('~breadcrumb', by.text))?.click();
         }
       },
       getBreadcrumb(by: { deepLinkId: AppDeepLinkId } | { text: string }) {

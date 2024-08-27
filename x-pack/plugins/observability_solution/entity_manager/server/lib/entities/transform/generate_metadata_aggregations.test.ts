@@ -85,7 +85,7 @@ describe('Generate Metadata Aggregations for history and latest', () => {
         'entity.metadata.host.name': {
           filter: {
             range: {
-              'event.ingested': {
+              '@timestamp': {
                 gte: 'now-1m',
               },
             },
@@ -111,7 +111,7 @@ describe('Generate Metadata Aggregations for history and latest', () => {
         'entity.metadata.host.name': {
           filter: {
             range: {
-              'event.ingested': {
+              '@timestamp': {
                 gte: 'now-1m',
               },
             },
@@ -137,7 +137,7 @@ describe('Generate Metadata Aggregations for history and latest', () => {
         'entity.metadata.host.name': {
           filter: {
             range: {
-              'event.ingested': {
+              '@timestamp': {
                 gte: 'now-1m',
               },
             },
@@ -163,7 +163,7 @@ describe('Generate Metadata Aggregations for history and latest', () => {
         'entity.metadata.hostName': {
           filter: {
             range: {
-              'event.ingested': {
+              '@timestamp': {
                 gte: 'now-1m',
               },
             },

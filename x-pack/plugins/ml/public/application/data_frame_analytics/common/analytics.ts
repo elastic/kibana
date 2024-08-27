@@ -203,7 +203,7 @@ export function getValuesFromResponse(response: RegressionEvaluateResponse) {
 
   if (response?.regression) {
     for (const statType in response.regression) {
-      if (response.regression.hasOwnProperty(statType)) {
+      if (Object.hasOwn(response.regression, statType)) {
         let currentStatValue =
           response.regression[statType as keyof RegressionEvaluateResponse['regression']]?.value;
         if (currentStatValue && Number.isFinite(currentStatValue)) {
