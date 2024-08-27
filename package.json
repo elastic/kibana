@@ -1170,7 +1170,7 @@
     "puppeteer": "22.13.1",
     "query-string": "^6.13.2",
     "rbush": "^3.0.1",
-    "re-resizable": "^6.9.9",
+    "re-resizable": "^6.9.17",
     "re2js": "0.4.1",
     "react": "^17.0.2",
     "react-ace": "^7.0.5",
