@@ -69,6 +69,10 @@ components:
           $ref: './common_attributes.schema.yaml#/components/schemas/RuleMetadata'
         investigation_fields:
           $ref: './common_attributes.schema.yaml#/components/schemas/InvestigationFields'
+        response_actions:
+          type: array
+          items:
+            $ref: '../rule_response_actions/response_actions.schema.yaml#/components/schemas/ResponseAction'
 
         # Throttle
         throttle:
@@ -354,10 +358,6 @@ components:
           $ref: './common_attributes.schema.yaml#/components/schemas/RuleFilterArray'
         saved_id:
           $ref: './common_attributes.schema.yaml#/components/schemas/SavedQueryId'
-        response_actions:
-          type: array
-          items:
-            $ref: '../rule_response_actions/response_actions.schema.yaml#/components/schemas/ResponseAction'
         alert_suppression:
           $ref: './common_attributes.schema.yaml#/components/schemas/AlertSuppression'
 
@@ -435,10 +435,6 @@ components:
           $ref: './common_attributes.schema.yaml#/components/schemas/DataViewId'
         filters:
           $ref: './common_attributes.schema.yaml#/components/schemas/RuleFilterArray'
-        response_actions:
-          type: array
-          items:
-            $ref: '../rule_response_actions/response_actions.schema.yaml#/components/schemas/ResponseAction'
         alert_suppression:
           $ref: './common_attributes.schema.yaml#/components/schemas/AlertSuppression'
         query:
