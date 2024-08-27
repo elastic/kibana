@@ -231,10 +231,11 @@ export default function ({
           'pdf',
           REPORTS_FOLDER
         );
-        const x = await comparePdf(sessionReportPath, baselinePath, {
-          compareThreshold: 0.035,
-        });
-        expect(x).to.be(true);
+        expect(
+          await comparePdf(sessionReportPath, baselinePath, {
+            compareThreshold: 0.035,
+          })
+        ).to.be(true);
       });
 
       it('PNG file matches the baseline image', async function () {
