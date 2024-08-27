@@ -32,11 +32,16 @@ export const HostsPage = () => {
   useTrackPageview({ app: 'infra_metrics', path: 'hosts' });
   useTrackPageview({ app: 'infra_metrics', path: 'hosts', delay: 15000 });
 
-  useMetricsBreadcrumbs([
+  useMetricsBreadcrumbs(
+    [
+      {
+        text: hostsTitle,
+      },
+    ],
     {
-      text: hostsTitle,
-    },
-  ]);
+      omitOnServerless: true,
+    }
+  );
 
   return (
     <EuiErrorBoundary>

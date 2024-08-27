@@ -22,6 +22,7 @@ import { ApmMainTemplate } from './apm_main_template';
 import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
 import { TechnicalPreviewBadge } from '../../shared/technical_preview_badge';
 import { useEntityManagerEnablementContext } from '../../../context/entity_manager_context/use_entity_manager_enablement_context';
+import { ServiceInventoryTitle } from '../home';
 
 export function ServiceGroupTemplate({
   pageTitle,
@@ -80,7 +81,7 @@ export function ServiceGroupTemplate({
     </EuiFlexGroup>
   );
 
-  const tabs = useTabs(serviceGroupContextTab);
+  const tabs = useTabs(serviceGroupContextTab, !!serviceGroupId);
   const selectedTab = tabs?.find(({ isSelected }) => isSelected);
   useBreadcrumb(
     () => [
@@ -107,7 +108,10 @@ export function ServiceGroupTemplate({
           ]
         : []),
     ],
-    [query, router, selectedTab, serviceGroupName, serviceGroupsLink]
+    [query, router, selectedTab, serviceGroupName, serviceGroupsLink],
+    {
+      omitRootOnServerless: true,
+    }
   );
   return (
     <ApmMainTemplate
@@ -150,7 +154,7 @@ type ServiceGroupContextTab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
   breadcrumbLabel?: string;
 };
 
-function useTabs(selectedTab: ServiceGroupContextTab['key']) {
+function useTabs(selectedTab: ServiceGroupContextTab['key'], isServiceGroup = false) {
   const router = useApmRouter();
   const { query } = useAnyOfApmParams('/services', '/service-map');
   const { isEntityCentricExperienceViewEnabled } = useEntityManagerEnablementContext();
@@ -158,9 +162,11 @@ function useTabs(selectedTab: ServiceGroupContextTab['key']) {
   const tabs: ServiceGroupContextTab[] = [
     {
       key: 'service-inventory',
-      breadcrumbLabel: i18n.translate('xpack.apm.serviceGroup.serviceInventory', {
-        defaultMessage: 'Inventory',
-      }),
+      breadcrumbLabel: isServiceGroup
+        ? i18n.translate('xpack.apm.serviceGroup.serviceInventory', {
+            defaultMessage: 'Inventory',
+          })
+        : ServiceInventoryTitle,
       label: (
         <EuiFlexGroup justifyContent="flexStart" alignItems="baseline" gutterSize="s">
           <EuiFlexItem grow={false}>

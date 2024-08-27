@@ -45,11 +45,16 @@ export const SourceConfigurationSettings = ({
   shouldAllowEdit,
   http,
 }: SourceConfigurationSettingsProps) => {
-  useMetricsBreadcrumbs([
+  useMetricsBreadcrumbs(
+    [
+      {
+        text: settingsTitle,
+      },
+    ],
     {
-      text: settingsTitle,
-    },
-  ]);
+      omitOnServerless: true,
+    }
+  );
 
   const [numberOfInfraRules, setNumberOfInfraRules] = useState(0);
 

@@ -14,7 +14,6 @@ import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { environmentRt } from '../../../../common/environment_rt';
 import { TraceSearchType } from '../../../../common/trace_explorer';
 import { ApmTimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
-import { Breadcrumb } from '../../app/breadcrumb';
 import { ServiceInventory } from '../../app/service_inventory';
 import { ServiceMapHome } from '../../app/service_map';
 import { TopTracesOverview } from '../../app/top_traces_overview';
@@ -50,11 +49,9 @@ function serviceGroupPage<TPath extends string>({
   return {
     [path]: {
       element: (
-        <Breadcrumb title={title} href={path}>
-          <ServiceGroupTemplate pageTitle={title} serviceGroupContextTab={serviceGroupContextTab}>
-            {element}
-          </ServiceGroupTemplate>
-        </Breadcrumb>
+        <ServiceGroupTemplate pageTitle={title} serviceGroupContextTab={serviceGroupContextTab}>
+          {element}
+        </ServiceGroupTemplate>
       ),
       params: t.type({
         query: t.type({ serviceGroup: t.string }),

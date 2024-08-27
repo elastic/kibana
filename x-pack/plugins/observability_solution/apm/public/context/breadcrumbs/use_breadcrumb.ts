@@ -9,8 +9,16 @@ import { useCurrentRoute } from '@kbn/typed-react-router-config';
 import { useContext, useEffect, useRef } from 'react';
 import { castArray } from 'lodash';
 import { Breadcrumb, BreadcrumbsContext } from './context';
+import { useKibanaEnvironmentContext } from '../kibana_environment_context/use_kibana_environment_context';
 
-export function useBreadcrumb(callback: () => Breadcrumb | Breadcrumb[], fnDeps: any[]) {
+export function useBreadcrumb(
+  callback: () => Breadcrumb | Breadcrumb[],
+  fnDeps: any[],
+  options?: { omitRootOnServerless?: boolean }
+) {
+  const { isServerlessEnv } = useKibanaEnvironmentContext();
+  const { omitRootOnServerless = false } = options || {};
+
   const api = useContext(BreadcrumbsContext);
 
   if (!api) {
@@ -29,7 +37,11 @@ export function useBreadcrumb(callback: () => Breadcrumb | Breadcrumb[], fnDeps:
     matchedRoute.current = match?.route;
 
     if (matchedRoute.current) {
-      api.set(matchedRoute.current, castArray(callback()));
+      const breadcrumbs = castArray(callback());
+      api.set(
+        matchedRoute.current,
+        omitRootOnServerless && isServerlessEnv ? breadcrumbs.slice(1) : breadcrumbs
+      );
     }
 
     return () => {

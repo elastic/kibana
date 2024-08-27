@@ -87,6 +87,7 @@ const apmRoutes = {
           defaultMessage: 'APM',
         })}
         href="/"
+        omitOnServerless
       >
         <Outlet />
       </Breadcrumb>
