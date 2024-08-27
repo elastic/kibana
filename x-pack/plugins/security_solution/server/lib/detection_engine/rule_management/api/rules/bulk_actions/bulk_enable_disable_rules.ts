@@ -64,23 +64,17 @@ export const bulkEnableDisableRules = async ({
       ? await rulesClient.bulkEnableRules({ ids: ruleIds })
       : await rulesClient.bulkDisableRules({ ids: ruleIds });
 
-  const failedRuleIds = results.errors.map(({ rule: { id } }) => id);
-
-  // We need to go through the original rules array and update rules that were
-  // not returned as failed from the bulkEnableRules. We cannot rely on the
-  // results from the bulkEnableRules because the response is not consistent.
-  // Some rules might be missing in the response if they were skipped by
-  // Alerting Framework. See this issue for more details:
-  // https://github.com/elastic/kibana/issues/181050
   updatedRules.push(
     ...rules.flatMap((rule) => {
-      if (failedRuleIds.includes(rule.id)) {
+      const updatedRule = results.rules.find((resultsRule) => resultsRule.id === rule.id);
+      if (updatedRule) {
+        return {
+          ...rule,
+          enabled: updatedRule.enabled,
+        };
+      } else {
         return [];
       }
-      return {
-        ...rule,
-        enabled: operation === 'enable',
-      };
     })
   );
 
