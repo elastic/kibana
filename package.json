@@ -1243,7 +1243,7 @@
     "utility-types": "^3.10.0",
     "uuid": "9.0.0",
     "vega": "^5.24.0",
-    "vega-interpreter": "^1.0.4",
+    "vega-interpreter": "^1.0.5",
     "vega-lite": "^5.5.0",
     "vega-schema-url-parser": "^2.2.0",
     "vega-spec-injector": "^0.0.2",
