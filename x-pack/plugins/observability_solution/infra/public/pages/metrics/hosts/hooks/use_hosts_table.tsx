@@ -70,7 +70,7 @@ const formatMetric = (type: InfraAssetMetricType, value: number | undefined | nu
 };
 
 const buildMetricCell = (
-  value: number,
+  value: number | null,
   formatType: InfraAssetMetricType,
   hasSystemMetrics?: boolean
 ) => {
@@ -82,6 +82,14 @@ const buildMetricCell = (
 };
 
 const buildItemsList = (nodes: InfraAssetMetricsItem[]): HostNodeRow[] => {
+  nodes.map((node) => {
+    if (node.name === 'instance') {
+      node.metrics[0].value = 0;
+      node.hasSystemMetrics = true;
+    }
+    return node;
+  });
+
   return nodes.map(({ metrics, metadata, name, alertsCount, hasSystemMetrics }) => {
     const metadataKeyValue = metadata.reduce(
       (acc, curr) => ({
