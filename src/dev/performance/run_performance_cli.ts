@@ -101,6 +101,8 @@ async function runFunctionalTest(props: TestRunProps) {
           k.startsWith('ELASTIC_APM_') ? [[k, undefined]] : []
         )
       ),
+      ELASTIC_APM_ENVIRONMENT: process.env.ELASTIC_APM_ENVIRONMENT,
+      ELASTIC_APM_SERVICE_NAME: process.env.ELASTIC_APM_SERVICE_NAME,
       TEST_PERFORMANCE_PHASE: phase,
       TEST_ES_URL: 'http://elastic:changeme@localhost:9200',
       TEST_ES_DISABLE_STARTUP: 'true',

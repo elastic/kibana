@@ -83,6 +83,7 @@ export class ApmSystem {
      * Register listeners for navigation changes and capture them as
      * route-change transactions after Kibana app is bootstrapped
      */
+
     start.application.currentAppId$.subscribe((appId) => {
       if (appId && this.apm) {
         this.closePageLoadTransaction();
