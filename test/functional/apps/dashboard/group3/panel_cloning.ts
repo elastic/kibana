@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('clones a panel', async () => {
       const initialPanelTitles = await dashboard.getPanelTitles();
-      await dashboardPanelActions.clonePanelByTitle(PIE_CHART_VIS_NAME);
+      await dashboardPanelActions.clonePanel(PIE_CHART_VIS_NAME);
       await header.waitUntilLoadingHasFinished();
       await dashboard.waitForRenderComplete();
       const postPanelTitles = await dashboard.getPanelTitles();
@@ -54,7 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('gives a correct title to the clone of a clone', async () => {
       const initialPanelTitles = await dashboard.getPanelTitles();
       const clonedPanelName = initialPanelTitles[initialPanelTitles.length - 1];
-      await dashboardPanelActions.clonePanelByTitle(clonedPanelName);
+      await dashboardPanelActions.clonePanel(clonedPanelName);
       await header.waitUntilLoadingHasFinished();
       await dashboard.waitForRenderComplete();
       const postPanelTitles = await dashboard.getPanelTitles();

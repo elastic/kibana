@@ -193,18 +193,13 @@ export class DashboardPanelActionsService extends FtrService {
     await this.removePanel(header);
   }
 
-  async customizePanel(parent?: WebElementWrapper) {
-    this.log.debug('customizePanel');
-    await this.clickContextMenuItem(CUSTOMIZE_PANEL_DATA_TEST_SUBJ, parent);
-  }
-
-  async customizePanelByTitle(title = '') {
-    this.log.debug('customizePanel');
+  async customizePanel(title = '') {
+    this.log.debug(`customizePanel(${title})`);
     const header = await this.getPanelHeading(title);
     await this.clickContextMenuItem(CUSTOMIZE_PANEL_DATA_TEST_SUBJ, header);
   }
 
-  async clonePanelByTitle(title = '') {
+  async clonePanel(title = '') {
     this.log.debug(`clonePanel(${title})`);
     const header = await this.getPanelHeading(title);
     await this.clickContextMenuItem(CLONE_PANEL_DATA_TEST_SUBJ, header);
@@ -382,7 +377,10 @@ export class DashboardPanelActionsService extends FtrService {
   async canConvertToLensByTitle(title = '') {
     this.log.debug(`canConvertToLens(${title})`);
     const header = await this.getPanelHeading(title);
-    return await this.canConvertToLens(header);
+    await this.openContextMenu(parent);
+    const isActionVisible = await this.testSubjects.exists(CONVERT_TO_LENS_TEST_SUBJ);
+    if (!isActionVisible) await this.clickContextMenuMoreItem();
+    return await this.testSubjects.exists(CONVERT_TO_LENS_TEST_SUBJ, { timeout: 500 });
   }
 
   async convertToLens(parent?: WebElementWrapper) {

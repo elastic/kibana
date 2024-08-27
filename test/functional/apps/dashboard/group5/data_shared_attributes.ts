@@ -129,7 +129,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('data-shared-item title should update a saved search when using a custom panel title', async () => {
       await dashboard.switchToEditMode();
       const CUSTOM_SEARCH_TITLE = 'ima custom title for a search!';
-      await dashboardPanelActions.customizePanelByTitle('Rendering Test: saved search');
+      await dashboardPanelActions.customizePanel('Rendering Test: saved search');
       await dashboardCustomizePanel.expectCustomizePanelSettingsFlyoutOpen();
       await dashboardCustomizePanel.setCustomPanelTitle(CUSTOM_SEARCH_TITLE);
       await dashboardCustomizePanel.clickSaveButton();

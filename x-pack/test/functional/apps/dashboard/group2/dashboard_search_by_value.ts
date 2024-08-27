@@ -60,7 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       let titles = await dashboard.getPanelTitles();
       expect(titles.length).to.be(1);
       await dashboardPanelActions.expectLinkedToLibrary(titles[0], false);
-      await dashboardPanelActions.clonePanelByTitle(titles[0]);
+      await dashboardPanelActions.clonePanel(titles[0]);
       await header.waitUntilLoadingHasFinished();
       await dashboard.waitForRenderComplete();
       titles = await dashboard.getPanelTitles();
