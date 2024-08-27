@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Client } from '@elastic/elasticsearch';
-import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
-import { getRiskScoreLatestIndex } from '@kbn/security-solution-plugin/common/entity_analytics/risk_engine';
+import type { Client } from '@elastic/elasticsearch';
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import { getRiskScoreLatestIndex } from '../../../../common/entity_analytics/risk_engine';
 
 export const getRiskScoreIndexMappings: () => MappingTypeMapping = () => ({
   dynamic: 'false',

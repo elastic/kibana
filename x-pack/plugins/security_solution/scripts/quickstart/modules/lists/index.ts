@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ListType } from '@kbn/securitysolution-lists-common/api';
-import { Client as ListsClient } from '@kbn/securitysolution-lists-common/api/quickstart_client.gen';
+import type { ListType } from '@kbn/securitysolution-lists-common/api';
+import type { Client as ListsClient } from '@kbn/securitysolution-lists-common/api/quickstart_client.gen';
 
 export const importListItemsWrapper = ({
   listsClient,

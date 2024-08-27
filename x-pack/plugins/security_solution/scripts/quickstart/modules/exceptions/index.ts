@@ -6,10 +6,12 @@
  */
 
 import type { ExceptionListItemEntry } from '@kbn/securitysolution-exceptions-common/api';
-import type { CreateRuleExceptionListItemsProps } from '@kbn/securitysolution-exceptions-common/api/quickstart_client.gen';
-import { ListType } from '@kbn/securitysolution-lists-common/api';
-import { Client as ExceptionsClient } from '@kbn/securitysolution-exceptions-common/api/quickstart_client.gen';
-import { Client as ListsClient } from '@kbn/securitysolution-lists-common/api/quickstart_client.gen';
+import type {
+  CreateRuleExceptionListItemsProps,
+  Client as ExceptionsClient,
+} from '@kbn/securitysolution-exceptions-common/api/quickstart_client.gen';
+import type { ListType } from '@kbn/securitysolution-lists-common/api';
+import type { Client as ListsClient } from '@kbn/securitysolution-lists-common/api/quickstart_client.gen';
 import { importListItemsWrapper } from '../lists';
 
 export const getMatchEntry: () => ExceptionListItemEntry = () => ({
