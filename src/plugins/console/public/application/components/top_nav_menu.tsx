@@ -45,7 +45,7 @@ export const TopNavMenu: FunctionComponent<Props> = ({ items, disabled, tourStep
 
         if (item.tourStep) {
           return (
-            <ConsoleTourStep tourStepProps={tourStepProps[item.tourStep - 1]}>
+            <ConsoleTourStep tourStepProps={tourStepProps[item.tourStep - 1]} key={idx}>
               {tab}
             </ConsoleTourStep>
           );
