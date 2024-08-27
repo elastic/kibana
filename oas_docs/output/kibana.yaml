@@ -51,6 +51,10 @@ info:
     url: 'https://www.elastic.co/licensing/elastic-license'
   title: Kibana APIs
   version: 1.0.2
+  x-feedbackLink:
+    label: Feedback
+    url: >-
+      https://github.com/elastic/docs-content/issues/new?assignees=&labels=feedback%2Ccommunity&projects=&template=api-feedback.yaml&title=%5BFeedback%5D%3A+
 servers:
   - url: 'https://{kibana_url}'
     variables:
@@ -862,37 +866,6 @@ paths:
       summary: Create agent action
       tags:
         - Elastic Agent actions
-  '/agents/{agentId}/actions/{actionId}/cancel':
-    parameters:
-      - in: path
-        name: agentId
-        required: true
-        schema:
-          type: string
-      - in: path
-        name: actionId
-        required: true
-        schema:
-          type: string
-    post:
-      operationId: agent-action-cancel
-      parameters:
-        - $ref: '#/components/parameters/Fleet_kbn_xsrf'
-      responses:
-        '200':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                type: object
-                properties:
-                  item:
-                    $ref: '#/components/schemas/Fleet_agent_action'
-          description: OK
-        '400':
-          $ref: '#/components/responses/Fleet_error'
-      summary: Cancel agent action
-      tags:
-        - Elastic Agent actions
   '/agents/{agentId}/reassign':
     parameters:
       - in: path
@@ -1211,6 +1184,32 @@ paths:
         '400':
           $ref: '#/components/responses/Fleet_error'
       summary: Get agent action status
+      tags:
+        - Elastic Agent actions
+  '/agents/actions/{actionId}/cancel':
+    parameters:
+      - in: path
+        name: actionId
+        required: true
+        schema:
+          type: string
+    post:
+      operationId: agent-action-cancel
+      parameters:
+        - $ref: '#/components/parameters/Fleet_kbn_xsrf'
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                type: object
+                properties:
+                  item:
+                    $ref: '#/components/schemas/Fleet_agent_action'
+          description: OK
+        '400':
+          $ref: '#/components/responses/Fleet_error'
+      summary: Cancel agent action
       tags:
         - Elastic Agent actions
   /agents/bulk_reassign:
@@ -2892,6 +2891,7 @@ paths:
                               - maxExecutableActions
                               - maxAlerts
                               - maxQueuedActions
+                              - ruleExecution
                             type: string
                         required:
                           - reason
@@ -2963,6 +2963,7 @@ paths:
                           - maxExecutableActions
                           - maxAlerts
                           - maxQueuedActions
+                          - ruleExecution
                         nullable: true
                         type: string
                     required:
@@ -3069,6 +3070,7 @@ paths:
                                         - maxExecutableActions
                                         - maxAlerts
                                         - maxQueuedActions
+                                        - ruleExecution
                                       nullable: true
                                       type: string
                                   required:
@@ -4024,6 +4026,7 @@ paths:
                               - maxExecutableActions
                               - maxAlerts
                               - maxQueuedActions
+                              - ruleExecution
                             type: string
                         required:
                           - reason
@@ -4095,6 +4098,7 @@ paths:
                           - maxExecutableActions
                           - maxAlerts
                           - maxQueuedActions
+                          - ruleExecution
                         nullable: true
                         type: string
                     required:
@@ -4201,6 +4205,7 @@ paths:
                                         - maxExecutableActions
                                         - maxAlerts
                                         - maxQueuedActions
+                                        - ruleExecution
                                       nullable: true
                                       type: string
                                   required:
@@ -5127,6 +5132,7 @@ paths:
                               - maxExecutableActions
                               - maxAlerts
                               - maxQueuedActions
+                              - ruleExecution
                             type: string
                         required:
                           - reason
@@ -5198,6 +5204,7 @@ paths:
                           - maxExecutableActions
                           - maxAlerts
                           - maxQueuedActions
+                          - ruleExecution
                         nullable: true
                         type: string
                     required:
@@ -5304,6 +5311,7 @@ paths:
                                         - maxExecutableActions
                                         - maxAlerts
                                         - maxQueuedActions
+                                        - ruleExecution
                                       nullable: true
                                       type: string
                                   required:
@@ -6294,6 +6302,7 @@ paths:
                               - maxExecutableActions
                               - maxAlerts
                               - maxQueuedActions
+                              - ruleExecution
                             type: string
                         required:
                           - reason
@@ -6365,6 +6374,7 @@ paths:
                           - maxExecutableActions
                           - maxAlerts
                           - maxQueuedActions
+                          - ruleExecution
                         nullable: true
                         type: string
                     required:
@@ -6471,6 +6481,7 @@ paths:
                                         - maxExecutableActions
                                         - maxAlerts
                                         - maxQueuedActions
+                                        - ruleExecution
                                       nullable: true
                                       type: string
                                   required:

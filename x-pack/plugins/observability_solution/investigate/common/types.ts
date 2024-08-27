@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { AuthenticatedUser } from '@kbn/core/public';
 import type { DeepPartial } from 'utility-types';
 
 export interface GlobalWidgetParameters {
@@ -36,13 +35,12 @@ export interface InvestigateWidget<
   TData extends Record<string, any> = {}
 > {
   id: string;
-  created: number;
-  last_updated: number;
+  createdAt: number;
+  createdBy: string;
+  title: string;
   type: string;
-  user: AuthenticatedUser;
   parameters: GlobalWidgetParameters & TParameters;
   data: TData;
-  title: string;
 }
 
 export type InvestigateWidgetCreate<TParameters extends Record<string, any> = {}> = Pick<

@@ -26,7 +26,7 @@ module.exports = {
   },
   overrides: [
     {
-      files: ['server/**/*'],
+      files: ['server/**/*', '*functional*/**/*', '*api_integration*/**/*'],
       rules: {
         // Let's focus on server-side errors first to avoid server crashes.
         // We'll tackle /public eventually.

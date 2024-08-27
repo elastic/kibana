@@ -16,7 +16,7 @@ import { SignalTypes } from '../../../../../../common/entities/types';
 import { NOT_AVAILABLE_LABEL } from '../../../../../../common/i18n';
 import { AgentName } from '../../../../../../typings/es_schemas/ui/fields/agent';
 import { useApmRouter } from '../../../../../hooks/use_apm_router';
-import { isLogsSignal } from '../../../../../utils/get_signal_type';
+import { isApmSignal } from '../../../../../utils/get_signal_type';
 import { truncate, unit } from '../../../../../utils/style';
 import { ApmRoutes } from '../../../../routing/apm_route_config';
 import { PopoverTooltip } from '../../../popover_tooltip';
@@ -46,9 +46,9 @@ export function ServiceLink({
 
   const serviceLink = isMobileAgentName(agentName)
     ? '/mobile-services/{serviceName}/overview'
-    : isLogsSignal(signalTypes)
-    ? '/logs-services/{serviceName}/overview'
-    : '/services/{serviceName}/overview';
+    : isApmSignal(signalTypes)
+    ? '/services/{serviceName}/overview'
+    : '/logs-services/{serviceName}/overview';
 
   if (serviceName === OTHER_SERVICE_NAME) {
     return (
