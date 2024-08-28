@@ -10,11 +10,11 @@ import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import styled from '@emotion/styled';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { FlyoutError } from '@kbn/security-solution-common';
 import { ALERT_REASON_BODY_TEST_ID } from './test_ids';
 import { useAlertReasonPanelContext } from './context';
 import { getRowRenderer } from '../../../timelines/components/timeline/body/renderers/get_row_renderer';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
-import { FlyoutError } from '../../shared/components/flyout_error';
 
 const ReasonContainerWrapper = styled.div`
   overflow-x: auto;

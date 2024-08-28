@@ -6,6 +6,13 @@
  */
 
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import {
+  ActionsClientChatOpenAI,
+  ActionsClientBedrockChatModel,
+  ActionsClientSimpleChatModel,
+  ActionsClientGeminiChatModel,
+} from '@kbn/langchain/server';
+import { SamplesFormat } from '../common';
 
 export interface IntegrationAssistantPluginSetup {
   setIsAvailable: (isAvailable: boolean) => void;
@@ -78,6 +85,16 @@ export interface EcsMappingState {
   ecsVersion: string;
 }
 
+export interface LogFormatDetectionState {
+  lastExecutedChain: string;
+  logSamples: string[];
+  exAnswer: string;
+  finalized: boolean;
+  samplesFormat: SamplesFormat;
+  ecsVersion: string;
+  results: object;
+}
+
 export interface RelatedState {
   rawSamples: string[];
   samples: string[];
@@ -97,3 +114,9 @@ export interface RelatedState {
   results: object;
   lastExecutedChain: string;
 }
+
+export type ChatModels =
+  | ActionsClientChatOpenAI
+  | ActionsClientBedrockChatModel
+  | ActionsClientSimpleChatModel
+  | ActionsClientGeminiChatModel;
