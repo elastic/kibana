@@ -81,6 +81,7 @@ export interface OptionsListRequestBody
   > {
   runtimeFieldMap?: Record<string, RuntimeFieldSpec>;
   allowExpensiveQueries: boolean;
+  ignoreValidations?: boolean;
   filters?: Array<{ bool: BoolQuery }>;
   runPastTimeout?: boolean;
   searchString?: string;
