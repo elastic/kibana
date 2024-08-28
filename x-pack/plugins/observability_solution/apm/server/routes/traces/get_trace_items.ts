@@ -136,8 +136,6 @@ export async function getTraceItems({
   const exceedsMax = traceDocsTotal > maxTraceItems;
   const traceDocs = traceResponse.hits.map((hit: any) => hit.fields);
   const errorDocs: WaterfallError[] = errorResponse.hits.hits.map((hit: any) => hit.fields);
-  // 98da587f4bf3c4a5
-  // http://127.0.0.1:5601/dlb/app/apm/link-to/trace/98da587f4bf3c4a5bf1b33417416885f?rangeFrom=now-15d&rangeTo=now
 
   return {
     exceedsMax,
