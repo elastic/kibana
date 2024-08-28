@@ -9,7 +9,7 @@ import type { IlmExplainLifecycleLifecycleExplain } from '@elastic/elasticsearch
 import { useEffect, useState } from 'react';
 
 import { useDataQualityContext } from '../../../../../data_quality_context';
-import { INTERNAL_API_VERSION } from '../../../../../helpers';
+import { INTERNAL_API_VERSION } from '../../../../../constants';
 import * as i18n from '../../../../../translations';
 import { useIsMounted } from '../../../../../hooks/use_is_mounted';
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type Observable } from 'rxjs';
+import { type Observable, firstValueFrom, filter } from 'rxjs';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
@@ -37,6 +37,7 @@ interface ConstructorOptions {
   frameworkAlerts: PublicFrameworkAlertsService;
   pluginStop$: Observable<void>;
   dataStreamAdapter: DataStreamAdapter;
+  elasticsearchAndSOAvailability$: Observable<boolean>;
 }
 
 export type IResourceInstaller = PublicMethodsOf<ResourceInstaller>;
@@ -53,6 +54,11 @@ export class ResourceInstaller {
    *   - component template containing all standard ECS fields
    */
   public async installCommonResources(): Promise<void> {
+    await firstValueFrom(
+      this.options.elasticsearchAndSOAvailability$.pipe(
+        filter((areESAndSOAvailable) => areESAndSOAvailable)
+      )
+    );
     const resourceDescription = 'common resources shared between all indices';
     const { logger, isWriteEnabled } = this.options;
     if (!isWriteEnabled) {

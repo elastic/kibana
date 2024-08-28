@@ -15,6 +15,7 @@ export {
 } from './api/check_pipeline/check_pipeline';
 export { EcsMappingRequestBody, EcsMappingResponse } from './api/ecs/ecs_route';
 export { RelatedRequestBody, RelatedResponse } from './api/related/related_route';
+export { AnalyzeLogsRequestBody, AnalyzeLogsResponse } from './api/analyze_logs/analyze_logs_route';
 
 export type {
   DataStream,
@@ -35,4 +36,5 @@ export {
   PLUGIN_ID,
   RELATED_GRAPH_PATH,
   CHECK_PIPELINE_PATH,
+  ANALYZE_LOGS_PATH,
 } from './constants';

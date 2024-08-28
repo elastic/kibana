@@ -19,7 +19,7 @@ import { mockUnallowedValuesResponse } from '../../../mock/unallowed_values/mock
 import { CANCEL, CHECK_ALL } from '../../../translations';
 import { OnCheckCompleted, UnallowedValueRequestItem } from '../../../types';
 import { CheckAll } from '.';
-import { EMPTY_STAT } from '../../../helpers';
+import { EMPTY_STAT } from '../../../constants';
 
 const defaultBytesFormat = '0,0.[0]b';
 const mockFormatBytes = (value: number | undefined) =>
