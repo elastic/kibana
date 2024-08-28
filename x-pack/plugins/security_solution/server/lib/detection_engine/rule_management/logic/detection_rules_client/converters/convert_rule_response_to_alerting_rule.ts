@@ -9,6 +9,7 @@ import type { UpdateRuleData } from '@kbn/alerting-plugin/server/application/rul
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { RuleActionCamel } from '@kbn/securitysolution-io-ts-alerting-types';
 
+import { addEcsToRequiredFields } from '../../../../../../../common/detection_engine/rule_management/utils';
 import type {
   RuleResponse,
   TypeSpecificCreateProps,
@@ -25,7 +26,7 @@ import { assertUnreachable } from '../../../../../../../common/utility_types';
 import { convertObjectKeysToCamelCase } from '../../../../../../utils/object_case_converters';
 import type { RuleParams, TypeSpecificRuleParams } from '../../../../rule_schema';
 import { transformToActionFrequency } from '../../../normalization/rule_actions';
-import { addEcsToRequiredFields, separateActionsAndSystemAction } from '../../../utils/utils';
+import { separateActionsAndSystemAction } from '../../../utils/utils';
 
 /**
  * These are the fields that are added to the rule response that are not part of the rule params

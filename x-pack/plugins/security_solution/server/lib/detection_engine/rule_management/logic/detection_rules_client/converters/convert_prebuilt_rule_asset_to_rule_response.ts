@@ -6,8 +6,8 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { addEcsToRequiredFields } from '../../../../../../../common/detection_engine/rule_management/utils';
 import { RuleResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
-import { addEcsToRequiredFields } from '../../../utils/utils';
 import type { PrebuiltRuleAsset } from '../../../../prebuilt_rules';
 import { RULE_DEFAULTS } from '../mergers/apply_rule_defaults';
 

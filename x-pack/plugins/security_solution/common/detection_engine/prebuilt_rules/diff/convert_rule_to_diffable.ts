@@ -7,8 +7,8 @@
 
 import type { RequiredOptional } from '@kbn/zod-helpers';
 import { requiredOptional } from '@kbn/zod-helpers';
-import { DEFAULT_MAX_SIGNALS } from '../../../../../../../common/constants';
-import { assertUnreachable } from '../../../../../../../common/utility_types';
+import { DEFAULT_MAX_SIGNALS } from '../../../constants';
+import { assertUnreachable } from '../../../utility_types';
 import type {
   EqlRule,
   EqlRuleCreateProps,
@@ -27,8 +27,7 @@ import type {
   ThreatMatchRuleCreateProps,
   ThresholdRule,
   ThresholdRuleCreateProps,
-} from '../../../../../../../common/api/detection_engine/model/rule_schema';
-import type { PrebuiltRuleAsset } from '../../../model/rule_assets/prebuilt_rule_asset';
+} from '../../../api/detection_engine/model/rule_schema';
 import type {
   DiffableCommonFields,
   DiffableCustomQueryFields,
@@ -40,7 +39,8 @@ import type {
   DiffableSavedQueryFields,
   DiffableThreatMatchFields,
   DiffableThresholdFields,
-} from '../../../../../../../common/api/detection_engine/prebuilt_rules';
+} from '../../../api/detection_engine/prebuilt_rules';
+import { addEcsToRequiredFields } from '../../rule_management/utils';
 import { extractBuildingBlockObject } from './extract_building_block_object';
 import {
   extractInlineKqlQuery,
@@ -53,13 +53,12 @@ import { extractRuleNameOverrideObject } from './extract_rule_name_override_obje
 import { extractRuleSchedule } from './extract_rule_schedule';
 import { extractTimelineTemplateReference } from './extract_timeline_template_reference';
 import { extractTimestampOverrideObject } from './extract_timestamp_override_object';
-import { addEcsToRequiredFields } from '../../../../rule_management/utils/utils';
 
 /**
  * Normalizes a given rule to the form which is suitable for passing to the diff algorithm.
  * Read more in the JSDoc description of DiffableRule.
  */
-export const convertRuleToDiffable = (rule: RuleResponse | PrebuiltRuleAsset): DiffableRule => {
+export const convertRuleToDiffable = (rule: RuleResponse): DiffableRule => {
   const commonFields = extractDiffableCommonFields(rule);
 
   switch (rule.type) {
@@ -109,7 +108,7 @@ export const convertRuleToDiffable = (rule: RuleResponse | PrebuiltRuleAsset): D
 };
 
 const extractDiffableCommonFields = (
-  rule: RuleResponse | PrebuiltRuleAsset
+  rule: RuleResponse
 ): RequiredOptional<DiffableCommonFields> => {
   return {
     // --------------------- REQUIRED FIELDS

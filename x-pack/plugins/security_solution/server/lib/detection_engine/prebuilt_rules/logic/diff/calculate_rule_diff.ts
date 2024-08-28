@@ -18,9 +18,9 @@ import {
 import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { invariant } from '../../../../../../common/utils/invariant';
 import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
+import { convertRuleToDiffable } from '../../../../../../common/detection_engine/prebuilt_rules/diff/convert_rule_to_diffable';
 
 import { calculateRuleFieldsDiff } from './calculation/calculate_rule_fields_diff';
-import { convertRuleToDiffable } from './normalization/convert_rule_to_diffable';
 
 export interface RuleVersions {
   current?: RuleResponse;
