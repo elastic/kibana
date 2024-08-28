@@ -711,7 +711,7 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       beforeEach(async () => {
-        es.updateByQuery({
+        await es.updateByQuery({
           index: '.fleet-agents',
           body: {
             script: "ctx._source.remove('upgrade_started_at')",

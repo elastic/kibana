@@ -1366,6 +1366,25 @@ module.exports = {
       },
     },
     {
+      files: [
+        'test/{accessibility,*functional*,*api_integration*}/apps/**/*.{js,ts}',
+        'x-pack/test/{accessibility,*functional*,*api_integration*}/apps/**/*.{js,ts}',
+        'x-pack/test_serverless/{functional,api_integration}/test_suites/**/*.{js,ts}',
+      ],
+      extends: ['plugin:mocha/recommended'],
+      plugins: ['mocha'],
+      env: {
+        mocha: true,
+      },
+      rules: {
+        'mocha/no-mocha-arrows': 'off',
+        'mocha/no-exports': 'off',
+        'mocha/no-setup-in-describe': 'off',
+        'mocha/no-nested-tests': 'off',
+        'mocha/no-skipped-tests': 'off',
+      },
+    },
+    {
       files: ['x-pack/plugins/lists/public/**/!(*.test).{js,mjs,ts,tsx}'],
       plugins: ['react-perf'],
       rules: {

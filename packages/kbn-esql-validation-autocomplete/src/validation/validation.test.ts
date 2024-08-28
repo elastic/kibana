@@ -12270,17 +12270,11 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | stats max(null)', []);
         testErrorsAndWarnings('row nullVar = null | stats max(nullVar)', []);
         testErrorsAndWarnings('from a_index | stats max("2022")', []);
-        testErrorsAndWarnings('from a_index | stats max(concat("20", "22"))', [
-          'Argument of [max] must be [double], found value [concat("20","22")] type [keyword]',
-        ]);
+        testErrorsAndWarnings('from a_index | stats max(concat("20", "22"))', []);
 
-        testErrorsAndWarnings('from a_index | stats var = max(textField)', [
-          'Argument of [max] must be [double], found value [textField] type [text]',
-        ]);
+        testErrorsAndWarnings('from a_index | stats var = max(textField)', []);
 
-        testErrorsAndWarnings('from a_index | stats max(textField)', [
-          'Argument of [max] must be [double], found value [textField] type [text]',
-        ]);
+        testErrorsAndWarnings('from a_index | stats max(textField)', []);
 
         testErrorsAndWarnings('from a_index | where max(textField)', [
           'WHERE does not support function max',
@@ -12303,6 +12297,58 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | eval max(textField) > 0', [
+          'EVAL does not support function max',
+        ]);
+        testErrorsAndWarnings('from a_index | stats var = max(versionField)', []);
+        testErrorsAndWarnings('from a_index | stats max(versionField)', []);
+        testErrorsAndWarnings('from a_index | stats var = max(keywordField)', []);
+        testErrorsAndWarnings('from a_index | stats max(keywordField)', []);
+
+        testErrorsAndWarnings('from a_index | where max(versionField)', [
+          'WHERE does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where max(versionField) > 0', [
+          'WHERE does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where max(keywordField)', [
+          'WHERE does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where max(keywordField) > 0', [
+          'WHERE does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = max(versionField)', [
+          'EVAL does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = max(versionField) > 0', [
+          'EVAL does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval max(versionField)', [
+          'EVAL does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval max(versionField) > 0', [
+          'EVAL does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = max(keywordField)', [
+          'EVAL does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = max(keywordField) > 0', [
+          'EVAL does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval max(keywordField)', [
+          'EVAL does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval max(keywordField) > 0', [
           'EVAL does not support function max',
         ]);
       });
@@ -12624,17 +12670,11 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | stats min(null)', []);
         testErrorsAndWarnings('row nullVar = null | stats min(nullVar)', []);
         testErrorsAndWarnings('from a_index | stats min("2022")', []);
-        testErrorsAndWarnings('from a_index | stats min(concat("20", "22"))', [
-          'Argument of [min] must be [double], found value [concat("20","22")] type [keyword]',
-        ]);
+        testErrorsAndWarnings('from a_index | stats min(concat("20", "22"))', []);
 
-        testErrorsAndWarnings('from a_index | stats var = min(textField)', [
-          'Argument of [min] must be [double], found value [textField] type [text]',
-        ]);
+        testErrorsAndWarnings('from a_index | stats var = min(textField)', []);
 
-        testErrorsAndWarnings('from a_index | stats min(textField)', [
-          'Argument of [min] must be [double], found value [textField] type [text]',
-        ]);
+        testErrorsAndWarnings('from a_index | stats min(textField)', []);
 
         testErrorsAndWarnings('from a_index | where min(textField)', [
           'WHERE does not support function min',
@@ -12657,6 +12697,58 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | eval min(textField) > 0', [
+          'EVAL does not support function min',
+        ]);
+        testErrorsAndWarnings('from a_index | stats var = min(versionField)', []);
+        testErrorsAndWarnings('from a_index | stats min(versionField)', []);
+        testErrorsAndWarnings('from a_index | stats var = min(keywordField)', []);
+        testErrorsAndWarnings('from a_index | stats min(keywordField)', []);
+
+        testErrorsAndWarnings('from a_index | where min(versionField)', [
+          'WHERE does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where min(versionField) > 0', [
+          'WHERE does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where min(keywordField)', [
+          'WHERE does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where min(keywordField) > 0', [
+          'WHERE does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = min(versionField)', [
+          'EVAL does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = min(versionField) > 0', [
+          'EVAL does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval min(versionField)', [
+          'EVAL does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval min(versionField) > 0', [
+          'EVAL does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = min(keywordField)', [
+          'EVAL does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = min(keywordField) > 0', [
+          'EVAL does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval min(keywordField)', [
+          'EVAL does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval min(keywordField) > 0', [
           'EVAL does not support function min',
         ]);
       });

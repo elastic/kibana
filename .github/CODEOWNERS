@@ -68,11 +68,13 @@ packages/kbn-capture-oas-snapshot-cli @elastic/kibana-core
 x-pack/test/cases_api_integration/common/plugins/cases @elastic/response-ops
 packages/kbn-cases-components @elastic/response-ops
 x-pack/plugins/cases @elastic/response-ops
+packages/kbn-cbor @elastic/kibana-operations
 packages/kbn-cell-actions @elastic/security-threat-hunting-explore
 src/plugins/chart_expressions/common @elastic/kibana-visualizations
 packages/kbn-chart-icons @elastic/kibana-visualizations
 src/plugins/charts @elastic/kibana-visualizations
 packages/kbn-check-mappings-update-cli @elastic/kibana-core
+packages/kbn-check-prod-native-modules-cli @elastic/kibana-operations
 packages/kbn-ci-stats-core @elastic/kibana-operations
 packages/kbn-ci-stats-performance-metrics @elastic/kibana-operations
 packages/kbn-ci-stats-reporter @elastic/kibana-operations
@@ -491,6 +493,7 @@ examples/guided_onboarding_example @elastic/appex-sharedux
 src/plugins/guided_onboarding @elastic/appex-sharedux
 packages/kbn-handlebars @elastic/kibana-security
 packages/kbn-hapi-mocks @elastic/kibana-core
+test/plugin_functional/plugins/hardening @elastic/kibana-security
 packages/kbn-health-gateway-server @elastic/kibana-core
 examples/hello_world @elastic/kibana-core
 src/plugins/home @elastic/kibana-core
@@ -741,6 +744,7 @@ packages/kbn-search-errors @elastic/kibana-data-discovery
 examples/search_examples @elastic/kibana-data-discovery
 x-pack/plugins/search_homepage @elastic/search-kibana
 packages/kbn-search-index-documents @elastic/search-kibana
+x-pack/plugins/search_indices @elastic/search-kibana
 x-pack/plugins/search_inference_endpoints @elastic/search-kibana
 x-pack/plugins/search_notebooks @elastic/search-kibana
 x-pack/plugins/search_playground @elastic/search-kibana
@@ -1348,7 +1352,9 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /packages/kbn-std/src/parse_next_url.ts @elastic/kibana-core @elastic/kibana-security
 /test/interactive_setup_api_integration/ @elastic/kibana-security
 /test/interactive_setup_functional/ @elastic/kibana-security
+/test/plugin_functional/plugins/hardening @elastic/kibana-security
 /test/plugin_functional/test_suites/core_plugins/rendering.ts @elastic/kibana-security
+/test/plugin_functional/test_suites/hardening @elastic/kibana-security
 /x-pack/test/accessibility/apps/group1/login_page.ts @elastic/kibana-security
 /x-pack/test/accessibility/apps/group1/roles.ts @elastic/kibana-security
 /x-pack/test/accessibility/apps/group1/spaces.ts @elastic/kibana-security
@@ -1398,6 +1404,7 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/plugins/enterprise_search/public/applications/shared/doc_links @elastic/platform-docs
 /x-pack/test_serverless/api_integration/test_suites/search/serverless_search @elastic/search-kibana
 /x-pack/test_serverless/functional/test_suites/search/ @elastic/search-kibana
+x-pack/test/api_integration/apis/management/index_management/inference_endpoints.ts @elastic/search-kibana
 
 # Management Experience - Deployment Management
 /x-pack/test_serverless/**/test_suites/common/index_management/ @elastic/kibana-management
@@ -1758,6 +1765,8 @@ x-pack/plugins/observability_solution/observability_shared/public/components/pro
 
 # Shared UX
 packages/react @elastic/appex-sharedux
+test/functional/page_objects/solution_navigation.ts @elastic/appex-sharedux
+/x-pack/test_serverless/functional/page_objects/svl_common_navigation.ts @elastic/appex-sharedux
 
 # OpenAPI spec files
 /x-pack/plugins/fleet/common/openapi          @elastic/platform-docs

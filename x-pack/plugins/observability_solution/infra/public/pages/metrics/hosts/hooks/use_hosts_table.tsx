@@ -22,6 +22,7 @@ import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import { EuiToolTip } from '@elastic/eui';
 import { EuiBadge } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { APM_HOST_TROUBLESHOOTING_LINK } from '../../../../components/asset_details/constants';
 import { Popover } from '../../../../components/asset_details/tabs/common/popover';
 import { HOST_NAME_FIELD } from '../../../../../common/constants';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
@@ -318,7 +319,7 @@ export const useHostsTable = () => {
                       <p>
                         <EuiLink
                           data-test-subj="hostsView-tableRow-hasSystemMetrics-learnMoreLink"
-                          href="https://ela.st/host-troubleshooting"
+                          href={APM_HOST_TROUBLESHOOTING_LINK}
                           target="_blank"
                         >
                           <FormattedMessage

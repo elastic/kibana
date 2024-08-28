@@ -139,6 +139,7 @@ pageLoadAssetSize:
   searchAssistant: 19831
   searchConnectors: 30000
   searchHomepage: 19831
+  searchIndices: 20519
   searchInferenceEndpoints: 20470
   searchNotebooks: 18942
   searchPlayground: 19325
