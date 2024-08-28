@@ -138,7 +138,7 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
       } as TextObject;
       editorDispatch({ type: 'setCurrentTextObject', payload: textObject });
     }
-  }, [value, currentTextObject]);
+  }, [value, currentTextObject, editorDispatch]);
 
   return (
     <div
