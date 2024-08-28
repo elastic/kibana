@@ -23,11 +23,11 @@ import * as constants from '../../../../../common/data_types/logs/constants';
 import { LogLevel } from '../../../data_types/logs/log_level';
 
 const SourceDocument = dynamic(
-  () => import('@kbn/unified-data-table/src/components/source_document')
+  () => import('@kbn/unified-data-table/src/components/cells/source_document')
 );
 
 const DiscoverSourcePopoverContent = dynamic(
-  () => import('@kbn/unified-data-table/src/components/source_popover_content')
+  () => import('@kbn/unified-data-table/src/components/cells/source_popover_content')
 );
 
 const sourceDocumentClassName = css`

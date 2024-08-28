@@ -16,7 +16,7 @@ import React from 'react';
 import { ReactNode, useState } from 'react';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import { useComparisonCellValue, UseComparisonCellValueProps } from './use_comparison_cell_value';
-import { CELL_CLASS } from '../../../utils/get_render_cell_value';
+import { CELL_CLASS } from '../../cells/get_render_cell_value';
 import {
   ADDED_SEGMENT_CLASS,
   BASE_CELL_CLASS,

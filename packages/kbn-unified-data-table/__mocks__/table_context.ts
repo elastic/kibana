@@ -12,10 +12,10 @@ import { dataViewComplexMock } from './data_view_complex';
 import { esHitsComplex } from './es_hits_complex';
 import { servicesMock } from './services';
 import { DataTableContext } from '../src/table_context';
-import { convertValueToString } from '../src/utils/convert_value_to_string';
+import { convertValueToString } from '../src/components/data_table/utils/convert_value_to_string';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
-import type { UseSelectedDocsState } from '../src/hooks/use_selected_docs';
+import type { UseSelectedDocsState } from '../src/components/data_table/hooks/use_selected_docs';
 
 const buildTableContext = (dataView: DataView, rows: EsHitRecord[]): DataTableContext => {
   const usedRows = rows.map((row) => {

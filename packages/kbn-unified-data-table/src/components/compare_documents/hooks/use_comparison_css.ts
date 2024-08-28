@@ -8,7 +8,7 @@
 
 import { tint, useEuiBackgroundColor, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { CELL_CLASS } from '../../../utils/get_render_cell_value';
+import { CELL_CLASS } from '../../cells/get_render_cell_value';
 import { DocumentDiffMode } from '../types';
 
 export const FIELD_NAME_CLASS = 'unifiedDataTable__comparisonFieldName';
