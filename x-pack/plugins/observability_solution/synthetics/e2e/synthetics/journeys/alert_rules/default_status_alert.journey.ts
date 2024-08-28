@@ -111,6 +111,8 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
       location: 'North America - US Central',
       timestamp: downCheckTime,
       status: 'down',
+      numberOfChecks: 1,
+      downThreshold: 1,
     });
 
     await retry.tryForTime(3 * 60 * 1000, async () => {
@@ -172,6 +174,8 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
       location: 'North America - US Central',
       timestamp: downCheckTime,
       status: 'down',
+      numberOfChecks: 1,
+      downThreshold: 1,
     });
 
     await retry.tryForTime(3 * 60 * 1000, async () => {

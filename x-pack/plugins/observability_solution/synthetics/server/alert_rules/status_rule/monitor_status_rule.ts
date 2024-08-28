@@ -219,30 +219,30 @@ const handleDownMonitorThresholdAlert = ({
         });
       }
     });
-  }
+  } else {
+    for (const [configId, configs] of downConfigsById) {
+      const totalDownChecks = configs.reduce((acc, { checks }) => acc + checks.down, 0);
+      const totalDownChecksWithinXChecks = configs.reduce(
+        (acc, { checks }) => acc + checks.downWithinXChecks,
+        0
+      );
+      const isTimeWindowConditionMet = isTimeWindow && totalDownChecks >= downThreshold;
+      const isChecksConditionMet = isChecksBased && totalDownChecksWithinXChecks >= downThreshold;
 
-  for (const [configId, configs] of downConfigsById) {
-    const totalDownChecks = configs.reduce((acc, { checks }) => acc + checks.down, 0);
-    const totalDownChecksWithinXChecks = configs.reduce(
-      (acc, { checks }) => acc + checks.downWithinXChecks,
-      0
-    );
-    const isTimeWindowConditionMet = isTimeWindow && totalDownChecks >= downThreshold;
-    const isChecksConditionMet = isChecksBased && totalDownChecksWithinXChecks >= downThreshold;
-
-    if (isTimeWindowConditionMet || isChecksConditionMet) {
-      const alertId = configId;
-      const monitorSummary = statusRule.getUngroupedDownSummary({
-        statusConfigs: configs,
-        downThreshold,
-      });
-      return statusRule.scheduleAlert({
-        idWithLocation: configId,
-        alertId,
-        monitorSummary,
-        statusConfig: configs[0],
-        downThreshold,
-      });
+      if (isTimeWindowConditionMet || isChecksConditionMet) {
+        const alertId = configId;
+        const monitorSummary = statusRule.getUngroupedDownSummary({
+          statusConfigs: configs,
+          downThreshold,
+        });
+        return statusRule.scheduleAlert({
+          idWithLocation: configId,
+          alertId,
+          monitorSummary,
+          statusConfig: configs[0],
+          downThreshold,
+        });
+      }
     }
   }
 };
