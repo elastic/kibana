@@ -36,7 +36,7 @@ export type Action =
   | { type: 'setCurrentTextObject'; payload: TextObject }
   | { type: 'updateSettings'; payload: DevToolsSettings }
   | { type: 'setRequestToRestore'; payload: string }
-  | { type: 'clearRequestToRestore'; };
+  | { type: 'clearRequestToRestore' };
 
 export const reducer: Reducer<Store, Action> = (state, action) =>
   produce<Store>(state, (draft) => {
