@@ -31,7 +31,7 @@ const CustomDataSourceFilters = ({
   return (
     <ControlGroupContainer data-test-subj={DATA_SOURCE_FILTERS_CUSTOMIZATION_ID}>
       <ControlGroupRenderer
-        ref={setControlGroupAPI}
+        onApiAvailable={setControlGroupAPI}
         getCreationOptions={getInitialState}
         query={query as Query}
         filters={filters ?? []}

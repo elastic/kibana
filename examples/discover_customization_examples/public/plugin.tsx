@@ -405,7 +405,7 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
               `}
             >
               <ControlGroupRenderer
-                ref={setControlGroupAPI}
+                onApiAvailable={setControlGroupAPI}
                 getCreationOptions={async (initialState, builder) => {
                   const panels = stateStorage.get<ControlsPanels>('controlPanels');
 

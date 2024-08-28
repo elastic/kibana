@@ -94,7 +94,7 @@ export const ControlsContent: React.FC<Props> = ({
     <ControlGroupContainer>
       <ControlGroupRenderer
         getCreationOptions={getInitialInput()}
-        ref={loadCompleteHandler}
+        onApiAvailable={loadCompleteHandler}
         timeRange={timeRange}
         query={query}
         filters={filters}

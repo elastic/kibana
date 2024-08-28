@@ -79,7 +79,7 @@ export class Timeslider extends Component<Props, {}> {
     return (
       <div className="mapTimeslider mapTimeslider--animation">
         <ControlGroupRenderer
-          ref={this._onLoadComplete}
+          onApiAvailable={this._onLoadComplete}
           dataLoading={this.dataLoading}
           getCreationOptions={this._getCreationOptions}
           timeRange={this.props.timeRange}

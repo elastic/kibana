@@ -194,7 +194,7 @@ export const EditExample = () => {
           </>
         ) : null}
         <ControlGroupRenderer
-          ref={setControlGroupAPI}
+          onApiAvailable={setControlGroupAPI}
           getCreationOptions={async (initialState, builder) => {
             const persistedState = await onLoad();
             return {

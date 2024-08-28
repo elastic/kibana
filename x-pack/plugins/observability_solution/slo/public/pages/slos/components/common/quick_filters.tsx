@@ -55,8 +55,8 @@ export function QuickFilters({
   return (
     <Container>
       <ControlGroupRenderer
+        onApiAvailable={setControlGroupAPI}
         getCreationOptions={async (initialState, builder) => {
-          console.log('MADE IT HERE!!');
           builder.addOptionsListControl(
             initialState,
             {
@@ -91,7 +91,6 @@ export function QuickFilters({
             initialState,
           };
         }}
-        ref={setControlGroupAPI}
         timeRange={{ from: 'now-24h', to: 'now' }}
       />
     </Container>

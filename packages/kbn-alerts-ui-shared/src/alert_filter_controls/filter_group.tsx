@@ -451,7 +451,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
           {Array.isArray(controlsFromUrl) ? (
             <EuiFlexItem grow={true} data-test-subj={TEST_IDS.FILTER_CONTROLS}>
               <ControlGroupRenderer
-                ref={onControlGroupLoadHandler}
+                onApiAvailable={onControlGroupLoadHandler}
                 getCreationOptions={getCreationOptions}
                 timeRange={timeRange}
                 query={validatedQuery}

@@ -149,7 +149,7 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
             };
           }}
           query={query}
-          ref={setControlGroupAPI}
+          onApiAvailable={setControlGroupAPI}
           timeRange={timeRange}
         />
         <EuiCallOut title="Search results">
