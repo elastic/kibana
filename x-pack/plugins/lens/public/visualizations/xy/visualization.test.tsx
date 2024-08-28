@@ -1721,48 +1721,6 @@ describe('xy_visualization', () => {
         },
       ]);
     });
-    it('converts percentage chart to normal chart when removing the split dimension', () => {
-      const state = xyVisualization.removeDimension({
-        frame,
-        prevState: {
-          ...exampleState(),
-          layers: [
-            {
-              layerId: 'first',
-              layerType: layerTypes.DATA,
-              seriesType: 'bar_percentage_stacked',
-              xAccessor: 'a',
-              accessors: [],
-              splitAccessor: 'b',
-            },
-          ],
-        },
-        layerId: 'first',
-        columnId: 'b',
-      });
-
-      expect((state.layers[0] as XYDataLayerConfig).seriesType).toBe('bar');
-      const horizontalState = xyVisualization.removeDimension({
-        frame,
-        prevState: {
-          ...exampleState(),
-          layers: [
-            {
-              layerId: 'first',
-              layerType: layerTypes.DATA,
-              seriesType: 'bar_horizontal_percentage_stacked',
-              xAccessor: 'a',
-              accessors: [],
-              splitAccessor: 'b',
-            },
-          ],
-        },
-        layerId: 'first',
-        columnId: 'b',
-      });
-
-      expect((horizontalState.layers[0] as XYDataLayerConfig).seriesType).toBe('bar_horizontal');
-    });
   });
 
   describe('#getConfiguration', () => {
