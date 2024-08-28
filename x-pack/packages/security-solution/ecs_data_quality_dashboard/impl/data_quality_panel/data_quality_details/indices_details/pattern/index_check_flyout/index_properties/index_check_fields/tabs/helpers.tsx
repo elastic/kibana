@@ -21,7 +21,7 @@ import {
   ECS_COMPLIANT_TAB_ID,
   INCOMPATIBLE_TAB_ID,
   SAME_FAMILY_TAB_ID,
-} from '../../helpers';
+} from '../constants';
 import { getMarkdownComment } from '../../markdown/helpers';
 import * as i18n from '../../translations';
 import { SameFamilyTab } from './same_family_tab';

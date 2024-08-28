@@ -100,6 +100,7 @@ export {
   aiAssistantLogsIndexPattern,
   aiAssistantSimulatedFunctionCalling,
   aiAssistantSearchConnectorIndexPattern,
+  aiAssistantPreferredAIAssistantType,
 } from '../common/ui_settings/settings_keys';
 
 export const plugin: PluginInitializer<
