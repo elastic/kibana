@@ -203,7 +203,7 @@ describe('TransactionActionMenu ', () => {
       const { getByText } = await renderTransaction(Transactions.transactionWithKubernetesData);
 
       expect((getByText('Pod metrics').parentElement as HTMLAnchorElement).href).toEqual(
-        'http://localhost/node-mock/pod/pod123456abcdef?receivedParams=(dateRange:(from:%271545091770952%27,to:%271545092370952%27))'
+        'http://localhost/node-mock/pod/pod123456abcdef?receivedParams=(dateRange:(from:%272018-12-18T00:09:30.952Z%27,to:%272018-12-18T00:19:30.952Z%27))'
       );
     });
   });
@@ -233,7 +233,7 @@ describe('TransactionActionMenu ', () => {
       const { getByText } = await renderTransaction(Transactions.transactionWithContainerData);
 
       expect((getByText('Container metrics').parentElement as HTMLAnchorElement).href).toEqual(
-        'http://localhost/node-mock/container/container123456abcdef?receivedParams=(dateRange:(from:%271545091770952%27,to:%271545092370952%27))'
+        'http://localhost/node-mock/container/container123456abcdef?receivedParams=(dateRange:(from:%272018-12-18T00:09:30.952Z%27,to:%272018-12-18T00:19:30.952Z%27))'
       );
     });
   });
@@ -263,7 +263,7 @@ describe('TransactionActionMenu ', () => {
       const { getByText } = await renderTransaction(Transactions.transactionWithHostData);
 
       expect((getByText('Host metrics').parentElement as HTMLAnchorElement).href).toEqual(
-        'http://localhost/node-mock/host/227453131a17?receivedParams=(dateRange:(from:%271545091770952%27,to:%271545092370952%27))'
+        'http://localhost/node-mock/host/227453131a17?receivedParams=(dateRange:(from:%272018-12-18T00:09:30.952Z%27,to:%272018-12-18T00:19:30.952Z%27))'
       );
     });
   });

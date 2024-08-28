@@ -29,8 +29,8 @@ function getInfraMetricsQuery(transaction: Transaction) {
   const fiveMinutes = moment.duration(5, 'minutes').asMilliseconds();
 
   return {
-    from: `${timestamp - fiveMinutes}`,
-    to: `${timestamp + fiveMinutes}`,
+    from: new Date(timestamp - fiveMinutes).toISOString(),
+    to: new Date(timestamp + fiveMinutes).toISOString(),
   };
 }
 

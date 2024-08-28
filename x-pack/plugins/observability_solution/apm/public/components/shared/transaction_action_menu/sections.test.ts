@@ -169,7 +169,7 @@ describe('Transaction action menu', () => {
             {
               key: 'podMetrics',
               label: 'Pod metrics',
-              href: "/node-mock/pod/123?receivedParams=(dateRange:(from:'1580986500000',to:'1580987100000'))",
+              href: "/node-mock/pod/123?receivedParams=(dateRange:(from:'2020-02-06T10:55:00.000Z',to:'2020-02-06T11:05:00.000Z'))",
               condition: true,
             },
           ],
@@ -256,7 +256,7 @@ describe('Transaction action menu', () => {
             {
               key: 'hostMetrics',
               label: 'Host metrics',
-              href: "/node-mock/host/foo?receivedParams=(dateRange:(from:'1580986500000',to:'1580987100000'))",
+              href: "/node-mock/host/foo?receivedParams=(dateRange:(from:'2020-02-06T10:55:00.000Z',to:'2020-02-06T11:05:00.000Z'))",
               condition: true,
             },
           ],

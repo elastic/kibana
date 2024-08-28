@@ -25,14 +25,14 @@ type InstaceDetails =
 
 function getInfraMetricsQuery(timestamp?: string) {
   if (!timestamp) {
-    return { from: '0', to: '0' };
+    return undefined;
   }
   const timeInMilliseconds = new Date(timestamp).getTime();
   const fiveMinutes = moment.duration(5, 'minutes').asMilliseconds();
 
   return {
-    from: `${timeInMilliseconds - fiveMinutes}`,
-    to: `${timeInMilliseconds + fiveMinutes}`,
+    from: new Date(timeInMilliseconds - fiveMinutes).toISOString(),
+    to: new Date(timeInMilliseconds + fiveMinutes).toISOString(),
   };
 }
 
