@@ -21,6 +21,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       log.debug('navigateTo console');
       await PageObjects.common.navigateToApp('console');
       await PageObjects.console.closeHelpIfExists();
+      await PageObjects.console.skipTourIfExists();
       await PageObjects.console.monaco.clearEditorText();
     });
 
