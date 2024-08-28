@@ -296,3 +296,12 @@ export const DATA_QUALITY_DASHBOARD_CONVERSATION_ID = i18n.translate(
     defaultMessage: 'Data Quality dashboard',
   }
 );
+
+export const AN_ERROR_OCCURRED_CHECKING_INDEX = (indexName: string) =>
+  i18n.translate(
+    'securitySolutionPackages.ecsDataQualityDashboard.checkAllErrorCheckingIndexMessage',
+    {
+      values: { indexName },
+      defaultMessage: 'An error occurred checking index {indexName}',
+    }
+  );
