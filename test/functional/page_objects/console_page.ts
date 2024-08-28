@@ -234,8 +234,16 @@ export class ConsolePageObject extends FtrService {
     await this.testSubjects.click('help-close-button');
   }
 
+  public async openConsole() {
+    await this.testSubjects.click('consoleShellButton');
+  }
+
+  public async openConfig() {
+    await this.testSubjects.click('consoleConfigButton');
+  }
+
   public async openSettings() {
-    await this.testSubjects.click('consoleSettingsButton');
+    await this.testSubjects.click('consoleConfigButton');
   }
 
   public async toggleA11yOverlaySetting() {
@@ -244,8 +252,6 @@ export class ConsolePageObject extends FtrService {
       const toggle = await this.testSubjects.find('enableA11yOverlay');
       await toggle.click();
     });
-
-    await this.testSubjects.click('settings-save-button');
   }
 
   public async openVariablesModal() {
@@ -257,48 +263,52 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async addNewVariable({ name, value }: { name: string; value: string }) {
-    await this.openVariablesModal();
-
-    // while the variables form opens/loads this may fail, so retry for a while
     await this.retry.try(async () => {
       await this.testSubjects.click('variablesAddButton');
 
-      const variableNameInputs = await this.testSubjects.findAll('variablesNameInput');
-      await variableNameInputs[variableNameInputs.length - 1].type(name);
+      const nameField = await this.testSubjects.find('nameField');
+      await nameField.type(name);
 
-      const variableValueInputs = await this.testSubjects.findAll('variablesValueInput');
-      await variableValueInputs[variableValueInputs.length - 1].type(value);
+      const valueField = await this.testSubjects.find('valueField');
+      await valueField.type(value);
     });
 
-    await this.testSubjects.click('variablesSaveButton');
+    await this.testSubjects.click('addNewVariableButton');
   }
 
   public async removeVariables() {
-    await this.openVariablesModal();
-
     // while the variables form opens/loads this may fail, so retry for a while
     await this.retry.try(async () => {
       const buttons = await this.testSubjects.findAll('variablesRemoveButton');
       await asyncForEach(buttons, async (button) => {
         await button.click();
+        await this.testSubjects.click('confirmModalConfirmButton');
       });
     });
-    await this.testSubjects.click('variablesSaveButton');
   }
 
   public async getVariables() {
-    await this.openVariablesModal();
-    const inputs = await this.testSubjects.findAll('variablesNameInput');
-    const variables = await Promise.all(
-      inputs.map(async (input) => await input.getAttribute('value'))
+    const table = await this.testSubjects.find('variablesTable');
+    const rows = await table.findAllByClassName('euiTableRow');
+    const tableText = await table.getVisibleText();
+
+    if (tableText.includes('No variables have been added yet')) {
+      return [];
+    }
+
+    const rowsData = await Promise.all(
+      rows.map(async (row) => {
+        return {
+          name: await (await row.findByTestSubject('variableNameCell')).getVisibleText(),
+          value: await (await row.findByTestSubject('variableValueCell')).getVisibleText(),
+        };
+      })
     );
-    await this.closeVariablesModal();
-    return variables;
+
+    return rowsData;
   }
 
   public async setFontSizeSetting(newSize: number) {
-    await this.openSettings();
-
     // while the settings form opens/loads this may fail, so retry for a while
     await this.retry.try(async () => {
       const fontSizeInput = await this.testSubjects.find('setting-font-size-input');
@@ -306,8 +316,6 @@ export class ConsolePageObject extends FtrService {
       await fontSizeInput.click();
       await fontSizeInput.type(String(newSize));
     });
-
-    await this.testSubjects.click('settings-save-button');
   }
 
   public async toggleKeyboardShortcuts(enabled: boolean) {
@@ -318,8 +326,6 @@ export class ConsolePageObject extends FtrService {
       const toggle = await this.testSubjects.find('enableKeyboardShortcuts');
       await toggle.click();
     });
-
-    await this.testSubjects.click('settings-save-button');
   }
 
   public async getFontSize(editor: WebElementWrapper) {

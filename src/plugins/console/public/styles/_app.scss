@@ -41,6 +41,11 @@
   }
 }
 
+// Expandable cell content has a padded panel inside
+.conVariablesTable .euiTableRow-isExpandedRow .euiTableCellContent {
+  padding: 0;
+}
+
 .conApp__output, .conApp_example {
   height: 100%;
   display: flex;
@@ -129,10 +134,6 @@
   /* by pass any other element in ace and resize bar, but not modal popups  */
   z-index: $euiZLevel1 + 2;
   margin-top: 22px;
-}
-
-.conApp__settingsModal {
-  min-width: 460px;
 }
 
 .conApp__requestProgressBarContainer {
