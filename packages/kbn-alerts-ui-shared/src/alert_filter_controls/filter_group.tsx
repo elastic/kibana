@@ -11,7 +11,6 @@ import { buildEsQuery } from '@kbn/es-query';
 import { OPTIONS_LIST_CONTROL } from '@kbn/controls-plugin/common';
 import { controlGroupStateBuilder } from '@kbn/controls-plugin/public';
 import type {
-  AwaitingControlGroupAPI,
   ControlGroupRendererApi,
   ControlGroupRendererProps,
   ControlGroupRuntimeState,
@@ -254,7 +253,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
   ]);
 
   const onControlGroupLoadHandler = useCallback(
-    (controlGroupRendererApi: AwaitingControlGroupAPI) => {
+    (controlGroupRendererApi: ControlGroupRendererApi | undefined) => {
       if (!controlGroupRendererApi) return;
       if (onInit) onInit(controlGroupRendererApi);
       setControlGroup(controlGroupRendererApi);

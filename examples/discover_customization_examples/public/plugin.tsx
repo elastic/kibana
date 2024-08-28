@@ -25,7 +25,7 @@ import type {
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
-import { AwaitingControlGroupAPI, ControlGroupRenderer } from '@kbn/controls-plugin/public';
+import { ControlGroupRendererApi, ControlGroupRenderer } from '@kbn/controls-plugin/public';
 import { css } from '@emotion/react';
 import type { ControlsPanels } from '@kbn/controls-plugin/common';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
@@ -341,7 +341,9 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
           );
         },
         PrependFilterBar: () => {
-          const [controlGroupAPI, setControlGroupAPI] = useState<AwaitingControlGroupAPI>();
+          const [controlGroupAPI, setControlGroupAPI] = useState<
+            ControlGroupRendererApi | undefined
+          >();
           const stateStorage = stateContainer.stateStorage;
           const dataView = useObservable(
             stateContainer.internalState.state$,

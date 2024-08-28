@@ -15,10 +15,10 @@ import { Filter } from '@kbn/es-query';
 import { PublishesUnifiedSearch, PublishingSubject } from '@kbn/presentation-publishing';
 import { act, render, waitFor } from '@testing-library/react';
 
+import { ControlGroupRendererApi } from '.';
 import { getControlGroupEmbeddableFactory } from '../../react_controls/control_group/get_control_group_factory';
 import { CONTROL_GROUP_TYPE } from '../types';
 import { ControlGroupRenderer, ControlGroupRendererProps } from './control_group_renderer';
-import { AwaitingControlGroupAPI, ControlGroupRendererApi } from './types';
 
 type ParentApiType = PublishesUnifiedSearch & {
   unifiedSearchFilters$?: PublishingSubject<Filter[] | undefined>;
@@ -33,7 +33,7 @@ describe('control group renderer', () => {
   const mountControlGroupRenderer = async (
     props: Omit<ControlGroupRendererProps, 'onApiAvailable'> = {}
   ) => {
-    let controlGroupApi: AwaitingControlGroupAPI;
+    let controlGroupApi: ControlGroupRendererApi | undefined;
     const component = render(
       <ControlGroupRenderer
         {...props}

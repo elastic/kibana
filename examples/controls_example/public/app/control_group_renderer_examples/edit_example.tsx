@@ -28,7 +28,7 @@ import {
   ACTION_EDIT_CONTROL,
   ControlGroupRenderer,
 } from '@kbn/controls-plugin/public';
-import { AwaitingControlGroupAPI } from '@kbn/controls-plugin/public/control_group/external_api/types';
+import { ControlGroupRendererApi } from '@kbn/controls-plugin/public';
 
 const INPUT_KEY = 'kbnControls:saveExample:input';
 
@@ -39,7 +39,7 @@ type StoredState = ControlGroupRuntimeState & { disabledActions: string[] };
 export const EditExample = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [controlGroupAPI, setControlGroupAPI] = useState<AwaitingControlGroupAPI>(null);
+  const [controlGroupAPI, setControlGroupAPI] = useState<ControlGroupRendererApi | undefined>();
   const [toggleIconIdToSelectedMapIcon, setToggleIconIdToSelectedMapIcon] = useState<{
     [id: string]: boolean;
   }>({});

@@ -11,7 +11,7 @@ import {
   type ControlGroupStateBuilder,
   ControlGroupRenderer,
   type ControlGroupRuntimeState,
-  type AwaitingControlGroupAPI,
+  type ControlGroupRendererApi,
 } from '@kbn/controls-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { Timeslice } from '../../../common/descriptor_types';
@@ -46,7 +46,7 @@ export class Timeslider extends Component<Props, {}> {
     };
   };
 
-  _onLoadComplete = (controlGroup: AwaitingControlGroupAPI) => {
+  _onLoadComplete = (controlGroup: ControlGroupRendererApi | undefined) => {
     if (!this._isMounted || !controlGroup) {
       return;
     }

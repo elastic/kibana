@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { skip } from 'rxjs';
 import React, { useEffect, useState } from 'react';
-import { AwaitingControlGroupAPI, ControlGroupRenderer } from '@kbn/controls-plugin/public';
+import { ControlGroupRenderer, ControlGroupRendererApi } from '@kbn/controls-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/common';
 import styled from 'styled-components';
 import { Filter } from '@kbn/es-query';
@@ -27,7 +27,7 @@ export function QuickFilters({
   initialState: { tagsFilter, statusFilter },
   onStateChange,
 }: Props) {
-  const [controlGroupAPI, setControlGroupAPI] = useState<AwaitingControlGroupAPI>();
+  const [controlGroupAPI, setControlGroupAPI] = useState<ControlGroupRendererApi | undefined>();
 
   useEffect(() => {
     if (!controlGroupAPI) {

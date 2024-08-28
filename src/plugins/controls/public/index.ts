@@ -34,13 +34,9 @@ export {
   ACTION_DELETE_CONTROL,
   ControlGroupRenderer,
   type ControlGroupRendererProps,
-  type AwaitingControlGroupAPI,
+  type ControlGroupRendererApi,
+  type ControlGroupCreationOptions,
 } from './control_group';
-
-export type {
-  ControlGroupRendererApi,
-  ControlGroupCreationOptions,
-} from './control_group/external_api/types';
 
 export type { ControlWidth, ControlStyle } from '../common/types';
 

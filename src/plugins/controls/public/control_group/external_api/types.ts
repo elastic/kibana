@@ -34,8 +34,6 @@ export type ControlGroupRendererApi = ControlGroupApi & {
   getInput$: () => BehaviorSubject<ControlGroupRuntimeState>;
 };
 
-export type AwaitingControlGroupAPI = ControlGroupRendererApi | null;
-
 export interface ControlGroupCreationOptions {
   initialState?: Partial<ControlGroupRuntimeState>;
   editorConfig?: ControlGroupEditorConfig;
