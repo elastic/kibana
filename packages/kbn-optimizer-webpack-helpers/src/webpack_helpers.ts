@@ -23,7 +23,7 @@ export function isFailureStats(stats: webpack.Stats) {
 
 export const STATS_WARNINGS_FILTER = new RegExp(
   [
-    '(export .* was not found in)',
+    '(export .* was not found in)', // with reexportExportsPresence = false and importExportsPresence = false in the module parser this should not be necessary but looks like it affects performance
     '|(chunk .* \\[mini-css-extract-plugin\\]\\\nConflicting order between:)',
   ].join('')
 );

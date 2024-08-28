@@ -368,7 +368,7 @@ export function getWebpackConfig(
       // This was default on webpack v4
       unsafeCache: true,
     },
-    // NOTE: I'm not sure about this but it does seem like it is speeding up
+    // NOTE: I'm not sure about this, but it does seem like it is speeding up
     // parallelism: 5000,
     //
   };
