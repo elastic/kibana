@@ -29,6 +29,7 @@ import { css } from '@emotion/react';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
+import type { TimeRange } from '@kbn/data-plugin/common';
 import { useKibana } from '../../../../common/lib/kibana';
 import { DRAFT_COMMENT_STORAGE_ID, ID } from './constants';
 import { CommentEditorContext } from '../../context';
@@ -37,7 +38,7 @@ import { VISUALIZATION } from './translations';
 import { useIsMainApplication } from '../../../../common/hooks';
 import { convertToAbsoluteTimeRange } from '../../../visualizations/actions/convert_to_absolute_time_range';
 
-const DEFAULT_TIMERANGE = {
+const DEFAULT_TIMERANGE: TimeRange = {
   from: 'now-7d',
   to: 'now',
   mode: 'relative',
@@ -87,7 +88,8 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
   }, [clearDraftComment, currentAppId, embeddable, onCancel]);
 
   const handleAdd = useCallback(
-    (attributes, timeRange) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (attributes: any, timeRange?: TimeRange) => {
       onSave(
         `!{${ID}${JSON.stringify({
           timeRange: convertToAbsoluteTimeRange(timeRange),
@@ -104,7 +106,8 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
   );
 
   const handleUpdate = useCallback(
-    (attributes, timeRange, position) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (attributes: any, timeRange: TimeRange | undefined, position: EuiMarkdownAstNodePosition) => {
       markdownContext.replaceNode(
         position,
         `!{${ID}${JSON.stringify({
@@ -152,7 +155,8 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
   ]);
 
   const handleEditInLensClick = useCallback(
-    (lensAttributes?, timeRange = DEFAULT_TIMERANGE) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (lensAttributes?: any, timeRange: TimeRange = DEFAULT_TIMERANGE) => {
       storage.set(DRAFT_COMMENT_STORAGE_ID, {
         commentId: commentEditorContext?.editorId,
         comment: commentEditorContext?.value,
@@ -190,7 +194,8 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
   );
 
   const handleChooseLensSO = useCallback(
-    (savedObjectId, savedObjectType, fullName, savedObject) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (savedObjectId: string, savedObjectType: string, fullName: string, savedObject: any) => {
       handleEditInLensClick({
         ...savedObject.attributes,
         title: '',

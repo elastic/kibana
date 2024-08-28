@@ -121,7 +121,8 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
   );
 
   const setAssistantStreamingEnabled = useCallback(
-    (value) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (value: any) => {
       setHasPendingChanges(true);
       setUpdatedAssistantStreamingEnabled(value);
     },

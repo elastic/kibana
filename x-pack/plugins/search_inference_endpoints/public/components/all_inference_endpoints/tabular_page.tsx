@@ -122,7 +122,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
   ];
 
   const handleTableChange = useCallback(
-    ({ page, sort }) => {
+    ({ page, sort }: any) => {
       const newQueryParams = {
         ...queryParams,
         ...(sort && {
