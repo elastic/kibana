@@ -314,7 +314,7 @@ export function jobsProvider(
     const jobs = fullJobsList.map((job) => {
       jobsMap[job.job_id] = job.groups || [];
       const hasDatafeed = isPopulatedObject(job.datafeed_config);
-      const timeRange: { to?: number; from?: number } = {};
+      const timeRange: { to?: number; from?: number } = Object.create(null);
 
       const dataCounts = job.data_counts;
       if (dataCounts !== undefined) {

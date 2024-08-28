@@ -54,7 +54,7 @@ interface Influencer {
  * @param source
  */
 export function getTypicalAndActualValues(source: MlAnomalyRecordDoc) {
-  const result: { actual?: number[]; typical?: number[] } = {};
+  const result: { actual?: number[]; typical?: number[] } = Object.create(null);
 
   const functionDescription = source.function_description || '';
   const causes = source.causes || [];

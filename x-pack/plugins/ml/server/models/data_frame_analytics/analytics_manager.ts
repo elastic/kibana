@@ -351,7 +351,7 @@ export class AnalyticsManager {
     try {
       await this.initData();
       // Create first node for incoming analyticsId or modelId
-      let initialData: InitialElementsReturnType = {} as InitialElementsReturnType;
+      let initialData: InitialElementsReturnType = Object.create(null) as InitialElementsReturnType;
       const job = analyticsId === undefined ? undefined : this.findJob(analyticsId);
       if (analyticsId !== undefined && job !== undefined) {
         const jobCreateTime = job.create_time!;
