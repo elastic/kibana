@@ -22,7 +22,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { v4 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { useGetUserInstructions } from '../../hooks/use_get_user_instructions';
 import { useCreateKnowledgeBaseUserInstruction } from '../../hooks/use_create_knowledge_base_user_instruction';
 
@@ -40,7 +40,7 @@ export function KnowledgeBaseEditUserInstructionFlyout({ onClose }: { onClose: (
   const handleSubmit = async () => {
     await createEntry({
       entry: {
-        id: v4(),
+        id: uuidv4(),
         text: newEntryText,
         public: false, // limit user instructions to private (for now)
       },
