@@ -177,6 +177,7 @@ interface ViewInDiscoverCallbacks {
 
 interface IntegrationCallbacks {
   isTextBasedLanguage: () => boolean | undefined;
+  getTextBasedLanguage: () => string | undefined;
   getSavedVis: () => Readonly<LensSavedObjectAttributes | undefined>;
   getFullAttributes: () => LensDocument | undefined;
 }
