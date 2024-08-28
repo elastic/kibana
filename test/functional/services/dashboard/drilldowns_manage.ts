@@ -147,16 +147,5 @@ export function DashboardDrilldownsManageProvider({
     async closeFlyout() {
       await flyout.ensureAllClosed();
     }
-
-    async getPanelDrilldownCount(panelIndex = 0): Promise<number> {
-      log.debug('getPanelDrilldownCount');
-      const panel = (await dashboard.getDashboardPanels())[panelIndex];
-      await dashboardPanelActions.openContextMenuMorePanel(panel);
-      const manageDrilldownAction = await panel.findByTestSubject(
-        'embeddablePanelAction-OPEN_FLYOUT_EDIT_DRILLDOWN'
-      );
-      const count = await manageDrilldownAction.findByCssSelector('.euiNotificationBadge');
-      return Number.parseInt(await count.getVisibleText(), 10);
-    }
   })();
 }

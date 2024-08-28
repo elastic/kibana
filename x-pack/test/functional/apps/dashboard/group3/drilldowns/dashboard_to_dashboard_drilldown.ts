@@ -61,7 +61,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await dashboardDrilldownsManage.closeFlyout();
 
     // check that drilldown notification badge is shown
-    expect(await dashboardDrilldownsManage.getPanelDrilldownCount()).to.be(1);
+    expect(await dashboardDrilldownPanelActions.getPanelDrilldownCount()).to.be(1);
 
     // save dashboard, navigate to view mode
     await testSubjects.existOrFail('dashboardUnsavedChangesBadge');
@@ -282,7 +282,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await dashboardDrilldownsManage.closeFlyout();
 
           // check that drilldown notification badge is not shown
-          expect(await dashboardDrilldownsManage.getPanelDrilldownCount()).to.be(0);
+          expect(await dashboardDrilldownPanelActions.getPanelDrilldownCount()).to.be(0);
 
           // this drilldown will be available again in the next test because the session storage is cleared.
         });

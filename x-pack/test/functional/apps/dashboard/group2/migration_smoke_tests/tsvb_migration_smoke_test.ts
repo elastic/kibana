@@ -14,7 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const dashboardPanelActions = getService('dashboardPanelActions');
-  const dashboardDrilldownsManage = getService('dashboardDrilldownsManage');
+  const dashboardDrilldownPanelActions = getService('dashboardDrilldownPanelActions');
 
   const { settings, savedObjects, dashboard } = getPageObjects([
     'settings',
@@ -69,14 +69,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         let panelsWithDrilldowns = 0;
         let drilldownCount = 0;
         for (let panelIndex = 0; panelIndex < totalPanels; panelIndex++) {
-          const panelDrilldownCount = await dashboardDrilldownsManage.getPanelDrilldownCount(
+          const panelDrilldownCount = await dashboardDrilldownPanelActions.getPanelDrilldownCount(
             panelIndex
           );
           if (panelDrilldownCount >= 1) {
             panelsWithDrilldowns++;
           }
 
-          drilldownCount += await dashboardDrilldownsManage.getPanelDrilldownCount(panelIndex);
+          drilldownCount += await dashboardDrilldownPanelActions.getPanelDrilldownCount(panelIndex);
         }
         expect(panelsWithDrilldowns).to.be(2);
         expect(drilldownCount).to.be(3);

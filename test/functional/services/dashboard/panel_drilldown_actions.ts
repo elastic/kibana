@@ -12,10 +12,15 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 const CREATE_DRILLDOWN_DATA_TEST_SUBJ = 'embeddablePanelAction-OPEN_FLYOUT_ADD_DRILLDOWN';
 const MANAGE_DRILLDOWNS_DATA_TEST_SUBJ = 'embeddablePanelAction-OPEN_FLYOUT_EDIT_DRILLDOWN';
 
-export function DashboardDrilldownPanelActionsProvider({ getService }: FtrProviderContext) {
+export function DashboardDrilldownPanelActionsProvider({
+  getService,
+  getPageObject,
+}: FtrProviderContext) {
   const log = getService('log');
   const testSubjects = getService('testSubjects');
   const dashboardPanelActions = getService('dashboardPanelActions');
+
+  const dashboard = getPageObject('dashboard');
 
   return new (class DashboardDrilldownPanelActions {
     async expectExistsCreateDrilldownAction() {
@@ -95,6 +100,15 @@ export function DashboardDrilldownPanelActionsProvider({ getService }: FtrProvid
       }
 
       throw new Error(`No action matching text "${text}"`);
+    }
+
+    async getPanelDrilldownCount(panelIndex = 0): Promise<number> {
+      log.debug('getPanelDrilldownCount');
+      const panel = (await dashboard.getDashboardPanels())[panelIndex];
+      await dashboardPanelActions.openContextMenuMorePanel(panel);
+      const manageDrilldownAction = await testSubjects.find(MANAGE_DRILLDOWNS_DATA_TEST_SUBJ);
+      const count = await manageDrilldownAction.findByCssSelector('.euiNotificationBadge');
+      return Number.parseInt(await count.getVisibleText(), 10);
     }
   })();
 }

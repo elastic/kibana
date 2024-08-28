@@ -17,7 +17,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
 
   const dashboardDrilldownPanelActions = getService('dashboardDrilldownPanelActions');
-  const dashboardDrilldownsManage = getService('dashboardDrilldownsManage');
 
   describe('image embeddable', function () {
     before(async () => {
@@ -54,18 +53,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('image embeddable should support drilldowns', async () => {
       await dashboardDrilldownPanelActions.expectExistsCreateDrilldownAction();
       await dashboardDrilldownPanelActions.clickCreateDrilldown();
-      await dashboardDrilldownsManage.expectsCreateDrilldownFlyoutOpen();
+      await dashboardDrilldownPanelActions.expectsCreateDrilldownFlyoutOpen();
 
       await testSubjects.click('actionFactoryItem-DASHBOARD_TO_DASHBOARD_DRILLDOWN');
-      await dashboardDrilldownsManage.fillInDashboardToDashboardDrilldownWizard({
+      await dashboardDrilldownPanelActions.fillInDashboardToDashboardDrilldownWizard({
         drilldownName: `My drilldown`,
         destinationDashboardTitle: `few panels`,
       });
 
-      await dashboardDrilldownsManage.saveChanges();
-      await dashboardDrilldownsManage.closeFlyout();
+      await dashboardDrilldownPanelActions.saveChanges();
+      await dashboardDrilldownPanelActions.closeFlyout();
 
-      expect(await dashboardDrilldownsManage.getPanelDrilldownCount()).to.be(1);
+      expect(await dashboardDrilldownPanelActions.getPanelDrilldownCount()).to.be(1);
 
       const panel = (await dashboard.getDashboardPanels())[0];
       const img = await panel.findByCssSelector('img.euiImage');

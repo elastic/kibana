@@ -55,7 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardDrilldownsManage.closeFlyout();
 
       // check that drilldown notification badge is shown
-      expect(await dashboardDrilldownsManage.getPanelDrilldownCount()).to.be(2);
+      expect(await dashboardDrilldownPanelActions.getPanelDrilldownCount()).to.be(2);
 
       // save dashboard, navigate to view mode
       await dashboard.saveDashboard(dashboardDrilldownsManage.DASHBOARD_WITH_AREA_CHART_NAME, {
