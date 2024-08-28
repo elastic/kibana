@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const SAME_FAMILY = i18n.translate(
+export const SAME_FAMILY_BADGE_LABEL = i18n.translate(
   'securitySolutionPackages.ecsDataQualityDashboard.sameFamilyBadgeLabel',
   {
     defaultMessage: 'same family',
