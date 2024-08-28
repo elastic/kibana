@@ -81,8 +81,14 @@ export const registerSyntheticsStatusCheckRule = (
 
       const isCustomRule = !isEmpty(params);
 
-      const { isLocationBased, isTimeWindow, isChecksBased, downThreshold, numberOfLocations } =
-        getConditionType(params.condition);
+      const {
+        isLocationBased,
+        isTimeWindow,
+        isChecksBased,
+        downThreshold,
+        numberOfLocations,
+        numberOfChecks,
+      } = getConditionType(params.condition);
 
       if (isLocationBased) {
         handleLocationBasedAlert({
@@ -112,6 +118,7 @@ export const registerSyntheticsStatusCheckRule = (
         upConfigs,
         dateFormat,
         tz,
+        numberOfChecks,
       });
       return {
         state: updateState(ruleState, !isEmpty(downConfigs), { downConfigs }),
@@ -159,7 +166,6 @@ const handleLocationBasedAlert = ({
     const monitorSummary = statusRule.getLocationBasedDownSummary({
       statusConfigs: configs,
       downThreshold,
-      noOfLocations: locationsThreshold,
     });
     const alertId = `${configId}_locations_based`;
     statusRule.scheduleAlert({

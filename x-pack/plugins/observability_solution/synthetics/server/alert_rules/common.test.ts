@@ -272,6 +272,7 @@ describe('setRecoveredAlertsContext', () => {
       upConfigs: {},
       dateFormat,
       tz: 'UTC',
+      numberOfChecks: 1,
     });
     expect(alertsClientMock.setAlertData).toBeCalledWith({
       id: idWithLocation,
@@ -352,6 +353,7 @@ describe('setRecoveredAlertsContext', () => {
       upConfigs: {},
       dateFormat,
       tz: 'UTC',
+      numberOfChecks: 1,
     });
     expect(alertsClientMock.setAlertData).toBeCalledWith({
       id: idWithLocation,
@@ -431,6 +433,7 @@ describe('setRecoveredAlertsContext', () => {
       upConfigs,
       dateFormat,
       tz: 'UTC',
+      numberOfChecks: 1,
     });
     expect(alertsClientMock.setAlertData).toBeCalledWith({
       id: idWithLocation,
