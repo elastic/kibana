@@ -25,16 +25,11 @@ export const SnapshotPage = () => {
   useTrackPageview({ app: 'infra_metrics', path: 'inventory' });
   useTrackPageview({ app: 'infra_metrics', path: 'inventory', delay: 15000 });
 
-  useMetricsBreadcrumbs(
-    [
-      {
-        text: inventoryTitle,
-      },
-    ],
+  useMetricsBreadcrumbs([
     {
-      omitOnServerless: true,
-    }
-  );
+      text: inventoryTitle,
+    },
+  ]);
 
   return (
     <EuiErrorBoundary>

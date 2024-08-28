@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { ChromeBreadcrumb } from '@kbn/core/public';
 import { useBreadcrumbs, useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { METRICS_APP } from '../../common/constants';
@@ -14,28 +14,33 @@ import { useKibanaContextForPlugin } from './use_kibana';
 
 export const useMetricsBreadcrumbs = (
   extraCrumbs: ChromeBreadcrumb[],
-  options?: { omitOnServerless?: boolean }
+  options?: { deeperContextServerless: boolean }
 ) => {
   const {
     services: { serverless },
   } = useKibanaContextForPlugin();
-  const { omitOnServerless = false } = options || {};
   const appLinkProps = useLinkProps({ app: METRICS_APP });
 
-  const breadcrumbs = useMemo(() => {
-    if (omitOnServerless && serverless) {
-      return [];
-    }
-    return serverless
-      ? extraCrumbs
-      : [
-          {
-            ...appLinkProps,
-            text: metricsTitle,
-          },
-          ...extraCrumbs,
-        ];
-  }, [omitOnServerless, serverless, extraCrumbs, appLinkProps]);
+  const breadcrumbs = useMemo(
+    () => [
+      {
+        ...appLinkProps,
+        text: metricsTitle,
+      },
+      ...extraCrumbs,
+    ],
+    [appLinkProps, extraCrumbs]
+  );
 
-  useBreadcrumbs(breadcrumbs, { serverless });
+  useBreadcrumbs(breadcrumbs);
+
+  useEffect(() => {
+    // For deeper context breadcrumbs in serveless, the `serverless` plugin provides its own breadcrumb service.
+    // https://docs.elastic.dev/kibana-dev-docs/serverless-project-navigation#breadcrumbs
+    if (serverless && options?.deeperContextServerless) {
+      // The initial path is already set in the breadcrumbs
+      const [, ...serverlessBreadcrumbs] = breadcrumbs;
+      serverless.setBreadcrumbs(serverlessBreadcrumbs);
+    }
+  }, [breadcrumbs, options?.deeperContextServerless, serverless]);
 };

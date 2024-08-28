@@ -27,16 +27,11 @@ export const MetricsExplorerPage = () => {
   useTrackPageview({ app: 'infra_metrics', path: 'metrics_explorer' });
   useTrackPageview({ app: 'infra_metrics', path: 'metrics_explorer', delay: 15000 });
 
-  useMetricsBreadcrumbs(
-    [
-      {
-        text: metricsExplorerTitle,
-      },
-    ],
+  useMetricsBreadcrumbs([
     {
-      omitOnServerless: true,
-    }
-  );
+      text: metricsExplorerTitle,
+    },
+  ]);
 
   return (
     <MetricsExplorerOptionsContainer>
@@ -85,16 +80,11 @@ const MetricsExplorerContent = () => {
     }
   }, [currentView]);
 
-  useMetricsBreadcrumbs(
-    [
-      {
-        text: metricsExplorerTitle,
-      },
-    ],
+  useMetricsBreadcrumbs([
     {
-      omitOnServerless: true,
-    }
-  );
+      text: metricsExplorerTitle,
+    },
+  ]);
 
   const viewState = {
     options,
