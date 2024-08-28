@@ -40,6 +40,7 @@ import {
   TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING,
 } from './task_runner';
 import { schema } from '@kbn/config-schema';
+import { CLAIM_STRATEGY_MGET, CLAIM_STRATEGY_UPDATE_BY_QUERY } from '../config';
 
 const baseDelay = 5 * 60 * 1000;
 const executionContext = executionContextServiceMock.createSetupContract();
@@ -766,6 +767,36 @@ describe('TaskManagerRunner', () => {
       const timeoutDelay = timeoutMinutes * 60 * 1000;
       expect(instance.retryAt!.getTime()).toEqual(new Date(Date.now() + timeoutDelay).getTime());
       expect(instance.enabled).not.toBeDefined();
+    });
+
+    test('skips marking task as running for mget claim strategy', async () => {
+      const { runner, store } = await pendingStageSetup({
+        instance: {
+          schedule: {
+            interval: '10m',
+          },
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              run: async () => undefined,
+            }),
+          },
+        },
+        strategy: CLAIM_STRATEGY_MGET,
+      });
+      const result = await runner.markTaskAsRunning();
+
+      expect(result).toBe(true);
+      expect(apm.startTransaction).not.toHaveBeenCalled();
+      expect(mockApmTrans.end).not.toHaveBeenCalled();
+
+      expect(runner.id).toEqual('foo');
+      expect(runner.taskType).toEqual('bar');
+      expect(runner.toString()).toEqual('bar "foo"');
+
+      expect(store.update).not.toHaveBeenCalled();
     });
 
     describe('TaskEvents', () => {
@@ -2259,6 +2290,7 @@ describe('TaskManagerRunner', () => {
     definitions?: TaskDefinitionRegistry;
     onTaskEvent?: jest.Mock<(event: TaskEvent<unknown, unknown>) => void>;
     allowReadingInvalidState?: boolean;
+    strategy?: string;
   }
 
   function withAnyTiming(taskRun: TaskRun) {
@@ -2335,6 +2367,7 @@ describe('TaskManagerRunner', () => {
         warn_threshold: 5000,
       },
       allowReadingInvalidState: opts.allowReadingInvalidState || false,
+      strategy: opts.strategy ?? CLAIM_STRATEGY_UPDATE_BY_QUERY,
     });
 
     if (stage === TaskRunningStage.READY_TO_RUN) {
