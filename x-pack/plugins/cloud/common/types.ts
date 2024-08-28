@@ -16,7 +16,7 @@ export type OnBoardingDefaultSolution = 'es' | 'oblt' | 'security';
  * x-pack/plugins/spaces/server/spaces_client/spaces_client.ts
  * x-pack/plugins/spaces/common/types/space/v1.ts
  */
-interface InternalSpaceClient {
+export interface InternalSpaceClient {
   /**
    * Retrieve a space by its id.
    * @param id the space id.

@@ -11,9 +11,9 @@ import {
   RouteValidatorConfig,
 } from '@kbn/core/server';
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
-import { ISpacesClient, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
 import { setDefaultSpaceSolutionType } from './set_default_space_solution';
+import { InternalSpaceClient, InternalSpacesContract } from '../../common';
 
 const mockRouteContext = {
   licensing: {
@@ -53,15 +53,15 @@ const createMockSpaceClient = () => {
     update: jest.fn(() => {
       return mockDefaultSpace;
     }),
-  } as unknown as jest.Mocked<ISpacesClient>;
+  } as unknown as jest.Mocked<InternalSpaceClient>;
 
   return mockSpaceClient;
 };
 
-const createMockSpaceService = (spaceClient: ISpacesClient) => {
+const createMockSpaceService = (spaceClient: InternalSpaceClient) => {
   const mockSpaceService = {
     createSpacesClient: jest.fn(() => spaceClient),
-  } as unknown as jest.Mocked<SpacesPluginStart['spacesService']>;
+  } as unknown as jest.Mocked<InternalSpacesContract['spacesService']>;
 
   return jest.fn().mockResolvedValue(mockSpaceService);
 };

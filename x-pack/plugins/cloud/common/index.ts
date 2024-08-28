@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export type { OnBoardingDefaultSolution, InternalSpacesContract } from './types';
+export type {
+  OnBoardingDefaultSolution,
+  InternalSpacesContract,
+  InternalSpaceClient,
+} from './types';
