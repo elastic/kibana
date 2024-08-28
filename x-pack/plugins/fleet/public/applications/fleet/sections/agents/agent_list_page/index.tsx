@@ -101,7 +101,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     setSelectedStatus,
     selectedTags,
     setSelectedTags,
-    agentPolicies,
+    allAgentPolicies,
     agentPoliciesRequest,
     agentPoliciesIndexedById,
     pagination,
@@ -290,14 +290,14 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             refreshAgentActivity={isLoading}
             setSearch={setSearch}
             setSelectedStatus={setSelectedStatus}
-            agentPolicies={agentPolicies}
+            agentPolicies={allAgentPolicies}
           />
         </EuiPortal>
       ) : null}
       {enrollmentFlyout.isOpen ? (
         <EuiPortal>
           <AgentEnrollmentFlyout
-            agentPolicy={agentPolicies.find((p) => p.id === enrollmentFlyout.selectedPolicyId)}
+            agentPolicy={allAgentPolicies.find((p) => p.id === enrollmentFlyout.selectedPolicyId)}
             onClose={() => {
               setEnrollmentFlyoutState({ isOpen: false });
               fetchData();
@@ -405,7 +405,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       )}
       {/* Search and filter bar */}
       <SearchAndFilterBar
-        agentPolicies={agentPolicies}
+        agentPolicies={allAgentPolicies}
         draftKuery={draftKuery}
         onDraftKueryChange={setDraftKuery}
         onSubmitSearch={onSubmitSearch}
