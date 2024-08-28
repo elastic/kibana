@@ -140,6 +140,12 @@ export const SolutionView: FunctionComponent<Props> = ({ space, onChange, sectio
               onChange={(solution) => {
                 onChange({ ...space, solution });
               }}
+              placeholder={i18n.translate(
+                'xpack.spaces.management.navigation.solutionViewDefaultValue',
+                {
+                  defaultMessage: 'Classic (Default)',
+                }
+              )}
             />
           </EuiFormRow>
         </EuiFlexItem>
