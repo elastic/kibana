@@ -12,6 +12,7 @@ import {
   ActionsClientSimpleChatModel,
   ActionsClientGeminiChatModel,
 } from '@kbn/langchain/server';
+import { SamplesFormat } from '../common';
 
 export interface IntegrationAssistantPluginSetup {
   setIsAvailable: (isAvailable: boolean) => void;
@@ -82,6 +83,16 @@ export interface EcsMappingState {
   results: object;
   samplesFormat: string;
   ecsVersion: string;
+}
+
+export interface LogFormatDetectionState {
+  lastExecutedChain: string;
+  logSamples: string[];
+  exAnswer: string;
+  finalized: boolean;
+  samplesFormat: SamplesFormat;
+  ecsVersion: string;
+  results: object;
 }
 
 export interface RelatedState {
