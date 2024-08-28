@@ -31,14 +31,14 @@ export const AzureCredentialsFormAgentless = ({
   updatePolicy,
   packageInfo,
 }: AzureCredentialsFormProps) => {
-  const integrationLink = cspIntegrationDocsNavigation.cspm.getStartedPath;
+  const documentationLink = cspIntegrationDocsNavigation.cspm.azureGetStartedPath;
   const options = getAzureCredentialsFormOptions();
   const group = options[AZURE_CREDENTIALS_TYPE.SERVICE_PRINCIPAL_WITH_CLIENT_SECRET];
   const fields = getInputVarsFields(input, group.fields);
 
   return (
     <>
-      <AzureSetupInfoContent integrationLink={integrationLink} />
+      <AzureSetupInfoContent documentationLink={documentationLink} />
       <EuiSpacer size="l" />
       <AzureInputVarFields
         packageInfo={packageInfo}
