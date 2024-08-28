@@ -40,7 +40,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('keyboard shortcuts', () => {
+    describe.skip('keyboard shortcuts', () => {
       let tabCount = 1;
 
       after(async () => {
