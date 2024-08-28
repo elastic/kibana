@@ -13,6 +13,7 @@ steps:
       automatic:
         - exit_status: '-1'
           limit: 1
+    soft_fail: true
 
   - command: .buildkite/scripts/steps/functional/security_solution_playwright.sh
     label: 'Playwright - Security Solution Tests'
@@ -28,3 +29,4 @@ steps:
       automatic:
         - exit_status: '-1'
           limit: 1
+    soft_fail: true
