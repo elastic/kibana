@@ -16,7 +16,7 @@ paths:
       description: >-
         The bulk action is applied to all anonymization fields that match the
         filter or to the list of anonymization fields by their IDs.
-      operationId: PerformBulkAction
+      operationId: PerformAnonymizationFieldsBulkAction
       requestBody:
         content:
           application/json:
@@ -422,7 +422,7 @@ paths:
       description: >-
         The bulk action is applied to all prompts that match the filter or to
         the list of prompts by their IDs.
-      operationId: PerformBulkAction
+      operationId: PerformPromptsBulkAction
       requestBody:
         content:
           application/json:

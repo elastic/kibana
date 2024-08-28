@@ -75,7 +75,7 @@ export const InspectorDataGrid = ({ columns, data, dataGridAriaLabel }: Inspecto
       // then the row index must be adjusted as `data` has already been pruned to the page size
       adjustedRowIndex = rowIndex - pagination.pageIndex * pagination.pageSize;
 
-      return gridData.hasOwnProperty(adjustedRowIndex)
+      return Object.hasOwn(gridData, adjustedRowIndex)
         ? gridData[adjustedRowIndex][columnId] || null
         : null;
     }) as EuiDataGridProps['renderCellValue'];

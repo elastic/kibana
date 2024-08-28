@@ -33,6 +33,7 @@ import { CopyToClipboardButton } from '../shared/copy_to_clipboard_button';
 import { LocatorButtonEmpty } from '../shared/locator_button_empty';
 import { GetStartedPanel } from '../shared/get_started_panel';
 import { isSupportedLogo, LogoIcon } from '../../shared/logo_icon';
+import { FeedbackButtons } from '../shared/feedback_buttons';
 
 export const AutoDetectPanel: FunctionComponent = () => {
   const { status, data, error, refetch, installedIntegrations } = useOnboardingFlow();
@@ -245,6 +246,7 @@ export const AutoDetectPanel: FunctionComponent = () => {
           },
         ]}
       />
+      <FeedbackButtons flow="auto-detect" />
     </EuiPanel>
   );
 };

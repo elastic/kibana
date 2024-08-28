@@ -7,19 +7,14 @@
 
 import React, { useEffect } from 'react';
 import {
-  EuiBetaBadge,
   EuiButton,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiModalBody,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
   EuiPanel,
   EuiSpacer,
   EuiSteps,
   EuiText,
-  EuiIcon,
   EuiButtonGroup,
   EuiCopy,
   EuiLink,
@@ -186,7 +181,7 @@ data:
       debug:
         verbosity: basic
       elasticsearch:
-        endpoints: 
+        endpoints:
         - \${env:ES_ENDPOINT}
         api_key: \${env:ES_API_KEY}
         logs_dynamic_index:
@@ -425,7 +420,7 @@ data:
       pipelines:
         logs:
           exporters:
-          - elasticsearch 
+          - elasticsearch
           - debug
           processors:
           - k8sattributes
@@ -551,10 +546,10 @@ spec:
       firstStepTitle: HOST_COMMAND,
       content: `arch=$(if ([[ $(arch) == "arm" || $(arch) == "aarch64" ]]); then echo "arm64"; else echo $(arch); fi)
 
-curl --output elastic-distro-${agentVersion}-linux-$arch.tar.gz --url https://${AGENT_CDN_BASE_URL}/elastic-agent-${agentVersion}-linux-$arch.tar.gz --proto '=https' --tlsv1.2 -fOL && mkdir -p elastic-distro-${agentVersion}-linux-$arch && tar -xvf elastic-distro-${agentVersion}-linux-$arch.tar.gz -C "elastic-distro-${agentVersion}-linux-$arch" --strip-components=1 && cd elastic-distro-${agentVersion}-linux-$arch 
+curl --output elastic-distro-${agentVersion}-linux-$arch.tar.gz --url https://${AGENT_CDN_BASE_URL}/elastic-agent-${agentVersion}-linux-$arch.tar.gz --proto '=https' --tlsv1.2 -fOL && mkdir -p elastic-distro-${agentVersion}-linux-$arch && tar -xvf elastic-distro-${agentVersion}-linux-$arch.tar.gz -C "elastic-distro-${agentVersion}-linux-$arch" --strip-components=1 && cd elastic-distro-${agentVersion}-linux-$arch
 
 sudo setcap 'cap_dac_read_search=ep' ./data/elastic-agent-*/elastic-agent
-        
+
 rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && mkdir -p ./data/otelcol && sed -i 's#\\\${env:STORAGE_DIR}#'"$PWD"/data/otelcol'#g' ./otel.yml && sed -i 's#\\\${env:ELASTIC_ENDPOINT}#${setup?.elasticsearchUrl}#g' ./otel.yml && sed -i 's/\\\${env:ELASTIC_API_KEY}/${apiKeyData?.apiKeyEncoded}/g' ./otel.yml`,
       start: './otelcol --config otel.yml',
       type: 'copy',
@@ -565,8 +560,8 @@ rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && mk
       firstStepTitle: HOST_COMMAND,
       content: `arch=$(if [[ $(arch) == "arm64" ]]; then echo "aarch64"; else echo $(arch); fi)
 
-curl --output elastic-distro-${agentVersion}-darwin-$arch.tar.gz --url https://${AGENT_CDN_BASE_URL}/elastic-agent-${agentVersion}-darwin-$arch.tar.gz --proto '=https' --tlsv1.2 -fOL && mkdir -p "elastic-distro-${agentVersion}-darwin-$arch" && tar -xvf elastic-distro-${agentVersion}-darwin-$arch.tar.gz -C "elastic-distro-${agentVersion}-darwin-$arch" --strip-components=1 && cd elastic-distro-${agentVersion}-darwin-$arch 
-      
+curl --output elastic-distro-${agentVersion}-darwin-$arch.tar.gz --url https://${AGENT_CDN_BASE_URL}/elastic-agent-${agentVersion}-darwin-$arch.tar.gz --proto '=https' --tlsv1.2 -fOL && mkdir -p "elastic-distro-${agentVersion}-darwin-$arch" && tar -xvf elastic-distro-${agentVersion}-darwin-$arch.tar.gz -C "elastic-distro-${agentVersion}-darwin-$arch" --strip-components=1 && cd elastic-distro-${agentVersion}-darwin-$arch
+
 rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && mkdir -p ./data/otelcol  && sed -i '' 's#\\\${env:STORAGE_DIR}#'"$PWD"/data/otelcol'#g' ./otel.yml && sed -i '' 's#\\\${env:ELASTIC_ENDPOINT}#${setup?.elasticsearchUrl}#g' ./otel.yml && sed -i '' 's/\\\${env:ELASTIC_API_KEY}/${apiKeyData?.apiKeyEncoded}/g' ./otel.yml`,
       start: './otelcol --config otel.yml',
       type: 'copy',
@@ -578,350 +573,285 @@ rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && mk
   const selectedContent = installTabContents.find((tab) => tab.id === selectedTab)!;
 
   return (
-    <EuiPanel hasBorder>
-      <EuiModalHeader>
-        <EuiModalHeaderTitle>
-          <EuiFlexGroup gutterSize="l" alignItems="flexStart">
-            {http && (
-              <EuiFlexItem grow={false}>
-                <EuiPanel paddingSize="s">
-                  <EuiIcon
-                    type={http?.staticAssets.getPluginAssetHref('opentelemetry.svg')}
-                    size="xxl"
-                  />
-                </EuiPanel>
-              </EuiFlexItem>
-            )}
-            <EuiFlexItem grow>
-              <EuiFlexGroup gutterSize="m" direction="column">
-                <EuiFlexGroup gutterSize="s" alignItems="center">
-                  <EuiFlexItem grow={false}>
-                    {i18n.translate(
-                      'xpack.observability_onboarding.otelLogsPanel.otelLogsModalHeaderTitleLabel',
-                      { defaultMessage: 'OpenTelemetry' }
-                    )}
-                  </EuiFlexItem>
+    <EuiPanel hasBorder paddingSize="xl">
+      <EuiFlexGroup direction="column" gutterSize="none">
+        <MultiIntegrationInstallBanner />
+        {error && (
+          <EuiFlexItem>
+            <ApiKeyBanner status={apiKeyStatus} payload={apiKeyData} error={error} />
+          </EuiFlexItem>
+        )}
+        <EuiSteps
+          steps={[
+            {
+              title: i18n.translate('xpack.observability_onboarding.otelLogsPanel.steps.platform', {
+                defaultMessage: 'Select your platform',
+              }),
 
-                  <EuiFlexItem grow={false}>
-                    <EuiBetaBadge
-                      label={i18n.translate(
-                        'xpack.observability_onboarding.otelLogsPanel.techPreviewBadge.label',
-                        {
-                          defaultMessage: 'Technical preview',
-                        }
+              children: (
+                <EuiFlexGroup direction="column">
+                  <EuiButtonGroup
+                    legend={i18n.translate(
+                      'xpack.observability_onboarding.otelLogsPanel.choosePlatform',
+                      { defaultMessage: 'Choose platform' }
+                    )}
+                    options={installTabContents.map(({ id, name }) => ({
+                      id,
+                      label: name,
+                    }))}
+                    type="single"
+                    idSelected={selectedTab}
+                    onChange={(id: string) => {
+                      setSelectedTab(id);
+                    }}
+                  />
+                  <EuiText>
+                    <p>{selectedContent.firstStepTitle}</p>
+                  </EuiText>
+                  <EuiFlexItem>
+                    <EuiCodeBlock language="sh" isCopyable overflowHeight={300}>
+                      {selectedContent.content}
+                    </EuiCodeBlock>
+                  </EuiFlexItem>
+                  <EuiFlexItem align="left">
+                    <EuiFlexGroup>
+                      {selectedContent.type === 'download' ? (
+                        <EuiButton
+                          iconType="download"
+                          color="primary"
+                          href={`data:application/yaml;base64,${Buffer.from(
+                            selectedContent.content,
+                            'utf8'
+                          ).toString('base64')}`}
+                          download={selectedContent.fileName}
+                          target="_blank"
+                          data-test-subj="obltOnboardingOtelDownloadConfig"
+                        >
+                          {i18n.translate(
+                            'xpack.observability_onboarding.installOtelCollector.configStep.downloadConfigButton',
+                            { defaultMessage: 'Download manifest' }
+                          )}
+                        </EuiButton>
+                      ) : (
+                        <EuiCopy textToCopy={selectedContent.content}>
+                          {(copy) => (
+                            <EuiButton
+                              data-test-subj="observabilityOnboardingOtelLogsPanelButton"
+                              iconType="copyClipboard"
+                              onClick={copy}
+                            >
+                              {i18n.translate(
+                                'xpack.observability_onboarding.installOtelCollector.configStep.copyCommand',
+                                { defaultMessage: 'Copy to clipboard' }
+                              )}
+                            </EuiButton>
+                          )}
+                        </EuiCopy>
                       )}
-                      size="m"
-                      color="hollow"
-                      tooltipContent={i18n.translate(
-                        'xpack.observability_onboarding.otelLogsPanel.techPreviewBadge.tooltip',
-                        {
-                          defaultMessage:
-                            'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
-                        }
-                      )}
-                      tooltipPosition={'right'}
-                    />
+                    </EuiFlexGroup>
                   </EuiFlexItem>
                 </EuiFlexGroup>
-                <EuiText size="s" color="subdued">
-                  <p>
-                    {i18n.translate(
-                      'xpack.observability_onboarding.otelLogsPanel.p.collectLogsWithOpenTelemetryLabel',
-                      {
-                        defaultMessage:
-                          'Collect logs and host metrics using the Elastic distribution of the OTel collector.',
-                      }
+              ),
+            },
+            {
+              title: i18n.translate('xpack.observability_onboarding.otelLogsPanel.steps.start', {
+                defaultMessage: 'Start the collector',
+              }),
+              children: (
+                <EuiFlexGroup direction="column">
+                  <EuiCallOut
+                    title={i18n.translate(
+                      'xpack.observability_onboarding.otelLogsPanel.limitationTitle',
+                      { defaultMessage: 'Configuration Information' }
                     )}
-                  </p>
-                </EuiText>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiModalHeaderTitle>
-      </EuiModalHeader>
-      <EuiModalBody>
-        <EuiFlexGroup direction="column" gutterSize="none">
-          <MultiIntegrationInstallBanner />
-          {error && (
-            <EuiFlexItem>
-              <ApiKeyBanner status={apiKeyStatus} payload={apiKeyData} error={error} />
-            </EuiFlexItem>
-          )}
-          <EuiSteps
-            steps={[
-              {
-                title: i18n.translate(
-                  'xpack.observability_onboarding.otelLogsPanel.steps.platform',
-                  {
-                    defaultMessage: 'Select your platform',
-                  }
-                ),
-
-                children: (
-                  <EuiFlexGroup direction="column">
-                    <EuiButtonGroup
-                      legend={i18n.translate(
-                        'xpack.observability_onboarding.otelLogsPanel.choosePlatform',
-                        { defaultMessage: 'Choose platform' }
+                    color="warning"
+                    iconType="iInCircle"
+                  >
+                    <p>
+                      {i18n.translate(
+                        'xpack.observability_onboarding.otelLogsPanel.historicalDataDescription',
+                        {
+                          defaultMessage: 'New log messages are collected from the setup onward.',
+                        }
                       )}
-                      options={installTabContents.map(({ id, name }) => ({
-                        id,
-                        label: name,
-                      }))}
-                      type="single"
-                      idSelected={selectedTab}
-                      onChange={(id: string) => {
-                        setSelectedTab(id);
-                      }}
-                    />
-                    <EuiText>
-                      <p>{selectedContent.firstStepTitle}</p>
-                    </EuiText>
-                    <EuiFlexItem>
-                      <EuiCodeBlock language="sh" isCopyable overflowHeight={300}>
-                        {selectedContent.content}
-                      </EuiCodeBlock>
+                    </p>
+                    {selectedTab !== 'kubernetes' && (
+                      <p>
+                        {i18n.translate(
+                          'xpack.observability_onboarding.otelLogsPanel.historicalDataDescription2',
+                          {
+                            defaultMessage:
+                              'The default log path is /var/log/*. You can change this path in the otel.yml file if needed.',
+                          }
+                        )}
+                      </p>
+                    )}
+                  </EuiCallOut>
+
+                  {selectedContent.prompt}
+                  {selectedContent.start && (
+                    <>
+                      <EuiText>
+                        <p>
+                          {i18n.translate(
+                            'xpack.observability_onboarding.otelLogsPanel.p.startTheCollectorLabel',
+                            {
+                              defaultMessage: 'Run the following command to start the collector',
+                            }
+                          )}
+                        </p>
+                      </EuiText>
+                      <CopyableCodeBlock content={selectedContent.start} />
+                    </>
+                  )}
+                </EuiFlexGroup>
+              ),
+            },
+            {
+              title: i18n.translate(
+                'xpack.observability_onboarding.otelLogsPanel.steps.visualize',
+                {
+                  defaultMessage: 'Visualize your data',
+                }
+              ),
+              children: (
+                <>
+                  <EuiText>
+                    <p>
+                      {i18n.translate(
+                        'xpack.observability_onboarding.otelLogsPanel.waitForTheDataLabel',
+                        {
+                          defaultMessage:
+                            'After running the previous command, come back and view your data.',
+                        }
+                      )}
+                    </p>
+                  </EuiText>
+                  <EuiSpacer />
+                  <EuiFlexGroup>
+                    <EuiFlexItem grow={false}>
+                      <EuiImage
+                        src={http?.staticAssets.getPluginAssetHref('waterfall_screen.svg')}
+                        width={160}
+                        alt="Illustration"
+                        hasShadow
+                      />
                     </EuiFlexItem>
-                    <EuiFlexItem align="left">
-                      <EuiFlexGroup>
-                        {selectedContent.type === 'download' ? (
-                          <EuiButton
-                            iconType="download"
-                            color="primary"
-                            href={`data:application/yaml;base64,${Buffer.from(
-                              selectedContent.content,
-                              'utf8'
-                            ).toString('base64')}`}
-                            download={selectedContent.fileName}
-                            target="_blank"
-                            data-test-subj="obltOnboardingOtelDownloadConfig"
-                          >
-                            {i18n.translate(
-                              'xpack.observability_onboarding.installOtelCollector.configStep.downloadConfigButton',
-                              { defaultMessage: 'Download manifest' }
-                            )}
-                          </EuiButton>
-                        ) : (
-                          <EuiCopy textToCopy={selectedContent.content}>
-                            {(copy) => (
-                              <EuiButton
-                                data-test-subj="observabilityOnboardingOtelLogsPanelButton"
-                                iconType="copyClipboard"
-                                onClick={copy}
+                    <EuiFlexItem grow>
+                      <EuiFlexGroup direction="column" gutterSize="xs">
+                        {deeplinks?.logs && (
+                          <>
+                            <EuiFlexItem grow={false}>
+                              <EuiText size="s">
+                                {i18n.translate(
+                                  'xpack.observability_onboarding.otelLogsPanel.viewAndAnalyzeYourTextLabel',
+                                  { defaultMessage: 'View and analyze your logs' }
+                                )}
+                              </EuiText>
+                            </EuiFlexItem>
+                            <EuiFlexItem grow={false}>
+                              <EuiLink
+                                data-test-subj="obltOnboardingExploreLogs"
+                                href={deeplinks.logs}
                               >
                                 {i18n.translate(
-                                  'xpack.observability_onboarding.installOtelCollector.configStep.copyCommand',
-                                  { defaultMessage: 'Copy to clipboard' }
+                                  'xpack.observability_onboarding.otelLogsPanel.exploreLogs',
+                                  {
+                                    defaultMessage: 'Open Logs Explorer',
+                                  }
                                 )}
-                              </EuiButton>
-                            )}
-                          </EuiCopy>
+                              </EuiLink>
+                            </EuiFlexItem>
+                          </>
+                        )}
+                        <EuiSpacer size="s" />
+                        {deeplinks?.metrics && (
+                          <>
+                            <EuiFlexItem grow={false}>
+                              <EuiText size="s">
+                                {i18n.translate(
+                                  'xpack.observability_onboarding.otelLogsPanel.viewAndAnalyzeYourMetricsTextLabel',
+                                  { defaultMessage: 'View and analyze your metrics' }
+                                )}
+                              </EuiText>
+                            </EuiFlexItem>
+                            <EuiFlexItem grow={false}>
+                              <EuiLink
+                                data-test-subj="obltOnboardingExploreMetrics"
+                                href={deeplinks.metrics}
+                              >
+                                {i18n.translate(
+                                  'xpack.observability_onboarding.otelLogsPanel.exploreMetrics',
+                                  {
+                                    defaultMessage: 'Open Hosts',
+                                  }
+                                )}
+                              </EuiLink>
+                            </EuiFlexItem>
+                          </>
                         )}
                       </EuiFlexGroup>
                     </EuiFlexItem>
                   </EuiFlexGroup>
-                ),
-              },
-              {
-                title: i18n.translate('xpack.observability_onboarding.otelLogsPanel.steps.start', {
-                  defaultMessage: 'Start the collector',
-                }),
-                children: (
-                  <EuiFlexGroup direction="column">
-                    <EuiCallOut
-                      title={i18n.translate(
-                        'xpack.observability_onboarding.otelLogsPanel.limitationTitle',
-                        { defaultMessage: 'Configuration Information' }
-                      )}
-                      color="warning"
-                      iconType="iInCircle"
-                    >
-                      <p>
-                        {i18n.translate(
-                          'xpack.observability_onboarding.otelLogsPanel.historicalDataDescription',
-                          {
-                            defaultMessage: 'New log messages are collected from the setup onward.',
-                          }
-                        )}
-                      </p>
-                      {selectedTab !== 'kubernetes' && (
-                        <p>
-                          {i18n.translate(
-                            'xpack.observability_onboarding.otelLogsPanel.historicalDataDescription2',
-                            {
-                              defaultMessage:
-                                'The default log path is /var/log/*. You can change this path in the otel.yml file if needed.',
-                            }
-                          )}
-                        </p>
-                      )}
-                    </EuiCallOut>
-
-                    {selectedContent.prompt}
-                    {selectedContent.start && (
-                      <>
-                        <EuiText>
-                          <p>
+                  <EuiSpacer />
+                  <EuiText size="xs" color="subdued">
+                    <FormattedMessage
+                      id="xpack.observability_onboarding.otelLogsPanel.troubleshooting"
+                      defaultMessage="Find more details and troubleshooting solution in our documentation. {link}"
+                      values={{
+                        link: (
+                          <EuiLink
+                            data-test-subj="observabilityOnboardingOtelLogsPanelDocumentationLink"
+                            href="https://ela.st/elastic-otel"
+                            target="_blank"
+                            external
+                          >
                             {i18n.translate(
-                              'xpack.observability_onboarding.otelLogsPanel.p.startTheCollectorLabel',
-                              {
-                                defaultMessage: 'Run the following command to start the collector',
-                              }
+                              'xpack.observability_onboarding.otelLogsPanel.documentationLink',
+                              { defaultMessage: 'Open documentation' }
                             )}
-                          </p>
-                        </EuiText>
-                        <CopyableCodeBlock content={selectedContent.start} />
-                      </>
-                    )}
-                  </EuiFlexGroup>
-                ),
-              },
-              {
-                title: i18n.translate(
-                  'xpack.observability_onboarding.otelLogsPanel.steps.visualize',
-                  {
-                    defaultMessage: 'Visualize your data',
-                  }
-                ),
-                children: (
-                  <>
-                    <EuiText>
-                      <p>
-                        {i18n.translate(
-                          'xpack.observability_onboarding.otelLogsPanel.waitForTheDataLabel',
-                          {
-                            defaultMessage:
-                              'After running the previous command, come back and view your data.',
-                          }
-                        )}
-                      </p>
-                    </EuiText>
-                    <EuiSpacer />
-                    <EuiFlexGroup>
-                      <EuiFlexItem grow={false}>
-                        <EuiImage
-                          src={http?.staticAssets.getPluginAssetHref('waterfall_screen.svg')}
-                          width={160}
-                          alt="Illustration"
-                          hasShadow
-                        />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow>
-                        <EuiFlexGroup direction="column" gutterSize="xs">
-                          {deeplinks?.logs && (
-                            <>
-                              <EuiFlexItem grow={false}>
-                                <EuiText size="s">
-                                  {i18n.translate(
-                                    'xpack.observability_onboarding.otelLogsPanel.viewAndAnalyzeYourTextLabel',
-                                    { defaultMessage: 'View and analyze your logs' }
-                                  )}
-                                </EuiText>
-                              </EuiFlexItem>
-                              <EuiFlexItem grow={false}>
-                                <EuiLink
-                                  data-test-subj="obltOnboardingExploreLogs"
-                                  href={deeplinks.logs}
-                                >
-                                  {i18n.translate(
-                                    'xpack.observability_onboarding.otelLogsPanel.exploreLogs',
-                                    {
-                                      defaultMessage: 'Open Logs Explorer',
-                                    }
-                                  )}
-                                </EuiLink>
-                              </EuiFlexItem>
-                            </>
-                          )}
-                          <EuiSpacer size="s" />
-                          {deeplinks?.metrics && (
-                            <>
-                              <EuiFlexItem grow={false}>
-                                <EuiText size="s">
-                                  {i18n.translate(
-                                    'xpack.observability_onboarding.otelLogsPanel.viewAndAnalyzeYourMetricsTextLabel',
-                                    { defaultMessage: 'View and analyze your metrics' }
-                                  )}
-                                </EuiText>
-                              </EuiFlexItem>
-                              <EuiFlexItem grow={false}>
-                                <EuiLink
-                                  data-test-subj="obltOnboardingExploreMetrics"
-                                  href={deeplinks.metrics}
-                                >
-                                  {i18n.translate(
-                                    'xpack.observability_onboarding.otelLogsPanel.exploreMetrics',
-                                    {
-                                      defaultMessage: 'Open Hosts',
-                                    }
-                                  )}
-                                </EuiLink>
-                              </EuiFlexItem>
-                            </>
-                          )}
-                        </EuiFlexGroup>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                    <EuiSpacer />
-                    <EuiText size="xs" color="subdued">
-                      <FormattedMessage
-                        id="xpack.observability_onboarding.otelLogsPanel.troubleshooting"
-                        defaultMessage="Find more details and troubleshooting solution in our documentation. {link}"
-                        values={{
-                          link: (
-                            <EuiLink
-                              data-test-subj="observabilityOnboardingOtelLogsPanelDocumentationLink"
-                              href="https://ela.st/elastic-otel"
-                              target="_blank"
-                              external
-                            >
-                              {i18n.translate(
-                                'xpack.observability_onboarding.otelLogsPanel.documentationLink',
-                                { defaultMessage: 'Open documentation' }
-                              )}
-                            </EuiLink>
-                          ),
-                        }}
-                      />
-                    </EuiText>
-                  </>
-                ),
-              },
-            ]}
-          />
-          <EuiHorizontalRule />
+                          </EuiLink>
+                        ),
+                      }}
+                    />
+                  </EuiText>
+                </>
+              ),
+            },
+          ]}
+        />
+        <EuiHorizontalRule />
 
-          <EuiFlexGroup responsive={false} direction="row" alignItems="center" gutterSize="s" wrap>
-            <EuiFlexItem grow={false}>
-              <EuiText color="subdued" size="s">
-                {i18n.translate(
-                  'xpack.observability_onboarding.otelLogsPanel.feedbackButtons.label',
-                  {
-                    defaultMessage: 'Was this helpful or were there any problems?',
-                  }
-                )}
-              </EuiText>
-            </EuiFlexItem>
+        <EuiFlexGroup responsive={false} direction="row" alignItems="center" gutterSize="s" wrap>
+          <EuiFlexItem grow={false}>
+            <EuiText color="subdued" size="s">
+              {i18n.translate(
+                'xpack.observability_onboarding.otelLogsPanel.feedbackButtons.label',
+                {
+                  defaultMessage: 'Was this helpful or were there any problems?',
+                }
+              )}
+            </EuiText>
+          </EuiFlexItem>
 
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                iconType="editorComment"
-                data-test-subj="observabilityOnboardingOtelLogsPanelGiveFeedbackButton"
-                href={feedbackUrl}
-                color="warning"
-                target="_blank"
-              >
-                {i18n.translate(
-                  'xpack.observability_onboarding.otelLogsPanel.feedbackButtons.title',
-                  {
-                    defaultMessage: 'Give feedback',
-                  }
-                )}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              iconType="editorComment"
+              data-test-subj="observabilityOnboardingOtelLogsPanelGiveFeedbackButton"
+              href={feedbackUrl}
+              color="warning"
+              target="_blank"
+            >
+              {i18n.translate(
+                'xpack.observability_onboarding.otelLogsPanel.feedbackButtons.title',
+                {
+                  defaultMessage: 'Give feedback',
+                }
+              )}
+            </EuiButton>
+          </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiModalBody>
+      </EuiFlexGroup>
     </EuiPanel>
   );
 };

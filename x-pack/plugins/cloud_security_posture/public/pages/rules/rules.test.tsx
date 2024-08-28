@@ -16,7 +16,6 @@ import { PageUrlParams } from '../../../common/types/latest';
 import { createReactQueryResponse } from '../../test/fixtures/react_query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
-import { useSubscriptionStatus } from '../../common/hooks/use_subscription_status';
 import { useCspIntegrationLink } from '../../common/navigation/use_csp_integration_link';
 import { useLicenseManagementLocatorApi } from '../../common/api/use_license_management_locator_api';
 import { useCspBenchmarkIntegrationsV2 } from '../benchmarks/use_csp_benchmark_integrations';
@@ -24,7 +23,7 @@ import * as TEST_SUBJECTS from './test_subjects';
 
 jest.mock('../../common/api/use_setup_status_api');
 jest.mock('../../common/api/use_license_management_locator_api');
-jest.mock('../../common/hooks/use_subscription_status');
+jest.mock('../../common/hooks/use_is_subscription_status_valid');
 jest.mock('../../common/navigation/use_csp_integration_link');
 jest.mock('../benchmarks/use_csp_benchmark_integrations', () => ({
   useCspBenchmarkIntegrationsV2: jest.fn(),
@@ -78,13 +77,6 @@ describe('<Rules />', () => {
             { index: 'logs-cloud_security_posture.findings-default*', status: 'not-empty' },
           ],
         },
-      })
-    );
-
-    (useSubscriptionStatus as jest.Mock).mockImplementation(() =>
-      createReactQueryResponse({
-        status: 'success',
-        data: true,
       })
     );
 

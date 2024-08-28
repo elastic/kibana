@@ -1,7 +1,7 @@
 get:
   summary: Get agent action status
   tags:
-    - Agent actions
+    - Elastic Agent actions
   parameters:
     - $ref: ../components/parameters/page_size.yaml
     - $ref: ../components/parameters/page_index.yaml

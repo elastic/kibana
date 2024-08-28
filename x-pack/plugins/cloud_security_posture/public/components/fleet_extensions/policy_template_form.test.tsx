@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { render, waitFor, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {
   CspPolicyTemplateForm,
@@ -53,9 +53,12 @@ import {
   GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ,
   SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ,
   SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ,
+  SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT,
 } from '../test_subjects';
 import { ExperimentalFeaturesService } from '@kbn/fleet-plugin/public/services';
 import { createFleetTestRendererMock } from '@kbn/fleet-plugin/public/mock';
+import { useIsSubscriptionStatusValid } from '../../common/hooks/use_is_subscription_status_valid';
+import { useLicenseManagementLocatorApi } from '../../common/api/use_license_management_locator_api';
 
 // mock useParams
 jest.mock('react-router-dom', () => ({
@@ -66,6 +69,8 @@ jest.mock('react-router-dom', () => ({
 }));
 jest.mock('../../common/api/use_setup_status_api');
 jest.mock('../../common/api/use_package_policy_list');
+jest.mock('../../common/hooks/use_is_subscription_status_valid');
+jest.mock('../../common/api/use_license_management_locator_api');
 jest.mock('@kbn/fleet-plugin/public/services/experimental_features');
 
 const onChange = jest.fn();
@@ -85,9 +90,11 @@ describe('<CspPolicyTemplateForm />', () => {
     (useParams as jest.Mock).mockReturnValue({
       integration: undefined,
     });
+
     mockedExperimentalFeaturesService.get.mockReturnValue({
       secretsStorage: true,
     } as any);
+
     (usePackagePolicyList as jest.Mock).mockImplementation((packageName) =>
       createReactQueryResponseWithRefetch({
         status: 'success',
@@ -96,11 +103,20 @@ describe('<CspPolicyTemplateForm />', () => {
         },
       })
     );
+
     onChange.mockClear();
+
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponseWithRefetch({
         status: 'success',
         data: { status: 'indexed', installedPackageVersion: '1.2.13' },
+      })
+    );
+
+    (useIsSubscriptionStatusValid as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: true,
       })
     );
   });
@@ -144,6 +160,53 @@ describe('<CspPolicyTemplateForm />', () => {
       </FleetAppWrapper>
     );
   };
+
+  it('shows license block if subscription is not allowed', () => {
+    (useIsSubscriptionStatusValid as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: false,
+      })
+    );
+
+    const policy = getMockPolicyK8s();
+    const { rerender } = render(<WrappedComponent newPolicy={policy} />);
+
+    rerender(<WrappedComponent newPolicy={{ ...policy, namespace: 'some-namespace' }} />);
+    expect(screen.getByTestId(SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT)).toBeInTheDocument();
+  });
+
+  it('license block renders with license url locator', () => {
+    (useIsSubscriptionStatusValid as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: false,
+      })
+    );
+    (useLicenseManagementLocatorApi as jest.Mock).mockImplementation(() => 'http://license-url');
+
+    const policy = getMockPolicyK8s();
+    const { rerender } = render(<WrappedComponent newPolicy={policy} />);
+
+    rerender(<WrappedComponent newPolicy={{ ...policy, namespace: 'some-namespace' }} />);
+    expect(screen.getByTestId('has_locator')).toBeInTheDocument();
+  });
+
+  it('license block renders without license url locator', () => {
+    (useIsSubscriptionStatusValid as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: false,
+      })
+    );
+    (useLicenseManagementLocatorApi as jest.Mock).mockImplementation(undefined);
+
+    const policy = getMockPolicyK8s();
+    const { rerender } = render(<WrappedComponent newPolicy={policy} />);
+
+    rerender(<WrappedComponent newPolicy={{ ...policy, namespace: 'some-namespace' }} />);
+    expect(screen.getByTestId('no_locator')).toBeInTheDocument();
+  });
 
   it('updates package policy namespace to default when it changes', () => {
     const policy = getMockPolicyK8s();
@@ -854,7 +917,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       expect(getByText('Getting Started')).toHaveAttribute(
         'href',
-        'https://ela.st/cspm-get-started'
+        'https://www.elastic.co/guide/en/security/current/cspm-get-started.html'
       );
     });
 
@@ -871,7 +934,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       expect(getByTestId('externalLink')).toHaveAttribute(
         'href',
-        'https://ela.st/cspm-get-started'
+        'https://www.elastic.co/guide/en/security/current/cspm-get-started.html'
       );
     });
 
@@ -1161,7 +1224,10 @@ describe('<CspPolicyTemplateForm />', () => {
         <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoCspmGCP()} />
       );
 
-      expect(getByText('documentation')).toHaveAttribute('href', 'https://ela.st/cspm-get-started');
+      expect(getByText('documentation')).toHaveAttribute(
+        'href',
+        'https://www.elastic.co/guide/en/security/current/cspm-get-started-gcp.html'
+      );
     });
 
     it(`renders Google Cloud Shell forms when Setup Access is set to Google Cloud Shell`, () => {

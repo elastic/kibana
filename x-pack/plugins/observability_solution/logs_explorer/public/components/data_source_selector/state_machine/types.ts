@@ -7,6 +7,7 @@
 import { DataViewDescriptor } from '../../../../common/data_views/models/data_view_descriptor';
 import { FilterDataViews, SearchDataViews } from '../../../hooks/use_data_views';
 import {
+  AllDatasetSelection,
   DataSourceSelection,
   DataSourceSelectionChangeHandler,
 } from '../../../../common/data_source_selection';
@@ -23,6 +24,7 @@ import { DataViewsFilterParams } from '../../../state_machines/data_views';
 
 export interface DefaultDataSourceSelectorContext {
   selection: DataSourceSelection;
+  allSelection: AllDatasetSelection;
   tabId: TabId;
   panelId: PanelId;
   searchCache: IHashedCache<PanelId | TabId, DataSourceSelectorSearchParams>;
