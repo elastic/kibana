@@ -33,13 +33,16 @@ export interface MonitorOverviewState {
   error: IHttpSerializedFetchError | null;
   groupBy: GroupByState;
   trendStats: TrendTable;
-  trendsLoading: boolean;
-  trendsPendingStack: Array<{ configId: string; locationId: string }>;
 }
 
 export interface GroupByState {
   field: ConfigKey.TAGS | ConfigKey.PROJECT_ID | ConfigKey.MONITOR_TYPE | 'locationId' | 'none';
   order: 'asc' | 'desc';
+}
+
+export interface TrendKey {
+  configId: string;
+  locationId: string;
 }
 
 export interface TrendDatum {

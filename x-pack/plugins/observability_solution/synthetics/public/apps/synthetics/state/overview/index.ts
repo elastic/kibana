@@ -15,7 +15,6 @@ import {
   setFlyoutConfig,
   setOverviewGroupByAction,
   setOverviewPageStateAction,
-  stackTrendStats,
   toggleErrorPopoverOpen,
   trendStatsBatch,
 } from './actions';
@@ -34,8 +33,6 @@ const initialState: MonitorOverviewState = {
     sortField: 'status',
   },
   trendStats: {},
-  trendsPendingStack: [],
-  trendsLoading: false,
   groupBy: { field: 'none', order: 'asc' },
   flyoutConfig: null,
   loading: false,
@@ -106,19 +103,10 @@ export const monitorOverviewReducer = createReducer(initialState, (builder) => {
         }
       }
     })
-    .addCase(trendStatsBatch.fail, (state, action) => {
-      console.error('received error', action.payload);
-      state.trendsLoading = false;
-    })
     .addCase(trendStatsBatch.success, (state, action) => {
-      console.log('received trend data', trendStatsBatch.success);
-      state.trendsLoading = false;
       for (const key of Object.keys(action.payload)) {
         state.trendStats[key] = action.payload[key];
       }
-    })
-    .addCase(stackTrendStats, (state, action) => {
-      state.trendsPendingStack.push(...action.payload);
     });
 });
 

@@ -10,6 +10,7 @@ import { schema } from '@kbn/config-schema';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { SyntheticsRestApiRouteFactory } from '../types';
 import { fetchTrends } from './fetch_trends';
+import { TrendKey } from '../../../public/apps/synthetics/state';
 
 export const createOverviewTrendsRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
@@ -20,7 +21,7 @@ export const createOverviewTrendsRoute: SyntheticsRestApiRouteFactory = () => ({
   handler: async (routeContext): Promise<any> => {
     return withSpan('fetch trends', async () => {
       const esClient = routeContext.syntheticsEsClient;
-      const body = routeContext.request.body as Array<{ configId: string; locationId: string }>;
+      const body = routeContext.request.body as TrendKey[];
       const configs = body.reduce((acc: Record<string, string[]>, { configId, locationId }) => {
         if (!acc[configId]) {
           acc[configId] = [locationId];

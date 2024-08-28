@@ -11,6 +11,7 @@ import type {
   MonitorOverviewFlyoutConfig,
   MonitorOverviewPageState,
   MonitorOverviewState,
+  TrendKey,
   TrendTable,
 } from './models';
 import { MonitorOverviewResult } from '../../../../../common/runtime_types';
@@ -39,13 +40,4 @@ export const refreshOverviewTrends = createAsyncAction<void, TrendTable, any>(
   'refreshOverviewTrendStats'
 );
 
-export const trendStatsBatch = createAsyncAction<
-  Array<{ configId: string; locationId: string }>,
-  TrendTable,
-  any
->('batchTrendStats');
-
-export const trendStatsInFlight = createAction<boolean>('trendStatsInFlight');
-
-export const stackTrendStats =
-  createAction<Array<{ configId: string; locationId: string }>>('enqueueTrendStats');
+export const trendStatsBatch = createAsyncAction<TrendKey[], TrendTable, any>('batchTrendStats');

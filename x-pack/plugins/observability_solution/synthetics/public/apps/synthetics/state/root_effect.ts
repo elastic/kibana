@@ -37,7 +37,6 @@ import {
   fetchMonitorOverviewEffect,
   fetchOverviewTrendStats,
   refreshOverviewTrendStats,
-  popPendingTrendRequests,
 } from './overview';
 import { fetchServiceLocationsEffect } from './service_locations';
 import { browserJourneyEffects, fetchJourneyStepsEffect } from './browser_journey';
@@ -78,6 +77,5 @@ export const rootEffect = function* root(): Generator {
     fork(enableDefaultAlertingSilentlyEffect),
     fork(fetchOverviewTrendStats),
     fork(refreshOverviewTrendStats),
-    fork(popPendingTrendRequests),
   ]);
 };
