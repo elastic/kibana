@@ -14,9 +14,7 @@ import {
 import { SetupRouteOptions } from '../types';
 import { EntitySecurityException } from '../../lib/entities/errors/entity_security_exception';
 import { InvalidTransformError } from '../../lib/entities/errors/invalid_transform_error';
-import { readEntityDefinition } from '../../lib/entities/read_entity_definition';
 import { EntityDefinitionNotFound } from '../../lib/entities/errors/entity_not_found';
-import { uninstallEntityDefinition } from '../../lib/entities/uninstall_entity_definition';
 
 /**
  * @openapi
@@ -55,6 +53,7 @@ import { uninstallEntityDefinition } from '../../lib/entities/uninstall_entity_d
 export function deleteEntityDefinitionRoute<T extends RequestHandlerContext>({
   router,
   server,
+  getClient,
 }: SetupRouteOptions<T>) {
   router.delete<{ id: string }, { deleteData?: boolean }, unknown>(
     {
@@ -64,19 +63,12 @@ export function deleteEntityDefinitionRoute<T extends RequestHandlerContext>({
         query: buildRouteValidationWithZod(deleteEntityDefinitionQuerySchema.strict()),
       },
     },
-    async (context, req, res) => {
+    async (context, request, res) => {
       try {
-        const { logger } = server;
-        const soClient = (await context.core).savedObjects.client;
-        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-
-        const definition = await readEntityDefinition(soClient, req.params.id, logger);
-        await uninstallEntityDefinition({
-          definition,
-          soClient,
-          esClient,
-          logger,
-          deleteData: req.query.deleteData,
+        const client = await getClient({ request });
+        await client.deleteEntityDefinition({
+          id: request.params.id,
+          deleteData: request.query.deleteData,
         });
 
         return res.ok({ body: { acknowledged: true } });

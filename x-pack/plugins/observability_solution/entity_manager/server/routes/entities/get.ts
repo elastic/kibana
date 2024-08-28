@@ -9,7 +9,6 @@ import { RequestHandlerContext } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { getEntityDefinitionQuerySchema } from '@kbn/entities-schema';
 import { SetupRouteOptions } from '../types';
-import { findEntityDefinitions } from '../../lib/entities/find_entity_definition';
 
 /**
  * @openapi
@@ -52,6 +51,7 @@ import { findEntityDefinitions } from '../../lib/entities/find_entity_definition
  */
 export function getEntityDefinitionRoute<T extends RequestHandlerContext>({
   router,
+  getClient,
 }: SetupRouteOptions<T>) {
   router.get<unknown, { page?: number; perPage?: number }, unknown>(
     {
@@ -60,17 +60,15 @@ export function getEntityDefinitionRoute<T extends RequestHandlerContext>({
         query: buildRouteValidationWithZod(getEntityDefinitionQuerySchema.strict()),
       },
     },
-    async (context, req, res) => {
+    async (context, request, res) => {
       try {
-        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-        const soClient = (await context.core).savedObjects.client;
-        const definitions = await findEntityDefinitions({
-          esClient,
-          soClient,
-          page: req.query.page ?? 1,
-          perPage: req.query.perPage ?? 10,
+        const client = await getClient({ request });
+        const result = await client.getEntityDefinitions({
+          page: request.query.page,
+          perPage: request.query.perPage,
         });
-        return res.ok({ body: { definitions } });
+
+        return res.ok({ body: result });
       } catch (e) {
         return res.customError({ body: e, statusCode: 500 });
       }
