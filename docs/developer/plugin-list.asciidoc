@@ -807,6 +807,10 @@ It uses Chromium and Puppeteer underneath to run the browser in headless mode.
 |The Search Homepage is a shared homepage for elasticsearch users.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/search_indices/README.mdx[searchIndices]
+|The Search Indices plugin is a shared set of pages for elasticsearch users across stack and serverless search solutions.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/search_inference_endpoints/README.md[searchInferenceEndpoints]
 |The Inference Endpoints is a tool used to manage inference endpoints
 

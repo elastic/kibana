@@ -6,15 +6,11 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import type { CspBenchmarkRulesStates } from '@kbn/cloud-security-posture-common';
+import { ruleStateAttributes, rulesStates } from '@kbn/cloud-security-posture-common/schema';
 import { BenchmarksCisId } from '../latest';
 import { DEFAULT_BENCHMARK_RULES_PER_PAGE } from './v3';
-export type {
-  cspBenchmarkRuleMetadataSchema,
-  CspBenchmarkRuleMetadata,
-  cspBenchmarkRuleSchema,
-  CspBenchmarkRule,
-  FindCspBenchmarkRuleResponse,
-} from './v3';
+export type { cspBenchmarkRuleSchema, CspBenchmarkRule, FindCspBenchmarkRuleResponse } from './v3';
 
 export type FindCspBenchmarkRuleRequest = TypeOf<typeof findCspBenchmarkRuleRequestSchema>;
 
@@ -25,8 +21,6 @@ export type CspBenchmarkRulesBulkActionRequestSchema = TypeOf<
 >;
 
 export type RuleStateAttributes = TypeOf<typeof ruleStateAttributes>;
-
-export type CspBenchmarkRulesStates = TypeOf<typeof rulesStates>;
 
 export type CspSettings = TypeOf<typeof cspSettingsSchema>;
 
@@ -142,16 +136,6 @@ export interface CspBenchmarkRulesBulkActionResponse {
   disabled_detection_rules?: string[];
   message: string;
 }
-
-const ruleStateAttributes = schema.object({
-  muted: schema.boolean(),
-  benchmark_id: schema.string(),
-  benchmark_version: schema.string(),
-  rule_number: schema.string(),
-  rule_id: schema.string(),
-});
-
-const rulesStates = schema.recordOf(schema.string(), ruleStateAttributes);
 
 export const cspSettingsSchema = schema.object({
   rules: rulesStates,

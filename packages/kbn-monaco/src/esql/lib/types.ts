@@ -13,6 +13,7 @@ export type MonacoAutocompleteCommandDefinition = Pick<
   monaco.languages.CompletionItem,
   | 'label'
   | 'insertText'
+  | 'filterText'
   | 'kind'
   | 'detail'
   | 'documentation'
