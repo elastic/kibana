@@ -7,14 +7,8 @@
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { isEmpty } from 'lodash';
-import { PluginSetupContract } from '@kbn/alerting-plugin/server';
-import {
-  GetViewInAppRelativeUrlFnOpts,
-  AlertsClientError,
-  IRuleTypeAlerts,
-} from '@kbn/alerting-plugin/server';
+import { GetViewInAppRelativeUrlFnOpts, AlertsClientError } from '@kbn/alerting-plugin/server';
 import { observabilityPaths } from '@kbn/observability-plugin/common';
-import { ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
 import { StatusRuleExecutorOptions } from './types';
 import { AlertStatusMetaDataCodec, StatusConfigs } from './queries/query_monitor_status_alert';
 import { syntheticsRuleFieldMap } from '../../../common/rules/synthetics_rule_field_map';
@@ -34,21 +28,18 @@ import { getActionVariables } from '../action_variables';
 import { STATUS_RULE_NAME } from '../translations';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 
-type MonitorStatusAlert = ObservabilityUptimeAlert;
-
 export const registerSyntheticsStatusCheckRule = (
   server: SyntheticsServerSetup,
   plugins: SyntheticsPluginsSetupDependencies,
-  syntheticsMonitorClient: SyntheticsMonitorClient,
-  alerting: PluginSetupContract
+  syntheticsMonitorClient: SyntheticsMonitorClient
 ) => {
-  if (!alerting) {
+  if (!plugins.alerting) {
     throw new Error(
       'Cannot register the synthetics monitor status rule type. The alerting plugin needs to be enabled.'
     );
   }
 
-  alerting.registerType({
+  plugins.alerting.registerType({
     id: SYNTHETICS_ALERT_RULE_TYPES.MONITOR_STATUS,
     category: DEFAULT_APP_CATEGORIES.observability.id,
     producer: 'uptime',
@@ -126,10 +117,7 @@ export const registerSyntheticsStatusCheckRule = (
         state: updateState(ruleState, !isEmpty(downConfigs), { downConfigs }),
       };
     },
-    alerts: {
-      ...SyntheticsRuleTypeAlertDefinition,
-      shouldWrite: true,
-    } as IRuleTypeAlerts<MonitorStatusAlert>,
+    alerts: SyntheticsRuleTypeAlertDefinition,
     fieldsForAAD: Object.keys(syntheticsRuleFieldMap),
     getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
       observabilityPaths.ruleDetails(rule.id),

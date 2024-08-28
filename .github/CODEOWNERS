@@ -642,6 +642,7 @@ x-pack/plugins/observability_solution/observability_onboarding/e2e @elastic/obs-
 x-pack/plugins/observability_solution/observability_onboarding @elastic/obs-ux-logs-team @elastic/obs-ux-onboarding-team
 x-pack/plugins/observability_solution/observability @elastic/obs-ux-management-team
 x-pack/plugins/observability_solution/observability_shared @elastic/observability-ui
+x-pack/packages/observability/observability_utils @elastic/observability-ui
 x-pack/packages/observability/synthetics_test_data @elastic/obs-ux-management-team
 x-pack/test/security_api_integration/plugins/oidc_provider @elastic/kibana-security
 test/common/plugins/otel_metrics @elastic/obs-ux-infra_services-team
@@ -775,6 +776,7 @@ x-pack/packages/security-solution/side_nav @elastic/security-threat-hunting-expl
 x-pack/packages/security-solution/storybook/config @elastic/security-threat-hunting-explore
 x-pack/packages/security-solution/upselling @elastic/security-threat-hunting-explore
 x-pack/test/security_functional/plugins/test_endpoints @elastic/kibana-security
+x-pack/packages/security/ui_components @elastic/kibana-security
 packages/kbn-securitysolution-autocomplete @elastic/security-detection-engine
 x-pack/packages/security-solution/data_table @elastic/security-threat-hunting-investigations
 packages/kbn-securitysolution-ecs @elastic/security-threat-hunting-explore
@@ -900,9 +902,9 @@ packages/kbn-test-eui-helpers @elastic/kibana-visualizations
 x-pack/test/licensing_plugin/plugins/test_feature_usage @elastic/kibana-security
 packages/kbn-test-jest-helpers @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-test-subj-selector @elastic/kibana-operations @elastic/appex-qa
-x-pack/test_serverless 
-test 
-x-pack/test 
+x-pack/test_serverless
+test
+x-pack/test
 x-pack/performance @elastic/appex-qa
 x-pack/examples/testing_embedded_lens @elastic/kibana-visualizations
 packages/kbn-text-based-editor @elastic/kibana-esql
