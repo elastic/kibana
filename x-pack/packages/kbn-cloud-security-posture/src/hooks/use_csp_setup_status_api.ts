@@ -10,14 +10,13 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { STATUS_API_CURRENT_VERSION, STATUS_ROUTE_PATH } from '@kbn/cloud-security-posture-common';
 import type { CspSetupStatus } from '@kbn/cloud-security-posture-common';
-import type { CspClientPluginStartDeps } from '../../type';
 
 const getCspSetupStatusQueryKey = 'csp_status_key';
 
 export const useCspSetupStatusApi = (
   options?: UseQueryOptions<CspSetupStatus, unknown, CspSetupStatus>
 ) => {
-  const { http } = useKibana<CoreStart & CspClientPluginStartDeps>().services;
+  const { http } = useKibana<CoreStart>().services;
   return useQuery<CspSetupStatus, unknown, CspSetupStatus>(
     [getCspSetupStatusQueryKey],
     () => http.get<CspSetupStatus>(STATUS_ROUTE_PATH, { version: STATUS_API_CURRENT_VERSION }),

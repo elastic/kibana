@@ -10,7 +10,7 @@ import type { IKibanaSearchResponse } from '@kbn/search-types';
 import { GenericBuckets, GroupingQuery, RootAggregation } from '@kbn/grouping/src';
 import { useQuery } from '@tanstack/react-query';
 import { lastValueFrom } from 'rxjs';
-import { showErrorToast } from '@kbn/cloud-security-posture-common';
+import { showErrorToast } from '@kbn/cloud-security-posture';
 import { LATEST_VULNERABILITIES_INDEX_PATTERN } from '../../../../common/constants';
 import { useKibana } from '../../../common/hooks/use_kibana';
 

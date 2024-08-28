@@ -18,6 +18,6 @@ export type {
   CspSetupStatus,
   CspFinding,
 } from './types';
+export type { BenchmarksCisId } from './types/benchmark';
 export * from './constants';
 export { extractErrorMessage, buildMutedRulesFilter } from './utils/helpers';
-export { showErrorToast } from './utils/show_error_toast';

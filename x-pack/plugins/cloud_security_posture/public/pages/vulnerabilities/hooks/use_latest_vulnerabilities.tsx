@@ -17,8 +17,7 @@ import {
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { EsHitRecord } from '@kbn/discover-utils/types';
 import { MAX_FINDINGS_TO_LOAD } from '@kbn/cloud-security-posture-common';
-import { FindingsBaseEsQuery } from '@kbn/cloud-security-posture';
-import { showErrorToast } from '@kbn/cloud-security-posture-common';
+import { FindingsBaseEsQuery, showErrorToast } from '@kbn/cloud-security-posture';
 import { VULNERABILITY_FIELDS } from '../../../common/constants';
 import { CspVulnerabilityFinding } from '../../../../common/schemas';
 import {

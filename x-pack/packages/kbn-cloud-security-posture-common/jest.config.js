@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export * from './type';
-export { showErrorToast } from './src/utils/show_error_toast';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../..',
+  roots: ['<rootDir>/x-pack/packages/kbn-cloud-security-posture-common'],
+};

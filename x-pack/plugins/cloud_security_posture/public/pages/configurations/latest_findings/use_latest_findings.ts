@@ -11,11 +11,8 @@ import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-ty
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { EsHitRecord } from '@kbn/discover-utils/types';
-import {
-  MAX_FINDINGS_TO_LOAD,
-  buildMutedRulesFilter,
-  showErrorToast,
-} from '@kbn/cloud-security-posture-common';
+import { showErrorToast } from '@kbn/cloud-security-posture';
+import { MAX_FINDINGS_TO_LOAD, buildMutedRulesFilter } from '@kbn/cloud-security-posture-common';
 import {
   CDR_MISCONFIGURATIONS_INDEX_PATTERN,
   LATEST_FINDINGS_RETENTION_POLICY,
