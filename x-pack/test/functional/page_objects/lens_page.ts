@@ -173,7 +173,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     /**
-     * Changes the specified dimension to the specified operation and (optinally) field.
+     * Changes the specified dimension to the specified operation and optionally the field.
      *
      * @param opts.dimension - the selector of the dimension being changed
      * @param opts.operation - the desired operation ID for the dimension
@@ -1129,8 +1129,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return el.getVisibleText();
     },
 
-    async getDatatableCellStyle(rowIndex = 0, colIndex = 0) {
-      const el = await this.getDatatableCell(rowIndex, colIndex);
+    async getStylesFromCell(el: WebElementWrapper) {
       const styleString = (await el.getAttribute('style')) ?? '';
       return styleString.split(';').reduce<Record<string, string>>((memo, cssLine) => {
         const [prop, value] = cssLine.split(':');
@@ -1139,6 +1138,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         }
         return memo;
       }, {});
+    },
+
+    async getDatatableCellStyle(rowIndex = 0, colIndex = 0) {
+      const el = await this.getDatatableCell(rowIndex, colIndex);
+      return this.getStylesFromCell(el);
     },
 
     async getDatatableCellSpanStyle(rowIndex = 0, colIndex = 0) {
@@ -1171,6 +1175,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async getDatatableCell(rowIndex = 0, colIndex = 0) {
       return await find.byCssSelector(
         `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridRowCell"][data-gridcell-column-index="${colIndex}"][data-gridcell-visible-row-index="${rowIndex}"]`
+      );
+    },
+
+    async getDatatableCellsByColumn(colIndex = 0) {
+      return await find.allByCssSelector(
+        `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridRowCell"][data-gridcell-column-index="${colIndex}"]`
       );
     },
 
@@ -1240,10 +1250,15 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async setPalette(paletteId: string, isLegacy: boolean) {
       await testSubjects.click('lns_colorEditing_trigger');
+      // This action needs to be slowed WAY down, otherwise it will not correctly set the palette
+      await PageObjects.common.sleep(200);
       await testSubjects.setEuiSwitch(
         'lns_colorMappingOrLegacyPalette_switch',
         isLegacy ? 'uncheck' : 'check'
       );
+
+      await PageObjects.common.sleep(200);
+
       if (isLegacy) {
         await testSubjects.click('lns-palettePicker');
         await find.clickByCssSelector(`#${paletteId}`);
@@ -1251,6 +1266,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await testSubjects.click('kbnColoring_ColorMapping_PalettePicker');
         await testSubjects.click(`kbnColoring_ColorMapping_Palette-${paletteId}`);
       }
+      await PageObjects.common.sleep(200);
+
       await this.closePaletteEditor();
     },
 
