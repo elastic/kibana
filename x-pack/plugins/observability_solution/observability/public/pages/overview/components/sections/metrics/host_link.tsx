@@ -5,19 +5,38 @@
  * 2.0.
  */
 import React from 'react';
+import {
+  ASSET_DETAILS_LOCATOR_ID,
+  AssetDetailsLocatorParams,
+} from '@kbn/observability-shared-plugin/common';
+import { useLocatorRedirect } from '../../../../../hooks/use_locator';
 import { StringOrNull } from '../../../../..';
 
 interface Props {
   name: StringOrNull;
-  id: StringOrNull;
-  timerange: { from: number; to: number };
+  id: string;
+  timerange: { from?: number; to?: number };
 }
 
 export function HostLink({ name, id, timerange }: Props) {
-  const link = `../../app/metrics/link-to/host-detail/${id}?from=${timerange.from}&to=${timerange.to}`;
+  const { getRedirectUrl } =
+    useLocatorRedirect<AssetDetailsLocatorParams>(ASSET_DETAILS_LOCATOR_ID);
+
+  const href = getRedirectUrl({
+    assetType: 'host',
+    assetId: id,
+    dateRange:
+      timerange.from && timerange.to
+        ? {
+            from: new Date(timerange.from).toISOString(),
+            to: new Date(timerange.to).toISOString(),
+          }
+        : undefined,
+  });
+
   return (
     <>
-      <a href={link}>{name}</a>
+      <a href={href}>{name}</a>
     </>
   );
 }
