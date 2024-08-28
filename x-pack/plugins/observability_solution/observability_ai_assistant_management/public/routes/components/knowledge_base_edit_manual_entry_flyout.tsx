@@ -49,9 +49,9 @@ export function KnowledgeBaseEditManualEntryFlyout({
   const [newEntryTitle, setNewEntryTitle] = useState(entry?.title ?? entry?.doc_id ?? '');
   const [newEntryText, setNewEntryText] = useState(entry?.text ?? '');
 
-  const isEntryIdInvalid = newEntryTitle.trim() === '';
+  const isEntryTitleInvalid = newEntryTitle.trim() === '';
   const isEntryTextInvalid = newEntryText.trim() === '';
-  const isFormInvalid = isEntryIdInvalid || isEntryTextInvalid;
+  const isFormInvalid = isEntryTitleInvalid || isEntryTextInvalid;
 
   const handleSubmit = async () => {
     await createEntry({
@@ -138,7 +138,7 @@ export function KnowledgeBaseEditManualEntryFlyout({
             fullWidth
             value={newEntryTitle}
             onChange={(e) => setNewEntryTitle(e.target.value)}
-            isInvalid={isEntryIdInvalid}
+            isInvalid={isEntryTitleInvalid}
           />
         </EuiFormRow>
 
