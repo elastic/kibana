@@ -7,6 +7,7 @@
 
 import styled from 'styled-components';
 import React, { useState, useCallback } from 'react';
+import type { EuiSwitchProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSwitch } from '@elastic/eui';
 import {
   isJobLoading,
@@ -36,7 +37,7 @@ export const JobSwitchComponent = ({
   onJobStateChange,
 }: JobSwitchProps) => {
   const [isLoading, setIsLoading] = useState(false);
-  const handleChange = useCallback(
+  const handleChange: EuiSwitchProps['onChange'] = useCallback(
     async (e) => {
       setIsLoading(true);
       await onJobStateChange(job, job.latestTimestampMs || 0, e.target.checked);

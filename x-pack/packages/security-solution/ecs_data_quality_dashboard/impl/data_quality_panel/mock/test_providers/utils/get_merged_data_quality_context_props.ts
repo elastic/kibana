@@ -8,7 +8,7 @@
 import numeral from '@elastic/numeral';
 
 import { DataQualityProviderProps } from '../../../data_quality_context';
-import { EMPTY_STAT } from '../../../helpers';
+import { EMPTY_STAT } from '../../../constants';
 
 export const getMergedDataQualityContextProps = (
   dataQualityContextProps?: Partial<DataQualityProviderProps>

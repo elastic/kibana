@@ -14,15 +14,15 @@ import {
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';
 
-const mockLlm = new FakeLLM({
+const model = new FakeLLM({
   response: '{ "message": "ll callback later."}',
 }) as unknown as ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
 
-const testState: EcsMappingState = ecsTestState;
+const state: EcsMappingState = ecsTestState;
 
 describe('Testing ecs handler', () => {
   it('handleEcsMapping()', async () => {
-    const response = await handleEcsMapping(testState, mockLlm);
+    const response = await handleEcsMapping({ state, model });
     expect(response.currentMapping).toStrictEqual({ message: 'll callback later.' });
     expect(response.lastExecutedChain).toBe('ecsMapping');
   });

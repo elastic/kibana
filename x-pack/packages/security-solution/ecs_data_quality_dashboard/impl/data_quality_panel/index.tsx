@@ -13,13 +13,12 @@ import React, { useCallback, useMemo, useState } from 'react';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import { EuiComboBoxOptionOption, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { DataQualityProvider } from './data_quality_context';
-import { EMPTY_STAT } from './helpers';
 import { ReportDataQualityCheckAllCompleted, ReportDataQualityIndexChecked } from './types';
 import { ResultsRollupContext } from './contexts/results_rollup_context';
 import { IndicesCheckContext } from './contexts/indices_check_context';
 import { useIndicesCheck } from './hooks/use_indices_check';
 import { useResultsRollup } from './hooks/use_results_rollup';
-import { ilmPhaseOptionsStatic } from './constants';
+import { ilmPhaseOptionsStatic, EMPTY_STAT } from './constants';
 import { DataQualitySummary } from './data_quality_summary';
 import { DataQualityDetails } from './data_quality_details';
 

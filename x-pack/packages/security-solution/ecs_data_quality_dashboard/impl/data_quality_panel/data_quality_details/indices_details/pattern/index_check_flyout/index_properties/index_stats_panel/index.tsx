@@ -9,11 +9,9 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 
-import { DOCS } from '../translations';
-import { ILM_PHASE } from '../../../../../../translations';
-import { SIZE } from '../../../summary_table/translations';
+import { DOCS, ILM_PHASE, SIZE } from '../../../../../../translations';
 import { Stat } from '../../../../../../stat';
-import { getIlmPhaseDescription } from '../../../../../../helpers';
+import { getIlmPhaseDescription } from '../../../../../../utils/get_ilm_phase_description';
 
 const StyledFlexItem = styled(EuiFlexItem)`
   border-right: 1px solid ${({ theme }) => theme.eui.euiBorderColor};

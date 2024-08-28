@@ -15,7 +15,7 @@ import {
 import React, { useCallback, useMemo } from 'react';
 
 import { ilmPhaseOptionsStatic } from '../../constants';
-import { getIlmPhaseDescription } from '../../helpers';
+import { getIlmPhaseDescription } from '../../utils/get_ilm_phase_description';
 import {
   ILM_PHASE,
   INDEX_LIFECYCLE_MANAGEMENT_PHASES,
