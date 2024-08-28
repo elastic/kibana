@@ -7,9 +7,9 @@
 
 import { IlmExplainLifecycleLifecycleExplain } from '@elastic/elasticsearch/lib/api/types';
 
+import { getIlmPhase } from '../../../../utils/get_ilm_phase';
 import { getDocsCount, getSizeInBytes } from '../../../../utils/stats';
 import { MeteringStatsIndex } from '../../../../types';
-import { getIlmPhase } from '../helpers';
 
 export const getPatternDocsCount = ({
   indexNames,
@@ -70,3 +70,20 @@ export const getIndexNames = ({
     return EMPTY_INDEX_NAMES;
   }
 };
+
+export const getDocsCountPercent = ({
+  docsCount,
+  locales,
+  patternDocsCount,
+}: {
+  docsCount: number;
+  locales?: string | string[];
+  patternDocsCount: number;
+}): string =>
+  patternDocsCount !== 0
+    ? Number(docsCount / patternDocsCount).toLocaleString(locales, {
+        style: 'percent',
+        maximumFractionDigits: 1,
+        minimumFractionDigits: 1,
+      })
+    : '';

@@ -5,22 +5,8 @@
  * 2.0.
  */
 
-import { FAILED, PASSED, THIS_INDEX_HAS_NOT_BEEN_CHECKED } from '../summary_table/translations';
-import { getIndexResultBadgeColor, getIndexResultToolTip } from './helpers';
-
-describe('getIndexResultBadgeColor', () => {
-  test('it returns `ghost` when `incompatible` is undefined', () => {
-    expect(getIndexResultBadgeColor(undefined)).toEqual('ghost');
-  });
-
-  test('it returns `success` when `incompatible` is zero', () => {
-    expect(getIndexResultBadgeColor(0)).toEqual('#6dcbb1');
-  });
-
-  test('it returns `danger` when `incompatible` is NOT zero', () => {
-    expect(getIndexResultBadgeColor(1)).toEqual('danger');
-  });
-});
+import { FAILED, PASSED, THIS_INDEX_HAS_NOT_BEEN_CHECKED } from '../translations';
+import { getIndexResultToolTip } from './get_index_result_tooltip';
 
 describe('getIndexResultToolTip', () => {
   test('it returns "this index has not been checked" when `incompatible` is undefined', () => {

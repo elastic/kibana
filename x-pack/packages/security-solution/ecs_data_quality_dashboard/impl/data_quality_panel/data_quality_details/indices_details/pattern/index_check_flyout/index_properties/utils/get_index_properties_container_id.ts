@@ -5,15 +5,10 @@
  * 2.0.
  */
 
-import { IlmPhase } from '../../../types';
-
-export interface IndexSummaryTableItem {
-  docsCount: number;
-  incompatible: number | undefined;
+export const getIndexPropertiesContainerId = ({
+  indexName,
+  pattern,
+}: {
   indexName: string;
-  ilmPhase: IlmPhase | undefined;
   pattern: string;
-  patternDocsCount: number;
-  sizeInBytes: number | undefined;
-  checkedAt: number | undefined;
-}
+}): string => `index-properties-container-${pattern}${indexName}`;
