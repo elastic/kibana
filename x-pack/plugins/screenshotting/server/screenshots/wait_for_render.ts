@@ -30,24 +30,7 @@ export const waitForRenderComplete = async (
 
         function waitForRender(visualization: Element) {
           return new Promise<void>((resolve) => {
-            const observer = new MutationObserver((mutationList) => {
-              for (const mutation of mutationList) {
-                if (mutation.type === 'attributes') {
-                  if (
-                    mutation.attributeName === 'data-render-complete' &&
-                    visualization.getAttribute('data-render-complete') === 'true'
-                  ) {
-                    observer.disconnect();
-                    resolve();
-                  }
-                }
-              }
-            });
-            observer.observe(visualization, { attributes: true });
-            visualization.addEventListener('renderComplete', () => {
-              observer.disconnect();
-              resolve();
-            });
+            visualization.addEventListener('renderComplete', () => resolve());
           });
         }
 
