@@ -131,7 +131,13 @@ export const enterConsoleCommand = async (
     dataTestSubj = 'test',
   }: Partial<{ inputOnly: boolean; useKeyboard: boolean; dataTestSubj: string }> = {}
 ): Promise<void> => {
-  const keyCaptureInput = renderResult.getByTestId(`${dataTestSubj}-keyCapture-input`);
+  const keyCaptureInput = renderResult
+    .getByTestId(`${dataTestSubj}-keyCapture-input`)
+    .querySelector('input');
+
+  if (keyCaptureInput === null) {
+    throw new Error(`No input found with test-subj: ${dataTestSubj}-keyCapture`);
+  }
 
   if (useKeyboard) {
     await userEvent.click(keyCaptureInput);

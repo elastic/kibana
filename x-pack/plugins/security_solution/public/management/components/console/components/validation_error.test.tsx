@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import type { CommandDefinition, ConsoleProps } from '..';
 import type { AppContextTestRender } from '../../../../common/mock/endpoint';
 import type { ConsoleTestSetup } from '../mocks';
@@ -27,24 +29,29 @@ describe('ValidationError component', () => {
     render = (props = {}) => (renderResult = testSetup.renderConsole(props));
   });
 
-  it('should display message and help output if command is not hidden from help', () => {
+  it('should display message and help output if command is not hidden from help', async () => {
     render();
-    enterCommand('cmd1');
+    await enterCommand('cmd1');
 
-    expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
-      'this command is not active'
-    );
-    expect(renderResult.getByTestId('test-validationError-commandUsage'));
+    await waitFor(() => {
+      expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
+        'this command is not active'
+      );
+      expect(renderResult.getByTestId('test-validationError-commandUsage'));
+    });
   });
 
-  it('should only display message (no help) if command is hidden from help', () => {
+  it('should only display message (no help) if command is hidden from help', async () => {
     command.helpHidden = true;
     render();
-    enterCommand('cmd1');
+    await enterCommand('cmd1');
+    await userEvent.click(renderResult.getByTestId('test-inputTextSubmitButton'));
 
-    expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
-      'this command is not active'
-    );
-    expect(renderResult.queryByTestId('test-validationError-commandUsage')).toBeNull();
+    await waitFor(() => {
+      expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
+        'this command is not active'
+      );
+      expect(renderResult.queryByTestId('test-validationError-commandUsage')).toBeNull();
+    });
   });
 });
