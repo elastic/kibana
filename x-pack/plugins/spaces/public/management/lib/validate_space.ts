@@ -169,8 +169,12 @@ export class SpaceValidator {
     return valid();
   }
 
-  public validateSolutionView(space: FormValues, isEditing: boolean) {
-    if (!this.shouldValidate || isEditing) {
+  public validateSolutionView(
+    space: FormValues,
+    isEditing: boolean,
+    allowSolutionVisibility = true
+  ) {
+    if (!this.shouldValidate || isEditing || !allowSolutionVisibility) {
       return valid();
     }
 
@@ -189,7 +193,7 @@ export class SpaceValidator {
     return valid();
   }
 
-  public validateForSave(space: FormValues, isEditing: boolean) {
+  public validateForSave(space: FormValues, isEditing: boolean, allowSolutionVisibility: boolean) {
     const { isInvalid: isNameInvalid } = this.validateSpaceName(space);
     const { isInvalid: isDescriptionInvalid } = this.validateSpaceDescription(space);
     const { isInvalid: isIdentifierInvalid } = this.validateURLIdentifier(space);
@@ -197,7 +201,11 @@ export class SpaceValidator {
     const { isInvalid: isAvatarColorInvalid } = this.validateAvatarColor(space);
     const { isInvalid: isAvatarImageInvalid } = this.validateAvatarImage(space);
     const { isInvalid: areFeaturesInvalid } = this.validateEnabledFeatures(space);
-    const { isInvalid: isSolutionViewInvalid } = this.validateSolutionView(space, isEditing);
+    const { isInvalid: isSolutionViewInvalid } = this.validateSolutionView(
+      space,
+      isEditing,
+      allowSolutionVisibility
+    );
 
     if (
       isNameInvalid ||
