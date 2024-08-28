@@ -100,7 +100,8 @@ const functionRecallRoute = createObservabilityAIAssistantServerRoute({
       throw notImplemented();
     }
 
-    return client.recall({ queries, categories });
+    const entries = await client.recall({ queries, categories });
+    return { entries };
   },
 });
 

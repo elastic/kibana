@@ -44,8 +44,7 @@ export async function recallAndScore({
     { text: context, boost: 1 },
   ].filter((query) => query.text.trim());
 
-  const { entries: recalledEntries } = await recall({ queries });
-  const suggestions: RecalledSuggestion[] = recalledEntries.map(
+  const suggestions: RecalledSuggestion[] = (await recall({ queries })).map(
     ({ id, title, docId, text, score }) => ({ id, title, docId, text, score })
   );
 

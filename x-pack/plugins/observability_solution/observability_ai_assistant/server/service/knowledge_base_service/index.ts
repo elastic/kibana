@@ -439,9 +439,7 @@ export class KnowledgeBaseService {
     namespace: string;
     esClient: { asCurrentUser: ElasticsearchClient; asInternalUser: ElasticsearchClient };
     uiSettingsClient: IUiSettingsClient;
-  }): Promise<{
-    entries: RecalledEntry[];
-  }> => {
+  }): Promise<RecalledEntry[]> => {
     this.dependencies.logger.debug(
       () => `Recalling entries from KB for queries: "${JSON.stringify(queries)}"`
     );
@@ -505,9 +503,7 @@ export class KnowledgeBaseService {
       this.dependencies.logger.info(`Dropped ${droppedEntries} entries because of token limit`);
     }
 
-    return {
-      entries: returnedEntries,
-    };
+    return returnedEntries;
   };
 
   getUserInstructions = async (
