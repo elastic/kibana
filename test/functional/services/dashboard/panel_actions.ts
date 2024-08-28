@@ -377,7 +377,7 @@ export class DashboardPanelActionsService extends FtrService {
   async canConvertToLensByTitle(title = '') {
     this.log.debug(`canConvertToLens(${title})`);
     const header = await this.getPanelHeading(title);
-    await this.openContextMenu(parent);
+    await this.openContextMenu(header);
     const isActionVisible = await this.testSubjects.exists(CONVERT_TO_LENS_TEST_SUBJ);
     if (!isActionVisible) await this.clickContextMenuMoreItem();
     return await this.testSubjects.exists(CONVERT_TO_LENS_TEST_SUBJ, { timeout: 500 });
