@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-export interface UninstallToken {
-  id: string;
-  policy_id: string;
-  policy_name: string | null;
-  token: string;
-  created_at: string;
-  namespaces?: string[];
-}
-
-export type UninstallTokenMetadata = Omit<UninstallToken, 'token'>;
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/x-pack/packages/observability/observability_utils'],
+};

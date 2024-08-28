@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-export interface UninstallToken {
-  id: string;
-  policy_id: string;
-  policy_name: string | null;
-  token: string;
-  created_at: string;
-  namespaces?: string[];
-}
+import { useEuiTheme } from '@elastic/eui';
 
-export type UninstallTokenMetadata = Omit<UninstallToken, 'token'>;
+export function useTheme() {
+  return useEuiTheme().euiTheme;
+}
