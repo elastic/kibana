@@ -16,8 +16,8 @@ export type {
   BaseCspSetupBothPolicy,
   BaseCspSetupStatus,
   CspSetupStatus,
-  CspFinding,
-} from './types';
+} from './types/status';
+export type { CspFinding } from './types/findings';
 export type { BenchmarksCisId } from './types/benchmark';
 export * from './constants';
 export { extractErrorMessage, buildMutedRulesFilter } from './utils/helpers';
