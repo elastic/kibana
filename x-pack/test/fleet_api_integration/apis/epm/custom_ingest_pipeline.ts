@@ -7,7 +7,6 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { setupFleetAndAgents } from '../agents/services';
 import { skipIfNoDockerRegistry } from '../../helpers';
 
 const TEST_INDEX = 'logs-log.log-test';
@@ -19,6 +18,7 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
   const esArchiver = getService('esArchiver');
+  const fleetAndAgents = getService('fleetAndAgents');
 
   // TODO: Use test package or move to input package version github.com/elastic/kibana/issues/154243
   const LOG_INTEGRATION_VERSION = '1.1.2';
@@ -26,13 +26,14 @@ export default function (providerContext: FtrProviderContext) {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await fleetAndAgents.setup();
+
       await supertest
         .post(`/api/fleet/epm/packages/log/${LOG_INTEGRATION_VERSION}`)
         .set('kbn-xsrf', 'xxxx')
         .send({ force: true })
         .expect(200);
     });
-    setupFleetAndAgents(providerContext);
 
     after(async () => {
       await supertest

@@ -10,7 +10,6 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useWhichFlyout } from '../../shared/hooks/use_which_flyout';
 import { Flyouts } from '../../shared/constants/flyouts';
 import { useDocumentDetailsContext } from '../../shared/context';
-import { FlyoutTour } from '../../shared/components/flyout_tour';
 import {
   getRightSectionTourSteps,
   getLeftSectionTourSteps,
@@ -24,6 +23,7 @@ import { EventKind } from '../../shared/constants/event_kinds';
 import { useTourContext } from '../../../../common/components/guided_onboarding_tour/tour';
 import { SecurityStepId } from '../../../../common/components/guided_onboarding_tour/tour_config';
 import { useKibana } from '../../../../common/lib/kibana';
+import { FlyoutTour } from '../../shared/components/flyout_tour';
 
 /**
  * Guided tour for the right panel in details flyout

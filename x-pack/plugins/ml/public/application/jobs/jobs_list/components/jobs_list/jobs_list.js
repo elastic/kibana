@@ -170,7 +170,6 @@ export class JobsList extends Component {
         sortable: true,
         truncateText: false,
         width: '15%',
-        scope: 'row',
         render: (id, item) => {
           if (!isManagedJob(item)) return id;
 
@@ -395,6 +394,7 @@ export class JobsList extends Component {
           'data-test-subj': `mlJobListRow row-${item.id}`,
         })}
         css={{ '.euiTableRow-isExpandedRow .euiTableCellContent': { animation: 'none' } }}
+        rowHeader="id"
       />
     );
   }

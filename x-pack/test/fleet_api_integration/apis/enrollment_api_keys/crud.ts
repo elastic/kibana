@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { setupFleetAndAgents, getEsClientForAPIKey } from '../agents/services';
+import { getEsClientForAPIKey } from '../agents/services';
 import { skipIfNoDockerRegistry } from '../../helpers';
 
 import { testUsers } from '../test_users';
@@ -21,10 +21,12 @@ export default function (providerContext: FtrProviderContext) {
   const es = getService('es');
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const fleetAndAgents = getService('fleetAndAgents');
 
   describe('fleet_enrollment_api_keys_crud', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/fleet/agents');
+      await fleetAndAgents.setup();
     });
 
     after(async () => {
@@ -32,7 +34,6 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     skipIfNoDockerRegistry(providerContext);
-    setupFleetAndAgents(providerContext);
 
     describe('GET /fleet/enrollment_api_keys', () => {
       it('should list existing api keys', async () => {

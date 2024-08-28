@@ -8,19 +8,23 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const fleetAndAgents = getService('fleetAndAgents');
 
   describe('fleet_fleet_server_hosts_crud', function () {
+    let defaultFleetServerHostId: string;
+
     skipIfNoDockerRegistry(providerContext);
+
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       await kibanaServer.savedObjects.cleanStandardList();
+      await fleetAndAgents.setup();
 
       await kibanaServer.savedObjects.clean({
         types: ['fleet-fleet-server-host'],
@@ -47,9 +51,6 @@ export default function (providerContext: FtrProviderContext) {
 
       defaultFleetServerHostId = defaultRes.item.id;
     });
-    setupFleetAndAgents(providerContext);
-
-    let defaultFleetServerHostId: string;
 
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();

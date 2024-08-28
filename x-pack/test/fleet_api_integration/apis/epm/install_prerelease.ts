@@ -7,11 +7,11 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry, isDockerRegistryEnabledOrSkipped } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
+  const fleetAndAgents = getService('fleetAndAgents');
 
   const testPackage = 'prerelease';
   const testPackageVersion = '0.1.0-dev.0+abc';
@@ -22,7 +22,10 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('installs package that has a prerelease version', () => {
     skipIfNoDockerRegistry(providerContext);
-    setupFleetAndAgents(providerContext);
+
+    before(async () => {
+      await fleetAndAgents.setup();
+    });
 
     after(async () => {
       if (isDockerRegistryEnabledOrSkipped(providerContext)) {
