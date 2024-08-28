@@ -31,12 +31,11 @@ export class HasData {
        * Check to see if ES data exists
        */
       hasESData: async (): Promise<boolean> => {
-        const hasLocalESData = await this.checkLocalESData(http);
-        if (!hasLocalESData) {
-          const hasRemoteESData = await this.checkRemoteESData(http);
-          return hasRemoteESData;
-        }
-        return hasLocalESData;
+        // @ts-ignore
+        const { hasEsData } = await http.get('/internal/data_views/has_es_data', {
+          version: '1',
+        });
+        return hasEsData;
       },
       /**
        * Check to see if a data view exists
@@ -132,6 +131,7 @@ export class HasData {
         }
       });
 
+  // @ts-ignore
   private checkLocalESData = (http: HttpStart): Promise<boolean> =>
     this.getIndices({
       http,
@@ -143,6 +143,7 @@ export class HasData {
       })
       .catch(() => this.getIndicesViaSearch({ http, pattern: '*', showAllIndices: false }));
 
+  // @ts-ignore
   private checkRemoteESData = (http: HttpStart): Promise<boolean> =>
     this.getIndices({
       http,
