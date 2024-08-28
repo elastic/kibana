@@ -17,7 +17,6 @@ const ANOTHER_1024_CHARS =
   'grape fig tangerine tangerine kiwi lemon papaya cherry nectarine papaya mango cherry nectarine fig cherry fig grape mango mango quince fig strawberry mango quince date kiwi quince raspberry apple kiwi banana quince fig papaya grape mango cherry banana mango cherry lemon cherry tangerine fig quince quince papaya tangerine grape strawberry banana kiwi grape mango papaya nectarine banana nectarine kiwi papaya lemon apple lemon orange fig cherry grape apple nectarine papaya orange fig papaya date mango papaya mango cherry tangerine papaya apple banana papaya cherry strawberry grape raspberry lemon date papaya mango kiwi cherry fig banana banana apple date strawberry mango tangerine date lemon kiwi quince date orange orange papaya date apple fig tangerine quince tangerine date papaya banana banana orange raspberry papaya apple nectarine lemon raspberry raspberry mango cherry kiwi cherry cherry nectarine cherry date strawberry banana orange mango mango tangerine quince papaya papaya kiwi papaya strawberry date mango';
 
 export default function ApiTest({ getService }: DatasetQualityFtrContextProvider) {
-  const registry = getService('registry');
   const synthtrace = getService('logSynthtraceEsClient');
   const datasetQualityApiClient = getService('datasetQualityApiClient');
   const svlUserManager = getService('svlUserManager');
@@ -29,7 +28,6 @@ export default function ApiTest({ getService }: DatasetQualityFtrContextProvider
   const degradedFieldName = 'cloud.availability_zone';
   const regularFieldName = 'service.name';
   const serviceName = 'my-service';
-  const hostName = 'synth-host';
 
   async function callApiAs({
     dataStream,
@@ -56,63 +54,61 @@ export default function ApiTest({ getService }: DatasetQualityFtrContextProvider
     });
   }
 
-  registry.when('Degraded Fields Values per field', { config: 'basic' }, () => {
-    describe('gets the degraded fields values for a given field', () => {
-      let roleAuthc: RoleCredentials;
-      let internalReqHeader: InternalRequestHeader;
+  describe('Degraded Fields Values per field', () => {
+    let roleAuthc: RoleCredentials;
+    let internalReqHeader: InternalRequestHeader;
 
-      before(async () => {
-        roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
-        internalReqHeader = svlCommonApi.getInternalRequestHeader();
-        await synthtrace.index([
-          timerange(start, end)
-            .interval('1m')
-            .rate(1)
-            .generator((timestamp) =>
-              log
-                .create()
-                .message('This is a error message')
-                .logLevel(MORE_THAN_1024_CHARS)
-                .timestamp(timestamp)
-                .dataset(degradedFieldDataset)
-                .defaults({
-                  'log.file.path': '/error.log',
-                  'service.name': serviceName + 1,
-                  'trace.id': MORE_THAN_1024_CHARS,
-                  'cloud.availability_zone': [
-                    ANOTHER_1024_CHARS,
-                    'hello world',
-                    MORE_THAN_1024_CHARS,
-                  ],
-                })
-            ),
-        ]);
-      });
+    before(async () => {
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
+      await synthtrace.index([
+        timerange(start, end)
+          .interval('1m')
+          .rate(1)
+          .generator((timestamp) =>
+            log
+              .create()
+              .message('This is a error message')
+              .logLevel(MORE_THAN_1024_CHARS)
+              .timestamp(timestamp)
+              .dataset(degradedFieldDataset)
+              .defaults({
+                'log.file.path': '/error.log',
+                'service.name': serviceName + 1,
+                'trace.id': MORE_THAN_1024_CHARS,
+                'cloud.availability_zone': [
+                  ANOTHER_1024_CHARS,
+                  'hello world',
+                  MORE_THAN_1024_CHARS,
+                ],
+              })
+          ),
+      ]);
+    });
 
-      after(async () => {
-        await synthtrace.clean();
-        await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
-      });
+    after(async () => {
+      await synthtrace.clean();
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+    });
 
-      it('returns no values when provided field has no degraded values', async () => {
-        const resp = await callApiAs({
-          dataStream: degradedFieldsDatastream,
-          degradedField: regularFieldName,
-          roleAuthc,
-          internalReqHeader,
-        });
-        expect(resp.body.values.length).to.be(0);
+    it('returns no values when provided field has no degraded values', async () => {
+      const resp = await callApiAs({
+        dataStream: degradedFieldsDatastream,
+        degradedField: regularFieldName,
+        roleAuthc,
+        internalReqHeader,
       });
+      expect(resp.body.values.length).to.be(0);
+    });
 
-      it('returns values when provided field has degraded values', async () => {
-        const resp = await callApiAs({
-          dataStream: degradedFieldsDatastream,
-          degradedField: degradedFieldName,
-          roleAuthc,
-          internalReqHeader,
-        });
-        expect(resp.body.values.length).to.be(2);
+    it('returns values when provided field has degraded values', async () => {
+      const resp = await callApiAs({
+        dataStream: degradedFieldsDatastream,
+        degradedField: degradedFieldName,
+        roleAuthc,
+        internalReqHeader,
       });
+      expect(resp.body.values.length).to.be(2);
     });
   });
 }
