@@ -83,7 +83,8 @@ export default function navLinksTests({ getService }: FtrProviderContext) {
                 'appSearch',
                 'workplaceSearch',
                 'guidedOnboardingFeature',
-                'securitySolutionAssistant'
+                'securitySolutionAssistant',
+                'securitySolutionAttackDiscovery'
               )
             );
             break;

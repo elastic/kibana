@@ -20,10 +20,19 @@ const ROOT = resolve(__dirname, '../..');
     ),
     options: {
       includeLabels: ['serverless'],
-      specInfo: {
-        title: 'Security Solution Detections API (Elastic Cloud Serverless)',
-        description:
-          'You can create rules that automatically turn events and external alerts sent to Elastic Security into detection alerts. These alerts are displayed on the Detections page.',
+      prototypeDocument: {
+        info: {
+          title: 'Security Solution Detections API (Elastic Cloud Serverless)',
+          description:
+            'You can create rules that automatically turn events and external alerts sent to Elastic Security into detection alerts. These alerts are displayed on the Detections page.',
+        },
+        tags: [
+          {
+            name: 'Security Solution Detections API',
+            description:
+              'You can create rules that automatically turn events and external alerts sent to Elastic Security into detection alerts. These alerts are displayed on the Detections page.',
+          },
+        ],
       },
     },
   });
@@ -36,10 +45,19 @@ const ROOT = resolve(__dirname, '../..');
     ),
     options: {
       includeLabels: ['ess'],
-      specInfo: {
-        title: 'Security Solution Detections API (Elastic Cloud and self-hosted)',
-        description:
-          'You can create rules that automatically turn events and external alerts sent to Elastic Security into detection alerts. These alerts are displayed on the Detections page.',
+      prototypeDocument: {
+        info: {
+          title: 'Security Solution Detections API (Elastic Cloud and self-hosted)',
+          description:
+            'You can create rules that automatically turn events and external alerts sent to Elastic Security into detection alerts. These alerts are displayed on the Detections page.',
+        },
+        tags: [
+          {
+            name: 'Security Solution Detections API',
+            description:
+              'You can create rules that automatically turn events and external alerts sent to Elastic Security into detection alerts. These alerts are displayed on the Detections page.',
+          },
+        ],
       },
     },
   });

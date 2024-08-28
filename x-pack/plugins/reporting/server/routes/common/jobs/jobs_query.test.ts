@@ -23,7 +23,7 @@ describe('jobsQuery', () => {
     const core = await createMockReportingCore(schema);
 
     client = (await core.getEsClient()).asInternalUser as typeof client;
-    jobsQuery = jobsQueryFactory(core);
+    jobsQuery = jobsQueryFactory(core, { isInternal: false });
   });
 
   describe('list', () => {

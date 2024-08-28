@@ -53,53 +53,79 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = ({ message }) =
   return (
     <>
       {!!retrievalDocs?.length && (
-        <EuiComment
-          username={username}
-          timelineAvatar="dot"
-          data-test-subj="retrieval-docs-comment"
-          eventColor="subdued"
-          css={{
-            '.euiAvatar': { backgroundColor: euiTheme.colors.ghost },
-            '.euiCommentEvent': {
-              border: euiTheme.border.thin,
-              borderRadius: euiTheme.border.radius.medium,
-            },
-          }}
-          event={
-            <>
+        <>
+          <EuiComment
+            username={username}
+            timelineAvatar="dot"
+            data-test-subj="assistant-message-searching"
+            eventColor="subdued"
+            css={{
+              '.euiAvatar': { backgroundColor: euiTheme.colors.ghost },
+              '.euiCommentEvent': {
+                border: euiTheme.border.thin,
+                borderRadius: euiTheme.border.radius.medium,
+              },
+            }}
+            event={
               <EuiText size="s">
                 <p>
                   <FormattedMessage
-                    id="xpack.searchPlayground.chat.message.assistant.retrievalDocs"
-                    defaultMessage="Grounding answer based on"
+                    id="xpack.searchPlayground.chat.message.assistant.searchingQuestion"
+                    defaultMessage='Searching for "{question}"'
+                    values={{ question: inputTokens.searchQuery }}
                   />
-                  {` `}
                 </p>
               </EuiText>
+            }
+          />
+          <EuiComment
+            username={username}
+            timelineAvatar="dot"
+            data-test-subj="retrieval-docs-comment"
+            eventColor="subdued"
+            css={{
+              '.euiAvatar': { backgroundColor: euiTheme.colors.ghost },
+              '.euiCommentEvent': {
+                border: euiTheme.border.thin,
+                borderRadius: euiTheme.border.radius.medium,
+              },
+            }}
+            event={
+              <>
+                <EuiText size="s">
+                  <p>
+                    <FormattedMessage
+                      id="xpack.searchPlayground.chat.message.assistant.retrievalDocs"
+                      defaultMessage="Grounding answer based on"
+                    />
+                    {` `}
+                  </p>
+                </EuiText>
 
-              <EuiButtonEmpty
-                css={{ blockSize: 'auto' }}
-                size="s"
-                flush="left"
-                data-test-subj="retrieval-docs-button"
-                onClick={() => setIsDocsFlyoutOpen(true)}
-              >
-                <FormattedMessage
-                  id="xpack.searchPlayground.chat.message.assistant.retrievalDocButton"
-                  defaultMessage="{count} document sources"
-                  values={{ count: retrievalDocs.length }}
-                />
-              </EuiButtonEmpty>
+                <EuiButtonEmpty
+                  css={{ blockSize: 'auto' }}
+                  size="s"
+                  flush="left"
+                  data-test-subj="retrieval-docs-button"
+                  onClick={() => setIsDocsFlyoutOpen(true)}
+                >
+                  <FormattedMessage
+                    id="xpack.searchPlayground.chat.message.assistant.retrievalDocButton"
+                    defaultMessage="{count} document sources"
+                    values={{ count: retrievalDocs.length }}
+                  />
+                </EuiButtonEmpty>
 
-              {isDocsFlyoutOpen && (
-                <RetrievalDocsFlyout
-                  onClose={() => setIsDocsFlyoutOpen(false)}
-                  retrievalDocs={retrievalDocs}
-                />
-              )}
-            </>
-          }
-        />
+                {isDocsFlyoutOpen && (
+                  <RetrievalDocsFlyout
+                    onClose={() => setIsDocsFlyoutOpen(false)}
+                    retrievalDocs={retrievalDocs}
+                  />
+                )}
+              </>
+            }
+          />
+        </>
       )}
       {retrievalDocs?.length === 0 && (
         <EuiComment

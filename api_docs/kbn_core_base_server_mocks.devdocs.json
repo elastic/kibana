@@ -37,9 +37,9 @@
               "({ env, logger, configService, }?: { env?: ",
               {
                 "pluginId": "@kbn/config",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnConfigPluginApi",
-                "section": "def-common.Env",
+                "section": "def-server.Env",
                 "text": "Env"
               },
               " | undefined; logger?: jest.Mocked<",
@@ -80,9 +80,9 @@
                   "{ env?: ",
                   {
                     "pluginId": "@kbn/config",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnConfigPluginApi",
-                    "section": "def-common.Env",
+                    "section": "def-server.Env",
                     "text": "Env"
                   },
                   " | undefined; logger?: jest.Mocked<",

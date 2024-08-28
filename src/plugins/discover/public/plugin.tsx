@@ -278,7 +278,7 @@ export class DiscoverPlugin
       plugins.share?.url.locators.create(
         new DiscoverESQLLocatorDefinition({
           discoverAppLocator: this.locator,
-          getIndices: plugins.dataViews.getIndices,
+          dataViews: plugins.dataViews,
         })
       );
     }
@@ -306,13 +306,13 @@ export class DiscoverPlugin
     const rootProfileService = new RootProfileService();
     const dataSourceProfileService = new DataSourceProfileService();
     const documentProfileService = new DocumentProfileService();
-    const experimentalProfileIds = this.experimentalFeatures.enabledProfiles ?? [];
+    const enabledExperimentalProfileIds = this.experimentalFeatures.enabledProfiles ?? [];
 
     registerProfileProviders({
       rootProfileService,
       dataSourceProfileService,
       documentProfileService,
-      experimentalProfileIds,
+      enabledExperimentalProfileIds,
     });
 
     return { rootProfileService, dataSourceProfileService, documentProfileService };

@@ -38,6 +38,8 @@ import {
 import { useKibana } from '../../common/hooks/use_kibana';
 
 export const ERROR_STATE_TEST_SUBJECT = 'benchmark_page_error';
+export const EMPTY_EVALUATION_TEST_SUBJECT = 'benchmark-not-evaluated-account';
+export const EMPTY_SCORE_TEST_SUBJECT = 'benchmark-score-no-findings';
 
 interface BenchmarksTableProps
   extends Pick<EuiBasicTableProps<Benchmark>, 'loading' | 'error' | 'noItemsMessage' | 'sorting'>,
@@ -170,7 +172,12 @@ const getBenchmarkTableColumns = (
 
       if (benchmarkEvaluation === 0) {
         return (
-          <EuiButtonEmpty href={integrationLink} iconType="plusInCircle" flush="left">
+          <EuiButtonEmpty
+            data-test-subj={EMPTY_EVALUATION_TEST_SUBJECT}
+            href={integrationLink}
+            iconType="plusInCircle"
+            flush="left"
+          >
             {i18n.translate('xpack.csp.benchmarks.benchmarksTable.addIntegrationTitle', {
               defaultMessage: 'Add {resourceCountLabel}',
               values: { resourceCountLabel },
@@ -215,10 +222,12 @@ const getBenchmarkTableColumns = (
         );
 
       return (
-        <FormattedMessage
-          id="xpack.csp.benchmarks.benchmarksTable.noFindingsScore"
-          defaultMessage="No Findings"
-        />
+        <span data-test-subj={EMPTY_SCORE_TEST_SUBJECT}>
+          <FormattedMessage
+            id="xpack.csp.benchmarks.benchmarksTable.noFindingsScore"
+            defaultMessage="No Findings"
+          />
+        </span>
       );
     },
   },

@@ -7,7 +7,7 @@
  */
 
 import { DataView, FieldSpec, RuntimeFieldSpec } from '@kbn/data-views-plugin/common';
-import type { BoolQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, BoolQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 
 import type { DataControlInput } from '../types';
 import { OptionsListSelection } from './options_list_selections';
@@ -68,7 +68,7 @@ export type OptionsListRequest = Omit<
   dataView: DataView;
   filters?: Filter[];
   field: FieldSpec;
-  query?: Query;
+  query?: Query | AggregateQuery;
 };
 
 /**
@@ -81,6 +81,7 @@ export interface OptionsListRequestBody
   > {
   runtimeFieldMap?: Record<string, RuntimeFieldSpec>;
   allowExpensiveQueries: boolean;
+  ignoreValidations?: boolean;
   filters?: Array<{ bool: BoolQuery }>;
   runPastTimeout?: boolean;
   searchString?: string;

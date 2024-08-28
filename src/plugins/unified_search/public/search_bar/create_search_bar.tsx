@@ -171,7 +171,7 @@ export function createSearchBar({
       query: props.query,
       queryStringManager: data.query.queryString,
     }) as { query: QT };
-    const { timeRange, refreshInterval } = useTimefilter({
+    const { timeRange, refreshInterval, minRefreshInterval } = useTimefilter({
       dateRangeFrom: props.dateRangeFrom,
       dateRangeTo: props.dateRangeTo,
       refreshInterval: props.refreshInterval,
@@ -232,6 +232,7 @@ export function createSearchBar({
             timeHistory={data.query.timefilter.history}
             dateRangeFrom={timeRange.from}
             dateRangeTo={timeRange.to}
+            minRefreshInterval={minRefreshInterval}
             refreshInterval={refreshInterval.value}
             isRefreshPaused={refreshInterval.pause}
             isLoading={props.isLoading}
@@ -261,7 +262,6 @@ export function createSearchBar({
             dataViewPickerComponentProps={props.dataViewPickerComponentProps}
             textBasedLanguageModeErrors={props.textBasedLanguageModeErrors}
             textBasedLanguageModeWarning={props.textBasedLanguageModeWarning}
-            onTextBasedSavedAndExit={props.onTextBasedSavedAndExit}
             displayStyle={props.displayStyle}
             isScreenshotMode={isScreenshotMode}
             dataTestSubj={props.dataTestSubj}

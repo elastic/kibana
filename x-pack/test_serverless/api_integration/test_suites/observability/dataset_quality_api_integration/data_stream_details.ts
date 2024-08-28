@@ -76,6 +76,7 @@ export default function ({ getService }: DatasetQualityFtrContextProvider) {
       ]);
     });
     after(async () => {
+      await synthtrace.clean();
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
@@ -104,10 +105,6 @@ export default function ({ getService }: DatasetQualityFtrContextProvider) {
       const resp = await callApi(`${type}-${dataset}-${namespace}`, roleAuthc, internalReqHeader);
       expect(resp.body.services).to.eql({ ['service.name']: [serviceName] });
       expect(resp.body.hosts?.['host.name']).to.eql([hostName]);
-    });
-
-    after(async () => {
-      await synthtrace.clean();
     });
   });
 }

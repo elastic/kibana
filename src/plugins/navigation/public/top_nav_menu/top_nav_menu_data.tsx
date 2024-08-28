@@ -22,6 +22,8 @@ export interface TopNavMenuData {
   tooltip?: string | (() => string | undefined);
   badge?: EuiBetaBadgeProps;
   emphasize?: boolean;
+  fill?: boolean;
+  color?: string;
   isLoading?: boolean;
   iconType?: string;
   iconSide?: EuiButtonProps['iconSide'];

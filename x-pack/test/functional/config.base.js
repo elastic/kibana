@@ -146,6 +146,9 @@ export default async function ({ readConfigFile }) {
       snapshotRestore: {
         pathname: '/app/management/data/snapshot_restore',
       },
+      spacesManagement: {
+        pathname: '/app/management/kibana/spaces',
+      },
       remoteClusters: {
         pathname: '/app/management/data/remote_clusters',
       },
@@ -181,6 +184,15 @@ export default async function ({ readConfigFile }) {
       },
       maintenanceWindows: {
         pathname: '/app/management/insightsAndAlerting/maintenanceWindows',
+      },
+      obsAIAssistant: {
+        pathname: '/app/observabilityAIAssistant',
+      },
+      aiAssistantManagementSelection: {
+        pathname: '/app/management/kibana/aiAssistantManagementSelection',
+      },
+      obsAIAssistantManagement: {
+        pathname: '/app/management/kibana/observabilityAiAssistantManagement',
       },
     },
 

@@ -225,7 +225,7 @@ export class TaskPool {
                 )}`
               : ``
           }${
-            taskRunner.definition.timeout
+            taskRunner.definition?.timeout
               ? ` (with timeout set at ${taskRunner.definition.timeout})`
               : ``
           }.`

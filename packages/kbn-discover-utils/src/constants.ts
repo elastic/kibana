@@ -26,3 +26,4 @@ export const SHOW_FIELD_STATISTICS = 'discover:showFieldStatistics';
 export const SHOW_MULTIFIELDS = 'discover:showMultiFields';
 export const SORT_DEFAULT_ORDER_SETTING = 'discover:sort:defaultOrder';
 export const TRUNCATE_MAX_HEIGHT = 'truncate:maxHeight';
+export const TRUNCATE_MAX_HEIGHT_DEFAULT_VALUE = 115;

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export type { TextBasedLanguagesEditorProps } from './src/text_based_languages_editor';
+export type { TextBasedLanguagesEditorProps } from './src/types';
 export { fetchFieldsFromESQL } from './src/fetch_fields_from_esql';
 import { TextBasedLanguagesEditor } from './src/text_based_languages_editor';
 

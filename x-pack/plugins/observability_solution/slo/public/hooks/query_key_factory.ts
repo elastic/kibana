@@ -41,7 +41,8 @@ export const sloKeys = {
   groups: () => [...sloKeys.all, 'group'] as const,
   overview: (filters: SLOOverviewFilter) => ['overview', filters] as const,
   details: () => [...sloKeys.all, 'details'] as const,
-  detail: (sloId?: string) => [...sloKeys.details(), sloId] as const,
+  detail: (sloId: string, instanceId: string | undefined, remoteName: string | undefined) =>
+    [...sloKeys.details(), { sloId, instanceId, remoteName }] as const,
   rules: () => [...sloKeys.all, 'rules'] as const,
   rule: (sloIds: string[]) => [...sloKeys.rules(), sloIds] as const,
   activeAlerts: () => [...sloKeys.all, 'activeAlerts'] as const,

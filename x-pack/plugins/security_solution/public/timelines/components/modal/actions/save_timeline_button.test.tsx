@@ -10,7 +10,7 @@ import { render, waitFor } from '@testing-library/react';
 import { SaveTimelineButton } from './save_timeline_button';
 import { mockTimelineModel, TestProviders } from '../../../../common/mock';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
-import { TimelineStatus } from '../../../../../common/api/timeline';
+import { TimelineStatusEnum } from '../../../../../common/api/timeline';
 import { useCreateTimeline } from '../../../hooks/use_create_timeline';
 
 jest.mock('../../../../common/components/user_privileges');
@@ -49,7 +49,7 @@ describe('SaveTimelineButton', () => {
     });
     mockGetState.mockReturnValue({
       ...mockTimelineModel,
-      status: TimelineStatus.active,
+      status: TimelineStatusEnum.active,
       isSaving: false,
     });
     (useCreateTimeline as jest.Mock).mockReturnValue({});
@@ -68,7 +68,7 @@ describe('SaveTimelineButton', () => {
     });
     mockGetState.mockReturnValue({
       ...mockTimelineModel,
-      status: TimelineStatus.active,
+      status: TimelineStatusEnum.active,
       isSaving: false,
     });
     (useCreateTimeline as jest.Mock).mockReturnValue({});
@@ -98,7 +98,7 @@ describe('SaveTimelineButton', () => {
     (useUserPrivileges as jest.Mock).mockReturnValue({
       kibanaSecuritySolutionsPrivileges: { crud: true },
     });
-    mockGetState.mockReturnValue({ ...mockTimelineModel, status: TimelineStatus.immutable });
+    mockGetState.mockReturnValue({ ...mockTimelineModel, status: TimelineStatusEnum.immutable });
 
     const { getByTestId } = renderSaveTimelineButton();
 

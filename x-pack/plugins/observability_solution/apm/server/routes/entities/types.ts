@@ -16,6 +16,7 @@ export interface Entity {
   latestTimestamp: string;
   identityFields: string[];
   metrics: EntityMetrics;
+  hasLogMetrics: boolean;
 }
 
 export interface TraceMetrics {
@@ -52,4 +53,5 @@ export interface MergedServiceEntities {
   signalTypes: SignalTypes[];
   environments: string[];
   metrics: EntityMetrics[];
+  hasLogMetrics: boolean;
 }

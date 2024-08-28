@@ -69,7 +69,7 @@ export class ActionsClientGeminiChatModel extends ChatGoogleGenerativeAI {
   }
 
   async completionWithRetry(
-    request: string | GenerateContentRequest | Array<string | Part>,
+    request: GenerateContentRequest,
     options?: this['ParsedCallOptions']
   ): Promise<GenerateContentResult> {
     return this.caller.callWithOptions({ signal: options?.signal }, async () => {
@@ -80,7 +80,8 @@ export class ActionsClientGeminiChatModel extends ChatGoogleGenerativeAI {
             subAction: 'invokeAIRaw',
             subActionParams: {
               model: this.#model,
-              messages: request,
+              messages: request.contents,
+              tools: request.tools,
               temperature: this.#temperature,
             },
           },

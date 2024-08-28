@@ -78,6 +78,8 @@ export type {
   ShortIdTable,
 } from '../common';
 
+export { KnowledgeBaseType } from '../common';
+
 export type { TelemetryEventTypeWithPayload } from './analytics';
 export { ObservabilityAIAssistantTelemetryEventType } from './analytics/telemetry_event_type';
 
@@ -98,6 +100,7 @@ export {
   aiAssistantLogsIndexPattern,
   aiAssistantSimulatedFunctionCalling,
   aiAssistantSearchConnectorIndexPattern,
+  aiAssistantPreferredAIAssistantType,
 } from '../common/ui_settings/settings_keys';
 
 export const plugin: PluginInitializer<

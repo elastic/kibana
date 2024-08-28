@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';
 import {
   FINDINGS_INDEX_NAME,
-  LATEST_FINDINGS_INDEX_PATTERN,
   LATEST_FINDINGS_INDEX_TEMPLATE_NAME,
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
   VULNERABILITIES_INDEX_NAME,
@@ -20,7 +20,7 @@ import { LatestIndexConfig } from './types';
 export const latestIndexConfigs: LatestIndexConfig = {
   findings: {
     indexName: FINDINGS_INDEX_NAME,
-    indexPattern: LATEST_FINDINGS_INDEX_PATTERN,
+    indexPattern: CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN,
     indexTemplateName: LATEST_FINDINGS_INDEX_TEMPLATE_NAME,
     indexDefaultName: LATEST_FINDINGS_INDEX_DEFAULT_NS,
   },

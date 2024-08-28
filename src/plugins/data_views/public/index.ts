@@ -47,7 +47,7 @@ export type {
   DataViewsServicePublic,
   DataViewsServicePublicDeps,
 } from './data_views_service_public';
-export { DataViewsApiClient, DataViewsService, DataView } from './data_views';
+export { DataViewsApiClient, DataViewsService, DataView, DataViewLazy } from './data_views';
 export type { DataViewListItem } from './data_views';
 export { UiSettingsPublicToCommon } from './ui_settings_wrapper';
 

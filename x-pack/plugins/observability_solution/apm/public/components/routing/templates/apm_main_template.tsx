@@ -77,7 +77,7 @@ export function ApmMainTemplate({
   const { config, core } = useApmPluginContext();
   const isEntityCentricExperienceSettingEnabled = core.uiSettings.get<boolean>(
     entityCentricExperience,
-    false
+    true
   );
   const { isEntityCentricExperienceViewEnabled, serviceInventoryViewLocalStorageSetting } =
     useEntityManagerEnablementContext();
@@ -120,6 +120,7 @@ export function ApmMainTemplate({
   const hasApmIntegrations = !!fleetApmPoliciesData?.hasApmPolicies;
   const showCustomEmptyState =
     !hasApmData &&
+    !isLoading &&
     isEntityCentricExperienceSettingEnabled &&
     serviceInventoryViewLocalStorageSetting === ServiceInventoryView.classic;
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mapValues } from 'lodash';
+import { mapValues, isNumber } from 'lodash';
 import { EntityMetrics } from '../../../../common/entities/types';
 import { MergedServiceEntities } from '../types';
 
@@ -28,11 +28,11 @@ type MetricsKey = keyof EntityMetrics;
 export function mergeMetrics(metrics: EntityMetrics[]) {
   return metrics.reduce((acc, metric) => {
     for (const key in metric) {
-      if (metric.hasOwnProperty(key)) {
+      if (Object.hasOwn(metric, key)) {
         const metricsKey = key as MetricsKey;
 
         const value = metric[metricsKey];
-        if (value) {
+        if (isNumber(value)) {
           if (!acc[metricsKey]) {
             acc[metricsKey] = [];
           }

@@ -28,7 +28,6 @@ import { getDetails, goBackToRulesTable } from '../../../../tasks/rule_details';
 import { expectNumberOfRules } from '../../../../tasks/alerts_detection_rules';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import {
-  expandEsqlQueryBar,
   fillAboutRuleAndContinue,
   fillDefineEsqlRuleAndContinue,
   fillScheduleRuleAndContinue,
@@ -87,7 +86,6 @@ describe(
 
       it('creates an ES|QL rule', function () {
         selectEsqlRuleType();
-        expandEsqlQueryBar();
 
         fillDefineEsqlRuleAndContinue(rule);
         fillAboutRuleAndContinue(rule);
@@ -109,7 +107,6 @@ describe(
       // this test case is important, since field shown in rule override component are coming from ES|QL query, not data view fields API
       it('creates an ES|QL rule and overrides its name', function () {
         selectEsqlRuleType();
-        expandEsqlQueryBar();
 
         fillDefineEsqlRuleAndContinue(rule);
         fillAboutSpecificEsqlRuleAndContinue({ ...rule, rule_name_override: 'test_id' });
@@ -130,7 +127,6 @@ describe(
       });
       it('shows error when ES|QL query is empty', function () {
         selectEsqlRuleType();
-        expandEsqlQueryBar();
         getDefineContinueButton().click();
 
         cy.get(ESQL_QUERY_BAR).contains('ES|QL query is required');
@@ -138,7 +134,6 @@ describe(
 
       it('proceeds further once invalid query is fixed', function () {
         selectEsqlRuleType();
-        expandEsqlQueryBar();
         getDefineContinueButton().click();
 
         cy.get(ESQL_QUERY_BAR).contains('required');
@@ -153,7 +148,6 @@ describe(
       it('shows error when non-aggregating ES|QL query does not have metadata operator', function () {
         const invalidNonAggregatingQuery = 'from auditbeat* | limit 5';
         selectEsqlRuleType();
-        expandEsqlQueryBar();
         fillEsqlQueryBar(invalidNonAggregatingQuery);
         getDefineContinueButton().click();
 
@@ -167,7 +161,6 @@ describe(
           'from auditbeat* metadata _id, _version, _index | keep agent.* | limit 5';
 
         selectEsqlRuleType();
-        expandEsqlQueryBar();
         fillEsqlQueryBar(invalidNonAggregatingQuery);
         getDefineContinueButton().click();
 
@@ -182,11 +175,21 @@ describe(
         visit(CREATE_RULE_URL);
 
         selectEsqlRuleType();
-        expandEsqlQueryBar();
         fillEsqlQueryBar(invalidEsqlQuery);
         getDefineContinueButton().click();
 
         cy.get(ESQL_QUERY_BAR).contains('Error validating ES|QL');
+      });
+
+      it('shows syntax error when query is syntactically invalid - prioritizing it over missing metadata operator error', function () {
+        const invalidNonAggregatingQuery = 'from auditbeat* | limit 5 test';
+        selectEsqlRuleType();
+        fillEsqlQueryBar(invalidNonAggregatingQuery);
+        getDefineContinueButton().click();
+
+        cy.get(ESQL_QUERY_BAR).contains(
+          `Error validating ES|QL: "SyntaxError: extraneous input 'test' expecting <EOF>"`
+        );
       });
     });
 
@@ -207,7 +210,6 @@ describe(
         workaroundForResizeObserver();
 
         selectEsqlRuleType();
-        expandEsqlQueryBar();
         fillEsqlQueryBar(queryWithCustomFields);
         getDefineContinueButton().click();
 
@@ -242,7 +244,6 @@ describe(
         workaroundForResizeObserver();
 
         selectEsqlRuleType();
-        expandEsqlQueryBar();
 
         interceptEsqlQueryFieldsRequest(queryWithCustomFields, 'esqlSuppressionFieldsRequest');
         fillEsqlQueryBar(queryWithCustomFields);

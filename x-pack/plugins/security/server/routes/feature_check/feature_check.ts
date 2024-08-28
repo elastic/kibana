@@ -142,5 +142,5 @@ async function getEnabledSecurityFeatures(esClient: ElasticsearchClient, logger:
 function usesCustomScriptSettings(
   nodeResponse: NodeSettingsResponse | {}
 ): nodeResponse is NodeSettingsResponse {
-  return nodeResponse.hasOwnProperty('nodes');
+  return Object.hasOwn(nodeResponse, 'nodes');
 }

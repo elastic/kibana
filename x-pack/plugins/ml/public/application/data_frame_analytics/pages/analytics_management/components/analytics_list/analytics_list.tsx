@@ -22,6 +22,7 @@ import {
   DATA_FRAME_TASK_STATE,
   type DataFrameAnalyticsId,
 } from '@kbn/ml-data-frame-analytics-utils';
+import type { ListingPageUrlState } from '@kbn/ml-url-state';
 import { useRefreshAnalyticsList } from '../../../../common';
 import { usePermissionCheck } from '../../../../../capabilities/check_capabilities';
 import { useNavigateToPath } from '../../../../../contexts/kibana';
@@ -38,7 +39,6 @@ import { CreateAnalyticsButton } from '../create_analytics_button';
 import { filterAnalytics } from '../../../../common/search_bar_filters';
 import { AnalyticsEmptyPrompt } from '../empty_prompt';
 import { useTableSettings } from './use_table_settings';
-import type { ListingPageUrlState } from '../../../../../../../common/types/common';
 import { JobsAwaitingNodeWarning } from '../../../../../components/jobs_awaiting_node_warning';
 import { useRefresh } from '../../../../../routing/use_refresh';
 
@@ -100,7 +100,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
 
   const searchQueryText = pageState.queryText ?? '';
   const setSearchQueryText = useCallback(
-    (value) => {
+    (value: any) => {
       updatePageState({ queryText: value });
     },
     [updatePageState]
@@ -278,6 +278,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
       <EuiSpacer size="m" />
       <div data-test-subj="mlAnalyticsTableContainer">
         <EuiInMemoryTable<DataFrameAnalyticsListRow>
+          rowHeader={DataFrameAnalyticsListColumn.id}
           allowNeutralSort={false}
           columns={columns}
           itemIdToExpandedRowMap={itemIdToExpandedRowMap}

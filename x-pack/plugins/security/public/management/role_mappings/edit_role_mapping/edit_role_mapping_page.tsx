@@ -8,6 +8,7 @@
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
@@ -26,7 +27,12 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { MappingInfoPanel } from './mapping_info_panel';
 import { RuleEditorPanel } from './rule_editor_panel';
 import { validateRoleMappingForSave } from './services/role_mapping_validation';
-import type { RoleMapping } from '../../../../common';
+import type {
+  RoleMapping,
+  RoleMappingAllRule,
+  RoleMappingAnyRule,
+  RoleMappingRule,
+} from '../../../../common';
 import type { RolesAPIClient } from '../../roles';
 import type { SecurityFeaturesAPIClient } from '../../security_features';
 import {
@@ -176,6 +182,8 @@ export class EditRoleMappingPage extends Component<Props, State> {
             readOnly={this.props.readOnly}
           />
           <EuiSpacer />
+          {this.getFormWarnings()}
+          <EuiSpacer />
           {this.getFormButtons()}
         </EuiForm>
       </>
@@ -209,6 +217,65 @@ export class EditRoleMappingPage extends Component<Props, State> {
         defaultMessage="Create role mapping"
       />
     );
+  };
+
+  private isObject = (record?: any): record is object => {
+    return typeof record === 'object' && record !== null;
+  };
+
+  private isRoleMappingAnyRule = (obj: unknown): obj is RoleMappingAnyRule => {
+    return this.isObject(obj) && 'any' in obj && Array.isArray(obj.any);
+  };
+
+  private isRoleMappingAllRule = (obj: unknown): obj is RoleMappingAllRule => {
+    return this.isObject(obj) && 'all' in obj && Array.isArray(obj.all);
+  };
+
+  private checkEmptyAnyAllMappings = (obj: RoleMappingRule) => {
+    const arrToCheck: RoleMappingRule[] = [obj];
+
+    while (arrToCheck.length > 0) {
+      const currentObj = arrToCheck.pop();
+      if (this.isObject(obj)) {
+        for (const key in currentObj) {
+          if (Object.hasOwn(currentObj, key)) {
+            if (this.isRoleMappingAnyRule(currentObj)) {
+              if (currentObj.any.length === 0) {
+                return true;
+              }
+              arrToCheck.push(...currentObj.any);
+            } else if (this.isRoleMappingAllRule(currentObj)) {
+              if (currentObj.all.length === 0) {
+                return true;
+              }
+              arrToCheck.push(...currentObj.all);
+            } else if (this.isObject(currentObj[key as keyof RoleMappingRule])) {
+              arrToCheck.push(currentObj[key as keyof RoleMappingRule] as RoleMappingRule);
+            }
+          }
+        }
+      }
+    }
+    return false;
+  };
+
+  private getFormWarnings = () => {
+    if (this.checkEmptyAnyAllMappings(this.state.roleMapping!.rules as RoleMappingRule)) {
+      return (
+        <EuiCallOut
+          title="Warning"
+          color="warning"
+          iconType="alert"
+          data-test-subj="emptyAnyOrAllRulesWarning"
+        >
+          <FormattedMessage
+            id="xpack.security.management.editRoleMapping.emptyAnyAllMappingsWarning"
+            defaultMessage="Role mapping rules contains empty 'any' or 'all' rules. These empty rule groups will always evaluate to true. Please proceed with caution"
+          />
+        </EuiCallOut>
+      );
+    }
+    return null;
   };
 
   private getFormButtons = () => {

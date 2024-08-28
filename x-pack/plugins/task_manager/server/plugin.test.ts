@@ -6,12 +6,13 @@
  */
 
 import { TaskManagerPlugin, getElasticsearchAndSOAvailability } from './plugin';
+import { KibanaDiscoveryService } from './kibana_discovery_service';
+
 import { coreMock } from '@kbn/core/server/mocks';
 import { TaskManagerConfig } from './config';
 import { Subject } from 'rxjs';
 import { bufferCount, take } from 'rxjs';
 import { CoreStatus, ServiceStatusLevels } from '@kbn/core/server';
-import { serverlessPluginMock } from '@kbn/serverless/server/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { taskPollingLifecycleMock } from './polling_lifecycle.mock';
 import { TaskPollingLifecycle } from './polling_lifecycle';
@@ -38,6 +39,9 @@ jest.mock('./ephemeral_task_lifecycle', () => {
   };
 });
 
+const deleteCurrentNodeSpy = jest.spyOn(KibanaDiscoveryService.prototype, 'deleteCurrentNode');
+const discoveryIsStarted = jest.spyOn(KibanaDiscoveryService.prototype, 'isStarted');
+
 const coreStart = coreMock.createStart();
 const pluginInitializerContextParams = {
   max_attempts: 9,
@@ -45,6 +49,11 @@ const pluginInitializerContextParams = {
   version_conflict_threshold: 80,
   request_capacity: 1000,
   allow_reading_invalid_state: false,
+  discovery: {
+    active_nodes_lookback: '30s',
+    interval: 10000,
+  },
+  kibanas_per_partition: 2,
   monitored_aggregated_stats_refresh_rate: 5000,
   monitored_stats_health_verbose_log: {
     enabled: false,
@@ -150,7 +159,6 @@ describe('TaskManagerPlugin', () => {
       const taskManagerPlugin = new TaskManagerPlugin(pluginInitializerContext);
       taskManagerPlugin.setup(coreMock.createSetup(), { usageCollection: undefined });
       taskManagerPlugin.start(coreStart, {
-        serverless: serverlessPluginMock.createStartContract(),
         cloud: cloudMock.createStart(),
       });
 
@@ -168,7 +176,6 @@ describe('TaskManagerPlugin', () => {
       const taskManagerPlugin = new TaskManagerPlugin(pluginInitializerContext);
       taskManagerPlugin.setup(coreMock.createSetup(), { usageCollection: undefined });
       taskManagerPlugin.start(coreStart, {
-        serverless: serverlessPluginMock.createStartContract(),
         cloud: cloudMock.createStart(),
       });
 
@@ -176,6 +183,25 @@ describe('TaskManagerPlugin', () => {
       expect(
         EphemeralTaskLifecycle as jest.Mock<EphemeralTaskLifecycleClass>
       ).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('stop', () => {
+    test('should remove the current from discovery service', async () => {
+      const pluginInitializerContext = coreMock.createPluginInitializerContext<TaskManagerConfig>(
+        pluginInitializerContextParams
+      );
+      pluginInitializerContext.node.roles.backgroundTasks = true;
+      const taskManagerPlugin = new TaskManagerPlugin(pluginInitializerContext);
+      taskManagerPlugin.setup(coreMock.createSetup(), { usageCollection: undefined });
+      taskManagerPlugin.start(coreStart, {
+        cloud: cloudMock.createStart(),
+      });
+
+      discoveryIsStarted.mockReturnValueOnce(true);
+      await taskManagerPlugin.stop();
+
+      expect(deleteCurrentNodeSpy).toHaveBeenCalledTimes(1);
     });
   });
 

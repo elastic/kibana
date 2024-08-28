@@ -23,17 +23,12 @@ import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
-import { useKibana } from '../../common/hooks/use_kibana';
-import { getFindingsDetectionRuleSearchTagsFromArrayOfRules } from '../../../common/utils/detection_rules';
 import {
   RuleStateAttributesWithoutStates,
   useChangeCspRuleState,
 } from './use_change_csp_rule_state';
 import { CspBenchmarkRulesWithStates } from './rules_container';
 import { MultiSelectFilter } from '../../common/component/multi_select_filter';
-import { showChangeBenchmarkRuleStatesSuccessToast } from '../../components/take_action';
-import { useFetchDetectionRulesByTags } from '../../common/api/use_fetch_detection_rules_by_tags';
 
 export const RULES_BULK_ACTION_BUTTON = 'bulk-action-button';
 export const RULES_BULK_ACTION_OPTION_ENABLE = 'bulk-action-option-enable';
@@ -42,8 +37,6 @@ export const RULES_SELECT_ALL_RULES = 'select-all-rules-button';
 export const RULES_CLEAR_ALL_RULES_SELECTION = 'clear-rules-selection-button';
 export const RULES_DISABLED_FILTER = 'rules-disabled-filter';
 export const RULES_ENABLED_FILTER = 'rules-enabled-filter';
-export const CIS_SECTION_FILTER = 'cis-section-filter';
-export const RULE_NUMBER_FILTER = 'rule-number-filter';
 
 interface RulesTableToolbarProps {
   search: (value: string) => void;
@@ -109,7 +102,7 @@ export const RulesTableHeader = ({
 
   return (
     <EuiFlexGroup direction="column">
-      <EuiFlexGroup>
+      <EuiFlexGroup wrap={true}>
         <EuiFlexItem grow={1}>
           <SearchField isSearching={isSearching} searchValue={searchValue} search={search} />
         </EuiFlexItem>
@@ -248,15 +241,8 @@ const CurrentPageOfTotal = ({
   };
 
   const { mutate: mutateRulesStates } = useChangeCspRuleState();
-  const { data: detectionRulesForSelectedRules } = useFetchDetectionRulesByTags(
-    getFindingsDetectionRuleSearchTagsFromArrayOfRules(selectedRules.map((rule) => rule.metadata)),
-    { match: 'any' }
-  );
 
-  const { notifications, analytics, i18n: i18nStart, theme } = useKibana().services;
-  const startServices = { notifications, analytics, i18n: i18nStart, theme };
-
-  const changeRulesState = async (state: 'mute' | 'unmute') => {
+  const changeCspRuleState = (state: 'mute' | 'unmute') => {
     const bulkSelectedRules: RuleStateAttributesWithoutStates[] = selectedRules.map(
       (e: CspBenchmarkRulesWithStates) => ({
         benchmark_id: e?.metadata.benchmark.id,
@@ -272,19 +258,15 @@ const CurrentPageOfTotal = ({
         ruleIds: bulkSelectedRules,
       });
       setIsPopoverOpen(false);
-      showChangeBenchmarkRuleStatesSuccessToast(startServices, state !== 'mute', {
-        numberOfRules: bulkSelectedRules.length,
-        numberOfDetectionRules: detectionRulesForSelectedRules?.total || 0,
-      });
     }
-  };
-  const changeCspRuleStateMute = async () => {
-    await changeRulesState('mute');
     setSelectedRules([]);
   };
-  const changeCspRuleStateUnmute = async () => {
-    await changeRulesState('unmute');
-    setSelectedRules([]);
+
+  const changeCspRuleStateMute = () => {
+    changeCspRuleState('mute');
+  };
+  const changeCspRuleStateUnmute = () => {
+    changeCspRuleState('unmute');
   };
 
   const areAllSelectedRulesMuted = selectedRules.every((rule) => rule?.state === 'muted');
@@ -296,9 +278,6 @@ const CurrentPageOfTotal = ({
       size="xs"
       iconType="arrowDown"
       iconSide="right"
-      css={css`
-        padding-bottom: ${euiThemeVars.euiSizeS};
-      `}
       data-test-subj={RULES_BULK_ACTION_BUTTON}
     >
       Bulk actions
@@ -328,7 +307,7 @@ const CurrentPageOfTotal = ({
   return (
     <EuiFlexItem grow={false}>
       <EuiSpacer size="s" />
-      <EuiFlexGroup gutterSize="s">
+      <EuiFlexGroup gutterSize="s" alignItems={'center'}>
         <EuiFlexItem grow={false}>
           <EuiText size="xs" textAlign="left" color="subdued" style={{ marginLeft: '8px' }}>
             <FormattedMessage
@@ -349,9 +328,6 @@ const CurrentPageOfTotal = ({
               onClick={setSelectAllRules}
               size="xs"
               iconType="pagesSelect"
-              css={css`
-                padding-bottom: ${euiThemeVars.euiSizeS};
-              `}
               data-test-subj={RULES_SELECT_ALL_RULES}
             >
               <FormattedMessage
@@ -365,9 +341,6 @@ const CurrentPageOfTotal = ({
               onClick={() => setSelectedRules([])}
               size="xs"
               iconType="cross"
-              css={css`
-                padding-bottom: ${euiThemeVars.euiSizeS};
-              `}
               data-test-subj={RULES_CLEAR_ALL_RULES_SELECTION}
             >
               <FormattedMessage

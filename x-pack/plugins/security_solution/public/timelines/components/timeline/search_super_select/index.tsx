@@ -10,17 +10,17 @@ import { EuiInputPopover, EuiFieldText, htmlIdGenerator, keys } from '@elastic/e
 import React, { memo, useCallback, useMemo, useState } from 'react';
 
 import type { OpenTimelineResult } from '../../open_timeline/types';
+import type { SelectableTimelineProps } from '../selectable_timeline';
 import { SelectableTimeline } from '../selectable_timeline';
 import * as i18n from '../translations';
-import type { TimelineTypeLiteral } from '../../../../../common/api/timeline';
-import { TimelineType } from '../../../../../common/api/timeline';
+import { type TimelineType, TimelineTypeEnum } from '../../../../../common/api/timeline';
 
 interface SearchTimelineSuperSelectProps {
   isDisabled: boolean;
   hideUntitled?: boolean;
   timelineId: string | null;
   timelineTitle: string | null;
-  timelineType?: TimelineTypeLiteral;
+  timelineType?: TimelineType;
   placeholder?: string;
   onTimelineChange: (timelineTitle: string, timelineId: string | null) => void;
   'aria-label'?: string;
@@ -42,7 +42,7 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
   hideUntitled = false,
   timelineId,
   timelineTitle,
-  timelineType = TimelineType.template,
+  timelineType = TimelineTypeEnum.template,
   onTimelineChange,
   placeholder,
   'aria-label': ariaLabel,
@@ -90,7 +90,7 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
     ]
   );
 
-  const handleGetSelectableOptions = useCallback(
+  const handleGetSelectableOptions = useCallback<SelectableTimelineProps['getSelectableOptions']>(
     ({ timelines, onlyFavorites, searchTimelineValue }) => [
       ...(!onlyFavorites && searchTimelineValue === ''
         ? getBasicSelectableOptions(timelineId == null ? '-1' : timelineId)
@@ -103,7 +103,8 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
               description: t.description,
               favorite: t.favorite,
               label: t.title,
-              id: timelineType === TimelineType.template ? t.templateTimelineId : t.savedObjectId,
+              id:
+                timelineType === TimelineTypeEnum.template ? t.templateTimelineId : t.savedObjectId,
               key: `${t.title}-${index}`,
               title: t.title,
               checked: [t.savedObjectId, t.templateTimelineId].includes(timelineId)
