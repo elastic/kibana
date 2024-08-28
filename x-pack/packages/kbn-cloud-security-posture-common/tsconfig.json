@@ -18,6 +18,5 @@
     "@kbn/config-schema",
     "@kbn/data-views-plugin",
     "@kbn/i18n",
-    "@kbn/core",
   ]
 }
