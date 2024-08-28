@@ -257,7 +257,7 @@ export default function (providerContext: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
       await setupTestUsers(getService('security'));
 
-      supertest
+      await supertest
         .post(`/api/fleet/outputs`)
         .set('kbn-xsrf', 'xxxx')
         .send({
@@ -268,7 +268,7 @@ export default function (providerContext: FtrProviderContext) {
         })
         .expect(200);
 
-      supertest
+      await supertest
         .post(`/api/fleet/fleet_server_hosts`)
         .set('kbn-xsrf', 'xxxx')
         .send({
@@ -279,7 +279,7 @@ export default function (providerContext: FtrProviderContext) {
         })
         .expect(200);
 
-      supertest
+      await supertest
         .post(`/api/fleet/proxies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
@@ -289,7 +289,7 @@ export default function (providerContext: FtrProviderContext) {
         })
         .expect(200);
 
-      supertest
+      await supertest
         .post(`/api/fleet/agent_download_sources`)
         .set('kbn-xsrf', 'xxxx')
         .send({
