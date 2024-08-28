@@ -8,3 +8,5 @@
 
 require('../src/setup_node_env');
 require('@kbn/test-suites-xpack/api_integration/apis/es/use_some_random');
+require('@kbn/test-suites-xpack/api_integration/apis/es/effect_provide_svc_multiple_times');
+require('@kbn/test-suites-xpack/api_integration/apis/es/effect_provide_mulitple_svcs_via_context');
