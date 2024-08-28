@@ -11,12 +11,14 @@ import {
   createMockVisualization,
   createMockDatasource,
   mockStoreDeps,
+  exactMatchDoc,
 } from '../mocks';
 import { Location, History } from 'history';
 import { act } from 'react-dom/test-utils';
-import { loadInitial } from './lens_slice';
+import { InitialAppState, loadInitial } from './lens_slice';
 import { Filter } from '@kbn/es-query';
 import faker from 'faker';
+import { DOC_TYPE } from '../../common/constants';
 
 const history = {
   location: {
@@ -33,26 +35,37 @@ const preloadedState = {
   },
 };
 
-const defaultProps = {
+const defaultProps: InitialAppState = {
   redirectCallback: jest.fn(),
   initialInput: { savedObjectId: defaultSavedObjectId },
   history,
 };
 
+/**
+ * This is just a convenience wrapper around act & dispatch
+ * The loadInitial action is hijacked by a custom middleware which returns a Promise
+ * therefore we need to await before proceeding with all the checks
+ * The intent of this wrapper is to avoid confusion with this specific action
+ */
+async function loadInitialAppState(
+  store: ReturnType<typeof makeLensStore>['store'],
+  initialState: InitialAppState
+) {
+  await act(async () => {
+    await store.dispatch(loadInitial(initialState));
+  });
+}
+
 describe('Initializing the store', () => {
   it('should initialize initial datasource', async () => {
-    const { store, deps } = await makeLensStore({ preloadedState });
-    await act(async () => {
-      await store.dispatch(loadInitial(defaultProps));
-    });
+    const { store, deps } = makeLensStore({ preloadedState });
+    await loadInitialAppState(store, defaultProps);
     expect(deps.datasourceMap.testDatasource.initialize).toHaveBeenCalled();
   });
 
   it('should have initialized the initial datasource and visualization', async () => {
-    const { store, deps } = await makeLensStore({ preloadedState });
-    await act(async () => {
-      await store.dispatch(loadInitial({ ...defaultProps, initialInput: undefined }));
-    });
+    const { store, deps } = makeLensStore({ preloadedState });
+    await loadInitialAppState(store, { ...defaultProps, initialInput: undefined });
     expect(deps.datasourceMap.testDatasource.initialize).toHaveBeenCalled();
     expect(deps.datasourceMap.testDatasource2.initialize).not.toHaveBeenCalled();
     expect(deps.visualizationMap.testVis.initialize).toHaveBeenCalled();
@@ -63,23 +76,23 @@ describe('Initializing the store', () => {
     const datasource1State = { datasource1: '' };
     const datasource2State = { datasource2: '' };
     const services = makeDefaultServices();
-    // services.attributeService. = jest.fn().mockResolvedValue({
-    //   attributes: {
-    //     exactMatchDoc,
-    //     visualizationType: 'testVis',
-    //     title: '',
-    //     state: {
-    //       datasourceStates: {
-    //         testDatasource: datasource1State,
-    //         testDatasource2: datasource2State,
-    //       },
-    //       visualization: {},
-    //       query: { query: '', language: 'lucene' },
-    //       filters: [],
-    //     },
-    //     references: [],
-    //   },
-    // });
+    services.attributeService.loadFromLibrary = jest.fn().mockResolvedValue({
+      attributes: {
+        exactMatchDoc,
+        visualizationType: 'testVis',
+        title: '',
+        state: {
+          datasourceStates: {
+            testDatasource: datasource1State,
+            testDatasource2: datasource2State,
+          },
+          visualization: {},
+          query: { query: '', language: 'lucene' },
+          filters: [],
+        },
+        references: [],
+      },
+    });
 
     const storeDeps = mockStoreDeps({
       lensServices: services,
@@ -104,16 +117,13 @@ describe('Initializing the store', () => {
       },
     });
 
-    const { store, deps } = await makeLensStore({
+    const { store, deps } = makeLensStore({
       storeDeps,
       preloadedState,
     });
 
-    await act(async () => {
-      await store.dispatch(loadInitial(defaultProps));
-    });
+    await loadInitialAppState(store, defaultProps);
     const { datasourceMap } = deps;
-    expect(datasourceMap.testDatasource.initialize).toHaveBeenCalled();
 
     expect(datasourceMap.testDatasource.initialize).toHaveBeenCalledWith(
       datasource1State,
@@ -136,22 +146,17 @@ describe('Initializing the store', () => {
   describe('loadInitial', () => {
     it('does not load a document if there is no initial input', async () => {
       const { deps, store } = makeLensStore({ preloadedState });
-      await act(async () => {
-        await store.dispatch(
-          loadInitial({
-            ...defaultProps,
-            initialInput: undefined,
-          })
-        );
+      await loadInitialAppState(store, {
+        ...defaultProps,
+        initialInput: undefined,
       });
+
       expect(deps.lensServices.attributeService.loadFromLibrary).not.toHaveBeenCalled();
     });
 
     it('starts new searchSessionId', async () => {
-      const { store } = await makeLensStore({ preloadedState });
-      await act(async () => {
-        await store.dispatch(loadInitial({ ...defaultProps, initialInput: undefined }));
-      });
+      const { store } = makeLensStore({ preloadedState });
+      await loadInitialAppState(store, { ...defaultProps, initialInput: undefined });
       expect(store.getState()).toEqual({
         lens: expect.objectContaining({
           searchSessionId: 'sessionId-1',
@@ -160,7 +165,7 @@ describe('Initializing the store', () => {
     });
 
     it('cleans datasource and visualization state properly when reloading', async () => {
-      const { store, deps } = await makeLensStore({
+      const { store, deps } = makeLensStore({
         preloadedState: {
           ...preloadedState,
           visualization: {
@@ -184,13 +189,9 @@ describe('Initializing the store', () => {
         }),
       });
 
-      await act(async () => {
-        await store.dispatch(
-          loadInitial({
-            ...defaultProps,
-            initialInput: undefined,
-          })
-        );
+      await loadInitialAppState(store, {
+        ...defaultProps,
+        initialInput: undefined,
       });
 
       expect(deps.visualizationMap.testVis.initialize).toHaveBeenCalled();
@@ -214,19 +215,17 @@ describe('Initializing the store', () => {
     it('loads a document and uses query and filters if initial input is provided', async () => {
       const { store, deps } = makeLensStore({ preloadedState });
 
-      const mockFilters = 'some filters from the filter manager' as unknown as Filter[];
+      const mockFilters = faker.lorem.words(3).split(' ') as unknown as Filter[];
 
       jest
         .spyOn(deps.lensServices.data.query.filterManager, 'getFilters')
         .mockReturnValue(mockFilters);
 
-      await act(async () => {
-        store.dispatch(loadInitial(defaultProps));
-      });
+      await loadInitialAppState(store, defaultProps);
 
-      expect(deps.lensServices.attributeService.loadFromLibrary).toHaveBeenCalledWith({
-        savedObjectId: defaultSavedObjectId,
-      });
+      expect(deps.lensServices.attributeService.loadFromLibrary).toHaveBeenCalledWith(
+        defaultSavedObjectId
+      );
 
       expect(deps.lensServices.data.query.filterManager.setAppFilters).toHaveBeenCalledWith([
         { query: { match_phrase: { src: 'test' } }, meta: { index: 'injected!' } },
@@ -234,8 +233,8 @@ describe('Initializing the store', () => {
 
       expect(store.getState()).toEqual({
         lens: expect.objectContaining({
-          persistedDoc: { ...defaultDoc, type: 'lens' },
-          query: 'kuery',
+          persistedDoc: { ...defaultDoc, type: DOC_TYPE },
+          query: defaultDoc.state.query,
           isLoading: false,
           activeDatasourceId: 'testDatasource',
           filters: mockFilters,
@@ -246,23 +245,15 @@ describe('Initializing the store', () => {
     it('does not load documents on sequential renders unless the id changes', async () => {
       const { store, deps } = makeLensStore({ preloadedState });
 
-      await act(async () => {
-        await store.dispatch(loadInitial(defaultProps));
-      });
+      await loadInitialAppState(store, defaultProps);
 
-      await act(async () => {
-        await store.dispatch(loadInitial(defaultProps));
-      });
+      await loadInitialAppState(store, defaultProps);
 
       expect(deps.lensServices.attributeService.loadFromLibrary).toHaveBeenCalledTimes(1);
 
-      await act(async () => {
-        await store.dispatch(
-          loadInitial({
-            ...defaultProps,
-            initialInput: { savedObjectId: '5678' },
-          })
-        );
+      await loadInitialAppState(store, {
+        ...defaultProps,
+        initialInput: { savedObjectId: '5678' },
       });
 
       expect(deps.lensServices.attributeService.loadFromLibrary).toHaveBeenCalledTimes(2);
@@ -275,13 +266,11 @@ describe('Initializing the store', () => {
         .fn()
         .mockRejectedValue('failed to load');
       const redirectCallback = jest.fn();
-      await act(async () => {
-        await store.dispatch(loadInitial({ ...defaultProps, redirectCallback }));
-      });
+      await loadInitialAppState(store, { ...defaultProps, redirectCallback });
 
-      expect(deps.lensServices.attributeService.loadFromLibrary).toHaveBeenCalledWith({
-        savedObjectId: defaultSavedObjectId,
-      });
+      expect(deps.lensServices.attributeService.loadFromLibrary).toHaveBeenCalledWith(
+        defaultSavedObjectId
+      );
       expect(deps.lensServices.notifications.toasts.addDanger).toHaveBeenCalled();
       expect(redirectCallback).toHaveBeenCalled();
     });
@@ -292,22 +281,18 @@ describe('Initializing the store', () => {
         attributes: {
           ...defaultDoc,
         },
-        metaInfo: {
-          sharingSavedObjectProps: {
-            outcome: 'aliasMatch',
-            aliasTargetId: 'id2',
-            aliasPurpose: 'savedObjectConversion',
-          },
+        sharingSavedObjectProps: {
+          outcome: 'aliasMatch',
+          aliasTargetId: 'id2',
+          aliasPurpose: 'savedObjectConversion',
         },
       });
 
-      await act(async () => {
-        await store.dispatch(loadInitial(defaultProps));
-      });
+      await loadInitialAppState(store, defaultProps);
 
-      expect(deps.lensServices.attributeService.loadFromLibrary).toHaveBeenCalledWith({
-        savedObjectId: defaultSavedObjectId,
-      });
+      expect(deps.lensServices.attributeService.loadFromLibrary).toHaveBeenCalledWith(
+        defaultSavedObjectId
+      );
       expect(deps.lensServices.spaces?.ui.redirectLegacyUrl).toHaveBeenCalledWith({
         path: '#/edit/id2?search',
         aliasPurpose: 'savedObjectConversion',
@@ -317,9 +302,7 @@ describe('Initializing the store', () => {
 
     it('adds to the recently accessed list on load', async () => {
       const { store, deps } = makeLensStore({ preloadedState });
-      await act(async () => {
-        await store.dispatch(loadInitial(defaultProps));
-      });
+      await loadInitialAppState(store, defaultProps);
 
       expect(deps.lensServices.chrome.recentlyAccessed.add).toHaveBeenCalledWith(
         '/app/lens#/edit/1234',
