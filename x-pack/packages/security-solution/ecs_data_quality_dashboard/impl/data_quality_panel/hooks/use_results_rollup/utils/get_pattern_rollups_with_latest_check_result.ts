@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { getIndexDocsCountFromRollup } from '../../../data_quality_summary/summary_actions/check_all/helpers';
-import { getIlmPhase } from '../../../data_quality_details/indices_details/pattern/helpers';
 import { getAllIncompatibleMarkdownComments } from '../../../data_quality_details/indices_details/pattern/index_check_flyout/index_properties/index_check_fields/tabs/incompatible_tab/helpers';
 import { getSizeInBytes } from '../../../utils/stats';
 import type { IlmPhase, PartitionedFieldMetadata, PatternRollup } from '../../../types';
+import { getIndexDocsCountFromRollup } from './stats';
+import { getIlmPhase } from '../../../utils/get_ilm_phase';
 
 export const getPatternRollupsWithLatestCheckResult = ({
   error,

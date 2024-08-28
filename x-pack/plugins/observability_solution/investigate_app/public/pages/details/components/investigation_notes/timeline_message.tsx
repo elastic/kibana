@@ -6,7 +6,7 @@
  */
 import { EuiFlexGroup, EuiFlexItem, EuiMarkdownFormat, EuiText } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { InvestigationNote } from '@kbn/investigate-plugin/common';
+import { InvestigationNoteResponse } from '@kbn/investigation-shared';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { formatDistance } from 'date-fns';
 import React from 'react';
@@ -24,7 +24,7 @@ export function TimelineMessage({
   isDeleting,
 }: {
   icon: React.ReactNode;
-  note: InvestigationNote;
+  note: InvestigationNoteResponse;
   onDelete: () => void;
   isDeleting: boolean;
 }) {
