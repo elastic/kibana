@@ -1612,7 +1612,7 @@
   dependencies:
     tslib "^2.0.0"
 
-"@elastic/apm-rum-core@^5.21.0", "@elastic/apm-rum-core@^5.21.1":
+"@elastic/apm-rum-core@^5.21.1":
   version "5.21.1"
   resolved "https://registry.yarnpkg.com/@elastic/apm-rum-core/-/apm-rum-core-5.21.1.tgz#ea6f2268629193962c194ae1d29971e2c5b2e531"
   integrity sha512-/LyLhVdJ+zcsKogwq2AEYARc//RDXOoTHWPERLay4sCsvvxc4/GkkhhOC40CqI0oMu4kUAoJInQWZuCM7zCZRQ==
@@ -5811,7 +5811,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-utils@link:x-pack/packages/observability/observability-utils":
+"@kbn/observability-utils@link:x-pack/packages/observability/observability_utils":
   version "0.0.0"
   uid ""
 
