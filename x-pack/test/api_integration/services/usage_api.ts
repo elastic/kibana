@@ -55,7 +55,7 @@ export function UsageAPIProvider({ getService }: FtrProviderContext) {
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
 
     if (opts?.authHeader) {
-      request.set(opts.authHeader);
+      void request.set(opts.authHeader);
     }
 
     const { body } = await request.send({ refreshCache: true, ...payload }).expect(200);

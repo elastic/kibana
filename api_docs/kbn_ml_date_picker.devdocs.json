@@ -728,7 +728,7 @@
                 "section": "def-common.RefreshInterval",
                 "text": "RefreshInterval"
               },
-              "; setRefreshInterval: (refreshInterval: Partial<",
+              "; getMinRefreshInterval: () => number; setRefreshInterval: (refreshInterval: Partial<",
               {
                 "pluginId": "data",
                 "scope": "common",

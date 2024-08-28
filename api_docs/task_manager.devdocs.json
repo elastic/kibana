@@ -300,7 +300,7 @@
             "label": "stop",
             "description": [],
             "signature": [
-              "() => void"
+              "() => Promise<void>"
             ],
             "path": "x-pack/plugins/task_manager/server/plugin.ts",
             "deprecated": false,
