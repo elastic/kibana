@@ -14,9 +14,9 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const log = getService('log');
   const PageObjects = getPageObjects(['common', 'console', 'header']);
 
-  describe.skip('Console variables', function testConsoleVariables() {
-    // FLAKY on firefox: https://github.com/elastic/kibana/issues/157776
-    // this.tags('includeFirefox');
+  describe('Console variables', function testConsoleVariables() {
+    this.tags('includeFirefox');
+
     before(async () => {
       log.debug('navigateTo console');
       await PageObjects.common.navigateToApp('console');
@@ -25,22 +25,33 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     });
 
     it('should allow creating a new variable', async () => {
+      await PageObjects.console.openConfig();
+
       await PageObjects.console.addNewVariable({ name: 'index1', value: 'test' });
+
       const variables = await PageObjects.console.getVariables();
       log.debug(variables);
-      expect(variables).to.contain('index1');
+      const variableNames = variables.map((variable) => variable.name);
+      expect(variableNames).to.contain('${index1}');
     });
 
     it('should allow removing a variable', async () => {
+      await PageObjects.console.openConfig();
+
       await PageObjects.console.addNewVariable({ name: 'index2', value: 'test' });
       await PageObjects.console.removeVariables();
+
       const variables = await PageObjects.console.getVariables();
+      log.debug(variables);
       expect(variables).to.eql([]);
     });
 
     describe('with variables in url', () => {
       it('should send a successful request', async () => {
+        await PageObjects.console.openConfig();
         await PageObjects.console.addNewVariable({ name: 'index3', value: '_search' });
+        await PageObjects.console.openConsole();
+
         await PageObjects.console.monaco.enterText('\n GET ${index3}');
         await PageObjects.console.clickPlay();
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -52,7 +63,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       });
     });
 
-    describe('with variables in request body', () => {
+    describe.skip('with variables in request body', () => {
       // bug in monaco https://github.com/elastic/kibana/issues/185999
       it.skip('should send a successful request', async () => {
         await PageObjects.console.addNewVariable({ name: 'query1', value: '{"match_all": {}}' });

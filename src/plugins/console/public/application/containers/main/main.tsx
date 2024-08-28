@@ -35,6 +35,7 @@ import { getTopNavConfig } from './get_top_nav';
 import { getTourSteps } from './get_tour_steps';
 import {
   SHELL_TAB_ID,
+  CONFIG_TAB_ID,
   EDITOR_TOUR_STEP,
   TOUR_STORAGE_KEY,
   INITIAL_TOUR_CONFIG,
@@ -155,10 +156,17 @@ export function Main({ isEmbeddable = false }: MainProps) {
               {selectedTab === SHELL_TAB_ID && (
                 <Editor loading={!done} setEditorInstance={() => {}} />
               )}
+
+              {selectedTab === CONFIG_TAB_ID && <Config editorInstance={null} />}
             </EuiSplitPanel.Inner>
             <EuiHorizontalRule margin="none" />
             <EuiSplitPanel.Inner paddingSize="xs" grow={false}>
-              <EuiButtonEmpty onClick={() => {}} iconType="editorCodeBlock" size="xs" color="text">
+              <EuiButtonEmpty
+                onClick={() => setSelectedTab(CONFIG_TAB_ID)}
+                iconType="editorCodeBlock"
+                size="xs"
+                color="text"
+              >
                 {MAIN_PANEL_LABELS.variablesButton}
               </EuiButtonEmpty>
             </EuiSplitPanel.Inner>

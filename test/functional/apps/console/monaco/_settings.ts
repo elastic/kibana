@@ -11,10 +11,10 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
+  const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'console']);
 
-  // Settings is not yet implemented in phase 2
-  describe.skip('console settings', function testSettings() {
+  describe('console settings', function testSettings() {
     this.tags('includeFirefox');
     before(async () => {
       log.debug('navigateTo console');
@@ -31,12 +31,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('disables the a11y overlay via settings', async () => {
-      await PageObjects.console.openSettings();
+      await PageObjects.console.openConfig();
       await PageObjects.console.toggleA11yOverlaySetting();
+      await PageObjects.console.openConsole();
 
-      await PageObjects.console.monaco.pressEscape();
-      const isOverlayVisible = await PageObjects.console.monaco.isA11yOverlayVisible();
-      expect(isOverlayVisible).to.be(false);
+      await retry.try(async () => {
+        await PageObjects.console.monaco.pressEscape();
+        const isOverlayVisible = await PageObjects.console.monaco.isA11yOverlayVisible();
+        expect(isOverlayVisible).to.be(false);
+      });
     });
   });
 }

@@ -145,14 +145,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('customizable font size', () => {
       // flaky
-      it.skip('should allow the font size to be customized', async () => {
+      it('should allow the font size to be customized', async () => {
+        await PageObjects.console.openConfig();
         await PageObjects.console.setFontSizeSetting(20);
+        await PageObjects.console.openConsole();
+
         await retry.try(async () => {
           // the settings are not applied synchronously, so we retry for a time
           expect(await PageObjects.console.monaco.getFontSize()).to.be('20px');
         });
 
+        await PageObjects.console.openConfig();
         await PageObjects.console.setFontSizeSetting(24);
+        await PageObjects.console.openConsole();
+
         await retry.try(async () => {
           // the settings are not applied synchronously, so we retry for a time
           expect(await PageObjects.console.monaco.getFontSize()).to.be('24px');
