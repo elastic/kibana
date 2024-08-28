@@ -125,8 +125,7 @@ import {
   VisualizationSavedObjectAttributes,
 } from '../common/content_management';
 import { AddAggVisualizationPanelAction } from './actions/add_agg_vis_action';
-import { VisualizeRuntimeState } from './react_embeddable/types';
-import { savedObjectToRuntimeState } from './react_embeddable/state';
+import { VisualizeSerializedState } from './react_embeddable/types';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -412,9 +411,8 @@ export class VisualizationsPlugin
     });
     embeddable.registerReactEmbeddableSavedObject<VisualizationSavedObjectAttributes>({
       onAdd: (container, savedObject) => {
-        container.addNewPanel<VisualizeRuntimeState>({
+        container.addNewPanel<VisualizeSerializedState>({
           panelType: VISUALIZE_EMBEDDABLE_TYPE,
-          initialState: savedObjectToRuntimeState(savedObject),
         });
       },
       embeddableType: VISUALIZE_EMBEDDABLE_TYPE,

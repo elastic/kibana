@@ -12,7 +12,6 @@ import { SerializedPanelState } from '@kbn/presentation-containers';
 import { SerializedTitles } from '@kbn/presentation-publishing';
 import { cloneDeep, isEmpty, omit } from 'lodash';
 import { Reference } from '../../common/content_management';
-import { VisualizationSavedObject } from '../../common';
 import {
   getAnalytics,
   getDataViews,
@@ -27,7 +26,7 @@ import {
   deserializeReferences,
   serializeReferences,
 } from '../utils/saved_visualization_references';
-import { getSavedVisualization, SAVED_VIS_TYPE } from '../utils/saved_visualize_utils';
+import { getSavedVisualization } from '../utils/saved_visualize_utils';
 import type { SerializedVis } from '../vis';
 import {
   isVisualizeSavedObjectState,
@@ -222,56 +221,5 @@ export const serializeState: (props: {
       },
     } as VisualizeSavedVisInputState,
     references,
-  };
-};
-
-export const savedObjectToRuntimeState: (
-  savedObject: VisualizationSavedObject
-) => VisualizeRuntimeState = (savedObject) => {
-  const { references, attributes, id, managed = false } = savedObject;
-
-  const {
-    title,
-    description,
-    visState: visStateJSON,
-    kibanaSavedObjectMeta,
-    uiStateJSON,
-  } = attributes;
-
-  const visState = JSON.parse(visStateJSON ?? '{}');
-  const { searchSourceJSON } = kibanaSavedObjectMeta ?? {};
-  const searchSource = searchSourceJSON
-    ? JSON.parse(searchSourceJSON)
-    : getSearch().searchSource.createEmpty();
-
-  return {
-    title,
-    description,
-    serializedVis: deserializeSavedVisState(
-      {
-        savedVis: {
-          title,
-          description,
-          type: visState.type,
-          params: visState.params,
-          uiState: uiStateJSON ? JSON.parse(uiStateJSON) : {},
-          data: {
-            aggs: visState.aggs,
-            searchSource,
-            savedSearchId: visState.savedSearchId,
-          },
-        },
-      } as VisualizeSavedVisInputState,
-      references
-    ),
-    linkedToLibrary: true,
-    savedObjectId: id,
-    savedObjectProperties: {
-      lastSavedTitle: title,
-      displayName: SAVED_VIS_TYPE,
-      getDisplayName: () => SAVED_VIS_TYPE,
-      getEsType: () => SAVED_VIS_TYPE,
-      managed,
-    },
   };
 };
