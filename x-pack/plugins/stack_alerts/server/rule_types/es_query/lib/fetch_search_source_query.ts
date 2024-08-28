@@ -106,6 +106,7 @@ export async function fetchSearchSourceQuery({
       isGroupAgg,
       esResult: searchResult,
       sourceFieldsParams: params.sourceFields,
+      termField: params.termField,
     }),
     index: [index.name],
     query: searchRequestBody,

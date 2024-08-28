@@ -3507,6 +3507,18 @@
                 "path": "src/plugins/usage_collection/server/routes/stats/stats.ts"
               },
               {
+                "plugin": "taskManager",
+                "path": "x-pack/plugins/task_manager/server/routes/health.ts"
+              },
+              {
+                "plugin": "taskManager",
+                "path": "x-pack/plugins/task_manager/server/routes/background_task_utilization.ts"
+              },
+              {
+                "plugin": "taskManager",
+                "path": "x-pack/plugins/task_manager/server/routes/metrics.ts"
+              },
+              {
                 "plugin": "licensing",
                 "path": "x-pack/plugins/licensing/server/routes/info.ts"
               },
@@ -3549,18 +3561,6 @@
               {
                 "plugin": "spaces",
                 "path": "x-pack/plugins/spaces/server/routes/api/internal/get_content_summary.ts"
-              },
-              {
-                "plugin": "taskManager",
-                "path": "x-pack/plugins/task_manager/server/routes/health.ts"
-              },
-              {
-                "plugin": "taskManager",
-                "path": "x-pack/plugins/task_manager/server/routes/background_task_utilization.ts"
-              },
-              {
-                "plugin": "taskManager",
-                "path": "x-pack/plugins/task_manager/server/routes/metrics.ts"
               },
               {
                 "plugin": "security",
@@ -4569,6 +4569,14 @@
               {
                 "plugin": "rollup",
                 "path": "x-pack/plugins/rollup/server/routes/api/jobs/register_get_route.ts"
+              },
+              {
+                "plugin": "searchIndices",
+                "path": "x-pack/plugins/search_indices/server/routes/status.ts"
+              },
+              {
+                "plugin": "searchIndices",
+                "path": "x-pack/plugins/search_indices/server/routes/status.ts"
               },
               {
                 "plugin": "searchInferenceEndpoints",
@@ -6683,10 +6691,6 @@
               {
                 "plugin": "triggersActionsUi",
                 "path": "x-pack/plugins/triggers_actions_ui/server/data/routes/indices.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/job_service.ts"
               },
               {
                 "plugin": "globalSearch",
@@ -15974,6 +15978,10 @@
               },
               {
                 "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/routes/job_service.ts"
+              },
+              {
+                "plugin": "ml",
                 "path": "x-pack/plugins/ml/server/routes/saved_objects.ts"
               },
               {
@@ -16167,6 +16175,10 @@
               {
                 "plugin": "integrationAssistant",
                 "path": "x-pack/plugins/integration_assistant/server/routes/pipeline_routes.ts"
+              },
+              {
+                "plugin": "integrationAssistant",
+                "path": "x-pack/plugins/integration_assistant/server/routes/analyze_logs_routes.ts"
               },
               {
                 "plugin": "lists",
