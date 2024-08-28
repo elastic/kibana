@@ -36,13 +36,12 @@ import { LensAttributesService } from '../lens_attribute_service';
 
 const startMock = coreMock.createStart();
 
-export const defaultDoc = {
+export const defaultDoc: LensDocument = {
   savedObjectId: '1234',
   title: 'An extremely cool default document!',
-  expression: 'definitely a valid expression',
   visualizationType: 'testVis',
   state: {
-    query: 'kuery',
+    query: { query: 'test', language: 'kuery' },
     filters: [{ query: { match_phrase: { src: 'test' } }, meta: { index: 'index-pattern-0' } }],
     datasourceStates: {
       testDatasource: 'datasource',
@@ -50,7 +49,7 @@ export const defaultDoc = {
     visualization: {},
   },
   references: [{ type: 'index-pattern', id: '1', name: 'index-pattern-0' }],
-} as unknown as LensDocument;
+};
 
 export const exactMatchDoc = {
   attributes: {
