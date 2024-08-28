@@ -296,9 +296,11 @@ export const createOutputParser = () => {
   let response = function () {
       white();
       addResponseStart();
+      // it can be an object
       if (ch == '{') {
         const parsedObject = object();
         addResponseData(parsedObject);
+      // but it could also be an array of objects
       } else if (ch == '[') {
         const parsedArray = array();
         parsedArray.forEach(item => {
