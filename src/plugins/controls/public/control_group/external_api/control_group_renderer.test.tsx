@@ -30,13 +30,22 @@ describe('control group renderer', () => {
   const factory = getControlGroupEmbeddableFactory({ core, dataViews });
   const buildControlGroupSpy = jest.spyOn(factory, 'buildEmbeddable');
 
-  const mountControlGroupRenderer = async (props: ControlGroupRendererProps = {}) => {
-    const ref = React.createRef<AwaitingControlGroupAPI>();
-    const component = render(<ControlGroupRenderer ref={ref} {...props} />);
+  const mountControlGroupRenderer = async (
+    props: Omit<ControlGroupRendererProps, 'onApiAvailable'> = {}
+  ) => {
+    let controlGroupApi: AwaitingControlGroupAPI;
+    const component = render(
+      <ControlGroupRenderer
+        {...props}
+        onApiAvailable={(newApi) => {
+          controlGroupApi = newApi;
+        }}
+      />
+    );
     await waitFor(() => {
-      expect(ref.current).toBeDefined();
+      expect(controlGroupApi).toBeDefined();
     });
-    return { component, api: ref.current as ControlGroupRendererApi };
+    return { component, api: controlGroupApi! as ControlGroupRendererApi };
   };
 
   beforeAll(() => {
@@ -76,7 +85,9 @@ describe('control group renderer', () => {
     expect((api.parentApi as ParentApiType).unifiedSearchFilters$?.getValue()).toEqual(
       initialFilters
     );
-    component.rerender(<ControlGroupRenderer filters={updatedFilters} />);
+    component.rerender(
+      <ControlGroupRenderer onApiAvailable={jest.fn()} filters={updatedFilters} />
+    );
     expect((api.parentApi as ParentApiType).unifiedSearchFilters$?.getValue()).toEqual(
       updatedFilters
     );
@@ -88,7 +99,7 @@ describe('control group renderer', () => {
 
     const { component, api } = await mountControlGroupRenderer({ query: initialQuery });
     expect((api.parentApi as ParentApiType).query$.getValue()).toEqual(initialQuery);
-    component.rerender(<ControlGroupRenderer query={updatedQuery} />);
+    component.rerender(<ControlGroupRenderer onApiAvailable={jest.fn()} query={updatedQuery} />);
     expect((api.parentApi as ParentApiType).query$.getValue()).toEqual(updatedQuery);
   });
 
@@ -98,7 +109,7 @@ describe('control group renderer', () => {
 
     const { component, api } = await mountControlGroupRenderer({ timeRange: initialTime });
     expect((api.parentApi as ParentApiType).timeRange$.getValue()).toEqual(initialTime);
-    component.rerender(<ControlGroupRenderer timeRange={updatedTime} />);
+    component.rerender(<ControlGroupRenderer onApiAvailable={jest.fn()} timeRange={updatedTime} />);
     expect((api.parentApi as ParentApiType).timeRange$.getValue()).toEqual(updatedTime);
   });
 });
