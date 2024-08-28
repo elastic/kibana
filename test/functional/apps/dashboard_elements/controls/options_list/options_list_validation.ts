@@ -38,7 +38,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('Options List dashboard validation', () => {
       after(async () => {
-        await dashboard.clickDiscardChanges();
+        // Instead of reset, filter must be manually deleted to avoid
+        // https://github.com/elastic/kibana/issues/191675
+        await filterBar.removeAllFilters();
       });
 
       it('Can mark selections invalid with Query', async () => {
@@ -91,6 +93,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('Options List dashboard no validation', () => {
       before(async () => {
         await dashboardControls.updateValidationSetting(false);
+      });
+
+      after(async () => {
+        await dashboard.clickDiscardChanges();
       });
 
       it('Does not mark selections invalid with Query', async () => {
