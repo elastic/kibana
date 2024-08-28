@@ -43,7 +43,7 @@ describe('gauge toolbar', () => {
     propsOverrides?: Partial<VisualizationToolbarProps<GaugeVisualizationState>>
   ) => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
-    const user = userEvent.setup({ delay: null });
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     const rtlRender = render(<GaugeToolbar {...defaultProps} {...propsOverrides} />);
     const openPopover = async () =>
       await user.click(screen.getByRole('button', { name: 'Appearance' }));

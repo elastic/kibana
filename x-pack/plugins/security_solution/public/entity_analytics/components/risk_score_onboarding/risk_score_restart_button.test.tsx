@@ -72,7 +72,7 @@ describe('RiskScoreRestartButton', () => {
     it('Update button state while installing', async () => {
       // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
       const user = userEvent.setup({
-        delay: null,
+        advanceTimers: jest.advanceTimersByTime,
         pointerEventsCheck: 0,
       });
       render(

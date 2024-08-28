@@ -9,7 +9,7 @@
 
 import React, { memo, useEffect } from 'react';
 import { EuiCode } from '@elastic/eui';
-import userEvent from '@testing-library/user-event';
+import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { within } from '@testing-library/react';
 import { convertToTestId } from './components/command_list';
 import { Console } from './console';
@@ -36,6 +36,8 @@ interface ConsoleSelectorsAndActionsMock {
     options?: Partial<{
       /** If true, the ENTER key will not be pressed */
       inputOnly: boolean;
+      /** If true, the submit button will be clicked instead of using ENTER */
+      submitClick: boolean;
       /**
        * if true, then the keyboard keys will be used to send the command.
        * Use this if wanting ot press keyboard keys other than letter/punctuation
@@ -57,6 +59,8 @@ export interface ConsoleTestSetup
   enterCommand: ConsoleSelectorsAndActionsMock['enterCommand'];
 
   selectors: ConsoleSelectorsAndActionsMock;
+
+  user: UserEvent;
 }
 
 /**
@@ -65,6 +69,7 @@ export interface ConsoleTestSetup
  */
 export const getConsoleSelectorsAndActionMock = (
   renderResult: ReturnType<AppContextTestRender['render']>,
+  user: UserEvent,
   dataTestSubj: string = 'test'
 ): ConsoleTestSetup['selectors'] => {
   const getLeftOfCursorInputText: ConsoleSelectorsAndActionsMock['getLeftOfCursorInputText'] =
@@ -100,7 +105,7 @@ export const getConsoleSelectorsAndActionMock = (
     cmd,
     options = {}
   ) => {
-    await enterConsoleCommand(renderResult, cmd, options);
+    await enterConsoleCommand(renderResult, user, cmd, options);
   };
 
   return {
@@ -124,34 +129,49 @@ export const getConsoleSelectorsAndActionMock = (
  */
 export const enterConsoleCommand = async (
   renderResult: ReturnType<AppContextTestRender['render']>,
+  user: UserEvent,
   cmd: string,
   {
     inputOnly = false,
     useKeyboard = false,
     dataTestSubj = 'test',
-  }: Partial<{ inputOnly: boolean; useKeyboard: boolean; dataTestSubj: string }> = {}
+    submitClick = false,
+  }: Partial<{
+    inputOnly: boolean;
+    useKeyboard: boolean;
+    dataTestSubj: string;
+    submitClick: boolean;
+  }> = {}
 ): Promise<void> => {
-  const keyCaptureInput = renderResult
-    .getByTestId(`${dataTestSubj}-keyCapture-input`)
-    .querySelector('input');
+  const keyCaptureInput = renderResult.getByTestId(`${dataTestSubj}-keyCapture-input`);
 
   if (keyCaptureInput === null) {
     throw new Error(`No input found with test-subj: ${dataTestSubj}-keyCapture`);
   }
 
   if (useKeyboard) {
-    await userEvent.click(keyCaptureInput);
-    await userEvent.keyboard(cmd);
+    await user.click(keyCaptureInput);
+    await user.keyboard(cmd);
   } else {
-    await userEvent.type(keyCaptureInput, cmd);
+    await user.type(keyCaptureInput, cmd);
+  }
+
+  // user-event v14 has a problem with {enter} not working on certain inputs
+  // so this provides a workaround to submit via click instead.
+  // See here for a related discussion: https://github.com/testing-library/user-event/discussions/1164
+  if (submitClick) {
+    await user.click(renderResult.getByTestId(`${dataTestSubj}-inputTextSubmitButton`));
+    return;
   }
 
   if (!inputOnly) {
-    await userEvent.keyboard('{enter}');
+    await user.keyboard('{enter}');
   }
 };
 
 export const getConsoleTestSetup = (): ConsoleTestSetup => {
+  // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
+  const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
   const mockedContext = createAppRootMockRenderer();
   const { startServices, coreStart, depsStart, queryClient, history, setExperimentalFlag } =
     mockedContext;
@@ -176,7 +196,7 @@ export const getConsoleTestSetup = (): ConsoleTestSetup => {
   };
 
   const enterCommand: ConsoleTestSetup['enterCommand'] = async (cmd, options = {}) => {
-    await enterConsoleCommand(renderResult, cmd, options);
+    await enterConsoleCommand(renderResult, user, cmd, options);
   };
 
   let selectors: ConsoleSelectorsAndActionsMock;
@@ -190,7 +210,7 @@ export const getConsoleTestSetup = (): ConsoleTestSetup => {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    selectors = getConsoleSelectorsAndActionMock(renderResult, testSubj!);
+    selectors = getConsoleSelectorsAndActionMock(renderResult, user, testSubj!);
   };
 
   return {
@@ -201,6 +221,7 @@ export const getConsoleTestSetup = (): ConsoleTestSetup => {
     history,
     setExperimentalFlag,
     renderConsole,
+    user,
     commands: commandList,
     enterCommand,
     selectors: {

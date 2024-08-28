@@ -75,28 +75,28 @@ describe.skip('FormatSelector', () => {
   it('updates the format decimals', async () => {
     renderFormatSelector();
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
-    const user = userEvent.setup({ delay: null });
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     await user.type(screen.getByLabelText('Decimals'), '{backspace}10');
     expect(props.onChange).toBeCalledWith({ id: 'bytes', params: { decimals: 10 } });
   });
   it('updates the format decimals to upper range when input exceeds the range', async () => {
     renderFormatSelector();
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
-    const user = userEvent.setup({ delay: null });
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     await user.type(screen.getByLabelText('Decimals'), '{backspace}10');
     expect(props.onChange).toBeCalledWith({ id: 'bytes', params: { decimals: 15 } });
   });
   it('updates the format decimals to lower range when input is smaller than range', async () => {
     renderFormatSelector();
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
-    const user = userEvent.setup({ delay: null });
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     await user.type(screen.getByLabelText('Decimals'), '{backspace}-2');
     expect(props.onChange).toBeCalledWith({ id: 'bytes', params: { decimals: 0 } });
   });
   it('updates the suffix', async () => {
     renderFormatSelector();
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
-    const user = userEvent.setup({ delay: null });
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     await user.type(screen.getByTestId('indexPattern-dimension-formatSuffix'), 'GB');
     jest.advanceTimersByTime(256);
     expect(props.onChange).toBeCalledWith({ id: 'bytes', params: { suffix: 'GB' } });
@@ -117,7 +117,7 @@ describe.skip('FormatSelector', () => {
         screen.getByTestId('indexPattern-dimension-duration-end')
       ).getByRole('combobox');
       // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
-      const user = userEvent.setup({ delay: null });
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       await user.click(durationEndInput);
       fireEvent.click(screen.getByText('Hours'));
       jest.advanceTimersByTime(256);

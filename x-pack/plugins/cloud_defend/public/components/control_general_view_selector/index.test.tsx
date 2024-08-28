@@ -109,7 +109,7 @@ describe('<ControlGeneralViewSelector />', () => {
   it('allows the user to add a limited set of file operations', async () => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
     const user = userEvent.setup({
-      delay: null,
+      advanceTimers: jest.advanceTimersByTime,
       pointerEventsCheck: 0,
     });
     const { getByTestId, rerender } = render(<WrappedComponent />);
@@ -144,7 +144,7 @@ describe('<ControlGeneralViewSelector />', () => {
   it('allows the user to add a limited set of process operations', async () => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
     const user = userEvent.setup({
-      delay: null,
+      advanceTimers: jest.advanceTimersByTime,
       pointerEventsCheck: 0,
     });
     const { getByTestId, rerender } = render(<WrappedComponent selector={mockProcessSelector2} />);
@@ -177,7 +177,7 @@ describe('<ControlGeneralViewSelector />', () => {
   it('allows the user add additional conditions', async () => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
     const user = userEvent.setup({
-      delay: null,
+      advanceTimers: jest.advanceTimersByTime,
       pointerEventsCheck: 0,
     });
     const { getByTestId, rerender } = render(<WrappedComponent />);
@@ -206,7 +206,7 @@ describe('<ControlGeneralViewSelector />', () => {
   it('allows the user add boolean type conditions', async () => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
     const user = userEvent.setup({
-      delay: null,
+      advanceTimers: jest.advanceTimersByTime,
       pointerEventsCheck: 0,
     });
     const { getByTestId, rerender } = render(<WrappedComponent />);
@@ -222,7 +222,7 @@ describe('<ControlGeneralViewSelector />', () => {
   it('shows an error if no conditions are added', async () => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
     const user = userEvent.setup({
-      delay: null,
+      advanceTimers: jest.advanceTimersByTime,
       pointerEventsCheck: 0,
     });
     const { getByText, getByTestId, rerender } = render(<WrappedComponent />);
@@ -241,7 +241,7 @@ describe('<ControlGeneralViewSelector />', () => {
   it('shows an error if no values provided for condition', async () => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
     const user = userEvent.setup({
-      delay: null,
+      advanceTimers: jest.advanceTimersByTime,
       pointerEventsCheck: 0,
     });
     const { getByText, getByTestId } = render(<WrappedComponent />);
@@ -259,7 +259,7 @@ describe('<ControlGeneralViewSelector />', () => {
   it('prevents conditions from having values that exceed MAX_CONDITION_VALUE_LENGTH_BYTES', async () => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
     const user = userEvent.setup({
-      delay: null,
+      advanceTimers: jest.advanceTimersByTime,
       pointerEventsCheck: 0,
     });
     const { getByText, getByTestId, rerender } = render(<WrappedComponent />);
@@ -290,7 +290,7 @@ describe('<ControlGeneralViewSelector />', () => {
   it('prevents targetFilePath conditions from having values that exceed MAX_FILE_PATH_VALUE_LENGTH_BYTES', async () => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
     const user = userEvent.setup({
-      delay: null,
+      advanceTimers: jest.advanceTimersByTime,
       pointerEventsCheck: 0,
     });
     const { getByText, getByTestId, rerender } = render(<WrappedComponent />);
@@ -320,7 +320,7 @@ describe('<ControlGeneralViewSelector />', () => {
   it('validates targetFilePath conditions values', async () => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
     const user = userEvent.setup({
-      delay: null,
+      advanceTimers: jest.advanceTimersByTime,
       pointerEventsCheck: 0,
     });
     const { getByText, getByTestId, queryByText, rerender } = render(<WrappedComponent />);
@@ -373,7 +373,7 @@ describe('<ControlGeneralViewSelector />', () => {
   it('validates processExecutable conditions values', async () => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
     const user = userEvent.setup({
-      delay: null,
+      advanceTimers: jest.advanceTimersByTime,
       pointerEventsCheck: 0,
     });
     const { getByText, getByTestId, queryByText, rerender } = render(
@@ -440,7 +440,7 @@ describe('<ControlGeneralViewSelector />', () => {
   it('validates containerImageFullName conditions values', async () => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
     const user = userEvent.setup({
-      delay: null,
+      advanceTimers: jest.advanceTimersByTime,
       pointerEventsCheck: 0,
     });
     const { getByText, getByTestId, queryByText, rerender } = render(<WrappedComponent />);
@@ -495,7 +495,7 @@ describe('<ControlGeneralViewSelector />', () => {
   it('validates kubernetesPodLabel conditions values', async () => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
     const user = userEvent.setup({
-      delay: null,
+      advanceTimers: jest.advanceTimersByTime,
       pointerEventsCheck: 0,
     });
     const { getByText, getByTestId, queryByText, rerender } = render(<WrappedComponent />);
@@ -551,7 +551,7 @@ describe('<ControlGeneralViewSelector />', () => {
   it('prevents processName conditions from having values that exceed 15 bytes', async () => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
     const user = userEvent.setup({
-      delay: null,
+      advanceTimers: jest.advanceTimersByTime,
       pointerEventsCheck: 0,
     });
     const { getByText, getByTestId, rerender } = render(
@@ -581,7 +581,7 @@ describe('<ControlGeneralViewSelector />', () => {
   it('shows an error if condition values fail their pattern regex', async () => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
     const user = userEvent.setup({
-      delay: null,
+      advanceTimers: jest.advanceTimersByTime,
       pointerEventsCheck: 0,
     });
     const { getByText, getByTestId, rerender } = render(<WrappedComponent />);
@@ -612,7 +612,7 @@ describe('<ControlGeneralViewSelector />', () => {
   it('allows the user to remove conditions', async () => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
     const user = userEvent.setup({
-      delay: null,
+      advanceTimers: jest.advanceTimersByTime,
       pointerEventsCheck: 0,
     });
 
@@ -633,7 +633,7 @@ describe('<ControlGeneralViewSelector />', () => {
   it('allows the user to remove the selector (unless its the last one)', async () => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
     const user = userEvent.setup({
-      delay: null,
+      advanceTimers: jest.advanceTimersByTime,
       pointerEventsCheck: 0,
     });
 
@@ -660,7 +660,7 @@ describe('<ControlGeneralViewSelector />', () => {
   it('allows the user to expand/collapse selector', async () => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
     const user = userEvent.setup({
-      delay: null,
+      advanceTimers: jest.advanceTimersByTime,
       pointerEventsCheck: 0,
     });
     const { getByText, getByTestId, queryByTestId } = render(<WrappedComponent />);

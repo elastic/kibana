@@ -21,7 +21,7 @@ describe('When entering data into the Console input', () => {
   let enterCommand: ConsoleTestSetup['enterCommand'];
 
   const showInputHistoryPopover = async () => {
-    enterCommand('{ArrowUp}', { inputOnly: true, useKeyboard: true });
+    await enterCommand('{ArrowUp}', { inputOnly: true, useKeyboard: true });
 
     await waitFor(() => {
       expect(renderResult.getByTestId('test-inputHistorySelector')).not.toBeNull();
@@ -57,27 +57,27 @@ describe('When entering data into the Console input', () => {
     render = (props = {}) => (renderResult = testSetup.renderConsole(props));
   });
 
-  it('should display what the user is typing', () => {
+  it('should display what the user is typing', async () => {
     render();
 
-    enterCommand('c', { inputOnly: true });
+    await enterCommand('c', { inputOnly: true });
     expect(getLeftOfCursorText()).toEqual('c');
 
-    enterCommand('m', { inputOnly: true });
+    await enterCommand('m', { inputOnly: true });
     expect(getLeftOfCursorText()).toEqual('cm');
   });
 
-  it('should repeat letters if the user holds letter key down on the keyboard', () => {
+  it('should repeat letters if the user holds letter key down on the keyboard', async () => {
     render();
-    enterCommand('{a>5/}', { inputOnly: true, useKeyboard: true });
+    await enterCommand('{a>5/}', { inputOnly: true, useKeyboard: true });
     expect(getLeftOfCursorText()).toEqual('aaaaa');
   });
 
-  it('should not display command key names in the input, when command keys are used', () => {
+  it('should not display command key names in the input, when command keys are used', async () => {
     render();
-    enterCommand('{Meta>}', { inputOnly: true, useKeyboard: true });
+    await enterCommand('{Meta>}', { inputOnly: true, useKeyboard: true });
     expect(getLeftOfCursorText()).toEqual('');
-    enterCommand('{Shift>}A{/Shift}', { inputOnly: true, useKeyboard: true });
+    await enterCommand('{Shift>}A{/Shift}', { inputOnly: true, useKeyboard: true });
     expect(getLeftOfCursorText()).toEqual('A');
   });
 
@@ -87,9 +87,9 @@ describe('When entering data into the Console input', () => {
     expect(getInputPlaceholderText()).toEqual(INPUT_DEFAULT_PLACEHOLDER_TEXT);
   });
 
-  it('should NOT display placeholder text if input area has text entered', () => {
+  it('should NOT display placeholder text if input area has text entered', async () => {
     render();
-    enterCommand('cm', { inputOnly: true });
+    await enterCommand('cm', { inputOnly: true });
 
     expect(renderResult.queryByTestId('test-inputPlaceholder')).toBeNull();
   });
@@ -100,16 +100,16 @@ describe('When entering data into the Console input', () => {
     expect(getFooterText()?.trim()).toBe(UP_ARROW_ACCESS_HISTORY_HINT);
   });
 
-  it('should display hint when a known command is typed', () => {
+  it('should display hint when a known command is typed', async () => {
     render();
-    enterCommand('cmd2 ', { inputOnly: true });
+    await enterCommand('cmd2 ', { inputOnly: true });
 
     expect(getFooterText()).toEqual('cmd2 --file [--ext --bad]');
   });
 
-  it('should display hint when an unknown command is typed', () => {
+  it('should display hint when an unknown command is typed', async () => {
     render();
-    enterCommand('abc ', { inputOnly: true });
+    await enterCommand('abc ', { inputOnly: true });
 
     expect(getFooterText()).toEqual('Unknown command abc');
     expect(renderResult.getByTestId('test-cmdInput-container').classList.contains('error')).toBe(
@@ -117,9 +117,9 @@ describe('When entering data into the Console input', () => {
     );
   });
 
-  it('should show the arrow button as not disabled if input has text entered', () => {
+  it('should show the arrow button as not disabled if input has text entered', async () => {
     render();
-    enterCommand('cm ', { inputOnly: true });
+    await enterCommand('cm ', { inputOnly: true });
 
     const arrowButton = renderResult.getByTestId('test-inputTextSubmitButton');
     expect(arrowButton).not.toBeDisabled();
@@ -132,26 +132,26 @@ describe('When entering data into the Console input', () => {
     expect(arrowButton).toBeDisabled();
   });
 
-  it('should show the arrow button as disabled if input has only whitespace entered and it is left to the cursor', () => {
+  it('should show the arrow button as disabled if input has only whitespace entered and it is left to the cursor', async () => {
     render();
-    enterCommand(' ', { inputOnly: true });
+    await enterCommand(' ', { inputOnly: true });
 
     const arrowButton = renderResult.getByTestId('test-inputTextSubmitButton');
     expect(arrowButton).toBeDisabled();
   });
 
-  it('should show the arrow button as disabled if input has only whitespace entered and it is right to the cursor', () => {
+  it('should show the arrow button as disabled if input has only whitespace entered and it is right to the cursor', async () => {
     render();
-    enterCommand(' ', { inputOnly: true });
+    await enterCommand(' ', { inputOnly: true });
     typeKeyboardKey('{ArrowLeft}');
 
     const arrowButton = renderResult.getByTestId('test-inputTextSubmitButton');
     expect(arrowButton).toBeDisabled();
   });
 
-  it('should execute correct command if arrow button is clicked', () => {
+  it('should execute correct command if arrow button is clicked', async () => {
     render();
-    enterCommand('isolate', { inputOnly: true });
+    await enterCommand('isolate', { inputOnly: true });
     act(() => {
       renderResult.getByTestId('test-inputTextSubmitButton').click();
     });
@@ -178,9 +178,9 @@ describe('When entering data into the Console input', () => {
   describe('and when the command input history popover is opened', () => {
     const renderWithInputHistory = async (inputText: string = '') => {
       render();
-      enterCommand('help');
-      enterCommand('cmd2 --help');
-      enterCommand('cmd1 --help');
+      await enterCommand('help', { submitClick: true });
+      await enterCommand('cmd2 --help', { submitClick: true });
+      await enterCommand('cmd1 --help', { submitClick: true });
 
       if (inputText) {
         enterCommand(inputText, { inputOnly: true });
@@ -279,9 +279,9 @@ describe('When entering data into the Console input', () => {
       selection!.addRange(range);
     };
 
-    beforeEach(() => {
+    beforeEach(async () => {
       render();
-      enterCommand('isolate', { inputOnly: true });
+      await enterCommand('isolate', { inputOnly: true });
     });
 
     it('should backspace and delete last character', () => {
@@ -465,21 +465,21 @@ describe('When entering data into the Console input', () => {
   describe('and a command argument has a value SelectorComponent defined', () => {
     it('should insert Selector component when argument name is used', async () => {
       render();
-      enterCommand('cmd7 --foo', { inputOnly: true });
+      await enterCommand('cmd7 --foo', { inputOnly: true });
 
       expect(getLeftOfCursorText()).toEqual('cmd7 --foo=foo[0]: foo selected');
     });
 
     it('should not insert Selector component if argument name is not a whole word', async () => {
       render();
-      enterCommand('cmd7 --foobar', { inputOnly: true });
+      await enterCommand('cmd7 --foobar', { inputOnly: true });
 
       expect(getLeftOfCursorText()).toEqual('cmd7 --foobar');
     });
 
     it('should not insert Selector component if argument name is not a whole word while cursor is between the argument name', async () => {
       render();
-      enterCommand('cmd7 --fooX', { inputOnly: true });
+      await enterCommand('cmd7 --fooX', { inputOnly: true });
       typeKeyboardKey('{ArrowLeft}');
 
       expect(getLeftOfCursorText()).toEqual('cmd7 --foo');
@@ -488,7 +488,7 @@ describe('When entering data into the Console input', () => {
 
     it('should support using argument multiple times (allowMultiples: true)', async () => {
       render();
-      enterCommand('cmd7 --foo --foo', { inputOnly: true });
+      await enterCommand('cmd7 --foo --foo', { inputOnly: true });
 
       expect(getLeftOfCursorText()).toEqual(
         'cmd7 --foo=foo[0]: foo selected --foo=foo[1]: foo selected'
@@ -497,7 +497,7 @@ describe('When entering data into the Console input', () => {
 
     it(`should remove entire argument if BACKSPACE key is pressed`, async () => {
       render();
-      enterCommand('cmd7 --foo', { inputOnly: true });
+      await enterCommand('cmd7 --foo', { inputOnly: true });
       typeKeyboardKey('{backspace}');
 
       expect(getLeftOfCursorText()).toEqual('cmd7 ');
@@ -505,7 +505,7 @@ describe('When entering data into the Console input', () => {
 
     it(`should remove entire argument if DELETE key is pressed`, async () => {
       render();
-      enterCommand('cmd7 --foo', { inputOnly: true });
+      await enterCommand('cmd7 --foo', { inputOnly: true });
       typeKeyboardKey('{ArrowLeft}');
       typeKeyboardKey('{Delete}');
 

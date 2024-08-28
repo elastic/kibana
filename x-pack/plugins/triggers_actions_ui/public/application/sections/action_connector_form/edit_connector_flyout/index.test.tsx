@@ -463,7 +463,7 @@ describe('EditConnectorFlyout', () => {
 
     it('updates connector form field with latest value', async () => {
       // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
-      const user = userEvent.setup({ delay: null });
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       const { getByTestId } = appMockRenderer.render(
         <EditConnectorFlyout
           actionTypeRegistry={actionTypeRegistry}

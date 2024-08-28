@@ -34,10 +34,9 @@ describe('BadArgument component', () => {
     render = (props = {}) => (renderResult = testSetup.renderConsole(props));
   });
 
-  // TODO This is failing with the update to userEvent v14 https://github.com/elastic/kibana/pull/189949
-  it.skip('should display message and help output if command is not hidden from help', async () => {
+  it('should display message and help output if command is not hidden from help', async () => {
     render();
-    await enterCommand('cmd1 --foo');
+    await enterCommand('cmd1 --foo', { submitClick: true });
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
       'Argument --foo must have a value'
@@ -45,11 +44,10 @@ describe('BadArgument component', () => {
     expect(renderResult.getByTestId('test-badArgument-commandUsage'));
   });
 
-  // TODO This is failing with the update to userEvent v14 https://github.com/elastic/kibana/pull/189949
-  it.skip('should only display message (no help) if command is hidden from help', async () => {
+  it('should only display message (no help) if command is hidden from help', async () => {
     command.helpHidden = true;
     render();
-    await enterCommand('cmd1 --foo');
+    await enterCommand('cmd1 --foo', { submitClick: true });
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
       'Argument --foo must have a value'

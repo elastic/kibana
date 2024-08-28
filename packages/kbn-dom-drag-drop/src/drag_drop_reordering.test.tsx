@@ -42,7 +42,7 @@ describe('Drag and drop reordering', () => {
     contextOverrides = {}
   ) => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
-    const user = userEvent.setup({ delay: null });
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
 
     const values = propsOverrides.map((props, index) => {
       return props?.value ? props.value : generateDragDropValue(`${index}`);

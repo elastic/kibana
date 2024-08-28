@@ -160,7 +160,7 @@ describe('ProcessTreeNode component', () => {
 
     it('executes callback function when user Clicks', async () => {
       // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
-      const user = userEvent.setup({ delay: null });
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       const onProcessSelected = jest.fn();
 
       renderResult = mockedContext.render(
@@ -173,7 +173,7 @@ describe('ProcessTreeNode component', () => {
 
     it('does not executes callback function when user is Clicking to copy text', async () => {
       // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
-      const user = userEvent.setup({ delay: null });
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
 
       const windowGetSelectionSpy = jest.spyOn(window, 'getSelection');
 
@@ -253,7 +253,7 @@ describe('ProcessTreeNode component', () => {
       });
       it('toggle Alert Details button when Alert button is clicked', async () => {
         // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
-        const user = userEvent.setup({ delay: null });
+        const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
         renderResult = mockedContext.render(
           <ProcessTreeNode {...props} process={sessionViewAlertProcessMock} />
         );
@@ -297,7 +297,7 @@ describe('ProcessTreeNode component', () => {
       });
       it('toggle Child processes nodes when Child processes button is clicked', async () => {
         // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
-        const user = userEvent.setup({ delay: null });
+        const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
         const processMockWithChildren: typeof processMock = {
           ...processMock,
           getChildren: () => [childProcessMock],

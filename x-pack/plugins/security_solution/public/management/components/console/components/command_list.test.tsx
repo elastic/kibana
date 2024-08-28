@@ -12,7 +12,6 @@ import {
   getHelpSidePanelSelectorsAndActionsMock,
 } from '../mocks';
 import React from 'react';
-import { waitFor } from '@testing-library/react';
 
 describe('When rendering the command list (help output)', () => {
   let render: ConsoleTestSetup['renderConsole'];
@@ -126,32 +125,26 @@ describe('When rendering the command list (help output)', () => {
       expect(consoleSelectors.getInputText()).toEqual('cmd6 --foo ');
     });
 
-    // TODO This is failing with the update to userEvent v14 https://github.com/elastic/kibana/pull/189949
-    it.skip('should display custom help output when Command service has `getHelp()` defined', async () => {
+    it('should display custom help output when Command service has `getHelp()` defined', async () => {
       const HelpComponent: React.FunctionComponent = () => {
         return <div data-test-subj="custom-help">{'help output'}</div>;
       };
       render({ HelpComponent });
-      await enterCommand('help');
+      await enterCommand('help', { submitClick: true });
 
-      await waitFor(() => {
-        expect(renderResult.getByTestId('custom-help')).toBeInTheDocument();
-      });
+      expect(renderResult.getByTestId('custom-help')).toBeInTheDocument();
     });
   });
 
   describe('And displayed when `help` command is entered', () => {
-    // TODO This is failing with the update to userEvent v14 https://github.com/elastic/kibana/pull/189949
-    it.skip('should display custom help output when Command service has `getHelp()` defined', async () => {
+    it('should display custom help output when Command service has `getHelp()` defined', async () => {
       const HelpComponent: React.FunctionComponent = () => {
         return <div data-test-subj="custom-help">{'help output'}</div>;
       };
       render({ HelpComponent });
-      await enterCommand('help');
+      await enterCommand('help', { submitClick: true });
 
-      await waitFor(() => {
-        expect(renderResult.getByTestId('custom-help')).toBeInTheDocument();
-      });
+      expect(renderResult.getByTestId('custom-help')).toBeInTheDocument();
     });
   });
 });

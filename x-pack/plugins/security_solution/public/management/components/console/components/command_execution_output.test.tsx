@@ -38,13 +38,12 @@ describe('When using CommandExecutionOutput component', () => {
 
     render = async (props = {}) => {
       renderResult = renderConsole(props);
-      await enterCommand('cmd1');
+      await enterCommand('cmd1', { submitClick: true });
       return renderResult;
     };
   });
 
-  // TODO This is failing with the update to userEvent v14 https://github.com/elastic/kibana/pull/189949
-  it.skip('should show long running hint message if pending and >15s have passed', async () => {
+  it('should show long running hint message if pending and >15s have passed', async () => {
     jest.useFakeTimers({ legacyFakeTimers: true });
     await render();
 
@@ -57,8 +56,7 @@ describe('When using CommandExecutionOutput component', () => {
     expect(renderResult.getByTestId('test-longRunningCommandHint')).not.toBeNull();
   });
 
-  // TODO This is failing with the update to userEvent v14 https://github.com/elastic/kibana/pull/189949
-  it.skip('should remove long running hint message if command completes', async () => {
+  it('should remove long running hint message if command completes', async () => {
     jest.useFakeTimers({ legacyFakeTimers: true });
     await render();
 
