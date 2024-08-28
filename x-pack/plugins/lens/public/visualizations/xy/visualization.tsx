@@ -644,14 +644,6 @@ export const getXyVisualization = ({
         delete newLayer.splitAccessor;
         // as the palette is associated with the break down by dimension, remove it together with the dimension
         delete newLayer.palette;
-        // percentage chart doesn't make sense if there's no split dimension so we convert to bar
-        if (newLayer.seriesType === 'bar_percentage_stacked') {
-          newLayer.seriesType = 'bar';
-        } else if (newLayer.seriesType === 'bar_horizontal_percentage_stacked') {
-          newLayer.seriesType = 'bar_horizontal';
-        } else if (newLayer.seriesType === 'area_percentage_stacked') {
-          newLayer.seriesType = 'area';
-        }
       }
     }
     if (newLayer.accessors.includes(columnId)) {
@@ -709,8 +701,8 @@ export const getXyVisualization = ({
   getSubtypeSwitch({ state, setState, layerId }) {
     const index = state.layers.findIndex((l) => l.layerId === layerId);
     const layer = state.layers[index];
-    // todo: test this: do not show subtype for non data, no split or seriestype line
-    if (!layer || !isDataLayer(layer) || !layer.splitAccessor || layer.seriesType === 'line') {
+
+    if (!layer || !isDataLayer(layer) || layer.seriesType === 'line') {
       return null;
     }
 

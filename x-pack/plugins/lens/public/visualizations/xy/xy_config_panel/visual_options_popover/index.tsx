@@ -10,20 +10,17 @@ import { i18n } from '@kbn/i18n';
 import { TooltipWrapper } from '@kbn/visualization-utils';
 import { EuiHorizontalRule } from '@elastic/eui';
 import { BarOrientationSettings } from '../../../../shared_components/bar_orientation';
-import { SeriesStackingSetting } from '../../../../shared_components/series_layer_stacking';
 import { ToolbarPopover } from '../../../../shared_components';
 import { MissingValuesOptions } from './missing_values_option';
 import { LineCurveOption } from './line_curve_option';
 import { FillOpacityOption } from './fill_opacity_option';
-import { SeriesType, XYState } from '../../types';
+import { XYState } from '../../types';
 import {
   flipSeriesType,
   getBarSeriesLayers,
-  getUniqueSeriesTypes,
   hasAreaSeries,
   hasHistogramSeries,
   hasNonBarSeries,
-  isAreaLayer,
   isBarLayer,
   isHorizontalChart,
 } from '../../state_helpers';
@@ -88,18 +85,6 @@ export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({
 
   const barSeriesLayers = getBarSeriesLayers(dataLayers);
 
-  const getBarSeriesType = () => {
-    const barSeriesTypes = getUniqueSeriesTypes(barSeriesLayers);
-    return barSeriesTypes.length === 1 ? barSeriesTypes[0] : 'bar';
-  };
-
-  const areaSeriesLayers = dataLayers.filter(({ seriesType }) => seriesType.startsWith('area'));
-
-  const getAreaSeriesType = () => {
-    const seriesType = getUniqueSeriesTypes(areaSeriesLayers);
-    return seriesType.length === 1 ? seriesType[0] : 'area';
-  };
-
   const hasAnyBarSetting = !isHasNonBarSeries || barSeriesLayers.length > 1;
   const hasAreaSettings = hasAreaSeries(dataLayers);
   const shouldDisplayDividerHr = hasAnyBarSetting && hasAreaSettings;
@@ -137,47 +122,10 @@ export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({
           />
         )}
 
-        {barSeriesLayers.length > 1 && (
-          <SeriesStackingSetting
-            seriesType={getBarSeriesType()}
-            onSeriesType={(newSeriesType: string) => {
-              setState({
-                ...state,
-                layers: state.layers.map((layer) =>
-                  isBarLayer(layer)
-                    ? {
-                        ...layer,
-                        seriesType: newSeriesType as SeriesType,
-                      }
-                    : layer
-                ),
-              });
-            }}
-          />
-        )}
         {shouldDisplayDividerHr && <EuiHorizontalRule margin="s" />}
 
         {hasAreaSettings && (
           <>
-            <SeriesStackingSetting
-              label={i18n.translate('xpack.lens.shared.areaStacking', {
-                defaultMessage: 'Area layer stacking',
-              })}
-              seriesType={getAreaSeriesType()}
-              onSeriesType={(newSeriesType: string) => {
-                setState({
-                  ...state,
-                  layers: state.layers.map((layer) =>
-                    isAreaLayer(layer)
-                      ? {
-                          ...layer,
-                          seriesType: newSeriesType as SeriesType,
-                        }
-                      : layer
-                  ),
-                });
-              }}
-            />
             <FillOpacityOption
               isFillOpacityEnabled={true}
               value={state?.fillOpacity ?? 0.3}
