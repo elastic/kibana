@@ -13,7 +13,7 @@ import deepEqual from 'fast-deep-equal';
 import { AIConnector } from '../../connectorland/connector_selector';
 import { getGenAiConfig } from '../../connectorland/helpers';
 import { NEW_CHAT } from '../conversations/conversation_sidepanel/translations';
-import { getDefaultSystemPrompt } from '../use_conversation/helpers';
+import { getDefaultNewSystemPrompt, getDefaultSystemPrompt } from '../use_conversation/helpers';
 import { useConversation } from '../use_conversation';
 import { sleep } from '../helpers';
 import { Conversation, WELCOME_CONVERSATION_TITLE } from '../../..';
@@ -248,10 +248,19 @@ export const useCurrentConversation = ({
       });
       return;
     }
+    const newSystemPrompt = getDefaultNewSystemPrompt(allSystemPrompts);
 
     const newConversation = await createConversation({
       title: NEW_CHAT,
-      apiConfig: currentConversation?.apiConfig,
+      ...(currentConversation?.apiConfig != null &&
+      currentConversation?.apiConfig?.actionTypeId !== null
+        ? {
+            apiConfig: {
+              ...currentConversation.apiConfig,
+              ...(newSystemPrompt?.id != null ? { defaultSystemPromptId: newSystemPrompt.id } : {}),
+            },
+          }
+        : {}),
     });
 
     if (newConversation) {
@@ -263,6 +272,7 @@ export const useCurrentConversation = ({
       await refetchCurrentUserConversations();
     }
   }, [
+    allSystemPrompts,
     conversations,
     createConversation,
     currentConversation?.apiConfig,
