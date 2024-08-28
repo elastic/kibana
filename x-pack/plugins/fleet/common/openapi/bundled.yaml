@@ -2561,6 +2561,10 @@ paths:
       summary: List enrollment API keys
       tags:
         - Fleet enrollment API keys
+      parameters:
+        - $ref: '#/components/parameters/page_size'
+        - $ref: '#/components/parameters/page_index'
+        - $ref: '#/components/parameters/kuery'
       responses:
         '200':
           description: OK
@@ -2592,7 +2596,6 @@ paths:
         '400':
           $ref: '#/components/responses/error'
       operationId: get-enrollment-api-keys
-      parameters: []
     post:
       summary: Create enrollment API key
       tags:
@@ -2613,6 +2616,22 @@ paths:
                       - created
         '400':
           $ref: '#/components/responses/error'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: The name of the enrollment API key. Must be unique.
+                policy_id:
+                  type: string
+                  description: >-
+                    The id of the agent policy the Elastic Agent will be
+                    enrolled in.
+              required:
+                - policy_id
       operationId: create-enrollment-api-keys
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
@@ -2643,7 +2662,7 @@ paths:
           $ref: '#/components/responses/error'
       operationId: get-enrollment-api-key
     delete:
-      summary: Delete enrollment API key by ID
+      summary: Revoke enrollment API key by ID by marking it as inactive
       tags:
         - Fleet enrollment API keys
       responses:
@@ -5279,14 +5298,21 @@ components:
           type: string
         api_key_id:
           type: string
+          description: The id of the API key in the Security API.
         api_key:
           type: string
+          description: The enrollment API key (token) used for enrolling Elastic Agents.
         name:
           type: string
+          description: The name of the enrollment API key.
         active:
           type: boolean
+          description: >-
+            When false, the enrollment API key is revoked and cannot be used for
+            enrolling Elastic Agents.
         policy_id:
           type: string
+          description: The id of the agent policy the Elastic Agent will be enrolled in.
         created_at:
           type: string
       required:
