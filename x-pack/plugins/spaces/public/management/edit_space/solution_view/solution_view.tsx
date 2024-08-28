@@ -24,6 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { Space } from '../../../../common';
+import type { SpaceValidator } from '../../lib';
 import { SectionPanel } from '../section_panel';
 
 type SolutionView = Space['solution'];
@@ -98,10 +99,16 @@ const getOptions = ({ size }: EuiThemeComputed): Array<EuiSuperSelectOption<Solu
 interface Props {
   space: Partial<Space>;
   onChange: (space: Partial<Space>) => void;
+  validator: SpaceValidator;
   sectionTitle?: string;
 }
 
-export const SolutionView: FunctionComponent<Props> = ({ space, onChange, sectionTitle }) => {
+export const SolutionView: FunctionComponent<Props> = ({
+  space,
+  onChange,
+  validator,
+  sectionTitle,
+}) => {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -132,6 +139,7 @@ export const SolutionView: FunctionComponent<Props> = ({ space, onChange, sectio
               defaultMessage: 'Solution view',
             })}
             fullWidth
+            {...validator.validateSolutionView(space)}
           >
             <EuiSuperSelect
               options={getOptions(euiTheme)}
@@ -146,6 +154,7 @@ export const SolutionView: FunctionComponent<Props> = ({ space, onChange, sectio
                   defaultMessage: 'Classic (Default)',
                 }
               )}
+              isInvalid={validator.validateSolutionView(space).isInvalid}
             />
           </EuiFormRow>
         </EuiFlexItem>

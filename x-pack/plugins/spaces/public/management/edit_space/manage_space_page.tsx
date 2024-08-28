@@ -204,6 +204,7 @@ export class ManageSpacePage extends Component<Props, State> {
             <SolutionView
               space={this.state.space}
               onChange={this.onSpaceChange}
+              validator={this.validator}
               sectionTitle={i18n.translate(
                 'xpack.spaces.management.manageSpacePage.navigationTitle',
                 { defaultMessage: 'Navigation' }

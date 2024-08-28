@@ -169,6 +169,22 @@ export class SpaceValidator {
     return valid();
   }
 
+  public validateSolutionView(space: FormValues) {
+    if (!this.shouldValidate) {
+      return valid();
+    }
+
+    if (!space.solution) {
+      return invalid(
+        i18n.translate('xpack.spaces.management.validateSpace.requiredSolutionViewErrorMessage', {
+          defaultMessage: 'Select one solution.',
+        })
+      );
+    }
+
+    return valid();
+  }
+
   public validateEnabledFeatures(space: FormValues) {
     return valid();
   }
@@ -181,6 +197,7 @@ export class SpaceValidator {
     const { isInvalid: isAvatarColorInvalid } = this.validateAvatarColor(space);
     const { isInvalid: isAvatarImageInvalid } = this.validateAvatarImage(space);
     const { isInvalid: areFeaturesInvalid } = this.validateEnabledFeatures(space);
+    const { isInvalid: isSolutionViewInvalid } = this.validateSolutionView(space);
 
     if (
       isNameInvalid ||
@@ -189,7 +206,8 @@ export class SpaceValidator {
       isAvatarInitialsInvalid ||
       isAvatarColorInvalid ||
       isAvatarImageInvalid ||
-      areFeaturesInvalid
+      areFeaturesInvalid ||
+      isSolutionViewInvalid
     ) {
       return invalid();
     }
