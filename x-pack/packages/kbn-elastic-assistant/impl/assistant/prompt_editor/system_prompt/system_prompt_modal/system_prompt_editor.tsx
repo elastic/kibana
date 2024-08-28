@@ -186,7 +186,7 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
       if (selectedSystemPrompt != null) {
         setConversationSettings((prev) =>
           keyBy(
-            'title',
+            'id',
             /*
              * updatedConversationWithPrompts calculates the present of prompt for
              * each conversation. Based on the values of selected conversation, it goes
