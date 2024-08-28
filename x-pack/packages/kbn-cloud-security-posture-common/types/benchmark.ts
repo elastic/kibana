@@ -4,9 +4,4 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-export * as benchmarkV1 from './benchmarks/v1';
-export * as benchmarkV2 from './benchmarks/v2';
-
-// Explicit export of everything from latest
-export type { BenchmarkScore, Benchmark, GetBenchmarkResponse } from './latest';
+export type BenchmarksCisId = 'cis_k8s' | 'cis_azure' | 'cis_aws' | 'cis_eks' | 'cis_gcp';

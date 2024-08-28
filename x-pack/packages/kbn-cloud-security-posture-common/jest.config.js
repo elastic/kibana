@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-export * as benchmarkV1 from './benchmarks/v1';
-export * as benchmarkV2 from './benchmarks/v2';
-
-// Explicit export of everything from latest
-export type { BenchmarkScore, Benchmark, GetBenchmarkResponse } from './latest';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../..',
+  roots: ['<rootDir>/x-pack/packages/kbn-cloud-security-posture-common'],
+};

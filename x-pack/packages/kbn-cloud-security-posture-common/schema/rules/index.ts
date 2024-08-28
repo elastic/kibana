@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-export * as benchmarkV1 from './benchmarks/v1';
-export * as benchmarkV2 from './benchmarks/v2';
-
-// Explicit export of everything from latest
-export type { BenchmarkScore, Benchmark, GetBenchmarkResponse } from './latest';
+export * as rulesV1 from './v1';
+export * as rulesV2 from './v2';
+export * as rulesV3 from './v3';
+export * as rulesV4 from './v4';
+export * as rulesV5 from './v5';
