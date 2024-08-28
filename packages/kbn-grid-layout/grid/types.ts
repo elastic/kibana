@@ -7,6 +7,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import type { ObservedSize } from 'use-resize-observer/polyfilled';
 export interface GridCoordinate {
   column: number;
   row: number;
@@ -53,6 +54,7 @@ export interface GridLayoutStateManager {
     right: number;
   }) => void;
 
+  gridDimensions$: BehaviorSubject<ObservedSize>;
   gridLayout$: BehaviorSubject<GridLayoutData>;
   runtimeSettings$: BehaviorSubject<RuntimeGridSettings>;
   rowRefs: React.MutableRefObject<Array<HTMLDivElement | null>>;
