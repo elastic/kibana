@@ -16,6 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('text input', function testTextInput() {
     before(async () => {
       await PageObjects.common.navigateToApp('console');
+      await PageObjects.console.skipTourIfExists();
     });
 
     beforeEach(async () => {

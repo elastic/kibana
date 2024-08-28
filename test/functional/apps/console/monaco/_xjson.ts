@@ -17,6 +17,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     this.tags('includeFirefox');
     before(async () => {
       await PageObjects.common.navigateToApp('console');
+      await PageObjects.console.skipTourIfExists();
     });
 
     beforeEach(async () => {

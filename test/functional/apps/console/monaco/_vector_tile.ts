@@ -24,6 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.home.addSampleDataSet('logs');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.common.navigateToApp('console');
+      await PageObjects.console.skipTourIfExists();
       await PageObjects.console.monaco.clearEditorText();
     });
 

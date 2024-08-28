@@ -236,6 +236,18 @@ export class ConsolePageObject extends FtrService {
     return classAttribute?.includes('euiPopover-isOpen');
   }
 
+  public async clickSkipTour() {
+    await this.testSubjects.click('consoleSkipTourButton');
+  }
+
+  public async clickNextTourStep() {
+    await this.testSubjects.click('consoleNextTourStepButton');
+  }
+
+  public async clickCompleteTour() {
+    await this.testSubjects.click('consoleCompleteTourButton');
+  }
+
   public async openSettings() {
     await this.testSubjects.click('consoleSettingsButton');
   }
@@ -502,6 +514,15 @@ export class ConsolePageObject extends FtrService {
     const statusBadge = await this.testSubjects.find('consoleResponseStatusBadge');
     const text = await statusBadge.getVisibleText();
     return text.replace(/[^\d.]+/, '');
+  }
+
+  async skipTourIfExists() {
+    await this.retry.try(async () => {
+      const tourShown = await this.testSubjects.exists('consoleSkipTourButton');
+      if (tourShown) {
+        await this.clickSkipTour();
+      }
+    });
   }
 
   public async collapseJsonBlock(blockNumber: number) {
