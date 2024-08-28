@@ -285,7 +285,7 @@ export class BuildkiteClient {
         hasRetries = true;
         const isPreemptionFailure =
           job.state === 'failed' &&
-          job.agent?.meta_data?.some((el) => ['spot=true', 'gcp:preemptible=true'].includes(el)) &&
+          job.agent_query_rules?.includes('preemptible=true') &&
           job.exit_status === -1;
 
         if (!isPreemptionFailure) {

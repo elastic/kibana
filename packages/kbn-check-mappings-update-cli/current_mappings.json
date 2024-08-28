@@ -1812,6 +1812,9 @@
   "fleet-uninstall-tokens": {
     "dynamic": false,
     "properties": {
+      "namespaces": {
+        "type": "keyword"
+      },
       "policy_id": {
         "type": "keyword"
       },
