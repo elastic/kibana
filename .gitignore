@@ -143,12 +143,11 @@ x-pack/test/security_api_integration/plugins/audit_log/audit.log
 role_users.json
 
 # Ignore temporary and serverless files in oas_docs
+oas_docs/kibana.info.serverless.yaml
 oas_docs/output/kibana.serverless.tmp1.yaml
 oas_docs/output/kibana.serverless.tmp2.yaml
+oas_docs/output/kibana.serverless.yaml
+oas_docs/output/kibana.serverless.new.yaml
 oas_docs/output/kibana.tmp1.yaml
 oas_docs/output/kibana.tmp2.yaml
 oas_docs/output/kibana.new.yaml
-oas_docs/output/kibana.serverless.yaml
-oas_docs/output/kibana.serverless.new.yaml
-oas_docs/output/kibana.serverless.yaml
-oas_docs/kibana.info.serverless.yaml
