@@ -22,7 +22,7 @@ import { useServicesContext } from '../../contexts';
 import { MAIN_PANEL_LABELS } from './i18n';
 import { NavIconButton } from './nav_icon_button';
 import { Editor } from '../editor';
-import { Config } from '../config/';
+import { Config } from '../config';
 import {
   TopNavMenu,
   SomethingWentWrongCallout,
