@@ -47,9 +47,10 @@ export { IconChartVerticalBullet } from './chart_vertical_bullet';
 export { IconChartGaugeSemiCircle } from './chart_gauge_semi_circle';
 export { IconChartGaugeArc } from './chart_gauge_arc';
 export { IconChartGaugeCircle } from './chart_gauge_circle';
-export { IconChartHorizontalBulletSimple } from './chart_horizontal_bullet_simple';
-export { IconChartVerticalBulletSimple } from './chart_vertical_bullet_simple';
-export { IconChartGaugeSemiCircleSimple } from './chart_gauge_semi_circle_simple';
-export { IconChartGaugeArcSimple } from './chart_gauge_arc_simple';
-export { IconChartGaugeCircleSimple } from './chart_gauge_circle_simple';
+export {
+  IconChartLinearSimple,
+  IconChartGaugeSemiCircleSimple,
+  IconChartGaugeArcSimple,
+  IconChartGaugeCircleSimple,
+} from './chart_gauge_simple_icons';
 export { IconChartTagcloud } from './chart_tagcloud';

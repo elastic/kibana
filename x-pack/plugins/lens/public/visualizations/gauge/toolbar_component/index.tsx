@@ -22,8 +22,7 @@ import {
   IconChartGaugeArcSimple,
   IconChartGaugeCircleSimple,
   IconChartGaugeSemiCircleSimple,
-  IconChartHorizontalBulletSimple,
-  IconChartVerticalBulletSimple,
+  IconChartLinearSimple,
 } from '@kbn/chart-icons';
 import type { VisualizationToolbarProps } from '../../../types';
 import { ToolbarPopover, VisLabel } from '../../../shared_components';
@@ -49,14 +48,14 @@ export const bulletTypes = [
 const CHART_NAMES: Record<GaugeShape, { id: string; icon: IconType; label: string }> = {
   horizontalBullet: {
     id: GaugeShapes.HORIZONTAL_BULLET,
-    icon: IconChartHorizontalBulletSimple,
+    icon: IconChartLinearSimple,
     label: i18n.translate('xpack.lens.gaugeLinear.gaugeLabel', {
       defaultMessage: 'Linear',
     }),
   },
   verticalBullet: {
     id: GaugeShapes.VERTICAL_BULLET,
-    icon: IconChartVerticalBulletSimple,
+    icon: IconChartLinearSimple,
     label: i18n.translate('xpack.lens.gaugeLinear.gaugeLabel', {
       defaultMessage: 'Linear',
     }),
