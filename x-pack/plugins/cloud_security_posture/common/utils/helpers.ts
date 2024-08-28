@@ -6,7 +6,7 @@
  */
 
 import { Truthy } from 'lodash';
-import type { BaseCspSetupStatus } from '@kbn/cloud-security-posture-common';
+import type { BaseCspSetupStatus, BenchmarksCisId } from '@kbn/cloud-security-posture-common';
 import {
   NewPackagePolicy,
   NewPackagePolicyInput,
@@ -15,6 +15,8 @@ import {
   PackagePolicyInput,
   UpdatePackagePolicy,
 } from '@kbn/fleet-plugin/common';
+import type { BenchmarkRuleSelectParams } from '@kbn/cloud-security-posture-common/schema/rules/latest';
+import type { BenchmarkRuleSelectParams as BenchmarkRuleSelectParamsV4 } from '@kbn/cloud-security-posture-common/schema/rules/v4';
 import {
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
   CLOUDBEAT_VANILLA,
@@ -31,8 +33,6 @@ import type {
   AzureCredentialsType,
   RuleSection,
 } from '../types_old';
-import type { BenchmarkRuleSelectParams, BenchmarksCisId } from '../types/latest';
-import type { BenchmarkRuleSelectParams as BenchmarkRuleSelectParamsV1 } from '../types/rules/v4';
 
 /**
  * @example
@@ -43,13 +43,6 @@ export const isNonNullable = <T extends unknown>(v: T): v is NonNullable<T> =>
   v !== null && v !== undefined;
 
 export const truthy = <T>(value: T): value is Truthy<T> => !!value;
-
-export const extractErrorMessage = (e: unknown, defaultMessage = 'Unknown Error'): string => {
-  if (e instanceof Error) return e.message;
-  if (typeof e === 'string') return e;
-
-  return defaultMessage; // TODO: i18n
-};
 
 export const getBenchmarkFilter = (type: BenchmarkId, section?: RuleSection): string =>
   `${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.id: "${type}"${
@@ -236,7 +229,7 @@ export const getCloudProviderNameFromAbbreviation = (cloudProvider: string) => {
 export const getBenchmarkFilterQuery = (
   benchmarkId: BenchmarkId,
   benchmarkVersion?: string,
-  selectParams?: BenchmarkRuleSelectParamsV1
+  selectParams?: BenchmarkRuleSelectParamsV4
 ): string => {
   const baseQuery = `${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.id:${benchmarkId} AND ${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.version:"v${benchmarkVersion}"`;
   const sectionQuery = selectParams?.section
