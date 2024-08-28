@@ -8,7 +8,7 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import Boom from '@hapi/boom';
+import type { Boom } from '@hapi/boom';
 import { stringifyZodError } from '@kbn/zod-helpers';
 import { ZodError } from '@kbn/zod';
 import { BadRequestError } from '../bad_request_error';
@@ -18,8 +18,12 @@ export interface OutputError {
   statusCode: number;
 }
 
+function isBoom(err: unknown): err is Boom {
+  return err instanceof Error && `isBoom` in err && !!err.isBoom;
+}
+
 export const transformError = (err: Error & Partial<errors.ResponseError>): OutputError => {
-  if (Boom.isBoom(err)) {
+  if (isBoom(err)) {
     return {
       message: err.output.payload.message,
       statusCode: err.output.statusCode,
