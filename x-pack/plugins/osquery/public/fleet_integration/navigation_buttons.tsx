@@ -36,7 +36,7 @@ const NavigationButtonsComponent: React.FC<NavigationButtonsProps> = ({
   );
 
   const liveQueryClick = useCallback(
-    (event) => {
+    (event: any) => {
       if (!isModifiedEvent(event) && isLeftClickEvent(event)) {
         event.preventDefault();
         navigateToApp(PLUGIN_ID, {
@@ -54,7 +54,7 @@ const NavigationButtonsComponent: React.FC<NavigationButtonsProps> = ({
   });
 
   const packsClick = useCallback(
-    (event) => {
+    (event: any) => {
       if (!isModifiedEvent(event) && isLeftClickEvent(event)) {
         event.preventDefault();
         navigateToApp(PLUGIN_ID, {
