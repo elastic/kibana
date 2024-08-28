@@ -100,6 +100,10 @@ export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({
     return seriesType.length === 1 ? seriesType[0] : 'area';
   };
 
+  const hasAnyBarSetting = !isHasNonBarSeries || barSeriesLayers.length > 1;
+  const hasAreaSettings = hasAreaSeries(dataLayers);
+  const shouldDisplayDividerHr = hasAnyBarSetting && hasAreaSettings;
+
   return (
     <TooltipWrapper tooltipContent={valueLabelsDisabledReason} condition={isDisabled}>
       <ToolbarPopover
@@ -134,38 +138,13 @@ export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({
         )}
 
         {barSeriesLayers.length > 1 && (
-          <>
-            <SeriesStackingSetting
-              seriesType={getBarSeriesType()}
-              onSeriesType={(newSeriesType: string) => {
-                setState({
-                  ...state,
-                  layers: state.layers.map((layer) =>
-                    isBarLayer(layer)
-                      ? {
-                          ...layer,
-                          seriesType: newSeriesType as SeriesType,
-                        }
-                      : layer
-                  ),
-                });
-              }}
-            />
-            <EuiHorizontalRule margin="s" />
-          </>
-        )}
-
-        {areaSeriesLayers.length > 1 && (
           <SeriesStackingSetting
-            label={i18n.translate('xpack.lens.shared.areaStacking', {
-              defaultMessage: 'Area layer stacking',
-            })}
-            seriesType={getAreaSeriesType()}
+            seriesType={getBarSeriesType()}
             onSeriesType={(newSeriesType: string) => {
               setState({
                 ...state,
                 layers: state.layers.map((layer) =>
-                  isAreaLayer(layer)
+                  isBarLayer(layer)
                     ? {
                         ...layer,
                         seriesType: newSeriesType as SeriesType,
@@ -176,8 +155,29 @@ export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({
             }}
           />
         )}
-        {hasAreaSeries(dataLayers) && (
+        {shouldDisplayDividerHr && <EuiHorizontalRule margin="s" />}
+
+        {hasAreaSettings && (
           <>
+            <SeriesStackingSetting
+              label={i18n.translate('xpack.lens.shared.areaStacking', {
+                defaultMessage: 'Area layer stacking',
+              })}
+              seriesType={getAreaSeriesType()}
+              onSeriesType={(newSeriesType: string) => {
+                setState({
+                  ...state,
+                  layers: state.layers.map((layer) =>
+                    isAreaLayer(layer)
+                      ? {
+                          ...layer,
+                          seriesType: newSeriesType as SeriesType,
+                        }
+                      : layer
+                  ),
+                });
+              }}
+            />
             <FillOpacityOption
               isFillOpacityEnabled={true}
               value={state?.fillOpacity ?? 0.3}
