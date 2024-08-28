@@ -166,10 +166,17 @@ Here is some context for you to reference for your task, read it carefully as yo
 <duplicate_fields>
 {duplicate_fields}
 </duplicate_fields>
-  
+
+Go through each ECS field in the above list of duplicate fields step by step and and modify the current mapping following this process:
+1. For each duplicate ECS field there is 2 or more source fields that has target set to the same ECS field, identify which of these it is.
+2. For each of the source fields that has the same target set, choose only one of them to have the target set to the ECS field, for the rest you should either find another matching ECS field or set the source to be null.
+3. Make sure that all of the ECS fields mentioned in the duplicate fields above have been resolved and return the updated current mapping object.
+
 To resolve the duplicate mappings, go through each key and value defined in the duplicate fields, and modify the current mapping step by step, and ensure they follow these guidelines:
 <guidelines>
-- Multiple keys should not have the same value (ECS field it will be mapped to). If multiple keys do have the same value then always choose the best match for the ECS field, while the other duplicates should have their value changed to null.
+- Only focus on ECS fields reported as duplicate fields, do not modify any other fields.
+- For all fields that are marked duplicate, when the best target is choosen, remember to set the value of the source field to null.
+- The value "target" should not have a null value, but rather the source object itself should be set to null, use the existing current mapping for reference.
 - Do not respond with anything except the updated current mapping JSON object enclosed with 3 backticks (\`). See example response below.
 </guidelines>
 
