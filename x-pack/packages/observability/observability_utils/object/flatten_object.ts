@@ -21,7 +21,7 @@ export function flattenObject(
   result: PlainObject = {}
 ): PlainObject {
   for (const key in obj) {
-    if (obj.hasOwnProperty(key)) {
+    if (Object.hasOwn(obj, key)) {
       const newKey = prefix ? `${prefix}.${key}` : key;
       // If the property value is an object and not an array or null, recurse
       // (array keys are not flattened because that gets a little weird I think)
