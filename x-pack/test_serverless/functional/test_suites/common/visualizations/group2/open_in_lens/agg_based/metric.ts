@@ -20,8 +20,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const panelActions = getService('dashboardPanelActions');
   const kibanaServer = getService('kibanaServer');
 
-  // Failing: See https://github.com/elastic/kibana/issues/191153
-  describe.skip('Metric', function describeIndexTests() {
+  describe('Metric', function describeIndexTests() {
     const fixture =
       'x-pack/test_serverless/functional/fixtures/kbn_archiver/lens/open_in_lens/agg_based/metric.json';
 
@@ -44,6 +43,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await panelActions.convertToLensByTitle('Metric - Basic');
       await lens.waitForVisualization('mtrVis');
 
+      // hovering over dimension button to make sure neither of metrics are hovered so the color is stable
+      await lens.hoverOverDimensionButton();
       const data = await lens.getMetricVisualizationData();
       expect(data.length).to.be.equal(1);
       expect(data).to.eql([
@@ -70,6 +71,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(dimensions).to.have.length(1);
       expect(await dimensions[0].getVisibleText()).to.be('Average machine.ram');
 
+      // hovering over dimension button to make sure neither of metrics are hovered so the color is stable
+      await lens.hoverOverDimensionButton();
       const data = await lens.getMetricVisualizationData();
       expect(data.length).to.be.equal(1);
       expect(data).to.eql([
@@ -97,6 +100,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(await dimensions[0].getVisibleText()).to.be('Overall Max of Count');
       expect(await dimensions[1].getVisibleText()).to.be('@timestamp');
 
+      // hovering over dimension button to make sure neither of metrics are hovered so the color is stable
+      await lens.hoverOverDimensionButton();
       const data = await lens.getMetricVisualizationData();
       expect(data.length).to.be.equal(1);
       expect(data).to.eql([
@@ -129,6 +134,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(dimensions).to.have.length(2);
       expect(await dimensions[0].getVisibleText()).to.be('Average machine.ram');
       expect(await dimensions[1].getVisibleText()).to.be('machine.os.raw: Descending');
+
+      // hovering over dimension button to make sure neither of metrics are hovered so the color is stable
+      await lens.hoverOverDimensionButton();
+
       const data = await lens.getMetricVisualizationData();
       expect(data.length).to.be.equal(6);
       expect(data).to.eql([
