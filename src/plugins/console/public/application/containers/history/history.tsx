@@ -198,24 +198,22 @@ export function History() {
                             </p>
                           }
                           footer={
-                            <>
-                              <EuiTitle size="xxs">
-                                <>
-                                  <h3>
-                                    <FormattedMessage
-                                      id="console.historyPage.emptyPromptFooterLabel"
-                                      defaultMessage="Want to learn more?"
-                                    />
-                                  </h3>
-                                  <EuiLink href={docLinks.console.guide} target="_blank">
-                                    <FormattedMessage
-                                      id="console.historyPage.emptyPromptFooterLink"
-                                      defaultMessage="Read Console documentation"
-                                    />
-                                  </EuiLink>
-                                </>
-                              </EuiTitle>
-                            </>
+                            <EuiTitle size="xxs">
+                              <div>
+                                <h3>
+                                  <FormattedMessage
+                                    id="console.historyPage.emptyPromptFooterLabel"
+                                    defaultMessage="Want to learn more?"
+                                  />
+                                </h3>
+                                <EuiLink href={docLinks.console.guide} target="_blank">
+                                  <FormattedMessage
+                                    id="console.historyPage.emptyPromptFooterLink"
+                                    defaultMessage="Read Console documentation"
+                                  />
+                                </EuiLink>
+                              </div>
+                            </EuiTitle>
                           }
                         />
                       </EuiFlexItem>

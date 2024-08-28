@@ -29,11 +29,13 @@ import {
   ConsoleTourStepProps,
 } from '../../components';
 import { History } from '../history';
+import { Config } from '../config';
 import { useDataInit } from '../../hooks';
 import { getTopNavConfig } from './get_top_nav';
 import { getTourSteps } from './get_tour_steps';
 import {
   SHELL_TAB_ID,
+  HISTORY_TAB_ID,
   CONFIG_TAB_ID,
   EDITOR_TOUR_STEP,
   TOUR_STORAGE_KEY,
