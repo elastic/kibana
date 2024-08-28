@@ -6,7 +6,7 @@
  */
 
 import { Observable } from 'rxjs';
-import type { HttpFetchOptionsWithPath, HttpFetchOptions, HttpSetup } from '@kbn/core/public';
+import type { HttpFetchOptionsWithPath, HttpFetchOptions, HttpStart } from '@kbn/core/public';
 
 function getResultHeaders(headers: HeadersInit) {
   return {
@@ -53,8 +53,8 @@ function getFetchOptions(options: HttpFetchOptionsWithPath): {
 export class HttpService {
   public getLoadingCount$: Observable<number>;
 
-  constructor(private httpSetup: HttpSetup) {
-    this.getLoadingCount$ = httpSetup.getLoadingCount$();
+  constructor(private httpStart: HttpStart) {
+    this.getLoadingCount$ = httpStart.getLoadingCount$();
   }
 
   /**
@@ -85,7 +85,7 @@ export class HttpService {
         signal,
       };
 
-      this.httpSetup
+      this.httpStart
         .fetch<T>(input, perSubscriberInit)
         .then((response) => {
           abortable = false;
@@ -114,7 +114,7 @@ export class HttpService {
    */
   public async http<T>(options: HttpFetchOptionsWithPath): Promise<T> {
     const { path, fetchOptions } = getFetchOptions(options);
-    return this.httpSetup.fetch<T>(path, fetchOptions);
+    return this.httpStart.fetch<T>(path, fetchOptions);
   }
 
   /**

@@ -99,8 +99,7 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
         mlApiServices,
         mlJobService
       ),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [data, uiSettings]
+    [dashboardService, data, mlApiServices, mlJobService, uiSettings]
   );
 
   function createADJobInWizard() {
