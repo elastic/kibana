@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import { filter, from, switchMap, tap } from 'rxjs';
+import { from, switchMap, tap, filter, map } from 'rxjs';
 import { Readable } from 'stream';
 import type { InvokeAIActionParams } from '@kbn/stack-connectors-plugin/common/bedrock/types';
+import { parseSerdeChunkMessage } from './serde_utils';
 import { Message, MessageRole } from '../../../../common/chat_complete';
-import { ToolChoiceType, type ToolOptions } from '../../../../common/chat_complete/tools';
 import { createInferenceInternalError } from '../../../../common/errors';
+import { ToolChoiceType, type ToolOptions } from '../../../../common/chat_complete/tools';
 import { InferenceConnectorAdapter } from '../../types';
 import type { BedRockMessage, BedrockToolChoice } from './types';
 import {
-  serdeEventstreamIntoObservable,
   BedrockChunkMember,
+  serdeEventstreamIntoObservable,
 } from './serde_eventstream_into_observable';
-import { processBedrockStream } from './process_bedrock_stream';
+import { processCompletionChunks } from './process_completion_chunks';
 
 export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
   chatComplete: ({ executor, system, messages, toolChoice, tools }) => {
@@ -48,7 +49,10 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
       filter((value): value is BedrockChunkMember => {
         return 'chunk' in value && value.chunk?.headers?.[':event-type']?.value === 'chunk';
       }),
-      processBedrockStream()
+      map((message) => {
+        return parseSerdeChunkMessage(message.chunk);
+      }),
+      processCompletionChunks()
     );
   },
 };

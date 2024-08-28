@@ -9,7 +9,7 @@ import { fromUtf8 } from '@smithy/util-utf8';
 import { lastValueFrom, of } from 'rxjs';
 import { Logger } from '@kbn/logging';
 import { concatenateChatCompletionChunks } from '../../../../../common/utils/concatenate_chat_completion_chunks';
-import { processBedrockStream } from './process_bedrock_stream';
+import { processCompletionChunks } from './process_bedrock_stream';
 import { MessageRole } from '../../../../../common';
 import { TOOL_USE_END, TOOL_USE_START } from '../simulate_function_calling/constants';
 import { parseInlineFunctionCalls } from '../simulate_function_calling/parse_inline_function_calls';
@@ -77,7 +77,7 @@ describe('processBedrockStream', () => {
           encode(' text'),
           stop()
         ).pipe(
-          processBedrockStream(),
+          processCompletionChunks(),
           parseInlineFunctionCalls({
             logger: getLoggerMock(),
           }),

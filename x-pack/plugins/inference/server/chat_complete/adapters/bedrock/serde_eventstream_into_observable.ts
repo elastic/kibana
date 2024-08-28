@@ -32,7 +32,9 @@ export type BedrockStreamMember = BedrockChunkMember | ModelStreamErrorException
 // AWS uses SerDe to send over serialized data, so we use their
 // @smithy library to parse the stream data
 
-export function serdeEventstreamIntoObservable(readable: Readable) {
+export function serdeEventstreamIntoObservable(
+  readable: Readable
+): Observable<BedrockStreamMember> {
   return new Observable<BedrockStreamMember>((subscriber) => {
     const marshaller = new EventStreamMarshaller({
       utf8Encoder: toUtf8,
@@ -40,9 +42,9 @@ export function serdeEventstreamIntoObservable(readable: Readable) {
     });
 
     async function processStream() {
-      for await (const chunk of marshaller.deserialize(readable, identity)) {
+      for await (const chunk of marshaller.deserialize<BedrockStreamMember>(readable, identity)) {
         if (chunk) {
-          subscriber.next(chunk as BedrockStreamMember);
+          subscriber.next(chunk);
         }
       }
     }

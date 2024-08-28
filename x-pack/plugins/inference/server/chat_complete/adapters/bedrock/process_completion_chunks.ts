@@ -6,7 +6,6 @@
  */
 
 import { Observable, Subscriber } from 'rxjs';
-import { toUtf8 } from '@smithy/util-utf8';
 import {
   ChatCompletionChunkEvent,
   ChatCompletionTokenCountEvent,
@@ -14,18 +13,15 @@ import {
   ChatCompletionEventType,
 } from '../../../../common/chat_complete';
 import type { CompletionChunk, MessageStopChunk } from './types';
-import type { BedrockChunkMember } from './serde_eventstream_into_observable';
 
-export function processBedrockStream() {
-  return (source: Observable<BedrockChunkMember>) =>
+export function processCompletionChunks() {
+  return (source: Observable<CompletionChunk>) =>
     new Observable<ChatCompletionChunkEvent | ChatCompletionTokenCountEvent>((subscriber) => {
       // We use this to make sure we don't complete the Observable
       // before all operations have completed.
       let nextPromise = Promise.resolve();
 
-      async function handleNext(value: BedrockChunkMember) {
-        const chunkBody: CompletionChunk = parseSerdeChunkBody(value.chunk);
-
+      async function handleNext(chunkBody: CompletionChunk) {
         if (isTokenCountCompletionChunk(chunkBody)) {
           return emitTokenCountEvent(subscriber, chunkBody);
         }
@@ -108,8 +104,4 @@ function emitTokenCountEvent(
       total: inputTokenCount + outputTokenCount,
     },
   });
-}
-
-function parseSerdeChunkBody(chunk: BedrockChunkMember['chunk']) {
-  return JSON.parse(Buffer.from(JSON.parse(toUtf8(chunk.body)).bytes, 'base64').toString('utf-8'));
 }
