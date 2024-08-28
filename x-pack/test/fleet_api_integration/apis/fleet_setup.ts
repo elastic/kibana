@@ -121,7 +121,6 @@ export default function (providerContext: FtrProviderContext) {
       it('should upgrade managed package policies', async () => {
         await apiClient.setup();
 
-        // const taskRes = await supertest.get('/api/task_manager/_health');
         await pRetry(
           async () => {
             const res = await es.search({
