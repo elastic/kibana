@@ -5,21 +5,10 @@
  * 2.0.
  */
 
-import { Effect, Context } from 'effect';
-// Create a tag for the 'Random' service
-class Random extends Context.Tag('MyRandomService')<
-  Random,
-  {
-    readonly next: Effect.Effect<number>;
-  }
->() {}
-// Create a tag for the 'Logger' service
-class Logger extends Context.Tag('MyLoggerService')<
-  Logger,
-  {
-    readonly log: (message: string) => Effect.Effect<void>;
-  }
->() {}
+import { Effect } from 'effect';
+import { Random } from './random';
+import { Logger } from './logger';
+
 const program =
   // Acquire instances of the 'Random' and 'Logger' services
   Effect.all([Random, Logger]).pipe(
@@ -28,6 +17,7 @@ const program =
       random.next.pipe(
         Effect.andThen((randomNumber) =>
           // Log the random number using the 'Logger' service
+
           logger.log(String(randomNumber))
         )
       )
@@ -39,6 +29,7 @@ const runnable1 = program.pipe(
     next: Effect.sync(() => Math.random()),
   }),
   Effect.provideService(Logger, {
+    // eslint-disable-next-line no-console
     log: (message) => Effect.sync(() => console.log(message)),
   })
 );
