@@ -305,6 +305,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.ml.nlp.enabled (boolean)',
         'xpack.osquery.actionEnabled (boolean?)',
         'xpack.remote_clusters.ui.enabled (boolean?)',
+        'xpack.ingest_pipelines.enableManageProcessors (boolean?|never)',
         /**
          * NOTE: The Reporting plugin is currently disabled in functional tests (see test/functional/config.base.js).
          * It will be re-enabled once #102552 is completed.

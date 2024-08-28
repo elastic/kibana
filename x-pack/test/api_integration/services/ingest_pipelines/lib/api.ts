@@ -74,7 +74,7 @@ export function IngestPipelinesAPIProvider({ getService }: FtrProviderContext) {
     async deleteGeoipDatabases() {
       const { databases } = await es.ingest.getGeoipDatabase();
       // Remove all geoip databases
-      const databaseIds = databases.map((database) => database.id);
+      const databaseIds = databases.map((database: { id: string }) => database.id);
 
       const deleteDatabase = (id: string) =>
         es.ingest.deleteGeoipDatabase({
