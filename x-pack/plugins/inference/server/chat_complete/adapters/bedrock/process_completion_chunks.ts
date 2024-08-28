@@ -29,38 +29,44 @@ export function processCompletionChunks() {
         let completionChunk = '';
         let toolCallChunk: ChatCompletionChunkToolCall | undefined;
 
-        if (chunkBody.type === 'content_block_start') {
-          if (chunkBody.content_block.type === 'text') {
-            completionChunk = chunkBody.content_block.text || '';
-          } else if (chunkBody.content_block.type === 'tool_use') {
-            toolCallChunk = {
-              index: chunkBody.index,
-              toolCallId: chunkBody.content_block.id,
-              function: {
-                name: chunkBody.content_block.name,
-                // the API returns '{}' here, which can't be merged with the deltas...
-                arguments: '',
-              },
-            };
-          }
-        } else if (chunkBody.type === 'content_block_delta') {
-          if (chunkBody.delta.type === 'text_delta') {
-            completionChunk = chunkBody.delta.text || '';
-          } else if (chunkBody.delta.type === 'input_json_delta') {
-            toolCallChunk = {
-              index: chunkBody.index,
-              toolCallId: '',
-              function: {
-                name: '',
-                arguments: chunkBody.delta.partial_json,
-              },
-            };
-          }
-        } else if (chunkBody.type === 'message_delta') {
-          completionChunk = chunkBody.delta.stop_sequence || '';
-        } else {
-          // we do not handle other event types
-          return;
+        switch (chunkBody.type) {
+          case 'content_block_start':
+            if (chunkBody.content_block.type === 'text') {
+              completionChunk = chunkBody.content_block.text || '';
+            } else if (chunkBody.content_block.type === 'tool_use') {
+              toolCallChunk = {
+                index: chunkBody.index,
+                toolCallId: chunkBody.content_block.id,
+                function: {
+                  name: chunkBody.content_block.name,
+                  // the API returns '{}' here, which can't be merged with the deltas...
+                  arguments: '',
+                },
+              };
+            }
+            break;
+
+          case 'content_block_delta':
+            if (chunkBody.delta.type === 'text_delta') {
+              completionChunk = chunkBody.delta.text || '';
+            } else if (chunkBody.delta.type === 'input_json_delta') {
+              toolCallChunk = {
+                index: chunkBody.index,
+                toolCallId: '',
+                function: {
+                  name: '',
+                  arguments: chunkBody.delta.partial_json,
+                },
+              };
+            }
+            break;
+
+          case 'message_delta':
+            completionChunk = chunkBody.delta.stop_sequence || '';
+            break;
+
+          default:
+            break;
         }
 
         if (completionChunk || toolCallChunk) {
