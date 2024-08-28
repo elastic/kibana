@@ -3,7 +3,10 @@
 
 Manage {kib} saved objects, including dashboards, visualizations, and more.
 
+WARNING: Deprecated APIs are to be removed in 9.0.0. Use domain-specific apis for managing corresponding saved objects. For example, <<data-views-api>> for managing data views, <<spaces-api>> for managing spaces, and <<short-urls-api>> for managing short urls.
+
 For the latest details, refer to the {api-kibana}/group/endpoint-saved-objects[saved object API].
 
 WARNING: Do not write documents directly to the `.kibana` index. When you write directly
 to the `.kibana` index, the data becomes corrupted and permanently breaks future {kib} versions.
+
