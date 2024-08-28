@@ -24,6 +24,7 @@ import { useOverviewStatus } from '../../hooks/use_overview_status';
 import { GridItemsByGroup } from './grid_by_group/grid_items_by_group';
 import { GroupFields } from './grid_by_group/group_fields';
 import {
+  TrendKey,
   fetchMonitorOverviewAction,
   quietFetchOverviewAction,
   refreshOverviewTrends,
@@ -92,9 +93,9 @@ export const OverviewGrid = memo(() => {
 
   useEffect(() => {
     if (monitorsSortedByStatus.length && maxItem) {
-      const batch = [];
-      const slice = monitorsSortedByStatus.slice(0, (maxItem + 1) * ROW_COUNT);
-      for (const item of slice) {
+      const batch: TrendKey[] = [];
+      const chunk = monitorsSortedByStatus.slice(0, (maxItem + 1) * ROW_COUNT);
+      for (const item of chunk) {
         if (trendData[item.configId + item.location.id] === undefined) {
           batch.push({ configId: item.configId, locationId: item.location.id });
         }
@@ -109,7 +110,7 @@ export const OverviewGrid = memo(() => {
   );
 
   const listItems: ListItem[][] = useMemo(() => {
-    const acc = [];
+    const acc: ListItem[][] = [];
     for (let i = 0; i < monitorsSortedByStatus.length; i += ROW_COUNT) {
       acc.push(monitorsSortedByStatus.slice(i, i + ROW_COUNT));
     }
