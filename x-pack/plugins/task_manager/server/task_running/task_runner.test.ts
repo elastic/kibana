@@ -35,7 +35,6 @@ import { executionContextServiceMock } from '@kbn/core/server/mocks';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { bufferedTaskStoreMock } from '../buffered_task_store.mock';
 import {
-  calculateDelay,
   TASK_MANAGER_RUN_TRANSACTION_TYPE,
   TASK_MANAGER_TRANSACTION_TYPE,
   TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING,
@@ -2252,26 +2251,6 @@ describe('TaskManagerRunner', () => {
       expect(logger.error).toHaveBeenCalledWith(
         `Error encountered when running onTaskRemoved() hook for testbar2 "foo": Fail`
       );
-    });
-
-    describe('calculateDelay', () => {
-      it('returns 30s on the first attempt', () => {
-        expect(calculateDelay(1)).toBe(30000);
-      });
-
-      it('returns delay with jitter', () => {
-        const delay = calculateDelay(5);
-        // with jitter should be random between 0 and 40 min (inclusive)
-        expect(delay).toBeGreaterThanOrEqual(0);
-        expect(delay).toBeLessThanOrEqual(2400000);
-      });
-
-      it('returns delay capped at 1 hour', () => {
-        const delay = calculateDelay(10);
-        // with jitter should be random between 0 and 1 hr (inclusive)
-        expect(delay).toBeGreaterThanOrEqual(0);
-        expect(delay).toBeLessThanOrEqual(60 * 60 * 1000);
-      });
     });
   });
 
