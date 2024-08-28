@@ -105,6 +105,10 @@ export const getSections = ({
     time,
   });
 
+  const hasPodLink = !!podId && infraLinksAvailable && !!assetDetailsLocator;
+  const hasContainerLink = !!containerId && infraLinksAvailable && !!assetDetailsLocator;
+  const hasHostLink = !!hostName && infraLinksAvailable && !!assetDetailsLocator;
+
   const podActions: Action[] = [
     {
       key: 'podLogs',
@@ -119,14 +123,16 @@ export const getSections = ({
       label: i18n.translate('xpack.apm.transactionActionMenu.showPodMetricsLinkLabel', {
         defaultMessage: 'Pod metrics',
       }),
-      href: assetDetailsLocator?.getRedirectUrl({
-        assetId: podId!,
-        assetType: 'pod',
-        assetDetails: {
-          dateRange: infraMetricsQuery,
-        },
-      }),
-      condition: !!podId && infraLinksAvailable && !!assetDetailsLocator,
+      href: hasPodLink
+        ? assetDetailsLocator.getRedirectUrl({
+            assetId: podId,
+            assetType: 'pod',
+            assetDetails: {
+              dateRange: infraMetricsQuery,
+            },
+          })
+        : undefined,
+      condition: hasPodLink,
     },
   ];
 
@@ -144,12 +150,14 @@ export const getSections = ({
       label: i18n.translate('xpack.apm.transactionActionMenu.showContainerMetricsLinkLabel', {
         defaultMessage: 'Container metrics',
       }),
-      href: assetDetailsLocator?.getRedirectUrl({
-        assetId: containerId!,
-        assetType: 'container',
-        assetDetails: { dateRange: infraMetricsQuery },
-      }),
-      condition: !!containerId && infraLinksAvailable && !!assetDetailsLocator,
+      href: hasContainerLink
+        ? assetDetailsLocator.getRedirectUrl({
+            assetId: containerId,
+            assetType: 'container',
+            assetDetails: { dateRange: infraMetricsQuery },
+          })
+        : undefined,
+      condition: hasContainerLink,
     },
   ];
 
@@ -167,14 +175,16 @@ export const getSections = ({
       label: i18n.translate('xpack.apm.transactionActionMenu.showHostMetricsLinkLabel', {
         defaultMessage: 'Host metrics',
       }),
-      href: assetDetailsLocator?.getRedirectUrl({
-        assetId: hostName!,
-        assetType: 'host',
-        assetDetails: {
-          dateRange: infraMetricsQuery,
-        },
-      }),
-      condition: !!hostName && infraLinksAvailable && !!assetDetailsLocator,
+      href: hasHostLink
+        ? assetDetailsLocator.getRedirectUrl({
+            assetId: hostName,
+            assetType: 'host',
+            assetDetails: {
+              dateRange: infraMetricsQuery,
+            },
+          })
+        : undefined,
+      condition: hasHostLink,
     },
     {
       key: 'hostProfilingFlamegraph',
