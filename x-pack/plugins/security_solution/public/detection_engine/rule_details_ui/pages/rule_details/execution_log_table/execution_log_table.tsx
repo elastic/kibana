@@ -240,7 +240,11 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
 
   // Callbacks
   const onTableChangeCallback = useCallback(
-    ({ page = {}, sort = {} }) => {
+    ({
+      page = {},
+      sort = {},
+    }: // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    any) => {
       const { index, size } = page;
       const { field, direction } = sort;
 
