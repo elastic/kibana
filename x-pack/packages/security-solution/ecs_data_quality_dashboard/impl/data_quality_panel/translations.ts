@@ -85,13 +85,6 @@ export const DATA_QUALITY_SUGGESTED_USER_PROMPT = i18n.translate(
   }
 );
 
-export const DATA_QUALITY_TITLE = i18n.translate(
-  'securitySolutionPackages.ecsDataQualityDashboard.securitySolutionPackages.ecsDataQualityDashboardTitle',
-  {
-    defaultMessage: 'Data quality',
-  }
-);
-
 export const DEFAULT_PANEL_TITLE = i18n.translate(
   'securitySolutionPackages.ecsDataQualityDashboard.defaultPanelTitle',
   {
@@ -187,6 +180,13 @@ export const ILM_PHASE: string = i18n.translate(
   'securitySolutionPackages.ecsDataQualityDashboard.ilmPhaseLabel',
   {
     defaultMessage: 'ILM phase',
+  }
+);
+
+export const ILM_PHASE_CAPITALIZED = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.ilmPhaseCapitalized',
+  {
+    defaultMessage: 'ILM Phase',
   }
 );
 
@@ -294,5 +294,98 @@ export const DATA_QUALITY_DASHBOARD_CONVERSATION_ID = i18n.translate(
   'securitySolutionPackages.ecsDataQualityDashboard.dataQualityDashboardConversationId',
   {
     defaultMessage: 'Data Quality dashboard',
+  }
+);
+
+export const AN_ERROR_OCCURRED_CHECKING_INDEX = (indexName: string) =>
+  i18n.translate(
+    'securitySolutionPackages.ecsDataQualityDashboard.checkAllErrorCheckingIndexMessage',
+    {
+      values: { indexName },
+      defaultMessage: 'An error occurred checking index {indexName}',
+    }
+  );
+
+export const DOCS = i18n.translate('securitySolutionPackages.ecsDataQualityDashboard.docs', {
+  defaultMessage: 'Docs',
+});
+
+export const INCOMPATIBLE_FIELDS = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.incompatibleFields',
+  {
+    defaultMessage: 'Incompatible fields',
+  }
+);
+
+export const INDICES = i18n.translate('securitySolutionPackages.ecsDataQualityDashboard.indices', {
+  defaultMessage: 'Indices',
+});
+
+export const INDICES_CHECKED = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.indicesChecked',
+  {
+    defaultMessage: 'Indices checked',
+  }
+);
+
+export const INDEX = i18n.translate('securitySolutionPackages.ecsDataQualityDashboard.index', {
+  defaultMessage: 'Index',
+});
+
+export const SIZE = i18n.translate('securitySolutionPackages.ecsDataQualityDashboard.size', {
+  defaultMessage: 'Size',
+});
+
+export const RESULT = i18n.translate('securitySolutionPackages.ecsDataQualityDashboard.result', {
+  defaultMessage: 'Result',
+});
+
+export const ERRORS_CALLOUT_SUMMARY = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.errors.errorsCalloutSummary',
+  {
+    defaultMessage: 'Some indices were not checked for Data Quality',
+  }
+);
+
+export const ERRORS_MAY_OCCUR = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.errors.errorMayOccurLabel',
+  {
+    defaultMessage:
+      "Errors may occur when pattern or index metadata is temporarily unavailable, or because you don't have the privileges required for access",
+  }
+);
+
+export const MANAGE = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.errors.manage',
+  {
+    defaultMessage: 'manage',
+  }
+);
+
+export const MONITOR = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.errors.monitor',
+  {
+    defaultMessage: 'monitor',
+  }
+);
+
+export const OR = i18n.translate('securitySolutionPackages.ecsDataQualityDashboard.errors.or', {
+  defaultMessage: 'or',
+});
+
+export const READ = i18n.translate('securitySolutionPackages.ecsDataQualityDashboard.errors.read', {
+  defaultMessage: 'read',
+});
+
+export const THE_FOLLOWING_PRIVILEGES_ARE_REQUIRED = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.errors.theFollowingPrivilegesLabel',
+  {
+    defaultMessage: 'The following privileges are required to check an index:',
+  }
+);
+export const VIEW_INDEX_METADATA = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.errors.viewIndexMetadata',
+  {
+    defaultMessage: 'view_index_metadata',
   }
 );
