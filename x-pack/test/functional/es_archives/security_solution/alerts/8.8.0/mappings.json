@@ -11,9 +11,6 @@
     },
     "index": ".internal.alerts-security.alerts-default-000001",
     "mappings": {
-      "_source": {
-        "mode": "synthetic"
-      },
       "_meta": {
         "kibana": {
           "version": "8.8.0"
