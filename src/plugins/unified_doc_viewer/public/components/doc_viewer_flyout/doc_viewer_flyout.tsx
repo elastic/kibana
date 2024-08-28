@@ -7,7 +7,6 @@
  */
 
 import React, { useMemo, useCallback, type ComponentType, useState, useEffect } from 'react';
-import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -29,7 +28,6 @@ import {
   EuiFlyoutProps,
   EuiScreenReaderOnly,
   useGeneratedHtmlId,
-  EuiWindowEvent,
 } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DataTableColumnsMeta } from '@kbn/unified-data-table';
@@ -75,6 +73,7 @@ function getIndexByDocId(hits: DataTableRecord[], id: string) {
 }
 
 export const FLYOUT_WIDTH_KEY = 'unifiedDocViewer:flyoutWidth';
+
 /**
  * Flyout displaying an expanded row details
  */
@@ -133,24 +132,29 @@ export function UnifiedDocViewerFlyout({
 
   const onKeyDown = useCallback(
     (ev: React.KeyboardEvent) => {
-      const nodeClasses = get(ev, 'target.className', '');
-      if (typeof nodeClasses === 'string' && nodeClasses.includes('euiDataGrid')) {
+      if (ev.target instanceof HTMLElement && ev.target.closest('.euiDataGrid__content')) {
         // ignore events triggered from the data grid
         return;
       }
 
-      const nodeName = get(ev, 'target.nodeName', null);
-      if (typeof nodeName === 'string' && nodeName.toLowerCase() === 'input') {
+      if (ev.key === keys.ESCAPE) {
+        ev.preventDefault();
+        ev.stopPropagation();
+        onClose();
+      }
+
+      if (ev.target instanceof HTMLInputElement) {
         // ignore events triggered from the search input
         return;
       }
+
       if (ev.key === keys.ARROW_LEFT || ev.key === keys.ARROW_RIGHT) {
         ev.preventDefault();
         ev.stopPropagation();
         setPage(activePage + (ev.key === keys.ARROW_RIGHT ? 1 : -1));
       }
     },
-    [activePage, setPage]
+    [activePage, onClose, setPage]
   );
 
   const addColumn = useCallback(
@@ -177,16 +181,6 @@ export function UnifiedDocViewerFlyout({
       );
     },
     [onRemoveColumn, services.toastNotifications]
-  );
-
-  const closeOnEscape = useCallback(
-    (event: KeyboardEvent) => {
-      if (event.key === keys.ESCAPE) {
-        event.preventDefault();
-        onClose();
-      }
-    },
-    [onClose]
   );
 
   const renderDefaultContent = useCallback(
@@ -285,19 +279,16 @@ export function UnifiedDocViewerFlyout({
         role={isXlScreen ? 'dialog' : undefined}
         tabIndex={isXlScreen ? 0 : undefined}
         aria-describedby={isXlScreen ? descriptionId : undefined}
+        data-no-focus-lock={isXlScreen || undefined}
       >
         {isXlScreen && (
-          <>
-            <EuiWindowEvent event="keydown" handler={closeOnEscape} />
-            <EuiScreenReaderOnly>
-              <p id={descriptionId}>
-                {i18n.translate('unifiedDocViewer.flyout.screenReaderDescription', {
-                  defaultMessage:
-                    'You are in a non-modal dialog. To close the dialog, press Escape.',
-                })}
-              </p>
-            </EuiScreenReaderOnly>
-          </>
+          <EuiScreenReaderOnly>
+            <p id={descriptionId}>
+              {i18n.translate('unifiedDocViewer.flyout.screenReaderDescription', {
+                defaultMessage: 'You are in a non-modal dialog. To close the dialog, press Escape.',
+              })}
+            </p>
+          </EuiScreenReaderOnly>
         )}
         <EuiFlyoutHeader hasBorder>
           <EuiFlexGroup
