@@ -50,16 +50,19 @@ export function isHorizontalSeries(seriesType: SeriesType) {
 
 export function flipSeriesType(seriesType: SeriesType) {
   switch (seriesType) {
+    case 'bar':
+      return 'bar_horizontal';
+    case 'bar_stacked':
+      return 'bar_horizontal_stacked';
+    case 'bar_percentage_stacked':
+      return 'bar_horizontal_percentage_stacked';
     case 'bar_horizontal':
       return 'bar';
     case 'bar_horizontal_stacked':
       return 'bar_stacked';
-    case 'bar':
-      return 'bar_horizontal';
     case 'bar_horizontal_percentage_stacked':
       return 'bar_percentage_stacked';
-    case 'bar_percentage_stacked':
-      return 'bar_horizontal_percentage_stacked';
+
     default:
       return 'bar_horizontal';
   }
