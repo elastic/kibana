@@ -10,6 +10,7 @@ import { toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
 import { Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
+import { dynamic } from '@kbn/shared-ux-utility';
 import { offsetRt } from '../../../../common/comparison_rt';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { environmentRt } from '../../../../common/environment_rt';
@@ -17,19 +18,51 @@ import {
   LatencyAggregationType,
   latencyAggregationTypeRt,
 } from '../../../../common/latency_aggregation_types';
-import { AlertsOverview } from '../../app/alerts_overview';
-import { ServiceMapServiceDetail } from '../../app/service_map';
 import { MobileServiceTemplate } from '../templates/mobile_service_template';
-import { MobileServiceOverview } from '../../app/mobile/service_overview';
-import { MobileTransactionOverview } from '../../app/mobile/transaction_overview';
-import { TransactionDetails } from '../../app/transaction_details';
 import { RedirectToDefaultServiceRouteView } from '../service_detail/redirect_to_default_service_route_view';
 import { ApmTimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
-import { ErrorGroupDetails } from '../../app/mobile/errors_and_crashes_group_details/error_group_details';
-import { CrashGroupDetails } from '../../app/mobile/errors_and_crashes_group_details/crash_group_details';
-import { MobileErrorCrashesOverview } from '../../app/mobile/errors_and_crashes_overview';
-import { ServiceDependencies } from '../../app/service_dependencies';
-import { ServiceDashboards } from '../../app/service_dashboards';
+
+const AlertsOverview = dynamic(() =>
+  import('../../app/alerts_overview').then((mod) => ({ default: mod.AlertsOverview }))
+);
+const ServiceMapServiceDetail = dynamic(() =>
+  import('../../app/service_map').then((mod) => ({ default: mod.ServiceMapServiceDetail }))
+);
+const MobileServiceOverview = dynamic(() =>
+  import('../../app/mobile/service_overview').then((mod) => ({
+    default: mod.MobileServiceOverview,
+  }))
+);
+const MobileTransactionOverview = dynamic(() =>
+  import('../../app/mobile/transaction_overview').then((mod) => ({
+    default: mod.MobileTransactionOverview,
+  }))
+);
+const TransactionDetails = dynamic(() =>
+  import('../../app/transaction_details').then((mod) => ({ default: mod.TransactionDetails }))
+);
+const ErrorGroupDetails = dynamic(() =>
+  import('../../app/mobile/errors_and_crashes_group_details/error_group_details').then((mod) => ({
+    default: mod.ErrorGroupDetails,
+  }))
+);
+const CrashGroupDetails = dynamic(() =>
+  import('../../app/mobile/errors_and_crashes_group_details/crash_group_details').then((mod) => ({
+    default: mod.CrashGroupDetails,
+  }))
+);
+const MobileErrorCrashesOverview = dynamic(() =>
+  import('../../app/mobile/errors_and_crashes_overview').then((mod) => ({
+    default: mod.MobileErrorCrashesOverview,
+  }))
+);
+const ServiceDependencies = dynamic(() =>
+  import('../../app/service_dependencies').then((mod) => ({ default: mod.ServiceDependencies }))
+);
+const ServiceDashboards = dynamic(() =>
+  import('../../app/service_dashboards').then((mod) => ({ default: mod.ServiceDashboards }))
+);
+
 export function page({
   title,
   tabKey,

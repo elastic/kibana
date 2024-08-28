@@ -10,16 +10,26 @@ import { toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
 import { Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
+import { dynamic } from '@kbn/shared-ux-utility';
 import { LogsServiceTemplate } from '../../templates/entities/logs_service_template';
 import { offsetRt } from '../../../../../common/comparison_rt';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { environmentRt } from '../../../../../common/environment_rt';
 import { ApmTimeRangeMetadataContextProvider } from '../../../../context/time_range_metadata/time_range_metadata_context';
-import { ServiceDashboards } from '../../../app/service_dashboards';
-import { ServiceLogs } from '../../../app/service_logs';
-import { LogsServiceOverview } from '../../../app/entities/logs/logs_service_overview';
 import { RedirectToDefaultLogsServiceRouteView } from '../../service_detail/redirect_to_default_service_route_view';
 import { SearchBar } from '../../../shared/search_bar/search_bar';
+
+const ServiceDashboards = dynamic(() =>
+  import('../../../app/service_dashboards').then((mod) => ({ default: mod.ServiceDashboards }))
+);
+const ServiceLogs = dynamic(() =>
+  import('../../../app/service_logs').then((mod) => ({ default: mod.ServiceLogs }))
+);
+const LogsServiceOverview = dynamic(() =>
+  import('../../../app/entities/logs/logs_service_overview').then((mod) => ({
+    default: mod.LogsServiceOverview,
+  }))
+);
 
 export function page({
   title,

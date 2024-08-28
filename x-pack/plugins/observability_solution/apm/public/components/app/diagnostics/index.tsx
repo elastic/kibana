@@ -10,26 +10,47 @@ import React from 'react';
 import * as t from 'io-ts';
 import { EuiButton, EuiCallOut, EuiIcon, EuiLoadingLogo, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { dynamic } from '@kbn/shared-ux-utility';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useApmRoutePath } from '../../../hooks/use_apm_route_path';
-import { DiagnosticsSummary, getIsCrossCluster } from './summary_tab';
-import { ApmMainTemplate } from '../../routing/templates/apm_main_template';
-import { DiagnosticsIndexTemplates } from './index_templates_tab';
-import { DiagnosticsIndices } from './indices_tab';
-import { DiagnosticsDataStreams } from './data_stream_tab';
-import {
-  DiagnosticsIndexPatternSettings,
-  getIsIndexPatternTabOk,
-} from './index_pattern_settings_tab';
-import { DiagnosticsImportExport } from './import_export_tab';
+import { getIsCrossCluster } from './summary_tab';
+import { getIsIndexPatternTabOk } from './index_pattern_settings_tab';
 import { DiagnosticsContextProvider } from './context/diagnostics_context';
 import { useDiagnosticsContext } from './context/use_diagnostics';
 import { getIsIndexTemplateOk } from './summary_tab/index_templates_status';
 import { getIsDataStreamTabOk } from './summary_tab/data_streams_status';
 import { getIsIndicesTabOk } from './summary_tab/indicies_status';
-import { DiagnosticsApmDocuments } from './apm_documents_tab';
 import { isPending } from '../../../hooks/use_fetcher';
+
+const DiagnosticsSummary = dynamic(() =>
+  import('./summary_tab').then((mod) => ({ default: mod.DiagnosticsSummary }))
+);
+const ApmMainTemplate = dynamic(() =>
+  import('../../routing/templates/apm_main_template').then((mod) => ({
+    default: mod.ApmMainTemplate,
+  }))
+);
+const DiagnosticsIndexTemplates = dynamic(() =>
+  import('./index_templates_tab').then((mod) => ({ default: mod.DiagnosticsIndexTemplates }))
+);
+const DiagnosticsIndices = dynamic(() =>
+  import('./indices_tab').then((mod) => ({ default: mod.DiagnosticsIndices }))
+);
+const DiagnosticsDataStreams = dynamic(() =>
+  import('./data_stream_tab').then((mod) => ({ default: mod.DiagnosticsDataStreams }))
+);
+const DiagnosticsIndexPatternSettings = dynamic(() =>
+  import('./index_pattern_settings_tab').then((mod) => ({
+    default: mod.DiagnosticsIndexPatternSettings,
+  }))
+);
+const DiagnosticsImportExport = dynamic(() =>
+  import('./import_export_tab').then((mod) => ({ default: mod.DiagnosticsImportExport }))
+);
+const DiagnosticsApmDocuments = dynamic(() =>
+  import('./apm_documents_tab').then((mod) => ({ default: mod.DiagnosticsApmDocuments }))
+);
 
 const params = t.type({
   query: t.intersection([
@@ -205,14 +226,19 @@ function TemplateDescription() {
   if (isImported) {
     return (
       <EuiCallOut
-        title="Displaying results from the uploaded diagnostics report"
+        title={i18n.translate(
+          'xpack.apm.templateDescription.euiCallOut.displayingResultsFromTheLabel',
+          { defaultMessage: 'Displaying results from the uploaded diagnostics report' }
+        )}
         iconType="exportAction"
       >
         <EuiButton
           data-test-subj="apmTemplateDescriptionClearBundleButton"
           onClick={() => setImportedDiagnosticsBundle(undefined)}
         >
-          Clear bundle
+          {i18n.translate('xpack.apm.templateDescription.clearBundleButtonLabel', {
+            defaultMessage: 'Clear bundle',
+          })}
         </EuiButton>
       </EuiCallOut>
     );
@@ -230,7 +256,7 @@ function RefreshButton() {
       fill
       onClick={refetch}
     >
-      Refresh
+      {i18n.translate('xpack.apm.refreshButton.refreshButtonLabel', { defaultMessage: 'Refresh' })}
     </EuiButton>
   );
 }

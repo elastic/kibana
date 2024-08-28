@@ -10,9 +10,8 @@ import { createRouter, Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
 import { toBooleanRt } from '@kbn/io-ts-utils';
+import { dynamic } from '@kbn/shared-ux-utility';
 import { Breadcrumb } from '../app/breadcrumb';
-import { TraceLink } from '../app/trace_link';
-import { TransactionLink } from '../app/transaction_link';
 import { homeRoute } from './home';
 import { serviceDetailRoute } from './service_detail';
 import { mobileServiceDetailRoute } from './mobile_service_detail';
@@ -20,11 +19,28 @@ import { logsServiceDetailsRoute } from './entities/logs_service_details';
 import { settingsRoute } from './settings';
 import { onboarding } from './onboarding';
 import { tutorialRedirectRoute } from './onboarding/redirect';
-import { ApmMainTemplate } from './templates/apm_main_template';
-import { ServiceGroupsList } from '../app/service_groups';
 import { offsetRt } from '../../../common/comparison_rt';
 import { diagnosticsRoute } from '../app/diagnostics';
-import { TransactionDetailsByNameLink } from '../app/transaction_details_link';
+
+const ApmMainTemplate = dynamic(() =>
+  import('./templates/apm_main_template').then((mod) => ({ default: mod.ApmMainTemplate }))
+);
+const TraceLink = dynamic(() =>
+  import('../app/trace_link').then((mod) => ({ default: mod.TraceLink }))
+);
+const TransactionDetailsByNameLink = dynamic(() =>
+  import('../app/transaction_details_link').then((mod) => ({
+    default: mod.TransactionDetailsByNameLink,
+  }))
+);
+const TransactionLink = dynamic(() =>
+  import('../app/transaction_link').then((mod) => ({ default: mod.TransactionLink }))
+);
+const ServiceGroupsList = dynamic(() =>
+  import('../app/service_groups/service_groups_list').then((mod) => ({
+    default: mod.ServiceGroupsList,
+  }))
+);
 
 const ServiceGroupsTitle = i18n.translate('xpack.apm.views.serviceGroups.title', {
   defaultMessage: 'Services',
