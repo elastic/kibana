@@ -54,7 +54,7 @@ import {
 } from '../task';
 import { TaskTypeDictionary } from '../task_type_dictionary';
 import { isUnrecoverableError } from './errors';
-import type { EventLoopDelayConfig } from '../config';
+import { CLAIM_STRATEGY_MGET, type EventLoopDelayConfig } from '../config';
 import { TaskValidator } from '../task_validator';
 import { getRetryAt, getRetryDate, getTimeout } from '../lib/get_retry_at';
 
@@ -109,6 +109,7 @@ type Opts = {
   usageCounter?: UsageCounter;
   eventLoopDelayConfig: EventLoopDelayConfig;
   allowReadingInvalidState: boolean;
+  strategy: string;
 } & Pick<Middleware, 'beforeRun' | 'beforeMarkRunning'>;
 
 export enum TaskRunResult {
@@ -160,6 +161,7 @@ export class TaskManagerRunner implements TaskRunner {
   private usageCounter?: UsageCounter;
   private eventLoopDelayConfig: EventLoopDelayConfig;
   private readonly taskValidator: TaskValidator;
+  private readonly claimStrategy: string;
 
   /**
    * Creates an instance of TaskManagerRunner.
@@ -184,6 +186,7 @@ export class TaskManagerRunner implements TaskRunner {
     usageCounter,
     eventLoopDelayConfig,
     allowReadingInvalidState,
+    strategy,
   }: Opts) {
     this.instance = asPending(sanitizeInstance(instance));
     this.definitions = definitions;
@@ -202,6 +205,7 @@ export class TaskManagerRunner implements TaskRunner {
       definitions: this.definitions,
       allowReadingInvalidState,
     });
+    this.claimStrategy = strategy;
   }
 
   /**
@@ -433,6 +437,13 @@ export class TaskManagerRunner implements TaskRunner {
           isReadyToRun(this.instance) ? `is already running` : `has already been ran`
         }`
       );
+    }
+
+    // mget claim strategy sets the task to `running` during the claim cycle
+    // so this update to mark the task as running is unnecessary
+    if (this.claimStrategy === CLAIM_STRATEGY_MGET) {
+      this.instance = asReadyToRun(this.instance.task as ConcreteTaskInstanceWithStartedAt);
+      return true;
     }
 
     const apmTrans = apm.startTransaction(
