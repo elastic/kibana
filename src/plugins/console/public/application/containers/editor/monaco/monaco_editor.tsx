@@ -7,7 +7,7 @@
  */
 
 import React, { CSSProperties, useCallback, useMemo, useRef, useState, useEffect } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { CodeEditor } from '@kbn/code-editor';
 import { CONSOLE_LANG_ID, CONSOLE_THEME_ID, monaco } from '@kbn/monaco';
@@ -135,29 +135,30 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
       <EuiFlexGroup
         className="conApp__editorActions"
         id="ConAppEditorActions"
-        gutterSize="none"
+        gutterSize="xs"
         responsive={false}
         style={editorActionsCss}
+        justifyContent="center"
+        alignItems="center"
       >
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <EuiToolTip
             content={i18n.translate('console.monaco.sendRequestButtonTooltipContent', {
               defaultMessage: 'Click to send request',
             })}
           >
-            <EuiLink
-              color="primary"
+            <EuiButtonIcon
+              iconType="playFilled"
               onClick={sendRequestsCallback}
               data-test-subj="sendRequestButton"
               aria-label={i18n.translate('console.monaco.sendRequestButtonTooltipAriaLabel', {
                 defaultMessage: 'Click to send request',
               })}
-            >
-              <EuiIcon type="play" />
-            </EuiLink>
+              iconSize={'s'}
+            />
           </EuiToolTip>
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <ContextMenu
             getRequests={getRequestsCallback}
             getDocumentation={getDocumenationLink}

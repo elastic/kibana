@@ -8,7 +8,7 @@
 
 import React, { useState } from 'react';
 import {
-  EuiIcon,
+  EuiButtonIcon,
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiPopover,
@@ -157,15 +157,15 @@ export const ContextMenu = ({
   };
 
   const button = (
-    <EuiLink
+    <EuiButtonIcon
       onClick={() => setIsPopoverOpen((prev) => !prev)}
       data-test-subj="toggleConsoleMenu"
       aria-label={i18n.translate('console.requestOptionsButtonAriaLabel', {
         defaultMessage: 'Request options',
       })}
-    >
-      <EuiIcon type="boxesVertical" />
-    </EuiLink>
+      iconType="boxesVertical"
+      iconSize="s"
+    />
   );
 
   const items = [
