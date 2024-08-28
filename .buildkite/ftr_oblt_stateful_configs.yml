@@ -50,3 +50,5 @@ enabled:
   - x-pack/test/observability_ai_assistant_functional/enterprise/config.ts
   - x-pack/test/profiling_api_integration/cloud/config.ts
   - x-pack/test/functional/apps/apm/config.ts
+  # stateful configs that run deployment-agnostic tests
+  - x-pack/test/api_integration/deployment_agnostic/configs/stateful/oblt.stateful.config.ts
