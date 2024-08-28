@@ -1538,6 +1538,10 @@ describe('autocomplete', () => {
           ].map(attachTriggerCommand)
         );
         testSuggestions(
+          'FROM a METADATA _id, /',
+          METADATA_FIELDS.filter((field) => field !== '_id').map(attachTriggerCommand)
+        );
+        testSuggestions(
           'FROM a METADATA _id, _ignored/',
           [
             { filterText: '_ignored', text: '_ignored, ' },

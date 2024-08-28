@@ -1755,9 +1755,18 @@ async function getOptionArgsSuggestions(
       } else {
         suggestions.push(...buildFieldsDefinitions(filteredMetaFields));
       }
-    } else {
+    } else if (isNewExpression) {
       // METADATA <suggest>
+      // METADATA field, <suggest>
       suggestions.push(...buildFieldsDefinitions(filteredMetaFields));
+    } else {
+      if (existingFields.size > 0) {
+        // METADATA field <suggest>
+        if (filteredMetaFields.length > 0) {
+          suggestions.push(commaCompleteItem);
+        }
+        suggestions.push(pipeCompleteItem);
+      }
     }
   }
 
