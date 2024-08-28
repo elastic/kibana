@@ -8,10 +8,76 @@
 import React from 'react';
 import { act, fireEvent, render, waitFor, type RenderResult } from '@testing-library/react';
 import { TestProvider } from '../../../../../mocks/test_provider';
-import { parseNDJSON, parseJSONArray, SampleLogsInput } from './sample_logs_input';
+import {
+  partialShuffleArray,
+  parseNDJSON,
+  parseJSONArray,
+  SampleLogsInput,
+} from './sample_logs_input';
 import { ActionsProvider } from '../../state';
 import { mockActions } from '../../mocks/state';
 import { mockServices } from '../../../../../services/mocks/services';
+
+describe('partialShuffleArray', () => {
+  const fixture = [1, 2, 3, 4, 5, 6, 7];
+
+  it('should shuffle the array in reproducible manner when shuffling the whole array', () => {
+    const arr = fixture.slice();
+    partialShuffleArray(arr, 0, 7);
+    expect(arr).toEqual([3, 5, 1, 7, 2, 6, 4]);
+  });
+
+  it('should shuffle the array in reproducible manner when providing a non-default seed', () => {
+    const arr = fixture.slice();
+    partialShuffleArray(arr, 0, 7, 'seed');
+    expect(arr).toEqual([4, 5, 1, 3, 7, 6, 2]);
+  });
+
+  it('should partially shuffle the array in reproducible manner when shuffling a subarray', () => {
+    const arr = fixture.slice();
+    partialShuffleArray(arr, 2, 5);
+    expect(arr).toEqual([1, 2, 5, 7, 6, 3, 4]);
+  });
+
+  it('should do nothing if start is at the end of the array', () => {
+    const arr = fixture.slice();
+    partialShuffleArray(arr, arr.length, arr.length);
+    expect(arr).toEqual(fixture);
+  });
+
+  it('should do nothing if start is the same as end', () => {
+    const arr = fixture.slice();
+    const size = arr.length;
+    partialShuffleArray(arr, size / 2, size / 2);
+    expect(arr).toEqual(fixture);
+  });
+
+  it('should throw an error for invalid start index', () => {
+    const arr = fixture.slice();
+    expect(() => partialShuffleArray(arr, arr.length + 1, 4)).toThrow('Invalid start index');
+    expect(() => partialShuffleArray(arr, -1, 4)).toThrow('Invalid start index');
+  });
+
+  it('should throw an error for invalid end index', () => {
+    const arr = fixture.slice();
+    expect(() => partialShuffleArray(arr, 1, 0)).toThrow('Invalid end index');
+    expect(() => partialShuffleArray(arr, 1, arr.length + 1)).toThrow('Invalid end index');
+  });
+
+  it('should handle large arrays', () => {
+    const size = 100000;
+    const original = Array.from({ length: size }, (_, i) => i);
+    const arr = original.slice();
+
+    partialShuffleArray(arr, 2, 200);
+
+    expect(arr).toHaveLength(size);
+    expect(arr[0]).toEqual(0);
+    expect(arr[1]).toEqual(1);
+    expect(arr === original).toBe(false);
+    expect(new Set(arr)).toEqual(new Set(original));
+  });
+});
 
 const wrapper: React.FC = ({ children }) => (
   <TestProvider>

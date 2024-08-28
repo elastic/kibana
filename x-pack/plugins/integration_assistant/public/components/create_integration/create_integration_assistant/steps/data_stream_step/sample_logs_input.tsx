@@ -17,7 +17,7 @@ import type { SamplesFormat } from '../../../../../../common';
 
 const MaxLogsSampleRows = 10;
 
-const PARTIAL_SHUFFLE_SEED = '1337';
+const DEFAULT_PARTIAL_SHUFFLE_SEED = '1337';
 
 /**
  * Partially shuffles an array using the Fisher-Yates algorithm.
@@ -25,9 +25,9 @@ const PARTIAL_SHUFFLE_SEED = '1337';
  * The array is shuffled in place, so that:
  *   - the first `start` elements are kept in place;
  *   - the elements in the slice from start to end represent the random sample;.
- *   - the order of elements after end is not guaranteed.
+ *   - the order of elements after end can be arbitrary (but the same over invocations).
  *
- * The result is reproducible, as the seed is fixed.
+ * The result is reproducible for the given random seed.
  *
  * Examples:
  *   - shuffle the whole array: partialShuffleArray(arr)
@@ -39,8 +39,13 @@ const PARTIAL_SHUFFLE_SEED = '1337';
  * @param start - The number of elements in the beginning of the array to keep in place.
  * @param end - The number of elements to be shuffled.
  */
-export const partialShuffleArray = (arr: object[], start: number = 0, end: number = arr.length) => {
-  const rng = seedrandom(PARTIAL_SHUFFLE_SEED);
+export function partialShuffleArray<T>(
+  arr: T[],
+  start: number = 0,
+  end: number = arr.length,
+  seed: string = DEFAULT_PARTIAL_SHUFFLE_SEED
+) {
+  const rng = seedrandom(seed);
 
   if (start < 0 || start > arr.length) {
     throw new RangeError('Invalid start index');
@@ -50,14 +55,16 @@ export const partialShuffleArray = (arr: object[], start: number = 0, end: numbe
     throw new RangeError('Invalid end index');
   }
 
-  let top = arr.length;
-  let index;
+  const len = arr.length;
 
-  while (top-- > end) {
-    index = start + (rng.int32() % (top - start));
-    [arr[top], arr[index]] = [arr[index], arr[top]];
+  for (let index = start; index < end; index++) {
+    const randValue = rng.int32();
+    const hop = Math.abs(randValue) % (len - index);
+    if (hop) {
+      [arr[index], arr[index + hop]] = [arr[index + hop], arr[index]];
+    }
   }
-};
+}
 
 /**
  * Parse the logs sample file content as newiline-delimited JSON (NDJSON).
