@@ -276,3 +276,14 @@ export interface TelemetryEvents {
   reportDataQualityIndexChecked?: ReportDataQualityIndexChecked;
   reportDataQualityCheckAllCompleted?: ReportDataQualityCheckAllCompleted;
 }
+
+export interface IndexSummaryTableItem {
+  docsCount: number;
+  incompatible: number | undefined;
+  indexName: string;
+  ilmPhase: IlmPhase | undefined;
+  pattern: string;
+  patternDocsCount: number;
+  sizeInBytes: number | undefined;
+  checkedAt: number | undefined;
+}
