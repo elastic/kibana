@@ -153,9 +153,9 @@ const saveKnowledgeBaseEntry = createObservabilityAIAssistantServerRoute({
         public: toBooleanRt,
         labels: t.record(t.string, t.string),
         role: t.union([
-          t.literal('assistant_summarization'),
-          t.literal('user_entry'),
-          t.literal('elastic'),
+          t.literal(KnowledgeBaseEntryRole.AssistantSummarization),
+          t.literal(KnowledgeBaseEntryRole.UserEntry),
+          t.literal(KnowledgeBaseEntryRole.Elastic),
         ]),
       }),
     ]),
@@ -192,7 +192,7 @@ const saveKnowledgeBaseEntry = createObservabilityAIAssistantServerRoute({
         is_correction: isCorrection ?? false,
         public: isPublic ?? true,
         labels: labels ?? {},
-        role: (role as KnowledgeBaseEntryRole) ?? KnowledgeBaseEntryRole.UserEntry,
+        role: role ?? KnowledgeBaseEntryRole.UserEntry,
       },
     });
   },

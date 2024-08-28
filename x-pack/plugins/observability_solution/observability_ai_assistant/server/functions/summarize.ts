@@ -14,6 +14,7 @@ export const SUMMARIZE_FUNCTION_NAME = 'summarize';
 export function registerSummarizationFunction({
   client,
   functions,
+  resources,
 }: FunctionRegistrationParameters) {
   functions.registerFunction(
     {
@@ -70,17 +71,23 @@ export function registerSummarizationFunction({
       // if no existing entry is found, we generate a uuid
       const id = await client.getUuidFromDocId(docId);
 
+      resources.logger.debug(
+        id
+          ? `Updating knowledge base entry with id: ${id}, doc_id: ${docId}`
+          : `Creating new knowledge base entry with doc_id: ${docId}`
+      );
+
       return client
         .addKnowledgeBaseEntry({
           entry: {
             id: id ?? v4(),
-            title: docId, // use doc_id as title for now
             doc_id: docId,
-            role: KnowledgeBaseEntryRole.AssistantSummarization,
+            title: docId, // use doc_id as title for now
             text,
-            is_correction: isCorrection,
-            confidence,
             public: isPublic,
+            role: KnowledgeBaseEntryRole.AssistantSummarization,
+            confidence,
+            is_correction: isCorrection,
             labels: {},
           },
           // signal,

@@ -26,7 +26,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import moment from 'moment';
-import type { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common/types';
+import { KnowledgeBaseEntryRole } from '@kbn/observability-ai-assistant-plugin/public';
+import { type KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common';
 import { v4 } from 'uuid';
 import { useCreateKnowledgeBaseEntry } from '../../hooks/use_create_knowledge_base_entry';
 import { useDeleteKnowledgeBaseEntry } from '../../hooks/use_delete_knowledge_base_entry';
@@ -61,6 +62,10 @@ export function KnowledgeBaseEditManualEntryFlyout({
         title: newEntryTitle,
         text: newEntryText,
         public: isPublic,
+        role: KnowledgeBaseEntryRole.UserEntry,
+        confidence: 'high',
+        is_correction: false,
+        labels: {},
       },
     });
 

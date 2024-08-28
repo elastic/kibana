@@ -28,7 +28,7 @@ export function useCreateKnowledgeBaseEntry() {
     void,
     ServerError,
     {
-      entry: Omit<KnowledgeBaseEntry, '@timestamp' | 'confidence' | 'is_correction' | 'role'> & {
+      entry: Omit<KnowledgeBaseEntry, '@timestamp'> & {
         title: string;
       };
     }
@@ -40,10 +40,7 @@ export function useCreateKnowledgeBaseEntry() {
         {
           signal: null,
           params: {
-            body: {
-              ...entry,
-              role: 'user_entry',
-            },
+            body: entry,
           },
         }
       );
