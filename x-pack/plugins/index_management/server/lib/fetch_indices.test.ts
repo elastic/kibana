@@ -19,7 +19,7 @@ describe('[Index management API Routes] fetch indices lib function', () => {
 
   const getIndices = router.getMockESApiFn('indices.get');
   const getIndicesStats = router.getMockESApiFn('indices.stats');
-  const getMetetringStats = router.getMockESApiFnAsSecondaryAuthUser('transport.request');
+  const getMeteringStats = router.getMockESApiFnAsSecondaryAuthUser('transport.request');
   const mockRequest: RequestMock = {
     method: 'get',
     path: addBasePath('/indices'),
@@ -29,6 +29,11 @@ describe('[Index management API Routes] fetch indices lib function', () => {
     beforeAll(() => {
       registerIndicesRoutes({
         ...routeDependencies,
+        config: {
+          ...routeDependencies.config,
+          isSizeAndDocCountEnabled: false,
+          isIndexStatsEnabled: true,
+        },
         router,
       });
     });
@@ -179,7 +184,7 @@ describe('[Index management API Routes] fetch indices lib function', () => {
       getIndices.mockResolvedValue({
         regular_index: createTestIndexState(),
       });
-      getMetetringStats.mockResolvedValue({
+      getMeteringStats.mockResolvedValue({
         indices: [{ name: 'regular_index', num_docs: 100, size_in_bytes: 1000 }],
       });
 
