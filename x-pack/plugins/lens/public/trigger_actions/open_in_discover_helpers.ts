@@ -34,7 +34,7 @@ type Context = EmbeddableApiContext & {
 export async function isCompatible({ hasDiscoverAccess, embeddable }: Context) {
   if (!hasDiscoverAccess) return false;
   try {
-    return isLensApi(embeddable) && (await embeddable.canViewUnderlyingData());
+    return isLensApi(embeddable) && (await embeddable.canViewUnderlyingData?.());
   } catch (e) {
     // Fetching underlying data failed, log the error and behave as if the action is not compatible
     // eslint-disable-next-line no-console
