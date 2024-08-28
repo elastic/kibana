@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { FAILED, PASSED, THIS_INDEX_HAS_NOT_BEEN_CHECKED } from '../summary_table/translations';
-
 export const getIndexResultBadgeColor = (incompatible: number | undefined): string => {
   if (incompatible == null) {
     return 'ghost';
@@ -14,15 +12,5 @@ export const getIndexResultBadgeColor = (incompatible: number | undefined): stri
     return '#6dcbb1';
   } else {
     return 'danger';
-  }
-};
-
-export const getIndexResultToolTip = (incompatible: number | undefined): string => {
-  if (incompatible == null) {
-    return THIS_INDEX_HAS_NOT_BEEN_CHECKED;
-  } else if (incompatible === 0) {
-    return PASSED;
-  } else {
-    return FAILED;
   }
 };

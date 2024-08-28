@@ -16,20 +16,17 @@ import userEvent from '@testing-library/user-event';
 import { omit } from 'lodash/fp';
 import React from 'react';
 
-import { TestExternalProviders } from '../../../../mock/test_providers/test_providers';
-import { EMPTY_STAT } from '../../../../constants';
+import { TestExternalProviders } from '../../../../../mock/test_providers/test_providers';
+import { EMPTY_STAT } from '../../../../../constants';
 import {
-  getDocsCountPercent,
   getIncompatibleStatColor,
-  getShowPagination,
   getSummaryTableColumns,
   getSummaryTableILMPhaseColumn,
   getSummaryTableSizeInBytesColumn,
-  getToggleButtonId,
-} from './helpers';
-import { CHECK_INDEX, VIEW_CHECK_DETAILS } from './translations';
-import { IndexSummaryTableItem } from '../types';
-import { getCheckState } from '../../../../stub/get_check_state';
+} from './columns';
+import { CHECK_INDEX, VIEW_CHECK_DETAILS } from '../translations';
+import { IndexSummaryTableItem } from '../../../../../types';
+import { getCheckState } from '../../../../../stub/get_check_state';
 
 const defaultBytesFormat = '0,0.[0]b';
 const formatBytes = (value: number | undefined) =>
@@ -40,59 +37,6 @@ const formatNumber = (value: number | undefined) =>
   value != null ? numeral(value).format(defaultNumberFormat) : EMPTY_STAT;
 
 describe('helpers', () => {
-  describe('getDocsCountPercent', () => {
-    test('it returns an empty string when `patternDocsCount` is zero', () => {
-      expect(
-        getDocsCountPercent({
-          docsCount: 0,
-          patternDocsCount: 0,
-        })
-      ).toEqual('');
-    });
-
-    test('it returns the expected format when when `patternDocsCount` is non-zero, and `locales` is undefined', () => {
-      expect(
-        getDocsCountPercent({
-          docsCount: 2904,
-          locales: undefined,
-          patternDocsCount: 57410,
-        })
-      ).toEqual('5.1%');
-    });
-
-    test('it returns the expected format when when `patternDocsCount` is non-zero, and `locales` is provided', () => {
-      expect(
-        getDocsCountPercent({
-          docsCount: 2904,
-          locales: 'en-US',
-          patternDocsCount: 57410,
-        })
-      ).toEqual('5.1%');
-    });
-  });
-
-  describe('getToggleButtonId', () => {
-    test('it returns the expected id when the button is expanded', () => {
-      expect(
-        getToggleButtonId({
-          indexName: 'auditbeat-custom-index-1',
-          isExpanded: true,
-          pattern: 'auditbeat-*',
-        })
-      ).toEqual('collapseauditbeat-custom-index-1auditbeat-*');
-    });
-
-    test('it returns the expected id when the button is collapsed', () => {
-      expect(
-        getToggleButtonId({
-          indexName: 'auditbeat-custom-index-1',
-          isExpanded: false,
-          pattern: 'auditbeat-*',
-        })
-      ).toEqual('expandauditbeat-custom-index-1auditbeat-*');
-    });
-  });
-
   describe('getSummaryTableColumns', () => {
     const indexName = '.ds-auditbeat-8.6.1-2023.02.07-000001';
     const isILMAvailable = true;
@@ -635,35 +579,6 @@ describe('helpers', () => {
 
         expect(screen.queryByTestId('sizeInBytes')).toBeNull();
       });
-    });
-  });
-
-  describe('getShowPagination', () => {
-    test('it returns true when `totalItemCount` is greater than `minPageSize`', () => {
-      expect(
-        getShowPagination({
-          minPageSize: 10,
-          totalItemCount: 11,
-        })
-      ).toBe(true);
-    });
-
-    test('it returns false when `totalItemCount` equals `minPageSize`', () => {
-      expect(
-        getShowPagination({
-          minPageSize: 10,
-          totalItemCount: 10,
-        })
-      ).toBe(false);
-    });
-
-    test('it returns false when `totalItemCount` is less than `minPageSize`', () => {
-      expect(
-        getShowPagination({
-          minPageSize: 10,
-          totalItemCount: 9,
-        })
-      ).toBe(false);
     });
   });
 

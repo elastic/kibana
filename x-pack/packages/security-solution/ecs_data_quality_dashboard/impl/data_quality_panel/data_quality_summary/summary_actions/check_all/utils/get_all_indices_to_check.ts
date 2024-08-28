@@ -7,8 +7,7 @@
 
 import { orderBy } from 'lodash/fp';
 
-import type { IndexToCheck, MeteringStatsIndex, PatternRollup } from '../../../types';
-import { getDocsCount } from '../../../utils/stats';
+import type { IndexToCheck } from '../../../../types';
 
 export const getIndexToCheck = ({
   indexName,
@@ -44,19 +43,4 @@ export const getAllIndicesToCheck = (
 
     return [...acc, ...sortedIndicesToCheck];
   }, []);
-};
-
-export const getIndexDocsCountFromRollup = ({
-  indexName,
-  patternRollup,
-}: {
-  indexName: string;
-  patternRollup: PatternRollup;
-}): number => {
-  const stats: Record<string, MeteringStatsIndex> | null = patternRollup?.stats ?? null;
-
-  return getDocsCount({
-    indexName,
-    stats,
-  });
 };

@@ -22,16 +22,14 @@ import {
   getSummaryTableMarkdownHeader,
   getSummaryTableMarkdownRow,
 } from '../../data_quality_details/indices_details/pattern/index_check_flyout/index_properties/markdown/helpers';
-import {
-  defaultSort,
-  getSummaryTableItems,
-} from '../../data_quality_details/indices_details/pattern/helpers';
 import type { DataQualityCheckResult, IndexToCheck, PatternRollup } from '../../types';
 import { useDataQualityContext } from '../../data_quality_context';
 import { useResultsRollupContext } from '../../contexts/results_rollup_context';
 import { Actions } from '../../actions';
 import { getErrorSummaries } from './utils/get_error_summaries';
 import { getSizeInBytes } from '../../utils/stats';
+import { getSummaryTableItems } from '../../utils/get_summary_table_items';
+import { defaultSort } from '../../constants';
 
 const StyledActionsContainerFlexItem = styled(EuiFlexItem)`
   margin-top: auto;
