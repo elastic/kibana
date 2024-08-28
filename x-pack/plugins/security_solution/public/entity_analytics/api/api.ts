@@ -111,7 +111,7 @@ export const useEntityAnalyticsRoutes = () => {
      */
     const scheduleNowRiskEngine = () =>
       http.fetch<RiskEngineScheduleNowResponse>(RISK_ENGINE_SCHEDULE_NOW_URL, {
-        version: '1',
+        version: API_VERSIONS.public.v1,
         method: 'POST',
       });
 

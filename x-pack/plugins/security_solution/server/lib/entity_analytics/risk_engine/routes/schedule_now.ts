@@ -8,7 +8,11 @@
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { RiskEngineScheduleNowResponse } from '../../../../../common/api/entity_analytics/risk_engine/engine_schedule_now_route.gen';
-import { APP_ID, RISK_ENGINE_SCHEDULE_NOW_URL } from '../../../../../common/constants';
+import {
+  API_VERSIONS,
+  APP_ID,
+  RISK_ENGINE_SCHEDULE_NOW_URL,
+} from '../../../../../common/constants';
 import { TASK_MANAGER_UNAVAILABLE_ERROR } from './translations';
 import { withRiskEnginePrivilegeCheck } from '../risk_engine_privileges';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
@@ -21,14 +25,14 @@ export const riskEngineScheduleNowRoute = (
 ) => {
   router.versioned
     .post({
-      access: 'internal',
+      access: 'public',
       path: RISK_ENGINE_SCHEDULE_NOW_URL,
       options: {
         tags: ['access:securitySolution', `access:${APP_ID}-entity-analytics`],
       },
     })
     .addVersion(
-      { version: '1', validate: {} },
+      { version: API_VERSIONS.public.v1, validate: {} },
       withRiskEnginePrivilegeCheck(getStartServices, async (context, request, response) => {
         const securitySolution = await context.securitySolution;
 
