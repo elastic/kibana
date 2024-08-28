@@ -183,13 +183,13 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   );
 
   const onChangeItemsPerPage = useCallback(
-    (pageSize) => onEditAction({ action: 'pagesize', size: pageSize }),
+    (pageSize: number) => onEditAction({ action: 'pagesize', size: pageSize }),
     [onEditAction]
   );
 
   // active page isn't persisted, so we manage this state locally
   const onChangePage = useCallback(
-    (pageIndex) => {
+    (pageIndex: number) => {
       setPagination((_pagination) => {
         if (_pagination) {
           return { pageSize: _pagination?.pageSize, pageIndex };
