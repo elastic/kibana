@@ -48,11 +48,12 @@ export const getMonitorSummary = (
   configId: string,
   dateFormat: string,
   tz: string,
-  checks?: {
+  checks: {
     downWithinXChecks: number;
     down: number;
   },
-  downThreshold?: number
+  downThreshold: number,
+  numberOfChecks: number
 ): MonitorSummaryStatusRule => {
   const monitorName = monitorInfo.monitor?.name ?? monitorInfo.monitor?.id;
   const observerLocation = monitorInfo.observer?.geo?.name ?? UNNAMED_LOCATION;
@@ -94,6 +95,8 @@ export const getMonitorSummary = (
       status: statusMessage,
       timestamp: monitorInfo['@timestamp'],
       checks,
+      downThreshold,
+      numberOfChecks,
     }),
     checks,
     downThreshold,
@@ -109,6 +112,8 @@ export const getReasonMessage = ({
   location,
   timestamp,
   checks,
+  downThreshold,
+  numberOfChecks,
 }: {
   name: string;
   location: string;
@@ -118,18 +123,21 @@ export const getReasonMessage = ({
     downWithinXChecks: number;
     down: number;
   };
+  downThreshold: number;
+  numberOfChecks: number;
 }) => {
   const checkedAt = moment(timestamp).format('LLL');
 
   return i18n.translate('xpack.synthetics.alertRules.monitorStatus.reasonMessage.new', {
-    defaultMessage: `Monitor "{name}" from {location} is {status}. Checked at {checkedAt}. Alert when {downCheck} out of last {downWithinXChecks} checks are down.`,
+    defaultMessage: `Monitor "{name}" from {location} is {status}. Checked at {checkedAt}. Monitor is down {downChecks} {downChecks, plural, one {time} other {times}} within the last {numberOfChecks} checks. Alert when {downThreshold} out of last {numberOfChecks} checks are down.`,
     values: {
       name,
       status,
       location,
       checkedAt,
-      downCheck: checks?.down ?? 1,
-      downWithinXChecks: checks?.downWithinXChecks ?? 1,
+      downThreshold,
+      downChecks: checks?.downWithinXChecks ?? 1,
+      numberOfChecks,
     },
   });
 };

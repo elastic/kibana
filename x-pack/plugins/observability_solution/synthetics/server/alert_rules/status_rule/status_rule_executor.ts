@@ -238,6 +238,7 @@ export class StatusRuleExecutor {
     downThreshold: number;
   }) {
     const { ping, configId, locationId, checks } = statusConfig;
+    const { numberOfChecks } = getConditionType(this.params.condition);
 
     const baseSummary = getMonitorSummary(
       ping,
@@ -247,7 +248,8 @@ export class StatusRuleExecutor {
       this.dateFormat!,
       this.tz!,
       checks,
-      downThreshold
+      downThreshold,
+      numberOfChecks
     );
 
     const condition = this.params.condition;
@@ -259,7 +261,7 @@ export class StatusRuleExecutor {
       baseSummary.reason = i18n.translate(
         'xpack.synthetics.alertRules.monitorStatus.reasonMessage.timeBased',
         {
-          defaultMessage: `Monitor "{name}" from {location} is {status}. Checked at {checkedAt}. Alert when {downThreshold} checks are down within last {size} {unitLabel}.`,
+          defaultMessage: `Monitor "{name}" from {location} is {status}. Checked at {checkedAt}. Alert when {downThreshold} checks are down within the last {size} {unitLabel}.`,
           values: {
             name: baseSummary.monitorName,
             status: baseSummary.status,
@@ -279,14 +281,13 @@ export class StatusRuleExecutor {
   getLocationBasedDownSummary({
     statusConfigs,
     downThreshold,
-    noOfLocations,
   }: {
     statusConfigs: AlertStatusMetaDataCodec[];
     downThreshold: number;
-    noOfLocations: number;
   }) {
     const sampleConfig = statusConfigs[0];
     const { ping, configId, locationId, checks } = sampleConfig;
+    const { numberOfChecks, numberOfLocations } = getConditionType(this.params.condition);
     const baseSummary = getMonitorSummary(
       ping,
       DOWN_LABEL,
@@ -295,15 +296,16 @@ export class StatusRuleExecutor {
       this.dateFormat!,
       this.tz!,
       checks,
-      downThreshold
+      downThreshold,
+      numberOfChecks
     );
     const locNames = statusConfigs.map((c) => c.ping.observer.geo?.name).join(', ');
     const thresholdReason = i18n.translate(
       'xpack.synthetics.alertRules.monitorStatus.reasonMessage.location.threshold',
       {
-        defaultMessage: `Alert when monitor is down from {noOfLocations, number} {noOfLocations, plural, one {location} other {locations}}.`,
+        defaultMessage: `Alert when monitor is down from {numberOfLocations, number} {numberOfLocations, plural, one {location} other {locations}}.`,
         values: {
-          noOfLocations,
+          numberOfLocations,
         },
       }
     );
@@ -341,7 +343,8 @@ export class StatusRuleExecutor {
       this.dateFormat!,
       this.tz!,
       checks,
-      downThreshold
+      downThreshold,
+      numberOfChecks
     );
     if (statusConfigs.length === 1) {
       const locNames = statusConfigs.map((c) => c.ping.observer.geo?.name);
