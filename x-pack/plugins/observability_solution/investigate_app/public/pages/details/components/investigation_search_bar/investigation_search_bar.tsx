@@ -8,7 +8,7 @@ import { css } from '@emotion/css';
 import type { TimeRange } from '@kbn/es-query';
 import { SearchBar } from '@kbn/unified-search-plugin/public';
 import React from 'react';
-import { useKibana } from '../../hooks/use_kibana';
+import { useKibana } from '../../../../hooks/use_kibana';
 
 const parentClassName = css`
   width: 100%;
@@ -21,7 +21,7 @@ interface Props {
   onRefresh?: Required<React.ComponentProps<typeof SearchBar>>['onRefresh'];
 }
 
-export function InvestigateSearchBar({
+export function InvestigationSearchBar({
   dateRangeFrom,
   dateRangeTo,
   onQuerySubmit,

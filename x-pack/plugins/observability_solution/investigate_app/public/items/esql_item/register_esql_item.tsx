@@ -10,20 +10,16 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { ESQLDataGrid } from '@kbn/esql-datagrid/public';
 import { i18n } from '@kbn/i18n';
-import {
-  type EsqlWidgetParameters,
-  type GlobalWidgetParameters,
-} from '@kbn/investigate-plugin/public';
+import { type GlobalWidgetParameters } from '@kbn/investigate-plugin/public';
 import type { Suggestion } from '@kbn/lens-plugin/public';
 import { useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
 import React, { useMemo } from 'react';
 import { ErrorMessage } from '../../components/error_message';
-import { ESQL_WIDGET_NAME } from '../../constants';
 import { useKibana } from '../../hooks/use_kibana';
 import { getDatatableFromEsqlResponse } from '../../utils/get_data_table_from_esql_response';
 import { getEsFilterFromOverrides } from '../../utils/get_es_filter_from_overrides';
 import { getLensAttrsForSuggestion } from '../../utils/get_lens_attrs_for_suggestion';
-import type { RegisterWidgetOptions } from '../register_widgets';
+import type { Options } from '../register_items';
 import { getDateHistogramResults } from './get_date_histogram_results';
 
 const lensClassName = css`
@@ -38,6 +34,24 @@ interface Props {
   allColumns: ESQLSearchResponse['all_columns'];
   values: ESQLSearchResponse['values'];
   dateHistogramResults?: {
+    query: string;
+    columns: ESQLSearchResponse['columns'];
+    values: ESQLSearchResponse['values'];
+    groupingExpression: string;
+  };
+}
+
+interface EsqlItemParams {
+  esql: string;
+  suggestion?: Suggestion;
+}
+
+interface EsqlItemData {
+  dataView: DataView;
+  columns: ESQLSearchResponse['columns'];
+  values: ESQLSearchResponse['values'];
+  suggestion: Suggestion;
+  dateHistoResponse?: {
     query: string;
     columns: ESQLSearchResponse['columns'];
     values: ESQLSearchResponse['values'];
@@ -207,34 +221,21 @@ export function EsqlWidget({
   );
 }
 
-export function registerEsqlWidget({
+export function registerEsqlItem({
   dependencies: {
     setup: { investigate },
   },
   services,
-  registerWidget,
-}: RegisterWidgetOptions) {
-  registerWidget(
-    {
-      type: ESQL_WIDGET_NAME,
-      description: 'Visualize an ES|QL query',
-      schema: {
-        type: 'object',
-        properties: {
-          esql: {
-            description: 'The ES|QL query',
-            type: 'string',
-          },
-        },
-        required: ['esql'],
-      } as const,
-    },
-    async ({ parameters, signal }) => {
-      const {
-        esql: esqlQuery,
-        timeRange,
-        suggestion: suggestionFromParameters,
-      } = parameters as EsqlWidgetParameters & GlobalWidgetParameters;
+}: Options) {
+  investigate.registerItemDefinition<EsqlItemParams, EsqlItemData>({
+    type: 'esql',
+    generate: async (option: {
+      itemParams: EsqlItemParams;
+      globalParams: GlobalWidgetParameters;
+    }) => {
+      const controller = new AbortController();
+      const { esql: esqlQuery, suggestion: suggestionFromParameters } = option.itemParams;
+      const { timeRange } = option.globalParams;
 
       const esql = await services.esql;
 
@@ -252,7 +253,7 @@ export function registerEsqlWidget({
 
       const mainResponse = await esql.queryWithMeta({
         query: esqlQuery,
-        signal,
+        signal: controller.signal,
         filter: getFilter(),
       });
 
@@ -263,37 +264,36 @@ export function registerEsqlWidget({
         columns: mainResponse.query.columns,
         esql,
         filter: getFilter(),
-        signal,
+        signal: controller.signal,
         suggestion,
         timeRange,
       });
 
       return {
-        main: {
-          columns: mainResponse.query.columns,
-          values: mainResponse.query.values,
-          suggestion,
-          dataView: mainResponse.meta.dataView,
-        },
-        dateHistogram: dateHistoResponse,
+        dataView: mainResponse.meta.dataView,
+        columns: mainResponse.query.columns,
+        values: mainResponse.query.values,
+        suggestion,
+        dateHistoResponse,
       };
     },
-    ({ widget }) => {
-      const {
-        main: { dataView, columns, values, suggestion },
-        dateHistogram,
-      } = widget.data;
+    render: (option: {
+      itemParams: EsqlItemParams;
+      globalParams: GlobalWidgetParameters;
+      data: EsqlItemData;
+    }) => {
+      const { itemParams, data } = option;
       return (
         <EsqlWidget
-          dataView={dataView}
-          columns={columns}
+          dataView={data.dataView}
+          columns={data.columns}
           allColumns={undefined}
-          values={values}
-          suggestion={suggestion}
-          esqlQuery={widget.parameters.esql}
-          dateHistogramResults={dateHistogram}
+          values={data.values}
+          suggestion={data.suggestion}
+          esqlQuery={itemParams.esql}
+          dateHistogramResults={data.dateHistoResponse}
         />
       );
-    }
-  );
+    },
+  });
 }

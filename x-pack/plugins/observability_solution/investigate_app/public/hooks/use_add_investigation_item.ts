@@ -6,12 +6,16 @@
  */
 
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import {
+  CreateInvestigationItemParams,
+  CreateInvestigationItemResponse,
+} from '@kbn/investigation-shared';
 import { useMutation } from '@tanstack/react-query';
 import { useKibana } from './use_kibana';
 
 type ServerError = IHttpFetchError<ResponseErrorBody>;
 
-export function useDeleteInvestigationNote() {
+export function useAddInvestigationItem() {
   const {
     core: {
       http,
@@ -20,21 +24,22 @@ export function useDeleteInvestigationNote() {
   } = useKibana();
 
   return useMutation<
-    void,
+    CreateInvestigationItemResponse,
     ServerError,
-    { investigationId: string; noteId: string },
+    { investigationId: string; item: CreateInvestigationItemParams },
     { investigationId: string }
   >(
-    ['deleteInvestigationNote'],
-    ({ investigationId, noteId }) => {
-      return http.delete<void>(
-        `/api/observability/investigations/${investigationId}/notes/${noteId}`,
-        { version: '2023-10-31' }
+    ['addInvestigationItem'],
+    ({ investigationId, item }) => {
+      const body = JSON.stringify(item);
+      return http.post<CreateInvestigationItemResponse>(
+        `/api/observability/investigations/${investigationId}/items`,
+        { body, version: '2023-10-31' }
       );
     },
     {
       onSuccess: (response, {}) => {
-        toasts.addSuccess('Note deleted');
+        toasts.addSuccess('Item saved');
       },
       onError: (error, {}, context) => {
         toasts.addError(new Error(error.body?.message ?? 'An error occurred'), { title: 'Error' });

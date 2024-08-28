@@ -11,7 +11,7 @@ import { useKibana } from './use_kibana';
 
 type ServerError = IHttpFetchError<ResponseErrorBody>;
 
-export function useDeleteInvestigationNote() {
+export function useDeleteInvestigationItem() {
   const {
     core: {
       http,
@@ -22,19 +22,19 @@ export function useDeleteInvestigationNote() {
   return useMutation<
     void,
     ServerError,
-    { investigationId: string; noteId: string },
+    { investigationId: string; itemId: string },
     { investigationId: string }
   >(
-    ['deleteInvestigationNote'],
-    ({ investigationId, noteId }) => {
+    ['deleteInvestigationItem'],
+    ({ investigationId, itemId }) => {
       return http.delete<void>(
-        `/api/observability/investigations/${investigationId}/notes/${noteId}`,
+        `/api/observability/investigations/${investigationId}/items/${itemId}`,
         { version: '2023-10-31' }
       );
     },
     {
       onSuccess: (response, {}) => {
-        toasts.addSuccess('Note deleted');
+        toasts.addSuccess('Item deleted');
       },
       onError: (error, {}, context) => {
         toasts.addError(new Error(error.body?.message ?? 'An error occurred'), { title: 'Error' });
