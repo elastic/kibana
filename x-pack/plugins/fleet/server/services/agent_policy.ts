@@ -1759,7 +1759,7 @@ export async function addPackageToAgentPolicy(
     ? String(packagePolicyId)
     : uuidv5(`${agentPolicy.id}-${packagePolicyName}`, UUID_V5_NAMESPACE);
 
-  await packagePolicyService.creaƒte(soClient, esClient, newPackagePolicy, {
+  await packagePolicyService.create(soClient, esClient, newPackagePolicy, {
     id,
     bumpRevision: bumpAgentPolicyRevison,
     skipEnsureInstalled: true,
