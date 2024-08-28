@@ -12,7 +12,6 @@ import { isRuntimeField } from '@kbn/ml-runtime-field-utils';
 /**
  * Schema for validating a runtime field
  */
-
 export const runtimeMappingsSchema = schema.object(
   {},
   {

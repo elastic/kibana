@@ -22,13 +22,13 @@ import React, { Component } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { FeaturesPrivileges, Role } from '@kbn/security-plugin-types-common';
+import { isGlobalPrivilegeDefinition } from '@kbn/security-role-management-model';
 import type { Space } from '@kbn/spaces-plugin/public';
 import { getSpaceColor } from '@kbn/spaces-plugin/public';
 
 import { PrivilegeDisplay } from './privilege_display';
-import type { FeaturesPrivileges, Role } from '../../../../../../../common';
 import { copyRole } from '../../../../../../../common/model';
-import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
 import { CUSTOM_PRIVILEGE_VALUE } from '../constants';
 import type { PrivilegeFormCalculator } from '../privilege_form_calculator';
 
