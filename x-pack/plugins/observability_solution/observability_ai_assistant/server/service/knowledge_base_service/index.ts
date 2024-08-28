@@ -71,7 +71,7 @@ export enum KnowledgeBaseEntryOperationType {
 
 interface KnowledgeBaseDeleteOperation {
   type: KnowledgeBaseEntryOperationType.Delete;
-  groupId?: string;
+  docId?: string;
   labels?: Record<string, string>;
 }
 
@@ -236,7 +236,7 @@ export class KnowledgeBaseService {
           query: {
             bool: {
               filter: [
-                ...(operation.groupId ? [{ term: { doc_id: operation.groupId } }] : []),
+                ...(operation.docId ? [{ term: { doc_id: operation.docId } }] : []),
                 ...(operation.labels
                   ? map(operation.labels, (value, key) => {
                       return { term: { [key]: value } };
@@ -249,7 +249,7 @@ export class KnowledgeBaseService {
         return;
       } catch (error) {
         this.dependencies.logger.error(
-          `Failed to delete document "${operation?.groupId}" due to ${error.message}`
+          `Failed to delete document "${operation?.docId}" due to ${error.message}`
         );
         this.dependencies.logger.debug(() => JSON.stringify(operation));
         throw error;
