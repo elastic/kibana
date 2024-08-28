@@ -62,7 +62,7 @@ export function useDegradedFields() {
     return sortedItems.slice(page * rowsPerPage, (page + 1) * rowsPerPage);
   }, [data, sort.field, sort.direction, page, rowsPerPage]);
 
-  const isLoading = useSelector(service, (state) =>
+  const isDegradedFieldsLoading = useSelector(service, (state) =>
     state.matches('initializing.dataStreamDegradedFields.fetching')
   );
 
@@ -93,7 +93,7 @@ export function useDegradedFields() {
   });
 
   return {
-    isLoading,
+    isDegradedFieldsLoading,
     pagination,
     onTableChange,
     renderedItems,

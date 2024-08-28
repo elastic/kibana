@@ -17,7 +17,7 @@ import { useDegradedFields } from '../../../../hooks/use_degraded_fields';
 
 export const DegradedFieldTable = () => {
   const {
-    isLoading,
+    isDegradedFieldsLoading,
     pagination,
     renderedItems,
     onTableChange,
@@ -31,7 +31,7 @@ export const DegradedFieldTable = () => {
   ]);
   const columns = getDegradedFieldsColumns({
     dateFormatter,
-    isLoading,
+    isLoading: isDegradedFieldsLoading,
     expandedDegradedField,
     openDegradedFieldFlyout,
   });
@@ -41,7 +41,7 @@ export const DegradedFieldTable = () => {
       tableLayout="fixed"
       columns={columns}
       items={renderedItems ?? []}
-      loading={isLoading}
+      loading={isDegradedFieldsLoading}
       sorting={sort}
       onChange={onTableChange}
       pagination={pagination}
@@ -50,7 +50,7 @@ export const DegradedFieldTable = () => {
         'data-test-subj': 'datasetQualityDetailsDegradedTableRow',
       }}
       noItemsMessage={
-        isLoading ? (
+        isDegradedFieldsLoading ? (
           overviewDegradedFieldsTableLoadingText
         ) : (
           <EuiEmptyPrompt

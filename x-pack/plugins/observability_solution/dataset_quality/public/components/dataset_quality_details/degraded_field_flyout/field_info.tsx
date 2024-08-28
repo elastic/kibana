@@ -34,6 +34,7 @@ export const DegradedFieldInfo = () => {
     fieldFormats,
     expandedDegradedField,
     degradedFieldValues,
+    isDegradedFieldsLoading,
     isDegradedFieldsValueLoading,
   } = useDegradedFields();
 
@@ -59,7 +60,7 @@ export const DegradedFieldInfo = () => {
           <SparkPlot
             series={fieldList?.timeSeries}
             valueLabel={formatNumber(fieldList?.count, NUMBER_FORMAT)}
-            isLoading={false}
+            isLoading={isDegradedFieldsLoading}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

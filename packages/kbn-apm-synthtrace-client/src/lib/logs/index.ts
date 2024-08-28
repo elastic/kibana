@@ -49,7 +49,7 @@ export type LogDocument = Fields &
     'container.name'?: string;
     'cloud.provider'?: string;
     'cloud.region'?: string;
-    'cloud.availability_zone'?: string;
+    'cloud.availability_zone'?: string | string[];
     'cloud.project.id'?: string;
     'cloud.instance.id'?: string;
     'error.stack_trace'?: string;
