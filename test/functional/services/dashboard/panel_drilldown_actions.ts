@@ -25,18 +25,12 @@ export function DashboardDrilldownPanelActionsProvider({
   return new (class DashboardDrilldownPanelActions {
     async expectExistsCreateDrilldownAction() {
       log.debug('expectExistsCreateDrilldownAction');
-      await dashboardPanelActions.openContextMenu();
-      await dashboardPanelActions.expectContextMenuToBeOpen();
-      await dashboardPanelActions.clickContextMenuMoreItem();
-      await await testSubjects.existOrFail(CREATE_DRILLDOWN_DATA_TEST_SUBJ);
+      await dashboardPanelActions.expectExistsPanelAction(CREATE_DRILLDOWN_DATA_TEST_SUBJ);
     }
 
     async expectMissingCreateDrilldownAction() {
       log.debug('expectMissingCreateDrilldownAction');
-      await dashboardPanelActions.openContextMenu();
-      await dashboardPanelActions.expectContextMenuToBeOpen();
-      await dashboardPanelActions.clickContextMenuMoreItem();
-      await testSubjects.existOrFail(MANAGE_DRILLDOWNS_DATA_TEST_SUBJ);
+      await dashboardPanelActions.expectMissingPanelAction(CREATE_DRILLDOWN_DATA_TEST_SUBJ);
     }
 
     async clickCreateDrilldown() {
@@ -47,18 +41,12 @@ export function DashboardDrilldownPanelActionsProvider({
 
     async expectExistsManageDrilldownsAction() {
       log.debug('expectExistsCreateDrilldownAction');
-      await dashboardPanelActions.openContextMenu();
-      await dashboardPanelActions.expectContextMenuToBeOpen();
-      await dashboardPanelActions.clickContextMenuMoreItem();
-      await testSubjects.existOrFail(CREATE_DRILLDOWN_DATA_TEST_SUBJ);
+      await dashboardPanelActions.expectExistsPanelAction(MANAGE_DRILLDOWNS_DATA_TEST_SUBJ);
     }
 
     async expectMissingManageDrilldownsAction() {
       log.debug('expectExistsRemovePanelAction');
-      await dashboardPanelActions.openContextMenu();
-      await dashboardPanelActions.expectContextMenuToBeOpen();
-      await dashboardPanelActions.clickContextMenuMoreItem();
-      await testSubjects.existOrFail(MANAGE_DRILLDOWNS_DATA_TEST_SUBJ);
+      await dashboardPanelActions.expectMissingPanelAction(MANAGE_DRILLDOWNS_DATA_TEST_SUBJ);
     }
 
     async clickManageDrilldowns() {
