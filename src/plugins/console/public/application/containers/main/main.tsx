@@ -16,6 +16,7 @@ import {
   EuiHorizontalRule,
   EuiButtonEmpty,
 } from '@elastic/eui';
+import { downloadFileAs } from '@kbn/share-plugin/public';
 import { MAIN_PANEL_LABELS } from './i18n';
 import { NavIconButton } from './nav_icon_button';
 import { Editor } from '../editor';
@@ -23,15 +24,20 @@ import { TopNavMenu, SomethingWentWrongCallout } from '../../components';
 import { useDataInit } from '../../hooks';
 import { getTopNavConfig } from './get_top_nav';
 import { SHELL_TAB_ID } from './tab_ids';
+import { useEditorReadContext } from '../../contexts';
 
 interface MainProps {
   isEmbeddable?: boolean;
 }
 
+const EXPORT_FILE_NAME = 'console_export';
+
 export function Main({ isEmbeddable = false }: MainProps) {
   const [selectedTab, setSelectedTab] = useState(SHELL_TAB_ID);
 
   const { done, error, retry } = useDataInit();
+
+  const { currentTextObject } = useEditorReadContext();
 
   if (error) {
     return (
@@ -67,13 +73,19 @@ export function Main({ isEmbeddable = false }: MainProps) {
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <NavIconButton
-                    iconType="save"
-                    onClick={() => {}}
-                    ariaLabel={MAIN_PANEL_LABELS.importExportButton}
-                    dataTestSubj="consoleImportExportButton"
-                    toolTipContent={MAIN_PANEL_LABELS.importExportButton}
-                  />
+                  <EuiButtonEmpty
+                    iconType="download"
+                    onClick={() =>
+                      downloadFileAs(EXPORT_FILE_NAME, {
+                        content: currentTextObject?.text,
+                        type: 'txt',
+                      })
+                    }
+                    size="xs"
+                    dataTestSubj="consoleExportFileButton"
+                  >
+                    {MAIN_PANEL_LABELS.exportFileButton}
+                  </EuiButtonEmpty>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <NavIconButton
