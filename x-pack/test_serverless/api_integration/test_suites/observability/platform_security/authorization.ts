@@ -1918,6 +1918,7 @@ export default function ({ getService }: FtrProviderContext) {
               "all": Array [
                 "login:",
                 "api:bulkGetUserProfiles",
+                "api:dashboardUsageStats",
                 "api:store_search_session",
                 "api:generateReport",
                 "api:downloadCsv",
@@ -2100,6 +2101,7 @@ export default function ({ getService }: FtrProviderContext) {
               "minimal_all": Array [
                 "login:",
                 "api:bulkGetUserProfiles",
+                "api:dashboardUsageStats",
                 "app:dashboards",
                 "app:kibana",
                 "ui:catalogue/dashboard",
@@ -2251,6 +2253,7 @@ export default function ({ getService }: FtrProviderContext) {
               "minimal_read": Array [
                 "login:",
                 "api:bulkGetUserProfiles",
+                "api:dashboardUsageStats",
                 "app:dashboards",
                 "app:kibana",
                 "ui:catalogue/dashboard",
@@ -2349,6 +2352,7 @@ export default function ({ getService }: FtrProviderContext) {
               "read": Array [
                 "login:",
                 "api:bulkGetUserProfiles",
+                "api:dashboardUsageStats",
                 "app:dashboards",
                 "app:kibana",
                 "ui:catalogue/dashboard",

@@ -98,7 +98,7 @@ export const IndexPipelinesConfigurationsLogic = kea<
     selectedPipeline: [
       () => [selectors.selectedPipelineId, selectors.pipelines],
       (selectedPipelineId: string, pipelines: Record<string, IngestPipeline>) => {
-        if (pipelines.hasOwnProperty(selectedPipelineId)) {
+        if (Object.hasOwn(pipelines, selectedPipelineId)) {
           return pipelines[selectedPipelineId];
         }
         return undefined;

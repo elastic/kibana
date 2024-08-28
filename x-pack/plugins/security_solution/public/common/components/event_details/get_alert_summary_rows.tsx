@@ -9,7 +9,7 @@ import { find, isEmpty, uniqBy } from 'lodash/fp';
 import { ALERT_RULE_PARAMETERS, ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
 
 import { EventCode, EventCategory } from '@kbn/securitysolution-ecs';
-import { RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD } from '../../../../common/endpoint/service/response_actions/constants';
+import { SUPPORTED_AGENT_ID_ALERT_FIELDS } from '../../../../common/endpoint/service/response_actions/constants';
 import { isResponseActionsAlertAgentIdField } from '../../lib/endpoint';
 import { useAlertResponseActionsSupport } from '../../hooks/endpoint/use_alert_response_actions_support';
 import * as i18n from './translations';
@@ -45,18 +45,17 @@ const THRESHOLD_COUNT = `${ALERT_THRESHOLD_RESULT}.count`;
 /** Always show these fields */
 const alwaysDisplayedFields: EventSummaryField[] = [
   { id: 'host.name' },
-  // ENDPOINT-related field //
-  { id: 'agent.id', overrideField: AGENT_STATUS_FIELD_NAME, label: i18n.AGENT_STATUS },
-  {
-    id: RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.sentinel_one,
-    overrideField: AGENT_STATUS_FIELD_NAME,
-    label: i18n.AGENT_STATUS,
-  },
-  {
-    id: RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.crowdstrike,
-    overrideField: AGENT_STATUS_FIELD_NAME,
-    label: i18n.AGENT_STATUS,
-  },
+
+  // Add all fields used to identify the agent ID in alert events and override them to
+  // show the `agent.status` field name/value
+  ...SUPPORTED_AGENT_ID_ALERT_FIELDS.map((fieldPath) => {
+    return {
+      id: fieldPath,
+      overrideField: AGENT_STATUS_FIELD_NAME,
+      label: i18n.AGENT_STATUS,
+    };
+  }),
+
   // ** //
   { id: 'user.name' },
   { id: 'rule.name' },

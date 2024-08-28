@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { EntityDefinition } from '@kbn/entities-schema';
-import { ENTITY_SCHEMA_VERSION_V1 } from '../../../../common/constants_entities';
+import { EntityDefinition, ENTITY_SCHEMA_VERSION_V1 } from '@kbn/entities-schema';
 import {
   initializePathScript,
   cleanScript,

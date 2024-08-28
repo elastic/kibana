@@ -7,22 +7,27 @@
  */
 
 import { camelCase } from 'lodash';
-import { supportedFieldTypes } from '../definitions/types';
+import { ESQLRealField } from '../validation/types';
+import { fieldTypes } from '../definitions/types';
 
-export const fields = [
-  ...supportedFieldTypes.map((type) => ({ name: `${camelCase(type)}Field`, type })),
+export const fields: ESQLRealField[] = [
+  ...fieldTypes
+    .map((type) => ({ name: `${camelCase(type)}Field`, type }))
+    .filter((f) => f.type !== 'unsupported'),
   { name: 'any#Char$Field', type: 'double' },
   { name: 'kubernetes.something.something', type: 'double' },
   { name: '@timestamp', type: 'date' },
 ];
 
-export const enrichFields = [
+export const enrichFields: ESQLRealField[] = [
   { name: 'otherField', type: 'text' },
   { name: 'yetAnotherField', type: 'double' },
 ];
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
-export const unsupported_field = [{ name: 'unsupported_field', type: 'unsupported' }];
+export const unsupported_field: ESQLRealField[] = [
+  { name: 'unsupported_field', type: 'unsupported' },
+];
 
 export const indexes = [
   'a_index',
@@ -58,7 +63,8 @@ export function getCallbackMocks() {
         return unsupported_field;
       }
       if (/dissect|grok/.test(query)) {
-        return [{ name: 'firstWord', type: 'text' }];
+        const field: ESQLRealField = { name: 'firstWord', type: 'text' };
+        return [field];
       }
       return fields;
     }),
@@ -66,6 +72,7 @@ export function getCallbackMocks() {
       indexes.map((name) => ({
         name,
         hidden: name.startsWith('.'),
+        type: 'Index',
       }))
     ),
     getPolicies: jest.fn(async () => policies),

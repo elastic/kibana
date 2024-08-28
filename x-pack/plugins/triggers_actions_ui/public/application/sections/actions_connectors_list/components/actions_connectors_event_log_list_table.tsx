@@ -522,9 +522,9 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
 
   return (
     <EuiFlexGroup gutterSize="none" direction="column">
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup alignItems="center">
-          <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={true}>
+        <EuiFlexGroup gutterSize="m" alignItems="center">
+          <EuiFlexItem grow={true}>
             <EuiFieldSearch
               fullWidth
               isClearable

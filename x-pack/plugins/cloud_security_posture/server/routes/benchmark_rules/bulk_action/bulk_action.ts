@@ -45,7 +45,7 @@ export const defineBulkActionCspBenchmarkRulesRoute = (router: CspRouter) =>
       access: 'internal',
       path: CSP_BENCHMARK_RULES_BULK_ACTION_ROUTE_PATH,
       options: {
-        tags: ['access:cloud-security-posture-read'],
+        tags: ['access:cloud-security-posture-all'],
       },
     })
     .addVersion(

@@ -84,6 +84,7 @@ export interface KnowledgeBaseEntry {
   doc_id: string;
   confidence: 'low' | 'medium' | 'high';
   is_correction: boolean;
+  type?: 'user_instruction' | 'contextual';
   public: boolean;
   labels?: Record<string, string>;
   role: KnowledgeBaseEntryRole;
@@ -92,13 +93,26 @@ export interface KnowledgeBaseEntry {
   };
 }
 
-export interface UserInstruction {
+export interface Instruction {
   doc_id: string;
   text: string;
-  system?: boolean;
 }
 
-export type UserInstructionOrPlainText = string | UserInstruction;
+export interface AdHocInstruction {
+  doc_id?: string;
+  text: string;
+  instruction_type: 'user_instruction' | 'application_instruction';
+}
+
+export type InstructionOrPlainText = string | Instruction;
+
+export enum KnowledgeBaseType {
+  // user instructions are included in the system prompt regardless of the user's input
+  UserInstruction = 'user_instruction',
+
+  // contextual entries are only included in the system prompt if the user's input matches the context
+  Contextual = 'contextual',
+}
 
 export interface ObservabilityAIAssistantScreenContextRequest {
   screenDescription?: string;

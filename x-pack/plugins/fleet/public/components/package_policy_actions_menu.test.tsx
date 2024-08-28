@@ -209,14 +209,4 @@ describe('PackagePolicyActionsMenu', () => {
       );
     });
   });
-
-  it('Should disable Edit integration when agentPolicy is agentless', async () => {
-    const agentPolicies = createMockAgentPolicies({ is_managed: true, supports_agentless: true });
-    const packagePolicy = createMockPackagePolicy();
-    const { utils } = renderMenu({ agentPolicies, packagePolicy });
-    await act(async () => {
-      const editButton = utils.getByTestId('PackagePolicyActionsEditItem');
-      expect(editButton).toHaveAttribute('disabled');
-    });
-  });
 });

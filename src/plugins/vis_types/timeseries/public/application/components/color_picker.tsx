@@ -41,8 +41,14 @@ export function ColorPicker({ name, value, disableTrash = false, onChange }: Col
 
   const { euiTheme } = useEuiTheme();
 
-  const handleColorChange: EuiColorPickerProps['onChange'] = (text: string, { rgba, hex }) => {
+  const handleColorChange: EuiColorPickerProps['onChange'] = (
+    text: string,
+    { rgba, hex, isValid }
+  ) => {
     setColor(text);
+    if (!isValid) {
+      return;
+    }
     onChange({ [name]: hex ? `rgba(${rgba.join(',')})` : '' });
   };
 

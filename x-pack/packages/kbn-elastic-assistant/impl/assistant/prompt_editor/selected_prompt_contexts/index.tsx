@@ -8,7 +8,6 @@
 import { EuiAccordion, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { isEmpty, omit } from 'lodash/fp';
 import React, { useCallback } from 'react';
-import styled from '@emotion/styled';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { Conversation } from '../../../assistant_context/types';
@@ -24,14 +23,6 @@ export interface Props {
   >;
   currentReplacements: Conversation['replacements'] | undefined;
 }
-
-export const EditorContainer = styled.div<{
-  $accordionState: 'closed' | 'open';
-}>`
-  ${({ $accordionState }) => ($accordionState === 'closed' ? 'height: 0px;' : '')}
-  ${({ $accordionState }) => ($accordionState === 'closed' ? 'overflow: hidden;' : '')}
-  ${({ $accordionState }) => ($accordionState === 'closed' ? 'position: absolute;' : '')}
-`;
 
 const SelectedPromptContextsComponent: React.FC<Props> = ({
   promptContexts,

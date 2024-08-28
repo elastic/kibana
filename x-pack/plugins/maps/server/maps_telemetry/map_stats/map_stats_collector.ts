@@ -155,7 +155,7 @@ export class MapStatsCollector {
     counts: { [key: string]: number }
   ) {
     for (const key in counts) {
-      if (!counts.hasOwnProperty(key)) {
+      if (!Object.hasOwn(counts, key)) {
         continue;
       }
 
@@ -174,7 +174,7 @@ export class MapStatsCollector {
     }
 
     for (const key in clusterStats) {
-      if (clusterStats.hasOwnProperty(key)) {
+      if (Object.hasOwn(clusterStats, key)) {
         clusterStats[key].avg = clusterStats[key].total / this._mapCount;
       }
     }
@@ -186,7 +186,7 @@ export class MapStatsCollector {
   } {
     const results: { [key: string]: Omit<ClusterCountStats, 'total'> } = {};
     for (const key in clusterStats) {
-      if (clusterStats.hasOwnProperty(key)) {
+      if (Object.hasOwn(clusterStats, key)) {
         results[key] = this._excludeTotal(clusterStats[key]);
       }
     }

@@ -291,7 +291,7 @@ export const setChanged = actionCreator<{ id: string; changed: boolean }>('SET_C
 export const updateColumnWidth = actionCreator<{
   columnId: string;
   id: string;
-  width: number;
+  width?: number;
 }>('UPDATE_COLUMN_WIDTH');
 
 export const updateRowHeight = actionCreator<{

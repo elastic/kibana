@@ -29,6 +29,8 @@ import memoize from 'lodash/memoize';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
+import { ESQLRealField } from '@kbn/esql-validation-autocomplete';
+import { FieldType } from '@kbn/esql-validation-autocomplete/src/definitions/types';
 import { EditorFooter } from './editor_footer';
 import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
 import {
@@ -190,6 +192,14 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     setIsHistoryOpen(status);
   }, []);
 
+  const showSuggestionsIfEmptyQuery = useCallback(() => {
+    if (editorModel.current?.getValueLength() === 0) {
+      setImmediate(() => {
+        editor1.current?.trigger(undefined, 'editor.action.triggerSuggest', {});
+      });
+    }
+  }, []);
+
   const openTimePickerPopover = useCallback(() => {
     const currentCursorPosition = editor1.current?.getPosition();
     const editorCoords = editor1.current?.getDomNode()!.getBoundingClientRect();
@@ -273,7 +283,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
 
   const onEditorFocus = useCallback(() => {
     setIsCodeEditorExpandedFocused(true);
-  }, []);
+    showSuggestionsIfEmptyQuery();
+  }, [showSuggestionsIfEmptyQuery]);
 
   const { cache: esqlFieldsCache, memoizedFieldsFromESQL } = useMemo(() => {
     // need to store the timing of the first request so we can atomically clear the cache per query
@@ -322,13 +333,12 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
               undefined,
               abortController
             ).result;
-            const columns =
+            const columns: ESQLRealField[] =
               table?.columns.map((c) => {
-                // Casting unsupported as unknown to avoid plethora of warnings
-                // Remove when addressed https://github.com/elastic/kibana/issues/189666
-                if (!c.meta.esType || c.meta.esType === 'unsupported')
-                  return { name: c.name, type: 'unknown' };
-                return { name: c.name, type: c.meta.esType };
+                return {
+                  name: c.name,
+                  type: c.meta.esType as FieldType,
+                };
               }) || [];
             return await getRateLimitedColumnsWithMetadata(columns, fieldsMetadata);
           } catch (e) {
@@ -681,6 +691,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                     editor.onDidLayoutChange((layoutInfoEvent) => {
                       onLayoutChangeRef.current(layoutInfoEvent);
                     });
+
+                    editor.onDidChangeModelContent(showSuggestionsIfEmptyQuery);
                   }}
                 />
               </div>

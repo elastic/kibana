@@ -54,8 +54,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await dashboard.waitForRenderComplete();
       await dashboardBadgeActions.expectExistsTimeRangeBadgeAction();
 
-      const visPanel = await panelActions.getPanelHeading('My TSVB to Lens viz 1');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('My TSVB to Lens viz 1');
       await lens.waitForVisualization('xyVisChart');
 
       await retry.try(async () => {
@@ -93,8 +92,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await dashboard.waitForRenderComplete();
       await dashboardBadgeActions.expectExistsTimeRangeBadgeAction();
 
-      const visPanel = await panelActions.getPanelHeading('My TSVB to Lens viz 2');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('My TSVB to Lens viz 2');
       await lens.waitForVisualization('xyVisChart');
 
       await retry.try(async () => {

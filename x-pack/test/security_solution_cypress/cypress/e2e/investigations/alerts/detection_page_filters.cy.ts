@@ -29,7 +29,6 @@ import {
   markAcknowledgedFirstAlert,
   openPageFilterPopover,
   resetFilters,
-  selectCountTable,
   selectPageFilterValue,
   togglePageFilterPopover,
   visitAlertsPageWithCustomFilters,
@@ -236,7 +235,6 @@ describe.skip(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, ()
       },
       () => {
         // mark status of one alert to be acknowledged
-        selectCountTable();
         cy.get(ALERTS_COUNT)
           .invoke('text')
           .then((noOfAlerts) => {

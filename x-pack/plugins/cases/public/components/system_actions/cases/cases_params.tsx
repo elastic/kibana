@@ -8,6 +8,7 @@
 import React, { memo, useCallback, useEffect, useMemo } from 'react';
 
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { AlertConsumers, ValidFeatureId } from '@kbn/rule-data-utils';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiCheckbox,
@@ -19,20 +20,30 @@ import {
   EuiSpacer,
   EuiComboBox,
 } from '@elastic/eui';
-import type { ValidFeatureId } from '@kbn/rule-data-utils';
-import { CASES_CONNECTOR_SUB_ACTION } from '../../../../common/constants';
+import { useAlertsDataView } from '@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view';
 import * as i18n from './translations';
 import type { CasesActionParams } from './types';
+import { CASES_CONNECTOR_SUB_ACTION } from '../../../../common/constants';
 import { DEFAULT_TIME_WINDOW, TIME_UNITS } from './constants';
 import { getTimeUnitOptions } from './utils';
-import { useAlertDataViews } from '../hooks/use_alert_data_view';
+import { useKibana } from '../../../common/lib/kibana';
 
 export const CasesParamsFieldsComponent: React.FunctionComponent<
   ActionParamsProps<CasesActionParams>
 > = ({ actionParams, editAction, errors, index, producerId }) => {
-  const { dataViews, loading: loadingAlertDataViews } = useAlertDataViews(
-    producerId ? [producerId as ValidFeatureId] : []
-  );
+  const {
+    http,
+    notifications: { toasts },
+    data: { dataViews: dataViewsService },
+  } = useKibana().services;
+  const { dataView, isLoading: loadingAlertDataViews } = useAlertsDataView({
+    http,
+    toasts,
+    dataViewsService,
+    featureIds: producerId
+      ? [producerId as Exclude<ValidFeatureId, typeof AlertConsumers.SIEM>]
+      : [],
+  });
 
   const { timeWindow, reopenClosedCases, groupingBy } = useMemo(
     () =>
@@ -108,21 +119,17 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
   );
 
   const options: Array<EuiComboBoxOptionOption<string>> = useMemo(() => {
-    if (!dataViews?.length) {
+    if (!dataView) {
       return [];
     }
 
-    return dataViews
-      .map((dataView) => {
-        return dataView.fields
-          .filter((field) => Boolean(field.aggregatable))
-          .map((field) => ({
-            value: field.name,
-            label: field.name,
-          }));
-      })
-      .flat();
-  }, [dataViews]);
+    return dataView.fields
+      .filter((field) => Boolean(field.aggregatable))
+      .map((field) => ({
+        value: field.name,
+        label: field.name,
+      }));
+  }, [dataView]);
 
   const selectedOptions = groupingBy.map((field) => ({ value: field, label: field }));
 
