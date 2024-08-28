@@ -42,9 +42,11 @@ export const setDefaultSpaceSolutionType = ({ router, getSpacesService }: RouteO
       createLicensedRouteHandler(async (context, request, response) => {
         const spacesClient = (await getSpacesService()).createSpacesClient(request);
         const solution = request.body.solution_type;
+
         try {
           const defaultSpace = await spacesClient?.get('default');
           const parseSolution = parseOnboardingSolution(solution);
+
           if (parseSolution) {
             await spacesClient?.update(
               'default',
