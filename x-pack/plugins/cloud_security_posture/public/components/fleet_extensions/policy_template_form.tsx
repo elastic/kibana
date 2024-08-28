@@ -28,6 +28,7 @@ import type {
   PackagePolicyReplaceDefineStepExtensionComponentProps,
 } from '@kbn/fleet-plugin/public/types';
 import { PackageInfo, PackagePolicy } from '@kbn/fleet-plugin/common';
+import { CSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { useIsSubscriptionStatusValid } from '../../common/hooks/use_is_subscription_status_valid';
@@ -39,7 +40,6 @@ import {
   CLOUDBEAT_AWS,
   CLOUDBEAT_VANILLA,
   CLOUDBEAT_VULN_MGMT_AWS,
-  CSPM_POLICY_TEMPLATE,
   SUPPORTED_POLICY_TEMPLATES,
 } from '../../../common/constants';
 import {
