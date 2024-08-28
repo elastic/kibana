@@ -80,7 +80,9 @@ describe('getApmConfig', () => {
     agentMock.currentTransaction = {
       sampled: 'sampled',
       traceId: 'traceId',
-      ensureParentId: () => 'parentId',
+      ids: {
+        ['transaction.id']: 'transactionId',
+      },
     } as any;
 
     const config = getApmConfig('/some-other-path');
@@ -89,7 +91,7 @@ describe('getApmConfig', () => {
       expect.objectContaining({
         pageLoadTraceId: 'traceId',
         pageLoadSampled: 'sampled',
-        pageLoadSpanId: 'parentId',
+        pageLoadParentId: 'transactionId',
       })
     );
   });
