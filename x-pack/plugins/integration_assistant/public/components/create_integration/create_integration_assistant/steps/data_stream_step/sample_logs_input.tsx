@@ -9,12 +9,55 @@ import React, { useCallback, useState } from 'react';
 import { EuiCallOut, EuiFilePicker, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { isPlainObject } from 'lodash/fp';
+import seedrandom from 'seedrandom';
 import type { IntegrationSettings } from '../../types';
 import * as i18n from './translations';
 import { useActions } from '../../state';
 import type { SamplesFormat } from '../../../../../../common';
 
 const MaxLogsSampleRows = 10;
+
+const PARTIAL_SHUFFLE_SEED = '1337';
+
+/**
+ * Partially shuffles an array using the Fisher-Yates algorithm.
+ *
+ * The array is shuffled in place, so that:
+ *   - the first `start` elements are kept in place;
+ *   - the elements in the slice from start to end represent the random sample;.
+ *   - the order of elements after end is not guaranteed.
+ *
+ * The result is reproducible, as the seed is fixed.
+ *
+ * Examples:
+ *   - shuffle the whole array: partialShuffleArray(arr)
+ *   - shuffle the first 5 elements: partialShuffleArray(arr, 0, 5)
+ *   - keep the first element, shuffle the rest: partialShuffleArray(arr,1)
+ *   - shuffle the last 5 elements: partialShuffleArray(arr, arr.length - 5)
+ *
+ * @param arr - The array to be partially shuffled.
+ * @param start - The number of elements in the beginning of the array to keep in place.
+ * @param end - The number of elements to be shuffled.
+ */
+export const partialShuffleArray = (arr: object[], start: number = 0, end: number = arr.length) => {
+  const rng = seedrandom(PARTIAL_SHUFFLE_SEED);
+
+  if (start < 0 || start > arr.length) {
+    throw new RangeError('Invalid start index');
+  }
+
+  if (end < start || end > arr.length) {
+    throw new RangeError('Invalid end index');
+  }
+
+  let top = arr.length;
+  let index;
+
+  while (top-- > end) {
+    index = start + (rng.int32() % (top - start));
+    [arr[top], arr[index]] = [arr[index], arr[top]];
+  }
+};
 
 /**
  * Parse the logs sample file content as newiline-delimited JSON (NDJSON).
