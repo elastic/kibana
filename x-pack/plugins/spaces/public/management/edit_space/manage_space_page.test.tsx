@@ -391,7 +391,6 @@ describe('ManageSpacePage', () => {
       id: 'existing-space',
       name: 'Existing Space',
       description: 'hey an existing space',
-      solution: 'oblt',
       color: undefined,
       initials: undefined,
       imageUrl: undefined,
@@ -493,7 +492,6 @@ describe('ManageSpacePage', () => {
       description: 'hey an existing space',
       color: '#aabbcc',
       initials: 'AB',
-      solution: 'oblt',
       disabledFeatures: [],
     });
     spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
@@ -557,7 +555,6 @@ describe('ManageSpacePage', () => {
       description: 'hey an existing space',
       color: '#aabbcc',
       initials: 'AB',
-      solution: 'oblt',
       disabledFeatures: [],
     });
     spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);

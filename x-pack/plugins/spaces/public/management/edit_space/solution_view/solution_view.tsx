@@ -99,6 +99,7 @@ const getOptions = ({ size }: EuiThemeComputed): Array<EuiSuperSelectOption<Solu
 interface Props {
   space: Partial<Space>;
   onChange: (space: Partial<Space>) => void;
+  isEditing: boolean;
   validator: SpaceValidator;
   sectionTitle?: string;
 }
@@ -107,6 +108,7 @@ export const SolutionView: FunctionComponent<Props> = ({
   space,
   onChange,
   validator,
+  isEditing,
   sectionTitle,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -139,7 +141,7 @@ export const SolutionView: FunctionComponent<Props> = ({
               defaultMessage: 'Solution view',
             })}
             fullWidth
-            {...validator.validateSolutionView(space)}
+            {...validator.validateSolutionView(space, isEditing)}
           >
             <EuiSuperSelect
               options={getOptions(euiTheme)}
@@ -154,7 +156,7 @@ export const SolutionView: FunctionComponent<Props> = ({
                   defaultMessage: 'Classic (Default)',
                 }
               )}
-              isInvalid={validator.validateSolutionView(space).isInvalid}
+              isInvalid={validator.validateSolutionView(space, isEditing).isInvalid}
             />
           </EuiFormRow>
         </EuiFlexItem>
