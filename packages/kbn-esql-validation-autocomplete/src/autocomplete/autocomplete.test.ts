@@ -1315,6 +1315,23 @@ describe('autocomplete', () => {
         ]
       );
 
+      testSuggestions(
+        'FROM index1, index2/',
+        [
+          { text: 'index2 | ', filterText: 'index2', command: TRIGGER_SUGGESTION_COMMAND },
+          { text: 'index2, ', filterText: 'index2', command: TRIGGER_SUGGESTION_COMMAND },
+          { text: 'index2 METADATA ', filterText: 'index2', command: TRIGGER_SUGGESTION_COMMAND },
+        ],
+        undefined,
+        [
+          ,
+          [
+            { name: 'index1', hidden: false },
+            { name: 'index2', hidden: false },
+          ],
+        ]
+      );
+
       // This is a source name that contains a special character
       // meaning that Monaco by default will only set the replacement
       // range to cover "bar" and not "foo$bar". We have to make sure

@@ -962,7 +962,8 @@ async function getExpressionSuggestionsByType(
         }
         suggestions.push(...(policies.length ? policies : [buildNoPoliciesAvailableDefinition()]));
       } else {
-        const index = getSourcesFromCommands(commands, 'index');
+        const indexes = getSourcesFromCommands(commands, 'index');
+        const lastIndex = indexes[indexes.length - 1];
         const canRemoveQuote = isNewExpression && innerText.includes('"');
         // Function to add suggestions based on canRemoveQuote
         const addSuggestionsBasedOnQuote = async (definitions: SuggestionRawDefinition[]) => {
@@ -971,9 +972,9 @@ async function getExpressionSuggestionsByType(
           );
         };
 
-        if (index && index.text && index.text !== EDITOR_MARKER) {
+        if (lastIndex && lastIndex.text && lastIndex.text !== EDITOR_MARKER) {
           const sources = await getSources();
-          const sourceIdentifier = index.text.replace(EDITOR_MARKER, '');
+          const sourceIdentifier = lastIndex.text.replace(EDITOR_MARKER, '');
           if (sourceExists(sourceIdentifier, new Set(sources.map(({ name }) => name)))) {
             const exactMatch = sources.find(({ name: _name }) => _name === sourceIdentifier);
             if (exactMatch?.dataStreams) {
