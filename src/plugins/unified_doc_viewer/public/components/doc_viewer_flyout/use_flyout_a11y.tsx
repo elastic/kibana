@@ -36,13 +36,13 @@ export const useFlyoutA11y = ({ isXlScreen }: { isXlScreen: boolean }) => {
     a11yProps: {
       ref: setFlyoutEl,
       role: isXlScreen ? 'dialog' : undefined,
-      tabIndex: isXlScreen ? 0 : undefined,
+      tabindex: isXlScreen ? 0 : undefined,
       'aria-describedby': isXlScreen ? descriptionId : undefined,
       'data-no-focus-lock': isXlScreen || undefined,
     },
     screenReaderDescription: isXlScreen && (
       <EuiScreenReaderOnly>
-        <p id={descriptionId}>
+        <p id={descriptionId} data-test-subj="unifiedDocViewerScreenReaderDescription">
           {i18n.translate('unifiedDocViewer.flyout.screenReaderDescription', {
             defaultMessage: 'You are in a non-modal dialog. To close the dialog, press Escape.',
           })}
