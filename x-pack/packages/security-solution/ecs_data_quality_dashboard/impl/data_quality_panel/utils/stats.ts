@@ -59,3 +59,20 @@ export const getTotalPatternIncompatible = (
 
   return allResults.reduce<number>((acc, { incompatible }) => acc + (incompatible ?? 0), 0);
 };
+
+export const getDocsCountPercent = ({
+  docsCount,
+  locales,
+  patternDocsCount,
+}: {
+  docsCount: number;
+  locales?: string | string[];
+  patternDocsCount: number;
+}): string =>
+  patternDocsCount !== 0
+    ? Number(docsCount / patternDocsCount).toLocaleString(locales, {
+        style: 'percent',
+        maximumFractionDigits: 1,
+        minimumFractionDigits: 1,
+      })
+    : '';
