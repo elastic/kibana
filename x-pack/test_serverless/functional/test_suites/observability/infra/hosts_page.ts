@@ -154,10 +154,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           expect(documentTitle).to.contain('Hosts - Infrastructure - Observability - Elastic');
         });
 
-        it('should render the title beta badge', async () => {
-          await pageObjects.infraHostsView.getBetaBadgeExists();
-        });
-
         describe('Hosts table', () => {
           let hostRows: WebElementWrapper[] = [];
 
