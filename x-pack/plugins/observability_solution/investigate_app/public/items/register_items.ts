@@ -5,22 +5,20 @@
  * 2.0.
  */
 
-import type { RegisterWidget } from '@kbn/investigate-plugin/public/types';
 import type { InvestigateAppServices } from '../services/types';
 import type { InvestigateAppSetupDependencies, InvestigateAppStartDependencies } from '../types';
-import { registerEmbeddableWidget } from './embeddable_widget/register_embeddable_widget';
-import { registerEsqlWidget } from './esql_widget/register_esql_widget';
+import { registerEmbeddableItem } from './embeddable_item/register_embeddable_item';
+import { registerEsqlItem } from './esql_item/register_esql_item';
 
-export interface RegisterWidgetOptions {
+export interface Options {
   dependencies: {
     setup: InvestigateAppSetupDependencies;
     start: InvestigateAppStartDependencies;
   };
   services: InvestigateAppServices;
-  registerWidget: RegisterWidget;
 }
 
-export function registerWidgets(options: RegisterWidgetOptions) {
-  registerEsqlWidget(options);
-  registerEmbeddableWidget(options);
+export function registerItems(options: Options) {
+  registerEsqlItem(options);
+  registerEmbeddableItem(options);
 }

@@ -9,19 +9,20 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiTitle } fro
 import { css } from '@emotion/css';
 import { TextBasedLangEditor } from '@kbn/esql/public';
 import { i18n } from '@kbn/i18n';
-import { GlobalWidgetParameters, OnWidgetAdd } from '@kbn/investigate-plugin/public';
+import { GlobalWidgetParameters } from '@kbn/investigate-plugin/public';
+import { Item } from '@kbn/investigation-shared';
 import React from 'react';
 import { EsqlWidgetPreview } from './esql_widget_preview';
 
 type Props = {
-  onWidgetAdd: OnWidgetAdd;
+  onItemAdd: (item: Item) => void;
 } & GlobalWidgetParameters;
 
 const emptyPreview = css`
   padding: 36px 0px 36px 0px;
 `;
 
-export function AddObservationUI({ onWidgetAdd, timeRange }: Props) {
+export function AddInvestigationItem({ onItemAdd: onItemAdd, timeRange }: Props) {
   const [isOpen, setIsOpen] = React.useState(false);
 
   const [query, setQuery] = React.useState({ esql: '' });
@@ -113,9 +114,9 @@ export function AddObservationUI({ onWidgetAdd, timeRange }: Props) {
                 <EsqlWidgetPreview
                   esqlQuery={submittedQuery.esql}
                   timeRange={timeRange}
-                  onWidgetAdd={(widget) => {
+                  onItemAdd={(item) => {
                     resetState();
-                    return onWidgetAdd(widget);
+                    return onItemAdd(item);
                   }}
                 />
               )}

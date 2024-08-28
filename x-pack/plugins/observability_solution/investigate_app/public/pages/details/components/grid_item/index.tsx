@@ -7,8 +7,8 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { css } from '@emotion/css';
 import React from 'react';
-import { useTheme } from '../../hooks/use_theme';
-import { InvestigateTextButton } from '../investigate_text_button';
+import { useTheme } from '../../../../hooks/use_theme';
+import { InvestigateTextButton } from '../../../../components/investigate_text_button';
 
 export const GRID_ITEM_HEADER_HEIGHT = 40;
 

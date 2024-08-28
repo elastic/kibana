@@ -6,16 +6,14 @@
  */
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { css } from '@emotion/css';
+import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import type { GlobalWidgetParameters } from '@kbn/investigate-plugin/public';
 import { useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { v4 } from 'uuid';
-import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import { EMBEDDABLE_WIDGET_NAME } from '../../constants';
-import { useKibana } from '../../hooks/use_kibana';
-import { RegisterWidgetOptions } from '../register_widgets';
-import { EmbeddableWidgetParameters } from './types';
 import { ErrorMessage } from '../../components/error_message';
+import { useKibana } from '../../hooks/use_kibana';
+import { Options } from '../register_items';
 
 const embeddableClassName = css`
   height: 100%;
@@ -24,7 +22,7 @@ const embeddableClassName = css`
   }
 `;
 
-type Props = EmbeddableWidgetParameters & GlobalWidgetParameters;
+type Props = EmbeddableItemParams & GlobalWidgetParameters;
 
 type ParentApi = ReturnType<React.ComponentProps<typeof ReactEmbeddableRenderer>['getParentApi']>;
 
@@ -155,40 +153,38 @@ function EmbeddableWidget(props: Props) {
   return <LegacyEmbeddable {...props} />;
 }
 
-export function registerEmbeddableWidget({ registerWidget }: RegisterWidgetOptions) {
-  registerWidget(
-    {
-      type: EMBEDDABLE_WIDGET_NAME,
-      description: 'Display a saved embeddable',
-      schema: {
-        type: 'object',
-        properties: {
-          type: {
-            type: 'string',
-          },
-          config: {
-            type: 'object',
-          },
-          savedObjectId: {
-            type: 'string',
-          },
-        },
-        required: ['type', 'config'],
-      } as const,
-    },
-    async ({ parameters, signal }) => {
+interface EmbeddableItemParams {
+  type: string;
+  config: Record<string, any>;
+  savedObjectId?: string;
+}
+
+export function registerEmbeddableItem({
+  dependencies: {
+    setup: { investigate },
+  },
+  services,
+}: Options) {
+  investigate.registerItemDefinition<EmbeddableItemParams, {}>({
+    type: 'esql',
+    generate: async (option: {
+      itemParams: EmbeddableItemParams;
+      globalParams: GlobalWidgetParameters;
+    }) => {
       return {};
     },
-    ({ widget }) => {
+    render: (option: {
+      itemParams: EmbeddableItemParams;
+      globalParams: GlobalWidgetParameters;
+    }) => {
       const parameters = {
-        type: widget.parameters.type,
-        config: widget.parameters.config,
-        savedObjectId: widget.parameters.savedObjectId,
-        timeRange: widget.parameters.timeRange,
-        query: widget.parameters.query,
+        type: option.itemParams.type,
+        config: option.itemParams.config,
+        savedObjectId: option.itemParams.savedObjectId,
+        timeRange: option.globalParams.timeRange,
       };
 
       return <EmbeddableWidget {...parameters} />;
-    }
-  );
+    },
+  });
 }

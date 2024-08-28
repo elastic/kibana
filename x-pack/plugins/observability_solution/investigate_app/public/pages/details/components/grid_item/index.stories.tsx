@@ -9,8 +9,8 @@ import { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import { v4 } from 'uuid';
 import { GridItem as Component } from '.';
-import { extendProps } from '../../../.storybook/extend_props';
-import { KibanaReactStorybookDecorator } from '../../../.storybook/storybook_decorator';
+import { extendProps } from '../../../../../.storybook/extend_props';
+import { KibanaReactStorybookDecorator } from '../../../../../.storybook/storybook_decorator';
 
 type Props = React.ComponentProps<typeof Component>;
 
