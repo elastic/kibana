@@ -149,6 +149,13 @@ export interface SetExecutionContextPayload {
   resolvedDateRange?: DateRange;
 }
 
+export interface InitialAppState {
+  initialInput?: LensSerializedState;
+  redirectCallback?: (savedObjectId?: string) => void;
+  history?: History<unknown>;
+  inlineEditing?: boolean;
+}
+
 export const setState = createAction<Partial<LensAppState>>('lens/setState');
 export const setExecutionContext = createAction<SetExecutionContextPayload>(
   'lens/setExecutionContext'
@@ -201,12 +208,7 @@ export const switchAndCleanDatasource = createAction<{
   currentIndexPatternId?: string;
 }>('lens/switchAndCleanDatasource');
 export const navigateAway = createAction<void>('lens/navigateAway');
-export const loadInitial = createAction<{
-  initialInput?: LensSerializedState;
-  redirectCallback?: (savedObjectId?: string) => void;
-  history?: History<unknown>;
-  inlineEditing?: boolean;
-}>('lens/loadInitial');
+export const loadInitial = createAction<InitialAppState>('lens/loadInitial');
 export const initEmpty = createAction(
   'initEmpty',
   function prepare({
