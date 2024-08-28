@@ -13,7 +13,6 @@ export const MINIMUM_INDEX_PRIVILEGE_SET_EDITOR = [
   'read',
   'view_index_metadata',
   'manage',
-  'auto_configure',
 ];
 export const TOTAL_INDEX_PRIVILEGE_SET_EDITOR = [
   'write',
@@ -21,7 +20,6 @@ export const TOTAL_INDEX_PRIVILEGE_SET_EDITOR = [
   'read_cross_cluster',
   'view_index_metadata',
   'manage',
-  'auto_configure',
 ];
 export const MINIMUM_INDEX_PRIVILEGE_SET_VIEWER = ['read'];
 export const TOTAL_INDEX_PRIVILEGE_SET_VIEWER = ['read', 'read_cross_cluster'];

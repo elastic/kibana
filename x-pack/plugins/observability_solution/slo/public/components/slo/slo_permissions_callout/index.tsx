@@ -62,7 +62,7 @@ export function SloPermissionsCallout() {
               <li>
                 <FormattedMessage
                   id="xpack.slo.permissionsCallout.writeSloPermission"
-                  defaultMessage="'read', 'view_index_metadata', 'write', 'manage' and 'auto_configure' permission on index pattern: .slo-observability.*"
+                  defaultMessage="'read', 'view_index_metadata', 'write' and 'manage' permission on index pattern: .slo-observability.*"
                 />
               </li>
               <li>
