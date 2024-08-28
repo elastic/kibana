@@ -41,8 +41,22 @@ export class AssetDetailsLocatorDefinition implements LocatorDefinition<AssetDet
   public readonly getLocation = async (
     params: AssetDetailsLocatorParams & { state?: SerializableRecord }
   ) => {
-    const legacyNodeDetailsQueryParams = rison.encodeUnknown(params._a);
-    const assetDetailsQueryParams = rison.encodeUnknown(params.assetDetails);
+    // Check which asset types are currently supported
+    const isSupportedByAssetDetails =
+      params.assetType === 'host' || params.assetType === 'container';
+
+    // Map the compatible parameters to _a compatible shape
+    const mappedParams =
+      params.assetDetails && !isSupportedByAssetDetails
+        ? {
+            time: params.assetDetails.dateRange,
+          }
+        : undefined;
+
+    const legacyNodeDetailsQueryParams = rison.encodeUnknown(params._a ?? mappedParams);
+    const assetDetailsQueryParams = isSupportedByAssetDetails
+      ? rison.encodeUnknown(params.assetDetails)
+      : undefined;
 
     const queryParams = [];
     if (assetDetailsQueryParams !== undefined) {
