@@ -16,8 +16,11 @@ export function useDatasetQualityWarnings() {
   );
 
   const isNonAggregatableDatasetsLoading = useSelector(service, (state) =>
-    state.matches('nonAggregatableDatasets.fetching')
+    state.matches('stats.nonAggregatableDatasets.fetching')
   );
 
-  return { loading: isNonAggregatableDatasetsLoading, nonAggregatableDatasets };
+  return {
+    loading: isNonAggregatableDatasetsLoading,
+    nonAggregatableDatasets,
+  };
 }

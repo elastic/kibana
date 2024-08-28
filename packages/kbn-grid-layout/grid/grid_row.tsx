@@ -8,6 +8,7 @@
 
 import { EuiButtonIcon, EuiFlexGroup, EuiSpacer, EuiTitle, transparentize } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
 import React, { forwardRef, useMemo } from 'react';
 import { GridPanel } from './grid_panel';
@@ -69,6 +70,9 @@ export const GridRow = forwardRef<
             <EuiFlexGroup gutterSize="s">
               <EuiButtonIcon
                 color="text"
+                aria-label={i18n.translate('kbnGridLayout.row.toggleCollapse', {
+                  defaultMessage: 'Toggle collapse',
+                })}
                 iconType={rowData.isCollapsed ? 'arrowRight' : 'arrowDown'}
                 onClick={toggleIsCollapsed}
               />
