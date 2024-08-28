@@ -919,7 +919,7 @@ export class DashboardContainer
             controlStyle: 'oneLine',
             chainingSystem: 'HIERARCHICAL',
             showApplySelections: false,
-            panelsJSON: JSON.stringify({}),
+            panelsJSON: '{}'
             ignoreParentSettingsJSON:
               '{"ignoreFilters":false,"ignoreQuery":false,"ignoreTimerange":false,"ignoreValidations":false}',
           } as ControlGroupSerializedState),
