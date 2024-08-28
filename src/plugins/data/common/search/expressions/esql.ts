@@ -19,7 +19,7 @@ import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { getStartEndParams } from '@kbn/esql-utils';
 import { zipObject } from 'lodash';
 import { catchError, defer, map, Observable, switchMap, tap, throwError } from 'rxjs';
-import { buildEsQuery } from '@kbn/es-query';
+import { buildEsQuery, type Filter } from '@kbn/es-query';
 import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import { getEsQueryConfig } from '../../es_query';
 import { getTime } from '../../query';
@@ -30,6 +30,15 @@ import {
   type KibanaContext,
 } from '..';
 import { UiSettingsCommon } from '../..';
+
+declare global {
+  interface Window {
+    /**
+     * Debug setting to make requests complete slower than normal. Only available on snapshots where `error_query` is enabled in ES.
+     */
+    ELASTIC_ESQL_DELAY_SECONDS?: number;
+  }
+}
 
 type Input = KibanaContext | null;
 type Output = Observable<Datatable>;
@@ -172,12 +181,31 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
                 fieldName: timeField,
               });
 
-            params.filter = buildEsQuery(
-              undefined,
-              input.query || [],
-              [...(input.filters ?? []), ...(timeFilter ? [timeFilter] : [])],
-              esQueryConfigs
-            );
+            // Used for debugging & inside automated tests to simulate a slow query
+            const delayFilter: Filter | undefined = window.ELASTIC_ESQL_DELAY_SECONDS
+              ? {
+                  meta: {},
+                  query: {
+                    error_query: {
+                      indices: [
+                        {
+                          name: '*',
+                          error_type: 'warning',
+                          stall_time_seconds: window.ELASTIC_ESQL_DELAY_SECONDS,
+                        },
+                      ],
+                    },
+                  },
+                }
+              : undefined;
+
+            const filters = [
+              ...(input.filters ?? []),
+              ...(timeFilter ? [timeFilter] : []),
+              ...(delayFilter ? [delayFilter] : []),
+            ];
+
+            params.filter = buildEsQuery(undefined, input.query || [], filters, esQueryConfigs);
           }
 
           let startTime = Date.now();
