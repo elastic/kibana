@@ -10,8 +10,6 @@ import { useMemo } from 'react';
 import type { AgentPolicy } from '../types';
 import { SO_SEARCH_LIMIT } from '../constants';
 
-import { useAuthz } from './use_authz';
-
 import { useGetAgentPolicies, useGetEnrollmentSettings } from './use_request';
 
 interface AgentEnrollmentFlyoutData {
