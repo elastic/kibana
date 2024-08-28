@@ -355,8 +355,15 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     const res = (await this.runApi(
       {
         body: JSON.stringify(
-          formatBedrockBody({ messages, stopSequences, system, temperature, maxTokens,     tools,
-            toolChoice, })
+          formatBedrockBody({
+            messages,
+            stopSequences,
+            system,
+            temperature,
+            maxTokens,
+            tools,
+            toolChoice,
+          })
         ),
         model,
         signal,
