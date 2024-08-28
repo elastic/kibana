@@ -42,10 +42,9 @@ actions:
         type: http
         scheme: basic
   - target: '$'
-    description: Add document-level security.
+    description: Add missing document-level security.
     update:
       security:
-        - apiKeyAuth: []
         - basicAuth: []
   # Add an introduction to spaces
   - target: '$'
