@@ -18,7 +18,9 @@ import {
   useServicesContext,
   useEditorReadContext,
   useRequestActionContext,
+  useEditorActionContext,
 } from '../../../contexts';
+import { TextObject } from '../../../../../common/text_object';
 import {
   useSetInitialValue,
   useSetupAutocompletePolling,
@@ -42,7 +44,7 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
     config: { isDevMode },
   } = context;
   const { toasts } = notifications;
-  const { settings } = useEditorReadContext();
+  const { settings, currentTextObject } = useEditorReadContext();
   const [editorInstance, setEditorInstace] = useState<
     monaco.editor.IStandaloneCodeEditor | undefined
   >();
@@ -51,6 +53,7 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
   const { setupResizeChecker, destroyResizeChecker } = useResizeCheckerUtils();
   const { registerKeyboardCommands, unregisterKeyboardCommands } = useKeyboardCommandsUtils();
 
+  const editorDispatch = useEditorActionContext();
   const dispatch = useRequestActionContext();
   const actionsProvider = useRef<MonacoEditorActionsProvider | null>(null);
   const [editorActionsCss, setEditorActionsCss] = useState<CSSProperties>({});
@@ -123,6 +126,19 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
   useSetupAutocompletePolling({ autocompleteInfo, settingsService });
 
   useSetupAutosave({ value });
+
+  // Always keep the currentTextObject in sync with the value in the editor
+  // to avoid losing the text object when the user navigates away from the shell
+  useEffect(() => {
+    if (currentTextObject?.text !== value) {
+      const textObject = {
+        ...currentTextObject,
+        text: value,
+        updatedAt: Date.now(),
+      } as TextObject;
+      editorDispatch({ type: 'setCurrentTextObject', payload: textObject });
+    }
+  }, [value, currentTextObject]);
 
   return (
     <div
