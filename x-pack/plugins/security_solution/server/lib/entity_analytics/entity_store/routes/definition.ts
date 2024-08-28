@@ -133,3 +133,7 @@ curl -H 'Content-Type: application/json' \
 
 
 */
+
+// Blockers
+// We can't access the entity manager plugin from the server side - @kevin Lacambane said he'd look into it https://elastic.slack.com/archives/C043Q05P12B/p1724839105633859
+// We cannot access the latest values only - https://elastic.slack.com/archives/C043Q05P12B/p1724754728872679
