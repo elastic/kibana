@@ -50,7 +50,7 @@ async function fetchIndicesCall(
 
   const indicesNames = Object.keys(indices);
 
-  if (config.isIndexStatsEnabled) {
+  if (!(config.isIndexStatsEnabled === false)) {
     const { indices: indicesStats } = await client.asCurrentUser.indices.stats({
       index: indexNamesString,
       expand_wildcards: ['hidden', 'all'],
