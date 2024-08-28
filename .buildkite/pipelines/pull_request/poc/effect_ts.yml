@@ -1,0 +1,15 @@
+steps:
+  - command: .buildkite/scripts/steps/test/poc/effect_ts.sh
+    label: 'Run Effect TS POC'
+    agents:
+      machineType: n2-standard-2
+      preemptible: true
+    depends_on:
+      - build
+      - quick_checks
+    timeout_in_minutes: 60
+    soft_fail: true
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3

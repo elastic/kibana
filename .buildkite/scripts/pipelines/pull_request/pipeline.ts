@@ -315,8 +315,13 @@ const getPipeline = (filename: string, removeSteps = true) => {
       );
     }
 
-    pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
+    if (
+      (await doAnyChangesMatch([/^x-pack\/test\/api_integration\/apis\/es/])) ||
+      GITHUB_PR_LABELS.includes('ci:poc-effect')
+    )
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/poc/effect_ts.yml'));
 
+    pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
     // remove duplicated steps
     console.log([...new Set(pipeline)].join('\n'));
   } catch (ex) {
