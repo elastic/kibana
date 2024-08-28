@@ -8,7 +8,7 @@
 import { EcsFlat } from '@elastic/ecs';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 
-import { EcsFieldMetadata } from './types';
+import { EcsFieldMetadata, PartitionedFieldMetadata, SortConfig } from './types';
 import * as i18n from './translations';
 
 export const EcsFlatTyped = EcsFlat as unknown as Record<string, EcsFieldMetadata>;
@@ -42,3 +42,18 @@ export const ilmPhaseOptionsStatic: EuiComboBoxOptionOption[] = [
 export const EMPTY_STAT = '--';
 
 export const INTERNAL_API_VERSION = '1';
+
+export const defaultSort: SortConfig = {
+  sort: {
+    direction: 'desc',
+    field: 'docsCount',
+  },
+};
+
+export const EMPTY_METADATA: PartitionedFieldMetadata = {
+  all: [],
+  ecsCompliant: [],
+  custom: [],
+  incompatible: [],
+  sameFamily: [],
+};

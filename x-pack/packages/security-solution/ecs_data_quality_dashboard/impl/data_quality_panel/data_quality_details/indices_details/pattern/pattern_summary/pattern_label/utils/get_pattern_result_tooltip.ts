@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as i18n from './translations';
+import * as i18n from '../translations';
 
 export const getPatternResultTooltip = (incompatible: number | undefined): string => {
   if (incompatible == null) {
@@ -16,16 +16,3 @@ export const getPatternResultTooltip = (incompatible: number | undefined): strin
     return i18n.SOME_FAILED;
   }
 };
-interface ShowResultProps<T> {
-  incompatible: T;
-  indices: T;
-  indicesChecked: T;
-}
-
-export const showResult = <T extends number | undefined>(
-  opts: ShowResultProps<T>
-): opts is ShowResultProps<NonNullable<T>> =>
-  opts.incompatible != null &&
-  opts.indices != null &&
-  opts.indicesChecked != null &&
-  opts.indices === opts.indicesChecked;

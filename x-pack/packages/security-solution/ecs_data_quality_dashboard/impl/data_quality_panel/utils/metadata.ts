@@ -5,16 +5,20 @@
  * 2.0.
  */
 
-import { has } from 'lodash/fp';
+import {
+  IndicesGetMappingIndexMappingRecord,
+  MappingProperty,
+} from '@elastic/elasticsearch/lib/api/types';
+import { has, sortBy } from 'lodash/fp';
 
-import { EcsFlatTyped } from '../../../../../../constants';
+import { EMPTY_METADATA, EcsFlatTyped } from '../constants';
 import {
   EcsBasedFieldMetadata,
   EnrichedFieldMetadata,
   PartitionedFieldMetadata,
   UnallowedValueCount,
-} from '../../../../../../types';
-import { getIsInSameFamily } from './get_is_in_same_family';
+} from '../types';
+import { getIsInSameFamily } from '../data_quality_details/indices_details/pattern/index_check_flyout/index_properties/utils/get_is_in_same_family';
 
 export const getPartitionedFieldMetadata = (
   enrichedFieldMetadata: EnrichedFieldMetadata[]
@@ -156,6 +160,49 @@ export const getEnrichedFieldMetadata = ({
   }
 };
 
+export const getSortedPartitionedFieldMetadata = ({
+  ecsMetadata,
+  loadingMappings,
+  mappingsProperties,
+  unallowedValues,
+}: {
+  ecsMetadata: EcsFlatTyped;
+  loadingMappings: boolean;
+  mappingsProperties: Record<string, MappingProperty> | null | undefined;
+  unallowedValues: Record<string, UnallowedValueCount[]> | null;
+}): PartitionedFieldMetadata | null => {
+  if (loadingMappings || unallowedValues == null) {
+    return null;
+  }
+
+  // this covers scenario when we try to check an empty index
+  // or index without required @timestamp field in the mapping
+  //
+  // we create an artifical incompatible timestamp field metadata
+  // so that we can signal to user that the incompatibility is due to missing timestamp
+  if (mappingsProperties == null) {
+    const missingTimestampFieldMetadata = getMissingTimestampFieldMetadata();
+    return {
+      ...EMPTY_METADATA,
+      all: [missingTimestampFieldMetadata],
+      incompatible: [missingTimestampFieldMetadata],
+    };
+  }
+
+  const fieldTypes = getFieldTypes(mappingsProperties);
+
+  const enrichedFieldMetadata = sortBy(
+    'indexFieldName',
+    fieldTypes.map((fieldMetadata) =>
+      getEnrichedFieldMetadata({ ecsMetadata, fieldMetadata, unallowedValues })
+    )
+  );
+
+  const partitionedFieldMetadata = getPartitionedFieldMetadata(enrichedFieldMetadata);
+
+  return partitionedFieldMetadata;
+};
+
 export const getMissingTimestampFieldMetadata = (): EcsBasedFieldMetadata => ({
   ...EcsFlatTyped['@timestamp'],
   hasEcsMetadata: true,
@@ -165,3 +212,17 @@ export const getMissingTimestampFieldMetadata = (): EcsBasedFieldMetadata => ({
   isEcsCompliant: false,
   isInSameFamily: false, // `date` is not a member of any families
 });
+
+export const getMappingsProperties = ({
+  indexes,
+  indexName,
+}: {
+  indexes: Record<string, IndicesGetMappingIndexMappingRecord> | null;
+  indexName: string;
+}): Record<string, MappingProperty> | null => {
+  if (indexes != null && indexes[indexName] != null) {
+    return indexes[indexName].mappings.properties ?? null;
+  }
+
+  return null;
+};
