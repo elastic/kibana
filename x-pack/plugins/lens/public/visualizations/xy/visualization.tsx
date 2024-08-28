@@ -755,14 +755,14 @@ export const getXyVisualization = ({
       paletteService,
     };
 
-    const darkMode: boolean = useObservable(kibanaTheme.theme$, { darkMode: false }).darkMode;
+    const isDarkMode: boolean = useObservable(kibanaTheme.theme$, { darkMode: false }).darkMode;
     const layer = props.state.layers.find((l) => l.layerId === props.layerId)!;
     const dimensionEditor = isReferenceLayer(layer) ? (
       <ReferenceLinePanel {...allProps} />
     ) : isAnnotationsLayer(layer) ? (
       <AnnotationsPanel {...allProps} dataViewsService={dataViewsService} />
     ) : (
-      <DataDimensionEditor {...allProps} darkMode={darkMode} />
+      <DataDimensionEditor {...allProps} isDarkMode={isDarkMode} />
     );
 
     return dimensionEditor;

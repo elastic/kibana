@@ -1314,6 +1314,8 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
    */
   onEditAction?: (state: T, event: LensEditEvent<LensEditSupportedActions>) => T;
 
+  onDatasourceUpdate?: (state: T, frame?: FramePublicAPI) => T;
+
   /**
    * Some visualization track indexPattern changes (i.e. annotations)
    * This method makes it aware of the change and produces a new updated state
