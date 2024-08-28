@@ -192,6 +192,14 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     setIsHistoryOpen(status);
   }, []);
 
+  const showSuggestionsIfEmptyQuery = useCallback(() => {
+    if (editorModel.current?.getValueLength() === 0) {
+      setImmediate(() => {
+        editor1.current?.trigger(undefined, 'editor.action.triggerSuggest', {});
+      });
+    }
+  }, []);
+
   const openTimePickerPopover = useCallback(() => {
     const currentCursorPosition = editor1.current?.getPosition();
     const editorCoords = editor1.current?.getDomNode()!.getBoundingClientRect();
@@ -275,7 +283,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
 
   const onEditorFocus = useCallback(() => {
     setIsCodeEditorExpandedFocused(true);
-  }, []);
+    showSuggestionsIfEmptyQuery();
+  }, [showSuggestionsIfEmptyQuery]);
 
   const { cache: esqlFieldsCache, memoizedFieldsFromESQL } = useMemo(() => {
     // need to store the timing of the first request so we can atomically clear the cache per query
@@ -682,6 +691,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                     editor.onDidLayoutChange((layoutInfoEvent) => {
                       onLayoutChangeRef.current(layoutInfoEvent);
                     });
+
+                    editor.onDidChangeModelContent(showSuggestionsIfEmptyQuery);
                   }}
                 />
               </div>

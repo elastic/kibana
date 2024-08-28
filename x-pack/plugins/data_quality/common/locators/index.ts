@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-import { DatasetQualityLocator } from './dataset_quality_locator';
-
 export * from './dataset_quality_locator';
+export * from './dataset_quality_details_locator';
 export * from './types';
-
-export interface DataQualityLocators {
-  datasetQualityLocator: DatasetQualityLocator;
-}
