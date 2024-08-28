@@ -7,7 +7,7 @@
 
 import type { ThreatMatchRuleCreateProps } from '../../../../../common/api/detection_engine';
 
-const basicRule: ThreatMatchRuleCreateProps = {
+export const basicThreatMatchRule: ThreatMatchRuleCreateProps = {
   type: 'threat_match',
   name: 'Basic threat match rule',
   description: 'Basic threat match rule',
