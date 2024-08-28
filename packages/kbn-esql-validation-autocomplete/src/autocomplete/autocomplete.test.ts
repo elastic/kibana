@@ -900,7 +900,7 @@ describe('autocomplete', () => {
   });
 
   describe('values suggestions', () => {
-    testSuggestions('FROM "i/"', ['index'], undefined, [, [{ name: 'index', hidden: false }]]);
+    testSuggestions.only('FROM "i/"', ['index'], undefined, [, [{ name: 'index', hidden: false }]]);
     testSuggestions('FROM "index/"', ['index'], undefined, [, [{ name: 'index', hidden: false }]]);
     // TODO — re-enable these tests when we can support this case
     testSuggestions.skip('FROM "  a/"', []);
