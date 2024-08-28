@@ -44,13 +44,15 @@ export const setDefaultSpaceSolutionType = ({ router, getSpacesService }: RouteO
         const solution = request.body.solution_type;
         try {
           const defaultSpace = await spacesClient?.get('default');
-          const parseSolution = parseOnboardingSolution(solution) || 'classic';
-          await spacesClient?.update(
-            'default',
-            Object.assign(defaultSpace, {
-              solution: parseSolution,
-            })
-          );
+          const parseSolution = parseOnboardingSolution(solution);
+          if (parseSolution) {
+            await spacesClient?.update(
+              'default',
+              Object.assign(defaultSpace, {
+                solution: parseSolution,
+              })
+            );
+          }
         } catch (error) {
           if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
             return response.notFound();
