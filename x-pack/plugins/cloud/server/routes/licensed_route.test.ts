@@ -7,7 +7,7 @@
 
 import type { KibanaResponseFactory, KibanaRequest, RequestHandler } from '@kbn/core-http-server';
 import { CustomRequestHandlerContext, kibanaResponseFactory } from '@kbn/core/server';
-import { createLicensedRouteHandler } from './error_handler';
+import { createLicensedRouteHandler } from './licensed_route';
 import { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 
 const createHandler =
@@ -37,7 +37,7 @@ const mockRouteContextWithInvalidLicense = {
   },
 } as unknown as CustomRequestHandlerContext<{ licensing: LicensingApiRequestHandlerContext }>;
 
-describe('wrapErrors', () => {
+describe('Licensed wrapper handler', () => {
   let context: CustomRequestHandlerContext<{ licensing: LicensingApiRequestHandlerContext }>;
   let request: KibanaRequest<any, any, any>;
   let response: KibanaResponseFactory;

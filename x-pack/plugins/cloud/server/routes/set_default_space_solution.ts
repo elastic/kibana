@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import { parseOnboardingSolution } from '../../common/parse_onboarding_default_solution';
-import { createLicensedRouteHandler } from './error_handler';
+import { createLicensedRouteHandler } from './licensed_route';
 import { RouteOptions } from '.';
 
 const createBodySchemaV1 = schema.object({
