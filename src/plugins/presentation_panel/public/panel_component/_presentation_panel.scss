@@ -6,6 +6,11 @@
   height: 100%;
   min-height: $euiSizeL + 2px; // + 2px to account for border
   position: relative;
+  border-radius: $euiSizeXS; // DnD
+  border-right: none; // DnD
+  border-left: none; // DnD
+  border-top: lightOrDarkTheme(none, 1px solid #3A4763); // DnD
+  border-bottom: lightOrDarkTheme(1px solid $euiBorderColor, none); // DnD
 
   &-isLoading {
     // completely center the loading indicator
@@ -186,7 +191,7 @@
   z-index: $euiZLevel1;
 }
 
-// TEMPORARY
+// TEMPORARY DND
 .echMetricText__value, .euiDataGridHeaderCell__content {
   font-weight: 500;
 }
@@ -195,6 +200,22 @@
   font-weight: 500;
 }
 
+.echMetricText__value {
+  font-family: 'Roboto Mono'
+}
+
 .echMetricText__title button {
   font-weight: 500;
+}
+
+.euiDataGrid--headerUnderline .euiDataGridHeaderCell {
+  border-bottom: 1px solid $euiColorLightShade;
+}
+
+.euiDataGrid--noControls.euiDataGrid--bordersHorizontal .euiDataGridHeaderCell {
+  border-top: none;
+}
+
+.visualize .visualization {
+ padding: 0;
 }
