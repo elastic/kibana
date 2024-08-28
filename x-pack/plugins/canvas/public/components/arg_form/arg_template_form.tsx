@@ -59,14 +59,18 @@ const ArgTemplateFormComponent: React.FunctionComponent<ArgTemplateFormProps> = 
     mountedArgumentRef.current = undefined;
   });
 
-  const onMount = useCallback((ref) => {
-    if (!mountedArgumentRef.current && ref) {
-      mountedArgumentRef.current = ref;
-    }
-  }, []);
+  const onMount = useCallback(
+    (ref: UpdatePropsRef<ArgTemplateFormProps['argumentProps']> | null) => {
+      if (!mountedArgumentRef.current && ref) {
+        mountedArgumentRef.current = ref;
+      }
+    },
+    []
+  );
 
   const renderTemplate = useCallback(
-    (domNode) => template && template(domNode, argumentProps, updatedHandlers, onMount),
+    (domNode: HTMLElement) =>
+      template && template(domNode, argumentProps, updatedHandlers, onMount),
     [argumentProps, onMount, template, updatedHandlers]
   );
 
