@@ -14,13 +14,6 @@ export const COLLAPSE = i18n.translate(
   }
 );
 
-export const DOCS = i18n.translate(
-  'securitySolutionPackages.ecsDataQualityDashboard.summaryTable.docsColumn',
-  {
-    defaultMessage: 'Docs',
-  }
-);
-
 export const VIEW_CHECK_DETAILS = i18n.translate(
   'securitySolutionPackages.ecsDataQualityDashboard.summaryTable.viewCheckDetailsLabel',
   {
@@ -32,41 +25,6 @@ export const EXPAND_ROWS = i18n.translate(
   'securitySolutionPackages.ecsDataQualityDashboard.summaryTable.expandRowsColumn',
   {
     defaultMessage: 'Expand rows',
-  }
-);
-
-export const ILM_PHASE = i18n.translate(
-  'securitySolutionPackages.ecsDataQualityDashboard.summaryTable.ilmPhaseColumn',
-  {
-    defaultMessage: 'ILM Phase',
-  }
-);
-
-export const INCOMPATIBLE_FIELDS = i18n.translate(
-  'securitySolutionPackages.ecsDataQualityDashboard.summaryTable.incompatibleFieldsColumn',
-  {
-    defaultMessage: 'Incompatible fields',
-  }
-);
-
-export const INDICES = i18n.translate(
-  'securitySolutionPackages.ecsDataQualityDashboard.summaryTable.indicesColumn',
-  {
-    defaultMessage: 'Indices',
-  }
-);
-
-export const INDICES_CHECKED = i18n.translate(
-  'securitySolutionPackages.ecsDataQualityDashboard.summaryTable.indicesCheckedColumn',
-  {
-    defaultMessage: 'Indices checked',
-  }
-);
-
-export const INDEX = i18n.translate(
-  'securitySolutionPackages.ecsDataQualityDashboard.summaryTable.indexColumn',
-  {
-    defaultMessage: 'Index',
   }
 );
 
@@ -82,20 +40,6 @@ export const INDEX_TOOL_TIP = (pattern: string) =>
     values: { pattern },
     defaultMessage: 'This index matches the pattern or index name: {pattern}',
   });
-
-export const RESULT = i18n.translate(
-  'securitySolutionPackages.ecsDataQualityDashboard.summaryTable.resultColumn',
-  {
-    defaultMessage: 'Result',
-  }
-);
-
-export const SIZE = i18n.translate(
-  'securitySolutionPackages.ecsDataQualityDashboard.summaryTable.sizeColumn',
-  {
-    defaultMessage: 'Size',
-  }
-);
 
 export const LAST_CHECK = i18n.translate(
   'securitySolutionPackages.ecsDataQualityDashboard.summaryTable.lastCheckColumn',

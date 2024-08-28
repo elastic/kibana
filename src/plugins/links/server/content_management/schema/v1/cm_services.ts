@@ -15,8 +15,11 @@ import {
   createOptionsSchemas,
   objectTypeToGetResultSchema,
 } from '@kbn/content-management-utils';
-import { DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE } from '.';
-import { LINKS_HORIZONTAL_LAYOUT, LINKS_VERTICAL_LAYOUT } from './constants';
+import { DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE } from '../../../../common/content_management/v1';
+import {
+  LINKS_HORIZONTAL_LAYOUT,
+  LINKS_VERTICAL_LAYOUT,
+} from '../../../../common/content_management/v1/constants';
 
 const baseLinkSchema = {
   id: schema.string(),
