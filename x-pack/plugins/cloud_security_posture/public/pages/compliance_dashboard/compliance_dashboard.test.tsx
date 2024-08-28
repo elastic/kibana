@@ -8,6 +8,7 @@
 import React from 'react';
 
 import { coreMock } from '@kbn/core/public/mocks';
+import type { BaseCspSetupStatus, CspStatusCode } from '@kbn/cloud-security-posture-common';
 import { render, screen } from '@testing-library/react';
 import { TestProvider } from '../../test/test_provider';
 import { ComplianceDashboard, getDefaultTab } from '.';
@@ -31,11 +32,7 @@ import {
   KSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT,
   PACKAGE_NOT_INSTALLED_TEST_SUBJECT,
 } from '../../components/cloud_posture_page';
-import {
-  BaseCspSetupStatus,
-  ComplianceDashboardDataV2,
-  CspStatusCode,
-} from '../../../common/types_old';
+import { ComplianceDashboardDataV2 } from '../../../common/types_old';
 import { cloudPosturePages } from '../../common/navigation/constants';
 import { MemoryRouter } from 'react-router-dom';
 
