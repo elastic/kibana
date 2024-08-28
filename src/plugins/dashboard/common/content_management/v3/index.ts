@@ -6,5 +6,16 @@
  * Side Public License, v 1.
  */
 
-// Latest version is 2
-export * from './v3';
+export {
+  serviceDefinition,
+  dashboardSavedObjectSchema,
+  dashboardAttributesSchema,
+} from './cm_services';
+
+export type { GridData, DashboardItem, SavedDashboardPanel } from '../v1/types';
+export type {
+  ControlGroupAttributes,
+  DashboardCrudTypes,
+  DashboardAttributes,
+  RawDashboardAttributes,
+} from './types';

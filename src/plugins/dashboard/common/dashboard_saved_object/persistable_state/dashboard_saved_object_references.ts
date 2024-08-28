@@ -8,63 +8,52 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common/types';
-import { rawControlGroupAttributesToControlGroupInput } from '@kbn/controls-plugin/common';
 
 import {
   convertPanelMapToSavedPanels,
   convertSavedPanelsToPanelMap,
 } from '../../lib/dashboard_panel_converters';
-import { DashboardAttributesAndReferences, ParsedDashboardAttributesWithType } from '../../types';
-import { DashboardAttributes, SavedDashboardPanel } from '../../content_management';
+import { DashboardAttributesAndReferences, DashboardAttributesWithType } from '../../types';
+import { DashboardAttributes } from '../../content_management';
 
 export interface InjectExtractDeps {
   embeddablePersistableStateService: EmbeddablePersistableStateService;
 }
 
-function parseDashboardAttributesWithType(
+function getDashboardAttributesWithType(
   attributes: DashboardAttributes
-): ParsedDashboardAttributesWithType {
-  let parsedPanels = [] as SavedDashboardPanel[];
-  if (typeof attributes.panelsJSON === 'string') {
-    const parsedJSON = JSON.parse(attributes.panelsJSON);
-    if (Array.isArray(parsedJSON)) {
-      parsedPanels = parsedJSON as SavedDashboardPanel[];
-    }
-  }
-
+): DashboardAttributesWithType {
   return {
-    controlGroupInput:
-      attributes.controlGroupInput &&
-      rawControlGroupAttributesToControlGroupInput(attributes.controlGroupInput),
+    controlGroupInput: attributes.controlGroupInput,
     type: 'dashboard',
-    panels: convertSavedPanelsToPanelMap(parsedPanels),
-  } as ParsedDashboardAttributesWithType;
+    panels: convertSavedPanelsToPanelMap(attributes.panels),
+  } as DashboardAttributesWithType;
 }
 
 export function injectReferences(
   { attributes, references = [] }: DashboardAttributesAndReferences,
   deps: InjectExtractDeps
 ): DashboardAttributes {
-  const parsedAttributes = parseDashboardAttributesWithType(attributes);
+  const stateWithType = getDashboardAttributesWithType(attributes);
 
   // inject references back into panels via the Embeddable persistable state service.
   const injectedState = deps.embeddablePersistableStateService.inject(
-    parsedAttributes,
+    stateWithType,
     references
-  ) as ParsedDashboardAttributesWithType;
+  ) as DashboardAttributesWithType;
   const injectedPanels = convertPanelMapToSavedPanels(injectedState.panels);
 
   const newAttributes = {
     ...attributes,
-    panelsJSON: JSON.stringify(injectedPanels),
-  } as DashboardAttributes;
-
-  if (attributes.controlGroupInput && injectedState.controlGroupInput) {
-    newAttributes.controlGroupInput = {
-      ...attributes.controlGroupInput,
-      panelsJSON: JSON.stringify(injectedState.controlGroupInput.panels),
-    };
-  }
+    panels: injectedPanels,
+    ...(attributes.controlGroupInput &&
+      injectedState.controlGroupInput && {
+        controlGroupInput: {
+          ...attributes.controlGroupInput,
+          panels: injectedState.controlGroupInput.panels,
+        },
+      }),
+  };
 
   return newAttributes;
 }
@@ -73,9 +62,9 @@ export function extractReferences(
   { attributes, references = [] }: DashboardAttributesAndReferences,
   deps: InjectExtractDeps
 ): DashboardAttributesAndReferences {
-  const parsedAttributes = parseDashboardAttributesWithType(attributes);
+  const stateWithType = getDashboardAttributesWithType(attributes);
 
-  const panels = parsedAttributes.panels;
+  const panels = stateWithType.panels;
 
   const panelMissingType = Object.values(panels).find((panel) => panel.type === undefined);
   if (panelMissingType) {
@@ -85,23 +74,23 @@ export function extractReferences(
   }
 
   const { references: extractedReferences, state: extractedState } =
-    deps.embeddablePersistableStateService.extract(parsedAttributes) as {
+    deps.embeddablePersistableStateService.extract(stateWithType) as {
       references: Reference[];
-      state: ParsedDashboardAttributesWithType;
+      state: DashboardAttributesWithType;
     };
   const extractedPanels = convertPanelMapToSavedPanels(extractedState.panels);
 
   const newAttributes = {
     ...attributes,
-    panelsJSON: JSON.stringify(extractedPanels),
-  } as DashboardAttributes;
-
-  if (attributes.controlGroupInput && extractedState.controlGroupInput) {
-    newAttributes.controlGroupInput = {
-      ...attributes.controlGroupInput,
-      panelsJSON: JSON.stringify(extractedState.controlGroupInput.panels),
-    };
-  }
+    panels: extractedPanels,
+    ...(attributes.controlGroupInput &&
+      extractedState.controlGroupInput && {
+        controlGroupInput: {
+          ...attributes.controlGroupInput,
+          panels: extractedState.controlGroupInput.panels,
+        },
+      }),
+  };
 
   return {
     references: [...references, ...extractedReferences],

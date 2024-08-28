@@ -6,5 +6,8 @@
  * Side Public License, v 1.
  */
 
-// Latest version is 2
-export * from './v3';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-content-management-api'],
+};

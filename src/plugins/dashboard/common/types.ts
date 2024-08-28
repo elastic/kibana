@@ -10,7 +10,11 @@ import type { Reference } from '@kbn/content-management-utils';
 import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
 
-import { DashboardAttributes, SavedDashboardPanel } from './content_management';
+import {
+  DashboardAttributes,
+  RawDashboardAttributes,
+  SavedDashboardPanel,
+} from './content_management';
 import { DashboardContainerInput, DashboardPanelMap } from './dashboard_container/types';
 
 export interface DashboardOptions {
@@ -39,7 +43,7 @@ export type SharedDashboardState = Partial<
 /**
  * A partially parsed version of the Dashboard Attributes used for inject and extract logic for both the Dashboard Container and the Dashboard Saved Object.
  */
-export type ParsedDashboardAttributesWithType = EmbeddableStateWithType & {
+export type DashboardAttributesWithType = EmbeddableStateWithType & {
   controlGroupInput?: PersistableControlGroupInput;
   panels: DashboardPanelMap;
   type: 'dashboard';
@@ -47,5 +51,10 @@ export type ParsedDashboardAttributesWithType = EmbeddableStateWithType & {
 
 export interface DashboardAttributesAndReferences {
   attributes: DashboardAttributes;
+  references: Reference[];
+}
+
+export interface RawDashboardAttributesAndReferences {
+  attributes: RawDashboardAttributes;
   references: Reference[];
 }

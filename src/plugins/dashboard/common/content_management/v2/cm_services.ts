@@ -11,12 +11,18 @@ import {
   objectTypeToGetResultSchema,
   savedObjectSchema,
 } from '@kbn/content-management-utils';
+import { RawControlGroupAttributes } from '@kbn/controls-plugin/common';
 import type { ContentManagementServicesDefinition as ServicesDefinition } from '@kbn/object-versioning';
 import {
   controlGroupInputSchema as controlGroupInputSchemaV1,
   dashboardAttributesSchema as dashboardAttributesSchemaV1,
   serviceDefinition as serviceDefinitionV1,
 } from '../v1';
+import { DashboardAttributes, DashboardCrudTypes } from './types';
+import {
+  DashboardAttributes as DashboardAttributesV3,
+  ControlGroupAttributes as ControlGroupAttributesV3,
+} from '../v3';
 
 export const dashboardAttributesSchema = dashboardAttributesSchemaV1.extends(
   {
@@ -34,6 +40,48 @@ export const dashboardAttributesSchema = dashboardAttributesSchemaV1.extends(
 
 export const dashboardSavedObjectSchema = savedObjectSchema(dashboardAttributesSchema);
 
+const controlGroupInputUp = (
+  controlGroupInput?: RawControlGroupAttributes
+): ControlGroupAttributesV3 | undefined => {
+  if (!controlGroupInput) {
+    return;
+  }
+  const { panelsJSON, ignoreParentSettingsJSON, ...rest } = controlGroupInput;
+  return {
+    ...rest,
+    panels: JSON.parse(panelsJSON),
+    ignoreParentSettings: JSON.parse(ignoreParentSettingsJSON),
+  };
+};
+
+const kibanaSavedObjectMetaUp = (
+  kibanaSavedObjectMeta: DashboardAttributes['kibanaSavedObjectMeta']
+) => {
+  if (!kibanaSavedObjectMeta) return;
+  const { searchSourceJSON, ...rest } = kibanaSavedObjectMeta;
+  return {
+    ...rest,
+    searchSource: JSON.parse(searchSourceJSON),
+  };
+};
+
+const dashboardAttributesUp = (
+  attributes: DashboardAttributes | Partial<DashboardAttributes>
+): DashboardAttributesV3 | Partial<DashboardAttributesV3> => {
+  const { controlGroupInput, panelsJSON, optionsJSON, kibanaSavedObjectMeta, ...rest } = attributes;
+
+  return {
+    ...rest,
+    ...(controlGroupInput && { controlGroupInput: controlGroupInputUp(controlGroupInput) }),
+    ...(optionsJSON && { options: JSON.parse(optionsJSON) ?? {} }),
+    ...(panelsJSON && { panels: JSON.parse(panelsJSON) ?? {} }),
+    ...(kibanaSavedObjectMeta && {
+      kibanaSavedObjectMeta: kibanaSavedObjectMetaUp(kibanaSavedObjectMeta),
+    }),
+    ...(controlGroupInput && { controlGroupInput: controlGroupInputUp(controlGroupInput) }),
+  };
+};
+
 // Content management service definition.
 export const serviceDefinition: ServicesDefinition = {
   get: {
@@ -48,6 +96,7 @@ export const serviceDefinition: ServicesDefinition = {
       ...serviceDefinitionV1?.create?.in,
       data: {
         schema: dashboardAttributesSchema,
+        up: (data: DashboardCrudTypes['CreateIn']['data']) => dashboardAttributesUp(data),
       },
     },
     out: {
@@ -61,6 +110,7 @@ export const serviceDefinition: ServicesDefinition = {
       ...serviceDefinitionV1.update?.in,
       data: {
         schema: dashboardAttributesSchema,
+        up: (data: DashboardCrudTypes['UpdateIn']['data']) => dashboardAttributesUp(data),
       },
     },
   },

@@ -13,7 +13,7 @@ import {
   EmbeddablePersistableStateService,
   EmbeddableStateWithType,
 } from '@kbn/embeddable-plugin/common';
-import { ParsedDashboardAttributesWithType } from '../../types';
+import { DashboardAttributesWithType } from '../../types';
 
 export const getReferencesForPanelId = (id: string, references: Reference[]): Reference[] => {
   const prefix = `${id}:`;
@@ -40,9 +40,7 @@ export const createInject = (
   persistableStateService: EmbeddablePersistableStateService
 ): EmbeddablePersistableStateService['inject'] => {
   return (state: EmbeddableStateWithType, references: Reference[]) => {
-    const workingState = { ...state } as
-      | EmbeddableStateWithType
-      | ParsedDashboardAttributesWithType;
+    const workingState = { ...state } as EmbeddableStateWithType | DashboardAttributesWithType;
 
     if ('panels' in workingState) {
       workingState.panels = { ...workingState.panels };
@@ -119,9 +117,7 @@ export const createExtract = (
   persistableStateService: EmbeddablePersistableStateService
 ): EmbeddablePersistableStateService['extract'] => {
   return (state: EmbeddableStateWithType) => {
-    const workingState = { ...state } as
-      | EmbeddableStateWithType
-      | ParsedDashboardAttributesWithType;
+    const workingState = { ...state } as EmbeddableStateWithType | DashboardAttributesWithType;
 
     const references: Reference[] = [];
 

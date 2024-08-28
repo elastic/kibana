@@ -194,6 +194,8 @@
       "@kbn/config-schema/*": ["packages/kbn-config-schema/*"],
       "@kbn/console-plugin": ["src/plugins/console"],
       "@kbn/console-plugin/*": ["src/plugins/console/*"],
+      "@kbn/content-management-api": ["packages/kbn-content-management-api"],
+      "@kbn/content-management-api/*": ["packages/kbn-content-management-api/*"],
       "@kbn/content-management-content-editor": ["packages/content-management/content_editor"],
       "@kbn/content-management-content-editor/*": ["packages/content-management/content_editor/*"],
       "@kbn/content-management-content-insights-public": ["packages/content-management/content_insights/content_insights_public"],

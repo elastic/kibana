@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-// Latest version is 2
-export * from './v3';
+export { registerAPIRoutes } from './src/register_routes';
+export { contentManagementApiVersions } from './src/constants';

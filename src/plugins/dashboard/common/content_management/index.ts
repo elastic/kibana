@@ -15,5 +15,6 @@ export type {
   DashboardItem,
   DashboardCrudTypes,
   DashboardAttributes,
+  RawDashboardAttributes,
   SavedDashboardPanel,
 } from './latest';
