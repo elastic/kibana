@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiAccordion,
@@ -133,7 +134,10 @@ export default function DegradedDocs({ lastReloadTime }: { lastReloadTime: numbe
             <EuiButtonIcon
               display="base"
               iconType="discoverApp"
-              aria-label="Discover"
+              aria-label={i18n.translate(
+                'xpack.datasetQuality.degradedDocs.euiButtonIcon.discoverLabel',
+                { defaultMessage: 'Discover' }
+              )}
               size="s"
               data-test-subj="datasetQualityDetailsLinkToDiscover"
               {...degradedDocLinkLogsExplorer.linkProps}

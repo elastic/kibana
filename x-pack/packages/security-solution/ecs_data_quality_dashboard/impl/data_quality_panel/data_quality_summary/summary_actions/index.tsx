@@ -12,26 +12,23 @@ import styled from 'styled-components';
 
 import { CheckAll } from './check_all';
 import { CheckStatus } from './check_status';
-import { ERROR, INDEX, PATTERN } from './check_status/errors_popover/errors_viewer/translations';
-import { ERRORS } from './check_status/errors_popover/translations';
-import {
-  getDataQualitySummaryMarkdownComment,
-  getErrorsMarkdownTable,
-  getErrorsMarkdownTableRows,
-  getPatternSummaryMarkdownComment,
-  getSummaryTableMarkdownHeader,
-  getSummaryTableMarkdownRow,
-} from '../../data_quality_details/indices_details/pattern/index_check_flyout/index_properties/markdown/helpers';
-import {
-  defaultSort,
-  getSummaryTableItems,
-} from '../../data_quality_details/indices_details/pattern/helpers';
 import type { DataQualityCheckResult, IndexToCheck, PatternRollup } from '../../types';
 import { useDataQualityContext } from '../../data_quality_context';
 import { useResultsRollupContext } from '../../contexts/results_rollup_context';
 import { Actions } from '../../actions';
 import { getErrorSummaries } from './utils/get_error_summaries';
 import { getSizeInBytes } from '../../utils/stats';
+import { getSummaryTableItems } from '../../utils/get_summary_table_items';
+import { defaultSort } from '../../constants';
+import {
+  getDataQualitySummaryMarkdownComment,
+  getErrorsMarkdownTable,
+  getErrorsMarkdownTableRows,
+  getPatternSummaryMarkdownComment,
+} from './utils/markdown';
+import { getSummaryTableMarkdownHeader, getSummaryTableMarkdownRow } from '../../utils/markdown';
+import { ERROR, ERRORS, PATTERN } from './translations';
+import { INDEX } from '../../translations';
 
 const StyledActionsContainerFlexItem = styled(EuiFlexItem)`
   margin-top: auto;
