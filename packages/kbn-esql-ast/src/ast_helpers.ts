@@ -404,9 +404,9 @@ export function createSource(
     index,
     name: text,
     sourceType: type,
-    text,
     location: getPosition(ctx.start, ctx.stop),
     incomplete: Boolean(ctx.exception || text === ''),
+    text: ctx?.getText(),
   };
 }
 
