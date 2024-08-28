@@ -21,6 +21,7 @@ export const getAttackDiscoveryBaseKibanaFeature = (): BaseKibanaFeatureConfig =
   ),
   order: 1100,
   category: DEFAULT_APP_CATEGORIES.security,
+  scope: 'agnostic',
   app: [ATTACK_DISCOVERY_FEATURE_ID, 'kibana'],
   catalogue: [APP_ID],
   minimumLicense: 'enterprise',

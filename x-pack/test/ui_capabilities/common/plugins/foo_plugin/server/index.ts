@@ -20,6 +20,7 @@ class FooPlugin implements Plugin {
       id: 'foo',
       name: 'Foo',
       category: { id: 'foo', label: 'foo' },
+      scope: 'agnostic',
       app: ['foo_plugin', 'kibana'],
       catalogue: ['foo'],
       privileges: {

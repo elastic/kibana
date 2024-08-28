@@ -26,6 +26,7 @@ export class FeatureControlsPluginExample
       name: 'Feature Plugin Examples',
       category: DEFAULT_APP_CATEGORIES.management,
       app: ['FeaturePluginExample'],
+      scope: 'agnostic',
       privileges: {
         all: {
           app: ['FeaturePluginExample'],

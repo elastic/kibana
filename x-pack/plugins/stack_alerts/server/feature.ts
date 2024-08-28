@@ -23,6 +23,7 @@ export const BUILT_IN_ALERTS_FEATURE: KibanaFeatureConfig = {
   }),
   app: [],
   category: DEFAULT_APP_CATEGORIES.management,
+  scope: 'agnostic',
   management: {
     insightsAndAlerting: ['triggersActions'],
   },

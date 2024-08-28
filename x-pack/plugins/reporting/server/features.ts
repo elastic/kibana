@@ -37,6 +37,7 @@ export function registerFeatures({
         defaultMessage: 'Reporting',
       }),
       category: DEFAULT_APP_CATEGORIES.management,
+      scope: 'agnostic',
       app: [],
       privileges: {
         all: { savedObject: { all: [], read: [] }, ui: [] },

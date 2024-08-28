@@ -52,6 +52,7 @@ export const getSecurityBaseKibanaFeature = ({
   ),
   order: 1100,
   category: DEFAULT_APP_CATEGORIES.security,
+  scope: 'agnostic',
   app: [APP_ID, CLOUD_POSTURE_APP_ID, CLOUD_DEFEND_APP_ID, 'kibana'],
   catalogue: [APP_ID],
   management: {

@@ -20,6 +20,7 @@ export const maintenanceWindowFeature: KibanaFeatureConfig = {
     defaultMessage: 'Maintenance Windows',
   }),
   category: DEFAULT_APP_CATEGORIES.management,
+  scope: 'agnostic',
   app: [],
   management: {
     insightsAndAlerting: ['maintenanceWindows'],

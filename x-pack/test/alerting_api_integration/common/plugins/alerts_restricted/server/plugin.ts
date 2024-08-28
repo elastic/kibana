@@ -30,6 +30,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       name: 'AlertRestricted',
       app: ['alerts', 'kibana'],
       category: { id: 'foo', label: 'foo' },
+      scope: 'agnostic',
       alerting: ['test.restricted-noop', 'test.unrestricted-noop', 'test.noop'],
       privileges: {
         all: {

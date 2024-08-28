@@ -149,6 +149,11 @@ export interface KibanaFeatureConfig {
    * are visible.
    */
   hidden?: boolean;
+
+  /**
+   * Indicates whether the feature is available in Security Feature Privileges and the Spaces Visibility Toggles.
+   */
+  scope?: 'agnostic' | 'security';
 }
 
 export class KibanaFeature {
@@ -218,6 +223,10 @@ export class KibanaFeature {
 
   public get reserved() {
     return this.config.reserved;
+  }
+
+  public get scope() {
+    return this.config.scope;
   }
 
   public toRaw() {

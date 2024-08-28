@@ -22,6 +22,7 @@ export function getCanvasFeature(plugins: { reporting?: ReportingStart }): Kiban
     name: 'Canvas',
     order: 300,
     category: DEFAULT_APP_CATEGORIES.kibana,
+    scope: 'agnostic',
     app: ['canvas', 'kibana'],
     management: {
       ...(includeReporting ? { insightsAndAlerting: ['reporting'] } : {}),

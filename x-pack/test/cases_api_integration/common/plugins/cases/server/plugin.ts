@@ -52,6 +52,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       name: 'TestNoCasesConnectorFixture',
       app: ['kibana'],
       category: { id: 'cases-fixtures', label: 'Cases Fixtures' },
+      scope: 'agnostic',
       cases: ['testNoCasesConnectorFixture'],
       privileges: {
         all: {

@@ -202,6 +202,7 @@ const kibanaFeatureSchema = schema.object({
   }),
   name: schema.string(),
   category: appCategorySchema,
+  scope: schema.maybe(schema.oneOf([schema.literal('security'), schema.literal('agnostic')])),
   description: schema.maybe(schema.string()),
   order: schema.maybe(schema.number()),
   excludeFromBasePrivileges: schema.maybe(schema.boolean()),

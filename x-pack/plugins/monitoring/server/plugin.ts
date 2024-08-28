@@ -272,6 +272,7 @@ export class MonitoringPlugin
         defaultMessage: 'Stack Monitoring',
       }),
       category: DEFAULT_APP_CATEGORIES.management,
+      scope: 'agnostic',
       app: ['monitoring', 'kibana'],
       catalogue: ['monitoring'],
       privileges: null,

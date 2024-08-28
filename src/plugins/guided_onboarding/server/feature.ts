@@ -18,6 +18,7 @@ export const GUIDED_ONBOARDING_FEATURE: KibanaFeatureConfig = {
     defaultMessage: 'Setup guides',
   }),
   category: DEFAULT_APP_CATEGORIES.management,
+  scope: 'agnostic',
   app: [PLUGIN_ID],
   privileges: {
     all: {

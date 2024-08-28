@@ -32,6 +32,7 @@ export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
       defaultMessage: 'Cases',
     }),
     category: DEFAULT_APP_CATEGORIES.management,
+    scope: 'agnostic',
     app: [],
     order: FEATURE_ORDER,
     management: {

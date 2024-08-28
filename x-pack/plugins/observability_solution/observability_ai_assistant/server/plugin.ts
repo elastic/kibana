@@ -69,6 +69,7 @@ export class ObservabilityAIAssistantPlugin
       }),
       order: 8600,
       category: DEFAULT_APP_CATEGORIES.observability,
+      scope: 'agnostic',
       app: [OBSERVABILITY_AI_ASSISTANT_FEATURE_ID, 'kibana'],
       catalogue: [OBSERVABILITY_AI_ASSISTANT_FEATURE_ID],
       minimumLicense: 'enterprise',

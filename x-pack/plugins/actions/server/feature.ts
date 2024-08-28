@@ -28,6 +28,7 @@ export const ACTIONS_FEATURE = {
     defaultMessage: 'Actions and Connectors',
   }),
   category: DEFAULT_APP_CATEGORIES.management,
+  scope: 'agnostic',
   app: [],
   order: FEATURE_ORDER,
   management: {

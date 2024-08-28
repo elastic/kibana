@@ -27,6 +27,7 @@ export const getCasesBaseKibanaFeature = ({
     ),
     order: 1100,
     category: DEFAULT_APP_CATEGORIES.security,
+    scope: 'agnostic',
     app: [CASES_FEATURE_ID, 'kibana'],
     catalogue: [APP_ID],
     cases: [APP_ID],

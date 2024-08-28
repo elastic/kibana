@@ -68,6 +68,7 @@ export class GraphPlugin implements Plugin {
         }),
         order: 600,
         category: DEFAULT_APP_CATEGORIES.kibana,
+        scope: 'agnostic',
         app: ['graph', 'kibana'],
         catalogue: ['graph'],
         minimumLicense: 'platinum',

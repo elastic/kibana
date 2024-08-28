@@ -25,6 +25,7 @@ export function getRulesSettingsFeature(isServerless: boolean): KibanaFeatureCon
       defaultMessage: 'Rules Settings',
     }),
     category: DEFAULT_APP_CATEGORIES.management,
+    scope: 'agnostic',
     app: [],
     management: {
       insightsAndAlerting: ['triggersActions'],

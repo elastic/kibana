@@ -36,6 +36,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       name: 'SecuritySolutionFixture',
       app: ['kibana'],
       category: { id: 'cases-fixtures', label: 'Cases Fixtures' },
+      scope: 'agnostic',
       cases: ['securitySolutionFixture'],
       privileges: {
         all: {
@@ -121,6 +122,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       name: 'TestDisabledFixture',
       app: ['kibana'],
       category: { id: 'cases-fixtures', label: 'Cases Fixtures' },
+      scope: 'agnostic',
       // testDisabledFixture is disabled in space1
       cases: ['testDisabledFixture'],
       privileges: {

@@ -135,6 +135,58 @@ export default function ({ getService }: FtrProviderContext) {
           ].sort()
         );
       });
+
+      it('should return a full feature set with correct scope', async () => {
+        const { body } = await supertest.get('/api/features').set('kbn-xsrf', 'xxx').expect(200);
+        expect(body).to.be.an(Array);
+
+        const scopeAgnosticFeatures = [
+          'discover',
+          'visualize',
+          'dashboard',
+          'dev_tools',
+          'actions',
+          'enterpriseSearch',
+          'filesManagement',
+          'filesSharedImage',
+          'advancedSettings',
+          'aiAssistantManagementSelection',
+          'indexPatterns',
+          'graph',
+          'guidedOnboardingFeature',
+          'monitoring',
+          'observabilityAIAssistant',
+          'observabilityCases',
+          'savedObjectsManagement',
+          'savedQueryManagement',
+          'savedObjectsTagging',
+          'ml',
+          'apm',
+          'stackAlerts',
+          'canvas',
+          'generalCases',
+          'infrastructure',
+          'logs',
+          'maintenanceWindow',
+          'maps',
+          'osquery',
+          'rulesSettings',
+          'uptime',
+          'siem',
+          'slo',
+          'securitySolutionAssistant',
+          'securitySolutionAttackDiscovery',
+          'securitySolutionCases',
+          'fleet',
+          'fleetv2',
+        ];
+
+        const features = body.filter((f: KibanaFeature) => f.scope === 'agnostic');
+
+        expect(features.every((f: KibanaFeature) => scopeAgnosticFeatures.includes(f.id))).to.be(
+          true
+        );
+      });
     });
   });
 }

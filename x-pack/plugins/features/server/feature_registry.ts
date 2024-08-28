@@ -41,6 +41,10 @@ export class FeatureRegistry {
       throw new Error(`Feature with id ${feature.id} is already registered.`);
     }
 
+    if (!feature.scope) {
+      feature.scope = 'security';
+    }
+
     const featureCopy = cloneDeep(feature);
 
     this.kibanaFeatures[feature.id] = applyAutomaticPrivilegeGrants(featureCopy);
