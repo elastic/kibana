@@ -222,14 +222,17 @@ export default ({ getService }: FtrProviderContext) => {
         await testSubjects.missingOrFail('editRuleButton');
       });
 
-      it('should not show the actions button if user has no permissions', async () => {
-        await observability.users.setTestUserRole(
-          observability.users.defineBasicObservabilityRole({
-            logs: ['read'],
-          })
-        );
-        await observability.alerts.common.navigateToRuleDetailsByRuleId(logThresholdRuleId);
-        await testSubjects.missingOrFail('actions');
+      describe('actions button', function () {
+        this.tags('skipFIPS');
+        it('should not show the actions button if user has no permissions', async () => {
+          await observability.users.setTestUserRole(
+            observability.users.defineBasicObservabilityRole({
+              logs: ['read'],
+            })
+          );
+          await observability.alerts.common.navigateToRuleDetailsByRuleId(logThresholdRuleId);
+          await testSubjects.missingOrFail('actions');
+        });
       });
     });
   });

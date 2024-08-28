@@ -52,7 +52,7 @@ while read -r config; do
     continue;
   fi
 
-  FULL_COMMAND="node scripts/functional_tests --bail --config $config $EXTRA_ARGS"
+  FULL_COMMAND="node scripts/functional_tests --config $config $EXTRA_ARGS"
   echo "--- $ $FULL_COMMAND"
 
   start=$(date +%s)
@@ -60,7 +60,6 @@ while read -r config; do
   # prevent non-zero exit code from breaking the loop
   set +e;
   node ./scripts/functional_tests \
-    --bail \
     --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
     --config="$config" \
     "$EXTRA_ARGS"

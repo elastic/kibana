@@ -90,7 +90,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('observability cases read-only privileges', () => {
+    describe('observability cases read-only privileges', function() {
+      this.tags('skipFIPS');
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         await observability.users.setTestUserRole(
@@ -143,7 +144,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('no observability privileges', () => {
+    describe('no observability privileges', fuction() {
+      this.tags('skipFIPS');
       before(async () => {
         await observability.users.setTestUserRole({
           elasticsearch: { cluster: [], indices: [], run_as: [] },

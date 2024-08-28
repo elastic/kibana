@@ -78,7 +78,8 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
   }
 
   registry.when('Annotations with a basic license', { config: 'basic', archives: [] }, () => {
-    describe('when creating an annotation', () => {
+    describe('when creating an annotation', function () {
+      this.tags('skipFIPS');
       it('fails with a 403 forbidden', async () => {
         const err = await expectToReject<ApmApiError>(() =>
           createAnnotation({
