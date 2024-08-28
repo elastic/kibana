@@ -16,6 +16,12 @@ const oneHourFromNow = () => {
   return date;
 };
 
+const thirtyMinutesFromNow = () => {
+  const date = new Date();
+  date.setMinutes(date.getMinutes() + 30);
+  return date;
+};
+
 const mockUseRiskEngineStatus = jest.fn();
 jest.mock('../../../api/hooks/use_risk_engine_status', () => {
   const originalModule = jest.requireActual('../../../api/hooks/use_risk_engine_status');
@@ -102,7 +108,7 @@ describe('ScheduleRiskEngineCallout', () => {
   });
 
   it('should update the count down time when time has passed', () => {
-    mockUseRiskEngineStatus.mockReturnValue({
+    mockUseRiskEngineStatus.mockReturnValueOnce({
       data: {
         isNewRiskScoreModuleInstalled: true,
 
@@ -113,12 +119,24 @@ describe('ScheduleRiskEngineCallout', () => {
       },
     });
 
-    const { getByText } = render(<ScheduleRiskEngineCallout />, {
+    const { getByText, rerender } = render(<ScheduleRiskEngineCallout />, {
       wrapper: TestProviders,
     });
-
     expect(getByText('an hour')).toBeInTheDocument();
-    jest.advanceTimersByTime(THIRTY_MINUTES);
+
+    // simulate useQuery re-render after fetching data
+    mockUseRiskEngineStatus.mockReturnValueOnce({
+      data: {
+        isNewRiskScoreModuleInstalled: true,
+
+        risk_engine_task_status: {
+          status: 'idle',
+          runAt: thirtyMinutesFromNow(),
+        },
+      },
+    });
+    rerender(<ScheduleRiskEngineCallout />);
+
     expect(getByText('30 minutes')).toBeInTheDocument();
   });
 

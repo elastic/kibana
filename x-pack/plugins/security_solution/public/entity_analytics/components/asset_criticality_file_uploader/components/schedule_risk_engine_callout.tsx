@@ -12,7 +12,7 @@ import {
   EuiText,
   EuiFlexItem,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { i18n } from '@kbn/i18n';
@@ -24,8 +24,11 @@ import { useRiskEngineStatus } from '../../../api/hooks/use_risk_engine_status';
 const TEN_SECONDS = 10000;
 
 export const ScheduleRiskEngineCallout: React.FC = () => {
-  const { data: riskEngineStatus, isLoading: isRiskEngineStatusLoading } =
-    useRiskEngineStatus(TEN_SECONDS);
+  const { data: riskEngineStatus, isLoading: isRiskEngineStatusLoading } = useRiskEngineStatus({
+    refetchInterval: TEN_SECONDS,
+    structuralSharing: false, // Force the component to rerender after every Risk Engine Status API call
+  });
+
   const { addSuccess, addError } = useAppToasts();
   const { isLoading: isLoadingRiskEngineSchedule, mutate: scheduleRiskEngineMutation } =
     useScheduleNowRiskEngineMutation({
@@ -48,7 +51,7 @@ export const ScheduleRiskEngineCallout: React.FC = () => {
           ),
         }),
     });
-  const [nextScheduleRun, setNextScheduleRun] = useState<string | undefined>();
+
   const { status, runAt } = riskEngineStatus?.risk_engine_task_status || {};
 
   const isRunning = useMemo(
@@ -56,7 +59,7 @@ export const ScheduleRiskEngineCallout: React.FC = () => {
     [runAt, status]
   );
 
-  const getCountDownText = useCallback(
+  const countDownText = useMemo(
     () =>
       isRunning
         ? i18n.translate(
@@ -68,16 +71,6 @@ export const ScheduleRiskEngineCallout: React.FC = () => {
         : formatTimeFromNow(riskEngineStatus?.risk_engine_task_status?.runAt),
     [isRunning, riskEngineStatus?.risk_engine_task_status?.runAt]
   );
-
-  useEffect(() => {
-    setNextScheduleRun(getCountDownText());
-
-    const intervalId = setInterval(() => {
-      setNextScheduleRun(getCountDownText());
-    }, TEN_SECONDS);
-
-    return () => clearInterval(intervalId);
-  }, [getCountDownText]);
 
   const scheduleRiskEngine = useCallback(() => {
     scheduleRiskEngineMutation();
@@ -111,7 +104,7 @@ export const ScheduleRiskEngineCallout: React.FC = () => {
               defaultMessage="The next scheduled engine run is in:"
               id="xpack.securitySolution.entityAnalytics.assetCriticalityResultStep.riskEngine.scheduleText"
             />
-            <b>{` ${nextScheduleRun}`}</b>
+            <b>{` ${countDownText}`}</b>
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
