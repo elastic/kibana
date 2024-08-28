@@ -5,30 +5,22 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
-
-import type { AgentPolicy } from '../../../../../../../../../common';
-
 import { SO_SEARCH_LIMIT } from '../../../../../../../../../common';
 import { useGetAgentPolicies } from '../../../../../../../../hooks';
 
 export const useAllNonManagedAgentPolicies = () => {
-  let existingAgentPolicies: AgentPolicy[] = [];
   const { data: agentPoliciesData, error: err } = useGetAgentPolicies({
     page: 1,
     perPage: SO_SEARCH_LIMIT,
     sortField: 'name',
     sortOrder: 'asc',
     full: false, // package_policies will always be empty
-    noAgentCount: true, // agentPolicy.agents will always be 0
+    noAgentCount: true, // agentPolicy.agents will always be 0,
+    kuery: 'ingest-agent-policies.is_managed:false',
   });
   if (err) {
     // eslint-disable-next-line no-console
     console.debug('Could not retrieve agent policies');
   }
-  existingAgentPolicies = useMemo(
-    () => agentPoliciesData?.items.filter((policy) => !policy.is_managed) || [],
-    [agentPoliciesData?.items]
-  );
-  return existingAgentPolicies;
+  return agentPoliciesData?.items || [];
 };
