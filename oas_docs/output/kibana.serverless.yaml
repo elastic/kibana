@@ -2850,9 +2850,9 @@ components:
         secrets:
           $ref: '#/components/schemas/Connectors_secrets_properties_gemini'
     Connectors_create_connector_request_inference:
-      title: Create Inference API connector request
+      title: Create AI Connector request
       description: >-
-        The Inference API connector uses axios to send a POST request to Elastic
+        The AI Connector uses axios to send a POST request to Elastic
         Inference Endpoint.
       type: object
       required:
@@ -3501,7 +3501,7 @@ components:
       properties:
         provider:
           type: string
-          description: Provider supported by inference endpoint.
+          description: Service provider supported by inference endpoint.
         taskType:
           type: string
           description: The type of inference task that the model performs.
@@ -3509,7 +3509,7 @@ components:
         inferenceConfig:
           type: string
           description: The service account configuration. This will be
-            different per the selected provider.
+            different per the selected service provider.
     Connectors_secrets_properties_inference:
       title: Connector secrets properties for a Inference API connector
       description: Defines secrets for connectors when type is `.inference`.
@@ -3520,7 +3520,7 @@ components:
         inferenceSecrets:
           type: object
           description: The service account credentials configuration. This will be
-            different per the selected provider.
+            different per the selected cervice provider.
     Connectors_config_properties_cases_webhook:
       title: Connector request properties for Webhook - Case Management connector
       required:

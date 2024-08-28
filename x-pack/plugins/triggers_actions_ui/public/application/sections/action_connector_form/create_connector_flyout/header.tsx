@@ -36,6 +36,10 @@ const FlyoutHeaderComponent: React.FC<Props> = ({
   compatibility,
   isExperimental,
 }) => {
+  const defaultMessageTitleText =
+    actionTypeName && actionTypeName.toLowerCase().includes('connector')
+      ? '{actionTypeName}'
+      : '{actionTypeName} connector';
   return (
     <EuiFlyoutHeader hasBorder data-test-subj="create-connector-flyout-header">
       <EuiFlexGroup gutterSize="m" alignItems="center">
@@ -52,7 +56,7 @@ const FlyoutHeaderComponent: React.FC<Props> = ({
                   <EuiTitle size="s">
                     <h3 id="flyoutTitle">
                       <FormattedMessage
-                        defaultMessage="{actionTypeName} connector"
+                        defaultMessage={defaultMessageTitleText}
                         id="xpack.triggersActionsUI.sections.addConnectorForm.flyoutTitle"
                         values={{
                           actionTypeName,

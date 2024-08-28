@@ -48,6 +48,7 @@ export const ConfigInputField: React.FC<ConfigInputFieldProps> = ({
   return (
     <EuiFieldText
       disabled={isLoading}
+      fullWidth
       required={required}
       value={ensureStringType(innerValue)}
       isInvalid={!isValid}
@@ -70,6 +71,7 @@ export const ConfigInputTextArea: React.FC<ConfigInputFieldProps> = ({
   return (
     <EuiTextArea
       disabled={isLoading}
+      fullWidth
       required={required}
       // ensures placeholder shows up when value is empty string
       value={ensureStringType(innerValue) || undefined}
@@ -124,6 +126,7 @@ export const ConfigInputPassword: React.FC<ConfigInputFieldProps> = ({
   const [innerValue, setInnerValue] = useState(value);
   return (
     <EuiFieldPassword
+      fullWidth
       disabled={isLoading}
       required={required}
       type="dual"
@@ -151,6 +154,7 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
     case DisplayType.DROPDOWN:
       return options && options.length > 3 ? (
         <EuiSelect
+          fullWidth
           disabled={isLoading}
           options={options.map((option) => ({ text: option.label, value: option.value }))}
           required={required}

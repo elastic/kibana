@@ -7,6 +7,7 @@
 
 import React, { useState, useEffect, ReactNode, useMemo, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import { css } from '@emotion/react';
 import {
   EuiFormRow,
   EuiSpacer,
@@ -16,6 +17,7 @@ import {
   EuiIcon,
   EuiFlexItem,
   EuiTitle,
+  EuiAccordion,
 } from '@elastic/eui';
 import {
   getFieldValidityAndErrorMessage,
@@ -97,6 +99,7 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
       'config.provider',
       'config.providerSchema',
       'config.providerConfig',
+      'secrets',
       'secrets.providerSecrets',
     ],
   });
@@ -159,23 +162,13 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
             validationErrors: [],
             ...(selectedProviderConfig?.configuration[k] as ConfigProperties),
           }))
-    ).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+    ).sort((a, b) => (b.order ?? 0) - (a.order ?? 0));
 
     if (config) {
       config.providerSchema = result;
     }
     return result;
   }, [config, providers, secrets?.providerSecrets, selectedProvider]);
-
-  const getProviderForm = useCallback(
-    (isFirstColumn: boolean) => {
-      const indexToSplit = Math.floor(providerForm.length / 2);
-      const firstHalf = providerForm.slice(0, indexToSplit);
-      const secondHalf = providerForm.slice(indexToSplit);
-      return isFirstColumn ? firstHalf : secondHalf;
-    },
-    [providerForm]
-  );
 
   const taskTypeForm: ConfigEntryView[] = useMemo(() => {
     const existingConfiguration = (config?.taskTypeSchema ?? []).map((item: ConfigEntryView) => {
@@ -271,74 +264,15 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
     [config, secrets]
   );
 
+  // Custom trigger button CSS
+  const buttonCss = css`
+    &:hover {
+      text-decoration: none;
+    }
+  `;
+
   return (
     <>
-      <FormattedMessage
-        defaultMessage="Elasticsearch provides access to managed and third party inference providers which are accessible through Inference Endpoint. Learn more about Inference Endpoints {inferenceAPIUrlDocs}."
-        id="xpack.stackConnectors.components.inference.inferenceAPIDocumentation"
-        values={{
-          inferenceAPIUrlDocs: (
-            <EuiLink
-              data-test-subj="inference-api-doc"
-              href="https://www.elastic.co/guide/en/elasticsearch/reference/current/inference-apis"
-              target="_blank"
-            >
-              {i18n.DOCUMENTATION}
-            </EuiLink>
-          ),
-        }}
-      />
-      <EuiSpacer size="m" />
-      <UseField
-        path="config.taskType"
-        component={SelectField}
-        defaultValue={DEFAULT_TASK_TYPE}
-        isDisabled={readOnly || isEdit}
-        config={{
-          label: i18n.TASK_TYPE,
-        }}
-        onChange={onTaskTypeOptionsSelect}
-        componentProps={{
-          euiFieldProps: {
-            'data-test-subj': 'taskTypeSelect',
-            options: taskTypeOptions,
-            fullWidth: true,
-            readOnly,
-          },
-          helpText: (
-            <FormattedMessage
-              defaultMessage="Inference endpoints have configurable task types of 'completion', 'rerank' and more. Configuration of an AI Assistant will require a 'completion' task type to the model provider of your choice."
-              id="xpack.stackConnectors.components.inference.inferenceTaskTypeDocumentation"
-            />
-          ),
-        }}
-      />
-      <EuiSpacer size="m" />
-      <EuiTitle size="xxs" data-test-subj="task-type-details-label">
-        <h4>
-          <FormattedMessage
-            id="xpack.stackConnectors.components.inference.taskTypeDetailsLabel"
-            defaultMessage="Task type details"
-          />
-        </h4>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <ConnectorConfigurationFormItems
-        itemsGrow={false}
-        isLoading={false}
-        items={getTaskTypeForm(true)}
-        setConfigEntry={onSetConfigEntry}
-      />
-      <EuiSpacer size="m" />
-      <ConnectorConfigurationFormItems
-        itemsGrow={false}
-        isLoading={false}
-        items={getTaskTypeForm(false)}
-        setConfigEntry={onSetConfigEntry}
-      />
-
-      <EuiSpacer size="m" />
-
       <UseField path="config.provider">
         {(field) => {
           const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
@@ -350,7 +284,7 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
               label={
                 <FormattedMessage
                   id="xpack.stackConnectors.components.inference.providerLabel"
-                  defaultMessage="Provider"
+                  defaultMessage="Service provider"
                 />
               }
               isInvalid={isInvalid}
@@ -394,28 +328,80 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
         }}
       </UseField>
       <EuiSpacer size="m" />
-      <EuiTitle size="xxs" data-test-subj="provider-details-label">
-        <h4>
-          <FormattedMessage
-            id="xpack.stackConnectors.components.inference.providerDetailsLabel"
-            defaultMessage="Provider details"
-          />
-        </h4>
-      </EuiTitle>
-      <EuiSpacer size="s" />
       <ConnectorConfigurationFormItems
         itemsGrow={false}
         isLoading={false}
-        items={getProviderForm(true)}
+        direction="column"
+        items={providerForm}
         setConfigEntry={onSetConfigEntry}
       />
       <EuiSpacer size="m" />
-      <ConnectorConfigurationFormItems
-        itemsGrow={false}
-        isLoading={false}
-        items={getProviderForm(false)}
-        setConfigEntry={onSetConfigEntry}
-      />
+
+      <EuiAccordion
+        id="inferenceAdditionalOptions"
+        buttonProps={{ paddingSize: 's', css: buttonCss }}
+        element="fieldset"
+        arrowDisplay="right"
+        buttonElement="button"
+        borders="all"
+        buttonContent={
+          <FormattedMessage
+            id="xpack.stackConnectors.components.inference.additionalOptionsLabel"
+            defaultMessage="Additional options"
+          />
+        }
+        initialIsOpen={true}
+      >
+        <>
+          <UseField
+            path="config.taskType"
+            component={SelectField}
+            defaultValue={DEFAULT_TASK_TYPE}
+            isDisabled={readOnly || isEdit}
+            config={{
+              label: i18n.TASK_TYPE,
+            }}
+            onChange={onTaskTypeOptionsSelect}
+            componentProps={{
+              euiFieldProps: {
+                'data-test-subj': 'taskTypeSelect',
+                options: taskTypeOptions,
+                fullWidth: true,
+                readOnly,
+              },
+              helpText: (
+                <FormattedMessage
+                  defaultMessage="Inference endpoints have configurable task types of 'completion', 'rerank' and more. Configuration of an AI Assistant will require a 'completion' task type to the model provider of your choice."
+                  id="xpack.stackConnectors.components.inference.inferenceTaskTypeDocumentation"
+                />
+              ),
+            }}
+          />
+          <EuiSpacer size="m" />
+          <EuiTitle size="xxs" data-test-subj="task-type-details-label">
+            <h4>
+              <FormattedMessage
+                id="xpack.stackConnectors.components.inference.taskTypeDetailsLabel"
+                defaultMessage="Task type details"
+              />
+            </h4>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <ConnectorConfigurationFormItems
+            itemsGrow={false}
+            isLoading={false}
+            items={getTaskTypeForm(true)}
+            setConfigEntry={onSetConfigEntry}
+          />
+          <EuiSpacer size="m" />
+          <ConnectorConfigurationFormItems
+            itemsGrow={false}
+            isLoading={false}
+            items={getTaskTypeForm(false)}
+            setConfigEntry={onSetConfigEntry}
+          />
+        </>
+      </EuiAccordion>
     </>
   );
 };

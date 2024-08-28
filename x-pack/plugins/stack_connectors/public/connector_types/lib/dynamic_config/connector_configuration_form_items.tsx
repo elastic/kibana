@@ -72,6 +72,7 @@ export const ConnectorConfigurationFormItems: React.FC<ConnectorConfigurationFor
               <EuiPanel color="subdued" borderRadius="none">
                 <EuiToolTip content={tooltip}>
                   <EuiFormRow
+                    fullWidth={true}
                     label={rowLabel}
                     helpText={helpText}
                     error={validationErrors}
@@ -96,10 +97,11 @@ export const ConnectorConfigurationFormItems: React.FC<ConnectorConfigurationFor
             <EuiToolTip content={tooltip}>
               <EuiFormRow
                 label={rowLabel}
+                fullWidth
                 helpText={helpText}
                 error={validationErrors}
                 isInvalid={!isValid}
-                data-test-subj={`entSearchContent-connector-configuration-formrow-${key}`}
+                data-test-subj={`connector-configuration-formrow-${key}`}
               >
                 <ConnectorConfigurationField
                   configEntry={configEntry}

@@ -22,9 +22,9 @@ interface ValidationErrors {
 export function getConnectorType(): InferenceConnector {
   return {
     id: INFERENCE_CONNECTOR_ID,
-    iconClass: 'logoElasticsearch',
+    iconClass: 'sparkles',
     selectMessage: i18n.translate('xpack.stackConnectors.components.inference.selectMessageText', {
-      defaultMessage: 'Send a query to a LLM.',
+      defaultMessage: 'Send requests to AI providers such as Amazon Bedrock, OpenAI and more.',
     }),
     actionTypeTitle: INFERENCE_CONNECTOR_TITLE,
     validateParams: async (
