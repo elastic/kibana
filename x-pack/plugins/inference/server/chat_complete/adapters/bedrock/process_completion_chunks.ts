@@ -63,11 +63,13 @@ export function processCompletionChunks() {
           return;
         }
 
-        subscriber.next({
-          type: ChatCompletionEventType.ChatCompletionChunk,
-          content: completionChunk,
-          tool_calls: toolCallChunk ? [toolCallChunk] : [],
-        });
+        if (completionChunk || toolCallChunk) {
+          subscriber.next({
+            type: ChatCompletionEventType.ChatCompletionChunk,
+            content: completionChunk,
+            tool_calls: toolCallChunk ? [toolCallChunk] : [],
+          });
+        }
       }
 
       source.subscribe({
@@ -86,7 +88,7 @@ export function processCompletionChunks() {
     });
 }
 
-function isTokenCountCompletionChunk(value: any): value is MessageStopChunk {
+function isTokenCountCompletionChunk(value: CompletionChunk): value is MessageStopChunk {
   return value.type === 'message_stop' && 'amazon-bedrock-invocationMetrics' in value;
 }
 

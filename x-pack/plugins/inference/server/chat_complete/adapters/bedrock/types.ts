@@ -94,4 +94,5 @@ export type CompletionChunk =
   | ContentBlockStartChunk
   | ContentBlockDeltaChunk
   | ContentBlockStopChunk
-  | MessageDeltaChunk;
+  | MessageDeltaChunk
+  | MessageStopChunk;
