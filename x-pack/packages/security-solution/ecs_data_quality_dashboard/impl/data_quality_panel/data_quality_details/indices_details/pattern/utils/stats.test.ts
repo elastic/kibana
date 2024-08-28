@@ -10,7 +10,12 @@ import { mockStatsAuditbeatIndex } from '../../../../mock/stats/mock_stats_packe
 import { mockStatsPacketbeatIndex } from '../../../../mock/stats/mock_stats_auditbeat_index';
 import { mockIlmExplain } from '../../../../mock/ilm_explain/mock_ilm_explain';
 import { mockStats } from '../../../../mock/stats/mock_stats';
-import { getIndexNames, getPatternDocsCount, getPatternSizeInBytes } from './stats';
+import {
+  getDocsCountPercent,
+  getIndexNames,
+  getPatternDocsCount,
+  getPatternSizeInBytes,
+} from './stats';
 import { IlmExplainLifecycleLifecycleExplain } from '@elastic/elasticsearch/lib/api/types';
 
 describe('getIndexNames', () => {
@@ -230,5 +235,36 @@ describe('getPatternSizeInBytes', () => {
         stats: mockStatsPacketbeatIndex,
       })
     ).toEqual(expectedCount);
+  });
+});
+
+describe('getDocsCountPercent', () => {
+  test('it returns an empty string when `patternDocsCount` is zero', () => {
+    expect(
+      getDocsCountPercent({
+        docsCount: 0,
+        patternDocsCount: 0,
+      })
+    ).toEqual('');
+  });
+
+  test('it returns the expected format when when `patternDocsCount` is non-zero, and `locales` is undefined', () => {
+    expect(
+      getDocsCountPercent({
+        docsCount: 2904,
+        locales: undefined,
+        patternDocsCount: 57410,
+      })
+    ).toEqual('5.1%');
+  });
+
+  test('it returns the expected format when when `patternDocsCount` is non-zero, and `locales` is provided', () => {
+    expect(
+      getDocsCountPercent({
+        docsCount: 2904,
+        locales: 'en-US',
+        patternDocsCount: 57410,
+      })
+    ).toEqual('5.1%');
   });
 });
