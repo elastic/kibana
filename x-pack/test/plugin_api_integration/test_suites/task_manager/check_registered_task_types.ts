@@ -80,6 +80,7 @@ export default function ({ getService }: FtrProviderContext) {
         'actions:.torq',
         'actions:.webhook',
         'actions:.xmatters',
+        'actions:connector_usage_reporting',
         'actions_telemetry',
         'ad_hoc_run-backfill',
         'alerting:.es-query',
@@ -161,7 +162,6 @@ export default function ({ getService }: FtrProviderContext) {
         'security:telemetry-timelines',
         'session_cleanup',
         'task_manager:delete_inactive_background_task_nodes',
-        'actions:connector_usage_reporting',
       ]);
     });
   });
