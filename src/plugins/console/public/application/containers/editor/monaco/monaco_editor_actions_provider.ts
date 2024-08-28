@@ -119,7 +119,8 @@ export class MonacoEditorActionsProvider {
       const offset = this.editor.getTopForLineNumber(lineNumber) - this.editor.getScrollTop();
       this.setEditorActionsCss({
         visibility: 'visible',
-        top: offset,
+        //  Move position up by 2 px to align the action buttons panel with the top border of the selected block
+        top: offset - 2,
       });
     }
   }
@@ -146,7 +147,7 @@ export class MonacoEditorActionsProvider {
           range: selectedRange,
           options: {
             isWholeLine: true,
-            className: SELECTED_REQUESTS_CLASSNAME,
+            blockClassName: SELECTED_REQUESTS_CLASSNAME,
           },
         },
       ]);

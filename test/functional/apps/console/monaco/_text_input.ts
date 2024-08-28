@@ -17,6 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await PageObjects.common.navigateToApp('console');
       await PageObjects.console.closeHelpIfExists();
+      await PageObjects.console.skipTourIfExists();
     });
 
     beforeEach(async () => {

@@ -21,6 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('navigateTo console');
       await PageObjects.common.navigateToApp('console');
       await PageObjects.console.closeHelpIfExists();
+      await PageObjects.console.skipTourIfExists();
     });
 
     describe('with comments', () => {

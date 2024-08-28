@@ -6,31 +6,62 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
   EuiPageTemplate,
   EuiSplitPanel,
-  EuiHorizontalRule,
+  useEuiTour,
   EuiButtonEmpty,
+  EuiHorizontalRule,
 } from '@elastic/eui';
+import { getConsoleTourStepProps } from './get_console_tour_step_props';
+import { useServicesContext } from '../../contexts';
 import { MAIN_PANEL_LABELS } from './i18n';
 import { NavIconButton } from './nav_icon_button';
 import { Editor } from '../editor';
+import {
+  TopNavMenu,
+  SomethingWentWrongCallout,
+  ConsoleTourStep,
+  ConsoleTourStepProps,
+} from '../../components';
 import { History } from '../history';
-import { TopNavMenu, SomethingWentWrongCallout } from '../../components';
 import { useDataInit } from '../../hooks';
 import { getTopNavConfig } from './get_top_nav';
-import { SHELL_TAB_ID, HISTORY_TAB_ID } from './tab_ids';
+import { getTourSteps } from './get_tour_steps';
+import {
+  SHELL_TAB_ID,
+  CONFIG_TAB_ID,
+  EDITOR_TOUR_STEP,
+  TOUR_STORAGE_KEY,
+  INITIAL_TOUR_CONFIG,
+  FILES_TOUR_STEP,
+} from './constants';
 
 interface MainProps {
   isEmbeddable?: boolean;
 }
 
 export function Main({ isEmbeddable = false }: MainProps) {
-  const [selectedTab, setSelectedTab] = useState(HISTORY_TAB_ID);
+  const [selectedTab, setSelectedTab] = useState(SHELL_TAB_ID);
+  const { docLinks } = useServicesContext();
+
+  const storageTourState = localStorage.getItem(TOUR_STORAGE_KEY);
+  const initialTourState = storageTourState ? JSON.parse(storageTourState) : INITIAL_TOUR_CONFIG;
+  const [tourStepProps, actions, tourState] = useEuiTour(getTourSteps(docLinks), initialTourState);
+
+  useEffect(() => {
+    localStorage.setItem(TOUR_STORAGE_KEY, JSON.stringify(tourState));
+  }, [tourState]);
+
+  const consoleTourStepProps: ConsoleTourStepProps[] = getConsoleTourStepProps(
+    tourStepProps,
+    actions,
+    tourState
+  );
 
   const { done, error, retry } = useDataInit();
 
@@ -65,16 +96,19 @@ export function Main({ isEmbeddable = false }: MainProps) {
                       selectedTab,
                       setSelectedTab,
                     })}
+                    tourStepProps={consoleTourStepProps}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <NavIconButton
-                    iconType="save"
-                    onClick={() => {}}
-                    ariaLabel={MAIN_PANEL_LABELS.importExportButton}
-                    dataTestSubj="consoleImportExportButton"
-                    toolTipContent={MAIN_PANEL_LABELS.importExportButton}
-                  />
+                  <ConsoleTourStep tourStepProps={consoleTourStepProps[FILES_TOUR_STEP - 1]}>
+                    <NavIconButton
+                      iconType="save"
+                      onClick={() => {}}
+                      ariaLabel={MAIN_PANEL_LABELS.importExportButton}
+                      dataTestSubj="consoleImportExportButton"
+                      toolTipContent={MAIN_PANEL_LABELS.importExportButton}
+                    />
+                  </ConsoleTourStep>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <NavIconButton
@@ -101,18 +135,28 @@ export function Main({ isEmbeddable = false }: MainProps) {
               {selectedTab === SHELL_TAB_ID && (
                 <Editor loading={!done} setEditorInstance={() => {}} />
               )}
-
               {selectedTab === HISTORY_TAB_ID && <History />}
+              {selectedTab === CONFIG_TAB_ID && <Config editorInstance={null} />}
             </EuiSplitPanel.Inner>
             <EuiHorizontalRule margin="none" />
             <EuiSplitPanel.Inner paddingSize="xs" grow={false}>
-              <EuiButtonEmpty onClick={() => {}} iconType="editorCodeBlock" size="xs" color="text">
+              <EuiButtonEmpty
+                onClick={() => setSelectedTab(CONFIG_TAB_ID)}
+                iconType="editorCodeBlock"
+                size="xs"
+                color="text"
+              >
                 {MAIN_PANEL_LABELS.variablesButton}
               </EuiButtonEmpty>
             </EuiSplitPanel.Inner>
           </EuiSplitPanel.Outer>
         </EuiFlexItem>
       </EuiFlexGroup>
+
+      {/* Empty container for Editor Tour Step */}
+      <ConsoleTourStep tourStepProps={consoleTourStepProps[EDITOR_TOUR_STEP - 1]}>
+        <div />
+      </ConsoleTourStep>
     </div>
   );
 }

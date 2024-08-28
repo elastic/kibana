@@ -40,6 +40,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('console');
       // Ensure that the text area can be interacted with
       await PageObjects.console.closeHelpIfExists();
+      await PageObjects.console.skipTourIfExists();
       await PageObjects.console.monaco.clearEditorText();
       log.debug('setAutocompleteTrace true');
       await PageObjects.console.setAutocompleteTrace(true);
