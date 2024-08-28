@@ -64,6 +64,7 @@ export interface InstallContext extends StateContext<StateNames> {
   authorizationHeader?: HTTPAuthorizationHeader | null;
   ignoreMappingUpdateErrors?: boolean;
   skipDataStreamRollover?: boolean;
+  retryStepInstall?: boolean;
 
   indexTemplates?: IndexTemplateEntry[];
   packageAssetRefs?: PackageAssetReference[];
@@ -145,22 +146,21 @@ const statesDefinition: StateMachineStates<StateNames> = {
  * After each transition `updateLatestExecutedState` is executed, it updates the executed state in the SO
  */
 export async function _stateMachineInstallPackage(
-  context: InstallContext,
-  options?: { retryStepInstall?: boolean }
+  context: InstallContext
 ): Promise<AssetReference[]> {
   const installStates: StateMachineDefinition<StateNames> = {
     context,
     states: statesDefinition,
   };
-  const { installedPkg } = context;
+  const { installedPkg, retryStepInstall } = context;
   const logger = appContextService.getLogger();
 
   const initialState =
-    options?.retryStepInstall && installedPkg?.attributes?.latest_executed_state?.name
+    retryStepInstall && installedPkg?.attributes?.latest_executed_state?.name
       ? findNextState(installedPkg.attributes.latest_executed_state.name, statesDefinition)
       : INSTALL_STATES.CREATE_RESTART_INSTALLATION;
 
-  if (options?.retryStepInstall) {
+  if (retryStepInstall) {
     logger.debug('Install with retryStepInstall option');
   }
   logger.debug(`Initial installation state: ${initialState}`);
@@ -171,9 +171,10 @@ export async function _stateMachineInstallPackage(
       installStates,
       installStates.context
     );
+
     return [
-      ...(installedKibanaAssetsRefs as KibanaAssetReference[]),
-      ...(esReferences as EsAssetReference[]),
+      ...(installedKibanaAssetsRefs ? (installedKibanaAssetsRefs as KibanaAssetReference[]) : []),
+      ...(esReferences ? (esReferences as EsAssetReference[]) : []),
     ];
   } catch (err) {
     const { packageInfo } = installStates.context.packageInstallContext;

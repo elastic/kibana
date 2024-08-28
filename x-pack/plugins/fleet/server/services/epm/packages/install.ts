@@ -518,6 +518,7 @@ function getElasticSubscription(packageInfo: ArchivePackage) {
   return subscription || packageInfo.license || 'basic';
 }
 
+// TODO: when installByUpload and installBundle are migrated, remove this function in favor of installWithStateMachine
 async function installPackageCommon(options: {
   pkgName: string;
   pkgVersion: string;
@@ -695,6 +696,7 @@ async function installPackageWitStateMachine(options: {
   authorizationHeader?: HTTPAuthorizationHeader | null;
   ignoreMappingUpdateErrors?: boolean;
   skipDataStreamRollover?: boolean;
+  retryStepInstall?: boolean;
 }): Promise<InstallResult> {
   const packageInfo = options.packageInstallContext.packageInfo;
 
@@ -792,27 +794,26 @@ async function installPackageWitStateMachine(options: {
       .createTagClient({ client: savedObjectClientWithSpace });
 
     // try installing the package, if there was an error, call error handler and rethrow
-    return await _stateMachineInstallPackage(
-      {
-        savedObjectsClient,
-        savedObjectsImporter,
-        savedObjectTagAssignmentService,
-        savedObjectTagClient,
-        esClient,
-        logger,
-        installedPkg,
-        packageInstallContext,
-        installType,
-        spaceId,
-        verificationResult,
-        installSource,
-        authorizationHeader,
-        force,
-        ignoreMappingUpdateErrors,
-        skipDataStreamRollover,
-      },
-      { retryStepInstall: true }
-    )
+    return await _stateMachineInstallPackage({
+      savedObjectsClient,
+      savedObjectsImporter,
+      savedObjectTagAssignmentService,
+      savedObjectTagClient,
+      esClient,
+      logger,
+      installedPkg,
+      packageInstallContext,
+      installType,
+      spaceId,
+      verificationResult,
+      installSource,
+      authorizationHeader,
+      force,
+      ignoreMappingUpdateErrors,
+      skipDataStreamRollover,
+      // TODO: remove hardcoded value
+      retryStepInstall: true,
+    })
       .then(async (assets) => {
         logger.debug(`Removing old assets from previous versions of ${pkgName}`);
         await removeOldAssets({
