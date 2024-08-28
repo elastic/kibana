@@ -714,40 +714,54 @@ export class TaskManagerRunner implements TaskRunner {
     await eitherAsync(
       result,
       async ({ runAt, schedule, taskRunError }: SuccessfulRunResult) => {
-        const processedResult = {
-          task,
-          persistence:
-            schedule || task.schedule ? TaskPersistence.Recurring : TaskPersistence.NonRecurring,
-          result: await (runAt || schedule || task.schedule
-            ? this.processResultForRecurringTask(result)
-            : this.processResultWhenDone()),
-        };
+        const taskPersistence =
+          schedule || task.schedule ? TaskPersistence.Recurring : TaskPersistence.NonRecurring;
+        try {
+          const processedResult = {
+            task,
+            persistence: taskPersistence,
+            result: await (runAt || schedule || task.schedule
+              ? this.processResultForRecurringTask(result)
+              : this.processResultWhenDone()),
+          };
 
-        // Alerting task runner returns SuccessfulRunResult with taskRunError
-        // when the alerting task fails, so we check for this condition in order
-        // to emit the correct task run event for metrics collection
-        // taskRunError contains the "source" (TaskErrorSource) data
-        if (!!taskRunError) {
-          debugLogger.debug(`Emitting task run failed event for task ${this.taskType}`);
+          // Alerting task runner returns SuccessfulRunResult with taskRunError
+          // when the alerting task fails, so we check for this condition in order
+          // to emit the correct task run event for metrics collection
+          // taskRunError contains the "source" (TaskErrorSource) data
+          if (!!taskRunError) {
+            debugLogger.debug(`Emitting task run failed event for task ${this.taskType}`);
+            this.onTaskEvent(
+              asTaskRunEvent(
+                this.id,
+                asErr({ ...processedResult, isExpired: taskHasExpired, error: taskRunError }),
+                taskTiming
+              )
+            );
+          } else {
+            this.onTaskEvent(
+              asTaskRunEvent(
+                this.id,
+                asOk({ ...processedResult, isExpired: taskHasExpired }),
+                taskTiming
+              )
+            );
+          }
+        } catch (err) {
           this.onTaskEvent(
             asTaskRunEvent(
               this.id,
               asErr({
-                ...processedResult,
+                task,
+                persistence: taskPersistence,
+                result: TaskRunResult.Failed,
                 isExpired: taskHasExpired,
-                error: taskRunError,
+                error: err,
               }),
               taskTiming
             )
           );
-        } else {
-          this.onTaskEvent(
-            asTaskRunEvent(
-              this.id,
-              asOk({ ...processedResult, isExpired: taskHasExpired }),
-              taskTiming
-            )
-          );
+          throw err;
         }
       },
       async ({ error }: FailedRunResult) => {

@@ -2091,6 +2091,97 @@ describe('TaskManagerRunner', () => {
         );
         expect(onTaskEvent).toHaveBeenCalledTimes(2);
       });
+
+      test('emits TaskEvent when failing to update a recurring task', async () => {
+        const id = _.random(1, 20).toString();
+        const runAt = minutesFromNow(_.random(5));
+        const onTaskEvent = jest.fn();
+        const { runner, instance, store } = await readyToRunStageSetup({
+          onTaskEvent,
+          instance: {
+            id,
+            schedule: { interval: '1m' },
+          },
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              createTaskRunner: () => ({
+                async run() {
+                  return { runAt, state: {} };
+                },
+              }),
+            },
+          },
+        });
+
+        const error = new Error('fail');
+
+        store.update.mockImplementation(() => {
+          throw error;
+        });
+
+        await expect(runner.run()).rejects.toThrowError('fail');
+
+        expect(onTaskEvent).toHaveBeenCalledWith(
+          withAnyTiming(
+            asTaskRunEvent(
+              id,
+              asErr({
+                task: instance,
+                persistence: TaskPersistence.Recurring,
+                result: TaskRunResult.Failed,
+                isExpired: false,
+                error,
+              })
+            )
+          )
+        );
+      });
+
+      test('emits TaskEvent when failing to update a non-recurring task', async () => {
+        const id = _.random(1, 20).toString();
+        const runAt = minutesFromNow(_.random(5));
+        const onTaskEvent = jest.fn();
+        const { runner, instance, store } = await readyToRunStageSetup({
+          onTaskEvent,
+          instance: {
+            id,
+          },
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              createTaskRunner: () => ({
+                async run() {
+                  return { runAt, state: {} };
+                },
+              }),
+            },
+          },
+        });
+
+        const error = new Error('fail');
+
+        store.update.mockImplementation(() => {
+          throw error;
+        });
+
+        await expect(runner.run()).rejects.toThrowError('fail');
+
+        expect(onTaskEvent).toHaveBeenCalledWith(
+          withAnyTiming(
+            asTaskRunEvent(
+              id,
+              asErr({
+                task: instance,
+                persistence: TaskPersistence.NonRecurring,
+                result: TaskRunResult.Failed,
+                isExpired: false,
+                error,
+              })
+            )
+          )
+        );
+      });
     });
 
     test('does not update saved object if task expires', async () => {
