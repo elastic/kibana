@@ -77,7 +77,7 @@ export interface WithIntegration {
 }
 
 export interface WithDegradedFieldValues {
-  degradedFieldValue: DegradedFieldValues;
+  degradedFieldValues: DegradedFieldValues;
 }
 
 export type DefaultDatasetQualityDetailsContext = Pick<

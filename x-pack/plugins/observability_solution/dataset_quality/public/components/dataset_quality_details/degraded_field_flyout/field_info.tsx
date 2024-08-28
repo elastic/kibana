@@ -6,16 +6,36 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiTitle, formatNumber } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiBadgeGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiSkeletonRectangle,
+  EuiTextColor,
+  EuiTitle,
+  formatNumber,
+} from '@elastic/eui';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 
 import { NUMBER_FORMAT } from '../../../../common/constants';
-import { countColumnName, lastOccurrenceColumnName } from '../../../../common/translations';
+import {
+  countColumnName,
+  degradedFieldValuesColumnName,
+  lastOccurrenceColumnName,
+} from '../../../../common/translations';
 import { useDegradedFields } from '../../../hooks';
 import { SparkPlot } from '../../common/spark_plot';
 
 export const DegradedFieldInfo = () => {
-  const { renderedItems, fieldFormats, expandedDegradedField } = useDegradedFields();
+  const {
+    renderedItems,
+    fieldFormats,
+    expandedDegradedField,
+    degradedFieldValues,
+    isDegradedFieldsValueLoading,
+  } = useDegradedFields();
 
   const dateFormatter = fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.DATE, [
     ES_FIELD_TYPES.DATE,
@@ -30,15 +50,12 @@ export const DegradedFieldInfo = () => {
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
       <EuiFlexGroup data-test-subj={`datasetQualityDetailsDegradedFieldFlyoutFieldsList-docCount`}>
-        <EuiFlexItem grow={1}>
+        <EuiFlexItem>
           <EuiTitle size="xxs">
             <span>{countColumnName}</span>
           </EuiTitle>
         </EuiFlexItem>
-        <EuiFlexItem
-          grow={4}
-          data-test-subj="datasetQualityDetailsDegradedFieldFlyoutFieldValue-docCount"
-        >
+        <EuiFlexItem data-test-subj="datasetQualityDetailsDegradedFieldFlyoutFieldValue-docCount">
           <SparkPlot
             series={fieldList?.timeSeries}
             valueLabel={formatNumber(fieldList?.count, NUMBER_FORMAT)}
@@ -50,16 +67,38 @@ export const DegradedFieldInfo = () => {
       <EuiFlexGroup
         data-test-subj={`datasetQualityDetailsDegradedFieldFlyoutFieldsList-lastOccurrence`}
       >
-        <EuiFlexItem grow={1}>
+        <EuiFlexItem>
           <EuiTitle size="xxs">
             <span>{lastOccurrenceColumnName}</span>
           </EuiTitle>
         </EuiFlexItem>
-        <EuiFlexItem
-          grow={4}
-          data-test-subj="datasetQualityDetailsDegradedFieldFlyoutFieldValue-lastOccurrence"
-        >
+        <EuiFlexItem data-test-subj="datasetQualityDetailsDegradedFieldFlyoutFieldValue-lastOccurrence">
           <span>{dateFormatter.convert(fieldList?.lastOccurrence)}</span>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiHorizontalRule margin="s" />
+      <EuiFlexGroup data-test-subj={`datasetQualityDetailsDegradedFieldFlyoutFieldsList-values`}>
+        <EuiFlexItem>
+          <EuiTitle size="xxs">
+            <span>{degradedFieldValuesColumnName}</span>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem
+          data-test-subj="datasetQualityDetailsDegradedFieldFlyoutFieldValue-values"
+          grow={false}
+          css={{ maxWidth: '49%' }}
+        >
+          <EuiSkeletonRectangle isLoading={isDegradedFieldsValueLoading} width="300px">
+            <EuiBadgeGroup gutterSize="s">
+              {degradedFieldValues?.values.map((value) => (
+                <EuiBadge color="hollow">
+                  <EuiTextColor color="#765B96">
+                    <strong>{value}</strong>
+                  </EuiTextColor>
+                </EuiBadge>
+              ))}
+            </EuiBadgeGroup>
+          </EuiSkeletonRectangle>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiHorizontalRule margin="s" />

@@ -303,7 +303,11 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                       },
                     },
                     done: {
-                      type: 'final',
+                      on: {
+                        UPDATE_TIME_RANGE: {
+                          target: 'fetching',
+                        },
+                      },
                     },
                   },
                 },
@@ -362,7 +366,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
         storeDegradedFieldValues: assign((_, event: DoneInvokeEvent<DegradedFieldValues>) => {
           return 'data' in event
             ? {
-                degradedFieldValue: event.data,
+                degradedFieldValues: event.data,
               }
             : {};
         }),

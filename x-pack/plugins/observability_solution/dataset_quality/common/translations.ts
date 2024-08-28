@@ -388,3 +388,10 @@ export const lastOccurrenceColumnName = i18n.translate(
     defaultMessage: 'Last occurrence',
   }
 );
+
+export const degradedFieldValuesColumnName = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.values',
+  {
+    defaultMessage: 'Values',
+  }
+);
