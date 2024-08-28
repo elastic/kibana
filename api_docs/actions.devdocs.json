@@ -317,7 +317,9 @@
             "label": "addComment",
             "description": [],
             "signature": [
-              "({ incidentId, comment, }: { incidentId: string; comment: string; }) => Promise<void>"
+              "({ incidentId, comment, }: { incidentId: string; comment: string; }, connectorUsageCollector: ",
+              "ConnectorUsageCollector",
+              ") => Promise<void>"
             ],
             "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
             "deprecated": false,
@@ -328,7 +330,7 @@
                 "id": "def-server.CaseConnector.addComment.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    incidentId,\n    comment,\n  }",
+                "label": "{\n      incidentId,\n      comment,\n    }",
                 "description": [],
                 "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
                 "deprecated": false,
@@ -357,6 +359,21 @@
                     "trackAdoption": false
                   }
                 ]
+              },
+              {
+                "parentPluginId": "actions",
+                "id": "def-server.CaseConnector.addComment.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "connectorUsageCollector",
+                "description": [],
+                "signature": [
+                  "ConnectorUsageCollector"
+                ],
+                "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -369,7 +386,9 @@
             "label": "createIncident",
             "description": [],
             "signature": [
-              "(incident: Incident) => Promise<",
+              "(incident: Incident, connectorUsageCollector: ",
+              "ConnectorUsageCollector",
+              ") => Promise<",
               "ExternalServiceIncidentResponse",
               ">"
             ],
@@ -391,6 +410,21 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "actions",
+                "id": "def-server.CaseConnector.createIncident.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "connectorUsageCollector",
+                "description": [],
+                "signature": [
+                  "ConnectorUsageCollector"
+                ],
+                "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -403,7 +437,9 @@
             "label": "updateIncident",
             "description": [],
             "signature": [
-              "({ incidentId, incident, }: { incidentId: string; incident: Incident; }) => Promise<",
+              "({ incidentId, incident, }: { incidentId: string; incident: Incident; }, connectorUsageCollector: ",
+              "ConnectorUsageCollector",
+              ") => Promise<",
               "ExternalServiceIncidentResponse",
               ">"
             ],
@@ -416,7 +452,7 @@
                 "id": "def-server.CaseConnector.updateIncident.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    incidentId,\n    incident,\n  }",
+                "label": "{\n      incidentId,\n      incident,\n    }",
                 "description": [],
                 "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
                 "deprecated": false,
@@ -448,6 +484,21 @@
                     "trackAdoption": false
                   }
                 ]
+              },
+              {
+                "parentPluginId": "actions",
+                "id": "def-server.CaseConnector.updateIncident.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "connectorUsageCollector",
+                "description": [],
+                "signature": [
+                  "ConnectorUsageCollector"
+                ],
+                "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -460,7 +511,9 @@
             "label": "getIncident",
             "description": [],
             "signature": [
-              "({ id }: { id: string; }) => Promise<GetIncidentResponse>"
+              "({ id }: { id: string; }, connectorUsageCollector: ",
+              "ConnectorUsageCollector",
+              ") => Promise<GetIncidentResponse>"
             ],
             "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
             "deprecated": false,
@@ -489,6 +542,21 @@
                     "trackAdoption": false
                   }
                 ]
+              },
+              {
+                "parentPluginId": "actions",
+                "id": "def-server.CaseConnector.getIncident.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "connectorUsageCollector",
+                "description": [],
+                "signature": [
+                  "ConnectorUsageCollector"
+                ],
+                "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -501,7 +569,9 @@
             "label": "pushToService",
             "description": [],
             "signature": [
-              "(params: { incident: { externalId: string | null; } & Incident; comments: { commentId: string; comment: string; }[]; }) => Promise<",
+              "(params: { incident: { externalId: string | null; } & Incident; comments: { commentId: string; comment: string; }[]; }, connectorUsageCollector: ",
+              "ConnectorUsageCollector",
+              ") => Promise<",
               "PushToServiceResponse",
               ">"
             ],
@@ -549,6 +619,21 @@
                     "trackAdoption": false
                   }
                 ]
+              },
+              {
+                "parentPluginId": "actions",
+                "id": "def-server.CaseConnector.pushToService.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "connectorUsageCollector",
+                "description": [],
+                "signature": [
+                  "ConnectorUsageCollector"
+                ],
+                "path": "x-pack/plugins/actions/server/sub_action_framework/case.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -2116,7 +2201,9 @@
             "signature": [
               "<R>({ url, data, method, responseSchema, headers, timeout, ...config }: ",
               "SubActionRequestParams",
-              "<R>) => Promise<",
+              "<R>, connectorUsageCollector: ",
+              "ConnectorUsageCollector",
+              ") => Promise<",
               "AxiosResponse",
               "<R, any>>"
             ],
@@ -2129,11 +2216,26 @@
                 "id": "def-server.SubActionConnector.request.$1",
                 "type": "CompoundType",
                 "tags": [],
-                "label": "{\n    url,\n    data,\n    method = 'get',\n    responseSchema,\n    headers,\n    timeout,\n    ...config\n  }",
+                "label": "{\n      url,\n      data,\n      method = 'get',\n      responseSchema,\n      headers,\n      timeout,\n      ...config\n    }",
                 "description": [],
                 "signature": [
                   "SubActionRequestParams",
                   "<R>"
+                ],
+                "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "actions",
+                "id": "def-server.SubActionConnector.request.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "connectorUsageCollector",
+                "description": [],
+                "signature": [
+                  "ConnectorUsageCollector"
                 ],
                 "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
                 "deprecated": false,
@@ -3137,6 +3239,20 @@
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any> | undefined"
+            ],
+            "path": "x-pack/plugins/actions/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.ActionTypeExecutorOptions.connectorUsageCollector",
+            "type": "Object",
+            "tags": [],
+            "label": "connectorUsageCollector",
+            "description": [],
+            "signature": [
+              "ConnectorUsageCollector"
             ],
             "path": "x-pack/plugins/actions/server/types.ts",
             "deprecated": false,
