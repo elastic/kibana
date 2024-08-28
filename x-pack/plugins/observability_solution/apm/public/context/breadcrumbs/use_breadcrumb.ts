@@ -14,10 +14,10 @@ import { useKibanaEnvironmentContext } from '../kibana_environment_context/use_k
 export function useBreadcrumb(
   callback: () => Breadcrumb | Breadcrumb[],
   fnDeps: any[],
-  options?: { omitRootOnServerless?: boolean }
+  options?: { omitRootOnServerless?: boolean; omitOnServerless?: boolean }
 ) {
   const { isServerlessEnv } = useKibanaEnvironmentContext();
-  const { omitRootOnServerless = false } = options || {};
+  const { omitRootOnServerless = false, omitOnServerless = false } = options || {};
 
   const api = useContext(BreadcrumbsContext);
 
@@ -30,6 +30,10 @@ export function useBreadcrumb(
   const matchedRoute = useRef(match?.route);
 
   useEffect(() => {
+    if (isServerlessEnv && omitOnServerless) {
+      return;
+    }
+
     if (matchedRoute.current && matchedRoute.current !== match?.route) {
       api.unset(matchedRoute.current);
     }
@@ -38,9 +42,12 @@ export function useBreadcrumb(
 
     if (matchedRoute.current) {
       const breadcrumbs = castArray(callback());
+
       api.set(
         matchedRoute.current,
-        omitRootOnServerless && isServerlessEnv ? breadcrumbs.slice(1) : breadcrumbs
+        isServerlessEnv && omitRootOnServerless && breadcrumbs.length >= 1
+          ? breadcrumbs.slice(1)
+          : breadcrumbs
       );
     }
 

@@ -10,7 +10,7 @@ import { ApplicationStart, ChromeBreadcrumb, ChromeStart } from '@kbn/core/publi
 import { MouseEvent, useEffect, useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ChromeBreadcrumbsAppendExtension } from '@kbn/core-chrome-browser';
-import { ServerlessPluginStart } from '@kbn/serverless/public';
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import { useQueryParams } from './use_query_params';
 
 function addClickHandlers(

@@ -22,18 +22,19 @@ import { ApmMainTemplate } from './apm_main_template';
 import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
 import { TechnicalPreviewBadge } from '../../shared/technical_preview_badge';
 import { useEntityManagerEnablementContext } from '../../../context/entity_manager_context/use_entity_manager_enablement_context';
-import { ServiceInventoryTitle } from '../home';
 
 export function ServiceGroupTemplate({
   pageTitle,
   pageHeader,
+  pagePath,
   children,
   environmentFilter = true,
   serviceGroupContextTab,
   ...pageTemplateProps
 }: {
-  pageTitle?: React.ReactNode;
+  pageTitle: string;
   pageHeader?: EuiPageHeaderProps;
+  pagePath: string;
   children: React.ReactNode;
   environmentFilter?: boolean;
   serviceGroupContextTab: ServiceGroupContextTab['key'];
@@ -81,38 +82,45 @@ export function ServiceGroupTemplate({
     </EuiFlexGroup>
   );
 
-  const tabs = useTabs(serviceGroupContextTab, !!serviceGroupId);
-  const selectedTab = tabs?.find(({ isSelected }) => isSelected);
+  const tabs = useTabs(serviceGroupContextTab);
+  const selectedTab = tabs.find(({ isSelected }) => isSelected);
+
+  // this is only used for building the breadcrumbs for the service group page
   useBreadcrumb(
-    () => [
-      {
-        title: i18n.translate('xpack.apm.serviceGroups.breadcrumb.title', {
-          defaultMessage: 'Services',
-        }),
-        href: serviceGroupsLink,
-      },
-      ...(selectedTab
+    () =>
+      !serviceGroupName
         ? [
-            ...(serviceGroupName
+            {
+              title: pageTitle,
+              href: pagePath,
+            },
+          ]
+        : [
+            {
+              title: i18n.translate('xpack.apm.serviceGroups.breadcrumb.title', {
+                defaultMessage: 'Services',
+              }),
+              href: serviceGroupsLink,
+            },
+            {
+              title: serviceGroupName,
+              href: router.link('/services', { query }),
+            },
+            ...(selectedTab
               ? [
                   {
-                    title: serviceGroupName,
-                    href: router.link('/services', { query }),
-                  },
+                    title: selectedTab.breadcrumbLabel || selectedTab.label,
+                    href: selectedTab.href,
+                  } as { title: string; href: string },
                 ]
               : []),
-            {
-              title: selectedTab.breadcrumbLabel || selectedTab.label,
-              href: selectedTab.href,
-            } as { title: string; href: string },
-          ]
-        : []),
-    ],
-    [query, router, selectedTab, serviceGroupName, serviceGroupsLink],
+          ],
+    [pagePath, pageTitle, query, router, selectedTab, serviceGroupName, serviceGroupsLink],
     {
       omitRootOnServerless: true,
     }
   );
+
   return (
     <ApmMainTemplate
       pageTitle={serviceGroupsPageTitle}
@@ -154,7 +162,7 @@ type ServiceGroupContextTab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
   breadcrumbLabel?: string;
 };
 
-function useTabs(selectedTab: ServiceGroupContextTab['key'], isServiceGroup = false) {
+function useTabs(selectedTab: ServiceGroupContextTab['key']) {
   const router = useApmRouter();
   const { query } = useAnyOfApmParams('/services', '/service-map');
   const { isEntityCentricExperienceViewEnabled } = useEntityManagerEnablementContext();
@@ -162,11 +170,9 @@ function useTabs(selectedTab: ServiceGroupContextTab['key'], isServiceGroup = fa
   const tabs: ServiceGroupContextTab[] = [
     {
       key: 'service-inventory',
-      breadcrumbLabel: isServiceGroup
-        ? i18n.translate('xpack.apm.serviceGroup.serviceInventory', {
-            defaultMessage: 'Inventory',
-          })
-        : ServiceInventoryTitle,
+      breadcrumbLabel: i18n.translate('xpack.apm.serviceGroup.serviceInventory', {
+        defaultMessage: 'Inventory',
+      }),
       label: (
         <EuiFlexGroup justifyContent="flexStart" alignItems="baseline" gutterSize="s">
           <EuiFlexItem grow={false}>

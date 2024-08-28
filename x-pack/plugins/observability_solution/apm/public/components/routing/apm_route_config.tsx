@@ -96,7 +96,7 @@ const apmRoutes = {
       // this route fails on navigation unless it's defined before home
       '/service-groups': {
         element: (
-          <Breadcrumb title={ServiceGroupsTitle} href={'/service-groups'}>
+          <Breadcrumb title={ServiceGroupsTitle} href={'/service-groups'} omitOnServerless>
             <ApmMainTemplate
               pageTitle={ServiceGroupsTitle}
               environmentFilter={false}

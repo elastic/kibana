@@ -49,7 +49,11 @@ function serviceGroupPage<TPath extends string>({
   return {
     [path]: {
       element: (
-        <ServiceGroupTemplate pageTitle={title} serviceGroupContextTab={serviceGroupContextTab}>
+        <ServiceGroupTemplate
+          pageTitle={title}
+          pagePath={path}
+          serviceGroupContextTab={serviceGroupContextTab}
+        >
           {element}
         </ServiceGroupTemplate>
       ),

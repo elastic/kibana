@@ -25,7 +25,7 @@ export const Breadcrumb = ({
     () => ({ title, href: core.http.basePath.prepend('/app/apm' + href) }),
     [core.http.basePath, href, title],
     {
-      omitRootOnServerless: omitOnServerless,
+      omitOnServerless,
     }
   );
 
