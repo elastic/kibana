@@ -50,6 +50,7 @@ import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { IS_OPERATOR } from '../../../../../common/types';
 import { hasPreview, PreviewLink } from '../../../shared/components/preview_link';
 import { CellActions } from '../../shared/components/cell_actions';
+import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
 
 export const PREVALENCE_TAB_ID = 'prevalence';
 const DEFAULT_FROM = 'now-30d';
@@ -89,6 +90,10 @@ interface PrevalenceDetailsRow extends PrevalenceData {
    * Scope id to pass to the preview link
    */
   scopeId: string;
+  /**
+   * Id of the rule
+   */
+  ruleId: string;
 }
 
 const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
@@ -123,6 +128,7 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
                     field={data.field}
                     value={value}
                     scopeId={data.scopeId}
+                    ruleId={data.ruleId}
                     data-test-subj={PREVALENCE_DETAILS_TABLE_PREVIEW_LINK_CELL_TEST_ID}
                   >
                     <EuiText size="xs">{value}</EuiText>
@@ -329,6 +335,7 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
 export const PrevalenceDetails: React.FC = () => {
   const { dataFormattedForFieldBrowser, investigationFields, scopeId } =
     useDocumentDetailsContext();
+  const { ruleId } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
 
   const isPlatinumPlus = useLicense().isPlatinumPlus();
   const isPreviewEnabled = !useIsExperimentalFeatureEnabled('entityAlertPreviewDisabled');
@@ -384,8 +391,9 @@ export const PrevalenceDetails: React.FC = () => {
         isPlatinumPlus,
         isPreviewEnabled,
         scopeId,
+        ruleId,
       })),
-    [data, absoluteStart, absoluteEnd, isPlatinumPlus, isPreviewEnabled, scopeId]
+    [data, absoluteStart, absoluteEnd, isPlatinumPlus, isPreviewEnabled, scopeId, ruleId]
   );
 
   const upsell = (

@@ -35,6 +35,10 @@ export interface FieldValueCellProps {
    */
   fieldFromBrowserField?: Partial<FieldSpec>;
   /**
+   * Id of the rule
+   */
+  ruleId: string;
+  /**
    * Value of the link field if it exists. Allows to navigate to other pages like host, user, network...
    */
   getLinkValue?: (field: string) => string | null;
@@ -53,6 +57,7 @@ export const TableFieldValueCell = memo(
     data,
     eventId,
     fieldFromBrowserField,
+    ruleId,
     getLinkValue,
     values,
   }: FieldValueCellProps) => {
@@ -87,6 +92,7 @@ export const TableFieldValueCell = memo(
                   field={data.field}
                   value={value}
                   scopeId={scopeId}
+                  ruleId={ruleId}
                   data-test-subj={`${FLYOUT_TABLE_PREVIEW_LINK_FIELD_TEST_ID}-${i}`}
                 />
               ) : (

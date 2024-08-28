@@ -17,6 +17,7 @@ import { HOST_PREVIEW_BANNER } from '../../document_details/right/components/hos
 import { UserPreviewPanelKey } from '../../entity_details/user_right';
 import { USER_PREVIEW_BANNER } from '../../document_details/right/components/user_entity_overview';
 import { NetworkPanelKey, NETWORK_PREVIEW_BANNER } from '../../network_details';
+import { RulePreviewPanelKey, RULE_PREVIEW_BANNER } from '../../rule_details/right';
 import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
 
 const mockedTelemetry = createTelemetryServiceMock();
@@ -43,7 +44,13 @@ jest.mock('@kbn/expandable-flyout', () => ({
 const renderPreviewLink = (field: string, value: string, dataTestSuj?: string) =>
   render(
     <TestProviders>
-      <PreviewLink field={field} value={value} data-test-subj={dataTestSuj} scopeId={'scopeId'} />
+      <PreviewLink
+        field={field}
+        value={value}
+        data-test-subj={dataTestSuj}
+        scopeId={'scopeId'}
+        ruleId={'ruleId'}
+      />
     </TestProviders>
   );
 
@@ -111,6 +118,20 @@ describe('<PreviewLink />', () => {
       },
     });
   });
+
+  it('should render a link to open rule preview', () => {
+    const { getByTestId } = renderPreviewLink('kibana.alert.rule.name', 'ruleId', 'rule-link');
+    getByTestId('rule-link').click();
+
+    expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
+      id: RulePreviewPanelKey,
+      params: {
+        ruleId: 'ruleId',
+        banner: RULE_PREVIEW_BANNER,
+        isPreviewMode: true,
+      },
+    });
+  });
 });
 
 describe('hasPreview', () => {
@@ -120,6 +141,10 @@ describe('hasPreview', () => {
 
   it('should return true if field is user.name', () => {
     expect(hasPreview('user.name')).toBe(true);
+  });
+
+  it('should return true if field is rule.id', () => {
+    expect(hasPreview('kibana.alert.rule.name')).toBe(true);
   });
 
   it('should return true if field type is source.ip', () => {

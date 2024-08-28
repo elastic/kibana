@@ -84,6 +84,7 @@ describe('TableFieldValueCell', () => {
               data={hostIpData}
               eventId={eventId}
               values={hostIpValues}
+              ruleId="ruleId"
             />
           </DocumentDetailsContext.Provider>
         </TestProviders>
@@ -106,6 +107,7 @@ describe('TableFieldValueCell', () => {
               eventId={eventId}
               fieldFromBrowserField={undefined} // <-- no metadata
               values={hostIpValues}
+              ruleId="ruleId"
             />
           </DocumentDetailsContext.Provider>
         </TestProviders>
@@ -152,6 +154,7 @@ describe('TableFieldValueCell', () => {
               eventId={eventId}
               fieldFromBrowserField={messageFieldFromBrowserField}
               values={messageValues}
+              ruleId="ruleId"
             />
           </DocumentDetailsContext.Provider>
         </TestProviders>
@@ -188,6 +191,7 @@ describe('TableFieldValueCell', () => {
               eventId={eventId}
               fieldFromBrowserField={hostIpFieldFromBrowserField} // <-- metadata
               values={hostIpValues}
+              ruleId="ruleId"
             />
           </DocumentDetailsContext.Provider>
         </TestProviders>

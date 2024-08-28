@@ -24,6 +24,9 @@ import { InvestigateInTimelineButton } from '../../../../common/components/event
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../detections/components/alerts_table/translations';
 import { getDataProvider } from '../../../../common/components/event_details/use_action_cell_data_provider';
 import { AlertPreviewButton } from '../../../shared/components/alert_preview_button';
+import { PreviewLink } from '../../../shared/components/preview_link';
+import { useDocumentDetailsContext } from '../../shared/context';
+import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
 
 export const TIMESTAMP_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
 const dataProviderLimit = 5;
@@ -81,6 +84,9 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
     error,
   } = usePaginatedAlerts(alertIds || []);
   const isPreviewEnabled = !useIsExperimentalFeatureEnabled('entityAlertPreviewDisabled');
+
+  const { dataFormattedForFieldBrowser } = useDocumentDetailsContext();
+  const { ruleId } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
 
   const onTableChange = useCallback(
     ({ page, sort }: Criteria<Record<string, unknown>>) => {
@@ -170,7 +176,13 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
         truncateText: true,
         render: (value: string) => (
           <CellTooltipWrapper tooltip={value}>
-            <span>{value}</span>
+            {isPreviewEnabled ? (
+              <PreviewLink field={ALERT_RULE_NAME} value={value} scopeId={scopeId} ruleId={ruleId}>
+                <span>{value}</span>
+              </PreviewLink>
+            ) : (
+              <span>{value}</span>
+            )}
           </CellTooltipWrapper>
         ),
       },
@@ -209,7 +221,7 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
         },
       },
     ],
-    [isPreviewEnabled, scopeId, dataTestSubj]
+    [isPreviewEnabled, scopeId, dataTestSubj, ruleId]
   );
 
   return (

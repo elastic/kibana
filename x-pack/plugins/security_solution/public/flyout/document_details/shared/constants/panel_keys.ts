@@ -11,4 +11,3 @@ export const DocumentDetailsPreviewPanelKey = 'document-details-preview' as cons
 
 export const DocumentDetailsIsolateHostPanelKey = 'document-details-isolate-host' as const;
 export const DocumentDetailsAlertReasonPanelKey = 'document-details-alert-reason' as const;
-export const DocumentDetailsRuleOverviewPanelKey = 'document-details-rule-overview' as const;
