@@ -77,7 +77,6 @@ import {
   getDateLiterals,
   buildFieldsDefinitionsWithMetadata,
   TRIGGER_SUGGESTION_COMMAND,
-  TIME_SYSTEM_PARAMS,
 } from './factories';
 import { EDITOR_MARKER, SINGLE_BACKTICK, METADATA_FIELDS } from '../shared/constants';
 import { getAstContext, removeMarkerArgFromArgsList } from '../shared/context';
@@ -99,6 +98,7 @@ import {
   removeQuoteForSuggestedSources,
   getValidFunctionSignaturesForPreviousArgs,
   strictlyGetParamAtPosition,
+  isLiteralDateItem,
 } from './helper';
 import {
   FunctionParameter,
@@ -1275,7 +1275,7 @@ async function getFunctionArgsSuggestions(
     let esType = extractFinalTypeFromArg(nodeArg, references);
 
     // For named system time parameters ?start and ?end, make sure it's compatiable
-    if (isLiteralItem(nodeArg) && TIME_SYSTEM_PARAMS.includes(nodeArg.text)) {
+    if (isLiteralDateItem(nodeArg)) {
       esType = 'date';
     }
 
