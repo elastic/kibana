@@ -90,7 +90,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('observability cases read-only privileges', function() {
+    describe('observability cases read-only privileges', function () {
       this.tags('skipFIPS');
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
@@ -144,7 +144,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('no observability privileges', fuction() {
+    describe('no observability privileges', function () {
       this.tags('skipFIPS');
       before(async () => {
         await observability.users.setTestUserRole({
