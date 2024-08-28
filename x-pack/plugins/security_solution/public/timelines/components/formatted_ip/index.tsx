@@ -183,7 +183,7 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
     address && eventContext?.enableIpDetailsFlyout && eventContext?.timelineID;
 
   const openNetworkDetailsSidePanel = useCallback(
-    (e: any) => {
+    (e: React.SyntheticEvent) => {
       e.preventDefault();
       if (onClick) {
         onClick();
@@ -241,6 +241,7 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
   );
 
   const render = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (_props: any, _provided: any, snapshot: any) =>
       snapshot.isDragging ? (
         <DragEffects>

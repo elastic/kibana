@@ -260,11 +260,10 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
   const columns = useMemo(
     () =>
       getColumns({
-        conversations: conversationSettings,
         onDeleteActionClicked,
         onEditActionClicked,
       }),
-    [conversationSettings, getColumns, onDeleteActionClicked, onEditActionClicked]
+    [getColumns, onDeleteActionClicked, onEditActionClicked]
   );
 
   const confirmationTitle = useMemo(
