@@ -4213,7 +4213,7 @@
                   },
                   "policy_id": {
                     "type": "string",
-                    "description": "The id of the agent policy the Elastic Agent will be enrolled in."
+                    "description": "The ID of the agent policy the Elastic Agent will be enrolled in."
                   }
                 },
                 "required": [
@@ -8232,7 +8232,7 @@
           },
           "api_key_id": {
             "type": "string",
-            "description": "The id of the API key in the Security API."
+            "description": "The ID of the API key in the Security API."
           },
           "api_key": {
             "type": "string",
@@ -8248,7 +8248,7 @@
           },
           "policy_id": {
             "type": "string",
-            "description": "The id of the agent policy the Elastic Agent will be enrolled in."
+            "description": "The ID of the agent policy the Elastic Agent will be enrolled in."
           },
           "created_at": {
             "type": "string"
