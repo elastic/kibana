@@ -8,11 +8,11 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
+  const fleetAndAgents = getService('fleetAndAgents');
 
   const pkgName = 'multiple_versions';
   const pkgOlderVersion = '0.1.0';
@@ -24,7 +24,10 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('bulk package install api', async () => {
     skipIfNoDockerRegistry(providerContext);
-    setupFleetAndAgents(providerContext);
+
+    before(async () => {
+      await fleetAndAgents.setup();
+    });
 
     it('should install the latest version by default', async () => {
       const response = await supertest
