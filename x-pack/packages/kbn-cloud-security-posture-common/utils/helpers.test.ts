@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { extractErrorMessage, defaultErrorMessage, buildMutedRulesFilter } from './helpers';
+import {
+  extractErrorMessage,
+  defaultErrorMessage,
+  buildMutedRulesFilter,
+  buildMisconfigurationPreviewQuery,
+} from './helpers';
 
 const fallbackMessage = 'thisIsAFallBackMessage';
 
@@ -136,6 +141,51 @@ describe('test helper methods', () => {
       ];
 
       expect(buildMutedRulesFilter(rulesStates)).toEqual(expectedQuery);
+    });
+  });
+
+  describe('buildMisconfigurationPreviewQuery Test', () => {
+    it('should return the correct query when given field and query', () => {
+      const field = 'host.name';
+      const query = 'exampleHost';
+      const expectedQuery = {
+        bool: {
+          must: [],
+          filter: [
+            {
+              bool: {
+                should: [{ term: { 'host.name': { value: 'exampleHost' } } }],
+                minimum_should_match: 1,
+              },
+            },
+          ],
+          should: [],
+          must_not: [],
+        },
+      };
+
+      expect(buildMisconfigurationPreviewQuery(field, query)).toEqual(expectedQuery);
+    });
+
+    it('should return the correct query when given field and empty query', () => {
+      const field = 'host.name';
+      const expectedQuery = {
+        bool: {
+          must: [],
+          filter: [
+            {
+              bool: {
+                should: [{ term: { 'host.name': { value: '' } } }],
+                minimum_should_match: 1,
+              },
+            },
+          ],
+          should: [],
+          must_not: [],
+        },
+      };
+
+      expect(buildMisconfigurationPreviewQuery(field)).toEqual(expectedQuery);
     });
   });
 });

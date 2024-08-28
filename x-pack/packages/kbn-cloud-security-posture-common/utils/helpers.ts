@@ -41,3 +41,21 @@ export const buildMutedRulesFilter = (
 
   return mutedRulesFilterQuery;
 };
+
+export const buildMisconfigurationPreviewQuery = (field: string, queryValue?: string) => {
+  return {
+    bool: {
+      must: [],
+      filter: [
+        {
+          bool: {
+            should: [{ term: { [field]: { value: `${queryValue || ''}` } } }],
+            minimum_should_match: 1,
+          },
+        },
+      ],
+      should: [],
+      must_not: [],
+    },
+  };
+};
