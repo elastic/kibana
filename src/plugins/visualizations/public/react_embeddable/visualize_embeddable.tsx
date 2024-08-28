@@ -104,6 +104,8 @@ export const getVisualizeEmbeddableFactory: (deps: {
     serializedVis$
       .pipe(
         switchMap(async (serializedVis) => {
+          const currentVis = vis$.getValue();
+          if (currentVis) currentVis.uiState.off('change', onUiStateChange);
           const vis = await createVisInstance(serializedVis);
           const { params, abortController } = await getExpressionParams();
           return { vis, params, abortController };
