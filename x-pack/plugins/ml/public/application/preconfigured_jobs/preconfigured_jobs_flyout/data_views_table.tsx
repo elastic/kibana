@@ -18,9 +18,10 @@ import { ML_PAGES } from '../../../../common/constants/locator';
 
 interface Props {
   matchingDataViews: DataViewInfo[];
+  moduleId: string;
 }
 
-export const DataViewsTable: FC<Props> = ({ matchingDataViews }) => {
+export const DataViewsTable: FC<Props> = ({ matchingDataViews, moduleId }) => {
   const {
     services: {
       application: { navigateToUrl },
@@ -33,12 +34,12 @@ export const DataViewsTable: FC<Props> = ({ matchingDataViews }) => {
       return await mlLocator.getUrl({
         page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_RECOGNIZER,
         pageState: {
-          id: module.id,
+          id: moduleId,
           index: id,
         },
       });
     },
-    [mlLocator]
+    [mlLocator, moduleId]
   );
 
   const columns: Array<

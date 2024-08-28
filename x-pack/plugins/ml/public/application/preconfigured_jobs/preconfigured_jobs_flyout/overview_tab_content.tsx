@@ -295,7 +295,7 @@ export const OverviewTabContent: FC<Props> = ({
                 ) : null}
                 {matchingDataViews.length ? (
                   <EuiFlexItem grow={false}>
-                    <DataViewsTable matchingDataViews={matchingDataViews} />
+                    <DataViewsTable matchingDataViews={matchingDataViews} moduleId={module.id} />
                   </EuiFlexItem>
                 ) : null}
               </EuiFlexGroup>
@@ -303,7 +303,7 @@ export const OverviewTabContent: FC<Props> = ({
               <EuiEmptyPrompt
                 css={{ margin: '10px' }}
                 color="primary"
-                iconType={(isLogoObject(module.logo) ? module.logo.icon : module.logo) as string}
+                iconType={(isLogoObject(module.logo) ? module.logo?.icon : module.logo) as string}
                 title={
                   <h2>
                     <FormattedMessage
