@@ -114,7 +114,6 @@ describe('useFetchAlertDetail', () => {
               "6": "o",
               "7": "n",
               "active": true,
-              "end": undefined,
               "fields": Object {
                 "@timestamp": "2022-01-31T18:20:57.204Z",
                 "_index": "alert-index",
