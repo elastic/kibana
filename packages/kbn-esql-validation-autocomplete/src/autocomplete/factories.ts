@@ -268,7 +268,7 @@ export const buildPoliciesDefinitions = (
 ): SuggestionRawDefinition[] =>
   policies.map(({ name: label, sourceIndices }) => ({
     label,
-    text: getSafeInsertText(label, { dashSupported: true }),
+    text: getSafeInsertText(label, { dashSupported: true }) + ' ',
     kind: 'Class',
     detail: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.policyDefinition', {
       defaultMessage: `Policy defined on {count, plural, one {index} other {indices}}: {indices}`,
@@ -278,6 +278,7 @@ export const buildPoliciesDefinitions = (
       },
     }),
     sortText: 'D',
+    command: TRIGGER_SUGGESTION_COMMAND,
   }));
 
 export const buildMatchingFieldsDefinition = (
@@ -286,7 +287,7 @@ export const buildMatchingFieldsDefinition = (
 ): SuggestionRawDefinition[] =>
   fields.map((label) => ({
     label,
-    text: getSafeInsertText(label),
+    text: getSafeInsertText(label) + ' ',
     kind: 'Variable',
     detail: i18n.translate(
       'kbn-esql-validation-autocomplete.esql.autocomplete.matchingFieldDefinition',
@@ -298,6 +299,7 @@ export const buildMatchingFieldsDefinition = (
       }
     ),
     sortText: 'D',
+    command: TRIGGER_SUGGESTION_COMMAND,
   }));
 
 export const buildOptionDefinition = (

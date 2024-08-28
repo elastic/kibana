@@ -370,27 +370,44 @@ describe('autocomplete', () => {
 
   describe('enrich', () => {
     const modes = ['any', 'coordinator', 'remote'];
-    const policyNames = policies.map(({ name, suggestedAs }) => suggestedAs || name);
+    const expectedPolicyNameSuggestions = policies
+      .map(({ name, suggestedAs }) => suggestedAs || name)
+      .map((name) => `${name} `);
     for (const prevCommand of [
       '',
       // '| enrich other-policy ',
       // '| enrich other-policy on b ',
       // '| enrich other-policy with c ',
     ]) {
-      testSuggestions(`from a ${prevCommand}| enrich /`, policyNames);
+      testSuggestions(`from a ${prevCommand}| enrich /`, expectedPolicyNameSuggestions);
       testSuggestions(
         `from a ${prevCommand}| enrich _/`,
         modes.map((mode) => `_${mode}:$0`),
         '_'
       );
       for (const mode of modes) {
-        testSuggestions(`from a ${prevCommand}| enrich _${mode}:/`, policyNames, ':');
-        testSuggestions(`from a ${prevCommand}| enrich _${mode.toUpperCase()}:/`, policyNames, ':');
-        testSuggestions(`from a ${prevCommand}| enrich _${camelCase(mode)}:/`, policyNames, ':');
+        testSuggestions(
+          `from a ${prevCommand}| enrich _${mode}:/`,
+          expectedPolicyNameSuggestions,
+          ':'
+        );
+        testSuggestions(
+          `from a ${prevCommand}| enrich _${mode.toUpperCase()}:/`,
+          expectedPolicyNameSuggestions,
+          ':'
+        );
+        testSuggestions(
+          `from a ${prevCommand}| enrich _${camelCase(mode)}:/`,
+          expectedPolicyNameSuggestions,
+          ':'
+        );
       }
       testSuggestions(`from a ${prevCommand}| enrich policy /`, ['ON $0', 'WITH $0', '| ']);
-      testSuggestions(`from a ${prevCommand}| enrich policy on /`, getFieldNamesByType('any'));
-      testSuggestions(`from a ${prevCommand}| enrich policy on b /`, ['WITH $0', ',', '| ']);
+      testSuggestions(
+        `from a ${prevCommand}| enrich policy on /`,
+        getFieldNamesByType('any').map((v) => `${v} `)
+      );
+      testSuggestions(`from a ${prevCommand}| enrich policy on b /`, ['WITH $0', '| ']);
       testSuggestions(
         `from a ${prevCommand}| enrich policy on b with /`,
         ['var0 = ', ...getPolicyFields('policy')],
@@ -1031,14 +1048,17 @@ describe('autocomplete', () => {
     // ENRICH policy
     testSuggestions(
       'FROM index1 | ENRICH p/',
-      policies.map(({ name }) => getSafeInsertText(name))
+      policies.map(({ name }) => getSafeInsertText(name) + ' ')
     );
 
     // ENRICH policy ON
     testSuggestions('FROM index1 | ENRICH policy O/', ['ON $0', 'WITH $0', '| ']);
 
     // ENRICH policy ON field
-    testSuggestions('FROM index1 | ENRICH policy ON f/', getFieldNamesByType('any'));
+    testSuggestions(
+      'FROM index1 | ENRICH policy ON f/',
+      getFieldNamesByType('any').map((name) => `${name} `)
+    );
 
     // ENRICH policy WITH policyfield
     testSuggestions('FROM index1 | ENRICH policy WITH v/', [
@@ -1346,12 +1366,37 @@ describe('autocomplete', () => {
     });
 
     // FROM source METADATA
-
     testSuggestions('FROM index1 M/', [
       ',',
       attachAsSnippet(attachTriggerCommand('METADATA $0')),
       '| ',
     ]);
+
+    describe('ENRICH', () => {
+      testSuggestions(
+        'FROM a | ENRICH /',
+        policies.map((p) => `${getSafeInsertText(p.name)} `).map(attachTriggerCommand)
+      );
+      testSuggestions(
+        'FROM a | ENRICH policy /',
+        ['ON $0', 'WITH $0', '| '].map(attachTriggerCommand)
+      );
+      testSuggestions(
+        'FROM a | ENRICH policy ON /',
+        getFieldNamesByType('any')
+          .map((name) => `${name} `)
+          .map(attachTriggerCommand)
+      );
+      testSuggestions(
+        'FROM a | ENRICH policy ON @timestamp /',
+        ['WITH $0', '| '].map(attachTriggerCommand)
+      );
+      // nothing fancy with this field list
+      testSuggestions('FROM a | ENRICH policy ON @timestamp WITH /', [
+        'var0 = ',
+        ...getPolicyFields('policy').map((name) => ({ text: name, command: undefined })),
+      ]);
+    });
 
     // LIMIT number
     testSuggestions('FROM a | LIMIT /', ['10 ', '100 ', '1000 '].map(attachTriggerCommand));
