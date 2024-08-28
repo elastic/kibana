@@ -162,7 +162,9 @@ export const buildStateSubscribe =
         JSON.stringify(logData, null, 2)
       );
 
-      sendLoadingMsg(dataState.data$.main$);
+      // Set documents loading to true immediately on state changes since there's a delay
+      // on the fetch and we don't want to see state changes reflected in the data grid
+      // until the fetch is complete (it also helps to minimize data grid re-renders)
       sendLoadingMsg(dataState.data$.documents$, dataState.data$.documents$.getValue());
 
       dataState.fetch();

@@ -30,7 +30,7 @@ import {
   EuiHorizontalRule,
   EuiDataGridToolBarVisibilityDisplaySelectorOptions,
 } from '@elastic/eui';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import {
   useDataGridColumnsCellActions,
   type UseDataGridColumnsCellActionsProps,
@@ -42,10 +42,9 @@ import { getShouldShowFieldHandler } from '@kbn/discover-utils';
 import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
-import { KBN_FIELD_TYPES, type DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { AdditionalFieldGroups } from '@kbn/unified-field-list';
-import { getSortingCriteria } from '@kbn/sort-predicates';
 import { DATA_GRID_DENSITY_STYLE_MAP, useDataGridDensity } from '../hooks/use_data_grid_density';
 import {
   UnifiedDataTableSettings,
@@ -91,10 +90,15 @@ import {
   type ColorIndicatorControlColumnParams,
   getAdditionalRowControlColumns,
 } from './custom_control_columns';
+import { useSorting } from '../hooks/use_sorting';
 
 const CONTROL_COLUMN_IDS_DEFAULT = [SELECT_ROW, OPEN_DETAILS];
 const THEME_DEFAULT = { darkMode: false };
-const VIRTUALIZATION_OPTIONS: EuiDataGridProps['virtualizationOptions'] = { overscanRowCount: 20 };
+const VIRTUALIZATION_OPTIONS: EuiDataGridProps['virtualizationOptions'] = {
+  // Allowing some additional rows to be rendered outside
+  // the view minimizes pop-in when scrolling quickly
+  overscanRowCount: 20,
+};
 
 export type SortOrder = [string, string];
 
@@ -102,11 +106,6 @@ export enum DataLoadingState {
   loading = 'loading',
   loadingMore = 'loadingMore',
   loaded = 'loaded',
-}
-
-interface SortObj {
-  id: string;
-  direction: string;
 }
 
 /**
@@ -520,79 +519,25 @@ export const UnifiedDataTable = ({
     [timeFieldName, isPlainRecord, showTimeCol, columnsMeta]
   );
 
-  const visibleColumns = useMemo(
-    () =>
-      getVisibleColumns(displayedColumns, dataView, shouldPrependTimeFieldColumn(displayedColumns)),
-    [dataView, displayedColumns, shouldPrependTimeFieldColumn]
-  );
+  const visibleColumns = useMemo(() => {
+    return getVisibleColumns(
+      displayedColumns,
+      dataView,
+      shouldPrependTimeFieldColumn(displayedColumns)
+    );
+  }, [dataView, displayedColumns, shouldPrependTimeFieldColumn]);
 
-  const sortingColumns = useMemo(
-    () =>
-      sort
-        .map(([id, direction]) => ({ id, direction }))
-        .filter(({ id }) => visibleColumns.includes(id)),
-    [sort, visibleColumns]
-  );
-
-  const comparators = useMemo(() => {
-    if (!isPlainRecord || !rows || !sortingColumns.length) {
-      return;
-    }
-
-    function getCriteriaType(field: DataViewField) {
-      switch (field.type) {
-        case KBN_FIELD_TYPES.IP:
-          return 'ip';
-        case KBN_FIELD_TYPES.GEO_SHAPE:
-        case KBN_FIELD_TYPES.NUMBER:
-          return 'number';
-        case KBN_FIELD_TYPES.DATE:
-          return 'date';
-        default:
-          return undefined;
-      }
-    }
-
-    const currentComparators: Array<(a: DataTableRecord, b: DataTableRecord) => number> = [];
-
-    for (const { id, direction } of sortingColumns) {
-      const field = dataView.fields.getByName(id);
-
-      if (!field) {
-        continue;
-      }
-
-      const sortField = getSortingCriteria(
-        getCriteriaType(field),
-        id,
-        dataView.getFormatterForField(field)
-      );
-
-      currentComparators.push((a, b) =>
-        sortField(a.flattened, b.flattened, direction as 'asc' | 'desc')
-      );
-    }
-
-    return currentComparators;
-  }, [dataView, isPlainRecord, rows, sortingColumns]);
-
-  const sortedRows = useMemo(() => {
-    if (!rows || !comparators) {
-      return rows;
-    }
-
-    return rows.slice().sort((a, b) => {
-      for (const comparator of comparators) {
-        const result = comparator(a, b);
-
-        if (result !== 0) {
-          return result;
-        }
-      }
-
-      return 0;
-    });
-  }, [comparators, rows]);
+  const { sortedRows, sorting } = useSorting({
+    rows,
+    visibleColumns,
+    columnsMeta,
+    sort,
+    dataView,
+    isPlainRecord,
+    isSortEnabled,
+    defaultColumns,
+    onSort,
+  });
 
   const displayedRows = useMemo(() => {
     if (!sortedRows) {
@@ -917,39 +862,6 @@ export const UnifiedDataTable = ({
     }),
     [visibleColumns, onSetColumns, shouldPrependTimeFieldColumn]
   );
-
-  /**
-   * Sorting
-   */
-  const onTableSort = useCallback(
-    (sortingColumnsData) => {
-      if (isSortEnabled) {
-        onSort?.(sortingColumnsData.map(({ id, direction }: SortObj) => [id, direction]));
-      }
-    },
-    [onSort, isSortEnabled]
-  );
-
-  const sorting = useMemo(() => {
-    if (!isSortEnabled) {
-      return {
-        columns: sortingColumns,
-        onSort: () => {},
-      };
-    }
-
-    // in ES|QL mode, sorting is disabled when in Document view
-    // ideally we want the @timestamp column to be sortable server side
-    // but it needs discussion before moving forward like this
-    if (isPlainRecord && !columns.length) {
-      return undefined;
-    }
-
-    return {
-      columns: sortingColumns,
-      onSort: onTableSort,
-    };
-  }, [isSortEnabled, sortingColumns, isPlainRecord, columns.length, onTableSort]);
 
   const canSetExpandedDoc = Boolean(setExpandedDoc && !!renderDocumentView);
 
