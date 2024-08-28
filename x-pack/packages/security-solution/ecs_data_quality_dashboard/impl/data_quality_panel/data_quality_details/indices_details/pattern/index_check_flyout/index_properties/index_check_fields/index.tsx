@@ -9,9 +9,10 @@ import React, { useMemo, useState } from 'react';
 import { EuiButtonGroup, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
 
+import { EMPTY_METADATA } from '../../../../../../constants';
 import { useDataQualityContext } from '../../../../../../data_quality_context';
 import { useIndicesCheckContext } from '../../../../../../contexts/indices_check_context';
-import { EMPTY_METADATA, INCOMPATIBLE_TAB_ID } from '../helpers';
+import { INCOMPATIBLE_TAB_ID } from './constants';
 import { IlmPhase, PatternRollup } from '../../../../../../types';
 import { getTabs } from './tabs/helpers';
 

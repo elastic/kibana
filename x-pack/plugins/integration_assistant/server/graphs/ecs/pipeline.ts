@@ -163,7 +163,7 @@ function generateProcessors(ecsMapping: object, samples: object, basePath: strin
 export function createPipeline(state: EcsMappingState): IngestPipeline {
   const samples = JSON.parse(state.combinedSamples);
 
-  const processors = generateProcessors(state.currentMapping, samples);
+  const processors = generateProcessors(state.finalMapping, samples);
   // Retrieve all source field names from convert processors to populate single remove processor:
   const fieldsToRemove = processors
     .map((p: any) => p.convert?.field)

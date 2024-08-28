@@ -37,7 +37,7 @@ def get_elasticsearch_results(query):
     result = es_client.search(index="${formValues.indices.join(',')}", body=es_query)
     return result["hits"]["hits"]
 
-def create_openai_prompt(question, results):
+def create_openai_prompt(results):
     context = ""
     for hit in results:
         inner_hit_path = f"{hit['_index']}.{index_source_fields.get(hit['_index'])[0]}"

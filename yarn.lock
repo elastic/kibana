@@ -1612,7 +1612,7 @@
   dependencies:
     tslib "^2.0.0"
 
-"@elastic/apm-rum-core@^5.21.0", "@elastic/apm-rum-core@^5.21.1":
+"@elastic/apm-rum-core@^5.21.1":
   version "5.21.1"
   resolved "https://registry.yarnpkg.com/@elastic/apm-rum-core/-/apm-rum-core-5.21.1.tgz#ea6f2268629193962c194ae1d29971e2c5b2e531"
   integrity sha512-/LyLhVdJ+zcsKogwq2AEYARc//RDXOoTHWPERLay4sCsvvxc4/GkkhhOC40CqI0oMu4kUAoJInQWZuCM7zCZRQ==
@@ -5810,6 +5810,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/observability-utils@link:x-pack/packages/observability/observability_utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/oidc-provider-plugin@link:x-pack/test/security_api_integration/plugins/oidc_provider":
   version "0.0.0"
   uid ""
@@ -9664,7 +9668,7 @@
   resolved "https://registry.yarnpkg.com/@testim/chrome-version/-/chrome-version-1.1.4.tgz#86e04e677cd6c05fa230dd15ac223fa72d1d7090"
   integrity sha512-kIhULpw9TrGYnHp/8VfdcneIcxKnLixmADtukQRtJUmsVlMg0niMkwV0xZmi8hqa57xqilIHjWFA0GKvEjVU5g==
 
-"@testing-library/dom@^8.0.0":
+"@testing-library/dom@^8.0.0", "@testing-library/dom@^8.19.0":
   version "8.19.0"
   resolved "https://registry.yarnpkg.com/@testing-library/dom/-/dom-8.19.0.tgz#bd3f83c217ebac16694329e413d9ad5fdcfd785f"
   integrity sha512-6YWYPPpxG3e/xOo6HIWwB/58HukkwIVTOaZ0VwdMVjhRUX/01E4FtQbck9GazOOj7MXHc5RBzMrU86iBJHbI+A==
