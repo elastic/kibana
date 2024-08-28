@@ -1378,6 +1378,13 @@ describe('autocomplete', () => {
         policies.map((p) => `${getSafeInsertText(p.name)} `).map(attachTriggerCommand)
       );
       testSuggestions(
+        'FROM a | ENRICH pol/',
+        policies
+          .map((p) => `${getSafeInsertText(p.name)} `)
+          .map(attachTriggerCommand)
+          .map((s) => ({ ...s, rangeToReplace: { start: 17, end: 20 } }))
+      );
+      testSuggestions(
         'FROM a | ENRICH policy /',
         ['ON $0', 'WITH $0', '| '].map(attachTriggerCommand)
       );
