@@ -1403,6 +1403,24 @@ describe('autocomplete', () => {
         'var0 = ',
         ...getPolicyFields('policy').map((name) => ({ text: name, command: undefined })),
       ]);
+      describe('replacement range', () => {
+        testSuggestions('FROM a | ENRICH policy ON @timestamp WITH othe/', [
+          'var0 = ',
+          ...getPolicyFields('policy').map((name) => ({
+            text: name,
+            command: undefined,
+            rangeToReplace: { start: 43, end: 47 },
+          })),
+        ]);
+        testSuggestions(
+          'FROM a | ENRICH policy ON @timestamp WITH var0 = othe/',
+          getPolicyFields('policy').map((name) => ({
+            text: name,
+            command: undefined,
+            rangeToReplace: { start: 50, end: 54 },
+          }))
+        );
+      });
     });
 
     // LIMIT number

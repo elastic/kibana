@@ -671,7 +671,7 @@ async function getExpressionSuggestionsByType(
         );
 
         /**
-         * @TODO — this string manipulation is crude and can't support all cases
+         * @TODO — this string scanning is crude and can't support all cases
          * Checking for a partial word and computing the replacement range should
          * really be done using the AST node, but we'll have to refactor further upstream
          * to make that available. This is a quick fix to support the most common case.
@@ -1664,10 +1664,22 @@ async function getOptionArgsSuggestions(
         if (policyMetadata) {
           if (isNewExpression || (assignFn && !isAssignmentComplete(assignFn))) {
             // ... | ENRICH ... WITH a =
+            // ... | ENRICH ... WITH b
             const fieldSuggestions = buildFieldsDefinitions(policyMetadata.enrichFields);
             // in this case, we don't want to open the suggestions menu when the field is accepted
             // because we're keeping the suggestions simple here for now. Could always revisit.
             fieldSuggestions.forEach((s) => (s.command = undefined));
+
+            // attach the replacement range if needed
+            const lastWord = findFinalWord(innerText);
+            if (lastWord) {
+              // ENRICH ... WITH a <suggest>
+              const rangeToReplace = {
+                start: innerText.length - lastWord.length + 1,
+                end: innerText.length + 1,
+              };
+              fieldSuggestions.forEach((s) => (s.rangeToReplace = rangeToReplace));
+            }
             suggestions.push(...fieldSuggestions);
           }
         }
