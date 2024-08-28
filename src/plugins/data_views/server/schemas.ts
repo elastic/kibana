@@ -7,8 +7,8 @@
  */
 
 import { schema, Type } from '@kbn/config-schema';
-import { MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH } from './constants';
-import { RuntimeType } from '.';
+import { MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH } from '../common/constants';
+import { RuntimeType } from '../common';
 
 export const serializedFieldFormatSchema = schema.object({
   id: schema.maybe(schema.string()),
