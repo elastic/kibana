@@ -7,6 +7,7 @@
 
 import React, { memo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
+import { FlyoutNavigation } from '@kbn/security-solution-common';
 import type { FlowTargetSourceDest } from '../../../common/search_strategy';
 import { PanelHeader } from './header';
 import { PanelContent } from './content';
@@ -35,6 +36,7 @@ export interface NetworkPanelProps extends Record<string, unknown> {
 export const NetworkPanel = memo(({ ip, flowTarget }: NetworkPanelProps) => {
   return (
     <>
+      <FlyoutNavigation flyoutIsExpandable={false} />
       <PanelHeader ip={ip} flowTarget={flowTarget} />
       <PanelContent ip={ip} flowTarget={flowTarget} />
     </>

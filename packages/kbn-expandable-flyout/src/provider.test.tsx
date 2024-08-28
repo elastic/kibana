@@ -29,6 +29,7 @@ describe('UrlSynchronizer', () => {
     const initialState: State = {
       byId: {
         [urlKey]: {
+          history: [],
           right: { id: 'key1' },
           left: { id: 'key11' },
           preview: undefined,
@@ -85,6 +86,7 @@ describe('UrlSynchronizer', () => {
           right: { id: 'key1' },
           left: { id: 'key2' },
           preview: undefined,
+          history: [],
         },
       },
       needsSync: true,

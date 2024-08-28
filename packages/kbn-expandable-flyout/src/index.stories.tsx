@@ -109,6 +109,7 @@ export const Right: Story<void> = () => {
         },
         left: undefined,
         preview: undefined,
+        history: [],
       },
     },
   };
@@ -131,6 +132,7 @@ export const Left: Story<void> = () => {
           id: 'left',
         },
         preview: undefined,
+        history: [],
       },
     },
   };
@@ -157,6 +159,7 @@ export const Preview: Story<void> = () => {
             id: 'preview1',
           },
         ],
+        history: [],
       },
     },
   };
@@ -186,6 +189,7 @@ export const MultiplePreviews: Story<void> = () => {
             id: 'preview2',
           },
         ],
+        history: [],
       },
     },
   };

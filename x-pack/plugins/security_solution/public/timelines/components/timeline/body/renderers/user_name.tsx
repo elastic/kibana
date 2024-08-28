@@ -46,7 +46,7 @@ const UserNameComponent: React.FC<Props> = ({
   const eventContext = useContext(StatefulEventContext);
   const userName = `${value}`;
   const isInTimelineContext = userName && eventContext?.timelineID;
-  const { openRightPanel } = useExpandableFlyoutApi();
+  const { openFlyout } = useExpandableFlyoutApi();
 
   const openUserDetailsSidePanel = useCallback(
     (e: React.SyntheticEvent) => {
@@ -62,17 +62,20 @@ const UserNameComponent: React.FC<Props> = ({
 
       const { timelineID } = eventContext;
 
-      openRightPanel({
-        id: UserPanelKey,
-        params: {
-          userName,
-          contextID: contextId,
-          scopeId: timelineID,
-          isDraggable,
+      openFlyout({
+        right: {
+          id: UserPanelKey,
+          title: userName,
+          params: {
+            userName,
+            contextID: contextId,
+            scopeId: timelineID,
+            isDraggable,
+          },
         },
       });
     },
-    [contextId, eventContext, isDraggable, isInTimelineContext, onClick, openRightPanel, userName]
+    [contextId, eventContext, isDraggable, isInTimelineContext, onClick, openFlyout, userName]
   );
 
   // The below is explicitly defined this way as the onClick takes precedence when it and the href are both defined

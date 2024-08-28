@@ -32,4 +32,7 @@ const stateSelector = (state: State) => state;
 export const selectPanelsById = (id: string) =>
   createSelector(stateSelector, (state) => state.byId[id] || {});
 
+export const selectHistoryById = (id: string) =>
+  createSelector(stateSelector, (state) => state.byId[id].history || []);
+
 export const selectNeedsSync = () => createSelector(stateSelector, (state) => state.needsSync);

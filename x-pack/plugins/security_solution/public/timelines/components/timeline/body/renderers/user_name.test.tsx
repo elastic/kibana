@@ -45,6 +45,7 @@ describe('UserName', () => {
     jest.mocked(useExpandableFlyoutApi).mockReturnValue({
       ...createExpandableFlyoutApiMock(),
       openRightPanel: mockOpenRightPanel,
+      goBack: jest.fn(),
     });
   });
   afterEach(() => {

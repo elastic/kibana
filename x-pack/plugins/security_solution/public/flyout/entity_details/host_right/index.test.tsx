@@ -9,9 +9,14 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../common/mock';
 import { mockHostRiskScoreState, mockObservedHostData } from '../mocks';
-
+import {
+  useExpandableFlyoutApi,
+  useExpandableFlyoutHistory,
+  useExpandableFlyoutState,
+} from '@kbn/expandable-flyout';
 import type { HostPanelProps } from '.';
 import { HostPanel } from '.';
+import { mockFlyoutApi } from '../../document_details/shared/mocks/mock_flyout_context';
 
 const mockProps: HostPanelProps = {
   hostName: 'test',
@@ -34,10 +39,16 @@ jest.mock('./hooks/use_observed_host', () => ({
   useObservedHost: () => mockedUseObservedHost(),
 }));
 
+jest.mock('@kbn/expandable-flyout');
+(useExpandableFlyoutHistory as jest.Mock).mockReturnValue([]);
+(useExpandableFlyoutState as jest.Mock).mockReturnValue({
+  left: undefined,
+});
 describe('HostPanel', () => {
   beforeEach(() => {
     mockedHostRiskScore.mockReturnValue(mockHostRiskScoreState);
     mockedUseObservedHost.mockReturnValue(mockObservedHostData);
+    jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
   });
 
   it('renders', () => {
