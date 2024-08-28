@@ -52,7 +52,7 @@ export const HelpPopover = ({ button, isOpen, closePopover, resetTour }: HelpPop
         <p>
           {i18n.translate('console.helpPopover.description', {
             defaultMessage:
-              'Use the Console UI to call Elasticsearch APIs and view their responses. Use Query DSL syntax to search your data, manage settings, and more.',
+              'Console is an interactive UI for calling Elasticsearch and Kibana APIs and viewing their responses. Search your data, manage settings, and more, using Query DSL and REST API syntax.',
           })}
         </p>
       </EuiText>
@@ -123,6 +123,7 @@ export const HelpPopover = ({ button, isOpen, closePopover, resetTour }: HelpPop
                 aria-label={i18n.translate('console.helpPopover.rerunTourButtonAriaLabel', {
                   defaultMessage: 'Re-run feature tour button',
                 })}
+                data-test-subj="consoleRerunTourButton"
               />
             </EuiFlexItem>
           </EuiFlexGroup>

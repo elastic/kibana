@@ -248,6 +248,10 @@ export class ConsolePageObject extends FtrService {
     await this.testSubjects.click('consoleCompleteTourButton');
   }
 
+  public async clickRerunTour() {
+    await this.testSubjects.click('consoleRerunTourButton');
+  }
+
   public async openSettings() {
     await this.testSubjects.click('consoleSettingsButton');
   }
