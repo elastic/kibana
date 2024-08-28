@@ -31,11 +31,22 @@ export class HasData {
        * Check to see if ES data exists
        */
       hasESData: async (): Promise<boolean> => {
-        // @ts-ignore
-        const { hasEsData } = await http.get('/internal/data_views/has_es_data', {
-          version: '1',
-        });
-        return hasEsData;
+        // attempt using resolve/cluster API
+        try {
+          // @ts-ignore
+          const { hasEsData } = await http.get('/internal/data_views/has_es_data', {
+            version: '1',
+          });
+          return hasEsData;
+        } catch (e) {
+          // fallback to previous implementation
+          const hasLocalESData = await this.checkLocalESData(http);
+          if (!hasLocalESData) {
+            const hasRemoteESData = await this.checkRemoteESData(http);
+            return hasRemoteESData;
+          }
+          return hasLocalESData;
+        }
       },
       /**
        * Check to see if a data view exists

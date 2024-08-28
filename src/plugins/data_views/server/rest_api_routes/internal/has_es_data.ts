@@ -17,7 +17,7 @@ export const handler: Handler = async (ctx: RequestHandlerContext, req, res) => 
   const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
   const response = await elasticsearchClient.indices.resolveCluster({
     // todo - better code for this, exclude these when on other clusters?
-    name: '*,-.*,-logs-enterprise_search.api-default,-logs-enterprise_search.audit-default',
+    name: '*:*,*,-.*,-logs-enterprise_search.api-default,-logs-enterprise_search.audit-default',
     allow_no_indices: true,
     ignore_unavailable: true,
   });
