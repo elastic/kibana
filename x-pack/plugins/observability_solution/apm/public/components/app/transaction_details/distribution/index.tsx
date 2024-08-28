@@ -61,9 +61,8 @@ export function TransactionDistribution({
   const { waterfallItemId, detailTab } = urlParams;
 
   const { serviceName } = useApmServiceContext();
-
   const markerCurrentEvent =
-    waterfallFetchResult.waterfall.entryWaterfallTransaction?.doc.transaction.duration.us;
+    waterfallFetchResult.waterfall.entryWaterfallTransaction?.doc['transaction.duration.us'][0];
 
   const { chartData, hasData, percentileThresholdValue, status, totalDocCount } =
     useTransactionDistributionChartData();

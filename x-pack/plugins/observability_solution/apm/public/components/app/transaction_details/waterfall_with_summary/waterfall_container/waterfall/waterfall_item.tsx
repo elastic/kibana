@@ -11,7 +11,26 @@ import React, { ReactNode, useRef, useEffect, useState } from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useTheme } from '../../../../../../hooks/use_theme';
 import { isMobileAgentName, isRumAgentName } from '../../../../../../../common/agent_name';
-import { TRACE_ID, TRANSACTION_ID } from '../../../../../../../common/es_fields/apm';
+import {
+  AGENT_NAME,
+  SPAN_COMPOSITE_COMPRESSION_STRATEGY,
+  SPAN_COMPOSITE_COUNT,
+  SPAN_COMPOSITE_SUM,
+  SPAN_DURATION,
+  SPAN_SYNC,
+  TRACE_ID,
+  SERVICE_NAME,
+  SPAN_NAME,
+  SPAN_SUBTYPE,
+  SPAN_TYPE,
+  SPAN_ACTION,
+  TRANSACTION_TYPE,
+  TRANSACTION_RESULT,
+  TRANSACTION_NAME,
+  TRANSACTION_ID,
+  FAAS_COLDSTART,
+  EVENT_OUTCOME,
+} from '../../../../../../../common/es_fields/apm';
 import { asDuration } from '../../../../../../../common/utils/formatters';
 import { Margins } from '../../../../../shared/charts/timeline';
 import { TruncateWithTooltip } from '../../../../../shared/truncate_with_tooltip';
@@ -126,7 +145,7 @@ interface IWaterfallItemProps {
 function PrefixIcon({ item }: { item: IWaterfallSpanOrTransaction }) {
   switch (item.docType) {
     case 'span': {
-      const spanType = item.doc.span.type || '';
+      const spanType = item.doc[SPAN_TYPE]?.[0] || '';
 
       // icon for database spans
       const isDbType = spanType.startsWith('db');
@@ -139,7 +158,7 @@ function PrefixIcon({ item }: { item: IWaterfallSpanOrTransaction }) {
     }
     case 'transaction': {
       // icon for RUM agent transactions
-      if (isRumAgentName(item.doc.agent.name)) {
+      if (isRumAgentName(item.doc[AGENT_NAME][0])) {
         return <EuiIcon type="globe" />;
       }
 
@@ -159,7 +178,7 @@ interface SpanActionToolTipProps {
 function SpanActionToolTip({ item, children }: SpanActionToolTipProps) {
   if (item?.docType === 'span') {
     return (
-      <EuiToolTip content={`${item.doc.span.subtype}.${item.doc.span.action}`}>
+      <EuiToolTip content={`${item.doc[SPAN_SUBTYPE]?.[0]}.${item.doc[SPAN_ACTION]?.[0]}`}>
         <>{children}</>
       </EuiToolTip>
     );
@@ -178,8 +197,8 @@ function Duration({ item }: { item: IWaterfallSpanOrTransaction }) {
 function HttpStatusCode({ item }: { item: IWaterfallSpanOrTransaction }) {
   // http status code for transactions of type 'request'
   const httpStatusCode =
-    item.docType === 'transaction' && item.doc.transaction.type === 'request'
-      ? item.doc.transaction.result
+    item.docType === 'transaction' && item.doc[TRANSACTION_TYPE][0] === 'request'
+      ? item.doc[TRANSACTION_RESULT]
       : undefined;
 
   if (!httpStatusCode) {
@@ -192,11 +211,11 @@ function HttpStatusCode({ item }: { item: IWaterfallSpanOrTransaction }) {
 function NameLabel({ item }: { item: IWaterfallSpanOrTransaction }) {
   switch (item.docType) {
     case 'span':
-      let name = item.doc.span.name;
-      if (item.doc.span.composite) {
+      let name = item.doc[SPAN_NAME][0];
+      if (item.doc[SPAN_COMPOSITE_COUNT]?.[0]) {
         const compositePrefix =
-          item.doc.span.composite.compression_strategy === 'exact_match' ? 'x' : '';
-        name = `${item.doc.span.composite.count}${compositePrefix} ${name}`;
+          item.doc[SPAN_COMPOSITE_COMPRESSION_STRATEGY]?.[0] === 'exact_match' ? 'x' : '';
+        name = `${item.doc[SPAN_COMPOSITE_COUNT][0]}${compositePrefix} ${name}`;
       }
       return (
         <EuiText style={{ overflow: 'hidden' }} size="s">
@@ -206,7 +225,7 @@ function NameLabel({ item }: { item: IWaterfallSpanOrTransaction }) {
     case 'transaction':
       return (
         <EuiTitle size="xxs">
-          <h5>{item.doc.transaction.name}</h5>
+          <h5>{item.doc[TRANSACTION_NAME][0]}</h5>
         </EuiTitle>
       );
   }
@@ -238,12 +257,11 @@ export function WaterfallItem({
 
   const width = (item.duration / totalDuration) * widthFactor * 100;
   const left = (((item.offset + item.skew) / totalDuration) * widthFactor - widthFactor + 1) * 100;
-
-  const isCompositeSpan = item.docType === 'span' && item.doc.span.composite;
+  const isCompositeSpan = item.docType === 'span' && item.doc[SPAN_COMPOSITE_COUNT]?.[0];
 
   const itemBarStyle = getItemBarStyle(item, color, width, left);
 
-  const isServerlessColdstart = item.docType === 'transaction' && item.doc.faas?.coldstart;
+  const isServerlessColdstart = item.docType === 'transaction' && item.doc[FAAS_COLDSTART]?.[0];
 
   const waterfallItemFlyoutTab = 'metadata';
 
@@ -289,7 +307,7 @@ export function WaterfallItem({
         <Duration item={item} />
         <RelatedErrors item={item} errorCount={errorCount} />
         {item.docType === 'span' && (
-          <SyncBadge sync={item.doc.span.sync} agentName={item.doc.agent.name} />
+          <SyncBadge sync={item.doc[SPAN_SYNC]?.[0]} agentName={item.doc[AGENT_NAME][0]} />
         )}
         <SpanLinksBadge
           linkedParents={item.spanLinksCount.linkedParents}
@@ -319,13 +337,13 @@ function RelatedErrors({
     '/dependencies/operation'
   );
 
-  let kuery = `${TRACE_ID} : "${item.doc.trace.id}"`;
-  if (item.doc.transaction?.id) {
-    kuery += ` and ${TRANSACTION_ID} : "${item.doc.transaction?.id}"`;
+  let kuery = `${TRACE_ID} : "${item.doc[TRACE_ID][0]}"`;
+  if (item.doc[TRANSACTION_ID]?.[0]) {
+    kuery += ` and ${TRANSACTION_ID} : "${item.doc[TRANSACTION_ID]?.[0]}"`;
   }
 
   const mobileHref = apmRouter.link(`/mobile-services/{serviceName}/errors-and-crashes`, {
-    path: { serviceName: item.doc.service.name },
+    path: { serviceName: item.doc[SERVICE_NAME][0] },
     query: {
       ...query,
       serviceGroup: '',
@@ -334,7 +352,7 @@ function RelatedErrors({
   });
 
   const href = apmRouter.link(`/services/{serviceName}/errors`, {
-    path: { serviceName: item.doc.service.name },
+    path: { serviceName: item.doc[SERVICE_NAME][0] },
     query: {
       ...query,
       serviceGroup: '',
@@ -347,7 +365,7 @@ function RelatedErrors({
       // eslint-disable-next-line jsx-a11y/click-events-have-key-events
       <div onClick={(e: React.MouseEvent) => e.stopPropagation()}>
         <EuiBadge
-          href={isMobileAgentName(item.doc.agent.name) ? mobileHref : href}
+          href={isMobileAgentName(item.doc[AGENT_NAME][0]) ? mobileHref : href}
           color={theme.eui.euiColorDanger}
           iconType="arrowRight"
         >
@@ -361,7 +379,7 @@ function RelatedErrors({
     );
   }
 
-  return <FailureBadge outcome={item.doc.event?.outcome} />;
+  return <FailureBadge outcome={item.doc[EVENT_OUTCOME]?.[0]} />;
 }
 
 function getItemBarStyle(
@@ -372,9 +390,9 @@ function getItemBarStyle(
 ): React.CSSProperties {
   let itemBarStyle = { left: `${left}%`, width: `${width}%` };
 
-  if (item.docType === 'span' && item.doc.span.composite) {
-    const percNumItems = 100.0 / item.doc.span.composite.count;
-    const spanSumRatio = item.doc.span.composite.sum.us / item.doc.span.duration.us;
+  if (item.docType === 'span' && item.doc[SPAN_COMPOSITE_COUNT]?.[0]) {
+    const percNumItems = 100.0 / item.doc[SPAN_COMPOSITE_COUNT][0];
+    const spanSumRatio = item.doc[SPAN_COMPOSITE_SUM]?.[0] / item.doc[SPAN_DURATION]?.[0];
     const percDuration = percNumItems * spanSumRatio;
 
     itemBarStyle = {

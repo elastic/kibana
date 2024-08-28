@@ -134,49 +134,10 @@ export async function getTraceItems({
 
   const traceDocsTotal = traceResponse.total;
   const exceedsMax = traceDocsTotal > maxTraceItems;
-  const traceDocs = traceResponse.hits.map((hit: any) => {
-    Object.keys(hit.fields).forEach((key) => {
-      const value = hit.fields[key][0];
-      hit.fields[key] = value;
-    });
-    Object.keys(hit.fields).forEach((key) => {
-      const keyArray = key.split('.');
-      let root = hit.fields;
-      const value = hit.fields[key];
-
-      for (let i = 0; i < keyArray.length - 1; i++) {
-        console.log(JSON.stringify(root, null, 2));
-        console.log('root = root[' + keyArray[i] + '] = ' + root[keyArray[i]] + ' || {}');
-
-        root = root[keyArray[i]] = root[keyArray[i]] || {};
-      }
-      console.log('root[' + keyArray[keyArray.length - 1] + '] = ' + value);
-      root[keyArray[keyArray.length - 1]] = value;
-    });
-    return hit;
-  });
-
-  console.log('traceDOcs: ' + JSON.stringify(traceDocs.fields, null, 2));
-
-  const errorDocs: WaterfallError[] = errorResponse.hits.hits.map((hit: any) => {
-    console.log('****************************' + JSON.stringify(hit.fields, null, 2));
-
-    Object.keys(hit.fields).forEach((key) => {
-      const value = hit.fields[key][0];
-      hit.fields[key] = value;
-    });
-
-    console.log('^^^^^^^^^^^^^^^^^^^^^^^^^^^^' + JSON.stringify(hit.fields, null, 2));
-
-    Object.keys(hit.fields).forEach((key) => {
-      hit.fields = key.split('.').reduce((obj, index) => obj[index], {} as { [key: string]: any });
-    });
-
-    console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~~: ' + JSON.stringify(hit.fields, null, 2));
-    return hit;
-  });
+  const traceDocs = traceResponse.hits.map((hit: any) => hit.fields);
+  const errorDocs: WaterfallError[] = errorResponse.hits.hits.map((hit: any) => hit.fields);
   // 98da587f4bf3c4a5
-  // http://127.0.0.1:5601/dlb/app/apm/link-to/trace/98da587f4bf3c4a5bf1b33417416885f?rangeFrom=now-15h&rangeTo=now
+  // http://127.0.0.1:5601/dlb/app/apm/link-to/trace/98da587f4bf3c4a5bf1b33417416885f?rangeFrom=now-15d&rangeTo=now
 
   return {
     exceedsMax,
@@ -332,7 +293,6 @@ async function getTraceDocsPerPage({
     },
     body,
   });
-
   return {
     hits: res.hits.hits,
     total: res.hits.total.value,
