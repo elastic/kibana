@@ -228,13 +228,16 @@ describe('setRecoveredAlertsContext', () => {
           alert: {
             getUuid: () => alertUuid,
             getId: () => idWithLocation,
-            getState: () => ({}),
+            getState: () => ({
+              downThreshold: 1,
+            }),
             setContext: jest.fn(),
           },
           hit: {
             'kibana.alert.instance.id': idWithLocation,
             'location.id': location,
             configId,
+            downThreshold: 1,
           },
         },
       ]),
@@ -288,13 +291,14 @@ describe('setRecoveredAlertsContext', () => {
         monitorUrl: '(unavailable)',
         monitorUrlLabel: 'URL',
         reason:
-          'Monitor "test-monitor" from Unnamed-location is recovered. Checked at February 25, 2023 7:00 PM. Alert when 1 out of last 1 checks are down.',
+          'Monitor "test-monitor" from Unnamed-location is recovered. Checked at February 25, 2023 7:00 PM. Monitor is down 1 time within the last 1 checks. Alert when 1 out of last 1 checks are down.',
 
         stateId: '123456',
         status: 'recovered',
         locationId: location,
         idWithLocation,
         timestamp: '2023-02-26T00:00:00.000Z',
+        downThreshold: 1,
       },
     });
   });
@@ -309,7 +313,9 @@ describe('setRecoveredAlertsContext', () => {
           alert: {
             getUuid: () => alertUuid,
             getId: () => idWithLocation,
-            getState: () => ({}),
+            getState: () => ({
+              downThreshold: 1,
+            }),
             setContext: jest.fn(),
           },
           hit: {
@@ -373,8 +379,9 @@ describe('setRecoveredAlertsContext', () => {
         monitorUrlLabel: 'URL',
         timestamp: '2023-02-26T00:00:00.000Z',
         reason:
-          'Monitor "test-monitor" from Unnamed-location is recovered. Checked at February 25, 2023 7:00 PM. Alert when 1 out of last 1 checks are down.',
+          'Monitor "test-monitor" from Unnamed-location is recovered. Checked at February 25, 2023 7:00 PM. Monitor is down 1 time within the last 1 checks. Alert when 1 out of last 1 checks are down.',
         locationId: location,
+        downThreshold: 1,
       },
     });
   });
@@ -389,7 +396,9 @@ describe('setRecoveredAlertsContext', () => {
           alert: {
             getId: () => idWithLocation,
             getUuid: () => alertUuid,
-            getState: () => ({}),
+            getState: () => ({
+              downThreshold: 1,
+            }),
             setContext: jest.fn(),
           },
           hit: {
@@ -455,9 +464,10 @@ describe('setRecoveredAlertsContext', () => {
         monitorUrl: '(unavailable)',
         monitorUrlLabel: 'URL',
         reason:
-          'Monitor "test-monitor" from Unnamed-location is recovered. Checked at February 25, 2023 7:00 PM. Alert when 1 out of last 1 checks are down.',
+          'Monitor "test-monitor" from Unnamed-location is recovered. Checked at February 25, 2023 7:00 PM. Monitor is down 1 time within the last 1 checks. Alert when 1 out of last 1 checks are down.',
         stateId: null,
         timestamp: '2023-02-26T00:00:00.000Z',
+        downThreshold: 1,
       },
     });
   });

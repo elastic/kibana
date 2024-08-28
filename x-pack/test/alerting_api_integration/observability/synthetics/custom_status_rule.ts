@@ -71,7 +71,9 @@ export default function ({ getService }: FtrProviderContext) {
         expect(alert['kibana.alert.reason']).to.eql(
           `Monitor "${monitor.name}" from Dev Service is down. Checked at ${moment(
             docs[4]['@timestamp']
-          ).format('LLL')}. Alert when 5 out of last 5 checks are down.`
+          ).format(
+            'LLL'
+          )}. Monitor is down 5 times within the last 5 checks. Alert when 5 out of last 5 checks are down.`
         );
       });
 
@@ -157,7 +159,12 @@ export default function ({ getService }: FtrProviderContext) {
       it('should trigger down alert based on location threshold', async () => {
         const response = await ruleHelper.waitForStatusAlert({
           ruleId,
-          filters: [{ term: { 'kibana.alert.status': 'active' } }],
+          filters: [
+            { term: { 'kibana.alert.status': 'active' } },
+            {
+              term: { 'monitor.id': monitor.id },
+            },
+          ],
         });
 
         const alert: any = response.hits.hits?.[0]._source;
@@ -175,7 +182,12 @@ export default function ({ getService }: FtrProviderContext) {
 
         const response = await ruleHelper.waitForStatusAlert({
           ruleId,
-          filters: [{ term: { 'kibana.alert.status': 'recovered' } }],
+          filters: [
+            { term: { 'kibana.alert.status': 'recovered' } },
+            {
+              term: { 'monitor.id': monitor.id },
+            },
+          ],
         });
 
         const alert = response.hits.hits?.[0]._source;
