@@ -36,7 +36,7 @@ import {
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
   VULNERABILITIES_INDEX_PATTERN,
   POSTURE_TYPES,
-  LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+  CDR_VULNERABILITIES_INDEX_PATTERN,
   VULN_MGMT_POLICY_TEMPLATE,
   POSTURE_TYPE_ALL,
   LATEST_VULNERABILITIES_RETENTION_POLICY,
@@ -257,7 +257,7 @@ export const getCspStatus = async ({
       retentionTime: LATEST_FINDINGS_RETENTION_POLICY,
     }),
 
-    checkIndexStatus(esClient, LATEST_VULNERABILITIES_INDEX_DEFAULT_NS, logger, {
+    checkIndexStatus(esClient, CDR_VULNERABILITIES_INDEX_PATTERN, logger, {
       postureType: VULN_MGMT_POLICY_TEMPLATE,
       retentionTime: LATEST_VULNERABILITIES_RETENTION_POLICY,
     }),
@@ -342,7 +342,7 @@ export const getCspStatus = async ({
       status: scoreIndexStatus,
     },
     {
-      index: LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+      index: CDR_VULNERABILITIES_INDEX_PATTERN,
       status: vulnerabilitiesLatestIndexStatus,
     },
   ];

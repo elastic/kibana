@@ -21,7 +21,8 @@ import { FindingsBaseEsQuery } from '@kbn/cloud-security-posture';
 import { VULNERABILITY_FIELDS } from '../../../common/constants';
 import { CspVulnerabilityFinding } from '../../../../common/schemas';
 import {
-  LATEST_VULNERABILITIES_INDEX_PATTERN,
+  CDR_VULNERABILITIES_INDEX_PATTERN,
+  CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
   LATEST_VULNERABILITIES_RETENTION_POLICY,
 } from '../../../../common/constants';
 import { useKibana } from '../../../common/hooks/use_kibana';
@@ -57,7 +58,7 @@ export const getVulnerabilitiesQuery = (
   { query, sort }: VulnerabilitiesQuery,
   pageParam: number
 ) => ({
-  index: LATEST_VULNERABILITIES_INDEX_PATTERN,
+  index: CDR_VULNERABILITIES_INDEX_PATTERN,
   sort: getMultiFieldsSort(sort),
   size: MAX_FINDINGS_TO_LOAD,
   query: {
@@ -92,7 +93,7 @@ export const useLatestVulnerabilities = (options: VulnerabilitiesQuery) => {
    * the last loaded record to be used as a from parameter to fetch the next chunk of data.
    */
   return useInfiniteQuery(
-    [LATEST_VULNERABILITIES_INDEX_PATTERN, options],
+    [CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN, options],
     async ({ pageParam }) => {
       const {
         rawResponse: { hits },

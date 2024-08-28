@@ -9,7 +9,8 @@ export const CSPM_POLICY_TEMPLATE = 'cspm';
 export const CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN =
   'logs-cloud_security_posture.findings_latest-default';
 export const CDR_LATEST_THIRD_PARTY_MISCONFIGURATIONS_INDEX_PATTERN =
-  'logs-*_latest_misconfigurations_cdr';
+  'security_solution-*.misconfigurations_latest-*';
+
 export const CDR_MISCONFIGURATIONS_INDEX_PATTERN = `${CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN},${CDR_LATEST_THIRD_PARTY_MISCONFIGURATIONS_INDEX_PATTERN}`;
 export const LATEST_FINDINGS_RETENTION_POLICY = '26h';
 export const MAX_FINDINGS_TO_LOAD = 500;
