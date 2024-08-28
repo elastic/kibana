@@ -7,7 +7,6 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { interceptRequest } from '../../common/intercept_request';
 import { createAndLoginUserWithCustomRole, deleteAndLogoutUser } from './helpers';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
@@ -15,9 +14,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'error', 'navigationalSearch', 'security']);
   const ui = getService('observabilityAIAssistantUI');
   const testSubjects = getService('testSubjects');
-  const driver = getService('__webdriver__');
-  const retry = getService('retry');
-  const toasts = getService('toasts');
 
   describe.only('ai assistant management privileges', () => {
     describe('all privileges', () => {
