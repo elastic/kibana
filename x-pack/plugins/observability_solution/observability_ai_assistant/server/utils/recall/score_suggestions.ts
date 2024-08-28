@@ -9,10 +9,12 @@ import { Logger } from '@kbn/logging';
 import dedent from 'dedent';
 import { lastValueFrom } from 'rxjs';
 import { decodeOrThrow, jsonRt } from '@kbn/io-ts-utils';
+import { omit } from 'lodash';
 import { concatenateChatCompletionChunks, Message, MessageRole } from '../../../common';
 import type { FunctionCallChatFunction } from '../../service/types';
 import { parseSuggestionScores } from './parse_suggestion_scores';
 import { RecalledSuggestion } from './recall_and_score';
+import { ShortIdTable } from '../../../common/utils/short_id_table';
 
 const scoreFunctionRequestRt = t.type({
   message: t.type({
@@ -47,6 +49,8 @@ export async function scoreSuggestions({
   relevantDocuments: RecalledSuggestion[];
   scores: Array<{ id: string; score: number }>;
 }> {
+  const shortIdTable = new ShortIdTable();
+
   const newUserMessageContent =
     dedent(`Given the following question, score the documents that are relevant to the question. on a scale from 0 to 7,
     0 being completely irrelevant, and 7 being extremely relevant. Information is relevant to the question if it helps in
@@ -66,7 +70,10 @@ export async function scoreSuggestions({
 
     Documents:
     ${JSON.stringify(
-      suggestions.map(({ id, doc_id: title, text }) => ({ id, title, text })),
+      suggestions.map((suggestion) => ({
+        ...omit(suggestion, 'score'), // Omit score to not bias the LLM
+        id: shortIdTable.take(suggestion.id), // Shorten id to save tokens
+      })),
       null,
       2
     )}`);
@@ -114,7 +121,9 @@ export async function scoreSuggestions({
     scoreFunctionRequest.message.function_call.arguments
   );
 
-  const scores = parseSuggestionScores(scoresAsString);
+  const scores = parseSuggestionScores(scoresAsString)
+    // Restore original IDs
+    .map(({ id, score }) => ({ id: shortIdTable.lookup(id)!, score }));
 
   if (scores.length === 0) {
     // seemingly invalid or no scores, return all
@@ -123,12 +132,13 @@ export async function scoreSuggestions({
 
   const suggestionIds = suggestions.map((document) => document.id);
 
+  // get top 5 documents ids with scores > 4
   const relevantDocumentIds = scores
-    .filter((document) => suggestionIds.includes(document.id ?? '')) // Remove hallucinated documents
-    .filter((document) => document.score > 4)
+    .filter(({ score }) => score > 4)
     .sort((a, b) => b.score - a.score)
     .slice(0, 5)
-    .map((document) => document.id);
+    .filter(({ id }) => suggestionIds.includes(id ?? '')) // Remove hallucinated documents
+    .map(({ id }) => id);
 
   const relevantDocuments = suggestions.filter((suggestion) =>
     relevantDocumentIds.includes(suggestion.id)

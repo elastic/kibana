@@ -38,7 +38,8 @@ interface Dependencies {
 
 export interface RecalledEntry {
   id: string;
-  doc_id?: string;
+  title?: string;
+  docId?: string;
   text: string;
   score: number | null;
   is_correction?: boolean;
@@ -403,18 +404,22 @@ export class KnowledgeBaseService {
     };
 
     const response = await this.dependencies.esClient.asInternalUser.search<
-      Pick<KnowledgeBaseEntry, 'text' | 'is_correction' | 'labels' | 'doc_id'>
+      Pick<KnowledgeBaseEntry, 'text' | 'is_correction' | 'labels' | 'doc_id' | 'title'>
     >({
       index: [resourceNames.aliases.kb],
       query: esQuery,
       size: 20,
       _source: {
-        includes: ['text', 'is_correction', 'labels', 'doc_id'],
+        includes: ['text', 'is_correction', 'labels', 'doc_id', 'title'],
       },
     });
 
     return response.hits.hits.map((hit) => ({
-      ...hit._source!,
+      text: hit._source?.text!,
+      is_correction: hit._source?.is_correction,
+      labels: hit._source?.labels,
+      title: hit._source?.title,
+      docId: hit._source?.doc_id,
       score: hit._score!,
       id: hit._id!,
     }));
