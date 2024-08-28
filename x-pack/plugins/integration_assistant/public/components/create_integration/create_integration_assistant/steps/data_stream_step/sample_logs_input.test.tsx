@@ -24,19 +24,42 @@ describe('partialShuffleArray', () => {
   it('should shuffle the array in reproducible manner when shuffling the whole array', () => {
     const arr = fixture.slice();
     partialShuffleArray(arr, 0, 7);
-    expect(arr).toEqual([3, 5, 1, 7, 2, 6, 4]);
+    expect(arr).toEqual([4, 5, 1, 3, 7, 6, 2]);
+  });
+
+  it('can sometimes keep the array the same by sheer coincidence', () => {
+    const arr = [1, 2, 3, 4, 5];
+    partialShuffleArray(arr, 1, 5, '1337');
+    expect(arr).toEqual([1, 2, 3, 4, 5]);
+  });
+
+  it('should mostly return a different array', () => {
+    const original = [1, 2, 3, 4, 5];
+    let countSameArray = 0;
+    let countDifferentArray = 0;
+
+    for (let start = 0; start < original.length; start++) {
+      for (let end = start + 1; end <= original.length; end++) {
+        const arr = original.slice();
+        partialShuffleArray(arr, start, end);
+        countSameArray += arr.every((v, i) => v === original[i]) ? 1 : 0;
+        countDifferentArray += arr.some((v, i) => v !== original[i]) ? 1 : 0;
+      }
+    }
+    expect(countSameArray).toBeTruthy();
+    expect(countSameArray).toBeLessThan(countDifferentArray);
   });
 
   it('should shuffle the array in reproducible manner when providing a non-default seed', () => {
     const arr = fixture.slice();
-    partialShuffleArray(arr, 0, 7, 'seed');
-    expect(arr).toEqual([4, 5, 1, 3, 7, 6, 2]);
+    partialShuffleArray(arr, 0, 7, '1337');
+    expect(arr).toEqual([3, 5, 1, 7, 2, 6, 4]);
   });
 
   it('should partially shuffle the array in reproducible manner when shuffling a subarray', () => {
     const arr = fixture.slice();
     partialShuffleArray(arr, 2, 5);
-    expect(arr).toEqual([1, 2, 5, 7, 6, 3, 4]);
+    expect(arr).toEqual([1, 2, 7, 5, 3, 6, 4]);
   });
 
   it('should do nothing if start is at the end of the array', () => {

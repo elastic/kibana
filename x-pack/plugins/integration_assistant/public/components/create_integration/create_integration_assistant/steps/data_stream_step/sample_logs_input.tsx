@@ -17,7 +17,7 @@ import type { SamplesFormat } from '../../../../../../common';
 
 const MaxLogsSampleRows = 10;
 
-const DEFAULT_PARTIAL_SHUFFLE_SEED = '1337';
+const DEFAULT_PARTIAL_SHUFFLE_SEED = 'seed';
 
 /**
  * Partially shuffles an array using the Fisher-Yates algorithm.
