@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { Module } from '../../../../common/types/modules';
-import { isLogoObject } from '../preconfigured_jobs';
+import { isLogoObject } from '../supplied_configurations';
 import { OverviewTabContent } from './overview_tab_content';
 import { JobsTabContent } from './jobs_tab_content';
 import { KibanaTabContent } from './kibana_tab_content';
@@ -46,7 +46,7 @@ export const KIBANA_ASSETS = {
 } as const;
 export type KibanaAssetType = (typeof KIBANA_ASSETS)[keyof typeof KIBANA_ASSETS];
 
-export const PreconfiguredJobsFlyout: FC<Props> = ({ module, onClose }) => {
+export const SuppliedConfigurationsFlyout: FC<Props> = ({ module, onClose }) => {
   const [selectedTabId, setSelectedTabId] = useState<TabIdType>(TAB_IDS.OVERVIEW);
   const [selectedKibanaSubTab, setSelectedKibanaSubTab] = useState<KibanaAssetType | undefined>();
 
@@ -56,7 +56,7 @@ export const PreconfiguredJobsFlyout: FC<Props> = ({ module, onClose }) => {
         id: TAB_IDS.OVERVIEW,
         name: (
           <FormattedMessage
-            id="xpack.ml.anomalyDetection.preconfiguredJobsFlyout.overviewTabLabel"
+            id="xpack.ml.anomalyDetection.suppliedConfigurationsFlyout.overviewTabLabel"
             defaultMessage="Overview"
           />
         ),
@@ -72,7 +72,7 @@ export const PreconfiguredJobsFlyout: FC<Props> = ({ module, onClose }) => {
         id: TAB_IDS.JOBS,
         name: (
           <FormattedMessage
-            id="xpack.ml.anomalyDetection.preconfiguredJobsFlyout.jobsTabLabel"
+            id="xpack.ml.anomalyDetection.suppliedConfigurationsFlyout.jobsTabLabel"
             defaultMessage="Jobs"
           />
         ),
@@ -85,7 +85,7 @@ export const PreconfiguredJobsFlyout: FC<Props> = ({ module, onClose }) => {
         id: TAB_IDS.KIBANA,
         name: (
           <FormattedMessage
-            id="xpack.ml.anomalyDetection.preconfiguredJobsFlyout.kibanaTabLabel"
+            id="xpack.ml.anomalyDetection.suppliedConfigurationsFlyout.kibanaTabLabel"
             defaultMessage="Kibana"
           />
         ),
@@ -102,7 +102,7 @@ export const PreconfiguredJobsFlyout: FC<Props> = ({ module, onClose }) => {
       onClick={() => setSelectedTabId(tab.id)}
       isSelected={tab.id === selectedTabId}
       key={tab.id}
-      data-test-subj={`mlPreconfiguredJobsFlyoutTab ${tab.id}`}
+      data-test-subj={`mlSuppliedConfigurationsFlyoutTab ${tab.id}`}
     >
       {tab.name}
     </EuiTab>
@@ -114,7 +114,7 @@ export const PreconfiguredJobsFlyout: FC<Props> = ({ module, onClose }) => {
       ownFocus
       onClose={onClose}
       hideCloseButton
-      aria-labelledby={'preconfigured-jobs-flyout'}
+      aria-labelledby={'supplied-configurations-flyout'}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup gutterSize="m">

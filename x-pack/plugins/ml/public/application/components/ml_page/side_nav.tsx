@@ -153,13 +153,16 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
             highlightNestedRoutes: true,
           },
           {
-            id: 'preconfigured_jobs',
-            name: i18n.translate('xpack.ml.navMenu.anomalyDetection.preconfiguredJobsLinkText', {
-              defaultMessage: 'Preconfigured jobs',
-            }),
+            id: 'supplied_cofigurations',
+            name: i18n.translate(
+              'xpack.ml.navMenu.anomalyDetection.suppliedConfigurationsLinkText',
+              {
+                defaultMessage: 'Supplied configurations',
+              }
+            ),
             disabled: disableLinks,
-            pathId: ML_PAGES.PRECONFIGURED_JOBS_MANAGE,
-            testSubj: 'mlMainTab preconfiguredJobs',
+            pathId: ML_PAGES.SUPPLIED_CONFIGURATIONS,
+            testSubj: 'mlMainTab suppliedConfigurations',
           },
         ],
       },

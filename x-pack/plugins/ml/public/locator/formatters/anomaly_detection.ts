@@ -93,11 +93,11 @@ export function formatAnomalyDetectionCreateJobSelectIndex(
   );
 }
 
-export function formatPreconfiguredJobManagementUrl(
+export function formatSuppliedConfigurationsManagementUrl(
   appBasePath: string,
   pageState: MlGenericUrlState['pageState']
 ): string {
-  return formatGenericMlUrl(appBasePath, ML_PAGES.PRECONFIGURED_JOBS_MANAGE, pageState);
+  return formatGenericMlUrl(appBasePath, ML_PAGES.SUPPLIED_CONFIGURATIONS, pageState);
 }
 
 /**

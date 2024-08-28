@@ -145,11 +145,11 @@ const moduleSchema = schema.object({
   type: schema.string(),
   logo: schema.maybe(schema.any()),
   logoFile: schema.maybe(schema.string()),
-  defaultIndexPattern: schema.string(),
-  query: schema.any(),
+  defaultIndexPattern: schema.maybe(schema.string()),
+  query: schema.maybe(schema.any()),
   jobs: schema.arrayOf(schema.any()),
   datafeeds: schema.arrayOf(schema.any()),
-  kibana: schema.any(),
+  kibana: schema.maybe(schema.any()),
   tags: schema.maybe(schema.arrayOf(schema.string())),
 });
 

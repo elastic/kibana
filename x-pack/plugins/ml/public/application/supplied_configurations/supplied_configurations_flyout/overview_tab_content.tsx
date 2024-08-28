@@ -32,30 +32,30 @@ import type { TabIdType, KibanaAssetType } from './flyout';
 import { TAB_IDS } from './flyout';
 import { DataViewsTable } from './data_views_table';
 import { useToastNotificationService } from '../../services/toast_notification_service';
-import { isLogoObject } from '../preconfigured_jobs';
+import { isLogoObject } from '../supplied_configurations';
 
 export const LABELS = {
   dashboard: (
     <FormattedMessage
-      id="xpack.ml.anomalyDetection.preconfiguredJobsFlyout.dashboardLabel"
+      id="xpack.ml.anomalyDetection.suppliedConfigurationsFlyout.dashboardLabel"
       defaultMessage="Dashboard"
     />
   ),
   jobs: (
     <FormattedMessage
-      id="xpack.ml.anomalyDetection.preconfiguredJobsFlyout.jobsLabel"
+      id="xpack.ml.anomalyDetection.suppliedConfigurationsFlyout.jobsLabel"
       defaultMessage="Jobs"
     />
   ),
   search: (
     <FormattedMessage
-      id="xpack.ml.anomalyDetection.preconfiguredJobsFlyout.searchLabel"
+      id="xpack.ml.anomalyDetection.suppliedConfigurationsFlyout.searchLabel"
       defaultMessage="Search"
     />
   ),
   visualization: (
     <FormattedMessage
-      id="xpack.ml.anomalyDetection.preconfiguredJobsFlyout.visualizationLabel"
+      id="xpack.ml.anomalyDetection.suppliedConfigurationsFlyout.visualizationLabel"
       defaultMessage="Visualization"
     />
   ),
@@ -148,7 +148,7 @@ export const OverviewTabContent: FC<Props> = ({
     if (matching.length === 0) {
       displayWarningToast(
         i18n.translate(
-          'xpack.ml.anomalyDetection.preconfiguredJobsFlyout.noMatchesFoundToastMessage',
+          'xpack.ml.anomalyDetection.suppliedConfigurationsFlyout.noMatchesFoundToastMessage',
           {
             defaultMessage: 'No matching data views found',
           }
@@ -176,7 +176,7 @@ export const OverviewTabContent: FC<Props> = ({
             <EuiDescriptionList rowGutterSize="s">
               <EuiDescriptionListTitle>
                 <FormattedMessage
-                  id="xpack.ml.anomalyDetection.preconfiguredJobsFlyout.assetsTitle"
+                  id="xpack.ml.anomalyDetection.suppliedConfigurationsFlyout.assetsTitle"
                   defaultMessage="Assets"
                 />
               </EuiDescriptionListTitle>
@@ -204,7 +204,7 @@ export const OverviewTabContent: FC<Props> = ({
               <EuiSpacer size="m" />
               <EuiDescriptionListTitle>
                 <FormattedMessage
-                  id="xpack.ml.anomalyDetection.preconfiguredJobsFlyout.tagsTitle"
+                  id="xpack.ml.anomalyDetection.suppliedConfigurationsFlyout.tagsTitle"
                   defaultMessage="Tags"
                 />
               </EuiDescriptionListTitle>
@@ -217,7 +217,7 @@ export const OverviewTabContent: FC<Props> = ({
                   // @ts-ignore
                   value={
                     <FormattedMessage
-                      id="xpack.ml.anomalyDetection.preconfiguredJobsFlyout.noTagsLabel"
+                      id="xpack.ml.anomalyDetection.suppliedConfigurationsFlyout.noTagsLabel"
                       defaultMessage="No tags"
                     />
                   }
@@ -227,7 +227,7 @@ export const OverviewTabContent: FC<Props> = ({
               <EuiSpacer size="m" />
               <EuiDescriptionListTitle>
                 <FormattedMessage
-                  id="xpack.ml.anomalyDetection.preconfiguredJobsFlyout.typeTitle"
+                  id="xpack.ml.anomalyDetection.suppliedConfigurationsFlyout.typeTitle"
                   defaultMessage="Type"
                 />
                 <EuiSpacer size="s" />
@@ -244,7 +244,7 @@ export const OverviewTabContent: FC<Props> = ({
                   <EuiDescriptionList rowGutterSize="m">
                     <EuiDescriptionListTitle>
                       <FormattedMessage
-                        id="xpack.ml.anomalyDetection.preconfiguredJobsFlyout.eligibleTitle"
+                        id="xpack.ml.anomalyDetection.suppliedConfigurationsFlyout.eligibleTitle"
                         defaultMessage="One or more indices must match the following query:"
                       />
                     </EuiDescriptionListTitle>
@@ -268,7 +268,7 @@ export const OverviewTabContent: FC<Props> = ({
                       <EuiFlexItem grow={false}>
                         <EuiText size={'xs'}>
                           <FormattedMessage
-                            id="xpack.ml.anomalyDetection.preconfiguredJobsFlyout.dataRecognizerHelpButtonLabel"
+                            id="xpack.ml.anomalyDetection.suppliedConfigurationsFlyout.dataRecognizerHelpButtonLabel"
                             defaultMessage="Check indices to see which can be used to run jobs in this module?"
                           />
                         </EuiText>
@@ -284,7 +284,7 @@ export const OverviewTabContent: FC<Props> = ({
                             size="s"
                           >
                             <FormattedMessage
-                              id="xpack.ml.anomalyDetection.preconfiguredJobsFlyout.runDataRecognizerButtonLabel"
+                              id="xpack.ml.anomalyDetection.suppliedConfigurationsFlyout.runDataRecognizerButtonLabel"
                               defaultMessage="Run data recognizer"
                             />
                           </EuiButton>
@@ -307,7 +307,7 @@ export const OverviewTabContent: FC<Props> = ({
                 title={
                   <h2>
                     <FormattedMessage
-                      id="xpack.ml.anomalyDetection.preconfiguredJobsFlyout.unableToUseModuleTitle"
+                      id="xpack.ml.anomalyDetection.suppliedConfigurationsFlyout.unableToUseModuleTitle"
                       defaultMessage="You cannot create these jobs here"
                     />
                   </h2>
@@ -315,8 +315,8 @@ export const OverviewTabContent: FC<Props> = ({
                 body={
                   <p>
                     <FormattedMessage
-                      id="xpack.ml.anomalyDetection.preconfiguredJobsFlyout.unableToUseModuleHelpMessage"
-                      defaultMessage="This job package can be used in {appName}."
+                      id="xpack.ml.anomalyDetection.suppliedConfigurationsFlyout.unableToUseModuleHelpMessage"
+                      defaultMessage="These supplied configurations can be used in {appName}."
                       values={{ appName: module.type }}
                     />
                   </p>
@@ -326,7 +326,7 @@ export const OverviewTabContent: FC<Props> = ({
                     <EuiTitle size="xxs">
                       <h3>
                         <FormattedMessage
-                          id="xpack.ml.anomalyDetection.preconfiguredJobsFlyout.useInanotherAppTitle"
+                          id="xpack.ml.anomalyDetection.suppliedConfigurationsFlyout.useInanotherAppTitle"
                           defaultMessage="Want to learn more?"
                         />
                       </h3>
@@ -336,7 +336,7 @@ export const OverviewTabContent: FC<Props> = ({
                       target="_blank"
                     >
                       <FormattedMessage
-                        id="xpack.ml.anomalyDetection.preconfiguredJobsFlyout.useInanotherAppLink"
+                        id="xpack.ml.anomalyDetection.suppliedConfigurationsFlyout.useInanotherAppLink"
                         defaultMessage="Read the docs for more information on how to use this module in other apps"
                       />
                     </EuiLink>

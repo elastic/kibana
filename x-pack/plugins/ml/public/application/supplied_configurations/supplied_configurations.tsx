@@ -21,7 +21,7 @@ import { useMlKibana } from '../contexts/kibana';
 import type { Module } from '../../../common/types/modules';
 import { LoadingIndicator } from '../components/loading_indicator';
 import { filterModules } from './utils';
-import { PreconfiguredJobsFlyout } from './preconfigured_jobs_flyout';
+import { SuppliedConfigurationsFlyout } from './supplied_configurations_flyout';
 
 const TAGS = ['observability', 'logs', 'security'];
 
@@ -29,7 +29,7 @@ export function isLogoObject(arg: unknown): arg is { icon: string } {
   return isPopulatedObject(arg) && Object.hasOwn(arg, 'icon');
 }
 
-export const PreconfiguredJobs = () => {
+export const SuppliedConfigurations = () => {
   const {
     services: {
       mlServices: {
@@ -126,7 +126,7 @@ export const PreconfiguredJobs = () => {
       <EuiSearchBar
         defaultQuery={query}
         box={{
-          placeholder: 'Search preconfigured jobs',
+          placeholder: 'Search supplied configurations',
           incremental: true,
           schema,
         }}
@@ -154,7 +154,7 @@ export const PreconfiguredJobs = () => {
         })}
       </EuiFlexGrid>
       {isFlyoutVisible && selectedModuleId ? (
-        <PreconfiguredJobsFlyout
+        <SuppliedConfigurationsFlyout
           module={modules.find(({ id }) => id === selectedModuleId) as Module}
           onClose={closeFlyout}
         />

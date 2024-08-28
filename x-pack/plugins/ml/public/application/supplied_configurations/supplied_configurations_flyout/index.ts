@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { PreconfiguredJobsFlyout } from './flyout';
+export { SuppliedConfigurationsFlyout } from './flyout';

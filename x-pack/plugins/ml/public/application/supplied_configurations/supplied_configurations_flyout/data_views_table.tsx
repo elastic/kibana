@@ -48,7 +48,7 @@ export const DataViewsTable: FC<Props> = ({ matchingDataViews, moduleId }) => {
     {
       field: 'title',
       name: i18n.translate(
-        'xpack.ml.anomalyDetection.preconfiguredJobsFlyout.dataViewMatches.dataViewTitleColumnName',
+        'xpack.ml.anomalyDetection.suppliedConfigurationsFlyout.dataViewMatches.dataViewTitleColumnName',
         {
           defaultMessage: 'Data View',
         }
@@ -58,7 +58,7 @@ export const DataViewsTable: FC<Props> = ({ matchingDataViews, moduleId }) => {
     },
     {
       name: i18n.translate(
-        'xpack.ml.anomalyDetection.preconfiguredJobsFlyout.dataViewMatches.actionsColumnName',
+        'xpack.ml.anomalyDetection.suppliedConfigurationsFlyout.dataViewMatches.actionsColumnName',
         {
           defaultMessage: 'Actions',
         }
@@ -76,16 +76,16 @@ export const DataViewsTable: FC<Props> = ({ matchingDataViews, moduleId }) => {
                 }}
               >
                 <FormattedMessage
-                  id="xpack.ml.anomalyDetection.preconfiguredJobsFlyout.dataViewMatches.createJobAction"
+                  id="xpack.ml.anomalyDetection.suppliedConfigurationsFlyout.dataViewMatches.createJobAction"
                   defaultMessage="Create job from data view"
                 />
               </EuiButtonEmpty>
             );
           },
-          'data-test-subj': 'mlPreconfiguredJobsFlyoutActionCreate',
+          'data-test-subj': 'mlSuppliedConfigurationsFlyoutActionCreate',
         },
       ],
-      'data-test-subj': 'mlPreconfiguredJobsFlyoutColumnActions',
+      'data-test-subj': 'mlSuppliedConfigurationsFlyoutColumnActions',
     },
   ];
 

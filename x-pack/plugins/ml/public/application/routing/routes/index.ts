@@ -17,4 +17,4 @@ export * from './explorer';
 export * from './trained_models';
 export * from './notifications';
 export * from './memory_usage';
-export * from './preconfigured_jobs';
+export * from './supplied_configurations';

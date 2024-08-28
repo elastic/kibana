@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './preconfigured_jobs_view';
+export * from './supplied_configurations_view';
