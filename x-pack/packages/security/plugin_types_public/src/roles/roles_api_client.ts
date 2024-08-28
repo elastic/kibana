@@ -16,4 +16,5 @@ export interface RolesAPIClient {
   getRole: (roleName: string) => Promise<Role>;
   deleteRole: (roleName: string) => Promise<void>;
   saveRole: (payload: RolePutPayload) => Promise<void>;
+  bulkUpdateRoles: (payload: { rolesUpdate: Role[] }) => Promise<void>;
 }

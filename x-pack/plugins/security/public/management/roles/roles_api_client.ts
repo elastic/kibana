@@ -32,6 +32,17 @@ export class RolesAPIClient {
     });
   };
 
+  public bulkUpdateRoles = async ({ rolesUpdate }: { rolesUpdate: Role[] }) => {
+    await this.http.post('/api/security/roles', {
+      body: JSON.stringify({
+        roles: rolesUpdate.reduce((transformed, value) => {
+          transformed[value.name] = this.transformRoleForSave(copyRole(value));
+          return transformed;
+        }, {} as Record<string, ReturnType<typeof this.transformRoleForSave>>),
+      }),
+    });
+  };
+
   private transformRoleForSave = (role: Role) => {
     // Remove any placeholder index privileges
     const isPlaceholderPrivilege = (

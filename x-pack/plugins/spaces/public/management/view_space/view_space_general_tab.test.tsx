@@ -10,18 +10,21 @@ import React from 'react';
 
 import {
   httpServiceMock,
+  i18nServiceMock,
   notificationServiceMock,
   overlayServiceMock,
   scopedHistoryMock,
+  themeServiceMock,
 } from '@kbn/core/public/mocks';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { KibanaFeature } from '@kbn/features-plugin/common';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
-import { ViewSpaceContextProvider } from './hooks/view_space_context_provider';
+import { ViewSpaceProvider } from './provider/view_space_provider';
 import { ViewSpaceSettings } from './view_space_general_tab';
 import type { SolutionView } from '../../../common';
 import { spacesManagerMock } from '../../spaces_manager/spaces_manager.mock';
+import { getPrivilegeAPIClientMock } from '../privilege_api_client.mock';
 import { getRolesAPIClientMock } from '../roles_api_client.mock';
 
 const space = { id: 'default', name: 'Default', disabledFeatures: [], _reserved: true };
@@ -29,12 +32,15 @@ const history = scopedHistoryMock.create();
 const getUrlForApp = (appId: string) => appId;
 const navigateToUrl = jest.fn();
 const spacesManager = spacesManagerMock.create();
-const getRolesAPIClient = getRolesAPIClientMock();
+const getRolesAPIClient = getRolesAPIClientMock;
+const getPrivilegeAPIClient = getPrivilegeAPIClientMock;
 const reloadWindow = jest.fn();
 
 const http = httpServiceMock.createStartContract();
 const notifications = notificationServiceMock.createStartContract();
 const overlays = overlayServiceMock.createStartContract();
+const theme = themeServiceMock.createStartContract();
+const i18n = i18nServiceMock.createStartContract();
 
 const navigateSpy = jest.spyOn(history, 'push').mockImplementation(() => {});
 const updateSpaceSpy = jest
@@ -54,7 +60,7 @@ describe('ViewSpaceSettings', () => {
   const TestComponent: React.FC = ({ children }) => {
     return (
       <IntlProvider locale="en">
-        <ViewSpaceContextProvider
+        <ViewSpaceProvider
           capabilities={{
             navLinks: {},
             management: {},
@@ -69,9 +75,12 @@ describe('ViewSpaceSettings', () => {
           http={http}
           notifications={notifications}
           overlays={overlays}
+          getPrivilegesAPIClient={getPrivilegeAPIClient}
+          theme={theme}
+          i18n={i18n}
         >
           {children}
-        </ViewSpaceContextProvider>
+        </ViewSpaceProvider>
       </IntlProvider>
     );
   };

@@ -44,6 +44,7 @@ export const spacesManagementApp = Object.freeze({
     config,
     eventTracker,
     getRolesAPIClient,
+    getPrivilegesAPIClient,
   }: CreateParams) {
     const title = i18n.translate('xpack.spaces.displayName', {
       defaultMessage: 'Spaces',
@@ -71,7 +72,7 @@ export const spacesManagementApp = Object.freeze({
           text: title,
           href: `/`,
         };
-        const { notifications, application, chrome, http, overlays } = coreStart;
+        const { notifications, application, chrome, http, overlays, theme } = coreStart;
 
         chrome.docTitle.change(title);
 
@@ -147,6 +148,8 @@ export const spacesManagementApp = Object.freeze({
               http={http}
               overlays={overlays}
               notifications={notifications}
+              theme={theme}
+              i18n={coreStart.i18n}
               spacesManager={spacesManager}
               spaceId={spaceId}
               onLoadSpace={onLoadSpace}
@@ -155,6 +158,7 @@ export const spacesManagementApp = Object.freeze({
               getRolesAPIClient={getRolesAPIClient}
               allowFeatureVisibility={config.allowFeatureVisibility}
               allowSolutionVisibility={config.allowSolutionVisibility}
+              getPrivilegesAPIClient={getPrivilegesAPIClient}
             />
           );
         };

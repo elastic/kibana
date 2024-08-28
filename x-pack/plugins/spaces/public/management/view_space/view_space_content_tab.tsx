@@ -18,7 +18,7 @@ import { capitalize } from 'lodash';
 import type { FC } from 'react';
 import React, { useEffect, useState } from 'react';
 
-import { useViewSpaceServices } from './hooks/view_space_context_provider';
+import { useViewSpaceServices } from './provider';
 import { addSpaceIdToPath, ENTER_SPACE_PATH, type Space } from '../../../common';
 import type { SpaceContentTypeSummaryItem } from '../../types';
 
