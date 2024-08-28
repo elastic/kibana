@@ -16,7 +16,7 @@ interface CounterParams {
 }
 
 export class SelfChangingEditor extends React.Component<VisEditorOptionsProps<CounterParams>> {
-  onCounterChange = (ev: any) => {
+  onCounterChange = (ev: React.ChangeEvent<HTMLInputElement>) => {
     this.props.setValue('counter', parseInt(ev.target.value, 10));
   };
 

@@ -8,6 +8,7 @@
 import { InferenceConnectorType } from '../../../common/connectors';
 import type { InferenceConnectorAdapter } from '../types';
 import { openAIAdapter } from './openai';
+import { geminiAdapter } from './gemini';
 import { bedrockClaudeAdapter } from './bedrock';
 
 export const getInferenceAdapter = (
@@ -17,12 +18,11 @@ export const getInferenceAdapter = (
     case InferenceConnectorType.OpenAI:
       return openAIAdapter;
 
+    case InferenceConnectorType.Gemini:
+      return geminiAdapter;
+
     case InferenceConnectorType.Bedrock:
       return bedrockClaudeAdapter;
-
-    case InferenceConnectorType.Gemini:
-      // not implemented yet
-      break;
   }
 
   return undefined;

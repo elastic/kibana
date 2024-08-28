@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment, useCallback, useMemo, useState, FC, PropsWithChildren } from 'react';
+import React, { Fragment, useCallback, useMemo, useState, FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiText, useEuiPaddingSize } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -241,7 +241,7 @@ export function ContextAppContent({
   );
 }
 
-const WrapperWithPadding: FC<PropsWithChildren<unknown>> = ({ children }) => {
+const WrapperWithPadding: FC = ({ children }) => {
   const padding = useEuiPaddingSize('s');
 
   return (

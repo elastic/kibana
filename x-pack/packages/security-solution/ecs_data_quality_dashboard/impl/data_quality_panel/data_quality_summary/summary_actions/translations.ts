@@ -7,22 +7,29 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const DATA_QUALITY = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.dataQuality',
+  {
+    defaultMessage: 'Data quality',
+  }
+);
+
 export const ERROR = i18n.translate(
-  'securitySolutionPackages.ecsDataQualityDashboard.errorsViewerTable.errorColumn',
+  'securitySolutionPackages.ecsDataQualityDashboard.errors.error',
   {
     defaultMessage: 'Error',
   }
 );
 
-export const INDEX = i18n.translate(
-  'securitySolutionPackages.ecsDataQualityDashboard.errorsViewerTable.indexColumn',
+export const ERRORS = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.errors.errors',
   {
-    defaultMessage: 'Index',
+    defaultMessage: 'Errors',
   }
 );
 
 export const PATTERN = i18n.translate(
-  'securitySolutionPackages.ecsDataQualityDashboard.errorsViewerTable.patternColumn',
+  'securitySolutionPackages.ecsDataQualityDashboard.errors.pattern',
   {
     defaultMessage: 'Pattern',
   }

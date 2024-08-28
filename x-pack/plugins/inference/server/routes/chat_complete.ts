@@ -57,7 +57,7 @@ const chatCompleteBodySchema: Type<ChatCompleteRequestBody> = schema.object({
       schema.object({
         role: schema.literal(MessageRole.Assistant),
         content: schema.oneOf([schema.string(), schema.literal(null)]),
-        toolCalls: schema.nullable(toolCallSchema),
+        toolCalls: schema.maybe(toolCallSchema),
       }),
       schema.object({
         role: schema.literal(MessageRole.User),
