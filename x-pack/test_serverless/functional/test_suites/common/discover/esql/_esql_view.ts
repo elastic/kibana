@@ -453,7 +453,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor('first cell contains the highest value', async () => {
           const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
           const text = await cell.getVisibleText();
-          return text === '483';
+          return text === '17,966';
         });
 
         expect(await testSubjects.getVisibleText('dataGridColumnSortingButton')).to.be(
@@ -468,7 +468,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor('first cell contains the same highest value', async () => {
           const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
           const text = await cell.getVisibleText();
-          return text === '483';
+          return text === '17,966';
         });
 
         await browser.refresh();
@@ -479,7 +479,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor('first cell contains the same highest value after reload', async () => {
           const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
           const text = await cell.getVisibleText();
-          return text === '483';
+          return text === '17,966';
         });
 
         await PageObjects.discover.clickNewSearchButton();
@@ -497,7 +497,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           async () => {
             const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
             const text = await cell.getVisibleText();
-            return text === '483';
+            return text === '17,966';
           }
         );
 

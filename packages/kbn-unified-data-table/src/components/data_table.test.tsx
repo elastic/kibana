@@ -16,7 +16,12 @@ import {
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { act } from 'react-dom/test-utils';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { buildDataViewMock, deepMockedFields, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
+import {
+  buildDataViewMock,
+  deepMockedFields,
+  esHitsMock,
+  generateEsHits,
+} from '@kbn/discover-utils/src/__mocks__';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { DataLoadingState, UnifiedDataTable, UnifiedDataTableProps } from './data_table';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -100,6 +105,7 @@ const renderDataTable = (props: Partial<UnifiedDataTableProps>) => {
   const DataTableWrapped = () => {
     const [columns, setColumns] = useState(props.columns ?? []);
     const [settings, setSettings] = useState(props.settings);
+    const [sort, setSort] = useState(props.sort ?? []);
 
     const { onSetColumns } = useColumns({
       capabilities,
@@ -136,6 +142,8 @@ const renderDataTable = (props: Partial<UnifiedDataTableProps>) => {
               },
             });
           }}
+          sort={sort}
+          onSort={setSort as UnifiedDataTableProps['onSort']}
         />
       </IntlProvider>
     );
@@ -378,25 +386,103 @@ describe('UnifiedDataTable', () => {
   });
 
   describe('sorting', () => {
-    it('should enable in memory sorting with plain records', async () => {
-      const component = await getComponent({
-        ...getProps(),
-        columns: ['message'],
-        isPlainRecord: true,
-      });
+    const getButton = (name: string) => screen.getByRole('button', { name });
+    const getCellValuesByColumn = () => {
+      const columns = screen
+        .getAllByRole('columnheader')
+        .map((header) => header.dataset.gridcellColumnId!);
+      const values = screen
+        .getAllByRole('gridcell')
+        .map((cell) => cell.querySelector('.unifiedDataTable__cellValue')?.textContent ?? '');
+      return values.reduce<Record<string, string[]>>((acc, value, i) => {
+        const column = columns[i % columns.length];
+        acc[column] = acc[column] ?? [];
+        acc[column].push(value);
+        return acc;
+      }, {});
+    };
 
-      expect(
-        (
-          findTestSubject(component, 'docTable')
-            .find('EuiDataGridInMemoryRenderer')
-            .first()
-            .props() as Record<string, string>
-        ).inMemory
-      ).toMatchInlineSnapshot(`
-        Object {
-          "level": "sorting",
-        }
-      `);
+    it('should apply client side sorting in ES|QL mode', async () => {
+      renderDataTable({
+        isPlainRecord: true,
+        columns: ['message'],
+        rows: generateEsHits(dataViewMock, 10).map((hit) =>
+          buildDataTableRecord(hit, dataViewMock)
+        ),
+      });
+      let values = getCellValuesByColumn();
+      expect(values.message).toEqual([
+        'message_0',
+        'message_1',
+        'message_2',
+        'message_3',
+        'message_4',
+        'message_5',
+        'message_6',
+        'message_7',
+        'message_8',
+        'message_9',
+      ]);
+      userEvent.click(getButton('message'));
+      // Column sort button incorrectly renders as "Sort " instead
+      // of "Sort Z-A" in Jest tests, so we need to find it by index
+      userEvent.click(screen.getAllByRole('button', { name: /Sort/ })[2], undefined, {
+        skipPointerEventsCheck: true,
+      });
+      values = getCellValuesByColumn();
+      expect(values.message).toEqual([
+        'message_9',
+        'message_8',
+        'message_7',
+        'message_6',
+        'message_5',
+        'message_4',
+        'message_3',
+        'message_2',
+        'message_1',
+        'message_0',
+      ]);
+    });
+
+    it('should not apply client side sorting if not in ES|QL mode', async () => {
+      renderDataTable({
+        columns: ['message'],
+        rows: generateEsHits(dataViewMock, 10).map((hit) =>
+          buildDataTableRecord(hit, dataViewMock)
+        ),
+      });
+      let values = getCellValuesByColumn();
+      expect(values.message).toEqual([
+        'message_0',
+        'message_1',
+        'message_2',
+        'message_3',
+        'message_4',
+        'message_5',
+        'message_6',
+        'message_7',
+        'message_8',
+        'message_9',
+      ]);
+      userEvent.click(getButton('message'));
+      // Column sort button incorrectly renders as "Sort " instead
+      // of "Sort Z-A" in Jest tests, so we need to find it by index
+      userEvent.click(screen.getAllByRole('button', { name: /Sort/ })[2], undefined, {
+        skipPointerEventsCheck: true,
+      });
+      values = getCellValuesByColumn();
+      expect(values.message).toEqual([
+        'message_0',
+        'message_1',
+        'message_2',
+        'message_3',
+        'message_4',
+        'message_5',
+        'message_6',
+        'message_7',
+        'message_8',
+        'message_9',
+      ]);
     });
 
     it('should apply sorting', async () => {
