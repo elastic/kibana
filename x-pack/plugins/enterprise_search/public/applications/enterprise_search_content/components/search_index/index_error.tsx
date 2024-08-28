@@ -50,7 +50,6 @@ const getSemanticTextFields = (
   return Object.entries(fields).flatMap(([key, value]) => {
     const currentPath: string = path ? `${path}.${key}` : key;
     const currentField: Array<{ path: string; source: SemanticTextProperty }> =
-      // @ts-expect-error because semantic_text type isn't incorporated in API type yet
       value.type === 'semantic_text' ? [{ path: currentPath, source: value }] : [];
     if (hasProperties(value)) {
       const childSemanticTextFields: Array<{ path: string; source: SemanticTextProperty }> =
