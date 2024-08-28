@@ -7,6 +7,20 @@
 
 import { DataQualityCheckResult, MeteringStatsIndex, PatternRollup } from '../types';
 
+export const getIndexIncompatible = ({
+  indexName,
+  results,
+}: {
+  indexName: string;
+  results: Record<string, DataQualityCheckResult> | undefined;
+}): number | undefined => {
+  if (results == null || results[indexName] == null) {
+    return undefined;
+  }
+
+  return results[indexName].incompatible;
+};
+
 export const getSizeInBytes = ({
   indexName,
   stats,
