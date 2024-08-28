@@ -18,9 +18,9 @@ export function useEmptyState() {
   const isDatasetEmpty = useSelector(
     service,
     (state) =>
-      !state.matches('datasets.fetching') &&
+      !state.matches('stats.datasets.fetching') &&
       !state.matches('integrations.fetching') &&
-      !state.matches('degradedDocs.fetching') &&
+      !state.matches('stats.degradedDocs.fetching') &&
       (state.context.datasets?.length ?? 0) === 0
   );
 

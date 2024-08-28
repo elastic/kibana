@@ -7,7 +7,7 @@
 
 export { DataQualityPanel } from './impl/data_quality_panel';
 
-export { getIlmPhaseDescription } from './impl/data_quality_panel/helpers';
+export { getIlmPhaseDescription } from './impl/data_quality_panel/utils/get_ilm_phase_description';
 
 export {
   DATA_QUALITY_PROMPT_CONTEXT_PILL,
@@ -20,4 +20,8 @@ export {
   DATA_QUALITY_DASHBOARD_CONVERSATION_ID,
 } from './impl/data_quality_panel/translations';
 
-export { ECS_REFERENCE_URL } from './impl/data_quality_panel/data_quality_details/indices_details/pattern/index_check_flyout/index_properties/markdown/helpers';
+export {
+  ECS_REFERENCE_URL,
+  ECS_FIELD_REFERENCE_URL,
+  MAPPING_URL,
+} from './impl/data_quality_panel/constants';

@@ -6,7 +6,8 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '../../constants';
+
+import { cspBenchmarkRuleMetadataSchema } from '@kbn/cloud-security-posture-common/schema';
 
 export const DEFAULT_BENCHMARK_RULES_PER_PAGE = 25;
 
@@ -14,35 +15,7 @@ export const DEFAULT_BENCHMARK_RULES_PER_PAGE = 25;
 
 export type FindCspBenchmarkRuleRequest = TypeOf<typeof findCspBenchmarkRuleRequestSchema>;
 
-export type CspBenchmarkRuleMetadata = TypeOf<typeof cspBenchmarkRuleMetadataSchema>;
-
 export type CspBenchmarkRule = TypeOf<typeof cspBenchmarkRuleSchema>;
-
-export const cspBenchmarkRuleMetadataSchema = schema.object({
-  audit: schema.string(),
-  benchmark: schema.object({
-    name: schema.string(),
-    posture_type: schema.maybe(
-      schema.oneOf([schema.literal(CSPM_POLICY_TEMPLATE), schema.literal(KSPM_POLICY_TEMPLATE)])
-    ),
-    id: schema.string(),
-    version: schema.string(),
-    rule_number: schema.maybe(schema.string()),
-  }),
-  default_value: schema.maybe(schema.string()),
-  description: schema.string(),
-  id: schema.string(),
-  impact: schema.maybe(schema.string()),
-  name: schema.string(),
-  profile_applicability: schema.string(),
-  rationale: schema.string(),
-  references: schema.maybe(schema.string()),
-  rego_rule_id: schema.string(),
-  remediation: schema.string(),
-  section: schema.string(),
-  tags: schema.arrayOf(schema.string()),
-  version: schema.string(),
-});
 
 export const cspBenchmarkRuleSchema = schema.object({
   metadata: cspBenchmarkRuleMetadataSchema,

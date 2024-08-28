@@ -16,6 +16,7 @@ import {
   EuiPanel,
   EuiButtonGroup,
   toSentenceCase,
+  Direction,
 } from '@elastic/eui';
 import type { DataViewListItem } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -107,8 +108,8 @@ export function DataViewsList({
   );
 
   const onChangeSortDirection = useCallback(
-    (value) => {
-      sortingService.setDirection(value);
+    (value: string) => {
+      sortingService.setDirection(value as Direction);
       setSortedDataViewsList((dataViews) => sortingService.sortData(dataViews));
     },
     [sortingService]
@@ -149,6 +150,7 @@ export function DataViewsList({
       searchProps={{
         id: searchListInputId,
         compressed: true,
+        autoFocus: true,
         placeholder: strings.editorAndPopover.search.getSearchPlaceholder(),
         'data-test-subj': 'indexPattern-switcher--input',
         ...(selectableProps ? selectableProps.searchProps : undefined),
