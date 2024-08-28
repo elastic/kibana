@@ -16,7 +16,7 @@ export const graphState: StateGraphArgs<EcsMappingState>['channels'] = {
   },
   chunkSize: {
     value: (x: number, y?: number) => y ?? x,
-    default: () => 10,
+    default: () => 20,
   },
   lastExecutedChain: {
     value: (x: string, y?: string) => y ?? x,
