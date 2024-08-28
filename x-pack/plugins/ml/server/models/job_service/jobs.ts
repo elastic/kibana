@@ -89,7 +89,7 @@ export function jobsProvider(
     deleteUserAnnotations = false,
     deleteAlertingRules = false
   ) {
-    const results: Results = {};
+    const results: Results = Object.create(null);
     const datafeedIds = await getDatafeedIdsByJobId();
 
     if (deleteAlertingRules && rulesClient) {
@@ -149,7 +149,7 @@ export function jobsProvider(
   }
 
   async function closeJobs(jobIds: string[]) {
-    const results: Results = {};
+    const results: Results = Object.create(null);
     for (const jobId of jobIds) {
       try {
         await mlClient.closeJob({ job_id: jobId });
@@ -185,7 +185,7 @@ export function jobsProvider(
   }
 
   async function resetJobs(jobIds: string[], deleteUserAnnotations = false) {
-    const results: ResetJobsResponse = {};
+    const results: ResetJobsResponse = Object.create(null);
     for (const jobId of jobIds) {
       try {
         // @ts-expect-error @elastic-elasticsearch resetJob response incorrect, missing task
@@ -229,7 +229,7 @@ export function jobsProvider(
   async function jobsSummary(jobIds: string[] = []) {
     const fullJobsList: CombinedJobWithStats[] = await createFullJobsList();
     const fullJobsIds = fullJobsList.map((job) => job.job_id);
-    let auditMessagesByJob: { [id: string]: AuditMessage } = {};
+    let auditMessagesByJob: { [id: string]: AuditMessage } = Object.create(null);
 
     // even if there are errors getting the audit messages, we still want to show the full list
     try {
@@ -309,12 +309,12 @@ export function jobsProvider(
 
   async function jobsWithTimerange() {
     const fullJobsList = await createFullJobsList();
-    const jobsMap: { [id: string]: string[] } = {};
+    const jobsMap: { [id: string]: string[] } = Object.create(null);
 
     const jobs = fullJobsList.map((job) => {
       jobsMap[job.job_id] = job.groups || [];
       const hasDatafeed = isPopulatedObject(job.datafeed_config);
-      const timeRange: { to?: number; from?: number } = {};
+      const timeRange: { to?: number; from?: number } = Object.create(null);
 
       const dataCounts = job.data_counts;
       if (dataCounts !== undefined) {
@@ -378,9 +378,9 @@ export function jobsProvider(
 
   async function createFullJobsList(jobIds: string[] = []) {
     const jobs: CombinedJobWithStats[] = [];
-    const groups: { [jobId: string]: string[] } = {};
-    const datafeeds: { [id: string]: DatafeedWithStats } = {};
-    const calendarsByJobId: { [jobId: string]: string[] } = {};
+    const groups: { [jobId: string]: string[] } = Object.create(null);
+    const datafeeds: { [id: string]: DatafeedWithStats } = Object.create(null);
+    const calendarsByJobId: { [jobId: string]: string[] } = Object.create(null);
     const globalCalendars: string[] = [];
 
     const jobIdsString = jobIds.join();
@@ -583,7 +583,7 @@ export function jobsProvider(
     jobIds: string[] = [],
     allSpaces: boolean = false
   ): Promise<JobsExistResponse> {
-    const results: JobsExistResponse = {};
+    const results: JobsExistResponse = Object.create(null);
     for (const jobId of jobIds) {
       try {
         if (jobId === '') {
@@ -669,7 +669,7 @@ export function jobsProvider(
     jobs: Array<{ job: Job; datafeed: Datafeed }>,
     authHeader: AuthorizationHeader
   ) {
-    const results: BulkCreateResults = {};
+    const results: BulkCreateResults = Object.create(null);
     await Promise.all(
       jobs.map(async ({ job, datafeed }) => {
         results[job.job_id] = { job: { success: false }, datafeed: { success: false } };

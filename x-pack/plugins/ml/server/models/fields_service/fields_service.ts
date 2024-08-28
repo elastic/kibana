@@ -146,7 +146,7 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
       mustCriteria.push(query);
     }
 
-    const runtimeMappings: any = {};
+    const runtimeMappings: any = Object.create(null);
     const aggs = fieldsToAgg.reduce(
       (obj, field) => {
         if (
