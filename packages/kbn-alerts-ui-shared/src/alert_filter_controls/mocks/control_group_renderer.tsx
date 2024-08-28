@@ -6,13 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type {
-  AwaitingControlGroupAPI,
-  ControlGroupStateBuilder,
-  ControlGroupRendererProps,
-  ControlGroupRendererApi,
+import {
+  type ControlGroupRendererApi,
+  type ControlGroupRendererProps,
+  type ControlGroupStateBuilder,
 } from '@kbn/controls-plugin/public';
-import React, { useState, forwardRef, useEffect, useImperativeHandle } from 'react';
+import React, { useEffect, useState } from 'react';
 import { TEST_IDS } from '../constants';
 import { getControlGroupMock } from './control_group';
 
@@ -30,23 +29,28 @@ export const getMockedControlGroupRenderer = (
 ) => {
   const controlGroupMock = controlGroupApiMock ?? getControlGroupMock();
 
-  const MockedControlGroupRenderer = forwardRef<AwaitingControlGroupAPI, ControlGroupRendererProps>(
-    ({ getCreationOptions }, ref) => {
-      useImperativeHandle(ref, () => controlGroupMock as unknown as ControlGroupRendererApi, []);
-      const [creationOptionsCalled, setCreationOptionsCalled] = useState(false);
+  const MockedControlGroupRenderer = ({
+    onApiAvailable,
+    getCreationOptions,
+  }: ControlGroupRendererProps) => {
+    const [creationOptionsCalled, setCreationOptionsCalled] = useState(false);
 
-      useEffect(() => {
-        if (creationOptionsCalled) return;
-        setCreationOptionsCalled(true);
-        if (getCreationOptions) {
-          getCreationOptions({}, {
-            addOptionsListControl: addOptionsListControlMock,
-          } as unknown as ControlGroupStateBuilder);
-        }
-      }, [getCreationOptions, creationOptionsCalled]);
-      return <div data-test-subj={TEST_IDS.MOCKED_CONTROL} />;
-    }
-  );
+    useEffect(() => {
+      if (creationOptionsCalled) return;
+      setCreationOptionsCalled(true);
+      if (getCreationOptions) {
+        getCreationOptions({}, {
+          addOptionsListControl: addOptionsListControlMock,
+        } as unknown as ControlGroupStateBuilder);
+      }
+    }, [getCreationOptions, creationOptionsCalled]);
+
+    useEffect(() => {
+      onApiAvailable(controlGroupMock as unknown as ControlGroupRendererApi);
+    }, [onApiAvailable]);
+
+    return <div data-test-subj={TEST_IDS.MOCKED_CONTROL} />;
+  };
 
   MockedControlGroupRenderer.displayName = 'MockedControlGroup';
   return MockedControlGroupRenderer;
