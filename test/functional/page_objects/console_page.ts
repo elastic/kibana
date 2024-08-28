@@ -218,6 +218,18 @@ export class ConsolePageObject extends FtrService {
     }
   }
 
+  public async clickSkipTour() {
+    await this.testSubjects.click('consoleSkipTourButton');
+  }
+
+  public async clickNextTourStep() {
+    await this.testSubjects.click('consoleNextTourStepButton');
+  }
+
+  public async clickCompleteTour() {
+    await this.testSubjects.click('consoleCompleteTourButton');
+  }
+
   public async collapseHelp() {
     await this.testSubjects.click('help-close-button');
   }
@@ -501,6 +513,15 @@ export class ConsolePageObject extends FtrService {
       const helpPanelShown = await this.testSubjects.exists('help-close-button');
       if (helpPanelShown) {
         await this.collapseHelp();
+      }
+    });
+  }
+
+  async skipTourIfExists() {
+    await this.retry.try(async () => {
+      const tourShown = await this.testSubjects.exists('consoleSkipTourButton');
+      if (tourShown) {
+        await this.clickSkipTour();
       }
     });
   }

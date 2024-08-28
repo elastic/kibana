@@ -20,6 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('console');
       // Ensure that the text area can be interacted with
       await PageObjects.console.closeHelpIfExists();
+      await PageObjects.console.skipTourIfExists();
     });
 
     beforeEach(async () => {
