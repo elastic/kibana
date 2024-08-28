@@ -246,6 +246,8 @@ export function UnifiedDocViewerFlyout({
   // Auto-focus push flyout on open or when switching to XL screen
   useEffect(() => {
     if (isXlScreen && flyoutEl && document.contains(flyoutEl)) {
+      // Wait a tick before focusing or focus will be stolen by the trigger element when
+      // switching from an overlay flyout to a push flyout (due to EUI focus lock)
       setTimeout(() => flyoutEl.focus());
     }
   }, [flyoutEl, isXlScreen]);
