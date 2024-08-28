@@ -14,22 +14,22 @@ export interface User {
   roles: string[];
 }
 
-export const editorUser: User = {
+export const editor: User = {
   username: 'editor',
   password,
   roles: ['editor'],
 };
 
-export const secondaryEditorUser: User = {
+export const secondaryEditor: User = {
   username: 'secondary_editor',
   password,
   roles: ['editor'],
 };
 
-export const viewerUser: User = {
+export const viewer: User = {
   username: 'viewer',
   password,
   roles: ['viewer'],
 };
 
-export const allUsers = [editorUser, secondaryEditorUser, viewerUser];
+export const allUsers = [editor, secondaryEditor, viewer];

@@ -26,7 +26,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       await createKnowledgeBaseModel(ml);
 
       await observabilityAIAssistantAPIClient
-        .editorUser({
+        .editor({
           endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
         })
         .expect(200);
@@ -45,12 +45,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       };
       it('returns 200 on create', async () => {
         await observabilityAIAssistantAPIClient
-          .editorUser({
+          .editor({
             endpoint: 'POST /internal/observability_ai_assistant/kb/entries/save',
             params: { body: knowledgeBaseEntry },
           })
           .expect(200);
-        const res = await observabilityAIAssistantAPIClient.editorUser({
+        const res = await observabilityAIAssistantAPIClient.editor({
           endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
           params: {
             query: {
@@ -68,7 +68,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns 200 on get entries and entry exists', async () => {
         const res = await observabilityAIAssistantAPIClient
-          .editorUser({
+          .editor({
             endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
             params: {
               query: {
@@ -88,7 +88,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns 200 on delete', async () => {
         const entryId = 'my-doc-id-1';
         await observabilityAIAssistantAPIClient
-          .editorUser({
+          .editor({
             endpoint: 'DELETE /internal/observability_ai_assistant/kb/entries/{entryId}',
             params: {
               path: { entryId },
@@ -97,7 +97,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           .expect(200);
 
         const res = await observabilityAIAssistantAPIClient
-          .editorUser({
+          .editor({
             endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
             params: {
               query: {
@@ -116,7 +116,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns 500 on delete not found', async () => {
         const entryId = 'my-doc-id-1';
         await observabilityAIAssistantAPIClient
-          .editorUser({
+          .editor({
             endpoint: 'DELETE /internal/observability_ai_assistant/kb/entries/{entryId}',
             params: {
               path: { entryId },
@@ -133,7 +133,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         sortDirection = 'asc',
       }: { query?: string; sortBy?: string; sortDirection?: 'asc' | 'desc' } = {}) {
         const res = await observabilityAIAssistantAPIClient
-          .editorUser({
+          .editor({
             endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
             params: {
               query: { query, sortBy, sortDirection },
@@ -148,7 +148,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         await clearKnowledgeBase(es);
 
         await observabilityAIAssistantAPIClient
-          .editorUser({
+          .editor({
             endpoint: 'POST /internal/observability_ai_assistant/kb/entries/import',
             params: {
               body: {
@@ -216,7 +216,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       const importCategories = () =>
         observabilityAIAssistantAPIClient
-          .editorUser({
+          .editor({
             endpoint: 'POST /internal/observability_ai_assistant/kb/entries/category/import',
             params: {
               body: {
@@ -260,7 +260,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         await pRetry(
           async () => {
             const res = await observabilityAIAssistantAPIClient
-              .editorUser({
+              .editor({
                 endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
                 params: {
                   query: {
@@ -326,7 +326,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       async function getEntriesWithDocId(docId: string) {
         const res = await observabilityAIAssistantAPIClient
-          .editorUser({
+          .editor({
             endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
             params: {
               query: {
@@ -349,14 +349,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           const docId = 'my_favourite_color';
 
           await addEntryWithDocId({
-            apiClient: observabilityAIAssistantAPIClient.editorUser,
+            apiClient: observabilityAIAssistantAPIClient.editor,
             docId,
             text: 'My favourite color is blue',
           });
           entries1 = await getEntriesWithDocId(docId);
 
           await addEntryWithDocId({
-            apiClient: observabilityAIAssistantAPIClient.editorUser,
+            apiClient: observabilityAIAssistantAPIClient.editor,
             docId,
             text: 'My favourite color is green',
           });
@@ -394,18 +394,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         before(async () => {
           await addEntryWithDocId({
-            apiClient: observabilityAIAssistantAPIClient.editorUser,
+            apiClient: observabilityAIAssistantAPIClient.editor,
             docId: 'users_favorite_animal',
             text: "The user's favourite animal is a dog",
           });
           await addEntryWithDocId({
-            apiClient: observabilityAIAssistantAPIClient.secondaryEditorUser,
+            apiClient: observabilityAIAssistantAPIClient.secondaryEditor,
             docId: 'users_favorite_animal',
             text: "The user's favourite animal is a cat",
           });
 
           const res = await observabilityAIAssistantAPIClient
-            .editorUser({
+            .editor({
               endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
               params: {
                 query: {
@@ -456,7 +456,7 @@ async function waitForModelReady(
 ) {
   return pRetry(async () => {
     const res = await observabilityAIAssistantAPIClient
-      .editorUser({ endpoint: 'GET /internal/observability_ai_assistant/kb/status' })
+      .editor({ endpoint: 'GET /internal/observability_ai_assistant/kb/status' })
       .expect(200);
 
     const isModelReady = res.body.ready;

@@ -11,7 +11,7 @@ import { ObservabilityAIAssistantFtrConfigName } from '../configs';
 import { getApmSynthtraceEsClient } from './create_synthtrace_client';
 import { InheritedFtrProviderContext, InheritedServices } from './ftr_provider_context';
 import { getScopedApiClient } from './observability_ai_assistant_api_client';
-import { editorUser, secondaryEditorUser, viewerUser } from './users/users';
+import { editor, secondaryEditor, viewer } from './users/users';
 
 export interface ObservabilityAIAssistantFtrConfig {
   name: ObservabilityAIAssistantFtrConfigName;
@@ -62,10 +62,10 @@ export function createObservabilityAIAssistantAPIConfig({
         getApmSynthtraceEsClient(context, apmSynthtraceKibanaClient),
       observabilityAIAssistantAPIClient: async () => {
         return {
-          adminUser: getScopedApiClient(kibanaServer, 'elastic'),
-          viewerUser: getScopedApiClient(kibanaServer, viewerUser.username),
-          editorUser: getScopedApiClient(kibanaServer, editorUser.username),
-          secondaryEditorUser: getScopedApiClient(kibanaServer, secondaryEditorUser.username),
+          admin: getScopedApiClient(kibanaServer, 'elastic'),
+          viewer: getScopedApiClient(kibanaServer, viewer.username),
+          editor: getScopedApiClient(kibanaServer, editor.username),
+          secondaryEditor: getScopedApiClient(kibanaServer, secondaryEditor.username),
         };
       },
     },

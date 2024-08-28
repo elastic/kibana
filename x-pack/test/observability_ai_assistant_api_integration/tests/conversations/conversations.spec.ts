@@ -48,7 +48,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     describe('without conversations', () => {
       it('returns no conversations when listing', async () => {
         const response = await observabilityAIAssistantAPIClient
-          .editorUser({
+          .editor({
             endpoint: 'POST /internal/observability_ai_assistant/conversations',
           })
           .expect(200);
@@ -58,7 +58,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns a 404 for updating conversations', async () => {
         await observabilityAIAssistantAPIClient
-          .editorUser({
+          .editor({
             endpoint: 'PUT /internal/observability_ai_assistant/conversation/{conversationId}',
             params: {
               path: {
@@ -74,7 +74,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns a 404 for retrieving a conversation', async () => {
         await observabilityAIAssistantAPIClient
-          .editorUser({
+          .editor({
             endpoint: 'GET /internal/observability_ai_assistant/conversation/{conversationId}',
             params: {
               path: {
@@ -92,7 +92,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       >;
       before(async () => {
         createResponse = await observabilityAIAssistantAPIClient
-          .editorUser({
+          .editor({
             endpoint: 'POST /internal/observability_ai_assistant/conversation',
             params: {
               body: {
@@ -105,7 +105,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       after(async () => {
         await observabilityAIAssistantAPIClient
-          .editorUser({
+          .editor({
             endpoint: 'DELETE /internal/observability_ai_assistant/conversation/{conversationId}',
             params: {
               path: {
@@ -116,7 +116,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           .expect(200);
 
         await observabilityAIAssistantAPIClient
-          .editorUser({
+          .editor({
             endpoint: 'GET /internal/observability_ai_assistant/conversation/{conversationId}',
             params: {
               path: {
@@ -148,7 +148,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns a 404 for updating a non-existing conversation', async () => {
         await observabilityAIAssistantAPIClient
-          .editorUser({
+          .editor({
             endpoint: 'PUT /internal/observability_ai_assistant/conversation/{conversationId}',
             params: {
               path: {
@@ -164,7 +164,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns a 404 for retrieving a non-existing conversation', async () => {
         await observabilityAIAssistantAPIClient
-          .editorUser({
+          .editor({
             endpoint: 'GET /internal/observability_ai_assistant/conversation/{conversationId}',
             params: {
               path: {
@@ -177,7 +177,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns the conversation that was created', async () => {
         const response = await observabilityAIAssistantAPIClient
-          .editorUser({
+          .editor({
             endpoint: 'GET /internal/observability_ai_assistant/conversation/{conversationId}',
             params: {
               path: {
@@ -192,7 +192,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns the created conversation when listing', async () => {
         const response = await observabilityAIAssistantAPIClient
-          .editorUser({
+          .editor({
             endpoint: 'POST /internal/observability_ai_assistant/conversations',
           })
           .expect(200);
@@ -210,7 +210,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         before(async () => {
           updateResponse = await observabilityAIAssistantAPIClient
-            .editorUser({
+            .editor({
               endpoint: 'PUT /internal/observability_ai_assistant/conversation/{conversationId}',
               params: {
                 path: {
@@ -234,7 +234,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         it('returns the updated conversation after get', async () => {
           const updateAfterCreateResponse = await observabilityAIAssistantAPIClient
-            .editorUser({
+            .editor({
               endpoint: 'GET /internal/observability_ai_assistant/conversation/{conversationId}',
               params: {
                 path: {
