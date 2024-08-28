@@ -12,6 +12,7 @@ import {
   aiAssistantResponseLanguage,
   aiAssistantSimulatedFunctionCalling,
   aiAssistantSearchConnectorIndexPattern,
+  aiAssistantPreferredAIAssistantType,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { FieldRow, FieldRowProvider } from '@kbn/management-settings-components-field-row';
 import { EuiSpacer } from '@elastic/eui';
@@ -24,6 +25,7 @@ const settingsKeys = [
   aiAssistantResponseLanguage,
   aiAssistantSimulatedFunctionCalling,
   aiAssistantSearchConnectorIndexPattern,
+  aiAssistantPreferredAIAssistantType,
 ];
 
 export function UISettings() {

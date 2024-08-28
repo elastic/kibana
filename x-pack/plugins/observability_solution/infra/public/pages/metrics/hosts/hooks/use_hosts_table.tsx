@@ -82,14 +82,6 @@ const buildMetricCell = (
 };
 
 const buildItemsList = (nodes: InfraAssetMetricsItem[]): HostNodeRow[] => {
-  nodes.map((node) => {
-    if (node.name === 'instance') {
-      node.metrics[0].value = 0;
-      node.hasSystemMetrics = true;
-    }
-    return node;
-  });
-
   return nodes.map(({ metrics, metadata, name, alertsCount, hasSystemMetrics }) => {
     const metadataKeyValue = metadata.reduce(
       (acc, curr) => ({
