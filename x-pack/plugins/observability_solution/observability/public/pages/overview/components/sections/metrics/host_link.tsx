@@ -25,13 +25,15 @@ export function HostLink({ name, id, timerange }: Props) {
   const href = getRedirectUrl({
     assetType: 'host',
     assetId: id,
-    dateRange:
-      timerange.from && timerange.to
-        ? {
-            from: new Date(timerange.from).toISOString(),
-            to: new Date(timerange.to).toISOString(),
-          }
-        : undefined,
+    assetDetails: {
+      dateRange:
+        timerange.from && timerange.to
+          ? {
+              from: new Date(timerange.from).toISOString(),
+              to: new Date(timerange.to).toISOString(),
+            }
+          : undefined,
+    },
   });
 
   return (
