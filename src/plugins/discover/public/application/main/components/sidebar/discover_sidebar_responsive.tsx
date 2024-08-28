@@ -250,7 +250,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   // As unifiedFieldListSidebarContainerRef ref can be empty in the beginning,
   // we need to fetch the data once API becomes available and after documents are fetched
   const initializeUnifiedFieldListSidebarContainerApi = useCallback(
-    (api) => {
+    (api: UnifiedFieldListSidebarContainerApi) => {
       if (!api) {
         return;
       }
