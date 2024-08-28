@@ -6,7 +6,6 @@
  */
 
 import { v4 } from 'uuid';
-import { KnowledgeBaseType } from '../../common/types';
 import type { FunctionRegistrationParameters } from '.';
 import { KnowledgeBaseEntryRole } from '../../common';
 

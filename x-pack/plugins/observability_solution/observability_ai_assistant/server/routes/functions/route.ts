@@ -9,7 +9,7 @@ import { nonEmptyStringRt, toBooleanRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import { v4 } from 'uuid';
 import { FunctionDefinition } from '../../../common/functions/types';
-import { KnowledgeBaseEntryRole, KnowledgeBaseType } from '../../../common/types';
+import { KnowledgeBaseEntryRole } from '../../../common/types';
 import type { RecalledEntry } from '../../service/knowledge_base_service';
 import { getSystemMessageFromInstructions } from '../../service/util/get_system_message_from_instructions';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
