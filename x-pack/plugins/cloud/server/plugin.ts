@@ -8,22 +8,21 @@
 import type { Logger } from '@kbn/logging';
 import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+
 import { once } from 'lodash';
 
 import { registerCloudDeploymentMetadataAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
-import type { CloudConfigType } from './config';
-import { registerCloudUsageCollector } from './collectors';
-import type { OnBoardingDefaultSolution } from '../common';
+import type { InternalSpacesContract, OnBoardingDefaultSolution } from '../common';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
 import { parseDeploymentIdFromDeploymentUrl } from '../common/parse_deployment_id_from_deployment_url';
 import { decodeCloudId, DecodedCloudId } from '../common/decode_cloud_id';
 import { parseOnboardingSolution } from '../common/parse_onboarding_default_solution';
 import { getFullCloudUrl } from '../common/utils';
+import type { CloudConfigType } from './config';
+import { registerCloudUsageCollector } from './collectors';
 import { readInstanceSizeMb } from './env';
 import { CloudRequestHandlerContext } from './routes/types';
 import { defineRoutes } from './routes';
-
 
 interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;
@@ -202,21 +201,23 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       decodedId = decodeCloudId(this.config.id, this.logger);
     }
 
-     const getSpacesService = once(async () => {
+    const getSpacesService = once(async () => {
       try {
-        const { spaces } = await core.plugins.onStart<{spaces?: SpacesPluginStart;}>('spaces');
+        const { spaces } = await core.plugins.onStart<{ spaces?: InternalSpacesContract }>(
+          'spaces'
+        );
         if (!spaces?.found) {
           throw new Error('Could not find Spaces plugin');
         }
-        return (spaces.contract as SpacesPluginStart).spacesService
+        return (spaces.contract as InternalSpacesContract).spacesService;
       } catch (error) {
         this.logger.error(`Failed to resolve spaces: ${error}`);
-        throw error
+        throw error;
       }
     });
 
     const router = core.http.createRouter<CloudRequestHandlerContext>();
-    defineRoutes({ router, getSpacesService: getSpacesService });
+    defineRoutes({ router, getSpacesService });
 
     return {
       ...this.getCloudUrls(),
@@ -248,7 +249,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
     };
   }
 
-  public  start() {
+  public start() {
     return {
       ...this.getCloudUrls(),
       isCloudEnabled: getIsCloudEnabled(this.config.id),

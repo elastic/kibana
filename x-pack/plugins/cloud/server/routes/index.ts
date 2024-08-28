@@ -6,13 +6,13 @@
  */
 
 import { IRouter } from '@kbn/core/server';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { setDefaultSpaceSolutionType } from './set_default_space_solution';
 import { CloudRequestHandlerContext } from './types';
+import { InternalSpacesContract } from '../../common';
 
 export interface RouteOptions {
   router: IRouter<CloudRequestHandlerContext>;
-  getSpacesService: () => Promise<SpacesPluginStart['spacesService']>;
+  getSpacesService: () => Promise<InternalSpacesContract['spacesService']>;
 }
 
 export function defineRoutes(opts: RouteOptions) {
