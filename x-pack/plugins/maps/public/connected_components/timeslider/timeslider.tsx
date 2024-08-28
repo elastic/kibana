@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import React, { Component } from 'react';
-import { Observable, Subscription, switchMap, tap } from 'rxjs';
+import React, { useEffect, useState } from 'react';
+import { Observable, switchMap, tap } from 'rxjs';
+
 import {
-  type ControlGroupStateBuilder,
   ControlGroupRenderer,
+  ControlGroupRendererApi,
   type ControlGroupRuntimeState,
-  type ControlGroupRendererApi,
+  type ControlGroupStateBuilder,
 } from '@kbn/controls-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
+
 import { Timeslice } from '../../../common/descriptor_types';
 
 export interface Props {
@@ -22,69 +24,61 @@ export interface Props {
   waitForTimesliceToLoad$: Observable<void>;
 }
 
-export class Timeslider extends Component<Props, {}> {
-  private _isMounted: boolean = false;
-  private readonly _subscriptions = new Subscription();
-  private dataLoading = true;
+export function Timeslider({ setTimeslice, timeRange, waitForTimesliceToLoad$ }: Props) {
+  const [dataLoading, setDataLoading] = useState(false);
+  const [api, setApi] = useState<ControlGroupRendererApi | undefined>();
 
-  componentWillUnmount() {
-    this._isMounted = false;
-    this._subscriptions.unsubscribe();
-  }
-
-  componentDidMount() {
-    this._isMounted = true;
-  }
-
-  _getCreationOptions = async (
-    initialState: Partial<ControlGroupRuntimeState>,
-    builder: ControlGroupStateBuilder
-  ) => {
-    builder.addTimeSliderControl(initialState);
-    return {
-      initialState,
-    };
-  };
-
-  _onLoadComplete = (controlGroup: ControlGroupRendererApi | undefined) => {
-    if (!this._isMounted || !controlGroup) {
+  useEffect(() => {
+    if (!api) {
       return;
     }
 
-    this._subscriptions.add(
-      controlGroup.timeslice$
-        .pipe(
-          tap(() => {
-            this.dataLoading = true;
-          }),
-          switchMap((timeslice) => {
-            this.props.setTimeslice(
-              timeslice === undefined
-                ? undefined
-                : {
-                    from: timeslice[0],
-                    to: timeslice[1],
-                  }
-            );
-            return this.props.waitForTimesliceToLoad$;
-          })
-        )
-        .subscribe(() => {
-          this.dataLoading = false;
+    let canceled = false;
+    const subscription = api.timeslice$
+      .pipe(
+        tap(() => {
+          if (!canceled) setDataLoading(true);
+        }),
+        switchMap((timeslice) => {
+          setTimeslice(
+            timeslice === undefined
+              ? undefined
+              : {
+                  from: timeslice[0],
+                  to: timeslice[1],
+                }
+          );
+          return waitForTimesliceToLoad$;
         })
-    );
-  };
+      )
+      .subscribe(() => {
+        if (!canceled) setDataLoading(false);
+      });
 
-  render() {
-    return (
-      <div className="mapTimeslider mapTimeslider--animation">
-        <ControlGroupRenderer
-          onApiAvailable={this._onLoadComplete}
-          dataLoading={this.dataLoading}
-          getCreationOptions={this._getCreationOptions}
-          timeRange={this.props.timeRange}
-        />
-      </div>
-    );
-  }
+    return () => {
+      subscription?.unsubscribe();
+      canceled = true;
+    };
+  }, [api, setTimeslice, waitForTimesliceToLoad$]);
+
+  return (
+    <div className="mapTimeslider mapTimeslider--animation">
+      <ControlGroupRenderer
+        onApiAvailable={(nextApi: ControlGroupRendererApi) => {
+          setApi(nextApi);
+        }}
+        dataLoading={dataLoading}
+        getCreationOptions={async (
+          initialState: Partial<ControlGroupRuntimeState>,
+          builder: ControlGroupStateBuilder
+        ) => {
+          builder.addTimeSliderControl(initialState);
+          return {
+            initialState,
+          };
+        }}
+        timeRange={timeRange}
+      />
+    </div>
+  );
 }
