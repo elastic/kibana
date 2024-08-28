@@ -1609,7 +1609,7 @@
     "@types/styled-components": "^5.1.0",
     "@types/supertest": "^6.0.2",
     "@types/tapable": "^1.0.6",
-    "@types/testing-library__jest-dom": "^5.14.7",
+    "@types/tar": "^6.1.11",
     "@types/textarea-caret": "^3.0.1",
     "@types/tinycolor2": "^1.4.1",
     "@types/tough-cookie": "^4.0.5",

@@ -11357,13 +11357,6 @@
     "@types/node" "*"
     minipass "^4.0.0"
 
-"@types/testing-library__jest-dom@^5.14.7", "@types/testing-library__jest-dom@^5.9.1":
-  version "5.14.7"
-  resolved "https://registry.yarnpkg.com/@types/testing-library__jest-dom/-/testing-library__jest-dom-5.14.7.tgz#fff92bed2a32c58a9224a85603e731519c0a9037"
-  integrity sha512-PFDoAbR9y8pD9+41oM1Yy0nVCkaRPlklmDZoPCXhNpR0ZO13HAYWqdNEjLtvIiveBmfB/+jdvmuOVeOXehKOaA==
-  dependencies:
-    "@types/jest" "*"
-
 "@types/textarea-caret@^3.0.1":
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/@types/textarea-caret/-/textarea-caret-3.0.1.tgz#5afd4b1c1b3bacb001d76a1e6ef192c710709a86"
