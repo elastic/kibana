@@ -590,9 +590,6 @@ describe('edit package policy page', () => {
         },
         isLoading: false,
       });
-      // (useAllNonManagedAgentPolicies as MockFn).mockReturnValue([
-      //       { id: 'fleet-server-policy', name: 'Fleet Server Policy' },
-      // ]);
 
       await act(async () => {
         render();
