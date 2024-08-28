@@ -432,7 +432,7 @@ function areCurrentArgsValid(
         return false;
       } else {
         return (
-          extractFinalTypeFromArg(node, references) ===
+          extractTypeFromASTArg(node, references) ===
           getCommandDefinition(command.name).signature.params[0].type
         );
       }
@@ -448,7 +448,7 @@ function areCurrentArgsValid(
   return true;
 }
 
-export function extractFinalTypeFromArg(
+export function extractTypeFromASTArg(
   arg: ESQLAstItem,
   references: Pick<ReferenceMaps, 'fields' | 'variables'>
 ):
@@ -459,7 +459,7 @@ export function extractFinalTypeFromArg(
   | string // @TODO remove this
   | undefined {
   if (Array.isArray(arg)) {
-    return extractFinalTypeFromArg(arg[0], references);
+    return extractTypeFromASTArg(arg[0], references);
   }
   if (isColumnItem(arg) || isLiteralItem(arg)) {
     if (isLiteralItem(arg)) {
@@ -512,7 +512,7 @@ function isFunctionArgComplete(
   }
   const hasCorrectTypes = fnDefinition.signatures.some((def) => {
     return arg.args.every((a, index) => {
-      return def.params[index].type === extractFinalTypeFromArg(a, references);
+      return def.params[index].type === extractTypeFromASTArg(a, references);
     });
   });
   if (!hasCorrectTypes) {
@@ -748,7 +748,7 @@ async function getExpressionSuggestionsByType(
       if (isColumnItem(nodeArg)) {
         // ... | STATS a <suggest>
         // ... | EVAL a <suggest>
-        const nodeArgType = extractFinalTypeFromArg(nodeArg, references);
+        const nodeArgType = extractTypeFromASTArg(nodeArg, references);
         if (isParameterType(nodeArgType)) {
           suggestions.push(
             ...getBuiltinCompatibleFunctionDefinition(
@@ -802,7 +802,7 @@ async function getExpressionSuggestionsByType(
       if (!isNewExpression) {
         if (isAssignment(nodeArg) && isAssignmentComplete(nodeArg)) {
           const [rightArg] = nodeArg.args[1] as [ESQLSingleAstItem];
-          const nodeArgType = extractFinalTypeFromArg(rightArg, references);
+          const nodeArgType = extractTypeFromASTArg(rightArg, references);
           suggestions.push(
             ...getBuiltinCompatibleFunctionDefinition(
               command.name,
@@ -819,7 +819,7 @@ async function getExpressionSuggestionsByType(
           if (isFunctionItem(rightArg)) {
             if (rightArg.args.some(isTimeIntervalItem)) {
               const lastFnArg = rightArg.args[rightArg.args.length - 1];
-              const lastFnArgType = extractFinalTypeFromArg(lastFnArg, references);
+              const lastFnArgType = extractTypeFromASTArg(lastFnArg, references);
               if (isNumericType(lastFnArgType) && isLiteralItem(lastFnArg))
                 // ... EVAL var = 1 year + 2 <suggest>
                 suggestions.push(...getCompatibleLiterals(command.name, ['time_literal_unit']));
@@ -842,7 +842,7 @@ async function getExpressionSuggestionsByType(
                 ))
               );
             } else {
-              const nodeArgType = extractFinalTypeFromArg(nodeArg, references);
+              const nodeArgType = extractTypeFromASTArg(nodeArg, references);
               suggestions.push(
                 ...(await getBuiltinFunctionNextArgument(
                   innerText,
@@ -857,7 +857,7 @@ async function getExpressionSuggestionsByType(
               );
               if (nodeArg.args.some(isTimeIntervalItem)) {
                 const lastFnArg = nodeArg.args[nodeArg.args.length - 1];
-                const lastFnArgType = extractFinalTypeFromArg(lastFnArg, references);
+                const lastFnArgType = extractTypeFromASTArg(lastFnArg, references);
                 if (isNumericType(lastFnArgType) && isLiteralItem(lastFnArg))
                   // ... EVAL var = 1 year + 2 <suggest>
                   suggestions.push(...getCompatibleLiterals(command.name, ['time_literal_unit']));
@@ -914,7 +914,7 @@ async function getExpressionSuggestionsByType(
           }
         } else {
           // if something is already present, leverage its type to suggest something in context
-          const nodeArgType = extractFinalTypeFromArg(nodeArg, references);
+          const nodeArgType = extractTypeFromASTArg(nodeArg, references);
           // These cases can happen here, so need to identify each and provide the right suggestion
           // i.e. ... | <COMMAND> field <suggest>
           // i.e. ... | <COMMAND> field + <suggest>
@@ -1085,7 +1085,7 @@ async function getBuiltinFunctionNextArgument(
 
     // pick the last arg and check its type to verify whether is incomplete for the given function
     const cleanedArgs = removeMarkerArgFromArgsList(nodeArg)!.args;
-    const nestedType = extractFinalTypeFromArg(nodeArg.args[cleanedArgs.length - 1], references);
+    const nestedType = extractTypeFromASTArg(nodeArg.args[cleanedArgs.length - 1], references);
 
     if (isFnComplete.reason === 'fewArgs') {
       const fnDef = getFunctionDefinition(nodeArg.name);
@@ -1272,14 +1272,14 @@ async function getFunctionArgsSuggestions(
   };
 
   const enrichedArgs = node.args.map((nodeArg) => {
-    let esType = extractFinalTypeFromArg(nodeArg, references);
+    let dataType = extractTypeFromASTArg(nodeArg, references);
 
     // For named system time parameters ?start and ?end, make sure it's compatiable
     if (isLiteralDateItem(nodeArg)) {
-      esType = 'date';
+      dataType = 'date';
     }
 
-    return { ...nodeArg, esType } as ESQLAstItem & { esType: string };
+    return { ...nodeArg, dataType } as ESQLAstItem & { dataType: string };
   });
 
   const variablesExcludingCurrentCommandOnes = excludeVariablesFromCurrentCommand(
@@ -1492,7 +1492,7 @@ async function getListArgsSuggestions(
     });
     const [firstArg] = node.args;
     if (isColumnItem(firstArg)) {
-      const argType = extractFinalTypeFromArg(firstArg, {
+      const argType = extractTypeFromASTArg(firstArg, {
         fields: fieldsMap,
         variables: anyVariables,
       });
@@ -1692,7 +1692,7 @@ async function getOptionArgsSuggestions(
   if (command.name === 'stats') {
     const argDef = optionDef?.signature.params[argIndex];
 
-    const nodeArgType = extractFinalTypeFromArg(nodeArg, references);
+    const nodeArgType = extractTypeFromASTArg(nodeArg, references);
     // These cases can happen here, so need to identify each and provide the right suggestion
     // i.e. ... | STATS ... BY field + <suggest>
     // i.e. ... | STATS ... BY field >= <suggest>

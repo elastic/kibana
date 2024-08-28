@@ -373,11 +373,11 @@ describe('autocomplete.suggest', () => {
               // @ts-expect-error Partial type
               const enrichedArgs: Array<
                 ESQLAstItem & {
-                  esType: string;
+                  dataType: string;
                 }
               > = signature.params.map(({ type }) => ({
                 type: 'column',
-                esType: type,
+                dataType: type,
               }));
 
               // Starting at -1 to include empty case e.g. to_string( / )

@@ -65,8 +65,15 @@ export function getParamAtPosition(
   return params.length > position ? params[position] : minParams ? params[params.length - 1] : null;
 }
 
+/**
+ * Given a function signature, returns the parameter at the given position, even if it's undefined or null
+ *
+ * @param {params}
+ * @param position
+ * @returns
+ */
 export function strictlyGetParamAtPosition(
-  { params, minParams }: FunctionDefinition['signatures'][number],
+  { params }: FunctionDefinition['signatures'][number],
   position: number
 ) {
   return params[position] ? params[position] : null;
@@ -112,7 +119,7 @@ export function getValidFunctionSignaturesForPreviousArgs(
   fnDefinition: FunctionDefinition,
   enrichedArgs: Array<
     ESQLAstItem & {
-      esType: string;
+      dataType: string;
     }
   >,
   argIndex: number
@@ -123,10 +130,10 @@ export function getValidFunctionSignaturesForPreviousArgs(
   const relevantFuncSignatures = fnDefinition.signatures.filter(
     (s) =>
       s.params?.length >= argIndex &&
-      s.params.slice(0, argIndex).every(({ type: esType }, idx) => {
+      s.params.slice(0, argIndex).every(({ type: dataType }, idx) => {
         return (
-          esType === enrichedArgs[idx].esType ||
-          compareTypesWithLiterals(esType, enrichedArgs[idx].esType)
+          dataType === enrichedArgs[idx].dataType ||
+          compareTypesWithLiterals(dataType, enrichedArgs[idx].dataType)
         );
       })
   );
@@ -134,26 +141,30 @@ export function getValidFunctionSignaturesForPreviousArgs(
 }
 
 /**
+ * Given a function signature, returns the compatible types to suggest for the next argument
  *
- * @param fnDefinition
- * @param enrichedArgs
- * @param argIndex
+ * @param fnDefinition: the function definition
+ * @param enrichedArgs: AST args with enriched esType info to match with function signatures
+ * @param argIndex: the index of the argument to suggest for
  * @returns
  */
 export function getCompatibleTypesToSuggestNext(
   fnDefinition: FunctionDefinition,
   enrichedArgs: Array<
     ESQLAstItem & {
-      esType: string;
+      dataType: string;
     }
   >,
   argIndex: number
 ) {
+  // First, narrow down to valid function signatures based on previous arguments
   const relevantFuncSignatures = getValidFunctionSignaturesForPreviousArgs(
     fnDefinition,
     enrichedArgs,
     argIndex
   );
+
+  // Then, get the compatible types to suggest for the next argument
   const compatibleTypesToSuggestForArg = uniqBy(
     relevantFuncSignatures.map((f) => f.params[argIndex]).filter((d) => d),
     (o) => `${o.type}-${o.constantOnly}`
