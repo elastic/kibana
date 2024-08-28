@@ -121,7 +121,7 @@ export async function createCookieSessionStorageFactory<T extends object>(
         }
       },
     },
-    validate: async (req: Request, session: T | T[]) => {
+    validateFunc: async (req: Request, session: T | T[]) => {
       const result = cookieOptions.validate(session);
       if (!result.isValid) {
         clearInvalidCookie(req, result.path);
