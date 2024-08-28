@@ -7,7 +7,7 @@
 
 import { getMapping } from './mapping';
 import { format } from './format';
-import type {TheHiveCaseConnector  } from './types';
+import type { TheHiveCaseConnector } from './types';
 
 export const getCaseConnector = (): TheHiveCaseConnector => ({
   getMapping,
