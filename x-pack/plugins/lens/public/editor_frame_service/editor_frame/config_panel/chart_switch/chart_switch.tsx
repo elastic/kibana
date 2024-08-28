@@ -77,14 +77,14 @@ type SelectableEntry = EuiSelectableOption<{
   icon?: IconType;
 }>;
 
-const MAX_LIST_HEIGHT = 324;
-const ENTRY_HEIGHT = 52;
+const ITEM_HEIGHT = 45.5;
+const MAX_ITEMS_COUNT = 6;
+const MAX_LIST_HEIGHT = ITEM_HEIGHT * MAX_ITEMS_COUNT;
 
-function computeListHeight(list: SelectableEntry[], maxHeight: number): number {
-  if (list.length === 0) {
-    return 0;
+function computeListHeight(list: SelectableEntry[]) {
+  if (list.length > MAX_ITEMS_COUNT) {
+    return MAX_LIST_HEIGHT;
   }
-  return Math.min(list.length * ENTRY_HEIGHT, maxHeight);
 }
 
 const sortByPriority = (a: VisualizationType, b: VisualizationType) => {
@@ -417,7 +417,7 @@ export const ChartSwitch = memo(function ChartSwitch({
         </EuiPopoverTitle>
         <EuiSelectable
           className="lnsChartSwitch__options"
-          height={computeListHeight(visualizationTypes, MAX_LIST_HEIGHT)}
+          height={computeListHeight(visualizationTypes)}
           searchable
           singleSelection
           isPreFiltered
@@ -435,7 +435,6 @@ export const ChartSwitch = memo(function ChartSwitch({
             <ChartOption option={option} searchValue={searchValue} />
           )}
           listProps={{
-            rowHeight: ENTRY_HEIGHT,
             showIcons: false,
             isVirtualized: false,
           }}
