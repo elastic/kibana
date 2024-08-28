@@ -22,7 +22,6 @@ interface AgentEnrollmentFlyoutData {
 }
 
 export function useAgentEnrollmentFlyoutData(): AgentEnrollmentFlyoutData {
-  const authz = useAuthz();
   const {
     data: agentPoliciesData,
     isInitialRequest: isInitialAgentPolicyRequest,
@@ -31,7 +30,6 @@ export function useAgentEnrollmentFlyoutData(): AgentEnrollmentFlyoutData {
   } = useGetAgentPolicies({
     page: 1,
     perPage: SO_SEARCH_LIMIT,
-    full: authz.fleet.readAgentPolicies,
   });
 
   const {
