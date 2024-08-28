@@ -617,7 +617,8 @@ export function trainedModelsRoutes(
         try {
           const { deploymentId, modelId } = request.params;
 
-          const results: Record<string, { success: boolean; error?: ErrorType }> = {};
+          const results: Record<string, { success: boolean; error?: ErrorType }> =
+            Object.create(null);
 
           for (const id of deploymentId.split(',')) {
             try {
