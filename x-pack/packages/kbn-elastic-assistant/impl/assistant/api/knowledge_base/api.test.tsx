@@ -18,6 +18,7 @@ const mockHttp = {
 describe('API tests', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (mockHttp.fetch as jest.Mock).mockImplementation(() => Promise.resolve({}));
   });
 
   const knowledgeBaseArgs = {
@@ -68,7 +69,7 @@ describe('API tests', () => {
         throw new Error(error);
       });
 
-      await expect(postKnowledgeBase(knowledgeBaseArgs)).resolves.toThrowError('simulated error');
+      await expect(postKnowledgeBase(knowledgeBaseArgs)).rejects.toThrowError('simulated error');
     });
   });
 

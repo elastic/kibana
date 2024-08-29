@@ -20,7 +20,8 @@
       "discover",
       "share",
       "fleet",
-      "security"
+      "security",
+      "customIntegrations",
     ],
     "optionalPlugins": [
       "cloud",

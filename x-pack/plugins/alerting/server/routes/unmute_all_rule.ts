@@ -25,6 +25,7 @@ export const unmuteAllRuleRoute = (
       options: {
         access: 'public',
         summary: `Unmute all alerts`,
+        tags: ['oas-tag:alerting'],
       },
       validate: {
         params: paramSchema,

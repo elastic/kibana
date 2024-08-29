@@ -98,7 +98,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
   const isEntityAnalyticsAuthorized = isPlatinumOrTrialLicense && hasEntityAnalyticsCapability;
 
   const { openPreviewPanel } = useExpandableFlyoutApi();
-  const isPreviewEnabled = useIsExperimentalFeatureEnabled('entityAlertPreviewEnabled');
+  const isPreviewEnabled = !useIsExperimentalFeatureEnabled('entityAlertPreviewDisabled');
 
   const narrowDateRange = useCallback(
     (score, interval) => {

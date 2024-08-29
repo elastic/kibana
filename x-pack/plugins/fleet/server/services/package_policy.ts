@@ -727,7 +727,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     soClient: SavedObjectsClientContract,
     options: ListWithKuery & { spaceId?: string }
   ): Promise<ListResult<PackagePolicy>> {
-    const { page = 1, perPage = 20, sortField = 'updated_at', sortOrder = 'desc', kuery } = options;
+    const {
+      page = 1,
+      perPage = 20,
+      sortField = 'updated_at',
+      sortOrder = 'desc',
+      kuery,
+      fields,
+    } = options;
 
     const packagePolicies = await soClient.find<PackagePolicySOAttributes>({
       type: SAVED_OBJECT_TYPE,
@@ -735,6 +742,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       sortOrder,
       page,
       perPage,
+      fields,
       filter: kuery ? normalizeKuery(SAVED_OBJECT_TYPE, kuery) : undefined,
       namespaces: options.spaceId ? [options.spaceId] : undefined,
     });
@@ -1030,6 +1038,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       error: Error | SavedObjectError;
     }> = [];
 
+    const secretStorageEnabled = await isSecretStorageEnabled(esClient, soClient);
+
     await pMap(packagePolicyUpdates, async (packagePolicyUpdate) => {
       try {
         const id = packagePolicyUpdate.id;
@@ -1061,7 +1071,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           if (pkgInfoAndAsset) {
             const { pkgInfo, assetsMap } = pkgInfoAndAsset;
             validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
-            if (await isSecretStorageEnabled(esClient, soClient)) {
+            if (secretStorageEnabled) {
               const secretsRes = await extractAndUpdateSecrets({
                 oldPackagePolicy,
                 packagePolicyUpdate: { ...restOfPackagePolicy, inputs },

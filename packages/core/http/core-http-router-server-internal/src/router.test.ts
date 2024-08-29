@@ -164,14 +164,14 @@ describe('Router', () => {
         isConfigSchema(
           (
             validationSchemas as () => RouteValidatorRequestAndResponses<unknown, unknown, unknown>
-          )().response![200].body()
+          )().response![200].body!()
         )
       ).toBe(true);
       expect(
         isConfigSchema(
           (
             validationSchemas as () => RouteValidatorRequestAndResponses<unknown, unknown, unknown>
-          )().response![404].body()
+          )().response![404].body!()
         )
       ).toBe(true);
     }

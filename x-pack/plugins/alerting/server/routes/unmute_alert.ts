@@ -35,6 +35,7 @@ export const unmuteAlertRoute = (
       options: {
         access: 'public',
         summary: `Unmute an alert`,
+        tags: ['oas-tag:alerting'],
       },
       validate: {
         params: paramSchema,

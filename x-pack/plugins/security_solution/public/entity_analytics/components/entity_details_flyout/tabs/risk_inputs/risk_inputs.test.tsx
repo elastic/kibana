@@ -130,7 +130,7 @@ describe('RiskInputsTab', () => {
   });
 
   it('it renders alert preview button when feature flag is enable', () => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
     mockUseRiskScore.mockReturnValue({
       loading: false,
       error: false,
@@ -152,7 +152,7 @@ describe('RiskInputsTab', () => {
   });
 
   it('it does not render alert preview button when feature flag is disable', () => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
     mockUseRiskScore.mockReturnValue({
       loading: false,
       error: false,

@@ -28,7 +28,7 @@ export const InferenceApi: FC<InferenceAPITabProps> = ({ inferenceApis }) => {
       {inferenceApis.map((inferenceApi, i) => {
         const initialIsOpen = i <= 2;
 
-        const modelId = inferenceApi.model_id;
+        const modelId = inferenceApi.inference_id;
 
         return (
           <React.Fragment key={modelId}>

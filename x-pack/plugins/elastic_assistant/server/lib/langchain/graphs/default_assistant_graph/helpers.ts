@@ -12,15 +12,17 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ExecuteConnectorRequestBody, TraceData } from '@kbn/elastic-assistant-common';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
+import { AIMessageChunk } from '@langchain/core/messages';
 import { withAssistantSpan } from '../../tracers/apm/with_assistant_span';
 import { AGENT_NODE_TAG } from './nodes/run_agent';
 import { DEFAULT_ASSISTANT_GRAPH_ID, DefaultAssistantGraph } from './graph';
+import { GraphInputs } from './types';
 import type { OnLlmResponse, TraceOptions } from '../../executors/types';
 
 interface StreamGraphParams {
   apmTracer: APMTracer;
   assistantGraph: DefaultAssistantGraph;
-  inputs: { input: string };
+  inputs: GraphInputs;
   logger: Logger;
   onLlmResponse?: OnLlmResponse;
   request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
@@ -77,6 +79,43 @@ export const streamGraph = async ({
     streamingSpan?.end();
   };
 
+  if (
+    (inputs?.llmType === 'bedrock' || inputs?.llmType === 'gemini') &&
+    inputs?.bedrockChatEnabled
+  ) {
+    const stream = await assistantGraph.streamEvents(
+      inputs,
+      {
+        callbacks: [apmTracer, ...(traceOptions?.tracers ?? [])],
+        runName: DEFAULT_ASSISTANT_GRAPH_ID,
+        tags: traceOptions?.tags ?? [],
+        version: 'v2',
+        streamMode: 'values',
+      },
+      inputs?.llmType === 'bedrock' ? { includeNames: ['Summarizer'] } : undefined
+    );
+
+    for await (const { event, data, tags } of stream) {
+      if ((tags || []).includes(AGENT_NODE_TAG)) {
+        if (event === 'on_chat_model_stream') {
+          const msg = data.chunk as AIMessageChunk;
+
+          if (!didEnd && !msg.tool_call_chunks?.length && msg.content.length) {
+            push({ payload: msg.content as string, type: 'content' });
+          }
+        }
+
+        if (
+          event === 'on_chat_model_end' &&
+          !data.output.lc_kwargs?.tool_calls?.length &&
+          !didEnd
+        ) {
+          handleStreamEnd(data.output.content);
+        }
+      }
+    }
+    return responseWithHeaders;
+  }
   let finalMessage = '';
   let conversationId: string | undefined;
   const stream = assistantGraph.streamEvents(inputs, {
@@ -186,7 +225,7 @@ export const streamGraph = async ({
 interface InvokeGraphParams {
   apmTracer: APMTracer;
   assistantGraph: DefaultAssistantGraph;
-  inputs: { input: string };
+  inputs: GraphInputs;
   onLlmResponse?: OnLlmResponse;
   traceOptions?: TraceOptions;
 }

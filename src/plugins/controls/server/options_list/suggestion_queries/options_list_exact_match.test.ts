@@ -6,31 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { SearchResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { FieldSpec } from '@kbn/data-views-plugin/common';
 import { OptionsListRequestBody } from '../../../common/options_list/types';
 import { getExactMatchAggregationBuilder } from './options_list_exact_match';
 
 describe('options list exact match search query', () => {
-  test('returns empty result when given invalid search', () => {
-    const optionsListRequestBodyMock: OptionsListRequestBody = {
-      size: 10,
-      fieldName: 'bytes',
-      allowExpensiveQueries: true,
-      sort: { by: '_key', direction: 'desc' },
-      searchString: '1a2b3c',
-      fieldSpec: { type: 'number' } as unknown as FieldSpec,
-    };
-    const aggregationBuilder = getExactMatchAggregationBuilder();
-    const aggregation = aggregationBuilder.buildAggregation(optionsListRequestBodyMock);
-    expect(aggregation).toEqual({});
-    const parsed = aggregationBuilder.parse(
-      {} as any as SearchResponse,
-      optionsListRequestBodyMock
-    );
-    expect(parsed).toEqual({ suggestions: [], totalCardinality: 0 });
-  });
-
   describe('suggestion aggregation', () => {
     test('string (keyword, text+keyword) field', () => {
       const optionsListRequestBodyMock: OptionsListRequestBody = {
@@ -107,7 +87,7 @@ describe('options list exact match search query', () => {
       });
     });
 
-    test('number field', () => {
+    test('numeric field', () => {
       const optionsListRequestBodyMock: OptionsListRequestBody = {
         size: 10,
         fieldName: 'bytes',
@@ -140,14 +120,57 @@ describe('options list exact match search query', () => {
     });
   });
 
-  test('suggestion parsing', () => {
+  describe('parsing', () => {
+    test('parses keyword result', () => {
+      const optionsListRequestBodyMock: OptionsListRequestBody = {
+        size: 10,
+        searchString: 'cool',
+        allowExpensiveQueries: true,
+        fieldName: 'coolTestField.keyword',
+        fieldSpec: { type: 'string' } as unknown as FieldSpec,
+      };
+      const aggregationBuilder = getExactMatchAggregationBuilder();
+
+      const searchResponseMock = {
+        hits: {
+          total: 1,
+          max_score: 1,
+          hits: [],
+        },
+        took: 10,
+        timed_out: false,
+        _shards: {
+          failed: 0,
+          successful: 1,
+          total: 1,
+          skipped: 0,
+        },
+        aggregations: {
+          suggestions: {
+            filteredSuggestions: {
+              buckets: [{ doc_count: 5, key: 'cool1' }],
+            },
+          },
+        },
+      };
+      expect(
+        aggregationBuilder.parse(searchResponseMock, optionsListRequestBodyMock)
+      ).toMatchObject({
+        suggestions: [{ docCount: 5, value: 'cool1' }],
+        totalCardinality: 1,
+      });
+    });
+  });
+
+  test('parses numeric field result', () => {
     const optionsListRequestBodyMock: OptionsListRequestBody = {
       size: 10,
-      searchString: 'cool',
+      fieldName: 'bytes',
       allowExpensiveQueries: true,
-      fieldName: 'coolTestField.keyword',
-      fieldSpec: { type: 'string' } as unknown as FieldSpec,
+      searchString: '12345',
+      fieldSpec: { type: 'number' } as unknown as FieldSpec,
     };
+
     const aggregationBuilder = getExactMatchAggregationBuilder();
 
     const searchResponseMock = {
@@ -167,13 +190,13 @@ describe('options list exact match search query', () => {
       aggregations: {
         suggestions: {
           filteredSuggestions: {
-            buckets: [{ doc_count: 5, key: 'cool1' }],
+            buckets: [{ doc_count: 5, key: 12345 }],
           },
         },
       },
     };
     expect(aggregationBuilder.parse(searchResponseMock, optionsListRequestBodyMock)).toMatchObject({
-      suggestions: [{ docCount: 5, value: 'cool1' }],
+      suggestions: [{ docCount: 5, value: 12345 }],
       totalCardinality: 1,
     });
   });

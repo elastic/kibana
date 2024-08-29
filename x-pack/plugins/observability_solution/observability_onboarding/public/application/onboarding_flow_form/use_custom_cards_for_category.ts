@@ -35,6 +35,9 @@ export function useCustomCardsForCategory(
   const { href: customLogsUrl } = reactRouterNavigate(history, `/customLogs/${location.search}`);
   const { href: otelLogsUrl } = reactRouterNavigate(history, `/otel-logs/${location.search}`);
 
+  const apmUrl = `${getUrlForApp?.('apm')}/${isServerless ? 'onboarding' : 'tutorial'}`;
+  const otelApmUrl = isServerless ? `${apmUrl}?agent=openTelemetry` : apmUrl;
+
   const otelCard: VirtualCard = {
     id: 'otel-logs',
     type: 'virtual',
@@ -71,7 +74,7 @@ export function useCustomCardsForCategory(
               src: 'apmApp',
             },
           ],
-          url: `${getUrlForApp?.('apm')}/onboarding` ?? '',
+          url: apmUrl,
           version: '',
           integration: '',
         },
@@ -88,7 +91,7 @@ export function useCustomCardsForCategory(
               src: http?.staticAssets.getPluginAssetHref('opentelemetry.svg') ?? '',
             },
           ],
-          url: `${getUrlForApp?.('apm')}/onboarding?agent=openTelemetry` ?? '',
+          url: otelApmUrl,
           version: '',
           integration: '',
         },

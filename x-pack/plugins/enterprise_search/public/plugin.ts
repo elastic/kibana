@@ -152,6 +152,7 @@ const relevanceLinks: AppDeepLink[] = [
         defaultMessage: 'Inference Endpoints',
       }
     ),
+    visibleIn: ['globalSearch'],
   },
 ];
 
@@ -494,7 +495,7 @@ export class EnterpriseSearchPlugin implements Plugin {
 
             return renderApp(EnterpriseSearchRelevance, kibanaDeps, pluginData);
           },
-          title: INFERENCE_ENDPOINTS_PLUGIN.NAME,
+          title: INFERENCE_ENDPOINTS_PLUGIN.NAV_TITLE,
           visibleIn: [],
         });
       }

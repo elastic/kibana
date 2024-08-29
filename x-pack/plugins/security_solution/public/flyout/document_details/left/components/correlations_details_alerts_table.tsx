@@ -80,7 +80,7 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
     sorting,
     error,
   } = usePaginatedAlerts(alertIds || []);
-  const isPreviewEnabled = useIsExperimentalFeatureEnabled('entityAlertPreviewEnabled');
+  const isPreviewEnabled = !useIsExperimentalFeatureEnabled('entityAlertPreviewDisabled');
 
   const onTableChange = useCallback(
     ({ page, sort }: Criteria<Record<string, unknown>>) => {

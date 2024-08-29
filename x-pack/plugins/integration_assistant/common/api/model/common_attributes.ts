@@ -46,6 +46,30 @@ export type Docs = z.infer<typeof Docs>;
 export const Docs = z.array(z.object({}).passthrough());
 
 /**
+ * The name of the log samples format.
+ */
+export type SamplesFormatName = z.infer<typeof SamplesFormatName>;
+export const SamplesFormatName = z.enum(['ndjson', 'json']);
+export type SamplesFormatNameEnum = typeof SamplesFormatName.enum;
+export const SamplesFormatNameEnum = SamplesFormatName.enum;
+
+/**
+ * Format of the provided log samples.
+ */
+export type SamplesFormat = z.infer<typeof SamplesFormat>;
+export const SamplesFormat = z.object({
+  name: SamplesFormatName,
+  /**
+   * For some formats, specifies whether the samples can be multiline.
+   */
+  multiline: z.boolean().optional(),
+  /**
+   * For a JSON format, describes how to get to the sample array from the root of the JSON.
+   */
+  json_path: z.array(z.string()).optional(),
+});
+
+/**
  * The pipeline object.
  */
 export type Pipeline = z.infer<typeof Pipeline>;
@@ -128,6 +152,10 @@ export const DataStream = z.object({
    * The documents of the dataStream.
    */
   docs: Docs,
+  /**
+   * The format of log samples in this dataStream.
+   */
+  samplesFormat: SamplesFormat,
 });
 
 /**
@@ -163,11 +191,11 @@ export const Integration = z.object({
 export type LangSmithOptions = z.infer<typeof LangSmithOptions>;
 export const LangSmithOptions = z.object({
   /**
-   * The project name to use with tracing.
+   * The project name.
    */
   projectName: z.string(),
   /**
-   * The api key for the project
+   * The apiKey to use for tracing.
    */
   apiKey: z.string(),
 });

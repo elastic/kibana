@@ -32,7 +32,7 @@ const getCustomInferenceIdMap = (
   const inferenceIdMap = models.reduce<InferenceToModelIdMap>((inferenceMap, model) => {
     const inferenceEntry = isLocalModel(model)
       ? {
-          trainedModelId: model.service_settings.model_id, // third-party models don't have trained model ids
+          trainedModelId: model.service_settings.model_id,
           isDeployable: model.service === Service.elser || model.service === Service.elasticsearch,
           isDeployed: modelStatsById[model.service_settings.model_id]?.state === 'started',
           isDownloading: Boolean(downloadStates[model.service_settings.model_id]),
@@ -45,7 +45,7 @@ const getCustomInferenceIdMap = (
           isDownloading: false,
           modelStats: undefined,
         };
-    inferenceMap[model.model_id] = inferenceEntry;
+    inferenceMap[model.inference_id] = inferenceEntry;
     return inferenceMap;
   }, {});
   const defaultInferenceIds = {

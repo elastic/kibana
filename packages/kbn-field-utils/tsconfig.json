@@ -10,6 +10,7 @@
     "@kbn/react-field",
     "@kbn/field-types",
     "@kbn/expressions-plugin",
+    "@kbn/data-view-utils",
   ],
   "exclude": ["target/**/*"]
 }

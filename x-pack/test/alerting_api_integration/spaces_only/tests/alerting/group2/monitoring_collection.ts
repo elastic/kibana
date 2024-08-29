@@ -38,8 +38,7 @@ export default function alertingMonitoringCollectionTests({ getService }: FtrPro
     ? dedicatedTaskRunner.getSupertest()
     : supertest;
 
-  // Failing: See https://github.com/elastic/kibana/issues/187275
-  describe.skip('monitoring_collection', () => {
+  describe('monitoring_collection', () => {
     let endDate: string;
     const objectRemover = new ObjectRemover(supertest);
 
@@ -124,8 +123,8 @@ export default function alertingMonitoringCollectionTests({ getService }: FtrPro
             rule_type_id: 'test.cancellableRule',
             schedule: { interval: '4s' },
             params: {
-              doLongSearch: true,
-              doLongPostProcessing: false,
+              doLongSearch: false,
+              doLongPostProcessing: true,
             },
           })
         );

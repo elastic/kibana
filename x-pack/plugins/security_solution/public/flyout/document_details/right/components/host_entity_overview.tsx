@@ -68,7 +68,7 @@ export interface HostEntityOverviewProps {
 
 export const HOST_PREVIEW_BANNER = {
   title: i18n.translate('xpack.securitySolution.flyout.right.host.hostPreviewTitle', {
-    defaultMessage: 'Preview host',
+    defaultMessage: 'Preview host details',
   }),
   backgroundColor: 'warning',
   textColor: 'warning',
@@ -82,7 +82,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
   const { openLeftPanel, openPreviewPanel } = useExpandableFlyoutApi();
   const { telemetry } = useKibana().services;
 
-  const isPreviewEnabled = useIsExperimentalFeatureEnabled('entityAlertPreviewEnabled');
+  const isPreviewEnabled = !useIsExperimentalFeatureEnabled('entityAlertPreviewDisabled');
 
   const goToEntitiesTab = useCallback(() => {
     openLeftPanel({

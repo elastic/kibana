@@ -13,26 +13,27 @@
 # this material is strictly forbidden unless prior written
 # permission is obtained from Elasticsearch B.V.
 
-.PHONY: api-docs
-api-docs: ## Generate kibana.yaml
-	@npx @redocly/cli join "kibana.info.yaml" "../x-pack/plugins/observability_solution/apm/docs/openapi/apm.yaml" "../x-pack/plugins/actions/docs/openapi/bundled.yaml" "../src/plugins/data_views/docs/openapi/bundled.yaml" "../x-pack/plugins/ml/common/openapi/ml_apis.yaml" "../packages/core/saved-objects/docs/openapi/bundled.yaml" "../x-pack/plugins/observability_solution/slo/docs/openapi/slo/bundled.yaml" -o "output/kibana.yaml" --prefix-components-with-info-prop title
+api-docs: ## Generate ESS Kibana OpenAPI bundles with kbn-openapi-bundler
+	@node scripts/merge_ess_oas.js
+
+.PHONY: api-docs-redocly
+api-docs-redocly: ## Generate kibana.yaml
+	@npx @redocly/cli join "kibana.info.yaml" "../x-pack/plugins/alerting/docs/openapi/bundled.yaml" "../x-pack/plugins/observability_solution/apm/docs/openapi/apm.yaml" "../x-pack/plugins/cases/docs/openapi/bundled.yaml" "../x-pack/plugins/actions/docs/openapi/bundled.yaml" "../src/plugins/data_views/docs/openapi/bundled.yaml" "../x-pack/plugins/ml/common/openapi/ml_apis.yaml" "../packages/core/saved-objects/docs/openapi/bundled.yaml" "../x-pack/plugins/observability_solution/slo/docs/openapi/slo/bundled.yaml" "../x-pack/plugins/fleet/common/openapi/bundled.yaml" "bundle.json" -o "output/kibana.yaml" --prefix-components-with-info-prop title
 
 .PHONY: api-docs-stateful
 api-docs-stateful: ## Generate only kibana.yaml
-	@npx @redocly/cli join "kibana.info.yaml" "../x-pack/plugins/observability_solution/apm/docs/openapi/apm.yaml" "../x-pack/plugins/actions/docs/openapi/bundled.yaml" "../src/plugins/data_views/docs/openapi/bundled.yaml" "../x-pack/plugins/ml/common/openapi/ml_apis.yaml" "../packages/core/saved-objects/docs/openapi/bundled.yaml" "../x-pack/plugins/observability_solution/slo/docs/openapi/slo/bundled.yaml" -o "output/kibana.yaml" --prefix-components-with-info-prop title
-# Temporarily omit "../x-pack/plugins/alerting/docs/openapi/bundled.yaml" and "../x-pack/plugins/cases/docs/openapi/bundled.yaml" due to OAS version
-# Temporarily omit "../x-pack/plugins/fleet/common/openapi/bundled.yaml" due to internals tag and tag sorting
+	@node scripts/merge_ess_oas.js
 	
 .PHONY: api-docs-lint
 api-docs-lint: ## Run spectral API docs linter 
-	@npx @stoplight/spectral-cli lint "output/kibana.yaml" --ruleset ".spectral.yaml"
+	@npx @stoplight/spectral-cli lint "output/*.yaml" --ruleset ".spectral.yaml"
 
 .PHONY: api-docs-lint-stateful
 api-docs-lint-stateful: ## Run spectral API docs linter on kibana.yaml
 	@npx @stoplight/spectral-cli lint "output/kibana.yaml" --ruleset ".spectral.yaml"
 
-.PHONY: api-docs-overlay-stateful
-api-docs-overlay-stateful: ## Run spectral API docs linter on kibana.yaml
+.PHONY: api-docs-overlay
+api-docs-overlay: ## Run spectral API docs linter on kibana.yaml
 	@npx bump overlay "output/kibana.yaml" "overlays/kibana.overlays.yaml" > "output/kibana.new.yaml"
 
 help:  ## Display help
