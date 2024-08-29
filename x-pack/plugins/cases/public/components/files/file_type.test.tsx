@@ -6,7 +6,7 @@
  */
 import type { JsonValue } from '@kbn/utility-types';
 import userEvent from '@testing-library/user-event';
-import { screen, waitFor } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 
 import type { ExternalReferenceAttachmentViewProps } from '../../client/attachment_framework/types';
 import type { AppMockRenderer } from '../../common/mock';
