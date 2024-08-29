@@ -16,5 +16,6 @@
   "kbn_references": [
     "@kbn/server-route-repository-utils",
     "@kbn/core-lifecycle-browser",
+    "@kbn/core-http-browser",
   ]
 }
