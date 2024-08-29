@@ -18,7 +18,6 @@
     "@kbn/config-schema",
     "@kbn/core-saved-objects-api-server",
     "@kbn/core-lifecycle-server",
-    "@kbn/logging",
     "@kbn/usage-collection-plugin",
   ]
 }
