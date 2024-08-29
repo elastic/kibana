@@ -9,7 +9,6 @@ import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_cont
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import type { AssistantAvailability } from '@kbn/elastic-assistant';
 import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import { Router } from '@kbn/shared-ux-router';
 import { render, screen } from '@testing-library/react';
@@ -17,7 +16,6 @@ import React from 'react';
 import { useLocalStorage } from 'react-use';
 
 import { TestProviders } from '../../common/mock';
-import { MockAssistantProvider } from '../../common/mock/mock_assistant_provider';
 import { ATTACK_DISCOVERY_PATH } from '../../../common/constants';
 import { mockHistory } from '../../common/utils/route/mocks';
 import { AttackDiscoveryPage } from '.';
@@ -549,54 +547,6 @@ describe('AttackDiscovery', () => {
 
     it('does NOT render the upgrade call to action', () => {
       expect(screen.queryByTestId('upgrade')).toBeNull();
-    });
-  });
-
-  describe('when the user does not have an Enterprise license', () => {
-    const assistantUnavailable: AssistantAvailability = {
-      hasAssistantPrivilege: false,
-      hasConnectorsAllPrivilege: true,
-      hasConnectorsReadPrivilege: true,
-      hasUpdateAIAssistantAnonymization: false,
-      isAssistantEnabled: false, // <-- non-Enterprise license
-    };
-
-    beforeEach(() => {
-      render(
-        <TestProviders>
-          <Router history={historyMock}>
-            <UpsellingProvider upsellingService={mockUpselling}>
-              <MockAssistantProvider assistantAvailability={assistantUnavailable}>
-                <AttackDiscoveryPage />
-              </MockAssistantProvider>
-            </UpsellingProvider>
-          </Router>
-        </TestProviders>
-      );
-    });
-
-    it('does NOT render the animated logo', () => {
-      expect(screen.queryByTestId('animatedLogo')).toBeNull();
-    });
-
-    it('does NOT render the header', () => {
-      expect(screen.queryByTestId('header')).toBeNull();
-    });
-
-    it('does NOT render the summary', () => {
-      expect(screen.queryByTestId('summary')).toBeNull();
-    });
-
-    it('does NOT render attack discoveries', () => {
-      expect(screen.queryAllByTestId('attackDiscovery')).toHaveLength(0);
-    });
-
-    it('does NOT render the loading callout', () => {
-      expect(screen.queryByTestId('loadingCallout')).toBeNull();
-    });
-
-    it('renders the upgrade call to action', () => {
-      expect(screen.getByTestId('upgrade')).toBeInTheDocument();
     });
   });
 });

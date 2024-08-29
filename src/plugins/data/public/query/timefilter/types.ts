@@ -14,6 +14,7 @@ import { RefreshInterval } from '../../../common';
 export interface TimefilterConfig {
   timeDefaults: TimeRange;
   refreshIntervalDefaults: RefreshInterval;
+  minRefreshIntervalDefault: number;
 }
 
 // Timefilter accepts moment input but always returns string output

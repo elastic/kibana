@@ -12,10 +12,12 @@ import { VisitorContext } from './contexts';
 import type {
   AstNodeToVisitorName,
   EnsureFunction,
+  ESQLAstExpressionNode,
   ESQLAstQueryNode,
   UndefinedToVoid,
   VisitorMethods,
 } from './types';
+import { ESQLCommand } from '../types';
 
 export interface VisitorOptions<
   Methods extends VisitorMethods = VisitorMethods,
@@ -86,6 +88,7 @@ export class Visitor<
    * Traverse the root node of ES|QL query with default context.
    *
    * @param node Query node to traverse.
+   * @param input Input to pass to the first visitor.
    * @returns The result of the query visitor.
    */
   public visitQuery(
@@ -94,5 +97,35 @@ export class Visitor<
   ) {
     const queryContext = new QueryVisitorContext(this.ctx, node, null);
     return this.visit(queryContext, input);
+  }
+
+  /**
+   * Traverse starting from known command node with default context.
+   *
+   * @param node Command node to traverse.
+   * @param input Input to pass to the first visitor.
+   * @returns The output of the visitor.
+   */
+  public visitCommand(
+    node: ESQLCommand,
+    input: UndefinedToVoid<Parameters<NonNullable<Methods['visitCommand']>>[1]>
+  ) {
+    this.ctx.assertMethodExists('visitCommand');
+    return this.ctx.visitCommand(null, node, input);
+  }
+
+  /**
+   * Traverse starting from known expression node with default context.
+   *
+   * @param node Expression node to traverse.
+   * @param input Input to pass to the first visitor.
+   * @returns The output of the visitor.
+   */
+  public visitExpression(
+    node: ESQLAstExpressionNode,
+    input: UndefinedToVoid<Parameters<NonNullable<Methods['visitExpression']>>[1]>
+  ) {
+    this.ctx.assertMethodExists('visitExpression');
+    return this.ctx.visitExpression(null, node, input);
   }
 }

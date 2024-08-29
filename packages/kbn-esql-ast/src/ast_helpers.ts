@@ -11,12 +11,15 @@
  */
 
 import { type Token, type ParserRuleContext, type TerminalNode } from 'antlr4';
-import type {
-  ArithmeticUnaryContext,
-  DecimalValueContext,
-  InlineCastContext,
-  IntegerValueContext,
-  QualifiedIntegerLiteralContext,
+import {
+  IndexPatternContext,
+  QualifiedNameContext,
+  type ArithmeticUnaryContext,
+  type DecimalValueContext,
+  type InlineCastContext,
+  type IntegerValueContext,
+  type QualifiedIntegerLiteralContext,
+  QualifiedNamePatternContext,
 } from './antlr/esql_parser';
 import { getPosition } from './ast_position_utils';
 import { DOUBLE_TICKS_REGEX, SINGLE_BACKTICK, TICKS_REGEX } from './constants';
@@ -40,6 +43,7 @@ import type {
   ESQLNumericLiteral,
   ESQLOrderExpression,
 } from './types';
+import { parseIdentifier } from './parser/helpers';
 
 export function nonNullable<T>(v: T): v is NonNullable<T> {
   return v != null;
@@ -324,6 +328,34 @@ function sanitizeSourceString(ctx: ParserRuleContext) {
   return contextText;
 }
 
+const unquoteIndexString = (indexString: string): string => {
+  const isStringQuoted = indexString[0] === '"';
+
+  if (!isStringQuoted) {
+    return indexString;
+  }
+
+  // If wrapped by triple double quotes, simply remove them.
+  if (indexString.startsWith(`"""`) && indexString.endsWith(`"""`)) {
+    return indexString.slice(3, -3);
+  }
+
+  // If wrapped by double quote, remove them and unescape the string.
+  if (indexString[indexString.length - 1] === '"') {
+    indexString = indexString.slice(1, -1);
+    indexString = indexString
+      .replace(/\\"/g, '"')
+      .replace(/\\r/g, '\r')
+      .replace(/\\n/g, '\n')
+      .replace(/\\t/g, '\t')
+      .replace(/\\\\/g, '\\');
+    return indexString;
+  }
+
+  // This should never happen, but if it does, return the original string.
+  return indexString;
+};
+
 export function sanitizeIdentifierString(ctx: ParserRuleContext) {
   const result =
     getUnquotedText(ctx)?.getText() ||
@@ -370,8 +402,27 @@ export function createSource(
   type: 'index' | 'policy' = 'index'
 ): ESQLSource {
   const text = sanitizeSourceString(ctx);
+
+  let cluster: string = '';
+  let index: string = '';
+
+  if (ctx instanceof IndexPatternContext) {
+    const clusterString = ctx.clusterString();
+    const indexString = ctx.indexString();
+
+    if (clusterString) {
+      cluster = clusterString.getText();
+    }
+    if (indexString) {
+      index = indexString.getText();
+      index = unquoteIndexString(index);
+    }
+  }
+
   return {
     type: 'source',
+    cluster,
+    index,
     name: text,
     sourceType: type,
     text,
@@ -381,10 +432,13 @@ export function createSource(
 }
 
 export function createColumnStar(ctx: TerminalNode): ESQLColumn {
+  const text = ctx.getText();
+
   return {
     type: 'column',
-    name: ctx.getText(),
-    text: ctx.getText(),
+    name: text,
+    parts: [text],
+    text,
     location: getPosition(ctx.symbol),
     incomplete: ctx.getText() === '',
     quoted: false,
@@ -392,11 +446,22 @@ export function createColumnStar(ctx: TerminalNode): ESQLColumn {
 }
 
 export function createColumn(ctx: ParserRuleContext): ESQLColumn {
+  const parts: string[] = [];
+  if (ctx instanceof QualifiedNamePatternContext) {
+    parts.push(
+      ...ctx.identifierPattern_list().map((identifier) => parseIdentifier(identifier.getText()))
+    );
+  } else if (ctx instanceof QualifiedNameContext) {
+    parts.push(...ctx.identifier_list().map((identifier) => parseIdentifier(identifier.getText())));
+  } else {
+    parts.push(sanitizeIdentifierString(ctx));
+  }
   const text = sanitizeIdentifierString(ctx);
   const hasQuotes = Boolean(getQuotedText(ctx) || isQuoted(ctx.getText()));
   return {
     type: 'column' as const,
     name: text,
+    parts,
     text: ctx.getText(),
     location: getPosition(ctx.start, ctx.stop),
     incomplete: Boolean(ctx.exception || text === ''),

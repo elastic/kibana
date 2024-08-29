@@ -20,7 +20,7 @@ import { keyBy } from 'lodash/fp';
 import { css } from '@emotion/react';
 import {
   PromptResponse,
-  PerformBulkActionRequestBody as PromptsPerformBulkActionRequestBody,
+  PerformPromptsBulkActionRequestBody as PromptsPerformBulkActionRequestBody,
 } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import { ApiConfig } from '@kbn/elastic-assistant-common';
 import { AIConnector } from '../../../../connectorland/connector_selector';

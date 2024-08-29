@@ -169,7 +169,6 @@ export const AppRoutes = memo(() => {
           }}
         />
       </Routes>
-
       {flyoutContext.isEnrollmentFlyoutOpen && (
         <EuiPortal>
           <AgentEnrollmentFlyout
@@ -183,7 +182,6 @@ export const AppRoutes = memo(() => {
           />
         </EuiPortal>
       )}
-
       {flyoutContext.isFleetServerFlyoutOpen && (
         <EuiPortal>
           <FleetServerFlyout onClose={() => flyoutContext.closeFleetServerFlyout()} />

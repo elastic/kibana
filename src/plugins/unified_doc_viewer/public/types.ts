@@ -5,10 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 export type { JsonCodeEditorProps } from './components';
 export type { EsDocSearchProps } from './hooks';
 export type { UnifiedDocViewerSetup, UnifiedDocViewerStart } from './plugin';
 
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -27,4 +29,5 @@ export interface UnifiedDocViewerServices {
   uiSettings: IUiSettingsClient;
   unifiedDocViewer: UnifiedDocViewerStart;
   share: SharePluginStart;
+  core: CoreStart;
 }

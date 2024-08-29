@@ -57,10 +57,8 @@ import {
   INFERENCE_ENDPOINTS_PLUGIN,
   SEMANTIC_SEARCH_PLUGIN,
 } from '../common/constants';
-import {
-  CreatIndexLocatorDefinition,
-  CreatIndexLocatorParams,
-} from '../common/locators/create_index_locator';
+import { registerLocators } from '../common/locators';
+
 import { ClientConfigType, InitialAppData } from '../common/types';
 
 import { ENGINES_PATH } from './applications/app_search/routes';
@@ -523,7 +521,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       visibleIn: [],
     });
 
-    share?.url.locators.create<CreatIndexLocatorParams>(new CreatIndexLocatorDefinition());
+    registerLocators(share!);
 
     if (config.canDeployEntSearch) {
       core.application.register({

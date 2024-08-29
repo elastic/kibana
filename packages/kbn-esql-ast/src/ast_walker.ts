@@ -61,6 +61,7 @@ import {
   InputNamedOrPositionalParamContext,
   InputParamContext,
   IndexPatternContext,
+  InlinestatsCommandContext,
 } from './antlr/esql_parser';
 import {
   createSource,
@@ -596,7 +597,10 @@ export function collectAllFields(ctx: FieldsContext | undefined): ESQLAstField[]
   return ast;
 }
 
-export function visitByOption(ctx: StatsCommandContext, expr: FieldsContext | undefined) {
+export function visitByOption(
+  ctx: StatsCommandContext | InlinestatsCommandContext,
+  expr: FieldsContext | undefined
+) {
   if (!ctx.BY() || !expr) {
     return [];
   }

@@ -15,7 +15,7 @@ import { useStorage } from '@kbn/ml-local-storage';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
 import type { MinimumTimeRangeOption } from './minimum_time_range';
-import { MINIMUM_TIME_RANGE } from './minimum_time_range';
+import { DEFAULT_MINIMUM_TIME_RANGE_OPTION, MINIMUM_TIME_RANGE } from './minimum_time_range';
 import type { AiOpsKey, AiOpsStorageMapped } from '../../../types/storage';
 import { AIOPS_PATTERN_ANALYSIS_MINIMUM_TIME_RANGE_PREFERENCE } from '../../../types/storage';
 
@@ -54,6 +54,11 @@ export function useMinimumTimeRange() {
         signal: abortController.current.signal,
       });
 
+      if (resp.end.epoch === null || resp.start.epoch === null) {
+        // epoch can be null if no data can be found.
+        return { ...timeRange, useSubAgg: false };
+      }
+
       // the index isn't big enough to get a wider time range
       const indexTimeRangeMs = resp.end.epoch - resp.start.epoch;
       if (indexTimeRangeMs < minimumTimeRangeMs) {
@@ -80,7 +85,7 @@ export function useMinimumTimeRange() {
   const [minimumTimeRangeOption, setMinimumTimeRangeOption] = useStorage<
     AiOpsKey,
     AiOpsStorageMapped<typeof AIOPS_PATTERN_ANALYSIS_MINIMUM_TIME_RANGE_PREFERENCE>
-  >(AIOPS_PATTERN_ANALYSIS_MINIMUM_TIME_RANGE_PREFERENCE, '1 week');
+  >(AIOPS_PATTERN_ANALYSIS_MINIMUM_TIME_RANGE_PREFERENCE, DEFAULT_MINIMUM_TIME_RANGE_OPTION);
 
   const cancelRequest = useCallback(() => {
     abortController.current.abort();
