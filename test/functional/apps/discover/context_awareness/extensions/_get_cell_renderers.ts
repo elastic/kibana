@@ -11,7 +11,11 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'discover', 'unifiedFieldList']);
+  const { common, discover, unifiedFieldList } = getPageObjects([
+    'common',
+    'discover',
+    'unifiedFieldList',
+  ]);
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const dataGrid = getService('dataGrid');
@@ -35,11 +39,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             esql: 'from my-example-logs,logstash* | sort @timestamp desc | where `log.level` is not null',
           },
         });
-        await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
+        await common.navigateToActualUrl('discover', `?_a=${state}`, {
           ensureCurrentUrl: false,
         });
-        await PageObjects.discover.waitUntilSearchingHasFinished();
-        await PageObjects.unifiedFieldList.clickFieldListItemAdd('log.level');
+        await discover.waitUntilSearchingHasFinished();
+        await unifiedFieldList.clickFieldListItemAdd('log.level');
         const firstCell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
         const logLevelBadge = await firstCell.findByTestSubject('*logLevelBadgeCell-');
         expect(await logLevelBadge.getVisibleText()).to.be('debug');
@@ -55,11 +59,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             esql: 'from my-example* | sort @timestamp desc | where `log.level` is not null',
           },
         });
-        await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
+        await common.navigateToActualUrl('discover', `?_a=${state}`, {
           ensureCurrentUrl: false,
         });
-        await PageObjects.discover.waitUntilSearchingHasFinished();
-        await PageObjects.unifiedFieldList.clickFieldListItemAdd('log.level');
+        await discover.waitUntilSearchingHasFinished();
+        await unifiedFieldList.clickFieldListItemAdd('log.level');
         const firstCell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
         expect(await firstCell.getVisibleText()).to.be('debug');
         await testSubjects.missingOrFail('*logLevelBadgeCell-');
@@ -68,14 +72,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('data view mode', () => {
       it('should render log.level badge cell', async () => {
-        await PageObjects.common.navigateToActualUrl('discover', undefined, {
+        await common.navigateToActualUrl('discover', undefined, {
           ensureCurrentUrl: false,
         });
         await dataViews.switchTo('my-example-logs,logstash*');
         await queryBar.setQuery('log.level:*');
         await queryBar.submitQuery();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
-        await PageObjects.unifiedFieldList.clickFieldListItemAdd('log.level');
+        await discover.waitUntilSearchingHasFinished();
+        await unifiedFieldList.clickFieldListItemAdd('log.level');
         const firstCell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
         const logLevelBadge = await firstCell.findByTestSubject('*logLevelBadgeCell-');
         expect(await logLevelBadge.getVisibleText()).to.be('debug');
@@ -85,14 +89,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it("should not render log.level badge cell if it's not a logs data source", async () => {
-        await PageObjects.common.navigateToActualUrl('discover', undefined, {
+        await common.navigateToActualUrl('discover', undefined, {
           ensureCurrentUrl: false,
         });
         await dataViews.switchTo('my-example-*');
         await queryBar.setQuery('log.level:*');
         await queryBar.submitQuery();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
-        await PageObjects.unifiedFieldList.clickFieldListItemAdd('log.level');
+        await discover.waitUntilSearchingHasFinished();
+        await unifiedFieldList.clickFieldListItemAdd('log.level');
         const firstCell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
         expect(await firstCell.getVisibleText()).to.be('debug');
         await testSubjects.missingOrFail('*logLevelBadgeCell-');

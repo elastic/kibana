@@ -14,18 +14,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const log = getService('log');
   const testSubjects = getService('testSubjects');
-  const reporting = getService('reporting');
+  const reportingService = getService('reporting');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const filterBar = getService('filterBar');
   const find = getService('find');
   const retry = getService('retry');
   const toasts = getService('toasts');
-  const {
-    reporting: reportingPage,
-    common,
-    dashboard,
-    timePicker,
-  } = getPageObjects(['reporting', 'common', 'dashboard', 'timePicker']);
+  const { reporting, common, dashboard, timePicker } = getPageObjects([
+    'reporting',
+    'common',
+    'dashboard',
+    'timePicker',
+  ]);
 
   const navigateToDashboardApp = async () => {
     log.debug('in navigateToDashboardApp');
@@ -37,8 +37,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const getCsvReportData = async () => {
     await toasts.dismissAll();
-    const url = await reportingPage.getReportURL(60000);
-    const res = await reportingPage.getResponse(url ?? '');
+    const url = await reporting.getReportURL(60000);
+    const res = await reporting.getResponse(url ?? '');
 
     expect(res.status).to.equal(200);
     expect(res.get('content-type')).to.equal('text/csv; charset=utf-8');
@@ -68,7 +68,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('Default Saved Search Data', () => {
       before(async () => {
         await esArchiver.emptyKibanaIndex();
-        await reporting.initEcommerce();
+        await reportingService.initEcommerce();
         await kibanaServer.uiSettings.update({ 'dateFormat:tz': 'UTC' });
       });
 
@@ -77,7 +77,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       after(async () => {
-        await reporting.teardownEcommerce();
+        await reportingService.teardownEcommerce();
       });
 
       it('Generate CSV export of a saved search panel', async function () {
@@ -138,7 +138,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       before(async () => {
         await esArchiver.emptyKibanaIndex();
-        await reporting.initEcommerce();
+        await reportingService.initEcommerce();
         await kibanaServer.uiSettings.update({ 'dateFormat:tz': 'UTC' });
       });
 
@@ -153,7 +153,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       after(async () => {
-        await reporting.teardownEcommerce();
+        await reportingService.teardownEcommerce();
         await common.unsetTime();
       });
 
@@ -172,7 +172,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       before(async () => {
         await esArchiver.emptyKibanaIndex();
-        await reporting.initLogs();
+        await reportingService.initLogs();
         await esArchiver.load('x-pack/test/functional/es_archives/reporting/hugedata');
         await kibanaServer.uiSettings.update({ 'dateFormat:tz': 'UTC' });
       });
@@ -191,7 +191,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       after(async () => {
-        await reporting.teardownLogs();
+        await reportingService.teardownLogs();
         await esArchiver.unload('x-pack/test/functional/es_archives/reporting/hugedata');
       });
 

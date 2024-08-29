@@ -10,11 +10,11 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function ({ getService, getPageObject }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
   const dashboardPanelActions = getService('dashboardPanelActions');
-  const dashboard = getPageObject('dashboard');
+  const { dashboard } = getPageObjects(['dashboard']);
 
   describe('dashboard grid', function () {
     before(async () => {

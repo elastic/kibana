@@ -16,7 +16,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const dataGrid = getService('dataGrid');
-  const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'unifiedFieldList']);
+  const { common, discover, timePicker, unifiedFieldList } = getPageObjects([
+    'common',
+    'discover',
+    'timePicker',
+    'unifiedFieldList',
+  ]);
   const defaultSettings = { defaultIndex: 'logstash-*' };
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
@@ -38,10 +43,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       beforeEach(async function () {
-        await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+        await timePicker.setDefaultAbsoluteRangeViaUiSettings();
         await kibanaServer.uiSettings.update(defaultSettings);
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await common.navigateToApp('discover');
+        await discover.waitUntilSearchingHasFinished();
       });
 
       it('should show footer only for the last page and allow to load more', async () => {
@@ -70,7 +75,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // press "Load more"
         await testSubjects.click(LOAD_MORE_SELECTOR);
-        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
 
         // more pages appeared and the footer is gone
         await retry.try(async function () {
@@ -85,7 +90,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // press "Load more"
         await testSubjects.click(LOAD_MORE_SELECTOR);
-        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
 
         // more pages appeared and the footer is gone
         await retry.try(async function () {
@@ -109,7 +114,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.isEnabled(LOAD_MORE_SELECTOR)).to.be(true);
 
         // enable the refresh interval
-        await PageObjects.timePicker.startAutoRefresh(10);
+        await timePicker.startAutoRefresh(10);
 
         // the button is disabled now
         await retry.waitFor('disabled state', async function () {
@@ -117,7 +122,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         // disable the refresh interval
-        await PageObjects.timePicker.pauseAutoRefresh();
+        await timePicker.pauseAutoRefresh();
 
         // the button is enabled again
         await retry.waitFor('enabled state', async function () {
@@ -141,7 +146,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       beforeEach(async function () {
-        await PageObjects.common.setTime({
+        await common.setTime({
           from: 'Sep 10, 2015 @ 00:00:00.000',
           to: 'Sep 30, 2019 @ 00:00:00.000',
         });
@@ -150,13 +155,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'discover:sampleSize': 4,
           'discover:sampleRowsPerPage': 2,
         });
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await common.navigateToApp('discover');
+        await discover.waitUntilSearchingHasFinished();
       });
 
       it('should work for date nanos too', async () => {
-        await PageObjects.unifiedFieldList.clickFieldListItemAdd('_id');
-        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await unifiedFieldList.clickFieldListItemAdd('_id');
+        await discover.waitUntilSearchingHasFinished();
 
         expect(await dataGrid.getRowsText()).to.eql([
           'Sep 22, 2019 @ 23:50:13.253123345AU_x3-TaGFA8no6QjiSJ',
@@ -184,7 +189,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // press "Load more"
         await testSubjects.click(LOAD_MORE_SELECTOR);
-        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
 
         // more pages appeared and the footer is gone
         await retry.try(async function () {
@@ -204,7 +209,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // press "Load more"
         await testSubjects.click(LOAD_MORE_SELECTOR);
-        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
 
         // more pages appeared and the footer is gone
         await retry.try(async function () {

@@ -9,12 +9,12 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { dashboard, security: securityPage } = getPageObjects(['dashboard', 'security']);
+  const { dashboard, security } = getPageObjects(['dashboard', 'security']);
 
   const esArchiver = getService('esArchiver');
   const listingTable = getService('listingTable');
   const kibanaServer = getService('kibanaServer');
-  const security = getService('security');
+  const securityService = getService('security');
   const testSubjects = getService('testSubjects');
 
   describe('created_by', function () {
@@ -33,9 +33,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
 
       // ensure we're logged out so we can login as the appropriate users
-      await securityPage.forceLogout();
+      await security.forceLogout();
 
-      await security.role.create('global_dashboard_all_role', {
+      await securityService.role.create('global_dashboard_all_role', {
         elasticsearch: {
           indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
         },
@@ -50,18 +50,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         ],
       });
 
-      await security.user.create(USERNAME_1, {
+      await securityService.user.create(USERNAME_1, {
         password: 'changeme',
         roles: ['global_dashboard_all_role'],
         full_name: 'global dashboard all user 1',
       });
-      await security.user.create(USERNAME_2, {
+      await securityService.user.create(USERNAME_2, {
         password: 'changeme',
         roles: ['global_dashboard_all_role'],
         full_name: 'global dashboard all user 2',
       });
 
-      await securityPage.login(USERNAME_1, 'changeme', {
+      await security.login(USERNAME_1, 'changeme', {
         expectSpaceSelector: false,
       });
 
@@ -78,10 +78,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     after(async () => {
       // logout, so the other tests don't accidentally run as the custom users we're testing below
-      await securityPage.forceLogout();
-      await security.role.delete('global_dashboard_all_role');
-      await security.user.delete(USERNAME_1);
-      await security.user.delete(USERNAME_2);
+      await security.forceLogout();
+      await securityService.role.delete('global_dashboard_all_role');
+      await securityService.user.delete(USERNAME_1);
+      await securityService.user.delete(USERNAME_2);
 
       await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.importExport.unload(
@@ -113,8 +113,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it("doesn't override creator when editing a dashboard", async () => {
-      await securityPage.forceLogout();
-      await securityPage.login(USERNAME_2, 'changeme', {
+      await security.forceLogout();
+      await security.login(USERNAME_2, 'changeme', {
         expectSpaceSelector: false,
       });
       await dashboard.navigateToApp();

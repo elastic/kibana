@@ -14,13 +14,13 @@ const MANAGE_DRILLDOWNS_DATA_TEST_SUBJ = 'embeddablePanelAction-OPEN_FLYOUT_EDIT
 
 export function DashboardDrilldownPanelActionsProvider({
   getService,
-  getPageObject,
+  getPageObjects,
 }: FtrProviderContext) {
   const log = getService('log');
   const testSubjects = getService('testSubjects');
   const dashboardPanelActions = getService('dashboardPanelActions');
 
-  const dashboard = getPageObject('dashboard');
+  const { dashboard } = getPageObjects(['dashboard']);
 
   return new (class DashboardDrilldownPanelActions {
     async expectExistsCreateDrilldownAction() {

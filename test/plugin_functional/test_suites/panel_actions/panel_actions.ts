@@ -7,16 +7,17 @@
  */
 
 import expect from '@kbn/expect';
+import { PluginFunctionalProviderContext } from '../../services';
 
-export default function ({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['dashboard']);
+  const { dashboard } = getPageObjects(['dashboard']);
 
   describe('Panel Actions', () => {
     before(async () => {
-      await PageObjects.dashboard.loadSavedDashboard('few panels');
+      await dashboard.loadSavedDashboard('few panels');
     });
 
     it('allows to register links into the context menu', async () => {

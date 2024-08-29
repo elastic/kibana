@@ -11,7 +11,12 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'timePicker', 'discover', 'unifiedFieldList']);
+  const { common, timePicker, discover, unifiedFieldList } = getPageObjects([
+    'common',
+    'timePicker',
+    'discover',
+    'unifiedFieldList',
+  ]);
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const dataGrid = getService('dataGrid');
@@ -31,19 +36,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         dataSource: { type: 'esql' },
         query: { esql: 'from logstash* | sort @timestamp desc' },
       });
-      await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
+      await common.navigateToActualUrl('discover', `?_a=${state}`, {
         ensureCurrentUrl: false,
       });
-      await PageObjects.discover.waitUntilSearchingHasFinished();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
+      await timePicker.setDefaultAbsoluteRange();
+      await discover.waitUntilSearchingHasFinished();
       // logstash does not have log.level field, so the color indicator should not be rendered
       await testSubjects.existOrFail('euiDataGridBody');
       await testSubjects.missingOrFail('dataGridHeaderCell-colorIndicator');
 
       // switch the time frame back
       await browser.goBack();
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
     });
 
     it('should not render log.level row indicators if not a logs data source', async () => {
@@ -51,10 +56,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         dataSource: { type: 'esql' },
         query: { esql: 'from my-example* | sort @timestamp desc' },
       });
-      await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
+      await common.navigateToActualUrl('discover', `?_a=${state}`, {
         ensureCurrentUrl: false,
       });
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
       // my-example* has a log.level field, but it's not matching the logs profile, so the color indicator should not be rendered
       await testSubjects.existOrFail('euiDataGridBody');
       await testSubjects.missingOrFail('dataGridHeaderCell-colorIndicator');
@@ -67,10 +72,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           esql: 'from my-example-logs,logstash* | sort @timestamp desc | where `log.level` is not null',
         },
       });
-      await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
+      await common.navigateToActualUrl('discover', `?_a=${state}`, {
         ensureCurrentUrl: false,
       });
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
       // in this case it's matching the logs data source profile and has a log.level field, so the color indicator should be rendered
       await testSubjects.existOrFail('dataGridHeaderCell-colorIndicator');
       const firstCell = await dataGrid.getCellElement(0, 0);

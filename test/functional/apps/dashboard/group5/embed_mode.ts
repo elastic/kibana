@@ -12,13 +12,13 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({
   getService,
-  getPageObject,
+  getPageObjects,
   updateBaselines,
 }: FtrProviderContext & { updateBaselines: boolean }) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
-  const dashboard = getPageObject('dashboard');
+  const { dashboard } = getPageObjects(['dashboard']);
   const browser = getService('browser');
   const globalNav = getService('globalNav');
   const screenshot = getService('screenshots');

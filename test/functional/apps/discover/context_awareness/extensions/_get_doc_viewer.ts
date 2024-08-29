@@ -10,7 +10,7 @@ import kbnRison from '@kbn/rison';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'discover']);
+  const { common, discover } = getPageObjects(['common', 'discover']);
   const testSubjects = getService('testSubjects');
   const dataViews = getService('dataViews');
   const dataGrid = getService('dataGrid');
@@ -22,10 +22,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           dataSource: { type: 'esql' },
           query: { esql: 'from my-example-logs | sort @timestamp desc' },
         });
-        await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
+        await common.navigateToActualUrl('discover', `?_a=${state}`, {
           ensureCurrentUrl: false,
         });
-        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
         await dataGrid.clickRowToggle();
         await testSubjects.existOrFail('docViewerTab-doc_view_table');
         await testSubjects.existOrFail('docViewerTab-doc_view_logs_overview');
@@ -38,10 +38,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           dataSource: { type: 'esql' },
           query: { esql: 'from my-example-metrics | sort @timestamp desc' },
         });
-        await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
+        await common.navigateToActualUrl('discover', `?_a=${state}`, {
           ensureCurrentUrl: false,
         });
-        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
         await dataGrid.clickRowToggle();
         await testSubjects.existOrFail('docViewerTab-doc_view_table');
         await testSubjects.missingOrFail('docViewerTab-doc_view_logs_overview');
@@ -50,11 +50,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('data view mode', () => {
       it('should render logs overview tab for logs data source', async () => {
-        await PageObjects.common.navigateToActualUrl('discover', undefined, {
+        await common.navigateToActualUrl('discover', undefined, {
           ensureCurrentUrl: false,
         });
         await dataViews.switchTo('my-example-logs');
-        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
         await dataGrid.clickRowToggle();
         await testSubjects.existOrFail('docViewerTab-doc_view_table');
         await testSubjects.existOrFail('docViewerTab-doc_view_logs_overview');
@@ -63,11 +63,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should not render logs overview tab for non-logs data source', async () => {
-        await PageObjects.common.navigateToActualUrl('discover', undefined, {
+        await common.navigateToActualUrl('discover', undefined, {
           ensureCurrentUrl: false,
         });
         await dataViews.switchTo('my-example-metrics');
-        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
         await dataGrid.clickRowToggle();
         await testSubjects.existOrFail('docViewerTab-doc_view_table');
         await testSubjects.missingOrFail('docViewerTab-doc_view_logs_overview');

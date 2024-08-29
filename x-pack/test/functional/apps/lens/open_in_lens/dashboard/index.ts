@@ -8,13 +8,14 @@
 import { EsArchiver } from '@kbn/es-archiver';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
-export default function ({ loadTestFile, getService, getPageObject }: FtrProviderContext) {
+export default function ({ loadTestFile, getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const config = getService('config');
-  const timePicker = getPageObject('timePicker');
+  const { timePicker } = getPageObjects(['timePicker']);
+
   let remoteEsArchiver;
 
   describe('lens app - TSVB Open in Lens', () => {

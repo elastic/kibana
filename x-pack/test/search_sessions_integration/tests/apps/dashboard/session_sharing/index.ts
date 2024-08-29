@@ -7,11 +7,11 @@
 
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
-export default function ({ loadTestFile, getService, getPageObject }: FtrProviderContext) {
+export default function ({ loadTestFile, getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const searchSessions = getService('searchSessions');
-  const common = getPageObject('common');
+  const { common } = getPageObjects(['common']);
 
   describe('Search session sharing', function () {
     before(async () => {

@@ -25,8 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const dashboardAddPanel = getService('dashboardAddPanel');
-  const PageObjects = getPageObjects([
-    'settings',
+  const { common, discover, header, timePicker, dashboard } = getPageObjects([
     'common',
     'discover',
     'header',
@@ -56,11 +55,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     beforeEach(async function () {
-      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update(defaultSettings);
-      await PageObjects.common.navigateToApp('discover');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await common.navigateToApp('discover');
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
     });
 
     async function goToLastPageAndCheckFooterMessage(sampleSize: number) {
@@ -89,8 +88,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await dataGrid.changeSampleSizeValue(CUSTOM_SAMPLE_SIZE);
 
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
 
       expect(await dataGrid.getCurrentSampleSizeValue()).to.be(CUSTOM_SAMPLE_SIZE);
       await goToLastPageAndCheckFooterMessage(CUSTOM_SAMPLE_SIZE);
@@ -102,12 +101,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await dataGrid.changeSampleSizeValue(CUSTOM_SAMPLE_SIZE);
 
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
 
       await browser.refresh();
 
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
       await dataGrid.clickGridSettings();
 
       expect(await dataGrid.getCurrentSampleSizeValue()).to.be(CUSTOM_SAMPLE_SIZE);
@@ -120,39 +119,39 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await dataGrid.changeSampleSizeValue(CUSTOM_SAMPLE_SIZE_FOR_SAVED_SEARCH);
 
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
 
-      await PageObjects.discover.saveSearch(SAVED_SEARCH_NAME);
+      await discover.saveSearch(SAVED_SEARCH_NAME);
 
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
       await dataGrid.clickGridSettings();
 
       expect(await dataGrid.getCurrentSampleSizeValue()).to.be(CUSTOM_SAMPLE_SIZE_FOR_SAVED_SEARCH);
       await goToLastPageAndCheckFooterMessage(CUSTOM_SAMPLE_SIZE_FOR_SAVED_SEARCH);
 
       // reset to the default value
-      await PageObjects.discover.clickNewSearchButton();
+      await discover.clickNewSearchButton();
       await dataGrid.clickGridSettings();
       expect(await dataGrid.getCurrentSampleSizeValue()).to.be(DEFAULT_SAMPLE_SIZE);
       await goToLastPageAndCheckFooterMessage(DEFAULT_SAMPLE_SIZE);
 
       // load the saved search again
-      await PageObjects.discover.loadSavedSearch(SAVED_SEARCH_NAME);
+      await discover.loadSavedSearch(SAVED_SEARCH_NAME);
       await dataGrid.clickGridSettings();
       expect(await dataGrid.getCurrentSampleSizeValue()).to.be(CUSTOM_SAMPLE_SIZE_FOR_SAVED_SEARCH);
       await goToLastPageAndCheckFooterMessage(CUSTOM_SAMPLE_SIZE_FOR_SAVED_SEARCH);
 
       // load another saved search without a custom sample size
-      await PageObjects.discover.loadSavedSearch('A Saved Search');
+      await discover.loadSavedSearch('A Saved Search');
       await dataGrid.clickGridSettings();
       expect(await dataGrid.getCurrentSampleSizeValue()).to.be(DEFAULT_SAMPLE_SIZE);
       await goToLastPageAndCheckFooterMessage(DEFAULT_SAMPLE_SIZE);
     });
 
     it('should use the default sample size on Dashboard', async () => {
-      await PageObjects.common.navigateToApp('dashboard');
-      await PageObjects.dashboard.clickNewDashboard();
+      await common.navigateToApp('dashboard');
+      await dashboard.clickNewDashboard();
       await dashboardAddPanel.clickOpenAddPanel();
       await dashboardAddPanel.addSavedSearch('A Saved Search');
 
@@ -162,8 +161,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should use custom sample size on Dashboard when specified', async () => {
-      await PageObjects.common.navigateToApp('dashboard');
-      await PageObjects.dashboard.clickNewDashboard();
+      await common.navigateToApp('dashboard');
+      await dashboard.clickNewDashboard();
       await dashboardAddPanel.clickOpenAddPanel();
       await dashboardAddPanel.addSavedSearch(SAVED_SEARCH_NAME);
 
@@ -172,7 +171,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await dataGrid.changeSampleSizeValue(CUSTOM_SAMPLE_SIZE_FOR_DASHBOARD_PANEL);
 
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
 
       await dataGrid.clickGridSettings();
       expect(await dataGrid.getCurrentSampleSizeValue()).to.be(
@@ -180,10 +179,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await goToLastPageAndCheckFooterMessage(CUSTOM_SAMPLE_SIZE_FOR_DASHBOARD_PANEL);
 
-      await PageObjects.dashboard.saveDashboard('test');
+      await dashboard.saveDashboard('test');
 
       await browser.refresh();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
 
       await dataGrid.clickGridSettings();
       expect(await dataGrid.getCurrentSampleSizeValue()).to.be(

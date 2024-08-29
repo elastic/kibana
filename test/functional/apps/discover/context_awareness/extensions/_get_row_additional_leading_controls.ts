@@ -10,7 +10,7 @@ import kbnRison from '@kbn/rison';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'discover']);
+  const { common, discover } = getPageObjects(['common', 'discover']);
   const testSubjects = getService('testSubjects');
   const dataViews = getService('dataViews');
 
@@ -21,10 +21,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           dataSource: { type: 'esql' },
           query: { esql: 'from my-example-logs | sort @timestamp desc' },
         });
-        await PageObjects.common.navigateToApp('discover', {
+        await common.navigateToApp('discover', {
           hash: `/?_a=${state}`,
         });
-        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
         await testSubjects.existOrFail('exampleLogsControl_visBarVerticalStacked');
         await testSubjects.existOrFail('unifiedDataTable_additionalRowControl_menuControl');
       });
@@ -34,10 +34,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           dataSource: { type: 'esql' },
           query: { esql: 'from my-example-metrics | sort @timestamp desc' },
         });
-        await PageObjects.common.navigateToApp('discover', {
+        await common.navigateToApp('discover', {
           hash: `/?_a=${state}`,
         });
-        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
         await testSubjects.missingOrFail('exampleLogsControl_visBarVerticalStacked');
         await testSubjects.missingOrFail('unifiedDataTable_additionalRowControl_menuControl');
       });
@@ -45,17 +45,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('data view mode', () => {
       it('should render logs controls for logs data source', async () => {
-        await PageObjects.common.navigateToApp('discover');
+        await common.navigateToApp('discover');
         await dataViews.switchTo('my-example-logs');
-        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
         await testSubjects.existOrFail('exampleLogsControl_visBarVerticalStacked');
         await testSubjects.existOrFail('unifiedDataTable_additionalRowControl_menuControl');
       });
 
       it('should not render logs controls for non-logs data source', async () => {
-        await PageObjects.common.navigateToApp('discover');
+        await common.navigateToApp('discover');
         await dataViews.switchTo('my-example-metrics');
-        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
         await testSubjects.missingOrFail('exampleLogsControl_visBarVerticalStacked');
         await testSubjects.missingOrFail('unifiedDataTable_additionalRowControl_menuControl');
       });

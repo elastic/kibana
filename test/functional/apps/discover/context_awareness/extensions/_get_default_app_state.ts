@@ -11,7 +11,12 @@ import kbnRison from '@kbn/rison';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'discover', 'unifiedFieldList', 'header']);
+  const { common, discover, unifiedFieldList, header } = getPageObjects([
+    'common',
+    'discover',
+    'unifiedFieldList',
+    'header',
+  ]);
   const dataViews = getService('dataViews');
   const dataGrid = getService('dataGrid');
   const queryBar = getService('queryBar');
@@ -26,10 +31,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     async function expectColumns(columns: string[]) {
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
       await retry.try(async () => {
-        const actualColumns = await PageObjects.discover.getColumnHeaders();
+        const actualColumns = await discover.getColumnHeaders();
         expect(actualColumns).to.eql(columns);
       });
     }
@@ -42,7 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             esql: 'from my-example-logs',
           },
         });
-        await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
+        await common.navigateToActualUrl('discover', `?_a=${state}`, {
           ensureCurrentUrl: false,
         });
         await expectColumns(['@timestamp', 'log.level', 'message']);
@@ -60,7 +65,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             esql: 'from my-example-*',
           },
         });
-        await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
+        await common.navigateToActualUrl('discover', `?_a=${state}`, {
           ensureCurrentUrl: false,
         });
         await expectColumns(['@timestamp', 'Document']);
@@ -86,12 +91,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             esql: 'from my-example-logs',
           },
         });
-        await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
+        await common.navigateToActualUrl('discover', `?_a=${state}`, {
           ensureCurrentUrl: false,
         });
-        await PageObjects.discover.waitUntilSearchingHasFinished();
-        await PageObjects.unifiedFieldList.clickFieldListItemRemove('log.level');
-        await PageObjects.unifiedFieldList.clickFieldListItemRemove('message');
+        await discover.waitUntilSearchingHasFinished();
+        await unifiedFieldList.clickFieldListItemRemove('log.level');
+        await unifiedFieldList.clickFieldListItemRemove('message');
         await expectColumns(['@timestamp', 'Document']);
         await dataGrid.clickGridSettings();
         await dataGrid.changeRowHeightValue('Single');
@@ -116,7 +121,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             esql: 'from my-example-logs',
           },
         });
-        await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
+        await common.navigateToActualUrl('discover', `?_a=${state}`, {
           ensureCurrentUrl: false,
         });
         await expectColumns(['@timestamp', 'log.level', 'message', 'data_stream.type']);
@@ -125,7 +130,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('data view mode', () => {
       it('should render default columns and row height', async () => {
-        await PageObjects.common.navigateToActualUrl('discover', undefined, {
+        await common.navigateToActualUrl('discover', undefined, {
           ensureCurrentUrl: false,
         });
         await dataViews.switchTo('my-example-logs');
@@ -138,7 +143,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should render default columns and row height when switching data views', async () => {
-        await PageObjects.common.navigateToActualUrl('discover', undefined, {
+        await common.navigateToActualUrl('discover', undefined, {
           ensureCurrentUrl: false,
         });
         await dataViews.switchTo('my-example-*');
@@ -158,13 +163,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should reset default columns and row height when clicking "New"', async () => {
-        await PageObjects.common.navigateToActualUrl('discover', undefined, {
+        await common.navigateToActualUrl('discover', undefined, {
           ensureCurrentUrl: false,
         });
         await dataViews.switchTo('my-example-logs');
-        await PageObjects.discover.waitUntilSearchingHasFinished();
-        await PageObjects.unifiedFieldList.clickFieldListItemRemove('log.level');
-        await PageObjects.unifiedFieldList.clickFieldListItemRemove('message');
+        await discover.waitUntilSearchingHasFinished();
+        await unifiedFieldList.clickFieldListItemRemove('log.level');
+        await unifiedFieldList.clickFieldListItemRemove('message');
         await expectColumns(['@timestamp', 'Document']);
         await dataGrid.clickGridSettings();
         await dataGrid.changeRowHeightValue('Single');
@@ -183,7 +188,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await kibanaServer.uiSettings.update({
           defaultColumns: ['bad_column', 'data_stream.type', 'message'],
         });
-        await PageObjects.common.navigateToActualUrl('discover', undefined, {
+        await common.navigateToActualUrl('discover', undefined, {
           ensureCurrentUrl: false,
         });
         await dataViews.switchTo('my-example-logs');

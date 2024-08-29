@@ -10,13 +10,13 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function ({ getService, getPageObject }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const browser = getService('browser');
   const globalNav = getService('globalNav');
   const kibanaServer = getService('kibanaServer');
   const dashboardSettings = getService('dashboardSettings');
-  const dashboard = getPageObject('dashboard');
+  const { dashboard } = getPageObjects(['dashboard']);
 
   describe('dashboard settings', () => {
     let originalTitles: string[] = [];

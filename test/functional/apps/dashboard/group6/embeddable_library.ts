@@ -8,8 +8,8 @@
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function ({ getService, getPageObject }: FtrProviderContext) {
-  const dashboard = getPageObject('dashboard');
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const { dashboard } = getPageObjects(['dashboard']);
   const find = getService('find');
   const kibanaServer = getService('kibanaServer');
   const dashboardAddPanel = getService('dashboardAddPanel');

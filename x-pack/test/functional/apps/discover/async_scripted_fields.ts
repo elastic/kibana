@@ -7,19 +7,19 @@
 
 // Tests for scripted field in default distribution where async search is used
 import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }:FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   // const log = getService('log');
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
   const log = getService('log');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects([
+  const { common, settings, discover, header, dashboard } = getPageObjects([
     'common',
     'settings',
     'discover',
-    'timePicker',
     'header',
     'dashboard',
   ]);
@@ -55,12 +55,12 @@ export default function ({ getService, getPageObjects }) {
       if (false) {
         /* If you had to modify the scripted fields, you could un-comment all this, run it, use es_archiver to update 'kibana_scripted_fields_on_logstash'
          */
-        await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaIndexPatterns();
-        await PageObjects.settings.createIndexPattern('logsta');
-        await PageObjects.settings.clickScriptedFieldsTab();
+        await settings.navigateTo();
+        await settings.clickKibanaIndexPatterns();
+        await settings.createIndexPattern('logsta');
+        await settings.clickScriptedFieldsTab();
         await log.debug('add scripted field');
-        await PageObjects.settings.addScriptedField(
+        await settings.addScriptedField(
           'sharedFail',
           'painless',
           'string',
@@ -72,8 +72,8 @@ export default function ({ getService, getPageObjects }) {
         );
       }
 
-      await PageObjects.common.navigateToApp('discover');
-      await PageObjects.discover.selectIndexPattern('logsta*');
+      await common.navigateToApp('discover');
+      await discover.selectIndexPattern('logsta*');
 
       await retry.try(async function () {
         await testSubjects.existOrFail('searchResponseWarningsEmptyPrompt');
@@ -86,18 +86,18 @@ export default function ({ getService, getPageObjects }) {
         'global_discover_all',
         'global_dashboard_all',
       ]);
-      await PageObjects.common.navigateToApp('discover');
-      await PageObjects.discover.selectIndexPattern('logsta*');
+      await common.navigateToApp('discover');
+      await discover.selectIndexPattern('logsta*');
 
-      await PageObjects.discover.saveSearch('search with warning');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await discover.saveSearch('search with warning');
+      await header.waitUntilLoadingHasFinished();
 
-      await PageObjects.dashboard.navigateToApp();
-      await PageObjects.dashboard.gotoDashboardLandingPage();
-      await PageObjects.dashboard.clickNewDashboard();
+      await dashboard.navigateToApp();
+      await dashboard.gotoDashboardLandingPage();
+      await dashboard.clickNewDashboard();
 
       await dashboardAddPanel.addSavedSearch('search with warning');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
 
       await retry.try(async function () {
         await testSubjects.existOrFail('searchResponseWarningsBadgeToogleButton');
@@ -110,13 +110,13 @@ export default function ({ getService, getPageObjects }) {
         which are now saved in the esArchive.
          */
 
-        await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaIndexPatterns();
-        await PageObjects.settings.clickIndexPatternLogstash();
-        const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount());
-        await PageObjects.settings.clickScriptedFieldsTab();
+        await settings.navigateTo();
+        await settings.clickKibanaIndexPatterns();
+        await settings.clickIndexPatternLogstash();
+        const startingCount = parseInt(await settings.getScriptedFieldsTabCount());
+        await settings.clickScriptedFieldsTab();
         await log.debug('add scripted field');
-        await PageObjects.settings.addScriptedField(
+        await settings.addScriptedField(
           'goodScript',
           'painless',
           'string',
@@ -126,12 +126,10 @@ export default function ({ getService, getPageObjects }) {
           "if (doc['response.raw'].value == '200') { if (doc['url.raw'].size() > 0) { return 'good ' + doc['url.raw'].value } else { return 'good' } } else { if (doc['machine.os.raw'].size() > 0) { return 'bad ' + doc['machine.os.raw'].value } else { return 'bad' } }"
         );
         await retry.try(async function () {
-          expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount())).to.be(
-            startingCount + 1
-          );
+          expect(parseInt(await settings.getScriptedFieldsTabCount())).to.be(startingCount + 1);
         });
 
-        await PageObjects.settings.addScriptedField(
+        await settings.addScriptedField(
           'goodScript2',
           'painless',
           'string',
@@ -141,18 +139,16 @@ export default function ({ getService, getPageObjects }) {
           "if (doc['url.raw'].size() > 0) { String tempString = \"\"; for ( int i = (doc['url.raw'].value.length() - 1); i >= 0 ; i--) { tempString = tempString + (doc['url.raw'].value).charAt(i); } return tempString; } else { return \"emptyUrl\"; }"
         );
         await retry.try(async function () {
-          expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount())).to.be(
-            startingCount + 2
-          );
+          expect(parseInt(await settings.getScriptedFieldsTabCount())).to.be(startingCount + 2);
         });
       }
 
-      await PageObjects.common.navigateToApp('discover');
-      await PageObjects.discover.selectIndexPattern('logstash-*');
+      await common.navigateToApp('discover');
+      await discover.selectIndexPattern('logstash-*');
       await queryBar.setQuery('php* OR *jpg OR *css*');
       await testSubjects.click('querySubmitButton');
       await retry.tryForTime(30000, async function () {
-        expect(await PageObjects.discover.getHitCount()).to.be('13,301');
+        expect(await discover.getHitCount()).to.be('13,301');
       });
     });
   });

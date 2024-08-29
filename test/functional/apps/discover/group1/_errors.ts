@@ -13,7 +13,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'header', 'discover', 'timePicker']);
+  const { common, header, discover, timePicker } = getPageObjects([
+    'common',
+    'header',
+    'discover',
+    'timePicker',
+  ]);
 
   describe('errors', function describeIndexTests() {
     before(async function () {
@@ -22,8 +27,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load(
         'test/functional/fixtures/kbn_archiver/invalid_scripted_field'
       );
-      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
-      await PageObjects.common.navigateToApp('discover');
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await common.navigateToApp('discover');
     });
 
     after(async function () {
@@ -32,7 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('invalid scripted field error', () => {
       it('is rendered', async () => {
-        await PageObjects.discover.showsErrorCallout();
+        await discover.showsErrorCallout();
         const painlessStackTrace = await testSubjects.find('painlessStackTrace');
         expect(painlessStackTrace).not.to.be(undefined);
       });
@@ -40,11 +45,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('not found', () => {
       it('should redirect to main page when trying to access invalid route', async () => {
-        await PageObjects.common.navigateToUrl('discover', '#/invalid-route', {
+        await common.navigateToUrl('discover', '#/invalid-route', {
           useActualUrl: true,
           ensureCurrentUrl: false,
         });
-        await PageObjects.header.awaitKibanaChrome();
+        await header.awaitKibanaChrome();
 
         const invalidLink = await testSubjects.find('invalidRouteMessage');
         expect(await invalidLink.getVisibleText()).to.be(

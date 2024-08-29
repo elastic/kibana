@@ -9,32 +9,24 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const {
-    timeToVisualize,
-    timePicker,
-    dashboard,
-    visEditor,
-    visualize,
-    security: securityPage,
-    header,
-    lens,
-  } = getPageObjects([
-    'timeToVisualize',
-    'timePicker',
-    'dashboard',
-    'visEditor',
-    'visualize',
-    'security',
-    'header',
-    'lens',
-  ]);
+  const { timeToVisualize, timePicker, dashboard, visEditor, visualize, security, header, lens } =
+    getPageObjects([
+      'timeToVisualize',
+      'timePicker',
+      'dashboard',
+      'visEditor',
+      'visualize',
+      'security',
+      'header',
+      'lens',
+    ]);
 
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardExpect = getService('dashboardExpect');
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
-  const security = getService('security');
+  const securityService = getService('security');
   const find = getService('find');
   const kbnServer = getService('kibanaServer');
 
@@ -50,9 +42,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       // ensure we're logged out so we can login as the appropriate users
-      await securityPage.forceLogout();
+      await security.forceLogout();
 
-      await security.role.create('dashboard_write_vis_read', {
+      await securityService.role.create('dashboard_write_vis_read', {
         elasticsearch: {
           indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
         },
@@ -67,13 +59,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         ],
       });
 
-      await security.user.create('dashboard_write_vis_read_user', {
+      await securityService.user.create('dashboard_write_vis_read_user', {
         password: 'dashboard_write_vis_read_user-password',
         roles: ['dashboard_write_vis_read'],
         full_name: 'test user',
       });
 
-      await securityPage.login(
+      await security.login(
         'dashboard_write_vis_read_user',
         'dashboard_write_vis_read_user-password',
         {
@@ -85,10 +77,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     after(async () => {
       // logout, so the other tests don't accidentally run as the custom users we're testing below
       // NOTE: Logout needs to happen before anything else to avoid flaky behavior
-      await securityPage.forceLogout();
+      await security.forceLogout();
 
-      await security.role.delete('dashboard_write_vis_read');
-      await security.user.delete('dashboard_write_vis_read_user');
+      await securityService.role.delete('dashboard_write_vis_read');
+      await securityService.user.delete('dashboard_write_vis_read_user');
 
       await kbnServer.savedObjects.cleanStandardList();
       await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');

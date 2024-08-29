@@ -6,11 +6,17 @@
  * Side Public License, v 1.
  */
 
-export default function ({ getService, getPageObjects, loadTestFile }) {
+import { PluginFunctionalProviderContext } from '../../services';
+
+export default function ({
+  getService,
+  getPageObjects,
+  loadTestFile,
+}: PluginFunctionalProviderContext) {
   const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['common', 'dashboard']);
+  const { common, dashboard } = getPageObjects(['common', 'dashboard']);
 
   describe('pluggable panel actions', function () {
     before(async () => {
@@ -23,12 +29,12 @@ export default function ({ getService, getPageObjects, loadTestFile }) {
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
       });
-      await PageObjects.common.navigateToApp('dashboard');
-      await PageObjects.dashboard.preserveCrossAppState();
+      await common.navigateToApp('dashboard');
+      await dashboard.preserveCrossAppState();
     });
 
     after(async function () {
-      await PageObjects.dashboard.clearSavedObjectsFromAppLinks();
+      await dashboard.clearSavedObjectsFromAppLinks();
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.unload('test/functional/fixtures/es_archiver/dashboard/current/data');
     });

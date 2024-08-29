@@ -10,14 +10,14 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const spacesService = getService('spaces');
-  const security = getService('security');
-  const {
-    common,
-    header,
-    dashboard,
-    security: securityPage,
-    searchSessionsManagement,
-  } = getPageObjects(['common', 'header', 'dashboard', 'security', 'searchSessionsManagement']);
+  const securityService = getService('security');
+  const { common, header, dashboard, security, searchSessionsManagement } = getPageObjects([
+    'common',
+    'header',
+    'dashboard',
+    'security',
+    'searchSessionsManagement',
+  ]);
   const dashboardPanelActions = getService('dashboardPanelActions');
   const browser = getService('browser');
   const searchSessions = getService('searchSessions');
@@ -101,7 +101,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       { space: 'another-space' }
     );
 
-    await security.role.create('data_analyst', {
+    await securityService.role.create('data_analyst', {
       elasticsearch: {
         indices: [{ names: ['logstash-*'], privileges: ['all'] }],
       },
@@ -115,24 +115,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       ],
     });
 
-    await security.user.create('analyst', {
+    await securityService.user.create('analyst', {
       password: 'analyst-password',
       roles: ['data_analyst'],
       full_name: 'test user',
     });
 
-    await securityPage.forceLogout();
+    await security.forceLogout();
 
-    await securityPage.login('analyst', 'analyst-password', {
+    await security.login('analyst', 'analyst-password', {
       expectSpaceSelector: false,
     });
   }
   async function clean() {
     await kibanaServer.savedObjects.cleanStandardList();
     // NOTE: Logout needs to happen before anything else to avoid flaky behavior
-    await securityPage.forceLogout();
-    await security.role.delete('data_analyst');
-    await security.user.delete('analyst');
+    await security.forceLogout();
+    await securityService.role.delete('data_analyst');
+    await securityService.user.delete('analyst');
     await spacesService.delete('another-space');
     await searchSessions.deleteAllSearchSessions();
   }

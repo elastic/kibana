@@ -8,12 +8,12 @@
 
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
-export default function ({ loadTestFile, getService, getPageObject }: FtrProviderContext) {
+export default function ({ loadTestFile, getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
 
-  const dashboard = getPageObject('dashboard');
+  const { dashboard } = getPageObjects(['dashboard']);
 
   async function setup() {
     await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/dashboard/current/data');

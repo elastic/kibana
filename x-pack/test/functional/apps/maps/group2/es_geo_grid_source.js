@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 
 export default function ({ getPageObjects, getService }) {
-  const PageObjects = getPageObjects(['maps']);
+  const { maps } = getPageObjects(['maps']);
   const inspector = getService('inspector');
   const DOC_COUNT_PROP_NAME = 'doc_count';
   const security = getService('security');
@@ -32,10 +32,7 @@ export default function ({ getPageObjects, getService }) {
       await inspector.open();
       await inspector.openInspectorRequestsView();
       const requestStats = await inspector.getTableData();
-      const requestTimestamp = PageObjects.maps.getInspectorStatRowHit(
-        requestStats,
-        'Request timestamp'
-      );
+      const requestTimestamp = maps.getInspectorStatRowHit(requestStats, 'Request timestamp');
       await inspector.close();
       return requestTimestamp;
     }
@@ -48,26 +45,26 @@ export default function ({ getPageObjects, getService }) {
       describe('geoprecision - requests', () => {
         let beforeTimestamp;
         beforeEach(async () => {
-          await PageObjects.maps.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 1);
+          await maps.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 1);
           beforeTimestamp = await getRequestTimestamp();
         });
 
         it('should not rerequest when pan changes do not move map view area outside of buffer', async () => {
-          await PageObjects.maps.setView(DATA_CENTER_LAT + 1, DATA_CENTER_LON + 1, 1);
+          await maps.setView(DATA_CENTER_LAT + 1, DATA_CENTER_LON + 1, 1);
           const afterTimestamp = await getRequestTimestamp();
           expect(afterTimestamp).to.equal(beforeTimestamp);
         });
 
         it('should not rerequest when zoom changes do not cause geotile_grid precision to change', async () => {
-          await PageObjects.maps.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 1.4);
+          await maps.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 1.4);
           const beforeSameZoom = await getRequestTimestamp();
-          await PageObjects.maps.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 1.6);
+          await maps.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 1.6);
           const afterTimestamp = await getRequestTimestamp();
           expect(afterTimestamp).to.equal(beforeSameZoom);
         });
 
         it('should rerequest when zoom changes causes the geotile_grid precision to change', async () => {
-          await PageObjects.maps.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 4);
+          await maps.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 4);
           const afterTimestamp = await getRequestTimestamp();
           expect(afterTimestamp).not.to.equal(beforeTimestamp);
         });
@@ -75,17 +72,17 @@ export default function ({ getPageObjects, getService }) {
 
       describe('geotile grid precision - data', () => {
         beforeEach(async () => {
-          await PageObjects.maps.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 1);
+          await maps.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 1);
         });
 
         it('should not return any data when the extent does not cover the data bounds', async () => {
-          await PageObjects.maps.setView(64, 179, 5);
-          const mapboxStyle = await PageObjects.maps.getMapboxStyle();
+          await maps.setView(64, 179, 5);
+          const mapboxStyle = await maps.getMapboxStyle();
           expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(0);
         });
 
         it('should request the data when the map covers the databounds', async () => {
-          const mapboxStyle = await PageObjects.maps.getMapboxStyle();
+          const mapboxStyle = await maps.getMapboxStyle();
           expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(
             expectedNumFeaturesZoomedOut
           );
@@ -93,8 +90,8 @@ export default function ({ getPageObjects, getService }) {
 
         it('should request only partial data when the map only covers part of the databounds', async () => {
           //todo this verifies the extent-filtering behavior (not really the correct application of geotile_grid-precision), and should ideally be moved to its own section
-          await PageObjects.maps.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 6);
-          const mapboxStyle = await PageObjects.maps.getMapboxStyle();
+          await maps.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 6);
+          const mapboxStyle = await maps.getMapboxStyle();
           expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(
             expectedNumPartialFeatures
           );
@@ -104,7 +101,7 @@ export default function ({ getPageObjects, getService }) {
 
     describe('geo_point', () => {
       before(async () => {
-        await PageObjects.maps.loadSavedMap('geo grid vector grid example');
+        await maps.loadSavedMap('geo grid vector grid example');
       });
 
       const LAYER_ID = 'g1xkv';
@@ -114,13 +111,13 @@ export default function ({ getPageObjects, getService }) {
       it('should re-fetch geotile_grid aggregation with refresh timer', async () => {
         const beforeRefreshTimerTimestamp = await getRequestTimestamp();
         expect(beforeRefreshTimerTimestamp.length).to.be(24);
-        await PageObjects.maps.triggerSingleRefresh(1000);
+        await maps.triggerSingleRefresh(1000);
         const afterRefreshTimerTimestamp = await getRequestTimestamp();
         expect(beforeRefreshTimerTimestamp).not.to.equal(afterRefreshTimerTimestamp);
       });
 
       it('should decorate feature properties with metrics properterties', async () => {
-        const mapboxStyle = await PageObjects.maps.getMapboxStyle();
+        const mapboxStyle = await maps.getMapboxStyle();
         expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(12);
 
         mapboxStyle.sources[LAYER_ID].data.features.forEach(({ properties }) => {
@@ -133,16 +130,16 @@ export default function ({ getPageObjects, getService }) {
 
       describe('query bar', () => {
         before(async () => {
-          await PageObjects.maps.setAndSubmitQuery('machine.os.raw : "win 8"');
-          await PageObjects.maps.setView(0, 0, 0);
+          await maps.setAndSubmitQuery('machine.os.raw : "win 8"');
+          await maps.setView(0, 0, 0);
         });
 
         after(async () => {
-          await PageObjects.maps.setAndSubmitQuery('');
+          await maps.setAndSubmitQuery('');
         });
 
         it('should apply query to geotile_grid aggregation request', async () => {
-          const { rawResponse: response } = await PageObjects.maps.getResponse();
+          const { rawResponse: response } = await maps.getResponse();
           expect(response.aggregations.gridSplit.buckets.length).to.equal(1);
         });
       });
@@ -153,13 +150,13 @@ export default function ({ getPageObjects, getService }) {
         });
 
         it('should contain geotile_grid aggregation elasticsearch request', async () => {
-          const { rawResponse: response } = await PageObjects.maps.getResponse();
+          const { rawResponse: response } = await maps.getResponse();
           expect(response.aggregations.gridSplit.buckets.length).to.equal(4);
         });
 
         it('should not contain any elasticsearch request after layer is deleted', async () => {
-          await PageObjects.maps.removeLayer('logstash-*');
-          const noRequests = await PageObjects.maps.doesInspectorHaveRequests();
+          await maps.removeLayer('logstash-*');
+          const noRequests = await maps.doesInspectorHaveRequests();
           expect(noRequests).to.equal(true);
         });
       });
@@ -167,12 +164,12 @@ export default function ({ getPageObjects, getService }) {
 
     describe('geo_shape', () => {
       before(async () => {
-        await PageObjects.maps.loadSavedMap('geo grid vector grid example with shape');
+        await maps.loadSavedMap('geo grid vector grid example with shape');
       });
 
       const LAYER_ID = 'g1xkv';
       it('should get expected number of grid cells', async () => {
-        const mapboxStyle = await PageObjects.maps.getMapboxStyle();
+        const mapboxStyle = await maps.getMapboxStyle();
         expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(26);
       });
 
@@ -182,7 +179,7 @@ export default function ({ getPageObjects, getService }) {
         });
 
         it('should contain geotile_grid aggregation elasticsearch request', async () => {
-          const { rawResponse: response } = await PageObjects.maps.getResponse();
+          const { rawResponse: response } = await maps.getResponse();
           expect(response.aggregations.gridSplit.buckets.length).to.equal(13);
         });
       });

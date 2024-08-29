@@ -10,7 +10,7 @@ import { GaugeShapes } from '@kbn/visualizations-plugin/common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['visualize', 'lens', 'common']);
+  const { visualize, lens } = getPageObjects(['visualize', 'lens']);
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
@@ -43,13 +43,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const { width, height } = await browser.getWindowSize();
       log.debug(`Current browser window size set to ${width}x${height}`);
 
-      await PageObjects.visualize.navigateToNewVisualization();
-      await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.lens.goToTimeRange();
+      await visualize.navigateToNewVisualization();
+      await visualize.clickVisType('lens');
+      await lens.goToTimeRange();
       // Detect here if the Chrome bug is present, and adjust the aspect ratio accordingly if not
       if (!within(width, DEFAULT_WINDOW_SIZE[0]) || !within(height, DEFAULT_WINDOW_SIZE[1])) {
         const { width: containerWidth, height: containerHeight } =
-          await PageObjects.lens.getWorkspaceVisContainerDimensions();
+          await lens.getWorkspaceVisContainerDimensions();
 
         const newRatio = pxToN(containerWidth) / pxToN(containerHeight);
         log.debug(
@@ -58,7 +58,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         UNCONSTRAINED = newRatio;
       }
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'average',
         field: 'bytes',
@@ -88,7 +88,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const tolerance = 1;
 
       await retry.tryForTime(2000, async () => {
-        const { width, height } = await PageObjects.lens.getWorkspaceVisContainerDimensions();
+        const { width, height } = await lens.getWorkspaceVisContainerDimensions();
         log.debug(
           `Checking workspace dimensions: ${width} x ${height} against ${expectedMaxWidth}x${expectedMaxHeight}`
         );
@@ -116,7 +116,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const tolerance = 0.07;
 
       await retry.try(async () => {
-        const { width, height } = await PageObjects.lens.getWorkspaceVisContainerDimensions();
+        const { width, height } = await lens.getWorkspaceVisContainerDimensions();
         log.debug(
           `Checking workspace dimensions: ${pxToN(width)} x ${pxToN(height)} with ratio ${
             pxToN(width) / pxToN(height)
@@ -137,7 +137,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       maxHeight: string;
       maxWidth: string;
     }) => {
-      const actualStyles = await PageObjects.lens.getWorkspaceVisContainerStyles();
+      const actualStyles = await lens.getWorkspaceVisContainerStyles();
 
       expect(actualStyles).to.eql(expectedStyles);
     };
@@ -207,7 +207,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       while (visTypes.length) {
         const vis = visTypes.pop()!;
         await retry.try(async () => {
-          await PageObjects.lens.switchToVisualization(vis.id, vis.searchText);
+          await lens.switchToVisualization(vis.id, vis.searchText);
         });
 
         log.debug(
@@ -228,12 +228,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('metric size (absolute pixels)', async () => {
       await retry.try(async () => {
-        await PageObjects.lens.switchToVisualization('lnsMetric');
+        await lens.switchToVisualization('lnsMetric');
       });
 
       await assertWorkspaceDimensions('300px', '300px');
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsMetric_breakdownByDimensionPanel > lns-empty-dimension',
         operation: 'terms',
         field: 'ip',
@@ -241,16 +241,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await assertWorkspaceDimensions('600px', '430px');
 
-      await PageObjects.lens.openDimensionEditor('lnsMetric_breakdownByDimensionPanel');
+      await lens.openDimensionEditor('lnsMetric_breakdownByDimensionPanel');
       await testSubjects.setValue('lnsMetric_max_cols', '2');
-      await PageObjects.lens.closeDimensionEditor();
+      await lens.closeDimensionEditor();
 
       await assertWorkspaceDimensions('430px', '430px');
     });
 
     it('gauge size (absolute pixels) - horizontal', async () => {
       await retry.try(async () => {
-        await PageObjects.lens.switchToVisualization(GaugeShapes.HORIZONTAL_BULLET, 'horizontal');
+        await lens.switchToVisualization(GaugeShapes.HORIZONTAL_BULLET, 'horizontal');
       });
 
       await assertWorkspaceDimensions('600px', '200px');
@@ -258,7 +258,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('gauge size (absolute pixels) - vertical', async () => {
       await retry.try(async () => {
-        await PageObjects.lens.switchToVisualization(GaugeShapes.VERTICAL_BULLET, 'vertical');
+        await lens.switchToVisualization(GaugeShapes.VERTICAL_BULLET, 'vertical');
       });
 
       // this height is below the requested 600px
@@ -271,21 +271,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('gauge size (absolute pixels) - arc', async () => {
       await retry.try(async () => {
-        await PageObjects.lens.switchToVisualization(GaugeShapes.SEMI_CIRCLE, 'semi');
+        await lens.switchToVisualization(GaugeShapes.SEMI_CIRCLE, 'semi');
       });
       await assertWorkspaceDimensions('600px', '375px');
     });
 
     it('gauge size (absolute pixels) - major arc', async () => {
       await retry.try(async () => {
-        await PageObjects.lens.switchToVisualization(GaugeShapes.ARC, 'arc');
+        await lens.switchToVisualization(GaugeShapes.ARC, 'arc');
       });
       await assertWorkspaceDimensions('600px', '430px');
     });
 
     it('gauge size (absolute pixels) - circle', async () => {
       await retry.try(async () => {
-        await PageObjects.lens.switchToVisualization(GaugeShapes.CIRCLE, 'circular');
+        await lens.switchToVisualization(GaugeShapes.CIRCLE, 'circular');
       });
       await assertWorkspaceDimensions('600px', '430px');
     });
@@ -294,7 +294,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // XY charts should have 100% width and 100% height unless they are a vertical chart with a time dimension
       await retry.try(async () => {
         // not important that this is specifically a line chart
-        await PageObjects.lens.switchToVisualization('line');
+        await lens.switchToVisualization('line');
       });
 
       await assertWorkspaceStyles({
@@ -305,7 +305,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         maxWidth: '100%',
       });
 
-      await PageObjects.lens.configureDimension({
+      await lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'date_histogram',
         field: '@timestamp',
@@ -322,7 +322,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await assertWorkspaceAspectRatio(VERTICAL_16_9);
 
       await retry.try(async () => {
-        await PageObjects.lens.switchToVisualization('bar_horizontal_stacked');
+        await lens.switchToVisualization('bar_horizontal_stacked');
       });
 
       await assertWorkspaceAspectRatio(UNCONSTRAINED);
