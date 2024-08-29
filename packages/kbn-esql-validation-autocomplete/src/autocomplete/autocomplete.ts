@@ -708,17 +708,28 @@ async function getExpressionSuggestionsByType(
           const column = getColumnByName(lastWord, references);
           if (column) {
             // now we know that the user has already entered a column,
-            // so suggest comma and pipe
-            // const NON_ALPHANUMERIC_REGEXP = /[^a-zA-Z\d]/g;
-            // const textToUse = lastWord.replace(NON_ALPHANUMERIC_REGEXP, '');
-            const textToUse = lastWord;
-            return [
+            // so suggest comma and pipe as well as any options from
+            // the next argument
+
+            // Incomplete since they don't have the range, etc
+            const incompleteSuggestions = [
               { ...pipeCompleteItem, text: ' | ' },
               { ...commaCompleteItem, text: ', ' },
-            ].map<SuggestionRawDefinition>((s) => ({
+            ];
+
+            const nextArg = commandDef.signature.params[argIndex + 1];
+            if (nextArg?.values) {
+              incompleteSuggestions.push(
+                ...buildConstantsDefinitions(nextArg.values, undefined, undefined, {
+                  advanceCursorAndOpenSuggestions: true,
+                }).map((s) => ({ ...s, text: ' ' + s.text }))
+              );
+            }
+
+            return incompleteSuggestions.map<SuggestionRawDefinition>((s) => ({
               ...s,
-              filterText: textToUse,
-              text: textToUse + s.text,
+              filterText: lastWord,
+              text: lastWord + s.text,
               command: TRIGGER_SUGGESTION_COMMAND,
               rangeToReplace,
             }));
@@ -1188,12 +1199,7 @@ async function getFieldsOrFunctionsSuggestions(
   } = {}
 ): Promise<SuggestionRawDefinition[]> {
   const filteredFieldsByType = pushItUpInTheList(
-    (await (fields
-      ? getFieldsByType(types, ignoreFields, {
-          advanceCursor: commandName === 'sort',
-          openSuggestions: commandName === 'sort',
-        })
-      : [])) as SuggestionRawDefinition[],
+    (await (fields ? getFieldsByType(types, ignoreFields, {}) : [])) as SuggestionRawDefinition[],
     functions
   );
 

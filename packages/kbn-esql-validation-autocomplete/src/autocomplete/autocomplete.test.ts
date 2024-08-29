@@ -308,22 +308,6 @@ describe('autocomplete', () => {
     }
   });
 
-  describe('sort', () => {
-    testSuggestions('from a | sort /', [
-      ...getFieldNamesByType('any').map((name) => `${name} `),
-      ...getFunctionSignaturesByReturnType('sort', 'any', { scalar: true }),
-    ]);
-    testSuggestions('from a | sort keywordField /', ['ASC ', 'DESC ', ',', '| ']);
-    testSuggestions('from a | sort keywordField desc /', [
-      'NULLS FIRST ',
-      'NULLS LAST ',
-      ',',
-      '| ',
-    ]);
-    // @TODO: improve here
-    // testSuggestions('from a | sort keywordField desc ', ['first', 'last']);
-  });
-
   describe('limit', () => {
     testSuggestions('from a | limit /', ['10 ', '100 ', '1000 ']);
     testSuggestions('from a | limit 4 /', ['| ']);
