@@ -14281,9 +14281,9 @@
                   "signature": [
                     {
                       "pluginId": "@kbn/content-management-utils",
-                      "scope": "common",
+                      "scope": "server",
                       "docId": "kibKbnContentManagementUtilsPluginApi",
-                      "section": "def-common.SOWithMetadata",
+                      "section": "def-server.SOWithMetadata",
                       "text": "SOWithMetadata"
                     },
                     "<TSavedObjectAttributes>"
@@ -14874,7 +14874,7 @@
             },
             {
               "plugin": "investigateApp",
-              "path": "x-pack/plugins/observability_solution/investigate_app/public/widgets/embeddable_widget/register_embeddable_widget.tsx"
+              "path": "x-pack/plugins/observability_solution/investigate_app/public/items/embeddable_item/register_embeddable_item.tsx"
             },
             {
               "plugin": "dashboard",
