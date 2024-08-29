@@ -142,7 +142,7 @@ const moduleSchema = schema.object({
   query: schema.maybe(schema.any()),
   jobs: schema.arrayOf(schema.any()),
   datafeeds: schema.arrayOf(schema.any()),
-  kibana: schema.any(),
+  kibana: schema.maybe(schema.any()),
   tags: schema.maybe(schema.arrayOf(schema.string())),
 });
 
@@ -157,7 +157,7 @@ export const dataRecognizerConfigResponse = () =>
   schema.object({
     datafeeds: schema.arrayOf(schema.any()),
     jobs: schema.arrayOf(schema.any()),
-    kibana: schema.any(),
+    kibana: schema.maybe(schema.any()),
   });
 
 export const jobExistsResponse = () =>
