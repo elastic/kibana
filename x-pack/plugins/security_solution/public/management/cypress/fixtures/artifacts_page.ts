@@ -17,7 +17,7 @@ interface FormEditingDescription {
   }>;
 }
 
-interface ArtifactsFixtureType {
+export interface ArtifactsFixtureType {
   title: string;
   pagePrefix: string;
   tabId: string;
