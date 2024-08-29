@@ -24,10 +24,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const end = '2024-08-28T08:02:00.000Z';
   const degradedFieldDataset = 'nginx.error';
   const degradedFieldsDatastream = 'logs-nginx.error-default';
-  const degradedFieldName = 'cloud.availability_zone';
+  const degradedFieldName = 'test_field';
   const regularFieldName = 'service.name';
   const serviceName = 'my-service';
-  const hostName = 'synth-host';
 
   async function callApiAs({
     user,
@@ -68,11 +67,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                   'log.file.path': '/error.log',
                   'service.name': serviceName + 1,
                   'trace.id': MORE_THAN_1024_CHARS,
-                  'cloud.availability_zone': [
-                    ANOTHER_1024_CHARS,
-                    'hello world',
-                    MORE_THAN_1024_CHARS,
-                  ],
+                  test_field: [ANOTHER_1024_CHARS, 'hello world', MORE_THAN_1024_CHARS],
                 })
             ),
         ]);
