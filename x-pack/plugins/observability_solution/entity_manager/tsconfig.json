@@ -29,7 +29,6 @@
     "@kbn/logging-mocks",
     "@kbn/licensing-plugin",
     "@kbn/server-route-repository-client",
-    "@kbn/core-http-browser",
     "@kbn/server-route-repository",
     "@kbn/zod",
     "@kbn/zod-helpers",
