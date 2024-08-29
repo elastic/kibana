@@ -17,6 +17,7 @@ import {
 } from '@kbn/embeddable-plugin/public';
 import { ExpressionRendererParams, useExpressionRenderer } from '@kbn/expressions-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { dispatchRenderComplete } from '@kbn/kibana-utils-plugin/public';
 import { apiPublishesSettings } from '@kbn/presentation-containers';
 import {
   apiHasAppContext,
@@ -499,8 +500,8 @@ export const getVisualizeEmbeddableFactory: (deps: {
         }, []);
 
         useEffect(() => {
-          if (hasRendered) {
-            domNode.current?.dispatchEvent(new Event('renderComplete'));
+          if (hasRendered && domNode.current) {
+            dispatchRenderComplete(domNode.current);
           }
         }, [hasRendered]);
 
