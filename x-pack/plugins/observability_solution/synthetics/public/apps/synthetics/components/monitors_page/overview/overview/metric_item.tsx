@@ -31,6 +31,7 @@ import {
   toggleTestNowFlyoutAction,
 } from '../../../../state/manual_test_runs';
 import { MetricItemIcon } from './metric_item_icon';
+import { MetricItemExtra } from './metric_item/metric_item_extra';
 
 const METRIC_ITEM_HEIGHT = 160;
 
@@ -144,39 +145,14 @@ export const MetricItem = ({
                   trendShape: MetricTrendShape.Area,
                   trend: trendData?.data ?? [],
                   extra: trendData ? (
-                    <EuiFlexGroup
-                      alignItems="center"
-                      gutterSize="xs"
-                      justifyContent="flexEnd"
-                      // empty title to prevent default title from showing
-                      title=""
-                      component="span"
-                    >
-                      <EuiFlexItem grow={false} component="span">
-                        {i18n.translate('xpack.synthetics.overview.duration.label', {
-                          defaultMessage: 'Duration',
-                        })}
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false} component="span">
-                        <EuiIconTip
-                          title={i18n.translate('xpack.synthetics.overview.duration.description', {
-                            defaultMessage: 'Median duration of last 50 checks',
-                          })}
-                          content={i18n.translate(
-                            'xpack.synthetics.overview.duration.description.values',
-                            {
-                              defaultMessage: 'Avg: {avg}, Min: {min}, Max: {max}',
-                              values: {
-                                avg: formatDuration(trendData.avg, { noSpace: true }),
-                                min: formatDuration(trendData.min, { noSpace: true }),
-                                max: formatDuration(trendData.max, { noSpace: true }),
-                              },
-                            }
-                          )}
-                          position="top"
-                        />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
+                    <MetricItemExtra
+                      stats={{
+                        medianDuration: trendData.median,
+                        minDuration: trendData.min,
+                        maxDuration: trendData.max,
+                        avgDuration: trendData.avg,
+                      }}
+                    />
                   ) : (
                     <div>
                       <FormattedMessage
