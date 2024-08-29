@@ -66,6 +66,7 @@ describe('XY Config panels', () => {
           addLayer={jest.fn()}
           removeLayer={jest.fn()}
           datasource={{} as DatasourcePublicAPI}
+          isDarkMode={false}
         />
       );
 
@@ -93,6 +94,7 @@ describe('XY Config panels', () => {
           addLayer={jest.fn()}
           removeLayer={jest.fn()}
           datasource={{} as DatasourcePublicAPI}
+          isDarkMode={false}
         />
       );
 
@@ -141,6 +143,7 @@ describe('XY Config panels', () => {
           addLayer={jest.fn()}
           removeLayer={jest.fn()}
           datasource={{} as DatasourcePublicAPI}
+          isDarkMode={false}
         />
       );
 
@@ -186,6 +189,7 @@ describe('XY Config panels', () => {
           addLayer={jest.fn()}
           removeLayer={jest.fn()}
           datasource={{} as DatasourcePublicAPI}
+          isDarkMode={false}
         />
       );
 
@@ -232,6 +236,7 @@ describe('XY Config panels', () => {
           addLayer={jest.fn()}
           removeLayer={jest.fn()}
           datasource={{} as DatasourcePublicAPI}
+          isDarkMode={false}
         />
       );
 

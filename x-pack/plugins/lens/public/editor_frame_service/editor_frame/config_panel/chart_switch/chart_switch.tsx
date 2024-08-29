@@ -435,17 +435,14 @@ export const ChartSwitch = memo(function ChartSwitch({
               defaultMessage: 'Search visualizations',
             }),
           }}
-          renderOption={(option, searchValue) => (
-            <ChartOption option={option} searchValue={searchValue} />
-          )}
           options={visualizationTypes}
-          onChange={(newOptions) => {
+          onChange={(newOptions: Array<{ label: string; value?: string; checked?: string }>) => {
             setFlyoutOpen(false);
             const chosenType = newOptions.find(({ checked }) => checked === 'on');
-            if (!chosenType) {
+            if (!chosenType || !chosenType.value) {
               return;
             }
-            const id = chosenType.value!;
+            const id = chosenType.value;
             commitSelection(visualizationsLookup[id].selection);
           }}
           noMatchesMessage={
@@ -488,6 +485,9 @@ const ChartSwitchSelectable = (props: EuiSelectableProps) => {
         isVirtualized: false,
         paddingSize: 'none',
       }}
+      renderOption={(option, searchValue) => (
+        <ChartOption option={option} searchValue={searchValue} />
+      )}
       {...props}
     />
   );

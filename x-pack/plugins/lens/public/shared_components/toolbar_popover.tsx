@@ -82,6 +82,7 @@ export const ToolbarPopover: React.FC<PropsWithChildren<ToolbarPopoverProps>> = 
           handleClose?.();
         }}
         anchorPosition="downRight"
+        panelPaddingSize="s"
         {...euiPopoverProps}
       >
         <EuiPopoverTitle data-test-subj={`${euiPopoverProps['data-test-subj']}_title`}>
