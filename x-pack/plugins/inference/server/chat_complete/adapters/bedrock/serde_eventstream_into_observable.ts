@@ -58,7 +58,7 @@ export function serdeEventstreamIntoObservable(
           try {
             const exceptionType = error.headers[':exception-type'].value;
             const body = toUtf8(error.body);
-            let message = 'Encountered error in Bedrock stream of type ' + exceptionType;
+            let message = `Encountered error in Bedrock stream of type ${exceptionType}`;
             try {
               message += '\n' + JSON.parse(body).message;
             } catch (parseError) {
@@ -66,7 +66,7 @@ export function serdeEventstreamIntoObservable(
             }
             error = createInferenceInternalError(message);
           } catch (decodeError) {
-            error = createInferenceInternalError();
+            error = createInferenceInternalError(decodeError.message);
           }
         }
         subscriber.error(error);
