@@ -21,7 +21,6 @@ webpack_cli(
     "//packages/kbn-babel-register",
     "//packages/kbn-babel-preset",
     # packages included in the shared deps src bundle
-    "@npm//@elastic/apm-rum-core",
     "//packages/kbn-ui-theme",
     "//packages/kbn-i18n",
     "//packages/kbn-i18n-react",
