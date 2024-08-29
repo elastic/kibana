@@ -16,7 +16,7 @@ import type {
   ESQLLiteral,
   ESQLSingleAstItem,
 } from '@kbn/esql-ast';
-import { partition } from 'lodash';
+import { partition, range } from 'lodash';
 import { ESQL_NUMBER_TYPES, compareTypesWithLiterals, isNumericType } from '../shared/esql_types';
 import type { EditorContext, SuggestionRawDefinition } from './types';
 import {
@@ -47,6 +47,7 @@ import {
   findPreviousWord,
   noCaseCompare,
   getColumnByName,
+  findFinalWord,
 } from '../shared/helpers';
 import { collectVariables, excludeVariablesFromCurrentCommand } from '../shared/variables';
 import type { ESQLPolicy, ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
@@ -538,6 +539,107 @@ function extractArgMeta(
   return { argIndex, prevIndex, lastArg, nodeArg };
 }
 
+function handleFragment(
+  innerText: string,
+  isFragmentComplete: (fragment: string) => boolean,
+  getSuggestionsForIncomplete: (
+    fragment: string,
+    rangeToReplace?: {}
+  ) => SuggestionRawDefinition[] | Promise<SuggestionRawDefinition[]>,
+  getSuggestionsForComplete: (
+    fragment: string,
+    rangeToReplace: {}
+  ) => SuggestionRawDefinition[] | Promise<SuggestionRawDefinition[]>
+): SuggestionRawDefinition[] | Promise<SuggestionRawDefinition[]> {
+  /**
+   * @TODO — this string manipulation is crude and can't support all cases
+   * Checking for a partial word and computing the replacement range should
+   * really be done using the AST node, but we'll have to refactor further upstream
+   * to make that available. This is a quick fix to support the most common case.
+   */
+  const fragment = findFinalWord(innerText);
+  if (!fragment) {
+    return getSuggestionsForIncomplete('');
+  } else {
+    const rangeToReplace = {
+      start: innerText.length - fragment.length + 1,
+      end: innerText.length + 1,
+    };
+    if (isFragmentComplete(fragment)) {
+      return getSuggestionsForComplete(fragment, rangeToReplace);
+    } else {
+      return getSuggestionsForIncomplete(fragment, rangeToReplace);
+    }
+  }
+}
+
+async function getSuggestionsForSortCommand(
+  innerText: string,
+  command: ESQLCommand,
+  _getColumnByName: (name: string) => ESQLRealField | ESQLVariable | undefined,
+  getFunctionsAndFields: (
+    types: string[],
+    ignoredFields?: string[]
+  ) => Promise<SuggestionRawDefinition[]>
+): Promise<SuggestionRawDefinition[]> {
+  // SORT <suggest>
+  if (command.args.length === 0 || isRestartingExpression(innerText)) {
+    const alreadyUsedFields = command.args.filter(isColumnItem).map(({ name }) => name);
+
+    const getCompletedSuggestions = (
+      fragment: string,
+      rangeToReplace: { start: number; end: number }
+    ) => {
+      // SORT field<suggest>
+      const incompleteSuggestions = [
+        { ...pipeCompleteItem, text: ' | ' },
+        { ...commaCompleteItem, text: ', ' },
+        ...buildConstantsDefinitions([' ASC', ' DESC'], undefined, undefined, {
+          advanceCursorAndOpenSuggestions: true,
+        }),
+      ];
+
+      return incompleteSuggestions.map<SuggestionRawDefinition>((s) => ({
+        ...s,
+        filterText: fragment,
+        text: fragment + s.text,
+        command: TRIGGER_SUGGESTION_COMMAND,
+        rangeToReplace,
+      }));
+    };
+
+    const getIncompleteSuggestions = (
+      fragment: string,
+      rangeToReplace?: { start: number; end: number }
+    ) => {
+      return getFunctionsAndFields(['any'], alreadyUsedFields).then((suggestions) =>
+        suggestions.map((s) => ({
+          ...s,
+          filterText: fragment,
+          rangeToReplace,
+        }))
+      );
+    };
+
+    return handleFragment(
+      innerText,
+      (fragment) => Boolean(_getColumnByName(fragment)),
+      getIncompleteSuggestions,
+      getCompletedSuggestions
+    );
+  }
+  if (isColumnItem(command.args[command.args.length - 1])) {
+    // SORT fieldA <suggest>
+    return [
+      ...getFinalSuggestions(),
+      ...buildConstantsDefinitions(['ASC', 'DESC'], undefined, undefined, {
+        advanceCursorAndOpenSuggestions: true,
+      }),
+    ];
+  }
+  return [];
+}
+
 async function getExpressionSuggestionsByType(
   innerText: string,
   commands: ESQLCommand[],
@@ -559,6 +661,35 @@ async function getExpressionSuggestionsByType(
 ) {
   const commandDef = getCommandDefinition(command.name);
   const { argIndex, prevIndex, lastArg, nodeArg } = extractArgMeta(command, node);
+
+  // get the next definition for the given command
+  let argDef = commandDef.signature.params[argIndex];
+  // collect all fields + variables to suggest
+  const fieldsMap: Map<string, ESQLRealField> = await (argDef ? getFieldsMap() : new Map());
+  const anyVariables = collectVariables(commands, fieldsMap, innerText);
+  const references = { fields: fieldsMap, variables: anyVariables };
+
+  if (commandDef.name === 'sort') {
+    return getSuggestionsForSortCommand(
+      innerText,
+      command,
+      (name: string) => getColumnByName(name, references),
+      (types: string[], ignoredFields?: string[]) =>
+        getFieldsOrFunctionsSuggestions(
+          types,
+          command.name,
+          option?.name,
+          getFieldsByType,
+          {
+            fields: true,
+            functions: true,
+          },
+          {
+            ignoreFields: ignoredFields,
+          }
+        )
+    );
+  }
 
   // TODO - this is a workaround because it was too difficult to handle this case in a generic way :(
   if (commandDef.name === 'from' && node && isSourceItem(node) && /\s/.test(node.name)) {
@@ -598,8 +729,7 @@ async function getExpressionSuggestionsByType(
     const optArg = optionsAlreadyDeclared.find(({ name: optionName }) => optionName === name);
     return (!optArg && !optionsAlreadyDeclared.length) || (optArg && index > optArg.index);
   });
-  // get the next definition for the given command
-  let argDef = commandDef.signature.params[argIndex];
+
   // tune it for the variadic case
   if (!argDef) {
     // this is the case of a comma argument
@@ -631,14 +761,8 @@ async function getExpressionSuggestionsByType(
     }
   }
 
-  // collect all fields + variables to suggest
-  const fieldsMap: Map<string, ESQLRealField> = await (argDef ? getFieldsMap() : new Map());
-  const anyVariables = collectVariables(commands, fieldsMap, innerText);
-
   // enrich with assignment has some special rules who are handled somewhere else
   const canHaveAssignments = ['eval', 'stats', 'row'].includes(command.name);
-
-  const references = { fields: fieldsMap, variables: anyVariables };
 
   const suggestions: SuggestionRawDefinition[] = [];
 
@@ -688,69 +812,43 @@ async function getExpressionSuggestionsByType(
           }
         );
 
-        /**
-         * @TODO — this string manipulation is crude and can't support all cases
-         * Checking for a partial word and computing the replacement range should
-         * really be done using the AST node, but we'll have to refactor further upstream
-         * to make that available. This is a quick fix to support the most common case.
-         */
-        const words = innerText.split(/\s+/);
-        const lastWord = words[words.length - 1];
-        if (lastWord !== '') {
-          // ... | <COMMAND> <word><suggest>
+        const getSuggestionsForComplete = (
+          fragment: string,
+          rangeToReplace: { start: number; end: number }
+        ) => {
+          // SORT field<suggest>
+          return [
+            { ...pipeCompleteItem, text: ' | ' },
+            { ...commaCompleteItem, text: ', ' },
+          ].map<SuggestionRawDefinition>((s) => ({
+            ...s,
+            filterText: fragment,
+            text: fragment + s.text,
+            command: TRIGGER_SUGGESTION_COMMAND,
+            rangeToReplace,
+          }));
+        };
 
-          const rangeToReplace = {
-            start: innerText.length - lastWord.length + 1,
-            end: innerText.length + 1,
-          };
+        const getSuggestionsForIncomplete = (
+          fragment: string,
+          rangeToReplace: { start: number; end: number }
+        ) => {
+          // SORT field<suggest>
+          return fieldSuggestions.map((suggestion) => ({
+            ...suggestion,
+            command: TRIGGER_SUGGESTION_COMMAND,
+            rangeToReplace,
+          }));
+        };
 
-          // check if lastWord is an existing field
-          const column = getColumnByName(lastWord, references);
-          if (column) {
-            // now we know that the user has already entered a column,
-            // so suggest comma and pipe as well as any options from
-            // the next argument
+        const someSuggestions = await handleFragment(
+          innerText,
+          (fragment) => Boolean(getColumnByName(fragment, references)),
+          getSuggestionsForIncomplete,
+          getSuggestionsForComplete
+        );
 
-            // Incomplete since they don't have the range, etc
-            const incompleteSuggestions = [
-              { ...pipeCompleteItem, text: ' | ' },
-              { ...commaCompleteItem, text: ', ' },
-            ];
-
-            const nextArg = commandDef.signature.params[argIndex + 1];
-            if (nextArg?.values) {
-              incompleteSuggestions.push(
-                ...buildConstantsDefinitions(nextArg.values, undefined, undefined, {
-                  advanceCursorAndOpenSuggestions: true,
-                }).map((s) => ({ ...s, text: ' ' + s.text }))
-              );
-            }
-
-            return incompleteSuggestions.map<SuggestionRawDefinition>((s) => ({
-              ...s,
-              filterText: lastWord,
-              text: lastWord + s.text,
-              command: TRIGGER_SUGGESTION_COMMAND,
-              rangeToReplace,
-            }));
-          } else {
-            suggestions.push(
-              ...fieldSuggestions.map((suggestion) => ({
-                ...suggestion,
-                command: TRIGGER_SUGGESTION_COMMAND,
-                rangeToReplace,
-              }))
-            );
-          }
-        } else {
-          // ... | <COMMAND> <suggest>
-          suggestions.push(
-            ...fieldSuggestions.map((suggestion) => ({
-              ...suggestion,
-              command: TRIGGER_SUGGESTION_COMMAND,
-            }))
-          );
-        }
+        suggestions.push(...someSuggestions);
       }
     }
     if (argDef.type === 'function' || argDef.type === 'any') {

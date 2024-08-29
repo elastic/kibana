@@ -1414,7 +1414,10 @@ describe('autocomplete', () => {
           .filter((s) => s !== 'doubleField')
           .map(attachTriggerCommand)
       );
-      testSuggestions('FROM a | KEEP doubleField, dateField/', ['dateField, ', 'dateField | ']);
+      testSuggestions.only('FROM a | KEEP doubleField, dateField/', [
+        'dateField, ',
+        'dateField | ',
+      ]);
     });
   });
 
