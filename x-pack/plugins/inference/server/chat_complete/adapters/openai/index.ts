@@ -25,7 +25,7 @@ import type { ToolOptions } from '../../../../common/chat_complete/tools';
 import { createTokenLimitReachedError } from '../../../../common/chat_complete/errors';
 import { createInferenceInternalError } from '../../../../common/errors';
 import { eventSourceStreamIntoObservable } from '../../../util/event_source_stream_into_observable';
-import { InferenceConnectorAdapter } from '../../types';
+import type { InferenceConnectorAdapter } from '../../types';
 
 export const openAIAdapter: InferenceConnectorAdapter = {
   chatComplete: ({ executor, system, messages, toolChoice, tools }) => {
@@ -76,6 +76,7 @@ export const openAIAdapter: InferenceConnectorAdapter = {
         const delta = chunk.choices[0].delta;
 
         return {
+          type: ChatCompletionEventType.ChatCompletionChunk,
           content: delta.content ?? '',
           tool_calls:
             delta.tool_calls?.map((toolCall) => {
@@ -88,7 +89,6 @@ export const openAIAdapter: InferenceConnectorAdapter = {
                 index: toolCall.index,
               };
             }) ?? [],
-          type: ChatCompletionEventType.ChatCompletionChunk,
         };
       })
     );
