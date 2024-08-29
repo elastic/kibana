@@ -99,13 +99,11 @@ const messagesToBedrock = (messages: Message[]): BedRockMessage[] => {
       case MessageRole.User:
         return {
           role: 'user' as const,
-          // content: message.content,
           rawContent: [{ type: 'text' as const, text: message.content }],
         };
       case MessageRole.Assistant:
         return {
           role: 'assistant' as const,
-          // content: message.content,
           rawContent: [
             ...(message.content ? [{ type: 'text' as const, text: message.content }] : []),
             ...(message.toolCalls
