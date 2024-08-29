@@ -27,9 +27,9 @@ export async function updateAgentTags(
   tagsToAdd: string[],
   tagsToRemove: string[]
 ): Promise<{ actionId: string }> {
+  const currentNameSpace = getCurrentNamespace(soClient);
   const outgoingErrors: Record<Agent['id'], Error> = {};
   const givenAgents: Agent[] = [];
-  const currentNameSpace = getCurrentNamespace(soClient);
 
   if ('agentIds' in options) {
     const maybeAgents = await getAgentsById(esClient, soClient, options.agentIds);
@@ -48,8 +48,8 @@ export async function updateAgentTags(
     }
   } else if ('kuery' in options) {
     const batchSize = options.batchSize ?? SO_SEARCH_LIMIT;
-
     const namespaceFilter = await agentsKueryNamespaceFilter(currentNameSpace);
+
     const filters = namespaceFilter ? [namespaceFilter] : [];
     if (options.kuery !== '') {
       filters.push(options.kuery);
@@ -86,8 +86,15 @@ export async function updateAgentTags(
     ).runActionAsyncWithRetry();
   }
 
-  return await updateTagsBatch(soClient, esClient, givenAgents, outgoingErrors, {
-    tagsToAdd,
-    tagsToRemove,
-  });
+  return await updateTagsBatch(
+    soClient,
+    esClient,
+    givenAgents,
+    outgoingErrors,
+    {
+      tagsToAdd,
+      tagsToRemove,
+    },
+    currentNameSpace
+  );
 }

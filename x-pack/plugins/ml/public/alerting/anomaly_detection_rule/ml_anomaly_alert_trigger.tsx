@@ -199,7 +199,6 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
         errors={Array.isArray(errors.jobSelection) ? errors.jobSelection : []}
         shouldUseDropdownJobCreate
       />
-
       <ConfigValidator
         jobConfigs={jobConfigs}
         alertInterval={ruleInterval}
@@ -207,7 +206,6 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
         alertParams={resultParams}
         maxNumberOfBuckets={maxNumberOfBuckets}
       />
-
       <ResultTypeSelector
         value={ruleParams.resultType}
         availableOption={availableResultTypes}
@@ -226,21 +224,17 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
         onChange={useCallback(onAlertParamChange('includeInterim'), [])}
       />
       <EuiSpacer size="m" />
-
       <AdvancedSettings
         value={advancedSettings}
-        onChange={useCallback((update) => {
+        onChange={useCallback((update: any) => {
           Object.keys(update).forEach((k) => {
             setRuleParams(k, update[k as keyof MlAnomalyDetectionAlertAdvancedSettings]);
           });
           // eslint-disable-next-line react-hooks/exhaustive-deps
         }, [])}
       />
-
       <EuiSpacer size="m" />
-
       <PreviewAlertCondition alertingApiService={alertingApiService} alertParams={ruleParams} />
-
       <EuiSpacer size="m" />
     </EuiForm>
   );

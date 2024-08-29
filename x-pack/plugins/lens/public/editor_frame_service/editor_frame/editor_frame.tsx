@@ -97,7 +97,7 @@ export function EditorFrame(props: EditorFrameProps) {
   );
 
   const dropOntoWorkspace = useCallback(
-    (field) => {
+    (field: DragDropIdentifier) => {
       const suggestion = getSuggestionForField.current!(field);
       if (suggestion) {
         trackUiCounterEvents('drop_onto_workspace');

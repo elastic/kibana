@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useHostsTable } from './use_hosts_table';
+import { type HostNodeRow, useHostsTable } from './use_hosts_table';
 import { renderHook } from '@testing-library/react-hooks';
 import { InfraAssetMetricsItem } from '../../../../../common/http_api';
 import * as useUnifiedSearchHooks from './use_unified_search';
@@ -75,6 +75,7 @@ const mockHostNode: InfraAssetMetricsItem[] = [
     ],
     name: 'host-0',
     alertsCount: 0,
+    hasSystemMetrics: true,
   },
   {
     metrics: [
@@ -113,6 +114,7 @@ const mockHostNode: InfraAssetMetricsItem[] = [
     ],
     name: 'host-1',
     alertsCount: 0,
+    hasSystemMetrics: true,
   },
 ];
 
@@ -156,7 +158,7 @@ describe('useHostTable hook', () => {
     } as unknown as ReturnType<typeof useKibanaContextForPluginHook.useKibanaContextForPlugin>);
   });
   it('it should map the nodes returned from the snapshot api to a format matching eui table items', () => {
-    const expected = [
+    const expected: Array<Partial<HostNodeRow>> = [
       {
         name: 'host-0',
         os: '-',
@@ -174,6 +176,7 @@ describe('useHostTable hook', () => {
         memoryFree: 34359.738368,
         normalizedLoad1m: 239.2040001,
         alertsCount: 0,
+        hasSystemMetrics: true,
       },
       {
         name: 'host-1',
@@ -192,6 +195,7 @@ describe('useHostTable hook', () => {
         memoryFree: 9.194304,
         normalizedLoad1m: 100,
         alertsCount: 0,
+        hasSystemMetrics: true,
       },
     ];
 

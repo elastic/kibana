@@ -40,6 +40,7 @@ import { DataViewsFilter } from './sub_components/data_view_filter';
 export function DataSourceSelector({
   datasets,
   dataSourceSelection,
+  allSelection,
   datasetsError,
   dataViews,
   dataViewCount,
@@ -307,7 +308,11 @@ export function DataSourceSelector({
       />
       <EuiHorizontalRule margin="none" />
       <SelectorFooter>
-        <ShowAllLogsButton isSelected={isAllMode} onClick={selectAllLogs} />
+        <ShowAllLogsButton
+          isSelected={isAllMode}
+          onClick={selectAllLogs}
+          allSelection={allSelection}
+        />
         {isEsqlEnabled && <ESQLButton {...discoverEsqlUrlProps} />}
       </SelectorFooter>
     </SelectorPopover>

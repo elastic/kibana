@@ -50,6 +50,7 @@ export function getWebpackConfig(
     profile: worker.profileWebpack,
 
     output: {
+      hashFunction: 'sha1',
       path: bundle.outputDir,
       filename: `${bundle.id}.${bundle.type}.js`,
       chunkFilename: `${bundle.id}.chunk.[id].js`,

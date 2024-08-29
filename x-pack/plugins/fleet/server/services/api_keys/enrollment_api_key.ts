@@ -313,7 +313,7 @@ export async function generateEnrollmentAPIKey(
     api_key: apiKey,
     name,
     policy_id: agentPolicyId,
-    namespaces: agentPolicy?.space_id ? [agentPolicy?.space_id] : undefined,
+    namespaces: agentPolicy?.space_ids,
     created_at: new Date().toISOString(),
   };
 

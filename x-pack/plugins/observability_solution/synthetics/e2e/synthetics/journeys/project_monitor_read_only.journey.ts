@@ -115,7 +115,7 @@ journey('ProjectMonitorReadOnly', async ({ page, params }) => {
   step('Monitor can be deleted', async () => {
     await page.click('text="Delete monitor"');
     await page.click('[data-test-subj="confirmModalConfirmButton"]');
-    await page.waitForSelector(`text='Deleted "${monitorName}"'`);
+    await page.waitForSelector(`text='Deleted "${monitorName}" monitor successfully.'`);
   });
 
   after(async () => {

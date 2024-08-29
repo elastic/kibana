@@ -107,7 +107,7 @@ describe('Elasticsearch blob storage', () => {
     esBlobStorage = createEsBlobStorage({ chunkSize: '1024B' });
     const { id } = await esBlobStorage.upload(Readable.from([fileString]));
     expect(await getAllDocCount()).toMatchObject({ count: 37 });
-    esRefreshIndexSpy.mockReset();
+    esRefreshIndexSpy.mockClear();
     const rs = await esBlobStorage.download({ id });
     expect(esRefreshIndexSpy).toHaveBeenCalled(); // Make sure we refresh the index before downloading the chunks
     const chunks: string[] = [];
@@ -141,7 +141,7 @@ describe('Elasticsearch blob storage', () => {
     const { id } = await esBlobStorage.upload(Readable.from([fileString]));
     const { id: id2 } = await esBlobStorage.upload(Readable.from([fileString2]));
     expect(await getAllDocCount()).toMatchObject({ count: 10 });
-    esRefreshIndexSpy.mockReset();
+    esRefreshIndexSpy.mockClear();
     await esBlobStorage.delete(id);
     expect(esRefreshIndexSpy).toHaveBeenCalled(); // Make sure we refresh the index before deleting the chunks
     expect(await getAllDocCount()).toMatchObject({ count: 2 });

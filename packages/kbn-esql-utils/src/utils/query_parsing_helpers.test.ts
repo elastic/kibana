@@ -77,17 +77,17 @@ describe('esql query helpers', () => {
   describe('getLimitFromESQLQuery', () => {
     it('should return default limit when ES|QL query is empty', () => {
       const limit = getLimitFromESQLQuery('');
-      expect(limit).toBe(500);
+      expect(limit).toBe(1000);
     });
 
     it('should return default limit when ES|QL query does not contain LIMIT command', () => {
       const limit = getLimitFromESQLQuery('FROM foo');
-      expect(limit).toBe(500);
+      expect(limit).toBe(1000);
     });
 
     it('should return default limit when ES|QL query contains invalid LIMIT command', () => {
       const limit = getLimitFromESQLQuery('FROM foo | LIMIT iAmNotANumber');
-      expect(limit).toBe(500);
+      expect(limit).toBe(1000);
     });
 
     it('should return limit when ES|QL query contains LIMIT command', () => {
@@ -95,7 +95,7 @@ describe('esql query helpers', () => {
       expect(limit).toBe(10000);
     });
 
-    it('should return last limit when ES|QL query contains multiple LIMIT command', () => {
+    it('should return minimum limit when ES|QL query contains multiple LIMIT command', () => {
       const limit = getLimitFromESQLQuery('FROM foo | LIMIT 200 | LIMIT 0');
       expect(limit).toBe(0);
     });

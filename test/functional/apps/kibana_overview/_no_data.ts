@@ -19,7 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('overview page - no data', function describeIndexTests() {
     before(async () => {
       await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
-      kibanaServer.savedObjects.clean({ types: ['index-pattern'] });
+      await kibanaServer.savedObjects.clean({ types: ['index-pattern'] });
       await kibanaServer.importExport.unload(
         'test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
       );

@@ -31,6 +31,11 @@ const actionNames: {
     completedText: 'force unenrolled',
     cancelledText: 'force unenrollment',
   },
+  AUTOMATIC_FORCE_UNENROLL: {
+    inProgressText: 'Automatic unenrolling',
+    completedText: 'automatically unenrolled',
+    cancelledText: 'automatic unenrollment',
+  },
   UPDATE_TAGS: {
     inProgressText: 'Updating tags of',
     completedText: 'updated tags',
@@ -60,7 +65,13 @@ const actionNames: {
   ACTION: { inProgressText: 'Actioning', completedText: 'actioned', cancelledText: 'action' },
 };
 
-export const getAction = (type?: string) => actionNames[type ?? 'ACTION'] ?? actionNames.ACTION;
+export const getAction = (type?: string, actionId?: string) => {
+  // handling a special case of force unenrollment coming from an automatic task
+  // we know what kind of action is from the actionId prefix
+  if (actionId?.includes('UnenrollInactiveAgentsTask-'))
+    return actionNames.AUTOMATIC_FORCE_UNENROLL;
+  return actionNames[type ?? 'ACTION'] ?? actionNames.ACTION;
+};
 
 export const inProgressTitle = (action: ActionStatus) => (
   <FormattedMessage
@@ -74,7 +85,7 @@ export const inProgressTitle = (action: ActionStatus) => (
           ? action.nbAgentsActioned
           : action.nbAgentsActioned - action.nbAgentsAck + ' of ' + action.nbAgentsActioned,
       agents: action.nbAgentsActioned === 1 ? 'agent' : 'agents',
-      inProgressText: getAction(action.type).inProgressText,
+      inProgressText: getAction(action.type, action.actionId).inProgressText,
       reassignText:
         action.type === 'POLICY_REASSIGN' && action.newPolicyId ? `to ${action.newPolicyId}` : '',
       upgradeText: action.type === 'UPGRADE' ? `to version ${action.version}` : '',
