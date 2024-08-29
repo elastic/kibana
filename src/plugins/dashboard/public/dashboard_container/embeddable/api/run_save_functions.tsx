@@ -127,7 +127,7 @@ export async function runInteractiveSave(this: DashboardContainer, interactionMo
         timefilter: { timefilter },
       },
     },
-    embeddable: { reactEmbeddableRegistryHasKey },
+    // embeddable: { reactEmbeddableRegistryHasKey },
     savedObjectsTagging: { hasApi: hasSavedObjectsTagging },
     dashboardContentManagement: { checkForDuplicateDashboardTitle, saveDashboardState },
   } = pluginServices.getServices();
