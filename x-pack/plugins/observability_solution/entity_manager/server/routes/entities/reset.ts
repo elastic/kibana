@@ -5,23 +5,8 @@
  * 2.0.
  */
 
-import { RequestHandlerContext } from '@kbn/core/server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { resetEntityDefinitionParamsSchema } from '@kbn/entities-schema';
-import { SetupRouteOptions } from '../types';
-import { EntitySecurityException } from '../../lib/entities/errors/entity_security_exception';
-import { InvalidTransformError } from '../../lib/entities/errors/invalid_transform_error';
-import { readEntityDefinition } from '../../lib/entities/read_entity_definition';
-import {
-  stopAndDeleteHistoryBackfillTransform,
-  stopAndDeleteHistoryTransform,
-  stopAndDeleteLatestTransform,
-} from '../../lib/entities/stop_and_delete_transform';
-import {
-  deleteHistoryIngestPipeline,
-  deleteLatestIngestPipeline,
-} from '../../lib/entities/delete_ingest_pipeline';
-import { deleteIndices } from '../../lib/entities/delete_index';
+import { z } from '@kbn/zod';
 import {
   createAndInstallHistoryIngestPipeline,
   createAndInstallLatestIngestPipeline,
@@ -31,58 +16,65 @@ import {
   createAndInstallHistoryTransform,
   createAndInstallLatestTransform,
 } from '../../lib/entities/create_and_install_transform';
-import { startTransform } from '../../lib/entities/start_transform';
+import { deleteIndices } from '../../lib/entities/delete_index';
+import {
+  deleteHistoryIngestPipeline,
+  deleteLatestIngestPipeline,
+} from '../../lib/entities/delete_ingest_pipeline';
 import { EntityDefinitionNotFound } from '../../lib/entities/errors/entity_not_found';
+import { EntitySecurityException } from '../../lib/entities/errors/entity_security_exception';
+import { InvalidTransformError } from '../../lib/entities/errors/invalid_transform_error';
 import { isBackfillEnabled } from '../../lib/entities/helpers/is_backfill_enabled';
+import { readEntityDefinition } from '../../lib/entities/read_entity_definition';
+import { startTransform } from '../../lib/entities/start_transform';
+import {
+  stopAndDeleteHistoryBackfillTransform,
+  stopAndDeleteHistoryTransform,
+  stopAndDeleteLatestTransform,
+} from '../../lib/entities/stop_and_delete_transform';
+import { createEntityManagerServerRoute } from '../create_entity_manager_server_route';
 
-export function resetEntityDefinitionRoute<T extends RequestHandlerContext>({
-  router,
-  logger,
-}: SetupRouteOptions<T>) {
-  router.post<{ id: string }, unknown, unknown>(
-    {
-      path: '/internal/entities/definition/{id}/_reset',
-      validate: {
-        params: buildRouteValidationWithZod(resetEntityDefinitionParamsSchema.strict()),
-      },
-    },
-    async (context, req, res) => {
-      try {
-        const soClient = (await context.core).savedObjects.client;
-        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+export const resetEntityDefinitionRoute = createEntityManagerServerRoute({
+  endpoint: 'POST /internal/entities/definition/{id}/_reset',
+  params: z.object({
+    path: resetEntityDefinitionParamsSchema,
+  }),
+  handler: async ({ context, params, response, logger }) => {
+    try {
+      const soClient = (await context.core).savedObjects.client;
+      const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
-        const definition = await readEntityDefinition(soClient, req.params.id, logger);
+      const definition = await readEntityDefinition(soClient, params.path.id, logger);
 
-        // Delete the transform and ingest pipeline
-        await stopAndDeleteHistoryTransform(esClient, definition, logger);
-        if (isBackfillEnabled(definition)) {
-          await stopAndDeleteHistoryBackfillTransform(esClient, definition, logger);
-        }
-        await stopAndDeleteLatestTransform(esClient, definition, logger);
-        await deleteHistoryIngestPipeline(esClient, definition, logger);
-        await deleteLatestIngestPipeline(esClient, definition, logger);
-        await deleteIndices(esClient, definition, logger);
-
-        // Recreate everything
-        await createAndInstallHistoryIngestPipeline(esClient, definition, logger);
-        await createAndInstallLatestIngestPipeline(esClient, definition, logger);
-        await createAndInstallHistoryTransform(esClient, definition, logger);
-        if (isBackfillEnabled(definition)) {
-          await createAndInstallHistoryBackfillTransform(esClient, definition, logger);
-        }
-        await createAndInstallLatestTransform(esClient, definition, logger);
-        await startTransform(esClient, definition, logger);
-
-        return res.ok({ body: { acknowledged: true } });
-      } catch (e) {
-        if (e instanceof EntityDefinitionNotFound) {
-          return res.notFound({ body: e });
-        }
-        if (e instanceof EntitySecurityException || e instanceof InvalidTransformError) {
-          return res.customError({ body: e, statusCode: 400 });
-        }
-        return res.customError({ body: e, statusCode: 500 });
+      // Delete the transform and ingest pipeline
+      await stopAndDeleteHistoryTransform(esClient, definition, logger);
+      if (isBackfillEnabled(definition)) {
+        await stopAndDeleteHistoryBackfillTransform(esClient, definition, logger);
       }
+      await stopAndDeleteLatestTransform(esClient, definition, logger);
+      await deleteHistoryIngestPipeline(esClient, definition, logger);
+      await deleteLatestIngestPipeline(esClient, definition, logger);
+      await deleteIndices(esClient, definition, logger);
+
+      // Recreate everything
+      await createAndInstallHistoryIngestPipeline(esClient, definition, logger);
+      await createAndInstallLatestIngestPipeline(esClient, definition, logger);
+      await createAndInstallHistoryTransform(esClient, definition, logger);
+      if (isBackfillEnabled(definition)) {
+        await createAndInstallHistoryBackfillTransform(esClient, definition, logger);
+      }
+      await createAndInstallLatestTransform(esClient, definition, logger);
+      await startTransform(esClient, definition, logger);
+
+      return response.ok({ body: { acknowledged: true } });
+    } catch (e) {
+      if (e instanceof EntityDefinitionNotFound) {
+        return response.notFound({ body: e });
+      }
+      if (e instanceof EntitySecurityException || e instanceof InvalidTransformError) {
+        return response.customError({ body: e, statusCode: 400 });
+      }
+      return response.customError({ body: e, statusCode: 500 });
     }
-  );
-}
+  },
+});

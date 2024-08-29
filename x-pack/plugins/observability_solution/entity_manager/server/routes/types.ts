@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { IRouter, RequestHandlerContextBase } from '@kbn/core-http-server';
-import { Logger } from '@kbn/core/server';
+import { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
 import { EntityManagerServerSetup } from '../types';
 
-export interface SetupRouteOptions<T extends RequestHandlerContextBase> {
-  router: IRouter<T>;
+export interface EntityManagerRouteDependencies {
   server: EntityManagerServerSetup;
-  logger: Logger;
 }
+
+export type EntityManagerRouteHandlerResources = EntityManagerRouteDependencies &
+  DefaultRouteHandlerResources;

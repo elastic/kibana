@@ -5,27 +5,28 @@
  * 2.0.
  */
 
-import { firstValueFrom } from 'rxjs';
 import {
-  Plugin,
   CoreSetup,
-  RequestHandlerContext,
   CoreStart,
-  PluginInitializerContext,
-  PluginConfigDescriptor,
   Logger,
+  Plugin,
+  PluginConfigDescriptor,
+  PluginInitializerContext,
 } from '@kbn/core/server';
+import { registerRoutes } from '@kbn/server-route-repository';
+import { firstValueFrom } from 'rxjs';
+import { EntityManagerConfig, configSchema, exposeToBrowserConfig } from '../common/config';
+import { builtInDefinitions } from './lib/entities/built_in';
+import { upgradeBuiltInEntityDefinitions } from './lib/entities/upgrade_entity_definition';
 import { installEntityManagerTemplates } from './lib/manage_index_templates';
-import { setupRoutes } from './routes';
+import { entityManagerRouteRepository } from './routes';
+import { EntityDiscoveryApiKeyType, entityDefinition } from './saved_objects';
 import {
   EntityManagerPluginSetupDependencies,
   EntityManagerPluginStartDependencies,
   EntityManagerServerSetup,
 } from './types';
-import { EntityManagerConfig, configSchema, exposeToBrowserConfig } from '../common/config';
-import { entityDefinition, EntityDiscoveryApiKeyType } from './saved_objects';
-import { upgradeBuiltInEntityDefinitions } from './lib/entities/upgrade_entity_definition';
-import { builtInDefinitions } from './lib/entities/built_in';
+import { EntityManagerRouteDependencies } from './routes/types';
 
 export type EntityManagerServerPluginSetup = ReturnType<EntityManagerServerPlugin['setup']>;
 export type EntityManagerServerPluginStart = ReturnType<EntityManagerServerPlugin['start']>;
@@ -62,17 +63,18 @@ export class EntityManagerServerPlugin
       attributesToIncludeInAAD: new Set(['id', 'name']),
     });
 
-    const router = core.http.createRouter();
-
     this.server = {
       config: this.config,
       logger: this.logger,
     } as EntityManagerServerSetup;
 
-    setupRoutes<RequestHandlerContext>({
-      router,
+    registerRoutes<EntityManagerRouteDependencies>({
+      repository: entityManagerRouteRepository,
+      dependencies: {
+        server: this.server,
+      },
+      core,
       logger: this.logger,
-      server: this.server,
     });
 
     return {};

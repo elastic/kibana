@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { RequestHandlerContext } from '@kbn/core/server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { getEntityDefinitionQuerySchema } from '@kbn/entities-schema';
-import { SetupRouteOptions } from '../types';
+import { z } from '@kbn/zod';
 import { findEntityDefinitions } from '../../lib/entities/find_entity_definition';
+import { createEntityManagerServerRoute } from '../create_entity_manager_server_route';
 
 /**
  * @openapi
@@ -50,30 +49,24 @@ import { findEntityDefinitions } from '../../lib/entities/find_entity_definition
  *                              running:
  *                                type: boolean
  */
-export function getEntityDefinitionRoute<T extends RequestHandlerContext>({
-  router,
-}: SetupRouteOptions<T>) {
-  router.get<unknown, { page?: number; perPage?: number }, unknown>(
-    {
-      path: '/internal/entities/definition',
-      validate: {
-        query: buildRouteValidationWithZod(getEntityDefinitionQuerySchema.strict()),
-      },
-    },
-    async (context, req, res) => {
-      try {
-        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-        const soClient = (await context.core).savedObjects.client;
-        const definitions = await findEntityDefinitions({
-          esClient,
-          soClient,
-          page: req.query.page ?? 1,
-          perPage: req.query.perPage ?? 10,
-        });
-        return res.ok({ body: { definitions } });
-      } catch (e) {
-        return res.customError({ body: e, statusCode: 500 });
-      }
+export const getEntityDefinitionRoute = createEntityManagerServerRoute({
+  endpoint: 'GET /internal/entities/definition',
+  params: z.object({
+    query: getEntityDefinitionQuerySchema,
+  }),
+  handler: async ({ context, params, response }) => {
+    try {
+      const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+      const soClient = (await context.core).savedObjects.client;
+      const definitions = await findEntityDefinitions({
+        esClient,
+        soClient,
+        page: params?.query?.page ?? 1,
+        perPage: params?.query?.perPage ?? 10,
+      });
+      return response.ok({ body: { definitions } });
+    } catch (e) {
+      return response.customError({ body: e, statusCode: 500 });
     }
-  );
-}
+  },
+});
