@@ -24,21 +24,10 @@ type TimeRangeConfig = {
 };
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-type DatasetConfig = {
-  rawName: string;
-  type: string;
-  name: string;
-  namespace: string;
-};
-
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 type Filters = {
   timeRange: TimeRangeConfig;
 };
 
 export interface DataQualityLocatorParams extends SerializableRecord {
   filters?: Filters;
-  flyout?: {
-    dataset: DatasetConfig;
-  };
 }

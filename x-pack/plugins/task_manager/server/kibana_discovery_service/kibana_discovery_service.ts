@@ -9,8 +9,10 @@ import type { ISavedObjectsRepository } from '@kbn/core/server';
 import { Logger } from '@kbn/core/server';
 import { BACKGROUND_TASK_NODE_SO_NAME } from '../saved_objects';
 import { BackgroundTaskNode } from '../saved_objects/schemas/background_task_node';
+import { TaskManagerConfig } from '../config';
 
 interface DiscoveryServiceParams {
+  config: TaskManagerConfig['discovery'];
   currentNode: string;
   savedObjectsRepository: ISavedObjectsRepository;
   logger: Logger;
@@ -21,16 +23,17 @@ interface DiscoveryServiceUpsertParams {
   lastSeen: string;
 }
 
-export const DISCOVERY_INTERVAL = 1000 * 10;
-export const ACTIVE_NODES_LOOK_BACK = '30s';
-
 export class KibanaDiscoveryService {
+  private readonly activeNodesLookBack: string;
+  private readonly discoveryInterval: number;
   private currentNode: string;
   private started = false;
   private savedObjectsRepository: ISavedObjectsRepository;
   private logger: Logger;
 
-  constructor({ currentNode, savedObjectsRepository, logger }: DiscoveryServiceParams) {
+  constructor({ config, currentNode, savedObjectsRepository, logger }: DiscoveryServiceParams) {
+    this.activeNodesLookBack = config.active_nodes_lookback;
+    this.discoveryInterval = config.interval;
     this.savedObjectsRepository = savedObjectsRepository;
     this.logger = logger;
     this.currentNode = currentNode;
@@ -60,7 +63,7 @@ export class KibanaDiscoveryService {
     } catch (e) {
       if (!this.started) {
         this.logger.error(
-          `Kibana Discovery Service couldn't be started and will be retried in ${DISCOVERY_INTERVAL}ms, error:${e.message}`
+          `Kibana Discovery Service couldn't be started and will be retried in ${this.discoveryInterval}ms, error:${e.message}`
         );
       } else {
         this.logger.error(
@@ -70,7 +73,7 @@ export class KibanaDiscoveryService {
     } finally {
       setTimeout(
         async () => await this.scheduleUpsertCurrentNode(),
-        DISCOVERY_INTERVAL - (Date.now() - lastSeenDate.getTime())
+        this.discoveryInterval - (Date.now() - lastSeenDate.getTime())
       );
     }
   }
@@ -93,18 +96,14 @@ export class KibanaDiscoveryService {
         type: BACKGROUND_TASK_NODE_SO_NAME,
         perPage: 10000,
         page: 1,
-        filter: `${BACKGROUND_TASK_NODE_SO_NAME}.attributes.last_seen > now-${ACTIVE_NODES_LOOK_BACK}`,
+        filter: `${BACKGROUND_TASK_NODE_SO_NAME}.attributes.last_seen > now-${this.activeNodesLookBack}`,
       });
 
     return activeNodes;
   }
 
   public async deleteCurrentNode() {
-    try {
-      await this.savedObjectsRepository.delete(BACKGROUND_TASK_NODE_SO_NAME, this.currentNode);
-      this.logger.info('Removed this node from the Kibana Discovery Service');
-    } catch (e) {
-      this.logger.error(`Deleting current node has failed. error: ${e.message}`);
-    }
+    await this.savedObjectsRepository.delete(BACKGROUND_TASK_NODE_SO_NAME, this.currentNode);
+    this.logger.info('Removed this node from the Kibana Discovery Service');
   }
 }

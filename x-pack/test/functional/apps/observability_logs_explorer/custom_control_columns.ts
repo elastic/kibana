@@ -43,7 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await synthtrace.clean();
     });
 
-    describe('should render custom control columns properly', async () => {
+    describe('should render custom control columns properly', () => {
       it('should render control column with proper header', async () => {
         await retry.tryForTime(TEST_TIMEOUT, async () => {
           // First control column has no title, so empty string, leading control column has title

@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { StateGraphArgs } from '@langchain/langgraph';
 import { StateGraph, END, START } from '@langchain/langgraph';
-import type {
-  ActionsClientChatOpenAI,
-  ActionsClientSimpleChatModel,
-} from '@kbn/langchain/server/language_models';
 import type { RelatedState } from '../../types';
-import { modifySamples, formatSamples } from '../../util/samples';
+import type { RelatedGraphParams, RelatedBaseNodeParams } from './types';
+import { prefixSamples, formatSamples } from '../../util/samples';
 import { handleValidatePipeline } from '../../util/graph';
 import { handleRelated } from './related';
 import { handleErrors } from './errors';
@@ -91,8 +87,8 @@ const graphState: StateGraphArgs<RelatedState>['channels'] = {
   },
 };
 
-function modelInput(state: RelatedState): Partial<RelatedState> {
-  const samples = modifySamples(state);
+function modelInput({ state }: RelatedBaseNodeParams): Partial<RelatedState> {
+  const samples = prefixSamples(state);
   const formattedSamples = formatSamples(samples);
   const initialPipeline = JSON.parse(JSON.stringify(state.currentPipeline));
   return {
@@ -107,7 +103,7 @@ function modelInput(state: RelatedState): Partial<RelatedState> {
   };
 }
 
-function modelOutput(state: RelatedState): Partial<RelatedState> {
+function modelOutput({ state }: RelatedBaseNodeParams): Partial<RelatedState> {
   return {
     finalized: true,
     lastExecutedChain: 'modelOutput',
@@ -118,14 +114,14 @@ function modelOutput(state: RelatedState): Partial<RelatedState> {
   };
 }
 
-function inputRouter(state: RelatedState): string {
+function inputRouter({ state }: RelatedBaseNodeParams): string {
   if (Object.keys(state.pipelineResults).length === 0) {
     return 'validatePipeline';
   }
   return 'related';
 }
 
-function chainRouter(state: RelatedState): string {
+function chainRouter({ state }: RelatedBaseNodeParams): string {
   if (Object.keys(state.currentProcessors).length === 0) {
     return 'related';
   }
@@ -141,34 +137,35 @@ function chainRouter(state: RelatedState): string {
   return END;
 }
 
-export async function getRelatedGraph(
-  client: IScopedClusterClient,
-  model: ActionsClientChatOpenAI | ActionsClientSimpleChatModel
-) {
+export async function getRelatedGraph({ client, model }: RelatedGraphParams) {
   const workflow = new StateGraph({ channels: graphState })
-    .addNode('modelInput', modelInput)
-    .addNode('modelOutput', modelOutput)
-    .addNode('handleRelated', (state: RelatedState) => handleRelated(state, model))
+    .addNode('modelInput', (state: RelatedState) => modelInput({ state }))
+    .addNode('modelOutput', (state: RelatedState) => modelOutput({ state }))
+    .addNode('handleRelated', (state: RelatedState) => handleRelated({ state, model }))
     .addNode('handleValidatePipeline', (state: RelatedState) =>
-      handleValidatePipeline(state, client)
+      handleValidatePipeline({ state, client })
     )
-    .addNode('handleErrors', (state: RelatedState) => handleErrors(state, model))
-    .addNode('handleReview', (state: RelatedState) => handleReview(state, model))
+    .addNode('handleErrors', (state: RelatedState) => handleErrors({ state, model }))
+    .addNode('handleReview', (state: RelatedState) => handleReview({ state, model }))
     .addEdge(START, 'modelInput')
     .addEdge('modelOutput', END)
     .addEdge('handleRelated', 'handleValidatePipeline')
     .addEdge('handleErrors', 'handleValidatePipeline')
     .addEdge('handleReview', 'handleValidatePipeline')
-    .addConditionalEdges('modelInput', inputRouter, {
+    .addConditionalEdges('modelInput', (state: RelatedState) => inputRouter({ state }), {
       related: 'handleRelated',
       validatePipeline: 'handleValidatePipeline',
     })
-    .addConditionalEdges('handleValidatePipeline', chainRouter, {
-      related: 'handleRelated',
-      errors: 'handleErrors',
-      review: 'handleReview',
-      modelOutput: 'modelOutput',
-    });
+    .addConditionalEdges(
+      'handleValidatePipeline',
+      (state: RelatedState) => chainRouter({ state }),
+      {
+        related: 'handleRelated',
+        errors: 'handleErrors',
+        review: 'handleReview',
+        modelOutput: 'modelOutput',
+      }
+    );
 
   const compiledRelatedGraph = workflow.compile();
   return compiledRelatedGraph;
