@@ -185,8 +185,8 @@ export const getGaugeVisualization = ({
 }: GaugeVisualizationDeps): Visualization<GaugeVisualizationState> => ({
   id: LENS_GAUGE_ID,
   visualizationTypes: [CHART_SWITCH_OPTIONS[LENS_GAUGE_ID]],
-  getVisualizationTypeId(state) {
-    return state.shape;
+  getVisualizationTypeId() {
+    return LENS_GAUGE_ID;
   },
   getLayerIds(state) {
     return [state.layerId];

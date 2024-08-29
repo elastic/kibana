@@ -277,7 +277,11 @@ export const ChartSwitch = memo(function ChartSwitch({
       }
       const subVisualizationId =
         visualization.activeId && visualizationMap[visualization.activeId]
-          ? getCurrentVisualizationId(visualizationMap[visualization.activeId], visualization.state)
+          ? getCurrentVisualizationId(
+              visualizationMap[visualization.activeId],
+              visualization.state,
+              layerId
+            )
           : undefined;
       const lowercasedSearchTerm = searchTerm.toLowerCase();
 
@@ -335,7 +339,7 @@ export const ChartSwitch = memo(function ChartSwitch({
           label: v.label,
           prepend: (
             <EuiFlexItem grow={false}>
-              {isChecked && <EuiIcon type="check" />}
+              {isChecked && <CheckIcon />}
               {dataLossWarning && (
                 <DataLossWarning content={dataLossWarning} id={v.selection.subVisualizationId} />
               )}
@@ -423,6 +427,7 @@ export const ChartSwitch = memo(function ChartSwitch({
           isPreFiltered
           data-test-subj="lnsChartSwitchList"
           searchProps={{
+            compressed: true,
             autoFocus: true,
             className: 'lnsChartSwitch__search',
             'data-test-subj': 'lnsChartSwitchSearch',
@@ -436,6 +441,7 @@ export const ChartSwitch = memo(function ChartSwitch({
           )}
           listProps={{
             showIcons: false,
+            onFocusBadge: false,
             isVirtualized: false,
           }}
           options={visualizationTypes}
@@ -546,6 +552,11 @@ export const getDataLossWarning = (dataLoss: 'nothing' | 'layers' | 'everything'
     return i18n.translate('xpack.lens.chartSwitch.dataLossColumns', {
       defaultMessage: `Changing to this visualization modifies the current configuration.`,
     });
+};
+
+const CheckIcon = () => {
+  const { euiTheme } = useEuiTheme();
+  return <EuiIcon type="check" color={euiTheme.colors.darkestShade} />;
 };
 
 const DataLossWarning = ({ content, id }: { content?: string; id: string }) => {
