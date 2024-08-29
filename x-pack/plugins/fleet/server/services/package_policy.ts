@@ -1319,6 +1319,12 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }
     }
 
+    if (agentlessAgentPolicies.length > 0) {
+      for (const agentPolicyId of agentlessAgentPolicies) {
+        await agentPolicyService.delete(soClient, esClient, agentPolicyId, { force: true });
+      }
+    }
+
     const idsToDelete: string[] = [];
 
     ids.forEach((id) => {
@@ -1384,12 +1390,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           });
         }
       });
-    }
-
-    if (agentlessAgentPolicies.length > 0) {
-      for (const agentPolicyId of agentlessAgentPolicies) {
-        await agentPolicyService.delete(soClient, esClient, agentPolicyId, { force: true });
-      }
     }
 
     if (!options?.skipUnassignFromAgentPolicies) {
