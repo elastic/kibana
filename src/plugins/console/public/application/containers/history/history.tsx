@@ -111,12 +111,15 @@ export function History() {
     initialize();
   };
 
-  const restoreRequestFromHistory = useCallback((req: ESRequest) => {
-    const formattedRequest = getFormattedRequest(req);
-    dispatch({ type: 'setRequestToRestore', payload: formattedRequest });
-    console.log('navigate to editor now: ');
-    console.log(formattedRequest);
-  }, [dispatch]);
+  const restoreRequestFromHistory = useCallback(
+    (req: ESRequest) => {
+      const formattedRequest = getFormattedRequest(req);
+      dispatch({ type: 'setRequestToRestore', payload: formattedRequest });
+      console.log('navigate to editor now: ');
+      console.log(formattedRequest);
+    },
+    [dispatch]
+  );
 
   useEffect(() => {
     initialize();
