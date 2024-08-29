@@ -343,6 +343,7 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
     authorizationHeader,
     ignoreMappingUpdateErrors: request.query?.ignoreMappingUpdateErrors,
     skipDataStreamRollover: request.query?.skipDataStreamRollover,
+    retryFromLastState: request.body?.retryFromLastState,
   });
 
   if (!res.error) {

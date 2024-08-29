@@ -249,6 +249,7 @@ export async function handleInstallPackageFailure({
   esClient,
   spaceId,
   authorizationHeader,
+  retryFromLastState,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   error: FleetError | Boom.Boom | Error;
@@ -258,6 +259,7 @@ export async function handleInstallPackageFailure({
   esClient: ElasticsearchClient;
   spaceId: string;
   authorizationHeader?: HTTPAuthorizationHeader | null;
+  retryFromLastState?: boolean;
 }) {
   if (error instanceof ConcurrentInstallOperationError) {
     return;
@@ -313,6 +315,7 @@ export async function handleInstallPackageFailure({
         spaceId,
         force: true,
         authorizationHeader,
+        retryFromLastState,
       });
     }
   } catch (e) {
@@ -354,6 +357,7 @@ interface InstallRegistryPackageParams {
   authorizationHeader?: HTTPAuthorizationHeader | null;
   ignoreMappingUpdateErrors?: boolean;
   skipDataStreamRollover?: boolean;
+  retryFromLastState?: boolean;
 }
 
 export interface CustomPackageDatasetConfiguration {
@@ -416,6 +420,7 @@ async function installPackageFromRegistry({
   prerelease = false,
   ignoreMappingUpdateErrors = false,
   skipDataStreamRollover = false,
+  retryFromLastState = false,
 }: InstallRegistryPackageParams): Promise<InstallResult> {
   const logger = appContextService.getLogger();
   // TODO: change epm API to /packageName/version so we don't need to do this
@@ -482,7 +487,7 @@ async function installPackageFromRegistry({
         }`
       );
     }
-    return await installPackageWitStateMachine({
+    return await installPackageWithStateMachine({
       pkgName,
       pkgVersion,
       installSource,
@@ -498,6 +503,7 @@ async function installPackageFromRegistry({
       authorizationHeader,
       ignoreMappingUpdateErrors,
       skipDataStreamRollover,
+      retryFromLastState,
     });
   } catch (e) {
     sendEvent({
@@ -679,7 +685,7 @@ async function installPackageCommon(options: {
   }
 }
 
-async function installPackageWitStateMachine(options: {
+async function installPackageWithStateMachine(options: {
   pkgName: string;
   pkgVersion: string;
   installSource: InstallSource;
@@ -696,7 +702,7 @@ async function installPackageWitStateMachine(options: {
   authorizationHeader?: HTTPAuthorizationHeader | null;
   ignoreMappingUpdateErrors?: boolean;
   skipDataStreamRollover?: boolean;
-  retryStepInstall?: boolean;
+  retryFromLastState?: boolean;
 }): Promise<InstallResult> {
   const packageInfo = options.packageInstallContext.packageInfo;
 
@@ -715,6 +721,7 @@ async function installPackageWitStateMachine(options: {
     ignoreMappingUpdateErrors,
     skipDataStreamRollover,
     packageInstallContext,
+    retryFromLastState,
   } = options;
   let { telemetryEvent } = options;
   const logger = appContextService.getLogger();
@@ -811,8 +818,7 @@ async function installPackageWitStateMachine(options: {
       force,
       ignoreMappingUpdateErrors,
       skipDataStreamRollover,
-      // TODO: remove hardcoded value
-      retryStepInstall: true,
+      retryFromLastState,
     })
       .then(async (assets) => {
         logger.debug(`Removing old assets from previous versions of ${pkgName}`);
@@ -969,6 +975,7 @@ async function installPackageByUpload({
 export type InstallPackageParams = {
   spaceId: string;
   neverIgnoreVerificationError?: boolean;
+  retryFromLastState?: boolean;
 } & (
   | ({ installSource: Extract<InstallSource, 'registry'> } & InstallRegistryPackageParams)
   | ({ installSource: Extract<InstallSource, 'upload'> } & InstallUploadedArchiveParams)
@@ -996,6 +1003,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       prerelease,
       ignoreMappingUpdateErrors,
       skipDataStreamRollover,
+      retryFromLastState,
     } = args;
 
     const matchingBundledPackage = await getBundledPackageByPkgKey(pkgkey);
@@ -1037,6 +1045,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       authorizationHeader,
       ignoreMappingUpdateErrors,
       skipDataStreamRollover,
+      retryFromLastState,
     });
     return response;
   } else if (args.installSource === 'upload') {

@@ -46,6 +46,7 @@ import {
   stepResolveKibanaPromise,
   stepSaveSystemObject,
   updateLatestExecutedState,
+  cleanupLatestExecutedState,
 } from './steps';
 import type { StateMachineDefinition, StateMachineStates } from './state_machine';
 import { handleState } from './state_machine';
@@ -64,7 +65,7 @@ export interface InstallContext extends StateContext<StateNames> {
   authorizationHeader?: HTTPAuthorizationHeader | null;
   ignoreMappingUpdateErrors?: boolean;
   skipDataStreamRollover?: boolean;
-  retryStepInstall?: boolean;
+  retryFromLastState?: boolean;
 
   indexTemplates?: IndexTemplateEntry[];
   packageAssetRefs?: PackageAssetReference[];
@@ -152,18 +153,25 @@ export async function _stateMachineInstallPackage(
     context,
     states: statesDefinition,
   };
-  const { installedPkg, retryStepInstall } = context;
+  const { installedPkg, retryFromLastState, force } = context;
   const logger = appContextService.getLogger();
+  let initialState = INSTALL_STATES.CREATE_RESTART_INSTALLATION;
 
-  const initialState =
-    retryStepInstall && installedPkg?.attributes?.latest_executed_state?.name
-      ? findNextState(installedPkg.attributes.latest_executed_state.name, statesDefinition)
-      : INSTALL_STATES.CREATE_RESTART_INSTALLATION;
+  // if retryFromLastState, restart install from last install state
+  // if force is passed, the install should be executed from the beginning
+  // should check installType as well?
 
-  if (retryStepInstall) {
-    logger.debug('Install with retryStepInstall option');
+  if (retryFromLastState && !force && installedPkg?.attributes?.latest_executed_state?.name) {
+    initialState = findNextState(
+      installedPkg.attributes.latest_executed_state.name,
+      statesDefinition
+    );
+    logger.debug(
+      `Install with retryFromLastState option - Initial installation state: ${initialState}`
+    );
+    // we need to clean up latest_executed_state or it won't be refreshed
+    await cleanupLatestExecutedState(context);
   }
-  logger.debug(`Initial installation state: ${initialState}`);
 
   try {
     const { installedKibanaAssetsRefs, esReferences } = await handleState(
@@ -195,5 +203,5 @@ export async function _stateMachineInstallPackage(
 }
 
 const findNextState = (latestExecutedState: StateNames, states: StateMachineStates<StateNames>) => {
-  return states[latestExecutedState].nextState;
+  return states[latestExecutedState].nextState! as StateNames;
 };

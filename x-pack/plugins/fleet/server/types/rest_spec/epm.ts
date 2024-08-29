@@ -147,6 +147,7 @@ export const InstallPackageFromRegistryRequestSchema = {
     schema.object({
       force: schema.boolean({ defaultValue: false }),
       ignore_constraints: schema.boolean({ defaultValue: false }),
+      retryFromLastState: schema.boolean({ defaultValue: false }),
     })
   ),
 };

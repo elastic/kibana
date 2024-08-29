@@ -257,7 +257,7 @@ describe('_stateMachineInstallPackage', () => {
     expect(installIlmForDataStream).toBeCalled();
   });
 
-  describe('With flag retryStepInstall = true', () => {
+  describe('With flag retryFromLastState = true', () => {
     const mockInstalledPackageSo: SavedObject<Installation> = {
       id: 'mocked-package',
       attributes: {
@@ -307,7 +307,7 @@ describe('_stateMachineInstallPackage', () => {
         installType: 'install',
         installSource: 'registry',
         spaceId: DEFAULT_SPACE_ID,
-        retryStepInstall: true,
+        retryFromLastState: true,
       });
 
       await expect(installationPromise).rejects.toThrow('error installing index templates');
@@ -361,7 +361,7 @@ describe('_stateMachineInstallPackage', () => {
             },
           },
         },
-        retryStepInstall: true,
+        retryFromLastState: true,
       });
 
       expect(handleStateSpy).toBeCalledWith(
