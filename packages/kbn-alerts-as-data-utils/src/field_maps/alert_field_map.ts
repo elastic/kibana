@@ -46,6 +46,7 @@ import {
   EVENT_KIND,
   EVENT_ORIGINAL,
   TAGS,
+  ALERT_INTENDED_TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { MultiField } from './types';
 
@@ -128,6 +129,11 @@ export const alertFieldMap = {
     required: true,
   },
   [ALERT_RULE_EXECUTION_TIMESTAMP]: {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  [ALERT_INTENDED_TIMESTAMP]: {
     type: 'date',
     array: false,
     required: false,
