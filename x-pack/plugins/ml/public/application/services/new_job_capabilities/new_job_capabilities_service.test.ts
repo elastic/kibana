@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { newJobCapsService } from './new_job_capabilities_service';
+import { mlJobCapsServiceFactory } from './new_job_capabilities_service';
 import type { DataView } from '@kbn/data-views-plugin/public';
+
+import type { MlApiServices } from '../ml_api_service';
 
 // there is magic happening here. starting the include name with `mock..`
 // ensures it can be lazily loaded by the jest.mock function below.
 import mockCloudwatchResponse from '../__mocks__/cloudwatch_job_caps_response.json';
 
-jest.mock('../ml_api_service', () => ({
-  ml: {
-    jobs: {
-      newJobCaps: jest.fn(() => Promise.resolve(mockCloudwatchResponse)),
-    },
+const mlApiServicesMock = {
+  jobs: {
+    newJobCaps: jest.fn(() => Promise.resolve(mockCloudwatchResponse)),
   },
-}));
+} as unknown as MlApiServices;
 
 const dataView = {
   id: 'cloudwatch-*',
@@ -28,6 +28,7 @@ const dataView = {
 describe('new_job_capabilities_service', () => {
   describe('cloudwatch newJobCaps()', () => {
     it('can construct job caps objects from endpoint json', async () => {
+      const newJobCapsService = mlJobCapsServiceFactory(mlApiServicesMock);
       await newJobCapsService.initializeFromDataVIew(dataView);
       const { fields, aggs } = await newJobCapsService.newJobCaps;
 
@@ -47,6 +48,7 @@ describe('new_job_capabilities_service', () => {
     });
 
     it('job caps including text fields', async () => {
+      const newJobCapsService = mlJobCapsServiceFactory(mlApiServicesMock);
       await newJobCapsService.initializeFromDataVIew(dataView, true, false);
       const { fields, aggs } = await newJobCapsService.newJobCaps;
 
@@ -55,6 +57,7 @@ describe('new_job_capabilities_service', () => {
     });
 
     it('job caps excluding event rate', async () => {
+      const newJobCapsService = mlJobCapsServiceFactory(mlApiServicesMock);
       await newJobCapsService.initializeFromDataVIew(dataView, false, true);
       const { fields, aggs } = await newJobCapsService.newJobCaps;
 

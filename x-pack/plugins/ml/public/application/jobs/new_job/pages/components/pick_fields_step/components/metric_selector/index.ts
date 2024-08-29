@@ -5,10 +5,4 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-
-export const configSchema = schema.object({
-  enableGeoTrackingThresholdAlert: schema.maybe(schema.boolean({ defaultValue: false })),
-});
-
-export type ConfigSchema = TypeOf<typeof configSchema>;
+export { MetricSelector } from './metric_selector';
