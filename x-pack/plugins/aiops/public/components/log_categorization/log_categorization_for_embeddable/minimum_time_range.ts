@@ -19,7 +19,7 @@ type MinimumTimeRange = Record<
 export const MINIMUM_TIME_RANGE: MinimumTimeRange = {
   'No minimum': {
     label: i18n.translate('xpack.aiops.logCategorization.minimumTimeRange.noMin', {
-      defaultMessage: 'No minimum',
+      defaultMessage: 'Use range specified in time selector',
     }),
     factor: 0,
     unit: 'w',
