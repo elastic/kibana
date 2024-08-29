@@ -9,7 +9,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { parse } from '@kbn/datemath';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
-import { useNodeDetailsRedirect } from '../../../pages/link_to';
+import { useNodeDetailsRedirect } from '@kbn/metrics-data-access-plugin/public';
 
 import { useAssetDetailsUrlState } from '../hooks/use_asset_details_url_state';
 
@@ -27,8 +27,8 @@ export const LinkToNodeDetails = ({ assetId, assetName, assetType }: LinkToNodeD
   const { dateRange, autoRefresh: _, ...assetDetails } = state ?? {};
 
   const nodeDetailMenuItemLinkProps = getNodeDetailUrl({
-    assetType,
-    assetId,
+    nodeType: assetType,
+    nodeId: assetId,
     search: {
       ...assetDetails,
       name: assetName,

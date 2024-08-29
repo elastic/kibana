@@ -9,24 +9,18 @@ import { useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
 import { RouterLinkProps, getRouterLinkProps } from '@kbn/router-utils/src/get_router_link_props';
-import { Search } from 'history';
 import {
   type AssetDetailsLocatorParams,
   ASSET_DETAILS_LOCATOR_ID,
 } from '@kbn/observability-shared-plugin/common';
 import type { InventoryItemType } from '../../../common/inventory_models/types';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
+import { RouteState } from '../../types';
 
 interface QueryParams {
   from?: number;
   to?: number;
-  assetName?: string;
-}
-
-export interface RouteState {
-  originAppId: string;
-  originPathname: string;
-  originSearch?: Search;
+  name?: string;
 }
 
 export const useNodeDetailsRedirect = () => {

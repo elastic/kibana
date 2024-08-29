@@ -10,6 +10,8 @@ import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
 
 export type AssetDetailsLocator = LocatorPublic<AssetDetailsLocatorParams>;
 
+export type AlertStatus = 'all' | 'active' | 'recovered' | 'untracked';
+
 export interface AssetDetailsLocatorParams extends SerializableRecord {
   assetType: string;
   assetId: string;
@@ -30,6 +32,11 @@ export interface AssetDetailsLocatorParams extends SerializableRecord {
       to: string;
     };
     alertMetric?: string;
+    processSearch?: string;
+    metadataSearch?: string;
+    logsSearch?: string;
+    profilingSearch?: string;
+    alertStatus?: AlertStatus;
   };
 }
 

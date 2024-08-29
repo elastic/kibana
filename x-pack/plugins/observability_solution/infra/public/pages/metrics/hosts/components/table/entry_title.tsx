@@ -8,7 +8,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiToolTip } from '@elastic/eui';
 import { CloudProviderIcon } from '@kbn/custom-icons';
-import { useNodeDetailsRedirect } from '../../../../link_to/use_node_details_redirect';
+import { useNodeDetailsRedirect } from '@kbn/metrics-data-access-plugin/public';
 import type { HostNodeRow } from '../../hooks/use_hosts_table';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 
@@ -23,8 +23,8 @@ export const EntryTitle = ({ onClick, title }: EntryTitleProps) => {
   const { getNodeDetailUrl } = useNodeDetailsRedirect();
 
   const link = getNodeDetailUrl({
-    assetId: name,
-    assetType: 'host',
+    nodeId: name,
+    nodeType: 'host',
     search: {
       from: parsedDateRange?.from ? new Date(parsedDateRange?.from).getTime() : undefined,
       to: parsedDateRange?.to ? new Date(parsedDateRange.to).getTime() : undefined,
@@ -33,7 +33,6 @@ export const EntryTitle = ({ onClick, title }: EntryTitleProps) => {
   });
 
   const providerName = cloudProvider ?? 'Unknown';
-
   return (
     <EuiToolTip
       delay="long"
