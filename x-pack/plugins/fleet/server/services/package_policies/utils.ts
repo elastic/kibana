@@ -76,10 +76,11 @@ export async function preflightCheckPackagePolicy(
   soClient: SavedObjectsClientContract,
   packagePolicy: PackagePolicy | NewPackagePolicy
 ) {
-  // If package policy has multiple agent policies, check if they can be used
+  // If package policy has multiple agent policies IDs, or no agent policies (orphaned integration policy)
+  // check if user can use multiple agent policies feature
   const { canUseReusablePolicies, errorMessage: canUseMultipleAgentPoliciesErrorMessage } =
     canUseMultipleAgentPolicies();
-  if ((packagePolicy.policy_ids ?? []).length > 1 && !canUseReusablePolicies) {
+  if (!canUseReusablePolicies && packagePolicy.policy_ids.length !== 1) {
     throw new PackagePolicyMultipleAgentPoliciesError(canUseMultipleAgentPoliciesErrorMessage);
   }
 
