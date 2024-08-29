@@ -217,7 +217,7 @@ export function AddLayerButton({
               title: i18n.translate('xpack.lens.layerPanel.compatibleVisualizationTypes', {
                 defaultMessage: 'Compatible visualization types',
               }),
-              width: 300,
+              width: 340,
               items: availableVisTypes.map((t) => {
                 const canInitializeWithSubtype =
                   t.subtypes?.includes(firstLayerSubtype) && !isPercentageSeries(firstLayerSubtype);

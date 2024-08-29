@@ -33,11 +33,9 @@ export const ChartOption = ({
           <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
         </EuiText>
         <EuiText size="xs" color="subdued">
-          <small>
-            {option.description ? (
-              <EuiHighlight search={searchValue}>{option.description}</EuiHighlight>
-            ) : null}
-          </small>
+          {option.description ? (
+            <EuiHighlight search={searchValue}>{option.description}</EuiHighlight>
+          ) : null}
         </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
