@@ -164,7 +164,7 @@ export function initControlsManager(
           type: controlApi.type,
           width,
           /** Re-add the `explicitInput` layer on serialize so control group saved object retains shape */
-          explicitInput: rest,
+          explicitInput: { id, ...rest },
         };
       });
 
