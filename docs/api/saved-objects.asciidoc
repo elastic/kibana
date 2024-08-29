@@ -1,18 +1,4 @@
 [[saved-objects-api]]
 == Saved objects APIs
 
-Export sets of saved objects that you want to import into {kib}, resolve import errors and rotate an encryption key for encrypted saved objects with the saved objects APIs.
-
-Manage a specific type of saved object with the corresponding APIs, for example, use:
-
-* <<data-views-api>> for managing data views
-* <<spaces-api>> for managing spaces
-* <<short-urls-api>> for managing short urls
-
-and others.
-
-For the latest details, refer to the {api-kibana}/group/endpoint-saved-objects[saved object API].
-
-WARNING: Do not write documents directly to the `.kibana` index. When you write directly
-to the `.kibana` index, the data becomes corrupted and permanently breaks future {kib} versions.
-
+For the latest details, refer to the {api-kibana}/group/endpoint-saved-objects[saved objects API].
