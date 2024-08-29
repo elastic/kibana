@@ -172,7 +172,6 @@ export async function _stateMachineInstallPackage(
     // we need to clean up latest_executed_state or it won't be refreshed
     await cleanupLatestExecutedState(context);
   }
-
   try {
     const { installedKibanaAssetsRefs, esReferences } = await handleState(
       initialState!,

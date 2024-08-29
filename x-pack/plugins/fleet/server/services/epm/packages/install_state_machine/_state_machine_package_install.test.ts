@@ -49,7 +49,11 @@ import { restartInstallation } from '../install';
 import { installIndexTemplatesAndPipelines } from '../install_index_template_pipeline';
 
 import { _stateMachineInstallPackage } from './_state_machine_package_install';
-import * as StateMachine from './state_machine';
+import { handleState } from './state_machine';
+import { cleanupLatestExecutedState } from './steps';
+
+jest.mock('./steps');
+jest.mock('./state_machine');
 
 const mockedInstallIndexTemplatesAndPipelines =
   installIndexTemplatesAndPipelines as jest.MockedFunction<
@@ -62,6 +66,10 @@ const mockedInstallKibanaAssetsAndReferences =
   installKibanaAssetsAndReferencesMultispace as jest.MockedFunction<
     typeof installKibanaAssetsAndReferencesMultispace
   >;
+const mockCleanupLatestExecutedState = cleanupLatestExecutedState as jest.MockedFunction<
+  typeof cleanupLatestExecutedState
+>;
+const mockHandleState = handleState as jest.MockedFunction<typeof handleState>;
 
 function sleep(millis: number) {
   return new Promise((resolve) => setTimeout(resolve, millis));
@@ -258,6 +266,11 @@ describe('_stateMachineInstallPackage', () => {
   });
 
   describe('With flag retryFromLastState = true', () => {
+    beforeEach(() => {
+      mockHandleState.mockImplementation(() =>
+        Promise.resolve({ installedKibanaAssetsRefs: [], esReferences: [] })
+      );
+    });
     const mockInstalledPackageSo: SavedObject<Installation> = {
       id: 'mocked-package',
       attributes: {
@@ -276,54 +289,12 @@ describe('_stateMachineInstallPackage', () => {
       references: [],
     };
 
-    it('If there is no latest_executed_state in SO, start from create_restart_installation', async () => {
-      const handleStateSpy = jest.spyOn(StateMachine, 'handleState');
-      mockedInstallIndexTemplatesAndPipelines.mockImplementation(async () => {
-        throw new Error('error installing index templates');
-      });
-
-      const installationPromise = _stateMachineInstallPackage({
-        savedObjectsClient: soClient,
-        // @ts-ignore
-        savedObjectsImporter: jest.fn(),
-        esClient,
-        logger: loggerMock.create(),
-        packageInstallContext: {
-          assetsMap: new Map(),
-          paths: [],
-          packageInfo: {
-            title: 'title',
-            name: 'xyz',
-            version: '4.5.6',
-            description: 'test',
-            type: 'integration',
-            categories: ['cloud', 'custom'],
-            format_version: 'string',
-            release: 'experimental',
-            conditions: { kibana: { version: 'x.y.z' } },
-            owner: { github: 'elastic/fleet' },
-          },
-        },
-        installType: 'install',
-        installSource: 'registry',
-        spaceId: DEFAULT_SPACE_ID,
-        retryFromLastState: true,
-      });
-
-      await expect(installationPromise).rejects.toThrow('error installing index templates');
-      expect(handleStateSpy).toBeCalledWith(
-        'create_restart_installation',
-        expect.any(Object),
-        expect.any(Object)
-      );
+    afterEach(() => {
+      mockCleanupLatestExecutedState.mockReset();
+      mockHandleState.mockClear();
     });
 
-    it('If there is latest_executed_state in SO, start from latest failed state', async () => {
-      const handleStateSpy = jest.spyOn(StateMachine, 'handleState');
-      mockedInstallIndexTemplatesAndPipelines.mockImplementation(async () => {
-        throw new Error('error installing index templates');
-      });
-
+    it('If there is no latest_executed_state in SO, start from create_restart_installation', async () => {
       _stateMachineInstallPackage({
         savedObjectsClient: soClient,
         // @ts-ignore
@@ -349,6 +320,44 @@ describe('_stateMachineInstallPackage', () => {
         installType: 'install',
         installSource: 'registry',
         spaceId: DEFAULT_SPACE_ID,
+        retryFromLastState: true,
+      });
+      expect(mockCleanupLatestExecutedState).not.toBeCalled();
+      expect(mockHandleState).toBeCalledWith(
+        'create_restart_installation',
+        expect.any(Object),
+        expect.any(Object)
+      );
+    });
+
+    it('If force is passed, always start from create_restart_installation', async () => {
+      _stateMachineInstallPackage({
+        savedObjectsClient: soClient,
+        // @ts-ignore
+        savedObjectsImporter: jest.fn(),
+        esClient,
+        logger: loggerMock.create(),
+        packageInstallContext: {
+          assetsMap: new Map(),
+          paths: [],
+          packageInfo: {
+            title: 'title',
+            name: 'xyz',
+            version: '4.5.6',
+            description: 'test',
+            type: 'integration',
+            categories: ['cloud', 'custom'],
+            format_version: 'string',
+            release: 'experimental',
+            conditions: { kibana: { version: 'x.y.z' } },
+            owner: { github: 'elastic/fleet' },
+          },
+        },
+        installType: 'install',
+        installSource: 'registry',
+        spaceId: DEFAULT_SPACE_ID,
+        retryFromLastState: true,
+        force: true,
         installedPkg: {
           ...mockInstalledPackageSo,
           attributes: {
@@ -361,10 +370,57 @@ describe('_stateMachineInstallPackage', () => {
             },
           },
         },
-        retryFromLastState: true,
       });
+      expect(mockCleanupLatestExecutedState).not.toBeCalled();
+      expect(mockHandleState).toBeCalledWith(
+        'create_restart_installation',
+        expect.any(Object),
+        expect.any(Object)
+      );
+    });
 
-      expect(handleStateSpy).toBeCalledWith(
+    it('If there is latest_executed_state in SO, start from latest failed state', async () => {
+      _stateMachineInstallPackage({
+        savedObjectsClient: soClient,
+        // @ts-ignore
+        savedObjectsImporter: jest.fn(),
+        esClient,
+        logger: loggerMock.create(),
+        packageInstallContext: {
+          assetsMap: new Map(),
+          paths: [],
+          packageInfo: {
+            title: 'title',
+            name: 'xyz',
+            version: '4.5.6',
+            description: 'test',
+            type: 'integration',
+            categories: ['cloud', 'custom'],
+            format_version: 'string',
+            release: 'experimental',
+            conditions: { kibana: { version: 'x.y.z' } },
+            owner: { github: 'elastic/fleet' },
+          },
+        },
+        installType: 'install',
+        installSource: 'registry',
+        spaceId: DEFAULT_SPACE_ID,
+        retryFromLastState: true,
+        installedPkg: {
+          ...mockInstalledPackageSo,
+          attributes: {
+            ...mockInstalledPackageSo.attributes,
+            install_started_at: new Date(Date.now() - 1000).toISOString(),
+            latest_executed_state: {
+              name: 'install_index_template_pipelines' as any,
+              error: 'Some error',
+              started_at: new Date(Date.now() - 100).toISOString(),
+            },
+          },
+        },
+      });
+      expect(mockCleanupLatestExecutedState).toBeCalled();
+      expect(mockHandleState).toBeCalledWith(
         'remove_legacy_templates',
         expect.any(Object),
         expect.any(Object)
