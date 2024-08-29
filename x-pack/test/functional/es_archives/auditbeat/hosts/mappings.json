@@ -1273,7 +1273,13 @@
             },
             "message": {
               "norms": false,
-              "type": "text"
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
             },
             "type": {
               "ignore_above": 1024,
@@ -1776,7 +1782,13 @@
         },
         "message": {
           "norms": false,
-          "type": "text"
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
         },
         "network": {
           "properties": {
