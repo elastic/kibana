@@ -95,7 +95,7 @@ export async function removeInstallation(options: {
 
   // Delete the installed assets. Don't include installation.package_assets. Those are irrelevant to users
   const installedAssets = [...installation.installed_kibana, ...installation.installed_es];
-  await deleteAssets(installation, savedObjectsClient, esClient);
+  await deleteAssets(installation, esClient);
 
   // Delete the manager saved object with references to the asset objects
   // could also update with [] or some other state
@@ -133,7 +133,7 @@ export async function removeInstallation(options: {
  * generally better to delete assets directly if the package is known to be
  * installed in 8.x or later.
  */
-async function deleteKibanaAssets({
+export async function deleteKibanaAssets({
   installedObjects,
   packageInfo,
   spaceId = DEFAULT_SPACE_ID,
@@ -240,7 +240,6 @@ async function deleteAssets(
     name,
     version,
   }: Installation,
-  savedObjectsClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient
 ) {
   const logger = appContextService.getLogger();

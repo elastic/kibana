@@ -10,11 +10,30 @@ import { installKibanaAssetsAndReferencesMultispace } from '../../../kibana/asse
 import { withPackageSpan } from '../../utils';
 
 import type { InstallContext } from '../_state_machine_package_install';
+import { deleteKibanaAssets } from '../../remove';
 
 export async function stepInstallKibanaAssets(context: InstallContext) {
-  const { savedObjectsClient, logger, installedPkg, packageInstallContext, spaceId } = context;
+  const {
+    savedObjectsClient,
+    logger,
+    installedPkg,
+    packageInstallContext,
+    spaceId,
+    retryFromLastState,
+    force,
+  } = context;
   const { packageInfo } = packageInstallContext;
   const { name: pkgName, title: pkgTitle } = packageInfo;
+
+  // In case of retry clean up previous installed kibana assets
+  if (retryFromLastState && !force && installedPkg?.attributes) {
+    const { installed_kibana: installedObjects } = installedPkg.attributes;
+    logger.debug('Retry transition - clean up Kibana assets first');
+
+    withPackageSpan('Retry transition - clean up Kibana assets first', async () => {
+      await deleteKibanaAssets({ installedObjects, spaceId, packageInfo });
+    });
+  }
 
   const kibanaAssetPromise = withPackageSpan('Install Kibana assets', () =>
     installKibanaAssetsAndReferencesMultispace({
