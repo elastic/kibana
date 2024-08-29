@@ -34,6 +34,9 @@ import {
   DEFAULT_BUCKET_SPAN,
   DEFAULT_RARE_BUCKET_SPAN,
 } from '../../../../../../common/constants/new_job';
+import type { MlJobService } from '../../../../services/job_service';
+import type { MlApiServices } from '../../../../services/ml_api_service';
+import type { NewJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
 
 import { getRichDetectors } from './util/general';
 import { CategorizationExamplesLoader } from '../results_loader';
@@ -61,8 +64,15 @@ export class CategorizationJobCreator extends JobCreator {
   private _partitionFieldName: string | null = null;
   private _ccsVersionFailure: boolean = false;
 
-  constructor(indexPattern: DataView, savedSearch: SavedSearch | null, query: object) {
-    super(indexPattern, savedSearch, query);
+  constructor(
+    mlApiServices: MlApiServices,
+    mlJobService: MlJobService,
+    newJobCapsService: NewJobCapsService,
+    indexPattern: DataView,
+    savedSearch: SavedSearch | null,
+    query: object
+  ) {
+    super(mlApiServices, mlJobService, newJobCapsService, indexPattern, savedSearch, query);
     this.createdBy = CREATED_BY_LABEL.CATEGORIZATION;
     this._examplesLoader = new CategorizationExamplesLoader(this, indexPattern, query);
 
@@ -254,7 +264,13 @@ export class CategorizationJobCreator extends JobCreator {
   public cloneFromExistingJob(job: Job, datafeed: Datafeed) {
     this._overrideConfigs(job, datafeed);
     this.createdBy = CREATED_BY_LABEL.CATEGORIZATION;
-    const detectors = getRichDetectors(job, datafeed, this.additionalFields, false);
+    const detectors = getRichDetectors(
+      this.newJobCapsService,
+      job,
+      datafeed,
+      this.additionalFields,
+      false
+    );
 
     const dtr = detectors[0];
     if (dtr !== undefined && dtr.agg !== null && dtr.field !== null) {

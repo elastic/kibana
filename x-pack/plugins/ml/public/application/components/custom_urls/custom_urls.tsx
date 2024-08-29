@@ -42,7 +42,7 @@ import {
 } from './custom_url_editor/utils';
 import { openCustomUrlWindow } from '../../util/custom_url_utils';
 import type { CustomUrlsWrapperProps } from './custom_urls_wrapper';
-import { indexServiceFactory } from '../../util/index_service';
+import { indexServiceFactory, type MlIndexUtils } from '../../util/index_service';
 
 interface CustomUrlsState {
   customUrls: MlUrlConfig[];
@@ -62,9 +62,10 @@ export class CustomUrls extends Component<CustomUrlsProps, CustomUrlsState> {
   static contextType = context;
   declare context: MlKibanaReactContextValue;
 
-  private toastNotificationService: ToastNotificationService | undefined;
+  private toastNotificationService: ToastNotificationService;
+  private mlIndexUtils: MlIndexUtils;
 
-  constructor(props: CustomUrlsProps) {
+  constructor(props: CustomUrlsProps, constructorContext: MlKibanaReactContextValue) {
     super(props);
 
     this.state = {
@@ -74,6 +75,11 @@ export class CustomUrls extends Component<CustomUrlsProps, CustomUrlsState> {
       editorOpen: false,
       supportedFilterFields: [],
     };
+
+    this.toastNotificationService = toastNotificationServiceProvider(
+      constructorContext.services.notifications.toasts
+    );
+    this.mlIndexUtils = indexServiceFactory(constructorContext.services.data.dataViews);
   }
 
   static getDerivedStateFromProps(props: CustomUrlsProps) {
@@ -84,10 +90,7 @@ export class CustomUrls extends Component<CustomUrlsProps, CustomUrlsState> {
   }
 
   componentDidMount() {
-    const { toasts } = this.context.services.notifications;
-    this.toastNotificationService = toastNotificationServiceProvider(toasts);
     const { dashboardService } = this.props;
-    const mlIndexUtils = indexServiceFactory(this.context.services.data.dataViews);
 
     dashboardService
       .fetchDashboards()
@@ -106,7 +109,7 @@ export class CustomUrls extends Component<CustomUrlsProps, CustomUrlsState> {
         );
       });
 
-    mlIndexUtils
+    this.mlIndexUtils
       .loadDataViewListItems()
       .then((dataViewListItems) => {
         this.setState({ dataViewListItems });
@@ -175,6 +178,7 @@ export class CustomUrls extends Component<CustomUrlsProps, CustomUrlsState> {
       http: { basePath },
       data: { dataViews },
       dashboard,
+      mlServices: { mlApiServices: ml },
     } = this.context.services;
     const dataViewId = this.state?.editorSettings?.kibanaSettings?.discoverIndexPatternId;
     const job = this.props.job;
@@ -190,6 +194,7 @@ export class CustomUrls extends Component<CustomUrlsProps, CustomUrlsState> {
         buildCustomUrlFromSettings(dashboard, this.state.editorSettings as CustomUrlSettings).then(
           (customUrl) => {
             getTestUrl(
+              ml,
               job,
               customUrl,
               timefieldName,
