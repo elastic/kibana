@@ -10,20 +10,25 @@ module.exports = {
   meta: {
     type: 'problem',
     docs: {
-      description: 'Discourage usage of createHash with "md5"',
+      description: 'Allow usage of createHash only with allowed algorithms.',
       category: 'FIPS',
       recommended: false,
     },
     messages: {
-      noMd5Hash: 'Usage of createHash with "md5" is not allowed.',
+      noDisallowedHash:
+        'Usage of createHash with "{{algorithm}}" is not allowed. Only the following algorithms are allowed: [{{allowedAlgorithms}}]. If you need to use a different algorithm, please contact the security team.',
     },
     schema: [],
   },
   create(context) {
+    const allowedAlgorithms = ['sha1', 'sha256'];
     let isCreateHashImported = false;
     let createHashName = 'createHash';
-    const md5Variables = new Set();
     const sourceCode = context.getSourceCode();
+
+    function isAllowedAlgorithm(algorithm) {
+      return allowedAlgorithms.includes(algorithm);
+    }
 
     function checkIdentifierValue(node) {
       const scope = sourceCode.scopeManager.acquire(node);
@@ -33,8 +38,19 @@ module.exports = {
 
         if (variable && variable.defs.length > 0) {
           const def = variable.defs[0];
-          if (def.node.init && def.node.init.type === 'Literal' && def.node.init.value === 'md5') {
-            md5Variables.add(node.name);
+          if (
+            def.node.init &&
+            def.node.init.type === 'Literal' &&
+            !isAllowedAlgorithm(def.node.init.value)
+          ) {
+            context.report({
+              node,
+              messageId: 'noDisallowedHash',
+              data: {
+                algorithm: def.node.init.value,
+                allowedAlgorithms: allowedAlgorithms.join(', '),
+              },
+            });
           }
         }
       }
@@ -52,17 +68,31 @@ module.exports = {
         }
       },
       VariableDeclarator(node) {
-        if (node.init && node.init.type === 'Literal' && node.init.value === 'md5') {
-          md5Variables.add(node.id.name);
+        if (node.init && node.init.type === 'Literal' && !isAllowedAlgorithm(node.init.value)) {
+          context.report({
+            node,
+            messageId: 'noDisallowedHash',
+            data: {
+              algorithm: node.init.value,
+              allowedAlgorithms: allowedAlgorithms.join(', '),
+            },
+          });
         }
       },
       AssignmentExpression(node) {
         if (
           node.right.type === 'Literal' &&
-          node.right.value === 'md5' &&
+          !isAllowedAlgorithm(node.right.value) &&
           node.left.type === 'Identifier'
         ) {
-          md5Variables.add(node.left.name);
+          context.report({
+            node,
+            messageId: 'noDisallowedHash',
+            data: {
+              algorithm: node.right.value,
+              allowedAlgorithms: allowedAlgorithms.join(', '),
+            },
+          });
         }
       },
       CallExpression(node) {
@@ -75,19 +105,17 @@ module.exports = {
           if (node.arguments.length > 0) {
             const arg = node.arguments[0];
 
-            if (arg.type === 'Literal' && arg.value === 'md5') {
+            if (arg.type === 'Literal' && !isAllowedAlgorithm(arg.value)) {
               context.report({
                 node,
-                messageId: 'noMd5Hash',
+                messageId: 'noDisallowedHash',
+                data: {
+                  algorithm: arg.value,
+                  allowedAlgorithms: allowedAlgorithms.join(', '),
+                },
               });
             } else if (arg.type === 'Identifier') {
               checkIdentifierValue(arg);
-              if (md5Variables.has(arg.name)) {
-                context.report({
-                  node,
-                  messageId: 'noMd5Hash',
-                });
-              }
             }
           }
         }

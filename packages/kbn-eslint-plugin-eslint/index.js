@@ -19,5 +19,6 @@ module.exports = {
     no_this_in_property_initializers: require('./rules/no_this_in_property_initializers'),
     no_unsafe_console: require('./rules/no_unsafe_console'),
     no_unsafe_js_yaml: require('./rules/no_unsafe_js_yaml'),
+    no_unsafe_hash: require('./rules/no_unsafe_hash'),
   },
 };
