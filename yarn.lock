@@ -9638,34 +9638,29 @@
   dependencies:
     defer-to-connect "^2.0.0"
 
-"@tanstack/match-sorter-utils@^8.7.0":
-  version "8.7.0"
-  resolved "https://registry.yarnpkg.com/@tanstack/match-sorter-utils/-/match-sorter-utils-8.7.0.tgz#60b09a6d3d7974d5f86f1318053c1bd5a85fb0be"
-  integrity sha512-OgfIPMHTfuw9JGcXCCoEHWFP/eSP2eyhCYwkrFnWBM3NbUPAgOlFP11DbM7cozDRVB0XbPr1tD4pLAtWKlVUVg==
-  dependencies:
-    remove-accents "0.4.2"
+"@tanstack/query-core@5.52.0":
+  version "5.52.0"
+  resolved "https://registry.yarnpkg.com/@tanstack/query-core/-/query-core-5.52.0.tgz#44070b2d6eb58c3a5ce2788471d842e932294a87"
+  integrity sha512-U1DOEgltjUwalN6uWYTewSnA14b+tE7lSylOiASKCAO61ENJeCq9VVD/TXHA6O5u9+6v5+UgGYBSccTKDoyMqw==
 
-"@tanstack/query-core@4.29.11":
-  version "4.29.11"
-  resolved "https://registry.yarnpkg.com/@tanstack/query-core/-/query-core-4.29.11.tgz#fa338f7d6897c6be5de6d8dabd603d9b78ee48c7"
-  integrity sha512-8C+hF6SFAb/TlFZyS9FItgNwrw4PMa7YeX+KQYe2ZAiEz6uzg6yIr+QBzPkUwZ/L0bXvGd1sufTm3wotoz+GwQ==
+"@tanstack/query-devtools@5.51.16":
+  version "5.51.16"
+  resolved "https://registry.yarnpkg.com/@tanstack/query-devtools/-/query-devtools-5.51.16.tgz#d855d00e7939c1a442c2e8ae3ad1a5bd603d003b"
+  integrity sha512-ajwuq4WnkNCMj/Hy3KR8d3RtZ6PSKc1dD2vs2T408MdjgKzQ3klVoL6zDgVO7X+5jlb5zfgcO3thh4ojPhfIaw==
 
-"@tanstack/react-query-devtools@^4.29.12":
-  version "4.29.12"
-  resolved "https://registry.yarnpkg.com/@tanstack/react-query-devtools/-/react-query-devtools-4.29.12.tgz#a5180bbd850dde6c81f87296acba1ac94302f936"
-  integrity sha512-ug4YGQhMhh6QI8/sWJhjXxuvdeehxf1cyxpTifGMH5qreQ5ECHT6vzqG/aKvADQDzqLBGrF0q4wTDnRRYvvtrA==
+"@tanstack/react-query-devtools@^5.52.1":
+  version "5.52.1"
+  resolved "https://registry.yarnpkg.com/@tanstack/react-query-devtools/-/react-query-devtools-5.52.1.tgz#5c15eef755a76ce45099206e0448cd120b3af9dc"
+  integrity sha512-6KwSm9vcIIK26osQJtT52Gyccz/DyHPT216B7kt4ihg22G2rtGZ7sCXYQO25XEHyVwVingwHdZ7auj+ydgg4Zg==
   dependencies:
-    "@tanstack/match-sorter-utils" "^8.7.0"
-    superjson "^1.10.0"
-    use-sync-external-store "^1.2.0"
+    "@tanstack/query-devtools" "5.51.16"
 
-"@tanstack/react-query@^4.29.12":
-  version "4.29.12"
-  resolved "https://registry.yarnpkg.com/@tanstack/react-query/-/react-query-4.29.12.tgz#de111cf1d6c389b86acacfaf972302914cfa1208"
-  integrity sha512-zhcN6+zF6cxprxhTHQajHGlvxgK8npnp9uLe9yaWhGc6sYcPWXzyO4raL4HomUzQOPzu3jLvkriJQ7BOrDM8vA==
+"@tanstack/react-query@^5.52.1":
+  version "5.52.1"
+  resolved "https://registry.yarnpkg.com/@tanstack/react-query/-/react-query-5.52.1.tgz#d454e2bb86ab21621de016c7044514d6412db7ee"
+  integrity sha512-soyn4dNIUZ8US8NaPVXv06gkZFHaZnPfKWPDjRJjFRW3Y7WZ0jx72eT6zhw3VQlkMPysmXye8l35ewPHspKgbQ==
   dependencies:
-    "@tanstack/query-core" "4.29.11"
-    use-sync-external-store "^1.2.0"
+    "@tanstack/query-core" "5.52.0"
 
 "@testim/chrome-version@^1.1.4":
   version "1.1.4"
@@ -14729,13 +14724,6 @@ cookiejar@^2.1.4:
   version "2.1.4"
   resolved "https://registry.yarnpkg.com/cookiejar/-/cookiejar-2.1.4.tgz#ee669c1fea2cf42dc31585469d193fef0d65771b"
   integrity sha512-LDx6oHrK+PhzLKJU9j5S7/Y3jM/mUHvD/DeI1WQmJn652iPC5Y4TBzC9l+5OMOXlyTTA+SmVUPm0HQUwpD5Jqw==
-
-copy-anything@^3.0.2:
-  version "3.0.2"
-  resolved "https://registry.yarnpkg.com/copy-anything/-/copy-anything-3.0.2.tgz#7189171ff5e1893b2287e8bf574b8cd448ed50b1"
-  integrity sha512-CzATjGXzUQ0EvuvgOCI6A4BGOo2bcVx8B+eC2nF862iv9fopnPQwlrbACakNCHRIJbCSBj+J/9JeDf60k64MkA==
-  dependencies:
-    is-what "^4.1.6"
 
 copy-concurrently@^1.0.0:
   version "1.0.5"
@@ -20651,11 +20639,6 @@ is-weakset@^2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/is-weakset/-/is-weakset-2.0.1.tgz#e9a0af88dbd751589f5e50d80f4c98b780884f83"
   integrity sha512-pi4vhbhVHGLxohUw7PhGsueT4vRGFoXhP7+RGN0jKIv9+8PWYCQTqtADngrxOm2g46hoH0+g8uZZBzMrvVGDmw==
-
-is-what@^4.1.6:
-  version "4.1.7"
-  resolved "https://registry.yarnpkg.com/is-what/-/is-what-4.1.7.tgz#c41dc1d2d2d6a9285c624c2505f61849c8b1f9cc"
-  integrity sha512-DBVOQNiPKnGMxRMLIYSwERAS5MVY1B7xYiGnpgctsOFvVDz9f9PFXXxMcTOHuoqYp4NK9qFYQaIC1NRRxLMpBQ==
 
 is-whitespace-character@^1.0.0:
   version "1.0.1"
@@ -27441,11 +27424,6 @@ remark-stringify@^8.0.3:
     unherit "^1.0.4"
     xtend "^4.0.1"
 
-remove-accents@0.4.2:
-  version "0.4.2"
-  resolved "https://registry.yarnpkg.com/remove-accents/-/remove-accents-0.4.2.tgz#0a43d3aaae1e80db919e07ae254b285d9e1c7bb5"
-  integrity sha1-CkPTqq4egNuRngeuJUsoXZ4ce7U=
-
 remove-trailing-separator@^1.0.1, remove-trailing-separator@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/remove-trailing-separator/-/remove-trailing-separator-1.1.0.tgz#c24bce2a283adad5bc3f58e0d48249b92379d8ef"
@@ -29624,13 +29602,6 @@ supercluster@^8.0.1:
   integrity sha512-IiOea5kJ9iqzD2t7QJq/cREyLHTtSmUT6gQsweojg9WH2sYJqZK9SswTu6jrscO6D1G5v5vYZ9ru/eq85lXeZQ==
   dependencies:
     kdbush "^4.0.2"
-
-superjson@^1.10.0:
-  version "1.10.1"
-  resolved "https://registry.yarnpkg.com/superjson/-/superjson-1.10.1.tgz#9c73e9393489dddab89d638694eadcbf4bda2f36"
-  integrity sha512-7fvPVDHmkTKg6641B9c6vr6Zz5CwPtF9j0XFExeLxJxrMaeLU2sqebY3/yrI3l0K5zJ+H9QA3H+lIYj5ooCOkg==
-  dependencies:
-    copy-anything "^3.0.2"
 
 supertest@^7.0.0:
   version "7.0.0"
