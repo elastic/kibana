@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
-import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -59,9 +57,6 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     });
 
     describe('Download report', () => {
-      let reportDownloadLinkCsvV1: WebElementWrapper;
-      let reportDownloadLinkCsvSearchSource: WebElementWrapper;
-
       // use archived reports to allow reporting_user to view report jobs they've created
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/reporting/archived_reports');
@@ -69,17 +64,15 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         await reportingFunctional.loginReportingUser();
         await PageObjects.common.navigateToApp('reporting');
         await testSubjects.existOrFail('reportJobListing');
-
-        const results = await testSubjects.findAll('reportDownloadLink');
-        [reportDownloadLinkCsvV1, reportDownloadLinkCsvSearchSource] = results;
-        expect(reportDownloadLinkCsvV1).not.to.be(null);
-        expect(reportDownloadLinkCsvSearchSource).not.to.be(null);
       });
       after(async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/reporting/archived_reports');
       });
 
       it('user can download report', async () => {
+        const reportDownloadLinkCsvSearchSource = await testSubjects.find(
+          'reportDownloadLink-kraz9db6154g0763b5141viu'
+        );
         await reportDownloadLinkCsvSearchSource.click();
 
         // FIXME how to verify the expected result was downloaded
@@ -88,6 +81,9 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       it('user can download report from export type that is no longer supported', async () => {
         // The "csv" export type, aka CSV V1, was removed and can no longer be created.
         // Downloading a report of this export type does still work
+        const reportDownloadLinkCsvV1 = await testSubjects.find(
+          'reportDownloadLink-krb7arhe164k0763b50bjm31'
+        );
         await reportDownloadLinkCsvV1.click();
 
         // FIXME how to verify the expected result was downloaded
