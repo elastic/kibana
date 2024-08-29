@@ -10,13 +10,14 @@ import {
   CSP_GET_BENCHMARK_RULES_STATE_API_CURRENT_VERSION,
   CSP_GET_BENCHMARK_RULES_STATE_ROUTE_PATH,
 } from '@kbn/cloud-security-posture-common';
-import type { CspBenchmarkRulesStates } from '@kbn/cloud-security-posture-common';
-import { useKibana } from '../../../common/hooks/use_kibana';
+import type { CspBenchmarkRulesStates } from '@kbn/cloud-security-posture-common/schema/rules/latest';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
 
 export const getRuleStatesKey = ['get_rules_state_key'];
 
 export const useGetCspBenchmarkRulesStatesApi = () => {
-  const { http } = useKibana().services;
+  const { http } = useKibana<CoreStart>().services;
   return useQuery<CspBenchmarkRulesStates, unknown, CspBenchmarkRulesStates>(getRuleStatesKey, () =>
     http.get<CspBenchmarkRulesStates>(CSP_GET_BENCHMARK_RULES_STATE_ROUTE_PATH, {
       version: CSP_GET_BENCHMARK_RULES_STATE_API_CURRENT_VERSION,

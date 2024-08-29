@@ -48,8 +48,8 @@ info:
 
     ```
   license:
-    name: Elastic License 2.0
-    url: 'https://www.elastic.co/licensing/elastic-license'
+    name: Attribution-NonCommercial-NoDerivatives 4.0 International
+    url: 'https://creativecommons.org/licenses/by-nc-nd/4.0/'
   title: Kibana Serverless APIs
   version: 1.0.2
   x-feedbackLink:

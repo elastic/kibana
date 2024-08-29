@@ -1,6 +1,6 @@
 :ems: Elastic Maps Service
-:ems-docker-repo: docker.elastic.co/elastic-maps-service/elastic-maps-server-ubi8
-:ems-docker-image: {ems-docker-repo}:{version}
+:ems-docker-repo: docker.elastic.co/elastic-maps-service/elastic-maps-server
+:ems-docker-image: {ems-docker-repo}:{version}-amd64
 :ems-headers-url: https://deployment-host
 
 [[maps-connect-to-ems]]
@@ -195,7 +195,7 @@ One way to configure {hosted-ems} is to provide `elastic-maps-server.yml` via bi
 --------------------------------------------
 version: '2'
 services:
-  {hosted-ems}:
+  ems-server:
     image: {ems-docker-image}
     volumes:
       - ./elastic-maps-server.yml:/usr/src/app/server/config/elastic-maps-server.yml
@@ -214,7 +214,7 @@ These variables can be set with +docker-compose+ like this:
 ----------------------------------------------------------
 version: '2'
 services:
-  {hosted-ems}:
+  ems-server:
     image: {ems-docker-image}
     environment:
       ELASTICSEARCH_HOST: http://elasticsearch.example.org

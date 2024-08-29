@@ -4,25 +4,29 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { schema, TypeOf } from '@kbn/config-schema';
-import type { CspBenchmarkRulesStates } from '@kbn/cloud-security-posture-common';
-import { ruleStateAttributes, rulesStates } from '@kbn/cloud-security-posture-common/schema';
-import { BenchmarksCisId } from '../latest';
 import { DEFAULT_BENCHMARK_RULES_PER_PAGE } from './v3';
-export type { cspBenchmarkRuleSchema, CspBenchmarkRule, FindCspBenchmarkRuleResponse } from './v3';
+
+export type {
+  cspBenchmarkRuleMetadataSchema,
+  CspBenchmarkRuleMetadata,
+  cspBenchmarkRuleSchema,
+  CspBenchmarkRule,
+  FindCspBenchmarkRuleResponse,
+} from './v3';
+export type {
+  PageUrlParams,
+  rulesToUpdate,
+  CspBenchmarkRulesBulkActionRequestSchema,
+  CspBenchmarkRulesBulkActionResponse,
+  RuleStateAttributes,
+  CspBenchmarkRulesStates,
+  cspSettingsSchema,
+  CspSettings,
+  BulkActionBenchmarkRulesResponse,
+} from './v4';
 
 export type FindCspBenchmarkRuleRequest = TypeOf<typeof findCspBenchmarkRuleRequestSchema>;
-
-export type RulesToUpdate = TypeOf<typeof rulesToUpdate>;
-
-export type CspBenchmarkRulesBulkActionRequestSchema = TypeOf<
-  typeof cspBenchmarkRulesBulkActionRequestSchema
->;
-
-export type RuleStateAttributes = TypeOf<typeof ruleStateAttributes>;
-
-export type CspSettings = TypeOf<typeof cspSettingsSchema>;
 
 export const findCspBenchmarkRuleRequestSchema = schema.object({
   /**
@@ -102,46 +106,15 @@ export const findCspBenchmarkRuleRequestSchema = schema.object({
   /**
    * rule section
    */
-  section: schema.maybe(schema.string()),
-  ruleNumber: schema.maybe(schema.string()),
+  section: schema.maybe(
+    schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { minSize: 1 })])
+  ),
+  ruleNumber: schema.maybe(
+    schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { minSize: 1 })])
+  ),
 });
 
 export interface BenchmarkRuleSelectParams {
-  section?: string;
-  ruleNumber?: string;
-}
-
-export interface PageUrlParams {
-  benchmarkId: BenchmarksCisId;
-  benchmarkVersion: string;
-  ruleId?: string;
-}
-
-export const rulesToUpdate = schema.arrayOf(
-  schema.object({
-    rule_id: schema.string(),
-    benchmark_id: schema.string(),
-    benchmark_version: schema.string(),
-    rule_number: schema.string(),
-  })
-);
-
-export const cspBenchmarkRulesBulkActionRequestSchema = schema.object({
-  action: schema.oneOf([schema.literal('mute'), schema.literal('unmute')]),
-  rules: rulesToUpdate,
-});
-
-export interface CspBenchmarkRulesBulkActionResponse {
-  updated_benchmark_rules: CspBenchmarkRulesStates;
-  disabled_detection_rules?: string[];
-  message: string;
-}
-
-export const cspSettingsSchema = schema.object({
-  rules: rulesStates,
-});
-
-export interface BulkActionBenchmarkRulesResponse {
-  updatedBenchmarkRulesStates: CspBenchmarkRulesStates;
-  disabledDetectionRules: string[];
+  section?: string[];
+  ruleNumber?: string[];
 }
