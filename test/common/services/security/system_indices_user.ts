@@ -13,7 +13,7 @@ import {
   createEsClientForFtrConfig,
   createRemoteEsClientForFtrConfig,
 } from '@kbn/test';
-import { FtrProviderContext } from '../ftr_provider_context';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 const SYSTEM_INDICES_SUPERUSER_ROLE = 'system_indices_superuser';
 

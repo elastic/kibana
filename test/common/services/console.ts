@@ -6,12 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { services as commonServices } from '../../common/services';
-
-import { KibanaSupertestProvider, ElasticsearchSupertestProvider } from './supertest';
-
-export const services = {
-  ...commonServices,
-  supertest: KibanaSupertestProvider,
-  esSupertest: ElasticsearchSupertestProvider,
-};
+import type { FtrProviderContext } from '../ftr_provider_context';
+import { helpers } from '../../api_integration/apis/console/helpers';
+export function ConsoleProvider({ getService }: FtrProviderContext) {
+  return {
+    helpers: helpers(getService),
+  };
+}

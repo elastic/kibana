@@ -6,12 +6,4 @@
  * Side Public License, v 1.
  */
 
-import { services as commonServices } from '../../common/services';
-
-import { KibanaSupertestProvider, ElasticsearchSupertestProvider } from './supertest';
-
-export const services = {
-  ...commonServices,
-  supertest: KibanaSupertestProvider,
-  esSupertest: ElasticsearchSupertestProvider,
-};
+export { SecurityServiceProvider } from './security';
