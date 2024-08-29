@@ -188,6 +188,7 @@ describe('Features Plugin', () => {
               "ui": Array [],
             },
           },
+          "scope": "security",
         },
         "subFeatures": Array [],
       }
