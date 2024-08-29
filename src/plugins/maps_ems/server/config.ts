@@ -16,7 +16,7 @@ import {
   DEFAULT_EMS_ROADMAP_ID,
   DEFAULT_EMS_ROADMAP_DESATURATED_ID,
   DEFAULT_EMS_DARKMAP_ID,
-} from './common';
+} from '../common';
 
 const tileMapConfigOptionsSchema = schema.object({
   attribution: schema.string({ defaultValue: '' }),
