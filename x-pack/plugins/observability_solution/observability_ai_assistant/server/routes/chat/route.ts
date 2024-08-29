@@ -33,7 +33,6 @@ const chatCompleteBaseRt = t.type({
     t.partial({
       conversationId: t.string,
       title: t.string,
-      responseLanguage: t.string,
       disableFunctions: t.union([
         toBooleanRt,
         t.type({
@@ -241,7 +240,6 @@ async function chatComplete(
       title,
       persist,
       screenContexts,
-      responseLanguage,
       instructions,
       disableFunctions,
     },
@@ -266,7 +264,6 @@ async function chatComplete(
     persist,
     signal,
     functionClient,
-    responseLanguage,
     instructions,
     simulateFunctionCalling,
     disableFunctions,
