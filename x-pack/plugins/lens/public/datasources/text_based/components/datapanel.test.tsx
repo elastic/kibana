@@ -223,7 +223,7 @@ describe('TextBased Query Languages Data Panel', () => {
   });
 
   it('should list all supported fields in the pattern that match the search input', async () => {
-    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
+    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     await renderTextBasedDataPanel();
     jest.useFakeTimers();

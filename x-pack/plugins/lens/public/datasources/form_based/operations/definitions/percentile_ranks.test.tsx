@@ -280,7 +280,7 @@ describe('percentile ranks', () => {
     });
 
     it('should update state on change', async () => {
-      // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
+      // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       const updateLayerSpy = jest.fn();
       render(
@@ -307,7 +307,7 @@ describe('percentile ranks', () => {
     });
 
     it('should not update on invalid input, but show invalid value locally', async () => {
-      // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
+      // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       const updateLayerSpy = jest.fn();
       render(
@@ -328,7 +328,7 @@ describe('percentile ranks', () => {
     });
 
     it('should support decimals on dimension edit', async () => {
-      // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
+      // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       const updateLayerSpy = jest.fn();
       render(
@@ -348,7 +348,7 @@ describe('percentile ranks', () => {
     });
 
     it('should not support decimals on inline edit', async () => {
-      // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
+      // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       const updateLayerSpy = jest.fn();
       const { container } = render(

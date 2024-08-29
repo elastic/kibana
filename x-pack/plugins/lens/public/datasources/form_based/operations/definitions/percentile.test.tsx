@@ -615,7 +615,7 @@ describe('percentile', () => {
     });
 
     it('should update state on change', async () => {
-      // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
+      // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       const updateLayerSpy = jest.fn();
       render(
@@ -643,7 +643,7 @@ describe('percentile', () => {
     });
 
     it('should update on decimals input up to 2 digits', async () => {
-      // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
+      // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       const updateLayerSpy = jest.fn();
       render(
@@ -664,7 +664,7 @@ describe('percentile', () => {
     });
 
     it('should not update on invalid input, but show invalid value locally', async () => {
-      // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
+      // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       const updateLayerSpy = jest.fn();
       render(

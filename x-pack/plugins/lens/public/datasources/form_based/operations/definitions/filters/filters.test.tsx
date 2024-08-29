@@ -301,7 +301,7 @@ describe('filters', () => {
   describe('popover param editor', () => {
     it('should update state when changing a filter', async () => {
       jest.useFakeTimers();
-      // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
+      // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       const updateLayerSpy = jest.fn();
       render(
@@ -362,7 +362,7 @@ describe('filters', () => {
       });
 
       it('should remove filter', async () => {
-        // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
+        // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
         const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
         jest.useFakeTimers();
         const updateLayerSpy = jest.fn();

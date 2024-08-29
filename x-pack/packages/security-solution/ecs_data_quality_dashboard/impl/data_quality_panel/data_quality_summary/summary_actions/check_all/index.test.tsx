@@ -168,7 +168,7 @@ describe('CheckAll', () => {
   });
 
   test('it renders the expected button text when a check is running', async () => {
-    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
+    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     render(
       <TestExternalProviders>
@@ -203,7 +203,7 @@ describe('CheckAll', () => {
 
   describe('formatNumber', () => {
     test('it renders a comma-separated `value` via the `defaultNumberFormat`', async () => {
-      // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
+      // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       /** stores the result of invoking `CheckAll`'s `formatNumber` function */
       let formatNumberResult = '';
@@ -249,7 +249,7 @@ describe('CheckAll', () => {
     });
 
     test('it renders an empty stat placeholder when `value` is undefined', async () => {
-      // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
+      // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
 
       /** stores the result of invoking `CheckAll`'s `formatNumber` function */
@@ -296,7 +296,7 @@ describe('CheckAll', () => {
   });
 
   describe('when a running check is cancelled', () => {
-    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
+    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
 
     const setCheckAllIndiciesChecked = jest.fn();
@@ -356,7 +356,7 @@ describe('CheckAll', () => {
       jest.clearAllMocks();
       jest.useFakeTimers();
 
-      // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1035334908
+      // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
 
       render(
