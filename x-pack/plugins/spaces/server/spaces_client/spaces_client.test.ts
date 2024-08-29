@@ -23,6 +23,7 @@ const createMockConfig = (
     maxSpaces: 1000,
     allowFeatureVisibility: true,
     allowSolutionVisibility: true,
+    forceSolutionVisibility: false,
   }
 ) => {
   return ConfigSchema.validate(mockConfig, { serverless: !mockConfig.allowFeatureVisibility });
@@ -313,6 +314,7 @@ describe('#create', () => {
       maxSpaces,
       allowFeatureVisibility: true,
       allowSolutionVisibility: true,
+      forceSolutionVisibility: false,
     });
 
     const client = new SpacesClient(
@@ -350,6 +352,7 @@ describe('#create', () => {
       maxSpaces,
       allowFeatureVisibility: true,
       allowSolutionVisibility: true,
+      forceSolutionVisibility: false,
     });
 
     const client = new SpacesClient(
@@ -386,6 +389,7 @@ describe('#create', () => {
       maxSpaces,
       allowFeatureVisibility: true,
       allowSolutionVisibility: true,
+      forceSolutionVisibility: false,
     });
 
     const client = new SpacesClient(
@@ -433,6 +437,7 @@ describe('#create', () => {
       maxSpaces,
       allowFeatureVisibility: true,
       allowSolutionVisibility: true,
+      forceSolutionVisibility: false,
     });
 
     const client = new SpacesClient(
@@ -476,6 +481,7 @@ describe('#create', () => {
         maxSpaces,
         allowFeatureVisibility: false,
         allowSolutionVisibility: false,
+        forceSolutionVisibility: false,
       });
 
       const client = new SpacesClient(
@@ -513,6 +519,7 @@ describe('#create', () => {
         maxSpaces,
         allowFeatureVisibility: false,
         allowSolutionVisibility: false,
+        forceSolutionVisibility: false,
       });
 
       const client = new SpacesClient(
@@ -553,6 +560,7 @@ describe('#create', () => {
         maxSpaces,
         allowFeatureVisibility: false,
         allowSolutionVisibility: false,
+        forceSolutionVisibility: false,
       });
 
       const client = new SpacesClient(
@@ -723,6 +731,7 @@ describe('#update', () => {
         maxSpaces: 1000,
         allowFeatureVisibility: false,
         allowSolutionVisibility: false,
+        forceSolutionVisibility: false,
       });
       const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
       mockCallWithRequestRepository.get.mockResolvedValue(savedObject);
@@ -749,6 +758,7 @@ describe('#update', () => {
         maxSpaces: 1000,
         allowFeatureVisibility: false,
         allowSolutionVisibility: false,
+        forceSolutionVisibility: false,
       });
       const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
       mockCallWithRequestRepository.get.mockResolvedValue(savedObject);
@@ -781,6 +791,7 @@ describe('#update', () => {
         maxSpaces: 1000,
         allowFeatureVisibility: false,
         allowSolutionVisibility: false,
+        forceSolutionVisibility: false,
       });
       const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
       mockCallWithRequestRepository.get.mockResolvedValue(savedObject);
