@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 import { Observable, Subject } from 'rxjs';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
@@ -20,6 +20,7 @@ import {
   renderWithReduxStore,
   mockStoreDeps,
   defaultDoc,
+  mountWithProvider,
 } from '../mocks';
 import { SavedObjectSaveModal } from '@kbn/saved-objects-plugin/public';
 import { checkForDuplicateTitle } from '../persistence';
@@ -34,13 +35,12 @@ import { SavedObjectReference } from '@kbn/core/types';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { serverlessMock } from '@kbn/serverless/public/mocks';
 import moment from 'moment';
-import { screen, waitFor } from '@testing-library/react';
 import { setState, LensAppState } from '../state_management';
 import { coreMock } from '@kbn/core/public/mocks';
 import { LensSerializedState } from '..';
 import { cloneDeep } from 'lodash';
 import { createMockedField, createMockedIndexPattern } from '../datasources/form_based/mocks';
-import userEvent from '@testing-library/user-event';
+import { I18nProvider } from '@kbn/i18n-react';
 jest.mock('../editor_frame_service/editor_frame/expression_helpers');
 jest.mock('@kbn/core/public');
 jest.mock('../persistence/saved_objects_utils/check_for_duplicate_title', () => ({
@@ -100,7 +100,15 @@ describe('Lens App', () => {
 
   const makeDefaultServicesForApp = () => makeDefaultServices(sessionIdSubject, 'sessionId-1');
 
-  async function mountWith({
+  /**
+   * Here's the deal: moving everything to RTL is not just big, but very hard
+   * right now because many tests rely on unifiedSearch mocks and other plugins
+   * which are used indirectly to test things. Of course this won't work with RTL as it
+   * expect to test rendered things, and these mocks won't render anything.
+   * So some tests who will be able to move over to RTL will be updated, but others
+   * remains with the old enzyme way
+   */
+  async function mountWithRTL({
     props = makeDefaultProps(),
     services = makeDefaultServicesForApp(),
     preloadedState,
@@ -126,6 +134,37 @@ describe('Lens App', () => {
     const frame = props.editorFrame as ReturnType<typeof createMockFrame>;
     await act(async () => await store.dispatch(setState({ ...preloadedState })));
     return { instance, frame, props, services, lensStore: store };
+  }
+
+  async function mountWith({
+    props = makeDefaultProps(),
+    services = makeDefaultServicesForApp(),
+    preloadedState,
+  }: {
+    props?: jest.Mocked<LensAppProps>;
+    services?: jest.Mocked<LensAppServices>;
+    preloadedState?: Partial<LensAppState>;
+  }) {
+    const wrappingComponent: React.FC<PropsWithChildren<{}>> = ({ children }) => {
+      return (
+        <I18nProvider>
+          <KibanaContextProvider services={services}>{children}</KibanaContextProvider>
+        </I18nProvider>
+      );
+    };
+    const storeDeps = mockStoreDeps({ lensServices: services });
+    const { instance, lensStore } = await mountWithProvider(
+      <App {...props} />,
+      {
+        storeDeps,
+        preloadedState,
+      },
+      { wrappingComponent }
+    );
+
+    const frame = props.editorFrame as ReturnType<typeof createMockFrame>;
+    lensStore.dispatch(setState({ ...preloadedState }));
+    return { instance, frame, props, services, lensStore };
   }
 
   function getLensDocumentMock(someProps?: Partial<LensDocument>) {
@@ -185,7 +224,7 @@ describe('Lens App', () => {
   describe('extra nav menu entries', () => {
     it('shows custom menu entry', async () => {
       const runFn = jest.fn();
-      const { services } = await mountWith({
+      const { services } = await mountWithRTL({
         props: {
           ...makeDefaultProps(),
           topNavMenuEntryGenerators: [
@@ -232,7 +271,7 @@ describe('Lens App', () => {
           },
         ],
       };
-      await mountWith({
+      await mountWithRTL({
         props: {
           ...makeDefaultProps(),
           topNavMenuEntryGenerators: [getterFn],
@@ -273,7 +312,7 @@ describe('Lens App', () => {
     });
 
     it('sets breadcrumbs when the document title changes', async () => {
-      const { services, lensStore } = await mountWith({});
+      const { services, lensStore } = await mountWithRTL({});
 
       expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith([
         {
@@ -383,7 +422,7 @@ describe('Lens App', () => {
         .mockImplementation((id) =>
           Promise.resolve({ id, isTimeBased: () => true, isPersisted: () => true } as DataView)
         );
-      const { services } = await mountWith({ services: customServices });
+      const { services } = await mountWithRTL({ services: customServices });
       expect(services.navigation.ui.AggregateQueryTopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({ showDatePicker: true }),
         {}
@@ -398,7 +437,7 @@ describe('Lens App', () => {
         );
       const customProps = makeDefaultProps();
       customProps.datasourceMap.testDatasource.isTimeBased = () => true;
-      const { services } = await mountWith({ props: customProps, services: customServices });
+      const { services } = await mountWithRTL({ props: customProps, services: customServices });
       expect(services.navigation.ui.AggregateQueryTopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({ showDatePicker: true }),
         {}
@@ -413,7 +452,7 @@ describe('Lens App', () => {
         );
       const customProps = makeDefaultProps();
       customProps.datasourceMap.testDatasource.isTimeBased = () => false;
-      const { services } = await mountWith({ props: customProps, services: customServices });
+      const { services } = await mountWithRTL({ props: customProps, services: customServices });
       expect(services.navigation.ui.AggregateQueryTopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({ showDatePicker: false }),
         {}
@@ -1425,6 +1464,7 @@ describe('Lens App', () => {
 
     it('dispatches update to searchSessionId and dateRange when the user hits refresh', async () => {
       const { instance, services, lensStore } = await mountWith({});
+
       act(() =>
         instance.find(services.navigation.ui.AggregateQueryTopNavMenu).prop('onQuerySubmit')!({
           dateRange: { from: 'now-7d', to: 'now' },
@@ -1612,8 +1652,7 @@ describe('Lens App', () => {
       expect(confirmLeave).toHaveBeenCalled();
     });
 
-    // @FIX this is likely a bug in the changes check
-    it.skip('should not confirm when changes are saved', async () => {
+    it('should not confirm when changes are saved', async () => {
       const localDoc = getLensDocumentMock();
       const preloadedState = {
         persistedDoc: {
