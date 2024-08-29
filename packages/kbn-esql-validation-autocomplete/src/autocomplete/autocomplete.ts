@@ -78,6 +78,7 @@ import {
   getDateLiterals,
   buildFieldsDefinitionsWithMetadata,
   TRIGGER_SUGGESTION_COMMAND,
+  ADD_DATE_HISTOGRAM_SNIPPET,
 } from './factories';
 import { EDITOR_MARKER, SINGLE_BACKTICK, METADATA_FIELDS } from '../shared/constants';
 import { getAstContext, removeMarkerArgFromArgsList } from '../shared/context';
@@ -1767,7 +1768,7 @@ async function getOptionArgsSuggestions(
                   defaultMessage: 'Add date histogram',
                 }
               ),
-              text: `BUCKET($0, 20, ?start, ?end)`,
+              text: ADD_DATE_HISTOGRAM_SNIPPET,
               asSnippet: true,
               kind: 'Function',
               detail: i18n.translate(
