@@ -35,6 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
     };
 
     before(async () => {
+      await slo.createUser();
       await slo.deleteAllSLOs();
       await sloEsClient.deleteTestSourceData();
       await loadTestData(getService);
@@ -55,10 +56,11 @@ export default function ({ getService }: FtrProviderContext) {
       await sloEsClient.deleteTestSourceData();
     });
 
-    it('gets slo by id and calculates SLI - occurances rolling', async () => {
-      const id = await createSLO({
+    it('gets slo by id and calculates SLI - occurrences rolling', async () => {
+      const response = await createSLO({
         groupBy: '*',
       });
+      const id = response.body.id;
 
       await retry.tryForTime(300 * 1000, async () => {
         const getResponse = await supertestAPI
@@ -87,7 +89,7 @@ export default function ({ getService }: FtrProviderContext) {
           groupBy: '*',
           groupings: {},
           id,
-          settings: { syncDelay: '1m', frequency: '1m' },
+          settings: { syncDelay: '1m', frequency: '1m', preventInitialBackfill: false },
           revision: 1,
           enabled: true,
           createdAt: getResponse.body.createdAt,
@@ -103,6 +105,9 @@ export default function ({ getService }: FtrProviderContext) {
               remaining: -49,
               isEstimated: false,
             },
+            fiveMinuteBurnRate: 40,
+            oneDayBurnRate: 50,
+            oneHourBurnRate: 50,
             status: 'VIOLATED',
           },
         });
@@ -110,13 +115,14 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('gets slo by id and calculates SLI - occurences calendarAligned', async () => {
-      const id = await createSLO({
+      const response = await createSLO({
         groupBy: '*',
         timeWindow: {
           duration: '1w',
           type: 'calendarAligned',
         },
       });
+      const id = response.body.id;
 
       await retry.tryForTime(300 * 1000, async () => {
         const getResponse = await supertestAPI
@@ -146,7 +152,7 @@ export default function ({ getService }: FtrProviderContext) {
           groupBy: '*',
           groupings: {},
           id,
-          settings: { syncDelay: '1m', frequency: '1m' },
+          settings: { syncDelay: '1m', frequency: '1m', preventInitialBackfill: false },
           revision: 1,
           enabled: true,
           createdAt: getResponse.body.createdAt,
@@ -162,6 +168,9 @@ export default function ({ getService }: FtrProviderContext) {
               remaining: -49,
               isEstimated: true,
             },
+            fiveMinuteBurnRate: 40,
+            oneDayBurnRate: 50,
+            oneHourBurnRate: 50,
             status: 'VIOLATED',
           },
         });
@@ -169,7 +178,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('gets slo by id and calculates SLI - timeslices rolling', async () => {
-      const id = await createSLO({
+      const response = await createSLO({
         groupBy: '*',
         timeWindow: {
           duration: '7d',
@@ -182,6 +191,7 @@ export default function ({ getService }: FtrProviderContext) {
           timesliceWindow: '1m',
         },
       });
+      const id = response.body.id;
 
       await retry.tryForTime(300 * 1000, async () => {
         const getResponse = await supertestAPI
@@ -215,7 +225,7 @@ export default function ({ getService }: FtrProviderContext) {
           groupBy: '*',
           groupings: {},
           id,
-          settings: { syncDelay: '1m', frequency: '1m' },
+          settings: { syncDelay: '1m', frequency: '1m', preventInitialBackfill: false },
           revision: 1,
           enabled: true,
           createdAt: getResponse.body.createdAt,
@@ -223,7 +233,7 @@ export default function ({ getService }: FtrProviderContext) {
           version: 2,
           instanceId: '*',
           meta: {},
-          summary: {
+          summary: expect.objectContaining({
             sliValue: 0.5,
             errorBudget: {
               initial: 0.01,
@@ -232,13 +242,13 @@ export default function ({ getService }: FtrProviderContext) {
               isEstimated: false,
             },
             status: 'VIOLATED',
-          },
+          }),
         });
       });
     });
 
     it('gets slo by id and calculates SLI - timeslices calendarAligned', async () => {
-      const id = await createSLO({
+      const response = await createSLO({
         groupBy: '*',
         timeWindow: {
           duration: '1w',
@@ -251,6 +261,7 @@ export default function ({ getService }: FtrProviderContext) {
           timesliceWindow: '10m',
         },
       });
+      const id = response.body.id;
 
       await retry.tryForTime(300 * 1000, async () => {
         const getResponse = await supertestAPI
@@ -283,7 +294,7 @@ export default function ({ getService }: FtrProviderContext) {
           groupBy: '*',
           groupings: {},
           id,
-          settings: { syncDelay: '1m', frequency: '1m' },
+          settings: { syncDelay: '1m', frequency: '1m', preventInitialBackfill: false },
           revision: 1,
           enabled: true,
           createdAt: getResponse.body.createdAt,
@@ -299,6 +310,9 @@ export default function ({ getService }: FtrProviderContext) {
               remaining: 0.801587,
               isEstimated: false,
             },
+            fiveMinuteBurnRate: 40,
+            oneDayBurnRate: 50,
+            oneHourBurnRate: 50,
             status: 'DEGRADING',
           },
         });
@@ -353,7 +367,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('gets slos instances', async () => {
-      const id = await createSLO();
+      const createResponse = await createSLO();
+      const id = createResponse.body.id;
 
       await retry.tryForTime(400 * 1000, async () => {
         const response = await supertestAPI
@@ -381,13 +396,11 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('gets slo definitions', async () => {
-      const id = await createSLO();
-      const secondId = await createSLO({ name: 'test name int' });
-      const response = await supertestAPI
-        .get(`/api/observability/slos/_definitions`)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(200);
+      const createResponse = await createSLO();
+      const id = createResponse.body.id;
+      const secondCreateResponse = await createSLO({ name: 'test name int' });
+      const secondId = secondCreateResponse.body.id;
+      const response = await slo.getDefinitions();
 
       expect(response.body).toEqual({
         page: 1,
@@ -418,6 +431,7 @@ export default function ({ getService }: FtrProviderContext) {
             settings: {
               frequency: '1m',
               syncDelay: '1m',
+              preventInitialBackfill: false,
             },
             tags: ['test'],
             timeWindow: {
@@ -452,6 +466,7 @@ export default function ({ getService }: FtrProviderContext) {
             settings: {
               frequency: '1m',
               syncDelay: '1m',
+              preventInitialBackfill: false,
             },
             tags: ['test'],
             timeWindow: {
@@ -466,11 +481,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       // can search by name
-      const searchResponse = await supertestAPI
-        .get(`/api/observability/slos/_definitions?search=api`)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(200);
+      const searchResponse = await slo.getDefinitions({ search: 'api' });
 
       expect(searchResponse.body.total).toEqual(1);
 

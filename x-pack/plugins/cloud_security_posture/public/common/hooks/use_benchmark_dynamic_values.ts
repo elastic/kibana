@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
+import type { BenchmarksCisId } from '@kbn/cloud-security-posture-common';
 import { useCspIntegrationLink } from '../navigation/use_csp_integration_link';
-import { BenchmarksCisId } from '../../../common/types/benchmarks/v2';
 
 type BenchmarkDynamicNames =
   | {
