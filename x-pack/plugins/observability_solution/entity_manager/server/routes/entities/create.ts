@@ -54,7 +54,7 @@ import { InvalidTransformError } from '../../lib/entities/errors/invalid_transfo
  */
 export function createEntityDefinitionRoute<T extends RequestHandlerContext>({
   router,
-  getClient,
+  getScopedClient,
 }: SetupRouteOptions<T>) {
   router.post<unknown, CreateEntityDefinitionQuery, EntityDefinition>(
     {
@@ -66,7 +66,7 @@ export function createEntityDefinitionRoute<T extends RequestHandlerContext>({
     },
     async (context, request, res) => {
       try {
-        const client = await getClient({ request });
+        const client = await getScopedClient({ request });
         const definition = await client.createEntityDefinition({
           definition: request.body,
           installOnly: request.query.installOnly,

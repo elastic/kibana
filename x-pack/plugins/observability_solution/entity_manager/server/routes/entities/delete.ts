@@ -52,8 +52,7 @@ import { EntityDefinitionNotFound } from '../../lib/entities/errors/entity_not_f
  */
 export function deleteEntityDefinitionRoute<T extends RequestHandlerContext>({
   router,
-  server,
-  getClient,
+  getScopedClient,
 }: SetupRouteOptions<T>) {
   router.delete<{ id: string }, { deleteData?: boolean }, unknown>(
     {
@@ -65,7 +64,7 @@ export function deleteEntityDefinitionRoute<T extends RequestHandlerContext>({
     },
     async (context, request, res) => {
       try {
-        const client = await getClient({ request });
+        const client = await getScopedClient({ request });
         await client.deleteEntityDefinition({
           id: request.params.id,
           deleteData: request.query.deleteData,

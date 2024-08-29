@@ -75,7 +75,7 @@ export class EntityManagerServerPlugin
       router,
       logger: this.logger,
       server: this.server,
-      getClient: async ({ request }: { request: KibanaRequest }) => {
+      getScopedClient: async ({ request }: { request: KibanaRequest }) => {
         const [coreStart] = await core.getStartServices();
         const esClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
         const soClient = coreStart.savedObjects.getScopedClient(request);

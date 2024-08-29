@@ -51,7 +51,7 @@ import { SetupRouteOptions } from '../types';
  */
 export function getEntityDefinitionRoute<T extends RequestHandlerContext>({
   router,
-  getClient,
+  getScopedClient,
 }: SetupRouteOptions<T>) {
   router.get<unknown, { page?: number; perPage?: number }, unknown>(
     {
@@ -62,7 +62,7 @@ export function getEntityDefinitionRoute<T extends RequestHandlerContext>({
     },
     async (context, request, res) => {
       try {
-        const client = await getClient({ request });
+        const client = await getScopedClient({ request });
         const result = await client.getEntityDefinitions({
           page: request.query.page,
           perPage: request.query.perPage,

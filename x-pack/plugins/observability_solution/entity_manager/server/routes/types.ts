@@ -14,5 +14,5 @@ export interface SetupRouteOptions<T extends RequestHandlerContextBase> {
   router: IRouter<T>;
   server: EntityManagerServerSetup;
   logger: Logger;
-  getClient: ({ request }: { request: KibanaRequest }) => Promise<EntityClient>;
+  getScopedClient: ({ request }: { request: KibanaRequest }) => Promise<EntityClient>;
 }
