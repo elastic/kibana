@@ -11,12 +11,15 @@ import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
 
 type BarOrientation = 'vertical' | 'horizontal';
 
-const barOrientationOptions: Array<{
+const getBarOrientationOptions = (
+  isDisabled?: boolean
+): Array<{
   id: string;
   value: BarOrientation;
   label: string;
   'data-test-subj': string;
-}> = [
+  toolTipContent?: string;
+}> => [
   {
     id: `bar_orientation_horizontal`,
     value: 'horizontal',
@@ -24,6 +27,12 @@ const barOrientationOptions: Array<{
       defaultMessage: 'Horizontal',
     }),
     'data-test-subj': 'lns_barOrientation_horizontal',
+    toolTipContent: isDisabled
+      ? i18n.translate('xpack.lens.shared.barOrientation.disabled', {
+          defaultMessage:
+            'A horizontal bar orientation cannot be applied when there are one or more area visualization layers.',
+        })
+      : undefined,
   },
   {
     id: `bar_orientation_vertical`,
@@ -38,12 +47,15 @@ const barOrientationOptions: Array<{
 export interface BarOrientationProps {
   barOrientation?: BarOrientation;
   onBarOrientationChange: (newMode: BarOrientation) => void;
+  isDisabled?: boolean;
 }
 
 export const BarOrientationSettings: FC<BarOrientationProps> = ({
   barOrientation = 'horizontal',
   onBarOrientationChange,
+  isDisabled = false,
 }) => {
+  const barOrientationOptions = getBarOrientationOptions(isDisabled);
   const label = i18n.translate('xpack.lens.shared.barOrientation', {
     defaultMessage: 'Bar orientation',
   });
@@ -52,8 +64,9 @@ export const BarOrientationSettings: FC<BarOrientationProps> = ({
     'bar_orientation_horizontal';
 
   return (
-    <EuiFormRow display="columnCompressed" label={label} fullWidth>
+    <EuiFormRow display="columnCompressed" label={label} fullWidth isDisabled={isDisabled}>
       <EuiButtonGroup
+        isDisabled={isDisabled}
         isFullWidth
         legend={label}
         data-test-subj="lns_barOrientation"

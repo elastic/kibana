@@ -85,7 +85,7 @@ export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({
 
   const barSeriesLayers = getBarSeriesLayers(dataLayers);
 
-  const hasAnyBarSetting = !isHasNonBarSeries || barSeriesLayers.length > 1;
+  const hasAnyBarSetting = barSeriesLayers.length > 1;
   const hasAreaSettings = hasAreaSeries(dataLayers);
   const shouldDisplayDividerHr = hasAnyBarSetting && hasAreaSettings;
 
@@ -102,8 +102,9 @@ export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({
         isDisabled={isDisabled}
         panelStyle={PANEL_STYLE}
       >
-        {!isHasNonBarSeries && (
+        {hasAnyBarSetting && (
           <BarOrientationSettings
+            isDisabled={isHasNonBarSeries}
             barOrientation={isHorizontal ? 'horizontal' : 'vertical'}
             onBarOrientationChange={() => {
               const newSeriesType = flipSeriesType(dataLayers[0].seriesType);
