@@ -5,16 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
-import {
-  EuiPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiImage,
-  EuiText,
-  EuiTitle,
-  EuiDataGridToolBarAdditionalControlsOptions,
-} from '@elastic/eui';
+import React, { ReactNode } from 'react';
+import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiImage, EuiText, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EsQuerySnapshot } from '@kbn/alerts-ui-shared';
 import icon from './assets/illustration_product_no_results_magnifying_glass.svg';
@@ -32,19 +24,24 @@ const panelStyle = {
 
 export const EmptyState: React.FC<{
   height?: keyof typeof heights;
-  controls?: EuiDataGridToolBarAdditionalControlsOptions;
-  querySnapshot?: EsQuerySnapshot;
+  additionalToolbarControls?: ReactNode;
+  alertsQuerySnapshot?: EsQuerySnapshot;
   showInspectButton?: boolean;
-}> = ({ height = 'tall', controls, querySnapshot, showInspectButton }) => {
+}> = ({ height = 'tall', additionalToolbarControls, alertsQuerySnapshot, showInspectButton }) => {
   return (
-    <EuiPanel color="subdued" data-test-subj="alertsStateTableEmptyState">
+    <EuiPanel color="subdued" data-test-subj="alertsTableEmptyState">
       <EuiFlexGroup alignItems="flexEnd" justifyContent="flexEnd">
-        {querySnapshot && showInspectButton && (
+        {alertsQuerySnapshot && showInspectButton && (
           <EuiFlexItem grow={false}>
-            <InspectButton querySnapshot={querySnapshot} inspectTitle={ALERTS_TABLE_TITLE} />
+            <InspectButton
+              alertsQuerySnapshot={alertsQuerySnapshot}
+              inspectTitle={ALERTS_TABLE_TITLE}
+            />
           </EuiFlexItem>
         )}
-        {controls?.right && <EuiFlexItem grow={false}>{controls.right}</EuiFlexItem>}
+        {additionalToolbarControls && (
+          <EuiFlexItem grow={false}>{additionalToolbarControls}</EuiFlexItem>
+        )}
       </EuiFlexGroup>
       <EuiFlexGroup style={{ height: heights[height] }} alignItems="center" justifyContent="center">
         <EuiFlexItem grow={false}>

@@ -5,42 +5,47 @@
  * 2.0.
  */
 
-import { ALERT_UUID } from '@kbn/rule-data-utils';
 import React, {
-  useState,
-  Suspense,
+  ComponentProps,
+  FC,
   lazy,
-  useCallback,
-  useMemo,
-  useEffect,
-  useRef,
   memo,
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
 } from 'react';
 import {
-  EuiDataGrid,
-  EuiDataGridStyle,
-  EuiSkeletonText,
-  EuiDataGridRefProps,
-  EuiFlexGroup,
-  EuiDataGridProps,
-  RenderCellValue,
-  EuiDataGridCellPopoverElementProps,
   EuiCodeBlock,
-  EuiText,
-  EuiIcon,
-  EuiSpacer,
+  EuiDataGrid,
+  EuiDataGridControlColumn,
+  EuiDataGridProps,
+  EuiDataGridRefProps,
+  EuiDataGridStyle,
+  EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
+  EuiSkeletonText,
+  EuiSpacer,
+  EuiText,
+  RenderCellValue,
 } from '@elastic/eui';
-import { useQueryClient } from '@tanstack/react-query';
 import styled from '@emotion/styled';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
-import { useSorting, usePagination, useBulkActions, useActionsColumn } from './hooks';
-import type {
+import { BulkActionsCell } from './bulk_actions/components/row_cell';
+import { BulkActionsHeader } from './bulk_actions/components';
+import { useAlertsTableContext } from './contexts/alerts_table_context';
+import { useBulkActions, useSorting } from './hooks';
+import {
+  AdditionalContext,
+  Alert,
+  AlertsDataGridProps,
   AlertsTableProps,
+  BulkActionsVerbs,
   FetchAlertData,
-  AlertsTableConfigurationRegistry,
 } from '../../../types';
 import { ALERTS_TABLE_CONTROL_COLUMNS_ACTIONS_LABEL } from './translations';
 
@@ -49,8 +54,11 @@ import { useGetToolbarVisibility } from './toolbar';
 import { InspectButtonContainer } from './toolbar/components/inspect';
 import { SystemCellId } from './types';
 import { SystemCellFactory, systemCells } from './cells';
-import { triggersActionsUiQueriesKeys } from '../../hooks/constants';
-const AlertsFlyout = lazy(() => import('./alerts_flyout'));
+import { typedMemo } from './utils';
+import type { AlertsFlyout as AlertsFlyoutType } from './alerts_flyout/alerts_flyout';
+import { ErrorBoundary } from '../common/components/error_boundary';
+
+const AlertsFlyout = lazy(() => import('./alerts_flyout')) as typeof AlertsFlyoutType;
 
 const DefaultGridStyle: EuiDataGridStyle = {
   border: 'none',
@@ -58,72 +66,27 @@ const DefaultGridStyle: EuiDataGridStyle = {
   fontSize: 's',
 };
 
-const getCellActionsStub = {
+const DEFAULT_CELL_ACTIONS = {
   getCellActions: () => null,
   visibleCellActions: undefined,
   disabledCellActions: [],
 };
+const DEFAULT_PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
+const DEFAULT_ACTIONS_COLUMNS_WIDTH = 75;
 
-const fieldBrowserStub = () => ({});
 const stableMappedRowClasses: EuiDataGridStyle['rowClasses'] = {};
 
-const BasicRenderCellValue: React.FC<{
-  data: Array<{ field: string; value: string[] }>;
+interface BasicCellValueProps {
   columnId: string;
-}> = memo(({ data, columnId }) => {
-  const value = (Array.isArray(data) && data.find((d) => d.field === columnId)?.value) ?? [];
+  alert: Alert;
+}
+
+const BasicCellValue = memo(({ alert, columnId }: BasicCellValueProps) => {
+  const value = alert[columnId];
   if (Array.isArray(value)) {
     return <>{value.length ? value.join() : '--'}</>;
   }
   return <>{value}</>;
-});
-
-const FullFeaturedRenderCellValue: RenderCellValue = memo((props) => {
-  const {
-    columnId,
-    cases,
-    maintenanceWindows,
-    showAlertStatusWithFlapping,
-    isLoading,
-    isLoadingCases,
-    isLoadingMaintenanceWindows,
-    casesConfig,
-    rowIndex,
-    pagination,
-    RenderCell,
-    ecsData,
-    alerts,
-  } = props;
-  const idx = rowIndex - pagination.pageSize * pagination.pageIndex;
-  const alert = alerts[idx];
-  if (isSystemCell(columnId)) {
-    return (
-      <SystemCellFactory
-        alert={alert}
-        columnId={columnId}
-        isLoading={isLoading || isLoadingCases || isLoadingMaintenanceWindows}
-        cases={cases}
-        maintenanceWindows={maintenanceWindows}
-        showAlertStatusWithFlapping={showAlertStatusWithFlapping}
-        caseAppId={casesConfig?.appId}
-      />
-    );
-  } else if (alert) {
-    // ecsAlert is needed for security solution
-    const ecsAlert = ecsData[idx];
-    const data: Array<{ field: string; value: string[] }> = [];
-    Object.entries(alert ?? {}).forEach(([key, value]) => {
-      data.push({ field: key, value: value as string[] });
-    });
-    if (RenderCell && ecsAlert) {
-      return <RenderCell {...props} data={data} ecsData={ecsAlert} />;
-    } else {
-      return <BasicRenderCellValue data={data} columnId={columnId} />;
-    }
-  } else if (isLoading) {
-    return <EuiSkeletonText lines={1} />;
-  }
-  return null;
 });
 
 const ControlColumnHeaderRenderCell = memo(() => {
@@ -134,53 +97,14 @@ const ControlColumnHeaderRenderCell = memo(() => {
   );
 });
 
-const ControlColumnRowRenderCell: RenderCellValue = memo((props) => {
-  const {
-    visibleRowIndex,
-    alerts,
-    ecsData,
-    setFlyoutAlert,
-    oldAlertsData,
-    id,
-    getSetIsActionLoadingCallback,
-    refresh,
-    clearSelection,
-    renderCustomActionsRow,
-  } = props;
-  if (!ecsData[visibleRowIndex]) {
-    return null;
-  }
-
-  return (
-    <EuiFlexGroup gutterSize="none" responsive={false}>
-      {renderCustomActionsRow({
-        alert: alerts[visibleRowIndex],
-        ecsAlert: ecsData[visibleRowIndex],
-        nonEcsData: oldAlertsData[visibleRowIndex],
-        rowIndex: visibleRowIndex,
-        setFlyoutAlert,
-        id,
-        cveProps: props,
-        setIsActionLoading: getSetIsActionLoadingCallback(visibleRowIndex),
-        refresh,
-        clearSelection,
-      })}
-    </EuiFlexGroup>
-  );
-});
+const CustomCellWrapper: FC = ({ children }) => (
+  <EuiFlexGroup gutterSize="none" responsive={false}>
+    {children}
+  </EuiFlexGroup>
+);
 
 const isSystemCell = (columnId: string): columnId is SystemCellId => {
   return systemCells.includes(columnId as SystemCellId);
-};
-
-const useFieldBrowserOptionsOrDefault = (
-  useFieldBrowserOptions:
-    | NonNullable<AlertsTableConfigurationRegistry['useFieldBrowserOptions']>
-    | (() => undefined),
-  onToggleColumn: (columnId: string) => void
-) => {
-  const args = useMemo(() => ({ onToggleColumn }), [onToggleColumn]);
-  return useFieldBrowserOptions(args);
 };
 
 // Here we force the error callout to be the same height as the cell content
@@ -279,413 +203,370 @@ const CustomGridBody = memo(
   }
 );
 
-const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: AlertsTableProps) => {
+const CellValueHost: AlertsTableProps['renderCellValue'] = (props) => {
   const {
-    visibleColumns,
-    onToggleColumn,
-    onResetColumns,
-    browserFields,
-    onChangeVisibleColumns,
-    onColumnResize,
-    showAlertStatusWithFlapping = false,
-    showInspectButton = false,
-    cellContext: passedCellContext,
-    leadingControlColumns: passedControlColumns,
-    trailingControlColumns,
-    alertsTableConfiguration,
-    pageIndex,
-    pageSize,
-    columns,
-    alerts,
-    alertsCount,
+    columnId,
+    renderCellValue: CellValue,
     isLoading,
-    oldAlertsData,
-    ecsAlertsData,
-    onSortChange,
-    onPageChange,
-    sort: sortingFields,
-    refetchAlerts,
-    rowHeightsOptions,
-    dynamicRowHeight,
-    query,
-    querySnapshot,
-    featureIds,
-    cases: { data: cases, isLoading: isLoadingCases },
-    maintenanceWindows: { data: maintenanceWindows, isLoading: isLoadingMaintenanceWindows },
-    controls,
-    toolbarVisibility: toolbarVisibilityProp,
-    shouldHighlightRow,
-    fieldFormats,
-    height,
-  } = props;
-
-  const dataGridRef = useRef<EuiDataGridRefProps>(null);
-  const [activeRowClasses, setActiveRowClasses] = useState<
-    NonNullable<EuiDataGridStyle['rowClasses']>
-  >({});
-
-  const queryClient = useQueryClient({ context: AlertsQueryContext });
-
-  const { sortingColumns, onSort } = useSorting(onSortChange, visibleColumns, sortingFields);
-
-  const { renderCustomActionsRow, actionsColumnWidth, getSetIsActionLoadingCallback } =
-    useActionsColumn({
-      options: alertsTableConfiguration.useActionsColumn,
-    });
-
-  const userAssigneeContext = alertsTableConfiguration.useFetchPageContext?.({
     alerts,
-    columns,
-  });
-
-  const bulkActionArgs = useMemo(() => {
-    return {
-      alertsCount: alerts.length,
-      casesConfig: alertsTableConfiguration.cases,
-      query,
-      useBulkActionsConfig: alertsTableConfiguration.useBulkActions,
-      refresh: refetchAlerts,
-      featureIds,
-      hideBulkActions: Boolean(alertsTableConfiguration.hideBulkActions),
-    };
-  }, [
-    alerts.length,
-    alertsTableConfiguration.cases,
-    alertsTableConfiguration.useBulkActions,
-    alertsTableConfiguration.hideBulkActions,
-    query,
-    refetchAlerts,
-    featureIds,
-  ]);
-
-  const {
-    isBulkActionsColumnActive,
-    getBulkActionsLeadingControlColumn,
-    bulkActionsState,
-    bulkActions,
-    setIsBulkActionsLoading,
-    clearSelection,
-  } = useBulkActions(bulkActionArgs);
-
-  const refreshData = useCallback(() => {
-    refetchAlerts();
-    queryClient.invalidateQueries(triggersActionsUiQueriesKeys.cases());
-    queryClient.invalidateQueries(triggersActionsUiQueriesKeys.mutedAlerts());
-    queryClient.invalidateQueries(triggersActionsUiQueriesKeys.maintenanceWindows());
-  }, [refetchAlerts, queryClient]);
-
-  const refresh = useCallback(() => {
-    refreshData();
-    clearSelection();
-  }, [clearSelection, refreshData]);
-
-  const {
-    pagination: updatedPagination,
-    onChangePageSize,
-    onChangePageIndex,
-    onPaginateFlyout,
-    flyoutAlertIndex,
-    setFlyoutAlertIndex,
-  } = usePagination({
-    onPageChange,
-    pageIndex,
-    pageSize,
-  });
-
-  // TODO when every solution is using this table, we will be able to simplify it by just passing the alert index
-  const handleFlyoutAlert = useCallback(
-    (alertId: string) => {
-      const idx = alerts.findIndex((a) => (a as any)[ALERT_UUID].includes(alertId));
-      setFlyoutAlertIndex(idx);
-    },
-    [alerts, setFlyoutAlertIndex]
-  );
-
-  const fieldBrowserOptions = useFieldBrowserOptionsOrDefault(
-    alertsTableConfiguration.useFieldBrowserOptions ?? fieldBrowserStub,
-    onToggleColumn
-  );
-
-  const toolbarVisibilityArgs = useMemo(() => {
-    return {
-      bulkActions,
-      alertsCount,
-      rowSelection: bulkActionsState.rowSelection,
-      alerts,
-      isLoading,
-      columnIds: columns.map((column) => column.id),
-      onToggleColumn,
-      onResetColumns,
-      browserFields,
-      controls,
-      setIsBulkActionsLoading,
-      clearSelection,
-      refresh,
-      fieldBrowserOptions,
-      querySnapshot,
-      showInspectButton,
-      toolbarVisibilityProp,
-    };
-  }, [
-    bulkActions,
-    alertsCount,
-    bulkActionsState,
-    isLoading,
-    columns,
-    onToggleColumn,
-    onResetColumns,
-    browserFields,
-    setIsBulkActionsLoading,
-    clearSelection,
-    refresh,
-    fieldBrowserOptions,
-    querySnapshot,
-    showInspectButton,
-    toolbarVisibilityProp,
-    alerts,
-    controls,
-  ]);
-
-  const toolbarVisibility = useGetToolbarVisibility(toolbarVisibilityArgs);
-
-  const customActionsRow = useMemo(() => {
-    return renderCustomActionsRow
-      ? {
-          id: 'expandColumn',
-          width: actionsColumnWidth,
-          headerCellRender: ControlColumnHeaderRenderCell,
-          rowCellRender: ControlColumnRowRenderCell,
-        }
-      : undefined;
-  }, [renderCustomActionsRow, actionsColumnWidth]);
-  const bulkActionsColumn = useMemo(() => {
-    return isBulkActionsColumnActive ? getBulkActionsLeadingControlColumn() : undefined;
-  }, [isBulkActionsColumnActive, getBulkActionsLeadingControlColumn]);
-
-  const leadingControlColumns = useMemo(() => {
-    const controlColumns = passedControlColumns ?? [];
-    const usedBulkActionsColumn = bulkActionsColumn ? [bulkActionsColumn] : [];
-    const usedCustomActionsRow = customActionsRow ? [customActionsRow] : [];
-    const mergedControlColumns = [
-      ...controlColumns,
-      ...usedBulkActionsColumn,
-      ...usedCustomActionsRow,
-    ];
-    if (mergedControlColumns.length) {
-      return mergedControlColumns;
-    } else {
-      return undefined;
-    }
-  }, [bulkActionsColumn, customActionsRow, passedControlColumns]);
-
-  const rowIndex = flyoutAlertIndex + pageIndex * pageSize;
-  useEffect(() => {
-    // Row classes do not deal with visible row indices, so we need to handle page offset
-    setActiveRowClasses({
-      [rowIndex]: 'alertsTableActiveRow',
-    });
-  }, [rowIndex]);
-
-  const handleFlyoutClose = useCallback(() => setFlyoutAlertIndex(-1), [setFlyoutAlertIndex]);
-
-  const RenderCell = useMemo(() => {
-    if (props.alertsTableConfiguration?.getRenderCellValue) {
-      return props.alertsTableConfiguration.getRenderCellValue;
-    } else {
-      return FullFeaturedRenderCellValue;
-    }
-  }, [props.alertsTableConfiguration]);
-
-  const renderCellContext = useMemo(() => {
-    const additionalContext = passedCellContext ? passedCellContext : {};
-    return {
-      ...additionalContext,
-      ...alertsTableConfiguration,
-      ecsData: ecsAlertsData,
-      oldAlertsData,
-      context: userAssigneeContext,
-      alerts,
-      browserFields,
-      pagination: updatedPagination,
-      isLoading,
-      setFlyoutAlert: handleFlyoutAlert,
-      RenderCell,
-      isLoadingCases,
-      isLoadingMaintenanceWindows,
-      getSetIsActionLoadingCallback,
-      cases,
-      maintenanceWindows,
-      showAlertStatusWithFlapping,
-      refresh,
-      clearSelection,
-      renderCustomActionsRow,
-      fieldFormats,
-    };
-  }, [
-    passedCellContext,
-    alertsTableConfiguration,
-    ecsAlertsData,
-    oldAlertsData,
-    refresh,
-    clearSelection,
-    renderCustomActionsRow,
-    handleFlyoutAlert,
-    RenderCell,
-    browserFields,
-    isLoading,
-    updatedPagination,
-    alerts,
-    isLoadingCases,
-    isLoadingMaintenanceWindows,
     cases,
     maintenanceWindows,
     showAlertStatusWithFlapping,
-    getSetIsActionLoadingCallback,
-    userAssigneeContext,
-    fieldFormats,
-  ]);
-
-  const renderCellPopover = useMemo(
-    () =>
-      props.alertsTableConfiguration?.getRenderCellPopover?.({
-        context: renderCellContext,
-      }) ?? props.renderCellPopover,
-    [props.alertsTableConfiguration, props.renderCellPopover, renderCellContext]
-  );
-
-  const handleRenderCellPopover = useMemo(
-    () =>
-      renderCellPopover
-        ? (_props: EuiDataGridCellPopoverElementProps) => {
-            try {
-              const idx = _props.rowIndex - pageSize * pageIndex;
-              const alert = alerts[idx];
-              if (alert) {
-                return renderCellPopover({
-                  ..._props,
-                  alert,
-                });
-              }
-              return null;
-            } catch (e) {
-              return <ViewError error={e} />;
-            }
-          }
-        : undefined,
-    [alerts, pageIndex, pageSize, renderCellPopover]
-  );
-
-  const dataGridPagination = useMemo(
-    () => ({
-      pageIndex: updatedPagination.pageIndex,
-      pageSize: updatedPagination.pageSize,
-      pageSizeOptions: props.pageSizeOptions,
-      onChangeItemsPerPage: onChangePageSize,
-      onChangePage: onChangePageIndex,
-    }),
-    [
-      onChangePageIndex,
-      onChangePageSize,
-      updatedPagination.pageIndex,
-      updatedPagination.pageSize,
-      props.pageSizeOptions,
-    ]
-  );
-
-  const { getCellActions, visibleCellActions, disabledCellActions } =
-    alertsTableConfiguration?.useCellActions
-      ? alertsTableConfiguration?.useCellActions({
-          columns,
-          data: oldAlertsData,
-          ecsData: ecsAlertsData,
-          dataGridRef,
-          pageSize,
-          pageIndex,
-        })
-      : getCellActionsStub;
-
-  const columnsWithCellActions = useMemo(() => {
-    if (getCellActions) {
-      return columns.map((col, idx) => ({
-        ...col,
-        ...(!(disabledCellActions ?? []).includes(col.id)
-          ? {
-              cellActions: getCellActions(col.id, idx) ?? [],
-              visibleCellActions,
-            }
-          : {}),
-      }));
-    }
-    return columns;
-  }, [getCellActions, disabledCellActions, columns, visibleCellActions]);
-
-  // // Update highlighted rows when alerts or pagination changes
-  const highlightedRowClasses = useMemo(() => {
-    if (shouldHighlightRow) {
-      const emptyShouldHighlightRow: EuiDataGridStyle['rowClasses'] = {};
-      return alerts.reduce<NonNullable<EuiDataGridStyle['rowClasses']>>(
-        (rowClasses, alert, index) => {
-          if (shouldHighlightRow(alert)) {
-            rowClasses[index + pageIndex * pageSize] = 'alertsTableHighlightedRow';
-          }
-
-          return rowClasses;
-        },
-        emptyShouldHighlightRow
+    casesConfig,
+    rowIndex,
+    pageIndex,
+    pageSize,
+  } = props;
+  const idx = rowIndex - pageSize * pageIndex;
+  const alert = alerts[idx];
+  if (isSystemCell(columnId)) {
+    return (
+      <SystemCellFactory
+        {...props}
+        alert={alert}
+        columnId={columnId}
+        isLoading={isLoading}
+        cases={cases}
+        maintenanceWindows={maintenanceWindows}
+        showAlertStatusWithFlapping={showAlertStatusWithFlapping ?? false}
+        caseAppId={casesConfig?.appId}
+      />
+    );
+  } else if (alert) {
+    if (CellValue) {
+      return (
+        <ErrorBoundary fallback={ViewError}>
+          <CellValue {...props} alert={alert} />
+        </ErrorBoundary>
       );
     } else {
-      return stableMappedRowClasses;
+      return <BasicCellValue alert={alert} columnId={columnId} />;
     }
-  }, [shouldHighlightRow, alerts, pageIndex, pageSize]);
+  } else if (isLoading) {
+    return <EuiSkeletonText lines={1} />;
+  }
+  return null;
+};
 
-  const mergedGridStyle = useMemo(() => {
-    const propGridStyle: NonNullable<EuiDataGridStyle> = props.gridStyle ?? {};
-    // Merges default row classes, custom ones and adds the active row class style
-    return {
-      ...DefaultGridStyle,
-      ...propGridStyle,
-      rowClasses: {
-        // We're spreadind the highlighted row classes first, so that the active
-        // row classed can override the highlighted row classes.
-        ...highlightedRowClasses,
-        ...activeRowClasses,
-      },
-    };
-  }, [activeRowClasses, highlightedRowClasses, props.gridStyle]);
+const CellPopoverHost: EuiDataGridProps['renderCellPopover'] = (props) => {
+  const { rowIndex, DefaultCellPopover } = props;
+  const renderContext = useAlertsTableContext();
+  const { pageSize, pageIndex, alerts, renderCellPopover: CellPopover } = renderContext;
 
-  // Merges the default grid style with the grid style that comes in through props.
-  const actualGridStyle = useMemo(() => {
-    const propGridStyle: NonNullable<EuiDataGridStyle> = props.gridStyle ?? {};
-    // If ANY additional rowClasses have been provided, we need to merge them with our internal ones
-    if (propGridStyle.rowClasses) {
-      // Get all row indices with a rowClass.
-      const mergedKeys = [
-        ...Object.keys(mergedGridStyle.rowClasses || {}),
-        ...Object.keys(propGridStyle.rowClasses || {}),
+  const idx = rowIndex - pageSize * pageIndex;
+  const alert = alerts[idx];
+  if (alert && CellPopover) {
+    return (
+      <ErrorBoundary fallback={ViewError}>
+        <CellPopover {...renderContext} {...props} alert={alert} />
+      </ErrorBoundary>
+    );
+  }
+
+  return <DefaultCellPopover {...props} />;
+};
+
+export const AlertsDataGrid = typedMemo(
+  <AC extends AdditionalContext>(props: AlertsDataGridProps<AC>) => {
+    const {
+      featureIds,
+      query,
+      visibleColumns,
+      onToggleColumn,
+      onResetColumns,
+      onChangeVisibleColumns,
+      onColumnResize,
+      showInspectButton = false,
+      leadingControlColumns: additionalLeadingControlColumns,
+      trailingControlColumns,
+      onSortChange,
+      sort: sortingFields,
+      rowHeightsOptions,
+      dynamicRowHeight,
+      alertsQuerySnapshot,
+      additionalToolbarControls,
+      toolbarVisibility: toolbarVisibilityProp,
+      shouldHighlightRow,
+      renderContext,
+      hideBulkActions,
+      casesConfiguration,
+      flyoutAlertIndex,
+      setFlyoutAlertIndex,
+      onPaginateFlyout,
+      onChangePageSize,
+      onChangePageIndex,
+      actionsColumnWidth = DEFAULT_ACTIONS_COLUMNS_WIDTH,
+      getBulkActions,
+      fieldsBrowserOptions,
+      getCellActionsOptions,
+      pageSizeOptions = DEFAULT_PAGE_SIZE_OPTIONS,
+      height,
+      ...euiDataGridProps
+    } = props;
+    const {
+      isLoading,
+      alerts,
+      alertsCount,
+      isLoadingAlerts,
+      oldAlertsData,
+      ecsData: ecsAlertsData,
+      browserFields,
+      renderActionsCell: ActionsCell,
+      pageIndex,
+      pageSize,
+      refresh: refreshQueries,
+      columns,
+    } = renderContext;
+
+    const dataGridRef = useRef<EuiDataGridRefProps>(null);
+    const [activeRowClasses, setActiveRowClasses] = useState<
+      NonNullable<EuiDataGridStyle['rowClasses']>
+    >({});
+
+    const { sortingColumns, onSort } = useSorting(onSortChange, visibleColumns, sortingFields);
+
+    const bulkActionArgs = useMemo(
+      () => ({
+        featureIds,
+        query,
+        alertsCount: alerts.length,
+        casesConfig: casesConfiguration,
+        getBulkActions,
+        refresh: refreshQueries,
+        hideBulkActions,
+      }),
+      [
+        featureIds,
+        query,
+        alerts.length,
+        casesConfiguration,
+        getBulkActions,
+        refreshQueries,
+        hideBulkActions,
+      ]
+    );
+
+    const {
+      isBulkActionsColumnActive,
+      bulkActionsState,
+      bulkActions,
+      setIsBulkActionsLoading,
+      clearSelection,
+      updateBulkActionsState,
+    } = useBulkActions(bulkActionArgs);
+
+    const refresh = useCallback(() => {
+      refreshQueries();
+      clearSelection();
+    }, [clearSelection, refreshQueries]);
+
+    const toolbarVisibilityArgs = useMemo(() => {
+      return {
+        bulkActions,
+        alertsCount,
+        rowSelection: bulkActionsState.rowSelection,
+        alerts,
+        isLoading,
+        columnIds: columns.map((column) => column.id),
+        onToggleColumn,
+        onResetColumns,
+        browserFields,
+        additionalToolbarControls,
+        setIsBulkActionsLoading,
+        clearSelection,
+        refresh,
+        fieldsBrowserOptions,
+        alertsQuerySnapshot,
+        showInspectButton,
+        toolbarVisibilityProp,
+      };
+    }, [
+      bulkActions,
+      alertsCount,
+      bulkActionsState.rowSelection,
+      alerts,
+      isLoading,
+      columns,
+      onToggleColumn,
+      onResetColumns,
+      browserFields,
+      additionalToolbarControls,
+      setIsBulkActionsLoading,
+      clearSelection,
+      refresh,
+      fieldsBrowserOptions,
+      alertsQuerySnapshot,
+      showInspectButton,
+      toolbarVisibilityProp,
+    ]);
+
+    const toolbarVisibility = useGetToolbarVisibility(toolbarVisibilityArgs);
+
+    const customActionsColumn: EuiDataGridControlColumn | undefined = useMemo(() => {
+      if (ActionsCell) {
+        const RowCellRender: EuiDataGridControlColumn['rowCellRender'] = (_props) => {
+          const setIsActionLoading = useCallback(
+            (_isLoading: boolean = true) => {
+              updateBulkActionsState({
+                action: BulkActionsVerbs.updateRowLoadingState,
+                rowIndex: _props.visibleRowIndex,
+                isLoading: _isLoading,
+              });
+            },
+            [_props.visibleRowIndex]
+          );
+          return (
+            <CustomCellWrapper>
+              <ActionsCell
+                {...(_props as ComponentProps<
+                  // `_props` already contains the correct render context
+                  typeof ActionsCell
+                >)}
+                setIsActionLoading={setIsActionLoading}
+              />
+            </CustomCellWrapper>
+          );
+        };
+        return {
+          id: 'expandColumn',
+          width: actionsColumnWidth,
+          headerCellRender: ControlColumnHeaderRenderCell,
+          rowCellRender: RowCellRender,
+        };
+      }
+    }, [ActionsCell, actionsColumnWidth, updateBulkActionsState]);
+
+    const leadingControlColumns: EuiDataGridControlColumn[] | undefined = useMemo(() => {
+      const controlColumns = [
+        ...(additionalLeadingControlColumns ?? []),
+        ...(isBulkActionsColumnActive
+          ? [
+              {
+                id: 'bulkActions',
+                width: 30,
+                headerCellRender: BulkActionsHeader,
+                rowCellRender: BulkActionsCell,
+              },
+            ]
+          : []),
+        ...(customActionsColumn ? [customActionsColumn] : []),
       ];
-      // Deduplicate keys to avoid extra iterations
-      const dedupedKeys = Array.from(new Set(mergedKeys));
+      if (controlColumns.length) {
+        return controlColumns;
+      }
+    }, [additionalLeadingControlColumns, isBulkActionsColumnActive, customActionsColumn]);
 
-      // For each index, merge row classes
-      const mergedRowClasses = dedupedKeys.reduce<NonNullable<EuiDataGridStyle['rowClasses']>>(
-        (rowClasses, key) => {
+    const flyoutRowIndex = flyoutAlertIndex + pageIndex * pageSize;
+    useEffect(() => {
+      // Row classes do not deal with visible row indices, so we need to handle page offset
+      setActiveRowClasses({
+        [flyoutRowIndex]: 'alertsTableActiveRow',
+      });
+    }, [flyoutRowIndex]);
+
+    const handleFlyoutClose = useCallback(() => setFlyoutAlertIndex(-1), [setFlyoutAlertIndex]);
+
+    const dataGridPagination = useMemo(
+      () => ({
+        pageIndex,
+        pageSize,
+        pageSizeOptions,
+        onChangeItemsPerPage: onChangePageSize,
+        onChangePage: onChangePageIndex,
+      }),
+      [onChangePageIndex, onChangePageSize, pageIndex, pageSize, pageSizeOptions]
+    );
+
+    const { getCellActions, visibleCellActions, disabledCellActions } =
+      getCellActionsOptions?.({
+        columns,
+        data: oldAlertsData,
+        ecsData: ecsAlertsData,
+        dataGridRef,
+        pageSize,
+        pageIndex,
+      }) ?? DEFAULT_CELL_ACTIONS;
+
+    const columnsWithCellActions = useMemo(() => {
+      if (getCellActions) {
+        return columns.map((col, idx) => ({
+          ...col,
+          ...(!(disabledCellActions ?? []).includes(col.id)
+            ? {
+                cellActions: getCellActions(col.id, idx) ?? [],
+                visibleCellActions,
+              }
+            : {}),
+        }));
+      }
+      return columns;
+    }, [getCellActions, disabledCellActions, columns, visibleCellActions]);
+
+    // Update highlighted rows when alerts or pagination changes
+    const highlightedRowClasses = useMemo(() => {
+      if (shouldHighlightRow) {
+        const emptyShouldHighlightRow: EuiDataGridStyle['rowClasses'] = {};
+        return alerts.reduce<NonNullable<EuiDataGridStyle['rowClasses']>>(
+          (rowClasses, alert, index) => {
+            if (shouldHighlightRow(alert)) {
+              rowClasses[index + pageIndex * pageSize] = 'alertsTableHighlightedRow';
+            }
+
+            return rowClasses;
+          },
+          emptyShouldHighlightRow
+        );
+      } else {
+        return stableMappedRowClasses;
+      }
+    }, [shouldHighlightRow, alerts, pageIndex, pageSize]);
+
+    const mergedGridStyle = useMemo(() => {
+      const propGridStyle: NonNullable<EuiDataGridStyle> = props.gridStyle ?? {};
+      // Merges default row classes, custom ones and adds the active row class style
+      return {
+        ...DefaultGridStyle,
+        ...propGridStyle,
+        rowClasses: {
+          // We're spreadind the highlighted row classes first, so that the active
+          // row classed can override the highlighted row classes.
+          ...highlightedRowClasses,
+          ...activeRowClasses,
+        },
+      };
+    }, [activeRowClasses, highlightedRowClasses, props.gridStyle]);
+
+    // Merges the default grid style with the grid style that comes in through props.
+    const actualGridStyle = useMemo(() => {
+      const propGridStyle: NonNullable<EuiDataGridStyle> = props.gridStyle ?? {};
+      // If ANY additional rowClasses have been provided, we need to merge them with our internal ones
+      if (propGridStyle.rowClasses) {
+        // Get all row indices with a rowClass.
+        const mergedKeys = [
+          ...Object.keys(mergedGridStyle.rowClasses || {}),
+          ...Object.keys(propGridStyle.rowClasses || {}),
+        ];
+        // Deduplicate keys to avoid extra iterations
+        const dedupedKeys = Array.from(new Set(mergedKeys));
+
+        // For each index, merge row classes
+        mergedGridStyle.rowClasses = dedupedKeys.reduce<
+          NonNullable<EuiDataGridStyle['rowClasses']>
+        >((rowClasses, key) => {
           const intKey = parseInt(key, 10);
           // Use internal row classes over custom row classes.
           rowClasses[intKey] =
             mergedGridStyle.rowClasses?.[intKey] || propGridStyle.rowClasses?.[intKey] || '';
           return rowClasses;
-        },
-        {}
-      );
-      mergedGridStyle.rowClasses = mergedRowClasses;
-    }
-    return mergedGridStyle;
-  }, [props.gridStyle, mergedGridStyle]);
+        }, {});
+      }
+      return mergedGridStyle;
+    }, [props.gridStyle, mergedGridStyle]);
 
-  const renderCustomGridBody = useCallback<NonNullable<EuiDataGridProps['renderCustomGridBody']>>(
-    ({ visibleColumns: _visibleColumns, Cell, headerRow, footerRow }) => (
-      <>
-        {headerRow}
+    const renderCustomGridBody = useCallback<NonNullable<EuiDataGridProps['renderCustomGridBody']>>(
+      ({ visibleColumns: _visibleColumns, Cell, headerRow, footerRow }) => (
+        <>
+          {headerRow}
         <CustomGridBody
           visibleColumns={_visibleColumns}
           Cell={Cell}
@@ -693,73 +574,78 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: Aler
           alertsData={oldAlertsData}
           pageIndex={pageIndex}
           pageSize={pageSize}
-          isLoading={isLoading}
+          isLoading={isLoadingAlerts}
           stripes={props.gridStyle?.stripes}
         />
-        {footerRow}
-      </>
-    ),
-    [actualGridStyle, oldAlertsData, pageIndex, pageSize, isLoading, props.gridStyle?.stripes]
-  );
+          {footerRow}
+        </>
+      ),
+      [
+        actualGridStyle,
+        oldAlertsData,
+        pageIndex,
+        pageSize,
+        isLoadingAlerts,
+        props.gridStyle?.stripes,
+      ]
+    );
 
-  const sortProps = useMemo(() => {
-    return { columns: sortingColumns, onSort };
-  }, [sortingColumns, onSort]);
+    const sortProps = useMemo(() => {
+      return { columns: sortingColumns, onSort };
+    }, [sortingColumns, onSort]);
 
-  const columnVisibility = useMemo(() => {
-    return { visibleColumns, setVisibleColumns: onChangeVisibleColumns };
-  }, [visibleColumns, onChangeVisibleColumns]);
-  return (
-    <InspectButtonContainer>
-      <section style={{ width: '100%' }} data-test-subj={props['data-test-subj']}>
-        <Suspense fallback={null}>
-          {flyoutAlertIndex > -1 && (
-            <AlertsFlyout
-              alert={alerts[flyoutAlertIndex]}
-              alertsCount={alertsCount}
-              onClose={handleFlyoutClose}
-              alertsTableConfiguration={alertsTableConfiguration}
-              flyoutIndex={flyoutAlertIndex + pageIndex * pageSize}
-              onPaginate={onPaginateFlyout}
-              isLoading={isLoading}
-              id={props.id}
+    const columnVisibility = useMemo(() => {
+      return { visibleColumns, setVisibleColumns: onChangeVisibleColumns };
+    }, [visibleColumns, onChangeVisibleColumns]);
+
+    return (
+      <InspectButtonContainer>
+        <section style={{ width: '100%' }} data-test-subj={props['data-test-subj']}>
+          <Suspense fallback={null}>
+            {flyoutAlertIndex > -1 && (
+              <AlertsFlyout
+                {...renderContext}
+                alert={alerts[flyoutAlertIndex]}
+                alertsCount={alertsCount}
+                onClose={handleFlyoutClose}
+                flyoutIndex={flyoutAlertIndex + pageIndex * pageSize}
+                onPaginate={onPaginateFlyout}
+              />
+            )}
+          </Suspense>
+          {alertsCount > 0 && (
+            <EuiDataGrid
+              {...euiDataGridProps}
+              // As per EUI docs, it is not recommended to switch between undefined and defined height.
+              // If user changes height, it is better to unmount and mount the component.
+              // Ref: https://eui.elastic.co/#/tabular-content/data-grid#virtualization
+              key={height ? 'fixedHeight' : 'autoHeight'}
+              ref={dataGridRef}
+              aria-label="Alerts table"
+              data-test-subj="alertsTable"
+              height={height}
+              columns={columnsWithCellActions}
+              columnVisibility={columnVisibility}
+              trailingControlColumns={trailingControlColumns}
+              leadingControlColumns={leadingControlColumns}
+              rowCount={alertsCount}
+              renderCustomGridBody={dynamicRowHeight ? renderCustomGridBody : undefined}
+              cellContext={renderContext}
+              renderCellValue={CellValueHost as RenderCellValue} // CellValue will receive the correct props through `cellContext`
+              renderCellPopover={CellPopoverHost}
+              gridStyle={actualGridStyle}
+              sorting={sortProps}
+              toolbarVisibility={toolbarVisibility}
+              pagination={dataGridPagination}
+              rowHeightsOptions={rowHeightsOptions}
+              onColumnResize={onColumnResize}
             />
           )}
-        </Suspense>
-        {alertsCount > 0 && (
-          <EuiDataGrid
-            // As per EUI docs, it is not recommended to switch between undefined and defined height.
-            // If user changes height, it is better to unmount and mount the component.
-            // Ref: https://eui.elastic.co/#/tabular-content/data-grid#virtualization
-            key={height ? 'fixedHeight' : 'autoHeight'}
-            aria-label="Alerts table"
-            data-test-subj="alertsTable"
-            columns={columnsWithCellActions}
-            columnVisibility={columnVisibility}
-            trailingControlColumns={trailingControlColumns}
-            leadingControlColumns={leadingControlColumns}
-            rowCount={alertsCount}
-            renderCellValue={FullFeaturedRenderCellValue}
-            gridStyle={actualGridStyle}
-            sorting={sortProps}
-            toolbarVisibility={toolbarVisibility}
-            cellContext={renderCellContext}
-            pagination={dataGridPagination}
-            rowHeightsOptions={rowHeightsOptions}
-            onColumnResize={onColumnResize}
-            ref={dataGridRef}
-            renderCustomGridBody={dynamicRowHeight ? renderCustomGridBody : undefined}
-            renderCellPopover={handleRenderCellPopover}
-            height={height}
-          />
-        )}
-      </section>
-    </InspectButtonContainer>
-  );
-});
+        </section>
+      </InspectButtonContainer>
+    );
+  }
+);
 
-AlertsTable.displayName = 'AlertsTable';
-
-export { AlertsTable };
 // eslint-disable-next-line import/no-default-export
-export { AlertsTable as default };
+export { AlertsDataGrid as default };

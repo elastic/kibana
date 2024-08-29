@@ -9,7 +9,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import * as api from './apis/bulk_get_cases';
 import { waitFor } from '@testing-library/react';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useBulkGetCases } from './use_bulk_get_cases';
+import { useBulkGetCasesQuery } from './use_bulk_get_cases';
 import { AppMockRenderer, createAppMockRenderer } from '../../test_utils';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 
@@ -28,14 +28,14 @@ describe('useBulkGetCases', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRender = createAppMockRenderer(AlertsQueryContext);
+    appMockRender = createAppMockRenderer({ queryClientContext: AlertsQueryContext });
   });
 
   it('calls the api when invoked with the correct parameters', async () => {
     const spy = jest.spyOn(api, 'bulkGetCases');
     spy.mockResolvedValue(response);
 
-    const { waitForNextUpdate } = renderHook(() => useBulkGetCases(['case-1'], true), {
+    const { waitForNextUpdate } = renderHook(() => useBulkGetCasesQuery({ caseIds: ['case-1'] }), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -54,7 +54,7 @@ describe('useBulkGetCases', () => {
     const spy = jest.spyOn(api, 'bulkGetCases');
     spy.mockResolvedValue(response);
 
-    renderHook(() => useBulkGetCases(['case-1'], false), {
+    renderHook(() => useBulkGetCasesQuery({ caseIds: ['case-1'] }, { enabled: false }), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -64,7 +64,7 @@ describe('useBulkGetCases', () => {
   it('shows a toast error when the api return an error', async () => {
     const spy = jest.spyOn(api, 'bulkGetCases').mockRejectedValue(new Error('An error'));
 
-    const { waitForNextUpdate } = renderHook(() => useBulkGetCases(['case-1'], true), {
+    const { waitForNextUpdate } = renderHook(() => useBulkGetCasesQuery({ caseIds: ['case-1'] }), {
       wrapper: appMockRender.AppWrapper,
     });
 

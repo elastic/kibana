@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { AlertsTable } from '../application/sections/alerts_table';
-import type { AlertsTableProps } from '../types';
+import type { AlertsDataGridProps } from '../types';
+import { AlertsDataGrid } from '../application/sections/alerts_table/alerts_data_grid';
 
-export const getAlertsTableLazy = (props: AlertsTableProps) => {
-  return <AlertsTable {...props} />;
+export const getAlertsTableLazy = (props: AlertsDataGridProps) => {
+  return <AlertsDataGrid {...props} />;
 };

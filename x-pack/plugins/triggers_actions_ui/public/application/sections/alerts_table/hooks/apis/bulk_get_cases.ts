@@ -7,6 +7,7 @@
 
 import { CaseStatuses } from '@kbn/cases-components';
 import { HttpStart } from '@kbn/core-http-browser';
+
 const INTERNAL_BULK_GET_CASES_URL = '/internal/cases/_bulk_get';
 
 export interface Case {
@@ -42,10 +43,8 @@ export const bulkGetCases = async (
   params: { ids: string[] },
   signal?: AbortSignal
 ): Promise<CasesBulkGetResponse> => {
-  const res = await http.post<CasesBulkGetResponse>(INTERNAL_BULK_GET_CASES_URL, {
+  return await http.post<CasesBulkGetResponse>(INTERNAL_BULK_GET_CASES_URL, {
     body: JSON.stringify({ ...params }),
     signal,
   });
-
-  return res;
 };

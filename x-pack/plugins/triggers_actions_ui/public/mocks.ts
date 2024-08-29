@@ -19,13 +19,16 @@ import { getEditRuleFlyoutLazy } from './common/get_edit_rule_flyout';
 import {
   ActionTypeModel,
   RuleTypeModel,
-  AlertsTableProps,
+  AlertsDataGridProps,
   FieldBrowserProps,
   RuleTagBadgeOptions,
   RuleTagBadgeProps,
   RuleEventLogListOptions,
   RuleEventLogListProps,
   RuleUiAction,
+  AlertsTableProps,
+  AdditionalContext,
+  LazyLoadProps,
 } from './types';
 import { getAlertsTableLazy } from './common/get_alerts_table';
 import { getRuleStatusDropdownLazy } from './common/get_rule_status_dropdown';
@@ -38,7 +41,6 @@ import { getRulesListLazy } from './common/get_rules_list';
 import { getAlertsTableStateLazy } from './common/get_alerts_table_state';
 import { getAlertsSearchBarLazy } from './common/get_alerts_search_bar';
 import { getRulesListNotifyBadgeLazy } from './common/get_rules_list_notify_badge';
-import { AlertsTableStateProps } from './application/sections/alerts_table/alerts_table_state';
 import { AlertsSearchBarProps } from './application/sections/alerts_search_bar';
 import { CreateConnectorFlyoutProps } from './application/sections/action_connector_form/create_connector_flyout';
 import { EditConnectorFlyoutProps } from './application/sections/action_connector_form/edit_connector_flyout';
@@ -102,13 +104,15 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
         connectorServices,
       });
     },
-    getAlertsStateTable: (props: AlertsTableStateProps) => {
+    getAlertsStateTable: <AC extends AdditionalContext>(
+      props: AlertsTableProps<AC> & LazyLoadProps
+    ) => {
       return getAlertsTableStateLazy(props);
     },
     getAlertsSearchBar: (props: AlertsSearchBarProps) => {
       return getAlertsSearchBarLazy(props);
     },
-    getAlertsTable: (props: AlertsTableProps) => {
+    getAlertsTable: <AC extends AdditionalContext>(props: AlertsDataGridProps<AC>) => {
       return getAlertsTableLazy(props);
     },
     getAlertsTableDefaultAlertActions: (props: AlertActionsProps) => {

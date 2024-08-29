@@ -34,7 +34,7 @@ import { RuleAction } from '@kbn/alerting-plugin/common';
 import { TypeRegistry } from '@kbn/alerts-ui-shared/src/common/type_registry';
 import { CloudSetup } from '@kbn/cloud-plugin/public';
 import { getAlertsTableDefaultAlertActionsLazy } from './common/get_alerts_table_default_row_actions';
-import type { AlertActionsProps, RuleUiAction } from './types';
+import type { AdditionalContext, AlertActionsProps, AlertsTableProps, RuleUiAction } from './types';
 import type { AlertsSearchBarProps } from './application/sections/alerts_search_bar';
 
 import { getAddConnectorFlyoutLazy } from './common/get_add_connector_flyout';
@@ -66,7 +66,7 @@ import type {
   RuleTypeModel,
   RuleTypeParams,
   RuleTypeMetaData,
-  AlertsTableProps,
+  AlertsDataGridProps,
   RuleStatusDropdownProps,
   RuleTagFilterProps,
   RuleStatusFilterProps,
@@ -84,7 +84,6 @@ import type {
 } from './types';
 import { TriggersActionsUiConfigType } from '../common/types';
 import { PLUGIN_ID, CONNECTORS_PLUGIN_ID, ALERTS_PAGE_ID } from './common/constants';
-import type { AlertsTableStateProps } from './application/sections/alerts_table/alerts_table_state';
 import { getAlertsTableStateLazy } from './common/get_alerts_table_state';
 import { getAlertsSearchBarLazy } from './common/get_alerts_search_bar';
 import { ActionAccordionFormProps } from './application/sections/action_connector_form/action_form';
@@ -133,13 +132,15 @@ export interface TriggersAndActionsUIPublicPluginStart {
   >(
     props: Omit<RuleEditProps<Params, MetaData>, 'actionTypeRegistry' | 'ruleTypeRegistry'>
   ) => ReactElement<RuleEditProps<Params, MetaData>>;
-  getAlertsTable: (props: AlertsTableProps) => ReactElement<AlertsTableProps>;
+  getAlertsTable: <AC extends AdditionalContext>(
+    props: AlertsDataGridProps<AC>
+  ) => ReactElement<AlertsDataGridProps<AC>>;
   getAlertsTableDefaultAlertActions: <P extends AlertActionsProps>(
     props: P
   ) => ReactElement<AlertActionsProps>;
-  getAlertsStateTable: (
-    props: AlertsTableStateProps & LazyLoadProps
-  ) => ReactElement<AlertsTableStateProps>;
+  getAlertsStateTable: <AC extends AdditionalContext>(
+    props: AlertsTableProps<AC> & LazyLoadProps
+  ) => ReactElement<AlertsTableProps<AC>>;
   getAlertsSearchBar: (props: AlertsSearchBarProps) => ReactElement<AlertsSearchBarProps>;
   getFieldBrowser: (props: FieldBrowserProps) => ReactElement<FieldBrowserProps>;
   getRuleStatusDropdown: (props: RuleStatusDropdownProps) => ReactElement<RuleStatusDropdownProps>;
@@ -451,14 +452,6 @@ export class Plugin
   }
 
   public start(core: CoreStart, plugins: PluginsStart): TriggersAndActionsUIPublicPluginStart {
-    import('./application/sections/alerts_table/configuration').then(
-      ({ createGenericAlertsTableConfigurations }) => {
-        createGenericAlertsTableConfigurations(plugins.fieldFormats).forEach((c) =>
-          this.alertsTableConfigurationRegistry.register(c)
-        );
-      }
-    );
-
     return {
       actionTypeRegistry: this.actionTypeRegistry,
       ruleTypeRegistry: this.ruleTypeRegistry,
@@ -507,13 +500,15 @@ export class Plugin
           connectorServices: this.connectorServices!,
         });
       },
-      getAlertsStateTable: (props: AlertsTableStateProps & LazyLoadProps) => {
+      getAlertsStateTable: <AC extends AdditionalContext>(
+        props: AlertsTableProps<AC> & LazyLoadProps
+      ) => {
         return getAlertsTableStateLazy(props);
       },
       getAlertsSearchBar: (props: AlertsSearchBarProps) => {
         return getAlertsSearchBarLazy(props);
       },
-      getAlertsTable: (props: AlertsTableProps) => {
+      getAlertsTable: <AC extends AdditionalContext>(props: AlertsDataGridProps<AC>) => {
         return getAlertsTableLazy(props);
       },
       getAlertsTableDefaultAlertActions: (props: AlertActionsProps) => {

@@ -4,56 +4,43 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo, useReducer } from 'react';
-import { identity } from 'lodash';
-import { fireEvent, render, screen, within, waitFor } from '@testing-library/react';
+import React, { FunctionComponent, useMemo, useReducer } from 'react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import {
-  ALERT_RULE_NAME,
-  ALERT_REASON,
-  ALERT_FLAPPING,
-  ALERT_STATUS,
-  ALERT_CASE_IDS,
-} from '@kbn/rule-data-utils';
-import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
-import { AlertsTable } from './alerts_table';
-import {
-  AlertsField,
-  AlertsTableConfigurationRegistry,
-  AlertsTableProps,
-  BulkActionsState,
-  FetchAlertData,
-  RowSelectionState,
-  UseCellActions,
-  Alerts,
-} from '../../../types';
-import { EuiButton, EuiButtonIcon, EuiDataGridColumnCellAction, EuiFlexItem } from '@elastic/eui';
+import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
+import { AlertsDataGrid } from './alerts_data_grid';
+import { BulkActionsState, AdditionalContext, RenderContext } from '../../../types';
+import { EuiButtonIcon, EuiDataGridColumnCellAction, EuiFlexItem } from '@elastic/eui';
 import { bulkActionsReducer } from './bulk_actions/reducer';
-import { BrowserFields } from '@kbn/alerting-types';
-import { getCasesMockMap } from './cases/index.mock';
-import { getMaintenanceWindowMockMap } from './maintenance_windows/index.mock';
 import { createAppMockRenderer, getJsDomPerformanceFix } from '../test_utils';
 import { createCasesServiceMock } from './index.mock';
 import { useCaseViewNavigation } from './cases/use_case_view_navigation';
 import { act } from 'react-dom/test-utils';
-import { AlertsTableContext } from './contexts/alerts_table_context';
-import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
+import { AlertsTableContextProvider } from './contexts/alerts_table_context';
+import {
+  TestAlertsDataGridProps,
+  BaseAlertsDataGridProps,
+  mockDataGridProps,
+  mockRenderContext,
+  mockColumns,
+  mockAlerts,
+  mockBulkActionsState,
+} from './alerts_data_grid.mock';
+import {
+  CELL_ACTIONS_EXPAND_TEST_ID,
+  CELL_ACTIONS_POPOVER_TEST_ID,
+  FIELD_BROWSER_BTN_TEST_ID,
+  FIELD_BROWSER_CUSTOM_CREATE_BTN_TEST_ID,
+  FIELD_BROWSER_TEST_ID,
+} from './constants';
 
-const mockCaseService = createCasesServiceMock();
-
-const mockFieldFormatsRegistry = {
-  deserialize: jest.fn().mockImplementation(() => ({
-    id: 'string',
-    convert: jest.fn().mockImplementation(identity),
-  })),
-} as unknown as FieldFormatsRegistry;
-
-jest.mock('@kbn/data-plugin/public');
 jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
   useUiSetting$: jest.fn((value: string) => ['0,0']),
 }));
 
+// useKibana mock
+const mockCaseService = createCasesServiceMock();
 jest.mock('@kbn/kibana-react-plugin/public', () => {
   const original = jest.requireActual('@kbn/kibana-react-plugin/public');
 
@@ -75,141 +62,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
 
 jest.mock('./cases/use_case_view_navigation');
 
-const columns = [
-  {
-    id: ALERT_RULE_NAME,
-    displayAsText: 'Name',
-  },
-  {
-    id: ALERT_REASON,
-    displayAsText: 'Reason',
-  },
-  {
-    id: ALERT_STATUS,
-    displayAsText: 'Alert status',
-  },
-  {
-    id: ALERT_CASE_IDS,
-    displayAsText: 'Cases',
-  },
-];
-
-const alerts = [
-  {
-    [ALERT_RULE_NAME]: ['one'],
-    [ALERT_REASON]: ['two'],
-    [ALERT_STATUS]: ['active'],
-    [ALERT_FLAPPING]: [true],
-    [ALERT_CASE_IDS]: ['test-id'],
-  },
-  {
-    [ALERT_RULE_NAME]: ['three'],
-    [ALERT_REASON]: ['four'],
-    [ALERT_STATUS]: ['active'],
-    [ALERT_FLAPPING]: [false],
-    [ALERT_CASE_IDS]: ['test-id-2'],
-  },
-  {
-    [ALERT_RULE_NAME]: ['five'],
-    [ALERT_REASON]: ['six'],
-    [ALERT_STATUS]: ['recovered'],
-    [ALERT_FLAPPING]: [true],
-  },
-  {
-    [ALERT_RULE_NAME]: ['seven'],
-    [ALERT_REASON]: ['eight'],
-    [ALERT_STATUS]: ['recovered'],
-    [ALERT_FLAPPING]: [false],
-  },
-] as unknown as Alerts;
-
-const oldAlertsData = [
-  [
-    {
-      field: AlertsField.name,
-      value: ['one'],
-    },
-    {
-      field: AlertsField.reason,
-      value: ['two'],
-    },
-  ],
-  [
-    {
-      field: AlertsField.name,
-      value: ['three'],
-    },
-    {
-      field: AlertsField.reason,
-      value: ['four'],
-    },
-  ],
-] as FetchAlertData['oldAlertsData'];
-
-const ecsAlertsData = [
-  [
-    {
-      '@timestamp': ['2023-01-28T10:48:49.559Z'],
-      _id: 'SomeId',
-      _index: 'SomeIndex',
-      kibana: {
-        alert: {
-          rule: {
-            name: ['one'],
-          },
-          reason: ['two'],
-        },
-      },
-    },
-  ],
-  [
-    {
-      '@timestamp': ['2023-01-27T10:48:49.559Z'],
-      _id: 'SomeId2',
-      _index: 'SomeIndex',
-      kibana: {
-        alert: {
-          rule: {
-            name: ['three'],
-          },
-          reason: ['four'],
-        },
-      },
-    },
-  ],
-] as FetchAlertData['ecsAlertsData'];
-
 const cellActionOnClickMockedFn = jest.fn();
-
-const TEST_ID = {
-  CELL_ACTIONS_POPOVER: 'euiDataGridExpansionPopover',
-  CELL_ACTIONS_EXPAND: 'euiDataGridCellExpandButton',
-  FIELD_BROWSER: 'fields-browser-container',
-  FIELD_BROWSER_BTN: 'show-field-browser',
-  FIELD_BROWSER_CUSTOM_CREATE_BTN: 'field-browser-custom-create-btn',
-};
-
-const mockedUseCellActions: UseCellActions = () => {
-  const mockedGetCellActions = (columnId: string): EuiDataGridColumnCellAction[] => {
-    const fakeCellAction: EuiDataGridColumnCellAction = ({ rowIndex, Component }) => {
-      const label = 'Fake Cell First Action';
-      return (
-        <Component
-          onClick={() => cellActionOnClickMockedFn(columnId, rowIndex)}
-          data-test-subj={'fake-cell-first-action'}
-          iconType="refresh"
-          aria-label={label}
-        />
-      );
-    };
-    return [fakeCellAction];
-  };
-  return {
-    getCellActions: mockedGetCellActions,
-    visibleCellActions: 2,
-    disabledCellActions: [],
-  };
-};
 
 const { fix, cleanup } = getJsDomPerformanceFix();
 
@@ -221,144 +74,39 @@ afterAll(() => {
   cleanup();
 });
 
-describe('AlertsTable', () => {
-  const alertsTableConfiguration: AlertsTableConfigurationRegistry = {
-    id: '',
-    columns,
-    sort: [],
-    useInternalFlyout: jest.fn().mockImplementation(() => ({
-      header: jest.fn(),
-      body: jest.fn(),
-      footer: jest.fn(),
-    })),
-    getRenderCellValue: jest.fn().mockImplementation((props) => {
-      return `${props.colIndex}:${props.rowIndex}`;
-    }),
-    useBulkActions: () => [
-      {
-        id: 0,
-        items: [
-          {
-            label: 'Fake Bulk Action',
-            key: 'fakeBulkAction',
-            'data-test-subj': 'fake-bulk-action',
-            disableOnQuery: false,
-            onClick: () => {},
-          },
-        ],
-      },
-    ],
-    useFieldBrowserOptions: () => {
-      return {
-        createFieldButton: () => (
-          <EuiButton data-test-subj={TEST_ID.FIELD_BROWSER_CUSTOM_CREATE_BTN} />
-        ),
-      };
-    },
-    useActionsColumn: () => {
-      return {
-        renderCustomActionsRow: () => (
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType="analyzeEvent"
-              color="primary"
-              onClick={() => {}}
-              size="s"
-              data-test-subj="fake-action"
-              aria-label="fake-action"
-            />
-          </EuiFlexItem>
-        ),
-      };
-    },
-  };
-
-  const browserFields: BrowserFields = {
-    kibana: {
-      fields: {
-        [AlertsField.uuid]: {
-          category: 'kibana',
-          name: AlertsField.uuid,
-        },
-        [AlertsField.name]: {
-          category: 'kibana',
-          name: AlertsField.name,
-        },
-        [AlertsField.reason]: {
-          category: 'kibana',
-          name: AlertsField.reason,
-        },
-      },
-    },
-  };
-
-  const casesMap = getCasesMockMap();
-  const maintenanceWindowsMap = getMaintenanceWindowMockMap();
-
-  const tableProps: AlertsTableProps = {
-    alertsTableConfiguration,
-    cases: { data: casesMap, isLoading: false },
-    maintenanceWindows: { data: maintenanceWindowsMap, isLoading: false },
-    columns,
-    deletedEventIds: [],
-    disabledCellActions: [],
-    pageSizeOptions: [1, 10, 20, 50, 100],
-    leadingControlColumns: [],
-    trailingControlColumns: [],
-    visibleColumns: columns.map((c) => c.id),
-    'data-test-subj': 'testTable',
-    onToggleColumn: () => {},
-    onResetColumns: () => {},
-    onChangeVisibleColumns: () => {},
-    browserFields,
-    query: {},
-    pageIndex: 0,
-    pageSize: 1,
-    sort: [],
-    isLoading: false,
-    alerts,
-    oldAlertsData,
-    ecsAlertsData,
-    querySnapshot: { request: [], response: [] },
-    refetchAlerts: () => {},
-    alertsCount: alerts.length,
-    onSortChange: jest.fn(),
-    onPageChange: jest.fn(),
-    fieldFormats: mockFieldFormatsRegistry,
-  };
-
-  const defaultBulkActionsState = {
-    rowSelection: new Map<number, RowSelectionState>(),
-    isAllSelected: false,
-    areAllVisibleRowsSelected: false,
-    rowCount: 4,
-    updatedAt: Date.now(),
-  };
-
+describe('AlertsDataGrid', () => {
   const useCaseViewNavigationMock = useCaseViewNavigation as jest.Mock;
   useCaseViewNavigationMock.mockReturnValue({ navigateToCaseView: jest.fn() });
 
-  const AlertsTableWithProviders: React.FunctionComponent<
-    AlertsTableProps & { initialBulkActionsState?: BulkActionsState }
+  const TestComponent: React.FunctionComponent<
+    Omit<TestAlertsDataGridProps, 'renderContext'> & {
+      initialBulkActionsState?: BulkActionsState;
+      renderContext?: Partial<RenderContext<AdditionalContext>>;
+    }
   > = (props) => {
-    const renderer = useMemo(() => createAppMockRenderer(AlertsQueryContext), []);
-    const AppWrapper = renderer.AppWrapper;
+    const { AppWrapper } = useMemo(
+      () => createAppMockRenderer({ queryClientContext: AlertsQueryContext }),
+      []
+    );
 
-    const initialBulkActionsState = useReducer(
+    const bulkActionsStore = useReducer(
       bulkActionsReducer,
-      props.initialBulkActionsState || defaultBulkActionsState
+      props.initialBulkActionsState || mockBulkActionsState
+    );
+    const renderContext = useMemo(
+      () => ({
+        ...mockRenderContext,
+        bulkActionsStore,
+        ...props.renderContext,
+      }),
+      [bulkActionsStore, props.renderContext]
     );
 
     return (
       <AppWrapper>
-        <AlertsTableContext.Provider
-          value={{
-            mutedAlerts: {},
-            bulkActions: initialBulkActionsState,
-          }}
-        >
-          <AlertsTable {...props} />
-        </AlertsTableContext.Provider>
+        <AlertsTableContextProvider value={renderContext}>
+          <AlertsDataGrid {...({ ...props, renderContext } as BaseAlertsDataGridProps)} />
+        </AlertsTableContextProvider>
       </AppWrapper>
     );
   };
@@ -369,70 +117,74 @@ describe('AlertsTable', () => {
 
   describe('Alerts table UI', () => {
     it('should support sorting', async () => {
-      const renderResult = render(<AlertsTableWithProviders {...tableProps} />);
-      await userEvent.click(
-        renderResult.container.querySelector('.euiDataGridHeaderCell__button')!,
-        { pointerEventsCheck: 0 }
-      );
+      const { container } = render(<TestComponent {...mockDataGridProps} />);
+      await userEvent.click(container.querySelector('.euiDataGridHeaderCell__button')!, {
+        pointerEventsCheck: 0,
+      });
 
       await waitForEuiPopoverOpen();
 
       await userEvent.click(
-        renderResult.getByTestId(`dataGridHeaderCellActionGroup-${columns[0].id}`),
-        { pointerEventsCheck: 0 }
+        screen.getByTestId(`dataGridHeaderCellActionGroup-${mockColumns[0].id}`),
+        {
+          pointerEventsCheck: 0,
+        }
       );
 
-      await userEvent.click(renderResult.getByTitle('Sort A-Z'), { pointerEventsCheck: 0 });
+      await userEvent.click(screen.getByTitle('Sort A-Z'), {
+        pointerEventsCheck: 0,
+      });
 
-      expect(tableProps.onSortChange).toHaveBeenCalledWith([
+      expect(mockDataGridProps.onSortChange).toHaveBeenCalledWith([
         { direction: 'asc', id: 'kibana.alert.rule.name' },
       ]);
     });
 
     it('should support pagination', async () => {
-      const renderResult = render(
-        <AlertsTableWithProviders {...tableProps} pageIndex={0} pageSize={1} />
-      );
-      await userEvent.click(renderResult.getByTestId('pagination-button-1'), {
+      render(<TestComponent {...mockDataGridProps} />);
+      await userEvent.click(screen.getByTestId('pagination-button-1'), {
         pointerEventsCheck: 0,
       });
 
-      expect(tableProps.onPageChange).toHaveBeenCalledWith({ pageIndex: 1, pageSize: 1 });
+      expect(mockDataGridProps.onChangePageIndex).toHaveBeenCalledWith(1);
     });
 
     it('should show when it was updated', () => {
-      const { getByTestId } = render(<AlertsTableWithProviders {...tableProps} />);
-      expect(getByTestId('toolbar-updated-at')).not.toBe(null);
+      render(<TestComponent {...mockDataGridProps} />);
+      expect(screen.getByTestId('toolbar-updated-at')).not.toBe(null);
     });
 
     it('should show alerts count', () => {
-      const { getByTestId } = render(<AlertsTableWithProviders {...tableProps} />);
-      expect(getByTestId('toolbar-alerts-count')).not.toBe(null);
+      render(<TestComponent {...mockDataGridProps} />);
+      expect(screen.getByTestId('toolbar-alerts-count')).not.toBe(null);
     });
 
     it('should show alert status', () => {
-      const props = {
-        ...tableProps,
-        showAlertStatusWithFlapping: true,
-        pageIndex: 0,
-        pageSize: 10,
-        alertsTableConfiguration: {
-          ...alertsTableConfiguration,
-          getRenderCellValue: undefined,
-        },
-      };
-
-      const { queryAllByTestId } = render(<AlertsTableWithProviders {...props} />);
-      expect(queryAllByTestId('alertLifecycleStatusBadge')[0].textContent).toEqual('Flapping');
-      expect(queryAllByTestId('alertLifecycleStatusBadge')[1].textContent).toEqual('Active');
-      expect(queryAllByTestId('alertLifecycleStatusBadge')[2].textContent).toEqual('Recovered');
-      expect(queryAllByTestId('alertLifecycleStatusBadge')[3].textContent).toEqual('Recovered');
+      render(
+        <TestComponent
+          {...mockDataGridProps}
+          renderContext={{
+            renderCellValue: undefined,
+            pageSize: 10,
+          }}
+        />
+      );
+      expect(screen.queryAllByTestId('alertLifecycleStatusBadge')[0].textContent).toEqual(
+        'Flapping'
+      );
+      expect(screen.queryAllByTestId('alertLifecycleStatusBadge')[1].textContent).toEqual('Active');
+      expect(screen.queryAllByTestId('alertLifecycleStatusBadge')[2].textContent).toEqual(
+        'Recovered'
+      );
+      expect(screen.queryAllByTestId('alertLifecycleStatusBadge')[3].textContent).toEqual(
+        'Recovered'
+      );
     });
 
     describe('leading control columns', () => {
       it('should render other leading controls', () => {
-        const customTableProps = {
-          ...tableProps,
+        const props: TestAlertsDataGridProps = {
+          ...mockDataGridProps,
           leadingControlColumns: [
             {
               id: 'selection',
@@ -441,159 +193,87 @@ describe('AlertsTable', () => {
               rowCellRender: () => <h2 data-test-subj="testCell">Test cell</h2>,
             },
           ],
-          pageIndex: 0,
-          pageSize: 1,
         };
-        const wrapper = render(<AlertsTableWithProviders {...customTableProps} />);
-        expect(wrapper.queryByTestId('testHeader')).not.toBe(null);
-        expect(wrapper.queryByTestId('testCell')).not.toBe(null);
+        render(<TestComponent {...props} />);
+        expect(screen.queryByTestId('testHeader')).not.toBe(null);
+        expect(screen.queryByTestId('testCell')).not.toBe(null);
       });
     });
 
     describe('actions column', () => {
-      it('should load actions set in config', () => {
-        const customTableProps = {
-          ...tableProps,
-          alertsTableConfiguration: {
-            ...alertsTableConfiguration,
-            useActionsColumn: () => {
-              return {
-                renderCustomActionsRow: () => {
-                  return (
-                    <>
-                      <EuiFlexItem grow={false}>
-                        <EuiButtonIcon
-                          iconType="analyzeEvent"
-                          color="primary"
-                          onClick={() => {}}
-                          size="s"
-                          data-test-subj="testActionColumn"
-                          aria-label="testActionLabel"
-                        />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiButtonIcon
-                          iconType="analyzeEvent"
-                          color="primary"
-                          onClick={() => {}}
-                          size="s"
-                          data-test-subj="testActionColumn2"
-                          aria-label="testActionLabel2"
-                        />
-                      </EuiFlexItem>
-                    </>
-                  );
-                },
-              };
-            },
-          },
-        };
-
-        const { queryByTestId } = render(<AlertsTableWithProviders {...customTableProps} />);
-        expect(queryByTestId('testActionColumn')).not.toBe(null);
-        expect(queryByTestId('testActionColumn2')).not.toBe(null);
-      });
-
-      it('should not add expansion action when not set', () => {
-        const customTableProps = {
-          ...tableProps,
-          alertsTableConfiguration: {
-            ...alertsTableConfiguration,
-            useActionsColumn: () => {
-              return {
-                renderCustomActionsRow: () => {
-                  return (
-                    <>
-                      <EuiFlexItem grow={false}>
-                        <EuiButtonIcon
-                          iconType="analyzeEvent"
-                          color="primary"
-                          onClick={() => {}}
-                          size="s"
-                          data-test-subj="testActionColumn"
-                          aria-label="testActionLabel"
-                        />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiButtonIcon
-                          iconType="analyzeEvent"
-                          color="primary"
-                          onClick={() => {}}
-                          size="s"
-                          data-test-subj="testActionColumn2"
-                          aria-label="testActionLabel2"
-                        />
-                      </EuiFlexItem>
-                    </>
-                  );
-                },
-              };
-            },
-          },
-        };
-
-        const { queryByTestId } = render(<AlertsTableWithProviders {...customTableProps} />);
-        expect(queryByTestId('testActionColumn')).not.toBe(null);
-        expect(queryByTestId('testActionColumn2')).not.toBe(null);
-        expect(queryByTestId('expandColumnCellOpenFlyoutButton-0')).toBe(null);
+      it('should render custom actions cells', () => {
+        render(
+          <TestComponent
+            {...mockDataGridProps}
+            renderContext={{
+              renderActionsCell: () => (
+                <>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonIcon
+                      iconType="analyzeEvent"
+                      color="primary"
+                      onClick={() => {}}
+                      size="s"
+                      data-test-subj="testAction"
+                      aria-label="testActionLabel"
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonIcon
+                      iconType="analyzeEvent"
+                      color="primary"
+                      onClick={() => {}}
+                      size="s"
+                      data-test-subj="testAction2"
+                      aria-label="testActionLabel2"
+                    />
+                  </EuiFlexItem>
+                </>
+              ),
+            }}
+          />
+        );
+        expect(screen.queryByTestId('testAction')).toBeInTheDocument();
+        expect(screen.queryByTestId('testAction2')).toBeInTheDocument();
+        expect(screen.queryByTestId('expandColumnCellOpenFlyoutButton-0')).not.toBeInTheDocument();
       });
 
       it('should render no action column if there is neither the action nor the expand action config is set', () => {
-        const customTableProps = {
-          ...tableProps,
-          alertsTableConfiguration: {
-            ...alertsTableConfiguration,
-            useActionsColumn: undefined,
-          },
-        };
-
-        const { queryByTestId } = render(<AlertsTableWithProviders {...customTableProps} />);
-        expect(queryByTestId('expandColumnHeaderLabel')).toBe(null);
-        expect(queryByTestId('expandColumnCellOpenFlyoutButton')).toBe(null);
+        render(
+          <TestComponent
+            {...mockDataGridProps}
+            renderContext={{
+              renderActionsCell: undefined,
+            }}
+          />
+        );
+        expect(screen.queryByTestId('expandColumnHeaderLabel')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('expandColumnCellOpenFlyoutButton')).not.toBeInTheDocument();
       });
 
       describe('row loading state on action', () => {
-        let mockedFn: jest.Mock;
-        let customTableProps: AlertsTableProps;
-
-        beforeEach(() => {
-          mockedFn = jest.fn();
-          customTableProps = {
-            ...tableProps,
-            pageIndex: 0,
+        type ExtractFunctionComponent<T> = T extends FunctionComponent<infer P> ? T : never;
+        const mockRenderActionsCell = jest.fn(
+          mockRenderContext.renderActionsCell as ExtractFunctionComponent<
+            typeof mockRenderContext.renderActionsCell
+          >
+        );
+        const props: TestAlertsDataGridProps = {
+          ...mockDataGridProps,
+          actionsColumnWidth: 124,
+          renderContext: {
             pageSize: 10,
-            alertsTableConfiguration: {
-              ...alertsTableConfiguration,
-              useActionsColumn: () => {
-                return {
-                  renderCustomActionsRow: mockedFn.mockReturnValue(
-                    <>
-                      <EuiFlexItem grow={false}>
-                        <EuiButtonIcon
-                          iconType="analyzeEvent"
-                          color="primary"
-                          onClick={() => {}}
-                          size="s"
-                          data-test-subj="testActionColumn"
-                          aria-label="testActionLabel"
-                        />
-                      </EuiFlexItem>
-                    </>
-                  ),
-                  width: 124,
-                };
-              },
-            },
-          };
-        });
+            renderActionsCell: mockRenderActionsCell,
+          },
+        };
 
         it('should show the row loader when callback triggered', async () => {
-          render(<AlertsTableWithProviders {...customTableProps} />);
-          fireEvent.click((await screen.findAllByTestId('testActionColumn'))[0]);
+          render(<TestComponent {...props} />);
+          fireEvent.click((await screen.findAllByTestId('testAction'))[0]);
 
           // the callback given to our clients to run when they want to update the loading state
           act(() => {
-            mockedFn.mock.calls[0][0].setIsActionLoading(true);
+            mockRenderActionsCell.mock.calls[0][0].setIsActionLoading!(true);
           });
 
           expect(await screen.findAllByTestId('row-loader')).toHaveLength(1);
@@ -612,21 +292,16 @@ describe('AlertsTable', () => {
 
         it('should show the row loader when callback triggered with false', async () => {
           const initialBulkActionsState = {
-            ...defaultBulkActionsState,
+            ...mockBulkActionsState,
             rowSelection: new Map([[0, { isLoading: true }]]),
           };
 
-          render(
-            <AlertsTableWithProviders
-              {...customTableProps}
-              initialBulkActionsState={initialBulkActionsState}
-            />
-          );
-          fireEvent.click((await screen.findAllByTestId('testActionColumn'))[0]);
+          render(<TestComponent {...props} initialBulkActionsState={initialBulkActionsState} />);
+          fireEvent.click((await screen.findAllByTestId('testAction'))[0]);
 
           // the callback given to our clients to run when they want to update the loading state
           act(() => {
-            mockedFn.mock.calls[0][0].setIsActionLoading(false);
+            mockRenderActionsCell.mock.calls[0][0].setIsActionLoading!(false);
           });
 
           expect(screen.queryByTestId('row-loader')).not.toBeInTheDocument();
@@ -635,64 +310,73 @@ describe('AlertsTable', () => {
     });
 
     describe('cell Actions', () => {
-      let customTableProps: AlertsTableProps;
+      const mockGetCellActions = jest.fn((columnId: string): EuiDataGridColumnCellAction[] => [
+        ({ rowIndex, Component }) => {
+          const label = 'Fake Cell First Action';
+          return (
+            <Component
+              onClick={() => cellActionOnClickMockedFn(columnId, rowIndex)}
+              data-test-subj={'fake-cell-first-action'}
+              iconType="refresh"
+              aria-label={label}
+            />
+          );
+        },
+      ]);
+      const props: TestAlertsDataGridProps = {
+        ...mockDataGridProps,
+        getCellActionsOptions: () => ({
+          getCellActions: mockGetCellActions,
+          visibleCellActions: 2,
+          disabledCellActions: [],
+        }),
+      };
 
-      beforeEach(() => {
-        customTableProps = {
-          ...tableProps,
-          alertsTableConfiguration: {
-            ...alertsTableConfiguration,
-            useCellActions: mockedUseCellActions,
-          },
-        };
-      });
-
-      it('Should render cell actions on hover', async () => {
-        render(<AlertsTableWithProviders {...customTableProps} />);
+      it('should render cell actions on hover', async () => {
+        render(<TestComponent {...props} />);
 
         const reasonFirstRow = (await screen.findAllByTestId('dataGridRowCell'))[3];
 
         fireEvent.mouseOver(reasonFirstRow);
 
-        await waitFor(() => {
-          expect(screen.getByTestId('fake-cell-first-action')).toBeInTheDocument();
-        });
+        expect(await screen.findByTestId('fake-cell-first-action')).toBeInTheDocument();
       });
-      it('cell Actions can be expanded', async () => {
-        render(<AlertsTableWithProviders {...customTableProps} />);
+
+      it('should render expandable cell actions', async () => {
+        render(<TestComponent {...props} />);
         const reasonFirstRow = (await screen.findAllByTestId('dataGridRowCell'))[3];
 
         fireEvent.mouseOver(reasonFirstRow);
 
-        expect(await screen.findByTestId(TEST_ID.CELL_ACTIONS_EXPAND)).toBeVisible();
+        expect(await screen.findByTestId(CELL_ACTIONS_EXPAND_TEST_ID)).toBeVisible();
 
-        fireEvent.click(await screen.findByTestId(TEST_ID.CELL_ACTIONS_EXPAND));
+        fireEvent.click(await screen.findByTestId(CELL_ACTIONS_EXPAND_TEST_ID));
 
-        expect(await screen.findByTestId(TEST_ID.CELL_ACTIONS_POPOVER)).toBeVisible();
+        expect(await screen.findByTestId(CELL_ACTIONS_POPOVER_TEST_ID)).toBeVisible();
         expect(await screen.findAllByLabelText(/fake cell first action/i)).toHaveLength(2);
       });
     });
 
-    describe('Alert Registry use field Browser Hook', () => {
-      it('field Browser Options hook is working correctly', async () => {
+    describe('Fields browser', () => {
+      it('fields browser is working correctly', async () => {
         render(
-          <AlertsTableWithProviders
-            {...tableProps}
+          <TestComponent
+            {...mockDataGridProps}
             initialBulkActionsState={{
-              ...defaultBulkActionsState,
+              ...mockBulkActionsState,
               rowSelection: new Map(),
             }}
           />
         );
 
-        const fieldBrowserBtn = screen.getByTestId(TEST_ID.FIELD_BROWSER_BTN);
+        const fieldBrowserBtn = screen.getByTestId(FIELD_BROWSER_BTN_TEST_ID);
         expect(fieldBrowserBtn).toBeVisible();
 
         fireEvent.click(fieldBrowserBtn);
 
-        expect(await screen.findByTestId(TEST_ID.FIELD_BROWSER)).toBeVisible();
+        expect(await screen.findByTestId(FIELD_BROWSER_TEST_ID)).toBeVisible();
 
-        expect(await screen.findByTestId(TEST_ID.FIELD_BROWSER_CUSTOM_CREATE_BTN)).toBeVisible();
+        expect(await screen.findByTestId(FIELD_BROWSER_CUSTOM_CREATE_BTN_TEST_ID)).toBeVisible();
       });
 
       it('The column state is synced correctly between the column selector and the field selector', async () => {
@@ -733,29 +417,33 @@ describe('AlertsTable', () => {
     });
 
     describe('cases column', () => {
-      const props = {
-        ...tableProps,
-        pageSize: alerts.length,
+      const props: TestAlertsDataGridProps = {
+        ...mockDataGridProps,
+        renderContext: {
+          pageSize: mockAlerts.length,
+        },
       };
 
       it('should show the cases column', async () => {
-        render(<AlertsTableWithProviders {...props} />);
+        render(<TestComponent {...props} />);
         expect(await screen.findByText('Cases')).toBeInTheDocument();
       });
 
       it('should show the cases titles correctly', async () => {
-        render(<AlertsTableWithProviders {...props} pageIndex={0} pageSize={10} />);
+        render(<TestComponent {...props} renderContext={{ pageSize: 10 }} />);
         expect(await screen.findByText('Test case')).toBeInTheDocument();
         expect(await screen.findByText('Test case 2')).toBeInTheDocument();
       });
 
       it('show loading skeleton if it loads cases', async () => {
         render(
-          <AlertsTableWithProviders
+          <TestComponent
             {...props}
-            pageIndex={0}
-            pageSize={10}
-            cases={{ ...props.cases, isLoading: true }}
+            renderContext={{
+              pageSize: 10,
+              isLoading: true,
+              isLoadingCases: true,
+            }}
           />
         );
 
@@ -763,7 +451,7 @@ describe('AlertsTable', () => {
       });
 
       it('shows the cases tooltip', async () => {
-        render(<AlertsTableWithProviders {...props} />);
+        render(<TestComponent {...props} />);
         expect(await screen.findByText('Test case')).toBeInTheDocument();
 
         await userEvent.hover(screen.getByText('Test case'));
@@ -774,13 +462,13 @@ describe('AlertsTable', () => {
 
     describe('dynamic row height mode', () => {
       it('should render a non-virtualized grid body when the dynamicRowHeight option is on', async () => {
-        const { container } = render(<AlertsTableWithProviders {...tableProps} dynamicRowHeight />);
+        const { container } = render(<TestComponent {...mockDataGridProps} dynamicRowHeight />);
 
         expect(container.querySelector('.euiDataGrid__customRenderBody')).toBeTruthy();
       });
 
       it('should render a virtualized grid body when the dynamicRowHeight option is off', async () => {
-        const { container } = render(<AlertsTableWithProviders {...tableProps} />);
+        const { container } = render(<TestComponent {...mockDataGridProps} />);
 
         expect(container.querySelector('.euiDataGrid__virtualized')).toBeTruthy();
       });

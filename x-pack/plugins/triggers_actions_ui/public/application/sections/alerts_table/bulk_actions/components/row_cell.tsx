@@ -5,45 +5,52 @@
  * 2.0.
  */
 
-import { EuiCheckbox, EuiLoadingSpinner } from '@elastic/eui';
-import React, { ChangeEvent, useCallback } from 'react';
-import { useContext } from 'react';
+import { EuiCheckbox, EuiLoadingSpinner, RenderCellValue } from '@elastic/eui';
+import React, { ChangeEvent, memo, useCallback } from 'react';
 import { SELECT_ROW_ARIA_LABEL } from '../translations';
-import { AlertsTableContext } from '../../contexts/alerts_table_context';
+import { useAlertsTableContext } from '../../contexts/alerts_table_context';
 import { BulkActionsVerbs } from '../../../../../types';
 
-const BulkActionsRowCellComponent = ({ rowIndex }: { rowIndex: number }) => {
-  const {
-    bulkActions: [{ rowSelection }, updateSelectedRows],
-  } = useContext(AlertsTableContext);
-  const isChecked = rowSelection.has(rowIndex);
-  const isLoading = isChecked && rowSelection.get(rowIndex)?.isLoading;
-  const onChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      if (e.target.checked) {
-        updateSelectedRows({ action: BulkActionsVerbs.add, rowIndex });
-      } else {
-        updateSelectedRows({ action: BulkActionsVerbs.delete, rowIndex });
-      }
-    },
-    [rowIndex, updateSelectedRows]
-  );
-  if (isLoading) {
-    return <EuiLoadingSpinner size="m" data-test-subj="row-loader" />;
+export const BulkActionsCell = memo(
+  ({
+    visibleRowIndex: rowIndex,
+  }: {
+    /**
+     * Defining manually since the {@renderCellValue} type is missing this prop
+     * @external https://github.com/elastic/eui/issues/5811
+     */
+    visibleRowIndex: number;
+  }) => {
+    const {
+      bulkActionsStore: [{ rowSelection }, updateSelectedRows],
+    } = useAlertsTableContext();
+    const isChecked = rowSelection.has(rowIndex);
+    const isLoading = isChecked && rowSelection.get(rowIndex)?.isLoading;
+    const onChange = useCallback(
+      (e: ChangeEvent<HTMLInputElement>) => {
+        if (e.target.checked) {
+          updateSelectedRows({ action: BulkActionsVerbs.add, rowIndex });
+        } else {
+          updateSelectedRows({ action: BulkActionsVerbs.delete, rowIndex });
+        }
+      },
+      [rowIndex, updateSelectedRows]
+    );
+    if (isLoading) {
+      return <EuiLoadingSpinner size="m" data-test-subj="row-loader" />;
+    }
+
+    // NOTE: id is prefixed here to avoid conflicts with labels in other sections in the app.
+    // see https://github.com/elastic/kibana/issues/162837
+
+    return (
+      <EuiCheckbox
+        id={`bulk-actions-row-cell-${rowIndex}`}
+        aria-label={SELECT_ROW_ARIA_LABEL(rowIndex + 1)}
+        checked={isChecked}
+        onChange={onChange}
+        data-test-subj="bulk-actions-row-cell"
+      />
+    );
   }
-
-  // NOTE: id is prefixed here to avoid conflicts with labels in other sections in the app.
-  // see https://github.com/elastic/kibana/issues/162837
-
-  return (
-    <EuiCheckbox
-      id={`bulk-actions-row-cell-${rowIndex}`}
-      aria-label={SELECT_ROW_ARIA_LABEL(rowIndex + 1)}
-      checked={isChecked}
-      onChange={onChange}
-      data-test-subj="bulk-actions-row-cell"
-    />
-  );
-};
-
-export const BulkActionsRowCell = React.memo(BulkActionsRowCellComponent);
+) as unknown as RenderCellValue;

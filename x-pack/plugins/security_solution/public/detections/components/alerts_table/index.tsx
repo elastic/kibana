@@ -10,7 +10,7 @@ import { EuiFlexGroup } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import type { FC } from 'react';
 import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
-import type { AlertsTableStateProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/alerts_table_state';
+import type { AlertsTableProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/alerts_table';
 import type { Alert } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { ALERT_BUILDING_BLOCK_TYPE } from '@kbn/rule-data-utils';
 import styled from 'styled-components';
@@ -186,7 +186,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
     endDate: to,
   });
 
-  const finalBoolQuery: AlertsTableStateProps['query'] = useMemo(() => {
+  const finalBoolQuery: AlertsTableProps['query'] = useMemo(() => {
     if (combinedQuery?.kqlError || !combinedQuery?.filterQuery) {
       return { bool: {} };
     }
@@ -230,7 +230,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
     [alertColumns, isEventRenderedView]
   );
 
-  const onAlertTableUpdate = useCallback<NonNullable<AlertsTableStateProps['onUpdate']>>(
+  const onAlertTableUpdate: AlertsTableProps['onUpdate'] = useCallback(
     ({ isLoading: isAlertTableLoading, totalCount, refresh }) => {
       dispatch(
         updateIsLoading({
@@ -277,7 +277,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
     };
   }, [isEventRenderedView]);
 
-  const alertStateProps: AlertsTableStateProps = useMemo(
+  const alertStateProps: AlertsTableProps = useMemo(
     () => ({
       alertsTableConfigurationRegistry: triggersActionsUi.alertsTableConfigurationRegistry,
       configurationId: configId,

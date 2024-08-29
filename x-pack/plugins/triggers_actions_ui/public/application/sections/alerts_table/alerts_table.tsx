@@ -5,51 +5,58 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useRef, useMemo, useReducer, useEffect, memo } from 'react';
+import React, {
+  useState,
+  useCallback,
+  useRef,
+  useMemo,
+  useReducer,
+  useEffect,
+  useImperativeHandle,
+  forwardRef,
+  Ref,
+  ReactElement,
+} from 'react';
 import { isEmpty } from 'lodash';
 import {
   EuiDataGridColumn,
   EuiProgress,
   EuiDataGridSorting,
   EuiEmptyPrompt,
-  EuiDataGridProps,
-  EuiDataGridToolBarVisibilityOptions,
   EuiButton,
   EuiCode,
   EuiCopy,
   EuiDataGridControlColumn,
 } from '@elastic/eui';
-import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ALERT_CASE_IDS, ALERT_MAINTENANCE_WINDOW_IDS } from '@kbn/rule-data-utils';
-import type { ValidFeatureId } from '@kbn/rule-data-utils';
+import {
+  ALERT_CASE_IDS,
+  ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_RULE_UUID,
+  ALERT_UUID,
+} from '@kbn/rule-data-utils';
 import type { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
-import type { BrowserFields } from '@kbn/alerting-types';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import type {
-  QueryDslQueryContainer,
-  SortCombinations,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { QueryClientProvider } from '@tanstack/react-query';
+import { useCombinedQueries } from '@kbn/react-query-utils';
+import type { SortCombinations } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { QueryClientProvider, useQueryClient } from '@tanstack/react-query';
 import { useSearchAlertsQuery } from '@kbn/alerts-ui-shared/src/common/hooks/use_search_alerts_query';
 import { DEFAULT_ALERTS_PAGE_SIZE } from '@kbn/alerts-ui-shared/src/common/constants';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import deepEqual from 'fast-deep-equal';
 import { useKibana } from '../../../common/lib/kibana';
-import { useGetMutedAlerts } from './hooks/alert_mute/use_get_muted_alerts';
-import { AlertsTable } from './alerts_table';
+import { useGetMutedAlertsQuery } from './hooks/alert_mute/use_get_muted_alerts';
+import { AlertsDataGrid } from './alerts_data_grid';
 import { EmptyState } from './empty_state';
 import {
+  AdditionalContext,
   Alert,
   Alerts,
-  AlertsTableConfigurationRegistry,
-  AlertsTableConfigurationRegistryContract,
+  AlertsDataGridProps,
   AlertsTableProps,
+  RenderContext,
   RowSelectionState,
-  TableUpdateHandlerArgs,
 } from '../../../types';
 import {
-  ALERTS_TABLE_CONF_ERROR_MESSAGE,
-  ALERTS_TABLE_CONF_ERROR_TITLE,
   ALERTS_TABLE_UNKNOWN_ERROR_TITLE,
   ALERTS_TABLE_UNKNOWN_ERROR_MESSAGE,
   ALERTS_TABLE_UNKNOWN_ERROR_COPY_TO_CLIPBOARD_LABEL,
@@ -58,37 +65,14 @@ import { bulkActionsReducer } from './bulk_actions/reducer';
 import { useColumns } from './hooks/use_columns';
 import { InspectButtonContainer } from './toolbar/components/inspect';
 import { alertsTableQueryClient } from './query_client';
-import { useBulkGetCases } from './hooks/use_bulk_get_cases';
-import { useBulkGetMaintenanceWindows } from './hooks/use_bulk_get_maintenance_windows';
+import { useBulkGetCasesQuery } from './hooks/use_bulk_get_cases';
+import { useBulkGetMaintenanceWindowsQuery } from './hooks/use_bulk_get_maintenance_windows';
 import { CasesService } from './types';
-import { AlertsTableContext } from './contexts/alerts_table_context';
+import { AlertsTableContextProvider } from './contexts/alerts_table_context';
 import { ErrorBoundary, FallbackComponent } from '../common/components/error_boundary';
-
-export type AlertsTableStateProps = {
-  alertsTableConfigurationRegistry: AlertsTableConfigurationRegistryContract;
-  configurationId: string;
-  id: string;
-  featureIds: ValidFeatureId[];
-  query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
-  initialPageSize?: number;
-  browserFields?: BrowserFields;
-  onUpdate?: (args: TableUpdateHandlerArgs) => void;
-  onLoaded?: (alerts: Alerts) => void;
-  runtimeMappings?: MappingRuntimeFields;
-  showAlertStatusWithFlapping?: boolean;
-  toolbarVisibility?: EuiDataGridToolBarVisibilityOptions;
-  /**
-   * Allows to consumers of the table to decide to highlight a row based on the current alert.
-   */
-  shouldHighlightRow?: (alert: Alert) => boolean;
-  /**
-   * Enable when rows may have variable heights (disables virtualization)
-   */
-  dynamicRowHeight?: boolean;
-  lastReloadRequestTime?: number;
-  renderCellPopover?: AlertsTableProps['renderCellPopover'];
-  emptyStateHeight?: 'tall' | 'short';
-} & Omit<Partial<EuiDataGridProps>, 'renderCellPopover'>;
+import { typedMemo } from './utils';
+import { usePagination } from './hooks/use_pagination';
+import { triggersActionsUiQueriesKeys } from '../../hooks/constants';
 
 export interface AlertsTableStorage {
   columns: EuiDataGridColumn[];
@@ -96,19 +80,12 @@ export interface AlertsTableStorage {
   sort: SortCombinations[];
 }
 
-const EmptyConfiguration: AlertsTableConfigurationRegistry = {
-  id: '',
-  columns: [],
-  sort: [],
-  getRenderCellValue: () => null,
-};
-
 type AlertWithCaseIds = Alert & Required<Pick<Alert, typeof ALERT_CASE_IDS>>;
 type AlertWithMaintenanceWindowIds = Alert &
   Required<Pick<Alert, typeof ALERT_MAINTENANCE_WINDOW_IDS>>;
 
-const getCaseIdsFromAlerts = (alerts: Alerts): Set<string> =>
-  new Set(
+const getCaseIdsFromAlerts = (alerts: Alerts) => [
+  ...new Set(
     alerts
       .filter((alert): alert is AlertWithCaseIds => {
         const caseIds = alert[ALERT_CASE_IDS];
@@ -116,10 +93,15 @@ const getCaseIdsFromAlerts = (alerts: Alerts): Set<string> =>
       })
       .map((alert) => alert[ALERT_CASE_IDS])
       .flat()
-  );
+  ),
+];
 
-const getMaintenanceWindowIdsFromAlerts = (alerts: Alerts): Set<string> =>
-  new Set(
+const getRuleIdsFromAlerts = (alerts: Alerts) => [
+  ...new Set(alerts.map((a) => a[ALERT_RULE_UUID]![0])),
+];
+
+const getMaintenanceWindowIdsFromAlerts = (alerts: Alerts) => [
+  ...new Set(
     alerts
       .filter((alert): alert is AlertWithMaintenanceWindowIds => {
         const maintenanceWindowIds = alert[ALERT_MAINTENANCE_WINDOW_IDS];
@@ -127,16 +109,14 @@ const getMaintenanceWindowIdsFromAlerts = (alerts: Alerts): Set<string> =>
       })
       .map((alert) => alert[ALERT_MAINTENANCE_WINDOW_IDS])
       .flat()
-  );
+  ),
+];
 
 const isCasesColumnEnabled = (columns: EuiDataGridColumn[]): boolean =>
   columns.some(({ id }) => id === ALERT_CASE_IDS);
 
 const isMaintenanceWindowColumnEnabled = (columns: EuiDataGridColumn[]): boolean =>
   columns.some(({ id }) => id === ALERT_MAINTENANCE_WINDOW_IDS);
-
-const stableEmptyArray: string[] = [];
-const defaultPageSizeOptions = [10, 20, 50, 100];
 
 const emptyRowSelection = new Map<number, RowSelectionState>();
 
@@ -173,46 +153,69 @@ const ErrorBoundaryFallback: FallbackComponent = ({ error }) => {
   );
 };
 
-const AlertsTableState = memo((props: AlertsTableStateProps) => {
-  return (
-    <QueryClientProvider client={alertsTableQueryClient} context={AlertsQueryContext}>
-      <ErrorBoundary fallback={ErrorBoundaryFallback}>
-        <AlertsTableStateWithQueryProvider {...props} />
-      </ErrorBoundary>
-    </QueryClientProvider>
-  );
-});
+export const AlertsTable = typedMemo(
+  <AC extends AdditionalContext>(props: AlertsTableProps<AC>) => {
+    return (
+      <QueryClientProvider client={alertsTableQueryClient} context={AlertsQueryContext}>
+        <ErrorBoundary fallback={ErrorBoundaryFallback}>
+          <AlertsTableContent<AC> {...props} />
+        </ErrorBoundary>
+      </QueryClientProvider>
+    );
+  }
+);
 
-AlertsTableState.displayName = 'AlertsTableState';
+function typedForwardRef<T, P = {}>(
+  render: (props: P, ref: React.Ref<T>) => ReactElement | null
+): (props: P & React.RefAttributes<T>) => ReactElement | null {
+  return forwardRef(render) as any;
+}
 
 const DEFAULT_LEADING_CONTROL_COLUMNS: EuiDataGridControlColumn[] = [];
+const DEFAULT_SORT: SortCombinations[] = [];
+const DEFAULT_COLUMNS: EuiDataGridColumn[] = [];
 
-const AlertsTableStateWithQueryProvider = memo(
-  ({
-    alertsTableConfigurationRegistry,
-    configurationId,
-    id,
-    featureIds,
-    query,
-    initialPageSize = DEFAULT_ALERTS_PAGE_SIZE,
-    leadingControlColumns = DEFAULT_LEADING_CONTROL_COLUMNS,
-    trailingControlColumns,
-    rowHeightsOptions,
-    cellContext,
-    columns: propColumns,
-    gridStyle,
-    browserFields: propBrowserFields,
-    onUpdate,
-    onLoaded,
-    runtimeMappings,
-    showAlertStatusWithFlapping,
-    toolbarVisibility,
-    shouldHighlightRow,
-    dynamicRowHeight,
-    lastReloadRequestTime,
-    emptyStateHeight,
-    height,
-  }: AlertsTableStateProps) => {
+interface AlertsTableImperativeApi {
+  refresh: () => void;
+  toggleColumn: (columnId: string) => void;
+}
+
+const AlertsTableContent = typedForwardRef(
+  <AC extends AdditionalContext>(
+    {
+      id,
+      featureIds,
+      query,
+      initialSort = DEFAULT_SORT,
+      initialPageSize = DEFAULT_ALERTS_PAGE_SIZE,
+      leadingControlColumns = DEFAULT_LEADING_CONTROL_COLUMNS,
+      trailingControlColumns,
+      rowHeightsOptions,
+      columns: initialColumns,
+      gridStyle,
+      browserFields: propBrowserFields,
+      onUpdate,
+      onLoaded,
+      runtimeMappings,
+      showAlertStatusWithFlapping,
+      toolbarVisibility,
+      shouldHighlightRow,
+      dynamicRowHeight = false,
+      emptyStateHeight,
+      additionalContext,
+      renderCellValue,
+      renderCellPopover,
+      renderActionsCell,
+      renderFlyoutHeader,
+      renderFlyoutBody,
+      renderFlyoutFooter,
+      renderAdditionalToolbarControls: AdditionalToolbarControlsComponent,
+      lastReloadRequestTime,
+      ...publicDataGridProps
+    }: AlertsTableProps<AC>,
+    ref: Ref<AlertsTableImperativeApi>
+  ) => {
+    const { casesConfiguration, showInspectButton } = publicDataGridProps;
     const {
       data,
       cases: casesService,
@@ -220,52 +223,31 @@ const AlertsTableStateWithQueryProvider = memo(
     } = useKibana().services as ReturnType<typeof useKibana>['services'] & {
       cases?: CasesService;
     };
-    const hasAlertsTableConfiguration =
-      alertsTableConfigurationRegistry?.has(configurationId) ?? false;
-
-    if (!hasAlertsTableConfiguration)
-      // eslint-disable-next-line no-console
-      console.warn(`Missing Alert Table configuration for configuration ID: ${configurationId}`);
-
-    const alertsTableConfiguration = hasAlertsTableConfiguration
-      ? alertsTableConfigurationRegistry.get(configurationId)
-      : EmptyConfiguration;
-
+    const queryClient = useQueryClient({ context: AlertsQueryContext });
     const storage = useRef(new Storage(window.localStorage));
     const localStorageAlertsTableConfig = storage.current.get(id) as Partial<AlertsTableStorage>;
-    const persistentControls = alertsTableConfiguration?.usePersistentControls?.();
-    const showInspectButton = alertsTableConfiguration?.showInspectButton ?? false;
 
-    const columnConfigByClient = useMemo(() => {
-      return propColumns && !isEmpty(propColumns)
-        ? propColumns
-        : alertsTableConfiguration?.columns ?? [];
-    }, [propColumns, alertsTableConfiguration]);
-
-    const columnsLocal =
-      localStorageAlertsTableConfig &&
-      localStorageAlertsTableConfig.columns &&
-      !isEmpty(localStorageAlertsTableConfig?.columns)
-        ? localStorageAlertsTableConfig?.columns
-        : columnConfigByClient;
+    const columnsLocal = useMemo(
+      () =>
+        !isEmpty(localStorageAlertsTableConfig?.columns)
+          ? localStorageAlertsTableConfig!.columns!
+          : !isEmpty(initialColumns)
+          ? initialColumns!
+          : [],
+      [initialColumns, localStorageAlertsTableConfig]
+    );
 
     const getStorageConfig = useCallback(
       () => ({
         columns: columnsLocal,
-        sort:
-          localStorageAlertsTableConfig &&
-          localStorageAlertsTableConfig.sort &&
-          !isEmpty(localStorageAlertsTableConfig?.sort)
-            ? localStorageAlertsTableConfig?.sort
-            : alertsTableConfiguration?.sort ?? [],
-        visibleColumns:
-          localStorageAlertsTableConfig &&
-          localStorageAlertsTableConfig.visibleColumns &&
-          !isEmpty(localStorageAlertsTableConfig?.visibleColumns)
-            ? localStorageAlertsTableConfig?.visibleColumns
-            : columnsLocal.map((c) => c.id),
+        sort: !isEmpty(localStorageAlertsTableConfig?.sort)
+          ? localStorageAlertsTableConfig!.sort!
+          : initialSort ?? [],
+        visibleColumns: !isEmpty(localStorageAlertsTableConfig?.visibleColumns)
+          ? localStorageAlertsTableConfig!.visibleColumns!
+          : columnsLocal.map((c) => c.id),
       }),
-      [columnsLocal, alertsTableConfiguration?.sort, localStorageAlertsTableConfig]
+      [columnsLocal, localStorageAlertsTableConfig, initialSort]
     );
     const storageAlertsTable = useRef<AlertsTableStorage>(getStorageConfig());
 
@@ -296,7 +278,7 @@ const AlertsTableStateWithQueryProvider = memo(
       storageAlertsTable,
       storage,
       id,
-      defaultColumns: columnConfigByClient,
+      defaultColumns: initialColumns ?? DEFAULT_COLUMNS,
       alertsFields: propBrowserFields,
     });
 
@@ -333,101 +315,83 @@ const AlertsTableStateWithQueryProvider = memo(
 
     const {
       data: alertsData,
-      refetch,
+      refetch: refetchAlerts,
       isSuccess,
-      isFetching: isLoading,
+      isFetching: isLoadingAlerts,
     } = useSearchAlertsQuery({
       data,
       ...queryParams,
     });
-
     const {
       alerts = [],
       oldAlertsData = [],
       ecsAlertsData = [],
       total: alertsCount = -1,
-      querySnapshot,
+      querySnapshot: alertsQuerySnapshot,
     } = alertsData ?? {};
 
-    const refetchAlerts = useCallback(() => {
+    useEffect(() => {
+      if (onLoaded && !isLoadingAlerts && isSuccess) {
+        onLoaded(alerts);
+      }
+    }, [alerts, isLoadingAlerts, isSuccess, onLoaded]);
+
+    const ruleIds = useMemo(() => getRuleIdsFromAlerts(alerts), [alerts]);
+    const mutedAlertsQuery = useGetMutedAlertsQuery({
+      ruleIds,
+    });
+
+    const caseIds = useMemo(() => getCaseIdsFromAlerts(alerts), [alerts]);
+    const casesPermissions = useMemo(() => {
+      return casesService?.helpers.canUseCases(casesConfiguration?.owner ?? []);
+    }, [casesConfiguration?.owner, casesService?.helpers]);
+    const casesQuery = useBulkGetCasesQuery(
+      { caseIds },
+      {
+        enabled: isCasesColumnEnabled(columns) && !!casesPermissions?.read,
+      }
+    );
+
+    const maintenanceWindowIds = useMemo(() => getMaintenanceWindowIdsFromAlerts(alerts), [alerts]);
+    const maintenanceWindowsQuery = useBulkGetMaintenanceWindowsQuery(
+      { ids: maintenanceWindowIds },
+      { enabled: isMaintenanceWindowColumnEnabled(columns) }
+    );
+
+    const queries = useCombinedQueries(casesQuery, maintenanceWindowsQuery, mutedAlertsQuery);
+
+    const refresh = useCallback(() => {
       if (queryParams.pageIndex !== 0) {
         // Refetch from the first page
         setQueryParams((prevQueryParams) => ({ ...prevQueryParams, pageIndex: 0 }));
+      } else {
+        refetchAlerts();
       }
-      refetch();
-    }, [queryParams.pageIndex, refetch]);
-
-    useEffect(() => {
-      if (onLoaded && !isLoading && isSuccess) {
-        onLoaded(alerts);
-      }
-    }, [alerts, isLoading, isSuccess, onLoaded]);
-
-    const mutedAlertIds = useMemo(() => {
-      return [...new Set(alerts.map((a) => a['kibana.alert.rule.uuid']![0]))];
-    }, [alerts]);
-
-    const { data: mutedAlerts } = useGetMutedAlerts(mutedAlertIds);
-    const overriddenActions = useMemo(() => {
-      return { toggleColumn: onToggleColumn };
-    }, [onToggleColumn]);
-
-    const configWithToggle = useMemo(() => {
-      return {
-        ...alertsTableConfiguration,
-        actions: overriddenActions,
-      };
-    }, [alertsTableConfiguration, overriddenActions]);
-
-    useEffect(() => {
-      const currentToggle =
-        alertsTableConfigurationRegistry.getActions(configurationId)?.toggleColumn;
-      if (onToggleColumn !== currentToggle) {
-        alertsTableConfigurationRegistry.update(configurationId, configWithToggle);
-      }
-    }, [configurationId, alertsTableConfigurationRegistry, configWithToggle, onToggleColumn]);
-
-    useEffect(() => {
-      if (onUpdate) {
-        onUpdate({ isLoading, totalCount: alertsCount, refresh: refetch });
-      }
-    }, [isLoading, alertsCount, onUpdate, refetch]);
+      queryClient.invalidateQueries(triggersActionsUiQueriesKeys.casesBulkGet(caseIds));
+      queryClient.invalidateQueries(triggersActionsUiQueriesKeys.mutedAlerts(ruleIds));
+      queryClient.invalidateQueries(
+        triggersActionsUiQueriesKeys.maintenanceWindowsBulkGet(maintenanceWindowIds)
+      );
+    }, [caseIds, maintenanceWindowIds, queryClient, queryParams.pageIndex, refetchAlerts, ruleIds]);
 
     useEffect(() => {
       if (lastReloadRequestTime) {
-        refetch();
+        refresh();
       }
-    }, [lastReloadRequestTime, refetch]);
+    }, [lastReloadRequestTime, refresh]);
 
-    const caseIds = useMemo(() => getCaseIdsFromAlerts(alerts), [alerts]);
-    const maintenanceWindowIds = useMemo(() => getMaintenanceWindowIdsFromAlerts(alerts), [alerts]);
+    useImperativeHandle(ref, () => ({
+      refresh,
+      toggleColumn: onToggleColumn,
+    }));
 
-    const casesPermissions = useMemo(() => {
-      return casesService?.helpers.canUseCases(alertsTableConfiguration?.cases?.owner ?? []);
-    }, [alertsTableConfiguration, casesService]);
+    useEffect(() => {
+      if (onUpdate) {
+        onUpdate({ isLoading: isLoadingAlerts, totalCount: alertsCount, refresh });
+      }
+    }, [isLoadingAlerts, alertsCount, onUpdate, refresh]);
 
-    const hasCaseReadPermissions = Boolean(casesPermissions?.read);
-    const fetchCases = isCasesColumnEnabled(columns) && hasCaseReadPermissions;
-    const fetchMaintenanceWindows = isMaintenanceWindowColumnEnabled(columns);
-
-    const caseIdsForBulk = useMemo(() => {
-      return Array.from(caseIds.values());
-    }, [caseIds]);
-
-    const { data: cases, isFetching: isLoadingCases } = useBulkGetCases(caseIdsForBulk, fetchCases);
-
-    const maintenanceWindowIdsForBulk = useMemo(() => {
-      return {
-        ids: Array.from(maintenanceWindowIds.values()),
-        canFetchMaintenanceWindows: fetchMaintenanceWindows,
-        queryContext: AlertsQueryContext,
-      };
-    }, [fetchMaintenanceWindows, maintenanceWindowIds]);
-
-    const { data: maintenanceWindows, isFetching: isLoadingMaintenanceWindows } =
-      useBulkGetMaintenanceWindows(maintenanceWindowIdsForBulk);
-
-    const activeBulkActionsReducer = useReducer(bulkActionsReducer, initialBulkActionsState);
+    const bulkActionsStore = useReducer(bulkActionsReducer, initialBulkActionsState);
 
     const onSortChange = useCallback(
       (_sort: EuiDataGridSorting['columns']) => {
@@ -455,35 +419,117 @@ const AlertsTableStateWithQueryProvider = memo(
 
     const isCasesContextAvailable = casesService && CasesContext;
 
-    const memoizedCases = useMemo(
-      () => ({
-        data: cases ?? new Map(),
-        isLoading: isLoadingCases,
-      }),
-      [cases, isLoadingCases]
+    const {
+      pagination,
+      onChangePageSize,
+      onChangePageIndex,
+      onPaginateFlyout,
+      flyoutAlertIndex,
+      setFlyoutAlertIndex,
+    } = usePagination({
+      bulkActionsStore,
+      onPageChange,
+      pageIndex: queryParams.pageIndex,
+      pageSize: queryParams.pageSize,
+    });
+
+    // TODO when every solution is using this table, we will be able to simplify it by just passing the alert index
+    const openAlertInFlyout = useCallback(
+      (alertId: string) => {
+        const idx = alerts.findIndex((a) => (a as any)[ALERT_UUID].includes(alertId));
+        setFlyoutAlertIndex(idx);
+      },
+      [alerts, setFlyoutAlertIndex]
     );
 
-    const memoizedMaintenanceWindows = useMemo(
-      () => ({
-        data: maintenanceWindows ?? new Map(),
-        isLoading: isLoadingMaintenanceWindows,
-      }),
-      [maintenanceWindows, isLoadingMaintenanceWindows]
-    );
+    const renderContext = useMemo(
+      () =>
+        ({
+          ...additionalContext,
+          columns,
+          tableId: id,
 
-    const tableProps: AlertsTableProps = useMemo(
-      () => ({
-        alertsTableConfiguration,
-        cases: memoizedCases,
-        maintenanceWindows: memoizedMaintenanceWindows,
+          refresh,
+
+          isLoading: isLoadingAlerts || queries.isFetching,
+
+          isLoadingAlerts,
+          alerts,
+          ecsData: ecsAlertsData, // TODO(@umbopepato) deprecate these
+          oldAlertsData,
+          browserFields,
+
+          isLoadingCases: casesQuery.isFetching,
+          cases: casesQuery.data,
+
+          isLoadingMaintenanceWindows: maintenanceWindowsQuery.isFetching,
+          maintenanceWindows: maintenanceWindowsQuery.data,
+
+          isLoadingMutedAlerts: mutedAlertsQuery.isFetching,
+          mutedAlerts: mutedAlertsQuery.data,
+
+          pageIndex: pagination.pageIndex,
+          pageSize: pagination.pageSize,
+
+          showAlertStatusWithFlapping,
+          fieldFormats,
+          openAlertInFlyout,
+
+          bulkActionsStore,
+
+          renderCellValue,
+          renderCellPopover,
+          renderActionsCell,
+          renderFlyoutHeader,
+          renderFlyoutBody,
+          renderFlyoutFooter,
+        } as RenderContext<AC>),
+      [
+        additionalContext,
         columns,
-        bulkActions: stableEmptyArray,
-        deletedEventIds: stableEmptyArray,
-        disabledCellActions: stableEmptyArray,
-        pageSizeOptions: defaultPageSizeOptions,
         id,
-        leadingControlColumns,
+        refresh,
+        isLoadingAlerts,
+        queries.isFetching,
+        alerts,
+        ecsAlertsData,
+        oldAlertsData,
+        browserFields,
+        casesQuery.isFetching,
+        casesQuery.data,
+        maintenanceWindowsQuery.isFetching,
+        maintenanceWindowsQuery.data,
+        mutedAlertsQuery.isFetching,
+        mutedAlertsQuery.data,
+        pagination.pageIndex,
+        pagination.pageSize,
         showAlertStatusWithFlapping,
+        fieldFormats,
+        openAlertInFlyout,
+        bulkActionsStore,
+        renderCellValue,
+        renderCellPopover,
+        renderActionsCell,
+        renderFlyoutHeader,
+        renderFlyoutBody,
+        renderFlyoutFooter,
+      ]
+    );
+
+    const additionalToolbarControls = useMemo(
+      () =>
+        AdditionalToolbarControlsComponent ? (
+          <AdditionalToolbarControlsComponent {...renderContext} />
+        ) : undefined,
+      [AdditionalToolbarControlsComponent, renderContext]
+    );
+
+    const dataGridProps: AlertsDataGridProps<AC> = useMemo(
+      () => ({
+        ...publicDataGridProps,
+        renderContext,
+        additionalToolbarControls,
+        leadingControlColumns,
         trailingControlColumns,
         visibleColumns,
         'data-test-subj': 'internalAlertsState',
@@ -494,37 +540,29 @@ const AlertsTableStateWithQueryProvider = memo(
         onColumnResize,
         query,
         rowHeightsOptions,
-        cellContext,
         gridStyle,
-        controls: persistentControls,
-        showInspectButton,
         toolbarVisibility,
         shouldHighlightRow,
         dynamicRowHeight,
         featureIds,
-        querySnapshot,
-        pageIndex: queryParams.pageIndex,
-        pageSize: queryParams.pageSize,
+        alertsQuerySnapshot,
+        pageIndex: pagination.pageIndex,
+        onChangePageIndex,
+        pageSize: pagination.pageSize,
+        onChangePageSize,
+        onPaginateFlyout,
+        flyoutAlertIndex,
+        setFlyoutAlertIndex,
         sort,
-        isLoading,
-        alerts,
-        oldAlertsData,
-        ecsAlertsData,
-        refetchAlerts,
+        refresh,
         alertsCount,
         onSortChange,
-        onPageChange,
-        fieldFormats,
-        height,
       }),
       [
-        alertsTableConfiguration,
-        memoizedCases,
-        memoizedMaintenanceWindows,
-        columns,
-        id,
+        publicDataGridProps,
+        renderContext,
+        additionalToolbarControls,
         leadingControlColumns,
-        showAlertStatusWithFlapping,
         trailingControlColumns,
         visibleColumns,
         browserFields,
@@ -534,83 +572,57 @@ const AlertsTableStateWithQueryProvider = memo(
         onColumnResize,
         query,
         rowHeightsOptions,
-        cellContext,
         gridStyle,
-        persistentControls,
-        showInspectButton,
         toolbarVisibility,
         shouldHighlightRow,
         dynamicRowHeight,
         featureIds,
-        querySnapshot,
-        queryParams.pageIndex,
-        queryParams.pageSize,
+        alertsQuerySnapshot,
+        pagination.pageIndex,
+        pagination.pageSize,
+        onChangePageIndex,
+        onChangePageSize,
+        onPaginateFlyout,
+        flyoutAlertIndex,
+        setFlyoutAlertIndex,
         sort,
-        isLoading,
-        alerts,
-        oldAlertsData,
-        ecsAlertsData,
-        refetchAlerts,
+        refresh,
         alertsCount,
         onSortChange,
-        onPageChange,
-        fieldFormats,
-        height,
       ]
     );
 
-    const alertsTableContext = useMemo(() => {
-      return {
-        mutedAlerts: mutedAlerts ?? {},
-        bulkActions: activeBulkActionsReducer,
-      };
-    }, [activeBulkActionsReducer, mutedAlerts]);
-
-    if (!hasAlertsTableConfiguration) {
-      return (
-        <EuiEmptyPrompt
-          data-test-subj="alertsTableNoConfiguration"
-          iconType="watchesApp"
-          title={<h2>{ALERTS_TABLE_CONF_ERROR_TITLE}</h2>}
-          body={<p>{ALERTS_TABLE_CONF_ERROR_MESSAGE}</p>}
-        />
-      );
-    }
-
     return (
-      <AlertsTableContext.Provider value={alertsTableContext}>
-        {!isLoading && alertsCount === 0 && (
+      <AlertsTableContextProvider value={renderContext}>
+        {!isLoadingAlerts && alertsCount === 0 && (
           <InspectButtonContainer>
             <EmptyState
-              controls={persistentControls}
-              querySnapshot={querySnapshot}
+              additionalToolbarControls={additionalToolbarControls}
+              alertsQuerySnapshot={alertsQuerySnapshot}
               showInspectButton={showInspectButton}
               height={emptyStateHeight}
             />
           </InspectButtonContainer>
         )}
-        {(isLoading || isBrowserFieldDataLoading) && (
+        {(isLoadingAlerts || isBrowserFieldDataLoading) && (
           <EuiProgress size="xs" color="accent" data-test-subj="internalAlertsPageLoading" />
         )}
         {alertsCount > 0 &&
           (isCasesContextAvailable ? (
             <CasesContext
-              owner={alertsTableConfiguration.cases?.owner ?? []}
+              owner={casesConfiguration?.owner ?? []}
               permissions={casesPermissions}
-              features={{ alerts: { sync: alertsTableConfiguration.cases?.syncAlerts ?? false } }}
+              features={{ alerts: { sync: casesConfiguration?.syncAlerts ?? false } }}
             >
-              <AlertsTable {...tableProps} />
+              <AlertsDataGrid {...dataGridProps} />
             </CasesContext>
           ) : (
-            <AlertsTable {...tableProps} />
+            <AlertsDataGrid {...dataGridProps} />
           ))}
-      </AlertsTableContext.Provider>
+      </AlertsTableContextProvider>
     );
   }
 );
 
-AlertsTableStateWithQueryProvider.displayName = 'AlertsTableStateWithQueryProvider';
-
-export { AlertsTableState };
 // eslint-disable-next-line import/no-default-export
-export { AlertsTableState as default };
+export { AlertsTable as default };
