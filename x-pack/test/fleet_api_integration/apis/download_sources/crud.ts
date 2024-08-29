@@ -8,7 +8,6 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
 import { testUsers } from '../test_users';
 
 export default function (providerContext: FtrProviderContext) {
@@ -18,14 +17,15 @@ export default function (providerContext: FtrProviderContext) {
 
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const fleetAndAgents = getService('fleetAndAgents');
 
-  describe('fleet_download_sources_crud', async function () {
+  describe('fleet_download_sources_crud', function () {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await fleetAndAgents.setup();
     });
-    setupFleetAndAgents(providerContext);
 
     let defaultDownloadSourceId: string;
 

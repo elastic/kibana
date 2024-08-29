@@ -9,7 +9,7 @@ import numeral from '@elastic/numeral';
 import { render, screen } from '@testing-library/react';
 import React, { ComponentProps } from 'react';
 
-import { EMPTY_STAT } from '../../../helpers';
+import { EMPTY_STAT } from '../../../constants';
 import {
   TestDataQualityProviders,
   TestExternalProviders,
