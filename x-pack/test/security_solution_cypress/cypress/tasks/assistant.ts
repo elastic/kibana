@@ -44,6 +44,7 @@ import {
   ADD_NEW_CONNECTOR,
   SHOW_ANONYMIZED_BUTTON,
   ASSISTANT_SETTINGS_BUTTON,
+  SEND_TO_TIMELINE_BUTTON,
 } from '../screens/ai_assistant';
 import { TOASTER } from '../screens/alerts_detection_rules';
 
@@ -53,12 +54,12 @@ export const openAssistant = (context?: 'rule' | 'alert') => {
     return;
   }
   if (context === 'rule') {
-    cy.get(CHAT_ICON).should('exist');
+    cy.get(CHAT_ICON).should('be.visible');
     cy.get(CHAT_ICON).click();
     return;
   }
   if (context === 'alert') {
-    cy.get(CHAT_ICON_SM).should('exist');
+    cy.get(CHAT_ICON_SM).should('be.visible');
     cy.get(CHAT_ICON_SM).click();
     return;
   }
@@ -81,7 +82,7 @@ export const resetConversation = () => {
   cy.get(CHAT_CONTEXT_MENU).click();
   cy.get(CLEAR_CHAT).click();
   cy.get(CONFIRM_CLEAR_CHAT).click();
-  cy.get(EMPTY_CONVO).should('exist');
+  cy.get(EMPTY_CONVO).should('be.visible');
 };
 export const selectConversation = (conversationName: string) => {
   cy.get(FLYOUT_NAV_TOGGLE).click();
@@ -101,6 +102,10 @@ export const updateConversationTitle = (newTitle: string) => {
 export const typeAndSendMessage = (message: string) => {
   cy.get(USER_PROMPT).type(message);
   cy.get(SUBMIT_CHAT).click();
+};
+
+export const sendQueryToTimeline = () => {
+  cy.get(SEND_TO_TIMELINE_BUTTON).click();
 };
 
 export const clearSystemPrompt = () => {
@@ -152,7 +157,7 @@ export const createQuickPrompt = (
 };
 
 export const selectRule = (ruleId: string) => {
-  cy.get(TIMELINE_CHECKBOX(ruleId)).should('exist');
+  cy.get(TIMELINE_CHECKBOX(ruleId)).should('be.visible');
   cy.get(TIMELINE_CHECKBOX(ruleId)).click();
 };
 
@@ -161,9 +166,9 @@ export const selectRule = (ruleId: string) => {
  */
 export const assertNewConversation = (isWelcome: boolean, title: string) => {
   if (isWelcome) {
-    cy.get(WELCOME_SETUP).should('exist');
+    cy.get(WELCOME_SETUP).should('be.visible');
   } else {
-    cy.get(EMPTY_CONVO).should('exist');
+    cy.get(EMPTY_CONVO).should('be.visible');
   }
   cy.get(CONVERSATION_TITLE + ' h2').should('have.text', title);
 };
@@ -178,7 +183,7 @@ export const assertMessageSent = (message: string, hasDefaultPrompt = false, pro
 };
 
 export const assertErrorResponse = () => {
-  cy.get(CONVERSATION_MESSAGE_ERROR).should('exist');
+  cy.get(CONVERSATION_MESSAGE_ERROR).should('be.visible');
 };
 
 export const assertSystemPrompt = (systemPrompt: string) => {

@@ -131,7 +131,7 @@ describe(
         waitForAlertsToPopulate();
         expandFirstAlert();
         openAssistant('alert');
-        cy.get(QUICK_PROMPT_BADGE(testPrompt.title)).should('exist');
+        cy.get(QUICK_PROMPT_BADGE(testPrompt.title)).should('be.visible');
         cy.get(USER_PROMPT).should(
           'have.text',
           EXPLAIN_THEN_SUMMARIZE_SUGGEST_INVESTIGATION_GUIDE_NON_I18N

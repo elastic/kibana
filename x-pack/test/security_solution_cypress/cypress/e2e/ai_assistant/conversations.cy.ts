@@ -121,7 +121,7 @@ describe(
         closeAssistant();
         deleteConnectors();
         openAssistant();
-        cy.get(CONNECTOR_MISSING_CALLOUT).should('exist');
+        cy.get(CONNECTOR_MISSING_CALLOUT).should('be.visible');
       });
     });
     describe('Changing conversations', () => {

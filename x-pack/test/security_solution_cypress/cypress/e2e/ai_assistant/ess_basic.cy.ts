@@ -20,7 +20,7 @@ describe('AI Assistant - Basic License', { tags: ['@ess'] }, () => {
 
   it('user with Basic license should not be able to use assistant', () => {
     openAssistant();
-    cy.get(UPGRADE_CTA).should('exist');
+    cy.get(UPGRADE_CTA).should('be.visible');
     assertConversationReadOnly();
   });
 });

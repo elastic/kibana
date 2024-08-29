@@ -29,7 +29,7 @@ describe(
 
     it('should have have AI Assistant available', () => {
       visitGetStartedPage();
-      cy.get(AI_ASSISTANT_BUTTON).should('exist');
+      cy.get(AI_ASSISTANT_BUTTON).should('be.visible');
     });
   }
 );

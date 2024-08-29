@@ -9,7 +9,7 @@ import { MessageRole } from '@kbn/elastic-assistant-common';
 import { TIMELINE_QUERY } from '../../screens/timeline';
 import { CASES_URL } from '../../urls/navigation';
 import { SEND_TO_TIMELINE_BUTTON } from '../../screens/ai_assistant';
-import { openAssistant, selectConversation } from '../../tasks/assistant';
+import { openAssistant, selectConversation, sendQueryToTimeline } from '../../tasks/assistant';
 import {
   deleteConversations,
   deletePrompts,
@@ -75,7 +75,7 @@ describe(
       cy.get(SEND_TO_TIMELINE_BUTTON).should('be.disabled');
       visit(CASES_URL);
       openAssistant();
-      cy.get(SEND_TO_TIMELINE_BUTTON).click();
+      sendQueryToTimeline();
       cy.get(TIMELINE_QUERY).should('have.text', `${mockTimelineQuery}`);
     });
   }
