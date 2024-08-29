@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, useEuiTheme, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
@@ -62,17 +62,19 @@ export const MisconfigurationsOverview = ({ hostName }: { hostName: string }) =>
       <EuiFlexItem>
         <EuiFlexGroup direction="column" gutterSize="none">
           <EuiFlexItem>
-            <EuiText
+            <EuiTitle
+              size="m"
               css={css`
-                font-size: ${euiTheme.size.l};
                 font-weight: ${euiTheme.font.weight.bold};
               `}
-            />
+            >
+              <h1>{'-'}</h1>
+            </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText
+              size="m"
               css={css`
-                font-size: ${euiTheme.size.base};
                 font-weight: ${euiTheme.font.weight.semiBold};
               `}
               data-test-subj="noFindingsDataTestSubj"
@@ -93,19 +95,21 @@ export const MisconfigurationsOverview = ({ hostName }: { hostName: string }) =>
       <EuiFlexItem>
         <EuiFlexGroup direction="column" gutterSize="none">
           <EuiFlexItem>
-            <EuiText
+            <EuiTitle
+              size="s"
               css={css`
-                font-size: ${euiTheme.size.l};
                 font-weight: ${euiTheme.font.weight.bold};
               `}
             >
-              {`${Math.round((passedFindings / (passedFindings + failedFindings)) * 100)}%`}
-            </EuiText>
+              <h1>{`${Math.round(
+                (passedFindings / (passedFindings + failedFindings)) * 100
+              )}%`}</h1>
+            </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText
+              size="m"
               css={css`
-                font-size: ${euiTheme.size.base};
                 font-weight: ${euiTheme.font.weight.semiBold};
               `}
             >
@@ -125,8 +129,8 @@ export const MisconfigurationsOverview = ({ hostName }: { hostName: string }) =>
       header={{
         title: (
           <EuiText
+            size="xs"
             css={css`
-              font-size: ${euiTheme.size.m};
               font-weight: ${euiTheme.font.weight.semiBold};
             `}
           >
