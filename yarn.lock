@@ -5754,6 +5754,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/object-versioning-utils@link:packages/kbn-object-versioning-utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/object-versioning@link:packages/kbn-object-versioning":
   version "0.0.0"
   uid ""
