@@ -225,7 +225,12 @@ export const ViewSpaceSettings: React.FC<Props> = ({ space, features, history, .
       {props.allowSolutionVisibility && (
         <>
           <EuiSpacer />
-          <SolutionView space={spaceSettings} onChange={onSolutionViewChange} />
+          <SolutionView
+            space={spaceSettings}
+            onChange={onSolutionViewChange}
+            validator={validator}
+            isEditing={true}
+          />
         </>
       )}
 
