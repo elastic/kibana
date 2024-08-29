@@ -67,7 +67,6 @@ export const getControlGroupEmbeddableFactory = (services: {
       lastSavedRuntimeState
     ) => {
       const {
-        initialChildControlState,
         labelPosition: initialLabelPosition,
         chainingSystem,
         autoApplySelections,
@@ -77,9 +76,12 @@ export const getControlGroupEmbeddableFactory = (services: {
       const autoApplySelections$ = new BehaviorSubject<boolean>(autoApplySelections);
       const defaultDataViewId = await services.dataViews.getDefaultId();
       const lastSavedControlsState$ = new BehaviorSubject<ControlPanelsState>(
-        initialChildControlState
+        lastSavedRuntimeState.initialChildControlState
       );
-      const controlsManager = initControlsManager(lastSavedControlsState$);
+      const controlsManager = initControlsManager(
+        initialRuntimeState.initialChildControlState,
+        lastSavedControlsState$
+      );
       const selectionsManager = initSelectionsManager({
         ...controlsManager.api,
         autoApplySelections$,

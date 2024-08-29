@@ -38,18 +38,25 @@ export function getControlsInOrder(initialControlPanelsState: ControlPanelsState
 }
 
 export function initControlsManager(
+  /**
+   * Composed from last saved controls state and previous sessions's unsaved changes to controls state
+   */
+  intialRuntimeControlsState: ControlPanelsState,
+  /**
+   * Observable that publishes last saved controls state only
+   */
   lastSavedControlsState$: PublishingSubject<ControlPanelsState>
 ) {
-  const initialControlIds = Object.keys(lastSavedControlsState$.value);
+  const initialControlIds = Object.keys(intialRuntimeControlsState);
   const children$ = new BehaviorSubject<{ [key: string]: DefaultControlApi }>({});
   let currentControlsState: { [panelId: string]: DefaultControlState } = {
-    ...lastSavedControlsState$.value,
+    ...intialRuntimeControlsState,
   };
   const controlsInOrder$ = new BehaviorSubject<ControlsInOrder>(
-    getControlsInOrder(lastSavedControlsState$.value)
+    getControlsInOrder(intialRuntimeControlsState)
   );
   const lastUsedDataViewId$ = new BehaviorSubject<string | undefined>(
-    getLastUsedDataViewId(controlsInOrder$.value, lastSavedControlsState$.value)
+    getLastUsedDataViewId(controlsInOrder$.value, intialRuntimeControlsState)
   );
   const lastUsedWidth$ = new BehaviorSubject<ControlWidth>(DEFAULT_CONTROL_WIDTH);
   const lastUsedGrow$ = new BehaviorSubject<boolean>(DEFAULT_CONTROL_GROW);
