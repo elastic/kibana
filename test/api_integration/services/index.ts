@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { services as commonServices } from '../../common/services';
-
+import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
+import { commonFunctionalUIServices } from '@kbn/ftr-common-functional-ui-services';
 import { KibanaSupertestProvider, ElasticsearchSupertestProvider } from './supertest';
 
 export const services = {
-  ...commonServices,
+  ...commonFunctionalServices,
+  ...commonFunctionalUIServices,
   supertest: KibanaSupertestProvider,
   esSupertest: ElasticsearchSupertestProvider,
 };

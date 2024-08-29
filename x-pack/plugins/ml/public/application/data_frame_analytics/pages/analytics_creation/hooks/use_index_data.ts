@@ -34,9 +34,8 @@ import {
   INDEX_STATUS,
 } from '@kbn/ml-data-grid';
 
+import { useMlApiContext } from '../../../../contexts/kibana';
 import { DataLoader } from '../../../../datavisualizer/index_based/data_loader';
-
-import { ml } from '../../../../services/ml_api_service';
 
 type IndexSearchResponse = estypes.SearchResponse;
 
@@ -82,6 +81,7 @@ export const useIndexData = (
   toastNotifications: CoreSetup['notifications']['toasts'],
   runtimeMappings?: RuntimeMappings
 ): UseIndexDataReturnType => {
+  const ml = useMlApiContext();
   // Fetch 500 random documents to determine populated fields.
   // This is a workaround to avoid passing potentially thousands of unpopulated fields
   // (for example, as part of filebeat/metricbeat/ECS based indices)
@@ -258,7 +258,7 @@ export const useIndexData = (
   ]);
 
   const dataLoader = useMemo(
-    () => new DataLoader(dataView, toastNotifications),
+    () => new DataLoader(dataView, ml),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [dataView]
   );
