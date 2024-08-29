@@ -180,6 +180,28 @@ export default function (providerContext: FtrProviderContext) {
       expect(response.body.item.policy_ids).to.eql([agentPolicyId, agentPolicyId2]);
     });
 
+    it('should work with no policy ids', async function () {
+      const response = await supertest
+        .post(`/api/fleet/package_policies`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'filetest-no-policies',
+          description: '',
+          namespace: 'default',
+          policy_ids: [],
+          enabled: true,
+          inputs: [],
+          package: {
+            name: 'filetest',
+            title: 'For File Tests',
+            version: '0.1.0',
+          },
+        })
+        .expect(200);
+      expect(response.body.item.policy_id).to.eql(null);
+      expect(response.body.item.policy_ids).to.eql([]);
+    });
+
     it('should allow to pass an empty namespace', async function () {
       await supertest
         .post(`/api/fleet/package_policies`)
