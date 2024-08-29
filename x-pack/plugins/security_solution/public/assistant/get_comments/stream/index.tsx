@@ -102,7 +102,14 @@ export const StreamComment = ({
 
   return (
     <MessagePanel
-      body={<MessageText content={message} index={index} loading={isAnythingLoading} />}
+      body={
+        <MessageText
+          data-test-subj={isError ? 'errorComment' : undefined}
+          content={message}
+          index={index}
+          loading={isAnythingLoading}
+        />
+      }
       error={error ? new Error(error) : undefined}
       controls={controls}
     />
