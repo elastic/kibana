@@ -16,11 +16,17 @@ properties:
     type: string
     description: The package policy namespace. Leave blank to inherit the agent policy's namespace.
     example: 'customnamespace'
+  output_id:
+    type: string
+    description: Output ID to send package data to
+    example: 'output-id'
+    nullable: true
   policy_id:
     type: string
     description: Agent policy ID where that package policy will be added
     example: 'agent-policy-id'
     deprecated: true
+    nullable: true
   policy_ids:
     type: array
     items:
