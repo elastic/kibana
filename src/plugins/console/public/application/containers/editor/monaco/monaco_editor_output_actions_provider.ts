@@ -20,7 +20,7 @@ import {
 import type { AdjustedParsedRequest } from './types';
 
 const DEBOUNCE_HIGHLIGHT_WAIT_MS = 200;
-const OFFSET_EDITOR_ACTIONS = 10;
+const OFFSET_EDITOR_ACTIONS = 1;
 
 export class MonacoEditorOutputActionsProvider {
   private highlightedLines: monaco.editor.IEditorDecorationsCollection;
@@ -94,7 +94,7 @@ export class MonacoEditorOutputActionsProvider {
           range: selectedRange,
           options: {
             isWholeLine: true,
-            className: SELECTED_REQUESTS_CLASSNAME,
+            blockClassName: SELECTED_REQUESTS_CLASSNAME,
           },
         },
       ]);

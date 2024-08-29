@@ -20,6 +20,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     before(async () => {
       log.debug('navigateTo console');
       await PageObjects.common.navigateToApp('console');
+      await PageObjects.console.skipTourIfExists();
       await PageObjects.console.monaco.clearEditorText();
     });
 

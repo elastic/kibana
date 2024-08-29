@@ -25,9 +25,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('console');
       await PageObjects.console.skipTourIfExists();
     });
-    beforeEach(async () => {
-      await PageObjects.console.closeHelpIfExists();
-    });
 
     it('should show the default request', async () => {
       await retry.try(async () => {
@@ -132,7 +129,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       beforeEach(async () => {
-        await PageObjects.console.closeHelpIfExists();
         await PageObjects.console.monaco.clearEditorText();
       });
 
