@@ -272,7 +272,7 @@ const AssistantComponent: React.FC<Props> = ({
 
   const {
     abortStream,
-    handleOnChatCleared: onChatCleared,
+    handleOnChatCleared,
     handleChatSend,
     handleRegenerateResponse,
     isLoading: isLoadingChatSend,
@@ -288,18 +288,6 @@ const AssistantComponent: React.FC<Props> = ({
     setSelectedPromptContexts,
     setCurrentConversation,
   });
-
-  const handleOnChatCleared = useCallback(() => {
-    onChatCleared();
-    if (!currentSystemPromptId) {
-      setCurrentSystemPromptId(currentConversation?.apiConfig?.defaultSystemPromptId);
-    }
-  }, [
-    currentConversation?.apiConfig?.defaultSystemPromptId,
-    currentSystemPromptId,
-    onChatCleared,
-    setCurrentSystemPromptId,
-  ]);
 
   useEffect(() => {
     // Adding `conversationTitle !== selectedConversationTitle` to prevent auto-run still executing after changing selected conversation

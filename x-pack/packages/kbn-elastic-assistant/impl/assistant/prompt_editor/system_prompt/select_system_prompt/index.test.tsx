@@ -46,9 +46,9 @@ const props: Props = {
       isNewConversationDefault: true,
     },
   ],
-  conversation: undefined,
   isSettingsModalVisible: false,
   isClearable: true,
+  onSystemPromptSelectionChange: jest.fn(),
   selectedPrompt: { id: 'default-system-prompt', content: '', name: '', promptType: 'system' },
   setIsSettingsModalVisible: jest.fn(),
 };

@@ -39,7 +39,7 @@ interface Props {
     QueryObserverResult<Record<string, Conversation>, unknown>
   >;
   http: HttpSetup;
-  setCurrentSystemPromptId: Dispatch<SetStateAction<string | undefined>>;
+  setCurrentSystemPromptId: (promptId: string | undefined) => void;
   setIsSettingsModalVisible: Dispatch<SetStateAction<boolean>>;
 }
 

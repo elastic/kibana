@@ -24,7 +24,7 @@ interface Props {
     QueryObserverResult<Record<string, Conversation>, unknown>
   >;
   setIsSettingsModalVisible: Dispatch<SetStateAction<boolean>>;
-  setCurrentSystemPromptId: Dispatch<SetStateAction<string | undefined>>;
+  setCurrentSystemPromptId: (promptId: string | undefined) => void;
   allSystemPrompts: PromptResponse[];
 }
 
@@ -59,13 +59,11 @@ export const EmptyConvo: React.FC<Props> = ({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <SystemPrompt
-                conversation={currentConversation}
-                currentSystemPromptId={currentSystemPromptId}
-                onSystemPromptSelectionChange={setCurrentSystemPromptId}
-                isSettingsModalVisible={isSettingsModalVisible}
-                setIsSettingsModalVisible={setIsSettingsModalVisible}
                 allSystemPrompts={allSystemPrompts}
-                refetchConversations={refetchCurrentUserConversations}
+                currentSystemPromptId={currentSystemPromptId}
+                isSettingsModalVisible={isSettingsModalVisible}
+                onSystemPromptSelectionChange={setCurrentSystemPromptId}
+                setIsSettingsModalVisible={setIsSettingsModalVisible}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>

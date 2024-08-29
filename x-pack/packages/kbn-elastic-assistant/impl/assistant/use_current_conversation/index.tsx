@@ -41,7 +41,7 @@ interface UseCurrentConversation {
     isStreamRefetch?: boolean;
   }) => Promise<Conversation | undefined>;
   setCurrentConversation: Dispatch<SetStateAction<Conversation | undefined>>;
-  setCurrentSystemPromptId: Dispatch<SetStateAction<string | undefined>>;
+  setCurrentSystemPromptId: (promptId: string | undefined) => void;
 }
 
 /**
@@ -74,21 +74,31 @@ export const useCurrentConversation = ({
   /**
    * START SYSTEM PROMPT
    */
-  const currentSystemPrompt = useMemo(
+  const currentSystemPromptId = useMemo(
     () =>
       getDefaultSystemPrompt({
         allSystemPrompts,
         conversation: currentConversation,
-      }),
+      })?.id,
     [allSystemPrompts, currentConversation]
   );
 
-  const [currentSystemPromptId, setCurrentSystemPromptId] = useState<string | undefined>(
-    currentSystemPrompt?.id
+  // Write the selected system prompt to the conversation config
+  const setCurrentSystemPromptId = useCallback(
+    async (promptId?: string) => {
+      if (currentConversation && currentConversation.apiConfig) {
+        await setApiConfig({
+          conversation: currentConversation,
+          apiConfig: {
+            ...currentConversation.apiConfig,
+            defaultSystemPromptId: promptId,
+          },
+        });
+        await refetchCurrentUserConversations();
+      }
+    },
+    [currentConversation, refetchCurrentUserConversations, setApiConfig]
   );
-  useEffect(() => {
-    setCurrentSystemPromptId(currentSystemPrompt?.id);
-  }, [currentSystemPrompt?.id]);
 
   /**
    * END SYSTEM PROMPT
