@@ -1237,27 +1237,6 @@ describe('autocomplete', () => {
     // LIMIT number
     testSuggestions('FROM a | LIMIT /', ['10 ', '100 ', '1000 '].map(attachTriggerCommand));
 
-    // SORT field
-    testSuggestions(
-      'FROM a | SORT /',
-      [
-        ...getFieldNamesByType('any').map((field) => `${field} `),
-        ...getFunctionSignaturesByReturnType('sort', 'any', { scalar: true }),
-      ].map(attachTriggerCommand)
-    );
-
-    // SORT field order
-    testSuggestions('FROM a | SORT field /', [
-      ',',
-      ...['ASC ', 'DESC ', '| '].map(attachTriggerCommand),
-    ]);
-
-    // SORT field order nulls
-    testSuggestions('FROM a | SORT field ASC /', [
-      ',',
-      ...['NULLS FIRST ', 'NULLS LAST ', '| '].map(attachTriggerCommand),
-    ]);
-
     // STATS argument
     testSuggestions(
       'FROM a | STATS /',
@@ -1425,22 +1404,6 @@ describe('autocomplete', () => {
       'IN $0',
     ]);
     testSuggestions('FROM a | EVAL doubleField IS NOT N/', [
-      { text: 'IS NOT NULL', rangeToReplace: { start: 27, end: 34 } },
-      'IS NULL',
-      '% $0',
-      '* $0',
-      '+ $0',
-      '- $0',
-      '/ $0',
-      '!= $0',
-      '< $0',
-      '<= $0',
-      '== $0',
-      '> $0',
-      '>= $0',
-      'IN $0',
-    ]);
-    testSuggestions('FROM a | SORT doubleField IS NOT N/', [
       { text: 'IS NOT NULL', rangeToReplace: { start: 27, end: 34 } },
       'IS NULL',
       '% $0',
