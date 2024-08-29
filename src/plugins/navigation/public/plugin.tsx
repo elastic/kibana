@@ -73,9 +73,7 @@ export class NavigationPublicPlugin
     const onCloud = cloud !== undefined; // The new side nav will initially only be available to cloud users
     const isServerless = this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
 
-    this.isSolutionNavEnabled = true;
-
-    console.log(this.isSolutionNavEnabled, 'solutionNavEnabled');
+    this.isSolutionNavEnabled = onCloud && !isServerless;
 
     /*
      *
