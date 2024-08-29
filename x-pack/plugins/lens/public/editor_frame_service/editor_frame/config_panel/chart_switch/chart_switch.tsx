@@ -18,6 +18,7 @@ import {
   useEuiTheme,
   EuiIconTip,
   IconType,
+  EuiSelectableProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -77,7 +78,7 @@ type SelectableEntry = EuiSelectableOption<{
   icon?: IconType;
 }>;
 
-const ITEM_HEIGHT = 45.5;
+const ITEM_HEIGHT = 52;
 const MAX_ITEMS_COUNT = 6;
 const MAX_LIST_HEIGHT = ITEM_HEIGHT * MAX_ITEMS_COUNT;
 
@@ -419,13 +420,11 @@ export const ChartSwitch = memo(function ChartSwitch({
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPopoverTitle>
-        <EuiSelectable
+        <ChartSwitchSelectable
           className="lnsChartSwitch__options"
           height={computeListHeight(visualizationTypes)}
-          searchable
-          singleSelection
-          isPreFiltered
           data-test-subj="lnsChartSwitchList"
+          searchable
           searchProps={{
             compressed: true,
             autoFocus: true,
@@ -439,11 +438,6 @@ export const ChartSwitch = memo(function ChartSwitch({
           renderOption={(option, searchValue) => (
             <ChartOption option={option} searchValue={searchValue} />
           )}
-          listProps={{
-            showIcons: false,
-            onFocusBadge: false,
-            isVirtualized: false,
-          }}
           options={visualizationTypes}
           onChange={(newOptions) => {
             setFlyoutOpen(false);
@@ -476,11 +470,28 @@ export const ChartSwitch = memo(function ChartSwitch({
               {list}
             </>
           )}
-        </EuiSelectable>
+        </ChartSwitchSelectable>
       </EuiPopover>
     </div>
   );
 });
+
+const ChartSwitchSelectable = (props: EuiSelectableProps) => {
+  return (
+    <EuiSelectable
+      singleSelection
+      isPreFiltered
+      data-test-subj="lnsChartSwitchList"
+      listProps={{
+        showIcons: false,
+        onFocusBadge: false,
+        isVirtualized: false,
+        paddingSize: 'none',
+      }}
+      {...props}
+    />
+  );
+};
 
 function getTopSuggestion(
   visualizationMap: VisualizationMap,

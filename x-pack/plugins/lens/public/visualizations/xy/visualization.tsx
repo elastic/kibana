@@ -35,6 +35,7 @@ import {
   EuiSelectable,
 } from '@elastic/eui';
 import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { generateId } from '../../id_generator';
 import {
   isDraggedDataViewField,
@@ -1410,7 +1411,11 @@ const SubtypeSwitch = ({
         anchorPosition="downLeft"
       >
         <EuiPopoverTitle>
-          <EuiFlexGroup alignItems="center" responsive={false} css={{ padding: `4px 12px` }}>
+          <EuiFlexGroup
+            alignItems="center"
+            responsive={false}
+            css={{ padding: `${euiThemeVars.euiSizeXS} ${euiThemeVars.euiSizeM}` }}
+          >
             <EuiFlexItem>
               {i18n.translate('xpack.lens.xyChart.stackingOptions', {
                 defaultMessage: 'Stacking',

@@ -85,7 +85,7 @@ export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({
 
   const barSeriesLayers = getBarSeriesLayers(dataLayers);
 
-  const hasAnyBarSetting = barSeriesLayers.length > 1;
+  const hasAnyBarSetting = barSeriesLayers.length;
   const hasAreaSettings = hasAreaSeries(dataLayers);
   const shouldDisplayDividerHr = hasAnyBarSetting && hasAreaSettings;
 
