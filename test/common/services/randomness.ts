@@ -9,7 +9,7 @@
 import Chance from 'chance';
 import { ToolingLog } from '@kbn/tooling-log';
 
-import { FtrService } from './ftr_provider_context';
+import { FtrService } from '../ftr_provider_context';
 
 let __CACHED_SEED__: number | undefined;
 function getSeed(log: ToolingLog) {
