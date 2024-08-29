@@ -23,7 +23,7 @@ interface Props {
   onChange: (updatedSpace: Partial<Space>) => void;
 }
 
-// FIXME: rename to EditSpaceEnabledFeatures
+// FIXME: rename to EditSpaceEnabledFeaturesPanel
 export const ViewSpaceEnabledFeatures: FC<Props> = ({ features, space, onChange }) => {
   const { capabilities, getUrlForApp } = useViewSpaceServices();
   const canManageRoles = capabilities.management?.security?.roles === true;
