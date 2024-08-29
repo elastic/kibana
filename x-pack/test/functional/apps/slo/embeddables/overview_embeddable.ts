@@ -23,6 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('overview embeddable', function () {
     before(async () => {
       await loadTestData(getService);
+      await slo.createUser();
       await slo.deleteAllSLOs();
       await slo.create(sloData);
       await PageObjects.dashboard.navigateToApp();
