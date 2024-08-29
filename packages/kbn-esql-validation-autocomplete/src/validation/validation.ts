@@ -30,7 +30,7 @@ import {
 import {
   areFieldAndVariableTypesCompatible,
   extractSingularType,
-  lookupColumn,
+  getColumnForASTNode,
   getCommandDefinition,
   getFunctionDefinition,
   isArrayType,
@@ -295,7 +295,7 @@ function validateFunctionColumnArg(
   if (
     !checkFunctionArgMatchesDefinition(actualArg, parameterDefinition, references, parentCommand)
   ) {
-    const columnHit = lookupColumn(actualArg, references);
+    const columnHit = getColumnForASTNode(actualArg, references);
     messages.push(
       getMessageFromId({
         messageId: 'wrongArgumentType',
@@ -876,7 +876,7 @@ function validateColumnForCommand(
         ({ type, innerTypes }) => type === 'column' && innerTypes
       );
       // this should be guaranteed by the columnCheck above
-      const columnRef = lookupColumn(column, references)!;
+      const columnRef = getColumnForASTNode(column, references)!;
 
       if (columnParamsWithInnerTypes.length) {
         const hasSomeWrongInnerTypes = columnParamsWithInnerTypes.every(({ innerTypes }) => {

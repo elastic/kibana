@@ -7,7 +7,7 @@
 
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import {
-  CreateInvestigationNoteInput,
+  CreateInvestigationNoteParams,
   CreateInvestigationNoteResponse,
 } from '@kbn/investigation-shared';
 import { useMutation } from '@tanstack/react-query';
@@ -26,7 +26,7 @@ export function useAddInvestigationNote() {
   return useMutation<
     CreateInvestigationNoteResponse,
     ServerError,
-    { investigationId: string; note: CreateInvestigationNoteInput },
+    { investigationId: string; note: CreateInvestigationNoteParams },
     { investigationId: string }
   >(
     ['addInvestigationNote'],
