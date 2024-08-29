@@ -181,9 +181,10 @@ function printResults(startTimestamp: number, results: CheckResult[]) {
   logger.info(`- Total time: ${total}, effective: ${effective}`);
 
   results.forEach((result) => {
-    logger.write(
-      `--- ${result.success ? '✅' : '❌'} ${result.script}: ${humanizeTime(result.durationMs)}`
-    );
+    const resultLabel = result.success ? '✅' : '❌';
+    const scriptPath = stripRoot(result.script);
+    const runtime = humanizeTime(result.durationMs);
+    logger.write(`--- ${resultLabel} ${scriptPath}: ${runtime}`);
     if (result.success) {
       logger.debug(result.output);
     } else {
@@ -219,4 +220,8 @@ function validateScriptPath(scriptPath: string) {
   } else {
     return;
   }
+}
+
+function stripRoot(script: string) {
+  return script.replace(REPO_ROOT, '');
 }
