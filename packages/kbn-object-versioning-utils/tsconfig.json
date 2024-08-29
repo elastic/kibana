@@ -16,8 +16,5 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/config-schema",
-    "@kbn/safer-lodash-set",
-    "@kbn/object-versioning-utils",
   ]
 }
