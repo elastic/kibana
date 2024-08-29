@@ -15,6 +15,8 @@ import {
   ES_AGGREGATION,
 } from '@kbn/ml-anomaly-utils';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { MlJobService } from '../../../../services/job_service';
+import type { MlApiServices } from '../../../../services/ml_api_service';
 import { parseInterval } from '../../../../../../common/util/parse_interval';
 import { JobCreator } from './job_creator';
 import type {
@@ -27,12 +29,20 @@ import { createBasicDetector } from './util/default_configs';
 import { JOB_TYPE, CREATED_BY_LABEL } from '../../../../../../common/constants/new_job';
 import { getRichDetectors } from './util/general';
 import { isSparseDataJob } from './util/general';
+import type { NewJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
 
 export class SingleMetricJobCreator extends JobCreator {
   protected _type: JOB_TYPE = JOB_TYPE.SINGLE_METRIC;
 
-  constructor(indexPattern: DataView, savedSearch: SavedSearch | null, query: object) {
-    super(indexPattern, savedSearch, query);
+  constructor(
+    mlApiServices: MlApiServices,
+    mlJobService: MlJobService,
+    newJobCapsService: NewJobCapsService,
+    indexPattern: DataView,
+    savedSearch: SavedSearch | null,
+    query: object
+  ) {
+    super(mlApiServices, mlJobService, newJobCapsService, indexPattern, savedSearch, query);
     this.createdBy = CREATED_BY_LABEL.SINGLE_METRIC;
     this._wizardInitialized$.next(true);
   }
@@ -203,7 +213,13 @@ export class SingleMetricJobCreator extends JobCreator {
     this._overrideConfigs(job, datafeed);
     this.createdBy = CREATED_BY_LABEL.SINGLE_METRIC;
     this._sparseData = isSparseDataJob(job, datafeed);
-    const detectors = getRichDetectors(job, datafeed, this.additionalFields, false);
+    const detectors = getRichDetectors(
+      this.newJobCapsService,
+      job,
+      datafeed,
+      this.additionalFields,
+      false
+    );
 
     this.removeAllDetectors();
 

@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-export type { ToastNotificationService } from './toast_notification_service';
-export {
-  toastNotificationServiceProvider,
-  useToastNotificationService,
-} from './toast_notification_service';
+export { MetricSelector } from './metric_selector';
