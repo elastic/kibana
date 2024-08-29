@@ -11,7 +11,7 @@ import { Agent } from 'https';
 import fetch from 'node-fetch';
 import { getUrl } from '@kbn/test';
 
-import { FtrService } from './ftr_provider_context';
+import { FtrService } from '../ftr_provider_context';
 
 export class DeploymentService extends FtrService {
   private readonly config = this.ctx.getService('config');

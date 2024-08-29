@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from '@kbn/test-suites-src/common/services';
+export { useUsageTracker } from '../contexts/usage_tracker_context';

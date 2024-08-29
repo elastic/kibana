@@ -6,4 +6,9 @@
  * Side Public License, v 1.
  */
 
-export { SecurityService, SecurityServiceProvider } from './security';
+import { GenericFtrProviderContext, GenericFtrService } from '@kbn/test';
+
+import { services } from './services';
+
+export type FtrProviderContext = GenericFtrProviderContext<typeof services, {}>;
+export class FtrService extends GenericFtrService<FtrProviderContext> {}
