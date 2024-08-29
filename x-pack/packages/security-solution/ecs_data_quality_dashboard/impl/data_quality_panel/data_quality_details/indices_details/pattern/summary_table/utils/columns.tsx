@@ -18,16 +18,24 @@ import moment from 'moment';
 import styled from 'styled-components';
 
 import { euiThemeVars } from '@kbn/ui-theme';
+import { getDocsCountPercent } from '../../../../../utils/stats';
 import { IndexSummaryTableItem } from '../../../../../types';
 import { EMPTY_STAT } from '../../../../../constants';
 import { getIlmPhaseDescription } from '../../../../../utils/get_ilm_phase_description';
 import { INCOMPATIBLE_INDEX_TOOL_TIP } from '../../../../../stat_label/translations';
-import { INDEX_SIZE_TOOLTIP } from '../../../../../translations';
+import {
+  DOCS,
+  ILM_PHASE_CAPITALIZED,
+  INCOMPATIBLE_FIELDS,
+  INDEX,
+  INDEX_SIZE_TOOLTIP,
+  RESULT,
+  SIZE,
+} from '../../../../../translations';
 import * as i18n from '../translations';
 import { UseIndicesCheckCheckState } from '../../../../../hooks/use_indices_check/types';
 import { IndexResultBadge } from '../../index_result_badge';
 import { Stat } from '../../../../../stat';
-import { getDocsCountPercent } from '../../utils/stats';
 import { getIndexResultToolTip } from '../../utils/get_index_result_tooltip';
 
 const ProgressContainer = styled.div`
@@ -41,7 +49,7 @@ export const getSummaryTableILMPhaseColumn = (
     ? [
         {
           field: 'ilmPhase',
-          name: i18n.ILM_PHASE,
+          name: ILM_PHASE_CAPITALIZED,
           render: (_, { ilmPhase }) =>
             ilmPhase != null ? (
               <Stat
@@ -70,7 +78,7 @@ export const getSummaryTableSizeInBytesColumn = ({
     ? [
         {
           field: 'sizeInBytes',
-          name: i18n.SIZE,
+          name: SIZE,
           render: (_, { sizeInBytes }) =>
             Number.isInteger(sizeInBytes) ? (
               <EuiToolTip content={INDEX_SIZE_TOOLTIP}>
@@ -143,7 +151,7 @@ export const getSummaryTableColumns = ({
   },
   {
     field: 'incompatible',
-    name: i18n.RESULT,
+    name: RESULT,
     render: (_, { incompatible }) =>
       incompatible != null ? (
         <IndexResultBadge incompatible={incompatible} data-test-subj="resultBadge" />
@@ -158,7 +166,7 @@ export const getSummaryTableColumns = ({
   },
   {
     field: 'indexName',
-    name: i18n.INDEX,
+    name: INDEX,
     render: (_, { indexName }) => (
       <EuiToolTip content={i18n.INDEX_TOOL_TIP(pattern)}>
         <span aria-roledescription={i18n.INDEX_NAME_LABEL} data-test-subj="indexName">
@@ -171,7 +179,7 @@ export const getSummaryTableColumns = ({
   },
   {
     field: 'docsCount',
-    name: i18n.DOCS,
+    name: DOCS,
     render: (_, { docsCount, patternDocsCount }) => (
       <ProgressContainer>
         <EuiProgress
@@ -190,8 +198,8 @@ export const getSummaryTableColumns = ({
   },
   {
     field: 'incompatible',
-    name: i18n.INCOMPATIBLE_FIELDS,
-    render: (_, { incompatible, indexName }) => (
+    name: INCOMPATIBLE_FIELDS,
+    render: (_, { incompatible }) => (
       <EuiToolTip content={INCOMPATIBLE_INDEX_TOOL_TIP}>
         <EuiText
           size="xs"

@@ -105,7 +105,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
 
   const goToHostEvents = useCallback(
-    (ev) => {
+    (ev: React.SyntheticEvent) => {
       ev.preventDefault();
       navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.hosts,

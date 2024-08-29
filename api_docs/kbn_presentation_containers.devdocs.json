@@ -1751,9 +1751,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/content-management-utils",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnContentManagementUtilsPluginApi",
-                "section": "def-common.Reference",
+                "section": "def-server.Reference",
                 "text": "Reference"
               },
               "[] | undefined"
