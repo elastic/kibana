@@ -54,6 +54,7 @@ export const ConfigSchema = schema.object({
       defaultValue: true,
     }),
   }),
+  forceSolutionVisibility: schema.boolean({ defaultValue: false }),
 });
 
 export function createConfig$(context: PluginInitializerContext) {

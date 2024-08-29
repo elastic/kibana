@@ -126,13 +126,22 @@ export class SpacesPlugin
       initializerContext.config.create<ConfigType>(),
       this.onCloud$,
     ]).pipe(
-      map(
-        ([config, onCloud]): ConfigType => ({
+      map(([config, onCloud]): ConfigType => {
+        let allowSolutionVisibility = config.allowSolutionVisibility;
+
+        // We only allow "solution" to be set on cloud environments, not on prem
+        // unless the forceSolutionVisibility flag is set
+        if (config.forceSolutionVisibility) {
+          allowSolutionVisibility = true;
+        } else if (!onCloud) {
+          allowSolutionVisibility = false;
+        }
+
+        return {
           ...config,
-          // We only allow "solution" to be set on cloud environments, not on prem
-          allowSolutionVisibility: onCloud ? config.allowSolutionVisibility : false,
-        })
-      )
+          allowSolutionVisibility,
+        };
+      })
     );
     this.hasOnlyDefaultSpace$ = this.config$.pipe(map(({ maxSpaces }) => maxSpaces === 1));
     this.log = initializerContext.logger.get();

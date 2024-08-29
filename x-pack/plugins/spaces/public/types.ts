@@ -60,4 +60,9 @@ export interface SpacesApi {
    * UI components and services to add spaces capabilities to an application.
    */
   ui: SpacesApiUi;
+
+  /**
+   * Indicates whether the solution view is enabled.
+   */
+  isSolutionViewEnabled: boolean;
 }
