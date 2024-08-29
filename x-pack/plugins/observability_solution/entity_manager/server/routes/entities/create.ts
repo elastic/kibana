@@ -12,11 +12,11 @@ import {
   createEntityDefinitionQuerySchema,
   CreateEntityDefinitionQuery,
 } from '@kbn/entities-schema';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { SetupRouteOptions } from '../types';
 import { EntityIdConflict } from '../../lib/entities/errors/entity_id_conflict_error';
 import { EntitySecurityException } from '../../lib/entities/errors/entity_security_exception';
 import { InvalidTransformError } from '../../lib/entities/errors/invalid_transform_error';
+import { EntityDefinitionIdInvalid } from '../../lib/entities/errors/entity_definition_id_invalid';
 
 /**
  * @openapi
@@ -55,13 +55,14 @@ import { InvalidTransformError } from '../../lib/entities/errors/invalid_transfo
 export function createEntityDefinitionRoute<T extends RequestHandlerContext>({
   router,
   getScopedClient,
+  logger,
 }: SetupRouteOptions<T>) {
   router.post<unknown, CreateEntityDefinitionQuery, EntityDefinition>(
     {
       path: '/internal/entities/definition',
       validate: {
-        body: buildRouteValidationWithZod(entityDefinitionSchema.strict()),
-        query: buildRouteValidationWithZod(createEntityDefinitionQuerySchema),
+        body: entityDefinitionSchema.strict(),
+        query: createEntityDefinitionQuerySchema,
       },
     },
     async (context, request, res) => {
@@ -74,12 +75,20 @@ export function createEntityDefinitionRoute<T extends RequestHandlerContext>({
 
         return res.ok({ body: definition });
       } catch (e) {
+        logger.error(e);
+
+        if (e instanceof EntityDefinitionIdInvalid) {
+          return res.badRequest({ body: e });
+        }
+
         if (e instanceof EntityIdConflict) {
           return res.conflict({ body: e });
         }
+
         if (e instanceof EntitySecurityException || e instanceof InvalidTransformError) {
           return res.customError({ body: e, statusCode: 400 });
         }
+
         return res.customError({ body: e, statusCode: 500 });
       }
     }

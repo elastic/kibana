@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod';
 import { RequestHandlerContext } from '@kbn/core/server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { getEntityDefinitionQuerySchema } from '@kbn/entities-schema';
 import { SetupRouteOptions } from '../types';
 
@@ -52,12 +52,14 @@ import { SetupRouteOptions } from '../types';
 export function getEntityDefinitionRoute<T extends RequestHandlerContext>({
   router,
   getScopedClient,
+  logger,
 }: SetupRouteOptions<T>) {
-  router.get<unknown, { page?: number; perPage?: number }, unknown>(
+  router.get<{ id?: string }, { page?: number; perPage?: number }, unknown>(
     {
-      path: '/internal/entities/definition',
+      path: '/internal/entities/definition/{id?}',
       validate: {
-        query: buildRouteValidationWithZod(getEntityDefinitionQuerySchema.strict()),
+        query: getEntityDefinitionQuerySchema.strict(),
+        params: z.object({ id: z.optional(z.string()) }),
       },
     },
     async (context, request, res) => {
@@ -70,6 +72,7 @@ export function getEntityDefinitionRoute<T extends RequestHandlerContext>({
 
         return res.ok({ body: result });
       } catch (e) {
+        logger.error(e);
         return res.customError({ body: e, statusCode: 500 });
       }
     }

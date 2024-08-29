@@ -6,7 +6,6 @@
  */
 
 import { RequestHandlerContext } from '@kbn/core/server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import {
   deleteEntityDefinitionParamsSchema,
   deleteEntityDefinitionQuerySchema,
@@ -53,13 +52,14 @@ import { EntityDefinitionNotFound } from '../../lib/entities/errors/entity_not_f
 export function deleteEntityDefinitionRoute<T extends RequestHandlerContext>({
   router,
   getScopedClient,
+  logger,
 }: SetupRouteOptions<T>) {
   router.delete<{ id: string }, { deleteData?: boolean }, unknown>(
     {
       path: '/internal/entities/definition/{id}',
       validate: {
-        params: buildRouteValidationWithZod(deleteEntityDefinitionParamsSchema.strict()),
-        query: buildRouteValidationWithZod(deleteEntityDefinitionQuerySchema.strict()),
+        params: deleteEntityDefinitionParamsSchema.strict(),
+        query: deleteEntityDefinitionQuerySchema.strict(),
       },
     },
     async (context, request, res) => {
@@ -72,6 +72,8 @@ export function deleteEntityDefinitionRoute<T extends RequestHandlerContext>({
 
         return res.ok({ body: { acknowledged: true } });
       } catch (e) {
+        logger.error(e);
+
         if (e instanceof EntityDefinitionNotFound) {
           return res.notFound({ body: e });
         }
