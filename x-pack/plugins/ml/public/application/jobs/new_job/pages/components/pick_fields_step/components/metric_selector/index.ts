@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { ReferenceLinePanel } from './reference_line_panel';
+export { MetricSelector } from './metric_selector';
