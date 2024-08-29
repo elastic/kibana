@@ -47,7 +47,7 @@ const TitleWithPopoverMessage = ({
 }) => {
   return (
     <EuiFormLabel htmlFor={embeddableId}>
-      <EuiFlexGroup alignItems="center" gutterSize="xs">
+      <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
         <EuiFlexItem grow={false}>{title}</EuiFlexItem>
         <EuiFlexItem grow={false}>
           <Popover>{helpMessage}</Popover>
