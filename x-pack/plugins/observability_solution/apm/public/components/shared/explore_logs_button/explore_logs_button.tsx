@@ -36,6 +36,7 @@ export function ExploreLogsButton({
   if (!logsExplorerLocator) {
     return null;
   }
+
   const { logsExplorerLinkProps } = buildLogsExplorerLocatorConfig({
     locator: logsExplorerLocator,
     from: start,
