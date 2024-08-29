@@ -56,6 +56,7 @@ export const ErrorCallout = ({ title, error, isEsqlMode }: Props) => {
                 css={css`
                   text-align: left;
                 `}
+                data-test-subj="discoverErrorCalloutMessage"
               >
                 {error.message}
               </EuiCodeBlock>
