@@ -65,8 +65,6 @@ describe('UserActionMarkdown ', () => {
 
       await userEvent.clear(screen.getByTestId('euiMarkdownEditorTextArea'));
 
-      await userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), '');
-
       await waitFor(() => {
         expect(screen.getByText('Empty comments are not allowed.')).toBeInTheDocument();
         expect(screen.getByTestId('editable-save-markdown')).toHaveProperty('disabled');

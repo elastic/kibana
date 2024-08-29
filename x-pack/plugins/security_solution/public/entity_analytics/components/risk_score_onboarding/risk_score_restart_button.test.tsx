@@ -16,19 +16,16 @@ import { restartRiskScoreTransforms } from './utils';
 jest.mock('./utils');
 
 const mockUseState = React.useState;
-jest.mock('../../../common/hooks/use_fetch', () => {
-  const originalModule = jest.requireActual('../../../common/hooks/use_fetch');
-  return {
-    ...originalModule,
-    useFetch: jest.fn().mockImplementation(() => {
-      const [isLoading, setIsLoading] = mockUseState(false);
-      return {
-        fetch: jest.fn().mockImplementation(() => setIsLoading(true)),
-        isLoading,
-      };
-    }),
-  };
-});
+jest.mock('../../../common/hooks/use_fetch', () => ({
+  ...jest.requireActual('../../../common/hooks/use_fetch'),
+  useFetch: jest.fn().mockImplementation(() => {
+    const [isLoading, setIsLoading] = mockUseState(false);
+    return {
+      fetch: jest.fn().mockImplementation(() => setIsLoading(true)),
+      isLoading,
+    };
+  }),
+}));
 
 const mockRestartRiskScoreTransforms = restartRiskScoreTransforms as jest.Mock;
 
