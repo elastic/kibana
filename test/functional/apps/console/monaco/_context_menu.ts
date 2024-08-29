@@ -43,7 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('Copy as', () => {
       beforeEach(async () => {
         await PageObjects.common.navigateToApp('console');
-        await PageObjects.console.closeHelpIfExists();
+        await PageObjects.console.skipTourIfExists();
         await PageObjects.console.monaco.clearEditorText();
         await PageObjects.console.monaco.enterText('GET _search');
       });
