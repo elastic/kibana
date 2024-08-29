@@ -16,6 +16,7 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { i18n } from '@kbn/i18n';
 
 import {
   EditorContentSpinner,
@@ -30,6 +31,7 @@ import {
   useServicesContext,
   useRequestReadContext,
   useRequestActionContext,
+  useEditorActionContext,
 } from '../../contexts';
 import type { SenseEditor } from '../../models';
 import { MonacoEditor, MonacoEditorOutput } from './monaco';
@@ -45,7 +47,7 @@ interface Props {
 
 export const Editor = memo(({ loading, setEditorInstance }: Props) => {
   const {
-    services: { storage },
+    services: { storage, objectStorageClient },
     config: { isMonacoEnabled } = {},
   } = useServicesContext();
 
@@ -55,7 +57,8 @@ export const Editor = memo(({ loading, setEditorInstance }: Props) => {
     lastResult: { data: requestData, error: requestError },
   } = useRequestReadContext();
 
-  const dispatch = useRequestActionContext();
+  const dispatchRequest = useRequestActionContext();
+  const dispatchEditor = useEditorActionContext();
 
   const [fetchingMappings, setFetchingMappings] = useState(false);
 
@@ -96,16 +99,51 @@ export const Editor = memo(({ loading, setEditorInstance }: Props) => {
           style={{ height: '100%', position: 'relative', minWidth: PANEL_MIN_WIDTH }}
           initialWidth={firstPanelWidth}
         >
-          {loading ? (
-            <EditorContentSpinner />
-          ) : isMonacoEnabled ? (
-            <MonacoEditor initialTextValue={currentTextObject.text} />
-          ) : (
-            <EditorUI
-              initialTextValue={currentTextObject.text}
-              setEditorInstance={setEditorInstance}
-            />
-          )}
+          <EuiSplitPanel.Outer grow={true} borderRadius="none" hasShadow={false}>
+            <EuiSplitPanel.Inner paddingSize="none">
+              {loading ? (
+                <EditorContentSpinner />
+              ) : isMonacoEnabled ? (
+                <MonacoEditor initialTextValue={currentTextObject.text} />
+              ) : (
+                <EditorUI
+                  initialTextValue={currentTextObject.text}
+                  setEditorInstance={setEditorInstance}
+                />
+              )}
+            </EuiSplitPanel.Inner>
+
+            {!loading && (
+              <EuiSplitPanel.Inner
+                grow={false}
+                paddingSize="m"
+                css={{
+                  backgroundColor: euiThemeVars.euiFormBackgroundColor,
+                }}
+              >
+                <EuiButtonEmpty
+                  size="xs"
+                  color="primary"
+                  data-test-subj="clearConsoleInput"
+                  onClick={async () => {
+                    const newObject = await objectStorageClient.text.create({
+                      createdAt: Date.now(),
+                      updatedAt: Date.now(),
+                      text: '',
+                    });
+                    dispatchEditor({
+                      type: 'setCurrentTextObject',
+                      payload: newObject,
+                    });
+                  }}
+                >
+                  {i18n.translate('console.editor.clearConsoleInputButton', {
+                    defaultMessage: 'Clear this input',
+                  })}
+                </EuiButtonEmpty>
+              </EuiSplitPanel.Inner>
+            )}
+          </EuiSplitPanel.Outer>
         </Panel>
         <Panel
           style={{ height: '100%', position: 'relative', minWidth: PANEL_MIN_WIDTH }}
@@ -141,9 +179,13 @@ export const Editor = memo(({ loading, setEditorInstance }: Props) => {
                         size="xs"
                         color="primary"
                         data-test-subj="clearConsoleOutput"
-                        onClick={() => dispatch({ type: 'cleanRequest', payload: undefined })}
+                        onClick={() =>
+                          dispatchRequest({ type: 'cleanResponse', payload: undefined })
+                        }
                       >
-                        Clear this output
+                        {i18n.translate('console.editor.clearConsoleOutputButton', {
+                          defaultMessage: 'Clear this output',
+                        })}
                       </EuiButtonEmpty>
                     </EuiFlexItem>
                   ) : (

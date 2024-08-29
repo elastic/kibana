@@ -106,7 +106,7 @@ export const useSetInitialValue = (params: SetInitialValueParams) => {
     if (loadFromParam) {
       loadBufferFromRemote(loadFromParam);
     } else {
-      setValue(initialTextValue || DEFAULT_INPUT_VALUE);
+      setValue(initialTextValue ?? DEFAULT_INPUT_VALUE);
     }
 
     return () => {
