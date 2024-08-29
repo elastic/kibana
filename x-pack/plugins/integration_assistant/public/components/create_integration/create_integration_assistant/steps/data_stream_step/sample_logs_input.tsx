@@ -176,6 +176,7 @@ const parseLogsContent = (
 
   let isTruncated = false;
   if (parsedContent.length > MaxLogsSampleRows) {
+    partialShuffleArray(parsedContent, 1, MaxLogsSampleRows);
     parsedContent = parsedContent.slice(0, MaxLogsSampleRows);
     isTruncated = true;
   }
