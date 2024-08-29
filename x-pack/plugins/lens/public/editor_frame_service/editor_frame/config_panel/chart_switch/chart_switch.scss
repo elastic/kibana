@@ -5,12 +5,17 @@
   }
 }
 
+.lnsChartSwitch__options {
+  width: 384px;
+
 .lnsChartSwitch__option {
   padding: $euiSizeS 0;
 }
 
-.lnsChartSwitch__options {
-  width: 384px;
+.euiSelectableList__groupLabel {
+  padding: $euiSizeS;
+}
+
 }
 
 .lnsChartSwitch__summaryIcon {

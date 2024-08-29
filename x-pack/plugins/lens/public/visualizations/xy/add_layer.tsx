@@ -14,11 +14,13 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   IconType,
+  transparentize,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { AddLayerFunction, VisualizationLayerDescription } from '../../types';
 import { LoadAnnotationLibraryFlyout } from './load_annotation_library_flyout';
 import type { ExtraAppendLayerArg } from './visualization';
@@ -285,15 +287,16 @@ const ChartOptionWrapper = ({
       onClick={onClick}
       className="euiContextMenuItem lnsLayerAddButton"
       css={css`
-        padding: 8px 12px;
-        border-bottom: 1px solid #eef2f7;
+        padding: ${euiThemeVars.euiSizeS};
+        border-bottom: ${euiThemeVars.euiBorderThin};
+        border-bottom-color: ${euiThemeVars.euiColorLightestShade};
         width: 100%;
         &: hover, &: focus {
-          color: #0071c2;
-          background-color: rgba(0, 119, 204, 0.1);
+          color: ${euiThemeVars.euiColorPrimary};
+          background-color: ${transparentize(euiThemeVars.euiColorPrimary, 0.1)};
           span, .euiText {
             text-decoration: underline;
-            color: #0071c2;
+            color: ${euiThemeVars.euiColorPrimary}};
           }
         }
       `}
