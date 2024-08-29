@@ -178,7 +178,6 @@ describe('resetControlsUnsavedChanges', () => {
     const lastSavedControlsState$ = new BehaviorSubject<ControlPanelsState>({});
     const controlsManager = initControlsManager(intialControlsState, lastSavedControlsState$);
     controlsManager.setControlApi('alpha', {} as unknown as DefaultControlApi);
-    controlsManager.setControlApi('bravo', {} as unknown as DefaultControlApi);
 
     expect(controlsManager.controlsInOrder$.value).toEqual([
       {
