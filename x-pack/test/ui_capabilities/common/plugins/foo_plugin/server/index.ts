@@ -21,7 +21,7 @@ class FooPlugin implements Plugin {
       id: 'foo',
       name: 'Foo',
       category: { id: 'foo', label: 'foo' },
-      scope: KibanaFeatureScope.Agnostic,
+      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: ['foo_plugin', 'kibana'],
       catalogue: ['foo'],
       privileges: {

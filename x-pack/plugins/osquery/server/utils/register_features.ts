@@ -23,7 +23,7 @@ export const registerFeatures = (features: SetupPlugins['features']) => {
       defaultMessage: 'Osquery',
     }),
     category: DEFAULT_APP_CATEGORIES.management,
-    scope: KibanaFeatureScope.Agnostic,
+    scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
     app: [PLUGIN_ID, 'kibana'],
     catalogue: [PLUGIN_ID],
     order: 2300,

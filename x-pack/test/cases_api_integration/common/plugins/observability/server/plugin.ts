@@ -29,7 +29,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       name: 'ObservabilityFixture',
       app: ['kibana'],
       category: { id: 'cases-fixtures', label: 'Cases Fixtures' },
-      scope: KibanaFeatureScope.Agnostic,
+      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       cases: ['observabilityFixture'],
       privileges: {
         all: {

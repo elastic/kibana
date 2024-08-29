@@ -317,7 +317,7 @@ export class FleetPlugin
         id: `fleetv2`,
         name: 'Fleet',
         category: DEFAULT_APP_CATEGORIES.management,
-        scope: KibanaFeatureScope.Agnostic,
+        scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
         app: [PLUGIN_ID],
         catalogue: ['fleet'],
         privilegesTooltip: i18n.translate('xpack.fleet.serverPlugin.privilegesTooltip', {
@@ -480,7 +480,7 @@ export class FleetPlugin
         id: 'fleet', // for BWC
         name: 'Integrations',
         category: DEFAULT_APP_CATEGORIES.management,
-        scope: KibanaFeatureScope.Agnostic,
+        scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
         app: [INTEGRATIONS_PLUGIN_ID],
         catalogue: ['fleet'],
         privileges: {

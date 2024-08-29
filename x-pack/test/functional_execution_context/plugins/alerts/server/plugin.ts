@@ -34,7 +34,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       name: 'Alerts',
       app: ['alerts', 'kibana'],
       category: { id: 'foo', label: 'foo' },
-      scope: KibanaFeatureScope.Agnostic,
+      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       alerting: ['test.executionContext'],
       privileges: {
         all: {

@@ -29,7 +29,7 @@ export const ACTIONS_FEATURE = {
     defaultMessage: 'Actions and Connectors',
   }),
   category: DEFAULT_APP_CATEGORIES.management,
-  scope: KibanaFeatureScope.Agnostic,
+  scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
   app: [],
   order: FEATURE_ORDER,
   management: {

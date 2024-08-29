@@ -42,7 +42,7 @@ export class AlertingExamplePlugin implements Plugin<void, void, AlertingExample
         insightsAndAlerting: ['triggersActions'],
       },
       category: DEFAULT_APP_CATEGORIES.management,
-      scope: KibanaFeatureScope.Agnostic,
+      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       alerting: [alwaysFiringRule.id, peopleInSpaceRule.id, INDEX_THRESHOLD_ID],
       privileges: {
         all: {

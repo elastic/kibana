@@ -89,7 +89,7 @@ export class SloPlugin implements Plugin<SloPluginSetup> {
       }),
       order: 1200,
       category: DEFAULT_APP_CATEGORIES.observability,
-      scope: KibanaFeatureScope.Agnostic,
+      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: [sloFeatureId, 'kibana'],
       catalogue: [sloFeatureId, 'observability'],
       alerting: sloRuleTypes,

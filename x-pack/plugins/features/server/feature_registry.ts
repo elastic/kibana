@@ -43,10 +43,14 @@ export class FeatureRegistry {
     }
 
     if (!feature.scope) {
-      feature.scope = KibanaFeatureScope.Security;
+      feature.scope = [KibanaFeatureScope.Security];
     }
 
     const featureCopy = cloneDeep(feature);
+
+    if (!feature.privileges) {
+      console.log(feature.id, 'feature');
+    }
 
     this.kibanaFeatures[feature.id] = applyAutomaticPrivilegeGrants(featureCopy);
   }

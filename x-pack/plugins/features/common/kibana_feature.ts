@@ -15,6 +15,7 @@ import { ReservedKibanaPrivilege } from './reserved_kibana_privilege';
 export enum KibanaFeatureScope {
   Agnostic = 'agnostic',
   Security = 'security',
+  Spaces = 'spaces',
 }
 
 /**
@@ -158,7 +159,7 @@ export interface KibanaFeatureConfig {
   /**
    * Indicates whether the feature is available in Security Feature Privileges and the Spaces Visibility Toggles.
    */
-  scope?: KibanaFeatureScope;
+  scope?: string[];
 }
 
 export class KibanaFeature {

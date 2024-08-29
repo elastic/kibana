@@ -68,7 +68,7 @@ function toggleDisabledFeatures(
     (acc, feature) => {
       if (
         disabledFeatureKeys.includes(feature.id) ||
-        feature.scope !== KibanaFeatureScope.Agnostic
+        !feature.scope?.includes(KibanaFeatureScope.Spaces)
       ) {
         acc.disabledFeatures.push(feature);
       } else {

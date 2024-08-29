@@ -23,7 +23,7 @@ export function getCanvasFeature(plugins: { reporting?: ReportingStart }): Kiban
     name: 'Canvas',
     order: 300,
     category: DEFAULT_APP_CATEGORIES.kibana,
-    scope: KibanaFeatureScope.Agnostic,
+    scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
     app: ['canvas', 'kibana'],
     management: {
       ...(includeReporting ? { insightsAndAlerting: ['reporting'] } : {}),

@@ -110,7 +110,7 @@ export class AIAssistantManagementSelectionPlugin
       order: 8600,
       app: [],
       category: DEFAULT_APP_CATEGORIES.management,
-      scope: KibanaFeatureScope.Agnostic,
+      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       management: {
         kibana: [
           'aiAssistantManagementSelection',

@@ -56,7 +56,7 @@ export const syntheticsFeature = {
   category: DEFAULT_APP_CATEGORIES.observability,
   app: ['uptime', 'kibana', 'synthetics'],
   catalogue: ['uptime'],
-  scope: KibanaFeatureScope.Agnostic,
+  scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
   management: {
     insightsAndAlerting: ['triggersActions'],
   },

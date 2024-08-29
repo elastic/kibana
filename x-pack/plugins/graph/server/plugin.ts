@@ -69,7 +69,7 @@ export class GraphPlugin implements Plugin {
         }),
         order: 600,
         category: DEFAULT_APP_CATEGORIES.kibana,
-        scope: KibanaFeatureScope.Agnostic,
+        scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
         app: ['graph', 'kibana'],
         catalogue: ['graph'],
         minimumLicense: 'platinum',

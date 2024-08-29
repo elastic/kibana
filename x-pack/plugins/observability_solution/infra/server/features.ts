@@ -38,7 +38,7 @@ export const METRICS_FEATURE = {
   }),
   order: 800,
   category: DEFAULT_APP_CATEGORIES.observability,
-  scope: KibanaFeatureScope.Agnostic,
+  scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
   app: ['infra', 'metrics', 'kibana'],
   catalogue: ['infraops', 'metrics'],
   management: {
@@ -105,7 +105,7 @@ export const LOGS_FEATURE = {
   }),
   order: 700,
   category: DEFAULT_APP_CATEGORIES.observability,
-  scope: KibanaFeatureScope.Agnostic,
+  scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
   app: ['infra', 'logs', 'kibana'],
   catalogue: ['infralogging', 'logs'],
   management: {

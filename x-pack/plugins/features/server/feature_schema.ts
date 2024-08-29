@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 
 import { difference } from 'lodash';
 import { Capabilities as UICapabilities } from '@kbn/core/server';
-import { KibanaFeatureConfig } from '../common';
+import { KibanaFeatureConfig, KibanaFeatureScope } from '../common';
 import { FeatureKibanaPrivileges, ElasticsearchFeatureConfig } from '.';
 
 // Each feature gets its own property on the UICapabilities object,
@@ -202,7 +202,18 @@ const kibanaFeatureSchema = schema.object({
   }),
   name: schema.string(),
   category: appCategorySchema,
-  scope: schema.maybe(schema.oneOf([schema.literal('security'), schema.literal('agnostic')])),
+  scope: schema.maybe(
+    schema.arrayOf(
+      schema.string({
+        validate(value: string) {
+          if (!Object.values(KibanaFeatureScope).includes(value as KibanaFeatureScope)) {
+            return `Invalid KibanaFeatureScope: [${value}]`;
+          }
+        },
+      }),
+      { minSize: 1 }
+    )
+  ),
   description: schema.maybe(schema.string()),
   order: schema.maybe(schema.number()),
   excludeFromBasePrivileges: schema.maybe(schema.boolean()),

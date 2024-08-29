@@ -17,7 +17,7 @@ export const savedObjectsTaggingFeature: KibanaFeatureConfig = {
     defaultMessage: 'Tag Management',
   }),
   category: DEFAULT_APP_CATEGORIES.management,
-  scope: KibanaFeatureScope.Agnostic,
+  scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
   order: 1800,
   app: [],
   management: {

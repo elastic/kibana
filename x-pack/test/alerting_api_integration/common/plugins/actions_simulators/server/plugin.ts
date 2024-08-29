@@ -126,7 +126,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       name: 'actionsSimulators',
       app: ['actions', 'kibana'],
       category: { id: 'foo', label: 'foo' },
-      scope: KibanaFeatureScope.Agnostic,
+      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       privileges: {
         all: {
           app: ['actions', 'kibana'],

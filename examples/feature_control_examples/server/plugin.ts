@@ -27,7 +27,7 @@ export class FeatureControlsPluginExample
       name: 'Feature Plugin Examples',
       category: DEFAULT_APP_CATEGORIES.management,
       app: ['FeaturePluginExample'],
-      scope: KibanaFeatureScope.Agnostic,
+      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       privileges: {
         all: {
           app: ['FeaturePluginExample'],

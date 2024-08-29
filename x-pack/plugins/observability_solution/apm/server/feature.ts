@@ -27,7 +27,7 @@ export const APM_FEATURE = {
   }),
   order: 900,
   category: DEFAULT_APP_CATEGORIES.observability,
-  scope: KibanaFeatureScope.Agnostic,
+  scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
   app: [APM_SERVER_FEATURE_ID, 'ux', 'kibana'],
   catalogue: [APM_SERVER_FEATURE_ID],
   management: {

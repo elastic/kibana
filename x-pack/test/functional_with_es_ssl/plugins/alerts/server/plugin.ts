@@ -117,7 +117,7 @@ export class AlertingFixturePlugin implements Plugin<void, void, AlertingExample
       name: 'alerting_fixture',
       app: [],
       category: { id: 'foo', label: 'foo' },
-      scope: KibanaFeatureScope.Agnostic,
+      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       alerting: ['test.always-firing', 'test.noop', 'test.failing'],
       privileges: {
         all: {
