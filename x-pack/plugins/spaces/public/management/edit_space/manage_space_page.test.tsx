@@ -308,6 +308,51 @@ describe('ManageSpacePage', () => {
     expect(wrapper.find(EnabledFeatures)).toHaveLength(0);
   });
 
+  it('hides feature visibility controls when solution view is not "classic"', async () => {
+    const spacesManager = spacesManagerMock.create();
+
+    const wrapper = mountWithIntl(
+      <ManageSpacePage
+        spacesManager={spacesManager}
+        getFeatures={featuresStart.getFeatures}
+        notifications={notificationServiceMock.createStartContract()}
+        history={history}
+        capabilities={{
+          navLinks: {},
+          management: {},
+          catalogue: {},
+          spaces: { manage: true },
+        }}
+        eventTracker={eventTracker}
+        allowFeatureVisibility
+        allowSolutionVisibility
+      />
+    );
+
+    await waitFor(async () => {
+      await Promise.resolve();
+
+      wrapper.update();
+
+      // default for create space: expect visible features table to exist
+      expect(wrapper.find(EnabledFeatures)).toHaveLength(1);
+    });
+
+    await waitFor(() => {
+      // switch to observability view
+      updateSpace(wrapper, false, 'oblt');
+      // expect visible features table to not exist
+      expect(wrapper.find(EnabledFeatures)).toHaveLength(0);
+    });
+
+    await waitFor(() => {
+      // switch to classic
+      updateSpace(wrapper, false, 'classic');
+      // expect visible features table to exist again
+      expect(wrapper.find(EnabledFeatures)).toHaveLength(1);
+    });
+  });
+
   it('allows a space to be updated', async () => {
     const spaceToUpdate = {
       id: 'existing-space',

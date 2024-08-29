@@ -35,7 +35,7 @@ export const WaterfallSidebarItem = React.memo(function WaterfallSidebarItem({
     }
   }, [buttonRef, index, onClick]);
 
-  const setRef = useCallback((ref) => setButtonRef(ref), [setButtonRef]);
+  const setRef = useCallback((ref: any) => setButtonRef(ref), [setButtonRef]);
 
   const isErrorStatusCode = (statusCode: number) => {
     const is400 = statusCode >= 400 && statusCode <= 499;
