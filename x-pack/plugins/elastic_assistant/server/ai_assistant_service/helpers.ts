@@ -81,6 +81,8 @@ export const createPipeline = async ({
 
     return response.acknowledged;
   } catch (e) {
+    // TODO: log error or just use semantic_text already
+    console.log('Error creating pipeline:', e);
     return false;
   }
 };

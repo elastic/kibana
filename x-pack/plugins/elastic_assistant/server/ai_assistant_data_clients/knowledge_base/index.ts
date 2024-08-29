@@ -15,21 +15,29 @@ import { Document } from 'langchain/document';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import {
   DocumentEntryType,
+  IndexEntry,
   KnowledgeBaseEntryCreateProps,
   KnowledgeBaseEntryResponse,
   Metadata,
 } from '@kbn/elastic-assistant-common';
 import pRetry from 'p-retry';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { StructuredTool } from '@langchain/core/tools';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { AIAssistantDataClient, AIAssistantDataClientParams } from '..';
 import { ElasticsearchStore } from '../../lib/langchain/elasticsearch_store/elasticsearch_store';
 import { loadESQL } from '../../lib/langchain/content_loaders/esql_loader';
-import { GetElser } from '../../types';
+import { AssistantToolParams, GetElser } from '../../types';
 import { createKnowledgeBaseEntry, transformToCreateSchema } from './create_knowledge_base_entry';
-import { EsDocumentEntry, EsKnowledgeBaseEntrySchema } from './types';
+import { EsDocumentEntry, EsIndexEntry, EsKnowledgeBaseEntrySchema } from './types';
 import { transformESSearchToKnowledgeBaseEntry } from './transforms';
 import { ESQL_DOCS_LOADED_QUERY } from '../../routes/knowledge_base/constants';
-import { getKBVectorSearchQuery, isModelAlreadyExistsError } from './helpers';
+import {
+  getKBVectorSearchQuery,
+  getStructuredToolForIndexEntry,
+  isModelAlreadyExistsError,
+} from './helpers';
+import { getKBUserFilter } from '../../routes/knowledge_base/entries/utils';
 
 interface KnowledgeBaseDataClientParams extends AIAssistantDataClientParams {
   ml: MlPluginSetup;
@@ -383,5 +391,50 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       user: authenticatedUser,
       knowledgeBaseEntry,
     });
+  };
+
+  /**
+   * Returns AssistantTools for any 'relevant' KB IndexEntries that exist in the knowledge base
+   */
+  public getAssistantTools = async ({
+    assistantToolParams,
+    esClient,
+  }: {
+    assistantToolParams: AssistantToolParams;
+    esClient: ElasticsearchClient;
+  }): Promise<StructuredTool[]> => {
+    const user = this.options.currentUser;
+    if (user == null) {
+      throw new Error(
+        'Authenticated user not found! Ensure kbDataClient was initialized from a request.'
+      );
+    }
+
+    const elserId = await this.options.getElserId();
+    const userFilter = getKBUserFilter(user);
+    const results = await this.findDocuments<EsIndexEntry>({
+      perPage: 23,
+      page: 1,
+      sortField: 'created_at',
+      sortOrder: 'asc',
+      filter: `${userFilter}${` AND type:index`}`, // TODO: Support global tools (no user filter), and filter by space as well
+    });
+    this.options.logger.debug(
+      `kbDataClient.getAssistantTools() - results:\n${JSON.stringify(results, null, 2)}`
+    );
+
+    if (results) {
+      const entries = transformESSearchToKnowledgeBaseEntry(results.data) as IndexEntry[];
+      return entries.map((indexEntry) => {
+        return getStructuredToolForIndexEntry({
+          indexEntry,
+          esClient,
+          logger: this.options.logger,
+          elserId,
+        });
+      });
+    }
+
+    return [];
   };
 }

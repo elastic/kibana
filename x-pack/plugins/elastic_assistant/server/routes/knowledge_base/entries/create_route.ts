@@ -64,6 +64,8 @@ export const createKnowledgeBaseEntryRoute = (router: ElasticAssistantPluginRout
             knowledgeBaseEntry: request.body,
           });
 
+          console.log('createResponse:', JSON.stringify(createResponse, null, 2));
+
           if (createResponse == null) {
             return assistantResponse.error({
               body: `Knowledge Base Entry was not created`,

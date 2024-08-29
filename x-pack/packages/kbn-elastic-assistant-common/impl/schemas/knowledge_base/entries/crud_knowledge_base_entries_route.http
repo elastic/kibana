@@ -1,6 +1,6 @@
 ### Create Document Entry
 POST http://{{host}}:{{port}}{{basePath}}/internal/elastic_assistant/knowledge_base/entries
-kbn-xsrf
+kbn-xsrf: "true"
 Elastic-Api-Version: 1
 Authorization: Basic elastic changeme
 X-Kbn-Context: %7B%22type%22%3A%22application%22%2C%22name%22%3A%22securitySolutionUI%22%2C%22url%22%3A%22%2Fkbn%2Fapp%2Fsecurity%22%7D
@@ -12,13 +12,12 @@ Content-Type: application/json
   "kbResource": "user",
   "source": "api",
   "required": true,
-  "text": "My favorite food is Dan Bing",
-  "users": []
+  "text": "My favorite food is Dan Bing"
 }
 
 ### Create Index Entry
 POST http://{{host}}:{{port}}{{basePath}}/internal/elastic_assistant/knowledge_base/entries
-kbn-xsrf
+kbn-xsrf: "true"
 Elastic-Api-Version: 1
 Content-Type: application/json
 Authorization: Basic elastic changeme
@@ -26,12 +25,11 @@ X-Kbn-Context: %7B%22type%22%3A%22application%22%2C%22name%22%3A%22securitySolut
 
 {
   "type": "index",
-  "name": "Sample Index Entry",
+  "name": "SpongBotSlackConnector",
   "namespace": "default",
-  "index": "sample-index",
-  "field": "sample-field",
-  "description": "This is a sample index entry",
-  "users": []
+  "index": "spongbot",
+  "field": "semantic_text",
+  "description": "Use this index to search for the user's Slack messages."
 }
 
 

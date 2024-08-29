@@ -82,6 +82,9 @@ export const IGNORE_FILE_GLOBS = [
 
   // ecs templates
   '**/ecs/fields/**/*',
+
+  // Support for including http-client.env.json configurations
+  '**/http-client.env.json',
 ];
 
 /**

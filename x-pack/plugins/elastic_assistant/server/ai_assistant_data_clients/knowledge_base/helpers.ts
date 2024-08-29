@@ -5,9 +5,13 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod';
+import { DynamicStructuredTool } from '@langchain/core/tools';
 import { errors } from '@elastic/elasticsearch';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { QueryDslQueryContainer, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { AuthenticatedUser } from '@kbn/core-security-common';
+import { IndexEntry } from '@kbn/elastic-assistant-common';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 export const isModelAlreadyExistsError = (error: Error) => {
   return (
@@ -99,4 +103,92 @@ export const getKBVectorSearchQuery = ({
       filter,
     },
   };
+};
+
+/**
+ * Returns a StructuredTool for a given IndexEntry
+ */
+export const getStructuredToolForIndexEntry = ({
+  indexEntry,
+  esClient,
+  logger,
+  elserId,
+}: {
+  indexEntry: IndexEntry;
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  elserId: string;
+}): DynamicStructuredTool => {
+  return new DynamicStructuredTool({
+    name: indexEntry.name.replaceAll(' ', ''),
+    description: indexEntry.description,
+    schema: z.object({
+      // name: z
+      //   .string()
+      //   .describe(`This is what the user will use to refer to the entry in the future.`),
+      query: z
+        .string()
+        .describe(
+          `The free text search that the user wants to perform over this dataset. So if asking "what are my slack messages from last week about failed tests", the query would be "A test has failed! failing test failed test".`
+        ),
+      // required: z
+      //   .boolean()
+      //   .describe(
+      //     `Whether or not the entry is required to always be included in conversations. Is only true if the user explicitly asks for it to be required or always included in conversations, otherwise this is always false.`
+      //   )
+      //   .default(false),
+    }),
+    func: async (input, _, cbManager) => {
+      logger.debug(
+        () => `Generated ${indexEntry.name} Tool:input\n ${JSON.stringify(input, null, 2)}`
+      );
+
+      const params: SearchRequest = {
+        index: indexEntry.index,
+        size: 10,
+        retriever: {
+          standard: {
+            query: {
+              nested: {
+                path: 'semantic_text.inference.chunks',
+                query: {
+                  sparse_vector: {
+                    inference_id: elserId,
+                    field: 'semantic_text.inference.chunks.embeddings',
+                    query: input.query,
+                  },
+                },
+                inner_hits: {
+                  size: 2,
+                  name: 'spongbot.semantic_text',
+                  _source: ['semantic_text.inference.chunks.text'],
+                },
+              },
+            },
+          },
+        },
+      };
+
+      try {
+        const result = await esClient.search(params);
+
+        const kbDocs = result.hits.hits.map((hit) => ({
+          text: (hit._source as { text: string }).text,
+        }));
+
+        logger.debug(() => `Similarity Search Params:\n ${JSON.stringify(params)}`);
+        logger.debug(() => `Similarity Search Results:\n ${JSON.stringify(result)}`);
+        logger.debug(() => `Similarity Text Extract Results:\n ${JSON.stringify(kbDocs)}`);
+
+        return `###\nBelow are all relevant documents in JSON format:\n${JSON.stringify(
+          kbDocs
+        )}\n###`;
+      } catch (e) {
+        logger.error(`Error performing IndexEntry KB Similarity Search: ${e.message}`);
+        return `I'm sorry, but I was unable to find any information in the knowledge base. Perhaps this error would be useful to deliver to the user. Be sure to print it below your response and in a codeblock so it is rendered nicely: ${e.message}`;
+      }
+    },
+    tags: ['knowledge-base'],
+    // TODO: Remove after ZodAny is fixed https://github.com/langchain-ai/langchainjs/blob/main/langchain-core/src/tools.ts
+  }) as unknown as DynamicStructuredTool;
 };

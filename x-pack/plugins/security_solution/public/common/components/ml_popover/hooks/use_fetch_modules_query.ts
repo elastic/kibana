@@ -8,10 +8,10 @@
 import type { UseQueryOptions } from '@tanstack/react-query';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
-import { getModules } from '../api';
 import type { GetModulesProps, Module } from '../types';
 
-const ONE_MINUTE = 60000;
+// TODO: Remove -- this is to fix that ML job fetch toaster error issue on `main` now
+// const ONE_MINUTE = 60000;
 export const GET_MODULES_QUERY_KEY = ['GET', '/internal/ml/modules/get_module/:moduleId'];
 
 export const useFetchModulesQuery = (
@@ -20,13 +20,14 @@ export const useFetchModulesQuery = (
 ) => {
   return useQuery<Module[]>(
     [GET_MODULES_QUERY_KEY, queryArgs],
-    async ({ signal }) => getModules({ signal, ...queryArgs }),
-    {
-      refetchIntervalInBackground: false,
-      staleTime: ONE_MINUTE * 5,
-      retry: false,
-      ...options,
-    }
+    () => []
+    // async ({ signal }) => getModules({ signal, ...queryArgs }),
+    // {
+    //   refetchIntervalInBackground: false,
+    //   staleTime: ONE_MINUTE * 5,
+    //   retry: false,
+    //   ...options,
+    // }
   );
 };
 
