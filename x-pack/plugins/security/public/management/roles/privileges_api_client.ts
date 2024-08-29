@@ -7,16 +7,15 @@
 
 import type { HttpStart } from '@kbn/core/public';
 import type { RawKibanaPrivileges } from '@kbn/security-authorization-core';
+import { PrivilegesAPIClientPublicContract } from '@kbn/security-plugin-types-public';
 
 import type { BuiltinESPrivileges } from '../../../common/model';
 
-export class PrivilegesAPIClient {
-  constructor(private readonly http: HttpStart) {}
+export class PrivilegesAPIClient extends PrivilegesAPIClientPublicContract {
+  constructor(private readonly http: HttpStart) {
+    super();
+  }
 
-  /*
-   * respectLicenseLevel is an internal optional parameter soley for getting all sub-feature
-   * privilieges to use in the UI. It is not meant for any other use.
-   */
   async getAll({
     includeActions,
     respectLicenseLevel = true,

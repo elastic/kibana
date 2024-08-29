@@ -29,6 +29,8 @@ import { StyledGraphControls, StyledGraphControlsColumn, StyledEuiRange } from '
 import { NodeLegend } from './legend';
 import { SchemaInformation } from './schema';
 
+type PopoverType = null | 'schemaInfo' | 'nodeLegend' | 'sourcererSelection' | 'datePicker';
+
 export const GraphControls = React.memo(
   ({
     id,
@@ -51,13 +53,11 @@ export const GraphControls = React.memo(
     const isDatePickerAndSourcererDisabled = useIsExperimentalFeatureEnabled(
       'analyzerDatePickersAndSourcererDisabled'
     );
-    const [activePopover, setPopover] = useState<
-      null | 'schemaInfo' | 'nodeLegend' | 'sourcererSelection' | 'datePicker'
-    >(null);
+    const [activePopover, setPopover] = useState<PopoverType>(null);
     const colorMap = useColors();
 
     const setActivePopover = useCallback(
-      (value) => {
+      (value: PopoverType) => {
         if (value === activePopover) {
           setPopover(null);
         } else {

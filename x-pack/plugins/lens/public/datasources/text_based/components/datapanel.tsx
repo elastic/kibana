@@ -24,6 +24,7 @@ import {
   GetCustomFieldType,
   useGroupedFields,
 } from '@kbn/unified-field-list';
+import { OverrideFieldGroupDetails } from '@kbn/unified-field-list/src/types';
 import type { DatasourceDataPanelProps } from '../../../types';
 import type { TextBasedPrivateState } from '../types';
 import { getStateFromAggregateQuery } from '../utils';
@@ -83,7 +84,7 @@ export function TextBasedDataPanel({
     [layerFields]
   );
 
-  const onOverrideFieldGroupDetails = useCallback((groupName) => {
+  const onOverrideFieldGroupDetails = useCallback<OverrideFieldGroupDetails>((groupName) => {
     if (groupName === FieldsGroupNames.AvailableFields) {
       return {
         helpText: i18n.translate('xpack.lens.indexPattern.allFieldsForTextBasedLabelHelp', {
