@@ -18,6 +18,7 @@ import {
   createHistoricalPrebuiltRuleAssetSavedObjects,
   getPrebuiltRulesAndTimelinesStatus,
   installPrebuiltRulesAndTimelines,
+  deleteAllTimelines,
 } from '../../../../utils';
 import {
   deleteAllRules,
@@ -34,6 +35,7 @@ export default ({ getService }: FtrProviderContext): void => {
     describe('get_prebuilt_rules_status', () => {
       beforeEach(async () => {
         await deleteAllPrebuiltRuleAssets(es, log);
+        await deleteAllTimelines(es, log);
         await deleteAllRules(supertest, log);
       });
 
