@@ -157,7 +157,8 @@ export const createQuickPrompt = (
 };
 
 export const selectRule = (ruleId: string) => {
-  cy.get(TIMELINE_CHECKBOX(ruleId)).should('be.visible');
+  // not be.visible because of eui css
+  cy.get(TIMELINE_CHECKBOX(ruleId)).should('exist');
   cy.get(TIMELINE_CHECKBOX(ruleId)).click();
 };
 
