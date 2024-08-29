@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { context } from '@kbn/kibana-react-plugin/public';
 
 import { EuiButton, EuiConfirmModal, EUI_MODAL_CONFIRM_BUTTON } from '@elastic/eui';
 
@@ -18,6 +19,8 @@ import { deleteFilterLists } from './delete_filter_lists';
  * React modal for confirming deletion of filter lists.
  */
 export class DeleteFilterListModal extends Component {
+  static contextType = context;
+
   static displayName = 'DeleteFilterListModal';
   static propTypes = {
     selectedFilterLists: PropTypes.array,
@@ -46,7 +49,11 @@ export class DeleteFilterListModal extends Component {
 
   async doDelete() {
     const { selectedFilterLists, refreshFilterLists } = this.props;
-    await deleteFilterLists(selectedFilterLists);
+    await deleteFilterLists(
+      this.context.services.notifications.toasts,
+      this.context.services.mlServices.mlApiServices,
+      selectedFilterLists
+    );
 
     refreshFilterLists();
     this.closeModal();

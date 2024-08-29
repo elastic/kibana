@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { FakeLLM } from '@langchain/core/utils/testing';
-import { handleDuplicates } from './duplicates';
-import type { EcsMappingState } from '../../types';
-import { ecsTestState } from '../../../__jest__/fixtures/ecs_mapping';
 import {
   ActionsClientChatOpenAI,
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';
+import { FakeLLM } from '@langchain/core/utils/testing';
+import { ecsTestState } from '../../../__jest__/fixtures/ecs_mapping';
+import type { EcsMappingState } from '../../types';
+import { handleDuplicates } from './duplicates';
 
 const model = new FakeLLM({
   response: '{ "message": "ll callback later."}',

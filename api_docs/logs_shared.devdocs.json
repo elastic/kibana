@@ -3175,6 +3175,137 @@
       },
       {
         "parentPluginId": "logsShared",
+        "id": "def-public.UpdatedDateRange",
+        "type": "Interface",
+        "tags": [],
+        "label": "UpdatedDateRange",
+        "description": [],
+        "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "logsShared",
+            "id": "def-public.UpdatedDateRange.startDateExpression",
+            "type": "string",
+            "tags": [],
+            "label": "startDateExpression",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "logsShared",
+            "id": "def-public.UpdatedDateRange.endDateExpression",
+            "type": "string",
+            "tags": [],
+            "label": "endDateExpression",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "logsShared",
+        "id": "def-public.VisibleInterval",
+        "type": "Interface",
+        "tags": [],
+        "label": "VisibleInterval",
+        "description": [],
+        "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "logsShared",
+            "id": "def-public.VisibleInterval.pagesBeforeStart",
+            "type": "number",
+            "tags": [],
+            "label": "pagesBeforeStart",
+            "description": [],
+            "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "logsShared",
+            "id": "def-public.VisibleInterval.pagesAfterEnd",
+            "type": "number",
+            "tags": [],
+            "label": "pagesAfterEnd",
+            "description": [],
+            "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "logsShared",
+            "id": "def-public.VisibleInterval.startKey",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "startKey",
+            "description": [],
+            "signature": [
+              "({ time: string; tiebreaker: number; } & { gid?: string | undefined; fromAutoReload?: boolean | undefined; }) | null"
+            ],
+            "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "logsShared",
+            "id": "def-public.VisibleInterval.middleKey",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "middleKey",
+            "description": [],
+            "signature": [
+              "({ time: string; tiebreaker: number; } & { gid?: string | undefined; fromAutoReload?: boolean | undefined; }) | null"
+            ],
+            "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "logsShared",
+            "id": "def-public.VisibleInterval.endKey",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "endKey",
+            "description": [],
+            "signature": [
+              "({ time: string; tiebreaker: number; } & { gid?: string | undefined; fromAutoReload?: boolean | undefined; }) | null"
+            ],
+            "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "logsShared",
+            "id": "def-public.VisibleInterval.fromScroll",
+            "type": "boolean",
+            "tags": [],
+            "label": "fromScroll",
+            "description": [],
+            "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "logsShared",
         "id": "def-public.WithSummaryProps",
         "type": "Interface",
         "tags": [],
