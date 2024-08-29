@@ -19,8 +19,8 @@ import { i18n } from '@kbn/i18n';
 
 import { MAX_SPACE_INITIALS } from '../../../../common';
 import { encode, imageTypes } from '../../../../common/lib/dataurl';
+import type { FormValues } from '../../create_space';
 import type { SpaceValidator } from '../../lib';
-import type { FormValues } from '../manage_space_page';
 
 interface Props {
   space: FormValues;

@@ -18,7 +18,7 @@ import { capitalize } from 'lodash';
 import type { FC } from 'react';
 import React, { useEffect, useState } from 'react';
 
-import { useViewSpaceServices } from './provider';
+import { useEditSpaceServices } from './provider';
 import { addSpaceIdToPath, ENTER_SPACE_PATH, type Space } from '../../../common';
 import type { SpaceContentTypeSummaryItem } from '../../types';
 
@@ -28,9 +28,9 @@ const handleApiError = (error: Error) => {
   throw error;
 };
 
-export const ViewSpaceContent: FC<{ space: Space }> = ({ space }) => {
+export const EditSpaceContentTab: FC<{ space: Space }> = ({ space }) => {
   const { id: spaceId } = space;
-  const { spacesManager, serverBasePath } = useViewSpaceServices();
+  const { spacesManager, serverBasePath } = useEditSpaceServices();
   const [isLoading, setIsLoading] = useState(true);
   const [items, setItems] = useState<SpaceContentTypeSummaryItem[] | null>(null);
 

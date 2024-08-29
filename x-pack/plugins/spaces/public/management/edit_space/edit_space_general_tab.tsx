@@ -13,15 +13,15 @@ import type { KibanaFeature } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 
-import { ViewSpaceTabFooter } from './footer';
-import { useViewSpaceServices } from './provider';
-import { ViewSpaceEnabledFeatures } from './view_space_features_tab';
+import { EditSpaceEnabledFeatures } from './edit_space_features_tab';
+import { EditSpaceTabFooter } from './footer';
+import { useEditSpaceServices } from './provider';
 import type { Space } from '../../../common';
 import { ConfirmDeleteModal } from '../components';
-import { ConfirmAlterActiveSpaceModal } from '../edit_space/confirm_alter_active_space_modal';
-import { CustomizeSpace } from '../edit_space/customize_space';
-import type { FormValues } from '../edit_space/manage_space_page';
-import { SolutionView } from '../edit_space/solution_view';
+import { ConfirmAlterActiveSpaceModal } from '../components/confirm_alter_active_space_modal';
+import { CustomizeSpace } from '../components/customize_space';
+import { SolutionView } from '../components/solution_view';
+import type { FormValues } from '../create_space';
 import { SpaceValidator } from '../lib';
 
 interface Props {
@@ -33,15 +33,14 @@ interface Props {
   reloadWindow: () => void;
 }
 
-// FIXME: rename to EditSpaceSettings
-export const ViewSpaceSettings: React.FC<Props> = ({ space, features, history, ...props }) => {
+export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history, ...props }) => {
   const [spaceSettings, setSpaceSettings] = useState<Partial<Space>>(space);
   const [isDirty, setIsDirty] = useState(false); // track if unsaved changes have been made
   const [isLoading, setIsLoading] = useState(false); // track if user has just clicked the Update button
   const [showUserImpactWarning, setShowUserImpactWarning] = useState(false);
   const [showAlteringActiveSpaceDialog, setShowAlteringActiveSpaceDialog] = useState(false);
   const [showConfirmDeleteModal, setShowConfirmDeleteModal] = useState(false);
-  const { http, overlays, notifications, navigateToUrl, spacesManager } = useViewSpaceServices();
+  const { http, overlays, notifications, navigateToUrl, spacesManager } = useEditSpaceServices();
 
   const [solution, setSolution] = useState<typeof space.solution | undefined>(space.solution);
 
@@ -237,7 +236,7 @@ export const ViewSpaceSettings: React.FC<Props> = ({ space, features, history, .
       {props.allowFeatureVisibility && (solution == null || solution === 'classic') && (
         <>
           <EuiSpacer />
-          <ViewSpaceEnabledFeatures
+          <EditSpaceEnabledFeatures
             features={features}
             space={spaceSettings}
             onChange={onChangeFeatures}
@@ -248,7 +247,7 @@ export const ViewSpaceSettings: React.FC<Props> = ({ space, features, history, .
       {doShowUserImpactWarning()}
 
       <EuiSpacer />
-      <ViewSpaceTabFooter
+      <EditSpaceTabFooter
         isDirty={isDirty}
         isLoading={isLoading}
         onClickCancel={onClickCancel}

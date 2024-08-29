@@ -20,12 +20,12 @@ export type IDispatchAction =
       payload: any;
     };
 
-export interface IViewSpaceStoreState {
+export interface IEditSpaceStoreState {
   /** roles assigned to current space */
   roles: Map<Role['name'], Role>;
 }
 
-export const createSpaceRolesReducer: Reducer<IViewSpaceStoreState, IDispatchAction> = (
+export const createSpaceRolesReducer: Reducer<IEditSpaceStoreState, IDispatchAction> = (
   state,
   action
 ) => {

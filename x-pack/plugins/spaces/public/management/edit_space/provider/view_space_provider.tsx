@@ -27,12 +27,11 @@ import type {
 import {
   createSpaceRolesReducer,
   type IDispatchAction,
-  type IViewSpaceStoreState,
+  type IEditSpaceStoreState,
 } from './reducers';
 import type { SpacesManager } from '../../../spaces_manager';
 
-// FIXME: rename to EditSpaceServices
-export interface ViewSpaceProviderProps
+export interface EditSpaceProviderProps
   extends Pick<CoreStart, 'theme' | 'i18n' | 'overlays' | 'http' | 'notifications'> {
   capabilities: ApplicationStart['capabilities'];
   getUrlForApp: ApplicationStart['getUrlForApp'];
@@ -43,41 +42,40 @@ export interface ViewSpaceProviderProps
   getPrivilegesAPIClient: () => Promise<PrivilegesAPIClientPublicContract>;
 }
 
-export interface ViewSpaceServices
-  extends Omit<ViewSpaceProviderProps, 'getRolesAPIClient' | 'getPrivilegesAPIClient'> {
-  invokeClient<R extends unknown>(arg: (clients: ViewSpaceClients) => Promise<R>): Promise<R>;
+export interface EditSpaceServices
+  extends Omit<EditSpaceProviderProps, 'getRolesAPIClient' | 'getPrivilegesAPIClient'> {
+  invokeClient<R extends unknown>(arg: (clients: EditSpaceClients) => Promise<R>): Promise<R>;
 }
 
-interface ViewSpaceClients {
-  spacesManager: ViewSpaceProviderProps['spacesManager'];
+interface EditSpaceClients {
+  spacesManager: EditSpaceProviderProps['spacesManager'];
   rolesClient: RolesAPIClient;
   privilegesClient: PrivilegesAPIClientPublicContract;
 }
 
-export interface ViewSpaceStore {
-  state: IViewSpaceStoreState;
+export interface EditSpaceStore {
+  state: IEditSpaceStoreState;
   dispatch: Dispatch<IDispatchAction>;
 }
 
-const createSpaceRolesContext = once(() => createContext<ViewSpaceStore | null>(null));
+const createSpaceRolesContext = once(() => createContext<EditSpaceStore | null>(null));
 
-const createViewSpaceServicesContext = once(() => createContext<ViewSpaceServices | null>(null));
+const createEditSpaceServicesContext = once(() => createContext<EditSpaceServices | null>(null));
 
-// FIXME: rename to EditSpaceProvider
-export const ViewSpaceProvider = ({
+export const EditSpaceProvider = ({
   children,
   getRolesAPIClient,
   getPrivilegesAPIClient,
   ...services
-}: PropsWithChildren<ViewSpaceProviderProps>) => {
-  const ViewSpaceStoreContext = createSpaceRolesContext();
-  const ViewSpaceServicesContext = createViewSpaceServicesContext();
+}: PropsWithChildren<EditSpaceProviderProps>) => {
+  const EditSpaceStoreContext = createSpaceRolesContext();
+  const EditSpaceServicesContext = createEditSpaceServicesContext();
 
   const clients = useRef(Promise.all([getRolesAPIClient(), getPrivilegesAPIClient()]));
   const rolesAPIClientRef = useRef<RolesAPIClient>();
   const privilegesClientRef = useRef<PrivilegesAPIClientPublicContract>();
 
-  const initialStoreState = useRef<IViewSpaceStoreState>({
+  const initialStoreState = useRef<IEditSpaceStoreState>({
     roles: new Map(),
   });
 
@@ -93,7 +91,7 @@ export const ViewSpaceProvider = ({
     resolveAPIClients();
   }, [resolveAPIClients]);
 
-  const createInitialState = useCallback((state: IViewSpaceStoreState) => {
+  const createInitialState = useCallback((state: IEditSpaceStoreState) => {
     return state;
   }, []);
 
@@ -103,7 +101,7 @@ export const ViewSpaceProvider = ({
     createInitialState
   );
 
-  const invokeClient: ViewSpaceServices['invokeClient'] = useCallback(
+  const invokeClient: EditSpaceServices['invokeClient'] = useCallback(
     async (...args) => {
       await resolveAPIClients();
 
@@ -117,38 +115,37 @@ export const ViewSpaceProvider = ({
   );
 
   return (
-    <ViewSpaceServicesContext.Provider value={{ ...services, invokeClient }}>
-      <ViewSpaceStoreContext.Provider value={{ state, dispatch }}>
+    <EditSpaceServicesContext.Provider value={{ ...services, invokeClient }}>
+      <EditSpaceStoreContext.Provider value={{ state, dispatch }}>
         {children}
-      </ViewSpaceStoreContext.Provider>
-    </ViewSpaceServicesContext.Provider>
+      </EditSpaceStoreContext.Provider>
+    </EditSpaceServicesContext.Provider>
   );
 };
 
-// FIXME: rename to useEditSpaceServices
-export const useViewSpaceServices = (): ViewSpaceServices => {
-  const context = useContext(createViewSpaceServicesContext());
+export const useEditSpaceServices = (): EditSpaceServices => {
+  const context = useContext(createEditSpaceServicesContext());
   if (!context) {
     throw new Error(
-      'ViewSpaceService Context is missing. Ensure the component or React root is wrapped with ViewSpaceProvider'
+      'EditSpaceService Context is missing. Ensure the component or React root is wrapped with EditSpaceProvider'
     );
   }
 
   return context;
 };
 
-export const useViewSpaceStore = () => {
+export const useEditSpaceStore = () => {
   const context = useContext(createSpaceRolesContext());
   if (!context) {
     throw new Error(
-      'ViewSpaceStore Context is missing. Ensure the component or React root is wrapped with ViewSpaceProvider'
+      'EditSpaceStore Context is missing. Ensure the component or React root is wrapped with EditSpaceProvider'
     );
   }
 
   return context;
 };
 
-export const useViewSpaceStoreDispatch = () => {
-  const { dispatch } = useViewSpaceStore();
+export const useEditSpaceStoreDispatch = () => {
+  const { dispatch } = useEditSpaceStore();
   return dispatch;
 };

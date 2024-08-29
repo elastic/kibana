@@ -20,8 +20,8 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { KibanaFeature } from '@kbn/features-plugin/common';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
-import { ViewSpaceProvider } from './provider/view_space_provider';
-import { ViewSpaceSettings } from './view_space_general_tab';
+import { EditSpaceSettingsTab } from './edit_space_general_tab';
+import { EditSpaceProvider } from './provider/view_space_provider';
 import type { SolutionView } from '../../../common';
 import { spacesManagerMock } from '../../spaces_manager/spaces_manager.mock';
 import { getPrivilegeAPIClientMock } from '../privilege_api_client.mock';
@@ -50,7 +50,7 @@ const deleteSpaceSpy = jest
   .spyOn(spacesManager, 'deleteSpace')
   .mockImplementation(() => Promise.resolve());
 
-describe('ViewSpaceSettings', () => {
+describe('EditSpaceSettings', () => {
   beforeEach(() => {
     navigateSpy.mockReset();
     updateSpaceSpy.mockReset();
@@ -60,7 +60,7 @@ describe('ViewSpaceSettings', () => {
   const TestComponent: React.FC = ({ children }) => {
     return (
       <IntlProvider locale="en">
-        <ViewSpaceProvider
+        <EditSpaceProvider
           capabilities={{
             navLinks: {},
             management: {},
@@ -80,7 +80,7 @@ describe('ViewSpaceSettings', () => {
           i18n={i18n}
         >
           {children}
-        </ViewSpaceProvider>
+        </EditSpaceProvider>
       </IntlProvider>
     );
   };
@@ -88,7 +88,7 @@ describe('ViewSpaceSettings', () => {
   it('should render controls for initial state of editing a space', () => {
     render(
       <TestComponent>
-        <ViewSpaceSettings
+        <EditSpaceSettingsTab
           space={space}
           history={history}
           features={[]}
@@ -111,7 +111,7 @@ describe('ViewSpaceSettings', () => {
   it('shows solution view select when visible', async () => {
     render(
       <TestComponent>
-        <ViewSpaceSettings
+        <EditSpaceSettingsTab
           space={space}
           history={history}
           features={[]}
@@ -139,7 +139,7 @@ describe('ViewSpaceSettings', () => {
 
     render(
       <TestComponent>
-        <ViewSpaceSettings
+        <EditSpaceSettingsTab
           space={space}
           history={history}
           features={features}
@@ -167,7 +167,7 @@ describe('ViewSpaceSettings', () => {
 
     render(
       <TestComponent>
-        <ViewSpaceSettings
+        <EditSpaceSettingsTab
           space={spaceToUpdate}
           history={history}
           features={[]}
@@ -212,7 +212,7 @@ describe('ViewSpaceSettings', () => {
 
     render(
       <TestComponent>
-        <ViewSpaceSettings
+        <EditSpaceSettingsTab
           space={spaceToDelete}
           history={history}
           features={[]}
@@ -250,7 +250,7 @@ describe('ViewSpaceSettings', () => {
 
     render(
       <TestComponent>
-        <ViewSpaceSettings
+        <EditSpaceSettingsTab
           space={spaceToUpdate}
           history={history}
           features={[]}
@@ -291,7 +291,7 @@ describe('ViewSpaceSettings', () => {
 
     render(
       <TestComponent>
-        <ViewSpaceSettings
+        <EditSpaceSettingsTab
           space={spaceToUpdate}
           history={history}
           features={[]}
@@ -355,7 +355,7 @@ describe('ViewSpaceSettings', () => {
 
     render(
       <TestComponent>
-        <ViewSpaceSettings
+        <EditSpaceSettingsTab
           space={spaceToUpdate}
           history={history}
           features={features}

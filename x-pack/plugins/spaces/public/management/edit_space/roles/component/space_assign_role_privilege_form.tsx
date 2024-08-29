@@ -36,7 +36,7 @@ import { KibanaPrivileges } from '@kbn/security-role-management-model';
 import { KibanaPrivilegeTable, PrivilegeFormCalculator } from '@kbn/security-ui-components';
 
 import type { Space } from '../../../../../common';
-import type { ViewSpaceServices, ViewSpaceStore } from '../../provider';
+import type { EditSpaceServices, EditSpaceStore } from '../../provider';
 
 type KibanaRolePrivilege = keyof NonNullable<KibanaFeatureConfig['privileges']> | 'custom';
 
@@ -46,8 +46,8 @@ interface PrivilegesRolesFormProps {
   closeFlyout: () => void;
   onSaveCompleted: () => void;
   defaultSelected?: Role[];
-  storeDispatch: ViewSpaceStore['dispatch'];
-  spacesClientsInvocator: ViewSpaceServices['invokeClient'];
+  storeDispatch: EditSpaceStore['dispatch'];
+  spacesClientsInvocator: EditSpaceServices['invokeClient'];
 }
 
 const createRolesComboBoxOptions = (roles: Role[]): Array<EuiComboBoxOptionOption<Role>> =>

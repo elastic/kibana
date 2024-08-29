@@ -15,7 +15,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { Role } from '@kbn/security-plugin-types-common';
 
-import { useViewSpaceServices, useViewSpaceStore } from './provider';
+import { useEditSpaceServices, useEditSpaceStore } from './provider';
 import { PrivilegesRolesForm } from './roles/component/space_assign_role_privilege_form';
 import { SpaceAssignedRolesTable } from './roles/component/space_assigned_roles_table';
 import type { Space } from '../../../common';
@@ -26,9 +26,8 @@ interface Props {
   isReadOnly: boolean;
 }
 
-// FIXME: rename to EditSpaceAssignedRoles
-export const ViewSpaceAssignedRoles: FC<Props> = ({ space, features, isReadOnly }) => {
-  const { dispatch, state } = useViewSpaceStore();
+export const EditSpaceAssignedRolesTab: FC<Props> = ({ space, features, isReadOnly }) => {
+  const { dispatch, state } = useEditSpaceStore();
   const {
     getUrlForApp,
     overlays,
@@ -36,7 +35,7 @@ export const ViewSpaceAssignedRoles: FC<Props> = ({ space, features, isReadOnly 
     i18n: i18nStart,
     notifications,
     invokeClient,
-  } = useViewSpaceServices();
+  } = useEditSpaceServices();
 
   const showRolesPrivilegeEditor = useCallback(
     (defaultSelected?: Role[]) => {

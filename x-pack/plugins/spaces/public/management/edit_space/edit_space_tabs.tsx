@@ -16,8 +16,7 @@ import { withSuspense } from '@kbn/shared-ux-utility';
 import { TAB_ID_CONTENT, TAB_ID_GENERAL, TAB_ID_ROLES } from './constants';
 import type { Space } from '../../../common';
 
-// FIXME: rename to EditSpaceTab
-export interface ViewSpaceTab {
+export interface EditSpaceTab {
   id: string;
   name: string;
   content: JSX.Element;
@@ -37,26 +36,26 @@ export interface GetTabsProps {
   allowSolutionVisibility: boolean;
 }
 
-const SuspenseViewSpaceSettings = withSuspense(
+const SuspenseEditSpaceSettingsTab = withSuspense(
   React.lazy(() =>
-    import('./view_space_general_tab').then(({ ViewSpaceSettings }) => ({
-      default: ViewSpaceSettings,
+    import('./edit_space_general_tab').then(({ EditSpaceSettingsTab }) => ({
+      default: EditSpaceSettingsTab,
     }))
   )
 );
 
-const SuspenseViewSpaceAssignedRoles = withSuspense(
+const SuspenseEditSpaceAssignedRolesTab = withSuspense(
   React.lazy(() =>
-    import('./view_space_roles').then(({ ViewSpaceAssignedRoles }) => ({
-      default: ViewSpaceAssignedRoles,
+    import('./edit_space_roles_tab').then(({ EditSpaceAssignedRolesTab }) => ({
+      default: EditSpaceAssignedRolesTab,
     }))
   )
 );
 
-const SuspenseViewSpaceContent = withSuspense(
+const SuspenseEditSpaceContentTab = withSuspense(
   React.lazy(() =>
-    import('./view_space_content_tab').then(({ ViewSpaceContent }) => ({
-      default: ViewSpaceContent,
+    import('./edit_space_content_tab').then(({ EditSpaceContentTab }) => ({
+      default: EditSpaceContentTab,
     }))
   )
 );
@@ -68,21 +67,21 @@ export const getTabs = ({
   capabilities,
   rolesCount,
   ...props
-}: GetTabsProps): ViewSpaceTab[] => {
+}: GetTabsProps): EditSpaceTab[] => {
   const canUserViewRoles = Boolean(capabilities?.roles?.view);
   const canUserModifyRoles = Boolean(capabilities?.roles?.save);
   const reloadWindow = () => {
     window.location.reload();
   };
 
-  const tabsDefinition: ViewSpaceTab[] = [
+  const tabsDefinition: EditSpaceTab[] = [
     {
       id: TAB_ID_GENERAL,
       name: i18n.translate('xpack.spaces.management.spaceDetails.contentTabs.general.heading', {
         defaultMessage: 'General settings',
       }),
       content: (
-        <SuspenseViewSpaceSettings
+        <SuspenseEditSpaceSettingsTab
           space={space}
           features={features}
           history={history}
@@ -105,7 +104,7 @@ export const getTabs = ({
         </EuiNotificationBadge>
       ),
       content: (
-        <SuspenseViewSpaceAssignedRoles
+        <SuspenseEditSpaceAssignedRolesTab
           space={space}
           features={features}
           isReadOnly={!canUserModifyRoles}
@@ -119,7 +118,7 @@ export const getTabs = ({
     name: i18n.translate('xpack.spaces.management.spaceDetails.contentTabs.content.heading', {
       defaultMessage: 'Content',
     }),
-    content: <SuspenseViewSpaceContent space={space} />,
+    content: <SuspenseEditSpaceContentTab space={space} />,
   });
 
   return tabsDefinition;
