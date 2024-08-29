@@ -174,18 +174,15 @@ const parseLogsContent = (
     return { error: i18n.LOGS_SAMPLE_ERROR.EMPTY };
   }
 
-  let isTruncated = false;
-  if (parsedContent.length > MaxLogsSampleRows) {
-    partialShuffleArray(parsedContent, 1, MaxLogsSampleRows);
-    parsedContent = parsedContent.slice(0, MaxLogsSampleRows);
-    isTruncated = true;
-  }
+  const isTruncated = parsedContent.length > MaxLogsSampleRows;
+  const numSampleRows = isTruncated ? MaxLogsSampleRows : parsedContent.length;
+  partialShuffleArray(parsedContent, 1, numSampleRows);
 
   if (parsedContent.some((log) => !isPlainObject(log))) {
     return { error: i18n.LOGS_SAMPLE_ERROR.NOT_OBJECT };
   }
 
-  const logsSampleParsed = parsedContent.map((log) => JSON.stringify(log));
+  const logsSampleParsed = parsedContent.slice(0, numSampleRows).map((log) => JSON.stringify(log));
   return { isTruncated, logsSampleParsed, samplesFormat };
 };
 
