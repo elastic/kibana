@@ -714,12 +714,10 @@ describe('TemplateForm', () => {
 
     await userEvent.click(await screen.findByTestId('template-name-input'));
     await userEvent.paste(name);
+    const { data, isValid } = await formState!.submit();
 
-    await act(async () => {
-      const { data, isValid } = await formState!.submit();
-
+    await waitFor(() => {
       expect(isValid).toBe(false);
-
       expect(data).toEqual({});
     });
   });
