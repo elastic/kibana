@@ -36,7 +36,7 @@ export const buildLogsExplorerLocatorConfig = ({
   const urlToLogsExplorer = locator.getRedirectUrl(params);
 
   const navigateToLogsExplorer = () => {
-    locator.navigate(params) as Promise<void>;
+    locator.navigate(params);
   };
 
   const logsExplorerLinkProps = getRouterLinkProps({
