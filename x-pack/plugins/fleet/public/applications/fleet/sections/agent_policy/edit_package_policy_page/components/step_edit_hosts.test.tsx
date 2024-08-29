@@ -8,25 +8,28 @@
 import React from 'react';
 import { act, fireEvent, waitFor } from '@testing-library/react';
 
-import type { TestRenderer } from '../../../../../../../mock';
-import { createFleetTestRendererMock } from '../../../../../../../mock';
+import type { TestRenderer } from '../../../../../../mock';
+import { createFleetTestRendererMock } from '../../../../../../mock';
 
-import { useGetAgentPolicies } from '../../../../../hooks';
-import type { AgentPolicy, PackageInfo } from '../../../../../types';
+import { useGetAgentPolicies } from '../../../../hooks';
+import type { AgentPolicy, PackageInfo } from '../../../../types';
 
-import { StepSelectHosts } from './step_select_hosts';
-import { useAllNonManagedAgentPolicies } from './components/use_policies';
+import { useAllNonManagedAgentPolicies } from '../../create_package_policy_page/components/steps/components/use_policies';
 
-jest.mock('./components/use_policies', () => {
+import { StepEditHosts } from './step_edit_hosts';
+
+jest.mock('../../create_package_policy_page/components/steps/components/use_policies', () => {
   return {
-    ...jest.requireActual('./components/use_policies'),
+    ...jest.requireActual(
+      '../../create_package_policy_page/components/steps/components/use_policies'
+    ),
     useAllNonManagedAgentPolicies: jest.fn(),
   };
 });
 
-jest.mock('../../../../../hooks', () => {
+jest.mock('../../../../hooks', () => {
   return {
-    ...jest.requireActual('../../../../../hooks'),
+    ...jest.requireActual('../../../../hooks'),
     useGetAgentPolicies: jest.fn(),
     useGetOutputs: jest.fn().mockResolvedValue({
       data: [],
@@ -40,7 +43,7 @@ jest.mock('../../../../../hooks', () => {
   };
 });
 
-describe('StepSelectHosts', () => {
+describe('StepEditHosts', () => {
   const packageInfo: PackageInfo = {
     name: 'apache',
     version: '1.0.0',
@@ -90,7 +93,7 @@ describe('StepSelectHosts', () => {
   let renderResult: ReturnType<typeof testRenderer.render>;
   const render = () =>
     (renderResult = testRenderer.render(
-      <StepSelectHosts
+      <StepEditHosts
         agentPolicies={agentPolicies}
         updateAgentPolicies={jest.fn()}
         newAgentPolicy={newAgentPolicy}
@@ -123,7 +126,7 @@ describe('StepSelectHosts', () => {
     expect(renderResult.queryByRole('tablist')).not.toBeInTheDocument();
   });
 
-  it('should display tabs with New hosts selected when agent policies exist', () => {
+  it('should display new policy button and existing policies when agent policies exist', () => {
     (useGetAgentPolicies as jest.MockedFunction<any>).mockReturnValue({
       data: {
         items: [{ id: '1', name: 'Agent policy 1', namespace: 'default' }],
@@ -135,41 +138,13 @@ describe('StepSelectHosts', () => {
 
     render();
 
-    waitFor(() => {
-      expect(renderResult.getByRole('tablist')).toBeInTheDocument();
-      expect(renderResult.getByText('Agent policy 3')).toBeInTheDocument();
-    });
-    expect(renderResult.getByText('New hosts').closest('button')).toHaveAttribute(
-      'aria-selected',
-      'true'
-    );
-  });
-
-  it('should display dropdown with agent policy selected when Existing hosts selected', async () => {
-    (useGetAgentPolicies as jest.MockedFunction<any>).mockReturnValue({
-      data: {
-        items: [{ id: '1', name: 'Agent policy 1', namespace: 'default' }],
-      },
-    });
-    (useAllNonManagedAgentPolicies as jest.MockedFunction<any>).mockReturnValue([
-      { id: '1', name: 'Agent policy 1', namespace: 'default' },
-    ]);
-
-    render();
-
-    waitFor(() => {
-      expect(renderResult.getByRole('tablist')).toBeInTheDocument();
-    });
-    act(() => {
-      fireEvent.click(renderResult.getByText('Existing hosts').closest('button')!);
-    });
-
+    expect(renderResult.getByTestId('createNewAgentPolicyButton')).toBeInTheDocument();
     expect(
       renderResult.container.querySelector('[data-test-subj="agentPolicySelect"]')?.textContent
     ).toContain('Agent policy 1');
   });
 
-  it('should display dropdown without preselected value when Existing hosts selected with mulitple agent policies', async () => {
+  it('should display dropdown without preselected value when mulitple agent policies', () => {
     (useGetAgentPolicies as jest.MockedFunction<any>).mockReturnValue({
       data: {
         items: [
@@ -178,23 +153,30 @@ describe('StepSelectHosts', () => {
         ],
       },
     });
-    (useAllNonManagedAgentPolicies as jest.MockedFunction<any>).mockReturnValue([
-      { id: '1', name: 'Agent policy 1', namespace: 'default' },
-      { id: '2', name: 'Agent policy 2', namespace: 'default' },
-    ]);
 
     render();
 
     waitFor(() => {
-      expect(renderResult.getByRole('tablist')).toBeInTheDocument();
+      expect(renderResult.getByText('At least one agent policy is required.')).toBeInTheDocument();
     });
+  });
+
+  it('should display delete button when add button clicked', () => {
+    (useGetAgentPolicies as jest.MockedFunction<any>).mockReturnValue({
+      data: {
+        items: [{ id: '1', name: 'Agent policy 1', namespace: 'default' }],
+      },
+    });
+    (useAllNonManagedAgentPolicies as jest.MockedFunction<any>).mockReturnValue([
+      { id: '1', name: 'Agent policy 1', namespace: 'default' },
+    ]);
+
+    render();
+
     act(() => {
-      fireEvent.click(renderResult.getByText('Existing hosts').closest('button')!);
+      fireEvent.click(renderResult.getByTestId('createNewAgentPolicyButton').closest('button')!);
     });
 
-    await act(async () => {
-      const select = renderResult.container.querySelector('[data-test-subj="agentPolicySelect"]');
-      expect((select as any)?.value).toEqual('');
-    });
+    expect(renderResult.getByTestId('deleteNewAgentPolicyButton')).toBeInTheDocument();
   });
 });
