@@ -12,7 +12,6 @@ import type {
   CombinedJobWithStats,
   MlSummaryJob,
 } from '../../../../../common/types/anomaly_detection_jobs';
-import type { MlJobService } from '../../../services/job_service';
 import type { MlApiServices } from '../../../services/ml_api_service';
 
 export function loadFullJob(
@@ -25,7 +24,7 @@ export function isClosable(jobs: CombinedJobWithStats[]): boolean;
 export function isResettable(jobs: CombinedJobWithStats[]): boolean;
 export function forceStartDatafeeds(
   toastNotifications: ToastsStart,
-  mlJobService: MlJobService,
+  mlApiServices: MlApiServices,
   jobs: CombinedJobWithStats[],
   start: number | undefined,
   end: number | undefined,
@@ -33,7 +32,7 @@ export function forceStartDatafeeds(
 ): Promise<void>;
 export function stopDatafeeds(
   toastNotifications: ToastsStart,
-  mlJobService: MlJobService,
+  mlApiServices: MlApiServices,
   jobs: CombinedJobWithStats[] | MlSummaryJob[],
   finish?: () => void
 ): Promise<void>;
@@ -46,18 +45,17 @@ export function cloneJob(
   toastNotifications: ToastsStart,
   application: ApplicationStart,
   mlApiServices: MlApiServices,
-  mlJobService: MlJobService,
   jobId: string
 ): Promise<void>;
 export function closeJobs(
   toastNotifications: ToastsStart,
-  mlJobService: MlJobService,
+  mlApiServices: MlApiServices,
   jobs: CombinedJobWithStats[] | MlSummaryJob[],
   finish?: () => void
 ): Promise<void>;
 export function deleteJobs(
   toastNotifications: ToastsStart,
-  mlJobService: MlJobService,
+  mlApiServices: MlApiServices,
   jobs: Array<{ id: string }>,
   deleteUserAnnotations?: boolean,
   deleteAlertingRules?: boolean,
@@ -65,7 +63,7 @@ export function deleteJobs(
 ): Promise<void>;
 export function resetJobs(
   toastNotifications: ToastsStart,
-  mlJobService: MlJobService,
+  mlApiServices: MlApiServices,
   jobIds: string[],
   deleteUserAnnotations?: boolean,
   finish?: () => void
@@ -76,8 +74,3 @@ export function filterJobs(
 ): CombinedJobWithStats[];
 export function jobProperty(job: CombinedJobWithStats, prop: string): any;
 export function jobTagFilter(jobs: CombinedJobWithStats[], value: string): CombinedJobWithStats[];
-export function checkForAutoStartDatafeed(
-  mlJobService: MlJobService
-):
-  | { id: string; hasDatafeed: boolean; latestTimestampSortValue: number; datafeedId: string }
-  | undefined;
