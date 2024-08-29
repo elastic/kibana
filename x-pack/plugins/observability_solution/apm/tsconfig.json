@@ -129,7 +129,8 @@
     "@kbn/apm-types",
     "@kbn/entities-schema",
     "@kbn/serverless",
-    "@kbn/aiops-log-rate-analysis"
+    "@kbn/aiops-log-rate-analysis",
+    "@kbn/router-utils"
   ],
   "exclude": ["target/**/*"]
 }
