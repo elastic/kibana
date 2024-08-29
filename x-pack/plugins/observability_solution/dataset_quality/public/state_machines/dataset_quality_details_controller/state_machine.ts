@@ -485,7 +485,7 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
         const { startDate: start, endDate: end } = getDateISORange(context.timeRange);
 
         return dataStreamStatsClient.getNonAggregatableDatasets({
-          type,
+          types: [type],
           start,
           end,
           dataStream: context.dataStream,
@@ -544,9 +544,7 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
       },
       loadDataStreamIntegration: (context) => {
         if ('dataStreamSettings' in context && context.dataStreamSettings?.integration) {
-          const { type } = indexNameToDataStreamParts(context.dataStream);
           return dataStreamDetailsClient.getDataStreamIntegration({
-            type,
             integrationName: context.dataStreamSettings.integration,
           });
         }

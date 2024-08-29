@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import type { DraggableChildrenFn } from '@hello-pangea/dnd';
+import type { DraggableChildrenFn, DroppableProps } from '@hello-pangea/dnd';
 import { Droppable } from '@hello-pangea/dnd';
 
 import { useDispatch } from 'react-redux';
@@ -162,7 +162,7 @@ export const ColumnHeadersComponent = ({
     [columnHeaders, timelineId, draggingIndex, sort, tabType]
   );
 
-  const DroppableContent = useCallback(
+  const DroppableContent = useCallback<DroppableProps['children']>(
     (dropProvided, snapshot) => (
       <>
         <EventsThGroupData

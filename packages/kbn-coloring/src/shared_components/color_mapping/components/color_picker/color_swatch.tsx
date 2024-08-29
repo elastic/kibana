@@ -124,15 +124,14 @@ export const ColorSwatch = ({
             css={css`
               &::after {
                 content: '';
-                width: 0;
-                height: 0;
-                border-left: 3px solid transparent;
-                border-right: 3px solid transparent;
-                border-top: 4px solid ${colorIsDark ? 'white' : 'black'};
-                margin: 0;
-                bottom: 2px;
+                background-color: ${colorIsDark ? 'white' : 'black'};
+                // custom arrowDown svg
+                mask-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI3IiBoZWlnaHQ9IjQiIHZpZXdCb3g9IjAgMCA3IDQiPgogIDxwYXRoIGQ9Ik0uMTQ2LjE0N2EuNS41IDAgMCAxIC43MDggMEwzLjUgMi43OTQgNi4xNDYuMTQ3YS41LjUgMCAxIDEgLjcwOC43MDhsLTMgM2EuNS41IDAgMCAxLS43MDggMGwtMy0zYS41LjUgMCAwIDEgMC0uNzA4WiIvPgo8L3N2Zz4K');
+                height: 4px;
+                width: 7px;
+                bottom: 6px;
+                right: 4px;
                 position: absolute;
-                right: 2px;
               }
             `}
           />

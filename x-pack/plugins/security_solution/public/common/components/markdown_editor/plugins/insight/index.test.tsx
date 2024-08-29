@@ -16,15 +16,15 @@ import {
 import { KibanaServices } from '../../../../lib/kibana';
 import type { DefaultTimeRangeSetting } from '../../../../utils/default_date_settings';
 import { plugin, renderer as Renderer } from '.';
-import type { InvestigateInTimelineButtonProps } from '../../../event_details/table/investigate_in_timeline_button';
+import type { InvestigateInTimelineButtonProps } from '../../../event_details/investigate_in_timeline_button';
 import { useUpsellingMessage } from '../../../../hooks/use_upselling';
 
 jest.mock('../../../../lib/kibana');
 const mockGetServices = KibanaServices.get as jest.Mock;
 
-jest.mock('../../../event_details/table/investigate_in_timeline_button', () => {
+jest.mock('../../../event_details/investigate_in_timeline_button', () => {
   const originalModule = jest.requireActual(
-    '../../../event_details/table/investigate_in_timeline_button'
+    '../../../event_details/investigate_in_timeline_button'
   );
   return {
     ...originalModule,

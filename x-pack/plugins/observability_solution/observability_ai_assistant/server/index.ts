@@ -19,7 +19,6 @@ export type {
 } from './types';
 
 export {
-  aiAssistantResponseLanguage,
   aiAssistantLogsIndexPattern,
   aiAssistantSimulatedFunctionCalling,
   aiAssistantSearchConnectorIndexPattern,
