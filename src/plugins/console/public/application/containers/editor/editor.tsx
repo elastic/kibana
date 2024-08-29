@@ -31,7 +31,6 @@ import {
   useServicesContext,
   useRequestReadContext,
   useRequestActionContext,
-  useEditorActionContext,
 } from '../../contexts';
 import type { SenseEditor } from '../../models';
 import { MonacoEditor, MonacoEditorOutput } from './monaco';
@@ -47,7 +46,7 @@ interface Props {
 
 export const Editor = memo(({ loading, setEditorInstance }: Props) => {
   const {
-    services: { storage, objectStorageClient },
+    services: { storage },
     config: { isMonacoEnabled } = {},
   } = useServicesContext();
 
@@ -57,10 +56,11 @@ export const Editor = memo(({ loading, setEditorInstance }: Props) => {
     lastResult: { data: requestData, error: requestError },
   } = useRequestReadContext();
 
-  const dispatchRequest = useRequestActionContext();
-  const dispatchEditor = useEditorActionContext();
+  const dispatch = useRequestActionContext();
 
   const [fetchingMappings, setFetchingMappings] = useState(false);
+
+  const [inputEditorValue, setInputEditorValue] = useState<string>(currentTextObject?.text ?? '');
 
   useEffect(() => {
     const subscription = getAutocompleteInfo().mapping.isLoading$.subscribe(setFetchingMappings);
@@ -104,7 +104,11 @@ export const Editor = memo(({ loading, setEditorInstance }: Props) => {
               {loading ? (
                 <EditorContentSpinner />
               ) : isMonacoEnabled ? (
-                <MonacoEditor initialTextValue={currentTextObject.text} />
+                <MonacoEditor
+                  localStorageValue={currentTextObject.text}
+                  value={inputEditorValue}
+                  setValue={setInputEditorValue}
+                />
               ) : (
                 <EditorUI
                   initialTextValue={currentTextObject.text}
@@ -116,7 +120,7 @@ export const Editor = memo(({ loading, setEditorInstance }: Props) => {
             {!loading && (
               <EuiSplitPanel.Inner
                 grow={false}
-                paddingSize="m"
+                paddingSize="s"
                 css={{
                   backgroundColor: euiThemeVars.euiFormBackgroundColor,
                 }}
@@ -125,17 +129,7 @@ export const Editor = memo(({ loading, setEditorInstance }: Props) => {
                   size="xs"
                   color="primary"
                   data-test-subj="clearConsoleInput"
-                  onClick={async () => {
-                    const newObject = await objectStorageClient.text.create({
-                      createdAt: Date.now(),
-                      updatedAt: Date.now(),
-                      text: '',
-                    });
-                    dispatchEditor({
-                      type: 'setCurrentTextObject',
-                      payload: newObject,
-                    });
-                  }}
+                  onClick={() => setInputEditorValue('')}
                 >
                   {i18n.translate('console.editor.clearConsoleInputButton', {
                     defaultMessage: 'Clear this input',
@@ -167,7 +161,7 @@ export const Editor = memo(({ loading, setEditorInstance }: Props) => {
             {(data || isLoading) && (
               <EuiSplitPanel.Inner
                 grow={false}
-                paddingSize="m"
+                paddingSize="s"
                 css={{
                   backgroundColor: euiThemeVars.euiFormBackgroundColor,
                 }}
@@ -179,9 +173,7 @@ export const Editor = memo(({ loading, setEditorInstance }: Props) => {
                         size="xs"
                         color="primary"
                         data-test-subj="clearConsoleOutput"
-                        onClick={() =>
-                          dispatchRequest({ type: 'cleanResponse', payload: undefined })
-                        }
+                        onClick={() => dispatch({ type: 'cleanRequest', payload: undefined })}
                       >
                         {i18n.translate('console.editor.clearConsoleOutputButton', {
                           defaultMessage: 'Clear this output',
