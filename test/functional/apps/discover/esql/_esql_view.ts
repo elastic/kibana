@@ -328,7 +328,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('with slow queries', () => {
         it('should show only one entry in inspector for table/visualization', async function () {
-          await PageObjects.discover.selectTextBaseLang();
+          await discover.selectTextBaseLang();
           const testQuery = `from kibana_sample_data_flights | limit 10`;
           await monacoEditor.setCodeEditorValue(testQuery);
 
@@ -336,7 +336,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             window.ELASTIC_ESQL_DELAY_SECONDS = 5;
           });
           await testSubjects.click('querySubmitButton');
-          await PageObjects.header.waitUntilLoadingHasFinished();
+          await header.waitUntilLoadingHasFinished();
           await browser.execute(() => {
             window.ELASTIC_ESQL_DELAY_SECONDS = undefined;
           });

@@ -11,7 +11,7 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { common, timePicker, discover, unifiedFieldList } = getPageObjects([
+  const { common, timePicker, discover } = getPageObjects([
     'common',
     'timePicker',
     'discover',

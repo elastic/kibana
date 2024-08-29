@@ -211,8 +211,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(savedSearchName).to.be.equal('logst*-ss-_bytes-runtimefield');
 
       // test the header now
-      const header = await dataGrid.getHeaderFields();
-      expect(header.join(' ')).to.have.string('_bytes-runtimefield');
+      const headerFields = await dataGrid.getHeaderFields();
+      expect(headerFields.join(' ')).to.have.string('_bytes-runtimefield');
     });
 
     it('should update id after data view field edit', async () => {

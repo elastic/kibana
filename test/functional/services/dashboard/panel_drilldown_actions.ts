@@ -7,6 +7,7 @@
  */
 
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import { existsFilterFunction } from '@kbn/data-plugin/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const CREATE_DRILLDOWN_DATA_TEST_SUBJ = 'embeddablePanelAction-OPEN_FLYOUT_ADD_DRILLDOWN';
@@ -95,11 +96,11 @@ export function DashboardDrilldownPanelActionsProvider({
       try {
         const panel = (await dashboard.getDashboardPanels())[panelIndex];
         await dashboardPanelActions.openContextMenu(panel);
-        let manageDrilldownAction = await testSubjects.find(MANAGE_DRILLDOWNS_DATA_TEST_SUBJ);
-        if (!manageDrilldownAction) {
+        const exists = await testSubjects.exists(MANAGE_DRILLDOWNS_DATA_TEST_SUBJ);
+        if (!exists) {
           await dashboardPanelActions.clickContextMenuMoreItem();
-          manageDrilldownAction = await testSubjects.find(MANAGE_DRILLDOWNS_DATA_TEST_SUBJ);
         }
+        const manageDrilldownAction = await testSubjects.find(MANAGE_DRILLDOWNS_DATA_TEST_SUBJ);
         const count = await manageDrilldownAction.findByCssSelector('.euiNotificationBadge');
         return Number.parseInt(await count.getVisibleText(), 10);
       } catch (e) {
