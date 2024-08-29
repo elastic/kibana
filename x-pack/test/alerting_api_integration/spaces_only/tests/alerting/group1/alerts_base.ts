@@ -78,86 +78,88 @@ export function alertTests({ getService }: FtrProviderContext, space: Space) {
       await objectRemover.removeAll();
     });
 
-    it('should schedule task, run alert and schedule actions', async () => {
-      const testStart = new Date();
-      const reference = alertUtils.generateReference();
-      const response = await alertUtils.createAlwaysFiringAction({ reference });
-      const alertId = response.body.id;
+    describe('schedule task, run alert and schedule actions', function () {
+      this.tags('skipFIPS');
+      it('should schedule task, run alert and schedule actions', async () => {
+        const testStart = new Date();
+        const reference = alertUtils.generateReference();
+        const response = await alertUtils.createAlwaysFiringAction({ reference });
+        const alertId = response.body.id;
 
-      expect(response.statusCode).to.eql(200);
-      const alertTestRecord = (
-        await esTestIndexTool.waitForDocs('alert:test.always-firing', reference)
-      )[0];
-      const expected = {
-        source: 'alert:test.always-firing',
-        reference,
-        state: {},
-        params: {
-          index: ES_TEST_INDEX_NAME,
+        expect(response.statusCode).to.eql(200);
+        const alertTestRecord = (
+          await esTestIndexTool.waitForDocs('alert:test.always-firing', reference)
+        )[0];
+        const expected = {
+          source: 'alert:test.always-firing',
           reference,
-        },
-        alertInfo: {
-          id: alertId,
-          consumer: 'alertsFixture',
-          spaceId: space.id,
-          namespace: space.namespace,
-          name: 'abc',
-          enabled: true,
-          notifyWhen: 'onActiveAlert',
-          schedule: {
-            interval: '1m',
+          state: {},
+          params: {
+            index: ES_TEST_INDEX_NAME,
+            reference,
           },
-          tags: ['tag-A', 'tag-B'],
-          throttle: '1m',
-          createdBy: null,
-          updatedBy: null,
-          actions: response.body.actions.map((action: any) => {
-            /* eslint-disable @typescript-eslint/naming-convention */
-            const { connector_type_id, group, id, params, uuid } = action;
-            return {
-              actionTypeId: connector_type_id,
-              group,
-              id,
-              params,
-              uuid,
-            };
-          }),
-          producer: 'alertsFixture',
-          revision: 0,
-          ruleTypeId: 'test.always-firing',
-          ruleTypeName: 'Test: Always Firing',
-          muteAll: false,
-          snoozeSchedule: [],
-        },
-      };
-      if (expected.alertInfo.namespace === undefined) {
-        delete expected.alertInfo.namespace;
-      }
-      const alertTestRecordWithoutDates = omit(alertTestRecord._source, [
-        'alertInfo.createdAt',
-        'alertInfo.updatedAt',
-      ]);
-      expect(alertTestRecordWithoutDates).to.eql(expected);
-      expect(alertTestRecord._source.alertInfo.createdAt).to.match(
-        /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/
-      );
-      expect(alertTestRecord._source.alertInfo.updatedAt).to.match(
-        /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/
-      );
-      const actionTestRecord = (
-        await esTestIndexTool.waitForDocs('action:test.index-record', reference)
-      )[0];
-      expect(actionTestRecord._source).to.eql({
-        config: {
-          unencrypted: `This value shouldn't get encrypted`,
-        },
-        secrets: {
-          encrypted: 'This value should be encrypted',
-        },
-        params: {
-          index: ES_TEST_INDEX_NAME,
-          reference,
-          message: `
+          alertInfo: {
+            id: alertId,
+            consumer: 'alertsFixture',
+            spaceId: space.id,
+            namespace: space.namespace,
+            name: 'abc',
+            enabled: true,
+            notifyWhen: 'onActiveAlert',
+            schedule: {
+              interval: '1m',
+            },
+            tags: ['tag-A', 'tag-B'],
+            throttle: '1m',
+            createdBy: null,
+            updatedBy: null,
+            actions: response.body.actions.map((action: any) => {
+              /* eslint-disable @typescript-eslint/naming-convention */
+              const { connector_type_id, group, id, params, uuid } = action;
+              return {
+                actionTypeId: connector_type_id,
+                group,
+                id,
+                params,
+                uuid,
+              };
+            }),
+            producer: 'alertsFixture',
+            revision: 0,
+            ruleTypeId: 'test.always-firing',
+            ruleTypeName: 'Test: Always Firing',
+            muteAll: false,
+            snoozeSchedule: [],
+          },
+        };
+        if (expected.alertInfo.namespace === undefined) {
+          delete expected.alertInfo.namespace;
+        }
+        const alertTestRecordWithoutDates = omit(alertTestRecord._source, [
+          'alertInfo.createdAt',
+          'alertInfo.updatedAt',
+        ]);
+        expect(alertTestRecordWithoutDates).to.eql(expected);
+        expect(alertTestRecord._source.alertInfo.createdAt).to.match(
+          /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/
+        );
+        expect(alertTestRecord._source.alertInfo.updatedAt).to.match(
+          /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/
+        );
+        const actionTestRecord = (
+          await esTestIndexTool.waitForDocs('action:test.index-record', reference)
+        )[0];
+        expect(actionTestRecord._source).to.eql({
+          config: {
+            unencrypted: `This value shouldn't get encrypted`,
+          },
+          secrets: {
+            encrypted: 'This value should be encrypted',
+          },
+          params: {
+            index: ES_TEST_INDEX_NAME,
+            reference,
+            message: `
 ruleId: ${alertId},
 ruleName: abc,
 spaceId: ${space.id},
@@ -167,12 +169,13 @@ alertActionGroup: default,
 instanceContextValue: true,
 instanceStateValue: true
 `.trim(),
-        },
-        reference,
-        source: 'action:test.index-record',
-      });
+          },
+          reference,
+          source: 'action:test.index-record',
+        });
 
-      await taskManagerUtils.waitForActionTaskParamsToBeCleanedUp(testStart);
+        await taskManagerUtils.waitForActionTaskParamsToBeCleanedUp(testStart);
+      });
     });
 
     it('should fire actions when an alert instance is recovered', async () => {
@@ -514,29 +517,32 @@ instanceStateValue: true
       });
     });
 
-    it('should notify feature usage when using a gold action type', async () => {
-      const testStart = new Date();
-      const reference = alertUtils.generateReference();
-      const response = await alertUtils.createAlwaysFiringAction({ reference });
-      expect(response.statusCode).to.eql(200);
+    describe('notify feature usage', function () {
+      this.tags('skipFIPS');
+      it('should notify feature usage when using a gold action type', async () => {
+        const testStart = new Date();
+        const reference = alertUtils.generateReference();
+        const response = await alertUtils.createAlwaysFiringAction({ reference });
+        expect(response.statusCode).to.eql(200);
 
-      // Wait for alert to run
-      await esTestIndexTool.waitForDocs('action:test.index-record', reference);
+        // Wait for alert to run
+        await esTestIndexTool.waitForDocs('action:test.index-record', reference);
 
-      const {
-        body: { features },
-      } = await supertestWithoutAuth.get(`${getUrlPrefix(space.id)}/api/licensing/feature_usage`);
-      expect(features).to.be.an(Array);
-      const indexRecordFeature = features.find(
-        (feature: { name: string }) => feature.name === 'Connector: Test: Index Record'
-      );
-      expect(indexRecordFeature).to.be.ok();
-      expect(indexRecordFeature.last_used).to.be.a('string');
-      expect(new Date(indexRecordFeature.last_used).getTime()).to.be.greaterThan(
-        testStart.getTime()
-      );
+        const {
+          body: { features },
+        } = await supertestWithoutAuth.get(`${getUrlPrefix(space.id)}/api/licensing/feature_usage`);
+        expect(features).to.be.an(Array);
+        const indexRecordFeature = features.find(
+          (feature: { name: string }) => feature.name === 'Connector: Test: Index Record'
+        );
+        expect(indexRecordFeature).to.be.ok();
+        expect(indexRecordFeature.last_used).to.be.a('string');
+        expect(new Date(indexRecordFeature.last_used).getTime()).to.be.greaterThan(
+          testStart.getTime()
+        );
 
-      await taskManagerUtils.waitForActionTaskParamsToBeCleanedUp(testStart);
+        await taskManagerUtils.waitForActionTaskParamsToBeCleanedUp(testStart);
+      });
     });
   });
 }

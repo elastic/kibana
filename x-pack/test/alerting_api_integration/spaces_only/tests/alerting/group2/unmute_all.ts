@@ -21,7 +21,8 @@ import {
 export default function createUnmuteTests({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('unmute_all', () => {
+  describe('unmute_all', function () {
+    this.tags('skipFIPS');
     const objectRemover = new ObjectRemover(supertestWithoutAuth);
     const alertUtils = new AlertUtils({ space: Spaces.space1, supertestWithoutAuth });
 

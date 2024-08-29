@@ -215,11 +215,14 @@ export default ({ getService }: FtrProviderContext) => {
         await testSubjects.existOrFail('deleteRuleButton');
       });
 
-      it('should close actions popover correctly', async () => {
-        await testSubjects.click('actions');
+      describe('close actions popover', function () {
+        this.tags('skipFIPS');
+        it('should close actions popover correctly', async () => {
+          await testSubjects.click('actions');
 
-        // popover should be closed
-        await testSubjects.missingOrFail('editRuleButton');
+          // popover should be closed
+          await testSubjects.missingOrFail('editRuleButton');
+        });
       });
 
       describe('actions button', function () {

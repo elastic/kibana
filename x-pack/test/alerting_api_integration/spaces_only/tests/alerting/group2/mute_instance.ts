@@ -21,7 +21,8 @@ import {
 export default function createMuteInstanceTests({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('mute_instance', () => {
+  describe('mute_instance', function () {
+    this.tags('skipFIPS');
     const objectRemover = new ObjectRemover(supertestWithoutAuth);
     const alertUtils = new AlertUtils({ space: Spaces.space1, supertestWithoutAuth });
 

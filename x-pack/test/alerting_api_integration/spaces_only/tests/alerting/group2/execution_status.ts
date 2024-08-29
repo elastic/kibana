@@ -184,42 +184,46 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
       await ensureAlertUpdatedAtHasNotChanged(alertId, alertUpdatedAt);
     });
 
-    it('should eventually have error reason "validate" when appropriate', async () => {
-      const response = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
-        .set('kbn-xsrf', 'foo')
-        .send(
-          getTestRuleData({
-            rule_type_id: 'test.validation',
-            schedule: { interval: '1s' },
-            params: { param1: 'valid now, but will change to a number soon!' },
+    describe('eventually have error reason "validate" when appropriate', function () {
+      this.tags('skipFIPS');
+      it('should eventually have error reason "validate" when appropriate', async () => {
+        const response = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              rule_type_id: 'test.validation',
+              schedule: { interval: '1s' },
+              params: { param1: 'valid now, but will change to a number soon!' },
+            })
+          );
+        expect(response.status).to.eql(200);
+        const alertId = response.body.id;
+        const alertUpdatedAt = response.body.updated_at;
+        objectRemover.add(Spaces.space1.id, alertId, 'rule', 'alerting');
+
+        let executionStatus = await waitForStatus(alertId, new Set(['ok']));
+
+        // break the validation of the params
+        await supertest
+          .put(`${getUrlPrefix(Spaces.space1.id)}/api/alerts_fixture/saved_object/alert/${alertId}`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            attributes: {
+              params: { param1: 42 },
+            },
           })
-        );
-      expect(response.status).to.eql(200);
-      const alertId = response.body.id;
-      const alertUpdatedAt = response.body.updated_at;
-      objectRemover.add(Spaces.space1.id, alertId, 'rule', 'alerting');
+          .expect(200);
 
-      let executionStatus = await waitForStatus(alertId, new Set(['ok']));
+        executionStatus = await waitForStatus(alertId, new Set(['error']));
+        expect(executionStatus.error).to.be.ok();
+        expect(executionStatus.error.reason).to.be('validate');
+        await ensureAlertUpdatedAtHasNotChanged(alertId, alertUpdatedAt);
 
-      // break the validation of the params
-      await supertest
-        .put(`${getUrlPrefix(Spaces.space1.id)}/api/alerts_fixture/saved_object/alert/${alertId}`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          attributes: {
-            params: { param1: 42 },
-          },
-        })
-        .expect(200);
-
-      executionStatus = await waitForStatus(alertId, new Set(['error']));
-      expect(executionStatus.error).to.be.ok();
-      expect(executionStatus.error.reason).to.be('validate');
-      await ensureAlertUpdatedAtHasNotChanged(alertId, alertUpdatedAt);
-
-      const message = 'params invalid: [param1]: expected value of type [string] but got [number]';
-      expect(executionStatus.error.message).to.be(message);
+        const message =
+          'params invalid: [param1]: expected value of type [string] but got [number]';
+        expect(executionStatus.error.message).to.be(message);
+      });
     });
 
     it('should be able to find over all the fields', async () => {

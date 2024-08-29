@@ -22,47 +22,50 @@ export default function (ftrContext: FtrProviderContext) {
       await scenario.teardown();
     });
 
-    it('provides changes in license types', async () => {
-      await scenario.setup();
-      await scenario.waitForPluginToDetectLicenseUpdate();
-      const initialLicense = await scenario.getLicense();
-      expect(initialLicense.license?.type).to.be('basic');
-      // security enabled explicitly in test config
-      expect(initialLicense.features?.security).to.eql({
-        isAvailable: true,
-        isEnabled: true,
+    describe('provides changes in license', function () {
+      this.tags('skipFIPS');
+      it('provides changes in license types', async () => {
+        await scenario.setup();
+        await scenario.waitForPluginToDetectLicenseUpdate();
+        const initialLicense = await scenario.getLicense();
+        expect(initialLicense.license?.type).to.be('basic');
+        // security enabled explicitly in test config
+        expect(initialLicense.features?.security).to.eql({
+          isAvailable: true,
+          isEnabled: true,
+        });
+
+        // license hasn't changed
+        await scenario.waitForPluginToDetectLicenseUpdate();
+        const refetchedLicense = await scenario.getLicense();
+        expect(refetchedLicense.license?.type).to.be('basic');
+        expect(refetchedLicense.signature).to.be(initialLicense.signature);
+
+        await scenario.startTrial();
+        await scenario.waitForPluginToDetectLicenseUpdate();
+        const trialLicense = await scenario.getLicense();
+        expect(trialLicense.license?.type).to.be('trial');
+        expect(trialLicense.signature).to.not.be(initialLicense.signature);
+
+        expect(trialLicense.features?.security).to.eql({
+          isAvailable: true,
+          isEnabled: true,
+        });
+
+        await scenario.startBasic();
+        await scenario.waitForPluginToDetectLicenseUpdate();
+        const basicLicense = await scenario.getLicense();
+        expect(basicLicense.license?.type).to.be('basic');
+        expect(basicLicense.signature).not.to.be(initialLicense.signature);
+
+        expect(basicLicense.features?.security).to.eql({
+          isAvailable: true,
+          isEnabled: true,
+        });
+
+        // banner shown only when license expired not just deleted
+        await testSubjects.missingOrFail('licenseExpiredBanner');
       });
-
-      // license hasn't changed
-      await scenario.waitForPluginToDetectLicenseUpdate();
-      const refetchedLicense = await scenario.getLicense();
-      expect(refetchedLicense.license?.type).to.be('basic');
-      expect(refetchedLicense.signature).to.be(initialLicense.signature);
-
-      await scenario.startTrial();
-      await scenario.waitForPluginToDetectLicenseUpdate();
-      const trialLicense = await scenario.getLicense();
-      expect(trialLicense.license?.type).to.be('trial');
-      expect(trialLicense.signature).to.not.be(initialLicense.signature);
-
-      expect(trialLicense.features?.security).to.eql({
-        isAvailable: true,
-        isEnabled: true,
-      });
-
-      await scenario.startBasic();
-      await scenario.waitForPluginToDetectLicenseUpdate();
-      const basicLicense = await scenario.getLicense();
-      expect(basicLicense.license?.type).to.be('basic');
-      expect(basicLicense.signature).not.to.be(initialLicense.signature);
-
-      expect(basicLicense.features?.security).to.eql({
-        isAvailable: true,
-        isEnabled: true,
-      });
-
-      // banner shown only when license expired not just deleted
-      await testSubjects.missingOrFail('licenseExpiredBanner');
     });
 
     it('properly recognize an enterprise license', async () => {

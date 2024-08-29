@@ -50,16 +50,18 @@ export default function apiTest({ getService }: FtrProviderContext) {
   }
 
   registry.when('ML jobs return a 403 for', { config: 'basic', archives: [] }, () => {
-    it('user without access', async () => {
-      await expectForbidden(apmApiClient.noAccessUser);
-    });
+    describe('basic', function () {
+      it('user without access', async () => {
+        await expectForbidden(apmApiClient.noAccessUser);
+      });
 
-    it('read user', async () => {
-      await expectForbidden(apmApiClient.readUser);
-    });
+      it('read user', async () => {
+        await expectForbidden(apmApiClient.readUser);
+      });
 
-    it('write user', async () => {
-      await expectForbidden(apmApiClient.writeUser);
+      it('write user', async () => {
+        await expectForbidden(apmApiClient.writeUser);
+      });
     });
   });
 }
