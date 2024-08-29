@@ -15,7 +15,7 @@ import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { HttpStart } from '@kbn/core-http-browser';
 import React, { ComponentType } from 'react';
-import { SharePluginStart } from '@kbn/share-plugin/public';
+import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import { CloudSetup } from '@kbn/cloud-plugin/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { AppMountParameters } from '@kbn/core/public';
@@ -34,6 +34,10 @@ export interface SearchPlaygroundPluginStart {
   PlaygroundProvider: React.FC<React.ComponentProps<typeof PlaygroundProviderComponent>>;
   Playground: React.FC<React.ComponentProps<typeof App>>;
   PlaygroundHeaderDocs: React.FC<React.ComponentProps<typeof PlaygroundHeaderDocs>>;
+}
+
+export interface AppPluginSetupDependencies {
+  share: SharePluginSetup;
 }
 
 export interface AppPluginStartDependencies {

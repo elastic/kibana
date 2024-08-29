@@ -292,7 +292,8 @@ describe('query tab with unified timeline', () => {
     );
   });
 
-  describe('pagination', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/189791
+  describe.skip('pagination', () => {
     beforeEach(() => {
       // should return all the records instead just 3
       // as the case in the default mock
@@ -595,7 +596,9 @@ describe('query tab with unified timeline', () => {
     );
   });
 
-  describe('left controls', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/189792
+  // FLAKY: https://github.com/elastic/kibana/issues/189793
+  describe.skip('left controls', () => {
     it(
       'should clear all sorting',
       async () => {
@@ -832,7 +835,8 @@ describe('query tab with unified timeline', () => {
   });
 
   describe('Leading actions - notes', () => {
-    describe('securitySolutionNotesEnabled = true', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/189794
+    describe.skip('securitySolutionNotesEnabled = true', () => {
       beforeEach(() => {
         (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
           jest.fn((feature: keyof ExperimentalFeatures) => {

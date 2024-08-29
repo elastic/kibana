@@ -8,6 +8,11 @@ deprecated::[7.13.0,Use <<disable-rule-api>> instead.]
 
 Disable an alert.
 
+[NOTE]
+====
+For the latest details, refer to {api-kibana}/group/endpoint-alerting[alerting APIs].
+====
+
 [[alerts-api-disable-request]]
 ==== Request
 

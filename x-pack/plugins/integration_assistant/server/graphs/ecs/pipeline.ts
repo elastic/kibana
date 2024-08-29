@@ -5,7 +5,7 @@
  * 2.0.
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { load } from 'js-yaml';
+import { safeLoad } from 'js-yaml';
 import { Environment, FileSystemLoader } from 'nunjucks';
 import { join as joinPath } from 'path';
 import type { EcsMappingState } from '../../types';
@@ -185,6 +185,6 @@ export function createPipeline(state: EcsMappingState): IngestPipeline {
   });
   const template = env.getTemplate('pipeline.yml.njk');
   const renderedTemplate = template.render(mappedValues);
-  const ingestPipeline = load(renderedTemplate) as IngestPipeline;
+  const ingestPipeline = safeLoad(renderedTemplate) as IngestPipeline;
   return ingestPipeline;
 }

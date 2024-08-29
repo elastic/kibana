@@ -8,11 +8,7 @@ deprecated::[8.7.0, To be removed in an upcoming version]
 
 Create {kib} saved objects.
 
-[NOTE]
-====
-For the most up-to-date API details, refer to the
-{kib-repo}/tree/{branch}/packages/core/saved-objects/docs/openapi[open API specification].
-====
+NOTE: For the latest details, refer to {api-kibana}/group/endpoint-saved-objects[saved object APIs].
 
 [[saved-objects-api-create-request]]
 ==== Request

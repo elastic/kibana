@@ -804,7 +804,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         id: packagePolicySO.id,
         version: packagePolicySO.version,
         ...packagePolicySO.attributes,
-        spaceId: packagePolicySO.namespaces?.[0],
+        spaceIds: packagePolicySO.namespaces,
       })),
       total: packagePolicies?.total,
       page,

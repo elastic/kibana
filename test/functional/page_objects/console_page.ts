@@ -638,8 +638,41 @@ export class ConsolePageObject extends FtrService {
     return await this.testSubjects.exists('a11y-overlay');
   }
 
+  public async isCopyAsButtonVisible() {
+    return await this.testSubjects.exists('consoleMenuCopyAsButton');
+  }
+
   public async clickCopyAsCurlButton() {
     const button = await this.testSubjects.find('consoleMenuCopyAsCurl');
+    await button.click();
+  }
+
+  public async changeLanguageAndCopy(language: string) {
+    const openModalButton = await this.testSubjects.find('changeLanguageButton');
+    await openModalButton.click();
+
+    const changeLangButton = await this.testSubjects.find(`languageOption-${language}`);
+    await changeLangButton.click();
+
+    const submitButton = await this.testSubjects.find('copyAsLanguageSubmit');
+    await submitButton.click();
+  }
+
+  public async changeDefaultLanguage(language: string) {
+    const openModalButton = await this.testSubjects.find('changeLanguageButton');
+    await openModalButton.click();
+
+    const changeDefaultLangButton = await this.testSubjects.find(
+      `changeDefaultLanguageTo-${language}`
+    );
+    await changeDefaultLangButton.click();
+
+    const submitButton = await this.testSubjects.find('copyAsLanguageSubmit');
+    await submitButton.click();
+  }
+
+  public async clickCopyAsButton() {
+    const button = await this.testSubjects.find('consoleMenuCopyAsButton');
     await button.click();
   }
 

@@ -209,8 +209,8 @@ export function CasesTableServiceProvider(
         return;
       }
 
+      await testSubjects.click('options-filter-popover-button-owner');
       await retry.waitFor(`filterByOwner popover opened`, async () => {
-        await testSubjects.click('options-filter-popover-button-owner');
         return await testSubjects.exists('options-filter-popover-panel-owner');
       });
 

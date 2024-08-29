@@ -23,7 +23,7 @@ export const createGridCell = (
   theme: CoreSetup['theme'],
   fitRowToContent?: boolean
 ) => {
-  return ({ rowIndex, columnId, setCellProps }: EuiDataGridCellValueElementProps) => {
+  return ({ rowIndex, columnId, setCellProps, isExpanded }: EuiDataGridCellValueElementProps) => {
     const { table, alignments, minMaxByColumnId, getColorForValue, handleFilterClick } =
       useContext(DataContext);
     const IS_DARK_THEME: boolean = useObservable(theme.theme$, { darkMode: false }).darkMode;
@@ -31,13 +31,14 @@ export const createGridCell = (
     const rowValue = table?.rows[rowIndex]?.[columnId];
 
     const colIndex = columnConfig.columns.findIndex(({ columnId: id }) => id === columnId);
-    const { colorMode, palette, oneClickFilter } = columnConfig.columns[colIndex] || {};
+    const { colorMode = 'none', palette, oneClickFilter } = columnConfig.columns[colIndex] || {};
     const filterOnClick = oneClickFilter && handleFilterClick;
 
     const content = formatters[columnId]?.convert(rowValue, filterOnClick ? 'text' : 'html');
     const currentAlignment = alignments && alignments[columnId];
 
     useEffect(() => {
+      let colorSet = false;
       const originalId = getOriginalId(columnId);
       if (minMaxByColumnId?.[originalId]) {
         if (colorMode !== 'none' && palette?.params && getColorForValue) {
@@ -52,24 +53,25 @@ export const createGridCell = (
             if (colorMode === 'cell' && color) {
               style.color = getContrastColor(color, IS_DARK_THEME);
             }
+            colorSet = true;
             setCellProps({
               style,
             });
           }
         }
       }
-      // make sure to clean it up when something change
-      // this avoids cell's styling to stick forever
-      return () => {
-        if (minMaxByColumnId?.[originalId]) {
+      // Clean up styles when something changes, this avoids cell's styling to stick forever
+      // Checks isExpanded to prevent clearing style after expanding cell
+      if (colorMode !== 'none' && minMaxByColumnId?.[originalId] && colorSet && !isExpanded) {
+        return () => {
           setCellProps({
             style: {
               backgroundColor: undefined,
               color: undefined,
             },
           });
-        }
-      };
+        };
+      }
     }, [
       rowValue,
       columnId,
@@ -79,6 +81,7 @@ export const createGridCell = (
       minMaxByColumnId,
       getColorForValue,
       IS_DARK_THEME,
+      isExpanded,
     ]);
 
     if (filterOnClick) {

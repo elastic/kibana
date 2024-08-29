@@ -15,17 +15,9 @@ export interface GlobalWidgetParameters {
   };
 }
 
-export enum InvestigateWidgetColumnSpan {
-  One = 1,
-  Two = 2,
-  Three = 3,
-  Four = 4,
-}
-
 export interface Investigation {
   id: string;
   createdAt: number;
-  user: AuthenticatedUser;
   title: string;
   items: InvestigateWidget[];
   notes: InvestigationNote[];
@@ -51,14 +43,11 @@ export interface InvestigateWidget<
   parameters: GlobalWidgetParameters & TParameters;
   data: TData;
   title: string;
-  description?: string;
-  columns: InvestigateWidgetColumnSpan;
-  rows: number;
 }
 
 export type InvestigateWidgetCreate<TParameters extends Record<string, any> = {}> = Pick<
   InvestigateWidget,
-  'title' | 'description' | 'columns' | 'rows' | 'type'
+  'title' | 'type'
 > & {
   parameters: DeepPartial<GlobalWidgetParameters> & TParameters;
 };

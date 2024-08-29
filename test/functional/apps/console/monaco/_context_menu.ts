@@ -13,6 +13,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'console']);
+  const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const toasts = getService('toasts');
 
@@ -31,36 +32,89 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(PageObjects.console.isContextMenuOpen()).to.be.eql(true);
     });
 
-    it('should have options to copy as curl, open documentation, and auto indent', async () => {
+    it('should have options to copy as, open documentation, and auto indent', async () => {
       await PageObjects.console.clickContextMenu();
       expect(PageObjects.console.isContextMenuOpen()).to.be.eql(true);
-      expect(PageObjects.console.isCopyAsCurlButtonVisible()).to.be.eql(true);
+      expect(PageObjects.console.isCopyAsButtonVisible()).to.be.eql(true);
       expect(PageObjects.console.isOpenDocumentationButtonVisible()).to.be.eql(true);
       expect(PageObjects.console.isAutoIndentButtonVisible()).to.be.eql(true);
     });
 
-    it('should copy as curl and show toast when copy as curl button is clicked', async () => {
-      await PageObjects.console.clickContextMenu();
-      await PageObjects.console.clickCopyAsCurlButton();
+    describe('Copy as', () => {
+      beforeEach(async () => {
+        await PageObjects.common.navigateToApp('console');
+        await PageObjects.console.closeHelpIfExists();
+        await PageObjects.console.monaco.clearEditorText();
+        await PageObjects.console.monaco.enterText('GET _search');
+      });
 
-      const resultToast = await toasts.getElementByIndex(1);
-      const toastText = await resultToast.getVisibleText();
+      it('by default it should copy as curl and show toast when copy as button is clicked', async () => {
+        await PageObjects.console.clickContextMenu();
+        await PageObjects.console.clickCopyAsButton();
 
-      if (toastText.includes('Write permission denied')) {
-        log.debug('Write permission denied, skipping test');
-        return;
-      }
+        const resultToast = await toasts.getElementByIndex(1);
+        const toastText = await resultToast.getVisibleText();
 
-      expect(toastText).to.be('Request copied as cURL');
+        if (toastText.includes('Write permission denied')) {
+          log.debug('Write permission denied, skipping test');
+          return;
+        }
 
-      const canReadClipboard = await browser.checkBrowserPermission('clipboard-read');
-      if (canReadClipboard) {
-        const clipboardText = await browser.getClipboardValue();
-        expect(clipboardText).to.contain('curl -XGET');
-      }
+        expect(toastText).to.be('Request copied to clipboard as curl');
+
+        const canReadClipboard = await browser.checkBrowserPermission('clipboard-read');
+        if (canReadClipboard) {
+          const clipboardText = await browser.getClipboardValue();
+          expect(clipboardText).to.contain('curl -X GET');
+        }
+      });
+
+      it.skip('allows to change default language', async () => {
+        await PageObjects.console.clickContextMenu();
+
+        // By default should be copy as cURL
+        let copyAsButton = await testSubjects.find('consoleMenuCopyAsButton');
+        let buttonLabel = await copyAsButton.getVisibleText();
+        expect(buttonLabel).to.contain('curl');
+
+        // Select python as default language
+        await PageObjects.console.changeDefaultLanguage('python');
+        // Wait until async operation is done
+        await PageObjects.common.sleep(2000);
+        // Open the context menu once again
+        await PageObjects.console.clickContextMenu();
+
+        // By default should be copy as cURL
+        copyAsButton = await testSubjects.find('consoleMenuCopyAsButton');
+        buttonLabel = await copyAsButton.getVisibleText();
+        expect(buttonLabel).to.contain('Python');
+      });
+
+      it('allows to select a different language to copy as and should copy it right away to clipboard', async () => {
+        await PageObjects.console.clickContextMenu();
+        await PageObjects.console.changeLanguageAndCopy('javascript');
+
+        const resultToast = await toasts.getElementByIndex(1);
+        const toastText = await resultToast.getVisibleText();
+
+        if (toastText.includes('Write permission denied')) {
+          log.debug('Write permission denied, skipping test');
+          return;
+        }
+
+        expect(toastText).to.be('Request copied to clipboard as JavaScript');
+
+        const canReadClipboard = await browser.checkBrowserPermission('clipboard-read');
+        if (canReadClipboard) {
+          const clipboardText = await browser.getClipboardValue();
+          expect(clipboardText).to.contain('require("@elastic/elasticsearch")');
+        }
+      });
     });
 
     it('should open documentation when open documentation button is clicked', async () => {
+      await PageObjects.console.monaco.clearEditorText();
+      await PageObjects.console.monaco.enterText('GET _search');
       await PageObjects.console.clickContextMenu();
       await PageObjects.console.clickOpenDocumentationButton();
 

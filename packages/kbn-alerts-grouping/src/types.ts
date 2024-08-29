@@ -29,7 +29,9 @@ export interface AlertsGroupingState {
   [groupingId: string]: GroupModel;
 }
 
-export interface AlertsGroupingProps<T extends Record<string, unknown> = {}> {
+export interface AlertsGroupingProps<
+  T extends BaseAlertsGroupAggregations = BaseAlertsGroupAggregations
+> {
   /**
    * The leaf component that will be rendered in the grouping panels
    */
@@ -94,5 +96,28 @@ export interface AlertsGroupingProps<T extends Record<string, unknown> = {}> {
     notifications: NotificationsStart;
     dataViews: DataViewsServicePublic;
     http: HttpSetup;
+  };
+}
+
+export interface AlertsGroupAggregationBucket {
+  key: string;
+  doc_count: number;
+  isNullGroup?: boolean;
+  unitsCount?: {
+    value: number;
+  };
+}
+
+export interface BaseAlertsGroupAggregations {
+  groupByFields: {
+    doc_count_error_upper_bound: number;
+    sum_other_doc_count: number;
+    buckets: AlertsGroupAggregationBucket[];
+  };
+  groupsCount: {
+    value: number;
+  };
+  unitsCount: {
+    value: number;
   };
 }

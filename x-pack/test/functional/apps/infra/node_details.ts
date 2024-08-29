@@ -7,6 +7,7 @@
 
 import moment from 'moment';
 import expect from '@kbn/expect';
+import rison from '@kbn/rison';
 import { InfraSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import {
   enableInfrastructureContainerAssetView,
@@ -42,6 +43,11 @@ const END_HOST_KUBERNETES_SECTION_DATE = moment.utc(
 const START_CONTAINER_DATE = moment.utc(DATE_WITH_DOCKER_DATA_FROM);
 const END_CONTAINER_DATE = moment.utc(DATE_WITH_DOCKER_DATA_TO);
 
+interface QueryParams {
+  name?: string;
+  alertMetric?: string;
+}
+
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const observability = getService('observability');
   const browser = getService('browser');
@@ -59,19 +65,24 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     'timePicker',
   ]);
 
-  const getNodeDetailsUrl = (assetName: string) => {
-    const queryParams = new URLSearchParams();
-
-    queryParams.set('assetName', assetName);
-
-    return queryParams.toString();
+  const getNodeDetailsUrl = (queryParams?: QueryParams) => {
+    return rison.encodeUnknown(
+      Object.entries(queryParams ?? {}).reduce<Record<string, string>>((acc, [key, value]) => {
+        acc[key] = value;
+        return acc;
+      }, {})
+    );
   };
 
-  const navigateToNodeDetails = async (assetId: string, assetName: string, assetType: string) => {
+  const navigateToNodeDetails = async (
+    assetId: string,
+    assetType: string,
+    queryParams?: QueryParams
+  ) => {
     await pageObjects.common.navigateToUrlWithBrowserHistory(
       'infraOps',
       `/${NODE_DETAILS_PATH}/${assetType}/${assetId}`,
-      getNodeDetailsUrl(assetName),
+      `assetDetails=${getNodeDetailsUrl(queryParams)}`,
       {
         insertTimestamp: false,
         ensureCurrentUrl: false,
@@ -113,7 +124,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         ]);
         await browser.setWindowSize(1600, 1200);
 
-        await navigateToNodeDetails('Jennys-MBP.fritz.box', 'Jennys-MBP.fritz.box', 'host');
+        await navigateToNodeDetails('Jennys-MBP.fritz.box', 'host', {
+          name: 'Jennys-MBP.fritz.box',
+        });
         await pageObjects.header.waitUntilLoadingHasFinished();
       });
 
@@ -270,7 +283,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             const ALL_ALERTS = ACTIVE_ALERTS + RECOVERED_ALERTS;
             const COLUMNS = 11;
             before(async () => {
-              await navigateToNodeDetails('demo-stack-apache-01', 'demo-stack-apache-01', 'host');
+              await navigateToNodeDetails('demo-stack-apache-01', 'host', {
+                name: 'demo-stack-apache-01',
+              });
               await pageObjects.header.waitUntilLoadingHasFinished();
 
               await pageObjects.timePicker.setAbsoluteRange(
@@ -282,7 +297,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             });
 
             after(async () => {
-              await navigateToNodeDetails('Jennys-MBP.fritz.box', 'Jennys-MBP.fritz.box', 'host');
+              await navigateToNodeDetails('Jennys-MBP.fritz.box', 'host', {
+                name: 'Jennys-MBP.fritz.box',
+              });
               await pageObjects.header.waitUntilLoadingHasFinished();
 
               await pageObjects.timePicker.setAbsoluteRange(
@@ -505,7 +522,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         describe('Host with alerts and no processes', () => {
           before(async () => {
-            await navigateToNodeDetails('demo-stack-mysql-01', 'demo-stack-mysql-01', 'host');
+            await navigateToNodeDetails('demo-stack-mysql-01', 'host', {
+              name: 'demo-stack-mysql-01',
+            });
             await pageObjects.timePicker.setAbsoluteRange(
               START_HOST_ALERTS_DATE.format(DATE_PICKER_FORMAT),
               END_HOST_ALERTS_DATE.format(DATE_PICKER_FORMAT)
@@ -539,11 +558,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         describe('#With Kubernetes section', () => {
           before(async () => {
-            await navigateToNodeDetails(
-              'demo-stack-kubernetes-01',
-              'demo-stack-kubernetes-01',
-              'host'
-            );
+            await navigateToNodeDetails('demo-stack-kubernetes-01', 'host', {
+              name: 'demo-stack-kubernetes-01',
+            });
             await pageObjects.header.waitUntilLoadingHasFinished();
           });
 
@@ -623,6 +640,43 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             });
           });
         });
+
+        describe('Callouts', () => {
+          describe('Legacy alert metric callout', () => {
+            [{ metric: 'cpu' }, { metric: 'rx' }, { metric: 'tx' }].forEach(({ metric }) => {
+              it(`Should show for: ${metric}`, async () => {
+                await navigateToNodeDetails('Jennys-MBP.fritz.box', 'host', {
+                  name: 'Jennys-MBP.fritz.box',
+                  alertMetric: metric,
+                });
+                await pageObjects.header.waitUntilLoadingHasFinished();
+
+                await retry.try(async () => {
+                  expect(await pageObjects.assetDetails.legacyMetricAlertCalloutExists()).to.be(
+                    true
+                  );
+                });
+              });
+            });
+
+            [{ metric: 'cpuV2' }, { metric: 'rxV2' }, { metric: 'txV2' }].forEach(({ metric }) => {
+              it(`Should not show for: ${metric}`, async () => {
+                await navigateToNodeDetails('Jennys-MBP.fritz.box', 'host', {
+                  name: 'Jennys-MBP.fritz.box',
+                  alertMetric: metric,
+                });
+
+                await pageObjects.header.waitUntilLoadingHasFinished();
+
+                await retry.try(async () => {
+                  expect(await pageObjects.assetDetails.legacyMetricAlertCalloutExists()).to.be(
+                    false
+                  );
+                });
+              });
+            });
+          });
+        });
       });
 
       describe('#Asset Type: container', () => {
@@ -647,7 +701,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         describe('when container asset view is disabled', () => {
           it('should show old view of container details', async () => {
             await setInfrastructureContainerAssetViewUiSetting(false);
-            await navigateToNodeDetails('container-id-0', 'container-id-0', 'container');
+            await navigateToNodeDetails('container-id-0', 'container', {
+              name: 'container-id-0',
+            });
             await pageObjects.header.waitUntilLoadingHasFinished();
             await testSubjects.find('metricsEmptyViewState');
           });
@@ -656,7 +712,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         describe('when container asset view is enabled', () => {
           before(async () => {
             await setInfrastructureContainerAssetViewUiSetting(true);
-            await navigateToNodeDetails('container-id-0', 'container-id-0', 'container');
+            await navigateToNodeDetails('container-id-0', 'container', {
+              name: 'container-id-0',
+            });
             await pageObjects.header.waitUntilLoadingHasFinished();
             await pageObjects.timePicker.setAbsoluteRange(
               START_CONTAINER_DATE.format(DATE_PICKER_FORMAT),

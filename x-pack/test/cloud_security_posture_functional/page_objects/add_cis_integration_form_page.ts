@@ -54,6 +54,9 @@ export function AddCisIntegrationFormPageProvider({
     getPostInstallCloudFormationModal: async () => {
       return await testSubjects.find('postInstallCloudFormationModal');
     },
+    showPostInstallCloudFormationModal: async () => {
+      return await testSubjects.exists('postInstallCloudFormationModal');
+    },
     showLaunchCloudFormationAgentlessButton: async () => {
       return await testSubjects.exists('launchCloudFormationAgentlessButton');
     },

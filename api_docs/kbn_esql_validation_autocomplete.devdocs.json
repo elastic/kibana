@@ -1452,7 +1452,7 @@
             "section": "def-common.ESQLCallbacks",
             "text": "ESQLCallbacks"
           },
-          " | undefined) => () => Promise<{ name: string; hidden: boolean; title?: string | undefined; dataStreams?: { name: string; title?: string | undefined; }[] | undefined; }[]>"
+          " | undefined) => () => Promise<{ name: string; hidden: boolean; title?: string | undefined; dataStreams?: { name: string; title?: string | undefined; }[] | undefined; type?: string | undefined; }[]>"
         ],
         "path": "packages/kbn-esql-validation-autocomplete/src/shared/resources_helpers.ts",
         "deprecated": false,
@@ -3054,7 +3054,7 @@
             "label": "getSources",
             "description": [],
             "signature": [
-              "CallbackFn<{}, { name: string; hidden: boolean; title?: string | undefined; dataStreams?: { name: string; title?: string | undefined; }[] | undefined; }> | undefined"
+              "CallbackFn<{}, { name: string; hidden: boolean; title?: string | undefined; dataStreams?: { name: string; title?: string | undefined; }[] | undefined; type?: string | undefined; }> | undefined"
             ],
             "path": "packages/kbn-esql-validation-autocomplete/src/shared/types.ts",
             "deprecated": false,
@@ -3626,6 +3626,22 @@
             ],
             "signature": [
               "{ title: string; id: string; } | undefined"
+            ],
+            "path": "packages/kbn-esql-validation-autocomplete/src/autocomplete/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-validation-autocomplete",
+            "id": "def-common.SuggestionRawDefinition.rangeToReplace",
+            "type": "Object",
+            "tags": [],
+            "label": "rangeToReplace",
+            "description": [
+              "\nThe range that should be replaced when the suggestion is applied"
+            ],
+            "signature": [
+              "{ start: number; end: number; } | undefined"
             ],
             "path": "packages/kbn-esql-validation-autocomplete/src/autocomplete/types.ts",
             "deprecated": false,

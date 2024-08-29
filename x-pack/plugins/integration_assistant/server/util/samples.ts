@@ -55,22 +55,25 @@ function isEmptyValue(value: unknown): boolean {
 
 function merge(target: Record<string, any>, source: Record<string, any>): Record<string, unknown> {
   for (const [key, sourceValue] of Object.entries(source)) {
-    const targetValue = target[key];
-    if (Array.isArray(sourceValue)) {
-      // Directly assign arrays
-      target[key] = sourceValue;
-    } else if (
-      typeof sourceValue === 'object' &&
-      sourceValue !== null &&
-      !Array.isArray(targetValue)
-    ) {
-      if (typeof targetValue !== 'object' || isEmptyValue(targetValue)) {
-        target[key] = merge({}, sourceValue);
-      } else {
-        target[key] = merge(targetValue, sourceValue);
+    if (key !== '__proto__' && key !== 'constructor') {
+      if (Object.prototype.hasOwnProperty.call(target, key)) {
+        const targetValue = target[key];
+        if (Array.isArray(sourceValue)) {
+          target[key] = sourceValue;
+        } else if (
+          typeof sourceValue === 'object' &&
+          sourceValue !== null &&
+          typeof targetValue === 'object' &&
+          targetValue !== null &&
+          !Array.isArray(targetValue)
+        ) {
+          target[key] = merge(targetValue, sourceValue);
+        } else if (isEmptyValue(targetValue) && !isEmptyValue(sourceValue)) {
+          target[key] = sourceValue;
+        }
+      } else if (!isEmptyValue(sourceValue)) {
+        target[key] = sourceValue;
       }
-    } else if (!(key in target) || (isEmptyValue(targetValue) && !isEmptyValue(sourceValue))) {
-      target[key] = sourceValue;
     }
   }
   return target;
@@ -203,5 +206,5 @@ export function generateFields(mergedDocs: string): string {
     .filter((key) => !ecsTopKeysSet.has(key))
     .map((key) => recursiveParse(doc[key], [key]));
 
-  return yaml.dump(fieldsStructure, { sortKeys: false });
+  return yaml.safeDump(fieldsStructure, { sortKeys: false });
 }

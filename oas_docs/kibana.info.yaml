@@ -37,6 +37,7 @@ servers:
         default: localhost:5601
 security:
   - apiKeyAuth: []
+  - basicAuth: []
 components:
   securitySchemes:
     apiKeyAuth:
@@ -47,3 +48,6 @@ components:
         These APIs use key-based authentication.
         You must create an API key and use the encoded value in the request header.
         For example: `Authorization: ApiKey base64AccessApiKey`
+    basicAuth:
+      type: http
+      scheme: basic

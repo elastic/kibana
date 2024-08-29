@@ -423,6 +423,7 @@ export interface InventoryModel<TMetrics = InventoryMetrics> {
   };
   metrics: TMetrics;
   requiredMetrics: InventoryMetric[];
+  legacyMetrics?: SnapshotMetricType[];
   tooltipMetrics: SnapshotMetricType[];
   nodeFilter?: object[];
 }

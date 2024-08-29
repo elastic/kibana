@@ -8,6 +8,11 @@ deprecated::[7.13.0,Use <<mute-alert-api>> instead.]
 
 Mute an alert instance.
 
+[NOTE]
+====
+For the latest details, refer to {api-kibana}/group/endpoint-alerting[alerting APIs].
+====
+
 [[alerts-api-mute-request]]
 ==== Request
 

@@ -8,6 +8,8 @@ deprecated::[7.13.0,Use <<get-connector-api>> instead.]
 
 Retrieves a connector by ID.
 
+NOTE: For the latest details, refer to {api-kibana}/group/endpoint-connectors[connector APIs].
+
 [[actions-and-connectors-legacy-api-get-request]]
 ===== Request
 

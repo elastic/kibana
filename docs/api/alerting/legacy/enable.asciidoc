@@ -8,6 +8,11 @@ deprecated::[7.13.0,Use <<enable-rule-api>> instead.]
 
 Enable an alert.
 
+[NOTE]
+====
+For the latest details, refer to {api-kibana}/group/endpoint-alerting[alerting APIs].
+====
+
 [[alerts-api-enable-request]]
 ==== Request
 

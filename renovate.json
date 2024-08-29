@@ -21,9 +21,11 @@
       "enabled": false
     },
     {
-      "matchPackageNames": [
-        "docker.elastic.co/wolfi/chainguard-base"
-      ],
+      "groupName": "chainguard",
+      "matchPackageNames": ["docker.elastic.co/wolfi/chainguard-base"],
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Operations", "release_note:skip"],
       "enabled": true
     },
     {
@@ -467,6 +469,14 @@
       "reviewers": ["team:visualizations", "dej611"],
       "matchBaseBranches": ["main"],
       "labels": ["release_note:skip", "backport:all-open", "Team:Visualizations"],
+      "enabled": true
+    },
+    {
+      "groupName": "Serve swagger docs",
+      "matchDepNames": ["express", "swagger-jsdoc", "swagger-ui-express"],
+      "reviewers": ["team:obs-entities"],
+      "matchBaseBranches": ["main"],
+      "labels": ["release_note:skip", "team:obs-entities"],
       "enabled": true
     }
   ],

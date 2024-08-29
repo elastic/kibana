@@ -14028,15 +14028,15 @@
               },
               {
                 "plugin": "@kbn/unified-field-list",
-                "path": "packages/kbn-unified-field-list/src/hooks/use_existing_fields.ts"
-              },
-              {
-                "plugin": "@kbn/unified-field-list",
-                "path": "packages/kbn-unified-field-list/src/hooks/use_existing_fields.ts"
-              },
-              {
-                "plugin": "@kbn/unified-field-list",
                 "path": "packages/kbn-unified-field-list/src/services/field_stats/load_field_stats.ts"
+              },
+              {
+                "plugin": "@kbn/unified-field-list",
+                "path": "packages/kbn-unified-field-list/src/hooks/use_existing_fields.ts"
+              },
+              {
+                "plugin": "@kbn/unified-field-list",
+                "path": "packages/kbn-unified-field-list/src/hooks/use_existing_fields.ts"
               },
               {
                 "plugin": "lens",

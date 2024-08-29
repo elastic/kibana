@@ -8,8 +8,7 @@ Disable a rule.
 
 [NOTE]
 ====
-For the most up-to-date API details, refer to the
-{kib-repo}/tree/{branch}/x-pack/plugins/alerting/docs/openapi[open API specification].
+For the latest details, refer to {api-kibana}/group/endpoint-alerting[alerting APIs].
 ====
 
 [[disable-rule-api-request]]

@@ -8,7 +8,9 @@ deprecated::[7.13.0,Use <<delete-connector-api>> instead.]
 
 Deletes a connector by ID.
 
-WARNING: When you delete an connector, _it cannot be recovered_.
+When you delete an connector, _it cannot be recovered_.
+
+NOTE: For the latest details, refer to {api-kibana}/group/endpoint-connectors[connector APIs].
 
 [[actions-and-connectors-legacy-api-delete-request]]
 ===== Request

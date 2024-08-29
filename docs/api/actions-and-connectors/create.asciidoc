@@ -6,11 +6,7 @@
 
 Creates a connector.
 
-[NOTE]
-====
-For the most up-to-date API details, refer to the
-{kib-repo}/tree/{branch}/x-pack/plugins/actions/docs/openapi[open API specification].
-====
+NOTE: For the latest details, refer to {api-kibana}/group/endpoint-connectors[connector APIs].
 
 [[create-connector-api-request]]
 === {api-request-title}

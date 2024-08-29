@@ -27,7 +27,7 @@
             "section": "def-public.EsqlWidgetParameters",
             "text": "EsqlWidgetParameters"
           },
-          ">, PredefinedKeys>>(widgetCreate: T) => Pick<",
+          ">, \"type\">>(widgetCreate: T) => Pick<",
           {
             "pluginId": "investigate",
             "scope": "common",
@@ -43,7 +43,7 @@
             "section": "def-public.EsqlWidgetParameters",
             "text": "EsqlWidgetParameters"
           },
-          ">, PredefinedKeys> & Omit<T, \"parameters\"> & { parameters: T[\"parameters\"] & ",
+          ">, \"type\"> & Omit<T, \"parameters\"> & { parameters: T[\"parameters\"] & ",
           "_DeepPartialObject",
           "<",
           "GlobalWidgetParameters",
@@ -79,15 +79,7 @@
         "label": "createWidgetFactory",
         "description": [],
         "signature": [
-          "(type: string, defaults: Pick<Partial<",
-          {
-            "pluginId": "investigate",
-            "scope": "common",
-            "docId": "kibInvestigatePluginApi",
-            "section": "def-common.InvestigateWidgetCreate",
-            "text": "InvestigateWidgetCreate"
-          },
-          "<{}>>, AllowedDefaultKeys> | undefined) => ",
+          "(type: string) => ",
           "WidgetFactory",
           "<TParameters>"
         ],
@@ -109,29 +101,6 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
-          },
-          {
-            "parentPluginId": "investigate",
-            "id": "def-public.createWidgetFactory.$2",
-            "type": "Object",
-            "tags": [],
-            "label": "defaults",
-            "description": [],
-            "signature": [
-              "Pick<Partial<",
-              {
-                "pluginId": "investigate",
-                "scope": "common",
-                "docId": "kibInvestigatePluginApi",
-                "section": "def-common.InvestigateWidgetCreate",
-                "text": "InvestigateWidgetCreate"
-              },
-              "<{}>>, AllowedDefaultKeys> | undefined"
-            ],
-            "path": "x-pack/plugins/observability_solution/investigate/public/create_widget.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -615,51 +584,6 @@
             "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "investigate",
-            "id": "def-public.InvestigateWidget.description",
-            "type": "string",
-            "tags": [],
-            "label": "description",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "investigate",
-            "id": "def-public.InvestigateWidget.columns",
-            "type": "Enum",
-            "tags": [],
-            "label": "columns",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "investigate",
-                "scope": "common",
-                "docId": "kibInvestigatePluginApi",
-                "section": "def-common.InvestigateWidgetColumnSpan",
-                "text": "InvestigateWidgetColumnSpan"
-              }
-            ],
-            "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "investigate",
-            "id": "def-public.InvestigateWidget.rows",
-            "type": "number",
-            "tags": [],
-            "label": "rows",
-            "description": [],
-            "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -693,26 +617,6 @@
             "tags": [],
             "label": "createdAt",
             "description": [],
-            "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "investigate",
-            "id": "def-public.Investigation.user",
-            "type": "Object",
-            "tags": [],
-            "label": "user",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/core-security-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSecurityCommonPluginApi",
-                "section": "def-common.AuthenticatedUser",
-                "text": "AuthenticatedUser"
-              }
-            ],
             "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -786,115 +690,9 @@
           }
         ],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "investigate",
-        "id": "def-public.WidgetRenderAPI",
-        "type": "Interface",
-        "tags": [],
-        "label": "WidgetRenderAPI",
-        "description": [],
-        "path": "x-pack/plugins/observability_solution/investigate/public/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "investigate",
-            "id": "def-public.WidgetRenderAPI.onDelete",
-            "type": "Function",
-            "tags": [],
-            "label": "onDelete",
-            "description": [],
-            "signature": [
-              "() => void"
-            ],
-            "path": "x-pack/plugins/observability_solution/investigate/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "investigate",
-            "id": "def-public.WidgetRenderAPI.onWidgetAdd",
-            "type": "Function",
-            "tags": [],
-            "label": "onWidgetAdd",
-            "description": [],
-            "signature": [
-              "(create: ",
-              {
-                "pluginId": "investigate",
-                "scope": "common",
-                "docId": "kibInvestigatePluginApi",
-                "section": "def-common.InvestigateWidgetCreate",
-                "text": "InvestigateWidgetCreate"
-              },
-              "<{}>) => Promise<void>"
-            ],
-            "path": "x-pack/plugins/observability_solution/investigate/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "investigate",
-                "id": "def-public.WidgetRenderAPI.onWidgetAdd.$1",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "create",
-                "description": [],
-                "signature": [
-                  "Pick<",
-                  {
-                    "pluginId": "investigate",
-                    "scope": "common",
-                    "docId": "kibInvestigatePluginApi",
-                    "section": "def-common.InvestigateWidget",
-                    "text": "InvestigateWidget"
-                  },
-                  "<{}, {}>, \"type\" | \"title\" | \"columns\" | \"description\" | \"rows\"> & { parameters: ",
-                  "_DeepPartialObject",
-                  "<",
-                  "GlobalWidgetParameters",
-                  ">; }"
-                ],
-                "path": "x-pack/plugins/observability_solution/investigate/public/types.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          }
-        ],
-        "initialIsOpen": false
       }
     ],
-    "enums": [
-      {
-        "parentPluginId": "investigate",
-        "id": "def-public.ChromeOption",
-        "type": "Enum",
-        "tags": [],
-        "label": "ChromeOption",
-        "description": [],
-        "path": "x-pack/plugins/observability_solution/investigate/public/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "investigate",
-        "id": "def-public.InvestigateWidgetColumnSpan",
-        "type": "Enum",
-        "tags": [],
-        "label": "InvestigateWidgetColumnSpan",
-        "description": [],
-        "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "enums": [],
     "misc": [
       {
         "parentPluginId": "investigate",
@@ -927,7 +725,7 @@
             "section": "def-common.InvestigateWidget",
             "text": "InvestigateWidget"
           },
-          "<{}, {}>, \"type\" | \"title\" | \"columns\" | \"description\" | \"rows\"> & { parameters: ",
+          "<{}, {}>, \"type\" | \"title\"> & { parameters: ",
           "_DeepPartialObject",
           "<",
           "GlobalWidgetParameters",
@@ -977,7 +775,7 @@
                 "section": "def-common.InvestigateWidget",
                 "text": "InvestigateWidget"
               },
-              "<{}, {}>, \"type\" | \"title\" | \"columns\" | \"description\" | \"rows\"> & { parameters: ",
+              "<{}, {}>, \"type\" | \"title\"> & { parameters: ",
               "_DeepPartialObject",
               "<",
               "GlobalWidgetParameters",
@@ -1088,7 +886,7 @@
               "section": "def-common.AuthenticatedUser",
               "text": "AuthenticatedUser"
             },
-            "; from: string; to: string; }) => ",
+            "; investigationData?: { id: string; title: string; createdAt: number; createdBy: string; params: { timeRange: { from: number; to: number; }; }; origin: { type: \"alert\"; id: string; } | { type: \"blank\"; }; status: \"closed\" | \"ongoing\"; notes: { id: string; content: string; createdAt: number; createdBy: string; }[]; } | undefined; }) => ",
             "UseInvestigationApi"
           ],
           "path": "x-pack/plugins/observability_solution/investigate/public/types.ts",
@@ -1128,22 +926,14 @@
                 },
                 {
                   "parentPluginId": "investigate",
-                  "id": "def-public.InvestigatePublicStart.useInvestigation.$1.from",
-                  "type": "string",
+                  "id": "def-public.InvestigatePublicStart.useInvestigation.$1.investigationData",
+                  "type": "Object",
                   "tags": [],
-                  "label": "from",
+                  "label": "investigationData",
                   "description": [],
-                  "path": "x-pack/plugins/observability_solution/investigate/public/types.ts",
-                  "deprecated": false,
-                  "trackAdoption": false
-                },
-                {
-                  "parentPluginId": "investigate",
-                  "id": "def-public.InvestigatePublicStart.useInvestigation.$1.to",
-                  "type": "string",
-                  "tags": [],
-                  "label": "to",
-                  "description": [],
+                  "signature": [
+                    "{ id: string; title: string; createdAt: number; createdBy: string; params: { timeRange: { from: number; to: number; }; }; origin: { type: \"alert\"; id: string; } | { type: \"blank\"; }; status: \"closed\" | \"ongoing\"; notes: { id: string; content: string; createdAt: number; createdBy: string; }[]; } | undefined"
+                  ],
                   "path": "x-pack/plugins/observability_solution/investigate/public/types.ts",
                   "deprecated": false,
                   "trackAdoption": false
@@ -1563,51 +1353,6 @@
             "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "investigate",
-            "id": "def-common.InvestigateWidget.description",
-            "type": "string",
-            "tags": [],
-            "label": "description",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "investigate",
-            "id": "def-common.InvestigateWidget.columns",
-            "type": "Enum",
-            "tags": [],
-            "label": "columns",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "investigate",
-                "scope": "common",
-                "docId": "kibInvestigatePluginApi",
-                "section": "def-common.InvestigateWidgetColumnSpan",
-                "text": "InvestigateWidgetColumnSpan"
-              }
-            ],
-            "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "investigate",
-            "id": "def-common.InvestigateWidget.rows",
-            "type": "number",
-            "tags": [],
-            "label": "rows",
-            "description": [],
-            "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1641,26 +1386,6 @@
             "tags": [],
             "label": "createdAt",
             "description": [],
-            "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "investigate",
-            "id": "def-common.Investigation.user",
-            "type": "Object",
-            "tags": [],
-            "label": "user",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/core-security-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSecurityCommonPluginApi",
-                "section": "def-common.AuthenticatedUser",
-                "text": "AuthenticatedUser"
-              }
-            ],
             "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1794,20 +1519,7 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [
-      {
-        "parentPluginId": "investigate",
-        "id": "def-common.InvestigateWidgetColumnSpan",
-        "type": "Enum",
-        "tags": [],
-        "label": "InvestigateWidgetColumnSpan",
-        "description": [],
-        "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "enums": [],
     "misc": [
       {
         "parentPluginId": "investigate",
@@ -1825,7 +1537,7 @@
             "section": "def-common.InvestigateWidget",
             "text": "InvestigateWidget"
           },
-          "<{}, {}>, \"type\" | \"title\" | \"columns\" | \"description\" | \"rows\"> & { parameters: ",
+          "<{}, {}>, \"type\" | \"title\"> & { parameters: ",
           "_DeepPartialObject",
           "<",
           "GlobalWidgetParameters",
