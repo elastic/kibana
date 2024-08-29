@@ -5,11 +5,12 @@
  * 2.0.
  */
 import React from 'react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   ASSET_DETAILS_LOCATOR_ID,
   AssetDetailsLocatorParams,
 } from '@kbn/observability-shared-plugin/common';
-import { useLocatorRedirect } from '../../../../../hooks/use_locator';
+import { SharePluginStart } from '@kbn/share-plugin/public';
 import { StringOrNull } from '../../../../..';
 
 interface Props {
@@ -19,10 +20,12 @@ interface Props {
 }
 
 export function HostLink({ name, id, timerange }: Props) {
-  const { getRedirectUrl } =
-    useLocatorRedirect<AssetDetailsLocatorParams>(ASSET_DETAILS_LOCATOR_ID);
+  const { services } = useKibana<{ share?: SharePluginStart }>();
 
-  const href = getRedirectUrl({
+  const assetDetailsLocator =
+    services.share?.url.locators.get<AssetDetailsLocatorParams>(ASSET_DETAILS_LOCATOR_ID);
+
+  const href = assetDetailsLocator?.getRedirectUrl({
     assetType: 'host',
     assetId: id,
     assetDetails: {
