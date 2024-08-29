@@ -19,7 +19,6 @@ import type { SelectionMode } from './types';
 
 export const AgentTableHeader: React.FunctionComponent<{
   agentStatus?: { [k in SimplifiedAgentStatus]: number };
-  showInactive: boolean;
   totalAgents: number;
   selectableAgents: number;
   managedAgentsOnCurrentPage: number;
@@ -38,7 +37,6 @@ export const AgentTableHeader: React.FunctionComponent<{
   setSelectionMode,
   selectedAgents,
   setSelectedAgents,
-  showInactive,
   clearFilters,
   isUsingFilter,
 }) => {
@@ -69,9 +67,7 @@ export const AgentTableHeader: React.FunctionComponent<{
           ) : null}
         </EuiFlexGroup>
         <EuiFlexItem grow={false}>
-          {agentStatus && (
-            <AgentStatusBadges showInactive={showInactive} agentStatus={agentStatus} />
-          )}
+          {agentStatus && <AgentStatusBadges agentStatus={agentStatus} />}
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
