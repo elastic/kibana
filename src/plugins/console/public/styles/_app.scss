@@ -119,7 +119,7 @@
 .conApp__editorActions {
   @extend .conApp__actionsPanel;
   // For IE11
-  min-width: $euiSizeXXL * 1.15;
+  min-width: $euiSizeL * 2;
 }
 
 .conApp__outputActions {
