@@ -8,6 +8,7 @@
 import _ from 'lodash';
 
 import type { Capabilities, CapabilitiesSwitcher, CoreSetup, Logger } from '@kbn/core/server';
+import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
 
 import type { Space } from '../../common';
@@ -65,7 +66,10 @@ function toggleDisabledFeatures(
 
   const { enabledFeatures, disabledFeatures } = features.reduce(
     (acc, feature) => {
-      if (disabledFeatureKeys.includes(feature.id)) {
+      if (
+        disabledFeatureKeys.includes(feature.id) ||
+        feature.scope !== KibanaFeatureScope.Agnostic
+      ) {
         acc.disabledFeatures.push(feature);
       } else {
         acc.enabledFeatures.push(feature);
