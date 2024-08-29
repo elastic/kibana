@@ -28,7 +28,7 @@ interface Params {
   packageInfo?: PackageInfo;
   existingAgentPolicies: AgentPolicy[];
   setHasAgentPolicyError: (hasError: boolean) => void;
-  updatePackagePolicy: (data: { policy_ids: string[] }) => void;
+  updatePackagePolicy: (fields: Partial<NewPackagePolicy>) => void;
   agentPolicies: AgentPolicy[];
   setAgentPolicies: (agentPolicies: AgentPolicy[]) => void;
   isLoadingData: boolean;
@@ -96,20 +96,12 @@ export function usePackagePolicySteps({
       if (!isLoadingData && isEqual(updatedAgentPolicies, agentPolicies)) {
         return;
       }
-      if (updatedAgentPolicies.length > 0) {
-        setAgentPolicies(updatedAgentPolicies);
-        updatePackagePolicy({
-          policy_ids: updatedAgentPolicies.map((policy) => policy.id),
-        });
-        if (packageInfo) {
-          setHasAgentPolicyError(false);
-        }
-      } else {
-        setHasAgentPolicyError(true);
-        setAgentPolicies([]);
-        updatePackagePolicy({
-          policy_ids: [],
-        });
+      setAgentPolicies(updatedAgentPolicies);
+      updatePackagePolicy({
+        policy_ids: updatedAgentPolicies.map((policy) => policy.id),
+      });
+      if (packageInfo) {
+        setHasAgentPolicyError(false);
       }
 
       // eslint-disable-next-line no-console

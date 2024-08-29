@@ -172,7 +172,7 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<TextAreaWithAutoc
   ]);
 
   const textareaOnKeyPress = useCallback(
-    (event) => {
+    (event: React.KeyboardEvent) => {
       if (selectableRef.current && isListOpen) {
         if (!selectableHasFocus && (event.code === 'ArrowUp' || event.code === 'ArrowDown')) {
           event.preventDefault();
@@ -219,7 +219,7 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<TextAreaWithAutoc
   );
 
   const clickOutSideTextArea = useCallback(
-    (event) => {
+    (event: any) => {
       const box = document
         .querySelector('.euiSelectableMsgAutoComplete')
         ?.getBoundingClientRect() || {
@@ -292,7 +292,7 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<TextAreaWithAutoc
   }, [editAction, index, inputTargetValue, isListOpen, paramsProperty]);
   const onClick = useCallback(() => closeList(), [closeList]);
   const onScroll = useCallback(
-    (evt) => {
+    (evt: any) => {
       // FUTURE ENGINEER -> we need to make sure to not close the autocomplete option list
       if (selectableRef?.current?.listId !== evt.target?.firstElementChild?.id) {
         closeList(true);
