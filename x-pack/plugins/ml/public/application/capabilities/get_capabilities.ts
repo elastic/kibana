@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ml } from '../services/ml_api_service';
+import type { MlApiServices } from '../services/ml_api_service';
 
 import type { MlCapabilitiesResponse } from '../../../common/types/capabilities';
 
-export function getCapabilities(): Promise<MlCapabilitiesResponse> {
+export function getCapabilities(ml: MlApiServices): Promise<MlCapabilitiesResponse> {
   return ml.checkMlCapabilities();
 }
