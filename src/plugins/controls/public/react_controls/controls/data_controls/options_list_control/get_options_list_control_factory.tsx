@@ -88,6 +88,7 @@ export const getOptionsListControlFactory = (
       >(
         uuid,
         OPTIONS_LIST_CONTROL,
+        'optionsListDataView',
         initialState,
         { searchTechnique: searchTechnique$, singleSelect: singleSelect$ },
         controlGroupApi,

@@ -63,6 +63,7 @@ export const getRangesliderControlFactory = (
       const dataControl = initializeDataControl<Pick<RangesliderControlState, 'step'>>(
         uuid,
         RANGE_SLIDER_CONTROL,
+        'rangeSliderDataView',
         initialState,
         {
           step: step$,
