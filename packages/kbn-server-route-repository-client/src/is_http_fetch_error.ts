@@ -6,11 +6,14 @@
  * Side Public License, v 1.
  */
 
-export { createRepositoryClient } from './src/create_repository_client';
-export { isHttpFetchError } from './src/is_http_fetch_error';
+import { IHttpFetchError, isHttpFetchError as coreIsHttpFetchError } from '@kbn/core-http-browser';
 
-export type {
-  DefaultClientOptions,
-  ClientRequestParamsOf,
-  RouteRepositoryClient,
-} from '@kbn/server-route-repository-utils';
+interface ErrorBody {
+  statusCode: number;
+  message: string;
+  error: string;
+}
+
+export function isHttpFetchError(error: unknown): error is IHttpFetchError<ErrorBody> {
+  return coreIsHttpFetchError(error);
+}
