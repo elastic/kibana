@@ -7,7 +7,7 @@
 
 import { HttpSetup, ResponseErrorBody } from '@kbn/core/public';
 
-import { FieldCopyAction, Pipeline } from '../../../common/types';
+import type { FieldCopyAction, GeoipDatabase, Pipeline } from '../../../common/types';
 import { API_BASE_PATH } from '../../../common/constants';
 import {
   UseRequestConfig,
@@ -16,7 +16,6 @@ import {
   sendRequest as _sendRequest,
   useRequest as _useRequest,
 } from '../../shared_imports';
-import { GeoipDatabase } from '../sections/manage_processors/types';
 import { UiMetricService } from './ui_metric';
 import {
   UIM_PIPELINE_CREATE,

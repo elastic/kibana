@@ -19,8 +19,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
+import type { GeoipDatabase } from '../../../../common/types';
 import { useKibana } from '../../../shared_imports';
-import { GeoipDatabase } from './types';
 import {
   DELETE_DATABASE_MODAL_FORM_ID,
   DELETE_DATABASE_MODAL_TITLE_ID,

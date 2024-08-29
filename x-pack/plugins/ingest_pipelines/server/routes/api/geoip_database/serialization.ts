@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export interface GeoipDatabase {
+export interface GeoipDatabaseFromES {
   id: string;
   version: number;
   modified_date_millis: number;
@@ -17,14 +17,14 @@ export interface GeoipDatabase {
   };
 }
 
-const getGeoipType = ({ database }: GeoipDatabase) => {
+const getGeoipType = ({ database }: GeoipDatabaseFromES) => {
   if (database.maxmind && database.maxmind.account_id) {
     return 'maxmind';
   }
   return 'unknown';
 };
 
-export const deserializeGeoipDatabase = (geoipDatabase: GeoipDatabase) => {
+export const deserializeGeoipDatabase = (geoipDatabase: GeoipDatabaseFromES) => {
   const { database, id } = geoipDatabase;
   return {
     name: database.name,

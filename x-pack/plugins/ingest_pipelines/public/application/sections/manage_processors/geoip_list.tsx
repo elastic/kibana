@@ -19,11 +19,11 @@ import {
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+
+import type { GeoipDatabase } from '../../../../common/types';
 import { SectionLoading, useKibana } from '../../../shared_imports';
-import type { GeoipDatabase } from './types';
 import { getTypeLabel } from './constants';
 import { EmptyList } from './empty_list';
 import { AddDatabaseModal } from './add_database_modal';
@@ -56,6 +56,7 @@ export const GeoipList: React.FunctionComponent = () => {
     </EuiButton>
   );
   const tableProps: EuiInMemoryTableProps<GeoipDatabase> = {
+    'data-test-subj': 'geoipDatabaseList',
     rowProps: () => ({
       'data-test-subj': 'geoipDatabaseListRow',
     }),

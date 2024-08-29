@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { GeoipDatabase } from './types';
+import type { GeoipDatabase } from '../../../../common/types';
 import { useKibana } from '../../../shared_imports';
 import {
   ADD_DATABASE_MODAL_TITLE_ID,
@@ -32,6 +32,7 @@ import {
   getAddDatabaseSuccessMessage,
   addDatabaseErrorTitle,
 } from './constants';
+
 export const AddDatabaseModal = ({
   closeModal,
   reloadDatabases,
