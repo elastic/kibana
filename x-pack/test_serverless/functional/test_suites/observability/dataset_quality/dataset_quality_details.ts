@@ -28,7 +28,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'navigationalSearch',
     'observabilityLogsExplorer',
     'datasetQuality',
-    'svlCommonNavigation',
     'svlCommonPage',
   ]);
   const testSubjects = getService('testSubjects');

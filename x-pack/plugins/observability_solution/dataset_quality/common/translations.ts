@@ -395,3 +395,10 @@ export const degradedFieldValuesColumnName = i18n.translate(
     defaultMessage: 'Values',
   }
 );
+
+export const fieldIgnoredText = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.fieldIgnored',
+  {
+    defaultMessage: 'field ignored',
+  }
+);

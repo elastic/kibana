@@ -17,7 +17,10 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { useDegradedFields } from '../../../hooks';
-import { overviewDegradedFieldsSectionTitle } from '../../../../common/translations';
+import {
+  fieldIgnoredText,
+  overviewDegradedFieldsSectionTitle,
+} from '../../../../common/translations';
 import { DegradedFieldInfo } from './field_info';
 
 export const DegradedFieldFlyout = () => {
@@ -32,13 +35,14 @@ export const DegradedFieldFlyout = () => {
       size="s"
       onClose={closeDegradedFieldFlyout}
       aria-labelledby={pushedFlyoutTitleId}
+      data-test-subj={'datasetQualityDetailsDegradedFieldFlyout'}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiBadge color="warning">{overviewDegradedFieldsSectionTitle}</EuiBadge>
         <EuiSpacer size="s" />
         <EuiTitle size="m">
           <EuiText>
-            {expandedDegradedField} <span style={{ fontWeight: 400 }}>field ignored</span>
+            {expandedDegradedField} <span style={{ fontWeight: 400 }}>{fieldIgnoredText}</span>
           </EuiText>
         </EuiTitle>
       </EuiFlyoutHeader>
