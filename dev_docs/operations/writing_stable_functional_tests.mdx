@@ -75,6 +75,10 @@ await testSubjects.existsOrFail('savedItemDetailPage')
 
 Even if you are very careful, the more UI automation you do the more likely you are to make a mistake and write a flaky test. If there is any way to do setup work for your test via the Kibana or Elasticsearch APIs rather than interacting with the UI, then take advantage of that opportunity to write less UI automation.
 
+## Incorrect usage of EUI components in React code will cause a functional test failure
+
+For EUI to support theming and internationalization, EUI components in your React application must be wrapped in `EuiProvider` (more preferably, use the `KibanaRenderContextProvider` wrapper). The functional test runner treats EUI as a first-class citizen and will throw an error when incorrect usage of EUI is detected. However, experiencing this type of failure in a test run is unlikely: in dev mode, a toast message alerts developers of incorrect EUI usage in real-time.
+
 ## Do you really need a functional test for this?
 
 Once you've invested a lot of time and energy into figuring out how to write functional tests well it can be tempting to use them for all sorts of things which might not justify the cost of a functional test. Make sure that your test is validating something that couldn't be validated by a series of unit tests on a component+store+API.

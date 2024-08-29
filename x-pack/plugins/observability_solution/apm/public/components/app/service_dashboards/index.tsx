@@ -123,7 +123,7 @@ export function ServiceDashboards({ checkForEntities = false }: { checkForEntiti
   }, [dataView, serviceName, environment, kuery, dashboard, rangeFrom, rangeTo, currentDashboard]);
 
   const getLocatorParams = useCallback(
-    (params) => {
+    (params: any) => {
       return {
         serviceName,
         dashboardId: params.dashboardId,

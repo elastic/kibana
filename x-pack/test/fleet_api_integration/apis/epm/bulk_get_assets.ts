@@ -8,11 +8,12 @@
 import { GetBulkAssetsResponse } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry, isDockerRegistryEnabledOrSkipped } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
+  const fleetAndAgents = getService('fleetAndAgents');
+
   const pkgName = 'all_assets';
   const pkgVersion = '0.1.0';
 
@@ -28,7 +29,10 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('Bulk get assets', async () => {
     skipIfNoDockerRegistry(providerContext);
-    setupFleetAndAgents(providerContext);
+
+    before(async () => {
+      await fleetAndAgents.setup();
+    });
 
     describe('installs all assets when installing a package for the first time', async () => {
       before(async () => {

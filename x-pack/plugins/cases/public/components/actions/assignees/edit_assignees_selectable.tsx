@@ -198,7 +198,7 @@ const EditAssigneesSelectableComponent: React.FC<Props> = ({
   );
 
   const onSearchChange = useCallback(
-    (value) => {
+    (value: string) => {
       setSearchValue(value);
       onContentChange(value);
     },
