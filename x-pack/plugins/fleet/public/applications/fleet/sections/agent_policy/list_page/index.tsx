@@ -98,7 +98,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
     sortField: sorting?.field,
     sortOrder: sorting?.direction,
     kuery: search,
-    noAgentCount: false, // Explicitely fetch agent count
+    noAgentCount: false, // Explicitly fetch agent count
     full: true,
   });
 
