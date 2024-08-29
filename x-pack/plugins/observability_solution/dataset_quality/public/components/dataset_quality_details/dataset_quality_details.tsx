@@ -16,7 +16,8 @@ import { DegradedFieldFlyout } from './degraded_field_flyout';
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
 export default function DatasetQualityDetails() {
-  const { isIndexNotFoundError, dataStream, expandedDegradedField } = useDatasetQualityDetailsState();
+  const { isIndexNotFoundError, dataStream, expandedDegradedField } =
+    useDatasetQualityDetailsState();
   const { startTracking } = useDatasetDetailsTelemetry();
 
   useEffect(() => {
