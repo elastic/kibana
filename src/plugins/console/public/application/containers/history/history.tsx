@@ -160,7 +160,6 @@ export function History() {
                 }}
               >
                 <EuiSplitPanel.Inner paddingSize="none">
-
                   <EuiFlexGroup direction="column" gutterSize="none" css={{ height: '100%' }}>
                     <EuiFlexItem grow={false}>
                       <EuiSpacer size="s" />
@@ -203,7 +202,6 @@ export function History() {
                       ))}
                     </EuiFlexItem>
                   </EuiFlexGroup>
-
                 </EuiSplitPanel.Inner>
                 <EuiSplitPanel.Inner grow={false} color="subdued" paddingSize="none">
                   <EuiText>

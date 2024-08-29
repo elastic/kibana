@@ -8,13 +8,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiTitle,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiEmptyPrompt,
-} from '@elastic/eui';
+import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiLink, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useServicesContext } from '../../contexts';
 
@@ -37,7 +31,7 @@ export function HistoryEmptyPrompt() {
             <p>
               {i18n.translate('console.historyPage.emptyPromptBody', {
                 defaultMessage:
-                'This history panel will display any past queries you’ve run for review and reuse.',
+                  'This history panel will display any past queries you’ve run for review and reuse.',
               })}
             </p>
           }
