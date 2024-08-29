@@ -21,7 +21,7 @@ export function ControlsToolbarButton({
   controlGroupApi,
   isDisabled,
 }: {
-  controlGroupApi: ControlGroupApi;
+  controlGroupApi?: ControlGroupApi;
   isDisabled?: boolean;
 }) {
   const { euiTheme } = useEuiTheme();

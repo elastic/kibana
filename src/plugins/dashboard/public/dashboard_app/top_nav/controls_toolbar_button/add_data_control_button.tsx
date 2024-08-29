@@ -14,7 +14,7 @@ import { useDashboardAPI } from '../../dashboard_app';
 
 interface Props {
   closePopover: () => void;
-  controlGroupApi: ControlGroupApi;
+  controlGroupApi?: ControlGroupApi;
 }
 
 export const AddDataControlButton = ({ closePopover, controlGroupApi, ...rest }: Props) => {
@@ -28,9 +28,10 @@ export const AddDataControlButton = ({ closePopover, controlGroupApi, ...rest }:
       {...rest}
       icon="plusInCircle"
       data-test-subj="controls-create-button"
+      disabled={!controlGroupApi}
       aria-label={getAddControlButtonTitle()}
       onClick={() => {
-        controlGroupApi.openAddDataControlFlyout({ onSave });
+        controlGroupApi?.openAddDataControlFlyout({ onSave });
         closePopover();
       }}
     >

@@ -83,6 +83,7 @@ export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }
    * dismissNotification: Optional, if not passed a toast will appear in the dashboard
    */
 
+  const controlGroupApi = useStateFromPublishingSubject(dashboard.controlGroupApi$);
   const extraButtons = [
     <EditorMenu createNewVisType={createNewVisType} isDisabled={isDisabled} api={dashboard} />,
     <AddFromLibraryButton
@@ -91,14 +92,8 @@ export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }
       data-test-subj="dashboardAddFromLibraryButton"
       isDisabled={isDisabled}
     />,
+    <ControlsToolbarButton isDisabled={isDisabled} controlGroupApi={controlGroupApi} />,
   ];
-
-  const controlGroupApi = useStateFromPublishingSubject(dashboard.controlGroupApi$);
-  if (controlGroupApi) {
-    extraButtons.push(
-      <ControlsToolbarButton isDisabled={isDisabled} controlGroupApi={controlGroupApi} />
-    );
-  }
 
   return (
     <div

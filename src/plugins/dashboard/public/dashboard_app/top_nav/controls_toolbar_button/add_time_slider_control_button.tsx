@@ -21,7 +21,7 @@ import { useDashboardAPI } from '../../dashboard_app';
 
 interface Props {
   closePopover: () => void;
-  controlGroupApi: ControlGroupApi;
+  controlGroupApi?: ControlGroupApi;
 }
 
 export const AddTimeSliderControlButton = ({ closePopover, controlGroupApi, ...rest }: Props) => {
@@ -29,6 +29,10 @@ export const AddTimeSliderControlButton = ({ closePopover, controlGroupApi, ...r
   const dashboard = useDashboardAPI();
 
   useEffect(() => {
+    if (!controlGroupApi) {
+      return;
+    }
+
     const subscription = controlGroupApi.children$.subscribe((children) => {
       const nextHasTimeSliderControl = Object.values(children).some((controlApi) => {
         return apiHasType(controlApi) && controlApi.type === TIME_SLIDER_CONTROL;
@@ -45,7 +49,7 @@ export const AddTimeSliderControlButton = ({ closePopover, controlGroupApi, ...r
       {...rest}
       icon="timeslider"
       onClick={async () => {
-        controlGroupApi.addNewPanel({
+        controlGroupApi?.addNewPanel({
           panelType: TIME_SLIDER_CONTROL,
           initialState: {
             grow: true,
@@ -57,7 +61,7 @@ export const AddTimeSliderControlButton = ({ closePopover, controlGroupApi, ...r
         closePopover();
       }}
       data-test-subj="controls-create-timeslider-button"
-      disabled={hasTimeSliderControl}
+      disabled={!controlGroupApi || hasTimeSliderControl}
       toolTipContent={hasTimeSliderControl ? getOnlyOneTimeSliderControlMsg() : null}
     >
       {getAddTimeSliderControlButtonTitle()}

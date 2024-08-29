@@ -13,7 +13,7 @@ import { getEditControlGroupButtonTitle } from '../../_dashboard_app_strings';
 
 interface Props {
   closePopover: () => void;
-  controlGroupApi: ControlGroupApi;
+  controlGroupApi?: ControlGroupApi;
 }
 
 export const EditControlGroupButton = ({ closePopover, controlGroupApi, ...rest }: Props) => {
@@ -22,9 +22,10 @@ export const EditControlGroupButton = ({ closePopover, controlGroupApi, ...rest 
       {...rest}
       icon="gear"
       data-test-subj="controls-settings-button"
+      disabled={!controlGroupApi}
       aria-label={getEditControlGroupButtonTitle()}
       onClick={() => {
-        controlGroupApi.onEdit();
+        controlGroupApi?.onEdit();
         closePopover();
       }}
     >
