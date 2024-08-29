@@ -34,12 +34,7 @@ import {
   removeServerGeneratedProperties,
   updateUsername,
 } from '../../../utils';
-import {
-  createRule,
-  createAlertsIndex,
-  deleteAllRules,
-  deleteAllAlerts,
-} from '../../../../../../common/utils/security_solution';
+import { createRule, deleteAllRules } from '../../../../../../common/utils/security_solution';
 import { deleteAllExceptions } from '../../../../lists_and_exception_lists/utils';
 
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
@@ -90,14 +85,12 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('@ess @serverless @skipInServerless perform_bulk_action', () => {
     beforeEach(async () => {
-      await createAlertsIndex(supertest, log);
+      await deleteAllRules(supertest, log);
       await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
     });
 
     afterEach(async () => {
-      await deleteAllAlerts(supertest, log, es);
-      await deleteAllRules(supertest, log);
-      await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+      await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
     });
 
     it('should export rules', async () => {

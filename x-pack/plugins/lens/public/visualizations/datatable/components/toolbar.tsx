@@ -24,9 +24,9 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
   const { state, setState } = props;
   const onChangeHeight = useCallback(
     (
-      newHeightMode,
-      heightProperty,
-      heightLinesProperty,
+      newHeightMode: RowHeightMode | undefined,
+      heightProperty: string,
+      heightLinesProperty: string,
       defaultRowHeight = DEFAULT_ROW_HEIGHT_LINES
     ) => {
       const rowHeightLines =
@@ -45,7 +45,7 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
   );
 
   const onChangeHeightLines = useCallback(
-    (newRowHeightLines, heightLinesProperty) => {
+    (newRowHeightLines: number, heightLinesProperty: string) => {
       setState({
         ...state,
         [heightLinesProperty]: newRowHeightLines,
