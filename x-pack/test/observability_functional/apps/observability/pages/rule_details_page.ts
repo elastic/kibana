@@ -194,7 +194,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('User permissions', () => {
+    describe('User permissions', function () {
+      this.tags('skipFIPS');
       before(async () => {
         await observability.alerts.common.navigateToRuleDetailsByRuleId(logThresholdRuleId);
       });
@@ -215,27 +216,21 @@ export default ({ getService }: FtrProviderContext) => {
         await testSubjects.existOrFail('deleteRuleButton');
       });
 
-      describe('close actions popover', function () {
-        this.tags('skipFIPS');
-        it('should close actions popover correctly', async () => {
-          await testSubjects.click('actions');
+      it('should close actions popover correctly', async () => {
+        await testSubjects.click('actions');
 
-          // popover should be closed
-          await testSubjects.missingOrFail('editRuleButton');
-        });
+        // popover should be closed
+        await testSubjects.missingOrFail('editRuleButton');
       });
 
-      describe('actions button', function () {
-        this.tags('skipFIPS');
-        it('should not show the actions button if user has no permissions', async () => {
-          await observability.users.setTestUserRole(
-            observability.users.defineBasicObservabilityRole({
-              logs: ['read'],
-            })
-          );
-          await observability.alerts.common.navigateToRuleDetailsByRuleId(logThresholdRuleId);
-          await testSubjects.missingOrFail('actions');
-        });
+      it('should not show the actions button if user has no permissions', async () => {
+        await observability.users.setTestUserRole(
+          observability.users.defineBasicObservabilityRole({
+            logs: ['read'],
+          })
+        );
+        await observability.alerts.common.navigateToRuleDetailsByRuleId(logThresholdRuleId);
+        await testSubjects.missingOrFail('actions');
       });
     });
   });

@@ -51,6 +51,7 @@ export default function apiTest({ getService }: FtrProviderContext) {
 
   registry.when('ML jobs return a 403 for', { config: 'basic', archives: [] }, () => {
     describe('basic', function () {
+      this.tags('skipFIPS');
       it('user without access', async () => {
         await expectForbidden(apmApiClient.noAccessUser);
       });
