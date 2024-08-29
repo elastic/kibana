@@ -206,6 +206,8 @@ export class ManageSpacePage extends Component<Props, State> {
             <SolutionView
               space={this.state.space}
               onChange={this.onSolutionViewChange}
+              validator={this.validator}
+              isEditing={this.editingExistingSpace()}
               sectionTitle={i18n.translate(
                 'xpack.spaces.management.manageSpacePage.navigationTitle',
                 { defaultMessage: 'Navigation' }
@@ -373,7 +375,11 @@ export class ManageSpacePage extends Component<Props, State> {
     const originalSpace: Space = this.state.originalSpace as Space;
     const space: Space = this.state.space as Space;
     const { haveDisabledFeaturesChanged, hasSolutionViewChanged } = this.state;
-    const result = this.validator.validateForSave(space);
+    const result = this.validator.validateForSave(
+      space,
+      this.editingExistingSpace(),
+      this.props.allowSolutionVisibility
+    );
     if (result.isInvalid) {
       this.setState({
         formError: result,

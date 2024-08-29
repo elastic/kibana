@@ -13,7 +13,7 @@ import type { Field } from '@kbn/ml-anomaly-utils';
 import { SplitFieldSelect } from '../split_field_select';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { filterCategoryFields } from '../../../../../../../../../common/util/fields_utils';
-import { newJobCapsService } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
+import { useNewJobCapsService } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
 import type { PopulationJobCreator } from '../../../../../common/job_creator';
 
 interface Props {
@@ -23,6 +23,7 @@ interface Props {
 export const ByFieldSelector: FC<Props> = ({ detectorIndex }) => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as PopulationJobCreator;
+  const newJobCapsService = useNewJobCapsService();
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const runtimeCategoryFields = useMemo(() => filterCategoryFields(jobCreator.runtimeFields), []);
