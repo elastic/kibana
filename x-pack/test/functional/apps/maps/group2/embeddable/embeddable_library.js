@@ -7,7 +7,6 @@
 
 export default function ({ getPageObjects, getService }) {
   const find = getService('find');
-  const testSubjects = getService('testSubjects');
   const { dashboard, header, maps, visualize } = getPageObjects([
     'dashboard',
     'header',
