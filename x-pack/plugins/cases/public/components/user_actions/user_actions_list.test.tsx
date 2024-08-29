@@ -95,8 +95,10 @@ describe(`UserActionsList`, () => {
     appMockRender.render(<UserActionsList {...props} />);
 
     expect(
-      await screen.findAllByTestId(`comment-create-action-${commentId}`)
-    )[0]?.classList.contains('outlined');
+      (await screen.findAllByTestId(`comment-create-action-${commentId}`))[0]?.classList.contains(
+        'outlined'
+      )
+    ).toBe(true);
   });
 
   it('Outlines comment when update move to link is clicked', async () => {
@@ -126,7 +128,9 @@ describe(`UserActionsList`, () => {
     await userEvent.click(await screen.findByTestId(`comment-update-action-${ourActions[1].id}`));
 
     expect(
-      await screen.findAllByTestId(`comment-create-action-${props.data.comments[0].id}`)
-    )[0]?.classList.contains('outlined');
+      (
+        await screen.findAllByTestId(`comment-create-action-${props.data.comments[0].id}`)
+      )[0]?.classList.contains('outlined')
+    ).toBe(true);
   });
 });
