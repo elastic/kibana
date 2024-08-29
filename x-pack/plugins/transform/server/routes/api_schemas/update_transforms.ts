@@ -8,7 +8,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 
-import type { TransformPivotConfig } from '../types/transform';
+import type { TransformPivotConfig } from '../../../common/types/transform';
 
 import { retentionPolicySchema, settingsSchema, sourceSchema, syncSchema } from './transforms';
 
