@@ -6,3 +6,4 @@
  */
 
 export * from './type';
+export { showErrorToast } from './src/utils/show_error_toast';
