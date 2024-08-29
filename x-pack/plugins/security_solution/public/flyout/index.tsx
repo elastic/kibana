@@ -190,7 +190,7 @@ export const TimelineFlyout = memo(() => {
       customStyles={{ 'z-index': (euiTheme.levels.flyout as number) + 2 }}
       onClose={onClose}
       flyoutCustomProps={{
-        typeDisabled: true,
+        hideSettings: true,
       }}
     />
   );

@@ -115,7 +115,10 @@ export const Right: Story<void> = () => {
 
   return (
     <TestProvider state={state}>
-      <ExpandableFlyout registeredPanels={registeredPanels} />
+      <ExpandableFlyout
+        registeredPanels={registeredPanels}
+        flyoutCustomProps={{ hideSettings: true }}
+      />
     </TestProvider>
   );
 };
@@ -137,7 +140,10 @@ export const Left: Story<void> = () => {
 
   return (
     <TestProvider state={state}>
-      <ExpandableFlyout registeredPanels={registeredPanels} />
+      <ExpandableFlyout
+        registeredPanels={registeredPanels}
+        flyoutCustomProps={{ hideSettings: true }}
+      />
     </TestProvider>
   );
 };
@@ -163,7 +169,10 @@ export const Preview: Story<void> = () => {
 
   return (
     <TestProvider state={state}>
-      <ExpandableFlyout registeredPanels={registeredPanels} />
+      <ExpandableFlyout
+        registeredPanels={registeredPanels}
+        flyoutCustomProps={{ hideSettings: true }}
+      />
     </TestProvider>
   );
 };
@@ -186,6 +195,51 @@ export const MultiplePreviews: Story<void> = () => {
             id: 'preview2',
           },
         ],
+      },
+    },
+  };
+
+  return (
+    <TestProvider state={state}>
+      <ExpandableFlyout
+        registeredPanels={registeredPanels}
+        flyoutCustomProps={{ hideSettings: true }}
+      />
+    </TestProvider>
+  );
+};
+
+export const CollapsedPushVsOverlay: Story<void> = () => {
+  const state: State = {
+    byId: {
+      memory: {
+        right: {
+          id: 'right',
+        },
+        left: undefined,
+        preview: undefined,
+      },
+    },
+  };
+
+  return (
+    <TestProvider state={state}>
+      <ExpandableFlyout registeredPanels={registeredPanels} />
+    </TestProvider>
+  );
+};
+
+export const ExpandedPushVsOverlay: Story<void> = () => {
+  const state: State = {
+    byId: {
+      memory: {
+        right: {
+          id: 'right',
+        },
+        left: {
+          id: 'left',
+        },
+        preview: undefined,
       },
     },
   };

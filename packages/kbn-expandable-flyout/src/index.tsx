@@ -38,10 +38,13 @@ export interface ExpandableFlyoutProps extends Omit<EuiFlyoutProps, 'onClose'> {
    */
   onClose?: EuiFlyoutProps['onClose'];
   /**
-   * Set of properties to control if the flyout is rendered in overlay or push mode
+   * Set of properties that drive a settings menu
    */
   flyoutCustomProps?: {
-    typeDisabled?: boolean;
+    /**
+     * hide the gear icon and settings menu if true
+     */
+    hideSettings?: boolean;
   };
 }
 
@@ -116,13 +119,14 @@ export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({
       }}
       css={customStyles}
     >
-      <RenderMenu
-        flyoutTypeProps={{
-          type: flyoutType,
-          onChange: flyoutTypeChange,
-          disabled: flyoutCustomProps?.typeDisabled || false,
-        }}
-      />
+      {!flyoutCustomProps?.hideSettings && (
+        <RenderMenu
+          flyoutTypeProps={{
+            type: flyoutType,
+            onChange: flyoutTypeChange,
+          }}
+        />
+      )}
       <EuiFlexGroup
         direction={leftSection ? 'row' : 'column'}
         wrap={false}

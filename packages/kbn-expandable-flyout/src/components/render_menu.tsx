@@ -56,10 +56,6 @@ interface RenderMenuProps {
      * Callback to change the flyout type
      */
     onChange: (type: EuiFlyoutProps['type']) => void;
-    /**
-     * Disables the button group for flyout where the option shouldn't be available
-     */
-    disabled: boolean;
   };
 }
 
@@ -98,7 +94,6 @@ export const RenderMenu: React.FC<RenderMenuProps> = ({ flyoutTypeProps }: Rende
                 ]}
                 idSelected={flyoutTypeProps.type as string}
                 onChange={(id: string) => flyoutTypeProps.onChange(id as EuiFlyoutProps['type'])}
-                isDisabled={flyoutTypeProps.disabled}
                 data-test-subj={RENDER_MENU_FLYOUT_TYPE_BUTTON_GROUP_TEST_ID}
               />
             </EuiFlexItem>

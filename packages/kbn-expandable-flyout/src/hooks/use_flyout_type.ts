@@ -42,12 +42,14 @@ export const useFlyoutType = (): UseFlyoutTypeResult => {
 
   const flyoutTypeChange = useCallback(
     (type: EuiFlyoutProps['type']) => {
-      if (type) {
+      // we only save to localStorage the value for flyouts that have a urlKey.
+      // The state of the memory flyout is not persisted.
+      if (urlKey && type) {
         localStorage.setItem(pushVsOverlayLocalStorageKey, type);
       }
       setFlyoutType(type);
     },
-    [pushVsOverlayLocalStorageKey, setFlyoutType]
+    [pushVsOverlayLocalStorageKey, setFlyoutType, urlKey]
   );
 
   return {

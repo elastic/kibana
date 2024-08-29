@@ -86,16 +86,16 @@ _where `myPanels` is a list of all the panels that can be rendered in the flyout
 
 ## Optional properties
 
-The expandable flyout now offers a way for developers to change some of the flyout's UI properties. These are done via a gear icon in the top right corner of the flyout, to the left of the close icon.
+The expandable flyout now offers a way for users to change some of the flyout's UI properties. These are done via a gear icon in the top right corner of the flyout, to the left of the close icon.
 
-At the moment, clicking on the gear icon opens a popover that allows you to toggle the flyout between `overlay` and `push` modes (see [EUI](https://eui.elastic.co/#/layout/flyout#push-versus-overlay)). The default value is `overlay`. The flyout type menu can be disabled, and a callback exists to notify outside the package that the type has been changed.
+The gear icon can be hidden by setting the `hideSettings` property to `true` in the flyout's custom props.
 ```typescript
-flyoutTypeProps?: {
-  type?: EuiFlyoutProps['type'];
-  callback?: (type: EuiFlyoutProps['type']) => void;
-  disabled?: boolean;
+flyoutCustomProps?: {
+  hideSettings?: boolean;
 };
 ```
+
+At the moment, clicking on the gear icon opens a popover that allows you to toggle the flyout between `overlay` and `push` modes (see [EUI](https://eui.elastic.co/#/layout/flyout#push-versus-overlay)). The default value is `overlay`. The package remembers the selected value in local storage, only for expandable flyout that have a urlKey. The state of memory flyouts is not persisted.
 
 ## Terminology
 
