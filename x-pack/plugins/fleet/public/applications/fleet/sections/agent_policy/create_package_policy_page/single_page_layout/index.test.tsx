@@ -848,7 +848,7 @@ describe('When on the package policy create page', () => {
 
         expect(sendCreateAgentPolicy).toHaveBeenCalledWith(
           expect.objectContaining({
-            monitoring_enabled: ['logs', 'metrics', 'traces'],
+            monitoring_enabled: ['logs', 'metrics'],
             name: 'Agentless policy for nginx-1',
             supports_agentless: true,
           }),
