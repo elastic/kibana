@@ -172,7 +172,11 @@ const getFieldErrorMessages = (fieldError: ValidationError) => {
   if (fieldError.message.length > 0) {
     return [fieldError.message];
   } else if (Array.isArray(fieldError.messages)) {
-    return fieldError.messages.map((message) => JSON.stringify(message));
+    // EQL validation can return multiple errors and thus we store them in a custom `messages` field on `ValidationError` object.
+    // Here we double check that `messages` is in fact an array and the content is of type `string`, otherwise we stringify it.
+    return fieldError.messages.map((message) =>
+      typeof message === 'string' ? message : JSON.stringify(message)
+    );
   }
   return [];
 };

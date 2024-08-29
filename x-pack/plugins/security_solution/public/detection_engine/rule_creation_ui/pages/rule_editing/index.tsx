@@ -426,6 +426,13 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     updateRule,
   ]);
 
+  const showSaveWithErrorsModal = useCallback(() => setIsSaveWithErrorsModalVisible(true), []);
+  const closeSaveWithErrorsModal = useCallback(() => setIsSaveWithErrorsModalVisible(false), []);
+  const onConfirmSaveWithErrors = useCallback(async () => {
+    closeSaveWithErrorsModal();
+    await saveChanges();
+  }, [closeSaveWithErrorsModal, saveChanges]);
+
   const onSubmit = useCallback(async () => {
     setNonBlockingRuleErrors([]);
 
@@ -464,14 +471,8 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     actionsStepForm,
     getRuleFormsErrors,
     saveChanges,
+    showSaveWithErrorsModal,
   ]);
-
-  const showSaveWithErrorsModal = () => setIsSaveWithErrorsModalVisible(true);
-  const closeSaveWithErrorsModal = () => setIsSaveWithErrorsModalVisible(false);
-  const onConfirmSaveWithErrors = useCallback(async () => {
-    closeSaveWithErrorsModal();
-    await saveChanges();
-  }, [saveChanges]);
 
   const onTabClick = useCallback(async (tab: EuiTabbedContentTab) => {
     const targetStep = tab.id as RuleStep;

@@ -464,12 +464,19 @@ const CreateRulePageComponent: React.FC = () => {
     ]
   );
 
+  const showSaveWithErrorsModal = useCallback(() => setIsSaveWithErrorsModalVisible(true), []);
+  const closeSaveWithErrorsModal = useCallback(() => setIsSaveWithErrorsModalVisible(false), []);
+  const onConfirmSaveWithErrors = useCallback(async () => {
+    closeSaveWithErrorsModal();
+    await createRuleFromFormData(enableRuleAfterConfirmation);
+  }, [closeSaveWithErrorsModal, createRuleFromFormData, enableRuleAfterConfirmation]);
+
   const submitRule = useCallback(
     async (enabled: boolean) => {
       const { valid, blockingErrors, nonBlockingErrors } = await validateEachStep();
       if (valid) {
         // There are no validation errors, thus proceed to rule creation
-        createRuleFromFormData(enabled);
+        await createRuleFromFormData(enabled);
         return;
       }
 
@@ -484,15 +491,8 @@ const CreateRulePageComponent: React.FC = () => {
         showSaveWithErrorsModal();
       }
     },
-    [createRuleFromFormData, validateEachStep]
+    [createRuleFromFormData, showSaveWithErrorsModal, validateEachStep]
   );
-
-  const showSaveWithErrorsModal = () => setIsSaveWithErrorsModalVisible(true);
-  const closeSaveWithErrorsModal = () => setIsSaveWithErrorsModalVisible(false);
-  const onConfirmSaveWithErrors = useCallback(async () => {
-    closeSaveWithErrorsModal();
-    await createRuleFromFormData(enableRuleAfterConfirmation);
-  }, [createRuleFromFormData, enableRuleAfterConfirmation]);
 
   const defineRuleButtonType =
     activeStep === RuleStep.defineRule ? 'active' : defineStepForm.isValid ? 'valid' : 'passive';
@@ -633,6 +633,9 @@ const CreateRulePageComponent: React.FC = () => {
   );
   const memoDefineStepExtraAction = useMemo(
     () =>
+      // During rule creation we would like to hide the edit button if user did not reach current step yet,
+      // thus we do `defineStepForm.isValid !== undefined` check which that the form validation has not been checked yet.
+      // Otherwise, we would like to show step edit button if user is currently at another step.
       defineStepForm.isValid !== undefined &&
       activeStep !== RuleStep.defineRule && (
         <EuiButtonEmpty
@@ -704,6 +707,9 @@ const CreateRulePageComponent: React.FC = () => {
   );
   const memoAboutStepExtraAction = useMemo(
     () =>
+      // During rule creation we would like to hide the edit button if user did not reach current step yet,
+      // thus we do `defineStepForm.isValid !== undefined` check which that the form validation has not been checked yet.
+      // Otherwise, we would like to show step edit button if user is currently at another step.
       aboutStepForm.isValid !== undefined &&
       activeStep !== RuleStep.aboutRule && (
         <EuiButtonEmpty
@@ -758,6 +764,9 @@ const CreateRulePageComponent: React.FC = () => {
   );
   const memoScheduleStepExtraAction = useMemo(
     () =>
+      // During rule creation we would like to hide the edit button if user did not reach current step yet,
+      // thus we do `defineStepForm.isValid !== undefined` check which that the form validation has not been checked yet.
+      // Otherwise, we would like to show step edit button if user is currently at another step.
       scheduleStepForm.isValid !== undefined &&
       activeStep !== RuleStep.scheduleRule && (
         <EuiButtonEmpty iconType="pencil" size="xs" onClick={() => editStep(RuleStep.scheduleRule)}>
@@ -839,6 +848,9 @@ const CreateRulePageComponent: React.FC = () => {
   );
   const memoActionsStepExtraAction = useMemo(
     () =>
+      // During rule creation we would like to hide the edit button if user did not reach current step yet,
+      // thus we do `defineStepForm.isValid !== undefined` check which that the form validation has not been checked yet.
+      // Otherwise, we would like to show step edit button if user is currently at another step.
       actionsStepForm.isValid !== undefined &&
       activeStep !== RuleStep.ruleActions && (
         <EuiButtonEmpty iconType="pencil" size="xs" onClick={() => editStep(RuleStep.ruleActions)}>
