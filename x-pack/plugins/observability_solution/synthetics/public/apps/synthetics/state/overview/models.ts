@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import type { TrendTable } from '../../../../../common/types';
 import type { MonitorListSortField } from '../../../../../common/runtime_types/monitor_management/sort_field';
 import { ConfigKey, MonitorOverviewResult } from '../../../../../common/runtime_types';
 
@@ -39,27 +41,3 @@ export interface GroupByState {
   field: ConfigKey.TAGS | ConfigKey.PROJECT_ID | ConfigKey.MONITOR_TYPE | 'locationId' | 'none';
   order: 'asc' | 'desc';
 }
-
-export interface TrendKey {
-  configId: string;
-  locationId: string;
-}
-
-export interface TrendDatum {
-  x: number;
-  y: number;
-}
-
-export interface OverviewTrend {
-  configId: string;
-  locationId: string;
-  data: TrendDatum[];
-  count: number;
-  min: number;
-  max: number;
-  avg: number;
-  sum: number;
-  median: number;
-}
-
-export type TrendTable = Record<string, OverviewTrend | null>;

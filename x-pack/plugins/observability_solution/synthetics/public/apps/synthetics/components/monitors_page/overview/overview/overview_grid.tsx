@@ -18,13 +18,13 @@ import {
   EuiAutoSizer,
   EuiAutoSize,
 } from '@elastic/eui';
+import type { TrendKey } from '../../../../../../../common/types';
 import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../../../../../embeddables/constants';
 import { AddToDashboard } from '../../../common/components/add_to_dashboard';
 import { useOverviewStatus } from '../../hooks/use_overview_status';
 import { GridItemsByGroup } from './grid_by_group/grid_items_by_group';
 import { GroupFields } from './grid_by_group/group_fields';
 import {
-  TrendKey,
   fetchMonitorOverviewAction,
   quietFetchOverviewAction,
   refreshOverviewTrends,

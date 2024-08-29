@@ -7,10 +7,11 @@
 
 import sagaHelper from 'redux-saga-testing';
 import { call, put, select } from 'redux-saga/effects';
+import { OverviewTrend, TrendKey, TrendTable } from '../../../../../common/types';
 import { TRENDS_CHUNK_SIZE, fetchTrendEffect, refreshTrends } from './effects';
 import { trendStatsBatch } from './actions';
 import { fetchOverviewTrendStats as trendsApi } from './api';
-import { OverviewTrend, TrendKey, TrendTable, selectOverviewTrends } from '.';
+import { selectOverviewTrends } from '.';
 
 const generateTrendRequests = () => {
   const ar: TrendKey[] = [];

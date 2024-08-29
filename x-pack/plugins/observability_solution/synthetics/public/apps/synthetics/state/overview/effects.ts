@@ -6,8 +6,9 @@
  */
 
 import { debounce, call, takeLeading, takeEvery, put, select } from 'redux-saga/effects';
-import { selectOverviewTrends } from './selectors';
+import type { TrendTable } from '../../../../../common/types';
 import { fetchEffectFactory } from '../utils/fetch_effect';
+import { selectOverviewTrends } from './selectors';
 import {
   fetchMonitorOverviewAction,
   quietFetchOverviewAction,
@@ -15,7 +16,6 @@ import {
   trendStatsBatch,
 } from './actions';
 import { fetchMonitorOverview, fetchOverviewTrendStats as trendsApi } from './api';
-import type { TrendTable } from './models';
 
 export function* fetchMonitorOverviewEffect() {
   yield debounce(

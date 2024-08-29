@@ -13,8 +13,9 @@ import {
   OverviewStatus,
   OverviewStatusCodec,
 } from '../../../../../common/runtime_types';
+import type { TrendKey, TrendTable } from '../../../../../common/types';
 import { apiService } from '../../../../utils/api_service';
-import type { MonitorOverviewPageState, TrendKey, TrendTable } from './models';
+import type { MonitorOverviewPageState } from './models';
 
 function toMonitorOverviewQueryArgs(
   pageState: MonitorOverviewPageState

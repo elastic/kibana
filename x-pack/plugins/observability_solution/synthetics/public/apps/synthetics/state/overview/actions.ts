@@ -5,14 +5,13 @@
  * 2.0.
  */
 import { createAction } from '@reduxjs/toolkit';
+import { TrendKey, TrendTable } from '../../../../../common/types';
 import { createAsyncAction } from '../utils/actions';
 
 import type {
   MonitorOverviewFlyoutConfig,
   MonitorOverviewPageState,
   MonitorOverviewState,
-  TrendKey,
-  TrendTable,
 } from './models';
 import { MonitorOverviewResult } from '../../../../../common/runtime_types';
 
