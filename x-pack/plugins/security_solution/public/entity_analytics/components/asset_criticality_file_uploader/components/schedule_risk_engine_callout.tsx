@@ -115,7 +115,7 @@ export const ScheduleRiskEngineCallout: React.FC = () => {
             isLoading={isLoadingRiskEngineSchedule || isRiskEngineStatusLoading || isRunning}
           >
             <FormattedMessage
-              defaultMessage="Run engine now"
+              defaultMessage="Recalculate entity risk scores now"
               id="xpack.securitySolution.entityAnalytics.assetCriticalityResultStep.riskEngine.runNowButton"
             />
           </EuiButtonEmpty>
