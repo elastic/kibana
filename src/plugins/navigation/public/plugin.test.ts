@@ -96,11 +96,11 @@ describe('Navigation Plugin', () => {
 
   describe('addSolutionNavigation()', () => {
     it('should update the solution navigation definitions', async () => {
-      const { plugin, coreStart, unifiedSearch, cloud } = setup();
+      const { plugin, coreStart, unifiedSearch, spaces } = setup();
 
       const { addSolutionNavigation } = plugin.start(coreStart, {
         unifiedSearch,
-        cloud,
+        spaces,
       });
       await new Promise((resolve) => setTimeout(resolve));
 
@@ -179,13 +179,11 @@ describe('Navigation Plugin', () => {
   });
 
   describe('isSolutionNavEnabled$', () => {
-    // This test will need to be changed when we remove the feature flag
-    it('should be off by default', async () => {
-      const { plugin, coreStart, unifiedSearch, cloud } = setup();
+    it('should be off if space plugin not available', async () => {
+      const { plugin, coreStart, unifiedSearch } = setup();
 
       const { isSolutionNavEnabled$ } = plugin.start(coreStart, {
         unifiedSearch,
-        cloud,
       });
       await new Promise((resolve) => setTimeout(resolve));
 
