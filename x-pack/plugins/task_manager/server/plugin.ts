@@ -45,6 +45,10 @@ import { metricsStream, Metrics } from './metrics';
 import { TaskManagerMetricsCollector } from './metrics/task_metrics_collector';
 import { TaskPartitioner } from './lib/task_partitioner';
 import { getDefaultCapacity } from './lib/get_default_capacity';
+import {
+  registerRebalanceTaskPartitionsTask,
+  ensureScheduleForRebalanceTaskPartitionsTask,
+} from './partitioning/rebalance_task';
 
 export interface TaskManagerSetupContract {
   /**
@@ -235,6 +239,12 @@ export class TaskManagerPlugin
       setupIntervalLogging(monitoredHealth$, this.logger, LogHealthForBackgroundTasksOnlyMinutes);
     }
 
+    registerRebalanceTaskPartitionsTask({
+      core,
+      logger: this.logger,
+      registerTaskDefinitions: this.definitions.registerTaskDefinitions.bind(this.definitions),
+    });
+
     return {
       index: TASK_MANAGER_INDEX,
       addMiddleware: (middleware: Middleware) => {
@@ -377,6 +387,7 @@ export class TaskManagerPlugin
     });
 
     scheduleDeleteInactiveNodesTaskDefinition(this.logger, taskScheduling).catch(() => {});
+    ensureScheduleForRebalanceTaskPartitionsTask(this.logger, taskScheduling);
 
     return {
       fetch: (opts: SearchOpts): Promise<FetchResult> => taskStore.fetch(opts),
