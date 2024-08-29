@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
+import type { Role } from '@kbn/security-plugin-types-common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { RoleCredentials } from '../../../../shared/services';
-import type { Role } from '@kbn/security-plugin-types-common';
 
 // Notes:
 // Test coverage comes from stateful test suite: x-pack/test/api_integration/apis/security/roles.ts
