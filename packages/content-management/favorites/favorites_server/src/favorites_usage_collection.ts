@@ -7,7 +7,6 @@
  */
 
 import type { CoreSetup } from '@kbn/core-lifecycle-server';
-import type { Logger } from '@kbn/logging';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { estypes } from '@elastic/elasticsearch';
 import { favoritesSavedObjectName } from './favorites_saved_object';
@@ -23,11 +22,9 @@ interface FavoritesUsage {
 
 export function registerFavoritesUsageCollection({
   core,
-  logger,
   usageCollection,
 }: {
   core: CoreSetup;
-  logger: Logger;
   usageCollection: UsageCollectionSetup;
 }) {
   usageCollection.registerCollector(
@@ -44,7 +41,7 @@ export function registerFavoritesUsageCollection({
             type: 'long',
             _meta: {
               description:
-                'Total unique users+spaces that have favorited an object of this type in this deployment',
+                'Total users per space that have favorited an object of this type in this deployment',
             },
           },
           avg_per_user_per_space: {
@@ -101,18 +98,8 @@ export function registerFavoritesUsageCollection({
                 field: 'favorites.type',
               },
               aggs: {
-                total: {
-                  sum: {
-                    field: 'number_of_favorites',
-                  },
-                },
-                avg: {
-                  avg: {
-                    field: 'number_of_favorites',
-                  },
-                },
-                max: {
-                  max: {
+                stats: {
+                  stats: {
                     field: 'number_of_favorites',
                   },
                 },
@@ -123,15 +110,15 @@ export function registerFavoritesUsageCollection({
 
         const favoritesUsage: FavoritesUsage = {};
 
-        const typesBuckets =
-          (response.aggregations?.types?.buckets as estypes.AggregationsStringTermsBucket[]) ?? [];
+        const typesBuckets = (response.aggregations?.types?.buckets ??
+          []) as estypes.AggregationsStringTermsBucket[];
 
         typesBuckets.forEach((bucket) => {
           favoritesUsage[bucket.key] = {
-            total: bucket.total.value,
-            total_users_spaces: bucket.doc_count,
-            avg_per_user_per_space: bucket.avg.value,
-            max_per_user_per_space: bucket.max.value,
+            total: bucket.stats.sum,
+            total_users_spaces: bucket.stats.count,
+            avg_per_user_per_space: bucket.stats.avg,
+            max_per_user_per_space: bucket.stats.max,
           };
         });
 

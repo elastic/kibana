@@ -35,6 +35,6 @@ export function registerFavorites({
   registerFavoritesRoutes({ core, logger });
 
   if (usageCollection) {
-    registerFavoritesUsageCollection({ core, logger, usageCollection });
+    registerFavoritesUsageCollection({ core, usageCollection });
   }
 }
