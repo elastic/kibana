@@ -5,9 +5,5 @@
  * 2.0.
  */
 
-export { ViewSpaceProvider, useViewSpaceServices, useViewSpaceStore } from './view_space_provider';
-export type {
-  ViewSpaceProviderProps,
-  ViewSpaceServices,
-  ViewSpaceStore,
-} from './view_space_provider';
+export type { FormValues } from './create_space_page';
+export { CreateSpacePage } from './create_space_page';

@@ -19,7 +19,7 @@ import {
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
-import { useViewSpaceServices, useViewSpaceStore, ViewSpaceProvider } from './view_space_provider';
+import { EditSpaceProvider, useEditSpaceServices, useEditSpaceStore } from './view_space_provider';
 import { spacesManagerMock } from '../../../spaces_manager/spaces_manager.mock';
 import { getPrivilegeAPIClientMock } from '../../privilege_api_client.mock';
 import { getRolesAPIClientMock } from '../../roles_api_client.mock';
@@ -43,7 +43,7 @@ const SUTProvider = ({
 }: PropsWithChildren<Partial<Pick<ApplicationStart, 'capabilities'>>>) => {
   return (
     <IntlProvider locale="en">
-      <ViewSpaceProvider
+      <EditSpaceProvider
         {...{
           i18n,
           http,
@@ -60,15 +60,15 @@ const SUTProvider = ({
         }}
       >
         {children}
-      </ViewSpaceProvider>
+      </EditSpaceProvider>
     </IntlProvider>
   );
 };
 
-describe('ViewSpaceProvider', () => {
-  describe('useViewSpaceServices', () => {
+describe('EditSpaceProvider', () => {
+  describe('useEditSpaceServices', () => {
     it('returns an object of predefined properties', () => {
-      const { result } = renderHook(useViewSpaceServices, { wrapper: SUTProvider });
+      const { result } = renderHook(useEditSpaceServices, { wrapper: SUTProvider });
 
       expect(result.current).toEqual(
         expect.objectContaining({
@@ -78,17 +78,17 @@ describe('ViewSpaceProvider', () => {
     });
 
     it('throws when the hook is used within a tree that does not have the provider', () => {
-      const { result } = renderHook(useViewSpaceServices);
+      const { result } = renderHook(useEditSpaceServices);
       expect(result.error).toBeDefined();
       expect(result.error?.message).toEqual(
-        expect.stringMatching('ViewSpaceService Context is missing.')
+        expect.stringMatching('EditSpaceService Context is missing.')
       );
     });
   });
 
-  describe('useViewSpaceStore', () => {
+  describe('useEditSpaceStore', () => {
     it('returns an object of predefined properties', () => {
-      const { result } = renderHook(useViewSpaceStore, { wrapper: SUTProvider });
+      const { result } = renderHook(useEditSpaceStore, { wrapper: SUTProvider });
 
       expect(result.current).toEqual(
         expect.objectContaining({
@@ -99,11 +99,11 @@ describe('ViewSpaceProvider', () => {
     });
 
     it('throws when the hook is used within a tree that does not have the provider', () => {
-      const { result } = renderHook(useViewSpaceStore);
+      const { result } = renderHook(useEditSpaceStore);
 
       expect(result.error).toBeDefined();
       expect(result.error?.message).toEqual(
-        expect.stringMatching('ViewSpaceStore Context is missing.')
+        expect.stringMatching('EditSpaceStore Context is missing.')
       );
     });
   });

@@ -18,13 +18,13 @@ import { KibanaFeature } from '@kbn/features-plugin/public';
 import { featuresPluginMock } from '@kbn/features-plugin/public/mocks';
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 
-import { ConfirmAlterActiveSpaceModal } from './confirm_alter_active_space_modal';
-import { EnabledFeatures } from './enabled_features';
-import { ManageSpacePage } from './manage_space_page';
+import { CreateSpacePage } from './create_space_page';
 import type { SolutionView, Space } from '../../../common/types/latest';
 import { EventTracker } from '../../analytics';
 import type { SpacesManager } from '../../spaces_manager';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
+import { ConfirmAlterActiveSpaceModal } from '../components/confirm_alter_active_space_modal';
+import { EnabledFeatures } from '../components/enabled_features';
 
 // To be resolved by EUI team.
 // https://github.com/elastic/eui/issues/3712
@@ -70,7 +70,7 @@ describe('ManageSpacePage', () => {
     spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
 
     const wrapper = mountWithIntl(
-      <ManageSpacePage
+      <CreateSpacePage
         spacesManager={spacesManager as unknown as SpacesManager}
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
@@ -122,7 +122,7 @@ describe('ManageSpacePage', () => {
     spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
 
     const wrapper = mountWithIntl(
-      <ManageSpacePage
+      <CreateSpacePage
         spacesManager={spacesManager as unknown as SpacesManager}
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
@@ -190,7 +190,7 @@ describe('ManageSpacePage', () => {
     spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
 
     const wrapper = mountWithIntl(
-      <ManageSpacePage
+      <CreateSpacePage
         spacesManager={spacesManager as unknown as SpacesManager}
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
@@ -221,7 +221,7 @@ describe('ManageSpacePage', () => {
     spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
 
     const wrapper = mountWithIntl(
-      <ManageSpacePage
+      <CreateSpacePage
         spacesManager={spacesManager as unknown as SpacesManager}
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
@@ -252,7 +252,7 @@ describe('ManageSpacePage', () => {
     spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
 
     const wrapper = mountWithIntl(
-      <ManageSpacePage
+      <CreateSpacePage
         spacesManager={spacesManager as unknown as SpacesManager}
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
@@ -283,7 +283,7 @@ describe('ManageSpacePage', () => {
     spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
 
     const wrapper = mountWithIntl(
-      <ManageSpacePage
+      <CreateSpacePage
         spacesManager={spacesManager as unknown as SpacesManager}
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
@@ -312,7 +312,7 @@ describe('ManageSpacePage', () => {
     const spacesManager = spacesManagerMock.create();
 
     const wrapper = mountWithIntl(
-      <ManageSpacePage
+      <CreateSpacePage
         spacesManager={spacesManager}
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
@@ -373,7 +373,7 @@ describe('ManageSpacePage', () => {
     const onLoadSpace = jest.fn();
 
     const wrapper = mountWithIntl(
-      <ManageSpacePage
+      <CreateSpacePage
         spaceId={'existing-space'}
         spacesManager={spacesManager as unknown as SpacesManager}
         onLoadSpace={onLoadSpace}
@@ -451,7 +451,7 @@ describe('ManageSpacePage', () => {
     const onLoadSpace = jest.fn();
 
     const wrapper = mountWithIntl(
-      <ManageSpacePage
+      <CreateSpacePage
         spaceId={'existing-space'}
         spacesManager={spacesManager as unknown as SpacesManager}
         onLoadSpace={onLoadSpace}
@@ -504,7 +504,7 @@ describe('ManageSpacePage', () => {
     const notifications = notificationServiceMock.createStartContract();
 
     const wrapper = mountWithIntl(
-      <ManageSpacePage
+      <CreateSpacePage
         spacesManager={spacesManager as unknown as SpacesManager}
         getFeatures={() => Promise.reject(error)}
         notifications={notifications}
@@ -542,7 +542,7 @@ describe('ManageSpacePage', () => {
     spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
 
     const wrapper = mountWithIntl(
-      <ManageSpacePage
+      <CreateSpacePage
         spaceId={'my-space'}
         spacesManager={spacesManager as unknown as SpacesManager}
         getFeatures={featuresStart.getFeatures}
@@ -605,7 +605,7 @@ describe('ManageSpacePage', () => {
     spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
 
     const wrapper = mountWithIntl(
-      <ManageSpacePage
+      <CreateSpacePage
         spaceId={'my-space'}
         spacesManager={spacesManager as unknown as SpacesManager}
         getFeatures={featuresStart.getFeatures}

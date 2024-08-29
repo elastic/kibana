@@ -22,8 +22,7 @@ interface Props {
   onClickDeleteSpace: () => void;
 }
 
-// FIXME: rename to EditSpaceTabFooter
-export const ViewSpaceTabFooter: React.FC<Props> = ({
+export const EditSpaceTabFooter: React.FC<Props> = ({
   isDirty,
   isLoading,
   onClickCancel,

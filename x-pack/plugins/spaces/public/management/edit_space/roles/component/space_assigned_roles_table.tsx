@@ -372,7 +372,7 @@ export const SpaceAssignedRolesTable = ({
                             }
                           ),
                           onClick: async () => {
-                            await onClickBulkEdit(selectedRoles);
+                            onClickBulkEdit(selectedRoles);
                             setBulkActionContextOpen(false);
                           },
                         },
@@ -387,7 +387,7 @@ export const SpaceAssignedRolesTable = ({
                             </EuiTextColor>
                           ),
                           onClick: async () => {
-                            await onClickBulkRemove(selectedRoles);
+                            onClickBulkRemove(selectedRoles);
                             setBulkActionContextOpen(false);
                           },
                         },

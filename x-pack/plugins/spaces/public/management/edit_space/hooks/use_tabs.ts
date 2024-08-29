@@ -11,7 +11,7 @@ import type { ScopedHistory } from '@kbn/core-application-browser';
 import type { KibanaFeature } from '@kbn/features-plugin/public';
 
 import type { Space } from '../../../../common';
-import { getTabs, type GetTabsProps, type ViewSpaceTab } from '../view_space_tabs';
+import { type EditSpaceTab, getTabs, type GetTabsProps } from '../edit_space_tabs';
 
 type UseTabsProps = Pick<GetTabsProps, 'capabilities' | 'rolesCount'> & {
   space: Space | null;
@@ -27,7 +27,7 @@ export const useTabs = ({
   features,
   currentSelectedTabId,
   ...getTabsArgs
-}: UseTabsProps): [ViewSpaceTab[], JSX.Element | undefined] => {
+}: UseTabsProps): [EditSpaceTab[], JSX.Element | undefined] => {
   const [tabs, selectedTabContent] = useMemo(() => {
     if (space === null || features === null) {
       return [[]];

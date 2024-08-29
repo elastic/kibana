@@ -28,7 +28,7 @@ import type { Role } from '@kbn/security-plugin-types-common';
 
 import { TAB_ID_CONTENT, TAB_ID_GENERAL, TAB_ID_ROLES } from './constants';
 import { useTabs } from './hooks/use_tabs';
-import { useViewSpaceServices, useViewSpaceStore } from './provider';
+import { useEditSpaceServices, useEditSpaceStore } from './provider';
 import { addSpaceIdToPath, ENTER_SPACE_PATH, type Space } from '../../../common';
 import { getSpaceAvatarComponent } from '../../space_avatar';
 import { SpaceSolutionBadge } from '../../space_solution_badge';
@@ -62,9 +62,7 @@ const handleApiError = (error: Error) => {
   throw error;
 };
 
-// FIXME: rename to EditSpacePage
-// FIXME: add eventTracker
-export const ViewSpace: FC<PageProps> = ({
+export const EditSpace: FC<PageProps> = ({
   spaceId,
   getFeatures,
   history,
@@ -72,9 +70,9 @@ export const ViewSpace: FC<PageProps> = ({
   selectedTabId: _selectedTabId,
   ...props
 }) => {
-  const { state, dispatch } = useViewSpaceStore();
-  const { invokeClient } = useViewSpaceServices();
-  const { spacesManager, capabilities, serverBasePath } = useViewSpaceServices();
+  const { state, dispatch } = useEditSpaceStore();
+  const { invokeClient } = useEditSpaceServices();
+  const { spacesManager, capabilities, serverBasePath } = useEditSpaceServices();
   const [space, setSpace] = useState<Space | null>(null);
   const [userActiveSpace, setUserActiveSpace] = useState<Space | null>(null);
   const [features, setFeatures] = useState<KibanaFeature[] | null>(null);

@@ -12,10 +12,10 @@ import React from 'react';
 import type { KibanaFeature } from '@kbn/features-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { useViewSpaceServices } from './provider';
+import { useEditSpaceServices } from './provider';
 import type { Space } from '../../../common';
-import { FeatureTable } from '../edit_space/enabled_features/feature_table';
-import { SectionPanel } from '../edit_space/section_panel';
+import { FeatureTable } from '../components/enabled_features/feature_table';
+import { SectionPanel } from '../components/section_panel';
 
 interface Props {
   space: Partial<Space>;
@@ -23,9 +23,8 @@ interface Props {
   onChange: (updatedSpace: Partial<Space>) => void;
 }
 
-// FIXME: rename to EditSpaceEnabledFeaturesPanel
-export const ViewSpaceEnabledFeatures: FC<Props> = ({ features, space, onChange }) => {
-  const { capabilities, getUrlForApp } = useViewSpaceServices();
+export const EditSpaceEnabledFeatures: FC<Props> = ({ features, space, onChange }) => {
+  const { capabilities, getUrlForApp } = useEditSpaceServices();
   const canManageRoles = capabilities.management?.security?.roles === true;
 
   if (!features) {
@@ -39,7 +38,7 @@ export const ViewSpaceEnabledFeatures: FC<Props> = ({ features, space, onChange 
           <EuiTitle size="xs">
             <h3>
               <FormattedMessage
-                id="xpack.spaces.management.viewSpaceFeatures.featuresVisibility"
+                id="xpack.spaces.management.editSpaceFeatures.featuresVisibility"
                 defaultMessage="Set features visibility"
               />
             </h3>
@@ -48,19 +47,19 @@ export const ViewSpaceEnabledFeatures: FC<Props> = ({ features, space, onChange 
           <EuiText size="s" color="subdued">
             <p>
               <FormattedMessage
-                id="xpack.spaces.management.viewSpaceFeatures.notASecurityMechanismMessage"
+                id="xpack.spaces.management.editSpaceFeatures.notASecurityMechanismMessage"
                 defaultMessage="Hidden features are removed from the user interface, but not disabled. To secure access to features, {manageRolesLink}."
                 values={{
                   manageRolesLink: canManageRoles ? (
                     <EuiLink href={getUrlForApp('management', { path: '/security/roles' })}>
                       <FormattedMessage
-                        id="xpack.spaces.management.viewSpaceFeatures.manageRolesLinkText"
+                        id="xpack.spaces.management.editSpaceFeatures.manageRolesLinkText"
                         defaultMessage="manage security roles"
                       />
                     </EuiLink>
                   ) : (
                     <FormattedMessage
-                      id="xpack.spaces.management.viewSpaceFeatures.manageRolesLinkText"
+                      id="xpack.spaces.management.editSpaceFeatures.manageRolesLinkText"
                       defaultMessage="manage security roles"
                     />
                   ),

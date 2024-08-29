@@ -9,21 +9,21 @@ jest.mock('./spaces_grid', () => ({
   SpacesGridPage: (props: any) => `Spaces Page: ${JSON.stringify(props)}`,
 }));
 
+jest.mock('./create_space', () => ({
+  CreateSpacePage: (props: any) => {
+    if (props.spacesManager && props.onLoadSpace) {
+      props.spacesManager.getSpace().then((space: any) => props.onLoadSpace(space));
+    }
+    return `Spaces Create Page: ${JSON.stringify(props)}`;
+  },
+}));
+
 jest.mock('./edit_space', () => ({
-  ManageSpacePage: (props: any) => {
+  EditSpacePage: (props: any) => {
     if (props.spacesManager && props.onLoadSpace) {
       props.spacesManager.getSpace().then((space: any) => props.onLoadSpace(space));
     }
     return `Spaces Edit Page: ${JSON.stringify(props)}`;
-  },
-}));
-
-jest.mock('./view_space', () => ({
-  ViewSpacePage: (props: any) => {
-    if (props.spacesManager && props.onLoadSpace) {
-      props.spacesManager.getSpace().then((space: any) => props.onLoadSpace(space));
-    }
-    return `Spaces View Page: ${JSON.stringify(props)}`;
   },
 }));
 
@@ -142,7 +142,7 @@ describe('spacesManagementApp', () => {
           css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
           data-test-subj="kbnRedirectAppLink"
         >
-          Spaces Edit Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"notifications":{"toasts":{}},"spacesManager":{"onActiveSpaceChange$":{}},"history":{"action":"PUSH","length":1,"location":{"pathname":"/create","search":"","hash":""}},"allowFeatureVisibility":true,"allowSolutionVisibility":true,"eventTracker":{"analytics":{}}}
+          Spaces Create Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"notifications":{"toasts":{}},"spacesManager":{"onActiveSpaceChange$":{}},"history":{"action":"PUSH","length":1,"location":{"pathname":"/create","search":"","hash":""}},"allowFeatureVisibility":true,"allowSolutionVisibility":true,"eventTracker":{"analytics":{}}}
         </div>
       </div>
     `);
@@ -175,7 +175,7 @@ describe('spacesManagementApp', () => {
           css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
           data-test-subj="kbnRedirectAppLink"
         >
-          Spaces View Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"serverBasePath":"","http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}},"overlays":{"banners":{}},"notifications":{"toasts":{}},"theme":{"theme$":{}},"i18n":{},"spacesManager":{"onActiveSpaceChange$":{}},"spaceId":"some-space","history":{"action":"PUSH","length":1,"location":{"pathname":"/edit/some-space","search":"","hash":""}},"allowFeatureVisibility":true,"allowSolutionVisibility":true}
+          Spaces Edit Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"serverBasePath":"","http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}},"overlays":{"banners":{}},"notifications":{"toasts":{}},"theme":{"theme$":{}},"i18n":{},"spacesManager":{"onActiveSpaceChange$":{}},"spaceId":"some-space","history":{"action":"PUSH","length":1,"location":{"pathname":"/edit/some-space","search":"","hash":""}},"allowFeatureVisibility":true,"allowSolutionVisibility":true}
         </div>
       </div>
     `);

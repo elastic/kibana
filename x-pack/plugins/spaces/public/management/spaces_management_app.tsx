@@ -59,13 +59,13 @@ export const spacesManagementApp = Object.freeze({
         const [
           [coreStart, { features }],
           { SpacesGridPage },
-          { ManageSpacePage: CreateSpacePage },
-          { ViewSpacePage: EditSpacePage },
+          { CreateSpacePage },
+          { EditSpacePage },
         ] = await Promise.all([
           getStartServices(),
           import('./spaces_grid'),
+          import('./create_space'),
           import('./edit_space'),
-          import('./view_space'),
         ]);
 
         const spacesFirstBreadcrumb = {

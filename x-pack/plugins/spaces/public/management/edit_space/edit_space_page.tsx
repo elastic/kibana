@@ -8,12 +8,12 @@
 import React from 'react';
 import type { ComponentProps, PropsWithChildren } from 'react';
 
-import { ViewSpaceProvider, type ViewSpaceProviderProps } from './provider';
-import { ViewSpace } from './view_space';
+import { EditSpace } from './edit_space';
+import { EditSpaceProvider, type EditSpaceProviderProps } from './provider';
 
-type ViewSpacePageProps = ComponentProps<typeof ViewSpace> & ViewSpaceProviderProps;
+type EditSpacePageProps = ComponentProps<typeof EditSpace> & EditSpaceProviderProps;
 
-export function ViewSpacePage({
+export function EditSpacePage({
   spaceId,
   getFeatures,
   history,
@@ -22,11 +22,11 @@ export function ViewSpacePage({
   allowFeatureVisibility,
   allowSolutionVisibility,
   children,
-  ...viewSpaceServicesProps
-}: PropsWithChildren<ViewSpacePageProps>) {
+  ...editSpaceServicesProps
+}: PropsWithChildren<EditSpacePageProps>) {
   return (
-    <ViewSpaceProvider {...viewSpaceServicesProps}>
-      <ViewSpace
+    <EditSpaceProvider {...editSpaceServicesProps}>
+      <EditSpace
         spaceId={spaceId}
         getFeatures={getFeatures}
         history={history}
@@ -35,6 +35,6 @@ export function ViewSpacePage({
         allowFeatureVisibility={allowFeatureVisibility}
         allowSolutionVisibility={allowSolutionVisibility}
       />
-    </ViewSpaceProvider>
+    </EditSpaceProvider>
   );
 }
