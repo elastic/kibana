@@ -134,7 +134,10 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
   // Always keep the currentTextObject in sync with the value in the editor
   // to avoid losing the text object when the user navigates away from the shell
   useEffect(() => {
-    if (currentTextObject?.text !== value) {
+    // Only update the currentTextObject if the value has changed and is not empty
+    // This is to avoid setting the currentTextObject to the example text when
+    // the user clears the editor.
+    if (currentTextObject?.text !== value && value !== '') {
       const textObject = {
         ...currentTextObject,
         text: value,
@@ -144,6 +147,7 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
     }
   }, [value, currentTextObject, editorDispatch]);
 
+  // Restore the request from history if there is one
   const updateEditor = useCallback(async () => {
     if (requestToRestoreFromHistory) {
       editorDispatch({ type: 'clearRequestToRestore' });
