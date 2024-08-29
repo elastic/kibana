@@ -63,7 +63,14 @@ export default function ({ getService }: FtrProviderContext) {
 
         const sortedReceivedKeys = Object.keys(indexCreated).sort();
 
-        expect(sortedReceivedKeys).to.eql(['aliases', 'hidden', 'isFrozen', 'name']);
+        expect(sortedReceivedKeys).to.eql([
+          'aliases',
+          'documents',
+          'hidden',
+          'isFrozen',
+          'name',
+          'size',
+        ]);
       });
     });
 
