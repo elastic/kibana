@@ -28,7 +28,7 @@ const eq = (newArgs: any[], lastArgs: any[]) => isEqual(newArgs, lastArgs);
 
 export class ChartLoader {
   protected _dataView: DataView;
-  protected _mlApiServices: MlApi;
+  protected _mlApi: MlApi;
 
   private _timeFieldName: string = '';
   private _query: object = {};
@@ -39,7 +39,7 @@ export class ChartLoader {
   private _getCategoryFields;
 
   constructor(mlApi: MlApi, indexPattern: DataView, query: object) {
-    this._mlApiServices = mlApi;
+    this._mlApi = mlApi;
     this._dataView = indexPattern;
     this._query = query;
 
@@ -163,7 +163,7 @@ export class ChartLoader {
     indicesOptions?: IndicesOptions
   ): Promise<string[]> {
     const { results } = await this._getCategoryFields(
-      this._mlApiServices,
+      this._mlApi,
       this._dataView.getIndexPattern(),
       field.name,
       10,

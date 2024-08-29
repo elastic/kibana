@@ -27,18 +27,16 @@ type ExportableConfigs =
   | DataFrameAnalyticsConfig[];
 
 export class JobsExportService {
-  constructor(private _mlApiServices: MlApi) {}
+  constructor(private _mlApi: MlApi) {}
 
   public async exportAnomalyDetectionJobs(jobIds: string[]) {
-    const configs = await Promise.all(
-      jobIds.map((id) => this._mlApiServices.jobs.jobForCloning(id, true))
-    );
+    const configs = await Promise.all(jobIds.map((id) => this._mlApi.jobs.jobForCloning(id, true)));
     this._export(configs, 'anomaly-detector');
   }
 
   public async exportDataframeAnalyticsJobs(jobIds: string[]) {
     const { data_frame_analytics: configs } =
-      await this._mlApiServices.dataFrameAnalytics.getDataFrameAnalytics(jobIds.join(','), true);
+      await this._mlApi.dataFrameAnalytics.getDataFrameAnalytics(jobIds.join(','), true);
     this._export(configs, 'data-frame-analytics');
   }
 
@@ -58,7 +56,7 @@ export class JobsExportService {
   }
 
   public async getJobDependencies(jobs: Job[]): Promise<JobDependencies> {
-    const calendars = await this._mlApiServices.calendars();
+    const calendars = await this._mlApi.calendars();
 
     // create a map of all jobs in groups
     const groups = jobs.reduce((acc, cur) => {
