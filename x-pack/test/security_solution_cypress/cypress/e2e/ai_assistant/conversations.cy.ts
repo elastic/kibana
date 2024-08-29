@@ -48,140 +48,126 @@ import {
 } from '../../screens/ai_assistant';
 import { visit, visitGetStartedPage } from '../../tasks/navigation';
 
-describe(
-  'AI Assistant Conversations',
-  {
-    tags: ['@ess', '@serverless'],
-    env: {
-      ftrConfig: {
-        productTypes: [
-          { product_line: 'security', product_tier: 'complete' },
-          { product_line: 'endpoint', product_tier: 'complete' },
-        ],
-      },
-    },
-  },
-  () => {
+describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => {
+  beforeEach(() => {
+    deleteConnectors();
+    deleteConversations();
+    deleteAlertsAndRules();
+    login();
+  });
+  describe('No connectors or conversations exist', () => {
+    it('Shows welcome setup when no connectors or conversations exist', () => {
+      visitGetStartedPage();
+      openAssistant();
+      assertNewConversation(true, 'Welcome');
+    });
+  });
+  describe('When no conversations exist but connectors do exist, show empty convo', () => {
     beforeEach(() => {
+      createAzureConnector();
+    });
+    it('When invoked on AI Assistant click', () => {
+      visitGetStartedPage();
+      openAssistant();
+      assertNewConversation(false, 'Welcome');
+      assertConnectorSelected(azureConnectorAPIPayload.name);
+      assertSystemPrompt('Default system prompt');
+      cy.get(USER_PROMPT).should('not.have.text');
+    });
+    it('When invoked from rules page', () => {
+      createRule(getExistingRule({ rule_id: 'rule1', enabled: true })).then((createdRule) => {
+        visitRulesManagementTable();
+        selectRule(createdRule?.body?.id);
+        openAssistant('rule');
+        assertNewConversation(false, 'Detection Rules');
+        assertConnectorSelected(azureConnectorAPIPayload.name);
+        assertSystemPrompt('Default system prompt');
+        cy.get(USER_PROMPT).should('have.text', EXPLAIN_THEN_SUMMARIZE_RULE_DETAILS);
+        cy.get(PROMPT_CONTEXT_BUTTON(0)).should('have.text', RULE_MANAGEMENT_CONTEXT_DESCRIPTION);
+      });
+    });
+    it('When invoked from alert details', () => {
+      createRule(getNewRule());
+      visit(ALERTS_URL);
+      waitForAlertsToPopulate();
+      expandFirstAlert();
+      openAssistant('alert');
+      assertNewConversation(false, 'Alert summary');
+      assertConnectorSelected(azureConnectorAPIPayload.name);
+      assertSystemPrompt('Default system prompt');
+      cy.get(USER_PROMPT).should(
+        'have.text',
+        EXPLAIN_THEN_SUMMARIZE_SUGGEST_INVESTIGATION_GUIDE_NON_I18N
+      );
+      cy.get(PROMPT_CONTEXT_BUTTON(0)).should('have.text', 'Alert (from summary)');
+    });
+    it('Shows empty connector callout when a conversation that had a connector no longer does', () => {
+      visitGetStartedPage();
+      openAssistant();
+      assertConnectorSelected(azureConnectorAPIPayload.name);
+      closeAssistant();
       deleteConnectors();
-      deleteConversations();
-      deleteAlertsAndRules();
-      login();
+      openAssistant();
+      cy.get(CONNECTOR_MISSING_CALLOUT).should('be.visible');
     });
-    describe('No connectors or conversations exist', () => {
-      it('Shows welcome setup when no connectors or conversations exist', () => {
-        visitGetStartedPage();
-        openAssistant();
-        assertNewConversation(true, 'Welcome');
-      });
+  });
+  describe('Changing conversations', () => {
+    beforeEach(() => {
+      createAzureConnector();
+      createBedrockConnector();
     });
-    describe('When no conversations exist but connectors do exist, show empty convo', () => {
-      beforeEach(() => {
-        createAzureConnector();
-      });
-      it('When invoked on AI Assistant click', () => {
-        visitGetStartedPage();
-        openAssistant();
-        assertNewConversation(false, 'Welcome');
-        assertConnectorSelected(azureConnectorAPIPayload.name);
-        assertSystemPrompt('Default system prompt');
-        cy.get(USER_PROMPT).should('not.have.text');
-      });
-      it('When invoked from rules page', () => {
-        createRule(getExistingRule({ rule_id: 'rule1', enabled: true })).then((createdRule) => {
-          visitRulesManagementTable();
-          selectRule(createdRule?.body?.id);
-          openAssistant('rule');
-          assertNewConversation(false, 'Detection Rules');
-          assertConnectorSelected(azureConnectorAPIPayload.name);
-          assertSystemPrompt('Default system prompt');
-          cy.get(USER_PROMPT).should('have.text', EXPLAIN_THEN_SUMMARIZE_RULE_DETAILS);
-          cy.get(PROMPT_CONTEXT_BUTTON(0)).should('have.text', RULE_MANAGEMENT_CONTEXT_DESCRIPTION);
-        });
-      });
-      it('When invoked from alert details', () => {
-        createRule(getNewRule());
-        visit(ALERTS_URL);
-        waitForAlertsToPopulate();
-        expandFirstAlert();
-        openAssistant('alert');
-        assertNewConversation(false, 'Alert summary');
-        assertConnectorSelected(azureConnectorAPIPayload.name);
-        assertSystemPrompt('Default system prompt');
-        cy.get(USER_PROMPT).should(
-          'have.text',
-          EXPLAIN_THEN_SUMMARIZE_SUGGEST_INVESTIGATION_GUIDE_NON_I18N
-        );
-        cy.get(PROMPT_CONTEXT_BUTTON(0)).should('have.text', 'Alert (from summary)');
-      });
-      it('Shows empty connector callout when a conversation that had a connector no longer does', () => {
-        visitGetStartedPage();
-        openAssistant();
-        assertConnectorSelected(azureConnectorAPIPayload.name);
-        closeAssistant();
-        deleteConnectors();
-        openAssistant();
-        cy.get(CONNECTOR_MISSING_CALLOUT).should('be.visible');
-      });
-    });
-    describe('Changing conversations', () => {
-      beforeEach(() => {
-        createAzureConnector();
-        createBedrockConnector();
-      });
 
-      it('Last conversation persists in memory from page to page', () => {
-        createRule(getNewRule());
-        visit(ALERTS_URL);
-        waitForAlertsToPopulate();
-        expandFirstAlert();
-        openAssistant('alert');
-        assertNewConversation(false, 'Alert summary');
-        closeAssistant();
-        visitGetStartedPage();
-        openAssistant();
-        assertNewConversation(false, 'Alert summary');
-      });
-      it('Properly switches back and forth between conversations', () => {
-        visitGetStartedPage();
-        openAssistant();
-        assertNewConversation(false, 'Welcome');
-        assertConnectorSelected(azureConnectorAPIPayload.name);
-        typeAndSendMessage('hello');
-        assertMessageSent('hello', true);
-        assertErrorResponse();
-        selectConversation('Alert summary');
-        selectConnector(bedrockConnectorAPIPayload.name);
-        typeAndSendMessage('goodbye');
-        assertMessageSent('goodbye', true);
-        assertErrorResponse();
-        selectConversation('Welcome');
-        assertConnectorSelected(azureConnectorAPIPayload.name);
-        assertMessageSent('hello', true);
-        selectConversation('Alert summary');
-        assertConnectorSelected(bedrockConnectorAPIPayload.name);
-        assertMessageSent('goodbye', true);
-      });
-      // This test is flakey due to the issue linked below and will be skipped until it is fixed
-      it.skip('Only allows one conversation called "New chat" at a time', () => {
-        visitGetStartedPage();
-        openAssistant();
-        createNewChat();
-        assertNewConversation(false, 'New chat');
-        assertConnectorSelected(azureConnectorAPIPayload.name);
-        typeAndSendMessage('hello');
-        // TODO fix bug with new chat and error message
-        // https://github.com/elastic/kibana/issues/191025
-        // assertMessageSent('hello', true);
-        assertErrorResponse();
-        selectConversation('Welcome');
-        createNewChat();
-        assertErrorToastShown('Error creating conversation with title New chat');
-        selectConversation('New chat');
-        updateConversationTitle('My other chat');
-        createNewChat();
-        assertNewConversation(false, 'New chat');
-      });
+    it('Last conversation persists in memory from page to page', () => {
+      createRule(getNewRule());
+      visit(ALERTS_URL);
+      waitForAlertsToPopulate();
+      expandFirstAlert();
+      openAssistant('alert');
+      assertNewConversation(false, 'Alert summary');
+      closeAssistant();
+      visitGetStartedPage();
+      openAssistant();
+      assertNewConversation(false, 'Alert summary');
     });
-  }
-);
+    it('Properly switches back and forth between conversations', () => {
+      visitGetStartedPage();
+      openAssistant();
+      assertNewConversation(false, 'Welcome');
+      assertConnectorSelected(azureConnectorAPIPayload.name);
+      typeAndSendMessage('hello');
+      assertMessageSent('hello', true);
+      assertErrorResponse();
+      selectConversation('Alert summary');
+      selectConnector(bedrockConnectorAPIPayload.name);
+      typeAndSendMessage('goodbye');
+      assertMessageSent('goodbye', true);
+      assertErrorResponse();
+      selectConversation('Welcome');
+      assertConnectorSelected(azureConnectorAPIPayload.name);
+      assertMessageSent('hello', true);
+      selectConversation('Alert summary');
+      assertConnectorSelected(bedrockConnectorAPIPayload.name);
+      assertMessageSent('goodbye', true);
+    });
+    // This test is flakey due to the issue linked below and will be skipped until it is fixed
+    it.skip('Only allows one conversation called "New chat" at a time', () => {
+      visitGetStartedPage();
+      openAssistant();
+      createNewChat();
+      assertNewConversation(false, 'New chat');
+      assertConnectorSelected(azureConnectorAPIPayload.name);
+      typeAndSendMessage('hello');
+      // TODO fix bug with new chat and error message
+      // https://github.com/elastic/kibana/issues/191025
+      // assertMessageSent('hello', true);
+      assertErrorResponse();
+      selectConversation('Welcome');
+      createNewChat();
+      assertErrorToastShown('Error creating conversation with title New chat');
+      selectConversation('New chat');
+      updateConversationTitle('My other chat');
+      createNewChat();
+      assertNewConversation(false, 'New chat');
+    });
+  });
+});

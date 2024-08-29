@@ -9,27 +9,13 @@ import { AI_ASSISTANT_BUTTON } from '../../screens/ai_assistant';
 import { login } from '../../tasks/login';
 import { visitGetStartedPage } from '../../tasks/navigation';
 
-describe(
-  'App Features for Security Complete',
-  {
-    tags: ['@serverless'],
-    env: {
-      ftrConfig: {
-        productTypes: [
-          { product_line: 'security', product_tier: 'complete' },
-          { product_line: 'endpoint', product_tier: 'complete' },
-        ],
-      },
-    },
-  },
-  () => {
-    beforeEach(() => {
-      login();
-    });
+describe('App Features for Security Complete', { tags: ['@serverless'] }, () => {
+  beforeEach(() => {
+    login();
+  });
 
-    it('should have have AI Assistant available', () => {
-      visitGetStartedPage();
-      cy.get(AI_ASSISTANT_BUTTON).should('be.visible');
-    });
-  }
-);
+  it('should have have AI Assistant available', () => {
+    visitGetStartedPage();
+    cy.get(AI_ASSISTANT_BUTTON).should('be.visible');
+  });
+});
