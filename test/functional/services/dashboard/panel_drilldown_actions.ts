@@ -96,7 +96,7 @@ export function DashboardDrilldownPanelActionsProvider({
         const panel = (await dashboard.getDashboardPanels())[panelIndex];
         await dashboardPanelActions.openContextMenu(panel);
         let manageDrilldownAction = await testSubjects.find(MANAGE_DRILLDOWNS_DATA_TEST_SUBJ);
-        if (!(await testSubjects.exists(MANAGE_DRILLDOWNS_DATA_TEST_SUBJ))) {
+        if (!manageDrilldownAction) {
           await dashboardPanelActions.clickContextMenuMoreItem();
           manageDrilldownAction = await testSubjects.find(MANAGE_DRILLDOWNS_DATA_TEST_SUBJ);
         }
