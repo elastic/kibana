@@ -41,7 +41,8 @@ export const requestDiagnosticsHandler: RequestHandler<
     const result = await AgentService.requestDiagnostics(
       esClient,
       request.params.agentId,
-      request.body?.additional_metrics
+      request.body?.additional_metrics,
+      request.body?.exclude_events_log
     );
 
     return response.ok({ body: { actionId: result.actionId } });
@@ -66,6 +67,7 @@ export const bulkRequestDiagnosticsHandler: RequestHandler<
       ...agentOptions,
       batchSize: request.body.batchSize,
       additionalMetrics: request.body.additional_metrics,
+      excludeEventsLog: request.body.exclude_events_log,
     });
 
     return response.ok({ body: { actionId: result.actionId } });

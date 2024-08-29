@@ -40,6 +40,8 @@ post:
                   - type: string
                     enum:
                       - "CPU"
+            exclude_events_log:
+              type: boolean
           required:
             - agents
         example:

@@ -165,5 +165,85 @@ export default function (providerContext: FtrProviderContext) {
       const action: any = actionsRes.hits.hits[0]._source;
       expect(action.data.additional_metrics).contain('CPU');
     });
+
+    it('should create action with exclude_events_log when api contains exclude_events_log option', async () => {
+      await supertest
+        .post(`/api/fleet/agents/agent1/request_diagnostics`)
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          exclude_events_log: false,
+        })
+        .expect(200);
+      const actionsRes = await es.search({
+        index: '.fleet-actions',
+        body: {
+          sort: [{ '@timestamp': { order: 'desc' } }],
+        },
+      });
+      const action: any = actionsRes.hits.hits[0]._source;
+      expect(action.data.exclude_events_log).equal(false);
+    });
+
+    it('/agents/bulk_request_diagnostics should add exclude_events_log option to action doc', async () => {
+      await supertestWithoutAuth
+        .post(`/api/fleet/agents/bulk_request_diagnostics`)
+        .set('kbn-xsrf', 'xxx')
+        .auth(testUsers.fleet_agents_read_only.username, testUsers.fleet_agents_read_only.password)
+        .send({
+          agents: ['agent2', 'agent3'],
+          exclude_events_log: true,
+        });
+
+      const actionsRes = await es.search({
+        index: '.fleet-actions',
+        body: {
+          sort: [{ '@timestamp': { order: 'desc' } }],
+        },
+      });
+      const action: any = actionsRes.hits.hits[0]._source;
+      expect(action.data.exclude_events_log).equal(true);
+    });
+
+    it('should create action with exclude_events_log when api contains exclude_events_log and collect CPU option', async () => {
+      await supertest
+        .post(`/api/fleet/agents/agent1/request_diagnostics`)
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          additional_metrics: ['CPU'],
+          exclude_events_log: false,
+        })
+        .expect(200);
+      const actionsRes = await es.search({
+        index: '.fleet-actions',
+        body: {
+          sort: [{ '@timestamp': { order: 'desc' } }],
+        },
+      });
+      const action: any = actionsRes.hits.hits[0]._source;
+      expect(action.data.exclude_events_log).equal(false);
+      expect(action.data.additional_metrics).contain('CPU');
+    });
+
+    it('/agents/bulk_request_diagnostics should add exclude_events_log and collect CPU option to action doc', async () => {
+      await supertestWithoutAuth
+        .post(`/api/fleet/agents/bulk_request_diagnostics`)
+        .set('kbn-xsrf', 'xxx')
+        .auth(testUsers.fleet_agents_read_only.username, testUsers.fleet_agents_read_only.password)
+        .send({
+          agents: ['agent2', 'agent3'],
+          additional_metrics: ['CPU'],
+          exclude_events_log: true,
+        });
+
+      const actionsRes = await es.search({
+        index: '.fleet-actions',
+        body: {
+          sort: [{ '@timestamp': { order: 'desc' } }],
+        },
+      });
+      const action: any = actionsRes.hits.hits[0]._source;
+      expect(action.data.exclude_events_log).equal(true);
+      expect(action.data.additional_metrics).contain('CPU');
+    });
   });
 }

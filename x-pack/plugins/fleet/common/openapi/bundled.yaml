@@ -2025,6 +2025,9 @@ paths:
                       - type: string
                         enum:
                           - CPU
+                exclude_events_log:
+                  type: boolean
+                  description: Excludes the event data logs from the diagnostic
       responses:
         '200':
           description: OK
@@ -2083,6 +2086,9 @@ paths:
                       - type: string
                         enum:
                           - CPU
+                exclude_events_log:
+                  type: boolean
+                  description: Excludes the event data logs from the diagnostic
               required:
                 - agents
             example:

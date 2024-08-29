@@ -23,7 +23,8 @@ import {
 export async function requestDiagnostics(
   esClient: ElasticsearchClient,
   agentId: string,
-  additionalMetrics?: RequestDiagnosticsAdditionalMetrics[]
+  additionalMetrics?: RequestDiagnosticsAdditionalMetrics[],
+  excludeEventsLog?: boolean
 ): Promise<{ actionId: string }> {
   const response = await createAgentAction(esClient, {
     agents: [agentId],
@@ -32,6 +33,7 @@ export async function requestDiagnostics(
     expiration: new Date(Date.now() + REQUEST_DIAGNOSTICS_TIMEOUT_MS).toISOString(),
     data: {
       additional_metrics: additionalMetrics,
+      exclude_events_log: excludeEventsLog,
     },
   });
   return { actionId: response.id };
@@ -43,12 +45,14 @@ export async function bulkRequestDiagnostics(
   options: GetAgentsOptions & {
     batchSize?: number;
     additionalMetrics?: RequestDiagnosticsAdditionalMetrics[];
+    excludeEventsLog?: boolean;
   }
 ): Promise<{ actionId: string }> {
   if ('agentIds' in options) {
     const givenAgents = await getAgents(esClient, soClient, options);
     return await requestDiagnosticsBatch(esClient, givenAgents, {
       additionalMetrics: options.additionalMetrics,
+      excludeEventsLog: options.excludeEventsLog,
     });
   }
 
@@ -63,6 +67,7 @@ export async function bulkRequestDiagnostics(
     const givenAgents = await getAgents(esClient, soClient, options);
     return await requestDiagnosticsBatch(esClient, givenAgents, {
       additionalMetrics: options.additionalMetrics,
+      excludeEventsLog: options.excludeEventsLog,
     });
   } else {
     return await new RequestDiagnosticsActionRunner(

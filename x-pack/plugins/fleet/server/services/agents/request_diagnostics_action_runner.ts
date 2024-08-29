@@ -39,6 +39,7 @@ export async function requestDiagnosticsBatch(
     actionId?: string;
     total?: number;
     additionalMetrics?: RequestDiagnosticsAdditionalMetrics[];
+    excludeEventsLog?: boolean;
   }
 ): Promise<{ actionId: string }> {
   const errors: Record<Agent['id'], Error> = {};
@@ -66,6 +67,7 @@ export async function requestDiagnosticsBatch(
     total,
     data: {
       additional_metrics: options.additionalMetrics,
+      exclude_events_log: options.excludeEventsLog,
     },
   });
 

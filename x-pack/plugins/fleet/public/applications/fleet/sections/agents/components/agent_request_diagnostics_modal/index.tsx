@@ -37,19 +37,23 @@ export const AgentRequestDiagnosticsModal: React.FunctionComponent<Props> = ({
   const { getPath } = useLink();
   const history = useHistory();
   const [cpuMetricsEnabled, setCPUMetricsEnabled] = useState(false);
+  const [includeEventsLogEnabled, setIncludeEventsLog] = useState(false);
 
   async function onSubmit() {
     try {
       setIsSubmitting(true);
       const additionalMetrics = cpuMetricsEnabled ? [RequestDiagnosticsAdditionalMetrics.CPU] : [];
+      const excludeEventsLog = !includeEventsLogEnabled;
 
       const { error } = isSingleAgent
         ? await sendPostRequestDiagnostics((agents[0] as Agent).id, {
             additional_metrics: additionalMetrics,
+            exclude_events_log: excludeEventsLog,
           })
         : await sendPostBulkRequestDiagnostics({
             agents: typeof agents === 'string' ? agents : agents.map((agent) => agent.id),
             additional_metrics: additionalMetrics,
+            exclude_events_log: excludeEventsLog,
           });
       if (error) {
         throw error;
@@ -128,15 +132,30 @@ export const AgentRequestDiagnosticsModal: React.FunctionComponent<Props> = ({
           defaultMessage="Consider changing the log level to debug before requesting a diagnostic. Diagnostics files are stored in Elasticsearch, and as such can incur storage costs. By default, files are deleted periodically through an ILM policy."
         />
       </p>
-      <p>
-        <EuiCheckbox
-          id="cpuMetricsCheckbox"
-          data-test-subj="cpuMetricsCheckbox"
-          label="Collect additional CPU metrics"
-          checked={cpuMetricsEnabled}
-          onChange={() => setCPUMetricsEnabled(!cpuMetricsEnabled)}
-        />
-      </p>
+      <EuiCheckbox
+        id="cpuMetricsCheckbox"
+        data-test-subj="cpuMetricsCheckbox"
+        label={
+          <FormattedMessage
+            id="xpack.fleet.requestDiagnostics.cpuMetricsCheckboxLabel"
+            defaultMessage="Collect additional CPU metrics"
+          />
+        }
+        checked={cpuMetricsEnabled}
+        onChange={() => setCPUMetricsEnabled(!cpuMetricsEnabled)}
+      />
+      <EuiCheckbox
+        id="includeEventsLogCheckbox"
+        data-test-subj="includeEventsLogCheckbox"
+        label={
+          <FormattedMessage
+            id="xpack.fleet.requestDiagnostics.includeEventsLogCheckboxLabel"
+            defaultMessage="Include Events Logs (might contain sensible information)"
+          />
+        }
+        checked={includeEventsLogEnabled}
+        onChange={() => setIncludeEventsLog(!includeEventsLogEnabled)}
+      />
     </EuiConfirmModal>
   );
 };

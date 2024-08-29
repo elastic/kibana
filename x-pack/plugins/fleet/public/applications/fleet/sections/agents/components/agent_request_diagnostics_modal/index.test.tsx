@@ -58,6 +58,7 @@ describe('AgentRequestDiagnosticsModal', () => {
 
     expect(mockSendPostRequestDiagnostics).toHaveBeenCalledWith('agent1', {
       additional_metrics: ['CPU'],
+      exclude_events_log: true,
     });
   });
 
@@ -70,6 +71,23 @@ describe('AgentRequestDiagnosticsModal', () => {
 
     expect(mockSendPostRequestDiagnostics).toHaveBeenCalledWith('agent1', {
       additional_metrics: [],
+      exclude_events_log: true,
+    });
+  });
+
+  it('should have Exclude Events Log set to false when checkbox is checked', async () => {
+    const { utils } = render();
+
+    act(() => {
+      fireEvent.click(utils.getByTestId('includeEventsLogCheckbox'));
+    });
+    act(() => {
+      fireEvent.click(utils.getByTestId('confirmModalConfirmButton'));
+    });
+
+    expect(mockSendPostRequestDiagnostics).toHaveBeenCalledWith('agent1', {
+      additional_metrics: [],
+      exclude_events_log: false,
     });
   });
 
@@ -86,6 +104,7 @@ describe('AgentRequestDiagnosticsModal', () => {
     expect(mockSendPostBulkRequestDiagnostics).toHaveBeenCalledWith({
       additional_metrics: ['CPU'],
       agents: ['agent1', 'agent2'],
+      exclude_events_log: true,
     });
   });
 
@@ -98,6 +117,24 @@ describe('AgentRequestDiagnosticsModal', () => {
 
     expect(mockSendPostBulkRequestDiagnostics).toHaveBeenCalledWith({
       additional_metrics: [],
+      exclude_events_log: true,
+      agents: ['agent1', 'agent2'],
+    });
+  });
+
+  it('should have Exclude Events Log set to false when checkbox is checked within bulk action', async () => {
+    const { utils } = render({ agents: [{ id: 'agent1' }, { id: 'agent2' }], agentCount: 2 });
+
+    act(() => {
+      fireEvent.click(utils.getByTestId('includeEventsLogCheckbox'));
+    });
+    act(() => {
+      fireEvent.click(utils.getByTestId('confirmModalConfirmButton'));
+    });
+
+    expect(mockSendPostBulkRequestDiagnostics).toHaveBeenCalledWith({
+      additional_metrics: [],
+      exclude_events_log: false,
       agents: ['agent1', 'agent2'],
     });
   });

@@ -170,6 +170,7 @@ export const PostRequestDiagnosticsActionRequestSchema = {
       additional_metrics: schema.maybe(
         schema.arrayOf(schema.oneOf([schema.literal(RequestDiagnosticsAdditionalMetrics.CPU)]))
       ),
+      exclude_events_log: schema.maybe(schema.boolean()),
     })
   ),
 };
@@ -181,6 +182,7 @@ export const PostBulkRequestDiagnosticsActionRequestSchema = {
     additional_metrics: schema.maybe(
       schema.arrayOf(schema.oneOf([schema.literal(RequestDiagnosticsAdditionalMetrics.CPU)]))
     ),
+    exclude_events_log: schema.maybe(schema.boolean()),
   }),
 };
 
