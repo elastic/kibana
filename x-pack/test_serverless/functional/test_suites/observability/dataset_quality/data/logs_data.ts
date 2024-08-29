@@ -169,7 +169,7 @@ export function createDegradedFieldsRecord({
             .defaults({
               'trace.id': generateShortId(),
               'agent.name': 'synth-agent',
-              'cloud.availability_zone': [MORE_THAN_1024_CHARS, ANOTHER_1024_CHARS],
+              test_field: [MORE_THAN_1024_CHARS, ANOTHER_1024_CHARS],
             })
             .timestamp(timestamp),
           log

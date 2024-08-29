@@ -49,7 +49,7 @@ export type LogDocument = Fields &
     'container.name'?: string;
     'cloud.provider'?: string;
     'cloud.region'?: string;
-    'cloud.availability_zone'?: string | string[];
+    'cloud.availability_zone'?: string;
     'cloud.project.id'?: string;
     'cloud.instance.id'?: string;
     'error.stack_trace'?: string;
@@ -63,6 +63,7 @@ export type LogDocument = Fields &
     'event.duration': number;
     'event.start': Date;
     'event.end': Date;
+    test_field: string | string[];
   }>;
 
 class Log extends Serializable<LogDocument> {

@@ -47,7 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await synthtrace.clean();
+      // await synthtrace.clean();
     });
 
     describe('degraded field flyout open-close', () => {
@@ -56,7 +56,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           dataStream: degradedDataStreamName,
         });
 
-        await PageObjects.datasetQuality.openDegradedFieldFlyout('cloud.availability_zone');
+        await PageObjects.datasetQuality.openDegradedFieldFlyout('test_field');
 
         await testSubjects.existOrFail(
           PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsDegradedFieldFlyout
@@ -68,7 +68,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           dataStream: degradedDataStreamName,
         });
 
-        await PageObjects.datasetQuality.openDegradedFieldFlyout('cloud.availability_zone');
+        await PageObjects.datasetQuality.openDegradedFieldFlyout('test_field');
 
         await testSubjects.existOrFail(
           PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsDegradedFieldFlyout
@@ -84,7 +84,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should open the flyoout when navigating to the page with degradedField in URL State', async () => {
         await PageObjects.datasetQuality.navigateToDetails({
           dataStream: degradedDataStreamName,
-          expandedDegradedField: 'cloud.availability_zone',
+          expandedDegradedField: 'test_field',
         });
 
         await testSubjects.existOrFail(
@@ -103,7 +103,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should display the degraded field values', async () => {
         await PageObjects.datasetQuality.navigateToDetails({
           dataStream: degradedDataStreamName,
-          expandedDegradedField: 'cloud.availability_zone',
+          expandedDegradedField: 'test_field',
         });
 
         await retry.tryForTime(5000, async () => {
