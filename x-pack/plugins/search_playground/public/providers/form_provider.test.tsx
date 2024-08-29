@@ -130,6 +130,8 @@ describe('FormProvider', () => {
 
     act(() => {
       setValue(ChatFormFields.prompt, 'New prompt');
+      // omit question from the session state
+      setValue(ChatFormFields.question, 'dont save me');
     });
 
     await waitFor(() => {

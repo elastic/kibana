@@ -10,8 +10,6 @@ paths:
       x-codegen-enabled: true
       summary: Exports an exception list
       description: Exports an exception list and its associated items to an .ndjson file
-      tags:
-        - Exceptions API
       parameters:
         - name: id
           in: query

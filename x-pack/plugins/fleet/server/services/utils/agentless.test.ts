@@ -10,9 +10,10 @@ import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { appContextService } from '../app_context';
 
 import {
-  isAgentlessCloudEnabled,
+  isAgentlessApiEnabled,
   isAgentlessEnabled,
-  isAgentlessServerlessEnabled,
+  isDefaultAgentlessPolicyEnabled,
+  prependAgentlessApiBasePathToEndpoint,
 } from './agentless';
 
 jest.mock('../app_context');
@@ -22,36 +23,51 @@ mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
   ...securityMock.createSetup(),
 }));
 
-describe('isAgentlessCloudEnabled', () => {
+describe('isAgentlessApiEnabled', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+    mockedAppContextService.getConfig.mockReset();
+  });
   it('should return false if cloud is not enabled', () => {
-    jest
-      .spyOn(appContextService, 'getExperimentalFeatures')
-      .mockReturnValue({ agentless: false } as any);
+    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      agentless: {
+        enabled: false,
+      },
+    } as any);
     jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: false } as any);
 
-    expect(isAgentlessCloudEnabled()).toBe(false);
+    expect(isAgentlessApiEnabled()).toBe(false);
   });
 
   it('should return false if cloud is enabled but agentless is not', () => {
-    jest
-      .spyOn(appContextService, 'getExperimentalFeatures')
-      .mockReturnValue({ agentless: false } as any);
+    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      agentless: {
+        enabled: false,
+      },
+    } as any);
     jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
 
-    expect(isAgentlessCloudEnabled()).toBe(false);
+    expect(isAgentlessApiEnabled()).toBe(false);
   });
 
   it('should return true if cloud is enabled and agentless is enabled', () => {
-    jest
-      .spyOn(appContextService, 'getExperimentalFeatures')
-      .mockReturnValue({ agentless: true } as any);
+    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      agentless: {
+        enabled: true,
+      },
+    } as any);
     jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
 
-    expect(isAgentlessCloudEnabled()).toBe(true);
+    expect(isAgentlessApiEnabled()).toBe(true);
   });
 });
 
-describe('isAgentlessServerlessEnabled', () => {
+describe('isDefaultAgentlessPolicyEnabled', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+    mockedAppContextService.getConfig.mockReset();
+  });
+
   it('should return false if serverless is not enabled', () => {
     jest
       .spyOn(appContextService, 'getExperimentalFeatures')
@@ -60,7 +76,7 @@ describe('isAgentlessServerlessEnabled', () => {
       .spyOn(appContextService, 'getCloud')
       .mockReturnValue({ isServerlessEnabled: false } as any);
 
-    expect(isAgentlessServerlessEnabled()).toBe(false);
+    expect(isDefaultAgentlessPolicyEnabled()).toBe(false);
   });
 
   it('should return false if serverless is enabled but agentless is not', () => {
@@ -69,7 +85,7 @@ describe('isAgentlessServerlessEnabled', () => {
       .mockReturnValue({ agentless: false } as any);
     jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isServerlessEnabled: true } as any);
 
-    expect(isAgentlessServerlessEnabled()).toBe(false);
+    expect(isDefaultAgentlessPolicyEnabled()).toBe(false);
   });
 
   it('should return true if serverless is enabled and agentless is enabled', () => {
@@ -78,11 +94,16 @@ describe('isAgentlessServerlessEnabled', () => {
       .mockReturnValue({ agentless: true } as any);
     jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isServerlessEnabled: true } as any);
 
-    expect(isAgentlessServerlessEnabled()).toBe(true);
+    expect(isDefaultAgentlessPolicyEnabled()).toBe(true);
   });
 });
 
 describe('isAgentlessEnabled', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+    mockedAppContextService.getConfig.mockReset();
+  });
+
   it('should return false if cloud and serverless are not enabled', () => {
     jest
       .spyOn(appContextService, 'getExperimentalFeatures')
@@ -120,8 +141,8 @@ describe('isAgentlessEnabled', () => {
 
   it('should return true if cloud is enabled and agentless is enabled', () => {
     jest
-      .spyOn(appContextService, 'getExperimentalFeatures')
-      .mockReturnValue({ agentless: true } as any);
+      .spyOn(appContextService, 'getConfig')
+      .mockReturnValue({ agentless: { enabled: true } } as any);
     jest
       .spyOn(appContextService, 'getCloud')
       .mockReturnValue({ isCloudEnabled: true, isServerlessEnabled: false } as any);
@@ -138,5 +159,59 @@ describe('isAgentlessEnabled', () => {
       .mockReturnValue({ isCloudEnabled: false, isServerlessEnabled: true } as any);
 
     expect(isAgentlessEnabled()).toBe(true);
+  });
+});
+describe('prependAgentlessApiBasePathToEndpoint', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should prepend the agentless api base path to the endpoint with ess if in cloud', () => {
+    jest
+      .spyOn(appContextService, 'getCloud')
+      .mockReturnValue({ isCloudEnabled: true, isServerlessEnabled: false } as any);
+    const agentlessConfig = {
+      api: {
+        url: 'https://agentless-api.com',
+      },
+    } as any;
+    const endpoint = '/deployments';
+
+    expect(prependAgentlessApiBasePathToEndpoint(agentlessConfig, endpoint)).toBe(
+      'https://agentless-api.com/api/v1/ess/deployments'
+    );
+  });
+
+  it('should prepend the agentless api base path to the endpoint with serverless if in serverless', () => {
+    jest
+      .spyOn(appContextService, 'getCloud')
+      .mockReturnValue({ isCloudEnabled: false, isServerlessEnabled: true } as any);
+    const agentlessConfig = {
+      api: {
+        url: 'https://agentless-api.com',
+      },
+    } as any;
+    const endpoint = '/deployments';
+
+    expect(prependAgentlessApiBasePathToEndpoint(agentlessConfig, endpoint)).toBe(
+      'https://agentless-api.com/api/v1/serverless/deployments'
+    );
+  });
+
+  it('should prepend the agentless api base path to the endpoint with a dynamic path', () => {
+    jest
+      .spyOn(appContextService, 'getCloud')
+      .mockReturnValue({ isCloudEnabled: true, isServerlessEnabled: false } as any);
+
+    const agentlessConfig = {
+      api: {
+        url: 'https://agentless-api.com',
+      },
+    } as any;
+    const endpoint = '/deployments/123';
+
+    expect(prependAgentlessApiBasePathToEndpoint(agentlessConfig, endpoint)).toBe(
+      'https://agentless-api.com/api/v1/ess/deployments/123'
+    );
   });
 });

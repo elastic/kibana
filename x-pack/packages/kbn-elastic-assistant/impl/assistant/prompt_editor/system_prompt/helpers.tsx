@@ -12,19 +12,38 @@ import styled from '@emotion/styled';
 import { isEmpty } from 'lodash/fp';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { PromptResponse } from '@kbn/elastic-assistant-common';
+import { css } from '@emotion/react';
 import { EMPTY_PROMPT } from './translations';
 
 const Strong = styled.strong`
   margin-right: ${euiThemeVars.euiSizeS};
 `;
 
+interface GetOptionFromPromptProps extends PromptResponse {
+  content: string;
+  id: string;
+  name: string;
+  isCleared: boolean;
+}
+
 export const getOptionFromPrompt = ({
   content,
   id,
+  isCleared,
   name,
-}: PromptResponse): EuiSuperSelectOption<string> => ({
+}: GetOptionFromPromptProps): EuiSuperSelectOption<string> => ({
   value: id,
-  inputDisplay: <span data-test-subj="systemPromptText">{name}</span>,
+  inputDisplay: (
+    <span
+      data-test-subj="systemPromptText"
+      // @ts-ignore
+      css={css`
+        color: ${isCleared ? euiThemeVars.euiColorLightShade : euiThemeVars.euiColorDarkestShade};
+      `}
+    >
+      {name}
+    </span>
+  ),
   dropdownDisplay: (
     <>
       <Strong data-test-subj="name">{name}</Strong>
@@ -41,6 +60,10 @@ export const getOptionFromPrompt = ({
 
 interface GetOptionsProps {
   prompts: PromptResponse[] | undefined;
+  isCleared: boolean;
 }
-export const getOptions = ({ prompts }: GetOptionsProps): Array<EuiSuperSelectOption<string>> =>
-  prompts?.map(getOptionFromPrompt) ?? [];
+export const getOptions = ({
+  prompts,
+  isCleared,
+}: GetOptionsProps): Array<EuiSuperSelectOption<string>> =>
+  prompts?.map((p) => getOptionFromPrompt({ ...p, isCleared })) ?? [];

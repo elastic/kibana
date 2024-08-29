@@ -18,5 +18,6 @@ export type {
   GetAllSpacesOptions,
   GetAllSpacesPurpose,
   GetSpaceResult,
+  SolutionView,
 } from './types/latest';
 export { spaceV1 } from './types';

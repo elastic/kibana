@@ -241,7 +241,7 @@ export function OverviewPage() {
               featureIds={observabilityAlertFeatureIds}
               hideLazyLoader
               id={ALERTS_TABLE_ID}
-              pageSize={ALERTS_PER_PAGE}
+              initialPageSize={ALERTS_PER_PAGE}
               query={esQuery}
               showAlertStatusWithFlapping
               cellContext={{ observabilityRuleTypeRegistry }}

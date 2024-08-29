@@ -59,7 +59,6 @@ import {
   EQL_TYPE,
   ESQL_TYPE,
   ESQL_QUERY_BAR,
-  ESQL_QUERY_BAR_EXPAND_BTN,
   ESQL_QUERY_BAR_INPUT_AREA,
   FALSE_POSITIVES_INPUT,
   IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK,
@@ -150,8 +149,8 @@ import { EUI_FILTER_SELECT_ITEM, COMBO_BOX_INPUT } from '../screens/common/contr
 import { ruleFields } from '../data/detection_engine';
 import { waitForAlerts } from './alerts';
 import { refreshPage } from './security_header';
-import { EMPTY_ALERT_TABLE } from '../screens/alerts';
 import { COMBO_BOX_OPTION, TOOLTIP } from '../screens/common';
+import { EMPTY_ALERT_TABLE } from '../screens/alerts';
 
 export const createAndEnableRule = () => {
   cy.get(CREATE_AND_ENABLE_BTN).click();
@@ -632,14 +631,6 @@ export const fillEsqlQueryBar = (query: string) => {
   typeEsqlQueryBar(query);
 };
 
-/**
- * expands query bar, so query is not obscured on narrow screens
- * and validation message is not covered by input menu tooltip
- */
-export const expandEsqlQueryBar = () => {
-  cy.get(ESQL_QUERY_BAR_EXPAND_BTN).click();
-};
-
 export const fillDefineEsqlRuleAndContinue = (rule: EsqlRuleCreateProps) => {
   cy.get(ESQL_QUERY_BAR).contains('ES|QL query');
   fillEsqlQueryBar(rule.query);
@@ -864,6 +855,7 @@ export const waitForAlertsToPopulate = (alertCountThreshold = 1) => {
     () => {
       cy.log('Waiting for alerts to appear');
       refreshPage();
+      cy.get([EMPTY_ALERT_TABLE, ALERTS_TABLE_COUNT].join(', '));
       return cy.root().then(($el) => {
         const emptyTableState = $el.find(EMPTY_ALERT_TABLE);
         if (emptyTableState.length > 0) {

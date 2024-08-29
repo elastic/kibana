@@ -16,7 +16,7 @@ import {
   DegradedFieldResponse,
   DatasetUserPrivileges,
 } from '../../../common/api_types';
-import { rangeRt, typeRt } from '../../types/default_api_types';
+import { rangeRt, typeRt, typesRt } from '../../types/default_api_types';
 import { createDatasetQualityServerRoute } from '../create_datasets_quality_server_route';
 import { datasetQualityPrivileges } from '../../services';
 import { getDataStreamDetails, getDataStreamSettings } from './get_data_stream_details';
@@ -30,7 +30,7 @@ const statsRoute = createDatasetQualityServerRoute({
   endpoint: 'GET /internal/dataset_quality/data_streams/stats',
   params: t.type({
     query: t.intersection([
-      typeRt,
+      t.type({ types: typesRt }),
       t.partial({
         datasetQuery: t.string,
       }),
@@ -59,6 +59,7 @@ const statsRoute = createDatasetQualityServerRoute({
     const privilegedDataStreams = items.filter((stream) => {
       return stream.userPrivileges.canMonitor;
     });
+
     const dataStreamsStats = await getDataStreamsStats({
       esClient,
       dataStreams: privilegedDataStreams.map((stream) => stream.name),
@@ -116,11 +117,35 @@ const nonAggregatableDatasetsRoute = createDatasetQualityServerRoute({
   params: t.type({
     query: t.intersection([
       rangeRt,
-      typeRt,
+      t.type({ types: typesRt }),
       t.partial({
         dataStream: t.string,
       }),
     ]),
+  }),
+  options: {
+    tags: [],
+  },
+  async handler(resources): Promise<NonAggregatableDatasets> {
+    const { context, params } = resources;
+    const coreContext = await context.core;
+
+    const esClient = coreContext.elasticsearch.client.asCurrentUser;
+
+    return await getNonAggregatableDataStreams({
+      esClient,
+      ...params.query,
+    });
+  },
+});
+
+const nonAggregatableDatasetRoute = createDatasetQualityServerRoute({
+  endpoint: 'GET /internal/dataset_quality/data_streams/{dataStream}/non_aggregatable',
+  params: t.type({
+    path: t.type({
+      dataStream: t.string,
+    }),
+    query: t.intersection([rangeRt, typeRt]),
   }),
   options: {
     tags: [],
@@ -136,6 +161,7 @@ const nonAggregatableDatasetsRoute = createDatasetQualityServerRoute({
     return await getNonAggregatableDataStreams({
       esClient,
       ...params.query,
+      types: [params.query.type],
     });
   },
 });
@@ -230,6 +256,7 @@ export const dataStreamsRouteRepository = {
   ...statsRoute,
   ...degradedDocsRoute,
   ...nonAggregatableDatasetsRoute,
+  ...nonAggregatableDatasetRoute,
   ...degradedFieldsRoute,
   ...dataStreamDetailsRoute,
   ...dataStreamSettingsRoute,

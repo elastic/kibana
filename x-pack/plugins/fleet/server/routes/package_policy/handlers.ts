@@ -10,7 +10,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { RequestHandler } from '@kbn/core/server';
 
-import { groupBy, keyBy } from 'lodash';
+import { groupBy, isEmpty, isEqual, keyBy } from 'lodash';
 
 import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 
@@ -63,10 +63,10 @@ import {
 import type { SimplifiedPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
 
 import {
-  canUseMultipleAgentPolicies,
   isSimplifiedCreatePackagePolicyRequest,
   removeFieldsFromInputSchema,
   renameAgentlessAgentPolicy,
+  alignInputsAndStreams,
 } from './utils';
 
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
@@ -241,21 +241,8 @@ export const createPackagePolicyHandler: FleetRequestHandler<
   const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
   let wasPackageAlreadyInstalled = false;
 
-  if ('output_id' in newPolicy) {
-    // TODO Remove deprecated APIs https://github.com/elastic/kibana/issues/121485
-    delete newPolicy.output_id;
-  }
   const spaceId = fleetContext.spaceId;
   try {
-    if (!newPolicy.policy_id && (!newPolicy.policy_ids || newPolicy.policy_ids.length === 0)) {
-      throw new PackagePolicyRequestError('Either policy_id or policy_ids must be provided');
-    }
-
-    const { canUseReusablePolicies, errorMessage } = canUseMultipleAgentPolicies();
-    if ((newPolicy.policy_ids ?? []).length > 1 && !canUseReusablePolicies) {
-      throw new PackagePolicyRequestError(errorMessage);
-    }
-
     let newPackagePolicy: NewPackagePolicy;
     if (isSimplifiedCreatePackagePolicyRequest(newPolicy)) {
       if (!pkg) {
@@ -277,6 +264,7 @@ export const createPackagePolicyHandler: FleetRequestHandler<
         package: pkg,
       } as NewPackagePolicy);
     }
+    newPackagePolicy.inputs = alignInputsAndStreams(newPackagePolicy.inputs);
 
     const installation = await getInstallation({
       savedObjectsClient: soClient,
@@ -367,11 +355,6 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
 
   try {
     const { force, package: pkg, ...body } = request.body;
-    // TODO Remove deprecated APIs https://github.com/elastic/kibana/issues/121485
-    if ('output_id' in body) {
-      delete body.output_id;
-    }
-
     let newData: NewPackagePolicy;
 
     if (
@@ -403,7 +386,8 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
         name: restOfBody.name ?? packagePolicy.name,
         description: restOfBody.description ?? packagePolicy.description,
         namespace: restOfBody.namespace ?? packagePolicy?.namespace,
-        policy_id: restOfBody.policy_id ?? packagePolicy.policy_id,
+        policy_id:
+          restOfBody.policy_id === undefined ? packagePolicy.policy_id : restOfBody.policy_id,
         enabled:
           'enabled' in restOfBody
             ? restOfBody.enabled ?? packagePolicy.enabled
@@ -417,13 +401,19 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
         newData.overrides = overrides;
       }
     }
-    const { canUseReusablePolicies, errorMessage } = canUseMultipleAgentPolicies();
-    if ((newData.policy_ids ?? []).length > 1 && !canUseReusablePolicies) {
-      throw new PackagePolicyRequestError(errorMessage);
-    }
+    newData.inputs = alignInputsAndStreams(newData.inputs);
 
-    if (newData.policy_ids && newData.policy_ids.length === 0) {
-      throw new PackagePolicyRequestError('At least one agent policy id must be provided');
+    if (
+      newData.policy_ids &&
+      !isEmpty(packagePolicy.policy_ids) &&
+      !isEqual(newData.policy_ids, packagePolicy.policy_ids)
+    ) {
+      const agentPolicy = await agentPolicyService.get(soClient, packagePolicy.policy_ids[0]);
+      if (agentPolicy?.supports_agentless) {
+        throw new PackagePolicyRequestError(
+          'Cannot change agent policies of an agentless integration'
+        );
+      }
     }
 
     await renameAgentlessAgentPolicy(soClient, esClient, packagePolicy, newData.name);

@@ -178,33 +178,33 @@
               "<string | undefined>; navigateToUrl: (url: string) => void | Promise<void>; }; notifications: { toasts: { addDanger: (notifyArgs: { title: ",
               {
                 "pluginId": "@kbn/core-mount-utils-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                "section": "def-common.MountPoint",
+                "section": "def-public.MountPoint",
                 "text": "MountPoint"
               },
               "<HTMLElement>; text?: string | undefined; }) => void; }; }; http: { basePath: { prepend: (path: string) => string; }; }; overlays: { openFlyout(mount: ",
               {
                 "pluginId": "@kbn/core-mount-utils-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                "section": "def-common.MountPoint",
+                "section": "def-public.MountPoint",
                 "text": "MountPoint"
               },
               "<HTMLElement>, options?: ",
               {
                 "pluginId": "@kbn/core-overlays-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreOverlaysBrowserPluginApi",
-                "section": "def-common.OverlayFlyoutOpenOptions",
+                "section": "def-public.OverlayFlyoutOpenOptions",
                 "text": "OverlayFlyoutOpenOptions"
               },
               " | undefined): ",
               {
                 "pluginId": "@kbn/core-mount-utils-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                "section": "def-common.OverlayRef",
+                "section": "def-public.OverlayRef",
                 "text": "OverlayRef"
               },
               "; }; userProfile: { bulkGet: <D extends ",
@@ -218,9 +218,9 @@
               ">(params: ",
               {
                 "pluginId": "@kbn/core-user-profile-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreUserProfileBrowserPluginApi",
-                "section": "def-common.UserProfileBulkGetParams",
+                "section": "def-public.UserProfileBulkGetParams",
                 "text": "UserProfileBulkGetParams"
               },
               ") => Promise<",
@@ -250,9 +250,9 @@
               "{ ui: { components: { TagList: React.FC<{ object: { references: ",
               {
                 "pluginId": "@kbn/content-management-content-editor",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnContentManagementContentEditorPluginApi",
-                "section": "def-common.SavedObjectsReference",
+                "section": "def-public.SavedObjectsReference",
                 "text": "SavedObjectsReference"
               },
               "[]; }; onClick?: ((tag: ",
@@ -268,9 +268,9 @@
               "[]; getTagIdsFromReferences: (references: ",
               {
                 "pluginId": "@kbn/content-management-content-editor",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnContentManagementContentEditorPluginApi",
-                "section": "def-common.SavedObjectsReference",
+                "section": "def-public.SavedObjectsReference",
                 "text": "SavedObjectsReference"
               },
               "[]) => string[]; }; } | undefined"
@@ -325,6 +325,52 @@
                 "trackAdoption": false
               }
             ]
+          },
+          {
+            "parentPluginId": "@kbn/content-management-table-list-view-table",
+            "id": "def-public.TableListViewKibanaDependencies.favorites",
+            "type": "Object",
+            "tags": [],
+            "label": "favorites",
+            "description": [
+              "\nThe favorites client to enable the favorites feature."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-management-favorites-public",
+                "scope": "public",
+                "docId": "kibKbnContentManagementFavoritesPublicPluginApi",
+                "section": "def-public.FavoritesClientPublic",
+                "text": "FavoritesClientPublic"
+              },
+              " | undefined"
+            ],
+            "path": "packages/content-management/table_list_view_table/src/services.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-table-list-view-table",
+            "id": "def-public.TableListViewKibanaDependencies.contentInsightsClient",
+            "type": "Object",
+            "tags": [],
+            "label": "contentInsightsClient",
+            "description": [
+              "\nContent insights client to enable content insights features."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-management-content-insights-public",
+                "scope": "public",
+                "docId": "kibKbnContentManagementContentInsightsPublicPluginApi",
+                "section": "def-public.ContentInsightsClientPublic",
+                "text": "ContentInsightsClientPublic"
+              },
+              " | undefined"
+            ],
+            "path": "packages/content-management/table_list_view_table/src/services.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

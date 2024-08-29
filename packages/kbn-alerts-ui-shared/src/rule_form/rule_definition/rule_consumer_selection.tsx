@@ -34,7 +34,6 @@ type ComboBoxOption = EuiComboBoxOptionOption<RuleCreationValidConsumer>;
 
 export const RuleConsumerSelection = (props: RuleConsumerSelectionProps) => {
   const { validConsumers } = props;
-
   const { multiConsumerSelection, baseErrors } = useRuleFormState();
 
   const dispatch = useRuleFormDispatch();

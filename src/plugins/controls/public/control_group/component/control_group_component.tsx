@@ -137,7 +137,8 @@ export const ControlGroup = () => {
       !renderTourStep ||
       !controlGroup.canShowInvalidSelectionsWarning() ||
       !tourStepOpen ||
-      !controlWithInvalidSelectionsId
+      !controlWithInvalidSelectionsId ||
+      !panels[controlWithInvalidSelectionsId]
     ) {
       return null;
     }

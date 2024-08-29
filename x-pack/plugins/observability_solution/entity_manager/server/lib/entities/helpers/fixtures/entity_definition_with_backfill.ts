@@ -7,7 +7,7 @@
 
 import { entityDefinitionSchema } from '@kbn/entities-schema';
 export const entityDefinitionWithBackfill = entityDefinitionSchema.parse({
-  id: 'admin-console-services',
+  id: 'admin-console-services-backfill',
   version: '999.999.999',
   name: 'Services for Admin Console',
   type: 'service',

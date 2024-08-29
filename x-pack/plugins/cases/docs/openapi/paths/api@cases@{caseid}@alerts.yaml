@@ -1,5 +1,5 @@
 get:
-  summary: Gets all alerts attached to a case in the default space.
+  summary: Get all alerts for a case
   description: >
     You must have `read` privileges for the **Cases** feature in the
     **Management**, **Observability**, or **Security** section of the Kibana

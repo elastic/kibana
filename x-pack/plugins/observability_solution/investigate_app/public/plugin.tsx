@@ -6,8 +6,9 @@
  */
 import { css } from '@emotion/css';
 import {
-  AppMountParameters,
   APP_WRAPPER_CLASS,
+  AppMountParameters,
+  AppStatus,
   CoreSetup,
   CoreStart,
   DEFAULT_APP_CATEGORIES,
@@ -41,10 +42,13 @@ export class InvestigateAppPlugin
     >
 {
   logger: Logger;
+  config: ConfigSchema;
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
+    this.config = context.config.get();
   }
+
   setup(
     coreSetup: CoreSetup<InvestigateAppStartDependencies, InvestigateAppPublicStart>,
     pluginsSetup: InvestigateAppSetupDependencies
@@ -52,17 +56,25 @@ export class InvestigateAppPlugin
     coreSetup.application.register({
       id: INVESTIGATE_APP_ID,
       title: i18n.translate('xpack.investigateApp.appTitle', {
-        defaultMessage: 'Observability AI Assistant',
+        defaultMessage: 'Investigations',
       }),
       euiIconType: 'logoObservability',
-      appRoute: '/app/investigate',
+      appRoute: '/app/investigations',
       category: DEFAULT_APP_CATEGORIES.observability,
+      status: this.config.enabled ? AppStatus.accessible : AppStatus.inaccessible,
       visibleIn: [],
       deepLinks: [
         {
-          id: 'investigate',
-          title: i18n.translate('xpack.investigateApp.investigateDeepLinkTitle', {
-            defaultMessage: 'Investigate',
+          id: 'investigations',
+          title: i18n.translate('xpack.investigateApp.investigationsDeepLinkTitle', {
+            defaultMessage: 'All investigations',
+          }),
+          path: '/',
+        },
+        {
+          id: 'investigationDetails',
+          title: i18n.translate('xpack.investigateApp.newInvestigateDeepLinkTitle', {
+            defaultMessage: 'New investigation',
           }),
           path: '/new',
         },
@@ -113,28 +125,26 @@ export class InvestigateAppPlugin
       .getStartServices()
       .then(([, pluginsStart]) => pluginsStart);
 
-    pluginsSetup.investigate.register((registerWidget) =>
-      Promise.all([
-        pluginsStartPromise,
-        import('./widgets/register_widgets').then((m) => m.registerWidgets),
-        getCreateEsqlService(),
-      ]).then(([pluginsStart, registerWidgets, createEsqlService]) => {
-        registerWidgets({
-          dependencies: {
-            setup: pluginsSetup,
-            start: pluginsStart,
-          },
-          services: {
-            esql: createEsqlService({
-              data: pluginsStart.data,
-              dataViews: pluginsStart.dataViews,
-              lens: pluginsStart.lens,
-            }),
-          },
-          registerWidget,
-        });
-      })
-    );
+    // new
+    Promise.all([
+      pluginsStartPromise,
+      import('./items/register_items').then((m) => m.registerItems),
+      getCreateEsqlService(),
+    ]).then(([pluginsStart, registerItems, createEsqlService]) => {
+      registerItems({
+        dependencies: {
+          setup: pluginsSetup,
+          start: pluginsStart,
+        },
+        services: {
+          esql: createEsqlService({
+            data: pluginsStart.data,
+            dataViews: pluginsStart.dataViews,
+            lens: pluginsStart.lens,
+          }),
+        },
+      });
+    });
 
     return {};
   }

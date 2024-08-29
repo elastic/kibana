@@ -20,19 +20,24 @@ const serviceTransactionFilter = (additionalFilters: string[] = []) => {
 
 export const builtInServicesFromLogsEntityDefinition: EntityDefinition =
   entityDefinitionSchema.parse({
-    version: '0.1.0',
+    version: '1.0.0',
     id: `${BUILT_IN_ID_PREFIX}services_from_ecs_data`,
     name: 'Services from ECS data',
     description:
       'This definition extracts service entities from common data streams by looking for the ECS field service.name',
     type: 'service',
     managed: true,
-    filter: '@timestamp >= now-10m',
-    indexPatterns: ['logs-*', 'filebeat*', 'metrics-apm.service_transaction.1m*'],
+    indexPatterns: [
+      'logs-*',
+      'filebeat*',
+      'metrics-apm.service_transaction.1m*',
+      'metrics-apm.service_summary.1m*',
+    ],
     history: {
       timestampField: '@timestamp',
       interval: '1m',
       settings: {
+        lookbackPeriod: '10m',
         frequency: '2m',
         syncDelay: '2m',
       },
@@ -76,24 +81,27 @@ export const builtInServicesFromLogsEntityDefinition: EntityDefinition =
         metrics: [
           {
             name: 'A',
-            aggregation: 'doc_count',
+            aggregation: 'value_count',
             filter: serviceTransactionFilter(),
+            field: 'transaction.duration.summary',
           },
         ],
       },
       {
         name: 'failedTransactionRate',
-        equation: 'A / B',
+        equation: '1 - (A / B)',
         metrics: [
           {
             name: 'A',
-            aggregation: 'doc_count',
-            filter: serviceTransactionFilter(['event.outcome: "failure"']),
+            aggregation: 'sum',
+            filter: serviceTransactionFilter(),
+            field: 'event.success_count',
           },
           {
             name: 'B',
-            aggregation: 'doc_count',
-            filter: serviceTransactionFilter(['event.outcome: *']),
+            aggregation: 'value_count',
+            filter: serviceTransactionFilter(),
+            field: 'event.success_count',
           },
         ],
       },

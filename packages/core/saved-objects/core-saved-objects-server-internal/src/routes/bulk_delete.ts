@@ -37,6 +37,7 @@ export const registerBulkDeleteRoute = (
         summary: `Delete saved objects`,
         tags: ['oas-tag:saved objects'],
         access,
+        deprecated: true,
       },
       validate: {
         body: schema.arrayOf(

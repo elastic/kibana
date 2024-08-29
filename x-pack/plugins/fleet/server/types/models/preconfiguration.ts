@@ -162,6 +162,7 @@ export const PreconfiguredAgentPoliciesSchema = schema.arrayOf(
             }),
             description: schema.maybe(schema.string()),
             namespace: schema.maybe(PackagePolicyNamespaceSchema),
+            output_id: schema.nullable(schema.maybe(schema.string())),
             inputs: schema.maybe(
               schema.arrayOf(
                 schema.object({

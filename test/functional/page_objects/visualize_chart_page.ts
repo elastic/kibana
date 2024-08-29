@@ -287,7 +287,7 @@ export class VisualizeChartPageObject extends FtrService {
       const legendItemColor = await chart.findByCssSelector(
         `[data-ech-series-name="${name}"] .echLegendItem__color`
       );
-      legendItemColor.click();
+      await legendItemColor.click();
 
       await this.waitForVisualizationRenderingStabilized();
       // arbitrary color chosen, any available would do
@@ -307,7 +307,7 @@ export class VisualizeChartPageObject extends FtrService {
         const legendItemColor = await chart.findByCssSelector(
           `[data-ech-series-name="${name}"] .echLegendItem__color`
         );
-        legendItemColor.click();
+        await legendItemColor.click();
       } else {
         // This click has been flaky in opening the legend, hence the this.retry.  See
         // https://github.com/elastic/kibana/issues/17468
@@ -333,7 +333,7 @@ export class VisualizeChartPageObject extends FtrService {
         cell
       );
       await this.common.sleep(2000);
-      filterBtn.click();
+      await filterBtn.click();
     });
   }
 

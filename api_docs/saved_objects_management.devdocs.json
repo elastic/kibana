@@ -476,9 +476,9 @@
           " | undefined; }) => ",
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-common.SavedObjectsFindOptionsReference",
+            "section": "def-server.SavedObjectsFindOptionsReference",
             "text": "SavedObjectsFindOptionsReference"
           },
           "[] | undefined"
@@ -1651,9 +1651,9 @@
             " | undefined; }) => ",
             {
               "pluginId": "@kbn/core-saved-objects-api-server",
-              "scope": "common",
+              "scope": "server",
               "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-              "section": "def-common.SavedObjectsFindOptionsReference",
+              "section": "def-server.SavedObjectsFindOptionsReference",
               "text": "SavedObjectsFindOptionsReference"
             },
             "[] | undefined"

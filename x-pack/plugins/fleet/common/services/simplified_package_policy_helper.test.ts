@@ -37,6 +37,7 @@ describe('toPackagePolicy', () => {
           namespace: 'default',
           policy_id: 'policy123',
           policy_ids: ['policy123'],
+          output_id: 'output123',
           description: 'Test description',
           inputs: {
             'nginx-logfile': {

@@ -28,6 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const dataViews = getService('dataViews');
+  const dashboardPanelActions = getService('dashboardPanelActions');
 
   const expectedData = [
     { x: '97.220.3.248', y: 19755 },
@@ -55,9 +56,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   }
 
   const checkDiscoverNavigationResult = async () => {
-    await testSubjects.click('embeddablePanelToggleMenuIcon');
-    await testSubjects.click('embeddablePanelMore-mainMenu');
-    await testSubjects.click('embeddablePanelAction-ACTION_OPEN_IN_DISCOVER');
+    await dashboardPanelActions.clickContextMenuItem(
+      'embeddablePanelAction-ACTION_OPEN_IN_DISCOVER'
+    );
 
     const [, discoverHandle] = await browser.getAllWindowHandles();
     await browser.switchToWindow(discoverHandle);
@@ -73,8 +74,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     expect(await dataViews.isAdHoc()).to.be(true);
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/164623
-  describe.skip('lens ad hoc data view tests', () => {
+  const waitForPageReady = async () => {
+    await PageObjects.header.waitUntilLoadingHasFinished();
+    await retry.waitFor('page ready after refresh', async () => {
+      const queryBarVisible = await testSubjects.exists('globalQueryBar');
+      return queryBarVisible;
+    });
+  };
+
+  describe('lens ad hoc data view tests', () => {
     it('should allow building a chart based on ad hoc data view', async () => {
       await setupAdHocDataView();
       await PageObjects.lens.configureDimension({
@@ -223,10 +231,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await dataViews.isAdHoc()).to.be(true);
 
       await browser.closeCurrentWindow();
+      const [lensHandle] = await browser.getAllWindowHandles();
+      await browser.switchToWindow(lensHandle);
     });
-
-    // Failing: See https://github.com/elastic/kibana/issues/164623
-    it.skip('should navigate to discover from embeddable correctly', async () => {
+    it('should navigate to discover from embeddable correctly', async () => {
       const [lensHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(lensHandle);
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -246,6 +254,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'new'
       );
 
+      await PageObjects.header.waitUntilLoadingHasFinished();
       await checkDiscoverNavigationResult();
 
       await browser.closeCurrentWindow();
@@ -255,6 +264,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // adhoc data view should be persisted after refresh
       await browser.refresh();
+      await waitForPageReady();
       await checkDiscoverNavigationResult();
 
       await browser.closeCurrentWindow();

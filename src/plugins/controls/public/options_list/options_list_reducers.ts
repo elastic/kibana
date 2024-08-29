@@ -12,6 +12,7 @@ import { FieldSpec } from '@kbn/data-views-plugin/common';
 import { Filter } from '@kbn/es-query';
 
 import { isValidSearch } from '../../common/options_list/is_valid_search';
+import { OptionsListSelection } from '../../common/options_list/options_list_selections';
 import {
   OptionsListSortingType,
   OPTIONS_LIST_DEFAULT_SORT,
@@ -25,8 +26,12 @@ export const getDefaultComponentState = (): OptionsListReduxState['componentStat
 });
 
 export const optionsListReducers = {
-  deselectOption: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<string>) => {
-    if (!state.explicitInput.selectedOptions) return;
+  deselectOption: (
+    state: WritableDraft<OptionsListReduxState>,
+    action: PayloadAction<OptionsListSelection>
+  ) => {
+    if (!state.explicitInput.selectedOptions || !state.componentState.field) return;
+
     const itemIndex = state.explicitInput.selectedOptions.indexOf(action.payload);
     if (itemIndex !== -1) {
       const newSelections = [...state.explicitInput.selectedOptions];
@@ -76,14 +81,18 @@ export const optionsListReducers = {
       state.explicitInput.existsSelected = false;
     }
   },
-  selectOption: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<string>) => {
+  selectOption: (
+    state: WritableDraft<OptionsListReduxState>,
+    action: PayloadAction<OptionsListSelection>
+  ) => {
     if (!state.explicitInput.selectedOptions) state.explicitInput.selectedOptions = [];
     if (state.explicitInput.existsSelected) state.explicitInput.existsSelected = false;
+
     state.explicitInput.selectedOptions?.push(action.payload);
   },
   replaceSelection: (
     state: WritableDraft<OptionsListReduxState>,
-    action: PayloadAction<string>
+    action: PayloadAction<OptionsListSelection>
   ) => {
     state.explicitInput.selectedOptions = [action.payload];
     if (state.explicitInput.existsSelected) state.explicitInput.existsSelected = false;
@@ -101,10 +110,7 @@ export const optionsListReducers = {
   },
   setValidAndInvalidSelections: (
     state: WritableDraft<OptionsListReduxState>,
-    action: PayloadAction<{
-      validSelections: string[];
-      invalidSelections: string[];
-    }>
+    action: PayloadAction<Pick<OptionsListComponentState, 'validSelections' | 'invalidSelections'>>
   ) => {
     const { invalidSelections, validSelections } = action.payload;
     state.componentState.invalidSelections = invalidSelections;

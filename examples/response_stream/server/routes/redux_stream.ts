@@ -16,7 +16,7 @@ import {
   error,
   type ReduxStreamApiAction,
 } from '../../common/api/redux_stream/data_slice';
-import { reducerStreamRequestBodySchema } from '../../common/api/reducer_stream';
+import { reducerStreamRequestBodySchema } from './schemas/reducer_stream';
 import { RESPONSE_STREAM_API_ENDPOINT } from '../../common/api';
 
 import { entities, getActions } from './shared';

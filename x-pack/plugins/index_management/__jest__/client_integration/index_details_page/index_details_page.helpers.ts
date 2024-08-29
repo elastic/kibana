@@ -330,7 +330,7 @@ export const setup = async ({
       find('inferenceIdButton').simulate('click');
     },
     openSelectInferencePopover: () => {
-      expect(exists('addInferenceEndpointButton')).toBe(true);
+      expect(exists('learn-how-to-create-inference-endpoints')).toBe(true);
       expect(exists('manageInferenceEndpointButton')).toBe(true);
     },
     expectDefaultInferenceModelToExists: () => {

@@ -732,16 +732,7 @@ export function getStateWithCopyToFields(state: State): State {
               : [field.path.join('.')],
           },
         };
-        // add existing text field and children to byId list
-        const children = existingTextField.childFields
-          ? existingTextField.childFields.reduce<Record<string, NormalizedField>>(
-              (acc, childFieldId) => {
-                acc[childFieldId] = state.mappingViewFields.byId[childFieldId];
-                return acc;
-              },
-              {}
-            )
-          : {};
+
         updatedState = {
           ...updatedState,
           fields: {
@@ -749,10 +740,10 @@ export function getStateWithCopyToFields(state: State): State {
             byId: {
               ...updatedState.fields.byId,
               [existingTextField.id]: updatedTextField,
-              ...children,
             },
           },
         };
+        addChildFieldsToState(updatedTextField, updatedState);
         if (existingTextField.parentId) {
           let currentField = existingTextField;
           let hasParent = true;
@@ -768,6 +759,10 @@ export function getStateWithCopyToFields(state: State): State {
               // parent is not in state yet
               updatedState.fields.byId[currentField.parentId] =
                 updatedState.mappingViewFields.byId[currentField.parentId];
+              addChildFieldsToState(
+                updatedState.mappingViewFields.byId[currentField.parentId],
+                updatedState
+              );
               currentField = updatedState.fields.byId[currentField.parentId];
             }
           }
@@ -780,6 +775,19 @@ export function getStateWithCopyToFields(state: State): State {
     }
   }
   return updatedState;
+}
+
+function addChildFieldsToState(field: NormalizedField, state: State): State {
+  if (!field.childFields || field.childFields.length === 0) {
+    return state;
+  }
+  for (const childFieldId of field.childFields) {
+    if (!state.fields.byId[childFieldId]) {
+      state.fields.byId[childFieldId] = state.mappingViewFields.byId[childFieldId];
+      state = addChildFieldsToState(state.fields.byId[childFieldId], state);
+    }
+  }
+  return state;
 }
 
 export const getFieldByPathName = (fields: NormalizedFields, name: string) => {

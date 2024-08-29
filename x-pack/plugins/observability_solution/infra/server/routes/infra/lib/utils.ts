@@ -8,9 +8,6 @@
 import { estypes } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 
-type FilterClauses = keyof estypes.QueryDslBoolQuery;
-const validClauses: FilterClauses[] = ['must', 'filter', 'must_not', 'should'];
-
 interface BoolQuery {
   bool: estypes.QueryDslBoolQuery;
 }
@@ -27,23 +24,8 @@ const isValidFilter = (query: any): query is BoolQuery => {
     .every((clause) => Array.isArray(clause) || clause === undefined);
 };
 
-export const assertQueryStructure: (query: any) => asserts query is BoolQuery = (query) => {
-  if (!isValidFilter(query)) {
+export const assertQueryStructure: (query?: any) => asserts query is BoolQuery = (query) => {
+  if (!!query && !isValidFilter(query)) {
     throw Boom.badRequest('Invalid query');
   }
-};
-
-export const hasFilters = (query?: any) => {
-  if (!query) {
-    return false;
-  }
-
-  assertQueryStructure(query);
-
-  // ignores minimum_should_match
-  return Object.entries(query.bool)
-    .filter(([key, _]) => validClauses.includes(key as FilterClauses))
-    .some(([_, filter]) => {
-      return Array.isArray(filter) ? filter.length > 0 : !!filter;
-    });
 };

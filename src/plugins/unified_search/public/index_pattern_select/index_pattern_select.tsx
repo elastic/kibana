@@ -13,7 +13,10 @@ import { Required } from '@kbn/utility-types';
 import { EuiComboBox, EuiComboBoxProps } from '@elastic/eui';
 import { calculateWidthFromEntries } from '@kbn/calculate-width-from-char-count';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
-import { MIDDLE_TRUNCATION_PROPS } from '../filter_bar/filter_editor/lib/helpers';
+import {
+  MIDDLE_TRUNCATION_PROPS,
+  SINGLE_SELECTION_AS_TEXT_PROPS,
+} from '../filter_bar/filter_editor/lib/helpers';
 
 export type IndexPatternSelectProps = Required<
   Omit<EuiComboBoxProps<any>, 'onSearchChange' | 'options' | 'selectedOptions' | 'onChange'>,
@@ -117,7 +120,7 @@ export default class IndexPatternSelect extends Component<IndexPatternSelectInte
 
     this.setState({
       isLoading: false,
-      options,
+      options: options.sort((a, b) => a.label.localeCompare(b.label)),
     });
 
     if (this.props.onNoIndexPatterns && searchValue === '' && options.length === 0) {
@@ -155,7 +158,7 @@ export default class IndexPatternSelect extends Component<IndexPatternSelectInte
       <EuiComboBox
         {...rest}
         placeholder={placeholder}
-        singleSelection={true}
+        singleSelection={SINGLE_SELECTION_AS_TEXT_PROPS}
         isLoading={this.state.isLoading || this.props.isLoading}
         onSearchChange={this.fetchOptions}
         options={this.state.options}

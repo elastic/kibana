@@ -39,12 +39,15 @@ export const MultiInputRowsLogic = kea<
     values: [
       props.values,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         addValue: (state) => [...state, ''],
+        // @ts-expect-error upgrade typescript v5.1.6
         deleteValue: (state, { indexToDelete }) => {
           const newState = [...state];
           newState.splice(indexToDelete, 1);
           return newState;
         },
+        // @ts-expect-error upgrade typescript v5.1.6
         editValue: (state, { index, newValueValue }) => {
           const newState = [...state];
           newState[index] = newValueValue;

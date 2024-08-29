@@ -35,8 +35,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             esql: 'from my-example-logs,logstash* | sort @timestamp desc | where `log.level` is not null',
           },
         });
-        await PageObjects.common.navigateToApp('discover', {
-          hash: `/?_a=${state}`,
+        await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
+          ensureCurrentUrl: false,
         });
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.unifiedFieldList.clickFieldListItemAdd('log.level');
@@ -55,8 +55,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             esql: 'from my-example* | sort @timestamp desc | where `log.level` is not null',
           },
         });
-        await PageObjects.common.navigateToApp('discover', {
-          hash: `/?_a=${state}`,
+        await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
+          ensureCurrentUrl: false,
         });
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.unifiedFieldList.clickFieldListItemAdd('log.level');
@@ -68,7 +68,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('data view mode', () => {
       it('should render log.level badge cell', async () => {
-        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.common.navigateToActualUrl('discover', undefined, {
+          ensureCurrentUrl: false,
+        });
         await dataViews.switchTo('my-example-logs,logstash*');
         await queryBar.setQuery('log.level:*');
         await queryBar.submitQuery();
@@ -83,7 +85,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it("should not render log.level badge cell if it's not a logs data source", async () => {
-        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.common.navigateToActualUrl('discover', undefined, {
+          ensureCurrentUrl: false,
+        });
         await dataViews.switchTo('my-example-*');
         await queryBar.setQuery('log.level:*');
         await queryBar.submitQuery();

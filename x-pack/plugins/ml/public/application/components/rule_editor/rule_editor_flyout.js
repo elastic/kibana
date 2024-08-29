@@ -53,13 +53,14 @@ import {
 } from './utils';
 
 import { getPartitioningFieldNames } from '../../../../common/util/job_utils';
-import { mlJobService } from '../../services/job_service';
+import { mlJobServiceFactory } from '../../services/job_service';
 import { toastNotificationServiceProvider } from '../../services/toast_notification_service';
 
 class RuleEditorFlyoutUI extends Component {
   static propTypes = {
     setShowFunction: PropTypes.func.isRequired,
     unsetShowFunction: PropTypes.func.isRequired,
+    selectedJob: PropTypes.object,
   };
 
   constructor(props) {
@@ -79,6 +80,11 @@ class RuleEditorFlyoutUI extends Component {
 
     this.partitioningFieldNames = [];
     this.canGetFilters = checkPermission('canGetFilters');
+
+    this.mlJobService = mlJobServiceFactory(
+      toastNotificationServiceProvider(props.kibana.services.notifications.toasts),
+      props.kibana.services.mlServices.mlApiServices
+    );
   }
 
   componentDidMount() {
@@ -100,7 +106,7 @@ class RuleEditorFlyoutUI extends Component {
 
   showFlyout = (anomaly) => {
     let ruleIndex = -1;
-    const job = mlJobService.getJob(anomaly.jobId);
+    const job = this.props.selectedJob ?? this.mlJobService.getJob(anomaly.jobId);
     if (job === undefined) {
       // No details found for this job, display an error and
       // don't open the Flyout as no edits can be made without the job.
@@ -336,14 +342,15 @@ class RuleEditorFlyoutUI extends Component {
   };
 
   updateRuleAtIndex = (ruleIndex, editedRule) => {
+    const mlJobService = this.mlJobService;
     const { toasts } = this.props.kibana.services.notifications;
-    const { mlApiServices, mlJobService } = this.props.kibana.services.mlServices;
+    const { mlApiServices } = this.props.kibana.services.mlServices;
     const { job, anomaly } = this.state;
 
     const jobId = job.job_id;
     const detectorIndex = anomaly.detectorIndex;
 
-    saveJobRule(job, detectorIndex, ruleIndex, editedRule, mlApiServices, mlJobService)
+    saveJobRule(mlJobService, job, detectorIndex, ruleIndex, editedRule, mlApiServices)
       .then((resp) => {
         if (resp.success) {
           toasts.add({
@@ -391,13 +398,14 @@ class RuleEditorFlyoutUI extends Component {
   };
 
   deleteRuleAtIndex = (index) => {
+    const mlJobService = this.mlJobService;
     const { toasts } = this.props.kibana.services.notifications;
-    const { mlApiServices, mlJobService: jobService } = this.props.kibana.services.mlServices;
+    const { mlApiServices } = this.props.kibana.services.mlServices;
     const { job, anomaly } = this.state;
     const jobId = job.job_id;
     const detectorIndex = anomaly.detectorIndex;
 
-    deleteJobRule(job, detectorIndex, index, mlApiServices, jobService)
+    deleteJobRule(mlJobService, job, detectorIndex, index, mlApiServices)
       .then((resp) => {
         if (resp.success) {
           toasts.addSuccess(

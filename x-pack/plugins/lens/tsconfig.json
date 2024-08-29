@@ -111,6 +111,8 @@
     "@kbn/licensing-plugin",
     "@kbn/react-kibana-context-render",
     "@kbn/react-kibana-mount",
+    "@kbn/es-types",
+    "@kbn/esql-datagrid",
   ],
   "exclude": ["target/**/*"]
 }

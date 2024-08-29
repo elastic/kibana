@@ -14,7 +14,7 @@
  *   version: not applicable
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 import { isValidDateMath } from '@kbn/zod-helpers';
 
 import { UUID, NonEmptyString } from '../../../model/primitives.gen';
@@ -514,7 +514,7 @@ export const RuleAction = z.object({
    * The action type used for sending notifications.
    */
   action_type_id: z.string(),
-  group: RuleActionGroup,
+  group: RuleActionGroup.optional(),
   id: RuleActionId,
   params: RuleActionParams,
   uuid: NonEmptyString.optional(),

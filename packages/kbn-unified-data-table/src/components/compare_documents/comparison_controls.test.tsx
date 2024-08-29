@@ -20,7 +20,7 @@ const renderComparisonControls = ({
   isPlainRecord?: ComparisonControlsProps['isPlainRecord'];
   forceShowAllFields?: ComparisonControlsProps['forceShowAllFields'];
 } = {}) => {
-  const selectedDocs = ['0', '1', '2'];
+  const selectedDocIds = ['0', '1', '2'];
   const Wrapper = () => {
     const [showDiff, setShowDiff] = useState(true);
     const [diffMode, setDiffMode] = useState<DocumentDiffMode>('basic');
@@ -34,7 +34,7 @@ const renderComparisonControls = ({
         <IntlProvider locale="en">
           <ComparisonControls
             isPlainRecord={isPlainRecord}
-            selectedDocs={selectedDocs}
+            selectedDocIds={selectedDocIds}
             showDiff={showDiff}
             diffMode={diffMode}
             showDiffDecorations={showDiffDecorations}
@@ -67,7 +67,7 @@ const renderComparisonControls = ({
   return {
     getComparisonCountDisplay: () =>
       screen.getByText(
-        `Comparing ${selectedDocs.length} ${isPlainRecord ? 'results' : 'documents'}`
+        `Comparing ${selectedDocIds.length} ${isPlainRecord ? 'results' : 'documents'}`
       ),
     getComparisonSettingsButton,
     clickComparisonSettingsButton: () => userEvent.click(getComparisonSettingsButton()),

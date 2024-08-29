@@ -3214,7 +3214,8 @@ describe('bulkEdit()', () => {
             value: ['test-1'],
           },
         ],
-        paramsModifier: async (params) => {
+        paramsModifier: async (rule) => {
+          const params = rule.params;
           params.index = ['test-index-*'];
 
           return { modifiedParams: params, isParamsUpdateSkipped: false, skipReasons: [] };
@@ -3431,7 +3432,8 @@ describe('bulkEdit()', () => {
             value: ['test-1'],
           },
         ],
-        paramsModifier: async (params) => {
+        paramsModifier: async (rule) => {
+          const params = rule.params;
           params.index = ['test-index-*'];
 
           return { modifiedParams: params, isParamsUpdateSkipped: false, skipReasons: [] };

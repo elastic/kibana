@@ -11,9 +11,6 @@ info:
 servers:
   - url: http://localhost:5601
     description: local
-security:
-  - basicAuth: []
-  - apiKeyAuth: []
 tags:
   - name: slo
     description: SLO APIs enable you to define, manage and track service-level objectives
@@ -413,110 +410,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404_response'
-  /s/{spaceId}/internal/observability/slos/_historical_summary:
-    post:
-      summary: Get a historical summary for SLOs
-      operationId: historicalSummaryOp
-      description: |
-        You must have the `read` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
-      tags:
-        - slo
-      parameters:
-        - $ref: '#/components/parameters/kbn_xsrf'
-        - $ref: '#/components/parameters/space_id'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/historical_summary_request'
-      responses:
-        '200':
-          description: Successful request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/historical_summary_response'
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/400_response'
-        '401':
-          description: Unauthorized response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401_response'
-        '403':
-          description: Unauthorized response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/403_response'
-  /s/{spaceId}/internal/observability/slos/_definitions:
-    get:
-      summary: Get the SLO definitions
-      operationId: getDefinitionsOp
-      description: |
-        You must have the `read` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
-      tags:
-        - slo
-      parameters:
-        - $ref: '#/components/parameters/kbn_xsrf'
-        - $ref: '#/components/parameters/space_id'
-        - name: includeOutdatedOnly
-          in: query
-          description: Indicates if the API returns only outdated SLO or all SLO definitions
-          schema:
-            type: boolean
-          example: true
-        - name: search
-          in: query
-          description: Filters the SLOs by name
-          schema:
-            type: string
-          example: my service availability
-        - name: page
-          in: query
-          description: The page to use for pagination, must be greater or equal than 1
-          schema:
-            type: number
-          example: 1
-        - name: perPage
-          in: query
-          description: Number of SLOs returned by page
-          schema:
-            type: integer
-            default: 100
-            maximum: 1000
-          example: 100
-      responses:
-        '200':
-          description: Successful request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/find_slo_definitions_response'
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/400_response'
-        '401':
-          description: Unauthorized response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401_response'
-        '403':
-          description: Unauthorized response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/403_response'
   /s/{spaceId}/api/observability/slos/_delete_instances:
     post:
       summary: Batch delete rollup and summary data
@@ -558,15 +451,6 @@ paths:
       servers:
         - url: https://localhost:5601
 components:
-  securitySchemes:
-    basicAuth:
-      type: http
-      scheme: basic
-    apiKeyAuth:
-      type: apiKey
-      in: header
-      name: Authorization
-      description: 'e.g. Authorization: ApiKey base64AccessApiKey'
   parameters:
     kbn_xsrf:
       schema:
@@ -1694,55 +1578,6 @@ components:
           description: The internal SLO version
           type: number
           example: 2
-    historical_summary_request:
-      title: Historical summary request
-      type: object
-      required:
-        - list
-      properties:
-        list:
-          description: The list of SLO identifiers to get the historical summary for
-          type: array
-          items:
-            type: string
-            example: 8853df00-ae2e-11ed-90af-09bb6422b258
-    historical_summary_response:
-      title: Historical summary response
-      type: object
-      additionalProperties:
-        type: array
-        items:
-          type: object
-          properties:
-            date:
-              type: string
-              example: '2022-01-01T00:00:00.000Z'
-            status:
-              $ref: '#/components/schemas/summary_status'
-            sliValue:
-              type: number
-              example: 0.9836
-            errorBudget:
-              $ref: '#/components/schemas/error_budget'
-    find_slo_definitions_response:
-      title: Find SLO definitions response
-      description: |
-        A paginated response of SLO definitions matching the query.
-      type: object
-      properties:
-        page:
-          type: number
-          example: 2
-        perPage:
-          type: number
-          example: 100
-        total:
-          type: number
-          example: 123
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/slo_definition_response'
     delete_slo_instances_request:
       title: Delete SLO instances request
       description: |

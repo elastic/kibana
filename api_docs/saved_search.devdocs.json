@@ -182,9 +182,9 @@
               ", \"description\"> & { description?: string | undefined; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnContentManagementUtilsPluginApi",
-                "section": "def-common.Reference",
+                "section": "def-server.Reference",
                 "text": "Reference"
               },
               "[]; }"
@@ -304,9 +304,9 @@
           ", \"description\"> & { description?: string | undefined; references: ",
           {
             "pluginId": "@kbn/content-management-utils",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnContentManagementUtilsPluginApi",
-            "section": "def-common.Reference",
+            "section": "def-server.Reference",
             "text": "Reference"
           },
           "[]; }"
@@ -422,9 +422,9 @@
             "() => Promise<",
             {
               "pluginId": "@kbn/content-management-utils",
-              "scope": "common",
+              "scope": "server",
               "docId": "kibKbnContentManagementUtilsPluginApi",
-              "section": "def-common.SOWithMetadata",
+              "section": "def-server.SOWithMetadata",
               "text": "SOWithMetadata"
             },
             "<",
@@ -730,16 +730,16 @@
             "pluginId": "data",
             "scope": "common",
             "docId": "kibDataSearchPluginApi",
-            "section": "def-common.SerializedSearchSourceFields",
-            "text": "SerializedSearchSourceFields"
+            "section": "def-common.ISearchSource",
+            "text": "ISearchSource"
           },
           " | ",
           {
             "pluginId": "data",
             "scope": "common",
             "docId": "kibDataSearchPluginApi",
-            "section": "def-common.ISearchSource",
-            "text": "ISearchSource"
+            "section": "def-common.SerializedSearchSourceFields",
+            "text": "SerializedSearchSourceFields"
           },
           ", managed: boolean, serialized?: Serialized) => ReturnType"
         ],
@@ -804,16 +804,16 @@
                 "pluginId": "data",
                 "scope": "common",
                 "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SerializedSearchSourceFields",
-                "text": "SerializedSearchSourceFields"
+                "section": "def-common.ISearchSource",
+                "text": "ISearchSource"
               },
               " | ",
               {
                 "pluginId": "data",
                 "scope": "common",
                 "docId": "kibDataSearchPluginApi",
-                "section": "def-common.ISearchSource",
-                "text": "ISearchSource"
+                "section": "def-common.SerializedSearchSourceFields",
+                "text": "SerializedSearchSourceFields"
               }
             ],
             "path": "src/plugins/saved_search/common/saved_searches_utils.ts",
@@ -866,9 +866,9 @@
           "(getStartDependencies: (getKibanaRequest: (() => ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.KibanaRequest",
+            "section": "def-server.KibanaRequest",
             "text": "KibanaRequest"
           },
           "<unknown, unknown, unknown, any>) | undefined) => Promise<",
@@ -897,9 +897,9 @@
               "(getKibanaRequest: (() => ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
+                "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>) | undefined) => Promise<",

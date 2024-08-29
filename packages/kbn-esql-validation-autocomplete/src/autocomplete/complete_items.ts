@@ -16,6 +16,7 @@ import {
   TRIGGER_SUGGESTION_COMMAND,
   buildConstantsDefinitions,
 } from './factories';
+import { FunctionParameterType, FunctionReturnType } from '../definitions/types';
 
 export function getAssignmentDefinitionCompletitionItem() {
   const assignFn = builtinFunctions.find(({ name }) => name === '=')!;
@@ -54,8 +55,8 @@ export const getNextTokenForNot = (
 export const getBuiltinCompatibleFunctionDefinition = (
   command: string,
   option: string | undefined,
-  argType: string,
-  returnTypes?: string[],
+  argType: FunctionParameterType,
+  returnTypes?: FunctionReturnType[],
   { skipAssign }: { skipAssign?: boolean } = {}
 ): SuggestionRawDefinition[] => {
   const compatibleFunctions = builtinFunctions.filter(
@@ -81,9 +82,9 @@ export const getBuiltinCompatibleFunctionDefinition = (
     .map(getSuggestionBuiltinDefinition);
 };
 
-export const commandAutocompleteDefinitions: SuggestionRawDefinition[] = getAllCommands().map(
-  getSuggestionCommandDefinition
-);
+export const commandAutocompleteDefinitions: SuggestionRawDefinition[] = getAllCommands()
+  .filter(({ hidden }) => !hidden)
+  .map(getSuggestionCommandDefinition);
 
 function buildCharCompleteItem(
   label: string,
@@ -98,13 +99,16 @@ function buildCharCompleteItem(
     sortText,
   };
 }
-export const pipeCompleteItem = buildCharCompleteItem(
-  '|',
-  i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.pipeDoc', {
+export const pipeCompleteItem: SuggestionRawDefinition = {
+  label: '|',
+  text: '| ',
+  kind: 'Keyword',
+  detail: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.pipeDoc', {
     defaultMessage: 'Pipe (|)',
   }),
-  { sortText: 'C', quoted: false }
-);
+  sortText: 'C',
+  command: TRIGGER_SUGGESTION_COMMAND,
+};
 
 export const commaCompleteItem = buildCharCompleteItem(
   ',',

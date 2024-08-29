@@ -18,13 +18,13 @@ export function insertRefByPointer(
   component: unknown,
   targetObject: Record<string, unknown>
 ): void {
-  if (!pointer.startsWith('/components')) {
+  if (!pointer.startsWith('/')) {
     throw new Error(
       `insertRefByPointer expected a pointer starting with "/components" but got ${pointer}`
     );
   }
 
-  // splitting '/components/some/path' by '/' gives ['', 'components'...]
+  // splitting '/components/some/path' by '/' gives ['', 'components',...]
   // where the first empty string should be skipped
   const segments = pointer.split('/').slice(1);
   let target = targetObject;

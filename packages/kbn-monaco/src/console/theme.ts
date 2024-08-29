@@ -39,23 +39,23 @@ export const buildConsoleTheme = (): monaco.editor.IStandaloneThemeData => {
       ),
       ...buildRuleGroup(
         ['status.info'],
-        makeHighContrastColor(euiThemeVars.euiColorWarningText)(background),
-        true
+        makeHighContrastColor(euiThemeVars.euiTextColor)(background)
       ),
       ...buildRuleGroup(
         ['status.success'],
-        makeHighContrastColor(euiThemeVars.euiColorSuccessText)(background),
-        true
+        makeHighContrastColor(euiThemeVars.euiTextColor)(euiThemeVars.euiColorSuccess)
       ),
       ...buildRuleGroup(
         ['status.redirect'],
-        makeHighContrastColor(euiThemeVars.euiColorWarningText)(background),
-        true
+        makeHighContrastColor(euiThemeVars.euiTextColor)(background)
+      ),
+      ...buildRuleGroup(
+        ['status.warning'],
+        makeHighContrastColor(euiThemeVars.euiTextColor)(euiThemeVars.euiColorWarning)
       ),
       ...buildRuleGroup(
         ['status.error'],
-        makeHighContrastColor(euiThemeVars.euiColorDangerText)(background),
-        true
+        makeHighContrastColor('#FFFFFF')(euiThemeVars.euiColorDanger)
       ),
       ...buildRuleGroup(['method'], makeHighContrastColor(methodTextColor)(background)),
       ...buildRuleGroup(['url'], makeHighContrastColor(urlTextColor)(background)),

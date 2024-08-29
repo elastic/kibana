@@ -14,18 +14,10 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-logging-server-mocks",
-        "id": "def-common.loggingServiceMock",
+        "id": "def-server.loggingServiceMock",
         "type": "Object",
         "tags": [],
         "label": "loggingServiceMock",
@@ -36,7 +28,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-logging-server-mocks",
-            "id": "def-common.loggingServiceMock.create",
+            "id": "def-server.loggingServiceMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -52,7 +44,7 @@
           },
           {
             "parentPluginId": "@kbn/core-logging-server-mocks",
-            "id": "def-common.loggingServiceMock.createSetupContract",
+            "id": "def-server.loggingServiceMock.createSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createSetupContract",
@@ -61,9 +53,9 @@
               "() => jest.Mocked<",
               {
                 "pluginId": "@kbn/core-logging-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreLoggingServerPluginApi",
-                "section": "def-common.LoggingServiceSetup",
+                "section": "def-server.LoggingServiceSetup",
                 "text": "LoggingServiceSetup"
               },
               ">"
@@ -76,7 +68,7 @@
           },
           {
             "parentPluginId": "@kbn/core-logging-server-mocks",
-            "id": "def-common.loggingServiceMock.createInternalPrebootContract",
+            "id": "def-server.loggingServiceMock.createInternalPrebootContract",
             "type": "Function",
             "tags": [],
             "label": "createInternalPrebootContract",
@@ -94,7 +86,7 @@
           },
           {
             "parentPluginId": "@kbn/core-logging-server-mocks",
-            "id": "def-common.loggingServiceMock.createInternalSetupContract",
+            "id": "def-server.loggingServiceMock.createInternalSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createInternalSetupContract",
@@ -115,7 +107,7 @@
       },
       {
         "parentPluginId": "@kbn/core-logging-server-mocks",
-        "id": "def-common.loggingSystemMock",
+        "id": "def-server.loggingSystemMock",
         "type": "Object",
         "tags": [],
         "label": "loggingSystemMock",
@@ -126,7 +118,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-logging-server-mocks",
-            "id": "def-common.loggingSystemMock.create",
+            "id": "def-server.loggingSystemMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -144,7 +136,7 @@
           },
           {
             "parentPluginId": "@kbn/core-logging-server-mocks",
-            "id": "def-common.loggingSystemMock.collect",
+            "id": "def-server.loggingSystemMock.collect",
             "type": "Function",
             "tags": [],
             "label": "collect",
@@ -217,7 +209,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-logging-server-mocks",
-                "id": "def-common.loggingSystemMock.collect.$1",
+                "id": "def-server.loggingSystemMock.collect.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "loggerFactory",
@@ -239,7 +231,7 @@
           },
           {
             "parentPluginId": "@kbn/core-logging-server-mocks",
-            "id": "def-common.loggingSystemMock.clear",
+            "id": "def-server.loggingSystemMock.clear",
             "type": "Function",
             "tags": [],
             "label": "clear",
@@ -262,7 +254,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-logging-server-mocks",
-                "id": "def-common.loggingSystemMock.clear.$1",
+                "id": "def-server.loggingSystemMock.clear.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "loggerFactory",
@@ -284,7 +276,7 @@
           },
           {
             "parentPluginId": "@kbn/core-logging-server-mocks",
-            "id": "def-common.loggingSystemMock.createLogger",
+            "id": "def-server.loggingSystemMock.createLogger",
             "type": "Function",
             "tags": [],
             "label": "createLogger",
@@ -306,7 +298,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-logging-server-mocks",
-                "id": "def-common.loggingSystemMock.createLogger.$1",
+                "id": "def-server.loggingSystemMock.createLogger.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "context",
@@ -324,5 +316,13 @@
         "initialIsOpen": false
       }
     ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }

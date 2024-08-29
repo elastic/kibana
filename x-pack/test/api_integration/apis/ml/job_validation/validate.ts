@@ -175,7 +175,7 @@ export default ({ getService }: FtrProviderContext) => {
       // and may vary between test environments, e.g. cloud vs non-cloud,
       // so it should not be part of the validation
       body.forEach((element: any) => {
-        if (element.hasOwnProperty('maxModelMemoryLimit')) {
+        if (Object.hasOwn(element, 'maxModelMemoryLimit')) {
           delete element.maxModelMemoryLimit;
         }
       });

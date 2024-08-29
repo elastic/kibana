@@ -7,7 +7,6 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { setupFleetAndAgents } from '../agents/services';
 import { skipIfNoDockerRegistry } from '../../helpers';
 
 const TEST_INDEX = 'logs-log.log-test';
@@ -24,6 +23,7 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
   const esArchiver = getService('esArchiver');
+  const fleetAndAgents = getService('fleetAndAgents');
 
   function indexUsingApiKey(body: any, apiKey: string): Promise<{ body: Record<string, unknown> }> {
     const supertestWithoutAuth = getService('esSupertestWithoutAuth');
@@ -34,13 +34,12 @@ export default function (providerContext: FtrProviderContext) {
       .expect(201);
   }
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/180071
-  describe.skip('fleet_final_pipeline', () => {
+  describe('fleet_final_pipeline', () => {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await fleetAndAgents.setup();
     });
-    setupFleetAndAgents(providerContext);
 
     // Use the custom log package to test the fleet final pipeline
     before(async () => {
@@ -157,9 +156,7 @@ export default function (providerContext: FtrProviderContext) {
         body: {
           message: 'message-test-1',
           event: {
-            original: {
-              foo: 'bar',
-            },
+            original: JSON.stringify({ foo: 'bar' }),
           },
           '@timestamp': '2023-01-01T09:00:00',
           tags: [],
@@ -185,9 +182,7 @@ export default function (providerContext: FtrProviderContext) {
         body: {
           message: 'message-test-1',
           event: {
-            original: {
-              foo: 'bar',
-            },
+            original: JSON.stringify({ foo: 'bar' }),
           },
           '@timestamp': '2023-01-01T09:00:00',
           tags: ['preserve_original_event'],
@@ -204,7 +199,7 @@ export default function (providerContext: FtrProviderContext) {
 
       const event = doc._source.event;
 
-      expect(event.original).to.eql({ foo: 'bar' });
+      expect(event.original).to.eql(JSON.stringify({ foo: 'bar' }));
     });
 
     const scenarios = [

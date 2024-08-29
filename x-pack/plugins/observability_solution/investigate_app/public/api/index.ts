@@ -11,7 +11,7 @@ import type {
   ReturnOf,
   RouteRepositoryClient,
 } from '@kbn/server-route-repository';
-import { formatRequest } from '@kbn/server-route-repository/src/format_request';
+import { formatRequest } from '@kbn/server-route-repository-utils/src/format_request';
 import type { InvestigateAppServerRouteRepository } from '../../server';
 
 type FetchOptions = Omit<HttpFetchOptions, 'body'> & {

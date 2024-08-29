@@ -6,8 +6,11 @@
  */
 
 import { uniq } from 'lodash';
-import { MetricsUIAggregation, ESBasicMetricAggRT } from '@kbn/metrics-data-access-plugin/common';
-import { MetricsAPITimerange } from '../../../../common/http_api';
+import {
+  type MetricsUIAggregation,
+  ESBasicMetricAggRT,
+  type MetricsAPITimerange,
+} from '@kbn/metrics-data-access-plugin/common';
 import { ESSearchClient } from '../../../lib/metrics/types';
 import { calculateMetricInterval } from '../../../utils/calculate_metric_interval';
 import { getMetricsAggregations, InfraSnapshotRequestOptions } from './get_metrics_aggregations';

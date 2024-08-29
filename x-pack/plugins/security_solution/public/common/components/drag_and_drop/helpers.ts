@@ -8,13 +8,14 @@ import { keyBy } from 'lodash/fp';
 import type { DropResult } from '@hello-pangea/dnd';
 import type { Dispatch } from 'redux';
 import type { ActionCreator } from 'typescript-fsa';
+import type { FieldSpec } from '@kbn/data-plugin/common';
 
 import { getFieldIdFromDraggable, getProviderIdFromDraggable } from '@kbn/securitysolution-t-grid';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
 import { getScopedActions } from '../../../helpers';
 import type { ColumnHeaderOptions } from '../../../../common/types';
-import type { BrowserField, BrowserFields } from '../../../../common/search_strategy';
+import type { BrowserFields } from '../../../../common/search_strategy';
 import { dragAndDropActions } from '../../store/actions';
 import type { IdToDataProvider } from '../../store/drag_and_drop/model';
 import { addContentToTimeline } from '../../../timelines/components/timeline/data_providers/helpers';
@@ -184,8 +185,8 @@ export const allowTopN = ({
   return isAllowlistedNonBrowserField || (isAggregatable && isAllowedType);
 };
 
-const getAllBrowserFields = (browserFields: BrowserFields): Array<Partial<BrowserField>> =>
-  Object.values(browserFields).reduce<Array<Partial<BrowserField>>>(
+const getAllBrowserFields = (browserFields: BrowserFields): Array<Partial<FieldSpec>> =>
+  Object.values(browserFields).reduce<Array<Partial<FieldSpec>>>(
     (acc, namespace) => [
       ...acc,
       ...Object.values(namespace.fields != null ? namespace.fields : {}),
@@ -195,8 +196,7 @@ const getAllBrowserFields = (browserFields: BrowserFields): Array<Partial<Browse
 
 const getAllFieldsByName = (
   browserFields: BrowserFields
-): { [fieldName: string]: Partial<BrowserField> } =>
-  keyBy('name', getAllBrowserFields(browserFields));
+): { [fieldName: string]: Partial<FieldSpec> } => keyBy('name', getAllBrowserFields(browserFields));
 
 const linkFields: Record<string, string> = {
   'kibana.alert.rule.name': 'kibana.alert.rule.uuid',

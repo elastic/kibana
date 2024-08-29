@@ -865,25 +865,25 @@
               "{ notifications: ",
               {
                 "pluginId": "@kbn/core-notifications-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-common.NotificationsStart",
+                "section": "def-public.NotificationsStart",
                 "text": "NotificationsStart"
               },
               "; theme: ",
               {
                 "pluginId": "@kbn/core-theme-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-common.ThemeServiceSetup",
+                "section": "def-public.ThemeServiceSetup",
                 "text": "ThemeServiceSetup"
               },
               "; i18n: ",
               {
                 "pluginId": "@kbn/core-i18n-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreI18nBrowserPluginApi",
-                "section": "def-common.I18nStart",
+                "section": "def-public.I18nStart",
                 "text": "I18nStart"
               },
               "; }"
@@ -929,9 +929,9 @@
               ") => ",
               {
                 "pluginId": "@kbn/core-mount-utils-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                "section": "def-common.MountPoint",
+                "section": "def-public.MountPoint",
                 "text": "MountPoint"
               },
               "<HTMLElement>"
@@ -966,25 +966,25 @@
                   "{ i18n: ",
                   {
                     "pluginId": "@kbn/core-i18n-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreI18nBrowserPluginApi",
-                    "section": "def-common.I18nStart",
+                    "section": "def-public.I18nStart",
                     "text": "I18nStart"
                   },
                   "; analytics?: Pick<",
                   {
                     "pluginId": "@kbn/core-analytics-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
-                    "section": "def-common.AnalyticsServiceStart",
+                    "section": "def-public.AnalyticsServiceStart",
                     "text": "AnalyticsServiceStart"
                   },
                   ", \"reportEvent\"> | undefined; theme: ",
                   {
                     "pluginId": "@kbn/react-kibana-context-common",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnReactKibanaContextCommonPluginApi",
-                    "section": "def-common.ThemeServiceStart",
+                    "section": "def-public.ThemeServiceStart",
                     "text": "ThemeServiceStart"
                   },
                   "; }"

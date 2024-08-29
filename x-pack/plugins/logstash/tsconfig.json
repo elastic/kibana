@@ -23,6 +23,7 @@
     "@kbn/shared-ux-router",
     "@kbn/code-editor",
     "@kbn/react-kibana-context-render",
+    "@kbn/core-plugins-browser",
   ],
   "exclude": [
     "target/**/*",

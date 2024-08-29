@@ -6,6 +6,7 @@
  */
 
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 
 import {
   getCreateEqlRuleSchemaMock,
@@ -32,11 +33,22 @@ describe('DetectionRulesClient.upgradePrebuiltRule', () => {
   let detectionRulesClient: IDetectionRulesClient;
 
   const mlAuthz = (buildMlAuthz as jest.Mock)();
+  let actionsClient = {
+    isSystemAction: jest.fn((id: string) => id === 'system-connector-.cases'),
+  } as unknown as jest.Mocked<ActionsClient>;
 
   beforeEach(() => {
+    actionsClient = {
+      isSystemAction: jest.fn((id: string) => id === 'system-connector-.cases'),
+    } as unknown as jest.Mocked<ActionsClient>;
     rulesClient = rulesClientMock.create();
     const savedObjectsClient = savedObjectsClientMock.create();
-    detectionRulesClient = createDetectionRulesClient({ rulesClient, mlAuthz, savedObjectsClient });
+    detectionRulesClient = createDetectionRulesClient({
+      actionsClient,
+      rulesClient,
+      mlAuthz,
+      savedObjectsClient,
+    });
   });
 
   it('throws if no matching rule_id is found', async () => {

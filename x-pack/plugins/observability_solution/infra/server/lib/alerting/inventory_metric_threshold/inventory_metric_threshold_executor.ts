@@ -6,10 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { Group } from '@kbn/observability-alerting-rule-utils';
 import {
   ALERT_REASON,
   ALERT_EVALUATION_VALUES,
   ALERT_EVALUATION_THRESHOLD,
+  ALERT_GROUP,
 } from '@kbn/rule-data-utils';
 import { first, get } from 'lodash';
 import {
@@ -19,9 +21,20 @@ import {
   AlertInstanceState as AlertState,
 } from '@kbn/alerting-plugin/common';
 import { AlertsClientError, RuleExecutorOptions, RuleTypeState } from '@kbn/alerting-plugin/server';
-import { convertToBuiltInComparators, getAlertUrl } from '@kbn/observability-plugin/common';
-import { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
+import {
+  AlertsLocatorParams,
+  alertsLocatorID,
+  convertToBuiltInComparators,
+  getAlertUrl,
+} from '@kbn/observability-plugin/common';
+import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { ObservabilityMetricsAlert } from '@kbn/alerts-as-data-utils';
+import {
+  ASSET_DETAILS_LOCATOR_ID,
+  INVENTORY_LOCATOR_ID,
+  type AssetDetailsLocatorParams,
+  type InventoryLocatorParams,
+} from '@kbn/observability-shared-plugin/common';
 import { getOriginalActionGroup } from '../../../utils/get_original_action_group';
 import {
   AlertStates,
@@ -64,11 +77,12 @@ export type InventoryMetricThresholdAlertContext = AlertContext; // no specific 
 
 export type InventoryMetricThresholdAlert = Omit<
   ObservabilityMetricsAlert,
-  'kibana.alert.evaluation.values' | 'kibana.alert.evaluation.threshold'
+  'kibana.alert.evaluation.values' | 'kibana.alert.evaluation.threshold' | 'kibana.alert.group'
 > & {
   // Defining a custom type for this because the schema generation script doesn't allow explicit null values
   [ALERT_EVALUATION_VALUES]?: Array<number | null>;
   [ALERT_EVALUATION_THRESHOLD]?: Array<number | null>;
+  [ALERT_GROUP]?: Group[];
 };
 
 export const createInventoryMetricThresholdExecutor =
@@ -92,6 +106,13 @@ export const createInventoryMetricThresholdExecutor =
       rule: { id: ruleId, tags: ruleTags },
       getTimeRange,
     } = options;
+
+    const { share } = libs.plugins;
+    const alertsLocator = share.setup.url.locators.get<AlertsLocatorParams>(alertsLocatorID);
+    const assetDetailsLocator =
+      share.setup.url.locators.get<AssetDetailsLocatorParams>(ASSET_DETAILS_LOCATOR_ID);
+    const inventoryLocator =
+      share.setup.url.locators.get<InventoryLocatorParams>(INVENTORY_LOCATOR_ID);
 
     const startTime = Date.now();
 
@@ -138,7 +159,7 @@ export const createInventoryMetricThresholdExecutor =
               uuid,
               spaceId,
               indexedStartedAt,
-              libs.alertsLocator,
+              alertsLocator,
               libs.basePath.publicBaseUrl
             ),
             alertState: stateToAlertMessage[AlertStates.ERROR],
@@ -153,6 +174,8 @@ export const createInventoryMetricThresholdExecutor =
               nodeType,
               timestamp: indexedStartedAt,
               spaceId,
+              assetDetailsLocator,
+              inventoryLocator,
             }),
           },
         });
@@ -162,9 +185,13 @@ export const createInventoryMetricThresholdExecutor =
     }
     const source = await libs.sources.getSourceConfiguration(savedObjectsClient, sourceId);
 
-    const [, { logsShared }] = await libs.getStartServices();
+    const [, { logsShared, logsDataAccess }] = await libs.getStartServices();
+
+    const logSourcesService =
+      logsDataAccess.services.logSourcesServiceFactory.getLogSourcesService(savedObjectsClient);
+
     const logQueryFields: LogQueryFields | undefined = await logsShared.logViews
-      .getClient(savedObjectsClient, esClient)
+      .getClient(savedObjectsClient, esClient, logSourcesService)
       .getResolvedLogView({
         type: 'log-view-reference',
         logViewId: sourceId,
@@ -223,12 +250,13 @@ export const createInventoryMetricThresholdExecutor =
       if (nextState === AlertStates.ALERT || nextState === AlertStates.WARNING) {
         reason = results
           .map((result) =>
-            buildReasonWithVerboseMetricName(
+            buildReasonWithVerboseMetricName({
               group,
-              result[group],
-              buildFiredAlertReason,
-              nextState === AlertStates.WARNING
-            )
+              resultItem: result[group],
+              buildReason: buildFiredAlertReason,
+              useWarningThreshold: nextState === AlertStates.WARNING,
+              nodeType,
+            })
           )
           .join('\n');
       }
@@ -237,14 +265,24 @@ export const createInventoryMetricThresholdExecutor =
           reason = results
             .filter((result) => result[group].isNoData)
             .map((result) =>
-              buildReasonWithVerboseMetricName(group, result[group], buildNoDataAlertReason)
+              buildReasonWithVerboseMetricName({
+                group,
+                resultItem: result[group],
+                buildReason: buildNoDataAlertReason,
+                nodeType,
+              })
             )
             .join('\n');
         } else if (nextState === AlertStates.ERROR) {
           reason = results
             .filter((result) => result[group].isError)
             .map((result) =>
-              buildReasonWithVerboseMetricName(group, result[group], buildErrorAlertReason)
+              buildReasonWithVerboseMetricName({
+                group,
+                resultItem: result[group],
+                buildReason: buildErrorAlertReason,
+                nodeType,
+              })
             )
             .join('\n');
         }
@@ -275,7 +313,7 @@ export const createInventoryMetricThresholdExecutor =
             uuid,
             spaceId,
             indexedStartedAt,
-            libs.alertsLocator,
+            alertsLocator,
             libs.basePath.publicBaseUrl
           ),
           alertState: stateToAlertMessage[nextState],
@@ -294,6 +332,8 @@ export const createInventoryMetricThresholdExecutor =
             timestamp: indexedStartedAt,
             spaceId,
             hostName: additionalContext?.host?.name,
+            assetDetailsLocator,
+            inventoryLocator,
           }),
           ...additionalContext,
         };
@@ -329,7 +369,7 @@ export const createInventoryMetricThresholdExecutor =
           alertUuid,
           spaceId,
           indexedStartedAt,
-          libs.alertsLocator,
+          alertsLocator,
           libs.basePath.publicBaseUrl
         ),
         alertState: stateToAlertMessage[AlertStates.OK],
@@ -344,6 +384,8 @@ export const createInventoryMetricThresholdExecutor =
           timestamp: indexedStartedAt,
           spaceId,
           hostName: additionalContext?.host?.name,
+          assetDetailsLocator,
+          inventoryLocator,
         }),
         originalAlertState: translateActionGroupToAlertState(originalActionGroup),
         originalAlertStateWasALERT: originalActionGroup === FIRED_ACTIONS_ID,
@@ -381,12 +423,19 @@ const formatThreshold = (metric: SnapshotMetricType, value: number | number[]) =
   return threshold;
 };
 
-const buildReasonWithVerboseMetricName = (
-  group: string,
-  resultItem: ConditionResult,
-  buildReason: (r: any) => string,
-  useWarningThreshold?: boolean
-) => {
+const buildReasonWithVerboseMetricName = ({
+  group,
+  resultItem,
+  buildReason,
+  useWarningThreshold,
+  nodeType,
+}: {
+  group: string;
+  resultItem: ConditionResult;
+  buildReason: (r: any) => string;
+  useWarningThreshold?: boolean;
+  nodeType?: InventoryItemType;
+}) => {
   if (!resultItem) return '';
 
   const thresholdToFormat = useWarningThreshold
@@ -396,7 +445,7 @@ const buildReasonWithVerboseMetricName = (
     ...resultItem,
     group,
     metric:
-      toMetricOpt(resultItem.metric)?.text ||
+      toMetricOpt(resultItem.metric, nodeType)?.text ||
       (resultItem.metric === 'custom' && resultItem.customMetric
         ? getCustomMetricLabel(resultItem.customMetric)
         : resultItem.metric),

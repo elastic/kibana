@@ -6,7 +6,7 @@
  */
 
 import axios from 'axios';
-import { SYNTHETICS_API_URLS } from '../../../../common/constants';
+import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 
 export const addTestMonitorProject = async (
   kibanaUrl: string,

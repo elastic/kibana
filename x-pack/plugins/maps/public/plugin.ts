@@ -68,7 +68,7 @@ import {
   MapsStartApi,
   suggestEMSTermJoinConfig,
 } from './api';
-import { MapsXPackConfig, MapsConfigType } from '../config';
+import type { MapsXPackConfig, MapsConfigType } from '../server/config';
 import { filterByMapExtentAction } from './trigger_actions/filter_by_map_extent/action';
 import { synchronizeMovementAction } from './trigger_actions/synchronize_movement/action';
 import { visualizeGeoFieldAction } from './trigger_actions/visualize_geo_field_action';

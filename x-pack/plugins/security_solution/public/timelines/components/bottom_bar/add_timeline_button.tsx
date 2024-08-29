@@ -9,7 +9,7 @@ import { EuiButtonEmpty, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPopover } 
 import React, { useCallback, useMemo, useState } from 'react';
 import * as i18n from './translations';
 import { useCreateTimeline } from '../../hooks/use_create_timeline';
-import { TimelineType } from '../../../../common/api/timeline';
+import { TimelineTypeEnum } from '../../../../common/api/timeline';
 import { OpenTimelineModal } from '../open_timeline/open_timeline_modal';
 import type { ActionTimelineToShow } from '../open_timeline/types';
 
@@ -39,12 +39,12 @@ export const AddTimelineButton = React.memo<AddTimelineButtonComponentProps>(({ 
 
   const createNewTimeline = useCreateTimeline({
     timelineId,
-    timelineType: TimelineType.default,
+    timelineType: TimelineTypeEnum.default,
     onClick: togglePopover,
   });
   const createNewTimelineTemplate = useCreateTimeline({
     timelineId,
-    timelineType: TimelineType.template,
+    timelineType: TimelineTypeEnum.template,
     onClick: togglePopover,
   });
 

@@ -14,7 +14,8 @@ import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { ColumnsPopover } from './columns_popover';
 
-describe('ColumnsPopover', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/174682
+describe.skip('ColumnsPopover', () => {
   let appMockRenderer: AppMockRenderer;
 
   beforeEach(() => {

@@ -17,7 +17,6 @@
     "@kbn/i18n",
     "@kbn/i18n-react",
     "@kbn/kibana-react-plugin",
-    "@kbn/ml-response-stream",
     "@kbn/security-plugin",
     "@kbn/user-profile-components",
     "@kbn/shared-ux-router",
@@ -39,7 +38,9 @@
     "@kbn/core-logging-server-mocks",
     "@kbn/analytics",
     "@kbn/usage-collection-plugin",
-    "@kbn/console-plugin"
+    "@kbn/console-plugin",
+    "@kbn/utility-types",
+    "@kbn/kibana-utils-plugin"
   ],
   "exclude": [
     "target/**/*",

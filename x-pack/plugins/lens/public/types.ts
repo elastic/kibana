@@ -300,6 +300,7 @@ export type UserMessagesDisplayLocationId = UserMessageDisplayLocation['id'];
 export interface UserMessage {
   uniqueId: string;
   severity: 'error' | 'warning' | 'info';
+  hidePopoverIcon?: boolean;
   shortMessage: string;
   longMessage: string | React.ReactNode | ((closePopover: () => void) => React.ReactNode);
   fixableInEditor: boolean;
@@ -1315,6 +1316,8 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
    * On Edit events the frame will call this to know what's going to be the next visualization state
    */
   onEditAction?: (state: T, event: LensEditEvent<LensEditSupportedActions>) => T;
+
+  onDatasourceUpdate?: (state: T, frame?: FramePublicAPI) => T;
 
   /**
    * Some visualization track indexPattern changes (i.e. annotations)

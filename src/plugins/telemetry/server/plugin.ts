@@ -22,7 +22,7 @@ import {
   map,
 } from 'rxjs';
 
-import { ElasticV3ServerShipper } from '@kbn/ebt/shippers/elastic_v3/server';
+import { ElasticV3ServerShipper } from '@elastic/ebt/shippers/elastic_v3/server';
 
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type {
@@ -41,6 +41,7 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 
 import apm from 'elastic-apm-node';
+import { buildShipperHeaders, createBuildShipperUrl } from '../common/ebt_v3_endpoint';
 import {
   type TelemetrySavedObject,
   getTelemetrySavedObject,
@@ -171,10 +172,12 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
 
     const currentKibanaVersion = this.currentKibanaVersion;
 
+    const sendTo = this.getSendToEnv(this.initialConfig.sendUsageTo);
     analytics.registerShipper(ElasticV3ServerShipper, {
       channelName: 'kibana-server',
       version: currentKibanaVersion,
-      sendTo: this.initialConfig.sendUsageTo === 'prod' ? 'production' : 'staging',
+      buildShipperHeaders,
+      buildShipperUrl: createBuildShipperUrl(sendTo),
     });
 
     analytics.registerContextProvider<{ labels: TelemetryConfigLabels }>({
@@ -260,6 +263,10 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     this.pluginStop$.complete();
     this.savedObjectsInternalClient$.complete();
     this.fetcherTask.stop();
+  }
+
+  private getSendToEnv(sendUsageTo: string): 'production' | 'staging' {
+    return sendUsageTo === 'prod' ? 'production' : 'staging';
   }
 
   private async getOptInStatus(): Promise<boolean | undefined> {
