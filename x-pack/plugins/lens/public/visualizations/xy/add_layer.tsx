@@ -121,8 +121,9 @@ export function AddLayerButton({
             aria-label={i18n.translate('xpack.lens.configPanel.addLayerButton', {
               defaultMessage: 'Add layer',
             })}
-            fill
-            color="text"
+            fill={false}
+            color="primary"
+            size="s"
             onClick={() => toggleLayersChoice(!showLayersChoice)}
             iconType="layers"
           >
