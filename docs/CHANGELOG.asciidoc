@@ -74,8 +74,55 @@ Review important information about the {kib} 8.x releases.
 [[release-notes-8.15.0]]
 == {kib} 8.15.0
 
-
 For information about the {kib} 8.15.0 release, review the following information.
+
+The 8.15.0 release includes the following known issues.
+
+[float]
+[[known-issues-8.15.0]]
+=== Known issues
+
+[discrete]
+[[known-178114]]
+.Kibana fails to start when processing YAML configuration keys that contain dotted notation in objects in arrays
+[%collapsible]
+====
+*Details* +
+In 8.15.1, We fixed a bug when processing YAML configuration keys that contain dotted notation in objects in arrays.
+This can manifest as a validation error causing Kibana to not start.
+
+For more information, refer to {kibana-pull}190590[#190590].
+====
+
+[discrete]
+[[known-187823]]
+.Connectors require update due to Microsoft Teams product retirement
+[%collapsible]
+====
+*Details* +
+The original method for configuring incoming webhooks in Microsoft Teams is being retired.
+Refer to https://devblogs.microsoft.com/microsoft365dev/retirement-of-office-365-connectors-within-microsoft-teams/[Retirement of Office 365 connectors within Microsoft Teams] and {kibana-issue}187823[#187823].
+
+*Impact* +
+If you used the *Incoming Webhook* app in Microsoft Teams to generate a webhook URL for a <<teams-action-type,Microsoft Teams connector>>, it will stop working in December 2024.
+
+*Workaround* +
+Use the *Workflows* app in Microsoft Teams to create a new webhook URL, as described in <<configuring-teams>>.
+Update your Microsoft Teams connector to use the new URL before the end of December 2024.
+====
+
+[discrete]
+[[known-189283]]
+.Incorrect index errors related to inference endpoints
+[%collapsible]
+====
+*Details* +
+In 8.15.1, we fixed a UI bug where an index error about the `semantic_text` field would be incorrectly displayed when the inference endpoint was configured and available.
+
+You can ignore this error if you've confirmed that the inference endpoint is configured and the model is deployed.
+
+This bug is fixed in {kibana-pull}189283[#189283].
+====
 
 [float]
 [[deprecations-8.15.0]]

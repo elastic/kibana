@@ -110,7 +110,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('maps', async () => {
         await PageObjects.common.navigateToActualUrl(
           'maps',
-          'map/managed-d7ab-46eb-a807-8fed28ed8566'
+          'map/managed-d7ab-46eb-a807-8fed28ed8566',
+          { ensureCurrentUrl: false }
         );
         await PageObjects.maps.waitForLayerAddPanelClosed();
 
@@ -118,7 +119,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await PageObjects.common.navigateToActualUrl(
           'maps',
-          'map/unmanaged-d7ab-46eb-a807-8fed28ed8566'
+          'map/unmanaged-d7ab-46eb-a807-8fed28ed8566',
+          { ensureCurrentUrl: false }
         );
         await PageObjects.maps.waitForLayerAddPanelClosed();
 
