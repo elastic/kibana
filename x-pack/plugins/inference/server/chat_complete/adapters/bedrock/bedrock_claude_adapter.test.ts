@@ -10,6 +10,7 @@ import type { InferenceExecutor } from '../../utils/inference_executor';
 import { MessageRole } from '../../../../common/chat_complete';
 import { ToolChoiceType } from '../../../../common/chat_complete/tools';
 import { bedrockClaudeAdapter } from './bedrock_claude_adapter';
+import { addNoToolUsageDirective } from './prompts';
 
 describe('bedrockClaudeAdapter', () => {
   const executorMock = {
@@ -278,6 +279,32 @@ describe('bedrockClaudeAdapter', () => {
         type: 'tool',
         name: 'foobar',
       });
+    });
+
+    it('correctly adapt the request for ToolChoiceType.None', () => {
+      bedrockClaudeAdapter.chatComplete({
+        executor: executorMock,
+        system: 'some system instruction',
+        messages: [
+          {
+            role: MessageRole.User,
+            content: 'question',
+          },
+        ],
+        tools: {
+          myFunction: {
+            description: 'myFunction',
+          },
+        },
+        toolChoice: ToolChoiceType.none,
+      });
+
+      expect(executorMock.invoke).toHaveBeenCalledTimes(1);
+
+      const { toolChoice, tools, system } = getCallParams();
+      expect(toolChoice).toBeUndefined();
+      expect(tools).toEqual([]);
+      expect(system).toEqual(addNoToolUsageDirective('some system instruction'));
     });
   });
 });

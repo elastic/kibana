@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { from, switchMap, tap, filter, map } from 'rxjs';
+import { filter, from, map, switchMap, tap } from 'rxjs';
 import { Readable } from 'stream';
 import type { InvokeAIActionParams } from '@kbn/stack-connectors-plugin/common/bedrock/types';
 import { parseSerdeChunkMessage } from './serde_utils';
@@ -19,13 +19,16 @@ import {
   serdeEventstreamIntoObservable,
 } from './serde_eventstream_into_observable';
 import { processCompletionChunks } from './process_completion_chunks';
+import { addNoToolUsageDirective } from './prompts';
 
 export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
   chatComplete: ({ executor, system, messages, toolChoice, tools }) => {
+    const noToolUsage = toolChoice === ToolChoiceType.none;
+
     const connectorInvokeRequest: InvokeAIActionParams = {
-      system,
+      system: noToolUsage ? addNoToolUsageDirective(system) : system,
       messages: messagesToBedrock(messages),
-      tools: toolsToBedrock(tools),
+      tools: noToolUsage ? [] : toolsToBedrock(tools),
       toolChoice: toolChoiceToBedrock(toolChoice),
       temperature: 0,
       stopSequences: ['\n\nHuman:'],
@@ -74,7 +77,8 @@ const toolChoiceToBedrock = (
       name: toolChoice.function,
     };
   }
-  // ToolChoiceType.none is not supported by claude.
+  // ToolChoiceType.none is not supported by claude
+  // we are adding a directive to the system instructions instead in that case.
   return undefined;
 };
 
