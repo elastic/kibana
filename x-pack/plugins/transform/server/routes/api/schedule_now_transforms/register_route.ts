@@ -8,7 +8,7 @@
 import {
   scheduleNowTransformsRequestSchema,
   type ScheduleNowTransformsRequestSchema,
-} from '../../../../common/api_schemas/schedule_now_transforms';
+} from '../../api_schemas/schedule_now_transforms';
 import { addInternalBasePath } from '../../../../common/constants';
 
 import type { RouteDependencies } from '../../../types';

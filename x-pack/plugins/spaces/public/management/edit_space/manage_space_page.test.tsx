@@ -98,6 +98,8 @@ describe('ManageSpacePage', () => {
     nameInput.simulate('change', { target: { value: 'New Space Name' } });
     descriptionInput.simulate('change', { target: { value: 'some description' } });
 
+    updateSpace(wrapper, false, 'oblt');
+
     const createButton = wrapper.find('button[data-test-subj="save-space-button"]');
     createButton.simulate('click');
     await Promise.resolve();
@@ -110,7 +112,76 @@ describe('ManageSpacePage', () => {
       color: '#AA6556',
       imageUrl: '',
       disabledFeatures: [],
+      solution: 'oblt',
     });
+  });
+
+  it('validates the form (name, initials, solution view...)', async () => {
+    const spacesManager = spacesManagerMock.create();
+    spacesManager.createSpace = jest.fn(spacesManager.createSpace);
+    spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
+
+    const wrapper = mountWithIntl(
+      <ManageSpacePage
+        spacesManager={spacesManager as unknown as SpacesManager}
+        getFeatures={featuresStart.getFeatures}
+        notifications={notificationServiceMock.createStartContract()}
+        history={history}
+        capabilities={{
+          navLinks: {},
+          management: {},
+          catalogue: {},
+          spaces: { manage: true },
+        }}
+        eventTracker={eventTracker}
+        allowFeatureVisibility
+        allowSolutionVisibility
+      />
+    );
+
+    await waitFor(() => {
+      wrapper.update();
+      expect(wrapper.find('input[name="name"]')).toHaveLength(1);
+    });
+
+    const createButton = wrapper.find('button[data-test-subj="save-space-button"]');
+    createButton.simulate('click');
+    await Promise.resolve();
+
+    {
+      const errors = wrapper.find('.euiFormErrorText').map((node) => node.text());
+      expect(errors).toEqual([
+        'Enter a name.',
+        'Enter a URL identifier.',
+        'Enter initials.',
+        'Select one solution.',
+      ]);
+
+      expect(spacesManager.createSpace).not.toHaveBeenCalled();
+
+      const nameInput = wrapper.find('input[name="name"]');
+      nameInput.simulate('change', { target: { value: 'New Space Name' } });
+    }
+
+    createButton.simulate('click');
+    await Promise.resolve();
+
+    {
+      const errors = wrapper.find('.euiFormErrorText').map((node) => node.text());
+      expect(errors).toEqual(['Select one solution.']); // requires solution view to be set
+    }
+
+    updateSpace(wrapper, false, 'oblt');
+
+    createButton.simulate('click');
+    await Promise.resolve();
+
+    {
+      const errors = wrapper.find('.euiFormErrorText').map((node) => node.text());
+      expect(errors).toEqual([]); // no more errors
+    }
+
+    expect(spacesManager.createSpace).toHaveBeenCalled();
   });
 
   it('shows solution view select when visible', async () => {
@@ -235,6 +306,51 @@ describe('ManageSpacePage', () => {
     });
 
     expect(wrapper.find(EnabledFeatures)).toHaveLength(0);
+  });
+
+  it('hides feature visibility controls when solution view is not "classic"', async () => {
+    const spacesManager = spacesManagerMock.create();
+
+    const wrapper = mountWithIntl(
+      <ManageSpacePage
+        spacesManager={spacesManager}
+        getFeatures={featuresStart.getFeatures}
+        notifications={notificationServiceMock.createStartContract()}
+        history={history}
+        capabilities={{
+          navLinks: {},
+          management: {},
+          catalogue: {},
+          spaces: { manage: true },
+        }}
+        eventTracker={eventTracker}
+        allowFeatureVisibility
+        allowSolutionVisibility
+      />
+    );
+
+    await waitFor(async () => {
+      await Promise.resolve();
+
+      wrapper.update();
+
+      // default for create space: expect visible features table to exist
+      expect(wrapper.find(EnabledFeatures)).toHaveLength(1);
+    });
+
+    await waitFor(() => {
+      // switch to observability view
+      updateSpace(wrapper, false, 'oblt');
+      // expect visible features table to not exist
+      expect(wrapper.find(EnabledFeatures)).toHaveLength(0);
+    });
+
+    await waitFor(() => {
+      // switch to classic
+      updateSpace(wrapper, false, 'classic');
+      // expect visible features table to exist again
+      expect(wrapper.find(EnabledFeatures)).toHaveLength(1);
+    });
   });
 
   it('allows a space to be updated', async () => {
