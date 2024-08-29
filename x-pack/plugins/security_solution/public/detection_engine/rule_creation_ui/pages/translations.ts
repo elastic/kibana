@@ -14,8 +14,8 @@ export const RULE_PREVIEW_TITLE = i18n.translate(
   }
 );
 
-export const QUERY_BAR_VALIDATION_ERROR = (vlidationError: string) =>
+export const QUERY_BAR_VALIDATION_ERROR = (validationError: string) =>
   i18n.translate('xpack.securitySolution.detectionEngine.createRule.validationError', {
-    values: { vlidationError },
-    defaultMessage: 'Query bar: {vlidationError}',
+    values: { validationError },
+    defaultMessage: 'Query bar: {validationError}',
   });
