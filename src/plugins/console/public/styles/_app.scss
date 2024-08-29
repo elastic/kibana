@@ -98,7 +98,7 @@
   flex: 1 1 1px;
 }
 
-.conApp__editorActions {
+.conApp__actionsPanel {
   button {
     height: $euiSize * 1.1;
     width: $euiSize * 1.1;
@@ -109,13 +109,23 @@
   top: 0;
   // Adjust for possible scrollbars
   right: $euiSize;
-  // For IE11
-  min-width: $euiSizeXXL * 1.15;
   height: $euiSizeL;
   background-color: $euiFormBackgroundColor;
   border-radius: $euiSizeXS;
   box-shadow: 0 0 $euiSizeXS $euiSizeXS transparentize($euiShadowColor, .9);
   padding-top: $euiSize * .1;
+}
+
+.conApp__editorActions {
+  @extend .conApp__actionsPanel;
+  // For IE11
+  min-width: $euiSizeL * 2;
+}
+
+.conApp__outputActions {
+  @extend .conApp__actionsPanel;
+  // For IE11
+  min-width: $euiSizeL;
 }
 
 .conApp__resizer {
@@ -153,8 +163,8 @@
 .console__monaco_editor__selectedRequests::before {
   content: '';
   position: absolute;
-  top: -$euiSize * .2;
-  bottom: -$euiSize * .2;
+  top: 0;
+  bottom: -$euiSize * .3;
   left: -$euiSize * 3;
   right: 0;
   background: transparentize($euiColorPrimary, .9);

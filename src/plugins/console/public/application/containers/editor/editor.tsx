@@ -113,7 +113,7 @@ export const Editor = memo(({ loading, setEditorInstance }: Props) => {
           initialWidth={secondPanelWidth}
         >
           <EuiSplitPanel.Outer grow borderRadius="none" hasShadow={false}>
-            <EuiSplitPanel.Inner paddingSize="none">
+            <EuiSplitPanel.Inner paddingSize="none" css={{ alignContent: 'center' }}>
               {data ? (
                 isMonacoEnabled ? (
                   <MonacoEditorOutput />

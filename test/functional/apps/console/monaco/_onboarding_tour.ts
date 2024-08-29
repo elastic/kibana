@@ -88,5 +88,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.refresh();
       await expectAllStepsHidden();
     });
+
+    it('allows re-running the tour', async () => {
+      await PageObjects.console.skipTourIfExists();
+
+      // Verify that tour is hiddern
+      await expectAllStepsHidden();
+
+      // Re-run tour
+      await PageObjects.console.clickHelpIcon();
+      await PageObjects.console.clickRerunTour();
+
+      // Verify that first tour step is visible
+      expect(await isTourStepOpen('shellTourStep')).to.be(true);
+    });
   });
 }

@@ -26,7 +26,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const setAllowExpensiveQueries = async (value: boolean) => {
     await common.navigateToApp('console');
-    await console.closeHelpIfExists();
     await console.clearTextArea();
     await console.enterRequest(
       '\nPUT _cluster/settings\n{"transient": {"search.allow_expensive_queries": ' + value + '}}'

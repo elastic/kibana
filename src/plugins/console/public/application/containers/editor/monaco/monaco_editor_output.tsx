@@ -23,10 +23,8 @@ import {
   EuiScreenReaderOnly,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
-  EuiLink,
+  EuiButtonIcon,
   EuiToolTip,
-  EuiPanel,
 } from '@elastic/eui';
 import { CONSOLE_THEME_ID, CONSOLE_OUTPUT_LANG_ID, monaco } from '@kbn/monaco';
 import { getStatusCodeDecorations } from './utils';
@@ -149,29 +147,27 @@ export const MonacoEditorOutput: FunctionComponent = () => {
       ref={divRef}
     >
       <EuiFlexGroup
-        className="conApp__editorActions"
-        gutterSize="none"
+        className="conApp__outputActions"
         responsive={false}
         style={editorActionsCss}
+        justifyContent="center"
+        alignItems="center"
       >
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <EuiToolTip
             content={i18n.translate('console.outputPanel.copyOutputButtonTooltipContent', {
               defaultMessage: 'Click to copy to clipboard',
             })}
           >
-            <EuiLink
-              color="primary"
+            <EuiButtonIcon
+              iconType="copyClipboard"
               onClick={copyOutputCallback}
               data-test-subj="copyOutputButton"
               aria-label={i18n.translate('console.outputPanel.copyOutputButtonTooltipAriaLabel', {
                 defaultMessage: 'Click to copy to clipboard',
               })}
-            >
-              <EuiPanel paddingSize="s">
-                <EuiIcon type="copyClipboard" />
-              </EuiPanel>
-            </EuiLink>
+              iconSize={'s'}
+            />
           </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>

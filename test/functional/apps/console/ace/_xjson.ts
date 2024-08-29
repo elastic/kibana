@@ -21,9 +21,6 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     this.tags('includeFirefox');
     before(async () => {
       await PageObjects.common.navigateToApp('console');
-      await retry.try(async () => {
-        await PageObjects.console.collapseHelp();
-      });
     });
 
     beforeEach(async () => {

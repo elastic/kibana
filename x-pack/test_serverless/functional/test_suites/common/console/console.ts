@@ -25,10 +25,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('dev_tools', { hash: '/console' });
     });
 
-    beforeEach(async () => {
-      await PageObjects.console.closeHelpIfExists();
-    });
-
     it('should show the default request', async () => {
       await retry.try(async () => {
         const actualRequest = await PageObjects.console.monaco.getEditorText();
