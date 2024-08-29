@@ -129,9 +129,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.closeAddPanel();
       await PageObjects.lens.goToTimeRange();
       await PageObjects.dashboard.saveDashboard('lnsDrilldown');
-      await panelActions.openContextMenu();
 
-      expect(await testSubjects.exists('embeddablePanelAction-ACTION_EXPLORE_DATA')).not.to.be.ok();
+      await panelActions.expectMissingPanelAction(
+        'embeddablePanelAction-ACTION_EXPLORE_DATA',
+        'lensXYVis'
+      );
     });
 
     it('should be able to add filters by clicking in pie chart', async () => {
@@ -238,7 +240,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.closeAddPanel();
 
       await panelActions.legacyUnlinkFromLibrary('lnsPieVis');
-      await testSubjects.existOrFail('unlinkPanelSuccess');
     });
 
     it('save lens panel to embeddable library', async () => {

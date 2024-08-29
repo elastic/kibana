@@ -51,13 +51,11 @@ export default function ({ getPageObjects, getService }) {
 
     it('save map panel to embeddable library', async () => {
       await dashboardPanelActions.saveToLibrary(mapTitle);
-      await testSubjects.existOrFail('addPanelToLibrarySuccess');
       await dashboardPanelActions.expectInLibrary(mapTitle);
     });
 
     it('unlink map panel from embeddable library', async () => {
       await dashboardPanelActions.unlinkFromLibrary(mapTitle);
-      await testSubjects.existOrFail('unlinkPanelSuccess');
       await dashboardPanelActions.expectNotInLibrary(mapTitle);
 
       await dashboardAddPanel.clickOpenAddPanel();

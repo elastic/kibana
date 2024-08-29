@@ -76,7 +76,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await common.waitForSaveModalToClose();
         await testSubjects.exists('addObjectToDashboardSuccess');
         await testSubjects.existOrFail('links--component');
-        await dashboardPanelActions.expectLinkedToLibrary(LINKS_PANEL_NAME);
+        await dashboardPanelActions.expectLinkedToLibrary(LINKS_PANEL_NAME, false);
 
         expect(await dashboardLinks.getNumberOfLinksInPanel()).to.equal(4);
         await dashboard.clickDiscardChanges();

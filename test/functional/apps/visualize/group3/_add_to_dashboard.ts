@@ -51,7 +51,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const panelCount = await PageObjects.dashboard.getPanelCount();
       expect(panelCount).to.eql(1);
 
-      await dashboardPanelActions.expectLinkedToLibrary('My New Vis 1');
+      await dashboardPanelActions.expectLinkedToLibrary('My New Vis 1', false);
 
       await PageObjects.timeToVisualize.resetNewDashboard();
     });
@@ -73,7 +73,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const panelCount = await PageObjects.dashboard.getPanelCount();
       expect(panelCount).to.eql(1);
 
-      await dashboardPanelActions.expectLinkedToLibrary('My Saved New Vis 1');
+      await dashboardPanelActions.expectLinkedToLibrary('My Saved New Vis 1', false);
 
       await PageObjects.timeToVisualize.resetNewDashboard();
     });
@@ -108,7 +108,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const panelCount = await PageObjects.dashboard.getPanelCount();
       expect(panelCount).to.eql(1);
 
-      await dashboardPanelActions.expectLinkedToLibrary('My New Vis 1 Copy');
+      await dashboardPanelActions.expectLinkedToLibrary('My New Vis 1 Copy', false);
 
       await PageObjects.timeToVisualize.resetNewDashboard();
     });
@@ -143,7 +143,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const panelCount = await PageObjects.dashboard.getPanelCount();
       expect(panelCount).to.eql(1);
 
-      await dashboardPanelActions.expectLinkedToLibrary('Another New Vis 1 Copy');
+      await dashboardPanelActions.expectLinkedToLibrary('Another New Vis 1 Copy', false);
 
       await PageObjects.timeToVisualize.resetNewDashboard();
     });
@@ -174,7 +174,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const panelCount = await PageObjects.dashboard.getPanelCount();
       expect(panelCount).to.eql(2);
 
-      await dashboardPanelActions.expectLinkedToLibrary('My New Vis 2');
+      await dashboardPanelActions.expectLinkedToLibrary('My New Vis 2', false);
     });
 
     it('adding a new metric to an existing dashboard by reference', async function () {
@@ -203,7 +203,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const panelCount = await PageObjects.dashboard.getPanelCount();
       expect(panelCount).to.eql(2);
 
-      await dashboardPanelActions.expectLinkedToLibrary('My Saved New Vis 2');
+      await dashboardPanelActions.expectLinkedToLibrary('My Saved New Vis 2', false);
     });
 
     it('adding a existing metric to an existing dashboard by value', async function () {
@@ -245,7 +245,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const panelCount = await PageObjects.dashboard.getPanelCount();
       expect(panelCount).to.eql(2);
 
-      await dashboardPanelActions.expectNotLinkedToLibrary('My New Vis 2 Copy');
+      await dashboardPanelActions.expectNotLinkedToLibrary('My New Vis 2 Copy', false);
     });
 
     it('adding a existing metric to an existing dashboard by reference', async function () {
@@ -287,7 +287,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const panelCount = await PageObjects.dashboard.getPanelCount();
       expect(panelCount).to.eql(2);
 
-      await dashboardPanelActions.expectLinkedToLibrary('Neat Saved Vis 2 Copy');
+      await dashboardPanelActions.expectLinkedToLibrary('Neat Saved Vis 2 Copy', false);
     });
   });
 }

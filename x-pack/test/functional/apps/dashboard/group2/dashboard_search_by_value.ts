@@ -15,7 +15,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const testSubjects = getService('testSubjects');
   const { common, dashboard, header } = getPageObjects(['common', 'dashboard', 'header']);
 
   describe('saved searches by value', () => {
@@ -75,7 +74,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(titles.length).to.be(1);
       await dashboardPanelActions.expectLinkedToLibrary(titles[0], false);
       await dashboardPanelActions.unlinkFromLibrary(titles[0]);
-      await testSubjects.existOrFail('unlinkPanelSuccess');
       titles = await dashboard.getPanelTitles();
       expect(titles.length).to.be(1);
       await dashboardPanelActions.expectNotLinkedToLibrary(titles[0], false);
