@@ -14,13 +14,14 @@ import { TextObject } from '../../../common/text_object';
 import { SenseEditor } from '../models';
 import { SHELL_TAB_ID } from '../containers/main/constants';
 import { MonacoEditorActionsProvider } from '../containers/editor/monaco/monaco_editor_actions_provider';
+import { RequestToRestore } from '../../types';
 
 export interface Store {
   ready: boolean;
   settings: DevToolsSettings;
   currentTextObject: TextObject | null;
   currentView: string;
-  restoreRequestFromHistory: string | null;
+  restoreRequestFromHistory: RequestToRestore | null;
 }
 
 export const initialValue: Store = produce<Store>(
@@ -39,7 +40,7 @@ export type Action =
   | { type: 'setCurrentTextObject'; payload: TextObject }
   | { type: 'updateSettings'; payload: DevToolsSettings }
   | { type: 'setCurrentView'; payload: string }
-  | { type: 'setRequestToRestore'; payload: string }
+  | { type: 'setRequestToRestore'; payload: RequestToRestore }
   | { type: 'clearRequestToRestore' };
 
 export const reducer: Reducer<Store, Action> = (state, action) =>

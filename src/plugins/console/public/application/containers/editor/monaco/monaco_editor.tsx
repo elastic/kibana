@@ -44,7 +44,11 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
     config: { isDevMode },
   } = context;
   const { toasts } = notifications;
-  const { settings, currentTextObject, restoreRequestFromHistory: requestToRestoreFromHistory } = useEditorReadContext();
+  const {
+    settings,
+    currentTextObject,
+    restoreRequestFromHistory: requestToRestoreFromHistory,
+  } = useEditorReadContext();
   const [editorInstance, setEditorInstace] = useState<
     monaco.editor.IStandaloneCodeEditor | undefined
   >();
@@ -143,9 +147,13 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
   const updateEditor = useCallback(async () => {
     if (requestToRestoreFromHistory) {
       editorDispatch({ type: 'clearRequestToRestore' });
-      await actionsProvider.current?.appendRequestToEditor(requestToRestoreFromHistory);
+      await actionsProvider.current?.appendRequestToEditor(
+        requestToRestoreFromHistory,
+        dispatch,
+        context
+      );
     }
-  }, [requestToRestoreFromHistory]);
+  }, [requestToRestoreFromHistory, dispatch, context, editorDispatch]);
 
   useEffect(() => {
     updateEditor();

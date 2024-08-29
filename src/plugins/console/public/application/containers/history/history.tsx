@@ -35,7 +35,7 @@ import { useEditorActionContext } from '../../contexts/editor_context';
 import { HistoryViewer } from './history_viewer_monaco';
 import { useEditorReadContext } from '../../contexts/editor_context';
 import { getFormattedRequest } from '../../lib';
-import { ESRequest } from '../../../types';
+import { ESRequest, RestoreMethod } from '../../../types';
 
 const CHILD_ELEMENT_PREFIX = 'historyReq';
 
@@ -112,11 +112,18 @@ export function History() {
   };
 
   const restoreRequestFromHistory = useCallback(
-    (req: ESRequest) => {
-      const formattedRequest = getFormattedRequest(req);
-      dispatch({ type: 'setRequestToRestore', payload: formattedRequest });
+    (restoreMethod: RestoreMethod) => {
+      const formattedRequest = getFormattedRequest(viewingReq as ESRequest);
+
+      dispatch({
+        type: 'setRequestToRestore',
+        payload: {
+          request: formattedRequest,
+          restoreMethod,
+        },
+      });
     },
-    [dispatch]
+    [viewingReq, dispatch]
   );
 
   useEffect(() => {
@@ -274,7 +281,12 @@ export function History() {
                 <EuiSplitPanel.Inner grow={false}>
                   <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
                     <EuiFlexItem grow={false}>
-                      <EuiButton color="primary" iconType="play" onClick={() => null}>
+                      <EuiButton
+                        color="primary"
+                        iconType="play"
+                        disabled={!viewingReq}
+                        onClick={() => restoreRequestFromHistory(RestoreMethod.RESTORE_AND_EXECUTE)}
+                      >
                         {i18n.translate('console.historyPage.addAndRunButtonLabel', {
                           defaultMessage: 'Add and run',
                         })}
@@ -288,7 +300,7 @@ export function History() {
                         color="primary"
                         iconType="plusInCircle"
                         disabled={!viewingReq}
-                        onClick={() => restoreRequestFromHistory(viewingReq as ESRequest)}
+                        onClick={() => restoreRequestFromHistory(RestoreMethod.RESTORE)}
                       >
                         {i18n.translate('console.historyPage.applyHistoryButtonLabel', {
                           defaultMessage: 'Add',

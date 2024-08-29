@@ -22,7 +22,11 @@ import { useServicesContext } from '../../contexts';
 import { MAIN_PANEL_LABELS } from './i18n';
 import { NavIconButton } from './nav_icon_button';
 import { Editor } from '../editor';
-import { useEditorReadContext, useEditorActionContext } from '../../contexts';
+import {
+  useEditorReadContext,
+  useEditorActionContext,
+  useRequestActionContext,
+} from '../../contexts';
 import {
   TopNavMenu,
   SomethingWentWrongCallout,
@@ -50,6 +54,7 @@ interface MainProps {
 
 export function Main({ isEmbeddable = false }: MainProps) {
   const dispatch = useEditorActionContext();
+  const requestDispatch = useRequestActionContext();
   const { currentView } = useEditorReadContext();
 
   const { docLinks } = useServicesContext();
@@ -61,6 +66,11 @@ export function Main({ isEmbeddable = false }: MainProps) {
   useEffect(() => {
     localStorage.setItem(TOUR_STORAGE_KEY, JSON.stringify(tourState));
   }, [tourState]);
+
+  // Clean up request output when switching tabs
+  useEffect(() => {
+    requestDispatch({ type: 'cleanRequest', payload: undefined });
+  }, [currentView, requestDispatch]);
 
   const consoleTourStepProps: ConsoleTourStepProps[] = getConsoleTourStepProps(
     tourStepProps,
