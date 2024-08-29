@@ -18,18 +18,17 @@ import {
   EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiButton,
   useEuiTheme,
   EuiSplitPanel,
   EuiButtonEmpty,
-  EuiEmptyPrompt,
   EuiFormFieldset,
   EuiCheckableCard,
   EuiResizableContainer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { HistoryEmptyPrompt } from './history_empty';
 import { useServicesContext } from '../../contexts';
 import { useEditorActionContext } from '../../contexts/editor_context';
 import { HistoryViewer } from './history_viewer_monaco';
@@ -63,7 +62,6 @@ const CheckeableCardLabel = ({
 export function History() {
   const { euiTheme } = useEuiTheme();
   const {
-    docLinks,
     services: { history },
   } = useServicesContext();
   const dispatch = useEditorActionContext();
@@ -162,86 +160,50 @@ export function History() {
                 }}
               >
                 <EuiSplitPanel.Inner paddingSize="none">
-                  <EuiSpacer size="s" />
-                  <EuiTitle>
-                    <h2>
-                      <FormattedMessage
-                        id="console.historyPage.pageTitle"
-                        defaultMessage="History"
-                      />
-                    </h2>
-                  </EuiTitle>
-                  <EuiSpacer size="s" />
-                  <EuiText color="subdued">
-                    <p>
-                      <FormattedMessage
-                        id="console.historyPage.pageDescription"
-                        defaultMessage="Revisit and reuse your past queries"
-                      />
-                    </p>
-                  </EuiText>
-                  <EuiSpacer size="l" />
 
-                  {requests.length === 0 && (
-                    <EuiFlexGroup>
-                      <EuiFlexItem>
-                        <EuiSpacer size="xxl" />
-                        <EuiSpacer size="xxl" />
-                        <EuiSpacer size="xxl" />
-                        <EuiEmptyPrompt
-                          title={
-                            <h2>
-                              {i18n.translate('console.historyPage.emptyPromptTitle', {
-                                defaultMessage: 'No queries yet',
-                              })}
-                            </h2>
-                          }
-                          titleSize="xs"
-                          body={
-                            <p>
-                              {i18n.translate('console.historyPage.emptyPromptBody', {
-                                defaultMessage:
-                                  'This history panel will display any past queries you’ve run for review and reuse.',
-                              })}
-                            </p>
-                          }
-                          footer={
-                            <EuiTitle size="xxs">
-                              <div>
-                                <h3>
-                                  <FormattedMessage
-                                    id="console.historyPage.emptyPromptFooterLabel"
-                                    defaultMessage="Want to learn more?"
-                                  />
-                                </h3>
-                                <EuiLink href={docLinks.console.guide} target="_blank">
-                                  <FormattedMessage
-                                    id="console.historyPage.emptyPromptFooterLink"
-                                    defaultMessage="Read Console documentation"
-                                  />
-                                </EuiLink>
-                              </div>
-                            </EuiTitle>
-                          }
-                        />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  )}
-
-                  {requests.map((req, idx) => (
-                    <EuiFormFieldset key={idx}>
-                      <EuiCheckableCard
-                        id={`${CHILD_ELEMENT_PREFIX}${idx}`}
-                        label={<CheckeableCardLabel {...describeReq(req)} />}
-                        checkableType="radio"
-                        checked={viewingReq === req}
-                        onChange={() => {
-                          setViewingReq(req);
-                        }}
-                      />
+                  <EuiFlexGroup direction="column" gutterSize="none" css={{ height: '100%' }}>
+                    <EuiFlexItem grow={false}>
                       <EuiSpacer size="s" />
-                    </EuiFormFieldset>
-                  ))}
+                      <EuiTitle>
+                        <h2>
+                          <FormattedMessage
+                            id="console.historyPage.pageTitle"
+                            defaultMessage="History"
+                          />
+                        </h2>
+                      </EuiTitle>
+                      <EuiSpacer size="s" />
+                      <EuiText color="subdued">
+                        <p>
+                          <FormattedMessage
+                            id="console.historyPage.pageDescription"
+                            defaultMessage="Revisit and reuse your past queries"
+                          />
+                        </p>
+                      </EuiText>
+                      <EuiSpacer size="l" />
+                    </EuiFlexItem>
+
+                    <EuiFlexItem grow={false} css={{ height: '100%', overflowY: 'scroll' }}>
+                      {requests.length === 0 && <HistoryEmptyPrompt />}
+
+                      {requests.slice(0, 14).map((req, idx) => (
+                        <EuiFormFieldset key={idx}>
+                          <EuiCheckableCard
+                            id={`${CHILD_ELEMENT_PREFIX}${idx}`}
+                            label={<CheckeableCardLabel {...describeReq(req)} />}
+                            checkableType="radio"
+                            checked={viewingReq === req}
+                            onChange={() => {
+                              setViewingReq(req);
+                            }}
+                          />
+                          <EuiSpacer size="s" />
+                        </EuiFormFieldset>
+                      ))}
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+
                 </EuiSplitPanel.Inner>
                 <EuiSplitPanel.Inner grow={false} color="subdued" paddingSize="none">
                   <EuiText>
