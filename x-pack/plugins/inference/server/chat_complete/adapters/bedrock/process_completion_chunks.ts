@@ -17,11 +17,7 @@ import type { CompletionChunk, MessageStopChunk } from './types';
 export function processCompletionChunks() {
   return (source: Observable<CompletionChunk>) =>
     new Observable<ChatCompletionChunkEvent | ChatCompletionTokenCountEvent>((subscriber) => {
-      // We use this to make sure we don't complete the Observable
-      // before all operations have completed.
-      let nextPromise = Promise.resolve();
-
-      async function handleNext(chunkBody: CompletionChunk) {
+      function handleNext(chunkBody: CompletionChunk) {
         if (isTokenCountCompletionChunk(chunkBody)) {
           return emitTokenCountEvent(subscriber, chunkBody);
         }
@@ -80,15 +76,17 @@ export function processCompletionChunks() {
 
       source.subscribe({
         next: (value) => {
-          nextPromise = nextPromise.then(() =>
-            handleNext(value).catch((error) => subscriber.error(error))
-          );
+          try {
+            handleNext(value);
+          } catch (error) {
+            subscriber.error(error);
+          }
         },
         error: (err) => {
           subscriber.error(err);
         },
         complete: () => {
-          nextPromise.then(() => subscriber.complete()).catch(() => {});
+          subscriber.complete();
         },
       });
     });
