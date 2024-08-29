@@ -6,7 +6,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import type { MlApiServices } from '../../../../services/ml_api_service';
+import type { MlApi } from '../../../../services/ml_api_service';
 import type { MlJobService } from '../../../../services/job_service';
 import type { JobCreator } from '../job_creator';
 import type { DatafeedId, JobId } from '../../../../../../common/types/anomaly_detection_jobs';
@@ -22,7 +22,7 @@ export type ProgressSubscriber = (progress: number) => void;
 export type JobAssignmentSubscriber = (assigned: boolean) => void;
 
 export class JobRunner {
-  private _mlApiServices: MlApiServices;
+  private _mlApiServices: MlApi;
   private _mlJobService: MlJobService;
   private _jobId: JobId;
   private _datafeedId: DatafeedId;
@@ -44,7 +44,7 @@ export class JobRunner {
   private _jobAssignedToNode$: BehaviorSubject<boolean>;
 
   constructor(jobCreator: JobCreator) {
-    this._mlApiServices = jobCreator.mlApiServices;
+    this._mlApiServices = jobCreator.mlApi;
     this._mlJobService = jobCreator.mlJobService;
     this._jobId = jobCreator.jobId;
     this._datafeedId = jobCreator.datafeedId;

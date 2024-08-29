@@ -45,9 +45,7 @@ export class ForecastsTable extends Component {
       isLoading: props.job.data_counts.processed_record_count !== 0,
       forecasts: [],
     };
-    this.mlForecastService = forecastServiceFactory(
-      constructorContext.services.mlServices.mlApiServices
-    );
+    this.mlForecastService = forecastServiceFactory(constructorContext.services.mlServices.mlApi);
   }
 
   /**
