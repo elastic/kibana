@@ -227,6 +227,14 @@ export const getControlGroupEmbeddableFactory = (services: {
       const saveNotificationSubscription = apiHasSaveNotification(parentApi)
         ? parentApi.saveNotification$.subscribe(() => {
             lastSavedControlsState$.next(controlsManager.snapshotControlsRuntimeState());
+
+            if (
+              typeof autoApplySelections$.value === 'boolean' &&
+              !autoApplySelections$.value &&
+              selectionsManager.hasUnappliedSelections$.value
+            ) {
+              selectionsManager.applySelections();
+            }
           })
         : undefined;
 
