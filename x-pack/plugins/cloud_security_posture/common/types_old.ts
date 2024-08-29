@@ -5,11 +5,11 @@
  * 2.0.
  */
 import { type TypeOf } from '@kbn/config-schema';
-import { CspFinding } from './schemas/csp_finding';
+import type { CspBenchmarkRuleMetadata } from '@kbn/cloud-security-posture-common/schema/rules/latest';
+import type { CspFinding } from '@kbn/cloud-security-posture-common';
 import { SUPPORTED_CLOUDBEAT_INPUTS, SUPPORTED_POLICY_TEMPLATES } from './constants';
 
 import { getComplianceDashboardSchema } from './schemas/stats';
-import type { CspBenchmarkRuleMetadata } from './types/latest';
 
 export type AwsCredentialsType =
   | 'assume_role'
@@ -99,44 +99,6 @@ export interface ComplianceDashboardDataV2 {
   trend: PostureTrend[];
   benchmarks: BenchmarkData[];
 }
-
-export type CspStatusCode =
-  | 'indexed' // latest findings index exists and has results
-  | 'indexing' // index timeout was not surpassed since installation, assumes data is being indexed
-  | 'unprivileged' // user lacks privileges for the latest findings index
-  | 'index-timeout' // index timeout was surpassed since installation
-  | 'not-deployed' // no healthy agents were deployed
-  | 'not-installed' // number of installed csp integrations is 0;
-  | 'waiting_for_results'; // have healthy agents but no findings at all, assumes data is being indexed for the 1st time
-
-export type IndexStatus =
-  | 'not-empty' // Index contains documents
-  | 'empty' // Index doesn't contain documents (or doesn't exist)
-  | 'unprivileged'; // User doesn't have access to query the index
-
-export interface IndexDetails {
-  index: string;
-  status: IndexStatus;
-}
-
-export interface BaseCspSetupBothPolicy {
-  status: CspStatusCode;
-  installedPackagePolicies: number;
-  healthyAgents: number;
-}
-
-export interface BaseCspSetupStatus {
-  indicesDetails: IndexDetails[];
-  latestPackageVersion: string;
-  cspm: BaseCspSetupBothPolicy;
-  kspm: BaseCspSetupBothPolicy;
-  vuln_mgmt: BaseCspSetupBothPolicy;
-  isPluginInitialized: boolean;
-  installedPackageVersion?: string | undefined;
-  hasMisconfigurationsFindings?: boolean;
-}
-
-export type CspSetupStatus = BaseCspSetupStatus;
 
 export type BenchmarkId = CspBenchmarkRuleMetadata['benchmark']['id'];
 export type BenchmarkName = CspBenchmarkRuleMetadata['benchmark']['name'];
