@@ -60,7 +60,8 @@ export type ExpressionVisitorInput<Methods extends VisitorMethods> = AnyToVoid<
       VisitorInput<Methods, 'visitListLiteralExpression'> &
       VisitorInput<Methods, 'visitTimeIntervalLiteralExpression'> &
       VisitorInput<Methods, 'visitInlineCastExpression'> &
-      VisitorInput<Methods, 'visitRenameExpression'>
+      VisitorInput<Methods, 'visitRenameExpression'> &
+      VisitorInput<Methods, 'visitOrderExpression'>
 >;
 
 /**
@@ -75,7 +76,8 @@ export type ExpressionVisitorOutput<Methods extends VisitorMethods> =
   | VisitorOutput<Methods, 'visitListLiteralExpression'>
   | VisitorOutput<Methods, 'visitTimeIntervalLiteralExpression'>
   | VisitorOutput<Methods, 'visitInlineCastExpression'>
-  | VisitorOutput<Methods, 'visitRenameExpression'>;
+  | VisitorOutput<Methods, 'visitRenameExpression'>
+  | VisitorOutput<Methods, 'visitOrderExpression'>;
 
 /**
  * Input that satisfies any command visitor input constraints.
@@ -202,6 +204,7 @@ export interface VisitorMethods<
     any,
     any
   >;
+  visitOrderExpression?: Visitor<contexts.OrderExpressionVisitorContext<Visitors, Data>, any, any>;
 }
 
 /**

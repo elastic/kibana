@@ -25,6 +25,7 @@ export type ESQLSingleAstItem =
   | ESQLLiteral // "literal expression"
   | ESQLCommandMode
   | ESQLInlineCast // "inline cast expression"
+  | ESQLOrderExpression
   | ESQLUnknownItem;
 
 export type ESQLAstField = ESQLFunction | ESQLColumn;
