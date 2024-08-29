@@ -34,7 +34,7 @@ export function initializeControlGroupUnsavedChanges(
   children$: PresentationContainer['children$'],
   comparators: StateComparators<ControlGroupComparatorState>,
   snapshotControlsRuntimeState: () => ControlPanelsState,
-  resetControlsRuntimeState: (lastControlsRuntimeState: ControlPanelsState) => void,
+  resetControlsUnsavedChanges: () => void,
   parentApi: unknown,
   lastSavedRuntimeState: ControlGroupRuntimeState
 ) {
@@ -50,8 +50,6 @@ export function initializeControlGroupUnsavedChanges(
     comparators
   );
 
-  let lastControlsRuntimeState = lastSavedRuntimeState.initialChildControlState;
-
   return {
     api: {
       unsavedChanges: combineLatest([
@@ -63,15 +61,14 @@ export function initializeControlGroupUnsavedChanges(
             ? omit(unsavedControlGroupState, 'controlsInOrder')
             : {};
           if (unsavedControlsState || unsavedControlGroupState?.controlsInOrder) {
-            lastControlsRuntimeState = snapshotControlsRuntimeState();
-            unsavedChanges.initialChildControlState = lastControlsRuntimeState;
+            unsavedChanges.initialChildControlState = snapshotControlsRuntimeState();
           }
           return Object.keys(unsavedChanges).length ? unsavedChanges : undefined;
         })
       ),
       asyncResetUnsavedChanges: async () => {
         controlGroupUnsavedChanges.api.resetUnsavedChanges();
-        resetControlsRuntimeState(lastControlsRuntimeState);
+        resetControlsUnsavedChanges();
 
         const filtersReadyPromises: Array<Promise<void>> = [];
         Object.values(children$.value).forEach((controlApi) => {

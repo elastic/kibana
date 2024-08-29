@@ -37,17 +37,19 @@ export function getControlsInOrder(initialControlPanelsState: ControlPanelsState
     .map(({ id, type }) => ({ id, type })); // filter out `order`
 }
 
-export function initControlsManager(initialControlPanelsState: ControlPanelsState) {
-  const initialControlIds = Object.keys(initialControlPanelsState);
+export function initControlsManager(
+  lastSavedControlsState$: PublishingSubject<ControlPanelsState>
+) {
+  const initialControlIds = Object.keys(lastSavedControlsState$.value);
   const children$ = new BehaviorSubject<{ [key: string]: DefaultControlApi }>({});
-  let controlsPanelState: { [panelId: string]: DefaultControlState } = {
-    ...initialControlPanelsState,
+  let currentControlsState: { [panelId: string]: DefaultControlState } = {
+    ...lastSavedControlsState$.value,
   };
   const controlsInOrder$ = new BehaviorSubject<ControlsInOrder>(
-    getControlsInOrder(initialControlPanelsState)
+    getControlsInOrder(lastSavedControlsState$.value)
   );
   const lastUsedDataViewId$ = new BehaviorSubject<string | undefined>(
-    getLastUsedDataViewId(controlsInOrder$.value, initialControlPanelsState)
+    getLastUsedDataViewId(controlsInOrder$.value, lastSavedControlsState$.value)
   );
   const lastUsedWidth$ = new BehaviorSubject<ControlWidth>(DEFAULT_CONTROL_WIDTH);
   const lastUsedGrow$ = new BehaviorSubject<boolean>(DEFAULT_CONTROL_GROW);
@@ -102,12 +104,12 @@ export function initControlsManager(initialControlPanelsState: ControlPanelsStat
       type: panelType,
     });
     controlsInOrder$.next(nextControlsInOrder);
-    controlsPanelState[id] = initialState ?? {};
+    currentControlsState[id] = initialState ?? {};
     return await untilControlLoaded(id);
   }
 
   function removePanel(panelId: string) {
-    delete controlsPanelState[panelId];
+    delete currentControlsState[panelId];
     controlsInOrder$.next(controlsInOrder$.value.filter(({ id }) => id !== panelId));
     children$.next(omit(children$.value, panelId));
   }
@@ -178,11 +180,11 @@ export function initControlsManager(initialControlPanelsState: ControlPanelsStat
       });
       return controlsRuntimeState;
     },
-    resetControlsRuntimeState: (resetState: ControlPanelsState) => {
-      controlsPanelState = {
-        ...resetState,
+    resetControlsUnsavedChanges: () => {
+      currentControlsState = {
+        ...lastSavedControlsState$.value,
       };
-      const nextControlsInOrder = getControlsInOrder(resetState);
+      const nextControlsInOrder = getControlsInOrder(currentControlsState as ControlPanelsState);
       controlsInOrder$.next(nextControlsInOrder);
 
       const nextControlIds = nextControlsInOrder.map(({ id }) => id);
@@ -201,7 +203,7 @@ export function initControlsManager(initialControlPanelsState: ControlPanelsStat
     },
     api: {
       getSerializedStateForChild: (childId: string) => {
-        const controlPanelState = controlsPanelState[childId];
+        const controlPanelState = currentControlsState[childId];
         return controlPanelState ? { rawState: controlPanelState } : undefined;
       },
       children$: children$ as PublishingSubject<{

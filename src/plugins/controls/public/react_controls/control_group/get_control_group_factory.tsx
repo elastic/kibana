@@ -34,7 +34,12 @@ import { chaining$, controlFetch$, controlGroupFetch$ } from './control_fetch';
 import { initControlsManager } from './init_controls_manager';
 import { openEditControlGroupFlyout } from './open_edit_control_group_flyout';
 import { deserializeControlGroup } from './serialization_utils';
-import { ControlGroupApi, ControlGroupRuntimeState, ControlGroupSerializedState } from './types';
+import {
+  ControlGroupApi,
+  ControlGroupRuntimeState,
+  ControlGroupSerializedState,
+  ControlPanelsState,
+} from './types';
 import { ControlGroup } from './components/control_group';
 import { initSelectionsManager } from './selections_manager';
 import { initializeControlGroupUnsavedChanges } from './control_group_unsaved_changes_api';
@@ -71,7 +76,10 @@ export const getControlGroupEmbeddableFactory = (services: {
 
       const autoApplySelections$ = new BehaviorSubject<boolean>(autoApplySelections);
       const defaultDataViewId = await services.dataViews.getDefaultId();
-      const controlsManager = initControlsManager(initialChildControlState);
+      const lastSavedControlsState$ = new BehaviorSubject<ControlPanelsState>(
+        initialChildControlState
+      );
+      const controlsManager = initControlsManager(lastSavedControlsState$);
       const selectionsManager = initSelectionsManager({
         ...controlsManager.api,
         autoApplySelections$,
@@ -113,7 +121,7 @@ export const getControlGroupEmbeddableFactory = (services: {
           labelPosition: [labelPosition$, (next: ControlStyle) => labelPosition$.next(next)],
         },
         controlsManager.snapshotControlsRuntimeState,
-        controlsManager.resetControlsRuntimeState,
+        controlsManager.resetControlsUnsavedChanges,
         parentApi,
         lastSavedRuntimeState
       );
@@ -216,6 +224,12 @@ export const getControlGroupEmbeddableFactory = (services: {
         dataViews.next(newDataViews)
       );
 
+      const saveNotificationSubscription = apiHasSaveNotification(parentApi)
+        ? parentApi.saveNotification$.subscribe(() => {
+            lastSavedControlsState$.next(controlsManager.snapshotControlsRuntimeState());
+          })
+        : undefined;
+
       /** Fetch the allowExpensiveQuries setting for the children to use if necessary */
       try {
         const { allowExpensiveQueries } = await services.core.http.get<{
@@ -244,6 +258,7 @@ export const getControlGroupEmbeddableFactory = (services: {
             return () => {
               selectionsManager.cleanup();
               childrenDataViewsSubscription.unsubscribe();
+              saveNotificationSubscription?.unsubscribe();
             };
           }, []);
 
