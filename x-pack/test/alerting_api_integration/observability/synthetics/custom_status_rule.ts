@@ -13,9 +13,7 @@ import { SyntheticsRuleHelper } from './synthetics_rule_helper';
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const server = getService('kibanaServer');
-
   const retryService = getService('retry');
-
   const ruleHelper = new SyntheticsRuleHelper(getService);
 
   describe('SyntheticsCustomStatusRule', () => {
@@ -130,7 +128,7 @@ export default function ({ getService }: FtrProviderContext) {
         const params: StatusRuleParams = {
           condition: {
             window: {
-              numberOfLocations: 1,
+              numberOfLocations: 2,
             },
             groupBy: 'locationId',
             downThreshold: 1,
@@ -156,7 +154,45 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
 
-      it('should trigger down alert based on location threshold', async () => {
+      it('should not trigger down alert based on location threshold with one location down', async () => {
+        // ensure alert does not fire
+        try {
+          const response = await ruleHelper.waitForStatusAlert({
+            ruleId,
+            filters: [
+              { term: { 'kibana.alert.status': 'active' } },
+              {
+                term: { 'monitor.id': monitor.id },
+              },
+            ],
+          });
+          const alert: any = response.hits.hits?.[0]._source;
+          expect(alert).to.have.property('kibana.alert.status', 'active');
+          expect(alert['kibana.alert.reason']).to.eql(
+            `Monitor "${monitor.name}" is down from 1 location (Dev Service). Alert when monitor is down from 1 location.`
+          );
+          throw new Error('Alert was triggered when condition should not be met');
+        } catch (e) {
+          if (e.message === 'Alert was triggered when condition should not be met') {
+            throw e;
+          }
+        }
+      });
+
+      it('should trigger down alert based on location threshold with two locations down', async () => {
+        await ruleHelper.makeSummaries({
+          monitor,
+          downChecks: 1,
+          location: {
+            id: 'dev2',
+            label: 'Dev Service 2',
+          },
+        });
+        await ruleHelper.makeSummaries({
+          monitor,
+          downChecks: 1,
+        });
+
         const response = await ruleHelper.waitForStatusAlert({
           ruleId,
           filters: [
@@ -166,11 +202,10 @@ export default function ({ getService }: FtrProviderContext) {
             },
           ],
         });
-
         const alert: any = response.hits.hits?.[0]._source;
         expect(alert).to.have.property('kibana.alert.status', 'active');
         expect(alert['kibana.alert.reason']).to.eql(
-          `Monitor "${monitor.name}" is down from 1 location (Dev Service). Alert when monitor is down from 1 location.`
+          `Monitor "${monitor.name}" is down from 2 locations (Dev Service, Dev Service 2). Alert when monitor is down from 2 locations.`
         );
       });
 
@@ -208,7 +243,7 @@ export default function ({ getService }: FtrProviderContext) {
         const alert: any = response.hits.hits?.[0]._source;
         expect(alert).to.have.property('kibana.alert.status', 'active');
         expect(alert['kibana.alert.reason']).to.eql(
-          `Monitor "${monitor.name}" is down from 1 location (Dev Service). Alert when monitor is down from 1 location.`
+          `Monitor "${monitor.name}" is down from 2 locations (Dev Service, Dev Service 2). Alert when monitor is down from 2 locations.`
         );
       });
 
@@ -337,7 +372,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(alert['kibana.alert.reason']).to.eql(
           `Monitor "${monitor.name}" from Dev Service is down. Checked at ${moment(
             docs[4]['@timestamp']
-          ).format('LLL')}. Alert when 5 checks are down within last 10 minutes.`
+          ).format('LLL')}. Alert when 5 checks are down within the last 1 minute.`
         );
       });
 

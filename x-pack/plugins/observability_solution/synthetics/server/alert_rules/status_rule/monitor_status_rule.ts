@@ -158,7 +158,7 @@ const handleLocationBasedAlert = ({
   // lets build a map of monitors for each location
   for (const [configId, configs] of downConfigsById) {
     const matchingLocationsWithDownThreshold = configs.filter(
-      (config) => config.checks.down >= downThreshold
+      (config) => config.checks.downWithinXChecks >= downThreshold // 2
     );
     if (matchingLocationsWithDownThreshold.length < locationsThreshold) {
       continue;
