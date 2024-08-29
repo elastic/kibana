@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 
 export default function ({ getPageObjects, getService }) {
-  const PageObjects = getPageObjects(['common', 'dashboard', 'maps']);
+  const { dashboard, maps } = getPageObjects(['dashboard', 'maps']);
   const kibanaServer = getService('kibanaServer');
   const filterBar = getService('filterBar');
   const dashboardPanelActions = getService('dashboardPanelActions');
@@ -35,9 +35,9 @@ export default function ({ getPageObjects, getService }) {
         defaultIndex: 'c698b940-e149-11e8-a35a-370a8516603a',
         [UI_SETTINGS.COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX]: true,
       });
-      await PageObjects.dashboard.navigateToApp();
-      await PageObjects.dashboard.loadSavedDashboard('map embeddable example');
-      await PageObjects.dashboard.waitForRenderComplete();
+      await dashboard.navigateToApp();
+      await dashboard.loadSavedDashboard('map embeddable example');
+      await dashboard.waitForRenderComplete();
     });
 
     after(async () => {
@@ -50,21 +50,18 @@ export default function ({ getPageObjects, getService }) {
     async function getRequestTimestamp() {
       await inspector.openInspectorRequestsView();
       const requestStats = await inspector.getTableData();
-      const requestTimestamp = PageObjects.maps.getInspectorStatRowHit(
-        requestStats,
-        'Request timestamp'
-      );
+      const requestTimestamp = maps.getInspectorStatRowHit(requestStats, 'Request timestamp');
       await inspector.close();
       return requestTimestamp;
     }
 
     it('should set "data-title" attribute', async () => {
-      const [{ title }] = await PageObjects.dashboard.getPanelSharedItemData();
+      const [{ title }] = await dashboard.getPanelSharedItemData();
       expect(title).to.be('join example');
     });
 
     it('should display tools control', async () => {
-      await PageObjects.maps.expectExistsToolsControl();
+      await maps.expectExistsToolsControl();
     });
 
     it('should pass index patterns to container', async () => {
@@ -92,7 +89,7 @@ export default function ({ getPageObjects, getService }) {
     });
 
     it('should apply container state (time, query, filters) to embeddable when loaded', async () => {
-      const { rawResponse: response } = await PageObjects.maps.getResponseFromDashboardPanel(
+      const { rawResponse: response } = await maps.getResponseFromDashboardPanel(
         'geo grid vector grid example'
       );
       expect(response.aggregations.gridSplit.buckets.length).to.equal(6);
@@ -104,21 +101,21 @@ export default function ({ getPageObjects, getService }) {
         operation: 'is',
         value: 'win 8',
       });
-      await PageObjects.maps.waitForLayersToLoad();
+      await maps.waitForLayersToLoad();
 
       await filterBar.addFilterAndSelectDataView('meta_for_geo_shapes*', {
         field: 'shape_name',
         operation: 'is',
         value: 'alpha',
       });
-      await PageObjects.maps.waitForLayersToLoad();
+      await maps.waitForLayersToLoad();
 
-      const { rawResponse: gridResponse } = await PageObjects.maps.getResponseFromDashboardPanel(
+      const { rawResponse: gridResponse } = await maps.getResponseFromDashboardPanel(
         'geo grid vector grid example'
       );
       expect(gridResponse.aggregations.gridSplit.buckets.length).to.equal(1);
 
-      const { rawResponse: joinResponse } = await PageObjects.maps.getResponseFromDashboardPanel(
+      const { rawResponse: joinResponse } = await maps.getResponseFromDashboardPanel(
         'join example',
         'load join metrics (geo_shapes*)'
       );
@@ -129,15 +126,15 @@ export default function ({ getPageObjects, getService }) {
       // clear filters from previous test
       await filterBar.removeAllFilters();
 
-      await PageObjects.dashboard.switchToEditMode();
+      await dashboard.switchToEditMode();
 
       await dashboardPanelActions.editPanelByTitle('geo grid vector grid example');
-      await PageObjects.maps.waitForLayersToLoad();
+      await maps.waitForLayersToLoad();
 
       await filterBar.addFilter({ field: 'machine.os', operation: 'is', value: 'ios' });
-      await PageObjects.maps.waitForLayersToLoad();
+      await maps.waitForLayersToLoad();
       await testSubjects.click('mapSaveAndReturnButton');
-      const { rawResponse: gridResponse } = await PageObjects.maps.getResponseFromDashboardPanel(
+      const { rawResponse: gridResponse } = await maps.getResponseFromDashboardPanel(
         'geo grid vector grid example'
       );
       expect(gridResponse.aggregations.gridSplit.buckets.length).to.equal(2);
@@ -146,7 +143,7 @@ export default function ({ getPageObjects, getService }) {
     it('should re-fetch query when "refresh" is clicked', async () => {
       await dashboardPanelActions.openInspectorByTitle('geo grid vector grid example');
       const beforeQueryRefreshTimestamp = await getRequestTimestamp();
-      await PageObjects.maps.refreshQuery();
+      await maps.refreshQuery();
       await dashboardPanelActions.openInspectorByTitle('geo grid vector grid example');
       const afterQueryRefreshTimestamp = await getRequestTimestamp();
       expect(beforeQueryRefreshTimestamp).not.to.equal(afterQueryRefreshTimestamp);
@@ -156,7 +153,7 @@ export default function ({ getPageObjects, getService }) {
       await dashboardPanelActions.openInspectorByTitle('geo grid vector grid example');
       const beforeRefreshTimerTimestamp = await getRequestTimestamp();
       expect(beforeRefreshTimerTimestamp.length).to.be(24);
-      await PageObjects.maps.triggerSingleRefresh(1000);
+      await maps.triggerSingleRefresh(1000);
       await dashboardPanelActions.openInspectorByTitle('geo grid vector grid example');
       const afterRefreshTimerTimestamp = await getRequestTimestamp();
       expect(beforeRefreshTimerTimestamp).not.to.equal(afterRefreshTimerTimestamp);
@@ -164,12 +161,12 @@ export default function ({ getPageObjects, getService }) {
 
     // see https://github.com/elastic/kibana/issues/61596 on why it is specific to maps
     it("dashboard's back button should navigate to previous page", async () => {
-      await PageObjects.dashboard.navigateToApp();
-      await PageObjects.dashboard.preserveCrossAppState();
-      await PageObjects.dashboard.loadSavedDashboard('map embeddable example');
-      await PageObjects.dashboard.waitForRenderComplete();
+      await dashboard.navigateToApp();
+      await dashboard.preserveCrossAppState();
+      await dashboard.loadSavedDashboard('map embeddable example');
+      await dashboard.waitForRenderComplete();
       await browser.goBack();
-      expect(await PageObjects.dashboard.onDashboardLandingPage()).to.be(true);
+      expect(await dashboard.onDashboardLandingPage()).to.be(true);
     });
   });
 }

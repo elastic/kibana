@@ -8,13 +8,11 @@
 import expect from '@kbn/expect';
 
 export default function ({ getPageObjects, getService }) {
-  const PageObjects = getPageObjects([
-    'common',
+  const { dashboard, header, maps, timePicker } = getPageObjects([
     'dashboard',
     'header',
     'maps',
     'timePicker',
-    'visualize',
   ]);
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
@@ -41,30 +39,30 @@ export default function ({ getPageObjects, getService }) {
 
     describe('new map', () => {
       beforeEach(async () => {
-        await PageObjects.dashboard.navigateToApp();
-        await PageObjects.dashboard.clickNewDashboard();
+        await dashboard.navigateToApp();
+        await dashboard.clickNewDashboard();
         await dashboardAddPanel.clickEditorMenuButton();
         await dashboardAddPanel.clickVisType('maps');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.maps.waitForLayersToLoad();
+        await header.waitUntilLoadingHasFinished();
+        await maps.waitForLayersToLoad();
       });
 
       describe('save', () => {
         it('should return to dashboard and add new panel', async () => {
-          await PageObjects.maps.saveMap('map created from dashboard save and return');
-          await PageObjects.dashboard.waitForRenderComplete();
-          const panelCount = await PageObjects.dashboard.getPanelCount();
+          await maps.saveMap('map created from dashboard save and return');
+          await dashboard.waitForRenderComplete();
+          const panelCount = await dashboard.getPanelCount();
           expect(panelCount).to.equal(1);
         });
       });
 
       describe('save and uncheck return to origin switch', () => {
         it('should cut the originator and stay in maps application', async () => {
-          await PageObjects.maps.saveMap(
+          await maps.saveMap(
             'map created from dashboard save and return with originator app cut',
             false
           );
-          await PageObjects.maps.waitForLayersToLoad();
+          await maps.waitForLayersToLoad();
           await testSubjects.missingOrFail('mapSaveAndReturnButton');
           await testSubjects.existOrFail('mapSaveButton');
         });
@@ -73,34 +71,34 @@ export default function ({ getPageObjects, getService }) {
 
     describe('edit existing map', () => {
       beforeEach(async () => {
-        await PageObjects.dashboard.navigateToApp();
-        await PageObjects.dashboard.loadSavedDashboard('map embeddable example');
-        await PageObjects.dashboard.switchToEditMode();
+        await dashboard.navigateToApp();
+        await dashboard.loadSavedDashboard('map embeddable example');
+        await dashboard.switchToEditMode();
         await dashboardPanelActions.editPanelByTitle('join example');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.maps.waitForLayersToLoad();
+        await header.waitUntilLoadingHasFinished();
+        await maps.waitForLayersToLoad();
       });
 
       describe('save and return', () => {
         it('should use dashboard instead of time stored in map state', async () => {
           // join example map's time is "last 17 minutes"
           // ensure map has dashboard time
-          const timeConfig = await PageObjects.timePicker.getTimeConfig();
+          const timeConfig = await timePicker.getTimeConfig();
           expect(timeConfig.start).to.equal('Sep 20, 2015 @ 00:00:00.000');
           expect(timeConfig.end).to.equal('Sep 20, 2015 @ 01:00:00.000');
         });
 
         it('should return to dashboard', async () => {
-          await PageObjects.maps.clickSaveAndReturnButton();
-          await PageObjects.dashboard.waitForRenderComplete();
-          const panelCount = await PageObjects.dashboard.getPanelCount();
+          await maps.clickSaveAndReturnButton();
+          await dashboard.waitForRenderComplete();
+          const panelCount = await dashboard.getPanelCount();
           expect(panelCount).to.equal(2);
         });
 
         it('should lose its connection to the dashboard when creating new map', async () => {
-          await PageObjects.maps.gotoMapListingPage();
-          await PageObjects.maps.openNewMap();
-          await PageObjects.maps.expectMissingSaveAndReturnButton();
+          await maps.gotoMapListingPage();
+          await maps.openNewMap();
+          await maps.expectMissingSaveAndReturnButton();
 
           // return to origin should not be present in save modal
           await testSubjects.click('mapSaveButton');
@@ -113,17 +111,17 @@ export default function ({ getPageObjects, getService }) {
 
       describe('save as', () => {
         it('should return to dashboard and add new panel', async () => {
-          await PageObjects.maps.saveMap('Clone of map embeddable example');
-          await PageObjects.header.waitUntilLoadingHasFinished();
-          const panelCount = await PageObjects.dashboard.getPanelCount();
+          await maps.saveMap('Clone of map embeddable example');
+          await header.waitUntilLoadingHasFinished();
+          const panelCount = await dashboard.getPanelCount();
           expect(panelCount).to.equal(3);
         });
       });
 
       describe('save as and uncheck return to origin switch', () => {
         it('should cut the originator and stay in maps application', async () => {
-          await PageObjects.maps.saveMap('Clone 2 of map embeddable example', false);
-          await PageObjects.maps.waitForLayersToLoad();
+          await maps.saveMap('Clone 2 of map embeddable example', false);
+          await maps.waitForLayersToLoad();
           await testSubjects.missingOrFail('mapSaveAndReturnButton');
           await testSubjects.existOrFail('mapSaveButton');
         });

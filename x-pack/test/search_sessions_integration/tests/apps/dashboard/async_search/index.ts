@@ -7,11 +7,11 @@
 
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
-export default function ({ loadTestFile, getService, getPageObjects }: FtrProviderContext) {
+export default function ({ loadTestFile, getService, getPageObject }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
-  const PageObjects = getPageObjects(['common']);
   const searchSessions = getService('searchSessions');
+  const common = getPageObject('common');
 
   describe('Dashboard', function () {
     before(async () => {
@@ -22,7 +22,7 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
       );
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
       await kibanaServer.uiSettings.replace({ 'search:timeout': 10000 });
-      await PageObjects.common.navigateToApp('dashboard');
+      await common.navigateToApp('dashboard');
     });
 
     beforeEach(async () => {

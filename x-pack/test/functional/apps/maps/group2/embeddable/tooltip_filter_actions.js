@@ -8,7 +8,12 @@
 import expect from '@kbn/expect';
 
 export default function ({ getPageObjects, getService }) {
-  const PageObjects = getPageObjects(['common', 'dashboard', 'discover', 'header', 'maps']);
+  const { dashboard, discover, header, maps } = getPageObjects([
+    'dashboard',
+    'discover',
+    'header',
+    'maps',
+  ]);
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
@@ -30,11 +35,11 @@ export default function ({ getPageObjects, getService }) {
         defaultIndex: 'c698b940-e149-11e8-a35a-370a8516603a',
       });
 
-      await PageObjects.dashboard.navigateToApp();
-      await PageObjects.dashboard.preserveCrossAppState();
-      await PageObjects.dashboard.loadSavedDashboard('dash for tooltip filter action test');
+      await dashboard.navigateToApp();
+      await dashboard.preserveCrossAppState();
+      await dashboard.loadSavedDashboard('dash for tooltip filter action test');
 
-      await PageObjects.maps.lockTooltipAtPosition(200, -200);
+      await maps.lockTooltipAtPosition(200, -200);
     }
 
     after(async () => {
@@ -53,8 +58,8 @@ export default function ({ getPageObjects, getService }) {
 
       it('should create filters when create filter button is clicked', async () => {
         await testSubjects.click('mapTooltipCreateFilterButton');
-        await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
-        await PageObjects.maps.waitForLayersToLoadMinimizedLayerControl();
+        await header.awaitGlobalLoadingIndicatorHidden();
+        await maps.waitForLayersToLoadMinimizedLayerControl();
 
         const numFilters = await filterBar.getFilterCount();
         expect(numFilters).to.be(1);
@@ -74,8 +79,8 @@ export default function ({ getPageObjects, getService }) {
         await testSubjects.click('mapFilterActionButton__drilldown1');
 
         // Assert on new dashboard with filter from action
-        await PageObjects.dashboard.waitForRenderComplete();
-        const panelCount = await PageObjects.dashboard.getPanelCount();
+        await dashboard.waitForRenderComplete();
+        const panelCount = await dashboard.getPanelCount();
         expect(panelCount).to.equal(2);
 
         const hasJoinFilter = await filterBar.hasFilter('runtime_shape_name', 'charlie');
@@ -87,7 +92,7 @@ export default function ({ getPageObjects, getService }) {
         await testSubjects.click('mapFilterActionButton__urlDrilldownToDiscover');
 
         // Assert on discover with filter from action
-        await PageObjects.discover.waitForDiscoverAppOnScreen();
+        await discover.waitForDiscoverAppOnScreen();
         const hasFilter = await filterBar.hasFilter('name', 'charlie');
         expect(hasFilter).to.be(true);
       });

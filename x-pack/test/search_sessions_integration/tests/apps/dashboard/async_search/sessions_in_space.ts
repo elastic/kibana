@@ -11,15 +11,13 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const spacesService = getService('spaces');
   const security = getService('security');
-  const PageObjects = getPageObjects([
-    'common',
-    'header',
-    'dashboard',
-    'visChart',
-    'security',
-    'timePicker',
-    'searchSessionsManagement',
-  ]);
+  const {
+    common,
+    header,
+    dashboard,
+    security: securityPage,
+    searchSessionsManagement,
+  } = getPageObjects(['common', 'header', 'dashboard', 'security', 'searchSessionsManagement']);
   const dashboardPanelActions = getService('dashboardPanelActions');
   const browser = getService('browser');
   const searchSessions = getService('searchSessions');
@@ -33,10 +31,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       before(async () => await load(['minimal_read', 'store_search_session']));
 
       it('Saves and restores a session', async () => {
-        await PageObjects.common.navigateToApp('dashboard', { basePath: 's/another-space' });
-        await PageObjects.dashboard.loadSavedDashboard('A Dashboard in another space');
+        await common.navigateToApp('dashboard', { basePath: 's/another-space' });
+        await dashboard.loadSavedDashboard('A Dashboard in another space');
 
-        await PageObjects.dashboard.waitForRenderComplete();
+        await dashboard.waitForRenderComplete();
 
         await searchSessions.expectState('completed');
         await searchSessions.save();
@@ -52,7 +50,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // https://github.com/elastic/kibana/issues/106074#issuecomment-920462094
         await browser.refresh();
 
-        const searchSessionList = await PageObjects.searchSessionsManagement.getList();
+        const searchSessionList = await searchSessionsManagement.getList();
         const searchSessionItem = searchSessionList.find(
           (session) => session.id === savedSessionId
         );
@@ -62,8 +60,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // navigate to discover
         await searchSessionItem.view();
 
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.dashboard.waitForRenderComplete();
+        await header.waitUntilLoadingHasFinished();
+        await dashboard.waitForRenderComplete();
 
         // Check that session is restored
         await searchSessions.expectState('restored');
@@ -75,17 +73,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       before(async () => await load(['minimal_read']));
 
       it("Doesn't allow to store a session", async () => {
-        await PageObjects.common.navigateToApp('dashboard', { basePath: 's/another-space' });
-        await PageObjects.dashboard.loadSavedDashboard('A Dashboard in another space');
+        await common.navigateToApp('dashboard', { basePath: 's/another-space' });
+        await dashboard.loadSavedDashboard('A Dashboard in another space');
 
-        await PageObjects.dashboard.waitForRenderComplete();
+        await dashboard.waitForRenderComplete();
 
         await searchSessions.expectState('completed');
         await searchSessions.disabledOrFail();
       });
     });
   });
-  async function load(dashboard: string[]) {
+  async function load(dashboards: string[]) {
     await kibanaServer.importExport.load(
       `x-pack/test/functional/fixtures/kbn_archiver/dashboard/session_in_space`
     );
@@ -110,7 +108,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       kibana: [
         {
           feature: {
-            dashboard,
+            dashboard: dashboards,
           },
           spaces: ['another-space'],
         },
@@ -123,16 +121,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       full_name: 'test user',
     });
 
-    await PageObjects.security.forceLogout();
+    await securityPage.forceLogout();
 
-    await PageObjects.security.login('analyst', 'analyst-password', {
+    await securityPage.login('analyst', 'analyst-password', {
       expectSpaceSelector: false,
     });
   }
   async function clean() {
     await kibanaServer.savedObjects.cleanStandardList();
     // NOTE: Logout needs to happen before anything else to avoid flaky behavior
-    await PageObjects.security.forceLogout();
+    await securityPage.forceLogout();
     await security.role.delete('data_analyst');
     await security.user.delete('analyst');
     await spacesService.delete('another-space');

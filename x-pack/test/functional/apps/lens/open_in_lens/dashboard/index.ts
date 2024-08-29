@@ -8,13 +8,13 @@
 import { EsArchiver } from '@kbn/es-archiver';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
-export default function ({ loadTestFile, getService, getPageObjects }: FtrProviderContext) {
+export default function ({ loadTestFile, getService, getPageObject }: FtrProviderContext) {
   const browser = getService('browser');
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['timePicker']);
   const config = getService('config');
+  const timePicker = getPageObject('timePicker');
   let remoteEsArchiver;
 
   describe('lens app - TSVB Open in Lens', () => {
@@ -53,7 +53,7 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
 
       await esNode.load(esArchive);
       // changing the timepicker default here saves us from having to set it in Discover (~8s)
-      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update({
         defaultIndex: indexPatternString,
         'dateFormat:tz': 'UTC',
@@ -64,7 +64,7 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
 
     after(async () => {
       await esArchiver.unload(esArchive);
-      await PageObjects.timePicker.resetDefaultAbsoluteRangeViaUiSettings();
+      await timePicker.resetDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.importExport.unload(fixtureDirs.lensBasic);
       await kibanaServer.importExport.unload(fixtureDirs.lensDefault);
     });
