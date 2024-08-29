@@ -86,8 +86,7 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
     moment().utc().startOf('day').subtract(9, 'days').add(667, 'seconds').toISOString(),
   ];
 
-  // FLAKY: https://github.com/elastic/kibana/issues/183350
-  describe.skip('ad hoc backfill task', () => {
+  describe('ad hoc backfill task', () => {
     beforeEach(async () => {
       await esTestIndexTool.destroy();
       await esTestIndexTool.setup();
