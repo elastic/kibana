@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { GetFieldsData } from '../../../../common/hooks/use_get_fields_data';
+import type { GetFieldsData } from './use_get_fields_data';
 import { ANCESTOR_ID } from '../constants/field_names';
 import { getField } from '../utils';
 

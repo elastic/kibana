@@ -92,13 +92,7 @@ export const fetchCategoryCounts = async (
   let mSearchresponse;
 
   try {
-    mSearchresponse = await esClient.msearch(
-      { searches },
-      {
-        signal: abortSignal,
-        maxRetries: 0,
-      }
-    );
+    mSearchresponse = await esClient.msearch({ searches }, { signal: abortSignal, maxRetries: 0 });
   } catch (error) {
     if (!isRequestAbortedError(error)) {
       if (logger) {

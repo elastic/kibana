@@ -12,19 +12,22 @@ import {
 } from '@kbn/fleet-plugin/common/constants';
 import { skipIfNoDockerRegistry, isDockerRegistryEnabledOrSkipped } from '../../helpers';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
+  const fleetAndAgents = getService('fleetAndAgents');
 
   const pkgName = 'multiple_versions';
   const pkgVersion = '0.1.0';
   const pkgUpdateVersion = '0.2.0';
   describe('setup checks packages completed install', async () => {
     skipIfNoDockerRegistry(providerContext);
-    setupFleetAndAgents(providerContext);
+
+    before(async () => {
+      await fleetAndAgents.setup();
+    });
 
     describe('package install', async () => {
       before(async () => {

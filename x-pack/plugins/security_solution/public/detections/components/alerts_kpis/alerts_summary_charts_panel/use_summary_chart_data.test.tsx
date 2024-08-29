@@ -14,7 +14,6 @@ import * as aggregations from './aggregations';
 import * as severityMock from '../severity_level_panel/mock_data';
 import * as alertRuleMock from '../alerts_by_rule_panel/mock_rule_data';
 import * as alertsGroupingMock from '../alerts_progress_bar_panel/mock_data';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 const from = '2022-04-05T12:00:00.000Z';
 const to = '2022-04-08T12:00:00.000Z';
@@ -49,9 +48,6 @@ jest.mock('../../../../common/containers/use_global_time', () => {
     useGlobalTime: (...props: unknown[]) => mockUseGlobalTime(...props),
   };
 });
-
-const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
-jest.mock('../../../../common/hooks/use_experimental_features');
 
 describe('getAlertsQuery', () => {
   test('it returns the expected severity query', () => {
@@ -167,7 +163,7 @@ describe('get summary charts data', () => {
     });
   });
 
-  describe('get alerts by type data', () => {
+  describe('get alerts by rule data', () => {
     beforeEach(() => {
       jest.clearAllMocks();
       mockDateNow.mockReturnValue(dateNow);
@@ -175,7 +171,6 @@ describe('get summary charts data', () => {
     });
 
     it('should return correct default values', () => {
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
       const { result } = renderUseSummaryChartData({
         aggregations: aggregations.alertRuleAggregations,
       });
@@ -195,7 +190,6 @@ describe('get summary charts data', () => {
     });
 
     it('should return parsed alerts by type items', () => {
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
       mockUseQueryAlerts.mockReturnValue({
         ...defaultUseQueryAlertsReturn,
         data: alertRuleMock.mockAlertsData,

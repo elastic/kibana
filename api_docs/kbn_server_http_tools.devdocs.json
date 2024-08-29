@@ -1268,7 +1268,7 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<\"none\" | \"optional\" | \"required\">; }>"
+          "<\"none\" | \"required\" | \"optional\">; }>"
         ],
         "path": "packages/kbn-server-http-tools/src/ssl/ssl_config.ts",
         "deprecated": false,

@@ -59,7 +59,7 @@ export function createVerboseInstance(
           };
         }
 
-        if (result.hasOwnProperty('thrown')) {
+        if (Object.hasOwn(result, 'thrown')) {
           log.indent(-2);
           throw result.thrown;
         }

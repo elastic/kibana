@@ -38,11 +38,20 @@ export interface DefaultAppStateExtension {
   rowHeight?: number;
 }
 
+export interface RowControlsExtensionParams {
+  dataView: DataView;
+}
+
 export interface Profile {
-  getCellRenderers: () => CustomCellRenderer;
-  getDocViewer: (params: DocViewerExtensionParams) => DocViewerExtension;
   getDefaultAppState: (params: DefaultAppStateExtensionParams) => DefaultAppStateExtension;
+  // Data grid
+  getCellRenderers: () => CustomCellRenderer;
   getRowIndicatorProvider: (
     params: RowIndicatorExtensionParams
   ) => UnifiedDataTableProps['getRowIndicator'] | undefined;
+  getRowAdditionalLeadingControls: (
+    params: RowControlsExtensionParams
+  ) => UnifiedDataTableProps['rowAdditionalLeadingControls'] | undefined;
+  // Doc viewer
+  getDocViewer: (params: DocViewerExtensionParams) => DocViewerExtension;
 }

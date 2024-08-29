@@ -11,10 +11,11 @@ import type { BrowserFields } from '@kbn/alerting-types';
 import type { FetchAlertsFieldsParams } from './types';
 import { BASE_RAC_ALERTS_API_PATH } from '../../constants';
 
-export const fetchAlertsFields = ({ http, featureIds }: FetchAlertsFieldsParams) =>
-  http.get<{ browserFields: BrowserFields; fields: FieldDescriptor[] }>(
+export const fetchAlertsFields = ({ http, featureIds }: FetchAlertsFieldsParams) => {
+  return http.get<{ browserFields: BrowserFields; fields: FieldDescriptor[] }>(
     `${BASE_RAC_ALERTS_API_PATH}/browser_fields`,
     {
       query: { featureIds },
     }
   );
+};

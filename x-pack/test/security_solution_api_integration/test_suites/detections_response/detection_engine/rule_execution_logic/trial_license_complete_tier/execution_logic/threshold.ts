@@ -133,7 +133,7 @@ export default ({ getService }: FtrProviderContext) => {
           field: 'host.id',
           value: 1, // This value generates 7 alerts with the current esArchive
         },
-        max_signals: 7,
+        max_signals: 8,
       };
       const { logs } = await previewRule({ supertest, rule });
       expect(logs[0].warnings).not.toContain(getMaxAlertsWarning());

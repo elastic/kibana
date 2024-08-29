@@ -6,13 +6,12 @@
  */
 
 import { getRegistryUrl as getRegistryUrlFromIngest } from '@kbn/fleet-plugin/server';
-import { isServerlessKibanaFlavor } from '@kbn/security-solution-plugin/scripts/endpoint/common/stack_services';
+import { isServerlessKibanaFlavor } from '@kbn/security-solution-plugin/common/endpoint/utils/kibana_status';
 import { FtrProviderContext } from '../../configs/ftr_provider_context';
 
 export default function (providerContext: FtrProviderContext) {
   const { loadTestFile, getService, getPageObjects } = providerContext;
 
-  // Flaky: https://github.com/elastic/kibana/issues/186086
   describe('endpoint', function () {
     const ingestManager = getService('ingestManager');
     const log = getService('log');
@@ -37,7 +36,7 @@ export default function (providerContext: FtrProviderContext) {
       if (await isServerlessKibanaFlavor(kbnClient)) {
         log.info('login for serverless environment');
         const pageObjects = getPageObjects(['svlCommonPage']);
-        await pageObjects.svlCommonPage.login();
+        await pageObjects.svlCommonPage.loginWithRole('admin');
       }
     });
     loadTestFile(require.resolve('./policy_list'));

@@ -24,7 +24,7 @@ import type { BrowserFields } from '../../../common/containers/source';
 import type { PrimitiveOrArrayOfPrimitives } from '../../../common/lib/kuery';
 import type { OnDataProviderEdited } from '../timeline/events';
 import type { QueryOperator } from '../timeline/data_providers/data_provider';
-import { DataProviderType } from '../timeline/data_providers/data_provider';
+import { type DataProviderType, DataProviderTypeEnum } from '../../../../common/api/timeline';
 
 import {
   getCategorizedFieldNames,
@@ -86,7 +86,7 @@ export const StatefulEditDataProvider = React.memo<Props>(
     providerId,
     timelineId,
     value,
-    type = DataProviderType.default,
+    type = DataProviderTypeEnum.default,
   }) => {
     const [updatedField, setUpdatedField] = useState<EuiComboBoxOptionOption[]>([{ label: field }]);
     const [updatedOperator, setUpdatedOperator] = useState<EuiComboBoxOptionOption[]>(
@@ -105,7 +105,7 @@ export const StatefulEditDataProvider = React.memo<Props>(
 
     const showValueInput = useMemo(
       () =>
-        type !== DataProviderType.template &&
+        type !== DataProviderTypeEnum.template &&
         updatedOperator.length > 0 &&
         updatedOperator[0].label !== i18n.EXISTS &&
         updatedOperator[0].label !== i18n.DOES_NOT_EXIST &&
@@ -137,7 +137,7 @@ export const StatefulEditDataProvider = React.memo<Props>(
       (selectedField: EuiComboBoxOptionOption[]) => {
         setUpdatedField(selectedField);
 
-        if (type === DataProviderType.template) {
+        if (type === DataProviderTypeEnum.template) {
           setUpdatedValue(`{${selectedField[0].label}}`);
         }
 
@@ -256,7 +256,7 @@ export const StatefulEditDataProvider = React.memo<Props>(
               </EuiFormRow>
             )}
 
-            {showComboBoxInput && type !== DataProviderType.template && (
+            {showComboBoxInput && type !== DataProviderTypeEnum.template && (
               <EuiFormRow label={i18n.VALUE_LABEL}>
                 <ControlledComboboxInput onChangeCallback={onValueChange} value={value} />
               </EuiFormRow>
@@ -268,7 +268,7 @@ export const StatefulEditDataProvider = React.memo<Props>(
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            {type === DataProviderType.template && showComboBoxInput && (
+            {type === DataProviderTypeEnum.template && showComboBoxInput && (
               <>
                 <EuiCallOut
                   color="warning"

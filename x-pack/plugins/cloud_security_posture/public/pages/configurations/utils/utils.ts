@@ -6,18 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { EuiThemeComputed } from '@elastic/eui';
-import type { CspFinding } from '../../../../common/schemas/csp_finding';
 export { getFilters } from './get_filters';
-
-export const getFindingsPageSizeInfo = ({
-  currentPageSize,
-  pageIndex,
-  pageSize,
-}: Record<'pageIndex' | 'pageSize' | 'currentPageSize', number>) => ({
-  pageStart: pageIndex * pageSize + 1,
-  pageEnd: pageIndex * pageSize + currentPageSize,
-});
 
 export const getFindingsCountAggQuery = () => ({
   count: { terms: { field: 'result.evaluation' } },
@@ -34,14 +23,3 @@ export const getAggregationCount = (
     failed: failed?.doc_count || 0,
   };
 };
-
-const isSelectedRow = (row: CspFinding, selected?: CspFinding) =>
-  row.resource.id === selected?.resource.id && row.rule.id === selected?.rule.id;
-
-export const getSelectedRowStyle = (
-  theme: EuiThemeComputed,
-  row: CspFinding,
-  selected?: CspFinding
-): React.CSSProperties => ({
-  background: isSelectedRow(row, selected) ? theme.colors.highlight : undefined,
-});

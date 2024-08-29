@@ -14,7 +14,7 @@ export {
   WithFieldEditorDependencies,
   spySearchQuery,
   spySearchQueryResponse,
-  spyIndexPatternGetAllFields,
+  spyIndexPatternGetByName,
   fieldFormatsOptions,
   indexPatternNameForTest,
   setSearchResponseLatency,
