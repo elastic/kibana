@@ -85,6 +85,7 @@ export function KnowledgeBaseTab() {
       width: '40px',
     },
     {
+      'data-test-subj': 'knowledgeBaseTableTitleCell',
       field: 'title',
       name: i18n.translate('xpack.observabilityAiAssistantManagement.kbTab.columns.name', {
         defaultMessage: 'Name',
@@ -107,6 +108,7 @@ export function KnowledgeBaseTab() {
       },
     },
     {
+      'data-test-subj': 'knowledgeBaseTableAuthorCell',
       name: i18n.translate('xpack.observabilityAiAssistantManagement.kbTab.columns.author', {
         defaultMessage: 'Author',
       }),

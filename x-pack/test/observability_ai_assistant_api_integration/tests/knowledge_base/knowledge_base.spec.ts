@@ -26,9 +26,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       await createKnowledgeBaseModel(ml);
 
       await observabilityAIAssistantAPIClient
-        .editor({
-          endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
-        })
+        .editor({ endpoint: 'POST /internal/observability_ai_assistant/kb/setup' })
         .expect(200);
     });
 
@@ -300,7 +298,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
 
     describe('When the LLM creates entries', () => {
-      async function addEntryWithDocId({
+      async function saveKbEntry({
         apiClient,
         docId,
         text,
@@ -348,14 +346,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         before(async () => {
           const docId = 'my_favourite_color';
 
-          await addEntryWithDocId({
+          await saveKbEntry({
             apiClient: observabilityAIAssistantAPIClient.editor,
             docId,
             text: 'My favourite color is blue',
           });
           entries1 = await getEntriesWithDocId(docId);
 
-          await addEntryWithDocId({
+          await saveKbEntry({
             apiClient: observabilityAIAssistantAPIClient.editor,
             docId,
             text: 'My favourite color is green',
@@ -393,12 +391,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         let entries: KnowledgeBaseEntry[];
 
         before(async () => {
-          await addEntryWithDocId({
+          await saveKbEntry({
             apiClient: observabilityAIAssistantAPIClient.editor,
             docId: 'users_favorite_animal',
             text: "The user's favourite animal is a dog",
           });
-          await addEntryWithDocId({
+          await saveKbEntry({
             apiClient: observabilityAIAssistantAPIClient.secondaryEditor,
             docId: 'users_favorite_animal',
             text: "The user's favourite animal is a cat",
