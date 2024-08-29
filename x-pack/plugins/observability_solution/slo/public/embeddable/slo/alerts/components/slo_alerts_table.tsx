@@ -8,7 +8,7 @@ import React, { useMemo } from 'react';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import type { TimeRange } from '@kbn/es-query';
 import { ALL_VALUE } from '@kbn/slo-schema';
-import { AlertsTableStateProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/alerts_table_state';
+import { AlertsTableProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/alerts_table';
 import { SloEmbeddableDeps } from '../types';
 import type { SloItem } from '../types';
 import { SLO_ALERTS_TABLE_CONFIG_ID } from '../../constants';
@@ -58,7 +58,7 @@ export const useSloAlertsQuery = (
   showAllGroupByInstances?: boolean
 ) => {
   return useMemo(() => {
-    const query: AlertsTableStateProps['query'] = {
+    const query: AlertsTableProps['query'] = {
       bool: {
         filter: [
           {

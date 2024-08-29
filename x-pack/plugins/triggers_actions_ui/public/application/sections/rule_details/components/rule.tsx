@@ -10,8 +10,6 @@ import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiTabbedContent } from '@elastic/eui';
 import { AlertStatusValues, ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { ALERT_RULE_UUID, AlertConsumers } from '@kbn/rule-data-utils';
-import { ALERT_TABLE_GENERIC_CONFIG_ID } from '../../../constants';
-import { AlertTableConfigRegistry } from '../../../alert_table_config_registry';
 import { useKibana } from '../../../../common/lib/kibana';
 import { Rule, RuleSummary, AlertStatus, RuleType } from '../../../../types';
 import {
@@ -33,11 +31,12 @@ import {
   rulesLastRunOutcomeTranslationMapping,
   rulesStatusesTranslationsMapping,
 } from '../../rules_list/translations';
+import { defaultAlertsTableColumns } from '../../alerts_table/configuration';
 
 const RuleEventLogList = lazy(() => import('./rule_event_log_list'));
 const RuleAlertList = lazy(() => import('./rule_alert_list'));
 const RuleDefinition = lazy(() => import('./rule_definition'));
-const AlertsTable = lazy(() => import('../../alerts_table/alerts_table_state'));
+const AlertsTable = lazy(() => import('../../alerts_table/alerts_table'));
 
 export type RuleComponentProps = {
   rule: Rule;
@@ -54,6 +53,8 @@ export type RuleComponentProps = {
 
 const EVENT_LOG_LIST_TAB = 'rule_event_log_list';
 const ALERT_LIST_TAB = 'rule_alert_list';
+
+const alertsTableColumns = [defaultAlertsTableColumns[0], ...defaultAlertsTableColumns.slice(2)];
 
 export function RuleComponent({
   rule,
@@ -99,10 +100,6 @@ export function RuleComponent({
       return (
         <AlertsTable
           id="rule-detail-alerts-table"
-          configurationId={ALERT_TABLE_GENERIC_CONFIG_ID}
-          alertsTableConfigurationRegistry={
-            alertsTableConfigurationRegistry as AlertTableConfigRegistry
-          }
           featureIds={
             (rule.consumer === ALERTING_FEATURE_ID
               ? [ruleType.producer]
@@ -110,6 +107,7 @@ export function RuleComponent({
           }
           query={{ bool: { filter: { term: { [ALERT_RULE_UUID]: rule.id } } } }}
           showAlertStatusWithFlapping
+          columns={alertsTableColumns}
         />
       );
     }
@@ -123,7 +121,6 @@ export function RuleComponent({
     });
   }, [
     alerts,
-    alertsTableConfigurationRegistry,
     onMuteAction,
     readOnly,
     rule.consumer,

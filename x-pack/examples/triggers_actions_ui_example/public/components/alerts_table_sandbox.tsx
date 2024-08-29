@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
-import { AlertsTableStateProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/alerts_table_state';
+import { AlertsTableProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/alerts_table';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 
 interface SandboxProps {
@@ -15,7 +15,7 @@ interface SandboxProps {
 
 export const AlertsTableSandbox = ({ triggersActionsUi }: SandboxProps) => {
   const { getAlertsStateTable: AlertsTable, alertsTableConfigurationRegistry } = triggersActionsUi;
-  const alertStateProps: AlertsTableStateProps = {
+  const alertStateProps: AlertsTableProps = {
     id: 'observabilityCases',
     configurationId: 'observabilityCases',
     alertsTableConfigurationRegistry,
