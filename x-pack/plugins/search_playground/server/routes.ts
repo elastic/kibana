@@ -57,9 +57,8 @@ export function defineRoutes({
         }),
       },
     },
-    errorHandler(async (context, request, response) => {
+    errorHandler(logger)(async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-
       const { indices } = request.body;
 
       const fields = await fetchFields(client, indices);
@@ -89,14 +88,14 @@ export function defineRoutes({
         }),
       },
     },
-    errorHandler(async (context, request, response) => {
+    errorHandler(logger)(async (context, request, response) => {
       const [{ analytics }, { actions, cloud }] = await getStartServices();
 
       const { client } = (await context.core).elasticsearch;
       const aiClient = Assist({
         es_client: client.asCurrentUser,
       } as AssistClientOptionsWithClient);
-      const { messages, data } = await request.body;
+      const { messages, data } = request.body;
       const { chatModel, chatPrompt, questionRewritePrompt, connector } = await getChatParams(
         {
           connectorId: data.connector_id,
@@ -184,7 +183,7 @@ export function defineRoutes({
         }),
       },
     },
-    errorHandler(async (context, request, response) => {
+    errorHandler(logger)(async (context, request, response) => {
       const { name, expiresInDays, indices } = request.body;
       const { client } = (await context.core).elasticsearch;
 
@@ -223,7 +222,7 @@ export function defineRoutes({
         }),
       },
     },
-    errorHandler(async (context, request, response) => {
+    errorHandler(logger)(async (context, request, response) => {
       const { search_query: searchQuery, size } = request.query;
       const {
         client: { asCurrentUser },

@@ -317,7 +317,7 @@ const UnstyledProcessEventDot = React.memo(
     }, [dispatch, nodeID, timestamp, id]);
 
     const handleClick = useCallback(
-      (clickEvent) => {
+      (clickEvent: React.MouseEvent) => {
         if (animationTarget.current?.beginElement) {
           animationTarget.current.beginElement();
         }
@@ -584,7 +584,7 @@ export const ProcessEventDot = styled(UnstyledProcessEventDot)`
     width: fit-content;
   }
 
-  & .euiSelectableList-bordered {
+  & .euiSelectableList {
     border-top-right-radius: 0px;
     border-top-left-radius: 0px;
   }

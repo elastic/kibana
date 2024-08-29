@@ -17,7 +17,7 @@ const TranslationsLowercase = {
   }),
 
   CPUUsageLegacy: i18n.translate('xpack.infra.waffle.metricOptions.cpuUsageLegacyText', {
-    defaultMessage: 'CPU usage (legacy)',
+    defaultMessage: 'CPU usage (Legacy)',
   }),
 
   MemoryUsage: i18n.translate('xpack.infra.waffle.metricOptions.memoryUsageText', {
@@ -113,16 +113,18 @@ export const toMetricOpt = (
   nodeType?: InventoryItemType
 ): { text: string; textLC: string; value: SnapshotMetricType } | undefined => {
   switch (metric) {
-    case 'cpuTotal':
+    case 'cpuV2':
       return {
         text: Translations.CPUUsageTotal,
         textLC: TranslationsLowercase.CPUUsageTotal,
-        value: 'cpuTotal',
+        value: 'cpuV2',
       };
     case 'cpu':
       return {
-        text: Translations.CPUUsageLegacy,
-        textLC: TranslationsLowercase.CPUUsageLegacy,
+        text: showLegacyLabel(nodeType) ? Translations.CPUUsageLegacy : Translations.CPUUsageTotal,
+        textLC: showLegacyLabel(nodeType)
+          ? TranslationsLowercase.CPUUsageLegacy
+          : TranslationsLowercase.CPUUsageTotal,
         value: 'cpu',
       };
     case 'memory':

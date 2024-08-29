@@ -115,6 +115,9 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         fleet: {
           pathname: '/app/fleet',
         },
+        integrations: {
+          pathname: '/app/integrations',
+        },
       },
       // choose where screenshots should be saved
       screenshots: {

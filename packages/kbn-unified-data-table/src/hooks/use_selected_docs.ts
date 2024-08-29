@@ -11,15 +11,17 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 
 export interface UseSelectedDocsState {
   isDocSelected: (docId: string) => boolean;
-  getCountOfSelectedDocs: (docIds: string[]) => number;
+  getCountOfFilteredSelectedDocs: (docIds: string[]) => number;
   hasSelectedDocs: boolean;
-  selectedDocIds: string[];
+  selectedDocsCount: number;
+  docIdsInSelectionOrder: string[];
   toggleDocSelection: (docId: string) => void;
   selectAllDocs: () => void;
   selectMoreDocs: (docIds: string[]) => void;
   deselectSomeDocs: (docIds: string[]) => void;
   replaceSelectedDocs: (docIds: string[]) => void;
   clearAllSelectedDocs: () => void;
+  getSelectedDocsOrderedByRows: (rows: DataTableRecord[]) => DataTableRecord[];
 }
 
 export const useSelectedDocs = (docMap: Map<string, DataTableRecord>): UseSelectedDocsState => {
@@ -70,43 +72,53 @@ export const useSelectedDocs = (docMap: Map<string, DataTableRecord>): UseSelect
     [selectedDocsSet, docMap]
   );
 
-  const usedSelectedDocsCount = selectedDocIds.length;
+  const getSelectedDocsOrderedByRows = useCallback(
+    (rows: DataTableRecord[]) => {
+      return rows.filter((row) => isDocSelected(row.id));
+    },
+    [isDocSelected]
+  );
 
-  const getCountOfSelectedDocs = useCallback(
+  const selectedDocsCount = selectedDocIds.length;
+
+  const getCountOfFilteredSelectedDocs = useCallback(
     (docIds) => {
-      if (!usedSelectedDocsCount) {
+      if (!selectedDocsCount) {
         return 0;
       }
 
       return docIds.filter(isDocSelected).length;
     },
-    [usedSelectedDocsCount, isDocSelected]
+    [selectedDocsCount, isDocSelected]
   );
 
   return useMemo(
     () => ({
       isDocSelected,
-      hasSelectedDocs: usedSelectedDocsCount > 0,
-      getCountOfSelectedDocs,
-      selectedDocIds,
+      hasSelectedDocs: selectedDocsCount > 0,
+      selectedDocsCount,
+      docIdsInSelectionOrder: selectedDocIds,
+      getCountOfFilteredSelectedDocs,
       toggleDocSelection,
       selectAllDocs,
       selectMoreDocs,
       deselectSomeDocs,
       replaceSelectedDocs,
       clearAllSelectedDocs,
+      getSelectedDocsOrderedByRows,
     }),
     [
       isDocSelected,
-      getCountOfSelectedDocs,
+      getCountOfFilteredSelectedDocs,
       toggleDocSelection,
       selectAllDocs,
       selectMoreDocs,
       deselectSomeDocs,
       replaceSelectedDocs,
       clearAllSelectedDocs,
-      usedSelectedDocsCount,
       selectedDocIds,
+      selectedDocsCount,
+      getSelectedDocsOrderedByRows,
     ]
   );
 };

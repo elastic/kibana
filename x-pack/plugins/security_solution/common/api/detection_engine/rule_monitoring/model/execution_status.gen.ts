@@ -14,7 +14,7 @@
  *   version: not applicable
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 /**
   * Custom execution status of Security rules that is different from the status used in the Alerting Framework. We merge our custom status with the Framework's status to determine the resulting status of a rule.

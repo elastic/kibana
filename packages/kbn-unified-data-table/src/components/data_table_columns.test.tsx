@@ -50,6 +50,7 @@ describe('Data table columns', function () {
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
+        onResize: () => {},
       });
       expect(actual).toMatchSnapshot();
     });
@@ -72,6 +73,7 @@ describe('Data table columns', function () {
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
+        onResize: () => {},
       });
       expect(actual).toMatchSnapshot();
     });
@@ -99,6 +101,7 @@ describe('Data table columns', function () {
           message: { type: 'string', esType: 'keyword' },
           timestamp: { type: 'date', esType: 'dateTime' },
         },
+        onResize: () => {},
       });
       expect(actual).toMatchSnapshot();
     });
@@ -297,6 +300,7 @@ describe('Data table columns', function () {
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
+        onResize: () => {},
       });
       expect(actual).toMatchSnapshot();
     });
@@ -324,6 +328,7 @@ describe('Data table columns', function () {
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
+        onResize: () => {},
       });
       expect(actual).toMatchSnapshot();
     });
@@ -356,6 +361,7 @@ describe('Data table columns', function () {
         columnsMeta: {
           extension: { type: 'string' },
         },
+        onResize: () => {},
       });
       expect(gridColumns[1].schema).toBe('string');
     });
@@ -386,6 +392,7 @@ describe('Data table columns', function () {
         columnsMeta: {
           var_test: { type: 'number' },
         },
+        onResize: () => {},
       });
       expect(gridColumns[1].schema).toBe('numeric');
     });
@@ -412,6 +419,7 @@ describe('Data table columns', function () {
           extension: { type: 'string' },
           message: { type: 'string', esType: 'keyword' },
         },
+        onResize: () => {},
       });
 
       const extensionGridColumn = gridColumns[0];
@@ -442,6 +450,7 @@ describe('Data table columns', function () {
           extension: { type: 'string' },
           message: { type: 'string', esType: 'keyword' },
         },
+        onResize: () => {},
       });
 
       expect(customizedGridColumns).toMatchSnapshot();
@@ -484,6 +493,7 @@ describe('Data table columns', function () {
         },
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
+        onResize: () => {},
       });
       const columnDisplayNames = customizedGridColumns.map((column) => column.displayAsText);
       expect(columnDisplayNames.includes('test_column_one')).toBeTruthy();

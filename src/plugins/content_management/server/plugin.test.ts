@@ -96,11 +96,10 @@ describe('ContentManagementPlugin', () => {
     });
 
     describe('RPC', () => {
-      test('should create a single POST HTTP route on the router', () => {
+      test('should create a rpc POST HTTP route on the router', () => {
         const { plugin, coreSetup, router } = setup();
         plugin.setup(coreSetup);
 
-        expect(router.post).toBeCalledTimes(1);
         const [routeConfig]: Parameters<IRouter['post']> = (router.post as jest.Mock).mock.calls[0];
 
         expect(routeConfig.path).toBe('/api/content_management/rpc/{name}');

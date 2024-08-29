@@ -209,7 +209,7 @@ The default refresh interval for the time filter. Example:
 The default selection in the time filter.
 
 [[truncate-maxheight]]`truncate:maxHeight`::
-The maximum height that a cell occupies in a table. Set to 0 to disable
+deprecated:[8.16.0]The maximum height that a cell occupies in a table. Set to 0 to disable
 truncation.
 
 [[enableESQL]]`enableESQL`::

@@ -20,7 +20,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('security feature controls', function () {
     this.tags(['skipFirefox']);
 
-    before(async () => await kibanaServer.importExport.load(archive));
+    before(async () => kibanaServer.importExport.load(archive));
 
     after(async () => await kibanaServer.importExport.unload(archive));
 
@@ -223,7 +223,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        PageObjects.error.expectForbidden();
+        await PageObjects.error.expectForbidden();
       });
 
       it(`create new workpad returns a 403`, async () => {
@@ -231,7 +231,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        PageObjects.error.expectForbidden();
+        await PageObjects.error.expectForbidden();
       });
     });
   });

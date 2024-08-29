@@ -41,7 +41,7 @@ function handleAdditionalArgs(
   criteria: boolean,
   additionalArgs: Array<{
     name: string;
-    type: string | string[];
+    type: FunctionParameterType | FunctionParameterType[];
     optional?: boolean;
     reference?: string;
   }>,
@@ -93,7 +93,7 @@ function printCommandArgument(
     return param.name || '';
   }
   return `${param.name}${param.optional ? ':?' : ':'} ${param.type}${
-    param.innerType ? `{${param.innerType}}` : ''
+    param.innerTypes ? `{${param.innerTypes}}` : ''
   }`;
 }
 

@@ -106,7 +106,7 @@ function validateAndMerge(
     if (k.startsWith('_')) {
       throw new Error(`Invalid mapping "${k}". Mappings cannot start with _.`);
     }
-    if (dest.hasOwnProperty(k)) {
+    if (Object.hasOwn(dest, k)) {
       throw new Error(`Cannot redefine core mapping "${k}".`);
     }
   });

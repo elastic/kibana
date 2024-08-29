@@ -316,7 +316,6 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
           </>
         ) : undefined}
       </EuiDescribedFormGroup>
-
       {isNewUser ? (
         <EuiDescribedFormGroup
           title={
@@ -377,7 +376,6 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
           </EuiFormRow>
         </EuiDescribedFormGroup>
       ) : null}
-
       <EuiDescribedFormGroup
         title={
           <h2>

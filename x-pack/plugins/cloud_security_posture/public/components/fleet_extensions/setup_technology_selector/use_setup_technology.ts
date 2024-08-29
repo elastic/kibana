@@ -14,19 +14,21 @@ export const useSetupTechnology = ({
   input,
   isAgentlessEnabled,
   handleSetupTechnologyChange,
+  isEditPage,
 }: {
   input: NewPackagePolicyInput;
   isAgentlessEnabled?: boolean;
   handleSetupTechnologyChange?: (value: SetupTechnology) => void;
+  isEditPage?: boolean;
 }) => {
   const isCspmAws = input.type === CLOUDBEAT_AWS;
   const isCspmGcp = input.type === CLOUDBEAT_GCP;
   const isCspmAzure = input.type === CLOUDBEAT_AZURE;
   const isAgentlessSupportedForCloudProvider = isCspmAws || isCspmGcp || isCspmAzure;
   const isAgentlessAvailable = isAgentlessSupportedForCloudProvider && isAgentlessEnabled;
-  const [setupTechnology, setSetupTechnology] = useState<SetupTechnology>(
-    SetupTechnology.AGENT_BASED
-  );
+  const defaultSetupTechnology =
+    isEditPage && isAgentlessEnabled ? SetupTechnology.AGENTLESS : SetupTechnology.AGENT_BASED;
+  const [setupTechnology, setSetupTechnology] = useState<SetupTechnology>(defaultSetupTechnology);
 
   const updateSetupTechnology = (value: SetupTechnology) => {
     setSetupTechnology(value);
