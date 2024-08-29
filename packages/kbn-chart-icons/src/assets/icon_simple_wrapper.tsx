@@ -32,3 +32,6 @@ export const IconSimpleWrapper = ({
     </svg>
   );
 };
+
+export const ChartIconWrapper = (props: Omit<EuiIconProps, 'type'>) =>
+  IconSimpleWrapper({ ...props, width: '30', height: '22' });
