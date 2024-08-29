@@ -22,7 +22,6 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       log.debug('navigateTo console');
       await PageObjects.common.navigateToApp('console');
       await retry.try(async () => {
-        await PageObjects.console.collapseHelp();
         await PageObjects.console.clearTextArea();
       });
     });

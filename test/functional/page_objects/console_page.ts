@@ -218,6 +218,24 @@ export class ConsolePageObject extends FtrService {
     }
   }
 
+  public async clickHelpIcon() {
+    await this.testSubjects.click('consoleHelpButton');
+  }
+
+  public async clickShortcutsIcon() {
+    await this.testSubjects.click('consoleShortcutsButton');
+  }
+
+  public async isHelpPopoverOpen() {
+    const classAttribute = await this.testSubjects.getAttribute('consoleHelpPopover', 'class');
+    return classAttribute?.includes('euiPopover-isOpen');
+  }
+
+  public async isShortcutsPopoverOpen() {
+    const classAttribute = await this.testSubjects.getAttribute('consoleShortcutsPopover', 'class');
+    return classAttribute?.includes('euiPopover-isOpen');
+  }
+
   public async clickSkipTour() {
     await this.testSubjects.click('consoleSkipTourButton');
   }
@@ -230,8 +248,8 @@ export class ConsolePageObject extends FtrService {
     await this.testSubjects.click('consoleCompleteTourButton');
   }
 
-  public async collapseHelp() {
-    await this.testSubjects.click('help-close-button');
+  public async clickRerunTour() {
+    await this.testSubjects.click('consoleRerunTourButton');
   }
 
   public async openConsole() {
@@ -506,15 +524,6 @@ export class ConsolePageObject extends FtrService {
     const statusBadge = await this.testSubjects.find('consoleResponseStatusBadge');
     const text = await statusBadge.getVisibleText();
     return text.replace(/[^\d.]+/, '');
-  }
-
-  async closeHelpIfExists() {
-    await this.retry.try(async () => {
-      const helpPanelShown = await this.testSubjects.exists('help-close-button');
-      if (helpPanelShown) {
-        await this.collapseHelp();
-      }
-    });
   }
 
   async skipTourIfExists() {

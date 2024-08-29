@@ -24,7 +24,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.home.addSampleDataSet('logs');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.common.navigateToApp('console');
-      await PageObjects.console.closeHelpIfExists();
       await PageObjects.console.clearTextArea();
     });
 
