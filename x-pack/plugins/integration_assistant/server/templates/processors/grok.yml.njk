@@ -1,0 +1,5 @@
+  - grok:
+      field: message
+      patterns:
+        - {{ grok_pattern }}
+      tag: 'grok_header_pattern'

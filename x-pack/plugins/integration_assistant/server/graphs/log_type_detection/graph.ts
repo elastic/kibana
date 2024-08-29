@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import type {
-  ActionsClientChatOpenAI,
-  ActionsClientSimpleChatModel,
-} from '@kbn/langchain/server/language_models';
 import type { StateGraphArgs } from '@langchain/langgraph';
 import { END, START, StateGraph } from '@langchain/langgraph';
 import type { LogFormatDetectionState } from '../../types';
 import { EX_ANSWER_LOG_TYPE } from './constants';
 import { handleLogFormatDetection } from './detection';
 import { SamplesFormat } from '../../../common';
+import { getKVGraph } from '../kv/graph';
+import { LogDetectionGraphParams } from './types';
 
 const graphState: StateGraphArgs<LogFormatDetectionState>['channels'] = {
   lastExecutedChain: {
@@ -22,6 +20,10 @@ const graphState: StateGraphArgs<LogFormatDetectionState>['channels'] = {
     default: () => '',
   },
   logSamples: {
+    value: (x: string[], y?: string[]) => y ?? x,
+    default: () => [],
+  },
+  jsonSamples: {
     value: (x: string[], y?: string[]) => y ?? x,
     default: () => [],
   },
@@ -37,6 +39,10 @@ const graphState: StateGraphArgs<LogFormatDetectionState>['channels'] = {
     value: (x: SamplesFormat, y?: SamplesFormat) => y ?? x,
     default: () => ({ name: 'unsupported' }),
   },
+  header: {
+    value: (x: boolean, y?: boolean) => y ?? x,
+    default: () => false,
+  },
   ecsVersion: {
     value: (x: string, y?: string) => y ?? x,
     default: () => '8.11.0',
@@ -44,6 +50,10 @@ const graphState: StateGraphArgs<LogFormatDetectionState>['channels'] = {
   results: {
     value: (x: object, y?: object) => y ?? x,
     default: () => ({}),
+  },
+  additionalProcessors: {
+    value: (x: object[], y?: object[]) => y ?? x,
+    default: () => [],
   },
 };
 
@@ -61,15 +71,15 @@ function modelOutput(state: LogFormatDetectionState): Partial<LogFormatDetection
     lastExecutedChain: 'modelOutput',
     results: {
       samplesFormat: state.samplesFormat,
-      parsedSamples: state.logSamples, // TODO: Add parsed samples
+      parsedSamples: state.jsonSamples,
     },
   };
 }
 
 function logFormatRouter(state: LogFormatDetectionState): string {
-  // if (state.samplesFormat === LogFormat.STRUCTURED) {
-  //   return 'structured';
-  // }
+  if (state.samplesFormat.name === "structured") {
+    return 'structured';
+  }
   // if (state.samplesFormat === LogFormat.UNSTRUCTURED) {
   //   return 'unstructured';
   // }
@@ -79,26 +89,23 @@ function logFormatRouter(state: LogFormatDetectionState): string {
   return 'unsupported';
 }
 
-export async function getLogFormatDetectionGraph(
-  model: ActionsClientChatOpenAI | ActionsClientSimpleChatModel
-) {
+export async function getLogFormatDetectionGraph({model , client}: LogDetectionGraphParams) {
   const workflow = new StateGraph({
     channels: graphState,
   })
     .addNode('modelInput', modelInput)
     .addNode('modelOutput', modelOutput)
-    .addNode('handleLogFormatDetection', (state: LogFormatDetectionState) =>
-      handleLogFormatDetection(state, model)
-    )
-    // .addNode('handleKVGraph', (state: LogFormatDetectionState) => getCompiledKvGraph(state, model))
+    .addNode('handleLogFormatDetection', (state: LogFormatDetectionState) => handleLogFormatDetection({state, model}))
+    .addNode('handleKVGraph', await getKVGraph({model,client}))
     // .addNode('handleUnstructuredGraph', (state: LogFormatDetectionState) => getCompiledUnstructuredGraph(state, model))
     // .addNode('handleCsvGraph', (state: LogFormatDetectionState) => getCompiledCsvGraph(state, model))
     .addEdge(START, 'modelInput')
     .addEdge('modelInput', 'handleLogFormatDetection')
+    .addEdge('handleKVGraph', 'modelOutput')
     .addEdge('modelOutput', END)
     .addConditionalEdges('handleLogFormatDetection', logFormatRouter, {
-      // TODO: Add structured, unstructured, csv nodes
-      // structured: 'handleKVGraph',
+      // TODO: Add unstructured, csv nodes
+      structured: 'handleKVGraph',
       // unstructured: 'handleUnstructuredGraph',
       // csv: 'handleCsvGraph',
       unsupported: 'modelOutput',

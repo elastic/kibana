@@ -88,11 +88,23 @@ export interface EcsMappingState {
 export interface LogFormatDetectionState {
   lastExecutedChain: string;
   logSamples: string[];
+  jsonSamples: string[];
   exAnswer: string;
   finalized: boolean;
   samplesFormat: SamplesFormat;
+  header: boolean;
   ecsVersion: string;
   results: object;
+  additionalProcessors: object[]; //# This will be generated in the sub-graphs
+}
+
+export interface KVState {
+  lastExecutedChain: string;
+  logSamples: string[];
+  kvLogMessages: string[];
+  jsonSamples: string[];
+  finalized: boolean;
+  additionalProcessors: object[];
 }
 
 export interface RelatedState {

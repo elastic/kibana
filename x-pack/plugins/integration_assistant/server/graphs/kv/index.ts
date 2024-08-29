@@ -4,8 +4,4 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-export const EX_ANSWER_LOG_TYPE = {
-  log_type: 'structured',
-  header: true,
-};
+export { getKVGraph } from './graph';
