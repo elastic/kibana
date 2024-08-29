@@ -22,9 +22,7 @@ describe('SORT', () => {
           name: 'sort',
           args: [
             {
-              type: 'function',
-              subtype: 'postfix-unary-expression',
-              name: 'order-expression',
+              type: 'order',
               order: '',
               nulls: '',
               args: [
@@ -54,9 +52,7 @@ describe('SORT', () => {
           name: 'sort',
           args: [
             {
-              type: 'function',
-              subtype: 'postfix-unary-expression',
-              name: 'order-expression',
+              type: 'order',
               order: 'DESC',
               nulls: '',
               args: [
@@ -86,9 +82,7 @@ describe('SORT', () => {
           name: 'sort',
           args: [
             {
-              type: 'function',
-              subtype: 'postfix-unary-expression',
-              name: 'order-expression',
+              type: 'order',
               order: '',
               nulls: 'NULLS LAST',
               args: [
@@ -116,9 +110,7 @@ describe('SORT', () => {
           name: 'sort',
           args: [
             {
-              type: 'function',
-              subtype: 'postfix-unary-expression',
-              name: 'order-expression',
+              type: 'order',
               order: '',
               nulls: '',
               args: [

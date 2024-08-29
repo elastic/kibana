@@ -228,18 +228,18 @@ export const createOrderExpression = (
   order: ESQLOrderExpression['order'],
   nulls: ESQLOrderExpression['nulls']
 ) => {
-  const orderExpression: ESQLOrderExpression = createFunction(
-    'order-expression',
-    ctx,
-    undefined,
-    'postfix-unary-expression'
-  ) as ESQLOrderExpression;
+  const node: ESQLOrderExpression = {
+    type: 'order',
+    name: '',
+    order,
+    nulls,
+    args: [arg],
+    text: ctx.getText(),
+    location: getPosition(ctx.start, ctx.stop),
+    incomplete: Boolean(ctx.exception),
+  };
 
-  orderExpression.args = [arg];
-  orderExpression.order = order;
-  orderExpression.nulls = nulls;
-
-  return orderExpression;
+  return node;
 };
 
 function walkFunctionStructure(

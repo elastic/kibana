@@ -129,9 +129,18 @@ export interface ESQLPostfixUnaryExpression<Name extends string = string>
   args: [ESQLAstItem];
 }
 
-export interface ESQLOrderExpression extends ESQLPostfixUnaryExpression<'order-expression'> {
+/**
+ * Represents an order expression used in SORT commands.
+ *
+ * ```
+ * ... | SORT field ASC NULLS FIRST
+ * ```
+ */
+export interface ESQLOrderExpression extends ESQLAstBaseItem {
+  type: 'order';
   order: '' | 'ASC' | 'DESC';
   nulls: '' | 'NULLS FIRST' | 'NULLS LAST';
+  args: [field: ESQLAstItem];
 }
 
 export interface ESQLBinaryExpression
