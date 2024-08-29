@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { OWNER_INFO } from '../constants';
-import { getCaseOwnerByAppId, isValidOwner } from './owner';
+import { getCaseOwnerByAppId, getOwnerFromRuleConsumerProducer, isValidOwner } from './owner';
 
 describe('owner utils', () => {
   describe('isValidOwner', () => {
@@ -30,6 +31,50 @@ describe('owner utils', () => {
 
     it('return undefined for invalid application ID', () => {
       expect(getCaseOwnerByAppId('not-valid')).toBe(undefined);
+    });
+  });
+
+  describe('getOwnerFromRuleConsumerProducer', () => {
+    it('returns observability owner correctly', () => {
+      for (const consumer of [
+        AlertConsumers.OBSERVABILITY,
+        AlertConsumers.APM,
+        AlertConsumers.INFRASTRUCTURE,
+        AlertConsumers.LOGS,
+        AlertConsumers.SLO,
+        AlertConsumers.UPTIME,
+        AlertConsumers.MONITORING,
+      ]) {
+        const owner = getOwnerFromRuleConsumerProducer(consumer);
+
+        expect(owner).toBe(OWNER_INFO.observability.id);
+      }
+    });
+
+    it('returns security solution owner correctly', () => {
+      for (const consumer of [AlertConsumers.SIEM]) {
+        const owner = getOwnerFromRuleConsumerProducer(consumer);
+
+        expect(owner).toBe(OWNER_INFO.securitySolution.id);
+      }
+    });
+
+    it('returns cases owner correctly', () => {
+      for (const consumer of [
+        AlertConsumers.ML,
+        AlertConsumers.STACK_ALERTS,
+        AlertConsumers.EXAMPLE,
+      ]) {
+        const owner = getOwnerFromRuleConsumerProducer(consumer);
+
+        expect(owner).toBe(OWNER_INFO.cases.id);
+      }
+    });
+
+    it('returns cases as a default owner', () => {
+      const owner = getOwnerFromRuleConsumerProducer();
+
+      expect(owner).toBe(OWNER_INFO.cases.id);
     });
   });
 });
