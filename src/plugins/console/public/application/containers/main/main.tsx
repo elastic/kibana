@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -22,6 +22,7 @@ import { useServicesContext } from '../../contexts';
 import { MAIN_PANEL_LABELS } from './i18n';
 import { NavIconButton } from './nav_icon_button';
 import { Editor } from '../editor';
+import { useEditorReadContext, useEditorActionContext } from '../../contexts';
 import {
   TopNavMenu,
   SomethingWentWrongCallout,
@@ -48,7 +49,9 @@ interface MainProps {
 }
 
 export function Main({ isEmbeddable = false }: MainProps) {
-  const [selectedTab, setSelectedTab] = useState(SHELL_TAB_ID);
+  const dispatch = useEditorActionContext();
+  const { currentView } = useEditorReadContext();
+
   const { docLinks } = useServicesContext();
 
   const storageTourState = localStorage.getItem(TOUR_STORAGE_KEY);
@@ -95,8 +98,8 @@ export function Main({ isEmbeddable = false }: MainProps) {
                   <TopNavMenu
                     disabled={!done}
                     items={getTopNavConfig({
-                      selectedTab,
-                      setSelectedTab,
+                      selectedTab: currentView,
+                      setSelectedTab: (tab) => dispatch({ type: 'setCurrentView', payload: tab }),
                     })}
                     tourStepProps={consoleTourStepProps}
                   />
@@ -134,16 +137,16 @@ export function Main({ isEmbeddable = false }: MainProps) {
             </EuiSplitPanel.Inner>
             <EuiHorizontalRule margin="none" />
             <EuiSplitPanel.Inner paddingSize="none">
-              {selectedTab === SHELL_TAB_ID && (
+              {currentView === SHELL_TAB_ID && (
                 <Editor loading={!done} setEditorInstance={() => {}} />
               )}
-              {selectedTab === HISTORY_TAB_ID && <History />}
-              {selectedTab === CONFIG_TAB_ID && <Config editorInstance={null} />}
+              {currentView === HISTORY_TAB_ID && <History />}
+              {currentView === CONFIG_TAB_ID && <Config editorInstance={null} />}
             </EuiSplitPanel.Inner>
             <EuiHorizontalRule margin="none" />
             <EuiSplitPanel.Inner paddingSize="xs" grow={false}>
               <EuiButtonEmpty
-                onClick={() => setSelectedTab(CONFIG_TAB_ID)}
+                onClick={() => dispatch({ type: 'setCurrentView', payload: CONFIG_TAB_ID })}
                 iconType="editorCodeBlock"
                 size="xs"
                 color="text"

@@ -12,12 +12,14 @@ import { identity } from 'fp-ts/lib/function';
 import { DevToolsSettings, DEFAULT_SETTINGS } from '../../services';
 import { TextObject } from '../../../common/text_object';
 import { SenseEditor } from '../models';
+import { SHELL_TAB_ID } from '../containers/main/constants';
 import { MonacoEditorActionsProvider } from '../containers/editor/monaco/monaco_editor_actions_provider';
 
 export interface Store {
   ready: boolean;
   settings: DevToolsSettings;
   currentTextObject: TextObject | null;
+  currentView: string;
   restoreRequestFromHistory: string | null;
 }
 
@@ -26,6 +28,7 @@ export const initialValue: Store = produce<Store>(
     ready: false,
     settings: DEFAULT_SETTINGS,
     currentTextObject: null,
+    currentView: SHELL_TAB_ID,
     restoreRequestFromHistory: null,
   },
   identity
@@ -35,6 +38,7 @@ export type Action =
   | { type: 'setInputEditor'; payload: SenseEditor | MonacoEditorActionsProvider }
   | { type: 'setCurrentTextObject'; payload: TextObject }
   | { type: 'updateSettings'; payload: DevToolsSettings }
+  | { type: 'setCurrentView'; payload: string }
   | { type: 'setRequestToRestore'; payload: string }
   | { type: 'clearRequestToRestore' };
 
@@ -58,7 +62,14 @@ export const reducer: Reducer<Store, Action> = (state, action) =>
     }
 
     if (action.type === 'setRequestToRestore') {
+      // Store the request and change the current view to the shell
       draft.restoreRequestFromHistory = action.payload;
+      draft.currentView = SHELL_TAB_ID;
+      return;
+    }
+
+    if (action.type === 'setCurrentView') {
+      draft.currentView = action.payload;
       return;
     }
 

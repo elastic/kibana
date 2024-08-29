@@ -115,8 +115,6 @@ export function History() {
     (req: ESRequest) => {
       const formattedRequest = getFormattedRequest(req);
       dispatch({ type: 'setRequestToRestore', payload: formattedRequest });
-      console.log('navigate to editor now: ');
-      console.log(formattedRequest);
     },
     [dispatch]
   );

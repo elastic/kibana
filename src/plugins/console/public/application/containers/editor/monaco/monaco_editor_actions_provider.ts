@@ -687,4 +687,31 @@ export class MonacoEditorActionsProvider {
       this.editor.trigger(TRIGGER_SUGGESTIONS_ACTION_LABEL, TRIGGER_SUGGESTIONS_HANDLER_ID, {});
     }
   }
+
+  /*
+   * This function inserts a request after the last request in the editor
+   */
+  public async appendRequestToEditor(request: string) {
+    const model = this.editor.getModel();
+
+    if (!model) {
+      return;
+    }
+
+    const lastLineNumber = model.getLineCount();
+    const column = model.getLineMaxColumn(lastLineNumber);
+
+    const edit: monaco.editor.IIdentifiedSingleEditOperation = {
+      range: {
+        startLineNumber: lastLineNumber,
+        startColumn: column,
+        endLineNumber: lastLineNumber,
+        endColumn: column,
+      },
+      text: `\n\n${request}`,
+      forceMoveMarkers: true,
+    };
+
+    this.editor.executeEdits('restoreFromHistory', [edit]);
+  }
 }
