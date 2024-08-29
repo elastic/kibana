@@ -38,15 +38,13 @@ export { GlobeIllustration } from './globe_illustration';
 export { EuiIconLegend } from './legend';
 export { IconRegionMap } from './region_map';
 export { IconChartHeatmap } from './chart_heatmap';
-export { IconDonutHoleLarge } from './donut_hole_large';
-export { IconDonutHoleMedium } from './donut_hole_medium';
-export { IconDonutHoleSmall } from './donut_hole_small';
 export { IconChartGauge } from './chart_gauge';
 export { IconChartHorizontalBullet } from './chart_horizontal_bullet';
 export { IconChartVerticalBullet } from './chart_vertical_bullet';
 export { IconChartGaugeSemiCircle } from './chart_gauge_semi_circle';
 export { IconChartGaugeArc } from './chart_gauge_arc';
 export { IconChartGaugeCircle } from './chart_gauge_circle';
+export { IconDonutHoleSmall, IconDonutHoleMedium, IconDonutHoleLarge } from './donut_hole_icons';
 export {
   IconChartLinearSimple,
   IconChartGaugeSemiCircleSimple,
