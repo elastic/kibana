@@ -22,15 +22,28 @@ describe('SORT', () => {
           name: 'sort',
           args: [
             {
-              type: 'order',
-              order: '',
-              nulls: '',
-              args: [
-                {
-                  type: 'column',
-                  name: 'height',
-                },
-              ],
+              type: 'column',
+              name: 'height',
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('sort expression is a function call', () => {
+      const text = `from a_index | sort values(textField)`;
+      const { ast, errors } = parse(text);
+
+      expect(errors.length).toBe(0);
+      expect(ast).toMatchObject([
+        {},
+        {
+          type: 'command',
+          name: 'sort',
+          args: [
+            {
+              type: 'function',
+              name: 'values',
             },
           ],
         },
@@ -110,15 +123,8 @@ describe('SORT', () => {
           name: 'sort',
           args: [
             {
-              type: 'order',
-              order: '',
-              nulls: '',
-              args: [
-                {
-                  type: 'column',
-                  name: 'a',
-                },
-              ],
+              type: 'column',
+              name: 'a',
             },
             {
               order: 'ASC',

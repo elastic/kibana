@@ -169,15 +169,8 @@ describe('commands', () => {
           name: 'sort',
           args: [
             {
-              type: 'order',
-              order: '',
-              nulls: '',
-              args: [
-                {
-                  type: 'literal',
-                  value: 1,
-                },
-              ],
+              type: 'literal',
+              value: 1,
             },
           ],
         },

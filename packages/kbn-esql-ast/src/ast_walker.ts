@@ -609,7 +609,7 @@ export function visitByOption(
   return [option];
 }
 
-const visitOrderExpression = (ctx: OrderExpressionContext): ESQLOrderExpression => {
+const visitOrderExpression = (ctx: OrderExpressionContext): ESQLOrderExpression | ESQLAstItem => {
   const arg = collectBooleanExpression(ctx.booleanExpression())[0];
 
   let order: ESQLOrderExpression['order'] = '';
@@ -630,11 +630,17 @@ const visitOrderExpression = (ctx: OrderExpressionContext): ESQLOrderExpression 
       break;
   }
 
+  if (!order && !nulls) {
+    return arg;
+  }
+
   return createOrderExpression(ctx, arg, order, nulls);
 };
 
-export function visitOrderExpressions(ctx: OrderExpressionContext[]): ESQLOrderExpression[] {
-  const ast: ESQLOrderExpression[] = [];
+export function visitOrderExpressions(
+  ctx: OrderExpressionContext[]
+): Array<ESQLOrderExpression | ESQLAstItem> {
+  const ast: Array<ESQLOrderExpression | ESQLAstItem> = [];
 
   for (const orderCtx of ctx) {
     ast.push(visitOrderExpression(orderCtx));

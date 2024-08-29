@@ -29,7 +29,7 @@ describe('autocomplete.suggest', () => {
           'NULLS FIRST',
           'NULLS LAST',
           ',',
-          '|',
+          '| ',
         ]);
       });
 
@@ -56,7 +56,7 @@ describe('autocomplete.suggest', () => {
           'NULLS FIRST',
           'NULLS LAST',
           ',',
-          '|',
+          '| ',
         ]);
       });
 
