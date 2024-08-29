@@ -108,13 +108,7 @@ export const bulkEnableRules = async <Params extends RuleParams>(
     filter: kueryNodeFilterWithAuth,
   });
 
-  const [taskIdsToEnable] = accListSpecificForBulkOperation;
-
-  const taskIdsFailedToBeEnabled = await tryToEnableTasks({
-    taskIdsToEnable,
-    logger: context.logger,
-    taskManager: context.taskManager,
-  });
+  const [taskIdsFailedToBeEnabled] = accListSpecificForBulkOperation;
 
   const updatedRules = rules.map(({ id, attributes, references }) => {
     // TODO (http-versioning): alertTypeId should never be null, but we need to
@@ -172,6 +166,7 @@ const bulkEnableRulesWithOCC = async (
   const rulesFinderRules: Array<SavedObjectsFindResult<RuleAttributes>> = [];
   const rulesToEnable: Array<SavedObjectsBulkUpdateObject<RuleAttributes>> = [];
   const tasksToSchedule: TaskInstanceWithDeprecatedFields[] = [];
+  const taskIdsToEnable: string[] = [];
   const errors: BulkOperationError[] = [];
   const ruleNameToRuleIdMapping: Record<string, string> = {};
   const username = await context.getUserName();
@@ -279,6 +274,8 @@ const bulkEnableRulesWithOCC = async (
                 scope: ['alerting'],
                 enabled: false, // we create the task as disabled, taskManager.bulkEnable will enable them by randomising their schedule datetime
               });
+            } else {
+              taskIdsToEnable.push(rule.id);
             }
 
             rulesToEnable.push({
@@ -325,6 +322,12 @@ const bulkEnableRulesWithOCC = async (
     );
   }
 
+  const taskIdsFailedToBeEnabled = await tryToEnableTasks({
+    taskIdsToEnable,
+    logger: context.logger,
+    taskManager: context.taskManager,
+  });
+
   const result = await withSpan(
     { name: 'unsecuredSavedObjectsClient.bulkCreate', type: 'rules' },
     () =>
@@ -343,15 +346,9 @@ const bulkEnableRulesWithOCC = async (
   );
 
   const rules: Array<SavedObjectsBulkUpdateObject<RuleAttributes>> = [];
-  const taskIdsToEnable: string[] = [];
 
   result.saved_objects.forEach((rule) => {
-    if (rule.error === undefined) {
-      if (rule.attributes.scheduledTaskId) {
-        taskIdsToEnable.push(rule.attributes.scheduledTaskId);
-      }
-      rules.push(rule);
-    } else {
+    if (rule.error) {
       errors.push({
         message: rule.error.message ?? 'n/a',
         status: rule.error.statusCode,
@@ -360,13 +357,15 @@ const bulkEnableRulesWithOCC = async (
           name: ruleNameToRuleIdMapping[rule.id] ?? 'n/a',
         },
       });
+    } else {
+      rules.push(rule);
     }
   });
   return {
     errors,
     // TODO: delete the casting when we do versioning of bulk disable api
     rules: rules as Array<SavedObjectsBulkUpdateObject<RuleAttributes>>,
-    accListSpecificForBulkOperation: [taskIdsToEnable],
+    accListSpecificForBulkOperation: [taskIdsFailedToBeEnabled],
   };
 };
 
