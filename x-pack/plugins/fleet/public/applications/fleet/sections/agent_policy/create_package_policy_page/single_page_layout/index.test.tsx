@@ -28,6 +28,20 @@ import {
   useConfig,
 } from '../../../../hooks';
 
+jest.mock('../components/steps/components/use_policies', () => {
+  return {
+    ...jest.requireActual('../components/steps/components/use_policies'),
+    useAllNonManagedAgentPolicies: jest.fn().mockReturnValue([
+      {
+        id: 'agent-policy-1',
+        name: 'Agent policy 1',
+        namespace: 'default',
+        unprivileged_agents: 1,
+      },
+    ]),
+  };
+});
+
 jest.mock('../../../../hooks', () => {
   return {
     ...jest.requireActual('../../../../hooks'),
@@ -125,6 +139,8 @@ jest.mock('react-router-dom', () => ({
 }));
 
 import { AGENTLESS_POLICY_ID } from '../../../../../../../common/constants';
+
+import { useAllNonManagedAgentPolicies } from '../components/steps/components/use_policies';
 
 import { CreatePackagePolicySinglePage } from '.';
 import { SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ } from './components/setup_technology_selector';
@@ -702,6 +718,9 @@ describe('When on the package policy create page', () => {
           isLoading: false,
           resendRequest: jest.fn(),
         });
+        (useAllNonManagedAgentPolicies as jest.MockedFunction<any>).mockReturnValue([
+          { id: AGENTLESS_POLICY_ID, name: 'Agentless CSPM', namespace: 'default' },
+        ]);
 
         await act(async () => {
           render();
@@ -848,7 +867,7 @@ describe('When on the package policy create page', () => {
 
         expect(sendCreateAgentPolicy).toHaveBeenCalledWith(
           expect.objectContaining({
-            monitoring_enabled: [],
+            monitoring_enabled: ['logs', 'metrics'],
             name: 'Agentless policy for nginx-1',
             supports_agentless: true,
           }),
