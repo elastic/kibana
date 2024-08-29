@@ -30,7 +30,7 @@
         "label": "CreateInvestigationItemParams",
         "description": [],
         "signature": [
-          "{ title: string; type: \"esql\"; params: { esql: string; suggestion: any; }; }"
+          "{ title: string; type: string; params: { [x: string]: any; }; }"
         ],
         "path": "packages/kbn-investigation-shared/src/rest_specs/create_item.ts",
         "deprecated": false,
@@ -45,7 +45,7 @@
         "label": "CreateInvestigationItemResponse",
         "description": [],
         "signature": [
-          "{ id: string; createdAt: number; createdBy: string; } & { title: string; type: \"esql\"; params: { esql: string; suggestion: any; }; }"
+          "{ id: string; createdAt: number; createdBy: string; } & { title: string; type: string; params: { [x: string]: any; }; }"
         ],
         "path": "packages/kbn-investigation-shared/src/rest_specs/create_item.ts",
         "deprecated": false,
@@ -105,7 +105,7 @@
         "label": "CreateInvestigationResponse",
         "description": [],
         "signature": [
-          "{ id: string; title: string; createdAt: number; createdBy: string; params: { timeRange: { from: number; to: number; }; }; origin: { type: \"alert\"; id: string; } | { type: \"blank\"; }; status: \"closed\" | \"ongoing\"; notes: { id: string; content: string; createdAt: number; createdBy: string; }[]; items: ({ id: string; createdAt: number; createdBy: string; } & { title: string; type: \"esql\"; params: { esql: string; suggestion: any; }; })[]; }"
+          "{ id: string; title: string; createdAt: number; createdBy: string; params: { timeRange: { from: number; to: number; }; }; origin: { type: \"alert\"; id: string; } | { type: \"blank\"; }; status: \"closed\" | \"ongoing\"; notes: { id: string; content: string; createdAt: number; createdBy: string; }[]; items: ({ id: string; createdAt: number; createdBy: string; } & { title: string; type: string; params: { [x: string]: any; }; })[]; }"
         ],
         "path": "packages/kbn-investigation-shared/src/rest_specs/create.ts",
         "deprecated": false,
@@ -180,7 +180,7 @@
         "label": "FindInvestigationsResponse",
         "description": [],
         "signature": [
-          "{ page: number; perPage: number; total: number; results: { id: string; title: string; createdAt: number; createdBy: string; params: { timeRange: { from: number; to: number; }; }; origin: { type: \"alert\"; id: string; } | { type: \"blank\"; }; status: \"closed\" | \"ongoing\"; notes: { id: string; content: string; createdAt: number; createdBy: string; }[]; items: ({ id: string; createdAt: number; createdBy: string; } & { title: string; type: \"esql\"; params: { esql: string; suggestion: any; }; })[]; }[]; }"
+          "{ page: number; perPage: number; total: number; results: { id: string; title: string; createdAt: number; createdBy: string; params: { timeRange: { from: number; to: number; }; }; origin: { type: \"alert\"; id: string; } | { type: \"blank\"; }; status: \"closed\" | \"ongoing\"; notes: { id: string; content: string; createdAt: number; createdBy: string; }[]; items: ({ id: string; createdAt: number; createdBy: string; } & { title: string; type: string; params: { [x: string]: any; }; })[]; }[]; }"
         ],
         "path": "packages/kbn-investigation-shared/src/rest_specs/find.ts",
         "deprecated": false,
@@ -195,7 +195,7 @@
         "label": "GetInvestigationItemsResponse",
         "description": [],
         "signature": [
-          "({ id: string; createdAt: number; createdBy: string; } & { title: string; type: \"esql\"; params: { esql: string; suggestion: any; }; })[]"
+          "({ id: string; createdAt: number; createdBy: string; } & { title: string; type: string; params: { [x: string]: any; }; })[]"
         ],
         "path": "packages/kbn-investigation-shared/src/rest_specs/get_items.ts",
         "deprecated": false,
@@ -240,9 +240,39 @@
         "label": "GetInvestigationResponse",
         "description": [],
         "signature": [
-          "{ id: string; title: string; createdAt: number; createdBy: string; params: { timeRange: { from: number; to: number; }; }; origin: { type: \"alert\"; id: string; } | { type: \"blank\"; }; status: \"closed\" | \"ongoing\"; notes: { id: string; content: string; createdAt: number; createdBy: string; }[]; items: ({ id: string; createdAt: number; createdBy: string; } & { title: string; type: \"esql\"; params: { esql: string; suggestion: any; }; })[]; }"
+          "{ id: string; title: string; createdAt: number; createdBy: string; params: { timeRange: { from: number; to: number; }; }; origin: { type: \"alert\"; id: string; } | { type: \"blank\"; }; status: \"closed\" | \"ongoing\"; notes: { id: string; content: string; createdAt: number; createdBy: string; }[]; items: ({ id: string; createdAt: number; createdBy: string; } & { title: string; type: string; params: { [x: string]: any; }; })[]; }"
         ],
         "path": "packages/kbn-investigation-shared/src/rest_specs/get.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/investigation-shared",
+        "id": "def-common.InvestigationItem",
+        "type": "Type",
+        "tags": [],
+        "label": "InvestigationItem",
+        "description": [],
+        "signature": [
+          "{ id: string; createdAt: number; createdBy: string; } & { title: string; type: string; params: { [x: string]: any; }; }"
+        ],
+        "path": "packages/kbn-investigation-shared/src/schema/investigation_item.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/investigation-shared",
+        "id": "def-common.InvestigationItemResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "InvestigationItemResponse",
+        "description": [],
+        "signature": [
+          "{ id: string; createdAt: number; createdBy: string; } & { title: string; type: string; params: { [x: string]: any; }; }"
+        ],
+        "path": "packages/kbn-investigation-shared/src/rest_specs/investigation_item.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -258,6 +288,21 @@
           "{ id: string; content: string; createdAt: number; createdBy: string; }"
         ],
         "path": "packages/kbn-investigation-shared/src/rest_specs/investigation_note.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/investigation-shared",
+        "id": "def-common.Item",
+        "type": "Type",
+        "tags": [],
+        "label": "Item",
+        "description": [],
+        "signature": [
+          "{ title: string; type: string; params: { [x: string]: any; }; }"
+        ],
+        "path": "packages/kbn-investigation-shared/src/schema/investigation_item.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -320,14 +365,14 @@
           "<{ title: ",
           "StringC",
           "; type: ",
-          "LiteralC",
-          "<\"esql\">; params: ",
-          "TypeC",
-          "<{ esql: ",
           "StringC",
-          "; suggestion: ",
+          "; params: ",
+          "RecordC",
+          "<",
+          "StringC",
+          ", ",
           "AnyC",
-          "; }>; }>; }>"
+          ">; }>; }>"
         ],
         "path": "packages/kbn-investigation-shared/src/rest_specs/create_item.ts",
         "deprecated": false,
@@ -356,14 +401,14 @@
           "<{ title: ",
           "StringC",
           "; type: ",
-          "LiteralC",
-          "<\"esql\">; params: ",
-          "TypeC",
-          "<{ esql: ",
           "StringC",
-          "; suggestion: ",
+          "; params: ",
+          "RecordC",
+          "<",
+          "StringC",
+          ", ",
           "AnyC",
-          "; }>; }>]>"
+          ">; }>]>"
         ],
         "path": "packages/kbn-investigation-shared/src/rest_specs/create_item.ts",
         "deprecated": false,
@@ -532,14 +577,14 @@
           "<{ title: ",
           "StringC",
           "; type: ",
-          "LiteralC",
-          "<\"esql\">; params: ",
-          "TypeC",
-          "<{ esql: ",
           "StringC",
-          "; suggestion: ",
+          "; params: ",
+          "RecordC",
+          "<",
+          "StringC",
+          ", ",
           "AnyC",
-          "; }>; }>]>>; }>"
+          ">; }>]>>; }>"
         ],
         "path": "packages/kbn-investigation-shared/src/rest_specs/create.ts",
         "deprecated": false,
@@ -606,32 +651,6 @@
           "; }>; }>"
         ],
         "path": "packages/kbn-investigation-shared/src/rest_specs/delete.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/investigation-shared",
-        "id": "def-common.esqlItemSchema",
-        "type": "Object",
-        "tags": [],
-        "label": "esqlItemSchema",
-        "description": [],
-        "signature": [
-          "TypeC",
-          "<{ title: ",
-          "StringC",
-          "; type: ",
-          "LiteralC",
-          "<\"esql\">; params: ",
-          "TypeC",
-          "<{ esql: ",
-          "StringC",
-          "; suggestion: ",
-          "AnyC",
-          "; }>; }>"
-        ],
-        "path": "packages/kbn-investigation-shared/src/schema/investigation_item.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -742,14 +761,14 @@
           "<{ title: ",
           "StringC",
           "; type: ",
-          "LiteralC",
-          "<\"esql\">; params: ",
-          "TypeC",
-          "<{ esql: ",
           "StringC",
-          "; suggestion: ",
+          "; params: ",
+          "RecordC",
+          "<",
+          "StringC",
+          ", ",
           "AnyC",
-          "; }>; }>]>>; }>>; }>"
+          ">; }>]>>; }>>; }>"
         ],
         "path": "packages/kbn-investigation-shared/src/rest_specs/find.ts",
         "deprecated": false,
@@ -800,14 +819,14 @@
           "<{ title: ",
           "StringC",
           "; type: ",
-          "LiteralC",
-          "<\"esql\">; params: ",
-          "TypeC",
-          "<{ esql: ",
           "StringC",
-          "; suggestion: ",
+          "; params: ",
+          "RecordC",
+          "<",
+          "StringC",
+          ", ",
           "AnyC",
-          "; }>; }>]>>"
+          ">; }>]>>"
         ],
         "path": "packages/kbn-investigation-shared/src/rest_specs/get_items.ts",
         "deprecated": false,
@@ -952,16 +971,52 @@
           "<{ title: ",
           "StringC",
           "; type: ",
-          "LiteralC",
-          "<\"esql\">; params: ",
-          "TypeC",
-          "<{ esql: ",
           "StringC",
-          "; suggestion: ",
+          "; params: ",
+          "RecordC",
+          "<",
+          "StringC",
+          ", ",
           "AnyC",
-          "; }>; }>]>>; }>"
+          ">; }>]>>; }>"
         ],
         "path": "packages/kbn-investigation-shared/src/rest_specs/get.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/investigation-shared",
+        "id": "def-common.investigationItemResponseSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "investigationItemResponseSchema",
+        "description": [],
+        "signature": [
+          "IntersectionC",
+          "<[",
+          "TypeC",
+          "<{ id: ",
+          "StringC",
+          "; createdAt: ",
+          "NumberC",
+          "; createdBy: ",
+          "StringC",
+          "; }>, ",
+          "TypeC",
+          "<{ title: ",
+          "StringC",
+          "; type: ",
+          "StringC",
+          "; params: ",
+          "RecordC",
+          "<",
+          "StringC",
+          ", ",
+          "AnyC",
+          ">; }>]>"
+        ],
+        "path": "packages/kbn-investigation-shared/src/rest_specs/investigation_item.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -988,40 +1043,14 @@
           "<{ title: ",
           "StringC",
           "; type: ",
-          "LiteralC",
-          "<\"esql\">; params: ",
-          "TypeC",
-          "<{ esql: ",
           "StringC",
-          "; suggestion: ",
+          "; params: ",
+          "RecordC",
+          "<",
+          "StringC",
+          ", ",
           "AnyC",
-          "; }>; }>]>"
-        ],
-        "path": "packages/kbn-investigation-shared/src/schema/investigation_item.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/investigation-shared",
-        "id": "def-common.investigationItemsSchema",
-        "type": "Object",
-        "tags": [],
-        "label": "investigationItemsSchema",
-        "description": [],
-        "signature": [
-          "TypeC",
-          "<{ title: ",
-          "StringC",
-          "; type: ",
-          "LiteralC",
-          "<\"esql\">; params: ",
-          "TypeC",
-          "<{ esql: ",
-          "StringC",
-          "; suggestion: ",
-          "AnyC",
-          "; }>; }>"
+          ">; }>]>"
         ],
         "path": "packages/kbn-investigation-shared/src/schema/investigation_item.ts",
         "deprecated": false,
@@ -1148,16 +1177,42 @@
           "<{ title: ",
           "StringC",
           "; type: ",
-          "LiteralC",
-          "<\"esql\">; params: ",
-          "TypeC",
-          "<{ esql: ",
           "StringC",
-          "; suggestion: ",
+          "; params: ",
+          "RecordC",
+          "<",
+          "StringC",
+          ", ",
           "AnyC",
-          "; }>; }>]>>; }>"
+          ">; }>]>>; }>"
         ],
         "path": "packages/kbn-investigation-shared/src/schema/investigation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/investigation-shared",
+        "id": "def-common.itemSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "itemSchema",
+        "description": [],
+        "signature": [
+          "TypeC",
+          "<{ title: ",
+          "StringC",
+          "; type: ",
+          "StringC",
+          "; params: ",
+          "RecordC",
+          "<",
+          "StringC",
+          ", ",
+          "AnyC",
+          ">; }>"
+        ],
+        "path": "packages/kbn-investigation-shared/src/schema/investigation_item.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
