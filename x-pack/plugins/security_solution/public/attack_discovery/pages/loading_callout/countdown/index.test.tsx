@@ -76,7 +76,7 @@ describe('Countdown', () => {
     );
 
     act(() => {
-      jest.runOnlyPendingTimers();
+      jest.advanceTimersByTime(1000);
     });
 
     expect(screen.getByTestId('timerText')).toHaveTextContent('00:59');
