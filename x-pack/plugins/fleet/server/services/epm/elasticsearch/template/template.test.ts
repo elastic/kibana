@@ -949,6 +949,42 @@ describe('EPM template', () => {
     expect(mappings).toEqual(expectedMapping);
   });
 
+  it('tests processing nested field with subobjects', () => {
+    const nestedYaml = `
+  - name: a
+    type: nested
+    include_in_parent: true
+    fields:
+    - name: b
+      type: group
+      fields:
+      - name: c
+        type: keyword
+    `;
+    const expectedMapping = {
+      properties: {
+        a: {
+          include_in_parent: true,
+          type: 'nested',
+          properties: {
+            b: {
+              properties: {
+                c: {
+                  ignore_above: 1024,
+                  type: 'keyword',
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(nestedYaml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(mappings).toEqual(expectedMapping);
+  });
+
   it('tests processing nested leaf field with properties', () => {
     const nestedYaml = `
   - name: a
