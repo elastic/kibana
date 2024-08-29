@@ -168,10 +168,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     setSortOrder(sort!.direction);
   };
 
-  const showInactive = useMemo(() => {
-    return selectedStatus.some((status) => status === 'inactive' || status === 'unenrolled');
-  }, [selectedStatus]);
-
   const renderActions = (agent: Agent) => {
     const agentPolicy =
       typeof agent.policy_id === 'string' ? agentPoliciesIndexedById[agent.policy_id] : undefined;
@@ -435,7 +431,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       <EuiSpacer size="m" />
       {/* Agent total, bulk actions and status bar */}
       <AgentTableHeader
-        showInactive={showInactive}
         totalAgents={nAgentsInTable}
         agentStatus={agentsStatus}
         selectableAgents={agentsOnCurrentPage?.filter(isAgentSelectable).length || 0}

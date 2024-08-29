@@ -16,6 +16,7 @@ import {
   getInvestigationItemsParamsSchema,
   getInvestigationNotesParamsSchema,
   getInvestigationParamsSchema,
+  updateInvestigationNoteParamsSchema,
 } from '@kbn/investigation-shared';
 import { createInvestigation } from '../services/create_investigation';
 import { createInvestigationItem } from '../services/create_investigation_item';
@@ -29,6 +30,7 @@ import { getInvestigationNotes } from '../services/get_investigation_notes';
 import { investigationRepositoryFactory } from '../services/investigation_repository';
 import { createInvestigateAppServerRoute } from './create_investigate_app_server_route';
 import { getInvestigationItems } from '../services/get_investigation_items';
+import { updateInvestigationNote } from '../services/update_investigation_note';
 
 const createInvestigationRoute = createInvestigateAppServerRoute({
   endpoint: 'POST /api/observability/investigations 2023-10-31',
@@ -125,7 +127,33 @@ const getInvestigationNotesRoute = createInvestigateAppServerRoute({
   },
 });
 
-const deleteInvestigationNotesRoute = createInvestigateAppServerRoute({
+const updateInvestigationNoteRoute = createInvestigateAppServerRoute({
+  endpoint: 'PUT /api/observability/investigations/{investigationId}/notes/{noteId} 2023-10-31',
+  options: {
+    tags: [],
+  },
+  params: updateInvestigationNoteParamsSchema,
+  handler: async ({ params, context, request, logger }) => {
+    const user = (await context.core).coreStart.security.authc.getCurrentUser(request);
+    if (!user) {
+      throw new Error('User is not authenticated');
+    }
+    const soClient = (await context.core).savedObjects.client;
+    const repository = investigationRepositoryFactory({ soClient, logger });
+
+    return await updateInvestigationNote(
+      params.path.investigationId,
+      params.path.noteId,
+      params.body,
+      {
+        repository,
+        user,
+      }
+    );
+  },
+});
+
+const deleteInvestigationNoteRoute = createInvestigateAppServerRoute({
   endpoint: 'DELETE /api/observability/investigations/{investigationId}/notes/{noteId} 2023-10-31',
   options: {
     tags: [],
@@ -207,10 +235,11 @@ export function getGlobalInvestigateAppServerRouteRepository() {
     ...createInvestigationRoute,
     ...findInvestigationsRoute,
     ...getInvestigationRoute,
-    ...deleteInvestigationRoute,
     ...createInvestigationNoteRoute,
     ...getInvestigationNotesRoute,
-    ...deleteInvestigationNotesRoute,
+    ...updateInvestigationNoteRoute,
+    ...deleteInvestigationNoteRoute,
+    ...deleteInvestigationRoute,
     ...createInvestigationItemRoute,
     ...deleteInvestigationItemRoute,
     ...getInvestigationItemsRoute,
