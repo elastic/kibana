@@ -39,7 +39,7 @@ import {
 } from '../../../common/constants';
 import { useParams } from 'react-router-dom';
 import { createReactQueryResponse } from '../../test/fixtures/react_query';
-import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
+import { useCspSetupStatusApi } from '@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api';
 import { usePackagePolicyList } from '../../common/api/use_package_policy_list';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import {
@@ -67,7 +67,7 @@ jest.mock('react-router-dom', () => ({
     integration: undefined,
   }),
 }));
-jest.mock('../../common/api/use_setup_status_api');
+jest.mock('@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api');
 jest.mock('../../common/api/use_package_policy_list');
 jest.mock('../../common/hooks/use_is_subscription_status_valid');
 jest.mock('../../common/api/use_license_management_locator_api');
