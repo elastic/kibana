@@ -131,7 +131,7 @@ export class BasicPrettyPrinter {
       : word.toUpperCase();
   }
 
-  protected readonly visitor = new Visitor()
+  protected readonly visitor: Visitor<any> = new Visitor()
     .on('visitExpression', (ctx) => {
       return '<EXPRESSION>';
     })
@@ -267,14 +267,14 @@ export class BasicPrettyPrinter {
     });
 
   public print(query: ESQLAstQueryNode) {
-    return this.visitor.visitQuery(query);
+    return this.visitor.visitQuery(query, undefined);
   }
 
   public printCommand(command: ESQLAstCommand) {
-    return this.visitor.visitCommand(command);
+    return this.visitor.visitCommand(command, undefined);
   }
 
   public printExpression(expression: ESQLAstExpressionNode) {
-    return this.visitor.visitExpression(expression);
+    return this.visitor.visitExpression(expression, undefined);
   }
 }
