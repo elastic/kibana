@@ -8,13 +8,13 @@
 .lnsChartSwitch__options {
   width: 384px;
 
-.lnsChartSwitch__option {
-  padding: $euiSizeS 0;
-}
+  .lnsChartSwitch__option {
+    padding: $euiSizeS 0;
+  }
 
-.euiSelectableList__groupLabel {
-  padding: $euiSizeS;
-}
+  .euiSelectableList__groupLabel {
+    padding: $euiSizeS;
+  }
 
 }
 
