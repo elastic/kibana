@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { Builder } from '.';
+export {
+  getLexer,
+  getParser,
+  parse,
+  type ParseOptions,
+  type ParseResult,
 
-test('can mint a numeric literal', () => {
-  const node = Builder.numericLiteral({ value: 42 });
+  /** @deprecated Use `parse` instead. */
+  parse as getAstAndSyntaxErrors,
+} from './parser';
 
-  expect(node).toMatchObject({
-    type: 'literal',
-    literalType: 'integer',
-    name: '42',
-    value: 42,
-  });
-});
+export { ESQLErrorListener } from './esql_error_listener';

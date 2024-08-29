@@ -92,7 +92,7 @@ export class VisitorContext<
     const node = this.node;
 
     if (!isNodeWithArgs(node)) {
-      throw new Error('Node does not have arguments');
+      return [];
     }
 
     const args: ESQLAstExpressionNode[] = [];
@@ -146,6 +146,10 @@ export class QueryVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
   Data extends SharedData = SharedData
 > extends VisitorContext<Methods, Data, ESQLAstQueryNode> {
+  public *commands(): Iterable<ESQLAstCommand> {
+    yield* this.node;
+  }
+
   public *visitCommands(
     input: UndefinedToVoid<Parameters<NonNullable<Methods['visitCommand']>>[1]>
   ): Iterable<
@@ -335,7 +339,7 @@ export class LimitCommandVisitorContext<
   }
 
   public setLimit(value: number): void {
-    const literalNode = Builder.numericLiteral({ value });
+    const literalNode = Builder.expression.literal.numeric({ value, literalType: 'integer' });
 
     this.node.args = [literalNode];
   }

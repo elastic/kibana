@@ -28,16 +28,14 @@ export type {
   ESQLAstNode,
 } from './src/types';
 
-// Low level functions to parse grammar
-export { getParser, getLexer, ROOT_STATEMENT } from './src/antlr_facade';
-
-/**
- * ES|QL Query string -> AST data structure
- * this is the foundational building block for any advanced feature
- * a developer wants to build on top of the ESQL language
- **/
-export { getAstAndSyntaxErrors } from './src/ast_parser';
-
-export { ESQLErrorListener } from './src/antlr_error_listener';
+export {
+  getParser,
+  getLexer,
+  parse,
+  type ParseOptions,
+  type ParseResult,
+  getAstAndSyntaxErrors,
+  ESQLErrorListener,
+} from './src/parser';
 
 export { Walker, type WalkerOptions, walk } from './src/walker';

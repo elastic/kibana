@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import type { RecognitionException } from 'antlr4';
-import { getPosition } from './ast_position_utils';
+import { Builder } from '.';
 
-export function createError(exception: RecognitionException) {
-  const token = exception.offendingToken;
+test('can mint a numeric literal', () => {
+  const node = Builder.expression.literal.numeric({ value: 42, literalType: 'integer' });
 
-  return {
-    type: 'error' as const,
-    text: `SyntaxError: ${exception.message}`,
-    location: getPosition(token),
-  };
-}
+  expect(node).toMatchObject({
+    type: 'literal',
+    literalType: 'integer',
+    name: '42',
+    value: 42,
+  });
+});

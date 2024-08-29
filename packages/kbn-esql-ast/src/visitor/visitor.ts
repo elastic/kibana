@@ -17,7 +17,7 @@ import type {
   UndefinedToVoid,
   VisitorMethods,
 } from './types';
-import { ESQLCommand } from '../types';
+import type { ESQLCommand, ESQLProperNode } from '../types';
 
 export interface VisitorOptions<
   Methods extends VisitorMethods = VisitorMethods,
@@ -31,6 +31,112 @@ export class Visitor<
   Methods extends VisitorMethods = VisitorMethods,
   Data extends SharedData = SharedData
 > {
+  /**
+   * Finds the most specific node immediately after the given position. If the
+   * position is inside a node, it will return the node itself. If no node is
+   * found, it returns `null`.
+   *
+   * @param ast ES|QL AST
+   * @param pos Offset position in the source text
+   * @returns The node at or after the given position
+   */
+  public static readonly findNodeAtOrAfter = (
+    ast: ESQLAstQueryNode,
+    pos: number
+  ): ESQLProperNode | null => {
+    return new Visitor()
+      .on('visitExpression', (ctx): ESQLProperNode | null => {
+        for (const node of ctx.arguments()) {
+          const { location } = node;
+          if (!location) continue;
+          const isInside = location.min <= pos && location.max >= pos;
+          if (isInside) return ctx.visitExpression(node, undefined);
+          const isBefore = location.min > pos;
+          if (isBefore) return ctx.visitExpression(node, undefined) || node;
+        }
+        return null;
+      })
+      .on('visitCommand', (ctx): ESQLProperNode | null => {
+        for (const node of ctx.arguments()) {
+          const { location } = node;
+          if (!location) continue;
+          const isInside = location.min <= pos && location.max >= pos;
+          if (isInside) return ctx.visitExpression(node);
+          const isBefore = location.min > pos;
+          if (isBefore) return ctx.visitExpression(node) || node;
+        }
+        return null;
+      })
+      .on('visitQuery', (ctx): ESQLProperNode | null => {
+        for (const node of ctx.commands()) {
+          const { location } = node;
+          if (!location) continue;
+          const isInside = location.min <= pos && location.max >= pos;
+          if (isInside) return ctx.visitCommand(node);
+          const isBefore = location.min > pos;
+          if (isBefore) return node;
+        }
+        return null;
+      })
+      .visitQuery(ast);
+  };
+
+  /**
+   * Finds the most specific node immediately before the given position. If the
+   * position is inside a node, it will return the node itself. If no node is
+   * found, it returns `null`.
+   *
+   * @param ast ES|QL AST
+   * @param pos Offset position in the source text
+   * @returns The node at or before the given position
+   */
+  public static readonly findNodeAtOrBefore = (
+    ast: ESQLAstQueryNode,
+    pos: number
+  ): ESQLProperNode | null => {
+    return new Visitor()
+      .on('visitExpression', (ctx): ESQLProperNode | null => {
+        const nodes = [...ctx.arguments()];
+        for (let i = nodes.length - 1; i >= 0; i--) {
+          const node = nodes[i];
+          const { location } = node;
+          if (!location) continue;
+          const isInside = location.min <= pos && location.max >= pos;
+          if (isInside) return ctx.visitExpression(node, undefined);
+          const isAfter = location.max < pos;
+          if (isAfter) return ctx.visitExpression(node, undefined) || node;
+        }
+        return null;
+      })
+      .on('visitCommand', (ctx): ESQLProperNode | null => {
+        const nodes = [...ctx.arguments()];
+        for (let i = nodes.length - 1; i >= 0; i--) {
+          const node = nodes[i];
+          const { location } = node;
+          if (!location) continue;
+          const isInside = location.min <= pos && location.max >= pos;
+          if (isInside) return ctx.visitExpression(node);
+          const isAfter = location.max < pos;
+          if (isAfter) return ctx.visitExpression(node) || node;
+        }
+        return null;
+      })
+      .on('visitQuery', (ctx): ESQLProperNode | null => {
+        const nodes = [...ctx.commands()];
+        for (let i = nodes.length - 1; i >= 0; i--) {
+          const node = nodes[i];
+          const { location } = node;
+          if (!location) continue;
+          const isInside = location.min <= pos && location.max >= pos;
+          if (isInside) return ctx.visitCommand(node);
+          const isAfter = location.max < pos;
+          if (isAfter) return ctx.visitCommand(node) || node;
+        }
+        return null;
+      })
+      .visitQuery(ast);
+  };
+
   public readonly ctx: GlobalVisitorContext<Methods, Data>;
 
   constructor(protected readonly options: VisitorOptions<Methods, Data> = {}) {

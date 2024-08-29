@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getAstAndSyntaxErrors } from '../../ast_parser';
+import { getAstAndSyntaxErrors } from '../../parser';
 import { ESQLFunction } from '../../types';
 import { Walker } from '../../walker';
 import { BasicPrettyPrinter, BasicPrettyPrinterMultilineOptions } from '../basic_pretty_printer';
@@ -211,7 +211,7 @@ describe('single line query', () => {
         });
       });
 
-      describe('binary expression expression', () => {
+      describe('binary expression', () => {
         test('arithmetic expression', () => {
           const { text } = reprint('ROW 1 + 2');
 
@@ -234,6 +234,36 @@ describe('single line query', () => {
           const { text } = reprint('FROM a | WHERE a LIKE "b"');
 
           expect(text).toBe('FROM a | WHERE a LIKE "b"');
+        });
+
+        test('inserts brackets where necessary due precedence', () => {
+          const { text } = reprint('FROM a | WHERE (1 + 2) * 3');
+
+          expect(text).toBe('FROM a | WHERE (1 + 2) * 3');
+        });
+
+        test('inserts brackets where necessary due precedence - 2', () => {
+          const { text } = reprint('FROM a | WHERE (1 + 2) * (3 - 4)');
+
+          expect(text).toBe('FROM a | WHERE (1 + 2) * (3 - 4)');
+        });
+
+        test('inserts brackets where necessary due precedence - 3', () => {
+          const { text } = reprint('FROM a | WHERE (1 + 2) * (3 - 4) / (5 + 6 + 7)');
+
+          expect(text).toBe('FROM a | WHERE (1 + 2) * (3 - 4) / (5 + 6 + 7)');
+        });
+
+        test('inserts brackets where necessary due precedence - 4', () => {
+          const { text } = reprint('FROM a | WHERE (1 + (1 + 2)) * ((3 - 4) / (5 + 6 + 7))');
+
+          expect(text).toBe('FROM a | WHERE (1 + 1 + 2) * (3 - 4) / (5 + 6 + 7)');
+        });
+
+        test('inserts brackets where necessary due precedence - 5', () => {
+          const { text } = reprint('FROM a | WHERE (1 + (1 + 2)) * (((3 - 4) / (5 + 6 + 7)) + 1)');
+
+          expect(text).toBe('FROM a | WHERE (1 + 1 + 2) * ((3 - 4) / (5 + 6 + 7) + 1)');
         });
       });
     });
@@ -455,3 +485,5 @@ describe('single line expression', () => {
     expect(text2).toBe('AVG(1, 2, 3)');
   });
 });
+
+it.todo('test for NOT unary expression');

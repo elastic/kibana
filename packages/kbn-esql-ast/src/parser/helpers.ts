@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
+import type { Token } from 'antlr4';
+import { DEFAULT_CHANNEL } from './constants';
+
 export const isQuotedIdentifier = (text: string): boolean => {
   const firstChar = text[0];
   const lastChar = text[text.length - 1];
@@ -35,3 +38,126 @@ export const formatIdentifier = (text: string): string => {
 
 export const formatIdentifierParts = (parts: string[]): string =>
   parts.map(formatIdentifier).join('.');
+
+export const getPosition = (
+  token: Pick<Token, 'start' | 'stop'> | null,
+  lastToken?: Pick<Token, 'stop'> | undefined
+) => {
+  if (!token || token.start < 0) {
+    return { min: 0, max: 0 };
+  }
+  const endFirstToken = token.stop > -1 ? Math.max(token.stop + 1, token.start) : undefined;
+  const endLastToken = lastToken?.stop;
+  return {
+    min: token.start,
+    max: endLastToken ?? endFirstToken ?? Infinity,
+  };
+};
+
+/**
+ * Finds all tokens in the given range using binary search. Allows to further
+ * filter the tokens using a predicate.
+ *
+ * @param tokens List of ANTLR tokens.
+ * @param min Text position to start searching from.
+ * @param max Text position to stop searching at.
+ * @param predicate Function to test each token.
+ */
+export const findTokens = function* (
+  tokens: Token[],
+  min: number = 0,
+  max: number = tokens.length ? tokens[tokens.length - 1].stop : 0,
+  predicate: (token: Token) => boolean = () => true
+): Iterable<Token> {
+  let left = 0;
+  let right = tokens.length - 1;
+
+  while (left <= right) {
+    const mid = left + Math.floor((right - left) / 2);
+    const token = tokens[mid];
+
+    if (token.start < min) {
+      left = mid + 1;
+    } else if (token.stop > max) {
+      right = mid - 1;
+    } else {
+      if (predicate(token)) {
+        yield token;
+      }
+
+      left = mid + 1;
+    }
+  }
+};
+
+/**
+ * Finds the first token in the given range using binary search. Allows to
+ * further filter the tokens using a predicate.
+ *
+ * @param tokens List of ANTLR tokens.
+ * @param min Text position to start searching from.
+ * @param max Text position to stop searching at.
+ * @param predicate Function to test each token.
+ * @returns The first token that matches the predicate or `null` if no token is found.
+ */
+export const findFirstToken = (
+  tokens: Token[],
+  min: number = 0,
+  max: number = tokens.length ? tokens[tokens.length - 1].stop : 0,
+  predicate: (token: Token) => boolean = () => true
+): Token | null => {
+  for (const token of findTokens(tokens, min, max, predicate)) {
+    return token;
+  }
+
+  return null;
+};
+
+/**
+ * Finds the first visible token in the given token range using binary search.
+ *
+ * @param tokens List of ANTLR tokens.
+ * @param min Text position to start searching from.
+ * @param max Text position to stop searching at.
+ * @returns The first punctuation token or `null` if no token is found.
+ */
+export const findVisibleToken = (
+  tokens: Token[],
+  min: number = 0,
+  max: number = tokens.length ? tokens[tokens.length - 1].stop : 0
+): Token | null => {
+  return findFirstToken(
+    tokens,
+    min,
+    max,
+    ({ channel, text }) => channel === DEFAULT_CHANNEL && text.length > 0
+  );
+};
+
+/**
+ * A heuristic set of punctuation characters.
+ */
+const punctuationChars = new Set(['.', ',', ';', ':', '(', ')', '[', ']', '{', '}']);
+
+/**
+ * Finds the first punctuation token in the given token range using binary
+ * search.
+ *
+ * @param tokens List of ANTLR tokens.
+ * @param min Text position to start searching from.
+ * @param max Text position to stop searching at.
+ * @returns The first punctuation token or `null` if no token is found.
+ */
+export const findPunctuationToken = (
+  tokens: Token[],
+  min: number = 0,
+  max: number = tokens.length ? tokens[tokens.length - 1].stop : 0
+): Token | null => {
+  return findFirstToken(
+    tokens,
+    min,
+    max,
+    ({ channel, text }) =>
+      channel === DEFAULT_CHANNEL && text.length === 1 && punctuationChars.has(text)
+  );
+};

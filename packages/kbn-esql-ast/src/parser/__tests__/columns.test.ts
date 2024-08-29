@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getAstAndSyntaxErrors as parse } from '../ast_parser';
+import { getAstAndSyntaxErrors as parse } from '..';
 
 describe('Column Identifier Expressions', () => {
   it('can parse un-quoted identifiers', () => {

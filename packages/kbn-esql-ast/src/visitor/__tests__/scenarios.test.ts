@@ -13,12 +13,12 @@
  * visitor to traverse the AST and make changes to it, or how to extract useful
  */
 
-import { getAstAndSyntaxErrors } from '../../ast_parser';
+import { parse } from '../../parser';
 import { ESQLAstQueryNode } from '../types';
 import { Visitor } from '../visitor';
 
 test('change LIMIT from 24 to 42', () => {
-  const { ast } = getAstAndSyntaxErrors(`
+  const { ast } = parse(`
     FROM index
       | STATS 1, "str", [true], a = b BY field
       | LIMIT 24
@@ -55,7 +55,7 @@ test('change LIMIT from 24 to 42', () => {
 test.todo('can modify sorting orders');
 
 test('can remove a specific WHERE command', () => {
-  const query = getAstAndSyntaxErrors(`
+  const query = parse(`
     FROM employees
       | KEEP first_name, last_name, still_hired
       | WHERE still_hired == true
@@ -182,7 +182,7 @@ export const prettyPrint = (ast: ESQLAstQueryNode) =>
     .visitQuery(ast);
 
 test('can print a query to text', () => {
-  const { ast } = getAstAndSyntaxErrors(
+  const { ast } = parse(
     'FROM index METADATA _id, asdf, 123 | STATS fn([1,2], 1d, 1::string, x in (1, 2)), a = b | LIMIT 1000'
   );
   const text = prettyPrint(ast);

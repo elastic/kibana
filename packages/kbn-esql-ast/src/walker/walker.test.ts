@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getAstAndSyntaxErrors } from '../ast_parser';
+import { getAstAndSyntaxErrors } from '../parser';
 import {
   ESQLColumn,
   ESQLCommand,

@@ -54,6 +54,18 @@ export interface ESQLAstBaseItem<Name = string> {
   text: string;
   location: ESQLLocation;
   incomplete: boolean;
+  formatting?: ESQLAstNodeFormatting;
+}
+
+/**
+ * Contains optional formatting information used by the pretty printer.
+ */
+export interface ESQLAstNodeFormatting {
+  top?: ESQLAstComment[];
+  left?: ESQLAstCommentMultiLine[];
+  right?: ESQLAstCommentMultiLine[];
+  rightSingleLine?: ESQLAstCommentSingleLine;
+  bottom?: ESQLAstComment[];
 }
 
 export interface ESQLCommand<Name = string> extends ESQLAstBaseItem<Name> {
@@ -305,3 +317,14 @@ export interface EditorError {
   code?: string;
   severity: 'error' | 'warning' | number;
 }
+
+export interface ESQLAstGenericComment<SubType extends 'single-line' | 'multi-line'> {
+  type: 'comment';
+  subtype: SubType;
+  text: string;
+  location: ESQLLocation;
+}
+
+export type ESQLAstCommentSingleLine = ESQLAstGenericComment<'single-line'>;
+export type ESQLAstCommentMultiLine = ESQLAstGenericComment<'multi-line'>;
+export type ESQLAstComment = ESQLAstCommentSingleLine | ESQLAstCommentMultiLine;

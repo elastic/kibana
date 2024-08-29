@@ -62,7 +62,7 @@ import {
   InputParamContext,
   IndexPatternContext,
   InlinestatsCommandContext,
-} from './antlr/esql_parser';
+} from '../antlr/esql_parser';
 import {
   createSource,
   createColumn,
@@ -83,8 +83,8 @@ import {
   textExistsAndIsValid,
   createInlineCast,
   createUnknownItem,
-} from './ast_helpers';
-import { getPosition } from './ast_position_utils';
+} from './factories';
+import { getPosition } from './helpers';
 import {
   ESQLLiteral,
   ESQLColumn,
@@ -96,7 +96,7 @@ import {
   ESQLUnnamedParamLiteral,
   ESQLPositionalParamLiteral,
   ESQLNamedParamLiteral,
-} from './types';
+} from '../types';
 
 export function collectAllSourceIdentifiers(ctx: FromCommandContext): ESQLAstItem[] {
   const fromContexts = ctx.getTypedRuleContexts(IndexPatternContext);
@@ -487,10 +487,7 @@ export function visitPrimaryExpression(ctx: PrimaryExpressionContext): ESQLAstIt
 
 function collectInlineCast(ctx: InlineCastContext): ESQLInlineCast {
   const primaryExpression = visitPrimaryExpression(ctx.primaryExpression());
-  return {
-    ...createInlineCast(ctx),
-    value: primaryExpression,
-  };
+  return createInlineCast(ctx, primaryExpression);
 }
 
 export function collectLogicalExpression(ctx: BooleanExpressionContext) {
