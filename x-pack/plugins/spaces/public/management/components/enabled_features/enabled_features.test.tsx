@@ -18,6 +18,7 @@ const features: KibanaFeatureConfig[] = [
   {
     id: 'feature-1',
     name: 'Feature 1',
+    scope: 'agnostic',
     app: [],
     category: DEFAULT_APP_CATEGORIES.kibana,
     privileges: null,
@@ -25,6 +26,7 @@ const features: KibanaFeatureConfig[] = [
   {
     id: 'feature-2',
     name: 'Feature 2',
+    scope: 'agnostic',
     app: [],
     category: DEFAULT_APP_CATEGORIES.kibana,
     privileges: null,
