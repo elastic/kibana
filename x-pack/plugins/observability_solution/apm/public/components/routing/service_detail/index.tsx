@@ -22,19 +22,16 @@ import {
 } from '../../../../common/latency_aggregation_types';
 import { ApmTimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { ALERT_STATUS_ALL } from '../../app/alerts_overview';
+import { ALERT_STATUS_ALL, AlertsOverview } from '../../app/alerts_overview';
 import { InfraTab } from '../../app/infra_overview/infra_tabs/use_tabs';
 import { ApmServiceTemplate } from '../templates/apm_service_template';
 import { ApmServiceWrapper } from './apm_service_wrapper';
 import { RedirectToDefaultServiceRouteView } from './redirect_to_default_service_route_view';
 import { SearchBar } from '../../shared/search_bar/search_bar';
+import { ServiceDependencies } from '../../app/service_dependencies';
+import { ServiceDashboards } from '../../app/service_dashboards';
+import { ErrorGroupDetails } from '../../app/error_group_details';
 
-const AlertsOverview = dynamic(() =>
-  import('../../app/alerts_overview').then((mod) => ({ default: mod.AlertsOverview }))
-);
-const ErrorGroupDetails = dynamic(() =>
-  import('../../app/error_group_details').then((mod) => ({ default: mod.ErrorGroupDetails }))
-);
 const ErrorGroupOverview = dynamic(() =>
   import('../../app/error_group_overview').then((mod) => ({ default: mod.ErrorGroupOverview }))
 );
@@ -47,9 +44,7 @@ const Metrics = dynamic(() =>
 const MetricsDetails = dynamic(() =>
   import('../../app/metrics_details').then((mod) => ({ default: mod.MetricsDetails }))
 );
-const ServiceDependencies = dynamic(() =>
-  import('../../app/service_dependencies').then((mod) => ({ default: mod.ServiceDependencies }))
-);
+
 const ServiceLogs = dynamic(() =>
   import('../../app/service_logs').then((mod) => ({ default: mod.ServiceLogs }))
 );
@@ -67,9 +62,6 @@ const TransactionOverview = dynamic(() =>
 );
 const ProfilingOverview = dynamic(() =>
   import('../../app/profiling_overview').then((mod) => ({ default: mod.ProfilingOverview }))
-);
-const ServiceDashboards = dynamic(() =>
-  import('../../app/service_dashboards').then((mod) => ({ default: mod.ServiceDashboards }))
 );
 
 function page({

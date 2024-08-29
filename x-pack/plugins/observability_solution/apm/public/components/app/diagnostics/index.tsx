@@ -22,15 +22,12 @@ import { getIsIndexTemplateOk } from './summary_tab/index_templates_status';
 import { getIsDataStreamTabOk } from './summary_tab/data_streams_status';
 import { getIsIndicesTabOk } from './summary_tab/indicies_status';
 import { isPending } from '../../../hooks/use_fetcher';
+import { ApmMainTemplate } from '../../routing/templates/apm_main_template';
 
 const DiagnosticsSummary = dynamic(() =>
   import('./summary_tab').then((mod) => ({ default: mod.DiagnosticsSummary }))
 );
-const ApmMainTemplate = dynamic(() =>
-  import('../../routing/templates/apm_main_template').then((mod) => ({
-    default: mod.ApmMainTemplate,
-  }))
-);
+
 const DiagnosticsIndexTemplates = dynamic(() =>
   import('./index_templates_tab').then((mod) => ({ default: mod.DiagnosticsIndexTemplates }))
 );

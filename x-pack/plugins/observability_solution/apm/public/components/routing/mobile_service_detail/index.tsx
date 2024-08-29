@@ -21,10 +21,11 @@ import {
 import { MobileServiceTemplate } from '../templates/mobile_service_template';
 import { RedirectToDefaultServiceRouteView } from '../service_detail/redirect_to_default_service_route_view';
 import { ApmTimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
+import { ServiceDependencies } from '../../app/service_dependencies';
+import { ServiceDashboards } from '../../app/service_dashboards';
+import { AlertsOverview } from '../../app/alerts_overview';
+import { ErrorGroupDetails } from '../../app/error_group_details';
 
-const AlertsOverview = dynamic(() =>
-  import('../../app/alerts_overview').then((mod) => ({ default: mod.AlertsOverview }))
-);
 const ServiceMapServiceDetail = dynamic(() =>
   import('../../app/service_map').then((mod) => ({ default: mod.ServiceMapServiceDetail }))
 );
@@ -41,11 +42,7 @@ const MobileTransactionOverview = dynamic(() =>
 const TransactionDetails = dynamic(() =>
   import('../../app/transaction_details').then((mod) => ({ default: mod.TransactionDetails }))
 );
-const ErrorGroupDetails = dynamic(() =>
-  import('../../app/mobile/errors_and_crashes_group_details/error_group_details').then((mod) => ({
-    default: mod.ErrorGroupDetails,
-  }))
-);
+
 const CrashGroupDetails = dynamic(() =>
   import('../../app/mobile/errors_and_crashes_group_details/crash_group_details').then((mod) => ({
     default: mod.CrashGroupDetails,
@@ -55,12 +52,6 @@ const MobileErrorCrashesOverview = dynamic(() =>
   import('../../app/mobile/errors_and_crashes_overview').then((mod) => ({
     default: mod.MobileErrorCrashesOverview,
   }))
-);
-const ServiceDependencies = dynamic(() =>
-  import('../../app/service_dependencies').then((mod) => ({ default: mod.ServiceDependencies }))
-);
-const ServiceDashboards = dynamic(() =>
-  import('../../app/service_dashboards').then((mod) => ({ default: mod.ServiceDashboards }))
 );
 
 export function page({

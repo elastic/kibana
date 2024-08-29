@@ -21,10 +21,8 @@ import { onboarding } from './onboarding';
 import { tutorialRedirectRoute } from './onboarding/redirect';
 import { offsetRt } from '../../../common/comparison_rt';
 import { diagnosticsRoute } from '../app/diagnostics';
+import { ApmMainTemplate } from './templates/apm_main_template';
 
-const ApmMainTemplate = dynamic(() =>
-  import('./templates/apm_main_template').then((mod) => ({ default: mod.ApmMainTemplate }))
-);
 const TraceLink = dynamic(() =>
   import('../app/trace_link').then((mod) => ({ default: mod.TraceLink }))
 );
