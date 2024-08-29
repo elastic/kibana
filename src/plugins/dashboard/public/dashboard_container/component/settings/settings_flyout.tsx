@@ -24,6 +24,8 @@ import {
   EuiTitle,
   EuiCallOut,
   EuiSwitch,
+  EuiText,
+  EuiIconTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DashboardContainerInput } from '../../../../common';
@@ -269,12 +271,47 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
             <>
               <EuiFormRow>
                 <EuiSwitch
-                  label={i18n.translate(
-                    'dashboard.embeddableApi.showSettings.flyout.form.syncColorsBetweenPanelsSwitchLabel',
-                    {
-                      defaultMessage: 'Sync color palettes across panels',
-                    }
-                  )}
+                  label={
+                    <EuiText size="s">
+                      {i18n.translate(
+                        'dashboard.embeddableApi.showSettings.flyout.form.syncColorsBetweenPanelsSwitchLabel',
+                        {
+                          defaultMessage: 'Sync color palettes across panels',
+                        }
+                      )}{' '}
+                      <EuiIconTip
+                        color="subdued"
+                        content={
+                          <FormattedMessage
+                            id="dashboard.embeddableApi.showSettings.flyout.form.syncColorsBetweenPanelsSwitchHelp"
+                            defaultMessage="Only valid for {default} and {compatibility} palettes"
+                            values={{
+                              default: (
+                                <strong>
+                                  {i18n.translate('dashboard.palettes.defaultPaletteLabel', {
+                                    defaultMessage: 'Default',
+                                  })}
+                                </strong>
+                              ),
+                              compatibility: (
+                                <strong>
+                                  {i18n.translate('dashboard.palettes.kibanaPaletteLabel', {
+                                    defaultMessage: 'Compatibility',
+                                  })}
+                                </strong>
+                              ),
+                            }}
+                          />
+                        }
+                        iconProps={{
+                          className: 'eui-alignTop',
+                        }}
+                        position="top"
+                        size="s"
+                        type="questionInCircle"
+                      />
+                    </EuiText>
+                  }
                   checked={dashboardSettingsState.syncColors}
                   onChange={(event) => updateDashboardSetting({ syncColors: event.target.checked })}
                   data-test-subj="dashboardSyncColorsCheckbox"

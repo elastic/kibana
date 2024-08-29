@@ -22,6 +22,7 @@ import {
   APMDownstreamDependency,
   getAssistantDownstreamDependencies,
 } from '../get_apm_downstream_dependencies';
+import { getLogRateAnalysisForAlert } from '../get_log_rate_analysis_for_alert';
 import { getLogCategories, LogCategory } from '../get_log_categories';
 import { getAnomalies } from '../get_apm_service_summary/get_anomalies';
 import { getServiceNameFromSignals } from './get_service_name_from_signals';
@@ -159,6 +160,42 @@ export const getAlertDetailsContextHandler = (
         };
       });
     }
+
+    // log rate analysis
+    dataFetchers.push(async () => {
+      const { logRateAnalysisType, significantItems } = await getLogRateAnalysisForAlert({
+        esClient,
+        coreContext,
+        arguments: {
+          alertStartedAt: moment(alertStartedAt).toISOString(),
+          alertRuleParameterTimeSize: query.alert_rule_parameter_time_size
+            ? parseInt(query.alert_rule_parameter_time_size, 10)
+            : undefined,
+          alertRuleParameterTimeUnit: query.alert_rule_parameter_time_unit,
+          entities: {
+            'service.name': serviceName,
+            'host.name': hostName,
+            'container.id': containerId,
+            'kubernetes.pod.name': kubernetesPodName,
+          },
+        },
+      });
+
+      if (logRateAnalysisType !== 'spike' || significantItems.length === 0) {
+        return {
+          key: 'logRateAnalysis',
+          description:
+            'Log rate analysis did not identify any significant metadata or log patterns.',
+          data: [],
+        };
+      }
+
+      return {
+        key: 'logRateAnalysis',
+        description: `Statistically significant log metadata and log message patterns occurring in the lookback period before the alert was triggered.`,
+        data: significantItems,
+      };
+    });
 
     // log categories
     dataFetchers.push(async () => {
