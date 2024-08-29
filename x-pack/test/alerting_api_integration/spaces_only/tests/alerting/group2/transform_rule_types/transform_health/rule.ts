@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { PutTransformsRequestSchema } from '@kbn/transform-plugin/common/api_schemas/transforms';
+import { PutTransformsRequestSchema } from '@kbn/transform-plugin/server/routes/api_schemas/transforms';
 import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import {
   ALERT_ACTION_GROUP,

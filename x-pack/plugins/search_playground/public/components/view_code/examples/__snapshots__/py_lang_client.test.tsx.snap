@@ -28,7 +28,7 @@ index_source_fields = {
     ]
 }
 
-def get_elasticsearch_results(query):
+def get_elasticsearch_results():
     es_query = {
         \\"query\\": {},
         \\"size\\": 10
@@ -82,7 +82,7 @@ def generate_openai_completion(user_prompt, question):
 
 if __name__ == \\"__main__\\":
     question = \\"my question\\"
-    elasticsearch_results = get_elasticsearch_results(question)
+    elasticsearch_results = get_elasticsearch_results()
     context_prompt = create_openai_prompt(elasticsearch_results)
     openai_completion = generate_openai_completion(context_prompt, question)
     print(openai_completion)
