@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -37,7 +37,6 @@ import {
   ConsoleTourStepProps,
 } from '../../components';
 import { History } from '../history';
-import { Config } from '../config';
 import { useDataInit } from '../../hooks';
 import { getTopNavConfig } from './get_top_nav';
 import { getTourSteps } from './get_tour_steps';
