@@ -37,26 +37,26 @@ export const prepareSearchParams = ({
 
   // otherwise create filter that excludes failed results based on dry run errors
   let modifiedFilterOptions = { ...props.filterOptions };
-  dryRunResult?.ruleErrors.forEach(({ errorCode }) => {
-    switch (errorCode) {
-      case BulkActionsDryRunErrCode.IMMUTABLE:
-        modifiedFilterOptions = { ...modifiedFilterOptions, showCustomRules: true };
-        break;
-      case BulkActionsDryRunErrCode.MACHINE_LEARNING_INDEX_PATTERN:
-      case BulkActionsDryRunErrCode.MACHINE_LEARNING_AUTH:
-        modifiedFilterOptions = {
-          ...modifiedFilterOptions,
-          excludeRuleTypes: [...(modifiedFilterOptions.excludeRuleTypes ?? []), 'machine_learning'],
-        };
-        break;
-      case BulkActionsDryRunErrCode.ESQL_INDEX_PATTERN:
-        modifiedFilterOptions = {
-          ...modifiedFilterOptions,
-          excludeRuleTypes: [...(modifiedFilterOptions.excludeRuleTypes ?? []), 'esql'],
-        };
-        break;
-    }
-  });
+  // dryRunResult?.ruleErrors.forEach(({ errorCode }) => {
+  //   switch (errorCode) {
+  //     case BulkActionsDryRunErrCode.IMMUTABLE:
+  //       modifiedFilterOptions = { ...modifiedFilterOptions, showCustomRules: true };
+  //       break;
+  //     case BulkActionsDryRunErrCode.MACHINE_LEARNING_INDEX_PATTERN:
+  //     case BulkActionsDryRunErrCode.MACHINE_LEARNING_AUTH:
+  //       modifiedFilterOptions = {
+  //         ...modifiedFilterOptions,
+  //         excludeRuleTypes: [...(modifiedFilterOptions.excludeRuleTypes ?? []), 'machine_learning'],
+  //       };
+  //       break;
+  //     case BulkActionsDryRunErrCode.ESQL_INDEX_PATTERN:
+  //       modifiedFilterOptions = {
+  //         ...modifiedFilterOptions,
+  //         excludeRuleTypes: [...(modifiedFilterOptions.excludeRuleTypes ?? []), 'esql'],
+  //       };
+  //       break;
+  //   }
+  // });
 
   return {
     query: convertRulesFilterToKQL(modifiedFilterOptions),

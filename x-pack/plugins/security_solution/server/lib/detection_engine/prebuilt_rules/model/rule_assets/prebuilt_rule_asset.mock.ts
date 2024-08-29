@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import type { PrebuiltRuleAsset } from './prebuilt_rule_asset';
+import { PrebuiltRuleAsset } from './prebuilt_rule_asset';
 
-export const getPrebuiltRuleMock = (rewrites?: Partial<PrebuiltRuleAsset>): PrebuiltRuleAsset =>
-  ({
+export const getPrebuiltRuleMock = (rewrites?: Partial<PrebuiltRuleAsset>): PrebuiltRuleAsset => {
+  const parsedFields = rewrites ? PrebuiltRuleAsset.parse(rewrites) : {};
+
+  return {
     description: 'some description',
     name: 'Query with a rule id',
     query: 'user.name: root or user.name: admin',
@@ -18,8 +20,9 @@ export const getPrebuiltRuleMock = (rewrites?: Partial<PrebuiltRuleAsset>): Preb
     language: 'kuery',
     rule_id: 'rule-1',
     version: 1,
-    ...rewrites,
-  } as PrebuiltRuleAsset);
+    ...parsedFields,
+  };
+};
 
 export const getPrebuiltRuleWithExceptionsMock = (): PrebuiltRuleAsset => ({
   description: 'A rule with an exception list',

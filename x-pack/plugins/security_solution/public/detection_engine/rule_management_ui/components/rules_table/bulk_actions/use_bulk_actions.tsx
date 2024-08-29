@@ -271,24 +271,24 @@ export const useBulkActions = ({
 
         setIsPreflightInProgress(true);
 
-        const dryRunResult = await executeBulkActionsDryRun({
-          type: BulkActionTypeEnum.edit,
-          ...(isAllSelected
-            ? { query: convertRulesFilterToKQL(filterOptions) }
-            : { ids: selectedRuleIds }),
-          editPayload: computeDryRunEditPayload(bulkEditActionType),
-        });
+        // const dryRunResult = await executeBulkActionsDryRun({
+        //   type: BulkActionTypeEnum.edit,
+        //   ...(isAllSelected
+        //     ? { query: convertRulesFilterToKQL(filterOptions) }
+        //     : { ids: selectedRuleIds }),
+        //   editPayload: computeDryRunEditPayload(bulkEditActionType),
+        // });
 
-        setIsPreflightInProgress(false);
+        // setIsPreflightInProgress(false);
 
-        // User has cancelled edit action or there are no custom rules to proceed
-        const hasActionBeenConfirmed = await showBulkActionConfirmation(
-          dryRunResult,
-          BulkActionTypeEnum.edit
-        );
-        if (hasActionBeenConfirmed === false) {
-          return;
-        }
+        // // User has cancelled edit action or there are no custom rules to proceed
+        // const hasActionBeenConfirmed = await showBulkActionConfirmation(
+        //   dryRunResult,
+        //   BulkActionTypeEnum.edit
+        // );
+        // if (hasActionBeenConfirmed === false) {
+        //   return;
+        // }
 
         const editPayload = await completeBulkEditForm(bulkEditActionType);
         if (editPayload == null) {
@@ -302,7 +302,11 @@ export const useBulkActions = ({
             toasts.api.remove(longTimeWarningToast);
           }
         };
-
+        const dryRunResult = {
+          succeededRulesCount: 0,
+          failedRulesCount: 0,
+          ruleErrors: [],
+        };
         // show warning toast only if bulk edit action exceeds 5s
         // if bulkAction already finished, we won't show toast at all (hence flag "isBulkEditFinished")
         setTimeout(() => {

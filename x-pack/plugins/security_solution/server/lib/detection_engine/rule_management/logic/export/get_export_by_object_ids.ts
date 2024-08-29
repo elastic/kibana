@@ -108,9 +108,7 @@ const fetchRulesByIds = async (
       const rulesAndErrors = ids.map((ruleId) => {
         const matchingRule = rulesMap.get(ruleId);
 
-        return matchingRule != null &&
-          hasValidRuleType(matchingRule) &&
-          matchingRule.params.immutable !== true
+        return matchingRule != null && hasValidRuleType(matchingRule)
           ? {
               rule: transformRuleToExportableFormat(internalRuleToAPIResponse(matchingRule)),
             }

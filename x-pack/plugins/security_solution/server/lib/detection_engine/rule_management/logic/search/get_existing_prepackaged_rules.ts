@@ -74,7 +74,7 @@ export const getNonPackagedRules = async ({
 }): Promise<RuleAlertType[]> => {
   return getRules({
     rulesClient,
-    filter: KQL_FILTER_MUTABLE_RULES,
+    filter: '',
   });
 };
 

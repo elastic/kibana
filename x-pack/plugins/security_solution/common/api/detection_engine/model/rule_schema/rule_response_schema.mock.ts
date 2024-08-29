@@ -71,7 +71,10 @@ const getResponseBaseParams = (anchorDate: string = ANCHOR_DATE): SharedResponse
   investigation_fields: undefined,
 });
 
-export const getRulesSchemaMock = (anchorDate: string = ANCHOR_DATE): QueryRule => ({
+export const getRulesSchemaMock = (
+  anchorDate: string = ANCHOR_DATE,
+  overwrites: Partial<QueryRule> = {}
+): QueryRule => ({
   ...getResponseBaseParams(anchorDate),
   query: 'user.name: root or user.name: admin',
   type: 'query',
@@ -83,6 +86,7 @@ export const getRulesSchemaMock = (anchorDate: string = ANCHOR_DATE): QueryRule 
   response_actions: undefined,
   alert_suppression: undefined,
   investigation_fields: undefined,
+  ...overwrites,
 });
 
 export const getSavedQuerySchemaMock = (anchorDate: string = ANCHOR_DATE): SavedQueryRule => ({

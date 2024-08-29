@@ -356,6 +356,7 @@ export const performBulkActionRoute = (
             isDryRun,
           });
         } catch (err) {
+          debugger;
           const error = transformError(err);
           return siemResponse.error({
             body: error.message,

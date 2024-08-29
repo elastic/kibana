@@ -82,6 +82,5 @@ export const PrebuiltRuleAsset = BaseCreateProps.omit(BASE_PROPS_REMOVED_FROM_PR
     z.object({
       rule_id: RuleSignatureId,
       version: RuleVersion,
-      source_updated_at: z.string().datetime().optional(),
     })
   );

@@ -15,31 +15,33 @@ import { calculateIsCustomized } from './calculate_is_customized';
 
 export const calculateRuleSourceFromAsset = ({
   rule,
-  prebuiltRuleAsset,
+  assetWithMatchingVersion,
   ruleIdExists,
 }: {
   rule: RuleResponse | PrebuiltRuleToImport;
-  prebuiltRuleAsset: PrebuiltRuleAsset | undefined;
+  assetWithMatchingVersion: PrebuiltRuleAsset | undefined;
   ruleIdExists: boolean;
 }): RuleSource => {
+  // No assetWithMatchingVersion found with same rule_id
   if (!ruleIdExists) {
     return {
       type: 'internal',
     };
   }
 
-  if (prebuiltRuleAsset == null) {
+  // PrebuiltRuleAsset was found with same rule_id, but different version
+  if (assetWithMatchingVersion == null) {
     return {
       type: 'external',
-      is_customized: false,
+      is_customized: true, // changed here from false to true, differs from RFC
     };
   }
 
-  const isCustomized = calculateIsCustomized(prebuiltRuleAsset, rule);
+  // assetWithMatchingVersion with matching rule_id and version found
+  const isCustomized = calculateIsCustomized(assetWithMatchingVersion, rule);
 
   return {
     type: 'external',
     is_customized: isCustomized,
-    source_updated_at: prebuiltRuleAsset.source_updated_at,
   };
 };

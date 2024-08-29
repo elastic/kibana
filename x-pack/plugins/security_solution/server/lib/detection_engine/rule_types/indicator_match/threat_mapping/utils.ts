@@ -301,6 +301,7 @@ export const getMaxClauseCountErrorValue = (
         }
         return { maxClauseCountValue: val, errorType };
       } else if (foundMaxClauseCountValue != null && !isEmpty(foundMaxClauseCountValue)) {
+        debugger;
         const errorType = `${FAILED_CREATE_QUERY_MAX_CLAUSE} ${foundNestedClauseCountValue}`;
         const tempVal = parseInt(foundMaxClauseCountValue, 10);
         eventsTelemetry?.sendAsync(TelemetryChannel.DETECTION_ALERTS, [

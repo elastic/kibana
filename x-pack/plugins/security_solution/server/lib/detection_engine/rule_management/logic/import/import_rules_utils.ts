@@ -72,7 +72,7 @@ export const importRules = async ({
     return importRuleResponse;
   }
 
-  prebuiltRulesImporter.setup();
+  await prebuiltRulesImporter.setup();
 
   while (ruleChunks.length) {
     const batchParseObjects = ruleChunks.shift() ?? [];

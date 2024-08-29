@@ -22,19 +22,21 @@ import { calculateRuleSourceFromAsset } from '../detection_rules_client/mergers/
  */
 export const calculateRuleSourceForImport = ({
   rule,
-  prebuiltRuleAssets,
-  installedRuleIds,
+  prebuiltRuleAssets, // contains only assets that match rule_id and version
+  installedRuleIds, // contains all assets that match rule_id (version might be different to rule.version)
 }: {
   rule: PrebuiltRuleToImport;
   prebuiltRuleAssets: PrebuiltRuleAsset[];
   installedRuleIds: string[];
 }): RuleSource => {
-  const matchingAsset = prebuiltRuleAssets.find((asset) => asset.rule_id === rule.rule_id);
+  const assetWithMatchingVersion = prebuiltRuleAssets.find(
+    (asset) => asset.rule_id === rule.rule_id
+  );
   const ruleIdExists = installedRuleIds.includes(rule.rule_id);
 
   return calculateRuleSourceFromAsset({
     rule,
-    prebuiltRuleAsset: matchingAsset,
+    assetWithMatchingVersion,
     ruleIdExists,
   });
 };

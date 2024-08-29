@@ -138,6 +138,7 @@ export async function bulkEditRules<Params extends RuleParams>(
       alertingAuthorizationFilterOpts
     );
   } catch (error) {
+    debugger;
     context.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.BULK_EDIT,
@@ -201,6 +202,7 @@ export async function bulkEditRules<Params extends RuleParams>(
             error,
           })
         );
+        debugger;
         throw error;
       }
     },
