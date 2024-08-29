@@ -11,6 +11,7 @@ import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 
+import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { APP_ID, FEATURE_ID } from '../common/constants';
 import { createUICapabilities, getApiTags } from '../common';
 
@@ -32,7 +33,7 @@ export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
       defaultMessage: 'Cases',
     }),
     category: DEFAULT_APP_CATEGORIES.management,
-    scope: 'agnostic',
+    scope: KibanaFeatureScope.Agnostic,
     app: [],
     order: FEATURE_ORDER,
     management: {

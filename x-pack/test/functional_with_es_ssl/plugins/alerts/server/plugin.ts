@@ -12,6 +12,7 @@ import {
   RuleTypeParams,
 } from '@kbn/alerting-plugin/server';
 import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 
 // this plugin's dependendencies
 export interface AlertingExampleDeps {
@@ -116,7 +117,7 @@ export class AlertingFixturePlugin implements Plugin<void, void, AlertingExample
       name: 'alerting_fixture',
       app: [],
       category: { id: 'foo', label: 'foo' },
-      scope: 'agnostic',
+      scope: KibanaFeatureScope.Agnostic,
       alerting: ['test.always-firing', 'test.noop', 'test.failing'],
       privileges: {
         all: {

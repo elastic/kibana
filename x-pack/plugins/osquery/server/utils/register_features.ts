@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import {
   packSavedObjectType,
   packAssetSavedObjectType,
@@ -22,7 +23,7 @@ export const registerFeatures = (features: SetupPlugins['features']) => {
       defaultMessage: 'Osquery',
     }),
     category: DEFAULT_APP_CATEGORIES.management,
-    scope: 'agnostic',
+    scope: KibanaFeatureScope.Agnostic,
     app: [PLUGIN_ID, 'kibana'],
     catalogue: [PLUGIN_ID],
     order: 2300,

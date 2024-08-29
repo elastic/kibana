@@ -37,6 +37,7 @@ import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { ObservabilityConfig } from '.';
 import { casesFeatureId, observabilityFeatureId } from '../common';
 import {
@@ -112,7 +113,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
       }),
       order: 1100,
       category: DEFAULT_APP_CATEGORIES.observability,
-      scope: 'agnostic',
+      scope: KibanaFeatureScope.Agnostic,
       app: [casesFeatureId, 'kibana'],
       catalogue: [observabilityFeatureId],
       cases: [observabilityFeatureId],
@@ -236,7 +237,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
         }),
         order: 1000,
         category: DEFAULT_APP_CATEGORIES.observability,
-        scope: 'agnostic',
+        scope: KibanaFeatureScope.Agnostic,
         app: [observabilityFeatureId],
         catalogue: [observabilityFeatureId],
         alerting: o11yRuleTypes,

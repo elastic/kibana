@@ -8,6 +8,7 @@
 import { DEFAULT_APP_CATEGORIES, type Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 
 interface FeatureRegistrationOpts {
   features: FeaturesPluginSetup;
@@ -37,7 +38,7 @@ export function registerFeatures({
         defaultMessage: 'Reporting',
       }),
       category: DEFAULT_APP_CATEGORIES.management,
-      scope: 'agnostic',
+      scope: KibanaFeatureScope.Agnostic,
       app: [],
       privileges: {
         all: { savedObject: { all: [], read: [] }, ui: [] },

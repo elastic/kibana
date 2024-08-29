@@ -12,6 +12,11 @@ import { FeatureKibanaPrivileges } from './feature_kibana_privileges';
 import { SubFeatureConfig, SubFeature as KibanaSubFeature } from './sub_feature';
 import { ReservedKibanaPrivilege } from './reserved_kibana_privilege';
 
+export enum KibanaFeatureScope {
+  Agnostic = 'agnostic',
+  Security = 'security',
+}
+
 /**
  * Interface for registering a feature.
  * Feature registration allows plugins to hide their applications with spaces,
@@ -153,7 +158,7 @@ export interface KibanaFeatureConfig {
   /**
    * Indicates whether the feature is available in Security Feature Privileges and the Spaces Visibility Toggles.
    */
-  scope?: 'agnostic' | 'security';
+  scope?: KibanaFeatureScope;
 }
 
 export class KibanaFeature {

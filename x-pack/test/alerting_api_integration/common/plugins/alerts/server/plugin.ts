@@ -25,6 +25,7 @@ import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/serve
 import { IEventLogClientService } from '@kbn/event-log-plugin/server';
 import { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
+import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { defineRoutes } from './routes';
 import { defineActionTypes } from './action_types';
 import { defineRuleTypes } from './rule_types';
@@ -71,7 +72,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       name: 'Alerts',
       app: ['alerts', 'kibana'],
       category: { id: 'foo', label: 'foo' },
-      scope: 'agnostic',
+      scope: KibanaFeatureScope.Agnostic,
       alerting: [
         'test.always-firing',
         'test.cumulative-firing',

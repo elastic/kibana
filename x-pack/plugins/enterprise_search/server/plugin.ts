@@ -18,6 +18,7 @@ import {
 } from '@kbn/core/server';
 import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
 import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
+import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/server';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
@@ -190,7 +191,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       name: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.NAME,
       order: 0,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      scope: 'agnostic',
+      scope: KibanaFeatureScope.Agnostic,
       app: ['kibana', ...PLUGIN_IDS],
       catalogue: PLUGIN_IDS,
       privileges: null,

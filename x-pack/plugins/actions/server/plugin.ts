@@ -42,7 +42,6 @@ import {
 import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
 
 import { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/server';
-import { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { ActionsConfig, AllowedHosts, EnabledConnectorTypes, getValidatedConfig } from './config';
 import { resolveCustomHosts } from './lib/custom_host_settings';
 import { events } from './lib/event_based_telemetry';
@@ -244,7 +243,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       );
     }
 
-    plugins.features.registerKibanaFeature(ACTIONS_FEATURE as KibanaFeatureConfig);
+    plugins.features.registerKibanaFeature(ACTIONS_FEATURE);
 
     this.eventLogService = plugins.eventLog;
     plugins.eventLog.registerProviderActions(EVENT_LOG_PROVIDER, Object.values(EVENT_LOG_ACTIONS));
