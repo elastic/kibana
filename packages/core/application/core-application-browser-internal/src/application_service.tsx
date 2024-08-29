@@ -182,7 +182,9 @@ export class ApplicationService {
 
     const validateApp = (app: App<unknown>) => {
       if (this.registrationClosed) {
-        throw new Error(`Applications cannot be registered after "setup"`);
+        throw new Error(
+          `Applications cannot be registered after "setup" (attempted to register "${app.id}")`
+        );
       } else if (!applicationIdRegexp.test(app.id)) {
         throw new Error(
           `Invalid application id: it can only be composed of alphanum chars, '-' and '_'`

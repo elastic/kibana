@@ -18,9 +18,12 @@ import { CONFIRM_MODAL } from '../screens/navigation';
 import { request } from './common';
 
 export const addIntegration = ({ useExistingPolicy } = { useExistingPolicy: false }) => {
+  cy.intercept('/api/fleet/agent_status?*').as('agentStatus');
+
   cy.getBySel(ADD_INTEGRATION_POLICY_BTN).click();
   if (useExistingPolicy) {
     cy.getBySel(EXISTING_HOSTS_TAB).click();
+    cy.wait('@agentStatus');
   } else {
     // speeding up creating with unchecking system and agent integration
     cy.getBySel(AGENT_POLICY_SYSTEM_MONITORING_CHECKBOX).uncheck({ force: true });
@@ -33,7 +36,8 @@ export const addIntegration = ({ useExistingPolicy } = { useExistingPolicy: fals
       force: true,
     });
   }
-  cy.getBySel(CREATE_PACKAGE_POLICY_SAVE_BTN).click();
+  cy.getBySel(CREATE_PACKAGE_POLICY_SAVE_BTN).should('be.enabled').click();
+
   // sometimes agent is assigned to default policy, sometimes not
   cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
 

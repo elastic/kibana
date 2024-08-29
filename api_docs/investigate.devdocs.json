@@ -494,10 +494,10 @@
           },
           {
             "parentPluginId": "investigate",
-            "id": "def-public.InvestigateWidget.created",
+            "id": "def-public.InvestigateWidget.createdAt",
             "type": "number",
             "tags": [],
-            "label": "created",
+            "label": "createdAt",
             "description": [],
             "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
             "deprecated": false,
@@ -505,10 +505,21 @@
           },
           {
             "parentPluginId": "investigate",
-            "id": "def-public.InvestigateWidget.last_updated",
-            "type": "number",
+            "id": "def-public.InvestigateWidget.createdBy",
+            "type": "string",
             "tags": [],
-            "label": "last_updated",
+            "label": "createdBy",
+            "description": [],
+            "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "investigate",
+            "id": "def-public.InvestigateWidget.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
             "description": [],
             "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
             "deprecated": false,
@@ -521,26 +532,6 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "investigate",
-            "id": "def-public.InvestigateWidget.user",
-            "type": "Object",
-            "tags": [],
-            "label": "user",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/core-security-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSecurityCommonPluginApi",
-                "section": "def-common.AuthenticatedUser",
-                "text": "AuthenticatedUser"
-              }
-            ],
             "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -570,17 +561,6 @@
             "signature": [
               "TData"
             ],
-            "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "investigate",
-            "id": "def-public.InvestigateWidget.title",
-            "type": "string",
-            "tags": [],
-            "label": "title",
-            "description": [],
             "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -886,7 +866,7 @@
               "section": "def-common.AuthenticatedUser",
               "text": "AuthenticatedUser"
             },
-            "; investigationData?: { id: string; title: string; createdAt: number; createdBy: string; params: { timeRange: { from: number; to: number; }; }; origin: { type: \"alert\"; id: string; } | { type: \"blank\"; }; status: \"closed\" | \"ongoing\"; notes: { id: string; content: string; createdAt: number; createdBy: string; }[]; } | undefined; }) => ",
+            "; investigationData?: { id: string; title: string; createdAt: number; createdBy: string; params: { timeRange: { from: number; to: number; }; }; origin: { type: \"alert\"; id: string; } | { type: \"blank\"; }; status: \"closed\" | \"ongoing\"; notes: { id: string; content: string; createdAt: number; createdBy: string; }[]; items: ({ id: string; createdAt: number; createdBy: string; } & { title: string; type: \"esql\"; params: { esql: string; suggestion: any; }; })[]; } | undefined; }) => ",
             "UseInvestigationApi"
           ],
           "path": "x-pack/plugins/observability_solution/investigate/public/types.ts",
@@ -932,7 +912,7 @@
                   "label": "investigationData",
                   "description": [],
                   "signature": [
-                    "{ id: string; title: string; createdAt: number; createdBy: string; params: { timeRange: { from: number; to: number; }; }; origin: { type: \"alert\"; id: string; } | { type: \"blank\"; }; status: \"closed\" | \"ongoing\"; notes: { id: string; content: string; createdAt: number; createdBy: string; }[]; } | undefined"
+                    "{ id: string; title: string; createdAt: number; createdBy: string; params: { timeRange: { from: number; to: number; }; }; origin: { type: \"alert\"; id: string; } | { type: \"blank\"; }; status: \"closed\" | \"ongoing\"; notes: { id: string; content: string; createdAt: number; createdBy: string; }[]; items: ({ id: string; createdAt: number; createdBy: string; } & { title: string; type: \"esql\"; params: { esql: string; suggestion: any; }; })[]; } | undefined"
                   ],
                   "path": "x-pack/plugins/observability_solution/investigate/public/types.ts",
                   "deprecated": false,
@@ -1263,10 +1243,10 @@
           },
           {
             "parentPluginId": "investigate",
-            "id": "def-common.InvestigateWidget.created",
+            "id": "def-common.InvestigateWidget.createdAt",
             "type": "number",
             "tags": [],
-            "label": "created",
+            "label": "createdAt",
             "description": [],
             "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
             "deprecated": false,
@@ -1274,10 +1254,21 @@
           },
           {
             "parentPluginId": "investigate",
-            "id": "def-common.InvestigateWidget.last_updated",
-            "type": "number",
+            "id": "def-common.InvestigateWidget.createdBy",
+            "type": "string",
             "tags": [],
-            "label": "last_updated",
+            "label": "createdBy",
+            "description": [],
+            "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "investigate",
+            "id": "def-common.InvestigateWidget.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
             "description": [],
             "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
             "deprecated": false,
@@ -1290,26 +1281,6 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "investigate",
-            "id": "def-common.InvestigateWidget.user",
-            "type": "Object",
-            "tags": [],
-            "label": "user",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/core-security-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSecurityCommonPluginApi",
-                "section": "def-common.AuthenticatedUser",
-                "text": "AuthenticatedUser"
-              }
-            ],
             "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1339,17 +1310,6 @@
             "signature": [
               "TData"
             ],
-            "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "investigate",
-            "id": "def-common.InvestigateWidget.title",
-            "type": "string",
-            "tags": [],
-            "label": "title",
-            "description": [],
             "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
