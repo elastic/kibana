@@ -30,7 +30,7 @@ export class SearchIndicesPlugin
         const { renderApp } = await import('./application');
         const { ElasticsearchStartPage } = await import('./components/start/start_page');
         const [coreStart, depsStart] = await core.getStartServices();
-        const startDeps: SearchIndicesServicesContext = {
+        const startDeps: Partial<SearchIndicesServicesContext> = {
           ...depsStart,
           history,
         };
