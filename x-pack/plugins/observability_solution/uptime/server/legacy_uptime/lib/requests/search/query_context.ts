@@ -62,21 +62,7 @@ export class QueryContext {
 
     return {
       bool: {
-        filter: [
-          timestampClause,
-          {
-            bool: {
-              should: [
-                this.timespanClause(),
-                {
-                  bool: {
-                    must_not: { exists: { field: 'monitor.timespan' } },
-                  },
-                },
-              ],
-            },
-          },
-        ],
+        filter: [timestampClause, this.timespanClause()],
       },
     };
   }
