@@ -23,41 +23,6 @@ export const getFetchTrendsQuery = (
                   field: 'summary',
                 },
               },
-              {
-                bool: {
-                  should: [
-                    {
-                      bool: {
-                        should: [
-                          {
-                            match: {
-                              'summary.final_attempt': true,
-                            },
-                          },
-                        ],
-                        minimum_should_match: 1,
-                      },
-                    },
-                    {
-                      bool: {
-                        must_not: {
-                          bool: {
-                            should: [
-                              {
-                                exists: {
-                                  field: 'summary.final_attempt',
-                                },
-                              },
-                            ],
-                            minimum_should_match: 1,
-                          },
-                        },
-                      },
-                    },
-                  ],
-                  minimum_should_match: 1,
-                },
-              },
             ],
           },
         },

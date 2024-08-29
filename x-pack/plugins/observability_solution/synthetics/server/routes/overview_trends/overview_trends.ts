@@ -66,7 +66,7 @@ export const createOverviewTrendsRoute = () => ({
       }
       return acc;
     }, {});
-    
+
     const requests = Object.keys(configs).map((key) => getFetchTrendsQuery(key, configs[key]));
     const results = await esClient.msearch(requests);
 
