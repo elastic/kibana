@@ -7,17 +7,26 @@
  */
 
 import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
-import { DeploymentService } from './deployment';
-import { RandomnessService } from './randomness';
-import { SecurityServiceProvider } from './security';
-import { EsDeleteAllIndicesProvider } from './es_delete_all_indices';
-import { SavedObjectInfoService } from './saved_object_info';
-import { IndexPatternsService } from './index_patterns';
-import { BsearchService } from './bsearch';
-import { ConsoleProvider } from './console';
+import { commonFunctionalUIServices } from '@kbn/ftr-common-functional-ui-services';
 
 // pick only services that work for any FTR config, e.g. 'samlAuth' requires SAML setup in config file
-const { es, esArchiver, kibanaServer, retry, supertestWithoutAuth } = commonFunctionalServices;
+const {
+  es,
+  esArchiver,
+  kibanaServer,
+  retry,
+  supertestWithoutAuth,
+  deployment,
+  randomness,
+  esDeleteAllIndices,
+  savedObjectInfo,
+  indexPatterns,
+  bsearch,
+  console,
+} = commonFunctionalServices;
+
+// pick what was there previously
+const { security } = commonFunctionalUIServices;
 
 export const services = {
   es,
@@ -25,12 +34,12 @@ export const services = {
   kibanaServer,
   retry,
   supertestWithoutAuth,
-  deployment: DeploymentService,
-  randomness: RandomnessService,
-  security: SecurityServiceProvider,
-  esDeleteAllIndices: EsDeleteAllIndicesProvider,
-  savedObjectInfo: SavedObjectInfoService,
-  indexPatterns: IndexPatternsService,
-  bsearch: BsearchService,
-  console: ConsoleProvider,
+  deployment,
+  randomness,
+  security,
+  esDeleteAllIndices,
+  savedObjectInfo,
+  indexPatterns,
+  bsearch,
+  console,
 };

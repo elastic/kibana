@@ -111,6 +111,19 @@ Use the *Workflows* app in Microsoft Teams to create a new webhook URL, as descr
 Update your Microsoft Teams connector to use the new URL before the end of December 2024.
 ====
 
+[discrete]
+[[known-189283]]
+.Incorrect index errors related to inference endpoints
+[%collapsible]
+====
+*Details* +
+In 8.15.1, we fixed a UI bug where an index error about the `semantic_text` field would be incorrectly displayed when the inference endpoint was configured and available.
+
+You can ignore this error if you've confirmed that the inference endpoint is configured and the model is deployed.
+
+This bug is fixed in {kibana-pull}189283[#189283].
+====
+
 [float]
 [[deprecations-8.15.0]]
 === Deprecations
