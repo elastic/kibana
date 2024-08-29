@@ -125,7 +125,6 @@ export class InvestigateAppPlugin
       .getStartServices()
       .then(([, pluginsStart]) => pluginsStart);
 
-    // new
     Promise.all([
       pluginsStartPromise,
       import('./items/register_items').then((m) => m.registerItems),
