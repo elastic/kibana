@@ -87,6 +87,14 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
             (arg: string) => arg !== 'xpack.security.enabled=false'
           );
           newServerArgs.push('xpack.security.enabled=true');
+
+          const selfTypedBasicLicenseIndex = newServerArgs.indexOf(
+            `xpack.license.self_generated.type=basic`
+          );
+          if (selfTypedBasicLicenseIndex > -1) {
+            newServerArgs[selfTypedBasicLicenseIndex] = `xpack.license.self_generated.type=trial`;
+          }
+
           vars.esTestCluster.serverArgs = newServerArgs;
         }
 
