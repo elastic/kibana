@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { SLO_SUMMARY_DESTINATION_INDEX_NAME } from '@kbn/slo-plugin/common/constants';
+import { TOTAL_INDEX_PRIVILEGE_SET_EDITOR } from '@kbn/slo-plugin/server/services/get_diagnosis';
 import {
   CreateSLOInput,
   fetchHistoricalSummaryParamsSchema,
@@ -21,39 +21,92 @@ type FetchHistoricalSummaryParams = t.OutputOf<
 >;
 
 export function SloApiProvider({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
+  const supertest = getService('supertestWithoutAuth');
   const esClient = getService('es');
+  const security = getService('security');
 
   return {
+    async createUser() {
+      const username = 'slo_editor';
+      const roleName = 'slo_editor';
+      try {
+        await security.user.delete(username);
+        await security.role.delete(roleName);
+      } catch (error) {
+        const status = error.response.status;
+        if (status !== 404) {
+          throw error;
+        }
+      }
+      const password = 'changeme';
+
+      await security.role.create(roleName, {
+        elasticsearch: {
+          indices: [
+            {
+              names: ['.slo-observability.*'],
+              privileges: TOTAL_INDEX_PRIVILEGE_SET_EDITOR,
+            },
+          ],
+        },
+      });
+
+      await security.user.create(username, {
+        password,
+        roles: [roleName, 'editor'],
+      });
+    },
     async create(params: CreateSLOInput) {
       const slo = await supertest
         .post('/api/observability/slos')
         .set('kbn-xsrf', 'true')
+        .auth('slo_editor', 'changeme')
         .send(params)
         .expect(200);
 
-      const { id } = slo.body;
-
-      const reqBody = [{ id: `slo-${id}-1` }, { id: `slo-summary-${id}-1` }];
-      await supertest
-        .post(`/internal/transform/schedule_now_transforms`)
+      return slo;
+    },
+    async reset(id: string) {
+      const response = supertest
+        .post(`/api/observability/slos/${id}/_reset`)
+        .auth('slo_editor', 'changeme')
         .set('kbn-xsrf', 'true')
-        .set('elastic-api-version', '1')
-        .send(reqBody)
+        .send()
         .expect(200);
 
-      return id;
+      return response;
+    },
+    async getDefinitions({ search }: { search?: string } = {}) {
+      const url = `/api/observability/slos/_definitions${search ? `?search=${search}` : ''}`;
+      const response = await supertest
+        .get(url)
+        .set('kbn-xsrf', 'true')
+        .auth('slo_editor', 'changeme')
+        .send()
+        .expect(200);
+
+      return response;
+    },
+    async delete(id: string) {
+      await supertest
+        .delete(`/api/observability/slos/${id}`)
+        .set('kbn-xsrf', 'true')
+        .auth('slo_editor', 'changeme')
+        .send()
+        .expect(204);
     },
     async deleteAllSLOs() {
       const response = await supertest
         .get(`/api/observability/slos/_definitions`)
         .set('kbn-xsrf', 'true')
+        .auth('slo_editor', 'changeme')
         .send()
         .expect(200);
       for (const { id } of (response.body as FindSLODefinitionsResponse).results) {
         await supertest
           .delete(`/api/observability/slos/${id}`)
           .set('kbn-xsrf', 'true')
+          .auth('slo_editor', 'changeme')
           .send()
           .expect(204);
       }
@@ -65,6 +118,7 @@ export function SloApiProvider({ getService }: FtrProviderContext) {
       const { body } = await supertest
         .post(`/internal/observability/slos/_historical_summary`)
         .set('kbn-xsrf', 'foo')
+        .auth('slo_editor', 'changeme')
         .set('elastic-api-version', '1')
         .send(params);
 

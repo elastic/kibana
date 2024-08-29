@@ -18,7 +18,7 @@ const cellValueAction: LensCellValueAction = {
   iconType: 'test-icon',
   execute: () => {},
 };
-function sampleArgs() {
+function sampleArgs(): DatatableProps {
   const indexPatternId = 'indexPatternId';
   const data: Datatable = {
     type: 'datatable',
@@ -80,13 +80,13 @@ function sampleArgs() {
     sortingDirection: 'none',
   };
 
-  return { data, args };
+  return { data, args, syncColors: false };
 }
 
 describe('datatable_expression', () => {
   describe('datatable renders', () => {
     test('it renders with the specified data and args', async () => {
-      const { data, args } = sampleArgs();
+      const { data, args, ...rest } = sampleArgs();
       const result = await getDatatable(() => Promise.resolve((() => {}) as FormatFactory)).fn(
         data,
         args,
@@ -96,7 +96,7 @@ describe('datatable_expression', () => {
       expect(result).toEqual({
         type: 'render',
         as: 'lens_datatable_renderer',
-        value: { data, args },
+        value: { data, args, ...rest },
       });
     });
   });
