@@ -6,31 +6,31 @@
  */
 
 import type { AuthenticatedUser } from '@kbn/core-security-common';
-import { UpdateInvestigationNoteParams } from '@kbn/investigation-shared';
+import { UpdateInvestigationItemParams } from '@kbn/investigation-shared';
 import { InvestigationRepository } from './investigation_repository';
 
-export async function updateInvestigationNote(
+export async function updateInvestigationItem(
   investigationId: string,
-  noteId: string,
-  params: UpdateInvestigationNoteParams,
+  itemId: string,
+  params: UpdateInvestigationItemParams,
   { repository, user }: { repository: InvestigationRepository; user: AuthenticatedUser }
 ): Promise<void> {
   const investigation = await repository.findById(investigationId);
-  const note = investigation.notes.find((currNote) => currNote.id === noteId);
-  if (!note) {
-    throw new Error('Note not found');
+  const item = investigation.items.find((currItem) => currItem.id === itemId);
+  if (!item) {
+    throw new Error('Item not found');
   }
 
-  if (note.createdBy !== user.username) {
-    throw new Error('User does not have permission to update note');
+  if (item.createdBy !== user.username) {
+    throw new Error('User does not have permission to update item');
   }
 
-  investigation.notes = investigation.notes.filter((currNote) => {
-    if (currNote.id === noteId) {
-      currNote.content = params.content;
+  investigation.items = investigation.items.filter((currItem) => {
+    if (currItem.id === itemId) {
+      currItem = { ...currItem, ...params };
     }
 
-    return currNote;
+    return currItem;
   });
 
   await repository.save(investigation);
