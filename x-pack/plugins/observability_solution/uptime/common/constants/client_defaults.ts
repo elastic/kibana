@@ -14,7 +14,7 @@ export const CLIENT_DEFAULTS = {
   /**
    * The application auto refreshes every 60s by default.
    */
-  AUTOREFRESH_INTERVAL: 60 * 1000,
+  AUTOREFRESH_INTERVAL: 5 * 60 * 1000,
   /**
    * The application's autorefresh feature is enabled.
    */
