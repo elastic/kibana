@@ -90,10 +90,7 @@ export const ControlGroupEditor = ({ onCancel, onSave, onDeleteAll, stateManager
       </EuiFlyoutHeader>
       <EuiFlyoutBody data-test-subj="control-group-settings-flyout">
         <EuiForm component="form" fullWidth>
-          <EuiFormRow
-            display="rowCompressed"
-            label={ControlGroupStrings.management.labelPosition.getLabelPositionTitle()}
-          >
+          <EuiFormRow label={ControlGroupStrings.management.labelPosition.getLabelPositionTitle()}>
             <EuiButtonGroup
               color="primary"
               options={CONTROL_LAYOUT_OPTIONS}
@@ -107,10 +104,9 @@ export const ControlGroupEditor = ({ onCancel, onSave, onDeleteAll, stateManager
           </EuiFormRow>
 
           <EuiFormRow
-            display="rowCompressed"
             label={ControlGroupStrings.management.filteringSettings.getFilteringSettingsTitle()}
           >
-            <>
+            <div>
               <EuiSwitch
                 compressed
                 data-test-subj="control-group-filter-sync"
@@ -134,11 +130,10 @@ export const ControlGroupEditor = ({ onCancel, onSave, onDeleteAll, stateManager
                 onChange={(e) => updateIgnoreSetting({ ignoreTimerange: !e.target.checked })}
                 checked={!Boolean(selectedIgnoreParentSettings?.ignoreTimerange)}
               />
-            </>
+            </div>
           </EuiFormRow>
 
           <EuiFormRow
-            display="rowCompressed"
             label={ControlGroupStrings.management.selectionSettings.getSelectionSettingsTitle()}
           >
             <div>
@@ -188,7 +183,7 @@ export const ControlGroupEditor = ({ onCancel, onSave, onDeleteAll, stateManager
           {controlCount > 0 && (
             <>
               <EuiHorizontalRule margin="m" />
-              <EuiFormRow display="rowCompressed">
+              <EuiFormRow>
                 <EuiButtonEmpty
                   onClick={onDeleteAll}
                   data-test-subj="delete-all-controls-button"
