@@ -75,6 +75,3 @@ xpack.search.homepage.ui.enabled: true
 
 # Semantic text UI
 xpack.index_management.dev.enableSemanticText: false
-
-# Enable Doc count and size from billing
-xpack.index_management.enableSizeAndDocCount: true
