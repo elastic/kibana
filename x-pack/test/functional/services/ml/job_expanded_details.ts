@@ -21,6 +21,14 @@ export function MachineLearningJobExpandedDetailsProvider(
   const headerPage = getPageObject('header');
 
   return {
+    async openAnnotationsTab(jobId: string) {
+      await retry.tryForTime(10000, async () => {
+        await jobTable.ensureDetailsOpen(jobId);
+        await testSubjects.click(jobTable.detailsSelector(jobId, 'mlJobListTab-annotations'));
+        await testSubjects.existOrFail('mlAnnotationsTable');
+      });
+    },
+
     async clickEditAnnotationAction(jobId: string, annotationId: string) {
       await jobAnnotationsTable.ensureAnnotationsActionsMenuOpen(annotationId);
       await testSubjects.click('mlAnnotationsActionEdit');
