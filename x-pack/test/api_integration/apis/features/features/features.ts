@@ -181,7 +181,9 @@ export default function ({ getService }: FtrProviderContext) {
           'fleetv2',
         ];
 
-        const features = body.filter((f: KibanaFeature) => f.scope === 'agnostic');
+        const features = body.filter(
+          (f: KibanaFeature) => f.scope?.includes('spaces') && f.scope?.includes('security')
+        );
 
         expect(features.every((f: KibanaFeature) => scopeAgnosticFeatures.includes(f.id))).to.be(
           true
