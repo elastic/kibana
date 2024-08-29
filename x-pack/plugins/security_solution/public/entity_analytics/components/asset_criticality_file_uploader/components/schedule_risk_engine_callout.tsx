@@ -93,7 +93,7 @@ export const ScheduleRiskEngineCallout: React.FC = () => {
       iconType="iInCircle"
     >
       <FormattedMessage
-        defaultMessage="The assigned criticalities will influence the calculated risk score on the next engine run."
+        defaultMessage="The assigned criticality levels will impact entity risk scores on the next engine run."
         id="xpack.securitySolution.entityAnalytics.assetCriticalityResultStep.riskEngine.calloutText"
       />
       <EuiHorizontalRule />
