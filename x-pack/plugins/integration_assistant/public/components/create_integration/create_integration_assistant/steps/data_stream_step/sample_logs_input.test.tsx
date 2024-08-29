@@ -263,7 +263,7 @@ describe('SampleLogsInput', () => {
 
         it('should truncate the logs sample', () => {
           expect(mockActions.setIntegrationSettings).toBeCalledWith({
-            logsSampleParsed: tooLargeLogsSample.split(',').slice(0, 10),
+            logsSampleParsed: tooLargeLogsSample.split(',').slice(0, 2),
             samplesFormat: { name: 'json', json_path: [] },
           });
         });
@@ -338,7 +338,7 @@ describe('SampleLogsInput', () => {
 
         it('should truncate the logs sample', () => {
           expect(mockActions.setIntegrationSettings).toBeCalledWith({
-            logsSampleParsed: tooLargeLogsSample.split('\n').slice(0, 10),
+            logsSampleParsed: tooLargeLogsSample.split('\n').slice(0, 2),
             samplesFormat: { name: 'ndjson', multiline: false },
           });
         });
