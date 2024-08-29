@@ -22,6 +22,12 @@ export type DataStreamName = z.infer<typeof DataStreamName>;
 export const DataStreamName = z.string().min(1);
 
 /**
+ * String form of the input logsamples.
+ */
+export type LogSamples = z.infer<typeof LogSamples>;
+export const LogSamples = z.array(z.string());
+
+/**
  * String array containing the json raw samples that are used for ecs mapping.
  */
 export type RawSamples = z.infer<typeof RawSamples>;
@@ -49,7 +55,14 @@ export const Docs = z.array(z.object({}).passthrough());
  * The name of the log samples format.
  */
 export type SamplesFormatName = z.infer<typeof SamplesFormatName>;
-export const SamplesFormatName = z.enum(['ndjson', 'json']);
+export const SamplesFormatName = z.enum([
+  'ndjson',
+  'json',
+  'csv',
+  'structured',
+  'unstructured',
+  'unsupported',
+]);
 export type SamplesFormatNameEnum = typeof SamplesFormatName.enum;
 export const SamplesFormatNameEnum = SamplesFormatName.enum;
 

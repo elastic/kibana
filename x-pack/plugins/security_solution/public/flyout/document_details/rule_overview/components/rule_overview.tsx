@@ -8,6 +8,7 @@ import React, { memo, useState, useEffect } from 'react';
 import { EuiText, EuiHorizontalRule, EuiSpacer, EuiPanel } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { FlyoutLoading, FlyoutError } from '@kbn/security-solution-common';
 import { useRuleOverviewPanelContext } from '../context';
 import { ExpandableSection } from '../../right/components/expandable_section';
 import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
@@ -17,8 +18,6 @@ import { RuleAboutSection } from '../../../../detection_engine/rule_management/c
 import { RuleScheduleSection } from '../../../../detection_engine/rule_management/components/rule_details/rule_schedule_section';
 import { RuleDefinitionSection } from '../../../../detection_engine/rule_management/components/rule_details/rule_definition_section';
 import { StepRuleActionsReadOnly } from '../../../../detection_engine/rule_creation/components/step_rule_actions';
-import { FlyoutLoading } from '../../../shared/components/flyout_loading';
-import { FlyoutError } from '../../../shared/components/flyout_error';
 import {
   RULE_OVERVIEW_BODY_TEST_ID,
   RULE_OVERVIEW_ABOUT_TEST_ID,

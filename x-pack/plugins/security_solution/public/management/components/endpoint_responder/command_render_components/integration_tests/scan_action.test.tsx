@@ -58,7 +58,6 @@ describe('When using scan action from response actions console', () => {
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
 
-    mockedContext.setExperimentalFlag({ responseActionScanEnabled: true });
     apiMocks = responseActionsHttpMocks(mockedContext.coreStart.http);
     endpointPrivileges = {
       ...getEndpointAuthzInitialStateMock(),
