@@ -8,12 +8,12 @@
 import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
+import { FlyoutHeader } from '@kbn/security-solution-common';
 import { AgentTypeIntegration } from '../../../common/components/endpoint/agents/agent_type_integration';
 import { useAlertResponseActionsSupport } from '../../../common/hooks/endpoint/use_alert_response_actions_support';
 import { TECHNICAL_PREVIEW, TECHNICAL_PREVIEW_TOOLTIP } from '../../../common/translations';
 import { useIsolateHostPanelContext } from './context';
 import { FLYOUT_HEADER_TITLE_TEST_ID } from './test_ids';
-import { FlyoutHeader } from '../../shared/components/flyout_header';
 import { ISOLATE_HOST, UNISOLATE_HOST } from '../../../common/components/endpoint';
 
 /**
