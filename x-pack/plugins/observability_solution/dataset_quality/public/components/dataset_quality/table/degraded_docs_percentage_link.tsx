@@ -8,8 +8,7 @@
 import { EuiSkeletonRectangle, EuiFlexGroup, EuiLink } from '@elastic/eui';
 import React from 'react';
 import { _IGNORED } from '../../../../common/es_fields';
-import { NavigationSource } from '../../../services/telemetry';
-import { useRedirectLink } from '../../../hooks';
+import { useDatasetRedirectLinkTelemetry, useRedirectLink } from '../../../hooks';
 import { QualityPercentageIndicator } from '../../quality_indicator';
 import { DataStreamStat } from '../../../../common/data_streams_stats/data_stream_stat';
 import { TimeRangeConfig } from '../../../../common/types';
@@ -27,13 +26,15 @@ export const DegradedDocsPercentageLink = ({
     degradedDocs: { percentage, count },
   } = dataStreamStat;
 
+  const { sendTelemetry } = useDatasetRedirectLinkTelemetry({
+    rawName: dataStreamStat.rawName,
+    query: { language: 'kuery', query: `${_IGNORED}: *` },
+  });
+
   const redirectLinkProps = useRedirectLink({
     dataStreamStat,
     query: { language: 'kuery', query: `${_IGNORED}: *` },
-    telemetry: {
-      page: 'main',
-      navigationSource: NavigationSource.Table,
-    },
+    sendTelemetry,
     timeRangeConfig: timeRange,
   });
 
