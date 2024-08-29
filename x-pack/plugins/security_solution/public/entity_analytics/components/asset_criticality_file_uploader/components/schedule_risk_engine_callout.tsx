@@ -85,7 +85,7 @@ export const ScheduleRiskEngineCallout: React.FC = () => {
       data-test-subj="risk-engine-callout"
       title={
         <FormattedMessage
-          defaultMessage="Risk score"
+          defaultMessage="Entity risk score"
           id="xpack.securitySolution.entityAnalytics.assetCriticalityResultStep.riskEngine.calloutTitle"
         />
       }
