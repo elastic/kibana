@@ -32,7 +32,7 @@ describe('Countdown', () => {
   ];
 
   beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    jest.useFakeTimers();
   });
 
   beforeEach(() => {
@@ -63,22 +63,24 @@ describe('Countdown', () => {
     expect(screen.getByTestId('prefix')).toHaveTextContent(APPROXIMATE_TIME_REMAINING);
   });
 
-  it('renders the expected the timer text', () => {
-    const approximateFutureTime = moment().add(1, 'minute').toDate();
+  for (let i = 0; i < 10_000; i++) {
+    it(`renders the expected the timer text - iteration ${i + 1}`, () => {
+      const approximateFutureTime = moment().add(1, 'minute').toDate();
 
-    render(
-      <TestProviders>
-        <Countdown
-          approximateFutureTime={approximateFutureTime}
-          connectorIntervals={connectorIntervals}
-        />
-      </TestProviders>
-    );
+      render(
+        <TestProviders>
+          <Countdown
+            approximateFutureTime={approximateFutureTime}
+            connectorIntervals={connectorIntervals}
+          />
+        </TestProviders>
+      );
 
-    act(() => {
-      jest.advanceTimersByTime(1000);
+      act(() => {
+        jest.advanceTimersByTime(1000);
+      });
+
+      expect(screen.getByTestId('timerText')).toHaveTextContent('00:59');
     });
-
-    expect(screen.getByTestId('timerText')).toHaveTextContent('00:59');
-  });
+  }
 });
