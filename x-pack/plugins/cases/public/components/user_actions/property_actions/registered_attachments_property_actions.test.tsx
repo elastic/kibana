@@ -33,12 +33,8 @@ describe('RegisteredAttachmentsPropertyActions', () => {
     appMock = createAppMockRenderer();
   });
 
-  afterEach(() => {
-    appMock.queryClient.getQueryCache().clear();
-  });
-
   afterEach(async () => {
-    await waitFor(() => expect(appMock.queryClient.isFetching()).toBe(0));
+    await appMock.clearQueryCache();
   });
 
   it('renders the correct number of actions', async () => {

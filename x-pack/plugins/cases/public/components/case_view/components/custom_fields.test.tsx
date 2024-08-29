@@ -25,12 +25,8 @@ describe('Case View Page files tab', () => {
     jest.clearAllMocks();
   });
 
-  afterEach(() => {
-    appMockRender.queryClient.getQueryCache().clear();
-  });
-
   afterEach(async () => {
-    await waitFor(() => expect(appMockRender.queryClient.isFetching()).toBe(0));
+    await appMockRender.clearQueryCache();
   });
 
   it('should render the custom fields correctly', async () => {

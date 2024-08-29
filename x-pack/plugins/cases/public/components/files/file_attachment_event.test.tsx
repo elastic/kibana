@@ -24,12 +24,8 @@ describe('FileAttachmentEvent', () => {
     appMockRender = createAppMockRenderer();
   });
 
-  afterEach(() => {
-    appMockRender.queryClient.getQueryCache().clear();
-  });
-
   afterEach(async () => {
-    await waitFor(() => expect(appMockRender.queryClient.isFetching()).toBe(0));
+    await appMockRender.clearQueryCache();
   });
 
   it('renders clickable name', async () => {

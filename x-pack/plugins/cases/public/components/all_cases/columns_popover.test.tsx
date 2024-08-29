@@ -22,12 +22,8 @@ describe('ColumnsPopover', () => {
     jest.clearAllMocks();
   });
 
-  afterEach(() => {
-    appMockRenderer.queryClient.getQueryCache().clear();
-  });
-
   afterEach(async () => {
-    await waitFor(() => expect(appMockRenderer.queryClient.isFetching()).toBe(0));
+    await appMockRenderer.clearQueryCache();
   });
 
   const selectedColumns = [

@@ -27,12 +27,8 @@ describe('Template fields', () => {
     appMockRenderer = createAppMockRenderer();
   });
 
-  afterEach(() => {
-    appMockRenderer.queryClient.getQueryCache().clear();
-  });
-
   afterEach(async () => {
-    await waitFor(() => expect(appMockRenderer.queryClient.isFetching()).toBe(0));
+    await appMockRenderer.clearQueryCache();
   });
 
   it('renders template fields correctly', async () => {
