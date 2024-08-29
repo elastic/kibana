@@ -6,12 +6,14 @@
  */
 import React, { useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
+import { dynamic } from '@kbn/shared-ux-utility';
 import { useDatasetDetailsTelemetry, useDatasetQualityDetailsState } from '../../hooks';
 import { DataStreamNotFoundPrompt } from './index_not_found_prompt';
 import { Header } from './header';
 import { Overview } from './overview';
 import { Details } from './details';
-import { DegradedFieldFlyout } from './degraded_field_flyout';
+
+const DegradedFieldFlyout = dynamic(() => import('./degraded_field_flyout'));
 
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export

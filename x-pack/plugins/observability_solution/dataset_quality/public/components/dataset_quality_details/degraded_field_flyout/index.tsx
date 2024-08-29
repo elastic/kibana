@@ -23,7 +23,9 @@ import {
 } from '../../../../common/translations';
 import { DegradedFieldInfo } from './field_info';
 
-export const DegradedFieldFlyout = () => {
+// Allow for lazy loading
+// eslint-disable-next-line import/no-default-export
+export default function DegradedFieldFlyout() {
   const { closeDegradedFieldFlyout, expandedDegradedField } = useDegradedFields();
   const pushedFlyoutTitleId = useGeneratedHtmlId({
     prefix: 'pushedFlyoutTitle',
@@ -51,4 +53,4 @@ export const DegradedFieldFlyout = () => {
       </EuiFlyoutBody>
     </EuiFlyout>
   );
-};
+}
