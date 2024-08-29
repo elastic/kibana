@@ -6,10 +6,14 @@
  * Side Public License, v 1.
  */
 
-import type { FtrProviderContext } from '../ftr_provider_context';
-import { helpers } from '../../api_integration/apis/console/helpers';
-export function ConsoleProvider({ getService }: FtrProviderContext) {
-  return {
-    helpers: helpers(getService),
-  };
+import { IHttpFetchError, isHttpFetchError as coreIsHttpFetchError } from '@kbn/core-http-browser';
+
+interface ErrorBody {
+  statusCode: number;
+  message: string;
+  error: string;
+}
+
+export function isHttpFetchError(error: unknown): error is IHttpFetchError<ErrorBody> {
+  return coreIsHttpFetchError(error);
 }
