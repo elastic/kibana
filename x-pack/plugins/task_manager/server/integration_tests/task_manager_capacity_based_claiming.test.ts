@@ -306,18 +306,22 @@ for (let i = 0; i < 100; i++) {
 
       // the first 6 tasks should have been run at the same time (adding some fudge factor)
       // and they should all be normal cost tasks
-      for (let i = 0; i < 6; i++) {
-        expect(taskRunAtDates[i].type).toBe('normal');
-        expect(taskRunAtDates[i].runAt.getTime() - firstRunAt).toBeLessThanOrEqual(500);
+      for (let j = 0; j < 6; j++) {
+        expect(taskRunAtDates[j].type).toBe('normal');
+        expect(taskRunAtDates[j].runAt.getTime() - firstRunAt).toBeLessThanOrEqual(500);
       }
 
       // the next task should be XL cost task and be run after one polling interval has passed (with some fudge factor)
       expect(taskRunAtDates[6].type).toBe('xl');
-      expect(taskRunAtDates[6].runAt.getTime() - firstRunAt).toBeGreaterThan(POLLING_INTERVAL - 500);
+      expect(taskRunAtDates[6].runAt.getTime() - firstRunAt).toBeGreaterThan(
+        POLLING_INTERVAL - 500
+      );
 
       // last task should be normal cost and be run after one polling interval has passed
       expect(taskRunAtDates[7].type).toBe('normal');
-      expect(taskRunAtDates[7].runAt.getTime() - firstRunAt).toBeGreaterThan(POLLING_INTERVAL - 500);
+      expect(taskRunAtDates[7].runAt.getTime() - firstRunAt).toBeGreaterThan(
+        POLLING_INTERVAL - 500
+      );
 
       // background task load should be 0 or 60 or 100 since we're only running these tasks
       // should be 100 during the claim cycle where we claimed 6 normal tasks but left the large capacity task in the queue
