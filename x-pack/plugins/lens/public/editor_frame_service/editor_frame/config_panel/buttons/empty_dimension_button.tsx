@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -14,6 +14,7 @@ import {
   DropType,
   DropTargetSwapDuplicateCombine,
   Droppable,
+  DroppableProps,
 } from '@kbn/dom-drag-drop';
 import { EmptyDimensionButton as EmptyDimensionButtonInner } from '@kbn/visualization-ui-components';
 import { css } from '@emotion/react';
@@ -167,7 +168,7 @@ export function EmptyDimensionButton({
     [newColumnId, target, nextLabel, canDuplicate]
   );
 
-  const handleOnDrop = React.useCallback(
+  const handleOnDrop = useCallback<NonNullable<DroppableProps['onDrop']>>(
     (source, selectedDropType) => onDrop(source, value, selectedDropType),
     [value, onDrop]
   );

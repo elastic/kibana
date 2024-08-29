@@ -100,7 +100,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
 
   const searchQueryText = pageState.queryText ?? '';
   const setSearchQueryText = useCallback(
-    (value) => {
+    (value: any) => {
       updatePageState({ queryText: value });
     },
     [updatePageState]
@@ -278,6 +278,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
       <EuiSpacer size="m" />
       <div data-test-subj="mlAnalyticsTableContainer">
         <EuiInMemoryTable<DataFrameAnalyticsListRow>
+          rowHeader={DataFrameAnalyticsListColumn.id}
           allowNeutralSort={false}
           columns={columns}
           itemIdToExpandedRowMap={itemIdToExpandedRowMap}
