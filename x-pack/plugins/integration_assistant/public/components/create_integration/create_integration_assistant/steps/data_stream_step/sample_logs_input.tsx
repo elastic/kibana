@@ -7,8 +7,8 @@
 
 import React, { useCallback, useState } from 'react';
 import { EuiCallOut, EuiFilePicker, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { isPlainObject } from 'lodash/fp';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { IntegrationSettings } from '../../types';
 import * as i18n from './translations';
 import { useActions } from '../../state';
@@ -68,16 +68,12 @@ export const parseJSONArray = (
  * Parse the logs sample file content (json or ndjson) and return the parsed logs sample
  */
 const parseLogsContent = (
-  fileContent: string | undefined
+  fileContent: string
 ): {
   error?: string;
-  isTruncated?: boolean;
-  logsSampleParsed?: string[];
+  logSamples: string[];
   samplesFormat?: SamplesFormat;
 } => {
-  if (fileContent == null) {
-    return { error: i18n.LOGS_SAMPLE_ERROR.CAN_NOT_READ };
-  }
   let parsedContent: unknown[];
   let samplesFormat: SamplesFormat;
 
@@ -97,7 +93,7 @@ const parseLogsContent = (
     try {
       const { entries, pathToEntries, errorNoArrayFound } = parseJSONArray(fileContent);
       if (errorNoArrayFound) {
-        return { error: i18n.LOGS_SAMPLE_ERROR.NOT_ARRAY };
+        return { error: i18n.LOGS_SAMPLE_ERROR.NOT_ARRAY, logSamples: [] };
       }
       parsedContent = entries;
       samplesFormat = { name: 'json', json_path: pathToEntries };
@@ -106,32 +102,29 @@ const parseLogsContent = (
         parsedContent = parseNDJSON(fileContent, true);
         samplesFormat = { name: 'ndjson', multiline: true };
       } catch (parseMultilineNDJSONError) {
-        return { error: i18n.LOGS_SAMPLE_ERROR.CAN_NOT_PARSE };
+        return {
+          logSamples: fileContent.split('\n').filter((line) => line.trim() !== ''),
+        };
       }
     }
   }
 
   if (parsedContent.length === 0) {
-    return { error: i18n.LOGS_SAMPLE_ERROR.EMPTY };
-  }
-
-  let isTruncated = false;
-  if (parsedContent.length > MaxLogsSampleRows) {
-    parsedContent = parsedContent.slice(0, MaxLogsSampleRows);
-    isTruncated = true;
+    return { error: i18n.LOGS_SAMPLE_ERROR.EMPTY, logSamples: [] };
   }
 
   if (parsedContent.some((log) => !isPlainObject(log))) {
-    return { error: i18n.LOGS_SAMPLE_ERROR.NOT_OBJECT };
+    return { error: i18n.LOGS_SAMPLE_ERROR.NOT_OBJECT, logSamples: [] };
   }
 
-  const logsSampleParsed = parsedContent.map((log) => JSON.stringify(log));
-  return { isTruncated, logsSampleParsed, samplesFormat };
+  const logSamples = parsedContent.map((log) => JSON.stringify(log));
+  return { logSamples, samplesFormat };
 };
 
 interface SampleLogsInputProps {
   integrationSettings: IntegrationSettings | undefined;
 }
+
 export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSettings }) => {
   const { notifications } = useKibana().services;
   const { setIntegrationSettings } = useActions();
@@ -145,7 +138,7 @@ export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSe
         setSampleFileError(undefined);
         setIntegrationSettings({
           ...integrationSettings,
-          logsSampleParsed: undefined,
+          logSamples: undefined,
           samplesFormat: undefined,
         });
         return;
@@ -154,26 +147,32 @@ export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSe
       const reader = new FileReader();
       reader.onload = function (e) {
         const fileContent = e.target?.result as string | undefined; // We can safely cast to string since we call `readAsText` to load the file.
-        const { error, isTruncated, logsSampleParsed, samplesFormat } =
-          parseLogsContent(fileContent);
+        if (fileContent == null) {
+          return { error: i18n.LOGS_SAMPLE_ERROR.CAN_NOT_READ };
+        }
+        let samples;
+        const { error, logSamples, samplesFormat } = parseLogsContent(fileContent);
         setIsParsing(false);
-        setSampleFileError(error);
+        samples = logSamples;
+
         if (error) {
+          setSampleFileError(error);
           setIntegrationSettings({
             ...integrationSettings,
-            logsSampleParsed: undefined,
+            logSamples: undefined,
             samplesFormat: undefined,
           });
           return;
         }
 
-        if (isTruncated) {
+        if (samples.length > MaxLogsSampleRows) {
+          samples = samples.slice(0, MaxLogsSampleRows);
           notifications?.toasts.addInfo(i18n.LOGS_SAMPLE_TRUNCATED(MaxLogsSampleRows));
         }
 
         setIntegrationSettings({
           ...integrationSettings,
-          logsSampleParsed,
+          logSamples: samples,
           samplesFormat,
         });
       };

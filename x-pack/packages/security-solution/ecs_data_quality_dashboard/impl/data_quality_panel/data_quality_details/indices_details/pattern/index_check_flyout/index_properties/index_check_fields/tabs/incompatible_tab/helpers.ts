@@ -7,16 +7,16 @@
 
 import { EcsVersion } from '@elastic/ecs';
 
+import { escapeNewlines } from '../../../../../../../../utils/markdown';
 import {
   getSummaryMarkdownComment,
   getIncompatibleMappingsMarkdownTableRows,
   getIncompatibleValuesMarkdownTableRows,
   getMarkdownComment,
   getMarkdownTable,
-  getSummaryTableMarkdownComment,
   getTabCountsMarkdownComment,
-  escape,
-} from '../../../markdown/helpers';
+  getSummaryTableMarkdownComment,
+} from '../../utils/markdown';
 import * as i18n from '../../../translations';
 import type {
   EcsBasedFieldMetadata,
@@ -34,7 +34,7 @@ import {
   DOCUMENT_VALUES_ACTUAL,
   ECS_VALUES_EXPECTED,
 } from '../compare_fields_table/translations';
-import { getIsInSameFamily } from '../../../../../../../../helpers';
+import { getIsInSameFamily } from '../../../utils/get_is_in_same_family';
 
 export const getIncompatibleFieldsMarkdownComment = (incompatible: number): string =>
   getMarkdownComment({
@@ -69,7 +69,7 @@ export const getIncompatibleMappingsFields = (
       x.type !== x.indexFieldType &&
       !getIsInSameFamily({ ecsExpectedType: x.type, type: x.indexFieldType })
     ) {
-      const field = escape(x.indexFieldName);
+      const field = escapeNewlines(x.indexFieldName);
       if (field != null) {
         return [...acc, field];
       }
@@ -80,7 +80,7 @@ export const getIncompatibleMappingsFields = (
 export const getSameFamilyFields = (ecsBasedFieldMetadata: EcsBasedFieldMetadata[]): string[] =>
   ecsBasedFieldMetadata.reduce<string[]>((acc, x) => {
     if (!x.isEcsCompliant && x.type !== x.indexFieldType && x.isInSameFamily) {
-      const field = escape(x.indexFieldName);
+      const field = escapeNewlines(x.indexFieldName);
       if (field != null) {
         return [...acc, field];
       }
@@ -98,7 +98,7 @@ export const getIncompatibleValuesFields = (
 ): string[] =>
   ecsBasedFieldMetadata.reduce<string[]>((acc, x) => {
     if (!x.isEcsCompliant && x.indexInvalidValues.length > 0) {
-      const field = escape(x.indexFieldName);
+      const field = escapeNewlines(x.indexFieldName);
       if (field != null) {
         return [...acc, field];
       }

@@ -9,7 +9,6 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { EuiDataGridColumn } from '@elastic/eui';
 
-import type { CoreSetup } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
@@ -35,7 +34,7 @@ import {
 } from '@kbn/ml-data-grid';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { MlApiServices } from '../../../../../services/ml_api_service';
+import { useMlApiContext, useMlKibana } from '../../../../../contexts/kibana';
 import { DataLoader } from '../../../../../datavisualizer/index_based/data_loader';
 
 import { getIndexData, getIndexFields } from '../../../../common';
@@ -45,10 +44,14 @@ import { useExplorationDataGrid } from './use_exploration_data_grid';
 export const useExplorationResults = (
   dataView: DataView | undefined,
   jobConfig: DataFrameAnalyticsConfig | undefined,
-  searchQuery: estypes.QueryDslQueryContainer,
-  toastNotifications: CoreSetup['notifications']['toasts'],
-  mlApiServices: MlApiServices
+  searchQuery: estypes.QueryDslQueryContainer
 ): UseIndexDataReturnType => {
+  const {
+    services: {
+      notifications: { toasts },
+    },
+  } = useMlKibana();
+  const ml = useMlApiContext();
   const [baseline, setBaseLine] = useState<FeatureImportanceBaseline | undefined>();
 
   const trainedModelsApiService = useTrainedModelsApiService();
@@ -60,7 +63,7 @@ export const useExplorationResults = (
 
   if (jobConfig !== undefined) {
     const resultsField = jobConfig.dest.results_field!;
-    const { fieldTypes } = getIndexFields(jobConfig, needsDestIndexFields);
+    const { fieldTypes } = getIndexFields(ml, jobConfig, needsDestIndexFields);
     columns.push(
       ...getDataGridSchemasFromFieldTypes(fieldTypes, resultsField).sort((a: any, b: any) =>
         sortExplorationResultsFields(a.id, b.id, jobConfig)
@@ -81,7 +84,7 @@ export const useExplorationResults = (
   // passed on to `getIndexData`.
   useEffect(() => {
     const options = { didCancel: false };
-    getIndexData(jobConfig, dataGrid, searchQuery, options);
+    getIndexData(ml, jobConfig, dataGrid, searchQuery, options);
     return () => {
       options.didCancel = true;
     };
@@ -90,7 +93,7 @@ export const useExplorationResults = (
   }, [jobConfig && jobConfig.id, dataGrid.pagination, searchQuery, dataGrid.sortingColumns]);
 
   const dataLoader = useMemo(
-    () => (dataView !== undefined ? new DataLoader(dataView, toastNotifications) : undefined),
+    () => (dataView !== undefined ? new DataLoader(dataView, ml) : undefined),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [dataView]
   );
@@ -110,7 +113,7 @@ export const useExplorationResults = (
         dataGrid.setColumnCharts(columnChartsData);
       }
     } catch (e) {
-      showDataGridColumnChartErrorMessageToast(e, toastNotifications);
+      showDataGridColumnChartErrorMessageToast(e, toasts);
     }
   };
 
@@ -158,7 +161,7 @@ export const useExplorationResults = (
     } catch (e) {
       const error = extractErrorMessage(e);
 
-      toastNotifications.addDanger({
+      toasts.addDanger({
         title: i18n.translate(
           'xpack.ml.dataframe.analytics.explorationResults.baselineErrorMessageToast',
           {
@@ -169,7 +172,7 @@ export const useExplorationResults = (
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mlApiServices, jobConfig]);
+  }, [jobConfig]);
 
   useEffect(() => {
     getAnalyticsBaseline();
