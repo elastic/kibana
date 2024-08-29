@@ -38,10 +38,6 @@ export function defineRoutes({ router, featureRegistry }: RouteDefinitionParams)
         request.query.ignoreValidLicenses
       );
 
-      console.log(allFeatures[0]);
-
-      console.log(allFeatures.map((feature) => feature.id));
-
       return response.ok({
         body: allFeatures
           .sort(
