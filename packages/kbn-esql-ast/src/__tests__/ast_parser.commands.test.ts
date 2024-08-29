@@ -169,8 +169,7 @@ describe('commands', () => {
           name: 'sort',
           args: [
             {
-              type: 'function',
-              name: 'order-expression',
+              type: 'order',
               order: '',
               nulls: '',
               args: [

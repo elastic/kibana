@@ -203,6 +203,20 @@ export class BasicPrettyPrinter {
     .on('visitRenameExpression', (ctx) => {
       return `${ctx.visitArgument(0)} ${this.keyword('AS')} ${ctx.visitArgument(1)}`;
     })
+    .on('visitOrderExpression', (ctx) => {
+      const node = ctx.node;
+      let text = ctx.visitArgument(0);
+
+      if (node.order) {
+        text += ` ${node.order}`;
+      }
+
+      if (node.nulls) {
+        text += ` ${node.nulls}`;
+      }
+
+      return text;
+    })
     .on('visitCommandOption', (ctx) => {
       const opts = this.opts;
       const option = opts.lowercaseOptions ? ctx.node.name : ctx.node.name.toUpperCase();
