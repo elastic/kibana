@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { Version } from '@kbn/object-versioning';
+// import type { Version } from '@kbn/object-versioning';
+// Declaring it directly to avoid circular dependencies.
+type Version = number;
 
 export const validateVersion = (
   version: unknown
