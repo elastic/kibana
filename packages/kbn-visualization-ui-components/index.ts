@@ -31,7 +31,7 @@ export {
   ChartSwitchTrigger,
 } from './components';
 
-export { isFieldLensCompatible } from './util';
+export { isFieldLensCompatible, sharedSetOfIcons, hasIcon, iconSortCriteria } from './util';
 
 export type {
   DataType,
@@ -43,4 +43,4 @@ export type {
   ColorPickerProps,
 } from './components';
 
-export type { FormatFactory, LineStyle } from './types';
+export type { FormatFactory, LineStyle, SharedSetOfIcons } from './types';
