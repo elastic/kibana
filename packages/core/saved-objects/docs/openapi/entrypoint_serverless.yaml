@@ -17,7 +17,9 @@ tags:
       To manage a specific type of saved object, use the corresponding APIs.
       For example, use:
 
-      * [Data views](../group/endpoint-data-views)
+      [Data views](../group/endpoint-data-views)
+
+      Warning: Do not write documents directly to the `.kibana` index. When you write directly to the `.kibana` index, the data becomes corrupted and permanently breaks future Kibana versions.
 servers:
   - url: 'https://{kibana_url}'
     variables:

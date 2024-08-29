@@ -20,6 +20,8 @@ tags:
       * [Data views](../group/endpoint-data-views)
       * [Spaces](https://www.elastic.co/guide/en/kibana/current/spaces-api.html)
       * [Short URLs](https://www.elastic.co/guide/en/kibana/current/short-urls-api.html)
+
+      Warning: Do not write documents directly to the `.kibana` index. When you write directly to the `.kibana` index, the data becomes corrupted and permanently breaks future Kibana versions.
 servers:
   - url: /
 paths:
