@@ -16,6 +16,7 @@ import type {
   ESQLLiteral,
   ESQLSingleAstItem,
 } from '@kbn/esql-ast';
+import { i18n } from '@kbn/i18n';
 import { ESQL_NUMBER_TYPES, isNumericType } from '../shared/esql_types';
 import type { EditorContext, SuggestionRawDefinition } from './types';
 import {
@@ -1426,7 +1427,6 @@ async function getFunctionArgsSuggestions(
         text: addCommaIf(shouldAddComma, suggestion.text),
       }))
     );
-
     // could also be in stats (bucket) but our autocomplete is not great yet
     if (
       (getTypesFromParamDefs(typesToSuggestNext).includes('date') &&
@@ -1758,6 +1758,31 @@ async function getOptionArgsSuggestions(
         );
 
         if (option.name === 'by') {
+          // Add quick snippet for for stats ... by bucket(<>)
+          if (command.name === 'stats') {
+            suggestions.push({
+              label: i18n.translate(
+                'kbn-esql-validation-autocomplete.esql.autocomplete.addDateHistogram',
+                {
+                  defaultMessage: 'Add date histogram',
+                }
+              ),
+              text: `BUCKET($0, 20, ?start, ?end)`,
+              asSnippet: true,
+              kind: 'Function',
+              detail: i18n.translate(
+                'kbn-esql-validation-autocomplete.esql.autocomplete.addDateHistogramDetail',
+                {
+                  defaultMessage: 'Add date histogram using bucket()',
+                }
+              ),
+              documentation: {
+                value: '',
+              },
+              sortText: '1A',
+            });
+          }
+
           suggestions.push(
             ...(await getFieldsOrFunctionsSuggestions(
               types[0] === 'column' ? ['any'] : types,
