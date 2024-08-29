@@ -21,7 +21,7 @@ jobs:
       fail-fast: false
       matrix:
         language: [ 'javascript' ]
-        branch: [ 'codeql', 'codeql-test' ]
+        branch: [ 'codeql' ]
 
     steps:
     - name: Checkout repository
@@ -35,12 +35,10 @@ jobs:
         languages: ${{ matrix.language }}
         config-file: ./.github/codeql/codeql-config.yml
 
-    # TODO: Possibly required to follow all call paths, however, when enabled, the step below runs out of memory.
-    # Possible workarounds: Apply for access to the GitHub beta where we can use beefier machines, or run it ourselves on Buildkite
     - name: setup node
       uses: actions/setup-node@v4
       with:
-        node-version: '20.15.1'
+        node-version-file: '.nvmrc'
     - name: yarn kbn bootstrap
       run: |
         yarn kbn bootstrap --no-validate --no-vscode
