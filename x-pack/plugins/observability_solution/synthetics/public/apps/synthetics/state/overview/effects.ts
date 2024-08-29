@@ -29,7 +29,7 @@ export function* fetchMonitorOverviewEffect() {
   );
 }
 
-export const TRENDS_CHUNK_SIZE = 20;
+export const TRENDS_CHUNK_SIZE = 50;
 
 export function* fetchTrendEffect(
   action: ReturnType<typeof trendStatsBatch.get>

@@ -5,139 +5,137 @@
  * 2.0.
  */
 
-import { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
-import { SyntheticsEsClient } from '../../lib';
+import { MsearchMultisearchBody } from '@elastic/elasticsearch/lib/api/types';
 
-export function fetchTrends(configId: string, locationIds: string[], esClient: SyntheticsEsClient) {
-  const query: SearchRequest = {
-    size: 0,
-    query: {
-      bool: {
-        filter: [
-          {
-            bool: {
-              filter: [
-                {
-                  exists: {
-                    field: 'summary',
-                  },
+export const getFetchTrendsQuery = (
+  configId: string,
+  locationIds: string[]
+): MsearchMultisearchBody => ({
+  size: 0,
+  query: {
+    bool: {
+      filter: [
+        {
+          bool: {
+            filter: [
+              {
+                exists: {
+                  field: 'summary',
                 },
-                {
-                  bool: {
-                    should: [
-                      {
-                        bool: {
-                          should: [
-                            {
-                              match: {
-                                'summary.final_attempt': true,
-                              },
+              },
+              {
+                bool: {
+                  should: [
+                    {
+                      bool: {
+                        should: [
+                          {
+                            match: {
+                              'summary.final_attempt': true,
                             },
-                          ],
-                          minimum_should_match: 1,
-                        },
+                          },
+                        ],
+                        minimum_should_match: 1,
                       },
-                      {
-                        bool: {
-                          must_not: {
-                            bool: {
-                              should: [
-                                {
-                                  exists: {
-                                    field: 'summary.final_attempt',
-                                  },
+                    },
+                    {
+                      bool: {
+                        must_not: {
+                          bool: {
+                            should: [
+                              {
+                                exists: {
+                                  field: 'summary.final_attempt',
                                 },
-                              ],
-                              minimum_should_match: 1,
-                            },
+                              },
+                            ],
+                            minimum_should_match: 1,
                           },
                         },
                       },
-                    ],
-                    minimum_should_match: 1,
-                  },
-                },
-              ],
-            },
-          },
-          {
-            bool: {
-              must_not: {
-                exists: {
-                  field: 'run_once',
-                },
-              },
-            },
-          },
-          {
-            terms: {
-              'observer.name': locationIds,
-            },
-          },
-          {
-            term: {
-              config_id: configId,
-            },
-          },
-          {
-            range: {
-              '@timestamp': {
-                gte: 'now-9h',
-                lte: 'now',
-              },
-            },
-          },
-        ],
-      },
-    },
-    aggs: {
-      byId: {
-        terms: {
-          field: 'config_id',
-        },
-        aggs: {
-          byLocation: {
-            terms: {
-              field: 'observer.name',
-            },
-            aggs: {
-              last_50: {
-                top_hits: {
-                  size: 50,
-                  sort: [
-                    {
-                      '@timestamp': {
-                        order: 'desc',
-                      },
                     },
                   ],
-                  _source: ['monitor.duration.us'],
+                  minimum_should_match: 1,
                 },
               },
+            ],
+          },
+        },
+        {
+          bool: {
+            must_not: {
+              exists: {
+                field: 'run_once',
+              },
+            },
+          },
+        },
+        {
+          terms: {
+            'observer.name': locationIds,
+          },
+        },
+        {
+          term: {
+            config_id: configId,
+          },
+        },
+        {
+          range: {
+            '@timestamp': {
+              gte: 'now-9h',
+              lte: 'now',
+            },
+          },
+        },
+      ],
+    },
+  },
+  aggs: {
+    byId: {
+      terms: {
+        field: 'config_id',
+      },
+      aggs: {
+        byLocation: {
+          terms: {
+            field: 'observer.name',
+          },
+          aggs: {
+            last_50: {
+              top_hits: {
+                size: 50,
+                sort: [
+                  {
+                    '@timestamp': {
+                      order: 'desc',
+                    },
+                  },
+                ],
+                _source: ['monitor.duration.us'],
+              },
+            },
+            stats: {
               stats: {
-                stats: {
-                  field: 'monitor.duration.us',
-                },
+                field: 'monitor.duration.us',
               },
-              median: {
-                percentiles: {
-                  field: 'monitor.duration.us',
-                  percents: [50],
-                },
+            },
+            median: {
+              percentiles: {
+                field: 'monitor.duration.us',
+                percents: [50],
               },
             },
           },
         },
       },
     },
-    _source: false,
-    sort: [
-      {
-        '@timestamp': 'desc',
-      },
-    ],
-    fields: ['monitor.duration.us'],
-  };
-
-  return esClient.search({ body: query });
-}
+  },
+  _source: false,
+  sort: [
+    {
+      '@timestamp': 'desc',
+    },
+  ],
+  fields: ['monitor.duration.us'],
+});
