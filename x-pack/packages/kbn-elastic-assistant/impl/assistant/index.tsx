@@ -279,9 +279,7 @@ const AssistantComponent: React.FC<Props> = ({
     setUserPrompt,
     userPrompt,
   } = useChatSend({
-    allSystemPrompts,
     currentConversation,
-    currentSystemPromptId,
     http,
     refetchCurrentUserConversations,
     selectedPromptContexts,

@@ -9,7 +9,6 @@ import { HttpSetup } from '@kbn/core-http-browser';
 import { useSendMessage } from '../use_send_message';
 import { useConversation } from '../use_conversation';
 import { emptyWelcomeConvo, welcomeConvo } from '../../mock/conversation';
-import { defaultSystemPrompt, mockSystemPrompt } from '../../mock/system_prompt';
 import { useChatSend, UseChatSendProps } from './use_chat_send';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { waitFor } from '@testing-library/react';
@@ -28,7 +27,6 @@ const setCurrentConversation = jest.fn();
 
 export const testProps: UseChatSendProps = {
   selectedPromptContexts: {},
-  allSystemPrompts: [defaultSystemPrompt, mockSystemPrompt],
   currentConversation: { ...emptyWelcomeConvo, id: 'an-id' },
   http: {
     basePath: {
@@ -38,7 +36,6 @@ export const testProps: UseChatSendProps = {
     anonymousPaths: {},
     externalUrl: {},
   } as unknown as HttpSetup,
-  currentSystemPromptId: defaultSystemPrompt.id,
   setSelectedPromptContexts,
   setCurrentConversation,
   refetchCurrentUserConversations: jest.fn(),
@@ -78,21 +75,7 @@ describe('use chat send', () => {
       expect(setCurrentConversation).toHaveBeenCalled();
     });
   });
-  it('handleChatSend sends message with context prompt when a valid prompt text is provided', async () => {
-    const promptText = 'prompt text';
-    const { result } = renderHook(() => useChatSend(testProps), {
-      wrapper: TestProviders,
-    });
-    result.current.handleChatSend(promptText);
 
-    await waitFor(() => {
-      expect(sendMessage).toHaveBeenCalled();
-      const appendMessageSend = sendMessage.mock.calls[0][0].message;
-      expect(appendMessageSend).toEqual(
-        `You are a helpful, expert assistant who answers questions about Elastic Security. Do not answer questions unrelated to Elastic Security.\nIf you answer a question related to KQL or EQL, it should be immediately usable within an Elastic Security timeline; please always format the output correctly with back ticks. Any answer provided for Query DSL should also be usable in a security timeline. This means you should only ever include the "filter" portion of the query.\nUse the following context to answer questions:\n\n${promptText}`
-      );
-    });
-  });
   it('handleChatSend sends message with only provided prompt text and context already exists in convo history', async () => {
     const promptText = 'prompt text';
     const { result } = renderHook(

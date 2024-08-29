@@ -75,14 +75,28 @@ describe('useCurrentConversation', () => {
     expect(result.current.currentSystemPromptId).toBeUndefined();
   });
 
-  it('should set the current system prompt ID when the prompt selection changes', () => {
-    const { result } = setupHook();
+  it('should set the current system prompt ID when the prompt selection changes', async () => {
+    const conversationId = 'welcome_id';
+    const conversation = mockData.welcome_id;
+    mockUseConversation.getConversation.mockResolvedValue(conversation);
 
-    act(() => {
-      result.current.setCurrentSystemPromptId('prompt-id');
+    const { result } = setupHook({
+      conversationId,
+      conversations: { [conversationId]: conversation },
     });
 
-    expect(result.current.currentSystemPromptId).toBe('prompt-id');
+    await act(async () => {
+      await result.current.setCurrentSystemPromptId('prompt-id');
+    });
+
+    expect(mockUseConversation.setApiConfig).toHaveBeenCalledWith({
+      conversation,
+      apiConfig: {
+        ...conversation.apiConfig,
+        defaultSystemPromptId: 'prompt-id',
+      },
+    });
+    expect(defaultProps.refetchCurrentUserConversations).toHaveBeenCalled();
   });
 
   it('should fetch and set the current conversation', async () => {
