@@ -179,11 +179,29 @@ describe('Navigation Plugin', () => {
   });
 
   describe('isSolutionNavEnabled$', () => {
-    it('should be off if space plugin not available', async () => {
+    it('should be off if spaces plugin not available', async () => {
       const { plugin, coreStart, unifiedSearch } = setup();
 
       const { isSolutionNavEnabled$ } = plugin.start(coreStart, {
         unifiedSearch,
+      });
+      await new Promise((resolve) => setTimeout(resolve));
+
+      const isEnabled = await firstValueFrom(isSolutionNavEnabled$);
+      expect(isEnabled).toBe(false);
+    });
+
+    it('should be off if spaces plugin `isSolutionViewEnabled` = false', async () => {
+      const { plugin, coreStart, unifiedSearch, spaces } = setup();
+      spaces.getActiveSpace$ = jest
+        .fn()
+        .mockReturnValue(of({ solution: 'es' } as Pick<Space, 'solution'>));
+
+      spaces.isSolutionViewEnabled = false;
+
+      const { isSolutionNavEnabled$ } = plugin.start(coreStart, {
+        unifiedSearch,
+        spaces,
       });
       await new Promise((resolve) => setTimeout(resolve));
 
