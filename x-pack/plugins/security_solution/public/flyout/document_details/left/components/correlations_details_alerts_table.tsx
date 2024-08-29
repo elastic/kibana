@@ -20,9 +20,9 @@ import { CellTooltipWrapper } from '../../shared/components/cell_tooltip_wrapper
 import type { DataProvider } from '../../../../../common/types';
 import { SeverityBadge } from '../../../../common/components/severity_badge';
 import { usePaginatedAlerts } from '../hooks/use_paginated_alerts';
-import { InvestigateInTimelineButton } from '../../../../common/components/event_details/table/investigate_in_timeline_button';
+import { InvestigateInTimelineButton } from '../../../../common/components/event_details/investigate_in_timeline_button';
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../detections/components/alerts_table/translations';
-import { getDataProvider } from '../../../../common/components/event_details/table/use_action_cell_data_provider';
+import { getDataProvider } from '../../../../common/components/event_details/use_action_cell_data_provider';
 import { AlertPreviewButton } from '../../../shared/components/alert_preview_button';
 
 export const TIMESTAMP_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';

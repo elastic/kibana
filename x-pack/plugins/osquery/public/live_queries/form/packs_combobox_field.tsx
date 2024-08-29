@@ -58,7 +58,7 @@ export const PacksComboBoxField = ({
   >([]);
 
   const handlePackChange = useCallback(
-    (newSelectedOptions) => {
+    (newSelectedOptions: any) => {
       if (!newSelectedOptions.length) {
         setSelectedOptions(newSelectedOptions);
         onChange([]);
@@ -86,7 +86,7 @@ export const PacksComboBoxField = ({
   );
 
   const renderOption = useCallback(
-    ({ value: option }) => (
+    ({ value: option }: any) => (
       <EuiFlexGroup
         gutterSize="none"
         direction="column"
