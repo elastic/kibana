@@ -40,6 +40,7 @@ export type {
   IconSet,
   AccessorConfig,
   QueryInputServices,
+  ColorPickerProps,
 } from './components';
 
 export type { FormatFactory, LineStyle, SharedSetOfIcons } from './types';
