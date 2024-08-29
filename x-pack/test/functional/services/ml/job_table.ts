@@ -287,14 +287,6 @@ export function MachineLearningJobTableProvider(
       });
     }
 
-    public async openAnnotationsTab<T>(jobId: string) {
-      await retry.tryForTime(10000, async () => {
-        await this.ensureDetailsOpen(jobId);
-        await testSubjects.click(this.detailsSelector(jobId, 'mlJobListTab-annotations'));
-        await testSubjects.existOrFail('mlAnnotationsTable');
-      });
-    }
-
     public async waitForRefreshButtonLoaded(buttonTestSubj: string) {
       await testSubjects.existOrFail(`~${buttonTestSubj}`, { timeout: 10 * 1000 });
       await testSubjects.existOrFail(`${buttonTestSubj} loaded`, { timeout: 30 * 1000 });

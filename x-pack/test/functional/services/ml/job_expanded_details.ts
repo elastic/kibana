@@ -100,7 +100,7 @@ export function MachineLearningJobExpandedDetailsProvider(
       await this.assertAnnotationsFromApi(annotationsFromApi);
 
       await jobTable.ensureDetailsOpen(jobId);
-      await jobTable.openAnnotationsTab(jobId);
+      await this.openAnnotationsTab(jobId);
       await this.clearSearchButton();
 
       const { _id: annotationId }: { _id: string } = annotationsFromApi[0];
@@ -115,7 +115,7 @@ export function MachineLearningJobExpandedDetailsProvider(
       await jobTable.ensureDetailsClosed(jobId);
 
       await jobTable.withDetailsOpen(jobId, async () => {
-        await jobTable.openAnnotationsTab(jobId);
+        await this.openAnnotationsTab(jobId);
         await this.clearSearchButton();
         const visibleText = await testSubjects.getVisibleText(
           jobTable.detailsSelector(jobId, 'mlAnnotationsColumnAnnotation')
@@ -126,7 +126,7 @@ export function MachineLearningJobExpandedDetailsProvider(
 
     async assertDataFeedFlyout(jobId: string): Promise<void> {
       await jobTable.withDetailsOpen(jobId, async () => {
-        await jobTable.openAnnotationsTab(jobId);
+        await this.openAnnotationsTab(jobId);
         await this.clearSearchButton();
         await testSubjects.click(jobTable.detailsSelector(jobId, 'euiCollapsedItemActionsButton'));
         await testSubjects.click('mlAnnotationsActionViewDatafeed');
