@@ -10,7 +10,7 @@ import https from 'https';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { SslConfig, sslSchema } from '@kbn/server-http-tools';
 
-import type { AxiosError } from 'axios';
+import type { AxiosError, AxiosRequestConfig } from 'axios';
 import axios from 'axios';
 
 import { SO_SEARCH_LIMIT } from '../../constants';
@@ -71,13 +71,12 @@ class AgentlessAgentService {
       })
     );
 
-    const requestConfig = {
+    const requestConfig: AxiosRequestConfig = {
       url: prependAgentlessApiBasePathToEndpoint(agentlessConfig, '/deployments'),
       data: {
         policy_id: policyId,
         fleet_url: fleetUrl,
         fleet_token: fleetToken,
-        stack_version: appContextService.getKibanaVersion(),
       },
       method: 'POST',
       headers: {
@@ -90,6 +89,11 @@ class AgentlessAgentService {
         ca: tlsConfig.certificateAuthorities,
       }),
     };
+
+    const cloudSetup = appContextService.getCloud();
+    if (cloudSetup?.isCloudEnabled) {
+      requestConfig.data.stack_version = appContextService.getKibanaVersion()
+    }
 
     logger.debug(
       `Creating agentless agent with request config ${JSON.stringify({
