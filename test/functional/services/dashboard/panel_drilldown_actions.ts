@@ -94,8 +94,12 @@ export function DashboardDrilldownPanelActionsProvider({
       log.debug('getPanelDrilldownCount');
       try {
         const panel = (await dashboard.getDashboardPanels())[panelIndex];
-        await dashboardPanelActions.openContextMenuMorePanel(panel);
-        const manageDrilldownAction = await testSubjects.find(MANAGE_DRILLDOWNS_DATA_TEST_SUBJ);
+        await dashboardPanelActions.openContextMenu(panel);
+        let manageDrilldownAction = await testSubjects.find(MANAGE_DRILLDOWNS_DATA_TEST_SUBJ);
+        if (!(await testSubjects.exists(MANAGE_DRILLDOWNS_DATA_TEST_SUBJ))) {
+          await dashboardPanelActions.clickContextMenuMoreItem();
+          manageDrilldownAction = await testSubjects.find(MANAGE_DRILLDOWNS_DATA_TEST_SUBJ);
+        }
         const count = await manageDrilldownAction.findByCssSelector('.euiNotificationBadge');
         return Number.parseInt(await count.getVisibleText(), 10);
       } catch (e) {
