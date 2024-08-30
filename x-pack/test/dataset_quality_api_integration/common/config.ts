@@ -55,7 +55,7 @@ export type DatasetQualityApiClientKey =
   | 'readUser'
   | 'adminUser'
   | 'writeUser'
-  | 'datasetQualityLogsUser';
+  | 'datasetQualityMonitorUser';
 
 export type DatasetQualityApiClient = Record<
   DatasetQualityApiClientKey,
@@ -164,9 +164,9 @@ export function createTestConfig(
               kibanaServer,
               username: DatasetQualityUsername.editorUser,
             }),
-            datasetQualityLogsUser: await getDatasetQualityApiClient({
+            datasetQualityMonitorUser: await getDatasetQualityApiClient({
               kibanaServer,
-              username: DatasetQualityUsername.datasetQualityLogsUser,
+              username: DatasetQualityUsername.datasetQualityMonitorUser,
             }),
           };
         },

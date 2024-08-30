@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { log, timerange } from '@kbn/apm-synthtrace-client';
+import { log, syntheticsMonitor, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
+import rison from '@kbn/rison';
 import { DatasetQualityApiClientKey } from '../../common/config';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { cleanLogIndexTemplate, addIntegrationToLogIndexTemplate } from './es_utils';
@@ -17,12 +18,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const datasetQualityApiClient = getService('datasetQualityApiClient');
   const es = getService('es');
 
-  async function callApiAs(user: DatasetQualityApiClientKey) {
+  async function callApiAs(
+    user: DatasetQualityApiClientKey,
+    types: Array<'logs' | 'metrics' | 'traces' | 'synthetics'> = ['logs']
+  ) {
     return await datasetQualityApiClient[user]({
       endpoint: 'GET /internal/dataset_quality/data_streams/stats',
       params: {
         query: {
-          types: ['logs'],
+          types: rison.encodeArray(types),
         },
       },
     });
@@ -84,18 +88,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns non empty stats for an authorized user', async () => {
         await ingestDocuments();
-        const stats = await callApiAs('datasetQualityLogsUser');
+        const stats = await callApiAs('datasetQualityMonitorUser');
 
         expect(stats.body.dataStreamsStats[0].size).not.empty();
         expect(stats.body.dataStreamsStats[0].sizeBytes).greaterThan(0);
         expect(stats.body.dataStreamsStats[0].lastActivity).greaterThan(0);
       });
 
-      it('get list of privileged data streams for datasetQualityLogsUser', async () => {
+      it('get list of privileged data streams for datasetQualityMonitorUser', async () => {
         // Index only one document to logs-test-1-default and logs-test-1-default data stream using synthtrace
         await ingestDocuments({ dataset: 'test.1' });
         await ingestDocuments({ dataset: 'test.2' });
-        const resp = await callApiAs('datasetQualityLogsUser');
+        const resp = await callApiAs('datasetQualityMonitorUser');
 
         expect(resp.body.datasetUserPrivileges.canMonitor).to.be(true);
         expect(
@@ -137,7 +141,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('returns stats correctly', async () => {
-          const stats = await callApiAs('datasetQualityLogsUser');
+          const stats = await callApiAs('datasetQualityMonitorUser');
 
           expect(stats.body.dataStreamsStats.length).to.be(1);
           expect(stats.body.dataStreamsStats[0].integration).to.be(integration);
@@ -168,7 +172,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('returns stats correctly', async () => {
-          const stats = await callApiAs('datasetQualityLogsUser');
+          const stats = await callApiAs('datasetQualityMonitorUser');
 
           expect(stats.body.dataStreamsStats.length).to.be(1);
           expect(stats.body.dataStreamsStats[0].integration).not.ok();
@@ -176,6 +180,46 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expect(stats.body.dataStreamsStats[0].sizeBytes).greaterThan(0);
           expect(stats.body.dataStreamsStats[0].lastActivity).greaterThan(0);
           expect(stats.body.dataStreamsStats[0].totalDocs).greaterThan(0);
+        });
+
+        after(async () => {
+          await synthtrace.clean();
+        });
+      });
+
+      describe('and multiple dataStream types are requested', () => {
+        before(async () => {
+          await synthtrace.index([
+            timerange('2023-11-20T15:00:00.000Z', '2023-11-20T15:01:00.000Z')
+              .interval('1m')
+              .rate(1)
+              .generator((timestamp) => [
+                log.create().message('This is a log message').timestamp(timestamp).defaults({
+                  'log.file.path': '/my-service.log',
+                }),
+                syntheticsMonitor.create().dataset('http').timestamp(timestamp),
+              ]),
+          ]);
+        });
+
+        it('returns stats correctly', async () => {
+          const stats = await callApiAs('datasetQualityMonitorUser', ['logs', 'synthetics']);
+
+          expect(stats.body.dataStreamsStats.length).to.be(2);
+          expect(stats.body.dataStreamsStats[0].integration).not.ok();
+          expect(stats.body.dataStreamsStats[0].size).not.empty();
+          expect(stats.body.dataStreamsStats[0].sizeBytes).greaterThan(0);
+          expect(stats.body.dataStreamsStats[0].lastActivity).greaterThan(0);
+          expect(stats.body.dataStreamsStats[0].totalDocs).greaterThan(0);
+          expect(stats.body.dataStreamsStats[0].name).match(new RegExp(/^logs-[\w.]+-[\w.]+/));
+          expect(stats.body.dataStreamsStats[1].integration).to.be('synthetics');
+          expect(stats.body.dataStreamsStats[1].size).not.empty();
+          expect(stats.body.dataStreamsStats[1].sizeBytes).greaterThan(0);
+          expect(stats.body.dataStreamsStats[1].lastActivity).greaterThan(0);
+          expect(stats.body.dataStreamsStats[1].totalDocs).greaterThan(0);
+          expect(stats.body.dataStreamsStats[1].name).match(
+            new RegExp(/^synthetics-[\w.]+-[\w.]+/)
+          );
         });
 
         after(async () => {
