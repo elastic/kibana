@@ -1,6 +1,22 @@
 ### Entity Definitions
 
-Entity definitions are a core concept of the entity model. They define the way to locate, aggregate and extract a specific type of entity documents from source indices. Definitions are stored as Kibana saved objects and serve as the input to build ingested pipelines and transforms that will actually collect and store the data.
+Entity definitions are a core concept of the entity model. They define the way to locate, aggregate and extract a specific type of entity documents from source indices. Definitions are stored as Kibana saved objects and serve as the input to build ingested pipelines, index templates and transforms that will collect and store the data.
+
+#### How a definition works
+
+> [!NOTE]
+> Entity definitions are based on transform and as such a subset of the configuration is tightly coupled to transform settings. While we provide defaults for these settings, one can still update properties such as `frequency`, `sync.time.delay` and `sync.time.field` (see [transform documentation](https://www.elastic.co/guide/en/elasticsearch/reference/current/put-transform.html)).
+
+When creating a definition (see [entity definition schema](https://github.com/elastic/kibana/blob/main/x-pack/packages/kbn-entities-schema/src/schema/entity_definition.ts#L21)), entity manager will create two transforms to collect entities based on the configured [identityFields](https://github.com/elastic/kibana/blob/main/x-pack/packages/kbn-entities-schema/src/schema/entity_definition.ts#L29):
+- the history transform creates a snapshot of entities over time, reading documents from the configured source indices and grouping them by the identity fields and a date histogram. For a given entity the transform creates at most one document per interval (configured by the `history.settings.interval` setting), with its associated metrics and metadata fields aggregated over that interval. While metrics support [multiple aggregations](https://github.com/elastic/kibana/blob/main/x-pack/packages/kbn-entities-schema/src/schema/common.ts#L13), metadata use a `terms` aggregation (to be expanded by https://github.com/elastic/elastic-entity-model/issues/130). To limit the amount of data processed when created, history transform accepts a `history.settings.lookbackPeriod` that defaults to 1h.
+- the summary transform creates one document per entity, reading documents from the history transform output indices. Each entity document gets overwritten over time, updating metadata and metrics with the following rules: metrics get the value of the most recent history document while metadata are aggregated over a computed period that attempts to limit the amount of data it looks at.
+
+The definition allows defining an optional backfill transform. This works on the principle that transforms only capture an immutable snapshot of the data at the time they execute. If data is ingested with delay and falls in a bucket that was already covered by a previous [transform checkpoint](https://www.elastic.co/guide/en/elasticsearch/reference/current/transform-checkpoints.html), the data will never be transformed in the output. Ideally one would sync the transform on the [event.ingested field](https://www.elastic.co/guide/en/elasticsearch/reference/current/transform-checkpoints.html#sync-field-ingest-timestamp) to work with delayed data, when that is not possible or desirable the backfill transform can be a fallback. Backfill transform will output its data to the same history indice, because transform uses deterministic ids for the generated document, it will not create duplicate but instead upsert documents from the initial history transform pass.
+To enable the backfill transform set a value to `history.settings.backfillSyncDelay` higher than the `history.settings.syncDelay`. The backfill lookback and frequency can also be configured.
+
+#### Extension
+The index templates and ingest pipelines created for a given definition are managed by the Entity manager and should not be directly updated. These components still offer extension points that allow customization of each transform through optional components labelled <component-name>@platform and <component-name>@custom where the former is targeted towards Elastic solution teams and the latter for end users. @custom will take precedence when both are defined.
+The extension points allow defining a global component (ie applied to both transforms) with <definition-id>@custom, or transform specific components with <definition-id>-(latest|history)@custom.
 
 #### Builtin Definitions
 
