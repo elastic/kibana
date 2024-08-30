@@ -112,6 +112,7 @@ import { createSoFindIterable } from './utils/create_so_find_iterable';
 import { isAgentlessEnabled } from './utils/agentless';
 import { validatePolicyNamespaceForSpace } from './spaces/policy_namespaces';
 import { isSpaceAwarenessEnabled } from './spaces/helpers';
+import { scheduleDeployAgentPoliciesTask } from './agent_policies/deploy_agent_policies_task';
 
 const KEY_EDITABLE_FOR_MANAGED_POLICIES = ['namespace'];
 
@@ -972,14 +973,24 @@ class AgentPolicyService {
       }
     );
 
-    await pMap(
-      savedObjectsResults,
-      (policy) =>
-        this.triggerAgentPolicyUpdatedEvent(esClient, 'updated', policy.id, {
+    if (appContextService.getExperimentalFeatures().asyncDeployPolicies) {
+      await scheduleDeployAgentPoliciesTask(
+        appContextService.getTaskManagerStart()!,
+        savedObjectsResults.map((policy) => ({
+          id: policy.id,
           spaceId: policy.namespaces?.[0],
-        }),
-      { concurrency: 50 }
-    );
+        }))
+      );
+    } else {
+      await pMap(
+        savedObjectsResults,
+        (policy) =>
+          this.triggerAgentPolicyUpdatedEvent(esClient, 'updated', policy.id, {
+            spaceId: policy.namespaces?.[0],
+          }),
+        { concurrency: 50 }
+      );
+    }
 
     return res;
   }
@@ -1221,7 +1232,7 @@ class AgentPolicyService {
           agentPolicy: agentPolicies?.find((policy) => policy.id === agentPolicyId),
         }),
       {
-        concurrency: 50,
+        concurrency: 20,
       }
     );
 
