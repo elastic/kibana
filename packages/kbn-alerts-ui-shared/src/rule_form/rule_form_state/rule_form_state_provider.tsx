@@ -16,7 +16,9 @@ export interface RuleFormStateProviderProps {
   initialRuleFormState: RuleFormState;
 }
 
-export const RuleFormStateProvider: React.FC<RuleFormStateProviderProps> = (props) => {
+export const RuleFormStateProvider: React.FC<
+  React.PropsWithChildren<RuleFormStateProviderProps>
+> = (props) => {
   const { children, initialRuleFormState } = props;
   const {
     formData,

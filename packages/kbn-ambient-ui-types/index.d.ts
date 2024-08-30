@@ -35,3 +35,11 @@ declare module '*.mdx' {
   // eslint-disable-next-line import/no-default-export
   export default MDXComponent;
 }
+
+import { FunctionComponent as _FunctionComponent, PropsWithChildren } from 'React';
+
+declare module 'react' {
+  interface FunctionComponent<P = {}> extends _FunctionComponent<P> {
+    (props: PropsWithChildren<P>, context?: any): ReactNode;
+  }
+}

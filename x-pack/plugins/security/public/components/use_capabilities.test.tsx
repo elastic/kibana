@@ -18,9 +18,11 @@ describe('useCapabilities', () => {
     const coreStart = coreMock.createStart();
 
     const { result } = renderHook(useCapabilities, {
-      wrapper: ({ children }) => (
-        <KibanaContextProvider services={coreStart}>{children}</KibanaContextProvider>
-      ),
+      initialProps: 'hello',
+      wrapper: (d) => {
+        console.log(d);
+        return <KibanaContextProvider services={coreStart}>{d.children}</KibanaContextProvider>;
+      },
     });
 
     expect(result.current).toEqual(coreStart.application.capabilities);

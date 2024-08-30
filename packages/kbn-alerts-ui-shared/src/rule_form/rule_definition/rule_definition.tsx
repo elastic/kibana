@@ -96,7 +96,7 @@ export const RuleDefinition = () => {
   }, [selectedRuleTypeModel, docLinks]);
 
   const onChangeMetaData = useCallback(
-    (newMetadata) => {
+    (newMetadata: any) => {
       dispatch({
         type: 'setMetadata',
         payload: newMetadata,

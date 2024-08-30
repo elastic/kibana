@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook } from '@testing-library/react-hooks/dom';
@@ -45,7 +45,7 @@ mockServices.dataViewsService.create.mockResolvedValue(mockDataView);
 
 const queryClient = new QueryClient(testQueryClientConfig);
 
-const wrapper: FunctionComponent = ({ children }) => (
+const wrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
   <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 );
 

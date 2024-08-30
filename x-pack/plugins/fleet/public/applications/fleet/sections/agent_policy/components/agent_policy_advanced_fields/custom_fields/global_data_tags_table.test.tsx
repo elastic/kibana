@@ -44,7 +44,7 @@ describe('GlobalDataTagsTable', () => {
         global_data_tags: tags,
       });
 
-      const updateAgentPolicy = React.useCallback((policy) => {
+      const updateAgentPolicy = React.useCallback((policy: any) => {
         mockUpdateAgentPolicy(policy);
         _updateAgentPolicy(policy);
       }, []);

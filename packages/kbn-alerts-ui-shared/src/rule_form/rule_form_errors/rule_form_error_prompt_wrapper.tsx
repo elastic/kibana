@@ -14,11 +14,9 @@ interface RuleFormErrorPromptWrapperProps {
   hasShadow?: boolean;
 }
 
-export const RuleFormErrorPromptWrapper: React.FC<RuleFormErrorPromptWrapperProps> = ({
-  children,
-  hasBorder,
-  hasShadow,
-}) => {
+export const RuleFormErrorPromptWrapper: React.FC<
+  React.PropsWithChildren<RuleFormErrorPromptWrapperProps>
+> = ({ children, hasBorder, hasShadow }) => {
   const styles = useEuiBackgroundColorCSS().transparent;
   return (
     <EuiPageTemplate offset={0} css={styles}>
