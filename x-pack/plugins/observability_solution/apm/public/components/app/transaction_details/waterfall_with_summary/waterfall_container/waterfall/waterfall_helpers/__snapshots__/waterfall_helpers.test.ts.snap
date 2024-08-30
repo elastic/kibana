@@ -4,12 +4,12 @@ exports[`waterfall_helpers getWaterfallItems should handle cyclic references 1`]
 Array [
   Object {
     "doc": Object {
-      "timestamp": Object {
-        "us": 10,
-      },
-      "transaction": Object {
-        "id": "a",
-      },
+      "timestamp.us": Array [
+        10,
+      ],
+      "transaction.id": Array [
+        "a",
+      ],
     },
     "docType": "transaction",
     "id": "a",
@@ -19,27 +19,27 @@ Array [
   },
   Object {
     "doc": Object {
-      "parent": Object {
-        "id": "a",
-      },
-      "span": Object {
-        "id": "b",
-      },
-      "timestamp": Object {
-        "us": 20,
-      },
+      "parent.id": Array [
+        "a",
+      ],
+      "span.id": Array [
+        "b",
+      ],
+      "timestamp.us": Array [
+        20,
+      ],
     },
     "docType": "span",
     "id": "b",
     "offset": 10,
     "parent": Object {
       "doc": Object {
-        "timestamp": Object {
-          "us": 10,
-        },
-        "transaction": Object {
-          "id": "a",
-        },
+        "timestamp.us": Array [
+          10,
+        ],
+        "transaction.id": Array [
+          "a",
+        ],
       },
       "docType": "transaction",
       "id": "a",
@@ -58,16 +58,18 @@ Array [
   Object {
     "color": "",
     "doc": Object {
-      "service": Object {
-        "name": "opbeans-java",
-      },
-      "timestamp": Object {
-        "us": 1536763736366000,
-      },
-      "transaction": Object {
-        "id": "a",
-        "name": "APIRestController#products",
-      },
+      "service.name": Array [
+        "opbeans-java",
+      ],
+      "timestamp.us": Array [
+        1536763736366000,
+      ],
+      "transaction.id": Array [
+        "a",
+      ],
+      "transaction.name": Array [
+        "APIRestController#products",
+      ],
     },
     "docType": "transaction",
     "duration": 9480,
@@ -87,22 +89,24 @@ Array [
   Object {
     "color": "",
     "doc": Object {
-      "parent": Object {
-        "id": "a",
-      },
-      "service": Object {
-        "name": "opbeans-java",
-      },
-      "span": Object {
-        "id": "b2",
-        "name": "GET [0:0:0:0:0:0:0:1]",
-      },
-      "timestamp": Object {
-        "us": 1536763736367000,
-      },
-      "transaction": Object {
-        "id": "a",
-      },
+      "parent.id": Array [
+        "a",
+      ],
+      "service.name": Array [
+        "opbeans-java",
+      ],
+      "span.id": Array [
+        "b2",
+      ],
+      "span.name": Array [
+        "GET [0:0:0:0:0:0:0:1]",
+      ],
+      "timestamp.us": Array [
+        1536763736367000,
+      ],
+      "transaction.id": Array [
+        "a",
+      ],
     },
     "docType": "span",
     "duration": 4694,
@@ -115,16 +119,18 @@ Array [
     "parent": Object {
       "color": "",
       "doc": Object {
-        "service": Object {
-          "name": "opbeans-java",
-        },
-        "timestamp": Object {
-          "us": 1536763736366000,
-        },
-        "transaction": Object {
-          "id": "a",
-          "name": "APIRestController#products",
-        },
+        "service.name": Array [
+          "opbeans-java",
+        ],
+        "timestamp.us": Array [
+          1536763736366000,
+        ],
+        "transaction.id": Array [
+          "a",
+        ],
+        "transaction.name": Array [
+          "APIRestController#products",
+        ],
       },
       "docType": "transaction",
       "duration": 9480,
@@ -151,22 +157,24 @@ Array [
   Object {
     "color": "",
     "doc": Object {
-      "parent": Object {
-        "id": "a",
-      },
-      "service": Object {
-        "name": "opbeans-java",
-      },
-      "span": Object {
-        "id": "b",
-        "name": "GET [0:0:0:0:0:0:0:1]",
-      },
-      "timestamp": Object {
-        "us": 1536763736368000,
-      },
-      "transaction": Object {
-        "id": "a",
-      },
+      "parent.id": Array [
+        "a",
+      ],
+      "service.name": Array [
+        "opbeans-java",
+      ],
+      "span.id": Array [
+        "b",
+      ],
+      "span.name": Array [
+        "GET [0:0:0:0:0:0:0:1]",
+      ],
+      "timestamp.us": Array [
+        1536763736368000,
+      ],
+      "transaction.id": Array [
+        "a",
+      ],
     },
     "docType": "span",
     "duration": 4694,
@@ -179,16 +187,18 @@ Array [
     "parent": Object {
       "color": "",
       "doc": Object {
-        "service": Object {
-          "name": "opbeans-java",
-        },
-        "timestamp": Object {
-          "us": 1536763736366000,
-        },
-        "transaction": Object {
-          "id": "a",
-          "name": "APIRestController#products",
-        },
+        "service.name": Array [
+          "opbeans-java",
+        ],
+        "timestamp.us": Array [
+          1536763736366000,
+        ],
+        "transaction.id": Array [
+          "a",
+        ],
+        "transaction.name": Array [
+          "APIRestController#products",
+        ],
       },
       "docType": "transaction",
       "duration": 9480,
@@ -215,19 +225,21 @@ Array [
   Object {
     "color": "",
     "doc": Object {
-      "parent": Object {
-        "id": "b",
-      },
-      "service": Object {
-        "name": "opbeans-java",
-      },
-      "timestamp": Object {
-        "us": 1536763736369000,
-      },
-      "transaction": Object {
-        "id": "c",
-        "name": "APIRestController#productsRemote",
-      },
+      "parent.id": Array [
+        "b",
+      ],
+      "service.name": Array [
+        "opbeans-java",
+      ],
+      "timestamp.us": Array [
+        1536763736369000,
+      ],
+      "transaction.id": Array [
+        "c",
+      ],
+      "transaction.name": Array [
+        "APIRestController#productsRemote",
+      ],
     },
     "docType": "transaction",
     "duration": 3581,
@@ -240,22 +252,24 @@ Array [
     "parent": Object {
       "color": "",
       "doc": Object {
-        "parent": Object {
-          "id": "a",
-        },
-        "service": Object {
-          "name": "opbeans-java",
-        },
-        "span": Object {
-          "id": "b",
-          "name": "GET [0:0:0:0:0:0:0:1]",
-        },
-        "timestamp": Object {
-          "us": 1536763736368000,
-        },
-        "transaction": Object {
-          "id": "a",
-        },
+        "parent.id": Array [
+          "a",
+        ],
+        "service.name": Array [
+          "opbeans-java",
+        ],
+        "span.id": Array [
+          "b",
+        ],
+        "span.name": Array [
+          "GET [0:0:0:0:0:0:0:1]",
+        ],
+        "timestamp.us": Array [
+          1536763736368000,
+        ],
+        "transaction.id": Array [
+          "a",
+        ],
       },
       "docType": "span",
       "duration": 4694,
@@ -268,16 +282,18 @@ Array [
       "parent": Object {
         "color": "",
         "doc": Object {
-          "service": Object {
-            "name": "opbeans-java",
-          },
-          "timestamp": Object {
-            "us": 1536763736366000,
-          },
-          "transaction": Object {
-            "id": "a",
-            "name": "APIRestController#products",
-          },
+          "service.name": Array [
+            "opbeans-java",
+          ],
+          "timestamp.us": Array [
+            1536763736366000,
+          ],
+          "transaction.id": Array [
+            "a",
+          ],
+          "transaction.name": Array [
+            "APIRestController#products",
+          ],
         },
         "docType": "transaction",
         "duration": 9480,
@@ -311,22 +327,24 @@ Array [
   Object {
     "color": "",
     "doc": Object {
-      "parent": Object {
-        "id": "c",
-      },
-      "service": Object {
-        "name": "opbeans-java",
-      },
-      "span": Object {
-        "id": "d",
-        "name": "SELECT",
-      },
-      "timestamp": Object {
-        "us": 1536763736371000,
-      },
-      "transaction": Object {
-        "id": "c",
-      },
+      "parent.id": Array [
+        "c",
+      ],
+      "service.name": Array [
+        "opbeans-java",
+      ],
+      "span.id": Array [
+        "d",
+      ],
+      "span.name": Array [
+        "SELECT",
+      ],
+      "timestamp.us": Array [
+        1536763736371000,
+      ],
+      "transaction.id": Array [
+        "c",
+      ],
     },
     "docType": "span",
     "duration": 210,
@@ -339,19 +357,21 @@ Array [
     "parent": Object {
       "color": "",
       "doc": Object {
-        "parent": Object {
-          "id": "b",
-        },
-        "service": Object {
-          "name": "opbeans-java",
-        },
-        "timestamp": Object {
-          "us": 1536763736369000,
-        },
-        "transaction": Object {
-          "id": "c",
-          "name": "APIRestController#productsRemote",
-        },
+        "parent.id": Array [
+          "b",
+        ],
+        "service.name": Array [
+          "opbeans-java",
+        ],
+        "timestamp.us": Array [
+          1536763736369000,
+        ],
+        "transaction.id": Array [
+          "c",
+        ],
+        "transaction.name": Array [
+          "APIRestController#productsRemote",
+        ],
       },
       "docType": "transaction",
       "duration": 3581,
@@ -364,22 +384,24 @@ Array [
       "parent": Object {
         "color": "",
         "doc": Object {
-          "parent": Object {
-            "id": "a",
-          },
-          "service": Object {
-            "name": "opbeans-java",
-          },
-          "span": Object {
-            "id": "b",
-            "name": "GET [0:0:0:0:0:0:0:1]",
-          },
-          "timestamp": Object {
-            "us": 1536763736368000,
-          },
-          "transaction": Object {
-            "id": "a",
-          },
+          "parent.id": Array [
+            "a",
+          ],
+          "service.name": Array [
+            "opbeans-java",
+          ],
+          "span.id": Array [
+            "b",
+          ],
+          "span.name": Array [
+            "GET [0:0:0:0:0:0:0:1]",
+          ],
+          "timestamp.us": Array [
+            1536763736368000,
+          ],
+          "transaction.id": Array [
+            "a",
+          ],
         },
         "docType": "span",
         "duration": 4694,
@@ -392,16 +414,18 @@ Array [
         "parent": Object {
           "color": "",
           "doc": Object {
-            "service": Object {
-              "name": "opbeans-java",
-            },
-            "timestamp": Object {
-              "us": 1536763736366000,
-            },
-            "transaction": Object {
-              "id": "a",
-              "name": "APIRestController#products",
-            },
+            "service.name": Array [
+              "opbeans-java",
+            ],
+            "timestamp.us": Array [
+              1536763736366000,
+            ],
+            "transaction.id": Array [
+              "a",
+            ],
+            "transaction.name": Array [
+              "APIRestController#products",
+            ],
           },
           "docType": "transaction",
           "duration": 9480,

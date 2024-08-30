@@ -24,8 +24,8 @@ export interface WaterfallTransaction {
   'transaction.name': string[];
   'transaction.type': string[];
   'transaction.result'?: string[];
-  'faas.coldstart': boolean[];
-  'span.links'?: SpanLink[][];
+  'faas.coldstart'?: boolean[];
+  'span.links'?: SpanLink[];
 }
 
 export interface WaterfallSpan {
@@ -42,14 +42,14 @@ export interface WaterfallSpan {
   'span.subtype'?: string[];
   'span.action'?: string[];
   'span.name': string[];
-  'span.composite.count': number[];
-  'span.composite.sum.us': number[];
-  'span.composite.compression_strategy': string[];
+  'span.composite.count'?: number[];
+  'span.composite.sum.us'?: number[];
+  'span.composite.compression_strategy'?: string[];
   'span.sync'?: boolean[];
   'span.duration.us': number[];
-  'span.links'?: SpanLink[][];
+  'span.links'?: SpanLink[];
   'transaction.id'?: string[];
-  'child.id'?: string[][];
+  'child.id'?: string[];
 }
 
 export interface WaterfallError {
@@ -59,7 +59,7 @@ export interface WaterfallError {
   'parent.id'?: string[];
   'error.id': string[];
   'error.log.message'?: string[];
-  'error.exception'?: Exception[][];
+  'error.exception'?: Exception[];
   'error.grouping_key': string[];
   'service.name': string[];
 }
