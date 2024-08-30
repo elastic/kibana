@@ -22,9 +22,12 @@ module.exports = {
   },
   create(context) {
     const allowedAlgorithms = ['sha1', 'sha256'];
+
     let isCreateHashImported = false;
     let createHashName = 'createHash';
     const sourceCode = context.getSourceCode();
+
+    const disallowedAlgorithmNodes = new Set();
 
     function isAllowedAlgorithm(algorithm) {
       return allowedAlgorithms.includes(algorithm);
@@ -32,7 +35,7 @@ module.exports = {
 
     function checkIdentifierValue(node) {
       const scope = sourceCode.scopeManager.acquire(node);
-
+      console.log(scope);
       if (scope) {
         const variable = scope.variables.find((variable) => variable.name === node.name);
 
@@ -43,14 +46,7 @@ module.exports = {
             def.node.init.type === 'Literal' &&
             !isAllowedAlgorithm(def.node.init.value)
           ) {
-            context.report({
-              node,
-              messageId: 'noDisallowedHash',
-              data: {
-                algorithm: def.node.init.value,
-                allowedAlgorithms: allowedAlgorithms.join(', '),
-              },
-            });
+            disallowedAlgorithmNodes.add(node.name);
           }
         }
       }
@@ -69,30 +65,16 @@ module.exports = {
       },
       VariableDeclarator(node) {
         if (node.init && node.init.type === 'Literal' && !isAllowedAlgorithm(node.init.value)) {
-          context.report({
-            node,
-            messageId: 'noDisallowedHash',
-            data: {
-              algorithm: node.init.value,
-              allowedAlgorithms: allowedAlgorithms.join(', '),
-            },
-          });
+          disallowedAlgorithmNodes.add(node.id.name);
         }
       },
       AssignmentExpression(node) {
         if (
           node.right.type === 'Literal' &&
-          !isAllowedAlgorithm(node.right.value) &&
+          node.right.value === 'md5' &&
           node.left.type === 'Identifier'
         ) {
-          context.report({
-            node,
-            messageId: 'noDisallowedHash',
-            data: {
-              algorithm: node.right.value,
-              allowedAlgorithms: allowedAlgorithms.join(', '),
-            },
-          });
+          disallowedAlgorithmNodes.add(node.left.name);
         }
       },
       CallExpression(node) {
@@ -116,6 +98,16 @@ module.exports = {
               });
             } else if (arg.type === 'Identifier') {
               checkIdentifierValue(arg);
+              if (disallowedAlgorithmNodes.has(arg.name)) {
+                context.report({
+                  node,
+                  messageId: 'noDisallowedHash',
+                  data: {
+                    algorithm: arg.value,
+                    allowedAlgorithms: allowedAlgorithms.join(', '),
+                  },
+                });
+              }
             }
           }
         }
