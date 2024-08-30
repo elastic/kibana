@@ -12,7 +12,7 @@ export const IconButtonGroupStyles = ({ euiTheme }: UseEuiTheme) => {
   return {
     button: {
       '&.euiButtonGroupButton': {
-        backgroundColor: 'transparent',
+        backgroundColor: euiTheme.colors.emptyShade,
         border: `${euiTheme.border.thin} !important`,
         borderRight: 'none !important',
         '&:first-of-type': {
