@@ -88,13 +88,5 @@ export function registerHelpers(handlebarsInstance: typeof Handlebars) {
     }
   );
 
-  handlebarsInstance.registerHelper('shouldCastExplicitly', function ({ anyOf }, options) {
-    if (anyOf?.length > 2) {
-      // @ts-expect-error
-      return options.fn(this);
-    } else {
-      // @ts-expect-error
-      return options.inverse(this);
-    }
-  });
+  handlebarsInstance.registerHelper('shouldCastExplicitly', ({ anyOf }) => anyOf?.length > 2);
 }
