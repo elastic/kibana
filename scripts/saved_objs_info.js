@@ -7,4 +7,4 @@
  */
 
 require('../src/setup_node_env');
-require('@kbn/ftr-common-functional-services').runSavedObjInfoSvc();
+require('@kbn/test-suites-src/common/services/saved_object_info').runSavedObjInfoSvc();

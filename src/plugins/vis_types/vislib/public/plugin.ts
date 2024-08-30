@@ -16,7 +16,7 @@ import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 
 import { LEGACY_HEATMAP_CHARTS_LIBRARY } from '@kbn/vis-type-heatmap-plugin/common';
 import { LEGACY_GAUGE_CHARTS_LIBRARY } from '@kbn/vis-type-gauge-plugin/common';
-import { VislibPublicConfig } from '../config';
+import type { VislibPublicConfig } from '../server/config';
 import { setAnalytics, setI18n, setUsageCollectionStart } from './services';
 import { heatmapVisTypeDefinition } from './heatmap';
 

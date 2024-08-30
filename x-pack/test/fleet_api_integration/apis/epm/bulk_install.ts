@@ -22,7 +22,7 @@ export default function (providerContext: FtrProviderContext) {
     await supertest.delete(`/api/fleet/epm/packages/${name}/${version}`).set('kbn-xsrf', 'xxxx');
   };
 
-  describe('bulk package install api', async () => {
+  describe('bulk package install api', () => {
     skipIfNoDockerRegistry(providerContext);
 
     before(async () => {
