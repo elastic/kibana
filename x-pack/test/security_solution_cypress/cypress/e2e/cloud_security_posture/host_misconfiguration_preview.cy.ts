@@ -93,10 +93,10 @@ describe('Alert Host details expandable flyout', { tags: ['@ess', '@serverless']
 
   it('should display Misconfiguration preview under Insights Entities when it has Misconfiguration Findings', () => {
     createMockFinding(mockFinding);
-    cy.log('check if Misconfiguration preview section is not rendered');
+    cy.log('check if Misconfiguration preview section rendered');
     cy.get(HOST_INSIGHT_MISCONFIGURATION).should('exist');
 
-    cy.log('check if Misconfiguration preview title is not shown');
+    cy.log('check if Misconfiguration preview title shown');
     cy.get(HOST_INSIGHT_MISCONFIGURATION_TITLE).should('exist');
   });
 });
