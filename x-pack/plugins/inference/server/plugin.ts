@@ -26,7 +26,7 @@ export class InferencePlugin
       InferenceStartDependencies
     >
 {
-  logger: Logger;
+  private logger: Logger;
 
   constructor(context: PluginInitializerContext<InferenceConfig>) {
     this.logger = context.logger.get();
