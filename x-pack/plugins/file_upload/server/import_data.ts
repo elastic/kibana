@@ -125,7 +125,6 @@ export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
       const resp = await asCurrentUser.bulk(bulkRequest, {
         maxRetries: 0,
         requestTimeout: 3600000,
-        retryOnTimeout: false,
       });
       if (resp.errors) {
         throw resp;
