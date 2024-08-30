@@ -85,15 +85,28 @@ export const ExceptionListItemEntryMatchWildcard = z.object({
   operator: ExceptionListItemEntryOperator,
 });
 
-export type ExceptionListItemEntry = z.infer<typeof ExceptionListItemEntry>;
-export const ExceptionListItemEntry = z.discriminatedUnion('type', [
+const ExceptionListItemEntryBatch1 = z.discriminatedUnion('type', [
   ExceptionListItemEntryMatch,
   ExceptionListItemEntryMatchAny,
+]);
+const ExceptionListItemEntryBatch2 = z.discriminatedUnion('type', [
   ExceptionListItemEntryList,
   ExceptionListItemEntryExists,
+]);
+const ExceptionListItemEntryBatch3 = z.discriminatedUnion('type', [
   ExceptionListItemEntryNested,
   ExceptionListItemEntryMatchWildcard,
 ]);
+export type ExceptionListItemEntry = z.infer<
+  | typeof ExceptionListItemEntryBatch1
+  | typeof ExceptionListItemEntryBatch2
+  | typeof ExceptionListItemEntryBatch3
+>;
+export const ExceptionListItemEntry = z.union([
+  ExceptionListItemEntryBatch1,
+  ExceptionListItemEntryBatch2,
+  ExceptionListItemEntryBatch3,
+]) as z.ZodType<ExceptionListItemEntry>;
 
 export type ExceptionListItemEntryArray = z.infer<typeof ExceptionListItemEntryArray>;
 export const ExceptionListItemEntryArray = z.array(ExceptionListItemEntry);
