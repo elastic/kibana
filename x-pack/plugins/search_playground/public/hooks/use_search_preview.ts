@@ -6,6 +6,7 @@
  */
 
 import { useFormContext } from 'react-hook-form';
+import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { APIRoutes, ChatFormFields } from '../types';
 import { useKibana } from './use_kibana';
 
@@ -19,15 +20,15 @@ export const useSearchPreview = () => {
   const { http } = services;
 
   return async ({ searchQuery }: UseSearchPreviewArgs) => {
-    const body = JSON.stringify({
-      search_query: searchQuery,
-      elasticsearch_query: JSON.stringify(getValues(ChatFormFields.elasticsearchQuery)),
-      indices: getValues(ChatFormFields.indices),
-      source_fields: JSON.stringify(getValues(ChatFormFields.sourceFields)),
+    const response = await http.post<SearchResponse>(APIRoutes.POST_SEARCH_QUERY, {
+      body: JSON.stringify({
+        search_query: searchQuery,
+        elasticsearch_query: JSON.stringify(getValues(ChatFormFields.elasticsearchQuery)),
+        indices: getValues(ChatFormFields.indices),
+        source_fields: JSON.stringify(getValues(ChatFormFields.sourceFields)),
+      }),
     });
-    console.log(body);
-    await http.post(APIRoutes.POST_SEARCH_QUERY, {
-      body,
-    });
+
+    return response?.hits?.hits ?? [];
   };
 };

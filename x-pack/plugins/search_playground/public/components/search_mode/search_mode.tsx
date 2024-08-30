@@ -8,24 +8,25 @@
 import {
   EuiButton,
   EuiEmptyPrompt,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
-  EuiSearchBar,
   useEuiTheme,
 } from '@elastic/eui';
 import React from 'react';
 import { css } from '@emotion/react';
-import { useController, useFormContext, useWatch } from 'react-hook-form';
+import { Controller, useController, useFormContext, useWatch } from 'react-hook-form';
+import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { ResultList } from './result_list';
 import { ChatForm, ChatFormFields } from '../../types';
 import { useSearchPreview } from '../../hooks/use_search_preview';
 
 export const SearchMode: React.FC = () => {
+  const [searchResults, setSearchResults] = React.useState<SearchHit[] | undefined>();
   const searchRequest = useSearchPreview();
   const { euiTheme } = useEuiTheme();
   const { control, formState, handleSubmit } = useFormContext();
-  const showResults = false;
   const sourceFields = useWatch<ChatForm, ChatFormFields.sourceFields>({
     name: ChatFormFields.sourceFields,
   });
@@ -34,10 +35,19 @@ export const SearchMode: React.FC = () => {
   } = useController<ChatForm, ChatFormFields.searchQuery>({
     name: ChatFormFields.searchQuery,
   });
+
+  const handleSearch = handleSubmit(async () => {
+    try {
+      const searchData = await searchRequest({ searchQuery: searchBarValue });
+      setSearchResults(searchData);
+    } catch (e) {
+      // TODO handle error ?
+      console.error(e);
+    }
+  });
+
   const updateSearchQuery = (query: string) => {
     searchBarOnChange(query);
-    // TODO call endpoint through the hook
-    searchRequest({ searchQuery: query });
   };
 
   return (
@@ -50,13 +60,27 @@ export const SearchMode: React.FC = () => {
       >
         <EuiFlexGroup direction="column">
           <EuiFlexItem grow={false}>
-            <EuiSearchBar onChange={({ queryText }) => updateSearchQuery(queryText)} />
+            <EuiForm component="form" onSubmit={handleSearch}>
+              <Controller
+                control={control}
+                name={ChatFormFields.searchQuery}
+                render={({ field }) => (
+                  <EuiFieldText
+                    {...field}
+                    icon="search"
+                    fullWidth
+                    placeholder="Search for documents"
+                    onChange={(e) => updateSearchQuery(e.target.value)}
+                  />
+                )}
+              />
+            </EuiForm>
           </EuiFlexItem>
           <EuiFlexItem className="eui-yScroll">
             <EuiFlexGroup direction="column">
               <EuiFlexItem>
-                {showResults ? (
-                  <ResultList />
+                {searchResults ? (
+                  <ResultList searchResults={searchResults} />
                 ) : (
                   <EuiEmptyPrompt
                     iconType={'checkInCircleFilled'}

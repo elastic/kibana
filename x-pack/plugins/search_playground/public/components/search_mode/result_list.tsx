@@ -19,7 +19,10 @@ import {
 import { UnifiedDocViewerFlyout } from '@kbn/unified-doc-viewer-plugin/public';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { EsHitRecord } from '@kbn/discover-utils/types';
+import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import { DocViewer } from '@kbn/unified-doc-viewer';
 
 const DEMO_DATA = [
   { id: '123321', name: 'John Doe', age: 25 },
@@ -34,19 +37,6 @@ const DEMO_DATA = [
   { id: '123321', name: 'John Doe', age: 25 },
 ];
 
-const hit = {
-  flattened: {
-    bytes: 123,
-    destination: 'Amsterdam',
-  },
-  id: '1',
-  raw: {
-    bytes: 123,
-    destination: 'Amsterdam',
-  },
-} as unknown as DataTableRecord;
-
-const hits = [hit];
 const dataView = {
   title: 'foo',
   id: 'foo',
@@ -61,46 +51,54 @@ const dataView = {
   timeFieldName: 'timestamp',
 };
 
-export const ResultList: React.FC = () => {
-  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+export interface ResultListArgs {
+  searchResults: SearchHit[];
+}
 
+export const ResultList: React.FC<ResultListArgs> = ({ searchResults }) => {
+  const [flyoutDocId, setFlyoutDocId] = useState<string | undefined>(undefined);
   return (
     <EuiPanel grow={false}>
       <EuiFlexGroup direction="column" gutterSize="none">
-        {DEMO_DATA.map((item, index) => {
+        {searchResults.map((item, index) => {
           return (
             <>
-              <EuiFlexItem key={item.id + '-' + index} onClick={() => setIsFlyoutOpen(true)} grow>
+              <EuiFlexItem
+                key={item._id + '-' + index}
+                onClick={() => setFlyoutDocId(item._id)}
+                grow
+              >
                 <EuiFlexGroup direction="column" gutterSize="xs">
                   <EuiFlexItem grow>
                     <EuiTitle size="xs">
-                      <h2>{item.id}</h2>
+                      <h2>{item._id}</h2>
                     </EuiTitle>
                   </EuiFlexItem>
                   <EuiFlexItem grow>
                     <EuiText size="s">
-                      <p>{item.name}</p>
+                      <p>{item._source?.title || item._id}</p>
                     </EuiText>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
-              {index !== DEMO_DATA.length - 1 && <EuiHorizontalRule margin="m" />}
+              {index !== searchResults.length - 1 && <EuiHorizontalRule margin="m" />}
             </>
           );
         })}
-        {isFlyoutOpen && (
+        {flyoutDocId && (
           <UnifiedDocViewerFlyout
             services={{}}
-            onClose={() => setIsFlyoutOpen(false)}
+            onClose={() => setFlyoutDocId(undefined)}
             isEsqlQuery={false}
-            columns={['column1', 'column2']}
-            hit={hit}
-            hits={hits}
+            columns={[]}
+            hit={buildDataTableRecord(
+              searchResults.find((item) => item._id === flyoutDocId) as EsHitRecord
+            )}
             dataView={dataView as unknown as DataView}
             onAddColumn={() => {}}
             onRemoveColumn={() => {}}
             setExpandedDoc={() => {}}
-            flyoutType="push"
+            flyoutType="overlay"
           />
         )}
       </EuiFlexGroup>
