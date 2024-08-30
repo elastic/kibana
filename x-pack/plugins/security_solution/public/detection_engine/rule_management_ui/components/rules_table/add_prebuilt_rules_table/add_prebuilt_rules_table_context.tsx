@@ -27,13 +27,9 @@ import { isUpgradeReviewRequestEnabled } from './add_prebuilt_rules_utils';
 
 export interface AddPrebuiltRulesTableState {
   /**
-   * Rules available to be installed
+   * Rules available to be installed after applying `filterOptions`
    */
   rules: RuleResponse[];
-  /**
-   * Rules to display in table after applying filters
-   */
-  filteredRules: RuleResponse[];
   /**
    * Currently selected table filter
    */
@@ -42,6 +38,10 @@ export interface AddPrebuiltRulesTableState {
    * All unique tags for all rules
    */
   tags: string[];
+  /**
+   * Indicates whether there are rules (without filters applied) available to install.
+   */
+  hasRulesToInstall: boolean;
   /**
    * Is true then there is no cached data and the query is currently fetching.
    */
@@ -229,10 +229,10 @@ export const AddPrebuiltRulesTableContextProvider = ({
   const providerValue = useMemo<AddPrebuiltRulesContextType>(() => {
     return {
       state: {
-        rules,
-        filteredRules,
+        rules: filteredRules,
         filterOptions,
         tags,
+        hasRulesToInstall: isFetched && rules.length > 0,
         isFetched,
         isLoading,
         loadingRules,

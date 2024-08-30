@@ -32,8 +32,7 @@ export const AddPrebuiltRulesTable = React.memo(() => {
   const {
     state: {
       rules,
-      filteredRules,
-      isFetched,
+      hasRulesToInstall,
       isLoading,
       isRefetching,
       selectedRules,
@@ -42,8 +41,6 @@ export const AddPrebuiltRulesTable = React.memo(() => {
     actions: { selectRules },
   } = addRulesTableContext;
   const rulesColumns = useAddPrebuiltRulesTableColumns();
-
-  const isTableEmpty = isFetched && rules.length === 0;
 
   const shouldShowProgress = isUpgradingSecurityPackages || isRefetching;
 
@@ -66,7 +63,7 @@ export const AddPrebuiltRulesTable = React.memo(() => {
           </>
         }
         loadedContent={
-          isTableEmpty ? (
+          !hasRulesToInstall ? (
             <AddPrebuiltRulesTableNoItemsMessage />
           ) : (
             <>
@@ -80,7 +77,7 @@ export const AddPrebuiltRulesTable = React.memo(() => {
               </EuiFlexGroup>
 
               <EuiInMemoryTable
-                items={filteredRules}
+                items={rules}
                 sorting
                 pagination={{
                   initialPageSize: RULES_TABLE_INITIAL_PAGE_SIZE,

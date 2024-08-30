@@ -15,7 +15,7 @@ import {
   EuiSkeletonText,
   EuiSkeletonTitle,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
 import { RULES_TABLE_INITIAL_PAGE_SIZE, RULES_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
 import { RulesChangelogLink } from '../rules_changelog_link';
@@ -23,6 +23,7 @@ import { UpgradePrebuiltRulesTableButtons } from './upgrade_prebuilt_rules_table
 import { useUpgradePrebuiltRulesTableContext } from './upgrade_prebuilt_rules_table_context';
 import { UpgradePrebuiltRulesTableFilters } from './upgrade_prebuilt_rules_table_filters';
 import { useUpgradePrebuiltRulesTableColumns } from './use_upgrade_prebuilt_rules_table_columns';
+import type { RuleUpgradeState } from './use_prebuilt_rules_upgrade_state';
 
 const NO_ITEMS_MESSAGE = (
   <EuiEmptyPrompt
@@ -38,23 +39,22 @@ const NO_ITEMS_MESSAGE = (
  */
 export const UpgradePrebuiltRulesTable = React.memo(() => {
   const upgradeRulesTableContext = useUpgradePrebuiltRulesTableContext();
+  const [selected, setSelected] = useState<RuleUpgradeState[]>([]);
 
   const {
     state: {
-      rules,
-      filteredRules,
-      isFetched,
+      rulesUpgradeState,
+      hasRulesToUpgrade,
       isLoading,
-      selectedRules,
       isRefetching,
       isUpgradingSecurityPackages,
     },
-    actions: { selectRules },
   } = upgradeRulesTableContext;
+  const ruleUpgradeStatesArray = useMemo(
+    () => Object.values(rulesUpgradeState),
+    [rulesUpgradeState]
+  );
   const rulesColumns = useUpgradePrebuiltRulesTableColumns();
-
-  const isTableEmpty = isFetched && rules.length === 0;
-
   const shouldShowProgress = isUpgradingSecurityPackages || isRefetching;
 
   return (
@@ -76,7 +76,7 @@ export const UpgradePrebuiltRulesTable = React.memo(() => {
           </>
         }
         loadedContent={
-          isTableEmpty ? (
+          !hasRulesToUpgrade ? (
             NO_ITEMS_MESSAGE
           ) : (
             <>
@@ -95,14 +95,14 @@ export const UpgradePrebuiltRulesTable = React.memo(() => {
                       <UpgradePrebuiltRulesTableFilters />
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
-                      <UpgradePrebuiltRulesTableButtons />
+                      <UpgradePrebuiltRulesTableButtons selectedRules={selected} />
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>
               </EuiFlexGroup>
 
               <EuiInMemoryTable
-                items={filteredRules}
+                items={ruleUpgradeStatesArray}
                 sorting
                 pagination={{
                   initialPageSize: RULES_TABLE_INITIAL_PAGE_SIZE,
@@ -110,8 +110,8 @@ export const UpgradePrebuiltRulesTable = React.memo(() => {
                 }}
                 selection={{
                   selectable: () => true,
-                  onSelectionChange: selectRules,
-                  initialSelected: selectedRules,
+                  onSelectionChange: setSelected,
+                  initialSelected: selected,
                 }}
                 itemId="rule_id"
                 data-test-subj="rules-upgrades-table"

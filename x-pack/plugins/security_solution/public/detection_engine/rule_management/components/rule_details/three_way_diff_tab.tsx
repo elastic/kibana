@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { DiffableRule } from '../../../../../common/api/detection_engine';
-import type { SetFieldResolvedValueFn } from '../../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_rules_upgrade_state';
+import type { SetFieldResolvedValueFn } from '../../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_prebuilt_rules_upgrade_state';
 
 interface ThreeWayDiffTabProps {
   finalDiffableRule: DiffableRule;
