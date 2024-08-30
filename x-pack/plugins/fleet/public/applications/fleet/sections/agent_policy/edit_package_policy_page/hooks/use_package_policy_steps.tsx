@@ -13,7 +13,7 @@ import type { EuiStepProps } from '@elastic/eui';
 import { useSpaceSettingsContext } from '../../../../../../hooks/use_space_settings_context';
 import type { AgentPolicy, NewAgentPolicy, NewPackagePolicy } from '../../../../../../../common';
 import { generateNewAgentPolicyWithDefaults } from '../../../../../../../common/services';
-import { SelectedPolicyTab, StepSelectHosts } from '../../create_package_policy_page/components';
+import { SelectedPolicyTab } from '../../create_package_policy_page/components';
 import type { PackageInfo } from '../../../../types';
 import { SetupTechnology } from '../../../../types';
 import {
@@ -22,13 +22,14 @@ import {
 } from '../../create_package_policy_page/single_page_layout/hooks';
 import { agentPolicyFormValidation } from '../../components';
 import { createAgentPolicyIfNeeded } from '../../create_package_policy_page/single_page_layout/hooks/form';
+import { StepEditHosts } from '../components/step_edit_hosts';
 
 interface Params {
   configureStep: React.ReactNode;
   packageInfo?: PackageInfo;
   existingAgentPolicies: AgentPolicy[];
   setHasAgentPolicyError: (hasError: boolean) => void;
-  updatePackagePolicy: (data: { policy_ids: string[] }) => void;
+  updatePackagePolicy: (fields: Partial<NewPackagePolicy>) => void;
   agentPolicies: AgentPolicy[];
   setAgentPolicies: (agentPolicies: AgentPolicy[]) => void;
   isLoadingData: boolean;
@@ -96,20 +97,12 @@ export function usePackagePolicySteps({
       if (!isLoadingData && isEqual(updatedAgentPolicies, agentPolicies)) {
         return;
       }
-      if (updatedAgentPolicies.length > 0) {
-        setAgentPolicies(updatedAgentPolicies);
-        updatePackagePolicy({
-          policy_ids: updatedAgentPolicies.map((policy) => policy.id),
-        });
-        if (packageInfo) {
-          setHasAgentPolicyError(false);
-        }
-      } else {
-        setHasAgentPolicyError(true);
-        setAgentPolicies([]);
-        updatePackagePolicy({
-          policy_ids: [],
-        });
+      setAgentPolicies(updatedAgentPolicies);
+      updatePackagePolicy({
+        policy_ids: updatedAgentPolicies.map((policy) => policy.id),
+      });
+      if (packageInfo) {
+        setHasAgentPolicyError(false);
       }
 
       // eslint-disable-next-line no-console
@@ -150,7 +143,7 @@ export function usePackagePolicySteps({
 
   const stepSelectAgentPolicy = useMemo(
     () => (
-      <StepSelectHosts
+      <StepEditHosts
         agentPolicies={agentPolicies}
         updateAgentPolicies={updateAgentPolicies}
         newAgentPolicy={newAgentPolicy}
@@ -162,7 +155,6 @@ export function usePackagePolicySteps({
         setHasAgentPolicyError={setHasAgentPolicyError}
         updateSelectedTab={updateSelectedPolicyTab}
         selectedAgentPolicyIds={existingAgentPolicies.map((policy) => policy.id)}
-        initialSelectedTabIndex={1}
       />
     ),
     [
