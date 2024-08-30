@@ -13,9 +13,12 @@ import { trendStatsBatch } from './actions';
 import { fetchOverviewTrendStats as trendsApi } from './api';
 import { selectOverviewTrends } from '.';
 
+const TEST_TRENDS_LENGTH = 80;
+
 const generateTrendRequests = () => {
   const ar: TrendKey[] = [];
-  for (let i = 0; i < 30; i++) ar.push({ configId: `configId${i}`, locationId: 'location' });
+  for (let i = 0; i < TEST_TRENDS_LENGTH; i++)
+    ar.push({ configId: `configId${i}`, locationId: 'location' });
   return ar;
 };
 
@@ -31,7 +34,7 @@ describe('overview effects', () => {
       trendRequests.length - TRENDS_CHUNK_SIZE,
       trendRequests.length
     );
-    const secondChunk = trendRequests.slice(0, 10);
+    const secondChunk = trendRequests.slice(0, TEST_TRENDS_LENGTH - TRENDS_CHUNK_SIZE);
     const firstChunkResponse = firstChunk.reduce(responseReducer, {});
     const secondChunkResponse = secondChunk.reduce(responseReducer, {});
 
