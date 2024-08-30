@@ -17,7 +17,6 @@ import {
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import {

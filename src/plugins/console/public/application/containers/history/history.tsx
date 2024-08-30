@@ -178,7 +178,10 @@ export function History() {
                       <EuiSpacer size="l" />
                     </EuiFlexItem>
 
-                    <EuiFlexItem grow={false} css={{ height: 'calc(100vh - 415px)', overflowY: 'auto' }}>
+                    <EuiFlexItem
+                      grow={false}
+                      css={{ height: 'calc(100vh - 415px)', overflowY: 'auto' }}
+                    >
                       {requests.length === 0 && <HistoryEmptyPrompt />}
 
                       {requests.map((req, idx) => (
