@@ -150,8 +150,13 @@ export function Main({ isEmbeddable = false }: MainProps) {
 
           {selectedTab === CONFIG_TAB_ID && <Config editorInstance={null} />}
         </EuiSplitPanel.Inner>
-        <EuiHorizontalRule margin="none" />
-        <EuiSplitPanel.Inner paddingSize="xs" grow={false}>
+        <EuiHorizontalRule margin="none" className="consoleVariablesBottomBar" />
+        <EuiSplitPanel.Inner
+          paddingSize="xs"
+          grow={false}
+          className="consoleVariablesBottomBar"
+          color="plain"
+        >
           <EuiButtonEmpty
             onClick={() => setSelectedTab(CONFIG_TAB_ID)}
             iconType="editorCodeBlock"

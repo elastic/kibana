@@ -38,7 +38,7 @@ import { MonacoEditor, MonacoEditorOutput } from './monaco';
 import { getResponseWithMostSevereStatusCode } from '../../../lib/utils';
 
 const INITIAL_PANEL_SIZE = 50;
-const PANEL_MIN_SIZE = '200px';
+const PANEL_MIN_SIZE = '20%';
 
 interface Props {
   loading: boolean;
@@ -108,7 +108,7 @@ export const Editor = memo(({ loading, setEditorInstance }: Props) => {
               initialSize={firstPanelSize}
               minSize={PANEL_MIN_SIZE}
               tabIndex={0}
-              style={{ height: '100%', padding: 0 }}
+              paddingSize="none"
             >
               <EuiSplitPanel.Outer
                 grow={true}
@@ -116,7 +116,12 @@ export const Editor = memo(({ loading, setEditorInstance }: Props) => {
                 hasShadow={false}
                 style={{ height: '100%' }}
               >
-                <EuiSplitPanel.Inner paddingSize="none" grow={true}>
+                <EuiSplitPanel.Inner
+                  paddingSize="none"
+                  grow={true}
+                  className="consoleEditorPanel"
+                  style={{ top: 0 }}
+                >
                   {loading ? (
                     <EditorContentSpinner />
                   ) : isMonacoEnabled ? (
@@ -140,6 +145,7 @@ export const Editor = memo(({ loading, setEditorInstance }: Props) => {
                     css={{
                       backgroundColor: euiThemeVars.euiFormBackgroundColor,
                     }}
+                    className="consoleEditorPanel"
                   >
                     <EuiButtonEmpty
                       size="xs"
@@ -167,15 +173,14 @@ export const Editor = memo(({ loading, setEditorInstance }: Props) => {
               initialSize={secondPanelSize}
               minSize={PANEL_MIN_SIZE}
               tabIndex={0}
-              style={{ height: '100%', padding: 0 }}
+              paddingSize="none"
             >
-              <EuiSplitPanel.Outer
-                grow
-                borderRadius="none"
-                hasShadow={false}
-                style={{ height: '100%' }}
-              >
-                <EuiSplitPanel.Inner paddingSize="none" css={{ alignContent: 'center' }}>
+              <EuiSplitPanel.Outer borderRadius="none" hasShadow={false} style={{ height: '100%' }}>
+                <EuiSplitPanel.Inner
+                  paddingSize="none"
+                  css={{ alignContent: 'center', top: 0 }}
+                  className="consoleEditorPanel"
+                >
                   {data ? (
                     isMonacoEnabled ? (
                       <MonacoEditorOutput />
@@ -196,6 +201,7 @@ export const Editor = memo(({ loading, setEditorInstance }: Props) => {
                     css={{
                       backgroundColor: euiThemeVars.euiFormBackgroundColor,
                     }}
+                    className="consoleEditorPanel"
                   >
                     <EuiFlexGroup gutterSize="none" responsive={false}>
                       <EuiFlexItem grow={false}>
