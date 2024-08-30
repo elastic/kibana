@@ -8,9 +8,9 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
-import { SAME_FAMILY } from './translations';
 import { TestExternalProviders } from '../../../../../../../../../mock/test_providers/test_providers';
 import { SameFamily } from '.';
+import { SAME_FAMILY_BADGE_LABEL } from '../../../translate';
 
 describe('SameFamily', () => {
   test('it renders a badge with the expected content', () => {
@@ -20,6 +20,6 @@ describe('SameFamily', () => {
       </TestExternalProviders>
     );
 
-    expect(screen.getByTestId('sameFamily')).toHaveTextContent(SAME_FAMILY);
+    expect(screen.getByTestId('sameFamily')).toHaveTextContent(SAME_FAMILY_BADGE_LABEL);
   });
 });

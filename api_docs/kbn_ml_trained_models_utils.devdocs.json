@@ -18,7 +18,43 @@
   },
   "common": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/ml-trained-models-utils",
+        "id": "def-common.isLocalModel",
+        "type": "Function",
+        "tags": [],
+        "label": "isLocalModel",
+        "description": [],
+        "signature": [
+          "(model: ",
+          "InferenceServiceSettings",
+          ") => boolean"
+        ],
+        "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-trained-models-utils",
+            "id": "def-common.isLocalModel.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "model",
+            "description": [],
+            "signature": [
+              "InferenceServiceSettings"
+            ],
+            "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
       {
         "parentPluginId": "@kbn/ml-trained-models-utils",

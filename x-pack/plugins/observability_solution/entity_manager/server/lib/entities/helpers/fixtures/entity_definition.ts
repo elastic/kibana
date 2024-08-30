@@ -15,6 +15,11 @@ export const rawEntityDefinition = {
   history: {
     timestampField: '@timestamp',
     interval: '1m',
+    settings: {
+      lookbackPeriod: '10m',
+      frequency: '2m',
+      syncDelay: '2m',
+    },
   },
   identityFields: ['log.logger', { field: 'event.category', optional: true }],
   displayNameTemplate: '{{log.logger}}{{#event.category}}:{{.}}{{/event.category}}',

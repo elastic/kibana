@@ -67,7 +67,6 @@ const SystemPromptComponent: React.FC<Props> = ({
       isCleared={isCleared}
       refetchConversations={refetchConversations}
       isSettingsModalVisible={isSettingsModalVisible}
-      onSystemPromptSelectionChange={onSystemPromptSelectionChange}
       selectedPrompt={selectedPrompt}
       setIsSettingsModalVisible={setIsSettingsModalVisible}
     />
