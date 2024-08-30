@@ -20,5 +20,3 @@ export {
   useEditorReadContext,
   EditorContextProvider,
 } from './editor_context';
-
-export { usePanelContext, PanelContextProvider, PanelRegistry } from './split_panel';

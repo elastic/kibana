@@ -7,4 +7,3 @@
  */
 
 export { Main } from './main';
-export { Panel, PanelsContainer } from './split_panel';

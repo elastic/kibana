@@ -37,7 +37,7 @@ import type { SenseEditor } from '../../models';
 import { MonacoEditor, MonacoEditorOutput } from './monaco';
 import { getResponseWithMostSevereStatusCode } from '../../../lib/utils';
 
-const INITIAL_PANEL_WIDTH = 50;
+const INITIAL_PANEL_SIZE = 50;
 const PANEL_MIN_SIZE = '200px';
 
 interface Props {
@@ -72,15 +72,15 @@ export const Editor = memo(({ loading, setEditorInstance }: Props) => {
     };
   }, []);
 
-  const [firstPanelWidth, secondPanelWidth] = storage.get(StorageKeys.WIDTH, [
-    INITIAL_PANEL_WIDTH,
-    INITIAL_PANEL_WIDTH,
+  const [firstPanelSize, secondPanelSize] = storage.get(StorageKeys.SIZE, [
+    INITIAL_PANEL_SIZE,
+    INITIAL_PANEL_SIZE,
   ]);
 
   /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const onPanelSizeChange = useCallback(
-    debounce((length: number[], isVertical) => {
-      storage.set(isVertical ? StorageKeys.HEIGHT : StorageKeys.WIDTH, widths);
+    debounce((sizes) => {
+      storage.set(StorageKeys.SIZE, Object.values(sizes));
     }, 300),
     []
   );
@@ -100,11 +100,12 @@ export const Editor = memo(({ loading, setEditorInstance }: Props) => {
       <EuiResizableContainer
         style={{ height: '100%' }}
         direction={isVerticalLayout ? 'vertical' : 'horizontal'}
+        onPanelWidthChange={(sizes) => onPanelSizeChange(sizes)}
       >
         {(EuiResizablePanel, EuiResizableButton) => (
           <>
             <EuiResizablePanel
-              initialSize={50}
+              initialSize={firstPanelSize}
               minSize={PANEL_MIN_SIZE}
               tabIndex={0}
               style={{ height: '100%', padding: 0 }}
@@ -155,9 +156,19 @@ export const Editor = memo(({ loading, setEditorInstance }: Props) => {
               </EuiSplitPanel.Outer>
             </EuiResizablePanel>
 
-            <EuiResizableButton />
+            <EuiResizableButton
+              className="conApp__resizerButton"
+              aria-label={i18n.translate('console.editor.resizerButtonAriaLabel', {
+                defaultMessage: 'Resizer button',
+              })}
+            />
 
-            <EuiResizablePanel initialSize={50} minSize={PANEL_MIN_SIZE} tabIndex={0}>
+            <EuiResizablePanel
+              initialSize={secondPanelSize}
+              minSize={PANEL_MIN_SIZE}
+              tabIndex={0}
+              style={{ height: '100%', padding: 0 }}
+            >
               <EuiSplitPanel.Outer grow borderRadius="none" hasShadow={false}>
                 <EuiSplitPanel.Inner paddingSize="none" css={{ alignContent: 'center' }}>
                   {data ? (
