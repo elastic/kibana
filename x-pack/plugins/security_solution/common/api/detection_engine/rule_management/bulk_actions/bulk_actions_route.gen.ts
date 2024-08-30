@@ -284,28 +284,26 @@ export const BulkActionEditPayloadTimeline = z.object({
   }),
 });
 
-const BulkActionEditPayloadBatch1 = z.union([
+// We need this type to infer from it below, but in the end we want to export a casted Type
+// error TS7056: The inferred type of this node exceeds the maximum length the compiler will serialize. An explicit type annotation is needed.
+const BulkActionEditPayloadInternal = z.union([
   BulkActionEditPayloadTags,
   BulkActionEditPayloadIndexPatterns,
-]);
-const BulkActionEditPayloadBatch2 = z.union([
   BulkActionEditPayloadInvestigationFields,
   BulkActionEditPayloadTimeline,
-]);
-const BulkActionEditPayloadBatch3 = z.union([
   BulkActionEditPayloadRuleActions,
   BulkActionEditPayloadSchedule,
 ]);
-export type BulkActionEditPayload = z.infer<
-  | typeof BulkActionEditPayloadBatch1
-  | typeof BulkActionEditPayloadBatch2
-  | typeof BulkActionEditPayloadBatch3
->;
+
+export type BulkActionEditPayload = z.infer<typeof BulkActionEditPayloadInternal>;
 export const BulkActionEditPayload = z.union([
-  BulkActionEditPayloadBatch1,
-  BulkActionEditPayloadBatch2,
-  BulkActionEditPayloadBatch3,
-]) as z.ZodType<BulkActionEditPayload>;
+  BulkActionEditPayloadTags,
+  BulkActionEditPayloadIndexPatterns,
+  BulkActionEditPayloadInvestigationFields,
+  BulkActionEditPayloadTimeline,
+  BulkActionEditPayloadRuleActions,
+  BulkActionEditPayloadSchedule,
+]) as z.ZodType<unknown> as z.ZodType<BulkActionEditPayload>;
 
 export type BulkEditRules = z.infer<typeof BulkEditRules>;
 export const BulkEditRules = BulkActionBase.merge(

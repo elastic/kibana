@@ -118,7 +118,12 @@ run(
 
       await procRunner.run('tsc', {
         cmd: Path.relative(REPO_ROOT, require.resolve('typescript/bin/tsc')),
-        args: ['-b', relative, '--pretty', '--verbose'],
+        args: [
+          '-b',
+          relative,
+          '--pretty',
+          ...(flagsReader.boolean('verbose') ? ['--verbose'] : []),
+        ],
         env: {
           NODE_OPTIONS: '--max-old-space-size=8192',
         },

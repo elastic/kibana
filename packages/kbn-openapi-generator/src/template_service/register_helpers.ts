@@ -87,21 +87,8 @@ export function registerHelpers(handlebarsInstance: typeof Handlebars) {
       return circularRefs.has(`#/components/schemas/${schemaName}`);
     }
   );
-  // Helper to chunk an array of anyOf schemas into smaller arrays of a specified size in order to fix the typescript infer limitation
-  handlebarsInstance.registerHelper('createBatch', ({ anyOf }, size) => {
-    if (anyOf) {
-      const chunks = [];
-      for (let i = 0; i < anyOf.length; i += size) {
-        chunks.push(anyOf.slice(i, i + size));
-      }
-      return chunks;
-    }
-  });
-  handlebarsInstance.registerHelper('generateBatchName', function (title = '', index) {
-    return `${title}Batch${index + 1}`;
-  });
 
-  handlebarsInstance.registerHelper('checkIfShouldBatch', function ({ anyOf }, options) {
+  handlebarsInstance.registerHelper('shouldCastExplicitly', function ({ anyOf }, options) {
     if (anyOf?.length > 2) {
       // @ts-expect-error
       return options.fn(this);
