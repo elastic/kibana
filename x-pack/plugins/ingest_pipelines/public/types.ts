@@ -27,5 +27,5 @@ export interface StartDependencies {
 }
 
 export interface Config {
-  enableManageProcessors?: boolean;
+  enableManageProcessors: boolean;
 }
