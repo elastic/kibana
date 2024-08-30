@@ -15,8 +15,8 @@ The definition allows defining an optional backfill transform. This works on the
 To enable the backfill transform set a value to `history.settings.backfillSyncDelay` higher than the `history.settings.syncDelay`. The backfill lookback and frequency can also be configured.
 
 #### Extension
-The index templates and ingest pipelines created for a given definition are managed by the Entity manager and should not be directly updated. These components still offer extension points that allow customization of each transform through optional components labelled <component-name>@platform and <component-name>@custom where the former is targeted towards Elastic solution teams and the latter for end users. @custom will take precedence when both are defined.
-The extension points allow defining a global component (ie applied to both transforms) with <definition-id>@custom, or transform specific components with <definition-id>-(latest|history)@custom.
+The index templates and ingest pipelines created for a given definition are managed by the Entity manager and should not be directly updated. These components still offer extension points that allow customization of each transform through optional components labelled `<component-name>@platform` and `<component-name>@custom` where the former is targeted towards Elastic solution teams and the latter for end users. `@custom` will take precedence when both are defined.
+The extension points allow defining a global component (ie applied to both transforms) with `<definition-id>@custom`, or transform specific components with `<definition-id>-(latest|history)@custom`.
 
 #### Builtin Definitions
 
