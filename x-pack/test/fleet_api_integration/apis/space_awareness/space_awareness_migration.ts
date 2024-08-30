@@ -10,13 +10,14 @@ import { FtrProviderContext } from '../../../api_integration/ftr_provider_contex
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { SpaceTestApiClient } from './api_helper';
 import { cleanFleetIndices } from './helpers';
-import { setupTestSpaces, TEST_SPACE_1 } from './space_helpers';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const esClient = getService('es');
   const kibanaServer = getService('kibanaServer');
+  const spaces = getService('spaces');
+  const TEST_SPACE_1 = spaces.getDefaultTestSpace();
 
   describe('space awareness migration', function () {
     skipIfNoDockerRegistry(providerContext);
@@ -63,6 +64,8 @@ export default function (providerContext: FtrProviderContext) {
         },
         inputs: {},
       });
+
+      await spaces.createTestSpace(TEST_SPACE_1);
     });
 
     after(async () => {
@@ -72,8 +75,6 @@ export default function (providerContext: FtrProviderContext) {
       });
       await cleanFleetIndices(esClient);
     });
-
-    setupTestSpaces(providerContext);
 
     describe('without opt-in', () => {
       it('agent policies should not be space aware', async () => {

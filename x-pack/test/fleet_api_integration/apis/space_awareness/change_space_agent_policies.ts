@@ -16,7 +16,6 @@ import {
   expectToRejectWithError,
   expectToRejectWithNotFound,
 } from './helpers';
-import { setupTestSpaces, TEST_SPACE_1 } from './space_helpers';
 import { testUsers, setupTestUsers } from '../test_users';
 
 export default function (providerContext: FtrProviderContext) {
@@ -25,10 +24,15 @@ export default function (providerContext: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esClient = getService('es');
   const kibanaServer = getService('kibanaServer');
+  const spaces = getService('spaces');
+  const TEST_SPACE_1 = spaces.getDefaultTestSpace();
 
   describe('change space agent policies', function () {
     skipIfNoDockerRegistry(providerContext);
     const apiClient = new SpaceTestApiClient(supertest);
+
+    let defaultSpacePolicy1: CreateAgentPolicyResponse;
+    let defaultPackagePolicy1: GetOnePackagePolicyResponse;
 
     before(async () => {
       await setupTestUsers(getService('security'), true);
@@ -58,6 +62,7 @@ export default function (providerContext: FtrProviderContext) {
         inputs: {},
       });
       defaultPackagePolicy1 = packagePolicyRes;
+      await spaces.createTestSpace(TEST_SPACE_1);
     });
 
     after(async () => {
@@ -67,10 +72,6 @@ export default function (providerContext: FtrProviderContext) {
       });
       await cleanFleetIndices(esClient);
     });
-
-    setupTestSpaces(providerContext);
-    let defaultSpacePolicy1: CreateAgentPolicyResponse;
-    let defaultPackagePolicy1: GetOnePackagePolicyResponse;
 
     describe('PUT /agent_policies/{id}', () => {
       beforeEach(async () => {

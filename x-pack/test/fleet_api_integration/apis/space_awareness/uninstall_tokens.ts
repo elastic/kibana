@@ -12,19 +12,19 @@ import { FtrProviderContext } from '../../../api_integration/ftr_provider_contex
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { SpaceTestApiClient } from './api_helper';
 import { cleanFleetIndices, expectToRejectWithNotFound } from './helpers';
-import { setupTestSpaces, TEST_SPACE_1 } from './space_helpers';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const esClient = getService('es');
   const kibanaServer = getService('kibanaServer');
+  const spaces = getService('spaces');
+  const TEST_SPACE_1 = spaces.getDefaultTestSpace();
 
   describe('uninstall tokens', function () {
     skipIfNoDockerRegistry(providerContext);
     const apiClient = new SpaceTestApiClient(supertest);
 
-    setupTestSpaces(providerContext);
     let defaultSpacePolicy1: CreateAgentPolicyResponse;
     let spaceTest1Policy1: CreateAgentPolicyResponse;
     let spaceTest1Policy2: CreateAgentPolicyResponse;
@@ -37,6 +37,7 @@ export default function (providerContext: FtrProviderContext) {
         space: TEST_SPACE_1,
       });
       await cleanFleetIndices(esClient);
+      await spaces.createTestSpace(TEST_SPACE_1);
       // Create agent policies it should create am uninstall token for every keys
       await apiClient.postEnableSpaceAwareness();
       const [_defaultSpacePolicy1, _spaceTest1Policy1, _spaceTest1Policy2] = await Promise.all([

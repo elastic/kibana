@@ -12,13 +12,14 @@ import { FtrProviderContext } from '../../../api_integration/ftr_provider_contex
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { SpaceTestApiClient } from './api_helper';
 import { cleanFleetIndices } from './helpers';
-import { setupTestSpaces, TEST_SPACE_1 } from './space_helpers';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const esClient = getService('es');
   const kibanaServer = getService('kibanaServer');
+  const spaces = getService('spaces');
+  const TEST_SPACE_1 = spaces.getDefaultTestSpace();
 
   describe('enrollment api keys', function () {
     skipIfNoDockerRegistry(providerContext);
@@ -53,6 +54,7 @@ export default function (providerContext: FtrProviderContext) {
       const defaultSpaceApiKeys = await apiClient.getEnrollmentApiKeys();
       defaultSpaceEnrollmentKey1 = defaultSpaceApiKeys.items[0];
       spaceTest1EnrollmentKey1 = space1ApiKeys.items[0];
+      await spaces.createTestSpace(TEST_SPACE_1);
     });
 
     after(async () => {
@@ -62,8 +64,6 @@ export default function (providerContext: FtrProviderContext) {
       });
       await cleanFleetIndices(esClient);
     });
-
-    setupTestSpaces(providerContext);
 
     describe('read APIs', () => {
       describe('GET /enrollment_api_keys', () => {

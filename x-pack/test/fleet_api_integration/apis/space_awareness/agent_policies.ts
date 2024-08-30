@@ -11,17 +11,22 @@ import { FtrProviderContext } from '../../../api_integration/ftr_provider_contex
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { SpaceTestApiClient } from './api_helper';
 import { cleanFleetIndices, expectToRejectWithNotFound } from './helpers';
-import { setupTestSpaces, TEST_SPACE_1 } from './space_helpers';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const esClient = getService('es');
   const kibanaServer = getService('kibanaServer');
+  const spaces = getService('spaces');
+  const TEST_SPACE_1 = spaces.getDefaultTestSpace();
 
   describe('agent policies', function () {
     skipIfNoDockerRegistry(providerContext);
     const apiClient = new SpaceTestApiClient(supertest);
+
+    let defaultSpacePolicy1: CreateAgentPolicyResponse;
+    let spaceTest1Policy1: CreateAgentPolicyResponse;
+    let spaceTest1Policy2: CreateAgentPolicyResponse;
 
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
@@ -40,6 +45,8 @@ export default function (providerContext: FtrProviderContext) {
       defaultSpacePolicy1 = _defaultSpacePolicy1;
       spaceTest1Policy1 = _spaceTest1Policy1;
       spaceTest1Policy2 = _spaceTest1Policy2;
+
+      await spaces.createTestSpace(TEST_SPACE_1);
     });
 
     after(async () => {
@@ -49,11 +56,6 @@ export default function (providerContext: FtrProviderContext) {
       });
       await cleanFleetIndices(esClient);
     });
-
-    setupTestSpaces(providerContext);
-    let defaultSpacePolicy1: CreateAgentPolicyResponse;
-    let spaceTest1Policy1: CreateAgentPolicyResponse;
-    let spaceTest1Policy2: CreateAgentPolicyResponse;
 
     describe('GET /agent_policies', () => {
       it('should return policies in a specific space', async () => {

@@ -24,6 +24,7 @@ import { DataViewApiProvider } from './data_view_api';
 import { SloApiProvider } from './slo';
 import { SecuritySolutionApiProvider } from './security_solution_api.gen';
 import { FleetAndAgents } from './fleet_and_agents';
+import { SpacesService } from './spaces';
 
 export const services = {
   ...commonServices,
@@ -44,4 +45,5 @@ export const services = {
   slo: SloApiProvider,
   securitySolutionApi: SecuritySolutionApiProvider,
   fleetAndAgents: FleetAndAgents,
+  spaces: SpacesService,
 };
