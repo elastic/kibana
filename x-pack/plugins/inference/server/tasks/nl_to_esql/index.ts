@@ -61,7 +61,7 @@ export function naturalLanguageToEsql<TToolOptions extends ToolOptions>({
     .pipe(
       withoutOutputUpdateEvents(),
       switchMap((event) => {
-        return getEsqlDocuments(event.output.documents ?? []);
+        return getEsqlDocuments(event.data.output.documents ?? []);
       }),
       switchMap((documents) => {
         return client

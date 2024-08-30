@@ -17,7 +17,6 @@ import {
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import { useAbortableAsync } from '@kbn/observability-utils/hooks/use_abortable_async';
-import { useTheme } from '@kbn/observability-utils/hooks/use_theme';
 import { partition } from 'lodash';
 import React, { useMemo, useState } from 'react';
 import { Dataset, DatasetType } from '../../../common/datasets';
@@ -27,7 +26,7 @@ import { useKibana } from '../../hooks/use_kibana';
 
 export function DatasetView() {
   const {
-    services: { callInventoryApi },
+    services: { inventoryAPIClient },
   } = useKibana();
 
   const router = useInventoryRouter();
@@ -37,21 +36,21 @@ export function DatasetView() {
     pageSize: 10,
   });
 
-  const theme = useTheme();
-
   const datasetsFetch = useAbortableAsync(
     ({ signal }) => {
-      return callInventoryApi('GET /internal/inventory/datasets', {
-        signal,
-      }).then((response) => {
-        setPage((prev) => ({
-          ...prev,
-          pageIndex: 0,
-        }));
-        return response;
-      });
+      return inventoryAPIClient
+        .fetch('GET /internal/inventory/datasets', {
+          signal,
+        })
+        .then((response) => {
+          setPage((prev) => ({
+            ...prev,
+            pageIndex: 0,
+          }));
+          return response;
+        });
     },
-    [callInventoryApi]
+    [inventoryAPIClient]
   );
 
   const columns = useMemo<Array<EuiBasicTableColumn<Dataset>>>(() => {

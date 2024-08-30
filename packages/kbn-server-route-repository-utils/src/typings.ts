@@ -16,6 +16,7 @@ import type {
   RouteConfigOptions,
   RouteMethod,
 } from '@kbn/core/server';
+import type { ServerSentEvent } from '@kbn/sse-utils';
 import { z } from '@kbn/zod';
 import * as t from 'io-ts';
 import { Observable } from 'rxjs';
@@ -97,6 +98,12 @@ type ValidateEndpoint<TEndpoint extends string> = string extends TEndpoint
     : false
   : false;
 
+type IsInvalidObservableReturnType<TReturnType> = TReturnType extends Observable<infer TValueType>
+  ? TValueType extends ServerSentEvent
+    ? false
+    : true
+  : false;
+
 export type ServerRoute<
   TEndpoint extends string,
   TRouteParamsRT extends RouteParamsRT | undefined,
@@ -110,7 +117,9 @@ export type ServerRoute<
       handler: ({}: TRouteHandlerResources &
         (TRouteParamsRT extends RouteParamsRT
           ? DecodedRequestParamsOfType<TRouteParamsRT>
-          : {})) => Promise<TReturnType>;
+          : {})) => IsInvalidObservableReturnType<TReturnType> extends true
+        ? never
+        : Promise<TReturnType>;
     } & TRouteCreateOptions
   : never;
 
@@ -193,23 +202,27 @@ type MaybeOptionalArgs<T extends Record<string, any>> = RequiredKeys<T> extends 
   ? [T] | []
   : [T];
 
-export type RouteRepositoryClient<
+export interface RouteRepositoryClient<
   TServerRouteRepository extends ServerRouteRepository,
-  TAdditionalClientOptions extends Record<string, any> = DefaultClientOptions
-> = <
-  TEndpoint extends Extract<keyof TServerRouteRepository, string>,
-  TAsEventSourceStreamOptions extends { asEventSourceStream?: boolean }
->(
-  endpoint: TEndpoint,
-  ...args: MaybeOptionalArgs<
-    ClientRequestParamsOf<TServerRouteRepository, TEndpoint> & TAdditionalClientOptions
-  > &
-    ([TAsEventSourceStreamOptions] | [])
-) => TAsEventSourceStreamOptions extends { asEventSourceStream: boolean }
-  ? ReturnOf<TServerRouteRepository, TEndpoint> extends Observable<infer TObservable>
-    ? Observable<TObservable>
-    : Observable<unknown>
-  : Promise<ReturnOf<TServerRouteRepository, TEndpoint>>;
+  TAdditionalClientOptions extends Record<string, any>
+> {
+  fetch<TEndpoint extends Extract<keyof TServerRouteRepository, string>>(
+    endpoint: TEndpoint,
+    ...args: MaybeOptionalArgs<
+      ClientRequestParamsOf<TServerRouteRepository, TEndpoint> & TAdditionalClientOptions
+    >
+  ): Promise<ReturnOf<TServerRouteRepository, TEndpoint>>;
+  stream<TEndpoint extends Extract<keyof TServerRouteRepository, string>>(
+    endpoint: TEndpoint,
+    ...args: MaybeOptionalArgs<
+      ClientRequestParamsOf<TServerRouteRepository, TEndpoint> & TAdditionalClientOptions
+    >
+  ): ReturnOf<TServerRouteRepository, TEndpoint> extends Observable<infer TReturnType>
+    ? TReturnType extends ServerSentEvent
+      ? Observable<TReturnType>
+      : never
+    : never;
+}
 
 interface CoreRouteHandlerResources {
   request: KibanaRequest;

@@ -8,11 +8,12 @@
 
 import { map, Observable } from 'rxjs';
 import { PassThrough } from 'stream';
+import { ServerSentEvent } from '@kbn/sse-utils';
 
-export function observableIntoEventSourceStream(source$: Observable<unknown>): PassThrough {
+export function observableIntoEventSourceStream(source$: Observable<ServerSentEvent>): PassThrough {
   const withSerializedErrors$ = source$.pipe(
     map((event) => {
-      return `data: ${JSON.stringify(event)}\n\n`;
+      return `event:${event.type}\ndata: ${JSON.stringify(event)}\n\n`;
     })
   );
 
@@ -26,7 +27,7 @@ export function observableIntoEventSourceStream(source$: Observable<unknown>): P
       stream.end();
     },
     error: (error) => {
-      stream.write(`data: ${JSON.stringify(error)}\n\n`);
+      stream.write(`event: "error"\ndata: ${JSON.stringify(error)}\n\n`);
       stream.end();
     },
   });

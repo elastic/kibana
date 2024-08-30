@@ -26,12 +26,12 @@ export type DatasetQualityClientOptions = Omit<
 export type DatasetQualityClient = RouteRepositoryClient<
   DatasetQualityServerRouteRepository,
   DatasetQualityClientOptions
->;
+>['fetch'];
 
 export type AutoAbortedClient = RouteRepositoryClient<
   DatasetQualityServerRouteRepository,
   Omit<DatasetQualityClientOptions, 'signal'>
->;
+>['fetch'];
 
 export type APIReturnType<TEndpoint extends APIEndpoint> = ReturnOf<
   DatasetQualityServerRouteRepository,

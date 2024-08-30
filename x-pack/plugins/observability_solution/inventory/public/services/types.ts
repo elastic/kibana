@@ -8,5 +8,5 @@
 import type { InventoryAPIClient } from '../api';
 
 export interface InventoryServices {
-  callInventoryApi: InventoryAPIClient;
+  inventoryAPIClient: InventoryAPIClient;
 }

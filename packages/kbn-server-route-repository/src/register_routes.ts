@@ -19,13 +19,14 @@ import {
   ZodParamsObject,
   parseEndpoint,
 } from '@kbn/server-route-repository-utils';
+import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
 import { isZod } from '@kbn/zod';
 import { merge } from 'lodash';
-import { isObservable } from 'rxjs';
+import { Observable, isObservable } from 'rxjs';
+import { ServerSentEvent } from '@kbn/sse-utils';
 import { passThroughValidationObject, noParamsValidationObject } from './validation_objects';
 import { validateAndDecodeParams } from './validate_and_decode_params';
 import { makeZodValidationObject } from './make_zod_validation_object';
-import { observableIntoEventSourceStream } from './observable_into_event_source_stream';
 
 const CLIENT_CLOSED_REQUEST = {
   statusCode: 499,
@@ -91,7 +92,9 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
         if (isKibanaResponse(result)) {
           return result;
         } else if (isObservable(result)) {
-          return response.ok({ body: observableIntoEventSourceStream(result) });
+          return response.ok({
+            body: observableIntoEventSourceStream(result as Observable<ServerSentEvent>),
+          });
         } else {
           const body = result || {};
           return response.ok({ body });

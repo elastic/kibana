@@ -31,15 +31,15 @@ export function ServiceExtractionList({ indexPatterns }: { indexPatterns: string
     dependencies: {
       start: {},
     },
-    services: { callInventoryApi },
+    services: { inventoryAPIClient },
   } = useKibana();
 
   const theme = useTheme();
 
-  const { value, loading, error } = useAbortableAsync(
+  const { value, loading } = useAbortableAsync(
     ({ signal }) => {
       return Promise.all([
-        callInventoryApi('POST /internal/inventory/service_definitions', {
+        inventoryAPIClient.fetch('POST /internal/inventory/service_definitions', {
           signal,
           params: {
             body: {
@@ -47,7 +47,7 @@ export function ServiceExtractionList({ indexPatterns }: { indexPatterns: string
             },
           },
         }),
-        callInventoryApi('GET /internal/inventory/datasets', {
+        inventoryAPIClient.fetch('GET /internal/inventory/datasets', {
           signal,
           params: {
             query: {
@@ -57,7 +57,7 @@ export function ServiceExtractionList({ indexPatterns }: { indexPatterns: string
         }),
       ]);
     },
-    [indexPatterns, callInventoryApi]
+    [indexPatterns, inventoryAPIClient]
   );
 
   const { signal, refresh: refreshAbortController } = useAbortController();
@@ -89,37 +89,39 @@ export function ServiceExtractionList({ indexPatterns }: { indexPatterns: string
       onClick={() => {
         setCandidates(() => []);
         setProgress(() => ({ loading: true, total: datasets.length, completed: 0 }));
-        callInventoryApi('POST /internal/inventory/service_definitions/extract', {
-          signal,
-          params: {
-            body: {
-              datasets: datasets.map((dataset) => dataset.name),
-              connectorId: 'azure-gpt4o',
+        inventoryAPIClient
+          .stream('POST /internal/inventory/service_definitions/extract', {
+            signal,
+            params: {
+              body: {
+                datasets: datasets.map((dataset) => dataset.name),
+                connectorId: 'azure-gpt4o',
+              },
             },
-          },
-          asEventSourceStream: true,
-        }).subscribe({
-          complete: () => {
-            setProgress((prev) => ({ ...prev, loading: false }));
-            refreshAbortController();
-          },
-          error: () => {
-            setProgress((prev) => ({ ...prev, loading: false }));
-            refreshAbortController();
-          },
-          next: (event) => {
-            setCandidates((prev) => {
-              return prev.concat(
-                event.output.candidates.map((candidate, index) => ({
-                  ...candidate,
-                  dataset: event.output.dataset,
-                  accept: index === 0,
-                }))
-              );
-            });
-            setProgress((prev) => ({ ...prev, completed: prev.completed + 1 }));
-          },
-        });
+            asEventSourceStream: true,
+          })
+          .subscribe({
+            complete: () => {
+              setProgress((prev) => ({ ...prev, loading: false }));
+              refreshAbortController();
+            },
+            error: () => {
+              setProgress((prev) => ({ ...prev, loading: false }));
+              refreshAbortController();
+            },
+            next: (event) => {
+              setCandidates((prev) => {
+                return prev.concat(
+                  event.data.output.candidates.map((candidate, index) => ({
+                    ...candidate,
+                    dataset: event.data.output.dataset,
+                    accept: index === 0,
+                  }))
+                );
+              });
+              setProgress((prev) => ({ ...prev, completed: prev.completed + 1 }));
+            },
+          });
       }}
     >
       {i18n.translate(

@@ -33,7 +33,7 @@
     "@kbn/entityManager-plugin",
     "@kbn/licensing-plugin",
     "@kbn/inference-plugin",
-    "@kbn/server-route-repository-utils",
-    "@kbn/data-views-plugin"
+    "@kbn/data-views-plugin",
+    "@kbn/server-route-repository-client"
   ]
 }

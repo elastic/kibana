@@ -6,8 +6,8 @@
  */
 
 import { Observable } from 'rxjs';
+import { ServerSentEventBase } from '@kbn/sse-utils';
 import { FromToolSchema, ToolSchema } from '../chat_complete/tool_schema';
-import { InferenceTaskEventBase } from '../tasks';
 
 export enum OutputEventType {
   OutputUpdate = 'output',
@@ -16,19 +16,24 @@ export enum OutputEventType {
 
 type Output = Record<string, any> | undefined;
 
-export type OutputUpdateEvent<TId extends string = string> =
-  InferenceTaskEventBase<OutputEventType.OutputUpdate> & {
+export type OutputUpdateEvent<TId extends string = string> = ServerSentEventBase<
+  OutputEventType.OutputUpdate,
+  {
     id: TId;
     content: string;
-  };
+  }
+>;
 
 export type OutputCompleteEvent<
   TId extends string = string,
   TOutput extends Output = Output
-> = InferenceTaskEventBase<OutputEventType.OutputComplete> & {
-  id: TId;
-  output: TOutput;
-};
+> = ServerSentEventBase<
+  OutputEventType.OutputComplete,
+  {
+    id: TId;
+    output: TOutput;
+  }
+>;
 
 export type OutputEvent<TId extends string = string, TOutput extends Output = Output> =
   | OutputUpdateEvent<TId>
@@ -62,8 +67,10 @@ export function createOutputCompleteEvent<TId extends string, TOutput extends Ou
   output: TOutput
 ): OutputCompleteEvent<TId, TOutput> {
   return {
-    id,
     type: OutputEventType.OutputComplete,
-    output,
+    data: {
+      id,
+      output,
+    },
   };
 }

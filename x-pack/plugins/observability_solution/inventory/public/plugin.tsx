@@ -47,7 +47,7 @@ export class InventoryPlugin
     coreSetup: CoreSetup<InventoryStartDependencies, InventoryPublicStart>,
     pluginsSetup: InventorySetupDependencies
   ): InventoryPublicSetup {
-    const callInventoryApi = createCallInventoryAPI(coreSetup);
+    const inventoryAPIClient = createCallInventoryAPI(coreSetup);
 
     coreSetup.application.register({
       id: INVENTORY_APP_ID,
@@ -76,7 +76,7 @@ export class InventoryPlugin
         ]);
 
         const services: InventoryServices = {
-          callInventoryApi,
+          inventoryAPIClient,
         };
 
         ReactDOM.render(

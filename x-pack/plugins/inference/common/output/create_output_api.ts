@@ -33,14 +33,18 @@ export function createOutputApi(chatCompleteApi: ChatCompleteAPI): OutputAPI {
         if (event.type === ChatCompletionEventType.ChatCompletionChunk) {
           return {
             type: OutputEventType.OutputUpdate,
-            id,
-            content: event.content,
+            data: {
+              id,
+              content: event.content,
+            },
           };
         }
         return {
-          id,
+          data: {
+            id,
+            output: event.toolCalls[0].function.arguments,
+          },
           type: OutputEventType.OutputComplete,
-          output: event.toolCalls[0].function.arguments,
         };
       })
     );

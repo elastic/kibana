@@ -6,8 +6,9 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
-import { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
-import { InventoryKibanaContext } from '../public/hooks/use_kibana';
+import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
+import type { InferencePublicStart } from '@kbn/inference-plugin/public';
+import type { InventoryKibanaContext } from '../public/hooks/use_kibana';
 
 export function getMockInventoryContext(): InventoryKibanaContext {
   const core = coreMock.createStart();
@@ -17,10 +18,14 @@ export function getMockInventoryContext(): InventoryKibanaContext {
     dependencies: {
       start: {
         observabilityShared: {} as unknown as ObservabilitySharedPluginStart,
+        inference: {} as unknown as InferencePublicStart,
       },
     },
     services: {
-      callInventoryApi: jest.fn(),
+      inventoryAPIClient: {
+        fetch: jest.fn(),
+        stream: jest.fn(),
+      },
     },
   };
 }

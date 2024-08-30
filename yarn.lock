@@ -6750,6 +6750,18 @@
   version "0.0.0"
   uid ""
 
+"@kbn/sse-utils-client@link:packages/kbn-sse-utils-client":
+  version "0.0.0"
+  uid ""
+
+"@kbn/sse-utils-server@link:packages/kbn-sse-utils-server":
+  version "0.0.0"
+  uid ""
+
+"@kbn/sse-utils@link:packages/kbn-sse-utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/stack-alerts-plugin@link:x-pack/plugins/stack_alerts":
   version "0.0.0"
   uid ""

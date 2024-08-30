@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, HttpFetchOptions, HttpResponse } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, HttpFetchOptions } from '@kbn/core/public';
 import type {
   ClientRequestParamsOf,
   ReturnOf,
   RouteRepositoryClient,
 } from '@kbn/server-route-repository';
-import { formatRequest } from '@kbn/server-route-repository-utils';
-import { httpResponseIntoObservable } from '@kbn/inference-plugin/public';
-import { from } from 'rxjs';
+import { createRepositoryClient } from '@kbn/server-route-repository-client';
 import type { InventoryServerRouteRepository } from '../../server';
 
 type FetchOptions = Omit<HttpFetchOptions, 'body'> & {
@@ -48,26 +46,6 @@ export type APIReturnType<TEndpoint extends InventoryAPIEndpoint> = ReturnOf<
 export type InventoryAPIClientRequestParamsOf<TEndpoint extends InventoryAPIEndpoint> =
   ClientRequestParamsOf<InventoryServerRouteRepository, TEndpoint>;
 
-export function createCallInventoryAPI(core: CoreStart | CoreSetup) {
-  return ((endpoint, options) => {
-    const { params, asEventSourceStream, ...passthrough } = options as unknown as {
-      params?: Partial<Record<string, any>>;
-      asEventSourceStream?: boolean;
-    };
-
-    const { method, pathname, version } = formatRequest(endpoint, params?.path);
-
-    const response = core.http[method](pathname, {
-      ...passthrough,
-      body: params && params.body ? JSON.stringify(params.body) : undefined,
-      query: params?.query,
-      version,
-      ...(asEventSourceStream ? { rawResponse: true, asResponse: true } : {}),
-    });
-
-    if (asEventSourceStream) {
-      return from(response as Promise<HttpResponse<unknown>>).pipe(httpResponseIntoObservable());
-    }
-    return response;
-  }) as InventoryAPIClient;
+export function createCallInventoryAPI(core: CoreStart | CoreSetup): InventoryAPIClient {
+  return createRepositoryClient(core);
 }

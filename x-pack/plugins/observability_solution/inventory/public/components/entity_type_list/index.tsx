@@ -80,16 +80,16 @@ export function EntityTypeListBase({
 
 export function EntityTypeList() {
   const {
-    services: { callInventoryApi },
+    services: { inventoryAPIClient },
   } = useKibana();
 
   const { value, loading, error } = useAbortableAsync(
     ({ signal }) => {
-      return callInventoryApi('GET /internal/inventory/entity_types', {
+      return inventoryAPIClient.fetch('GET /internal/inventory/entity_types', {
         signal,
       });
     },
-    [callInventoryApi]
+    [inventoryAPIClient]
   );
 
   return <EntityTypeListBase definitions={value?.definitions} error={error} loading={loading} />;

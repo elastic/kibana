@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { map, OperatorFunction, pipe, switchMap, tap } from 'rxjs';
+import { catchError, map, OperatorFunction, pipe, switchMap, tap, throwError } from 'rxjs';
 import { InferenceTaskEvent, InferenceTaskEventType } from '../../common/tasks';
 import {
   createObservableFromHttpResponse,
@@ -22,6 +22,9 @@ export function httpResponseIntoObservable<
 >(): OperatorFunction<StreamedHttpResponse, T> {
   return pipe(
     switchMap((response) => createObservableFromHttpResponse(response)),
+    catchError((error) => {
+      return throwError(() => createInferenceInternalError(error.message));
+    }),
     map((line): T => {
       try {
         return JSON.parse(line);
