@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { ObjectType, schema } from '@kbn/config-schema';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { TrendKey } from '../../../common/types';
 import { getFetchTrendsQuery } from './fetch_trends';
+import { SyntheticsRestApiRouteFactory } from '../types';
 
 interface TrendAggs {
   aggregations: {
@@ -44,7 +45,7 @@ interface TrendAggs {
   };
 }
 
-export const createOverviewTrendsRoute = () => ({
+export const createOverviewTrendsRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
   path: SYNTHETICS_API_URLS.OVERVIEW_TRENDS,
   validate: {
@@ -53,7 +54,7 @@ export const createOverviewTrendsRoute = () => ({
         configId: schema.string(),
         locationId: schema.string(),
       })
-    ),
+    ) as unknown as ObjectType,
   },
   handler: async (routeContext) => {
     const esClient = routeContext.syntheticsEsClient;
