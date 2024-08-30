@@ -181,24 +181,28 @@ export const OverviewGrid = memo(() => {
                       itemData={listItems}
                       ref={listRef}
                     >
-                      {(props: React.PropsWithChildren<ListChildComponentProps<ListItem[][]>>) => (
+                      {({
+                        index: listIndex,
+                        style,
+                        data: listData,
+                      }: React.PropsWithChildren<ListChildComponentProps<ListItem[][]>>) => (
                         <EuiFlexGroup
-                          data-test-subj={`overview-grid-row-${props.index}`}
+                          data-test-subj={`overview-grid-row-${listIndex}`}
                           gutterSize="m"
-                          style={{ ...props.style }}
+                          style={{ ...style }}
                         >
-                          {props.data[props.index].map((_, idx) => (
-                            <EuiFlexItem key={props.index * ROW_COUNT + idx}>
+                          {listData[listIndex].map((_, idx) => (
+                            <EuiFlexItem key={listIndex * ROW_COUNT + idx}>
                               <MetricItem
-                                monitor={monitorsSortedByStatus[props.index * ROW_COUNT + idx]}
+                                monitor={monitorsSortedByStatus[listIndex * ROW_COUNT + idx]}
                                 onClick={setFlyoutConfigCallback}
                               />
                             </EuiFlexItem>
                           ))}
-                          {props.data[props.index].length % ROW_COUNT !== 0 &&
+                          {listData[listIndex].length % ROW_COUNT !== 0 &&
                             // Adds empty items to fill out row
                             Array.from({
-                              length: ROW_COUNT - props.data[props.index].length,
+                              length: ROW_COUNT - listData[listIndex].length,
                             }).map((_, idx) => <EuiFlexItem key={idx} />)}
                         </EuiFlexGroup>
                       )}
