@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-import { D3SecuritySeverity } from './constants';
+import { TypeOf, schema } from '@kbn/config-schema';
+import { D3SecuritySeverity } from '../../../common/d3security/constants';
 
 // Connector schema
 export const D3SecurityConfigSchema = schema.object({
@@ -28,3 +28,8 @@ export const D3SecurityRunActionResponseSchema = schema.object(
   },
   { unknowns: 'ignore' }
 );
+
+export type D3SecurityConfig = TypeOf<typeof D3SecurityConfigSchema>;
+export type D3SecuritySecrets = TypeOf<typeof D3SecuritySecretsSchema>;
+export type D3SecurityRunActionParams = TypeOf<typeof D3SecurityRunActionParamsSchema>;
+export type D3SecurityRunActionResponse = TypeOf<typeof D3SecurityRunActionResponseSchema>;

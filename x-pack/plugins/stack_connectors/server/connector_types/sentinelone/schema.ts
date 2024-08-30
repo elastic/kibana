@@ -7,8 +7,9 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { schema } from '@kbn/config-schema';
-import { SUB_ACTION } from './constants';
+import { TypeOf, schema } from '@kbn/config-schema';
+import { Mutable } from 'utility-types';
+import { SUB_ACTION } from '../../../common/sentinelone/constants';
 
 // Connector schema
 export const SentinelOneConfigSchema = schema.object({ url: schema.string() });
@@ -586,3 +587,67 @@ export const SentinelOneActionParamsSchema = schema.oneOf([
   SentinelOneReleaseHostSchema,
   SentinelOneExecuteScriptSchema,
 ]);
+
+export type SentinelOneConfig = TypeOf<typeof SentinelOneConfigSchema>;
+export type SentinelOneSecrets = TypeOf<typeof SentinelOneSecretsSchema>;
+
+export type SentinelOneBaseApiResponse = TypeOf<typeof SentinelOneBaseApiResponseSchema>;
+
+export type SentinelOneGetAgentsParams = Partial<TypeOf<typeof SentinelOneGetAgentsParamsSchema>>;
+export type SentinelOneGetAgentsResponse = TypeOf<typeof SentinelOneGetAgentsResponseSchema>;
+
+export type SentinelOneExecuteScriptParams = TypeOf<typeof SentinelOneExecuteScriptParamsSchema>;
+export type SentinelOneExecuteScriptResponse = TypeOf<
+  typeof SentinelOneExecuteScriptResponseSchema
+>;
+
+export type SentinelOneGetRemoteScriptStatusParams = TypeOf<
+  typeof SentinelOneGetRemoteScriptStatusParamsSchema
+>;
+
+export type SentinelOneGetRemoteScriptResultsParams = TypeOf<
+  typeof SentinelOneGetRemoteScriptResultsParamsSchema
+>;
+
+export type SentinelOneDownloadRemoteScriptResultsParams = TypeOf<
+  typeof SentinelOneDownloadRemoteScriptResultsParamsSchema
+>;
+
+export type SentinelOneGetRemoteScriptsParams = TypeOf<
+  typeof SentinelOneGetRemoteScriptsParamsSchema
+>;
+
+export type SentinelOneGetRemoteScriptsResponse = TypeOf<
+  typeof SentinelOneGetRemoteScriptsResponseSchema
+>;
+
+export type SentinelOneFetchAgentFilesParams = Mutable<
+  TypeOf<typeof SentinelOneFetchAgentFilesParamsSchema>
+>;
+export type SentinelOneFetchAgentFilesResponse = TypeOf<
+  typeof SentinelOneFetchAgentFilesResponseSchema
+>;
+
+export type SentinelOneDownloadAgentFileParams = Mutable<
+  TypeOf<typeof SentinelOneDownloadAgentFileParamsSchema>
+>;
+
+export type SentinelOneActivityRecord<TData = unknown> = Omit<
+  TypeOf<typeof SentinelOneGetActivitiesResponseSchema>['data'][number],
+  'data'
+> & {
+  data: TData;
+};
+
+export type SentinelOneGetActivitiesParams = TypeOf<typeof SentinelOneGetActivitiesParamsSchema>;
+
+export type SentinelOneGetActivitiesResponse<TData = unknown> = Omit<
+  TypeOf<typeof SentinelOneGetActivitiesResponseSchema>,
+  'data'
+> & { data: Array<SentinelOneActivityRecord<TData>> };
+
+export type SentinelOneIsolateHostParams = Partial<
+  Mutable<TypeOf<typeof SentinelOneIsolateHostParamsSchema>>
+>;
+
+export type SentinelOneActionParams = TypeOf<typeof SentinelOneActionParamsSchema>;

@@ -43,7 +43,7 @@ import {
   SentinelOneGetRemoteScriptResultsParamsSchema,
   SentinelOneDownloadRemoteScriptResultsParamsSchema,
   SentinelOneDownloadRemoteScriptResultsResponseSchema,
-} from '../../../common/sentinelone/schema';
+} from './schema';
 import { SUB_ACTION } from '../../../common/sentinelone/constants';
 import {
   SentinelOneFetchAgentFilesParams,

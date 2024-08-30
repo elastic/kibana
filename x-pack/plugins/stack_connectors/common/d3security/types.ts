@@ -5,15 +5,9 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import {
-  D3SecurityConfigSchema,
-  D3SecuritySecretsSchema,
-  D3SecurityRunActionParamsSchema,
-  D3SecurityRunActionResponseSchema,
-} from './schema';
-
-export type D3SecurityConfig = TypeOf<typeof D3SecurityConfigSchema>;
-export type D3SecuritySecrets = TypeOf<typeof D3SecuritySecretsSchema>;
-export type D3SecurityRunActionParams = TypeOf<typeof D3SecurityRunActionParamsSchema>;
-export type D3SecurityRunActionResponse = TypeOf<typeof D3SecurityRunActionResponseSchema>;
+export type {
+  D3SecurityConfig,
+  D3SecuritySecrets,
+  D3SecurityRunActionParams,
+  D3SecurityRunActionResponse,
+} from '../../server/connector_types/d3security/schema';

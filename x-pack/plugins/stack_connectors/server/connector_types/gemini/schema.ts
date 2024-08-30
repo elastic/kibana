@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-import { DEFAULT_GEMINI_MODEL } from './constants';
+import { TypeOf, schema } from '@kbn/config-schema';
+import { DEFAULT_GEMINI_MODEL } from '../../../common/gemini/constants';
 
 export const ConfigSchema = schema.object({
   apiUrl: schema.string(),
@@ -105,3 +105,17 @@ export const DashboardActionParamsSchema = schema.object({
 export const DashboardActionResponseSchema = schema.object({
   available: schema.boolean(),
 });
+
+export type Config = TypeOf<typeof ConfigSchema>;
+export type Secrets = TypeOf<typeof SecretsSchema>;
+export type RunActionParams = TypeOf<typeof RunActionParamsSchema>;
+export type RunApiResponse = TypeOf<typeof RunApiResponseSchema>;
+export type RunActionResponse = TypeOf<typeof RunActionResponseSchema>;
+export type RunActionRawResponse = TypeOf<typeof RunActionRawResponseSchema>;
+export type DashboardActionParams = TypeOf<typeof DashboardActionParamsSchema>;
+export type DashboardActionResponse = TypeOf<typeof DashboardActionResponseSchema>;
+export type InvokeAIActionParams = TypeOf<typeof InvokeAIActionParamsSchema>;
+export type InvokeAIActionResponse = TypeOf<typeof InvokeAIActionResponseSchema>;
+export type InvokeAIRawActionParams = TypeOf<typeof InvokeAIRawActionParamsSchema>;
+export type InvokeAIRawActionResponse = TypeOf<typeof InvokeAIRawActionResponseSchema>;
+export type StreamingResponse = TypeOf<typeof StreamingResponseSchema>;

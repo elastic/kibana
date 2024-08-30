@@ -5,27 +5,17 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import {
-  TheHiveConfigSchema,
-  TheHiveSecretsSchema,
-  ExecutorParamsSchema,
-  ExecutorSubActionPushParamsSchema,
-  ExecutorSubActionCreateAlertParamsSchema,
-  TheHiveFailureResponseSchema,
-  TheHiveIncidentResponseSchema,
-} from './schema';
+import type { ExecutorSubActionPushParams } from '../../server/connector_types/thehive/schema';
 
-export type TheHiveConfig = TypeOf<typeof TheHiveConfigSchema>;
-export type TheHiveSecrets = TypeOf<typeof TheHiveSecretsSchema>;
-
-export type ExecutorParams = TypeOf<typeof ExecutorParamsSchema>;
-export type ExecutorSubActionPushParams = TypeOf<typeof ExecutorSubActionPushParamsSchema>;
-export type ExecutorSubActionCreateAlertParams = TypeOf<
-  typeof ExecutorSubActionCreateAlertParamsSchema
->;
-
-export type TheHiveFailureResponse = TypeOf<typeof TheHiveFailureResponseSchema>;
+export type {
+  TheHiveConfig,
+  TheHiveSecrets,
+  ExecutorParams,
+  ExecutorSubActionPushParams,
+  ExecutorSubActionCreateAlertParams,
+  TheHiveFailureResponse,
+  GetIncidentResponse,
+} from '../../server/connector_types/thehive/schema';
 
 export interface ExternalServiceIncidentResponse {
   id: string;
@@ -35,5 +25,3 @@ export interface ExternalServiceIncidentResponse {
 }
 
 export type Incident = Omit<ExecutorSubActionPushParams['incident'], 'externalId'>;
-
-export type GetIncidentResponse = TypeOf<typeof TheHiveIncidentResponseSchema>;

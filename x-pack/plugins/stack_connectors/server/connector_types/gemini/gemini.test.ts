@@ -11,7 +11,7 @@ import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.moc
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
-import { RunApiResponseSchema, StreamingResponseSchema } from '../../../common/gemini/schema';
+import { RunApiResponseSchema, StreamingResponseSchema } from './schema';
 import { DEFAULT_GEMINI_MODEL } from '../../../common/gemini/constants';
 import { AxiosError } from 'axios';
 import { Transform } from 'stream';

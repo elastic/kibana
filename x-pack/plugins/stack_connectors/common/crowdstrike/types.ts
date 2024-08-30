@@ -5,35 +5,15 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import {
-  CrowdstrikeBaseApiResponseSchema,
-  CrowdstrikeConfigSchema,
-  CrowdstrikeGetAgentsParamsSchema,
-  CrowdstrikeGetAgentOnlineStatusResponseSchema,
-  CrowdstrikeHostActionsParamsSchema,
-  CrowdstrikeSecretsSchema,
-  CrowdstrikeActionParamsSchema,
-  CrowdstrikeGetTokenResponseSchema,
-  CrowdstrikeGetAgentsResponseSchema,
-  RelaxedCrowdstrikeBaseApiResponseSchema,
-} from './schema';
-
-export type CrowdstrikeConfig = TypeOf<typeof CrowdstrikeConfigSchema>;
-export type CrowdstrikeSecrets = TypeOf<typeof CrowdstrikeSecretsSchema>;
-
-export type CrowdstrikeBaseApiResponse = TypeOf<typeof CrowdstrikeBaseApiResponseSchema>;
-export type RelaxedCrowdstrikeBaseApiResponse = TypeOf<
-  typeof RelaxedCrowdstrikeBaseApiResponseSchema
->;
-
-export type CrowdstrikeGetAgentsParams = Partial<TypeOf<typeof CrowdstrikeGetAgentsParamsSchema>>;
-export type CrowdstrikeGetAgentsResponse = TypeOf<typeof CrowdstrikeGetAgentsResponseSchema>;
-export type CrowdstrikeGetAgentOnlineStatusResponse = TypeOf<
-  typeof CrowdstrikeGetAgentOnlineStatusResponseSchema
->;
-export type CrowdstrikeGetTokenResponse = TypeOf<typeof CrowdstrikeGetTokenResponseSchema>;
-
-export type CrowdstrikeHostActionsParams = TypeOf<typeof CrowdstrikeHostActionsParamsSchema>;
-
-export type CrowdstrikeActionParams = TypeOf<typeof CrowdstrikeActionParamsSchema>;
+export type {
+  CrowdstrikeConfig,
+  CrowdstrikeSecrets,
+  CrowdstrikeBaseApiResponse,
+  RelaxedCrowdstrikeBaseApiResponse,
+  CrowdstrikeGetAgentsParams,
+  CrowdstrikeGetAgentsResponse,
+  CrowdstrikeGetAgentOnlineStatusResponse,
+  CrowdstrikeGetTokenResponse,
+  CrowdstrikeHostActionsParams,
+  CrowdstrikeActionParams,
+} from '../../server/connector_types/crowdstrike/schema';

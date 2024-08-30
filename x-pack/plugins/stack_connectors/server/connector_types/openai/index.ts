@@ -23,7 +23,7 @@ import {
   OPENAI_TITLE,
   OpenAiProviderType,
 } from '../../../common/openai/constants';
-import { ConfigSchema, SecretsSchema } from '../../../common/openai/schema';
+import { ConfigSchema, SecretsSchema } from './schema';
 import { Config, Secrets } from '../../../common/openai/types';
 import { OpenAIConnector } from './openai';
 import { renderParameterTemplates } from './render';

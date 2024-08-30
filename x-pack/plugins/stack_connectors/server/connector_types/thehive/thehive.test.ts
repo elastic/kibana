@@ -16,7 +16,7 @@ import {
   TheHiveAddCommentResponseSchema,
   TheHiveCreateAlertResponseSchema,
   PushToServiceIncidentSchema,
-} from '../../../common/thehive/schema';
+} from './schema';
 import type { ExecutorSubActionCreateAlertParams, Incident } from '../../../common/thehive/types';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-import { DEFAULT_OPENAI_MODEL, OpenAiProviderType } from './constants';
+import { TypeOf, schema } from '@kbn/config-schema';
+import { DEFAULT_OPENAI_MODEL, OpenAiProviderType } from '../../../common/openai/constants';
 
 // Connector schema
 export const ConfigSchema = schema.oneOf([
@@ -171,3 +171,13 @@ export const DashboardActionParamsSchema = schema.object({
 export const DashboardActionResponseSchema = schema.object({
   available: schema.boolean(),
 });
+
+export type Config = TypeOf<typeof ConfigSchema>;
+export type Secrets = TypeOf<typeof SecretsSchema>;
+export type RunActionParams = TypeOf<typeof RunActionParamsSchema>;
+export type InvokeAIActionParams = TypeOf<typeof InvokeAIActionParamsSchema>;
+export type InvokeAIActionResponse = TypeOf<typeof InvokeAIActionResponseSchema>;
+export type RunActionResponse = TypeOf<typeof RunActionResponseSchema>;
+export type DashboardActionParams = TypeOf<typeof DashboardActionParamsSchema>;
+export type DashboardActionResponse = TypeOf<typeof DashboardActionResponseSchema>;
+export type StreamActionParams = TypeOf<typeof StreamActionParamsSchema>;

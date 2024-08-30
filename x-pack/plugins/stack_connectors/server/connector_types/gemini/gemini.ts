@@ -24,7 +24,7 @@ import {
   InvokeAIActionParamsSchema,
   InvokeAIRawActionParamsSchema,
   StreamingResponseSchema,
-} from '../../../common/gemini/schema';
+} from './schema';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import {
   Config,
@@ -46,7 +46,7 @@ import {
   DEFAULT_TIMEOUT_MS,
   DEFAULT_TOKEN_LIMIT,
 } from '../../../common/gemini/constants';
-import { DashboardActionParamsSchema } from '../../../common/gemini/schema';
+import { DashboardActionParamsSchema } from './schema';
 /** Interfaces to define Gemini model response type */
 
 interface MessagePart {

@@ -12,7 +12,7 @@ import {
   SentinelOneGetActivitiesParams,
 } from '../../../common/sentinelone/types';
 import { API_PATH } from './sentinelone';
-import { SentinelOneGetActivitiesResponseSchema } from '../../../common/sentinelone/schema';
+import { SentinelOneGetActivitiesResponseSchema } from './schema';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 

@@ -21,7 +21,7 @@ import {
   StreamingResponseSchema,
   RunActionResponseSchema,
   RunApiLatestResponseSchema,
-} from '../../../common/bedrock/schema';
+} from './schema';
 import type {
   Config,
   Secrets,
@@ -45,7 +45,7 @@ import {
   DashboardActionResponse,
   StreamingResponse,
 } from '../../../common/bedrock/types';
-import { DashboardActionParamsSchema } from '../../../common/bedrock/schema';
+import { DashboardActionParamsSchema } from './schema';
 
 interface SignedRequest {
   host: string;

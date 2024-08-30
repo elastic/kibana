@@ -25,7 +25,7 @@ import {
   StreamActionParamsSchema,
   StreamingResponseSchema,
   InvokeAIActionParamsSchema,
-} from '../../../common/openai/schema';
+} from './schema';
 import type {
   Config,
   Secrets,

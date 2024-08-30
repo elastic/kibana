@@ -27,7 +27,7 @@ import {
   CrowdstrikeGetTokenResponseSchema,
   CrowdstrikeHostActionsResponseSchema,
   RelaxedCrowdstrikeBaseApiResponseSchema,
-} from '../../../common/crowdstrike/schema';
+} from './schema';
 import { SUB_ACTION } from '../../../common/crowdstrike/constants';
 import { CrowdstrikeError } from './error';
 

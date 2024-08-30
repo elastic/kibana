@@ -5,25 +5,14 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import {
-  ConfigSchema,
-  SecretsSchema,
-  RunActionParamsSchema,
-  RunActionResponseSchema,
-  DashboardActionParamsSchema,
-  DashboardActionResponseSchema,
-  StreamActionParamsSchema,
-  InvokeAIActionParamsSchema,
-  InvokeAIActionResponseSchema,
-} from './schema';
-
-export type Config = TypeOf<typeof ConfigSchema>;
-export type Secrets = TypeOf<typeof SecretsSchema>;
-export type RunActionParams = TypeOf<typeof RunActionParamsSchema>;
-export type InvokeAIActionParams = TypeOf<typeof InvokeAIActionParamsSchema>;
-export type InvokeAIActionResponse = TypeOf<typeof InvokeAIActionResponseSchema>;
-export type RunActionResponse = TypeOf<typeof RunActionResponseSchema>;
-export type DashboardActionParams = TypeOf<typeof DashboardActionParamsSchema>;
-export type DashboardActionResponse = TypeOf<typeof DashboardActionResponseSchema>;
-export type StreamActionParams = TypeOf<typeof StreamActionParamsSchema>;
+export type {
+  Config,
+  Secrets,
+  RunActionParams,
+  InvokeAIActionParams,
+  InvokeAIActionResponse,
+  RunActionResponse,
+  DashboardActionParams,
+  DashboardActionResponse,
+  StreamActionParams,
+} from '../../server/connector_types/openai/schema';

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-import { DEFAULT_BEDROCK_MODEL } from './constants';
+import { TypeOf, schema } from '@kbn/config-schema';
+import { DEFAULT_BEDROCK_MODEL } from '../../../common/bedrock/constants';
 
 // Connector schema
 export const ConfigSchema = schema.object({
@@ -143,3 +143,18 @@ export const DashboardActionParamsSchema = schema.object({
 export const DashboardActionResponseSchema = schema.object({
   available: schema.boolean(),
 });
+
+export type Config = TypeOf<typeof ConfigSchema>;
+export type Secrets = TypeOf<typeof SecretsSchema>;
+export type RunActionParams = TypeOf<typeof RunActionParamsSchema>;
+export type InvokeAIActionParams = TypeOf<typeof InvokeAIActionParamsSchema>;
+export type InvokeAIActionResponse = TypeOf<typeof InvokeAIActionResponseSchema>;
+export type InvokeAIRawActionParams = TypeOf<typeof InvokeAIRawActionParamsSchema>;
+export type InvokeAIRawActionResponse = TypeOf<typeof InvokeAIRawActionResponseSchema>;
+export type RunApiLatestResponse = TypeOf<typeof RunApiLatestResponseSchema>;
+export type RunActionResponse = TypeOf<typeof RunActionResponseSchema>;
+export type StreamingResponse = TypeOf<typeof StreamingResponseSchema>;
+export type DashboardActionParams = TypeOf<typeof DashboardActionParamsSchema>;
+export type DashboardActionResponse = TypeOf<typeof DashboardActionResponseSchema>;
+export type BedRockMessage = TypeOf<typeof BedrockMessageSchema>;
+export type BedrockToolChoice = TypeOf<typeof BedrockToolChoiceSchema>;
