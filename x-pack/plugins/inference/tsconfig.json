@@ -32,7 +32,6 @@
     "@kbn/tooling-log",
     "@kbn/es-types",
     "@kbn/field-types",
-    "@kbn/expressions-plugin",
-    "@kbn/stack-connectors-plugin"
+    "@kbn/expressions-plugin"
   ]
 }

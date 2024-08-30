@@ -7,7 +7,6 @@
 
 import { filter, from, map, switchMap, tap } from 'rxjs';
 import { Readable } from 'stream';
-import type { InvokeAIActionParams } from '@kbn/stack-connectors-plugin/common/bedrock/types';
 import { parseSerdeChunkMessage } from './serde_utils';
 import { Message, MessageRole } from '../../../../common/chat_complete';
 import { createInferenceInternalError } from '../../../../common/errors';
@@ -25,19 +24,17 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
   chatComplete: ({ executor, system, messages, toolChoice, tools }) => {
     const noToolUsage = toolChoice === ToolChoiceType.none;
 
-    const connectorInvokeRequest: InvokeAIActionParams = {
-      system: noToolUsage ? addNoToolUsageDirective(system) : system,
-      messages: messagesToBedrock(messages),
-      tools: noToolUsage ? [] : toolsToBedrock(tools),
-      toolChoice: toolChoiceToBedrock(toolChoice),
-      temperature: 0,
-      stopSequences: ['\n\nHuman:'],
-    };
-
     return from(
       executor.invoke({
         subAction: 'invokeStream',
-        subActionParams: connectorInvokeRequest,
+        subActionParams: {
+          system: noToolUsage ? addNoToolUsageDirective(system) : system,
+          messages: messagesToBedrock(messages),
+          tools: noToolUsage ? [] : toolsToBedrock(tools),
+          toolChoice: toolChoiceToBedrock(toolChoice),
+          temperature: 0,
+          stopSequences: ['\n\nHuman:'],
+        },
       })
     ).pipe(
       switchMap((response) => {
