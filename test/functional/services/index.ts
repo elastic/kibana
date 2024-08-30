@@ -7,7 +7,7 @@
  */
 
 import { commonFunctionalUIServices } from '@kbn/ftr-common-functional-ui-services';
-import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
+import { services as commonServiceProviders } from '../../common/services';
 
 import { AppsMenuService } from './apps_menu';
 import {
@@ -57,7 +57,7 @@ import { ESQLService } from './esql';
 import { DataViewsService } from './data_views';
 
 export const services = {
-  ...commonFunctionalServices,
+  ...commonServiceProviders,
   ...commonFunctionalUIServices,
   filterBar: FilterBarService,
   queryBar: QueryBarService,
