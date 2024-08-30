@@ -7,13 +7,7 @@
  */
 
 import { GenericFtrProviderContext } from '@kbn/test';
-import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
-import { services as functionalServces } from '../../services';
+import { services } from '../../services';
 import { pageObjects } from '../../page_objects';
-
-const services = {
-  ...functionalServces,
-  ...commonFunctionalServices,
-};
 
 export type FtrProviderContext = GenericFtrProviderContext<typeof services, typeof pageObjects>;
