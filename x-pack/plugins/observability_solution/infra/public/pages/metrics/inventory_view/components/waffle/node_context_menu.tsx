@@ -21,14 +21,17 @@ import {
   ActionMenuDivider,
   useLinkProps,
 } from '@kbn/observability-shared-plugin/public';
-import { findInventoryModel, findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
-import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import {
+  findInventoryModel,
+  findInventoryFields,
+  type InventoryItemType,
+} from '@kbn/metrics-data-access-plugin/common';
+import { useAssetDetailsRedirect } from '@kbn/metrics-data-access-plugin/public';
 import { getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
 import { uptimeOverviewLocatorID } from '@kbn/observability-plugin/common';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { AlertFlyout } from '../../../../../alerting/inventory/components/alert_flyout';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../../common/inventory/types';
-import { useNodeDetailsRedirect } from '../../../../link_to';
 import { navigateToUptime } from '../../lib/navigate_to_uptime';
 
 interface Props {
@@ -40,7 +43,7 @@ interface Props {
 
 export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme(
   ({ options, currentTime, node, nodeType }) => {
-    const { getNodeDetailUrl } = useNodeDetailsRedirect();
+    const { getAssetDetailUrl } = useAssetDetailsRedirect();
     const [flyoutVisible, setFlyoutVisible] = useState(false);
     const inventoryModel = findInventoryModel(nodeType);
     const nodeDetailFrom = currentTime - inventoryModel.metrics.defaultTimeRangeInSeconds * 1000;
@@ -90,7 +93,7 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
       return { label: '', value: '' };
     }, [nodeType, node.ip, node.id]);
 
-    const nodeDetailMenuItemLinkProps = getNodeDetailUrl({
+    const nodeDetailMenuItemLinkProps = getAssetDetailUrl({
       assetType: nodeType,
       assetId: node.id,
       search: {
