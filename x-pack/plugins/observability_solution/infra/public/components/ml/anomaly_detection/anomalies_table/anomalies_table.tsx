@@ -27,7 +27,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n-react';
 import { useLinkProps, useUiTracker } from '@kbn/observability-shared-plugin/public';
-import { Filter, TimeRange } from '@kbn/es-query';
+import type { Filter, TimeRange } from '@kbn/es-query';
 import { css } from '@emotion/react';
 import type { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { type HostsLocatorParams, HOSTS_LOCATOR_ID } from '@kbn/observability-shared-plugin/common';
