@@ -26,7 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'dashboard',
   ]);
 
-  describe('Export import saved objects between versions', () => {
+  describe('Lens - Export import saved objects between versions', () => {
     before(async () => {
       await esArchiver.loadIfNeeded(
         'x-pack/test/functional/es_archives/getting_started/shakespeare'

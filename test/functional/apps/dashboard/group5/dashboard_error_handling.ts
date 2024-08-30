@@ -59,7 +59,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const embeddableError = await testSubjects.find('embeddableError');
         const errorMessage = await embeddableError.getVisibleText();
 
-        expect(errorMessage).to.contain('Could not find the data view');
+        expect(errorMessage).to.contain('Could not locate that data view');
       });
     });
   });

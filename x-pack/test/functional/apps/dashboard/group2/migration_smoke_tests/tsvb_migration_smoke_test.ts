@@ -22,7 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'dashboard',
   ]);
 
-  describe('Export import saved objects between versions', () => {
+  describe('TSVB - Export import saved objects between versions', () => {
     describe('From 7.12.1', () => {
       before(async () => {
         await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');

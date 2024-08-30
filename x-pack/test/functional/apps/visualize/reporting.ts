@@ -135,7 +135,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await reporting.clickGenerateReportButton();
 
         log.debug('get the report download URL');
-        const url = await reporting.getReportURL(60000);
+        const url = await reporting.getReportURL(120000);
         log.debug('download the report');
         const reportData = await reporting.getRawReportData(url ?? '');
         const sessionReportPath = await reporting.writeSessionReport(

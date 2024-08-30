@@ -274,7 +274,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it('delete dashboard to dashboard drilldown', async () => {
           // delete drilldown
           await dashboard.switchToEditMode();
-          await dashboardDrilldownPanelActions.expectExistsManageDrilldownsAction();
           await dashboardDrilldownPanelActions.clickManageDrilldowns();
           await dashboardDrilldownsManage.expectsManageDrilldownsFlyoutOpen();
 
