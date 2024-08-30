@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import { BooleanFromString } from '@kbn/zod-helpers';
+import { BooleanFromString, z } from '@kbn/zod';
 
 export const deleteEntityDefinitionParamsSchema = z.object({
   id: z.string(),
