@@ -17,12 +17,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
-  const { common, svlCommonPage, dashboard, header, timePicker, discover } = getPageObjects([
+  const { common, svlCommonPage, dashboard, header, discover } = getPageObjects([
     'common',
     'svlCommonPage',
     'dashboard',
     'header',
-    'timePicker',
     'discover',
   ]);
 
