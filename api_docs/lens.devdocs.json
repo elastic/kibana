@@ -2510,7 +2510,7 @@
                 "section": "def-public.IncompleteColumn",
                 "text": "IncompleteColumn"
               },
-              "> | undefined"
+              " | undefined> | undefined"
             ],
             "path": "x-pack/plugins/lens/public/datasources/form_based/types.ts",
             "deprecated": false,
@@ -11776,7 +11776,7 @@
             "section": "def-public.IncompleteColumn",
             "text": "IncompleteColumn"
           },
-          "> | undefined; sampling?: number | undefined; }"
+          " | undefined> | undefined; sampling?: number | undefined; }"
         ],
         "path": "x-pack/plugins/lens/public/datasources/form_based/types.ts",
         "deprecated": false,

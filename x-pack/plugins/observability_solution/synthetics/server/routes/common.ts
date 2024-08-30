@@ -8,6 +8,7 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { SavedObjectsFindResponse } from '@kbn/core/server';
 import { isEmpty } from 'lodash';
+import { escapeQuotes } from '@kbn/es-query';
 import { RouteContext } from './types';
 import { MonitorSortFieldSchema } from '../../common/runtime_types/monitor_management/sort_field';
 import { getAllLocations } from '../synthetics_service/get_all_locations';
@@ -147,21 +148,15 @@ export const parseArrayFilters = ({
   locationFilter?: string | string[];
   configIds?: string[];
 }) => {
-  const formatKqlFilter = (field: string, values?: string | string[]) => {
-    return values === 'All' || (Array.isArray(values) && values?.includes('All'))
-      ? undefined
-      : getKqlFilter({ field, values });
-  };
-
   const filtersStr = [
     filter,
-    formatKqlFilter('tags', tags),
-    formatKqlFilter('project_id', projects),
-    formatKqlFilter('type', monitorTypes),
-    formatKqlFilter('locations.id', locationFilter),
-    formatKqlFilter('schedule.number', schedules),
-    formatKqlFilter('id', monitorQueryIds),
-    formatKqlFilter('config_id', configIds),
+    getSavedObjectKqlFilter({ field: 'tags', values: tags }),
+    getSavedObjectKqlFilter({ field: 'project_id', values: projects }),
+    getSavedObjectKqlFilter({ field: 'type', values: monitorTypes }),
+    getSavedObjectKqlFilter({ field: 'locations.id', values: locationFilter }),
+    getSavedObjectKqlFilter({ field: 'schedule.number', values: schedules }),
+    getSavedObjectKqlFilter({ field: 'id', values: monitorQueryIds }),
+    getSavedObjectKqlFilter({ field: 'config_id', values: monitorQueryIds }),
   ]
     .filter((f) => !!f)
     .join(' AND ');
@@ -169,7 +164,7 @@ export const parseArrayFilters = ({
   return { filtersStr, locationFilter };
 };
 
-export const getKqlFilter = ({
+export const getSavedObjectKqlFilter = ({
   field,
   values,
   operator = 'OR',
@@ -180,6 +175,10 @@ export const getKqlFilter = ({
   operator?: string;
   searchAtRoot?: boolean;
 }) => {
+  if (values === 'All' || (Array.isArray(values) && values?.includes('All'))) {
+    return undefined;
+  }
+
   if (isEmpty(values)) {
     return '';
   }
@@ -191,11 +190,12 @@ export const getKqlFilter = ({
   }
 
   if (Array.isArray(values)) {
-    const vals = values.map((val) => `"${val}"`).join(` ${operator} `);
-    return ` (${fieldKey}: (${vals}))`;
+    return `${fieldKey}:(${values
+      .map((value) => `"${escapeQuotes(value)}"`)
+      .join(` ${operator} `)})`;
   }
 
-  return `${fieldKey}:"${values}"`;
+  return `${fieldKey}:"${escapeQuotes(values)}"`;
 };
 
 const parseLocationFilter = async (context: RouteContext, locations?: string | string[]) => {

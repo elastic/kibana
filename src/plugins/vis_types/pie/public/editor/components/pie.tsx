@@ -117,14 +117,17 @@ const PieOptions = (props: PieOptionsProps) => {
   }, [props.palettes]);
 
   const handleEmptySizeRatioChange = useCallback(
-    (sizeId) => {
+    (sizeId: string) => {
       const emptySizeRatio = emptySizeRatioOptions.find(({ id }) => id === sizeId)?.value;
       setValue('emptySizeRatio', emptySizeRatio);
     },
     [setValue]
   );
 
-  const handleLegendSizeChange = useCallback((size) => setValue('legendSize', size), [setValue]);
+  const handleLegendSizeChange = useCallback(
+    (size?: LegendSize) => setValue('legendSize', size),
+    [setValue]
+  );
 
   const handleLegendDisplayChange = useCallback(
     (name: keyof PartitionVisParams, show: boolean) => {

@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { IRouter, RequestHandlerContextBase } from '@kbn/core-http-server';
+import { IRouter, KibanaRequest, RequestHandlerContextBase } from '@kbn/core-http-server';
 import { Logger } from '@kbn/core/server';
 import { EntityManagerServerSetup } from '../types';
+import { EntityClient } from '../lib/entity_client';
 
 export interface SetupRouteOptions<T extends RequestHandlerContextBase> {
   router: IRouter<T>;
   server: EntityManagerServerSetup;
   logger: Logger;
+  getScopedClient: ({ request }: { request: KibanaRequest }) => Promise<EntityClient>;
 }
