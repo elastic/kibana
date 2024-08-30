@@ -21,7 +21,7 @@ module.exports = {
     schema: [],
   },
   create(context) {
-    const allowedAlgorithms = ['sha1', 'sha256'];
+    const allowedAlgorithms = ['sha1', 'sha256', 'sha3-256'];
 
     let isCreateHashImported = false;
     let createHashName = 'createHash';
