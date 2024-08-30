@@ -182,12 +182,39 @@ describe('Create rule route', () => {
     });
     const defaultAction = getResponseAction();
 
-    test('is successful', async () => {
+    test('is successful in query rule', async () => {
       const request = requestMock.create({
         method: 'post',
         path: DETECTION_ENGINE_RULES_URL,
         body: {
           ...getCreateRulesSchemaMock(),
+          response_actions: [defaultAction],
+        },
+      });
+
+      const response = await server.inject(request, requestContextMock.convertContext(context));
+      expect(response.status).toEqual(200);
+    });
+
+    test('is successful in esql rule', async () => {
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_RULES_URL,
+        body: {
+          ...getCreateEsqlRulesSchemaMock('rule-2'),
+          response_actions: [defaultAction],
+        },
+      });
+
+      const response = await server.inject(request, requestContextMock.convertContext(context));
+      expect(response.status).toEqual(200);
+    });
+    test('is successful in eql rule', async () => {
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_RULES_URL,
+        body: {
+          ...getCreateEqlRuleSchemaMock('rule-3'),
           response_actions: [defaultAction],
         },
       });

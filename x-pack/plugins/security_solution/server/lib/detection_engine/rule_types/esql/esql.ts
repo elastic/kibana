@@ -19,6 +19,7 @@ import {
 } from '@kbn/securitysolution-utils';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { buildEsqlSearchRequest } from './build_esql_search_request';
+import { expandDottedObject } from '../../../../../common/utils/expand_dotted';
 import { performEsqlRequest } from './esql_request';
 import { wrapEsqlAlerts } from './wrap_esql_alerts';
 import { wrapSuppressedEsqlAlerts } from './wrap_suppressed_esql_alerts';
@@ -28,8 +29,7 @@ import { rowToDocument } from './utils';
 import { fetchSourceDocuments } from './fetch_source_documents';
 import { buildReasonMessageForEsqlAlert } from '../utils/reason_formatters';
 
-import type { RunOpts, SignalSource } from '../types';
-
+import type { RunOpts, SignalSource, CreateQueryRuleAdditionalOptions } from '../types';
 import {
   addToSearchAfterReturn,
   createSearchAfterReturnType,
@@ -63,6 +63,7 @@ export const esqlExecutor = async ({
   spaceId,
   experimentalFeatures,
   licensing,
+  scheduleNotificationResponseActionsService,
 }: {
   runOpts: RunOpts<EsqlRuleParams>;
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
@@ -71,6 +72,7 @@ export const esqlExecutor = async ({
   version: string;
   experimentalFeatures: ExperimentalFeatures;
   licensing: LicensingPluginSetup;
+  scheduleNotificationResponseActionsService?: CreateQueryRuleAdditionalOptions['scheduleNotificationResponseActionsService'];
 }) => {
   const ruleParams = completeRule.ruleParams;
   /**
@@ -224,6 +226,16 @@ export const esqlExecutor = async ({
           result.warningMessages.push(getMaxSignalsWarning());
           break;
         }
+      }
+      if (
+        completeRule.ruleParams.responseActions?.length &&
+        result.createdSignalsCount &&
+        scheduleNotificationResponseActionsService
+      ) {
+        scheduleNotificationResponseActionsService({
+          signals: result.createdSignals.map((signal) => expandDottedObject(signal as object)),
+          responseActions: completeRule.ruleParams.responseActions,
+        });
       }
 
       // no more results will be found

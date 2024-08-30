@@ -11,12 +11,17 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 import { EsqlRuleParams } from '../../rule_schema';
 import { esqlExecutor } from './esql';
-import type { CreateRuleOptions, SecurityAlertType } from '../types';
+import type {
+  CreateRuleOptions,
+  SecurityAlertType,
+  CreateQueryRuleAdditionalOptions,
+} from '../types';
 
 export const createEsqlAlertType = (
-  createOptions: CreateRuleOptions
+  createOptions: CreateRuleOptions & CreateQueryRuleAdditionalOptions
 ): SecurityAlertType<EsqlRuleParams, {}, {}, 'default'> => {
-  const { version, experimentalFeatures, licensing } = createOptions;
+  const { version, experimentalFeatures, licensing, scheduleNotificationResponseActionsService } =
+    createOptions;
   return {
     id: ESQL_RULE_TYPE_ID,
     name: 'ES|QL Rule',
@@ -44,6 +49,13 @@ export const createEsqlAlertType = (
     isExportable: false,
     category: DEFAULT_APP_CATEGORIES.security.id,
     producer: SERVER_APP_ID,
-    executor: (params) => esqlExecutor({ ...params, experimentalFeatures, version, licensing }),
+    executor: (params) =>
+      esqlExecutor({
+        ...params,
+        experimentalFeatures,
+        version,
+        licensing,
+        scheduleNotificationResponseActionsService,
+      }),
   };
 };

@@ -31,6 +31,9 @@ export const endpointResponseAction = async (
   );
   const ruleId = alerts[0][ALERT_RULE_UUID];
   const ruleName = alerts[0][ALERT_RULE_NAME];
+  // Query rules contain rule details with dotted syntax, while EQL/Esql rules contain rule details with nested syntax
+  const ruleId = alerts[0][ALERT_RULE_UUID] ?? alerts[0].kibana?.alert?.rule.rule_id;
+  const ruleName = alerts[0][ALERT_RULE_NAME] ?? alerts[0].kibana?.alert?.rule.name;
   const logMsgPrefix = `Rule [${ruleName}][${ruleId}]:`;
   const { comment, command } = responseAction.params;
   const errors: string[] = [];

@@ -163,6 +163,8 @@ export interface ScheduleNotificationActions {
   signals: unknown[];
   responseActions: RuleResponseAction[];
 }
+
+// TODO TC: Rename - it's not about QueryRule anymore
 export interface CreateQueryRuleAdditionalOptions {
   scheduleNotificationResponseActionsService?: (params: ScheduleNotificationActions) => void;
 }

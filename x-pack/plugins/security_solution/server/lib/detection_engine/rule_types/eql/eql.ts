@@ -66,6 +66,7 @@ interface EqlExecutorParams {
   alertWithSuppression: SuppressedAlertService;
   isAlertSuppressionActive: boolean;
   experimentalFeatures: ExperimentalFeatures;
+  scheduleNotificationResponseActionsService?: CreateQueryRuleAdditionalOptions['scheduleNotificationResponseActionsService'];
 }
 
 export const eqlExecutor = async ({
@@ -88,6 +89,7 @@ export const eqlExecutor = async ({
   alertWithSuppression,
   isAlertSuppressionActive,
   experimentalFeatures,
+  scheduleNotificationResponseActionsService,
 }: EqlExecutorParams): Promise<SearchAfterAndBulkCreateReturnType> => {
   const ruleParams = completeRule.ruleParams;
 
@@ -187,7 +189,16 @@ export const eqlExecutor = async ({
 
         result.warningMessages.push(maxSignalsWarning);
       }
-
+      if (
+        completeRule.ruleParams.responseActions?.length &&
+        result.createdSignalsCount &&
+        scheduleNotificationResponseActionsService
+      ) {
+        scheduleNotificationResponseActionsService({
+          signals: result.createdSignals.map((signal) => expandDottedObject(signal as object)),
+          responseActions: completeRule.ruleParams.responseActions,
+        });
+      }
       return result;
     } catch (error) {
       if (
