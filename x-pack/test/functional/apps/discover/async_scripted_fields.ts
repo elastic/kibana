@@ -113,7 +113,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await settings.navigateTo();
         await settings.clickKibanaIndexPatterns();
         await settings.clickIndexPatternLogstash();
-        const startingCount = parseInt(await settings.getScriptedFieldsTabCount());
+        const startingCount = parseInt(await settings.getScriptedFieldsTabCount(), 10);
         await settings.clickScriptedFieldsTab();
         await log.debug('add scripted field');
         await settings.addScriptedField(
@@ -126,7 +126,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           "if (doc['response.raw'].value == '200') { if (doc['url.raw'].size() > 0) { return 'good ' + doc['url.raw'].value } else { return 'good' } } else { if (doc['machine.os.raw'].size() > 0) { return 'bad ' + doc['machine.os.raw'].value } else { return 'bad' } }"
         );
         await retry.try(async function () {
-          expect(parseInt(await settings.getScriptedFieldsTabCount())).to.be(startingCount + 1);
+          expect(parseInt(await settings.getScriptedFieldsTabCount(), 10)).to.be(startingCount + 1);
         });
 
         await settings.addScriptedField(
@@ -139,7 +139,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           "if (doc['url.raw'].size() > 0) { String tempString = \"\"; for ( int i = (doc['url.raw'].value.length() - 1); i >= 0 ; i--) { tempString = tempString + (doc['url.raw'].value).charAt(i); } return tempString; } else { return \"emptyUrl\"; }"
         );
         await retry.try(async function () {
-          expect(parseInt(await settings.getScriptedFieldsTabCount())).to.be(startingCount + 2);
+          expect(parseInt(await settings.getScriptedFieldsTabCount(), 10)).to.be(startingCount + 2);
         });
       }
 

@@ -12,13 +12,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const inspector = getService('inspector');
-  const { common, settings, header, home, maps } = getPageObjects([
-    'common',
-    'settings',
-    'header',
-    'home',
-    'maps',
-  ]);
+  const { common, header, home, maps } = getPageObjects(['common', 'header', 'home', 'maps']);
 
   describe('Maps app Accessibility', () => {
     before(async () => {

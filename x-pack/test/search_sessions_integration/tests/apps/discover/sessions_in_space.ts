@@ -94,7 +94,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
   });
-  async function load(discover: string[]) {
+  async function load(discoverIDs: string[]) {
     await kibanaServer.importExport.load(
       `x-pack/test/functional/fixtures/kbn_archiver/dashboard/session_in_space`
     );
@@ -119,7 +119,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       kibana: [
         {
           feature: {
-            discover,
+            discover: discoverIDs,
           },
           spaces: ['another-space'],
         },
