@@ -7,7 +7,6 @@
  */
 
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
-import { existsFilterFunction } from '@kbn/data-plugin/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const CREATE_DRILLDOWN_DATA_TEST_SUBJ = 'embeddablePanelAction-OPEN_FLYOUT_ADD_DRILLDOWN';
