@@ -10,7 +10,7 @@ import React from 'react';
 
 import { FieldSpec } from '@kbn/data-views-plugin/common';
 import { stubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { render, RenderResult, within } from '@testing-library/react';
+import { render, RenderResult, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { ControlOutput, OptionsListEmbeddableInput } from '../..';
@@ -234,6 +234,10 @@ describe('Options list popover', () => {
       const sortButton = popover.getByTestId('optionsListControl__sortingOptionsButton');
       await userEvent.click(sortButton);
 
+      await waitFor(() => {
+        expect(popover.getByTestId('optionsListControl__sortingOptions')).toBeInTheDocument();
+      });
+
       const sortingOptionsDiv = popover.getByTestId('optionsListControl__sortingOptions');
       const optionsText = within(sortingOptionsDiv)
         .getAllByRole('option')
@@ -250,6 +254,10 @@ describe('Options list popover', () => {
       });
       const sortButton = popover.getByTestId('optionsListControl__sortingOptionsButton');
       await userEvent.click(sortButton);
+
+      await waitFor(() => {
+        expect(popover.getByTestId('optionsListControl__sortingOptions')).toBeInTheDocument();
+      });
 
       const sortingOptionsDiv = popover.getByTestId('optionsListControl__sortingOptions');
       const optionsText = within(sortingOptionsDiv)
@@ -270,6 +278,10 @@ describe('Options list popover', () => {
       const sortButton = popover.getByTestId('optionsListControl__sortingOptionsButton');
       await userEvent.click(sortButton);
 
+      await waitFor(() => {
+        expect(popover.getByTestId('optionsListControl__sortingOptions')).toBeInTheDocument();
+      });
+
       const sortingOptionsDiv = popover.getByTestId('optionsListControl__sortingOptions');
       const optionsText = within(sortingOptionsDiv)
         .getAllByRole('option')
@@ -284,6 +296,10 @@ describe('Options list popover', () => {
       const sortButton = popover.getByTestId('optionsListControl__sortingOptionsButton');
       await userEvent.click(sortButton);
 
+      await waitFor(() => {
+        expect(popover.getByTestId('optionsListControl__sortingOptions')).toBeInTheDocument();
+      });
+
       const sortingOptionsDiv = popover.getByTestId('optionsListControl__sortingOptions');
       const optionsText = within(sortingOptionsDiv)
         .getAllByRole('option')
@@ -297,6 +313,10 @@ describe('Options list popover', () => {
       });
       const sortButton = popover.getByTestId('optionsListControl__sortingOptionsButton');
       await userEvent.click(sortButton);
+
+      await waitFor(() => {
+        expect(popover.getByTestId('optionsListControl__sortingOptions')).toBeInTheDocument();
+      });
 
       const sortingOptionsDiv = popover.getByTestId('optionsListControl__sortingOptions');
       const optionsText = within(sortingOptionsDiv)
