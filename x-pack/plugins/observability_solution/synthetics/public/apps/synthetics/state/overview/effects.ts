@@ -47,16 +47,18 @@ export function* fetchTrendEffect(
     yield put(trendStatsBatch.fail(e));
   }
 }
+
 export function* fetchOverviewTrendStats() {
   yield takeEvery(trendStatsBatch.get, fetchTrendEffect);
 }
+
 export function* refreshTrends(): Generator<unknown, void, TrendTable> {
   const existingTrends: TrendTable = yield select(selectOverviewTrends);
   let acc = {};
   const keys = Object.keys(existingTrends);
-  do {
+  while (keys.length) {
     const chunk = keys
-      .splice(0, keys.length < 10 ? keys.length : 10)
+      .splice(0, keys.length < 10 ? keys.length : 40)
       .filter((key: string) => existingTrends[key] !== null)
       .map((key: string) => ({
         configId: existingTrends[key]!.configId,
@@ -66,11 +68,12 @@ export function* refreshTrends(): Generator<unknown, void, TrendTable> {
       const res = yield call(trendsApi, chunk);
       acc = { ...acc, ...res };
     }
-  } while (keys.length);
+  }
   if (Object.keys(acc).length) {
     yield put(trendStatsBatch.success(acc));
   }
 }
+
 export function* refreshOverviewTrendStats() {
   yield takeLeading(refreshOverviewTrends.get, refreshTrends);
 }
