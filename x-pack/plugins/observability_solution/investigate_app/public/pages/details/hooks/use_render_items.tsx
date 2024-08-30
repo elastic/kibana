@@ -6,29 +6,66 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { GetInvestigationResponse, InvestigationItem } from '@kbn/investigation-shared';
+import { type GlobalWidgetParameters } from '@kbn/investigate-plugin/public';
+import { GetInvestigationResponse, InvestigationItem, Item } from '@kbn/investigation-shared';
 import React, { useEffect, useState } from 'react';
 import { useKibana } from '../../../hooks/use_kibana';
+import { useFetchInvestigationItems } from '../../../hooks/use_fetch_investigation_items';
+import { useAddInvestigationItem } from '../../../hooks/use_add_investigation_item';
+import { useDeleteInvestigationItem } from '../../../hooks/use_delete_investigation_item';
 
 export type RenderedInvestigationItem = InvestigationItem & {
   loading: boolean;
   element: React.ReactNode;
 };
 
-export function useRenderItems({
-  items,
-  params,
-}: {
-  items?: InvestigationItem[];
-  params: GetInvestigationResponse['params'];
-}) {
+interface Props {
+  investigation: GetInvestigationResponse;
+}
+
+interface UseRenderItemsHook {
+  renderableItems: RenderedInvestigationItem[];
+  globalParams: GlobalWidgetParameters;
+  setGlobalParams: (params: GlobalWidgetParameters) => void;
+  addItem: (item: Item) => Promise<void>;
+  deleteItem: (itemId: string) => Promise<void>;
+  isAdding: boolean;
+  isDeleting: boolean;
+}
+
+export function useRenderItems({ investigation }: Props): UseRenderItemsHook {
   const {
     dependencies: {
       start: { investigate },
     },
   } = useKibana();
 
+  const { data: items, refetch } = useFetchInvestigationItems({
+    investigationId: investigation.id,
+    initialItems: investigation.items,
+  });
+
+  const { mutateAsync: addInvestigationItem, isLoading: isAdding } = useAddInvestigationItem();
+  const { mutateAsync: deleteInvestigationItem, isLoading: isDeleting } =
+    useDeleteInvestigationItem();
+
+  const addItem = async (item: Item) => {
+    await addInvestigationItem({ investigationId: investigation.id, item });
+    refetch();
+  };
+
+  const deleteItem = async (itemId: string) => {
+    await deleteInvestigationItem({ investigationId: investigation.id, itemId });
+    refetch();
+  };
+
   const [renderableItems, setRenderableItems] = useState<RenderedInvestigationItem[]>([]);
+  const [globalParams, setGlobalParams] = useState<GlobalWidgetParameters>({
+    timeRange: {
+      from: new Date(investigation.params.timeRange.from).toISOString(),
+      to: new Date(investigation.params.timeRange.to).toISOString(),
+    },
+  });
 
   useEffect(() => {
     async function renderItems(currItems: InvestigationItem[]) {
@@ -49,13 +86,6 @@ export function useRenderItems({
               ),
             });
           }
-
-          const globalParams = {
-            timeRange: {
-              from: new Date(params.timeRange.from).toISOString(),
-              to: new Date(params.timeRange.to).toISOString(),
-            },
-          };
 
           const data = await itemDefinition.generate({
             itemParams: item.params,
@@ -78,7 +108,15 @@ export function useRenderItems({
     if (items) {
       renderItems(items).then((nextRenderableItems) => setRenderableItems(nextRenderableItems));
     }
-  }, [items, investigate, params]);
+  }, [items, investigate, globalParams]);
 
-  return renderableItems;
+  return {
+    renderableItems,
+    setGlobalParams,
+    globalParams,
+    addItem,
+    deleteItem,
+    isAdding,
+    isDeleting,
+  };
 }
