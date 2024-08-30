@@ -87,4 +87,14 @@ export function registerHelpers(handlebarsInstance: typeof Handlebars) {
       return circularRefs.has(`#/components/schemas/${schemaName}`);
     }
   );
+
+  handlebarsInstance.registerHelper('shouldCastExplicitly', function ({ anyOf }, options) {
+    if (anyOf?.length > 2) {
+      // @ts-expect-error
+      return options.fn(this);
+    } else {
+      // @ts-expect-error
+      return options.inverse(this);
+    }
+  });
 }

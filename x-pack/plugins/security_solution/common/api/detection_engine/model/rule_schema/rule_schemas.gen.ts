@@ -597,8 +597,9 @@ export const EsqlRuleUpdateProps = SharedUpdateProps.merge(EsqlRuleCreateFields)
 export type EsqlRulePatchProps = z.infer<typeof EsqlRulePatchProps>;
 export const EsqlRulePatchProps = SharedPatchProps.merge(EsqlRulePatchFields.partial());
 
-export type TypeSpecificCreateProps = z.infer<typeof TypeSpecificCreateProps>;
-export const TypeSpecificCreateProps = z.discriminatedUnion('type', [
+// We need this temporary type to infer from it below, but in the end we want to export as a casted TypeSpecificCreateProps type
+// error TS7056: The inferred type of this node exceeds the maximum length the compiler will serialize. An explicit type annotation is needed.
+const TypeSpecificCreatePropsInternal = z.discriminatedUnion('type', [
   EqlRuleCreateFields,
   QueryRuleCreateFields,
   SavedQueryRuleCreateFields,
@@ -609,8 +610,13 @@ export const TypeSpecificCreateProps = z.discriminatedUnion('type', [
   EsqlRuleCreateFields,
 ]);
 
-export type TypeSpecificPatchProps = z.infer<typeof TypeSpecificPatchProps>;
-export const TypeSpecificPatchProps = z.union([
+export type TypeSpecificCreateProps = z.infer<typeof TypeSpecificCreatePropsInternal>;
+export const TypeSpecificCreateProps =
+  TypeSpecificCreatePropsInternal as z.ZodType<unknown> as z.ZodType<TypeSpecificCreateProps>;
+
+// We need this temporary type to infer from it below, but in the end we want to export as a casted TypeSpecificPatchProps type
+// error TS7056: The inferred type of this node exceeds the maximum length the compiler will serialize. An explicit type annotation is needed.
+const TypeSpecificPatchPropsInternal = z.union([
   EqlRulePatchFields,
   QueryRulePatchFields,
   SavedQueryRulePatchFields,
@@ -621,8 +627,13 @@ export const TypeSpecificPatchProps = z.union([
   EsqlRulePatchFields,
 ]);
 
-export type TypeSpecificResponse = z.infer<typeof TypeSpecificResponse>;
-export const TypeSpecificResponse = z.discriminatedUnion('type', [
+export type TypeSpecificPatchProps = z.infer<typeof TypeSpecificPatchPropsInternal>;
+export const TypeSpecificPatchProps =
+  TypeSpecificPatchPropsInternal as z.ZodType<unknown> as z.ZodType<TypeSpecificPatchProps>;
+
+// We need this temporary type to infer from it below, but in the end we want to export as a casted TypeSpecificResponse type
+// error TS7056: The inferred type of this node exceeds the maximum length the compiler will serialize. An explicit type annotation is needed.
+const TypeSpecificResponseInternal = z.discriminatedUnion('type', [
   EqlRuleResponseFields,
   QueryRuleResponseFields,
   SavedQueryRuleResponseFields,
@@ -633,8 +644,13 @@ export const TypeSpecificResponse = z.discriminatedUnion('type', [
   EsqlRuleResponseFields,
 ]);
 
-export type RuleCreateProps = z.infer<typeof RuleCreateProps>;
-export const RuleCreateProps = z.discriminatedUnion('type', [
+export type TypeSpecificResponse = z.infer<typeof TypeSpecificResponseInternal>;
+export const TypeSpecificResponse =
+  TypeSpecificResponseInternal as z.ZodType<unknown> as z.ZodType<TypeSpecificResponse>;
+
+// We need this temporary type to infer from it below, but in the end we want to export as a casted RuleCreateProps type
+// error TS7056: The inferred type of this node exceeds the maximum length the compiler will serialize. An explicit type annotation is needed.
+const RuleCreatePropsInternal = z.discriminatedUnion('type', [
   EqlRuleCreateProps,
   QueryRuleCreateProps,
   SavedQueryRuleCreateProps,
@@ -645,8 +661,13 @@ export const RuleCreateProps = z.discriminatedUnion('type', [
   EsqlRuleCreateProps,
 ]);
 
-export type RuleUpdateProps = z.infer<typeof RuleUpdateProps>;
-export const RuleUpdateProps = z.discriminatedUnion('type', [
+export type RuleCreateProps = z.infer<typeof RuleCreatePropsInternal>;
+export const RuleCreateProps =
+  RuleCreatePropsInternal as z.ZodType<unknown> as z.ZodType<RuleCreateProps>;
+
+// We need this temporary type to infer from it below, but in the end we want to export as a casted RuleUpdateProps type
+// error TS7056: The inferred type of this node exceeds the maximum length the compiler will serialize. An explicit type annotation is needed.
+const RuleUpdatePropsInternal = z.discriminatedUnion('type', [
   EqlRuleUpdateProps,
   QueryRuleUpdateProps,
   SavedQueryRuleUpdateProps,
@@ -657,8 +678,13 @@ export const RuleUpdateProps = z.discriminatedUnion('type', [
   EsqlRuleUpdateProps,
 ]);
 
-export type RulePatchProps = z.infer<typeof RulePatchProps>;
-export const RulePatchProps = z.union([
+export type RuleUpdateProps = z.infer<typeof RuleUpdatePropsInternal>;
+export const RuleUpdateProps =
+  RuleUpdatePropsInternal as z.ZodType<unknown> as z.ZodType<RuleUpdateProps>;
+
+// We need this temporary type to infer from it below, but in the end we want to export as a casted RulePatchProps type
+// error TS7056: The inferred type of this node exceeds the maximum length the compiler will serialize. An explicit type annotation is needed.
+const RulePatchPropsInternal = z.union([
   EqlRulePatchProps,
   QueryRulePatchProps,
   SavedQueryRulePatchProps,
@@ -669,8 +695,13 @@ export const RulePatchProps = z.union([
   EsqlRulePatchProps,
 ]);
 
-export type RuleResponse = z.infer<typeof RuleResponse>;
-export const RuleResponse = z.discriminatedUnion('type', [
+export type RulePatchProps = z.infer<typeof RulePatchPropsInternal>;
+export const RulePatchProps =
+  RulePatchPropsInternal as z.ZodType<unknown> as z.ZodType<RulePatchProps>;
+
+// We need this temporary type to infer from it below, but in the end we want to export as a casted RuleResponse type
+// error TS7056: The inferred type of this node exceeds the maximum length the compiler will serialize. An explicit type annotation is needed.
+const RuleResponseInternal = z.discriminatedUnion('type', [
   EqlRule,
   QueryRule,
   SavedQueryRule,
@@ -680,3 +711,6 @@ export const RuleResponse = z.discriminatedUnion('type', [
   NewTermsRule,
   EsqlRule,
 ]);
+
+export type RuleResponse = z.infer<typeof RuleResponseInternal>;
+export const RuleResponse = RuleResponseInternal as z.ZodType<unknown> as z.ZodType<RuleResponse>;

@@ -85,8 +85,9 @@ export const ExceptionListItemEntryMatchWildcard = z.object({
   operator: ExceptionListItemEntryOperator,
 });
 
-export type ExceptionListItemEntry = z.infer<typeof ExceptionListItemEntry>;
-export const ExceptionListItemEntry = z.discriminatedUnion('type', [
+// We need this temporary type to infer from it below, but in the end we want to export as a casted ExceptionListItemEntry type
+// error TS7056: The inferred type of this node exceeds the maximum length the compiler will serialize. An explicit type annotation is needed.
+const ExceptionListItemEntryInternal = z.discriminatedUnion('type', [
   ExceptionListItemEntryMatch,
   ExceptionListItemEntryMatchAny,
   ExceptionListItemEntryList,
@@ -94,6 +95,10 @@ export const ExceptionListItemEntry = z.discriminatedUnion('type', [
   ExceptionListItemEntryNested,
   ExceptionListItemEntryMatchWildcard,
 ]);
+
+export type ExceptionListItemEntry = z.infer<typeof ExceptionListItemEntryInternal>;
+export const ExceptionListItemEntry =
+  ExceptionListItemEntryInternal as z.ZodType<unknown> as z.ZodType<ExceptionListItemEntry>;
 
 export type ExceptionListItemEntryArray = z.infer<typeof ExceptionListItemEntryArray>;
 export const ExceptionListItemEntryArray = z.array(ExceptionListItemEntry);
