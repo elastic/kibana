@@ -5,49 +5,68 @@
  * 2.0.
  */
 
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom/extend-expect';
 
 import { FilterLists } from './filter_lists';
 
+// Mocking the child components to just assert that they get the data
+// received via the async call using mlApiServices in the main component.
 jest.mock('../../../components/help_menu', () => ({
-  HelpMenu: () => <div id="mockHelpMenu" />,
+  HelpMenu: ({ docLink }) => <div data-test-subj="mockHelpMenu" data-link={docLink} />,
 }));
-
-jest.mock('../../../util/dependency_cache', () => ({
-  getDocLinks: () => ({
-    links: {
-      ml: { customRules: jest.fn() },
-    },
-  }),
+jest.mock('./header', () => ({
+  FilterListsHeader: ({ totalCount }) => (
+    <div data-test-subj="mockFilterListsHeader">{totalCount}</div>
+  ),
+}));
+jest.mock('./table', () => ({
+  FilterListsTable: ({ filterLists, selectedFilterLists }) => (
+    <div
+      data-test-subj="mockFilterListsTable"
+      data-filter-lists={JSON.stringify(filterLists)}
+      data-selected-filter-lists={JSON.stringify(selectedFilterLists)}
+    />
+  ),
 }));
 
 jest.mock('../../../capabilities/check_capabilities', () => ({
   checkPermission: () => true,
 }));
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  withKibana: (node) => {
-    return node;
-  },
-}));
-
 // Mock the call for loading the list of filters.
-// The mock is hoisted to the top, so need to prefix the filter variable
-// with 'mock' so it can be used lazily.
 const mockTestFilter = {
   filter_id: 'safe_domains',
   description: 'List of known safe domains',
   item_count: 500,
   used_by: { jobs: ['dns_exfiltration'] },
 };
-jest.mock('../../../services/ml_api_service', () => ({
-  ml: {
-    filters: {
-      filtersStats: () => {
-        return Promise.resolve([mockTestFilter]);
+const mockKibanaProp = {
+  services: {
+    docLinks: { links: { ml: { customRules: 'https://customRules' } } },
+    mlServices: {
+      mlApiServices: {
+        filters: {
+          filtersStats: () => {
+            return Promise.resolve([mockTestFilter]);
+          },
+        },
       },
     },
+  },
+};
+
+const mockReact = React;
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  withKibana: (type) => {
+    const EnhancedType = (props) => {
+      return mockReact.createElement(type, {
+        ...props,
+        kibana: mockKibanaProp,
+      });
+    };
+    return EnhancedType;
   },
 }));
 
@@ -57,15 +76,23 @@ const props = {
 };
 
 describe('Filter Lists', () => {
-  test('renders a list of filters', () => {
-    const wrapper = shallowWithIntl(<FilterLists {...props} />);
+  test('renders a list of filters', async () => {
+    render(<FilterLists {...props} />);
 
-    // Cannot find a way to generate the snapshot after the Promise in the mock ml.filters
-    // has resolved.
-    // So set the filter lists directly to ensure the snapshot is generated against
-    // the test list and not the default empty state.
-    wrapper.instance().setFilterLists([mockTestFilter]);
-    wrapper.update();
-    expect(wrapper).toMatchSnapshot();
+    // Wait for the elements to appear
+    await waitFor(() => {
+      expect(screen.getByTestId('mockFilterListsHeader')).toHaveTextContent('1');
+    });
+
+    // Assert that the child components receive the data based on async calls and kibana context.
+    const filterListsTableElement = screen.getByTestId('mockFilterListsTable');
+    expect(filterListsTableElement).toHaveAttribute(
+      'data-filter-lists',
+      JSON.stringify([mockTestFilter])
+    );
+    expect(filterListsTableElement).toHaveAttribute('data-selected-filter-lists', '[]');
+
+    const helpMenuElement = screen.getByTestId('mockHelpMenu');
+    expect(helpMenuElement).toHaveAttribute('data-link', 'https://customRules');
   });
 });

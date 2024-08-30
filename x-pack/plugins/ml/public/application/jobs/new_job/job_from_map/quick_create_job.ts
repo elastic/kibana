@@ -13,6 +13,7 @@ import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public'
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { MapApi } from '@kbn/maps-plugin/public';
 import type { MlApiServices } from '../../../services/ml_api_service';
+import type { MlJobService } from '../../../services/job_service';
 import {
   CREATED_BY_LABEL,
   JOB_TYPE,
@@ -20,7 +21,6 @@ import {
 } from '../../../../../common/constants/new_job';
 import { createEmptyJob, createEmptyDatafeed } from '../common/job_creator/util/default_configs';
 import type { JobCreatorType } from '../common/job_creator';
-import { stashJobForCloning } from '../common/job_creator/util/general';
 import { getJobsItemsFromEmbeddable } from './utils';
 import type { CreateState } from '../job_from_dashboard';
 import { QuickJobCreatorBase } from '../job_from_dashboard';
@@ -43,9 +43,10 @@ export class QuickGeoJobCreator extends QuickJobCreatorBase {
     kibanaConfig: IUiSettingsClient,
     timeFilter: TimefilterContract,
     dashboardService: DashboardStart,
-    mlApiServices: MlApiServices
+    mlApiServices: MlApiServices,
+    mlJobService: MlJobService
   ) {
-    super(dataViews, kibanaConfig, timeFilter, dashboardService, mlApiServices);
+    super(dataViews, kibanaConfig, timeFilter, dashboardService, mlApiServices, mlJobService);
   }
 
   public async createAndSaveGeoJob({
@@ -144,7 +145,7 @@ export class QuickGeoJobCreator extends QuickJobCreatorBase {
       // add job config and start and end dates to the
       // job cloning stash, so they can be used
       // by the new job wizards
-      stashJobForCloning(
+      this.mlJobService.stashJobForCloning(
         {
           jobConfig,
           datafeedConfig,
