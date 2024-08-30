@@ -223,13 +223,21 @@ const kibanaFeatureSchema = schema.object({
   catalogue: schema.maybe(catalogueSchema),
   alerting: schema.maybe(alertingSchema),
   cases: schema.maybe(casesSchema),
-  privileges: schema.oneOf([
-    schema.literal(null),
-    schema.object({
-      all: schema.maybe(kibanaPrivilegeSchema),
-      read: schema.maybe(kibanaPrivilegeSchema),
+  privileges: schema.conditional(
+    schema.siblingRef('scope'),
+    schema.arrayOf(schema.literal('spaces'), {
+      minSize: 1,
+      maxSize: 1,
     }),
-  ]),
+    schema.literal(null),
+    schema.oneOf([
+      schema.literal(null),
+      schema.object({
+        all: schema.maybe(kibanaPrivilegeSchema),
+        read: schema.maybe(kibanaPrivilegeSchema),
+      }),
+    ])
+  ),
   subFeatures: schema.maybe(
     schema.conditional(
       schema.siblingRef('privileges'),

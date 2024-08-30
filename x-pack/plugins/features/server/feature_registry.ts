@@ -46,16 +46,6 @@ export class FeatureRegistry {
       feature.scope = [KibanaFeatureScope.Security];
     }
 
-    if (
-      feature.scope.length === 1 &&
-      feature.scope[0] === KibanaFeatureScope.Spaces &&
-      feature.privileges
-    ) {
-      throw new Error(
-        `Feature with id ${feature.id} and only spaces scope could not have privileges.`
-      );
-    }
-
     const featureCopy = cloneDeep(feature);
 
     this.kibanaFeatures[feature.id] = applyAutomaticPrivilegeGrants(featureCopy);
