@@ -22,7 +22,18 @@ export type ParentApi = PresentationContainer &
   HasRuntimeChildState &
   PublishesTimeRange;
 
-export interface SerializedState {
+export interface LastSavedPanelState {
+  id: string;
+}
+export interface LastSavedState {
   timeRange: TimeRange;
-  panels: SerializedPanelState[];
+  panels: Array<SerializedPanelState<LastSavedPanelState>>;
+}
+
+export interface UnsavedPanelState {
+  id: string;
+}
+export interface UnsavedChanges {
+  timeRange?: TimeRange;
+  panels?: UnsavedPanelState[];
 }
