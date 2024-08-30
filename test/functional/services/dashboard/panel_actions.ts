@@ -281,7 +281,7 @@ export class DashboardPanelActionsService extends FtrService {
     });
     await this.testSubjects.clickWhenNotDisabledWithoutRetry('confirmSaveSavedObjectButton');
     await this.testSubjects.existOrFail('addPanelToLibrarySuccess');
-    await this.expectLinkedToLibrary(newTitle, false);
+    await this.expectLinkedToLibrary(newTitle);
   }
 
   async expectExistsPanelAction(testSubject: string, title = '') {

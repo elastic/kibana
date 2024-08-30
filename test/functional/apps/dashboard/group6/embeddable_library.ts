@@ -15,6 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardAddPanel = getService('dashboardAddPanel');
   const panelActions = getService('dashboardPanelActions');
   const savedObjectsFinder = getService('savedObjectsFinder');
+  const title = 'Rendering Test: heatmap';
 
   describe('embeddable library', () => {
     before(async () => {
@@ -33,22 +34,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('unlink visualize panel from embeddable library', async () => {
       // add heatmap panel from library
       await dashboardAddPanel.clickOpenAddPanel();
-      await savedObjectsFinder.filterEmbeddableNames('Rendering Test: heatmap');
-      await find.clickByButtonText('Rendering Test: heatmap');
+      await savedObjectsFinder.filterEmbeddableNames(title);
+      await find.clickByButtonText(title);
       await dashboardAddPanel.closeAddPanel();
 
-      await panelActions.legacyUnlinkFromLibrary('RenderingTest:heatmap');
-      await panelActions.expectNotLinkedToLibrary('RenderingTest:heatmap');
+      await panelActions.unlinkFromLibrary(title);
+      await panelActions.expectNotLinkedToLibrary(title);
 
       await dashboardAddPanel.clickOpenAddPanel();
-      await savedObjectsFinder.filterEmbeddableNames('Rendering Test: heatmap');
-      await find.existsByLinkText('Rendering Test: heatmap');
+      await savedObjectsFinder.filterEmbeddableNames(title);
+      await find.existsByLinkText(title);
       await dashboardAddPanel.closeAddPanel();
     });
 
     it('save visualize panel to embeddable library', async () => {
       const newTitle = 'Rendering Test: heatmap - copy';
-      await panelActions.saveToLibrary(newTitle, 'RenderingTest:heatmap');
+      await panelActions.saveToLibrary(newTitle, title);
       await panelActions.expectLinkedToLibrary(newTitle);
     });
   });
