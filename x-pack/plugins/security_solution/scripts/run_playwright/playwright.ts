@@ -23,6 +23,7 @@ import {
 } from '@kbn/test/src/functional_test_runner/lib';
 import pRetry from 'p-retry';
 import execa from 'execa';
+import { createFailError } from '@kbn/dev-cli-errors';
 import { prefixedOutputLogger } from '../endpoint/common/utils';
 import { createToolingLogger } from '../../common/endpoint/data_loaders/utils';
 import { parseTestFileConfig, retrieveIntegrations } from '../run_cypress/utils';
@@ -134,6 +135,8 @@ ${JSON.stringify(playwrightConfigFile, null, 2)}
         _.pull(kibanaPorts, kibanaPort);
         _.pull(fleetServerPorts, fleetServerPort);
       };
+
+      const failedSpecFilePaths: string[] = [];
 
       const runSpecs = async (filePaths: string[]) =>
         pMap(
@@ -350,6 +353,8 @@ ${JSON.stringify(playwrightConfigFile, null, 2)}
                 }
               } catch (error) {
                 log.error(error);
+                result = error;
+                failedSpecFilePaths.push(filePath);
               }
 
               if (fleetServer) {
@@ -359,6 +364,7 @@ ${JSON.stringify(playwrightConfigFile, null, 2)}
               await procs.stop('kibana');
               await shutdownEs?.();
               cleanupServerPorts({ esPort, kibanaPort, fleetServerPort });
+              return result;
             });
             return result;
           },
@@ -367,8 +373,23 @@ ${JSON.stringify(playwrightConfigFile, null, 2)}
           }
         );
 
-      await runSpecs(files);
+      const initialResults = await runSpecs(files);
+      const retryResults = await runSpecs([...failedSpecFilePaths]);
 
+      // If there are failed tests, retry them
+      const hasFailedTests = (runResults) =>
+        _.some(
+          // only fail the job if retry failed as well
+          runResults,
+          (runResult) => runResult?.exitCode === 1
+        );
+      const hasFailedInitialTests = hasFailedTests(initialResults);
+      const hasFailedRetryTests = hasFailedTests(retryResults);
+
+      // If the initialResults had failures and failedSpecFilePaths was not populated properly return errors
+      if (hasFailedRetryTests || (hasFailedInitialTests && !retryResults.length)) {
+        throw createFailError('Not all tests passed');
+      }
     },
     {
       flags: {
