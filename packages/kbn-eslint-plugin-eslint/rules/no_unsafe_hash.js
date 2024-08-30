@@ -16,7 +16,7 @@ module.exports = {
     },
     messages: {
       noDisallowedHash:
-        'Usage of createHash with "{{algorithm}}" is not allowed. Only the following algorithms are allowed: [{{allowedAlgorithms}}]. If you need to use a different algorithm, please contact the security team.',
+        'Usage of createHash with "{{algorithm}}" is not allowed. Only the following algorithms are allowed: [{{allowedAlgorithms}}]. If you need to use a different algorithm, please contact the Kibana security team.',
     },
     schema: [],
   },
@@ -33,12 +33,10 @@ module.exports = {
       return allowedAlgorithms.includes(algorithm);
     }
 
-    function checkIdentifierValue(node) {
-      const scope = sourceCode.scopeManager.acquire(node);
-      console.log(scope);
+    function getIdentifierValue(node) {
+      const scope = sourceCode.getScope(node);
       if (scope) {
         const variable = scope.variables.find((variable) => variable.name === node.name);
-
         if (variable && variable.defs.length > 0) {
           const def = variable.defs[0];
           if (
@@ -47,9 +45,11 @@ module.exports = {
             !isAllowedAlgorithm(def.node.init.value)
           ) {
             disallowedAlgorithmNodes.add(node.name);
+            return def.node.init.value;
           }
         }
       }
+      return undefined;
     }
 
     return {
@@ -86,7 +86,6 @@ module.exports = {
         ) {
           if (node.arguments.length > 0) {
             const arg = node.arguments[0];
-
             if (arg.type === 'Literal' && !isAllowedAlgorithm(arg.value)) {
               context.report({
                 node,
@@ -97,13 +96,13 @@ module.exports = {
                 },
               });
             } else if (arg.type === 'Identifier') {
-              checkIdentifierValue(arg);
-              if (disallowedAlgorithmNodes.has(arg.name)) {
+              const identifierValue = getIdentifierValue(arg);
+              if (disallowedAlgorithmNodes.has(arg.name) && identifierValue) {
                 context.report({
                   node,
                   messageId: 'noDisallowedHash',
                   data: {
-                    algorithm: arg.value,
+                    algorithm: identifierValue,
                     allowedAlgorithms: allowedAlgorithms.join(', '),
                   },
                 });
