@@ -94,7 +94,7 @@ const AnomalyActionMenu = ({
       },
     },
   } = useKibanaContextForPlugin();
-  const hostLocator = share.url.locators.get<HostsLocatorParams>(HOSTS_LOCATOR_ID);
+  const hostsLocator = share.url.locators.get<HostsLocatorParams>(HOSTS_LOCATOR_ID);
 
   const showInInventory = useCallback(() => {
     const metricTypeMap: { [key in Metric]: SnapshotMetricType } = {
@@ -147,14 +147,10 @@ const AnomalyActionMenu = ({
       filterManagerService.addFilters(filter);
     };
 
-    if (!hostName || !closeFlyout) {
-      hostLocator?.navigate({}).then(() => addHostFilter(newFilter));
-    } else {
-      addHostFilter(newFilter);
-    }
+    hostsLocator?.navigate({}).then(() => addHostFilter(newFilter));
 
     if (closeFlyout) closeFlyout();
-  }, [closeFlyout, influencers, metricsView, hostName, hostLocator, filterManagerService]);
+  }, [closeFlyout, influencers, metricsView, hostsLocator, filterManagerService]);
 
   const anomaliesUrl = useLinkProps({
     app: 'ml',
@@ -176,19 +172,25 @@ const AnomalyActionMenu = ({
   ];
 
   if (!disableShowInInventory) {
+    const showInHostsItem = !hostName ? (
+      <EuiContextMenuItem
+        key="showInHosts"
+        icon="search"
+        data-test-subj="infraAnomalyFlyoutShowInHosts"
+        onClick={showInHosts}
+      >
+        <FormattedMessage
+          id="xpack.infra.ml.anomalyFlyout.actions.showInHosts"
+          defaultMessage="Show in Hosts"
+        />
+      </EuiContextMenuItem>
+    ) : (
+      <></>
+    );
+
     items.push(
       influencerField === HOST_NAME_FIELD ? (
-        <EuiContextMenuItem
-          key="showInHosts"
-          icon="search"
-          data-test-subj="infraAnomalyFlyoutShowInHosts"
-          onClick={showInHosts}
-        >
-          <FormattedMessage
-            id="xpack.infra.ml.anomalyFlyout.actions.showInHosts"
-            defaultMessage="Show in Hosts"
-          />
-        </EuiContextMenuItem>
+        showInHostsItem
       ) : (
         <EuiContextMenuItem
           key="showInInventory"
@@ -522,6 +524,7 @@ export const AnomaliesTable = ({
                 influencers={anomaly.influencers}
                 startTime={anomaly.startTime}
                 closeFlyout={closeFlyout}
+                hostName={hostName}
               />
             );
           },
