@@ -20,6 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     beforeEach(async () => {
+      await PageObjects.console.openConsole();
       await PageObjects.console.monaco.clearEditorText();
     });
 
@@ -64,8 +65,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // History is not yet implemented in phase 2
-    describe.skip('console history', () => {
+    describe('console history', () => {
       const sendRequest = async (request: string) => {
         await PageObjects.console.monaco.enterText(request);
         await PageObjects.console.clickPlay();
@@ -74,25 +74,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should show the history', async () => {
         await sendRequest('GET /_search?pretty');
-        await PageObjects.console.clickHistory();
+        await PageObjects.console.openHistory();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
         await retry.try(async () => {
           const history = await PageObjects.console.getHistoryEntries();
-          expect(history).to.eql(['/_search?pretty (a few seconds ago)']);
+          expect(history).to.eql(['/_search?pretty\na few seconds ago']);
         });
 
-        // Clear the history
         await PageObjects.console.clickClearHistory();
-        await PageObjects.console.closeHistory();
       });
 
       it('should load a request from history', async () => {
         await sendRequest('GET _search\n{"query": {"match_all": {}}}');
         await PageObjects.console.monaco.clearEditorText();
-        await PageObjects.console.clickHistory();
+
+        await PageObjects.console.openHistory();
         await PageObjects.console.loadRequestFromHistory(0);
+
         await retry.try(async () => {
           const actualRequest = await PageObjects.console.monaco.getEditorText();
-          expect(actualRequest.trim()).to.eql(
+          expect(actualRequest.trim()).to.contain(
             'GET _search\n{\n  "query": {\n    "match_all": {}\n  }\n}'
           );
         });

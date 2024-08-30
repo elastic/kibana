@@ -187,10 +187,11 @@ export function History() {
                       {requests.length === 0 && <HistoryEmptyPrompt />}
 
                       {requests.slice(0, 14).map((req, idx) => (
-                        <EuiFormFieldset key={idx}>
+                        <EuiFormFieldset key={idx} data-test-subj="historyItemFieldset">
                           <EuiCheckableCard
                             id={`${CHILD_ELEMENT_PREFIX}${idx}`}
                             label={<CheckeableCardLabel {...describeReq(req)} />}
+                            data-test-subj={`historyItem-${idx}`}
                             checkableType="radio"
                             checked={viewingReq === req}
                             onChange={() => {

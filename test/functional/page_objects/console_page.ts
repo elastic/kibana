@@ -260,6 +260,10 @@ export class ConsolePageObject extends FtrService {
     await this.testSubjects.click('consoleConfigButton');
   }
 
+  public async openHistory() {
+    await this.testSubjects.click('consoleHistoryButton');
+  }
+
   public async openSettings() {
     await this.testSubjects.click('consoleConfigButton');
   }
@@ -841,12 +845,12 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async getHistoryEntries() {
-    const history = await this.find.allByCssSelector('.list-group-item');
+    const history = await this.testSubjects.findAll('historyItemFieldset');
     return await Promise.all(history.map(async (item) => await item.getVisibleText()));
   }
 
   public async loadRequestFromHistory(index: number) {
-    const historyItem = await this.find.byCssSelector(`#historyReq${index}`);
+    const historyItem = await this.testSubjects.find(`historyItem-${index}`);
     await historyItem.click();
     await this.testSubjects.click('consoleHistoryApplyButton');
   }
