@@ -272,9 +272,9 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
             allPrompts={allSystemPrompts}
             compressed
             isDisabled={isDisabled}
+            isSettingsModalVisible={true}
             onSystemPromptSelectionChange={handleOnSystemPromptSelectionChange}
             selectedPrompt={selectedSystemPrompt}
-            isSettingsModalVisible={true}
             setIsSettingsModalVisible={noop} // noop, already in settings
           />
         </EuiFormRow>

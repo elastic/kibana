@@ -524,7 +524,6 @@ const AssistantComponent: React.FC<Props> = ({
                   isLoading={isInitialLoad}
                   isSettingsModalVisible={isSettingsModalVisible}
                   isWelcomeSetup={isWelcomeSetup}
-                  refetchCurrentUserConversations={refetchCurrentUserConversations}
                   setCurrentSystemPromptId={setCurrentSystemPromptId}
                   setIsSettingsModalVisible={setIsSettingsModalVisible}
                 />

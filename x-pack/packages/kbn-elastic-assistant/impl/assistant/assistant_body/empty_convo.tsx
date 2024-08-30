@@ -9,20 +9,14 @@ import React, { Dispatch, SetStateAction } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { PromptResponse } from '@kbn/elastic-assistant-common';
-import { QueryObserverResult } from '@tanstack/react-query';
-import { Conversation } from '../../..';
 import { AssistantAnimatedIcon } from '../assistant_animated_icon';
 import { SystemPrompt } from '../prompt_editor/system_prompt';
 import { SetupKnowledgeBaseButton } from '../../knowledge_base/setup_knowledge_base_button';
 import * as i18n from '../translations';
 
 interface Props {
-  currentConversation: Conversation | undefined;
   currentSystemPromptId: string | undefined;
   isSettingsModalVisible: boolean;
-  refetchCurrentUserConversations: () => Promise<
-    QueryObserverResult<Record<string, Conversation>, unknown>
-  >;
   setIsSettingsModalVisible: Dispatch<SetStateAction<boolean>>;
   setCurrentSystemPromptId: (promptId: string | undefined) => void;
   allSystemPrompts: PromptResponse[];
@@ -30,10 +24,8 @@ interface Props {
 
 export const EmptyConvo: React.FC<Props> = ({
   allSystemPrompts,
-  currentConversation,
   currentSystemPromptId,
   isSettingsModalVisible,
-  refetchCurrentUserConversations,
   setCurrentSystemPromptId,
   setIsSettingsModalVisible,
 }) => {
