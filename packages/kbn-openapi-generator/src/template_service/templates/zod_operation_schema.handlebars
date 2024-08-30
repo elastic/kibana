@@ -31,8 +31,36 @@ export type {{@key}} = {{> ts_type}};
 export type {{@key}}Input = {{> ts_input_type }};
 export const {{@key}}: z.ZodType<{{@key}}, ZodTypeDef, {{@key}}Input> = {{> zod_schema_item }};
 {{else}}
+{{#checkIfShouldBatch this}}
+{{~#each (createBatch this 2)~}}
+const {{generateBatchName ../title @index}} = z.{{#if ../discriminator.propertyName}}
+  discriminatedUnion('{{../discriminator.propertyName}}', [
+{{else}}
+  union([
+{{/if}}
+{{#each this}}
+  {{~> zod_schema_item ~}},
+{{/each}}
+]);
+{{~/each~}}
+export type {{@key}} = z.infer<
+{{~#each (createBatch this 2)~}}
+  | typeof {{generateBatchName ../title @index}}
+{{~/each~}}
+>;
+export const {{@key}} = z.{{#if ../discriminator.propertyName}}
+discriminatedUnion('{{../discriminator.propertyName}}', [
+{{else}}
+union([
+{{/if}}
+{{~#each (createBatch this 2)~}}
+{{generateBatchName ../title @index}},
+{{~/each~}}
+]) as z.ZodType<{{@key}}>;
+{{else}}
 export type {{@key}} = z.infer<typeof {{@key}}>;
 export const {{@key}} = {{> zod_schema_item}};
+{{/checkIfShouldBatch}}
 {{/if}}
 {{#if enum}}
 {{#unless (isSingle enum)}}

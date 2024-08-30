@@ -599,86 +599,172 @@ export const EsqlRuleUpdateProps = SharedUpdateProps.merge(EsqlRuleCreateFields)
 export type EsqlRulePatchProps = z.infer<typeof EsqlRulePatchProps>;
 export const EsqlRulePatchProps = SharedPatchProps.merge(EsqlRulePatchFields.partial());
 
-export type TypeSpecificCreateProps = z.infer<typeof TypeSpecificCreateProps>;
-export const TypeSpecificCreateProps = z.discriminatedUnion('type', [
+const TypeSpecificCreatePropsBatch1 = z.discriminatedUnion('type', [
   EqlRuleCreateFields,
   QueryRuleCreateFields,
+]);
+const TypeSpecificCreatePropsBatch2 = z.discriminatedUnion('type', [
   SavedQueryRuleCreateFields,
   ThresholdRuleCreateFields,
+]);
+const TypeSpecificCreatePropsBatch3 = z.discriminatedUnion('type', [
   ThreatMatchRuleCreateFields,
   MachineLearningRuleCreateFields,
+]);
+const TypeSpecificCreatePropsBatch4 = z.discriminatedUnion('type', [
   NewTermsRuleCreateFields,
   EsqlRuleCreateFields,
 ]);
+export type TypeSpecificCreateProps = z.infer<
+  | typeof TypeSpecificCreatePropsBatch1
+  | typeof TypeSpecificCreatePropsBatch2
+  | typeof TypeSpecificCreatePropsBatch3
+  | typeof TypeSpecificCreatePropsBatch4
+>;
+export const TypeSpecificCreateProps = z.union([
+  TypeSpecificCreatePropsBatch1,
+  TypeSpecificCreatePropsBatch2,
+  TypeSpecificCreatePropsBatch3,
+  TypeSpecificCreatePropsBatch4,
+]) as z.ZodType<TypeSpecificCreateProps>;
 
-export type TypeSpecificPatchProps = z.infer<typeof TypeSpecificPatchProps>;
-export const TypeSpecificPatchProps = z.union([
-  EqlRulePatchFields,
-  QueryRulePatchFields,
-  SavedQueryRulePatchFields,
-  ThresholdRulePatchFields,
+const TypeSpecificPatchPropsBatch1 = z.union([EqlRulePatchFields, QueryRulePatchFields]);
+const TypeSpecificPatchPropsBatch2 = z.union([SavedQueryRulePatchFields, ThresholdRulePatchFields]);
+const TypeSpecificPatchPropsBatch3 = z.union([
   ThreatMatchRulePatchFields,
   MachineLearningRulePatchFields,
-  NewTermsRulePatchFields,
-  EsqlRulePatchFields,
 ]);
+const TypeSpecificPatchPropsBatch4 = z.union([NewTermsRulePatchFields, EsqlRulePatchFields]);
+export type TypeSpecificPatchProps = z.infer<
+  | typeof TypeSpecificPatchPropsBatch1
+  | typeof TypeSpecificPatchPropsBatch2
+  | typeof TypeSpecificPatchPropsBatch3
+  | typeof TypeSpecificPatchPropsBatch4
+>;
+export const TypeSpecificPatchProps = z.union([
+  TypeSpecificPatchPropsBatch1,
+  TypeSpecificPatchPropsBatch2,
+  TypeSpecificPatchPropsBatch3,
+  TypeSpecificPatchPropsBatch4,
+]) as z.ZodType<TypeSpecificPatchProps>;
 
-export type TypeSpecificResponse = z.infer<typeof TypeSpecificResponse>;
-export const TypeSpecificResponse = z.discriminatedUnion('type', [
+const TypeSpecificResponseBatch1 = z.discriminatedUnion('type', [
   EqlRuleResponseFields,
   QueryRuleResponseFields,
+]);
+const TypeSpecificResponseBatch2 = z.discriminatedUnion('type', [
   SavedQueryRuleResponseFields,
   ThresholdRuleResponseFields,
+]);
+const TypeSpecificResponseBatch3 = z.discriminatedUnion('type', [
   ThreatMatchRuleResponseFields,
   MachineLearningRuleResponseFields,
+]);
+const TypeSpecificResponseBatch4 = z.discriminatedUnion('type', [
   NewTermsRuleResponseFields,
   EsqlRuleResponseFields,
 ]);
+export type TypeSpecificResponse = z.infer<
+  | typeof TypeSpecificResponseBatch1
+  | typeof TypeSpecificResponseBatch2
+  | typeof TypeSpecificResponseBatch3
+  | typeof TypeSpecificResponseBatch4
+>;
+export const TypeSpecificResponse = z.union([
+  TypeSpecificResponseBatch1,
+  TypeSpecificResponseBatch2,
+  TypeSpecificResponseBatch3,
+  TypeSpecificResponseBatch4,
+]) as z.ZodType<TypeSpecificResponse>;
 
-export type RuleCreateProps = z.infer<typeof RuleCreateProps>;
-export const RuleCreateProps = z.discriminatedUnion('type', [
+const RuleCreatePropsBatch1 = z.discriminatedUnion('type', [
   EqlRuleCreateProps,
   QueryRuleCreateProps,
+]);
+const RuleCreatePropsBatch2 = z.discriminatedUnion('type', [
   SavedQueryRuleCreateProps,
   ThresholdRuleCreateProps,
+]);
+const RuleCreatePropsBatch3 = z.discriminatedUnion('type', [
   ThreatMatchRuleCreateProps,
   MachineLearningRuleCreateProps,
+]);
+const RuleCreatePropsBatch4 = z.discriminatedUnion('type', [
   NewTermsRuleCreateProps,
   EsqlRuleCreateProps,
 ]);
+export type RuleCreateProps = z.infer<
+  | typeof RuleCreatePropsBatch1
+  | typeof RuleCreatePropsBatch2
+  | typeof RuleCreatePropsBatch3
+  | typeof RuleCreatePropsBatch4
+>;
+export const RuleCreateProps = z.union([
+  RuleCreatePropsBatch1,
+  RuleCreatePropsBatch2,
+  RuleCreatePropsBatch3,
+  RuleCreatePropsBatch4,
+]) as z.ZodType<RuleCreateProps>;
 
-export type RuleUpdateProps = z.infer<typeof RuleUpdateProps>;
-export const RuleUpdateProps = z.discriminatedUnion('type', [
+const RuleUpdatePropsBatch1 = z.discriminatedUnion('type', [
   EqlRuleUpdateProps,
   QueryRuleUpdateProps,
+]);
+const RuleUpdatePropsBatch2 = z.discriminatedUnion('type', [
   SavedQueryRuleUpdateProps,
   ThresholdRuleUpdateProps,
+]);
+const RuleUpdatePropsBatch3 = z.discriminatedUnion('type', [
   ThreatMatchRuleUpdateProps,
   MachineLearningRuleUpdateProps,
+]);
+const RuleUpdatePropsBatch4 = z.discriminatedUnion('type', [
   NewTermsRuleUpdateProps,
   EsqlRuleUpdateProps,
 ]);
+export type RuleUpdateProps = z.infer<
+  | typeof RuleUpdatePropsBatch1
+  | typeof RuleUpdatePropsBatch2
+  | typeof RuleUpdatePropsBatch3
+  | typeof RuleUpdatePropsBatch4
+>;
+export const RuleUpdateProps = z.union([
+  RuleUpdatePropsBatch1,
+  RuleUpdatePropsBatch2,
+  RuleUpdatePropsBatch3,
+  RuleUpdatePropsBatch4,
+]) as z.ZodType<RuleUpdateProps>;
 
-export type RulePatchProps = z.infer<typeof RulePatchProps>;
+const RulePatchPropsBatch1 = z.union([EqlRulePatchProps, QueryRulePatchProps]);
+const RulePatchPropsBatch2 = z.union([SavedQueryRulePatchProps, ThresholdRulePatchProps]);
+const RulePatchPropsBatch3 = z.union([ThreatMatchRulePatchProps, MachineLearningRulePatchProps]);
+const RulePatchPropsBatch4 = z.union([NewTermsRulePatchProps, EsqlRulePatchProps]);
+export type RulePatchProps = z.infer<
+  | typeof RulePatchPropsBatch1
+  | typeof RulePatchPropsBatch2
+  | typeof RulePatchPropsBatch3
+  | typeof RulePatchPropsBatch4
+>;
 export const RulePatchProps = z.union([
-  EqlRulePatchProps,
-  QueryRulePatchProps,
-  SavedQueryRulePatchProps,
-  ThresholdRulePatchProps,
-  ThreatMatchRulePatchProps,
-  MachineLearningRulePatchProps,
-  NewTermsRulePatchProps,
-  EsqlRulePatchProps,
-]);
+  RulePatchPropsBatch1,
+  RulePatchPropsBatch2,
+  RulePatchPropsBatch3,
+  RulePatchPropsBatch4,
+]) as z.ZodType<RulePatchProps>;
 
-export type RuleResponse = z.infer<typeof RuleResponse>;
-export const RuleResponse = z.discriminatedUnion('type', [
-  ThresholdRule,
-  EqlRule,
-  QueryRule,
-  SavedQueryRule,
-  ThreatMatchRule,
-  MachineLearningRule,
-  NewTermsRule,
-  EsqlRule,
-]);
+const RuleResponseBatch1 = z.discriminatedUnion('type', [ThresholdRule, EqlRule]);
+const RuleResponseBatch2 = z.discriminatedUnion('type', [QueryRule, SavedQueryRule]);
+const RuleResponseBatch3 = z.discriminatedUnion('type', [ThreatMatchRule, MachineLearningRule]);
+const RuleResponseBatch4 = z.discriminatedUnion('type', [NewTermsRule, EsqlRule]);
+export type RuleResponse = z.infer<
+  | typeof RuleResponseBatch1
+  | typeof RuleResponseBatch2
+  | typeof RuleResponseBatch3
+  | typeof RuleResponseBatch4
+>;
+export const RuleResponse = z.union([
+  RuleResponseBatch1,
+  RuleResponseBatch2,
+  RuleResponseBatch3,
+  RuleResponseBatch4,
+]) as z.ZodType<RuleResponse>;

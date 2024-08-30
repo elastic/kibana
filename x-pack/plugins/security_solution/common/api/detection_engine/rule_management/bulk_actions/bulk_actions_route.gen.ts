@@ -284,15 +284,28 @@ export const BulkActionEditPayloadTimeline = z.object({
   }),
 });
 
-export type BulkActionEditPayload = z.infer<typeof BulkActionEditPayload>;
-export const BulkActionEditPayload = z.union([
+const BulkActionEditPayloadBatch1 = z.union([
   BulkActionEditPayloadTags,
   BulkActionEditPayloadIndexPatterns,
+]);
+const BulkActionEditPayloadBatch2 = z.union([
   BulkActionEditPayloadInvestigationFields,
   BulkActionEditPayloadTimeline,
+]);
+const BulkActionEditPayloadBatch3 = z.union([
   BulkActionEditPayloadRuleActions,
   BulkActionEditPayloadSchedule,
 ]);
+export type BulkActionEditPayload = z.infer<
+  | typeof BulkActionEditPayloadBatch1
+  | typeof BulkActionEditPayloadBatch2
+  | typeof BulkActionEditPayloadBatch3
+>;
+export const BulkActionEditPayload = z.union([
+  BulkActionEditPayloadBatch1,
+  BulkActionEditPayloadBatch2,
+  BulkActionEditPayloadBatch3,
+]) as z.ZodType<BulkActionEditPayload>;
 
 export type BulkEditRules = z.infer<typeof BulkEditRules>;
 export const BulkEditRules = BulkActionBase.merge(

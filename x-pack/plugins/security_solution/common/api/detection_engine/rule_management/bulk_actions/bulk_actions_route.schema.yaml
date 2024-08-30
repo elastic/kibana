@@ -5,7 +5,7 @@ info:
 paths:
   /api/detection_engine/rules/_bulk_action:
     post:
-      x-labels: [ess, serverless]
+      x-labels: [ ess, serverless ]
       x-codegen-enabled: true
       operationId: PerformRulesBulkAction
       summary: Apply a bulk action to detection rules
@@ -23,6 +23,7 @@ paths:
         content:
           application/json:
             schema:
+              title: 'PerformRulesBulkActionRequestBody'
               oneOf:
                 - $ref: '#/components/schemas/BulkDeleteRules'
                 - $ref: '#/components/schemas/BulkDisableRules'
@@ -37,6 +38,7 @@ paths:
           content:
             application/json:
               schema:
+                title: 'PerformRulesBulkActionResponses'
                 oneOf:
                   - $ref: '#/components/schemas/BulkEditActionResponse'
                   - $ref: '#/components/schemas/BulkExportActionResponse'
@@ -193,7 +195,7 @@ components:
           properties:
             action:
               type: string
-              enum: [delete]
+              enum: [ delete ]
           required:
             - action
 
@@ -204,7 +206,7 @@ components:
           properties:
             action:
               type: string
-              enum: [disable]
+              enum: [ disable ]
           required:
             - action
 
@@ -215,7 +217,7 @@ components:
           properties:
             action:
               type: string
-              enum: [enable]
+              enum: [ enable ]
           required:
             - action
 
@@ -226,7 +228,7 @@ components:
           properties:
             action:
               type: string
-              enum: [export]
+              enum: [ export ]
           required:
             - action
 
@@ -237,7 +239,7 @@ components:
           properties:
             action:
               type: string
-              enum: [duplicate]
+              enum: [ duplicate ]
             duplicate:
               type: object
               properties:
@@ -260,7 +262,7 @@ components:
           properties:
             action:
               type: string
-              enum: [run]
+              enum: [ run ]
             run:
               type: object
               properties:
@@ -337,7 +339,7 @@ components:
       properties:
         type:
           type: string
-          enum: [add_rule_actions, set_rule_actions]
+          enum: [ add_rule_actions, set_rule_actions ]
         value:
           type: object
           properties:
@@ -358,7 +360,7 @@ components:
       properties:
         type:
           type: string
-          enum: [set_schedule]
+          enum: [ set_schedule ]
         value:
           type: object
           properties:
@@ -448,6 +450,7 @@ components:
         - value
 
     BulkActionEditPayload:
+      title: 'BulkActionEditPayload'
       anyOf:
         - $ref: '#/components/schemas/BulkActionEditPayloadTags'
         - $ref: '#/components/schemas/BulkActionEditPayloadIndexPatterns'
@@ -463,7 +466,7 @@ components:
           properties:
             action:
               type: string
-              enum: [edit]
+              enum: [ edit ]
             edit:
               type: array
               description: Array of objects containing the edit operations

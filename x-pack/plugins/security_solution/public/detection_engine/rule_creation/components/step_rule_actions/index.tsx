@@ -18,7 +18,6 @@ import { UseArray } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { RuleObjectId } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { isQueryRule, isEsqlRule, isEqlRule } from '../../../../../common/detection_engine/utils';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { ResponseActionsForm } from '../../../rule_response_actions/response_actions_form';
 import type {
   RuleStepProps,
