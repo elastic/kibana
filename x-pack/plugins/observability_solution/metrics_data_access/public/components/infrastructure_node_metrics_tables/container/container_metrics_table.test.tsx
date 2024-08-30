@@ -15,7 +15,7 @@ import { createLazyContainerMetricsTable } from './create_lazy_container_metrics
 import IntegratedContainerMetricsTable from './integrated_container_metrics_table';
 import { metricByField } from './use_container_metrics_table';
 
-jest.mock('../../../pages/link_to/use_node_details_redirect', () => ({
+jest.mock('../../../pages/link_to/use_asset_details_redirect', () => ({
   useNodeDetailsRedirect: jest.fn(() => ({
     getNodeDetailUrl: jest.fn(() => ({
       app: 'metrics',

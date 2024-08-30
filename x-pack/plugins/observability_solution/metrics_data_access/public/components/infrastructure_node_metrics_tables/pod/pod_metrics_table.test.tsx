@@ -15,7 +15,7 @@ import IntegratedPodMetricsTable from './integrated_pod_metrics_table';
 import { PodMetricsTable } from './pod_metrics_table';
 import { metricByField } from './use_pod_metrics_table';
 
-jest.mock('../../../pages/link_to/use_node_details_redirect', () => ({
+jest.mock('../../../pages/link_to/use_asset_details_redirect', () => ({
   useNodeDetailsRedirect: jest.fn(() => ({
     getNodeDetailUrl: jest.fn(() => ({
       app: 'metrics',
