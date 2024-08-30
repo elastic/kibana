@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { schema, type TypeOf } from '@kbn/config-schema';
+import { take } from 'lodash';
 
-export const config = schema.object({
-  enabled: schema.boolean({ defaultValue: false }),
-});
+export function truncateList<T>(values: T[], limit: number): Array<T | string> {
+  if (values.length <= limit) {
+    return values;
+  }
 
-export type InventoryConfig = TypeOf<typeof config>;
+  return [...take(values, limit), `${values.length - limit} more values`];
+}
