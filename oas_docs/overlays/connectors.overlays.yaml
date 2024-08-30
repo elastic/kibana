@@ -4,6 +4,11 @@ info:
   title: Overlays for the connector objects and examples
   version: 0.0.1
 actions:
+  # Fix some optional path parameters
+  - target: "$.paths['/api/actions/connector/{id}']['post'].parameters[?(@.name=='id')]"
+    description: Remove optional indicator from path parameter
+    update:
+      required: true
   # Add some connector API examples
   - target: "$.paths['/api/actions/connector/{id}']['post']"
     description: "Add examples to create connector API"
@@ -32,110 +37,80 @@ actions:
                 createWebhookConnectorResponse:
                   $ref: "../examples/create_webhook_connector_response.yaml"
                 createXmattersConnectorResponse:
-                  $ref: "../examples/create_xmatters_connector_response.yaml"
-  # - target: "$.paths['/api/alerting/rule/{id}']['put']"
-  #   description: "Add examples to update rule API"
-  #   update: 
-  #     requestBody: 
-  #       content: 
-  #         application/json; Elastic-Api-Version=2023-10-31:
-  #           examples:
-  #             updateRuleRequest:
-  #               $ref: '../examples/update_rule_request.yaml'
-  #     responses:
-  #       200:
-  #         content:
-  #           application/json; Elastic-Api-Version=2023-10-31:
-  #             examples:
-  #               updateRuleResponse:
-  #                 $ref: '../examples/update_rule_response.yaml'
-  # - target: "$.paths['/api/alerting/rules/_find']['get']"
-  #   description: "Add examples to find rules API"
-  #   update:
-  #     responses:
-  #       200:
-  #         content:
-  #           application/json; Elastic-Api-Version=2023-10-31:
-  #             examples:
-  #               findRulesResponse:
-  #                 $ref: '../examples/find_rules_response.yaml'
-  #               findConditionalActionRulesResponse:
-  #                 $ref: '../examples/find_rules_response_conditional_action.yaml'
-  # Remove the alerting rule parameters
-  # - target: "$.paths['/api/alerting/rule/{id}']['post'].requestBody.content.*.schema.properties.params"
-  #   description: "Remove params type in create rule API"
-  #   remove: true
-  # Add some alerting rule parameters
-  # - target: "$.paths['/api/alerting/rule/{id}']['post']"
-  #   description: "Add params to create rule API"
-  #   update: 
-  #     requestBody: 
-  #       content: 
-  #         application/json; Elastic-Api-Version=2023-10-31:
-  #           schema:
-  #             properties:
-  #               params:
-  #                 additionalProperties: {}
-  #                 default: {}
-  #                 description: The parameters for the rule.
-  #                 anyOf:
-  #                   # APM anomaly rule (apm.anomaly)
-  #                   - $ref: '../../x-pack/plugins/observability_solution/apm/server/routes/alerts/rule_types/docs/params_property_apm_anomaly.yaml'
-  #                   # APM error count rule (apm.error_rate)
-  #                   - $ref: '../../x-pack/plugins/observability_solution/apm/server/routes/alerts/rule_types/docs/params_property_apm_error_count.yaml'
-  #                   # APM transaction duration rule (apm.transaction_duration)
-  #                   - $ref: '../../x-pack/plugins/observability_solution/apm/server/routes/alerts/rule_types/docs/params_property_apm_transaction_duration.yaml'
-  #                   # APM transaction error rate rule (apm.transaction_error_rate)
-  #                   - $ref: '../../x-pack/plugins/observability_solution/apm/server/routes/alerts/rule_types/docs/params_property_apm_transaction_error_rate.yaml'
-  #                   # Elasticsearch DSL query rule (.es-query)
-  #                   - $ref: '../../x-pack/plugins/alerting/docs/openapi/components/schemas/params_es_query_dsl_rule.yaml'
-  #                   # Elasticsearch ES|QL query rule (.es-query)
-  #                   - $ref: '../../x-pack/plugins/alerting/docs/openapi/components/schemas/params_es_query_esql_rule.yaml'
-  #                   # Elasticsearch KQL query rule (.es-query)
-  #                   - $ref: '../../x-pack/plugins/alerting/docs/openapi/components/schemas/params_es_query_kql_rule.yaml'
-  #                   # Index threshold rule ()
-  #                   - $ref: '../../x-pack/plugins/alerting/docs/openapi/components/schemas/params_index_threshold_rule.yaml'
-  #                   # Infra inventory rule (metrics.alert.inventory.threshold)
-  #                   - $ref: '../../x-pack/plugins/observability_solution/infra/server/lib/alerting/docs/params_property_infra_inventory.yaml'
-  #                   # Log threshold rule (logs.alert.document.count)
-  #                   - $ref: '../../x-pack/plugins/observability_solution/infra/server/lib/alerting/docs/params_property_log_threshold.yaml'
-  #                   # Infra metric threshold rule (metrics.alert.threshold)
-  #                   - $ref: '../../x-pack/plugins/observability_solution/infra/server/lib/alerting/docs/params_property_infra_metric_threshold.yaml'
-  #                   # SLO burn rate (slo.rules.burnRate)
-  #                   - $ref:  '../../x-pack/plugins/observability_solution/slo/server/lib/rules/slo_burn_rate/docs/params_property_slo_burn_rate.yaml'
-  #                   # Synthetics uptime TLS rule (xpack.uptime.alerts.tls)
-  #                   - $ref: '../../x-pack/plugins/observability_solution/uptime/server/legacy_uptime/lib/alerts/docs/params_property_synthetics_uptime_tls.yaml'
-  #                   # Uptime monitor status rule (xpack.uptime.alerts.monitorStatus)
-  #                   - $ref: '../../x-pack/plugins/observability_solution/uptime/server/legacy_uptime/lib/alerts/docs/params_property_synthetics_monitor_status.yaml'
-  #                 # TBD
-  #                   # Anomaly detection alert rule (xpack.ml.anomaly_detection_alert)
-  #                   # Anomaly detection jobs health rule (xpack.ml.anomaly_detection_jobs_health)
-  #                   # Tracking containment rule (.geo-containment)
-  #                   # Infrastructure anomaly rule (metrics.alert.anomaly)
-  #                   # CCR read exceptions rule (monitoring_ccr_read_exceptions)
-  #                   # Cluster health rule (monitoring_alert_cluster_health)
-  #                   # CPU usage rule (monitoring_alert_cpu_usage)
-  #                   # Custom query rule (siem.queryRule)
-  #                   # Disk usage rule (monitoring_alert_disk_usage)
-  #                   # Elasticsearch version mismatch rule (monitoring_alert_elasticsearch_version_mismatch)
-  #                   # Event correlation rule (siem.eqlRule)
-  #                   # Indicator match rule (siem.indicatorRule)
-  #                   # JVM memory usage rule (monitoring_alert_jvm_memory_usage)
-  #                   # Kibana version mismatch rule ( monitoring_alert_kibana_version_mismatch)
-  #                   # License expiration rule (monitoring_alert_license_expiration)
-  #                   # Logstash version mismatch rule (monitoring_alert_logstash_version_mismatch)
-  #                   # Machine learning rule (siem.mlRule)
-  #                   # Missing monitoring data rule (monitoring_alert_missing_monitoring_data)
-  #                   # New terms rule (siem.newTermsRule)
-  #                   # Nodes changed rule (monitoring_alert_nodes_changed)
-  #                   # Saved query rule (siem.savedQueryRule)
-  #                   # Security solution notification (legacy) rule (siem.notifications)
-  #                   # Shard size rule (monitoring_shard_size)
-  #                   # Synthetics monitor status rule (xpack.synthetics.alerts.monitorStatus)
-  #                   # Synthetics uptime duration anomaly rule (xpack.uptime.alerts.durationAnomaly)
-  #                   # Thread pool search rejections rule (monitoring_alert_thread_pool_search_rejections)
-  #                   # Thread pool write rejections rule (monitoring_alert_thread_pool_write_rejections)
-  #                   # Threshold rule (siem.thresholdRule)
-  #                   # TLS certificate rule (xpack.uptime.alerts.tlsCertificate)
-  #                   # Transform health (transform_health)
+                  $ref: "../examples/get_connector_response.yaml"
+  - target: "$.paths['/api/actions/connector/{id}/_execute']['post']"
+    description: "Add examples to run connector API"
+    update: 
+      requestBody: 
+        content: 
+          application/json; Elastic-Api-Version=2023-10-31: 
+            examples:
+              runIndexConnectorRequest:
+                $ref: "../examples/run_index_connector_request.yaml"
+              runJiraConnectorRequest:
+                $ref: "../examples/run_jira_connector_request.yaml"
+              runServerLogConnectorRequest:
+                $ref: "../examples/run_servicenow_itom_connector_request.yaml"
+              runSlackConnectorRequest:
+                $ref: "../examples/run_slack_api_connector_request.yaml"
+              runSwimlaneConnectorRequest:
+                $ref: "../examples/run_swimlane_connector_request.yaml"
+      responses:
+        200:
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                runIndexConnectorResponse:
+                  $ref: "../examples/run_index_connector_response.yaml"
+                runJiraConnectorResponse:
+                  $ref: "../examples/run_jira_connector_response.yaml"
+                runServerLogConnectorResponse:
+                  $ref: "../examples/run_server_log_connector_response.yaml"
+                runServiceNowITOMConnectorResponse:
+                  $ref: "../examples/run_servicenow_itom_connector_response.yaml"
+                runSlackConnectorResponse:
+                  $ref: "../examples/run_slack_api_connector_response.yaml"
+                runSwimlaneConnectorResponse:
+                  $ref: "../examples/run_swimlane_connector_response.yaml"
+  - target: "$.paths['/api/actions/connector/{id}']['get']"
+    description: "Add examples to get connector API"
+    update:
+      responses:
+        200:
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                getConnectorResponse:
+                  $ref: '../examples/get_connector_response.yaml'
+  - target: "$.paths['/api/actions/connector_types']['get']"
+    description: "Add examples to get connector types API"
+    update:
+      responses:
+        200:
+          description: Indicates a successful call.
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                getConnectorTypesServerlessResponse:
+                  $ref: '../examples/get_connector_types_generativeai_response.yaml'
+  - target: "$.paths['/api/actions/connectors']['get']"
+    description: "Add examples to get all connectors API"
+    update:
+      responses:
+        200:
+          description: Indicates a successful call.
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                getConnectorsResponse:
+                  $ref: '../examples/get_connectors_response.yaml'
+  - target: "$.paths['/api/actions/connector/{id}']['put']"
+    description: "Add examples to update connector API"
+    update: 
+      requestBody: 
+        content: 
+          application/json; Elastic-Api-Version=2023-10-31:
+            examples:
+              updateIndexConnectorRequest:
+                $ref: '../examples/update_index_connector_request.yaml'
   
