@@ -89,15 +89,14 @@ export class DashboardPanelActionsService extends FtrService {
 
   async hasContextMenuMoreItem() {
     this.log.debug('hasContextMenuMoreItem');
-    return await this.testSubjects.exists('embeddablePanelMore-mainMenu');
+    return await this.testSubjects.exists('embeddablePanelMore-mainMenu', { timeout: 500 });
   }
 
   async clickContextMenuMoreItem() {
     this.log.debug('clickContextMenuMoreItem');
     await this.expectContextMenuToBeOpen();
-    const hasMoreSubPanel = await this.hasContextMenuMoreItem();
-    if (hasMoreSubPanel) {
-      await this.testSubjects.click('embeddablePanelMore-mainMenu');
+    if (await this.hasContextMenuMoreItem()) {
+      await this.testSubjects.clickWhenNotDisabledWithoutRetry('embeddablePanelMore-mainMenu');
     }
   }
 
@@ -110,11 +109,11 @@ export class DashboardPanelActionsService extends FtrService {
   async clickContextMenuItem(testSubject: string, parent?: WebElementWrapper) {
     this.log.debug(`clickContextMenuItem(${testSubject})`);
     await this.openContextMenu(parent);
-    const exists = await this.testSubjects.exists(testSubject);
+    const exists = await this.testSubjects.exists(testSubject, { timeout: 500 });
     if (!exists) {
       await this.clickContextMenuMoreItem();
     }
-    await this.testSubjects.click(testSubject);
+    await this.testSubjects.clickWhenNotDisabledWithoutRetry(testSubject, { timeout: 500 });
   }
 
   async clickContextMenuItemByTitle(testSubject: string, title = '') {
@@ -127,10 +126,12 @@ export class DashboardPanelActionsService extends FtrService {
     this.log.debug('navigateToEditorFromFlyout');
     await this.clickContextMenuItem(INLINE_EDIT_PANEL_DATA_TEST_SUBJ);
     await this.header.waitUntilLoadingHasFinished();
-    await this.testSubjects.click(EDIT_IN_LENS_EDITOR_DATA_TEST_SUBJ);
+    await this.testSubjects.clickWhenNotDisabledWithoutRetry(EDIT_IN_LENS_EDITOR_DATA_TEST_SUBJ);
     const isConfirmModalVisible = await this.testSubjects.exists('confirmModalConfirmButton');
     if (isConfirmModalVisible) {
-      await this.testSubjects.click('confirmModalConfirmButton', 20000);
+      await this.testSubjects.clickWhenNotDisabledWithoutRetry('confirmModalConfirmButton', {
+        timeout: 20000,
+      });
     }
   }
 
@@ -266,7 +267,7 @@ export class DashboardPanelActionsService extends FtrService {
     await this.testSubjects.setValue('savedObjectTitle', newTitle, {
       clearWithKeyboard: true,
     });
-    await this.testSubjects.click('confirmSaveSavedObjectButton');
+    await this.testSubjects.clickWhenNotDisabledWithoutRetry('confirmSaveSavedObjectButton');
     await this.testSubjects.existOrFail('addPanelToLibrarySuccess');
     await this.expectLinkedToLibrary(newTitle);
   }
@@ -278,7 +279,7 @@ export class DashboardPanelActionsService extends FtrService {
     await this.testSubjects.setValue('savedObjectTitle', newTitle, {
       clearWithKeyboard: true,
     });
-    await this.testSubjects.click('confirmSaveSavedObjectButton');
+    await this.testSubjects.clickWhenNotDisabledWithoutRetry('confirmSaveSavedObjectButton');
     await this.testSubjects.existOrFail('addPanelToLibrarySuccess');
     await this.expectLinkedToLibrary(newTitle, false);
   }
@@ -288,12 +289,13 @@ export class DashboardPanelActionsService extends FtrService {
 
     const panelWrapper = await this.getPanelHeading(title);
     await this.openContextMenu(panelWrapper);
-    if (!(await this.testSubjects.exists(testSubject))) {
+    if (!(await this.testSubjects.exists(testSubject, { timeout: 1000 }))) {
       if (await this.hasContextMenuMoreItem()) {
         await this.clickContextMenuMoreItem();
       }
-      await this.testSubjects.existOrFail(testSubject);
+      await this.testSubjects.existOrFail(testSubject, { timeout: 1000 });
     }
+    await this.toggleContextMenu(panelWrapper);
   }
 
   async expectExistsRemovePanelAction(title = '') {
@@ -322,13 +324,14 @@ export class DashboardPanelActionsService extends FtrService {
 
   async expectMissingPanelAction(testSubject: string, title = '') {
     this.log.debug(`expectMissingPanelAction(${title})`, testSubject);
-    await this.openContextMenuByTitle(title);
+    const panelWrapper = await this.getPanelHeading(title);
+    await this.openContextMenu(panelWrapper);
     await this.testSubjects.missingOrFail(testSubject);
     if (await this.hasContextMenuMoreItem()) {
       await this.clickContextMenuMoreItem();
       await this.testSubjects.missingOrFail(testSubject);
     }
-    await this.toggleContextMenuByTitle(title);
+    await this.toggleContextMenu(panelWrapper);
   }
 
   async expectMissingEditPanelAction(title = '') {
@@ -371,7 +374,7 @@ export class DashboardPanelActionsService extends FtrService {
     await this.openContextMenu(parent);
     const isActionVisible = await this.testSubjects.exists(CONVERT_TO_LENS_TEST_SUBJ);
     if (!isActionVisible) await this.clickContextMenuMoreItem();
-    return await this.testSubjects.exists(CONVERT_TO_LENS_TEST_SUBJ, { timeout: 500 });
+    return await this.testSubjects.exists(CONVERT_TO_LENS_TEST_SUBJ, { timeout: 1000 });
   }
 
   async canConvertToLensByTitle(title = '') {
@@ -380,7 +383,7 @@ export class DashboardPanelActionsService extends FtrService {
     await this.openContextMenu(header);
     const isActionVisible = await this.testSubjects.exists(CONVERT_TO_LENS_TEST_SUBJ);
     if (!isActionVisible) await this.clickContextMenuMoreItem();
-    return await this.testSubjects.exists(CONVERT_TO_LENS_TEST_SUBJ, { timeout: 500 });
+    return await this.testSubjects.exists(CONVERT_TO_LENS_TEST_SUBJ, { timeout: 1000 });
   }
 
   async convertToLens(parent?: WebElementWrapper) {
@@ -391,7 +394,7 @@ export class DashboardPanelActionsService extends FtrService {
         throw new Error('Convert to Lens option not found');
       }
 
-      await this.testSubjects.click(CONVERT_TO_LENS_TEST_SUBJ);
+      await this.testSubjects.clickWhenNotDisabledWithoutRetry(CONVERT_TO_LENS_TEST_SUBJ);
     });
   }
 
