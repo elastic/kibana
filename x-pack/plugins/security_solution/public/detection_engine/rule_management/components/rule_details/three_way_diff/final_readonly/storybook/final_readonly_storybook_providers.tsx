@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import React from 'react';
 import { merge } from 'lodash';
-import type { CoreStart } from '@kbn/core/public';
 import { Subject } from 'rxjs';
+import type { CoreStart } from '@kbn/core/public';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { ReactQueryClientProvider } from '../../../../../../../common/containers/query_client/query_client_provider';
 
-export const createKibanaServicesMock = (overrides?: Partial<CoreStart>) => {
+function createKibanaServicesMock(overrides?: Partial<CoreStart>) {
   const baseMock = {
     data: {
       dataViews: {
@@ -42,4 +45,22 @@ export const createKibanaServicesMock = (overrides?: Partial<CoreStart>) => {
   } as unknown as CoreStart;
 
   return merge(baseMock, overrides);
-};
+}
+
+interface StorybookProvidersProps {
+  children: React.ReactNode;
+  kibanaServicesMock?: ReturnType<typeof createKibanaServicesMock>;
+}
+
+export function FinalReadOnlyStorybookProviders({
+  children,
+  kibanaServicesMock,
+}: StorybookProvidersProps) {
+  const KibanaReactContext = createKibanaReactContext(createKibanaServicesMock(kibanaServicesMock));
+
+  return (
+    <KibanaReactContext.Provider>
+      <ReactQueryClientProvider>{children}</ReactQueryClientProvider>
+    </KibanaReactContext.Provider>
+  );
+}

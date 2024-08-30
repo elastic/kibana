@@ -7,23 +7,21 @@
 
 import React from 'react';
 import type { Story } from '@storybook/react';
-import { DataView } from '@kbn/data-views-plugin/common';
 import { FinalReadonly } from '../../final_readonly';
-import { KqlQueryType } from '../../../../../../../../../common/api/detection_engine';
 import type {
   DiffableAllFields,
   RuleKqlQuery,
 } from '../../../../../../../../../common/api/detection_engine';
 
-import { StorybookProviders } from '../../storybook/storybook_providers';
+import { FinalReadOnlyStorybookProviders } from '../../storybook/final_readonly_storybook_providers';
 import {
   dataSourceWithDataView,
   dataSourceWithIndexPatterns,
-  filtersMock,
   inlineKqlQuery,
+  mockDataView,
+  savedKqlQuery,
+  savedQueryResponse,
 } from '../../storybook/mocks';
-
-type DataViewDeps = ConstructorParameters<typeof DataView>[0];
 
 export default {
   component: FinalReadonly,
@@ -43,12 +41,12 @@ interface TemplateProps {
 
 const Template: Story<TemplateProps> = (args) => {
   return (
-    <StorybookProviders kibanaServicesMock={args.kibanaServicesMock}>
+    <FinalReadOnlyStorybookProviders kibanaServicesMock={args.kibanaServicesMock}>
       <FinalReadonly
         fieldName="kql_query"
         finalDiffableRule={args.finalDiffableRule as DiffableAllFields}
       />
-    </StorybookProviders>
+    </FinalReadOnlyStorybookProviders>
   );
 };
 
@@ -62,21 +60,7 @@ InlineKqlQueryWithIndexPatterns.args = {
   kibanaServicesMock: {
     data: {
       dataViews: {
-        create: async (spec: Record<string, unknown>) => {
-          const dataView = new DataView({
-            spec: {
-              ...spec,
-              fields: {
-                'Responses.message': {
-                  name: 'Responses.message',
-                  type: 'string',
-                },
-              },
-            },
-          } as unknown as DataViewDeps);
-
-          return dataView;
-        },
+        create: async () => mockDataView(),
       },
     },
   },
@@ -92,23 +76,29 @@ InlineKqlQueryWithDataView.args = {
   kibanaServicesMock: {
     data: {
       dataViews: {
-        get: async (id: string) => {
-          const dataView = new DataView({
-            spec: {
-              id,
-              fields: {
-                'Responses.message': {
-                  name: 'Responses.message',
-                  type: 'string',
-                },
-              },
-            },
-          } as unknown as DataViewDeps);
-
-          return dataView;
-        },
+        get: async () => mockDataView(),
       },
     },
+  },
+};
+
+export const SavedKqlQueryWithIndexPatterns = Template.bind({});
+
+SavedKqlQueryWithIndexPatterns.args = {
+  kibanaServicesMock: {
+    data: {
+      dataViews: {
+        create: async () => mockDataView(),
+      },
+    },
+    http: {
+      get: async () => savedQueryResponse,
+    },
+  },
+  finalDiffableRule: {
+    kql_query: savedKqlQuery,
+    data_source: dataSourceWithIndexPatterns,
+    type: 'saved_query',
   },
 };
 
@@ -118,45 +108,15 @@ SavedKqlQueryWithDataView.args = {
   kibanaServicesMock: {
     data: {
       dataViews: {
-        get: async (id: string) => {
-          const dataView = new DataView({
-            spec: {
-              id,
-              fields: {
-                'Responses.message': {
-                  name: 'Responses.message',
-                  type: 'string',
-                },
-              },
-            },
-          } as unknown as DataViewDeps);
-
-          return dataView;
-        },
+        get: async () => mockDataView(),
       },
     },
     http: {
-      get: async () => {
-        const mockedSavedQuery = {
-          id: 'fake-saved-query-id',
-          attributes: {
-            title: 'Fake Saved Query',
-            description: '',
-            query: { query: '*', language: 'kuery' },
-            filters: filtersMock,
-          },
-          namespaces: ['default'],
-        };
-
-        return mockedSavedQuery;
-      },
+      get: async () => savedQueryResponse,
     },
   },
   finalDiffableRule: {
-    kql_query: {
-      type: KqlQueryType.saved_query,
-      saved_query_id: 'fake-saved-query-id',
-    },
+    kql_query: savedKqlQuery,
     data_source: dataSourceWithDataView,
     type: 'saved_query',
   },

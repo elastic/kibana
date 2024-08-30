@@ -9,7 +9,7 @@ import React from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import type { Story } from '@storybook/react';
 import { RelatedIntegrationsReadOnly } from './related_integrations';
-import { StorybookProviders } from '../../storybook/storybook_providers';
+import { FinalReadOnlyStorybookProviders } from '../../storybook/final_readonly_storybook_providers';
 import { FinalReadonly } from '../../final_readonly';
 import type { DiffableAllFields } from '../../../../../../../../../common/api/detection_engine';
 
@@ -50,14 +50,14 @@ interface TemplateProps {
 
 const Template: Story<TemplateProps> = (args) => {
   return (
-    <StorybookProviders>
+    <FinalReadOnlyStorybookProviders>
       <MockRelatedIntegrationsData>
         <FinalReadonly
           fieldName="related_integrations"
           finalDiffableRule={args.finalDiffableRule as DiffableAllFields}
         />
       </MockRelatedIntegrationsData>
-    </StorybookProviders>
+    </FinalReadOnlyStorybookProviders>
   );
 };
 

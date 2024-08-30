@@ -10,7 +10,7 @@ import type { Story } from '@storybook/react';
 import { FinalReadonly } from '../../final_readonly';
 import type { DiffableAllFields } from '../../../../../../../../../common/api/detection_engine';
 
-import { StorybookProviders } from '../../storybook/storybook_providers';
+import { FinalReadOnlyStorybookProviders } from '../../storybook/final_readonly_storybook_providers';
 import { dataViewDataSource, indexPatternsDataSource } from '../../storybook/mocks';
 
 export default {
@@ -31,12 +31,12 @@ interface TemplateProps {
 
 const Template: Story<TemplateProps> = (args) => {
   return (
-    <StorybookProviders kibanaServicesMock={args.kibanaServicesMock}>
+    <FinalReadOnlyStorybookProviders kibanaServicesMock={args.kibanaServicesMock}>
       <FinalReadonly
         fieldName="data_source"
         finalDiffableRule={args.finalDiffableRule as DiffableAllFields}
       />
-    </StorybookProviders>
+    </FinalReadOnlyStorybookProviders>
   );
 };
 

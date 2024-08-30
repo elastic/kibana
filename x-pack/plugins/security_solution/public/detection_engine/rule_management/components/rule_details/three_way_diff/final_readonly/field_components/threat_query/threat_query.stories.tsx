@@ -7,14 +7,16 @@
 
 import React from 'react';
 import type { Story } from '@storybook/react';
-import { DataView } from '@kbn/data-views-plugin/common';
 import { FinalReadonly } from '../../final_readonly';
 import type { DiffableAllFields } from '../../../../../../../../../common/api/detection_engine';
 import { ThreatQueryReadOnly } from './threat_query';
-import { dataSourceWithDataView, inlineKqlQuery } from '../../storybook/mocks';
-import { StorybookProviders } from '../../storybook/storybook_providers';
-
-type DataViewDeps = ConstructorParameters<typeof DataView>[0];
+import {
+  dataSourceWithDataView,
+  dataSourceWithIndexPatterns,
+  inlineKqlQuery,
+  mockDataView,
+} from '../../storybook/mocks';
+import { FinalReadOnlyStorybookProviders } from '../../storybook/final_readonly_storybook_providers';
 
 export default {
   component: ThreatQueryReadOnly,
@@ -34,18 +36,34 @@ interface TemplateProps {
 
 const Template: Story<TemplateProps> = (args) => {
   return (
-    <StorybookProviders kibanaServicesMock={args.kibanaServicesMock}>
+    <FinalReadOnlyStorybookProviders kibanaServicesMock={args.kibanaServicesMock}>
       <FinalReadonly
         fieldName="threat_query"
         finalDiffableRule={args.finalDiffableRule as DiffableAllFields}
       />
-    </StorybookProviders>
+    </FinalReadOnlyStorybookProviders>
   );
 };
 
-export const Default = Template.bind({});
+export const ThreatQueryWithIndexPatterns = Template.bind({});
 
-Default.args = {
+ThreatQueryWithIndexPatterns.args = {
+  finalDiffableRule: {
+    threat_query: inlineKqlQuery,
+    data_source: dataSourceWithIndexPatterns,
+  },
+  kibanaServicesMock: {
+    data: {
+      dataViews: {
+        create: async () => mockDataView(),
+      },
+    },
+  },
+};
+
+export const ThreatQueryWithDataView = Template.bind({});
+
+ThreatQueryWithDataView.args = {
   finalDiffableRule: {
     threat_query: inlineKqlQuery,
     data_source: dataSourceWithDataView,
@@ -53,21 +71,7 @@ Default.args = {
   kibanaServicesMock: {
     data: {
       dataViews: {
-        get: async (id: string) => {
-          const dataView = new DataView({
-            spec: {
-              id,
-              fields: {
-                'Responses.message': {
-                  name: 'Responses.message',
-                  type: 'string',
-                },
-              },
-            },
-          } as unknown as DataViewDeps);
-
-          return dataView;
-        },
+        get: async () => mockDataView(),
       },
     },
   },

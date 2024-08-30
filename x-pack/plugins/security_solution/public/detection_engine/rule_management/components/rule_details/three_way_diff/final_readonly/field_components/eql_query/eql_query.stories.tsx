@@ -7,13 +7,17 @@
 
 import React from 'react';
 import type { Story } from '@storybook/react';
-import { DataView } from '@kbn/data-views-plugin/common';
 import { FinalReadonly } from '../../final_readonly';
 import type { DiffableAllFields } from '../../../../../../../../../common/api/detection_engine';
 
-import { StorybookProviders } from '../../storybook/storybook_providers';
+import { FinalReadOnlyStorybookProviders } from '../../storybook/final_readonly_storybook_providers';
 import { EqlQueryReadOnly } from './eql_query';
-import { dataSourceWithIndexPatterns, filtersMock } from '../../storybook/mocks';
+import {
+  dataSourceWithDataView,
+  dataSourceWithIndexPatterns,
+  eqlQuery,
+  mockDataView,
+} from '../../storybook/mocks';
 
 export default {
   component: EqlQueryReadOnly,
@@ -33,44 +37,42 @@ interface TemplateProps {
 
 const Template: Story<TemplateProps> = (args) => {
   return (
-    <StorybookProviders kibanaServicesMock={args.kibanaServicesMock}>
+    <FinalReadOnlyStorybookProviders kibanaServicesMock={args.kibanaServicesMock}>
       <FinalReadonly
         fieldName="eql_query"
         finalDiffableRule={args.finalDiffableRule as DiffableAllFields}
       />
-    </StorybookProviders>
+    </FinalReadOnlyStorybookProviders>
   );
 };
 
-export const Default = Template.bind({});
+export const EqlQueryWithIndexPatterns = Template.bind({});
 
-Default.args = {
+EqlQueryWithIndexPatterns.args = {
   finalDiffableRule: {
-    eql_query: {
-      query: '*',
-      language: 'eql',
-      filters: filtersMock,
-    },
+    eql_query: eqlQuery,
     data_source: dataSourceWithIndexPatterns,
   },
   kibanaServicesMock: {
     data: {
       dataViews: {
-        create: async (spec: Record<string, unknown>) => {
-          const dataView = new DataView({
-            spec: {
-              ...spec,
-              fields: {
-                'Responses.message': {
-                  name: 'Responses.message',
-                  type: 'string',
-                },
-              },
-            },
-          } as unknown as ConstructorParameters<typeof DataView>[0]);
+        create: async () => mockDataView(),
+      },
+    },
+  },
+};
 
-          return dataView;
-        },
+export const EqlQueryWithDataView = Template.bind({});
+
+EqlQueryWithDataView.args = {
+  finalDiffableRule: {
+    eql_query: eqlQuery,
+    data_source: dataSourceWithDataView,
+  },
+  kibanaServicesMock: {
+    data: {
+      dataViews: {
+        get: async () => mockDataView(),
       },
     },
   },

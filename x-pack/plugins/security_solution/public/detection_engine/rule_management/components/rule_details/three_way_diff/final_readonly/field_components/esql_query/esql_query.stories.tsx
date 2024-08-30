@@ -39,7 +39,7 @@ export const Default = Template.bind({});
 Default.args = {
   finalDiffableRule: {
     esql_query: {
-      query: 'source.ip: *',
+      query: `SELECT user.name, source.ip FROM "logs-*" WHERE event.action = 'user_login' AND event.outcome = 'failure'`,
       language: 'esql',
     },
   },

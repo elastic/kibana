@@ -5,34 +5,49 @@
  * 2.0.
  */
 
+import { DataView } from '@kbn/data-views-plugin/common';
 import { DataSourceType, KqlQueryType } from '../../../../../../../../common/api/detection_engine';
-import type { DiffableAllFields } from '../../../../../../../../common/api/detection_engine';
+import type {
+  DiffableAllFields,
+  SavedKqlQuery,
+} from '../../../../../../../../common/api/detection_engine';
 
-export const filtersMock = [
+export const filters = [
   {
     meta: {
       disabled: false,
       negate: false,
       alias: null,
-      index: '',
-      key: 'Responses.message',
-      field: 'Responses.message',
-      params: ['test-1', 'test-2'],
-      value: ['test-1', 'test-2'],
-      type: 'phrases',
+      index: 'logs-*',
+      key: '@timestamp',
+      field: '@timestamp',
+      value: 'exists',
+      type: 'exists',
     },
     query: {
-      bool: {
-        minimum_should_match: 1,
-        should: [
-          { match_phrase: { 'Responses.message': 'test-1' } },
-          { match_phrase: { 'Responses.message': 'test-2' } },
-        ],
+      exists: {
+        field: '@timestamp',
       },
     },
-    $state: { store: 'appState' },
+    $state: {
+      store: 'appState',
+    },
   },
 ];
+
+export const savedQueryResponse = {
+  id: 'fake-saved-query-id',
+  attributes: {
+    title: 'Fake Saved Query',
+    description: '',
+    query: {
+      query: 'file.path: "/etc/passwd" and event.action: "modification"',
+      language: 'kuery',
+    },
+    filters,
+  },
+  namespaces: ['default'],
+};
 
 export const indexPatternsDataSource: DiffableAllFields['data_source'] = {
   type: DataSourceType.index_patterns,
@@ -46,9 +61,20 @@ export const dataViewDataSource: DiffableAllFields['data_source'] = {
 
 export const inlineKqlQuery: DiffableAllFields['kql_query'] = {
   type: KqlQueryType.inline_query,
-  query: '*',
+  query: 'event.action: "user_login" and source.ip: "192.168.1.100"',
   language: 'kuery',
-  filters: filtersMock,
+  filters,
+};
+
+export const savedKqlQuery: SavedKqlQuery = {
+  type: KqlQueryType.saved_query,
+  saved_query_id: 'fake-saved-query-id',
+};
+
+export const eqlQuery: DiffableAllFields['eql_query'] = {
+  query: 'process where process.name == "powershell.exe" and process.args : "* -EncodedCommand *"',
+  language: 'eql',
+  filters,
 };
 
 export const dataSourceWithIndexPatterns: DiffableAllFields['data_source'] = {
@@ -60,3 +86,26 @@ export const dataSourceWithDataView: DiffableAllFields['data_source'] = {
   type: DataSourceType.data_view,
   data_view_id: 'logs-*',
 };
+
+type DataViewDeps = ConstructorParameters<typeof DataView>[0];
+
+export function mockDataView(spec: Partial<DataViewDeps['spec']> = {}): DataView {
+  const dataView = new DataView({
+    spec: {
+      fields: {
+        '@timestamp': {
+          name: '@timestamp',
+          type: 'date',
+        },
+      },
+      ...spec,
+    },
+    fieldFormats: {
+      getDefaultInstance: () => ({
+        toJSON: () => ({}),
+      }),
+    },
+  } as unknown as DataViewDeps);
+
+  return dataView;
+}
