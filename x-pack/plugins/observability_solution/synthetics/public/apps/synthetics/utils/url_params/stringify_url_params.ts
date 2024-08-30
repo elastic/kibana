@@ -41,12 +41,6 @@ const replaceDefaults = (params: Partial<SyntheticsUrlParams>) => {
     if (key === 'dateRangeEnd' && val === DATE_RANGE_END) {
       delete params[key];
     }
-    if (key === 'refreshPaused' && val === AUTOREFRESH_IS_PAUSED) {
-      delete params[key];
-    }
-    if (key === 'refreshInterval' && val === AUTOREFRESH_INTERVAL_SECONDS) {
-      delete params[key];
-    }
     if (key === 'focusConnectorField' && val === FOCUS_CONNECTOR_FIELD) {
       delete params[key];
     }

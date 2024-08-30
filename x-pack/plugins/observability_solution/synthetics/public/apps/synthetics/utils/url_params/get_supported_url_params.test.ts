@@ -75,8 +75,6 @@ describe('getSupportedUrlParams', () => {
       projects: [],
       schedules: [],
       tags: [],
-      refreshInterval: AUTOREFRESH_INTERVAL_SECONDS,
-      refreshPaused: AUTOREFRESH_IS_PAUSED,
     });
   });
 

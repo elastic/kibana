@@ -12,8 +12,6 @@ describe('stringifyUrlParams', () => {
     const result = stringifyUrlParams({
       absoluteDateRangeStart: 1000,
       absoluteDateRangeEnd: 2000,
-      refreshInterval: 50000,
-      refreshPaused: false,
       dateRangeStart: 'now-15m',
       dateRangeEnd: 'now',
       filters: 'monitor.id: bar',
@@ -22,7 +20,7 @@ describe('stringifyUrlParams', () => {
       statusFilter: 'up',
     });
     expect(result).toMatchInlineSnapshot(
-      `"?absoluteDateRangeStart=1000&absoluteDateRangeEnd=2000&refreshInterval=50000&refreshPaused=false&dateRangeStart=now-15m&dateRangeEnd=now&filters=monitor.id%3A%20bar&focusConnectorField=true&search=monitor.id%3A%20foo&statusFilter=up"`
+      `"?absoluteDateRangeStart=1000&absoluteDateRangeEnd=2000&dateRangeStart=now-15m&dateRangeEnd=now&filters=monitor.id%3A%20bar&focusConnectorField=true&search=monitor.id%3A%20foo&statusFilter=up"`
     );
   });
 
@@ -31,8 +29,6 @@ describe('stringifyUrlParams', () => {
       {
         absoluteDateRangeStart: 1000,
         absoluteDateRangeEnd: 2000,
-        refreshInterval: 50000,
-        refreshPaused: false,
         dateRangeStart: 'now-15m',
         dateRangeEnd: 'now',
         filters: 'monitor.id: bar',
@@ -43,9 +39,7 @@ describe('stringifyUrlParams', () => {
       },
       true
     );
-    expect(result).toMatchInlineSnapshot(
-      `"?refreshInterval=50000&dateRangeStart=now-15m&filters=monitor.id%3A%20bar"`
-    );
+    expect(result).toMatchInlineSnapshot(`"?dateRangeStart=now-15m&filters=monitor.id%3A%20bar"`);
 
     expect(result.includes('pagination')).toBeFalsy();
     expect(result.includes('search')).toBeFalsy();
