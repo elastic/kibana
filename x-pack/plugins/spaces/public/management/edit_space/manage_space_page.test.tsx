@@ -149,7 +149,7 @@ describe('ManageSpacePage', () => {
     await Promise.resolve();
 
     {
-      const errors = wrapper.find('.euiFormErrorText').map((node) => node.text());
+      const errors = wrapper.find('div.euiFormErrorText').map((node) => node.text());
       expect(errors).toEqual([
         'Enter a name.',
         'Enter a URL identifier.',
@@ -167,7 +167,7 @@ describe('ManageSpacePage', () => {
     await Promise.resolve();
 
     {
-      const errors = wrapper.find('.euiFormErrorText').map((node) => node.text());
+      const errors = wrapper.find('div.euiFormErrorText').map((node) => node.text());
       expect(errors).toEqual(['Select one solution.']); // requires solution view to be set
     }
 
@@ -177,7 +177,7 @@ describe('ManageSpacePage', () => {
     await Promise.resolve();
 
     {
-      const errors = wrapper.find('.euiFormErrorText').map((node) => node.text());
+      const errors = wrapper.find('div.euiFormErrorText').map((node) => node.text());
       expect(errors).toEqual([]); // no more errors
     }
 
