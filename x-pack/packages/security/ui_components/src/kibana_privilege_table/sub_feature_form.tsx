@@ -21,6 +21,7 @@ import type {
   SubFeaturePrivilege,
   SubFeaturePrivilegeGroup,
 } from '@kbn/security-role-management-model';
+
 import { NO_PRIVILEGE_VALUE } from '../constants';
 import type { PrivilegeFormCalculator } from '../privilege_form_calculator';
 
