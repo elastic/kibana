@@ -16,19 +16,19 @@ export function getParentApi(): ParentApi {
      * return last saved embeddable state
      */
     getSerializedStateForChild: (childId: string) => {
-      const state = lastSavedState.load();
-      return state.panels.find((panel) => {
-        return panel.rawState.id === childId;
+      const panel = lastSavedState.load().panels.find(({ id }) => {
+        return id === childId;
       });
+      return panel ? panel.panelState : undefined;
     },
     /**
      * return previous session's unsaved changes for embeddable
      */
     getRuntimeStateForChild: (childId: string) => {
-      const state = unsavedChanges.load();
-      return state.panels?.find((panel) => {
-        return panel.id === childId;
+      const panel = unsavedChanges.load().panels?.find(({ id }) => {
+        return id === childId;
       });
+      return panel ? panel.unsavedPanelChanges : undefined;
     },
   };
 }
