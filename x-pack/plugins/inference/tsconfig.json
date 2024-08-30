@@ -32,6 +32,7 @@
     "@kbn/tooling-log",
     "@kbn/es-types",
     "@kbn/field-types",
-    "@kbn/expressions-plugin"
+    "@kbn/expressions-plugin",
+    "@kbn/logging-mocks"
   ]
 }
