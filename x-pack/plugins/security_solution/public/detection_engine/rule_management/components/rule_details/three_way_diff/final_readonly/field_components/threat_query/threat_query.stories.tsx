@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { Story } from '@storybook/react';
-import { FinalReadonly } from '../../final_readonly';
+import { FinalReadOnly } from '../../final_readonly';
 import type { DiffableAllFields } from '../../../../../../../../../common/api/detection_engine';
 import { ThreatQueryReadOnly } from './threat_query';
 import {
@@ -37,7 +37,7 @@ interface TemplateProps {
 const Template: Story<TemplateProps> = (args) => {
   return (
     <FinalReadOnlyStorybookProviders kibanaServicesMock={args.kibanaServicesMock}>
-      <FinalReadonly
+      <FinalReadOnly
         fieldName="threat_query"
         finalDiffableRule={args.finalDiffableRule as DiffableAllFields}
       />

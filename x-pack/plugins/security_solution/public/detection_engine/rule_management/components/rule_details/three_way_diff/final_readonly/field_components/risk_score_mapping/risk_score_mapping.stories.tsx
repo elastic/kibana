@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { Story } from '@storybook/react';
-import { FinalReadonly } from '../../final_readonly';
+import { FinalReadOnly } from '../../final_readonly';
 import type { DiffableAllFields } from '../../../../../../../../../common/api/detection_engine';
 import { RiskScoreMappingReadOnly } from './risk_score_mapping';
 
@@ -29,7 +29,7 @@ interface TemplateProps {
 
 const Template: Story<TemplateProps> = (args) => {
   return (
-    <FinalReadonly
+    <FinalReadOnly
       fieldName="risk_score_mapping"
       finalDiffableRule={args.finalDiffableRule as DiffableAllFields}
     />

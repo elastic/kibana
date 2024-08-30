@@ -7,14 +7,14 @@
 
 import React from 'react';
 import type { Story } from '@storybook/react';
-import { FinalReadonly } from '../../final_readonly';
+import { FinalReadOnly } from '../../final_readonly';
 import type { DiffableAllFields } from '../../../../../../../../../common/api/detection_engine';
 
 import { FinalReadOnlyStorybookProviders } from '../../storybook/final_readonly_storybook_providers';
 import { dataViewDataSource, indexPatternsDataSource } from '../../storybook/mocks';
 
 export default {
-  component: FinalReadonly,
+  component: FinalReadOnly,
   title: 'Rule Management/Prebuilt Rules/Upgrade Flyout/ThreeWayDiff/FinalReadonly/data_source',
   argTypes: {
     finalDiffableRule: {
@@ -32,7 +32,7 @@ interface TemplateProps {
 const Template: Story<TemplateProps> = (args) => {
   return (
     <FinalReadOnlyStorybookProviders kibanaServicesMock={args.kibanaServicesMock}>
-      <FinalReadonly
+      <FinalReadOnly
         fieldName="data_source"
         finalDiffableRule={args.finalDiffableRule as DiffableAllFields}
       />

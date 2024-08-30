@@ -10,7 +10,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import type { Story } from '@storybook/react';
 import { RelatedIntegrationsReadOnly } from './related_integrations';
 import { FinalReadOnlyStorybookProviders } from '../../storybook/final_readonly_storybook_providers';
-import { FinalReadonly } from '../../final_readonly';
+import { FinalReadOnly } from '../../final_readonly';
 import type { DiffableAllFields } from '../../../../../../../../../common/api/detection_engine';
 
 export default {
@@ -52,7 +52,7 @@ const Template: Story<TemplateProps> = (args) => {
   return (
     <FinalReadOnlyStorybookProviders>
       <MockRelatedIntegrationsData>
-        <FinalReadonly
+        <FinalReadOnly
           fieldName="related_integrations"
           finalDiffableRule={args.finalDiffableRule as DiffableAllFields}
         />

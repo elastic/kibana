@@ -28,7 +28,7 @@ interface FinalReadonlyProps {
   finalDiffableRule: DiffableAllFields;
 }
 
-export function FinalReadonly({ fieldName, finalDiffableRule }: FinalReadonlyProps) {
+export function FinalReadOnly({ fieldName, finalDiffableRule }: FinalReadonlyProps) {
   switch (fieldName) {
     case 'data_source':
       return <DataSourceReadOnly dataSource={finalDiffableRule.data_source} />;

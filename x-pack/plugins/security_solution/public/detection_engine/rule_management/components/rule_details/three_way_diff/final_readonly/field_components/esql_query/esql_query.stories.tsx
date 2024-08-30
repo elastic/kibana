@@ -7,11 +7,11 @@
 
 import React from 'react';
 import type { Story } from '@storybook/react';
-import { FinalReadonly } from '../../final_readonly';
+import { FinalReadOnly } from '../../final_readonly';
 import type { DiffableAllFields } from '../../../../../../../../../common/api/detection_engine';
 
 export default {
-  component: FinalReadonly,
+  component: FinalReadOnly,
   title: 'Rule Management/Prebuilt Rules/Upgrade Flyout/ThreeWayDiff/FinalReadonly/esql_query',
   argTypes: {
     finalDiffableRule: {
@@ -27,7 +27,7 @@ interface TemplateProps {
 
 const Template: Story<TemplateProps> = (args) => {
   return (
-    <FinalReadonly
+    <FinalReadOnly
       fieldName="esql_query"
       finalDiffableRule={args.finalDiffableRule as DiffableAllFields}
     />

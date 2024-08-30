@@ -7,7 +7,7 @@
 import React from 'react';
 import type { Story } from '@storybook/react';
 import { RequiredFieldsReadOnly } from './required_fields';
-import { FinalReadonly } from '../../final_readonly';
+import { FinalReadOnly } from '../../final_readonly';
 import type { DiffableAllFields } from '../../../../../../../../../common/api/detection_engine';
 
 export default {
@@ -27,7 +27,7 @@ interface TemplateProps {
 
 const Template: Story<TemplateProps> = (args) => {
   return (
-    <FinalReadonly
+    <FinalReadOnly
       fieldName="required_fields"
       finalDiffableRule={args.finalDiffableRule as DiffableAllFields}
     />
