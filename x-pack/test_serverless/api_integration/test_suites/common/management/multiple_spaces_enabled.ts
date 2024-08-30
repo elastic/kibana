@@ -6,9 +6,9 @@
  */
 
 import expect from 'expect';
+import { asyncForEach } from '@kbn/std';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { RoleCredentials } from '../../../../shared/services';
-import { asyncForEach } from '@kbn/std';
 
 // Notes:
 // This suite is currently only called from the feature flags test configs, e.g.
@@ -65,9 +65,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send()
         .expect(200);
 
-
-      const toDelete = (body as Array<{ id: string }>)
-        .filter((f) => f.id !== 'default');
+      const toDelete = (body as Array<{ id: string }>).filter((f) => f.id !== 'default');
 
       await asyncForEach(toDelete, async (space) => {
         console.log(`*** Deleting space ${space.id}...`);
