@@ -62,6 +62,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(initialSize.width).to.be.greaterThan(afterSize.width);
     });
 
+    it('should allow clearing the input editor', async () => {
+      await PageObjects.console.monaco.enterText('GET _all');
+
+      // Check current input is not empty
+      const input = await PageObjects.console.monaco.getEditorText();
+      expect(input).to.not.be.empty();
+
+      // Clear the output
+      await PageObjects.console.clickClearInput();
+
+      // Check that after clearing the input, the editor is empty
+      expect(await PageObjects.console.monaco.getEditorText()).to.be.empty();
+    });
+
     it('should return statusCode 400 to unsupported HTTP verbs', async () => {
       const expectedResponseContains = '"statusCode": 400';
       await PageObjects.console.monaco.clearEditorText();

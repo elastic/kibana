@@ -16,6 +16,7 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { i18n } from '@kbn/i18n';
 
 import {
   EditorContentSpinner,
@@ -59,6 +60,8 @@ export const Editor = memo(({ loading, setEditorInstance }: Props) => {
 
   const [fetchingMappings, setFetchingMappings] = useState(false);
 
+  const [inputEditorValue, setInputEditorValue] = useState<string>(currentTextObject?.text ?? '');
+
   useEffect(() => {
     const subscription = getAutocompleteInfo().mapping.isLoading$.subscribe(setFetchingMappings);
     return () => {
@@ -96,16 +99,45 @@ export const Editor = memo(({ loading, setEditorInstance }: Props) => {
           style={{ height: '100%', position: 'relative', minWidth: PANEL_MIN_WIDTH }}
           initialWidth={firstPanelWidth}
         >
-          {loading ? (
-            <EditorContentSpinner />
-          ) : isMonacoEnabled ? (
-            <MonacoEditor initialTextValue={currentTextObject.text} />
-          ) : (
-            <EditorUI
-              initialTextValue={currentTextObject.text}
-              setEditorInstance={setEditorInstance}
-            />
-          )}
+          <EuiSplitPanel.Outer grow={true} borderRadius="none" hasShadow={false}>
+            <EuiSplitPanel.Inner paddingSize="none">
+              {loading ? (
+                <EditorContentSpinner />
+              ) : isMonacoEnabled ? (
+                <MonacoEditor
+                  localStorageValue={currentTextObject.text}
+                  value={inputEditorValue}
+                  setValue={setInputEditorValue}
+                />
+              ) : (
+                <EditorUI
+                  initialTextValue={currentTextObject.text}
+                  setEditorInstance={setEditorInstance}
+                />
+              )}
+            </EuiSplitPanel.Inner>
+
+            {!loading && (
+              <EuiSplitPanel.Inner
+                grow={false}
+                paddingSize="s"
+                css={{
+                  backgroundColor: euiThemeVars.euiFormBackgroundColor,
+                }}
+              >
+                <EuiButtonEmpty
+                  size="xs"
+                  color="primary"
+                  data-test-subj="clearConsoleInput"
+                  onClick={() => setInputEditorValue('')}
+                >
+                  {i18n.translate('console.editor.clearConsoleInputButton', {
+                    defaultMessage: 'Clear this input',
+                  })}
+                </EuiButtonEmpty>
+              </EuiSplitPanel.Inner>
+            )}
+          </EuiSplitPanel.Outer>
         </Panel>
         <Panel
           style={{ height: '100%', position: 'relative', minWidth: PANEL_MIN_WIDTH }}
@@ -129,7 +161,7 @@ export const Editor = memo(({ loading, setEditorInstance }: Props) => {
             {(data || isLoading) && (
               <EuiSplitPanel.Inner
                 grow={false}
-                paddingSize="m"
+                paddingSize="s"
                 css={{
                   backgroundColor: euiThemeVars.euiFormBackgroundColor,
                 }}
@@ -143,7 +175,9 @@ export const Editor = memo(({ loading, setEditorInstance }: Props) => {
                         data-test-subj="clearConsoleOutput"
                         onClick={() => dispatch({ type: 'cleanRequest', payload: undefined })}
                       >
-                        Clear this output
+                        {i18n.translate('console.editor.clearConsoleOutputButton', {
+                          defaultMessage: 'Clear this output',
+                        })}
                       </EuiButtonEmpty>
                     </EuiFlexItem>
                   ) : (
