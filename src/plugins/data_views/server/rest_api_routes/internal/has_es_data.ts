@@ -9,20 +9,26 @@
 import { IRouter, RequestHandlerContext } from '@kbn/core/server';
 import type { VersionedRoute } from '@kbn/core-http-server';
 import { schema } from '@kbn/config-schema';
+import { DEFAULT_ASSETS_TO_IGNORE } from '../../../common';
 
 type Handler = Parameters<VersionedRoute<any, RequestHandlerContext>['addVersion']>[1];
+
+const patterns = ['*', '-.*'].concat(
+  DEFAULT_ASSETS_TO_IGNORE.DATA_STREAMS_TO_IGNORE.map((ds) => `,-${ds}`)
+);
+
+const crossClusterPatterns = patterns.map((ds) => `*:${ds}`);
 
 export const handler: Handler = async (ctx: RequestHandlerContext, req, res) => {
   const core = await ctx.core;
   const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
   const response = await elasticsearchClient.indices.resolveCluster({
-    // todo - better code for this, exclude these when on other clusters?
-    name: '*:*,*,-.*,-logs-enterprise_search.api-default,-logs-enterprise_search.audit-default',
+    name: crossClusterPatterns,
     allow_no_indices: true,
     ignore_unavailable: true,
   });
 
-  const hasEsData = !!Object.values(response).find((cluster) => !!cluster.matching_indices);
+  const hasEsData = !!Object.values(response).find((cluster) => cluster.matching_indices);
 
   return res.ok({ body: { hasEsData } });
 };

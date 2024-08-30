@@ -33,10 +33,12 @@ export class HasData {
       hasESData: async (): Promise<boolean> => {
         // attempt using resolve/cluster API
         try {
-          // @ts-ignore
-          const { hasEsData } = await http.get('/internal/data_views/has_es_data', {
-            version: '1',
-          });
+          const { hasEsData } = await http.get<{ hasEsData: boolean }>(
+            '/internal/data_views/has_es_data',
+            {
+              version: '1',
+            }
+          );
           return hasEsData;
         } catch (e) {
           // fallback to previous implementation
@@ -142,7 +144,6 @@ export class HasData {
         }
       });
 
-  // @ts-ignore
   private checkLocalESData = (http: HttpStart): Promise<boolean> =>
     this.getIndices({
       http,
@@ -154,7 +155,6 @@ export class HasData {
       })
       .catch(() => this.getIndicesViaSearch({ http, pattern: '*', showAllIndices: false }));
 
-  // @ts-ignore
   private checkRemoteESData = (http: HttpStart): Promise<boolean> =>
     this.getIndices({
       http,
