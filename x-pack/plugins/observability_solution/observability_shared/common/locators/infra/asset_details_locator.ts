@@ -7,10 +7,9 @@
 import { SerializableRecord } from '@kbn/utility-types';
 import rison from '@kbn/rison';
 import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
+import { type AlertStatus } from '@kbn/rule-data-utils';
 
 export type AssetDetailsLocator = LocatorPublic<AssetDetailsLocatorParams>;
-
-export type AlertStatus = 'all' | 'active' | 'recovered' | 'untracked';
 
 export interface AssetDetailsLocatorParams extends SerializableRecord {
   assetType: string;
@@ -36,7 +35,7 @@ export interface AssetDetailsLocatorParams extends SerializableRecord {
     metadataSearch?: string;
     logsSearch?: string;
     profilingSearch?: string;
-    alertStatus?: AlertStatus;
+    alertStatus?: AlertStatus | 'all';
   };
 }
 

@@ -24,7 +24,7 @@ import {
 import {
   findInventoryModel,
   findInventoryFields,
-  InventoryItemType,
+  type InventoryItemType,
 } from '@kbn/metrics-data-access-plugin/common';
 import { useAssetDetailsRedirect } from '@kbn/metrics-data-access-plugin/public';
 import { getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';

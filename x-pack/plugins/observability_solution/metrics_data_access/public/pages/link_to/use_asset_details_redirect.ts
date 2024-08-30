@@ -15,7 +15,7 @@ import {
 } from '@kbn/observability-shared-plugin/common';
 import type { InventoryItemType } from '../../../common/inventory_models/types';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
-import { RouteState } from '../../types';
+import type { RouteState } from '../../types';
 
 interface QueryParams {
   from?: number;
