@@ -40,6 +40,19 @@ export const rootRequest = <T = unknown>({
     ...restOptions,
   });
 
+// a helper function to wait for the root request to be successful
+// defaults to 5 second intervals for 3 attempts
+// can be helpful when waiting for a resource to be created before proceeding
+export const waitForRootRequest = <T = unknown>(
+  fn: Cypress.Chainable<Cypress.Response<T>>,
+  interval = 5000,
+  timeout = 15000
+) =>
+  cy.waitUntil(() => fn.then((response) => cy.wrap(response.status === 200)), {
+    interval,
+    timeout,
+  });
+
 export const deleteAlertsAndRules = () => {
   cy.log('Delete all alerts and rules');
 

@@ -26,7 +26,7 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import { useLicense } from '../../../../common/hooks/use_license';
-import { InvestigateInTimelineButton } from '../../../../common/components/event_details/table/investigate_in_timeline_button';
+import { InvestigateInTimelineButton } from '../../../../common/components/event_details/investigate_in_timeline_button';
 import type { PrevalenceData } from '../../shared/hooks/use_prevalence';
 import { usePrevalence } from '../../shared/hooks/use_prevalence';
 import {
@@ -47,7 +47,7 @@ import { useDocumentDetailsContext } from '../../shared/context';
 import {
   getDataProvider,
   getDataProviderAnd,
-} from '../../../../common/components/event_details/table/use_action_cell_data_provider';
+} from '../../../../common/components/event_details/use_action_cell_data_provider';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { IS_OPERATOR } from '../../../../../common/types';
 import { useKibana } from '../../../../common/lib/kibana';

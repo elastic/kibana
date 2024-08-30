@@ -5754,6 +5754,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/object-versioning-utils@link:packages/kbn-object-versioning-utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/object-versioning@link:packages/kbn-object-versioning":
   version "0.0.0"
   uid ""
@@ -8285,12 +8289,12 @@
     require-from-string "^2.0.2"
     uri-js "^4.2.2"
 
-"@redocly/cli@^1.19.0":
-  version "1.19.0"
-  resolved "https://registry.yarnpkg.com/@redocly/cli/-/cli-1.19.0.tgz#fa7ac88c50b8850c1358bb68a22a3330efe0e0b0"
-  integrity sha512-ev6J0eD+quprvW9PVCl9JmRFZbj6cuK+mnYPAjcrPvesy2RF752fflcpgQjGnyFaGb1Cj+DiwDi3dYr3EAp04A==
+"@redocly/cli@^1.20.1":
+  version "1.21.1"
+  resolved "https://registry.yarnpkg.com/@redocly/cli/-/cli-1.21.1.tgz#92b3c878a571e4e89782ce13acb821222fd2bd0c"
+  integrity sha512-ES1UF7gk/+D0KA97lHEvL4HJZIuNlKe2FyWioxKsmWaqCMikF1cgHFOxr/3GlxtvWd4LaHkwPJBEobRQYOBK+Q==
   dependencies:
-    "@redocly/openapi-core" "1.19.0"
+    "@redocly/openapi-core" "1.21.1"
     abort-controller "^3.0.0"
     chokidar "^3.5.1"
     colorette "^1.2.0"
@@ -8310,18 +8314,18 @@
     styled-components "^6.0.7"
     yargs "17.0.1"
 
-"@redocly/config@^0.7.0":
-  version "0.7.0"
-  resolved "https://registry.yarnpkg.com/@redocly/config/-/config-0.7.0.tgz#e8d06dc1f2d9cb9a4b5c5ce09afbf8536b32161c"
-  integrity sha512-6GKxTo/9df0654Mtivvr4lQnMOp+pRj9neVywmI5+BwfZLTtkJnj2qB3D6d8FHTr4apsNOf6zTa5FojX0Evh4g==
+"@redocly/config@^0.10.0":
+  version "0.10.1"
+  resolved "https://registry.yarnpkg.com/@redocly/config/-/config-0.10.1.tgz#c7bcbab6cb3b82236c2f5c87aa44924a652d8e80"
+  integrity sha512-H3LnKVGzOaxskwJu8pmJYwBOWjP61qOK7TuTrbafqArDVckE06fhA6l0nO4KvBbjLPjy1Al7UnlxOu23V4Nl0w==
 
-"@redocly/openapi-core@1.19.0", "@redocly/openapi-core@^1.4.0":
-  version "1.19.0"
-  resolved "https://registry.yarnpkg.com/@redocly/openapi-core/-/openapi-core-1.19.0.tgz#8c6db2f0286b7776d79e392335f89f702ea19432"
-  integrity sha512-ezK6qr80sXvjDgHNrk/zmRs9vwpIAeHa0T/qmo96S+ib4ThQ5a8f3qjwEqxMeVxkxCTbkaY9sYSJKOxv4ejg5w==
+"@redocly/openapi-core@1.21.1", "@redocly/openapi-core@^1.4.0":
+  version "1.21.1"
+  resolved "https://registry.yarnpkg.com/@redocly/openapi-core/-/openapi-core-1.21.1.tgz#b9221f6effc96ad2210256061cd624648ddc1f1d"
+  integrity sha512-WTsie5b+Ohx2NsmEBVCS5WF24h4XqDpb834ZR4EeE7f+Zjwn34AgaC78HP2xGydi+gFfD4PiqDGgnDPtR5s1OA==
   dependencies:
     "@redocly/ajv" "^8.11.0"
-    "@redocly/config" "^0.7.0"
+    "@redocly/config" "^0.10.0"
     colorette "^1.2.0"
     https-proxy-agent "^7.0.4"
     js-levenshtein "^1.1.6"
@@ -14103,10 +14107,10 @@ chrome-trace-event@^1.0.2:
   dependencies:
     tslib "^1.9.0"
 
-chromedriver@^127.0.3:
-  version "127.0.3"
-  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-127.0.3.tgz#33abca5924eb809e0e6ef2dd30eaa8cf7dba58d4"
-  integrity sha512-trUHkFt0n7jGzNOgkO1srOJfz50kKyAGJ016PyV0hrtyKNIGnOC9r3Jlssz19UoEjSzI/1g2shEiIFtDbBYVaw==
+chromedriver@^128.0.0:
+  version "128.0.0"
+  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-128.0.0.tgz#7f75a984101199e0bcc2c92fe9f91917fcd1f918"
+  integrity sha512-Ggo21z/dFQxTOTgU0vm0V59Mi79yyR+9AUk/KiVAsRfbDRdVZQYQWfgxnIvD/x8KOKn0oB7haRzDO/KfrKyvOA==
   dependencies:
     "@testim/chrome-version" "^1.1.4"
     axios "^1.7.4"
