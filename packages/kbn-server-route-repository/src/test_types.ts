@@ -9,7 +9,7 @@ import * as t from 'io-ts';
 import { z } from '@kbn/zod';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { EndpointOf, ReturnOf, RouteRepositoryClient } from '@kbn/server-route-repository-utils';
-import type { HttpFetchOptions } from '@kbn/core-http-browser';
+import { Observable, of } from 'rxjs';
 import { createServerRouteFactory } from './create_server_route_factory';
 import { decodeRequestParams } from './decode_request_params';
 
@@ -200,6 +200,12 @@ const repository = {
       });
     },
   }),
+  ...createServerRoute({
+    endpoint: 'POST /internal/endpoint_returning_observable',
+    handler: async () => {
+      return of({ streamed_response: true });
+    },
+  }),
 };
 
 type TestRepository = typeof repository;
@@ -240,7 +246,10 @@ assertType<ReturnOf<TestRepository, 'GET /internal/endpoint_returning_kibana_res
 
 // RouteRepositoryClient
 
-type TestClient = RouteRepositoryClient<TestRepository, HttpFetchOptions & { timeout: number }>;
+type TestClient = RouteRepositoryClient<
+  TestRepository,
+  { asEventSourceStream?: boolean; timeout: number }
+>;
 
 const client: TestClient = {} as any;
 
@@ -382,4 +391,11 @@ assertType<{ path: { serviceName: boolean } }>(
     },
     t.type({ path: t.type({ serviceName: t.string }) })
   )
+);
+
+assertType<Observable<{ streamed_response: boolean }>>(
+  client('POST /internal/endpoint_returning_observable', {
+    timeout: 10,
+    asEventSourceStream: true as const,
+  })
 );

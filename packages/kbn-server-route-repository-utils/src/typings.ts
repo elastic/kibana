@@ -195,29 +195,29 @@ type MaybeOptionalArgs<T extends Record<string, any>> = RequiredKeys<T> extends 
 
 export type RouteRepositoryClient<
   TServerRouteRepository extends ServerRouteRepository,
-  TAdditionalClientOptions extends HttpFetchOptions & {
-    asEventSourceStream?: boolean;
-  } = DefaultClientOptions
+  TAdditionalClientOptions extends Record<string, any> = DefaultClientOptions
 > = <
   TEndpoint extends Extract<keyof TServerRouteRepository, string>,
-  TParamsArgs extends MaybeOptionalArgs<ClientRequestParamsOf<TServerRouteRepository, TEndpoint>>,
-  TClientArgs extends MaybeOptionalArgs<TAdditionalClientOptions>
+  TAsEventSourceStreamOptions extends { asEventSourceStream?: boolean }
 >(
   endpoint: TEndpoint,
-  ...args: TParamsArgs & TClientArgs
-) => TClientArgs extends [{ asEventSourceStream: true }]
+  ...args: MaybeOptionalArgs<
+    ClientRequestParamsOf<TServerRouteRepository, TEndpoint> & TAdditionalClientOptions
+  > &
+    ([TAsEventSourceStreamOptions] | [])
+) => TAsEventSourceStreamOptions extends { asEventSourceStream: boolean }
   ? ReturnOf<TServerRouteRepository, TEndpoint> extends Observable<infer TObservable>
     ? Observable<TObservable>
     : Observable<unknown>
   : Promise<ReturnOf<TServerRouteRepository, TEndpoint>>;
-
-export type DefaultClientOptions = HttpFetchOptions;
 
 interface CoreRouteHandlerResources {
   request: KibanaRequest;
   response: KibanaResponseFactory;
   context: RequestHandlerContext;
 }
+
+export type DefaultClientOptions = HttpFetchOptions;
 
 export interface DefaultRouteHandlerResources extends CoreRouteHandlerResources {
   logger: Logger;
