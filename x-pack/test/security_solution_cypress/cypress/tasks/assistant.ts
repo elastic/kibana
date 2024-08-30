@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { DEFAULT_SYSTEM_PROMPT_NON_I18N } from '@kbn/security-solution-plugin/public/assistant/content/prompts/system/translations';
 import { TIMELINE_CHECKBOX } from '../screens/timelines';
 import { CLOSE_FLYOUT } from '../screens/alerts';
 import {
@@ -45,6 +44,7 @@ import {
   SHOW_ANONYMIZED_BUTTON,
   ASSISTANT_SETTINGS_BUTTON,
   SEND_TO_TIMELINE_BUTTON,
+  PROMPT_SELECT,
 } from '../screens/ai_assistant';
 import { TOASTER } from '../screens/alerts_detection_rules';
 
@@ -110,6 +110,7 @@ export const sendQueryToTimeline = () => {
 
 export const clearSystemPrompt = () => {
   cy.get(CLEAR_SYSTEM_PROMPT).click();
+  assertEmptySystemPrompt();
 };
 
 export const sendQuickPrompt = (prompt: string) => {
@@ -118,9 +119,9 @@ export const sendQuickPrompt = (prompt: string) => {
 };
 
 export const selectSystemPrompt = (systemPrompt: string) => {
-  cy.get(SYSTEM_PROMPT).click();
+  cy.get(PROMPT_SELECT).click();
   cy.get(SYSTEM_PROMPT_SELECT(systemPrompt)).click();
-  assertSystemPrompt(systemPrompt);
+  assertSystemPromptSelected(systemPrompt);
 };
 
 export const createSystemPrompt = (
@@ -174,21 +175,28 @@ export const assertNewConversation = (isWelcome: boolean, title: string) => {
   cy.get(CONVERSATION_TITLE + ' h2').should('have.text', title);
 };
 
-export const assertMessageSent = (message: string, hasDefaultPrompt = false, prompt?: string) => {
-  cy.get(CONVERSATION_MESSAGE)
-    .first()
-    .should(
-      'contain',
-      hasDefaultPrompt ? `${prompt ?? DEFAULT_SYSTEM_PROMPT_NON_I18N}\n${message}` : message
-    );
+export const assertSystemPromptSent = (message: string) => {
+  cy.get(CONVERSATION_MESSAGE).eq(0).should('contain', message);
+};
+
+export const assertMessageSent = (message: string, prompt: boolean = false) => {
+  if (prompt) {
+    return cy.get(CONVERSATION_MESSAGE).eq(1).should('contain', message);
+  }
+  cy.get(CONVERSATION_MESSAGE).eq(0).should('contain', message);
 };
 
 export const assertErrorResponse = () => {
   cy.get(CONVERSATION_MESSAGE_ERROR).should('be.visible');
 };
 
-export const assertSystemPrompt = (systemPrompt: string) => {
+export const assertSystemPromptSelected = (systemPrompt: string) => {
   cy.get(SYSTEM_PROMPT).should('have.text', systemPrompt);
+};
+
+export const assertEmptySystemPrompt = () => {
+  const EMPTY = 'Select a system prompt';
+  cy.get(SYSTEM_PROMPT).should('have.text', EMPTY);
 };
 
 export const assertConnectorSelected = (connectorName: string) => {

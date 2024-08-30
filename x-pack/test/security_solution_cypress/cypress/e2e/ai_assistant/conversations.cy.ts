@@ -24,7 +24,6 @@ import {
   selectRule,
   assertErrorToastShown,
   updateConversationTitle,
-  assertSystemPrompt,
 } from '../../tasks/assistant';
 import { deleteConversations } from '../../tasks/api_calls/assistant';
 import {
@@ -71,7 +70,6 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
       openAssistant();
       assertNewConversation(false, 'Welcome');
       assertConnectorSelected(azureConnectorAPIPayload.name);
-      assertSystemPrompt('Default system prompt');
       cy.get(USER_PROMPT).should('not.have.text');
     });
     it('When invoked from rules page', () => {
@@ -81,7 +79,6 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
         openAssistant('rule');
         assertNewConversation(false, 'Detection Rules');
         assertConnectorSelected(azureConnectorAPIPayload.name);
-        assertSystemPrompt('Default system prompt');
         cy.get(USER_PROMPT).should('have.text', EXPLAIN_THEN_SUMMARIZE_RULE_DETAILS);
         cy.get(PROMPT_CONTEXT_BUTTON(0)).should('have.text', RULE_MANAGEMENT_CONTEXT_DESCRIPTION);
       });
@@ -94,7 +91,6 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
       openAssistant('alert');
       assertNewConversation(false, 'Alert summary');
       assertConnectorSelected(azureConnectorAPIPayload.name);
-      assertSystemPrompt('Default system prompt');
       cy.get(USER_PROMPT).should(
         'have.text',
         EXPLAIN_THEN_SUMMARIZE_SUGGEST_INVESTIGATION_GUIDE_NON_I18N
@@ -135,19 +131,19 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
       assertNewConversation(false, 'Welcome');
       assertConnectorSelected(azureConnectorAPIPayload.name);
       typeAndSendMessage('hello');
-      assertMessageSent('hello', true);
+      assertMessageSent('hello');
       assertErrorResponse();
       selectConversation('Alert summary');
       selectConnector(bedrockConnectorAPIPayload.name);
       typeAndSendMessage('goodbye');
-      assertMessageSent('goodbye', true);
+      assertMessageSent('goodbye');
       assertErrorResponse();
       selectConversation('Welcome');
       assertConnectorSelected(azureConnectorAPIPayload.name);
-      assertMessageSent('hello', true);
+      assertMessageSent('hello');
       selectConversation('Alert summary');
       assertConnectorSelected(bedrockConnectorAPIPayload.name);
-      assertMessageSent('goodbye', true);
+      assertMessageSent('goodbye');
     });
     // This test is flakey due to the issue linked below and will be skipped until it is fixed
     it.skip('Only allows one conversation called "New chat" at a time', () => {
@@ -159,7 +155,7 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
       typeAndSendMessage('hello');
       // TODO fix bug with new chat and error message
       // https://github.com/elastic/kibana/issues/191025
-      // assertMessageSent('hello', true);
+      // assertMessageSent('hello');
       assertErrorResponse();
       selectConversation('Welcome');
       createNewChat();
