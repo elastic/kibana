@@ -16,5 +16,6 @@ cd x-pack/test/security_solution_playwright
 set +e
 
 yarn run:serverless; 
-
 exit_code=$?
+
+exit $exit_code
