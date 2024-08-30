@@ -6,8 +6,9 @@
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ECS_FULL } from '../../../common/ecs';
-import type { EcsBaseNodeParams } from './types';
+import { mergeSamples } from '../../util/samples';
 import { ECS_RESERVED } from './constants';
+import type { EcsBaseNodeParams } from './types';
 
 const valueFieldKeys = new Set(['target', 'confidence', 'date_formats', 'type']);
 type AnyObject = Record<string, any>;
@@ -89,7 +90,7 @@ function getValueFromPath(obj: AnyObject, path: string[]): unknown {
   return path.reduce((acc, key) => (acc && acc[key] !== undefined ? acc[key] : null), obj);
 }
 
-function findDuplicateFields(prefixedSamples: string[], ecsMapping: AnyObject): string[] {
+export function findDuplicateFields(prefixedSamples: string[], ecsMapping: AnyObject): string[] {
   const parsedSamples = prefixedSamples.map((sample) => JSON.parse(sample));
   const results: string[] = [];
   const output: Record<string, string[][]> = {};
@@ -148,9 +149,13 @@ export function findInvalidEcsFields(currentMapping: AnyObject): string[] {
 }
 
 export function handleValidateMappings({ state }: EcsBaseNodeParams): AnyObject {
-  const missingKeys = findMissingFields(state?.combinedSamples, state?.currentMapping);
-  const duplicateFields = findDuplicateFields(state?.prefixedSamples, state?.currentMapping);
-  const invalidEcsFields = findInvalidEcsFields(state?.currentMapping);
+  const usesFinalMapping = state?.useFinalMapping;
+  const mapping = usesFinalMapping ? state.finalMapping : state.currentMapping;
+  const samples = usesFinalMapping ? mergeSamples(state.prefixedSamples) : state.combinedSamples;
+
+  const missingKeys = findMissingFields(samples, mapping);
+  const duplicateFields = findDuplicateFields(state?.prefixedSamples, mapping);
+  const invalidEcsFields = findInvalidEcsFields(mapping);
   return {
     missingKeys,
     duplicateFields,

@@ -938,6 +938,7 @@
     "@kbn/visualizations-plugin": "link:src/plugins/visualizations",
     "@kbn/watcher-plugin": "link:x-pack/plugins/watcher",
     "@kbn/xstate-utils": "link:packages/kbn-xstate-utils",
+    "@kbn/zod": "link:packages/kbn-zod",
     "@kbn/zod-helpers": "link:packages/kbn-zod-helpers",
     "@langchain/community": "0.2.18",
     "@langchain/core": "^0.2.18",
@@ -1765,7 +1766,7 @@
     "xmlbuilder": "13.0.2",
     "yargs": "^15.4.1",
     "yarn-deduplicate": "^6.0.2",
-    "zod-to-json-schema": "^3.22.3"
+    "zod-to-json-schema": "^3.23.0"
   },
   "packageManager": "yarn@1.22.21"
 }
