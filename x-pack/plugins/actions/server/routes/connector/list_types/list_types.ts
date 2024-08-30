@@ -6,11 +6,11 @@
  */
 
 import { IRouter } from '@kbn/core/server';
-import { ConnectorTypesResponseV1 } from '../../../../common/routes/connector/response';
+import { ConnectorTypesResponseV1 } from '../schemas/response';
 import {
   connectorTypesQuerySchemaV1,
   ConnectorTypesRequestQueryV1,
-} from '../../../../common/routes/connector/apis/connector_types';
+} from '../schemas/apis/connector_types';
 import { transformListTypesResponseV1 } from './transforms';
 import { ActionsRequestHandlerContext } from '../../../types';
 import { BASE_ACTION_API_PATH } from '../../../../common';

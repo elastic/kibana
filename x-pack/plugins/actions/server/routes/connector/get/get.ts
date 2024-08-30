@@ -6,10 +6,7 @@
  */
 
 import { IRouter } from '@kbn/core/server';
-import {
-  getConnectorParamsSchemaV1,
-  GetConnectorParamsV1,
-} from '../../../../common/routes/connector/apis/get';
+import { getConnectorParamsSchemaV1, GetConnectorParamsV1 } from '../schemas/apis/get';
 import { transformGetConnectorResponseV1 } from './transforms';
 import { ILicenseState } from '../../../lib';
 import { BASE_ACTION_API_PATH } from '../../../../common';

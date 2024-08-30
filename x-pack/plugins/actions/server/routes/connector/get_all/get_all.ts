@@ -6,7 +6,7 @@
  */
 
 import { IRouter } from '@kbn/core/server';
-import { AllConnectorsResponseV1 } from '../../../../common/routes/connector/response';
+import { AllConnectorsResponseV1 } from '../schemas/response';
 import { transformGetAllConnectorsResponseV1 } from './transforms';
 import { ActionsRequestHandlerContext } from '../../../types';
 import { BASE_ACTION_API_PATH } from '../../../../common';

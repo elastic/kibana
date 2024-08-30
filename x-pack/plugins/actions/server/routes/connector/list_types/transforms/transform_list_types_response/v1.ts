@@ -6,7 +6,7 @@
  */
 
 import { ConnectorType } from '../../../../../application/connector/types';
-import { ConnectorTypesResponseV1 } from '../../../../../../common/routes/connector/response';
+import { ConnectorTypesResponseV1 } from '../../../schemas/response';
 
 export const transformListTypesResponse = (
   results: ConnectorType[]

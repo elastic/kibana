@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ConnectorResponseV1 } from '../../../../../../common/routes/connector/response';
+import { ConnectorResponseV1 } from '../../../schemas/response';
 import { Connector } from '../../../../../application/connector/types';
 
 export const transformGetConnectorResponse = ({
