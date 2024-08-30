@@ -38,6 +38,7 @@ export const CardRadioGroupField = ({
     <EuiFormRow
       label={field.label}
       labelType="legend"
+      // @ts-ignore - field.helpText is uncallable with @types/react@18
       helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
       error={errorMessage}
       isInvalid={isInvalid}
@@ -57,7 +58,7 @@ export const CardRadioGroupField = ({
               onChange={() => field.setValue(value)}
               data-test-subj={dataTestSubj}
             >
-              {children}
+              <>{children}</>
             </EuiCheckableCard>
             <EuiSpacer size="s" />
           </Fragment>

@@ -173,6 +173,7 @@ export function openContextMenu(
     <KibanaRenderContextProvider analytics={getAnalytics()} i18n={getI18n()} theme={getTheme()}>
       <EuiPopover
         className="embPanel__optionsMenuPopover"
+        // @ts-ignore - TODO: button is React.ReactNode but we're passing HTMLElement
         button={container}
         isOpen={true}
         closePopover={onClose}

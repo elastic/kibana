@@ -32,6 +32,7 @@ export const MultiButtonGroupField = ({ field, euiFieldProps, idAria, ...rest }:
   return (
     <EuiFormRow
       label={field.label}
+      // @ts-ignore - field.helpText is uncallable with @types/react@18
       helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
       error={errorMessage}
       isInvalid={isInvalid}

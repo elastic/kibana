@@ -36,7 +36,7 @@ export class FormatEditorSamples extends PureComponent<FormatEditorSamplesProps>
           defaultMessage: 'Input',
         }),
         render: (input: {} | string) => {
-          return typeof input === 'object' ? JSON.stringify(input) : input;
+          return (typeof input === 'object' ? JSON.stringify(input) : input) as string;
         },
       },
       {

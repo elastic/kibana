@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { Component, ReactElement } from 'react';
+import React, { Component } from 'react';
 import {
   EuiButton,
   EuiCopy,
@@ -581,7 +581,7 @@ export class UrlPanelContent extends Component<UrlPanelContentProps, State> {
     );
   };
 
-  private renderUrlParamExtensions = (): ReactElement | void => {
+  private renderUrlParamExtensions = (): React.ReactNode => {
     if (!this.props.urlParamExtensions) {
       return;
     }

@@ -34,7 +34,7 @@ const security = {
 
 const { http, notifications } = core;
 
-const wrapper: WrapperComponent<void> = ({ children }) => (
+const wrapper: WrapperComponent<{ children?: React.ReactNode }> = ({ children }) => (
   <UserProfilesKibanaProvider
     core={core}
     security={security}

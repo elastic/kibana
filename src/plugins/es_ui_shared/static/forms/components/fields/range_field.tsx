@@ -23,7 +23,7 @@ export const RangeField = ({ field, euiFieldProps = {}, idAria, ...rest }: Props
   const { onChange: onFieldChange } = field;
 
   const onChange: EuiRangeProps['onChange'] = useCallback(
-    (e) => {
+    (e: any) => {
       const event = { ...e, value: `${e.currentTarget.value}` };
       onFieldChange(event);
     },
@@ -33,6 +33,7 @@ export const RangeField = ({ field, euiFieldProps = {}, idAria, ...rest }: Props
   return (
     <EuiFormRow
       label={field.label}
+      // @ts-ignore - field.helpText is uncallable with @types/react@18
       helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
       error={errorMessage}
       isInvalid={isInvalid}
