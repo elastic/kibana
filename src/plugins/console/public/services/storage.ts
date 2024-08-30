@@ -13,6 +13,7 @@ type IStorageEngine = typeof window.localStorage;
 
 export enum StorageKeys {
   WIDTH = 'widths',
+  HEIGHT = 'height',
   FOLDS = 'folds',
   VARIABLES = 'variables',
   DEFAULT_LANGUAGE = 'defaultLanguage',

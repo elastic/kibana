@@ -8,7 +8,7 @@
 
 import React, { Children, ReactNode, useRef, useState, useCallback, useEffect } from 'react';
 
-import { keys } from '@elastic/eui';
+import { keys, useIsWithinMaxBreakpoint } from '@elastic/eui';
 import { Resizer, ResizerMouseEvent, ResizerKeyDownEvent } from './resizer';
 import { PanelContextProvider, PanelRegistry } from '../../contexts';
 
@@ -16,7 +16,7 @@ export interface Props {
   children: ReactNode;
   className?: string;
   resizerClassName?: string;
-  onPanelWidthChange?: (arrayOfPanelWidths: number[]) => void;
+  onPanelSizeChange?: (arrayOfPanelLengths: number[], isVertical: boolean) => void;
 }
 
 interface State {
@@ -24,18 +24,19 @@ interface State {
   currentResizerPos: number;
 }
 
-const initialState: State = { isDragging: false, currentResizerPos: -1 };
-
 const pxToPercent = (proportion: number, whole: number) => (proportion / whole) * 100;
 
 export function PanelsContainer({
   children,
   className,
-  onPanelWidthChange,
+  onPanelSizeChange,
   resizerClassName,
 }: Props) {
   const childrenArray = Children.toArray(children);
   const [firstChild, secondChild] = childrenArray;
+
+  const isVerticalLayout = useIsWithinMaxBreakpoint('m');
+  const initialState: State = { isDragging: false, currentResizerPos: isVerticalLayout ? 100 : -1 };
 
   const registryRef = useRef(new PanelRegistry());
   const containerRef = useRef<HTMLDivElement>(null);
@@ -72,12 +73,12 @@ export function PanelsContainer({
         left.setWidth(leftPercent);
         right.setWidth(rightPercent);
 
-        if (onPanelWidthChange) {
-          onPanelWidthChange([leftPercent, rightPercent]);
+        if (onPanelSizeChange) {
+          onPanelSizeChange([leftPercent, rightPercent], false);
         }
       }
     },
-    [onPanelWidthChange]
+    [onPanelSizeChange]
   );
 
   useEffect(() => {
@@ -99,35 +100,63 @@ export function PanelsContainer({
       className={resizerClassName}
       onKeyDown={handleKeyDown}
       onMouseDown={handleMouseDown}
+      isVertical={isVerticalLayout}
     />,
     secondChild,
   ];
+
+  const onResizerMove = (event) => {
+    if (!state.isDragging) {
+      return;
+    }
+    const { current: registry } = registryRef;
+    if (isVerticalLayout) {
+      const { clientY: y } = event;
+      const [up, down] = registry.getPanels();
+      const delta = y - state.currentResizerPos;
+      const containerHeight = getContainerHeight();
+      const upPercent = pxToPercent(up.getHeight() + delta, containerHeight);
+      const downPercent = pxToPercent(down.getHeight() - delta, containerHeight);
+      up.setHeight(upPercent);
+      down.setHeight(downPercent);
+
+      if (onPanelSizeChange) {
+        onPanelSizeChange([upPercent, downPercent], true);
+      }
+
+      setState({ ...state, currentResizerPos: x });
+    } else {
+      const { clientX: x } = event;
+      const [left, right] = registry.getPanels();
+      const delta = x - state.currentResizerPos;
+      const containerWidth = getContainerWidth();
+      const leftPercent = pxToPercent(left.getWidth() + delta, containerWidth);
+      const rightPercent = pxToPercent(right.getWidth() - delta, containerWidth);
+      if (leftPercent >= 0.1 && rightPercent >= 0.1) {
+        left.setWidth(leftPercent);
+        right.setWidth(rightPercent);
+
+        if (onPanelSizeChange) {
+          onPanelSizeChange([leftPercent, rightPercent], false);
+        }
+
+        setState({ ...state, currentResizerPos: x });
+      }
+    }
+  };
 
   return (
     <PanelContextProvider registry={registryRef.current}>
       <div
         className={className}
         ref={containerRef}
-        style={{ display: 'flex', height: '100%', width: '100%' }}
-        onMouseMove={(event) => {
-          if (state.isDragging) {
-            const { clientX: x } = event;
-            const { current: registry } = registryRef;
-            const [left, right] = registry.getPanels();
-            const delta = x - state.currentResizerPos;
-            const containerWidth = getContainerWidth();
-            const leftPercent = pxToPercent(left.getWidth() + delta, containerWidth);
-            const rightPercent = pxToPercent(right.getWidth() - delta, containerWidth);
-            left.setWidth(leftPercent);
-            right.setWidth(rightPercent);
-
-            if (onPanelWidthChange) {
-              onPanelWidthChange([leftPercent, rightPercent]);
-            }
-
-            setState({ ...state, currentResizerPos: x });
-          }
+        style={{
+          display: 'flex',
+          flexDirection: isVerticalLayout ? 'column' : 'row',
+          height: '100%',
+          width: '100%',
         }}
+        onMouseMove={(event) => onResizerMove(event)}
         onMouseUp={() => {
           setState(initialState);
         }}

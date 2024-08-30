@@ -10,6 +10,9 @@ export interface PanelController {
   setWidth: (percent: number) => void;
   getWidth: () => number;
   width: number;
+  setHeight: (percent: number) => void;
+  getHeight: () => number;
+  height: number;
 }
 
 export class PanelRegistry {

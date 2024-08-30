@@ -17,18 +17,19 @@ export interface Props {
   onKeyDown: (eve: ResizerKeyDownEvent) => void;
   onMouseDown: (eve: ResizerMouseEvent) => void;
   className?: string;
+  isVertical: boolean;
 }
 
-export function Resizer(props: Props) {
+export function Resizer({ onKeyDown, onMouseDown, className, isVertical }: Props) {
   return (
     <button
-      {...props}
+      {...{ onKeyDown, onMouseDown, className }}
       data-test-subj="splitPanelResizer"
       aria-label={i18n.translate('console.splitPanel.adjustPanelSizeAriaLabel', {
         defaultMessage: 'Press left/right to adjust panels size',
       })}
     >
-      <EuiIcon type="grabHorizontal" />
+      <EuiIcon type={isVertical ? 'grab' : 'grabHorizontal'} />
     </button>
   );
 }

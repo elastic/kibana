@@ -128,6 +128,7 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
     <div
       css={css`
         width: 100%;
+        height: 100%;
       `}
       ref={divRef}
       data-test-subj="consoleMonacoEditorContainer"

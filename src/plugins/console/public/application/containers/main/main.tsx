@@ -102,8 +102,8 @@ export function Main({ isEmbeddable = false }: MainProps) {
     <div id="consoleRoot">
       <EuiFlexGroup
         className={`consoleContainer${isEmbeddable ? '--embeddable' : ''}`}
-        gutterSize="m"
-        responsive={false}
+        gutterSize="none"
+        responsive={true}
       >
         <EuiFlexItem grow={false}>
           <EuiTitle className="euiScreenReaderOnly">
@@ -113,7 +113,7 @@ export function Main({ isEmbeddable = false }: MainProps) {
         <EuiFlexItem>
           <EuiSplitPanel.Outer grow={true} borderRadius={isEmbeddable ? 'none' : 'm'}>
             <EuiSplitPanel.Inner grow={false} className="consoleTabs">
-              <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
+              <EuiFlexGroup direction="row" alignItems="center" gutterSize="s" responsive={false}>
                 <EuiFlexItem>
                   <TopNavMenu
                     disabled={!done}
