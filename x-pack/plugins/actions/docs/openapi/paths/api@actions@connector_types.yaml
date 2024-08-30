@@ -52,8 +52,8 @@ get:
                   items:
                     $ref: '../components/schemas/features.yaml'
                   example: [alerting, cases, siem]
-          examples:
-            getConnectorTypesServerlessResponse:
-              $ref: '../components/examples/get_connector_types_generativeai_response.yaml'
+          # examples:
+          #   getConnectorTypesServerlessResponse:
+          #     $ref: '../components/examples/get_connector_types_generativeai_response.yaml'
     '401':
       $ref: '../components/responses/401.yaml'

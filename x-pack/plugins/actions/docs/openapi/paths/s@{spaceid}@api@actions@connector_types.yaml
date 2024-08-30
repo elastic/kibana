@@ -53,8 +53,8 @@ get:
                   items:
                     $ref: '../components/schemas/features.yaml'
                   example: [alerting, uptime, siem]
-          examples:
-            getConnectorTypesResponse:
-              $ref: '../components/examples/get_connector_types_response.yaml'
+          # examples:
+          #   getConnectorTypesResponse:
+          #     $ref: '../components/examples/get_connector_types_response.yaml'
     '401':
       $ref: '../components/responses/401.yaml'

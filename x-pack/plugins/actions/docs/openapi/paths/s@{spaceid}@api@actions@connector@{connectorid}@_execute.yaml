@@ -17,19 +17,19 @@ post:
       application/json:
         schema:
           $ref: '../components/schemas/run_connector_request.yaml' 
-        examples:
-          runIndexConnectorRequest:
-            $ref: '../components/examples/run_index_connector_request.yaml'
-          runJiraConnectorRequest:
-            $ref: '../components/examples/run_jira_connector_request.yaml'
-          runServerLogConnectorRequest:
-            $ref: '../components/examples/run_server_log_connector_request.yaml'
-          runServiceNowITOMConnectorRequest:
-            $ref: '../components/examples/run_servicenow_itom_connector_request.yaml'
-          runSlackConnectorRequest:
-            $ref: '../components/examples/run_slack_api_connector_request.yaml'
-          runSwimlaneConnectorRequest:
-            $ref: '../components/examples/run_swimlane_connector_request.yaml'
+        # examples:
+        #   runIndexConnectorRequest:
+        #     $ref: '../components/examples/run_index_connector_request.yaml'
+        #   runJiraConnectorRequest:
+        #     $ref: '../components/examples/run_jira_connector_request.yaml'
+        #   runServerLogConnectorRequest:
+        #     $ref: '../components/examples/run_server_log_connector_request.yaml'
+        #   runServiceNowITOMConnectorRequest:
+        #     $ref: '../components/examples/run_servicenow_itom_connector_request.yaml'
+        #   runSlackConnectorRequest:
+        #     $ref: '../components/examples/run_slack_api_connector_request.yaml'
+        #   runSwimlaneConnectorRequest:
+        #     $ref: '../components/examples/run_swimlane_connector_request.yaml'
   responses:
     '200':
       description: Indicates a successful call.
@@ -63,18 +63,18 @@ post:
                 enum:
                   - error
                   - ok
-          examples:
-            runIndexConnectorResponse:
-              $ref: '../components/examples/run_index_connector_response.yaml'
-            runJiraConnectorResponse:
-              $ref: '../components/examples/run_jira_connector_response.yaml'
-            runServerLogConnectorResponse:
-              $ref: '../components/examples/run_server_log_connector_response.yaml'
-            runServiceNowITOMConnectorResponse:
-              $ref: '../components/examples/run_servicenow_itom_connector_response.yaml'
-            runSlackConnectorResponse:
-              $ref: '../components/examples/run_slack_api_connector_response.yaml'
-            runSwimlaneConnectorResponse:
-              $ref: '../components/examples/run_swimlane_connector_response.yaml'
+          # examples:
+          #   runIndexConnectorResponse:
+          #     $ref: '../components/examples/run_index_connector_response.yaml'
+          #   runJiraConnectorResponse:
+          #     $ref: '../components/examples/run_jira_connector_response.yaml'
+          #   runServerLogConnectorResponse:
+          #     $ref: '../components/examples/run_server_log_connector_response.yaml'
+          #   runServiceNowITOMConnectorResponse:
+          #     $ref: '../components/examples/run_servicenow_itom_connector_response.yaml'
+          #   runSlackConnectorResponse:
+          #     $ref: '../components/examples/run_slack_api_connector_response.yaml'
+          #   runSwimlaneConnectorResponse:
+          #     $ref: '../components/examples/run_swimlane_connector_response.yaml'
     '401':
       $ref: '../components/responses/401.yaml'

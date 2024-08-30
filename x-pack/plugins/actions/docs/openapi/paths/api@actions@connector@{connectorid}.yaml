@@ -13,9 +13,9 @@ get:
         application/json:
           schema:
             $ref: '../components/schemas/connector_response_properties.yaml'
-          examples:
-            getConnectorResponse:
-              $ref: '../components/examples/get_connector_response.yaml'
+          # examples:
+            # getConnectorResponse:
+            #   $ref: '../components/examples/get_connector_response.yaml'
     '401':
       $ref: '../components/responses/401.yaml'
     '404':
@@ -61,9 +61,9 @@ post:
       application/json:
         schema:
           $ref: '../components/schemas/create_connector_request.yaml'
-        examples:
-          createIndexConnectorRequest:
-            $ref: '../components/examples/create_index_connector_request.yaml'
+        # examples:
+        #   createIndexConnectorRequest:
+        #     $ref: '../components/examples/create_index_connector_request.yaml'
   responses:
     '200':
       description: Indicates a successful call.
@@ -71,9 +71,9 @@ post:
          application/json:
           schema:
             $ref: '../components/schemas/connector_response_properties.yaml'
-          examples:
-            createIndexConnectorResponse:
-              $ref: '../components/examples/create_index_connector_response.yaml'
+          # examples:
+          #   createIndexConnectorResponse:
+          #     $ref: '../components/examples/create_index_connector_response.yaml'
     '401':
       $ref: '../components/responses/401.yaml'
 
@@ -92,9 +92,9 @@ put:
       application/json:
         schema:
           $ref: '../components/schemas/update_connector_request.yaml'
-        examples:
-          updateIndexConnectorRequest:
-            $ref: '../components/examples/update_index_connector_request.yaml'
+        # examples:
+        #   updateIndexConnectorRequest:
+        #     $ref: '../components/examples/update_index_connector_request.yaml'
   responses:
     '200':
       description: Indicates a successful call.
