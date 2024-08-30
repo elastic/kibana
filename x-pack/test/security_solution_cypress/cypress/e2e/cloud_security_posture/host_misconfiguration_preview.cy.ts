@@ -50,7 +50,7 @@ const mockFinding = {
   },
 };
 
-const createMockFinding = (mockFindings) => {
+const createMockFinding = (mockFindings: any) => {
   return rootRequest({
     method: 'POST',
     url: `${Cypress.env(
