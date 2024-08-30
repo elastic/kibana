@@ -5,36 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { schema } from '@kbn/config-schema';
 import type { Version } from '@kbn/object-versioning';
-import { versionSchema } from './constants';
-import { searchQuerySchema, searchResultSchema, SearchQuery, SearchResult } from './search';
-
-import type { ProcedureSchemas } from './types';
-
-export const mSearchSchemas: ProcedureSchemas = {
-  in: schema.object(
-    {
-      contentTypes: schema.arrayOf(
-        schema.object({ contentTypeId: schema.string(), version: versionSchema }),
-        {
-          minSize: 1,
-        }
-      ),
-      query: searchQuerySchema,
-    },
-    { unknowns: 'forbid' }
-  ),
-  out: schema.object(
-    {
-      contentTypes: schema.arrayOf(
-        schema.object({ contentTypeId: schema.string(), version: versionSchema })
-      ),
-      result: searchResultSchema,
-    },
-    { unknowns: 'forbid' }
-  ),
-};
+import { SearchQuery, SearchResult } from './search';
 
 export type MSearchQuery = SearchQuery;
 

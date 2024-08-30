@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { ProcedureName } from './constants';
-import type { ProcedureSchemas } from './types';
+import type { ProcedureName, ProcedureSchemas } from '../../../common';
 import { getSchemas } from './get';
 import { bulkGetSchemas } from './bulk_get';
 import { createSchemas } from './create';

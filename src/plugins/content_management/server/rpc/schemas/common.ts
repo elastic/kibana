@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import { schema } from '@kbn/config-schema';
+import { validateVersion } from '@kbn/object-versioning-utils';
 
 export const itemResultSchema = schema.object(
   {
@@ -14,3 +15,12 @@ export const itemResultSchema = schema.object(
   },
   { unknowns: 'forbid' }
 );
+
+export const versionSchema = schema.number({
+  validate: (value) => {
+    const { result } = validateVersion(value);
+    if (!result) {
+      return 'must be an integer';
+    }
+  },
+});

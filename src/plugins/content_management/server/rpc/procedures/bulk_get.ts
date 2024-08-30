@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { rpcSchemas } from '../../../common/schemas';
+import { rpcSchemas } from '../schemas';
 import type { BulkGetIn } from '../../../common';
 import type { ProcedureDefinition } from '../rpc_service';
 import type { Context } from '../types';
