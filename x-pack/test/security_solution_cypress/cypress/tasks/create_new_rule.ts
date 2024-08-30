@@ -128,6 +128,8 @@ import {
   MAX_SIGNALS_INPUT,
   SETUP_GUIDE_TEXTAREA,
   RELATED_INTEGRATION_COMBO_BOX_INPUT,
+  SAVE_WITH_ERRORS_MODAL,
+  SAVE_WITH_ERRORS_MODAL_CONFIRM_BTN,
 } from '../screens/create_new_rule';
 import {
   INDEX_SELECTOR,
@@ -160,6 +162,14 @@ export const createAndEnableRule = () => {
 export const createRuleWithoutEnabling = () => {
   cy.get(CREATE_WITHOUT_ENABLING_BTN).click();
   cy.get(CREATE_WITHOUT_ENABLING_BTN).should('not.exist');
+};
+
+export const createRuleWithNonBlockingErrors = () => {
+  cy.get(CREATE_AND_ENABLE_BTN).click();
+  cy.get(SAVE_WITH_ERRORS_MODAL).should('exist');
+  cy.get(SAVE_WITH_ERRORS_MODAL_CONFIRM_BTN).first().click();
+  cy.get(SAVE_WITH_ERRORS_MODAL).should('not.exist');
+  cy.get(CREATE_AND_ENABLE_BTN).should('not.exist');
 };
 
 export const fillAboutRule = (rule: RuleCreateProps) => {

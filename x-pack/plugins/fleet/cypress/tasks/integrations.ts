@@ -25,16 +25,8 @@ export const addIntegration = ({ useExistingPolicy } = { useExistingPolicy: fals
     cy.getBySel(EXISTING_HOSTS_TAB).click();
     cy.wait('@agentStatus');
   } else {
-    // speeding up creating with unchecking system and agent integration
+    // speeding up creating with unchecking system integration
     cy.getBySel(AGENT_POLICY_SYSTEM_MONITORING_CHECKBOX).uncheck({ force: true });
-    cy.get('.euiAccordion__button').click();
-
-    cy.get('*[id^="logs_"]').uncheck({
-      force: true,
-    });
-    cy.get('*[id^="metrics_"]').uncheck({
-      force: true,
-    });
   }
   cy.getBySel(CREATE_PACKAGE_POLICY_SAVE_BTN).should('be.enabled').click();
 

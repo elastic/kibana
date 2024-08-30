@@ -1252,6 +1252,8 @@
       "@kbn/notifications-plugin/*": ["x-pack/plugins/notifications/*"],
       "@kbn/object-versioning": ["packages/kbn-object-versioning"],
       "@kbn/object-versioning/*": ["packages/kbn-object-versioning/*"],
+      "@kbn/object-versioning-utils": ["packages/kbn-object-versioning-utils"],
+      "@kbn/object-versioning-utils/*": ["packages/kbn-object-versioning-utils/*"],
       "@kbn/observability-ai-assistant-app-plugin": ["x-pack/plugins/observability_solution/observability_ai_assistant_app"],
       "@kbn/observability-ai-assistant-app-plugin/*": ["x-pack/plugins/observability_solution/observability_ai_assistant_app/*"],
       "@kbn/observability-ai-assistant-management-plugin": ["x-pack/plugins/observability_solution/observability_ai_assistant_management"],
