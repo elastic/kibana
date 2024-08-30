@@ -12,7 +12,6 @@ import { FindProvider } from './find';
 import { TestSubjects } from './test_subjects';
 import { BrowserProvider } from './browser';
 import { ToastsService } from './toasts';
-import { SecurityServiceProvider } from './security';
 
 export const services = {
   retryOnStale: RetryOnStaleProvider,
@@ -21,5 +20,4 @@ export const services = {
   testSubjects: TestSubjects,
   browser: BrowserProvider,
   toasts: ToastsService,
-  security: SecurityServiceProvider,
 };
