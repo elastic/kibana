@@ -45,8 +45,7 @@ export const getApmConfig = (requestPath: string) => {
       ...config,
       pageLoadTraceId: traceId,
       pageLoadSampled: sampled,
-      pageLoadParentId:
-        agent.currentSpan?.ids['span.id'] || agent.currentTransaction?.ids['transaction.id'],
+      pageLoadSpanId: backendTransaction.ensureParentId(),
     };
   }
 
