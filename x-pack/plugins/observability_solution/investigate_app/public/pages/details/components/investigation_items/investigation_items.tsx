@@ -23,7 +23,7 @@ export function InvestigationItems({ investigation }: Props) {
   const {
     renderableItems,
     globalParams,
-    setGlobalParams,
+    updateInvestigationParams,
     addItem,
     deleteItem,
     isAdding,
@@ -44,7 +44,7 @@ export function InvestigationItems({ investigation }: Props) {
               to: datemath.parse(dateRange.to)!.toISOString(),
             };
 
-            setGlobalParams({ ...globalParams, timeRange: nextTimeRange });
+            updateInvestigationParams({ ...globalParams, timeRange: nextTimeRange });
           }}
         />
 

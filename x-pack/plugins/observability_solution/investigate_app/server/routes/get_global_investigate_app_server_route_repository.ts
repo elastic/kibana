@@ -18,6 +18,7 @@ import {
   getInvestigationParamsSchema,
   updateInvestigationItemParamsSchema,
   updateInvestigationNoteParamsSchema,
+  updateInvestigationParamsSchema,
 } from '@kbn/investigation-shared';
 import { createInvestigation } from '../services/create_investigation';
 import { createInvestigationItem } from '../services/create_investigation_item';
@@ -33,6 +34,7 @@ import { createInvestigateAppServerRoute } from './create_investigate_app_server
 import { getInvestigationItems } from '../services/get_investigation_items';
 import { updateInvestigationNote } from '../services/update_investigation_note';
 import { updateInvestigationItem } from '../services/update_investigation_item';
+import { updateInvestigation } from '../services/update_investigation';
 
 const createInvestigationRoute = createInvestigateAppServerRoute({
   endpoint: 'POST /api/observability/investigations 2023-10-31',
@@ -77,6 +79,27 @@ const getInvestigationRoute = createInvestigateAppServerRoute({
     const repository = investigationRepositoryFactory({ soClient, logger });
 
     return await getInvestigation(params.path, repository);
+  },
+});
+
+const updateInvestigationRoute = createInvestigateAppServerRoute({
+  endpoint: 'PUT /api/observability/investigations/{investigationId} 2023-10-31',
+  options: {
+    tags: [],
+  },
+  params: updateInvestigationParamsSchema,
+  handler: async ({ params, context, request, logger }) => {
+    const user = (await context.core).coreStart.security.authc.getCurrentUser(request);
+    if (!user) {
+      throw new Error('User is not authenticated');
+    }
+    const soClient = (await context.core).savedObjects.client;
+    const repository = investigationRepositoryFactory({ soClient, logger });
+
+    return await updateInvestigation(params.path.investigationId, params.body, {
+      repository,
+      user,
+    });
   },
 });
 
@@ -263,11 +286,12 @@ export function getGlobalInvestigateAppServerRouteRepository() {
     ...createInvestigationRoute,
     ...findInvestigationsRoute,
     ...getInvestigationRoute,
+    ...updateInvestigationRoute,
+    ...deleteInvestigationRoute,
     ...createInvestigationNoteRoute,
     ...getInvestigationNotesRoute,
     ...updateInvestigationNoteRoute,
     ...deleteInvestigationNoteRoute,
-    ...deleteInvestigationRoute,
     ...createInvestigationItemRoute,
     ...deleteInvestigationItemRoute,
     ...updateInvestigationItemRoute,

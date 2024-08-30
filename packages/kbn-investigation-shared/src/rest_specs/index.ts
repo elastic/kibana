@@ -18,6 +18,7 @@ export type * from './get_items';
 export type * from './get_notes';
 export type * from './investigation_item';
 export type * from './investigation_note';
+export type * from './update';
 export type * from './update_item';
 export type * from './update_note';
 
@@ -33,5 +34,6 @@ export * from './get_items';
 export * from './get_notes';
 export * from './investigation_item';
 export * from './investigation_note';
+export * from './update';
 export * from './update_item';
 export * from './update_note';
