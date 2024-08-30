@@ -19,6 +19,7 @@ import type {
   TypedLensByValueInput,
   XYState,
 } from '@kbn/lens-plugin/public';
+import type { LensBaseEmbeddableInput } from '@kbn/lens-plugin/public/embeddable';
 import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { useKibana } from '../../lib/kibana';
 import { useLensAttributes } from './use_lens_attributes';
@@ -159,7 +160,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   });
 
   const updateDateRange = useCallback(
-    ({ range }) => {
+    ({ range }: { range: Array<number | string> }) => {
       const [min, max] = range;
       dispatch(
         setAbsoluteRangeDatePicker({
@@ -172,7 +173,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     [dispatch, inputsModelId]
   );
 
-  const onFilterCallback = useCallback(
+  const onFilterCallback = useCallback<Required<LensBaseEmbeddableInput>['onFilter']>(
     (event) => {
       if (disableOnClickFilter) {
         event.preventDefault();
