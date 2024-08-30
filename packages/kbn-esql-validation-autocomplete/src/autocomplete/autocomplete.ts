@@ -309,7 +309,9 @@ export async function suggest(
       astContext,
       getFieldsByType,
       getFieldsMap,
-      getPolicyMetadata
+      getPolicyMetadata,
+      fullText,
+      offset
     );
   }
   if (astContext.type === 'list') {
@@ -1258,7 +1260,9 @@ async function getFunctionArgsSuggestions(
   },
   getFieldsByType: GetFieldsByTypeFn,
   getFieldsMap: GetFieldsMapFn,
-  getPolicyMetadata: GetPolicyMetadataFn
+  getPolicyMetadata: GetPolicyMetadataFn,
+  fullText: string,
+  offset: number
 ): Promise<SuggestionRawDefinition[]> {
   const fnDefinition = getFunctionDefinition(node.name);
   // early exit on no hit
@@ -1314,9 +1318,11 @@ async function getFunctionArgsSuggestions(
     // no need to suggest comma
     .some((p) => p === null || p?.optional === true);
 
-  // Wehther to prepend comma to suggestion string
+  // Whether to prepend comma to suggestion string
   // E.g. if true, "fieldName" -> "fieldName, "
-  const shouldAddComma = hasMoreMandatoryArgs && fnDefinition.type !== 'builtin';
+  const alreadyHasComma = fullText ? fullText[offset] === ',' : false;
+  const shouldAddComma =
+    hasMoreMandatoryArgs && fnDefinition.type !== 'builtin' && !alreadyHasComma;
 
   const suggestedConstants = uniq(
     typesToSuggestNext
@@ -1777,11 +1783,8 @@ async function getOptionArgsSuggestions(
                   defaultMessage: 'Add date histogram using bucket()',
                 }
               ),
-              documentation: {
-                value: '',
-              },
               sortText: '1A',
-            });
+            } as SuggestionRawDefinition);
           }
 
           suggestions.push(
