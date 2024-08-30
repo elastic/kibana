@@ -28,7 +28,7 @@ import {
 import { unhashUrl } from '@kbn/kibana-utils-plugin/public';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { saveVisualization } from '../../utils/saved_visualize_utils';
-import { VISUALIZE_EMBEDDABLE_TYPE, VisualizeInput, getFullPath } from '../..';
+import { VISUALIZE_EMBEDDABLE_TYPE, getFullPath } from '../..';
 
 import {
   VisualizeServices,
@@ -245,8 +245,8 @@ export const getTopNavConfig = (
 
     const state = {
       input: {
-        savedVis: vis.serialize(),
-      } as VisualizeInput,
+        serializedVis: vis.serialize(),
+      },
       embeddableId,
       type: VISUALIZE_EMBEDDABLE_TYPE,
       searchSessionId: data.search.session.getSessionId(),
@@ -514,12 +514,12 @@ export const getTopNavConfig = (
 
                   const state = {
                     input: {
-                      savedVis: {
+                      serializedVis: {
                         ...vis.serialize(),
                         title: newTitle,
                         description: newDescription,
                       },
-                    } as VisualizeInput,
+                    },
                     embeddableId,
                     type: VISUALIZE_EMBEDDABLE_TYPE,
                     searchSessionId: data.search.session.getSessionId(),
