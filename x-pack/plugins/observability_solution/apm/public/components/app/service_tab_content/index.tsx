@@ -7,7 +7,14 @@
 
 import React from 'react';
 import { ReactNode } from 'react-markdown';
+import { EuiSpacer } from '@elastic/eui';
+import { SignalTypes } from '../../../../common/entities/types';
+import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
+import { isApmSignal, isLogsSignal } from '../../../utils/get_signal_type';
+import { useLocalStorage } from '../../../hooks/use_local_storage';
+import { emptyStateContent } from './constants';
 import { Tab } from './types';
+import { ServiceTabEmptyState } from '../service_tab_empty_state';
 
 interface ServiceTabContentProps {
   tabName: Tab;
@@ -15,55 +22,50 @@ interface ServiceTabContentProps {
 }
 
 export function ServiceTabContent({ children, tabName }: ServiceTabContentProps) {
-  // commented/blocked until PR #191183 is merged
+  const { serviceEntitySummary } = useApmServiceContext();
 
-  // const { serviceEntitySummary } = useApmServiceContext();
+  const hasOnlyLogsSignal =
+    serviceEntitySummary?.signalTypes &&
+    !isApmSignal(serviceEntitySummary.signalTypes as SignalTypes[]) &&
+    isLogsSignal(serviceEntitySummary.signalTypes as SignalTypes[]);
 
-  // const hasOnlyLogsSignal =
-  //   serviceEntitySummary?.signalTypes &&
-  //   !isApmSignal(serviceEntitySummary.signalTypes as SignalTypes[]) &&
-  // isLogsSignal(serviceEntitySummary.signalTypes as SignalTypes[]);
+  const [dismissedLogsOnlyEmptyState, setdismissedLogsOnlyEmptyState] = useLocalStorage(
+    `apm.dismissedLogsOnlyEmptyState.${tabName}`,
+    false
+  );
 
-  // const [dismissedLogsOnlyEmptyState, setdismissedLogsOnlyEmptyState] = useLocalStorage(
-  //   `apm.dismissedLogsOnlyEmptyState.${tabName}`,
-  //   false
-  // );
+  const displayEmptyStateOnly = tabName !== 'overview';
 
-  // const displayEmptyStateOnly = tabName !== 'overview';
+  return (
+    <>
+      {hasOnlyLogsSignal ? (
+        <>
+          {displayEmptyStateOnly ? (
+            <ServiceTabEmptyState
+              title={emptyStateContent[tabName].title}
+              content={emptyStateContent[tabName].content}
+              imgSrc={emptyStateContent[tabName].imgSrc ?? null}
+            />
+          ) : (
+            <>
+              {!dismissedLogsOnlyEmptyState && (
+                <ServiceTabEmptyState
+                  title={emptyStateContent[tabName].title}
+                  content={emptyStateContent[tabName].content}
+                  imgSrc={emptyStateContent[tabName].imgSrc ?? null}
+                  dismissable={true}
+                  onDissmiss={() => setdismissedLogsOnlyEmptyState(true)}
+                />
+              )}
+              <EuiSpacer size="m" />
 
-  return <>{children}</>;
-
-  // commented/blocked until PR #191183 is merged
-  // return (
-  //   <>
-  //     {hasOnlyLogsSignal ? (
-  //       <>
-  //         {displayEmptyStateOnly ? (
-  //           <ServiceTabEmptyState
-  //             title={emptyStateContent[tabName].title}
-  //             content={emptyStateContent[tabName].content}
-  //             imgSrc={emptyStateContent[tabName].imgSrc ?? null}
-  //           />
-  //         ) : (
-  //           <>
-  //             {!dismissedLogsOnlyEmptyState && (
-  //               <ServiceTabEmptyState
-  //                 title={emptyStateContent[tabName].title}
-  //                 content={emptyStateContent[tabName].content}
-  //                 imgSrc={emptyStateContent[tabName].imgSrc ?? null}
-  //                 dismissable={true}
-  //                 onDissmiss={() => setdismissedLogsOnlyEmptyState(true)}
-  //               />
-  //             )}
-  //             <EuiSpacer size="m" />
-
-  //             {children}
-  //           </>
-  //         )}
-  //       </>
-  //     ) : (
-  //       <>{children}</>
-  //     )}
-  //   </>
-  // );
+              {children}
+            </>
+          )}
+        </>
+      ) : (
+        <>{children}</>
+      )}
+    </>
+  );
 }
