@@ -27,6 +27,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 
+import { useMlJobService } from '../../../../../../../services/job_service';
 import { JobCreatorContext } from '../../../job_creator_context';
 import type { AdvancedJobCreator } from '../../../../../common/job_creator';
 import { resetAdvancedJob } from '../../../../../common/job_creator/util/general';
@@ -66,6 +67,7 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
 
   const { jobCreator: jc } = useContext(JobCreatorContext);
   const jobCreator = jc as AdvancedJobCreator;
+  const mlJobService = useMlJobService();
 
   const [validating, setValidating] = useState(false);
   const [step, setStep] = useState(STEP.PICK_DATA_VIEW);
@@ -123,7 +125,9 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
   const applyDataView = useCallback(() => {
     const newIndices = newDataViewTitle.split(',');
     jobCreator.indices = newIndices;
-    resetAdvancedJob(jobCreator, navigateToPath);
+    resetAdvancedJob(mlJobService, jobCreator, navigateToPath);
+    // exclude mlJobService from deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreator, newDataViewTitle, navigateToPath]);
 
   return (

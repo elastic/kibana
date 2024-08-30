@@ -15,6 +15,7 @@ import {
 import { mockStats } from '../../../mock/stats/mock_stats';
 import { DataQualityCheckResult, PatternRollup } from '../../../types';
 import {
+  getIndexDocsCountFromRollup,
   getIndexId,
   getTotalDocsCount,
   getTotalIncompatible,
@@ -227,5 +228,30 @@ describe('getIndexId', () => {
     expect(getIndexId({ indexName: 'auditbeat-custom-index-1', stats: mockStats })).toEqual(
       'uyJDDqGrRQqdBTN0mCF-iw'
     );
+  });
+});
+
+describe('getIndexDocsCountFromRollup', () => {
+  test('it returns the expected count when the `patternRollup` has `stats`', () => {
+    expect(
+      getIndexDocsCountFromRollup({
+        indexName: '.ds-packetbeat-8.6.1-2023.02.04-000001',
+        patternRollup: mockPacketbeatPatternRollup,
+      })
+    ).toEqual(1628343);
+  });
+
+  test('it returns zero when the `patternRollup` `stats` is null', () => {
+    const patternRollup = {
+      ...mockPacketbeatPatternRollup,
+      stats: null, // <--
+    };
+
+    expect(
+      getIndexDocsCountFromRollup({
+        indexName: '.ds-packetbeat-8.6.1-2023.02.04-000001',
+        patternRollup,
+      })
+    ).toEqual(0);
   });
 });
