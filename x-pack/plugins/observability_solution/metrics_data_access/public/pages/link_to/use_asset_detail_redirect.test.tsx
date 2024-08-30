@@ -37,7 +37,7 @@ const wrapper = ({ children }: { children: React.ReactNode }): JSX.Element => (
 );
 
 describe('useNodeDetailsRedirect', () => {
-  it('should return the LinkProperties for nodeType pod', () => {
+  it('should return the LinkProperties for assetType pod', () => {
     const { result } = renderHook(() => useAssetDetailsRedirect(), { wrapper });
 
     const fromDateStrig = '2019-01-01T11:00:00Z';
@@ -57,7 +57,7 @@ describe('useNodeDetailsRedirect', () => {
     expect(getLinkProps).toHaveProperty('onClick');
   });
 
-  it('should return the LinkProperties for nodeType host', () => {
+  it('should return the LinkProperties for assetType host', () => {
     const { result } = renderHook(() => useAssetDetailsRedirect(), { wrapper });
 
     const fromDateStrig = '2019-01-01T11:00:00Z';
