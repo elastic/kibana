@@ -37,7 +37,7 @@ export const ElasticsearchStartPage = () => {
     <EuiPageTemplate
       offset={0}
       restrictWidth={false}
-      data-test-subj="search-startpage"
+      data-test-subj="elasticsearchStartPage"
       grow={false}
     >
       <KibanaPageTemplate.Section alignment="center" restrictWidth={false} grow>

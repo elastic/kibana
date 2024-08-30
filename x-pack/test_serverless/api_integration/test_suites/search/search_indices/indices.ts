@@ -15,7 +15,7 @@ export default function ({ getService }: FtrProviderContext) {
   const log = getService('log');
   const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
-  const svlIndicesHelpers = getService('svlIndicesHelpers');
+  const esDeleteAllIndices = getService('esDeleteAllIndices');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   let roleAuthc: RoleCredentials;
   let internalReqHeader: InternalRequestHeader;
@@ -34,7 +34,7 @@ export default function ({ getService }: FtrProviderContext) {
         after(async () => {
           // Cleanup index created for testing purposes
           try {
-            await svlIndicesHelpers.deleteAllIndices();
+            await esDeleteAllIndices(createIndexName);
           } catch (err) {
             log.debug('[Cleanup error] Error deleting index');
             throw err;
