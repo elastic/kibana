@@ -40,7 +40,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const log = getService('log');
 
-  describe('@ess @serverless Basic Security AI Assistant Knowledge Base Entries', async () => {
+  describe('@ess @serverless Basic Security AI Assistant Knowledge Base Entries', () => {
     describe('Create Entries', () => {
       it('should create a new document entry', async () => {
         const entry = await createEntry(supertest, log, documentEntry);
