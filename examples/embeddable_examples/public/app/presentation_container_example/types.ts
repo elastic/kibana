@@ -14,20 +14,23 @@ import {
   PresentationContainer,
   SerializedPanelState,
 } from '@kbn/presentation-containers';
-import { PublishesTimeRange } from '@kbn/presentation-publishing';
+import { PublishesTimeRange, PublishingSubject } from '@kbn/presentation-publishing';
 
 export type ParentApi = PresentationContainer &
   CanAddNewPanel &
   HasSerializedChildState &
   HasRuntimeChildState &
-  PublishesTimeRange;
+  PublishesTimeRange & {
+    panels$: PublishingSubject<Array<{ id: string; type: string }>>
+  };
 
 export interface LastSavedState {
   timeRange: TimeRange;
-  panels: Array<{ id: string, type: string, panelState: SerializedPanelState }>;
+  panelsState: Array<{ id: string, type: string, panelState: SerializedPanelState }>;
 }
 
 export interface UnsavedChanges {
   timeRange?: TimeRange;
-  panels?: Array<{ id: string, unsavedPanelChanges: Object }>;
+  panels?: Array<{ id: string, type: string }>;
+  panelUnsavedChanges?: Record<string, object>;
 }
