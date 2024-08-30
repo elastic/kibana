@@ -14,7 +14,7 @@ import {
   VisualizationLayerWidgetProps,
   VisualizationMap,
 } from '../../../types';
-import { ChartSwitch } from './chart_switch';
+import { ChartSwitchPopover } from './chart_switch/chart_switch_popover';
 
 export function LayerHeader({
   activeVisualizationId,
@@ -59,7 +59,7 @@ export function LayerHeader({
   return SubtypeSwitch ? (
     <EuiFlexGroup gutterSize="s">
       <EuiFlexItem>
-        <ChartSwitch
+        <ChartSwitchPopover
           datasourceMap={datasourceMap}
           visualizationMap={availableVisualizationMap}
           framePublicAPI={layerConfigProps.frame}
@@ -71,7 +71,7 @@ export function LayerHeader({
       </EuiFlexItem>
     </EuiFlexGroup>
   ) : (
-    <ChartSwitch
+    <ChartSwitchPopover
       datasourceMap={datasourceMap}
       visualizationMap={availableVisualizationMap}
       framePublicAPI={layerConfigProps.frame}
