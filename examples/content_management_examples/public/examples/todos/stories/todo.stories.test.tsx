@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { render, screen, within, waitForElementToBeRemoved } from '@testing-library/react';
+import { render, screen, within, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { SimpleTodoApp } from './todo.stories';
 
@@ -86,5 +86,7 @@ test('SimpleTodoApp works', async () => {
   await userEvent.click(within(newTodo).getByLabelText('Delete'));
 
   // wait for new todo to be removed
-  await waitForElementToBeRemoved(() => screen.getByText('Learn React'));
+  await waitFor(() => {
+    expect(screen.queryByText('Learn React')).not.toBeInTheDocument();
+  });
 });
