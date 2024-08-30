@@ -71,6 +71,7 @@ const AnomalyActionMenu = ({
   influencers,
   disableShowInInventory,
   hostName,
+  timeRange,
 }: {
   jobId: string;
   type: string;
@@ -80,6 +81,7 @@ const AnomalyActionMenu = ({
   influencers: string[];
   disableShowInInventory?: boolean;
   hostName?: string;
+  timeRange: { start: string; end: string };
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const close = useCallback(() => setIsOpen(false), [setIsOpen]);
@@ -87,12 +89,7 @@ const AnomalyActionMenu = ({
   const { onViewChange } = useWaffleViewState();
   const { metricsView } = useMetricsDataViewContext();
   const {
-    services: {
-      share,
-      data: {
-        query: { filterManager: filterManagerService },
-      },
-    },
+    services: { share },
   } = useKibanaContextForPlugin();
   const hostsLocator = share.url.locators.get<HostsLocatorParams>(HOSTS_LOCATOR_ID);
 
@@ -135,23 +132,6 @@ const AnomalyActionMenu = ({
     closeFlyout();
   }, [jobId, onViewChange, startTime, type, influencers, influencerField, closeFlyout]);
 
-  const showInHosts = useCallback(() => {
-    const newFilter = buildCombinedAssetFilter({
-      field: HOST_NAME_FIELD,
-      values: influencers,
-      dataView: metricsView?.dataViewReference,
-    });
-
-    const addHostFilter = (filter: Filter[] | Filter) => {
-      filterManagerService.removeAll();
-      filterManagerService.addFilters(filter);
-    };
-
-    hostsLocator?.navigate({}).then(() => addHostFilter(newFilter));
-
-    if (closeFlyout) closeFlyout();
-  }, [closeFlyout, influencers, metricsView, hostsLocator, filterManagerService]);
-
   const anomaliesUrl = useLinkProps({
     app: 'ml',
     pathname: `/explorer?_g=${createResultsUrl([jobId.toString()])}`,
@@ -172,12 +152,29 @@ const AnomalyActionMenu = ({
   ];
 
   if (!disableShowInInventory) {
+    const buildFilter = buildCombinedAssetFilter({
+      field: HOST_NAME_FIELD,
+      values: influencers,
+      dataView: metricsView?.dataViewReference,
+    });
+
+    let newFilter: Filter[] = [];
+    if (!Array.isArray(buildFilter)) {
+      newFilter = [buildFilter];
+    }
+
     const showInHostsItem = !hostName ? (
       <EuiContextMenuItem
         key="showInHosts"
         icon="search"
         data-test-subj="infraAnomalyFlyoutShowInHosts"
-        onClick={showInHosts}
+        href={hostsLocator?.getRedirectUrl({
+          dateRange: {
+            from: timeRange.start,
+            to: timeRange.end,
+          },
+          filters: newFilter,
+        })}
       >
         <FormattedMessage
           id="xpack.infra.ml.anomalyFlyout.actions.showInHosts"
@@ -525,6 +522,7 @@ export const AnomaliesTable = ({
                 startTime={anomaly.startTime}
                 closeFlyout={closeFlyout}
                 hostName={hostName}
+                timeRange={timeRange}
               />
             );
           },
