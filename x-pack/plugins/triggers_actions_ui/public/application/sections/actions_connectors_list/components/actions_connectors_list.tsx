@@ -162,7 +162,7 @@ const ActionsConnectorsList = ({
     if (connectorId && !isLoadingActions) {
       const connector = actions.find((action) => action.id === connectorId);
       if (connector) {
-        editItem(connector, EditConnectorTabs.Configuration);
+        editItem(connector, EditConnectorTabs.Configuration, true);
       }
 
       const linkToConnectors = history.createHref({ pathname: routeToConnectors });
