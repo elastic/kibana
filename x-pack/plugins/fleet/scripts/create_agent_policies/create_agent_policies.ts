@@ -8,7 +8,10 @@
 import { ToolingLog } from '@kbn/tooling-log';
 import yargs from 'yargs';
 
+import { LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../common/constants';
 import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../common';
+
+import { packagePolicyFixture } from './fixtures';
 
 const logger = new ToolingLog({
   level: 'info',
@@ -89,7 +92,7 @@ async function createEnrollmentToken(size: number) {
         api_key_id: 'faketest123',
         api_key: 'test==',
         name: `Test Policy ${idx}`,
-        policy_id: `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}:test-policy-${idx}`,
+        policy_id: `test-policy-${idx}`,
         namespaces: [],
         created_at: new Date().toISOString(),
       }) + '\n',
@@ -97,6 +100,40 @@ async function createEnrollmentToken(size: number) {
     .join('');
 
   const res = await fetch(`${ES_URL}/.fleet-enrollment-api-keys/_bulk`, {
+    method: 'post',
+    body,
+    headers: {
+      Authorization: auth,
+      'Content-Type': 'application/x-ndjson',
+    },
+  });
+  const data = await res.json();
+
+  if (!data.items) {
+    logger.error('Error creating agent policies docs: ' + JSON.stringify(data));
+    process.exit(1);
+  }
+  return data;
+}
+
+async function createPackagePolicies(size: number) {
+  const auth = 'Basic ' + Buffer.from(ES_SUPERUSER + ':' + ES_PASSWORD).toString('base64');
+  const body = Array.from({ length: size }, (_, index) => index + 1)
+    .flatMap((idx) => [
+      INDEX_BULK_OP.replace(
+        /{{id}}/,
+        `${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}:test-policy-${idx}`
+      ),
+      JSON.stringify(
+        packagePolicyFixture({
+          idx,
+          agentPolicyId: `test-policy-${idx}`,
+        })
+      ) + '\n',
+    ])
+    .join('');
+
+  const res = await fetch(`${ES_URL}/.kibana_ingest/_bulk`, {
     method: 'post',
     body,
     headers: {
@@ -129,6 +166,10 @@ export async function run() {
 
   const size = Number(sizeArg).valueOf();
   logger.info(`Creating ${size} policies`);
-  await Promise.all([createAgentPoliciesDocsBulk(size), createEnrollmentToken(size)]);
+  await Promise.all([
+    createAgentPoliciesDocsBulk(size),
+    createEnrollmentToken(size),
+    createPackagePolicies(size),
+  ]);
   logger.info(`Succesfuly created ${size} policies`);
 }
