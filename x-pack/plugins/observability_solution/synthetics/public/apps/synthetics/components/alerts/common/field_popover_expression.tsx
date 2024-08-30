@@ -7,6 +7,7 @@
 
 import React, { ReactNode } from 'react';
 import { EuiExpression, EuiPopover } from '@elastic/eui';
+import { Suggestion } from '../hooks/use_fetch_synthetics_suggestions';
 
 type ExpressionColor = 'subdued' | 'primary' | 'success' | 'accent' | 'warning' | 'danger';
 interface Props {
@@ -17,6 +18,7 @@ interface Props {
   selectedField?: string;
   fieldName: string;
   setSelectedField: (value?: string) => void;
+  suggestions?: Suggestion[];
 }
 
 export function FieldPopoverExpression({
@@ -27,8 +29,11 @@ export function FieldPopoverExpression({
   selectedField,
   fieldName,
   setSelectedField,
+  suggestions,
 }: Props) {
   const isPopoverOpen = selectedField === fieldName;
+
+  const label = suggestions?.find((suggestion) => suggestion.value === selectedField)?.label;
 
   const closePopover = () => setSelectedField(selectedField === fieldName ? undefined : fieldName);
   return (
@@ -39,7 +44,7 @@ export function FieldPopoverExpression({
       button={
         <EuiExpression
           description={title}
-          value={value}
+          value={label}
           isActive={Boolean(selectedField)}
           color={color}
           onClick={closePopover}
