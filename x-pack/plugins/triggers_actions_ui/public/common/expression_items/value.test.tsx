@@ -22,32 +22,27 @@ describe('value expression', () => {
       />
     );
     expect(wrapper.find('[data-test-subj="valueFieldTitle"]')).toMatchInlineSnapshot(`
-    <ClosablePopoverTitle
-      data-test-subj="valueFieldTitle"
-      onClose={[Function]}
-    >
-      test
-    </ClosablePopoverTitle>
-    `);
+          <ClosablePopoverTitle
+            data-test-subj="valueFieldTitle"
+            onClose={[Function]}
+          >
+            test
+          </ClosablePopoverTitle>
+        `);
     expect(wrapper.find('[data-test-subj="valueFieldNumberForm"]')).toMatchInlineSnapshot(`
-    <EuiFormRow
-      data-test-subj="valueFieldNumberForm"
-      describedByIds={Array []}
-      display="row"
-      error={Array []}
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
-      isInvalid={false}
-      labelType="label"
-    >
-      <EuiFieldNumber
-        data-test-subj="valueFieldNumber"
+      <EuiFormRow
+        data-test-subj="valueFieldNumberForm"
+        error={Array []}
         isInvalid={false}
-        min={0}
-        onChange={[Function]}
-        value={1000}
-      />
-    </EuiFormRow>
+      >
+        <EuiFieldNumber
+          data-test-subj="valueFieldNumber"
+          isInvalid={false}
+          min={0}
+          onChange={[Function]}
+          value={1000}
+        />
+      </EuiFormRow>
     `);
   });
 
@@ -61,28 +56,23 @@ describe('value expression', () => {
       />
     );
     expect(wrapper.find('[data-test-subj="valueFieldNumberForm"]')).toMatchInlineSnapshot(`
-    <EuiFormRow
-      data-test-subj="valueFieldNumberForm"
-      describedByIds={Array []}
-      display="row"
-      error={
-        Array [
-          "value is not valid",
-        ]
-      }
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
-      isInvalid={true}
-      labelType="label"
-    >
-      <EuiFieldNumber
-        data-test-subj="valueFieldNumber"
+      <EuiFormRow
+        data-test-subj="valueFieldNumberForm"
+        error={
+          Array [
+            "value is not valid",
+          ]
+        }
         isInvalid={true}
-        min={0}
-        onChange={[Function]}
-        value={1000}
-      />
-    </EuiFormRow>
+      >
+        <EuiFieldNumber
+          data-test-subj="valueFieldNumber"
+          isInvalid={true}
+          min={0}
+          onChange={[Function]}
+          value={1000}
+        />
+      </EuiFormRow>
     `);
   });
 

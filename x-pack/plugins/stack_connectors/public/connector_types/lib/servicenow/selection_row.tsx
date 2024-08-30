@@ -26,7 +26,6 @@ export function ServiceNowSelectableRowIcon({
       color="warning"
       content={connectorDeprecatedMessage}
       data-test-subj={`deprecated-connector-icon-${actionConnector.id}`}
-      anchorClassName={'euiFormControlLayout__prepend'}
     />
   );
 }

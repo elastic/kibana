@@ -14,7 +14,7 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
+  EuiFormControlLayoutIcons,
   EuiIconProps,
   EuiLink,
   EuiOutsideClickDetector,
@@ -851,32 +851,28 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
               >
                 {this.forwardNewValueIfNeeded(this.getQueryString())}
               </EuiTextArea>
-              {/* EUI TODO: This will need to be fixed before the Emotion conversion */}
               {this.props.iconType ? (
-                <div className="euiFormControlLayoutIcons euiFormControlLayoutIcons--absolute euiFormControlLayoutIcons--left">
-                  <EuiIcon
-                    className="euiFormControlLayoutCustomIcon__icon"
-                    aria-hidden="true"
-                    type={this.props.iconType}
-                  />
-                </div>
+                <EuiFormControlLayoutIcons
+                  side="left"
+                  iconsPosition="absolute"
+                  icon={{ type: this.props.iconType }}
+                  isDisabled={this.props.isDisabled}
+                />
               ) : null}
               {this.props.isClearable && !this.props.isDisabled && this.props.query.query ? (
-                <div className="euiFormControlLayoutIcons euiFormControlLayoutIcons--absolute euiFormControlLayoutIcons--right">
-                  <button
-                    type="button"
-                    className="euiFormControlLayoutClearButton"
-                    title={strings.getQueryBarClearInputLabel()}
-                    onClick={() => {
+                <EuiFormControlLayoutIcons
+                  side="right"
+                  iconsPosition="absolute"
+                  clear={{
+                    onClick: () => {
                       this.onQueryStringChange('');
                       if (this.props.autoSubmit) {
                         this.onSubmit({ query: '', language: this.props.query.language });
                       }
-                    }}
-                  >
-                    <EuiIcon className="euiFormControlLayoutClearButton__icon" type="cross" />
-                  </button>
-                </div>
+                    },
+                    title: strings.getQueryBarClearInputLabel(),
+                  }}
+                />
               ) : null}
             </div>
             <EuiPortal>

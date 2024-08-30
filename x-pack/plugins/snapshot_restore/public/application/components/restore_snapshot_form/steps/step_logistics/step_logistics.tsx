@@ -236,7 +236,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
         }
         fullWidth
       >
-        <EuiFormRow hasEmptyLabelSpace fullWidth>
+        <EuiFormRow fullWidth>
           <Fragment>
             <EuiSwitch
               label={
@@ -451,7 +451,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
         }
         fullWidth
       >
-        <EuiFormRow hasEmptyLabelSpace fullWidth>
+        <EuiFormRow fullWidth>
           <Fragment>
             <EuiSwitch
               label={
@@ -566,7 +566,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
         }
         fullWidth
       >
-        <EuiFormRow hasEmptyLabelSpace={true} fullWidth>
+        <EuiFormRow fullWidth>
           <EuiSwitch
             label={
               <FormattedMessage
@@ -601,7 +601,6 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
         fullWidth
       >
         <EuiFormRow
-          hasEmptyLabelSpace={true}
           fullWidth
           helpText={
             snapshotIncludeGlobalState ? null : (
@@ -660,7 +659,6 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
         fullWidth
       >
         <EuiFormRow
-          hasEmptyLabelSpace={true}
           fullWidth
           helpText={
             snapshotIncludeFeatureStates ? null : (
@@ -732,7 +730,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
         }
         fullWidth
       >
-        <EuiFormRow hasEmptyLabelSpace={true} fullWidth>
+        <EuiFormRow fullWidth>
           <EuiSwitch
             label={
               <FormattedMessage
