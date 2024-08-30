@@ -158,8 +158,8 @@ export const Editor = memo(({ loading, setEditorInstance }: Props) => {
 
             <EuiResizableButton
               className="conApp__resizerButton"
-              aria-label={i18n.translate('console.editor.resizerButtonAriaLabel', {
-                defaultMessage: 'Resizer button',
+              aria-label={i18n.translate('console.editor.adjustPanelSizeAriaLabel', {
+                defaultMessage: "Press left/right to adjust panels' sizes",
               })}
             />
 
@@ -169,7 +169,12 @@ export const Editor = memo(({ loading, setEditorInstance }: Props) => {
               tabIndex={0}
               style={{ height: '100%', padding: 0 }}
             >
-              <EuiSplitPanel.Outer grow borderRadius="none" hasShadow={false}>
+              <EuiSplitPanel.Outer
+                grow
+                borderRadius="none"
+                hasShadow={false}
+                style={{ height: '100%' }}
+              >
                 <EuiSplitPanel.Inner paddingSize="none" css={{ alignContent: 'center' }}>
                   {data ? (
                     isMonacoEnabled ? (
@@ -192,23 +197,19 @@ export const Editor = memo(({ loading, setEditorInstance }: Props) => {
                       backgroundColor: euiThemeVars.euiFormBackgroundColor,
                     }}
                   >
-                    <EuiFlexGroup gutterSize="none">
-                      {data ? (
-                        <EuiFlexItem grow={false}>
-                          <EuiButtonEmpty
-                            size="xs"
-                            color="primary"
-                            data-test-subj="clearConsoleOutput"
-                            onClick={() => dispatch({ type: 'cleanRequest', payload: undefined })}
-                          >
-                            {i18n.translate('console.editor.clearConsoleOutputButton', {
-                              defaultMessage: 'Clear this output',
-                            })}
-                          </EuiButtonEmpty>
-                        </EuiFlexItem>
-                      ) : (
-                        <EuiFlexItem grow={false} />
-                      )}
+                    <EuiFlexGroup gutterSize="none" responsive={false}>
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonEmpty
+                          size="xs"
+                          color="primary"
+                          data-test-subj="clearConsoleOutput"
+                          onClick={() => dispatch({ type: 'cleanRequest', payload: undefined })}
+                        >
+                          {i18n.translate('console.editor.clearConsoleOutputButton', {
+                            defaultMessage: 'Clear this output',
+                          })}
+                        </EuiButtonEmpty>
+                      </EuiFlexItem>
 
                       <EuiFlexItem>
                         <NetworkRequestStatusBar

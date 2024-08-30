@@ -10,12 +10,12 @@ import React, { useState, useEffect } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTitle,
   EuiPageTemplate,
   EuiSplitPanel,
   useEuiTour,
   EuiButtonEmpty,
   EuiHorizontalRule,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { getConsoleTourStepProps } from './get_console_tour_step_props';
 import { useServicesContext } from '../../contexts';
@@ -99,81 +99,69 @@ export function Main({ isEmbeddable = false }: MainProps) {
   );
 
   return (
-    <div id="consoleRoot">
-      <EuiFlexGroup
-        className={`consoleContainer${isEmbeddable ? '--embeddable' : ''}`}
-        gutterSize="none"
-        responsive={true}
-      >
-        <EuiFlexItem grow={false}>
-          <EuiTitle className="euiScreenReaderOnly">
-            <h1>{MAIN_PANEL_LABELS.consolePageHeading}</h1>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiSplitPanel.Outer grow={true} borderRadius={isEmbeddable ? 'none' : 'm'}>
-            <EuiSplitPanel.Inner grow={false} className="consoleTabs">
-              <EuiFlexGroup direction="row" alignItems="center" gutterSize="s" responsive={false}>
-                <EuiFlexItem>
-                  <TopNavMenu
-                    disabled={!done}
-                    items={getTopNavConfig({
-                      selectedTab,
-                      setSelectedTab,
-                    })}
-                    tourStepProps={consoleTourStepProps}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <ConsoleTourStep tourStepProps={consoleTourStepProps[FILES_TOUR_STEP - 1]}>
-                    <NavIconButton
-                      iconType="save"
-                      onClick={() => {}}
-                      ariaLabel={MAIN_PANEL_LABELS.importExportButton}
-                      dataTestSubj="consoleImportExportButton"
-                      toolTipContent={MAIN_PANEL_LABELS.importExportButton}
-                    />
-                  </ConsoleTourStep>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <ShortcutsPopover
-                    button={shortcutsButton}
-                    isOpen={isShortcutsOpen}
-                    closePopover={() => setIsShortcutsOpen(false)}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <HelpPopover
-                    button={helpButton}
-                    isOpen={isHelpOpen}
-                    closePopover={() => setIsHelpOpen(false)}
-                    resetTour={() => actions.resetTour()}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiSplitPanel.Inner>
-            <EuiHorizontalRule margin="none" />
-            <EuiSplitPanel.Inner paddingSize="none">
-              {selectedTab === SHELL_TAB_ID && (
-                <Editor loading={!done} setEditorInstance={() => {}} />
-              )}
+    <div id="consoleRoot" className={`consoleContainer${isEmbeddable ? '--embeddable' : ''}`}>
+      <EuiScreenReaderOnly>
+        <h1>{MAIN_PANEL_LABELS.consolePageHeading}</h1>
+      </EuiScreenReaderOnly>
+      <EuiSplitPanel.Outer grow={true} borderRadius={isEmbeddable ? 'none' : 'm'}>
+        <EuiSplitPanel.Inner grow={false} className="consoleTabs">
+          <EuiFlexGroup direction="row" alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem>
+              <TopNavMenu
+                disabled={!done}
+                items={getTopNavConfig({
+                  selectedTab,
+                  setSelectedTab,
+                })}
+                tourStepProps={consoleTourStepProps}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <ConsoleTourStep tourStepProps={consoleTourStepProps[FILES_TOUR_STEP - 1]}>
+                <NavIconButton
+                  iconType="save"
+                  onClick={() => {}}
+                  ariaLabel={MAIN_PANEL_LABELS.importExportButton}
+                  dataTestSubj="consoleImportExportButton"
+                  toolTipContent={MAIN_PANEL_LABELS.importExportButton}
+                />
+              </ConsoleTourStep>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <ShortcutsPopover
+                button={shortcutsButton}
+                isOpen={isShortcutsOpen}
+                closePopover={() => setIsShortcutsOpen(false)}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <HelpPopover
+                button={helpButton}
+                isOpen={isHelpOpen}
+                closePopover={() => setIsHelpOpen(false)}
+                resetTour={() => actions.resetTour()}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiSplitPanel.Inner>
+        <EuiHorizontalRule margin="none" />
+        <EuiSplitPanel.Inner paddingSize="none">
+          {selectedTab === SHELL_TAB_ID && <Editor loading={!done} setEditorInstance={() => {}} />}
 
-              {selectedTab === CONFIG_TAB_ID && <Config editorInstance={null} />}
-            </EuiSplitPanel.Inner>
-            <EuiHorizontalRule margin="none" />
-            <EuiSplitPanel.Inner paddingSize="xs" grow={false}>
-              <EuiButtonEmpty
-                onClick={() => setSelectedTab(CONFIG_TAB_ID)}
-                iconType="editorCodeBlock"
-                size="xs"
-                color="text"
-              >
-                {MAIN_PANEL_LABELS.variablesButton}
-              </EuiButtonEmpty>
-            </EuiSplitPanel.Inner>
-          </EuiSplitPanel.Outer>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+          {selectedTab === CONFIG_TAB_ID && <Config editorInstance={null} />}
+        </EuiSplitPanel.Inner>
+        <EuiHorizontalRule margin="none" />
+        <EuiSplitPanel.Inner paddingSize="xs" grow={false}>
+          <EuiButtonEmpty
+            onClick={() => setSelectedTab(CONFIG_TAB_ID)}
+            iconType="editorCodeBlock"
+            size="xs"
+            color="text"
+          >
+            {MAIN_PANEL_LABELS.variablesButton}
+          </EuiButtonEmpty>
+        </EuiSplitPanel.Inner>
+      </EuiSplitPanel.Outer>
 
       {/* Empty container for Editor Tour Step */}
       <ConsoleTourStep tourStepProps={consoleTourStepProps[EDITOR_TOUR_STEP - 1]}>
