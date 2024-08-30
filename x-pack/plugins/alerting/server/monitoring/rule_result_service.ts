@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import crypto from 'crypto';
-
 import { PublicLastRunSetters } from '../types';
 
 export interface RuleResultServiceResults {
