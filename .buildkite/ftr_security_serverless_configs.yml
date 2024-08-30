@@ -13,7 +13,7 @@ disabled:
   - x-pack/test/security_solution_cypress/serverless_config.ts
 
   # Playwright
-  - x-pack/test/security_solution_cypress/serverless_config.ts
+  - x-pack/test/security_solution_playwright/serverless_config.ts
 
   # Serverless base config files
   - x-pack/test_serverless/api_integration/config.base.ts
