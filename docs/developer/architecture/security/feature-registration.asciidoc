@@ -60,8 +60,8 @@ of features within the management screens.
 |The set of subfeatures that enables finer access control than the `all` and `read` feature privileges. These options are only available in the Gold subscription level and higher.
 
 |`scope` (optional)
-|`string`
-|`["agnostic", "security"]`
+|`string[]`
+|`["spaces", "security"]`
 | Default `security`. Scope identifies if feature should appear in both Spaces Visibility Toggles and Security Feature Privileges or only in Security Feature Privileges.
 
 |===
