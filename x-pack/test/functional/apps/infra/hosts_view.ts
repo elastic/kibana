@@ -371,18 +371,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         ]);
       });
 
-      it('should be accessible from the Inventory page', async () => {
-        await pageObjects.common.navigateToApp('infraOps');
-
-        await pageObjects.infraHome.clickDismissKubernetesTourButton();
-        await pageObjects.infraHostsView.getBetaBadgeExists();
-        await pageObjects.infraHostsView.clickTryHostViewBadge();
-
-        const pageUrl = await browser.getCurrentUrl();
-
-        expect(pageUrl).to.contain(HOSTS_VIEW_PATH);
-      });
-
       describe('#Single Host Flyout', () => {
         before(async () => {
           await setCustomDashboardsEnabled(true);
@@ -571,10 +559,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         it('should render the correct page title', async () => {
           const documentTitle = await browser.getTitle();
           expect(documentTitle).to.contain('Hosts - Infrastructure - Observability - Elastic');
-        });
-
-        it('should render the title beta badge', async () => {
-          await pageObjects.infraHostsView.getBetaBadgeExists();
         });
 
         describe('Hosts table', () => {
