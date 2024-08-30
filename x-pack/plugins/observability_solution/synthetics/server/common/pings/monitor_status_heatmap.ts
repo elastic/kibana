@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { UptimeEsClient } from '../../lib';
+import { SyntheticsEsClient } from '../../lib';
 
 export async function queryMonitorHeatmap({
-  uptimeEsClient,
+  syntheticsEsClient,
   from,
   to,
   monitorId,
   location,
   interval,
 }: {
-  uptimeEsClient: UptimeEsClient;
+  syntheticsEsClient: SyntheticsEsClient;
   from: number | string;
   to: number | string;
   monitorId: string;
   location: string;
   interval: number;
 }) {
-  return uptimeEsClient.search({
+  return syntheticsEsClient.search({
     body: {
       size: 0,
       query: {
@@ -36,9 +36,7 @@ export async function queryMonitorHeatmap({
             {
               range: {
                 '@timestamp': {
-                  // @ts-expect-error strings work
                   gte: from,
-                  // @ts-expect-error strings work
                   lte: to,
                 },
               },

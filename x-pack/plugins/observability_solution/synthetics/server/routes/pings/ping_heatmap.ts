@@ -22,11 +22,11 @@ export const syntheticsGetPingHeatmapRoute: SyntheticsRestApiRouteFactory = () =
       location: schema.string(),
     }),
   },
-  handler: async ({ uptimeEsClient, request, response }): Promise<any> => {
+  handler: async ({ syntheticsEsClient, request, response }): Promise<any> => {
     const { from, to, interval, monitorId, location } = request.query;
 
     const result = await queryMonitorHeatmap({
-      uptimeEsClient,
+      syntheticsEsClient,
       from,
       to,
       monitorId,
@@ -35,7 +35,6 @@ export const syntheticsGetPingHeatmapRoute: SyntheticsRestApiRouteFactory = () =
     });
 
     return response.ok({
-      // @ts-expect-error heatmap exists in the query results
       body: result.body.aggregations?.heatmap?.buckets,
     });
   },
