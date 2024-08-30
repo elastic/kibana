@@ -1415,8 +1415,8 @@ async function getFunctionArgsSuggestions(
           [],
           {
             addComma: shouldAddComma,
-            advanceCursor: hasMoreMandatoryArgs,
-            openSuggestions: hasMoreMandatoryArgs,
+            advanceCursor: shouldAddComma,
+            openSuggestions: shouldAddComma,
           }
         ),
         true
