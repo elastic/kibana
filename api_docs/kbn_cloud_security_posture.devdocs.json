@@ -2,7 +2,70 @@
   "id": "@kbn/cloud-security-posture",
   "client": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/cloud-security-posture",
+        "id": "def-public.showErrorToast",
+        "type": "Function",
+        "tags": [],
+        "label": "showErrorToast",
+        "description": [],
+        "signature": [
+          "(toasts: ",
+          {
+            "pluginId": "@kbn/core-notifications-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreNotificationsBrowserPluginApi",
+            "section": "def-public.IToasts",
+            "text": "IToasts"
+          },
+          ", error: unknown) => void"
+        ],
+        "path": "x-pack/packages/kbn-cloud-security-posture/src/utils/show_error_toast.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.showErrorToast.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "toasts",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-notifications-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
+                "section": "def-public.IToasts",
+                "text": "IToasts"
+              }
+            ],
+            "path": "x-pack/packages/kbn-cloud-security-posture/src/utils/show_error_toast.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.showErrorToast.$2",
+            "type": "Unknown",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/packages/kbn-cloud-security-posture/src/utils/show_error_toast.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
       {
         "parentPluginId": "@kbn/cloud-security-posture",
