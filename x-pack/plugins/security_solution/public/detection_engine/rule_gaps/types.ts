@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FindBackfillResponseBody } from '@kbn/alerting-plugin/common/routes/backfill/apis/find';
+import type { FindBackfillResponseBody } from '@kbn/alerting-plugin/server/routes/schemas/backfill/apis/find';
 
 export type Backfill = FindBackfillResponseBody['data']['0'];
 

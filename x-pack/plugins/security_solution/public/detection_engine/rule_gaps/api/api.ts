@@ -10,8 +10,8 @@ import {
   INTERNAL_ALERTING_BACKFILL_FIND_API_PATH,
   INTERNAL_ALERTING_BACKFILL_SCHEDULE_API_PATH,
 } from '@kbn/alerting-plugin/common';
-import type { FindBackfillResponseBody } from '@kbn/alerting-plugin/common/routes/backfill/apis/find';
-import type { ScheduleBackfillResponseBody } from '@kbn/alerting-plugin/common/routes/backfill/apis/schedule';
+import type { FindBackfillResponseBody } from '@kbn/alerting-plugin/server/routes/schemas/backfill/apis/find';
+import type { ScheduleBackfillResponseBody } from '@kbn/alerting-plugin/server/routes/schemas/backfill/apis/schedule';
 import { KibanaServices } from '../../../common/lib/kibana';
 import type { ScheduleBackfillProps } from '../types';
 

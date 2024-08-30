@@ -14,8 +14,8 @@ import {
   INTERNAL_ALERTING_BACKFILL_API_PATH,
   INTERNAL_ALERTING_BACKFILL_FIND_API_PATH,
 } from '@kbn/alerting-plugin/common';
-import { ScheduleBackfillResponseBody } from '@kbn/alerting-plugin/common/routes/backfill/apis/schedule';
-import { FindBackfillResponse } from '@kbn/alerting-plugin/common/routes/backfill/apis/find';
+import type { ScheduleBackfillResponseBody } from '@kbn/alerting-plugin/server/routes/schemas/backfill/apis/schedule';
+import type { FindBackfillResponse } from '@kbn/alerting-plugin/server/routes/schemas/backfill/apis/find';
 import { waitFor } from '../../../../../common/utils/security_solution';
 export interface TimeRange {
   startDate: moment.Moment;

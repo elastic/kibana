@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ScheduleBackfillResponseBody } from '@kbn/alerting-plugin/common/routes/backfill/apis/schedule';
+import type { ScheduleBackfillResponseBody } from '@kbn/alerting-plugin/server/routes/schemas/backfill/apis/schedule';
 
 export const scheduleRuleRunMock: ScheduleBackfillResponseBody = [
   {

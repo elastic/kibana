@@ -6,7 +6,7 @@
  */
 import type SuperTest from 'supertest';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '@kbn/alerting-plugin/common';
-import { ScheduleBackfillResponse } from '@kbn/alerting-plugin/common/routes/backfill/apis/schedule';
+import type { ScheduleBackfillResponse } from '@kbn/alerting-plugin/server/routes/schemas/backfill/apis/schedule';
 import { routeWithNamespace } from '../route_with_namespace';
 
 const BACKFILL_RULE_URL = `${INTERNAL_BASE_ALERTING_API_PATH}/rules/backfill`;

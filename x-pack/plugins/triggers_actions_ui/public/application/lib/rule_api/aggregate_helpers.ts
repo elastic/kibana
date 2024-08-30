@@ -7,7 +7,7 @@
 
 import { HttpSetup } from '@kbn/core/public';
 import { RewriteRequestCase } from '@kbn/actions-plugin/common';
-import { AggregateRulesResponseBody } from '@kbn/alerting-plugin/common/routes/rule/apis/aggregate';
+import type { AggregateRulesResponseBody } from '@kbn/alerting-plugin/server/routes/schemas/rule/apis/aggregate';
 import { RuleStatus } from '../../../types';
 
 export interface AggregateRulesResponse {
