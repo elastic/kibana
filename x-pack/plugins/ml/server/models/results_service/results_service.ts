@@ -217,9 +217,9 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
         (item: any) => item.entityName === 'mlcategory'
       );
       if (categoryAnomalies.length > 0) {
-        tableData.examplesByJobId = {};
+        tableData.examplesByJobId = Object.create(null);
 
-        const categoryIdsByJobId: { [key: string]: any } = {};
+        const categoryIdsByJobId: { [key: string]: any } = Object.create(null);
         categoryAnomalies.forEach((anomaly) => {
           if (categoryIdsByJobId[anomaly.jobId] === undefined) {
             categoryIdsByJobId[anomaly.jobId] = [];
@@ -383,7 +383,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
       ['aggregations', 'byJobId', 'buckets'],
       []
     );
-    const timestampByJobId: { [key: string]: number | undefined } = {};
+    const timestampByJobId: { [key: string]: number | undefined } = Object.create(null);
     bucketsByJobId.forEach((bucket) => {
       timestampByJobId[bucket.key] = bucket.maxTimestamp.value;
     });
@@ -409,7 +409,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
       [jobId]
     );
 
-    const examplesByCategoryId: { [key: string]: any } = {};
+    const examplesByCategoryId: { [key: string]: any } = Object.create(null);
     // @ts-expect-error incorrect search response type
     if (body.hits.total.value > 0) {
       body.hits.hits.forEach((hit: any) => {

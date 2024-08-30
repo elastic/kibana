@@ -268,7 +268,7 @@ export class AnalyticsManager {
   async getInitialElementsModelRoot(modelId: string): Promise<InitialElementsReturnType> {
     const resultElements = [];
     const modelElements = [];
-    const details: any = {};
+    const details: any = Object.create(null);
     // fetch model data and create model elements
     let data = await this.getAnalyticsModelData(modelId);
     const modelNodeId = `${data.model_id}-${JOB_MAP_NODE_TYPES.TRAINED_MODEL}`;
@@ -338,7 +338,7 @@ export class AnalyticsManager {
   async getInitialElementsJobRoot(jobId: string): Promise<InitialElementsReturnType> {
     const resultElements = [];
     const modelElements = [];
-    const details: any = {};
+    const details: any = Object.create(null);
     const data = await this.getAnalyticsData(jobId);
     // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
     const nextLinkId = data?.source?.index[0];
@@ -389,7 +389,7 @@ export class AnalyticsManager {
     try {
       await Promise.all([this.setInferenceModels(), this.setJobStats()]);
       // Create first node for incoming analyticsId or modelId
-      let initialData: InitialElementsReturnType = {} as InitialElementsReturnType;
+      let initialData: InitialElementsReturnType = Object.create(null) as InitialElementsReturnType;
       if (analyticsId !== undefined) {
         initialData = await this.getInitialElementsJobRoot(analyticsId);
       } else if (modelId !== undefined) {

@@ -139,7 +139,7 @@ export function registerJobsMonitoringRuleType({
     async executor(options) {
       const { services, name } = options;
 
-      const fakeRequest = {} as KibanaRequest;
+      const fakeRequest = Object.create(null) as KibanaRequest;
       const { getTestsResults } = mlServicesProviders.jobsHealthServiceProvider(
         services.savedObjectsClient,
         fakeRequest,

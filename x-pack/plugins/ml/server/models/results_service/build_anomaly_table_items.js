@@ -125,7 +125,7 @@ function aggregateAnomalies(anomalyRecords, interval, dateFormatTz) {
     return [];
   }
 
-  const aggregatedData = {};
+  const aggregatedData = Object.create(null);
   anomalyRecords.forEach((record) => {
     // Use moment.js to get start of interval.
     const roundedTime =
@@ -133,21 +133,21 @@ function aggregateAnomalies(anomalyRecords, interval, dateFormatTz) {
         ? moment(record.timestamp).tz(dateFormatTz).startOf(interval).valueOf()
         : moment(record.timestamp).startOf(interval).valueOf();
     if (aggregatedData[roundedTime] === undefined) {
-      aggregatedData[roundedTime] = {};
+      aggregatedData[roundedTime] = Object.create(null);
     }
 
     // Aggregate by job, then detectorIndex.
     const jobId = record.job_id;
     const jobsAtTime = aggregatedData[roundedTime];
     if (jobsAtTime[jobId] === undefined) {
-      jobsAtTime[jobId] = {};
+      jobsAtTime[jobId] = Object.create(null);
     }
 
     // Aggregate by detector - default to function_description if no description available.
     const detectorIndex = record.detector_index;
     const detectorsForJob = jobsAtTime[jobId];
     if (detectorsForJob[detectorIndex] === undefined) {
-      detectorsForJob[detectorIndex] = {};
+      detectorsForJob[detectorIndex] = Object.create(null);
     }
 
     // Now add an object for the anomaly with the highest anomaly score per entity.
