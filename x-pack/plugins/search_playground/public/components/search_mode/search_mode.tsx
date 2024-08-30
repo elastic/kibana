@@ -10,16 +10,35 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiForm,
   EuiSearchBar,
   useEuiTheme,
 } from '@elastic/eui';
 import React from 'react';
 import { css } from '@emotion/react';
+import { useController, useFormContext, useWatch } from 'react-hook-form';
 import { ResultList } from './result_list';
+import { ChatForm, ChatFormFields } from '../../types';
+import { useSearchPreview } from '../../hooks/use_search_preview';
 
 export const SearchMode: React.FC = () => {
+  const searchRequest = useSearchPreview();
   const { euiTheme } = useEuiTheme();
-  const showResults = true; // TODO demo
+  const { control, formState, handleSubmit } = useFormContext();
+  const showResults = false;
+  const sourceFields = useWatch<ChatForm, ChatFormFields.sourceFields>({
+    name: ChatFormFields.sourceFields,
+  });
+  const {
+    field: { onChange: searchBarOnChange, value: searchBarValue },
+  } = useController<ChatForm, ChatFormFields.searchQuery>({
+    name: ChatFormFields.searchQuery,
+  });
+  const updateSearchQuery = (query: string) => {
+    searchBarOnChange(query);
+    // TODO call endpoint through the hook
+    searchRequest({ searchQuery: query });
+  };
 
   return (
     <EuiFlexGroup direction="row" justifyContent="center">
@@ -31,7 +50,7 @@ export const SearchMode: React.FC = () => {
       >
         <EuiFlexGroup direction="column">
           <EuiFlexItem grow={false}>
-            <EuiSearchBar />
+            <EuiSearchBar onChange={({ queryText }) => updateSearchQuery(queryText)} />
           </EuiFlexItem>
           <EuiFlexItem className="eui-yScroll">
             <EuiFlexGroup direction="column">

@@ -70,7 +70,7 @@ export const ResultList: React.FC = () => {
         {DEMO_DATA.map((item, index) => {
           return (
             <>
-              <EuiFlexItem key={item.id + '-' + index} onClick={setIsFlyoutOpen(true)} grow>
+              <EuiFlexItem key={item.id + '-' + index} onClick={() => setIsFlyoutOpen(true)} grow>
                 <EuiFlexGroup direction="column" gutterSize="xs">
                   <EuiFlexItem grow>
                     <EuiTitle size="xs">

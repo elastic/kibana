@@ -240,4 +240,74 @@ export function defineRoutes({
       });
     })
   );
+
+  router.post(
+    {
+      path: APIRoutes.POST_SEARCH_QUERY,
+      validate: {
+        body: schema.object({
+          search_query: schema.string(),
+          elasticsearch_query: schema.string(),
+          indices: schema.arrayOf(schema.string()),
+          source_fields: schema.string(),
+          pagination: schema.maybe(
+            schema.object({
+              size: schema.number(),
+              from: schema.number(),
+            })
+          ),
+        }),
+      },
+    },
+    errorHandler(logger)(async (context, request, response) => {
+      // NOTE: size from the body for pagination
+      // TODO validate indices not empty, figure out if it is ok
+      const { client } = (await context.core).elasticsearch;
+      const {
+        elasticsearch_query: elasticsearchQuery,
+        indices,
+        source_fields: sourceFieldsParam,
+      } = request.body;
+
+      let sourceFields = {};
+      try {
+        // TODO duplicated code extract to a utility function
+        sourceFields = JSON.parse(sourceFieldsParam);
+        sourceFields = Object.keys(sourceFields).reduce((acc, key) => {
+          // @ts-ignore
+          acc[key] = sourceFields[key][0];
+          return acc;
+        }, {});
+      } catch (e) {
+        logger.error('Failed to parse the source fields', e);
+        throw Error(e);
+      }
+      const retriever = createRetriever(elasticsearchQuery)(request.body.search_query);
+
+      try {
+        const searchResult = await client.asCurrentUser.search({
+          index: indices,
+          retriever: retriever.retriever,
+          // TODO NOTE: add pagination later on
+        });
+
+        // todo add pagination
+        return response.ok({ body: searchResult });
+      } catch (e) {
+        logger.error('Failed to search the query', e);
+
+        // TODO do we have standardized handlers for this?
+        // currently just copied the above example
+        if (typeof e === 'object') {
+          return response.badRequest({
+            body: {
+              message: e.message,
+            },
+          });
+        }
+
+        throw e;
+      }
+    })
+  );
 }

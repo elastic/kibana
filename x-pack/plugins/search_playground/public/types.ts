@@ -74,6 +74,7 @@ export enum ChatFormFields {
   sourceFields = 'source_fields',
   docSize = 'doc_size',
   queryFields = 'query_fields',
+  searchQuery = 'search_query',
 }
 
 export interface ChatForm {
@@ -86,6 +87,7 @@ export interface ChatForm {
   [ChatFormFields.sourceFields]: { [index: string]: string[] };
   [ChatFormFields.docSize]: number;
   [ChatFormFields.queryFields]: { [index: string]: string[] };
+  [ChatFormFields.searchQuery]: string;
 }
 
 export interface Message {
