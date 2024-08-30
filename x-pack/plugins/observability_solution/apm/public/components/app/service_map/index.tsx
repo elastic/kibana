@@ -29,6 +29,7 @@ import { useApmParams, useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { Environment } from '../../../../common/environment_rt';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { DisabledPrompt } from './disabled_prompt';
+import { ServiceTabContent } from '../service_tab_content';
 
 function PromptContainer({ children }: { children: ReactNode }) {
   return (
@@ -181,27 +182,29 @@ export function ServiceMap({
   return (
     <>
       <SearchBar showTimeComparison />
-      <EuiPanel hasBorder={true} paddingSize="none">
-        <div data-test-subj="serviceMap" style={{ height: heightWithPadding }} ref={ref}>
-          <Cytoscape
-            elements={data.elements}
-            height={heightWithPadding}
-            serviceName={serviceName}
-            style={getCytoscapeDivStyle(theme, status)}
-          >
-            <Controls />
-            {serviceName && <EmptyBanner />}
-            {status === FETCH_STATUS.LOADING && <LoadingSpinner />}
-            <Popover
-              focusedServiceName={serviceName}
-              environment={environment}
-              kuery={kuery}
-              start={start}
-              end={end}
-            />
-          </Cytoscape>
-        </div>
-      </EuiPanel>
+      <ServiceTabContent tabName="service-map">
+        <EuiPanel hasBorder={true} paddingSize="none">
+          <div data-test-subj="serviceMap" style={{ height: heightWithPadding }} ref={ref}>
+            <Cytoscape
+              elements={data.elements}
+              height={heightWithPadding}
+              serviceName={serviceName}
+              style={getCytoscapeDivStyle(theme, status)}
+            >
+              <Controls />
+              {serviceName && <EmptyBanner />}
+              {status === FETCH_STATUS.LOADING && <LoadingSpinner />}
+              <Popover
+                focusedServiceName={serviceName}
+                environment={environment}
+                kuery={kuery}
+                start={start}
+                end={end}
+              />
+            </Cytoscape>
+          </div>
+        </EuiPanel>
+      </ServiceTabContent>
     </>
   );
 }
