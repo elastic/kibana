@@ -56,8 +56,6 @@ jest.mock('lodash', () => {
   };
 });
 
-// const navigationStartMock = navigationPluginMock.createStartContract();
-
 const sessionIdSubject = new Subject<string>();
 
 describe('Lens App', () => {
