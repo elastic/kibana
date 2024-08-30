@@ -173,8 +173,10 @@ export const getMetricsViewInAppUrlWithSpaceId = ({
   groupBy?: string[];
   assetDetailsLocator?: LocatorPublic<AssetDetailsLocatorParams>;
   metricsExplorerLocator?: LocatorPublic<MetricsExplorerLocatorParams>;
+  additionalContext?: AdditionalContext;
 }) => {
   const fields = {
+    ...hasAdditionalContext,
     [TIMESTAMP]: timestamp,
   };
 

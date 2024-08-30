@@ -417,6 +417,7 @@ export const createMetricThresholdExecutor =
             groupBy,
             assetDetailsLocator,
             metricsExplorerLocator,
+            additionalContext,
           }),
           ...additionalContext,
         };
