@@ -25,7 +25,7 @@ export default function (providerContext: FtrProviderContext) {
   const esClient = getService('es');
   const kibanaServer = getService('kibanaServer');
   const spaces = getService('spaces');
-  const TEST_SPACE_1 = spaces.getDefaultTestSpace();
+  let TEST_SPACE_1: string;
 
   describe('change space agent policies', function () {
     skipIfNoDockerRegistry(providerContext);
@@ -35,6 +35,7 @@ export default function (providerContext: FtrProviderContext) {
     let defaultPackagePolicy1: GetOnePackagePolicyResponse;
 
     before(async () => {
+      TEST_SPACE_1 = spaces.getDefaultTestSpace();
       await setupTestUsers(getService('security'), true);
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.savedObjects.cleanStandardList({

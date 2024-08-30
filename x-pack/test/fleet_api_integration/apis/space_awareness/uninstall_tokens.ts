@@ -19,7 +19,7 @@ export default function (providerContext: FtrProviderContext) {
   const esClient = getService('es');
   const kibanaServer = getService('kibanaServer');
   const spaces = getService('spaces');
-  const TEST_SPACE_1 = spaces.getDefaultTestSpace();
+  let TEST_SPACE_1: string;
 
   describe('uninstall tokens', function () {
     skipIfNoDockerRegistry(providerContext);
@@ -32,6 +32,7 @@ export default function (providerContext: FtrProviderContext) {
     let spaceTest1Token: UninstallTokenMetadata;
 
     before(async () => {
+      TEST_SPACE_1 = spaces.getDefaultTestSpace();
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.savedObjects.cleanStandardList({
         space: TEST_SPACE_1,

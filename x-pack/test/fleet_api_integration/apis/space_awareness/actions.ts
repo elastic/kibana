@@ -23,13 +23,14 @@ export default function (providerContext: FtrProviderContext) {
   const esClient = getService('es');
   const kibanaServer = getService('kibanaServer');
   const spaces = getService('spaces');
-  const TEST_SPACE_1 = spaces.getDefaultTestSpace();
+  let TEST_SPACE_1: string;
 
   describe('actions', function () {
     skipIfNoDockerRegistry(providerContext);
     const apiClient = new SpaceTestApiClient(supertest);
 
     before(async () => {
+      TEST_SPACE_1 = spaces.getDefaultTestSpace();
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.savedObjects.cleanStandardList({
         space: TEST_SPACE_1,
