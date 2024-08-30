@@ -67,7 +67,7 @@ export function useRenderItems({ investigation }: Props): UseRenderItemsHook {
 
     await updateInvestigation({
       investigationId: investigation.id,
-      params: { params: { timeRange } },
+      payload: { params: { timeRange } },
     });
     setGlobalParams(nextGlobalParams);
   };

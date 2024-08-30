@@ -23,12 +23,12 @@ export function useUpdateInvestigation() {
   return useMutation<
     UpdateInvestigationResponse,
     ServerError,
-    { investigationId: string; params: UpdateInvestigationParams },
+    { investigationId: string; payload: UpdateInvestigationParams },
     { investigationId: string }
   >(
     ['updateInvestigation'],
-    ({ investigationId, params }) => {
-      const body = JSON.stringify(params);
+    ({ investigationId, payload }) => {
+      const body = JSON.stringify(payload);
       return http.put<UpdateInvestigationResponse>(
         `/api/observability/investigations/${investigationId}`,
         { body, version: '2023-10-31' }
