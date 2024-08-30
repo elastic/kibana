@@ -12,11 +12,11 @@ import { i18n } from '@kbn/i18n';
 
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
-import { addInternalBasePath } from '../../../common/constants';
 import type {
   StopTransformsRequestSchema,
   StopTransformsResponseSchema,
-} from '../../../common/api_schemas/stop_transforms';
+} from '../../../server/routes/api_schemas/stop_transforms';
+import { addInternalBasePath } from '../../../common/constants';
 import { getErrorMessage } from '../../../common/utils/errors';
 
 import { useAppDependencies, useToastNotifications } from '../app_dependencies';
