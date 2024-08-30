@@ -50,7 +50,7 @@ function chainRouter({ state }: EcsBaseNodeParams): string {
 }
 
 // This is added as a separate graph to be able to run these steps concurrently from handleCreateMappingChunks
-async function getEcsSubGraph({ model }: EcsGraphParams) {
+export async function getEcsSubGraph({ model }: EcsGraphParams) {
   const workflow = new StateGraph({
     channels: graphState,
   })
