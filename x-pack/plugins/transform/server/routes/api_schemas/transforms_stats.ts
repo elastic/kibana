@@ -8,7 +8,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 
-import type { TransformStats } from '../types/transform_stats';
+import type { TransformStats } from '../../../common/types/transform_stats';
 
 import { getTransformsRequestSchema } from './transforms';
 

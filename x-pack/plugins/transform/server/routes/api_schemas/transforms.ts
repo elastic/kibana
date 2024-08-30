@@ -9,10 +9,10 @@ import { schema, type TypeOf } from '@kbn/config-schema';
 import type { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { CreateDataViewApiResponseSchema } from '@kbn/ml-data-view-utils/types/api_create_response_schema';
 
-import type { Dictionary } from '../types/common';
-import type { PivotAggDict } from '../types/pivot_aggs';
-import type { PivotGroupByDict } from '../types/pivot_group_by';
-import type { TransformId, TransformConfigUnion } from '../types/transform';
+import type { Dictionary } from '../../../common/types/common';
+import type { PivotAggDict } from '../../../common/types/pivot_aggs';
+import type { PivotGroupByDict } from '../../../common/types/pivot_group_by';
+import type { TransformId, TransformConfigUnion } from '../../../common/types/transform';
 
 import { transformStateSchema, runtimeMappingsSchema } from './common';
 

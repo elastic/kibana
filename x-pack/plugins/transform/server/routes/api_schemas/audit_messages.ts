@@ -8,7 +8,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 
-import type { TransformMessage } from '../types/messages';
+import type { TransformMessage } from '../../../common/types/messages';
 
 export interface GetTransformsAuditMessagesResponseSchema {
   messages: TransformMessage[];
