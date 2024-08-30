@@ -127,7 +127,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await panelActions.expectMissingPanelAction(
         'embeddablePanelAction-ACTION_EXPLORE_DATA',
-        'lnsXYVis'
+        'lnsXYvis'
       );
     });
 
