@@ -98,8 +98,10 @@ async function createRoot({ logFileName }: CreateRootConfig) {
   return root;
 }
 
-// FLAKY: https://github.com/elastic/kibana/issues/107864
-describe.skip('migration v2', () => {
+// suite is very long, the 10mins default can cause timeouts
+jest.setTimeout(15 * 60 * 1000);
+
+describe('migration v2', () => {
   let esServer: kbnTestServer.TestElasticsearchUtils;
   let rootA: Root;
   let rootB: Root;
@@ -121,9 +123,7 @@ describe.skip('migration v2', () => {
     },
   };
 
-  afterAll(async () => {
-    await new Promise((resolve) => setTimeout(resolve, 10000));
-  });
+  const delay = (timeInMs: number) => new Promise((resolve) => setTimeout(resolve, timeInMs));
 
   beforeEach(async () => {
     await removeLogFiles();
@@ -157,23 +157,35 @@ describe.skip('migration v2', () => {
   });
 
   afterEach(async () => {
-    await Promise.all([rootA.shutdown(), rootB.shutdown(), rootC.shutdown()]);
+    try {
+      await Promise.all([rootA.shutdown(), rootB.shutdown(), rootC.shutdown()]);
+    } catch (e) {
+      /* trap */
+    }
 
     if (esServer) {
       await esServer.stop();
     }
   });
 
-  const delay = (timeInMs: number) => new Promise((resolve) => setTimeout(resolve, timeInMs));
   const startWithDelay = async (instances: Root[], delayInSec: number) => {
     const promises: Array<Promise<unknown>> = [];
+    const errors: string[] = [];
     for (let i = 0; i < instances.length; i++) {
-      promises.push(instances[i].start());
-      if (i < instances.length - 1) {
+      promises.push(
+        instances[i].start().catch((err) => {
+          errors.push(err.message);
+        })
+      );
+      if (i < instances.length - 2) {
+        // We wait between instances, but not after the last one
         await delay(delayInSec * 1000);
       }
     }
-    return Promise.all(promises);
+    await Promise.all(promises);
+    if (errors.length) {
+      throw new Error(`Failed to start all instances: ${errors.join(',')}`);
+    }
   };
 
   it('migrates saved objects normally when multiple Kibana instances are started at the same time', async () => {

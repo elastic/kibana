@@ -76,6 +76,12 @@ export const ResetCommand: ICommand = {
       log.success('Removed disk caches');
     }
 
+    // Deletes the data folder
+    if (await isDirectory(kbn.getDataFolder())) {
+      await del(kbn.getDataFolder(), { force: true });
+      log.success('Removed data folder');
+    }
+
     if (toDelete.length === 0) {
       return;
     }

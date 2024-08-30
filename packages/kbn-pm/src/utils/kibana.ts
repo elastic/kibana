@@ -159,4 +159,8 @@ export class Kibana {
       throw error;
     }
   }
+
+  getDataFolder() {
+    return this.getAbsolute('data');
+  }
 }

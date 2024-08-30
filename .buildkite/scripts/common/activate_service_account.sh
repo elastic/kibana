@@ -76,6 +76,11 @@ if [[ -z "$EMAIL" ]]; then
     "ci-artifacts.kibana.dev")
       EMAIL="kibana-ci-access-artifacts@$GCLOUD_EMAIL_POSTFIX"
       ;;
+    "kibana-ci-ts-refs-cache")
+    # This bucket is used for ts-refs-cache in 7.17 only,
+    # set up with the kibana-ci-access-artifacts SA
+      EMAIL="kibana-ci-access-artifacts@$GCLOUD_EMAIL_POSTFIX"
+      ;;
     *)
       EMAIL="$BUCKET_NAME@$GCLOUD_EMAIL_POSTFIX"
       ;;

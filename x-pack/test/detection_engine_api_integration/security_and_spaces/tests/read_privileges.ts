@@ -17,8 +17,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  // Failing ES 8.x Compatibility: https://github.com/elastic/kibana/issues/174028
-  describe.skip('read_privileges', () => {
+  describe('read_privileges', () => {
     it('should return expected privileges for elastic admin', async () => {
       const { body } = await supertest.get(DETECTION_ENGINE_PRIVILEGES_URL).send().expect(200);
       expect(body).to.eql({

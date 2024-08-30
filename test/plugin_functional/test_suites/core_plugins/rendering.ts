@@ -192,6 +192,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled (boolean)',
         'xpack.fleet.agents.enabled (boolean)',
         'xpack.global_search.search_timeout (duration)',
+        'xpack.global_search_bar.input_max_limit (number)',
         'xpack.graph.canEditDrillDownUrls (boolean)',
         'xpack.graph.savePolicy (alternatives)',
         'xpack.ilm.ui.enabled (boolean)',

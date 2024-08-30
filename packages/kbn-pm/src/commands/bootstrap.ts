@@ -69,12 +69,7 @@ export const BootstrapCommand: ICommand = {
       const forceInstallStartTime = Date.now();
       await removeYarnIntegrityFileIfExists(resolve(kibanaProjectPath, 'node_modules'));
       await runBazel(['clean']);
-      await runBazel(['run', '@nodejs//:yarn'], runOffline, {
-        env: {
-          RE2_DOWNLOAD_MIRROR:
-            'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2',
-        },
-      });
+      await runBazel(['run', '@nodejs//:yarn'], runOffline);
       timings.push({
         id: 'force install dependencies',
         ms: Date.now() - forceInstallStartTime,

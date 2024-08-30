@@ -80,7 +80,8 @@ report.asciidoc
 *.tsbuildinfo
 
 # Ignore gihub folder to avoid pings on backports
-.github
+.github/*
+!.github/workflows/
 
 # Automatically generated and user-modifiable
 /tsconfig.refs.json
@@ -99,7 +100,7 @@ report.asciidoc
 # Exclude renovate config file (we only need it on master)
 renovate.json5
 
-# Exclude auto generated files from tooling 
+# Exclude auto generated files from tooling
 /packages/*/synthetic-packages.json
 /packages/*/package-map.json
 /packages/*/config-paths.json
