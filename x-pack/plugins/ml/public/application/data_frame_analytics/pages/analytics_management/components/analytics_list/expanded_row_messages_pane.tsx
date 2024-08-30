@@ -10,7 +10,7 @@ import './expanded_row_messages_pane.scss';
 import type { FC } from 'react';
 import React, { useState, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { ml } from '../../../../../services/ml_api_service';
+import { useMlApiContext } from '../../../../../contexts/kibana';
 import { useRefreshAnalyticsList } from '../../../../common';
 import { JobMessages } from '../../../../../components/job_messages';
 import type { JobMessage } from '../../../../../../../common/types/audit_message';
@@ -22,6 +22,7 @@ interface Props {
 }
 
 export const ExpandedRowMessagesPane: FC<Props> = ({ analyticsId, dataTestSubj }) => {
+  const ml = useMlApiContext();
   const [messages, setMessages] = useState<JobMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
