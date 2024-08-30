@@ -612,7 +612,7 @@ const TypeSpecificCreatePropsInternal = z.discriminatedUnion('type', [
 
 export type TypeSpecificCreateProps = z.infer<typeof TypeSpecificCreatePropsInternal>;
 export const TypeSpecificCreateProps =
-  TypeSpecificCreatePropsInternal as z.ZodType<unknown> as z.ZodType<TypeSpecificCreateProps>;
+  TypeSpecificCreatePropsInternal as z.ZodType<TypeSpecificCreateProps>;
 
 // We need this temporary type to infer from it below, but in the end we want to export as a casted TypeSpecificPatchProps type
 // error TS7056: The inferred type of this node exceeds the maximum length the compiler will serialize. An explicit type annotation is needed.
@@ -629,7 +629,7 @@ const TypeSpecificPatchPropsInternal = z.union([
 
 export type TypeSpecificPatchProps = z.infer<typeof TypeSpecificPatchPropsInternal>;
 export const TypeSpecificPatchProps =
-  TypeSpecificPatchPropsInternal as z.ZodType<unknown> as z.ZodType<TypeSpecificPatchProps>;
+  TypeSpecificPatchPropsInternal as z.ZodType<TypeSpecificPatchProps>;
 
 // We need this temporary type to infer from it below, but in the end we want to export as a casted TypeSpecificResponse type
 // error TS7056: The inferred type of this node exceeds the maximum length the compiler will serialize. An explicit type annotation is needed.
@@ -645,8 +645,7 @@ const TypeSpecificResponseInternal = z.discriminatedUnion('type', [
 ]);
 
 export type TypeSpecificResponse = z.infer<typeof TypeSpecificResponseInternal>;
-export const TypeSpecificResponse =
-  TypeSpecificResponseInternal as z.ZodType<unknown> as z.ZodType<TypeSpecificResponse>;
+export const TypeSpecificResponse = TypeSpecificResponseInternal as z.ZodType<TypeSpecificResponse>;
 
 // We need this temporary type to infer from it below, but in the end we want to export as a casted RuleCreateProps type
 // error TS7056: The inferred type of this node exceeds the maximum length the compiler will serialize. An explicit type annotation is needed.
@@ -662,8 +661,7 @@ const RuleCreatePropsInternal = z.discriminatedUnion('type', [
 ]);
 
 export type RuleCreateProps = z.infer<typeof RuleCreatePropsInternal>;
-export const RuleCreateProps =
-  RuleCreatePropsInternal as z.ZodType<unknown> as z.ZodType<RuleCreateProps>;
+export const RuleCreateProps = RuleCreatePropsInternal as z.ZodType<RuleCreateProps>;
 
 // We need this temporary type to infer from it below, but in the end we want to export as a casted RuleUpdateProps type
 // error TS7056: The inferred type of this node exceeds the maximum length the compiler will serialize. An explicit type annotation is needed.
@@ -679,8 +677,7 @@ const RuleUpdatePropsInternal = z.discriminatedUnion('type', [
 ]);
 
 export type RuleUpdateProps = z.infer<typeof RuleUpdatePropsInternal>;
-export const RuleUpdateProps =
-  RuleUpdatePropsInternal as z.ZodType<unknown> as z.ZodType<RuleUpdateProps>;
+export const RuleUpdateProps = RuleUpdatePropsInternal as z.ZodType<RuleUpdateProps>;
 
 // We need this temporary type to infer from it below, but in the end we want to export as a casted RulePatchProps type
 // error TS7056: The inferred type of this node exceeds the maximum length the compiler will serialize. An explicit type annotation is needed.
@@ -696,8 +693,7 @@ const RulePatchPropsInternal = z.union([
 ]);
 
 export type RulePatchProps = z.infer<typeof RulePatchPropsInternal>;
-export const RulePatchProps =
-  RulePatchPropsInternal as z.ZodType<unknown> as z.ZodType<RulePatchProps>;
+export const RulePatchProps = RulePatchPropsInternal as z.ZodType<RulePatchProps>;
 
 // We need this temporary type to infer from it below, but in the end we want to export as a casted RuleResponse type
 // error TS7056: The inferred type of this node exceeds the maximum length the compiler will serialize. An explicit type annotation is needed.
@@ -713,4 +709,4 @@ const RuleResponseInternal = z.discriminatedUnion('type', [
 ]);
 
 export type RuleResponse = z.infer<typeof RuleResponseInternal>;
-export const RuleResponse = RuleResponseInternal as z.ZodType<unknown> as z.ZodType<RuleResponse>;
+export const RuleResponse = RuleResponseInternal as z.ZodType<RuleResponse>;

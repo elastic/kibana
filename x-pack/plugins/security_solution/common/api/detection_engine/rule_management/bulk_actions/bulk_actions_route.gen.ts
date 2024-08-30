@@ -297,7 +297,7 @@ const BulkActionEditPayloadInternal = z.union([
 
 export type BulkActionEditPayload = z.infer<typeof BulkActionEditPayloadInternal>;
 export const BulkActionEditPayload =
-  BulkActionEditPayloadInternal as z.ZodType<unknown> as z.ZodType<BulkActionEditPayload>;
+  BulkActionEditPayloadInternal as z.ZodType<BulkActionEditPayload>;
 
 export type BulkEditRules = z.infer<typeof BulkEditRules>;
 export const BulkEditRules = BulkActionBase.merge(

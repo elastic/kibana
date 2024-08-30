@@ -98,7 +98,7 @@ const ExceptionListItemEntryInternal = z.discriminatedUnion('type', [
 
 export type ExceptionListItemEntry = z.infer<typeof ExceptionListItemEntryInternal>;
 export const ExceptionListItemEntry =
-  ExceptionListItemEntryInternal as z.ZodType<unknown> as z.ZodType<ExceptionListItemEntry>;
+  ExceptionListItemEntryInternal as z.ZodType<ExceptionListItemEntry>;
 
 export type ExceptionListItemEntryArray = z.infer<typeof ExceptionListItemEntryArray>;
 export const ExceptionListItemEntryArray = z.array(ExceptionListItemEntry);

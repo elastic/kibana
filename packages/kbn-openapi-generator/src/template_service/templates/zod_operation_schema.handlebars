@@ -37,7 +37,7 @@ export const {{@key}}: z.ZodType<{{@key}}, ZodTypeDef, {{@key}}Input> = {{> zod_
 const {{@key}}Internal = {{> zod_schema_item}};
 
 export type {{@key}} = z.infer<typeof {{@key}}Internal>;
-export const {{@key}} = {{@key}}Internal as z.ZodType<unknown> as z.ZodType<{{@key}}>;
+export const {{@key}} = {{@key}}Internal as z.ZodType<{{@key}}>;
 {{else}}
 export type {{@key}} = z.infer<typeof {{@key}}>;
 export const {{@key}} = {{> zod_schema_item}};
