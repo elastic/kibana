@@ -1784,6 +1784,7 @@ async function getOptionArgsSuggestions(
                 }
               ),
               sortText: '1A',
+              command: TRIGGER_SUGGESTION_COMMAND,
             } as SuggestionRawDefinition);
           }
 

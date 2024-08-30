@@ -856,7 +856,7 @@ describe('autocomplete', () => {
       'by'
     );
     testSuggestions('FROM a | STATS AVG(numberField) BY /', [
-      'BUCKET($0, 20, ?start, ?end)',
+      ADD_DATE_HISTOGRAM_SNIPPET,
       attachTriggerCommand('var0 = '),
       ...getFieldNamesByType('any')
         .map((field) => `${field} `)
@@ -866,7 +866,7 @@ describe('autocomplete', () => {
 
     // STATS argument BY assignment (checking field suggestions)
     testSuggestions('FROM a | STATS AVG(numberField) BY var0 = /', [
-      'BUCKET($0, 20, ?start, ?end)',
+      ADD_DATE_HISTOGRAM_SNIPPET,
       ...getFieldNamesByType('any')
         .map((field) => `${field} `)
         .map(attachTriggerCommand),
