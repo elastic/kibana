@@ -7,7 +7,7 @@
  */
 
 import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
-import { configSchema, XyConfig } from '../config';
+import { configSchema, XyConfig } from './config';
 
 export const config: PluginConfigDescriptor<XyConfig> = {
   exposeToBrowser: {
