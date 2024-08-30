@@ -20,7 +20,7 @@ export const CLIENT_DEFAULTS_SYNTHETICS = {
    */
   AUTOREFRESH_INTERVAL_SECONDS: 60,
   /**
-   * The application's autorefresh feature is enabled.
+   * The application's autorefresh feature is disabled by default.
    */
-  AUTOREFRESH_IS_PAUSED: false,
+  AUTOREFRESH_IS_PAUSED: true,
 };
