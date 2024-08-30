@@ -368,6 +368,7 @@ ${JSON.stringify(playwrightConfigFile, null, 2)}
         );
 
       await runSpecs(files);
+
     },
     {
       flags: {
