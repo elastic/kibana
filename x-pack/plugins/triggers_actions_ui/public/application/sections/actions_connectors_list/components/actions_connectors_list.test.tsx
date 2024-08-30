@@ -172,7 +172,7 @@ describe('actions_connectors_list', () => {
         config: {},
       },
     ] as ActionConnector[];
-    let mockedEditItem;
+    let mockedEditItem: jest.Mock;
 
     afterEach(() => {
       mockedEditItem.mockReset();
