@@ -74,7 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
         `,index:afac7364-c755-5f5c-acd5-8ed6605c5c77,query:(language:kuery,query:''),version:!t),sort:!((order_date:desc)),trackTotalHits:!t)`;
 
       it('should use formats from the default space', async () => {
-        kibanaServer.uiSettings.update({ 'csv:separator': ',', 'dateFormat:tz': 'UTC' });
+        await kibanaServer.uiSettings.update({ 'csv:separator': ',', 'dateFormat:tz': 'UTC' });
         const path = await reportingAPI.postJobJSON(`/api/reporting/generate/csv_searchsource`, {
           jobParams: `(${JOB_PARAMS_CSV_DEFAULT_SPACE},title:'EC SEARCH')`,
         });
@@ -137,7 +137,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it(`should default to UTC for date formatting when timezone is not known`, async () => {
-        kibanaServer.uiSettings.update({ 'csv:separator': ',', 'dateFormat:tz': 'Browser' });
+        await kibanaServer.uiSettings.update({ 'csv:separator': ',', 'dateFormat:tz': 'Browser' });
         const path = await reportingAPI.postJobJSON(`/api/reporting/generate/csv_searchsource`, {
           jobParams: `(${JOB_PARAMS_CSV_DEFAULT_SPACE},title:'EC SEARCH')`,
         });

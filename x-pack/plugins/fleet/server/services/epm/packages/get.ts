@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as yaml from 'js-yaml';
+import { safeLoad } from 'js-yaml';
 import pMap from 'p-map';
 import type { SavedObjectsClientContract, SavedObjectsFindOptions } from '@kbn/core/server';
 import semverGte from 'semver/functions/gte';
@@ -60,6 +60,12 @@ import { auditLoggingService } from '../../audit_logging';
 import { getFilteredSearchPackages } from '../filtered_packages';
 
 import { createInstallableFrom } from '.';
+import {
+  getPackageAssetsMapCache,
+  setPackageAssetsMapCache,
+  getPackageInfoCache,
+  setPackageInfoCache,
+} from './cache';
 
 export { getFile } from '../registry';
 
@@ -360,7 +366,7 @@ export async function getInstalledPackageManifests(
 
   const parsedManifests = result.saved_objects.reduce<Map<string, PackageSpecManifest>>(
     (acc, asset) => {
-      acc.set(asset.attributes.asset_path, yaml.load(asset.attributes.data_utf8));
+      acc.set(asset.attributes.asset_path, safeLoad(asset.attributes.data_utf8));
       return acc;
     },
     new Map()
@@ -415,6 +421,10 @@ export async function getPackageInfo({
   ignoreUnverified?: boolean;
   prerelease?: boolean;
 }): Promise<PackageInfo> {
+  const cacheResult = getPackageInfoCache(pkgName, pkgVersion);
+  if (cacheResult) {
+    return cacheResult;
+  }
   const [savedObject, latestPackage] = await Promise.all([
     getInstallationObject({ savedObjectsClient, pkgName }),
     Registry.fetchFindLatestPackageOrUndefined(pkgName, { prerelease }),
@@ -468,7 +478,10 @@ export async function getPackageInfo({
   };
   const updated = { ...packageInfo, ...additions };
 
-  return createInstallableFrom(updated, savedObject);
+  const installable = createInstallableFrom(updated, savedObject);
+  setPackageInfoCache(pkgName, pkgVersion, installable);
+
+  return installable;
 }
 
 export const getPackageUsageStats = async ({
@@ -720,6 +733,10 @@ export async function getPackageAssetsMap({
   logger: Logger;
   ignoreUnverified?: boolean;
 }) {
+  const cache = getPackageAssetsMapCache(packageInfo.name, packageInfo.version);
+  if (cache) {
+    return cache;
+  }
   const installedPackageWithAssets = await getInstalledPackageWithAssets({
     savedObjectsClient,
     pkgName: packageInfo.name,
@@ -736,6 +753,7 @@ export async function getPackageAssetsMap({
   } else {
     assetsMap = installedPackageWithAssets.assetsMap;
   }
+  setPackageAssetsMapCache(packageInfo.name, packageInfo.version, assetsMap);
 
   return assetsMap;
 }

@@ -28,7 +28,7 @@ import {
   MessageOrChatEvent,
 } from '../../../../common/conversation_complete';
 import { FunctionVisibility } from '../../../../common/functions/types';
-import { UserInstruction } from '../../../../common/types';
+import { AdHocInstruction, Instruction } from '../../../../common/types';
 import { createFunctionResponseMessage } from '../../../../common/utils/create_function_response_message';
 import { emitWithConcatenatedMessage } from '../../../../common/utils/emit_with_concatenated_message';
 import { withoutTokenCountEvents } from '../../../../common/utils/without_token_count_events';
@@ -175,7 +175,7 @@ export function continueConversation({
   chat,
   signal,
   functionCallsLeft,
-  requestInstructions,
+  adHocInstructions,
   userInstructions,
   logger,
   disableFunctions,
@@ -187,8 +187,8 @@ export function continueConversation({
   chat: AutoAbortedChatFunction;
   signal: AbortSignal;
   functionCallsLeft: number;
-  requestInstructions: Array<string | UserInstruction>;
-  userInstructions: UserInstruction[];
+  adHocInstructions: AdHocInstruction[];
+  userInstructions: Instruction[];
   logger: Logger;
   disableFunctions:
     | boolean
@@ -210,9 +210,9 @@ export function continueConversation({
 
   const messagesWithUpdatedSystemMessage = replaceSystemMessage(
     getSystemMessageFromInstructions({
-      registeredInstructions: functionClient.getInstructions(),
+      applicationInstructions: functionClient.getInstructions(),
       userInstructions,
-      requestInstructions,
+      adHocInstructions,
       availableFunctionNames: definitions.map((def) => def.name),
     }),
     initialMessages
@@ -333,7 +333,7 @@ export function continueConversation({
               functionClient,
               signal,
               userInstructions,
-              requestInstructions,
+              adHocInstructions,
               logger,
               disableFunctions,
               tracer,

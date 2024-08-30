@@ -13,10 +13,3 @@ export type {
   DashboardAttributes,
   SavedDashboardPanel,
 } from './types';
-
-export {
-  serviceDefinition,
-  dashboardSavedObjectSchema,
-  controlGroupInputSchema,
-  dashboardAttributesSchema,
-} from './cm_services';

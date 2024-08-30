@@ -99,7 +99,7 @@ function ensureValidMultiText(textMultiValue: string[] | undefined) {
 
 function escapeInvalidYamlString(yamlString: string) {
   try {
-    yaml.load(yamlString);
+    yaml.safeLoad(yamlString);
   } catch (error) {
     if (error instanceof yaml.YAMLException) {
       return `"${yamlString}"`;

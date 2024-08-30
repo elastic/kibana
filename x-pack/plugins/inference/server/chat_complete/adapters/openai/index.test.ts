@@ -6,15 +6,15 @@
  */
 
 import OpenAI from 'openai';
-import { openAIAdapter } from '.';
-import type { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
-import { ChatCompletionEventType, MessageRole } from '../../../../common/chat_complete';
+import { v4 } from 'uuid';
 import { PassThrough } from 'stream';
 import { pick } from 'lodash';
 import { lastValueFrom, Subject, toArray } from 'rxjs';
-import { observableIntoEventSourceStream } from '../../../util/observable_into_event_source_stream';
-import { v4 } from 'uuid';
 import type { Logger } from '@kbn/logging';
+import { ChatCompletionEventType, MessageRole } from '../../../../common/chat_complete';
+import { observableIntoEventSourceStream } from '../../../util/observable_into_event_source_stream';
+import { InferenceExecutor } from '../../utils/inference_executor';
+import { openAIAdapter } from '.';
 
 function createOpenAIChunk({
   delta,
@@ -40,9 +40,9 @@ function createOpenAIChunk({
 }
 
 describe('openAIAdapter', () => {
-  const actionsClientMock = {
-    execute: jest.fn(),
-  } as ActionsClient & { execute: jest.MockedFn<ActionsClient['execute']> };
+  const executorMock = {
+    invoke: jest.fn(),
+  } as InferenceExecutor & { invoke: jest.MockedFn<InferenceExecutor['invoke']> };
 
   const logger = {
     debug: jest.fn(),
@@ -50,33 +50,22 @@ describe('openAIAdapter', () => {
   } as unknown as Logger;
 
   beforeEach(() => {
-    actionsClientMock.execute.mockReset();
+    executorMock.invoke.mockReset();
   });
 
   const defaultArgs = {
-    connector: {
-      id: 'foo',
-      actionTypeId: '.gen-ai',
-      name: 'OpenAI',
-      isPreconfigured: false,
-      isDeprecated: false,
-      isSystemAction: false,
-    },
-    actionsClient: actionsClientMock,
+    executor: executorMock,
   };
 
   describe('when creating the request', () => {
     function getRequest() {
-      const params = actionsClientMock.execute.mock.calls[0][0].params.subActionParams as Record<
-        string,
-        any
-      >;
+      const params = executorMock.invoke.mock.calls[0][0].subActionParams as Record<string, any>;
 
       return { stream: params.stream, body: JSON.parse(params.body) };
     }
 
     beforeEach(() => {
-      actionsClientMock.execute.mockImplementation(async () => {
+      executorMock.invoke.mockImplementation(async () => {
         return {
           actionId: '',
           status: 'ok',
@@ -268,7 +257,7 @@ describe('openAIAdapter', () => {
     beforeEach(() => {
       source$ = new Subject<Record<string, any>>();
 
-      actionsClientMock.execute.mockImplementation(async () => {
+      executorMock.invoke.mockImplementation(async () => {
         return {
           actionId: '',
           status: 'ok',

@@ -286,28 +286,25 @@ export function registerResponseActionRoutes(
       )
     );
 
-  // 8.15 route
-  if (endpointContext.experimentalFeatures.responseActionScanEnabled) {
-    router.versioned
-      .post({
-        access: 'public',
-        path: SCAN_ROUTE,
-        options: { authRequired: true, tags: ['access:securitySolution'] },
-      })
-      .addVersion(
-        {
-          version: '2023-10-31',
-          validate: {
-            request: ScanActionRequestSchema,
-          },
+  router.versioned
+    .post({
+      access: 'public',
+      path: SCAN_ROUTE,
+      options: { authRequired: true, tags: ['access:securitySolution'] },
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: ScanActionRequestSchema,
         },
-        withEndpointAuthz(
-          { all: ['canWriteScanOperations'] },
-          logger,
-          responseActionRequestHandler<ResponseActionScanParameters>(endpointContext, 'scan')
-        )
-      );
-  }
+      },
+      withEndpointAuthz(
+        { all: ['canWriteScanOperations'] },
+        logger,
+        responseActionRequestHandler<ResponseActionScanParameters>(endpointContext, 'scan')
+      )
+    );
 }
 
 function responseActionRequestHandler<T extends EndpointActionDataParameterTypes>(
