@@ -69,7 +69,7 @@ export const getAction = (type?: string, actionId?: string) => {
   // handling a special case of force unenrollment coming from an automatic task
   // we know what kind of action is from the actionId prefix
   if (actionId?.includes('UnenrollInactiveAgentsTask-'))
-    return actionNames.AUTOMATICAL_FORCE_UNENROLL;
+    return actionNames.AUTOMATIC_FORCE_UNENROLL;
   return actionNames[type ?? 'ACTION'] ?? actionNames.ACTION;
 };
 
