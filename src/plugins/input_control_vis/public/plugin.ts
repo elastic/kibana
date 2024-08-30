@@ -20,7 +20,7 @@ import { PANEL_BADGE_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { createInputControlVisFn } from './input_control_fn';
 import { getInputControlVisRenderer } from './input_control_vis_renderer';
 import { createInputControlVisTypeDefinition } from './input_control_vis_type';
-import { InputControlPublicConfig } from '../config';
+import type { InputControlPublicConfig } from '../server/config';
 import { InputControlDeprecationBadge } from './deprecation_badge';
 
 type InputControlVisCoreSetup = CoreSetup<InputControlVisPluginStartDependencies, void>;

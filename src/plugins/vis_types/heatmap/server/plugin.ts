@@ -11,7 +11,7 @@ import { schema } from '@kbn/config-schema';
 
 import { CoreSetup, Plugin, PluginInitializerContext, UiSettingsParams } from '@kbn/core/server';
 import type { VisualizationsServerSetup } from '@kbn/visualizations-plugin/server';
-import { HeatmapConfig } from '../config';
+import { HeatmapConfig } from './config';
 
 import { LEGACY_HEATMAP_CHARTS_LIBRARY } from '../common';
 

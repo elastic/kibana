@@ -23,6 +23,7 @@
     "@kbn/core-http-server",
     "@kbn/actions-plugin",
     "@kbn/config-schema",
-    "@kbn/sse-utils"
+    "@kbn/sse-utils",
+    "@kbn/stack-connectors-plugin"
   ]
 }
