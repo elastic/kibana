@@ -6,7 +6,7 @@ $controlMinWidth: $euiSize * 14;
 .controlsWrapper {
   display: flex;
   align-items: center;
-  min-height: $euiSize * 4;
+  min-height: $euiSizeL;
 
   .controlGroup--endButtonGroup {
     align-self: end;
@@ -47,7 +47,7 @@ $controlMinWidth: $euiSize * 14;
 
   .controlFrame__draggable {
     cursor: grabbing;
-    height: $euiButtonHeight;
+    height: $euiSizeL;
     align-items: center;
     border-radius: $euiBorderRadius;
     font-weight: $euiFontWeightSemiBold;
@@ -103,6 +103,7 @@ $controlMinWidth: $euiSize * 14;
       @include euiTextTruncate;
       border-radius: $euiBorderRadius;
       padding-left: 0;
+      font-weight: 500;
     }
 
     &:not(.controlFrame__formControlLayout-clone) {

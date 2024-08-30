@@ -6,6 +6,11 @@
   height: 100%;
   min-height: $euiSizeL + 2px; // + 2px to account for border
   position: relative;
+  border-radius: $euiSizeXS; // DnD
+  border-right: none; // DnD
+  border-left: none; // DnD
+  border-top: lightOrDarkTheme(none, 1px solid #3A4763); // DnD
+  border-bottom: lightOrDarkTheme(1px solid $euiBorderColor, none); // DnD
 
   &-isLoading {
     // completely center the loading indicator
@@ -54,6 +59,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  font-weight: 500;
 
   &:not(:empty) {
     line-height: $euiSizeL;
@@ -73,7 +79,7 @@
 
   .embPanel__titleText {
     @include euiTextTruncate;
-    font-weight: $euiFontWeightBold;
+    // font-weight: 500;
   }
 
   .embPanel__placeholderTitleText {
@@ -183,4 +189,33 @@
   position: absolute;
   padding-left: $euiSizeS;
   z-index: $euiZLevel1;
+}
+
+// TEMPORARY DND
+.echMetricText__value, .euiDataGridHeaderCell__content {
+  font-weight: 500;
+}
+
+.echMetricText__title {
+  font-weight: 500;
+}
+
+.echMetricText__title button {
+  font-weight: 500;
+}
+
+.euiDataGrid--headerUnderline .euiDataGridHeaderCell {
+  border-bottom: 1px solid $euiColorLightShade;
+}
+
+.euiDataGrid--noControls.euiDataGrid--bordersHorizontal .euiDataGridHeaderCell {
+  border-top: none;
+}
+
+.visualize .visualization {
+ padding: 0;
+}
+
+.embPanel__titleText {
+  font-size: 14px;
 }

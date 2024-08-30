@@ -152,7 +152,7 @@ function QueryBarMenuComponent({
   const button = (
     <EuiToolTip delay="long" content={strings.getFilterSetButtonLabel()}>
       <EuiButtonIcon
-        size="m"
+        size="s"
         display="empty"
         onClick={onButtonClick}
         isDisabled={isDisabled}

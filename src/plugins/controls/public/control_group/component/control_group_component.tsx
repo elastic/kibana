@@ -245,7 +245,7 @@ export const ControlGroup = () => {
         <EuiPanel
           borderRadius="m"
           color={panelBg}
-          paddingSize={emptyState ? 's' : 'none'}
+          paddingSize="none"
           data-test-subj="controls-group-wrapper"
           className={classNames('controlsWrapper', {
             'controlsWrapper--empty': emptyState,
