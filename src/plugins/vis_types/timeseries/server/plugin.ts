@@ -26,7 +26,7 @@ import type { PluginStart as DataViewsPublicPluginStart } from '@kbn/data-views-
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import type { VisualizationsServerSetup } from '@kbn/visualizations-plugin/server';
 import { VIS_TYPE } from '../common/constants';
-import { VisTypeTimeseriesConfig } from '../config';
+import { VisTypeTimeseriesConfig } from './config';
 import { getVisData } from './lib/get_vis_data';
 import { visDataRoutes } from './routes/vis';
 import { fieldsRoutes } from './routes/fields';
