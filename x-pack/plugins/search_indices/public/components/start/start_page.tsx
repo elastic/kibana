@@ -11,6 +11,8 @@ import { EuiLoadingLogo, EuiPageTemplate } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 import { useKibana } from '../../hooks/use_kibana';
+import { ConnectionDetails } from '../connection_details/connection_details';
+import { QuickStats } from '../quick_stats/quick_stats';
 
 export const ElasticsearchStartPage = () => {
   const { console: consolePlugin } = useKibana().services;
@@ -28,7 +30,8 @@ export const ElasticsearchStartPage = () => {
       grow={false}
     >
       <KibanaPageTemplate.Section alignment="center" restrictWidth={false} grow>
-        <EuiLoadingLogo />
+        {/* <ConnectionDetails elasticsearchUrl="http://localhost:9200" /> */}
+        <QuickStats />
       </KibanaPageTemplate.Section>
       {embeddableConsole}
     </EuiPageTemplate>
