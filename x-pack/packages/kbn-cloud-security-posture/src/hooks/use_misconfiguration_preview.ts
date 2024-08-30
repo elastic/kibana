@@ -11,7 +11,6 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   CDR_MISCONFIGURATIONS_INDEX_PATTERN,
   LATEST_FINDINGS_RETENTION_POLICY,
-  MAX_FINDINGS_TO_LOAD,
   CspFinding,
 } from '@kbn/cloud-security-posture-common';
 import type { CspBenchmarkRulesStates } from '@kbn/cloud-security-posture-common/schema/rules/latest';
@@ -66,18 +65,16 @@ export const getMisconfigurationAggregationCount = (
 
 export const buildMisconfigurationsFindingsQuery = (
   { query }: UseFindingsOptions,
-  rulesStates: CspBenchmarkRulesStates,
-  pageParam?: number
+  rulesStates: CspBenchmarkRulesStates
 ) => {
   const mutedRulesFilterQuery = buildMutedRulesFilter(rulesStates);
 
   return {
     index: CDR_MISCONFIGURATIONS_INDEX_PATTERN,
-    size: MAX_FINDINGS_TO_LOAD,
+    size: 0,
     aggs: getFindingsCountAggQueryMisconfigurationPreview(),
     ignore_unavailable: false,
     query: buildMisconfigurationsFindingsQueryWithFilters(query, mutedRulesFilterQuery),
-    ...(pageParam ? { from: pageParam } : {}),
   };
 };
 
@@ -113,13 +110,13 @@ export const useMisconfigurationPreview = (options: UseFindingsOptions) => {
   const { data: rulesStates } = useGetCspBenchmarkRulesStatesApi();
 
   return useQuery(
-    ['csp_findings', { params: options }, rulesStates],
-    async ({ pageParam }) => {
+    ['csp_misconfiguration_preview', { params: options }, rulesStates],
+    async () => {
       const {
         rawResponse: { aggregations },
       } = await lastValueFrom(
         data.search.search<LatestFindingsRequest, LatestFindingsResponse>({
-          params: buildMisconfigurationsFindingsQuery(options, rulesStates!, pageParam),
+          params: buildMisconfigurationsFindingsQuery(options, rulesStates!),
         })
       );
       if (!aggregations) throw new Error('expected aggregations to be defined');

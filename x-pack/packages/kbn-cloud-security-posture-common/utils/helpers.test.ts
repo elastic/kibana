@@ -9,7 +9,7 @@ import {
   extractErrorMessage,
   defaultErrorMessage,
   buildMutedRulesFilter,
-  buildMisconfigurationPreviewQuery,
+  buildEntityFlyoutPreviewQuery,
 } from './helpers';
 
 const fallbackMessage = 'thisIsAFallBackMessage';
@@ -144,7 +144,7 @@ describe('test helper methods', () => {
     });
   });
 
-  describe('buildMisconfigurationPreviewQuery Test', () => {
+  describe('buildEntityFlyoutPreviewQueryTest', () => {
     it('should return the correct query when given field and query', () => {
       const field = 'host.name';
       const query = 'exampleHost';
@@ -164,7 +164,7 @@ describe('test helper methods', () => {
         },
       };
 
-      expect(buildMisconfigurationPreviewQuery(field, query)).toEqual(expectedQuery);
+      expect(buildEntityFlyoutPreviewQuery(field, query)).toEqual(expectedQuery);
     });
 
     it('should return the correct query when given field and empty query', () => {
@@ -185,7 +185,7 @@ describe('test helper methods', () => {
         },
       };
 
-      expect(buildMisconfigurationPreviewQuery(field)).toEqual(expectedQuery);
+      expect(buildEntityFlyoutPreviewQuery(field)).toEqual(expectedQuery);
     });
   });
 });

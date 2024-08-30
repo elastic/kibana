@@ -42,7 +42,7 @@ export const buildMutedRulesFilter = (
   return mutedRulesFilterQuery;
 };
 
-export const buildMisconfigurationPreviewQuery = (field: string, queryValue?: string) => {
+export const buildEntityFlyoutPreviewQuery = (field: string, queryValue?: string) => {
   return {
     bool: {
       must: [],

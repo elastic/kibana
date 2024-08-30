@@ -9,15 +9,15 @@
 import { TestProviders } from '../../../common/mock';
 import { render } from '@testing-library/react';
 import React from 'react';
-import { MisconfigurationsOverview } from './misconfiguration_overview';
+import { MisconfigurationsPreview } from './misconfiguration_preview';
 
 const mockProps = {
   hostName: 'testContextID',
 };
 
-describe('MisconfigurationsOverview', () => {
+describe('MisconfigurationsPreview', () => {
   it('renders', () => {
-    const { queryByTestId } = render(<MisconfigurationsOverview {...mockProps} />, {
+    const { queryByTestId } = render(<MisconfigurationsPreview {...mockProps} />, {
       wrapper: TestProviders,
     });
     expect(

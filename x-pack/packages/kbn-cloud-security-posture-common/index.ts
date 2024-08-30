@@ -23,5 +23,5 @@ export * from './constants';
 export {
   extractErrorMessage,
   buildMutedRulesFilter,
-  buildMisconfigurationPreviewQuery,
+  buildEntityFlyoutPreviewQuery,
 } from './utils/helpers';

@@ -11,7 +11,7 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useCspSetupStatusApi } from '@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api';
-import { MisconfigurationsOverview } from './misconfiguration/misconfiguration_overview';
+import { MisconfigurationsPreview } from './misconfiguration/misconfiguration_preview';
 
 export const EntityInsight = <T,>({ hostName }: { hostName: string }) => {
   const { euiTheme } = useEuiTheme();
@@ -43,7 +43,7 @@ export const EntityInsight = <T,>({ hostName }: { hostName: string }) => {
           }
         >
           <EuiSpacer size="m" />
-          <MisconfigurationsOverview hostName={hostName} />
+          <MisconfigurationsPreview hostName={hostName} />
           <EuiSpacer size="m" />
         </EuiAccordion>
       )}

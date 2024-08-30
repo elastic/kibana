@@ -15,7 +15,7 @@ import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hook
 import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 import { ExpandablePanel } from '@kbn/security-solution-common';
-import { buildMisconfigurationPreviewQuery } from '@kbn/cloud-security-posture-common';
+import { buildEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
 
 const getFindingsStats = (passedFindingsStats: number, failedFindingsStats: number) => {
   if (passedFindingsStats === 0 && failedFindingsStats === 0) return [];
@@ -116,9 +116,9 @@ const MisconfigurationPreviewScore = ({
   );
 };
 
-export const MisconfigurationsOverview = ({ hostName }: { hostName: string }) => {
+export const MisconfigurationsPreview = ({ hostName }: { hostName: string }) => {
   const { data } = useMisconfigurationPreview({
-    query: buildMisconfigurationPreviewQuery('host.name', hostName),
+    query: buildEntityFlyoutPreviewQuery('host.name', hostName),
     sort: [],
     enabled: true,
     pageSize: 1,
@@ -145,8 +145,6 @@ export const MisconfigurationsOverview = ({ hostName }: { hostName: string }) =>
             />
           </EuiText>
         ),
-        // TODO: Uncomment when we have the expanded flyout
-        // iconType: 'arrowStart',
       }}
       data-test-subj={'securitySolutionFlyoutInsightsMisconfigurations'}
     >
