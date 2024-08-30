@@ -10,6 +10,13 @@ import userEvent from '@testing-library/user-event';
 import crypto from 'crypto';
 import React from 'react';
 
+import {
+  httpServiceMock,
+  i18nServiceMock,
+  notificationServiceMock,
+  overlayServiceMock,
+  themeServiceMock,
+} from '@kbn/core/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { Role } from '@kbn/security-plugin-types-common';
 import {
@@ -19,11 +26,22 @@ import {
 
 import { PrivilegesRolesForm } from './space_assign_role_privilege_form';
 import type { Space } from '../../../../../common';
-import { createPrivilegeAPIClientMock } from '../../../privilege_api_client.mock';
-import { createRolesAPIClientMock } from '../../../roles_api_client.mock';
+import { spacesManagerMock } from '../../../../spaces_manager/spaces_manager.mock';
+import {
+  createPrivilegeAPIClientMock,
+  getPrivilegeAPIClientMock,
+} from '../../../privilege_api_client.mock';
+import { createRolesAPIClientMock, getRolesAPIClientMock } from '../../../roles_api_client.mock';
+import { EditSpaceProvider } from '../../provider';
 
 const rolesAPIClient = createRolesAPIClientMock();
 const privilegeAPIClient = createPrivilegeAPIClientMock();
+const http = httpServiceMock.createStartContract();
+const notifications = notificationServiceMock.createStartContract();
+const overlays = overlayServiceMock.createStartContract();
+const theme = themeServiceMock.createStartContract();
+const i18n = i18nServiceMock.createStartContract();
+const spacesManager = spacesManagerMock.create();
 
 const createRole = (roleName: string, kibana: Role['kibana'] = []): Role => {
   return {
@@ -57,17 +75,39 @@ const renderPrivilegeRolesForm = ({
 } = {}) => {
   return render(
     <IntlProvider locale="en">
-      <PrivilegesRolesForm
+      <EditSpaceProvider
         {...{
-          space,
-          features: kibanaFeatures,
-          closeFlyout,
-          defaultSelected: preSelectedRoles,
-          onSaveCompleted,
-          storeDispatch: dispatchMock,
-          spacesClientsInvocator: spacesClientsInvocatorMock,
+          i18n,
+          http,
+          theme,
+          overlays,
+          notifications,
+          spacesManager,
+          serverBasePath: '',
+          getUrlForApp: (_) => _,
+          getRolesAPIClient: getRolesAPIClientMock,
+          getPrivilegesAPIClient: getPrivilegeAPIClientMock,
+          navigateToUrl: jest.fn(),
+          capabilities: {
+            navLinks: {},
+            management: {},
+            catalogue: {},
+            spaces: { manage: true },
+          },
         }}
-      />
+      >
+        <PrivilegesRolesForm
+          {...{
+            space,
+            features: kibanaFeatures,
+            closeFlyout,
+            defaultSelected: preSelectedRoles,
+            onSaveCompleted,
+            storeDispatch: dispatchMock,
+            spacesClientsInvocator: spacesClientsInvocatorMock,
+          }}
+        />
+      </EditSpaceProvider>
     </IntlProvider>
   );
 };
