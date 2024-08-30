@@ -7,18 +7,12 @@
  */
 
 import { GenericFtrProviderContext, GenericFtrService } from '@kbn/test';
-import {
-  RetryService,
-  EsProvider,
-  KibanaServerProvider,
-} from '@kbn/ftr-common-functional-services';
+import { RetryService } from '@kbn/ftr-common-functional-services';
 import { services as commonFunctionalUiServices } from './all';
 
 const services = {
   ...commonFunctionalUiServices,
   retry: RetryService,
-  es: EsProvider,
-  kibanaServer: KibanaServerProvider,
 };
 
 export type FtrProviderContext = GenericFtrProviderContext<typeof services, {}>;
