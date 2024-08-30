@@ -402,6 +402,7 @@ const AssistantComponent: React.FC<Props> = ({
       isLoadingChatSend,
       setIsStreaming,
       currentUserAvatar,
+      currentSystemPrompt?.content,
       selectedPromptContextsCount,
     ]
   );
