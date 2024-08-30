@@ -16,6 +16,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...kibanaCommonTestsConfig.getAll(),
 
+    // FIXME Just triggering a change for ci purposes
     services: {
       ...commonFunctionalServices,
     },
