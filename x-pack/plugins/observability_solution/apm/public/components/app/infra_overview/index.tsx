@@ -7,11 +7,14 @@
 import { EuiPanel } from '@elastic/eui';
 import React from 'react';
 import { InfraTabs } from './infra_tabs';
+import { ServiceTabContent } from '../service_tab_content';
 
 export function InfraOverview() {
   return (
-    <EuiPanel color="subdued" borderRadius="none" hasShadow={false}>
-      <InfraTabs />
-    </EuiPanel>
+    <ServiceTabContent tabName="infrastructure">
+      <EuiPanel color="subdued" borderRadius="none" hasShadow={false}>
+        <InfraTabs />
+      </EuiPanel>
+    </ServiceTabContent>
   );
 }
