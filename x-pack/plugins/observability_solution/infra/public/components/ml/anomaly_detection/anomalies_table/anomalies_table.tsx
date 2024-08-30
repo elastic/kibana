@@ -190,7 +190,6 @@ const AnomalyActionMenu = ({
         showInHostsItem
       ) : (
         <EuiContextMenuItem
-          key="showInInventory"
           icon="search"
           data-test-subj="infraAnomalyFlyoutShowInInventory"
           onClick={showInInventory}
