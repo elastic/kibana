@@ -44,12 +44,14 @@ export const SearchLogic = kea<MakeLogicType<SearchValues, SearchActions>>({
     searchQuery: [
       '',
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         search: (_, { query }) => query,
       },
     ],
     searchResults: [
       [],
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onSearch: (_, { results }) => results.map((res) => formatResult(res) as SearchResult),
       },
     ],
