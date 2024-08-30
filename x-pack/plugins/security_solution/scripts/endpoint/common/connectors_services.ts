@@ -6,7 +6,7 @@
  */
 
 import type { KbnClient } from '@kbn/test';
-import type { AllConnectorsResponseV1 } from '@kbn/actions-plugin/common/routes/connector/response';
+import type { AllConnectorsResponseV1 } from '@kbn/actions-plugin/server/routes/connector/schemas/response';
 import type { bodySchema } from '@kbn/actions-plugin/server/routes/create';
 import type { TypeOf } from '@kbn/config-schema';
 import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
