@@ -150,7 +150,7 @@ describe('useCurrentConversation', () => {
     });
 
     expect(result.current.currentConversation).toEqual(conversation);
-    expect(result.current.currentSystemPromptId).toBe('something-crazy');
+    expect(result.current.currentSystemPrompt?.id).toBe('something-crazy');
   });
 
   it('should non-existing handle conversation selection', async () => {
@@ -183,7 +183,7 @@ describe('useCurrentConversation', () => {
     });
 
     expect(result.current.currentConversation).toEqual(mockData.welcome_id);
-    expect(result.current.currentSystemPromptId).toBe('system-prompt-id');
+    expect(result.current.currentSystemPrompt?.id).toBe('system-prompt-id');
   });
 
   it('should create a new conversation', async () => {

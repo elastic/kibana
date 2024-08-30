@@ -6,6 +6,8 @@
  */
 
 import { ApiConfig, Message, Replacements } from '@kbn/elastic-assistant-common';
+import { EuiCommentProps } from '@elastic/eui';
+import { UserAvatar } from '.';
 
 export interface MessagePresentation {
   delay?: number;
@@ -67,3 +69,15 @@ export interface AssistantAvailability {
   // When true, user has `Edit` privilege for `AnonymizationFields`
   hasUpdateAIAssistantAnonymization: boolean;
 }
+
+export type GetAssistantMessages = (commentArgs: {
+  abortStream: () => void;
+  currentConversation?: Conversation;
+  isFetchingResponse: boolean;
+  refetchCurrentConversation: ({ isStreamRefetch }: { isStreamRefetch?: boolean }) => void;
+  regenerateMessage: (conversationId: string) => void;
+  showAnonymizedValues: boolean;
+  currentUserAvatar?: UserAvatar;
+  setIsStreaming: (isStreaming: boolean) => void;
+  systemPromptContent?: string;
+}) => EuiCommentProps[];

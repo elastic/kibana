@@ -31,7 +31,7 @@ export interface Props {
 
 interface UseCurrentConversation {
   currentConversation: Conversation | undefined;
-  currentSystemPromptId: string | undefined;
+  currentSystemPrompt: PromptResponse | undefined;
   handleCreateConversation: () => Promise<void>;
   handleOnConversationDeleted: (cTitle: string) => Promise<void>;
   handleOnConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => Promise<void>;
@@ -74,12 +74,12 @@ export const useCurrentConversation = ({
   /**
    * START SYSTEM PROMPT
    */
-  const currentSystemPromptId = useMemo(
+  const currentSystemPrompt = useMemo(
     () =>
       getDefaultSystemPrompt({
         allSystemPrompts,
         conversation: currentConversation,
-      })?.id,
+      }),
     [allSystemPrompts, currentConversation]
   );
 
@@ -292,7 +292,7 @@ export const useCurrentConversation = ({
 
   return {
     currentConversation,
-    currentSystemPromptId,
+    currentSystemPrompt,
     handleCreateConversation,
     handleOnConversationDeleted,
     handleOnConversationSelected,

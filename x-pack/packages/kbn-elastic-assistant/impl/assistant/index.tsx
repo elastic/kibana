@@ -125,7 +125,7 @@ const AssistantComponent: React.FC<Props> = ({
   const defaultConnector = useMemo(() => getDefaultConnector(connectors), [connectors]);
   const {
     currentConversation,
-    currentSystemPromptId,
+    currentSystemPrompt,
     handleCreateConversation,
     handleOnConversationDeleted,
     handleOnConversationSelected,
@@ -375,6 +375,7 @@ const AssistantComponent: React.FC<Props> = ({
             isFetchingResponse: isLoadingChatSend,
             setIsStreaming,
             currentUserAvatar,
+            systemPromptContent: currentSystemPrompt?.content,
           })}
           // Avoid comments going off the flyout
           css={css`
@@ -516,7 +517,7 @@ const AssistantComponent: React.FC<Props> = ({
                   allSystemPrompts={allSystemPrompts}
                   comments={comments}
                   currentConversation={currentConversation}
-                  currentSystemPromptId={currentSystemPromptId}
+                  currentSystemPromptId={currentSystemPrompt?.id}
                   handleOnConversationSelected={handleOnConversationSelected}
                   http={http}
                   isAssistantEnabled={isAssistantEnabled}
