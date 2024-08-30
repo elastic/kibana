@@ -61,7 +61,7 @@ ruleTester.run('@kbn/eslint/no_unsafe_hash', rule, {
         {
           line: 3,
           message:
-            'Usage of createHash with "md5" is not allowed. Only the following algorithms are allowed: [sha1, sha256]. If you need to use a different algorithm, please contact the Kibana security team.',
+            'Usage of createHash with "md5" is not allowed. Only the following algorithms are allowed: [sha1, sha256, sha3-256]. If you need to use a different algorithm, please contact the Kibana security team.',
         },
       ],
     },
@@ -76,7 +76,7 @@ ruleTester.run('@kbn/eslint/no_unsafe_hash', rule, {
         {
           line: 3,
           message:
-            'Usage of createHash with "md5" is not allowed. Only the following algorithms are allowed: [sha1, sha256]. If you need to use a different algorithm, please contact the Kibana security team.',
+            'Usage of createHash with "md5" is not allowed. Only the following algorithms are allowed: [sha1, sha256, sha3-256]. If you need to use a different algorithm, please contact the Kibana security team.',
         },
       ],
     },
@@ -91,7 +91,7 @@ ruleTester.run('@kbn/eslint/no_unsafe_hash', rule, {
         {
           line: 3,
           message:
-            'Usage of createHash with "md5" is not allowed. Only the following algorithms are allowed: [sha1, sha256]. If you need to use a different algorithm, please contact the Kibana security team.',
+            'Usage of createHash with "md5" is not allowed. Only the following algorithms are allowed: [sha1, sha256, sha3-256]. If you need to use a different algorithm, please contact the Kibana security team.',
         },
       ],
     },
