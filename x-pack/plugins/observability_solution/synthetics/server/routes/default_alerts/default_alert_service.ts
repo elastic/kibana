@@ -65,25 +65,31 @@ export class DefaultAlertService {
     };
   }
 
+  getMinimumRuleInterval() {
+    return this.server.alerting.getConfig().minimumScheduleInterval;
+  }
+
   setupStatusRule() {
+    const minimumRuleInterval = this.getMinimumRuleInterval();
     if (this.settings?.defaultStatusRuleEnabled === false) {
       return;
     }
     return this.createDefaultAlertIfNotExist(
       SYNTHETICS_STATUS_RULE,
       `Synthetics status internal rule`,
-      '1m'
+      minimumRuleInterval.value
     );
   }
 
   setupTlsRule() {
+    const minimumRuleInterval = this.getMinimumRuleInterval();
     if (this.settings?.defaultTLSRuleEnabled === false) {
       return;
     }
     return this.createDefaultAlertIfNotExist(
       SYNTHETICS_TLS_RULE,
       `Synthetics internal TLS rule`,
-      '1m'
+      minimumRuleInterval.value
     );
   }
 
@@ -139,11 +145,12 @@ export class DefaultAlertService {
   }
 
   async updateStatusRule(enabled?: boolean) {
+    const minimumRuleInterval = this.getMinimumRuleInterval();
     if (enabled) {
       return this.updateDefaultAlert(
         SYNTHETICS_STATUS_RULE,
         `Synthetics status internal rule`,
-        '1m'
+        minimumRuleInterval.value
       );
     } else {
       const rulesClient = (await this.context.alerting)?.getRulesClient();
@@ -154,8 +161,13 @@ export class DefaultAlertService {
   }
 
   async updateTlsRule(enabled?: boolean) {
+    const minimumRuleInterval = this.getMinimumRuleInterval();
     if (enabled) {
-      return this.updateDefaultAlert(SYNTHETICS_TLS_RULE, `Synthetics internal TLS rule`, '1m');
+      return this.updateDefaultAlert(
+        SYNTHETICS_TLS_RULE,
+        `Synthetics internal TLS rule`,
+        minimumRuleInterval.value
+      );
     } else {
       const rulesClient = (await this.context.alerting)?.getRulesClient();
       await rulesClient.bulkDeleteRules({
@@ -180,7 +192,7 @@ export class DefaultAlertService {
           actions,
           name: alert.name,
           tags: alert.tags,
-          schedule: alert.schedule,
+          schedule: { interval },
           params: alert.params,
         },
       });
