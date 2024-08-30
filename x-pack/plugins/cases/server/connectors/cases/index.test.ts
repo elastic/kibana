@@ -163,6 +163,51 @@ describe('getCasesConnectorType', () => {
         `);
       });
 
+      it('builds the action getParams() and templateId correctly', () => {
+        const adapter = getCasesConnectorAdapter();
+
+        expect(
+          adapter.buildActionParams({
+            // @ts-expect-error: not all fields are needed
+            alerts,
+            rule,
+            params: getParams({ templateId: 'template_key_1' }),
+            spaceId: 'default',
+            ruleUrl: 'https://example.com',
+          })
+        ).toMatchInlineSnapshot(`
+          Object {
+            "subAction": "run",
+            "subActionParams": Object {
+              "alerts": Array [
+                Object {
+                  "_id": "alert-id-1",
+                  "_index": "alert-index-1",
+                },
+                Object {
+                  "_id": "alert-id-2",
+                  "_index": "alert-index-2",
+                },
+              ],
+              "groupingBy": Array [],
+              "maximumCasesToOpen": 5,
+              "owner": "cases",
+              "reopenClosedCases": false,
+              "rule": Object {
+                "id": "rule-id",
+                "name": "my rule name",
+                "ruleUrl": "https://example.com",
+                "tags": Array [
+                  "my-tag",
+                ],
+              },
+              "templateId": "template_key_1",
+              "timeWindow": "7d",
+            },
+          }
+        `);
+      });
+
       it('builds the action getParams() correctly without ruleUrl', () => {
         const adapter = getCasesConnectorAdapter();
         expect(

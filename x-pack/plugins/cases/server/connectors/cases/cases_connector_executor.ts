@@ -91,6 +91,7 @@ export class CasesConnectorExecutor {
 
   public async execute(params: CasesConnectorRunParams) {
     const { alerts, groupingBy } = params;
+
     const groupedAlerts = this.groupAlerts({ params, alerts, groupingBy });
     const groupedAlertsWithCircuitBreakers = this.applyCircuitBreakers(params, groupedAlerts);
 

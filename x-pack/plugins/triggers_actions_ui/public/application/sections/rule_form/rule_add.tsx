@@ -343,7 +343,6 @@ const RuleAdd = <
               isFormLoading={isLoading}
               isRuleValid={isRuleValid}
               onSave={async () => {
-                console.log('Save button', { rule, ruleErrors, ruleActionsErrors });
                 setIsSaving(true);
                 if (isLoading || !isValidRule(rule, ruleErrors, ruleActionsErrors)) {
                   setRule(
