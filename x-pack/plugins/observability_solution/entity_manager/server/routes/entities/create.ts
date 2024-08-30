@@ -16,8 +16,6 @@ import { SetupRouteOptions } from '../types';
 import { EntityIdConflict } from '../../lib/entities/errors/entity_id_conflict_error';
 import { EntitySecurityException } from '../../lib/entities/errors/entity_security_exception';
 import { InvalidTransformError } from '../../lib/entities/errors/invalid_transform_error';
-import { startTransform } from '../../lib/entities/start_transform';
-import { installEntityDefinition } from '../../lib/entities/install_entity_definition';
 import { EntityDefinitionIdInvalid } from '../../lib/entities/errors/entity_definition_id_invalid';
 
 /**
@@ -56,7 +54,8 @@ import { EntityDefinitionIdInvalid } from '../../lib/entities/errors/entity_defi
  */
 export function createEntityDefinitionRoute<T extends RequestHandlerContext>({
   router,
-  server,
+  getScopedClient,
+  logger,
 }: SetupRouteOptions<T>) {
   router.post<unknown, CreateEntityDefinitionQuery, EntityDefinition>(
     {
@@ -66,23 +65,13 @@ export function createEntityDefinitionRoute<T extends RequestHandlerContext>({
         query: createEntityDefinitionQuerySchema,
       },
     },
-    async (context, req, res) => {
-      const { logger } = server;
-      const core = await context.core;
-      const soClient = core.savedObjects.client;
-      const esClient = core.elasticsearch.client.asCurrentUser;
-
+    async (context, request, res) => {
       try {
-        const definition = await installEntityDefinition({
-          soClient,
-          esClient,
-          logger,
-          definition: req.body,
+        const client = await getScopedClient({ request });
+        const definition = await client.createEntityDefinition({
+          definition: request.body,
+          installOnly: request.query.installOnly,
         });
-
-        if (!req.query.installOnly) {
-          await startTransform(esClient, definition, logger);
-        }
 
         return res.ok({ body: definition });
       } catch (e) {
