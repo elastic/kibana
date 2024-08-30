@@ -242,7 +242,6 @@ export const S3Settings: React.FunctionComponent<Props> = ({
         fullWidth
       >
         <EuiFormRow
-          hasEmptyLabelSpace={true}
           fullWidth
           isInvalid={Boolean(hasErrors && settingErrors.compress)}
           error={settingErrors.compress}
@@ -294,7 +293,6 @@ export const S3Settings: React.FunctionComponent<Props> = ({
         fullWidth
       >
         <EuiFormRow
-          hasEmptyLabelSpace={true}
           fullWidth
           isInvalid={Boolean(hasErrors && settingErrors.serverSideEncryption)}
           error={settingErrors.serverSideEncryption}
@@ -503,7 +501,6 @@ export const S3Settings: React.FunctionComponent<Props> = ({
         fullWidth
       >
         <EuiFormRow
-          hasEmptyLabelSpace={true}
           fullWidth
           isInvalid={Boolean(hasErrors && settingErrors.readonly)}
           error={settingErrors.readonly}

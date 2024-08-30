@@ -4,12 +4,12 @@
 }
 
 .mapAttributionFormRow__legend {
-  @include euiFormLabel;
   display: inline-flex;
   width: calc(33% - #{$euiSizeS});
   height: $euiSizeXL;
   align-items: center;
   margin-right: $euiSizeS;
+  font-weight: $euiFontWeightSemiBold;
 }
 
 .mapAttributionFormRow__field {

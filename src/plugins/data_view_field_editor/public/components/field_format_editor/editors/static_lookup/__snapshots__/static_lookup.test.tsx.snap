@@ -84,17 +84,12 @@ exports[`StaticLookupFormatEditor should render multiple lookup entries and unkn
     size="l"
   />
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     label={
       <Memo(MemoizedFormattedMessage)
         defaultMessage="Value for unknown key"
         id="indexPatternFieldEditor.staticLookup.unknownKeyLabel"
       />
     }
-    labelType="label"
   >
     <EuiFieldText
       data-test-subj="staticLookupEditorUnknownValue"
@@ -187,17 +182,12 @@ exports[`StaticLookupFormatEditor should render normally 1`] = `
     size="l"
   />
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     label={
       <Memo(MemoizedFormattedMessage)
         defaultMessage="Value for unknown key"
         id="indexPatternFieldEditor.staticLookup.unknownKeyLabel"
       />
     }
-    labelType="label"
   >
     <EuiFieldText
       data-test-subj="staticLookupEditorUnknownValue"
