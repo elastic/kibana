@@ -24,7 +24,7 @@ if docker manifest inspect $KIBANA_IMAGE &> /dev/null; then
   exit 0
 fi
 
-docker_pull_with_retry $KIBANA_BASE_IMAGE:latest
+docker_with_retry pull $KIBANA_BASE_IMAGE:latest
 
 echo "--- Build images"
 node scripts/build \
@@ -51,8 +51,8 @@ docker load < "target/kibana-serverless-$BASE_VERSION-docker-image-aarch64.tar.g
 docker tag "$KIBANA_IMAGE" "$KIBANA_IMAGE-arm64"
 
 echo "--- Push images"
-docker image push "$KIBANA_IMAGE-arm64"
-docker image push "$KIBANA_IMAGE-amd64"
+docker_with_retry push "$KIBANA_IMAGE-arm64"
+docker_with_retry push "$KIBANA_IMAGE-amd64"
 
 echo "--- Create and push manifests"
 docker manifest create \

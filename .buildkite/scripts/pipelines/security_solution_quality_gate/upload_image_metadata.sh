@@ -19,7 +19,7 @@ else
     KBN_IMAGE=${KIBANA_LATEST}
 fi
 
-docker_pull_with_retry ${KBN_IMAGE}
+docker_with_retry pull ${KBN_IMAGE}
 build_date=$(docker inspect ${KBN_IMAGE} | jq -r '.[0].Config.Labels."org.label-schema.build-date"')
 vcs_ref=$(docker inspect ${KBN_IMAGE} | jq -r '.[0].Config.Labels."org.label-schema.vcs-ref"')
 vcs_url=$(docker inspect ${KBN_IMAGE} | jq -r '.[0].Config.Labels."org.label-schema.vcs-url"')

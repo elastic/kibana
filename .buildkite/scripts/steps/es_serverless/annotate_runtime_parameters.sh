@@ -17,7 +17,7 @@ fi
 
 # Pull the target image
 if [[ $ES_SERVERLESS_IMAGE != *":git-"* ]]; then
-  docker_pull_with_retry "$ES_SERVERLESS_IMAGE"
+  docker_with_retry pull "$ES_SERVERLESS_IMAGE"
   ES_SERVERLESS_VERSION=$(docker inspect --format='{{json .Config.Labels}}' "$ES_SERVERLESS_IMAGE" | jq -r '.["org.opencontainers.image.revision"]' | cut -c1-12)
 
   IMAGE_WITHOUT_TAG=$(echo "$ES_SERVERLESS_IMAGE" | cut -d: -f1)

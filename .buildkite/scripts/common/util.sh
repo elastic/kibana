@@ -179,7 +179,9 @@ print_if_dry_run() {
   fi
 }
 
-docker_pull_with_retry () {
+docker_with_retry () {
+  cmd=$1
+  shift
   args=("$@")
   attempt=0
   max_retries=5
@@ -191,16 +193,16 @@ docker_pull_with_retry () {
 
     if [ $attempt -gt $max_retries ]
     then
-      echo "Docker pull retries exceeded, aborting."
+      echo "Docker $cmd retries exceeded, aborting."
       exit 1
     fi
 
-    if docker pull "${args[@]}"
+    if docker "$cmd" "${args[@]}"
     then
-      echo "Docker pull successful."
+      echo "Docker $cmd successful."
       break
     else
-      echo "Docker pull unsuccessful, attempt '$attempt'... Retrying in $sleep_time"
+      echo "Docker $cmd unsuccessful, attempt '$attempt'... Retrying in $sleep_time"
       sleep $sleep_time
     fi
   done
