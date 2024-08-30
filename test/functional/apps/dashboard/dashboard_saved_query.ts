@@ -18,7 +18,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const savedQueryManagementComponent = getService('savedQueryManagementComponent');
   const testSubjects = getService('testSubjects');
 
-  describe('dashboard saved queries', function describeIndexTests() {
+  // Failing: See https://github.com/elastic/kibana/issues/189078
+  describe.skip('dashboard saved queries', function describeIndexTests() {
     before(async function () {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(

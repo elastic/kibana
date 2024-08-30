@@ -15,6 +15,7 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
   const retry = getService('retry');
   const find = getService('find');
   const pageObjects = getPageObjects(['common']);
+  const comboBox = getService('comboBox');
 
   return {
     async goToTime(time: string) {
@@ -254,6 +255,27 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
 
     async closeAlertFlyout() {
       await testSubjects.click('euiFlyoutCloseButton');
+    },
+    async clickCustomMetricDropdown() {
+      await testSubjects.click('infraInventoryMetricDropdown');
+    },
+
+    async addCustomMetric(field: string) {
+      await testSubjects.click('infraModeSwitcherAddMetricButton');
+      const groupByCustomField = await testSubjects.find('infraCustomMetricFieldSelect');
+      await comboBox.setElement(groupByCustomField, field);
+      await testSubjects.click('infraCustomMetricFormSaveButton');
+    },
+
+    async getMetricsContextMenuItemsCount() {
+      const contextMenu = await testSubjects.find('infraInventoryMetricsContextMenu');
+      const menuItems = await contextMenu.findAllByCssSelector('button.euiContextMenuItem');
+      return menuItems.length;
+    },
+
+    async ensureCustomMetricAddButtonIsDisabled() {
+      const button = await testSubjects.find('infraModeSwitcherAddMetricButton');
+      expect(await button.getAttribute('disabled')).to.be('true');
     },
   };
 }

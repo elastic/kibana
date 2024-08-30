@@ -6,11 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ChromiumArchivePaths } from '@kbn/screenshotting-server';
 import { BrowserDownload } from '../';
 import { ReportingCore } from '../../../server';
 import { LevelLogger } from '../../lib';
 import { HeadlessChromiumDriverFactory } from './driver_factory';
-import { ChromiumArchivePaths } from './paths';
 
 export const chromium: BrowserDownload = {
   paths: new ChromiumArchivePaths(),

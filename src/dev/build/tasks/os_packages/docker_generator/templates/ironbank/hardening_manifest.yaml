@@ -14,7 +14,7 @@ tags:
 # Build args passed to Dockerfile ARGs
 args:
   BASE_IMAGE: 'redhat/ubi/ubi9'
-  BASE_TAG: '9.3'
+  BASE_TAG: '9.4'
 
 # Docker image labels
 labels:
@@ -60,7 +60,27 @@ maintainers:
     name: 'Alexander Klepal'
     username: 'alexander.klepal'
     cht_member: true
-  - email: "yalabe.dukuly@anchore.com"
-    name: "Yalabe Dukuly"
-    username: "yalabe.dukuly"
-    cht_member: true
+  - cht_member: false
+    email: larry.gregory@elastic.co
+    name: Larry Gregory
+    username: legrego
+  - cht_member: false
+    email: aleh.zasypkin@elastic.co
+    name: Aleh Zasypkin
+    username: azasypkin
+  - cht_member: false
+    email: kurt.greiner@elastic.co
+    name: Kurt Greiner
+    username: kc13greiner
+  - cht_member: false
+    email: jeramy.soucy@elastic.co
+    name: Jeramy Soucy
+    username: jeramysoucy
+  - cht_member: false
+    email: sid.mantri@elastic.co
+    name: Sid Mantri
+    username: sidmantri
+  - cht_member: false
+    email: elena.shostak@elastic.co
+    name: Elena Shostak
+    username: elena.shostak

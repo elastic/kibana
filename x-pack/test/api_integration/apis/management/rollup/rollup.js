@@ -12,9 +12,11 @@ import { registerHelpers } from './rollup.test_helpers';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
+  const esVersion = getService('esVersion');
 
   const {
     createIndexWithMappings,
+    createMockRollupIndex,
     getJobPayload,
     loadJobs,
     createJob,
@@ -25,8 +27,6 @@ export default function ({ getService }) {
   } = registerHelpers(getService);
 
   describe('jobs', function () {
-    this.onlyEsVersion('<=7');
-
     after(() => cleanUp());
 
     describe('indices', () => {
@@ -86,6 +86,15 @@ export default function ({ getService }) {
     });
 
     describe('crud', () => {
+      // The step below is done for the 7.17 ES 8.15 forward compatibility tests
+      // From 8.15, Es only allows creating a new rollup job when there is existing rollup usage in the cluster
+      // We will simulate rollup usage by creating a mock-up rollup index
+      before(async () => {
+        await createMockRollupIndex();
+      });
+
+      after(() => cleanUp());
+
       describe('list', () => {
         it('should return an empty array when there are no jobs', async () => {
           const { body } = await loadJobs().expect(200);
@@ -223,6 +232,15 @@ export default function ({ getService }) {
     });
 
     describe('actions', () => {
+      // The step below is done for the 7.17 ES 8.15 forward compatibility tests
+      // From 8.15, Es only allows creating a new rollup job when there is existing rollup usage in the cluster
+      // We will simulate rollup usage by creating a mock-up rollup index
+      before(async () => {
+        await createMockRollupIndex();
+      });
+
+      after(() => cleanUp());
+
       describe('start', () => {
         let job;
 
@@ -256,9 +274,15 @@ export default function ({ getService }) {
         it('should throw a 400 Bad request if the job is already started', async () => {
           await startJob(job.config.id); // Start the job
 
-          const { body } = await startJob(job.config.id).expect(400);
-          expect(body.error).to.eql('Bad Request');
-          expect(body.message).to.contain('Cannot start task for Rollup Job');
+          if (esVersion.matchRange('<=7')) {
+            const { body } = await startJob(job.config.id).expect(400);
+            expect(body.error).to.eql('Bad Request');
+            expect(body.message).to.contain('Cannot start task for Rollup Job');
+          } else {
+            // Since ES 8.0, starting a started job is allowed
+            // See https://github.com/elastic/kibana/pull/38168
+            await startJob(job.config.id).expect(200);
+          }
         });
       });
 

@@ -5,11 +5,19 @@
  * 2.0.
  */
 
-import { EuiComboBox } from '@elastic/eui';
+import {
+  EuiComboBox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiIcon,
+  EuiComboBoxOptionOption,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 import { IFieldType } from 'src/plugins/data/public';
+import { METRICS_EXPLORER_API_MAX_METRICS } from '../../../../../common/constants';
 import { colorTransformer, Color } from '../../../../../common/color_palette';
 import { MetricsExplorerMetric } from '../../../../../common/http_api/metrics_explorer';
 import { MetricsExplorerOptions } from '../hooks/use_metrics_explorer_options';
@@ -26,9 +34,20 @@ interface SelectedOption {
   label: string;
 }
 
+const placeholderText = i18n.translate('xpack.infra.metricsExplorer.metricComboBoxPlaceholder', {
+  defaultMessage: 'choose a metric to plot',
+});
+
+const comboValidationText = i18n.translate('xpack.infra.metricsExplorer.maxItemsSelected', {
+  defaultMessage: 'Maximum number of {maxMetrics} metrics reached.',
+  values: { maxMetrics: METRICS_EXPLORER_API_MAX_METRICS },
+});
+
 export const MetricsExplorerMetrics = ({ options, onChange, fields, autoFocus = false }: Props) => {
   const colors = Object.keys(Color) as Array<keyof typeof Color>;
   const [shouldFocus, setShouldFocus] = useState(autoFocus);
+
+  const maxMetricsReached = options.metrics.length >= METRICS_EXPLORER_API_MAX_METRICS;
 
   // the EuiCombobox forwards the ref to an input element
   const autoFocusInputElement = useCallback(
@@ -54,7 +73,17 @@ export const MetricsExplorerMetrics = ({ options, onChange, fields, autoFocus = 
     [onChange, options.aggregation, colors]
   );
 
-  const comboOptions = fields.map((field) => ({ label: field.name, value: field.name }));
+  const comboOptions = useMemo(
+    (): EuiComboBoxOptionOption[] =>
+      maxMetricsReached
+        ? [{ label: comboValidationText, disabled: true }]
+        : fields.map((field) => ({
+            label: field.name,
+            value: field.name,
+          })),
+    [maxMetricsReached, fields]
+  );
+
   const selectedOptions = options.metrics
     .filter((m) => m.aggregation !== 'count')
     .map((metric) => ({
@@ -63,9 +92,37 @@ export const MetricsExplorerMetrics = ({ options, onChange, fields, autoFocus = 
       color: colorTransformer(metric.color || Color.color0),
     }));
 
-  const placeholderText = i18n.translate('xpack.infra.metricsExplorer.metricComboBoxPlaceholder', {
-    defaultMessage: 'choose a metric to plot',
-  });
+  const handleOnKeyDown = (ev: React.KeyboardEvent<HTMLDivElement>) => {
+    if (maxMetricsReached) {
+      ev.preventDefault();
+    }
+
+    return ev;
+  };
+
+  const renderFields = useCallback((option: EuiComboBoxOptionOption) => {
+    const { label, disabled } = option;
+
+    if (disabled) {
+      return (
+        <EuiFlexGroup
+          direction="column"
+          justifyContent="center"
+          alignItems="center"
+          data-test-subj="infraMetricsExplorerMaxMetricsReached"
+        >
+          <EuiFlexItem>
+            <EuiFlexGroup gutterSize="xs" justifyContent="center" alignItems="center">
+              <EuiIcon type="iInCircle" size="s" />
+              <EuiText size="xs">{label}</EuiText>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
+
+    return label;
+  }, []);
 
   return (
     <EuiComboBox
@@ -77,8 +134,10 @@ export const MetricsExplorerMetrics = ({ options, onChange, fields, autoFocus = 
       options={comboOptions}
       selectedOptions={selectedOptions}
       onChange={handleChange}
-      isClearable={true}
+      onKeyDown={handleOnKeyDown}
+      isClearable
       inputRef={autoFocusInputElement}
+      renderOption={renderFields}
     />
   );
 };

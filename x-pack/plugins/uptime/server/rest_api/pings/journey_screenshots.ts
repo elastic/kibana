@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { isRefResult, isFullScreenshot } from '../../../common/runtime_types/ping/synthetics';
+import { isRefResult } from '../../../common/runtime_types/ping/synthetics';
 import { UMServerLibs } from '../../lib/lib';
 import { ScreenshotReturnTypesUnion } from '../../lib/requests/get_journey_screenshot';
 import { UMRestApiRouteFactory } from '../types';
@@ -37,15 +37,7 @@ export const createJourneyScreenshotRoute: UMRestApiRouteFactory = (libs: UMServ
       stepIndex,
     });
 
-    if (isFullScreenshot(result) && typeof result.synthetics?.blob !== 'undefined') {
-      return response.ok({
-        body: Buffer.from(result.synthetics.blob, 'base64'),
-        headers: {
-          'content-type': result.synthetics.blob_mime || 'image/png', // falls back to 'image/png' for earlier versions of synthetics
-          ...getSharedHeaders(result.synthetics.step.name, result.totalSteps),
-        },
-      });
-    } else if (isRefResult(result)) {
+    if (isRefResult(result)) {
       return response.ok({
         body: {
           screenshotRef: result,

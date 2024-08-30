@@ -42,6 +42,9 @@ const createResult = (result: Result): GlobalSearchResult => {
 const createBatch = (...results: Result[]): GlobalSearchBatchedResults => ({
   results: results.map(createResult),
 });
+
+const searchCharLimit = 1000;
+
 jest.useFakeTimers({ legacyFakeTimers: true });
 
 describe('SearchBar', () => {
@@ -96,7 +99,7 @@ describe('SearchBar', () => {
     render(
       <IntlProvider locale="en">
         <SearchBar
-          globalSearch={searchService}
+          globalSearch={{ ...searchService, searchCharLimit }}
           navigateToUrl={applications.navigateToUrl}
           basePathUrl={basePathUrl}
           darkMode={darkMode}
@@ -124,7 +127,7 @@ describe('SearchBar', () => {
     render(
       <IntlProvider locale="en">
         <SearchBar
-          globalSearch={searchService}
+          globalSearch={{ ...searchService, searchCharLimit }}
           navigateToUrl={applications.navigateToUrl}
           basePathUrl={basePathUrl}
           darkMode={darkMode}
@@ -156,7 +159,7 @@ describe('SearchBar', () => {
     render(
       <IntlProvider locale="en">
         <SearchBar
-          globalSearch={searchService}
+          globalSearch={{ ...searchService, searchCharLimit }}
           navigateToUrl={applications.navigateToUrl}
           basePathUrl={basePathUrl}
           darkMode={darkMode}

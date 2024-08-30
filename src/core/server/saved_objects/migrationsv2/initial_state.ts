@@ -73,6 +73,7 @@ export const createInitialState = ({
     versionAlias: `${indexPrefix}_${kibanaVersion}`,
     versionIndex: `${indexPrefix}_${kibanaVersion}_001`,
     tempIndex: `${indexPrefix}_${kibanaVersion}_reindex_temp`,
+    tempIndexAlias: `${indexPrefix}_${kibanaVersion}_reindex_temp_alias`,
     kibanaVersion,
     preMigrationScript: Option.fromNullable(preMigrationScript),
     targetIndexMappings: targetMappings,
