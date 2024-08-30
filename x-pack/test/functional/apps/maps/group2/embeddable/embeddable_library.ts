@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export default function ({ getPageObjects, getService }) {
+import { FtrProviderContext } from '../../../../ftr_provider_context';
+
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const find = getService('find');
   const { dashboard, header, maps, visualize } = getPageObjects([
     'dashboard',
@@ -50,12 +52,12 @@ export default function ({ getPageObjects, getService }) {
 
     it('save map panel to embeddable library', async () => {
       await dashboardPanelActions.saveToLibrary(mapTitle);
-      await dashboardPanelActions.expectInLibrary(mapTitle);
+      await dashboardPanelActions.expectLinkedToLibrary(mapTitle);
     });
 
     it('unlink map panel from embeddable library', async () => {
       await dashboardPanelActions.unlinkFromLibrary(mapTitle);
-      await dashboardPanelActions.expectNotInLibrary(mapTitle);
+      await dashboardPanelActions.expectNotLinkedToLibrary(mapTitle);
 
       await dashboardAddPanel.clickOpenAddPanel();
       await dashboardAddPanel.filterEmbeddableNames(mapTitle);

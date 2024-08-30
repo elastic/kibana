@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export default function ({ loadTestFile }) {
+import { FtrProviderContext } from '../../../../ftr_provider_context';
+
+export default function ({ loadTestFile }: FtrProviderContext) {
   describe('embeddable', function () {
     loadTestFile(require.resolve('./canvas'));
     loadTestFile(require.resolve('./add_to_dashboard'));

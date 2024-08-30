@@ -6,8 +6,10 @@
  */
 
 import expect from '@kbn/expect';
+import { Feature } from 'geojson';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function ({ getPageObjects, getService }) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { maps } = getPageObjects(['maps']);
   const inspector = getService('inspector');
   const DOC_COUNT_PROP_NAME = 'doc_count';
@@ -38,12 +40,12 @@ export default function ({ getPageObjects, getService }) {
     }
 
     function makeRequestTestsForGeoPrecision(
-      LAYER_ID,
-      expectedNumFeaturesZoomedOut,
-      expectedNumPartialFeatures
+      layerID: string,
+      expectedNumFeaturesZoomedOut: number,
+      expectedNumPartialFeatures: number
     ) {
       describe('geoprecision - requests', () => {
-        let beforeTimestamp;
+        let beforeTimestamp = '';
         beforeEach(async () => {
           await maps.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 1);
           beforeTimestamp = await getRequestTimestamp();
@@ -78,21 +80,21 @@ export default function ({ getPageObjects, getService }) {
         it('should not return any data when the extent does not cover the data bounds', async () => {
           await maps.setView(64, 179, 5);
           const mapboxStyle = await maps.getMapboxStyle();
-          expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(0);
+          expect(mapboxStyle.sources[layerID].data.features.length).to.equal(0);
         });
 
         it('should request the data when the map covers the databounds', async () => {
           const mapboxStyle = await maps.getMapboxStyle();
-          expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(
+          expect(mapboxStyle.sources[layerID].data.features.length).to.equal(
             expectedNumFeaturesZoomedOut
           );
         });
 
         it('should request only partial data when the map only covers part of the databounds', async () => {
-          //todo this verifies the extent-filtering behavior (not really the correct application of geotile_grid-precision), and should ideally be moved to its own section
+          // todo this verifies the extent-filtering behavior (not really the correct application of geotile_grid-precision), and should ideally be moved to its own section
           await maps.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 6);
           const mapboxStyle = await maps.getMapboxStyle();
-          expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(
+          expect(mapboxStyle.sources[layerID].data.features.length).to.equal(
             expectedNumPartialFeatures
           );
         });
@@ -120,10 +122,12 @@ export default function ({ getPageObjects, getService }) {
         const mapboxStyle = await maps.getMapboxStyle();
         expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(12);
 
-        mapboxStyle.sources[LAYER_ID].data.features.forEach(({ properties }) => {
-          expect(Object.hasOwn(properties, MAX_OF_BYTES_PROP_NAME)).to.be(true);
-          expect(Object.hasOwn(properties, DOC_COUNT_PROP_NAME)).to.be(true);
-        });
+        mapboxStyle.sources[LAYER_ID].data.features.forEach(
+          ({ properties }: Feature<null, object>) => {
+            expect(Object.hasOwn(properties, MAX_OF_BYTES_PROP_NAME)).to.be(true);
+            expect(Object.hasOwn(properties, DOC_COUNT_PROP_NAME)).to.be(true);
+          }
+        );
       });
 
       makeRequestTestsForGeoPrecision(LAYER_ID, 8, 4);

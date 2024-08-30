@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import { FtrProviderContext } from '../../../../ftr_provider_context';
+
 const FILTER_BY_MAP_EXTENT_DATA_TEST_SUBJ = 'embeddablePanelAction-FILTER_BY_MAP_EXTENT';
 
-export default function ({ getPageObjects, getService }) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { dashboard, header, lens, maps } = getPageObjects(['dashboard', 'header', 'lens', 'maps']);
 
   const browser = getService('browser');
