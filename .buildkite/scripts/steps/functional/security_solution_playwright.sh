@@ -13,7 +13,4 @@ cd x-pack/test/security_solution_playwright
 
 set +e
 
-yarn run:ess; 
-exit_code=$?
-
-exit $exit_code
+yarn run:ess; exit_code=$?; exit $exit_code
