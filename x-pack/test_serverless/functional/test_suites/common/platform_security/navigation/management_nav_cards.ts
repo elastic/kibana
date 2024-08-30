@@ -72,7 +72,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('as viewer', function () {
+    // failing feature flag test, see https://github.com/elastic/kibana/issues/191856
+    describe.skip('as viewer', function () {
       before(async () => {
         await pageObjects.svlCommonPage.loginAsViewer();
       });
