@@ -128,7 +128,7 @@ describe('<RequestBodyField />', () => {
     expect(keyValueTextBox).toHaveValue('formfield');
   });
 
-  // TODO: This test needs revisting, after the userEvent v14 update the test fails to use
+  // TODO: This test needs revisiting, after the userEvent v14 update the test fails to use
   // userEvent on the form field in read-only mode. And we cannot use `pointerEventsCheck: 0`
   // because it would defeat the purpose of the test.
   it.skip('handles read only', async () => {
