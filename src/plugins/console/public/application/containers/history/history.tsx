@@ -160,7 +160,7 @@ export function History() {
                 }}
               >
                 <EuiSplitPanel.Inner paddingSize="none">
-                  <EuiFlexGroup direction="column" gutterSize="none" css={{ height: '100%' }}>
+                  <EuiFlexGroup direction="column" gutterSize="none">
                     <EuiFlexItem grow={false}>
                       <EuiSpacer size="s" />
                       <EuiTitle>
@@ -183,10 +183,10 @@ export function History() {
                       <EuiSpacer size="l" />
                     </EuiFlexItem>
 
-                    <EuiFlexItem grow={false} css={{ height: '100%', overflowY: 'scroll' }}>
+                    <EuiFlexItem grow={false} css={{ height: 'calc(100vh - 415px)', overflowY: 'auto' }}>
                       {requests.length === 0 && <HistoryEmptyPrompt />}
 
-                      {requests.slice(0, 14).map((req, idx) => (
+                      {requests.map((req, idx) => (
                         <EuiFormFieldset key={idx} data-test-subj="historyItemFieldset">
                           <EuiCheckableCard
                             id={`${CHILD_ELEMENT_PREFIX}${idx}`}
