@@ -23,6 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('fetch historical summary', () => {
     before(async () => {
+      await sloApi.createUser();
       const now = moment().startOf('minute');
       const curr = now.clone().subtract(30, 'days');
       const end = now.clone().add(5, 'minutes');
