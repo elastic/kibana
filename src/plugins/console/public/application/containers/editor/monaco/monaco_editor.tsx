@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { debounce } from 'lodash';
 import React, { CSSProperties, useCallback, useMemo, useRef, useState, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -37,6 +38,8 @@ export interface EditorProps {
   value: string;
   setValue: (value: string) => void;
 }
+
+const DEBOUNCE_DELAY = 500;
 
 export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps) => {
   const context = useServicesContext();
@@ -132,6 +135,12 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
 
   useSetupAutosave({ value });
 
+  const debouncedUpdateLocalStorageValue = useCallback(
+    debounce((textObject: TextObject) => {
+      editorDispatch({ type: 'setCurrentTextObject', payload: textObject });
+    }, DEBOUNCE_DELAY),
+    []
+  );
   // Always keep the currentTextObject in sync with the value in the editor
   // to avoid losing the text object when the user navigates away from the shell
   useEffect(() => {
@@ -144,7 +153,8 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
         text: value,
         updatedAt: Date.now(),
       } as TextObject;
-      editorDispatch({ type: 'setCurrentTextObject', payload: textObject });
+
+      debouncedUpdateLocalStorageValue(textObject);
     }
   }, [value, currentTextObject, editorDispatch]);
 
@@ -161,6 +171,7 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
   }, [requestToRestoreFromHistory, dispatch, context, editorDispatch]);
 
   useEffect(() => {
+    console.log('update editor called');
     updateEditor();
   }, [updateEditor]);
 

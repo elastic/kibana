@@ -741,6 +741,7 @@ export class MonacoEditorActionsProvider {
       scrollTop: this.editor.getTopForLineNumber(restoredRequest.startLineNumber),
     });
 
+    // 5 - Optionally send the request
     if (req.restoreMethod === RestoreMethod.RESTORE_AND_EXECUTE) {
       this.sendRequests(dispatch, context);
     }
