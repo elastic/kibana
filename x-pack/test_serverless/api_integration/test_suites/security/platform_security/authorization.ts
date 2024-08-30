@@ -10,7 +10,8 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
 
-  describe('security/authorization', function () {
+  // failing feature flag test, see https://github.com/elastic/kibana/issues/191810
+  describe.skip('security/authorization', function () {
     describe('available features', () => {
       const svlUserManager = getService('svlUserManager');
       const supertestWithoutAuth = getService('supertestWithoutAuth');
