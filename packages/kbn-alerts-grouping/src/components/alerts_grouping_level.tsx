@@ -14,6 +14,7 @@ import { type GroupingAggregation } from '@kbn/grouping';
 import { isNoneGroup } from '@kbn/grouping';
 import type { DynamicGroupingProps } from '@kbn/grouping/src';
 import { parseGroupingQuery } from '@kbn/grouping/src';
+import { ALERT_TIME_RANGE } from '@kbn/rule-data-utils';
 import {
   useGetAlertsGroupAggregationsQuery,
   UseGetAlertsGroupAggregationsQueryProps,
@@ -94,7 +95,7 @@ export const AlertsGroupingLevel = typedMemo(
           ...filters,
           {
             range: {
-              '@timestamp': {
+              [ALERT_TIME_RANGE]: {
                 gte: from,
                 lte: to,
               },

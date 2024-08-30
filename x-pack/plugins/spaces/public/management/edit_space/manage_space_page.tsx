@@ -66,6 +66,7 @@ interface State {
   features: KibanaFeature[];
   originalSpace?: Partial<Space>;
   showAlteringActiveSpaceDialog: boolean;
+  showVisibleFeaturesPicker: boolean;
   haveDisabledFeaturesChanged: boolean;
   hasSolutionViewChanged: boolean;
   isLoading: boolean;
@@ -85,6 +86,7 @@ export class ManageSpacePage extends Component<Props, State> {
     this.state = {
       isLoading: true,
       showAlteringActiveSpaceDialog: false,
+      showVisibleFeaturesPicker: !!props.allowFeatureVisibility,
       saveInProgress: false,
       space: {
         color: getSpaceColor({}),
@@ -189,6 +191,9 @@ export class ManageSpacePage extends Component<Props, State> {
     return (
       <div data-test-subj="spaces-edit-page">
         <CustomizeSpace
+          title={i18n.translate('xpack.spaces.management.manageSpacePage.generalTitle', {
+            defaultMessage: 'General',
+          })}
           space={this.state.space}
           onChange={this.onSpaceChange}
           editingExistingSpace={this.editingExistingSpace()}
@@ -198,11 +203,20 @@ export class ManageSpacePage extends Component<Props, State> {
         {!!this.props.allowSolutionVisibility && (
           <>
             <EuiSpacer size="l" />
-            <SolutionView space={this.state.space} onChange={this.onSpaceChange} />
+            <SolutionView
+              space={this.state.space}
+              onChange={this.onSolutionViewChange}
+              validator={this.validator}
+              isEditing={this.editingExistingSpace()}
+              sectionTitle={i18n.translate(
+                'xpack.spaces.management.manageSpacePage.navigationTitle',
+                { defaultMessage: 'Navigation' }
+              )}
+            />
           </>
         )}
 
-        {this.props.allowFeatureVisibility && (
+        {this.state.showVisibleFeaturesPicker && (
           <>
             <EuiSpacer />
             <EnabledFeatures
@@ -338,6 +352,17 @@ export class ManageSpacePage extends Component<Props, State> {
     return null;
   };
 
+  private onSolutionViewChange = (space: Partial<Space>) => {
+    if (this.props.allowFeatureVisibility) {
+      let showVisibleFeaturesPicker = false;
+      if (space.solution === 'classic' || space.solution == null) {
+        showVisibleFeaturesPicker = true;
+      }
+      this.setState((state) => ({ ...state, showVisibleFeaturesPicker }));
+    }
+    this.onSpaceChange(space);
+  };
+
   public onSpaceChange = (updatedSpace: FormValues) => {
     this.setState({
       space: updatedSpace,
@@ -350,7 +375,11 @@ export class ManageSpacePage extends Component<Props, State> {
     const originalSpace: Space = this.state.originalSpace as Space;
     const space: Space = this.state.space as Space;
     const { haveDisabledFeaturesChanged, hasSolutionViewChanged } = this.state;
-    const result = this.validator.validateForSave(space);
+    const result = this.validator.validateForSave(
+      space,
+      this.editingExistingSpace(),
+      this.props.allowSolutionVisibility
+    );
     if (result.isInvalid) {
       this.setState({
         formError: result,

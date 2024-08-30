@@ -22,6 +22,7 @@ import { ControlGroupApi, ControlPanelsState, ControlPanelState } from './types'
 import { DefaultControlApi, DefaultControlState } from '../controls/types';
 import { ControlGroupComparatorState } from './control_group_unsaved_changes_api';
 import { DefaultDataControlState } from '../controls/data_controls/types';
+import { ControlWidth, DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '../../../common';
 
 export type ControlsInOrder = Array<{ id: string; type: string }>;
 
@@ -54,6 +55,8 @@ export function initControlsManager(
       defaultDataViewId ??
       undefined
   );
+  const lastUsedWidth$ = new BehaviorSubject<ControlWidth>(DEFAULT_CONTROL_WIDTH);
+  const lastUsedGrow$ = new BehaviorSubject<boolean>(DEFAULT_CONTROL_GROW);
 
   function untilControlLoaded(
     id: string
@@ -91,6 +94,13 @@ export function initControlsManager(
     if ((initialState as DefaultDataControlState)?.dataViewId) {
       lastUsedDataViewId$.next((initialState as DefaultDataControlState).dataViewId);
     }
+    if (initialState?.width) {
+      lastUsedWidth$.next(initialState.width);
+    }
+    if (typeof initialState?.grow === 'boolean') {
+      lastUsedGrow$.next(initialState.grow);
+    }
+
     const id = generateId();
     const nextControlsInOrder = [...controlsInOrder$.value];
     nextControlsInOrder.splice(index, 0, {
@@ -110,6 +120,13 @@ export function initControlsManager(
 
   return {
     controlsInOrder$,
+    getNewControlState: () => {
+      return {
+        grow: lastUsedGrow$.value,
+        width: lastUsedWidth$.value,
+        dataViewId: lastUsedDataViewId$.value,
+      };
+    },
     getControlApi,
     setControlApi: (uuid: string, controlApi: DefaultControlApi) => {
       children$.next({
@@ -168,7 +185,6 @@ export function initControlsManager(
       return controlsRuntimeState;
     },
     api: {
-      lastUsedDataViewId$: lastUsedDataViewId$ as PublishingSubject<string | undefined>,
       getSerializedStateForChild: (childId: string) => {
         const controlPanelState = controlsPanelState[childId];
         return controlPanelState ? { rawState: controlPanelState } : undefined;
@@ -210,7 +226,7 @@ export function initControlsManager(
       },
     } as PresentationContainer &
       HasSerializedChildState<ControlPanelState> &
-      Pick<ControlGroupApi, 'untilInitialized' | 'lastUsedDataViewId$'>,
+      Pick<ControlGroupApi, 'untilInitialized'>,
     comparators: {
       controlsInOrder: [
         controlsInOrder$,

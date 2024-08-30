@@ -22,7 +22,7 @@ import { ReactElement } from 'react';
 
 export interface GroupModel {
   activeGroups: string[];
-  options: Array<{ key: string; label: string }>;
+  options?: Array<{ key: string; label: string }>;
 }
 
 export interface AlertsGroupingState {
