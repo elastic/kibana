@@ -17,7 +17,6 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Router } from '@kbn/shared-ux-router';
-
 import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import { kibanaService } from '../../utils/kibana_service';
 import { ActionMenu } from './components/common/header/action_menu';
@@ -51,14 +50,14 @@ const Application = (props: SyntheticsAppProps) => {
     setBadge(
       !canSave
         ? {
-          text: i18n.translate('xpack.synthetics.badge.readOnly.text', {
-            defaultMessage: 'Read only',
-          }),
-          tooltip: i18n.translate('xpack.synthetics.badge.readOnly.tooltip', {
-            defaultMessage: 'Unable to save',
-          }),
-          iconType: 'glasses',
-        }
+            text: i18n.translate('xpack.synthetics.badge.readOnly.text', {
+              defaultMessage: 'Read only',
+            }),
+            tooltip: i18n.translate('xpack.synthetics.badge.readOnly.tooltip', {
+              defaultMessage: 'Unable to save',
+            }),
+            iconType: 'glasses',
+          }
         : undefined
     );
   }, [canSave, renderGlobalHelpControls, setBadge]);
