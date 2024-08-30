@@ -6,13 +6,7 @@
  */
 
 import * as t from 'io-ts';
-
-export const investigationNoteSchema = t.type({
-  id: t.string,
-  createdAt: t.number,
-  createdBy: t.string,
-  content: t.string,
-});
+import { investigationNoteSchema } from '@kbn/investigation-shared';
 
 export type InvestigationNote = t.TypeOf<typeof investigationNoteSchema>;
 export type StoredInvestigationNote = t.OutputOf<typeof investigationNoteSchema>;

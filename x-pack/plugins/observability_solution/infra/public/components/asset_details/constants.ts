@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { SupportedAssetTypes } from '../../../common/asset_details/types';
 import type { DockerContainerMetrics, KubernetesContainerMetrics } from './charts/types';
 import { IntegrationEventModules } from './types';
 
@@ -14,11 +13,6 @@ export const ASSET_DETAILS_PAGE_COMPONENT_NAME = 'infraAssetDetailsPage';
 
 export const APM_HOST_FILTER_FIELD = 'host.hostname';
 export const APM_CONTAINER_FILTER_FIELD = 'container.id';
-
-export const APM_FILTER_FIELD_PER_ASSET_TYPE = {
-  [SupportedAssetTypes.container]: APM_CONTAINER_FILTER_FIELD,
-  [SupportedAssetTypes.host]: APM_HOST_FILTER_FIELD,
-};
 
 export const ASSET_DETAILS_URL_STATE_KEY = 'assetDetails';
 
@@ -30,3 +24,5 @@ export const INTEGRATIONS = {
 
 export const DOCKER_METRIC_TYPES: DockerContainerMetrics[] = ['cpu', 'memory', 'network', 'disk'];
 export const KUBERNETES_METRIC_TYPES: KubernetesContainerMetrics[] = ['cpu', 'memory'];
+
+export const APM_HOST_TROUBLESHOOTING_LINK = 'https://ela.st/host-troubleshooting';

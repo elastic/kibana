@@ -6,7 +6,6 @@
  */
 
 import {
-  EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
   EuiButton,
@@ -20,6 +19,7 @@ import useEvent from 'react-use/lib/useEvent';
 
 import { css } from '@emotion/react';
 import { isEmpty, findIndex, orderBy } from 'lodash';
+import { DataStreamApis } from '../../use_data_stream_apis';
 import { Conversation } from '../../../..';
 import * as i18n from './translations';
 
@@ -33,7 +33,7 @@ interface Props {
   conversations: Record<string, Conversation>;
   onConversationDeleted: (conversationId: string) => void;
   onConversationCreate: () => void;
-  refetchConversationsState: () => Promise<void>;
+  refetchCurrentUserConversations: DataStreamApis['refetchCurrentUserConversations'];
 }
 
 const getCurrentConversationIndex = (
@@ -69,11 +69,6 @@ const getNextConversation = (
     ? conversationList[0]
     : conversationList[conversationIndex + 1];
 };
-
-export type ConversationSelectorOption = EuiComboBoxOptionOption<{
-  isDefault: boolean;
-}>;
-
 export const ConversationSidePanel = React.memo<Props>(
   ({
     currentConversation,
@@ -202,6 +197,7 @@ export const ConversationSidePanel = React.memo<Props>(
                       onConversationSelected({ cId: conversation.id, cTitle: conversation.title })
                     }
                     label={conversation.title}
+                    data-test-subj={`conversation-select-${conversation.title}`}
                     isActive={
                       !isEmpty(conversation.id)
                         ? conversation.id === currentConversation?.id

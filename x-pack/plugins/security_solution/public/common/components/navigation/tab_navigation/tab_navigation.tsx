@@ -29,7 +29,7 @@ const TabNavigationItemComponent = ({
   const { getAppUrl, navigateTo } = useNavigation();
 
   const handleClick = useCallback(
-    (ev) => {
+    (ev: React.SyntheticEvent) => {
       ev.preventDefault();
       navigateTo({ path: hrefWithSearch, restoreScroll: true });
       track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.TAB_CLICKED}${id}`);

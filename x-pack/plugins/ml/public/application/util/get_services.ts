@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { HttpStart } from '@kbn/core-http-browser';
+import type { CoreStart } from '@kbn/core/public';
 
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
@@ -16,18 +16,22 @@ import { fieldFormatServiceFactory } from '../services/field_format_service_fact
 import { HttpService } from '../services/http_service';
 import { mlApiServicesProvider } from '../services/ml_api_service';
 import { mlUsageCollectionProvider } from '../services/usage_collection';
+import { mlJobServiceFactory } from '../services/job_service';
+import { toastNotificationServiceProvider } from '../services/toast_notification_service';
 import { indexServiceFactory } from './index_service';
 
 /**
  * Provides global services available across the entire ML app.
  */
 export function getMlGlobalServices(
-  httpStart: HttpStart,
+  coreStart: CoreStart,
   dataViews: DataViewsContract,
   usageCollection?: UsageCollectionSetup
 ) {
-  const httpService = new HttpService(httpStart);
+  const httpService = new HttpService(coreStart.http);
   const mlApiServices = mlApiServicesProvider(httpService);
+  const toastNotificationService = toastNotificationServiceProvider(coreStart.notifications.toasts);
+  const mlJobService = mlJobServiceFactory(toastNotificationService, mlApiServices);
   // Note on the following services:
   // - `mlIndexUtils` is just instantiated here to be passed on to `mlFieldFormatService`,
   //   but it's not being made available as part of global services. Since it's just
@@ -38,7 +42,7 @@ export function getMlGlobalServices(
   //   its own context or possibly without having a singleton like state at all, since the
   //   way this manages its own state right now doesn't consider React component lifecycles.
   const mlIndexUtils = indexServiceFactory(dataViews);
-  const mlFieldFormatService = fieldFormatServiceFactory(mlApiServices, mlIndexUtils);
+  const mlFieldFormatService = fieldFormatServiceFactory(mlApiServices, mlIndexUtils, mlJobService);
 
   return {
     httpService,
