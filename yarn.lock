@@ -8307,7 +8307,7 @@
     styled-components "^6.0.7"
     yargs "17.0.1"
 
-"@redocly/config@^0.10.0", "@redocly/config@^0.10.1":
+"@redocly/config@^0.10.1":
   version "0.10.1"
   resolved "https://registry.yarnpkg.com/@redocly/config/-/config-0.10.1.tgz#c7bcbab6cb3b82236c2f5c87aa44924a652d8e80"
   integrity sha512-H3LnKVGzOaxskwJu8pmJYwBOWjP61qOK7TuTrbafqArDVckE06fhA6l0nO4KvBbjLPjy1Al7UnlxOu23V4Nl0w==
