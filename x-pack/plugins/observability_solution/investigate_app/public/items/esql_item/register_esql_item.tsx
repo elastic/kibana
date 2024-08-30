@@ -59,6 +59,8 @@ interface EsqlItemData {
   };
 }
 
+export const ESQL_ITEM_TYPE = 'esql';
+
 export function EsqlWidget({
   suggestion,
   dataView,
@@ -228,7 +230,7 @@ export function registerEsqlItem({
   services,
 }: Options) {
   investigate.registerItemDefinition<EsqlItemParams, EsqlItemData>({
-    type: 'esql',
+    type: ESQL_ITEM_TYPE,
     generate: async (option: {
       itemParams: EsqlItemParams;
       globalParams: GlobalWidgetParameters;
