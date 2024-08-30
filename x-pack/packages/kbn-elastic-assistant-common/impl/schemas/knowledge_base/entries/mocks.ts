@@ -14,4 +14,14 @@ export const indexEntryMock: IndexEntryCreateFields = {
   index: 'spongbot',
   field: 'semantic_text',
   description: "Use this index to search for the user's Slack messages.",
+  queryDescription:
+    'The free text search that the user wants to perform over this dataset. So if asking "what are my slack messages from last week about failed tests", the query would be "A test has failed! failing test failed test".',
+  inputSchema: [
+    {
+      fieldName: 'author',
+      fieldType: 'string',
+      description:
+        "The author of the message. So if asking for recent messages from Stan, you would provide 'Stan' as the author.",
+    },
+  ],
 };

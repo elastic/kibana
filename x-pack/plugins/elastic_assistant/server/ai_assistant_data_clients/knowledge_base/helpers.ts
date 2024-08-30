@@ -119,29 +119,39 @@ export const getStructuredToolForIndexEntry = ({
   logger: Logger;
   elserId: string;
 }): DynamicStructuredTool => {
+  const inputSchema = indexEntry.inputSchema?.reduce((prev, input) => {
+    const fieldType =
+      input.fieldType === 'string'
+        ? z.string()
+        : input.fieldType === 'number'
+        ? z.number()
+        : input.fieldType === 'boolean'
+        ? z.boolean()
+        : z.any();
+    return { ...prev, [input.fieldName]: fieldType.describe(input.description) };
+  }, {});
+
   return new DynamicStructuredTool({
-    name: indexEntry.name.replaceAll(' ', ''),
+    name: indexEntry.name.replaceAll(' ', ''), // Tool names cannot contain spaces, further sanitization possibly needed
     description: indexEntry.description,
     schema: z.object({
-      // name: z
-      //   .string()
-      //   .describe(`This is what the user will use to refer to the entry in the future.`),
-      query: z
-        .string()
-        .describe(
-          `The free text search that the user wants to perform over this dataset. So if asking "what are my slack messages from last week about failed tests", the query would be "A test has failed! failing test failed test".`
-        ),
-      // required: z
-      //   .boolean()
-      //   .describe(
-      //     `Whether or not the entry is required to always be included in conversations. Is only true if the user explicitly asks for it to be required or always included in conversations, otherwise this is always false.`
-      //   )
-      //   .default(false),
+      query: z.string().describe(indexEntry.queryDescription),
+      ...inputSchema,
     }),
     func: async (input, _, cbManager) => {
       logger.debug(
         () => `Generated ${indexEntry.name} Tool:input\n ${JSON.stringify(input, null, 2)}`
       );
+
+      // Generate filters for inputSchema fields
+      const filter =
+        indexEntry.inputSchema?.reduce((prev, i) => {
+          return [
+            ...prev,
+            // @ts-expect-error Possible to override types with dynamic input schema?
+            { term: { [`${i.fieldName}`]: input?.[i.fieldName] } },
+          ];
+        }, [] as Array<{ term: { [key: string]: string } }>) ?? [];
 
       const params: SearchRequest = {
         index: indexEntry.index,
@@ -154,17 +164,18 @@ export const getStructuredToolForIndexEntry = ({
                 query: {
                   sparse_vector: {
                     inference_id: elserId,
-                    field: 'semantic_text.inference.chunks.embeddings',
+                    field: `${indexEntry.field}.inference.chunks.embeddings`,
                     query: input.query,
                   },
                 },
                 inner_hits: {
                   size: 2,
-                  name: 'spongbot.semantic_text',
-                  _source: ['semantic_text.inference.chunks.text'],
+                  name: `${indexEntry.name}.${indexEntry.field}`,
+                  _source: [`${indexEntry.field}.inference.chunks.text`],
                 },
               },
             },
+            filter,
           },
         },
       };
@@ -172,9 +183,17 @@ export const getStructuredToolForIndexEntry = ({
       try {
         const result = await esClient.search(params);
 
-        const kbDocs = result.hits.hits.map((hit) => ({
-          text: (hit._source as { text: string }).text,
-        }));
+        const kbDocs = result.hits.hits.map((hit) => {
+          if (indexEntry.outputFields && indexEntry.outputFields.length > 0) {
+            return indexEntry.outputFields.reduce((prev, field) => {
+              // @ts-expect-error
+              return { ...prev, [field]: hit._source[field] };
+            }, {});
+          }
+          return {
+            text: (hit._source as { text: string }).text,
+          };
+        });
 
         logger.debug(() => `Similarity Search Params:\n ${JSON.stringify(params)}`);
         logger.debug(() => `Similarity Search Results:\n ${JSON.stringify(result)}`);

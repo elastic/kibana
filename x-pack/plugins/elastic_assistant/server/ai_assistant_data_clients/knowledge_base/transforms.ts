@@ -23,7 +23,11 @@ export const transformESSearchToKnowledgeBaseEntry = (
     .map((hit) => {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const kbEntrySchema = hit._source!;
-      return { ...transformEsSchemaToEntry(kbEntrySchema), id: hit._id };
+      return {
+        ...transformEsSchemaToEntry(kbEntrySchema),
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        id: hit._id!,
+      };
     });
 };
 
@@ -50,6 +54,7 @@ const transformEsSchemaToEntry = (
           id: user.id,
           name: user.name,
         })) ?? [],
+
       name: esKbEntry.name,
       namespace: esKbEntry.namespace,
       type: esKbEntry.type,
@@ -86,6 +91,14 @@ const transformEsSchemaToEntry = (
       index: esKbEntry.index,
       field: esKbEntry.field,
       description: esKbEntry.description,
+      queryDescription: esKbEntry.query_description,
+      inputSchema:
+        esKbEntry.input_schema?.map((schema) => ({
+          fieldName: schema.field_name,
+          fieldType: schema.field_type,
+          description: schema.description,
+        })) ?? [],
+      outputFields: esKbEntry.output_fields ?? [],
     };
     return indexEntry;
   }

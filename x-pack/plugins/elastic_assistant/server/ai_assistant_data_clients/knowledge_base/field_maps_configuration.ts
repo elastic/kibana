@@ -108,8 +108,38 @@ export const knowledgeBaseFieldMap: FieldMap = {
     required: false,
   },
   description: {
+    type: 'text',
+    array: false,
+    required: false,
+  },
+  query_description: {
+    type: 'text',
+    array: false,
+    required: false,
+  },
+  input_schema: {
+    type: 'nested',
+    array: true,
+    required: false,
+  },
+  'input_schema.field_name': {
     type: 'keyword',
     array: false,
+    required: true,
+  },
+  'input_schema.field_type': {
+    type: 'keyword',
+    array: false,
+    required: true,
+  },
+  'input_schema.description': {
+    type: 'text',
+    array: false,
+    required: true,
+  },
+  output_fields: {
+    type: 'keyword',
+    array: true,
     required: false,
   },
 } as const;

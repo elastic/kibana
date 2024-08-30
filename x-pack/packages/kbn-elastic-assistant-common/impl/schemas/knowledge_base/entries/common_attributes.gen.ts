@@ -18,6 +18,27 @@ import { z } from '@kbn/zod';
 
 import { User, NonEmptyString } from '../../common_attributes.gen';
 
+/**
+ * Array of objects defining the input schema, allowing the LLM to extract structured data to be used in retrieval
+ */
+export type InputSchema = z.infer<typeof InputSchema>;
+export const InputSchema = z.array(
+  z.object({
+    /**
+     * Name of the field
+     */
+    fieldName: z.string(),
+    /**
+     * Type of the field
+     */
+    fieldType: z.string(),
+    /**
+     * Description of the field
+     */
+    description: z.string(),
+  })
+);
+
 export type KnowledgeBaseEntryErrorSchema = z.infer<typeof KnowledgeBaseEntryErrorSchema>;
 export const KnowledgeBaseEntryErrorSchema = z
   .object({
@@ -180,13 +201,23 @@ export const IndexEntryRequiredFields = z.object({
    */
   field: z.string(),
   /**
-   * Description for when this index or data stream should be queried for Knowledge Base content. Passed to the LLM as a tool descriptor.
+   * Description for when this index or data stream should be queried for Knowledge Base content. Passed to the LLM as a tool description
    */
   description: z.string(),
+  /**
+   * Description of query field used to fetch Knowledge Base content. Passed to the LLM as part of the tool input schema
+   */
+  queryDescription: z.string(),
 });
 
 export type IndexEntryOptionalFields = z.infer<typeof IndexEntryOptionalFields>;
-export const IndexEntryOptionalFields = z.object({});
+export const IndexEntryOptionalFields = z.object({
+  inputSchema: InputSchema.optional(),
+  /**
+   * Fields to extract from the query result, defaults to all fields if not provided or empty
+   */
+  outputFields: z.array(z.string()).optional(),
+});
 
 export type IndexEntryCreateFields = z.infer<typeof IndexEntryCreateFields>;
 export const IndexEntryCreateFields =

@@ -64,7 +64,7 @@ export const transformToCreateSchema = (
   user: AuthenticatedUser,
   entry: KnowledgeBaseEntryCreateProps
 ): CreateKnowledgeBaseEntrySchema => {
-  return {
+  const base = {
     '@timestamp': createdAt,
     created_at: createdAt,
     created_by: user.profile_uid ?? 'unknown',
@@ -77,7 +77,22 @@ export const transformToCreateSchema = (
         name: user.username,
       },
     ],
-    ...entry,
-    vector: undefined,
   };
+
+  if (entry.type === 'index') {
+    const { inputSchema, outputFields, queryDescription, ...restEntry } = entry;
+    return {
+      ...base,
+      ...restEntry,
+      query_description: queryDescription,
+      input_schema:
+        entry.inputSchema?.map((schema) => ({
+          field_name: schema.fieldName,
+          field_type: schema.fieldType,
+          description: schema.description,
+        })) ?? undefined,
+      output_fields: outputFields ?? undefined,
+    };
+  }
+  return { ...base, ...entry, vector: undefined };
 };

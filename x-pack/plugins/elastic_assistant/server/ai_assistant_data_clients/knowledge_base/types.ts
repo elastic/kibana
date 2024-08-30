@@ -50,6 +50,13 @@ export interface EsIndexEntry {
   index: string;
   field: string;
   description: string;
+  query_description: string;
+  input_schema?: Array<{
+    field_name: string;
+    field_type: string;
+    description: string;
+  }>;
+  output_fields?: string[];
 }
 
 export interface CreateKnowledgeBaseEntrySchema {
@@ -79,4 +86,11 @@ export interface CreateKnowledgeBaseEntrySchema {
   index?: string;
   field?: string;
   description?: string;
+  query_description?: string;
+  input_schema?: Array<{
+    field_name: string;
+    field_type: string;
+    description: string;
+  }>;
+  output_fields?: string[];
 }
