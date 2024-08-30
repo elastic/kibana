@@ -14,7 +14,7 @@ import type { SearchSessionsMgmtAPI } from '../lib/api';
 import type { AsyncSearchIntroDocumentation } from '../lib/documentation';
 import { SearchSessionsMgmtTable } from './table';
 import { SearchSessionsDeprecatedWarning } from '../../search_sessions_deprecation_message';
-import { SearchSessionsConfigSchema } from '../../../../../config';
+import type { SearchSessionsConfigSchema } from '../../../../../server/config';
 import { SearchUsageCollector } from '../../../collectors';
 
 interface Props {
