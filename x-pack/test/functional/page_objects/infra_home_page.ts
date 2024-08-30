@@ -513,9 +513,9 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       await testSubjects.click('infraAnomalyActionMenuButton');
     },
 
-    async clickShowInHostsListButton() {
+    async clickShowAffectedHostsButton() {
       await this.clickAnomalyActionMenuButton();
-      await testSubjects.click('infraAnomalyFlyoutShowInHosts');
+      await testSubjects.click('infraAnomalyFlyoutShowAffectedHosts');
     },
 
     async getAnomalyHostName() {

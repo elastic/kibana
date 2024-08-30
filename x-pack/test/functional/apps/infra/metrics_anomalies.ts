@@ -136,14 +136,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           const k8sAnomalies = await pageObjects.infraHome.findAnomalies();
           expect(k8sAnomalies.length).to.be(3);
         });
-        it("should take users to hosts list when 'Show in Hosts List' is clicked", async () => {
+        it("should take users to hosts list when 'Show affected Hosts' is clicked", async () => {
           await pageObjects.infraHome.goToInventory();
           await pageObjects.infraHome.openAnomalyFlyout();
           await pageObjects.infraHome.goToAnomaliesTab();
           await pageObjects.infraHome.clickHostsAnomaliesDropdown();
           await pageObjects.infraHome.setAnomaliesDate('Apr 21, 2021 @ 00:00:00.000');
           const hostName = await pageObjects.infraHome.getAnomalyHostName();
-          await pageObjects.infraHome.clickShowInHostsListButton();
+          await pageObjects.infraHome.clickShowAffectedHostsButton();
           const currentUrl = await browser.getCurrentUrl();
           expect(currentUrl).to.contain(
             encodeURIComponent(`query:(terms:(host.name:!(${hostName})))`)

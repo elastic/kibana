@@ -165,9 +165,9 @@ const AnomalyActionMenu = ({
 
     const showInHostsItem = !hostName ? (
       <EuiContextMenuItem
-        key="showInHosts"
+        key="showAffectedHosts"
         icon="search"
-        data-test-subj="infraAnomalyFlyoutShowInHosts"
+        data-test-subj="infraAnomalyFlyoutShowAffectedHosts"
         href={hostsLocator?.getRedirectUrl({
           dateRange: {
             from: timeRange.start,
@@ -177,8 +177,8 @@ const AnomalyActionMenu = ({
         })}
       >
         <FormattedMessage
-          id="xpack.infra.ml.anomalyFlyout.actions.showInHosts"
-          defaultMessage="Show in Hosts"
+          id="xpack.infra.ml.anomalyFlyout.actions.showAffectedHosts"
+          defaultMessage="Show affected Hosts"
         />
       </EuiContextMenuItem>
     ) : (
