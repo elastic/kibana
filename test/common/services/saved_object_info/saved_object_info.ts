@@ -13,7 +13,7 @@ import { flow, pipe } from 'fp-ts/function';
 import * as TE from 'fp-ts/lib/TaskEither';
 import * as T from 'fp-ts/lib/Task';
 import { ToolingLog } from '@kbn/tooling-log';
-import { FtrService } from '../ftr_provider_context';
+import { FtrService } from '../../ftr_provider_context';
 import { print } from './utils';
 
 const pluck =

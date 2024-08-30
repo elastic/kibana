@@ -42,9 +42,6 @@ export const builtInServicesFromLogsEntityDefinition: EntityDefinition =
         syncDelay: '2m',
       },
     },
-    latest: {
-      lookback: '5m',
-    },
     identityFields: ['service.name', { field: 'service.environment', optional: true }],
     displayNameTemplate: '{{service.name}}{{#service.environment}}:{{.}}{{/service.environment}}',
     metadata: [
