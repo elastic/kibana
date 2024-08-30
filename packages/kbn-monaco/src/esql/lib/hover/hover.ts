@@ -89,15 +89,16 @@ async function getHoverItemForFunction(
       fullText,
       offset
     );
-    // @TODO: remove
 
     const hoveredArg = enrichedArgs[enrichedArgs.length - 1];
     const contents = [];
     if (hoveredArg && hoveredArg.paramType === 'named' && hoveredArg.type === 'literal') {
-      const bestMatch = TIME_SYSTEM_PARAMS.find((p) => p.startsWith(hoveredArg.text));
-      if (bestMatch) {
-        contents.push({
-          value: `**${bestMatch}**: ${TIME_SYSTEM_DESCRIPTIONS[bestMatch]}`,
+      const hasMatch = TIME_SYSTEM_PARAMS.find((p) => p.startsWith(hoveredArg.text));
+      if (hasMatch) {
+        Object.entries(TIME_SYSTEM_DESCRIPTIONS).forEach(([key, value]) => {
+          contents.push({
+            value: `**${key}**: ${value}`,
+          });
         });
       }
     }
