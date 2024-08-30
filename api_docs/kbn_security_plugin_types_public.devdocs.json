@@ -1,7 +1,76 @@
 {
   "id": "@kbn/security-plugin-types-public",
   "client": {
-    "classes": [],
+    "classes": [
+      {
+        "parentPluginId": "@kbn/security-plugin-types-public",
+        "id": "def-public.PrivilegesAPIClientPublicContract",
+        "type": "Class",
+        "tags": [],
+        "label": "PrivilegesAPIClientPublicContract",
+        "description": [],
+        "path": "x-pack/packages/security/plugin_types_public/src/privileges/privileges_api_client.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-public",
+            "id": "def-public.PrivilegesAPIClientPublicContract.getAll",
+            "type": "Function",
+            "tags": [],
+            "label": "getAll",
+            "description": [],
+            "signature": [
+              "(args: ",
+              {
+                "pluginId": "@kbn/security-plugin-types-public",
+                "scope": "public",
+                "docId": "kibKbnSecurityPluginTypesPublicPluginApi",
+                "section": "def-public.PrivilegesAPIClientGetAllArgs",
+                "text": "PrivilegesAPIClientGetAllArgs"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/security-authorization-core",
+                "scope": "server",
+                "docId": "kibKbnSecurityAuthorizationCorePluginApi",
+                "section": "def-server.RawKibanaPrivileges",
+                "text": "RawKibanaPrivileges"
+              },
+              ">"
+            ],
+            "path": "x-pack/packages/security/plugin_types_public/src/privileges/privileges_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-plugin-types-public",
+                "id": "def-public.PrivilegesAPIClientPublicContract.getAll.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/security-plugin-types-public",
+                    "scope": "public",
+                    "docId": "kibKbnSecurityPluginTypesPublicPluginApi",
+                    "section": "def-public.PrivilegesAPIClientGetAllArgs",
+                    "text": "PrivilegesAPIClientGetAllArgs"
+                  }
+                ],
+                "path": "x-pack/packages/security/plugin_types_public/src/privileges/privileges_api_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "functions": [],
     "interfaces": [
       {
@@ -112,6 +181,28 @@
             "path": "x-pack/packages/security/plugin_types_public/src/authorization/authorization_service.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-public",
+            "id": "def-public.AuthorizationServiceSetup.privileges",
+            "type": "Object",
+            "tags": [],
+            "label": "privileges",
+            "description": [
+              "\nA set of methods to work with Kibana role privileges"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/security-plugin-types-public",
+                "scope": "public",
+                "docId": "kibKbnSecurityPluginTypesPublicPluginApi",
+                "section": "def-public.PrivilegesAPIClientPublicContract",
+                "text": "PrivilegesAPIClientPublicContract"
+              }
+            ],
+            "path": "x-pack/packages/security/plugin_types_public/src/authorization/authorization_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -181,6 +272,42 @@
               ", \"authentication_provider\">"
             ],
             "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-public",
+        "id": "def-public.PrivilegesAPIClientGetAllArgs",
+        "type": "Interface",
+        "tags": [],
+        "label": "PrivilegesAPIClientGetAllArgs",
+        "description": [],
+        "path": "x-pack/packages/security/plugin_types_public/src/privileges/privileges_api_client.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-public",
+            "id": "def-public.PrivilegesAPIClientGetAllArgs.includeActions",
+            "type": "boolean",
+            "tags": [],
+            "label": "includeActions",
+            "description": [],
+            "path": "x-pack/packages/security/plugin_types_public/src/privileges/privileges_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-public",
+            "id": "def-public.PrivilegesAPIClientGetAllArgs.respectLicenseLevel",
+            "type": "boolean",
+            "tags": [],
+            "label": "respectLicenseLevel",
+            "description": [],
+            "path": "x-pack/packages/security/plugin_types_public/src/privileges/privileges_api_client.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -638,10 +765,6 @@
               {
                 "plugin": "cloudLinks",
                 "path": "x-pack/plugins/cloud_integrations/cloud_links/public/maybe_add_cloud_links/maybe_add_cloud_links.ts"
-              },
-              {
-                "plugin": "observabilityAIAssistantApp",
-                "path": "x-pack/plugins/observability_solution/observability_ai_assistant_app/public/hooks/use_current_user.ts"
               },
               {
                 "plugin": "cases",

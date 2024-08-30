@@ -78,7 +78,6 @@ export const getTopNavLinks = ({
           defaultMessage: 'Try ES|QL',
         }),
     emphasize: true,
-    iconType: 'editorRedo',
     fill: false,
     color: 'text',
     tooltip: isEsqlMode

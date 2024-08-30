@@ -39,7 +39,9 @@ export default function ({ getService }: FtrProviderContext) {
         svlCommonApi.assertResponseStatusCode(400, status, body);
       });
 
-      it('#create', async () => {
+      // Skipped due to change in QA environment for role management and spaces
+      // TODO: revisit once the change is rolled out to all environments
+      it.skip('#create', async () => {
         const { body, status } = await supertestWithoutAuth
           .post('/api/spaces/space')
           .set(internalRequestHeader)

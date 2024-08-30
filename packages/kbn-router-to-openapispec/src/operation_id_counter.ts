@@ -11,6 +11,7 @@ export type OperationIdCounter = (name: string) => string;
 export const createOperationIdCounter = () => {
   const operationIdCounters = new Map<string, number>();
   return (name: string): string => {
+    name = encodeURIComponent(name);
     // Aliases an operationId to ensure it is unique across
     // multiple method+path combinations sharing a name.
     // "search" -> "search#0", "search#1", etc.

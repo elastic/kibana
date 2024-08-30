@@ -23,6 +23,12 @@ import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { apiCanAddNewPanel } from '@kbn/presentation-containers';
 import { IncompatibleActionError, ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import { COMMON_EMBEDDABLE_GROUPING } from '@kbn/embeddable-plugin/public';
+import {
+  ASSET_DETAILS_LOCATOR_ID,
+  INVENTORY_LOCATOR_ID,
+  type AssetDetailsLocatorParams,
+  type InventoryLocatorParams,
+} from '@kbn/observability-shared-plugin/common';
 import type { InfraPublicConfig } from '../common/plugin_config_types';
 import { createInventoryMetricRuleType } from './alerting/inventory';
 import { createLogThresholdRuleType } from './alerting/log_threshold';
@@ -80,12 +86,17 @@ export class Plugin implements InfraClientPluginClass {
       id: ObservabilityTriggerId.LogEntryContextMenu,
     });
 
+    const assetDetailsLocator =
+      pluginsSetup.share.url.locators.get<AssetDetailsLocatorParams>(ASSET_DETAILS_LOCATOR_ID);
+    const inventoryLocator =
+      pluginsSetup.share.url.locators.get<InventoryLocatorParams>(INVENTORY_LOCATOR_ID);
+
     pluginsSetup.observability.observabilityRuleTypeRegistry.register(
-      createInventoryMetricRuleType()
+      createInventoryMetricRuleType({ assetDetailsLocator, inventoryLocator })
     );
 
     pluginsSetup.observability.observabilityRuleTypeRegistry.register(
-      createMetricThresholdRuleType()
+      createMetricThresholdRuleType({ assetDetailsLocator })
     );
 
     if (this.config.featureFlags.logsUIEnabled) {
@@ -161,7 +172,6 @@ export class Plugin implements InfraClientPluginClass {
                           ? [
                               {
                                 label: 'Hosts',
-                                isBetaFeature: true,
                                 app: 'metrics',
                                 path: '/hosts',
                               },

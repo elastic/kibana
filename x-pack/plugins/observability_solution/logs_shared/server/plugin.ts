@@ -24,6 +24,8 @@ import { LogsSharedLogEntriesDomain } from './lib/domains/log_entries_domain';
 import { LogsSharedKibanaLogEntriesAdapter } from './lib/adapters/log_entries/kibana_log_entries_adapter';
 import { LogEntriesService } from './services/log_entries';
 import { LogsSharedConfig } from '../common/plugin_config';
+import { registerDeprecations } from './deprecations';
+import { defaultLogViewId } from '../common/log_views';
 
 export class LogsSharedPlugin
   implements
@@ -58,7 +60,7 @@ export class LogsSharedPlugin
       core.savedObjects.registerType(logViewSavedObjectType);
     } else {
       // Register a static internal view to use as a fallback when the log view SO is not registered
-      logViews.defineInternalLogView('default', {});
+      logViews.defineInternalLogView(defaultLogViewId, {});
     }
 
     const domainLibs: LogsSharedDomainLibs = {
@@ -83,6 +85,8 @@ export class LogsSharedPlugin
 
     const logEntriesService = new LogEntriesService();
     logEntriesService.setup(core, plugins);
+
+    registerDeprecations({ core });
 
     return {
       ...domainLibs,

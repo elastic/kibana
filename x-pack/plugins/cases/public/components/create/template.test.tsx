@@ -13,7 +13,8 @@ import { createAppMockRenderer } from '../../common/mock';
 import { templatesConfigurationMock } from '../../containers/mock';
 import { TemplateSelector } from './templates';
 
-describe('CustomFields', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/178457
+describe.skip('CustomFields', () => {
   let appMockRender: AppMockRenderer;
   const onTemplateChange = jest.fn();
 

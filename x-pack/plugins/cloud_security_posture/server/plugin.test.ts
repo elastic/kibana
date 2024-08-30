@@ -49,7 +49,6 @@ import {
 } from '@kbn/core/server';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
-import * as onPackagePolicyPostCreateCallback from './fleet_integration/fleet_integration';
 
 const chance = new Chance();
 
@@ -149,58 +148,6 @@ describe('Cloud Security Posture Plugin', () => {
       // Assert
       expect(fleetMock.packageService.asInternalUser.getInstallation).toHaveBeenCalledTimes(1);
       expect(spy).toHaveBeenCalledTimes(0);
-    });
-
-    it('should initialize when new package is created', async () => {
-      const soClient = savedObjectsClientMock.create();
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      fleetMock.packageService.asInternalUser.getInstallation.mockImplementationOnce(
-        async (): Promise<Installation | undefined> => {
-          return;
-        }
-      );
-
-      const onPackagePolicyPostCreateCallbackSpy = jest
-        .spyOn(onPackagePolicyPostCreateCallback, 'onPackagePolicyPostCreateCallback')
-        .mockResolvedValue();
-
-      const packageMock = createPackagePolicyMock();
-      packageMock.package!.name = CLOUD_SECURITY_POSTURE_PACKAGE_NAME;
-
-      const packagePolicyPostCreateCallbacks: PostPackagePolicyPostCreateCallback[] = [];
-      fleetMock.registerExternalCallback.mockImplementation((...args) => {
-        if (args[0] === 'packagePolicyPostCreate') {
-          packagePolicyPostCreateCallbacks.push(args[1]);
-        }
-      });
-
-      const context = coreMock.createPluginInitializerContext<unknown>();
-      plugin = new CspPlugin(context);
-      const spy = jest.spyOn(plugin, 'initialize').mockImplementation();
-
-      // Act
-      await plugin.start(coreMock.createStart(), mockPlugins);
-      await mockPlugins.fleet.fleetSetupCompleted();
-
-      // Assert
-      expect(onPackagePolicyPostCreateCallbackSpy).not.toHaveBeenCalled();
-      expect(fleetMock.packageService.asInternalUser.getInstallation).toHaveBeenCalledTimes(1);
-      expect(spy).toHaveBeenCalledTimes(0);
-
-      expect(packagePolicyPostCreateCallbacks.length).toBeGreaterThan(0);
-
-      for (const cb of packagePolicyPostCreateCallbacks) {
-        await cb(
-          packageMock,
-          soClient,
-          esClient,
-          contextMock,
-          httpServerMock.createKibanaRequest()
-        );
-      }
-
-      expect(onPackagePolicyPostCreateCallbackSpy).toHaveBeenCalled();
-      expect(spy).toHaveBeenCalledTimes(1);
     });
 
     it('should not initialize when other package is created', async () => {

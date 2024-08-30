@@ -29,6 +29,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   ]);
   const elasticChart = getService('elasticChart');
   const monacoEditor = getService('monacoEditor');
+  const dashboardPanelActions = getService('dashboardPanelActions');
 
   const defaultSettings = {
     enableESQL: true,
@@ -232,8 +233,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await testSubjects.existOrFail('embeddablePanelHeading-TextBasedChart');
       await elasticChart.setNewChartUiDebugFlag(true);
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.click('embeddablePanelToggleMenuIcon');
-      await testSubjects.click('embeddablePanelAction-ACTION_CONFIGURE_IN_LENS');
+      await dashboardPanelActions.clickInlineEdit();
       await PageObjects.header.waitUntilLoadingHasFinished();
       expect(await PageObjects.lens.canRemoveDimension('lnsXY_xDimensionPanel')).to.equal(true);
       await PageObjects.lens.removeDimension('lnsXY_xDimensionPanel');
@@ -261,8 +261,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await elasticChart.setNewChartUiDebugFlag(true);
       await PageObjects.header.waitUntilLoadingHasFinished();
       // open the inline editing flyout
-      await testSubjects.click('embeddablePanelToggleMenuIcon');
-      await testSubjects.click('embeddablePanelAction-ACTION_CONFIGURE_IN_LENS');
+      await dashboardPanelActions.clickInlineEdit();
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       // change the query

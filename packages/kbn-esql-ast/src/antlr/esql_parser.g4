@@ -52,6 +52,7 @@ processingCommand
     | grokCommand
     | enrichCommand
     | mvExpandCommand
+    | matchCommand
     ;
 
 whereCommand
@@ -75,7 +76,7 @@ regexBooleanExpression
     ;
 
 matchBooleanExpression
-    : qualifiedName MATCH queryString=string
+    : qualifiedName MATCH_OPERATOR queryString=string
     ;
 
 valueExpression
@@ -305,4 +306,12 @@ enrichWithClause
 
 lookupCommand
     : LOOKUP tableName=indexPattern ON matchFields=qualifiedNamePatterns
+    ;
+
+matchCommand
+    : MATCH matchQuery
+    ;
+
+matchQuery
+    : QUOTED_STRING
     ;

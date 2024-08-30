@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { TaskCost } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { schema } from '@kbn/config-schema';
 import { ActionTypeRegistry, ActionTypeRegistryOpts } from './action_type_registry';
@@ -88,6 +89,7 @@ describe('actionTypeRegistry', () => {
             'actions:my-action-type': {
               createTaskRunner: expect.any(Function),
               maxAttempts: 3,
+              cost: TaskCost.Tiny,
               title: 'My action type',
             },
           },
