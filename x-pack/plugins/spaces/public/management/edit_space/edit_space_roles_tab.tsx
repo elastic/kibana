@@ -68,7 +68,9 @@ export const EditSpaceAssignedRolesTab: FC<Props> = ({ space, features, isReadOn
           { theme, i18n: i18nStart }
         ),
         {
-          size: 's',
+          size: 'm',
+          maxWidth: true,
+          maskProps: { headerZindexLocation: 'below' },
         }
       );
     },
