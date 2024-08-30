@@ -44,6 +44,9 @@ export const getRotatingNumberVisualization = ({
 }): Visualization<RotatingNumberState> => ({
   id: 'rotatingNumber',
 
+  getVisualizationTypeId() {
+    return 'rotatingNumber';
+  },
   visualizationTypes: [
     {
       id: 'rotatingNumber',
@@ -53,10 +56,6 @@ export const getRotatingNumberVisualization = ({
       sortPriority: 3,
     },
   ],
-
-  getVisualizationTypeId() {
-    return 'rotatingNumber';
-  },
 
   clearLayer(state) {
     return {

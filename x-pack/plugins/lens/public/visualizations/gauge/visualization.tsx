@@ -61,28 +61,6 @@ export const isNumericMetric = (op: OperationMetadata) =>
 export const isNumericDynamicMetric = (op: OperationMetadata) =>
   isNumericMetric(op) && !op.isStaticValue;
 
-export const CHART_SWITCH_OPTIONS = {
-  [LENS_GAUGE_ID]: {
-    id: LENS_GAUGE_ID,
-    icon: IconChartGauge,
-    label: i18n.translate('xpack.lens.gauge.label', {
-      defaultMessage: 'Gauge',
-    }),
-    showExperimentalBadge: true,
-    sortPriority: 7,
-    description: i18n.translate('xpack.lens.gauge.visualizationDescription', {
-      defaultMessage: 'Show progress to a goal in linear or arced style.',
-    }),
-    subtypes: [
-      GaugeShapes.HORIZONTAL_BULLET,
-      GaugeShapes.VERTICAL_BULLET,
-      GaugeShapes.SEMI_CIRCLE,
-      GaugeShapes.ARC,
-      GaugeShapes.CIRCLE,
-    ],
-  },
-};
-
 function computePaletteParams(params: CustomPaletteParams) {
   return {
     ...params,
@@ -184,10 +162,30 @@ export const getGaugeVisualization = ({
   paletteService,
 }: GaugeVisualizationDeps): Visualization<GaugeVisualizationState> => ({
   id: LENS_GAUGE_ID,
-  visualizationTypes: [CHART_SWITCH_OPTIONS[LENS_GAUGE_ID]],
   getVisualizationTypeId() {
-    return LENS_GAUGE_ID;
+    return this.id;
   },
+  visualizationTypes: [
+    {
+      id: LENS_GAUGE_ID,
+      icon: IconChartGauge,
+      label: i18n.translate('xpack.lens.gauge.label', {
+        defaultMessage: 'Gauge',
+      }),
+      showExperimentalBadge: true,
+      sortPriority: 7,
+      description: i18n.translate('xpack.lens.gauge.visualizationDescription', {
+        defaultMessage: 'Show progress to a goal in linear or arced style.',
+      }),
+      subtypes: [
+        GaugeShapes.HORIZONTAL_BULLET,
+        GaugeShapes.VERTICAL_BULLET,
+        GaugeShapes.SEMI_CIRCLE,
+        GaugeShapes.ARC,
+        GaugeShapes.CIRCLE,
+      ],
+    },
+  ],
   getLayerIds(state) {
     return [state.layerId];
   },
@@ -203,7 +201,12 @@ export const getGaugeVisualization = ({
   },
 
   getDescription() {
-    return CHART_SWITCH_OPTIONS[LENS_GAUGE_ID];
+    return {
+      icon: IconChartGauge,
+      label: i18n.translate('xpack.lens.gauge.label', {
+        defaultMessage: 'Gauge',
+      }),
+    };
   },
 
   switchVisualizationType: (visualizationTypeId, state) => {

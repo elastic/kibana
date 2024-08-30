@@ -157,6 +157,9 @@ export const getLegacyMetricVisualization = ({
 }): Visualization<LegacyMetricState> => ({
   id: 'lnsLegacyMetric',
 
+  getVisualizationTypeId() {
+    return this.id;
+  },
   visualizationTypes: [
     {
       id: 'lnsLegacyMetric',
@@ -175,10 +178,6 @@ export const getLegacyMetricVisualization = ({
     return Object.values(frame.datasourceLayers).some(
       (datasource) => datasource && datasource.datasourceId === 'textBased'
     );
-  },
-
-  getVisualizationTypeId() {
-    return 'lnsLegacyMetric';
   },
 
   clearLayer(state) {

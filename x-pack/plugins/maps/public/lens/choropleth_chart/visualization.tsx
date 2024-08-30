@@ -32,6 +32,9 @@ export const getVisualization = ({
 }): Visualization<ChoroplethChartState> => ({
   id: 'lnsChoropleth',
 
+  getVisualizationTypeId() {
+    return this.id;
+  },
   visualizationTypes: [
     {
       id: 'lnsChoropleth',
@@ -43,10 +46,6 @@ export const getVisualization = ({
       }),
     },
   ],
-
-  getVisualizationTypeId() {
-    return 'lnsChoropleth';
-  },
 
   clearLayer(state) {
     const newState = { ...state };

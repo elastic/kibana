@@ -301,6 +301,9 @@ export const getMetricVisualization = ({
 }): Visualization<MetricVisualizationState> => ({
   id: LENS_METRIC_ID,
 
+  getVisualizationTypeId() {
+    return this.id;
+  },
   visualizationTypes: [
     {
       id: LENS_METRIC_ID,
@@ -313,10 +316,6 @@ export const getMetricVisualization = ({
       }),
     },
   ],
-
-  getVisualizationTypeId() {
-    return LENS_METRIC_ID;
-  },
 
   clearLayer(state) {
     const newState = { ...state };

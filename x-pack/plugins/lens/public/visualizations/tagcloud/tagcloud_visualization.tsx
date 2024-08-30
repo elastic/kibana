@@ -41,6 +41,9 @@ export const getTagcloudVisualization = ({
 }): Visualization<TagcloudState> => ({
   id: 'lnsTagcloud',
 
+  getVisualizationTypeId() {
+    return this.id;
+  },
   visualizationTypes: [
     {
       id: 'lnsTagcloud',
@@ -52,10 +55,6 @@ export const getTagcloudVisualization = ({
       }),
     },
   ],
-
-  getVisualizationTypeId() {
-    return 'lnsTagcloud';
-  },
 
   clearLayer(state) {
     const newState = {

@@ -85,9 +85,9 @@ export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({
 
   const barSeriesLayers = getBarSeriesLayers(dataLayers);
 
-  const hasAnyBarSetting = barSeriesLayers.length;
+  const hasAnyBarSetting = !!barSeriesLayers.length;
   const hasAreaSettings = hasAreaSeries(dataLayers);
-  const shouldDisplayDividerHr = hasAnyBarSetting && hasAreaSettings;
+  const shouldDisplayDividerHr = !!(hasAnyBarSetting && hasAreaSettings);
 
   return (
     <TooltipWrapper tooltipContent={valueLabelsDisabledReason} condition={isDisabled}>
@@ -102,7 +102,7 @@ export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({
         isDisabled={isDisabled}
         panelStyle={PANEL_STYLE}
       >
-        {hasAnyBarSetting && (
+        {hasAnyBarSetting ? (
           <BarOrientationSettings
             isDisabled={isHasNonBarSeries}
             barOrientation={isHorizontal ? 'horizontal' : 'vertical'}
@@ -121,11 +121,11 @@ export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({
               });
             }}
           />
-        )}
+        ) : null}
 
-        {shouldDisplayDividerHr && <EuiHorizontalRule margin="s" />}
+        {shouldDisplayDividerHr ? <EuiHorizontalRule margin="s" /> : null}
 
-        {hasAreaSettings && (
+        {hasAreaSettings ? (
           <>
             <FillOpacityOption
               isFillOpacityEnabled={true}
@@ -140,7 +140,7 @@ export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({
 
             <EuiHorizontalRule margin="s" />
           </>
-        )}
+        ) : null}
         <LineCurveOption
           enabled={isCurveTypeEnabled}
           value={state?.curveType}

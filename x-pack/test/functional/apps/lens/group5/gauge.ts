@@ -10,16 +10,16 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header']);
+  const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header', 'timePicker']);
   const elasticChart = getService('elasticChart');
   const testSubjects = getService('testSubjects');
 
   describe('lens gauge', () => {
     before(async () => {
+      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
       await elasticChart.setNewChartUiDebugFlag(true);
-      await PageObjects.lens.goToTimeRange();
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',

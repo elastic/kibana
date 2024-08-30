@@ -104,6 +104,9 @@ export const getHeatmapVisualization = ({
 }: HeatmapVisualizationDeps): Visualization<HeatmapVisualizationState> => ({
   id: LENS_HEATMAP_ID,
 
+  getVisualizationTypeId(state) {
+    return state.shape;
+  },
   visualizationTypes: [
     {
       id: 'heatmap',
@@ -117,10 +120,6 @@ export const getHeatmapVisualization = ({
       }),
     },
   ],
-
-  getVisualizationTypeId(state) {
-    return state.shape;
-  },
 
   getLayerIds(state) {
     return [state.layerId];

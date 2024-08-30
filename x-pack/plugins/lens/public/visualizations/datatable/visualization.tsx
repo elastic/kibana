@@ -89,7 +89,7 @@ export const getDatatableVisualization = ({
   ],
 
   getVisualizationTypeId() {
-    return 'lnsDatatable';
+    return this.id;
   },
 
   getLayerIds(state) {
