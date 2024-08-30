@@ -147,7 +147,6 @@ function getEnabledFtrConfigs(patterns?: string[]) {
     if (configs.enabled.length === 0) {
       throw new Error('expected yaml files to have at least 1 "enabled" key');
     }
-
     if (uniqueQueues.size !== 1) {
       throw Error(
         `FTR manifest yml files should define the same 'defaultQueue', but found different ones: ${[
@@ -169,7 +168,6 @@ function getEnabledFtrConfigs(patterns?: string[]) {
   - {configPath}:
       queue: {queueName}`);
     }
-
     if (typeof configs.defaultQueue !== 'string') {
       throw new Error('expected yaml file to have a string "defaultQueue" key');
     }
