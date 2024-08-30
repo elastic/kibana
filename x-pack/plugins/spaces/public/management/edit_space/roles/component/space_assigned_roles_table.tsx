@@ -33,6 +33,7 @@ import { i18n } from '@kbn/i18n';
 import type { Role } from '@kbn/security-plugin-types-common';
 
 import type { Space } from '../../../../../common';
+import { sortRolesForListing } from '../../../lib';
 
 interface ISpaceAssignedRolesTableProps {
   isReadOnly: boolean;
@@ -254,7 +255,9 @@ export const SpaceAssignedRolesTable = ({
   });
 
   useEffect(() => {
-    setRolesInView(Array.from(assignedRoles.values()));
+    const valuesFromMap = Array.from(assignedRoles.values());
+    const sortedRoles = valuesFromMap.sort(sortRolesForListing);
+    setRolesInView(sortedRoles);
   }, [assignedRoles]);
 
   const onSearchQueryChange = useCallback<NonNullable<NonNullable<EuiSearchBarProps['onChange']>>>(
