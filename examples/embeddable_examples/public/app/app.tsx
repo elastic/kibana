@@ -23,10 +23,12 @@ import {
 import { Overview } from './overview';
 import { RegisterEmbeddable } from './register_embeddable';
 import { RenderExamples } from './render_examples';
+import { PresentationContainerExample } from './presentation_container_example/presentation_container_example';
 
 const OVERVIEW_TAB_ID = 'overview';
 const REGISTER_EMBEDDABLE_TAB_ID = 'register';
 const RENDER_TAB_ID = 'render';
+const PRESENTATION_CONTAINER_EXAMPLE_ID = 'presentationContainerExample';
 
 const App = ({ core }: { core: CoreStart }) => {
   const [selectedTabId, setSelectedTabId] = useState(OVERVIEW_TAB_ID);
@@ -42,6 +44,10 @@ const App = ({ core }: { core: CoreStart }) => {
 
     if (selectedTabId === REGISTER_EMBEDDABLE_TAB_ID) {
       return <RegisterEmbeddable />;
+    }
+
+    if (selectedTabId === PRESENTATION_CONTAINER_EXAMPLE_ID) {
+      return <PresentationContainerExample />;
     }
 
     return <Overview />;
@@ -74,6 +80,12 @@ const App = ({ core }: { core: CoreStart }) => {
                   isSelected={RENDER_TAB_ID === selectedTabId}
                 >
                   Rendering embeddables in your application
+                </EuiTab>
+                <EuiTab
+                  onClick={() => onSelectedTabChanged(PRESENTATION_CONTAINER_EXAMPLE_ID)}
+                  isSelected={PRESENTATION_CONTAINER_EXAMPLE_ID === selectedTabId}
+                >
+                  PresentationContainer example
                 </EuiTab>
               </EuiTabs>
 
