@@ -6,21 +6,22 @@
  * Side Public License, v 1.
  */
 
+import { BehaviorSubject } from 'rxjs';
+import { TimeRange } from '@kbn/es-query';
 import { lastSavedState } from './last_saved_state';
 import { unsavedChanges } from './unsaved_changes';
 import { LastSavedState, ParentApi, UnsavedChanges } from './types';
-import { BehaviorSubject } from 'rxjs';
-import { TimeRange } from '@kbn/es-query';
 
 export function getParentApi(): ParentApi {
   const lastSavedState$ = new BehaviorSubject<LastSavedState>(lastSavedState.load());
   const unsavedChanges$ = new BehaviorSubject<UnsavedChanges>(unsavedChanges.load());
 
   const children$ = new BehaviorSubject<{ [key: string]: unknown }>({});
-  const panels$ = new BehaviorSubject<Array<{ id: string, type: string }>>(
-    unsavedChanges$.value.panels ?? lastSavedState$.value.panelsState.map(({ id, type }) => {
-      return { id, type };
-    })
+  const panels$ = new BehaviorSubject<Array<{ id: string; type: string }>>(
+    unsavedChanges$.value.panels ??
+      lastSavedState$.value.panelsState.map(({ id, type }) => {
+        return { id, type };
+      })
   );
 
   const timeRange$ = new BehaviorSubject<TimeRange | undefined>(
@@ -29,6 +30,12 @@ export function getParentApi(): ParentApi {
 
   return {
     children$,
+    setChild: (id: string, api: unknown) => {
+      children$.next({
+        ...children$.value,
+        [id]: api,
+      });
+    },
     /**
      * return last saved embeddable state
      */

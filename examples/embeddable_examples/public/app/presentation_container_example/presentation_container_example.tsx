@@ -6,10 +6,19 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { EuiCallOut } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { getParentApi } from './parent_api';
 
 export const PresentationContainerExample = () => {
+  const parentApi = useMemo(() => {
+    return getParentApi();
+  }, []);
+
+  const panels = useStateFromPublishingSubject(parentApi.panels$);
+
   return (
     <div>
       <EuiCallOut title="Presentation Container interfaces">
@@ -30,6 +39,24 @@ export const PresentationContainerExample = () => {
           production implemenation may choose to persist state elsewhere.
         </p>
       </EuiCallOut>
+
+      <EuiSpacer />
+
+      {panels.forEach(({ id, type }) => {
+        return (
+          <div key={id} style={{ height: '300px' }}>
+            <ReactEmbeddableRenderer
+              type={type}
+              maybeId={id}
+              getParentApi={() => parentApi}
+              hidePanelChrome={false}
+              onApiAvailable={(api) => {
+                parentApi.setChild(id, api);
+              }}
+            />
+          </div>
+        );
+      })}
     </div>
   );
 };

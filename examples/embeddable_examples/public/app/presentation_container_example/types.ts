@@ -21,16 +21,17 @@ export type ParentApi = PresentationContainer &
   HasSerializedChildState &
   HasRuntimeChildState &
   PublishesTimeRange & {
-    panels$: PublishingSubject<Array<{ id: string; type: string }>>
+    setChild: (id: string, api: unknown) => void;
+    panels$: PublishingSubject<Array<{ id: string; type: string }>>;
   };
 
 export interface LastSavedState {
   timeRange: TimeRange;
-  panelsState: Array<{ id: string, type: string, panelState: SerializedPanelState }>;
+  panelsState: Array<{ id: string; type: string; panelState: SerializedPanelState }>;
 }
 
 export interface UnsavedChanges {
   timeRange?: TimeRange;
-  panels?: Array<{ id: string, type: string }>;
+  panels?: Array<{ id: string; type: string }>;
   panelUnsavedChanges?: Record<string, object>;
 }

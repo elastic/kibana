@@ -16,7 +16,7 @@ const DEFAULT_STATE: LastSavedState = {
     from: 'now-15m',
     to: 'now',
   },
-  panels: [],
+  panelsState: [],
 };
 
 function load(): LastSavedState {
