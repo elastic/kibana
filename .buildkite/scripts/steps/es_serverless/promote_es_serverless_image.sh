@@ -31,11 +31,11 @@ ARM_64_DIGEST=$(jq -r '.manifests[] | select(.platform.architecture == "arm64") 
 AMD_64_DIGEST=$(jq -r '.manifests[] | select(.platform.architecture == "amd64") | .digest' manifests.json)
 
 echo docker pull --platform linux/arm64 "$SOURCE_IMAGE@$ARM_64_DIGEST"
-docker pull --platform linux/arm64 "$SOURCE_IMAGE@$ARM_64_DIGEST"
+docker_pull_with_retry --platform linux/arm64 "$SOURCE_IMAGE@$ARM_64_DIGEST"
 echo linux/arm64 image pulled, with digest: $ARM_64_DIGEST
 
 echo docker pull --platform linux/amd64 "$SOURCE_IMAGE@$AMD_64_DIGEST"
-docker pull --platform linux/amd64 "$SOURCE_IMAGE@$AMD_64_DIGEST"
+docker_pull_with_retry --platform linux/amd64 "$SOURCE_IMAGE@$AMD_64_DIGEST"
 echo linux/amd64 image pulled, with digest: $AMD_64_DIGEST
 
 docker tag "$SOURCE_IMAGE@$ARM_64_DIGEST" "$TARGET_IMAGE-arm64"

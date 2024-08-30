@@ -180,9 +180,28 @@ print_if_dry_run() {
 }
 
 docker_pull_with_retry () {
-  local image=$1
-  local retries=${2:-3}
-  local delay=${3:-15}
+  args=("$@")
+  attempt=0
+  max_retries=5
+  sleep_time=15
 
-  retry "$retries" "$delay" docker pull "$image"
+  while true
+  do
+    attempt=$((attempt+1))
+
+    if [ $attempt -gt $max_retries ]
+    then
+      echo "Docker pull retries exceeded, aborting."
+      exit 1
+    fi
+
+    if docker pull "${args[@]}"
+    then
+      echo "Docker pull successful."
+      break
+    else
+      echo "Docker pull unsuccessful, attempt '$attempt'... Retrying in $sleep_time"
+      sleep $sleep_time
+    fi
+  done
 }
