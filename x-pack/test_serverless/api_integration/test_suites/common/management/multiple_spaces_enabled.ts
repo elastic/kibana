@@ -8,6 +8,7 @@
 import expect from 'expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { RoleCredentials } from '../../../../shared/services';
+import { asyncForEach } from '@kbn/std';
 
 // Notes:
 // This suite is currently only called from the feature flags test configs, e.g.
@@ -64,12 +65,14 @@ export default function ({ getService }: FtrProviderContext) {
         .send()
         .expect(200);
 
-      (body as Array<{ id: string }>)
-        .filter((f) => f.id !== 'default')
-        .forEach(async (space) => {
-          console.log(`*** Deleting space ${space.id}...`);
-          await deleteSpace(space.id);
-        });
+
+      const toDelete = (body as Array<{ id: string }>)
+        .filter((f) => f.id !== 'default');
+
+      await asyncForEach(toDelete, async (space) => {
+        console.log(`*** Deleting space ${space.id}...`);
+        await deleteSpace(space.id);
+      });
 
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
@@ -226,35 +229,33 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('returns the default space', async () => {
-        await supertestWithoutAuth
+        const response = await supertestWithoutAuth
           .get('/internal/spaces/_active_space')
           .set(internalRequestHeader)
           .set(roleAuthc.apiKeyHeader)
-          .expect(200)
-          .then((response) => {
-            const { id, name, _reserved } = response.body;
-            expect({ id, name, _reserved }).toEqual({
-              id: 'default',
-              name: 'Default',
-              _reserved: true,
-            });
-          });
+          .expect(200);
+
+        const { id, name, _reserved } = response.body;
+        expect({ id, name, _reserved }).toEqual({
+          id: 'default',
+          name: 'Default',
+          _reserved: true,
+        });
       });
 
       it('returns the default space when explicitly referenced', async () => {
-        await supertestWithoutAuth
+        const response = await supertestWithoutAuth
           .get('/s/default/internal/spaces/_active_space')
           .set(internalRequestHeader)
           .set(roleAuthc.apiKeyHeader)
-          .expect(200)
-          .then((response) => {
-            const { id, name, _reserved } = response.body;
-            expect({ id, name, _reserved }).toEqual({
-              id: 'default',
-              name: 'Default',
-              _reserved: true,
-            });
-          });
+          .expect(200);
+
+        const { id, name, _reserved } = response.body;
+        expect({ id, name, _reserved }).toEqual({
+          id: 'default',
+          name: 'Default',
+          _reserved: true,
+        });
       });
 
       it('returns the foo space', async () => {
