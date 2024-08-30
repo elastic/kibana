@@ -10,12 +10,9 @@ import { httpServiceMock, type HttpSetupMock } from '@kbn/core-http-browser-mock
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { createConversations } from './provider';
 import { coreMock } from '@kbn/core/public/mocks';
-import { useKibana as mockUseKibana } from '../common/lib/kibana/__mocks__';
 import { loadAllActions as loadConnectors } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 
-const mockedUseKibana = mockUseKibana();
 jest.mock('./use_assistant_availability');
-jest.mock('../common/lib/kibana');
 
 jest.mock('@kbn/elastic-assistant/impl/assistant/api');
 jest.mock('../common/hooks/use_license', () => ({

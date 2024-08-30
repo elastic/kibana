@@ -13,6 +13,7 @@ import { AssistantAvatar } from '@kbn/elastic-assistant';
 import type { Replacements } from '@kbn/elastic-assistant-common';
 import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
 import styled from '@emotion/styled';
+import type { EuiPanelProps } from '@elastic/eui/src/components/panel';
 import { StreamComment } from './stream';
 import { CommentActions } from '../comment_actions';
 import * as i18n from './translations';
@@ -152,7 +153,7 @@ export const getComments: GetAssistantMessages = ({
             : new Date(message.timestamp).toLocaleString()
         ),
         username: isUser ? i18n.YOU : i18n.ASSISTANT,
-        eventColor: message.isError ? 'danger' : undefined,
+        eventColor: message.isError ? ('danger' as EuiPanelProps['color']) : undefined,
       };
 
       const isControlsEnabled = isLastComment && !isUser;

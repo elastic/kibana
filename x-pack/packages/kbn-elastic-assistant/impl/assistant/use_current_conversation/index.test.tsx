@@ -72,7 +72,7 @@ describe('useCurrentConversation', () => {
     const { result } = setupHook();
 
     expect(result.current.currentConversation).toBeUndefined();
-    expect(result.current.currentSystemPromptId).toBeUndefined();
+    expect(result.current.currentSystemPrompt).toBeUndefined();
   });
 
   it('should set the current system prompt ID when the prompt selection changes', async () => {
