@@ -8913,7 +8913,11 @@
           "StringC",
           "; }>, ",
           "PartialC",
-          "<{ 'service.name': ",
+          "<{ alert_rule_parameter_time_size: ",
+          "StringC",
+          "; alert_rule_parameter_time_unit: ",
+          "StringC",
+          "; 'service.name': ",
           "StringC",
           "; 'service.environment': ",
           "StringC",
@@ -8935,7 +8939,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          " & { params: { query: { alert_started_at: string; } & { 'service.name'?: string | undefined; 'service.environment'?: string | undefined; 'transaction.type'?: string | undefined; 'transaction.name'?: string | undefined; 'host.name'?: string | undefined; 'container.id'?: string | undefined; 'kubernetes.pod.name'?: string | undefined; }; }; }) => Promise<{ alertContext: ",
+          " & { params: { query: { alert_started_at: string; } & { alert_rule_parameter_time_size?: string | undefined; alert_rule_parameter_time_unit?: string | undefined; 'service.name'?: string | undefined; 'service.environment'?: string | undefined; 'transaction.type'?: string | undefined; 'transaction.name'?: string | undefined; 'host.name'?: string | undefined; 'container.id'?: string | undefined; 'kubernetes.pod.name'?: string | undefined; }; }; }) => Promise<{ alertContext: ",
           "AlertDetailsContextualInsight",
           "[]; }>; } & ",
           {
@@ -9037,7 +9041,11 @@
           "StringC",
           "; }>, ",
           "PartialC",
-          "<{ 'service.name': ",
+          "<{ alert_rule_parameter_time_size: ",
+          "StringC",
+          "; alert_rule_parameter_time_unit: ",
+          "StringC",
+          "; 'service.name': ",
           "StringC",
           "; 'service.environment': ",
           "StringC",
@@ -9059,7 +9067,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          " & { params: { query: { alert_started_at: string; } & { 'service.name'?: string | undefined; 'service.environment'?: string | undefined; 'transaction.type'?: string | undefined; 'transaction.name'?: string | undefined; 'host.name'?: string | undefined; 'container.id'?: string | undefined; 'kubernetes.pod.name'?: string | undefined; }; }; }) => Promise<{ alertContext: ",
+          " & { params: { query: { alert_started_at: string; } & { alert_rule_parameter_time_size?: string | undefined; alert_rule_parameter_time_unit?: string | undefined; 'service.name'?: string | undefined; 'service.environment'?: string | undefined; 'transaction.type'?: string | undefined; 'transaction.name'?: string | undefined; 'host.name'?: string | undefined; 'container.id'?: string | undefined; 'kubernetes.pod.name'?: string | undefined; }; }; }) => Promise<{ alertContext: ",
           "AlertDetailsContextualInsight",
           "[]; }>; } & ",
           {

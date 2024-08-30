@@ -70,6 +70,11 @@ export const ManageAgentPoliciesModal: React.FunctionComponent<Props> = ({
     setIsSubmitting(true);
     const { error } = await savePackagePolicy({
       policy_ids: selectedPolicyIds,
+      ...(selectedPolicyIds.length === 0
+        ? {
+            policy_id: undefined,
+          }
+        : {}),
     });
     setIsSubmitting(false);
     if (!error) {
@@ -138,11 +143,7 @@ export const ManageAgentPoliciesModal: React.FunctionComponent<Props> = ({
         />
       }
       buttonColor="primary"
-      confirmButtonDisabled={
-        selectedPolicyIds.length === 0 ||
-        isSubmitting ||
-        isEqual(initialPolicyIds, selectedPolicyIds)
-      }
+      confirmButtonDisabled={isSubmitting || isEqual(initialPolicyIds, selectedPolicyIds)}
       data-test-subj="manageAgentPoliciesModal"
     >
       <EuiFlexGroup direction="column" gutterSize="m">

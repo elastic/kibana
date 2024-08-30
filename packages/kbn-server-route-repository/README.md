@@ -88,9 +88,7 @@ The client can be created either in `setup` or `start`.
 
 > browser/plugin.ts
 ```javascript
-import { isHttpFetchError } from '@kbn/core-http-browser';
-import { DefaultClientOptions } from '@kbn/server-route-repository-utils';
-import { createRepositoryClient } from '@kbn/server-route-repository-client';
+import { createRepositoryClient, isHttpFetchError, DefaultClientOptions } from '@kbn/server-route-repository-client';
 import type { MyPluginRouteRepository } from '../server/plugin';
 
 export type MyPluginRepositoryClient = 
