@@ -904,7 +904,7 @@ export const enablesAndPopulatesThresholdSuppression = (
 
   // enables suppression for threshold rule
   cy.get(THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX).should('not.be.checked');
-  cy.get(THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX).siblings('label').click();
+  cy.get(THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX).click();
 
   setAlertSuppressionDuration(interval, timeUnit);
 
@@ -935,11 +935,11 @@ export const selectAlertSuppressionPerInterval = () => {
 };
 
 export const selectAlertSuppressionPerRuleExecution = () => {
-  cy.get(ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION).siblings('label').click();
+  cy.get(ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION).click();
 };
 
 export const selectDoNotSuppressForMissingFields = () => {
-  cy.get(ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS).siblings('label').click();
+  cy.get(ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS).click();
 };
 
 export const setAlertSuppressionDuration = (interval: number, timeUnit: 's' | 'm' | 'h') => {
