@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import { useContext } from 'react';
-import { KibanaEnvironmentContext } from './kibana_environment_context';
+require('../../../../../src/setup_node_env');
+require('./create_agent_policies').run();
 
-export const useKibanaEnvironmentContext = () => {
-  return useContext(KibanaEnvironmentContext);
-};
+/*
+Usage:
+
+cd x-pack/plugins/fleet
+node scripts/create_agents/index.js
+
+*/
