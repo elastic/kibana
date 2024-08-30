@@ -178,3 +178,11 @@ print_if_dry_run() {
     echo "DRY_RUN is enabled."
   fi
 }
+
+docker_pull_with_retry () {
+  local image=$1
+  local retries=${2:-3}
+  local delay=${3:-15}
+
+  retry "$retries" "$delay" docker pull "$image"
+}

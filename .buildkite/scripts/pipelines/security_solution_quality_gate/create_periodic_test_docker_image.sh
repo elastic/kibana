@@ -8,6 +8,7 @@ fi
 .buildkite/scripts/bootstrap.sh
 
 source .buildkite/scripts/steps/artifacts/env.sh
+source .buildkite/scripts/common/util.sh
 
 GIT_ABBREV_COMMIT=${BUILDKITE_COMMIT:0:12}
 KIBANA_IMAGE_TAG="sec-sol-qg-$GIT_ABBREV_COMMIT"
@@ -23,7 +24,7 @@ if docker manifest inspect $KIBANA_IMAGE &> /dev/null; then
   exit 0
 fi
 
-docker pull $KIBANA_BASE_IMAGE:latest
+docker_pull_with_retry $KIBANA_BASE_IMAGE:latest
 
 echo "--- Build images"
 node scripts/build \
