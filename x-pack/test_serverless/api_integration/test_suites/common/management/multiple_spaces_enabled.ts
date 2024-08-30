@@ -68,7 +68,6 @@ export default function ({ getService }: FtrProviderContext) {
       const toDelete = (body as Array<{ id: string }>).filter((f) => f.id !== 'default');
 
       await asyncForEach(toDelete, async (space) => {
-        console.log(`*** Deleting space ${space.id}...`);
         await deleteSpace(space.id);
       });
 
