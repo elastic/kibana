@@ -9,7 +9,6 @@ import { render, screen } from '@testing-library/react';
 import { omit } from 'lodash/fp';
 import React from 'react';
 
-import { SAME_FAMILY } from '../same_family/translations';
 import {
   eventCategory,
   someField,
@@ -26,6 +25,7 @@ import {
 } from '../translations';
 import { EnrichedFieldMetadata } from '../../../../../../../../../types';
 import { EMPTY_PLACEHOLDER, getCommonTableColumns } from '.';
+import { SAME_FAMILY_BADGE_LABEL } from '../../../translate';
 
 describe('getCommonTableColumns', () => {
   test('it returns the expected column configuration', () => {
@@ -128,7 +128,7 @@ describe('getCommonTableColumns', () => {
       });
 
       test('it renders the same family badge', () => {
-        expect(screen.getByTestId('sameFamily')).toHaveTextContent(SAME_FAMILY);
+        expect(screen.getByTestId('sameFamily')).toHaveTextContent(SAME_FAMILY_BADGE_LABEL);
       });
     });
 
