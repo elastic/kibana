@@ -320,6 +320,35 @@ export default function (providerContext: FtrProviderContext) {
       expect(response.body.item.policy_ids).to.eql([agentPolicyId, managedAgentPolicyId]);
     });
 
+    it('should work with no policy ids', async function () {
+      const { body: packagePolicyResponse } = await supertest
+        .post(`/api/fleet/package_policies`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'filetest-to-clear-policy',
+          description: '',
+          namespace: 'default',
+          policy_id: agentPolicyId,
+          policy_ids: [agentPolicyId],
+          enabled: true,
+          inputs: [],
+          package: {
+            name: 'filetest',
+            title: 'For File Tests',
+            version: '0.1.0',
+          },
+        });
+      const response = await supertest
+        .put(`/api/fleet/package_policies/${packagePolicyResponse.item.id}`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          policy_ids: [],
+        })
+        .expect(200);
+      expect(response.body.item.policy_id).to.eql(null);
+      expect(response.body.item.policy_ids).to.eql([]);
+    });
+
     it('should trim whitespace from name on update', async function () {
       await supertest
         .put(`/api/fleet/package_policies/${packagePolicyId}`)

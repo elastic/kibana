@@ -16,7 +16,7 @@ export const graphState: StateGraphArgs<EcsMappingState>['channels'] = {
   },
   chunkSize: {
     value: (x: number, y?: number) => y ?? x,
-    default: () => 20,
+    default: () => 25,
   },
   lastExecutedChain: {
     value: (x: string, y?: string) => y ?? x,
@@ -58,9 +58,17 @@ export const graphState: StateGraphArgs<EcsMappingState>['channels'] = {
     value: (x: object, y?: object) => y ?? x,
     default: () => ({}),
   },
-  finalMapping: {
+  chunkMapping: {
     reducer: merge,
     default: () => ({}),
+  },
+  finalMapping: {
+    value: (x: object, y?: object) => y ?? x,
+    default: () => ({}),
+  },
+  useFinalMapping: {
+    value: (x: boolean, y?: boolean) => y ?? x,
+    default: () => false,
   },
   currentPipeline: {
     value: (x: object, y?: object) => y ?? x,

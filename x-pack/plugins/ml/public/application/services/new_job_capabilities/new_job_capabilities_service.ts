@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
@@ -14,8 +15,9 @@ import {
   EVENT_RATE_FIELD_ID,
 } from '@kbn/ml-anomaly-utils';
 import { DataViewType } from '@kbn/data-views-plugin/public';
+import { useMlApiContext } from '../../contexts/kibana';
 import { getGeoFields, filterCategoryFields } from '../../../../common/util/fields_utils';
-import { ml, type MlApiServices } from '../ml_api_service';
+import type { MlApiServices } from '../ml_api_service';
 import { processTextAndKeywordFields, NewJobCapabilitiesServiceBase } from './new_job_capabilities';
 
 export class NewJobCapsService extends NewJobCapabilitiesServiceBase {
@@ -185,4 +187,16 @@ function addEventRateField(aggs: Aggregation[], fields: Field[]) {
   fields.splice(0, 0, eventRateField);
 }
 
-export const newJobCapsService = new NewJobCapsService(ml);
+// This is to retain the singleton behavior of the previous direct instantiation and export.
+let newJobCapsService: NewJobCapsService;
+export const mlJobCapsServiceFactory = (mlApiServices: MlApiServices) => {
+  if (newJobCapsService) return newJobCapsService;
+
+  newJobCapsService = new NewJobCapsService(mlApiServices);
+  return newJobCapsService;
+};
+
+export const useNewJobCapsService = () => {
+  const mlApiServices = useMlApiContext();
+  return mlJobCapsServiceFactory(mlApiServices);
+};
