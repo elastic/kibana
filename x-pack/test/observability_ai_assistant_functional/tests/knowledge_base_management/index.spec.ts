@@ -48,20 +48,18 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
   describe('Knowledge management tab', () => {
     before(async () => {
+      // create a knowledge base model
       await createKnowledgeBaseModel(ml);
 
       await Promise.all([
+        // setup the knowledge base
         observabilityAIAssistantAPIClient
           .editor({ endpoint: 'POST /internal/observability_ai_assistant/kb/setup' })
           .expect(200),
+
+        // login as editor
         ui.auth.login('editor'),
       ]);
-
-      await common.navigateToUrlWithBrowserHistory(
-        'management',
-        '/kibana/observabilityAiAssistantManagement',
-        'tab=knowledge_base'
-      );
     });
 
     after(async () => {
@@ -69,24 +67,12 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
     });
 
     describe('when the LLM calls the "summarize" function for two different users', () => {
-      let rowsWithFavColor: Array<{
-        rowText: string[];
-        authorText: string;
-        entryTitleText: string;
-      }>;
-
-      before(async () => {
-        await saveKbEntry({
-          apiClient: observabilityAIAssistantAPIClient.editor,
-          docId: 'my_fav_color',
-          text: 'My favourite color is red',
-        });
-
-        await saveKbEntry({
-          apiClient: observabilityAIAssistantAPIClient.secondaryEditor,
-          docId: 'my_fav_color',
-          text: 'My favourite color is blue',
-        });
+      async function getKnowledgeBaseEntries() {
+        await common.navigateToUrlWithBrowserHistory(
+          'management',
+          '/kibana/observabilityAiAssistantManagement',
+          'tab=knowledge_base'
+        );
 
         const entryTitleCells = await testSubjects.findAll(ui.pages.kbManagementTab.tableTitleCell);
 
@@ -107,18 +93,31 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
         log.debug(`Found ${rows.length} rows in the KB management table: ${JSON.stringify(rows)}`);
 
-        rowsWithFavColor = rows.filter(({ entryTitleText }) => entryTitleText === 'my_fav_color');
+        return rows.filter(({ entryTitleText }) => entryTitleText === 'my_fav_color');
+      }
+
+      before(async () => {
+        await saveKbEntry({
+          apiClient: observabilityAIAssistantAPIClient.editor,
+          docId: 'my_fav_color',
+          text: 'My favourite color is red',
+        });
+
+        await saveKbEntry({
+          apiClient: observabilityAIAssistantAPIClient.secondaryEditor,
+          docId: 'my_fav_color',
+          text: 'My favourite color is blue',
+        });
       });
 
       it('shows two entries', async () => {
-        expect(rowsWithFavColor.length).to.eql(2);
+        const entries = await getKnowledgeBaseEntries();
+        expect(entries.length).to.eql(2);
       });
 
       it('shows two different authors', async () => {
-        expect(rowsWithFavColor.map(({ authorText }) => authorText)).to.eql([
-          'secondary_editor',
-          'editor',
-        ]);
+        const entries = await getKnowledgeBaseEntries();
+        expect(entries.map(({ authorText }) => authorText)).to.eql(['secondary_editor', 'editor']);
       });
     });
   });
