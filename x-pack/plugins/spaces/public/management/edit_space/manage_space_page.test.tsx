@@ -18,13 +18,13 @@ import { KibanaFeature } from '@kbn/features-plugin/public';
 import { featuresPluginMock } from '@kbn/features-plugin/public/mocks';
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 
-import { ConfirmAlterActiveSpaceModal } from './confirm_alter_active_space_modal';
-import { EnabledFeatures } from './enabled_features';
 import { ManageSpacePage } from './manage_space_page';
 import type { SolutionView, Space } from '../../../common/types/latest';
 import { EventTracker } from '../../analytics';
 import type { SpacesManager } from '../../spaces_manager';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
+import { ConfirmAlterActiveSpaceModal } from '../components/confirm_alter_active_space_modal';
+import { EnabledFeatures } from '../components/enabled_features';
 
 // To be resolved by EUI team.
 // https://github.com/elastic/eui/issues/3712
