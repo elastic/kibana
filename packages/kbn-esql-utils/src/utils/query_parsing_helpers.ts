@@ -7,6 +7,14 @@
  */
 import type { ESQLSource, ESQLFunction, ESQLColumn, ESQLSingleAstItem } from '@kbn/esql-ast';
 import { getAstAndSyntaxErrors, Walker, walk, BasicPrettyPrinter } from '@kbn/esql-ast';
+import type {
+  ESQLSource,
+  ESQLFunction,
+  ESQLColumn,
+  ESQLSingleAstItem,
+  ESQLCommandOption,
+} from '@kbn/esql-ast';
+import { getAstAndSyntaxErrors, Walker, walk } from '@kbn/esql-ast';
 
 const DEFAULT_ESQL_LIMIT = 1000;
 
@@ -117,4 +125,15 @@ export const isQueryWrappedByPipes = (query: string): boolean => {
 export const wrapByPipes = (query: string, isWrapped: boolean): string => {
   const { ast } = getAstAndSyntaxErrors(query);
   return BasicPrettyPrinter.print(ast, { multiline: !isWrapped });
+};
+
+export const retieveMetadataColumns = (esql: string): string[] => {
+  const { ast } = getAstAndSyntaxErrors(esql);
+  const options: ESQLCommandOption[] = [];
+
+  walk(ast, {
+    visitCommandOption: (node) => options.push(node),
+  });
+  const metadataOptions = options.find(({ name }) => name === 'metadata');
+  return metadataOptions?.args.map((column) => (column as ESQLColumn).name) ?? [];
 };

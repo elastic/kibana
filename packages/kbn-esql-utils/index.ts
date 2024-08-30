@@ -26,6 +26,7 @@ export {
   hasStartEndParams,
   wrapByPipes,
   isQueryWrappedByPipes,
+  retieveMetadataColumns,
   TextBasedLanguages,
 } from './src';
 
