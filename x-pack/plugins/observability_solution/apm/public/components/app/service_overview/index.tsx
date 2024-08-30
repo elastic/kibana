@@ -73,7 +73,7 @@ export function ServiceOverview() {
           {/* Only shows Logs overview when entity has Logs signal */}
           {hasLogsSignal ? (
             <EuiFlexItem>
-              <LogsOverview hasApmSignal={hasApmSignal} />
+              <LogsOverview />
             </EuiFlexItem>
           ) : null}
         </EuiFlexGroup>
