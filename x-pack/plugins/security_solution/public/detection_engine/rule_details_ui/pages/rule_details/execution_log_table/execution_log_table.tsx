@@ -14,6 +14,7 @@ import type {
   OnRefreshProps,
   OnRefreshChangeProps,
   EuiSwitchEvent,
+  CriteriaWithPagination,
 } from '@elastic/eui';
 import {
   EuiTextColor,
@@ -240,18 +241,15 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
 
   // Callbacks
   const onTableChangeCallback = useCallback(
-    ({
-      page = {},
-      sort = {},
-    }: // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    any) => {
+    ({ page, sort }: CriteriaWithPagination<RuleExecutionResult>) => {
       const { index, size } = page;
-      const { field, direction } = sort;
-
       setPageIndex(index + 1);
       setPageSize(size);
-      setSortField(field);
-      setSortDirection(direction);
+      if (sort) {
+        const { field, direction } = sort;
+        setSortField(field);
+        setSortDirection(direction);
+      }
     },
     [setPageIndex, setPageSize, setSortDirection, setSortField]
   );
