@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export type { FormValues } from './create_space_page';
 export { CreateSpacePage } from './create_space_page';

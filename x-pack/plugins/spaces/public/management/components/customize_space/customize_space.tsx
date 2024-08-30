@@ -22,9 +22,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { CustomizeSpaceAvatar } from './customize_space_avatar';
 import { getSpaceAvatarComponent, getSpaceColor, getSpaceInitials } from '../../../space_avatar';
-import type { FormValues } from '../../create_space';
 import type { SpaceValidator } from '../../lib';
 import { toSpaceIdentifier } from '../../lib';
+import type { FormValues } from '../../types';
 import { SectionPanel } from '../section_panel';
 
 // No need to wrap LazySpaceAvatar in an error boundary, because it is one of the first chunks loaded when opening Kibana.

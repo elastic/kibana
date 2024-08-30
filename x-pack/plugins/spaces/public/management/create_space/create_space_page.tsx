@@ -40,13 +40,7 @@ import { EnabledFeatures } from '../components/enabled_features';
 import { SolutionView } from '../components/solution_view';
 import { toSpaceIdentifier } from '../lib';
 import { SpaceValidator } from '../lib/validate_space';
-
-export interface FormValues extends Partial<Space> {
-  customIdentifier?: boolean;
-  avatarType?: 'initials' | 'image';
-  customAvatarInitials?: boolean;
-  customAvatarColor?: boolean;
-}
+import type { FormValues } from '../types';
 
 interface Props {
   getFeatures: FeaturesPluginStart['getFeatures'];

@@ -21,8 +21,8 @@ import { ConfirmDeleteModal } from '../components';
 import { ConfirmAlterActiveSpaceModal } from '../components/confirm_alter_active_space_modal';
 import { CustomizeSpace } from '../components/customize_space';
 import { SolutionView } from '../components/solution_view';
-import type { FormValues } from '../create_space';
 import { SpaceValidator } from '../lib';
+import type { FormValues } from '../types';
 
 interface Props {
   space: Space;
