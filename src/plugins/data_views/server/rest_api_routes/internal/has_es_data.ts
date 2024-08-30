@@ -14,7 +14,7 @@ import { DEFAULT_ASSETS_TO_IGNORE } from '../../../common';
 type Handler = Parameters<VersionedRoute<any, RequestHandlerContext>['addVersion']>[1];
 
 const patterns = ['*', '-.*'].concat(
-  DEFAULT_ASSETS_TO_IGNORE.DATA_STREAMS_TO_IGNORE.map((ds) => `,-${ds}`)
+  DEFAULT_ASSETS_TO_IGNORE.DATA_STREAMS_TO_IGNORE.map((ds) => `-${ds}`)
 );
 
 const crossClusterPatterns = patterns.map((ds) => `*:${ds}`);
@@ -23,7 +23,7 @@ export const handler: Handler = async (ctx: RequestHandlerContext, req, res) => 
   const core = await ctx.core;
   const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
   const response = await elasticsearchClient.indices.resolveCluster({
-    name: crossClusterPatterns,
+    name: patterns.concat(crossClusterPatterns),
     allow_no_indices: true,
     ignore_unavailable: true,
   });
