@@ -15,8 +15,8 @@ use File::Copy;
 
 my $file;
 # I'm hardcoding these directories just temporarily for testing
-my $sourcedir = '/Users/kilfoyle/repos/kibana/docs/settings-gen/source';
-my $asciidocdir = '/Users/kilfoyle/repos/kibana/docs/settings-gen/source/';
+my $sourcedir = './source';
+my $asciidocdir = 'source/';
 my $count;
 
 find(\&iteratefiles, $sourcedir);
@@ -179,8 +179,7 @@ sub parsefile {
   $asciidocoutput .= "\n\n";
 
   # write the contents into the generated asciidoc file
-  my $outputfilefullpath = $asciidocdir.'/'.$outputfile;
-  open (WRITE, "> $outputfilefullpath") or die("$!");
+  open (WRITE, "> $outputfile") or die("$!");
   print WRITE $asciidocoutput;
   close WRITE;
   print "\nGenerated file: ".$outputfile;
