@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';
 import { getDataTestSubjectSelector } from '../../helpers/common';
 
 import { deleteAlertsAndRules, rootRequest } from '../../tasks/api_calls/common';
@@ -50,12 +51,12 @@ const mockFinding = {
   },
 };
 
-const createMockFinding = (mockFindings: any) => {
+const createMockFinding = () => {
   return rootRequest({
     method: 'POST',
     url: `${Cypress.env(
       'ELASTICSEARCH_URL'
-    )}/logs-cloud_security_posture.findings_latest-default/_doc`,
+    )}/${CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN}/_doc`,
     body: mockFinding,
   });
 };
@@ -65,7 +66,7 @@ const deleteDataStream = () => {
     method: 'DELETE',
     url: `${Cypress.env(
       'ELASTICSEARCH_URL'
-    )}/_data_stream/logs-cloud_security_posture.findings_latest-default`,
+    )}/_data_stream/${CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN}`,
   });
 };
 
@@ -76,7 +77,6 @@ describe('Alert Host details expandable flyout', { tags: ['@ess', '@serverless']
     createRule(getNewRule());
     visit(ALERTS_URL);
     waitForAlertsToPopulate();
-    expandFirstAlertHostFlyout();
   });
 
   after(() => {
@@ -84,6 +84,7 @@ describe('Alert Host details expandable flyout', { tags: ['@ess', '@serverless']
   });
 
   it('should not display Misconfiguration preview under Insights Entities when it does not have Misconfiguration Findings', () => {
+    expandFirstAlertHostFlyout();
     cy.log('check if Misconfiguration preview section is not rendered');
     cy.get(HOST_INSIGHT_MISCONFIGURATION).should('not.exist');
 
@@ -92,7 +93,8 @@ describe('Alert Host details expandable flyout', { tags: ['@ess', '@serverless']
   });
 
   it('should display Misconfiguration preview under Insights Entities when it has Misconfiguration Findings', () => {
-    createMockFinding(mockFinding);
+    createMockFinding();
+    expandFirstAlertHostFlyout();
     cy.log('check if Misconfiguration preview section rendered');
     cy.get(HOST_INSIGHT_MISCONFIGURATION).should('exist');
 
