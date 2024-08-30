@@ -34,7 +34,6 @@ export const createKnowledgeBaseEntry = async ({
 }: CreateKnowledgeBaseEntryParams): Promise<KnowledgeBaseEntryResponse | null> => {
   const createdAt = new Date().toISOString();
   const body = transformToCreateSchema(createdAt, spaceId, user, knowledgeBaseEntry);
-  console.log('body:', JSON.stringify(body, null, 2));
   try {
     const response = await esClient.create({
       body,
