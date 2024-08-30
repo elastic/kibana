@@ -58,25 +58,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await addSearchEmbeddableToDashboard();
       let titles = await dashboard.getPanelTitles();
       expect(titles.length).to.be(1);
-      await dashboardPanelActions.expectLinkedToLibrary(titles[0], false);
+      await dashboardPanelActions.expectLinkedToLibrary(titles[0]);
       await dashboardPanelActions.clonePanel(titles[0]);
       await header.waitUntilLoadingHasFinished();
       await dashboard.waitForRenderComplete();
       titles = await dashboard.getPanelTitles();
       expect(titles.length).to.be(2);
-      await dashboardPanelActions.expectLinkedToLibrary(titles[0], false);
-      await dashboardPanelActions.expectNotLinkedToLibrary(titles[1], false);
+      await dashboardPanelActions.expectLinkedToLibrary(titles[0]);
+      await dashboardPanelActions.expectNotLinkedToLibrary(titles[1]);
     });
 
     it('should allow unlinking a by ref saved search embeddable from library', async () => {
       await addSearchEmbeddableToDashboard();
       let titles = await dashboard.getPanelTitles();
       expect(titles.length).to.be(1);
-      await dashboardPanelActions.expectLinkedToLibrary(titles[0], false);
+      await dashboardPanelActions.expectLinkedToLibrary(titles[0]);
       await dashboardPanelActions.unlinkFromLibrary(titles[0]);
       titles = await dashboard.getPanelTitles();
       expect(titles.length).to.be(1);
-      await dashboardPanelActions.expectNotLinkedToLibrary(titles[0], false);
+      await dashboardPanelActions.expectNotLinkedToLibrary(titles[0]);
     });
   });
 }

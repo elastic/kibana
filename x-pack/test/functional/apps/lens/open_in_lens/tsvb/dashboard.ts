@@ -89,7 +89,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await dashboardAddPanel.clickEditorMenuButton();
       await dashboardAddPanel.clickVisType('metrics');
       await testSubjects.click('visualizesaveAndReturnButton');
-      await panelActions.legacySaveToLibrary(visTitle, false);
+      await panelActions.saveToLibrary(visTitle);
 
       await dashboard.waitForRenderComplete();
       const originalEmbeddableCount = await canvas.getEmbeddableCount();

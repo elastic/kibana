@@ -48,7 +48,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('save visualize panel to embeddable library', async () => {
       const newTitle = 'Rendering Test: heatmap - copy';
-      await panelActions.legacySaveToLibrary(newTitle, 'RenderingTest:heatmap');
+      await panelActions.saveToLibrary(newTitle, 'RenderingTest:heatmap');
       await panelActions.expectLinkedToLibrary(newTitle);
     });
   });

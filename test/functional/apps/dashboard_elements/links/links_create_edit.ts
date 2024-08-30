@@ -105,7 +105,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await dashboardLinks.clickPanelEditorSaveButton();
           await testSubjects.exists('addObjectToDashboardSuccess');
           await testSubjects.existOrFail('links--component');
-          await dashboardPanelActions.expectNotLinkedToLibrary('', false);
+          await dashboardPanelActions.expectNotLinkedToLibrary();
 
           expect(await dashboardLinks.getNumberOfLinksInPanel()).to.equal(4);
         });
