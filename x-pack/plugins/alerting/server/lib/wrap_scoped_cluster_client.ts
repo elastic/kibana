@@ -369,6 +369,13 @@ function getWrappedSearchFn(opts: WrapEsClientOpts) {
         took = (result as SearchResponse<TDocument, TAggregations>).took;
       }
 
+      opts.logger.info(
+        `executing query for rule ${opts.rule.alertTypeId}:${opts.rule.id} in space ${
+          opts.rule.spaceId
+        } - ${JSON.stringify(params)} - with options ${JSON.stringify(searchOptions)}${
+          requestTimeout ? ` and ${requestTimeout}ms requestTimeout` : ''
+        } - result ${JSON.stringify(result)}`
+      );
       opts.logMetricsFn({ esSearchDuration: took ?? 0, totalSearchDuration: durationMs });
       return result;
     } catch (e) {
