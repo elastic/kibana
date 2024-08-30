@@ -35,6 +35,7 @@ async function config({ readConfigFile }: FtrConfigProviderContext) {
       ...commonFunctionalServices,
       ...commonFunctionalUIServices,
     },
+
     esTestCluster: {
       ...xpackFunctionalTestsConfig.get('esTestCluster'),
       serverArgs: [
