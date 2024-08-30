@@ -48,10 +48,6 @@ export class FeatureRegistry {
 
     const featureCopy = cloneDeep(feature);
 
-    if (!feature.privileges) {
-      console.log(feature.id, 'feature');
-    }
-
     this.kibanaFeatures[feature.id] = applyAutomaticPrivilegeGrants(featureCopy);
   }
 
