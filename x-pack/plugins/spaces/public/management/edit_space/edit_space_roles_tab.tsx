@@ -15,7 +15,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { Role } from '@kbn/security-plugin-types-common';
 
-import { useEditSpaceServices, useEditSpaceStore } from './provider';
+import { EditSpaceProvider, useEditSpaceServices, useEditSpaceStore } from './provider';
 import { PrivilegesRolesForm } from './roles/component/space_assign_role_privilege_form';
 import { SpaceAssignedRolesTable } from './roles/component/space_assigned_roles_table';
 import type { Space } from '../../../common';
@@ -28,43 +28,39 @@ interface Props {
 
 export const EditSpaceAssignedRolesTab: FC<Props> = ({ space, features, isReadOnly }) => {
   const { dispatch, state } = useEditSpaceStore();
-  const {
-    getUrlForApp,
-    overlays,
-    theme,
-    i18n: i18nStart,
-    notifications,
-    invokeClient,
-  } = useEditSpaceServices();
+  const services = useEditSpaceServices();
+  const { getUrlForApp, overlays, theme, i18n: i18nStart, notifications, invokeClient } = services;
 
   const showRolesPrivilegeEditor = useCallback(
     (defaultSelected?: Role[]) => {
       const overlayRef = overlays.openFlyout(
         toMountPoint(
-          <PrivilegesRolesForm
-            {...{
-              space,
-              features,
-              onSaveCompleted: () => {
-                notifications.toasts.addSuccess(
-                  i18n.translate(
-                    'xpack.spaces.management.spaceDetails.roles.assignmentSuccessMsg',
-                    {
-                      defaultMessage: `Selected roles have been assigned to the {spaceName} space`,
-                      values: {
-                        spaceName: space.name,
-                      },
-                    }
-                  )
-                );
-                overlayRef.close();
-              },
-              closeFlyout: () => overlayRef.close(),
-              defaultSelected,
-              storeDispatch: dispatch,
-              spacesClientsInvocator: invokeClient,
-            }}
-          />,
+          <EditSpaceProvider {...services}>
+            <PrivilegesRolesForm
+              {...{
+                space,
+                features,
+                onSaveCompleted: () => {
+                  notifications.toasts.addSuccess(
+                    i18n.translate(
+                      'xpack.spaces.management.spaceDetails.roles.assignmentSuccessMsg',
+                      {
+                        defaultMessage: `Selected roles have been assigned to the {spaceName} space`,
+                        values: {
+                          spaceName: space.name,
+                        },
+                      }
+                    )
+                  );
+                  overlayRef.close();
+                },
+                closeFlyout: () => overlayRef.close(),
+                defaultSelected,
+                storeDispatch: dispatch,
+                spacesClientsInvocator: invokeClient,
+              }}
+            />
+          </EditSpaceProvider>,
           { theme, i18n: i18nStart }
         ),
         {
@@ -74,7 +70,17 @@ export const EditSpaceAssignedRolesTab: FC<Props> = ({ space, features, isReadOn
         }
       );
     },
-    [dispatch, features, i18nStart, invokeClient, notifications.toasts, overlays, space, theme]
+    [
+      dispatch,
+      features,
+      i18nStart,
+      invokeClient,
+      notifications.toasts,
+      overlays,
+      space,
+      theme,
+      services,
+    ]
   );
 
   const removeRole = useCallback(

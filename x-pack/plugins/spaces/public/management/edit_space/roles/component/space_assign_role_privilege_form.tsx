@@ -36,7 +36,7 @@ import { KibanaPrivileges } from '@kbn/security-role-management-model';
 import { KibanaPrivilegeTable, PrivilegeFormCalculator } from '@kbn/security-ui-components';
 
 import type { Space } from '../../../../../common';
-import type { EditSpaceServices, EditSpaceStore } from '../../provider';
+import { type EditSpaceServices, type EditSpaceStore, useEditSpaceServices } from '../../provider';
 
 type KibanaRolePrivilege = keyof NonNullable<KibanaFeatureConfig['privileges']> | 'custom';
 
@@ -110,6 +110,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
       ? 'read'
       : selectedRolesCombinedPrivileges[0]
   );
+  const { notifications } = useEditSpaceServices();
 
   useEffect(() => {
     async function fetchRequiredData(spaceId: string) {
@@ -266,8 +267,16 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
       });
 
       onSaveCompleted();
-    } catch (err) {
-      // Handle resulting error
+    } catch (error) {
+      console.error('Could not assign role to space!', error); // eslint-disable-line no-console
+      const message = error?.body?.message ?? error.toString();
+
+      notifications.toasts.addError(error, {
+        title: i18n.translate('xpack.spaces.management.spaceDetails.errorSavingSpaceTitle', {
+          defaultMessage: 'Error assigning role to space: {message}',
+          values: { message },
+        }),
+      });
     }
   }, [
     selectedRoles,
@@ -277,6 +286,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
     space.id,
     roleSpacePrivilege,
     roleCustomizationAnchor,
+    notifications.toasts,
   ]);
 
   const getForm = () => {
@@ -414,7 +424,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
                         return { value, privilegeIndex };
                       });
                     }}
-                    onChangeAll={(privilege) => {
+                    onChangeAll={(_privilege) => {
                       // dummy function we wouldn't be using this
                     }}
                     kibanaPrivileges={new KibanaPrivileges(kibanaPrivileges, features)}

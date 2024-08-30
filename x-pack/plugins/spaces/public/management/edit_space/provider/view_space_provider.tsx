@@ -42,8 +42,7 @@ export interface EditSpaceProviderProps
   getPrivilegesAPIClient: () => Promise<PrivilegesAPIClientPublicContract>;
 }
 
-export interface EditSpaceServices
-  extends Omit<EditSpaceProviderProps, 'getRolesAPIClient' | 'getPrivilegesAPIClient'> {
+export interface EditSpaceServices extends EditSpaceProviderProps {
   invokeClient<R extends unknown>(arg: (clients: EditSpaceClients) => Promise<R>): Promise<R>;
 }
 
@@ -64,14 +63,14 @@ const createEditSpaceServicesContext = once(() => createContext<EditSpaceService
 
 export const EditSpaceProvider = ({
   children,
-  getRolesAPIClient,
-  getPrivilegesAPIClient,
   ...services
 }: PropsWithChildren<EditSpaceProviderProps>) => {
   const EditSpaceStoreContext = createSpaceRolesContext();
   const EditSpaceServicesContext = createEditSpaceServicesContext();
 
-  const clients = useRef(Promise.all([getRolesAPIClient(), getPrivilegesAPIClient()]));
+  const clients = useRef(
+    Promise.all([services.getRolesAPIClient(), services.getPrivilegesAPIClient()])
+  );
   const rolesAPIClientRef = useRef<RolesAPIClient>();
   const privilegesClientRef = useRef<PrivilegesAPIClientPublicContract>();
 
@@ -82,8 +81,8 @@ export const EditSpaceProvider = ({
   const resolveAPIClients = useCallback(async () => {
     try {
       [rolesAPIClientRef.current, privilegesClientRef.current] = await clients.current;
-    } catch {
-      // handle errors
+    } catch (err) {
+      console.error('Could not resolve API Clients!', err); // eslint-disable-line no-console
     }
   }, []);
 

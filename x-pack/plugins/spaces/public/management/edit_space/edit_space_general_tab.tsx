@@ -134,13 +134,14 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
           props.reloadWindow();
         }
       } catch (error) {
+        console.error('Could not save changes to space!', error); // eslint-disable-line no-console
         const message = error?.body?.message ?? error.toString();
-        notifications.toasts.addDanger(
-          i18n.translate('xpack.spaces.management.spaceDetails.errorSavingSpaceTitle', {
+        notifications.toasts.addError(error, {
+          title: i18n.translate('xpack.spaces.management.spaceDetails.errorSavingSpaceTitle', {
             defaultMessage: 'Error saving space: {message}',
             values: { message },
-          })
-        );
+          }),
+        });
       } finally {
         setIsLoading(false);
       }
