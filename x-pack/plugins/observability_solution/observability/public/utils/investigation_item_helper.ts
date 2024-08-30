@@ -6,7 +6,10 @@
  */
 
 import { Group } from '@kbn/observability-alerting-rule-utils';
-import { CustomThresholdSearchSourceFields } from '../../common/custom_threshold_rule/types';
+import {
+  CustomThresholdExpressionMetric,
+  CustomThresholdSearchSourceFields,
+} from '../../common/custom_threshold_rule/types';
 import { MetricExpression } from '../components/custom_threshold/types';
 import { getGroupFilters } from '..';
 
@@ -19,7 +22,7 @@ const generateLensEquation = (criterion: MetricExpression) => {
   };
 
   criterion.metrics.forEach(
-    (metric: any) =>
+    (metric: CustomThresholdExpressionMetric) =>
       (metricNameResolver[metric.name] = `${
         aggMapping[metric.aggType] ? aggMapping[metric.aggType] : metric.aggType
       }(${metric.field ? metric.field : metric.filter ? metric.filter : ''})`)
