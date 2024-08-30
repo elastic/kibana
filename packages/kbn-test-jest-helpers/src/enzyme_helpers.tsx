@@ -63,6 +63,7 @@ export function shallowWithIntl(node: React.ReactElement, options?: ShallowRende
   const optionsWithIntl = getOptions(context, props);
 
   return shallow(nodeWithIntlProp(node), {
+    // @ts-expect-error enzyme types are incorrect with @types/react@18
     wrappingComponent: I18nProvider,
     ...optionsWithIntl,
   });
@@ -81,6 +82,7 @@ export function mountWithIntl(node: React.ReactElement, options?: MountRendererP
   const optionsWithIntl = getOptions(context, props);
 
   return mount(nodeWithIntlProp(node), {
+    // @ts-expect-error enzyme types are incorrect with @types/react@18
     wrappingComponent: I18nProvider,
     ...optionsWithIntl,
   });
@@ -135,7 +137,7 @@ interface ReactHookWrapper<Args, HookValue> {
  */
 export const mountHook = <Args extends {}, HookValue extends any>(
   body: (args: Args) => HookValue,
-  WrapperComponent?: React.ComponentType,
+  WrapperComponent?: React.ComponentType<{ children?: React.ReactNode }>,
   initialArgs: Args = {} as Args
 ): ReactHookWrapper<Args, HookValue> => {
   const hookValueCallback = jest.fn();
