@@ -9,7 +9,7 @@
 import React from 'react';
 
 import { EuiBasicTable, EuiBasicTableColumn, EuiIcon, EuiToolTip, EuiCode } from '@elastic/eui';
-import { ByteSizeValue } from '@kbn/config-schema/src/byte_size_value'; // importing from file to avoid leaking `joi` to the browser
+import { ByteSizeValue } from '@kbn/byte-size-value';
 import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';

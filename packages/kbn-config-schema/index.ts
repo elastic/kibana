@@ -9,7 +9,7 @@
 import { Duration } from 'moment';
 import { Stream } from 'stream';
 
-import { ByteSizeValue } from './src/byte_size_value';
+import { ByteSizeValue } from '@kbn/byte-size-value';
 import { ContextReference, Reference, SiblingReference } from './src/references';
 import {
   AnyType,
@@ -57,8 +57,8 @@ import {
 
 export type { AnyType, ConditionalType, TypeOf, Props, SchemaStructureEntry, NullableProps };
 export { ObjectType, Type };
+export { ByteSizeValue } from '@kbn/byte-size-value';
 export type { SchemaValidationOptions } from './src/types';
-export { ByteSizeValue } from './src/byte_size_value';
 export { SchemaTypeError, ValidationError } from './src/errors';
 export { isConfigSchema } from './src/typeguards';
 export { offeringBasedSchema } from './src/helpers';

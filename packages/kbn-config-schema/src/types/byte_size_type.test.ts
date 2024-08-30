@@ -7,7 +7,7 @@
  */
 
 import { schema } from '../..';
-import { ByteSizeValue } from '../byte_size_value';
+import { ByteSizeValue } from '@kbn/byte-size-value';
 
 const { byteSize } = schema;
 

@@ -193,6 +193,7 @@
     "@kbn/bfetch-error": "link:packages/kbn-bfetch-error",
     "@kbn/bfetch-explorer-plugin": "link:examples/bfetch_explorer",
     "@kbn/bfetch-plugin": "link:src/plugins/bfetch",
+    "@kbn/byte-size-value": "link:packages/kbn-byte-size-value",
     "@kbn/calculate-auto": "link:packages/kbn-calculate-auto",
     "@kbn/calculate-width-from-char-count": "link:packages/kbn-calculate-width-from-char-count",
     "@kbn/canvas-plugin": "link:x-pack/plugins/canvas",

@@ -11,7 +11,7 @@ import type { JoiRoot, CustomHelpers } from 'joi';
 import { isPlainObject } from 'lodash';
 import { isDuration } from 'moment';
 import { Stream } from 'stream';
-import { ByteSizeValue, ensureByteSizeValue } from '../byte_size_value';
+import { ByteSizeValue, ensureByteSizeValue } from '@kbn/byte-size-value';
 import { ensureDuration } from '../duration';
 
 function isMap<K, V>(o: any): o is Map<K, V> {

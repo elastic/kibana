@@ -116,6 +116,8 @@
       "@kbn/bfetch-explorer-plugin/*": ["examples/bfetch_explorer/*"],
       "@kbn/bfetch-plugin": ["src/plugins/bfetch"],
       "@kbn/bfetch-plugin/*": ["src/plugins/bfetch/*"],
+      "@kbn/byte-size-value": ["packages/kbn-byte-size-value"],
+      "@kbn/byte-size-value/*": ["packages/kbn-byte-size-value/*"],
       "@kbn/calculate-auto": ["packages/kbn-calculate-auto"],
       "@kbn/calculate-auto/*": ["packages/kbn-calculate-auto/*"],
       "@kbn/calculate-width-from-char-count": ["packages/kbn-calculate-width-from-char-count"],

@@ -3486,6 +3486,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/byte-size-value@link:packages/kbn-byte-size-value":
+  version "0.0.0"
+  uid ""
+
 "@kbn/calculate-auto@link:packages/kbn-calculate-auto":
   version "0.0.0"
   uid ""

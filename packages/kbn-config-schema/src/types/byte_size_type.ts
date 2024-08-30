@@ -7,7 +7,7 @@
  */
 
 import typeDetect from 'type-detect';
-import { ByteSizeValue, ensureByteSizeValue } from '../byte_size_value';
+import { ByteSizeValue, ensureByteSizeValue } from '@kbn/byte-size-value';
 import { SchemaTypeError } from '../errors';
 import { internals } from '../internals';
 import { Type } from './type';
