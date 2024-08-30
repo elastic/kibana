@@ -6,6 +6,7 @@
  */
 
 import { PassThrough } from 'stream';
+import { loggerMock } from '@kbn/logging-mocks';
 import type { InferenceExecutor } from '../../utils/inference_executor';
 import { MessageRole } from '../../../../common/chat_complete';
 import { ToolChoiceType } from '../../../../common/chat_complete/tools';
@@ -13,6 +14,7 @@ import { bedrockClaudeAdapter } from './bedrock_claude_adapter';
 import { addNoToolUsageDirective } from './prompts';
 
 describe('bedrockClaudeAdapter', () => {
+  const logger = loggerMock.create();
   const executorMock = {
     invoke: jest.fn(),
   } as InferenceExecutor & { invoke: jest.MockedFn<InferenceExecutor['invoke']> };
@@ -41,6 +43,7 @@ describe('bedrockClaudeAdapter', () => {
   describe('#chatComplete()', () => {
     it('calls `executor.invoke` with the right fixed parameters', () => {
       bedrockClaudeAdapter.chatComplete({
+        logger,
         executor: executorMock,
         messages: [
           {
@@ -69,6 +72,7 @@ describe('bedrockClaudeAdapter', () => {
     it('correctly format tools', () => {
       bedrockClaudeAdapter.chatComplete({
         executor: executorMock,
+        logger,
         messages: [
           {
             role: MessageRole.User,
@@ -127,6 +131,7 @@ describe('bedrockClaudeAdapter', () => {
     it('correctly format messages', () => {
       bedrockClaudeAdapter.chatComplete({
         executor: executorMock,
+        logger,
         messages: [
           {
             role: MessageRole.User,
@@ -225,6 +230,7 @@ describe('bedrockClaudeAdapter', () => {
     it('correctly format system message', () => {
       bedrockClaudeAdapter.chatComplete({
         executor: executorMock,
+        logger,
         system: 'Some system message',
         messages: [
           {
@@ -243,6 +249,7 @@ describe('bedrockClaudeAdapter', () => {
     it('correctly format tool choice', () => {
       bedrockClaudeAdapter.chatComplete({
         executor: executorMock,
+        logger,
         messages: [
           {
             role: MessageRole.User,
@@ -263,6 +270,7 @@ describe('bedrockClaudeAdapter', () => {
     it('correctly format tool choice for named function', () => {
       bedrockClaudeAdapter.chatComplete({
         executor: executorMock,
+        logger,
         messages: [
           {
             role: MessageRole.User,
@@ -284,6 +292,7 @@ describe('bedrockClaudeAdapter', () => {
     it('correctly adapt the request for ToolChoiceType.None', () => {
       bedrockClaudeAdapter.chatComplete({
         executor: executorMock,
+        logger,
         system: 'some system instruction',
         messages: [
           {
