@@ -71,8 +71,6 @@ const mountComponentWithProviders = (props: Props): ReactWrapper => {
   );
 };
 
-// x-pack/plugins/observability_solution/metrics_data_access/public/pages/link_to/use_asset_details_redirect.ts
-
 jest.mock(
   '@kbn/metrics-data-access-plugin/public/pages/link_to/use_asset_details_redirect',
   () => ({
