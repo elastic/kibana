@@ -106,6 +106,7 @@ export const FlyoutNavigation = memo<FlyoutNavigationProps>(
                       size="xs"
                       color="primary"
                       iconType="newChat"
+                      data-test-subj="newChatFromOverlay"
                       onClick={onConversationCreate}
                       disabled={isLoading || !isAssistantEnabled}
                     >
