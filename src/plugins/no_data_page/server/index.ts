@@ -8,7 +8,7 @@
 
 import { PluginConfigDescriptor } from '@kbn/core-plugins-server';
 
-import { configSchema, NoDataPageConfig } from '../config';
+import { configSchema, NoDataPageConfig } from './config';
 
 export const config: PluginConfigDescriptor<NoDataPageConfig> = {
   exposeToBrowser: {
