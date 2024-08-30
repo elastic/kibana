@@ -33,10 +33,12 @@ import { MonacoEditorActionsProvider } from './monaco_editor_actions_provider';
 import { getSuggestionProvider } from './monaco_editor_suggestion_provider';
 
 export interface EditorProps {
-  initialTextValue: string;
+  localStorageValue: string | undefined;
+  value: string;
+  setValue: (value: string) => void;
 }
 
-export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
+export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps) => {
   const context = useServicesContext();
   const {
     services: { notifications, settings: settingsService, autocompleteInfo },
@@ -123,9 +125,8 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
   const suggestionProvider = useMemo(() => {
     return getSuggestionProvider(actionsProvider);
   }, []);
-  const [value, setValue] = useState(initialTextValue);
 
-  useSetInitialValue({ initialTextValue, setValue, toasts });
+  useSetInitialValue({ localStorageValue, setValue, toasts });
 
   useSetupAutocompletePolling({ autocompleteInfo, settingsService });
 
@@ -167,6 +168,7 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
     <div
       css={css`
         width: 100%;
+        height: 100%;
       `}
       ref={divRef}
       data-test-subj="consoleMonacoEditorContainer"
