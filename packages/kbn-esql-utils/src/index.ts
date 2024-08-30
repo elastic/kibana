@@ -16,7 +16,7 @@ export {
   removeDropCommandsFromESQLQuery,
   hasTransformationalCommand,
   getTimeFieldFromESQLQuery,
-  retieveMetadataColumns,
+  retrieveMetadataColumns,
 } from './utils/query_parsing_helpers';
 export { appendToESQLQuery, appendWhereClauseToESQLQuery } from './utils/append_to_query';
 export {

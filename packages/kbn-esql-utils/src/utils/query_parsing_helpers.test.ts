@@ -12,7 +12,7 @@ import {
   removeDropCommandsFromESQLQuery,
   hasTransformationalCommand,
   getTimeFieldFromESQLQuery,
-  retieveMetadataColumns,
+  retrieveMetadataColumns,
 } from './query_parsing_helpers';
 
 describe('esql query helpers', () => {
@@ -177,16 +177,16 @@ describe('esql query helpers', () => {
     });
   });
 
-  describe('retieveMetadataColumns', () => {
+  describe('retrieveMetadataColumns', () => {
     it('should return metadata columns if they exist', () => {
-      expect(retieveMetadataColumns('from a  metadata _id, _ignored | eval b = 1')).toStrictEqual([
+      expect(retrieveMetadataColumns('from a  metadata _id, _ignored | eval b = 1')).toStrictEqual([
         '_id',
         '_ignored',
       ]);
     });
 
     it('should return empty columns if metadata doesnt exist', () => {
-      expect(retieveMetadataColumns('from a | eval b = 1')).toStrictEqual([]);
+      expect(retrieveMetadataColumns('from a | eval b = 1')).toStrictEqual([]);
     });
   });
 });

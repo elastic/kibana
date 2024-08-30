@@ -112,7 +112,7 @@ export const getTimeFieldFromESQLQuery = (esql: string) => {
   return column?.name;
 };
 
-export const retieveMetadataColumns = (esql: string): string[] => {
+export const retrieveMetadataColumns = (esql: string): string[] => {
   const { ast } = getAstAndSyntaxErrors(esql);
   const options: ESQLCommandOption[] = [];
 
