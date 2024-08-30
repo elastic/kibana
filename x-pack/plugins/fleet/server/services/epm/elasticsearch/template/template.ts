@@ -526,7 +526,7 @@ function _generateMappings(
                     : field.name,
                 },
                 isIndexModeTimeSeries
-              ).properties
+              ).properties;
             }
             break;
           case 'integer':
