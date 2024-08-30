@@ -7,6 +7,7 @@
  */
 
 import type { HttpStart } from '@kbn/core-http-browser';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { GetFavoritesResponse } from '@kbn/content-management-favorites-server';
 
 export interface FavoritesClientPublic {
@@ -15,10 +16,16 @@ export interface FavoritesClientPublic {
   removeFavorite({ id }: { id: string }): Promise<GetFavoritesResponse>;
 
   getFavoriteType(): string;
+  reportAddFavoriteClick(): void;
+  reportRemoveFavoriteClick(): void;
 }
 
 export class FavoritesClient implements FavoritesClientPublic {
-  constructor(private favoriteObjectType: string, private deps: { http: HttpStart }) {}
+  constructor(
+    private readonly appName: string,
+    private readonly favoriteObjectType: string,
+    private readonly deps: { http: HttpStart; usageCollection?: UsageCollectionStart }
+  ) {}
 
   public async getFavorites(): Promise<GetFavoritesResponse> {
     return this.deps.http.get(`/internal/content_management/favorites/${this.favoriteObjectType}`);
@@ -38,5 +45,12 @@ export class FavoritesClient implements FavoritesClientPublic {
 
   public getFavoriteType() {
     return this.favoriteObjectType;
+  }
+
+  public reportAddFavoriteClick() {
+    this.deps.usageCollection?.reportUiCounter(this.appName, 'click', 'add_favorite');
+  }
+  public reportRemoveFavoriteClick() {
+    this.deps.usageCollection?.reportUiCounter(this.appName, 'click', 'remove_favorite');
   }
 }

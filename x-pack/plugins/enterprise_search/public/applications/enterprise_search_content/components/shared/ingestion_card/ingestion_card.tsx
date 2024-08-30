@@ -46,6 +46,7 @@ export const IngestionCard: React.FC<IngestionCardProps> = ({
       hasBorder
       isDisabled={isDisabled}
       textAlign="left"
+      titleElement="h3"
       title={
         <>
           <EuiFlexGroup direction="row" alignItems="center">

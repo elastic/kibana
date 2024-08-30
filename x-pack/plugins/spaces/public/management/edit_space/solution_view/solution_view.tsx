@@ -24,6 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { Space } from '../../../../common';
+import type { SpaceValidator } from '../../lib';
 import { SectionPanel } from '../section_panel';
 
 type SolutionView = Space['solution'];
@@ -98,18 +99,22 @@ const getOptions = ({ size }: EuiThemeComputed): Array<EuiSuperSelectOption<Solu
 interface Props {
   space: Partial<Space>;
   onChange: (space: Partial<Space>) => void;
+  isEditing: boolean;
+  validator: SpaceValidator;
+  sectionTitle?: string;
 }
 
-export const SolutionView: FunctionComponent<Props> = ({ space, onChange }) => {
+export const SolutionView: FunctionComponent<Props> = ({
+  space,
+  onChange,
+  validator,
+  isEditing,
+  sectionTitle,
+}) => {
   const { euiTheme } = useEuiTheme();
 
   return (
-    <SectionPanel
-      title={i18n.translate('xpack.spaces.management.manageSpacePage.navigationTitle', {
-        defaultMessage: 'Navigation',
-      })}
-      dataTestSubj="navigationPanel"
-    >
+    <SectionPanel title={sectionTitle} dataTestSubj="navigationPanel">
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiTitle size="xs">
@@ -136,6 +141,7 @@ export const SolutionView: FunctionComponent<Props> = ({ space, onChange }) => {
               defaultMessage: 'Solution view',
             })}
             fullWidth
+            {...validator.validateSolutionView(space, isEditing)}
           >
             <EuiSuperSelect
               options={getOptions(euiTheme)}
@@ -144,6 +150,13 @@ export const SolutionView: FunctionComponent<Props> = ({ space, onChange }) => {
               onChange={(solution) => {
                 onChange({ ...space, solution });
               }}
+              placeholder={i18n.translate(
+                'xpack.spaces.management.navigation.solutionViewDefaultValue',
+                {
+                  defaultMessage: 'Classic (Default)',
+                }
+              )}
+              isInvalid={validator.validateSolutionView(space, isEditing).isInvalid}
             />
           </EuiFormRow>
         </EuiFlexItem>
