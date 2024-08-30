@@ -11,6 +11,7 @@ import {
   getConsoleManagerMockRenderResultQueriesAndActions,
 } from '../../../console/components/console_manager/mocks';
 import React from 'react';
+import userEvent from '@testing-library/user-event';
 import { getEndpointConsoleCommands } from '../../lib/console_commands_definition';
 import { enterConsoleCommand } from '../../../console/mocks';
 import { getEndpointAuthzInitialState } from '../../../../../../common/endpoint/service/authz';
@@ -118,10 +119,14 @@ describe('When using processes action from response actions console', () => {
   });
 
   it('should show expected status output', async () => {
+    jest.useFakeTimers();
+
+    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     pendingActionsMock();
     endpointDetailsMock();
     await render();
-    enterConsoleCommand(renderResult, 'status');
+    enterConsoleCommand(renderResult, user, 'status');
     const statusResults = renderResult.getByTestId('agent-status-console-output');
 
     expect(
@@ -147,5 +152,7 @@ describe('When using processes action from response actions console', () => {
       'With Eventing',
       'Apr 20, 2023 @ 09:37:40.309',
     ]);
+
+    jest.useRealTimers();
   });
 });

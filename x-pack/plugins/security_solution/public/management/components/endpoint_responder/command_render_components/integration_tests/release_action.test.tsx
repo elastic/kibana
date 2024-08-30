@@ -15,6 +15,7 @@ import React from 'react';
 import { getEndpointConsoleCommands } from '../../lib/console_commands_definition';
 import { enterConsoleCommand } from '../../../console/mocks';
 import { waitFor } from '@testing-library/react';
+import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { responseActionsHttpMocks } from '../../../../mocks/response_actions_http_mocks';
 import { getDeferred } from '../../../../mocks/utils';
 import { getEndpointAuthzInitialState } from '../../../../../../common/endpoint/service/authz';
@@ -25,6 +26,7 @@ import { UPGRADE_AGENT_FOR_RESPONDER } from '../../../../../common/translations'
 jest.mock('../../../../../common/experimental_features_service');
 
 describe('When using the release action from response actions console', () => {
+  let user: UserEvent;
   let render: (
     capabilities?: EndpointCapabilities[]
   ) => Promise<ReturnType<AppContextTestRender['render']>>;
@@ -34,7 +36,17 @@ describe('When using the release action from response actions console', () => {
     typeof getConsoleManagerMockRenderResultQueriesAndActions
   >;
 
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   beforeEach(() => {
+    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     const mockedContext = createAppRootMockRenderer();
 
     apiMocks = responseActionsHttpMocks(mockedContext.coreStart.http);
@@ -73,7 +85,7 @@ describe('When using the release action from response actions console', () => {
 
   it('should show an error if the `isolation` capability is not present in the endpoint', async () => {
     await render([]);
-    enterConsoleCommand(renderResult, 'release');
+    enterConsoleCommand(renderResult, user, 'release');
 
     expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
       UPGRADE_AGENT_FOR_RESPONDER('endpoint', 'release')
@@ -82,7 +94,7 @@ describe('When using the release action from response actions console', () => {
 
   it('should call `release` api when command is entered', async () => {
     await render();
-    enterConsoleCommand(renderResult, 'release');
+    enterConsoleCommand(renderResult, user, 'release');
 
     await waitFor(() => {
       expect(apiMocks.responseProvider.releaseHost).toHaveBeenCalledTimes(1);
@@ -92,7 +104,7 @@ describe('When using the release action from response actions console', () => {
 
   it('should accept an optional `--comment`', async () => {
     await render();
-    enterConsoleCommand(renderResult, 'release --comment "This is a comment"');
+    enterConsoleCommand(renderResult, user, 'release --comment "This is a comment"');
 
     await waitFor(() => {
       expect(apiMocks.responseProvider.releaseHost).toHaveBeenCalledWith(
@@ -105,7 +117,7 @@ describe('When using the release action from response actions console', () => {
 
   it('should only accept one `--comment`', async () => {
     await render();
-    enterConsoleCommand(renderResult, 'release --comment "one" --comment "two"');
+    enterConsoleCommand(renderResult, user, 'release --comment "one" --comment "two"');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
       'Argument can only be used once: --comment'
@@ -114,7 +126,7 @@ describe('When using the release action from response actions console', () => {
 
   it('should call the action status api after creating the `release` request', async () => {
     await render();
-    enterConsoleCommand(renderResult, 'release');
+    enterConsoleCommand(renderResult, user, 'release');
 
     await waitFor(() => {
       expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalled();
@@ -123,7 +135,7 @@ describe('When using the release action from response actions console', () => {
 
   it('should show success when `release` action completes with no errors', async () => {
     await render();
-    enterConsoleCommand(renderResult, 'release');
+    enterConsoleCommand(renderResult, user, 'release');
 
     await waitFor(() => {
       expect(renderResult.getByTestId('release-success')).toBeTruthy();
@@ -147,7 +159,7 @@ describe('When using the release action from response actions console', () => {
     };
     apiMocks.responseProvider.actionDetails.mockReturnValue(pendingDetailResponse);
     await render();
-    enterConsoleCommand(renderResult, 'release');
+    enterConsoleCommand(renderResult, user, 'release');
 
     await waitFor(() => {
       expect(renderResult.getByTestId('release-actionFailure').textContent).toMatch(
@@ -162,7 +174,7 @@ describe('When using the release action from response actions console', () => {
     await render();
 
     // enter command
-    enterConsoleCommand(renderResult, 'release');
+    enterConsoleCommand(renderResult, user, 'release');
     // hide console
     await consoleManagerMockAccess.hideOpenedConsole();
 
@@ -186,7 +198,7 @@ describe('When using the release action from response actions console', () => {
 
       render = async () => {
         const response = await _render();
-        enterConsoleCommand(response, 'release');
+        enterConsoleCommand(response, user, 'release');
 
         await waitFor(() => {
           expect(apiMocks.responseProvider.releaseHost).toHaveBeenCalledTimes(1);

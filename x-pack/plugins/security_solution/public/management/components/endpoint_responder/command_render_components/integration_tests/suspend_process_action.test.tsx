@@ -15,6 +15,7 @@ import React from 'react';
 import { getEndpointConsoleCommands } from '../../lib/console_commands_definition';
 import { enterConsoleCommand } from '../../../console/mocks';
 import { waitFor } from '@testing-library/react';
+import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { responseActionsHttpMocks } from '../../../../mocks/response_actions_http_mocks';
 import { getEndpointAuthzInitialState } from '../../../../../../common/endpoint/service/authz';
 import type { EndpointCapabilities } from '../../../../../../common/endpoint/service/response_actions/constants';
@@ -29,6 +30,7 @@ import { UPGRADE_AGENT_FOR_RESPONDER } from '../../../../../common/translations'
 jest.mock('../../../../../common/experimental_features_service');
 
 describe('When using the suspend-process action from response actions console', () => {
+  let user: UserEvent;
   let render: (
     capabilities?: EndpointCapabilities[]
   ) => Promise<ReturnType<AppContextTestRender['render']>>;
@@ -38,7 +40,17 @@ describe('When using the suspend-process action from response actions console', 
     typeof getConsoleManagerMockRenderResultQueriesAndActions
   >;
 
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   beforeEach(() => {
+    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     const mockedContext = createAppRootMockRenderer();
 
     apiMocks = responseActionsHttpMocks(mockedContext.coreStart.http);
@@ -79,7 +91,7 @@ describe('When using the suspend-process action from response actions console', 
 
   it('should show an error if the `suspend_process` capability is not present in the endpoint', async () => {
     await render([]);
-    enterConsoleCommand(renderResult, 'suspend-process --pid 123');
+    enterConsoleCommand(renderResult, user, 'suspend-process --pid 123');
 
     expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
       UPGRADE_AGENT_FOR_RESPONDER('endpoint', 'suspend-process')
@@ -88,7 +100,7 @@ describe('When using the suspend-process action from response actions console', 
 
   it('should call `suspend-process` api when command is entered', async () => {
     await render();
-    enterConsoleCommand(renderResult, 'suspend-process --pid 123');
+    enterConsoleCommand(renderResult, user, 'suspend-process --pid 123');
 
     await waitFor(() => {
       expect(apiMocks.responseProvider.suspendProcess).toHaveBeenCalledTimes(1);
@@ -97,7 +109,11 @@ describe('When using the suspend-process action from response actions console', 
 
   it('should accept an optional `--comment`', async () => {
     await render();
-    enterConsoleCommand(renderResult, 'suspend-process --pid 123 --comment "This is a comment"');
+    enterConsoleCommand(
+      renderResult,
+      user,
+      'suspend-process --pid 123 --comment "This is a comment"'
+    );
 
     await waitFor(() => {
       expect(apiMocks.responseProvider.suspendProcess).toHaveBeenCalledWith(
@@ -110,7 +126,11 @@ describe('When using the suspend-process action from response actions console', 
 
   it('should only accept one `--comment`', async () => {
     await render();
-    enterConsoleCommand(renderResult, 'suspend-process --pid 123 --comment "one" --comment "two"');
+    enterConsoleCommand(
+      renderResult,
+      user,
+      'suspend-process --pid 123 --comment "one" --comment "two"'
+    );
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
       'Argument can only be used once: --comment'
@@ -119,7 +139,7 @@ describe('When using the suspend-process action from response actions console', 
 
   it('should only accept one exclusive argument', async () => {
     await render();
-    enterConsoleCommand(renderResult, 'suspend-process --pid 123 --entityId 123wer');
+    enterConsoleCommand(renderResult, user, 'suspend-process --pid 123 --entityId 123wer');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
       'This command supports only one of the following arguments: --pid, --entityId'
@@ -128,7 +148,7 @@ describe('When using the suspend-process action from response actions console', 
 
   it('should check for at least one exclusive argument', async () => {
     await render();
-    enterConsoleCommand(renderResult, 'suspend-process');
+    enterConsoleCommand(renderResult, user, 'suspend-process');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
       'This command supports only one of the following arguments: --pid, --entityId'
@@ -137,7 +157,7 @@ describe('When using the suspend-process action from response actions console', 
 
   it('should check the pid has a given value', async () => {
     await render();
-    enterConsoleCommand(renderResult, 'suspend-process --pid');
+    enterConsoleCommand(renderResult, user, 'suspend-process --pid');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
       'Invalid argument value: --pid. Argument cannot be empty'
@@ -146,7 +166,7 @@ describe('When using the suspend-process action from response actions console', 
 
   it('should check the pid has a non-empty value', async () => {
     await render();
-    enterConsoleCommand(renderResult, 'suspend-process --pid "   "');
+    enterConsoleCommand(renderResult, user, 'suspend-process --pid "   "');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
       'Invalid argument value: --pid. Argument cannot be empty'
@@ -155,7 +175,7 @@ describe('When using the suspend-process action from response actions console', 
 
   it('should check the pid has a non-negative value', async () => {
     await render();
-    enterConsoleCommand(renderResult, 'suspend-process --pid -123');
+    enterConsoleCommand(renderResult, user, 'suspend-process --pid -123');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
       'Invalid argument value: --pid. Argument must be a positive number representing the PID of a process'
@@ -164,7 +184,7 @@ describe('When using the suspend-process action from response actions console', 
 
   it('should check the pid is a number', async () => {
     await render();
-    enterConsoleCommand(renderResult, 'suspend-process --pid asd');
+    enterConsoleCommand(renderResult, user, 'suspend-process --pid asd');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
       'Invalid argument value: --pid. Argument must be a positive number representing the PID of a process'
@@ -173,7 +193,7 @@ describe('When using the suspend-process action from response actions console', 
 
   it('should check the entityId has a given value', async () => {
     await render();
-    enterConsoleCommand(renderResult, 'suspend-process --entityId');
+    enterConsoleCommand(renderResult, user, 'suspend-process --entityId');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
       'Invalid argument value: --entityId. Argument cannot be empty'
@@ -182,7 +202,7 @@ describe('When using the suspend-process action from response actions console', 
 
   it('should check the entity id has a non-empty value', async () => {
     await render();
-    enterConsoleCommand(renderResult, 'suspend-process --entityId "   "');
+    enterConsoleCommand(renderResult, user, 'suspend-process --entityId "   "');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
       'Invalid argument value: --entityId. Argument cannot be empty'
@@ -191,7 +211,7 @@ describe('When using the suspend-process action from response actions console', 
 
   it('should call the action status api after creating the `suspend-process` request', async () => {
     await render();
-    enterConsoleCommand(renderResult, 'suspend-process --pid 123');
+    enterConsoleCommand(renderResult, user, 'suspend-process --pid 123');
 
     await waitFor(() => {
       expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalled();
@@ -200,7 +220,7 @@ describe('When using the suspend-process action from response actions console', 
 
   it('should show success when `suspend-process` action completes with no errors when using `pid`', async () => {
     await render();
-    enterConsoleCommand(renderResult, 'suspend-process --pid 123');
+    enterConsoleCommand(renderResult, user, 'suspend-process --pid 123');
 
     await waitFor(() => {
       expect(renderResult.getByTestId('suspendProcess-success')).toBeTruthy();
@@ -209,7 +229,7 @@ describe('When using the suspend-process action from response actions console', 
 
   it('should show success when `suspend-process` action completes with no errors when using `entityId`', async () => {
     await render();
-    enterConsoleCommand(renderResult, 'suspend-process --entityId 123wer');
+    enterConsoleCommand(renderResult, user, 'suspend-process --entityId 123wer');
 
     await waitFor(() => {
       expect(renderResult.getByTestId('suspendProcess-success')).toBeTruthy();
@@ -233,7 +253,7 @@ describe('When using the suspend-process action from response actions console', 
     };
     apiMocks.responseProvider.actionDetails.mockReturnValue(pendingDetailResponse);
     await render();
-    enterConsoleCommand(renderResult, 'suspend-process --pid 123');
+    enterConsoleCommand(renderResult, user, 'suspend-process --pid 123');
 
     await waitFor(() => {
       expect(renderResult.getByTestId('suspendProcess-actionFailure').textContent).toMatch(
@@ -248,7 +268,7 @@ describe('When using the suspend-process action from response actions console', 
       message: 'this is an error',
     } as never);
     await render();
-    enterConsoleCommand(renderResult, 'suspend-process --pid 123');
+    enterConsoleCommand(renderResult, user, 'suspend-process --pid 123');
 
     await waitFor(() => {
       expect(renderResult.getByTestId('suspendProcess-apiFailure').textContent).toMatch(
@@ -286,7 +306,7 @@ describe('When using the suspend-process action from response actions console', 
 
       apiMocks.responseProvider.actionDetails.mockReturnValue(pendingDetailResponse);
       await render();
-      enterConsoleCommand(renderResult, 'suspend-process --pid 123');
+      enterConsoleCommand(renderResult, user, 'suspend-process --pid 123');
 
       await waitFor(() => {
         expect(renderResult.getByTestId('suspendProcess-actionFailure').textContent).toMatch(
@@ -302,7 +322,7 @@ describe('When using the suspend-process action from response actions console', 
 
       render = async () => {
         const response = await _render();
-        enterConsoleCommand(response, 'suspend-process --pid 123');
+        enterConsoleCommand(response, user, 'suspend-process --pid 123');
 
         await waitFor(() => {
           expect(apiMocks.responseProvider.suspendProcess).toHaveBeenCalledTimes(1);

@@ -131,8 +131,15 @@ describe('Response actions history page', () => {
     refetch: refetchFunction,
   };
 
-  beforeEach(async () => {
+  beforeAll(() => {
     jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
+  beforeEach(async () => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
     user = userEvent.setup({
       advanceTimers: jest.advanceTimersByTime,
@@ -169,7 +176,6 @@ describe('Response actions history page', () => {
     };
     jest.clearAllMocks();
     jest.runOnlyPendingTimers();
-    jest.useRealTimers();
   });
 
   describe('Hide/Show header', () => {
@@ -449,7 +455,9 @@ describe('Response actions history page', () => {
     });
   });
 
-  describe('Set selected/set values to URL params', () => {
+  // TODO: These tests need revisiting, they likely time out because of slow click events after
+  // the upgrade to user-event v14 (https://github.com/elastic/kibana/pull/189949)
+  describe.skip('Set selected/set values to URL params', () => {
     it('should set selected page number to URL params', async () => {
       render();
       const { getByTestId } = renderResult;
@@ -469,8 +477,6 @@ describe('Response actions history page', () => {
       expect(history.location.search).toEqual('?page=1&pageSize=20');
     });
 
-    // TODO: This needs revisiting, it times out because of slow click events after
-    // the upgrade to user-event v14 (https://github.com/elastic/kibana/pull/189949)
     it('should set selected command filter options to URL params', async () => {
       const filterPrefix = 'actions-filter';
       render();
@@ -487,9 +493,7 @@ describe('Response actions history page', () => {
       );
     });
 
-    // TODO: This needs revisiting, it times out because of slow click events after
-    // the upgrade to user-event v14 (https://github.com/elastic/kibana/pull/189949)
-    it.skip('should set selected hosts filter options to URL params ', async () => {
+    it('should set selected hosts filter options to URL params ', async () => {
       const filterPrefix = 'hosts-filter';
       render();
       const { getAllByTestId, getByTestId } = renderResult;
@@ -611,9 +615,9 @@ describe('Response actions history page', () => {
     });
   });
 
-  describe('Clear all selected options on a filter', () => {
-    // TODO: This needs revisiting, it times out because of slow click events after
-    // the upgrade to user-event v14 (https://github.com/elastic/kibana/pull/189949)
+  // TODO: These tests need revisiting, they likely time out because of slow click events after
+  // the upgrade to user-event v14 (https://github.com/elastic/kibana/pull/189949)
+  describe.skip('Clear all selected options on a filter', () => {
     it('should clear all selected options on `actions` filter', async () => {
       const filterPrefix = 'actions-filter';
       render();
@@ -634,9 +638,7 @@ describe('Response actions history page', () => {
       expect(history.location.search).toEqual('');
     });
 
-    // TODO: This needs revisiting, it times out because of slow click events after
-    // the upgrade to user-event v14 (https://github.com/elastic/kibana/pull/189949)
-    it.skip('should clear all selected options on `hosts` filter', async () => {
+    it('should clear all selected options on `hosts` filter', async () => {
       const filterPrefix = 'hosts-filter';
       render();
       const { getAllByTestId, getByTestId } = renderResult;
@@ -656,9 +658,7 @@ describe('Response actions history page', () => {
       expect(history.location.search).toEqual('');
     });
 
-    // TODO: This needs revisiting, it times out because of slow click events after
-    // the upgrade to user-event v14 (https://github.com/elastic/kibana/pull/189949)
-    it.skip('should clear all selected options on `statuses` filter', async () => {
+    it('should clear all selected options on `statuses` filter', async () => {
       const filterPrefix = 'statuses-filter';
       render();
       const { getAllByTestId, getByTestId } = renderResult;
@@ -676,9 +676,7 @@ describe('Response actions history page', () => {
       expect(history.location.search).toEqual('');
     });
 
-    // TODO: This needs revisiting, it times out because of slow click events after
-    // the upgrade to user-event v14 (https://github.com/elastic/kibana/pull/189949)
-    it.skip('should clear `agentTypes` and `actionTypes` selected options on `types` filter', async () => {
+    it('should clear `agentTypes` and `actionTypes` selected options on `types` filter', async () => {
       mockedContext.setExperimentalFlag({
         responseActionsSentinelOneV1Enabled: true,
       });

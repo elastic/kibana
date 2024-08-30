@@ -28,7 +28,7 @@ import { getEndpointConsoleCommands } from '../..';
 import React from 'react';
 import { getConsoleSelectorsAndActionMock } from '../../../console/mocks';
 import { waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { executionTranslations } from '../../../console/components/console_state/state_update_handlers/translations';
 import { UPLOAD_ROUTE } from '../../../../../../common/endpoint/constants';
 import type { HttpFetchOptionsWithPath } from '@kbn/core-http-browser';
@@ -39,6 +39,7 @@ import {
 import { endpointActionResponseCodes } from '../../lib/endpoint_action_response_codes';
 
 describe('When using `upload` response action', () => {
+  let user: UserEvent;
   let render: (
     capabilities?: EndpointCapabilities[]
   ) => Promise<ReturnType<AppContextTestRender['render']>>;
@@ -53,6 +54,8 @@ describe('When using `upload` response action', () => {
   let console: ReturnType<typeof getConsoleSelectorsAndActionMock>;
 
   beforeEach(() => {
+    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     const mockedContext = createAppRootMockRenderer();
 
     mockedContext.setExperimentalFlag({ responseActionUploadEnabled: true });
@@ -82,7 +85,7 @@ describe('When using `upload` response action', () => {
         />
       );
 
-      console = getConsoleSelectorsAndActionMock(renderResult);
+      console = getConsoleSelectorsAndActionMock(renderResult, user);
       consoleManagerMockAccess = getConsoleManagerMockRenderResultQueriesAndActions(renderResult);
 
       await consoleManagerMockAccess.clickOnRegisterNewConsole();
