@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { riskEngineInitRoute } from './init';
-import { riskEngineEnableRoute } from './enable';
-import { riskEngineDisableRoute } from './disable';
-import { riskEngineStatusRoute } from './status';
-import { riskEnginePrivilegesRoute } from './privileges';
-import { riskEngineSettingsRoute } from './settings';
-import type { EntityAnalyticsRoutesDeps } from '../../types';
+import { riskEngineInitRoute } from "./init";
+import { riskEngineEnableRoute } from "./enable";
+import { riskEngineDisableRoute } from "./disable";
+import { riskEngineStatusRoute } from "./status";
+import { riskEnginePrivilegesRoute } from "./privileges";
+import { riskEngineSettingsRoute } from "./settings";
+import type { EntityAnalyticsRoutesDeps } from "../../types";
+import { riskEngineCleanupRoute } from "./delete";
 
 export const registerRiskEngineRoutes = ({
   router,
@@ -22,4 +23,5 @@ export const registerRiskEngineRoutes = ({
   riskEngineDisableRoute(router, getStartServices);
   riskEngineSettingsRoute(router);
   riskEnginePrivilegesRoute(router, getStartServices);
+  riskEngineCleanupRoute(router, getStartServices);
 };
