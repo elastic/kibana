@@ -28,6 +28,10 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 
 import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 
+import type {
+  PutTransformsLatestRequestSchema,
+  PutTransformsPivotRequestSchema,
+} from '../../../../../../server/routes/api_schemas/transforms';
 import { PROGRESS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants';
 
 import { getErrorMessage } from '../../../../../../common/utils/errors';
@@ -37,10 +41,6 @@ import { useCreateTransform, useGetTransformStats, useStartTransforms } from '..
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 import { RedirectToTransformManagement } from '../../../../common/navigation';
 import { ToastNotificationText } from '../../../../components';
-import type {
-  PutTransformsLatestRequestSchema,
-  PutTransformsPivotRequestSchema,
-} from '../../../../../../common/api_schemas/transforms';
 import { isContinuousTransform } from '../../../../../../common/types/transform';
 import { TransformAlertFlyout } from '../../../../../alerting/transform_alerting_flyout';
 

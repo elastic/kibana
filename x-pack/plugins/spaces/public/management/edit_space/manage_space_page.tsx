@@ -66,6 +66,7 @@ interface State {
   features: KibanaFeature[];
   originalSpace?: Partial<Space>;
   showAlteringActiveSpaceDialog: boolean;
+  showVisibleFeaturesPicker: boolean;
   haveDisabledFeaturesChanged: boolean;
   hasSolutionViewChanged: boolean;
   isLoading: boolean;
@@ -85,6 +86,7 @@ export class ManageSpacePage extends Component<Props, State> {
     this.state = {
       isLoading: true,
       showAlteringActiveSpaceDialog: false,
+      showVisibleFeaturesPicker: !!props.allowFeatureVisibility,
       saveInProgress: false,
       space: {
         color: getSpaceColor({}),
@@ -203,7 +205,9 @@ export class ManageSpacePage extends Component<Props, State> {
             <EuiSpacer size="l" />
             <SolutionView
               space={this.state.space}
-              onChange={this.onSpaceChange}
+              onChange={this.onSolutionViewChange}
+              validator={this.validator}
+              isEditing={this.editingExistingSpace()}
               sectionTitle={i18n.translate(
                 'xpack.spaces.management.manageSpacePage.navigationTitle',
                 { defaultMessage: 'Navigation' }
@@ -212,7 +216,7 @@ export class ManageSpacePage extends Component<Props, State> {
           </>
         )}
 
-        {this.props.allowFeatureVisibility && (
+        {this.state.showVisibleFeaturesPicker && (
           <>
             <EuiSpacer />
             <EnabledFeatures
@@ -348,6 +352,17 @@ export class ManageSpacePage extends Component<Props, State> {
     return null;
   };
 
+  private onSolutionViewChange = (space: Partial<Space>) => {
+    if (this.props.allowFeatureVisibility) {
+      let showVisibleFeaturesPicker = false;
+      if (space.solution === 'classic' || space.solution == null) {
+        showVisibleFeaturesPicker = true;
+      }
+      this.setState((state) => ({ ...state, showVisibleFeaturesPicker }));
+    }
+    this.onSpaceChange(space);
+  };
+
   public onSpaceChange = (updatedSpace: FormValues) => {
     this.setState({
       space: updatedSpace,
@@ -360,7 +375,11 @@ export class ManageSpacePage extends Component<Props, State> {
     const originalSpace: Space = this.state.originalSpace as Space;
     const space: Space = this.state.space as Space;
     const { haveDisabledFeaturesChanged, hasSolutionViewChanged } = this.state;
-    const result = this.validator.validateForSave(space);
+    const result = this.validator.validateForSave(
+      space,
+      this.editingExistingSpace(),
+      this.props.allowSolutionVisibility
+    );
     if (result.isInvalid) {
       this.setState({
         formError: result,
