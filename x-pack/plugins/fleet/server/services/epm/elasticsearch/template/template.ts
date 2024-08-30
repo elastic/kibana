@@ -515,7 +515,7 @@ function _generateMappings(
             break;
           case 'nested':
           case 'group-nested':
-            fieldProps = { ...fieldProps, ...generateNestedProps(field), type: 'nested' };
+            fieldProps = { ...generateNestedProps(field), type: 'nested' };
             if (field.fields) {
               fieldProps.properties = _generateMappings(
                 field.fields!,
