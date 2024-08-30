@@ -105,13 +105,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await dashboardControls.optionsListGetCardinalityValue()).to.be('4');
       await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[0]);
 
-      dashboardControls.validateRange('placeholder', controlIds[1], '100', '1200');
+      await dashboardControls.validateRange('placeholder', controlIds[1], '100', '1200');
 
       await dashboardControls.optionsListOpenPopover(controlIds[2]);
       expect(await dashboardControls.optionsListGetCardinalityValue()).to.be('5');
       await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[2]);
 
-      dashboardControls.validateRange('placeholder', controlIds[3], '0', '19979');
+      await dashboardControls.validateRange('placeholder', controlIds[3], '0', '19979');
     });
 
     it('ignores controls on other controls and panels using a data view without the control field by default', async () => {
@@ -120,13 +120,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardControls.optionsListPopoverSelectOption('Kibana Airlines');
       await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[0]);
 
-      dashboardControls.validateRange('placeholder', controlIds[1], '100', '1196');
+      await dashboardControls.validateRange('placeholder', controlIds[1], '100', '1196');
 
       await dashboardControls.optionsListOpenPopover(controlIds[2]);
       expect(await dashboardControls.optionsListGetCardinalityValue()).to.be('5');
       await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[2]);
 
-      dashboardControls.validateRange('placeholder', controlIds[3], '0', '19979');
+      await dashboardControls.validateRange('placeholder', controlIds[3], '0', '19979');
 
       const logstashSavedSearchPanel = await testSubjects.find('embeddedSavedSearchDocTable');
       expect(
@@ -154,13 +154,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await dashboardControls.optionsListGetCardinalityValue()).to.be('4');
       await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[0]);
 
-      dashboardControls.validateRange('placeholder', controlIds[1], '100', '1200');
+      await dashboardControls.validateRange('placeholder', controlIds[1], '100', '1200');
 
       await dashboardControls.optionsListOpenPopover(controlIds[2]);
       expect(await dashboardControls.optionsListGetCardinalityValue()).to.be('0');
       await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[2]);
 
-      dashboardControls.validateRange('placeholder', controlIds[3], '0', '0');
+      await dashboardControls.validateRange('placeholder', controlIds[3], '0', '0');
     });
 
     it('applies global filters on controls using a data view without the filter field', async () => {
@@ -169,13 +169,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardControls.optionsListPopoverSelectOption('Kibana Airlines');
       await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[0]);
 
-      dashboardControls.validateRange('placeholder', controlIds[1], '100', '1196');
+      await dashboardControls.validateRange('placeholder', controlIds[1], '100', '1196');
 
       await dashboardControls.optionsListOpenPopover(controlIds[2]);
       expect(await dashboardControls.optionsListGetCardinalityValue()).to.be('0');
       await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[2]);
 
-      dashboardControls.validateRange('placeholder', controlIds[3], '0', '0');
+      await dashboardControls.validateRange('placeholder', controlIds[3], '0', '0');
 
       const logstashSavedSearchPanel = await testSubjects.find('embeddedSavedSearchDocTable');
       expect(

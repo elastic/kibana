@@ -34,6 +34,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     after(async () => {
       await kibanaServer.importExport.unload(kbnArchive);
+      await kibanaServer.savedObjects.cleanStandardList();
+      await security.testUser.restoreDefaults();
     });
 
     beforeEach(async () => {
@@ -41,11 +43,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await esArchiver.load('x-pack/test/functional/es_archives/reporting/archived_reports');
       await pageObjects.common.navigateToApp('reporting');
       await testSubjects.existOrFail(REPORT_TABLE_ID, { timeout: 200000 });
-    });
-
-    after(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
-      await security.testUser.restoreDefaults();
     });
 
     afterEach(async () => {
