@@ -16,6 +16,113 @@ To enable the backfill transform set a value to `history.settings.backfillSyncDe
 
 History and summary transforms will output their data to indices where history writes to time-based (monthly) indices (`.entities.v1.history.<definition-id>.<yyyy-MM-dd>`) and summary writes to a unique indice (`.entities.v1.latest.<definition-id>`). For convenience we create type-based aliases on top on these indices, where the type is extracted from the `entityDefinition.type` property. For a definition of `type: service`, the data can be read through the `entities-service-history` and `entities-service-latest` aliases.
 
+**Entity definition example**:
+
+One can create a definition with a `POST kbn:/internal/entities/definition` request, or through the [entity client](https://github.com/elastic/kibana/blob/main/x-pack/plugins/observability_solution/entity_manager/server/lib/entity_client.ts). Given the `services_from_logs` definition below, the history transform will create one entity document per service per minute (based on `@timestamp` field, granted at least one document exist for a given bucket in the source indices), with the `logRate` metric and `data_stream.type` metadata aggregated over one minute. Note that it is not necessary to add the `identifyFields` as metadata as these will be automatically collected in the output documents, and that it is possible to set `identityFields` as optional.
+
+__service_from_logs definition__
+```
+{
+  "id": "services_from_logs",
+  "name": "Extract services from logs",
+  "type": "service",
+  "indexPatterns": ["logs-*"],
+  "identityFields": ["service.name", { "field": "service.environment", "optional": true }],
+  "displayNameTemplate": "{{service.name}}{{#service.environment}}:{{.}}{{/service.environment}}",
+  "metadata": [
+    "data_stream.type"
+  ],
+  "metrics": [
+    {
+      "name": "logRate",
+      "equation": "A",
+      "metrics": [
+        {
+          "aggregation": "doc_count",
+          "filter": "log.level: *",
+          "name": "A"
+        }
+      ]
+    }
+  ],
+  "history": {
+    "timestampField": "@timestamp",
+    "interval": "1m"
+  },
+  "version": "1.0.0"
+}
+```
+
+__services_from_logs history entity__
+```
+{
+  "@timestamp": 1725021900000,
+  "event": {
+    "ingested": "2024-08-30T12:49:57.600784550Z"
+  },
+  "entity": {
+    "lastSeenTimestamp": "2024-08-30T12:45:29.308Z",
+    "schemaVersion": "v1",
+    "definitionVersion": "1.0.0",
+    "identityFields": [
+      "service.name",
+      "service.environment"
+    ],
+    "metrics": {
+      "logRate": 1
+    },
+    "id": "xFF9jc/wxiHrgidS+PwIgQ==",
+    "type": "service",
+    "definitionId": "services_from_logs"
+  },
+  "data_stream": {
+    "type": [
+      "logs"
+    ]
+  },
+  "service": {
+    "environment": "default",
+    "name": "opbeans-swift"
+  }
+}
+```
+
+__services_from_logs summary entity__
+```
+{
+  "event": {
+    "ingested": "2024-08-30T12:50:27.637038362Z"
+  },
+  "entity": {
+    "lastSeenTimestamp": "2024-08-30T12:45:29.308Z",
+    "schemaVersion": "v1",
+    "definitionVersion": "1.0.0",
+    "displayName": "opbeans-swift:default",
+    "identityFields": [
+      "service.name",
+      "service.environment"
+    ],
+    "id": "xFF9jc/wxiHrgidS+PwIgQ==",
+    "metrics": {
+      "logRate": 1
+    },
+    "type": "service",
+    "firstSeenTimestamp": "2024-08-30T11:51:00.000Z",
+    "definitionId": "services_from_definition"
+  },
+  "data_stream": {
+    "type": [
+        "logs"
+    ]
+  },
+  "service": {
+    "environment": "default",
+    "name": "opbeans-swift"
+  }
+}
+```
+
+
 #### Extension
 The index templates and ingest pipelines created for a given definition are managed by the Entity manager and should not be directly updated. These components still offer extension points that allow customization of each transform through optional components labelled `<component-name>@platform` and `<component-name>@custom` where the former is targeted towards Elastic solution teams and the latter for end users. `@custom` will take precedence when both are defined.
 The extension points allow defining a global component (ie applied to both transforms) with `<definition-id>@custom`, or transform specific components with `<definition-id>-(latest|history)@custom`.
