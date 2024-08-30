@@ -312,7 +312,11 @@ export const ReactControlExample = ({
               core.overlays.openModal(
                 toMountPoint(
                   <EuiCodeBlock language="json">
-                    {JSON.stringify(controlGroupApi?.serializeState(), null, 2)}
+                    {JSON.stringify(
+                      controlGroupApi?.serializeState(controlGroupApi.snapshotRuntimeState()),
+                      null,
+                      2
+                    )}
                   </EuiCodeBlock>,
                   {
                     theme: core.theme,
@@ -376,7 +380,9 @@ export const ReactControlExample = ({
                 onClick={async () => {
                   if (controlGroupApi) {
                     saveNotification$.next();
-                    setControlGroupSerializedState(await controlGroupApi.serializeState());
+                    setControlGroupSerializedState(
+                      await controlGroupApi.serializeState(controlGroupApi.snapshotRuntimeState())
+                    );
                   }
                 }}
               >

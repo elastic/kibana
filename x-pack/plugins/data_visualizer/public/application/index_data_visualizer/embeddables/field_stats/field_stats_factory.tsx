@@ -138,13 +138,9 @@ export const getFieldStatsChartEmbeddableFactory = (
         fieldFormats,
         ...startServices,
       };
-      const {
-        api: timeRangeApi,
-        comparators: timeRangeComparators,
-        serialize: serializeTimeRange,
-      } = initializeTimeRange(state);
+      const { api: timeRangeApi, comparators: timeRangeComparators } = initializeTimeRange(state);
 
-      const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
+      const { titlesApi, titleComparators } = initializeTitles(state);
 
       const {
         fieldStatsControlsApi,
@@ -236,7 +232,7 @@ export const getFieldStatsChartEmbeddableFactory = (
             }
           },
           dataViews: dataViews$,
-          serializeState: () => {
+          serializeState: (runtimeState) => {
             const dataViewId = fieldStatsControlsApi.dataViewId$?.getValue();
             const references: Reference[] = dataViewId
               ? [
@@ -248,11 +244,7 @@ export const getFieldStatsChartEmbeddableFactory = (
                 ]
               : [];
             return {
-              rawState: {
-                ...serializeTitles(),
-                ...serializeTimeRange(),
-                ...serializeFieldStatsChartState(),
-              },
+              rawState: runtimeState,
               references,
             };
           },

@@ -138,6 +138,25 @@ export const ReactEmbeddableRenderer = <
             >,
             comparators: StateComparators<RuntimeState>
           ) => {
+            const unsavedChanges = initializeUnsavedChanges<RuntimeState>(
+              lastSavedRuntimeState,
+              parentApi,
+              comparators
+            );
+
+            const fullApi = setApi({
+              serializeState: (runtimeState: RuntimeState) => {
+                return {
+                  rawState: runtimeState,
+                  references: [],
+                };
+              },
+              ...apiRegistration,
+              ...unsavedChanges.api,
+            } as unknown as SetReactEmbeddableApiRegistration<SerializedState, RuntimeState, Api>);
+
+            cleanupFunction.current = () => unsavedChanges.cleanup();
+
             if (onAnyStateChange) {
               /**
                * To avoid unnecessary re-renders, only subscribe to the comparator publishing subjects if
@@ -152,13 +171,12 @@ export const ReactEmbeddableRenderer = <
                     skip(1),
                     debounceTime(ON_STATE_CHANGE_DEBOUNCE),
                     switchMap(() => {
-                      const isAsync =
-                        apiRegistration.serializeState.prototype?.name === 'AsyncFunction';
+                      const isAsync = fullApi.serializeState.prototype?.name === 'AsyncFunction';
                       return isAsync
-                        ? (apiRegistration.serializeState() as Promise<
+                        ? (fullApi.serializeState(fullApi.snapshotRuntimeState()) as Promise<
                             SerializedPanelState<SerializedState>
                           >)
-                        : Promise.resolve(apiRegistration.serializeState());
+                        : Promise.resolve(fullApi.serializeState(fullApi.snapshotRuntimeState()));
                     })
                   )
                   .subscribe((nextSerializedState) => {
@@ -167,18 +185,6 @@ export const ReactEmbeddableRenderer = <
               );
             }
 
-            const unsavedChanges = initializeUnsavedChanges<RuntimeState>(
-              lastSavedRuntimeState,
-              parentApi,
-              comparators
-            );
-
-            const fullApi = setApi({
-              ...apiRegistration,
-              ...unsavedChanges.api,
-            } as unknown as SetReactEmbeddableApiRegistration<SerializedState, RuntimeState, Api>);
-
-            cleanupFunction.current = () => unsavedChanges.cleanup();
             return fullApi as Api & HasSnapshottableState<RuntimeState>;
           };
 

@@ -54,11 +54,6 @@ export const getDataTableFactory = (
         ...timeRange.api,
         ...titlesApi,
         dataLoading: queryLoading$,
-        serializeState: () => {
-          return {
-            rawState: { ...serializeTitles(), ...timeRange.serialize() },
-          };
-        },
       },
       { ...titleComparators, ...timeRange.comparators }
     );

@@ -38,7 +38,7 @@ export const getErrorBudgetEmbeddableFactory = (deps: SloEmbeddableDeps) => {
       return state.rawState as SloErrorBudgetEmbeddableState;
     },
     buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
-      const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
+      const { titlesApi, titleComparators } = initializeTitles(state);
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getErrorBudgetPanelTitle());
       const sloId$ = new BehaviorSubject(state.sloId);
       const sloInstanceId$ = new BehaviorSubject(state.sloInstanceId);
@@ -48,15 +48,6 @@ export const getErrorBudgetEmbeddableFactory = (deps: SloEmbeddableDeps) => {
         {
           ...titlesApi,
           defaultPanelTitle: defaultTitle$,
-          serializeState: () => {
-            return {
-              rawState: {
-                ...serializeTitles(),
-                sloId: sloId$.getValue(),
-                sloInstanceId: sloInstanceId$.getValue(),
-              },
-            };
-          },
         },
         {
           sloId: [sloId$, (value) => sloId$.next(value)],

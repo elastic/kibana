@@ -108,7 +108,7 @@ export const getFieldListFactory = (
           ...titlesApi,
           dataViews: dataViews$,
           selectedFields: selectedFieldNames$,
-          serializeState: () => {
+          serializeState: (runtimeState) => {
             const dataViewId = selectedDataViewId$.getValue();
             const references: Reference[] = dataViewId
               ? [
@@ -120,11 +120,7 @@ export const getFieldListFactory = (
                 ]
               : [];
             return {
-              rawState: {
-                ...serializeTitles(),
-                // here we skip serializing the dataViewId, because the reference contains that information.
-                selectedFieldNames: selectedFieldNames$.getValue(),
-              },
+              rawState: runtimeState,
               references,
             };
           },

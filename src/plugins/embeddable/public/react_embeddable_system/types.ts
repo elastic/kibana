@@ -32,7 +32,7 @@ export interface DefaultEmbeddableApi<
     HasType,
     PublishesPhaseEvents,
     Partial<PublishesUnsavedChanges>,
-    HasSerializableState<SerializedState>,
+    HasSerializableState<SerializedState, RuntimeState>,
     HasSnapshottableState<RuntimeState> {}
 
 /**
@@ -61,8 +61,9 @@ export type BuildReactEmbeddableApiRegistration<
   >
 > = Omit<
   SetReactEmbeddableApiRegistration<SerializedState, RuntimeState, Api>,
-  'unsavedChanges' | 'resetUnsavedChanges' | 'snapshotRuntimeState'
->;
+  'unsavedChanges' | 'resetUnsavedChanges' | 'snapshotRuntimeState' | 'serializeState'
+> &
+  Partial<HasSerializableState>; // serializeState is optional; if not provided, it will be overwritten by the default
 
 /**
  * The React Embeddable Factory interface is used to register a series of functions that

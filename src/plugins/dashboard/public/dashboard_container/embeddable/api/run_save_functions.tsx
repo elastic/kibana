@@ -9,22 +9,19 @@
 import type { Reference } from '@kbn/content-management-utils';
 import type { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import {
-  EmbeddableInput,
-  isReferenceOrValueEmbeddable,
-  ViewMode,
-} from '@kbn/embeddable-plugin/public';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { apiHasSerializableState, SerializedPanelState } from '@kbn/presentation-containers';
+import { apiHasSnapshottableState } from '@kbn/presentation-containers/interfaces/serialized_state';
+import {
+  apiHasInPlaceLibraryTransforms,
+  apiHasLibraryTransforms,
+} from '@kbn/presentation-publishing';
 import { showSaveModal } from '@kbn/saved-objects-plugin/public';
 import { cloneDeep } from 'lodash';
 import React from 'react';
 import { batch } from 'react-redux';
-import { i18n } from '@kbn/i18n';
-import {
-  DashboardContainerInput,
-  DashboardPanelMap,
-  prefixReferencesFromPanel,
-} from '../../../../common';
+import { DashboardContainerInput, prefixReferencesFromPanel } from '../../../../common';
 import { DASHBOARD_CONTENT_ID, SAVED_OBJECT_POST_TIME } from '../../../dashboard_constants';
 import {
   SaveDashboardReturn,
@@ -37,7 +34,8 @@ import { extractTitleAndCount } from './lib/extract_title_and_count';
 import { DashboardSaveModal } from './overlays/save_modal';
 
 const serializeAllPanelState = async (
-  dashboard: DashboardContainer
+  dashboard: DashboardContainer,
+  serializeByValue?: boolean
 ): Promise<{ panels: DashboardContainerInput['panels']; references: Reference[] }> => {
   const {
     embeddable: { reactEmbeddableRegistryHasKey },
@@ -52,10 +50,16 @@ const serializeAllPanelState = async (
     if (!reactEmbeddableRegistryHasKey(panel.type)) continue;
     const api = dashboard.children$.value[uuid];
 
-    if (api && apiHasSerializableState(api)) {
+    if (api && apiHasSerializableState(api) && apiHasSnapshottableState(api)) {
       serializePromises.push(
         (async () => {
-          const serialized = await api.serializeState();
+          const serialized = await api.serializeState(
+            serializeByValue && apiHasInPlaceLibraryTransforms(api)
+              ? api.getByValueRuntimeSnapshot()
+              : apiHasLibraryTransforms(api)
+              ? api.getByValueState()
+              : api.snapshotRuntimeState()
+          );
           return { uuid, serialized };
         })()
       );
@@ -123,6 +127,7 @@ export async function runInteractiveSave(this: DashboardContainer, interactionMo
         timefilter: { timefilter },
       },
     },
+    // embeddable: { reactEmbeddableRegistryHasKey },
     savedObjectsTagging: { hasApi: hasSavedObjectsTagging },
     dashboardContentManagement: { checkForDuplicateDashboardTitle, saveDashboardState },
   } = pluginServices.getServices();
@@ -196,32 +201,7 @@ export async function runInteractiveSave(this: DashboardContainer, interactionMo
           };
         }
 
-        const { panels: nextPanels, references } = await serializeAllPanelState(this);
-
-        const newPanels = await (async () => {
-          if (!managed) return nextPanels;
-
-          // this is a managed dashboard - unlink all by reference embeddables on clone
-          const unlinkedPanels: DashboardPanelMap = {};
-          for (const [panelId, panel] of Object.entries(nextPanels)) {
-            const child = this.getChild(panelId);
-            if (
-              child &&
-              isReferenceOrValueEmbeddable(child) &&
-              child.inputIsRefType(child.getInput() as EmbeddableInput)
-            ) {
-              const valueTypeInput = await child.getInputAsValueType();
-              unlinkedPanels[panelId] = {
-                ...panel,
-                explicitInput: valueTypeInput,
-              };
-              continue;
-            }
-            unlinkedPanels[panelId] = panel;
-          }
-          return unlinkedPanels;
-        })();
-
+        const { panels: newPanels, references } = await serializeAllPanelState(this, managed);
         const beforeAddTime = window.performance.now();
 
         const saveResult = await saveDashboardState({

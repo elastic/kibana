@@ -46,11 +46,7 @@ export const getSingleMetricViewerEmbeddableFactory = (
       const subscriptions = new Subscription();
       const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
 
-      const {
-        api: timeRangeApi,
-        comparators: timeRangeComparators,
-        serialize: serializeTimeRange,
-      } = initializeTimeRange(state);
+      const { api: timeRangeApi, comparators: timeRangeComparators } = initializeTimeRange(state);
 
       const {
         singleMetricViewerControlsApi,
@@ -97,17 +93,6 @@ export const getSingleMetricViewerEmbeddableFactory = (
           ...singleMetricViewerControlsApi,
           dataLoading,
           blockingError,
-          serializeState: () => {
-            return {
-              rawState: {
-                timeRange: undefined,
-                ...serializeTitles(),
-                ...serializeTimeRange(),
-                ...serializeSingleMetricViewerState(),
-              },
-              references: [],
-            };
-          },
         },
         {
           ...timeRangeComparators,

@@ -27,7 +27,7 @@ export const getApmAlertingLatencyChartEmbeddableFactory = (deps: EmbeddableDeps
       return state.rawState as EmbeddableApmAlertingLatencyVizProps;
     },
     buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
-      const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
+      const { titlesApi, titleComparators } = initializeTitles(state);
       const serviceName$ = new BehaviorSubject(state.serviceName);
       const transactionType$ = new BehaviorSubject(state.transactionType);
       const transactionName$ = new BehaviorSubject(state.transactionName);
@@ -45,24 +45,6 @@ export const getApmAlertingLatencyChartEmbeddableFactory = (deps: EmbeddableDeps
       const api = buildApi(
         {
           ...titlesApi,
-          serializeState: () => {
-            return {
-              rawState: {
-                ...serializeTitles(),
-                serviceName: serviceName$.getValue(),
-                transactionType: transactionType$.getValue(),
-                transactionName: transactionName$.getValue(),
-                environment: environment$.getValue(),
-                latencyThresholdInMicroseconds: latencyThresholdInMicroseconds$.getValue(),
-                rangeFrom: rangeFrom$.getValue(),
-                rangeTo: rangeTo$.getValue(),
-                rule: rule$.getValue(),
-                alert: alert$.getValue(),
-                kuery: kuery$.getValue(),
-                filters: filters$.getValue(),
-              },
-            };
-          },
         },
         {
           serviceName: [serviceName$, (value) => serviceName$.next(value)],

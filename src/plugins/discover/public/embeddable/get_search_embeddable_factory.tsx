@@ -174,16 +174,14 @@ export const getSearchEmbeddableFactory = ({
             defaultPanelTitle$.next(undefined);
             defaultPanelDescription$.next(undefined);
           },
-          serializeState: async () =>
-            serializeState({
+          serializeState: async (runtimeState) => {
+            return serializeState({
               uuid,
-              initialState,
+              runtimeState,
               savedSearch: searchEmbeddable.api.savedSearch$.getValue(),
-              serializeTitles,
-              serializeTimeRange: timeRange.serialize,
-              savedObjectId: savedObjectId$.getValue(),
               discoverServices,
-            }),
+            });
+          },
         },
         {
           ...titleComparators,

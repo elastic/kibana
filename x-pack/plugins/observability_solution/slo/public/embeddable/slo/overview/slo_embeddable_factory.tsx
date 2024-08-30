@@ -58,7 +58,7 @@ export const getOverviewEmbeddableFactory = (
           return Promise.reject();
         }
       }
-      const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
+      const { titlesApi, titleComparators } = initializeTitles(state);
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getOverviewPanelTitle());
       const sloId$ = new BehaviorSubject(state.sloId);
       const sloInstanceId$ = new BehaviorSubject(state.sloInstanceId);
@@ -79,19 +79,6 @@ export const getOverviewEmbeddableFactory = (
           isEditingEnabled: () => api.getSloGroupOverviewConfig().overviewMode === 'groups',
           onEdit: async () => {
             onEdit();
-          },
-          serializeState: () => {
-            return {
-              rawState: {
-                ...serializeTitles(),
-                sloId: sloId$.getValue(),
-                sloInstanceId: sloInstanceId$.getValue(),
-                showAllGroupByInstances: showAllGroupByInstances$.getValue(),
-                overviewMode: overviewMode$.getValue(),
-                groupFilters: groupFilters$.getValue(),
-                remoteName: remoteName$.getValue(),
-              },
-            };
           },
           getSloGroupOverviewConfig: () => {
             return {
