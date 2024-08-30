@@ -677,6 +677,17 @@
             "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.elasticapmrumcore",
+            "type": "string",
+            "tags": [],
+            "label": "'@elastic/apm-rum-core'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
