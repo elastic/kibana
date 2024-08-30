@@ -2403,7 +2403,7 @@ describe('The metric threshold rule type', () => {
               }, {})
             : null,
 
-        groupByKeys,
+        ...(groupByKeys ? { groupByKeys } : {}),
 
         ...(tags ? { tags } : {}),
         ...(alertState !== 'ERROR'
@@ -2438,7 +2438,7 @@ describe('The metric threshold rule type', () => {
                         value: groupByKeys[key],
                       })),
                     }
-                : { [ALERT_GROUP]: undefined }),
+                : {}),
             }
           : {}),
         [ALERT_REASON]: reason,
