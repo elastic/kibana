@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '@kbn/core/server';
-
 import type { SecurityRequestHandlerContext } from '@kbn/core-security-server';
 
 import { toAlphanumeric } from '../../../common/utils/to_alphanumeric';
 
 export const createApiKey = async (
-  request: KibanaRequest,
   security: SecurityRequestHandlerContext,
   indexName: string,
   keyName: string

@@ -29,7 +29,7 @@ export function registerApiKeysRoutes({ log, router }: RouteDependencies) {
       const { keyName } = request.body;
       const { security: coreSecurity } = await context.core;
 
-      const createResponse = await createApiKey(request, coreSecurity, indexName, keyName);
+      const createResponse = await createApiKey(coreSecurity, indexName, keyName);
 
       if (!createResponse) {
         throw new Error('Unable to create API Key');
