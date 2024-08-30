@@ -8,7 +8,7 @@
 import { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
 import { Plugin } from './plugin';
 import { MetricsDataPluginSetup, MetricsDataPluginStart, RouteState } from './types';
-import { useNodeDetailsRedirect } from './pages/link_to';
+import { useAssetDetailsRedirect } from './pages/link_to';
 
 export const plugin: PluginInitializer<MetricsDataPluginSetup, MetricsDataPluginStart> = (
   context: PluginInitializerContext
@@ -20,4 +20,4 @@ export type { MetricsDataPluginSetup, MetricsDataPluginStart };
 
 export type { RouteState };
 
-export { useNodeDetailsRedirect };
+export { useAssetDetailsRedirect };

@@ -28,7 +28,7 @@ const mockDataView = {
   toSpec: () => ({}),
 } as jest.Mocked<DataView>;
 
-const series = { id: 'exmaple-01', rows: [], columns: [] };
+const series = { id: 'example-01', rows: [], columns: [] };
 const uiCapabilities: Capabilities = {
   navLinks: { show: false },
   management: { fake: { show: false } },
@@ -71,7 +71,7 @@ const mountComponentWithProviders = (props: Props): ReactWrapper => {
   );
 };
 
-jest.mock('../../../link_to', () => ({
+jest.mock('@kbn/metrics-data-access-plugin/public', () => ({
   useNodeDetailsRedirect: jest.fn(() => ({
     getNodeDetailUrl: jest.fn(() => ({
       onClick: jest.fn(),

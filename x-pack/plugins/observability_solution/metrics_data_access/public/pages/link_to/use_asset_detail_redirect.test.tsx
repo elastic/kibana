@@ -10,7 +10,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
-import { useNodeDetailsRedirect } from './use_node_details_redirect';
+import { useAssetDetailsRedirect } from './use_asset_details_redirect';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -38,14 +38,14 @@ const wrapper = ({ children }: { children: React.ReactNode }): JSX.Element => (
 
 describe('useNodeDetailsRedirect', () => {
   it('should return the LinkProperties for nodeType pod', () => {
-    const { result } = renderHook(() => useNodeDetailsRedirect(), { wrapper });
+    const { result } = renderHook(() => useAssetDetailsRedirect(), { wrapper });
 
     const fromDateStrig = '2019-01-01T11:00:00Z';
     const toDateStrig = '2019-01-01T12:00:00Z';
 
-    const getLinkProps = result.current.getNodeDetailUrl({
-      nodeType: 'pod',
-      nodeId: 'example-01',
+    const getLinkProps = result.current.getAssetDetailUrl({
+      assetType: 'pod',
+      assetId: 'example-01',
       search: {
         from: new Date(fromDateStrig).getTime(),
         to: new Date(toDateStrig).getTime(),
@@ -58,14 +58,14 @@ describe('useNodeDetailsRedirect', () => {
   });
 
   it('should return the LinkProperties for nodeType host', () => {
-    const { result } = renderHook(() => useNodeDetailsRedirect(), { wrapper });
+    const { result } = renderHook(() => useAssetDetailsRedirect(), { wrapper });
 
     const fromDateStrig = '2019-01-01T11:00:00Z';
     const toDateStrig = '2019-01-01T12:00:00Z';
 
-    const getLinkProps = result.current.getNodeDetailUrl({
-      nodeType: 'host',
-      nodeId: 'example-01',
+    const getLinkProps = result.current.getAssetDetailUrl({
+      assetType: 'host',
+      assetId: 'example-01',
       search: {
         from: new Date(fromDateStrig).getTime(),
         to: new Date(toDateStrig).getTime(),

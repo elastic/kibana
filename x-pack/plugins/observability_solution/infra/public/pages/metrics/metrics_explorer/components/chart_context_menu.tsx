@@ -18,7 +18,7 @@ import DateMath from '@kbn/datemath';
 import { Capabilities } from '@kbn/core/public';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
-import { useNodeDetailsRedirect } from '@kbn/metrics-data-access-plugin/public';
+import { useAssetDetailsRedirect } from '@kbn/metrics-data-access-plugin/public';
 import { useMetricsDataViewContext } from '../../../../containers/metrics_source';
 import { AlertFlyout } from '../../../../alerting/metric_threshold/components/alert_flyout';
 import { MetricsExplorerSeries } from '../../../../../common/http_api/metrics_explorer';
@@ -70,7 +70,7 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
   uiCapabilities,
   chartOptions,
 }: Props) => {
-  const { getNodeDetailUrl } = useNodeDetailsRedirect();
+  const { getAssetDetailUrl } = useAssetDetailsRedirect();
   const [isPopoverOpen, setPopoverState] = useState(false);
   const [flyoutVisible, setFlyoutVisible] = useState(false);
   const { metricsView } = useMetricsDataViewContext();
@@ -107,9 +107,9 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
   const nodeType = options.groupBy && fieldToNodeType(options.groupBy);
 
   const nodeDetailLinkProps = nodeType
-    ? getNodeDetailUrl({
-        nodeType,
-        nodeId: series.id,
+    ? getAssetDetailUrl({
+        assetType: nodeType,
+        assetId: series.id,
         search: {
           from: dateMathExpressionToEpoch(timeRange.from),
           to: dateMathExpressionToEpoch(timeRange.to, true),

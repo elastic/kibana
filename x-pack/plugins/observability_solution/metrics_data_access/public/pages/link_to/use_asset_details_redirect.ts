@@ -23,7 +23,7 @@ interface QueryParams {
   name?: string;
 }
 
-export const useNodeDetailsRedirect = () => {
+export const useAssetDetailsRedirect = () => {
   const location = useLocation();
   const {
     services: {
@@ -35,19 +35,19 @@ export const useNodeDetailsRedirect = () => {
   const appId = useObservable(currentAppId$);
   const locator = share?.url.locators.get<AssetDetailsLocatorParams>(ASSET_DETAILS_LOCATOR_ID);
 
-  const getNodeDetailUrl = useCallback(
+  const getAssetDetailUrl = useCallback(
     ({
-      nodeType,
-      nodeId,
+      assetType,
+      assetId,
       search,
     }: {
-      nodeType: InventoryItemType;
-      nodeId: string;
+      assetType: InventoryItemType;
+      assetId: string;
       search: QueryParams;
     }): RouterLinkProps => {
       const { to, from, ...rest } = search;
       const queryParams = {
-        nodeDetails:
+        assetDetails:
           Object.keys(rest).length > 0
             ? {
                 ...rest,
@@ -66,10 +66,10 @@ export const useNodeDetailsRedirect = () => {
         },
       };
 
-      const nodeDetailsLocatorParams = {
+      const assetDetailsLocatorParams = {
         ...queryParams,
-        assetType: nodeType,
-        assetId: nodeId,
+        assetType,
+        assetId,
         state: {
           ...(location.state ?? {}),
           ...(location.key
@@ -82,17 +82,17 @@ export const useNodeDetailsRedirect = () => {
         },
       };
 
-      const nodeDetailsLinkProps = getRouterLinkProps({
-        href: locator?.getRedirectUrl(nodeDetailsLocatorParams),
+      const assetDetailsLinkProps = getRouterLinkProps({
+        href: locator?.getRedirectUrl(assetDetailsLocatorParams),
         onClick: () => {
-          locator?.navigate(nodeDetailsLocatorParams, { replace: false });
+          locator?.navigate(assetDetailsLocatorParams, { replace: false });
         },
       });
 
-      return nodeDetailsLinkProps;
+      return assetDetailsLinkProps;
     },
     [appId, location.key, location.pathname, location.search, location.state, locator]
   );
 
-  return { getNodeDetailUrl };
+  return { getAssetDetailUrl };
 };

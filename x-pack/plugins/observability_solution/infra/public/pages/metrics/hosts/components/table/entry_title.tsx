@@ -8,7 +8,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiToolTip } from '@elastic/eui';
 import { CloudProviderIcon } from '@kbn/custom-icons';
-import { useNodeDetailsRedirect } from '@kbn/metrics-data-access-plugin/public';
+import { useAssetDetailsRedirect } from '@kbn/metrics-data-access-plugin/public';
 import type { HostNodeRow } from '../../hooks/use_hosts_table';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 
@@ -20,11 +20,11 @@ interface EntryTitleProps {
 export const EntryTitle = ({ onClick, title }: EntryTitleProps) => {
   const { name, cloudProvider } = title;
   const { parsedDateRange } = useUnifiedSearchContext();
-  const { getNodeDetailUrl } = useNodeDetailsRedirect();
+  const { getAssetDetailUrl } = useAssetDetailsRedirect();
 
-  const link = getNodeDetailUrl({
-    nodeId: name,
-    nodeType: 'host',
+  const link = getAssetDetailUrl({
+    assetId: name,
+    assetType: 'host',
     search: {
       from: parsedDateRange?.from ? new Date(parsedDateRange?.from).getTime() : undefined,
       to: parsedDateRange?.to ? new Date(parsedDateRange.to).getTime() : undefined,
