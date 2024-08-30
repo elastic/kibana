@@ -14,7 +14,7 @@ import { useKibana, isModifiedEvent, isLeftClickEvent } from '../common/lib/kiba
 
 interface NavigationButtonsProps {
   isDisabled?: boolean;
-  agentPolicyId?: string | undefined;
+  agentPolicyId?: string | null;
 }
 
 const NavigationButtonsComponent: React.FC<NavigationButtonsProps> = ({
