@@ -128,11 +128,6 @@ export function History() {
     initialize();
   }, [initialize]);
 
-  useEffect(() => {
-    const done = history.change(setPastRequests);
-    return () => done();
-  }, [history]);
-
   return (
     <EuiPanel
       color="subdued"
@@ -210,7 +205,7 @@ export function History() {
                       size="xs"
                       color="primary"
                       data-test-subj="consoleClearHistoryButton"
-                      onClick={() => clear()}
+                      onClick={clear}
                     >
                       <FormattedMessage
                         id="console.historyPage.clearHistoryButtonLabel"
