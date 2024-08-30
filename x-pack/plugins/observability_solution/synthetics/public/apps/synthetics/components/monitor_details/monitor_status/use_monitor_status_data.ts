@@ -121,7 +121,7 @@ export const useMonitorStatusData = ({ from, to, initialSizeRef }: Props) => {
       timeBinMap: indexBinsByEndTime(bins),
       xDomain: {
         min: bins?.[0]?.end ?? fromMillis,
-        max: bins?.[bins.length - 1]?.end ?? toMillis,
+        max: bins?.at(-1)?.end ?? toMillis,
       },
     };
   }, [minsPerBin, fromMillis, toMillis, dateHistogram]);
