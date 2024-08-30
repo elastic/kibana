@@ -434,6 +434,20 @@ export function getCompatibleLiterals(
   return suggestions;
 }
 
+export const TIME_SYSTEM_DESCRIPTIONS = {
+  '?t_start': i18n.translate(
+    'kbn-esql-validation-autocomplete.esql.autocomplete.timeSystemParamStart',
+    {
+      defaultMessage: 'The earliest start time from date picker',
+    }
+  ),
+  '?t_end': i18n.translate(
+    'kbn-esql-validation-autocomplete.esql.autocomplete.timeSystemParamEnd',
+    {
+      defaultMessage: 'The latest start time from date picker',
+    }
+  ),
+};
 export function getDateLiterals(options?: {
   advanceCursorAndOpenSuggestions?: boolean;
   addComma?: boolean;
