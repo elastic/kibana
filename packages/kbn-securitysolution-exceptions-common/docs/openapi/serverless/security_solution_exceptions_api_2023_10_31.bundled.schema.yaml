@@ -1544,6 +1544,7 @@ components:
         - $ref: '#/components/schemas/ExceptionListItemEntryMatchWildcard'
       discriminator:
         propertyName: type
+      title: ExceptionListItemEntry
     ExceptionListItemEntryArray:
       items:
         $ref: '#/components/schemas/ExceptionListItemEntry'

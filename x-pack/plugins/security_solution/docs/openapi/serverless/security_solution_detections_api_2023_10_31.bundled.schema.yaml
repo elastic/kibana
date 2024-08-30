@@ -206,6 +206,7 @@ paths:
                 - $ref: '#/components/schemas/BulkDuplicateRules'
                 - $ref: '#/components/schemas/BulkManualRuleRun'
                 - $ref: '#/components/schemas/BulkEditRules'
+              title: PerformRulesBulkActionRequestBody
       responses:
         '200':
           content:
@@ -214,6 +215,7 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/BulkEditActionResponse'
                   - $ref: '#/components/schemas/BulkExportActionResponse'
+                title: PerformRulesBulkActionResponses
           description: OK
       summary: Apply a bulk action to detection rules
       tags:
@@ -895,6 +897,7 @@ components:
         - $ref: '#/components/schemas/BulkActionEditPayloadTimeline'
         - $ref: '#/components/schemas/BulkActionEditPayloadRuleActions'
         - $ref: '#/components/schemas/BulkActionEditPayloadSchedule'
+      title: BulkActionEditPayload
     BulkActionEditPayloadIndexPatterns:
       type: object
       properties:
@@ -4159,6 +4162,7 @@ components:
         - $ref: '#/components/schemas/EsqlRuleCreateProps'
       discriminator:
         propertyName: type
+      title: RuleCreateProps
     RuleDescription:
       minLength: 1
       type: string
@@ -4327,6 +4331,7 @@ components:
         - $ref: '#/components/schemas/MachineLearningRulePatchProps'
         - $ref: '#/components/schemas/NewTermsRulePatchProps'
         - $ref: '#/components/schemas/EsqlRulePatchProps'
+      title: RulePatchProps
     RulePreviewLogs:
       type: object
       properties:
@@ -4376,6 +4381,7 @@ components:
         - $ref: '#/components/schemas/EsqlRule'
       discriminator:
         propertyName: type
+      title: RuleResponse
     RuleSignatureId:
       description: 'Could be any string, not necessarily a UUID'
       type: string
@@ -4408,6 +4414,7 @@ components:
         - $ref: '#/components/schemas/EsqlRuleUpdateProps'
       discriminator:
         propertyName: type
+      title: RuleUpdateProps
     RuleVersion:
       description: The rule's version number.
       minimum: 1
