@@ -8,6 +8,8 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
+const RESTORE_AND_EXECUTE = true;
+
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const toasts = getService('toasts');
@@ -97,6 +99,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(actualRequest.trim()).to.contain(
             'GET _search\n{\n  "query": {\n    "match_all": {}\n  }\n}'
           );
+        });
+      });
+
+      it('can restore and execute a request from history', async () => {
+        await sendRequest('GET _search\n{"query": {"match_all": {}}}');
+        await PageObjects.console.monaco.clearEditorText();
+
+        await PageObjects.console.openHistory();
+        await PageObjects.console.loadRequestFromHistory(0, RESTORE_AND_EXECUTE);
+
+        await retry.try(async () => {
+          const output = await PageObjects.console.monaco.getOutputText();
+          expect(output).to.contain('successful');
         });
       });
     });

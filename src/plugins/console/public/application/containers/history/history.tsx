@@ -243,6 +243,7 @@ export function History() {
                   <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
                     <EuiFlexItem grow={false}>
                       <EuiButton
+                        data-test-subj="consoleHistoryAddAndRunButton"
                         color="primary"
                         iconType="play"
                         disabled={!viewingReq}

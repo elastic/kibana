@@ -849,10 +849,15 @@ export class ConsolePageObject extends FtrService {
     return await Promise.all(history.map(async (item) => await item.getVisibleText()));
   }
 
-  public async loadRequestFromHistory(index: number) {
+  public async loadRequestFromHistory(index: number, andExcute: boolean = false) {
     const historyItem = await this.testSubjects.find(`historyItem-${index}`);
     await historyItem.click();
-    await this.testSubjects.click('consoleHistoryApplyButton');
+
+    if (andExcute) {
+      await this.testSubjects.click('consoleHistoryAddAndRunButton');
+    } else {
+      await this.testSubjects.click('consoleHistoryApplyButton');
+    }
   }
 
   public async clickClearHistory() {
