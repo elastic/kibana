@@ -10,7 +10,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import type { UseSessionPreviewParams } from './use_session_preview';
 import { useSessionPreview } from './use_session_preview';
 import type { SessionViewConfig } from '@kbn/securitysolution-data-table/common/types';
-import type { GetFieldsData } from '../../../../common/hooks/use_get_fields_data';
+import type { GetFieldsData } from '../../shared/hooks/use_get_fields_data';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
 import { mockFieldData, mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
 
@@ -45,7 +45,7 @@ describe('useSessionPreview', () => {
 
     expect(hookResult.result.current).toEqual({
       index: 'kibana.alert.ancestors.index',
-      investigatedAlertId: 'id',
+      investigatedAlertId: '_id',
       jumpToCursor: '2023-01-01T00:00:00.000Z',
       jumpToEntityId: 'process.entity_id',
       sessionEntityId: 'process.entry_leader.entity_id',
@@ -79,8 +79,8 @@ describe('useSessionPreview', () => {
     });
 
     expect(hookResult.result.current).toEqual({
-      index: '.some-index',
-      investigatedAlertId: 'id',
+      index: 'index',
+      investigatedAlertId: '_id',
       jumpToCursor: '2023-01-01T00:00:00.000Z',
       jumpToEntityId: 'process.entity_id',
       sessionEntityId: 'process.entry_leader.entity_id',
