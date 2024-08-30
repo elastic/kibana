@@ -197,6 +197,7 @@ export const getComments: GetAssistantMessages = ({
             content={transformedMessage.content}
             index={index}
             isControlsEnabled={isControlsEnabled}
+            isError={message.isError}
             // reader is used to determine if streaming controls are shown
             reader={transformedMessage.reader}
             regenerateMessage={regenerateMessageOfConversation}

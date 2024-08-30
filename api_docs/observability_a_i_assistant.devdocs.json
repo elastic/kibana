@@ -1606,7 +1606,7 @@
                 "section": "def-common.Message",
                 "text": "Message"
               },
-              "[]; persist: boolean; disableFunctions: boolean | { except: string[]; }; signal: AbortSignal; responseLanguage?: string | undefined; instructions?: ",
+              "[]; persist: boolean; disableFunctions: boolean | { except: string[]; }; signal: AbortSignal; instructions?: ",
               "AdHocInstruction",
               "[] | undefined; }) => ",
               "Observable",
@@ -1733,20 +1733,6 @@
                     "description": [],
                     "signature": [
                       "AbortSignal"
-                    ],
-                    "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  },
-                  {
-                    "parentPluginId": "observabilityAIAssistant",
-                    "id": "def-public.ObservabilityAIAssistantChatService.complete.$1.responseLanguage",
-                    "type": "string",
-                    "tags": [],
-                    "label": "responseLanguage",
-                    "description": [],
-                    "signature": [
-                      "string | undefined"
                     ],
                     "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
                     "deprecated": false,
@@ -2526,8 +2512,6 @@
               "StringC",
               "; title: ",
               "StringC",
-              "; responseLanguage: ",
-              "StringC",
               "; disableFunctions: ",
               "UnionC",
               "<[",
@@ -2592,7 +2576,7 @@
                 "section": "def-common.Message",
                 "text": "Message"
               },
-              "[]; connectorId: string; persist: boolean; } & { conversationId?: string | undefined; title?: string | undefined; responseLanguage?: string | undefined; disableFunctions?: boolean | { except: string[]; } | undefined; instructions?: ({ doc_id?: string | undefined; } & { text: string; instruction_type: \"user_instruction\" | \"application_instruction\"; })[] | undefined; }; } & { body?: { actions?: ({ name: string; description: string; } & { parameters?: any; })[] | undefined; } | undefined; query?: { format?: \"default\" | \"openai\" | undefined; } | undefined; }; }) => Promise<",
+              "[]; connectorId: string; persist: boolean; } & { conversationId?: string | undefined; title?: string | undefined; disableFunctions?: boolean | { except: string[]; } | undefined; instructions?: ({ doc_id?: string | undefined; } & { text: string; instruction_type: \"user_instruction\" | \"application_instruction\"; })[] | undefined; }; } & { body?: { actions?: ({ name: string; description: string; } & { parameters?: any; })[] | undefined; } | undefined; query?: { format?: \"default\" | \"openai\" | undefined; } | undefined; }; }) => Promise<",
               "Readable",
               ">; } & ",
               "ObservabilityAIAssistantRouteCreateOptions",
@@ -2633,8 +2617,6 @@
               "<{ conversationId: ",
               "StringC",
               "; title: ",
-              "StringC",
-              "; responseLanguage: ",
               "StringC",
               "; disableFunctions: ",
               "UnionC",
@@ -2686,7 +2668,7 @@
                 "section": "def-common.Message",
                 "text": "Message"
               },
-              "[]; connectorId: string; persist: boolean; } & { conversationId?: string | undefined; title?: string | undefined; responseLanguage?: string | undefined; disableFunctions?: boolean | { except: string[]; } | undefined; instructions?: ({ doc_id?: string | undefined; } & { text: string; instruction_type: \"user_instruction\" | \"application_instruction\"; })[] | undefined; }; } & { body: { screenContexts: ",
+              "[]; connectorId: string; persist: boolean; } & { conversationId?: string | undefined; title?: string | undefined; disableFunctions?: boolean | { except: string[]; } | undefined; instructions?: ({ doc_id?: string | undefined; } & { text: string; instruction_type: \"user_instruction\" | \"application_instruction\"; })[] | undefined; }; } & { body: { screenContexts: ",
               "ObservabilityAIAssistantScreenContextRequest",
               "[]; }; }; }) => Promise<",
               "Readable",
@@ -3232,8 +3214,6 @@
               "StringC",
               "; title: ",
               "StringC",
-              "; responseLanguage: ",
-              "StringC",
               "; disableFunctions: ",
               "UnionC",
               "<[",
@@ -3298,7 +3278,7 @@
                 "section": "def-common.Message",
                 "text": "Message"
               },
-              "[]; connectorId: string; persist: boolean; } & { conversationId?: string | undefined; title?: string | undefined; responseLanguage?: string | undefined; disableFunctions?: boolean | { except: string[]; } | undefined; instructions?: ({ doc_id?: string | undefined; } & { text: string; instruction_type: \"user_instruction\" | \"application_instruction\"; })[] | undefined; }; } & { body?: { actions?: ({ name: string; description: string; } & { parameters?: any; })[] | undefined; } | undefined; query?: { format?: \"default\" | \"openai\" | undefined; } | undefined; }; }) => Promise<",
+              "[]; connectorId: string; persist: boolean; } & { conversationId?: string | undefined; title?: string | undefined; disableFunctions?: boolean | { except: string[]; } | undefined; instructions?: ({ doc_id?: string | undefined; } & { text: string; instruction_type: \"user_instruction\" | \"application_instruction\"; })[] | undefined; }; } & { body?: { actions?: ({ name: string; description: string; } & { parameters?: any; })[] | undefined; } | undefined; query?: { format?: \"default\" | \"openai\" | undefined; } | undefined; }; }) => Promise<",
               "Readable",
               ">; } & ",
               "ObservabilityAIAssistantRouteCreateOptions",
@@ -3339,8 +3319,6 @@
               "<{ conversationId: ",
               "StringC",
               "; title: ",
-              "StringC",
-              "; responseLanguage: ",
               "StringC",
               "; disableFunctions: ",
               "UnionC",
@@ -3392,7 +3370,7 @@
                 "section": "def-common.Message",
                 "text": "Message"
               },
-              "[]; connectorId: string; persist: boolean; } & { conversationId?: string | undefined; title?: string | undefined; responseLanguage?: string | undefined; disableFunctions?: boolean | { except: string[]; } | undefined; instructions?: ({ doc_id?: string | undefined; } & { text: string; instruction_type: \"user_instruction\" | \"application_instruction\"; })[] | undefined; }; } & { body: { screenContexts: ",
+              "[]; connectorId: string; persist: boolean; } & { conversationId?: string | undefined; title?: string | undefined; disableFunctions?: boolean | { except: string[]; } | undefined; instructions?: ({ doc_id?: string | undefined; } & { text: string; instruction_type: \"user_instruction\" | \"application_instruction\"; })[] | undefined; }; } & { body: { screenContexts: ",
               "ObservabilityAIAssistantScreenContextRequest",
               "[]; }; }; }) => Promise<",
               "Readable",
@@ -4060,13 +4038,13 @@
       },
       {
         "parentPluginId": "observabilityAIAssistant",
-        "id": "def-public.aiAssistantResponseLanguage",
+        "id": "def-public.aiAssistantPreferredAIAssistantType",
         "type": "string",
         "tags": [],
-        "label": "aiAssistantResponseLanguage",
+        "label": "aiAssistantPreferredAIAssistantType",
         "description": [],
         "signature": [
-          "\"observability:aiAssistantResponseLanguage\""
+          "\"aiAssistant:preferredAIAssistantType\""
         ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/ui_settings/settings_keys.ts",
         "deprecated": false,
@@ -4565,8 +4543,6 @@
           "StringC",
           "; title: ",
           "StringC",
-          "; responseLanguage: ",
-          "StringC",
           "; disableFunctions: ",
           "UnionC",
           "<[",
@@ -4631,7 +4607,7 @@
             "section": "def-common.Message",
             "text": "Message"
           },
-          "[]; connectorId: string; persist: boolean; } & { conversationId?: string | undefined; title?: string | undefined; responseLanguage?: string | undefined; disableFunctions?: boolean | { except: string[]; } | undefined; instructions?: ({ doc_id?: string | undefined; } & { text: string; instruction_type: \"user_instruction\" | \"application_instruction\"; })[] | undefined; }; } & { body?: { actions?: ({ name: string; description: string; } & { parameters?: any; })[] | undefined; } | undefined; query?: { format?: \"default\" | \"openai\" | undefined; } | undefined; }; }) => Promise<",
+          "[]; connectorId: string; persist: boolean; } & { conversationId?: string | undefined; title?: string | undefined; disableFunctions?: boolean | { except: string[]; } | undefined; instructions?: ({ doc_id?: string | undefined; } & { text: string; instruction_type: \"user_instruction\" | \"application_instruction\"; })[] | undefined; }; } & { body?: { actions?: ({ name: string; description: string; } & { parameters?: any; })[] | undefined; } | undefined; query?: { format?: \"default\" | \"openai\" | undefined; } | undefined; }; }) => Promise<",
           "Readable",
           ">; } & ",
           "ObservabilityAIAssistantRouteCreateOptions",
@@ -4672,8 +4648,6 @@
           "<{ conversationId: ",
           "StringC",
           "; title: ",
-          "StringC",
-          "; responseLanguage: ",
           "StringC",
           "; disableFunctions: ",
           "UnionC",
@@ -4725,7 +4699,7 @@
             "section": "def-common.Message",
             "text": "Message"
           },
-          "[]; connectorId: string; persist: boolean; } & { conversationId?: string | undefined; title?: string | undefined; responseLanguage?: string | undefined; disableFunctions?: boolean | { except: string[]; } | undefined; instructions?: ({ doc_id?: string | undefined; } & { text: string; instruction_type: \"user_instruction\" | \"application_instruction\"; })[] | undefined; }; } & { body: { screenContexts: ",
+          "[]; connectorId: string; persist: boolean; } & { conversationId?: string | undefined; title?: string | undefined; disableFunctions?: boolean | { except: string[]; } | undefined; instructions?: ({ doc_id?: string | undefined; } & { text: string; instruction_type: \"user_instruction\" | \"application_instruction\"; })[] | undefined; }; } & { body: { screenContexts: ",
           "ObservabilityAIAssistantScreenContextRequest",
           "[]; }; }; }) => Promise<",
           "Readable",
@@ -5028,21 +5002,6 @@
           "\"negative\" | \"positive\""
         ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/components/buttons/feedback_buttons.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityAIAssistant",
-        "id": "def-public.LANGUAGE_OPTIONS",
-        "type": "Array",
-        "tags": [],
-        "label": "LANGUAGE_OPTIONS",
-        "description": [],
-        "signature": [
-          "{ value: string; label: string; }[]"
-        ],
-        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/ui_settings/language_options.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5509,8 +5468,6 @@
           "StringC",
           "; title: ",
           "StringC",
-          "; responseLanguage: ",
-          "StringC",
           "; disableFunctions: ",
           "UnionC",
           "<[",
@@ -5575,7 +5532,7 @@
             "section": "def-common.Message",
             "text": "Message"
           },
-          "[]; connectorId: string; persist: boolean; } & { conversationId?: string | undefined; title?: string | undefined; responseLanguage?: string | undefined; disableFunctions?: boolean | { except: string[]; } | undefined; instructions?: ({ doc_id?: string | undefined; } & { text: string; instruction_type: \"user_instruction\" | \"application_instruction\"; })[] | undefined; }; } & { body?: { actions?: ({ name: string; description: string; } & { parameters?: any; })[] | undefined; } | undefined; query?: { format?: \"default\" | \"openai\" | undefined; } | undefined; }; }) => Promise<",
+          "[]; connectorId: string; persist: boolean; } & { conversationId?: string | undefined; title?: string | undefined; disableFunctions?: boolean | { except: string[]; } | undefined; instructions?: ({ doc_id?: string | undefined; } & { text: string; instruction_type: \"user_instruction\" | \"application_instruction\"; })[] | undefined; }; } & { body?: { actions?: ({ name: string; description: string; } & { parameters?: any; })[] | undefined; } | undefined; query?: { format?: \"default\" | \"openai\" | undefined; } | undefined; }; }) => Promise<",
           "Readable",
           ">; } & ",
           "ObservabilityAIAssistantRouteCreateOptions",
@@ -5616,8 +5573,6 @@
           "<{ conversationId: ",
           "StringC",
           "; title: ",
-          "StringC",
-          "; responseLanguage: ",
           "StringC",
           "; disableFunctions: ",
           "UnionC",
@@ -5669,7 +5624,7 @@
             "section": "def-common.Message",
             "text": "Message"
           },
-          "[]; connectorId: string; persist: boolean; } & { conversationId?: string | undefined; title?: string | undefined; responseLanguage?: string | undefined; disableFunctions?: boolean | { except: string[]; } | undefined; instructions?: ({ doc_id?: string | undefined; } & { text: string; instruction_type: \"user_instruction\" | \"application_instruction\"; })[] | undefined; }; } & { body: { screenContexts: ",
+          "[]; connectorId: string; persist: boolean; } & { conversationId?: string | undefined; title?: string | undefined; disableFunctions?: boolean | { except: string[]; } | undefined; instructions?: ({ doc_id?: string | undefined; } & { text: string; instruction_type: \"user_instruction\" | \"application_instruction\"; })[] | undefined; }; } & { body: { screenContexts: ",
           "ObservabilityAIAssistantScreenContextRequest",
           "[]; }; }; }) => Promise<",
           "Readable",
@@ -6030,21 +5985,6 @@
           }
         ],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityAIAssistant",
-        "id": "def-public.DEFAULT_LANGUAGE_OPTION",
-        "type": "Object",
-        "tags": [],
-        "label": "DEFAULT_LANGUAGE_OPTION",
-        "description": [],
-        "signature": [
-          "{ value: string; label: string; }"
-        ],
-        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/ui_settings/language_options.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
       }
     ],
     "setup": {
@@ -6276,22 +6216,6 @@
         },
         {
           "parentPluginId": "observabilityAIAssistant",
-          "id": "def-public.ObservabilityAIAssistantPublicStart.useUserPreferredLanguage",
-          "type": "Function",
-          "tags": [],
-          "label": "useUserPreferredLanguage",
-          "description": [],
-          "signature": [
-            "() => { selectedLanguage: string; getPreferredLanguage: () => string; }"
-          ],
-          "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
-          "deprecated": false,
-          "trackAdoption": false,
-          "children": [],
-          "returnComment": []
-        },
-        {
-          "parentPluginId": "observabilityAIAssistant",
           "id": "def-public.ObservabilityAIAssistantPublicStart.getContextualInsightMessages",
           "type": "Function",
           "tags": [],
@@ -6492,21 +6416,6 @@
         "description": [],
         "signature": [
           "\"observability:aiAssistantLogsIndexPattern\""
-        ],
-        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/ui_settings/settings_keys.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityAIAssistant",
-        "id": "def-server.aiAssistantResponseLanguage",
-        "type": "string",
-        "tags": [],
-        "label": "aiAssistantResponseLanguage",
-        "description": [],
-        "signature": [
-          "\"observability:aiAssistantResponseLanguage\""
         ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/ui_settings/settings_keys.ts",
         "deprecated": false,
@@ -7005,8 +6914,6 @@
           "StringC",
           "; title: ",
           "StringC",
-          "; responseLanguage: ",
-          "StringC",
           "; disableFunctions: ",
           "UnionC",
           "<[",
@@ -7071,7 +6978,7 @@
             "section": "def-common.Message",
             "text": "Message"
           },
-          "[]; connectorId: string; persist: boolean; } & { conversationId?: string | undefined; title?: string | undefined; responseLanguage?: string | undefined; disableFunctions?: boolean | { except: string[]; } | undefined; instructions?: ({ doc_id?: string | undefined; } & { text: string; instruction_type: \"user_instruction\" | \"application_instruction\"; })[] | undefined; }; } & { body?: { actions?: ({ name: string; description: string; } & { parameters?: any; })[] | undefined; } | undefined; query?: { format?: \"default\" | \"openai\" | undefined; } | undefined; }; }) => Promise<",
+          "[]; connectorId: string; persist: boolean; } & { conversationId?: string | undefined; title?: string | undefined; disableFunctions?: boolean | { except: string[]; } | undefined; instructions?: ({ doc_id?: string | undefined; } & { text: string; instruction_type: \"user_instruction\" | \"application_instruction\"; })[] | undefined; }; } & { body?: { actions?: ({ name: string; description: string; } & { parameters?: any; })[] | undefined; } | undefined; query?: { format?: \"default\" | \"openai\" | undefined; } | undefined; }; }) => Promise<",
           "Readable",
           ">; } & ",
           "ObservabilityAIAssistantRouteCreateOptions",
@@ -7112,8 +7019,6 @@
           "<{ conversationId: ",
           "StringC",
           "; title: ",
-          "StringC",
-          "; responseLanguage: ",
           "StringC",
           "; disableFunctions: ",
           "UnionC",
@@ -7165,7 +7070,7 @@
             "section": "def-common.Message",
             "text": "Message"
           },
-          "[]; connectorId: string; persist: boolean; } & { conversationId?: string | undefined; title?: string | undefined; responseLanguage?: string | undefined; disableFunctions?: boolean | { except: string[]; } | undefined; instructions?: ({ doc_id?: string | undefined; } & { text: string; instruction_type: \"user_instruction\" | \"application_instruction\"; })[] | undefined; }; } & { body: { screenContexts: ",
+          "[]; connectorId: string; persist: boolean; } & { conversationId?: string | undefined; title?: string | undefined; disableFunctions?: boolean | { except: string[]; } | undefined; instructions?: ({ doc_id?: string | undefined; } & { text: string; instruction_type: \"user_instruction\" | \"application_instruction\"; })[] | undefined; }; } & { body: { screenContexts: ",
           "ObservabilityAIAssistantScreenContextRequest",
           "[]; }; }; }) => Promise<",
           "Readable",
@@ -8429,21 +8334,6 @@
       },
       {
         "parentPluginId": "observabilityAIAssistant",
-        "id": "def-common.aiAssistantResponseLanguage",
-        "type": "string",
-        "tags": [],
-        "label": "aiAssistantResponseLanguage",
-        "description": [],
-        "signature": [
-          "\"observability:aiAssistantResponseLanguage\""
-        ],
-        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/ui_settings/settings_keys.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityAIAssistant",
         "id": "def-common.aiAssistantSearchConnectorIndexPattern",
         "type": "string",
         "tags": [],
@@ -8715,21 +8605,6 @@
       },
       {
         "parentPluginId": "observabilityAIAssistant",
-        "id": "def-common.LANGUAGE_OPTIONS",
-        "type": "Array",
-        "tags": [],
-        "label": "LANGUAGE_OPTIONS",
-        "description": [],
-        "signature": [
-          "{ value: string; label: string; }[]"
-        ],
-        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/ui_settings/language_options.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityAIAssistant",
         "id": "def-common.MessageAddEvent",
         "type": "Type",
         "tags": [],
@@ -8884,22 +8759,6 @@
         "initialIsOpen": false
       }
     ],
-    "objects": [
-      {
-        "parentPluginId": "observabilityAIAssistant",
-        "id": "def-common.DEFAULT_LANGUAGE_OPTION",
-        "type": "Object",
-        "tags": [],
-        "label": "DEFAULT_LANGUAGE_OPTION",
-        "description": [],
-        "signature": [
-          "{ value: string; label: string; }"
-        ],
-        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/ui_settings/language_options.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ]
+    "objects": []
   }
 }

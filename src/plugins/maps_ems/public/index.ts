@@ -9,14 +9,14 @@
 import type { PluginInitializerContext } from '@kbn/core/public';
 import type { EMSClient } from '@elastic/ems-client';
 import { MapsEmsPlugin } from './plugin';
-import type { MapConfig } from '../config';
+import type { MapConfig } from '../server/config';
 import type { EMSSettings } from '../common';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new MapsEmsPlugin(initializerContext);
 }
 
-export type { MapConfig, TileMapConfig } from '../config';
+export type { MapConfig, TileMapConfig } from '../server/config';
 export type { EMSConfig } from '../common';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

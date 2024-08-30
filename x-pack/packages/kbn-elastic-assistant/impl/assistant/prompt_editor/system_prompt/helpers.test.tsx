@@ -29,7 +29,9 @@ describe('helpers', () => {
     it('shows the expected name in the dropdownDisplay', () => {
       render(<TestProviders>{option.dropdownDisplay}</TestProviders>);
 
-      expect(screen.getByTestId('name')).toHaveTextContent(mockSystemPrompt.name);
+      expect(screen.getByTestId(`systemPrompt-${mockSystemPrompt.name}`)).toHaveTextContent(
+        mockSystemPrompt.name
+      );
     });
 
     it('shows the expected prompt content in the dropdownDisplay', () => {
