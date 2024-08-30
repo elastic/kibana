@@ -454,17 +454,6 @@ export const RulesList = ({
     }
   }, [typeFilter]);
 
-  useEffect(() => {
-    if (cloneRuleId.current) {
-      const ruleItem = tableItems.find((ti) => ti.id === cloneRuleId.current);
-      cloneRuleId.current = null;
-      setIsCloningRule(false);
-      if (ruleItem) {
-        onRuleEdit(ruleItem);
-      }
-    }
-  }, [tableItems]);
-
   const buildErrorListItems = (_executionStatus: RuleExecutionStatus) => {
     const hasErrorMessage = _executionStatus.status === 'error';
     const errorMessage = _executionStatus?.error?.message;
@@ -643,10 +632,19 @@ export const RulesList = ({
     setIsCloningRule(true);
     try {
       const RuleCloned = await cloneRule({ http, ruleId });
-      cloneRuleId.current = RuleCloned.id;
-      await loadRules();
+      const refreshedRules = await loadRules();
+      const ruleItem = refreshedRules.data?.data.find((rule) => rule.id === RuleCloned.id);
+      if (ruleItem) {
+        onRuleEdit(
+          convertRulesToTableItems({
+            rules: [ruleItem],
+            ruleTypeIndex: ruleTypesState.data,
+            canExecuteActions,
+            config,
+          })[0]
+        );
+      }
     } catch {
-      cloneRuleId.current = null;
       setIsCloningRule(false);
       toasts.addDanger(
         i18n.translate('xpack.triggersActionsUI.sections.rulesList.cloneFailed', {
