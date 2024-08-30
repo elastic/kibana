@@ -8312,30 +8312,13 @@
   resolved "https://registry.yarnpkg.com/@redocly/config/-/config-0.10.1.tgz#c7bcbab6cb3b82236c2f5c87aa44924a652d8e80"
   integrity sha512-H3LnKVGzOaxskwJu8pmJYwBOWjP61qOK7TuTrbafqArDVckE06fhA6l0nO4KvBbjLPjy1Al7UnlxOu23V4Nl0w==
 
-"@redocly/openapi-core@1.22.0":
+"@redocly/openapi-core@1.22.0", "@redocly/openapi-core@^1.4.0":
   version "1.22.0"
   resolved "https://registry.yarnpkg.com/@redocly/openapi-core/-/openapi-core-1.22.0.tgz#dea3eb5705a96fd1bb105ac97f51369256628d61"
   integrity sha512-IXazrCCUwRkwgVGlaWghFEyyLrz5EM1VM+Kn3/By4QGaNVd04oxC1c92h3kbt1StAxtrTfxBAGwS7bqqCF7nsw==
   dependencies:
     "@redocly/ajv" "^8.11.0"
     "@redocly/config" "^0.10.1"
-    colorette "^1.2.0"
-    https-proxy-agent "^7.0.4"
-    js-levenshtein "^1.1.6"
-    js-yaml "^4.1.0"
-    lodash.isequal "^4.5.0"
-    minimatch "^5.0.1"
-    node-fetch "^2.6.1"
-    pluralize "^8.0.0"
-    yaml-ast-parser "0.0.43"
-
-"@redocly/openapi-core@^1.4.0":
-  version "1.21.1"
-  resolved "https://registry.yarnpkg.com/@redocly/openapi-core/-/openapi-core-1.21.1.tgz#b9221f6effc96ad2210256061cd624648ddc1f1d"
-  integrity sha512-WTsie5b+Ohx2NsmEBVCS5WF24h4XqDpb834ZR4EeE7f+Zjwn34AgaC78HP2xGydi+gFfD4PiqDGgnDPtR5s1OA==
-  dependencies:
-    "@redocly/ajv" "^8.11.0"
-    "@redocly/config" "^0.10.0"
     colorette "^1.2.0"
     https-proxy-agent "^7.0.4"
     js-levenshtein "^1.1.6"
