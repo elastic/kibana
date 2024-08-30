@@ -10,7 +10,7 @@ import { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public
 import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { GaugePublicConfig } from '../config';
+import type { GaugePublicConfig } from '../server/config';
 import { LEGACY_GAUGE_CHARTS_LIBRARY } from '../common';
 import { VisTypeGaugePluginSetup } from './types';
 import { gaugeVisType, goalVisType } from './vis_type';
