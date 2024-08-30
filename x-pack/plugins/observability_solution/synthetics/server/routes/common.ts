@@ -133,19 +133,19 @@ export const getMonitorFilters = async ({
 
   const filtersStr = [
     filter,
-    getSavedObjectsKqlFilter({ field: 'tags', values: tags }),
-    getSavedObjectsKqlFilter({ field: 'project_id', values: projects }),
-    getSavedObjectsKqlFilter({ field: 'type', values: monitorTypes }),
-    getSavedObjectsKqlFilter({ field: 'locations.id', values: locationFilter }),
-    getSavedObjectsKqlFilter({ field: 'schedule.number', values: schedules }),
-    getSavedObjectsKqlFilter({ field: 'id', values: monitorQueryIds }),
+    getSavedObjectKqlFilter({ field: 'tags', values: tags }),
+    getSavedObjectKqlFilter({ field: 'project_id', values: projects }),
+    getSavedObjectKqlFilter({ field: 'type', values: monitorTypes }),
+    getSavedObjectKqlFilter({ field: 'locations.id', values: locationFilter }),
+    getSavedObjectKqlFilter({ field: 'schedule.number', values: schedules }),
+    getSavedObjectKqlFilter({ field: 'id', values: monitorQueryIds }),
   ]
     .filter((f) => !!f)
     .join(' AND ');
   return { filtersStr, locationFilter };
 };
 
-export const getSavedObjectsKqlFilter = ({
+export const getSavedObjectKqlFilter = ({
   field,
   values,
   operator = 'OR',

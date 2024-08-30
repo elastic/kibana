@@ -5,33 +5,33 @@
  * 2.0.
  */
 
-import { getSavedObjectsKqlFilter } from './common';
+import { getSavedObjectKqlFilter } from './common';
 
-describe('getKqlFilter', () => {
+describe('getSavedObjectKqlFilter', () => {
   it('returns empty string if no values are provided', () => {
-    expect(getSavedObjectsKqlFilter({ field: 'tags' })).toBe('');
+    expect(getSavedObjectKqlFilter({ field: 'tags' })).toBe('');
   });
 
   it('returns KQL string if values are provided', () => {
-    expect(getSavedObjectsKqlFilter({ field: 'tags', values: 'apm' })).toBe(
+    expect(getSavedObjectKqlFilter({ field: 'tags', values: 'apm' })).toBe(
       'synthetics-monitor.attributes.tags:"apm"'
     );
   });
 
   it('searches at root when specified', () => {
-    expect(getSavedObjectsKqlFilter({ field: 'tags', values: 'apm', searchAtRoot: true })).toBe(
+    expect(getSavedObjectKqlFilter({ field: 'tags', values: 'apm', searchAtRoot: true })).toBe(
       'tags:"apm"'
     );
   });
 
   it('handles array values', () => {
-    expect(getSavedObjectsKqlFilter({ field: 'tags', values: ['apm', 'synthetics'] })).toBe(
+    expect(getSavedObjectKqlFilter({ field: 'tags', values: ['apm', 'synthetics'] })).toBe(
       'synthetics-monitor.attributes.tags:("apm" OR "synthetics")'
     );
   });
 
   it('escapes quotes', () => {
-    expect(getSavedObjectsKqlFilter({ field: 'tags', values: ['"apm', 'synthetics'] })).toBe(
+    expect(getSavedObjectKqlFilter({ field: 'tags', values: ['"apm', 'synthetics'] })).toBe(
       'synthetics-monitor.attributes.tags:("\\"apm" OR "synthetics")'
     );
   });
