@@ -6,14 +6,14 @@
  */
 
 import React from 'react';
-import LatencyChart from '../../../components/alerting/ui_components/alert_details_app_section/latency_chart';
-import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
-import { useAlertingProps } from '../use_alerting_props';
-import { TimeRangeCallout } from '../time_range_callout';
-import type { EmbeddableApmAlertingLatencyVizProps } from '../types';
-import { ServiceNameCallout } from '../service_name_callout';
+import LatencyChart from '../../components/alerting/ui_components/alert_details_app_section/latency_chart';
+import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
+import { useEmbeddableProps } from '../common/use_embeddable_props';
+import { TimeRangeCallout } from '../common/time_range_callout';
+import { ServiceNameCallout } from '../common/service_name_callout';
+import type { EmbeddableApmLatencyVizProps } from '../types';
 
-export function APMAlertingLatencyChart({
+export function APMAlertingChart({
   rule,
   alert,
   serviceName,
@@ -25,7 +25,7 @@ export function APMAlertingLatencyChart({
   latencyThresholdInMicroseconds,
   kuery = '',
   filters,
-}: EmbeddableApmAlertingLatencyVizProps) {
+}: EmbeddableApmLatencyVizProps) {
   const {
     transactionType: currentTransactionType,
     transactionTypes,
@@ -34,7 +34,7 @@ export function APMAlertingLatencyChart({
     latencyAggregationType,
     setLatencyAggregationType,
     timeZone,
-  } = useAlertingProps({
+  } = useEmbeddableProps({
     rule,
     rangeFrom,
     rangeTo,

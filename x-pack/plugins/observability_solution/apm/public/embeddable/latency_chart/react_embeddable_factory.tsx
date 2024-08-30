@@ -9,22 +9,22 @@ import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { initializeTitles, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
-import type { EmbeddableApmAlertingVizProps } from '../types';
-import type { EmbeddableDeps } from '../../types';
-import { ApmEmbeddableContext } from '../../embeddable_context';
-import { APMAlertingThroughputChart } from './chart';
+import type { EmbeddableApmLatencyVizProps } from '../types';
+import type { EmbeddableDeps } from '../types';
+import { ApmEmbeddableContext } from '../embeddable_context';
+import { APMAlertingChart } from './chart';
 
-export const APM_ALERTING_THROUGHPUT_CHART_EMBEDDABLE = 'APM_ALERTING_THROUGHPUT_CHART_EMBEDDABLE';
+export const APM_LATENCY_CHART_EMBEDDABLE = 'APM_LATENCY_CHART_EMBEDDABLE';
 
-export const getApmAlertingThroughputChartEmbeddableFactory = (deps: EmbeddableDeps) => {
+export const getApmLatencyChartEmbeddableFactory = (deps: EmbeddableDeps) => {
   const factory: ReactEmbeddableFactory<
-    EmbeddableApmAlertingVizProps,
-    EmbeddableApmAlertingVizProps,
-    DefaultEmbeddableApi<EmbeddableApmAlertingVizProps>
+    EmbeddableApmLatencyVizProps,
+    EmbeddableApmLatencyVizProps,
+    DefaultEmbeddableApi<EmbeddableApmLatencyVizProps>
   > = {
-    type: APM_ALERTING_THROUGHPUT_CHART_EMBEDDABLE,
+    type: APM_LATENCY_CHART_EMBEDDABLE,
     deserializeState: (state) => {
-      return state.rawState as EmbeddableApmAlertingVizProps;
+      return state.rawState as EmbeddableApmLatencyVizProps;
     },
     buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
       const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
@@ -32,6 +32,9 @@ export const getApmAlertingThroughputChartEmbeddableFactory = (deps: EmbeddableD
       const transactionType$ = new BehaviorSubject(state.transactionType);
       const transactionName$ = new BehaviorSubject(state.transactionName);
       const environment$ = new BehaviorSubject(state.environment);
+      const latencyThresholdInMicroseconds$ = new BehaviorSubject(
+        state.latencyThresholdInMicroseconds
+      );
       const rangeFrom$ = new BehaviorSubject(state.rangeFrom);
       const rangeTo$ = new BehaviorSubject(state.rangeTo);
       const rule$ = new BehaviorSubject(state.rule);
@@ -50,6 +53,7 @@ export const getApmAlertingThroughputChartEmbeddableFactory = (deps: EmbeddableD
                 transactionType: transactionType$.getValue(),
                 transactionName: transactionName$.getValue(),
                 environment: environment$.getValue(),
+                latencyThresholdInMicroseconds: latencyThresholdInMicroseconds$.getValue(),
                 rangeFrom: rangeFrom$.getValue(),
                 rangeTo: rangeTo$.getValue(),
                 rule: rule$.getValue(),
@@ -65,6 +69,10 @@ export const getApmAlertingThroughputChartEmbeddableFactory = (deps: EmbeddableD
           transactionType: [transactionType$, (value) => transactionType$.next(value)],
           transactionName: [transactionName$, (value) => transactionName$.next(value)],
           environment: [environment$, (value) => environment$.next(value)],
+          latencyThresholdInMicroseconds: [
+            latencyThresholdInMicroseconds$,
+            (value) => latencyThresholdInMicroseconds$.next(value),
+          ],
           rangeFrom: [rangeFrom$, (value) => rangeFrom$.next(value)],
           rangeTo: [rangeTo$, (value) => rangeTo$.next(value)],
           rule: [rule$, (value) => rule$.next(value)],
@@ -83,6 +91,7 @@ export const getApmAlertingThroughputChartEmbeddableFactory = (deps: EmbeddableD
             transactionType,
             transactionName,
             environment,
+            latencyThresholdInMicroseconds,
             rangeFrom,
             rangeTo,
             rule,
@@ -94,6 +103,7 @@ export const getApmAlertingThroughputChartEmbeddableFactory = (deps: EmbeddableD
             transactionType$,
             transactionName$,
             environment$,
+            latencyThresholdInMicroseconds$,
             rangeFrom$,
             rangeTo$,
             rule$,
@@ -104,9 +114,10 @@ export const getApmAlertingThroughputChartEmbeddableFactory = (deps: EmbeddableD
 
           return (
             <ApmEmbeddableContext deps={deps} rangeFrom={rangeFrom} rangeTo={rangeTo}>
-              <APMAlertingThroughputChart
+              <APMAlertingChart
                 rule={rule}
                 alert={alert}
+                latencyThresholdInMicroseconds={latencyThresholdInMicroseconds}
                 serviceName={serviceName}
                 transactionType={transactionType}
                 environment={environment}

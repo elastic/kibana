@@ -62,7 +62,7 @@ function LatencyChart({
   kuery = '',
   filters,
 }: {
-  alert: TopAlert;
+  alert?: TopAlert;
   transactionType: string;
   transactionTypes?: string[];
   transactionName?: string;
@@ -134,9 +134,11 @@ function LatencyChart({
     ]
   );
   const alertEvalThreshold =
-    customAlertEvaluationThreshold || alert.fields[ALERT_EVALUATION_THRESHOLD];
+    customAlertEvaluationThreshold || alert?.fields[ALERT_EVALUATION_THRESHOLD];
 
-  const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]).valueOf() : undefined;
+  const alertEnd = alert?.fields[ALERT_END]
+    ? moment(alert?.fields[ALERT_END]).valueOf()
+    : undefined;
 
   const alertEvalThresholdChartData = alertEvalThreshold
     ? [
@@ -155,12 +157,8 @@ function LatencyChart({
       ]
     : [];
 
-  const getLatencyChartAdditionalData = () => {
-    if (
-      isLatencyThresholdRuleType(alert.fields[ALERT_RULE_TYPE_ID]) ||
-      customAlertEvaluationThreshold
-    ) {
-      return [
+  const alertStartChartAnnotations = alert?.start
+    ? [
         <AlertActiveTimeRangeAnnotation
           alertStart={alert.start}
           alertEnd={alertEnd}
@@ -177,8 +175,15 @@ function LatencyChart({
             (uiSettings && uiSettings.get(UI_SETTINGS.DATE_FORMAT)) || DEFAULT_DATE_FORMAT
           }
         />,
-        ...alertEvalThresholdChartData,
-      ];
+      ]
+    : [];
+
+  const getLatencyChartAdditionalData = () => {
+    if (
+      isLatencyThresholdRuleType(alert?.fields?.[ALERT_RULE_TYPE_ID]) ||
+      customAlertEvaluationThreshold
+    ) {
+      return [...alertStartChartAnnotations, ...alertEvalThresholdChartData];
     }
   };
   const memoizedData = useMemo(
