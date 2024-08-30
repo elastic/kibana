@@ -51,6 +51,7 @@ export const JobsTabContent: FC<Props> = ({ module }) => {
               css={{ padding: '0 3%' }}
             >
               <EuiFlexGroup direction="column">
+                <EuiSpacer size="s" />
                 <EuiFlexItem>
                   <EuiText size="s" color="subdued">
                     <p>{job.config.description}</p>

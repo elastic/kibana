@@ -8,7 +8,6 @@
 import type { FC } from 'react';
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -31,7 +30,6 @@ import { useMlKibana } from '../../contexts/kibana';
 import type { TabIdType, KibanaAssetType } from './flyout';
 import { TAB_IDS } from './flyout';
 import { DataViewsTable } from './data_views_table';
-import { useToastNotificationService } from '../../services/toast_notification_service';
 import { isLogoObject } from '../supplied_configurations';
 
 export const LABELS = {
@@ -107,6 +105,7 @@ export const OverviewTabContent: FC<Props> = ({
   setSelectedKibanaSubTab,
 }) => {
   const [runningDataRecognizer, setRunningDataRecognizer] = useState<boolean>(false);
+  const [recognizerWasRun, setRecognizerWasRun] = useState<boolean>(false);
   const [matchingDataViews, setMatchingDataViews] = useState<DataViewInfo[]>([]);
   const {
     services: {
@@ -117,7 +116,6 @@ export const OverviewTabContent: FC<Props> = ({
       data: { dataViews: dataViewsService },
     },
   } = useMlKibana();
-  const { displayWarningToast } = useToastNotificationService();
   const logsConfigsUrl = docLinks.links.ml.logsAnomalyDetectionConfigs;
   const metricsConfigsUrl = docLinks.links.ml.metricsAnomalyDetectionConfigs;
 
@@ -145,18 +143,9 @@ export const OverviewTabContent: FC<Props> = ({
       });
     }
 
-    if (matching.length === 0) {
-      displayWarningToast(
-        i18n.translate(
-          'xpack.ml.anomalyDetection.suppliedConfigurationsFlyout.noMatchesFoundToastMessage',
-          {
-            defaultMessage: 'No matching data views found',
-          }
-        )
-      );
-    }
     setMatchingDataViews(matching);
     setRunningDataRecognizer(false);
+    setRecognizerWasRun(true);
   };
 
   return (
@@ -245,7 +234,7 @@ export const OverviewTabContent: FC<Props> = ({
                     <EuiDescriptionListTitle>
                       <FormattedMessage
                         id="xpack.ml.anomalyDetection.suppliedConfigurationsFlyout.eligibleTitle"
-                        defaultMessage="One or more indices must match the following query:"
+                        defaultMessage="These jobs are available if data exists that match the following query:"
                       />
                     </EuiDescriptionListTitle>
                     <EuiSpacer size="m" />
@@ -269,7 +258,7 @@ export const OverviewTabContent: FC<Props> = ({
                         <EuiText size={'xs'}>
                           <FormattedMessage
                             id="xpack.ml.anomalyDetection.suppliedConfigurationsFlyout.dataRecognizerHelpButtonLabel"
-                            defaultMessage="Check indices to see which can be used to run jobs in this module?"
+                            defaultMessage="Check data views to determine which can be used to create jobs with this configuration."
                           />
                         </EuiText>
                       </EuiFlexItem>
@@ -293,9 +282,13 @@ export const OverviewTabContent: FC<Props> = ({
                     </EuiFlexGroup>
                   </EuiFlexItem>
                 ) : null}
-                {matchingDataViews.length ? (
+                {recognizerWasRun ? (
                   <EuiFlexItem grow={false}>
-                    <DataViewsTable matchingDataViews={matchingDataViews} moduleId={module.id} />
+                    <DataViewsTable
+                      matchingDataViews={matchingDataViews}
+                      moduleId={module.id}
+                      jobsLength={module.jobs.length}
+                    />
                   </EuiFlexItem>
                 ) : null}
               </EuiFlexGroup>
@@ -337,7 +330,7 @@ export const OverviewTabContent: FC<Props> = ({
                     >
                       <FormattedMessage
                         id="xpack.ml.anomalyDetection.suppliedConfigurationsFlyout.useInanotherAppLink"
-                        defaultMessage="Read the docs for more information on how to use this module in other apps"
+                        defaultMessage="Refer to the docs for more information on how to use this supplied configuration in other apps"
                       />
                     </EuiLink>
                   </>

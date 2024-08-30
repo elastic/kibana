@@ -113,7 +113,6 @@ export const SuppliedConfigurationsFlyout: FC<Props> = ({ module, onClose }) => 
       size="l"
       ownFocus
       onClose={onClose}
-      hideCloseButton
       aria-labelledby={'supplied-configurations-flyout'}
     >
       <EuiFlyoutHeader hasBorder>

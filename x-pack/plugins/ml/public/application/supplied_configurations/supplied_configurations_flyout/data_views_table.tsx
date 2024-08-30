@@ -19,9 +19,10 @@ import { ML_PAGES } from '../../../../common/constants/locator';
 interface Props {
   matchingDataViews: DataViewInfo[];
   moduleId: string;
+  jobsLength: number;
 }
 
-export const DataViewsTable: FC<Props> = ({ matchingDataViews, moduleId }) => {
+export const DataViewsTable: FC<Props> = ({ matchingDataViews, moduleId, jobsLength }) => {
   const {
     services: {
       application: { navigateToUrl },
@@ -77,7 +78,8 @@ export const DataViewsTable: FC<Props> = ({ matchingDataViews, moduleId }) => {
               >
                 <FormattedMessage
                   id="xpack.ml.anomalyDetection.suppliedConfigurationsFlyout.dataViewMatches.createJobAction"
-                  defaultMessage="Create job from data view"
+                  defaultMessage="Create {jobsLength, plural, one {# job} other {# jobs}}"
+                  values={{ jobsLength }}
                 />
               </EuiButtonEmpty>
             );

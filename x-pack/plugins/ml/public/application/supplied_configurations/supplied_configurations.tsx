@@ -134,7 +134,7 @@ export const SuppliedConfigurations = () => {
         onChange={onChange}
       />
       <EuiSpacer size="l" />
-      <EuiFlexGrid gutterSize="l" columns={3}>
+      <EuiFlexGrid gutterSize="l" columns={4}>
         {filteredModules.map(({ description, id, logo, title }) => {
           return (
             <EuiFlexItem key={id}>
@@ -142,7 +142,6 @@ export const SuppliedConfigurations = () => {
                 layout="horizontal"
                 icon={<EuiIcon size="xxl" type={isLogoObject(logo) ? logo.icon : logo} />}
                 title={title}
-                // isDisabled={false}
                 description={description}
                 onClick={() => {
                   setIsFlyoutVisible(true);

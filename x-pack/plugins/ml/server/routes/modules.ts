@@ -99,6 +99,9 @@ export function dataRecognizer(
       options: {
         tags: ['access:ml:canCreateJob'],
       },
+      summary: 'Recognize module',
+      description:
+        'By supplying a module id, discover if any of the data views contain data that is a match for that module.',
     })
     .addVersion(
       {

@@ -74,7 +74,7 @@ const PageWrapper: FC = () => {
             <EuiText size="s">
               <FormattedMessage
                 id="xpack.ml.suppliedConfigurations.preconfigurecJobsHeaderDescription"
-                defaultMessage="This page lists anomaly detection job packages that include supplied configurations for jobs and associated Kibana assets."
+                defaultMessage="This page lists pre-defined anomaly detection job configurations with related Kibana assets."
               />
             </EuiText>
           </EuiFlexItem>

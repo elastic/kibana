@@ -157,7 +157,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
             name: i18n.translate(
               'xpack.ml.navMenu.anomalyDetection.suppliedConfigurationsLinkText',
               {
-                defaultMessage: 'Supplied configurations',
+                defaultMessage: 'Supplied Configurations',
               }
             ),
             disabled: disableLinks,
