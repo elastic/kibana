@@ -179,7 +179,6 @@ describe('esql query helpers', () => {
     });
   });
 
-
   describe('wrapByPipes', function () {
     it('should return the code wrapped', function () {
       const code = wrapByPipes('FROM index1 | KEEP field1, field2 | SORT field1', false);
@@ -214,8 +213,9 @@ describe('esql query helpers', () => {
     it('should return true if the query is wrapped and prettified', function () {
       const flag = isQueryWrappedByPipes('FROM index1 /n  | KEEP field1, field2 /n  | SORT field1');
       expect(flag).toBeTruthy();
+    });
   });
-  
+
   describe('retieveMetadataColumns', () => {
     it('should return metadata columns if they exist', () => {
       expect(retieveMetadataColumns('from a  metadata _id, _ignored | eval b = 1')).toStrictEqual([
