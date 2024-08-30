@@ -31,6 +31,20 @@
           },
           {
             "parentPluginId": "cloud",
+            "id": "def-public.CloudConfigType.organization_id",
+            "type": "string",
+            "tags": [],
+            "label": "organization_id",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/cloud/public/plugin.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloud",
             "id": "def-public.CloudConfigType.cname",
             "type": "string",
             "tags": [],
@@ -219,7 +233,7 @@
             "label": "serverless",
             "description": [],
             "signature": [
-              "{ project_id: string; project_name?: string | undefined; project_type?: string | undefined; } | undefined"
+              "{ project_id: string; project_name?: string | undefined; project_type?: string | undefined; orchestrator_target?: string | undefined; } | undefined"
             ],
             "path": "x-pack/plugins/cloud/public/plugin.tsx",
             "deprecated": false,
@@ -530,6 +544,22 @@
           "label": "cloudId",
           "description": [
             "\nCloud ID. Undefined if not running on Cloud."
+          ],
+          "signature": [
+            "string | undefined"
+          ],
+          "path": "x-pack/plugins/cloud/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "cloud",
+          "id": "def-public.CloudSetup.organizationId",
+          "type": "string",
+          "tags": [],
+          "label": "organizationId",
+          "description": [
+            "\nThe Elastic Cloud Organization that owns this deployment/project."
           ],
           "signature": [
             "string | undefined"
@@ -858,7 +888,7 @@
             "\nServerless configuration"
           ],
           "signature": [
-            "{ projectId?: string | undefined; projectName?: string | undefined; projectType?: string | undefined; }"
+            "{ projectId?: string | undefined; projectName?: string | undefined; projectType?: string | undefined; orchestratorTarget?: string | undefined; }"
           ],
           "path": "x-pack/plugins/cloud/public/types.ts",
           "deprecated": false,
@@ -899,6 +929,22 @@
           "label": "cloudId",
           "description": [
             "\nThis is the ID of the Cloud deployment to which the Kibana instance belongs.\n"
+          ],
+          "signature": [
+            "string | undefined"
+          ],
+          "path": "x-pack/plugins/cloud/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "cloud",
+          "id": "def-server.CloudSetup.organizationId",
+          "type": "string",
+          "tags": [],
+          "label": "organizationId",
+          "description": [
+            "\nThe Elastic Cloud Organization that owns this deployment/project."
           ],
           "signature": [
             "string | undefined"
@@ -1145,7 +1191,7 @@
             "\nServerless configuration.\n"
           ],
           "signature": [
-            "{ projectId?: string | undefined; projectName?: string | undefined; projectType?: string | undefined; }"
+            "{ projectId?: string | undefined; projectName?: string | undefined; projectType?: string | undefined; orchestratorTarget?: string | undefined; }"
           ],
           "path": "x-pack/plugins/cloud/server/plugin.ts",
           "deprecated": false,

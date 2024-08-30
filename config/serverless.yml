@@ -108,8 +108,6 @@ xpack.index_management.editableIndexSettings: limited
 xpack.index_management.enableMappingsSourceFieldSection: false
 # Disable toggle for enabling data retention in DSL form from Index Management UI
 xpack.index_management.enableTogglingDataRetention: false
-# Disable the Monaco migration in Console
-console.dev.enableMonaco: false
 
 # Keep deeplinks visible so that they are shown in the sidenav
 dev_tools.deeplinks.navLinkStatus: visible
@@ -152,6 +150,7 @@ server.versioned.strictClientVersionCheck: false
 # Enforce single "default" space and disable feature visibility controls
 xpack.spaces.maxSpaces: 1
 xpack.spaces.allowFeatureVisibility: false
+xpack.spaces.allowSolutionVisibility: false
 
 # Only display console autocomplete suggestions for ES endpoints that are available in serverless
 console.autocompleteDefinitions.endpointsAvailability: serverless

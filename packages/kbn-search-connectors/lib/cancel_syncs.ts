@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { asyncForEach } from '@kbn/std';
 
 import { fetchSyncJobs, cancelSync } from '..';

@@ -32,7 +32,8 @@ export function kibanaLogsSpecProvider(context: TutorialContext): TutorialSchema
       defaultMessage: 'Collect and parse logs from Kibana with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.kibanaLogs.longDescription', {
-      defaultMessage: 'This is the Kibana module. \
+      defaultMessage:
+        'This is the Kibana module. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-kibana.html',

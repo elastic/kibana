@@ -5,12 +5,10 @@
  * 2.0.
  */
 import type { Logger, SavedObjectsFindResponse } from '@kbn/core/server';
-import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { INTERNAL_TAGS_URL, SECURITY_TAG_NAME } from '../../../../common/constants';
 import {
   serverMock,
   requestContextMock,
-  mockGetCurrentUser,
   requestMock,
 } from '../../detection_engine/routes/__mocks__';
 import { mockGetTagsResult } from '../__mocks__';
@@ -18,7 +16,6 @@ import { getTagsByNameRoute } from './get_tags_by_name';
 
 describe('getTagsByNameRoute', () => {
   let server: ReturnType<typeof serverMock.create>;
-  let securitySetup: SecurityPluginSetup;
   const { context } = requestContextMock.createTools();
   const logger = { error: jest.fn() } as unknown as Logger;
 
@@ -36,14 +33,7 @@ describe('getTagsByNameRoute', () => {
     jest.clearAllMocks();
     server = serverMock.create();
 
-    securitySetup = {
-      authc: {
-        getCurrentUser: jest.fn().mockReturnValue(mockGetCurrentUser),
-      },
-      authz: {},
-    } as unknown as SecurityPluginSetup;
-
-    getTagsByNameRoute(server.router, logger, securitySetup);
+    getTagsByNameRoute(server.router, logger);
   });
 
   it('should return tags with the exact name', async () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useReducer, useMemo, useCallback, useEffect } from 'react';
+import React, { useReducer, useMemo, useEffect } from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { Header } from './header';
 import { Footer } from './footer';
@@ -59,8 +59,6 @@ export const CreateIntegrationAssistant = React.memo(() => {
     return false;
   }, [state]);
 
-  const onGenerate = useCallback(() => actions.setIsGenerating(true), [actions]);
-
   return (
     <ActionsProvider value={actions}>
       <KibanaPageTemplate>
@@ -92,7 +90,6 @@ export const CreateIntegrationAssistant = React.memo(() => {
         </KibanaPageTemplate.Section>
         <Footer
           currentStep={state.step}
-          onGenerate={onGenerate}
           isGenerating={state.isGenerating}
           isNextStepEnabled={isNextStepEnabled}
         />

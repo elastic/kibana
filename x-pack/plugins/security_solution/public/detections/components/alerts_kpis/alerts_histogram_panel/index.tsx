@@ -8,6 +8,7 @@
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import type { EuiComboBox, EuiTitleSize } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiToolTip } from '@elastic/eui';
+import type { SyntheticEvent } from 'react';
 import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { isEmpty, noop } from 'lodash/fp';
@@ -36,7 +37,6 @@ import { KpiPanel, StackByComboBox } from '../common/components';
 
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { GROUP_BY_TOP_LABEL } from '../common/translations';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { getAlertsHistogramLensAttributes as getLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/common/alerts/alerts_histogram';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
@@ -118,7 +118,6 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     const [selectedStackByOption, setSelectedStackByOption] = useState<string>(
       onlyField == null ? defaultStackByOption : onlyField
     );
-    const isAlertsPageChartsEnabled = useIsExperimentalFeatureEnabled('alertsPageChartsEnabled');
 
     const onSelect = useCallback(
       (field: string) => {
@@ -136,15 +135,17 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
 
     const { toggleStatus, setToggleStatus } = useQueryToggle(DETECTIONS_HISTOGRAM_ID);
 
+    // alerts page uses isExpanded from kpi panel
+    // rules detail page and overview uses the toggle query
     const toggleQuery = useCallback(
-      (newToggleStatus: boolean) => {
-        if (isAlertsPageChartsEnabled && setIsExpanded !== undefined) {
-          setIsExpanded(newToggleStatus);
-        } else {
-          setToggleStatus(newToggleStatus);
-        }
-      },
-      [setToggleStatus, setIsExpanded, isAlertsPageChartsEnabled]
+      (newToggleStatus: boolean) =>
+        setIsExpanded ? setIsExpanded(newToggleStatus) : setToggleStatus(newToggleStatus),
+      [setToggleStatus, setIsExpanded]
+    );
+
+    const showHistogram = useMemo(
+      () => (setIsExpanded ? Boolean(isExpanded) : toggleStatus),
+      [setIsExpanded, isExpanded, toggleStatus]
     );
 
     const timerange = useMemo(() => ({ from, to }), [from, to]);
@@ -160,7 +161,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     });
 
     const goToDetectionEngine = useCallback(
-      (ev) => {
+      (ev: SyntheticEvent) => {
         ev.preventDefault();
         navigateToApp(APP_UI_ID, {
           deepLinkId: SecurityPageName.alerts,
@@ -201,20 +202,6 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
       () => (onlyField == null ? title : i18n.TOP(onlyField)),
       [onlyField, title]
     );
-
-    const showHistogram = useMemo(() => {
-      if (isAlertsPageChartsEnabled) {
-        if (isExpanded !== undefined) {
-          // alerts page
-          return isExpanded;
-        } else {
-          // rule details page and overview page
-          return toggleStatus;
-        }
-      } else {
-        return toggleStatus;
-      }
-    }, [isAlertsPageChartsEnabled, isExpanded, toggleStatus]);
 
     const { responses, loading } = useVisualizationResponse({
       visualizationId,

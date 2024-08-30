@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiCheckbox,
@@ -20,9 +20,11 @@ import {
 import { css } from '@emotion/react';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
+import { useWhichFlyout } from '../../shared/hooks/use_which_flyout';
+import { Flyouts } from '../../shared/constants/flyouts';
+import { useKibana } from '../../../../common/lib/kibana';
 import { TimelineId } from '../../../../../common/types';
 import { timelineSelectors } from '../../../../timelines/store';
-import { useIsTimelineFlyoutOpen } from '../../shared/hooks/use_is_timeline_flyout_open';
 import {
   ADD_NOTE_BUTTON_TEST_ID,
   ADD_NOTE_MARKDOWN_TEST_ID,
@@ -80,17 +82,20 @@ export interface AddNewNoteProps {
  * The checkbox is automatically checked if the flyout is opened from a timeline and that timeline is saved. It is disabled if the flyout is NOT opened from a timeline.
  */
 export const AddNote = memo(({ eventId }: AddNewNoteProps) => {
+  const { telemetry } = useKibana().services;
   const dispatch = useDispatch();
   const { addError: addErrorToast } = useAppToasts();
   const [editorValue, setEditorValue] = useState('');
+  const [isMarkdownInvalid, setIsMarkdownInvalid] = useState(false);
 
   const activeTimeline = useSelector((state: State) =>
     timelineSelectors.selectTimelineById(state, TimelineId.active)
   );
 
   // if the flyout is open from a timeline and that timeline is saved, we automatically check the checkbox to associate the note to it
-  const isTimelineFlyout = useIsTimelineFlyoutOpen();
-  const [checked, setChecked] = useState(isTimelineFlyout && activeTimeline.savedObjectId != null);
+  const isTimelineFlyout = useWhichFlyout() === Flyouts.timeline;
+
+  const [checked, setChecked] = useState<boolean>(true);
   const onCheckboxChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => setChecked(e.target.checked),
     []
@@ -109,8 +114,11 @@ export const AddNote = memo(({ eventId }: AddNewNoteProps) => {
         },
       })
     );
+    telemetry.reportAddNoteFromExpandableFlyoutClicked({
+      isRelatedToATimeline: checked && activeTimeline?.savedObjectId !== null,
+    });
     setEditorValue('');
-  }, [activeTimeline?.savedObjectId, checked, dispatch, editorValue, eventId]);
+  }, [activeTimeline?.savedObjectId, checked, dispatch, editorValue, eventId, telemetry]);
 
   // show a toast if the create note call fails
   useEffect(() => {
@@ -121,8 +129,20 @@ export const AddNote = memo(({ eventId }: AddNewNoteProps) => {
     }
   }, [addErrorToast, createError, createStatus]);
 
-  const checkBoxDisabled =
-    !isTimelineFlyout || (isTimelineFlyout && activeTimeline.savedObjectId == null);
+  const buttonDisabled = useMemo(
+    () => editorValue.trim().length === 0 || isMarkdownInvalid,
+    [editorValue, isMarkdownInvalid]
+  );
+
+  const initialCheckboxChecked = useMemo(
+    () => isTimelineFlyout && activeTimeline.savedObjectId != null,
+    [activeTimeline?.savedObjectId, isTimelineFlyout]
+  );
+
+  const checkBoxDisabled = useMemo(
+    () => !isTimelineFlyout || (isTimelineFlyout && activeTimeline?.savedObjectId == null),
+    [activeTimeline?.savedObjectId, isTimelineFlyout]
+  );
 
   return (
     <>
@@ -133,7 +153,7 @@ export const AddNote = memo(({ eventId }: AddNewNoteProps) => {
             value={editorValue}
             onChange={setEditorValue}
             ariaLabel={MARKDOWN_ARIA_LABEL}
-            setIsMarkdownInvalid={() => {}}
+            setIsMarkdownInvalid={setIsMarkdownInvalid}
           />
         </EuiComment>
       </EuiCommentList>
@@ -158,7 +178,7 @@ export const AddNote = memo(({ eventId }: AddNewNoteProps) => {
                 </>
               }
               disabled={checkBoxDisabled}
-              checked={checked}
+              checked={initialCheckboxChecked && checked}
               onChange={(e) => onCheckboxChange(e)}
             />
           </>
@@ -167,6 +187,7 @@ export const AddNote = memo(({ eventId }: AddNewNoteProps) => {
           <EuiButton
             onClick={addNote}
             isLoading={createStatus === ReqStatus.Loading}
+            disabled={buttonDisabled}
             data-test-subj={ADD_NOTE_BUTTON_TEST_ID}
           >
             {ADD_NOTE_BUTTON}

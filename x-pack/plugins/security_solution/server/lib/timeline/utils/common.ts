@@ -14,17 +14,16 @@ import { schema } from '@kbn/config-schema';
 
 import type { KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
 import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
-import type { SetupPlugins, StartPlugins } from '../../../plugin';
 
 import type { FrameworkRequest } from '../../framework';
 
 export const buildFrameworkRequest = async (
   context: RequestHandlerContext,
-  security: StartPlugins['security'] | SetupPlugins['security'] | undefined,
   request: KibanaRequest
 ): Promise<FrameworkRequest> => {
-  const savedObjectsClient = (await context.core).savedObjects.client;
-  const user = await security?.authc.getCurrentUser(request);
+  const coreContext = await context.core;
+  const savedObjectsClient = coreContext.savedObjects.client;
+  const user = coreContext.security.authc.getCurrentUser();
 
   return set<FrameworkRequest>(
     'user',
@@ -38,16 +37,6 @@ export const buildFrameworkRequest = async (
 };
 
 export const escapeHatch = schema.object({}, { unknowns: 'allow' });
-
-export const getNotesPaginated = schema.object({
-  documentIds: schema.maybe(schema.oneOf([schema.arrayOf(schema.string()), schema.string()])),
-  page: schema.maybe(schema.string()),
-  perPage: schema.maybe(schema.string()),
-  search: schema.maybe(schema.string()),
-  sortField: schema.maybe(schema.string()),
-  sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
-  filter: schema.maybe(schema.string()),
-});
 
 type ErrorFactory = (message: string) => Error;
 

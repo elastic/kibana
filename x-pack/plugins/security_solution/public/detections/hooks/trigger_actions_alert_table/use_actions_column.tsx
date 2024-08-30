@@ -8,7 +8,10 @@
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import React, { useCallback, useContext, useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import type { AlertsTableConfigurationRegistry } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type {
+  AlertsTableConfigurationRegistry,
+  RenderCustomActionsRowArgs,
+} from '@kbn/triggers-actions-ui-plugin/public/types';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { StatefulEventContext } from '../../../common/components/events_viewer/stateful_event_context';
@@ -29,11 +32,10 @@ export const getUseActionColumnHook =
 
     // we only want to show the note icon if the expandable flyout and the new notes system are enabled
     // TODO delete most likely in 8.16
-    const expandableFlyoutDisabled = useIsExperimentalFeatureEnabled('expandableFlyoutDisabled');
     const securitySolutionNotesEnabled = useIsExperimentalFeatureEnabled(
       'securitySolutionNotesEnabled'
     );
-    if (expandableFlyoutDisabled || !securitySolutionNotesEnabled) {
+    if (!securitySolutionNotesEnabled) {
       ACTION_BUTTON_COUNT--;
     }
 
@@ -62,7 +64,7 @@ export const getUseActionColumnHook =
         clearSelection,
         ecsAlert: alert,
         nonEcsData,
-      }) => {
+      }: RenderCustomActionsRowArgs) => {
         const timelineItem: TimelineItem = {
           _id: (alert as Ecs)._id,
           _index: (alert as Ecs)._index,

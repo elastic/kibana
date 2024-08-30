@@ -1056,7 +1056,7 @@
           {
             "parentPluginId": "@kbn/config-schema",
             "id": "def-common.Type.internalSchema",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [
               "type"
             ],
@@ -1066,6 +1066,28 @@
             ],
             "signature": [
               "AnySchema",
+              "<any> | ",
+              "ArraySchema",
+              "<any> | ",
+              "AlternativesSchema",
+              "<any> | ",
+              "BinarySchema",
+              "<any> | ",
+              "BooleanSchema",
+              "<any> | ",
+              "DateSchema",
+              "<any> | ",
+              "FunctionSchema",
+              "<any> | ",
+              "NumberSchema",
+              "<any> | ",
+              "ObjectSchema",
+              "<any> | ",
+              "StringSchema",
+              "<any> | ",
+              "LinkSchema",
+              "<any> | ",
+              "SymbolSchema",
               "<any>"
             ],
             "path": "packages/kbn-config-schema/src/types/type.ts",
@@ -1089,12 +1111,12 @@
               {
                 "parentPluginId": "@kbn/config-schema",
                 "id": "def-common.Type.Unnamed.$1",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "schema",
                 "description": [],
                 "signature": [
-                  "AnySchema",
+                  "Schema",
                   "<any>"
                 ],
                 "path": "packages/kbn-config-schema/src/types/type.ts",
@@ -1173,7 +1195,15 @@
               "\nValidates the provided value against this schema.\nIf valid, the resulting output will be returned, otherwise an exception will be thrown."
             ],
             "signature": [
-              "(value: unknown, context?: Record<string, unknown>, namespace?: string | undefined) => V"
+              "(value: unknown, context?: Record<string, unknown>, namespace?: string | undefined, validationOptions?: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.SchemaValidationOptions",
+                "text": "SchemaValidationOptions"
+              },
+              " | undefined) => V"
             ],
             "path": "packages/kbn-config-schema/src/types/type.ts",
             "deprecated": false,
@@ -1223,6 +1253,28 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/config-schema",
+                "id": "def-common.Type.validate.$4",
+                "type": "Object",
+                "tags": [],
+                "label": "validationOptions",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.SchemaValidationOptions",
+                    "text": "SchemaValidationOptions"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/kbn-config-schema/src/types/type.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -1238,7 +1290,7 @@
             "description": [],
             "signature": [
               "() => ",
-              "AnySchema",
+              "Schema",
               "<any>"
             ],
             "path": "packages/kbn-config-schema/src/types/type.ts",
@@ -1606,6 +1658,38 @@
             "tags": [],
             "label": "type",
             "description": [],
+            "path": "packages/kbn-config-schema/src/types/type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/config-schema",
+        "id": "def-common.SchemaValidationOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "SchemaValidationOptions",
+        "description": [
+          "\nGlobal validation Options to be provided when calling the `schema.validate()` method."
+        ],
+        "path": "packages/kbn-config-schema/src/types/type.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/config-schema",
+            "id": "def-common.SchemaValidationOptions.stripUnknownKeys",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "stripUnknownKeys",
+            "description": [
+              "\nRemove unknown config keys"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/kbn-config-schema/src/types/type.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4586,7 +4670,113 @@
             "section": "def-common.ObjectType",
             "text": "ObjectType"
           },
-          "<P>; oneOf: { <A, B, C, D, E, F, G, H, I, J, K>(types: [",
+          "<P>; oneOf: { <A, B, C, D, E, F, G, H, I, J, K, L>(types: [",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<A>, ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<B>, ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<C>, ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<D>, ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<E>, ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<F>, ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<G>, ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<H>, ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<I>, ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<J>, ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<K>, ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<L>], options?: ",
+          "UnionTypeOptions",
+          "<A | B | C | D | E | F | G | H | I | J | K | L> | undefined): ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<A | B | C | D | E | F | G | H | I | J | K | L>; <A, B, C, D, E, F, G, H, I, J, K>(types: [",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -8992,7 +9182,113 @@
             "label": "oneOf",
             "description": [],
             "signature": [
-              "{ <A, B, C, D, E, F, G, H, I, J, K>(types: [",
+              "{ <A, B, C, D, E, F, G, H, I, J, K, L>(types: [",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<A>, ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<B>, ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<C>, ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<D>, ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<E>, ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<F>, ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<G>, ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<H>, ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<I>, ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<J>, ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<K>, ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<L>], options?: ",
+              "UnionTypeOptions",
+              "<A | B | C | D | E | F | G | H | I | J | K | L> | undefined): ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<A | B | C | D | E | F | G | H | I | J | K | L>; <A, B, C, D, E, F, G, H, I, J, K>(types: [",
               {
                 "pluginId": "@kbn/config-schema",
                 "scope": "common",

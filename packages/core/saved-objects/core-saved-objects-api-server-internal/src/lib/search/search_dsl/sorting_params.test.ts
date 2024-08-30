@@ -238,4 +238,12 @@ describe('searchDsl/getSortParams', () => {
       });
     });
   });
+
+  describe('pit, no sortField', () => {
+    it('defaults to natural storage order sorting', () => {
+      expect(getSortingParams(MAPPINGS, 'saved', undefined, undefined, { id: 'abc123' })).toEqual({
+        sort: ['_shard_doc'],
+      });
+    });
+  });
 });

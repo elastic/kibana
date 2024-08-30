@@ -70,10 +70,7 @@ export const ElasticsearchModels: React.FC<ElasticsearchModelsProps> = ({
     }
   }, [numberOfAllocations, numberOfThreads, serviceType]);
 
-  const elasticSearchModelTypesDescriptions: Record<
-    ElasticsearchModelDefaultOptions | string,
-    ElasticsearchModelDescriptions
-  > = {
+  const elasticSearchModelTypesDescriptions: Record<string, ElasticsearchModelDescriptions> = {
     [ElasticsearchModelDefaultOptions.elser]: {
       description: i18n.translate(
         'xpack.ml.addInferenceEndpoint.elasticsearchModels.elser.description',

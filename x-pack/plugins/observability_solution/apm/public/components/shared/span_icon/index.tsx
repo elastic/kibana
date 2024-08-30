@@ -6,16 +6,16 @@
  */
 
 import React from 'react';
-import { EuiIcon } from '@elastic/eui';
+import { EuiIcon, type EuiIconProps } from '@elastic/eui';
 import { getSpanIcon } from './get_span_icon';
 
-interface Props {
+interface Props extends Omit<EuiIconProps, 'type'> {
   type?: string;
   subtype?: string;
 }
 
-export function SpanIcon({ type, subtype }: Props) {
+export function SpanIcon({ type, subtype, ...props }: Props) {
   const icon = getSpanIcon(type, subtype);
 
-  return <EuiIcon type={icon} size="l" title={type || subtype} />;
+  return <EuiIcon type={icon} size="l" title={type || subtype} {...props} />;
 }

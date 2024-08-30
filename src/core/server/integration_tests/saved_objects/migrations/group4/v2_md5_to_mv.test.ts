@@ -19,7 +19,7 @@ import {
   readLog,
   startElasticsearch,
 } from '../kibana_migrator_test_kit';
-import { delay, createType } from '../test_utils';
+import { createType } from '../test_utils';
 import '../jest_matchers';
 
 const logFilePath = Path.join(__dirname, 'v2_md5_to_mv.test.log');
@@ -270,6 +270,5 @@ describe('V2 algorithm', () => {
 
   afterAll(async () => {
     await esServer?.stop();
-    await delay(10);
   });
 });

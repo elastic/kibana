@@ -12,8 +12,8 @@ import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import { DatasetQualityContext, DatasetQualityContextValue } from './context';
 import { useKibanaContextForPluginProvider } from '../../utils';
 import { DatasetQualityStartDeps } from '../../types';
-import { DatasetQualityController } from '../../controller';
-import { IDataStreamsStatsClient } from '../../services/data_streams_stats';
+import { DatasetQualityController } from '../../controller/dataset_quality';
+import { ITelemetryClient } from '../../services/telemetry';
 
 export interface DatasetQualityProps {
   controller: DatasetQualityController;
@@ -22,13 +22,13 @@ export interface DatasetQualityProps {
 export interface CreateDatasetQualityArgs {
   core: CoreStart;
   plugins: DatasetQualityStartDeps;
-  dataStreamStatsClient: IDataStreamsStatsClient;
+  telemetryClient: ITelemetryClient;
 }
 
 export const createDatasetQuality = ({
   core,
   plugins,
-  dataStreamStatsClient,
+  telemetryClient,
 }: CreateDatasetQualityArgs) => {
   return ({ controller }: DatasetQualityProps) => {
     const SummaryPanelProvider = dynamic(() => import('../../hooks/use_summary_panel'));
@@ -37,6 +37,7 @@ export const createDatasetQuality = ({
     const datasetQualityProviderValue: DatasetQualityContextValue = useMemo(
       () => ({
         service: controller.service,
+        telemetryClient,
       }),
       [controller.service]
     );

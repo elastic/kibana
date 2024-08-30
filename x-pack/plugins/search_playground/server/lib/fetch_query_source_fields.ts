@@ -164,11 +164,20 @@ const isFieldInIndex = (
   );
 };
 
+const sortFields = (fields: FieldCapsResponse['fields']): FieldCapsResponse['fields'] => {
+  const entries = Object.entries(fields);
+
+  entries.sort((a, b) => a[0].localeCompare(b[0]));
+
+  return Object.fromEntries(entries);
+};
+
 export const parseFieldsCapabilities = (
   fieldCapsResponse: FieldCapsResponse,
   aggMappingDocs: Array<{ index: string; doc: SearchResponse; mapping: IndicesGetMappingResponse }>
 ): IndicesQuerySourceFields => {
-  const { fields, indices: indexOrIndices } = fieldCapsResponse;
+  const { indices: indexOrIndices } = fieldCapsResponse;
+  const fields = sortFields(fieldCapsResponse.fields);
   const indices = Array.isArray(indexOrIndices) ? indexOrIndices : [indexOrIndices];
 
   const indexModelIdFields = aggMappingDocs.map<IndexFieldModel>((aggDoc) => {
@@ -259,12 +268,9 @@ export const parseFieldsCapabilities = (
           } else {
             acc[index].skipped_fields++;
           }
-        } else if (
-          isFieldInIndex(field, 'rank_features', index) ||
-          isFieldInIndex(field, 'sparse_vector', index)
-        ) {
+        } else if (isFieldInIndex(field, 'sparse_vector', index)) {
           const modelId = getModelField(fieldKey, modelIdFields);
-          const fieldCapabilities = field.rank_features || field.sparse_vector;
+          const fieldCapabilities = field.sparse_vector;
 
           // Check if the sparse vector field has a model_id associated with it
           // skip this field if has no model associated with it
@@ -274,6 +280,27 @@ export const parseFieldsCapabilities = (
               field: fieldKey,
               model_id: modelId,
               indices: (fieldCapabilities.indices as string[]) || indicesPresentIn,
+              // we must use sparse_vector query
+              sparse_vector: true,
+            };
+            acc[index].elser_query_fields.push(elserModelField);
+          } else {
+            acc[index].skipped_fields++;
+          }
+        } else if (isFieldInIndex(field, 'rank_features', index)) {
+          const modelId = getModelField(fieldKey, modelIdFields);
+          const fieldCapabilities = field.rank_features;
+
+          // Check if the sparse vector field has a model_id associated with it
+          // skip this field if has no model associated with it
+          // and the vectors were embedded outside of stack
+          if (modelId && !nestedField) {
+            const elserModelField = {
+              field: fieldKey,
+              model_id: modelId,
+              indices: (fieldCapabilities.indices as string[]) || indicesPresentIn,
+              // we must use text_expansion query
+              sparse_vector: false,
             };
             acc[index].elser_query_fields.push(elserModelField);
           } else {

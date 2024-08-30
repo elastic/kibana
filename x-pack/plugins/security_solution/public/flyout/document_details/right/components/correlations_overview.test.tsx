@@ -39,7 +39,7 @@ import {
   EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
-} from '../../../shared/components/test_ids';
+} from '@kbn/security-solution-common';
 import { useTourContext } from '../../../../common/components/guided_onboarding_tour';
 import { AlertsCasesTourSteps } from '../../../../common/components/guided_onboarding_tour/tour_config';
 
@@ -92,10 +92,7 @@ const flyoutContextValue = {
   openLeftPanel: jest.fn(),
 } as unknown as ExpandableFlyoutApi;
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn(),
-  ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
-}));
+jest.mock('@kbn/expandable-flyout');
 
 jest.mock('../../../../timelines/containers/use_timeline_data_filters', () => ({
   useTimelineDataFilters: jest.fn(),
@@ -139,6 +136,26 @@ describe('<CorrelationsOverview />', () => {
     expect(getByTestId(TITLE_LINK_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(TITLE_ICON_TEST_ID)).toBeInTheDocument();
     expect(queryByTestId(TITLE_TEXT_TEST_ID)).not.toBeInTheDocument();
+  });
+
+  it('should not render link when isPreviewMode is true', () => {
+    jest
+      .mocked(useShowRelatedAlertsByAncestry)
+      .mockReturnValue({ show: false, documentId: 'event-id' });
+    jest
+      .mocked(useShowRelatedAlertsBySameSourceEvent)
+      .mockReturnValue({ show: false, originalEventId });
+    jest.mocked(useShowRelatedAlertsBySession).mockReturnValue({ show: false });
+    jest.mocked(useShowRelatedCases).mockReturnValue(false);
+    jest.mocked(useShowSuppressedAlerts).mockReturnValue({ show: false, alertSuppressionCount: 0 });
+
+    const { getByTestId, queryByTestId } = render(
+      renderCorrelationsOverview({ ...panelContextValue, isPreviewMode: true })
+    );
+    expect(queryByTestId(TOGGLE_ICON_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(TITLE_LINK_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(TITLE_ICON_TEST_ID)).not.toBeInTheDocument();
+    expect(getByTestId(TITLE_TEXT_TEST_ID)).toBeInTheDocument();
   });
 
   it('should show component with all rows in expandable panel', () => {

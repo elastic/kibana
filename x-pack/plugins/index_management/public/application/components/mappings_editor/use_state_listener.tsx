@@ -8,6 +8,7 @@
 import { useEffect, useMemo } from 'react';
 
 import { EuiSelectableOption } from '@elastic/eui';
+import { cloneDeep } from 'lodash';
 import {
   DocumentFieldsStatus,
   Field,
@@ -180,6 +181,12 @@ export const useMappingsStateListener = ({ onChange, value, status }: Args) => {
           filteredFields: getFieldsFromState(parsedFieldsDefaultValue),
           selectedDataTypes: [],
         },
+      },
+    });
+    dispatch({
+      type: 'editor.replaceViewMappings',
+      value: {
+        fields: cloneDeep(parsedFieldsDefaultValue),
       },
     });
   }, [

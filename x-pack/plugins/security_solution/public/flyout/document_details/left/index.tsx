@@ -32,7 +32,7 @@ export const LeftPanelNotesTab: LeftPanelPaths = 'notes';
 export const LeftPanel: FC<Partial<DocumentDetailsProps>> = memo(({ path }) => {
   const { telemetry } = useKibana().services;
   const { openLeftPanel } = useExpandableFlyoutApi();
-  const { eventId, indexName, scopeId, getFieldsData } = useDocumentDetailsContext();
+  const { eventId, indexName, scopeId, getFieldsData, isPreview } = useDocumentDetailsContext();
   const eventKind = getField(getFieldsData('event.kind'));
   const securitySolutionNotesEnabled = useIsExperimentalFeatureEnabled(
     'securitySolutionNotesEnabled'
@@ -43,11 +43,11 @@ export const LeftPanel: FC<Partial<DocumentDetailsProps>> = memo(({ path }) => {
       eventKind === EventKind.signal
         ? [tabs.insightsTab, tabs.investigationTab, tabs.responseTab]
         : [tabs.insightsTab];
-    if (securitySolutionNotesEnabled) {
+    if (securitySolutionNotesEnabled && !isPreview) {
       tabList.push(tabs.notesTab);
     }
     return tabList;
-  }, [eventKind, securitySolutionNotesEnabled]);
+  }, [eventKind, isPreview, securitySolutionNotesEnabled]);
 
   const selectedTabId = useMemo(() => {
     const defaultTab = tabsDisplayed[0].id;

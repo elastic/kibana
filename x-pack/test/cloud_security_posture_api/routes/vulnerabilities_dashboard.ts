@@ -13,6 +13,7 @@ import {
   vulnerabilitiesLatestMock,
   scoresVulnerabilitiesMock,
 } from './mocks/vulnerabilities_latest_mock';
+import { CspSecurityCommonProvider } from './helper/user_roles_utilites';
 
 export interface CnvmStatistics {
   criticalCount?: number;
@@ -106,11 +107,14 @@ const removeRealtimeCalculatedFields = (
 };
 
 // eslint-disable-next-line import/no-default-export
-export default function ({ getService }: FtrProviderContext) {
+export default function (providerContext: FtrProviderContext) {
+  const { getService } = providerContext;
   const retry = getService('retry');
   const es = getService('es');
   const supertest = getService('supertest');
   const log = getService('log');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const cspSecurity = CspSecurityCommonProvider(providerContext);
 
   /**
    * required before indexing findings
@@ -186,14 +190,11 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Vulnerability Dashboard API', async () => {
     beforeEach(async () => {
+      await index.removeFindings();
+      await index.removeScores();
       await waitForPluginInitialized();
       await index.addScores(scoresVulnerabilitiesMock);
       await index.addFindings(vulnerabilitiesLatestMock);
-    });
-
-    afterEach(async () => {
-      await index.removeFindings();
-      await index.removeScores();
     });
 
     it('responds with a 200 status code and matching data mock', async () => {
@@ -306,6 +307,29 @@ export default function ({ getService }: FtrProviderContext) {
         .get('/internal/cloud_security_posture/vulnerabilities_dashboard')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .expect(500);
+    });
+
+    it('GET vulnerabilities dashboard API with users with read access to cloud security posture', async () => {
+      const { status } = await supertestWithoutAuth
+        .get('/internal/cloud_security_posture/vulnerabilities_dashboard')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set('kbn-xsrf', 'xxxx')
+        .auth('role_security_read_user', cspSecurity.getPasswordForUser('role_security_read_user'));
+
+      expect(status).to.be(200);
+    });
+
+    it('GET vulnerabilities dashboard API with users without read access to cloud security posture', async () => {
+      const { status } = await supertestWithoutAuth
+        .get('/internal/cloud_security_posture/vulnerabilities_dashboard')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set('kbn-xsrf', 'xxxx')
+        .auth(
+          'role_security_no_read_user',
+          cspSecurity.getPasswordForUser('role_security_no_read_user')
+        );
+
+      expect(status).to.be(403);
     });
   });
 }

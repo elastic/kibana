@@ -22,7 +22,7 @@
     ],
     "requiredBundles": [
       "esUiShared",
-      "textBasedLanguages"
+      "esql"
     ],
     "extraPublicDirs": ["common"]
   }

@@ -11,12 +11,11 @@ import { API_ERROR } from '../translations';
 import { getOptionalRequestParams } from '../helpers';
 import { TraceOptions } from '../types';
 export * from './conversations';
+export * from './prompts';
 
 export interface FetchConnectorExecuteAction {
   conversationId: string;
-  isEnabledRAGAlerts: boolean;
   alertsIndexPattern?: string;
-  isEnabledKnowledgeBase: boolean;
   assistantStreamingEnabled: boolean;
   apiConfig: ApiConfig;
   http: HttpSetup;
@@ -39,9 +38,7 @@ export interface FetchConnectorExecuteResponse {
 
 export const fetchConnectorExecuteAction = async ({
   conversationId,
-  isEnabledRAGAlerts,
   alertsIndexPattern,
-  isEnabledKnowledgeBase,
   assistantStreamingEnabled,
   http,
   message,
@@ -55,7 +52,6 @@ export const fetchConnectorExecuteAction = async ({
   const isStream = assistantStreamingEnabled;
 
   const optionalRequestParams = getOptionalRequestParams({
-    isEnabledRAGAlerts,
     alertsIndexPattern,
     size,
   });
@@ -67,8 +63,6 @@ export const fetchConnectorExecuteAction = async ({
     conversationId,
     actionTypeId: apiConfig.actionTypeId,
     replacements,
-    isEnabledKnowledgeBase,
-    isEnabledRAGAlerts,
     langSmithProject:
       traceOptions?.langSmithProject === '' ? undefined : traceOptions?.langSmithProject,
     langSmithApiKey:

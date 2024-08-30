@@ -18,13 +18,14 @@ import {
 } from '@kbn/core/server';
 import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
 import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
-import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/server';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { LogsSharedPluginSetup } from '@kbn/logs-shared-plugin/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { SearchConnectorsPluginSetup } from '@kbn/search-connectors-plugin/server';
-import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
@@ -95,6 +96,7 @@ interface PluginsSetup {
   guidedOnboarding?: GuidedOnboardingPluginSetup;
   logsShared: LogsSharedPluginSetup;
   ml?: MlPluginSetup;
+  licensing: LicensingPluginStart;
   searchConnectors?: SearchConnectorsPluginSetup;
   security: SecurityPluginSetup;
   usageCollection?: UsageCollectionSetup;
@@ -102,7 +104,6 @@ interface PluginsSetup {
 
 export interface PluginsStart {
   data: DataPluginStart;
-  security: SecurityPluginStart;
   spaces?: SpacesPluginStart;
 }
 
@@ -148,6 +149,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       logsShared,
       customIntegrations,
       ml,
+      licensing,
       guidedOnboarding,
       cloud,
       searchConnectors,
@@ -226,6 +228,7 @@ export class EnterpriseSearchPlugin implements Plugin {
             enterpriseSearchApplications: showEnterpriseSearch,
             enterpriseSearchAISearch: showEnterpriseSearch,
             enterpriseSearchVectorSearch: showEnterpriseSearch,
+            enterpriseSearchSemanticSearch: showEnterpriseSearch,
             enterpriseSearchElasticsearch: showEnterpriseSearch,
             appSearch: hasAppSearchAccess && config.canDeployEntSearch,
             workplaceSearch: hasWorkplaceSearchAccess && config.canDeployEntSearch,
@@ -238,6 +241,7 @@ export class EnterpriseSearchPlugin implements Plugin {
             enterpriseSearchApplications: showEnterpriseSearch,
             enterpriseSearchAISearch: showEnterpriseSearch,
             enterpriseSearchVectorSearch: showEnterpriseSearch,
+            enterpriseSearchSemanticSearch: showEnterpriseSearch,
             enterpriseSearchElasticsearch: showEnterpriseSearch,
             appSearch: hasAppSearchAccess && config.canDeployEntSearch,
             workplaceSearch: hasWorkplaceSearchAccess && config.canDeployEntSearch,
@@ -262,6 +266,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       log,
       enterpriseSearchRequestHandler,
       ml,
+      licensing,
     };
 
     registerConfigDataRoute(dependencies);
@@ -278,9 +283,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       registerAnalyticsRoutes({ ...dependencies, data, savedObjects: coreStart.savedObjects });
     });
 
-    void getStartServices().then(([, { security: securityStart }]) => {
-      registerApiKeysRoutes(dependencies, securityStart);
-    });
+    registerApiKeysRoutes(dependencies);
 
     /**
      * Bootstrap the routes, saved objects, and collector for telemetry

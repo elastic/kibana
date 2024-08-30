@@ -8,3 +8,4 @@
 export { partiallyUpdateAdHocRun } from './partially_update_ad_hoc_run';
 export { processRunResults } from './process_run_result';
 export { withAlertingSpan } from './with_alerting_span';
+export { createTaskRunnerLogger } from './task_runner_logger';

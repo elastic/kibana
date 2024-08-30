@@ -40,8 +40,8 @@ import { ensureFleetFinalPipelineIsInstalled } from './epm/elasticsearch/ingest_
 import { ensureDefaultComponentTemplates } from './epm/elasticsearch/template/install';
 import { getInstallations, reinstallPackageForInstallation } from './epm/packages';
 import { isPackageInstalled } from './epm/packages/install';
-import type { UpgradeManagedPackagePoliciesResult } from './managed_package_policies';
-import { upgradeManagedPackagePolicies } from './managed_package_policies';
+import type { UpgradeManagedPackagePoliciesResult } from './setup/managed_package_policies';
+import { setupUpgradeManagedPackagePolicies } from './setup/managed_package_policies';
 import { upgradePackageInstallVersion } from './setup/upgrade_package_install_version';
 import { upgradeAgentPolicySchemaVersion } from './setup/upgrade_agent_policy_schema_version';
 import { migrateSettingsToFleetServerHost } from './fleet_server_host';
@@ -52,6 +52,7 @@ import {
 import { cleanUpOldFileIndices } from './setup/clean_old_fleet_indices';
 import type { UninstallTokenInvalidError } from './security/uninstall_token_service';
 import { ensureAgentPoliciesFleetServerKeysAndPolicies } from './setup/fleet_server_policies_enrollment_keys';
+import { ensureSpaceSettings } from './preconfiguration/space_settings';
 
 export interface SetupStatus {
   isInitialized: boolean;
@@ -133,7 +134,9 @@ async function createLock(
       },
       { id: FLEET_SETUP_LOCK_TYPE }
     );
-    logger.debug(`Fleet setup lock created: ${JSON.stringify(created)}`);
+    if (logger.isLevelEnabled('debug')) {
+      logger.debug(`Fleet setup lock created: ${JSON.stringify(created)}`);
+    }
   } catch (error) {
     logger.info(`Could not create fleet setup lock, abort setup: ${error}`);
     return { created: false, toReturn: { isInitialized: false, nonFatalErrors: [] } };
@@ -188,6 +191,9 @@ async function createSetupSideEffects(
     esClient,
     getPreconfiguredFleetServerHostFromConfig(appContextService.getConfig())
   );
+
+  logger.debug('Setting up Space settings');
+  await ensureSpaceSettings(appContextService.getConfig()?.spaceSettings ?? []);
 
   logger.debug('Setting up Fleet outputs');
   await Promise.all([
@@ -244,9 +250,7 @@ async function createSetupSideEffects(
   stepSpan?.end();
 
   stepSpan = apm.startSpan('Upgrade managed package policies', 'preconfiguration');
-  const packagePolicyUpgradeErrors = (
-    await upgradeManagedPackagePolicies(soClient, esClient)
-  ).filter((result) => (result.errors ?? []).length > 0);
+  await setupUpgradeManagedPackagePolicies(soClient, esClient);
   stepSpan?.end();
 
   logger.debug('Upgrade Fleet package install versions');
@@ -288,7 +292,6 @@ async function createSetupSideEffects(
 
   const nonFatalErrors = [
     ...preconfiguredPackagesNonFatalErrors,
-    ...packagePolicyUpgradeErrors,
     ...(messageSigningServiceNonFatalError ? [messageSigningServiceNonFatalError] : []),
   ];
 

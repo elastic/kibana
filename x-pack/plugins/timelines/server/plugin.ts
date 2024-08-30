@@ -12,6 +12,8 @@ import { SetupPlugins, StartPlugins, TimelinesPluginUI, TimelinesPluginStart } f
 import { timelineSearchStrategyProvider } from './search_strategy/timeline';
 import { timelineEqlSearchStrategyProvider } from './search_strategy/timeline/eql';
 import { indexFieldsProvider } from './search_strategy/index_fields';
+import { parseExperimentalConfigValue } from '../common/experimental_features';
+import { ConfigSchema } from './config';
 
 export class TimelinesPlugin
   implements Plugin<TimelinesPluginUI, TimelinesPluginStart, SetupPlugins, StartPlugins>
@@ -21,6 +23,11 @@ export class TimelinesPlugin
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
+
+    // NOTE: underscored to skip lint warning, but it can be used to implement experimental features behind a flag
+    const { features: _experimentalFeatures } = parseExperimentalConfigValue(
+      initializerContext.config.get<ConfigSchema>().enableExperimental
+    );
   }
 
   public setup(core: CoreSetup<StartPlugins, TimelinesPluginStart>, plugins: SetupPlugins) {

@@ -6,42 +6,31 @@
  */
 
 import React, { useEffect } from 'react';
-import { Provider as ReduxProvider } from 'react-redux';
 
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { InspectorContextProvider } from '@kbn/observability-shared-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Router } from '@kbn/shared-ux-router';
 
+import { PerformanceContextProvider } from '@kbn/ebt-tools';
+import { SyntheticsSharedContext } from './contexts/synthetics_shared_context';
 import { kibanaService } from '../../utils/kibana_service';
 import { ActionMenu } from './components/common/header/action_menu';
 import { TestNowModeFlyoutContainer } from './components/test_now_mode/test_now_mode_flyout_container';
-import {
-  SyntheticsAppProps,
-  SyntheticsRefreshContextProvider,
-  SyntheticsSettingsContextProvider,
-  SyntheticsStartupPluginsContextProvider,
-  SyntheticsThemeContextProvider,
-} from './contexts';
-import { SyntheticsDataViewContextProvider } from './contexts/synthetics_data_view_context';
+import { SyntheticsAppProps, SyntheticsSettingsContextProvider } from './contexts';
 import { PageRouter } from './routes';
-import { setBasePath, storage, store } from './state';
+import { setBasePath, store } from './state';
 
 const Application = (props: SyntheticsAppProps) => {
   const {
     basePath,
     canSave,
-    core,
-    darkMode,
-    plugins,
+    coreStart,
+    startPlugins,
     renderGlobalHelpControls,
     setBadge,
-    startPlugins,
     appMountParameters,
   } = props;
 
@@ -62,16 +51,17 @@ const Application = (props: SyntheticsAppProps) => {
     );
   }, [canSave, renderGlobalHelpControls, setBadge]);
 
-  kibanaService.core = core;
-  kibanaService.startPlugins = startPlugins;
   kibanaService.theme = props.appMountParameters.theme$;
 
   store.dispatch(setBasePath(basePath));
 
+  const PresentationContextProvider =
+    startPlugins.presentationUtil?.ContextProvider ?? React.Fragment;
+
   return (
-    <KibanaRenderContextProvider {...core}>
+    <KibanaRenderContextProvider {...coreStart}>
       <KibanaThemeProvider
-        theme={core.theme}
+        theme={coreStart.theme}
         modify={{
           breakpoint: {
             xxl: 1600,
@@ -79,54 +69,23 @@ const Application = (props: SyntheticsAppProps) => {
           },
         }}
       >
-        <ReduxProvider store={store}>
-          <KibanaContextProvider
-            services={{
-              ...core,
-              ...plugins,
-              storage,
-              data: startPlugins.data,
-              inspector: startPlugins.inspector,
-              triggersActionsUi: startPlugins.triggersActionsUi,
-              observability: startPlugins.observability,
-              observabilityShared: startPlugins.observabilityShared,
-              observabilityAIAssistant: startPlugins.observabilityAIAssistant,
-              exploratoryView: startPlugins.exploratoryView,
-              cases: startPlugins.cases,
-              spaces: startPlugins.spaces,
-              fleet: startPlugins.fleet,
-              unifiedSearch: startPlugins.unifiedSearch,
-            }}
-          >
-            <SyntheticsDataViewContextProvider dataViews={startPlugins.dataViews}>
-              <Router history={appMountParameters.history}>
-                <EuiThemeProvider darkMode={darkMode}>
-                  <SyntheticsRefreshContextProvider>
-                    <SyntheticsSettingsContextProvider {...props}>
-                      <SyntheticsThemeContextProvider darkMode={darkMode}>
-                        <SyntheticsStartupPluginsContextProvider {...startPlugins}>
-                          <div className={APP_WRAPPER_CLASS} data-test-subj="syntheticsApp">
-                            <RedirectAppLinks
-                              coreStart={{
-                                application: core.application,
-                              }}
-                            >
-                              <InspectorContextProvider>
-                                <PageRouter />
-                                <ActionMenu appMountParameters={appMountParameters} />
-                                <TestNowModeFlyoutContainer />
-                              </InspectorContextProvider>
-                            </RedirectAppLinks>
-                          </div>
-                        </SyntheticsStartupPluginsContextProvider>
-                      </SyntheticsThemeContextProvider>
-                    </SyntheticsSettingsContextProvider>
-                  </SyntheticsRefreshContextProvider>
-                </EuiThemeProvider>
-              </Router>
-            </SyntheticsDataViewContextProvider>
-          </KibanaContextProvider>
-        </ReduxProvider>
+        <SyntheticsSharedContext {...props}>
+          <PresentationContextProvider>
+            <Router history={appMountParameters.history}>
+              <SyntheticsSettingsContextProvider {...props}>
+                <PerformanceContextProvider>
+                  <div className={APP_WRAPPER_CLASS} data-test-subj="syntheticsApp">
+                    <InspectorContextProvider>
+                      <PageRouter />
+                      <ActionMenu appMountParameters={appMountParameters} />
+                      <TestNowModeFlyoutContainer />
+                    </InspectorContextProvider>
+                  </div>
+                </PerformanceContextProvider>
+              </SyntheticsSettingsContextProvider>
+            </Router>
+          </PresentationContextProvider>
+        </SyntheticsSharedContext>
       </KibanaThemeProvider>
     </KibanaRenderContextProvider>
   );

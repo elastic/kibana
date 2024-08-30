@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { BedrockLogo, OpenAILogo } from '@kbn/stack-connectors-plugin/public/common';
+import { BedrockLogo, OpenAILogo, GeminiLogo } from '@kbn/stack-connectors-plugin/public/common';
 import { ComponentType, useMemo } from 'react';
 import { LLMs } from '../../common/types';
 import { LLMModel } from '../types';
@@ -47,6 +47,15 @@ const mapLlmToModels: Record<
     icon: BedrockLogo,
     getModels: () =>
       MODELS.filter(({ provider }) => provider === LLMs.bedrock).map((model) => ({
+        label: model.name,
+        value: model.model,
+        promptTokenLimit: model.promptTokenLimit,
+      })),
+  },
+  [LLMs.gemini]: {
+    icon: GeminiLogo,
+    getModels: () =>
+      MODELS.filter(({ provider }) => provider === LLMs.gemini).map((model) => ({
         label: model.name,
         value: model.model,
         promptTokenLimit: model.promptTokenLimit,

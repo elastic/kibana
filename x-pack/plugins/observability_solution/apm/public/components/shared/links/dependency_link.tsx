@@ -35,7 +35,7 @@ export function DependencyLink({ query, subtype, type, onClick }: Props) {
     >
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
-          <SpanIcon type={type} subtype={subtype} />
+          <SpanIcon type={type} subtype={subtype} role="presentation" />
         </EuiFlexItem>
         <EuiFlexItem className="eui-textTruncate">
           <span className="eui-textTruncate">{query.dependencyName}</span>

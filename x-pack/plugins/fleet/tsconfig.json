@@ -64,7 +64,6 @@
     "@kbn/utility-types-jest",
     "@kbn/es-query",
     "@kbn/ui-theme",
-    "@kbn/rison",
     "@kbn/config-schema",
     "@kbn/telemetry-plugin",
     "@kbn/task-manager-plugin",
@@ -112,5 +111,8 @@
     "@kbn/core-saved-objects-utils-server",
     "@kbn/integration-assistant-plugin",
     "@kbn/core-security-server-mocks",
+    "@kbn/server-http-tools",
+    "@kbn/avc-banner",
+    "@kbn/zod",
   ]
 }

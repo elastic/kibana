@@ -63,6 +63,7 @@ export class SecuritySolutionServerlessPlugin
 
     // Register product features
     const enabledProductFeatures = getProductProductFeatures(this.config.productTypes);
+
     registerProductFeatures(pluginsSetup, enabledProductFeatures, this.config);
 
     // Register telemetry events
@@ -113,7 +114,7 @@ export class SecuritySolutionServerlessPlugin
     this.cloudSecurityUsageReportingTask
       ?.start({
         taskManager: pluginsSetup.taskManager,
-        interval: cloudSecurityMetringTaskProperties.interval,
+        interval: this.config.cloudSecurityUsageReportingTaskInterval,
       })
       .catch(() => {});
 

@@ -612,7 +612,7 @@ export const metrics = {
       defaultMessage: 'Count',
     }),
     description: i18n.translate('xpack.monitoring.metrics.apm.acmRequest.countTitleDescription', {
-      defaultMessage: 'HTTP Requests received by agent configuration managemen',
+      defaultMessage: 'HTTP Requests received by agent configuration management',
     }),
   }),
   apm_cgroup_memory_usage: new ApmMetric({

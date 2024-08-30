@@ -9,7 +9,6 @@ import { transformError, BadRequestError, getIndexAliases } from '@kbn/securitys
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { CreateAlertsMigrationRequestBody } from '../../../../../common/api/detection_engine/signals_migration';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import type { SetupPlugins } from '../../../../plugin';
 import { DETECTION_ENGINE_SIGNALS_MIGRATION_URL } from '../../../../../common/constants';
 import { buildSiemResponse } from '../utils';
 
@@ -20,10 +19,7 @@ import { isOutdated, signalsAreOutdated } from '../../migrations/helpers';
 import { getIndexVersionsByIndex } from '../../migrations/get_index_versions_by_index';
 import { getSignalVersionsByIndex } from '../../migrations/get_signal_versions_by_index';
 
-export const createSignalsMigrationRoute = (
-  router: SecuritySolutionPluginRouter,
-  security: SetupPlugins['security']
-) => {
+export const createSignalsMigrationRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
     .post({
       path: DETECTION_ENGINE_SIGNALS_MIGRATION_URL,
@@ -53,7 +49,7 @@ export const createSignalsMigrationRoute = (
           if (!appClient) {
             return siemResponse.error({ statusCode: 404 });
           }
-          const user = await security?.authc.getCurrentUser(request);
+          const user = core.security.authc.getCurrentUser();
           const migrationService = signalsMigrationService({
             esClient,
             soClient,

@@ -28,9 +28,10 @@ import {
   useFleetStatus,
   useAgentEnrollmentFlyoutData,
   useFleetServerHostsForPolicy,
+  useAuthz,
 } from '../../hooks';
 import { FLEET_SERVER_PACKAGE, MAX_FLYOUT_WIDTH } from '../../constants';
-import type { PackagePolicy, AgentPolicy } from '../../types';
+import type { PackagePolicy } from '../../types';
 
 import { Loading } from '..';
 
@@ -56,10 +57,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
   isIntegrationFlow,
   installedPackagePolicy,
 }) => {
-  const findPolicyById = (policies: AgentPolicy[], id: string | undefined) => {
-    if (!id) return undefined;
-    return policies.find((p) => p.id === id);
-  };
+  const authz = useAuthz();
 
   const fleetStatus = useFleetStatus();
   const { docLinks } = useStartServices();
@@ -84,7 +82,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
 
   const selectedPolicy = agentPolicyWithPackagePolicies
     ? agentPolicyWithPackagePolicies
-    : findPolicyById(agentPolicies, selectedPolicyId);
+    : undefined;
 
   const hasNoFleetServerHost = fleetStatus.isReady && !fleetServerHost;
 
@@ -172,6 +170,8 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
                 data-test-subj="standaloneTab"
                 isSelected={mode === 'standalone'}
                 onClick={() => setMode('standalone')}
+                // Standalone need read access to agent policies
+                disabled={!authz.fleet.readAgentPolicies}
               >
                 <FormattedMessage
                   id="xpack.fleet.agentEnrollment.enrollStandaloneTabLabel"

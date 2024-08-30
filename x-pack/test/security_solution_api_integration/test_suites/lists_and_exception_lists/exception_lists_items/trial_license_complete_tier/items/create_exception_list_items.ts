@@ -28,7 +28,7 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const utils = getService('securitySolutionUtils');
 
-  describe('@ess @serverless create_exception_list_items', () => {
+  describe('@ess @serverless @serverlessQA create_exception_list_items', () => {
     describe('validation errors', () => {
       it('should give a 404 error that the exception list must exist first before being able to add a list item to the exception list', async () => {
         const { body } = await supertest

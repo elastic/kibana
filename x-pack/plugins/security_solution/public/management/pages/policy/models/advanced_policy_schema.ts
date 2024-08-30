@@ -1286,6 +1286,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'windows.advanced.events.callstacks.use_hardware',
+    first_supported_version: '8.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.callstacks.use_hardware',
+      {
+        defaultMessage:
+          'Use hardware callstacks (e.g. Intel CET) if supported by the OS and CPU.  Default: true',
+      }
+    ),
+  },
+  {
     key: 'windows.advanced.events.process_ancestry_length',
     first_supported_version: '8.15',
     documentation: i18n.translate(
@@ -1905,6 +1916,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           "Deduplication transfer threshold in bytes. Events exceeding the transfer will not be deduplicated. A value '0' means disabled. Default: 1048576 (1MB)",
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.registry.enforce_registry_filters',
+    first_supported_version: '8.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.registry.enforce_registry_filters',
+      {
+        defaultMessage:
+          'Reduce data volume by filtering out registry events which are not relevant to behavioral protections.  Default: true',
       }
     ),
   },

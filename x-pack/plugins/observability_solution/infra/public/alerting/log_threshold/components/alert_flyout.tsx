@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useContext, useMemo } from 'react';
-import { TriggerActionsContext } from '../../../utils/triggers_actions_context';
+import { TriggerActionsContext } from '../../../containers/triggers_actions_context';
 import { LOG_DOCUMENT_COUNT_RULE_TYPE_ID } from '../../../../common/alerting/logs/log_threshold/types';
 
 interface Props {

@@ -354,7 +354,10 @@ export function DiscoverMainRoute({
     <DiscoverCustomizationProvider value={customizationService}>
       <DiscoverMainProvider value={stateContainer}>
         <>
-          <DiscoverTopNavInline stateContainer={stateContainer} hideNavMenuItems={loading} />
+          <DiscoverTopNavInline
+            stateContainer={stateContainer}
+            hideNavMenuItems={loading || showNoDataPage}
+          />
           {mainContent}
         </>
       </DiscoverMainProvider>
@@ -377,7 +380,7 @@ function getLoadParamsForNewSearch(stateContainer: DiscoverStateContainer): {
       ? {
           // reset to a default ES|QL query
           query: {
-            esql: getInitialESQLQuery(prevDataView.getIndexPattern()),
+            esql: getInitialESQLQuery(prevDataView),
           },
         }
       : undefined;

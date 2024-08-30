@@ -1,0 +1,62 @@
+openapi: 3.0.0
+info:
+  title: Elastic Security - Timeline - Import Timelines API
+  version: '2023-10-31'
+externalDocs:
+  url: https://www.elastic.co/guide/en/security/current/timeline-api-import.html
+  description: Documentation
+servers:
+  - url: 'http://{kibana_host}:{port}'
+    variables:
+      kibana_host:
+        default: localhost
+      port:
+        default: '5601'
+paths:
+  /api/timeline/_export:
+    post:
+      x-labels: [serverless, ess]
+      x-codegen-enabled: true
+      operationId: ExportTimelines
+      summary: Exports timelines as an NDJSON file
+      tags:
+        - access:securitySolution
+      parameters:
+        - in: query
+          name: file_name
+          required: true
+          schema:
+            type: string
+          description: The name of the file to export
+      requestBody:
+        description: The ids of the timelines to export
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ids:
+                  nullable: true
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: Indicates the timelines were successfully exported
+          content:
+            application/ndjson:
+              schema:
+                type: string
+                description: NDJSON of the exported timelines
+        '400':
+          description: Indicates that the export size limit was exceeded
+          content:
+            application/ndjson:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: string
+                  statusCode:
+                    type: number

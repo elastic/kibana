@@ -12,7 +12,6 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 
 import { ConfigType } from './config';
@@ -41,7 +40,6 @@ export class ListPlugin implements Plugin<ListPluginSetup, ListsPluginStart, {},
   private readonly config: ConfigType;
   private readonly extensionPoints: ExtensionPointStorageInterface;
   private spaces: SpacesServiceStart | undefined | null;
-  private security: SecurityPluginStart | undefined | null;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
@@ -90,7 +88,6 @@ export class ListPlugin implements Plugin<ListPluginSetup, ListsPluginStart, {},
 
   public start(core: CoreStart, plugins: PluginsStart): ListsPluginStart {
     this.logger.debug('Starting plugin');
-    this.security = plugins.security;
     this.spaces = plugins.spaces?.spacesService;
   }
 
@@ -101,8 +98,9 @@ export class ListPlugin implements Plugin<ListPluginSetup, ListsPluginStart, {},
 
   private createRouteHandlerContext = (): ContextProvider => {
     return async (context, request): ContextProviderReturn => {
-      const { spaces, config, security, extensionPoints } = this;
+      const { spaces, config, extensionPoints } = this;
       const {
+        security,
         savedObjects: { client: savedObjectsClient },
         elasticsearch: {
           client: { asCurrentUser: esClient },
@@ -112,7 +110,7 @@ export class ListPlugin implements Plugin<ListPluginSetup, ListsPluginStart, {},
         throw new TypeError('Configuration is required for this plugin to operate');
       } else {
         const spaceId = getSpaceId({ request, spaces });
-        const user = getUser({ request, security });
+        const user = getUser({ security });
         return {
           getExceptionListClient: (): ExceptionListClient =>
             new ExceptionListClient({

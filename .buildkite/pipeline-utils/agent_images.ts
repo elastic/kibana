@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+// eslint-disable-next-line @kbn/eslint/no_unsafe_js_yaml
 import { dump } from 'js-yaml';
 import { BuildkiteClient, BuildkiteCommandStep } from './buildkite';
 
@@ -52,4 +53,19 @@ function getAgentImageConfig({ returnYaml = false } = {}): string | AgentImageCo
   return config;
 }
 
-export { getAgentImageConfig };
+const expandAgentQueue = (queueName: string = 'n2-4-spot') => {
+  const [kind, cores, addition] = queueName.split('-');
+  const additionalProps =
+    {
+      spot: { preemptible: true },
+      virt: { localSsdInterface: 'nvme', enableNestedVirtualization: true, localSsds: 1 },
+    }[addition] || {};
+
+  return {
+    ...getAgentImageConfig(),
+    machineType: `${kind}-standard-${cores}`,
+    ...additionalProps,
+  };
+};
+
+export { getAgentImageConfig, expandAgentQueue };

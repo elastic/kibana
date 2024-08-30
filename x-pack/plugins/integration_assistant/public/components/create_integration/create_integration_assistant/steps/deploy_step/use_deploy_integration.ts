@@ -10,7 +10,6 @@ import { useKibana } from '../../../../../common/hooks/use_kibana';
 import type { BuildIntegrationRequestBody } from '../../../../../../common';
 import type { State } from '../../state';
 import { runBuildIntegration, runInstallPackage } from '../../../../../common/lib/api';
-import { defaultLogoEncoded } from '../default_logo';
 import { getIntegrationNameFromResponse } from '../../../../../common/lib/api_parsers';
 import { useTelemetry } from '../../../telemetry';
 
@@ -19,8 +18,6 @@ interface PipelineGenerationProps {
   result: State['result'];
   connector: State['connector'];
 }
-
-export type ProgressItem = 'build' | 'install';
 
 export const useDeployIntegration = ({
   integrationSettings,
@@ -40,7 +37,8 @@ export const useDeployIntegration = ({
       connector == null ||
       integrationSettings == null ||
       notifications?.toasts == null ||
-      result?.pipeline == null
+      result?.pipeline == null ||
+      result?.samplesFormat == null
     ) {
       return;
     }
@@ -54,15 +52,16 @@ export const useDeployIntegration = ({
             title: integrationSettings.title ?? '',
             description: integrationSettings.description ?? '',
             name: integrationSettings.name ?? '',
-            logo: integrationSettings.logo ?? defaultLogoEncoded,
+            logo: integrationSettings.logo,
             dataStreams: [
               {
                 title: integrationSettings.dataStreamTitle ?? '',
                 description: integrationSettings.dataStreamDescription ?? '',
                 name: integrationSettings.dataStreamName ?? '',
-                inputTypes: integrationSettings.inputType ? [integrationSettings.inputType] : [],
-                rawSamples: integrationSettings.logsSampleParsed ?? [],
+                inputTypes: integrationSettings.inputTypes ?? [],
+                rawSamples: integrationSettings.logSamples ?? [],
                 docs: result.docs ?? [],
+                samplesFormat: result.samplesFormat ?? { name: 'json' },
                 pipeline: result.pipeline,
               },
             ],
@@ -91,7 +90,18 @@ export const useDeployIntegration = ({
         }
       } catch (e) {
         if (abortController.signal.aborted) return;
-        setError(`Error: ${e.body?.message ?? e.message}`);
+        const errorMessage = `${e.message}${
+          e.body ? ` (${e.body.statusCode}): ${e.body.message}` : ''
+        }`;
+
+        telemetry.reportAssistantComplete({
+          integrationName: integrationSettings.name ?? '',
+          integrationSettings,
+          connector,
+          error: errorMessage,
+        });
+
+        setError(errorMessage);
       } finally {
         setIsLoading(false);
       }
@@ -108,6 +118,7 @@ export const useDeployIntegration = ({
     notifications?.toasts,
     result?.docs,
     result?.pipeline,
+    result?.samplesFormat,
     telemetry,
   ]);
 

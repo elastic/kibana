@@ -4,23 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { KibanaRequest } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { ActionExecutor } from './action_executor';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { httpServerMock, loggingSystemMock, analyticsServiceMock } from '@kbn/core/server/mocks';
+import {
+  httpServerMock,
+  loggingSystemMock,
+  analyticsServiceMock,
+  securityServiceMock,
+} from '@kbn/core/server/mocks';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
 import { spacesServiceMock } from '@kbn/spaces-plugin/server/spaces_service/spaces_service.mock';
-import { ActionType as ConnectorType } from '../types';
+import { ActionType as ConnectorType, ConnectorUsageCollector } from '../types';
 import { actionsAuthorizationMock, actionsMock } from '../mocks';
 import {
   asBackgroundTaskExecutionSource,
   asHttpRequestExecutionSource,
   asSavedObjectExecutionSource,
 } from './action_execution_source';
-import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { finished } from 'stream/promises';
 import { PassThrough } from 'stream';
 import { SecurityConnectorFeatureId } from '../../common';
@@ -58,7 +61,7 @@ const executeParams = {
 const spacesMock = spacesServiceMock.createStartContract();
 const loggerMock: ReturnType<typeof loggingSystemMock.createLogger> =
   loggingSystemMock.createLogger();
-const securityMockStart = securityMock.createStart();
+const securityMockStart = securityServiceMock.createStart();
 
 const authorizationMock = actionsAuthorizationMock.create();
 const getActionsAuthorizationWithRequest = jest.fn();
@@ -146,6 +149,10 @@ const connectorSavedObject = {
   references: [],
 };
 
+interface ActionUsage {
+  request_body_bytes: number;
+}
+
 const getBaseExecuteStartEventLogDoc = (unsecured: boolean) => {
   return {
     event: {
@@ -159,6 +166,7 @@ const getBaseExecuteStartEventLogDoc = (unsecured: boolean) => {
         },
         id: CONNECTOR_ID,
         name: '1',
+        type_id: 'test',
       },
       ...(unsecured
         ? {}
@@ -186,10 +194,23 @@ const getBaseExecuteStartEventLogDoc = (unsecured: boolean) => {
   };
 };
 
-const getBaseExecuteEventLogDoc = (unsecured: boolean) => {
+const getBaseExecuteEventLogDoc = (
+  unsecured: boolean,
+  actionUsage: ActionUsage = { request_body_bytes: 0 }
+) => {
   const base = getBaseExecuteStartEventLogDoc(unsecured);
   return {
     ...base,
+    kibana: {
+      ...base.kibana,
+      action: {
+        ...base.kibana.action,
+        execution: {
+          ...base.kibana.action.execution,
+          usage: actionUsage,
+        },
+      },
+    },
     event: {
       ...base.event,
       action: 'execute',
@@ -207,9 +228,12 @@ const getBaseExecuteEventLogDoc = (unsecured: boolean) => {
   };
 };
 
+const mockGetRequestBodyByte = jest.spyOn(ConnectorUsageCollector.prototype, 'getRequestBodyByte');
+
 beforeEach(() => {
   jest.resetAllMocks();
   jest.clearAllMocks();
+  mockGetRequestBodyByte.mockReturnValue(0);
   spacesMock.getSpaceId.mockReturnValue('some-namespace');
   loggerMock.get.mockImplementation(() => loggerMock);
   const mockRealm = { name: 'default_native', type: 'native' };
@@ -233,6 +257,7 @@ describe('Action Executor', () => {
     const label = executeUnsecure ? 'executes unsecured' : 'executes';
 
     test(`successfully ${label}`, async () => {
+      mockGetRequestBodyByte.mockReturnValue(300);
       encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
         connectorSavedObject
       );
@@ -276,13 +301,15 @@ describe('Action Executor', () => {
         },
         params: { foo: true },
         logger: loggerMock,
+        connectorUsageCollector: expect.any(ConnectorUsageCollector),
       });
 
       expect(loggerMock.debug).toBeCalledWith('executing action test:1: 1');
       expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
 
       const execStartDoc = getBaseExecuteStartEventLogDoc(executeUnsecure);
-      const execDoc = getBaseExecuteEventLogDoc(executeUnsecure);
+      const execDoc = getBaseExecuteEventLogDoc(executeUnsecure, { request_body_bytes: 300 });
+
       expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, execStartDoc);
       expect(eventLogger.logEvent).toHaveBeenNthCalledWith(2, execDoc);
     });
@@ -349,6 +376,7 @@ describe('Action Executor', () => {
           params: { foo: true },
           logger: loggerMock,
           source: executionSource.source,
+          connectorUsageCollector: expect.any(ConnectorUsageCollector),
         });
 
         expect(loggerMock.debug).toBeCalledWith('executing action test:1: 1');
@@ -356,6 +384,7 @@ describe('Action Executor', () => {
 
         const execStartDoc = getBaseExecuteStartEventLogDoc(executeUnsecure);
         const execDoc = getBaseExecuteEventLogDoc(executeUnsecure);
+
         expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
           ...execStartDoc,
           kibana: {
@@ -427,6 +456,7 @@ describe('Action Executor', () => {
         },
         params: { foo: true },
         logger: loggerMock,
+        connectorUsageCollector: expect.any(ConnectorUsageCollector),
       });
 
       expect(loggerMock.debug).toBeCalledWith('executing action test:preconfigured: Preconfigured');
@@ -434,6 +464,7 @@ describe('Action Executor', () => {
 
       const execStartDoc = getBaseExecuteStartEventLogDoc(executeUnsecure);
       const execDoc = getBaseExecuteEventLogDoc(executeUnsecure);
+
       expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
         ...execStartDoc,
         kibana: {
@@ -509,6 +540,7 @@ describe('Action Executor', () => {
           params: { foo: true },
           logger: loggerMock,
           request: {},
+          connectorUsageCollector: expect.any(ConnectorUsageCollector),
         });
       }
 
@@ -528,6 +560,7 @@ describe('Action Executor', () => {
 
       const execStartDoc = getBaseExecuteStartEventLogDoc(executeUnsecure);
       const execDoc = getBaseExecuteEventLogDoc(executeUnsecure);
+
       expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
         ...execStartDoc,
         kibana: {
@@ -536,6 +569,7 @@ describe('Action Executor', () => {
             ...execStartDoc.kibana.action,
             id: 'system-connector-.cases',
             name: 'System action: .cases',
+            type_id: '.cases',
           },
           saved_objects: [
             {
@@ -565,6 +599,7 @@ describe('Action Executor', () => {
             ...execDoc.kibana.action,
             id: 'system-connector-.cases',
             name: 'System action: .cases',
+            type_id: '.cases',
           },
           saved_objects: [
             {
@@ -886,6 +921,7 @@ describe('Action Executor', () => {
         },
         params: { foo: true },
         logger: loggerMock,
+        connectorUsageCollector: expect.any(ConnectorUsageCollector),
       });
     });
 
@@ -917,6 +953,7 @@ describe('Action Executor', () => {
         params: { foo: true },
         logger: loggerMock,
         request: {},
+        connectorUsageCollector: expect.any(ConnectorUsageCollector),
       });
     });
 
@@ -985,6 +1022,7 @@ describe('Action Executor', () => {
         },
         params: { foo: true },
         logger: loggerMock,
+        connectorUsageCollector: expect.any(ConnectorUsageCollector),
       });
 
       expect(loggerMock.debug).toBeCalledWith('executing action test:preconfigured: Preconfigured');
@@ -992,6 +1030,7 @@ describe('Action Executor', () => {
 
       const execStartDoc = getBaseExecuteStartEventLogDoc(executeUnsecure);
       const execDoc = getBaseExecuteEventLogDoc(executeUnsecure);
+
       expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
         ...execStartDoc,
         kibana: {
@@ -1022,6 +1061,12 @@ describe('Action Executor', () => {
             ...execDoc.kibana.action,
             id: 'preconfigured',
             name: 'Preconfigured',
+            execution: {
+              ...execStartDoc.kibana.action.execution,
+              usage: {
+                request_body_bytes: 0,
+              },
+            },
           },
           saved_objects: [
             {
@@ -1070,6 +1115,7 @@ describe('Action Executor', () => {
         params: { foo: true },
         logger: loggerMock,
         request: {},
+        connectorUsageCollector: expect.any(ConnectorUsageCollector),
       });
 
       expect(loggerMock.debug).toBeCalledWith(
@@ -1079,6 +1125,7 @@ describe('Action Executor', () => {
 
       const execStartDoc = getBaseExecuteStartEventLogDoc(executeUnsecure);
       const execDoc = getBaseExecuteEventLogDoc(executeUnsecure);
+
       expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
         ...execStartDoc,
         kibana: {
@@ -1087,6 +1134,7 @@ describe('Action Executor', () => {
             ...execStartDoc.kibana.action,
             id: 'system-connector-.cases',
             name: 'System action: .cases',
+            type_id: '.cases',
           },
           saved_objects: [
             {
@@ -1116,6 +1164,7 @@ describe('Action Executor', () => {
             ...execDoc.kibana.action,
             id: 'system-connector-.cases',
             name: 'System action: .cases',
+            type_id: '.cases',
           },
           saved_objects: [
             {
@@ -1286,6 +1335,7 @@ describe('Action Executor', () => {
           },
           params: { foo: true },
           logger: loggerMock,
+          connectorUsageCollector: expect.any(ConnectorUsageCollector),
         });
       }
     });
@@ -1381,6 +1431,7 @@ describe('Event log', () => {
           },
           name: undefined,
           id: 'action1',
+          type_id: 'test',
         },
         alert: {
           rule: {
@@ -1426,6 +1477,7 @@ describe('Event log', () => {
           },
           name: 'action-1',
           id: '1',
+          type_id: 'test',
         },
         alert: {
           rule: {
@@ -1479,6 +1531,7 @@ describe('Event log', () => {
           },
           name: 'action-1',
           id: '1',
+          type_id: 'test',
         },
         alert: {
           rule: {
@@ -1555,9 +1608,13 @@ describe('Event log', () => {
             gen_ai: {
               usage: mockGenAi.usage,
             },
+            usage: {
+              request_body_bytes: 0,
+            },
           },
           name: 'action-1',
           id: '1',
+          type_id: '.gen-ai',
         },
         alert: {
           rule: {
@@ -1651,9 +1708,13 @@ describe('Event log', () => {
                 total_tokens: 35,
               },
             },
+            usage: {
+              request_body_bytes: 0,
+            },
           },
           name: 'action-1',
           id: '1',
+          type_id: '.gen-ai',
         },
         alert: {
           rule: {
@@ -1691,10 +1752,35 @@ describe('Event log', () => {
       { actionTypeId: '.gen-ai', completion_tokens: 9, prompt_tokens: 10, total_tokens: 19 }
     );
   });
+  test('reports telemetry for token count events with additional properties', async () => {
+    const executorMock = setupActionExecutorMock('.gen-ai', {} as ConnectorType['validate'], {
+      defaultModel: 'gpt-4',
+      apiProvider: 'OpenAI',
+    });
+    executorMock.mockResolvedValue({
+      actionId: '1',
+      status: 'ok',
+      // @ts-ignore
+      data: mockGenAi,
+    });
+    await actionExecutor.execute(executeParams);
+    expect(actionExecutorInitializationParams.analyticsService.reportEvent).toHaveBeenCalledWith(
+      GEN_AI_TOKEN_COUNT_EVENT.eventType,
+      {
+        actionTypeId: '.gen-ai',
+        completion_tokens: 9,
+        prompt_tokens: 10,
+        total_tokens: 19,
+        model: 'gpt-4',
+        provider: 'OpenAI',
+      }
+    );
+  });
 });
 function setupActionExecutorMock(
   actionTypeId = 'test',
-  validationOverride?: ConnectorType['validate']
+  validationOverride?: ConnectorType['validate'],
+  additionalConfig?: Record<string, unknown>
 ) {
   const thisConnectorType: jest.Mocked<ConnectorType> = {
     ...connectorType,
@@ -1708,6 +1794,7 @@ function setupActionExecutorMock(
       actionTypeId,
       config: {
         bar: true,
+        ...additionalConfig,
       },
       secrets: {
         baz: true,

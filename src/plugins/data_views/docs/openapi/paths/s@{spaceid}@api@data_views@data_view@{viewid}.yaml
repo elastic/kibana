@@ -1,8 +1,6 @@
 get:
   summary: Get a data view
   operationId: getDataView
-  description: >
-    This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
   tags:
     - data views
   parameters:
@@ -30,7 +28,6 @@ delete:
   operationId: deleteDataView
   description: >
     WARNING: When you delete a data view, it cannot be recovered.
-    This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
   tags:
     - data views
   parameters:
@@ -50,8 +47,6 @@ delete:
 post:
   summary: Update a data view
   operationId: updateDataView
-  description: >
-    This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
   tags:
     - data views
   parameters:

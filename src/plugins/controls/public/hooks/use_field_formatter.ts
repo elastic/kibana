@@ -5,8 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { FieldSpec } from '@kbn/data-views-plugin/common';
 import { useEffect, useState } from 'react';
+
+import { FieldSpec } from '@kbn/data-views-plugin/common';
+
 import { pluginServices } from '../services';
 
 export const useFieldFormatter = ({
@@ -19,7 +21,7 @@ export const useFieldFormatter = ({
   const {
     dataViews: { get: getDataViewById },
   } = pluginServices.getServices();
-  const [fieldFormatter, setFieldFormatter] = useState(() => (toFormat: string) => toFormat);
+  const [fieldFormatter, setFieldFormatter] = useState(() => (toFormat: any) => String(toFormat));
 
   /**
    * derive field formatter from fieldSpec and dataViewId
@@ -32,7 +34,7 @@ export const useFieldFormatter = ({
       setFieldFormatter(
         () =>
           dataView?.getFormatterForField(fieldSpec).getConverterFor('text') ??
-          ((toFormat: string) => toFormat)
+          ((toFormat: any) => String(toFormat))
       );
     })();
   }, [fieldSpec, dataViewId, getDataViewById]);

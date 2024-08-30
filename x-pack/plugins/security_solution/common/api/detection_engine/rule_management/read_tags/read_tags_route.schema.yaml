@@ -4,12 +4,12 @@ info:
   version: '2023-10-31'
 paths:
   /api/detection_engine/tags:
-    summary: Aggregates and returns rule tags
     get:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
       operationId: ReadTags
-      summary: Aggregates and returns all unique tags from all rules
+      summary: List all detection rule tags
+      description: List all unique tags from all detection rules.
       tags:
         - Tags API
       responses:

@@ -17,12 +17,14 @@ import {
   config as httpConfig,
   cspConfig,
   externalUrlConfig,
+  permissionsPolicyConfig,
 } from '@kbn/core-http-server-internal';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import type { Logger } from '@kbn/logging';
 
 const CSP_CONFIG = cspConfig.schema.validate({});
 const EXTERNAL_URL_CONFIG = externalUrlConfig.schema.validate({});
+const PERMISSIONS_POLICY_CONFIG = permissionsPolicyConfig.schema.validate({});
 
 describe('Http2 - Smoke tests', () => {
   let server: HttpServer;
@@ -56,7 +58,7 @@ describe('Http2 - Smoke tests', () => {
       },
       shutdownTimeout: '5s',
     });
-    config = new HttpConfig(rawConfig, CSP_CONFIG, EXTERNAL_URL_CONFIG);
+    config = new HttpConfig(rawConfig, CSP_CONFIG, EXTERNAL_URL_CONFIG, PERMISSIONS_POLICY_CONFIG);
     server = new HttpServer(coreContext, 'tests', of(config.shutdownTimeout));
   });
 

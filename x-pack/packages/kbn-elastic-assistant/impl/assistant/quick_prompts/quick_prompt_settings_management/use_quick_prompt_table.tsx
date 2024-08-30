@@ -5,76 +5,81 @@
  * 2.0.
  */
 
-import { EuiBasicTableColumn, EuiLink } from '@elastic/eui';
+import { EuiBadge, EuiBasicTableColumn, EuiLink } from '@elastic/eui';
 import React, { useCallback } from 'react';
+import { PromptResponse } from '@kbn/elastic-assistant-common';
+import { FormattedDate } from '@kbn/i18n-react';
 import { BadgesColumn } from '../../common/components/assistant_settings_management/badges';
-import { RowActions } from '../../common/components/assistant_settings_management/row_actions';
 import { PromptContextTemplate } from '../../prompt_context/types';
-import { QuickPrompt } from '../types';
 import * as i18n from './translations';
+import { useInlineActions } from '../../common/components/assistant_settings_management/inline_actions';
 
 export const useQuickPromptTable = () => {
+  const getActions = useInlineActions<PromptResponse>();
   const getColumns = useCallback(
     ({
+      isActionsDisabled,
       basePromptContexts,
       onEditActionClicked,
       onDeleteActionClicked,
     }: {
+      isActionsDisabled: boolean;
       basePromptContexts: PromptContextTemplate[];
-      onEditActionClicked: (prompt: QuickPrompt) => void;
-      onDeleteActionClicked: (prompt: QuickPrompt) => void;
-    }): Array<EuiBasicTableColumn<QuickPrompt>> => [
+      onEditActionClicked: (prompt: PromptResponse, color?: string) => void;
+      onDeleteActionClicked: (prompt: PromptResponse) => void;
+    }): Array<EuiBasicTableColumn<PromptResponse>> => [
       {
         align: 'left',
         name: i18n.QUICK_PROMPTS_TABLE_COLUMN_NAME,
-        render: (prompt: QuickPrompt) =>
-          prompt?.title ? (
-            <EuiLink onClick={() => onEditActionClicked(prompt)}>{prompt?.title}</EuiLink>
+        render: (prompt: PromptResponse) =>
+          prompt?.name ? (
+            <EuiLink onClick={() => onEditActionClicked(prompt)} disabled={isActionsDisabled}>
+              {prompt?.name}
+            </EuiLink>
           ) : null,
-        sortable: ({ title }: QuickPrompt) => title,
+        sortable: ({ name }: PromptResponse) => name,
       },
       {
         align: 'left',
         name: i18n.QUICK_PROMPTS_TABLE_COLUMN_CONTEXTS,
-        render: (prompt: QuickPrompt) => {
+        render: (prompt: PromptResponse) => {
           const selectedPromptContexts = (
             basePromptContexts.filter((bpc) =>
               prompt?.categories?.some((cat) => bpc?.category === cat)
             ) ?? []
           ).map((bpc) => bpc?.description);
           return selectedPromptContexts ? (
-            <BadgesColumn items={selectedPromptContexts} prefix={prompt.title} />
+            <BadgesColumn items={selectedPromptContexts} prefix={prompt.name} />
           ) : null;
         },
       },
-      /* TODO: enable when createdAt is added
       {
         align: 'left',
-        field: 'createdAt',
-        name: i18n.QUICK_PROMPTS_TABLE_COLUMN_CREATED_AT,
+        field: 'updatedAt',
+        name: i18n.QUICK_PROMPTS_TABLE_COLUMN_DATE_UPDATED,
+        render: (updatedAt: PromptResponse['updatedAt']) =>
+          updatedAt ? (
+            <EuiBadge color="hollow">
+              <FormattedDate
+                value={new Date(updatedAt)}
+                year="numeric"
+                month="2-digit"
+                day="numeric"
+              />
+            </EuiBadge>
+          ) : null,
+        sortable: true,
       },
-      */
       {
         align: 'center',
-        name: i18n.QUICK_PROMPTS_TABLE_COLUMN_ACTIONS,
         width: '120px',
-        render: (prompt: QuickPrompt) => {
-          if (!prompt) {
-            return null;
-          }
-          const isDeletable = !prompt.isDefault;
-          return (
-            <RowActions<QuickPrompt>
-              rowItem={prompt}
-              onDelete={isDeletable ? onDeleteActionClicked : undefined}
-              onEdit={onEditActionClicked}
-              isDeletable={isDeletable}
-            />
-          );
-        },
+        ...getActions({
+          onDelete: onDeleteActionClicked,
+          onEdit: onEditActionClicked,
+        }),
       },
     ],
-    []
+    [getActions]
   );
 
   return { getColumns };

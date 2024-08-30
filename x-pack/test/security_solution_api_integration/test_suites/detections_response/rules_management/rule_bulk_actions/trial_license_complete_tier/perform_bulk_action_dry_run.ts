@@ -44,7 +44,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await createRule(supertest, log, getSimpleRule());
 
       const { body } = await securitySolutionApi
-        .performBulkAction({
+        .performRulesBulkAction({
           query: { dry_run: true },
           body: { action: BulkActionTypeEnum.export },
         })
@@ -62,7 +62,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await createRule(supertest, log, testRule);
 
       const { body } = await securitySolutionApi
-        .performBulkAction({
+        .performRulesBulkAction({
           query: { dry_run: true },
           body: { action: BulkActionTypeEnum.delete },
         })
@@ -86,7 +86,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await createRule(supertest, log, getSimpleRule(ruleId));
 
       const { body } = await securitySolutionApi
-        .performBulkAction({
+        .performRulesBulkAction({
           query: { dry_run: true },
           body: { action: BulkActionTypeEnum.enable },
         })
@@ -113,7 +113,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await createRule(supertest, log, getSimpleRule(ruleId, true));
 
       const { body } = await securitySolutionApi
-        .performBulkAction({
+        .performRulesBulkAction({
           query: { dry_run: true },
           body: { action: BulkActionTypeEnum.disable },
         })
@@ -141,7 +141,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await createRule(supertest, log, ruleToDuplicate);
 
       const { body } = await securitySolutionApi
-        .performBulkAction({
+        .performRulesBulkAction({
           query: { dry_run: true },
           body: { action: BulkActionTypeEnum.disable },
         })
@@ -171,7 +171,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await createRule(supertest, log, { ...getSimpleRule(ruleId), tags });
 
         const { body } = await securitySolutionApi
-          .performBulkAction({
+          .performRulesBulkAction({
             query: { dry_run: true },
             body: {
               action: BulkActionTypeEnum.edit,
@@ -210,7 +210,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const immutableRule = findBody.data[0];
 
         const { body } = await securitySolutionApi
-          .performBulkAction({
+          .performRulesBulkAction({
             query: { dry_run: true },
             body: {
               ids: [immutableRule.id],
@@ -256,7 +256,7 @@ export default ({ getService }: FtrProviderContext): void => {
             const mlRule = await createRule(supertest, log, getSimpleMlRule());
 
             const { body } = await securitySolutionApi
-              .performBulkAction({
+              .performRulesBulkAction({
                 query: { dry_run: true },
                 body: {
                   ids: [mlRule.id],
@@ -296,7 +296,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    describe('schedule manual rule run action', () => {
+    describe('@skipInServerless @skipInServerlessMKI schedule manual rule run action', () => {
       it('should return all existing and enabled rules as succeeded', async () => {
         const intervalInMinutes = 25;
         const interval = `${intervalInMinutes}m`;
@@ -323,7 +323,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const startDate = endDate.clone().subtract(1, 'h');
 
         const { body } = await securitySolutionApi
-          .performBulkAction({
+          .performRulesBulkAction({
             query: { dry_run: true },
             body: {
               ids: [createdRule1.id, createdRule2.id],
@@ -362,7 +362,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const startDate = endDate.clone().subtract(1, 'h');
 
         const { body } = await securitySolutionApi
-          .performBulkAction({
+          .performRulesBulkAction({
             query: { dry_run: true },
             body: {
               ids: [createdRule1.id, 'rule-2'],
@@ -420,7 +420,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const startDate = endDate.clone().subtract(1, 'h');
 
         const { body } = await securitySolutionApi
-          .performBulkAction({
+          .performRulesBulkAction({
             query: { dry_run: true },
             body: {
               ids: [createdRule1.id, createdRule2.id],

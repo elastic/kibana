@@ -6,55 +6,95 @@
  */
 
 import { RequestHandlerContext } from '@kbn/core/server';
-import { getFakeKibanaRequest } from '@kbn/security-plugin/server/authentication/api_keys/fake_kibana_request';
+import { schema } from '@kbn/config-schema';
 import { SetupRouteOptions } from '../types';
-import { ENTITY_INTERNAL_API_PREFIX } from '../../../common/constants_entities';
-import {
-  checkIfEntityDiscoveryAPIKeyIsValid,
-  deleteEntityDiscoveryAPIKey,
-  readEntityDiscoveryAPIKey,
-} from '../../lib/auth';
-import { ERROR_API_KEY_NOT_FOUND, ERROR_API_KEY_NOT_VALID } from '../../../common/errors';
+import { deleteEntityDiscoveryAPIKey, readEntityDiscoveryAPIKey } from '../../lib/auth';
 import { uninstallBuiltInEntityDefinitions } from '../../lib/entities/uninstall_entity_definition';
-import { DisableManagedEntityResponse } from '../../../common/types_api';
+import { canDisableEntityDiscovery } from '../../lib/auth/privileges';
+import { EntityDiscoveryApiKeyType } from '../../saved_objects';
 
+/**
+ * @openapi
+ * /internal/entities/managed/enablement:
+ *   delete:
+ *     description: Disable managed (built-in) entity discovery. This stops and deletes the transforms, ingest pipelines, definitions saved objects, and index templates for this entity definition, as well as the stored API key for entity discovery management.
+ *     tags:
+ *       - management
+ *     parameters:
+ *       - in: query
+ *         name: deleteData
+ *         description: If true, delete all entity data in the managed indices
+ *         required: false
+ *         schema:
+ *           type: boolean
+ *           default: false
+ *     responses:
+ *       403:
+ *         description: The current user does not have the required permissions to disable entity discovery
+ *       200:
+ *         description: Built-in entity discovery successfully disabled
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                  type: boolean
+ */
 export function disableEntityDiscoveryRoute<T extends RequestHandlerContext>({
   router,
   server,
   logger,
 }: SetupRouteOptions<T>) {
-  router.delete<unknown, unknown, DisableManagedEntityResponse>(
+  router.delete<unknown, { deleteData?: boolean }, unknown>(
     {
-      path: `${ENTITY_INTERNAL_API_PREFIX}/managed/enablement`,
-      validate: false,
+      path: '/internal/entities/managed/enablement',
+      validate: {
+        query: schema.object({
+          deleteData: schema.maybe(schema.boolean({ defaultValue: false })),
+        }),
+      },
     },
     async (context, req, res) => {
-      server.logger.debug('reading entity discovery API key from saved object');
-      const apiKey = await readEntityDiscoveryAPIKey(server);
+      try {
+        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+        const canDisable = await canDisableEntityDiscovery(esClient);
+        if (!canDisable) {
+          return res.forbidden({
+            body: {
+              message:
+                'Current Kibana user does not have the required permissions to disable entity discovery',
+            },
+          });
+        }
 
-      if (apiKey === undefined) {
-        return res.ok({ body: { success: false, reason: ERROR_API_KEY_NOT_FOUND } });
+        const soClient = (await context.core).savedObjects.getClient({
+          includedHiddenTypes: [EntityDiscoveryApiKeyType.name],
+        });
+
+        await uninstallBuiltInEntityDefinitions({
+          soClient,
+          esClient,
+          logger,
+          deleteData: req.query.deleteData,
+        });
+
+        server.logger.debug('reading entity discovery API key from saved object');
+        const apiKey = await readEntityDiscoveryAPIKey(server);
+        // api key could be deleted outside of the apis, it does not affect the
+        // disablement flow
+        if (apiKey) {
+          await deleteEntityDiscoveryAPIKey(soClient);
+          await server.security.authc.apiKeys.invalidateAsInternalUser({
+            ids: [apiKey.id],
+          });
+        }
+
+        return res.ok({ body: { success: true } });
+      } catch (err) {
+        logger.error(err);
+        return res.customError({ statusCode: 500, body: err });
       }
-
-      server.logger.debug('validating existing entity discovery API key');
-      const isValid = await checkIfEntityDiscoveryAPIKeyIsValid(server, apiKey);
-
-      if (!isValid) {
-        return res.ok({ body: { success: false, reason: ERROR_API_KEY_NOT_VALID } });
-      }
-
-      const fakeRequest = getFakeKibanaRequest({ id: apiKey.id, api_key: apiKey.apiKey });
-      const soClient = server.core.savedObjects.getScopedClient(fakeRequest);
-      const esClient = server.core.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
-
-      await uninstallBuiltInEntityDefinitions({ soClient, esClient, logger });
-
-      await deleteEntityDiscoveryAPIKey((await context.core).savedObjects.client);
-      await server.security.authc.apiKeys.invalidateAsInternalUser({
-        ids: [apiKey.id],
-      });
-
-      return res.ok();
     }
   );
 }

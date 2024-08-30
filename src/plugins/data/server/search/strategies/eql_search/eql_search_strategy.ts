@@ -10,7 +10,7 @@ import type { TransportResult } from '@elastic/elasticsearch';
 import { tap } from 'rxjs';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
-import { SearchConfigSchema } from '../../../../config';
+import { SearchConfigSchema } from '../../../config';
 import {
   EqlSearchStrategyRequest,
   EqlSearchStrategyResponse,
@@ -44,7 +44,7 @@ export const eqlSearchStrategyProvider = (
     },
 
     search: ({ id, ...request }, options: IAsyncSearchOptions, { esClient, uiSettingsClient }) => {
-      logger.debug(`_eql/search ${JSON.stringify(request.params) || id}`);
+      logger.debug(() => `_eql/search ${JSON.stringify(request.params) || id}`);
 
       const client = esClient.asCurrentUser.eql;
 

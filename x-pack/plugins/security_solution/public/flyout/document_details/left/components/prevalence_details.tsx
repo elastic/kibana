@@ -26,7 +26,7 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import { useLicense } from '../../../../common/hooks/use_license';
-import { InvestigateInTimelineButton } from '../../../../common/components/event_details/table/investigate_in_timeline_button';
+import { InvestigateInTimelineButton } from '../../../../common/components/event_details/investigate_in_timeline_button';
 import type { PrevalenceData } from '../../shared/hooks/use_prevalence';
 import { usePrevalence } from '../../shared/hooks/use_prevalence';
 import {
@@ -47,9 +47,10 @@ import { useDocumentDetailsContext } from '../../shared/context';
 import {
   getDataProvider,
   getDataProviderAnd,
-} from '../../../../common/components/event_details/table/use_action_cell_data_provider';
+} from '../../../../common/components/event_details/use_action_cell_data_provider';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { IS_OPERATOR } from '../../../../../common/types';
+import { useKibana } from '../../../../common/lib/kibana';
 import {
   HOST_NAME_FIELD_NAME,
   USER_NAME_FIELD_NAME,
@@ -348,9 +349,10 @@ export const PrevalenceDetails: React.FC = () => {
   const { dataFormattedForFieldBrowser, investigationFields, scopeId } =
     useDocumentDetailsContext();
   const { openPreviewPanel } = useExpandableFlyoutApi();
+  const { telemetry } = useKibana().services;
 
   const isPlatinumPlus = useLicense().isPlatinumPlus();
-  const isPreviewEnabled = useIsExperimentalFeatureEnabled('entityAlertPreviewEnabled');
+  const isPreviewEnabled = !useIsExperimentalFeatureEnabled('entityAlertPreviewDisabled');
 
   // these two are used by the usePrevalence hook to fetch the data
   const [start, setStart] = useState(DEFAULT_FROM);
@@ -403,8 +405,12 @@ export const PrevalenceDetails: React.FC = () => {
           banner: HOST_PREVIEW_BANNER,
         },
       });
+      telemetry.reportDetailsFlyoutOpened({
+        location: scopeId,
+        panel: 'preview',
+      });
     },
-    [openPreviewPanel, scopeId]
+    [openPreviewPanel, scopeId, telemetry]
   );
 
   const openUserPreview = useCallback(
@@ -417,8 +423,12 @@ export const PrevalenceDetails: React.FC = () => {
           banner: USER_PREVIEW_BANNER,
         },
       });
+      telemetry.reportDetailsFlyoutOpened({
+        location: scopeId,
+        panel: 'preview',
+      });
     },
-    [openPreviewPanel, scopeId]
+    [openPreviewPanel, scopeId, telemetry]
   );
 
   // add timeRange to pass it down to timeline and license to drive the rendering of the last 2 prevalence columns

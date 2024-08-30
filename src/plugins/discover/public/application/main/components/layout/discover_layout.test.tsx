@@ -21,7 +21,6 @@ import {
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import {
-  AvailableFields$,
   DataDocuments$,
   DataMain$,
   DataTotalHits$,
@@ -83,11 +82,6 @@ async function mountComponent(
     result: esHitsMock.map((esHit) => buildDataTableRecord(esHit, dataView)),
   }) as DataDocuments$;
 
-  const availableFields$ = new BehaviorSubject({
-    fetchStatus: FetchStatus.COMPLETE,
-    fields: [] as string[],
-  }) as AvailableFields$;
-
   const totalHits$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
     result: Number(esHitsMock.length),
@@ -97,7 +91,6 @@ async function mountComponent(
     main$,
     documents$,
     totalHits$,
-    availableFields$,
   };
 
   const session = getSessionServiceMock();

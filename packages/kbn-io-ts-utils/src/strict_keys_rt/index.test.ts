@@ -12,6 +12,7 @@ import { strictKeysRt } from '.';
 import { jsonRt } from '../json_rt';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { isoToEpochRt } from '../iso_to_epoch_rt';
+import { toBooleanRt } from '../to_boolean_rt';
 
 describe('strictKeysRt', () => {
   it('correctly and deeply validates object keys', () => {
@@ -205,7 +206,38 @@ describe('strictKeysRt', () => {
       {
         type: t.array(t.type({ foo: t.string })),
         passes: [[{ foo: 'bar' }], [{ foo: 'baz' }, { foo: 'bar' }]],
-        fails: [],
+        fails: [{ foo: 'bar', bar: 'foo' }],
+      },
+      {
+        type: t.type({
+          nestedArray: t.array(
+            t.type({
+              bar: t.string,
+            })
+          ),
+        }),
+        passes: [
+          {
+            nestedArray: [],
+          },
+          {
+            nestedArray: [
+              {
+                bar: 'foo',
+              },
+            ],
+          },
+        ],
+        fails: [
+          {
+            nestedArray: [
+              {
+                bar: 'foo',
+                foo: 'bar',
+              },
+            ],
+          },
+        ],
       },
     ];
 
@@ -236,6 +268,33 @@ describe('strictKeysRt', () => {
         }
       });
     });
+  });
+
+  it('deals with union types', () => {
+    const type = t.intersection([
+      t.type({
+        required: t.string,
+      }),
+      t.partial({
+        disable: t.union([
+          toBooleanRt,
+          t.type({
+            except: t.array(t.string),
+          }),
+        ]),
+      }),
+    ]);
+
+    const value = {
+      required: 'required',
+      disable: {
+        except: ['foo'],
+      },
+    };
+
+    const asStrictType = strictKeysRt(type);
+
+    expect(isRight(asStrictType.decode(value))).toBe(true);
   });
 
   it('does not support piped types', () => {

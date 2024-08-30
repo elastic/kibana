@@ -17,12 +17,11 @@ import { Router } from '@kbn/shared-ux-router';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT } from '../../common/telemetry_events';
-import { ConfigSchema } from '..';
+import { AppContext, ConfigSchema, ObservabilityOnboardingAppServices } from '..';
 import { ObservabilityOnboardingHeaderActionMenu } from './shared/header_action_menu';
 import {
   ObservabilityOnboardingPluginSetupDeps,
   ObservabilityOnboardingPluginStartDeps,
-  ObservabilityOnboardingContextValue,
 } from '../plugin';
 import { ObservabilityOnboardingFlow } from './observability_onboarding_flow';
 
@@ -43,11 +42,17 @@ export function ObservabilityOnboardingAppRoot({
   core,
   corePlugins,
   config,
+  context,
 }: {
   appMountParameters: AppMountParameters;
 } & RenderAppProps) {
   const { history, setHeaderActionMenu, theme$ } = appMountParameters;
-  const services: ObservabilityOnboardingContextValue = { ...core, ...corePlugins, config };
+  const services: ObservabilityOnboardingAppServices = {
+    ...core,
+    ...corePlugins,
+    config,
+    context,
+  };
 
   const renderFeedbackLinkAsPortal = !config.serverless.enabled;
 
@@ -101,6 +106,7 @@ interface RenderAppProps {
   appMountParameters: AppMountParameters;
   corePlugins: ObservabilityOnboardingPluginStartDeps;
   config: ConfigSchema;
+  context: AppContext;
 }
 
 export const renderApp = (props: RenderAppProps) => {

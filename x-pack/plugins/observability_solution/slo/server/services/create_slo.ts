@@ -4,19 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { IScopedClusterClient } from '@kbn/core/server';
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient, IBasePath, Logger } from '@kbn/core/server';
 import { ALL_VALUE, CreateSLOParams, CreateSLOResponse } from '@kbn/slo-schema';
 import { asyncForEach } from '@kbn/std';
 import { v4 as uuidv4 } from 'uuid';
 import {
+  getSLOPipelineId,
   getSLOSummaryPipelineId,
   getSLOSummaryTransformId,
   getSLOTransformId,
   SLO_MODEL_VERSION,
   SLO_SUMMARY_TEMP_INDEX_NAME,
 } from '../../common/constants';
+import { getSLOPipelineTemplate } from '../assets/ingest_templates/slo_pipeline_template';
 import { getSLOSummaryPipelineTemplate } from '../assets/ingest_templates/slo_summary_pipeline_template';
 import { Duration, DurationUnit, SLODefinition } from '../domain/models';
 import { validateSLO } from '../domain/services';
@@ -30,6 +32,7 @@ import { getTransformQueryComposite } from './utils/get_transform_compite_query'
 export class CreateSLO {
   constructor(
     private esClient: ElasticsearchClient,
+    private scopedClusterClient: IScopedClusterClient,
     private repository: SLORepository,
     private transformManager: TransformManager,
     private summaryTransformManager: TransformManager,
@@ -50,6 +53,20 @@ export class CreateSLO {
     const rollupTransformId = getSLOTransformId(slo.id, slo.revision);
     const summaryTransformId = getSLOSummaryTransformId(slo.id, slo.revision);
     try {
+      await retryTransientEsErrors(
+        () =>
+          this.scopedClusterClient.asSecondaryAuthUser.ingest.putPipeline(
+            getSLOPipelineTemplate(slo)
+          ),
+        { logger: this.logger }
+      );
+      rollbackOperations.push(() =>
+        this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
+          { id: getSLOPipelineId(slo.id, slo.revision) },
+          { ignore: [404] }
+        )
+      );
+
       await this.transformManager.install(slo);
       rollbackOperations.push(() => this.transformManager.uninstall(rollupTransformId));
 
@@ -58,13 +75,13 @@ export class CreateSLO {
 
       await retryTransientEsErrors(
         () =>
-          this.esClient.ingest.putPipeline(
+          this.scopedClusterClient.asSecondaryAuthUser.ingest.putPipeline(
             getSLOSummaryPipelineTemplate(slo, this.spaceId, this.basePath)
           ),
         { logger: this.logger }
       );
       rollbackOperations.push(() =>
-        this.esClient.ingest.deletePipeline(
+        this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
           { id: getSLOSummaryPipelineId(slo.id, slo.revision) },
           { ignore: [404] }
         )
@@ -111,7 +128,8 @@ export class CreateSLO {
 
   public async inspect(params: CreateSLOParams): Promise<{
     slo: CreateSLOParams;
-    pipeline: Record<string, any>;
+    rollUpPipeline: Record<string, any>;
+    summaryPipeline: Record<string, any>;
     rollUpTransform: TransformPutTransformRequest;
     summaryTransform: TransformPutTransformRequest;
     temporaryDoc: Record<string, any>;
@@ -122,13 +140,15 @@ export class CreateSLO {
     validateSLO(slo);
 
     const rollUpTransform = await this.transformManager.inspect(slo);
-    const pipeline = getSLOSummaryPipelineTemplate(slo, this.spaceId, this.basePath);
+    const rollUpPipeline = getSLOPipelineTemplate(slo);
+    const summaryPipeline = getSLOSummaryPipelineTemplate(slo, this.spaceId, this.basePath);
     const summaryTransform = await this.summaryTransformManager.inspect(slo);
     const temporaryDoc = createTempSummaryDocument(slo, this.spaceId, this.basePath);
 
     return {
       slo,
-      pipeline,
+      rollUpPipeline,
+      summaryPipeline,
       temporaryDoc,
       summaryTransform,
       rollUpTransform,

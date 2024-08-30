@@ -85,6 +85,9 @@ enforce even rudimentary CSP rules, though {kib} is still accessible. This
 configuration is effectively ignored when <<csp-strict, `csp.strict`>> is enabled.
 *Default: `true`*
 
+`permissionsPolicy.report_to:`::
+Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy[Permissions Policy `report-to` directive].
+
 [[elasticsearch-maxSockets]] `elasticsearch.maxSockets`::
 The maximum number of sockets that can be used for communications with {es}.
 *Default: `Infinity`*
@@ -423,6 +426,12 @@ is used in all responses to the client from the {kib} server, and specifies what
 Refer to the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy[`Permissions-Policy` documentation] for defined
 directives, values, and text format. To disable, set to `null`.
 *Default:* `camera=(), display-capture=(), fullscreen=(self), geolocation=(), microphone=(), web-share=()`
+
+[[server-securityResponseHeaders-permissionsPolicyReportOnly]] `server.securityResponseHeaders.permissionsPolicyReportOnly`::
+experimental[] Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy[`Permissions-Policy-Report-Only`] header
+is used in all responses to the client from the {kib} server, and specifies what value is used. Allowed values are any text value or `null`.
+Refer to the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy[`Permissions-Policy` documentation] for defined
+directives, values, and text format.
 
 [[server-securityResponseHeaders-disableEmbedding]]`server.securityResponseHeaders.disableEmbedding`::
 Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy[`Content-Security-Policy`] and

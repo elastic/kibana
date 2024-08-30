@@ -207,12 +207,12 @@ export const getSyntheticsEnablement = async ({ server }: { server: SyntheticsSe
 };
 
 const hasEnablePermissions = async ({
-  uptimeEsClient,
+  syntheticsEsClient,
   isElasticsearchServerless,
 }: SyntheticsServerSetup) => {
   const { cluster: clusterPrivs, indices: index } =
     getServiceApiKeyPrivileges(isElasticsearchServerless);
-  const hasPrivileges = await uptimeEsClient.baseESClient.security.hasPrivileges({
+  const hasPrivileges = await syntheticsEsClient.baseESClient.security.hasPrivileges({
     body: {
       cluster: ['manage_security', 'manage_api_key', 'manage_own_api_key', ...clusterPrivs],
       index,

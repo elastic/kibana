@@ -18,7 +18,6 @@ import { uniq } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocalStorage } from 'react-use';
 
-import { SecurityRoutePageWrapper } from '../../common/components/security_route_page_wrapper';
 import { SecurityPageName } from '../../../common/constants';
 import { HeaderPage } from '../../common/components/header_page';
 import { useSpaceId } from '../../common/hooks/use_space_id';
@@ -35,17 +34,12 @@ import { EmptyStates } from './empty_states';
 import { LoadingCallout } from './loading_callout';
 import { PageTitle } from './page_title';
 import { Summary } from './summary';
-import { Upgrade } from './upgrade';
 import { useAttackDiscovery } from '../use_attack_discovery';
 
 const AttackDiscoveryPageComponent: React.FC = () => {
   const spaceId = useSpaceId() ?? 'default';
 
-  const {
-    assistantAvailability: { isAssistantEnabled },
-    http,
-    knowledgeBase,
-  } = useAssistantContext();
+  const { http, knowledgeBase } = useAssistantContext();
   const { data: aiConnectors } = useLoadConnectors({
     http,
   });
@@ -136,19 +130,17 @@ const AttackDiscoveryPageComponent: React.FC = () => {
     // If there is only one connector, set it as the selected connector
     if (aiConnectors != null && aiConnectors.length === 1) {
       setConnectorId(aiConnectors[0].id);
+    } else if (aiConnectors != null && aiConnectors.length === 0) {
+      // connectors have been removed, reset the connectorId and cached Attack discoveries
+      setConnectorId(undefined);
+      setSelectedConnectorAttackDiscoveries([]);
     }
-  }, [aiConnectors, setConnectorId]);
+  }, [aiConnectors]);
 
+  const animatedLogo = useMemo(() => <EuiLoadingLogo logo="logoSecurity" size="xl" />, []);
+
+  const connectorsAreConfigured = aiConnectors != null && aiConnectors.length > 0;
   const attackDiscoveriesCount = selectedConnectorAttackDiscoveries.length;
-
-  if (!isAssistantEnabled) {
-    return (
-      <>
-        <EuiSpacer size="xxl" />
-        <Upgrade />
-      </>
-    );
-  }
 
   return (
     <div
@@ -159,14 +151,11 @@ const AttackDiscoveryPageComponent: React.FC = () => {
       `}
       data-test-subj="fullHeightContainer"
     >
-      <SecurityRoutePageWrapper
-        data-test-subj="attackDiscoveryPage"
-        pageName={SecurityPageName.attackDiscovery}
-      >
+      <div data-test-subj="attackDiscoveryPage">
         <HeaderPage border title={pageTitle}>
           <Header
             connectorId={connectorId}
-            connectorsAreConfigured={aiConnectors != null && aiConnectors.length > 0}
+            connectorsAreConfigured={connectorsAreConfigured}
             isLoading={isLoading}
             // disable header actions before post request has completed
             isDisabledActions={isLoadingPost}
@@ -177,8 +166,8 @@ const AttackDiscoveryPageComponent: React.FC = () => {
           />
           <EuiSpacer size="m" />
         </HeaderPage>
-        {!didInitialFetch ? (
-          <EuiEmptyPrompt icon={<EuiLoadingLogo logo="logoSecurity" size="xl" />} />
+        {connectorsAreConfigured && connectorId != null && !didInitialFetch ? (
+          <EuiEmptyPrompt data-test-subj="animatedLogo" icon={animatedLogo} />
         ) : (
           <>
             {showSummary({
@@ -246,7 +235,7 @@ const AttackDiscoveryPageComponent: React.FC = () => {
           </>
         )}
         <SpyRoute pageName={SecurityPageName.attackDiscovery} />
-      </SecurityRoutePageWrapper>
+      </div>
     </div>
   );
 };

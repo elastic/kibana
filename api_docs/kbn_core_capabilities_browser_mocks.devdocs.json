@@ -6,26 +6,10 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-capabilities-browser-mocks",
-        "id": "def-common.capabilitiesServiceMock",
+        "id": "def-public.capabilitiesServiceMock",
         "type": "Object",
         "tags": [],
         "label": "capabilitiesServiceMock",
@@ -36,7 +20,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-capabilities-browser-mocks",
-            "id": "def-common.capabilitiesServiceMock.create",
+            "id": "def-public.capabilitiesServiceMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -62,7 +46,7 @@
           },
           {
             "parentPluginId": "@kbn/core-capabilities-browser-mocks",
-            "id": "def-common.capabilitiesServiceMock.createStartContract",
+            "id": "def-public.capabilitiesServiceMock.createStartContract",
             "type": "Function",
             "tags": [],
             "label": "createStartContract",
@@ -82,5 +66,21 @@
         "initialIsOpen": false
       }
     ]
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }

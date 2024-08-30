@@ -20,8 +20,6 @@ import { MANAGEMENT_PATH } from '../../../../../common/constants';
 import { getActionListMock } from '../../../components/endpoint_response_actions_list/mocks';
 import { useGetEndpointsList } from '../../../hooks/endpoint/use_get_endpoints_list';
 
-jest.mock('../../../../common/experimental_features_service');
-
 let mockUseGetEndpointActionList: {
   isFetched?: boolean;
   isFetching?: boolean;
@@ -463,7 +461,7 @@ describe('Response actions history page', () => {
       expect(history.location.search).toEqual('?page=1&pageSize=20');
     });
 
-    it('should set selected command filter options to URL params ', () => {
+    it('should set selected command filter options to URL params', () => {
       const filterPrefix = 'actions-filter';
       render();
       const { getAllByTestId, getByTestId } = renderResult;
@@ -476,7 +474,7 @@ describe('Response actions history page', () => {
       });
 
       expect(history.location.search).toEqual(
-        '?commands=isolate%2Crelease%2Ckill-process%2Csuspend-process%2Cprocesses%2Cget-file%2Cexecute%2Cupload'
+        '?commands=isolate%2Crelease%2Ckill-process%2Csuspend-process%2Cprocesses%2Cget-file%2Cexecute%2Cupload%2Cscan'
       );
     });
 
@@ -620,7 +618,7 @@ describe('Response actions history page', () => {
       });
 
       expect(history.location.search).toEqual(
-        '?commands=isolate%2Crelease%2Ckill-process%2Csuspend-process%2Cprocesses%2Cget-file%2Cexecute%2Cupload'
+        '?commands=isolate%2Crelease%2Ckill-process%2Csuspend-process%2Cprocesses%2Cget-file%2Cexecute%2Cupload%2Cscan'
       );
 
       const clearAllButton = getByTestId(`${testPrefix}-${filterPrefix}-clearAllButton`);

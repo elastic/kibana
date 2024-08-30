@@ -12,8 +12,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { isEmpty, isNumber } from 'lodash/fp';
 import React from 'react';
 import { css } from '@emotion/css';
-
-import type { BrowserField } from '../../../../../common/containers/source';
+import type { FieldSpec } from '@kbn/data-plugin/common';
+import { getAgentTypeForAgentIdField } from '../../../../../common/lib/endpoint/utils/get_agent_type_for_agent_id_field';
 import {
   ALERT_HOST_CRITICALITY,
   ALERT_USER_CRITICALITY,
@@ -49,7 +49,6 @@ import { RuleStatus } from './rule_status';
 import { HostName } from './host_name';
 import { UserName } from './user_name';
 import { AssetCriticalityLevel } from './asset_criticality_level';
-import { RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD } from '../../../../../../common/endpoint/service/response_actions/constants';
 
 // simple black-list to prevent dragging and dropping fields such as message name
 const columnNamesNotDraggable = [MESSAGE_FIELD_NAME];
@@ -71,7 +70,7 @@ const FormattedFieldValueComponent: React.FC<{
   isObjectArray?: boolean;
   isUnifiedDataTable?: boolean;
   fieldFormat?: string;
-  fieldFromBrowserField?: BrowserField;
+  fieldFromBrowserField?: Partial<FieldSpec>;
   fieldName: string;
   fieldType?: string;
   isButton?: boolean;
@@ -268,11 +267,6 @@ const FormattedFieldValueComponent: React.FC<{
         iconSide={isButton ? 'right' : undefined}
       />
     );
-  } else if (
-    fieldName === AGENT_STATUS_FIELD_NAME &&
-    fieldFromBrowserField?.name === RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.sentinel_one
-  ) {
-    return <AgentStatus agentId={String(value ?? '')} agentType="sentinel_one" />;
   } else if (fieldName === ALERT_HOST_CRITICALITY || fieldName === ALERT_USER_CRITICALITY) {
     return (
       <AssetCriticalityLevel
@@ -289,7 +283,7 @@ const FormattedFieldValueComponent: React.FC<{
     return (
       <AgentStatus
         agentId={String(value ?? '')}
-        agentType="endpoint"
+        agentType={getAgentTypeForAgentIdField(fieldFromBrowserField?.name ?? '')}
         data-test-subj="endpointHostAgentStatus"
       />
     );

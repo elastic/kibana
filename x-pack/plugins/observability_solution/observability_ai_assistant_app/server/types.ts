@@ -17,10 +17,7 @@ import type {
   DataViewsServerPluginSetup,
   DataViewsServerPluginStart,
 } from '@kbn/data-views-plugin/server';
-import type {
-  PluginStartContract as FeaturesPluginStart,
-  PluginSetupContract as FeaturesPluginSetup,
-} from '@kbn/features-plugin/server';
+import type { FeaturesPluginStart, FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type {
   ObservabilityAIAssistantServerSetup,

@@ -10,13 +10,14 @@ import { FeatureFeedbackButton } from '@kbn/observability-shared-plugin/public';
 import { AnomaliesTable } from '../../../ml/anomaly_detection/anomalies_table/anomalies_table';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 import { useDatePickerContext } from '../../hooks/use_date_picker';
-import { useIntersectingState } from '../../hooks/use_intersecting_state';
 import { useRequestObservable } from '../../hooks/use_request_observable';
 import { KibanaEnvironmentContext } from '../../../../hooks/use_kibana';
 import { INFRA_ML_FLYOUT_FEEDBACK_LINK } from '../../../ml/anomaly_detection/flyout_home';
+import { useTabSwitcherContext } from '../../hooks/use_tab_switcher';
 
 export const Anomalies = () => {
   const ref = useRef<HTMLDivElement>(null);
+  const { isActiveTab } = useTabSwitcherContext();
   const { request$ } = useRequestObservable();
   const { getParsedDateRange } = useDatePickerContext();
   const { asset, overrides } = useAssetDetailsRenderPropsContext();
@@ -24,18 +25,18 @@ export const Anomalies = () => {
   const { onClose = () => {} } = overrides?.anomalies ?? {};
 
   const parsedDateRange = useMemo(() => getParsedDateRange(), [getParsedDateRange]);
-  const state = useIntersectingState(ref, {
-    parsedDateRange,
-  });
 
   return (
     <div ref={ref}>
       <AnomaliesTable
         closeFlyout={onClose}
         hostName={asset.name}
-        dateRange={state.parsedDateRange}
+        dateRange={parsedDateRange}
         hideDatePicker
-        request$={request$}
+        fetcherOpts={{
+          autoFetch: isActiveTab('anomalies'),
+          requestObservable$: request$,
+        }}
       />
       <div
         style={{

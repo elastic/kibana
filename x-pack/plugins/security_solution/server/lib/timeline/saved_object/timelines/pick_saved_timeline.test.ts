@@ -8,7 +8,7 @@
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 
 import type { SavedTimeline, Note } from '../../../../../common/api/timeline';
-import { TimelineStatus, TimelineType } from '../../../../../common/api/timeline';
+import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../../common/api/timeline';
 
 import { pickSavedTimeline } from './pick_saved_timeline';
 
@@ -55,7 +55,7 @@ describe('pickSavedTimeline', () => {
     sort: { sortDirection: 'desc', columnType: 'number', columnId: '@timestamp' },
     title: 'title',
     kqlMode: 'filter',
-    timelineType: TimelineType.default,
+    timelineType: TimelineTypeEnum.default,
     savedQueryId: null,
     kqlQuery: { filterQuery: null },
     dataProviders: [],
@@ -185,7 +185,7 @@ describe('pickSavedTimeline', () => {
       const userInfo = { username: 'elastic' } as AuthenticatedUser;
       const result = pickSavedTimeline(timelineId, savedTimeline, userInfo);
 
-      expect(result.status).toEqual(TimelineStatus.active);
+      expect(result.status).toEqual(TimelineStatusEnum.active);
     });
 
     test('Creating a timeline without title', () => {
@@ -194,7 +194,7 @@ describe('pickSavedTimeline', () => {
       const userInfo = { username: 'elastic' } as AuthenticatedUser;
       const result = pickSavedTimeline(timelineId, savedTimeline, userInfo);
 
-      expect(result.status).toEqual(TimelineStatus.draft);
+      expect(result.status).toEqual(TimelineStatusEnum.draft);
     });
 
     test('Updating a timeline with a new title', () => {
@@ -203,7 +203,7 @@ describe('pickSavedTimeline', () => {
       const userInfo = { username: 'elastic' } as AuthenticatedUser;
       const result = pickSavedTimeline(timelineId, savedTimeline, userInfo);
 
-      expect(result.status).toEqual(TimelineStatus.active);
+      expect(result.status).toEqual(TimelineStatusEnum.active);
     });
 
     test('Updating a timeline without title', () => {
@@ -212,65 +212,65 @@ describe('pickSavedTimeline', () => {
       const userInfo = { username: 'elastic' } as AuthenticatedUser;
       const result = pickSavedTimeline(timelineId, savedTimeline, userInfo);
 
-      expect(result.status).toEqual(TimelineStatus.active);
+      expect(result.status).toEqual(TimelineStatusEnum.active);
     });
 
     test('Updating an immutable timeline with a new title', () => {
-      const savedTimeline = { ...getMockSavedTimeline(), status: TimelineStatus.immutable };
+      const savedTimeline = { ...getMockSavedTimeline(), status: TimelineStatusEnum.immutable };
       const timelineId = savedTimeline.savedObjectId ?? null;
       const userInfo = { username: 'elastic' } as AuthenticatedUser;
       const result = pickSavedTimeline(timelineId, savedTimeline, userInfo);
 
-      expect(result.status).toEqual(TimelineStatus.immutable);
+      expect(result.status).toEqual(TimelineStatusEnum.immutable);
     });
 
     test('Creating a draft timeline with title', () => {
-      const savedTimeline = { ...getMockSavedTimeline(), status: TimelineStatus.draft };
+      const savedTimeline = { ...getMockSavedTimeline(), status: TimelineStatusEnum.draft };
       const timelineId = null;
       const userInfo = { username: 'elastic' } as AuthenticatedUser;
       const result = pickSavedTimeline(timelineId, savedTimeline, userInfo);
 
-      expect(result.status).toEqual(TimelineStatus.active);
+      expect(result.status).toEqual(TimelineStatusEnum.active);
     });
 
     test('Creating a draft timeline without title', () => {
       const savedTimeline = {
         ...getMockSavedTimeline(),
         title: null,
-        status: TimelineStatus.draft,
+        status: TimelineStatusEnum.draft,
       };
       const timelineId = null;
       const userInfo = { username: 'elastic' } as AuthenticatedUser;
       const result = pickSavedTimeline(timelineId, savedTimeline, userInfo);
 
-      expect(result.status).toEqual(TimelineStatus.draft);
+      expect(result.status).toEqual(TimelineStatusEnum.draft);
     });
 
     test('Updating an untitled draft timeline with a title', () => {
-      const savedTimeline = { ...getMockSavedTimeline(), status: TimelineStatus.draft };
+      const savedTimeline = { ...getMockSavedTimeline(), status: TimelineStatusEnum.draft };
       const timelineId = savedTimeline.savedObjectId ?? null;
       const userInfo = { username: 'elastic' } as AuthenticatedUser;
       const result = pickSavedTimeline(timelineId, savedTimeline, userInfo);
 
-      expect(result.status).toEqual(TimelineStatus.active);
+      expect(result.status).toEqual(TimelineStatusEnum.active);
     });
 
     test('Updating a draft timeline with a new title', () => {
-      const savedTimeline = { ...getMockSavedTimeline(), status: TimelineStatus.draft };
+      const savedTimeline = { ...getMockSavedTimeline(), status: TimelineStatusEnum.draft };
       const timelineId = savedTimeline.savedObjectId ?? null;
       const userInfo = { username: 'elastic' } as AuthenticatedUser;
       const result = pickSavedTimeline(timelineId, savedTimeline, userInfo);
 
-      expect(result.status).toEqual(TimelineStatus.active);
+      expect(result.status).toEqual(TimelineStatusEnum.active);
     });
 
     test('Updating a draft timeline without title', () => {
-      const savedTimeline = { ...getMockSavedTimeline(), status: TimelineStatus.draft };
+      const savedTimeline = { ...getMockSavedTimeline(), status: TimelineStatusEnum.draft };
       const timelineId = savedTimeline.savedObjectId ?? null;
       const userInfo = { username: 'elastic' } as AuthenticatedUser;
       const result = pickSavedTimeline(timelineId, savedTimeline, userInfo);
 
-      expect(result.status).toEqual(TimelineStatus.active);
+      expect(result.status).toEqual(TimelineStatusEnum.active);
     });
   });
 
@@ -280,8 +280,8 @@ describe('pickSavedTimeline', () => {
     const userInfo = { username: 'elastic' } as AuthenticatedUser;
     const result = pickSavedTimeline(timelineId, savedTimeline, userInfo);
 
-    expect(result.timelineType).toEqual(TimelineType.default);
-    expect(result.status).toEqual(TimelineStatus.active);
+    expect(result.timelineType).toEqual(TimelineTypeEnum.default);
+    expect(result.status).toEqual(TimelineStatusEnum.active);
     expect(result.templateTimelineId).toBeNull();
     expect(result.templateTimelineVersion).toBeNull();
   });

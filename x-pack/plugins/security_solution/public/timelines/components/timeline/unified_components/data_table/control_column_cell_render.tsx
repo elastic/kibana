@@ -6,7 +6,6 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import { eventIsPinned } from '../../body/helpers';
 import { Actions } from '../../../../../common/components/header_actions';
 import type { TimelineModel } from '../../../../store/model';
@@ -14,37 +13,46 @@ import type { ActionProps } from '../../../../../../common/types';
 
 const noOp = () => {};
 export interface UnifiedActionProps extends ActionProps {
-  onToggleShowNotes: (eventId?: string) => void;
-  events: TimelineItem[];
   pinnedEventIds: TimelineModel['pinnedEventIds'];
 }
 
-export const ControlColumnCellRender = memo(function ControlColumnCellRender(
+export const TimelineControlColumnCellRender = memo(function TimelineControlColumnCellRender(
   props: UnifiedActionProps
 ) {
-  const { rowIndex, events, pinnedEventIds, onToggleShowNotes, eventIdToNoteIds, timelineId } =
-    props;
+  const { rowIndex, pinnedEventIds } = props;
 
-  const event = useMemo(() => events && events[rowIndex], [events, rowIndex]);
   const isPinned = useMemo(
-    () => eventIsPinned({ eventId: event?._id, pinnedEventIds }),
-    [event?._id, pinnedEventIds]
+    () => eventIsPinned({ eventId: props.eventId, pinnedEventIds }),
+    [props.eventId, pinnedEventIds]
   );
   return (
     <Actions
-      {...props}
-      ariaRowindex={rowIndex}
+      action={props.action}
+      columnId={props.columnId}
       columnValues="columnValues"
-      disableExpandAction
-      eventIdToNoteIds={eventIdToNoteIds}
+      data={props.data}
+      ecsData={props.ecsData}
+      eventId={props.eventId}
+      eventIdToNoteIds={props.eventIdToNoteIds}
+      index={rowIndex}
       isEventPinned={isPinned}
       isEventViewer={false}
-      onEventDetailsPanelOpened={noOp}
-      onRuleChange={noOp}
-      showNotes={true}
-      timelineId={timelineId}
-      toggleShowNotes={onToggleShowNotes}
+      refetch={props.refetch}
       rowIndex={rowIndex}
+      setEventsDeleted={noOp}
+      setEventsLoading={noOp}
+      onEventDetailsPanelOpened={noOp}
+      onRowSelected={noOp}
+      onRuleChange={noOp}
+      showCheckboxes={false}
+      showNotes={true}
+      timelineId={props.timelineId}
+      ariaRowindex={rowIndex}
+      checked={false}
+      loadingEventIds={props.loadingEventIds}
+      toggleShowNotes={props.toggleShowNotes}
+      disableExpandAction
+      disablePinAction={false}
     />
   );
 });

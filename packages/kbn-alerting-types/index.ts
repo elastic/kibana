@@ -6,12 +6,16 @@
  * Side Public License, v 1.
  */
 
-export * from './builtin_action_groups_types';
-export * from './rule_type_types';
 export * from './action_group_types';
-export * from './alert_type';
-export * from './rule_notify_when_type';
-export * from './r_rule_types';
-export * from './rule_types';
-export * from './alerting_framework_health_types';
 export * from './action_variable';
+export * from './alert_fields_type';
+export * from './alert_type';
+export * from './alerting_framework_health_types';
+export * from './builtin_action_groups_types';
+export * from './circuit_breaker_message_header';
+export * from './r_rule_types';
+export * from './rule_notify_when_type';
+export * from './rule_type_types';
+export * from './rule_types';
+export * from './rule_flapping';
+export * from './search_strategy_types';

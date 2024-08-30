@@ -41,7 +41,7 @@ export function createFieldsRoute(logger: Logger, router: IRouter, baseRoute: st
     req: KibanaRequest<unknown, unknown, RequestBody>,
     res: KibanaResponseFactory
   ): Promise<IKibanaResponse> {
-    logger.debug(`route ${path} request: ${JSON.stringify(req.body)}`);
+    logger.debug(() => `route ${path} request: ${JSON.stringify(req.body)}`);
 
     let rawFields: RawFields;
 
@@ -63,7 +63,7 @@ export function createFieldsRoute(logger: Logger, router: IRouter, baseRoute: st
 
     const result = { fields: getFieldsFromRawFields(rawFields) };
 
-    logger.debug(`route ${path} response: ${JSON.stringify(result)}`);
+    logger.debug(() => `route ${path} response: ${JSON.stringify(result)}`);
     return res.ok({ body: result });
   }
 }

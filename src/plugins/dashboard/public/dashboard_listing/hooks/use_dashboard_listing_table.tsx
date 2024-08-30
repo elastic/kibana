@@ -100,6 +100,7 @@ export const useDashboardListingTable = ({
       checkForDuplicateDashboardTitle,
     },
     notifications: { toasts },
+    dashboardRecentlyAccessed,
   } = pluginServices.getServices();
 
   const { getEntityName, getTableListTitle, getEntityNamePlural } = dashboardListingTableStrings;
@@ -282,7 +283,6 @@ export const useDashboardListingTable = ({
         isReadonly: !showWriteControls,
         onSave: updateItemMeta,
         customValidators: contentEditorValidators,
-        showActivityView: true,
       },
       createItem: !showWriteControls || !showCreateDashboardButton ? undefined : createItem,
       deleteItems: !showWriteControls ? undefined : deleteItems,
@@ -302,6 +302,7 @@ export const useDashboardListingTable = ({
       title,
       urlStateEnabled,
       createdByEnabled: true,
+      recentlyAccessed: dashboardRecentlyAccessed,
     }),
     [
       contentEditorValidators,
@@ -324,6 +325,7 @@ export const useDashboardListingTable = ({
       title,
       updateItemMeta,
       urlStateEnabled,
+      dashboardRecentlyAccessed,
     ]
   );
 

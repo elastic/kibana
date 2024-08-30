@@ -28,6 +28,7 @@ import { NoPrivilegesPage } from '../no_privileges';
 import * as i18n from './translations';
 import { useReadonlyHeader } from './use_readonly_header';
 import type { CaseViewProps } from '../case_view/types';
+import type { CreateCaseFormProps } from '../create/form';
 
 const CaseViewLazy: React.FC<CaseViewProps> = lazy(() => import('../case_view'));
 
@@ -36,6 +37,7 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
   ruleDetailsNavigation,
   showAlertDetails,
   useFetchAlertData,
+  onAlertsTableLoaded,
   refreshRef,
   timelineIntegration,
 }) => {
@@ -44,7 +46,7 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
   const { navigateToCaseView } = useCaseViewNavigation();
   useReadonlyHeader();
 
-  const onCreateCaseSuccess = useCallback(
+  const onCreateCaseSuccess: CreateCaseFormProps['onSuccess'] = useCallback(
     async ({ id }) => navigateToCaseView({ detailName: id }),
     [navigateToCaseView]
   );
@@ -84,6 +86,7 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
               ruleDetailsNavigation={ruleDetailsNavigation}
               showAlertDetails={showAlertDetails}
               useFetchAlertData={useFetchAlertData}
+              onAlertsTableLoaded={onAlertsTableLoaded}
               refreshRef={refreshRef}
               timelineIntegration={timelineIntegration}
             />

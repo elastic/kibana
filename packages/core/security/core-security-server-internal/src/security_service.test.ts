@@ -45,6 +45,16 @@ describe('SecurityService', () => {
         );
       });
     });
+
+    describe('#fips', () => {
+      describe('#isEnabled', () => {
+        it('should return boolean', () => {
+          const { fips } = service.setup();
+
+          expect(fips.isEnabled()).toBe(false);
+        });
+      });
+    });
   });
 
   describe('#start', () => {

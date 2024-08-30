@@ -53,8 +53,8 @@ export interface UsageStats {
   'observability:apmEnableTableSearchBar': boolean;
   'observability:apmEnableServiceInventoryTableSearchBar': boolean;
   'observability:logsExplorer:allowedDataViews': string[];
+  'observability:logSources': string[];
   'observability:aiAssistantLogsIndexPattern': string;
-  'observability:aiAssistantResponseLanguage': string;
   'observability:aiAssistantSimulatedFunctionCalling': boolean;
   'observability:aiAssistantSearchConnectorIndexPattern': string;
   'visualization:heatmap:maxBuckets': number;
@@ -162,7 +162,7 @@ export interface UsageStats {
   'observability:apmTraceExplorerTab': boolean;
   'observability:apmEnableCriticalPath': boolean;
   'observability:apmEnableProfilingIntegration': boolean;
-  'observability:apmEnableMultiSignal': boolean;
+  'observability:entityCentricExperience': boolean;
   'observability:profilingShowErrorFrames': boolean;
   'securitySolution:enableGroupedNav': boolean;
   'securitySolution:showRelatedIntegrations': boolean;
@@ -179,4 +179,5 @@ export interface UsageStats {
   'devTools:enablePersistentConsole': boolean;
   'aiAssistant:preferredAIAssistantType': string;
   'observability:profilingFetchTopNFunctionsFromStacktraces': boolean;
+  'securitySolution:excludedDataTiersForRuleExecution': string[];
 }

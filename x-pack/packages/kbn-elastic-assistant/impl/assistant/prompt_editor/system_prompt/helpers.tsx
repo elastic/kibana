@@ -8,46 +8,45 @@
 import { EuiText, EuiToolTip } from '@elastic/eui';
 import type { EuiSuperSelectOption } from '@elastic/eui';
 import React from 'react';
-// eslint-disable-next-line @kbn/eslint/module_migration
-import styled from 'styled-components';
-
-import { css } from '@emotion/react';
+import styled from '@emotion/styled';
 import { isEmpty } from 'lodash/fp';
-import type { Prompt } from '../../types';
+import { euiThemeVars } from '@kbn/ui-theme';
+import { PromptResponse } from '@kbn/elastic-assistant-common';
+import { css } from '@emotion/react';
 import { EMPTY_PROMPT } from './translations';
 
 const Strong = styled.strong`
-  margin-right: ${({ theme }) => theme.eui.euiSizeS};
+  margin-right: ${euiThemeVars.euiSizeS};
 `;
+
+interface GetOptionFromPromptProps extends PromptResponse {
+  content: string;
+  id: string;
+  name: string;
+  isCleared: boolean;
+}
 
 export const getOptionFromPrompt = ({
   content,
   id,
+  isCleared,
   name,
-  showTitles = false,
-  isFlyoutMode,
-}: Prompt & { showTitles?: boolean }): EuiSuperSelectOption<string> => ({
+}: GetOptionFromPromptProps): EuiSuperSelectOption<string> => ({
   value: id,
-  inputDisplay: isFlyoutMode ? (
-    name
-  ) : (
-    <EuiText
-      color="subdued"
+  inputDisplay: (
+    <span
       data-test-subj="systemPromptText"
+      // @ts-ignore
       css={css`
-        overflow: hidden;
-        &:hover {
-          cursor: pointer;
-          text-decoration: underline;
-        }
+        color: ${isCleared ? euiThemeVars.euiColorLightShade : euiThemeVars.euiColorDarkestShade};
       `}
     >
-      {showTitles ? name : content}
-    </EuiText>
+      {name}
+    </span>
   ),
   dropdownDisplay: (
     <>
-      <Strong data-test-subj="name">{name}</Strong>
+      <Strong data-test-subj={`systemPrompt-${name}`}>{name}</Strong>
 
       {/* Empty content tooltip gets around :hover styles from SuperSelectOptionButton */}
       <EuiToolTip content={undefined}>
@@ -60,13 +59,11 @@ export const getOptionFromPrompt = ({
 });
 
 interface GetOptionsProps {
-  prompts: Prompt[] | undefined;
-  showTitles?: boolean;
-  isFlyoutMode: boolean;
+  prompts: PromptResponse[] | undefined;
+  isCleared: boolean;
 }
 export const getOptions = ({
   prompts,
-  showTitles = false,
-  isFlyoutMode = false,
+  isCleared,
 }: GetOptionsProps): Array<EuiSuperSelectOption<string>> =>
-  prompts?.map((p) => getOptionFromPrompt({ ...p, showTitles, isFlyoutMode })) ?? [];
+  prompts?.map((p) => getOptionFromPrompt({ ...p, isCleared })) ?? [];

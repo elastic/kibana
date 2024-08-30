@@ -18,7 +18,7 @@ import React from 'react';
 import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { css } from '@emotion/react';
 import { useBoolean } from '../../../../../hooks/use_boolean';
-import { InfraGroupByOptions } from '../../../../../lib/lib';
+import { InfraGroupByOptions } from '../../../../../common/inventory/types';
 import { CustomFieldPanel } from './custom_field_panel';
 import { SnapshotGroupBy } from '../../../../../../common/http_api/snapshot_api';
 import { DropdownButton } from '../dropdown_button';

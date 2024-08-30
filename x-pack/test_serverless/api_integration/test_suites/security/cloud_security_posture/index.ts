@@ -17,6 +17,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./benchmark/v2'));
     loadTestFile(require.resolve('./find_csp_benchmark_rule'));
     loadTestFile(require.resolve('./telemetry'));
+    loadTestFile(require.resolve('./serverless_metering/cloud_security_metering'));
 
     // TODO: migrate status_unprivileged tests from stateful, if it feasible in serverless with the new security model
     // loadTestFile(require.resolve('./status/status_unprivileged'));

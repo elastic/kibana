@@ -108,7 +108,9 @@
           "\nHook to configure grouping component"
         ],
         "signature": [
-          "<T>({ componentProps, defaultGroupingOptions, fields, groupingId, maxGroupingLevels, onGroupChange, onOptionsChange, tracker, title, }: GroupingArgs<T>) => ",
+          "<T>({ componentProps, defaultGroupingOptions, fields, groupingId, maxGroupingLevels, onGroupChange, onOptionsChange, tracker, title, }: ",
+          "GroupingArgs",
+          "<T>) => ",
           "UseGrouping",
           "<T>"
         ],
@@ -124,7 +126,8 @@
             "label": "{\n  componentProps,\n  defaultGroupingOptions,\n  fields,\n  groupingId,\n  maxGroupingLevels,\n  onGroupChange,\n  onOptionsChange,\n  tracker,\n  title,\n}",
             "description": [],
             "signature": [
-              "GroupingArgs<T>"
+              "GroupingArgs",
+              "<T>"
             ],
             "path": "packages/kbn-grouping/src/hooks/use_grouping.tsx",
             "deprecated": false,
@@ -175,10 +178,10 @@
       },
       {
         "parentPluginId": "@kbn/grouping",
-        "id": "def-common.StatRenderer",
+        "id": "def-common.GroupStatsItem",
         "type": "Interface",
         "tags": [],
-        "label": "StatRenderer",
+        "label": "GroupStatsItem",
         "description": [],
         "path": "packages/kbn-grouping/src/components/types.ts",
         "deprecated": false,
@@ -186,7 +189,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/grouping",
-            "id": "def-common.StatRenderer.title",
+            "id": "def-common.GroupStatsItem.title",
             "type": "string",
             "tags": [],
             "label": "title",
@@ -197,10 +200,10 @@
           },
           {
             "parentPluginId": "@kbn/grouping",
-            "id": "def-common.StatRenderer.renderer",
+            "id": "def-common.GroupStatsItem.component",
             "type": "Object",
             "tags": [],
-            "label": "renderer",
+            "label": "component",
             "description": [],
             "signature": [
               "JSX.Element | undefined"
@@ -211,7 +214,7 @@
           },
           {
             "parentPluginId": "@kbn/grouping",
-            "id": "def-common.StatRenderer.badge",
+            "id": "def-common.GroupStatsItem.badge",
             "type": "Object",
             "tags": [],
             "label": "badge",
@@ -244,7 +247,7 @@
         "signature": [
           "{ isLoading: boolean; data?: ",
           "ParsedGroupingAggregation",
-          "<T> | undefined; activePage: number; groupingLevel?: number | undefined; inspectButton?: JSX.Element | undefined; itemsPerPage: number; onChangeGroupsItemsPerPage?: ((size: number) => void) | undefined; onChangeGroupsPage?: ((index: number) => void) | undefined; renderChildComponent: (groupFilter: ",
+          "<T> | undefined; activePage: number; selectedGroup: string; takeActionItems?: ((groupFilters: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -252,7 +255,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]) => React.ReactElement<any, string | React.JSXElementConstructor<any>>; onGroupClose: () => void; selectedGroup: string; takeActionItems: (groupFilters: ",
+          "[], groupNumber: number) => JSX.Element[]) | undefined; groupingLevel?: number | undefined; inspectButton?: JSX.Element | undefined; itemsPerPage: number; onChangeGroupsItemsPerPage?: ((size: number) => void) | undefined; onChangeGroupsPage?: ((index: number) => void) | undefined; renderChildComponent: (groupFilter: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -260,7 +263,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[], groupNumber: number) => JSX.Element[]; }"
+          "[]) => React.ReactElement<any, string | React.JSXElementConstructor<any>>; onGroupClose: () => void; }"
         ],
         "path": "packages/kbn-grouping/src/hooks/use_grouping.tsx",
         "deprecated": false,

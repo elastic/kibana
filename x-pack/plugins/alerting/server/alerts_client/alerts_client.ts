@@ -112,6 +112,8 @@ export class AlertsClient<
 
   private reportedAlerts: Record<string, DeepPartial<AlertData>> = {};
   private _isUsingDataStreams: boolean;
+  private ruleInfoMessage: string;
+  private logTags: { tags: string[] };
 
   constructor(private readonly options: AlertsClientParams) {
     this.legacyAlertsClient = new LegacyAlertsClient<
@@ -130,6 +132,8 @@ export class AlertsClient<
     this.rule = formatRule({ rule: this.options.rule, ruleType: this.options.ruleType });
     this.ruleType = options.ruleType;
     this._isUsingDataStreams = this.options.dataStreamAdapter.isUsingDataStreams();
+    this.ruleInfoMessage = `for ${this.ruleType.id}:${this.options.rule.id} '${this.options.rule.name}'`;
+    this.logTags = { tags: [this.ruleType.id, this.options.rule.id, 'alerts-client'] };
   }
 
   public async initializeExecution(opts: InitializeExecutionOpts) {
@@ -202,7 +206,10 @@ export class AlertsClient<
         this.fetchedAlerts.primaryTerm[alertUuid] = hit._primary_term;
       }
     } catch (err) {
-      this.options.logger.error(`Error searching for tracked alerts by UUID - ${err.message}`);
+      this.options.logger.error(
+        `Error searching for tracked alerts by UUID ${this.ruleInfoMessage} - ${err.message}`,
+        this.logTags
+      );
     }
   }
 
@@ -327,7 +334,8 @@ export class AlertsClient<
       );
     } catch (e) {
       this.options.logger.debug(
-        `Failed to update alert matched by maintenance window scoped query for rule ${this.ruleType.id}:${this.options.rule.id}: '${this.options.rule.name}'.`
+        `Failed to update alert matched by maintenance window scoped query ${this.ruleInfoMessage}`,
+        this.logTags
       );
     }
 
@@ -407,7 +415,8 @@ export class AlertsClient<
   private async persistAlertsHelper() {
     if (!this.ruleType.alerts?.shouldWrite) {
       this.options.logger.debug(
-        `Resources registered and installed for ${this.ruleType.alerts?.context} context but "shouldWrite" is set to false.`
+        `Resources registered and installed for ${this.ruleType.alerts?.context} context but "shouldWrite" is set to false ${this.ruleInfoMessage}.`,
+        this.logTags
       );
       return;
     }
@@ -429,7 +438,7 @@ export class AlertsClient<
       // See if there's an existing active alert document
       if (!!activeAlerts[id]) {
         if (
-          this.fetchedAlerts.data.hasOwnProperty(id) &&
+          Object.hasOwn(this.fetchedAlerts.data, id) &&
           get(this.fetchedAlerts.data[id], ALERT_STATUS) === 'active'
         ) {
           const isImproving = isAlertImproving<
@@ -482,7 +491,8 @@ export class AlertsClient<
         }
       } else {
         this.options.logger.error(
-          `Error writing alert(${id}) to ${this.indexTemplateAndPattern.alias} - alert(${id}) doesn't exist in active alerts`
+          `Error writing alert(${id}) to ${this.indexTemplateAndPattern.alias} - alert(${id}) doesn't exist in active alerts ${this.ruleInfoMessage}.`,
+          this.logTags
         );
       }
     }
@@ -491,7 +501,7 @@ export class AlertsClient<
     for (const id of keys(recoveredAlertsToReturn)) {
       // See if there's an existing alert document
       // If there is not, log an error because there should be
-      if (this.fetchedAlerts.data.hasOwnProperty(id)) {
+      if (Object.hasOwn(this.fetchedAlerts.data, id)) {
         recoveredAlertsToIndex.push(
           currentRecoveredAlerts[id]
             ? buildRecoveredAlert<
@@ -518,12 +528,6 @@ export class AlertsClient<
                 rule: this.rule,
               })
         );
-      } else {
-        this.options.logger.debug(
-          `Could not find alert document to update for recovered alert with id ${id} and uuid ${currentRecoveredAlerts[
-            id
-          ].getUuid()}`
-        );
       }
     }
 
@@ -535,7 +539,8 @@ export class AlertsClient<
           return true;
         } else if (!isValidAlertIndexName(alertIndex)) {
           this.options.logger.warn(
-            `Could not update alert ${alertUuid} in ${alertIndex}. Partial and restored alert indices are not supported.`
+            `Could not update alert ${alertUuid} in ${alertIndex}. Partial and restored alert indices are not supported ${this.ruleInfoMessage}.`,
+            this.logTags
           );
           return false;
         }
@@ -579,11 +584,15 @@ export class AlertsClient<
               operations: bulkBody,
             },
             bulkResponse: response,
+            ruleId: this.options.rule.id,
+            ruleName: this.options.rule.name,
+            ruleType: this.ruleType.id,
           });
         }
       } catch (err) {
         this.options.logger.error(
-          `Error writing ${alertsToIndex.length} alerts to ${this.indexTemplateAndPattern.alias} - ${err.message}`
+          `Error writing ${alertsToIndex.length} alerts to ${this.indexTemplateAndPattern.alias} ${this.ruleInfoMessage} - ${err.message}`,
+          this.logTags
         );
       }
     }
@@ -675,7 +684,10 @@ export class AlertsClient<
       });
       return response;
     } catch (err) {
-      this.options.logger.warn(`Error updating alert maintenance window IDs: ${err}`);
+      this.options.logger.warn(
+        `Error updating alert maintenance window IDs ${this.ruleInfoMessage}: ${err}`,
+        this.logTags
+      );
       throw err;
     }
   }
@@ -745,7 +757,8 @@ export class AlertsClient<
       // Update alerts with new maintenance window IDs, await not needed
       this.updateAlertMaintenanceWindowIds(uniqueAlertsId).catch(() => {
         this.options.logger.debug(
-          'Failed to update new alerts with scoped query maintenance window Ids by updateByQuery.'
+          `Failed to update new alerts with scoped query maintenance window Ids by updateByQuery ${this.ruleInfoMessage}.`,
+          this.logTags
         );
       });
     }

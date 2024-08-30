@@ -19,6 +19,7 @@ import type {
 import { OpsMetricsCollector } from './ops_metrics_collector';
 import { OPS_CONFIG_PATH, type OpsConfigType } from './ops_config';
 import { getEcsOpsMetricsLog } from './logging';
+import { registerEluHistoryRoute } from './routes/elu_history';
 
 export interface MetricsServiceSetupDeps {
   http: InternalHttpServiceSetup;
@@ -71,6 +72,8 @@ export class MetricsService
     }, config.interval.asMilliseconds());
 
     const metricsObservable = this.metrics$.asObservable();
+
+    registerEluHistoryRoute(http.createRouter(''), metricsObservable);
 
     this.service = {
       collectionInterval: config.interval.asMilliseconds(),

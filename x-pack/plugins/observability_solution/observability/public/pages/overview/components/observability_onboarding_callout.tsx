@@ -14,14 +14,19 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import React, { useCallback } from 'react';
+import { ObservabilityPublicPluginsStart } from '../../../plugin';
 import { useObservabilityOnboarding } from '../../../hooks/use_observability_onboarding';
 
 export function ObservabilityOnboardingCallout() {
-  const { application } = useKibana().services;
+  const { application, share } = useKibana<ObservabilityPublicPluginsStart>().services;
+  const onboardingHref = share?.url.locators
+    .get<ObservabilityOnboardingLocatorParams>('OBSERVABILITY_ONBOARDING_LOCATOR')
+    ?.useUrl({ category: 'logs' });
 
   const trackMetric = useUiTracker({ app: 'observability-overview' });
   const { isObservabilityOnboardingDismissed, dismissObservabilityOnboarding } =
@@ -34,7 +39,7 @@ export function ObservabilityOnboardingCallout() {
 
   const getStarted = () => {
     trackMetric({ metric: 'observability_onboarding_get_started' });
-    application?.navigateToApp('observabilityOnboarding');
+    application?.navigateToUrl(onboardingHref!);
   };
 
   return !isObservabilityOnboardingDismissed ? (

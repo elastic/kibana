@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { ReactElement, useState } from 'react';
+import React, { useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiDescriptionList,
@@ -43,8 +43,7 @@ export const StepPageNavigation = ({ testRunPage }: { testRunPage?: boolean }) =
   const formatter = useDateFormat();
   const { basePath } = useSyntheticsSettingsContext();
   const selectedLocation = useSelectedLocation();
-
-  let startedAt: string | ReactElement = formatter(data?.details?.timestamp);
+  const startedAt = formatter(data?.details?.timestamp);
 
   const { stepIndex, monitorId } = useParams<{ stepIndex: string; monitorId: string }>();
 
@@ -77,9 +76,7 @@ export const StepPageNavigation = ({ testRunPage }: { testRunPage?: boolean }) =
     }
   }
 
-  if (!startedAt) {
-    startedAt = <EuiSkeletonText lines={1} />;
-  }
+  const startedAtWrapped = startedAt || <EuiSkeletonText lines={1} />;
 
   return (
     <EuiPopover
@@ -94,7 +91,7 @@ export const StepPageNavigation = ({ testRunPage }: { testRunPage?: boolean }) =
           iconSide="right"
           flush="left"
         >
-          {startedAt}
+          {startedAtWrapped}
         </EuiButtonEmpty>
       }
     >
@@ -111,8 +108,12 @@ export const StepPageNavigation = ({ testRunPage }: { testRunPage?: boolean }) =
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiText size="s" className="eui-textNoWrap">
-            {startedAt}
+          <EuiText
+            size="s"
+            className="eui-textNoWrap"
+            aria-label={CURRENT_CHECK_ARIA_LABEL(startedAt)}
+          >
+            {startedAtWrapped}
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -145,3 +146,11 @@ export const NEXT_CHECK_BUTTON_TEXT = i18n.translate(
     defaultMessage: 'Next check',
   }
 );
+
+export const CURRENT_CHECK_ARIA_LABEL = (timestamp: string) =>
+  i18n.translate('xpack.synthetics.synthetics.stepDetail.currentCheckAriaLabel', {
+    defaultMessage: 'Current check: {timestamp}',
+    values: {
+      timestamp,
+    },
+  });

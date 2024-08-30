@@ -71,7 +71,7 @@ export function registerHelpers(handlebarsInstance: typeof Handlebars) {
   });
 
   /**
-   * Checks whether provided schema is circular or a part of the circular chain.
+   * Checks whether provided schema is circular or a part of a circular chain.
    *
    * It's expected that `context.circularRefs` has been filled by the parser.
    */

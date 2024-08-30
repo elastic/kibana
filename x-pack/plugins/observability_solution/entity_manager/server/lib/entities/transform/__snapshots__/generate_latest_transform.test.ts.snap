@@ -2,10 +2,14 @@
 
 exports[`generateLatestTransform(definition) should generate a valid latest transform 1`] = `
 Object {
+  "_meta": Object {
+    "definitionVersion": "1.0.0",
+    "managed": false,
+  },
   "defer_validation": true,
   "dest": Object {
-    "index": ".entities-observability.latest-v1.admin-console-services",
-    "pipeline": ".entities-observability.latest-v1.admin-console-services",
+    "index": ".entities.v1.latest.noop",
+    "pipeline": "entities-v1-latest-admin-console-services",
   },
   "frequency": "30s",
   "pivot": Object {
@@ -43,6 +47,40 @@ Object {
           "field": "@timestamp",
         },
       },
+      "entity.identity.event.category": Object {
+        "aggs": Object {
+          "top_metric": Object {
+            "top_metrics": Object {
+              "metrics": Object {
+                "field": "event.category",
+              },
+              "sort": "_score",
+            },
+          },
+        },
+        "filter": Object {
+          "exists": Object {
+            "field": "event.category",
+          },
+        },
+      },
+      "entity.identity.log.logger": Object {
+        "aggs": Object {
+          "top_metric": Object {
+            "top_metrics": Object {
+              "metrics": Object {
+                "field": "log.logger",
+              },
+              "sort": "_score",
+            },
+          },
+        },
+        "filter": Object {
+          "exists": Object {
+            "field": "log.logger",
+          },
+        },
+      },
       "entity.lastSeenTimestamp": Object {
         "max": Object {
           "field": "entity.lastSeenTimestamp",
@@ -59,8 +97,8 @@ Object {
         },
         "filter": Object {
           "range": Object {
-            "event.ingested": Object {
-              "gte": "now-1m",
+            "@timestamp": Object {
+              "gte": "now-360s",
             },
           },
         },
@@ -76,8 +114,25 @@ Object {
         },
         "filter": Object {
           "range": Object {
-            "event.ingested": Object {
-              "gte": "now-1m",
+            "@timestamp": Object {
+              "gte": "now-360s",
+            },
+          },
+        },
+      },
+      "entity.metadata.sourceIndex": Object {
+        "aggs": Object {
+          "data": Object {
+            "terms": Object {
+              "field": "sourceIndex",
+              "size": 1000,
+            },
+          },
+        },
+        "filter": Object {
+          "range": Object {
+            "@timestamp": Object {
+              "gte": "now-360s",
             },
           },
         },
@@ -93,8 +148,8 @@ Object {
         },
         "filter": Object {
           "range": Object {
-            "event.ingested": Object {
-              "gte": "now-1m",
+            "@timestamp": Object {
+              "gte": "now-360s",
             },
           },
         },
@@ -117,26 +172,9 @@ Object {
       },
     },
     "group_by": Object {
-      "entity.displayName": Object {
-        "terms": Object {
-          "field": "entity.displayName.keyword",
-        },
-      },
       "entity.id": Object {
         "terms": Object {
           "field": "entity.id",
-        },
-      },
-      "entity.identityFields.event.category": Object {
-        "terms": Object {
-          "field": "entity.identityFields.event.category",
-          "missing_bucket": true,
-        },
-      },
-      "entity.identityFields.log.logger": Object {
-        "terms": Object {
-          "field": "entity.identityFields.log.logger",
-          "missing_bucket": false,
         },
       },
     },
@@ -146,7 +184,7 @@ Object {
     "unattended": true,
   },
   "source": Object {
-    "index": ".entities-observability.history-v1.admin-console-services.*",
+    "index": ".entities.v1.history.admin-console-services.*",
   },
   "sync": Object {
     "time": Object {
@@ -154,6 +192,6 @@ Object {
       "field": "event.ingested",
     },
   },
-  "transform_id": "entity-latest-v1-admin-console-services",
+  "transform_id": "entities-v1-latest-admin-console-services",
 }
 `;

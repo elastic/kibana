@@ -7,15 +7,19 @@
 
 import type { EuiTableSortingType } from '@elastic/eui';
 import { Pagination } from '@elastic/eui';
-import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import { DeploymentState, InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { useMemo } from 'react';
+import { TaskTypes } from '../../common/types';
 import { DEFAULT_TABLE_LIMIT } from '../components/all_inference_endpoints/constants';
 import {
-  InferenceEndpointUI,
+  FilterOptions,
   INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES,
+  InferenceEndpointUI,
   QueryParams,
   SortOrder,
+  ServiceProviderKeys,
 } from '../components/all_inference_endpoints/types';
+import { useTrainedModelStats } from './use_trained_model_stats';
 
 interface UseTableDataReturn {
   tableData: InferenceEndpointUI[];
@@ -27,15 +31,51 @@ interface UseTableDataReturn {
 
 export const useTableData = (
   inferenceEndpoints: InferenceAPIConfigResponse[],
-  queryParams: QueryParams
+  queryParams: QueryParams,
+  filterOptions: FilterOptions,
+  searchKey: string
 ): UseTableDataReturn => {
+  const { data: trainedModelStats } = useTrainedModelStats();
+
+  const deploymentStatus = trainedModelStats?.trained_model_stats.reduce((acc, modelStat) => {
+    if (modelStat.deployment_stats?.deployment_id) {
+      acc[modelStat.deployment_stats.deployment_id] = modelStat?.deployment_stats?.state;
+    }
+    return acc;
+  }, {} as Record<string, DeploymentState | undefined>);
+
   const tableData: InferenceEndpointUI[] = useMemo(() => {
-    return inferenceEndpoints.map((endpoint) => ({
-      endpoint: endpoint.model_id,
-      provider: endpoint.service,
-      type: endpoint.task_type,
-    }));
-  }, [inferenceEndpoints]);
+    let filteredEndpoints = inferenceEndpoints;
+
+    if (filterOptions.provider.length > 0) {
+      filteredEndpoints = filteredEndpoints.filter((endpoint) =>
+        filterOptions.provider.includes(ServiceProviderKeys[endpoint.service])
+      );
+    }
+
+    if (filterOptions.type.length > 0) {
+      filteredEndpoints = filteredEndpoints.filter((endpoint) =>
+        filterOptions.type.includes(TaskTypes[endpoint.task_type])
+      );
+    }
+
+    return filteredEndpoints
+      .filter((endpoint) => endpoint.inference_id.includes(searchKey))
+      .map((endpoint) => {
+        const isElasticService =
+          endpoint.service === ServiceProviderKeys.elasticsearch ||
+          endpoint.service === ServiceProviderKeys.elser;
+        const deploymentId = isElasticService ? endpoint.inference_id : undefined;
+        const deployment = (deploymentId && deploymentStatus?.[deploymentId]) || undefined;
+
+        return {
+          deployment,
+          endpoint,
+          provider: endpoint.service,
+          type: endpoint.task_type,
+        };
+      });
+  }, [inferenceEndpoints, searchKey, filterOptions, deploymentStatus]);
 
   const sortedTableData: InferenceEndpointUI[] = useMemo(() => {
     return [...tableData].sort((a, b) => {
@@ -43,9 +83,9 @@ export const useTableData = (
       const bValue = b[queryParams.sortField];
 
       if (queryParams.sortOrder === SortOrder.asc) {
-        return aValue.localeCompare(bValue);
+        return aValue.inference_id.localeCompare(bValue.inference_id);
       } else {
-        return bValue.localeCompare(aValue);
+        return bValue.inference_id.localeCompare(aValue.inference_id);
       }
     });
   }, [tableData, queryParams]);

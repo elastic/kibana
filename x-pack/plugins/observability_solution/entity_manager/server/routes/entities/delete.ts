@@ -6,39 +6,74 @@
  */
 
 import { RequestHandlerContext } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
+import {
+  deleteEntityDefinitionParamsSchema,
+  deleteEntityDefinitionQuerySchema,
+} from '@kbn/entities-schema';
 import { SetupRouteOptions } from '../types';
 import { EntitySecurityException } from '../../lib/entities/errors/entity_security_exception';
 import { InvalidTransformError } from '../../lib/entities/errors/invalid_transform_error';
-import { readEntityDefinition } from '../../lib/entities/read_entity_definition';
 import { EntityDefinitionNotFound } from '../../lib/entities/errors/entity_not_found';
-import { ENTITY_INTERNAL_API_PREFIX } from '../../../common/constants_entities';
-import { uninstallEntityDefinition } from '../../lib/entities/uninstall_entity_definition';
 
+/**
+ * @openapi
+ * /internal/entities/definition:
+ *   delete:
+ *     description: Uninstall an entity definition. This stops and deletes the transforms, ingest pipelines, definitions saved objects, and index templates for this entity definition.
+ *     tags:
+ *       - definitions
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         description: The entity definition ID
+ *         schema:
+ *           $ref: '#/components/schemas/deleteEntityDefinitionParamsSchema/properties/id'
+ *         required: true
+ *       - in: query
+ *         name: deleteData
+ *         description: If true, delete all entity data in the indices associated with this entity definition
+ *         schema:
+ *           $ref: '#/components/schemas/deleteEntityDefinitionQuerySchema/properties/deleteData'
+ *     responses:
+ *       200:
+ *         description: Success
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 acknowledged:
+ *                   type: boolean
+ *       400:
+ *         description: The entity definition cannot be removed; see the error for more details
+ *       404:
+ *         description: Entity definition with given ID not found
+ */
 export function deleteEntityDefinitionRoute<T extends RequestHandlerContext>({
   router,
-  server,
+  getScopedClient,
+  logger,
 }: SetupRouteOptions<T>) {
-  router.delete<{ id: string }, unknown, unknown>(
+  router.delete<{ id: string }, { deleteData?: boolean }, unknown>(
     {
-      path: `${ENTITY_INTERNAL_API_PREFIX}/definition/{id}`,
+      path: '/internal/entities/definition/{id}',
       validate: {
-        params: schema.object({
-          id: schema.string(),
-        }),
+        params: deleteEntityDefinitionParamsSchema.strict(),
+        query: deleteEntityDefinitionQuerySchema.strict(),
       },
     },
-    async (context, req, res) => {
+    async (context, request, res) => {
       try {
-        const { logger } = server;
-        const soClient = (await context.core).savedObjects.client;
-        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-
-        const definition = await readEntityDefinition(soClient, req.params.id, logger);
-        await uninstallEntityDefinition({ definition, soClient, esClient, logger });
+        const client = await getScopedClient({ request });
+        await client.deleteEntityDefinition({
+          id: request.params.id,
+          deleteData: request.query.deleteData,
+        });
 
         return res.ok({ body: { acknowledged: true } });
       } catch (e) {
+        logger.error(e);
+
         if (e instanceof EntityDefinitionNotFound) {
           return res.notFound({ body: e });
         }

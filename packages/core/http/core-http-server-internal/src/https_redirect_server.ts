@@ -40,7 +40,7 @@ export class HttpsRedirectServer {
       return responseToolkit
         .redirect(
           formatUrl({
-            hostname: config.host,
+            hostname: request.url.hostname,
             pathname: request.url.pathname,
             port: config.port,
             protocol: 'https',

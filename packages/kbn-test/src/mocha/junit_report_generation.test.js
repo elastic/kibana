@@ -45,9 +45,9 @@ describe('dev/mocha/junit report generation', () => {
 
     // test case results are wrapped in <testsuites></testsuites>
     expect(report).toEqual({
-      testsuites: {
+      testsuites: expect.objectContaining({
         testsuite: [report.testsuites.testsuite[0]],
-      },
+      }),
     });
 
     // the single <testsuite> element at the root contains summary data for all tests results
@@ -55,6 +55,8 @@ describe('dev/mocha/junit report generation', () => {
     expect(testsuite.$.time).toMatch(DURATION_REGEX);
     expect(testsuite.$.timestamp).toMatch(ISO_DATE_SEC_REGEX);
     expect(testsuite.$).toEqual({
+      'command-line':
+        'node scripts/jest --config=packages/kbn-test/jest.config.js --runInBand --coverage=false --passWithNoTests',
       failures: '2',
       name: 'test',
       skipped: '1',

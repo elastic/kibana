@@ -68,7 +68,10 @@ const RuleActionsOverflowComponent = ({
   confirmDeletion,
 }: RuleActionsOverflowComponentProps) => {
   const [isPopoverOpen, , closePopover, togglePopover] = useBoolState();
-  const { navigateToApp } = useKibana().services.application;
+  const {
+    application: { navigateToApp },
+    telemetry,
+  } = useKibana().services;
   const { startTransaction } = useStartTransaction();
   const { executeBulkAction } = useExecuteBulkAction({ suppressSuccessToast: true });
   const { bulkExport } = useBulkExport();
@@ -166,6 +169,9 @@ const RuleActionsOverflowComponent = ({
                       closePopover();
                       const modalManualRuleRunConfirmationResult =
                         await showManualRuleRunConfirmation();
+                      telemetry.reportManualRuleRunOpenModal({
+                        type: 'single',
+                      });
                       if (modalManualRuleRunConfirmationResult === null) {
                         return;
                       }
@@ -221,6 +227,7 @@ const RuleActionsOverflowComponent = ({
       confirmDeletion,
       scheduleRuleRun,
       isManualRuleRunEnabled,
+      telemetry,
     ]
   );
 

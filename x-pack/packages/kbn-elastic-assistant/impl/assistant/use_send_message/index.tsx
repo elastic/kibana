@@ -41,10 +41,8 @@ export const useSendMessage = (): UseSendMessage => {
       try {
         return await fetchConnectorExecuteAction({
           conversationId,
-          isEnabledRAGAlerts: knowledgeBase.isEnabledRAGAlerts, // settings toggle
           alertsIndexPattern,
           apiConfig,
-          isEnabledKnowledgeBase: knowledgeBase.isEnabledKnowledgeBase,
           assistantStreamingEnabled,
           http,
           message,
@@ -57,14 +55,7 @@ export const useSendMessage = (): UseSendMessage => {
         setIsLoading(false);
       }
     },
-    [
-      alertsIndexPattern,
-      assistantStreamingEnabled,
-      knowledgeBase.isEnabledRAGAlerts,
-      knowledgeBase.isEnabledKnowledgeBase,
-      knowledgeBase.latestAlerts,
-      traceOptions,
-    ]
+    [alertsIndexPattern, assistantStreamingEnabled, knowledgeBase.latestAlerts, traceOptions]
   );
 
   const cancelRequest = useCallback(() => {

@@ -34,10 +34,10 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('bsearch', () => {
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
     });
     after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
     describe('post', () => {
       it('should return 200 a single response', async () => {

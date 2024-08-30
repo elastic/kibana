@@ -19,6 +19,10 @@ import { createMockStore, mockGlobalState, TestProviders } from '../../../../com
 import { DELETE_NOTE_ERROR, FETCH_NOTES_ERROR, NO_NOTES, NotesList } from './notes_list';
 import { ReqStatus } from '../../../../notes/store/notes.slice';
 import { useQueryTimelineById } from '../../../../timelines/components/open_timeline/helpers';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
+
+jest.mock('../../../../common/components/user_privileges');
+const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
 
 jest.mock('../../../../timelines/components/open_timeline/helpers');
 
@@ -41,11 +45,17 @@ jest.mock('react-redux', () => {
 const renderNotesList = () =>
   render(
     <TestProviders>
-      <NotesList eventId={'event-id'} />
+      <NotesList eventId={'1'} />
     </TestProviders>
   );
 
 describe('NotesList', () => {
+  beforeEach(() => {
+    useUserPrivilegesMock.mockReturnValue({
+      kibanaSecuritySolutionsPrivileges: { crud: true, read: true },
+    });
+  });
+
   it('should render a note as a comment', () => {
     const { getByTestId, getByText } = renderNotesList();
     expect(getByTestId(`${NOTES_COMMENT_TEST_ID}-0`)).toBeInTheDocument();
@@ -69,7 +79,7 @@ describe('NotesList', () => {
 
     const { getByTestId } = render(
       <TestProviders store={store}>
-        <NotesList eventId={'event-id'} />
+        <NotesList eventId={'1'} />
       </TestProviders>
     );
 
@@ -115,7 +125,7 @@ describe('NotesList', () => {
 
     render(
       <TestProviders store={store}>
-        <NotesList eventId={'event-id'} />
+        <NotesList eventId={'1'} />
       </TestProviders>
     );
 
@@ -131,7 +141,7 @@ describe('NotesList', () => {
         ...mockGlobalState.notes,
         entities: {
           '1': {
-            eventId: 'event-id',
+            eventId: '1',
             noteId: '1',
             note: 'note-1',
             timelineId: '',
@@ -147,7 +157,7 @@ describe('NotesList', () => {
 
     const { getByTestId } = render(
       <TestProviders store={store}>
-        <NotesList eventId={'event-id'} />
+        <NotesList eventId={'1'} />
       </TestProviders>
     );
     const { getByText } = within(getByTestId(`${NOTE_AVATAR_TEST_ID}-0`));
@@ -169,7 +179,7 @@ describe('NotesList', () => {
 
     const { getByTestId } = render(
       <TestProviders store={store}>
-        <NotesList eventId={'event-id'} />
+        <NotesList eventId={'1'} />
       </TestProviders>
     );
 
@@ -196,18 +206,29 @@ describe('NotesList', () => {
         ...mockGlobalState.notes,
         status: {
           ...mockGlobalState.notes.status,
-          deleteNote: ReqStatus.Loading,
+          deleteNotes: ReqStatus.Loading,
         },
       },
     });
 
     const { getByTestId } = render(
       <TestProviders store={store}>
-        <NotesList eventId={'event-id'} />
+        <NotesList eventId={'1'} />
       </TestProviders>
     );
 
     expect(getByTestId(`${DELETE_NOTE_BUTTON_TEST_ID}-0`)).toHaveAttribute('disabled');
+  });
+
+  it('should not render a delete icon when the user does not have crud privileges', () => {
+    useUserPrivilegesMock.mockReturnValue({
+      kibanaSecuritySolutionsPrivileges: { crud: false, read: true },
+    });
+    const { queryByTestId } = renderNotesList();
+
+    const deleteIcon = queryByTestId(`${DELETE_NOTE_BUTTON_TEST_ID}-0`);
+
+    expect(deleteIcon).not.toBeInTheDocument();
   });
 
   it('should render error toast if deleting a note fails', () => {
@@ -217,18 +238,18 @@ describe('NotesList', () => {
         ...mockGlobalState.notes,
         status: {
           ...mockGlobalState.notes.status,
-          deleteNote: ReqStatus.Failed,
+          deleteNotes: ReqStatus.Failed,
         },
         error: {
           ...mockGlobalState.notes.error,
-          deleteNote: { type: 'http', status: 500 },
+          deleteNotes: { type: 'http', status: 500 },
         },
       },
     });
 
     render(
       <TestProviders store={store}>
-        <NotesList eventId={'event-id'} />
+        <NotesList eventId={'1'} />
       </TestProviders>
     );
 
@@ -250,7 +271,7 @@ describe('NotesList', () => {
       onOpenTimeline: undefined,
       timelineId: 'timeline-1',
       timelineType: undefined,
-      unifiedComponentsInTimelineEnabled: false,
+      unifiedComponentsInTimelineDisabled: false,
     });
   });
 
@@ -261,7 +282,7 @@ describe('NotesList', () => {
         ...mockGlobalState.notes,
         entities: {
           '1': {
-            eventId: 'event-id',
+            eventId: '1',
             noteId: '1',
             note: 'note-1',
             timelineId: '',
@@ -277,7 +298,7 @@ describe('NotesList', () => {
 
     const { queryByTestId } = render(
       <TestProviders store={store}>
-        <NotesList eventId={'event-id'} />
+        <NotesList eventId={'1'} />
       </TestProviders>
     );
 

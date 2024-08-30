@@ -9,11 +9,18 @@ import { compact } from 'lodash';
 import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { EntityDefinition } from '@kbn/entities-schema';
 import { SO_ENTITY_DEFINITION_TYPE } from '../../saved_objects';
-import { generateHistoryIngestPipelineId } from './ingest_pipeline/generate_history_ingest_pipeline_id';
-import { generateLatestIngestPipelineId } from './ingest_pipeline/generate_latest_ingest_pipeline_id';
-import { generateHistoryTransformId } from './transform/generate_history_transform_id';
-import { generateLatestTransformId } from './transform/generate_latest_transform_id';
+import {
+  generateHistoryTransformId,
+  generateHistoryBackfillTransformId,
+  generateHistoryIngestPipelineId,
+  generateHistoryIndexTemplateId,
+  generateLatestTransformId,
+  generateLatestIngestPipelineId,
+  generateLatestIndexTemplateId,
+} from './helpers/generate_component_id';
 import { BUILT_IN_ID_PREFIX } from './built_in';
+import { EntityDefinitionWithState } from './types';
+import { isBackfillEnabled } from './helpers/is_backfill_enabled';
 
 export async function findEntityDefinitions({
   soClient,
@@ -29,7 +36,7 @@ export async function findEntityDefinitions({
   id?: string;
   page?: number;
   perPage?: number;
-}): Promise<Array<EntityDefinition & { state: { installed: boolean; running: boolean } }>> {
+}): Promise<EntityDefinitionWithState[]> {
   const filter = compact([
     typeof builtIn === 'boolean'
       ? `${SO_ENTITY_DEFINITION_TYPE}.attributes.id:(${BUILT_IN_ID_PREFIX}*)`
@@ -51,25 +58,57 @@ export async function findEntityDefinitions({
   );
 }
 
+export async function findEntityDefinitionById({
+  id,
+  esClient,
+  soClient,
+}: {
+  id: string;
+  esClient: ElasticsearchClient;
+  soClient: SavedObjectsClientContract;
+}) {
+  const [definition] = await findEntityDefinitions({
+    esClient,
+    soClient,
+    id,
+    perPage: 1,
+  });
+
+  return definition;
+}
+
 async function getEntityDefinitionState(
   esClient: ElasticsearchClient,
   definition: EntityDefinition
 ) {
   const historyIngestPipelineId = generateHistoryIngestPipelineId(definition);
   const latestIngestPipelineId = generateLatestIngestPipelineId(definition);
-  const [ingestPipelines, transforms] = await Promise.all([
-    esClient.ingest.getPipeline({
-      id: `${historyIngestPipelineId},${latestIngestPipelineId}`,
+  const transformIds = [
+    generateHistoryTransformId(definition),
+    generateLatestTransformId(definition),
+    ...(isBackfillEnabled(definition) ? [generateHistoryBackfillTransformId(definition)] : []),
+  ];
+  const [ingestPipelines, indexTemplatesInstalled, transforms] = await Promise.all([
+    esClient.ingest.getPipeline(
+      {
+        id: `${historyIngestPipelineId},${latestIngestPipelineId}`,
+      },
+      { ignore: [404] }
+    ),
+    esClient.indices.existsIndexTemplate({
+      name: `${
+        (generateLatestIndexTemplateId(definition), generateHistoryIndexTemplateId(definition))
+      }`,
     }),
     esClient.transform.getTransformStats({
-      transform_id: [generateHistoryTransformId(definition), generateLatestTransformId(definition)],
+      transform_id: transformIds,
     }),
   ]);
 
   const ingestPipelinesInstalled = !!(
     ingestPipelines[historyIngestPipelineId] && ingestPipelines[latestIngestPipelineId]
   );
-  const transformsInstalled = transforms.count === 2;
+  const transformsInstalled = transforms.count === transformIds.length;
   const transformsRunning =
     transformsInstalled &&
     transforms.transforms.every(
@@ -77,7 +116,7 @@ async function getEntityDefinitionState(
     );
 
   return {
-    installed: ingestPipelinesInstalled && transformsInstalled,
+    installed: ingestPipelinesInstalled && transformsInstalled && indexTemplatesInstalled,
     running: transformsRunning,
   };
 }

@@ -160,9 +160,11 @@ EOF
 
 is_pr_with_label "ci:project-deploy-elasticsearch" && deploy "elasticsearch"
 if is_pr_with_label "ci:project-deploy-observability" ; then
-  create_github_issue_oblt_test_environments
-  echo "--- Deploy observability with Kibana CI"
-  deploy "observability"
+  # Only deploy observability if the PR is targeting main
+  if [[ "$BUILDKITE_PULL_REQUEST_BASE_BRANCH" == "main" ]]; then
+    create_github_issue_oblt_test_environments
+    buildkite-agent annotate --context obl-test-info --style info 'See linked [Deploy Serverless Kibana] issue in pull request for project deployment information'
+  fi
 fi
 is_pr_with_label "ci:project-deploy-security" && deploy "security"
 

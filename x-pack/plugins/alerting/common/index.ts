@@ -23,6 +23,7 @@ export type {
   RuleTaskState,
   RuleTaskParams,
 } from '@kbn/alerting-state-types';
+export type { AlertingFrameworkHealth } from '@kbn/alerting-types';
 export * from './alert_summary';
 export * from './builtin_action_groups';
 export * from './bulk_edit';

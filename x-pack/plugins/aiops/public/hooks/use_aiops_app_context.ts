@@ -7,6 +7,7 @@
 
 import { createContext, type FC, type PropsWithChildren, useContext } from 'react';
 
+import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
@@ -134,6 +135,8 @@ export interface AiopsAppDependencies {
   isServerless?: boolean;
   /** Identifier to indicate the plugin utilizing the component */
   embeddingOrigin?: string;
+  /** Observability AI Assistant */
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
 }
 
 /**

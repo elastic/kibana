@@ -13,6 +13,12 @@ import { Type, TypeOptions } from './type';
 export type NumberOptions = TypeOptions<number> & {
   min?: number;
   max?: number;
+  /**
+   * When set to true, will accept unsafe numbers (integers > 2^53).
+   * Otherwise, unsafe numbers will fail validation.
+   * Default: `false`
+   */
+  unsafe?: boolean;
 };
 
 export class NumberType extends Type<number> {
@@ -21,9 +27,11 @@ export class NumberType extends Type<number> {
     if (options.min !== undefined) {
       schema = schema.min(options.min);
     }
-
     if (options.max !== undefined) {
       schema = schema.max(options.max);
+    }
+    if (options.unsafe === true) {
+      schema = schema.unsafe(true);
     }
 
     super(schema, options);

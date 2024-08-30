@@ -45,6 +45,10 @@ export const ConnectorSelector = ({
     [handleChange, field]
   );
 
+  const isConnectorAvailable = Boolean(
+    connectors.find((connector) => connector.id === field.value)
+  );
+
   return (
     <EuiFormRow
       css={css`
@@ -66,7 +70,7 @@ export const ConnectorSelector = ({
         disabled={disabled}
         isLoading={isLoading}
         onChange={onChange}
-        selectedConnector={isEmpty(field.value) ? 'none' : field.value}
+        selectedConnector={isEmpty(field.value) || !isConnectorAvailable ? 'none' : field.value}
       />
     </EuiFormRow>
   );

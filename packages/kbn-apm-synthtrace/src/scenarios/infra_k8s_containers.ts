@@ -21,19 +21,7 @@ const scenario: Scenario<InfraDocument> = async (runOptions) => {
         .fill(0)
         .map((_, idx) => {
           const id = generateShortId();
-          return infra.k8sContainer(id, `pod-${idx}`, `node-${idx}`).defaults({
-            'container.id': id,
-            'kubernetes.pod.uid': `pod-${idx}`,
-            'kubernetes.node.name': `node-${idx}`,
-            'container.name': `container-${idx}`,
-            'container.runtime': 'docker',
-            'container.image.name': 'image-1',
-            'host.name': 'host-1',
-            'cloud.instance.id': 'instance-1',
-            'cloud.image.id': 'image-1',
-            'cloud.provider': 'aws',
-            'event.dataset': 'kubernetes.container',
-          });
+          return infra.k8sContainer(id, `pod-${idx}`, `node-${idx}`);
         });
 
       const containers = range

@@ -24,7 +24,7 @@ describe('registerEbtCounters', () => {
       .spyOn(core.analytics.telemetryCounter$, 'subscribe')
       .mockImplementation(((listener) => {
         internalListener = listener as (counter: TelemetryCounter) => void;
-      }) as typeof core.analytics.telemetryCounter$['subscribe']);
+      }) as (typeof core.analytics.telemetryCounter$)['subscribe']);
   });
 
   test('it subscribes to `analytics.telemetryCounters$`', () => {
@@ -42,15 +42,18 @@ describe('registerEbtCounters', () => {
       code: 'test-code',
       count: 1,
     });
-    expect(usageCollection.getUsageCounterByType).toHaveBeenCalledTimes(1);
-    expect(usageCollection.getUsageCounterByType).toHaveBeenCalledWith('ebt_counters.test-shipper');
+    expect(usageCollection.getUsageCounterByDomainId).toHaveBeenCalledTimes(1);
+    expect(usageCollection.getUsageCounterByDomainId).toHaveBeenCalledWith(
+      'ebt_counters.test-shipper'
+    );
     expect(usageCollection.createUsageCounter).toHaveBeenCalledTimes(1);
     expect(usageCollection.createUsageCounter).toHaveBeenCalledWith('ebt_counters.test-shipper');
   });
 
   test('it reuses the usageCounter when it already exists', () => {
     const incrementCounterMock = jest.fn();
-    usageCollection.getUsageCounterByType.mockReturnValue({
+    usageCollection.getUsageCounterByDomainId.mockReturnValue({
+      domainId: 'abc123',
       incrementCounter: incrementCounterMock,
     });
     registerEbtCounters(core.analytics, usageCollection);
@@ -62,8 +65,10 @@ describe('registerEbtCounters', () => {
       code: 'test-code',
       count: 1,
     });
-    expect(usageCollection.getUsageCounterByType).toHaveBeenCalledTimes(1);
-    expect(usageCollection.getUsageCounterByType).toHaveBeenCalledWith('ebt_counters.test-shipper');
+    expect(usageCollection.getUsageCounterByDomainId).toHaveBeenCalledTimes(1);
+    expect(usageCollection.getUsageCounterByDomainId).toHaveBeenCalledWith(
+      'ebt_counters.test-shipper'
+    );
     expect(usageCollection.createUsageCounter).toHaveBeenCalledTimes(0);
     expect(incrementCounterMock).toHaveBeenCalledTimes(1);
     expect(incrementCounterMock).toHaveBeenCalledWith({

@@ -1,0 +1,147 @@
+openapi: 3.0.0
+info:
+  title: Common Exception List Item Entry Attributes
+  version: 'not applicable'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    ExceptionListItemEntryOperator:
+      type: string
+      enum: [excluded, included]
+
+    ExceptionListItemEntryMatch:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [match]
+        field:
+          $ref: '../../../kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        value:
+          $ref: '../../../kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        operator:
+          $ref: '#/components/schemas/ExceptionListItemEntryOperator'
+      required:
+        - type
+        - field
+        - value
+        - operator
+
+    ExceptionListItemEntryMatchAny:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [match_any]
+        field:
+          $ref: '../../../kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        value:
+          type: array
+          items:
+            $ref: '../../../kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          minItems: 1
+        operator:
+          $ref: '#/components/schemas/ExceptionListItemEntryOperator'
+      required:
+        - type
+        - field
+        - value
+        - operator
+
+    ExceptionListItemEntryList:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [list]
+        field:
+          $ref: '../../../kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        list:
+          type: object
+          properties:
+            id:
+              $ref: '../../../kbn-securitysolution-lists-common/api/model/list_common.schema.yaml#/components/schemas/ListId'
+            type:
+              $ref: '../../../kbn-securitysolution-lists-common/api/model/list_common.schema.yaml#/components/schemas/ListType'
+          required: [id, type]
+        operator:
+          $ref: '#/components/schemas/ExceptionListItemEntryOperator'
+      required:
+        - type
+        - field
+        - list
+        - operator
+
+    ExceptionListItemEntryExists:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [exists]
+        field:
+          $ref: '../../../kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        operator:
+          $ref: '#/components/schemas/ExceptionListItemEntryOperator'
+      required:
+        - type
+        - field
+        - operator
+
+    ExceptionListItemEntryNestedEntryItem:
+      oneOf:
+        - $ref: '#/components/schemas/ExceptionListItemEntryMatch'
+        - $ref: '#/components/schemas/ExceptionListItemEntryMatchAny'
+        - $ref: '#/components/schemas/ExceptionListItemEntryExists'
+
+    ExceptionListItemEntryNested:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [nested]
+        field:
+          $ref: '../../../kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExceptionListItemEntryNestedEntryItem'
+          minItems: 1
+      required:
+        - type
+        - field
+        - entries
+
+    ExceptionListItemEntryMatchWildcard:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [wildcard]
+        field:
+          $ref: '../../../kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        value:
+          $ref: '../../../kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        operator:
+          $ref: '#/components/schemas/ExceptionListItemEntryOperator'
+      required:
+        - type
+        - field
+        - value
+        - operator
+
+    ExceptionListItemEntry:
+      discriminator:
+        propertyName: type
+      anyOf:
+        - $ref: '#/components/schemas/ExceptionListItemEntryMatch'
+        - $ref: '#/components/schemas/ExceptionListItemEntryMatchAny'
+        - $ref: '#/components/schemas/ExceptionListItemEntryList'
+        - $ref: '#/components/schemas/ExceptionListItemEntryExists'
+        - $ref: '#/components/schemas/ExceptionListItemEntryNested'
+        - $ref: '#/components/schemas/ExceptionListItemEntryMatchWildcard'
+
+    ExceptionListItemEntryArray:
+      type: array
+      items:
+        $ref: '#/components/schemas/ExceptionListItemEntry'

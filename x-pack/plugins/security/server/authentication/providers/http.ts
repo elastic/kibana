@@ -113,12 +113,19 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
         return AuthenticationResult.notHandled();
       }
 
-      return AuthenticationResult.succeeded(user);
+      return AuthenticationResult.succeeded(user, {
+        // Even though the `Authorization` header is already present in the HTTP headers of the original request,
+        // we still need to expose it to the Core authentication service for consistency.
+        authHeaders: { authorization: authorizationHeader.toString() },
+      });
     } catch (err) {
       this.logger.debug(
-        `Failed to authenticate request to ${request.url.pathname} via authorization header with "${
-          authorizationHeader.scheme
-        }" scheme: ${getDetailedErrorMessage(err)}`
+        () =>
+          `Failed to authenticate request to ${
+            request.url.pathname
+          } via authorization header with "${
+            authorizationHeader.scheme
+          }" scheme: ${getDetailedErrorMessage(err)}`
       );
       return AuthenticationResult.failed(err);
     }

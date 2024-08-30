@@ -6,8 +6,8 @@
  */
 
 import { EntityDefinition } from '@kbn/entities-schema';
-import { builtInServicesEntityDefinition } from './services';
+import { builtInServicesFromLogsEntityDefinition } from './services';
 
 export { BUILT_IN_ID_PREFIX } from './constants';
 
-export const builtInDefinitions: EntityDefinition[] = [builtInServicesEntityDefinition];
+export const builtInDefinitions: EntityDefinition[] = [builtInServicesFromLogsEntityDefinition];

@@ -13,6 +13,7 @@ import type {
   PluginInitializerContext,
   Logger,
 } from '@kbn/core/server';
+import { registerFavorites } from '@kbn/content-management-favorites-server';
 import { Core } from './core';
 import { initRpcRoutes, registerProcedures, RpcService } from './rpc';
 import type { Context as RpcContext } from './rpc';
@@ -58,7 +59,7 @@ export class ContentManagementPlugin
     });
   }
 
-  public setup(core: CoreSetup) {
+  public setup(core: CoreSetup, plugins: ContentManagementServerSetupDependencies) {
     if (this.#eventStream) {
       this.#eventStream.setup({ core });
     }
@@ -73,6 +74,8 @@ export class ContentManagementPlugin
       rpc,
       contentRegistry,
     });
+
+    registerFavorites({ core, logger: this.logger, usageCollection: plugins.usageCollection });
 
     return {
       ...coreApi,

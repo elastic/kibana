@@ -71,7 +71,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('@ess @serverless Risk Scoring Preview API', () => {
     before(async () => {
-      enableAssetCriticalityAdvancedSetting(kibanaServer, log);
+      await enableAssetCriticalityAdvancedSetting(kibanaServer, log);
     });
 
     context('with auditbeat data', () => {
@@ -564,6 +564,17 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           ]);
         });
+      });
+    });
+
+    it('does not return an 404 when the data_view_id is an non existent index', async () => {
+      const { scores } = await previewRiskScores({
+        body: { data_view_id: 'invalid-index' },
+      });
+
+      expect(scores).to.eql({
+        host: [],
+        user: [],
       });
     });
   });

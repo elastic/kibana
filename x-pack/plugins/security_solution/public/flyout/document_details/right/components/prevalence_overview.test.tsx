@@ -20,7 +20,7 @@ import {
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
   EXPANDABLE_PANEL_LOADING_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
-} from '../../../shared/components/test_ids';
+} from '@kbn/security-solution-common';
 import { usePrevalence } from '../../shared/hooks/use_prevalence';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { type ExpandableFlyoutApi, useExpandableFlyoutApi } from '@kbn/expandable-flyout';
@@ -38,10 +38,7 @@ const flyoutContextValue = {
   openLeftPanel: jest.fn(),
 } as unknown as ExpandableFlyoutApi;
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn(),
-  ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
-}));
+jest.mock('@kbn/expandable-flyout');
 
 const renderPrevalenceOverview = (contextValue: DocumentDetailsContext = mockContextValue) =>
   render(
@@ -70,6 +67,23 @@ describe('<PrevalenceOverview />', () => {
     expect(getByTestId(TITLE_LINK_TEST_ID)).toHaveTextContent('Prevalence');
     expect(getByTestId(TITLE_ICON_TEST_ID)).toBeInTheDocument();
     expect(queryByTestId(TITLE_TEXT_TEST_ID)).not.toBeInTheDocument();
+  });
+
+  it('should not render link and icon if isPreviewMode is true', () => {
+    (usePrevalence as jest.Mock).mockReturnValue({
+      loading: false,
+      error: false,
+      data: [],
+    });
+
+    const { getByTestId, queryByTestId } = renderPrevalenceOverview({
+      ...mockContextValue,
+      isPreviewMode: true,
+    });
+    expect(queryByTestId(TOGGLE_ICON_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(TITLE_LINK_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(TITLE_ICON_TEST_ID)).not.toBeInTheDocument();
+    expect(getByTestId(TITLE_TEXT_TEST_ID)).toBeInTheDocument();
   });
 
   it('should render loading', () => {

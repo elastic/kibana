@@ -9,7 +9,8 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Serverless Common UI - Examples', function () {
-    this.tags('skipMKI');
+    this.tags(['skipMKI', 'esGate']);
+
     loadTestFile(require.resolve('./data_view_field_editor_example'));
     loadTestFile(require.resolve('./discover_customization_examples'));
     loadTestFile(require.resolve('./field_formats'));

@@ -41,7 +41,7 @@ const SubGrouping = ({
     setActivePageIndex,
   } = useLatestFindingsGrouping({
     groupPanelRenderer,
-    groupStatsRenderer,
+    getGroupStats: groupStatsRenderer,
     groupingLevel,
     selectedGroup,
     groupFilters: parentGroupFilters ? JSON.parse(parentGroupFilters) : [],
@@ -76,7 +76,7 @@ const SubGrouping = ({
 
 export const LatestFindingsContainer = () => {
   const { grouping, isFetching, urlQuery, setUrlQuery, onResetFilters, error, isEmptyResults } =
-    useLatestFindingsGrouping({ groupPanelRenderer, groupStatsRenderer });
+    useLatestFindingsGrouping({ groupPanelRenderer, getGroupStats: groupStatsRenderer });
 
   const renderChildComponent = ({
     level,

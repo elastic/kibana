@@ -16,12 +16,12 @@ import {
 
 import {
   AnonymizationFieldResponse,
-  BulkActionSkipResult,
-  BulkCrudActionResponse,
-  BulkCrudActionResults,
+  AnonymizationFieldsBulkActionSkipResult,
+  AnonymizationFieldsBulkCrudActionResponse,
+  AnonymizationFieldsBulkCrudActionResults,
   BulkCrudActionSummary,
-  PerformBulkActionRequestBody,
-  PerformBulkActionResponse,
+  PerformAnonymizationFieldsBulkActionRequestBody,
+  PerformAnonymizationFieldsBulkActionResponse,
 } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { ANONYMIZATION_FIELDS_TABLE_MAX_PAGE_SIZE } from '../../../common/constants';
@@ -63,9 +63,9 @@ const buildBulkResponse = (
     updated?: AnonymizationFieldResponse[];
     created?: AnonymizationFieldResponse[];
     deleted?: string[];
-    skipped?: BulkActionSkipResult[];
+    skipped?: AnonymizationFieldsBulkActionSkipResult[];
   }
-): IKibanaResponse<BulkCrudActionResponse> => {
+): IKibanaResponse<AnonymizationFieldsBulkCrudActionResponse> => {
   const numSucceeded = updated.length + created.length + deleted.length;
   const numSkipped = skipped.length;
   const numFailed = errors.length;
@@ -77,7 +77,7 @@ const buildBulkResponse = (
     total: numSucceeded + numFailed + numSkipped,
   };
 
-  const results: BulkCrudActionResults = {
+  const results: AnonymizationFieldsBulkCrudActionResults = {
     updated,
     created,
     deleted,
@@ -85,7 +85,7 @@ const buildBulkResponse = (
   };
 
   if (numFailed > 0) {
-    return response.custom<BulkCrudActionResponse>({
+    return response.custom<AnonymizationFieldsBulkCrudActionResponse>({
       headers: { 'content-type': 'application/json' },
       body: {
         message: summary.succeeded > 0 ? 'Bulk edit partially failed' : 'Bulk edit failed',
@@ -103,7 +103,7 @@ const buildBulkResponse = (
     });
   }
 
-  const responseBody: BulkCrudActionResponse = {
+  const responseBody: AnonymizationFieldsBulkCrudActionResponse = {
     success: true,
     anonymization_fields_count: summary.total,
     attributes: { results, summary },
@@ -118,7 +118,7 @@ export const bulkActionAnonymizationFieldsRoute = (
 ) => {
   router.versioned
     .post({
-      access: 'internal',
+      access: 'public',
       path: ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_BULK_ACTION,
       options: {
         tags: ['access:securitySolution-updateAIAssistantAnonymization'],
@@ -129,14 +129,18 @@ export const bulkActionAnonymizationFieldsRoute = (
     })
     .addVersion(
       {
-        version: API_VERSIONS.internal.v1,
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            body: buildRouteValidationWithZod(PerformBulkActionRequestBody),
+            body: buildRouteValidationWithZod(PerformAnonymizationFieldsBulkActionRequestBody),
           },
         },
       },
-      async (context, request, response): Promise<IKibanaResponse<PerformBulkActionResponse>> => {
+      async (
+        context,
+        request,
+        response
+      ): Promise<IKibanaResponse<PerformAnonymizationFieldsBulkActionResponse>> => {
         const { body } = request;
         const assistantResponse = buildResponse(response);
 

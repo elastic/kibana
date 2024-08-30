@@ -31,13 +31,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'x-pack/test/functional/es_archives/observability_logs_explorer/data_streams'
       );
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
-      await PageObjects.svlCommonPage.loginWithRole('viewer');
+      await PageObjects.svlCommonPage.loginAsViewer();
       await PageObjects.observabilityLogsExplorer.navigateTo();
       await PageObjects.header.waitUntilLoadingHasFinished();
     });
 
     after(async () => {
-      await PageObjects.svlCommonPage.forceLogout();
       await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
       await esArchiver.unload(
         'x-pack/test/functional/es_archives/observability_logs_explorer/data_streams'
@@ -82,7 +81,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.observabilityLogsExplorer.submitQuery('*favicon*');
 
         const discoverLink = await PageObjects.observabilityLogsExplorer.getDiscoverFallbackLink();
-        discoverLink.click();
+        await discoverLink.click();
 
         await PageObjects.discover.waitForDocTableLoadingComplete();
 
@@ -190,7 +189,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should navigate to the observability onboarding overview page', async () => {
         const onboardingLink = await PageObjects.observabilityLogsExplorer.getOnboardingLink();
-        onboardingLink.click();
+        await onboardingLink.click();
 
         await retry.try(async () => {
           const url = await browser.getCurrentUrl();

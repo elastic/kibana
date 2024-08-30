@@ -31,10 +31,6 @@ export const InstallDependencies: Task = {
       ],
       {
         cwd: build.resolvePath(),
-        env: {
-          RE2_DOWNLOAD_MIRROR:
-            'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2',
-        },
       }
     );
   },

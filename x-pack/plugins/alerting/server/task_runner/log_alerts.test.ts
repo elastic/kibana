@@ -27,6 +27,7 @@ describe('logAlerts', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
+    logger.isLevelEnabled.mockReturnValue(true);
     ruleRunMetricsStore = new RuleRunMetricsStore();
   });
 

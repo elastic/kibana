@@ -17,7 +17,7 @@ import {
   inventoryFiltersStateRT,
 } from '../../../../../common/inventory_views';
 import { useAlertPrefillContext } from '../../../../alerting/use_alert_prefill';
-import { useUrlState } from '../../../../utils/use_url_state';
+import { useUrlState } from '../../../../hooks/use_url_state';
 import { useMetricsDataViewContext } from '../../../../containers/metrics_source';
 import { convertKueryToElasticSearchQuery } from '../../../../utils/kuery';
 

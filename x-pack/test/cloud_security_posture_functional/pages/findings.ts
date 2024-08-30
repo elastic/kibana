@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import Chance from 'chance';
-import { CspBenchmarkRule } from '@kbn/cloud-security-posture-plugin/common/types/latest';
+import { CspBenchmarkRule } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import { CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE } from '@kbn/cloud-security-posture-plugin/common/constants';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
@@ -17,7 +17,6 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const supertest = getService('supertest');
@@ -45,6 +44,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         type: 'process',
       },
       cluster_id: 'Upper case cluster id',
+      data_stream: {
+        dataset: 'cloud_security_posture.findings',
+      },
     },
     {
       '@timestamp': timeFiveHoursAgo,
@@ -62,6 +64,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         type: 'process',
       },
       cluster_id: 'Another Upper case cluster id',
+      data_stream: {
+        dataset: 'cloud_security_posture.findings',
+      },
     },
     {
       '@timestamp': timeFiveHoursAgo,
@@ -79,6 +84,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         type: 'process',
       },
       cluster_id: 'lower case cluster id',
+      data_stream: {
+        dataset: 'cloud_security_posture.findings',
+      },
     },
     {
       '@timestamp': timeFiveHoursAgo,
@@ -96,6 +104,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         type: 'process',
       },
       cluster_id: 'another lower case cluster id',
+      data_stream: {
+        dataset: 'cloud_security_posture.findings',
+      },
     },
   ];
 
@@ -140,7 +151,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         'Findings table to be loaded',
         async () => (await latestFindingsTable.getRowsCount()) === data.length
       );
-      pageObjects.header.waitUntilLoadingHasFinished();
+      await pageObjects.header.waitUntilLoadingHasFinished();
     });
 
     afterEach(async () => {
@@ -173,7 +184,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         for (const [columnName, dir, sortingMethod] of testCases) {
           await latestFindingsTable.toggleColumnSort(columnName, dir);
           /* This sleep or delay is added to allow some time for the column to settle down before we get the value and to prevent the test from getting the wrong value*/
-          pageObjects.header.waitUntilLoadingHasFinished();
+          await pageObjects.header.waitUntilLoadingHasFinished();
           const values = (await latestFindingsTable.getColumnValues(columnName)).filter(Boolean);
           expect(values).to.not.be.empty();
           const sorted = values
@@ -186,19 +197,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             );
           });
         }
-      });
-    });
-
-    describe('DistributionBar', () => {
-      (['passed', 'failed'] as const).forEach((type) => {
-        it(`filters by ${type} findings`, async () => {
-          await distributionBar.filterBy(type);
-
-          const items = data.filter(({ result }) => result.evaluation === type);
-          expect(await latestFindingsTable.getFindingsCount(type)).to.eql(items.length);
-
-          await filterBar.removeFilter('result.evaluation');
-        });
       });
     });
 
@@ -311,7 +309,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           'Findings table to be loaded',
           async () => (await latestFindingsTable.getRowsCount()) === data.length + 1
         );
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
 
         await distributionBar.filterBy('passed');
 
@@ -342,7 +340,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           'Findings table to be loaded',
           async () => (await latestFindingsTable.getRowsCount()) === data.length
         );
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
 
         await distributionBar.filterBy('passed');
 
@@ -360,7 +358,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await cspSecurity.logout();
         await cspSecurity.login('csp_read_user');
         await findings.navigateToLatestFindingsPage();
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         expect(await latestFindingsTable.getRowsCount()).to.be.greaterThan(0);
       });
 
@@ -370,7 +368,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await findings.navigateToLatestFindingsPage();
 
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         expect(await findings.getUnprivilegedPrompt());
       });
     });

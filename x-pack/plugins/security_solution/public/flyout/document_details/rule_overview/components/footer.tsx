@@ -8,8 +8,8 @@
 import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FlyoutFooter } from '@kbn/security-solution-common';
 import { useRuleOverviewPanelContext } from '../context';
-import { FlyoutFooter } from '../../../shared/components/flyout_footer';
 import { RULE_OVERVIEW_FOOTER_TEST_ID, RULE_OVERVIEW_NAVIGATE_TO_RULE_TEST_ID } from './test_ids';
 import { useRuleDetailsLink } from '../../shared/hooks/use_rule_details_link';
 
@@ -30,7 +30,7 @@ export const RuleFooter = memo(() => {
             data-test-subj={RULE_OVERVIEW_NAVIGATE_TO_RULE_TEST_ID}
           >
             {i18n.translate('xpack.securitySolution.flyout.preview.rule.viewDetailsLabel', {
-              defaultMessage: 'Show rule details',
+              defaultMessage: 'Show full rule details',
             })}
           </EuiLink>
         </EuiFlexItem>

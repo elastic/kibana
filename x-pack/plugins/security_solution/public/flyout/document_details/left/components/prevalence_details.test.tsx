@@ -33,10 +33,7 @@ import { HOST_PREVIEW_BANNER } from '../../right/components/host_entity_overview
 import { UserPreviewPanelKey } from '../../../entity_details/user_right';
 import { USER_PREVIEW_BANNER } from '../../right/components/user_entity_overview';
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn(),
-  ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
-}));
+jest.mock('@kbn/expandable-flyout');
 
 jest.mock('../../../../common/hooks/use_experimental_features');
 const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
@@ -130,7 +127,7 @@ describe('PrevalenceDetails', () => {
     jest.clearAllMocks();
     licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
   });
 
   it('should render the table with all data if license is platinum', () => {
@@ -159,7 +156,7 @@ describe('PrevalenceDetails', () => {
   });
 
   it('should render host and user name as clickable link if feature flag is true', () => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
     (usePrevalence as jest.Mock).mockReturnValue(mockPrevelanceReturnValue);
 
     const { getByTestId } = renderPrevalenceDetails();

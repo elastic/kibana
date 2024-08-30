@@ -359,6 +359,24 @@ export const sampleDocNoSortIdWithTimestamp = (
   };
 };
 
+export const sampleDocWithNonEcsCompliantFields = (
+  someUuid: string = sampleIdGuid,
+  nonEcsFields: Record<string, string>
+): SignalSourceHit & {
+  _id: Required<SignalSourceHit>['_id'];
+  _source: Required<SignalSourceHit>['_source'] & { '@timestamp': string };
+} => {
+  const doc = sampleDocNoSortId(someUuid);
+  return {
+    ...doc,
+    _source: {
+      ...doc._source,
+      ...nonEcsFields,
+      '@timestamp': new Date().toISOString(),
+    },
+  };
+};
+
 export const sampleAlertDocNoSortIdWithTimestamp = (
   someUuid: string = sampleIdGuid,
   ip?: string

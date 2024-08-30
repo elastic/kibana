@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 
 import { LanguageDefinition, Languages } from '@kbn/search-api-panels';
+import { i18n } from '@kbn/i18n';
 
 export interface LanguageGridProps {
   assetBasePath: string;
@@ -52,6 +53,15 @@ export const LanguageGrid: React.FC<LanguageGridProps> = ({
             onClick={() => setSelectedLanguage(language)}
             color={language.id === selectedLanguage ? 'primary' : 'plain'}
             data-test-subj={`${language.id}-client-panel`}
+            aria-label={i18n.translate(
+              'xpack.serverlessSearch.languageGrid.selectButton.ariaLabel',
+              {
+                defaultMessage: 'Select "{client}" client',
+                values: {
+                  client: language.id,
+                },
+              }
+            )}
           >
             <EuiFlexGroup justifyContent="flexStart" responsive={false}>
               <EuiFlexItem grow={false}>

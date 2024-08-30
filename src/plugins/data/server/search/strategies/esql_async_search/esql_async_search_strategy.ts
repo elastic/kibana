@@ -22,7 +22,7 @@ import { getKbnSearchError } from '../../report_search_error';
 import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
 import type { IAsyncSearchOptions } from '../../../../common';
 import { toAsyncKibanaSearchResponse } from './response_utils';
-import { SearchConfigSchema } from '../../../../config';
+import { SearchConfigSchema } from '../../../config';
 
 // `drop_null_columns` is going to change the response
 // now we get `all_columns` and `columns`
@@ -134,7 +134,7 @@ export const esqlAsyncSearchStrategyProvider = (
      * @throws `KbnSearchError`
      */
     search: (request, options: IAsyncSearchOptions, deps) => {
-      logger.debug(`search ${JSON.stringify(request) || request.id}`);
+      logger.debug(() => `search ${JSON.stringify(request) || request.id}`);
 
       return asyncSearch(request, options, deps);
     },

@@ -8,6 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { FlyoutLoading, FlyoutNavigation } from '@kbn/security-solution-common/src/flyout';
 import { useRefetchQueryById } from '../../../entity_analytics/api/hooks/use_refetch_query_by_id';
 import type { Refetch } from '../../../common/types';
 import { RISK_INPUTS_TAB_QUERY_ID } from '../../../entity_analytics/components/entity_details_flyout/tabs/risk_inputs/risk_inputs_tab';
@@ -15,7 +16,7 @@ import { useCalculateEntityRiskScore } from '../../../entity_analytics/api/hooks
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { ManagedUserDatasetKey } from '../../../../common/search_strategy/security_solution/users/managed_details';
-import { useManagedUser } from '../../../timelines/components/side_panel/new_user_detail/hooks/use_managed_user';
+import { useManagedUser } from '../shared/hooks/use_managed_user';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { UsersType } from '../../../explore/users/store/model';
 import { getCriteriaFromUsersType } from '../../../common/components/ml/criteria/get_criteria_from_users_type';
@@ -23,8 +24,6 @@ import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { AnomalyTableProvider } from '../../../common/components/ml/anomaly/anomaly_table_provider';
 import { buildUserNamesFilter } from '../../../../common/search_strategy';
 import { RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
-import { FlyoutLoading } from '../../shared/components/flyout_loading';
-import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { UserPanelContent } from './content';
 import { UserPanelHeader } from './header';
 import { UserDetailsPanelKey } from '../user_details_left';
@@ -115,6 +114,7 @@ export const UserPanel = ({
         id: UserDetailsPanelKey,
         params: {
           isRiskScoreExist: !!userRiskData?.user?.risk,
+          scopeId,
           user: {
             name: userName,
             email,
@@ -123,7 +123,7 @@ export const UserPanel = ({
         path: tab ? { tab } : undefined,
       });
     },
-    [telemetry, email, openLeftPanel, userName, userRiskData]
+    [telemetry, openLeftPanel, userRiskData?.user?.risk, userName, email, scopeId]
   );
 
   const openPanelFirstTab = useCallback(() => openPanelTab(), [openPanelTab]);

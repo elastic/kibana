@@ -10,7 +10,6 @@ import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
 import { getAccessibilitySettings } from './accessibility';
 import { getDateFormatSettings } from './date_formats';
 import { getMiscUiSettings } from './misc';
-import { getNavigationSettings } from './navigation';
 import { getNotificationsSettings } from './notifications';
 import { getThemeSettings } from './theme';
 import { getStateSettings } from './state';
@@ -28,7 +27,6 @@ export const getCoreSettings = (
     ...getAnnouncementsSettings(),
     ...getDateFormatSettings(),
     ...getMiscUiSettings(),
-    ...getNavigationSettings(),
     ...getNotificationsSettings(),
     ...getThemeSettings(options),
     ...getStateSettings(),

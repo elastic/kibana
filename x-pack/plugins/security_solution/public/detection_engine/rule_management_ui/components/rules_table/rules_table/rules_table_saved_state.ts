@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as z from 'zod';
+import * as z from '@kbn/zod';
 import { RuleExecutionStatus } from '../../../../../../common/api/detection_engine';
 import { PaginationOptions, SortingOptions } from '../../../../rule_management/logic';
 

@@ -13,10 +13,10 @@ import {
   requestMock,
 } from '../../../detection_engine/routes/__mocks__';
 import { NOTE_URL } from '../../../../../common/constants';
-import type { getNotesPaginated } from '../../utils/common';
+import type { getNotesSchema } from '../../../../../common/api/timeline';
 import { mockGetCurrentUser } from '../../__mocks__/import_timelines';
 
-const getAllNotesRequest = (query?: typeof getNotesPaginated) =>
+const getAllNotesRequest = (query?: typeof getNotesSchema) =>
   requestMock.create({
     method: 'get',
     path: NOTE_URL,

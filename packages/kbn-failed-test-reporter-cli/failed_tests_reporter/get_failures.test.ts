@@ -16,6 +16,7 @@ it('discovers failures in ftr report', async () => {
     Array [
       Object {
         "classname": "Chrome X-Pack UI Functional Tests.x-pack/test/functional/apps/maps/sample_data·js",
+        "commandLine": "node scripts/functional_tests --config=x-pack/test/api_integration/apis/status/config.ts",
         "failure": "
             Error: retry.try timeout: TimeoutError: Waiting for element to be located By(css selector, [data-test-subj~=\\"layerTocActionsPanelToggleButtonRoad_Map_-_Bright\\"])
     Wait timed out after 10055ms
@@ -37,6 +38,7 @@ it('discovers failures in ftr report', async () => {
       },
       Object {
         "classname": "Chrome X-Pack UI Functional Tests.x-pack/test/functional/apps/maps",
+        "commandLine": "node scripts/functional_tests --config=x-pack/test/api_integration/apis/status/config.ts",
         "failure": "
             { NoSuchSessionError: This driver instance does not have a valid session ID (did you call WebDriver.quit()?) and may no longer be used.
         at promise.finally (/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-ciGroup7/node/immutable/kibana/node_modules/selenium-webdriver/lib/webdriver.js:726:38)
@@ -56,6 +58,7 @@ it('discovers failures in ftr report', async () => {
       },
       Object {
         "classname": "Firefox XPack UI Functional Tests.x-pack/test/functional/apps/machine_learning/anomaly_detection/saved_search_job·ts",
+        "commandLine": "node scripts/functional_tests --config=x-pack/test/api_integration/apis/status/config.ts",
         "failure": "{ NoSuchSessionError: Tried to run command without establishing a connection
         at Object.throwDecodedError (/dev/shm/workspace/kibana/node_modules/selenium-webdriver/lib/error.js:550:15)
         at parseHttpResponse (/dev/shm/workspace/kibana/node_modules/selenium-webdriver/lib/http.js:563:13)
@@ -76,6 +79,7 @@ it('discovers failures in jest report', async () => {
     Array [
       Object {
         "classname": "X-Pack Jest Tests.x-pack/legacy/plugins/code/server/lsp",
+        "commandLine": "node scripts/jest --config some/jest/config.ts",
         "failure": "
             TypeError: Cannot read property '0' of undefined
         at Object.<anonymous>.test (/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-intake/node/immutable/kibana/x-pack/legacy/plugins/code/server/lsp/abstract_launcher.test.ts:166:10)
@@ -95,6 +99,7 @@ it('discovers failures in mocha report', async () => {
     Array [
       Object {
         "classname": "X-Pack Mocha Tests.x-pack/legacy/plugins/code/server/__tests__/multi_node·ts",
+        "commandLine": "node scripts/functional_tests --config super-mocha-test.config.js",
         "failure": "
             Error: Unable to read artifact info from https://artifacts-api.elastic.co/v1/versions/8.0.0-SNAPSHOT/builds/latest/projects/elasticsearch: Service Temporarily Unavailable
       <html>
@@ -117,6 +122,7 @@ it('discovers failures in mocha report', async () => {
       },
       Object {
         "classname": "X-Pack Mocha Tests.x-pack/legacy/plugins/code/server/__tests__/multi_node·ts",
+        "commandLine": "node scripts/functional_tests --config super-mocha-test.config.js",
         "failure": "
             TypeError: Cannot read property 'shutdown' of undefined
         at Context.shutdown (plugins/code/server/__tests__/multi_node.ts:125:23)

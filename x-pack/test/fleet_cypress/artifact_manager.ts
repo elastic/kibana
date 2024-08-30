@@ -15,6 +15,10 @@ export async function getLatestVersion(): Promise<string> {
   return pRetry(() => axios('https://artifacts-api.elastic.co/v1/versions'), {
     maxRetryTime: 60 * 1000, // 1 minute
   })
-    .then((response) => last(response.data.versions as string[]) || DEFAULT_VERSION)
+    .then(
+      (response) =>
+        last((response.data.versions as string[]).filter((v) => v.includes('-SNAPSHOT'))) ||
+        DEFAULT_VERSION
+    )
     .catch(() => DEFAULT_VERSION);
 }

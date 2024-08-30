@@ -10,7 +10,7 @@ import 'cypress-axe';
 import moment from 'moment';
 import '@frsource/cypress-plugin-visual-regression-diff';
 import { AXE_CONFIG, AXE_OPTIONS } from '@kbn/axe-config';
-import { ApmUsername } from '../../../server/test_helpers/create_apm_users/authentication';
+import { ApmUsername } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/authentication';
 
 Cypress.Commands.add('loginAsSuperUser', () => {
   return cy.loginAs({ username: 'elastic', password: 'changeme' });
@@ -131,16 +131,6 @@ Cypress.Commands.add('updateAdvancedSettings', (settings: Record<string, unknown
     },
     auth: { user: 'editor', pass: 'changeme' },
   });
-});
-
-Cypress.Commands.add('dismissServiceGroupsTour', () => {
-  window.localStorage.setItem(
-    'apm.serviceGroupsTour',
-    JSON.stringify({
-      createGroup: false,
-      editGroup: false,
-    })
-  );
 });
 
 Cypress.Commands.add('withHidden', (selector, callback) => {

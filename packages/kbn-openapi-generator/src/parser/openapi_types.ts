@@ -16,6 +16,11 @@ interface AdditionalProperties {
 }
 
 export type OpenApiDocument = OpenAPIV3.Document<AdditionalProperties>;
+export type OpenApiComponentsObject = OpenAPIV3.ComponentsObject;
+export type OpenApiSchemasObject = Record<
+  string,
+  OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaObject
+>;
 
 // Override the OpenAPI types to add the x-codegen-enabled property to the
 // components object.

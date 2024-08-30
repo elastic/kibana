@@ -375,6 +375,7 @@ export type AlertEvent = Partial<{
         sid: ECSField<string>;
         integrity_level: ECSField<number>;
         integrity_level_name: ECSField<string>;
+        elevation_level: ECSField<string>;
         // Using ECSField as the outer because the object is expected to be an array
         privileges: ECSField<
           Partial<{
@@ -406,6 +407,8 @@ export type AlertEvent = Partial<{
     Ext: Partial<{
       malware_classification: MalwareClassification;
       temp_file_path: ECSField<string>;
+      quarantine_result: ECSField<boolean>;
+      quarantine_message: ECSField<string>;
       // Using ECSField as the outer because the object is expected to be an array
       code_signature: ECSField<
         Partial<{
@@ -1225,6 +1228,9 @@ export interface HostPolicyResponseAppliedAction {
 export type HostPolicyResponseConfiguration =
   HostPolicyResponse['Endpoint']['policy']['applied']['response']['configurations'];
 
+export type HostPolicyResponseArtifacts =
+  HostPolicyResponse['Endpoint']['policy']['applied']['artifacts'];
+
 interface HostPolicyResponseConfigurationStatus {
   status: HostPolicyResponseActionStatus;
   concerned_actions: HostPolicyActionName[];
@@ -1233,7 +1239,7 @@ interface HostPolicyResponseConfigurationStatus {
 /**
  * Host Policy Response Applied Artifact
  */
-interface HostPolicyResponseAppliedArtifact {
+export interface HostPolicyResponseAppliedArtifact {
   name: string;
   sha256: string;
 }

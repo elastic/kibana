@@ -6,10 +6,19 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
-import { CspFinding } from '../../../common/schemas/csp_finding';
+import type { CspFinding } from '@kbn/cloud-security-posture-common';
 import { isArray } from 'lodash';
 import { http, HttpResponse } from 'msw';
 import { v4 as uuidV4 } from 'uuid';
+
+export const generateMultipleCspFindings = (
+  option: { count: number; failedCount?: number } = { count: 1, failedCount: 0 }
+) => {
+  const failedCount = option.failedCount || 0;
+  return Array.from({ length: option?.count }, (_, i) => {
+    return generateCspFinding(i.toString(), i < failedCount ? 'failed' : 'passed');
+  });
+};
 
 export const generateCspFinding = (
   id: string,
@@ -123,6 +132,9 @@ export const generateCspFinding = (
       dataset: 'cloud_security_posture.findings',
       outcome: 'success',
     },
+    data_stream: {
+      dataset: 'cloud_security_posture.findings',
+    },
   };
 };
 
@@ -211,25 +223,36 @@ export const bsearchFindingsHandler = (findings: CspFinding[]) =>
       filter[0]?.bool?.should?.[0]?.term?.['rule.section']?.value !== undefined;
 
     if (hasRuleSectionQuerySearchTerm) {
-      const filteredFindingJson = findings.filter((finding) => {
+      const filteredFindings = findings.filter((finding) => {
         const termValue = (filter[0].bool?.should as estypes.QueryDslQueryContainer[])?.[0]?.term?.[
           'rule.section'
         ]?.value;
         return finding.rule.section === termValue;
       });
 
-      return HttpResponse.json(getFindingsBsearchResponse(filteredFindingJson));
+      return HttpResponse.json(getFindingsBsearchResponse(filteredFindings));
     }
 
     const hasRuleSectionFilter =
       isArray(filter) && filter?.[0]?.match_phrase?.['rule.section'] !== undefined;
 
     if (hasRuleSectionFilter) {
-      const filteredFindingJson = findings.filter((finding) => {
+      const filteredFindings = findings.filter((finding) => {
         return finding.rule.section === filter?.[0]?.match_phrase?.['rule.section'];
       });
 
-      return HttpResponse.json(getFindingsBsearchResponse(filteredFindingJson));
+      return HttpResponse.json(getFindingsBsearchResponse(filteredFindings));
+    }
+
+    const hasResultEvaluationFilter =
+      isArray(filter) && filter?.[0]?.match_phrase?.['result.evaluation'] !== undefined;
+
+    if (hasResultEvaluationFilter) {
+      const filteredFindings = findings.filter((finding) => {
+        return finding.result.evaluation === filter?.[0]?.match_phrase?.['result.evaluation'];
+      });
+
+      return HttpResponse.json(getFindingsBsearchResponse(filteredFindings));
     }
 
     return HttpResponse.json(getFindingsBsearchResponse(findings));

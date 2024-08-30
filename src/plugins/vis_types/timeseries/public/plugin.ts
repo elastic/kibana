@@ -19,7 +19,7 @@ import type { IUiSettingsClient } from '@kbn/core/public';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { VisTypeTimeseriesPublicConfig } from '../config';
+import type { VisTypeTimeseriesPublicConfig } from '../server/config';
 
 import { EditorController, TSVB_EDITOR_NAME } from './application/editor_controller';
 

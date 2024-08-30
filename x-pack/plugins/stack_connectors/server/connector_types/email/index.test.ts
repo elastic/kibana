@@ -20,6 +20,8 @@ import {
   validateParams,
   validateSecrets,
 } from '@kbn/actions-plugin/server/lib';
+
+import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { sendEmail } from './send_email';
 import {
   ActionParamsType,
@@ -514,6 +516,10 @@ describe('execute()', () => {
       text: 'Go to Elastic',
     },
   };
+  const connectorUsageCollector = new ConnectorUsageCollector({
+    logger: mockedLogger,
+    connectorId: 'test-connector-id',
+  });
 
   const actionId = 'some-id';
   const executorOptions: EmailConnectorTypeExecutorOptions = {
@@ -524,6 +530,7 @@ describe('execute()', () => {
     services,
     configurationUtilities: actionsConfigMock.create(),
     logger: mockedLogger,
+    connectorUsageCollector,
   };
 
   beforeEach(() => {
@@ -823,6 +830,76 @@ describe('execute()', () => {
         "actionId": "some-id",
         "message": "error sending email",
         "serviceMessage": "wops",
+        "status": "error",
+      }
+    `);
+  });
+
+  test('returns expected result when a 450 error is thrown', async () => {
+    const customExecutorOptions: EmailConnectorTypeExecutorOptions = {
+      ...executorOptions,
+      config: {
+        ...config,
+        hasAuth: false,
+      },
+      secrets: {
+        ...secrets,
+        user: null,
+        password: null,
+      },
+    };
+
+    const errorResponse = {
+      message: 'Mail command failed: 450 4.7.1 Error: too much mail',
+      response: {
+        status: 450,
+      },
+    };
+
+    sendEmailMock.mockReset();
+    sendEmailMock.mockRejectedValue(errorResponse);
+    const result = await connectorType.executor(customExecutorOptions);
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actionId": "some-id",
+        "errorSource": "user",
+        "message": "error sending email",
+        "serviceMessage": "Mail command failed: 450 4.7.1 Error: too much mail",
+        "status": "error",
+      }
+    `);
+  });
+
+  test('returns expected result when a 554 error is thrown', async () => {
+    const customExecutorOptions: EmailConnectorTypeExecutorOptions = {
+      ...executorOptions,
+      config: {
+        ...config,
+        hasAuth: false,
+      },
+      secrets: {
+        ...secrets,
+        user: null,
+        password: null,
+      },
+    };
+
+    const errorResponse = {
+      message: "Can't send mail - all recipients were rejected: 554 5.7.1",
+      response: {
+        status: 554,
+      },
+    };
+
+    sendEmailMock.mockReset();
+    sendEmailMock.mockRejectedValue(errorResponse);
+    const result = await connectorType.executor(customExecutorOptions);
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actionId": "some-id",
+        "errorSource": "user",
+        "message": "error sending email",
+        "serviceMessage": "Can't send mail - all recipients were rejected: 554 5.7.1",
         "status": "error",
       }
     `);

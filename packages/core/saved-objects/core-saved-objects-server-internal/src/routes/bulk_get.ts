@@ -34,8 +34,10 @@ export const registerBulkGetRoute = (
     {
       path: '/_bulk_get',
       options: {
+        summary: `Get saved objects`,
+        tags: ['oas-tag:saved objects'],
         access,
-        description: `Get saved objects`,
+        deprecated: true,
       },
       validate: {
         body: schema.arrayOf(

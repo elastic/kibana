@@ -1066,9 +1066,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-notifications-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-common.IToasts",
+                "section": "def-public.IToasts",
                 "text": "IToasts"
               }
             ],

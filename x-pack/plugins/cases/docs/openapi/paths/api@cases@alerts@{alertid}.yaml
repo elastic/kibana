@@ -1,5 +1,5 @@
 get:
-  summary:  Returns the cases associated with a specific alert in the default space.
+  summary:  Get cases for an alert
   operationId: getCasesByAlertDefaultSpace
   description: >
     You must have `read` privileges for the **Cases** feature in the
@@ -28,7 +28,7 @@ get:
                 title:
                   type: string
                   description: The case title.
-            examples:
+            example:
               - id: 06116b80-e1c3-11ec-be9b-9b1838238ee6
                 title: security_case
     '401':

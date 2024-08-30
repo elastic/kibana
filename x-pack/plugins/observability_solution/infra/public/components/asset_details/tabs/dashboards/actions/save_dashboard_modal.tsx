@@ -25,11 +25,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import { DashboardItem } from '@kbn/dashboard-plugin/common/content_management';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { FETCH_STATUS } from '../../../../../hooks/use_fetcher';
 import type {
   DashboardItemWithTitle,
   InfraCustomDashboardAssetType,
 } from '../../../../../../common/custom_dashboards';
-import { useDashboardFetcher, FETCH_STATUS } from '../../../hooks/use_dashboards_fetcher';
+import { useDashboardFetcher } from '../../../hooks/use_dashboards_fetcher';
 import {
   useUpdateCustomDashboard,
   useCreateCustomDashboard,
@@ -90,7 +91,7 @@ export function SaveDashboardModal({
     () => setAssetNameFiltersEnabled(!assetNameEnabled),
     [assetNameEnabled]
   );
-  const onSelect = useCallback((newSelection) => setSelectedDashboard(newSelection), []);
+  const onSelect = useCallback((newSelection: any) => setSelectedDashboard(newSelection), []);
 
   const onClickSave = useCallback(
     async function () {

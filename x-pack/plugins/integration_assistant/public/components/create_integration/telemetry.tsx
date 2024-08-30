@@ -39,6 +39,7 @@ type ReportAssistantComplete = (params: {
   integrationName: string;
   integrationSettings: IntegrationSettings;
   connector: AIConnector;
+  error?: string;
 }) => void;
 
 interface TelemetryContextProps {
@@ -101,7 +102,7 @@ export const TelemetryContextProvider = React.memo<PropsWithChildren<{}>>(({ chi
     ({ connector, integrationSettings, durationMs, error }) => {
       telemetry.reportEvent(TelemetryEventType.IntegrationAssistantGenerationComplete, {
         sessionId: sessionData.current.sessionId,
-        sampleRows: integrationSettings?.logsSampleParsed?.length ?? 0,
+        sampleRows: integrationSettings?.logSamples?.length ?? 0,
         actionTypeId: connector.actionTypeId,
         model: getConnectorModel(connector),
         provider: connector.apiProvider ?? 'unknown',
@@ -113,17 +114,18 @@ export const TelemetryContextProvider = React.memo<PropsWithChildren<{}>>(({ chi
   );
 
   const reportAssistantComplete = useCallback<ReportAssistantComplete>(
-    ({ integrationName, integrationSettings, connector }) => {
+    ({ integrationName, integrationSettings, connector, error }) => {
       telemetry.reportEvent(TelemetryEventType.IntegrationAssistantComplete, {
         sessionId: sessionData.current.sessionId,
         integrationName,
         integrationDescription: integrationSettings?.description ?? 'unknown',
         dataStreamName: integrationSettings?.dataStreamName ?? 'unknown',
-        inputType: integrationSettings?.inputType ?? 'unknown',
+        inputTypes: integrationSettings?.inputTypes ?? ['unknown'],
         actionTypeId: connector.actionTypeId,
         model: getConnectorModel(connector),
         provider: connector.apiProvider ?? 'unknown',
         durationMs: Date.now() - sessionData.current.startedAt,
+        errorMessage: error,
       });
     },
     [telemetry]

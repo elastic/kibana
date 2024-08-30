@@ -6,6 +6,8 @@
  */
 
 import {
+  EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -20,17 +22,20 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
-import type {
-  CategorizationRequestBody,
-  EcsMappingRequestBody,
-  RelatedRequestBody,
+import { getLangSmithOptions } from '../../../../../common/lib/lang_smith';
+import {
+  type AnalyzeLogsRequestBody,
+  type CategorizationRequestBody,
+  type EcsMappingRequestBody,
+  type RelatedRequestBody,
 } from '../../../../../../common';
 import {
   runCategorizationGraph,
   runEcsGraph,
   runRelatedGraph,
+  runAnalyzeLogsGraph,
 } from '../../../../../common/lib/api';
 import { useKibana } from '../../../../../common/hooks/use_kibana';
 import type { State } from '../../state';
@@ -40,9 +45,10 @@ import { useTelemetry } from '../../../telemetry';
 export type OnComplete = (result: State['result']) => void;
 
 const ProgressOrder = ['ecs', 'categorization', 'related'];
-type ProgressItem = typeof ProgressOrder[number];
+type ProgressItem = (typeof ProgressOrder)[number];
 
 const progressText: Record<ProgressItem, string> = {
+  analyzeLogs: i18n.PROGRESS_ANALYZE_LOGS,
   ecs: i18n.PROGRESS_ECS_MAPPING,
   categorization: i18n.PROGRESS_CATEGORIZATION,
   related: i18n.PROGRESS_RELATED_GRAPH,
@@ -62,9 +68,11 @@ export const useGeneration = ({
   const { http, notifications } = useKibana().services;
   const [progress, setProgress] = useState<ProgressItem>();
   const [error, setError] = useState<null | string>(null);
+  const [isRequesting, setIsRequesting] = useState<boolean>(true);
 
   useEffect(() => {
     if (
+      !isRequesting ||
       http == null ||
       connector == null ||
       integrationSettings == null ||
@@ -78,11 +86,33 @@ export const useGeneration = ({
 
     (async () => {
       try {
+        let logSamples = integrationSettings.logSamples;
+        let samplesFormat = integrationSettings.samplesFormat;
+
+        if (integrationSettings.samplesFormat === undefined) {
+          const analyzeLogsRequest: AnalyzeLogsRequestBody = {
+            logSamples: integrationSettings.logSamples ?? [],
+            connectorId: connector.id,
+            langSmithOptions: getLangSmithOptions(),
+          };
+
+          setProgress('analyzeLogs');
+          const analyzeLogsResult = await runAnalyzeLogsGraph(analyzeLogsRequest, deps);
+          if (abortController.signal.aborted) return;
+          if (isEmpty(analyzeLogsResult?.results)) {
+            setError('No results from Analyze Logs Graph');
+            return;
+          }
+          logSamples = analyzeLogsResult.results.parsedSamples;
+          samplesFormat = analyzeLogsResult.results.samplesFormat;
+        }
+
         const ecsRequest: EcsMappingRequestBody = {
           packageName: integrationSettings.name ?? '',
           dataStreamName: integrationSettings.dataStreamName ?? '',
-          rawSamples: integrationSettings.logsSampleParsed ?? [],
+          rawSamples: logSamples ?? [],
           connectorId: connector.id,
+          langSmithOptions: getLangSmithOptions(),
         };
 
         setProgress('ecs');
@@ -119,10 +149,18 @@ export const useGeneration = ({
           durationMs: Date.now() - generationStartedAt,
         });
 
-        onComplete(relatedGraphResult.results);
+        const result = {
+          pipeline: relatedGraphResult.results.pipeline,
+          docs: relatedGraphResult.results.docs,
+          samplesFormat,
+        };
+
+        onComplete(result);
       } catch (e) {
         if (abortController.signal.aborted) return;
-        const errorMessage = e.body?.message ?? e.message;
+        const errorMessage = `${e.message}${
+          e.body ? ` (${e.body.statusCode}): ${e.body.message}` : ''
+        }`;
 
         reportGenerationComplete({
           connector,
@@ -131,13 +169,16 @@ export const useGeneration = ({
           error: errorMessage,
         });
 
-        setError(`Error: ${errorMessage}`);
+        setError(errorMessage);
+      } finally {
+        setIsRequesting(false);
       }
     })();
     return () => {
       abortController.abort();
     };
   }, [
+    isRequesting,
     onComplete,
     setProgress,
     connector,
@@ -147,10 +188,12 @@ export const useGeneration = ({
     notifications?.toasts,
   ]);
 
-  return {
-    progress,
-    error,
-  };
+  const retry = useCallback(() => {
+    setError(null);
+    setIsRequesting(true);
+  }, []);
+
+  return { progress, error, retry };
 };
 
 const useModalCss = () => {
@@ -176,7 +219,7 @@ interface GenerationModalProps {
 export const GenerationModal = React.memo<GenerationModalProps>(
   ({ integrationSettings, connector, onComplete, onClose }) => {
     const { headerCss, bodyCss } = useModalCss();
-    const { progress, error } = useGeneration({
+    const { progress, error, retry } = useGeneration({
       integrationSettings,
       connector,
       onComplete,
@@ -188,7 +231,7 @@ export const GenerationModal = React.memo<GenerationModalProps>(
     );
 
     return (
-      <EuiModal onClose={onClose}>
+      <EuiModal onClose={onClose} data-test-subj="generationModal">
         <EuiModalHeader css={headerCss}>
           <EuiModalHeaderTitle>{i18n.ANALYZING}</EuiModalHeaderTitle>
         </EuiModalHeader>
@@ -196,41 +239,58 @@ export const GenerationModal = React.memo<GenerationModalProps>(
           <EuiFlexGroup direction="column" gutterSize="l" justifyContent="center">
             {progress && (
               <>
-                <EuiFlexItem>
-                  <EuiFlexGroup
-                    direction="row"
-                    gutterSize="s"
-                    alignItems="center"
-                    justifyContent="center"
-                  >
-                    {!error && (
-                      <EuiFlexItem grow={false}>
-                        <EuiLoadingSpinner size="s" />
-                      </EuiFlexItem>
-                    )}
-                    <EuiFlexItem grow={false}>
-                      <EuiText size="xs" color="subdued">
-                        {progressText[progress]}
-                      </EuiText>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiProgress value={progressValue} max={4} color="primary" size="m" />
-                </EuiFlexItem>
-                {error && (
+                {error ? (
                   <EuiFlexItem>
-                    <EuiText color="danger" size="xs">
+                    <EuiCallOut
+                      title={i18n.GENERATION_ERROR(progressText[progress])}
+                      color="danger"
+                      iconType="alert"
+                      data-test-subj="generationErrorCallout"
+                    >
                       {error}
-                    </EuiText>
+                    </EuiCallOut>
                   </EuiFlexItem>
+                ) : (
+                  <>
+                    <EuiFlexItem>
+                      <EuiFlexGroup
+                        direction="row"
+                        gutterSize="s"
+                        alignItems="center"
+                        justifyContent="center"
+                      >
+                        <EuiFlexItem grow={false}>
+                          <EuiLoadingSpinner size="s" />
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiText size="xs" color="subdued">
+                            {progressText[progress]}
+                          </EuiText>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiFlexItem>
+                    <EuiFlexItem />
+                    <EuiFlexItem>
+                      <EuiProgress value={progressValue} max={4} color="primary" size="m" />
+                    </EuiFlexItem>
+                  </>
                 )}
               </>
             )}
           </EuiFlexGroup>
         </EuiModalBody>
         <EuiModalFooter>
-          <EuiSpacer size="xl" />
+          {error ? (
+            <EuiFlexGroup justifyContent="center">
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty iconType="refresh" onClick={retry} data-test-subj="retryButton">
+                  {i18n.RETRY}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ) : (
+            <EuiSpacer size="xl" />
+          )}
         </EuiModalFooter>
       </EuiModal>
     );

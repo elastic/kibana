@@ -9,7 +9,7 @@ import { EuiLink, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { FlyoutFooter } from '../../shared/components/flyout_footer';
+import { FlyoutFooter } from '@kbn/security-solution-common';
 import { HostPanelKey } from '../host_right';
 
 export interface HostPreviewPanelFooterProps {
@@ -47,7 +47,7 @@ export const HostPreviewPanelFooter = ({
         <EuiFlexItem grow={false}>
           <EuiLink onClick={openHostFlyout} target="_blank" data-test-subj={'open-host-flyout'}>
             {i18n.translate('xpack.securitySolution.flyout.host.preview.viewDetailsLabel', {
-              defaultMessage: 'Open host details flyout',
+              defaultMessage: 'Show full host details',
             })}
           </EuiLink>
         </EuiFlexItem>

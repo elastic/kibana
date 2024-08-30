@@ -12,7 +12,6 @@ import {
   EncryptedSyntheticsMonitor,
   FetchMonitorManagementListQueryArgs,
   MonitorManagementListResult,
-  MonitorManagementListResultCodec,
   SyntheticsMonitor,
   MonitorFiltersResult,
 } from '../../../../../common/runtime_types';
@@ -44,19 +43,18 @@ export const fetchMonitorManagementList = async (
 ): Promise<MonitorManagementListResult> => {
   const params = toMonitorManagementListQueryArgs(pageState);
 
-  return await apiService.get(
-    SYNTHETICS_API_URLS.SYNTHETICS_MONITORS,
-    { ...params, version: INITIAL_REST_VERSION },
-    MonitorManagementListResultCodec
-  );
+  return await apiService.get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS, {
+    ...params,
+    version: INITIAL_REST_VERSION,
+  });
 };
 
-export const fetchDeleteMonitor = async ({ configId }: { configId: string }): Promise<void> => {
+export const fetchDeleteMonitor = async ({ configIds }: { configIds: string[] }): Promise<void> => {
   return await apiService.delete(
     SYNTHETICS_API_URLS.SYNTHETICS_MONITORS,
     { version: INITIAL_REST_VERSION },
     {
-      ids: [configId],
+      ids: configIds,
     }
   );
 };

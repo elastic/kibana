@@ -12,7 +12,7 @@ import {
 import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../common/mock';
-import { RiskSummary } from './risk_summary';
+import { FlyoutRiskSummary } from './risk_summary';
 import type {
   LensAttributes,
   VisualizationEmbeddableProps,
@@ -37,7 +37,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
   };
 });
 
-describe('RiskSummary', () => {
+describe('FlyoutRiskSummary', () => {
   beforeEach(() => {
     mockVisualizationEmbeddable.mockClear();
   });
@@ -45,7 +45,7 @@ describe('RiskSummary', () => {
   it('renders risk summary table with alerts only', () => {
     const { getByTestId, queryByTestId } = render(
       <TestProviders>
-        <RiskSummary
+        <FlyoutRiskSummary
           riskScoreData={mockHostRiskScoreState}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
@@ -76,7 +76,7 @@ describe('RiskSummary', () => {
 
     const { getByTestId } = render(
       <TestProviders>
-        <RiskSummary
+        <FlyoutRiskSummary
           riskScoreData={mockHostRiskScoreState}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
@@ -108,7 +108,7 @@ describe('RiskSummary', () => {
   it('renders risk summary table when riskScoreData is empty', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <RiskSummary
+        <FlyoutRiskSummary
           riskScoreData={{ ...mockHostRiskScoreState, data: undefined }}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
@@ -122,7 +122,7 @@ describe('RiskSummary', () => {
   it('risk summary header does not render link when riskScoreData is loading', () => {
     const { queryByTestId } = render(
       <TestProviders>
-        <RiskSummary
+        <FlyoutRiskSummary
           riskScoreData={{ ...mockHostRiskScoreState, data: undefined, loading: true }}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
@@ -137,7 +137,7 @@ describe('RiskSummary', () => {
   it('risk summary header does not render expand icon when in preview mode', () => {
     const { queryByTestId } = render(
       <TestProviders>
-        <RiskSummary
+        <FlyoutRiskSummary
           riskScoreData={{ ...mockHostRiskScoreState, data: undefined, loading: true }}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
@@ -154,7 +154,7 @@ describe('RiskSummary', () => {
   it('renders visualization embeddable', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <RiskSummary
+        <FlyoutRiskSummary
           riskScoreData={mockHostRiskScoreState}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
@@ -169,7 +169,7 @@ describe('RiskSummary', () => {
   it('renders updated at', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <RiskSummary
+        <FlyoutRiskSummary
           riskScoreData={mockHostRiskScoreState}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
@@ -184,7 +184,7 @@ describe('RiskSummary', () => {
   it('builds lens attributes for host risk score', () => {
     render(
       <TestProviders>
-        <RiskSummary
+        <FlyoutRiskSummary
           riskScoreData={mockHostRiskScoreState}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
@@ -211,7 +211,7 @@ describe('RiskSummary', () => {
   it('builds lens cases attachment metadata for host risk score', () => {
     render(
       <TestProviders>
-        <RiskSummary
+        <FlyoutRiskSummary
           riskScoreData={mockHostRiskScoreState}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
@@ -233,7 +233,7 @@ describe('RiskSummary', () => {
   it('builds lens cases attachment metadata for user risk score', () => {
     render(
       <TestProviders>
-        <RiskSummary
+        <FlyoutRiskSummary
           riskScoreData={mockUserRiskScoreState}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
@@ -255,7 +255,7 @@ describe('RiskSummary', () => {
   it('builds lens attributes for user risk score', () => {
     render(
       <TestProviders>
-        <RiskSummary
+        <FlyoutRiskSummary
           riskScoreData={mockUserRiskScoreState}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}

@@ -24,7 +24,7 @@ import {
   USER_DETAILS_RELATED_HOSTS_TABLE_TEST_ID,
   USER_DETAILS_RELATED_HOSTS_LINK_TEST_ID,
 } from './test_ids';
-import { EXPANDABLE_PANEL_CONTENT_TEST_ID } from '../../../shared/components/test_ids';
+import { EXPANDABLE_PANEL_CONTENT_TEST_ID } from '@kbn/security-solution-common';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
@@ -34,10 +34,7 @@ import { HOST_PREVIEW_BANNER } from '../../right/components/host_entity_overview
 import { UserPreviewPanelKey } from '../../../entity_details/user_right';
 import { USER_PREVIEW_BANNER } from '../../right/components/user_entity_overview';
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn(),
-  ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
-}));
+jest.mock('@kbn/expandable-flyout');
 
 jest.mock('../../../../common/hooks/use_experimental_features');
 const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
@@ -155,7 +152,7 @@ describe('<UserDetails />', () => {
     mockUseObservedUserDetails.mockReturnValue(mockUserDetailsResponse);
     mockUseRiskScore.mockReturnValue(mockRiskScoreResponse);
     mockUseUsersRelatedHosts.mockReturnValue(mockRelatedHostsResponse);
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
   });
 
   it('should render user details correctly', () => {
@@ -165,7 +162,7 @@ describe('<UserDetails />', () => {
   });
 
   it('should render user name as clicable link when feature flag is true', () => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
     const { getByTestId } = renderUserDetails(mockContextValue);
     expect(getByTestId(USER_DETAILS_LINK_TEST_ID)).toBeInTheDocument();
 
@@ -254,7 +251,7 @@ describe('<UserDetails />', () => {
     });
 
     it('should render host name as clicable link when feature flag is true', () => {
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
       const { getAllByTestId } = renderUserDetails(mockContextValue);
       expect(getAllByTestId(USER_DETAILS_RELATED_HOSTS_LINK_TEST_ID).length).toBe(1);
 
