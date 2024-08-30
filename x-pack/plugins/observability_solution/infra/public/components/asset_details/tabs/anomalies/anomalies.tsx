@@ -20,7 +20,7 @@ export const Anomalies = () => {
   const { isActiveTab } = useTabSwitcherContext();
   const { request$ } = useRequestObservable();
   const { getParsedDateRange } = useDatePickerContext();
-  const { asset, renderMode } = useAssetDetailsRenderPropsContext();
+  const { asset } = useAssetDetailsRenderPropsContext();
   const { kibanaVersion, isCloudEnv, isServerlessEnv } = useContext(KibanaEnvironmentContext);
 
   const parsedDateRange = useMemo(() => getParsedDateRange(), [getParsedDateRange]);
@@ -28,7 +28,6 @@ export const Anomalies = () => {
   return (
     <div ref={ref}>
       <AnomaliesTable
-        closeFlyout={renderMode.mode === 'flyout' ? renderMode.closeFlyout : () => {}}
         hostName={asset.name}
         dateRange={parsedDateRange}
         hideDatePicker

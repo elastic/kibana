@@ -76,7 +76,7 @@ const AnomalyActionMenu = ({
   jobId: string;
   type: string;
   startTime: number;
-  closeFlyout: () => void;
+  closeFlyout?: () => void;
   influencerField: string;
   influencers: string[];
   disableShowInInventory?: boolean;
@@ -129,7 +129,7 @@ const AnomalyActionMenu = ({
       time: startTime,
     };
     onViewChange({ attributes: anomalyViewParams });
-    closeFlyout();
+    if (closeFlyout) closeFlyout();
   }, [jobId, onViewChange, startTime, type, influencers, influencerField, closeFlyout]);
 
   const anomaliesUrl = useLinkProps({
@@ -255,7 +255,7 @@ export const NoAnomaliesFound = () => {
   );
 };
 export interface Props {
-  closeFlyout(): void;
+  closeFlyout?(): void;
   hostName?: string;
   dateRange?: TimeRange;
   // In case the date picker is managed outside this component
