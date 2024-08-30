@@ -180,7 +180,6 @@ export class Plugin implements InfraClientPluginClass {
                           ? [
                               {
                                 label: 'Hosts',
-                                isBetaFeature: true,
                                 app: 'metrics',
                                 path: '/hosts',
                               },

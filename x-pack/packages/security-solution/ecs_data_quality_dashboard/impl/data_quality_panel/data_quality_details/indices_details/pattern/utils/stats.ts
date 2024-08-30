@@ -70,20 +70,3 @@ export const getIndexNames = ({
     return EMPTY_INDEX_NAMES;
   }
 };
-
-export const getDocsCountPercent = ({
-  docsCount,
-  locales,
-  patternDocsCount,
-}: {
-  docsCount: number;
-  locales?: string | string[];
-  patternDocsCount: number;
-}): string =>
-  patternDocsCount !== 0
-    ? Number(docsCount / patternDocsCount).toLocaleString(locales, {
-        style: 'percent',
-        maximumFractionDigits: 1,
-        minimumFractionDigits: 1,
-      })
-    : '';
