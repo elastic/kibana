@@ -23,7 +23,7 @@ const NoCasesComponent = ({ recentCasesFilterBy }: NoCasesComp) => {
   const { getCreateCaseUrl, navigateToCreateCase } = useCreateCaseNavigation();
 
   const navigateToCreateCaseClick = useCallback(
-    (e) => {
+    (e: React.SyntheticEvent) => {
       e.preventDefault();
       navigateToCreateCase();
     },
