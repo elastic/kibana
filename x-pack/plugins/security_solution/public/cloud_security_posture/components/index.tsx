@@ -41,11 +41,6 @@ export const EntityInsight = <T,>({ hostName }: { hostName: string }) => {
               </h3>
             </EuiTitle>
           }
-          css={css`
-            .euiAccordion__optionalAction {
-              margin-left: auto;
-            }
-          `}
         >
           <EuiSpacer size="m" />
           <MisconfigurationsOverview hostName={hostName} />

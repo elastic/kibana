@@ -64,10 +64,10 @@ export const getMisconfigurationAggregationCount = (
   };
 };
 
-export const getFindingsQuery = (
-  { query, sort }: UseFindingsOptions,
+export const buildMisconfigurationsFindingsQuery = (
+  { query }: UseFindingsOptions,
   rulesStates: CspBenchmarkRulesStates,
-  pageParam: any
+  pageParam?: number
 ) => {
   const mutedRulesFilterQuery = buildMutedRulesFilter(rulesStates);
 
@@ -76,25 +76,32 @@ export const getFindingsQuery = (
     size: MAX_FINDINGS_TO_LOAD,
     aggs: getFindingsCountAggQueryMisconfigurationPreview(),
     ignore_unavailable: false,
-    query: {
-      ...query,
-      bool: {
-        ...query?.bool,
-        filter: [
-          ...(query?.bool?.filter ?? []),
-          {
-            range: {
-              '@timestamp': {
-                gte: `now-${LATEST_FINDINGS_RETENTION_POLICY}`,
-                lte: 'now',
-              },
+    query: buildMisconfigurationsFindingsQueryWithFilters(query, mutedRulesFilterQuery),
+    ...(pageParam ? { from: pageParam } : {}),
+  };
+};
+
+const buildMisconfigurationsFindingsQueryWithFilters = (
+  query: UseFindingsOptions['query'],
+  mutedRulesFilterQuery: estypes.QueryDslQueryContainer[]
+) => {
+  return {
+    ...query,
+    bool: {
+      ...query?.bool,
+      filter: [
+        ...(query?.bool?.filter ?? []),
+        {
+          range: {
+            '@timestamp': {
+              gte: `now-${LATEST_FINDINGS_RETENTION_POLICY}`,
+              lte: 'now',
             },
           },
-        ],
-        must_not: [...(query?.bool?.must_not ?? []), ...mutedRulesFilterQuery],
-      },
+        },
+      ],
+      must_not: [...(query?.bool?.must_not ?? []), ...mutedRulesFilterQuery],
     },
-    ...(pageParam ? { from: pageParam } : {}),
   };
 };
 
@@ -112,7 +119,7 @@ export const useMisconfigurationPreview = (options: UseFindingsOptions) => {
         rawResponse: { aggregations },
       } = await lastValueFrom(
         data.search.search<LatestFindingsRequest, LatestFindingsResponse>({
-          params: getFindingsQuery(options, rulesStates!, pageParam),
+          params: buildMisconfigurationsFindingsQuery(options, rulesStates!, pageParam),
         })
       );
       if (!aggregations) throw new Error('expected aggregations to be defined');
