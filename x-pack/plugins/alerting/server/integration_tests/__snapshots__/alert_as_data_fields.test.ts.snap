@@ -837,7 +837,7 @@ Object {
       "required": true,
       "type": "keyword",
     },
-    "kibana.alert.intended_timstamp": Object {
+    "kibana.alert.intended_timestamp": Object {
       "array": false,
       "required": false,
       "type": "date",
@@ -1935,7 +1935,7 @@ Object {
       "required": true,
       "type": "keyword",
     },
-    "kibana.alert.intended_timstamp": Object {
+    "kibana.alert.intended_timestamp": Object {
       "array": false,
       "required": false,
       "type": "date",
@@ -3033,7 +3033,7 @@ Object {
       "required": true,
       "type": "keyword",
     },
-    "kibana.alert.intended_timstamp": Object {
+    "kibana.alert.intended_timestamp": Object {
       "array": false,
       "required": false,
       "type": "date",
@@ -4131,7 +4131,7 @@ Object {
       "required": true,
       "type": "keyword",
     },
-    "kibana.alert.intended_timstamp": Object {
+    "kibana.alert.intended_timestamp": Object {
       "array": false,
       "required": false,
       "type": "date",
@@ -5229,7 +5229,7 @@ Object {
       "required": true,
       "type": "keyword",
     },
-    "kibana.alert.intended_timstamp": Object {
+    "kibana.alert.intended_timestamp": Object {
       "array": false,
       "required": false,
       "type": "date",
@@ -6333,7 +6333,7 @@ Object {
       "required": true,
       "type": "keyword",
     },
-    "kibana.alert.intended_timstamp": Object {
+    "kibana.alert.intended_timestamp": Object {
       "array": false,
       "required": false,
       "type": "date",
@@ -7431,7 +7431,7 @@ Object {
       "required": true,
       "type": "keyword",
     },
-    "kibana.alert.intended_timstamp": Object {
+    "kibana.alert.intended_timestamp": Object {
       "array": false,
       "required": false,
       "type": "date",
@@ -8529,7 +8529,7 @@ Object {
       "required": true,
       "type": "keyword",
     },
-    "kibana.alert.intended_timstamp": Object {
+    "kibana.alert.intended_timestamp": Object {
       "array": false,
       "required": false,
       "type": "date",

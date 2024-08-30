@@ -59,7 +59,7 @@ const ALERT_INSTANCE_ID = `${ALERT_NAMESPACE}.instance.id` as const;
 const ALERT_LAST_DETECTED = `${ALERT_NAMESPACE}.last_detected` as const;
 
 // kiana.alert.intended_timestamp - timestamp when the alert was intended to be detected, useful for backfilling
-const ALERT_INTENDED_TIMESTAMP = `${ALERT_NAMESPACE}.intended_timstamp` as const;
+const ALERT_INTENDED_TIMESTAMP = `${ALERT_NAMESPACE}.intended_timestamp` as const;
 
 // kibana.alert.reason - human readable reason that this alert is active
 const ALERT_REASON = `${ALERT_NAMESPACE}.reason` as const;
