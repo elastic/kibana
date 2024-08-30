@@ -20,7 +20,7 @@ import {
   UpdateMaintenanceWindowRequestBodyV1,
   UpdateMaintenanceWindowRequestParamsV1,
   UpdateMaintenanceWindowResponseV1,
-} from '../../../../../common/routes/maintenance_window/apis/update';
+} from '../../../schemas/maintenance_window/apis/update';
 import { transformUpdateBodyV1 } from './transforms';
 import { transformMaintenanceWindowToResponseV1 } from '../../transforms';
 

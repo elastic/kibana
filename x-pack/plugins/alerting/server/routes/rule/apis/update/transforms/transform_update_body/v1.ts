@@ -9,7 +9,7 @@ import { omit } from 'lodash';
 import type {
   UpdateRuleActionV1,
   UpdateRuleRequestBodyV1,
-} from '../../../../../../../common/routes/rule/apis/update';
+} from '../../../../../schemas/rule/apis/update';
 import type { UpdateRuleData } from '../../../../../../application/rule/methods/update';
 import type {
   RuleParams,

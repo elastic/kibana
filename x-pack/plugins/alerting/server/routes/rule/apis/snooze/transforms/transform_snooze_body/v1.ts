@@ -6,7 +6,7 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
-import { snoozeBodySchemaV1 } from '../../../../../../../common/routes/rule/apis/snooze';
+import { snoozeBodySchemaV1 } from '../../../../../schemas/rule/apis/snooze';
 
 type SnoozeBodySchema = TypeOf<typeof snoozeBodySchemaV1>;
 

@@ -9,7 +9,7 @@ import {
   scheduleBodySchemaV1,
   ScheduleBackfillRequestBodyV1,
   ScheduleBackfillResponseV1,
-} from '../../../../../common/routes/backfill/apis/schedule';
+} from '../../../schemas/backfill/apis/schedule';
 import { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';

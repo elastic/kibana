@@ -9,7 +9,7 @@ import { IRouter } from '@kbn/core/server';
 import {
   UpdateApiKeyParamsV1,
   updateApiKeyParamsSchemaV1,
-} from '../../../../../common/routes/rule/apis/update_api_key';
+} from '../../../schemas/rule/apis/update_api_key';
 import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../../types';

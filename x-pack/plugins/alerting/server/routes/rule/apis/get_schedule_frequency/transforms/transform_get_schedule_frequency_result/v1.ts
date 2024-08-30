@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { GetScheduleFrequencyResponseBodyV1 } from '../../../../../../../common/routes/rule/apis/get_schedule_frequency';
+import type { GetScheduleFrequencyResponseBodyV1 } from '../../../../../schemas/rule/apis/get_schedule_frequency';
 import type { GetScheduleFrequencyResult } from '../../../../../../application/rule/methods/get_schedule_frequency';
 
 export const transformGetScheduleFrequencyResult = (

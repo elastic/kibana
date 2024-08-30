@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { DEFAULT_TAGS_PER_PAGE } from '../../../../../../common/routes/rule/apis/tags/constants/latest';
+import { DEFAULT_TAGS_PER_PAGE } from '../../../../../routes/schemas/rule/apis/tags/constants/latest';
 
 export const ruleTagsParamsSchema = schema.object({
   page: schema.number({ defaultValue: 1, min: 1 }),

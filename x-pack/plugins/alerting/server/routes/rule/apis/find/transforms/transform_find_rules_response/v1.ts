@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import type { FindRulesResponseV1 } from '../../../../../../../common/routes/rule/apis/find';
-import type {
-  RuleResponseV1,
-  RuleParamsV1,
-} from '../../../../../../../common/routes/rule/response';
+import type { FindRulesResponseV1 } from '../../../../../schemas/rule/apis/find';
+import type { RuleResponseV1, RuleParamsV1 } from '../../../../../schemas/rule/response';
 import type { FindResult } from '../../../../../../application/rule/methods/find';
 import { Rule, RuleParams } from '../../../../../../application/rule/types';
 import {

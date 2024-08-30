@@ -17,12 +17,9 @@ import type {
   CreateRuleRequestBodyV1,
   CreateRuleRequestParamsV1,
   CreateRuleResponseV1,
-} from '../../../../../common/routes/rule/apis/create';
-import {
-  createBodySchemaV1,
-  createParamsSchemaV1,
-} from '../../../../../common/routes/rule/apis/create';
-import { RuleParamsV1, ruleResponseSchemaV1 } from '../../../../../common/routes/rule/response';
+} from '../../../schemas/rule/apis/create';
+import { createBodySchemaV1, createParamsSchemaV1 } from '../../../schemas/rule/apis/create';
+import { RuleParamsV1, ruleResponseSchemaV1 } from '../../../schemas/rule/response';
 import { Rule } from '../../../../application/rule/types';
 import { transformCreateBodyV1 } from './transforms';
 import { transformRuleToRuleResponseV1 } from '../../transforms';

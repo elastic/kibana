@@ -14,7 +14,7 @@ import {
   updateQueryDelaySettingsBodySchemaV1,
   UpdateQueryDelaySettingsRequestBodyV1,
   UpdateQueryDelaySettingsResponseV1,
-} from '../../../../../common/routes/rules_settings/apis/update';
+} from '../../../schemas/rules_settings/apis/update';
 import { transformQueryDelaySettingsToResponseV1 } from '../../transforms';
 
 export const updateQueryDelaySettingsRoute = (

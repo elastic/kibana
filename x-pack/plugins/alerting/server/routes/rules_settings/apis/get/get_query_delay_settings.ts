@@ -11,7 +11,7 @@ import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '
 import { verifyAccessAndContext } from '../../../lib';
 import { API_PRIVILEGES } from '../../../../../common';
 import { transformQueryDelaySettingsToResponseV1 } from '../../transforms';
-import { GetQueryDelaySettingsResponseV1 } from '../../../../../common/routes/rules_settings/apis/get';
+import { GetQueryDelaySettingsResponseV1 } from '../../../schemas/rules_settings/apis/get';
 
 export const getQueryDelaySettingsRoute = (
   router: IRouter<AlertingRequestHandlerContext>,

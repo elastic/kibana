@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BulkGetMaintenanceWindowsResponseBodyV1 } from '../../../../../../../common/routes/maintenance_window/apis/bulk_get';
+import { BulkGetMaintenanceWindowsResponseBodyV1 } from '../../../../../schemas/maintenance_window/apis/bulk_get';
 import { BulkGetMaintenanceWindowsResult } from '../../../../../../application/maintenance_window/methods/bulk_get/types';
 import { transformMaintenanceWindowToResponseV1 } from '../../../../transforms';
 

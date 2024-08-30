@@ -11,7 +11,7 @@ import type {
   ScheduleBackfillResult,
   ScheduleBackfillResults,
 } from '../../../../../../application/backfill/methods/schedule/types';
-import { ScheduleBackfillResponseBodyV1 } from '../../../../../../../common/routes/backfill/apis/schedule';
+import { ScheduleBackfillResponseBodyV1 } from '../../../../../schemas/backfill/apis/schedule';
 import { transformBackfillToBackfillResponseV1 } from '../../../../transforms';
 
 export const transformResponse = (

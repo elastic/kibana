@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { BulkUntrackRequestBodyV1 } from '../../../../../../../common/routes/rule/apis/bulk_untrack';
+import type { BulkUntrackRequestBodyV1 } from '../../../../../schemas/rule/apis/bulk_untrack';
 
 export const transformBulkUntrackAlertsBody = ({
   indices,

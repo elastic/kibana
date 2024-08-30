@@ -9,12 +9,9 @@ import { IRouter } from '@kbn/core/server';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
-import { findRulesRequestQuerySchemaV1 } from '../../../../../common/routes/rule/apis/find';
-import type {
-  FindRulesRequestQueryV1,
-  FindRulesResponseV1,
-} from '../../../../../common/routes/rule/apis/find';
-import { RuleParamsV1, ruleResponseSchemaV1 } from '../../../../../common/routes/rule/response';
+import { findRulesRequestQuerySchemaV1 } from '../../../schemas/rule/apis/find';
+import type { FindRulesRequestQueryV1, FindRulesResponseV1 } from '../../../schemas/rule/apis/find';
+import { RuleParamsV1, ruleResponseSchemaV1 } from '../../../schemas/rule/response';
 import {
   AlertingRequestHandlerContext,
   BASE_ALERTING_API_PATH,

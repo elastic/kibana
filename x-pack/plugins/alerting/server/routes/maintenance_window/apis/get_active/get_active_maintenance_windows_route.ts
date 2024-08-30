@@ -15,7 +15,7 @@ import {
 import { MAINTENANCE_WINDOW_API_PRIVILEGES } from '../../../../../common';
 
 import { MaintenanceWindow } from '../../../../application/maintenance_window/types';
-import { GetActiveMaintenanceWindowsResponseV1 } from '../../../../../common/routes/maintenance_window/apis/get_active';
+import { GetActiveMaintenanceWindowsResponseV1 } from '../../../schemas/maintenance_window/apis/get_active';
 import { transformMaintenanceWindowToResponseV1 } from '../../transforms';
 
 export const getActiveMaintenanceWindowsRoute = (

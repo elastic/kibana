@@ -9,7 +9,7 @@ import {
   getParamsSchemaV1,
   GetBackfillRequestParamsV1,
   GetBackfillResponseV1,
-} from '../../../../../common/routes/backfill/apis/get';
+} from '../../../schemas/backfill/apis/get';
 import { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';

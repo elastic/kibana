@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
-import { validateBackfillSchedule } from '../../../../..';
-import { MAX_SCHEDULE_BACKFILL_BULK_SIZE } from '../../../../../constants';
+import { validateBackfillSchedule } from '../../../../../../../common';
+import { MAX_SCHEDULE_BACKFILL_BULK_SIZE } from '../../../../../../../common/constants';
 import { backfillResponseSchemaV1, errorResponseSchemaV1 } from '../../../response';
 
 export const scheduleBodySchema = schema.arrayOf(

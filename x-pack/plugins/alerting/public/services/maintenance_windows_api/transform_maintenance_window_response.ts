@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MaintenanceWindowResponse } from '../../../common/routes/maintenance_window/response';
+import type { MaintenanceWindowResponse } from '../../../server/routes/schemas/maintenance_window/response';
 import type { MaintenanceWindow } from '../../../common';
 
 export const transformMaintenanceWindowResponse = (

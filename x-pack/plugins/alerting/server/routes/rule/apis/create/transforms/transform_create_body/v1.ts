@@ -8,7 +8,7 @@
 import type {
   CreateRuleActionV1,
   CreateRuleRequestBodyV1,
-} from '../../../../../../../common/routes/rule/apis/create';
+} from '../../../../../schemas/rule/apis/create';
 import type { CreateRuleData } from '../../../../../../application/rule/methods/create';
 import type {
   RuleParams,

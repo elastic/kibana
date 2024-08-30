@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { adHocRunStatus } from '../../../../constants';
+import { adHocRunStatus } from '../../../../../../common/constants';
 
 export const statusSchema = schema.oneOf([
   schema.literal(adHocRunStatus.COMPLETE),

@@ -13,8 +13,8 @@ import {
   cloneRuleRequestParamsSchemaV1,
   CloneRuleRequestParamsV1,
   CloneRuleResponseV1,
-} from '../../../../../common/routes/rule/apis/clone';
-import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
+} from '../../../schemas/rule/apis/clone';
+import type { RuleParamsV1 } from '../../../schemas/rule/response';
 import { Rule } from '../../../../application/rule/types';
 import { transformRuleToRuleResponseV1 } from '../../transforms';
 

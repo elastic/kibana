@@ -15,7 +15,7 @@ import { getMockMaintenanceWindow } from '../../../../data/maintenance_window/te
 import { MaintenanceWindowStatus } from '../../../../../common';
 
 import { MaintenanceWindow } from '../../../../application/maintenance_window/types';
-import { CreateMaintenanceWindowRequestBody } from '../../../../../common/routes/maintenance_window/apis/create';
+import { CreateMaintenanceWindowRequestBody } from '../../../schemas/maintenance_window/apis/create';
 import { transformCreateBody } from './transforms';
 import { transformMaintenanceWindowToResponse } from '../../transforms';
 

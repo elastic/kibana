@@ -17,7 +17,7 @@ import {
   finishParamsSchemaV1,
   FinishMaintenanceWindowRequestParamsV1,
   FinishMaintenanceWindowResponseV1,
-} from '../../../../../common/routes/maintenance_window/apis/finish';
+} from '../../../schemas/maintenance_window/apis/finish';
 import { MAINTENANCE_WINDOW_API_PRIVILEGES } from '../../../../../common';
 import { transformMaintenanceWindowToResponseV1 } from '../../transforms';
 

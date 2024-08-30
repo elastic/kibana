@@ -11,7 +11,7 @@ import {
   disableRuleRequestBodySchemaV1,
   DisableRuleRequestParamsV1,
   DisableRuleRequestBodyV1,
-} from '../../../../../common/routes/rule/apis/disable';
+} from '../../../schemas/rule/apis/disable';
 import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../../types';

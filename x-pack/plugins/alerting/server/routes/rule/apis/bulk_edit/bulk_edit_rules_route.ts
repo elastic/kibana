@@ -15,9 +15,9 @@ import {
   bulkEditRulesRequestBodySchemaV1,
   BulkEditRulesRequestBodyV1,
   BulkEditRulesResponseV1,
-} from '../../../../../common/routes/rule/apis/bulk_edit';
+} from '../../../schemas/rule/apis/bulk_edit';
 import { Rule } from '../../../../application/rule/types';
-import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
+import type { RuleParamsV1 } from '../../../schemas/rule/response';
 
 import { transformRuleToRuleResponseV1 } from '../../transforms';
 import { transformOperationsV1 } from './transforms';

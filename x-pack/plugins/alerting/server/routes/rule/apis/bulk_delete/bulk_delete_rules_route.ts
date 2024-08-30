@@ -13,8 +13,8 @@ import {
   bulkDeleteRulesRequestBodySchemaV1,
   BulkDeleteRulesRequestBodyV1,
   BulkDeleteRulesResponseV1,
-} from '../../../../../common/routes/rule/apis/bulk_delete';
-import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
+} from '../../../schemas/rule/apis/bulk_delete';
+import type { RuleParamsV1 } from '../../../schemas/rule/response';
 import { transformRuleToRuleResponseV1 } from '../../transforms';
 import { Rule } from '../../../../application/rule/types';
 
