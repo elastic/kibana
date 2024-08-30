@@ -8,15 +8,24 @@
 
 import { lastSavedState } from './last_saved_state';
 import { unsavedChanges } from './unsaved_changes';
-import { ParentApi } from './types';
+import { LastSavedState, ParentApi, UnsavedChanges } from './types';
+import { BehaviorSubject } from 'rxjs';
+import { TimeRange } from '@kbn/es-query';
 
 export function getParentApi(): ParentApi {
+  const lastSavedState$ = new BehaviorSubject<LastSavedState>(lastSavedState.load());
+  const unsavedChanges$ = new BehaviorSubject<UnsavedChanges>(unsavedChanges.load());
+  const timeRange$ = new BehaviorSubject<TimeRange | undefined>(
+    unsavedChanges$.value.timeRange ?? lastSavedState$.value.timeRange
+  );
+  
   return {
+    timeRange$,
     /**
      * return last saved embeddable state
      */
     getSerializedStateForChild: (childId: string) => {
-      const panel = lastSavedState.load().panels.find(({ id }) => {
+      const panel = lastSavedState$.value.panels.find(({ id }) => {
         return id === childId;
       });
       return panel ? panel.panelState : undefined;
@@ -25,7 +34,7 @@ export function getParentApi(): ParentApi {
      * return previous session's unsaved changes for embeddable
      */
     getRuntimeStateForChild: (childId: string) => {
-      const panel = unsavedChanges.load().panels?.find(({ id }) => {
+      const panel = unsavedChanges$.value.panels?.find(({ id }) => {
         return id === childId;
       });
       return panel ? panel.unsavedPanelChanges : undefined;
