@@ -43,6 +43,7 @@ export const ErrorCallout = ({ title, error, isEsqlMode }: Props) => {
       title={
         <h2 data-test-subj="discoverErrorCalloutTitle">{searchErrorDisplay?.title ?? title}</h2>
       }
+      titleSize="xs"
       hasBorder
       actions={searchErrorDisplay?.actions ?? []}
       body={
