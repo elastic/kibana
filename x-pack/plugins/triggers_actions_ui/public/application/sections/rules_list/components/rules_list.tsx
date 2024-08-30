@@ -14,16 +14,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { parseRuleCircuitBreakerErrorMessage } from '@kbn/alerting-plugin/common';
 import { RuleTypeModal } from '@kbn/alerts-ui-shared/src/rule_type_modal';
-import React, {
-  lazy,
-  useEffect,
-  useState,
-  ReactNode,
-  useCallback,
-  useMemo,
-  useRef,
-  Suspense,
-} from 'react';
+import React, { lazy, useEffect, useState, ReactNode, useCallback, useMemo, Suspense } from 'react';
 import {
   EuiSpacer,
   EuiPageTemplate,
@@ -208,7 +199,6 @@ export const RulesList = ({
     {}
   );
   const [showErrors, setShowErrors] = useState(false);
-  const cloneRuleId = useRef<null | string>(null);
 
   const isRuleStatusFilterEnabled = getIsExperimentalFeatureEnabled('ruleStatusFilter');
 
