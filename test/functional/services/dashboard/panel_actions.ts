@@ -404,7 +404,7 @@ export class DashboardPanelActionsService extends FtrService {
     return await this.convertToLens(header);
   }
 
-  public async expectLinkedToLibrary(title = '', legacy = true) {
+  public async expectLinkedToLibrary(title = '', legacy?: boolean) {
     this.log.debug(`expectLinkedToLibrary(${title})`);
     if (legacy) {
       await this.expectExistsPanelAction(LEGACY_UNLINK_FROM_LIBRARY_TEST_SUBJ, title);
