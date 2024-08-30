@@ -21,11 +21,6 @@ source .buildkite/scripts/common/util.sh
   KIBANA_DOCKER_USERNAME="$(vault_get container-registry username)"
   KIBANA_DOCKER_PASSWORD="$(vault_get container-registry password)"
   function docker_login() {
-      if [[ -z "${FIRST_FAILURE:-}" ]]; then
-        export FIRST_FAILURE=true
-        echo "Intentional failure! Retrying docker login on failure"
-        return 1
-      fi
       if (command -v docker && docker version) &> /dev/null; then
         echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
       fi
