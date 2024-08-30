@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import {
-  ActionsClientChatOpenAI,
   ActionsClientBedrockChatModel,
-  ActionsClientSimpleChatModel,
+  ActionsClientChatOpenAI,
   ActionsClientGeminiChatModel,
+  ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server';
+import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 
 export interface IntegrationAssistantPluginSetup {
   setIsAvailable: (isAvailable: boolean) => void;
@@ -75,6 +75,8 @@ export interface EcsMappingState {
   finalized: boolean;
   currentMapping: object;
   finalMapping: object;
+  chunkMapping: object;
+  useFinalMapping: boolean;
   currentPipeline: object;
   duplicateFields: string[];
   missingKeys: string[];

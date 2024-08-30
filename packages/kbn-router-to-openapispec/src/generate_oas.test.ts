@@ -6,9 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { generateOpenApiDocument } from './generate_oas';
 import { schema, Type } from '@kbn/config-schema';
+import { generateOpenApiDocument } from './generate_oas';
 import { createTestRouters, createRouter, createVersionedRouter } from './generate_oas.test.util';
+import {
+  sharedOas,
+  createSharedZodSchema,
+  createSharedConfigSchema,
+} from './generate_oas.test.fixture';
 
 interface RecursiveType {
   name: string;
@@ -17,6 +22,27 @@ interface RecursiveType {
 
 describe('generateOpenApiDocument', () => {
   describe('@kbn/config-schema', () => {
+    it('generates the expected OpenAPI document for the shared schema', () => {
+      const [routers, versionedRouters] = createTestRouters({
+        routers: { testRouter: { routes: [{ method: 'get' }, { method: 'post' }] } },
+        versionedRouters: { testVersionedRouter: { routes: [{}] } },
+        bodySchema: createSharedConfigSchema(),
+      });
+      expect(
+        generateOpenApiDocument(
+          {
+            routers,
+            versionedRouters,
+          },
+          {
+            title: 'test',
+            baseUrl: 'https://test.oas',
+            version: '99.99.99',
+          }
+        )
+      ).toEqual(sharedOas);
+    });
+
     it('generates the expected OpenAPI document', () => {
       const [routers, versionedRouters] = createTestRouters({
         routers: {
@@ -66,7 +92,10 @@ describe('generateOpenApiDocument', () => {
     it('generates references in the expected format', () => {
       const sharedIdSchema = schema.string({ minLength: 1, meta: { description: 'test' } });
       const sharedNameSchema = schema.string({ minLength: 1 });
-      const otherSchema = schema.object({ name: sharedNameSchema, other: schema.string() });
+      const otherSchema = schema.object(
+        { name: sharedNameSchema, other: schema.string() },
+        { meta: { id: 'foo' } }
+      );
       expect(
         generateOpenApiDocument(
           {
@@ -149,6 +178,29 @@ describe('generateOpenApiDocument', () => {
           }
         )
       ).toMatchSnapshot();
+    });
+  });
+
+  describe('Zod', () => {
+    it('generates the expected OpenAPI document for the shared schema', () => {
+      const [routers, versionedRouters] = createTestRouters({
+        routers: { testRouter: { routes: [{ method: 'get' }, { method: 'post' }] } },
+        versionedRouters: { testVersionedRouter: { routes: [{}] } },
+        bodySchema: createSharedZodSchema(),
+      });
+      expect(
+        generateOpenApiDocument(
+          {
+            routers,
+            versionedRouters,
+          },
+          {
+            title: 'test',
+            baseUrl: 'https://test.oas',
+            version: '99.99.99',
+          }
+        )
+      ).toMatchObject(sharedOas);
     });
   });
 
