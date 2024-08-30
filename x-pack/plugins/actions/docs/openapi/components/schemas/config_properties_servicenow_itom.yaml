@@ -1,7 +1,7 @@
-title: Connector request properties for a ServiceNow ITSM connector
+title: Connector request properties for a ServiceNow ITOM connector
 required:
   - apiUrl
-description: Defines properties for connectors when type is `.servicenow`.
+description: Defines properties for connectors when type is `.servicenow-itom`.
 type: object
 properties:
   apiUrl:
