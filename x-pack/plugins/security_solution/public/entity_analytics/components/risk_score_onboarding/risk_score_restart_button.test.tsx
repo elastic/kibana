@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import userEvent, { type UserEvent } from '@testing-library/user-event';
 import React from 'react';
 import { RiskScoreEntity } from '../../../../common/search_strategy';
 import { TestProviders } from '../../../common/mock';
@@ -15,27 +15,38 @@ import { restartRiskScoreTransforms } from './utils';
 
 jest.mock('./utils');
 
+const mockRestartRiskScoreTransforms = restartRiskScoreTransforms as jest.Mock;
+
 const mockUseState = React.useState;
 jest.mock('../../../common/hooks/use_fetch', () => ({
   ...jest.requireActual('../../../common/hooks/use_fetch'),
   useFetch: jest.fn().mockImplementation(() => {
     const [isLoading, setIsLoading] = mockUseState(false);
     return {
-      fetch: jest.fn().mockImplementation(() => setIsLoading(true)),
+      fetch: jest.fn().mockImplementation((param) => {
+        setIsLoading(true);
+        mockRestartRiskScoreTransforms(param);
+      }),
       isLoading,
     };
   }),
 }));
 
-const mockRestartRiskScoreTransforms = restartRiskScoreTransforms as jest.Mock;
-
 describe('RiskScoreRestartButton', () => {
+  let user: UserEvent;
   const mockRefetch = jest.fn();
   beforeEach(() => {
     jest.useFakeTimers();
     jest.clearAllMocks();
+    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+    user = userEvent.setup({
+      advanceTimers: jest.advanceTimersByTime,
+      pointerEventsCheck: 0,
+    });
   });
   afterEach(() => {
+    jest.clearAllTimers();
+    jest.clearAllMocks();
     jest.useRealTimers();
   });
   describe.each([[RiskScoreEntity.host], [RiskScoreEntity.user]])('%s', (riskScoreEntity) => {
@@ -58,20 +69,17 @@ describe('RiskScoreRestartButton', () => {
         </TestProviders>
       );
 
-      await userEvent.click(screen.getByTestId(`restart_${riskScoreEntity}_risk_score`));
+      await user.click(screen.getByTestId(`restart_${riskScoreEntity}_risk_score`));
 
-      expect(mockRestartRiskScoreTransforms).toHaveBeenCalled();
-      expect(mockRestartRiskScoreTransforms.mock.calls[0][0].riskScoreEntity).toEqual(
-        riskScoreEntity
-      );
+      await waitFor(() => {
+        expect(mockRestartRiskScoreTransforms).toHaveBeenCalled();
+        expect(mockRestartRiskScoreTransforms.mock.calls[0][0].riskScoreEntity).toEqual(
+          riskScoreEntity
+        );
+      });
     });
 
     it('Update button state while installing', async () => {
-      // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
-      const user = userEvent.setup({
-        advanceTimers: jest.advanceTimersByTime,
-        pointerEventsCheck: 0,
-      });
       render(
         <TestProviders>
           <RiskScoreRestartButton refetch={mockRefetch} riskScoreEntity={riskScoreEntity} />
