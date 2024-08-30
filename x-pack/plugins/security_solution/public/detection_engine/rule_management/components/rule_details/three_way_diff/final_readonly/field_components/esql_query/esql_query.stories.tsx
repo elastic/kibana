@@ -13,12 +13,6 @@ import type { DiffableAllFields } from '../../../../../../../../../common/api/de
 export default {
   component: FinalReadOnly,
   title: 'Rule Management/Prebuilt Rules/Upgrade Flyout/ThreeWayDiff/FinalReadonly/esql_query',
-  argTypes: {
-    finalDiffableRule: {
-      control: 'object',
-      description: 'Final value of the diffable rule',
-    },
-  },
 };
 
 interface TemplateProps {

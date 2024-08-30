@@ -15,12 +15,6 @@ export default {
   component: SeverityMappingReadOnly,
   title:
     'Rule Management/Prebuilt Rules/Upgrade Flyout/ThreeWayDiff/FinalReadonly/severity_mapping',
-  argTypes: {
-    finalDiffableRule: {
-      control: 'object',
-      description: 'Final value of the diffable rule',
-    },
-  },
 };
 
 interface TemplateProps {

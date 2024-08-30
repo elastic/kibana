@@ -12,7 +12,6 @@ import type {
   DiffableAllFields,
   RuleKqlQuery,
 } from '../../../../../../../../../common/api/detection_engine';
-
 import { FinalReadOnlyStorybookProviders } from '../../storybook/final_readonly_storybook_providers';
 import {
   dataSourceWithDataView,
@@ -26,12 +25,6 @@ import {
 export default {
   component: FinalReadOnly,
   title: 'Rule Management/Prebuilt Rules/Upgrade Flyout/ThreeWayDiff/FinalReadonly/kql_query',
-  argTypes: {
-    finalDiffableRule: {
-      control: 'object',
-      description: 'Final value of the diffable rule',
-    },
-  },
 };
 
 interface TemplateProps {
@@ -85,6 +78,11 @@ InlineKqlQueryWithDataView.args = {
 export const SavedKqlQueryWithIndexPatterns = Template.bind({});
 
 SavedKqlQueryWithIndexPatterns.args = {
+  finalDiffableRule: {
+    kql_query: savedKqlQuery,
+    data_source: dataSourceWithIndexPatterns,
+    type: 'saved_query',
+  },
   kibanaServicesMock: {
     data: {
       dataViews: {
@@ -95,16 +93,16 @@ SavedKqlQueryWithIndexPatterns.args = {
       get: async () => savedQueryResponse,
     },
   },
-  finalDiffableRule: {
-    kql_query: savedKqlQuery,
-    data_source: dataSourceWithIndexPatterns,
-    type: 'saved_query',
-  },
 };
 
 export const SavedKqlQueryWithDataView = Template.bind({});
 
 SavedKqlQueryWithDataView.args = {
+  finalDiffableRule: {
+    kql_query: savedKqlQuery,
+    data_source: dataSourceWithDataView,
+    type: 'saved_query',
+  },
   kibanaServicesMock: {
     data: {
       dataViews: {
@@ -114,10 +112,5 @@ SavedKqlQueryWithDataView.args = {
     http: {
       get: async () => savedQueryResponse,
     },
-  },
-  finalDiffableRule: {
-    kql_query: savedKqlQuery,
-    data_source: dataSourceWithDataView,
-    type: 'saved_query',
   },
 };

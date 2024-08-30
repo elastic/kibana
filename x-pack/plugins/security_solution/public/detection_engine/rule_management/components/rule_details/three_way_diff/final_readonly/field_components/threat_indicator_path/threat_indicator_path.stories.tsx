@@ -15,12 +15,6 @@ export default {
   component: ThreatIndicatorPathReadOnly,
   title:
     'Rule Management/Prebuilt Rules/Upgrade Flyout/ThreeWayDiff/FinalReadonly/threat_indicator_path',
-  argTypes: {
-    finalDiffableRule: {
-      control: 'object',
-      description: 'Final value of the diffable rule',
-    },
-  },
 };
 
 interface TemplateProps {

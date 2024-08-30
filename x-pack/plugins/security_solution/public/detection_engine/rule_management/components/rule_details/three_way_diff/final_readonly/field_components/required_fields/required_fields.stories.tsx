@@ -13,12 +13,6 @@ import type { DiffableAllFields } from '../../../../../../../../../common/api/de
 export default {
   component: RequiredFieldsReadOnly,
   title: 'Rule Management/Prebuilt Rules/Upgrade Flyout/ThreeWayDiff/FinalReadonly/required_fields',
-  argTypes: {
-    finalDiffableRule: {
-      control: 'object',
-      description: 'Final value of the diffable rule',
-    },
-  },
 };
 
 interface TemplateProps {

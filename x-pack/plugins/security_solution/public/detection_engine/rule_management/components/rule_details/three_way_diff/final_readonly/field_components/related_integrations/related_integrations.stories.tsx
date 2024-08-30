@@ -17,12 +17,6 @@ export default {
   component: RelatedIntegrationsReadOnly,
   title:
     'Rule Management/Prebuilt Rules/Upgrade Flyout/ThreeWayDiff/FinalReadonly/related_integrations',
-  argTypes: {
-    finalDiffableRule: {
-      control: 'object',
-      description: 'Final value of the diffable rule',
-    },
-  },
 };
 
 const mockedIntegrationsData = [

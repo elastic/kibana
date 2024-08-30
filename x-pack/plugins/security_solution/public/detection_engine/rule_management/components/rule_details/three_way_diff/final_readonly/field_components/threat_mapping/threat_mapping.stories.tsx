@@ -14,12 +14,6 @@ import { ThreatMappingReadOnly } from './threat_mapping';
 export default {
   component: ThreatMappingReadOnly,
   title: 'Rule Management/Prebuilt Rules/Upgrade Flyout/ThreeWayDiff/FinalReadonly/threat_mapping',
-  argTypes: {
-    finalDiffableRule: {
-      control: 'object',
-      description: 'Final value of the diffable rule',
-    },
-  },
 };
 
 interface TemplateProps {

@@ -21,12 +21,6 @@ import { FinalReadOnlyStorybookProviders } from '../../storybook/final_readonly_
 export default {
   component: ThreatQueryReadOnly,
   title: 'Rule Management/Prebuilt Rules/Upgrade Flyout/ThreeWayDiff/FinalReadonly/threat_query',
-  argTypes: {
-    finalDiffableRule: {
-      control: 'object',
-      description: 'Final value of the diffable rule',
-    },
-  },
 };
 
 interface TemplateProps {

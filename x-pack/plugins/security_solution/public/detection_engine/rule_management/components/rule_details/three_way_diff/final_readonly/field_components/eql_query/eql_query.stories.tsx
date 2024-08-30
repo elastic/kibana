@@ -9,7 +9,6 @@ import React from 'react';
 import type { Story } from '@storybook/react';
 import { FinalReadOnly } from '../../final_readonly';
 import type { DiffableAllFields } from '../../../../../../../../../common/api/detection_engine';
-
 import { FinalReadOnlyStorybookProviders } from '../../storybook/final_readonly_storybook_providers';
 import { EqlQueryReadOnly } from './eql_query';
 import {
@@ -22,12 +21,6 @@ import {
 export default {
   component: EqlQueryReadOnly,
   title: 'Rule Management/Prebuilt Rules/Upgrade Flyout/ThreeWayDiff/FinalReadonly/eql_query',
-  argTypes: {
-    finalDiffableRule: {
-      control: 'object',
-      description: 'Final value of the diffable rule',
-    },
-  },
 };
 
 interface TemplateProps {

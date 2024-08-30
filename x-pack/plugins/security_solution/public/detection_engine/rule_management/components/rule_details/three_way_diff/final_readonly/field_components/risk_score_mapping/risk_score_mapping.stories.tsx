@@ -15,12 +15,6 @@ export default {
   component: RiskScoreMappingReadOnly,
   title:
     'Rule Management/Prebuilt Rules/Upgrade Flyout/ThreeWayDiff/FinalReadonly/risk_score_mapping',
-  argTypes: {
-    finalDiffableRule: {
-      control: 'object',
-      description: 'Final value of the diffable rule',
-    },
-  },
 };
 
 interface TemplateProps {

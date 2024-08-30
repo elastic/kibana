@@ -49,16 +49,6 @@ export const savedQueryResponse = {
   namespaces: ['default'],
 };
 
-export const indexPatternsDataSource: DiffableAllFields['data_source'] = {
-  type: DataSourceType.index_patterns,
-  index_patterns: ['logs-*'],
-};
-
-export const dataViewDataSource: DiffableAllFields['data_source'] = {
-  type: DataSourceType.data_view,
-  data_view_id: 'logs-*',
-};
-
 export const inlineKqlQuery: DiffableAllFields['kql_query'] = {
   type: KqlQueryType.inline_query,
   query: 'event.action: "user_login" and source.ip: "192.168.1.100"',
@@ -92,6 +82,7 @@ type DataViewDeps = ConstructorParameters<typeof DataView>[0];
 export function mockDataView(spec: Partial<DataViewDeps['spec']> = {}): DataView {
   const dataView = new DataView({
     spec: {
+      title: 'logs-*',
       fields: {
         '@timestamp': {
           name: '@timestamp',

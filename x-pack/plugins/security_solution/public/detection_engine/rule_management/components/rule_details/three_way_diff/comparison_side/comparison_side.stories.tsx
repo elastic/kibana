@@ -33,7 +33,7 @@ export default {
     },
     resolvedValue: {
       control: 'text',
-      description: 'User-set resolved value',
+      description: 'Resolved value',
     },
   },
 };

@@ -20,12 +20,6 @@ export default {
   component: MachineLearningJobIdReadOnly,
   title:
     'Rule Management/Prebuilt Rules/Upgrade Flyout/ThreeWayDiff/FinalReadonly/machine_learning_job_id',
-  argTypes: {
-    finalDiffableRule: {
-      control: 'object',
-      description: 'Final value of the diffable rule',
-    },
-  },
 };
 
 const mockedModulesData = [
@@ -71,8 +65,6 @@ interface TemplateProps {
 }
 
 const Template: Story<TemplateProps> = (args) => {
-  // console.log('dbg template', useSecurityJobs);
-
   return (
     <FinalReadOnlyStorybookProviders kibanaServicesMock={args.kibanaServicesMock}>
       <MockMlData>

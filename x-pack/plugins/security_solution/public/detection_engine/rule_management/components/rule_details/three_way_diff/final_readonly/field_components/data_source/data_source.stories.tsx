@@ -9,19 +9,16 @@ import React from 'react';
 import type { Story } from '@storybook/react';
 import { FinalReadOnly } from '../../final_readonly';
 import type { DiffableAllFields } from '../../../../../../../../../common/api/detection_engine';
-
 import { FinalReadOnlyStorybookProviders } from '../../storybook/final_readonly_storybook_providers';
-import { dataViewDataSource, indexPatternsDataSource } from '../../storybook/mocks';
+import {
+  dataSourceWithDataView,
+  dataSourceWithIndexPatterns,
+  mockDataView,
+} from '../../storybook/mocks';
 
 export default {
   component: FinalReadOnly,
   title: 'Rule Management/Prebuilt Rules/Upgrade Flyout/ThreeWayDiff/FinalReadonly/data_source',
-  argTypes: {
-    finalDiffableRule: {
-      control: 'object',
-      description: 'Final value of the diffable rule',
-    },
-  },
 };
 
 interface TemplateProps {
@@ -44,7 +41,7 @@ export const DataSourceWithIndexPatterns = Template.bind({});
 
 DataSourceWithIndexPatterns.args = {
   finalDiffableRule: {
-    data_source: indexPatternsDataSource,
+    data_source: dataSourceWithIndexPatterns,
   },
 };
 
@@ -52,12 +49,12 @@ export const DataSourceWithDataView = Template.bind({});
 
 DataSourceWithDataView.args = {
   finalDiffableRule: {
-    data_source: dataViewDataSource,
+    data_source: dataSourceWithDataView,
   },
   kibanaServicesMock: {
     data: {
       dataViews: {
-        get: async () => ({ getIndexPattern: () => 'logs-*' }),
+        get: async () => mockDataView(),
       },
     },
   },
