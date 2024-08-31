@@ -5,12 +5,12 @@
  * 2.0.
  */
 import type { CoreStart, CoreTheme } from '@kbn/core/public';
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import type { History } from 'history';
 import React, { useMemo } from 'react';
 import type { Observable } from 'rxjs';
 import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { InventoryStartDependencies } from './types';
 import { inventoryRouter } from './routes/config';
 import { InventoryKibanaContext } from './hooks/use_kibana';
@@ -46,7 +46,11 @@ function Application({
   );
 
   return (
-    <KibanaThemeProvider theme={theme}>
+    <KibanaRenderContextProvider
+      theme={theme}
+      i18n={coreStart.i18n}
+      analytics={coreStart.analytics}
+    >
       <InventoryContextProvider context={context}>
         <RedirectAppLinks coreStart={coreStart}>
           <coreStart.i18n.Context>
@@ -56,7 +60,7 @@ function Application({
           </coreStart.i18n.Context>
         </RedirectAppLinks>
       </InventoryContextProvider>
-    </KibanaThemeProvider>
+    </KibanaRenderContextProvider>
   );
 }
 
