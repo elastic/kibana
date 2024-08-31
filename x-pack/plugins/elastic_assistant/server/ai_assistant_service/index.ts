@@ -88,7 +88,7 @@ export class AIAssistantService {
     this.knowledgeBaseDataStream = this.createDataStream({
       resource: 'knowledgeBase',
       kibanaVersion: options.kibanaVersion,
-      fieldMap: knowledgeBaseFieldMap,
+      fieldMap: knowledgeBaseFieldMap, // TODO: use v2 if FF is enabled
     });
     this.promptsDataStream = this.createDataStream({
       resource: 'prompts',
