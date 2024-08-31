@@ -7,7 +7,7 @@
  */
 
 import expect from '@kbn/expect';
-
+import kbnRison from '@kbn/rison';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -52,7 +52,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await kibanaServer.uiSettings.replace(defaultSettings);
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+    });
+
+    after(async () => {
+      await PageObjects.timePicker.resetDefaultAbsoluteRangeViaUiSettings();
     });
 
     describe('ES|QL in Discover', () => {
@@ -328,8 +332,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('with slow queries', () => {
         it('should show only one entry in inspector for table/visualization', async function () {
+          const state = kbnRison.encode({
+            dataSource: { type: 'esql' },
+            query: { esql: 'from kibana_sample_data_flights' },
+          });
+          await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
+            ensureCurrentUrl: false,
+          });
           await PageObjects.discover.selectTextBaseLang();
-          const testQuery = `from kibana_sample_data_flights | limit 10`;
+          const testQuery = `from logstash-* | limit 10`;
           await monacoEditor.setCodeEditorValue(testQuery);
 
           await browser.execute(() => {
