@@ -19,21 +19,39 @@ const patterns = ['*', '-.*'].concat(
 
 const crossClusterPatterns = patterns.map((ds) => `*:${ds}`);
 
-export const handler: Handler = async (ctx: RequestHandlerContext, req, res) => {
-  const core = await ctx.core;
-  const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
-  const response = await elasticsearchClient.indices.resolveCluster({
-    name: patterns.concat(crossClusterPatterns),
-    allow_no_indices: true,
-    ignore_unavailable: true,
-  });
+const localAndCrossClusterPatterns = patterns.concat(crossClusterPatterns);
 
-  const hasEsData = !!Object.values(response).find((cluster) => cluster.matching_indices);
+export const handler: (callResolveCluster: boolean) => Handler =
+  (callResolveCluster: boolean) => async (ctx: RequestHandlerContext, req, res) => {
+    const core = await ctx.core;
+    const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
+    let hasEsData = false;
 
-  return res.ok({ body: { hasEsData } });
-};
+    if (callResolveCluster) {
+      const response = await elasticsearchClient.indices.resolveCluster({
+        name: localAndCrossClusterPatterns,
+        ignore_unavailable: true,
+      });
 
-export const registerHasEsDataRoute = (router: IRouter): void => {
+      hasEsData = !!Object.values(response).find((cluster) => cluster.matching_indices);
+    } else {
+      const {
+        indices,
+        aliases,
+        data_streams: dataStreams,
+      } = await elasticsearchClient.indices.resolveIndex({
+        name: patterns,
+        // the client doesn't support this parameter yet, enable when it does
+        // ignore_unavailable: true,
+      });
+
+      hasEsData = indices.length > 0 || dataStreams.length > 0 || aliases.length > 0;
+    }
+
+    return res.ok({ body: { hasEsData } });
+  };
+
+export const registerHasEsDataRoute = (router: IRouter, callResolveCluster: boolean): void => {
   router.versioned
     .get({
       path: '/internal/data_views/has_es_data',
@@ -53,6 +71,6 @@ export const registerHasEsDataRoute = (router: IRouter): void => {
           },
         },
       },
-      handler
+      handler(callResolveCluster)
     );
 };

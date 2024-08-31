@@ -37,9 +37,11 @@ export class DataViewsServerPlugin
 {
   private readonly logger: Logger;
   private rollupsEnabled: boolean = false;
+  private readonly callResolveCluster: boolean;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get('dataView');
+    this.callResolveCluster = initializerContext.env.packageInfo.buildFlavor === 'traditional';
   }
 
   public setup(
@@ -65,6 +67,7 @@ export class DataViewsServerPlugin
       getStartServices: core.getStartServices,
       isRollupsEnabled: () => this.rollupsEnabled,
       dataViewRestCounter,
+      callResolveCluster: this.callResolveCluster,
     });
 
     expressions.registerFunction(getIndexPatternLoad({ getStartServices: core.getStartServices }));

@@ -25,6 +25,7 @@ interface RegisterRoutesArgs {
   >;
   isRollupsEnabled: () => boolean;
   dataViewRestCounter?: UsageCounter;
+  callResolveCluster: boolean;
 }
 
 export function registerRoutes({
@@ -32,6 +33,7 @@ export function registerRoutes({
   getStartServices,
   dataViewRestCounter,
   isRollupsEnabled,
+  callResolveCluster,
 }: RegisterRoutesArgs) {
   const router = http.createRouter();
 
@@ -41,5 +43,5 @@ export function registerRoutes({
   registerFieldForWildcard(router, getStartServices, isRollupsEnabled);
   registerFields(router, getStartServices, isRollupsEnabled);
   registerHasDataViewsRoute(router);
-  registerHasEsDataRoute(router);
+  registerHasEsDataRoute(router, callResolveCluster);
 }
