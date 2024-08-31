@@ -50,11 +50,9 @@ export function SuggestionsSelect({
 
   const [searchValue, setSearchValue] = useState('');
 
-  const hasMounted = useRef(false);
-
   const { data, status } = useFetcher(
     (callApmApi) => {
-      if (!hasMounted.current) {
+      if (!searchValue) {
         return { terms: [] }; // Return empty data on initial render
       }
       return callApmApi('GET /internal/apm/suggestions', {
@@ -72,11 +70,6 @@ export function SuggestionsSelect({
     [fieldName, searchValue, start, end, serviceName],
     { preservePreviousData: false }
   );
-
-  // Use useEffect to set hasMounted to true after the initial render
-  useEffect(() => {
-    hasMounted.current = true;
-  }, []);
 
   const handleChange = useCallback(
     (changedOptions: Array<EuiComboBoxOptionOption<string>>) => {
