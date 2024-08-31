@@ -22,7 +22,6 @@ export type InventoryAPIClientOptions = Omit<
   FetchOptions,
   'query' | 'body' | 'pathname' | 'signal'
 > & {
-  asEventSourceStream?: boolean;
   signal: AbortSignal | null;
 };
 

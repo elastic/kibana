@@ -254,10 +254,7 @@ assertType<ReturnOf<TestRepository, 'GET /internal/endpoint_returning_kibana_res
 
 // RouteRepositoryClient
 
-type TestClient = RouteRepositoryClient<
-  TestRepository,
-  { asEventSourceStream?: boolean; timeout: number }
->;
+type TestClient = RouteRepositoryClient<TestRepository, { timeout: number }>;
 
 const client: TestClient = {} as any;
 
@@ -412,6 +409,5 @@ assertType<{ path: { serviceName: boolean } }>(
 assertType<Observable<{ type: 'foo'; data: { streamed_response: boolean } }>>(
   client.stream('POST /internal/endpoint_returning_observable', {
     timeout: 10,
-    asEventSourceStream: true as const,
   })
 );

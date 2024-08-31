@@ -12,6 +12,7 @@ import { createObservabilityEsClient } from '@kbn/observability-utils/es/client/
 import { kqlQuery } from '@kbn/observability-utils/es/queries/kql_query';
 import moment from 'moment';
 import type { Observable } from 'rxjs';
+import { z } from '@kbn/zod';
 import type { Dataset } from '../../../common/datasets';
 import type { EntityDefinition, EntityTypeDefinition } from '../../../common/entities';
 import { createDatasetMatcher } from '../../../common/utils/create_dataset_matcher';
@@ -24,10 +25,12 @@ import {
 
 export const listDatasetsRoute = createInventoryServerRoute({
   endpoint: 'GET /internal/inventory/datasets',
-  params: t.partial({
-    query: t.partial({
-      indexPatterns: t.string,
-    }),
+  params: z.object({
+    query: z
+      .object({
+        indexPatterns: z.string(),
+      })
+      .optional(),
   }),
   options: {
     tags: ['access:inventory'],
@@ -134,9 +137,9 @@ export const listServiceDefinitionsRoute = createInventoryServerRoute({
 
     async function fetchEntityDefinitions() {
       const entityManagerStart = await plugins.entityManager.start();
-      const client = await entityManagerStart.getClientWithRequest({ request });
+      const client = await entityManagerStart.getScopedClient({ request });
 
-      return await client.findEntityDefinitions({
+      return await client.getEntityDefinitions({
         page: 1,
         perPage: 10000,
       });
@@ -147,7 +150,7 @@ export const listServiceDefinitionsRoute = createInventoryServerRoute({
       fetchEntityDefinitions(),
     ]);
 
-    const serviceDefinitions = entityDefinitions.filter(
+    const serviceDefinitions = entityDefinitions.definitions.filter(
       (definition) => definition.type === 'service'
     );
 

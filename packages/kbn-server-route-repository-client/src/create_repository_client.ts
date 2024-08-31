@@ -55,7 +55,7 @@ export function createRepositoryClient<
           asResponse: true,
           rawResponse: true,
         }) as Promise<HttpResponse>
-      ).pipe(httpResponseIntoObservable<any>()) as any;
+      ).pipe(httpResponseIntoObservable()) as any;
     },
   };
 }

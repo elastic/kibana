@@ -98,7 +98,6 @@ export function ServiceExtractionList({ indexPatterns }: { indexPatterns: string
                 connectorId: 'azure-gpt4o',
               },
             },
-            asEventSourceStream: true,
           })
           .subscribe({
             complete: () => {

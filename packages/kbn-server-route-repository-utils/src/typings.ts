@@ -22,38 +22,6 @@ import * as t from 'io-ts';
 import { Observable } from 'rxjs';
 import { RequiredKeys } from 'utility-types';
 
-type PathMaybeOptional<T extends { path: Record<string, any> }> = RequiredKeys<
-  T['path']
-> extends never
-  ? { path?: T['path'] }
-  : { path: T['path'] };
-
-type QueryMaybeOptional<T extends { query: Record<string, any> }> = RequiredKeys<
-  T['query']
-> extends never
-  ? { query?: T['query'] }
-  : { query: T['query'] };
-
-type BodyMaybeOptional<T extends { body: Record<string, any> }> = RequiredKeys<
-  T['body']
-> extends never
-  ? { body?: T['body'] }
-  : { body: T['body'] };
-
-type ParamsMaybeOptional<
-  TPath extends Record<string, any>,
-  TQuery extends Record<string, any>,
-  TBody extends Record<string, any>
-> = PathMaybeOptional<{ path: TPath }> &
-  QueryMaybeOptional<{ query: TQuery }> &
-  BodyMaybeOptional<{ body: TBody }>;
-
-type ZodMaybeOptional<T extends { path: any; query: any; body: any }> = ParamsMaybeOptional<
-  T['path'],
-  T['query'],
-  T['body']
->;
-
 type MaybeOptional<T extends { params: Record<string, any> }> = RequiredKeys<
   T['params']
 > extends never
@@ -65,19 +33,19 @@ type WithoutIncompatibleMethods<T extends t.Any> = Omit<T, 'encode' | 'asEncoder
   asEncoder: () => t.Encoder<any, any>;
 };
 
-export type ZodParamsObject = z.ZodObject<{
+export interface RouteParams {
   path?: any;
   query?: any;
   body?: any;
+}
+
+export type ZodParamsObject = z.ZodObject<{
+  path?: z.ZodSchema;
+  query?: z.ZodSchema;
+  body?: z.ZodSchema;
 }>;
 
-export type IoTsParamsObject = WithoutIncompatibleMethods<
-  t.Type<{
-    path?: any;
-    query?: any;
-    body?: any;
-  }>
->;
+export type IoTsParamsObject = WithoutIncompatibleMethods<t.Type<RouteParams>>;
 
 export type RouteParamsRT = IoTsParamsObject | ZodParamsObject;
 
@@ -133,9 +101,9 @@ type ClientRequestParamsOfType<TRouteParamsRT extends RouteParamsRT> =
     ? MaybeOptional<{
         params: t.OutputOf<TRouteParamsRT>;
       }>
-    : TRouteParamsRT extends z.Schema
+    : TRouteParamsRT extends z.ZodSchema
     ? MaybeOptional<{
-        params: ZodMaybeOptional<z.input<TRouteParamsRT>>;
+        params: z.input<TRouteParamsRT>;
       }>
     : {};
 
@@ -144,10 +112,12 @@ type DecodedRequestParamsOfType<TRouteParamsRT extends RouteParamsRT> =
     ? MaybeOptional<{
         params: t.TypeOf<TRouteParamsRT>;
       }>
-    : TRouteParamsRT extends z.Schema
-    ? MaybeOptional<{
-        params: ZodMaybeOptional<z.output<TRouteParamsRT>>;
-      }>
+    : TRouteParamsRT extends z.ZodType<infer TOutput>
+    ? TOutput extends RouteParams
+      ? MaybeOptional<{
+          params: TOutput;
+        }>
+      : never
     : {};
 
 export type EndpointOf<TServerRouteRepository extends ServerRouteRepository> =

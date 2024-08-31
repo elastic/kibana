@@ -7,11 +7,14 @@
  */
 
 import { OperatorFunction, switchMap } from 'rxjs';
+import type { ServerSentEvent } from '@kbn/sse-utils/src/events';
 import {
   createObservableFromHttpResponse,
   StreamedHttpResponse,
 } from './create_observable_from_http_response';
 
-export function httpResponseIntoObservable<T>(): OperatorFunction<StreamedHttpResponse, T> {
+export function httpResponseIntoObservable<
+  T extends ServerSentEvent = ServerSentEvent
+>(): OperatorFunction<StreamedHttpResponse, T> {
   return switchMap((response) => createObservableFromHttpResponse<T>(response));
 }
