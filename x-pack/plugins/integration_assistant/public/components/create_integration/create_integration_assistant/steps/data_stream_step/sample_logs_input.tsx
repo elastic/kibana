@@ -76,7 +76,16 @@ interface ParseLogsSuccessResult {
 type ParseLogsResult = ParseLogsErrorResult | ParseLogsSuccessResult;
 
 /**
- * Parse the logs sample file content (json or ndjson) and return the parsed logs sample
+ * Parse the logs sample file content and return the parsed logs sample.
+ *
+ * This function will return an error message if the file content is not valid, that is:
+ *  - it is too large to parse (the memory required is 2-3x of the file size); or
+ *  - it looks like a JSON format, but there is no array; or
+ *  - it looks like (ND)JSON format, but the items are not JSON dictionaries.
+ *
+ * Otherwise it is guaranteed to parse and return (possibly empty) `logSamples` array.
+ * If the file content is (ND)JSON, it will additionally:
+ *  - fill out the `samplesFormat` field with name 'json' or 'ndjson'.
  */
 const parseLogsContent = (fileContent: string): ParseLogsResult => {
   let parsedContent: unknown[];
@@ -121,10 +130,6 @@ const parseLogsContent = (fileContent: string): ParseLogsResult => {
         };
       }
     }
-  }
-
-  if (parsedContent.length === 0) {
-    return { error: i18n.LOGS_SAMPLE_ERROR.EMPTY };
   }
 
   if (parsedContent.some((log) => !isPlainObject(log))) {
@@ -192,8 +197,13 @@ export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSe
         }
 
         const { logSamples: possiblyLargeLogSamples, samplesFormat } = result;
-        let logSamples;
 
+        if (possiblyLargeLogSamples.length === 0) {
+          setSampleFileError(i18n.LOGS_SAMPLE_ERROR.EMPTY);
+          return;
+        }
+
+        let logSamples;
         if (possiblyLargeLogSamples.length > MaxLogsSampleRows) {
           logSamples = possiblyLargeLogSamples.slice(0, MaxLogsSampleRows);
           notifications?.toasts.addInfo(i18n.LOGS_SAMPLE_TRUNCATED(MaxLogsSampleRows));
