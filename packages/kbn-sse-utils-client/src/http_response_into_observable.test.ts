@@ -22,11 +22,15 @@ describe('httpResponseIntoObservable', () => {
     const events = [
       {
         type: 'chatCompletionChunk',
-        content: 'Hello',
+        data: {
+          content: 'Hello',
+        },
       },
       {
         type: 'chatCompletionChunk',
-        content: 'Hello again',
+        data: {
+          content: 'Hello again',
+        },
       },
     ];
 

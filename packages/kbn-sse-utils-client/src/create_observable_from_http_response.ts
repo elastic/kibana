@@ -8,13 +8,13 @@
 
 import { createParser } from 'eventsource-parser';
 import { Observable, throwError } from 'rxjs';
-import { createSSEInternalError, ServerSentEventError } from '@kbn/sse-utils';
+import { createSSEInternalError, ServerSentEvent, ServerSentEventError } from '@kbn/sse-utils';
 
 export interface StreamedHttpResponse {
   response?: { body: ReadableStream<Uint8Array> | null | undefined };
 }
 
-export function createObservableFromHttpResponse<T = never>(
+export function createObservableFromHttpResponse<T extends ServerSentEvent = never>(
   response: StreamedHttpResponse
 ): Observable<T> {
   const rawResponse = response.response;
@@ -34,7 +34,7 @@ export function createObservableFromHttpResponse<T = never>(
           if (event.event === 'error') {
             subscriber.error(new ServerSentEventError(data.code, data.message, data.meta));
           } else {
-            subscriber.next(data);
+            subscriber.next({ type: event.event || 'event', data } as T);
           }
         } catch (error) {
           subscriber.error(createSSEInternalError(`Failed to parse JSON`));
