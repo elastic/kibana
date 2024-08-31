@@ -8,7 +8,7 @@
 import semver from 'semver';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { EntityDefinition } from '@kbn/entities-schema';
+import { EntityDefinition, EntityDefinitionUpdate } from '@kbn/entities-schema';
 import { Logger } from '@kbn/logging';
 import {
   generateHistoryIndexTemplateId,
@@ -26,7 +26,7 @@ import {
 import { validateDefinitionCanCreateValidTransformIds } from './transform/validate_transform_ids';
 import { deleteEntityDefinition } from './delete_entity_definition';
 import { deleteHistoryIngestPipeline, deleteLatestIngestPipeline } from './delete_ingest_pipeline';
-import { findEntityDefinitions } from './find_entity_definition';
+import { findEntityDefinitionById } from './find_entity_definition';
 import {
   entityDefinitionExists,
   saveEntityDefinition,
@@ -44,6 +44,7 @@ import { generateEntitiesHistoryIndexTemplateConfig } from './templates/entities
 import { EntityIdConflict } from './errors/entity_id_conflict_error';
 import { EntityDefinitionNotFound } from './errors/entity_not_found';
 import { EntityDefinitionWithState } from './types';
+import { mergeEntityDefinitionUpdate } from './helpers/merge_definition_update';
 
 export interface InstallDefinitionParams {
   esClient: ElasticsearchClient;
@@ -140,13 +141,13 @@ export async function installBuiltInEntityDefinitions({
 
   logger.debug(`Starting installation of ${definitions.length} built-in definitions`);
   const installPromises = definitions.map(async (builtInDefinition) => {
-    const installedDefinitions = await findEntityDefinitions({
+    const installedDefinition = await findEntityDefinitionById({
       esClient,
       soClient,
       id: builtInDefinition.id,
     });
 
-    if (installedDefinitions.length === 0) {
+    if (!installedDefinition) {
       return await installEntityDefinition({
         definition: builtInDefinition,
         esClient,
@@ -156,20 +157,19 @@ export async function installBuiltInEntityDefinitions({
     }
 
     // verify existing installation
-    const installedDefinition = installedDefinitions[0];
-    if (!shouldReinstall(installedDefinition, builtInDefinition)) {
+    if (!shouldReinstallBuiltinDefinition(installedDefinition, builtInDefinition)) {
       return installedDefinition;
     }
 
     logger.debug(
       `Detected failed or outdated installation of definition [${installedDefinition.id}] v${installedDefinition.version}, installing v${builtInDefinition.version}`
     );
-    return await reinstall({
+    return await reinstallEntityDefinition({
       soClient,
       esClient,
       logger,
       definition: installedDefinition,
-      latestDefinition: builtInDefinition,
+      definitionUpdate: builtInDefinition,
     });
   });
 
@@ -223,30 +223,36 @@ async function install({
   ]).then(throwIfRejected);
 
   await updateEntityDefinition(soClient, definition.id, { installStatus: 'installed' });
-
   return { ...definition, installStatus: 'installed' };
 }
 
 // stop and delete the current transforms and reinstall all the components
-async function reinstall({
+export async function reinstallEntityDefinition({
   esClient,
   soClient,
   definition,
-  latestDefinition,
+  definitionUpdate,
   logger,
-}: InstallDefinitionParams & { latestDefinition: EntityDefinition }): Promise<EntityDefinition> {
-  logger.debug(
-    `Reinstalling definition ${definition.id} from v${definition.version} to v${latestDefinition.version}`
-  );
-
+}: InstallDefinitionParams & {
+  definitionUpdate: EntityDefinitionUpdate;
+}): Promise<EntityDefinition> {
   try {
-    await updateEntityDefinition(soClient, latestDefinition.id, {
-      ...latestDefinition,
+    const updatedDefinition = mergeEntityDefinitionUpdate(definition, definitionUpdate);
+
+    logger.debug(
+      () =>
+        `Reinstalling definition ${definition.id} from v${definition.version} to v${
+          definitionUpdate.version
+        }\n${JSON.stringify(updatedDefinition, null, 2)}`
+    );
+
+    await updateEntityDefinition(soClient, definition.id, {
+      ...updatedDefinition,
       installStatus: 'upgrading',
       installStartedAt: new Date().toISOString(),
     });
 
-    logger.debug(`Stopping transforms for definition ${definition.id} v${definition.version}`);
+    logger.debug(`Deleting transforms for definition ${definition.id} v${definition.version}`);
     await Promise.all([
       stopAndDeleteHistoryTransform(esClient, definition, logger),
       isBackfillEnabled(definition)
@@ -259,10 +265,10 @@ async function reinstall({
       esClient,
       soClient,
       logger,
-      definition: latestDefinition,
+      definition: updatedDefinition,
     });
   } catch (err) {
-    await updateEntityDefinition(soClient, latestDefinition.id, {
+    await updateEntityDefinition(soClient, definition.id, {
       installStatus: 'failed',
     });
 
@@ -271,19 +277,34 @@ async function reinstall({
 }
 
 const INSTALLATION_TIMEOUT = 5 * 60 * 1000;
-const shouldReinstall = (
-  definition: EntityDefinitionWithState,
-  latestDefinition: EntityDefinition
-) => {
+export const installationInProgress = (definition: EntityDefinition) => {
   const { installStatus, installStartedAt } = definition;
 
-  const isStale =
+  return (
     (installStatus === 'installing' || installStatus === 'upgrading') &&
-    Date.now() - Date.parse(installStartedAt!) >= INSTALLATION_TIMEOUT;
-  const isOutdated =
-    installStatus === 'installed' && semver.neq(definition.version, latestDefinition.version);
-  const isFailed = installStatus === 'failed';
-  const isPartial = installStatus === 'installed' && !definition.state.installed;
+    Date.now() - Date.parse(installStartedAt!) < INSTALLATION_TIMEOUT
+  );
+};
 
-  return isStale || isOutdated || isFailed || isPartial;
+const installationTimedOut = (definition: EntityDefinition) => {
+  const { installStatus, installStartedAt } = definition;
+
+  return (
+    (installStatus === 'installing' || installStatus === 'upgrading') &&
+    Date.now() - Date.parse(installStartedAt!) >= INSTALLATION_TIMEOUT
+  );
+};
+
+const shouldReinstallBuiltinDefinition = (
+  installedDefinition: EntityDefinitionWithState,
+  latestDefinition: EntityDefinition
+) => {
+  const { installStatus, version, state } = installedDefinition;
+
+  const timedOut = installationTimedOut(installedDefinition);
+  const outdated = installStatus === 'installed' && semver.neq(version, latestDefinition.version);
+  const failed = installStatus === 'failed';
+  const partial = installStatus === 'installed' && !state.installed;
+
+  return timedOut || outdated || failed || partial;
 };

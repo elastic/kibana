@@ -6,7 +6,11 @@
  */
 
 import { DataQualityCheckResult, MeteringStatsIndex, PatternRollup } from '../../../types';
-import { getTotalPatternIncompatible, getTotalPatternIndicesChecked } from '../../../utils/stats';
+import {
+  getDocsCount,
+  getTotalPatternIncompatible,
+  getTotalPatternIndicesChecked,
+} from '../../../utils/stats';
 
 export const getTotalPatternSameFamily = (
   results: Record<string, DataQualityCheckResult> | undefined
@@ -98,3 +102,18 @@ export const getIndexId = ({
   indexName: string;
   stats: Record<string, MeteringStatsIndex> | null;
 }): string | null | undefined => stats && stats[indexName]?.uuid;
+
+export const getIndexDocsCountFromRollup = ({
+  indexName,
+  patternRollup,
+}: {
+  indexName: string;
+  patternRollup: PatternRollup;
+}): number => {
+  const stats: Record<string, MeteringStatsIndex> | null = patternRollup?.stats ?? null;
+
+  return getDocsCount({
+    indexName,
+    stats,
+  });
+};
