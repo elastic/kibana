@@ -9277,6 +9277,10 @@
                 "path": "x-pack/test/alerting_api_integration/common/plugins/actions_simulators/server/resilient_simulation.ts"
               },
               {
+                "plugin": "entityManager",
+                "path": "x-pack/plugins/observability_solution/entity_manager/server/routes/entities/update.ts"
+              },
+              {
                 "plugin": "@kbn/core-http-router-server-internal",
                 "path": "packages/core/http/core-http-router-server-internal/src/router.ts"
               },

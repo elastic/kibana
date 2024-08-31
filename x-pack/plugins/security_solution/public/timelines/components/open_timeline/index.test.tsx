@@ -363,7 +363,7 @@ describe('StatefulOpenTimeline', () => {
 
       await waitFor(() => {
         wrapper
-          .find('.euiCheckbox__input')
+          .find('input.euiCheckbox__input')
           .first()
           .simulate('change', { target: { checked: true } });
 
@@ -425,7 +425,7 @@ describe('StatefulOpenTimeline', () => {
 
       await waitFor(() => {
         wrapper
-          .find('.euiCheckbox__input')
+          .find('input.euiCheckbox__input')
           .first()
           .simulate('change', { target: { checked: true } });
 
@@ -637,7 +637,7 @@ describe('StatefulOpenTimeline', () => {
       await waitFor(() => {
         expect(getSelectedItem().length).toEqual(0);
         wrapper
-          .find('.euiCheckbox__input')
+          .find('input.euiCheckbox__input')
           .first()
           .simulate('change', { target: { checked: true } });
         expect(getSelectedItem().length).toEqual(13);

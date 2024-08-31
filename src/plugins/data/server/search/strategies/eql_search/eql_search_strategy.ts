@@ -10,7 +10,7 @@ import type { TransportResult } from '@elastic/elasticsearch';
 import { tap } from 'rxjs';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
-import { SearchConfigSchema } from '../../../../config';
+import { SearchConfigSchema } from '../../../config';
 import {
   EqlSearchStrategyRequest,
   EqlSearchStrategyResponse,

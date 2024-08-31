@@ -218,7 +218,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('when creating a new conversation', async () => {
+    describe('when creating a new conversation', () => {
       let events: StreamingChatResponseEvent[];
 
       before(async () => {
@@ -298,7 +298,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('after executing a screen context action', async () => {
+    describe('after executing a screen context action', () => {
       let events: StreamingChatResponseEvent[];
 
       before(async () => {
@@ -371,7 +371,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('when updating an existing conversation', async () => {
+    describe('when updating an existing conversation', () => {
       let conversationCreatedEvent: ConversationCreateEvent;
       let conversationUpdatedEvent: ConversationUpdateEvent;
 
