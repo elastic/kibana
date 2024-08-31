@@ -7,7 +7,7 @@
 
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { throttle } from 'lodash';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 
 interface SuggestionsSelectProps {
@@ -50,8 +50,13 @@ export function SuggestionsSelect({
 
   const [searchValue, setSearchValue] = useState('');
 
+  const hasMounted = useRef(false);
+
   const { data, status } = useFetcher(
     (callApmApi) => {
+      if (!hasMounted.current) {
+        return { terms: [] }; // Return empty data on initial render
+      }
       return callApmApi('GET /internal/apm/suggestions', {
         params: {
           query: {
@@ -67,6 +72,11 @@ export function SuggestionsSelect({
     [fieldName, searchValue, start, end, serviceName],
     { preservePreviousData: false }
   );
+
+  // Use useEffect to set hasMounted to true after the initial render
+  useEffect(() => {
+    hasMounted.current = true;
+  }, []);
 
   const handleChange = useCallback(
     (changedOptions: Array<EuiComboBoxOptionOption<string>>) => {
