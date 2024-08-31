@@ -49,7 +49,9 @@ jest.mock('@kbn/cell-actions', () => ({
   useDataGridColumnsCellActions: (prop: unknown) => mockUseDataGridColumnsCellActions(prop),
 }));
 
-export const dataViewMock = buildDataViewMock({
+const EXTENDED_JEST_TIMEOUT = 10000;
+
+const dataViewMock = buildDataViewMock({
   name: 'the-data-view',
   fields: deepMockedFields,
   timeFieldName: '@timestamp',
@@ -338,63 +340,83 @@ describe('UnifiedDataTable', () => {
   });
 
   describe('edit field button', () => {
-    it('should render the edit field button if onFieldEdited is provided', async () => {
-      await renderDataTable({ columns: ['message'], onFieldEdited: jest.fn() });
-      expect(screen.queryByTestId('dataGridHeaderCellActionGroup-message')).not.toBeInTheDocument();
-      userEvent.click(screen.getByRole('button', { name: 'message' }));
-      expect(screen.getByTestId('dataGridHeaderCellActionGroup-message')).toBeInTheDocument();
-      expect(screen.getByTestId('gridEditFieldButton')).toBeInTheDocument();
-    });
+    it(
+      'should render the edit field button if onFieldEdited is provided',
+      async () => {
+        await renderDataTable({ columns: ['message'], onFieldEdited: jest.fn() });
+        expect(
+          screen.queryByTestId('dataGridHeaderCellActionGroup-message')
+        ).not.toBeInTheDocument();
+        userEvent.click(screen.getByRole('button', { name: 'message' }));
+        expect(screen.getByTestId('dataGridHeaderCellActionGroup-message')).toBeInTheDocument();
+        expect(screen.getByTestId('gridEditFieldButton')).toBeInTheDocument();
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
 
-    it('should not render the edit field button if onFieldEdited is not provided', async () => {
-      await renderDataTable({ columns: ['message'] });
-      expect(screen.queryByTestId('dataGridHeaderCellActionGroup-message')).not.toBeInTheDocument();
-      userEvent.click(screen.getByRole('button', { name: 'message' }));
-      expect(screen.getByTestId('dataGridHeaderCellActionGroup-message')).toBeInTheDocument();
-      expect(screen.queryByTestId('gridEditFieldButton')).not.toBeInTheDocument();
-    });
+    it(
+      'should not render the edit field button if onFieldEdited is not provided',
+      async () => {
+        await renderDataTable({ columns: ['message'] });
+        expect(
+          screen.queryByTestId('dataGridHeaderCellActionGroup-message')
+        ).not.toBeInTheDocument();
+        userEvent.click(screen.getByRole('button', { name: 'message' }));
+        expect(screen.getByTestId('dataGridHeaderCellActionGroup-message')).toBeInTheDocument();
+        expect(screen.queryByTestId('gridEditFieldButton')).not.toBeInTheDocument();
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
   });
 
   describe('cellActionsTriggerId', () => {
-    it('should call useDataGridColumnsCellActions with empty params when no cellActionsTriggerId is provided', async () => {
-      await getComponent({
-        ...getProps(),
-        columns: ['message'],
-        onFieldEdited: jest.fn(),
-      });
-      expect(mockUseDataGridColumnsCellActions).toHaveBeenCalledWith({
-        triggerId: undefined,
-        getCellValue: expect.any(Function),
-        fields: undefined,
-        dataGridRef: expect.any(Object),
-        metadata: {
-          dataViewId: 'the-data-view-id',
-          someKey: 'someValue',
-        },
-      });
-    });
+    it(
+      'should call useDataGridColumnsCellActions with empty params when no cellActionsTriggerId is provided',
+      async () => {
+        await getComponent({
+          ...getProps(),
+          columns: ['message'],
+          onFieldEdited: jest.fn(),
+        });
+        expect(mockUseDataGridColumnsCellActions).toHaveBeenCalledWith({
+          triggerId: undefined,
+          getCellValue: expect.any(Function),
+          fields: undefined,
+          dataGridRef: expect.any(Object),
+          metadata: {
+            dataViewId: 'the-data-view-id',
+            someKey: 'someValue',
+          },
+        });
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
 
-    it('should call useDataGridColumnsCellActions properly when cellActionsTriggerId defined', async () => {
-      await getComponent({
-        ...getProps(),
-        columns: ['message'],
-        onFieldEdited: jest.fn(),
-        cellActionsTriggerId: 'test',
-      });
-      expect(mockUseDataGridColumnsCellActions).toHaveBeenCalledWith({
-        triggerId: 'test',
-        getCellValue: expect.any(Function),
-        fields: [
-          dataViewMock.getFieldByName('@timestamp')?.toSpec(),
-          dataViewMock.getFieldByName('message')?.toSpec(),
-        ],
-        dataGridRef: expect.any(Object),
-        metadata: {
-          dataViewId: 'the-data-view-id',
-          someKey: 'someValue',
-        },
-      });
-    });
+    it(
+      'should call useDataGridColumnsCellActions properly when cellActionsTriggerId defined',
+      async () => {
+        await getComponent({
+          ...getProps(),
+          columns: ['message'],
+          onFieldEdited: jest.fn(),
+          cellActionsTriggerId: 'test',
+        });
+        expect(mockUseDataGridColumnsCellActions).toHaveBeenCalledWith({
+          triggerId: 'test',
+          getCellValue: expect.any(Function),
+          fields: [
+            dataViewMock.getFieldByName('@timestamp')?.toSpec(),
+            dataViewMock.getFieldByName('message')?.toSpec(),
+          ],
+          dataGridRef: expect.any(Object),
+          metadata: {
+            dataViewId: 'the-data-view-id',
+            someKey: 'someValue',
+          },
+        });
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
   });
 
   describe('sorting', () => {
@@ -414,78 +436,17 @@ describe('UnifiedDataTable', () => {
       }, {});
     };
 
-    it('should apply client side sorting in ES|QL mode', async () => {
-      await renderDataTable({
-        isPlainRecord: true,
-        columns: ['message'],
-        rows: generateEsHits(dataViewMock, 10).map((hit) =>
-          buildDataTableRecord(hit, dataViewMock)
-        ),
-      });
-      let values = getCellValuesByColumn();
-      expect(values.message).toEqual([
-        'message_0',
-        'message_1',
-        'message_2',
-        'message_3',
-        'message_4',
-        'message_5',
-        'message_6',
-        'message_7',
-        'message_8',
-        'message_9',
-      ]);
-      userEvent.click(getButton('message'));
-      // Column sort button incorrectly renders as "Sort " instead
-      // of "Sort Z-A" in Jest tests, so we need to find it by index
-      userEvent.click(screen.getAllByRole('button', { name: /Sort/ })[2], undefined, {
-        skipPointerEventsCheck: true,
-      });
-      await waitFor(() => {
-        values = getCellValuesByColumn();
-        expect(values.message).toEqual([
-          'message_9',
-          'message_8',
-          'message_7',
-          'message_6',
-          'message_5',
-          'message_4',
-          'message_3',
-          'message_2',
-          'message_1',
-          'message_0',
-        ]);
-      });
-    });
-
-    it('should not apply client side sorting if not in ES|QL mode', async () => {
-      await renderDataTable({
-        columns: ['message'],
-        rows: generateEsHits(dataViewMock, 10).map((hit) =>
-          buildDataTableRecord(hit, dataViewMock)
-        ),
-      });
-      let values = getCellValuesByColumn();
-      expect(values.message).toEqual([
-        'message_0',
-        'message_1',
-        'message_2',
-        'message_3',
-        'message_4',
-        'message_5',
-        'message_6',
-        'message_7',
-        'message_8',
-        'message_9',
-      ]);
-      userEvent.click(getButton('message'));
-      // Column sort button incorrectly renders as "Sort " instead
-      // of "Sort Z-A" in Jest tests, so we need to find it by index
-      userEvent.click(screen.getAllByRole('button', { name: /Sort/ })[2], undefined, {
-        skipPointerEventsCheck: true,
-      });
-      await waitFor(() => {
-        values = getCellValuesByColumn();
+    it(
+      'should apply client side sorting in ES|QL mode',
+      async () => {
+        await renderDataTable({
+          isPlainRecord: true,
+          columns: ['message'],
+          rows: generateEsHits(dataViewMock, 10).map((hit) =>
+            buildDataTableRecord(hit, dataViewMock)
+          ),
+        });
+        let values = getCellValuesByColumn();
         expect(values.message).toEqual([
           'message_0',
           'message_1',
@@ -498,17 +459,88 @@ describe('UnifiedDataTable', () => {
           'message_8',
           'message_9',
         ]);
-      });
-    });
+        userEvent.click(getButton('message'));
+        // Column sort button incorrectly renders as "Sort " instead
+        // of "Sort Z-A" in Jest tests, so we need to find it by index
+        userEvent.click(screen.getAllByRole('button', { name: /Sort/ })[2], undefined, {
+          skipPointerEventsCheck: true,
+        });
+        await waitFor(() => {
+          values = getCellValuesByColumn();
+          expect(values.message).toEqual([
+            'message_9',
+            'message_8',
+            'message_7',
+            'message_6',
+            'message_5',
+            'message_4',
+            'message_3',
+            'message_2',
+            'message_1',
+            'message_0',
+          ]);
+        });
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
 
-    it('should apply sorting', async () => {
-      const component = await getComponent({
-        ...getProps(),
-        sort: [['message', 'desc']],
-        columns: ['message'],
-      });
+    it(
+      'should not apply client side sorting if not in ES|QL mode',
+      async () => {
+        await renderDataTable({
+          columns: ['message'],
+          rows: generateEsHits(dataViewMock, 10).map((hit) =>
+            buildDataTableRecord(hit, dataViewMock)
+          ),
+        });
+        let values = getCellValuesByColumn();
+        expect(values.message).toEqual([
+          'message_0',
+          'message_1',
+          'message_2',
+          'message_3',
+          'message_4',
+          'message_5',
+          'message_6',
+          'message_7',
+          'message_8',
+          'message_9',
+        ]);
+        userEvent.click(getButton('message'));
+        // Column sort button incorrectly renders as "Sort " instead
+        // of "Sort Z-A" in Jest tests, so we need to find it by index
+        userEvent.click(screen.getAllByRole('button', { name: /Sort/ })[2], undefined, {
+          skipPointerEventsCheck: true,
+        });
+        await waitFor(() => {
+          values = getCellValuesByColumn();
+          expect(values.message).toEqual([
+            'message_0',
+            'message_1',
+            'message_2',
+            'message_3',
+            'message_4',
+            'message_5',
+            'message_6',
+            'message_7',
+            'message_8',
+            'message_9',
+          ]);
+        });
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
 
-      expect(component.find(EuiDataGrid).last().prop('sorting')).toMatchInlineSnapshot(`
+    it(
+      'should apply sorting',
+      async () => {
+        const component = await getComponent({
+          ...getProps(),
+          sort: [['message', 'desc']],
+          columns: ['message'],
+        });
+
+        expect(component.find(EuiDataGrid).last().prop('sorting')).toMatchInlineSnapshot(`
         Object {
           "columns": Array [
             Object {
@@ -519,20 +551,24 @@ describe('UnifiedDataTable', () => {
           "onSort": [Function],
         }
       `);
-    });
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
 
-    it('should not apply unknown sorting', async () => {
-      const component = await getComponent({
-        ...getProps(),
-        sort: [
-          ['bytes', 'desc'],
-          ['unknown', 'asc'],
-          ['message', 'desc'],
-        ],
-        columns: ['bytes', 'message'],
-      });
+    it(
+      'should not apply unknown sorting',
+      async () => {
+        const component = await getComponent({
+          ...getProps(),
+          sort: [
+            ['bytes', 'desc'],
+            ['unknown', 'asc'],
+            ['message', 'desc'],
+          ],
+          columns: ['bytes', 'message'],
+        });
 
-      expect(component.find(EuiDataGrid).last().prop('sorting')).toMatchInlineSnapshot(`
+        expect(component.find(EuiDataGrid).last().prop('sorting')).toMatchInlineSnapshot(`
         Object {
           "columns": Array [
             Object {
@@ -547,19 +583,24 @@ describe('UnifiedDataTable', () => {
           "onSort": [Function],
         }
       `);
-    });
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
   });
 
   describe('display settings', () => {
-    it('should include additional display settings if onUpdateSampleSize is provided', async () => {
-      const component = await getComponent({
-        ...getProps(),
-        sampleSizeState: 150,
-        onUpdateSampleSize: jest.fn(),
-        onUpdateRowHeight: jest.fn(),
-      });
+    it(
+      'should include additional display settings if onUpdateSampleSize is provided',
+      async () => {
+        const component = await getComponent({
+          ...getProps(),
+          sampleSizeState: 150,
+          onUpdateSampleSize: jest.fn(),
+          onUpdateRowHeight: jest.fn(),
+        });
 
-      expect(component.find(EuiDataGrid).first().prop('toolbarVisibility')).toMatchInlineSnapshot(`
+        expect(component.find(EuiDataGrid).first().prop('toolbarVisibility'))
+          .toMatchInlineSnapshot(`
         Object {
           "additionalControls": null,
           "showColumnSelector": false,
@@ -584,16 +625,21 @@ describe('UnifiedDataTable', () => {
           "showSortSelector": true,
         }
       `);
-    });
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
 
-    it('should not include additional display settings if onUpdateSampleSize is not provided', async () => {
-      const component = await getComponent({
-        ...getProps(),
-        sampleSizeState: 200,
-        onUpdateRowHeight: jest.fn(),
-      });
+    it(
+      'should not include additional display settings if onUpdateSampleSize is not provided',
+      async () => {
+        const component = await getComponent({
+          ...getProps(),
+          sampleSizeState: 200,
+          onUpdateRowHeight: jest.fn(),
+        });
 
-      expect(component.find(EuiDataGrid).first().prop('toolbarVisibility')).toMatchInlineSnapshot(`
+        expect(component.find(EuiDataGrid).first().prop('toolbarVisibility'))
+          .toMatchInlineSnapshot(`
         Object {
           "additionalControls": null,
           "showColumnSelector": false,
@@ -617,16 +663,21 @@ describe('UnifiedDataTable', () => {
           "showSortSelector": true,
         }
       `);
-    });
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
 
-    it('should hide display settings if no handlers provided', async () => {
-      const component = await getComponent({
-        ...getProps(),
-        onUpdateRowHeight: undefined,
-        onUpdateSampleSize: undefined,
-      });
+    it(
+      'should hide display settings if no handlers provided',
+      async () => {
+        const component = await getComponent({
+          ...getProps(),
+          onUpdateRowHeight: undefined,
+          onUpdateSampleSize: undefined,
+        });
 
-      expect(component.find(EuiDataGrid).first().prop('toolbarVisibility')).toMatchInlineSnapshot(`
+        expect(component.find(EuiDataGrid).first().prop('toolbarVisibility'))
+          .toMatchInlineSnapshot(`
         Object {
           "additionalControls": null,
           "showColumnSelector": false,
@@ -635,302 +686,358 @@ describe('UnifiedDataTable', () => {
           "showSortSelector": true,
         }
       `);
-    });
-  });
-
-  describe('custom control columns', () => {
-    it('should be able to customise the leading controls', async () => {
-      const component = await getComponent({
-        ...getProps(),
-        expandedDoc: {
-          id: 'test',
-          raw: {
-            _index: 'test_i',
-            _id: 'test',
-          },
-          flattened: { test: jest.fn() },
-        },
-        setExpandedDoc: jest.fn(),
-        renderDocumentView: jest.fn(),
-        externalControlColumns: [testLeadingControlColumn],
-        rowAdditionalLeadingControls: mockRowAdditionalLeadingControls,
-      });
-
-      expect(findTestSubject(component, 'test-body-control-column-cell').exists()).toBeTruthy();
-      expect(
-        findTestSubject(component, 'exampleRowControl-visBarVerticalStacked').exists()
-      ).toBeTruthy();
-      expect(
-        findTestSubject(component, 'unifiedDataTable_additionalRowControl_menuControl').exists()
-      ).toBeTruthy();
-    });
-
-    it('should be able to customise the trailing controls', async () => {
-      const component = await getComponent({
-        ...getProps(),
-        expandedDoc: {
-          id: 'test',
-          raw: {
-            _index: 'test_i',
-            _id: 'test',
-          },
-          flattened: { test: jest.fn() },
-        },
-        setExpandedDoc: jest.fn(),
-        renderDocumentView: jest.fn(),
-        externalControlColumns: [testLeadingControlColumn],
-        trailingControlColumns: testTrailingControlColumns,
-      });
-
-      expect(findTestSubject(component, 'test-body-control-column-cell').exists()).toBeTruthy();
-      expect(
-        findTestSubject(component, 'test-trailing-column-popover-button').exists()
-      ).toBeTruthy();
-    });
-  });
-
-  describe('externalControlColumns', () => {
-    it('should render external leading control columns', async () => {
-      const component = await getComponent({
-        ...getProps(),
-        expandedDoc: {
-          id: 'test',
-          raw: {
-            _index: 'test_i',
-            _id: 'test',
-          },
-          flattened: { test: jest.fn() },
-        },
-        setExpandedDoc: jest.fn(),
-        renderDocumentView: jest.fn(),
-        externalControlColumns: [testLeadingControlColumn],
-      });
-
-      expect(findTestSubject(component, 'docTableExpandToggleColumn').exists()).toBeTruthy();
-      expect(findTestSubject(component, 'test-body-control-column-cell').exists()).toBeTruthy();
-    });
-  });
-
-  it('should render provided in renderDocumentView DocumentView on expand clicked', async () => {
-    const expandedDoc = {
-      id: 'test',
-      raw: {
-        _index: 'test_i',
-        _id: 'test',
       },
-      flattened: { test: jest.fn() },
-    };
-    const columnsMetaOverride = { testField: { type: 'number' as DatatableColumnType } };
-    const renderDocumentViewMock = jest.fn((hit: DataTableRecord) => (
-      <div data-test-subj="test-document-view">{hit.id}</div>
-    ));
-
-    const component = await getComponent({
-      ...getProps(),
-      expandedDoc,
-      setExpandedDoc: jest.fn(),
-      columnsMeta: columnsMetaOverride,
-      renderDocumentView: renderDocumentViewMock,
-      externalControlColumns: [testLeadingControlColumn],
-    });
-
-    findTestSubject(component, 'docTableExpandToggleColumn').first().simulate('click');
-    expect(findTestSubject(component, 'test-document-view').exists()).toBeTruthy();
-    expect(renderDocumentViewMock).toHaveBeenLastCalledWith(
-      expandedDoc,
-      getProps().rows,
-      ['_source'],
-      columnsMetaOverride
+      EXTENDED_JEST_TIMEOUT
     );
   });
 
-  describe('externalAdditionalControls', () => {
-    it('should render external additional toolbar controls', async () => {
+  describe('custom control columns', () => {
+    it(
+      'should be able to customise the leading controls',
+      async () => {
+        const component = await getComponent({
+          ...getProps(),
+          expandedDoc: {
+            id: 'test',
+            raw: {
+              _index: 'test_i',
+              _id: 'test',
+            },
+            flattened: { test: jest.fn() },
+          },
+          setExpandedDoc: jest.fn(),
+          renderDocumentView: jest.fn(),
+          externalControlColumns: [testLeadingControlColumn],
+          rowAdditionalLeadingControls: mockRowAdditionalLeadingControls,
+        });
+
+        expect(findTestSubject(component, 'test-body-control-column-cell').exists()).toBeTruthy();
+        expect(
+          findTestSubject(component, 'exampleRowControl-visBarVerticalStacked').exists()
+        ).toBeTruthy();
+        expect(
+          findTestSubject(component, 'unifiedDataTable_additionalRowControl_menuControl').exists()
+        ).toBeTruthy();
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+
+    it(
+      'should be able to customise the trailing controls',
+      async () => {
+        const component = await getComponent({
+          ...getProps(),
+          expandedDoc: {
+            id: 'test',
+            raw: {
+              _index: 'test_i',
+              _id: 'test',
+            },
+            flattened: { test: jest.fn() },
+          },
+          setExpandedDoc: jest.fn(),
+          renderDocumentView: jest.fn(),
+          externalControlColumns: [testLeadingControlColumn],
+          trailingControlColumns: testTrailingControlColumns,
+        });
+
+        expect(findTestSubject(component, 'test-body-control-column-cell').exists()).toBeTruthy();
+        expect(
+          findTestSubject(component, 'test-trailing-column-popover-button').exists()
+        ).toBeTruthy();
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+  });
+
+  describe('externalControlColumns', () => {
+    it(
+      'should render external leading control columns',
+      async () => {
+        const component = await getComponent({
+          ...getProps(),
+          expandedDoc: {
+            id: 'test',
+            raw: {
+              _index: 'test_i',
+              _id: 'test',
+            },
+            flattened: { test: jest.fn() },
+          },
+          setExpandedDoc: jest.fn(),
+          renderDocumentView: jest.fn(),
+          externalControlColumns: [testLeadingControlColumn],
+        });
+
+        expect(findTestSubject(component, 'docTableExpandToggleColumn').exists()).toBeTruthy();
+        expect(findTestSubject(component, 'test-body-control-column-cell').exists()).toBeTruthy();
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+  });
+
+  it(
+    'should render provided in renderDocumentView DocumentView on expand clicked',
+    async () => {
+      const expandedDoc = {
+        id: 'test',
+        raw: {
+          _index: 'test_i',
+          _id: 'test',
+        },
+        flattened: { test: jest.fn() },
+      };
+      const columnsMetaOverride = { testField: { type: 'number' as DatatableColumnType } };
+      const renderDocumentViewMock = jest.fn((hit: DataTableRecord) => (
+        <div data-test-subj="test-document-view">{hit.id}</div>
+      ));
+
       const component = await getComponent({
         ...getProps(),
-        columns: ['message'],
-        externalAdditionalControls: <EuiButton data-test-subj="test-additional-control" />,
+        expandedDoc,
+        setExpandedDoc: jest.fn(),
+        columnsMeta: columnsMetaOverride,
+        renderDocumentView: renderDocumentViewMock,
+        externalControlColumns: [testLeadingControlColumn],
       });
 
-      expect(findTestSubject(component, 'test-additional-control').exists()).toBeTruthy();
-      expect(findTestSubject(component, 'dataGridColumnSelectorButton').exists()).toBeTruthy();
-    });
+      findTestSubject(component, 'docTableExpandToggleColumn').first().simulate('click');
+      expect(findTestSubject(component, 'test-document-view').exists()).toBeTruthy();
+      expect(renderDocumentViewMock).toHaveBeenLastCalledWith(
+        expandedDoc,
+        getProps().rows,
+        ['_source'],
+        columnsMetaOverride
+      );
+    },
+    EXTENDED_JEST_TIMEOUT
+  );
+
+  describe('externalAdditionalControls', () => {
+    it(
+      'should render external additional toolbar controls',
+      async () => {
+        const component = await getComponent({
+          ...getProps(),
+          columns: ['message'],
+          externalAdditionalControls: <EuiButton data-test-subj="test-additional-control" />,
+        });
+
+        expect(findTestSubject(component, 'test-additional-control').exists()).toBeTruthy();
+        expect(findTestSubject(component, 'dataGridColumnSelectorButton').exists()).toBeTruthy();
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
   });
 
   describe('externalCustomRenderers', () => {
-    it('should render only host column with the custom renderer, message should be rendered with the default cell renderer', async () => {
-      const component = await getComponent({
-        ...getProps(),
-        columns: ['message', 'host'],
-        externalCustomRenderers: {
-          host: (props: EuiDataGridCellValueElementProps) => (
-            <div data-test-subj={`test-renderer-${props.columnId}`}>{props.columnId}</div>
-          ),
-        },
-      });
+    it(
+      'should render only host column with the custom renderer, message should be rendered with the default cell renderer',
+      async () => {
+        const component = await getComponent({
+          ...getProps(),
+          columns: ['message', 'host'],
+          externalCustomRenderers: {
+            host: (props: EuiDataGridCellValueElementProps) => (
+              <div data-test-subj={`test-renderer-${props.columnId}`}>{props.columnId}</div>
+            ),
+          },
+        });
 
-      expect(findTestSubject(component, 'test-renderer-host').exists()).toBeTruthy();
-      expect(findTestSubject(component, 'test-renderer-message').exists()).toBeFalsy();
-    });
+        expect(findTestSubject(component, 'test-renderer-host').exists()).toBeTruthy();
+        expect(findTestSubject(component, 'test-renderer-message').exists()).toBeFalsy();
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
   });
 
   describe('renderCustomGridBody', () => {
-    it('should render custom grid body for each row', async () => {
-      const component = await getComponent({
-        ...getProps(),
-        columns: ['message', 'host'],
-        trailingControlColumns: [
-          {
-            id: 'row-details',
+    it(
+      'should render custom grid body for each row',
+      async () => {
+        const component = await getComponent({
+          ...getProps(),
+          columns: ['message', 'host'],
+          trailingControlColumns: [
+            {
+              id: 'row-details',
 
-            // The header cell should be visually hidden, but available to screen readers
-            width: 0,
-            headerCellRender: () => <></>,
-            headerCellProps: { className: 'euiScreenReaderOnly' },
+              // The header cell should be visually hidden, but available to screen readers
+              width: 0,
+              headerCellRender: () => <></>,
+              headerCellProps: { className: 'euiScreenReaderOnly' },
 
-            // The footer cell can be hidden to both visual & SR users, as it does not contain meaningful information
-            footerCellProps: { style: { display: 'none' } },
+              // The footer cell can be hidden to both visual & SR users, as it does not contain meaningful information
+              footerCellProps: { style: { display: 'none' } },
 
-            // When rendering this custom cell, we'll want to override
-            // the automatic width/heights calculated by EuiDataGrid
-            rowCellRender: jest.fn(),
-          },
-        ],
-        renderCustomGridBody: (props: EuiDataGridCustomBodyProps) => (
-          <div data-test-subj="test-renderer-custom-grid-body">
-            <EuiButton />
-          </div>
-        ),
-      });
+              // When rendering this custom cell, we'll want to override
+              // the automatic width/heights calculated by EuiDataGrid
+              rowCellRender: jest.fn(),
+            },
+          ],
+          renderCustomGridBody: (props: EuiDataGridCustomBodyProps) => (
+            <div data-test-subj="test-renderer-custom-grid-body">
+              <EuiButton />
+            </div>
+          ),
+        });
 
-      expect(findTestSubject(component, 'test-renderer-custom-grid-body').exists()).toBeTruthy();
-    });
+        expect(findTestSubject(component, 'test-renderer-custom-grid-body').exists()).toBeTruthy();
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
   });
 
   describe('componentsTourSteps', () => {
-    it('should render tour step for the first row of leading control column expandButton', async () => {
-      const component = await getComponent({
-        ...getProps(),
-        expandedDoc: {
-          id: 'test',
-          raw: {
-            _index: 'test_i',
-            _id: 'test',
+    it(
+      'should render tour step for the first row of leading control column expandButton',
+      async () => {
+        const component = await getComponent({
+          ...getProps(),
+          expandedDoc: {
+            id: 'test',
+            raw: {
+              _index: 'test_i',
+              _id: 'test',
+            },
+            flattened: { test: jest.fn() },
           },
-          flattened: { test: jest.fn() },
-        },
-        setExpandedDoc: jest.fn(),
-        renderDocumentView: jest.fn(),
-        componentsTourSteps: { expandButton: 'test-expand' },
-      });
+          setExpandedDoc: jest.fn(),
+          renderDocumentView: jest.fn(),
+          componentsTourSteps: { expandButton: 'test-expand' },
+        });
 
-      const gridExpandBtn = findTestSubject(component, 'docTableExpandToggleColumn').first();
-      const tourStep = gridExpandBtn.getDOMNode().getAttribute('id');
-      expect(tourStep).toEqual('test-expand');
-    });
+        const gridExpandBtn = findTestSubject(component, 'docTableExpandToggleColumn').first();
+        const tourStep = gridExpandBtn.getDOMNode().getAttribute('id');
+        expect(tourStep).toEqual('test-expand');
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
   });
 
   describe('renderCustomToolbar', () => {
-    it('should render a custom toolbar', async () => {
-      let toolbarParams: Record<string, unknown> = {};
-      let gridParams: Record<string, unknown> = {};
-      const renderCustomToolbarMock = jest.fn((props) => {
-        toolbarParams = props.toolbarProps;
-        gridParams = props.gridProps;
-        return <div data-test-subj="custom-toolbar">Custom layout</div>;
-      });
-      const component = await getComponent({
-        ...getProps(),
-        renderCustomToolbar: renderCustomToolbarMock,
-      });
+    it(
+      'should render a custom toolbar',
+      async () => {
+        let toolbarParams: Record<string, unknown> = {};
+        let gridParams: Record<string, unknown> = {};
+        const renderCustomToolbarMock = jest.fn((props) => {
+          toolbarParams = props.toolbarProps;
+          gridParams = props.gridProps;
+          return <div data-test-subj="custom-toolbar">Custom layout</div>;
+        });
+        const component = await getComponent({
+          ...getProps(),
+          renderCustomToolbar: renderCustomToolbarMock,
+        });
 
-      // custom toolbar should be rendered
-      expect(findTestSubject(component, 'custom-toolbar').exists()).toBe(true);
+        // custom toolbar should be rendered
+        expect(findTestSubject(component, 'custom-toolbar').exists()).toBe(true);
 
-      expect(renderCustomToolbarMock).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          toolbarProps: expect.objectContaining({
-            hasRoomForGridControls: true,
-          }),
-          gridProps: expect.objectContaining({
-            additionalControls: null,
-          }),
-        })
-      );
+        expect(renderCustomToolbarMock).toHaveBeenLastCalledWith(
+          expect.objectContaining({
+            toolbarProps: expect.objectContaining({
+              hasRoomForGridControls: true,
+            }),
+            gridProps: expect.objectContaining({
+              additionalControls: null,
+            }),
+          })
+        );
 
-      // the default eui controls should be available for custom rendering
-      expect(toolbarParams?.columnSortingControl).toBeTruthy();
-      expect(toolbarParams?.keyboardShortcutsControl).toBeTruthy();
-      expect(gridParams?.additionalControls).toBe(null);
+        // the default eui controls should be available for custom rendering
+        expect(toolbarParams?.columnSortingControl).toBeTruthy();
+        expect(toolbarParams?.keyboardShortcutsControl).toBeTruthy();
+        expect(gridParams?.additionalControls).toBe(null);
 
-      // additional controls become available after selecting a document
-      act(() => {
-        component
-          .find('.euiDataGridRowCell[data-gridcell-column-id="select"] .euiCheckbox__input')
-          .first()
-          .simulate('change');
-      });
+        // additional controls become available after selecting a document
+        act(() => {
+          component
+            .find('.euiDataGridRowCell[data-gridcell-column-id="select"] .euiCheckbox__input')
+            .first()
+            .simulate('change');
+        });
 
-      expect(toolbarParams?.keyboardShortcutsControl).toBeTruthy();
-      expect(gridParams?.additionalControls).toBeTruthy();
-    });
+        expect(toolbarParams?.keyboardShortcutsControl).toBeTruthy();
+        expect(gridParams?.additionalControls).toBeTruthy();
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
   });
 
   describe('gridStyleOverride', () => {
-    it('should render the grid with the default style if no gridStyleOverride is provided', async () => {
-      const component = await getComponent({
-        ...getProps(),
-      });
+    it(
+      'should render the grid with the default style if no gridStyleOverride is provided',
+      async () => {
+        const component = await getComponent({
+          ...getProps(),
+        });
 
-      const grid = findTestSubject(component, 'docTable');
+        const grid = findTestSubject(component, 'docTable');
 
-      expect(grid.hasClass('euiDataGrid--bordersHorizontal')).toBeTruthy();
-      expect(grid.hasClass('euiDataGrid--fontSizeSmall')).toBeTruthy();
-      expect(grid.hasClass('euiDataGrid--paddingSmall')).toBeTruthy();
-      expect(grid.hasClass('euiDataGrid--rowHoverHighlight')).toBeTruthy();
-      expect(grid.hasClass('euiDataGrid--headerUnderline')).toBeTruthy();
-      expect(grid.hasClass('euiDataGrid--stripes')).toBeTruthy();
-    });
-    it('should render the grid with style override if gridStyleOverride is provided', async () => {
-      const component = await getComponent({
-        ...getProps(),
-        gridStyleOverride: {
-          stripes: false,
-          rowHover: 'none',
-          border: 'none',
-        },
-      });
+        expect(grid.hasClass('euiDataGrid--bordersHorizontal')).toBeTruthy();
+        expect(grid.hasClass('euiDataGrid--fontSizeSmall')).toBeTruthy();
+        expect(grid.hasClass('euiDataGrid--paddingSmall')).toBeTruthy();
+        expect(grid.hasClass('euiDataGrid--rowHoverHighlight')).toBeTruthy();
+        expect(grid.hasClass('euiDataGrid--headerUnderline')).toBeTruthy();
+        expect(grid.hasClass('euiDataGrid--stripes')).toBeTruthy();
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
 
-      const grid = findTestSubject(component, 'docTable');
+    it(
+      'should render the grid with style override if gridStyleOverride is provided',
+      async () => {
+        const component = await getComponent({
+          ...getProps(),
+          gridStyleOverride: {
+            stripes: false,
+            rowHover: 'none',
+            border: 'none',
+          },
+        });
 
-      expect(grid.hasClass('euiDataGrid--stripes')).toBeFalsy();
-      expect(grid.hasClass('euiDataGrid--rowHoverHighlight')).toBeFalsy();
-      expect(grid.hasClass('euiDataGrid--bordersNone')).toBeTruthy();
-    });
+        const grid = findTestSubject(component, 'docTable');
+
+        expect(grid.hasClass('euiDataGrid--stripes')).toBeFalsy();
+        expect(grid.hasClass('euiDataGrid--rowHoverHighlight')).toBeFalsy();
+        expect(grid.hasClass('euiDataGrid--bordersNone')).toBeTruthy();
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
   });
 
   describe('rowLineHeightOverride', () => {
-    it('should render the grid with the default row line height if no rowLineHeightOverride is provided', async () => {
-      const component = await getComponent({
-        ...getProps(),
-      });
+    it(
+      'should render the grid with the default row line height if no rowLineHeightOverride is provided',
+      async () => {
+        const component = await getComponent({
+          ...getProps(),
+        });
 
-      const gridRowCell = findTestSubject(component, 'dataGridRowCell').first();
-      expect(gridRowCell.prop('style')).toMatchObject({
-        lineHeight: '1.6em',
-      });
-    });
-    it('should render the grid with row line height override if rowLineHeightOverride is provided', async () => {
-      const component = await getComponent({
-        ...getProps(),
-        rowLineHeightOverride: '24px',
-      });
+        const gridRowCell = findTestSubject(component, 'dataGridRowCell').first();
+        expect(gridRowCell.prop('style')).toMatchObject({
+          lineHeight: '1.6em',
+        });
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
 
-      const gridRowCell = findTestSubject(component, 'dataGridRowCell').first();
-      expect(gridRowCell.prop('style')).toMatchObject({
-        lineHeight: '24px',
-      });
-    });
+    it(
+      'should render the grid with row line height override if rowLineHeightOverride is provided',
+      async () => {
+        const component = await getComponent({
+          ...getProps(),
+          rowLineHeightOverride: '24px',
+        });
+
+        const gridRowCell = findTestSubject(component, 'dataGridRowCell').first();
+        expect(gridRowCell.prop('style')).toMatchObject({
+          lineHeight: '24px',
+        });
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
   });
 
   describe('document comparison', () => {
@@ -979,84 +1086,130 @@ describe('UnifiedDataTable', () => {
     const getCellValues = () =>
       Array.from(document.querySelectorAll(`.${CELL_CLASS}`)).map(({ textContent }) => textContent);
 
-    it('should not allow comparison if less than 2 documents are selected', async () => {
-      await renderDataTable({ enableComparisonMode: true });
-      expect(getSelectedDocumentsButton()).not.toBeInTheDocument();
-      selectDocument(esHitsMock[0]);
-      expect(getSelectedDocumentsButton()).toBeInTheDocument();
-      await openSelectedRowsMenu();
-      expect(getCompareDocumentsButton()).not.toBeInTheDocument();
-      await closeSelectedRowsMenu();
-      selectDocument(esHitsMock[1]);
-      expect(getSelectedDocumentsButton()).toBeInTheDocument();
-      await openSelectedRowsMenu();
-      expect(getCompareDocumentsButton()).toBeInTheDocument();
-      await closeSelectedRowsMenu();
-    });
+    it(
+      'should not allow comparison if less than 2 documents are selected',
+      async () => {
+        await renderDataTable({ enableComparisonMode: true });
+        expect(getSelectedDocumentsButton()).not.toBeInTheDocument();
+        selectDocument(esHitsMock[0]);
+        expect(getSelectedDocumentsButton()).toBeInTheDocument();
+        await openSelectedRowsMenu();
+        expect(getCompareDocumentsButton()).not.toBeInTheDocument();
+        await closeSelectedRowsMenu();
+        selectDocument(esHitsMock[1]);
+        expect(getSelectedDocumentsButton()).toBeInTheDocument();
+        await openSelectedRowsMenu();
+        expect(getCompareDocumentsButton()).toBeInTheDocument();
+        await closeSelectedRowsMenu();
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
 
-    it('should not allow comparison if comparison mode is disabled', async () => {
-      await renderDataTable({ enableComparisonMode: false });
-      selectDocument(esHitsMock[0]);
-      selectDocument(esHitsMock[1]);
-      await openSelectedRowsMenu();
-      expect(getCompareDocumentsButton()).not.toBeInTheDocument();
-      await closeSelectedRowsMenu();
-    });
+    it(
+      'should not allow comparison if comparison mode is disabled',
+      async () => {
+        await renderDataTable({ enableComparisonMode: false });
+        selectDocument(esHitsMock[0]);
+        selectDocument(esHitsMock[1]);
+        await openSelectedRowsMenu();
+        expect(getCompareDocumentsButton()).not.toBeInTheDocument();
+        await closeSelectedRowsMenu();
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
 
-    it('should allow comparison if 2 or more documents are selected and comparison mode is enabled', async () => {
-      await renderDataTable({ enableComparisonMode: true });
-      await goToComparisonMode();
-      expect(getColumnHeaders()).toEqual(['Field', '1', '2']);
-      expect(getCellValues()).toEqual(['', '', 'i', 'i', '20', '', '', 'jpg', 'test1', '']);
-    });
+    it(
+      'should allow comparison if 2 or more documents are selected and comparison mode is enabled',
+      async () => {
+        await renderDataTable({ enableComparisonMode: true });
+        await goToComparisonMode();
+        expect(getColumnHeaders()).toEqual(['Field', '1', '2']);
+        expect(getCellValues()).toEqual(['', '', 'i', 'i', '20', '', '', 'jpg', 'test1', '']);
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
 
-    it('should show full screen button if showFullScreenButton is true', async () => {
-      await renderDataTable({ enableComparisonMode: true, showFullScreenButton: true });
-      await goToComparisonMode();
-      expect(getFullScreenButton()).toBeInTheDocument();
-    });
+    it(
+      'should show full screen button if showFullScreenButton is true',
+      async () => {
+        await renderDataTable({ enableComparisonMode: true, showFullScreenButton: true });
+        await goToComparisonMode();
+        expect(getFullScreenButton()).toBeInTheDocument();
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
 
-    it('should hide full screen button if showFullScreenButton is false', async () => {
-      await renderDataTable({ enableComparisonMode: true, showFullScreenButton: false });
-      await goToComparisonMode();
-      expect(getFullScreenButton()).not.toBeInTheDocument();
-    });
+    it(
+      'should hide full screen button if showFullScreenButton is false',
+      async () => {
+        await renderDataTable({ enableComparisonMode: true, showFullScreenButton: false });
+        await goToComparisonMode();
+        expect(getFullScreenButton()).not.toBeInTheDocument();
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
 
-    it('should render selected fields', async () => {
-      const columns = ['bytes', 'message'];
-      await renderDataTable({ enableComparisonMode: true, columns });
-      await goToComparisonMode();
-      expect(getFieldColumns()).toEqual(['@timestamp', ...columns]);
-    });
+    it(
+      'should render selected fields',
+      async () => {
+        const columns = ['bytes', 'message'];
+        await renderDataTable({ enableComparisonMode: true, columns });
+        await goToComparisonMode();
+        expect(getFieldColumns()).toEqual(['@timestamp', ...columns]);
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
 
-    it('should render all available fields if no fields are selected', async () => {
-      await renderDataTable({ enableComparisonMode: true });
-      await goToComparisonMode();
-      expect(getFieldColumns()).toEqual(['@timestamp', '_index', 'bytes', 'extension', 'message']);
-    });
+    it(
+      'should render all available fields if no fields are selected',
+      async () => {
+        await renderDataTable({ enableComparisonMode: true });
+        await goToComparisonMode();
+        expect(getFieldColumns()).toEqual([
+          '@timestamp',
+          '_index',
+          'bytes',
+          'extension',
+          'message',
+        ]);
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
   });
 
   describe('getRowIndicator', () => {
-    it('should render the color indicator control', async () => {
-      const component = await getComponent({
-        ...getProps(),
-        getRowIndicator: jest.fn(() => ({ color: 'blue', label: 'test' })),
-      });
+    it(
+      'should render the color indicator control',
+      async () => {
+        const component = await getComponent({
+          ...getProps(),
+          getRowIndicator: jest.fn(() => ({ color: 'blue', label: 'test' })),
+        });
 
-      expect(findTestSubject(component, 'dataGridHeaderCell-colorIndicator').exists()).toBeTruthy();
-      expect(
-        findTestSubject(component, 'unifiedDataTableRowColorIndicatorCell').first().prop('title')
-      ).toEqual('test');
-    });
+        expect(
+          findTestSubject(component, 'dataGridHeaderCell-colorIndicator').exists()
+        ).toBeTruthy();
+        expect(
+          findTestSubject(component, 'unifiedDataTableRowColorIndicatorCell').first().prop('title')
+        ).toEqual('test');
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
 
-    it('should not render the color indicator control by default', async () => {
-      const component = await getComponent({
-        ...getProps(),
-        getRowIndicator: undefined,
-      });
+    it(
+      'should not render the color indicator control by default',
+      async () => {
+        const component = await getComponent({
+          ...getProps(),
+          getRowIndicator: undefined,
+        });
 
-      expect(findTestSubject(component, 'dataGridHeaderCell-colorIndicator').exists()).toBeFalsy();
-    });
+        expect(
+          findTestSubject(component, 'dataGridHeaderCell-colorIndicator').exists()
+        ).toBeFalsy();
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
   });
 
   describe('columns', () => {
@@ -1067,76 +1220,90 @@ describe('UnifiedDataTable', () => {
     const getButton = (name: string) => screen.getByRole('button', { name });
     const queryButton = (name: string) => screen.queryByRole('button', { name });
 
-    it('should reset the last column to auto width if only absolute width columns remain', async () => {
-      await renderDataTable({
-        columns: ['message', 'extension', 'bytes'],
-        settings: {
-          columns: {
-            extension: { width: 50 },
-            bytes: { width: 50 },
+    it(
+      'should reset the last column to auto width if only absolute width columns remain',
+      async () => {
+        await renderDataTable({
+          columns: ['message', 'extension', 'bytes'],
+          settings: {
+            columns: {
+              extension: { width: 50 },
+              bytes: { width: 50 },
+            },
           },
-        },
-      });
-      expect(getColumnHeader('message')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
-      expect(getColumnHeader('extension')).toHaveStyle({ width: '50px' });
-      expect(getColumnHeader('bytes')).toHaveStyle({ width: '50px' });
-      userEvent.click(getButton('message'));
-      userEvent.click(getButton('Remove column'), undefined, { skipPointerEventsCheck: true });
-      await waitFor(() => {
-        expect(queryColumnHeader('message')).not.toBeInTheDocument();
-      });
-      expect(getColumnHeader('extension')).toHaveStyle({ width: '50px' });
-      expect(getColumnHeader('bytes')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
-    });
-
-    it('should not reset the last column to auto width when there are remaining auto width columns', async () => {
-      await renderDataTable({
-        columns: ['message', 'extension', 'bytes'],
-        settings: {
-          columns: {
-            bytes: { width: 50 },
-          },
-        },
-      });
-      expect(getColumnHeader('message')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
-      expect(getColumnHeader('extension')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
-      expect(getColumnHeader('bytes')).toHaveStyle({ width: '50px' });
-      userEvent.click(getButton('message'));
-      userEvent.click(getButton('Remove column'), undefined, { skipPointerEventsCheck: true });
-      await waitFor(() => {
-        expect(queryColumnHeader('message')).not.toBeInTheDocument();
-      });
-      expect(getColumnHeader('extension')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
-      expect(getColumnHeader('bytes')).toHaveStyle({ width: '50px' });
-    });
-
-    it('should show the reset width button only for absolute width columns, and allow resetting to default width', async () => {
-      await renderDataTable({
-        columns: ['message', 'extension'],
-        settings: {
-          columns: {
-            '@timestamp': { width: 50 },
-            extension: { width: 50 },
-          },
-        },
-      });
-      expect(getColumnHeader('@timestamp')).toHaveStyle({ width: '50px' });
-      userEvent.click(getButton('@timestamp'));
-      userEvent.click(getButton('Reset width'), undefined, { skipPointerEventsCheck: true });
-      await waitFor(() => {
-        expect(getColumnHeader('@timestamp')).toHaveStyle({ width: `${defaultTimeColumnWidth}px` });
-      });
-      expect(getColumnHeader('message')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
-      userEvent.click(getButton('message'));
-      expect(queryButton('Reset width')).not.toBeInTheDocument();
-      await waitFor(() => {
+        });
+        expect(getColumnHeader('message')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
         expect(getColumnHeader('extension')).toHaveStyle({ width: '50px' });
-      });
-      userEvent.click(getButton('extension'));
-      userEvent.click(getButton('Reset width'), undefined, { skipPointerEventsCheck: true });
-      await waitFor(() => {
+        expect(getColumnHeader('bytes')).toHaveStyle({ width: '50px' });
+        userEvent.click(getButton('message'));
+        userEvent.click(getButton('Remove column'), undefined, { skipPointerEventsCheck: true });
+        await waitFor(() => {
+          expect(queryColumnHeader('message')).not.toBeInTheDocument();
+        });
+        expect(getColumnHeader('extension')).toHaveStyle({ width: '50px' });
+        expect(getColumnHeader('bytes')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+
+    it(
+      'should not reset the last column to auto width when there are remaining auto width columns',
+      async () => {
+        await renderDataTable({
+          columns: ['message', 'extension', 'bytes'],
+          settings: {
+            columns: {
+              bytes: { width: 50 },
+            },
+          },
+        });
+        expect(getColumnHeader('message')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
         expect(getColumnHeader('extension')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
-      });
-    });
+        expect(getColumnHeader('bytes')).toHaveStyle({ width: '50px' });
+        userEvent.click(getButton('message'));
+        userEvent.click(getButton('Remove column'), undefined, { skipPointerEventsCheck: true });
+        await waitFor(() => {
+          expect(queryColumnHeader('message')).not.toBeInTheDocument();
+        });
+        expect(getColumnHeader('extension')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
+        expect(getColumnHeader('bytes')).toHaveStyle({ width: '50px' });
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+
+    it(
+      'should show the reset width button only for absolute width columns, and allow resetting to default width',
+      async () => {
+        await renderDataTable({
+          columns: ['message', 'extension'],
+          settings: {
+            columns: {
+              '@timestamp': { width: 50 },
+              extension: { width: 50 },
+            },
+          },
+        });
+        expect(getColumnHeader('@timestamp')).toHaveStyle({ width: '50px' });
+        userEvent.click(getButton('@timestamp'));
+        userEvent.click(getButton('Reset width'), undefined, { skipPointerEventsCheck: true });
+        await waitFor(() => {
+          expect(getColumnHeader('@timestamp')).toHaveStyle({
+            width: `${defaultTimeColumnWidth}px`,
+          });
+        });
+        expect(getColumnHeader('message')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
+        userEvent.click(getButton('message'));
+        expect(queryButton('Reset width')).not.toBeInTheDocument();
+        await waitFor(() => {
+          expect(getColumnHeader('extension')).toHaveStyle({ width: '50px' });
+        });
+        userEvent.click(getButton('extension'));
+        userEvent.click(getButton('Reset width'), undefined, { skipPointerEventsCheck: true });
+        await waitFor(() => {
+          expect(getColumnHeader('extension')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
+        });
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
   });
 });
