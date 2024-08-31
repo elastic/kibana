@@ -22,7 +22,6 @@
     "@kbn/config-schema",
     "@kbn/observability-shared-plugin",
     "@kbn/server-route-repository",
-    "@kbn/react-kibana-context-theme",
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/typed-react-router-config",
     "@kbn/investigate-plugin",
@@ -34,6 +33,8 @@
     "@kbn/licensing-plugin",
     "@kbn/inference-plugin",
     "@kbn/data-views-plugin",
-    "@kbn/server-route-repository-client"
+    "@kbn/server-route-repository-client",
+    "@kbn/react-kibana-context-render",
+    "@kbn/zod"
   ]
 }
