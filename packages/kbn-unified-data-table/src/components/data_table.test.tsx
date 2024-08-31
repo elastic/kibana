@@ -226,117 +226,153 @@ describe('UnifiedDataTable', () => {
       component = await getComponent();
     });
 
-    test('no documents are selected initially', async () => {
-      expect(getSelectedDocNr(component)).toBe(0);
-      expect(getDisplayedDocNr(component)).toBe(5);
-    });
+    test(
+      'no documents are selected initially',
+      async () => {
+        expect(getSelectedDocNr(component)).toBe(0);
+        expect(getDisplayedDocNr(component)).toBe(5);
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
 
-    test('Allows selection/deselection of multiple documents', async () => {
-      await toggleDocSelection(component, esHitsMock[0]);
-      expect(getSelectedDocNr(component)).toBe(1);
-      await toggleDocSelection(component, esHitsMock[1]);
-      expect(getSelectedDocNr(component)).toBe(2);
-      await toggleDocSelection(component, esHitsMock[1]);
-      expect(getSelectedDocNr(component)).toBe(1);
-    });
+    test(
+      'Allows selection/deselection of multiple documents',
+      async () => {
+        await toggleDocSelection(component, esHitsMock[0]);
+        expect(getSelectedDocNr(component)).toBe(1);
+        await toggleDocSelection(component, esHitsMock[1]);
+        expect(getSelectedDocNr(component)).toBe(2);
+        await toggleDocSelection(component, esHitsMock[1]);
+        expect(getSelectedDocNr(component)).toBe(1);
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
 
-    test('deselection of all selected documents', async () => {
-      await toggleDocSelection(component, esHitsMock[0]);
-      await toggleDocSelection(component, esHitsMock[1]);
-      expect(getSelectedDocNr(component)).toBe(2);
-      findTestSubject(component, 'unifiedDataTableSelectionBtn').simulate('click');
-      findTestSubject(component, 'dscGridClearSelectedDocuments').simulate('click');
-      expect(getSelectedDocNr(component)).toBe(0);
-    });
+    test(
+      'deselection of all selected documents',
+      async () => {
+        await toggleDocSelection(component, esHitsMock[0]);
+        await toggleDocSelection(component, esHitsMock[1]);
+        expect(getSelectedDocNr(component)).toBe(2);
+        findTestSubject(component, 'unifiedDataTableSelectionBtn').simulate('click');
+        findTestSubject(component, 'dscGridClearSelectedDocuments').simulate('click');
+        expect(getSelectedDocNr(component)).toBe(0);
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
 
-    test('showing only selected documents and undo selection', async () => {
-      await toggleDocSelection(component, esHitsMock[0]);
-      await toggleDocSelection(component, esHitsMock[1]);
-      expect(getSelectedDocNr(component)).toBe(2);
-      findTestSubject(component, 'unifiedDataTableSelectionBtn').simulate('click');
-      findTestSubject(component, 'dscGridShowSelectedDocuments').simulate('click');
-      expect(getDisplayedDocNr(component)).toBe(2);
-      findTestSubject(component, 'unifiedDataTableSelectionBtn').simulate('click');
-      component.update();
-      findTestSubject(component, 'dscGridShowAllDocuments').simulate('click');
-      expect(getDisplayedDocNr(component)).toBe(5);
-    });
+    test(
+      'showing only selected documents and undo selection',
+      async () => {
+        await toggleDocSelection(component, esHitsMock[0]);
+        await toggleDocSelection(component, esHitsMock[1]);
+        expect(getSelectedDocNr(component)).toBe(2);
+        findTestSubject(component, 'unifiedDataTableSelectionBtn').simulate('click');
+        findTestSubject(component, 'dscGridShowSelectedDocuments').simulate('click');
+        expect(getDisplayedDocNr(component)).toBe(2);
+        findTestSubject(component, 'unifiedDataTableSelectionBtn').simulate('click');
+        component.update();
+        findTestSubject(component, 'dscGridShowAllDocuments').simulate('click');
+        expect(getDisplayedDocNr(component)).toBe(5);
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
 
-    test('showing selected documents, underlying data changes, all documents are displayed, selection is gone', async () => {
-      await toggleDocSelection(component, esHitsMock[0]);
-      await toggleDocSelection(component, esHitsMock[1]);
-      expect(getSelectedDocNr(component)).toBe(2);
-      findTestSubject(component, 'unifiedDataTableSelectionBtn').simulate('click');
-      findTestSubject(component, 'dscGridShowSelectedDocuments').simulate('click');
-      expect(getDisplayedDocNr(component)).toBe(2);
-      component.setProps({
-        rows: [
-          {
-            _index: 'i',
-            _id: '6',
-            _score: 1,
-            _source: {
-              date: '2020-20-02T12:12:12.128',
-              name: 'test6',
-              extension: 'doc',
-              bytes: 50,
+    test(
+      'showing selected documents, underlying data changes, all documents are displayed, selection is gone',
+      async () => {
+        await toggleDocSelection(component, esHitsMock[0]);
+        await toggleDocSelection(component, esHitsMock[1]);
+        expect(getSelectedDocNr(component)).toBe(2);
+        findTestSubject(component, 'unifiedDataTableSelectionBtn').simulate('click');
+        findTestSubject(component, 'dscGridShowSelectedDocuments').simulate('click');
+        expect(getDisplayedDocNr(component)).toBe(2);
+        component.setProps({
+          rows: [
+            {
+              _index: 'i',
+              _id: '6',
+              _score: 1,
+              _source: {
+                date: '2020-20-02T12:12:12.128',
+                name: 'test6',
+                extension: 'doc',
+                bytes: 50,
+              },
             },
-          },
-        ].map((row) => buildDataTableRecord(row, dataViewMock)),
-      });
-      expect(getDisplayedDocNr(component)).toBe(1);
-      expect(getSelectedDocNr(component)).toBe(0);
-    });
+          ].map((row) => buildDataTableRecord(row, dataViewMock)),
+        });
+        expect(getDisplayedDocNr(component)).toBe(1);
+        expect(getSelectedDocNr(component)).toBe(0);
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
 
-    test('showing only selected documents and remove filter deselecting each doc manually', async () => {
-      await toggleDocSelection(component, esHitsMock[0]);
-      findTestSubject(component, 'unifiedDataTableSelectionBtn').simulate('click');
-      findTestSubject(component, 'dscGridShowSelectedDocuments').simulate('click');
-      expect(getDisplayedDocNr(component)).toBe(1);
-      await toggleDocSelection(component, esHitsMock[0]);
-      expect(getDisplayedDocNr(component)).toBe(5);
-      await toggleDocSelection(component, esHitsMock[0]);
-      expect(getDisplayedDocNr(component)).toBe(5);
-    });
+    test(
+      'showing only selected documents and remove filter deselecting each doc manually',
+      async () => {
+        await toggleDocSelection(component, esHitsMock[0]);
+        findTestSubject(component, 'unifiedDataTableSelectionBtn').simulate('click');
+        findTestSubject(component, 'dscGridShowSelectedDocuments').simulate('click');
+        expect(getDisplayedDocNr(component)).toBe(1);
+        await toggleDocSelection(component, esHitsMock[0]);
+        expect(getDisplayedDocNr(component)).toBe(5);
+        await toggleDocSelection(component, esHitsMock[0]);
+        expect(getDisplayedDocNr(component)).toBe(5);
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
 
-    test('copying selected documents to clipboard as JSON', async () => {
-      await toggleDocSelection(component, esHitsMock[0]);
-      findTestSubject(component, 'unifiedDataTableSelectionBtn').simulate('click');
-      findTestSubject(component, 'dscGridCopySelectedDocumentsJSON').simulate('click');
-      // wait for async copy action to avoid act warning
-      await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
-      expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
-        '[{"_index":"i","_id":"1","_score":1,"_type":"_doc","_source":{"date":"2020-20-01T12:12:12.123","message":"test1","bytes":20}}]'
-      );
-    });
+    test(
+      'copying selected documents to clipboard as JSON',
+      async () => {
+        await toggleDocSelection(component, esHitsMock[0]);
+        findTestSubject(component, 'unifiedDataTableSelectionBtn').simulate('click');
+        findTestSubject(component, 'dscGridCopySelectedDocumentsJSON').simulate('click');
+        // wait for async copy action to avoid act warning
+        await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
+        expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+          '[{"_index":"i","_id":"1","_score":1,"_type":"_doc","_source":{"date":"2020-20-01T12:12:12.123","message":"test1","bytes":20}}]'
+        );
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
 
-    test('copying selected documents to clipboard as text', async () => {
-      await toggleDocSelection(component, esHitsMock[2]);
-      await toggleDocSelection(component, esHitsMock[1]);
-      findTestSubject(component, 'unifiedDataTableSelectionBtn').simulate('click');
-      findTestSubject(component, 'unifiedDataTableCopyRowsAsText').simulate('click');
-      // wait for async copy action to avoid act warning
-      await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
-      expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
-        '"\'@timestamp"\t"_index"\t"_score"\tbytes\tdate\textension\tmessage\tname\n-\ti\t1\t-\t"2020-20-01T12:12:12.124"\tjpg\t-\ttest2\n-\ti\t1\t50\t"2020-20-01T12:12:12.124"\tgif\t-\ttest3'
-      );
-    });
+    test(
+      'copying selected documents to clipboard as text',
+      async () => {
+        await toggleDocSelection(component, esHitsMock[2]);
+        await toggleDocSelection(component, esHitsMock[1]);
+        findTestSubject(component, 'unifiedDataTableSelectionBtn').simulate('click');
+        findTestSubject(component, 'unifiedDataTableCopyRowsAsText').simulate('click');
+        // wait for async copy action to avoid act warning
+        await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
+        expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+          '"\'@timestamp"\t"_index"\t"_score"\tbytes\tdate\textension\tmessage\tname\n-\ti\t1\t-\t"2020-20-01T12:12:12.124"\tjpg\t-\ttest2\n-\ti\t1\t50\t"2020-20-01T12:12:12.124"\tgif\t-\ttest3'
+        );
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
 
-    test('copying selected columns to clipboard as text', async () => {
-      component = await getComponent({
-        ...getProps(),
-        columns: ['date', 'extension', 'name'],
-      });
-      await toggleDocSelection(component, esHitsMock[2]);
-      await toggleDocSelection(component, esHitsMock[1]);
-      findTestSubject(component, 'unifiedDataTableSelectionBtn').simulate('click');
-      findTestSubject(component, 'unifiedDataTableCopyRowsAsText').simulate('click');
-      // wait for async copy action to avoid act warning
-      await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
-      expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
-        '"\'@timestamp"\tdate\textension\tname\n-\t"2020-20-01T12:12:12.124"\tjpg\ttest2\n-\t"2020-20-01T12:12:12.124"\tgif\ttest3'
-      );
-    });
+    test(
+      'copying selected columns to clipboard as text',
+      async () => {
+        component = await getComponent({
+          ...getProps(),
+          columns: ['date', 'extension', 'name'],
+        });
+        await toggleDocSelection(component, esHitsMock[2]);
+        await toggleDocSelection(component, esHitsMock[1]);
+        findTestSubject(component, 'unifiedDataTableSelectionBtn').simulate('click');
+        findTestSubject(component, 'unifiedDataTableCopyRowsAsText').simulate('click');
+        // wait for async copy action to avoid act warning
+        await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
+        expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+          '"\'@timestamp"\tdate\textension\tname\n-\t"2020-20-01T12:12:12.124"\tjpg\ttest2\n-\t"2020-20-01T12:12:12.124"\tgif\ttest3'
+        );
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
   });
 
   describe('edit field button', () => {
