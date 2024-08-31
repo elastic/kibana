@@ -347,11 +347,11 @@ describe('Agentless Agent service', () => {
     expect(createAgentlessAgentReturnValue).toEqual(returnValue);
     expect(axios).toHaveBeenCalledWith(
       expect.objectContaining({
-        data: expect.objectContaining({
+        data: {
           fleet_token: 'mocked-fleet-enrollment-api-key',
           fleet_url: 'http://fleetserver:8220',
           policy_id: 'mocked-agentless-agent-policy-id',
-        }),
+        },
         headers: expect.anything(),
         httpsAgent: expect.anything(),
         method: 'POST',
