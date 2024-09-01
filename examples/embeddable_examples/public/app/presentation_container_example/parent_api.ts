@@ -67,7 +67,25 @@ export function getParentApi(): ParentApi {
       });
       return await untilChildLoaded(id);
     },
+    canRemovePanels: () => true,
     children$,
+    getPanelCount: () => {
+      return panels$.value.length;
+    },
+    removePanel: (id: string) => {
+      panels$.next(panels$.value.filter(({ id: panelId }) => panelId !== id));
+
+      const currentUnsavedChanges = unsavedChanges$.value;
+      const { [id]: panelToRemove, ...otherPanelUnsavedChanges } =
+        currentUnsavedChanges.panelUnsavedChanges ?? {};
+      unsavedChanges$.next({
+        ...currentUnsavedChanges,
+        panelUnsavedChanges: otherPanelUnsavedChanges,
+      });
+
+      const { [id]: childToRemove, ...otherChildren } = children$.value;
+      children$.next(otherChildren);
+    },
     setChild: (id: string, api: unknown) => {
       children$.next({
         ...children$.value,

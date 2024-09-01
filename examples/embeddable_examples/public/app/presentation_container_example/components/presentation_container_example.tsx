@@ -46,7 +46,7 @@ export const PresentationContainerExample = ({ uiActions }: { uiActions: UiActio
 
       {panels.map(({ id, type }) => {
         return (
-          <div key={id} style={{ height: '300px' }}>
+          <div key={id} style={{ height: '200' }}>
             <ReactEmbeddableRenderer
               type={type}
               maybeId={id}
@@ -56,6 +56,7 @@ export const PresentationContainerExample = ({ uiActions }: { uiActions: UiActio
                 parentApi.setChild(id, api);
               }}
             />
+            <EuiSpacer size="s" />
           </div>
         );
       })}
