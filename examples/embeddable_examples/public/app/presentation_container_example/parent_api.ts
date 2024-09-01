@@ -10,6 +10,7 @@ import { BehaviorSubject, merge } from 'rxjs';
 import { v4 as generateId } from 'uuid';
 import { TimeRange } from '@kbn/es-query';
 import { PanelPackage } from '@kbn/presentation-containers';
+import { omit } from 'lodash';
 import { lastSavedState } from './last_saved_state';
 import { unsavedChanges } from './unsaved_changes';
 import { LastSavedState, ParentApi, UnsavedChanges } from './types';
@@ -76,15 +77,12 @@ export function getParentApi(): ParentApi {
       panels$.next(panels$.value.filter(({ id: panelId }) => panelId !== id));
 
       const currentUnsavedChanges = unsavedChanges$.value;
-      const { [id]: panelToRemove, ...otherPanelUnsavedChanges } =
-        currentUnsavedChanges.panelUnsavedChanges ?? {};
       unsavedChanges$.next({
         ...currentUnsavedChanges,
-        panelUnsavedChanges: otherPanelUnsavedChanges,
+        panelUnsavedChanges: omit(currentUnsavedChanges.panelUnsavedChanges ?? {}, id),
       });
 
-      const { [id]: childToRemove, ...otherChildren } = children$.value;
-      children$.next(otherChildren);
+      children$.next(omit(children$.value, id));
     },
     setChild: (id: string, api: unknown) => {
       children$.next({
