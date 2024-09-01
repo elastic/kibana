@@ -16,8 +16,9 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
   isLegacyTableEnabled,
 } from '@kbn/discover-utils';
-import { Filter } from '@kbn/es-query';
+import { Filter, isOfAggregateQueryType } from '@kbn/es-query';
 import {
+  FetchContext,
   useBatchedOptionalPublishingSubjects,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
@@ -37,9 +38,15 @@ import type { SearchEmbeddableApi, SearchEmbeddableStateManager } from '../types
 import { DiscoverGridEmbeddable } from './saved_search_grid';
 import { getSearchEmbeddableDefaults } from '../get_search_embeddable_defaults';
 import { onResizeGridColumn } from '../../utils/on_resize_grid_column';
+import { DISCOVER_CELL_ACTIONS_TRIGGER, useAdditionalCellActions } from '../../context_awareness';
+import { createDataViewDataSource, createEsqlDataSource } from '../../../common/data_sources';
+import { getTimeRangeFromFetchContext } from '../utils/update_search_source';
 
 interface SavedSearchEmbeddableComponentProps {
-  api: SearchEmbeddableApi & { fetchWarnings$: BehaviorSubject<SearchResponseIncompleteWarning[]> };
+  api: SearchEmbeddableApi & {
+    fetchWarnings$: BehaviorSubject<SearchResponseIncompleteWarning[]>;
+    fetchContext$: BehaviorSubject<FetchContext | undefined>;
+  };
   dataView: DataView;
   onAddFilter?: DocViewFilterFn;
   stateManager: SearchEmbeddableStateManager;
@@ -60,6 +67,9 @@ export function SearchEmbeddableGridComponent({
     savedSearch,
     savedSearchId,
     interceptedWarnings,
+    query,
+    filters,
+    fetchContext,
     rows,
     totalHitCount,
     columnsMeta,
@@ -69,6 +79,9 @@ export function SearchEmbeddableGridComponent({
     api.savedSearch$,
     api.savedObjectId,
     api.fetchWarnings$,
+    api.query$,
+    api.filters$,
+    api.fetchContext$,
     stateManager.rows,
     stateManager.totalHitCount,
     stateManager.columnsMeta,
@@ -120,6 +133,27 @@ export function SearchEmbeddableGridComponent({
     columns: originalColumns,
     sort,
     settings: grid,
+  });
+
+  const dataSource = useMemo(() => {
+    return isOfAggregateQueryType(query)
+      ? createEsqlDataSource()
+      : dataView.id
+      ? createDataViewDataSource({ dataViewId: dataView.id })
+      : undefined;
+  }, [dataView.id, query]);
+
+  const timeRange = useMemo(
+    () => (fetchContext ? getTimeRangeFromFetchContext(fetchContext) : undefined),
+    [fetchContext]
+  );
+
+  const cellActionsMetadata = useAdditionalCellActions({
+    dataSource,
+    dataView,
+    query,
+    filters,
+    timeRange,
   });
 
   const onStateEditedProps = useMemo(
@@ -209,7 +243,13 @@ export function SearchEmbeddableGridComponent({
       {...onStateEditedProps}
       settings={savedSearch.grid}
       ariaLabelledBy={'documentsAriaLabel'}
-      cellActionsTriggerId={SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID}
+      cellActionsTriggerId={
+        cellActionsMetadata
+          ? DISCOVER_CELL_ACTIONS_TRIGGER.id
+          : SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID
+      }
+      cellActionsMetadata={cellActionsMetadata}
+      cellActionsHandling={cellActionsMetadata ? 'append' : 'replace'}
       columnsMeta={columnsMeta}
       configHeaderRowHeight={defaults.headerRowHeight}
       configRowHeight={defaults.rowHeight}

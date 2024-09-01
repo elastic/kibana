@@ -84,10 +84,12 @@ export const useAdditionalCellActions = ({
     };
   }, [additionalCellActions, uiActions]);
 
-  return useMemo<DiscoverCellActionMetadata>(
+  const metadata = useMemo<DiscoverCellActionMetadata>(
     () => ({ instanceId, dataSource, dataView, query, filters, timeRange }),
     [dataSource, dataView, filters, instanceId, query, timeRange]
   );
+
+  return additionalCellActions.length ? metadata : undefined;
 };
 
 const toCellActionContext = ({
