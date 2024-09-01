@@ -89,7 +89,7 @@ Cypress.Commands.add('selectAbsoluteTimeRange', (start: string, end: string) => 
 
   cy.getByTestSubj('superDatePickerstartDatePopoverButton').click();
   cy.contains('Start date')
-    .nextAll()
+    .parentsUntil('.euiDatePopoverContent')
     .find('[data-test-subj="superDatePickerAbsoluteDateInput"]')
     .clear({ force: true })
     .type(moment(start).format(format), { force: true })
@@ -97,7 +97,7 @@ Cypress.Commands.add('selectAbsoluteTimeRange', (start: string, end: string) => 
 
   cy.getByTestSubj('superDatePickerendDatePopoverButton').click();
   cy.contains('End date')
-    .nextAll()
+    .parentsUntil('.euiDatePopoverContent')
     .find('[data-test-subj="superDatePickerAbsoluteDateInput"]')
     .clear({ force: true })
     .type(moment(end).format(format), { force: true })
