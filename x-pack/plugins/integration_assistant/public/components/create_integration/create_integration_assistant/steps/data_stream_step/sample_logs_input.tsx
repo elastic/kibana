@@ -7,8 +7,8 @@
 
 import React, { useCallback, useState } from 'react';
 import { EuiCallOut, EuiFilePicker, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { isPlainObject } from 'lodash/fp';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { IntegrationSettings } from '../../types';
 import * as i18n from './translations';
 import { useActions } from '../../state';
@@ -65,22 +65,36 @@ export const parseJSONArray = (
   return { errorNoArrayFound: true, entries: [], pathToEntries: [] };
 };
 
-/**
- * Parse the logs sample file content (json or ndjson) and return the parsed logs sample
- */
-const parseLogsContent = (
-  fileContent: string | undefined
-): {
-  error?: string;
-  isTruncated?: boolean;
-  logsSampleParsed?: string[];
+interface ParseLogsErrorResult {
+  error: string;
+}
+
+interface ParseLogsSuccessResult {
+  logSamples: string[];
+  isTruncated: boolean;
   samplesFormat?: SamplesFormat;
-} => {
-  if (fileContent == null) {
-    return { error: i18n.LOGS_SAMPLE_ERROR.CAN_NOT_READ };
-  }
+}
+
+type ParseLogsResult = ParseLogsErrorResult | ParseLogsSuccessResult;
+
+/**
+ * Parse the logs sample file content and return the parsed logs sample.
+ *
+ * This function will return an error message if the file content is not valid, that is:
+ *  - it is too large to parse (the memory required is 2-3x of the file size); or
+ *  - it looks like a JSON format, but there is no array; or
+ *  - it looks like (ND)JSON format, but the items are not JSON dictionaries.
+ *
+ * Otherwise it is guaranteed to parse and return (possibly empty) `logSamples` array.
+ * If the format was (ND)JSON, the `samplesFormat` field will be filled out with the format.
+ * The function will also:
+ *  - fill out the `samplesFormat` field with name 'json' or 'ndjson' if recognized;
+ *  - truncate the parsed logs sample to MaxLogsSampleRows;
+ *  - shuffle the parsed logs sample.
+ */
+const parseLogsContent = (fileContent: string): ParseLogsResult => {
   let parsedContent: unknown[];
-  let samplesFormat: SamplesFormat;
+  let samplesFormat: SamplesFormat | undefined;
 
   try {
     parsedContent = parseNDJSON(fileContent);
@@ -116,30 +130,27 @@ const parseLogsContent = (
         if (parseMultilineNDJSONError instanceof RangeError) {
           return { error: i18n.LOGS_SAMPLE_ERROR.TOO_LARGE_TO_PARSE };
         }
-        return { error: i18n.LOGS_SAMPLE_ERROR.CAN_NOT_PARSE };
+        parsedContent = fileContent.split('\n').filter((line) => line.trim() !== '');
       }
     }
   }
 
-  if (parsedContent.length === 0) {
-    return { error: i18n.LOGS_SAMPLE_ERROR.EMPTY };
+  if (samplesFormat && parsedContent.some((log) => !isPlainObject(log))) {
+    return { error: i18n.LOGS_SAMPLE_ERROR.NOT_OBJECT };
   }
 
   const isTruncated = parsedContent.length > MaxLogsSampleRows;
   const numSampleRows = isTruncated ? MaxLogsSampleRows : parsedContent.length;
   partialShuffleArray(parsedContent, 1, numSampleRows);
 
-  if (parsedContent.some((log) => !isPlainObject(log))) {
-    return { error: i18n.LOGS_SAMPLE_ERROR.NOT_OBJECT };
-  }
-
-  const logsSampleParsed = parsedContent.slice(0, numSampleRows).map((log) => JSON.stringify(log));
-  return { isTruncated, logsSampleParsed, samplesFormat };
+  const logSamples = parsedContent.slice(0, numSampleRows).map((log) => JSON.stringify(log));
+  return { isTruncated, logSamples, samplesFormat };
 };
 
 interface SampleLogsInputProps {
   integrationSettings: IntegrationSettings | undefined;
 }
+
 export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSettings }) => {
   const { notifications } = useKibana().services;
   const { setIntegrationSettings } = useActions();
@@ -148,21 +159,23 @@ export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSe
 
   const onChangeLogsSample = useCallback(
     (files: FileList | null) => {
-      const logsSampleFile = files?.[0];
+      if (!files) {
+        return;
+      }
 
       setSampleFileError(undefined);
       setIntegrationSettings({
         ...integrationSettings,
-        logsSampleParsed: undefined,
+        logSamples: undefined,
         samplesFormat: undefined,
       });
 
-      if (logsSampleFile == null) {
-        return;
-      }
-
-      setIsParsing(true);
+      const logsSampleFile = files[0];
       const reader = new FileReader();
+
+      reader.onloadstart = function () {
+        setIsParsing(true);
+      };
 
       reader.onloadend = function () {
         setIsParsing(false);
@@ -171,17 +184,29 @@ export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSe
       reader.onload = function (e) {
         const fileContent = e.target?.result as string | undefined; // We can safely cast to string since we call `readAsText` to load the file.
 
+        if (fileContent == null) {
+          setSampleFileError(i18n.LOGS_SAMPLE_ERROR.CAN_NOT_READ);
+          return;
+        }
+
         if (fileContent === '' && e.loaded > 100000) {
-          // V8-based browsers can't handle large files and return an empty string instead of an error: https://stackoverflow.com/a/61316641
+          // V8-based browsers can't handle large files and return an empty string
+          // instead of an error; see https://stackoverflow.com/a/61316641
           setSampleFileError(i18n.LOGS_SAMPLE_ERROR.TOO_LARGE_TO_PARSE);
           return;
         }
 
-        const { error, isTruncated, logsSampleParsed, samplesFormat } =
-          parseLogsContent(fileContent);
+        const result = parseLogsContent(fileContent);
 
-        if (error) {
-          setSampleFileError(error);
+        if ('error' in result) {
+          setSampleFileError(result.error);
+          return;
+        }
+
+        const { isTruncated, logSamples, samplesFormat } = result;
+
+        if (logSamples.length === 0) {
+          setSampleFileError(i18n.LOGS_SAMPLE_ERROR.EMPTY);
           return;
         }
 
@@ -191,7 +216,7 @@ export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSe
 
         setIntegrationSettings({
           ...integrationSettings,
-          logsSampleParsed,
+          logSamples,
           samplesFormat,
         });
       };

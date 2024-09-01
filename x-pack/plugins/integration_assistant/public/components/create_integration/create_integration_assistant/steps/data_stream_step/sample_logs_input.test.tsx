@@ -161,7 +161,7 @@ describe('SampleLogsInput', () => {
 
       it('should set the integrationSetting correctly', () => {
         expect(mockActions.setIntegrationSettings).toBeCalledWith({
-          logsSampleParsed: logsSampleRaw.split(','),
+          logSamples: logsSampleRaw.split(','),
           samplesFormat: { name: 'json', json_path: [] },
         });
       });
@@ -174,7 +174,7 @@ describe('SampleLogsInput', () => {
 
         it('should truncate the logs sample', () => {
           expect(mockActions.setIntegrationSettings).toBeCalledWith({
-            logsSampleParsed: tooLargeLogsSample.split(',').slice(0, 2),
+            logSamples: tooLargeLogsSample.split(',').slice(0, 2),
             samplesFormat: { name: 'json', json_path: [] },
           });
         });
@@ -193,7 +193,7 @@ describe('SampleLogsInput', () => {
 
       it('should set the integrationSetting correctly', () => {
         expect(mockActions.setIntegrationSettings).toBeCalledWith({
-          logsSampleParsed: splitNDJSON,
+          logSamples: splitNDJSON,
           samplesFormat: { name: 'json', json_path: ['events'] },
         });
       });
@@ -201,10 +201,6 @@ describe('SampleLogsInput', () => {
 
     describe('when the file is invalid', () => {
       describe.each([
-        [
-          '[{"message":"test message 1"}',
-          'Cannot parse the logs sample file as either a JSON or NDJSON file',
-        ],
         ['["test message 1"]', 'The logs sample file contains non-object entries'],
         ['[]', 'The logs sample file is empty'],
       ])('with logs content %s', (logsSample, errorMessage) => {
@@ -218,7 +214,7 @@ describe('SampleLogsInput', () => {
 
         it('should set the integrationSetting correctly', () => {
           expect(mockActions.setIntegrationSettings).toBeCalledWith({
-            logsSampleParsed: undefined,
+            logSamples: undefined,
             samplesFormat: undefined,
           });
         });
@@ -236,7 +232,7 @@ describe('SampleLogsInput', () => {
 
       it('should set the integrationSetting correctly', () => {
         expect(mockActions.setIntegrationSettings).toBeCalledWith({
-          logsSampleParsed: splitNDJSON,
+          logSamples: splitNDJSON,
           samplesFormat: { name: 'ndjson', multiline: false },
         });
       });
@@ -249,7 +245,7 @@ describe('SampleLogsInput', () => {
 
         it('should truncate the logs sample', () => {
           expect(mockActions.setIntegrationSettings).toBeCalledWith({
-            logsSampleParsed: tooLargeLogsSample.split('\n').slice(0, 2),
+            logSamples: tooLargeLogsSample.split('\n').slice(0, 2),
             samplesFormat: { name: 'ndjson', multiline: false },
           });
         });
@@ -268,7 +264,7 @@ describe('SampleLogsInput', () => {
 
       it('should set the integrationSetting correctly', () => {
         expect(mockActions.setIntegrationSettings).toBeCalledWith({
-          logsSampleParsed: [splitNDJSON[0]],
+          logSamples: [splitNDJSON[0]],
           samplesFormat: { name: 'ndjson', multiline: false },
         });
       });
@@ -281,7 +277,7 @@ describe('SampleLogsInput', () => {
 
       it('should set the integrationSetting correctly', () => {
         expect(mockActions.setIntegrationSettings).toBeCalledWith({
-          logsSampleParsed: splitNDJSON,
+          logSamples: splitNDJSON,
           samplesFormat: { name: 'ndjson', multiline: true },
         });
       });
@@ -289,10 +285,6 @@ describe('SampleLogsInput', () => {
 
     describe('when the file is invalid', () => {
       describe.each([
-        [
-          '{"message":"test message 1"}\n{"message": }',
-          'Cannot parse the logs sample file as either a JSON or NDJSON file',
-        ],
         ['"test message 1"', 'The logs sample file contains non-object entries'],
         ['', 'The logs sample file is empty'],
       ])('with logs content %s', (logsSample, errorMessage) => {
@@ -306,7 +298,7 @@ describe('SampleLogsInput', () => {
 
         it('should set the integrationSetting correctly', () => {
           expect(mockActions.setIntegrationSettings).toBeCalledWith({
-            logsSampleParsed: undefined,
+            logSamples: undefined,
             samplesFormat: undefined,
           });
         });
