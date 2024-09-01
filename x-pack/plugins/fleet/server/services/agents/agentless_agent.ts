@@ -92,7 +92,7 @@ class AgentlessAgentService {
 
     const cloudSetup = appContextService.getCloud();
     if (!cloudSetup?.isServerlessEnabled) {
-      requestConfig.data.stack_version = appContextService.getKibanaVersion()
+      requestConfig.data.stack_version = appContextService.getKibanaVersion();
     }
 
     logger.debug(
