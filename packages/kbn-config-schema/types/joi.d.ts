@@ -7,7 +7,7 @@
  */
 
 import * as Joi from 'joi';
-import type { ByteSizeValue } from '../src/byte_size_value';
+import type { ByteSizeValue } from '@kbn/byte-size-value';
 import type { DurationValueType } from '../src/types/duration_type';
 
 declare module 'joi' {

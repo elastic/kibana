@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/byte-size-value",
+  "owner": "@elastic/kibana-core"
+}

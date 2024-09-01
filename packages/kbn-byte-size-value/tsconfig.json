@@ -2,19 +2,18 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "stripInternal": true,
     "types": [
       "jest",
-      "node"
+      "node",
+      "react"
     ]
   },
   "include": [
-    "**/*.ts"
+    "**/*.ts",
+    "**/*.tsx",
   ],
   "exclude": [
-    "target/**/*",
+    "target/**/*"
   ],
-  "kbn_references": [
-    "@kbn/byte-size-value",
-  ]
+  "kbn_references": []
 }
