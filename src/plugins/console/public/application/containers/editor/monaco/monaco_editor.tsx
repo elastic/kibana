@@ -171,7 +171,6 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
   }, [requestToRestoreFromHistory, dispatch, context, editorDispatch]);
 
   useEffect(() => {
-    console.log('update editor called');
     updateEditor();
   }, [updateEditor]);
 
