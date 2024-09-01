@@ -548,7 +548,6 @@ export class AlertsClient<
       }
     );
     if (alertsToIndex.length > 0) {
-      this.options.logger.info(`alertsToIndex ${JSON.stringify(alertsToIndex)}`);
       const bulkBody = flatMap(
         alertsToIndex.map((alert: Alert & AlertData) => {
           const alertUuid = get(alert, ALERT_UUID);
