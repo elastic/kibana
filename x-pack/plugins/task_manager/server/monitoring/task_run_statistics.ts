@@ -319,6 +319,7 @@ function createTaskRunEventToStat(runningAverageWindowSize: number) {
 
 const DEFAULT_TASK_RUN_FREQUENCIES = {
   [TaskRunResult.Success]: 0,
+  // @ts-expect-error upgrade typescript v5.1.6
   [TaskRunResult.SuccessRescheduled]: 0,
   [TaskRunResult.RetryScheduled]: 0,
   [TaskRunResult.Failed]: 0,

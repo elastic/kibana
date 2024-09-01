@@ -62,6 +62,7 @@ export const EsQueryRuleTypeExpression: React.FunctionComponent<
   );
 
   const errorParam = ALL_EXPRESSION_ERROR_KEYS.find((errorKey) => {
+    // @ts-expect-error upgrade typescript v5.1.6
     return errors[errorKey]?.length >= 1 && ruleParams[errorKey] !== undefined;
   });
 
