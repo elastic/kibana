@@ -10,9 +10,11 @@ import React, { useMemo } from 'react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import { getParentApi } from './parent_api';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { getParentApi } from '../parent_api';
+import { AddButton } from './add_button';
 
-export const PresentationContainerExample = () => {
+export const PresentationContainerExample = ({ uiActions }: { uiActions: UiActionsStart }) => {
   const parentApi = useMemo(() => {
     return getParentApi();
   }, []);
@@ -42,7 +44,7 @@ export const PresentationContainerExample = () => {
 
       <EuiSpacer />
 
-      {panels.forEach(({ id, type }) => {
+      {panels.map(({ id, type }) => {
         return (
           <div key={id} style={{ height: '300px' }}>
             <ReactEmbeddableRenderer
@@ -57,6 +59,8 @@ export const PresentationContainerExample = () => {
           </div>
         );
       })}
+
+      <AddButton parentApi={parentApi} uiActions={uiActions} />
     </div>
   );
 };

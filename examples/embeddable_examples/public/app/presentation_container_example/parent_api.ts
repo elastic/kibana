@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, merge } from 'rxjs';
+import { v4 as generateId } from 'uuid';
 import { TimeRange } from '@kbn/es-query';
+import { PanelPackage } from '@kbn/presentation-containers';
 import { lastSavedState } from './last_saved_state';
 import { unsavedChanges } from './unsaved_changes';
 import { LastSavedState, ParentApi, UnsavedChanges } from './types';
@@ -28,7 +30,43 @@ export function getParentApi(): ParentApi {
     unsavedChanges$.value.timeRange ?? lastSavedState$.value.timeRange
   );
 
+  function untilChildLoaded(childId: string): unknown | Promise<unknown | undefined> {
+    if (children$.value[childId]) {
+      return children$.value[childId];
+    }
+
+    return new Promise((resolve) => {
+      const subscription = merge(children$, panels$).subscribe(() => {
+        if (children$.value[childId]) {
+          subscription.unsubscribe();
+          resolve(children$.value[childId]);
+          return;
+        }
+
+        const panelExists = panels$.value.some(({ id }) => id === childId);
+        if (!panelExists) {
+          // panel removed before finished loading.
+          subscription.unsubscribe();
+          resolve(undefined);
+        }
+      });
+    });
+  }
+
   return {
+    addNewPanel: async ({ panelType, initialState }: PanelPackage) => {
+      const id = generateId();
+      panels$.next([...panels$.value, { id, type: panelType }]);
+      const currentUnsavedChanges = unsavedChanges$.value;
+      unsavedChanges$.next({
+        ...currentUnsavedChanges,
+        panelUnsavedChanges: {
+          ...(currentUnsavedChanges.panelUnsavedChanges ?? {}),
+          [id]: initialState ?? {},
+        },
+      });
+      return await untilChildLoaded(id);
+    },
     children$,
     setChild: (id: string, api: unknown) => {
       children$.next({

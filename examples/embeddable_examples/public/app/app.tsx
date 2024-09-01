@@ -23,14 +23,15 @@ import {
 import { Overview } from './overview';
 import { RegisterEmbeddable } from './register_embeddable';
 import { RenderExamples } from './render_examples';
-import { PresentationContainerExample } from './presentation_container_example/presentation_container_example';
+import { PresentationContainerExample } from './presentation_container_example/components/presentation_container_example';
+import { StartDeps } from '../plugin';
 
 const OVERVIEW_TAB_ID = 'overview';
 const REGISTER_EMBEDDABLE_TAB_ID = 'register';
 const RENDER_TAB_ID = 'render';
 const PRESENTATION_CONTAINER_EXAMPLE_ID = 'presentationContainerExample';
 
-const App = ({ core }: { core: CoreStart }) => {
+const App = ({ core, deps }: { core: CoreStart; deps: StartDeps }) => {
   const [selectedTabId, setSelectedTabId] = useState(OVERVIEW_TAB_ID);
 
   function onSelectedTabChanged(tabId: string) {
@@ -47,7 +48,7 @@ const App = ({ core }: { core: CoreStart }) => {
     }
 
     if (selectedTabId === PRESENTATION_CONTAINER_EXAMPLE_ID) {
-      return <PresentationContainerExample />;
+      return <PresentationContainerExample uiActions={deps.uiActions} />;
     }
 
     return <Overview />;
@@ -100,8 +101,12 @@ const App = ({ core }: { core: CoreStart }) => {
   );
 };
 
-export const renderApp = (core: CoreStart, element: AppMountParameters['element']) => {
-  ReactDOM.render(<App core={core} />, element);
+export const renderApp = (
+  core: CoreStart,
+  deps: StartDeps,
+  element: AppMountParameters['element']
+) => {
+  ReactDOM.render(<App core={core} deps={deps} />, element);
 
   return () => ReactDOM.unmountComponentAtNode(element);
 };
