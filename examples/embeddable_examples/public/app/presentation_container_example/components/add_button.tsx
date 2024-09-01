@@ -38,7 +38,9 @@ export function AddButton({
       }
 
       const nextItems = actions
-        .filter(({ isCompatable }) => isCompatable)
+        .filter(
+          ({ action, isCompatable }) => isCompatable && action.id !== 'ACTION_CREATE_ESQL_CHART'
+        )
         .map(({ action }) => {
           return (
             <EuiContextMenuItem

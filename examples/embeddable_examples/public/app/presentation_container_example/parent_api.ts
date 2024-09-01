@@ -11,6 +11,7 @@ import { v4 as generateId } from 'uuid';
 import { TimeRange } from '@kbn/es-query';
 import { PanelPackage } from '@kbn/presentation-containers';
 import { omit } from 'lodash';
+import { ViewMode } from '@kbn/presentation-publishing';
 import { lastSavedState } from './last_saved_state';
 import { unsavedChanges } from './unsaved_changes';
 import { LastSavedState, ParentApi, UnsavedChanges } from './types';
@@ -73,6 +74,10 @@ export function getParentApi(): ParentApi {
     getPanelCount: () => {
       return panels$.value.length;
     },
+    hidePanelTitle: new BehaviorSubject<boolean | undefined>(false),
+    replacePanel: async (idToRemove: string, newPanel: PanelPackage<object>) => {
+      // TODO remove method from interface? It should not be required
+    },
     removePanel: (id: string) => {
       panels$.next(panels$.value.filter(({ id: panelId }) => panelId !== id));
 
@@ -90,6 +95,7 @@ export function getParentApi(): ParentApi {
         [id]: api,
       });
     },
+    viewMode: new BehaviorSubject<ViewMode>('edit'),
     /**
      * return last saved embeddable state
      */

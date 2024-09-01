@@ -14,12 +14,19 @@ import {
   PresentationContainer,
   SerializedPanelState,
 } from '@kbn/presentation-containers';
-import { PublishesTimeRange, PublishingSubject } from '@kbn/presentation-publishing';
+import {
+  PublishesPanelTitle,
+  PublishesTimeRange,
+  PublishesViewMode,
+  PublishingSubject,
+} from '@kbn/presentation-publishing';
 
 export type ParentApi = PresentationContainer &
   CanAddNewPanel &
   HasSerializedChildState &
   HasRuntimeChildState &
+  PublishesViewMode &
+  Pick<PublishesPanelTitle, 'hidePanelTitle'> &
   PublishesTimeRange & {
     setChild: (id: string, api: unknown) => void;
     panels$: PublishingSubject<Array<{ id: string; type: string }>>;
