@@ -775,6 +775,10 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       setTimeout(() => setIsLoading(false), 200);
     }, [validationResultsNonNullFields]);
 
+    useEffect(() => {
+      setIsLoading(getIsSubscriptionValid.isLoading);
+    }, [getIsSubscriptionValid.isLoading]);
+
     const { data: packagePolicyList, refetch } = usePackagePolicyList(packageInfo.name, {
       enabled: canFetchIntegration,
     });
@@ -859,7 +863,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       },
     ];
 
-    if (!isSubscriptionValid) {
+    if (!getIsSubscriptionValid.isLoading && !isSubscriptionValid) {
       return <SubscriptionNotAllowed />;
     }
 
