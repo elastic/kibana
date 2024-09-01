@@ -21,7 +21,7 @@ export const Vulnerabilities = () => {
   const setupStatus = getSetupStatus.data;
 
   const hasFindings =
-    !!setupStatus?.hasVulnerabilitiesFindings || setupStatus?.vuln_mgmt?.status !== 'indexed';
+    !!setupStatus?.hasVulnerabilitiesFindings || setupStatus?.vuln_mgmt?.status === 'indexed';
 
   if (!hasFindings) return <NoVulnerabilitiesStates />;
 

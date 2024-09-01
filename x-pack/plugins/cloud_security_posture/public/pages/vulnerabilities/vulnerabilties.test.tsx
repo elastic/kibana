@@ -72,6 +72,7 @@ describe('<Vulnerabilities />', () => {
         data: {
           [VULN_MGMT_POLICY_TEMPLATE]: { status: 'not-deployed' },
           indicesDetails: [{ index: LATEST_VULNERABILITIES_INDEX_DEFAULT_NS, status: 'empty' }],
+          hasVulnerabilitiesFindings: false,
         },
       })
     );
