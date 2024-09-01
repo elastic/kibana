@@ -83,14 +83,20 @@ type ParseLogsResult = ParseLogsErrorResult | ParseLogsSuccessResult;
  * This function will return an error message if the file content is not valid, that is:
  *  - it is too large to parse (the memory required is 2-3x of the file size); or
  *  - it looks like a JSON format, but there is no array; or
- *  - it looks like (ND)JSON format, but the items are not JSON dictionaries.
+ *  - it looks like (ND)JSON format, but the items are not JSON dictionaries; or
+ *  - the list of entires is empty.
+ * Otherwise it is guaranteed to parse and return the `logSamples` array of strings.
  *
- * Otherwise it is guaranteed to parse and return (possibly empty) `logSamples` array.
- * If the format was (ND)JSON, the `samplesFormat` field will be filled out with the format.
- * The function will also:
- *  - fill out the `samplesFormat` field with name 'json' or 'ndjson' if recognized;
- *  - truncate the parsed logs sample to MaxLogsSampleRows;
- *  - shuffle the parsed logs sample.
+ * If the format was (ND)JSON:
+ *  - the samples will be serialized back to JSON strings; and
+ *  - the `samplesFormat` field will be filled out with the format description.
+ *
+ * In all cases it will also:
+ *  - shuffle the parsed logs sample using the reproducible shuffle algorithm;
+ *  - return no more than MaxLogsSampleRows entries.
+ *
+ * @param fileContent The content of the logs sample file.
+ * @returns The parsed logs sample structure or an error message.
  */
 const parseLogsContent = (fileContent: string): ParseLogsResult => {
   let parsedContent: unknown[];
@@ -137,6 +143,10 @@ const parseLogsContent = (fileContent: string): ParseLogsResult => {
 
   if (samplesFormat && parsedContent.some((log) => !isPlainObject(log))) {
     return { error: i18n.LOGS_SAMPLE_ERROR.NOT_OBJECT };
+  }
+
+  if (parsedContent.length === 0) {
+    return { error: i18n.LOGS_SAMPLE_ERROR.EMPTY };
   }
 
   const isTruncated = parsedContent.length > MaxLogsSampleRows;
@@ -204,11 +214,6 @@ export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSe
         }
 
         const { isTruncated, logSamples, samplesFormat } = result;
-
-        if (logSamples.length === 0) {
-          setSampleFileError(i18n.LOGS_SAMPLE_ERROR.EMPTY);
-          return;
-        }
 
         if (isTruncated) {
           notifications?.toasts.addInfo(i18n.LOGS_SAMPLE_TRUNCATED(MaxLogsSampleRows));
