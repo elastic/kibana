@@ -8,8 +8,8 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { TooltipWrapper } from '@kbn/visualization-utils';
-import { EuiHorizontalRule } from '@elastic/eui';
 import { BarOrientationSettings } from '../../../../shared_components/bar_orientation';
+import { ToolbarDivider } from '../../../../shared_components/toolbar_divider';
 import { ToolbarPopover } from '../../../../shared_components';
 import { MissingValuesOptions } from './missing_values_option';
 import { LineCurveOption } from './line_curve_option';
@@ -123,7 +123,7 @@ export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({
           />
         ) : null}
 
-        {shouldDisplayDividerHr ? <EuiHorizontalRule margin="s" /> : null}
+        {shouldDisplayDividerHr ? <ToolbarDivider /> : null}
 
         {hasAreaSettings ? (
           <>
@@ -138,7 +138,7 @@ export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({
               }}
             />
 
-            <EuiHorizontalRule margin="s" />
+            <ToolbarDivider />
           </>
         ) : null}
         <LineCurveOption

@@ -27,15 +27,8 @@ import { type AccessorConfig, DimensionTrigger } from '@kbn/visualization-ui-com
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { getColorsFromMapping } from '@kbn/coloring';
 import useObservable from 'react-use/lib/useObservable';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPopover,
-  EuiPopoverTitle,
-  EuiSelectable,
-} from '@elastic/eui';
+import { EuiPopover, EuiSelectable } from '@elastic/eui';
 import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { generateId } from '../../id_generator';
 import {
   isDraggedDataViewField,
@@ -1410,21 +1403,7 @@ const SubtypeSwitch = ({
         closePopover={() => setFlyoutOpen(false)}
         anchorPosition="downLeft"
       >
-        <EuiPopoverTitle>
-          <EuiFlexGroup
-            alignItems="center"
-            responsive={false}
-            css={{ padding: `${euiThemeVars.euiSizeXS} ${euiThemeVars.euiSizeM}` }}
-          >
-            <EuiFlexItem>
-              {i18n.translate('xpack.lens.xyChart.stackingOptions', {
-                defaultMessage: 'Stacking',
-              })}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPopoverTitle>
         <EuiSelectable
-          listProps={{ paddingSize: 's' }}
           css={{ width: 200 }}
           singleSelection
           data-test-subj="lnsChartSwitchList"

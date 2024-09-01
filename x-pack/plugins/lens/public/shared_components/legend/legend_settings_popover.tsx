@@ -22,6 +22,7 @@ import { Position, VerticalAlignment, HorizontalAlignment, LegendValue } from '@
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { XYLegendValue } from '@kbn/visualizations-plugin/common/constants';
+import { ToolbarDivider } from '../toolbar_divider';
 import { ToolbarPopover, type ToolbarPopoverProps } from '../toolbar_popover';
 import { LegendLocationSettings } from './location/legend_location_settings';
 import { ColumnsNumberSetting } from './layout/columns_number_setting';
@@ -315,7 +316,7 @@ export function LegendSettingsPopover<LegendStats extends LegendValue = XYLegend
 
       {showsStatisticsSetting && (
         <>
-          <EuiHorizontalRule margin="s" />
+          <ToolbarDivider />
           <EuiFormRow
             display="columnCompressed"
             label={i18n.translate('xpack.lens.shared.legendStatistics', {

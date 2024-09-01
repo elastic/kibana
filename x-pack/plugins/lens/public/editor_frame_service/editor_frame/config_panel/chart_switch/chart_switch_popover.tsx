@@ -7,7 +7,7 @@
 
 import './chart_switch.scss';
 import React, { useState, memo } from 'react';
-import { EuiPopover, EuiPopoverTitle, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ChartSwitchTrigger } from '@kbn/visualization-ui-components';
 import { useLensSelector, selectVisualization } from '../../../../state_management';
@@ -37,7 +37,7 @@ export const ChartSwitchPopover = memo(function ChartSwitchPopover(
         ownFocus
         initialFocus=".lnsChartSwitch__popoverPanel"
         panelClassName="lnsChartSwitch__popoverPanel"
-        panelPaddingSize="s"
+        panelPaddingSize="none"
         button={
           <ChartSwitchTrigger
             icon={icon}
@@ -50,15 +50,6 @@ export const ChartSwitchPopover = memo(function ChartSwitchPopover(
         closePopover={() => setFlyoutOpen(false)}
         anchorPosition="downLeft"
       >
-        <EuiPopoverTitle>
-          <EuiFlexGroup alignItems="center" responsive={false}>
-            <EuiFlexItem>
-              {i18n.translate('xpack.lens.configPanel.visualizationTypes', {
-                defaultMessage: 'Visualization types',
-              })}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPopoverTitle>
         {flyoutOpen ? <ChartSwitch {...props} onChartSelect={() => setFlyoutOpen(false)} /> : null}
       </EuiPopover>
     </div>
