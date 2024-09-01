@@ -16,7 +16,6 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiComboBox,
-  EuiHorizontalRule,
 } from '@elastic/eui';
 import { Position, VerticalAlignment, HorizontalAlignment, LegendValue } from '@elastic/charts';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
