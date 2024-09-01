@@ -14,8 +14,7 @@ import {
   JOB_MAP_NODE_TYPES,
   type AnalyticsMapReturnType,
 } from '@kbn/ml-data-frame-analytics-utils';
-import { ml } from '../../../services/ml_api_service';
-
+import { useMlApiContext } from '../../../contexts/kibana';
 interface GetDataObjectParameter {
   analyticsId?: string;
   id?: string;
@@ -24,6 +23,7 @@ interface GetDataObjectParameter {
 }
 
 export const useFetchAnalyticsMapData = () => {
+  const ml = useMlApiContext();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [elements, setElements] = useState<cytoscape.ElementDefinition[]>([]);
   const [error, setError] = useState<any>();
