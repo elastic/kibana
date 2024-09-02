@@ -21,7 +21,7 @@ export const logCategoriesGridChangeTimeColumn = {
     }
   ),
   isSortable: true,
-  initialWidth: 200,
+  initialWidth: 220,
   schema: 'datetime',
 } satisfies EuiDataGridColumn;
 

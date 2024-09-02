@@ -19,7 +19,7 @@ export const logCategoriesGridChangeTypeColumn = {
     }
   ),
   isSortable: true,
-  initialWidth: 130,
+  initialWidth: 110,
 } satisfies EuiDataGridColumn;
 
 export interface LogCategoriesGridChangeTypeCellProps {

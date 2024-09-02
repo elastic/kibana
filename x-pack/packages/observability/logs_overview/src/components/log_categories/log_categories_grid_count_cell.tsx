@@ -18,7 +18,7 @@ export const logCategoriesGridCountColumn = {
   }),
   isSortable: true,
   schema: 'numeric',
-  initialWidth: 120,
+  initialWidth: 100,
 } satisfies EuiDataGridColumn;
 
 export interface LogCategoriesGridCountCellProps {
