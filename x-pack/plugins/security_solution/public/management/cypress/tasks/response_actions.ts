@@ -76,9 +76,7 @@ export const fillUpNewEsqlRule = (name = 'Test', description = 'Test') => {
   cy.getByTestSubj('stepDefineRule').within(() => {
     cy.getByTestSubj('esqlRuleType').click();
     cy.getByTestSubj('globalQueryBar').first().click();
-    cy.getByTestSubj('kibanaCodeEditor').type(
-      'FROM logs-* METADATA _index, _id {backspace}{enter}'
-    );
+    cy.getByTestSubj('kibanaCodeEditor').type('FROM * METADATA _index, _id {backspace}{enter}');
   });
   cy.getByTestSubj('define-continue').click();
   cy.getByTestSubj('detectionEngineStepAboutRuleName').within(() => {
