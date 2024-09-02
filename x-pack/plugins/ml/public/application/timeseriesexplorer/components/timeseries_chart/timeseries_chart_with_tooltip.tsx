@@ -86,7 +86,7 @@ export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> =
 
   useEffect(() => {
     let unmounted = false;
-    const entities = getControlsForDetector(detectorIndex, selectedEntities, selectedJob.job_id);
+    const entities = getControlsForDetector(detectorIndex, selectedEntities, selectedJob);
     const nonBlankEntities = Array.isArray(entities)
       ? entities.filter((entity) => entity.fieldValue !== null)
       : undefined;
