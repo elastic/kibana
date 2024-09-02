@@ -56,7 +56,7 @@ export function WorkspaceErrors(props: Props) {
               {activeError.longMessage ? (
                 <>
                   <EuiSpacer />
-                  <EuiText size="s"> {activeError.longMessage}</EuiText>
+                  <EuiText size="s"> {activeError.longMessage as React.ReactNode}</EuiText>
                 </>
               ) : null}
             </div>

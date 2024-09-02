@@ -170,7 +170,7 @@ describe('application-level user messages', () => {
             getApplicationUserMessages({
               ...props,
               ...propsOverrides,
-            })[0].longMessage
+            })[0].longMessage as React.ReactNode
           }
         </I18nProvider>
       );

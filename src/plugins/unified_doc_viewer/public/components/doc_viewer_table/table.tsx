@@ -367,7 +367,7 @@ export const DocViewerTable = ({
   );
 
   const onHideNullValuesChange = useCallback(
-    (e) => {
+    (e: any) => {
       setAreNullValuesHidden(e.target.checked);
     },
     [setAreNullValuesHidden]

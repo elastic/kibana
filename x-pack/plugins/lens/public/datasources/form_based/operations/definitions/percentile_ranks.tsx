@@ -220,7 +220,7 @@ export const percentileRanksOperation: OperationDefinition<
     const inputValueIsValid = isValidNumber(inputValue, isInline);
 
     const handleInputChange: EuiFieldNumberProps['onChange'] = useCallback(
-      (e) => {
+      (e: any) => {
         handleInputChangeWithoutValidation(e.currentTarget.value);
       },
       [handleInputChangeWithoutValidation]

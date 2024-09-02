@@ -67,7 +67,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   );
   const [rowsPerPage, setRowsPerPage] = useState(DEFAULT_ROWS_PER_PAGE);
 
-  const onSetColumns = useCallback((columns) => {
+  const onSetColumns = useCallback((columns: any) => {
     setActiveColumns(columns);
   }, []);
 
@@ -146,7 +146,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   }, [props.share?.url.locators]);
 
   const renderToolbar = useCallback(
-    (customToolbarProps) => {
+    (customToolbarProps: any) => {
       const discoverLink = discoverLocator?.getRedirectUrl({
         dataViewSpec: props.dataView.toSpec(),
         timeRange: props.data.query.timefilter.timefilter.getTime(),

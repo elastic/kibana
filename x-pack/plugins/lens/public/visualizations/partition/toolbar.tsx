@@ -95,36 +95,36 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
   );
 
   const onCategoryDisplayChange = useCallback(
-    (option) => onStateChange({ categoryDisplay: option }),
+    (option: any) => onStateChange({ categoryDisplay: option }),
     [onStateChange]
   );
 
   const onNumberDisplayChange = useCallback(
-    (option) => onStateChange({ numberDisplay: option }),
+    (option: any) => onStateChange({ numberDisplay: option }),
     [onStateChange]
   );
 
   const onPercentDecimalsChange = useCallback(
-    (option) => {
+    (option: any) => {
       onStateChange({ percentDecimals: option });
     },
     [onStateChange]
   );
 
   const onLegendDisplayChange = useCallback(
-    (optionId) => {
+    (optionId: any) => {
       onStateChange({ legendDisplay: legendOptions.find(({ id }) => id === optionId)!.value });
     },
     [onStateChange]
   );
 
   const onLegendPositionChange = useCallback(
-    (id) => onStateChange({ legendPosition: id as Position }),
+    (id: any) => onStateChange({ legendPosition: id as Position }),
     [onStateChange]
   );
 
   const onNestedLegendChange = useCallback(
-    (id) => onStateChange({ nestedLegend: !layer.nestedLegend }),
+    (id: any) => onStateChange({ nestedLegend: !layer.nestedLegend }),
     [layer, onStateChange]
   );
 
@@ -134,24 +134,24 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
   }, [layer, onStateChange]);
 
   const onLegendMaxLinesChange = useCallback(
-    (val) => onStateChange({ legendMaxLines: val }),
+    (val: any) => onStateChange({ legendMaxLines: val }),
     [onStateChange]
   );
 
   const onLegendSizeChange = useCallback(
-    (val) => onStateChange({ legendSize: val }),
+    (val: any) => onStateChange({ legendSize: val }),
     [onStateChange]
   );
 
   const onLegendStatsChange = useCallback(
-    (legendStats) => {
+    (legendStats: any) => {
       onStateChange({ legendStats });
     },
     [onStateChange]
   );
 
   const onEmptySizeRatioChange = useCallback(
-    (sizeId) => {
+    (sizeId: any) => {
       const emptySizeRatio = emptySizeRatioOptions?.find(({ id }) => id === sizeId)?.value;
       onStateChange({ emptySizeRatio });
     },

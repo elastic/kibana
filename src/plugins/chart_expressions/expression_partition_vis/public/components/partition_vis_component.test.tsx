@@ -34,7 +34,7 @@ const actWithTimeout = (action: Function, timer: number = 1) =>
       new Promise((resolve) =>
         setTimeout(async () => {
           await action();
-          resolve();
+          resolve(void 0);
         }, timer)
       )
   );

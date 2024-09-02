@@ -64,14 +64,14 @@ export const RuleSettingsFlappingInputs = (props: RuleSettingsFlappingInputsProp
   } = props;
 
   const internalOnLookBackWindowChange = useCallback(
-    (e) => {
+    (e: any) => {
       onLookBackWindowChange(parseInt(e.currentTarget.value, 10));
     },
     [onLookBackWindowChange]
   );
 
   const internalOnStatusChangeThresholdChange = useCallback(
-    (e) => {
+    (e: any) => {
       onStatusChangeThresholdChange(parseInt(e.currentTarget.value, 10));
     },
     [onStatusChangeThresholdChange]

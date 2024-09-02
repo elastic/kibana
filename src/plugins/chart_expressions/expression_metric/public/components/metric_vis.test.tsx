@@ -560,7 +560,7 @@ describe('MetricVisComponent', function () {
         componentWithSecondaryDimension
           .find(Metric)
           .props()
-          .data?.[0].map((datum) => datum?.extra)
+          .data?.[0].map((datum: any) => datum?.extra)
       ).toMatchInlineSnapshot(`
         Array [
           <span>
@@ -601,7 +601,7 @@ describe('MetricVisComponent', function () {
         componentWithExtraText
           .find(Metric)
           .props()
-          .data?.[0].map((datum) => datum?.extra)
+          .data?.[0].map((datum: any) => datum?.extra)
       ).toMatchInlineSnapshot(`
         Array [
           <span>
