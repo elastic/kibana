@@ -98,7 +98,7 @@ export function createInferenceEvaluationClient({
                     score: {
                       type: 'number',
                       description:
-                        'A score of either 0 (criterion failed) or 1 (criterion succeeded)',
+                        'A score between 0 (criterion failed) or 1 (criterion succeeded). Fractional results (e.g. 0.5) are allowed, if part of the criterion succeeded',
                     },
                     reasoning: {
                       type: 'string',
