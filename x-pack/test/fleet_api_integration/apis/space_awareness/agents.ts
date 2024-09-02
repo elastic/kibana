@@ -21,35 +21,18 @@ import {
   createFleetAgent,
   makeAgentsUpgradeable,
 } from './helpers';
-import { setupTestSpaces, TEST_SPACE_1 } from './space_helpers';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const esClient = getService('es');
   const kibanaServer = getService('kibanaServer');
+  const spaces = getService('spaces');
+  let TEST_SPACE_1: string;
 
-  describe('agents', async function () {
+  describe('agents', function () {
     skipIfNoDockerRegistry(providerContext);
     const apiClient = new SpaceTestApiClient(supertest);
-
-    before(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
-      await kibanaServer.savedObjects.cleanStandardList({
-        space: TEST_SPACE_1,
-      });
-      await cleanFleetIndices(esClient);
-    });
-
-    after(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
-      await kibanaServer.savedObjects.cleanStandardList({
-        space: TEST_SPACE_1,
-      });
-      await cleanFleetIndices(esClient);
-    });
-
-    setupTestSpaces(providerContext);
 
     let defaultSpacePolicy1: CreateAgentPolicyResponse;
     let defaultSpacePolicy2: CreateAgentPolicyResponse;
@@ -61,6 +44,40 @@ export default function (providerContext: FtrProviderContext) {
     let testSpaceAgent1: string;
     let testSpaceAgent2: string;
     let testSpaceAgent3: string;
+
+    before(async () => {
+      TEST_SPACE_1 = spaces.getDefaultTestSpace();
+      await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.savedObjects.cleanStandardList({
+        space: TEST_SPACE_1,
+      });
+      await cleanFleetIndices(esClient);
+      await spaces.createTestSpace(TEST_SPACE_1);
+
+      await apiClient.postEnableSpaceAwareness();
+
+      const [_defaultSpacePolicy1, _defaultSpacePolicy2, _spaceTest1Policy1, _spaceTest1Policy2] =
+        await Promise.all([
+          apiClient.createAgentPolicy(),
+          apiClient.createAgentPolicy(),
+          apiClient.createAgentPolicy(TEST_SPACE_1),
+          apiClient.createAgentPolicy(TEST_SPACE_1),
+        ]);
+      defaultSpacePolicy1 = _defaultSpacePolicy1;
+      defaultSpacePolicy2 = _defaultSpacePolicy2;
+      spaceTest1Policy1 = _spaceTest1Policy1;
+      spaceTest1Policy2 = _spaceTest1Policy2;
+
+      await createAgents();
+    });
+
+    after(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.savedObjects.cleanStandardList({
+        space: TEST_SPACE_1,
+      });
+      await cleanFleetIndices(esClient);
+    });
 
     async function createAgents() {
       const [
@@ -82,24 +99,6 @@ export default function (providerContext: FtrProviderContext) {
       testSpaceAgent2 = _testSpaceAgent2;
       testSpaceAgent3 = _testSpaceAgent3;
     }
-
-    before(async () => {
-      await apiClient.postEnableSpaceAwareness();
-
-      const [_defaultSpacePolicy1, _defaultSpacePolicy2, _spaceTest1Policy1, _spaceTest1Policy2] =
-        await Promise.all([
-          apiClient.createAgentPolicy(),
-          apiClient.createAgentPolicy(),
-          apiClient.createAgentPolicy(TEST_SPACE_1),
-          apiClient.createAgentPolicy(TEST_SPACE_1),
-        ]);
-      defaultSpacePolicy1 = _defaultSpacePolicy1;
-      defaultSpacePolicy2 = _defaultSpacePolicy2;
-      spaceTest1Policy1 = _spaceTest1Policy1;
-      spaceTest1Policy2 = _spaceTest1Policy2;
-
-      await createAgents();
-    });
 
     beforeEach(async () => {
       await cleanFleetActionIndices(esClient);
