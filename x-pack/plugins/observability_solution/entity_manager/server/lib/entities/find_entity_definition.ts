@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { concat, compact, forEach, reduce } from 'lodash';
+import { compact, forEach, reduce } from 'lodash';
 import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { EntityDefinition } from '@kbn/entities-schema';
 import { NodesIngestTotal } from '@elastic/elasticsearch/lib/api/types';
@@ -125,7 +125,7 @@ async function getTransformState({
 
   const transformStats = await Promise.all(
     transformIds.map((id) => esClient.transform.getTransformStats({ transform_id: id }))
-  ).then((results) => concat([], ...results.map(({ transforms }) => transforms)));
+  ).then((results) => results.map(({ transforms }) => transforms).flat());
 
   return transformIds.map((id) => {
     const stats = transformStats.find((transform) => transform.id === id);
