@@ -82,11 +82,30 @@ export const OnboardingComponent: React.FC<OnboardingProps> = ({
   const renderDataIngestionHubHeader = useMemo(
     () =>
       isDataIngestionHubEnabled ? (
-        <DataIngestionHubHeader />
+        <StepContextProvider
+          expandedCardSteps={expandedCardSteps}
+          finishedSteps={finishedSteps}
+          indicesExist={!!indicesExist}
+          onStepClicked={onStepClicked}
+          onStepLinkClicked={onStepLinkClicked}
+          toggleTaskCompleteStatus={toggleTaskCompleteStatus}
+        >
+          <DataIngestionHubHeader spaceId={spaceId} />
+        </StepContextProvider>
       ) : (
         <WelcomeHeader productTier={productTier} />
       ),
-    [isDataIngestionHubEnabled, productTier]
+    [
+      expandedCardSteps,
+      spaceId,
+      finishedSteps,
+      indicesExist,
+      isDataIngestionHubEnabled,
+      onStepClicked,
+      onStepLinkClicked,
+      productTier,
+      toggleTaskCompleteStatus,
+    ]
   );
 
   const kibanaPageTemplateSectionStyles = useMemo(

@@ -5,22 +5,57 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import classnames from 'classnames';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { useLocalStorage } from 'react-use';
 import {
   GET_STARTED_PAGE_TITLE,
   GET_STARTED_DATA_INGESTION_HUB_DESCRIPTION,
   GET_STARTED_DATA_INGESTION_HUB_SUBTITLE,
 } from '../translations';
 import { useCurrentUser } from '../../../../lib/kibana';
-import { useDataIngestionHubHeaderStyles } from '../styles/data_ingestion_hub_header.styles';
+import { useDataIngestionHubHeaderStyles } from './index.styles';
 import { useDataIngestionHubHeaderCards } from './cards';
 import { DataIngestionHubHeaderCard } from './data_ingestion_hub_header_card';
+import { DataIngestionHubVideoModal } from './data_ingestion_hub_video_modal';
 
-const DataIngestionHubHeaderComponent: React.FC = () => {
+export const getStorageKeyBySpace = (storageKey: string, spaceId: string | null | undefined) => {
+  if (spaceId == null) {
+    return storageKey;
+  }
+  return `${storageKey}.${spaceId}`;
+};
+
+const IS_ONBOARDING_HUB_VISITED_LOCAL_STORAGE_KEY = 'secutirySolution.isOnboardingHubVisited';
+
+const DataIngestionHubHeaderComponent: React.FC<{ spaceId: string }> = (props) => {
+  const { spaceId } = props;
   const userName = useCurrentUser();
-  const cards = useDataIngestionHubHeaderCards();
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
+  const isOnboardingHubVisitedStorageKey = getStorageKeyBySpace(
+    IS_ONBOARDING_HUB_VISITED_LOCAL_STORAGE_KEY,
+    spaceId
+  );
+
+  const [isOnboardingHubVisited, setIsOnboardingHubVisited] = useLocalStorage<boolean | null>(
+    isOnboardingHubVisitedStorageKey,
+    null
+  );
+
+  const closeModal = () => {
+    if (isOnboardingHubVisited === null) {
+      setIsOnboardingHubVisited(true);
+    }
+    setIsModalVisible(false);
+  };
+
+  const showModal = () => {
+    setIsModalVisible(true);
+  };
+
+  const cards = useDataIngestionHubHeaderCards({ videoAction: showModal });
 
   const {
     headerContentStyles,
@@ -79,6 +114,12 @@ const DataIngestionHubHeaderComponent: React.FC = () => {
           </EuiFlexItem>
         ))}
       </EuiFlexGroup>
+      {isModalVisible && (
+        <DataIngestionHubVideoModal
+          onCloseModal={closeModal}
+          isOnboardingHubVisited={isOnboardingHubVisited}
+        />
+      )}
     </>
   );
 };

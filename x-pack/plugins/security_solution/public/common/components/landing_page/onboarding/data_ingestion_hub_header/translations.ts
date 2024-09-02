@@ -69,3 +69,25 @@ export const DATA_INGESTION_HUB_HEADER_TEAMMATES_LINK_TITLE = i18n.translate(
     defaultMessage: 'Add users',
   }
 );
+
+export const DATA_INGESTION_HUB_VIDEO_MODAL_TITLE = i18n.translate(
+  'xpack.securitySolution.onboarding.dataIngestionHubHeader.videoModal.title',
+  {
+    defaultMessage: 'Welcome to Elastic Security!',
+  }
+);
+
+export const DATA_INGESTION_HUB_VIDEO_MODAL_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.onboarding.dataIngestionHubHeader.videoModal.description',
+  {
+    defaultMessage:
+      'We’re excited to support you in protecting your organization’s data. Here’s a preview of the steps you’ll take to set up.',
+  }
+);
+
+export const DATA_INGESTION_HUB_VIDEO_MODAL_BUTTON = i18n.translate(
+  'xpack.securitySolution.onboarding.dataIngestionHubHeader.videoModal.button',
+  {
+    defaultMessage: 'Head to steps',
+  }
+);

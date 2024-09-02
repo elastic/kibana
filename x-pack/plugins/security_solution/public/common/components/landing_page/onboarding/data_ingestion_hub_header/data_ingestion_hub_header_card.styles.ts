@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { useMemo } from 'react';
 
 export const useDataIngestionHubHeaderCardStyles = () => {
   const { euiTheme, colorMode } = useEuiTheme();
@@ -44,6 +44,16 @@ export const useDataIngestionHubHeaderCardStyles = () => {
         fontSize: euiTheme.size.m,
         fontWeight: euiTheme.font.weight.medium,
         lineHeight: euiTheme.size.base,
+      }),
+      cardButtonStyle: css({
+        padding: '0px',
+        height: 'auto',
+        fontSize: euiTheme.size.m,
+        fontWeight: euiTheme.font.weight.medium,
+        lineHeight: euiTheme.size.base,
+        ':focus': {
+          backgroundColor: 'transparent',
+        },
       }),
     };
   }, [

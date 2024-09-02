@@ -15,18 +15,28 @@ import darkDemo from '../images/dark_data_ingestion_hub_demo.png';
 import * as i18n from './translations';
 import { useUserSettingsUrl } from '../hooks/use_user_settings_url';
 
-export interface Card {
+export enum HeaderCardAsTypeEnum {
+  action = 'action',
+  link = 'link',
+}
+
+export interface HeaderCard {
   icon: string;
   key: string;
   title: string;
   description: string;
-  link: {
+  link?: {
     title: string;
     href: string | undefined;
   };
+  action?: { title: string; trigger: () => void };
+  asType: HeaderCardAsTypeEnum;
 }
 
-export const useDataIngestionHubHeaderCards: () => Card[] = () => {
+export const useDataIngestionHubHeaderCards: (actions: {
+  videoAction: () => void;
+}) => HeaderCard[] = (actions) => {
+  const { videoAction } = actions;
   const { colorMode } = useEuiTheme();
   const isDarkMode = colorMode === 'DARK';
   const userSettingsUrl = useUserSettingsUrl();
@@ -35,16 +45,15 @@ export const useDataIngestionHubHeaderCards: () => Card[] = () => {
     {
       icon: isDarkMode ? darkVideo : video,
       key: 'video',
+      asType: HeaderCardAsTypeEnum.action,
       title: i18n.DATA_INGESTION_HUB_HEADER_VIDEO_TITLE,
       description: i18n.DATA_INGESTION_HUB_HEADER_VIDEO_DESCRIPTION,
-      link: {
-        title: i18n.DATA_INGESTION_HUB_HEADER_VIDEO_LINK_TITLE,
-        href: 'https://docs.elastic.co/integrations/elastic-security-intro',
-      },
+      action: { title: i18n.DATA_INGESTION_HUB_HEADER_VIDEO_LINK_TITLE, trigger: videoAction },
     },
     {
       icon: isDarkMode ? darkTeammates : teammates,
       key: 'teammates',
+      asType: HeaderCardAsTypeEnum.link,
       title: i18n.DATA_INGESTION_HUB_HEADER_TEAMMATES_TITLE,
       description: i18n.DATA_INGESTION_HUB_HEADER_TEAMMATES_DESCRIPTION,
       link: {
@@ -55,11 +64,12 @@ export const useDataIngestionHubHeaderCards: () => Card[] = () => {
     {
       icon: isDarkMode ? darkDemo : demo,
       key: 'demo',
+      asType: HeaderCardAsTypeEnum.link,
       title: i18n.DATA_INGESTION_HUB_HEADER_DEMO_TITLE,
       description: i18n.DATA_INGESTION_HUB_HEADER_DEMO_DESCRIPTION,
       link: {
         title: i18n.DATA_INGESTION_HUB_HEADER_DEMO_LINK_TITLE,
-        href: 'https://www.elastic.co/demo-gallery?solutions=security&features=null',
+        href: 'https://www.elastic.co/demo-gallery/security-overview',
       },
     },
   ];
