@@ -27,14 +27,17 @@ export const categorizeLogsService = setup({
       samplingProbability: number;
       error?: Error;
     },
+    events: {} as {
+      type: 'cancel';
+    },
   },
   actors: {
     countDocuments: getPlaceholderFor(countDocuments),
     categorizeDocuments: getPlaceholderFor(categorizeDocuments),
   },
   actions: {
-    storeError: assign((_, params: { error: Error }) => ({
-      error: params.error,
+    storeError: assign((_, params: { error: unknown }) => ({
+      error: params.error instanceof Error ? params.error : new Error(String(params.error)),
     })),
     storeCategories: assign(({ context }, params: { categories: LogCategory[] }) => ({
       categories: [...context.categories, ...params.categories],
@@ -50,7 +53,7 @@ export const categorizeLogsService = setup({
     requiresSampling: ({ context }) => context.samplingProbability < 1,
   },
 }).createMachine({
-  /** @xstate-layout N4IgpgJg5mDOIC5QGMCGAXMUD2AnAlgF5gAy2UsAdMtgK4B26+9UAItsrQLZiOwDEEbPTCVmAN2wBrUWkw4CxMhWp1GzNh2690sBBI4Z8wgNoAGALrmLiUAAdssfE2G2QAD0QAmABw-KACw+AQDMAOwAbGEAnGFmPgA0IACe3gFmlD7RIV4AjPlm6SFmXtEAvmVJclh4RKTkVDQMTCzsnDx8gsKiBjLUGDWK9SpN6q1aHbr69JJyxvTWJrk2SCAOTi70bp4Ivv5BoZExcYkpiD65lACsZrchUV5mEeFmIRVVAwp1yo1qLZrtHQCMC4XB4Sh2AA2GAAZnguP15LUlA1VM0NG1tHxprMjKZLNY3OtnPNtt4-IFguEorF4klUghQldKDSwmF7hEsmEvFc3pUQNUviiVDCwOhkAALDQAZVQXChkAAwp9anAuiIxDNpLIVUNZfLIUrdfg4ITVsTNmSELkzFdmWZsmzObkrukAld6d4vCFApEIrkwj5OT57gH3gLjcKqKLxVKWPqFRBlUiCGqQWDcBDoeg4bgEYLkWAE4ak8bTZYiY4Sa5VjsbXbKA7wpELq7Ch6zggQrkIoFShFSiVCo8IuGC0MfpQY5KNAAlMBcVDMDTJwYmgRCDW9HUpurzxfLlirr7llb2KuW2uIAMBXtNiLPHxXYIXLyehA+LyUEI-l62kK0vcY6RsM0ZijOLD7ku9ArmWwKguCUKwvCiJrsQUGHlAx6qrAZrnhspJXtaYS3o22QPiET4vrkb6dgGzK+BEvLejc9xBhU-L0NgEBwG447fA0lYETWoA7AAtBE74ScBu5RmiYwAliuhCdWWxEQEtEMjalzaREGncl4jwOj4MloaBU7gXGUDFkau68eaF6EaJiBMdEZHNmY7LekE76GW5-qxFRpQaQOfIfLJ5nTlZGEwUecEqZeznWiENzueyP4BIG3YBO+FKZQ+uQpUG0RRClplCpFS4lglTkeN4tqXF4TFXC6eQxNEtq+R1LIxAOHWZSVkTlYWk6bmANUiXVuwNZQTV2q1AbRB1HZaSUmQOtEvKUb40TpLkHFlEAA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QGMCGAXMUD2AnAlgF5gAy2UsAdMtgK4B26+9UAItsrQLZiOwDEEbPTCVmAN2wBrUWkw4CxMhWp1GzNh2690sBBI4Z8wgNoAGALrmLiUAAdssfE2G2QAD0QAmAJwAOSgAWP0CAZgA2M0CzAEZwgFYYgHYkgBoQAE9EJK8vIPCYsy8k+K94pJ8YmIBfavS5LDwiUnIqGgYmFnZOHj5BYVEDGWoMRsUWlXb1Lq1e3X16STljemsTGJskEAcnF3o3TwRfAOCwyOi4xJT0rKPQmMpQxPifJNCkyLK-cNr60YVmso2mpOpoejoBGBcLg8JQ7AAbDAAMzwXBG8iaSlaqg6Gm62j4CyWRlMlmsbh2zhWB28-iCIQiUViCWSaUyiD8D3iZh5MS8kSiXhilV+IAaAKxkxBeNmEP4aHoyDA8PJW0pexpRzpp0ZFxZ13ZCHipUofhewQqKXCXkCovFmImVCRYHQyAAFhoAMqoLgIyAAYX+TTg-REYkW0lkQfG3t98ID0fwcFV9kcVNcW0OhRKlDMPneZktPjKBtu4R84UejNCXh5SUCQqSdsTkqdLvdXp9foggYxBBDUJhuDhiPQKNwaPtMa78Z7ieTlgpaY1mcQ2fiufzSULr2L5TZtySfh8lC8x9rgXigXCoT8T2bfcB2Odro9LFj3d7YyTAgVSpVi5qsu1Krgg66bgWRYlgeHJ+HkNpeO825mqEl5eA+36tpQL4diwABKYBcKgzAaF+AIhkIYZDFGj7EARREkSwZHBrAKbbMBGagFmVoQeECShO8No1jc3iIUEHwvH43w+D4RT1hhEqOth7ZvlA9HEfQpHzpC0KwgiyKouimFgOpjFQMx-asYBqa7CBXFrjxeYRPxglhF4IkIIEfKPHBZo+NeISRDUdRii2Sk4appmaUx2nyqgirKmx6p2R4DkfLxLk5G5Hn3JWDavEkMTRFJ4SBGVtQhfQ2AQHAbhTk+FBLrZnGpQgAC04QeW1G4yb1fX9aECkOkCOLTGCBK6E16b7KBDYeYUG7vAkZplXmHzFEN4wjRFnZxgmj61UBzUzfZCB8SeTk5DEJXHJ1hqFQ813rcU8QoQJm0NW2r4aFFWkHfAR3TZqMQFhBJQNreDY2h5iEBDWnLHtahRFRtIX1VhSLEbOU0rqdQqxKeCTXgkiR+EUHlnJQRWJNEr104W8QfVhlFgDjKWHPjDz8lefHGtd5OGkJlA+PENbvJekR3vcFXVEAA */
   id: 'categorizeLogs',
   context: ({ input }) => ({
     categories: [],
@@ -87,7 +90,24 @@ export const categorizeLogsService = setup({
         ],
         onError: {
           target: 'failed',
-          actions: [],
+          actions: [
+            {
+              type: 'storeError',
+              params: ({ event }) => ({ error: event.error }),
+            },
+          ],
+        },
+      },
+
+      on: {
+        cancel: {
+          target: 'failed',
+          actions: [
+            {
+              type: 'storeError',
+              params: () => ({ error: new Error('Counting cancelled') }),
+            },
+          ],
         },
       },
     },
@@ -111,7 +131,27 @@ export const categorizeLogsService = setup({
             },
           ],
         },
-        onError: 'failed',
+        onError: {
+          target: 'failed',
+          actions: [
+            {
+              type: 'storeError',
+              params: ({ event }) => ({ error: event.error }),
+            },
+          ],
+        },
+      },
+
+      on: {
+        cancel: {
+          target: 'failed',
+          actions: [
+            {
+              type: 'storeError',
+              params: () => ({ error: new Error('Categorization cancelled') }),
+            },
+          ],
+        },
       },
     },
 
@@ -134,7 +174,27 @@ export const categorizeLogsService = setup({
             },
           ],
         },
-        onError: 'failed',
+        onError: {
+          target: 'failed',
+          actions: [
+            {
+              type: 'storeError',
+              params: ({ event }) => ({ error: event.error }),
+            },
+          ],
+        },
+      },
+
+      on: {
+        cancel: {
+          target: 'failed',
+          actions: [
+            {
+              type: 'storeError',
+              params: () => ({ error: new Error('Categorization cancelled') }),
+            },
+          ],
+        },
       },
     },
 

@@ -44,7 +44,6 @@ export const LogCategoriesGrid: React.FC<LogCategoriesGridProps> = ({
     inspect: consoleInspector,
   });
 
-  // TODO: sort data based on sorting columns
   const sortedLogCategories = useMemo(() => {
     const sortingCriteria = gridState.context.sortingColumns.map(
       ({ id, direction }): [(logCategory: LogCategory) => any, 'asc' | 'desc'] => {

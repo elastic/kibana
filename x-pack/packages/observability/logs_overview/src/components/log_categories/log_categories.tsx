@@ -8,7 +8,8 @@
 import { ISearchGeneric } from '@kbn/search-types';
 import { createConsoleInspector } from '@kbn/xstate-utils';
 import { useMachine } from '@xstate5/react';
-import React from 'react';
+import React, { useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   categorizeLogsService,
   createCategorizeLogsServiceImplementations,
@@ -28,7 +29,7 @@ export type LogCategoriesDependencies = LogCategoriesResultContentDependencies &
 };
 
 export const LogCategories: React.FC<LogCategoriesProps> = ({ dependencies }) => {
-  const [categorizeLogsServiceState, _sendToCategorizeLogsService] = useMachine(
+  const [categorizeLogsServiceState, sendToCategorizeLogsService] = useMachine(
     categorizeLogsService.provide(
       createCategorizeLogsServiceImplementations({ search: dependencies.search })
     ),
@@ -44,6 +45,12 @@ export const LogCategories: React.FC<LogCategoriesProps> = ({ dependencies }) =>
     }
   );
 
+  const cancelOperation = useCallback(() => {
+    sendToCategorizeLogsService({
+      type: 'cancel',
+    });
+  }, [sendToCategorizeLogsService]);
+
   if (categorizeLogsServiceState.matches('done')) {
     return (
       <LogCategoriesResultContent
@@ -52,9 +59,22 @@ export const LogCategories: React.FC<LogCategoriesProps> = ({ dependencies }) =>
       />
     );
   } else if (categorizeLogsServiceState.matches('failed')) {
-    return <div>Error</div>;
+    return (
+      <div>
+        {i18n.translate('xpack.observabilityLogsOverview.logCategories.div.errorLabel', {
+          defaultMessage: 'Error',
+        })}
+      </div>
+    );
+  } else if (categorizeLogsServiceState.matches('countingDocuments')) {
+    return <LogCategoriesLoadingContent onCancel={cancelOperation} stage="counting" />;
+  } else if (
+    categorizeLogsServiceState.matches('fetchingSampledCategories') ||
+    categorizeLogsServiceState.matches('fetchingRemainingCategories')
+  ) {
+    return <LogCategoriesLoadingContent onCancel={cancelOperation} stage="categorizing" />;
   } else {
-    return <LogCategoriesLoadingContent />;
+    return null;
   }
 };
 
