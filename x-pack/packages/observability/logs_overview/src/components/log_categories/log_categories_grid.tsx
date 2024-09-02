@@ -10,16 +10,18 @@ import {
   EuiDataGridColumnSortingConfig,
   EuiDataGridPaginationProps,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { createConsoleInspector } from '@kbn/xstate-utils';
 import { useMachine } from '@xstate5/react';
-import React, { useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
-import { assign, setup } from 'xstate5';
 import _ from 'lodash';
+import React, { useMemo } from 'react';
+import { assign, setup } from 'xstate5';
 import { LogCategory } from '../../types';
 import {
   LogCategoriesGridCellDependencies,
+  LogCategoriesGridColumnId,
   createCellContext,
+  logCategoriesGridColumnIds,
   logCategoriesGridColumns,
   renderLogCategoriesGridCell,
 } from './log_categories_grid_cell';
@@ -49,10 +51,10 @@ export const LogCategoriesGrid: React.FC<LogCategoriesGridProps> = ({
         switch (id) {
           case 'count':
             return [(logCategory: LogCategory) => logCategory.documentCount, direction];
-          case 'type':
+          case 'change_type':
             // TODO: use better sorting weight for change types
             return [(logCategory: LogCategory) => logCategory.change.type, direction];
-          case 'change':
+          case 'change_time':
             return [
               (logCategory: LogCategory) =>
                 'timestamp' in logCategory.change ? logCategory.change.timestamp ?? '' : '',
@@ -101,7 +103,7 @@ const gridStateService = setup({
     context: {} as {
       visibleColumns: string[];
       pagination: Pick<EuiDataGridPaginationProps, 'pageIndex' | 'pageSize' | 'pageSizeOptions'>;
-      sortingColumns: EuiDataGridColumnSortingConfig[];
+      sortingColumns: LogCategoriesGridSortingConfig[];
     },
     events: {} as
       | {
@@ -151,7 +153,10 @@ const gridStateService = setup({
     },
     changeSortingColumns: {
       actions: assign(({ event }) => ({
-        sortingColumns: event.sortingColumns,
+        sortingColumns: event.sortingColumns.filter(
+          (sortingConfig): sortingConfig is LogCategoriesGridSortingConfig =>
+            (logCategoriesGridColumnIds as string[]).includes(sortingConfig.id)
+        ),
       })),
     },
     changeVisibleColumns: {
@@ -168,3 +173,11 @@ const logCategoriesGridLabel = i18n.translate(
   'xpack.observabilityLogsOverview.logCategoriesGrid.euiDataGrid.logCategoriesLabel',
   { defaultMessage: 'Log categories' }
 );
+
+interface TypedEuiDataGridColumnSortingConfig<ColumnId extends string>
+  extends EuiDataGridColumnSortingConfig {
+  id: ColumnId;
+}
+
+type LogCategoriesGridSortingConfig =
+  TypedEuiDataGridColumnSortingConfig<LogCategoriesGridColumnId>;

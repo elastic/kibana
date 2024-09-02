@@ -77,7 +77,9 @@ export const logCategoriesGridColumns = [
   logCategoriesGridHistoryColumn,
 ] satisfies EuiDataGridColumn[];
 
-type LogCategoriesGridColumnId = (typeof logCategoriesGridColumns)[number]['id'];
+export const logCategoriesGridColumnIds = logCategoriesGridColumns.map(({ id }) => id);
+
+export type LogCategoriesGridColumnId = (typeof logCategoriesGridColumns)[number]['id'];
 
 const cellContextKey = 'cellContext';
 
