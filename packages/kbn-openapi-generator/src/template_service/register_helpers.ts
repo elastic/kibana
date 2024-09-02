@@ -89,7 +89,7 @@ export function registerHelpers(handlebarsInstance: typeof Handlebars) {
   );
 
   /**
-     In case of anyOf schemas, we should cast explicitly to the type because TS doesn't handle big sized z.infer types
+     * Large Zod schemas might lead to TypeScript type serialization limit. The hotfix applies type hinting for all schemas using `anyOf` or `oneOf`.
      */
   handlebarsInstance.registerHelper(
     'shouldCastExplicitly',
