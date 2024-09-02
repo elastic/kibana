@@ -273,6 +273,37 @@ describe('processFields', () => {
     expect(processFields(nested)).toEqual(nestedExpanded);
   });
 
+  test('correctly handles properties of nested type fields with subfields', () => {
+    const nested = [
+      {
+        name: 'a',
+        type: 'nested',
+        dynamic: true,
+        fields: [
+          {
+            name: 'b',
+            type: 'keyword',
+          },
+        ],
+      },
+    ];
+
+    const nestedExpanded = [
+      {
+        name: 'a',
+        type: 'nested',
+        dynamic: true,
+        fields: [
+          {
+            name: 'b',
+            type: 'keyword',
+          },
+        ],
+      },
+    ];
+    expect(processFields(nested)).toEqual(nestedExpanded);
+  });
+
   test('correctly handles properties of nested and object type fields together', () => {
     const fields = [
       {
