@@ -19,6 +19,7 @@ import {
 import { findEntityDefinitions } from '../../lib/entities/find_entity_definition';
 import { builtInDefinitions } from '../../lib/entities/built_in';
 import { getClientsFromAPIKey } from '../../lib/utils';
+import { EntityDefinitionWithState } from '../../lib/entities/types';
 
 /**
  * @openapi
@@ -76,9 +77,13 @@ export function checkEntityDiscoveryEnabledRoute<T extends RequestHandlerContext
               esClient,
               soClient,
               id: builtInDefinition.id,
+              includeState: true,
             });
 
-            return { installedDefinition: definitions[0], builtInDefinition };
+            return {
+              installedDefinition: definitions[0] as EntityDefinitionWithState,
+              builtInDefinition,
+            };
           })
         ).then((results) =>
           results.reduce(
