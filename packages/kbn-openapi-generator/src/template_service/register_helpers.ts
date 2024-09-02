@@ -89,8 +89,8 @@ export function registerHelpers(handlebarsInstance: typeof Handlebars) {
   );
 
   /**
-     * Large Zod schemas might lead to TypeScript type serialization limit. The hotfix applies type hinting for all schemas using `anyOf` or `oneOf`.
-     */
+   * Large Zod schemas might lead to TypeScript type serialization limit. The hotfix applies type hinting for all schemas using `anyOf` or `oneOf`.
+   */
   handlebarsInstance.registerHelper(
     'shouldCastExplicitly',
     ({ anyOf, oneOf }) => anyOf?.length > 2 || oneOf?.length > 2
