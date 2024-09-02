@@ -237,59 +237,69 @@ export const DocViewerTable = ({
     ]
   );
 
+  const selectedFieldNames = useMemo(
+    () => columns?.filter((column) => column !== '_source') || [],
+    [columns]
+  );
+  const displayedFieldNames = useMemo(() => {
+    if (showOnlySelectedFields) {
+      return selectedFieldNames;
+    }
+    return Object.keys(flattened).sort((fieldA, fieldB) => {
+      const mappingA = mapping(fieldA);
+      const mappingB = mapping(fieldB);
+      const nameA = !mappingA || !mappingA.displayName ? fieldA : mappingA.displayName;
+      const nameB = !mappingB || !mappingB.displayName ? fieldB : mappingB.displayName;
+      return nameA.localeCompare(nameB);
+    });
+  }, [selectedFieldNames, flattened, showOnlySelectedFields, mapping]);
+
   const { pinnedItems, restItems, allFields } = useMemo(
     () =>
-      Object.keys(flattened)
-        .sort((fieldA, fieldB) => {
-          const mappingA = mapping(fieldA);
-          const mappingB = mapping(fieldB);
-          const nameA = !mappingA || !mappingA.displayName ? fieldA : mappingA.displayName;
-          const nameB = !mappingB || !mappingB.displayName ? fieldB : mappingB.displayName;
-          return nameA.localeCompare(nameB);
-        })
-        .reduce<ItemsEntry>(
-          (acc, curFieldName) => {
-            if (!shouldShowFieldHandler(curFieldName)) {
-              return acc;
-            }
-            const shouldHideNullValue =
-              areNullValuesHidden && flattened[curFieldName] == null && isEsqlMode;
-            if (shouldHideNullValue) {
-              return acc;
-            }
-
-            const isPinned = pinnedFields.includes(curFieldName);
-            const row = fieldToItem(curFieldName, isPinned);
-
-            if (isPinned) {
-              acc.pinnedItems.push(row);
-            } else {
-              if (onFilterField(curFieldName, row.field.displayName, row.field.fieldType)) {
-                // filter only unpinned fields
-                acc.restItems.push(row);
-              }
-            }
-
-            acc.allFields.push({
-              name: curFieldName,
-              displayName: row.field.displayName,
-              type: row.field.fieldType,
-            });
-
+      displayedFieldNames.reduce<ItemsEntry>(
+        (acc, curFieldName) => {
+          if (!showOnlySelectedFields && !shouldShowFieldHandler(curFieldName)) {
             return acc;
-          },
-          {
-            pinnedItems: [],
-            restItems: [],
-            allFields: [],
           }
-        ),
+          const shouldHideNullValue =
+            isEsqlMode && areNullValuesHidden && flattened[curFieldName] == null;
+          if (shouldHideNullValue) {
+            return acc;
+          }
+
+          const isPinned = pinnedFields.includes(curFieldName);
+          const row = fieldToItem(curFieldName, isPinned);
+
+          if (isPinned) {
+            acc.pinnedItems.push(row);
+          } else {
+            if (onFilterField(curFieldName, row.field.displayName, row.field.fieldType)) {
+              // filter only unpinned fields
+              acc.restItems.push(row);
+            }
+          }
+
+          acc.allFields.push({
+            name: curFieldName,
+            displayName: row.field.displayName,
+            type: row.field.fieldType,
+          });
+
+          return acc;
+        },
+        {
+          pinnedItems: [],
+          restItems: [],
+          allFields: [],
+        }
+      ),
     [
+      displayedFieldNames,
       areNullValuesHidden,
+      showOnlySelectedFields,
       fieldToItem,
       flattened,
       isEsqlMode,
-      mapping,
       onFilterField,
       pinnedFields,
       shouldShowFieldHandler,
@@ -429,8 +439,6 @@ export const DocViewerTable = ({
     ? getTabContentAvailableHeight(containerRef, decreaseAvailableHeightBy ?? DEFAULT_MARGIN_BOTTOM)
     : 0;
 
-  const hasSelectedFields = Boolean(columns?.filter((column) => column !== '_source').length);
-
   return (
     <EuiFlexGroup
       ref={setContainerRef}
@@ -486,7 +494,7 @@ export const DocViewerTable = ({
                     description: 'Switch label to show only selected fields in the table',
                   })}
                   checked={showOnlySelectedFields ?? false}
-                  disabled={!hasSelectedFields}
+                  disabled={!selectedFieldNames.length}
                   onChange={onShowOnlySelectedFieldsChange}
                   compressed
                   data-test-subj="unifiedDocViewerShowOnlySelectedFieldsSwitch"
