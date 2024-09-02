@@ -19,7 +19,7 @@ import {
   SearchSessionSavedObjectAttributes,
   SearchSessionStatusResponse,
 } from '../../../common/search';
-import { SearchSessionsConfigSchema } from '../../../config';
+import { SearchSessionsConfigSchema } from '../../config';
 
 export { SearchStatus } from '../../../common/search';
 

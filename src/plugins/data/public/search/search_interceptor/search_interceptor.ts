@@ -73,7 +73,7 @@ import { toPartialResponseAfterTimeout } from './to_partial_response';
 import { ISessionService, SearchSessionState } from '../session';
 import { SearchResponseCache } from './search_response_cache';
 import { SearchAbortController } from './search_abort_controller';
-import { SearchConfigSchema } from '../../../config';
+import type { SearchConfigSchema } from '../../../server/config';
 import type { SearchServiceStartDependencies } from '../search_service';
 import { createRequestHash } from './create_request_hash';
 

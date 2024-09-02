@@ -11,6 +11,7 @@ import { createEntityDefinitionRoute } from './entities/create';
 import { deleteEntityDefinitionRoute } from './entities/delete';
 import { resetEntityDefinitionRoute } from './entities/reset';
 import { getEntityDefinitionRoute } from './entities/get';
+import { updateEntityDefinitionRoute } from './entities/update';
 import { checkEntityDiscoveryEnabledRoute } from './enablement/check';
 import { enableEntityDiscoveryRoute } from './enablement/enable';
 import { disableEntityDiscoveryRoute } from './enablement/disable';
@@ -23,4 +24,5 @@ export function setupRoutes<T extends RequestHandlerContext>(dependencies: Setup
   checkEntityDiscoveryEnabledRoute<T>(dependencies);
   enableEntityDiscoveryRoute<T>(dependencies);
   disableEntityDiscoveryRoute<T>(dependencies);
+  updateEntityDefinitionRoute<T>(dependencies);
 }

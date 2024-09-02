@@ -223,7 +223,6 @@ exports[`ScreenReaderRouteAnnouncements renders 1`] = `
     <EuiScreenReaderOnly>
       <div
         css="unknown styles"
-        key="null"
         tabIndex={-1}
       >
         <Insertion
