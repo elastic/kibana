@@ -81,14 +81,14 @@ export type ServerRoute<
 > = ValidateEndpoint<TEndpoint> extends true
   ? {
       endpoint: TEndpoint;
-      params?: TRouteParamsRT;
       handler: ({}: TRouteHandlerResources &
         (TRouteParamsRT extends RouteParamsRT
           ? DecodedRequestParamsOfType<TRouteParamsRT>
           : {})) => IsInvalidObservableReturnType<TReturnType> extends true
         ? never
         : Promise<TReturnType>;
-    } & TRouteCreateOptions
+    } & TRouteCreateOptions &
+      (TRouteParamsRT extends RouteParamsRT ? { params: TRouteParamsRT } : {})
   : never;
 
 export type ServerRouteRepository = Record<
@@ -166,7 +166,7 @@ export type ClientRequestParamsOf<
   ? TRouteParamsRT extends RouteParamsRT
     ? ClientRequestParamsOfType<TRouteParamsRT>
     : {}
-  : never;
+  : {};
 
 type MaybeOptionalArgs<T extends Record<string, any>> = RequiredKeys<T> extends never
   ? [T] | []

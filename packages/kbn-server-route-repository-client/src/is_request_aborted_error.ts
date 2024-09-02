@@ -6,12 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { createRepositoryClient } from './src/create_repository_client';
-export { isHttpFetchError } from './src/is_http_fetch_error';
-export { isRequestAbortedError } from './src/is_request_aborted_error';
+import { get } from 'lodash';
 
-export type {
-  DefaultClientOptions,
-  ClientRequestParamsOf,
-  RouteRepositoryClient,
-} from '@kbn/server-route-repository-utils';
+export function isRequestAbortedError(error: unknown): error is Error {
+  return get(error, 'name') === 'AbortError';
+}

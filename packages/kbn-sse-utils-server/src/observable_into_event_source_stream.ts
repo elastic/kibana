@@ -11,15 +11,15 @@ import { PassThrough } from 'stream';
 import { ServerSentEvent } from '@kbn/sse-utils';
 
 export function observableIntoEventSourceStream(source$: Observable<ServerSentEvent>): PassThrough {
-  const withSerializedErrors$ = source$.pipe(
+  const withSerializedEvents$ = source$.pipe(
     map((event) => {
-      return `event:${event.type}\ndata: ${JSON.stringify(event)}\n\n`;
+      return `event: ${event.type}\ndata: ${JSON.stringify(event.data)}\n\n`;
     })
   );
 
   const stream = new PassThrough();
 
-  withSerializedErrors$.subscribe({
+  withSerializedEvents$.subscribe({
     next: (line) => {
       stream.write(line);
     },
@@ -27,7 +27,7 @@ export function observableIntoEventSourceStream(source$: Observable<ServerSentEv
       stream.end();
     },
     error: (error) => {
-      stream.write(`event: "error"\ndata: ${JSON.stringify(error)}\n\n`);
+      stream.write(`event: error\ndata: ${JSON.stringify(error)}\n\n`);
       stream.end();
     },
   });

@@ -18,11 +18,7 @@ import {
 export function createServerRouteFactory<
   TRouteHandlerResources extends ServerRouteHandlerResources = DefaultRouteHandlerResources,
   TRouteCreateOptions extends ServerRouteCreateOptions = DefaultRouteCreateOptions
->(): <
-  TEndpoint extends string,
-  TReturnType,
-  TRouteParamsRT extends RouteParamsRT | undefined = undefined
->(
+>(): <TEndpoint extends string, TReturnType, TRouteParamsRT extends RouteParamsRT | undefined>(
   route: ServerRoute<
     TEndpoint,
     TRouteParamsRT,
