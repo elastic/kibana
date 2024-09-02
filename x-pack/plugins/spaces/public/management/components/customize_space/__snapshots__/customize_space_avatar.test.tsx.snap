@@ -5,13 +5,8 @@ exports[`renders without crashing 1`] = `
   onSubmit={[Function]}
 >
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
     fullWidth={true}
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     label="Avatar type"
-    labelType="label"
   >
     <EuiButtonGroup
       buttonSize="m"
@@ -33,16 +28,11 @@ exports[`renders without crashing 1`] = `
     />
   </EuiFormRow>
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
     error="Enter initials."
     fullWidth={true}
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     helpText="Enter up to two characters."
     isInvalid={true}
     label="Initials"
-    labelType="label"
   >
     <EuiFieldText
       data-test-subj="spaceLetterInitial"
@@ -54,15 +44,10 @@ exports[`renders without crashing 1`] = `
     />
   </EuiFormRow>
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
     error="Select a background color."
     fullWidth={true}
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     isInvalid={true}
     label="Background color"
-    labelType="label"
   >
     <EuiColorPicker
       color=""

@@ -51,7 +51,7 @@ export default ({ getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const es = getService('es');
 
-  describe('@ess @serverless Detection rule telemetry', async () => {
+  describe('@ess @serverless Detection rule telemetry', () => {
     before(async () => {
       // Just in case other tests do not clean up the event logs, let us clear them now and here only once.
       await deleteAllEventLogExecutionEvents(es, log);
@@ -1058,7 +1058,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('"pre-packaged"/"immutable" rules', async () => {
+    describe('"pre-packaged"/"immutable" rules', () => {
       it('@skipInServerless should show stats for totals for in-active pre-packaged rules', async () => {
         await installMockPrebuiltRules(supertest, es);
         await retry.try(async () => {
