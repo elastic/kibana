@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { rpcSchemas } from '../../../common/schemas';
+import { rpcSchemas } from '../schemas';
 import type { UpdateIn } from '../../../common';
 import { getContentClientFactory } from '../../content_client';
 import type { ProcedureDefinition } from '../rpc_service';

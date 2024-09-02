@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { schemas } from './rpc';
 export { procedureNames } from './constants';
 
 export type { GetIn, GetResult } from './get';
