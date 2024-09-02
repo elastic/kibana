@@ -126,7 +126,7 @@ export const metricTrendlineFunction = (): TrendlineExpressionFunctionDefinition
       });
 
       for (const breakdownTerm in rowsByBreakdown) {
-        if (!rowsByBreakdown.hasOwnProperty(breakdownTerm)) continue;
+        if (!Object.hasOwn(rowsByBreakdown, breakdownTerm)) continue;
         trends[breakdownTerm] = rowsByBreakdown[breakdownTerm].map((row) => ({
           x: row[timeColId] !== null ? row[timeColId] : NaN,
           y: row[metricColId] !== null ? row[metricColId] : NaN,

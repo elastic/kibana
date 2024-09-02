@@ -52,6 +52,7 @@ export const toSavedSearchAttributes = (
   refreshInterval: savedSearch.refreshInterval,
   rowsPerPage: savedSearch.rowsPerPage,
   sampleSize: savedSearch.sampleSize,
+  density: savedSearch.density,
   breakdownField: savedSearch.breakdownField,
   visContext: savedSearch.visContext,
 });

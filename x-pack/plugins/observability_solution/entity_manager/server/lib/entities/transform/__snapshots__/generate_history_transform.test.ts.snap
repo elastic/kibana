@@ -133,6 +133,11 @@ Object {
               },
             },
           },
+          Object {
+            "exists": Object {
+              "field": "log.logger",
+            },
+          },
         ],
       },
     },
@@ -150,7 +155,7 @@ Object {
 exports[`generateHistoryTransform(definition) should generate a valid history transform 1`] = `
 Object {
   "_meta": Object {
-    "definitionVersion": "999.999.999",
+    "definitionVersion": "1.0.0",
     "managed": false,
   },
   "defer_validation": true,
@@ -158,7 +163,7 @@ Object {
     "index": ".entities.v1.history.noop",
     "pipeline": "entities-v1-history-admin-console-services",
   },
-  "frequency": "1m",
+  "frequency": "2m",
   "pivot": Object {
     "aggs": Object {
       "_errorRate_A": Object {
@@ -270,10 +275,28 @@ Object {
     "index": Array [
       "kbn-data-forge-fake_stack.*",
     ],
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "exists": Object {
+              "field": "log.logger",
+            },
+          },
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "gte": "now-10m",
+              },
+            },
+          },
+        ],
+      },
+    },
   },
   "sync": Object {
     "time": Object {
-      "delay": "60s",
+      "delay": "2m",
       "field": "@timestamp",
     },
   },

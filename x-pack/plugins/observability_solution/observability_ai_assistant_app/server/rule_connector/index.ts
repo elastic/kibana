@@ -36,6 +36,7 @@ import { concatenateChatCompletionChunks } from '@kbn/observability-ai-assistant
 import { CompatibleJSONSchema } from '@kbn/observability-ai-assistant-plugin/common/functions/types';
 import { AlertDetailsContextualInsightsService } from '@kbn/observability-plugin/server/services';
 import { getSystemMessageFromInstructions } from '@kbn/observability-ai-assistant-plugin/server/service/util/get_system_message_from_instructions';
+import { AdHocInstruction } from '@kbn/observability-ai-assistant-plugin/common/types';
 import { convertSchemaToOpenApi } from './convert_schema_to_open_api';
 import { OBSERVABILITY_AI_ASSISTANT_CONNECTOR_ID } from '../../common/rule_connector';
 
@@ -177,12 +178,15 @@ async function executor(
     });
   });
 
-  const backgroundInstruction = dedent(
-    `You are called as a background process because alerts have changed state.
-    As a background process you are not interacting with a user. Because of that DO NOT ask for user
-    input if tasked to execute actions. You can generate multiple responses in a row.
-    If available, include the link of the conversation at the end of your answer.`
-  );
+  const backgroundInstruction: AdHocInstruction = {
+    instruction_type: 'application_instruction',
+    text: dedent(
+      `You are called as a background process because alerts have changed state.
+As a background process you are not interacting with a user. Because of that DO NOT ask for user
+input if tasked to execute actions. You can generate multiple responses in a row.
+If available, include the link of the conversation at the end of your answer.`
+    ),
+  };
 
   const alertsContext = await getAlertsContext(
     execOptions.params.rule,
@@ -223,9 +227,9 @@ async function executor(
             role: MessageRole.System,
             content: getSystemMessageFromInstructions({
               availableFunctionNames: functionClient.getFunctions().map((fn) => fn.definition.name),
-              registeredInstructions: functionClient.getInstructions(),
+              applicationInstructions: functionClient.getInstructions(),
               userInstructions: [],
-              requestInstructions: [],
+              adHocInstructions: [],
             }),
           },
         },

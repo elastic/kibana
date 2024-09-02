@@ -96,7 +96,6 @@ function ExplorerChartContainer({
   timefilter,
   timeRange,
   onSelectEntity,
-  recentlyAccessed,
   tooManyBucketsCalloutMsg,
   showSelectedInterval,
   chartsService,
@@ -106,6 +105,7 @@ function ExplorerChartContainer({
 
   const {
     services: {
+      chrome: { recentlyAccessed },
       share,
       application: { navigateToApp },
     },
@@ -393,11 +393,7 @@ export const ExplorerChartsContainerUI = ({
   chartsService,
 }) => {
   const {
-    services: {
-      chrome: { recentlyAccessed },
-      embeddable: embeddablePlugin,
-      maps: mapsPlugin,
-    },
+    services: { embeddable: embeddablePlugin, maps: mapsPlugin },
   } = kibana;
 
   let seriesToPlotFiltered;
@@ -457,7 +453,6 @@ export const ExplorerChartsContainerUI = ({
                   timefilter={timefilter}
                   timeRange={timeRange}
                   onSelectEntity={onSelectEntity}
-                  recentlyAccessed={recentlyAccessed}
                   tooManyBucketsCalloutMsg={tooManyBucketsCalloutMsg}
                   showSelectedInterval={showSelectedInterval}
                   chartsService={chartsService}

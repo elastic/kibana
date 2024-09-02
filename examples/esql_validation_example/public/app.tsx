@@ -23,7 +23,7 @@ import {
 
 import type { CoreStart } from '@kbn/core/public';
 
-import { ESQLCallbacks, validateQuery } from '@kbn/esql-validation-autocomplete';
+import { ESQLCallbacks, ESQLRealField, validateQuery } from '@kbn/esql-validation-autocomplete';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import type { StartDependencies } from './plugin';
 import { CodeSnippet } from './code_snippet';
@@ -52,10 +52,11 @@ export const App = (props: { core: CoreStart; plugins: StartDependencies }) => {
             ['index1', 'anotherIndex', 'dataStream'].map((name) => ({ name, hidden: false }))
         : undefined,
       getFieldsFor: callbacksEnabled.fields
-        ? async () => [
-            { name: 'numberField', type: 'number' },
-            { name: 'stringField', type: 'string' },
-          ]
+        ? async () =>
+            [
+              { name: 'doubleField', type: 'double' },
+              { name: 'keywordField', type: 'keyword' },
+            ] as ESQLRealField[]
         : undefined,
       getPolicies: callbacksEnabled.policies
         ? async () => [

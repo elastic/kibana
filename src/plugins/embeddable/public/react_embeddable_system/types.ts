@@ -31,7 +31,7 @@ export interface DefaultEmbeddableApi<
 > extends DefaultPresentationPanelApi,
     HasType,
     PublishesPhaseEvents,
-    PublishesUnsavedChanges,
+    Partial<PublishesUnsavedChanges>,
     HasSerializableState<SerializedState>,
     HasSnapshottableState<RuntimeState> {}
 
@@ -106,7 +106,10 @@ export interface ReactEmbeddableFactory<
    * function.
    */
   buildEmbeddable: (
-    initialState: RuntimeState,
+    /**
+     * Initial runtime state. Composed from last saved state and previous sessions's unsaved changes
+     */
+    initialRuntimeState: RuntimeState,
     /**
      * `buildApi` should be used by most embeddables that are used in dashboards, since it implements the unsaved
      * changes logic that the dashboard expects using the provided comparators
@@ -118,6 +121,11 @@ export interface ReactEmbeddableFactory<
     uuid: string,
     parentApi: unknown | undefined,
     /** `setApi` should be used when the unsaved changes logic in `buildApi` is unnecessary */
-    setApi: (api: SetReactEmbeddableApiRegistration<SerializedState, RuntimeState, Api>) => Api
+    setApi: (api: SetReactEmbeddableApiRegistration<SerializedState, RuntimeState, Api>) => Api,
+    /**
+     * Last saved runtime state. Different from initialRuntimeState in that it does not contain previous sessions's unsaved changes
+     * Compare with initialRuntimeState to flag unsaved changes on load
+     */
+    lastSavedRuntimeState: RuntimeState
   ) => Promise<{ Component: React.FC<{}>; api: Api }>;
 }

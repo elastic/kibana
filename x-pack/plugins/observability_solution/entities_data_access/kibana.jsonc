@@ -1,0 +1,13 @@
+{
+  "type": "plugin",
+  "id": "@kbn/entities-data-access-plugin",
+  "owner": "@elastic/obs-entities",
+  "plugin": {
+    "id": "entitiesDataAccess",
+    "server": true,
+    "browser": false,
+    "requiredPlugins": [],
+    "optionalPlugins": [],
+    "requiredBundles": []
+  }
+}

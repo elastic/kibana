@@ -35,6 +35,15 @@ export type ESQLAstField = ESQLFunction | ESQLColumn;
  */
 export type ESQLAstItem = ESQLSingleAstItem | ESQLAstItem[];
 
+export type ESQLAstNodeWithArgs = ESQLCommand | ESQLCommandOption | ESQLFunction;
+
+/**
+ * *Proper* are nodes which are objects with `type` property, once we get rid
+ * of the nodes which are plain arrays, all nodes will be *proper* and we can
+ * remove this type.
+ */
+export type ESQLProperNode = ESQLSingleAstItem | ESQLAstCommand;
+
 export interface ESQLLocation {
   min: number;
   max: number;
@@ -61,6 +70,14 @@ export interface ESQLAstMetricsCommand extends ESQLCommand<'metrics'> {
 export interface ESQLCommandOption extends ESQLAstBaseItem {
   type: 'option';
   args: ESQLAstItem[];
+}
+
+/**
+ * Right now rename expressions ("clauses") are parsed as options in the
+ * RENAME command.
+ */
+export interface ESQLAstRenameExpression extends ESQLCommandOption {
+  name: 'as';
 }
 
 export interface ESQLCommandMode extends ESQLAstBaseItem {
@@ -158,10 +175,45 @@ export interface ESQLTimeInterval extends ESQLAstBaseItem {
 export interface ESQLSource extends ESQLAstBaseItem {
   type: 'source';
   sourceType: 'index' | 'policy';
+
+  /**
+   * Represents the cluster part of the source identifier. Empty string if not
+   * present.
+   *
+   * ```
+   * FROM [<cluster>:]<index>
+   * ```
+   */
+  cluster?: string;
+
+  /**
+   * Represents the index part of the source identifier. Unescaped and unquoted.
+   *
+   * ```
+   * FROM [<cluster>:]<index>
+   * ```
+   */
+  index?: string;
 }
 
 export interface ESQLColumn extends ESQLAstBaseItem {
   type: 'column';
+
+  /**
+   * An identifier can be composed of multiple parts, e.g: part1.part2.`part``3️⃣`.
+   * This property contains the parsed unquoted parts of the identifier.
+   * For example: `['part1', 'part2', 'part`3️⃣']`.
+   */
+  parts: string[];
+
+  /**
+   * @deprecated
+   *
+   * An identifier can be composed of multiple parts, e.g: part1.part2.`part3️⃣`
+   *
+   * Each part can be quoted or not quoted independently. A single `quoted`
+   * property is not enough to represent the identifier. Use `parts` instead.
+   */
   quoted: boolean;
 }
 
@@ -170,19 +222,30 @@ export interface ESQLList extends ESQLAstBaseItem {
   values: ESQLLiteral[];
 }
 
+export type ESQLNumericLiteralType = 'decimal' | 'integer';
+
 export type ESQLLiteral =
-  | ESQLNumberLiteral
+  | ESQLDecimalLiteral
+  | ESQLIntegerLiteral
   | ESQLBooleanLiteral
   | ESQLNullLiteral
   | ESQLStringLiteral
   | ESQLParamLiteral<string>;
 
+// Exporting here to prevent TypeScript error TS4058
+// Return type of exported function has or is using name 'ESQLNumericLiteral' from external module
 // @internal
-export interface ESQLNumberLiteral extends ESQLAstBaseItem {
+export interface ESQLNumericLiteral<T extends ESQLNumericLiteralType> extends ESQLAstBaseItem {
   type: 'literal';
-  literalType: 'number';
+  literalType: T;
   value: number;
 }
+// We cast anything as decimal (e.g. 32.12) as generic decimal numeric type here
+// @internal
+export type ESQLDecimalLiteral = ESQLNumericLiteral<'decimal'>;
+
+// @internal
+export type ESQLIntegerLiteral = ESQLNumericLiteral<'integer'>;
 
 // @internal
 export interface ESQLBooleanLiteral extends ESQLAstBaseItem {

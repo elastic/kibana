@@ -8,7 +8,7 @@
 import { UsageCounters } from '../../common';
 export type IncrementCounterParams = UsageCounters.v1.IncrementCounterParams;
 
-export type { UsageCountersServiceSetup } from './usage_counters_service';
+export type { UsageCountersServiceSetup, UsageCountersServiceStart } from './types';
 export type { UsageCountersSavedObjectAttributes, UsageCountersSavedObject } from './saved_objects';
 export type { IUsageCounter as UsageCounter } from './usage_counter';
 

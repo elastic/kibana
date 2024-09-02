@@ -134,7 +134,7 @@ RUN for iter in {1..10}; do \
     (exit $exit_code)
 {{/ubuntu}}
 {{#wolfi}}
-RUN apk --no-cache add bash curl fontconfig libstdc++ freetype nss findutils shadow
+RUN apk --no-cache add bash curl fontconfig libstdc++ nss findutils shadow
 {{/wolfi}}
 
 # Bring in Kibana from the initial stage.

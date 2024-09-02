@@ -81,40 +81,32 @@ export default function ({ getService }: FtrProviderContext) {
         });
     });
 
-    it('should report success when opt *in* is incremented successfully', () => {
-      return (
-        supertestWithoutAuth
-          .post('/internal/kql_opt_in_stats')
-          .set('content-type', 'application/json')
-          .set(ELASTIC_HTTP_VERSION_HEADER, KQL_TELEMETRY_ROUTE_LATEST_VERSION)
-          // TODO: API requests in Serverless require internal request headers
-          .set(svlCommonApi.getInternalRequestHeader())
-          .send({ opt_in: true })
-          .expect('Content-Type', /json/)
-          .set(roleAuthc.apiKeyHeader)
-          .expect(200)
-          .then(({ body }) => {
-            expect(body.success).to.be(true);
-          })
-      );
+    it('should report success when opt *in* is incremented successfully', async () => {
+      const { body } = await supertestWithoutAuth
+        .post('/internal/kql_opt_in_stats')
+        .set('content-type', 'application/json')
+        .set(ELASTIC_HTTP_VERSION_HEADER, KQL_TELEMETRY_ROUTE_LATEST_VERSION)
+        // TODO: API requests in Serverless require internal request headers
+        .set(svlCommonApi.getInternalRequestHeader())
+        .send({ opt_in: true })
+        .expect('Content-Type', /json/)
+        .set(roleAuthc.apiKeyHeader)
+        .expect(200);
+      expect(body.success).to.be(true);
     });
 
-    it('should report success when opt *out* is incremented successfully', () => {
-      return (
-        supertestWithoutAuth
-          .post('/internal/kql_opt_in_stats')
-          .set('content-type', 'application/json')
-          .set(ELASTIC_HTTP_VERSION_HEADER, KQL_TELEMETRY_ROUTE_LATEST_VERSION)
-          // TODO: API requests in Serverless require internal request headers
-          .set(svlCommonApi.getInternalRequestHeader())
-          .send({ opt_in: false })
-          .expect('Content-Type', /json/)
-          .set(roleAuthc.apiKeyHeader)
-          .expect(200)
-          .then(({ body }) => {
-            expect(body.success).to.be(true);
-          })
-      );
+    it('should report success when opt *out* is incremented successfully', async () => {
+      const { body } = await supertestWithoutAuth
+        .post('/internal/kql_opt_in_stats')
+        .set('content-type', 'application/json')
+        .set(ELASTIC_HTTP_VERSION_HEADER, KQL_TELEMETRY_ROUTE_LATEST_VERSION)
+        // TODO: API requests in Serverless require internal request headers
+        .set(svlCommonApi.getInternalRequestHeader())
+        .send({ opt_in: false })
+        .expect('Content-Type', /json/)
+        .set(roleAuthc.apiKeyHeader)
+        .expect(200);
+      expect(body.success).to.be(true);
     });
 
     it('should only accept literal boolean values for the opt_in POST body param', function () {

@@ -98,7 +98,7 @@
             "label": "setup",
             "description": [],
             "signature": [
-              "(_core: ",
+              "(core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-browser",
                 "scope": "public",
@@ -124,7 +124,7 @@
                 "id": "def-public.NavigationPublicPlugin.setup.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "_core",
+                "label": "core",
                 "description": [],
                 "signature": [
                   {
@@ -736,6 +736,34 @@
           },
           {
             "parentPluginId": "navigation",
+            "id": "def-public.TopNavMenuData.fill",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "fill",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "navigation",
+            "id": "def-public.TopNavMenuData.color",
+            "type": "string",
+            "tags": [],
+            "label": "color",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "navigation",
             "id": "def-public.TopNavMenuData.isLoading",
             "type": "CompoundType",
             "tags": [],
@@ -1173,13 +1201,13 @@
     "misc": [
       {
         "parentPluginId": "navigation",
-        "id": "def-common.SOLUTION_NAV_FEATURE_FLAG_NAME",
+        "id": "def-common.DEFAULT_ROUTE_UI_SETTING_ID",
         "type": "string",
         "tags": [],
-        "label": "SOLUTION_NAV_FEATURE_FLAG_NAME",
+        "label": "DEFAULT_ROUTE_UI_SETTING_ID",
         "description": [],
         "signature": [
-          "\"solutionNavEnabled\""
+          "\"defaultRoute\""
         ],
         "path": "src/plugins/navigation/common/constants.ts",
         "deprecated": false,
@@ -1187,6 +1215,65 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "navigation",
+        "id": "def-common.DEFAULT_ROUTES",
+        "type": "Object",
+        "tags": [],
+        "label": "DEFAULT_ROUTES",
+        "description": [],
+        "path": "src/plugins/navigation/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "navigation",
+            "id": "def-common.DEFAULT_ROUTES.classic",
+            "type": "string",
+            "tags": [],
+            "label": "classic",
+            "description": [],
+            "path": "src/plugins/navigation/common/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "navigation",
+            "id": "def-common.DEFAULT_ROUTES.es",
+            "type": "string",
+            "tags": [],
+            "label": "es",
+            "description": [],
+            "path": "src/plugins/navigation/common/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "navigation",
+            "id": "def-common.DEFAULT_ROUTES.oblt",
+            "type": "string",
+            "tags": [],
+            "label": "oblt",
+            "description": [],
+            "path": "src/plugins/navigation/common/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "navigation",
+            "id": "def-common.DEFAULT_ROUTES.security",
+            "type": "string",
+            "tags": [],
+            "label": "security",
+            "description": [],
+            "path": "src/plugins/navigation/common/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
   }
 }

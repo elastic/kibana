@@ -9,6 +9,7 @@ import type { VFC } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import { EuiFlexItem, EuiLink } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { getAgentTypeForAgentIdField } from '../../../../common/lib/endpoint/utils/get_agent_type_for_agent_id_field';
 import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import { AgentStatus } from '../../../../common/components/endpoint/agents/agent_status';
 import { useDocumentDetailsContext } from '../../shared/context';
@@ -28,7 +29,6 @@ import {
   HIGHLIGHTED_FIELDS_CELL_TEST_ID,
   HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID,
 } from './test_ids';
-import { RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD } from '../../../../../common/endpoint/service/response_actions/constants';
 import { HostPreviewPanelKey } from '../../../entity_details/host_right';
 import { HOST_PREVIEW_BANNER } from './host_entity_overview';
 import { UserPreviewPanelKey } from '../../../entity_details/user_right';
@@ -135,25 +135,11 @@ export interface HighlightedFieldsCellProps {
 export const HighlightedFieldsCell: VFC<HighlightedFieldsCellProps> = ({
   values,
   field,
-  originalField,
+  originalField = '',
 }) => {
-  const isSentinelOneAgentIdField = useMemo(
-    () => originalField === RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.sentinel_one,
-    [originalField]
-  );
-  const isCrowdstrikeAgentIdField = useMemo(
-    () => originalField === RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.crowdstrike,
-    [originalField]
-  );
   const agentType: ResponseActionAgentType = useMemo(() => {
-    if (isSentinelOneAgentIdField) {
-      return 'sentinel_one';
-    }
-    if (isCrowdstrikeAgentIdField) {
-      return 'crowdstrike';
-    }
-    return 'endpoint';
-  }, [isCrowdstrikeAgentIdField, isSentinelOneAgentIdField]);
+    return getAgentTypeForAgentIdField(originalField);
+  }, [originalField]);
 
   return (
     <>

@@ -80,8 +80,8 @@ export const JobsListPage: FC<Props> = ({
   const [refreshJobs, setRefreshJobs] = useState<(() => void) | null>(null);
 
   const mlServices = useMemo(
-    () => getMlGlobalServices(coreStart.http, data.dataViews, usageCollection),
-    [coreStart.http, data.dataViews, usageCollection]
+    () => getMlGlobalServices(coreStart, data.dataViews, usageCollection),
+    [coreStart, data.dataViews, usageCollection]
   );
 
   const check = async () => {

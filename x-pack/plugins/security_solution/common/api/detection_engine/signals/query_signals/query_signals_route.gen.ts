@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 export type AlertsSortCombinations = z.infer<typeof AlertsSortCombinations>;
 export const AlertsSortCombinations = z.union([z.string(), z.object({}).catchall(z.unknown())]);

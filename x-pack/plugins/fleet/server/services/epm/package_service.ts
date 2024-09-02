@@ -40,7 +40,7 @@ import type { InstallResult } from '../../../common';
 
 import { appContextService } from '..';
 
-import type { CustomPackageDatasetConfiguration } from './packages/install';
+import type { CustomPackageDatasetConfiguration, EnsurePackageResult } from './packages/install';
 
 import type { FetchFindLatestPackageOptions } from './registry';
 import { getPackageFieldsMetadata } from './registry';
@@ -73,7 +73,7 @@ export interface PackageClient {
     pkgVersion?: string;
     spaceId?: string;
     force?: boolean;
-  }): Promise<Installation>;
+  }): Promise<EnsurePackageResult>;
 
   installPackage(options: {
     pkgName: string;
@@ -201,7 +201,7 @@ class PackageClientImpl implements PackageClient {
     pkgVersion?: string;
     spaceId?: string;
     force?: boolean;
-  }): Promise<Installation> {
+  }): Promise<EnsurePackageResult> {
     await this.#runPreflight(INSTALL_PACKAGES_AUTHZ);
 
     return ensureInstalledPackage({

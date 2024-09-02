@@ -10,18 +10,10 @@
   },
   "server": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/docs-utils",
-        "id": "def-common.findPlugins",
+        "id": "def-server.findPlugins",
         "type": "Function",
         "tags": [],
         "label": "findPlugins",
@@ -37,7 +29,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/docs-utils",
-            "id": "def-common.findPlugins.$1",
+            "id": "def-server.findPlugins.$1",
             "type": "Array",
             "tags": [],
             "label": "pluginOrPackageFilter",
@@ -56,7 +48,7 @@
       },
       {
         "parentPluginId": "@kbn/docs-utils",
-        "id": "def-common.findTeamPlugins",
+        "id": "def-server.findTeamPlugins",
         "type": "Function",
         "tags": [],
         "label": "findTeamPlugins",
@@ -72,7 +64,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/docs-utils",
-            "id": "def-common.findTeamPlugins.$1",
+            "id": "def-server.findTeamPlugins.$1",
             "type": "string",
             "tags": [],
             "label": "team",
@@ -91,7 +83,7 @@
       },
       {
         "parentPluginId": "@kbn/docs-utils",
-        "id": "def-common.runBuildApiDocsCli",
+        "id": "def-server.runBuildApiDocsCli",
         "type": "Function",
         "tags": [],
         "label": "runBuildApiDocsCli",
@@ -107,6 +99,14 @@
         "initialIsOpen": false
       }
     ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
     "interfaces": [],
     "enums": [],
     "misc": [],

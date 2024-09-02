@@ -64,13 +64,11 @@
     "@kbn/rison",
     "@kbn/config-schema",
     "@kbn/repo-info",
-    "@kbn/apm-utils",
     "@kbn/apm-data-view",
     "@kbn/logging",
     "@kbn/std",
     "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/field-types",
-    "@kbn/core-http-server-mocks",
     "@kbn/babel-register",
     "@kbn/core-saved-objects-migration-server-internal",
     "@kbn/core-elasticsearch-server",
@@ -127,9 +125,12 @@
     "@kbn/shared-ux-page-no-data-config-types",
     "@kbn/react-hooks",
     "@kbn/server-route-repository-utils",
-    "@kbn/core-analytics-browser"
+    "@kbn/core-analytics-browser",
+    "@kbn/apm-types",
+    "@kbn/entities-schema",
+    "@kbn/serverless",
+    "@kbn/aiops-log-rate-analysis",
+    "@kbn/router-utils"
   ],
-  "exclude": [
-    "target/**/*"
-  ]
+  "exclude": ["target/**/*"]
 }

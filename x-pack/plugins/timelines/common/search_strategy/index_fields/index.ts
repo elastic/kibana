@@ -65,23 +65,10 @@ export interface IndexFieldsStrategyResponse extends IEsSearchResponse {
   runtimeMappings: MappingRuntimeFields;
 }
 
-/**
- * @deprecated use fields list on dataview / "indexPattern"
- * about to use browserFields? Reconsider! Maybe you can accomplish
- * everything you need via the `fields` property on the data view
- * you are working with? Or perhaps you need a description for a
- * particular field? Consider using the EcsFlat module from `@kbn/ecs`
- */
-export type BrowserField = FieldSpec;
-
 type FieldCategoryName = string;
 
 export interface FieldCategory {
-  fields: Record<string, Partial<BrowserField>>;
-}
-
-export interface FieldCategory {
-  fields: Record<string, Partial<BrowserField>>;
+  fields: Record<string, Partial<FieldSpec>>;
 }
 
 /**
@@ -94,4 +81,3 @@ export interface FieldCategory {
 export type BrowserFields = Record<FieldCategoryName, FieldCategory>;
 
 export const EMPTY_BROWSER_FIELDS = {};
-export const EMPTY_INDEX_FIELDS: FieldSpec[] = [];

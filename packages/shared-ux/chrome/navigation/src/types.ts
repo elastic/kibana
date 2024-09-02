@@ -15,8 +15,9 @@ import type {
   ChromeProjectNavigationNode,
   ChromeRecentlyAccessedHistoryItem,
 } from '@kbn/core-chrome-browser';
+import { EventTracker } from './analytics';
 
-type BasePathService = Pick<IBasePath, 'prepend'>;
+export type BasePathService = Pick<IBasePath, 'prepend' | 'remove'>;
 
 /**
  * @internal
@@ -35,6 +36,7 @@ export interface NavigationServices {
   navigateToUrl: NavigateToUrlFn;
   activeNodes$: Observable<ChromeProjectNavigationNode[][]>;
   isSideNavCollapsed: boolean;
+  eventTracker: EventTracker;
 }
 
 /**
@@ -55,6 +57,9 @@ export interface NavigationKibanaDependencies {
     http: {
       basePath: BasePathService;
       getLoadingCount$(): Observable<number>;
+    };
+    analytics: {
+      reportEvent: (eventType: string, eventData: object) => void;
     };
   };
   activeNodes$: Observable<ChromeProjectNavigationNode[][]>;
