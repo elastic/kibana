@@ -9,27 +9,21 @@ import { useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
 import { RouterLinkProps, getRouterLinkProps } from '@kbn/router-utils/src/get_router_link_props';
-import { Search } from 'history';
 import {
   type AssetDetailsLocatorParams,
   ASSET_DETAILS_LOCATOR_ID,
 } from '@kbn/observability-shared-plugin/common';
 import type { InventoryItemType } from '../../../common/inventory_models/types';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
+import type { RouteState } from '../../types';
 
 interface QueryParams {
   from?: number;
   to?: number;
-  assetName?: string;
+  name?: string;
 }
 
-export interface RouteState {
-  originAppId: string;
-  originPathname: string;
-  originSearch?: Search;
-}
-
-export const useNodeDetailsRedirect = () => {
+export const useAssetDetailsRedirect = () => {
   const location = useLocation();
   const {
     services: {
@@ -41,19 +35,19 @@ export const useNodeDetailsRedirect = () => {
   const appId = useObservable(currentAppId$);
   const locator = share?.url.locators.get<AssetDetailsLocatorParams>(ASSET_DETAILS_LOCATOR_ID);
 
-  const getNodeDetailUrl = useCallback(
+  const getAssetDetailUrl = useCallback(
     ({
-      nodeType,
-      nodeId,
+      assetType,
+      assetId,
       search,
     }: {
-      nodeType: InventoryItemType;
-      nodeId: string;
+      assetType: InventoryItemType;
+      assetId: string;
       search: QueryParams;
     }): RouterLinkProps => {
       const { to, from, ...rest } = search;
       const queryParams = {
-        nodeDetails:
+        assetDetails:
           Object.keys(rest).length > 0
             ? {
                 ...rest,
@@ -72,10 +66,10 @@ export const useNodeDetailsRedirect = () => {
         },
       };
 
-      const nodeDetailsLocatorParams = {
+      const assetDetailsLocatorParams = {
         ...queryParams,
-        assetType: nodeType,
-        assetId: nodeId,
+        assetType,
+        assetId,
         state: {
           ...(location.state ?? {}),
           ...(location.key
@@ -88,17 +82,17 @@ export const useNodeDetailsRedirect = () => {
         },
       };
 
-      const nodeDetailsLinkProps = getRouterLinkProps({
-        href: locator?.getRedirectUrl(nodeDetailsLocatorParams),
+      const assetDetailsLinkProps = getRouterLinkProps({
+        href: locator?.getRedirectUrl(assetDetailsLocatorParams),
         onClick: () => {
-          locator?.navigate(nodeDetailsLocatorParams, { replace: false });
+          locator?.navigate(assetDetailsLocatorParams, { replace: false });
         },
       });
 
-      return nodeDetailsLinkProps;
+      return assetDetailsLinkProps;
     },
     [appId, location.key, location.pathname, location.search, location.state, locator]
   );
 
-  return { getNodeDetailUrl };
+  return { getAssetDetailUrl };
 };

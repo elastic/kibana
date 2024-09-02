@@ -6,14 +6,14 @@
  */
 
 import { SERVICE_ENVIRONMENT } from '@kbn/observability-shared-plugin/common';
-import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
-import { Environment } from '../../../../common/environment_rt';
+import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
+import { Environment } from '../../../../../common/environment_rt';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
-} from '../../../../common/es_fields/apm';
+} from '../../../../../common/es_fields/apm';
 
 export function getThroughputScreenContext({
   serviceName,
