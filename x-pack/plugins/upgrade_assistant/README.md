@@ -11,7 +11,7 @@ Its primary purposes are to:
 
 ### UA feature set
 Since Kibana version `8.6` UA is enabled to assist users during all upgrades including minor versions of the Elastic Stack.
-Some features of the UA are only needed when upgrading to a new major version, controlled by the config `featureSet`. These are the following features:
+Some features of the UA are only needed when upgrading to a new major version. These are the following features are controlled by the config `featureSet`:
 * ML Snapshots (`featureSet.mlSnapshots`): Machine learning Upgrade mode can be toggled from outside Kibana, the purpose of this feature guard is to hide all ML related deprecations from the end user until the next major upgrade.
 When we want to enable ML model snapshot deprecation warnings again we need to change the constant `MachineLearningField.MIN_CHECKED_SUPPORTED_SNAPSHOT_VERSION` to something higher than 7.0.0 in the Elasticsearch code.
 * Migrating system indices (`featureSet.migrateSystemIndices`): Migrating system indices should only be enabled for major version upgrades. This config hides the second step from the UA UI for migrating system indices.
