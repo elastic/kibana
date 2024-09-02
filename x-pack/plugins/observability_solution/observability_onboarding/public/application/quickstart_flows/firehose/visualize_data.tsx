@@ -68,44 +68,47 @@ export function VisualizeData() {
 
       <EuiSpacer size="xl" />
 
-      {awsServiceGetStartedConfigList.map(
-        ({ id, indexNameList, actionLinks, title, logoURL, previewImage }) => {
-          const isEnabled = indexNameList.some((indexName) =>
-            populatedAWSLogsIndexList.includes(indexName)
-          );
+      <div data-test-subj="observabilityOnboardingAWSServiceList">
+        {awsServiceGetStartedConfigList.map(
+          ({ id, indexNameList, actionLinks, title, logoURL, previewImage }) => {
+            const isEnabled = indexNameList.some((indexName) =>
+              populatedAWSLogsIndexList.includes(indexName)
+            );
 
-          return (
-            <AccordionWithIcon
-              key={id}
-              id={`${accordionId}_${id}`}
-              icon={<EuiIcon type={logoURL} size="l" />}
-              title={i18n.translate(
-                'xpack.observability_onboarding.firehosePanel.awsServiceDataFoundTitle',
-                {
-                  defaultMessage: '{title}',
-                  values: { title },
+            return (
+              <AccordionWithIcon
+                data-test-subj={`observabilityOnboardingAWSService-${id}`}
+                key={id}
+                id={`${accordionId}_${id}`}
+                icon={<EuiIcon type={logoURL} size="l" />}
+                title={i18n.translate(
+                  'xpack.observability_onboarding.firehosePanel.awsServiceDataFoundTitle',
+                  {
+                    defaultMessage: '{title}',
+                    values: { title },
+                  }
+                )}
+                extraAction={
+                  isEnabled ? <EuiIcon type="checkInCircleFilled" color="success" /> : null
                 }
-              )}
-              extraAction={
-                isEnabled ? <EuiIcon type="checkInCircleFilled" color="success" /> : null
-              }
-              isDisabled={!isEnabled}
-              css={{
-                paddingRight: euiTheme.size.s,
-                filter: `grayscale(${isEnabled ? 0 : 1})`,
-              }}
-            >
-              <GetStartedPanel
-                integration="aws"
-                newTab
-                isLoading={false}
-                actionLinks={actionLinks}
-                previewImage={previewImage}
-              />
-            </AccordionWithIcon>
-          );
-        }
-      )}
+                isDisabled={!isEnabled}
+                css={{
+                  paddingRight: euiTheme.size.s,
+                  filter: `grayscale(${isEnabled ? 0 : 1})`,
+                }}
+              >
+                <GetStartedPanel
+                  integration="aws"
+                  newTab
+                  isLoading={false}
+                  actionLinks={actionLinks}
+                  previewImage={previewImage}
+                />
+              </AccordionWithIcon>
+            );
+          }
+        )}
+      </div>
     </>
   );
 }
