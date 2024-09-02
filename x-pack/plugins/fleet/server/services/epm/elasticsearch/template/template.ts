@@ -513,11 +513,9 @@ function _generateMappings(
               fieldProps.subobjects = mappings.subobjects;
             }
             break;
-          case 'nested':
           case 'group-nested':
-            fieldProps = { ...generateNestedProps(field), type: 'nested' };
-            if (field.fields) {
-              fieldProps.properties = _generateMappings(
+            fieldProps = {
+              properties: _generateMappings(
                 field.fields!,
                 {
                   ...ctx,
@@ -526,8 +524,10 @@ function _generateMappings(
                     : field.name,
                 },
                 isIndexModeTimeSeries
-              ).properties;
-            }
+              ).properties,
+              ...generateNestedProps(field),
+              type: 'nested',
+            };
             break;
           case 'integer':
             fieldProps.type = 'long';
@@ -563,6 +563,9 @@ function _generateMappings(
             if (field.value) {
               fieldProps.value = field.value;
             }
+            break;
+          case 'nested':
+            fieldProps = { ...fieldProps, ...generateNestedProps(field), type: 'nested' };
             break;
           case 'array':
             // this assumes array fields were validated in an earlier step
