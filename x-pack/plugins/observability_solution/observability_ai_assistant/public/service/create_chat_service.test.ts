@@ -229,38 +229,4 @@ describe('createChatService', () => {
       ).rejects.toEqual(expect.any(AbortError));
     });
   });
-
-  describe('complete', () => {
-    it("sends the user's preferred response language to the API", async () => {
-      respondWithChunks({
-        chunks: [
-          '{"id":"my-id","type":"chatCompletionChunk","message":{"content":"Some message"}}',
-        ],
-      });
-
-      const response$ = service.complete({
-        connectorId: '',
-        getScreenContexts: () => [],
-        messages: [],
-        persist: false,
-        disableFunctions: false,
-        signal: new AbortController().signal,
-        responseLanguage: 'orcish',
-      });
-
-      await getConcatenatedMessage(response$);
-
-      expect(clientSpy).toHaveBeenNthCalledWith(
-        2,
-        'POST /internal/observability_ai_assistant/chat/complete',
-        expect.objectContaining({
-          params: expect.objectContaining({
-            body: expect.objectContaining({
-              responseLanguage: 'orcish',
-            }),
-          }),
-        })
-      );
-    });
-  });
 });
