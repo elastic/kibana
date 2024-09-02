@@ -34,13 +34,13 @@ export const WindowValueExpression = ({ ruleParams, setRuleParams }: Props) => {
   const numberOfChecks =
     condition && 'numberOfChecks' in condition.window ? condition.window.numberOfChecks : null;
 
-  const { isTimeWindow, isLocationBased } = getConditionType(ruleParams.condition);
+  const { isTimeWindow } = getConditionType(ruleParams.condition);
 
   const onTimeWindowChange = useCallback(
     (value: TimeWindow) => {
       setRuleParams('condition', {
         ...ruleParams.condition,
-        window: { time: value },
+        window: { ...ruleParams.condition?.window, time: value },
       });
     },
     [ruleParams.condition, setRuleParams]
@@ -50,50 +50,11 @@ export const WindowValueExpression = ({ ruleParams, setRuleParams }: Props) => {
     (value: number) => {
       setRuleParams('condition', {
         ...ruleParams.condition,
-        window: { numberOfChecks: value },
+        window: { ...ruleParams.condition?.window, numberOfChecks: value },
       });
     },
     [ruleParams.condition, setRuleParams]
   );
-
-  const onPercentageChange = useCallback(
-    (value: number) => {
-      setRuleParams('condition', {
-        ...ruleParams.condition,
-        window: { numberOfLocations: value },
-      });
-    },
-    [ruleParams.condition, setRuleParams]
-  );
-
-  if (isLocationBased) {
-    const numberOfLocations =
-      condition && 'numberOfLocations' in condition.window
-        ? condition.window.numberOfLocations ?? 1
-        : 1;
-    return (
-      <PopoverExpression
-        value={i18n.translate('xpack.synthetics.windowValueExpression.percentLabel', {
-          defaultMessage: '{numberOfLocations} locations',
-          values: { numberOfLocations: numberOfLocations ?? 1 },
-        })}
-      >
-        <EuiPopoverTitle>
-          {i18n.translate('xpack.synthetics.windowValueExpression.numberOfLocPopoverTitleLabel', {
-            defaultMessage: 'Number of locations',
-          })}
-        </EuiPopoverTitle>
-        <EuiFieldNumber
-          data-test-subj="syntheticsWindowValueExpressionFieldNumber"
-          min={1}
-          max={100}
-          compressed
-          value={numberOfLocations}
-          onChange={(evt) => onPercentageChange(Number(evt.target.value))}
-        />
-      </PopoverExpression>
-    );
-  }
 
   if (!isTimeWindow) {
     return (

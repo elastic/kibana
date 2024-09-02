@@ -43,20 +43,6 @@ export const WITHIN_TIMERANGE_LABEL = i18n.translate(
   }
 );
 
-export const FROM_LOCATIONS_LABEL = i18n.translate(
-  'xpack.synthetics.monitorStatusRule.fromLocations.label',
-  {
-    defaultMessage: 'From locations',
-  }
-);
-
-export const FROM_LOCATIONS_EXPRESSION = i18n.translate(
-  'xpack.synthetics.forTheLastExpression.fromLocationsPopoverLabel',
-  {
-    defaultMessage: 'From',
-  }
-);
-
 interface Option {
   label: string;
   key: 'checksWindow' | 'timeWindow' | 'locations';
@@ -71,14 +57,10 @@ const OPTIONS: Option[] = [
     label: WITHIN_TIMERANGE_LABEL,
     key: 'timeWindow',
   },
-  {
-    label: FROM_LOCATIONS_LABEL,
-    key: 'locations',
-  },
 ];
 
 export const DEFAULT_CONDITION: StatusRuleCondition = {
-  window: { numberOfChecks: 5 },
+  window: { numberOfChecks: 5, numberOfLocations: 1 },
   groupBy: 'locationId',
   downThreshold: 5,
 };
@@ -102,7 +84,7 @@ const getCheckedOption = (option: Option, condition?: StatusRuleCondition) => {
 export const ForTheLastExpression = ({ ruleParams, setRuleParams }: Props) => {
   const { condition } = ruleParams;
 
-  const { isTimeWindow, isLocationBased } = getConditionType(condition);
+  const { isTimeWindow } = getConditionType(condition);
 
   const [isOpen, setIsOpen] = useState(false);
 
@@ -125,9 +107,6 @@ export const ForTheLastExpression = ({ ruleParams, setRuleParams }: Props) => {
   }, [condition, isTimeWindow]);
 
   const getDescriptiveText = () => {
-    if (isLocationBased) {
-      return FROM_LOCATIONS_EXPRESSION;
-    }
     if (isTimeWindow) {
       return WITHIN_TIMERANGE_EXPRESSION;
     }
@@ -159,21 +138,14 @@ export const ForTheLastExpression = ({ ruleParams, setRuleParams }: Props) => {
               setRuleParams('condition', {
                 ...ruleParams.condition,
                 downThreshold: 5,
-                window: { numberOfChecks: 5 },
+                window: { numberOfChecks: 5, numberOfLocations: 1 },
               });
               break;
             case 'timeWindow':
               setRuleParams('condition', {
                 ...ruleParams.condition,
                 downThreshold: 5,
-                window: { time: { unit: 'm', size: 5 } },
-              });
-              break;
-            case 'locations':
-              setRuleParams('condition', {
-                ...ruleParams.condition,
-                downThreshold: 1,
-                window: { numberOfLocations: 1 },
+                window: { time: { unit: 'm', size: 5 }, numberOfLocations: 1 },
               });
               break;
             default:
