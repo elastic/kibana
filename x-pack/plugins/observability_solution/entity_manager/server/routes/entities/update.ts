@@ -63,7 +63,7 @@ export const updateEntityDefinitionRoute = createEntityManagerServerRoute({
   params: z.object({
     path: z.object({ id: z.string() }),
     query: createEntityDefinitionQuerySchema,
-    body: entityDefinitionUpdateSchema.strict(),
+    body: entityDefinitionUpdateSchema,
   }),
   handler: async ({ context, response, params, logger }) => {
     const core = await context.core;
