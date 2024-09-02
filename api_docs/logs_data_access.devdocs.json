@@ -2,7 +2,75 @@
   "id": "logsDataAccess",
   "client": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "logsDataAccess",
+        "id": "def-public.LogSourcesProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "LogSourcesProvider",
+        "description": [],
+        "signature": [
+          "React.FunctionComponent<React.PropsWithChildren<{ logSourcesService: ",
+          "LogSourcesService",
+          "; }>>"
+        ],
+        "path": "x-pack/plugins/observability_solution/logs_data_access/public/hooks/use_log_sources.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "logsDataAccess",
+            "id": "def-public.LogSourcesProvider.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P & { children?: React.ReactNode; }"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "logsDataAccess",
+            "id": "def-public.LogSourcesProvider.$2",
+            "type": "Any",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "logsDataAccess",
+        "id": "def-public.useLogSourcesContext",
+        "type": "Function",
+        "tags": [],
+        "label": "useLogSourcesContext",
+        "description": [],
+        "signature": [
+          "() => { isUninitialized: boolean; isLoadingLogSources: boolean; hasFailedLoadingLogSources: boolean; logSourcesError: Error | undefined; logSources: ",
+          "LogSource",
+          "[]; combinedIndices: string; }"
+        ],
+        "path": "x-pack/plugins/observability_solution/logs_data_access/public/hooks/use_log_sources.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [],
     "enums": [],
     "misc": [],

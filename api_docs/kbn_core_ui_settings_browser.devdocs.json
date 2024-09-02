@@ -597,7 +597,7 @@
             "section": "def-common.GetUiSettingsContext",
             "text": "GetUiSettingsContext"
           },
-          " | undefined) => Promise<unknown>) | undefined; category?: string[] | undefined; metric?: { type: string; name: string; } | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; readonlyMode?: ",
+          " | undefined) => Promise<unknown>) | undefined; category?: string[] | undefined; metric?: { type: string; name: string; } | undefined; readonly?: boolean | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonlyMode?: ",
           {
             "pluginId": "@kbn/core-ui-settings-common",
             "scope": "common",

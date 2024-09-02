@@ -12,7 +12,7 @@ import { isValidNamespace } from '@kbn/fleet-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { parseMonitorLocations } from './utils';
 import { MonitorValidationError } from '../monitor_validation';
-import { getKqlFilter } from '../../common';
+import { getSavedObjectKqlFilter } from '../../common';
 import { deleteMonitor } from '../delete_monitor';
 import { monitorAttributes, syntheticsMonitorType } from '../../../../common/types/saved_objects';
 import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
@@ -81,7 +81,6 @@ export class AddEditMonitorAPI {
 
       const syncErrorsPromise = syntheticsMonitorClient.addMonitors(
         [{ monitor: monitorWithNamespace as MonitorFields, id: newMonitorId }],
-        savedObjectsClient,
         this.allPrivateLocations ?? [],
         spaceId
       );
@@ -239,7 +238,7 @@ export class AddEditMonitorAPI {
 
   async validateUniqueMonitorName(name: string, id?: string) {
     const { savedObjectsClient } = this.routeContext;
-    const kqlFilter = getKqlFilter({ field: 'name.keyword', values: name });
+    const kqlFilter = getSavedObjectKqlFilter({ field: 'name.keyword', values: name });
     const { total } = await savedObjectsClient.find({
       perPage: 0,
       type: syntheticsMonitorType,

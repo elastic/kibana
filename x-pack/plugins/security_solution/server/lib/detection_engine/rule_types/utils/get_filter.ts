@@ -74,8 +74,9 @@ export const getFilter = async ({
   fields = [],
   loadFields = false,
 }: GetFilterArgs): Promise<ESBoolQuery> => {
+  const dataViews = await services.getDataViews();
   const getQueryFilter = loadFields
-    ? getQueryFilterLoadFields(services.dataViews)
+    ? getQueryFilterLoadFields(dataViews)
     : getQueryFilterNoLoadFields;
 
   const dataTiersFilters = ruleTypesSupportingTierFilters.has(type)

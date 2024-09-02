@@ -7,12 +7,12 @@
 
 import { EuiDescribedFormGroup, EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { LogSourcesKibanaAdvancedSettingReference } from '@kbn/logs-shared-plugin/common';
 import { ApplicationStart } from '@kbn/core-application-browser';
 import { EuiLink } from '@elastic/eui';
-import { useTrackedPromise } from '../../../hooks/use_tracked_promise';
+import { useLogSourcesContext } from '@kbn/logs-data-access-plugin/public';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { FormElement } from './form_elements';
 import { getFormRowProps } from './form_field_props';
@@ -33,7 +33,7 @@ export const KibanaAdvancedSettingConfigurationPanel: React.FC<{
   >;
 }> = ({ isLoading, isReadOnly, advancedSettingFormElement }) => {
   const {
-    services: { application, logsDataAccess },
+    services: { application },
   } = useKibanaContextForPlugin();
 
   useTrackPageview({ app: 'infra_logs', path: 'log_source_configuration_kibana_advanced_setting' });
@@ -48,31 +48,7 @@ export const KibanaAdvancedSettingConfigurationPanel: React.FC<{
     [application]
   );
 
-  const [logSourcesSettingValue, setLogSourcesSettingValue] = useState<string | undefined>(
-    undefined
-  );
-
-  const [getLogSourcesRequest, getLogSources] = useTrackedPromise(
-    {
-      cancelPreviousOn: 'resolution',
-      createPromise: async () => {
-        return await logsDataAccess.services.logSourcesService.getLogSources();
-      },
-      onResolve: (response) => {
-        setLogSourcesSettingValue(response.map((logSource) => logSource.indexPattern).join(','));
-      },
-    },
-    []
-  );
-
-  const isLoadingLogSourcesSetting = useMemo(
-    () => getLogSourcesRequest.state === 'pending',
-    [getLogSourcesRequest.state]
-  );
-
-  useEffect(() => {
-    getLogSources();
-  }, [getLogSources]);
+  const { isLoadingLogSources, combinedIndices } = useLogSourcesContext();
 
   return (
     <>
@@ -125,9 +101,9 @@ export const KibanaAdvancedSettingConfigurationPanel: React.FC<{
             data-test-subj="logSourcesSettingInput"
             fullWidth
             disabled={isLoading}
-            isLoading={isLoadingLogSourcesSetting}
+            isLoading={isLoadingLogSources}
             readOnly={true}
-            value={logSourcesSettingValue}
+            value={combinedIndices}
             isInvalid={false}
           />
         </EuiFormRow>

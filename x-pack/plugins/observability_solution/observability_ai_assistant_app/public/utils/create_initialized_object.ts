@@ -14,7 +14,7 @@ export function createInitializedObject(parameters: Params) {
 
   function traverseProperties({ properties, required }: Params) {
     for (const propName in properties) {
-      if (properties.hasOwnProperty(propName)) {
+      if (Object.hasOwn(properties, propName)) {
         const prop = properties[propName] as Params;
 
         if (prop.type === 'object') {

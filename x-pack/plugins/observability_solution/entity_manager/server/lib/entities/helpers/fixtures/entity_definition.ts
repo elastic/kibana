@@ -8,13 +8,18 @@
 import { entityDefinitionSchema } from '@kbn/entities-schema';
 export const rawEntityDefinition = {
   id: 'admin-console-services',
-  version: '999.999.999',
+  version: '1.0.0',
   name: 'Services for Admin Console',
   type: 'service',
   indexPatterns: ['kbn-data-forge-fake_stack.*'],
   history: {
     timestampField: '@timestamp',
     interval: '1m',
+    settings: {
+      lookbackPeriod: '10m',
+      frequency: '2m',
+      syncDelay: '2m',
+    },
   },
   identityFields: ['log.logger', { field: 'event.category', optional: true }],
   displayNameTemplate: '{{log.logger}}{{#event.category}}:{{.}}{{/event.category}}',

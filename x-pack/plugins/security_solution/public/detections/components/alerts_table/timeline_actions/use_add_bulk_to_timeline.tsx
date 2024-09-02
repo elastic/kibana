@@ -12,6 +12,7 @@ import type { Filter } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { BulkActionsConfig } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { dataTableActions, TableId, tableDefaults } from '@kbn/securitysolution-data-table';
+import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 import type { CustomBulkAction } from '../../../../../common/types';
 import { combineQueries } from '../../../../common/lib/kuery';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -66,8 +67,8 @@ export const useAddBulkToTimelineAction = ({
   const {
     browserFields,
     dataViewId,
-    runtimeMappings,
     indexPattern,
+    sourcererDataView,
     // important to get selectedPatterns from useSourcererDataView
     // in order to include the exclude filters in the search that are not stored in the timeline
     selectedPatterns,
@@ -119,7 +120,7 @@ export const useAddBulkToTimelineAction = ({
     sort: timelineQuerySortField,
     indexNames: selectedPatterns,
     filterQuery,
-    runtimeMappings,
+    runtimeMappings: sourcererDataView?.runtimeFieldMap as RunTimeMappings,
     limit: Math.min(BULK_ADD_TO_TIMELINE_LIMIT, totalCount),
     timerangeKind: 'absolute',
   });
@@ -142,7 +143,8 @@ export const useAddBulkToTimelineAction = ({
   });
 
   const updateTimelineIsLoading = useCallback(
-    (payload) => dispatch(timelineActions.updateIsLoading(payload)),
+    (payload: Parameters<typeof timelineActions.updateIsLoading>[0]) =>
+      dispatch(timelineActions.updateIsLoading(payload)),
     [dispatch]
   );
 

@@ -199,7 +199,7 @@ export default ({ getService }: FtrProviderContext) => {
       const createRecords = () => createAssetCriticalityRecords(records, es);
 
       before(async () => {
-        enableAssetCriticalityAdvancedSetting(kibanaServer, log);
+        await enableAssetCriticalityAdvancedSetting(kibanaServer, log);
       });
 
       it('@skipInServerless should return the first 10 asset criticality records if no args provided', async () => {

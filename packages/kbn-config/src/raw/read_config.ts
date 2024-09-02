@@ -59,7 +59,9 @@ function processEntryValue(value: any) {
         delete value[subKey];
         set(value, [unsplitKey], processEntryValue(subVal));
       } else {
-        set(value, subKey, processEntryValue(subVal));
+        const subKeySplits = splitKey(subKey);
+        if (subKeySplits.length > 1) delete value[subKey];
+        set(value, subKeySplits, processEntryValue(subVal));
       }
     }
   } else if (typeof value === 'string') {

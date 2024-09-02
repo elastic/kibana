@@ -56,6 +56,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async function afterAll() {
       await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
       await kibanaServer.uiSettings.replace({});
+      await PageObjects.common.unsetTime();
     });
 
     /**
@@ -145,7 +146,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      describe('discover scripted field', async () => {
+      describe('discover scripted field', () => {
         before(async () => {
           const from = 'Sep 17, 2015 @ 06:31:44.000';
           const to = 'Sep 18, 2015 @ 18:31:44.000';
@@ -514,10 +515,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           return elements[0] === 'painDate';
         });
       });
-    });
-
-    after(async () => {
-      await PageObjects.common.unsetTime();
     });
   });
 }

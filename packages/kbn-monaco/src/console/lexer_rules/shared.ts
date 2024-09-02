@@ -15,11 +15,13 @@ export const consoleSharedLanguageConfiguration: monaco.languages.LanguageConfig
   brackets: [
     ['{', '}'],
     ['[', ']'],
+    ['"""', '"""\n'],
   ],
   autoClosingPairs: [
     { open: '{', close: '}' },
     { open: '[', close: ']' },
     { open: '"', close: '"' },
+    { open: '"""', close: '"""' },
   ],
 };
 

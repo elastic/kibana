@@ -36,7 +36,9 @@ describe('APMEventClient', () => {
         esClient: {
           search: async (params: any, { signal }: { signal: AbortSignal }) => {
             abortSignal = signal;
-            await setTimeoutPromise(3_000);
+            await setTimeoutPromise(3_000, undefined, {
+              signal: abortSignal,
+            });
             return {};
           },
         } as any,

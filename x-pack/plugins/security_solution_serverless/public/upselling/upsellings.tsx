@@ -25,6 +25,7 @@ import {
 } from './sections/endpoint_management';
 import { getProductTypeByPLI } from './hooks/use_product_type_by_pli';
 import {
+  AttackDiscoveryUpsellingPageLazy,
   EndpointExceptionsDetailsUpsellingLazy,
   EntityAnalyticsUpsellingPageLazy,
   EntityAnalyticsUpsellingSectionLazy,
@@ -75,6 +76,11 @@ export const upsellingPages: UpsellingPages = [
     component: () => (
       <EndpointExceptionsDetailsUpsellingLazy requiredPLI={ProductFeatureKey.endpointExceptions} />
     ),
+  },
+  {
+    pageName: SecurityPageName.attackDiscovery,
+    pli: ProductFeatureKey.attackDiscovery,
+    component: () => <AttackDiscoveryUpsellingPageLazy />,
   },
 ];
 

@@ -25,7 +25,7 @@ export const useQuickPromptTable = () => {
     }: {
       isActionsDisabled: boolean;
       basePromptContexts: PromptContextTemplate[];
-      onEditActionClicked: (prompt: PromptResponse) => void;
+      onEditActionClicked: (prompt: PromptResponse, color?: string) => void;
       onDeleteActionClicked: (prompt: PromptResponse) => void;
     }): Array<EuiBasicTableColumn<PromptResponse>> => [
       {

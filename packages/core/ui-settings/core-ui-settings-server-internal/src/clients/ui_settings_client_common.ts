@@ -93,7 +93,7 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
   }
 
   private assertUpdateAllowed(key: string) {
-    if (this.overrides.hasOwnProperty(key)) {
+    if (Object.hasOwn(this.overrides, key)) {
       throw new CannotOverrideError(`Unable to update "${key}" because it is overridden`);
     }
   }
@@ -113,7 +113,7 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
     // validate value read from saved objects as it can be changed via SO API
     const filteredValues: UserProvided<T> = {};
     for (const [key, userValue] of Object.entries(values)) {
-      if (userValue === null || this.overrides.hasOwnProperty(key)) continue;
+      if (userValue === null || Object.hasOwn(this.overrides, key)) continue;
       try {
         this.validateKey(key, userValue);
         filteredValues[key] = {
