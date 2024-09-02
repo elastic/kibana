@@ -287,7 +287,6 @@ export class RemoteClusterForm extends Component<Props, State> {
         <EuiFormRow
           data-test-subj="remoteClusterFormSkipUnavailableFormRow"
           className="remoteClusterSkipIfUnavailableSwitch"
-          hasEmptyLabelSpace
           fullWidth
           helpText={
             skipUnavailable !== defaultClusterValues.skipUnavailable ? (

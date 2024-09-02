@@ -229,7 +229,7 @@ export function ColorRangeItem({
           append={getAppend(rangeType, mode)}
           onBlur={onLeaveFocus}
           data-test-subj={`lnsPalettePanel_dynamicColoring_range_value_${index}`}
-          prepend={<span className="euiFormLabel">{isLast ? '\u2264' : '\u2265'}</span>}
+          prepend={isLast ? '\u2264' : '\u2265'}
           aria-label={i18n.translate('coloring.dynamicColoring.customPalette.rangeAriaLabel', {
             defaultMessage: 'Range {index}',
             values: {
