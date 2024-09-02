@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { css } from '@emotion/react';
-import { Controller, useController, useFormContext, useWatch } from 'react-hook-form';
+import { Controller, useController, useFormContext } from 'react-hook-form';
 import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { ResultList } from './result_list';
 import { ChatForm, ChatFormFields } from '../../types';
@@ -26,10 +26,7 @@ export const SearchMode: React.FC = () => {
   const [searchResults, setSearchResults] = React.useState<SearchHit[] | undefined>();
   const searchRequest = useSearchPreview();
   const { euiTheme } = useEuiTheme();
-  const { control, formState, handleSubmit } = useFormContext();
-  const sourceFields = useWatch<ChatForm, ChatFormFields.sourceFields>({
-    name: ChatFormFields.sourceFields,
-  });
+  const { control, handleSubmit } = useFormContext();
   const {
     field: { onChange: searchBarOnChange, value: searchBarValue },
   } = useController<ChatForm, ChatFormFields.searchQuery>({
@@ -38,16 +35,15 @@ export const SearchMode: React.FC = () => {
 
   const handleSearch = handleSubmit(async () => {
     try {
-      const searchData = await searchRequest({ searchQuery: searchBarValue });
-      setSearchResults(searchData);
+      const searchData = await searchRequest(searchBarValue);
+      setSearchResults(searchData.results);
     } catch (e) {
       // TODO handle error ?
-      console.error(e);
     }
   });
 
   const updateSearchQuery = (query: string) => {
-    searchBarOnChange(query);
+    searchBarOnChange({ query, pagination: searchBarValue.pagination });
   };
 
   return (
@@ -67,6 +63,7 @@ export const SearchMode: React.FC = () => {
                 render={({ field }) => (
                   <EuiFieldText
                     {...field}
+                    value={searchBarValue.query}
                     icon="search"
                     fullWidth
                     placeholder="Search for documents"

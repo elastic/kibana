@@ -12,7 +12,7 @@ import { useKibana } from './use_kibana';
 import { DEFAULT_PAGINATION } from '../../common';
 
 export interface UseSearchPreviewArgs {
-  searchQuery: string;
+  query: string;
   pagination: Pagination;
 }
 
@@ -27,7 +27,7 @@ export const useSearchPreview = () => {
   const { http } = services;
 
   return async ({
-    searchQuery,
+    query,
     pagination: paginationParam = DEFAULT_PAGINATION,
   }: UseSearchPreviewArgs): Promise<UseSearchPreviewResponse> => {
     const { results, pagination } = await http.post<{
@@ -35,10 +35,9 @@ export const useSearchPreview = () => {
       pagination: Pagination;
     }>(APIRoutes.POST_SEARCH_QUERY, {
       body: JSON.stringify({
-        search_query: searchQuery,
+        search_query: query,
         elasticsearch_query: JSON.stringify(getValues(ChatFormFields.elasticsearchQuery)),
         indices: getValues(ChatFormFields.indices),
-        source_fields: JSON.stringify(getValues(ChatFormFields.sourceFields)),
         size: paginationParam.size,
         from: paginationParam.from,
       }),
