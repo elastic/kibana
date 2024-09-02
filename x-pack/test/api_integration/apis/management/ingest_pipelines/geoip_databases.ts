@@ -55,7 +55,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('Delete', async () => {
+    describe('Delete', () => {
       it('deletes a geoip database', async () => {
         await supertest
           .delete(`${url}/${normalizedDatabaseName}`)
