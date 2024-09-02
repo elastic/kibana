@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-/* eslint-disable complexity */
+/* eslint-disable complexity,@typescript-eslint/no-explicit-any */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
@@ -159,7 +159,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
   } = useGetActionTypes();
 
   const onConnectorUpdated = useCallback(
-    async (updatedConnector) => {
+    async (updatedConnector: any) => {
       setEditedConnectorItem(updatedConnector);
       refetchConnectors();
       refetchActionTypes();
@@ -169,7 +169,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
   );
 
   const onConnectorCreated = useCallback(
-    async (createdConnector) => {
+    async (createdConnector: any) => {
       const caseConnector = normalizeActionConnector(createdConnector);
 
       await persistCaseConfigureAsync({

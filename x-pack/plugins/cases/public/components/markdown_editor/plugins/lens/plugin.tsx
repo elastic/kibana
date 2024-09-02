@@ -87,7 +87,8 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
   }, [clearDraftComment, currentAppId, embeddable, onCancel]);
 
   const handleAdd = useCallback(
-    (attributes, timeRange) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (attributes: any, timeRange: any) => {
       onSave(
         `!{${ID}${JSON.stringify({
           timeRange: convertToAbsoluteTimeRange(timeRange),
@@ -104,7 +105,8 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
   );
 
   const handleUpdate = useCallback(
-    (attributes, timeRange, position) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (attributes: any, timeRange: any, position: any) => {
       markdownContext.replaceNode(
         position,
         `!{${ID}${JSON.stringify({
@@ -152,7 +154,8 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
   ]);
 
   const handleEditInLensClick = useCallback(
-    (lensAttributes?, timeRange = DEFAULT_TIMERANGE) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (lensAttributes?: any, timeRange: any = DEFAULT_TIMERANGE) => {
       storage.set(DRAFT_COMMENT_STORAGE_ID, {
         commentId: commentEditorContext?.editorId,
         comment: commentEditorContext?.value,
@@ -190,7 +193,8 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
   );
 
   const handleChooseLensSO = useCallback(
-    (savedObjectId, savedObjectType, fullName, savedObject) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (savedObjectId: any, savedObjectType: any, fullName: any, savedObject: any) => {
       handleEditInLensClick({
         ...savedObject.attributes,
         title: '',

@@ -35,10 +35,14 @@ const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProp
   ({ ariaLabel, dataTestSubj, editorId, height, onChange, value, disabledUiPlugins }, ref) => {
     const astRef = useRef<EuiMarkdownAstNode | undefined>(undefined);
     const [markdownErrorMessages, setMarkdownErrorMessages] = useState([]);
-    const onParse: EuiMarkdownEditorProps['onParse'] = useCallback((err, { messages, ast }) => {
-      setMarkdownErrorMessages(err ? [err] : messages);
-      astRef.current = ast;
-    }, []);
+    const onParse: EuiMarkdownEditorProps['onParse'] = useCallback(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (err: any, { messages, ast }: any) => {
+        setMarkdownErrorMessages(err ? [err] : messages);
+        astRef.current = ast;
+      },
+      []
+    );
 
     const { parsingPlugins, processingPlugins, uiPlugins } = usePlugins(disabledUiPlugins);
     const editorRef = useRef<EuiMarkdownEditorRef>(null);

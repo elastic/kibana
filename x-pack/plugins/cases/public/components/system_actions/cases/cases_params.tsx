@@ -157,7 +157,7 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
       <EuiFormRow
         fullWidth
         id="timeWindow"
-        error={errors.timeWindow}
+        error={errors.timeWindow as string}
         isInvalid={
           errors.timeWindow !== undefined &&
           Number(errors.timeWindow.length) > 0 &&
