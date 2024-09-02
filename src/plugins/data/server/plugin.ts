@@ -12,7 +12,7 @@ import { BfetchServerSetup } from '@kbn/bfetch-plugin/server';
 import { PluginStart as DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/server';
-import { ConfigSchema } from '../config';
+import { ConfigSchema } from './config';
 import type { ISearchSetup, ISearchStart } from './search';
 import { DatatableUtilitiesService } from './datatable_utilities';
 import { SearchService } from './search/search_service';
