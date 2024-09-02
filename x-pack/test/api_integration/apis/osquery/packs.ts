@@ -61,9 +61,6 @@ export default function ({ getService }: FtrProviderContext) {
       await getService('esArchiver').unload(
         'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
       );
-    });
-
-    after(async function () {
       await supertest
         .post(`/api/fleet/agent_policies/delete`)
         .set('kbn-xsrf', 'xxxx')

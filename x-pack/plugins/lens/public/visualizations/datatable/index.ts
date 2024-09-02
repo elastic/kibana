@@ -44,7 +44,7 @@ export class DatatableVisualization {
         })
       );
 
-      return getDatatableVisualization({ paletteService: palettes, theme: core.theme });
+      return getDatatableVisualization({ paletteService: palettes, kibanaTheme: core.theme });
     });
   }
 }

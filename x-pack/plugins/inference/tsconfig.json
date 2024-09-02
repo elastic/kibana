@@ -22,6 +22,7 @@
     "@kbn/logging",
     "@kbn/core-http-server",
     "@kbn/actions-plugin",
-    "@kbn/config-schema"
+    "@kbn/config-schema",
+    "@kbn/stack-connectors-plugin"
   ]
 }
