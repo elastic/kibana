@@ -91,5 +91,8 @@ export function registerHelpers(handlebarsInstance: typeof Handlebars) {
   /**
      In case of anyOf schemas, we should cast explicitly to the type because TS doesn't handle big sized z.infer types
      */
-  handlebarsInstance.registerHelper('shouldCastExplicitly', ({ anyOf }) => anyOf?.length > 2);
+  handlebarsInstance.registerHelper(
+    'shouldCastExplicitly',
+    ({ anyOf, oneOf }) => anyOf?.length > 2 || oneOf?.length > 2
+  );
 }

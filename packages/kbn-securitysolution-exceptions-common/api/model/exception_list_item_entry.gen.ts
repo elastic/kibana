@@ -59,14 +59,17 @@ export const ExceptionListItemEntryExists = z.object({
   operator: ExceptionListItemEntryOperator,
 });
 
-export type ExceptionListItemEntryNestedEntryItem = z.infer<
-  typeof ExceptionListItemEntryNestedEntryItem
->;
-export const ExceptionListItemEntryNestedEntryItem = z.union([
+const ExceptionListItemEntryNestedEntryItemInternal = z.union([
   ExceptionListItemEntryMatch,
   ExceptionListItemEntryMatchAny,
   ExceptionListItemEntryExists,
 ]);
+
+export type ExceptionListItemEntryNestedEntryItem = z.infer<
+  typeof ExceptionListItemEntryNestedEntryItemInternal
+>;
+export const ExceptionListItemEntryNestedEntryItem =
+  ExceptionListItemEntryNestedEntryItemInternal as z.ZodType<ExceptionListItemEntryNestedEntryItem>;
 
 export type ExceptionListItemEntryNested = z.infer<typeof ExceptionListItemEntryNested>;
 export const ExceptionListItemEntryNested = z.object({
