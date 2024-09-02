@@ -17,7 +17,7 @@ import {
   EuiIconAxisRight,
   EuiIconAxisTop,
 } from '@kbn/chart-icons';
-import { useDebouncedValue } from '@kbn/visualization-ui-components';
+import { useDebouncedValue } from '@kbn/visualization-utils';
 import { isHorizontalChart } from '../state_helpers';
 import {
   ToolbarPopover,
@@ -245,7 +245,7 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
   const config = popoverConfig(axis, isHorizontal);
 
   const onExtentChange = useCallback(
-    (newExtent) => {
+    (newExtent: AxisExtentConfig | undefined) => {
       if (setExtent && newExtent && !isEqual(newExtent, extent)) {
         const { errorMsg } = validateExtent(hasBarOrAreaOnAxis, newExtent, scale);
         if (axis === 'x' || newExtent.mode !== 'custom' || !errorMsg) {

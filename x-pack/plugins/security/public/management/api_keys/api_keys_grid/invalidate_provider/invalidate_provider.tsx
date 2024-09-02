@@ -10,10 +10,9 @@ import React, { Fragment, useRef, useState } from 'react';
 
 import type { NotificationsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import type { APIKeysAPIClient } from '@kbn/security-api-key-management';
+import type { ApiKeyToInvalidate } from '@kbn/security-plugin-types-common';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-
-import type { ApiKeyToInvalidate } from '../../../../../common/model';
-import type { APIKeysAPIClient } from '../../api_keys_api_client';
 
 interface Props {
   isAdmin: boolean;

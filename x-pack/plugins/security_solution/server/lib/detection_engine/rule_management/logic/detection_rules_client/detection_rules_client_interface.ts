@@ -38,7 +38,7 @@ export interface UpdateRuleArgs {
 }
 
 export interface PatchRuleArgs {
-  nextParams: RulePatchProps;
+  rulePatch: RulePatchProps;
 }
 
 export interface DeleteRuleArgs {

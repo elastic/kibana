@@ -5,9 +5,9 @@
  * 2.0.
  */
 import moment from 'moment';
-import { EuiFieldNumber } from '@elastic/eui';
+import { EuiExpression, EuiFieldNumber, EuiFormRow, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useState } from 'react';
 import {
   ERROR_GROUP_ID,
   SERVICE_ENVIRONMENT,
@@ -34,6 +34,7 @@ export function ServiceField({
 }) {
   return (
     <PopoverExpression
+      dataTestSubj="apmServiceField"
       value={currentValue || allOptionText}
       title={i18n.translate('xpack.apm.alerting.fields.service', {
         defaultMessage: 'Service',
@@ -68,6 +69,7 @@ export function EnvironmentField({
 }) {
   return (
     <PopoverExpression
+      dataTestSubj="apmEnvironmentField"
       value={getEnvironmentLabel(currentValue)}
       title={i18n.translate('xpack.apm.alerting.fields.environment', {
         defaultMessage: 'Environment',
@@ -106,7 +108,11 @@ export function TransactionNameField({
   });
 
   return (
-    <PopoverExpression value={currentValue || allOptionText} title={label}>
+    <PopoverExpression
+      dataTestSubj="apmTransactionNameField"
+      value={currentValue || allOptionText}
+      title={label}
+    >
       <SuggestionsSelect
         customOptions={[{ label: allOptionText, value: undefined }]}
         customOptionText={i18n.translate('xpack.apm.alerting.transaction.name.custom.text', {
@@ -139,7 +145,11 @@ export function TransactionTypeField({
     defaultMessage: 'Type',
   });
   return (
-    <PopoverExpression value={currentValue || allOptionText} title={label}>
+    <PopoverExpression
+      dataTestSubj="apmTransactionTypeField"
+      value={currentValue || allOptionText}
+      title={label}
+    >
       <SuggestionsSelect
         customOptions={[{ label: allOptionText, value: undefined }]}
         customOptionText={i18n.translate('xpack.apm.transactionTypesSelectCustomOptionText', {
@@ -172,7 +182,11 @@ export function ErrorGroupingKeyField({
     defaultMessage: 'Error grouping key',
   });
   return (
-    <PopoverExpression value={currentValue || allOptionText} title={label}>
+    <PopoverExpression
+      dataTestSubj="apmErrorGroupingKeyField"
+      value={currentValue || allOptionText}
+      title={label}
+    >
       <SuggestionsSelect
         customOptions={[{ label: allOptionText, value: undefined }]}
         customOptionText={i18n.translate('xpack.apm.errorKeySelectCustomOptionText', {
@@ -192,6 +206,10 @@ export function ErrorGroupingKeyField({
   );
 }
 
+function isNumeric(value: string): boolean {
+  return !isNaN(Number(value)) && value.trim() !== '';
+}
+
 export function IsAboveField({
   value,
   unit,
@@ -203,22 +221,56 @@ export function IsAboveField({
   onChange: (value: number) => void;
   step?: number;
 }) {
+  const [thresholdPopoverOpen, serThresholdPopoverOpen] = useState(false);
+  const [isAboveValue, setIsAboveValue] = useState(String(value));
+
   return (
-    <PopoverExpression
-      value={`${value}${unit}`}
-      title={i18n.translate('xpack.apm.transactionErrorRateRuleType.isAbove', {
-        defaultMessage: 'is above',
-      })}
+    <EuiPopover
+      isOpen={thresholdPopoverOpen}
+      anchorPosition={'downLeft'}
+      ownFocus
+      closePopover={() => {
+        serThresholdPopoverOpen(false);
+      }}
+      button={
+        <EuiExpression
+          value={`${value}${unit}`}
+          description={i18n.translate('xpack.apm.transactionErrorRateRuleType.isAbove', {
+            defaultMessage: 'is above',
+          })}
+          isInvalid={!isNumeric(isAboveValue)}
+          isActive={thresholdPopoverOpen}
+          onClick={() => {
+            serThresholdPopoverOpen(true);
+          }}
+        />
+      }
     >
-      <EuiFieldNumber
-        data-test-subj="apmIsAboveFieldFieldNumber"
-        min={0}
-        value={value ?? 0}
-        onChange={(e) => onChange(parseInt(e.target.value, 10))}
-        append={unit}
-        compressed
-        step={step}
-      />
-    </PopoverExpression>
+      <EuiFormRow
+        isInvalid={!isNumeric(isAboveValue)}
+        error={i18n.translate('xpack.apm.transactionErrorRateRuleType.error.validThreshold', {
+          defaultMessage: 'Thresholds must contain a valid number.',
+        })}
+      >
+        <EuiFieldNumber
+          data-test-subj="apmIsAboveFieldFieldNumber"
+          min={0}
+          value={isAboveValue}
+          onChange={(e) => {
+            const thresholdVal = e.target.value;
+            // Update the value to continue typing (if user stopped at . or ,)
+            setIsAboveValue(thresholdVal);
+            // Only send the value back to the rule if it's a valid number
+            if (!isNaN(Number(thresholdVal))) {
+              onChange(Number(thresholdVal));
+            }
+          }}
+          append={unit}
+          isInvalid={!isNumeric(isAboveValue)}
+          compressed
+          step={step}
+        />
+      </EuiFormRow>
+    </EuiPopover>
   );
 }

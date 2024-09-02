@@ -18,7 +18,9 @@ import {
   MARK_ALERT_ACKNOWLEDGED_BTN,
   OPEN_ALERT_BTN,
   SEND_ALERT_TO_TIMELINE_BTN,
-  SELECT_AGGREGATION_CHART,
+  ALERT_CHARTS_TOGGLE_BUTTON,
+  SELECT_COUNTS_TABLE,
+  SELECT_TREEMAP,
   TAKE_ACTION_POPOVER_BTN,
   TIMELINE_CONTEXT_MENU_BTN,
   CLOSE_FLYOUT,
@@ -60,7 +62,6 @@ import {
   ENRICHMENT_QUERY_END_INPUT,
   ENRICHMENT_QUERY_RANGE_PICKER,
   ENRICHMENT_QUERY_START_INPUT,
-  THREAT_INTEL_TAB,
   CELL_EXPAND_VALUE,
 } from '../screens/alerts_details';
 import { FIELD_INPUT } from '../screens/exceptions';
@@ -153,8 +154,6 @@ export const hideMessageTooltip = () => {
 };
 
 export const closeAlertFlyout = () => cy.get(CLOSE_FLYOUT).click();
-
-export const viewThreatIntelTab = () => cy.get(THREAT_INTEL_TAB).click();
 
 export const setEnrichmentDates = (from?: string, to?: string) => {
   cy.get(ENRICHMENT_QUERY_RANGE_PICKER).within(() => {
@@ -267,12 +266,20 @@ export const openAlerts = () => {
   cy.get(OPEN_ALERT_BTN).click();
 };
 
-export const selectCountTable = () => {
-  cy.get(SELECT_AGGREGATION_CHART).click({ force: true });
+export const toggleKPICharts = () => {
+  cy.get(ALERT_CHARTS_TOGGLE_BUTTON).click();
+};
+
+export const selectAlertsCountTable = () => {
+  cy.get(SELECT_COUNTS_TABLE).click();
 };
 
 export const selectAlertsHistogram = () => {
   cy.get(SELECT_HISTOGRAM).click();
+};
+
+export const selectAlertsTreemap = () => {
+  cy.get(SELECT_TREEMAP).click();
 };
 
 export const goToAcknowledgedAlerts = () => {
@@ -489,7 +496,7 @@ export const updateAlertTags = () => {
 };
 
 export const showHoverActionsEventRenderedView = (fieldSelector: string) => {
-  cy.get(fieldSelector).first().trigger('mouseover');
+  cy.get(fieldSelector).first().realHover();
   cy.get(HOVER_ACTIONS_CONTAINER).should('be.visible');
 };
 

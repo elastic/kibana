@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import semverLt from 'semver/functions/lt';
 import type Boom from '@hapi/boom';
 import moment from 'moment';
+import { omit } from 'lodash';
 import type {
   ElasticsearchClient,
   SavedObject,
@@ -21,7 +22,11 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 import pRetry from 'p-retry';
 import type { LicenseType } from '@kbn/licensing-plugin/server';
 
-import type { PackageDataStreamTypes, PackageInstallContext } from '../../../../common/types';
+import type {
+  KibanaAssetReference,
+  PackageDataStreamTypes,
+  PackageInstallContext,
+} from '../../../../common/types';
 import type { HTTPAuthorizationHeader } from '../../../../common/http_authorization_header';
 import { isPackagePrerelease, getNormalizedDataStreams } from '../../../../common/services';
 import { FLEET_INSTALL_FORMAT_VERSION } from '../../../constants/fleet_es_assets';
@@ -153,6 +158,11 @@ export async function isPackageVersionOrLaterInstalled(options: {
   });
 }
 
+export interface EnsurePackageResult {
+  status: InstallResultStatus;
+  package: Installation;
+}
+
 export async function ensureInstalledPackage(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
@@ -161,7 +171,7 @@ export async function ensureInstalledPackage(options: {
   spaceId?: string;
   force?: boolean;
   authorizationHeader?: HTTPAuthorizationHeader | null;
-}): Promise<Installation> {
+}): Promise<EnsurePackageResult> {
   const {
     savedObjectsClient,
     pkgName,
@@ -184,7 +194,10 @@ export async function ensureInstalledPackage(options: {
   });
 
   if (installedPackageResult) {
-    return installedPackageResult.package;
+    return {
+      status: 'already_installed',
+      package: installedPackageResult.package,
+    };
   }
   const pkgkey = Registry.pkgToPkgKey(pkgKeyProps);
   const installResult = await installPackage({
@@ -221,7 +234,10 @@ export async function ensureInstalledPackage(options: {
 
   const installation = await getInstallation({ savedObjectsClient, pkgName });
   if (!installation) throw new FleetError(`Could not get installation for ${pkgName}`);
-  return installation;
+  return {
+    status: 'installed',
+    package: installation,
+  };
 }
 
 export async function handleInstallPackageFailure({
@@ -466,44 +482,23 @@ async function installPackageFromRegistry({
         }`
       );
     }
-    const { enablePackagesStateMachine } = appContextService.getExperimentalFeatures();
-    if (enablePackagesStateMachine) {
-      return await installPackageWitStateMachine({
-        pkgName,
-        pkgVersion,
-        installSource,
-        installedPkg,
-        installType,
-        savedObjectsClient,
-        esClient,
-        spaceId,
-        force,
-        packageInstallContext,
-        paths,
-        verificationResult,
-        authorizationHeader,
-        ignoreMappingUpdateErrors,
-        skipDataStreamRollover,
-      });
-    } else {
-      return await installPackageCommon({
-        pkgName,
-        pkgVersion,
-        installSource,
-        installedPkg,
-        installType,
-        savedObjectsClient,
-        esClient,
-        spaceId,
-        force,
-        packageInstallContext,
-        paths,
-        verificationResult,
-        authorizationHeader,
-        ignoreMappingUpdateErrors,
-        skipDataStreamRollover,
-      });
-    }
+    return await installPackageWitStateMachine({
+      pkgName,
+      pkgVersion,
+      installSource,
+      installedPkg,
+      installType,
+      savedObjectsClient,
+      esClient,
+      spaceId,
+      force,
+      packageInstallContext,
+      paths,
+      verificationResult,
+      authorizationHeader,
+      ignoreMappingUpdateErrors,
+      skipDataStreamRollover,
+    });
   } catch (e) {
     sendEvent({
       ...telemetryEvent,
@@ -619,27 +614,9 @@ async function installPackageCommon(options: {
       return { error: err, installType, installSource };
     }
 
-    // Saved object client need to be scopped with the package space for saved object tagging
-    const savedObjectClientWithSpace = appContextService.getInternalUserSOClientForSpaceId(spaceId);
-
-    const savedObjectsImporter = appContextService
-      .getSavedObjects()
-      .createImporter(savedObjectClientWithSpace, { importSizeLimit: 15_000 });
-
-    const savedObjectTagAssignmentService = appContextService
-      .getSavedObjectsTagging()
-      .createInternalAssignmentService({ client: savedObjectClientWithSpace });
-
-    const savedObjectTagClient = appContextService
-      .getSavedObjectsTagging()
-      .createTagClient({ client: savedObjectClientWithSpace });
-
     // try installing the package, if there was an error, call error handler and rethrow
     return await _installPackage({
       savedObjectsClient,
-      savedObjectsImporter,
-      savedObjectTagAssignmentService,
-      savedObjectTagClient,
       esClient,
       logger,
       installedPkg,
@@ -740,7 +717,7 @@ async function installPackageWitStateMachine(options: {
   let { telemetryEvent } = options;
   const logger = appContextService.getLogger();
   logger.info(
-    `Install with enablePackagesStateMachine - Starting installation of ${pkgName}@${pkgVersion} from ${installSource} `
+    `Install with state machine - Starting installation of ${pkgName}@${pkgVersion} from ${installSource} `
   );
 
   // Workaround apm issue with async spans: https://github.com/elastic/apm-agent-nodejs/issues/2611
@@ -958,6 +935,7 @@ async function installPackageByUpload({
     // update the timestamp of latest installation
     setLastUploadInstallCache();
 
+    // TODO: use installPackageWithStateMachine instead of installPackageCommon https://github.com/elastic/kibana/issues/189346
     return await installPackageCommon({
       packageInstallContext,
       pkgName,
@@ -1141,7 +1119,7 @@ export async function installCustomPackage(
     paths,
     packageInfo,
   };
-
+  // TODO: use installPackageWithStateMachine instead of installPackageCommon https://github.com/elastic/kibana/issues/189347
   return await installPackageCommon({
     packageInstallContext,
     pkgName,
@@ -1294,10 +1272,17 @@ export async function createInstallation(options: {
   return created;
 }
 
+export const kibanaAssetsToAssetsRef = (
+  kibanaAssets: Record<KibanaAssetType, ArchiveAsset[]>
+): KibanaAssetReference[] => {
+  return Object.values(kibanaAssets).flat().map(toAssetReference);
+};
+
 export const saveKibanaAssetsRefs = async (
   savedObjectsClient: SavedObjectsClientContract,
   pkgName: string,
-  kibanaAssets: Record<KibanaAssetType, ArchiveAsset[]>
+  assetRefs: KibanaAssetReference[],
+  saveAsAdditionnalSpace = false
 ) => {
   auditLoggingService.writeCustomSoAuditLog({
     action: 'update',
@@ -1305,20 +1290,43 @@ export const saveKibanaAssetsRefs = async (
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
   });
 
-  const assetRefs = Object.values(kibanaAssets).flat().map(toAssetReference);
+  const spaceId = savedObjectsClient.getCurrentNamespace() || DEFAULT_SPACE_ID;
+
   // Because Kibana assets are installed in parallel with ES assets with refresh: false, we almost always run into an
   // issue that causes a conflict error due to this issue: https://github.com/elastic/kibana/issues/126240. This is safe
   // to retry constantly until it succeeds to optimize this critical user journey path as much as possible.
   await pRetry(
-    () =>
-      savedObjectsClient.update(
+    async () => {
+      const installation = saveAsAdditionnalSpace
+        ? await savedObjectsClient
+            .get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName)
+            .catch((e) => {
+              if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+                return undefined;
+              }
+              throw e;
+            })
+        : undefined;
+
+      return savedObjectsClient.update<Installation>(
         PACKAGES_SAVED_OBJECT_TYPE,
         pkgName,
-        {
-          installed_kibana: assetRefs,
-        },
+        saveAsAdditionnalSpace
+          ? {
+              additional_spaces_installed_kibana: {
+                ...omit(
+                  installation?.attributes?.additional_spaces_installed_kibana ?? {},
+                  spaceId
+                ),
+                ...(assetRefs.length > 0 ? { [spaceId]: assetRefs } : {}),
+              },
+            }
+          : {
+              installed_kibana: assetRefs,
+            },
         { refresh: false }
-      ),
+      );
+    },
     { retries: 20 } // Use a number of retries higher than the number of es asset update operations
   );
 

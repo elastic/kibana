@@ -137,4 +137,4 @@ export const isCategoricalDriftData = (arg: any): arg is CategoricalDriftData =>
   return isPopulatedObject(arg, ['type']) && arg.type === DATA_COMPARISON_TYPE.CATEGORICAL;
 };
 
-export type DataComparisonType = typeof DATA_COMPARISON_TYPE[keyof typeof DATA_COMPARISON_TYPE];
+export type DataComparisonType = (typeof DATA_COMPARISON_TYPE)[keyof typeof DATA_COMPARISON_TYPE];

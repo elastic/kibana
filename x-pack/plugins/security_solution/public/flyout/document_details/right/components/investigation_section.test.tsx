@@ -14,16 +14,18 @@ import {
   INVESTIGATION_GUIDE_TEST_ID,
   HIGHLIGHTED_FIELDS_TITLE_TEST_ID,
 } from './test_ids';
-import { RightPanelContext } from '../context';
+import { DocumentDetailsContext } from '../../shared/context';
 import { InvestigationSection } from './investigation_section';
 import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
 import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
-import { mockContextValue } from '../mocks/mock_context';
+import { mockContextValue } from '../../shared/mocks/mock_context';
 import { useExpandSection } from '../hooks/use_expand_section';
+import { useHighlightedFields } from '../../shared/hooks/use_highlighted_fields';
 
 jest.mock('../../../../detection_engine/rule_management/logic/use_rule_with_fallback');
 jest.mock('../hooks/use_expand_section');
+jest.mock('../../shared/hooks/use_highlighted_fields');
 
 const panelContextValue = {
   ...mockContextValue,
@@ -36,9 +38,9 @@ const renderInvestigationSection = (contextValue = panelContextValue) =>
   render(
     <IntlProvider locale="en">
       <TestProvider>
-        <RightPanelContext.Provider value={contextValue}>
+        <DocumentDetailsContext.Provider value={contextValue}>
           <InvestigationSection />
-        </RightPanelContext.Provider>
+        </DocumentDetailsContext.Provider>
       </TestProvider>
     </IntlProvider>
   );
@@ -65,6 +67,7 @@ describe('<InvestigationSection />', () => {
 
   it('should render the component expanded if value is true in local storage', () => {
     (useExpandSection as jest.Mock).mockReturnValue(true);
+    (useHighlightedFields as jest.Mock).mockReturnValue([]);
 
     const { getByTestId } = renderInvestigationSection();
     expect(getByTestId(INVESTIGATION_SECTION_CONTENT_TEST_ID)).toBeVisible();
@@ -72,6 +75,7 @@ describe('<InvestigationSection />', () => {
 
   it('should render investigation guide and highlighted fields when document is signal', () => {
     (useExpandSection as jest.Mock).mockReturnValue(true);
+    (useHighlightedFields as jest.Mock).mockReturnValue([]);
 
     const { getByTestId } = renderInvestigationSection();
     expect(getByTestId(INVESTIGATION_GUIDE_TEST_ID)).toBeInTheDocument();
@@ -80,6 +84,7 @@ describe('<InvestigationSection />', () => {
 
   it('should not render investigation guide when document is not signal', () => {
     (useExpandSection as jest.Mock).mockReturnValue(true);
+    (useHighlightedFields as jest.Mock).mockReturnValue([]);
 
     const mockGetFieldsData = (field: string) => {
       switch (field) {

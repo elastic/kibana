@@ -13,16 +13,15 @@ servers:
     variables:
       kibanaUrl:
         default: localhost:5601
-security:
-  - apiKeyAuth: []
 tags:
   - name: connectors
     description: Connector APIs enable you to create and manage connectors.
 paths:
   /api/actions/connector:
     post:
-      summary: Create a connector
+      summary: Create a connector with a random ID
       operationId: createConnector
+      description: The connector identifier is randomly generated.
       tags:
         - connectors
       parameters:
@@ -247,13 +246,6 @@ paths:
         '401':
           $ref: '#/components/responses/401'
 components:
-  securitySchemes:
-    apiKeyAuth:
-      type: apiKey
-      in: header
-      name: Authorization
-      description: |
-        Serverless APIs support only key-based authentication. You must create an API key and use the encoded value in the request header. For example: 'Authorization: ApiKey base64AccessApiKey'.
   parameters:
     kbn_xsrf:
       schema:
@@ -858,7 +850,7 @@ components:
           type: string
           description: |
             The generative artificial intelligence model for Amazon Bedrock to use. Current support is for the Anthropic Claude models.
-          default: anthropic.claude-3-sonnet-20240229-v1:0
+          default: anthropic.claude-3-5-sonnet-20240620-v1:0
     secrets_properties_bedrock:
       title: Connector secrets properties for an Amazon Bedrock connector
       description: Defines secrets for connectors when type is `.bedrock`.
@@ -888,7 +880,7 @@ components:
         defaultModel:
           type: string
           description: The generative artificial intelligence model for Google Gemini to use.
-          default: gemini-1.5-pro-preview-0409
+          default: gemini-1.5-pro-001
         gcpRegion:
           type: string
           description: The GCP region where the Vertex AI endpoint enabled.
@@ -1053,14 +1045,14 @@ components:
           type: boolean
         host:
           description: |
-            The host name of the service provider. If the `service` is `elastic_cloud` (for Elastic Cloud notifications) or one of Nodemailer's well-known email service providers, this property is ignored. If `service` is `other`, this property must be defined. 
+            The host name of the service provider. If the `service` is `elastic_cloud` (for Elastic Cloud notifications) or one of Nodemailer's well-known email service providers, this property is ignored. If `service` is `other`, this property must be defined.
           type: string
         oauthTokenUrl:
           type: string
           nullable: true
         port:
           description: |
-            The port to connect to on the service provider. If the `service` is `elastic_cloud` (for Elastic Cloud notifications) or one of Nodemailer's well-known email service providers, this property is ignored. If `service` is `other`, this property must be defined. 
+            The port to connect to on the service provider. If the `service` is `elastic_cloud` (for Elastic Cloud notifications) or one of Nodemailer's well-known email service providers, this property is ignored. If `service` is `other`, this property must be defined.
           type: integer
         secure:
           description: |
@@ -2624,7 +2616,7 @@ components:
     is_preconfigured:
       type: boolean
       description: |
-        Indicates whether it is a preconfigured connector. If true, the `config` and `is_missing_secrets` properties are omitted from the response. 
+        Indicates whether it is a preconfigured connector. If true, the `config` and `is_missing_secrets` properties are omitted from the response.
       example: false
     is_system_action:
       type: boolean

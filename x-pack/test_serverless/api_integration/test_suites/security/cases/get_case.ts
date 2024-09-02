@@ -16,7 +16,7 @@ export default ({ getService }: FtrProviderContext): void => {
   describe('get_case', () => {
     let roleAuthc: RoleCredentials;
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
     });
 
     afterEach(async () => {

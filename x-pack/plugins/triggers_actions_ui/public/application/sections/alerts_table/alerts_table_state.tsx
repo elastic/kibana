@@ -20,22 +20,22 @@ import {
   EuiDataGridControlColumn,
 } from '@elastic/eui';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { ALERT_CASE_IDS, ALERT_MAINTENANCE_WINDOW_IDS } from '@kbn/rule-data-utils';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
-import type {
-  BrowserFields,
-  RuleRegistrySearchRequestPagination,
-} from '@kbn/rule-registry-plugin/common';
+import type { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
+import type { BrowserFields } from '@kbn/alerting-types';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type {
   QueryDslQueryContainer,
   SortCombinations,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { QueryClientProvider } from '@tanstack/react-query';
+import { useSearchAlertsQuery } from '@kbn/alerts-ui-shared/src/common/hooks/use_search_alerts_query';
+import { DEFAULT_ALERTS_PAGE_SIZE } from '@kbn/alerts-ui-shared/src/common/constants';
+import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
+import deepEqual from 'fast-deep-equal';
+import { useKibana } from '../../../common/lib/kibana';
 import { useGetMutedAlerts } from './hooks/alert_mute/use_get_muted_alerts';
-import { useFetchAlerts } from './hooks/use_fetch_alerts';
 import { AlertsTable } from './alerts_table';
 import { EmptyState } from './empty_state';
 import {
@@ -61,13 +61,8 @@ import { alertsTableQueryClient } from './query_client';
 import { useBulkGetCases } from './hooks/use_bulk_get_cases';
 import { useBulkGetMaintenanceWindows } from './hooks/use_bulk_get_maintenance_windows';
 import { CasesService } from './types';
-import { AlertsTableContext, AlertsTableQueryContext } from './contexts/alerts_table_context';
+import { AlertsTableContext } from './contexts/alerts_table_context';
 import { ErrorBoundary, FallbackComponent } from '../common/components/error_boundary';
-
-const DefaultPagination = {
-  pageSize: 10,
-  pageIndex: 0,
-};
 
 export type AlertsTableStateProps = {
   alertsTableConfigurationRegistry: AlertsTableConfigurationRegistryContract;
@@ -75,10 +70,10 @@ export type AlertsTableStateProps = {
   id: string;
   featureIds: ValidFeatureId[];
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
-  pageSize?: number;
+  initialPageSize?: number;
   browserFields?: BrowserFields;
   onUpdate?: (args: TableUpdateHandlerArgs) => void;
-  onLoaded?: () => void;
+  onLoaded?: (alerts: Alerts) => void;
   runtimeMappings?: MappingRuntimeFields;
   showAlertStatusWithFlapping?: boolean;
   toolbarVisibility?: EuiDataGridToolBarVisibilityOptions;
@@ -180,7 +175,7 @@ const ErrorBoundaryFallback: FallbackComponent = ({ error }) => {
 
 const AlertsTableState = memo((props: AlertsTableStateProps) => {
   return (
-    <QueryClientProvider client={alertsTableQueryClient} context={AlertsTableQueryContext}>
+    <QueryClientProvider client={alertsTableQueryClient} context={AlertsQueryContext}>
       <ErrorBoundary fallback={ErrorBoundaryFallback}>
         <AlertsTableStateWithQueryProvider {...props} />
       </ErrorBoundary>
@@ -199,7 +194,7 @@ const AlertsTableStateWithQueryProvider = memo(
     id,
     featureIds,
     query,
-    pageSize,
+    initialPageSize = DEFAULT_ALERTS_PAGE_SIZE,
     leadingControlColumns = DEFAULT_LEADING_CONTROL_COLUMNS,
     trailingControlColumns,
     rowHeightsOptions,
@@ -217,10 +212,13 @@ const AlertsTableStateWithQueryProvider = memo(
     lastReloadRequestTime,
     emptyStateHeight,
   }: AlertsTableStateProps) => {
-    const { cases: casesService, fieldFormats } = useKibana<{
+    const {
+      data,
+      cases: casesService,
+      fieldFormats,
+    } = useKibana().services as ReturnType<typeof useKibana>['services'] & {
       cases?: CasesService;
-      fieldFormats: FieldFormatsRegistry;
-    }>().services;
+    };
     const hasAlertsTableConfiguration =
       alertsTableConfigurationRegistry?.has(configurationId) ?? false;
 
@@ -273,13 +271,13 @@ const AlertsTableStateWithQueryProvider = memo(
     storageAlertsTable.current = getStorageConfig();
 
     const [sort, setSort] = useState<SortCombinations[]>(storageAlertsTable.current.sort);
-    const [pagination, setPagination] = useState({
-      ...DefaultPagination,
-      pageSize: pageSize ?? DefaultPagination.pageSize,
-    });
 
-    const onPageChange = useCallback((_pagination: RuleRegistrySearchRequestPagination) => {
-      setPagination(_pagination);
+    const onPageChange = useCallback((pagination: RuleRegistrySearchRequestPagination) => {
+      setQueryParams((prevQueryParams) => ({
+        ...prevQueryParams,
+        pageSize: pagination.pageSize,
+        pageIndex: pagination.pageIndex,
+      }));
     }, []);
 
     const {
@@ -298,31 +296,70 @@ const AlertsTableStateWithQueryProvider = memo(
       storage,
       id,
       defaultColumns: columnConfigByClient,
-      initialBrowserFields: propBrowserFields,
+      alertsFields: propBrowserFields,
     });
 
-    const [
-      isLoading,
-      {
-        alerts,
-        oldAlertsData,
-        ecsAlertsData,
-        isInitializing,
-        getInspectQuery,
-        refetch: refresh,
-        totalAlerts: alertsCount,
-      },
-    ] = useFetchAlerts({
-      fields,
+    const [queryParams, setQueryParams] = useState({
       featureIds,
+      fields,
       query,
-      pagination,
-      onPageChange,
-      onLoaded,
-      runtimeMappings,
       sort,
-      skip: false,
+      runtimeMappings,
+      pageIndex: 0,
+      pageSize: initialPageSize,
     });
+
+    useEffect(() => {
+      setQueryParams(({ pageIndex: oldPageIndex, pageSize: oldPageSize, ...prevQueryParams }) => ({
+        featureIds,
+        fields,
+        query,
+        sort,
+        runtimeMappings,
+        // Go back to the first page if the query changes
+        pageIndex: !deepEqual(prevQueryParams, {
+          featureIds,
+          fields,
+          query,
+          sort,
+          runtimeMappings,
+        })
+          ? 0
+          : oldPageIndex,
+        pageSize: oldPageSize,
+      }));
+    }, [featureIds, fields, query, runtimeMappings, sort]);
+
+    const {
+      data: alertsData,
+      refetch,
+      isSuccess,
+      isFetching: isLoading,
+    } = useSearchAlertsQuery({
+      data,
+      ...queryParams,
+    });
+    const {
+      alerts = [],
+      oldAlertsData = [],
+      ecsAlertsData = [],
+      total: alertsCount = -1,
+      querySnapshot,
+    } = alertsData ?? {};
+
+    const refetchAlerts = useCallback(() => {
+      if (queryParams.pageIndex !== 0) {
+        // Refetch from the first page
+        setQueryParams((prevQueryParams) => ({ ...prevQueryParams, pageIndex: 0 }));
+      }
+      refetch();
+    }, [queryParams.pageIndex, refetch]);
+
+    useEffect(() => {
+      if (onLoaded && !isLoading && isSuccess) {
+        onLoaded(alerts);
+      }
+    }, [alerts, isLoading, isSuccess, onLoaded]);
 
     const mutedAlertIds = useMemo(() => {
       return [...new Set(alerts.map((a) => a['kibana.alert.rule.uuid']![0]))];
@@ -350,14 +387,15 @@ const AlertsTableStateWithQueryProvider = memo(
 
     useEffect(() => {
       if (onUpdate) {
-        onUpdate({ isLoading, totalCount: alertsCount, refresh });
+        onUpdate({ isLoading, totalCount: alertsCount, refresh: refetch });
       }
-    }, [isLoading, alertsCount, onUpdate, refresh]);
+    }, [isLoading, alertsCount, onUpdate, refetch]);
+
     useEffect(() => {
       if (lastReloadRequestTime) {
-        refresh();
+        refetch();
       }
-    }, [lastReloadRequestTime, refresh]);
+    }, [lastReloadRequestTime, refetch]);
 
     const caseIds = useMemo(() => getCaseIdsFromAlerts(alerts), [alerts]);
     const maintenanceWindowIds = useMemo(() => getMaintenanceWindowIdsFromAlerts(alerts), [alerts]);
@@ -380,7 +418,7 @@ const AlertsTableStateWithQueryProvider = memo(
       return {
         ids: Array.from(maintenanceWindowIds.values()),
         canFetchMaintenanceWindows: fetchMaintenanceWindows,
-        queryContext: AlertsTableQueryContext,
+        queryContext: AlertsQueryContext,
       };
     }, [fetchMaintenanceWindows, maintenanceWindowIds]);
 
@@ -462,15 +500,15 @@ const AlertsTableStateWithQueryProvider = memo(
         shouldHighlightRow,
         dynamicRowHeight,
         featureIds,
-        isInitializing,
-        pagination,
+        querySnapshot,
+        pageIndex: queryParams.pageIndex,
+        pageSize: queryParams.pageSize,
         sort,
         isLoading,
         alerts,
         oldAlertsData,
         ecsAlertsData,
-        getInspectQuery,
-        refetch: refresh,
+        refetchAlerts,
         alertsCount,
         onSortChange,
         onPageChange,
@@ -483,8 +521,8 @@ const AlertsTableStateWithQueryProvider = memo(
         columns,
         id,
         leadingControlColumns,
-        trailingControlColumns,
         showAlertStatusWithFlapping,
+        trailingControlColumns,
         visibleColumns,
         browserFields,
         onToggleColumn,
@@ -493,6 +531,7 @@ const AlertsTableStateWithQueryProvider = memo(
         onColumnResize,
         query,
         rowHeightsOptions,
+        cellContext,
         gridStyle,
         persistentControls,
         showInspectButton,
@@ -500,16 +539,15 @@ const AlertsTableStateWithQueryProvider = memo(
         shouldHighlightRow,
         dynamicRowHeight,
         featureIds,
-        cellContext,
-        isInitializing,
-        pagination,
+        querySnapshot,
+        queryParams.pageIndex,
+        queryParams.pageSize,
         sort,
         isLoading,
         alerts,
         oldAlertsData,
         ecsAlertsData,
-        getInspectQuery,
-        refresh,
+        refetchAlerts,
         alertsCount,
         onSortChange,
         onPageChange,
@@ -524,14 +562,25 @@ const AlertsTableStateWithQueryProvider = memo(
       };
     }, [activeBulkActionsReducer, mutedAlerts]);
 
-    return hasAlertsTableConfiguration ? (
+    if (!hasAlertsTableConfiguration) {
+      return (
+        <EuiEmptyPrompt
+          data-test-subj="alertsTableNoConfiguration"
+          iconType="watchesApp"
+          title={<h2>{ALERTS_TABLE_CONF_ERROR_TITLE}</h2>}
+          body={<p>{ALERTS_TABLE_CONF_ERROR_MESSAGE}</p>}
+        />
+      );
+    }
+
+    return (
       <AlertsTableContext.Provider value={alertsTableContext}>
         {!isLoading && alertsCount === 0 && (
           <InspectButtonContainer>
             <EmptyState
               controls={persistentControls}
-              getInspectQuery={getInspectQuery}
-              showInpectButton={showInspectButton}
+              querySnapshot={querySnapshot}
+              showInspectButton={showInspectButton}
               height={emptyStateHeight}
             />
           </InspectButtonContainer>
@@ -539,24 +588,19 @@ const AlertsTableStateWithQueryProvider = memo(
         {(isLoading || isBrowserFieldDataLoading) && (
           <EuiProgress size="xs" color="accent" data-test-subj="internalAlertsPageLoading" />
         )}
-        {alertsCount !== 0 && isCasesContextAvailable && (
-          <CasesContext
-            owner={alertsTableConfiguration.cases?.owner ?? []}
-            permissions={casesPermissions}
-            features={{ alerts: { sync: alertsTableConfiguration.cases?.syncAlerts ?? false } }}
-          >
+        {alertsCount > 0 &&
+          (isCasesContextAvailable ? (
+            <CasesContext
+              owner={alertsTableConfiguration.cases?.owner ?? []}
+              permissions={casesPermissions}
+              features={{ alerts: { sync: alertsTableConfiguration.cases?.syncAlerts ?? false } }}
+            >
+              <AlertsTable {...tableProps} />
+            </CasesContext>
+          ) : (
             <AlertsTable {...tableProps} />
-          </CasesContext>
-        )}
-        {alertsCount !== 0 && !isCasesContextAvailable && <AlertsTable {...tableProps} />}
+          ))}
       </AlertsTableContext.Provider>
-    ) : (
-      <EuiEmptyPrompt
-        data-test-subj="alertsTableNoConfiguration"
-        iconType="watchesApp"
-        title={<h2>{ALERTS_TABLE_CONF_ERROR_TITLE}</h2>}
-        body={<p>{ALERTS_TABLE_CONF_ERROR_MESSAGE}</p>}
-      />
     );
   }
 );

@@ -21,17 +21,7 @@ const scenario: Scenario<InfraDocument> = async (runOptions) => {
         .fill(0)
         .map((_, idx) => {
           const id = generateShortId();
-          return infra.dockerContainer(id).defaults({
-            'container.name': `container-${idx}`,
-            'container.id': id,
-            'container.runtime': 'docker',
-            'container.image.name': 'image-1',
-            'host.name': 'host-1',
-            'cloud.instance.id': 'instance-1',
-            'cloud.image.id': 'image-1',
-            'cloud.provider': 'aws',
-            'event.dataset': 'docker.container',
-          });
+          return infra.dockerContainer(id);
         });
 
       const containers = range

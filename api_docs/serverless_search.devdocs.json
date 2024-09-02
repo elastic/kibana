@@ -80,6 +80,21 @@
     "misc": [
       {
         "parentPluginId": "serverlessSearch",
+        "id": "def-common.DEFAULT_INGESTION_PIPELINE",
+        "type": "string",
+        "tags": [],
+        "label": "DEFAULT_INGESTION_PIPELINE",
+        "description": [],
+        "signature": [
+          "\"search-default-ingestion\""
+        ],
+        "path": "x-pack/plugins/serverless_search/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "serverlessSearch",
         "id": "def-common.PLUGIN_ID",
         "type": "string",
         "tags": [],

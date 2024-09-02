@@ -15,6 +15,15 @@ export {
   getLimitFromESQLQuery,
   removeDropCommandsFromESQLQuery,
   hasTransformationalCommand,
+  getTimeFieldFromESQLQuery,
+  retieveMetadataColumns,
 } from './utils/query_parsing_helpers';
 export { appendToESQLQuery, appendWhereClauseToESQLQuery } from './utils/append_to_query';
-export { getESQLQueryColumns, getESQLQueryColumnsRaw, getESQLResults } from './utils/run_query';
+export {
+  getESQLQueryColumns,
+  getESQLQueryColumnsRaw,
+  getESQLResults,
+  formatESQLColumns,
+  getStartEndParams,
+  hasStartEndParams,
+} from './utils/run_query';

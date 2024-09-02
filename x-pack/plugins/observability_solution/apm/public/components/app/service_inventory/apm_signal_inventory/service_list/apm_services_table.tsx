@@ -9,7 +9,6 @@ import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiIconTip,
   EuiLink,
   EuiSpacer,
@@ -436,15 +435,15 @@ export function ApmServicesTable({
           )}
           {maxCountExceeded && (
             <EuiFlexItem grow={false}>
-              <EuiToolTip
+              <EuiIconTip
                 position="top"
+                type="warning"
+                color="danger"
                 content={i18n.translate('xpack.apm.servicesTable.tooltip.maxCountExceededWarning', {
                   defaultMessage:
                     'The limit of 1,000 services is exceeded. Please use the query bar to narrow down the results or create service groups.',
                 })}
-              >
-                <EuiIcon type="warning" color="danger" />
-              </EuiToolTip>
+              />
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={false}>

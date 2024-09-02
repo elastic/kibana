@@ -1,5 +1,5 @@
 {
-  "type": "shared-common",
+  "type": "shared-server",
   "id": "@kbn/core-execution-context-server",
   "owner": "@elastic/kibana-core"
 }

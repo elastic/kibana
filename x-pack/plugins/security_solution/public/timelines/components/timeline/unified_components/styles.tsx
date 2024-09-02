@@ -22,7 +22,7 @@ export const StyledTableFlexGroup = styled(EuiFlexGroup).attrs(({ className = ''
   }
 `;
 
-export const StyledTableFlexItem = styled(EuiFlexItem).attrs(({ className = '' }) => ({
+export const StyledUnifiedTableFlexItem = styled(EuiFlexItem).attrs(({ className = '' }) => ({
   className: `${className}`,
 }))`
   ${({ theme }) => `margin: 0 ${theme.eui.euiSizeM};`}
@@ -56,6 +56,12 @@ export const StyledMainEuiPanel = styled(EuiPanel).attrs(({ className = '' }) =>
   height: 100%;
 `;
 
+export const leadingActionsColumnStyles = `
+  .udtTimeline .euiDataGridRowCell--controlColumn:nth-child(3) .euiDataGridRowCell__content {
+    padding: 0;
+  }
+`;
+
 export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = '' }) => ({
   className: `unifiedDataTable ${className}`,
   role: 'rowgroup',
@@ -67,7 +73,10 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
     margin-top: 3px;
   }
 
-  .udtTimeline .euiDataGridHeaderCell.euiDataGridHeaderCell--controlColumn {
+  .udtTimeline
+    .euiDataGridHeaderCell.euiDataGridHeaderCell--controlColumn:not(
+      [data-gridcell-column-id='select']
+    ) {
     padding: 0;
     position: relative;
   }
@@ -94,7 +103,8 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
     border-radius: 8px;
   }
 
-  .udtTimeline .euiDataGridRow:has(.buildingBlockType) {
+  .udtTimeline .euiDataGridRow:has(.buildingBlockType),
+  .udtTimeline .euiDataGridRow.buildingBlockType {
     background: repeating-linear-gradient(
       127deg,
       rgba(245, 167, 0, 0.2),
@@ -103,9 +113,10 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
       rgba(245, 167, 0, 0.05) 10px
     );
   }
-  .udtTimeline .euiDataGridRow:has(.eqlSequence) {
+  .udtTimeline .euiDataGridRow:has(.eqlSequence),
+  .udtTimeline .euiDataGridRow.eqlSequence {
     .euiDataGridRowCell--firstColumn,
-    .euiDataGridRowCell--lastColumn,
+    .euiDataGridRowCell--controlColumn.euiDataGridRowCell--lastColumn,
     .udt--customRow {
       ${({ theme }) => `border-left: 4px solid ${theme.eui.euiColorPrimary}`};
     }
@@ -117,9 +128,10 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
       rgba(0, 107, 180, 0.05) 10px
     );
   }
-  .udtTimeline .euiDataGridRow:has(.eqlNonSequence) {
+  .udtTimeline .euiDataGridRow:has(.eqlNonSequence),
+  .udtTimeline .euiDataGridRow.eqlNonSequence {
     .euiDataGridRowCell--firstColumn,
-    .euiDataGridRowCell--lastColumn,
+    .euiDataGridRowCell--controlColumn.euiDataGridRowCell--lastColumn,
     .udt--customRow {
       ${({ theme }) => `border-left: 4px solid ${theme.eui.euiColorAccent};`}
     }
@@ -131,16 +143,18 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
       rgba(221, 10, 115, 0.05) 10px
     );
   }
-  .udtTimeline .euiDataGridRow:has(.nonRawEvent) {
+  .udtTimeline .euiDataGridRow:has(.nonRawEvent),
+  .udtTimeline .euiDataGridRow.nonRawEvent {
     .euiDataGridRowCell--firstColumn,
-    .euiDataGridRowCell--lastColumn,
+    .euiDataGridRowCell--controlColumn.euiDataGridRowCell--lastColumn,
     .udt--customRow {
       ${({ theme }) => `border-left: 4px solid ${theme.eui.euiColorWarning};`}
     }
   }
-  .udtTimeline .euiDataGridRow:has(.rawEvent) {
+  .udtTimeline .euiDataGridRow:has(.rawEvent),
+  .udtTimeline .euiDataGridRow.rawEvent {
     .euiDataGridRowCell--firstColumn,
-    .euiDataGridRowCell--lastColumn,
+    .euiDataGridRowCell--controlColumn.euiDataGridRowCell--lastColumn,
     .udt--customRow {
       ${({ theme }) => `border-left: 4px solid ${theme.eui.euiColorLightShade};`}
     }
@@ -167,6 +181,8 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
     display: flex;
     align-items: baseline;
   }
+
+  ${leadingActionsColumnStyles}
 `;
 
 export const UnifiedTimelineGlobalStyles = createGlobalStyle`

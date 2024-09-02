@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { Replacements } from '@kbn/elastic-assistant-common';
+import type { AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
 import { AlertConsumers } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import React, { useMemo } from 'react';
 
 import { ALERTS_TABLE_REGISTRY_CONFIG_IDS } from '../../../../../common/constants';
 import { useKibana } from '../../../../common/lib/kibana';
-import type { AttackDiscovery } from '../../../types';
 
 interface Props {
   attackDiscovery: AttackDiscovery;

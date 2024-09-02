@@ -13,8 +13,7 @@ import {
 } from '@kbn/fleet-plugin/common/constants';
 import { v4 as uuidV4 } from 'uuid';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { skipIfNoDockerRegistry } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
+import { enableSecrets, skipIfNoDockerRegistry } from '../../helpers';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -22,6 +21,7 @@ export default function (providerContext: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const es = getService('es');
+  const fleetAndAgents = getService('fleetAndAgents');
 
   let pkgVersion: string;
 
@@ -47,30 +47,15 @@ export default function (providerContext: FtrProviderContext) {
     }
   };
 
-  const enableSecrets = async () => {
-    try {
-      await kibanaServer.savedObjects.update({
-        type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
-        id: 'fleet-default-settings',
-        attributes: {
-          secret_storage_requirements_met: true,
-        },
-        overwrite: false,
-      });
-    } catch (e) {
-      throw e;
-    }
-  };
-
   const enableOutputSecrets = async () => {
     try {
-      await kibanaServer.savedObjects.update({
+      await kibanaServer.savedObjects.create({
         type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
         id: 'fleet-default-settings',
         attributes: {
           output_secret_storage_requirements_met: true,
         },
-        overwrite: false,
+        overwrite: true,
       });
     } catch (e) {
       throw e;
@@ -79,13 +64,13 @@ export default function (providerContext: FtrProviderContext) {
 
   const disableOutputSecrets = async () => {
     try {
-      await kibanaServer.savedObjects.update({
+      await kibanaServer.savedObjects.create({
         type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
         id: 'fleet-default-settings',
         attributes: {
           output_secret_storage_requirements_met: false,
         },
-        overwrite: false,
+        overwrite: true,
       });
     } catch (e) {
       throw e;
@@ -135,7 +120,10 @@ export default function (providerContext: FtrProviderContext) {
     }
   };
 
-  const createAgentPolicy = async (spaceId?: string): Promise<CreateAgentPolicyResponse> => {
+  const createAgentPolicy = async (
+    spaceId?: string,
+    dataOutputId?: string
+  ): Promise<CreateAgentPolicyResponse> => {
     const { body: testPolicyRes } = await supertest
       .post(spaceId ? `/s/${spaceId}/api/fleet/agent_policies` : `/api/fleet/agent_policies`)
       .set('kbn-xsrf', 'xxxx')
@@ -143,6 +131,7 @@ export default function (providerContext: FtrProviderContext) {
         name: `test ${uuidV4()}`,
         description: '',
         namespace: 'default',
+        ...(dataOutputId ? { data_output_id: dataOutputId } : {}),
       })
       .expect(200);
 
@@ -163,6 +152,33 @@ export default function (providerContext: FtrProviderContext) {
       .expect(200);
   };
 
+  const createPackagePolicy = async (
+    agentPolicyIds: string[],
+    spaceId?: string,
+    outputId?: string
+  ): Promise<CreateAgentPolicyResponse> => {
+    const { body: testPolicyRes } = await supertest
+      .post(spaceId ? `/s/${spaceId}/api/fleet/package_policies` : `/api/fleet/package_policies`)
+      .set('kbn-xsrf', 'xxxx')
+      .send({
+        name: `package ${uuidV4()}`,
+        description: '',
+        namespace: 'default',
+        policy_ids: agentPolicyIds,
+        enabled: true,
+        inputs: [],
+        package: {
+          name: 'filetest',
+          title: 'For File Tests',
+          version: '0.1.0',
+        },
+        ...(outputId ? { output_id: outputId } : {}),
+      })
+      .expect(200);
+
+    return testPolicyRes;
+  };
+
   const getAgentPolicy = async (
     policyId: string,
     spaceId?: string
@@ -180,21 +196,22 @@ export default function (providerContext: FtrProviderContext) {
 
   const TEST_SPACE_ID = 'testspaceoutputs';
 
-  describe('fleet_outputs_crud', async function () {
+  describe('fleet_outputs_crud', function () {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await fleetAndAgents.setup();
     });
-    setupFleetAndAgents(providerContext);
 
     let defaultOutputId: string;
     let ESOutputId: string;
     let fleetServerPolicyId: string;
     let fleetServerPolicyWithCustomOutputId: string;
 
+    // eslint-disable-next-line mocha/no-sibling-hooks
     before(async function () {
-      await enableSecrets();
+      await enableSecrets(providerContext);
       await enableOutputSecrets();
       await kibanaServer.spaces
         .create({
@@ -411,7 +428,7 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(400);
         expect(body.message).to.eql(
-          'Logstash output cannot be used with Fleet Server integration in Fleet Server policy 1. Please create a new ElasticSearch output.'
+          'Logstash output cannot be used with Fleet Server integration in Fleet Server policy 1. Please create a new Elasticsearch output.'
         );
       });
 
@@ -432,7 +449,7 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(400);
         expect(body.message).to.eql(
-          'Kafka output cannot be used with Fleet Server integration in Fleet Server policy 1. Please create a new ElasticSearch output.'
+          'Kafka output cannot be used with Fleet Server integration in Fleet Server policy 1. Please create a new Elasticsearch output.'
         );
       });
 
@@ -780,10 +797,28 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('should bump all policies in all spaces if updating the default output', async () => {
-        const [policy1, policy2, policy3] = await Promise.all([
+        const { body: nonDefaultOutput } = await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Nondefault Output',
+            type: 'elasticsearch',
+            hosts: ['https://test.fr'],
+          })
+          .expect(200);
+
+        const [policy1, policy2, policy3, policy4] = await Promise.all([
           createAgentPolicy(),
-          createAgentPolicy(),
+          createAgentPolicy(undefined, nonDefaultOutput.item.id),
           createAgentPolicy(TEST_SPACE_ID),
+          createAgentPolicy(TEST_SPACE_ID, nonDefaultOutput.item.id),
+        ]);
+
+        // Create package policies with default output under agent policies not using default output
+        // to ensure that those agent policies still get bumped
+        await Promise.all([
+          createPackagePolicy([policy2.item.id], undefined, defaultOutputId),
+          createPackagePolicy([policy4.item.id], TEST_SPACE_ID, defaultOutputId),
         ]);
 
         await supertest
@@ -796,20 +831,79 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
 
-        const [updatedPolicy1, updatedPolicy2, updatedPolicy3] = await Promise.all([
+        const [updatedPolicy1, updatedPolicy2, updatedPolicy3, updatedPolicy4] = await Promise.all([
           getAgentPolicy(policy1.item.id),
           getAgentPolicy(policy2.item.id),
           getAgentPolicy(policy3.item.id, TEST_SPACE_ID),
+          getAgentPolicy(policy4.item.id, TEST_SPACE_ID),
         ]);
         expect(updatedPolicy1.item.revision).to.eql(policy1.item.revision + 1);
-        expect(updatedPolicy2.item.revision).to.eql(policy2.item.revision + 1);
+        expect(updatedPolicy2.item.revision).to.eql(policy2.item.revision + 2);
         expect(updatedPolicy3.item.revision).to.eql(policy3.item.revision + 1);
+        expect(updatedPolicy4.item.revision).to.eql(policy4.item.revision + 2);
 
         // cleanup
         await Promise.all([
           deleteAgentPolicy(policy1.item.id),
           deleteAgentPolicy(policy2.item.id),
           deleteAgentPolicy(policy3.item.id, TEST_SPACE_ID),
+          deleteAgentPolicy(policy4.item.id, TEST_SPACE_ID),
+        ]);
+      });
+
+      it('should bump all policies in all spaces if updating non-default output', async () => {
+        const { body: nonDefaultOutput } = await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Nondefault Output',
+            type: 'elasticsearch',
+            hosts: ['https://test.fr'],
+          })
+          .expect(200);
+
+        const [policy1, policy2, policy3, policy4] = await Promise.all([
+          createAgentPolicy(),
+          createAgentPolicy(undefined, nonDefaultOutput.item.id),
+          createAgentPolicy(TEST_SPACE_ID),
+          createAgentPolicy(TEST_SPACE_ID, nonDefaultOutput.item.id),
+        ]);
+
+        // Create package policies under agent policies using default output to ensure those
+        // agent policies still get bumped
+        await Promise.all([
+          createPackagePolicy([policy1.item.id], undefined, nonDefaultOutput.item.id),
+          createPackagePolicy([policy3.item.id], TEST_SPACE_ID, nonDefaultOutput.item.id),
+        ]);
+
+        await supertest
+          .put(`/api/fleet/outputs/${nonDefaultOutput.item.id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Updated Nondefault Output',
+            type: 'elasticsearch',
+            hosts: ['http://test.fr:443'],
+          })
+          .expect(200);
+
+        const [updatedPolicy1, updatedPolicy2, updatedPolicy3, updatedPolicy4] = await Promise.all([
+          getAgentPolicy(policy1.item.id),
+          getAgentPolicy(policy2.item.id),
+          getAgentPolicy(policy3.item.id, TEST_SPACE_ID),
+          getAgentPolicy(policy4.item.id, TEST_SPACE_ID),
+        ]);
+
+        expect(updatedPolicy1.item.revision).to.eql(policy1.item.revision + 2);
+        expect(updatedPolicy2.item.revision).to.eql(policy2.item.revision + 1);
+        expect(updatedPolicy3.item.revision).to.eql(policy3.item.revision + 2);
+        expect(updatedPolicy4.item.revision).to.eql(policy4.item.revision + 1);
+
+        // cleanup
+        await Promise.all([
+          deleteAgentPolicy(policy1.item.id),
+          deleteAgentPolicy(policy2.item.id),
+          deleteAgentPolicy(policy3.item.id, TEST_SPACE_ID),
+          deleteAgentPolicy(policy4.item.id, TEST_SPACE_ID),
         ]);
       });
     });
@@ -1259,6 +1353,7 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
 
+      // eslint-disable-next-line mocha/no-identical-title
       it('should discard the shipper values when shipper is disabled', async function () {
         await supertest
           .post(`/api/fleet/outputs`)
@@ -1608,6 +1703,7 @@ export default function (providerContext: FtrProviderContext) {
             .expect(400);
         });
 
+        // eslint-disable-next-line mocha/no-identical-title
         it('should return a 400 when deleting a default output ', async function () {
           await supertest
             .delete(`/api/fleet/outputs/${defaultMonitoringOutputId}`)

@@ -10,16 +10,16 @@ import { useDispatch } from 'react-redux';
 import { TimelineTabs } from '@kbn/securitysolution-data-table';
 import { EuiLink, EuiMark } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ExpandablePanel } from '@kbn/security-solution-common';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { useInvestigateInTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
 import { ALERTS_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { getScopedActions } from '../../../../helpers';
 import { setActiveTabTimeline } from '../../../../timelines/store/actions';
-import { useRightPanelContext } from '../context';
+import { useDocumentDetailsContext } from '../../shared/context';
 import { useIsInvestigateInResolverActionEnabled } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
 import { AnalyzerPreview } from './analyzer_preview';
 import { ANALYZER_PREVIEW_TEST_ID } from './test_ids';
-import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 
 const timelineId = 'timeline-1';
 
@@ -27,7 +27,7 @@ const timelineId = 'timeline-1';
  * Analyzer preview under Overview, Visualizations. It shows a tree representation of analyzer.
  */
 export const AnalyzerPreviewContainer: React.FC = () => {
-  const { dataAsNestedObject, isPreview } = useRightPanelContext();
+  const { dataAsNestedObject, isPreview } = useDocumentDetailsContext();
 
   // decide whether to show the analyzer preview or not
   const isEnabled = useIsInvestigateInResolverActionEnabled(dataAsNestedObject);

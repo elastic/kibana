@@ -6,14 +6,13 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import {
   ConversationCategoryEnum,
   ConversationCreateProps,
   ConversationResponse,
 } from '@kbn/elastic-assistant-common';
-import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import { getConversation } from './get_conversation';
 import { CreateMessageSchema } from './types';
 

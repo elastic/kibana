@@ -12,6 +12,7 @@ import {
   fetchConnectorById,
   fetchConnectors,
   fetchSyncJobs,
+  IngestPipelineParams,
   startConnectorSync,
   updateConnectorConfiguration,
   updateConnectorIndexName,
@@ -19,6 +20,7 @@ import {
   updateConnectorScheduling,
   updateConnectorServiceType,
 } from '@kbn/search-connectors';
+import { DEFAULT_INGESTION_PIPELINE } from '../../common';
 import { RouteDependencies } from '../plugin';
 
 export const registerConnectorsRoutes = ({ http, router }: RouteDependencies) => {
@@ -71,10 +73,17 @@ export const registerConnectorsRoutes = ({ http, router }: RouteDependencies) =>
     },
     async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
+      const defaultPipeline: IngestPipelineParams = {
+        name: DEFAULT_INGESTION_PIPELINE,
+        extract_binary_content: true,
+        reduce_whitespace: true,
+        run_ml_inference: true,
+      };
       const connector = await createConnector(client.asCurrentUser, {
         indexName: null,
         isNative: false,
         language: null,
+        pipeline: defaultPipeline,
       });
 
       return response.ok({

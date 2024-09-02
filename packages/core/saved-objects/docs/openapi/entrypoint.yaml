@@ -10,7 +10,18 @@ info:
     url: https://www.elastic.co/licensing/elastic-license
 tags:
   - name: saved objects
-    description: Manage Kibana saved objects, including dashboards, visualizations, and more.
+    x-displayName: Saved objects
+    description: |
+      Export sets of saved objects that you want to import into {kib}, resolve import errors, and rotate an encryption key for encrypted saved objects with the saved objects APIs.
+      
+      To manage a specific type of saved object, use the corresponding APIs.
+      For example, use:
+
+      * [Data views](../group/endpoint-data-views)
+      * [Spaces](https://www.elastic.co/guide/en/kibana/current/spaces-api.html)
+      * [Short URLs](https://www.elastic.co/guide/en/kibana/current/short-urls-api.html)
+
+      Warning: Do not write documents directly to the `.kibana` index. When you write directly to the `.kibana` index, the data becomes corrupted and permanently breaks future Kibana versions.
 servers:
   - url: /
 paths:
@@ -41,16 +52,16 @@ paths:
     $ref: 'paths/api@saved_objects@{type}@{id}.yaml'
   '/api/saved_objects/resolve/{type}/{id}':
     $ref: 'paths/api@saved_objects@resolve@{type}@{id}.yaml'
-components:
-  securitySchemes:
-    basicAuth:
-      type: http
-      scheme: basic
-    apiKeyAuth:
-      type: apiKey
-      in: header
-      name: Authorization
-      description: 'e.g. Authorization: ApiKey base64AccessApiKey'
-security:
-  - basicAuth: []
-  - apiKeyAuth: []
+# components:
+#   securitySchemes:
+#     basicAuth:
+#       type: http
+#       scheme: basic
+#     apiKeyAuth:
+#       type: apiKey
+#       in: header
+#       name: Authorization
+#       description: 'e.g. Authorization: ApiKey base64AccessApiKey'
+# security:
+#   - basicAuth: []
+#   - apiKeyAuth: []

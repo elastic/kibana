@@ -920,6 +920,106 @@ describe('EPM template', () => {
     expect(mappings).toEqual(expectedMapping);
   });
 
+  it('tests processing nested field with subobject, nested field first', () => {
+    const nestedYaml = `
+  - name: a
+    type: nested
+    include_in_parent: true
+  - name: a.b
+    type: group
+    fields:
+      - name: c
+        type: keyword
+    `;
+    const expectedMapping = {
+      properties: {
+        a: {
+          include_in_parent: true,
+          type: 'nested',
+          properties: {
+            b: {
+              properties: {
+                c: {
+                  ignore_above: 1024,
+                  type: 'keyword',
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(nestedYaml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(mappings).toEqual(expectedMapping);
+  });
+
+  it('tests processing nested field with subfields', () => {
+    const nestedYaml = `
+  - name: a
+    type: nested
+    include_in_parent: true
+    fields:
+    - name: b
+      type: keyword
+    `;
+    const expectedMapping = {
+      properties: {
+        a: {
+          include_in_parent: true,
+          type: 'nested',
+          properties: {
+            b: {
+              ignore_above: 1024,
+              type: 'keyword',
+            },
+          },
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(nestedYaml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(mappings).toEqual(expectedMapping);
+  });
+
+  it('tests processing nested field with subobjects', () => {
+    const nestedYaml = `
+  - name: a
+    type: nested
+    include_in_parent: true
+    fields:
+    - name: b
+      type: group
+      fields:
+      - name: c
+        type: keyword
+    `;
+    const expectedMapping = {
+      properties: {
+        a: {
+          include_in_parent: true,
+          type: 'nested',
+          properties: {
+            b: {
+              properties: {
+                c: {
+                  ignore_above: 1024,
+                  type: 'keyword',
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(nestedYaml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(mappings).toEqual(expectedMapping);
+  });
+
   it('tests processing nested leaf field with properties', () => {
     const nestedYaml = `
   - name: a
@@ -1791,6 +1891,59 @@ describe('EPM template', () => {
             template: {
               settings: { index: {} },
               mappings: { properties: {} },
+            },
+          } as any,
+        },
+      ]);
+
+      expect(esClient.transport.request).toHaveBeenCalledWith(
+        expect.objectContaining({
+          path: '/test.prefix1-default/_rollover',
+          querystring: {
+            lazy: true,
+          },
+        })
+      );
+    });
+
+    it('should rollover on expected error when field subobjects in mappings changed', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.indices.getDataStream.mockResponse({
+        data_streams: [{ name: 'test.prefix1-default' }],
+      } as any);
+      esClient.indices.get.mockResponse({
+        'test.prefix1-default': {
+          mappings: {},
+        },
+      } as any);
+      esClient.indices.simulateTemplate.mockResponse({
+        template: {
+          settings: { index: {} },
+          mappings: { subobjects: false },
+        },
+      } as any);
+      esClient.indices.putMapping.mockImplementation(() => {
+        throw new errors.ResponseError({
+          body: {
+            error: {
+              message:
+                'mapper_exception\n' +
+                '\tRoot causes:\n' +
+                "\t\tmapper_exception: the [subobjects] parameter can't be updated for the object mapping [_doc]",
+            },
+          },
+        } as any);
+      });
+
+      const logger = loggerMock.create();
+      await updateCurrentWriteIndices(esClient, logger, [
+        {
+          templateName: 'test',
+          indexTemplate: {
+            index_patterns: ['test.*-*'],
+            template: {
+              settings: { index: {} },
+              mappings: {},
             },
           } as any,
         },

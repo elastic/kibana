@@ -5,15 +5,17 @@
  * 2.0.
  */
 
+import { waitForAlertsToPopulate } from '@kbn/test-suites-xpack/security_solution_cypress/cypress/tasks/create_new_rule';
+import { disableNewFeaturesTours } from './navigation';
 import { getAdvancedButton } from '../screens/integrations';
 import { LIVE_QUERY_EDITOR, OSQUERY_FLYOUT_BODY_EDITOR } from '../screens/live_query';
 import { ServerlessRoleName } from '../support/roles';
-import { waitForAlertsToPopulate } from '../../../../test/security_solution_cypress/cypress/tasks/create_new_rule';
 
 export const DEFAULT_QUERY = 'select * from processes;';
 export const BIG_QUERY = 'select * from processes, users limit 110;';
 
 export const selectAllAgents = () => {
+  cy.getBySel('globalLoadingIndicator').should('not.exist');
   cy.getBySel('agentSelection').find('input').should('not.be.disabled');
   cy.getBySel('agentSelection').within(() => {
     cy.getBySel('comboBoxInput').click();
@@ -116,8 +118,10 @@ export const toggleRuleOffAndOn = (ruleName: string) => {
 };
 
 export const loadRuleAlerts = (ruleName: string) => {
-  cy.login(ServerlessRoleName.SOC_MANAGER);
-  cy.visit('/app/security/rules');
+  cy.login(ServerlessRoleName.SOC_MANAGER, false);
+  cy.visit('/app/security/rules', {
+    onBeforeLoad: (win) => disableNewFeaturesTours(win),
+  });
   clickRuleName(ruleName);
   waitForAlertsToPopulate();
 };
@@ -161,7 +165,7 @@ export const checkActionItemsInResults = ({
 };
 
 export const takeOsqueryActionWithParams = () => {
-  cy.getBySel('take-action-dropdown-btn').click();
+  cy.getBySel('securitySolutionFlyoutFooterDropdownButton').click();
   cy.getBySel('osquery-action-item').click();
   selectAllAgents();
   inputQuery("SELECT * FROM os_version where name='{{host.os.name}}';", {

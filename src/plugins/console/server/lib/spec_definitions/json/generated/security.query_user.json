@@ -1,0 +1,16 @@
+{
+  "security.query_user": {
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "patterns": [
+      "_security/_query/user"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-query-user.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

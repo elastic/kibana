@@ -7,20 +7,37 @@
 
 import { BaseMessage } from '@langchain/core/messages';
 import { AgentAction, AgentFinish, AgentStep } from '@langchain/core/agents';
-import { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import type { Logger } from '@kbn/logging';
+import { ConversationResponse } from '@kbn/elastic-assistant-common';
 
 export interface AgentStateBase {
   agentOutcome?: AgentAction | AgentFinish;
   steps: AgentStep[];
 }
 
+export interface GraphInputs {
+  bedrockChatEnabled?: boolean;
+  conversationId?: string;
+  llmType?: string;
+  isStream?: boolean;
+  input: string;
+  responseLanguage?: string;
+}
+
 export interface AgentState extends AgentStateBase {
   input: string;
   messages: BaseMessage[];
+  chatTitle: string;
+  lastNode: string;
+  hasRespondStep: boolean;
+  isStream: boolean;
+  bedrockChatEnabled: boolean;
+  llmType: string;
+  responseLanguage: string;
+  conversation: ConversationResponse | undefined;
+  conversationId: string;
 }
 
 export interface NodeParamsBase {
   logger: Logger;
-  model: BaseChatModel;
 }

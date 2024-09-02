@@ -6,39 +6,65 @@
  */
 
 import { rulesClientMock } from '@kbn/alerting-plugin/server/rules_client.mock';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 
 import { getRuleMock } from '../../../routes/__mocks__/request_responses';
 import { getMlRuleParams, getQueryRuleParams } from '../../../rule_schema/mocks';
 import {
   getCreateMachineLearningRulesSchemaMock,
   getCreateRulesSchemaMock,
+  getRulesMlSchemaMock,
+  getRulesSchemaMock,
 } from '../../../../../../common/api/detection_engine/model/rule_schema/mocks';
-import { readRules } from './read_rules';
+import { getRuleByRuleId } from './methods/get_rule_by_rule_id';
 import { buildMlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
 import { createDetectionRulesClient } from './detection_rules_client';
 import type { IDetectionRulesClient } from './detection_rules_client_interface';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 jest.mock('../../../../machine_learning/authz');
 jest.mock('../../../../machine_learning/validation');
 
-jest.mock('./read_rules');
+jest.mock('./methods/get_rule_by_rule_id');
 
 describe('DetectionRulesClient.updateRule', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
   let detectionRulesClient: IDetectionRulesClient;
 
   const mlAuthz = (buildMlAuthz as jest.Mock)();
+  let actionsClient = {
+    isSystemAction: jest.fn((id: string) => id === 'system-connector-.cases'),
+  } as unknown as jest.Mocked<ActionsClient>;
 
   beforeEach(() => {
+    actionsClient = {
+      isSystemAction: jest.fn((id: string) => id === 'system-connector-.cases'),
+    } as unknown as jest.Mocked<ActionsClient>;
+
     rulesClient = rulesClientMock.create();
-    detectionRulesClient = createDetectionRulesClient(rulesClient, mlAuthz);
+
+    const savedObjectsClient = savedObjectsClientMock.create();
+    detectionRulesClient = createDetectionRulesClient({
+      actionsClient,
+      rulesClient,
+      mlAuthz,
+      savedObjectsClient,
+    });
   });
 
   it('calls the rulesClient with expected params', async () => {
-    const ruleUpdate = getCreateRulesSchemaMock();
-    const existingRule = getRuleMock(getQueryRuleParams());
-    (readRules as jest.Mock).mockResolvedValueOnce(existingRule);
+    // Mock the existing rule
+    const existingRule = getRulesSchemaMock();
+    (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(existingRule);
+
+    // Mock the rule update
+    const ruleUpdate = getCreateRulesSchemaMock('query-rule-id');
+    ruleUpdate.name = 'new name';
+    ruleUpdate.description = 'new description';
+
+    // Mock the rule returned after update; not used for this test directly but
+    // needed so that the patchRule method does not throw
     rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams()));
 
     await detectionRulesClient.updateRule({ ruleUpdate });
@@ -56,44 +82,266 @@ describe('DetectionRulesClient.updateRule', () => {
     );
   });
 
-  it('returns rule enabled: true if the nexParams have enabled: true', async () => {
-    const ruleUpdate = { ...getCreateRulesSchemaMock(), enabled: true };
-    const existingRule = getRuleMock(getQueryRuleParams());
-    (readRules as jest.Mock).mockResolvedValueOnce(existingRule);
-    rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams()));
-
-    const rule = await detectionRulesClient.updateRule({ ruleUpdate });
-
-    expect(rule.enabled).toBe(true);
-  });
-
-  it('calls the rulesClient with legacy ML params', async () => {
-    const ruleUpdate = getCreateMachineLearningRulesSchemaMock();
-    const existingRule = getRuleMock(getMlRuleParams());
-    (readRules as jest.Mock).mockResolvedValueOnce(existingRule);
-    rulesClient.update.mockResolvedValue(getRuleMock(getMlRuleParams()));
+  it('calls the rulesClient with actions and system actions', async () => {
+    const ruleUpdate = {
+      ...getCreateRulesSchemaMock(),
+      actions: [
+        {
+          id: 'system-connector-.cases',
+          params: {
+            subAction: 'run',
+            subActionParams: {
+              timeWindow: '7d',
+              reopenClosedCases: false,
+              groupingBy: ['agent.name'],
+            },
+          },
+          action_type_id: '.cases',
+          uuid: 'e62cbe00-a0e1-44d9-9585-c39e5da63d6f',
+        },
+        {
+          id: 'b7da98d0-e1ef-4954-969f-e69c9ef5f65d',
+          params: {
+            message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
+          },
+          action_type_id: '.slack',
+          uuid: '4c3601b5-74b9-4330-b2f3-fea4ea3dc046',
+          frequency: {
+            summary: true,
+            notifyWhen: 'onActiveAlert' as 'onActiveAlert', // needed for type check on line 127
+            throttle: null,
+          },
+          group: 'default',
+        },
+      ],
+    };
+    const existingRule = getRulesSchemaMock();
+    (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(existingRule);
+    rulesClient.update.mockResolvedValue(
+      getRuleMock(getQueryRuleParams(), {
+        actions: [
+          {
+            id: 'b7da98d0-e1ef-4954-969f-e69c9ef5f65d',
+            params: {
+              message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
+            },
+            actionTypeId: '.slack',
+            uuid: '4c3601b5-74b9-4330-b2f3-fea4ea3dc046',
+            frequency: { summary: true, notifyWhen: 'onActiveAlert', throttle: null },
+            group: 'default',
+          },
+        ],
+        systemActions: [
+          {
+            id: 'system-connector-.cases',
+            params: {
+              subAction: 'run',
+              subActionParams: {
+                timeWindow: '7d',
+                reopenClosedCases: false,
+                groupingBy: ['agent.name'],
+              },
+            },
+            actionTypeId: '.cases',
+            uuid: 'e62cbe00-a0e1-44d9-9585-c39e5da63d6f',
+          },
+        ],
+      })
+    );
 
     await detectionRulesClient.updateRule({ ruleUpdate });
 
     expect(rulesClient.update).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
-          params: expect.objectContaining({
-            anomalyThreshold: 58,
-            machineLearningJobId: ['typical-ml-job-id'],
-          }),
+          actions: expect.arrayContaining([
+            {
+              id: 'b7da98d0-e1ef-4954-969f-e69c9ef5f65d',
+              params: {
+                message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
+              },
+              actionTypeId: '.slack',
+              uuid: '4c3601b5-74b9-4330-b2f3-fea4ea3dc046',
+              frequency: {
+                summary: true,
+                notifyWhen: 'onActiveAlert' as 'onActiveAlert', // needed for type check on line 127
+                throttle: null,
+              },
+              group: 'default',
+            },
+          ]),
+          systemActions: expect.arrayContaining([
+            {
+              id: 'system-connector-.cases',
+              params: {
+                subAction: 'run',
+                subActionParams: {
+                  timeWindow: '7d',
+                  reopenClosedCases: false,
+                  groupingBy: ['agent.name'],
+                },
+              },
+              actionTypeId: '.cases',
+              uuid: 'e62cbe00-a0e1-44d9-9585-c39e5da63d6f',
+            },
+          ]),
+        }),
+      })
+    );
+  });
+
+  it('calls the rulesClient when updating a system action groupingBy property from agent.name to agent.type', async () => {
+    const ruleUpdate = {
+      ...getCreateRulesSchemaMock(),
+      actions: [
+        {
+          id: 'system-connector-.cases',
+          params: {
+            subAction: 'run',
+            subActionParams: {
+              timeWindow: '7d',
+              reopenClosedCases: false,
+              groupingBy: ['agent.type'], // changing this value
+            },
+          },
+          action_type_id: '.cases',
+          uuid: 'e62cbe00-a0e1-44d9-9585-c39e5da63d6f',
+        },
+        {
+          id: 'b7da98d0-e1ef-4954-969f-e69c9ef5f65d',
+          params: {
+            message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
+          },
+          action_type_id: '.slack',
+          uuid: '4c3601b5-74b9-4330-b2f3-fea4ea3dc046',
+          frequency: {
+            summary: true,
+            notifyWhen: 'onActiveAlert' as 'onActiveAlert', // needed for type check on line 127
+            throttle: null,
+          },
+          group: 'default',
+        },
+      ],
+    };
+    const existingRule = getRuleMock(getQueryRuleParams(), {
+      systemActions: [
+        {
+          id: 'system-connector-.cases',
+          params: {
+            subAction: 'run',
+            subActionParams: {
+              timeWindow: '7d',
+              reopenClosedCases: false,
+              groupingBy: ['agent.name'], // changing this value
+            },
+          },
+          actionTypeId: '.cases',
+          uuid: 'e62cbe00-a0e1-44d9-9585-c39e5da63d6f',
+        },
+      ],
+      actions: [
+        {
+          id: 'b7da98d0-e1ef-4954-969f-e69c9ef5f65d',
+          params: {
+            message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
+          },
+          actionTypeId: '.slack',
+          uuid: '4c3601b5-74b9-4330-b2f3-fea4ea3dc046',
+          frequency: {
+            summary: true,
+            notifyWhen: 'onActiveAlert' as 'onActiveAlert', // needed for type check on line 127
+            throttle: null,
+          },
+          group: 'default',
+        },
+      ],
+    });
+    (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(existingRule);
+    rulesClient.update.mockResolvedValue(
+      getRuleMock(getQueryRuleParams(), {
+        actions: [
+          {
+            id: 'b7da98d0-e1ef-4954-969f-e69c9ef5f65d',
+            params: {
+              message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
+            },
+            actionTypeId: '.slack',
+            uuid: '4c3601b5-74b9-4330-b2f3-fea4ea3dc046',
+            frequency: { summary: true, notifyWhen: 'onActiveAlert', throttle: null },
+            group: 'default',
+          },
+        ],
+        systemActions: [
+          {
+            id: 'system-connector-.cases',
+            params: {
+              subAction: 'run',
+              subActionParams: {
+                timeWindow: '7d',
+                reopenClosedCases: false,
+                groupingBy: ['agent.type'],
+              },
+            },
+            actionTypeId: '.cases',
+            uuid: 'e62cbe00-a0e1-44d9-9585-c39e5da63d6f',
+          },
+        ],
+      })
+    );
+
+    await detectionRulesClient.updateRule({ ruleUpdate });
+
+    expect(rulesClient.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          actions: expect.arrayContaining([
+            {
+              id: 'b7da98d0-e1ef-4954-969f-e69c9ef5f65d',
+              params: {
+                message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
+              },
+              actionTypeId: '.slack',
+              uuid: '4c3601b5-74b9-4330-b2f3-fea4ea3dc046',
+              frequency: {
+                summary: true,
+                notifyWhen: 'onActiveAlert' as 'onActiveAlert', // needed for type check on line 127
+                throttle: null,
+              },
+              group: 'default',
+            },
+          ]),
+          systemActions: expect.arrayContaining([
+            {
+              id: 'system-connector-.cases',
+              params: {
+                subAction: 'run',
+                subActionParams: {
+                  timeWindow: '7d',
+                  reopenClosedCases: false,
+                  groupingBy: ['agent.type'],
+                },
+              },
+              actionTypeId: '.cases',
+              uuid: 'e62cbe00-a0e1-44d9-9585-c39e5da63d6f',
+            },
+          ]),
         }),
       })
     );
   });
 
   it('calls the rulesClient with new ML params', async () => {
-    const ruleUpdate = {
-      ...getCreateMachineLearningRulesSchemaMock(),
-      machine_learning_job_id: ['new_job_1', 'new_job_2'],
-    };
-    const existingRule = getRuleMock(getMlRuleParams());
-    (readRules as jest.Mock).mockResolvedValueOnce(existingRule);
+    // Mock the existing rule
+    const existingRule = getRulesMlSchemaMock();
+    (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(existingRule);
+
+    // Mock the rule update
+    const ruleUpdate = getCreateMachineLearningRulesSchemaMock();
+    ruleUpdate.anomaly_threshold = 42;
+    ruleUpdate.machine_learning_job_id = ['new-job-id'];
+
+    // Mock the rule returned after update; not used for this test directly but
+    // needed so that the patchRule method does not throw
     rulesClient.update.mockResolvedValue(getRuleMock(getMlRuleParams()));
 
     await detectionRulesClient.updateRule({ ruleUpdate });
@@ -102,50 +350,52 @@ describe('DetectionRulesClient.updateRule', () => {
       expect.objectContaining({
         data: expect.objectContaining({
           params: expect.objectContaining({
-            anomalyThreshold: 58,
-            machineLearningJobId: ['new_job_1', 'new_job_2'],
+            anomalyThreshold: ruleUpdate.anomaly_threshold,
+            machineLearningJobId: ruleUpdate.machine_learning_job_id,
           }),
         }),
       })
     );
   });
 
-  it('should call rulesClient.disable if the rule was enabled and enabled is false', async () => {
-    const ruleUpdate = {
-      ...getCreateRulesSchemaMock(),
-      enabled: false,
-    };
-    const existingRule = {
-      ...getRuleMock(getQueryRuleParams()),
-      enabled: true,
-    };
+  it('disables rule if the rule was enabled and enabled is false', async () => {
+    // Mock the existing rule
+    const existingRule = getRulesSchemaMock();
+    existingRule.enabled = true;
+    (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(existingRule);
+
+    // Mock the rule update
+    const ruleUpdate = { ...getCreateRulesSchemaMock(), enabled: false };
+
+    // Mock the rule returned after update; not used for this test directly but
+    // needed so that the patchRule method does not throw
     rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams()));
-    (readRules as jest.Mock).mockResolvedValueOnce(existingRule);
 
     await detectionRulesClient.updateRule({ ruleUpdate });
 
-    expect(rulesClient.disable).toHaveBeenCalledWith(
+    expect(rulesClient.disableRule).toHaveBeenCalledWith(
       expect.objectContaining({
         id: existingRule.id,
       })
     );
   });
 
-  it('should call rulesClient.enable if the rule was disabled and enabled is true', async () => {
-    const ruleUpdate = {
-      ...getCreateRulesSchemaMock(),
-      enabled: true,
-    };
-    const existingRule = {
-      ...getRuleMock(getQueryRuleParams()),
-      enabled: false,
-    };
+  it('enables rule if the rule was disabled and enabled is true', async () => {
+    // Mock the existing rule
+    const existingRule = getRulesSchemaMock();
+    existingRule.enabled = false;
+    (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(existingRule);
+
+    // Mock the rule update
+    const ruleUpdate = { ...getCreateRulesSchemaMock(), enabled: true };
+
+    // Mock the rule returned after update; not used for this test directly but
+    // needed so that the patchRule method does not throw
     rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams()));
-    (readRules as jest.Mock).mockResolvedValueOnce(existingRule);
 
     await detectionRulesClient.updateRule({ ruleUpdate });
 
-    expect(rulesClient.enable).toHaveBeenCalledWith(
+    expect(rulesClient.enableRule).toHaveBeenCalledWith(
       expect.objectContaining({
         id: existingRule.id,
       })
@@ -169,8 +419,13 @@ describe('DetectionRulesClient.updateRule', () => {
     expect(rulesClient.create).not.toHaveBeenCalled();
   });
 
-  describe('regression tests', () => {
+  describe('actions', () => {
     it("updates the rule's actions if provided", async () => {
+      // Mock the existing rule
+      const existingRule = getRulesSchemaMock();
+      (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(existingRule);
+
+      // Mock the rule update
       const ruleUpdate = {
         ...getCreateRulesSchemaMock(),
         actions: [
@@ -184,8 +439,9 @@ describe('DetectionRulesClient.updateRule', () => {
           },
         ],
       };
-      const existingRule = getRuleMock(getQueryRuleParams());
-      (readRules as jest.Mock).mockResolvedValueOnce(existingRule);
+
+      // Mock the rule returned after update; not used for this test directly but
+      // needed so that the patchRule method does not throw
       rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams()));
 
       await detectionRulesClient.updateRule({ ruleUpdate });
@@ -210,12 +466,12 @@ describe('DetectionRulesClient.updateRule', () => {
     });
 
     it('updates actions to empty if none are specified', async () => {
-      const ruleUpdate = getCreateRulesSchemaMock();
-      delete ruleUpdate.actions;
-      const existingRule = getRuleMock(getQueryRuleParams());
+      // Mock the existing rule
+      const existingRule = getRulesSchemaMock();
+      (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(existingRule);
       existingRule.actions = [
         {
-          actionTypeId: '.slack',
+          action_type_id: '.slack',
           id: '2933e581-d81c-4fe3-88fe-c57c6b8a5bfd',
           params: {
             message: 'Rule {{context.rule.name}} generated {{state.signals_count}} signals',
@@ -223,8 +479,14 @@ describe('DetectionRulesClient.updateRule', () => {
           group: 'default',
         },
       ];
+
+      // Mock the rule update
+      const ruleUpdate = getCreateRulesSchemaMock();
+      delete ruleUpdate.actions;
+
+      // Mock the rule returned after update; not used for this test directly but
+      // needed so that the patchRule method does not throw
       rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams()));
-      (readRules as jest.Mock).mockResolvedValueOnce(existingRule);
 
       await detectionRulesClient.updateRule({ ruleUpdate });
 

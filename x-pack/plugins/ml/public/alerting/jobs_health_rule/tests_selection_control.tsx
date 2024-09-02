@@ -47,7 +47,7 @@ export const TestsSelectionControl: FC<TestsSelectionControlProps> = React.memo(
       <>
         <EuiForm component="div" isInvalid={!!errors?.length} error={errors}>
           {(
-            Object.entries(uiConfig) as Array<[JobsHealthTests, typeof uiConfig[JobsHealthTests]]>
+            Object.entries(uiConfig) as Array<[JobsHealthTests, (typeof uiConfig)[JobsHealthTests]]>
           ).map(([name, conf], i) => {
             return (
               <EuiDescribedFormGroup

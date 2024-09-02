@@ -39,7 +39,7 @@ export const initServicesRoute = (libs: InfraBackendLibs) => {
 
       const client = createSearchClient(requestContext, framework, request);
       const soClient = savedObjects.getScopedClient(request);
-      const apmIndices = await libs.getApmIndices(soClient);
+      const apmIndices = await libs.plugins.apmDataAccess.setup.getApmIndices(soClient);
       const services = await getServices(client, apmIndices, {
         from,
         to,

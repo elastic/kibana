@@ -15,7 +15,7 @@ import type {
 import { useUserPrivileges } from '../user_privileges';
 import { useGetAutomatedActionResponseList } from '../../../management/hooks/response_actions/use_get_automated_action_list';
 import { ActionsLogExpandedTray } from '../../../management/components/endpoint_response_actions_list/components/action_log_expanded_tray';
-import { ENDPOINT_COMMANDS } from '../event_details/translations';
+import { ENDPOINT_COMMANDS } from './translations';
 import { ResponseActionsEmptyPrompt } from './response_actions_empty_prompt';
 
 interface EndpointResponseActionResultsProps {
@@ -67,6 +67,7 @@ export const EndpointResponseActionResults = ({
         expandedAction ? (
           <ActionsLogExpandedTray
             action={expandedAction}
+            fromAlertWorkaround
             data-test-subj={`response-results-${hostName}`}
           />
         ) : (

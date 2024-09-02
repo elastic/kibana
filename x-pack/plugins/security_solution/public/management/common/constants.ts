@@ -41,5 +41,5 @@ export const MANAGEMENT_DEFAULT_SORT_ORDER = 'desc';
 export const MANAGEMENT_DEFAULT_SORT_FIELD = 'created_at';
 
 // --[ DEFAULTS ]---------------------------------------------------------------------------
-/** The default polling interval to start all polling pages */
+/** The default polling interval for API calls that require a refresh interval */
 export const DEFAULT_POLL_INTERVAL = 10000;

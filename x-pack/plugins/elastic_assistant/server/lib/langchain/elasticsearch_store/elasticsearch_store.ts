@@ -127,7 +127,7 @@ export class ElasticsearchStore extends VectorStore {
 
     try {
       const response = await this.esClient.bulk({ refresh: true, operations });
-      this.logger.debug(`Add Documents Response:\n ${JSON.stringify(response)}`);
+      this.logger.debug(() => `Add Documents Response:\n ${JSON.stringify(response)}`);
 
       const errorIds = response.items.filter((i) => i.index?.error != null);
       operations.forEach((op, i) => {
@@ -268,11 +268,12 @@ export class ElasticsearchStore extends VectorStore {
       });
 
       this.logger.debug(
-        `Similarity search metadata source:\n${JSON.stringify(
-          results.map((r) => r?.metadata?.source ?? '(missing metadata.source)'),
-          null,
-          2
-        )}`
+        () =>
+          `Similarity search metadata source:\n${JSON.stringify(
+            results.map((r) => r?.metadata?.source ?? '(missing metadata.source)'),
+            null,
+            2
+          )}`
       );
 
       return results;

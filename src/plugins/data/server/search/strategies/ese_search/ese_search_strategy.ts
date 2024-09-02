@@ -31,7 +31,7 @@ import {
   getTotalLoaded,
   shimHitsTotal,
 } from '../es_search';
-import { SearchConfigSchema } from '../../../../config';
+import { SearchConfigSchema } from '../../../config';
 import { sanitizeRequestParams } from '../../sanitize_request_params';
 
 export const enhancedEsSearchStrategyProvider = (
@@ -204,7 +204,7 @@ export const enhancedEsSearchStrategyProvider = (
      * @throws `KbnSearchError`
      */
     search: (request, options: IAsyncSearchOptions, deps) => {
-      logger.debug(`search ${JSON.stringify(request.params) || request.id}`);
+      logger.debug(() => `search ${JSON.stringify(request.params) || request.id}`);
 
       if (request.indexType === DataViewType.ROLLUP && deps.rollupsEnabled) {
         return from(rollupSearch(request, options, deps));

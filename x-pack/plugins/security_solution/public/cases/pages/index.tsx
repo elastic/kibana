@@ -11,7 +11,6 @@ import type { CaseViewRefreshPropInterface } from '@kbn/cases-plugin/common';
 import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { CaseDetailsRefreshContext } from '../../common/components/endpoint';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { DocumentDetailsRightPanelKey } from '../../flyout/document_details/shared/constants/panel_keys';
 import { useTourContext } from '../../common/components/guided_onboarding_tour';
 import {
@@ -25,29 +24,14 @@ import { getRuleDetailsUrl, useFormatUrl } from '../../common/components/link_to
 import { useKibana, useNavigation } from '../../common/lib/kibana';
 import { APP_ID, CASES_PATH, SecurityPageName } from '../../../common/constants';
 import { timelineActions } from '../../timelines/store';
-import { useSourcererDataView } from '../../sourcerer/containers';
-import { SourcererScopeName } from '../../sourcerer/store/model';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { getEndpointDetailsPath } from '../../management/common/routing';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { useInsertTimeline } from '../components/use_insert_timeline';
 import * as timelineMarkdownPlugin from '../../common/components/markdown_editor/plugins/timeline';
-import { DetailsPanel } from '../../timelines/components/side_panel';
 import { useFetchAlertData } from './use_fetch_alert_data';
 import { useUpsellingMessage } from '../../common/hooks/use_upselling';
-
-const TimelineDetailsPanel = () => {
-  const { browserFields, runtimeMappings } = useSourcererDataView(SourcererScopeName.detections);
-  return (
-    <DetailsPanel
-      browserFields={browserFields}
-      entityType="events"
-      isFlyoutView
-      runtimeMappings={runtimeMappings}
-      scopeId={TimelineId.casePage}
-    />
-  );
-};
+import { useFetchNotes } from '../../notes/hooks/use_fetch_notes';
 
 const CaseContainerComponent: React.FC = () => {
   const { cases, telemetry } = useKibana().services;
@@ -58,10 +42,10 @@ const CaseContainerComponent: React.FC = () => {
     SecurityPageName.rules
   );
   const { openFlyout } = useExpandableFlyoutApi();
-  const expandableFlyoutDisabled = useIsExperimentalFeatureEnabled('expandableFlyoutDisabled');
 
   const getDetectionsRuleDetailsHref = useCallback(
-    (ruleId) => detectionsFormatUrl(getRuleDetailsUrl(ruleId ?? '', detectionsUrlSearch)),
+    (ruleId: string | null | undefined) =>
+      detectionsFormatUrl(getRuleDetailsUrl(ruleId ?? '', detectionsUrlSearch)),
     [detectionsFormatUrl, detectionsUrlSearch]
   );
 
@@ -69,39 +53,25 @@ const CaseContainerComponent: React.FC = () => {
 
   const showAlertDetails = useCallback(
     (alertId: string, index: string) => {
-      if (!expandableFlyoutDisabled) {
-        openFlyout({
-          right: {
-            id: DocumentDetailsRightPanelKey,
-            params: {
-              id: alertId,
-              indexName: index,
-              scopeId: TimelineId.casePage,
-            },
+      openFlyout({
+        right: {
+          id: DocumentDetailsRightPanelKey,
+          params: {
+            id: alertId,
+            indexName: index,
+            scopeId: TimelineId.casePage,
           },
-        });
-        telemetry.reportDetailsFlyoutOpened({
-          location: TimelineId.casePage,
-          panel: 'right',
-        });
-      }
-      // TODO remove when https://github.com/elastic/security-team/issues/7462 is merged
-      // support of old flyout in cases page
-      else {
-        dispatch(
-          timelineActions.toggleDetailPanel({
-            panelView: 'eventDetail',
-            id: TimelineId.casePage,
-            params: {
-              eventId: alertId,
-              indexName: index,
-            },
-          })
-        );
-      }
+        },
+      });
+      telemetry.reportDetailsFlyoutOpened({
+        location: TimelineId.casePage,
+        panel: 'right',
+      });
     },
-    [dispatch, expandableFlyoutDisabled, openFlyout, telemetry]
+    [openFlyout, telemetry]
   );
+
+  const { onLoad: onAlertsTableLoaded } = useFetchNotes();
 
   const endpointDetailsHref = (endpointId: string) =>
     getAppUrl({
@@ -130,7 +100,6 @@ const CaseContainerComponent: React.FC = () => {
         columns: [],
         dataViewId: null,
         indexNames: [],
-        expandedDetail: {},
         show: false,
       })
     );
@@ -190,11 +159,9 @@ const CaseContainerComponent: React.FC = () => {
             hooks: {
               useInsertTimeline,
             },
-            ui: {
-              renderTimelineDetailsPanel: TimelineDetailsPanel,
-            },
           },
           useFetchAlertData,
+          onAlertsTableLoaded,
           permissions: userCasesPermissions,
         })}
       </CaseDetailsRefreshContext.Provider>

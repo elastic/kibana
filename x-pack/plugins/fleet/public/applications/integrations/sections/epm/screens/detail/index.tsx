@@ -210,6 +210,7 @@ export function Detail() {
     pkgVersion,
     {
       prerelease: prereleaseIntegrationsEnabled,
+      withMetadata: true,
     },
     {
       enabled: !authz.fleet.readSettings || !isSettingsInitialLoading, // Load only after settings are loaded
@@ -785,7 +786,11 @@ export function Detail() {
             />
           </Route>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_settings}>
-            <SettingsPage packageInfo={packageInfo} startServices={services} />
+            <SettingsPage
+              packageInfo={packageInfo}
+              packageMetadata={packageInfoData?.metadata}
+              startServices={services}
+            />
           </Route>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_assets}>
             <AssetsPage packageInfo={packageInfo} refetchPackageInfo={refetchPackageInfo} />

@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import type { Replacements } from '@kbn/elastic-assistant-common';
+import type { AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
 
 import { AttackChain } from '../../../attack/attack_chain';
-import { InvestigateInTimelineButton } from '../../../../common/components/event_details/table/investigate_in_timeline_button';
+import { InvestigateInTimelineButton } from '../../../../common/components/event_details/investigate_in_timeline_button';
 import { buildAlertsKqlFilter } from '../../../../detections/components/alerts_table/actions';
 import { getTacticMetadata } from '../../../helpers';
 import { AttackDiscoveryMarkdownFormatter } from '../../../attack_discovery_markdown_formatter';
 import * as i18n from './translations';
-import type { AttackDiscovery } from '../../../types';
 import { ViewInAiAssistant } from '../../view_in_ai_assistant';
 
 interface Props {
@@ -86,7 +85,7 @@ const AttackDiscoveryTabComponent: React.FC<Props> = ({
 
       {tacticMetadata.length > 0 && (
         <>
-          <EuiTitle data-test-subj="detailsTitle" size="xs">
+          <EuiTitle data-test-subj="attackChainTitle" size="xs">
             <h2>{i18n.ATTACK_CHAIN}</h2>
           </EuiTitle>
           <EuiSpacer size="s" />

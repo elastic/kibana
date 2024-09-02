@@ -58,7 +58,7 @@ export function parseInlineFunctionCalls({ logger }: { logger: Logger }) {
           input?: unknown;
         };
 
-        logger.debug('Parsed function call:\n ' + JSON.stringify(parsedFunctionCall));
+        logger.debug(() => 'Parsed function call:\n ' + JSON.stringify(parsedFunctionCall));
 
         if (!parsedFunctionCall.name) {
           throw createInternalServerError(`Missing name for tool use`);

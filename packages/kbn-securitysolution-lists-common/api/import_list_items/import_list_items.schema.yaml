@@ -1,0 +1,101 @@
+openapi: 3.0.0
+info:
+  title: Import list items API endpoint
+  version: '2023-10-31'
+paths:
+  /api/lists/items/_import:
+    post:
+      x-labels: [serverless, ess]
+      operationId: ImportListItems
+      x-codegen-enabled: true
+      summary: Imports list items
+      description: |
+        Imports a list of items from a `.txt` or `.csv` file. The maximum file size is 9 million bytes.
+
+        You can import items to a new or existing list.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: A `.txt` or `.csv` file containing newline separated list items
+      parameters:
+        - name: list_id
+          in: query
+          required: false
+          description: |
+            List's id.
+
+            Required when importing to an existing list.
+          schema:
+            $ref: '../model/list_common.schema.yaml#/components/schemas/ListId'
+        - name: type
+          in: query
+          required: false
+          description: |
+            Type of the importing list.
+
+            Required when importing a new list that is `list_id` is not specified.
+          schema:
+            $ref: '../model/list_common.schema.yaml#/components/schemas/ListType'
+        - name: serializer
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: deserializer
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: refresh
+          in: query
+          required: false
+          description: Determines when changes made by the request are made visible to search
+          schema:
+            type: string
+            enum: ['true', 'false', 'wait_for']
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '../model/list_schemas.schema.yaml#/components/schemas/List'
+        400:
+          description: Invalid input data response
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+                  - $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+        401:
+          description: Unsuccessful authentication response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+        403:
+          description: Not enough privileges response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+        409:
+          description: List with specified list_id does not exist response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+        500:
+          description: Internal server error response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'

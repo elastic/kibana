@@ -42,7 +42,8 @@ import { agentPolicyService, addPackageToAgentPolicy } from './agent_policy';
 import { type InputsOverride, packagePolicyService } from './package_policy';
 import { preconfigurePackageInputs } from './package_policy';
 import { appContextService } from './app_context';
-import type { UpgradeManagedPackagePoliciesResult } from './managed_package_policies';
+import type { UpgradeManagedPackagePoliciesResult } from './setup/managed_package_policies';
+import { isDefaultAgentlessPolicyEnabled } from './utils/agentless';
 
 interface PreconfigurationResult {
   policies: Array<{ id: string; updated_at: string }>;
@@ -60,7 +61,6 @@ export async function ensurePreconfiguredPackagesAndPolicies(
   spaceId: string
 ): Promise<PreconfigurationResult> {
   const logger = appContextService.getLogger();
-  const cloudSetup = appContextService.getCloud();
 
   // Validate configured packages to ensure there are no version conflicts
   const packageNames = groupBy(packages, (pkg) => pkg.name);
@@ -164,8 +164,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
       }
 
       if (
-        (!cloudSetup?.isServerlessEnabled ||
-          !appContextService.getExperimentalFeatures().agentless) &&
+        !isDefaultAgentlessPolicyEnabled() &&
         preconfiguredAgentPolicy?.supports_agentless !== undefined
       ) {
         throw new FleetError(
@@ -296,12 +295,13 @@ export async function ensurePreconfiguredPackagesAndPolicies(
         );
       });
       logger.debug(
-        `Adding preconfigured package policies ${JSON.stringify(
-          packagePoliciesToAdd.map((pol) => ({
-            name: pol.packagePolicy.name,
-            package: pol.installedPackage.name,
-          }))
-        )}`
+        () =>
+          `Adding preconfigured package policies ${JSON.stringify(
+            packagePoliciesToAdd.map((pol) => ({
+              name: pol.packagePolicy.name,
+              package: pol.installedPackage.name,
+            }))
+          )}`
       );
       const s = apm.startSpan('Add preconfigured package policies', 'preconfiguration');
       await addPreconfiguredPolicyPackages(

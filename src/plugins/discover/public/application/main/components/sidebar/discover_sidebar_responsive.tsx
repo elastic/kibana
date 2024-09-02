@@ -21,13 +21,10 @@ import {
   type UnifiedFieldListSidebarContainerApi,
   FieldsGroupNames,
 } from '@kbn/unified-field-list';
+import { calcFieldCounts } from '@kbn/discover-utils/src/utils/calc_field_counts';
 import { PLUGIN_ID } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import {
-  AvailableFields$,
-  DataDocuments$,
-} from '../../state_management/discover_data_state_container';
-import { calcFieldCounts } from '../../utils/calc_field_counts';
+import { DataDocuments$ } from '../../state_management/discover_data_state_container';
 import { FetchStatus, SidebarToggleState } from '../../../types';
 import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../../../../components/discover_tour';
 import {
@@ -129,10 +126,6 @@ export interface DiscoverSidebarResponsiveProps {
    * callback to execute on create dataview
    */
   onDataViewCreated: (dataView: DataView) => void;
-  /**
-   * list of available fields fetched from ES
-   */
-  availableFields$: AvailableFields$;
   /**
    * For customization and testing purposes
    */
@@ -257,7 +250,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   // As unifiedFieldListSidebarContainerRef ref can be empty in the beginning,
   // we need to fetch the data once API becomes available and after documents are fetched
   const initializeUnifiedFieldListSidebarContainerApi = useCallback(
-    (api) => {
+    (api: UnifiedFieldListSidebarContainerApi) => {
       if (!api) {
         return;
       }
@@ -291,20 +284,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   }, []);
 
   const { dataViewEditor } = services;
-  const { availableFields$ } = props;
-
-  useEffect(() => {
-    // For an external embeddable like the Field stats
-    // it is useful to know what fields are populated in the docs fetched
-    // or what fields are selected by the user
-
-    const availableFields =
-      props.columns.length > 0 ? props.columns : Object.keys(sidebarState.fieldCounts || {});
-    availableFields$.next({
-      fetchStatus: FetchStatus.COMPLETE,
-      fields: availableFields,
-    });
-  }, [selectedDataView, sidebarState.fieldCounts, props.columns, availableFields$]);
 
   const canEditDataView =
     Boolean(dataViewEditor?.userPermissions.editDataView()) ||

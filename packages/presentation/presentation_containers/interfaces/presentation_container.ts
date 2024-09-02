@@ -53,8 +53,14 @@ export const apiIsPresentationContainer = (api: unknown | null): api is Presenta
       typeof (api as PresentationContainer)?.removePanel === 'function' &&
       typeof (api as PresentationContainer)?.replacePanel === 'function' &&
       typeof (api as PresentationContainer)?.addNewPanel === 'function' &&
-      (api as PresentationContainer)?.children$
+      apiPublishesChildren(api)
   );
+};
+
+export const apiPublishesChildren = (
+  api: unknown | null
+): api is Pick<PresentationContainer, 'children$'> => {
+  return Boolean((api as PresentationContainer)?.children$);
 };
 
 export const getContainerParentFromAPI = (
@@ -102,7 +108,7 @@ export const combineCompatibleChildrenApis = <ApiType extends unknown, Publishin
   emptyState: PublishingSubjectType,
   flattenMethod?: (array: PublishingSubjectType[]) => PublishingSubjectType
 ): Observable<PublishingSubjectType> => {
-  if (!api || !apiIsPresentationContainer(api)) return of();
+  if (!api || !apiPublishesChildren(api)) return of();
 
   return api.children$.pipe(
     switchMap((children) => {

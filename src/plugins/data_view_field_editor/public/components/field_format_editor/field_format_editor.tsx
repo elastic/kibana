@@ -9,7 +9,6 @@
 import { EuiCode, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { CoreStart } from '@kbn/core/public';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/public';
 import type {
   FieldFormatInstanceType,
   FieldFormatParams,
@@ -25,7 +24,6 @@ import { FormatEditor } from './format_editor';
 
 export interface FormatSelectEditorProps {
   esTypes: ES_FIELD_TYPES[];
-  indexPattern: DataView;
   fieldFormatEditors: FormatEditorServiceStart['fieldFormatEditors'];
   fieldFormats: FieldFormatsStart;
   uiSettings: CoreStart['uiSettings'];

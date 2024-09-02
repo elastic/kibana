@@ -21,7 +21,7 @@ import {
   getPerformBulkActionSchemaMock,
   getUpdateConversationSchemaMock,
 } from '../../__mocks__/conversations_schema.mock';
-import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
+import { AuthenticatedUser } from '@kbn/core-security-common';
 
 describe('Perform bulk action route', () => {
   let server: ReturnType<typeof serverMock.create>;

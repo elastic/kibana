@@ -48,7 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('search', () => {
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       // ensure es not empty
       await es.index({
         index: 'search-api-test',
@@ -61,7 +61,7 @@ export default function ({ getService }: FtrProviderContext) {
       await es.indices.delete({
         index: 'search-api-test',
       });
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     describe('post', () => {

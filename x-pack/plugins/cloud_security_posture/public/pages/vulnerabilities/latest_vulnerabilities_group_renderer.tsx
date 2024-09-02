@@ -14,7 +14,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { GroupPanelRenderer, RawBucket, StatRenderer } from '@kbn/grouping/src';
+import { GroupPanelRenderer, GroupStatsItem, RawBucket } from '@kbn/grouping/src';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getCloudProviderNameFromAbbreviation } from '../../../common/utils/helpers';
@@ -70,9 +70,9 @@ export const groupPanelRenderer: GroupPanelRenderer<VulnerabilitiesGroupingAggre
                     css={css`
                       word-break: break-all;
                     `}
-                    title={bucket.resourceId?.buckets?.[0].key}
+                    title={bucket.resourceId?.buckets?.[0]?.key}
                   >
-                    <strong>{bucket.key_as_string}</strong> {bucket.resourceId?.buckets?.[0].key}
+                    <strong>{bucket.key_as_string}</strong> {bucket.resourceId?.buckets?.[0]?.key}
                   </EuiTextBlockTruncate>
                 </EuiText>
               </EuiFlexItem>
@@ -150,7 +150,7 @@ const VulnerabilitiesCountComponent = ({
     <EuiToolTip content={bucket.doc_count}>
       <EuiBadge
         css={css`
-          margin-left: ${euiTheme.size.s}};
+          margin-left: ${euiTheme.size.s};
         `}
         color="hollow"
         data-test-subj={VULNERABILITIES_GROUPING_COUNTER}
@@ -195,17 +195,13 @@ const SeverityStats = React.memo(SeverityStatsComponent);
 export const groupStatsRenderer = (
   selectedGroup: string,
   bucket: RawBucket<VulnerabilitiesGroupingAggregation>
-): StatRenderer[] => {
-  const defaultBadges = [
-    {
-      title: VULNERABILITIES,
-      renderer: <VulnerabilitiesCount bucket={bucket} />,
-    },
-    {
-      title: '',
-      renderer: <SeverityStats bucket={bucket} />,
-    },
-  ];
-
-  return defaultBadges;
-};
+): GroupStatsItem[] => [
+  {
+    title: VULNERABILITIES,
+    component: <VulnerabilitiesCount bucket={bucket} />,
+  },
+  {
+    title: '',
+    component: <SeverityStats bucket={bucket} />,
+  },
+];

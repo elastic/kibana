@@ -18,7 +18,7 @@ export type SLOView = 'cardView' | 'listView' | 'compactView';
 interface Props {
   onChangeView: (view: SLOView) => void;
   onStateChange: (newState: Partial<SearchState>) => void;
-  sloView: SLOView;
+  view: SLOView;
   state: SearchState;
   sloList?: FindSLOResponse;
   loading: boolean;
@@ -47,7 +47,7 @@ const toggleButtonsIcons = [
 ];
 
 export function ToggleSLOView({
-  sloView,
+  view,
   onChangeView,
   onStateChange,
   sloList,
@@ -95,7 +95,7 @@ export function ToggleSLOView({
             defaultMessage: 'SLO View',
           })}
           options={toggleButtonsIcons}
-          idSelected={sloView}
+          idSelected={view}
           onChange={(id) => onChangeView(id as SLOView)}
           isIconOnly
           isDisabled={loading}

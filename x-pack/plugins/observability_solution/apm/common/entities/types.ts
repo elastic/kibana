@@ -9,14 +9,15 @@ import { AgentName } from '../../typings/es_schemas/ui/fields/agent';
 
 export enum SignalTypes {
   METRICS = 'metrics',
+  TRACES = 'traces',
   LOGS = 'logs',
 }
 
 export interface EntityMetrics {
   latency: number | null;
   throughput: number | null;
-  failedTransactionRate: number;
-  logRatePerMinute: number;
+  failedTransactionRate: number | null;
+  logRate: number | null;
   logErrorRate: number | null;
 }
 
@@ -26,4 +27,5 @@ export interface EntityServiceListItem {
   environments: string[];
   serviceName: string;
   agentName: AgentName;
+  hasLogMetrics: boolean;
 }

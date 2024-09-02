@@ -19,15 +19,15 @@ import * as labels from './labels';
 export const DeleteMonitor = ({
   name,
   reloadPage,
-  configId,
+  configIds,
   isProjectMonitor,
   setMonitorPendingDeletion,
 }: {
-  configId: string;
+  configIds: string[];
   name: string;
   isProjectMonitor: boolean;
   reloadPage: () => void;
-  setMonitorPendingDeletion: (val: null) => void;
+  setMonitorPendingDeletion: (val: string[]) => void;
 }) => {
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
 
@@ -37,12 +37,12 @@ export const DeleteMonitor = ({
 
   const { status: monitorDeleteStatus } = useFetcher(() => {
     if (isDeleting) {
-      return fetchDeleteMonitor({ configId });
+      return fetchDeleteMonitor({ configIds });
     }
-  }, [configId, isDeleting]);
+  }, [configIds, isDeleting]);
 
   useEffect(() => {
-    const { core, toasts } = kibanaService;
+    const { coreStart, toasts } = kibanaService;
     if (!isDeleting) {
       return;
     }
@@ -53,7 +53,7 @@ export const DeleteMonitor = ({
             <p data-test-subj="uptimeDeleteMonitorFailure">
               {labels.MONITOR_DELETE_FAILURE_LABEL}
             </p>,
-            core
+            coreStart
           ),
         },
         { toastLifeTimeMs: 3000 }
@@ -64,15 +64,21 @@ export const DeleteMonitor = ({
         {
           title: toMountPoint(
             <p data-test-subj="uptimeDeleteMonitorSuccess">
-              {i18n.translate(
-                'xpack.synthetics.monitorManagement.monitorDeleteSuccessMessage.name',
-                {
-                  defaultMessage: 'Deleted "{name}"',
-                  values: { name },
-                }
-              )}
+              {configIds.length === 1
+                ? i18n.translate(
+                    'xpack.synthetics.monitorManagement.monitorDeleteSuccessMessage.name',
+                    {
+                      defaultMessage: 'Deleted "{name}" monitor successfully.',
+                      values: { name },
+                    }
+                  )
+                : i18n.translate('xpack.synthetics.monitorManagement.successDeletion', {
+                    defaultMessage:
+                      'Deleted {monitorCount, number} {monitorCount, plural, one {monitor} other {monitors}} successfully.',
+                    values: { monitorCount: configIds.length },
+                  })}
             </p>,
-            core
+            coreStart
           ),
         },
         { toastLifeTimeMs: 3000 }
@@ -83,17 +89,33 @@ export const DeleteMonitor = ({
       monitorDeleteStatus === FETCH_STATUS.FAILURE
     ) {
       setIsDeleting(false);
-      setMonitorPendingDeletion(null);
+      setMonitorPendingDeletion([]);
     }
-  }, [setIsDeleting, isDeleting, reloadPage, monitorDeleteStatus, setMonitorPendingDeletion, name]);
+  }, [
+    setIsDeleting,
+    isDeleting,
+    reloadPage,
+    monitorDeleteStatus,
+    setMonitorPendingDeletion,
+    name,
+    configIds.length,
+  ]);
 
   return (
     <EuiConfirmModal
-      title={i18n.translate('xpack.synthetics.monitorManagement.deleteMonitorNameLabel', {
-        defaultMessage: 'Delete "{name}" monitor?',
-        values: { name },
-      })}
-      onCancel={() => setMonitorPendingDeletion(null)}
+      title={
+        configIds.length === 1
+          ? i18n.translate('xpack.synthetics.monitorManagement.deleteMonitorNameLabel', {
+              defaultMessage: 'Delete "{name}" monitor?',
+              values: { name },
+            })
+          : i18n.translate('xpack.synthetics.monitorManagement.deleteMonitorNameLabel', {
+              defaultMessage:
+                'Delete {monitorCount, number} selected {monitorCount, plural, one {monitor} other {monitors}}?',
+              values: { monitorCount: configIds.length },
+            })
+      }
+      onCancel={() => setMonitorPendingDeletion([])}
       onConfirm={handleConfirmDelete}
       cancelButtonText={labels.NO_LABEL}
       confirmButtonText={labels.YES_LABEL}
@@ -118,7 +140,7 @@ export const DeleteMonitor = ({
 export const PROJECT_MONITOR_TITLE = i18n.translate(
   'xpack.synthetics.monitorManagement.monitorList.disclaimer.title',
   {
-    defaultMessage: 'Deleting this monitor will not remove it from the project source',
+    defaultMessage: 'Deleting project monitor will not remove it from the project source',
   }
 );
 

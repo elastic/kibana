@@ -14,7 +14,6 @@ import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { TIMELINES_URL } from '../../../../../../common/constants';
 
 import type { ConfigType } from '../../../../..';
-import type { SetupPlugins } from '../../../../../plugin';
 
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
@@ -23,11 +22,7 @@ import { buildFrameworkRequest, escapeHatch, throwErrors } from '../../../utils/
 import { getAllTimeline } from '../../../saved_object/timelines';
 import { getTimelinesQuerySchema } from '../../../../../../common/api/timeline';
 
-export const getTimelinesRoute = (
-  router: SecuritySolutionPluginRouter,
-  _: ConfigType,
-  security: SetupPlugins['security']
-) => {
+export const getTimelinesRoute = (router: SecuritySolutionPluginRouter, _: ConfigType) => {
   router.versioned
     .get({
       path: TIMELINES_URL,
@@ -47,7 +42,7 @@ export const getTimelinesRoute = (
         const customHttpRequestError = (message: string) =>
           new CustomHttpRequestError(message, 400);
         try {
-          const frameworkRequest = await buildFrameworkRequest(context, security, request);
+          const frameworkRequest = await buildFrameworkRequest(context, request);
           const queryParams = pipe(
             getTimelinesQuerySchema.decode(request.query),
             fold(throwErrors(customHttpRequestError), identity)

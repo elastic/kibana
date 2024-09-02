@@ -162,6 +162,7 @@ describe('get()', () => {
                 "should": Array [],
               },
             },
+            "runtime_mappings": undefined,
             "size": undefined,
             "sort": Array [
               Object {

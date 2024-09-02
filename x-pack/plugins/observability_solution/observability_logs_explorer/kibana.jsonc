@@ -19,7 +19,9 @@
       "observabilityShared",
       "slo",
       "share",
-      "kibanaUtils"
+      "kibanaUtils",
+      "dataQuality",
+      "logsDataAccess"
     ],
     "optionalPlugins": [
       "serverless",
@@ -35,7 +37,7 @@
       "triggersActionsUi"
     ],
     "extraPublicDirs": [
-      "common",
+      "common"
     ]
   }
 }

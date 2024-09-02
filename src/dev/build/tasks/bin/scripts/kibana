@@ -38,6 +38,9 @@ if [ "$KBN_ENABLE_POINTER_COMPRESSION" = 'true' ]; then
   NODE="${DIR}/node/pointer-compression/bin/node"
 fi
 {{/serverless}}
+{{#forcePointerCompression}}
+NODE="${DIR}/node/pointer-compression/bin/node"
+{{/forcePointerCompression}}
 {{/linux}}
 test_node
 

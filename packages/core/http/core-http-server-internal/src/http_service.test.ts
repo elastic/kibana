@@ -23,6 +23,7 @@ import { HttpService } from './http_service';
 import { HttpConfigType, config } from './http_config';
 import { cspConfig } from './csp';
 import { externalUrlConfig, ExternalUrlConfig } from './external_url';
+import { permissionsPolicyConfig } from './permissions_policy';
 
 const logger = loggingSystemMock.create();
 const env = Env.createDefault(REPO_ROOT, getEnvOptions());
@@ -42,6 +43,7 @@ const createConfigService = (value: Partial<HttpConfigType> = {}) => {
   configService.setSchema(config.path, config.schema);
   configService.setSchema(cspConfig.path, cspConfig.schema);
   configService.setSchema(externalUrlConfig.path, externalUrlConfig.schema);
+  configService.setSchema(permissionsPolicyConfig.path, permissionsPolicyConfig.schema);
   return configService;
 };
 const contextPreboot = contextServiceMock.createPrebootContract();

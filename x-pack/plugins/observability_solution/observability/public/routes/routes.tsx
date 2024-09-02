@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
+import { AnnotationsPage } from '../pages/annotations/annotations';
 import { DatePickerContextProvider } from '../context/date_picker_context/date_picker_context';
 import { useKibana } from '../utils/kibana_react';
 import { AlertsPage } from '../pages/alerts/alerts';
@@ -27,6 +28,7 @@ import {
   RULES_LOGS_PATH,
   RULES_PATH,
   RULE_DETAIL_PATH,
+  ANNOTATIONS_PATH,
   OLD_SLOS_PATH,
   OLD_SLOS_WELCOME_PATH,
   OLD_SLOS_OUTDATED_DEFINITIONS_PATH,
@@ -169,6 +171,13 @@ export const routes = {
   [OLD_SLO_EDIT_PATH]: {
     handler: () => {
       return <SimpleRedirect to="/:sloId" redirectToApp="slo" />;
+    },
+    params: {},
+    exact: true,
+  },
+  [ANNOTATIONS_PATH]: {
+    handler: () => {
+      return <AnnotationsPage />;
     },
     params: {},
     exact: true,

@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
@@ -27,6 +27,11 @@ jest.mock('@kbn/security-solution-features/product_features', () => ({
     subFeaturesMap: new Map(),
   })),
   getAssistantFeature: jest.fn(() => ({
+    baseKibanaFeature: {},
+    baseKibanaSubFeatureIds: [],
+    subFeaturesMap: new Map(),
+  })),
+  getAttackDiscoveryFeature: jest.fn(() => ({
     baseKibanaFeature: {},
     baseKibanaSubFeatureIds: [],
     subFeaturesMap: new Map(),
@@ -85,6 +90,25 @@ export const createProductFeaturesServiceMock = (
         )
       ),
       securityAssistant: jest.fn().mockReturnValue(
+        new Map(
+          enabledFeatureKeys.map((key) => [
+            key,
+            {
+              privileges: {
+                all: {
+                  ui: ['entity-analytics'],
+                  api: [`test-entity-analytics`],
+                },
+                read: {
+                  ui: ['entity-analytics'],
+                  api: [`test-entity-analytics`],
+                },
+              },
+            },
+          ])
+        )
+      ),
+      attackDiscovery: jest.fn().mockReturnValue(
         new Map(
           enabledFeatureKeys.map((key) => [
             key,

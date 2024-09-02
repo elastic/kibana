@@ -37,6 +37,7 @@ import type { FindRulesSortField } from '../../../../../common/api/detection_eng
 import { useIsUpgradingSecurityPackages } from '../../../rule_management/logic/use_upgrade_security_packages';
 import { useManualRuleRunConfirmation } from '../../../rule_gaps/components/manual_rule_run/use_manual_rule_run_confirmation';
 import { ManualRuleRunModal } from '../../../rule_gaps/components/manual_rule_run';
+import { BulkManualRuleRunLimitErrorModal } from './bulk_actions/bulk_manual_rule_run_limit_error_modal';
 
 const INITIAL_SORT_FIELD = 'enabled';
 
@@ -117,6 +118,12 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
     confirmManualRuleRun,
   } = useManualRuleRunConfirmation();
 
+  const [
+    isManualRuleRunLimitErrorVisible,
+    showManualRuleRunLimitError,
+    hideManualRuleRunLimitError,
+  ] = useBoolState();
+
   const {
     bulkEditActionType,
     isBulkEditFlyoutVisible,
@@ -132,6 +139,8 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
     confirmDeletion,
     showBulkActionConfirmation,
     showBulkDuplicateConfirmation,
+    showManualRuleRunConfirmation,
+    showManualRuleRunLimitError,
     completeBulkEditForm,
     executeBulkActionsDryRun,
   });
@@ -275,6 +284,9 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
       )}
       {isManualRuleRunConfirmationVisible && (
         <ManualRuleRunModal onCancel={cancelManualRuleRun} onConfirm={confirmManualRuleRun} />
+      )}
+      {isManualRuleRunLimitErrorVisible && (
+        <BulkManualRuleRunLimitErrorModal onClose={hideManualRuleRunLimitError} />
       )}
       {isBulkActionConfirmationVisible && bulkAction && (
         <BulkActionDryRunConfirmation

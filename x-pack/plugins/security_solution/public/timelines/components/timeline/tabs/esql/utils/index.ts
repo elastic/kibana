@@ -24,8 +24,6 @@ export const savedSearchComparator = (
 
   const keysToSelect = [
     'columns',
-    'grid',
-    'hideChart',
     'sort',
     'timeRange',
     'fields.filter',

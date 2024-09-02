@@ -11,7 +11,7 @@ import { has, unset, some, mapKeys } from 'lodash';
 import { produce } from 'immer';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
-  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '@kbn/fleet-plugin/common';
 import type { IRouter } from '@kbn/core/server';
@@ -64,7 +64,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         const agentPolicyService = osqueryContext.service.getAgentPolicyService();
 
         const packagePolicyService = osqueryContext.service.getPackagePolicyService();
-        const currentUser = await osqueryContext.security.authc.getCurrentUser(request)?.username;
+        const currentUser = coreContext.security.authc.getCurrentUser()?.username;
 
         // eslint-disable-next-line @typescript-eslint/naming-convention
         const { name, description, queries, enabled, policy_ids, shards = {} } = request.body;
@@ -112,7 +112,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         const references = policiesList.map((id) => ({
           id,
           name: agentPoliciesIdMap[id]?.name,
-          type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+          type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
         }));
 
         const packSO = await savedObjectsClient.create<PackSavedObjectLimited>(

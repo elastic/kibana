@@ -61,4 +61,8 @@ describe('getInheritedNamespace', () => {
   it('should return default namespace when there are no agent policies', () => {
     expect(getInheritedNamespace([])).toEqual('default');
   });
+
+  it('should allow to override default namespace when there are no agent policies', () => {
+    expect(getInheritedNamespace([], 'test')).toEqual('test');
+  });
 });

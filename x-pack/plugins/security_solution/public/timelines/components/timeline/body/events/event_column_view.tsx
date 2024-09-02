@@ -48,7 +48,7 @@ interface Props {
   showNotes: boolean;
   tabType?: TimelineTabs;
   timelineId: string;
-  toggleShowNotes: () => void;
+  toggleShowNotes: (eventId?: string) => void;
   leadingControlColumns: ControlColumnProps[];
   trailingControlColumns: ControlColumnProps[];
   setEventsLoading: SetEventsLoading;
@@ -149,6 +149,7 @@ export const EventColumnView = React.memo<Props>(
                   toggleShowNotes={toggleShowNotes}
                   setEventsLoading={setEventsLoading}
                   setEventsDeleted={setEventsDeleted}
+                  disablePinAction={false}
                 />
               )}
             </EventsTdGroupActions>
@@ -173,12 +174,12 @@ export const EventColumnView = React.memo<Props>(
         refetch,
         selectedEventIds,
         showCheckboxes,
-        showNotes,
         tabType,
         timelineId,
         toggleShowNotes,
         setEventsLoading,
         setEventsDeleted,
+        showNotes,
       ]
     );
     return (

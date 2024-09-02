@@ -8,7 +8,7 @@
 
 import { SearchQuery } from '@kbn/content-management-plugin/common';
 import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
-import {
+import type {
   ContentManagementCrudTypes,
   SavedObjectCreateOptions,
   SavedObjectUpdateOptions,
@@ -118,6 +118,7 @@ export interface VisTypeAlias {
     visualizations: VisualizationsAppExtension;
     [appName: string]: unknown;
   };
+  order?: number;
 }
 
 let registry: VisTypeAlias[] = [];

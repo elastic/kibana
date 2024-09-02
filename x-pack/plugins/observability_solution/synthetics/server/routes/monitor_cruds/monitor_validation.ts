@@ -11,10 +11,9 @@ import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
 
 import { omit } from 'lodash';
 import { schema } from '@kbn/config-schema';
-import { AlertConfigSchema } from '../../../common/runtime_types/monitor_management/alert_config';
+import { AlertConfigSchema } from '../../../common/runtime_types/monitor_management/alert_config_schema';
 import { CreateMonitorPayLoad } from './add_monitor/add_monitor_api';
 import { flattenAndFormatObject } from '../../synthetics_service/project_monitor/normalizers/common_fields';
-import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 import {
   BrowserFieldsCodec,
   CodeEditorMode,
@@ -29,6 +28,7 @@ import {
   ProjectMonitor,
   ProjectMonitorCodec,
   SyntheticsMonitor,
+  type SyntheticsPrivateLocations,
   TCPFieldsCodec,
 } from '../../../common/runtime_types';
 
@@ -338,7 +338,7 @@ const validateJSON = (jsonString: string | any) => {
 export function validateProjectMonitor(
   monitorFields: ProjectMonitor,
   publicLocations: Locations,
-  privateLocations: PrivateLocationAttributes[]
+  privateLocations: SyntheticsPrivateLocations
 ): ValidationResult {
   const locationsError = validateLocation(monitorFields, publicLocations, privateLocations);
   // Cast it to ICMPCodec to satisfy typing. During runtime, correct codec will be used to decode.
@@ -370,7 +370,7 @@ export function validateProjectMonitor(
 export function validateLocation(
   monitorFields: ProjectMonitor,
   publicLocations: Locations,
-  privateLocations: PrivateLocationAttributes[]
+  privateLocations: SyntheticsPrivateLocations
 ) {
   const hasPublicLocationsConfigured = (monitorFields.locations || []).length > 0;
   const hasPrivateLocationsConfigured = (monitorFields.privateLocations || []).length > 0;

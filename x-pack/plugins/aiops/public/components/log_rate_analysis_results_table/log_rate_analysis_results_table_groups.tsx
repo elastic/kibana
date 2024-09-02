@@ -149,6 +149,7 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
     {
       'data-test-subj': 'aiopsLogRateAnalysisResultsGroupsTableColumnGroup',
       field: 'group',
+      width: skippedColumns.length < 3 ? '34%' : '50%',
       name: (
         <>
           <FormattedMessage
@@ -246,7 +247,7 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
 
   groupColumns.push(...columns);
 
-  const onChange = useCallback((tableSettings) => {
+  const onChange = useCallback((tableSettings: any) => {
     if (tableSettings.page) {
       const { index, size } = tableSettings.page;
       setPageIndex(index);
@@ -344,7 +345,7 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
       ) {
         const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
         for (const itemId in itemIdToExpandedRowMapValues) {
-          if (itemIdToExpandedRowMapValues.hasOwnProperty(itemId)) {
+          if (Object.hasOwn(itemIdToExpandedRowMapValues, itemId)) {
             const component = itemIdToExpandedRowMapValues[itemId];
             itemIdToExpandedRowMapValues[itemId] = (
               <LogRateAnalysisResultsTable {...component.props} skippedColumns={skippedColumns} />

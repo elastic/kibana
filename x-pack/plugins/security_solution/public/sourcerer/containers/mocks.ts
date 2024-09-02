@@ -8,7 +8,7 @@
 import { mockGlobalState } from '../../common/mock';
 import type { SelectedDataView } from '../store/model';
 import { initSourcererScope } from '../store/model';
-import { mockBrowserFields, mockRuntimeMappings } from '../../common/containers/source/mock';
+import { mockBrowserFields } from '../../common/containers/source/mock';
 
 export const mockPatterns = [
   'auditbeat-*',
@@ -28,12 +28,8 @@ export const mockSourcererScope: SelectedDataView = {
       fields: {
         _id: {
           aggregatable: false,
-          category: '_id',
-          description: 'Each document has an _id that uniquely identifies it',
           esTypes: undefined,
-          example: 'Y-6TfmcB0WOhS6qyMv3s',
           format: undefined,
-          indexes: mockPatterns,
           name: '_id',
           searchable: true,
           subType: undefined,
@@ -60,6 +56,4 @@ export const mockSourcererScope: SelectedDataView = {
   indicesExist: true,
   loading: false,
   dataViewId: mockGlobalState.sourcerer.defaultDataView.id,
-  runtimeMappings: mockRuntimeMappings,
-  patternList: mockPatterns,
 };

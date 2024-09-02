@@ -8,11 +8,11 @@
 import React, { type FC, type PropsWithChildren } from 'react';
 import ReactDOM from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
+import { ReplaySubject, first } from 'rxjs';
+import type { Logger } from '@kbn/logging';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { HttpSetup } from '@kbn/core-http-browser';
-import type { SecurityPluginSetup } from '@kbn/security-plugin/public';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
-import { ReplaySubject, first } from 'rxjs';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { ChatVariant, GetChatUserDataResponseBody } from '../common/types';
 import { GET_CHAT_USER_DATA_ROUTE_PATH } from '../common/constants';
@@ -22,7 +22,6 @@ import { ChatExperimentSwitcher } from './components/chat_experiment_switcher';
 
 interface CloudChatSetupDeps {
   cloud: CloudSetup;
-  security?: SecurityPluginSetup;
 }
 
 interface CloudChatStartDeps {
@@ -40,6 +39,7 @@ interface CloudChatConfig {
 
 export class CloudChatPlugin implements Plugin<void, void, CloudChatSetupDeps, CloudChatStartDeps> {
   private readonly config: CloudChatConfig;
+  private readonly logger: Logger;
   private chatConfig$ = new ReplaySubject<ChatConfig>(1);
   private kbnVersion: string;
   private kbnBuildNum: number;
@@ -48,12 +48,12 @@ export class CloudChatPlugin implements Plugin<void, void, CloudChatSetupDeps, C
     this.kbnVersion = initializerContext.env.packageInfo.version;
     this.kbnBuildNum = initializerContext.env.packageInfo.buildNum;
     this.config = initializerContext.config.get();
+    this.logger = initializerContext.logger.get();
   }
 
-  public setup(core: CoreSetup, { cloud, security }: CloudChatSetupDeps) {
-    this.setupChat({ http: core.http, cloud, security }).catch((e) =>
-      // eslint-disable-next-line no-console
-      console.debug(`Error setting up Chat: ${e.toString()}`)
+  public setup(core: CoreSetup, { cloud }: CloudChatSetupDeps) {
+    this.setupChat({ http: core.http, cloud }).catch((e) =>
+      this.logger.debug(`Error setting up Chat: ${e.toString()}`)
     );
   }
 
@@ -92,12 +92,11 @@ export class CloudChatPlugin implements Plugin<void, void, CloudChatSetupDeps, C
 
   public stop() {}
 
-  private async setupChat({ cloud, http, security }: SetupChatDeps) {
+  private async setupChat({ cloud, http }: SetupChatDeps) {
     const { isCloudEnabled, trialEndDate } = cloud;
     const { chatURL, trialBuffer } = this.config;
 
     if (
-      !security ||
       !isCloudEnabled ||
       !chatURL ||
       !trialEndDate ||
@@ -131,8 +130,7 @@ export class CloudChatPlugin implements Plugin<void, void, CloudChatSetupDeps, C
         },
       });
     } catch (e) {
-      // eslint-disable-next-line no-console
-      console.debug(
+      this.logger.debug(
         `[cloud.chat] Could not retrieve chat config: ${e.response.status} ${e.message}`,
         e
       );

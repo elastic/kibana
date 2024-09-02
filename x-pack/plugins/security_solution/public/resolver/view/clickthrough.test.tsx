@@ -279,11 +279,13 @@ describe.skip('Resolver, when using a generated tree with 20 generations, 4 chil
         timeRange,
         indexPatterns,
         limit,
+        agentId,
       }: {
         ids: string[];
         timeRange: TimeRange;
         indexPatterns: string[];
         limit: number;
+        agentId: string;
       }): Promise<SafeResolverEvent[]> => {
         if (throwError) {
           throw new Error(
@@ -291,7 +293,7 @@ describe.skip('Resolver, when using a generated tree with 20 generations, 4 chil
           );
         }
 
-        return generatorDAL.nodeData({ ids, timeRange, indexPatterns, limit });
+        return generatorDAL.nodeData({ ids, timeRange, indexPatterns, limit, agentId });
       };
 
       // create a simulator using most of the generator's data access layer, but let's use our nodeDataError

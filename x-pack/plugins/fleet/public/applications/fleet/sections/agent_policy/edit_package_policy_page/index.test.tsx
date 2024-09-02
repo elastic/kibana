@@ -8,8 +8,6 @@
 import React from 'react';
 import { fireEvent, act, waitFor } from '@testing-library/react';
 
-import { ExperimentalFeaturesService } from '../../../../../services';
-
 import type { TestRenderer } from '../../../../../mock';
 import { createFleetTestRendererMock } from '../../../../../mock';
 
@@ -24,12 +22,23 @@ import {
   sendCreateAgentPolicy,
   sendBulkGetAgentPolicies,
   useGetAgentPolicies,
+  useMultipleAgentPolicies,
+  useGetPackagePolicies,
 } from '../../../hooks';
 import { useGetOnePackagePolicy } from '../../../../integrations/hooks';
 
 import { EditPackagePolicyPage } from '.';
 
 type MockFn = jest.MockedFunction<any>;
+
+jest.mock('../create_package_policy_page/components/steps/components/use_policies', () => {
+  return {
+    ...jest.requireActual('../create_package_policy_page/components/steps/components/use_policies'),
+    useAllNonManagedAgentPolicies: jest
+      .fn()
+      .mockReturnValue([{ id: 'agent-policy-1', name: 'Agent policy 1' }]),
+  };
+});
 
 jest.mock('../../../hooks', () => {
   return {
@@ -39,6 +48,7 @@ jest.mock('../../../hooks', () => {
     sendGetOnePackagePolicy: jest.fn(),
     sendGetOneAgentPolicy: jest.fn(),
     sendUpgradePackagePolicyDryRun: jest.fn(),
+    useMultipleAgentPolicies: jest.fn(),
     sendGetPackageInfoByKey: jest.fn().mockImplementation((name, version) =>
       Promise.resolve({
         data: {
@@ -134,6 +144,18 @@ jest.mock('../../../hooks', () => {
     sendCreateAgentPolicy: jest.fn(),
     sendBulkGetAgentPolicies: jest.fn(),
     sendBulkInstallPackages: jest.fn(),
+    useGetPackagePolicies: jest.fn(),
+    useGetOutputs: jest.fn().mockReturnValue({
+      data: {
+        items: [
+          {
+            id: 'logstash-1',
+            type: 'logstash',
+          },
+        ],
+      },
+      isLoading: false,
+    }),
   };
 });
 
@@ -201,6 +223,10 @@ const TestComponent = async () => {
   };
 };
 
+const useMultipleAgentPoliciesMock = useMultipleAgentPolicies as jest.MockedFunction<
+  typeof useMultipleAgentPolicies
+>;
+
 describe('edit package policy page', () => {
   let testRenderer: TestRenderer;
   let renderResult: ReturnType<typeof testRenderer.render>;
@@ -219,8 +245,11 @@ describe('edit package policy page', () => {
         item: mockPackagePolicy,
       },
     });
-    (sendGetOneAgentPolicy as MockFn).mockResolvedValue({
-      data: { item: { id: 'agent-policy-1', name: 'Agent policy 1', namespace: 'default' } },
+    (useGetPackagePolicies as MockFn).mockReturnValue({
+      data: {
+        items: [mockPackagePolicy],
+      },
+      isLoading: false,
     });
     (sendUpgradePackagePolicyDryRun as MockFn).mockResolvedValue({
       data: [
@@ -250,6 +279,7 @@ describe('edit package policy page', () => {
       isLoading: false,
       resendRequest: jest.fn(),
     });
+    useMultipleAgentPoliciesMock.mockReturnValue({ canUseMultipleAgentPolicies: false });
   });
 
   it('should disable submit button on invalid form with empty package var', async () => {
@@ -486,15 +516,15 @@ describe('edit package policy page', () => {
 
   describe('modify agent policies', () => {
     beforeEach(() => {
-      jest
-        .spyOn(ExperimentalFeaturesService, 'get')
-        .mockReturnValue({ enableReusableIntegrationPolicies: true });
+      useMultipleAgentPoliciesMock.mockReturnValue({ canUseMultipleAgentPolicies: true });
+
       (sendGetAgentStatus as jest.MockedFunction<any>).mockResolvedValue({
         data: { results: { total: 0 } },
       });
+      jest.clearAllMocks();
     });
 
-    it('should create agent policy with sys monitoring when new hosts is selected', async () => {
+    it('should create agent policy with sys monitoring when new agent policy button is clicked', async () => {
       await act(async () => {
         render();
       });
@@ -507,7 +537,7 @@ describe('edit package policy page', () => {
       });
 
       await act(async () => {
-        fireEvent.click(renderResult.getByTestId('newHostsTab'));
+        fireEvent.click(renderResult.getByTestId('createNewAgentPolicyButton'));
       });
 
       await act(async () => {
@@ -520,7 +550,7 @@ describe('edit package policy page', () => {
       expect(sendCreateAgentPolicy as jest.MockedFunction<any>).toHaveBeenCalledWith(
         {
           description: '',
-          monitoring_enabled: ['logs', 'metrics'],
+          monitoring_enabled: ['logs', 'metrics', 'traces'],
           name: 'Agent policy 2',
           namespace: 'default',
           inactivity_timeout: 1209600,
@@ -532,6 +562,61 @@ describe('edit package policy page', () => {
         'nginx-1',
         expect.objectContaining({
           policy_ids: ['agent-policy-1', 'agent-policy-2'],
+        })
+      );
+    });
+
+    it('should not remove managed policy when policies are modified', async () => {
+      (sendBulkGetAgentPolicies as MockFn).mockImplementation((ids: string[]) => {
+        const items = [];
+        if (ids.includes('agent-policy-1')) {
+          items.push({ id: 'agent-policy-1', name: 'Agent policy 1', is_managed: true });
+        }
+        if (ids.includes('fleet-server-policy')) {
+          items.push({ id: 'fleet-server-policy', name: 'Fleet Server Policy' });
+        }
+        return Promise.resolve({
+          data: {
+            items,
+          },
+        });
+      });
+      (useGetAgentPolicies as MockFn).mockReturnValue({
+        data: {
+          items: [
+            { id: 'agent-policy-1', name: 'Agent policy 1', is_managed: true },
+            { id: 'fleet-server-policy', name: 'Fleet Server Policy' },
+          ],
+        },
+        isLoading: false,
+      });
+
+      await act(async () => {
+        render();
+      });
+      expect(renderResult.getByTestId('agentPolicyMultiSelect')).toBeInTheDocument();
+
+      await act(async () => {
+        renderResult.getByTestId('comboBoxToggleListButton').click();
+      });
+
+      expect(renderResult.queryByText('Agent policy 1')).toBeNull();
+
+      await act(async () => {
+        fireEvent.click(renderResult.getByText('Fleet Server Policy'));
+      });
+
+      await act(async () => {
+        fireEvent.click(renderResult.getByText(/Save integration/).closest('button')!);
+      });
+      await act(async () => {
+        fireEvent.click(renderResult.getAllByText(/Save and deploy changes/)[1].closest('button')!);
+      });
+
+      expect(sendUpdatePackagePolicy).toHaveBeenCalledWith(
+        'nginx-1',
+        expect.objectContaining({
+          policy_ids: ['agent-policy-1', 'fleet-server-policy'],
         })
       );
     });

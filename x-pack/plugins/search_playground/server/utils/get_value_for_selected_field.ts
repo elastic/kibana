@@ -14,8 +14,9 @@ export const getValueForSelectedField = (hit: SearchHit, path: string): string =
   }
 
   // for semantic_text matches
-  if (!!hit.inner_hits?.[`${path}.inference.chunks`]) {
-    return hit.inner_hits[`${path}.inference.chunks`].hits.hits
+  const innerHitPath = `${hit._index}.${path}`;
+  if (!!hit.inner_hits?.[innerHitPath]) {
+    return hit.inner_hits[innerHitPath].hits.hits
       .map((innerHit) => innerHit._source.text)
       .join('\n --- \n');
   }

@@ -12,7 +12,6 @@ import { join } from 'path';
 import _ from 'lodash';
 import type { RecursivePartial } from '@kbn/utility-types';
 import { FunctionDefinition } from '../src/definitions/types';
-import { esqlToKibanaType } from '../src/shared/esql_to_kibana_type';
 
 const aliasTable: Record<string, string[]> = {
   to_version: ['to_ver'],
@@ -26,7 +25,7 @@ const aliasTable: Record<string, string[]> = {
 const aliases = new Set(Object.values(aliasTable).flat());
 
 const evalSupportedCommandsAndOptions = {
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
 };
 
@@ -62,7 +61,7 @@ const validateLogFunctions = `(fnDef: ESQLFunction) => {
   // do not really care here about the base and field
   // just need to check both values are not negative
   for (const arg of fnDef.args) {
-    if (isLiteralItem(arg) && arg.value < 0) {
+    if (isLiteralItem(arg) && Number(arg.value) < 0) {
       messages.push({
         type: 'warning' as const,
         code: 'logOfNegativeValue',
@@ -145,6 +144,39 @@ const dateDiffOptions = [
   'ns',
 ];
 
+const dateExtractOptions = [
+  'ALIGNED_DAY_OF_WEEK_IN_MONTH',
+  'ALIGNED_DAY_OF_WEEK_IN_YEAR',
+  'ALIGNED_WEEK_OF_MONTH',
+  'ALIGNED_WEEK_OF_YEAR',
+  'AMPM_OF_DAY',
+  'CLOCK_HOUR_OF_AMPM',
+  'CLOCK_HOUR_OF_DAY',
+  'DAY_OF_MONTH',
+  'DAY_OF_WEEK',
+  'DAY_OF_YEAR',
+  'EPOCH_DAY',
+  'ERA',
+  'HOUR_OF_AMPM',
+  'HOUR_OF_DAY',
+  'INSTANT_SECONDS',
+  'MICRO_OF_DAY',
+  'MICRO_OF_SECOND',
+  'MILLI_OF_DAY',
+  'MILLI_OF_SECOND',
+  'MINUTE_OF_DAY',
+  'MINUTE_OF_HOUR',
+  'MONTH_OF_YEAR',
+  'NANO_OF_DAY',
+  'NANO_OF_SECOND',
+  'OFFSET_SECONDS',
+  'PROLEPTIC_MONTH',
+  'SECOND_OF_DAY',
+  'SECOND_OF_MINUTE',
+  'YEAR',
+  'YEAR_OF_ERA',
+];
+
 /**
  * Enrichments for function definitions
  *
@@ -168,8 +200,7 @@ const functionEnrichments: Record<string, RecursivePartial<FunctionDefinition>> 
   date_extract: {
     signatures: [
       {
-        // override the first param as type chrono_literal
-        params: [{ type: 'chrono_literal' }],
+        params: [{ literalOptions: dateExtractOptions }],
       },
     ],
   },
@@ -182,11 +213,13 @@ const functionEnrichments: Record<string, RecursivePartial<FunctionDefinition>> 
     ],
   },
   mv_sort: {
-    signatures: new Array(6).fill({
+    signatures: new Array(9).fill({
       params: [{}, { literalOptions: ['asc', 'desc'] }],
     }),
   },
 };
+
+const convertDateTime = (s: string) => (s === 'datetime' ? 'date' : s);
 
 /**
  * Builds a function definition object from a row of the "meta functions" table
@@ -208,10 +241,10 @@ function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): Funct
         ...signature,
         params: signature.params.map((param: any) => ({
           ...param,
-          type: esqlToKibanaType(param.type),
+          type: convertDateTime(param.type),
           description: undefined,
         })),
-        returnType: esqlToKibanaType(signature.returnType),
+        returnType: convertDateTime(signature.returnType),
         variadic: undefined, // we don't support variadic property
         minParams: signature.variadic
           ? signature.params.filter((param: any) => !param.optional).length
@@ -347,7 +380,11 @@ import type { FunctionDefinition } from './types';
 
   const evalFunctionDefinitions: FunctionDefinition[] = [];
   for (const ESDefinition of ESFunctionDefinitions) {
-    if (aliases.has(ESDefinition.name) || excludedFunctions.has(ESDefinition.name)) {
+    if (
+      aliases.has(ESDefinition.name) ||
+      excludedFunctions.has(ESDefinition.name) ||
+      ESDefinition.type !== 'eval'
+    ) {
       continue;
     }
 

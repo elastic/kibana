@@ -2,7 +2,11 @@
 
 set -euo pipefail
 
-source .buildkite/scripts/common/util.sh
+# This script is part of checks.sh in the PR pipeline but is called directly in the FIPS pipeline, so we need to bootstrap
+if [[ -z "${BASH_SOURCE[1]+x}" || "${BASH_SOURCE[1]}" != *"checks.sh"* ]]; then
+  export DISABLE_BOOTSTRAP_VALIDATION=false
+  .buildkite/scripts/bootstrap.sh
+fi
 
 .buildkite/scripts/download_build_artifacts.sh
 

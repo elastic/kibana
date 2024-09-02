@@ -14,9 +14,9 @@ import {
   savedObjectsClientMock,
   savedObjectsServiceMock,
   loggingSystemMock,
+  securityServiceMock,
 } from '@kbn/core/server/mocks';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
-import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { RULES_SETTINGS_SAVED_OBJECT_TYPE } from '../common';
 
@@ -25,11 +25,12 @@ jest.mock('./rules_settings_client');
 const savedObjectsClient = savedObjectsClientMock.create();
 const savedObjectsService = savedObjectsServiceMock.createInternalStartContract();
 
-const securityPluginStart = securityMock.createStart();
+const securityService = securityServiceMock.createStart();
 
 const rulesSettingsClientFactoryParams: jest.Mocked<RulesSettingsClientFactoryOpts> = {
   logger: loggingSystemMock.create().get(),
   savedObjectsService,
+  securityService,
   isServerless: false,
 };
 
@@ -39,10 +40,7 @@ beforeEach(() => {
 
 test('creates a rules settings client with proper constructor arguments when security is enabled', async () => {
   const factory = new RulesSettingsClientFactory();
-  factory.initialize({
-    securityPluginStart,
-    ...rulesSettingsClientFactoryParams,
-  });
+  factory.initialize(rulesSettingsClientFactoryParams);
   const request = mockRouter.createKibanaRequest();
 
   savedObjectsService.getScopedClient.mockReturnValue(savedObjectsClient);
@@ -88,10 +86,7 @@ test('creates a rules settings client with proper constructor arguments', async 
 
 test('creates an unauthorized rules settings client', async () => {
   const factory = new RulesSettingsClientFactory();
-  factory.initialize({
-    securityPluginStart,
-    ...rulesSettingsClientFactoryParams,
-  });
+  factory.initialize(rulesSettingsClientFactoryParams);
   const request = mockRouter.createKibanaRequest();
 
   savedObjectsService.getScopedClient.mockReturnValue(savedObjectsClient);
@@ -128,10 +123,7 @@ test('getUserName() returns null when security is disabled', async () => {
 
 test('getUserName() returns a name when security is enabled', async () => {
   const factory = new RulesSettingsClientFactory();
-  factory.initialize({
-    securityPluginStart,
-    ...rulesSettingsClientFactoryParams,
-  });
+  factory.initialize(rulesSettingsClientFactoryParams);
   const request = mockRouter.createKibanaRequest();
 
   factory.createWithAuthorization(request);
@@ -139,7 +131,7 @@ test('getUserName() returns a name when security is enabled', async () => {
   const constructorCall =
     jest.requireMock('./rules_settings_client').RulesSettingsClient.mock.calls[0][0];
 
-  securityPluginStart.authc.getCurrentUser.mockReturnValueOnce({
+  securityService.authc.getCurrentUser.mockReturnValueOnce({
     username: 'testname',
   } as unknown as AuthenticatedUser);
   const userNameResult = await constructorCall.getUserName();

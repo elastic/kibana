@@ -31,7 +31,7 @@ const jsFilename = 'kbn-ui-shared-deps-src.js';
 const cssDistFilename = 'kbn-ui-shared-deps-src.css';
 
 /**
- * Externals mapping inteded to be used in a webpack config
+ * Externals mapping intended to be used in a webpack config
  */
 const externals = {
   /**
@@ -61,6 +61,7 @@ const externals = {
   redux: '__kbnSharedDeps__.Redux',
   immer: '__kbnSharedDeps__.Immer',
   reselect: '__kbnSharedDeps__.Reselect',
+  'fastest-levenshtein': '__kbnSharedDeps__.FastestLevenshtein',
 
   /**
    * big deps which are locked to a single version
@@ -88,6 +89,7 @@ const externals = {
   tslib: '__kbnSharedDeps__.TsLib',
   uuid: '__kbnSharedDeps__.Uuid',
   '@kbn/analytics': '__kbnSharedDeps__.KbnAnalytics',
+  '@kbn/crypto-browser': '__kbnSharedDeps__.KbnCryptoBrowser',
   '@kbn/es-query': '__kbnSharedDeps__.KbnEsQuery',
   '@kbn/search-errors': '__kbnSharedDeps__.KbnSearchErrors',
   '@kbn/std': '__kbnSharedDeps__.KbnStd',
@@ -100,6 +102,8 @@ const externals = {
   '@tanstack/react-query-devtools': '__kbnSharedDeps__.ReactQueryDevtools',
   '@kbn/code-editor': '__kbnSharedDeps__.KbnCodeEditor',
   '@kbn/esql-ast': '__kbnSharedDeps__.KbnEsqlAst',
+  '@kbn/ebt-tools': '__kbnSharedDeps__.KbnEbtTools',
+  '@elastic/apm-rum-core': '__kbnSharedDeps__.ElasticApmRumCore',
 };
 
 module.exports = { distDir, jsFilename, cssDistFilename, externals };

@@ -9,7 +9,7 @@
 jest.mock('../../..');
 
 import { IUiSettingsClient } from '@kbn/core/public';
-import { getUiSettingFn } from '../ui_setting';
+import { getUiSettingFnBrowser as getUiSettingFn } from '../ui_setting';
 import { functionWrapper } from './utils';
 
 describe('uiSetting', () => {

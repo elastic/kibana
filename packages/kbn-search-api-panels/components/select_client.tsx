@@ -97,26 +97,23 @@ export const SelectClientPanel: FC<PropsWithChildren<SelectClientPanelProps>> = 
   return (
     <OverviewPanel
       description={
-        <FormattedMessage
-          id="searchApiPanels.welcomeBanner.selectClient.description"
-          defaultMessage="Elastic builds and maintains clients in several popular languages and our community has contributed many more. Select your favorite language client or dive into the {console} to get started."
-          values={{
-            console: (
-              <TryInConsoleButton
-                application={application}
-                consolePlugin={consolePlugin}
-                sharePlugin={sharePlugin}
-                content={i18n.translate(
-                  'searchApiPanels.welcomeBanner.selectClient.description.console.link',
-                  {
-                    defaultMessage: 'Console',
-                  }
-                )}
-                link
-              />
-            ),
-          }}
-        />
+        <EuiFlexGroup direction="column" alignItems="flexStart" justifyContent="flexStart">
+          <EuiFlexItem>
+            <FormattedMessage
+              id="searchApiPanels.welcomeBanner.selectClient.description"
+              defaultMessage="Elastic builds and maintains clients in several popular languages and our community has contributed many more. Select your favorite language client or dive into the console to get started."
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <TryInConsoleButton
+              application={application}
+              consolePlugin={consolePlugin}
+              sharePlugin={sharePlugin}
+              type="button"
+              showIcon={false}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       }
       leftPanelContent={isPanelLeft ? panelContent : undefined}
       rightPanelContent={!isPanelLeft ? panelContent : undefined}

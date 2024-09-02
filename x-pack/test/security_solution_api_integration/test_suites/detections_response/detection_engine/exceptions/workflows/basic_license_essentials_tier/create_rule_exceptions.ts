@@ -45,8 +45,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const log = getService('log');
   const es = getService('es');
-  const config = getService('config');
-  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
+  const utils = getService('securitySolutionUtils');
 
   describe('@serverless @serverlessQA @ess create "rule_default" exceptions', () => {
     before(async () => {
@@ -61,7 +60,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('creates and associates a `rule_default` exception list to a rule if one not already found', async () => {
       const rule = await createRule(supertest, log, getSimpleRule('rule-2'));
-
+      const username = await utils.getUsername();
       const { body: items } = await supertest
         .post(`${DETECTION_ENGINE_RULES_URL}/${rule.id}/exceptions`)
         .set('kbn-xsrf', 'true')
@@ -82,7 +81,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(itemsWithoutServerGeneratedValues).to.eql([
         {
           comments: [],
-          created_by: ELASTICSEARCH_USERNAME,
+          created_by: username,
           description: 'Exception item for rule default exception list',
           entries: [
             {
@@ -98,13 +97,14 @@ export default ({ getService }: FtrProviderContext) => {
           os_types: [],
           tags: [],
           type: 'simple',
-          updated_by: ELASTICSEARCH_USERNAME,
+          updated_by: username,
         },
       ]);
       expect(udpatedRule.exceptions_list.some((list) => list.type === 'rule_default')).to.eql(true);
     });
 
     it('creates and associates a `rule_default` exception list to a rule even when rule has non existent default list attached', async () => {
+      const username = await utils.getUsername();
       // create a rule that has a non existent default exception list
       const rule = await createRule(supertest, log, {
         ...getSimpleRule('rule-5'),
@@ -146,7 +146,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(itemsWithoutServerGeneratedValues).to.eql([
         {
           comments: [],
-          created_by: ELASTICSEARCH_USERNAME,
+          created_by: username,
           description: 'Exception item for rule default exception list',
           entries: [
             {
@@ -162,12 +162,13 @@ export default ({ getService }: FtrProviderContext) => {
           os_types: [],
           tags: [],
           type: 'simple',
-          updated_by: ELASTICSEARCH_USERNAME,
+          updated_by: username,
         },
       ]);
     });
 
     it('adds exception items to rule default exception list', async () => {
+      const username = await utils.getUsername();
       // create default exception list
       const exceptionList: CreateExceptionListSchema = {
         ...getCreateExceptionListMinimalSchemaMock(),
@@ -208,7 +209,7 @@ export default ({ getService }: FtrProviderContext) => {
       );
       expect(itemsWithoutServerGeneratedValues[0]).to.eql({
         comments: [],
-        created_by: ELASTICSEARCH_USERNAME,
+        created_by: username,
         description: 'Exception item for rule default exception list',
         entries: [
           {
@@ -224,7 +225,7 @@ export default ({ getService }: FtrProviderContext) => {
         os_types: [],
         tags: [],
         type: 'simple',
-        updated_by: ELASTICSEARCH_USERNAME,
+        updated_by: username,
       });
     });
 

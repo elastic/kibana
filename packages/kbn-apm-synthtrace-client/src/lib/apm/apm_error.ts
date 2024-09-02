@@ -25,9 +25,11 @@ export class ApmError extends Serializable<ApmFields> {
       this.fields['error.grouping_name'] || this.fields['error.exception']?.[0]?.message;
 
     const [data] = super.serialize();
-    data['error.grouping_key'] = errorMessage
-      ? generateLongIdWithSeed(errorMessage)
-      : generateLongId();
+
+    data['error.grouping_key'] =
+      this.fields['error.grouping_key'] ??
+      (errorMessage ? generateLongIdWithSeed(errorMessage) : generateLongId());
+
     return [data];
   }
 

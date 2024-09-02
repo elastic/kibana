@@ -19,7 +19,7 @@ import { GroupListView } from './group_list_view';
 interface Props {
   groupBy: GroupByField;
   kqlQuery?: string;
-  sloView: SLOView;
+  view: SLOView;
   sort?: SortField;
   direction?: SortDirection;
   filters?: Filter[];
@@ -29,7 +29,7 @@ interface Props {
 
 export function GroupView({
   kqlQuery,
-  sloView,
+  view,
   sort,
   direction,
   groupBy,
@@ -83,7 +83,7 @@ export function GroupView({
           <GroupListView
             groupBy={result.groupBy}
             key={result.group}
-            sloView={sloView}
+            view={view}
             group={result.group}
             kqlQuery={kqlQuery}
             sort={sort}

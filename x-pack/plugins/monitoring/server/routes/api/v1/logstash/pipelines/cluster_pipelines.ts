@@ -35,6 +35,9 @@ export function logstashClusterPipelinesRoute(server: MonitoringCore) {
       params: validateParams,
       body: validateBody,
     },
+    options: {
+      access: 'internal',
+    },
     async handler(req) {
       const {
         pagination,

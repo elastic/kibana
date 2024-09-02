@@ -13,7 +13,7 @@ import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { RulesClient, PartialRule } from '@kbn/alerting-plugin/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
-import { internalRuleToAPIResponse } from '../../normalization/rule_converters';
+import { internalRuleToAPIResponse } from '../detection_rules_client/converters/internal_rule_to_api_response';
 import type { RuleParams } from '../../../rule_schema';
 import { hasValidRuleType } from '../../../rule_schema';
 import { findRules } from '../search/find_rules';

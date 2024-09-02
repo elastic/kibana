@@ -20,7 +20,7 @@ import {
   LegendValue,
 } from '@elastic/charts';
 import { EuiPageSection } from '@elastic/eui';
-import { useTimelineChartTheme } from '../../../../utils/use_timeline_chart_theme';
+import { useTimelineChartTheme } from '../../../../hooks/use_timeline_chart_theme';
 import { SeriesChart } from './series_chart';
 import {
   getFormatter,
@@ -31,7 +31,7 @@ import {
   seriesHasLessThen2DataPoints,
 } from './helpers';
 import { ErrorMessage } from './error_message';
-import { useKibanaUiSetting } from '../../../../utils/use_kibana_ui_setting';
+import { useKibanaUiSetting } from '../../../../hooks/use_kibana_ui_setting';
 import { VisSectionProps } from '../types';
 
 export const ChartSectionVis = ({

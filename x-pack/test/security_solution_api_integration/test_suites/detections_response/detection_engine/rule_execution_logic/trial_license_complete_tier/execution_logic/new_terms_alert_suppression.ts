@@ -56,7 +56,8 @@ export default ({ getService }: FtrProviderContext) => {
 
   const historicalWindowStart = '2019-10-13T05:00:04.000Z';
 
-  describe('@ess @serverless @serverlessQA New terms type rules, alert suppression', () => {
+  // NOTE: Add to second quality gate after feature is GA
+  describe('@ess @serverless New terms type rules, alert suppression', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
     });
@@ -122,7 +123,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       const createdRule = await createRule(supertest, log, rule);
       const alerts = await getOpenAlerts(supertest, log, es, createdRule);
-      expect(alerts.hits.hits.length).toEqual(1);
+      expect(alerts.hits.hits).toHaveLength(1);
 
       expect(alerts.hits.hits[0]._source).toEqual(
         expect.objectContaining({
@@ -231,7 +232,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(alerts.hits.hits).toHaveLength(1);
       // Close the alert. Subsequent rule executions should ignore this closed alert
       // for suppression purposes.
-      const alertIds = alerts.hits.hits.map((alert) => alert._id);
+      const alertIds = alerts.hits.hits.map((alert) => alert._id!);
       await supertest
         .post(DETECTION_ENGINE_ALERTS_STATUS_URL)
         .set('kbn-xsrf', 'true')

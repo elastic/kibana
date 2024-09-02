@@ -13,7 +13,8 @@
       "observabilityShared",
       "discover",
       "share",
-      "fleet"
+      "fleet",
+      "customIntegrations"
     ],
     "optionalPlugins": ["cloud", "cloudExperiments", "usageCollection"],
     "requiredBundles": ["kibanaReact"],

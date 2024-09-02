@@ -15,7 +15,7 @@ import {
   getUpdateConversationSchemaMock,
 } from '../../__mocks__/conversations_schema.mock';
 import { appendConversationMessageRoute } from './append_conversation_messages_route';
-import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
+import { AuthenticatedUser } from '@kbn/core-security-common';
 
 describe('Append conversation messages route', () => {
   let server: ReturnType<typeof serverMock.create>;

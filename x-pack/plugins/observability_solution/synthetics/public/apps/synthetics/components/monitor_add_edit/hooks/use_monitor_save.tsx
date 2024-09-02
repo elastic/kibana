@@ -45,7 +45,7 @@ export const useMonitorSave = ({ monitorData }: { monitorData?: SyntheticsMonito
   }, [monitorData]);
 
   useEffect(() => {
-    const { core, toasts } = kibanaService;
+    const { coreStart, toasts } = kibanaService;
 
     if (status === FETCH_STATUS.FAILURE && error) {
       toasts.addError(
@@ -64,7 +64,7 @@ export const useMonitorSave = ({ monitorData }: { monitorData?: SyntheticsMonito
           <p data-test-subj="synthetcsMonitorSaveSubtext">
             {monitorId ? MONITOR_UPDATED_SUCCESS_LABEL_SUBTEXT : MONITOR_SUCCESS_LABEL_SUBTEXT}
           </p>,
-          core
+          coreStart
         ),
         toastLifeTimeMs: 3000,
       });

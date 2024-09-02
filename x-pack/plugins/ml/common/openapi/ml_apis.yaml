@@ -41,44 +41,44 @@ paths:
               schema:
                 $ref: '#/components/schemas/mlSync4xxResponse'
 
-  /s/{spaceId}/api/ml/saved_objects/sync:
-    get:
-      summary: Sync saved objects
-      description: >
-        Synchronizes Kibana saved objects for machine learning jobs and trained models.
-        You must have `all` privileges for the **Machine Learning** feature in the **Analytics** section of the Kibana feature privileges.
-        This API runs automatically when you start Kibana and periodically thereafter.
-      operationId: mlSyncWithSpaceId
-      tags:
-        - ml
-      parameters:
-        - $ref: '#/components/parameters/spaceParam'
-        - $ref: '#/components/parameters/simulateParam'
-      responses:
-        '200':
-          description: Indicates a successful call
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/mlSync200Response'
-              examples:
-                syncExample:
-                  $ref: '#/components/examples/mlSyncExample'
-        '401':
-          description: Authorization information is missing or invalid.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/mlSync4xxResponse'
+  # /s/{spaceId}/api/ml/saved_objects/sync:
+    # get:
+    #   summary: Sync saved objects
+    #   description: >
+    #     Synchronizes Kibana saved objects for machine learning jobs and trained models.
+    #     You must have `all` privileges for the **Machine Learning** feature in the **Analytics** section of the Kibana feature privileges.
+    #     This API runs automatically when you start Kibana and periodically thereafter.
+    #   operationId: mlSyncWithSpaceId
+    #   tags:
+    #     - ml
+    #   parameters:
+    #     - $ref: '#/components/parameters/spaceParam'
+    #     - $ref: '#/components/parameters/simulateParam'
+    #   responses:
+    #     '200':
+    #       description: Indicates a successful call
+    #       content:
+    #         application/json:
+    #           schema:
+    #             $ref: '#/components/schemas/mlSync200Response'
+    #           examples:
+    #             syncExample:
+    #               $ref: '#/components/examples/mlSyncExample'
+    #     '401':
+    #       description: Authorization information is missing or invalid.
+    #       content:
+    #         application/json:
+    #           schema:
+    #             $ref: '#/components/schemas/mlSync4xxResponse'
 components:
  parameters:
-  spaceParam:
-    in: path
-    name: spaceId
-    description: An identifier for the space. If `/s/` and the identifier are omitted from the path, the default space is used.
-    required: true
-    schema:
-      type: string
+  # spaceParam:
+  #   in: path
+  #   name: spaceId
+  #   description: An identifier for the space. If `/s/` and the identifier are omitted from the path, the default space is used.
+  #   required: true
+  #   schema:
+  #     type: string
   simulateParam:
     in: query
     name: simulate
@@ -87,14 +87,6 @@ components:
     schema:
       type: boolean
     example: 'true'
- securitySchemes:
-  basicAuth:
-    type: http
-    scheme: basic
-  apiKeyAuth:
-    type: apiKey
-    in: header
-    name: ApiKey
  schemas:
     mlSyncResponseSuccess:
       type: boolean
@@ -212,6 +204,3 @@ components:
           "datafeedsAdded": {},
           "datafeedsRemoved": {}
         }
-security:
-  - basicAuth: [ ]
-  - apiKeyAuth: [ ]

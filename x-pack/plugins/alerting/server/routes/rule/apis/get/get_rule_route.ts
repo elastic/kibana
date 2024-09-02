@@ -8,7 +8,7 @@
 import { IRouter, RouteConfigOptions, RouteMethod } from '@kbn/core/server';
 import { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
-import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
+import { RuleParamsV1, ruleResponseSchemaV1 } from '../../../../../common/routes/rule/response';
 import { Rule } from '../../../../application/rule/types';
 import {
   AlertingRequestHandlerContext,
@@ -42,7 +42,15 @@ const buildGetRuleRoute = ({
       path,
       options,
       validate: {
-        params: getRuleRequestParamsSchemaV1,
+        request: {
+          params: getRuleRequestParamsSchemaV1,
+        },
+        response: {
+          200: {
+            body: () => ruleResponseSchemaV1,
+            description: 'Indicates a successful call.',
+          },
+        },
       },
     },
     router.handleLegacyErrors(
@@ -79,6 +87,7 @@ export const getRuleRoute = (
     options: {
       access: 'public',
       summary: `Get rule details`,
+      tags: ['oas-tag:alerting'],
     },
   });
 

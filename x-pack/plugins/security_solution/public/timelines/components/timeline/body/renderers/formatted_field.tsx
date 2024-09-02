@@ -12,17 +12,13 @@ import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { isEmpty, isNumber } from 'lodash/fp';
 import React from 'react';
 import { css } from '@emotion/css';
-
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import type { BrowserField } from '../../../../../common/containers/source';
+import type { FieldSpec } from '@kbn/data-plugin/common';
+import { getAgentTypeForAgentIdField } from '../../../../../common/lib/endpoint/utils/get_agent_type_for_agent_id_field';
 import {
   ALERT_HOST_CRITICALITY,
   ALERT_USER_CRITICALITY,
 } from '../../../../../../common/field_maps/field_names';
-import {
-  AgentStatus,
-  EndpointAgentStatusById,
-} from '../../../../../common/components/endpoint/agents/agent_status';
+import { AgentStatus } from '../../../../../common/components/endpoint/agents/agent_status';
 import { INDICATOR_REFERENCE } from '../../../../../../common/cti/constants';
 import { DefaultDraggable } from '../../../../../common/components/draggables';
 import { Bytes, BYTES_FORMAT } from './bytes';
@@ -53,7 +49,6 @@ import { RuleStatus } from './rule_status';
 import { HostName } from './host_name';
 import { UserName } from './user_name';
 import { AssetCriticalityLevel } from './asset_criticality_level';
-import { RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD } from '../../../../../../common/endpoint/service/response_actions/constants';
 
 // simple black-list to prevent dragging and dropping fields such as message name
 const columnNamesNotDraggable = [MESSAGE_FIELD_NAME];
@@ -75,7 +70,7 @@ const FormattedFieldValueComponent: React.FC<{
   isObjectArray?: boolean;
   isUnifiedDataTable?: boolean;
   fieldFormat?: string;
-  fieldFromBrowserField?: BrowserField;
+  fieldFromBrowserField?: Partial<FieldSpec>;
   fieldName: string;
   fieldType?: string;
   isButton?: boolean;
@@ -107,8 +102,6 @@ const FormattedFieldValueComponent: React.FC<{
   value,
   linkValue,
 }) => {
-  const agentStatusClientEnabled = useIsExperimentalFeatureEnabled('agentStatusClientEnabled');
-
   if (isObjectArray || asPlainText) {
     return <span data-test-subj={`formatted-field-${fieldName}`}>{value}</span>;
   } else if (fieldType === IP_FIELD_TYPE) {
@@ -274,11 +267,6 @@ const FormattedFieldValueComponent: React.FC<{
         iconSide={isButton ? 'right' : undefined}
       />
     );
-  } else if (
-    fieldName === AGENT_STATUS_FIELD_NAME &&
-    fieldFromBrowserField?.name === RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.sentinel_one
-  ) {
-    return <AgentStatus agentId={String(value ?? '')} agentType="sentinel_one" />;
   } else if (fieldName === ALERT_HOST_CRITICALITY || fieldName === ALERT_USER_CRITICALITY) {
     return (
       <AssetCriticalityLevel
@@ -292,15 +280,10 @@ const FormattedFieldValueComponent: React.FC<{
       />
     );
   } else if (fieldName === AGENT_STATUS_FIELD_NAME) {
-    return agentStatusClientEnabled ? (
+    return (
       <AgentStatus
         agentId={String(value ?? '')}
-        agentType="endpoint"
-        data-test-subj="endpointHostAgentStatus"
-      />
-    ) : (
-      <EndpointAgentStatusById
-        endpointAgentId={String(value ?? '')}
+        agentType={getAgentTypeForAgentIdField(fieldFromBrowserField?.name ?? '')}
         data-test-subj="endpointHostAgentStatus"
       />
     );

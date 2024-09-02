@@ -160,8 +160,9 @@ export const DevToolsSettingsModal = (props: DevToolsSettingsModalProps) => {
     (isEnabled: boolean) => {
       if (props.editorInstance) {
         unregisterCommands(props.editorInstance);
-        setIsKeyboardShortcutsEnabled(isEnabled);
       }
+
+      setIsKeyboardShortcutsEnabled(isEnabled);
     },
     [props.editorInstance]
   );
@@ -319,6 +320,7 @@ export const DevToolsSettingsModal = (props: DevToolsSettingsModalProps) => {
         >
           <EuiSwitch
             checked={isKeyboardShortcutsEnabled}
+            data-test-subj="enableKeyboardShortcuts"
             label={
               <FormattedMessage
                 defaultMessage="Enable keyboard shortcuts"

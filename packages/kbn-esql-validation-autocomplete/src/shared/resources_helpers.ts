@@ -26,18 +26,17 @@ export function getFieldsByTypeHelper(queryText: string, resourceRetriever?: ESQ
     }
   };
   return {
-    getFieldsByType: async (expectedType: string | string[] = 'any', ignored: string[] = []) => {
+    getFieldsByType: async (
+      expectedType: string | string[] = 'any',
+      ignored: string[] = []
+    ): Promise<ESQLRealField[]> => {
       const types = Array.isArray(expectedType) ? expectedType : [expectedType];
       await getFields();
       return (
-        Array.from(cacheFields.values())
-          ?.filter(({ name, type }) => {
-            const ts = Array.isArray(type) ? type : [type];
-            return (
-              !ignored.includes(name) && ts.some((t) => types[0] === 'any' || types.includes(t))
-            );
-          })
-          .map(({ name }) => name) || []
+        Array.from(cacheFields.values())?.filter(({ name, type }) => {
+          const ts = Array.isArray(type) ? type : [type];
+          return !ignored.includes(name) && ts.some((t) => types[0] === 'any' || types.includes(t));
+        }) || []
       );
     },
     getFieldsMap: async () => {

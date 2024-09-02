@@ -73,13 +73,13 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
   );
 
   const convertThreshold = useCallback(
-    (enteredThreshold) =>
+    (enteredThreshold: any) =>
       isMetricPct ? enteredThreshold.map((v: number) => pctToDecimal(v)) : enteredThreshold,
     [isMetricPct]
   );
 
   const updateThreshold = useCallback(
-    (enteredThreshold) => {
+    (enteredThreshold: any) => {
       const t = convertThreshold(enteredThreshold);
       if (t.join() !== expression.threshold.join()) {
         setRuleParams(expressionId, { ...expression, threshold: t });
@@ -89,7 +89,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
   );
 
   const handleCustomMetricChange = useCallback(
-    (exp) => {
+    (exp: any) => {
       setRuleParams(expressionId, exp);
     },
     [expressionId, setRuleParams]
@@ -112,6 +112,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
 
   const normalizedFields = fields.map((f) => ({
     normalizedType: f.type,
+    esTypes: f.esTypes,
     name: f.name,
   }));
 
@@ -311,6 +312,15 @@ export const aggregationType: { [key: string]: AggregationType } = {
     ),
     fieldRequired: false,
     value: Aggregators.RATE,
+    validNormalizedTypes: ['number'],
+  },
+  last_value: {
+    text: i18n.translate(
+      'xpack.observability..customThreshold.rule.alertFlyout.aggregationText.last_value',
+      { defaultMessage: 'Last value' }
+    ),
+    fieldRequired: false,
+    value: Aggregators.LAST_VALUE,
     validNormalizedTypes: ['number'],
   },
 };

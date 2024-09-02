@@ -7,7 +7,8 @@
  */
 
 import { EuiBadge } from '@elastic/eui';
-import type { DataTableRecord } from '@kbn/discover-utils';
+import { getFieldValue } from '@kbn/discover-utils';
+import type { RowControlColumn } from '@kbn/unified-data-table';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -18,6 +19,7 @@ import { DataSourceCategory, DataSourceProfileProvider } from '../../profiles';
 
 export const exampleDataSourceProfileProvider: DataSourceProfileProvider = {
   profileId: 'example-data-source-profile',
+  isExperimental: true,
   profile: {
     getCellRenderers: (prev) => () => ({
       ...prev(),
@@ -52,6 +54,66 @@ export const exampleDataSourceProfileProvider: DataSourceProfileProvider = {
         );
       },
     }),
+    getDocViewer: (prev) => (params) => {
+      const recordId = params.record.id;
+      const prevValue = prev(params);
+      return {
+        title: `Record #${recordId}`,
+        docViewsRegistry: (registry) => {
+          registry.add({
+            id: 'doc_view_example',
+            title: 'Example',
+            order: 0,
+            component: () => (
+              <div data-test-subj="exampleDataSourceProfileDocView">Example Doc View</div>
+            ),
+          });
+
+          return prevValue.docViewsRegistry(registry);
+        },
+      };
+    },
+    getRowAdditionalLeadingControls: (prev) => (params) => {
+      const additionalControls = prev(params) || [];
+
+      return [
+        ...additionalControls,
+        ...['visBarVerticalStacked', 'heart', 'inspect'].map(
+          (iconType, index): RowControlColumn => ({
+            id: `exampleControl_${iconType}`,
+            headerAriaLabel: `Example Row Control ${iconType}`,
+            renderControl: (Control, rowProps) => {
+              return (
+                <Control
+                  data-test-subj={`exampleLogsControl_${iconType}`}
+                  label={`Example ${iconType}`}
+                  iconType={iconType}
+                  onClick={() => {
+                    alert(`Example "${iconType}" control clicked. Row index: ${rowProps.rowIndex}`);
+                  }}
+                />
+              );
+            },
+          })
+        ),
+      ];
+    },
+    getDefaultAppState: () => () => ({
+      columns: [
+        {
+          name: '@timestamp',
+          width: 212,
+        },
+        {
+          name: 'log.level',
+          width: 150,
+        },
+        {
+          name: 'message',
+        },
+      ],
+      rowHeight: 5,
+    }),
   },
   resolve: (params) => {
     let indexPattern: string | undefined;
@@ -75,9 +137,4 @@ export const exampleDataSourceProfileProvider: DataSourceProfileProvider = {
       context: { category: DataSourceCategory.Logs },
     };
   },
-};
-
-const getFieldValue = (record: DataTableRecord, field: string) => {
-  const value = record.flattened[field];
-  return Array.isArray(value) ? value[0] : value;
 };

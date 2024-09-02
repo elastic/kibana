@@ -12,14 +12,15 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
 import { appContextService } from '../../../../app_context';
 import { createAppContextStartContractMock } from '../../../../../mocks';
-import { installKibanaAssetsAndReferences } from '../../../kibana/assets/install';
+import { installKibanaAssetsAndReferencesMultispace } from '../../../kibana/assets/install';
 
 jest.mock('../../../kibana/assets/install');
 
 import { stepInstallKibanaAssets } from './step_install_kibana_assets';
 
-const mockedInstallKibanaAssetsAndReferences =
-  installKibanaAssetsAndReferences as jest.MockedFunction<typeof installKibanaAssetsAndReferences>;
+const mockedInstallKibanaAssetsAndReferencesMultispace = jest.mocked(
+  installKibanaAssetsAndReferencesMultispace
+);
 
 describe('stepInstallKibanaAssets', () => {
   let soClient: jest.Mocked<SavedObjectsClientContract>;
@@ -42,8 +43,6 @@ describe('stepInstallKibanaAssets', () => {
   it('Should call installKibanaAssetsAndReferences', async () => {
     const installationPromise = stepInstallKibanaAssets({
       savedObjectsClient: soClient,
-      // @ts-ignore
-      savedObjectsImporter: jest.fn(),
       esClient,
       logger: loggerMock.create(),
       packageInstallContext: {
@@ -68,14 +67,14 @@ describe('stepInstallKibanaAssets', () => {
     });
 
     await expect(installationPromise).resolves.not.toThrowError();
-    expect(mockedInstallKibanaAssetsAndReferences).toBeCalledTimes(1);
+    expect(mockedInstallKibanaAssetsAndReferencesMultispace).toBeCalledTimes(1);
   });
   esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
   appContextService.start(createAppContextStartContractMock());
 
   it('Should correctly handle errors', async () => {
     // force errors from this function
-    mockedInstallKibanaAssetsAndReferences.mockImplementation(async () => {
+    mockedInstallKibanaAssetsAndReferencesMultispace.mockImplementation(async () => {
       throw new Error('mocked async error A: should be caught');
     });
 

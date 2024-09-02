@@ -71,13 +71,3 @@ export const NoParametersRequestSchema = {
   body: schema.object({ ...BaseActionRequestSchema }),
 };
 export type BaseActionRequestBody = TypeOf<typeof NoParametersRequestSchema.body>;
-
-export const KillOrSuspendProcessRequestSchema = {
-  body: schema.object({
-    ...BaseActionRequestSchema,
-    parameters: schema.oneOf([
-      schema.object({ pid: schema.number({ min: 1 }) }),
-      schema.object({ entity_id: schema.string({ minLength: 1 }) }),
-    ]),
-  }),
-};

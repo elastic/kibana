@@ -177,6 +177,18 @@ export function trainedModelsApiProvider(httpService: HttpService) {
       });
     },
 
+    /**
+     * Gets model config based on the cluster OS and CPU architecture.
+     */
+    getCuratedModelConfig(modelName: string, options?: GetModelDownloadConfigOptions) {
+      return httpService.http<ModelDefinitionResponse>({
+        path: `${ML_INTERNAL_BASE_PATH}/trained_models/curated_model_config/${modelName}`,
+        method: 'GET',
+        ...(options ? { query: options as HttpFetchQuery } : {}),
+        version: '1',
+      });
+    },
+
     getTrainedModelsNodesOverview() {
       return httpService.http<NodesOverviewResponse>({
         path: `${ML_INTERNAL_BASE_PATH}/model_management/nodes_overview`,

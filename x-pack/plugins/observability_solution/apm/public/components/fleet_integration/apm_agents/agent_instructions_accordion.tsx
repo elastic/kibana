@@ -38,7 +38,7 @@ function AccordionButtonContent({ agentName, title }: { agentName: AgentName; ti
   return (
     <EuiFlexGroup justifyContent="flexStart" alignItems="center">
       <EuiFlexItem grow={false}>
-        <AgentIcon size="xl" agentName={agentName} />
+        <AgentIcon size="xl" agentName={agentName} role="presentation" />
       </EuiFlexItem>
       <EuiFlexItem grow={1}>
         <EuiFlexGroup direction="column" gutterSize="none">

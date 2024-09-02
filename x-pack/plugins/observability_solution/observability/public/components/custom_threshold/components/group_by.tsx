@@ -22,10 +22,9 @@ interface Props {
   options: GroupByOptions;
   onChange: (groupBy: GroupBy) => void;
   fields: MetricsExplorerFields;
-  errorOptions?: string[];
 }
 
-export function GroupBy({ options, onChange, fields, errorOptions, ...rest }: Props) {
+export function GroupBy({ options, onChange, fields, ...rest }: Props) {
   const handleChange = useCallback(
     (selectedOptions: Array<{ label: string }>) => {
       const groupBy = selectedOptions.map((option) => option.label);
@@ -35,17 +34,9 @@ export function GroupBy({ options, onChange, fields, errorOptions, ...rest }: Pr
   );
 
   const selectedOptions = Array.isArray(options.groupBy)
-    ? options.groupBy.map((field) => ({
-        label: field,
-        color: errorOptions?.includes(field) ? 'danger' : undefined,
-      }))
+    ? options.groupBy.map((field) => ({ label: field }))
     : options.groupBy
-    ? [
-        {
-          label: options.groupBy,
-          color: errorOptions?.includes(options.groupBy) ? 'danger' : undefined,
-        },
-      ]
+    ? [{ label: options.groupBy }]
     : [];
 
   return (

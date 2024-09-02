@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { get } from 'lodash';
 import { deepFreeze } from '@kbn/std';
 import type { InjectedMetadata } from '@kbn/core-injected-metadata-common-internal';
 import type {
@@ -74,14 +73,6 @@ export class InjectedMetadataService {
 
       getLegacyMetadata: () => {
         return this.state.legacyMetadata;
-      },
-
-      getInjectedVar: (name: string, defaultValue?: any): unknown => {
-        return get(this.state.vars, name, defaultValue);
-      },
-
-      getInjectedVars: () => {
-        return this.state.vars;
       },
 
       getKibanaBuildNumber: () => {

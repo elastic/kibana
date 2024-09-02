@@ -21,6 +21,7 @@ export interface NewAgentPolicy {
   id?: string;
   name: string;
   namespace: string;
+  space_ids?: string[];
   description?: string;
   is_default?: boolean;
   is_default_fleet_server?: boolean; // Optional when creating a policy
@@ -53,7 +54,7 @@ export interface GlobalDataTag {
 // SO definition for this type is declared in server/types/interfaces
 export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {
   id: string;
-  space_id?: string | undefined;
+  space_ids?: string[] | undefined;
   status: ValueOf<AgentPolicyStatus>;
   package_policies?: PackagePolicy[];
   is_managed: boolean; // required for created policy
@@ -117,6 +118,7 @@ export interface FullAgentPolicyMonitoring {
   enabled: boolean;
   metrics: boolean;
   logs: boolean;
+  traces: boolean;
 }
 
 export interface FullAgentPolicy {
@@ -194,6 +196,10 @@ export interface FleetServerPolicy {
    */
   coordinator_idx: number;
   /**
+   * The namespaces of the policy
+   */
+  namespaces?: string[];
+  /**
    * The opaque payload.
    */
   data: {
@@ -211,4 +217,9 @@ export interface FleetServerPolicy {
    * Mark agents as inactive if they have not checked in for this many seconds
    */
   inactivity_timeout?: number;
+}
+
+export interface AgentlessApiResponse {
+  id: string;
+  region_id: string;
 }

@@ -15,10 +15,15 @@ export interface ValidationResults {
 }
 
 export const agentPolicyFormValidation = (
-  agentPolicy: Partial<NewAgentPolicy | AgentPolicy>
+  agentPolicy: Partial<NewAgentPolicy | AgentPolicy>,
+  options?: { allowedNamespacePrefixes?: string[] }
 ): ValidationResults => {
   const errors: ValidationResults = {};
-  const namespaceValidation = isValidNamespace(agentPolicy.namespace || '');
+  const namespaceValidation = isValidNamespace(
+    agentPolicy.namespace || '',
+    false,
+    options?.allowedNamespacePrefixes
+  );
 
   if (!agentPolicy.name?.trim()) {
     errors.name = [
@@ -33,20 +38,20 @@ export const agentPolicyFormValidation = (
     errors.namespace = [namespaceValidation.error];
   }
 
-  if (agentPolicy.unenroll_timeout && agentPolicy.unenroll_timeout < 0) {
+  if (agentPolicy.unenroll_timeout !== undefined && agentPolicy.unenroll_timeout <= 0) {
     errors.unenroll_timeout = [
       <FormattedMessage
         id="xpack.fleet.agentPolicyForm.unenrollTimeoutMinValueErrorMessage"
-        defaultMessage="Unenroll timeout must be greater than zero."
+        defaultMessage="Unenroll timeout must be an integer greater than zero."
       />,
     ];
   }
 
-  if (agentPolicy.inactivity_timeout && agentPolicy.inactivity_timeout < 0) {
+  if (agentPolicy.inactivity_timeout !== undefined && agentPolicy.inactivity_timeout <= 0) {
     errors.inactivity_timeout = [
       <FormattedMessage
         id="xpack.fleet.agentPolicyForm.inactivityTimeoutMinValueErrorMessage"
-        defaultMessage="Inactivity timeout must be greater than zero."
+        defaultMessage="Inactivity timeout must be an integer greater than zero."
       />,
     ];
   }

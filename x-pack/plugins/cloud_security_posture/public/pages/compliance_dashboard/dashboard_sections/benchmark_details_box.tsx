@@ -163,14 +163,22 @@ export const BenchmarkDetailsBox = ({ benchmark }: { benchmark: BenchmarkData })
             </EuiText>
           }
         >
-          <EuiLink onClick={benchmarkInfo.handleClick} color="text">
+          <EuiLink
+            onClick={benchmarkInfo.handleClick}
+            color="text"
+            data-test-subj="benchmark-section-bench-name"
+          >
             <EuiTitle css={{ fontSize: 20 }}>
               <h5>{benchmarkInfo.name}</h5>
             </EuiTitle>
           </EuiLink>
         </EuiToolTip>
 
-        <EuiLink onClick={benchmarkInfo.handleClick} color="text">
+        <EuiLink
+          data-test-subj="benchmark-asset-type"
+          onClick={benchmarkInfo.handleClick}
+          color="text"
+        >
           <EuiText size="xs">{benchmarkInfo.assetType}</EuiText>
         </EuiLink>
       </EuiFlexItem>

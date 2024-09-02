@@ -14,7 +14,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
 import { replaceStateKeyInQueryString } from '../../../../../common/url_state_storage_service';
-import { useUrlState } from '../../../../utils/use_url_state';
+import { useUrlState } from '../../../../hooks/use_url_state';
 
 const parseRange = (range: MetricsTimeInput) => {
   const parsedFrom = dateMath.parse(range.from.toString());

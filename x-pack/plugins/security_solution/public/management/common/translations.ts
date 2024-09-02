@@ -93,6 +93,12 @@ export const CONSOLE_COMMANDS = {
           }
         ),
       },
+      processName: {
+        about: i18n.translate(
+          'xpack.securitySolution.endpointConsoleCommands.processName.arg.comment',
+          { defaultMessage: 'The process name to kill' }
+        ),
+      },
     },
   },
   suspendProcess: {

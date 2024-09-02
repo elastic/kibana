@@ -19,10 +19,10 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('security/user_profiles', function () {
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('viewer');
     });
     after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
     describe('route access', () => {
       describe('internal', () => {

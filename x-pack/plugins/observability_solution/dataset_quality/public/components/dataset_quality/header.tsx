@@ -10,16 +10,12 @@ import { EuiBetaBadge, EuiLink, EuiPageHeader, EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { useKibanaContextForPlugin } from '../../utils';
+import { KNOWN_TYPES } from '../../../common/constants';
 import { datasetQualityAppTitle } from '../../../common/translations';
 
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
 export default function Header() {
-  const {
-    services: { docLinks },
-  } = useKibanaContextForPlugin();
-
   return (
     <EuiPageHeader
       bottomBorder
@@ -37,19 +33,26 @@ export default function Header() {
       description={
         <FormattedMessage
           id="xpack.datasetQuality.appDescription"
-          defaultMessage="Monitor the data set quality for {logsPattern} data streams that follow the {ecsNamingSchemeLink}."
+          defaultMessage="Monitor the data set quality for {types} data streams that follow the {dsNamingSchemeLink}."
           values={{
-            logsPattern: <EuiCode>logs-*</EuiCode>,
-            ecsNamingSchemeLink: (
+            types: KNOWN_TYPES.map((type, index) => {
+              return (
+                <>
+                  {index > 0 && ', '}
+                  <EuiCode>{type}</EuiCode>
+                </>
+              );
+            }),
+            dsNamingSchemeLink: (
               <EuiLink
-                data-test-subj="datasetQualityAppDescriptionEcsNamingSchemeLink"
-                href={docLinks.links.ecs.dataStreams}
+                data-test-subj="datasetQualityAppDescriptionDsNamingSchemeLink"
+                href="https://ela.st/data-stream-naming-scheme"
                 target="_blank"
                 rel="noopener"
               >
                 <FormattedMessage
-                  id="xpack.datasetQuality.appDescription.ecsNamingSchemeLinkText"
-                  defaultMessage="ECS naming scheme"
+                  id="xpack.datasetQuality.appDescription.dsNamingSchemeLinkText"
+                  defaultMessage="Data stream naming scheme"
                 />
               </EuiLink>
             ),

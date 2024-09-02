@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { MODEL_GPT_3_5_TURBO, MODEL_GPT_4, ModelSelector } from './model_selector';
+import { MODEL_GPT_4O, MODEL_GPT_4_TURBO, ModelSelector } from './model_selector';
 import { fireEvent, render } from '@testing-library/react';
 
 describe('ModelSelector', () => {
@@ -15,7 +15,7 @@ describe('ModelSelector', () => {
     const { getByTestId } = render(
       <ModelSelector onModelSelectionChange={onModelSelectionChange} />
     );
-    expect(getByTestId('comboBoxSearchInput')).toHaveValue(MODEL_GPT_3_5_TURBO);
+    expect(getByTestId('comboBoxSearchInput')).toHaveValue(MODEL_GPT_4O);
   });
   it('should call onModelSelectionChange when custom option', () => {
     const onModelSelectionChange = jest.fn();
@@ -39,7 +39,7 @@ describe('ModelSelector', () => {
     );
     const comboBox = getByTestId('comboBoxSearchInput');
     fireEvent.click(comboBox);
-    fireEvent.click(getByTestId(MODEL_GPT_4));
-    expect(onModelSelectionChange).toHaveBeenCalledWith(MODEL_GPT_4);
+    fireEvent.click(getByTestId(MODEL_GPT_4_TURBO));
+    expect(onModelSelectionChange).toHaveBeenCalledWith(MODEL_GPT_4_TURBO);
   });
 });

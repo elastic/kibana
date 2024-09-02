@@ -25,11 +25,29 @@ import {
   useStartServices,
   useGetAgentPolicies,
   useGetPackageInfoByKeyQuery,
+  useConfig,
 } from '../../../../hooks';
+
+jest.mock('../components/steps/components/use_policies', () => {
+  return {
+    ...jest.requireActual('../components/steps/components/use_policies'),
+    useAllNonManagedAgentPolicies: jest.fn().mockReturnValue([
+      {
+        id: 'agent-policy-1',
+        name: 'Agent policy 1',
+        namespace: 'default',
+        unprivileged_agents: 1,
+      },
+    ]),
+  };
+});
 
 jest.mock('../../../../hooks', () => {
   return {
     ...jest.requireActual('../../../../hooks'),
+    useConfig: jest.fn().mockReturnValue({
+      agents: { enabled: true },
+    }),
     useFleetStatus: jest.fn().mockReturnValue({ isReady: true } as any),
     sendGetStatus: jest
       .fn()
@@ -122,7 +140,10 @@ jest.mock('react-router-dom', () => ({
 
 import { AGENTLESS_POLICY_ID } from '../../../../../../../common/constants';
 
+import { useAllNonManagedAgentPolicies } from '../components/steps/components/use_policies';
+
 import { CreatePackagePolicySinglePage } from '.';
+import { SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ } from './components/setup_technology_selector';
 
 // mock console.debug to prevent noisy logs from console.debugs in ./index.tsx
 let consoleDebugMock: any;
@@ -156,6 +177,7 @@ describe('When on the package policy create page', () => {
   function getMockPackageInfo(options?: {
     requiresRoot?: boolean;
     dataStreamRequiresRoot?: boolean;
+    agentlessEnabled?: boolean;
   }) {
     return {
       data: {
@@ -177,6 +199,7 @@ describe('When on the package policy create page', () => {
                 },
               ],
               multiple: true,
+              deployment_modes: { agentless: { enabled: options?.agentlessEnabled } },
             },
           ],
           data_streams: [
@@ -374,7 +397,6 @@ describe('When on the package policy create page', () => {
 
       expect(sendCreatePackagePolicy as jest.MockedFunction<any>).toHaveBeenCalledWith({
         ...newPackagePolicy,
-        policy_id: 'agent-policy-1',
         policy_ids: ['agent-policy-1'],
         force: false,
       });
@@ -485,7 +507,7 @@ describe('When on the package policy create page', () => {
       expect(sendCreateAgentPolicy as jest.MockedFunction<any>).toHaveBeenCalledWith(
         {
           description: '',
-          monitoring_enabled: ['logs', 'metrics'],
+          monitoring_enabled: ['logs', 'metrics', 'traces'],
           name: 'Agent policy 2',
           namespace: 'default',
           inactivity_timeout: 1209600,
@@ -520,7 +542,7 @@ describe('When on the package policy create page', () => {
         expect(sendCreateAgentPolicy as jest.MockedFunction<any>).toHaveBeenCalledWith(
           {
             description: '',
-            monitoring_enabled: ['logs', 'metrics'],
+            monitoring_enabled: ['logs', 'metrics', 'traces'],
             name: 'Agent policy 2',
             namespace: 'default',
             inactivity_timeout: 1209600,
@@ -671,7 +693,7 @@ describe('When on the package policy create page', () => {
       });
     });
 
-    describe('With agentless policy available', () => {
+    describe('With agentless policy and Serverless available', () => {
       beforeEach(async () => {
         (useStartServices as jest.MockedFunction<any>).mockReturnValue({
           ...useStartServices(),
@@ -680,7 +702,7 @@ describe('When on the package policy create page', () => {
             isServerlessEnabled: true,
           },
         });
-        jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({ agentless: true });
+        jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({ agentless: true } as any);
         (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue(
           getMockPackageInfo({ requiresRoot: false, dataStreamRequiresRoot: false })
         );
@@ -696,6 +718,9 @@ describe('When on the package policy create page', () => {
           isLoading: false,
           resendRequest: jest.fn(),
         });
+        (useAllNonManagedAgentPolicies as jest.MockedFunction<any>).mockReturnValue([
+          { id: AGENTLESS_POLICY_ID, name: 'Agentless CSPM', namespace: 'default' },
+        ]);
 
         await act(async () => {
           render();
@@ -703,7 +728,7 @@ describe('When on the package policy create page', () => {
       });
 
       test('should not force create package policy when not in serverless', async () => {
-        jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({ agentless: false });
+        jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({ agentless: false } as any);
         (useStartServices as jest.MockedFunction<any>).mockReturnValue({
           ...useStartServices(),
           cloud: {
@@ -767,6 +792,92 @@ describe('When on the package policy create page', () => {
 
         expect(sendCreateAgentPolicy as jest.MockedFunction<any>).not.toHaveBeenCalled();
         expect(sendCreatePackagePolicy as jest.MockedFunction<any>).toHaveBeenCalled();
+      });
+    });
+
+    describe('With agentless Cloud available', () => {
+      beforeEach(async () => {
+        (useConfig as jest.MockedFunction<any>).mockReturnValue({
+          agentless: {
+            enabled: true,
+            api: {
+              url: 'http://agentless-api-url',
+            },
+          },
+          agents: { enabled: true },
+        });
+        (useStartServices as jest.MockedFunction<any>).mockReturnValue({
+          ...useStartServices(),
+          cloud: {
+            ...useStartServices().cloud,
+            isServerlessEnabled: false,
+            isCloudEnabled: true,
+          },
+        });
+        (sendCreateAgentPolicy as jest.MockedFunction<any>).mockResolvedValue({
+          data: {
+            item: { id: 'agentless-policy-1', name: 'Agentless policy 1', namespace: 'default' },
+          },
+        });
+
+        (sendCreatePackagePolicy as jest.MockedFunction<any>).mockResolvedValue({
+          data: { item: { id: 'policy-1', inputs: [], policy_ids: ['agentless-policy-1'] } },
+        });
+        jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({ agentless: true } as any);
+        (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue(
+          getMockPackageInfo({
+            requiresRoot: false,
+            dataStreamRequiresRoot: false,
+            agentlessEnabled: true,
+          })
+        );
+        await act(async () => {
+          render();
+        });
+      });
+
+      test('should create agent policy and package policy when in cloud and agentless API url is set', async () => {
+        await act(async () => {
+          fireEvent.click(renderResult.getByText(/Save and continue/).closest('button')!);
+        });
+
+        // tech debt: this should be converted to use MSW to mock the API calls
+        // https://github.com/elastic/security-team/issues/9816
+        expect(sendGetOneAgentPolicy).not.toHaveBeenCalled();
+        expect(sendCreateAgentPolicy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            monitoring_enabled: ['logs', 'metrics', 'traces'],
+            name: 'Agent policy 1',
+          }),
+          { withSysMonitoring: true }
+        );
+        expect(sendCreatePackagePolicy).toHaveBeenCalled();
+
+        await waitFor(() => {
+          expect(renderResult.getByText('Nginx integration added')).toBeInTheDocument();
+        });
+      });
+
+      test('should create agentless agent policy and package policy when in cloud and agentless API url is set', async () => {
+        fireEvent.click(renderResult.getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ));
+        fireEvent.click(renderResult.getByText('Agentless'));
+        await act(async () => {
+          fireEvent.click(renderResult.getByText(/Save and continue/).closest('button')!);
+        });
+
+        expect(sendCreateAgentPolicy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            monitoring_enabled: ['logs', 'metrics'],
+            name: 'Agentless policy for nginx-1',
+            supports_agentless: true,
+          }),
+          { withSysMonitoring: false }
+        );
+        expect(sendCreatePackagePolicy).toHaveBeenCalled();
+
+        await waitFor(() => {
+          expect(renderResult.getByText('Nginx integration added')).toBeInTheDocument();
+        });
       });
     });
   });

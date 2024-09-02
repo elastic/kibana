@@ -26,6 +26,8 @@ type OpenTelemetryAgentName =
   | 'opentelemetry/erlang'
   | 'opentelemetry/go'
   | 'opentelemetry/java'
+  | 'opentelemetry/java/opentelemetry-java-instrumentation'
+  | 'opentelemetry/java/elastic'
   | 'opentelemetry/nodejs'
   | 'opentelemetry/php'
   | 'opentelemetry/python'

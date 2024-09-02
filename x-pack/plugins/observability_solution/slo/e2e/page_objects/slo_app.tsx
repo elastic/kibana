@@ -5,9 +5,9 @@
  * 2.0.
  */
 import { Page } from '@elastic/synthetics';
-import { loginPageProvider } from '@kbn/synthetics-plugin/e2e/page_objects/login';
-import { utilsPageProvider } from '@kbn/synthetics-plugin/e2e/page_objects/utils';
-import { recordVideo } from '@kbn/synthetics-plugin/e2e/helpers/record_video';
+import { loginPageProvider } from '@kbn/synthetics-e2e/page_objects/login';
+import { utilsPageProvider } from '@kbn/synthetics-e2e/page_objects/utils';
+import { recordVideo } from '@kbn/synthetics-e2e/helpers/record_video';
 
 export function sloAppPageProvider({ page, kibanaUrl }: { page: Page; kibanaUrl: string }) {
   page.setDefaultTimeout(60 * 1000);

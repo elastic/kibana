@@ -39,6 +39,8 @@ async function withFastAsyncTransform(config, block) {
   try {
     await block(transform);
     success = true;
+  } catch (e) {
+    console.error('Error during transformation', e);
   } finally {
     try {
       await pool.destroy();

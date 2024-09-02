@@ -189,7 +189,7 @@ export class ManifestManager {
     const exceptions: ExceptionListItemSchema[] =
       listId === ENDPOINT_LIST_ID ? allExceptionsByListId : allExceptionsByListId.filter(filter);
 
-    return convertExceptionsToEndpointFormat(exceptions, schemaVersion);
+    return convertExceptionsToEndpointFormat(exceptions, schemaVersion, this.experimentalFeatures);
   }
 
   /**
@@ -686,7 +686,7 @@ export class ManifestManager {
       },
     });
 
-    for await (const policies of this.fetchAllPolicies()) {
+    for await (const policies of await this.fetchAllPolicies()) {
       for (const packagePolicy of policies) {
         const { id, name } = packagePolicy;
 
@@ -768,7 +768,7 @@ export class ManifestManager {
     }
   }
 
-  private fetchAllPolicies(): AsyncIterable<PackagePolicy[]> {
+  private fetchAllPolicies(): Promise<AsyncIterable<PackagePolicy[]>> {
     return this.packagePolicyService.fetchAllItems(this.savedObjectsClient, {
       kuery: 'ingest-package-policies.package.name:endpoint',
     });
@@ -776,7 +776,7 @@ export class ManifestManager {
 
   private async listEndpointPolicyIds(): Promise<string[]> {
     const allPolicyIds: string[] = [];
-    const idFetcher = this.packagePolicyService.fetchAllItemIds(this.savedObjectsClient, {
+    const idFetcher = await this.packagePolicyService.fetchAllItemIds(this.savedObjectsClient, {
       kuery: 'ingest-package-policies.package.name:endpoint',
     });
 

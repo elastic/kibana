@@ -60,16 +60,14 @@ export const createKnowledgeBaseEntryRoute = (router: ElasticAssistantPluginRout
             return checkResponse;
           }
 
-          logger.debug(`Creating KB Entry:\n${JSON.stringify(request.body)}`);
+          logger.debug(() => `Creating KB Entry:\n${JSON.stringify(request.body)}`);
           const documents: Array<Document<Metadata>> = [
             {
               metadata: request.body.metadata,
               pageContent: request.body.text,
             },
           ];
-          const kbDataClient = await ctx.elasticAssistant.getAIAssistantKnowledgeBaseDataClient(
-            false
-          );
+          const kbDataClient = await ctx.elasticAssistant.getAIAssistantKnowledgeBaseDataClient();
           const createResponse = await kbDataClient?.addKnowledgeBaseDocuments({ documents });
 
           if (createResponse == null) {

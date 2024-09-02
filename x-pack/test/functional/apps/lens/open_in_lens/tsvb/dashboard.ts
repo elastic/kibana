@@ -55,9 +55,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await dashboard.waitForRenderComplete();
       await dashboardBadgeActions.expectExistsTimeRangeBadgeAction();
       await panelActions.openContextMenu();
-      await panelActions.clickEdit();
+      const editInLensExists = await testSubjects.exists(
+        'embeddablePanelAction-ACTION_EDIT_IN_LENS'
+      );
+      if (!editInLensExists) {
+        await testSubjects.click('embeddablePanelMore-mainMenu');
+      }
+      await testSubjects.click('embeddablePanelAction-ACTION_EDIT_IN_LENS');
 
-      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('xyVisChart');
       await retry.try(async () => {
         const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
@@ -85,17 +90,24 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await testSubjects.click('visualizesaveAndReturnButton');
       // save it to library
       const originalPanel = await testSubjects.find('embeddablePanelHeading-');
-      await panelActions.legacySaveToLibrary('My TSVB to Lens viz 2', originalPanel);
+      await panelActions.saveToLibrary('My TSVB to Lens viz 2', originalPanel);
 
       await dashboard.waitForRenderComplete();
       const originalEmbeddableCount = await canvas.getEmbeddableCount();
-      await dashboardPanelActions.customizePanel();
+
+      await panelActions.customizePanel();
+      await dashboardCustomizePanel.expectCustomizePanelSettingsFlyoutOpen();
       await dashboardCustomizePanel.enableCustomTimeRange();
-      await dashboardCustomizePanel.openDatePickerQuickMenu();
+      await retry.waitFor('quick menu', async () => {
+        await dashboardCustomizePanel.openDatePickerQuickMenu();
+        return await testSubjects.exists('superDatePickerCommonlyUsed_Last_30 days');
+      });
       await dashboardCustomizePanel.clickCommonlyUsedTimeRange('Last_30 days');
       await dashboardCustomizePanel.clickSaveButton();
+      await dashboardCustomizePanel.expectCustomizePanelSettingsFlyoutClosed();
       await dashboard.waitForRenderComplete();
       await dashboardBadgeActions.expectExistsTimeRangeBadgeAction();
+
       await panelActions.openContextMenu();
       await panelActions.clickEdit();
 

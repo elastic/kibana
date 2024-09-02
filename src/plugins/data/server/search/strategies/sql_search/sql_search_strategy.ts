@@ -22,7 +22,7 @@ import type {
 import { pollSearch } from '../../../../common';
 import { getDefaultAsyncGetParams, getDefaultAsyncSubmitParams } from './request_utils';
 import { toAsyncKibanaSearchResponse } from './response_utils';
-import { SearchConfigSchema } from '../../../../config';
+import { SearchConfigSchema } from '../../../config';
 
 export const sqlSearchStrategyProvider = (
   searchConfig: SearchConfigSchema,
@@ -120,7 +120,7 @@ export const sqlSearchStrategyProvider = (
      * @throws `KbnSearchError`
      */
     search: (request, options: IAsyncSearchOptions, deps) => {
-      logger.debug(`sql search: search request=${JSON.stringify(request)}`);
+      logger.debug(() => `sql search: search request=${JSON.stringify(request)}`);
 
       return asyncSearch(request, options, deps);
     },

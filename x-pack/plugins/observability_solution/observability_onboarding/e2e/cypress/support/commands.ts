@@ -6,7 +6,7 @@
  */
 
 import URL from 'url';
-import { ObservabilityOnboardingUsername } from '../../../server/test_helpers/create_observability_onboarding_users/authentication';
+import { ObservabilityOnboardingUsername } from '@kbn/observability-onboarding-plugin/server/test_helpers/create_observability_onboarding_users/authentication';
 
 export type InstallationStep =
   | 'ea-download'
@@ -23,6 +23,10 @@ export type InstallationStepStatus =
   | 'warning'
   | 'danger'
   | 'current';
+
+export interface ElasticAgentStepPayload {
+  agentId: string;
+}
 
 Cypress.Commands.add('loginAsViewerUser', () => {
   return cy.loginAs({
@@ -151,7 +155,12 @@ Cypress.Commands.add('deleteIntegration', (integrationName: string) => {
 
 Cypress.Commands.add(
   'updateInstallationStepStatus',
-  (onboardingId: string, step: InstallationStep, status: InstallationStepStatus) => {
+  (
+    onboardingId: string,
+    step: InstallationStep,
+    status: InstallationStepStatus,
+    payload: ElasticAgentStepPayload | undefined
+  ) => {
     const kibanaUrl = Cypress.env('KIBANA_URL');
 
     cy.log(onboardingId, step, status);
@@ -166,6 +175,7 @@ Cypress.Commands.add(
       auth: { user: 'editor', pass: 'changeme' },
       body: {
         status,
+        payload,
       },
     });
   }

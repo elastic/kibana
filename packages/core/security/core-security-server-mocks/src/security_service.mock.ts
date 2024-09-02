@@ -15,11 +15,14 @@ import type {
   InternalSecurityServiceSetup,
   InternalSecurityServiceStart,
 } from '@kbn/core-security-server-internal';
+import { apiKeysMock } from './api_keys.mock';
 import { auditServiceMock, type MockedAuditService } from './audit.mock';
+import { mockAuthenticatedUser, MockAuthenticatedUserProps } from '@kbn/core-security-common/mocks';
 
 const createSetupMock = () => {
   const mock: jest.Mocked<SecurityServiceSetup> = {
     registerSecurityDelegate: jest.fn(),
+    fips: { isEnabled: jest.fn() },
   };
 
   return mock;
@@ -33,6 +36,7 @@ const createStartMock = (): SecurityStartMock => {
   const mock = {
     authc: {
       getCurrentUser: jest.fn(),
+      apiKeys: apiKeysMock.create(),
     },
     audit: auditServiceMock.create(),
   };
@@ -43,6 +47,7 @@ const createStartMock = (): SecurityStartMock => {
 const createInternalSetupMock = () => {
   const mock: jest.Mocked<InternalSecurityServiceSetup> = {
     registerSecurityDelegate: jest.fn(),
+    fips: { isEnabled: jest.fn() },
   };
 
   return mock;
@@ -58,6 +63,7 @@ const createInternalStartMock = (): InternalSecurityStartMock => {
   const mock = {
     authc: {
       getCurrentUser: jest.fn(),
+      apiKeys: apiKeysMock.create(),
     },
     audit: auditServiceMock.create(),
   };
@@ -79,6 +85,13 @@ const createRequestHandlerContextMock = () => {
   const mock: jest.MockedObjectDeep<SecurityRequestHandlerContext> = {
     authc: {
       getCurrentUser: jest.fn(),
+      apiKeys: {
+        areAPIKeysEnabled: jest.fn(),
+        create: jest.fn(),
+        update: jest.fn(),
+        validate: jest.fn(),
+        invalidate: jest.fn(),
+      },
     },
     audit: {
       logger: {
@@ -97,4 +110,6 @@ export const securityServiceMock = {
   createInternalSetup: createInternalSetupMock,
   createInternalStart: createInternalStartMock,
   createRequestHandlerContext: createRequestHandlerContextMock,
+  createMockAuthenticatedUser: (props: MockAuthenticatedUserProps = {}) =>
+    mockAuthenticatedUser(props),
 };

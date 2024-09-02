@@ -7,11 +7,11 @@ jobs:
     name: Alert on failed test
     if: |
       !github.event.issue.pull_request
-      && github.event.comment.user.login == 'kibanamachine'
+      && (github.event.comment.user.login == 'kibanamachine' || github.event.comment.user.login == 'elasticmachine')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout kibana-operations
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           repository: 'elastic/kibana-operations'
           ref: main

@@ -24,6 +24,13 @@ describe(
           { product_line: 'security', product_tier: 'essentials' },
           { product_line: 'endpoint', product_tier: 'essentials' },
         ],
+        // This is not needed for this test, but it's a good example of
+        // how to enable experimental features in the Cypress tests.
+        // kbnServerArgs: [
+        //   `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+        //     'featureFlagName',
+        //   ])}`,
+        // ],
       },
     },
   },
@@ -62,10 +69,9 @@ describe(
         });
       }
 
-      // TODO: update tests when `scan` is included in PLIs
       for (const actionName of RESPONSE_ACTION_API_COMMANDS_NAMES.filter(
-        (apiName) => apiName !== 'scan'
-      ).filter((apiName) => apiName !== 'unisolate')) {
+        (apiName) => apiName !== 'unisolate'
+      )) {
         it(`should not allow access to Response Action: ${actionName}`, () => {
           ensureResponseActionAuthzAccess('none', actionName, username, password);
         });
@@ -92,10 +98,9 @@ describe(
         });
       });
 
-      // TODO: update tests when `scan` is included in PLIs
       for (const actionName of RESPONSE_ACTION_API_COMMANDS_NAMES.filter(
-        (apiName) => apiName !== 'scan'
-      ).filter((apiName) => apiName !== 'unisolate')) {
+        (apiName) => apiName !== 'unisolate'
+      )) {
         it(`should not allow access to Response Action: ${actionName}`, () => {
           ensureResponseActionAuthzAccess('none', actionName, username, password);
         });

@@ -9,7 +9,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { CoreStart, OverlayStart, ThemeServiceStart, ToastsSetup } from '@kbn/core/public';
+import { CoreStart, ThemeServiceStart, ToastsSetup } from '@kbn/core/public';
 import { ShareMenuItem, ShowShareMenuOptions } from '../types';
 import { ShareMenuRegistryStart } from './share_menu_registry';
 import { AnonymousAccessServiceContract } from '../../common/anonymous_access';
@@ -49,7 +49,6 @@ export class ShareMenuManager {
           urlService,
           anonymousAccess,
           theme: core.theme,
-          overlays: core.overlays,
           i18n: core.i18n,
           toasts: core.notifications.toasts,
           publicAPIEnabled: !disableEmbed,
@@ -82,7 +81,6 @@ export class ShareMenuManager {
     snapshotShareWarning,
     onClose,
     disabledShareUrl,
-    overlays,
     i18n,
     isDirty,
     toasts,
@@ -95,7 +93,6 @@ export class ShareMenuManager {
     anonymousAccess: AnonymousAccessServiceContract | undefined;
     theme: ThemeServiceStart;
     onClose: () => void;
-    overlays: OverlayStart;
     i18n: CoreStart['i18n'];
     isDirty: boolean;
     toasts: ToastsSetup;
@@ -105,47 +102,49 @@ export class ShareMenuManager {
       return;
     }
 
-    this.isOpen = true;
     document.body.appendChild(this.container);
 
+    // initialize variable that will hold reference for unmount
+    let unmount: ReturnType<ReturnType<typeof toMountPoint>>;
+
+    const mount = toMountPoint(
+      <ShareMenu
+        shareContext={{
+          publicAPIEnabled,
+          anchorElement,
+          allowEmbed,
+          allowShortUrl,
+          objectId,
+          objectType,
+          objectTypeMeta,
+          sharingData,
+          shareableUrl,
+          shareableUrlLocatorParams,
+          delegatedShareUrlHandler,
+          embedUrlParamExtensions,
+          anonymousAccess,
+          showPublicUrlSwitch,
+          urlService,
+          snapshotShareWarning,
+          disabledShareUrl,
+          isDirty,
+          isEmbedded: allowEmbed,
+          shareMenuItems: menuItems,
+          toasts,
+          onClose: () => {
+            onClose();
+            unmount();
+          },
+          theme,
+          i18n,
+        }}
+      />,
+      { i18n, theme }
+    );
+
     const openModal = () => {
-      const session = overlays.openModal(
-        toMountPoint(
-          <ShareMenu
-            shareContext={{
-              publicAPIEnabled,
-              anchorElement,
-              allowEmbed,
-              allowShortUrl,
-              objectId,
-              objectType,
-              objectTypeMeta,
-              sharingData,
-              shareableUrl,
-              shareableUrlLocatorParams,
-              delegatedShareUrlHandler,
-              embedUrlParamExtensions,
-              anonymousAccess,
-              showPublicUrlSwitch,
-              urlService,
-              snapshotShareWarning,
-              disabledShareUrl,
-              isDirty,
-              isEmbedded: allowEmbed,
-              shareMenuItems: menuItems,
-              toasts,
-              onClose: () => {
-                onClose();
-                session.close();
-              },
-              theme,
-              i18n,
-            }}
-          />,
-          { i18n, theme }
-        ),
-        { 'data-test-subj': 'share-modal' }
-      );
+      unmount = mount(this.container);
+      this.isOpen = true;
     };
 
     // @ts-ignore openModal() returns void

@@ -9,12 +9,14 @@ import { i18n } from '@kbn/i18n';
 import { lazy } from 'react';
 import { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
+import { LocatorPublic } from '@kbn/share-plugin/common';
+import { AssetDetailsLocatorParams } from '@kbn/observability-shared-plugin/common';
 import {
   MetricExpressionParams,
   METRIC_THRESHOLD_ALERT_TYPE_ID,
 } from '../../../common/alerting/metrics';
 import { validateMetricThreshold } from './components/validation';
-import { formatReason } from './rule_data_formatters';
+import { getRuleFormat } from './rule_data_formatters';
 
 export interface MetricThresholdRuleTypeParams extends RuleTypeParams {
   criteria: MetricExpressionParams[];
@@ -50,7 +52,11 @@ const metricThresholdDefaultRecoveryMessage = i18n.translate(
   }
 );
 
-export function createMetricThresholdRuleType(): ObservabilityRuleTypeModel<MetricThresholdRuleTypeParams> {
+export function createMetricThresholdRuleType({
+  assetDetailsLocator,
+}: {
+  assetDetailsLocator?: LocatorPublic<AssetDetailsLocatorParams>;
+}): ObservabilityRuleTypeModel<MetricThresholdRuleTypeParams> {
   return {
     id: METRIC_THRESHOLD_ALERT_TYPE_ID,
     description: i18n.translate('xpack.infra.metrics.alertFlyout.alertDescription', {
@@ -65,7 +71,7 @@ export function createMetricThresholdRuleType(): ObservabilityRuleTypeModel<Metr
     defaultActionMessage: metricThresholdDefaultActionMessage,
     defaultRecoveryMessage: metricThresholdDefaultRecoveryMessage,
     requiresAppContext: false,
-    format: formatReason,
+    format: getRuleFormat({ assetDetailsLocator }),
     alertDetailsAppSection: lazy(() => import('./components/alert_details_app_section')),
     priority: 10,
   };

@@ -28,19 +28,16 @@ import {
 import { getDataBoundsForPalette } from '@kbn/expression-metric-vis-plugin/public';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { css } from '@emotion/react';
-import { DebouncedInput, useDebouncedValue, IconSelect } from '@kbn/visualization-ui-components';
+import { DebouncedInput, IconSelect } from '@kbn/visualization-ui-components';
+import { useDebouncedValue } from '@kbn/visualization-utils';
 import { isNumericFieldForDatatable } from '../../../common/expressions/datatable/utils';
 import { applyPaletteParams, PalettePanelContainer } from '../../shared_components';
 import type { VisualizationDimensionEditorProps } from '../../types';
 import { defaultNumberPaletteParams, defaultPercentagePaletteParams } from './palette_config';
-import {
-  DEFAULT_MAX_COLUMNS,
-  getDefaultColor,
-  MetricVisualizationState,
-  showingBar,
-} from './visualization';
+import { DEFAULT_MAX_COLUMNS, getDefaultColor, showingBar } from './visualization';
 import { CollapseSetting } from '../../shared_components/collapse_setting';
-import { iconsSet } from './icon_set';
+import { MetricVisualizationState } from './types';
+import { metricIconsSet } from '../../shared_components/icon_set';
 
 export type SupportingVisType = 'none' | 'bar' | 'trendline';
 
@@ -134,7 +131,7 @@ function MaximumEditor({ setState, state, idPrefix }: SubProps) {
 }
 
 function SecondaryMetricEditor({ accessor, idPrefix, frame, layerId, setState, state }: SubProps) {
-  const columnName = getColumnByAccessor(accessor, frame.activeData?.[layerId].columns)?.name;
+  const columnName = getColumnByAccessor(accessor, frame.activeData?.[layerId]?.columns)?.name;
   const defaultPrefix = columnName || '';
 
   return (
@@ -261,15 +258,15 @@ function PrimaryMetricEditor(props: SubProps) {
         <EuiFormRow
           display="columnCompressed"
           fullWidth
-          label={i18n.translate('xpack.lens.metric.dynamicColoring.label', {
-            defaultMessage: 'Color mode',
+          label={i18n.translate('xpack.lens.metric.colorByValue.label', {
+            defaultMessage: 'Color by value',
           })}
         >
           <EuiButtonGroup
             isFullWidth
             buttonSize="compressed"
-            legend={i18n.translate('xpack.lens.metric.colorMode.label', {
-              defaultMessage: 'Color mode',
+            legend={i18n.translate('xpack.lens.metric.colorByValue.label', {
+              defaultMessage: 'Color by value',
             })}
             data-test-subj="lnsMetric_color_mode_buttons"
             options={[
@@ -322,7 +319,7 @@ function PrimaryMetricEditor(props: SubProps) {
           display="columnCompressed"
           fullWidth
           label={i18n.translate('xpack.lens.paletteMetricGradient.label', {
-            defaultMessage: 'Color',
+            defaultMessage: 'Color mapping',
           })}
         >
           <PalettePanelContainer
@@ -353,7 +350,7 @@ function PrimaryMetricEditor(props: SubProps) {
         })}
       >
         <IconSelect
-          customIconSet={iconsSet}
+          customIconSet={metricIconsSet}
           value={state?.icon}
           onChange={(newIcon) => {
             setState({

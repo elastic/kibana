@@ -6,10 +6,10 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { PackageInfo } from '@kbn/screenshotting-server';
 import assert from 'assert';
 import axios from 'axios';
 import path from 'path';
-import { PackageInfo } from '..';
 import { paths as chromiumArchivePaths } from '../../../utils';
 import { download } from '../../download';
 import { install } from '../../install';
@@ -17,13 +17,13 @@ import { install } from '../../install';
 /* eslint-disable no-console */
 
 const mockLogger = loggingSystemMock.create().get();
-mockLogger.warn = jest.fn((message: string | Error) => {
+mockLogger.warn = jest.fn((message: string | (() => string) | Error) => {
   console.warn(message);
 });
-mockLogger.debug = jest.fn((message: string | Error) => {
+mockLogger.debug = jest.fn((message: string | (() => string) | Error) => {
   console.log(message);
 });
-mockLogger.error = jest.fn((message: string | Error) => {
+mockLogger.error = jest.fn((message: string | (() => string) | Error) => {
   console.error(message);
 });
 

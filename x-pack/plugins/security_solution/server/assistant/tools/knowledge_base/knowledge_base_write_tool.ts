@@ -6,7 +6,7 @@
  */
 
 import { DynamicStructuredTool } from '@langchain/core/tools';
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import type { AIAssistantKnowledgeBaseDataClient } from '@kbn/elastic-assistant-plugin/server/ai_assistant_data_clients/knowledge_base';
 import type { KnowledgeBaseEntryCreateProps } from '@kbn/elastic-assistant-common';
@@ -47,14 +47,16 @@ export const KNOWLEDGE_BASE_WRITE_TOOL: AssistantTool = {
           ),
       }),
       func: async (input, _, cbManager) => {
-        logger.debug(`KnowledgeBaseWriteToolParams:input\n ${JSON.stringify(input, null, 2)}`);
+        logger.debug(
+          () => `KnowledgeBaseWriteToolParams:input\n ${JSON.stringify(input, null, 2)}`
+        );
 
         const knowledgeBaseEntry: KnowledgeBaseEntryCreateProps = {
           metadata: { kbResource: 'user', source: 'conversation', required: input.required },
           text: input.query,
         };
 
-        logger.debug(`knowledgeBaseEntry\n ${JSON.stringify(knowledgeBaseEntry, null, 2)}`);
+        logger.debug(() => `knowledgeBaseEntry\n ${JSON.stringify(knowledgeBaseEntry, null, 2)}`);
 
         const resp = await kbDataClient.createKnowledgeBaseEntry({ knowledgeBaseEntry });
 
@@ -64,6 +66,7 @@ export const KNOWLEDGE_BASE_WRITE_TOOL: AssistantTool = {
         return "I've successfully saved this entry to your knowledge base. You can ask me to recall this information at any time.";
       },
       tags: ['knowledge-base'],
-    });
+      // TODO: Remove after ZodAny is fixed https://github.com/langchain-ai/langchainjs/blob/main/langchain-core/src/tools.ts
+    }) as unknown as DynamicStructuredTool;
   },
 };

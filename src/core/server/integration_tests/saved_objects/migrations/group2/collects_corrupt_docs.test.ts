@@ -42,8 +42,6 @@ describe('migration v2 with corrupt saved object documents', () => {
     if (esServer) {
       await esServer.stop();
     }
-
-    await new Promise((resolve) => setTimeout(resolve, 10000));
   });
 
   it('collects corrupt saved object documents across batches', async () => {

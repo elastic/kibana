@@ -8,6 +8,8 @@
 import { expect } from 'expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
+const ADD_TO_CASE_DATA_TEST_SUBJ = 'embeddablePanelAction-embeddable_addToExistingCase';
+
 export default ({ getPageObject, getService }: FtrProviderContext) => {
   const common = getPageObject('common');
   const dashboard = getPageObject('dashboard');
@@ -20,11 +22,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const header = getPageObject('header');
   const toasts = getService('toasts');
+  const dashboardPanelActions = getService('dashboardPanelActions');
 
   describe('Cases persistable attachments', () => {
-    describe('lens visualization', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/176874
+    describe.skip('lens visualization', () => {
       before(async () => {
-        await svlCommonPage.login();
+        await svlCommonPage.loginAsAdmin();
         await common.navigateToApp('security', { path: 'dashboards' });
         await header.waitUntilLoadingHasFinished();
 
@@ -41,16 +45,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       after(async () => {
         await svlCases.api.deleteAllCaseItems();
-        await svlCommonPage.forceLogout();
       });
 
       it('adds lens visualization to a new case', async () => {
         const caseTitle =
           'case created in security solution from my dashboard with lens visualization';
 
-        await testSubjects.click('embeddablePanelToggleMenuIcon');
-        await testSubjects.click('embeddablePanelMore-mainMenu');
-        await testSubjects.click('embeddablePanelAction-embeddable_addToExistingCase');
+        await dashboardPanelActions.clickContextMenuItem(ADD_TO_CASE_DATA_TEST_SUBJ);
 
         await retry.waitFor('wait for the modal to open', async () => {
           return (
@@ -101,14 +102,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await common.navigateToApp('security', { path: 'dashboards' });
         await header.waitUntilLoadingHasFinished();
+        await testSubjects.click('LandingImageCards-accordionButton');
 
         if (await testSubjects.exists('edit-unsaved-New-Dashboard')) {
           await testSubjects.click('edit-unsaved-New-Dashboard');
         }
 
-        await testSubjects.click('embeddablePanelToggleMenuIcon');
-        await testSubjects.click('embeddablePanelMore-mainMenu');
-        await testSubjects.click('embeddablePanelAction-embeddable_addToExistingCase');
+        await dashboardPanelActions.clickContextMenuItem(ADD_TO_CASE_DATA_TEST_SUBJ);
 
         // verify that solution filter is not visible
         await testSubjects.missingOrFail('options-filter-popover-button-owner');

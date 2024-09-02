@@ -1,7 +1,7 @@
 get:
   summary: List agents
   tags:
-    - Agents
+    - Elastic Agents
   responses:
     '200':
       description: OK
@@ -31,7 +31,7 @@ get:
 post:
   summary: List agents by action ids
   tags:
-    - Agents
+    - Elastic Agents
   responses:
     '200':
       description: OK

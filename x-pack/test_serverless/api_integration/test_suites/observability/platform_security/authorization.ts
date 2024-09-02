@@ -18,7 +18,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       before(async () => {
         // get auth header for Viewer role
-        adminCredentials = await svlUserManager.getApiCredentialsForRole('admin');
+        adminCredentials = await svlUserManager.getM2MApiCredentialsWithRoleScope('admin');
       });
 
       it('composite features', async () => {
@@ -1918,6 +1918,7 @@ export default function ({ getService }: FtrProviderContext) {
               "all": Array [
                 "login:",
                 "api:bulkGetUserProfiles",
+                "api:dashboardUsageStats",
                 "api:store_search_session",
                 "api:generateReport",
                 "api:downloadCsv",
@@ -2100,6 +2101,7 @@ export default function ({ getService }: FtrProviderContext) {
               "minimal_all": Array [
                 "login:",
                 "api:bulkGetUserProfiles",
+                "api:dashboardUsageStats",
                 "app:dashboards",
                 "app:kibana",
                 "ui:catalogue/dashboard",
@@ -2251,6 +2253,7 @@ export default function ({ getService }: FtrProviderContext) {
               "minimal_read": Array [
                 "login:",
                 "api:bulkGetUserProfiles",
+                "api:dashboardUsageStats",
                 "app:dashboards",
                 "app:kibana",
                 "ui:catalogue/dashboard",
@@ -2349,6 +2352,7 @@ export default function ({ getService }: FtrProviderContext) {
               "read": Array [
                 "login:",
                 "api:bulkGetUserProfiles",
+                "api:dashboardUsageStats",
                 "app:dashboards",
                 "app:kibana",
                 "ui:catalogue/dashboard",
@@ -3746,6 +3750,18 @@ export default function ({ getService }: FtrProviderContext) {
                 "saved_object:fleet-proxy/delete",
                 "saved_object:fleet-proxy/bulk_delete",
                 "saved_object:fleet-proxy/share_to_space",
+                "saved_object:fleet-space-settings/bulk_get",
+                "saved_object:fleet-space-settings/get",
+                "saved_object:fleet-space-settings/find",
+                "saved_object:fleet-space-settings/open_point_in_time",
+                "saved_object:fleet-space-settings/close_point_in_time",
+                "saved_object:fleet-space-settings/create",
+                "saved_object:fleet-space-settings/bulk_create",
+                "saved_object:fleet-space-settings/update",
+                "saved_object:fleet-space-settings/bulk_update",
+                "saved_object:fleet-space-settings/delete",
+                "saved_object:fleet-space-settings/bulk_delete",
+                "saved_object:fleet-space-settings/share_to_space",
                 "saved_object:telemetry/bulk_get",
                 "saved_object:telemetry/get",
                 "saved_object:telemetry/find",
@@ -4061,6 +4077,18 @@ export default function ({ getService }: FtrProviderContext) {
                 "saved_object:fleet-proxy/delete",
                 "saved_object:fleet-proxy/bulk_delete",
                 "saved_object:fleet-proxy/share_to_space",
+                "saved_object:fleet-space-settings/bulk_get",
+                "saved_object:fleet-space-settings/get",
+                "saved_object:fleet-space-settings/find",
+                "saved_object:fleet-space-settings/open_point_in_time",
+                "saved_object:fleet-space-settings/close_point_in_time",
+                "saved_object:fleet-space-settings/create",
+                "saved_object:fleet-space-settings/bulk_create",
+                "saved_object:fleet-space-settings/update",
+                "saved_object:fleet-space-settings/bulk_update",
+                "saved_object:fleet-space-settings/delete",
+                "saved_object:fleet-space-settings/bulk_delete",
+                "saved_object:fleet-space-settings/share_to_space",
                 "saved_object:telemetry/bulk_get",
                 "saved_object:telemetry/get",
                 "saved_object:telemetry/find",
@@ -4312,6 +4340,11 @@ export default function ({ getService }: FtrProviderContext) {
                 "saved_object:fleet-proxy/find",
                 "saved_object:fleet-proxy/open_point_in_time",
                 "saved_object:fleet-proxy/close_point_in_time",
+                "saved_object:fleet-space-settings/bulk_get",
+                "saved_object:fleet-space-settings/get",
+                "saved_object:fleet-space-settings/find",
+                "saved_object:fleet-space-settings/open_point_in_time",
+                "saved_object:fleet-space-settings/close_point_in_time",
                 "saved_object:config/bulk_get",
                 "saved_object:config/get",
                 "saved_object:config/find",
@@ -4459,6 +4492,11 @@ export default function ({ getService }: FtrProviderContext) {
                 "saved_object:fleet-proxy/find",
                 "saved_object:fleet-proxy/open_point_in_time",
                 "saved_object:fleet-proxy/close_point_in_time",
+                "saved_object:fleet-space-settings/bulk_get",
+                "saved_object:fleet-space-settings/get",
+                "saved_object:fleet-space-settings/find",
+                "saved_object:fleet-space-settings/open_point_in_time",
+                "saved_object:fleet-space-settings/close_point_in_time",
                 "saved_object:config/bulk_get",
                 "saved_object:config/get",
                 "saved_object:config/find",

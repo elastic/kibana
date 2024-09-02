@@ -22,7 +22,7 @@ async function popularizeField(
     return;
   }
 
-  field.count++;
+  dataView.setFieldCount(fieldName, field.count + 1);
 
   if (!dataView.isPersisted()) {
     return;

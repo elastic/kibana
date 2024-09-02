@@ -40,12 +40,12 @@ import {
   importFile,
 } from '../../../../../lists_and_exception_lists/utils';
 import {
-  executeSetupModuleRequest,
   forceStartDatafeeds,
   getAlerts,
   getPreviewAlerts,
   previewRule,
   previewRuleWithExceptionEntries,
+  setupMlModulesWithRetry,
 } from '../../../../utils';
 import {
   createRule,
@@ -86,13 +86,13 @@ export default ({ getService }: FtrProviderContext) => {
     rule_id: 'ml-rule-id',
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/171426
-  describe.skip('@ess @serverless @serverlessQA Machine learning type rules', () => {
+  // Note: This suite of tests can be a candidate for the Kibana QA quality gate once the tests are passing consistenly on the periodic pipeline.
+  describe('@ess @serverless Machine learning type rules', () => {
     before(async () => {
       // Order is critical here: auditbeat data must be loaded before attempting to start the ML job,
       // as the job looks for certain indices on start
       await esArchiver.load(auditPath);
-      await executeSetupModuleRequest({ module: siemModule, rspCode: 200, supertest });
+      await setupMlModulesWithRetry({ module: siemModule, supertest, retry });
       await forceStartDatafeeds({ jobId: mlJobId, rspCode: 200, supertest });
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/anomalies');
     });
@@ -151,7 +151,7 @@ export default ({ getService }: FtrProviderContext) => {
           [SPACE_IDS]: ['default'],
           [ALERT_SEVERITY]: 'critical',
           [ALERT_RISK_SCORE]: 50,
-          [ALERT_RULE_PARAMETERS]: {
+          [ALERT_RULE_PARAMETERS]: expect.objectContaining({
             anomaly_threshold: 30,
             author: [],
             description: 'Test ML rule description',
@@ -174,7 +174,7 @@ export default ({ getService }: FtrProviderContext) => {
             to: 'now',
             type: 'machine_learning',
             version: 1,
-          },
+          }),
           [ALERT_DEPTH]: 1,
           [ALERT_REASON]: `event with process store, by root on mothra created critical alert Test ML rule.`,
           [ALERT_ORIGINAL_TIME]: expect.any(String),
@@ -328,7 +328,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('with asset criticality', async () => {
+    describe('with asset criticality', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/asset_criticality');
         await kibanaServer.uiSettings.update({

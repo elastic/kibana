@@ -9,7 +9,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { EMSSettings } from '@kbn/maps-ems-plugin/common/ems_settings';
 import { MapsEmsPluginPublicStart } from '@kbn/maps-ems-plugin/public';
 import { BehaviorSubject } from 'rxjs';
-import type { MapsConfigType } from '../config';
+import type { MapsConfigType } from '../server/config';
 import type { MapsPluginStartDependencies } from './plugin';
 
 const servicesReady$ = new BehaviorSubject(false);
@@ -90,7 +90,6 @@ export const getUrlForApp = () => coreStart.application.getUrlForApp;
 export const getNavigateToUrl = () => coreStart.application.navigateToUrl;
 export const getSavedObjectsTagging = () => pluginsStart.savedObjectsTagging;
 export const getPresentationUtilContext = () => pluginsStart.presentationUtil.ContextProvider;
-export const getSecurityService = () => pluginsStart.security;
 export const getSpacesApi = () => pluginsStart.spaces;
 export const getTheme = () => coreStart.theme;
 export const getApplication = () => coreStart.application;

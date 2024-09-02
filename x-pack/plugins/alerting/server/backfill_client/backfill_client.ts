@@ -159,7 +159,7 @@ export class BackfillClient {
     );
 
     const transformedResponse: ScheduleBackfillResults = bulkCreateResponse.saved_objects.map(
-      (so: SavedObject<AdHocRunSO>) => {
+      (so: SavedObject<AdHocRunSO>, index: number) => {
         if (so.error) {
           auditLogger?.log(
             adHocRunAuditEvent({
@@ -175,7 +175,7 @@ export class BackfillClient {
             })
           );
         }
-        return transformAdHocRunToBackfillResult(so);
+        return transformAdHocRunToBackfillResult(so, adHocSOsToCreate?.[index]);
       }
     );
 
@@ -315,16 +315,13 @@ function getRuleOrError(
       ruleId
     );
     return {
-      error: createBackfillError(
-        notFoundError.output.payload.error,
-        notFoundError.output.payload.message
-      ),
+      error: createBackfillError(notFoundError.output.payload.message, ruleId),
     };
   }
 
   // if rule exists, check that it is enabled
   if (!rule.enabled) {
-    return { error: createBackfillError('Bad Request', `Rule ${ruleId} is disabled`) };
+    return { error: createBackfillError(`Rule ${ruleId} is disabled`, ruleId, rule.name) };
   }
 
   // check that the rule type is supported
@@ -332,8 +329,9 @@ function getRuleOrError(
   if (isLifecycleRule) {
     return {
       error: createBackfillError(
-        'Bad Request',
-        `Rule type "${rule.alertTypeId}" for rule ${ruleId} is not supported`
+        `Rule type "${rule.alertTypeId}" for rule ${ruleId} is not supported`,
+        ruleId,
+        rule.name
       ),
     };
   }
@@ -341,7 +339,7 @@ function getRuleOrError(
   // check that the API key is not null
   if (!rule.apiKey) {
     return {
-      error: createBackfillError('Bad Request', `Rule ${ruleId} has no API key`),
+      error: createBackfillError(`Rule ${ruleId} has no API key`, ruleId, rule.name),
     };
   }
 

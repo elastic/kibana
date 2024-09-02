@@ -19,18 +19,31 @@ export interface DeletedEndpointHeartbeats {
   data: estypes.BulkResponse;
 }
 
+interface EndpointHeartbeat {
+  '@timestamp': string;
+  agent: {
+    id: string;
+  };
+  event: {
+    agent_id_status: string;
+    ingested: string;
+  };
+  billable?: boolean;
+}
+
 export const indexEndpointHeartbeats = async (
   esClient: Client,
   log: ToolingLog,
-  count: number
+  count: number = 1,
+  unbilledCount: number = 1
 ): Promise<IndexedEndpointHeartbeats> => {
   log.debug(`Indexing ${count} endpoint heartbeats`);
   const startTime = new Date();
 
-  const docs = Array.from({ length: count }).map((_, i) => {
+  const docs: EndpointHeartbeat[] = Array.from({ length: count }).map((_, i) => {
     const ingested = new Date(startTime.getTime() + i).toISOString();
 
-    return {
+    const heartbeatDoc: EndpointHeartbeat = {
       '@timestamp': '2024-06-11T13:03:37Z',
       agent: {
         id: `agent-${i}`,
@@ -40,9 +53,30 @@ export const indexEndpointHeartbeats = async (
         ingested,
       },
     };
+    // billable: true and missing billable are billed
+    if (i % 2) {
+      heartbeatDoc.billable = true;
+    }
+    return heartbeatDoc;
   });
 
-  const operations = docs.flatMap((doc) => [
+  const unbilledDocs: EndpointHeartbeat[] = Array.from({ length: unbilledCount }).map((_, i) => {
+    const ingested = new Date(startTime.getTime() + i).toISOString();
+
+    return {
+      '@timestamp': '2024-06-11T13:03:37Z',
+      agent: {
+        id: `agent-billable-false-${i}`,
+      },
+      event: {
+        agent_id_status: 'auth_metadata_missing',
+        ingested,
+      },
+      billable: false,
+    };
+  });
+
+  const operations = docs.concat(unbilledDocs).flatMap((doc) => [
     {
       index: {
         _index: ENDPOINT_HEARTBEAT_INDEX,
