@@ -182,4 +182,5 @@ export {
   FlamegraphLocatorDefinition,
   StacktracesLocatorDefinition,
   TopNFunctionsLocatorDefinition,
+  HOSTS_LOCATOR_ID,
 } from './locators';
