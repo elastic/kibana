@@ -31,7 +31,7 @@ export default function (providerContext: FtrProviderContext) {
       .send({ force: true });
   };
 
-  describe('delete and force delete scenarios', async () => {
+  describe('delete and force delete scenarios', () => {
     skipIfNoDockerRegistry(providerContext);
 
     before(async () => {
