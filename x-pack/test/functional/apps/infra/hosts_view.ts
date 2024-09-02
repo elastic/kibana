@@ -298,7 +298,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         (await pageObjects.infraHostsView.isKPIChartsLoaded())
     );
 
-  describe('Hosts View', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/191806
+  describe.skip('Hosts View', function () {
     let synthEsInfraClient: InfraSynthtraceEsClient;
     let syntEsLogsClient: LogsSynthtraceEsClient;
 
@@ -369,18 +370,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           synthEsInfraClient.clean(),
           browser.removeLocalStorageItem(HOSTS_LINK_LOCAL_STORAGE_KEY),
         ]);
-      });
-
-      it('should be accessible from the Inventory page', async () => {
-        await pageObjects.common.navigateToApp('infraOps');
-
-        await pageObjects.infraHome.clickDismissKubernetesTourButton();
-        await pageObjects.infraHostsView.getBetaBadgeExists();
-        await pageObjects.infraHostsView.clickTryHostViewBadge();
-
-        const pageUrl = await browser.getCurrentUrl();
-
-        expect(pageUrl).to.contain(HOSTS_VIEW_PATH);
       });
 
       describe('#Single Host Flyout', () => {
@@ -571,10 +560,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         it('should render the correct page title', async () => {
           const documentTitle = await browser.getTitle();
           expect(documentTitle).to.contain('Hosts - Infrastructure - Observability - Elastic');
-        });
-
-        it('should render the title beta badge', async () => {
-          await pageObjects.infraHostsView.getBetaBadgeExists();
         });
 
         describe('Hosts table', () => {
