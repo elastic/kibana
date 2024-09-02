@@ -7,7 +7,7 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/public';
-import { MetricPublicConfig } from '../config';
+import type { MetricPublicConfig } from '../server/config';
 import { MetricVisPlugin as Plugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext<MetricPublicConfig>) {

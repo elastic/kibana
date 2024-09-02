@@ -7,7 +7,7 @@
  */
 
 import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
-import { ConfigSchema, configSchema } from '../config';
+import { ConfigSchema, configSchema } from './config';
 import type {
   UnifiedSearchServerPlugin,
   UnifiedSearchServerPluginSetup,
