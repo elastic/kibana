@@ -52,7 +52,7 @@ export default function (providerContext: FtrProviderContext) {
 
         await deleteIndex(es, INDEX_ARRAY);
         await addIndex(es, findingsMockData, LATEST_FINDINGS_INDEX_DEFAULT_NS);
-        await addIndex(es, vulnerabilityMockData, LATEST_VULNERABILITIES_INDEX_DEFAULT_NS);
+        await addIndex(es, vulnerabilityMockData, CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN);
       });
 
       afterEach(async () => {
