@@ -25,7 +25,7 @@ Given the `services_from_logs` definition below, the history transform will crea
 Note that it is not necessary to add the `identifyFields` as metadata as these will be automatically collected in the output documents, and that it is possible to set `identityFields` as optional.
 
 __service_from_logs definition__
-```
+<pre>
 {
   "id": "services_from_logs",
   "name": "Extract services from logs",
@@ -37,7 +37,7 @@ __service_from_logs definition__
     "service.name", // == { "field": "service.name", "optional": false }
     { "field": "service.environment", "optional": true }
   ],
-  "displayNameTemplate": "{{service.name}}{{#service.environment}}:{{.}}{{/service.environment}}", // [mustache](https://mustache.github.io/) template
+  "displayNameTemplate": "{{service.name}}{{#service.environment}}:{{.}}{{/service.environment}}", // <a href="https://mustache.github.io/">mustache</a> template
   /**
    * the list of fields to collect and aggregate from the source documents
    */
@@ -45,7 +45,7 @@ __service_from_logs definition__
     {
       "source": "_index", // the field name in the source indices documents
       "destination": "sourceIndex", // the field name in the entity documents
-      "limit": 10 // see [terms aggregation size](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-terms-aggregation.html#search-aggregations-bucket-terms-aggregation-size)
+      "limit": 10 // see <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-terms-aggregation.html#search-aggregations-bucket-terms-aggregation-size">terms aggregation size</a>
     },
     "data_stream.type" // == { "source": "data_stream.type", "destination": "data_stream.type" }
   ],
@@ -81,11 +81,11 @@ __service_from_logs definition__
   ],
   "history": {
     "timestampField": "@timestamp", // used for the lookback filter and date_histogram field
-    "interval": "1m", // [fixed_interval](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-datehistogram-aggregation.html#fixed_intervals) of the history date histogram
+    "interval": "1m", // <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-datehistogram-aggregation.html#fixed_intervals">fixed_interval</a> of the history date histogram
     "settings": {
-      "syncField": "@timestamp", // see [sync.time.field](https://www.elastic.co/guide/en/elasticsearch/reference/current/put-transform.html)
-      "syncDelay": "1m", // see [sync.time.delay](https://www.elastic.co/guide/en/elasticsearch/reference/current/put-transform.html)
-      "frequency": "1m", // see [frequency](https://www.elastic.co/guide/en/elasticsearch/reference/current/put-transform.html)
+      "syncField": "@timestamp", // see <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/put-transform.html">sync.time.field</a>
+      "syncDelay": "1m", // see <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/put-transform.html">sync.time.delay</a>
+      "frequency": "1m", // see <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/put-transform.html">frequency</a>
       "lookbackPeriod": "10m", // added as `timestampField >= now-{lookbackPeriod}` filter to the transform query
       "backfillSyncDelay": "10m", // activates the backfill transform if set
       "backfillLookbackPeriod": "20m",
@@ -100,7 +100,7 @@ __service_from_logs definition__
   },
   "version": "1.0.0" // semver
 }
-```
+</pre>
 
 __services_from_logs history entity__
 ```
