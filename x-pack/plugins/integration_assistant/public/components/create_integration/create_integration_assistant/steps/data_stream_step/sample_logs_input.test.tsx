@@ -315,10 +315,6 @@ describe('SampleLogsInput', () => {
         await changeFile(input, new File(['...'], 'test.json', { type }));
       });
 
-      afterEach(() => {
-        jest.clearAllMocks();
-      });
-
       it('should raise an appropriate error', () => {
         jest.spyOn(JSON, 'parse').mockImplementation(() => {
           throw new RangeError();
