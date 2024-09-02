@@ -18,7 +18,7 @@ import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { PiePublicConfig } from '../config';
+import type { PiePublicConfig } from '../server/config';
 import { pieVisType } from './vis_type';
 import { setDataViewsStart } from './services';
 
