@@ -10,7 +10,6 @@ import type { Rule } from '@kbn/alerting-plugin/common';
 import { isEqual, xorWith } from 'lodash';
 import { stringifyZodError } from '@kbn/zod-helpers';
 import {
-  type QueryRule,
   type ResponseAction,
   type RuleCreateProps,
   RuleResponse,
@@ -24,12 +23,7 @@ import {
 import { isQueryRule, isEsqlRule, isEqlRule } from '../../../../../common/detection_engine/utils';
 import type { SecuritySolutionApiRequestHandlerContext } from '../../../..';
 import { CustomHttpRequestError } from '../../../../utils/custom_http_request_error';
-import {
-  hasValidRuleType,
-  type RuleAlertType,
-  type RuleParams,
-  type UnifiedQueryRuleParams,
-} from '../../rule_schema';
+import { hasValidRuleType, type RuleAlertType, type RuleParams } from '../../rule_schema';
 import { type BulkError, createBulkErrorObject } from '../../routes/utils';
 import { internalRuleToAPIResponse } from '../logic/detection_rules_client/converters/internal_rule_to_api_response';
 
@@ -115,15 +109,14 @@ export const validateResponseActionsPermissions = async (
   });
 };
 
-// TODO TC: figure out typings
 function rulePayloadContainsResponseActions(
   rule: RuleCreateProps | RuleUpdateProps
-): rule is QueryRule {
+): rule is { response_actions: ResponseAction[] } {
   return 'response_actions' in rule;
 }
 
 function ruleObjectContainsResponseActions(
   rule?: RuleAlertType
-): rule is Rule<UnifiedQueryRuleParams> {
+): rule is Rule<{ response_actions: ResponseAction[] }> {
   return rule != null && 'params' in rule && 'responseActions' in rule?.params;
 }
