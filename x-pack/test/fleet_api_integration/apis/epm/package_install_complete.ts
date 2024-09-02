@@ -22,14 +22,14 @@ export default function (providerContext: FtrProviderContext) {
   const pkgName = 'multiple_versions';
   const pkgVersion = '0.1.0';
   const pkgUpdateVersion = '0.2.0';
-  describe('setup checks packages completed install', async () => {
+  describe('setup checks packages completed install', () => {
     skipIfNoDockerRegistry(providerContext);
 
     before(async () => {
       await fleetAndAgents.setup();
     });
 
-    describe('package install', async () => {
+    describe('package install', () => {
       before(async () => {
         if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
         await supertest
@@ -100,7 +100,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
       });
     });
-    describe('package update', async () => {
+    describe('package update', () => {
       before(async () => {
         if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
         await supertest

@@ -2718,9 +2718,9 @@
               "[version: number]:  ",
               {
                 "pluginId": "@kbn/object-versioning",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnObjectVersioningPluginApi",
-                "section": "def-common.ServicesDefinition",
+                "section": "def-server.ServicesDefinition",
                 "text": "ServicesDefinition"
               }
             ],
