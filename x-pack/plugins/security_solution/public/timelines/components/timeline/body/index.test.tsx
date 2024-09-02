@@ -237,6 +237,7 @@ describe('Body', () => {
     jest.mocked(useExpandableFlyoutApi).mockReturnValue({
       ...createExpandableFlyoutApiMock(),
       openFlyout: mockOpenFlyout,
+      goBack: jest.fn(),
     });
 
     mockUseCurrentUser.mockReturnValue({ username: 'test-username' });

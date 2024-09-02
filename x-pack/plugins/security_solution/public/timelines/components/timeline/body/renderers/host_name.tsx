@@ -43,7 +43,7 @@ const HostNameComponent: React.FC<Props> = ({
   title,
   value,
 }) => {
-  const { openRightPanel } = useExpandableFlyoutApi();
+  const { openFlyout } = useExpandableFlyoutApi();
 
   const eventContext = useContext(StatefulEventContext);
   const hostName = `${value}`;
@@ -64,17 +64,20 @@ const HostNameComponent: React.FC<Props> = ({
 
       const { timelineID } = eventContext;
 
-      openRightPanel({
-        id: HostPanelKey,
-        params: {
-          hostName,
-          contextID: contextId,
-          scopeId: timelineID,
-          isDraggable,
+      openFlyout({
+        right: {
+          id: HostPanelKey,
+          title: hostName,
+          params: {
+            hostName,
+            contextID: contextId,
+            scopeId: timelineID,
+            isDraggable,
+          },
         },
       });
     },
-    [contextId, eventContext, hostName, isDraggable, isInTimelineContext, onClick, openRightPanel]
+    [contextId, eventContext, hostName, isDraggable, isInTimelineContext, onClick, openFlyout]
   );
 
   // The below is explicitly defined this way as the onClick takes precedence when it and the href are both defined

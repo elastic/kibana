@@ -55,6 +55,7 @@ describe('FormattedIp', () => {
     jest.mocked(useExpandableFlyoutApi).mockReturnValue({
       ...createExpandableFlyoutApiMock(),
       openFlyout: mockOpenFlyout,
+      goBack: jest.fn(),
     });
   });
   const props = {

@@ -52,6 +52,7 @@ describe('ExpandableFlyout', () => {
           },
           left: undefined,
           preview: undefined,
+          history: [],
         },
       },
     };
@@ -74,6 +75,7 @@ describe('ExpandableFlyout', () => {
             id: 'key',
           },
           preview: undefined,
+          history: [],
         },
       },
     };
@@ -98,6 +100,7 @@ describe('ExpandableFlyout', () => {
               id: 'key',
             },
           ],
+          history: [],
         },
       },
     };
@@ -120,6 +123,7 @@ describe('ExpandableFlyout', () => {
           },
           left: undefined,
           preview: undefined,
+          history: [],
         },
       },
     };

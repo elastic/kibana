@@ -97,10 +97,14 @@ const RowActionComponent = ({
     'securitySolutionNotesEnabled'
   );
 
+  const ruleName = ecsData?.kibana?.alert?.rule?.name;
+  const title = ruleName ? ruleName[0] : 'Details Flyout';
+
   const handleOnEventDetailPanelOpened = useCallback(() => {
     openFlyout({
       right: {
         id: DocumentDetailsRightPanelKey,
+        title,
         path: shouldFocusOnOverviewTab ? { tab: 'overview' } : undefined,
         params: {
           id: eventId,
@@ -113,7 +117,7 @@ const RowActionComponent = ({
       location: tableId,
       panel: 'right',
     });
-  }, [eventId, indexName, tableId, openFlyout, shouldFocusOnOverviewTab, telemetry]);
+  }, [eventId, indexName, tableId, openFlyout, shouldFocusOnOverviewTab, telemetry, title]);
 
   const toggleShowNotes = useCallback(() => {
     openFlyout({

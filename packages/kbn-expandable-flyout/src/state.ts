@@ -21,6 +21,17 @@ export interface FlyoutState {
    * Panels to render in the preview section
    */
   preview: FlyoutPanelProps[] | undefined;
+  /**
+   * History of previously opened flyouts
+   */
+  history: FlyoutHistoryProps[];
+}
+
+export interface FlyoutHistoryProps {
+  left: FlyoutPanelProps | undefined;
+  right: FlyoutPanelProps | undefined;
+  // keeping the latest preview
+  preview: FlyoutPanelProps | undefined;
 }
 
 export interface State {

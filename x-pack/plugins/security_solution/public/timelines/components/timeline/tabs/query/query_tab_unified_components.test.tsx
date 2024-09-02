@@ -161,6 +161,7 @@ describe('query tab with unified timeline', () => {
       ...createExpandableFlyoutApiMock(),
       openFlyout: mockOpenFlyout,
       closeFlyout: mockCloseFlyout,
+      goBack: jest.fn(),
     }));
 
     Object.defineProperty(window, '__@hello-pangea/dnd-disable-dev-warnings', {

@@ -192,6 +192,7 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
         openFlyout({
           right: {
             id: NetworkPanelKey,
+            title: address,
             params: {
               ip: address,
               flowTarget: fieldName.includes(FlowTargetSourceDest.destination)

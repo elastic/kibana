@@ -31,6 +31,10 @@ export interface DocumentDetailsContext {
    */
   scopeId: string;
   /**
+   * Title of the flyout to be displayed as header
+   */
+  title: string;
+  /**
    * An object containing fields by type
    */
   browserFields: BrowserFields;
@@ -92,7 +96,7 @@ export const DocumentDetailsProvider = memo(
       searchHit,
     } = useEventDetails({ eventId: id, indexName });
 
-    const { ruleId } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
+    const { ruleId, ruleName } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
     const { rule: maybeRule } = useRuleWithFallback(ruleId);
 
     const contextValue = useMemo(
@@ -107,6 +111,7 @@ export const DocumentDetailsProvider = memo(
               eventId: id,
               indexName,
               scopeId,
+              title: ruleName,
               browserFields,
               dataAsNestedObject,
               dataFormattedForFieldBrowser,
@@ -130,6 +135,7 @@ export const DocumentDetailsProvider = memo(
         refetchFlyoutData,
         getFieldsData,
         isPreviewMode,
+        ruleName,
       ]
     );
 
