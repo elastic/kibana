@@ -7,7 +7,7 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/public';
-import { GaugePublicConfig } from '../config';
+import type { GaugePublicConfig } from '../server/config';
 import { VisTypeGaugePlugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext<GaugePublicConfig>) {
