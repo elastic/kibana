@@ -168,6 +168,7 @@ export const getMetricsViewInAppUrlWithSpaceId = ({
   groupBy,
   assetDetailsLocator,
   metricsExplorerLocator,
+  additionalContext,
 }: {
   timestamp: string;
   groupBy?: string[];
@@ -176,7 +177,7 @@ export const getMetricsViewInAppUrlWithSpaceId = ({
   additionalContext?: AdditionalContext;
 }) => {
   const fields = {
-    ...hasAdditionalContext,
+    ...additionalContext,
     [TIMESTAMP]: timestamp,
   };
 
