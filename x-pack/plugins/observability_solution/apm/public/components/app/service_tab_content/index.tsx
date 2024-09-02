@@ -15,6 +15,7 @@ import { useLocalStorage } from '../../../hooks/use_local_storage';
 import { emptyStateContent } from './constants';
 import { Tab } from './types';
 import { ServiceTabEmptyState } from '../service_tab_empty_state';
+import { SearchBar } from '../../shared/search_bar/search_bar';
 
 interface ServiceTabContentProps {
   tabName: Tab;
@@ -35,17 +36,21 @@ export function ServiceTabContent({ children, tabName }: ServiceTabContentProps)
   );
 
   const displayEmptyStateOnly = tabName !== 'overview';
+  const displaySearchBar = tabName === 'service-map';
 
   return (
     <>
       {hasOnlyLogsSignal ? (
         <>
           {displayEmptyStateOnly ? (
-            <ServiceTabEmptyState
-              title={emptyStateContent[tabName].title}
-              content={emptyStateContent[tabName].content}
-              imgSrc={emptyStateContent[tabName].imgSrc ?? null}
-            />
+            <>
+              {displaySearchBar && <SearchBar showTimeComparison={true} />}
+              <ServiceTabEmptyState
+                title={emptyStateContent[tabName].title}
+                content={emptyStateContent[tabName].content}
+                imgSrc={emptyStateContent[tabName].imgSrc ?? null}
+              />
+            </>
           ) : (
             <>
               {!dismissedLogsOnlyEmptyState && (
