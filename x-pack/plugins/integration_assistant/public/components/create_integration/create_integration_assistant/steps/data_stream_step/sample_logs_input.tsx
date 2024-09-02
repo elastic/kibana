@@ -129,6 +129,7 @@ const parseLogsContent = (fileContent: string): ParseLogsResult => {
         }
         return {
           logSamples: fileContent.split('\n').filter((line) => line.trim() !== ''),
+          samplesFormat: undefined, // Signifies that the format is unknown.
         };
       }
     }
