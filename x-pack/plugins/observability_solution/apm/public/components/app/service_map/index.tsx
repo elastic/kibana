@@ -138,7 +138,7 @@ export function ServiceMap({
   }
 
   if (!isActivePlatinumLicense(license)) {
-    return (
+    return wrapReturn(
       <PromptContainer>
         <LicensePrompt text={invalidLicenseMessage} />
       </PromptContainer>
@@ -146,7 +146,7 @@ export function ServiceMap({
   }
 
   if (!config.serviceMapEnabled) {
-    return (
+    return wrapReturn(
       <PromptContainer>
         <DisabledPrompt />
       </PromptContainer>
@@ -154,12 +154,10 @@ export function ServiceMap({
   }
 
   if (status === FETCH_STATUS.SUCCESS && data.elements.length === 0) {
-    return (
-      <ServiceTabContent tabName="service-map">
-        <PromptContainer>
-          <EmptyPrompt />
-        </PromptContainer>
-      </ServiceTabContent>
+    return wrapReturn(
+      <PromptContainer>
+        <EmptyPrompt />
+      </PromptContainer>
     );
   }
 
@@ -170,7 +168,7 @@ export function ServiceMap({
     error.body?.statusCode === 500 &&
     error.body?.message === SERVICE_MAP_TIMEOUT_ERROR
   ) {
-    return (
+    return wrapReturn(
       <PromptContainer>
         <TimeoutPrompt isGlobalServiceMap={!serviceName} />
       </PromptContainer>
@@ -181,30 +179,36 @@ export function ServiceMap({
     onPageReady();
   }
 
-  return (
+  function wrapReturn(content: JSX.Element) {
+    return <ServiceTabContent tabName="service-map">content</ServiceTabContent>;
+  }
+
+  return wrapReturn(
     <>
-      <SearchBar showTimeComparison />
-      <EuiPanel hasBorder={true} paddingSize="none">
-        <div data-test-subj="serviceMap" style={{ height: heightWithPadding }} ref={ref}>
-          <Cytoscape
-            elements={data.elements}
-            height={heightWithPadding}
-            serviceName={serviceName}
-            style={getCytoscapeDivStyle(theme, status)}
-          >
-            <Controls />
-            {serviceName && <EmptyBanner />}
-            {status === FETCH_STATUS.LOADING && <LoadingSpinner />}
-            <Popover
-              focusedServiceName={serviceName}
-              environment={environment}
-              kuery={kuery}
-              start={start}
-              end={end}
-            />
-          </Cytoscape>
-        </div>
-      </EuiPanel>
+      <ServiceTabContent tabName="service-map">
+        <SearchBar showTimeComparison />
+        <EuiPanel hasBorder={true} paddingSize="none">
+          <div data-test-subj="serviceMap" style={{ height: heightWithPadding }} ref={ref}>
+            <Cytoscape
+              elements={data.elements}
+              height={heightWithPadding}
+              serviceName={serviceName}
+              style={getCytoscapeDivStyle(theme, status)}
+            >
+              <Controls />
+              {serviceName && <EmptyBanner />}
+              {status === FETCH_STATUS.LOADING && <LoadingSpinner />}
+              <Popover
+                focusedServiceName={serviceName}
+                environment={environment}
+                kuery={kuery}
+                start={start}
+                end={end}
+              />
+            </Cytoscape>
+          </div>
+        </EuiPanel>
+      </ServiceTabContent>
     </>
   );
 }
