@@ -48,7 +48,7 @@ export const disableEntityDiscoveryRoute = createEntityManagerServerRoute({
       deleteData: z.optional(BooleanFromString).default(false),
     }),
   }),
-  handler: async ({ context, params, response, logger, server }) => {
+  handler: async ({ context, response, params, logger, server }) => {
     try {
       const esClient = (await context.core).elasticsearch.client.asCurrentUser;
       const canDisable = await canDisableEntityDiscovery(esClient);
@@ -72,7 +72,7 @@ export const disableEntityDiscoveryRoute = createEntityManagerServerRoute({
         deleteData: params.query.deleteData,
       });
 
-      logger.debug('reading entity discovery API key from saved object');
+      server.logger.debug('reading entity discovery API key from saved object');
       const apiKey = await readEntityDiscoveryAPIKey(server);
       // api key could be deleted outside of the apis, it does not affect the
       // disablement flow

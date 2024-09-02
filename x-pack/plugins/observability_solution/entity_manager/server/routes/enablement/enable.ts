@@ -63,7 +63,7 @@ export const enableEntityDiscoveryRoute = createEntityManagerServerRoute({
   params: z.object({
     query: createEntityDefinitionQuerySchema,
   }),
-  handler: async ({ context, request, response, server, logger, params }) => {
+  handler: async ({ context, request, response, params, server, logger }) => {
     try {
       const apiKeysEnabled = await checkIfAPIKeysAreEnabled(server);
       if (!apiKeysEnabled) {

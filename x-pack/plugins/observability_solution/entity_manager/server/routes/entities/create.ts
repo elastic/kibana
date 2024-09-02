@@ -7,11 +7,10 @@
 
 import { createEntityDefinitionQuerySchema, entityDefinitionSchema } from '@kbn/entities-schema';
 import { z } from '@kbn/zod';
+import { EntityDefinitionIdInvalid } from '../../lib/entities/errors/entity_definition_id_invalid';
 import { EntityIdConflict } from '../../lib/entities/errors/entity_id_conflict_error';
 import { EntitySecurityException } from '../../lib/entities/errors/entity_security_exception';
 import { InvalidTransformError } from '../../lib/entities/errors/invalid_transform_error';
-import { installEntityDefinition } from '../../lib/entities/install_entity_definition';
-import { startTransform } from '../../lib/entities/start_transform';
 import { createEntityManagerServerRoute } from '../create_entity_manager_server_route';
 
 /**
@@ -51,34 +50,33 @@ import { createEntityManagerServerRoute } from '../create_entity_manager_server_
 export const createEntityDefinitionRoute = createEntityManagerServerRoute({
   endpoint: 'POST /internal/entities/definition',
   params: z.object({
-    body: entityDefinitionSchema,
     query: createEntityDefinitionQuerySchema,
+    body: entityDefinitionSchema,
   }),
-
-  handler: async ({ context, params, response, logger }) => {
-    const core = await context.core;
-    const soClient = core.savedObjects.client;
-    const esClient = core.elasticsearch.client.asCurrentUser;
+  handler: async ({ request, response, params, logger, getScopedClient }) => {
     try {
-      const definition = await installEntityDefinition({
-        soClient,
-        esClient,
-        logger,
+      const client = await getScopedClient({ request });
+      const definition = await client.createEntityDefinition({
         definition: params.body,
+        installOnly: params.query.installOnly,
       });
-
-      if (!params.query.installOnly) {
-        await startTransform(esClient, definition, logger);
-      }
 
       return response.ok({ body: definition });
     } catch (e) {
+      logger.error(e);
+
+      if (e instanceof EntityDefinitionIdInvalid) {
+        return response.badRequest({ body: e });
+      }
+
       if (e instanceof EntityIdConflict) {
         return response.conflict({ body: e });
       }
+
       if (e instanceof EntitySecurityException || e instanceof InvalidTransformError) {
         return response.customError({ body: e, statusCode: 400 });
       }
+
       return response.customError({ body: e, statusCode: 500 });
     }
   },

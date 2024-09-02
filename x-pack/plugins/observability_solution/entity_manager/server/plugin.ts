@@ -8,6 +8,7 @@
 import {
   CoreSetup,
   CoreStart,
+  KibanaRequest,
   Logger,
   Plugin,
   PluginConfigDescriptor,
@@ -18,15 +19,16 @@ import { firstValueFrom } from 'rxjs';
 import { EntityManagerConfig, configSchema, exposeToBrowserConfig } from '../common/config';
 import { builtInDefinitions } from './lib/entities/built_in';
 import { upgradeBuiltInEntityDefinitions } from './lib/entities/upgrade_entity_definition';
+import { EntityClient } from './lib/entity_client';
 import { installEntityManagerTemplates } from './lib/manage_index_templates';
 import { entityManagerRouteRepository } from './routes';
+import { EntityManagerRouteDependencies } from './routes/types';
 import { EntityDiscoveryApiKeyType, entityDefinition } from './saved_objects';
 import {
   EntityManagerPluginSetupDependencies,
   EntityManagerPluginStartDependencies,
   EntityManagerServerSetup,
 } from './types';
-import { EntityManagerRouteDependencies } from './routes/types';
 
 export type EntityManagerServerPluginSetup = ReturnType<EntityManagerServerPlugin['setup']>;
 export type EntityManagerServerPluginStart = ReturnType<EntityManagerServerPlugin['start']>;
@@ -72,6 +74,12 @@ export class EntityManagerServerPlugin
       repository: entityManagerRouteRepository,
       dependencies: {
         server: this.server,
+        getScopedClient: async ({ request }: { request: KibanaRequest }) => {
+          const [coreStart] = await core.getStartServices();
+          const esClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
+          const soClient = coreStart.savedObjects.getScopedClient(request);
+          return new EntityClient({ esClient, soClient, logger: this.logger });
+        },
       },
       core,
       logger: this.logger,

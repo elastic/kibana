@@ -7,7 +7,6 @@
 
 import { getEntityDefinitionQuerySchema } from '@kbn/entities-schema';
 import { z } from '@kbn/zod';
-import { findEntityDefinitions } from '../../lib/entities/find_entity_definition';
 import { createEntityManagerServerRoute } from '../create_entity_manager_server_route';
 
 /**
@@ -54,18 +53,17 @@ export const getEntityDefinitionRoute = createEntityManagerServerRoute({
   params: z.object({
     query: getEntityDefinitionQuerySchema,
   }),
-  handler: async ({ context, params, response }) => {
+  handler: async ({ request, response, params, logger, getScopedClient }) => {
     try {
-      const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-      const soClient = (await context.core).savedObjects.client;
-      const definitions = await findEntityDefinitions({
-        esClient,
-        soClient,
-        page: params?.query?.page ?? 1,
-        perPage: params?.query?.perPage ?? 10,
+      const client = await getScopedClient({ request });
+      const result = await client.getEntityDefinitions({
+        page: params?.query?.page,
+        perPage: params?.query?.perPage,
       });
-      return response.ok({ body: { definitions } });
+
+      return response.ok({ body: result });
     } catch (e) {
+      logger.error(e);
       return response.customError({ body: e, statusCode: 500 });
     }
   },

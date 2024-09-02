@@ -13,8 +13,6 @@ import { z } from '@kbn/zod';
 import { EntityDefinitionNotFound } from '../../lib/entities/errors/entity_not_found';
 import { EntitySecurityException } from '../../lib/entities/errors/entity_security_exception';
 import { InvalidTransformError } from '../../lib/entities/errors/invalid_transform_error';
-import { readEntityDefinition } from '../../lib/entities/read_entity_definition';
-import { uninstallEntityDefinition } from '../../lib/entities/uninstall_entity_definition';
 import { createEntityManagerServerRoute } from '../create_entity_manager_server_route';
 
 /**
@@ -57,22 +55,18 @@ export const deleteEntityDefinitionRoute = createEntityManagerServerRoute({
     path: deleteEntityDefinitionParamsSchema,
     query: deleteEntityDefinitionQuerySchema,
   }),
-  handler: async ({ context, params, response, logger }) => {
+  handler: async ({ request, response, params, logger, getScopedClient }) => {
     try {
-      const soClient = (await context.core).savedObjects.client;
-      const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-
-      const definition = await readEntityDefinition(soClient, params.path.id, logger);
-      await uninstallEntityDefinition({
-        definition,
-        soClient,
-        esClient,
-        logger,
-        deleteData: params.query?.deleteData,
+      const client = await getScopedClient({ request });
+      await client.deleteEntityDefinition({
+        id: params.path.id,
+        deleteData: params.query.deleteData,
       });
 
       return response.ok({ body: { acknowledged: true } });
     } catch (e) {
+      logger.error(e);
+
       if (e instanceof EntityDefinitionNotFound) {
         return response.notFound({ body: e });
       }

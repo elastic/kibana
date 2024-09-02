@@ -9,10 +9,12 @@ import { createEntityDefinitionRoute } from './create';
 import { deleteEntityDefinitionRoute } from './delete';
 import { getEntityDefinitionRoute } from './get';
 import { resetEntityDefinitionRoute } from './reset';
+import { updateEntityDefinitionRoute } from './update';
 
 export const entitiesRoutes = {
   ...createEntityDefinitionRoute,
   ...deleteEntityDefinitionRoute,
   ...getEntityDefinitionRoute,
   ...resetEntityDefinitionRoute,
+  ...updateEntityDefinitionRoute,
 };

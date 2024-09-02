@@ -59,7 +59,6 @@ export class SpaceTestApiClient {
 
     return res;
   }
-
   // Agent policies
   async createAgentPolicy(
     spaceId?: string,
@@ -92,7 +91,6 @@ export class SpaceTestApiClient {
 
     return res;
   }
-
   async getPackagePolicy(
     packagePolicyId: string,
     spaceId?: string
@@ -103,7 +101,6 @@ export class SpaceTestApiClient {
 
     return res;
   }
-
   async getPackagePolicies(spaceId?: string): Promise<GetPackagePoliciesResponse> {
     const { body: res } = await this.supertest
       .get(`${this.getBaseUrl(spaceId)}/api/fleet/package_policies`)
@@ -111,7 +108,6 @@ export class SpaceTestApiClient {
 
     return res;
   }
-
   async createFleetServerPolicy(spaceId?: string): Promise<CreateAgentPolicyResponse> {
     const { body: res } = await this.supertest
       .post(`${this.getBaseUrl(spaceId)}/api/fleet/agent_policies`)
@@ -263,13 +259,15 @@ export class SpaceTestApiClient {
     return res;
   }
   async reassignAgent(agentId: string, policyId: string, spaceId?: string) {
-    await this.supertest
+    const { body: res } = await this.supertest
       .post(`${this.getBaseUrl(spaceId)}/api/fleet/agents/${agentId}/reassign`)
       .set('kbn-xsrf', 'xxx')
       .send({
         policy_id: policyId,
       })
       .expect(200);
+
+    return res;
   }
   async bulkReassignAgents(data: any, spaceId?: string) {
     const { body: res } = await this.supertest
@@ -281,18 +279,56 @@ export class SpaceTestApiClient {
     return res;
   }
   async upgradeAgent(agentId: string, data: any, spaceId?: string) {
-    await this.supertest
+    const { body: res } = await this.supertest
       .post(`${this.getBaseUrl(spaceId)}/api/fleet/agents/${agentId}/upgrade`)
       .set('kbn-xsrf', 'xxxx')
       .send(data)
       .expect(200);
+
+    return res;
   }
   async bulkUpgradeAgents(data: any, spaceId?: string) {
-    await this.supertest
+    const { body: res } = await this.supertest
       .post(`${this.getBaseUrl(spaceId)}/api/fleet/agents/bulk_upgrade`)
       .set('kbn-xsrf', 'xxxx')
       .send(data)
       .expect(200);
+
+    return res;
+  }
+  async requestAgentDiagnostics(agentId: string, spaceId?: string) {
+    const { body: res } = await this.supertest
+      .post(`${this.getBaseUrl(spaceId)}/api/fleet/agents/${agentId}/request_diagnostics`)
+      .set('kbn-xsrf', 'xxxx')
+      .expect(200);
+
+    return res;
+  }
+  async bulkRequestDiagnostics(data: any, spaceId?: string) {
+    const { body: res } = await this.supertest
+      .post(`${this.getBaseUrl(spaceId)}/api/fleet/agents/bulk_request_diagnostics`)
+      .set('kbn-xsrf', 'xxxx')
+      .send(data)
+      .expect(200);
+
+    return res;
+  }
+  async unenrollAgent(agentId: string, spaceId?: string) {
+    const { body: res } = await this.supertest
+      .post(`${this.getBaseUrl(spaceId)}/api/fleet/agents/${agentId}/unenroll`)
+      .set('kbn-xsrf', 'xxxx')
+      .expect(200);
+
+    return res;
+  }
+  async bulkUnenrollAgents(data: any, spaceId?: string) {
+    const { body: res } = await this.supertest
+      .post(`${this.getBaseUrl(spaceId)}/api/fleet/agents/bulk_unenroll`)
+      .set('kbn-xsrf', 'xxxx')
+      .send(data)
+      .expect(200);
+
+    return res;
   }
   async bulkUpdateAgentTags(data: any, spaceId?: string) {
     const { body: res } = await this.supertest
@@ -429,7 +465,6 @@ export class SpaceTestApiClient {
 
     return res;
   }
-
   async cancelAction(actionId: string, spaceId?: string): Promise<PostNewAgentActionResponse> {
     const { body: res } = await this.supertest
       .post(`${this.getBaseUrl(spaceId)}/api/fleet/agents/actions/${actionId}/cancel`)

@@ -43,7 +43,7 @@ import { createEntityManagerServerRoute } from '../create_entity_manager_server_
  */
 export const checkEntityDiscoveryEnabledRoute = createEntityManagerServerRoute({
   endpoint: 'GET /internal/entities/managed/enablement',
-  handler: async ({ logger, response, server }) => {
+  handler: async ({ response, logger, server }) => {
     try {
       logger.debug('reading entity discovery API key from saved object');
       const apiKey = await readEntityDiscoveryAPIKey(server);

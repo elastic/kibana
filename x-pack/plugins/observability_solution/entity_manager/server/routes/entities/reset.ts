@@ -39,7 +39,7 @@ export const resetEntityDefinitionRoute = createEntityManagerServerRoute({
   params: z.object({
     path: resetEntityDefinitionParamsSchema,
   }),
-  handler: async ({ context, params, response, logger }) => {
+  handler: async ({ context, response, params, logger }) => {
     try {
       const soClient = (await context.core).savedObjects.client;
       const esClient = (await context.core).elasticsearch.client.asCurrentUser;
@@ -68,6 +68,8 @@ export const resetEntityDefinitionRoute = createEntityManagerServerRoute({
 
       return response.ok({ body: { acknowledged: true } });
     } catch (e) {
+      logger.error(e);
+
       if (e instanceof EntityDefinitionNotFound) {
         return response.notFound({ body: e });
       }
