@@ -162,6 +162,7 @@ export const EqlSpecificRuleParams = z.object({
   timestampField: TimestampField.optional(),
   tiebreakerField: TiebreakerField.optional(),
   alertSuppression: AlertSuppressionCamel.optional(),
+  responseActions: z.array(RuleResponseAction).optional(),
 });
 
 export type EqlRuleParams = BaseRuleParams & EqlSpecificRuleParams;
@@ -172,6 +173,7 @@ export const EsqlSpecificRuleParams = z.object({
   type: z.literal('esql'),
   language: z.literal('esql'),
   query: RuleQuery,
+  responseActions: z.array(RuleResponseAction).optional(),
   alertSuppression: AlertSuppressionCamel.optional(),
 });
 

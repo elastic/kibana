@@ -14,6 +14,7 @@ import type {
 } from '@kbn/alerting-plugin/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Filter } from '@kbn/es-query';
+import { expandDottedObject } from '../../../../../common/utils/expand_dotted';
 import { buildEqlSearchRequest } from './build_eql_search_request';
 import { createEnrichEventsFunction } from '../utils/enrichments';
 
@@ -26,6 +27,7 @@ import type {
   SearchAfterAndBulkCreateReturnType,
   SignalSource,
   WrapSuppressedHits,
+  CreateQueryRuleAdditionalOptions,
 } from '../types';
 import {
   addToSearchAfterReturn,
@@ -189,6 +191,7 @@ export const eqlExecutor = async ({
 
         result.warningMessages.push(maxSignalsWarning);
       }
+
       if (
         completeRule.ruleParams.responseActions?.length &&
         result.createdSignalsCount &&
@@ -199,6 +202,7 @@ export const eqlExecutor = async ({
           responseActions: completeRule.ruleParams.responseActions,
         });
       }
+
       return result;
     } catch (error) {
       if (
