@@ -43,7 +43,7 @@ export default ({ getService }: FtrProviderContext): void => {
      * Tests the legacy actions to ensure we can export legacy notifications
      * @deprecated Once the legacy notification system is removed, remove this test too.
      */
-    describe('legacy_notification_system', async () => {
+    describe('legacy_notification_system', () => {
       it('should be able to a read a scheduled action correctly', async () => {
         // create an connector/action
         const { body: hookAction } = await supertest
