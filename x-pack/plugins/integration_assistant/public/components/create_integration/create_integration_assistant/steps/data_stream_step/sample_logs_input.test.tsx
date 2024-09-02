@@ -304,25 +304,43 @@ describe('SampleLogsInput', () => {
         });
       });
     });
+  });
 
-    describe('when the file is too large', () => {
-      beforeEach(async () => {
-        // Simulate large log content that would cause a RangeError
-        jest.spyOn(JSON, 'parse').mockImplementation(() => {
-          throw new RangeError();
-        });
+  describe('when the file is too large', () => {
+    const type = 'text/plain';
+    let jsonParseSpy: jest.SpyInstance;
 
-        await changeFile(input, new File(['...'], 'test.json', { type }));
+    beforeEach(async () => {
+      // Simulate large log content that would cause a RangeError
+      jsonParseSpy = jest.spyOn(JSON, 'parse').mockImplementation(() => {
+        throw new RangeError();
       });
 
-      it('should raise an appropriate error', () => {
-        jest.spyOn(JSON, 'parse').mockImplementation(() => {
-          throw new RangeError();
-        });
+      await changeFile(input, new File(['...'], 'test.json', { type }));
+    });
 
-        expect(
-          result.queryByText('This logs sample file is too large to parse')
-        ).toBeInTheDocument();
+    afterAll(() => {
+      // Restore the original implementation after all tests
+      jsonParseSpy.mockRestore();
+    });
+
+    it('should raise an appropriate error', () => {
+      expect(result.queryByText('This logs sample file is too large to parse')).toBeInTheDocument();
+    });
+  });
+
+  describe('when the file is neither a valid json nor ndjson', () => {
+    const plainTextFile = 'test message 1\ntest message 2';
+    const type = 'text/plain';
+
+    beforeEach(async () => {
+      await changeFile(input, new File([plainTextFile], 'test.txt', { type }));
+    });
+
+    it('should set the integrationSetting correctly', () => {
+      expect(mockActions.setIntegrationSettings).toBeCalledWith({
+        logSamples: plainTextFile.split('\n'),
+        samplesFormat: undefined,
       });
     });
   });
