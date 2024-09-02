@@ -146,7 +146,7 @@ exports[`it renders correctly in serverless mode 1`] = `
     }
     validator={
       RoleValidator {
-        "buildFlavor": undefined,
+        "buildFlavor": "serverless",
         "shouldValidate": undefined,
       }
     }
