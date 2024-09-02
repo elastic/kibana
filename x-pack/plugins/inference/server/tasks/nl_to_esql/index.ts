@@ -130,13 +130,22 @@ export function naturalLanguageToEsql<TToolOptions extends ToolOptions>({
           <query>
           \`\`\`
 
-          When generating ES|QL, you must use commands and functions for which you 
-          requested documentation.
-          
-          DO NOT UNDER ANY CIRCUMSTANCES use commands or functions that are not a capability
-          of ES|QL as mentioned in the system message and documentation. When converting
-          queries from one language to ES|QL, make sure that the functions are available
-          and documented in ES|QL. E.g., for SPL's LEN, use LENGTH. For IF, use CASE.`,
+          When generating ES|QL, you must use commands and functions present on the
+          requested documentation, and follow the syntax as described in the documentation
+          and its examples.
+
+          DO NOT UNDER ANY CIRCUMSTANCES use commands, functions, parameters, or syntaxes that are not
+          explicitly mentioned as supported capability by ES|QL, either in the system message or documentation.
+          assume that ONLY the set of capabilities described in the requested documentation is valid.
+          Do not try to guess parameters or syntax based on other query languages.
+
+          If what the user is asking for is not technically achievable with ES|QL's capabilities, just inform
+          the user. DO NOT invent capabilities not described in the documentation just to provide
+          a positive answer to the user. E.g. LIMIT only has one parameter, do not assume you can add more.
+
+          When converting queries from one language to ES|QL, make sure that the functions are available
+          and documented in ES|QL. E.g., for SPL's LEN, use LENGTH. For IF, use CASE.
+`,
               messages: messages.concat([
                 {
                   role: MessageRole.Assistant,
@@ -215,7 +224,7 @@ export function naturalLanguageToEsql<TToolOptions extends ToolOptions>({
           messages,
           input: `Based on the previous conversation, request documentation
         from the ES|QL handbook to help you get the right information
-        needed to generate a query. 
+        needed to generate a query.
 
         Examples for functions and commands:
         Do you need to group data? Request \`STATS\`.
