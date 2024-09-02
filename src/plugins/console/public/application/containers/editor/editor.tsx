@@ -89,7 +89,7 @@ export const Editor = memo(({ loading, setEditorInstance }: Props) => {
 
   return (
     <>
-      {requestInFlight || fetchingMappings ? (
+      {fetchingMappings ? (
         <div className="conApp__requestProgressBarContainer">
           <EuiProgress size="xs" color="accent" position="absolute" />
         </div>
