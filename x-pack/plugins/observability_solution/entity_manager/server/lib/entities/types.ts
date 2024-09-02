@@ -35,15 +35,13 @@ interface IndexTemplateState {
 // modified or deleted outside of the entity manager apis, this can
 // be used to verify the actual installation is complete and running
 export interface EntityDefinitionState {
-  state: {
-    installed: boolean;
-    running: boolean;
-    components: {
-      transforms: TransformState[];
-      ingestPipelines: IngestPipelineState[];
-      indexTemplates: IndexTemplateState[];
-    };
+  installed: boolean;
+  running: boolean;
+  components: {
+    transforms: TransformState[];
+    ingestPipelines: IngestPipelineState[];
+    indexTemplates: IndexTemplateState[];
   };
 }
 
-export type EntityDefinitionWithState = EntityDefinition & EntityDefinitionState;
+export type EntityDefinitionWithState = EntityDefinition & { state: EntityDefinitionState };

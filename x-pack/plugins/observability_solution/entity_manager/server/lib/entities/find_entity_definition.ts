@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { compact, forEach, reduce } from 'lodash';
+import { concat, compact, forEach, reduce } from 'lodash';
 import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { EntityDefinition } from '@kbn/entities-schema';
 import { NodesIngestTotal } from '@elastic/elasticsearch/lib/api/types';
@@ -104,11 +104,9 @@ async function getEntityDefinitionState(
   const running = transforms.every((transform) => transform.running);
 
   return {
-    state: {
-      installed,
-      running,
-      components: { transforms, ingestPipelines, indexTemplates },
-    },
+    installed,
+    running,
+    components: { transforms, ingestPipelines, indexTemplates },
   };
 }
 
@@ -125,9 +123,12 @@ async function getTransformState({
     ...(isBackfillEnabled(definition) ? [generateHistoryBackfillTransformId(definition)] : []),
   ];
 
-  const transformStats = await esClient.transform.getTransformStats({ transform_id: transformIds });
+  const transformStats = await Promise.all(
+    transformIds.map((id) => esClient.transform.getTransformStats({ transform_id: id }))
+  ).then((results) => concat([], ...results.map(({ transforms }) => transforms)));
+
   return transformIds.map((id) => {
-    const stats = transformStats.transforms.find((transform) => transform.id === id);
+    const stats = transformStats.find((transform) => transform.id === id);
     if (!stats) {
       return { id, installed: false, running: false };
     }
@@ -197,9 +198,9 @@ async function getIndexTemplatesState({
     indexTemplatesIds.map((id) =>
       esClient.indices
         .getIndexTemplate({ name: id }, { ignore: [404] })
-        .then(({ index_templates: indexTemplates }) => indexTemplates[0])
+        .then(({ index_templates: indexTemplates }) => indexTemplates?.[0])
     )
-  );
+  ).then(compact);
   return indexTemplatesIds.map((id) => {
     const template = templates.find(({ name }) => name === id);
     if (!template) {
