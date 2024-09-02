@@ -54,7 +54,6 @@ export const useAlertsGroupingState = (groupingId: string) => {
       setGroupingState((prevState) => ({
         ...prevState,
         [groupingId]: {
-          // @ts-expect-error options might not be defined
           options: [],
           // @ts-expect-error activeGroups might not be defined
           activeGroups: initialActiveGroups,

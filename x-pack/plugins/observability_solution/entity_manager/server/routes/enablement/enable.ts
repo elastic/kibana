@@ -10,7 +10,6 @@ import {
   CreateEntityDefinitionQuery,
   createEntityDefinitionQuerySchema,
 } from '@kbn/entities-schema';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { SetupRouteOptions } from '../types';
 import {
   canEnableEntityDiscovery,
@@ -27,6 +26,41 @@ import { ERROR_API_KEY_SERVICE_DISABLED } from '../../../common/errors';
 import { EntityDiscoveryApiKeyType } from '../../saved_objects';
 import { startTransform } from '../../lib/entities/start_transform';
 
+/**
+ * @openapi
+ * /internal/entities/managed/enablement:
+ *   put:
+ *     description: Enable managed (built-in) entity discovery.
+ *     tags:
+ *       - management
+ *     parameters:
+ *       - in: query
+ *         name: installOnly
+ *         description: If true, the definition transforms will not be started
+ *         required: false
+ *         schema:
+ *           type: boolean
+ *           default: false
+ *     responses:
+ *       403:
+ *         description: The current user does not have the required permissions to enable entity discovery
+ *       200:
+ *         description: OK - Verify result in response body
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                  type: boolean
+ *                  example: false
+ *                 reason:
+ *                  type: string
+ *                  example: api_key_service_disabled
+ *                 message:
+ *                  type: string
+ *                  example: API key service is not enabled; try configuring `xpack.security.authc.api_key.enabled` in your elasticsearch config
+ */
 export function enableEntityDiscoveryRoute<T extends RequestHandlerContext>({
   router,
   server,
@@ -36,7 +70,7 @@ export function enableEntityDiscoveryRoute<T extends RequestHandlerContext>({
     {
       path: '/internal/entities/managed/enablement',
       validate: {
-        query: buildRouteValidationWithZod(createEntityDefinitionQuerySchema),
+        query: createEntityDefinitionQuerySchema,
       },
     },
     async (context, req, res) => {

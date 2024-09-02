@@ -436,7 +436,11 @@
     "updated_by",
     "version"
   ],
-  "favorites": [],
+  "favorites": [
+    "favoriteIds",
+    "type",
+    "userId"
+  ],
   "file": [
     "FileKind",
     "Meta",
@@ -544,6 +548,7 @@
   ],
   "fleet-space-settings": [],
   "fleet-uninstall-tokens": [
+    "namespaces",
     "policy_id",
     "token_plain"
   ],

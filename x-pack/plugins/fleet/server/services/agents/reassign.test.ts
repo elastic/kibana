@@ -15,11 +15,15 @@ import { reassignAgent, reassignAgents } from './reassign';
 import { createClientMock } from './action.mock';
 
 describe('reassignAgent', () => {
+  let mocks: ReturnType<typeof createClientMock>;
+
   beforeEach(async () => {
-    const { soClient } = createClientMock();
+    mocks = createClientMock();
+
     appContextService.start(
       createAppContextStartContractMock({}, false, {
-        withoutSpaceExtensions: soClient,
+        internal: mocks.soClient,
+        withoutSpaceExtensions: mocks.soClient,
       })
     );
   });
@@ -29,7 +33,7 @@ describe('reassignAgent', () => {
   });
   describe('reassignAgent (singular)', () => {
     it('can reassign from regular agent policy to regular', async () => {
-      const { soClient, esClient, agentInRegularDoc, regularAgentPolicySO } = createClientMock();
+      const { soClient, esClient, agentInRegularDoc, regularAgentPolicySO } = mocks;
       await reassignAgent(soClient, esClient, agentInRegularDoc._id, regularAgentPolicySO.id);
 
       // calls ES update with correct values
@@ -43,7 +47,7 @@ describe('reassignAgent', () => {
     });
 
     it('cannot reassign from regular agent policy to hosted', async () => {
-      const { soClient, esClient, agentInRegularDoc, hostedAgentPolicySO } = createClientMock();
+      const { soClient, esClient, agentInRegularDoc, hostedAgentPolicySO } = mocks;
       await expect(
         reassignAgent(soClient, esClient, agentInRegularDoc._id, hostedAgentPolicySO.id)
       ).rejects.toThrowError(HostedAgentPolicyRestrictionRelatedError);
@@ -54,7 +58,7 @@ describe('reassignAgent', () => {
 
     it('cannot reassign from hosted agent policy', async () => {
       const { soClient, esClient, agentInHostedDoc, hostedAgentPolicySO, regularAgentPolicySO } =
-        createClientMock();
+        mocks;
       await expect(
         reassignAgent(soClient, esClient, agentInHostedDoc._id, regularAgentPolicySO.id)
       ).rejects.toThrowError(HostedAgentPolicyRestrictionRelatedError);
@@ -78,7 +82,7 @@ describe('reassignAgent', () => {
         agentInHostedDoc,
         agentInHostedDoc2,
         regularAgentPolicySO2,
-      } = createClientMock();
+      } = mocks;
 
       esClient.search.mockResponse({
         hits: {
@@ -116,7 +120,8 @@ describe('reassignAgent', () => {
     });
 
     it('should report errors from ES agent update call', async () => {
-      const { soClient, esClient, agentInRegularDoc, regularAgentPolicySO2 } = createClientMock();
+      const { soClient, esClient, agentInRegularDoc, regularAgentPolicySO2 } = mocks;
+
       esClient.bulk.mockResponse({
         items: [
           {

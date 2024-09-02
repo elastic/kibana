@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 import { schema } from '@kbn/config-schema';
 
 export const sharedOas = {
