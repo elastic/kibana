@@ -43,8 +43,8 @@ import { generateEntitiesLatestIndexTemplateConfig } from './templates/entities_
 import { generateEntitiesHistoryIndexTemplateConfig } from './templates/entities_history_template';
 import { EntityIdConflict } from './errors/entity_id_conflict_error';
 import { EntityDefinitionNotFound } from './errors/entity_not_found';
-import { EntityDefinitionWithState } from './types';
 import { mergeEntityDefinitionUpdate } from './helpers/merge_definition_update';
+import { EntityDefinitionWithState } from './types';
 
 export interface InstallDefinitionParams {
   esClient: ElasticsearchClient;
@@ -145,6 +145,7 @@ export async function installBuiltInEntityDefinitions({
       esClient,
       soClient,
       id: builtInDefinition.id,
+      includeState: true,
     });
 
     if (!installedDefinition) {
@@ -157,7 +158,12 @@ export async function installBuiltInEntityDefinitions({
     }
 
     // verify existing installation
-    if (!shouldReinstallBuiltinDefinition(installedDefinition, builtInDefinition)) {
+    if (
+      !shouldReinstallBuiltinDefinition(
+        installedDefinition as EntityDefinitionWithState,
+        builtInDefinition
+      )
+    ) {
       return installedDefinition;
     }
 

@@ -7,7 +7,10 @@
 
 import { z } from '@kbn/zod';
 import { RequestHandlerContext } from '@kbn/core/server';
-import { getEntityDefinitionQuerySchema } from '@kbn/entities-schema';
+import {
+  GetEntityDefinitionQuerySchema,
+  getEntityDefinitionQuerySchema,
+} from '@kbn/entities-schema';
 import { SetupRouteOptions } from '../types';
 
 /**
@@ -54,7 +57,7 @@ export function getEntityDefinitionRoute<T extends RequestHandlerContext>({
   getScopedClient,
   logger,
 }: SetupRouteOptions<T>) {
-  router.get<{ id?: string }, { page?: number; perPage?: number }, unknown>(
+  router.get<{ id?: string }, GetEntityDefinitionQuerySchema, unknown>(
     {
       path: '/internal/entities/definition/{id?}',
       validate: {
@@ -66,8 +69,10 @@ export function getEntityDefinitionRoute<T extends RequestHandlerContext>({
       try {
         const client = await getScopedClient({ request });
         const result = await client.getEntityDefinitions({
+          id: request.params.id,
           page: request.query.page,
           perPage: request.query.perPage,
+          includeState: request.query.includeState,
         });
 
         return res.ok({ body: result });

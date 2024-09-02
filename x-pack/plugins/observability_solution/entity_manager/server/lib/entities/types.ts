@@ -7,10 +7,28 @@
 
 import { EntityDefinition } from '@kbn/entities-schema';
 
+interface TransformState {
+  installed: boolean;
+}
+
+interface IngestPipelineState {
+  installed: boolean;
+}
+
+interface IndexTemplateState {
+  installed: boolean;
+}
+
 // state is the *live* state of the definition. since a definition
 // is composed of several elasticsearch components that can be
 // modified or deleted outside of the entity manager apis, this can
 // be used to verify the actual installation is complete and running
 export type EntityDefinitionWithState = EntityDefinition & {
-  state: { installed: boolean; running: boolean };
+  state: {
+    installed: boolean;
+    running: boolean;
+    transforms: TransformState[];
+    ingestPipelines: IngestPipelineState[];
+    indexTemplates: IndexTemplateState[];
+  };
 };
