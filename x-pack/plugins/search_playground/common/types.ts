@@ -83,3 +83,9 @@ export interface ModelProvider {
   promptTokenLimit: number;
   provider: LLMs;
 }
+
+export interface Pagination {
+  from: number;
+  size: number;
+  total?: number;
+}
