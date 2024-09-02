@@ -376,6 +376,7 @@ export class ApplicationService {
             setAppActionMenu={this.setAppActionMenu}
             setIsMounting={(isMounting) => httpLoadingCount$.next(isMounting ? 1 : 0)}
             hasCustomBranding$={this.hasCustomBranding$}
+            appId$={this.currentAppId$}
           />
         );
       },

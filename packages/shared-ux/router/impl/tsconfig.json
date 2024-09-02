@@ -13,6 +13,8 @@
     "**/*",
   ],
   "kbn_references": [
+    "@kbn/shared-ux-router-types",
+    "@kbn/core-execution-context-server-mocks",
   ],
   "exclude": [
     "target/**/*",
