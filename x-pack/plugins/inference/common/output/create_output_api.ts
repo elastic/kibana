@@ -31,7 +31,7 @@ export function createOutputApi(chatCompleteApi: ChatCompleteAPI): OutputAPI {
                 schema,
               },
             },
-            toolChoice: { function: 'output' },
+            toolChoice: { function: 'output' as const },
           }
         : {}),
     }).pipe(
@@ -44,10 +44,14 @@ export function createOutputApi(chatCompleteApi: ChatCompleteAPI): OutputAPI {
             content: event.content,
           };
         }
+
         return {
           id,
           type: OutputEventType.OutputComplete,
-          output: event.toolCalls?.[0]?.function.arguments,
+          output:
+            'arguments' in event.toolCalls[0].function
+              ? event.toolCalls[0].function.arguments
+              : undefined,
           content: event.content,
         };
       })

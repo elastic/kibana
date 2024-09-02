@@ -59,7 +59,7 @@ type FromToolSchemaObject<TToolSchemaObject extends ToolSchemaTypeObject> =
           ? ValuesType<TToolSchemaObject['required']>
           : never
       >
-    : unknown;
+    : never;
 
 type FromToolSchemaArray<TToolSchemaObject extends ToolSchemaTypeArray> = Array<
   FromToolSchema<TToolSchemaObject['items']>

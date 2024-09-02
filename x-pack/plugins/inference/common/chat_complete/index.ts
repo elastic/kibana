@@ -34,13 +34,14 @@ export type ToolMessage<TToolResponse extends Record<string, any> | unknown> =
 
 export type Message = UserMessage | AssistantMessage | ToolMessage<unknown>;
 
-export type ChatCompletionMessageEvent<TToolOptions extends ToolOptions> =
+export type ChatCompletionMessageEvent<TToolOptions extends ToolOptions = ToolOptions> =
   InferenceTaskEventBase<ChatCompletionEventType.ChatCompletionMessage> & {
     content: string;
   } & { toolCalls: ToolCallsOf<TToolOptions>['toolCalls'] };
 
-export type ChatCompletionResponse<TToolOptions extends ToolOptions = ToolOptions> =
-  Observable<TToolOptions>;
+export type ChatCompletionResponse<TToolOptions extends ToolOptions = ToolOptions> = Observable<
+  ChatCompletionEvent<TToolOptions>
+>;
 
 export enum ChatCompletionEventType {
   ChatCompletionChunk = 'chatCompletionChunk',
@@ -86,7 +87,7 @@ export type ChatCompletionEvent<TToolOptions extends ToolOptions = ToolOptions> 
  * @param {ToolChoice} [options.toolChoice] Force the LLM to call a (specific) tool, or no tool
  * @param {Record<string, ToolDefinition>} [options.tools] A map of tools that can be called by the LLM
  */
-export type ChatCompleteAPI = <TToolOptions extends ToolOptions>(
+export type ChatCompleteAPI = <TToolOptions extends ToolOptions = ToolOptions>(
   options: {
     connectorId: string;
     system?: string;
