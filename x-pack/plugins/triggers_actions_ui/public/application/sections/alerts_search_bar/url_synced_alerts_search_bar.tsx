@@ -152,7 +152,7 @@ export const UrlSyncedAlertsSearchBar = ({
         onClearSavedQuery={clearSavedQuery}
         {...rest}
       />
-      {showFilterControls && dataView && dataView.hasReadIndexPrivilege && (
+      {showFilterControls && dataView?.hasReadIndexPrivilege && (
         <AlertFilterControls
           dataViewSpec={{
             id: 'alerts-filter-controls-data-view',
