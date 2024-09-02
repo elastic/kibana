@@ -8,6 +8,7 @@
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldNumber, EuiPopoverTitle } from '@elastic/eui';
+import { StatusRuleCondition } from '../../../../../../common/rules/status_rule';
 import { PopoverExpression } from './popover_expression';
 import { StatusRuleParamsProps } from '../status_rule_ui';
 
@@ -23,9 +24,12 @@ export const LocationsValueExpression = ({ ruleParams, setRuleParams }: Props) =
     (value: number) => {
       setRuleParams('condition', {
         ...ruleParams.condition,
-        window: { ...ruleParams.condition?.window, numberOfLocations: value },
+        window: {
+          ...ruleParams.condition?.window,
+          numberOfLocations: value,
+        },
         groupBy: value === 1 ? ruleParams.condition?.groupBy : 'none',
-      });
+      } as StatusRuleCondition);
     },
     [ruleParams.condition, setRuleParams]
   );

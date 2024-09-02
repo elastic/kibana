@@ -9,7 +9,6 @@ import {
   SavedObjectsClientContract,
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { queryFilterMonitors } from './queries/filter_monitors';
@@ -69,18 +68,16 @@ export class StatusRuleExecutor {
   options: StatusRuleExecutorOptions;
 
   constructor(
-    previousStartedAt: Date | null,
-    p: StatusRuleParams,
-    soClient: SavedObjectsClientContract,
-    scopedClient: ElasticsearchClient,
     server: SyntheticsServerSetup,
     syntheticsMonitorClient: SyntheticsMonitorClient,
     options: StatusRuleExecutorOptions
   ) {
+    const { services, params, previousStartedAt } = options;
+    const { scopedClusterClient, savedObjectsClient } = services;
     this.previousStartedAt = previousStartedAt;
-    this.params = p;
-    this.soClient = soClient;
-    this.esClient = new SyntheticsEsClient(this.soClient, scopedClient, {
+    this.params = params;
+    this.soClient = savedObjectsClient;
+    this.esClient = new SyntheticsEsClient(this.soClient, scopedClusterClient.asCurrentUser, {
       heartbeatIndices: SYNTHETICS_INDEX_PATTERN,
     });
     this.server = server;
@@ -230,6 +227,68 @@ export class StatusRuleExecutor {
     return staleDownConfigs;
   }
 
+  handleDownMonitorThresholdAlert = ({ downConfigs }: { downConfigs: StatusConfigs }) => {
+    const isCustomRule = !isEmpty(this.params);
+    const { isTimeWindow, downThreshold, numberOfLocations } = getConditionType(
+      this.params?.condition
+    );
+    const groupBy = this.params?.condition?.groupBy ?? 'locationId';
+
+    if (groupBy === 'locationId') {
+      Object.entries(downConfigs).forEach(([idWithLocation, statusConfig]) => {
+        const doesMonitorMeetLocationThreshold = getDoesMonitorMeetLocationThreshold({
+          matchesByLocation: [statusConfig],
+          locationsThreshold: numberOfLocations,
+          downThreshold,
+          useTimeWindow: isTimeWindow || false,
+        });
+        if (doesMonitorMeetLocationThreshold) {
+          const alertId = isCustomRule ? `${idWithLocation}_custom` : idWithLocation;
+          const monitorSummary = this.getMonitorDownSummary({
+            statusConfig,
+            downThreshold,
+            numberOfLocations,
+          });
+
+          return this.scheduleAlert({
+            idWithLocation,
+            alertId,
+            monitorSummary,
+            statusConfig,
+            downThreshold,
+          });
+        }
+      });
+    } else {
+      const downConfigsById = getConfigsByIds(downConfigs);
+
+      for (const [configId, configs] of downConfigsById) {
+        const doesMonitorMeetLocationThreshold = getDoesMonitorMeetLocationThreshold({
+          matchesByLocation: configs,
+          locationsThreshold: numberOfLocations,
+          downThreshold,
+          useTimeWindow: isTimeWindow || false,
+        });
+
+        if (doesMonitorMeetLocationThreshold) {
+          const alertId = configId;
+          const monitorSummary = this.getUngroupedDownSummary({
+            statusConfigs: configs,
+            downThreshold,
+            numberOfLocations,
+          });
+          return this.scheduleAlert({
+            idWithLocation: configId,
+            alertId,
+            monitorSummary,
+            statusConfig: configs[0],
+            downThreshold,
+          });
+        }
+      }
+    }
+  };
+
   getMonitorDownSummary({
     statusConfig,
     downThreshold,
@@ -241,21 +300,21 @@ export class StatusRuleExecutor {
   }) {
     const { ping, configId, locationId, checks } = statusConfig;
     const { numberOfChecks } = getConditionType(this.params.condition);
-    const baseSummary = getMonitorSummary(
-      ping,
-      DOWN_LABEL,
+    const baseSummary = getMonitorSummary({
+      monitorInfo: ping,
+      statusMessage: DOWN_LABEL,
       locationId,
       configId,
-      this.dateFormat!,
-      this.tz!,
+      dateFormat: this.dateFormat ?? 'Y-MM-DD HH:mm:ss',
+      tz: this.tz ?? 'UTC',
       checks,
       downThreshold,
       numberOfChecks,
-      numberOfLocations
-    );
+      numberOfLocations,
+    });
 
     const condition = this.params.condition;
-    if (condition && 'time' in condition.window) {
+    if (condition?.window && 'time' in condition.window) {
       const time = condition.window.time;
       const { unit, size } = time;
       const checkedAt = moment(baseSummary.timestamp).format('LLL');
@@ -292,18 +351,18 @@ export class StatusRuleExecutor {
     const { isChecksBased, numberOfChecks, timeWindow } = getConditionType(this.params.condition);
     const sampleConfig = statusConfigs[0];
     const { ping, configId, locationId, checks } = sampleConfig;
-    const baseSummary = getMonitorSummary(
-      ping,
-      DOWN_LABEL,
+    const baseSummary = getMonitorSummary({
+      monitorInfo: ping,
+      statusMessage: DOWN_LABEL,
       locationId,
       configId,
-      this.dateFormat!,
-      this.tz!,
+      dateFormat: this.dateFormat!,
+      tz: this.tz!,
       checks,
       downThreshold,
       numberOfChecks,
-      numberOfLocations
-    );
+      numberOfLocations,
+    });
     if (statusConfigs.length === 1) {
       const locNames = statusConfigs.map((c) => c.ping.observer.geo?.name);
       baseSummary.reason = i18n.translate(
@@ -431,3 +490,48 @@ export class StatusRuleExecutor {
     });
   }
 }
+
+export const getDoesMonitorMeetLocationThreshold = ({
+  matchesByLocation,
+  locationsThreshold,
+  downThreshold,
+  useTimeWindow,
+}: {
+  matchesByLocation: AlertStatusMetaDataCodec[];
+  locationsThreshold: number;
+  downThreshold: number;
+  useTimeWindow: boolean;
+}) => {
+  // for location based we need to make sure, monitor is down for the threshold for all locations
+  const getMatchingLocationsWithDownThresholdWithXChecks = (
+    matches: AlertStatusMetaDataCodec[]
+  ) => {
+    return matches.filter((config) => config.checks.downWithinXChecks >= downThreshold);
+  };
+  const getMatchingLocationsWithDownThresholdWithinTimeWindow = (
+    matches: AlertStatusMetaDataCodec[]
+  ) => {
+    return matches.filter((config) => config.checks.down >= downThreshold);
+  };
+  if (useTimeWindow) {
+    const matchingLocationsWithDownThreshold =
+      getMatchingLocationsWithDownThresholdWithinTimeWindow(matchesByLocation);
+    return matchingLocationsWithDownThreshold.length >= locationsThreshold;
+  } else {
+    const matchingLocationsWithDownThreshold =
+      getMatchingLocationsWithDownThresholdWithXChecks(matchesByLocation);
+    return matchingLocationsWithDownThreshold.length >= locationsThreshold;
+  }
+};
+
+const getConfigsByIds = (downConfigs: StatusConfigs): Map<string, AlertStatusMetaDataCodec[]> => {
+  const downConfigsById = new Map<string, AlertStatusMetaDataCodec[]>();
+  Object.entries(downConfigs).forEach(([_, config]) => {
+    const { configId } = config;
+    if (!downConfigsById.has(configId)) {
+      downConfigsById.set(configId, []);
+    }
+    downConfigsById.get(configId)?.push(config);
+  });
+  return downConfigsById;
+};

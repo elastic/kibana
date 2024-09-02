@@ -41,24 +41,39 @@ export const getMonitorAlertDocument = (monitorSummary: MonitorSummaryStatusRule
   'monitor.tags': monitorSummary.monitorTags ?? [],
 });
 
-export const getMonitorSummary = (
-  monitorInfo: OverviewPing,
-  statusMessage: string,
-  locationId: string,
-  configId: string,
-  dateFormat: string,
-  tz: string,
+export interface MonitorSummaryData {
+  monitorInfo: OverviewPing;
+  statusMessage: string;
+  locationId: string;
+  configId: string;
+  dateFormat: string;
+  tz: string;
   checks: {
     downWithinXChecks: number;
     down: number;
-  },
-  downThreshold: number,
-  numberOfChecks: number,
-  numberOfLocations: number
-): MonitorSummaryStatusRule => {
+  };
+  downThreshold: number;
+  numberOfChecks: number;
+  numberOfLocations: number;
+}
+
+export const getMonitorSummary = ({
+  monitorInfo,
+  locationId,
+  configId,
+  tz,
+  downThreshold,
+  dateFormat,
+  statusMessage,
+  checks,
+  numberOfLocations,
+  numberOfChecks,
+}: MonitorSummaryData): MonitorSummaryStatusRule => {
   const monitorName = monitorInfo.monitor?.name ?? monitorInfo.monitor?.id;
   const observerLocation = monitorInfo.observer?.geo?.name ?? UNNAMED_LOCATION;
-  const checkedAt = moment(monitorInfo['@timestamp']).tz(tz).format(dateFormat);
+  const checkedAt = moment(monitorInfo['@timestamp'])
+    .tz(tz || 'UTC')
+    .format(dateFormat);
   const typeToLabelMap: Record<string, string> = {
     http: 'HTTP',
     tcp: 'TCP',

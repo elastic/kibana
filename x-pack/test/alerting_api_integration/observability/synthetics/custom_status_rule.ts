@@ -7,6 +7,7 @@
 import expect from '@kbn/expect';
 import moment from 'moment';
 import { StatusRuleParams } from '@kbn/synthetics-plugin/common/rules/status_rule';
+import { getReasonMessage } from '@kbn/synthetics-plugin/server/alert_rules/status_rule/message_utils';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { SyntheticsRuleHelper } from './synthetics_rule_helper';
 
@@ -22,7 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await server.savedObjects.cleanStandardList();
+      // await server.savedObjects.cleanStandardList();
     });
 
     describe('NumberOfChecks', () => {
@@ -31,6 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
         condition: {
           window: {
             numberOfChecks: 5,
+            numberOfLocations: 1,
           },
           groupBy: 'locationId',
           downThreshold: 5,
@@ -40,7 +42,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('creates a custom rule', async () => {
         const rule = await ruleHelper.createCustomStatusRule({
           params,
-          name: 'Status based on number of checks',
+          name: 'When down 5 times from 1 location',
         });
         ruleId = rule.id;
         expect(rule.params).to.eql(params);
@@ -64,15 +66,23 @@ export default function ({ getService }: FtrProviderContext) {
           ruleId,
         });
 
+        const reasonMessage = getReasonMessage({
+          name: monitor.name,
+          location: 'Dev Service',
+          timestamp: moment(docs[4]['@timestamp']).format('LLL'),
+          status: 'down',
+          numberOfChecks: 5,
+          downThreshold: 5,
+          numberOfLocations: 1,
+          checks: {
+            downWithinXChecks: 5,
+            down: 5,
+          },
+        });
+
         const alert: any = response.hits.hits?.[0]._source;
         expect(alert).to.have.property('kibana.alert.status', 'active');
-        expect(alert['kibana.alert.reason']).to.eql(
-          `Monitor "${monitor.name}" from Dev Service is down. Checked at ${moment(
-            docs[4]['@timestamp']
-          ).format(
-            'LLL'
-          )}. Monitor is down 5 times within the last 5 checks. Alert when 5 out of last 5 checks are down.`
-        );
+        expect(alert['kibana.alert.reason']).to.eql(reasonMessage);
       });
 
       it('should trigger recovered alert', async function () {
@@ -91,7 +101,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should trigger down for ungrouped', async () => {
-        params.condition.groupBy = '';
+        params.condition.groupBy = 'none';
         const rule = await ruleHelper.createCustomStatusRule({
           params,
           name: 'Status based on number of checks',
@@ -129,6 +139,7 @@ export default function ({ getService }: FtrProviderContext) {
           condition: {
             window: {
               numberOfLocations: 2,
+              numberOfChecks: 5,
             },
             groupBy: 'locationId',
             downThreshold: 1,
@@ -136,7 +147,7 @@ export default function ({ getService }: FtrProviderContext) {
         };
         const rule = await ruleHelper.createCustomStatusRule({
           params,
-          name: 'Status based on number of locations',
+          name: 'When down from 2 locations',
         });
         ruleId = rule.id;
         expect(rule.params).to.eql(params);

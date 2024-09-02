@@ -179,7 +179,7 @@ export const getSavedObjectKqlFilter = ({
     return undefined;
   }
 
-  if (isEmpty(values)) {
+  if (isEmpty(values) || !values) {
     return '';
   }
   let fieldKey = '';

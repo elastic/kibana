@@ -169,6 +169,7 @@ export const setRecoveredAlertsContext = ({
   dateFormat,
   tz,
   numberOfChecks,
+  numberOfLocations,
 }: {
   alertsClient: PublicAlertsClient<
     ObservabilityUptimeAlert,
@@ -183,6 +184,7 @@ export const setRecoveredAlertsContext = ({
   dateFormat: string;
   tz: string;
   numberOfChecks: number;
+  numberOfLocations: number;
 }) => {
   const recoveredAlerts = alertsClient.getRecoveredAlerts() ?? [];
   for (const recoveredAlert of recoveredAlerts) {
@@ -211,17 +213,18 @@ export const setRecoveredAlertsContext = ({
     if (recoveredAlertId && locationId && staleDownConfigs[recoveredAlertId]) {
       const downConfig = staleDownConfigs[recoveredAlertId];
       const { ping } = downConfig;
-      monitorSummary = getMonitorSummary(
-        ping,
-        RECOVERED_LABEL,
+      monitorSummary = getMonitorSummary({
+        monitorInfo: ping,
+        statusMessage: RECOVERED_LABEL,
         locationId,
-        downConfig.configId,
+        configId: downConfig.configId,
         dateFormat,
         tz,
         checks,
         downThreshold,
-        numberOfChecks
-      );
+        numberOfChecks,
+        numberOfLocations,
+      });
       lastErrorMessage = monitorSummary.lastErrorMessage;
 
       if (downConfig.isDeleted) {
@@ -261,17 +264,18 @@ export const setRecoveredAlertsContext = ({
       isUp = Boolean(upConfig) || false;
       const ping = upConfig.ping;
 
-      monitorSummary = getMonitorSummary(
-        ping,
-        RECOVERED_LABEL,
+      monitorSummary = getMonitorSummary({
+        monitorInfo: ping,
+        statusMessage: RECOVERED_LABEL,
         locationId,
         configId,
         dateFormat,
         tz,
         checks,
         downThreshold,
-        numberOfChecks
-      );
+        numberOfChecks,
+        numberOfLocations,
+      });
 
       // When alert is flapping, the stateId is not available on ping.state.ends.id, use state instead
       const stateId = ping.state?.ends?.id || state.stateId;
