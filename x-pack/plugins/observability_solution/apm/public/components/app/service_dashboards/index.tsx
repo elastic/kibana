@@ -51,8 +51,7 @@ export function ServiceDashboards({ checkForEntities = false }: { checkForEntiti
     query: { environment, kuery, rangeFrom, rangeTo, dashboardId },
   } = useAnyOfApmParams(
     '/services/{serviceName}/dashboards',
-    '/mobile-services/{serviceName}/dashboards',
-    '/logs-services/{serviceName}/dashboards'
+    '/mobile-services/{serviceName}/dashboards'
   );
   const [dashboard, setDashboard] = useState<AwaitingDashboardAPI>();
   const [serviceDashboards, setServiceDashboards] = useState<MergedServiceDashboard[]>([]);
