@@ -16,7 +16,7 @@ import { StringOrNull } from '../../../../..';
 interface Props {
   name: StringOrNull;
   id: StringOrNull;
-  timerange: { from?: number; to?: number };
+  timerange: { from: number; to: number };
 }
 
 export function HostLink({ name, id, timerange }: Props) {
@@ -32,13 +32,10 @@ export function HostLink({ name, id, timerange }: Props) {
         assetType: 'host',
         assetId: id,
         assetDetails: {
-          dateRange:
-            timerange.from && timerange.to
-              ? {
-                  from: new Date(timerange.from).toISOString(),
-                  to: new Date(timerange.to).toISOString(),
-                }
-              : undefined,
+          dateRange: {
+            from: new Date(timerange.from).toISOString(),
+            to: new Date(timerange.to).toISOString(),
+          },
         },
       })
     : undefined;
