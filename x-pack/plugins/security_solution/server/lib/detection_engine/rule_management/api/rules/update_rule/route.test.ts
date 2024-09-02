@@ -17,6 +17,8 @@ import { getRulesSchemaMock } from '../../../../../../../common/api/detection_en
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
 import { updateRuleRoute } from './route';
 import {
+  getCreateEqlRuleSchemaMock,
+  getCreateEsqlRulesSchemaMock,
   getCreateRulesSchemaMock,
   getUpdateRulesSchemaMock,
 } from '../../../../../../../common/api/detection_engine/model/rule_schema/mocks';
@@ -202,7 +204,6 @@ describe('Update rule route', () => {
       const response = await server.inject(request, requestContextMock.convertContext(context));
       expect(response.status).toEqual(200);
     });
-
     test('is successful for esql rule', async () => {
       const request = requestMock.create({
         method: 'post',

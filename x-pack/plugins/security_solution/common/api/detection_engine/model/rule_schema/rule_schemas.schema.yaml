@@ -70,10 +70,6 @@ components:
         investigation_fields:
           $ref: './common_attributes.schema.yaml#/components/schemas/InvestigationFields'
 
-        response_actions:
-          type: array
-          items:
-            $ref: '../rule_response_actions/response_actions.schema.yaml#/components/schemas/ResponseAction'
         # Throttle
         throttle:
           $ref: './common_attributes.schema.yaml#/components/schemas/RuleActionThrottle'
@@ -296,6 +292,10 @@ components:
           $ref: './specific_attributes/eql_attributes.schema.yaml#/components/schemas/TimestampField'
         alert_suppression:
           $ref: './common_attributes.schema.yaml#/components/schemas/AlertSuppression'
+        response_actions:
+          type: array
+          items:
+            $ref: '../rule_response_actions/response_actions.schema.yaml#/components/schemas/ResponseAction'
 
     EqlRuleCreateFields:
       allOf:
@@ -358,6 +358,10 @@ components:
           $ref: './common_attributes.schema.yaml#/components/schemas/RuleFilterArray'
         saved_id:
           $ref: './common_attributes.schema.yaml#/components/schemas/SavedQueryId'
+        response_actions:
+          type: array
+          items:
+            $ref: '../rule_response_actions/response_actions.schema.yaml#/components/schemas/ResponseAction'
         alert_suppression:
           $ref: './common_attributes.schema.yaml#/components/schemas/AlertSuppression'
 
@@ -435,6 +439,10 @@ components:
           $ref: './common_attributes.schema.yaml#/components/schemas/DataViewId'
         filters:
           $ref: './common_attributes.schema.yaml#/components/schemas/RuleFilterArray'
+        response_actions:
+          type: array
+          items:
+            $ref: '../rule_response_actions/response_actions.schema.yaml#/components/schemas/ResponseAction'
         alert_suppression:
           $ref: './common_attributes.schema.yaml#/components/schemas/AlertSuppression'
         query:
@@ -836,6 +844,10 @@ components:
       properties:
         alert_suppression:
           $ref: './common_attributes.schema.yaml#/components/schemas/AlertSuppression'
+        response_actions:
+          type: array
+          items:
+            $ref: '../rule_response_actions/response_actions.schema.yaml#/components/schemas/ResponseAction'
 
     EsqlRulePatchFields:
       allOf:
@@ -956,10 +968,10 @@ components:
       discriminator:
         propertyName: type
       anyOf:
+        - $ref: '#/components/schemas/ThresholdRule'
         - $ref: '#/components/schemas/EqlRule'
         - $ref: '#/components/schemas/QueryRule'
         - $ref: '#/components/schemas/SavedQueryRule'
-        - $ref: '#/components/schemas/ThresholdRule'
         - $ref: '#/components/schemas/ThreatMatchRule'
         - $ref: '#/components/schemas/MachineLearningRule'
         - $ref: '#/components/schemas/NewTermsRule'

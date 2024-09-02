@@ -16,7 +16,11 @@ import {
 } from '../../../../routes/__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../../../../routes/__mocks__';
 import { createRuleRoute } from './route';
-import { getCreateRulesSchemaMock } from '../../../../../../../common/api/detection_engine/model/rule_schema/mocks';
+import {
+  getCreateEqlRuleSchemaMock,
+  getCreateEsqlRulesSchemaMock,
+  getCreateRulesSchemaMock,
+} from '../../../../../../../common/api/detection_engine/model/rule_schema/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
 import { HttpAuthzError } from '../../../../../machine_learning/validation';
@@ -195,7 +199,6 @@ describe('Create rule route', () => {
       const response = await server.inject(request, requestContextMock.convertContext(context));
       expect(response.status).toEqual(200);
     });
-
     test('is successful in esql rule', async () => {
       const request = requestMock.create({
         method: 'post',

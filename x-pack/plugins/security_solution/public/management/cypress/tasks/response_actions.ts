@@ -70,7 +70,6 @@ export const fillUpNewRule = (name = 'Test', description = 'Test') => {
   cy.getByTestSubj('about-continue').click();
   cy.getByTestSubj('schedule-continue').click();
 };
-
 export const fillUpNewEsqlRule = (name = 'Test', description = 'Test') => {
   loadPage('app/security/rules/management');
   cy.getByTestSubj('create-new-rule').click();
@@ -91,7 +90,6 @@ export const fillUpNewEsqlRule = (name = 'Test', description = 'Test') => {
   cy.getByTestSubj('about-continue').click();
   cy.getByTestSubj('schedule-continue').click();
 };
-
 export const visitRuleActions = (ruleId: string) => {
   loadPage(`app/security/rules/id/${ruleId}/edit`);
   cy.getByTestSubj('edit-rule-actions-tab').should('exist');

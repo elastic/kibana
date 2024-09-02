@@ -8,12 +8,12 @@
 
 import {
   addEndpointResponseAction,
+  fillUpNewEsqlRule,
   fillUpNewRule,
   focusAndOpenCommandDropdown,
   tryAddingDisabledResponseAction,
   validateAvailableCommands,
   visitRuleActions,
-  fillUpNewEsqlRule,
 } from '../../tasks/response_actions';
 import { cleanupRule, generateRandomStringName, loadRule } from '../../tasks/api_fixtures';
 import { ResponseActionTypesEnum } from '../../../../../common/api/detection_engine';

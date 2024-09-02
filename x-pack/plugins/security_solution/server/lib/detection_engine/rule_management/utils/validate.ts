@@ -9,7 +9,6 @@ import type { PartialRule } from '@kbn/alerting-plugin/server';
 import type { Rule } from '@kbn/alerting-plugin/common';
 import { isEqual, xorWith } from 'lodash';
 import { stringifyZodError } from '@kbn/zod-helpers';
-import type { BaseCreateProps, BasePatchProps } from '../../../../../common/api/detection_engine';
 import {
   type QueryRule,
   type ResponseAction,
@@ -22,11 +21,15 @@ import {
   RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP,
   RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ,
 } from '../../../../../common/endpoint/service/response_actions/constants';
-import { isEqlRule, isEsqlRule, isQueryRule } from '../../../../../common/detection_engine/utils';
+import { isQueryRule, isEsqlRule, isEqlRule } from '../../../../../common/detection_engine/utils';
 import type { SecuritySolutionApiRequestHandlerContext } from '../../../..';
 import { CustomHttpRequestError } from '../../../../utils/custom_http_request_error';
-import type { BaseRuleParams } from '../../rule_schema';
-import { hasValidRuleType, type RuleAlertType, type RuleParams } from '../../rule_schema';
+import {
+  hasValidRuleType,
+  type RuleAlertType,
+  type RuleParams,
+  type UnifiedQueryRuleParams,
+} from '../../rule_schema';
 import { type BulkError, createBulkErrorObject } from '../../routes/utils';
 import { internalRuleToAPIResponse } from '../logic/detection_rules_client/converters/internal_rule_to_api_response';
 
@@ -112,14 +115,15 @@ export const validateResponseActionsPermissions = async (
   });
 };
 
-// TODO TD: fix types
+// TODO TC: figure out typings
 function rulePayloadContainsResponseActions(
-  rule: BaseCreateProps | BasePatchProps
+  rule: RuleCreateProps | RuleUpdateProps
 ): rule is QueryRule {
   return 'response_actions' in rule;
 }
 
-// @ts-expect-error TODO TC: fix types
-function ruleObjectContainsResponseActions(rule?: RuleAlertType): rule is Rule<BaseRuleParams> {
+function ruleObjectContainsResponseActions(
+  rule?: RuleAlertType
+): rule is Rule<UnifiedQueryRuleParams> {
   return rule != null && 'params' in rule && 'responseActions' in rule?.params;
 }
