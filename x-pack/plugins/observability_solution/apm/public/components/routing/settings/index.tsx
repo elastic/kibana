@@ -9,53 +9,20 @@ import { Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
-import { dynamic } from '@kbn/shared-ux-utility';
 import { agentConfigurationPageStepRt } from '../../../../common/agent_configuration/constants';
 import { environmentRt } from '../../../../common/environment_rt';
 import { Breadcrumb } from '../../app/breadcrumb';
-
-const SettingsTemplate = dynamic(() =>
-  import('../templates/settings_template').then((mod) => ({
-    default: mod.SettingsTemplate,
-  }))
-);
-
-const CreateAgentConfigurationRouteView = dynamic(() =>
-  import('./create_agent_configuration_route_view').then((mod) => ({
-    default: mod.CreateAgentConfigurationRouteView,
-  }))
-);
-const EditAgentConfigurationRouteView = dynamic(() =>
-  import('./edit_agent_configuration_route_view').then((mod) => ({
-    default: mod.EditAgentConfigurationRouteView,
-  }))
-);
-const AgentConfigurations = dynamic(() =>
-  import('../../app/settings/agent_configurations').then((mod) => ({
-    default: mod.AgentConfigurations,
-  }))
-);
-const AgentExplorer = dynamic(() =>
-  import('../../app/settings/agent_explorer').then((mod) => ({ default: mod.AgentExplorer }))
-);
-const AgentKeys = dynamic(() =>
-  import('../../app/settings/agent_keys').then((mod) => ({ default: mod.AgentKeys }))
-);
-const AnomalyDetection = dynamic(() =>
-  import('../../app/settings/anomaly_detection').then((mod) => ({ default: mod.AnomalyDetection }))
-);
-const ApmIndices = dynamic(() =>
-  import('../../app/settings/apm_indices').then((mod) => ({ default: mod.ApmIndices }))
-);
-const CustomLinkOverview = dynamic(() =>
-  import('../../app/settings/custom_link').then((mod) => ({ default: mod.CustomLinkOverview }))
-);
-const GeneralSettings = dynamic(() =>
-  import('../../app/settings/general_settings').then((mod) => ({ default: mod.GeneralSettings }))
-);
-const Schema = dynamic(() =>
-  import('../../app/settings/schema').then((mod) => ({ default: mod.Schema }))
-);
+import { AgentConfigurations } from '../../app/settings/agent_configurations';
+import { AgentExplorer } from '../../app/settings/agent_explorer';
+import { AgentKeys } from '../../app/settings/agent_keys';
+import { AnomalyDetection } from '../../app/settings/anomaly_detection';
+import { ApmIndices } from '../../app/settings/apm_indices';
+import { CustomLinkOverview } from '../../app/settings/custom_link';
+import { GeneralSettings } from '../../app/settings/general_settings';
+import { Schema } from '../../app/settings/schema';
+import { SettingsTemplate } from '../templates/settings_template';
+import { CreateAgentConfigurationRouteView } from './create_agent_configuration_route_view';
+import { EditAgentConfigurationRouteView } from './edit_agent_configuration_route_view';
 
 function page({
   title,
@@ -85,7 +52,6 @@ export const settingsRoute = {
         title={i18n.translate('xpack.apm.views.listSettings.title', {
           defaultMessage: 'Settings',
         })}
-        omitOnServerless
       >
         <Outlet />
       </Breadcrumb>
