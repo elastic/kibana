@@ -272,7 +272,7 @@ export const RulesCounters = ({
   ];
 
   return (
-    <EuiFlexGroup>
+    <EuiFlexGroup wrap={true}>
       {counters.map((counter) => (
         <EuiFlexItem key={counter.id}>
           <CspCounterCard {...counter} />

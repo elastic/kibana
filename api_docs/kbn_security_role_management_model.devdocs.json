@@ -1,0 +1,1489 @@
+{
+  "id": "@kbn/security-role-management-model",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/security-role-management-model",
+        "id": "def-common.KibanaPrivilege",
+        "type": "Class",
+        "tags": [],
+        "label": "KibanaPrivilege",
+        "description": [],
+        "path": "x-pack/packages/security/role_management_model/src/kibana_privilege.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-role-management-model",
+            "id": "def-common.KibanaPrivilege.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/packages/security/role_management_model/src/kibana_privilege.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-role-management-model",
+                "id": "def-common.KibanaPrivilege.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/packages/security/role_management_model/src/kibana_privilege.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/security-role-management-model",
+                "id": "def-common.KibanaPrivilege.Unnamed.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "actions",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/packages/security/role_management_model/src/kibana_privilege.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-role-management-model",
+            "id": "def-common.KibanaPrivilege.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/packages/security/role_management_model/src/kibana_privilege.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-role-management-model",
+            "id": "def-common.KibanaPrivilege.grantsPrivilege",
+            "type": "Function",
+            "tags": [],
+            "label": "grantsPrivilege",
+            "description": [],
+            "signature": [
+              "(candidatePrivilege: ",
+              {
+                "pluginId": "@kbn/security-role-management-model",
+                "scope": "common",
+                "docId": "kibKbnSecurityRoleManagementModelPluginApi",
+                "section": "def-common.KibanaPrivilege",
+                "text": "KibanaPrivilege"
+              },
+              ") => boolean"
+            ],
+            "path": "x-pack/packages/security/role_management_model/src/kibana_privilege.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-role-management-model",
+                "id": "def-common.KibanaPrivilege.grantsPrivilege.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "candidatePrivilege",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/security-role-management-model",
+                    "scope": "common",
+                    "docId": "kibKbnSecurityRoleManagementModelPluginApi",
+                    "section": "def-common.KibanaPrivilege",
+                    "text": "KibanaPrivilege"
+                  }
+                ],
+                "path": "x-pack/packages/security/role_management_model/src/kibana_privilege.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-role-management-model",
+        "id": "def-common.KibanaPrivileges",
+        "type": "Class",
+        "tags": [],
+        "label": "KibanaPrivileges",
+        "description": [],
+        "path": "x-pack/packages/security/role_management_model/src/kibana_privileges.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-role-management-model",
+            "id": "def-common.KibanaPrivileges.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/packages/security/role_management_model/src/kibana_privileges.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-role-management-model",
+                "id": "def-common.KibanaPrivileges.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "rawKibanaPrivileges",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/security-authorization-core",
+                    "scope": "server",
+                    "docId": "kibKbnSecurityAuthorizationCorePluginApi",
+                    "section": "def-server.RawKibanaPrivileges",
+                    "text": "RawKibanaPrivileges"
+                  }
+                ],
+                "path": "x-pack/packages/security/role_management_model/src/kibana_privileges.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/security-role-management-model",
+                "id": "def-common.KibanaPrivileges.Unnamed.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "features",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "features",
+                    "scope": "common",
+                    "docId": "kibFeaturesPluginApi",
+                    "section": "def-common.KibanaFeature",
+                    "text": "KibanaFeature"
+                  },
+                  "[]"
+                ],
+                "path": "x-pack/packages/security/role_management_model/src/kibana_privileges.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-role-management-model",
+            "id": "def-common.KibanaPrivileges.getBasePrivileges",
+            "type": "Function",
+            "tags": [],
+            "label": "getBasePrivileges",
+            "description": [],
+            "signature": [
+              "(entry: ",
+              {
+                "pluginId": "@kbn/security-plugin-types-common",
+                "scope": "common",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "section": "def-common.RoleKibanaPrivilege",
+                "text": "RoleKibanaPrivilege"
+              },
+              ") => ",
+              {
+                "pluginId": "@kbn/security-role-management-model",
+                "scope": "common",
+                "docId": "kibKbnSecurityRoleManagementModelPluginApi",
+                "section": "def-common.KibanaPrivilege",
+                "text": "KibanaPrivilege"
+              },
+              "[]"
+            ],
+            "path": "x-pack/packages/security/role_management_model/src/kibana_privileges.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-role-management-model",
+                "id": "def-common.KibanaPrivileges.getBasePrivileges.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "entry",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/security-plugin-types-common",
+                    "scope": "common",
+                    "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                    "section": "def-common.RoleKibanaPrivilege",
+                    "text": "RoleKibanaPrivilege"
+                  }
+                ],
+                "path": "x-pack/packages/security/role_management_model/src/kibana_privileges.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-role-management-model",
+            "id": "def-common.KibanaPrivileges.getSecuredFeature",
+            "type": "Function",
+            "tags": [],
+            "label": "getSecuredFeature",
+            "description": [],
+            "signature": [
+              "(featureId: string) => ",
+              {
+                "pluginId": "@kbn/security-role-management-model",
+                "scope": "common",
+                "docId": "kibKbnSecurityRoleManagementModelPluginApi",
+                "section": "def-common.SecuredFeature",
+                "text": "SecuredFeature"
+              }
+            ],
+            "path": "x-pack/packages/security/role_management_model/src/kibana_privileges.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-role-management-model",
+                "id": "def-common.KibanaPrivileges.getSecuredFeature.$1",
+                "type": "string",
+                "tags": [],
+                "label": "featureId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/packages/security/role_management_model/src/kibana_privileges.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-role-management-model",
+            "id": "def-common.KibanaPrivileges.getSecuredFeatures",
+            "type": "Function",
+            "tags": [],
+            "label": "getSecuredFeatures",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/security-role-management-model",
+                "scope": "common",
+                "docId": "kibKbnSecurityRoleManagementModelPluginApi",
+                "section": "def-common.SecuredFeature",
+                "text": "SecuredFeature"
+              },
+              "[]"
+            ],
+            "path": "x-pack/packages/security/role_management_model/src/kibana_privileges.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-role-management-model",
+            "id": "def-common.KibanaPrivileges.createCollectionFromRoleKibanaPrivileges",
+            "type": "Function",
+            "tags": [],
+            "label": "createCollectionFromRoleKibanaPrivileges",
+            "description": [],
+            "signature": [
+              "(roleKibanaPrivileges: ",
+              {
+                "pluginId": "@kbn/security-plugin-types-common",
+                "scope": "common",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "section": "def-common.RoleKibanaPrivilege",
+                "text": "RoleKibanaPrivilege"
+              },
+              "[]) => ",
+              {
+                "pluginId": "@kbn/security-role-management-model",
+                "scope": "common",
+                "docId": "kibKbnSecurityRoleManagementModelPluginApi",
+                "section": "def-common.PrivilegeCollection",
+                "text": "PrivilegeCollection"
+              }
+            ],
+            "path": "x-pack/packages/security/role_management_model/src/kibana_privileges.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-role-management-model",
+                "id": "def-common.KibanaPrivileges.createCollectionFromRoleKibanaPrivileges.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "roleKibanaPrivileges",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/security-plugin-types-common",
+                    "scope": "common",
+                    "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                    "section": "def-common.RoleKibanaPrivilege",
+                    "text": "RoleKibanaPrivilege"
+                  },
+                  "[]"
+                ],
+                "path": "x-pack/packages/security/role_management_model/src/kibana_privileges.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-role-management-model",
+        "id": "def-common.PrimaryFeaturePrivilege",
+        "type": "Class",
+        "tags": [],
+        "label": "PrimaryFeaturePrivilege",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/security-role-management-model",
+            "scope": "common",
+            "docId": "kibKbnSecurityRoleManagementModelPluginApi",
+            "section": "def-common.PrimaryFeaturePrivilege",
+            "text": "PrimaryFeaturePrivilege"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/security-role-management-model",
+            "scope": "common",
+            "docId": "kibKbnSecurityRoleManagementModelPluginApi",
+            "section": "def-common.KibanaPrivilege",
+            "text": "KibanaPrivilege"
+          }
+        ],
+        "path": "x-pack/packages/security/role_management_model/src/primary_feature_privilege.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-role-management-model",
+            "id": "def-common.PrimaryFeaturePrivilege.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/packages/security/role_management_model/src/primary_feature_privilege.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-role-management-model",
+                "id": "def-common.PrimaryFeaturePrivilege.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/packages/security/role_management_model/src/primary_feature_privilege.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/security-role-management-model",
+                "id": "def-common.PrimaryFeaturePrivilege.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "config",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "features",
+                    "scope": "common",
+                    "docId": "kibFeaturesPluginApi",
+                    "section": "def-common.FeatureKibanaPrivileges",
+                    "text": "FeatureKibanaPrivileges"
+                  }
+                ],
+                "path": "x-pack/packages/security/role_management_model/src/primary_feature_privilege.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/security-role-management-model",
+                "id": "def-common.PrimaryFeaturePrivilege.Unnamed.$3",
+                "type": "Array",
+                "tags": [],
+                "label": "actions",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/packages/security/role_management_model/src/primary_feature_privilege.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-role-management-model",
+            "id": "def-common.PrimaryFeaturePrivilege.isMinimalFeaturePrivilege",
+            "type": "Function",
+            "tags": [],
+            "label": "isMinimalFeaturePrivilege",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "x-pack/packages/security/role_management_model/src/primary_feature_privilege.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-role-management-model",
+            "id": "def-common.PrimaryFeaturePrivilege.getMinimalPrivilegeId",
+            "type": "Function",
+            "tags": [],
+            "label": "getMinimalPrivilegeId",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "x-pack/packages/security/role_management_model/src/primary_feature_privilege.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-role-management-model",
+            "id": "def-common.PrimaryFeaturePrivilege.requireAllSpaces",
+            "type": "boolean",
+            "tags": [],
+            "label": "requireAllSpaces",
+            "description": [],
+            "path": "x-pack/packages/security/role_management_model/src/primary_feature_privilege.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-role-management-model",
+            "id": "def-common.PrimaryFeaturePrivilege.disabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "disabled",
+            "description": [],
+            "path": "x-pack/packages/security/role_management_model/src/primary_feature_privilege.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-role-management-model",
+        "id": "def-common.PrivilegeCollection",
+        "type": "Class",
+        "tags": [],
+        "label": "PrivilegeCollection",
+        "description": [],
+        "path": "x-pack/packages/security/role_management_model/src/privilege_collection.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-role-management-model",
+            "id": "def-common.PrivilegeCollection.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/packages/security/role_management_model/src/privilege_collection.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-role-management-model",
+                "id": "def-common.PrivilegeCollection.Unnamed.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "privileges",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/security-role-management-model",
+                    "scope": "common",
+                    "docId": "kibKbnSecurityRoleManagementModelPluginApi",
+                    "section": "def-common.KibanaPrivilege",
+                    "text": "KibanaPrivilege"
+                  },
+                  "[]"
+                ],
+                "path": "x-pack/packages/security/role_management_model/src/privilege_collection.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-role-management-model",
+            "id": "def-common.PrivilegeCollection.grantsPrivilege",
+            "type": "Function",
+            "tags": [],
+            "label": "grantsPrivilege",
+            "description": [],
+            "signature": [
+              "(privilege: ",
+              {
+                "pluginId": "@kbn/security-role-management-model",
+                "scope": "common",
+                "docId": "kibKbnSecurityRoleManagementModelPluginApi",
+                "section": "def-common.KibanaPrivilege",
+                "text": "KibanaPrivilege"
+              },
+              ") => boolean"
+            ],
+            "path": "x-pack/packages/security/role_management_model/src/privilege_collection.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-role-management-model",
+                "id": "def-common.PrivilegeCollection.grantsPrivilege.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "privilege",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/security-role-management-model",
+                    "scope": "common",
+                    "docId": "kibKbnSecurityRoleManagementModelPluginApi",
+                    "section": "def-common.KibanaPrivilege",
+                    "text": "KibanaPrivilege"
+                  }
+                ],
+                "path": "x-pack/packages/security/role_management_model/src/privilege_collection.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-role-management-model",
+        "id": "def-common.SecuredFeature",
+        "type": "Class",
+        "tags": [],
+        "label": "SecuredFeature",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/security-role-management-model",
+            "scope": "common",
+            "docId": "kibKbnSecurityRoleManagementModelPluginApi",
+            "section": "def-common.SecuredFeature",
+            "text": "SecuredFeature"
+          },
+          " extends ",
+          {
+            "pluginId": "features",
+            "scope": "common",
+            "docId": "kibFeaturesPluginApi",
+            "section": "def-common.KibanaFeature",
+            "text": "KibanaFeature"
+          }
+        ],
+        "path": "x-pack/packages/security/role_management_model/src/secured_feature.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-role-management-model",
+            "id": "def-common.SecuredFeature.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/packages/security/role_management_model/src/secured_feature.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-role-management-model",
+                "id": "def-common.SecuredFeature.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "config",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "features",
+                    "scope": "common",
+                    "docId": "kibFeaturesPluginApi",
+                    "section": "def-common.KibanaFeatureConfig",
+                    "text": "KibanaFeatureConfig"
+                  }
+                ],
+                "path": "x-pack/packages/security/role_management_model/src/secured_feature.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/security-role-management-model",
+                "id": "def-common.SecuredFeature.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "actionMapping",
+                "description": [],
+                "path": "x-pack/packages/security/role_management_model/src/secured_feature.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/security-role-management-model",
+                    "id": "def-common.SecuredFeature.Unnamed.$2.Unnamed",
+                    "type": "IndexSignature",
+                    "tags": [],
+                    "label": "[privilegeId: string]: string[]",
+                    "description": [],
+                    "signature": [
+                      "[privilegeId: string]:  string[]"
+                    ],
+                    "path": "x-pack/packages/security/role_management_model/src/secured_feature.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-role-management-model",
+            "id": "def-common.SecuredFeature.getPrivilegesTooltip",
+            "type": "Function",
+            "tags": [],
+            "label": "getPrivilegesTooltip",
+            "description": [],
+            "signature": [
+              "() => string | undefined"
+            ],
+            "path": "x-pack/packages/security/role_management_model/src/secured_feature.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-role-management-model",
+            "id": "def-common.SecuredFeature.getAllPrivileges",
+            "type": "Function",
+            "tags": [],
+            "label": "getAllPrivileges",
+            "description": [],
+            "signature": [
+              "() => (",
+              {
+                "pluginId": "@kbn/security-role-management-model",
+                "scope": "common",
+                "docId": "kibKbnSecurityRoleManagementModelPluginApi",
+                "section": "def-common.PrimaryFeaturePrivilege",
+                "text": "PrimaryFeaturePrivilege"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/security-role-management-model",
+                "scope": "common",
+                "docId": "kibKbnSecurityRoleManagementModelPluginApi",
+                "section": "def-common.SubFeaturePrivilege",
+                "text": "SubFeaturePrivilege"
+              },
+              ")[]"
+            ],
+            "path": "x-pack/packages/security/role_management_model/src/secured_feature.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-role-management-model",
+            "id": "def-common.SecuredFeature.getPrimaryFeaturePrivileges",
+            "type": "Function",
+            "tags": [],
+            "label": "getPrimaryFeaturePrivileges",
+            "description": [],
+            "signature": [
+              "({ includeMinimalFeaturePrivileges }?: { includeMinimalFeaturePrivileges: boolean; }) => ",
+              {
+                "pluginId": "@kbn/security-role-management-model",
+                "scope": "common",
+                "docId": "kibKbnSecurityRoleManagementModelPluginApi",
+                "section": "def-common.PrimaryFeaturePrivilege",
+                "text": "PrimaryFeaturePrivilege"
+              },
+              "[]"
+            ],
+            "path": "x-pack/packages/security/role_management_model/src/secured_feature.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-role-management-model",
+                "id": "def-common.SecuredFeature.getPrimaryFeaturePrivileges.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ includeMinimalFeaturePrivileges }",
+                "description": [],
+                "path": "x-pack/packages/security/role_management_model/src/secured_feature.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/security-role-management-model",
+                    "id": "def-common.SecuredFeature.getPrimaryFeaturePrivileges.$1.includeMinimalFeaturePrivileges",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "includeMinimalFeaturePrivileges",
+                    "description": [],
+                    "path": "x-pack/packages/security/role_management_model/src/secured_feature.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-role-management-model",
+            "id": "def-common.SecuredFeature.getMinimalFeaturePrivileges",
+            "type": "Function",
+            "tags": [],
+            "label": "getMinimalFeaturePrivileges",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/security-role-management-model",
+                "scope": "common",
+                "docId": "kibKbnSecurityRoleManagementModelPluginApi",
+                "section": "def-common.PrimaryFeaturePrivilege",
+                "text": "PrimaryFeaturePrivilege"
+              },
+              "[]"
+            ],
+            "path": "x-pack/packages/security/role_management_model/src/secured_feature.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-role-management-model",
+            "id": "def-common.SecuredFeature.getSubFeaturePrivileges",
+            "type": "Function",
+            "tags": [],
+            "label": "getSubFeaturePrivileges",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/security-role-management-model",
+                "scope": "common",
+                "docId": "kibKbnSecurityRoleManagementModelPluginApi",
+                "section": "def-common.SubFeaturePrivilege",
+                "text": "SubFeaturePrivilege"
+              },
+              "[]"
+            ],
+            "path": "x-pack/packages/security/role_management_model/src/secured_feature.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-role-management-model",
+            "id": "def-common.SecuredFeature.getSubFeatures",
+            "type": "Function",
+            "tags": [],
+            "label": "getSubFeatures",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/security-role-management-model",
+                "scope": "common",
+                "docId": "kibKbnSecurityRoleManagementModelPluginApi",
+                "section": "def-common.SecuredSubFeature",
+                "text": "SecuredSubFeature"
+              },
+              "[]"
+            ],
+            "path": "x-pack/packages/security/role_management_model/src/secured_feature.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-role-management-model",
+        "id": "def-common.SecuredSubFeature",
+        "type": "Class",
+        "tags": [],
+        "label": "SecuredSubFeature",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/security-role-management-model",
+            "scope": "common",
+            "docId": "kibKbnSecurityRoleManagementModelPluginApi",
+            "section": "def-common.SecuredSubFeature",
+            "text": "SecuredSubFeature"
+          },
+          " extends ",
+          {
+            "pluginId": "features",
+            "scope": "common",
+            "docId": "kibFeaturesPluginApi",
+            "section": "def-common.SubFeature",
+            "text": "SubFeature"
+          }
+        ],
+        "path": "x-pack/packages/security/role_management_model/src/secured_sub_feature.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-role-management-model",
+            "id": "def-common.SecuredSubFeature.privileges",
+            "type": "Array",
+            "tags": [],
+            "label": "privileges",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/security-role-management-model",
+                "scope": "common",
+                "docId": "kibKbnSecurityRoleManagementModelPluginApi",
+                "section": "def-common.SubFeaturePrivilege",
+                "text": "SubFeaturePrivilege"
+              },
+              "[]"
+            ],
+            "path": "x-pack/packages/security/role_management_model/src/secured_sub_feature.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-role-management-model",
+            "id": "def-common.SecuredSubFeature.privilegesTooltip",
+            "type": "string",
+            "tags": [],
+            "label": "privilegesTooltip",
+            "description": [],
+            "path": "x-pack/packages/security/role_management_model/src/secured_sub_feature.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-role-management-model",
+            "id": "def-common.SecuredSubFeature.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/packages/security/role_management_model/src/secured_sub_feature.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-role-management-model",
+                "id": "def-common.SecuredSubFeature.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "config",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "features",
+                    "scope": "common",
+                    "docId": "kibFeaturesPluginApi",
+                    "section": "def-common.SubFeatureConfig",
+                    "text": "SubFeatureConfig"
+                  }
+                ],
+                "path": "x-pack/packages/security/role_management_model/src/secured_sub_feature.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/security-role-management-model",
+                "id": "def-common.SecuredSubFeature.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "actionMapping",
+                "description": [],
+                "path": "x-pack/packages/security/role_management_model/src/secured_sub_feature.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/security-role-management-model",
+                    "id": "def-common.SecuredSubFeature.Unnamed.$2.Unnamed",
+                    "type": "IndexSignature",
+                    "tags": [],
+                    "label": "[privilegeId: string]: string[]",
+                    "description": [],
+                    "signature": [
+                      "[privilegeId: string]:  string[]"
+                    ],
+                    "path": "x-pack/packages/security/role_management_model/src/secured_sub_feature.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-role-management-model",
+            "id": "def-common.SecuredSubFeature.getPrivilegeGroups",
+            "type": "Function",
+            "tags": [],
+            "label": "getPrivilegeGroups",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/security-role-management-model",
+                "scope": "common",
+                "docId": "kibKbnSecurityRoleManagementModelPluginApi",
+                "section": "def-common.SubFeaturePrivilegeGroup",
+                "text": "SubFeaturePrivilegeGroup"
+              },
+              "[]"
+            ],
+            "path": "x-pack/packages/security/role_management_model/src/secured_sub_feature.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-role-management-model",
+            "id": "def-common.SecuredSubFeature.privilegeIterator",
+            "type": "Function",
+            "tags": [],
+            "label": "privilegeIterator",
+            "description": [],
+            "signature": [
+              "({ predicate, }?: { predicate?: ((privilege: ",
+              {
+                "pluginId": "@kbn/security-role-management-model",
+                "scope": "common",
+                "docId": "kibKbnSecurityRoleManagementModelPluginApi",
+                "section": "def-common.SubFeaturePrivilege",
+                "text": "SubFeaturePrivilege"
+              },
+              ", feature: ",
+              {
+                "pluginId": "@kbn/security-role-management-model",
+                "scope": "common",
+                "docId": "kibKbnSecurityRoleManagementModelPluginApi",
+                "section": "def-common.SecuredSubFeature",
+                "text": "SecuredSubFeature"
+              },
+              ") => boolean) | undefined; }) => IterableIterator<",
+              {
+                "pluginId": "@kbn/security-role-management-model",
+                "scope": "common",
+                "docId": "kibKbnSecurityRoleManagementModelPluginApi",
+                "section": "def-common.SubFeaturePrivilege",
+                "text": "SubFeaturePrivilege"
+              },
+              ">"
+            ],
+            "path": "x-pack/packages/security/role_management_model/src/secured_sub_feature.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-role-management-model",
+                "id": "def-common.SecuredSubFeature.privilegeIterator.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{\n    predicate = () => true,\n  }",
+                "description": [],
+                "path": "x-pack/packages/security/role_management_model/src/secured_sub_feature.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/security-role-management-model",
+                    "id": "def-common.SecuredSubFeature.privilegeIterator.$1.predicate",
+                    "type": "Function",
+                    "tags": [],
+                    "label": "predicate",
+                    "description": [],
+                    "signature": [
+                      "((privilege: ",
+                      {
+                        "pluginId": "@kbn/security-role-management-model",
+                        "scope": "common",
+                        "docId": "kibKbnSecurityRoleManagementModelPluginApi",
+                        "section": "def-common.SubFeaturePrivilege",
+                        "text": "SubFeaturePrivilege"
+                      },
+                      ", feature: ",
+                      {
+                        "pluginId": "@kbn/security-role-management-model",
+                        "scope": "common",
+                        "docId": "kibKbnSecurityRoleManagementModelPluginApi",
+                        "section": "def-common.SecuredSubFeature",
+                        "text": "SecuredSubFeature"
+                      },
+                      ") => boolean) | undefined"
+                    ],
+                    "path": "x-pack/packages/security/role_management_model/src/secured_sub_feature.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/security-role-management-model",
+                        "id": "def-common.SecuredSubFeature.privilegeIterator.$1.predicate.$1",
+                        "type": "Object",
+                        "tags": [],
+                        "label": "privilege",
+                        "description": [],
+                        "signature": [
+                          {
+                            "pluginId": "@kbn/security-role-management-model",
+                            "scope": "common",
+                            "docId": "kibKbnSecurityRoleManagementModelPluginApi",
+                            "section": "def-common.SubFeaturePrivilege",
+                            "text": "SubFeaturePrivilege"
+                          }
+                        ],
+                        "path": "x-pack/packages/security/role_management_model/src/secured_sub_feature.ts",
+                        "deprecated": false,
+                        "trackAdoption": false,
+                        "isRequired": true
+                      },
+                      {
+                        "parentPluginId": "@kbn/security-role-management-model",
+                        "id": "def-common.SecuredSubFeature.privilegeIterator.$1.predicate.$2",
+                        "type": "Object",
+                        "tags": [],
+                        "label": "feature",
+                        "description": [],
+                        "signature": [
+                          {
+                            "pluginId": "@kbn/security-role-management-model",
+                            "scope": "common",
+                            "docId": "kibKbnSecurityRoleManagementModelPluginApi",
+                            "section": "def-common.SecuredSubFeature",
+                            "text": "SecuredSubFeature"
+                          }
+                        ],
+                        "path": "x-pack/packages/security/role_management_model/src/secured_sub_feature.ts",
+                        "deprecated": false,
+                        "trackAdoption": false,
+                        "isRequired": true
+                      }
+                    ],
+                    "returnComment": []
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-role-management-model",
+            "id": "def-common.SecuredSubFeature.getDescription",
+            "type": "Function",
+            "tags": [],
+            "label": "getDescription",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "x-pack/packages/security/role_management_model/src/secured_sub_feature.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-role-management-model",
+        "id": "def-common.SubFeaturePrivilege",
+        "type": "Class",
+        "tags": [],
+        "label": "SubFeaturePrivilege",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/security-role-management-model",
+            "scope": "common",
+            "docId": "kibKbnSecurityRoleManagementModelPluginApi",
+            "section": "def-common.SubFeaturePrivilege",
+            "text": "SubFeaturePrivilege"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/security-role-management-model",
+            "scope": "common",
+            "docId": "kibKbnSecurityRoleManagementModelPluginApi",
+            "section": "def-common.KibanaPrivilege",
+            "text": "KibanaPrivilege"
+          }
+        ],
+        "path": "x-pack/packages/security/role_management_model/src/sub_feature_privilege.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-role-management-model",
+            "id": "def-common.SubFeaturePrivilege.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/packages/security/role_management_model/src/sub_feature_privilege.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-role-management-model",
+                "id": "def-common.SubFeaturePrivilege.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "subPrivilegeConfig",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "features",
+                    "scope": "common",
+                    "docId": "kibFeaturesPluginApi",
+                    "section": "def-common.SubFeaturePrivilegeConfig",
+                    "text": "SubFeaturePrivilegeConfig"
+                  }
+                ],
+                "path": "x-pack/packages/security/role_management_model/src/sub_feature_privilege.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/security-role-management-model",
+                "id": "def-common.SubFeaturePrivilege.Unnamed.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "actions",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/packages/security/role_management_model/src/sub_feature_privilege.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-role-management-model",
+            "id": "def-common.SubFeaturePrivilege.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/packages/security/role_management_model/src/sub_feature_privilege.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-role-management-model",
+            "id": "def-common.SubFeaturePrivilege.disabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "disabled",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/packages/security/role_management_model/src/sub_feature_privilege.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-role-management-model",
+            "id": "def-common.SubFeaturePrivilege.requireAllSpaces",
+            "type": "boolean",
+            "tags": [],
+            "label": "requireAllSpaces",
+            "description": [],
+            "path": "x-pack/packages/security/role_management_model/src/sub_feature_privilege.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-role-management-model",
+        "id": "def-common.SubFeaturePrivilegeGroup",
+        "type": "Class",
+        "tags": [],
+        "label": "SubFeaturePrivilegeGroup",
+        "description": [],
+        "path": "x-pack/packages/security/role_management_model/src/sub_feature_privilege_group.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-role-management-model",
+            "id": "def-common.SubFeaturePrivilegeGroup.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/packages/security/role_management_model/src/sub_feature_privilege_group.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-role-management-model",
+                "id": "def-common.SubFeaturePrivilegeGroup.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "config",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "features",
+                    "scope": "common",
+                    "docId": "kibFeaturesPluginApi",
+                    "section": "def-common.SubFeaturePrivilegeGroupConfig",
+                    "text": "SubFeaturePrivilegeGroupConfig"
+                  }
+                ],
+                "path": "x-pack/packages/security/role_management_model/src/sub_feature_privilege_group.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/security-role-management-model",
+                "id": "def-common.SubFeaturePrivilegeGroup.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "actionMapping",
+                "description": [],
+                "path": "x-pack/packages/security/role_management_model/src/sub_feature_privilege_group.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/security-role-management-model",
+                    "id": "def-common.SubFeaturePrivilegeGroup.Unnamed.$2.Unnamed",
+                    "type": "IndexSignature",
+                    "tags": [],
+                    "label": "[privilegeId: string]: string[]",
+                    "description": [],
+                    "signature": [
+                      "[privilegeId: string]:  string[]"
+                    ],
+                    "path": "x-pack/packages/security/role_management_model/src/sub_feature_privilege_group.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-role-management-model",
+            "id": "def-common.SubFeaturePrivilegeGroup.groupType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "groupType",
+            "description": [],
+            "signature": [
+              "\"mutually_exclusive\" | \"independent\""
+            ],
+            "path": "x-pack/packages/security/role_management_model/src/sub_feature_privilege_group.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-role-management-model",
+            "id": "def-common.SubFeaturePrivilegeGroup.privileges",
+            "type": "Array",
+            "tags": [],
+            "label": "privileges",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/security-role-management-model",
+                "scope": "common",
+                "docId": "kibKbnSecurityRoleManagementModelPluginApi",
+                "section": "def-common.SubFeaturePrivilege",
+                "text": "SubFeaturePrivilege"
+              },
+              "[]"
+            ],
+            "path": "x-pack/packages/security/role_management_model/src/sub_feature_privilege_group.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/security-role-management-model",
+        "id": "def-common.isGlobalPrivilegeDefinition",
+        "type": "Function",
+        "tags": [],
+        "label": "isGlobalPrivilegeDefinition",
+        "description": [
+          "\nDetermines if the passed privilege spec defines global privileges."
+        ],
+        "signature": [
+          "(privilegeSpec: ",
+          {
+            "pluginId": "@kbn/security-plugin-types-common",
+            "scope": "common",
+            "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+            "section": "def-common.RoleKibanaPrivilege",
+            "text": "RoleKibanaPrivilege"
+          },
+          ") => boolean"
+        ],
+        "path": "x-pack/packages/security/role_management_model/src/kibana_privileges.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-role-management-model",
+            "id": "def-common.isGlobalPrivilegeDefinition.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "privilegeSpec",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/security-plugin-types-common",
+                "scope": "common",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "section": "def-common.RoleKibanaPrivilege",
+                "text": "RoleKibanaPrivilege"
+              }
+            ],
+            "path": "x-pack/packages/security/role_management_model/src/kibana_privileges.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

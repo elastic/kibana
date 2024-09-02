@@ -28,6 +28,17 @@ const tooltipContent = {
   }),
 };
 
+export interface ColorPickerProps {
+  overwriteColor?: string | null;
+  defaultColor?: string | null;
+  isClearable?: boolean;
+  setConfig: (config: { color?: string }) => void;
+  label?: string;
+  disableHelpTooltip?: boolean;
+  disabledMessage?: string;
+  showAlpha?: boolean;
+}
+
 export const ColorPicker = ({
   overwriteColor,
   defaultColor,
@@ -37,16 +48,7 @@ export const ColorPicker = ({
   disableHelpTooltip,
   disabledMessage,
   showAlpha,
-}: {
-  overwriteColor?: string | null;
-  defaultColor?: string | null;
-  isClearable?: boolean;
-  setConfig: (config: { color?: string }) => void;
-  label?: string;
-  disableHelpTooltip?: boolean;
-  disabledMessage?: string;
-  showAlpha?: boolean;
-}) => {
+}: ColorPickerProps) => {
   const [colorText, setColorText] = useState(overwriteColor || defaultColor);
   const [validatedColor, setValidatedColor] = useState(overwriteColor || defaultColor);
   const [currentColorAlpha, setCurrentColorAlpha] = useState(getColorAlpha(colorText));

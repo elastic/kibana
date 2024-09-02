@@ -1314,7 +1314,9 @@
         "parentPluginId": "visualizations",
         "id": "def-public.VisualizeEmbeddable",
         "type": "Class",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "VisualizeEmbeddable",
         "description": [],
         "signature": [
@@ -1365,8 +1367,22 @@
           }
         ],
         "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/legacy_visualizations/is_legacy_map.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/legacy_visualizations/is_legacy_map.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/legacy_visualizations/is_legacy_map.ts"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "visualizations",
@@ -3612,82 +3628,11 @@
           {
             "parentPluginId": "visualizations",
             "id": "def-public.SerializedVisData.searchSource",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "searchSource",
             "description": [],
             "signature": [
-              "{ type?: string | undefined; query?: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
-              " | ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.AggregateQuery",
-                "text": "AggregateQuery"
-              },
-              " | undefined; filter?: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[] | undefined; sort?: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.EsQuerySortValue",
-                "text": "EsQuerySortValue"
-              },
-              "[] | undefined; highlight?: ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
-              " | undefined; highlightAll?: boolean | undefined; trackTotalHits?: number | boolean | undefined; aggs?: { type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
-              " | undefined; schema?: string | undefined; }[] | undefined; from?: number | undefined; size?: number | undefined; source?: boolean | ",
-              "Fields",
-              " | undefined; version?: boolean | undefined; fields?: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchFieldValue",
-                "text": "SearchFieldValue"
-              },
-              "[] | undefined; fieldsFromSource?: ",
-              "Fields",
-              " | undefined; index?: string | ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewSpec",
-                "text": "DataViewSpec"
-              },
-              " | undefined; searchAfter?: ",
-              "SortResults",
-              " | undefined; timeout?: string | undefined; terminate_after?: number | undefined; parent?: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -3695,7 +3640,7 @@
                 "section": "def-common.SerializedSearchSourceFields",
                 "text": "SerializedSearchSourceFields"
               },
-              " | undefined; }"
+              " & { indexRefName?: string | undefined; }"
             ],
             "path": "src/plugins/visualizations/common/types.ts",
             "deprecated": false,
@@ -3710,6 +3655,22 @@
             "description": [],
             "signature": [
               "string | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.SerializedVisData.savedSearchRefName",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "savedSearchRefName",
+            "description": [],
+            "signature": [
+              "string | ",
+              "Reference",
+              " | undefined"
             ],
             "path": "src/plugins/visualizations/common/types.ts",
             "deprecated": false,
@@ -4320,7 +4281,7 @@
                 "section": "def-common.RefreshInterval",
                 "text": "RefreshInterval"
               },
-              "; setRefreshInterval: (refreshInterval: Partial<",
+              "; getMinRefreshInterval: () => number; setRefreshInterval: (refreshInterval: Partial<",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -5671,9 +5632,9 @@
               "(id: string) => Promise<{ item: ",
               {
                 "pluginId": "@kbn/content-management-utils",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnContentManagementUtilsPluginApi",
-                "section": "def-common.SOWithMetadata",
+                "section": "def-server.SOWithMetadata",
                 "text": "SOWithMetadata"
               },
               "<Attr>; meta: { outcome: \"exactMatch\" | \"aliasMatch\" | \"conflict\"; aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; }; }>"
@@ -5719,17 +5680,17 @@
               "<ContentType, Attr, Pick<",
               {
                 "pluginId": "@kbn/content-management-utils",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnContentManagementUtilsPluginApi",
-                "section": "def-common.SavedObjectCreateOptions",
+                "section": "def-server.SavedObjectCreateOptions",
                 "text": "SavedObjectCreateOptions"
               },
               ", \"overwrite\" | \"references\">>, \"contentTypeId\">) => Promise<{ item: ",
               {
                 "pluginId": "@kbn/content-management-utils",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnContentManagementUtilsPluginApi",
-                "section": "def-common.SOWithMetadata",
+                "section": "def-server.SOWithMetadata",
                 "text": "SOWithMetadata"
               },
               "<Attr>; meta?: undefined; }>"
@@ -5757,9 +5718,9 @@
                   "<ContentType, Attr, Pick<",
                   {
                     "pluginId": "@kbn/content-management-utils",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnContentManagementUtilsPluginApi",
-                    "section": "def-common.SavedObjectCreateOptions",
+                    "section": "def-server.SavedObjectCreateOptions",
                     "text": "SavedObjectCreateOptions"
                   },
                   ", \"overwrite\" | \"references\">>, \"contentTypeId\">"
@@ -5791,17 +5752,17 @@
               "<ContentType, Partial<Attr>, Pick<",
               {
                 "pluginId": "@kbn/content-management-utils",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnContentManagementUtilsPluginApi",
-                "section": "def-common.SavedObjectUpdateOptions",
+                "section": "def-server.SavedObjectUpdateOptions",
                 "text": "SavedObjectUpdateOptions"
               },
               "<unknown>, \"references\">>, \"contentTypeId\">) => Promise<{ item: ",
               {
                 "pluginId": "@kbn/content-management-utils",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnContentManagementUtilsPluginApi",
-                "section": "def-common.SOWithMetadataPartial",
+                "section": "def-server.SOWithMetadataPartial",
                 "text": "SOWithMetadataPartial"
               },
               "<Attr>; meta?: undefined; }>"
@@ -5829,9 +5790,9 @@
                   "<ContentType, Partial<Attr>, Pick<",
                   {
                     "pluginId": "@kbn/content-management-utils",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnContentManagementUtilsPluginApi",
-                    "section": "def-common.SavedObjectUpdateOptions",
+                    "section": "def-server.SavedObjectUpdateOptions",
                     "text": "SavedObjectUpdateOptions"
                   },
                   "<unknown>, \"references\">>, \"contentTypeId\">"
@@ -5903,9 +5864,9 @@
               ", options?: object | undefined) => Promise<{ hits: ",
               {
                 "pluginId": "@kbn/content-management-utils",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnContentManagementUtilsPluginApi",
-                "section": "def-common.SOWithMetadata",
+                "section": "def-server.SOWithMetadata",
                 "text": "SOWithMetadata"
               },
               "<Attr>[]; pagination: { total: number; cursor?: string | undefined; }; }>"
@@ -6802,6 +6763,63 @@
           "\"visualization\""
         ],
         "path": "src/plugins/visualizations/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-public.VisualizeEditorInput",
+        "type": "Type",
+        "tags": [],
+        "label": "VisualizeEditorInput",
+        "description": [],
+        "signature": [
+          "Omit<",
+          "VisualizeRuntimeState",
+          ", \"vis\"> & { savedVis?: ",
+          {
+            "pluginId": "visualizations",
+            "scope": "common",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-common.SerializedVis",
+            "text": "SerializedVis"
+          },
+          "<",
+          {
+            "pluginId": "visualizations",
+            "scope": "common",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-common.VisParams",
+            "text": "VisParams"
+          },
+          "> | undefined; timeRange: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
+          "; vis?: (",
+          {
+            "pluginId": "visualizations",
+            "scope": "public",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-public.Vis",
+            "text": "Vis"
+          },
+          "<",
+          {
+            "pluginId": "visualizations",
+            "scope": "common",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-common.VisParams",
+            "text": "VisParams"
+          },
+          "> & { colors?: Record<string, string> | undefined; legendOpen?: boolean | undefined; }) | undefined; }"
+        ],
+        "path": "src/plugins/visualizations/public/react_embeddable/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -12843,82 +12861,11 @@
           {
             "parentPluginId": "visualizations",
             "id": "def-common.SerializedVisData.searchSource",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "searchSource",
             "description": [],
             "signature": [
-              "{ type?: string | undefined; query?: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
-              " | ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.AggregateQuery",
-                "text": "AggregateQuery"
-              },
-              " | undefined; filter?: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[] | undefined; sort?: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.EsQuerySortValue",
-                "text": "EsQuerySortValue"
-              },
-              "[] | undefined; highlight?: ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
-              " | undefined; highlightAll?: boolean | undefined; trackTotalHits?: number | boolean | undefined; aggs?: { type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
-              " | undefined; schema?: string | undefined; }[] | undefined; from?: number | undefined; size?: number | undefined; source?: boolean | ",
-              "Fields",
-              " | undefined; version?: boolean | undefined; fields?: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchFieldValue",
-                "text": "SearchFieldValue"
-              },
-              "[] | undefined; fieldsFromSource?: ",
-              "Fields",
-              " | undefined; index?: string | ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewSpec",
-                "text": "DataViewSpec"
-              },
-              " | undefined; searchAfter?: ",
-              "SortResults",
-              " | undefined; timeout?: string | undefined; terminate_after?: number | undefined; parent?: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -12926,7 +12873,7 @@
                 "section": "def-common.SerializedSearchSourceFields",
                 "text": "SerializedSearchSourceFields"
               },
-              " | undefined; }"
+              " & { indexRefName?: string | undefined; }"
             ],
             "path": "src/plugins/visualizations/common/types.ts",
             "deprecated": false,
@@ -12941,6 +12888,22 @@
             "description": [],
             "signature": [
               "string | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.SerializedVisData.savedSearchRefName",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "savedSearchRefName",
+            "description": [],
+            "signature": [
+              "string | ",
+              "Reference",
+              " | undefined"
             ],
             "path": "src/plugins/visualizations/common/types.ts",
             "deprecated": false,

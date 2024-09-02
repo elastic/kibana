@@ -67,7 +67,7 @@ const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
   );
 
   const handleSavedQueryChange = useCallback(
-    (newSelectedOptions) => {
+    (newSelectedOptions: any) => {
       if (!newSelectedOptions.length) {
         onChange(null);
         setSelectedOptions(newSelectedOptions);
@@ -87,7 +87,7 @@ const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
   );
 
   const renderOption = useCallback(
-    ({ value }) => (
+    ({ value }: any) => (
       <>
         <strong>{value.id}</strong>
         <div className="eui-textTruncate">

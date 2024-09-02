@@ -5278,41 +5278,6 @@
           },
           {
             "parentPluginId": "controls",
-            "id": "def-public.ControlGroupRuntimeState.defaultControlGrow",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "defaultControlGrow",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/controls/public/react_controls/control_group/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "controls",
-            "id": "def-public.ControlGroupRuntimeState.defaultControlWidth",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "defaultControlWidth",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "controls",
-                "scope": "common",
-                "docId": "kibControlsPluginApi",
-                "section": "def-common.ControlWidth",
-                "text": "ControlWidth"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/controls/public/react_controls/control_group/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "controls",
             "id": "def-public.ControlGroupRuntimeState.labelPosition",
             "type": "CompoundType",
             "tags": [],
@@ -6572,18 +6537,6 @@
             "text": "PublishesUnsavedChanges"
           },
           "<object>, \"unsavedChanges\"> & ",
-          "PublishesControlDisplaySettings",
-          " & { labelPosition: ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishingSubject",
-            "text": "PublishingSubject"
-          },
-          "<",
-          "ControlStyle",
-          ">; } & ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -6647,7 +6600,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<boolean>; untilInitialized: () => Promise<void>; openAddDataControlFlyout: (settings?: { controlInputTransform?: ",
+          "<boolean>; untilInitialized: () => Promise<void>; openAddDataControlFlyout: (options?: { controlInputTransform?: ",
           {
             "pluginId": "controls",
             "scope": "common",
@@ -6655,7 +6608,7 @@
             "section": "def-common.ControlInputTransform",
             "text": "ControlInputTransform"
           },
-          " | undefined; } | undefined) => void; lastUsedDataViewId$: ",
+          " | undefined; onSave?: (() => void) | undefined; } | undefined) => void; labelPosition: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -6663,7 +6616,9 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<string | undefined>; }"
+          "<",
+          "ControlStyle",
+          ">; }"
         ],
         "path": "src/plugins/controls/public/react_controls/control_group/types.ts",
         "deprecated": false,
@@ -6927,9 +6882,7 @@
             "section": "def-public.PublishesUnsavedChanges",
             "text": "PublishesUnsavedChanges"
           },
-          "<object> & ",
-          "PublishesControlDisplaySettings",
-          " & Partial<",
+          "<object> & Partial<",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -6997,7 +6950,31 @@
           },
           "<",
           "DefaultControlState",
-          ">; setDataLoading: (loading: boolean) => void; setBlockingError: (error: Error | undefined) => void; } & Omit<",
+          ">; setDataLoading: (loading: boolean) => void; setBlockingError: (error: Error | undefined) => void; grow: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<boolean | undefined>; width: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.ControlWidth",
+            "text": "ControlWidth"
+          },
+          " | undefined>; } & Omit<",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -7813,130 +7790,6 @@
   "common": {
     "classes": [],
     "functions": [
-      {
-        "parentPluginId": "controls",
-        "id": "def-common.controlGroupInputToRawControlGroupAttributes",
-        "type": "Function",
-        "tags": [],
-        "label": "controlGroupInputToRawControlGroupAttributes",
-        "description": [],
-        "signature": [
-          "(controlGroupInput: Omit<",
-          {
-            "pluginId": "controls",
-            "scope": "common",
-            "docId": "kibControlsPluginApi",
-            "section": "def-common.ControlGroupInput",
-            "text": "ControlGroupInput"
-          },
-          ", \"id\">) => ",
-          {
-            "pluginId": "controls",
-            "scope": "common",
-            "docId": "kibControlsPluginApi",
-            "section": "def-common.RawControlGroupAttributes",
-            "text": "RawControlGroupAttributes"
-          }
-        ],
-        "path": "src/plugins/controls/common/control_group/control_group_persistence.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "controls",
-            "id": "def-common.controlGroupInputToRawControlGroupAttributes.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "controlGroupInput",
-            "description": [],
-            "signature": [
-              "Omit<",
-              {
-                "pluginId": "controls",
-                "scope": "common",
-                "docId": "kibControlsPluginApi",
-                "section": "def-common.ControlGroupInput",
-                "text": "ControlGroupInput"
-              },
-              ", \"id\">"
-            ],
-            "path": "src/plugins/controls/common/control_group/control_group_persistence.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "controls",
-        "id": "def-common.generateNewControlIds",
-        "type": "Function",
-        "tags": [],
-        "label": "generateNewControlIds",
-        "description": [],
-        "signature": [
-          "(controlGroupInput?: ",
-          {
-            "pluginId": "controls",
-            "scope": "common",
-            "docId": "kibControlsPluginApi",
-            "section": "def-common.PersistableControlGroupInput",
-            "text": "PersistableControlGroupInput"
-          },
-          " | undefined) => { panels: ",
-          {
-            "pluginId": "controls",
-            "scope": "common",
-            "docId": "kibControlsPluginApi",
-            "section": "def-common.ControlsPanels",
-            "text": "ControlsPanels"
-          },
-          "; chainingSystem: ",
-          {
-            "pluginId": "controls",
-            "scope": "common",
-            "docId": "kibControlsPluginApi",
-            "section": "def-common.ControlGroupChainingSystem",
-            "text": "ControlGroupChainingSystem"
-          },
-          "; ignoreParentSettings?: ",
-          "ParentIgnoreSettings",
-          " | undefined; controlStyle: ",
-          "ControlStyle",
-          "; showApplySelections?: boolean | undefined; } | undefined"
-        ],
-        "path": "src/plugins/controls/common/control_group/control_group_persistence.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "controls",
-            "id": "def-common.generateNewControlIds.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "controlGroupInput",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "controls",
-                "scope": "common",
-                "docId": "kibControlsPluginApi",
-                "section": "def-common.PersistableControlGroupInput",
-                "text": "PersistableControlGroupInput"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/controls/common/control_group/control_group_persistence.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "controls",
         "id": "def-common.getDefaultControlGroupInput",

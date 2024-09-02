@@ -38,7 +38,7 @@ import { CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS } from '../../test_subjects';
 import { AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ } from '../../test_subjects';
 
 interface AzureSetupInfoContentProps {
-  integrationLink: string;
+  documentationLink: string;
 }
 
 export type SetupFormat = typeof AZURE_SETUP_FORMAT.ARM_TEMPLATE | typeof AZURE_SETUP_FORMAT.MANUAL;
@@ -58,7 +58,7 @@ export const AZURE_CREDENTIALS_TYPE = {
   MANAGED_IDENTITY: 'managed_identity',
 } as const;
 
-export const AzureSetupInfoContent = ({ integrationLink }: AzureSetupInfoContentProps) => {
+export const AzureSetupInfoContent = ({ documentationLink }: AzureSetupInfoContentProps) => {
   return (
     <>
       <EuiHorizontalRule margin="xl" />
@@ -74,13 +74,13 @@ export const AzureSetupInfoContent = ({ integrationLink }: AzureSetupInfoContent
       <EuiText color="subdued" size="s">
         <FormattedMessage
           id="xpack.csp.azureIntegration.gettingStarted.setupInfoContent"
-          defaultMessage="Utilize an Azure Resource Manager (ARM) template (a built-in Azure IaC tool) or a series of manual steps to set up and deploy CSPM for assessing your Azure environment's security posture. Refer to our {gettingStartedLink} for details."
+          defaultMessage="Utilize an Azure Resource Manager (ARM) template (a built-in Azure IaC tool) or a series of manual steps to set up and deploy CSPM for assessing your Azure environment's security posture. Refer to our {gettingStartedLink} guide for details."
           values={{
             gettingStartedLink: (
-              <EuiLink href={integrationLink} target="_blank">
+              <EuiLink href={documentationLink} target="_blank">
                 <FormattedMessage
                   id="xpack.csp.azureIntegration.gettingStarted.setupInfoContentLink"
-                  defaultMessage="Getting Started guide"
+                  defaultMessage="Getting Started"
                 />
               </EuiLink>
             ),
@@ -221,19 +221,19 @@ const AzureCredentialTypeSelector = ({
   </EuiFormRow>
 );
 
-const TemporaryManualSetup = ({ integrationLink }: { integrationLink: string }) => {
+const TemporaryManualSetup = ({ documentationLink }: { documentationLink: string }) => {
   return (
     <>
       <EuiText color="subdued" size="s">
         <FormattedMessage
           id="xpack.csp.azureIntegration.manualCredentialType.instructions"
-          defaultMessage="Ensure the agent is deployed on a resource that supports managed identities (e.g., Azure Virtual Machines). No explicit credentials need to be provided; Azure handles the authentication. Refer to our {gettingStartedLink} for details."
+          defaultMessage="Ensure the agent is deployed on a resource that supports managed identities (e.g., Azure Virtual Machines). No explicit credentials need to be provided; Azure handles the authentication. Refer to our {gettingStartedLink} guide for details."
           values={{
             gettingStartedLink: (
-              <EuiLink href={integrationLink} target="_blank">
+              <EuiLink href={documentationLink} target="_blank">
                 <FormattedMessage
                   id="xpack.csp.azureIntegration.gettingStarted.setupInfoContentLink"
-                  defaultMessage="Getting Started guide"
+                  defaultMessage="Getting Started"
                 />
               </EuiLink>
             ),
@@ -356,7 +356,7 @@ export const AzureCredentialsForm = ({
     azureCredentialsType,
     setupFormat,
     onSetupFormatChange,
-    integrationLink,
+    documentationLink,
     hasArmTemplateUrl,
   } = useAzureCredentialsForm({
     newPolicy,
@@ -410,7 +410,7 @@ export const AzureCredentialsForm = ({
 
   return (
     <>
-      <AzureSetupInfoContent integrationLink={integrationLink} />
+      <AzureSetupInfoContent documentationLink={documentationLink} />
       <EuiSpacer size="l" />
       <RadioGroup
         disabled={disabled}
@@ -426,7 +426,7 @@ export const AzureCredentialsForm = ({
         <ArmTemplateSetup hasArmTemplateUrl={hasArmTemplateUrl} input={input} />
       )}
       {setupFormat === AZURE_SETUP_FORMAT.MANUAL && !isPackageVersionValidForManualFields && (
-        <TemporaryManualSetup integrationLink={integrationLink} />
+        <TemporaryManualSetup documentationLink={documentationLink} />
       )}
       {setupFormat === AZURE_SETUP_FORMAT.MANUAL && isPackageVersionValidForManualFields && (
         <>
