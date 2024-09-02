@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { ml } from '../../../services/ml_api_service';
 import { isJobIdValid } from '../../../../../common/util/job_utils';
 import { i18n } from '@kbn/i18n';
 
-function getJobIds() {
+function getJobIds(mlApiServices) {
   return new Promise((resolve, reject) => {
-    ml.jobs
+    mlApiServices.jobs
       .jobsSummary()
       .then((resp) => {
         resolve(resp.map((job) => job.id));
@@ -30,9 +29,9 @@ function getJobIds() {
   });
 }
 
-function getGroupIds() {
+function getGroupIds(mlApiServices) {
   return new Promise((resolve, reject) => {
-    ml.jobs
+    mlApiServices.jobs
       .groups()
       .then((resp) => {
         resolve(resp.map((group) => group.id));
@@ -51,9 +50,10 @@ function getGroupIds() {
   });
 }
 
-function getCalendars() {
+function getCalendars(mlApiServices) {
   return new Promise((resolve, reject) => {
-    ml.calendars()
+    mlApiServices
+      .calendars()
       .then((resp) => {
         resolve(resp);
       })
@@ -71,13 +71,13 @@ function getCalendars() {
   });
 }
 
-export function getCalendarSettingsData() {
+export function getCalendarSettingsData(mlApiServices) {
   return new Promise(async (resolve, reject) => {
     try {
       const [jobIds, groupIds, calendars] = await Promise.all([
-        getJobIds(),
-        getGroupIds(),
-        getCalendars(),
+        getJobIds(mlApiServices),
+        getGroupIds(mlApiServices),
+        getCalendars(mlApiServices),
       ]);
 
       resolve({

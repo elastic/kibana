@@ -8,7 +8,7 @@
 
 import { PluginInitializerContext } from '@kbn/core/public';
 import { InputControlVisPlugin as Plugin } from './plugin';
-import { InputControlPublicConfig } from '../config';
+import type { InputControlPublicConfig } from '../server/config';
 
 export function plugin(initializerContext: PluginInitializerContext<InputControlPublicConfig>) {
   return new Plugin(initializerContext);

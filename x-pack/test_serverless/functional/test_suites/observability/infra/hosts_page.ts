@@ -154,11 +154,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           expect(documentTitle).to.contain('Hosts - Infrastructure - Observability - Elastic');
         });
 
-        it('should render the title beta badge', async () => {
-          await pageObjects.infraHostsView.getBetaBadgeExists();
-        });
-
-        describe('Hosts table', async () => {
+        describe('Hosts table', () => {
           let hostRows: WebElementWrapper[] = [];
 
           before(async () => {
@@ -218,7 +214,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
 
           it('should correctly load the Alerts tab section when clicking on it', async () => {
-            testSubjects.existOrFail('hostsView-alerts');
+            await testSubjects.existOrFail('hostsView-alerts');
           });
         });
       });

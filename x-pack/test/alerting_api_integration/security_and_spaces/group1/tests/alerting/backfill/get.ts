@@ -25,7 +25,7 @@ export default function getBackfillTests({ getService }: FtrProviderContext) {
     const end2 = moment().utc().startOf('day').subtract(3, 'day').toISOString();
 
     afterEach(async () => {
-      asyncForEach(backfillIds, async ({ id, spaceId }: { id: string; spaceId: string }) => {
+      await asyncForEach(backfillIds, async ({ id, spaceId }: { id: string; spaceId: string }) => {
         await supertest
           .delete(`${getUrlPrefix(spaceId)}/internal/alerting/rules/backfill/${id}`)
           .set('kbn-xsrf', 'foo');
