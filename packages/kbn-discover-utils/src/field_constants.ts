@@ -34,7 +34,7 @@ export const CONTAINER_NAME_FIELD = 'container.name';
 export const CONTAINER_ID_FIELD = 'container.id';
 
 // Degraded Docs
-export const DEGRADED_DOCS_FIELD = 'ignored_field_values';
+export const DEGRADED_DOCS_FIELDS = ['ignored_field_values', '_ignored'];
 
 // Error Stacktrace
 export const ERROR_STACK_TRACE = 'error.stack_trace';

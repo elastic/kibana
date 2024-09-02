@@ -7,11 +7,24 @@
  */
 
 import { createDegradedDocsControl, createStacktraceControl } from '@kbn/discover-utils';
+import { retrieveMetadataColumns } from '@kbn/esql-utils';
 import type { DataSourceProfileProvider } from '../../../profiles';
+import { RowControlsExtensionParams } from '../../../types';
 
 export const getRowAdditionalLeadingControls: DataSourceProfileProvider['profile']['getRowAdditionalLeadingControls'] =
   (prev) => (params) => {
     const additionalControls = prev(params) || [];
+    const { query, dataView } = params;
 
-    return [...additionalControls, createDegradedDocsControl(), createStacktraceControl()];
+    const isDegradedDocsControlEnabled =
+      dataView.type === 'esql' ? queryContainsMetadataIgnored(query) : true;
+
+    return [
+      ...additionalControls,
+      createDegradedDocsControl({ enabled: isDegradedDocsControlEnabled }),
+      createStacktraceControl(),
+    ];
   };
+
+const queryContainsMetadataIgnored = (query?: RowControlsExtensionParams['query']) =>
+  query && 'esql' in query && retrieveMetadataColumns(query.esql).includes('_ignored');

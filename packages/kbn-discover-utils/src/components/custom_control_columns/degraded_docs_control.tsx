@@ -8,19 +8,24 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { EuiCode, EuiSpacer } from '@elastic/eui';
 import {
   RowControlColumn,
   RowControlComponent,
   RowControlProps,
   RowControlRowProps,
 } from './types';
-import { DEGRADED_DOCS_FIELD } from '../../field_constants';
+import { DEGRADED_DOCS_FIELDS } from '../../field_constants';
+
+interface DegradedDocsControlProps extends Partial<RowControlProps> {
+  enabled?: boolean;
+}
 
 /**
  * Degraded docs control factory function.
  * @param props Optional props for the generated Control component, useful to override onClick, etc
  */
-export const createDegradedDocsControl = (props?: Partial<RowControlProps>): RowControlColumn => ({
+export const createDegradedDocsControl = (props?: DegradedDocsControlProps): RowControlColumn => ({
   id: 'connectedDegradedDocs',
   headerAriaLabel: actionsHeaderAriaLabelDegradedAction,
   renderControl: (Control, rowProps) => {
@@ -46,15 +51,45 @@ const degradedDocButtonLabelWhenNotPresent = i18n.translate(
   { defaultMessage: 'All fields in this document were parsed correctly' }
 );
 
+const degradedDocButtonLabelWhenDisabled = i18n.translate(
+  'discover.customControl.degradedDocDisabled',
+  {
+    defaultMessage:
+      'Degraded document field detection is currently disabled for this search. To enable it, include the METADATA directive for the `_ignored` field in your ES|QL query. For example:',
+  }
+);
+
 const DegradedDocs = ({
   Control,
+  enabled = true,
   rowProps: { record },
   ...props
 }: {
   Control: RowControlComponent;
   rowProps: RowControlRowProps;
-} & Partial<RowControlProps>) => {
-  const isDegradedDocumentExists = DEGRADED_DOCS_FIELD in record.raw;
+} & DegradedDocsControlProps) => {
+  const isDegradedDocumentExists = DEGRADED_DOCS_FIELDS.some((field) => field in record.raw);
+
+  if (!enabled) {
+    const tooltipContent = (
+      <div>
+        {degradedDocButtonLabelWhenDisabled}
+        <EuiSpacer size="s" />
+        <EuiCode>FROM logs-* METADATA _ignored</EuiCode>
+      </div>
+    );
+
+    return (
+      <Control
+        disabled
+        data-test-subj="docTableDegradedDocDisabled"
+        label={tooltipContent}
+        iconType="indexClose"
+        onClick={undefined}
+        {...props}
+      />
+    );
+  }
 
   return isDegradedDocumentExists ? (
     <Control

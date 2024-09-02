@@ -10,6 +10,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { CustomCellRenderer, UnifiedDataTableProps } from '@kbn/unified-data-table';
 import type { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import { DiscoverAppState } from '../application/main/state_management/discover_app_state_container';
 
 export interface DocViewerExtension {
   title: string | undefined;
@@ -40,6 +41,7 @@ export interface DefaultAppStateExtension {
 
 export interface RowControlsExtensionParams {
   dataView: DataView;
+  query?: DiscoverAppState['query'];
 }
 
 export interface Profile {

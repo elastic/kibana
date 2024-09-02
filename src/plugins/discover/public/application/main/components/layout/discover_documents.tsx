@@ -468,6 +468,7 @@ function DiscoverDocumentsComponent({
                 additionalFieldGroups={additionalFieldGroups}
                 dataGridDensityState={density}
                 onUpdateDataGridDensity={onUpdateDensity}
+                query={query}
               />
             </CellActionsProvider>
           </div>
