@@ -155,9 +155,11 @@ export function ServiceMap({
 
   if (status === FETCH_STATUS.SUCCESS && data.elements.length === 0) {
     return (
-      <PromptContainer>
-        <EmptyPrompt />
-      </PromptContainer>
+      <ServiceTabContent tabName="service-map">
+        <PromptContainer>
+          <EmptyPrompt />
+        </PromptContainer>
+      </ServiceTabContent>
     );
   }
 
@@ -182,29 +184,27 @@ export function ServiceMap({
   return (
     <>
       <SearchBar showTimeComparison />
-      <ServiceTabContent tabName="service-map">
-        <EuiPanel hasBorder={true} paddingSize="none">
-          <div data-test-subj="serviceMap" style={{ height: heightWithPadding }} ref={ref}>
-            <Cytoscape
-              elements={data.elements}
-              height={heightWithPadding}
-              serviceName={serviceName}
-              style={getCytoscapeDivStyle(theme, status)}
-            >
-              <Controls />
-              {serviceName && <EmptyBanner />}
-              {status === FETCH_STATUS.LOADING && <LoadingSpinner />}
-              <Popover
-                focusedServiceName={serviceName}
-                environment={environment}
-                kuery={kuery}
-                start={start}
-                end={end}
-              />
-            </Cytoscape>
-          </div>
-        </EuiPanel>
-      </ServiceTabContent>
+      <EuiPanel hasBorder={true} paddingSize="none">
+        <div data-test-subj="serviceMap" style={{ height: heightWithPadding }} ref={ref}>
+          <Cytoscape
+            elements={data.elements}
+            height={heightWithPadding}
+            serviceName={serviceName}
+            style={getCytoscapeDivStyle(theme, status)}
+          >
+            <Controls />
+            {serviceName && <EmptyBanner />}
+            {status === FETCH_STATUS.LOADING && <LoadingSpinner />}
+            <Popover
+              focusedServiceName={serviceName}
+              environment={environment}
+              kuery={kuery}
+              start={start}
+              end={end}
+            />
+          </Cytoscape>
+        </div>
+      </EuiPanel>
     </>
   );
 }
