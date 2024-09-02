@@ -194,7 +194,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
 
   const getColor = useCallback(
     (
-      value,
+      value: number,
       paletteConfig: PaletteOutput<CustomPaletteState>,
       bands: number[],
       percentageMode?: boolean

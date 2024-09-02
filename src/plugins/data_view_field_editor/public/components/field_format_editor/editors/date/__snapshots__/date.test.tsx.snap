@@ -3,10 +3,6 @@
 exports[`DateFormatEditor should render normally 1`] = `
 <Fragment>
   <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
     helpText={
       <span>
         <EuiLink
@@ -38,7 +34,6 @@ exports[`DateFormatEditor should render normally 1`] = `
         }
       />
     }
-    labelType="label"
   >
     <EuiFieldText
       data-test-subj="dateEditorPattern"
