@@ -27,7 +27,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     require.resolve('../functional/config.base.js')
   );
 
-  // FIXME Just triggering a change for ci purposes
   return {
     ...kibanaCommonTestsConfig.getAll(),
 
