@@ -18,9 +18,9 @@ History and summary transforms will output their data to indices where history w
 
 **Entity definition example**:
 
-One can create a definition with a request to `POST kbn:/internal/entities/definition`, or through the [entity client](https://github.com/elastic/kibana/blob/main/x-pack/plugins/observability_solution/entity_manager/server/lib/entity_client.ts).
+One can create a definition with a `POST kbn:/internal/entities/definition` request, or through the [entity client](https://github.com/elastic/kibana/blob/main/x-pack/plugins/observability_solution/entity_manager/server/lib/entity_client.ts).
 
-Given the `services_from_logs` definition below, the history transform will create one entity document per service per minute (based on `@timestamp` field, granted at least one document exist for a given bucket in the source indices), with the `logRate` metric and `data_stream.type` metadata aggregated over one minute.
+Given the `services_from_logs` definition below, the history transform will create one entity document per service per minute (based on `@timestamp` field, granted at least one document exist for a given bucket in the source indices), with the `logRate`, `logErrorRatio` metrics and `data_stream.type`, `sourceIndex` metadata aggregated over one minute.
 
 Note that it is not necessary to add the `identifyFields` as metadata as these will be automatically collected in the output documents, and that it is possible to set `identityFields` as optional.
 
@@ -29,13 +29,27 @@ __service_from_logs definition__
 {
   "id": "services_from_logs",
   "name": "Extract services from logs",
-  "type": "service",
+  "type": "service", // the type of entities extracted
+  "filter": "", // kql filter
   "indexPatterns": ["logs-*"],
-  "identityFields": ["service.name", { "field": "service.environment", "optional": true }],
-  "displayNameTemplate": "{{service.name}}{{#service.environment}}:{{.}}{{/service.environment}}",
-  "metadata": [
-    "data_stream.type"
+  /** the field/combination of fields identifying an entity **/
+  "identityFields": [
+    "service.name", // == { "field": "service.name", "optional": false }
+    { "field": "service.environment", "optional": true }
   ],
+  "displayNameTemplate": "{{service.name}}{{#service.environment}}:{{.}}{{/service.environment}}", // [mustache](https://mustache.github.io/) template
+  /**
+   * the list of fields to collect and aggregate from the source documents
+   */
+  "metadata": [
+    {
+      "source": "_index", // the field name in the source indices documents
+      "destination": "sourceIndex", // the field name in the entity documents
+      "limit": 10 // see [terms aggregation size](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-terms-aggregation.html#search-aggregations-bucket-terms-aggregation-size)
+    },
+    "data_stream.type" // == { "source": "data_stream.type", "destination": "data_stream.type" }
+  ],
+  /** metrics to collect */
   "metrics": [
     {
       "name": "logRate",
@@ -43,17 +57,48 @@ __service_from_logs definition__
       "metrics": [
         {
           "aggregation": "doc_count",
-          "filter": "log.level: *",
+          "filter": "log.level: *", // kql filter
           "name": "A"
+        }
+      ]
+    },
+    {
+      "name": "logErrorRatio",
+      "equation": "A / B",
+      "metrics": [
+        {
+          "aggregation": "doc_count",
+          "filter": "log.level: error",
+          "name": "A"
+        },
+        {
+          "aggregation": "doc_count",
+          "filter": "log.level: *",
+          "name": "B"
         }
       ]
     }
   ],
   "history": {
-    "timestampField": "@timestamp",
-    "interval": "1m"
+    "timestampField": "@timestamp", // used for the lookback filter and date_histogram field
+    "interval": "1m", // [fixed_interval](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-datehistogram-aggregation.html#fixed_intervals) of the history date histogram
+    "settings": {
+      "syncField": "@timestamp", // see [sync.time.field](https://www.elastic.co/guide/en/elasticsearch/reference/current/put-transform.html)
+      "syncDelay": "1m", // see [sync.time.delay](https://www.elastic.co/guide/en/elasticsearch/reference/current/put-transform.html)
+      "frequency": "1m", // see [frequency](https://www.elastic.co/guide/en/elasticsearch/reference/current/put-transform.html)
+      "lookbackPeriod": "10m", // added as `timestampField >= now-{lookbackPeriod}` filter to the transform query
+      "backfillSyncDelay": "10m", // activates the backfill transform if set
+      "backfillLookbackPeriod": "20m",
+      "backfillFrequency": "5m",
+    }
   },
-  "version": "1.0.0"
+  "latest": {
+    "settings": {
+      "syncField": "event.ingested", // summary transform reads from history indices which contain `event.ingested`
+      "syncDelay": "1m",
+      "frequency": "1m"
+  },
+  "version": "1.0.0" // semver
 }
 ```
 
@@ -73,7 +118,8 @@ __services_from_logs history entity__
       "service.environment"
     ],
     "metrics": {
-      "logRate": 1
+      "logRate": 1,
+      "logErrorRatio": 0
     },
     "id": "xFF9jc/wxiHrgidS+PwIgQ==",
     "type": "service",
@@ -84,6 +130,9 @@ __services_from_logs history entity__
       "logs"
     ]
   },
+  "sourceIndex": [
+    ".ds-logs-apm.app.opbeans_swift-default-2024.09.02-000001"
+  ],
   "service": {
     "environment": "default",
     "name": "opbeans-swift"
@@ -108,7 +157,8 @@ __services_from_logs summary entity__
     ],
     "id": "xFF9jc/wxiHrgidS+PwIgQ==",
     "metrics": {
-      "logRate": 1
+      "logRate": 1,
+      "logErrorRatio": 0
     },
     "type": "service",
     "firstSeenTimestamp": "2024-08-30T11:51:00.000Z",
@@ -116,9 +166,12 @@ __services_from_logs summary entity__
   },
   "data_stream": {
     "type": [
-        "logs"
+      "logs"
     ]
   },
+  "sourceIndex": [
+    ".ds-logs-apm.app.opbeans_swift-default-2024.09.02-000001"
+  ],
   "service": {
     "environment": "default",
     "name": "opbeans-swift"
