@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { lastValueFrom } from 'rxjs';
 import { remove } from 'lodash';
 import type { EvaluationResult } from './types';
@@ -60,27 +61,27 @@ export function createInferenceEvaluationClient({
       const evaluation = await lastValueFrom(
         outputApi('evaluate', {
           connectorId,
-          system: `You are a helfpul, respected assistant for evaluating task
+          system: `You are a helpful, respected assistant for evaluating task
             inputs and outputs in the Elastic Platform.
 
             Your goal is to verify whether the output of a task
             succeeded, given the criteria.
-            
+
             For each criterion, calculate a score. Explain your score, by
             describing what the assistant did right, and describing and
             quoting what the assistant did wrong, where it could improve,
             and what the root cause was in case of a failure.`,
 
           input: `## Criteria
-            
+
             ${criteria
               .map((criterion, index) => {
                 return `${index}: ${criterion}`;
               })
               .join('\n')}
-            
+
             ## Input
-            
+
             ${input}`,
           schema: {
             type: 'object',

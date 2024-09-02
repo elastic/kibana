@@ -27,3 +27,5 @@ By default, the tool will look for a Kibana instance running locally (at `http:/
 #### Connector
 
 Use `--connectorId` to specify a generative AI connector to use. If none are given, it will prompt you to select a connector based on the ones that are available. If only a single supported connector is found, it will be used without prompting.
+
+Use `--evaluateWith` to specify the gen AI connector to use for evaluating the output of the task. By default, the same connector will be used.
