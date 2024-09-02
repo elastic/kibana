@@ -31,7 +31,7 @@ export const Flyout = ({
   const {
     services: { telemetry },
   } = useKibanaContextForPlugin();
-  const { metadata, loading: metadataLoading } = useMetadataStateContext();
+  const { metadata } = useMetadataStateContext();
 
   useEffectOnce(() => {
     telemetry.reportAssetDetailsFlyoutViewed({
@@ -61,7 +61,6 @@ export const Flyout = ({
             rightSideItems={rightSideItems}
             hasSystemIntegration={!!metadata?.hasSystemIntegration}
             assetType={asset.type}
-            metadataLoading={metadataLoading}
             loading={loading}
           />
         </EuiFlyoutHeader>
