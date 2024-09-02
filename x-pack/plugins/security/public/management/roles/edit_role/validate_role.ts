@@ -86,8 +86,7 @@ export class RoleValidator {
           }
         )
       );
-    }
-    if (!role.name.match(NAME_REGEX)) {
+    } else if (!role.name.match(NAME_REGEX)) {
       return invalid(
         i18n.translate(
           'xpack.security.management.editRole.validateRole.nameAllowedCharactersWarningMessage',

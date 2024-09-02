@@ -96,6 +96,26 @@ describe('validateRoleName', () => {
       expect(validator.validateRoleName(role)).toEqual({ isInvalid: false });
     });
   });
+
+  test('should not allow whitespace for serverless', () => {
+    const serverlessValidator = new RoleValidator({
+      shouldValidate: true,
+      buildFlavor: 'serverless',
+    });
+    const role = {
+      name: 'role name',
+      elasticsearch: {
+        cluster: [],
+        indices: [],
+        run_as: [],
+      },
+      kibana: [],
+    };
+    expect(serverlessValidator.validateRoleName(role)).toEqual({
+      isInvalid: true,
+      error: `Name must contain only letters, numbers, punctuation and printable symbols.`,
+    });
+  });
 });
 
 describe('validateIndexPrivileges', () => {
