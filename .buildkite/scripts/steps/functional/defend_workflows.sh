@@ -9,6 +9,8 @@ export KIBANA_INSTALL_DIR=${KIBANA_BUILD_LOCATION}
 
 echo "--- Defend Workflows Cypress tests"
 
+echo "EEEY TOMAATO!"
+
 cd x-pack/plugins/security_solution
 
 set +e
