@@ -34,11 +34,18 @@ import { chaining$, controlFetch$, controlGroupFetch$ } from './control_fetch';
 import { initControlsManager } from './init_controls_manager';
 import { openEditControlGroupFlyout } from './open_edit_control_group_flyout';
 import { deserializeControlGroup } from './serialization_utils';
-import { ControlGroupApi, ControlGroupRuntimeState, ControlGroupSerializedState } from './types';
+import {
+  ControlGroupApi,
+  ControlGroupRuntimeState,
+  ControlGroupSerializedState,
+  ControlPanelsState,
+} from './types';
 import { ControlGroup } from './components/control_group';
 import { initSelectionsManager } from './selections_manager';
 import { initializeControlGroupUnsavedChanges } from './control_group_unsaved_changes_api';
 import { openDataControlEditor } from '../controls/data_controls/open_data_control_editor';
+
+const DEFAULT_CHAINING_SYSTEM = 'HIERARCHICAL';
 
 export const getControlGroupEmbeddableFactory = (services: {
   core: CoreStart;
@@ -60,7 +67,6 @@ export const getControlGroupEmbeddableFactory = (services: {
       lastSavedRuntimeState
     ) => {
       const {
-        initialChildControlState,
         labelPosition: initialLabelPosition,
         chainingSystem,
         autoApplySelections,
@@ -68,19 +74,22 @@ export const getControlGroupEmbeddableFactory = (services: {
       } = initialRuntimeState;
 
       const autoApplySelections$ = new BehaviorSubject<boolean>(autoApplySelections);
-      const parentDataViewId = apiPublishesDataViews(parentApi)
-        ? parentApi.dataViews.value?.[0]?.id
-        : undefined;
+      const defaultDataViewId = await services.dataViews.getDefaultId();
+      const lastSavedControlsState$ = new BehaviorSubject<ControlPanelsState>(
+        lastSavedRuntimeState.initialChildControlState
+      );
       const controlsManager = initControlsManager(
-        initialChildControlState,
-        parentDataViewId ?? (await services.dataViews.getDefaultId())
+        initialRuntimeState.initialChildControlState,
+        lastSavedControlsState$
       );
       const selectionsManager = initSelectionsManager({
         ...controlsManager.api,
         autoApplySelections$,
       });
       const dataViews = new BehaviorSubject<DataView[] | undefined>(undefined);
-      const chainingSystem$ = new BehaviorSubject<ControlGroupChainingSystem>(chainingSystem);
+      const chainingSystem$ = new BehaviorSubject<ControlGroupChainingSystem>(
+        chainingSystem ?? DEFAULT_CHAINING_SYSTEM
+      );
       const ignoreParentSettings$ = new BehaviorSubject<ParentIgnoreSettings | undefined>(
         ignoreParentSettings
       );
@@ -104,6 +113,7 @@ export const getControlGroupEmbeddableFactory = (services: {
           chainingSystem: [
             chainingSystem$,
             (next: ControlGroupChainingSystem) => chainingSystem$.next(next),
+            (a, b) => (a ?? DEFAULT_CHAINING_SYSTEM) === (b ?? DEFAULT_CHAINING_SYSTEM),
           ],
           ignoreParentSettings: [
             ignoreParentSettings$,
@@ -113,6 +123,7 @@ export const getControlGroupEmbeddableFactory = (services: {
           labelPosition: [labelPosition$, (next: ControlStyle) => labelPosition$.next(next)],
         },
         controlsManager.snapshotControlsRuntimeState,
+        controlsManager.resetControlsUnsavedChanges,
         parentApi,
         lastSavedRuntimeState
       );
@@ -159,20 +170,28 @@ export const getControlGroupEmbeddableFactory = (services: {
           i18n.translate('controls.controlGroup.displayName', {
             defaultMessage: 'Controls',
           }),
-        openAddDataControlFlyout: (settings) => {
-          const { controlInputTransform } = settings ?? {
-            controlInputTransform: (state) => state,
-          };
+        openAddDataControlFlyout: (options) => {
+          const parentDataViewId = apiPublishesDataViews(parentApi)
+            ? parentApi.dataViews.value?.[0]?.id
+            : undefined;
+          const newControlState = controlsManager.getNewControlState();
           openDataControlEditor({
-            initialState: controlsManager.getNewControlState(),
+            initialState: {
+              ...newControlState,
+              dataViewId:
+                newControlState.dataViewId ?? parentDataViewId ?? defaultDataViewId ?? undefined,
+            },
             onSave: ({ type: controlType, state: initialState }) => {
               controlsManager.api.addNewPanel({
                 panelType: controlType,
-                initialState: controlInputTransform!(
-                  initialState as Partial<ControlGroupSerializedState>,
-                  controlType
-                ),
+                initialState: options?.controlInputTransform
+                  ? options.controlInputTransform(
+                      initialState as Partial<ControlGroupSerializedState>,
+                      controlType
+                    )
+                  : initialState,
               });
+              options?.onSave?.();
             },
             controlGroupApi: api,
             services,
@@ -207,6 +226,20 @@ export const getControlGroupEmbeddableFactory = (services: {
         dataViews.next(newDataViews)
       );
 
+      const saveNotificationSubscription = apiHasSaveNotification(parentApi)
+        ? parentApi.saveNotification$.subscribe(() => {
+            lastSavedControlsState$.next(controlsManager.snapshotControlsRuntimeState());
+
+            if (
+              typeof autoApplySelections$.value === 'boolean' &&
+              !autoApplySelections$.value &&
+              selectionsManager.hasUnappliedSelections$.value
+            ) {
+              selectionsManager.applySelections();
+            }
+          })
+        : undefined;
+
       /** Fetch the allowExpensiveQuries setting for the children to use if necessary */
       try {
         const { allowExpensiveQueries } = await services.core.http.get<{
@@ -235,6 +268,7 @@ export const getControlGroupEmbeddableFactory = (services: {
             return () => {
               selectionsManager.cleanup();
               childrenDataViewsSubscription.unsubscribe();
+              saveNotificationSubscription?.unsubscribe();
             };
           }, []);
 
