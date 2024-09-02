@@ -292,7 +292,8 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
   );
 
   const handleNewConversationDefaultChange = useCallback(
-    (e) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (e: any) => {
       const isChecked = e.target.checked;
       const defaultNewSystemPrompts = systemPromptSettings.filter(
         (p) => p.isNewConversationDefault

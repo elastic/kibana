@@ -24,7 +24,8 @@ export const DefaultConversationsColumn: React.FC<Props> = React.memo(
       : Math.min(maxConversationsToShow, defaultConversations.length);
     const itemsToDisplay = defaultConversations.slice(0, currentDisplaying - 1);
 
-    const toggleContent = useCallback((prev) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const toggleContent = useCallback((prev: any) => {
       setIsExpanded(!prev);
     }, []);
 

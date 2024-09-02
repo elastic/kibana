@@ -48,7 +48,8 @@ export const useSessionPagination = ({
   );
 
   const onTableChange = useCallback(
-    ({ page, sort }) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ({ page, sort }: any) => {
       setSessionStorageTableOptions({
         page,
         sort,

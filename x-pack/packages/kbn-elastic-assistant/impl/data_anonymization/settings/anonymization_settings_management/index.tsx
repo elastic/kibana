@@ -71,7 +71,8 @@ const AnonymizationSettingsManagementComponent: React.FC<Props> = ({ defaultPage
   }, [handleSave]);
 
   const handleAnonymizationFieldsBulkActions = useCallback(
-    (value) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (value: any) => {
       setHasPendingChanges(true);
       setAnonymizationFieldsBulkActions(value);
     },
@@ -79,7 +80,8 @@ const AnonymizationSettingsManagementComponent: React.FC<Props> = ({ defaultPage
   );
 
   const handleUpdatedAnonymizationData = useCallback(
-    (value) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (value: any) => {
       setHasPendingChanges(true);
       setUpdatedAnonymizationData(value);
     },

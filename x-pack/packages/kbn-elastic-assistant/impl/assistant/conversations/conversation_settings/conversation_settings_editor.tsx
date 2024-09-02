@@ -140,7 +140,8 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
       [selectedConversation]
     );
     const handleOnConnectorSelectionChange = useCallback(
-      (connector) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (connector: any) => {
         if (selectedConversation != null) {
           const config = getGenAiConfig(connector);
           const updatedConversation = {

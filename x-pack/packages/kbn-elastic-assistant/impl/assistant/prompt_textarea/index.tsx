@@ -28,7 +28,8 @@ export const PromptTextArea = forwardRef<HTMLTextAreaElement, Props>(
     );
 
     const onKeyDown = useCallback(
-      (event) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (event: any) => {
         // keyCode 13 is needed in case of IME input
         if (event.keyCode === 13 && !event.shiftKey) {
           event.preventDefault();

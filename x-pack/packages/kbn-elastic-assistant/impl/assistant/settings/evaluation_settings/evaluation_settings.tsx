@@ -57,7 +57,8 @@ export const EvaluationSettings: React.FC = React.memo(() => {
   // Run Name
   const [runName, setRunName] = useState();
   const onRunNameChange = useCallback(
-    (e) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (e: any) => {
       setRunName(e.target.value);
     },
     [setRunName]
@@ -65,19 +66,22 @@ export const EvaluationSettings: React.FC = React.memo(() => {
   /** Trace Options **/
   const [showTraceOptions, setShowTraceOptions] = useState(false);
   const onApmUrlChange = useCallback(
-    (e) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (e: any) => {
       setTraceOptions({ ...traceOptions, apmUrl: e.target.value });
     },
     [setTraceOptions, traceOptions]
   );
   const onLangSmithProjectChange = useCallback(
-    (e) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (e: any) => {
       setTraceOptions({ ...traceOptions, langSmithProject: e.target.value });
     },
     [setTraceOptions, traceOptions]
   );
   const onLangSmithApiKeyChange = useCallback(
-    (e) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (e: any) => {
       setTraceOptions({ ...traceOptions, langSmithApiKey: e.target.value });
     },
     [setTraceOptions, traceOptions]
