@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react-hooks/exhaustive-deps */
-
 import { i18n } from '@kbn/i18n';
 import { capitalize, isEmpty, isEqual, sortBy } from 'lodash';
 import { KueryNode } from '@kbn/es-query';
@@ -31,6 +29,7 @@ import {
   ALERTING_FEATURE_ID,
   RuleExecutionStatusErrorReasons,
   RuleLastRunOutcomeValues,
+  parseDuration,
 } from '@kbn/alerting-plugin/common';
 import {
   RuleCreationValidConsumer,
@@ -49,6 +48,7 @@ import {
   UpdateFiltersProps,
   BulkEditActions,
   UpdateRulesToBulkEditProps,
+  RuleTypeIndex,
 } from '../../../../types';
 import { BulkOperationPopover } from '../../common/components/bulk_operation_popover';
 import { RuleQuickEditButtonsWithApi as RuleQuickEditButtons } from '../../common/components/rule_quick_edit_buttons';
@@ -72,23 +72,20 @@ import { useKibana } from '../../../../common/lib/kibana';
 import './rules_list.scss';
 import { CreateRuleButton } from './create_rule_button';
 import { ManageLicenseModal } from './manage_license_modal';
-import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { RulesListClearRuleFilterBanner } from './rules_list_clear_rule_filter_banner';
-import { RulesListTable, convertRulesToTableItems } from './rules_list_table';
+import { RulesListTable } from './rules_list_table';
 import { RulesListDocLink } from './rules_list_doc_link';
 import { UpdateApiKeyModalConfirmation } from '../../../components/update_api_key_modal_confirmation';
 import { BulkSnoozeModalWithApi as BulkSnoozeModal } from './bulk_snooze_modal';
 import { BulkSnoozeScheduleModalWithApi as BulkSnoozeScheduleModal } from './bulk_snooze_schedule_modal';
 import { useBulkEditSelect } from '../../../hooks/use_bulk_edit_select';
 import { runRule } from '../../../lib/run_rule';
-
 import { useLoadActionTypesQuery } from '../../../hooks/use_load_action_types_query';
 import { useLoadRuleAggregationsQuery } from '../../../hooks/use_load_rule_aggregations_query';
 import { useLoadRuleTypesQuery } from '../../../hooks/use_load_rule_types_query';
 import { useLoadRulesQuery } from '../../../hooks/use_load_rules_query';
 import { useLoadConfigQuery } from '../../../hooks/use_load_config_query';
 import { ToastWithCircuitBreakerContent } from '../../../components/toast_with_circuit_breaker_content';
-
 import {
   getConfirmDeletionButtonText,
   getConfirmDeletionModalText,
@@ -199,9 +196,6 @@ export const RulesList = ({
     {}
   );
   const [showErrors, setShowErrors] = useState(false);
-
-  const isRuleStatusFilterEnabled = getIsExperimentalFeatureEnabled('ruleStatusFilter');
-
   const [percentileOptions, setPercentileOptions] =
     useState<EuiSelectableOption[]>(initialPercentileOptions);
 
@@ -327,10 +321,37 @@ export const RulesList = ({
     loadRuleAggregations,
     setLocalRefresh,
     onRefresh,
-    isRuleStatusFilterEnabled,
     hasAnyAuthorizedRuleType,
     ruleTypesState,
   ]);
+
+  const convertRulesToTableItems = useCallback(
+    ({
+      rules,
+      ruleTypeIndex,
+    }: {
+      rules: Rule[];
+      ruleTypeIndex: RuleTypeIndex;
+    }): RuleTableItem[] => {
+      const minimumDuration = config.minimumScheduleInterval
+        ? parseDuration(config.minimumScheduleInterval.value)
+        : 0;
+      return rules.map((rule, index: number) => {
+        return {
+          ...rule,
+          index,
+          actionsCount: rule.actions.length,
+          ruleType: ruleTypeIndex.get(rule.ruleTypeId)?.name ?? rule.ruleTypeId,
+          isEditable:
+            hasAllPrivilege(rule.consumer, ruleTypeIndex.get(rule.ruleTypeId)) &&
+            (canExecuteActions || (!canExecuteActions && !rule.actions.length)),
+          enabledInLicense: !!ruleTypeIndex.get(rule.ruleTypeId)?.enabledInLicense,
+          showIntervalWarning: parseDuration(rule.schedule.interval) < minimumDuration,
+        };
+      });
+    },
+    [canExecuteActions, config.minimumScheduleInterval]
+  );
 
   const tableItems = useMemo(() => {
     if (ruleTypesState.initialLoad) {
@@ -339,10 +360,8 @@ export const RulesList = ({
     return convertRulesToTableItems({
       rules: rulesState.data,
       ruleTypeIndex: ruleTypesState.data,
-      canExecuteActions,
-      config,
     });
-  }, [ruleTypesState, rulesState.data, canExecuteActions, config]);
+  }, [ruleTypesState.initialLoad, ruleTypesState.data, convertRulesToTableItems, rulesState.data]);
 
   const {
     isAllSelected,
@@ -389,12 +408,13 @@ export const RulesList = ({
       }
     },
     [
+      onClearSelection,
       onStatusFilterChange,
       onLastResponseFilterChange,
       onLastRunOutcomeFilterChange,
+      onRuleParamFilterChange,
       onSearchFilterChange,
       onTypeFilterChange,
-      onClearSelection,
     ]
   );
 
@@ -412,37 +432,38 @@ export const RulesList = ({
     if (statusFilter) {
       updateFilters({ filter: 'ruleStatuses', value: statusFilter });
     }
-  }, [statusFilter]);
+  }, [statusFilter, updateFilters]);
 
   useEffect(() => {
     if (lastResponseFilter) {
       updateFilters({ filter: 'ruleExecutionStatuses', value: lastResponseFilter });
     }
-  }, [lastResponseFilter]);
+  }, [lastResponseFilter, updateFilters]);
 
   useEffect(() => {
     if (lastRunOutcomeFilter) {
       updateFilters({ filter: 'ruleLastRunOutcomes', value: lastRunOutcomeFilter });
     }
-  }, [lastRunOutcomeFilter]);
+  }, [lastRunOutcomeFilter, updateFilters]);
 
   useEffect(() => {
     if (ruleParamFilter && !isEqual(ruleParamFilter, filters.ruleParams)) {
       updateFilters({ filter: 'ruleParams', value: ruleParamFilter });
     }
-  }, [ruleParamFilter]);
+  }, [filters.ruleParams, ruleParamFilter, updateFilters]);
 
   useEffect(() => {
     if (typeof searchFilter === 'string') {
       updateFilters({ filter: 'searchText', value: searchFilter });
     }
-  }, [searchFilter]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchFilter]); // HERE
 
   useEffect(() => {
     if (typeFilter) {
       updateFilters({ filter: 'types', value: typeFilter });
     }
-  }, [typeFilter]);
+  }, [typeFilter, updateFilters]);
 
   const buildErrorListItems = (_executionStatus: RuleExecutionStatus) => {
     const hasErrorMessage = _executionStatus.status === 'error';
@@ -508,7 +529,7 @@ export const RulesList = ({
       }
       return !prevValue;
     });
-  }, [showErrors, rulesState]);
+  }, [rulesState]);
 
   const getProducerFeatureName = (producer: string) => {
     return kibanaFeatures?.find((featureItem) => featureItem.id === producer)?.name;
@@ -541,14 +562,14 @@ export const RulesList = ({
     (rule: RuleTableItem, untrack: boolean) => {
       return bulkDisableRules({ http, ids: [rule.id], untrack });
     },
-    [bulkDisableRules]
+    [http]
   );
 
   const onEnableRule = useCallback(
     (rule: RuleTableItem) => {
       return bulkEnableRules({ http, ids: [rule.id] });
     },
-    [bulkEnableRules]
+    [http]
   );
 
   const onSnoozeRule = (rule: RuleTableItem, snoozeSchedule: SnoozeSchedule) => {
@@ -606,6 +627,7 @@ export const RulesList = ({
     setRulesToBulkEdit([]);
     setRulesToBulkEditFilter(undefined);
     setBulkEditAction(undefined);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const isRulesTableLoading =
@@ -618,31 +640,33 @@ export const RulesList = ({
     isDisablingRules ||
     isCloningRule;
 
-  const onCloneRule = async (ruleId: string) => {
-    setIsCloningRule(true);
-    try {
-      const RuleCloned = await cloneRule({ http, ruleId });
-      const refreshedRules = await loadRules();
-      const ruleItem = refreshedRules.data?.data.find((rule) => rule.id === RuleCloned.id);
-      if (ruleItem) {
-        onRuleEdit(
-          convertRulesToTableItems({
-            rules: [ruleItem],
-            ruleTypeIndex: ruleTypesState.data,
-            canExecuteActions,
-            config,
-          })[0]
+  const onCloneRule = useCallback(
+    async (ruleId: string) => {
+      setIsCloningRule(true);
+      try {
+        const RuleCloned = await cloneRule({ http, ruleId });
+        const refreshedRules = await loadRules();
+        const ruleItem = refreshedRules.data?.data.find((rule) => rule.id === RuleCloned.id);
+        if (ruleItem) {
+          onRuleEdit(
+            convertRulesToTableItems({
+              rules: [ruleItem],
+              ruleTypeIndex: ruleTypesState.data,
+            })[0]
+          );
+        }
+        setIsCloningRule(false);
+      } catch {
+        setIsCloningRule(false);
+        toasts.addDanger(
+          i18n.translate('xpack.triggersActionsUI.sections.rulesList.cloneFailed', {
+            defaultMessage: 'Unable to clone rule',
+          })
         );
       }
-    } catch {
-      setIsCloningRule(false);
-      toasts.addDanger(
-        i18n.translate('xpack.triggersActionsUI.sections.rulesList.cloneFailed', {
-          defaultMessage: 'Unable to clone rule',
-        })
-      );
-    }
-  };
+    },
+    [convertRulesToTableItems, http, loadRules, ruleTypesState.data, toasts]
+  );
 
   const openRuleTypeModal = useCallback(() => {
     setRuleTypeModalVisibility(true);
@@ -654,17 +678,18 @@ export const RulesList = ({
       <RulesSettingsLink />,
       <RulesListDocLink />,
     ]);
-  }, [authorizedToCreateAnyRules]);
+  }, [authorizedToCreateAnyRules, openRuleTypeModal, setHeaderActions]);
 
   useEffect(() => {
     return () => setHeaderActions?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const [isDeleteModalFlyoutVisible, setIsDeleteModalVisibility] = useState<boolean>(false);
 
   const { showToast } = useBulkOperationToast({ onSearchPopulate });
 
-  const onEnable = async () => {
+  const onEnable = useCallback(async () => {
     setIsEnablingRules(true);
 
     const { errors, total } = isAllSelected
@@ -692,20 +717,34 @@ export const RulesList = ({
 
     await refreshRules();
     onClearSelection();
-  };
+  }, [
+    getFilter,
+    http,
+    i18nStart,
+    isAllSelected,
+    onClearSelection,
+    refreshRules,
+    selectedIds,
+    showToast,
+    theme,
+    toasts,
+  ]);
 
-  const onDisable = async (untrack: boolean) => {
-    setIsDisablingRules(true);
+  const onDisable = useCallback(
+    async (untrack: boolean) => {
+      setIsDisablingRules(true);
 
-    const { errors, total } = isAllSelected
-      ? await bulkDisableRules({ http, filter: getFilter(), untrack })
-      : await bulkDisableRules({ http, ids: selectedIds, untrack });
+      const { errors, total } = isAllSelected
+        ? await bulkDisableRules({ http, filter: getFilter(), untrack })
+        : await bulkDisableRules({ http, ids: selectedIds, untrack });
 
-    setIsDisablingRules(false);
-    showToast({ action: 'DISABLE', errors, total });
-    await refreshRules();
-    onClearSelection();
-  };
+      setIsDisablingRules(false);
+      showToast({ action: 'DISABLE', errors, total });
+      await refreshRules();
+      onClearSelection();
+    },
+    [getFilter, http, isAllSelected, onClearSelection, refreshRules, selectedIds, showToast]
+  );
 
   const onDeleteCancel = () => {
     setIsDeleteModalVisibility(false);
@@ -947,8 +986,6 @@ export const RulesList = ({
                       selectedItems={convertRulesToTableItems({
                         rules: filterRulesById(rulesState.data, selectedIds),
                         ruleTypeIndex: ruleTypesState.data,
-                        canExecuteActions,
-                        config,
                       })}
                       isBulkEditing={isBulkEditing}
                       bulkEditAction={bulkEditAction}
