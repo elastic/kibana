@@ -305,6 +305,9 @@ export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {
       async expectEmbeddedConsoleToBeOpen() {
         await testSubjects.existOrFail('consoleEmbeddedBody');
       },
+      async expectEmbeddedConsoleHaveFullscreenToggle() {
+        await testSubjects.existOrFail('consoleToggleFullscreenButton');
+      },
       async expectEmbeddedConsoleToBeClosed() {
         await testSubjects.missingOrFail('consoleEmbeddedBody');
       },
