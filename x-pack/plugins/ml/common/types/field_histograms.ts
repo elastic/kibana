@@ -22,11 +22,11 @@ export interface NumericChartData {
 export const isNumericChartData = (arg: any): arg is NumericChartData => {
   return (
     typeof arg === 'object' &&
-    arg.hasOwnProperty('data') &&
-    arg.hasOwnProperty('id') &&
-    arg.hasOwnProperty('interval') &&
-    arg.hasOwnProperty('stats') &&
-    arg.hasOwnProperty('type') &&
+    Object.hasOwn(arg, 'data') &&
+    Object.hasOwn(arg, 'id') &&
+    Object.hasOwn(arg, 'interval') &&
+    Object.hasOwn(arg, 'stats') &&
+    Object.hasOwn(arg, 'type') &&
     arg.type === 'numeric'
   );
 };
@@ -47,10 +47,10 @@ export interface OrdinalChartData {
 export const isOrdinalChartData = (arg: any): arg is OrdinalChartData => {
   return (
     typeof arg === 'object' &&
-    arg.hasOwnProperty('data') &&
-    arg.hasOwnProperty('cardinality') &&
-    arg.hasOwnProperty('id') &&
-    arg.hasOwnProperty('type') &&
+    Object.hasOwn(arg, 'data') &&
+    Object.hasOwn(arg, 'cardinality') &&
+    Object.hasOwn(arg, 'id') &&
+    Object.hasOwn(arg, 'type') &&
     (arg.type === 'ordinal' || arg.type === 'boolean')
   );
 };
@@ -61,7 +61,7 @@ export interface UnsupportedChartData {
 }
 
 export const isUnsupportedChartData = (arg: any): arg is UnsupportedChartData => {
-  return typeof arg === 'object' && arg.hasOwnProperty('type') && arg.type === 'unsupported';
+  return typeof arg === 'object' && Object.hasOwn(arg, 'type') && arg.type === 'unsupported';
 };
 
 export type ChartDataItem = NumericDataItem | OrdinalDataItem;

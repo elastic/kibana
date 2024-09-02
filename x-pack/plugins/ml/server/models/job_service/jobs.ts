@@ -403,7 +403,7 @@ export function jobsProvider(
 
       // de-duplicate calendars
       for (const cal in calendarsByJobId) {
-        if (calendarsByJobId.hasOwnProperty(cal)) {
+        if (Object.hasOwn(calendarsByJobId, cal)) {
           calendarsByJobId[cal] = uniq(calendarsByJobId[cal]);
         }
       }
