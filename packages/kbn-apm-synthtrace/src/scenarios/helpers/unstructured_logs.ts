@@ -9,14 +9,7 @@ import { Faker, faker } from '@faker-js/faker';
 
 export type LogMessageGenerator = (f: Faker) => string[];
 
-/**
- * Ensures the type safety of the log message generators.
- */
-const ensureGeneratorType = <T extends Record<string, LogMessageGenerator>>(generators: T): T => {
-  return generators;
-};
-
-export const unstructuredLogMessageGenerators = ensureGeneratorType({
+export const unstructuredLogMessageGenerators = {
   httpAccess: (f: Faker) => [
     `${f.internet.ip()} - - [${f.date
       .past()
@@ -77,7 +70,21 @@ export const unstructuredLogMessageGenerators = ensureGeneratorType({
       ])}`,
     ];
   },
-});
+  userAuthentication: (f: Faker) => [
+    `User ${f.internet.userName()} ${f.helpers.arrayElement([
+      'logged in',
+      'logged out',
+      'failed to login',
+    ])}`,
+  ],
+  networkEvent: (f: Faker) => [
+    `Network ${f.helpers.arrayElement([
+      'connection',
+      'disconnection',
+      'data transfer',
+    ])} ${f.helpers.arrayElement(['from', 'to'])} ${f.internet.ip()}`,
+  ],
+} satisfies Record<string, LogMessageGenerator>;
 
 export const generateUnstructuredLogMessage =
   (generators: LogMessageGenerator[] = Object.values(unstructuredLogMessageGenerators)) =>

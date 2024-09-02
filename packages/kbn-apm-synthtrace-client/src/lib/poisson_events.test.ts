@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PoissonEvents } from './random_events';
+import { PoissonEvents } from './poisson_events';
 import { Serializable } from './serializable';
 
 describe('poisson events', () => {

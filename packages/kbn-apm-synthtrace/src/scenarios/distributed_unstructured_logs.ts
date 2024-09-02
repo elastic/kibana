@@ -11,18 +11,50 @@ import { z } from 'zod';
 import { Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';
 import {
+  LogMessageGenerator,
   generateUnstructuredLogMessage,
   unstructuredLogMessageGenerators,
 } from './helpers/unstructured_logs';
 
-const scenarioOptsSchema = z.object({
-  randomSeed: z.number().default(0),
-  distribution: z.enum(['uniform', 'poisson']).default('uniform'),
-  rate: z.number().default(1),
-  messageGroup: z
-    .enum(['healthyOperations', 'degradedOperations', 'errorOperations'])
-    .default('healthyOperations'),
-});
+const scenarioOptsSchema = z.intersection(
+  z.object({
+    randomSeed: z.number().default(0),
+    messageGroup: z
+      .enum([
+        'httpAccess',
+        'userAuthentication',
+        'networkEvent',
+        'dbOperations',
+        'taskOperations',
+        'degradedOperations',
+        'errorOperations',
+      ])
+      .default('dbOperations'),
+  }),
+  z
+    .discriminatedUnion('distribution', [
+      z.object({
+        distribution: z.literal('uniform'),
+        rate: z.number().default(1),
+      }),
+      z.object({
+        distribution: z.literal('poisson'),
+        rate: z.number().default(1),
+      }),
+      z.object({
+        distribution: z.literal('gaussian'),
+        mean: z.coerce.date().describe('Time of the peak of the gaussian distribution'),
+        width: z.number().default(5000).describe('Width of the gaussian distribution in ms'),
+        totalPoints: z
+          .number()
+          .default(100)
+          .describe('Total number of points in the gaussian distribution'),
+      }),
+    ])
+    .default({ distribution: 'uniform', rate: 1 })
+);
+
+type ScenarioOpts = z.output<typeof scenarioOptsSchema>;
 
 const scenario: Scenario<LogDocument> = async (runOptions) => {
   return {
@@ -33,9 +65,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
       faker.seed(scenarioOpts.randomSeed);
       faker.setDefaultRefDate(range.from.toISOString());
 
-      logger.debug(
-        `Generating ${scenarioOpts.distribution} logs with a rate of ${scenarioOpts.rate}...`
-      );
+      logger.debug(`Generating ${scenarioOpts.distribution} logs...`);
 
       // Logs Data logic
       const LOG_LEVELS = ['info', 'debug', 'error', 'warn', 'trace', 'fatal'];
@@ -106,7 +136,9 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
       const generatorFactory =
         scenarioOpts.distribution === 'uniform'
           ? range.interval('1s').rate(scenarioOpts.rate)
-          : range.poissonEvents(scenarioOpts.rate);
+          : scenarioOpts.distribution === 'poisson'
+          ? range.poissonEvents(scenarioOpts.rate)
+          : range.gaussianEvents(scenarioOpts.mean, scenarioOpts.width, scenarioOpts.totalPoints);
 
       const logs = generatorFactory.generator((timestamp) => {
         const entity = faker.helpers.arrayElement(hostEntities);
@@ -143,20 +175,21 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
 
 export default scenario;
 
-const healthyLogMessageGenerators = [
-  unstructuredLogMessageGenerators.dbOperation,
-  unstructuredLogMessageGenerators.taskStatusSuccess,
-];
-
-const degradedLogMessageGenerators = [unstructuredLogMessageGenerators.taskStatusFailure];
-
-const errorLogMessageGenerators = [
-  unstructuredLogMessageGenerators.error,
-  unstructuredLogMessageGenerators.restart,
-];
-
 const logMessageGenerators = {
-  healthyOperations: generateUnstructuredLogMessage(healthyLogMessageGenerators),
-  degradedOperations: generateUnstructuredLogMessage(degradedLogMessageGenerators),
-  errorOperations: generateUnstructuredLogMessage(errorLogMessageGenerators),
-};
+  httpAccess: generateUnstructuredLogMessage([unstructuredLogMessageGenerators.httpAccess]),
+  userAuthentication: generateUnstructuredLogMessage([
+    unstructuredLogMessageGenerators.userAuthentication,
+  ]),
+  networkEvent: generateUnstructuredLogMessage([unstructuredLogMessageGenerators.networkEvent]),
+  dbOperations: generateUnstructuredLogMessage([unstructuredLogMessageGenerators.dbOperation]),
+  taskOperations: generateUnstructuredLogMessage([
+    unstructuredLogMessageGenerators.taskStatusSuccess,
+  ]),
+  degradedOperations: generateUnstructuredLogMessage([
+    unstructuredLogMessageGenerators.taskStatusFailure,
+  ]),
+  errorOperations: generateUnstructuredLogMessage([
+    unstructuredLogMessageGenerators.error,
+    unstructuredLogMessageGenerators.restart,
+  ]),
+} satisfies Record<ScenarioOpts['messageGroup'], LogMessageGenerator>;

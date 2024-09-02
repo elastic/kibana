@@ -7,8 +7,9 @@
  */
 import datemath from '@kbn/datemath';
 import type { Moment } from 'moment';
+import { GaussianEvents } from './gaussian_events';
 import { Interval } from './interval';
-import { PoissonEvents } from './random_events';
+import { PoissonEvents } from './poisson_events';
 
 export class Timerange {
   constructor(public readonly from: Date, public readonly to: Date) {}
@@ -23,6 +24,10 @@ export class Timerange {
 
   poissonEvents(rate: number) {
     return new PoissonEvents(this.from, this.to, rate);
+  }
+
+  gaussianEvents(mean: Date, width: number, totalPoints: number) {
+    return new GaussianEvents(this.from, this.to, mean, width, totalPoints);
   }
 
   splitInto(segmentCount: number): Timerange[] {
