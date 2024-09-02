@@ -54,7 +54,7 @@ export default function ({ getService }: FtrProviderContext) {
   const testIndex = '.test_index';
   const testAlias = 'test_alias';
   const testIlmPolicy = 'test_policy';
-  describe('GET indices with data enrichers', async () => {
+  describe('GET indices with data enrichers', () => {
     before(async () => {
       await createIndex(testIndex);
       await createIlmPolicy('test_policy');

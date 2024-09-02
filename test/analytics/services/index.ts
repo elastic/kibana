@@ -7,17 +7,14 @@
  */
 
 import { GenericFtrProviderContext } from '@kbn/test';
-import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
-import { commonFunctionalUIServices } from '@kbn/ftr-common-functional-ui-services';
-
+import { services as commonServices } from '../../common/services';
 import { services as functionalServices } from '../../functional/services';
 import { pageObjects } from '../../functional/page_objects';
 
 import { KibanaEBTServerProvider, KibanaEBTUIProvider } from './kibana_ebt';
 
 export const services = {
-  ...commonFunctionalServices,
-  ...commonFunctionalUIServices,
+  ...commonServices,
   ...functionalServices,
   kibana_ebt_server: KibanaEBTServerProvider,
   kibana_ebt_ui: KibanaEBTUIProvider,

@@ -306,6 +306,36 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/investigation-shared",
+        "id": "def-common.UpdateInvestigationNoteParams",
+        "type": "Type",
+        "tags": [],
+        "label": "UpdateInvestigationNoteParams",
+        "description": [],
+        "signature": [
+          "{ content: string; }"
+        ],
+        "path": "packages/kbn-investigation-shared/src/rest_specs/update_note.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/investigation-shared",
+        "id": "def-common.UpdateInvestigationNoteResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "UpdateInvestigationNoteResponse",
+        "description": [],
+        "signature": [
+          "{ id: string; content: string; createdAt: number; createdBy: string; }"
+        ],
+        "path": "packages/kbn-investigation-shared/src/rest_specs/update_note.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "objects": [
@@ -1213,6 +1243,56 @@
           ">; }>"
         ],
         "path": "packages/kbn-investigation-shared/src/schema/investigation_item.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/investigation-shared",
+        "id": "def-common.updateInvestigationNoteParamsSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "updateInvestigationNoteParamsSchema",
+        "description": [],
+        "signature": [
+          "TypeC",
+          "<{ path: ",
+          "TypeC",
+          "<{ investigationId: ",
+          "StringC",
+          "; noteId: ",
+          "StringC",
+          "; }>; body: ",
+          "TypeC",
+          "<{ content: ",
+          "StringC",
+          "; }>; }>"
+        ],
+        "path": "packages/kbn-investigation-shared/src/rest_specs/update_note.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/investigation-shared",
+        "id": "def-common.updateInvestigationNoteResponseSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "updateInvestigationNoteResponseSchema",
+        "description": [],
+        "signature": [
+          "TypeC",
+          "<{ id: ",
+          "StringC",
+          "; content: ",
+          "StringC",
+          "; createdAt: ",
+          "NumberC",
+          "; createdBy: ",
+          "StringC",
+          "; }>"
+        ],
+        "path": "packages/kbn-investigation-shared/src/rest_specs/update_note.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
