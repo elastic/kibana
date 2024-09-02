@@ -7,8 +7,6 @@
 
 import { FtrConfigProviderContext, getKibanaCliLoggers } from '@kbn/test';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
-import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
-import { commonFunctionalUIServices } from '@kbn/ftr-common-functional-ui-services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaCommonTestsConfig = await readConfigFile(
@@ -20,11 +18,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...kibanaCommonTestsConfig.getAll(),
-
-    services: {
-      ...commonFunctionalServices,
-      ...commonFunctionalUIServices,
-    },
 
     esTestCluster: {
       ...xpackFunctionalTestsConfig.get('esTestCluster'),
