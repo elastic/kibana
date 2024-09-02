@@ -76,7 +76,7 @@ export default function (providerContext: FtrProviderContext) {
     after(async () => {
       await deleteSpace(testSpaceId);
     });
-    describe('creates correct tags when installing a package in non default space after installing in default space', async () => {
+    describe('creates correct tags when installing a package in non default space after installing in default space', () => {
       before(async () => {
         if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
         await installPackageInSpace('all_assets', pkgVersion, 'default');
@@ -104,7 +104,7 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('Handles presence of legacy tags', async () => {
+    describe('Handles presence of legacy tags', () => {
       before(async () => {
         if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
 
@@ -152,7 +152,7 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('Handles presence of tags inside integration package', async () => {
+    describe('Handles presence of tags inside integration package', () => {
       const testPackage = 'assets_with_tags';
       const testPackageVersion = '0.1.1';
       // tag corresponding to `OnlySomeAssets`
