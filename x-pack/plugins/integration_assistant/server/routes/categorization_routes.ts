@@ -10,9 +10,9 @@ import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import {
-    CATEGORIZATION_GRAPH_PATH,
-    CategorizationRequestBody,
-    CategorizationResponse,
+  CATEGORIZATION_GRAPH_PATH,
+  CategorizationRequestBody,
+  CategorizationResponse,
 } from '../../common';
 import { ROUTE_HANDLER_TIMEOUT } from '../constants';
 import { getCategorizationGraph } from '../graphs/categorization';

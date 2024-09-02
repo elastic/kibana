@@ -6,10 +6,10 @@
  */
 
 import {
-    ActionsClientBedrockChatModel,
-    ActionsClientChatOpenAI,
-    ActionsClientGeminiChatModel,
-    ActionsClientSimpleChatModel,
+  ActionsClientBedrockChatModel,
+  ActionsClientChatOpenAI,
+  ActionsClientGeminiChatModel,
+  ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server';
 export const getLLMType = (actionTypeId: string): string | undefined => {
   const llmTypeDictionary: Record<string, string> = {
