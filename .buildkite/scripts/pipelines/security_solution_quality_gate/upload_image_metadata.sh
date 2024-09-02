@@ -17,24 +17,34 @@ else
     KBN_IMAGE=${KIBANA_LATEST}
 fi
 
-docker pull ${KBN_IMAGE}
-build_date=$(docker inspect ${KBN_IMAGE} | jq -r '.[0].Config.Labels."org.label-schema.build-date"')
-vcs_ref=$(docker inspect ${KBN_IMAGE} | jq -r '.[0].Config.Labels."org.label-schema.vcs-ref"')
-vcs_url=$(docker inspect ${KBN_IMAGE} | jq -r '.[0].Config.Labels."org.label-schema.vcs-url"')
-version=$(docker inspect ${KBN_IMAGE} | jq -r '.[0].Config.Labels."org.label-schema.version"')   
+if [ -z "${ENVIRONMENT}" ] || [ "${ENVIRONMENT}" != "prod" ]; then
+  docker pull ${KBN_IMAGE}
+  build_date=$(docker inspect ${KBN_IMAGE} | jq -r '.[0].Config.Labels."org.label-schema.build-date"')
+  vcs_ref=$(docker inspect ${KBN_IMAGE} | jq -r '.[0].Config.Labels."org.label-schema.vcs-ref"')
+  vcs_url=$(docker inspect ${KBN_IMAGE} | jq -r '.[0].Config.Labels."org.label-schema.vcs-url"')
+  version=$(docker inspect ${KBN_IMAGE} | jq -r '.[0].Config.Labels."org.label-schema.version"')
 
-markdown_text="""
-#### $triggered_by
+  markdown_text="""
+  #### $triggered_by
 
-- Triggered from buildkite pipeline : $BUILDKITE_TRIGGERED_FROM_BUILD_PIPELINE_SLUG
-- Triggered from build              : $BUILDKITE_TRIGGERED_FROM_BUILD_NUMBER
+  - Triggered from buildkite pipeline : $BUILDKITE_TRIGGERED_FROM_BUILD_PIPELINE_SLUG
+  - Triggered from build              : $BUILDKITE_TRIGGERED_FROM_BUILD_NUMBER
 
----
+  ---
 
-#### Kibana Container Metadata
-- Build Date            : $build_date 
-- Github Commit Hash    : $vcs_ref 
-- Github Repo           : $vcs_url 
-- Version               : $version
-"""
-echo "${markdown_text//[*\\_]/\\&}" | buildkite-agent annotate --style "info"
+  #### Kibana Container Metadata
+  - Build Date            : $build_date
+  - Github Commit Hash    : $vcs_ref
+  - Github Repo           : $vcs_url
+  - Version               : $version
+  """
+  echo "${markdown_text//[*\\_]/\\&}" | buildkite-agent annotate --style "info"
+else
+  markdown_text="""
+  #### $triggered_by
+
+  - Triggered from buildkite pipeline : $BUILDKITE_TRIGGERED_FROM_BUILD_PIPELINE_SLUG
+  - Triggered from build              : $BUILDKITE_TRIGGERED_FROM_BUILD_NUMBER
+  """
+  echo "${markdown_text//[*\\_]/\\&}" | buildkite-agent annotate --style "info"
+fi

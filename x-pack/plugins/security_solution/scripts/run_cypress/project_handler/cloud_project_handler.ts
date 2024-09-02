@@ -31,9 +31,10 @@ export class CloudHandler extends ProjectHandler {
     productTypes?: ProductType[],
     commit?: string
   ): Promise<Project | undefined> {
+    const regionId = process.env.REGION ?? DEFAULT_REGION;
     const body: CreateProjectRequestBody = {
       name: projectName,
-      region_id: DEFAULT_REGION,
+      region_id: regionId,
     };
 
     if (productTypes) {

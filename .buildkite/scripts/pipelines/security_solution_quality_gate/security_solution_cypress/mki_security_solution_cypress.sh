@@ -23,4 +23,4 @@ set +e
 export BK_ANALYTICS_API_KEY=$(vault_get security-solution-quality-gate $BK_TEST_SUITE_KEY)
 
 echo "--- Triggering Kibana tests for $1"
-BK_ANALYTICS_API_KEY=$BK_ANALYTICS_API_KEY  yarn $1; status=$?; yarn junit:merge || :; exit $status
+yarn $1; status=$?; yarn junit:merge || :; exit $status

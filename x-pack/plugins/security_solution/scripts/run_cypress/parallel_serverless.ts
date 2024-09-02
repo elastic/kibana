@@ -32,6 +32,7 @@ import { getOnBeforeHook, parseTestFileConfig, retrieveIntegrations } from './ut
 import { prefixedOutputLogger } from '../endpoint/common/utils';
 
 import type { ProductType, Credentials, ProjectHandler } from './project_handler/project_handler';
+import { Environment } from './project_handler/project_handler';
 import { CloudHandler } from './project_handler/cloud_project_handler';
 import { ProxyHandler } from './project_handler/proxy_project_handler';
 
@@ -41,8 +42,8 @@ const DEFAULT_CONFIGURATION: Readonly<ProductType[]> = [
   { product_line: 'endpoint', product_tier: 'complete' },
 ] as const;
 
+const BASE_ENV_URL = `${process.env.CONSOLE_URL}`;
 const PROJECT_NAME_PREFIX = 'kibana-cypress-security-solution-ephemeral';
-const BASE_ENV_URL = `${process.env.QA_CONSOLE_URL}`;
 let log: ToolingLog = new ToolingLog({
   level: 'info',
   writeTo: process.stdout,
@@ -58,12 +59,12 @@ const PROVIDERS = Object.freeze({
   providerName: 'cloud-basic',
 });
 
-const getApiKeyFromElasticCloudJsonFile = (): string | undefined => {
+export const getApiKeyFromElasticCloudJsonFile = (environment: Environment): string | undefined => {
   const userHomeDir = os.homedir();
   try {
     const jsonString = fs.readFileSync(path.join(userHomeDir, '.elastic/cloud.json'), 'utf-8');
     const jsonData = JSON.parse(jsonString);
-    return jsonData.api_key.qa;
+    return environment === Environment.Production ? jsonData.api_key.prod : jsonData.api_key.qa;
   } catch (e) {
     log.info('API KEY could not be found in .elastic/cloud.json');
   }
@@ -244,27 +245,41 @@ const getProductTypes = (
   return productTypes;
 };
 
+/**
+ * Testing against MKI is only enabled for QA. So Environment (process.env.ENVIRONMENT) should only reflect to QA
+ * environment anyway. There is only one scenario that would potentially require production so far which is testing
+ * against the already deployed production image for multiple project regions (aws-eu-west "aws-us-west-2",
+ * "aws-eu-west-1" and "aws-ap-southeast-1". The Production testing is not applicable to Quality Gates or any scheduled
+ * pipeline execution or release process. It runs only on Demand, required by the Product Team. Also the functionality to
+ * execute some tests against a production project is now introduced for future use.
+ */
 export const cli = () => {
   run(
     async (context) => {
+      const environment = process.env.ENVIRONMENT
+        ? (process.env.ENVIRONMENT.toLowerCase() as Environment)
+        : Environment.QA;
+
+      const PROXY_URL = process.env.PROXY_URL;
+      const PROXY_SECRET = process.env.PROXY_SECRET;
+      const PROXY_CLIENT_ID = process.env.PROXY_CLIENT_ID;
+
+      const apiKeyFromCloudJsonFile = getApiKeyFromElasticCloudJsonFile(environment);
       // Checking if API key is either provided via env variable or in ~/.elastic.cloud.json
       // This works for either local executions or fallback in case proxy service is unavailable.
-      if (!process.env.CLOUD_QA_API_KEY && !getApiKeyFromElasticCloudJsonFile()) {
-        log.error('The API key for the environment needs to be provided with the env var API_KEY.');
+      if (!process.env.CLOUD_API_KEY && !apiKeyFromCloudJsonFile) {
+        log.error(
+          'The API key for the environment needs to be provided with the env var CLOUD_API_KEY.'
+        );
         log.error(
           'If running locally, ~/.elastic/cloud.json is attempted to be read which contains the API key.'
         );
         // eslint-disable-next-line no-process-exit
         return process.exit(1);
       }
-
-      const PROXY_URL = process.env.PROXY_URL ? process.env.PROXY_URL : undefined;
-      const PROXY_SECRET = process.env.PROXY_SECRET ? process.env.PROXY_SECRET : undefined;
-      const PROXY_CLIENT_ID = process.env.PROXY_CLIENT_ID ? process.env.PROXY_CLIENT_ID : undefined;
-
-      const API_KEY = process.env.CLOUD_QA_API_KEY
-        ? process.env.CLOUD_QA_API_KEY
-        : getApiKeyFromElasticCloudJsonFile();
+      const API_KEY = process.env.CLOUD_API_KEY
+        ? process.env.CLOUD_API_KEY
+        : apiKeyFromCloudJsonFile;
 
       log.info(`PROXY_URL is defined : ${PROXY_URL !== undefined}`);
       log.info(`PROXY_CLIENT_ID is defined : ${PROXY_CLIENT_ID !== undefined}`);
@@ -272,11 +287,20 @@ export const cli = () => {
       log.info(`API_KEY is defined : ${API_KEY !== undefined}`);
 
       let cloudHandler: ProjectHandler;
-      if (PROXY_URL && PROXY_CLIENT_ID && PROXY_SECRET && (await proxyHealthcheck(PROXY_URL))) {
+      const proxyServiceUse =
+        PROXY_URL &&
+        PROXY_CLIENT_ID &&
+        PROXY_SECRET &&
+        environment !== Environment.Production &&
+        (await proxyHealthcheck(PROXY_URL));
+
+      if (proxyServiceUse) {
         log.info('Proxy service is up and running, so the tests will run using the proxyHandler.');
         cloudHandler = new ProxyHandler(PROXY_URL, PROXY_CLIENT_ID, PROXY_SECRET);
       } else if (API_KEY) {
-        log.info('Proxy service is unavailable, so the tests will run using the cloudHandler.');
+        log.info(
+          'Proxy service is unavailable or execution environment is prod, so the tests will run using the cloudHandler.'
+        );
         cloudHandler = new CloudHandler(API_KEY, BASE_ENV_URL);
       } else {
         log.info('PROXY_URL or API KEY which are needed to create project could not be retrieved.');
@@ -517,7 +541,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
                 // Both CLOUD_SERVERLESS and IS_SERVERLESS are used by the cypress tests.
                 CLOUD_SERVERLESS: true,
                 IS_SERVERLESS: true,
-                CLOUD_QA_API_KEY: API_KEY,
+                CLOUD_API_KEY: API_KEY,
                 // TEST_CLOUD is used by SvlUserManagerProvider to define if testing against cloud.
                 TEST_CLOUD: 1,
               };

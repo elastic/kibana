@@ -14,6 +14,7 @@ import type {
   ProductType,
   ProjectHandler,
 } from '@kbn/security-solution-plugin/scripts/run_cypress/project_handler/project_handler';
+import { Environment } from '@kbn/security-solution-plugin/scripts/run_cypress/project_handler/project_handler';
 import { CloudHandler } from '@kbn/security-solution-plugin/scripts/run_cypress/project_handler/cloud_project_handler';
 import { ProxyHandler } from '@kbn/security-solution-plugin/scripts/run_cypress/project_handler/proxy_project_handler';
 import {
@@ -21,9 +22,10 @@ import {
   waitForEsStatusGreen,
   waitForKibanaAvailable,
   waitForEsAccess,
+  getApiKeyFromElasticCloudJsonFile,
 } from '@kbn/security-solution-plugin/scripts/run_cypress/parallel_serverless';
 
-const BASE_ENV_URL = `${process.env.QA_CONSOLE_URL}`;
+const BASE_ENV_URL = `${process.env.CONSOLE_URL}`;
 const PROJECT_NAME_PREFIX = 'kibana-ftr-api-integration-security-solution';
 
 // Function to execute a command and return a Promise with the status code
@@ -81,6 +83,14 @@ async function parseProductTypes(log: ToolingLog): Promise<ProductType[] | undef
   }
 }
 
+/**
+ * Testing against MKI is only enabled for QA. So Environment (process.env.ENVIRONMENT) should only reflect to QA
+ * environment anyway. There is only one scenario that would potentially require production so far which is testing
+ * against the already deployed production image for multiple project regions (aws-eu-west "aws-us-west-2",
+ * "aws-eu-west-1" and "aws-ap-southeast-1". The Production testing is not applicable to Quality Gates or any scheduled
+ * pipeline execution or release process. It runs only on Demand, required by the Product Team. Also the functionality to
+ * execute some tests against a production project is now introduced for future use.
+ */
 export const cli = () => {
   run(
     async (context) => {
@@ -88,11 +98,31 @@ export const cli = () => {
         level: 'info',
         writeTo: process.stdout,
       });
+      const environment = process.env.ENVIRONMENT
+        ? (process.env.ENVIRONMENT.toLowerCase() as Environment)
+        : Environment.QA;
 
       const PROXY_URL = process.env.PROXY_URL ? process.env.PROXY_URL : undefined;
       const PROXY_SECRET = process.env.PROXY_SECRET ? process.env.PROXY_SECRET : undefined;
       const PROXY_CLIENT_ID = process.env.PROXY_CLIENT_ID ? process.env.PROXY_CLIENT_ID : undefined;
-      const API_KEY = process.env.CLOUD_QA_API_KEY ? process.env.CLOUD_QA_API_KEY : undefined;
+
+      const apiKeyFromCloudJsonFile = getApiKeyFromElasticCloudJsonFile(environment);
+      // Checking if API key is either provided via env variable or in ~/.elastic.cloud.json
+      // This works for either local executions or fallback in case proxy service is unavailable.
+      if (!process.env.CLOUD_API_KEY && !apiKeyFromCloudJsonFile) {
+        log.error(
+          'The API key for the environment needs to be provided with the env var CLOUD_API_KEY.'
+        );
+        log.error(
+          'If running locally, ~/.elastic/cloud.json is attempted to be read which contains the API key.'
+        );
+
+        return process.exit(1);
+      }
+
+      const API_KEY = process.env.CLOUD_API_KEY
+        ? process.env.CLOUD_API_KEY
+        : apiKeyFromCloudJsonFile;
 
       log.info(`PROXY_URL is defined : ${PROXY_URL !== undefined}`);
       log.info(`PROXY_CLIENT_ID is defined : ${PROXY_CLIENT_ID !== undefined}`);
@@ -100,11 +130,20 @@ export const cli = () => {
       log.info(`API_KEY is defined : ${API_KEY !== undefined}`);
 
       let cloudHandler: ProjectHandler;
-      if (PROXY_URL && PROXY_CLIENT_ID && PROXY_SECRET && (await proxyHealthcheck(PROXY_URL))) {
+      const proxyServiceUse =
+        PROXY_URL &&
+        PROXY_CLIENT_ID &&
+        PROXY_SECRET &&
+        environment !== Environment.Production &&
+        (await proxyHealthcheck(PROXY_URL));
+
+      if (proxyServiceUse) {
         log.info('Proxy service is up and running, so the tests will run using the proxyHandler.');
         cloudHandler = new ProxyHandler(PROXY_URL, PROXY_CLIENT_ID, PROXY_SECRET);
       } else if (API_KEY) {
-        log.info('Proxy service is unavailable, so the tests will run using the cloudHandler.');
+        log.info(
+          'Proxy service is unavailable or execution environment is prod, so the tests will run using the cloudHandler.'
+        );
         cloudHandler = new CloudHandler(API_KEY, BASE_ENV_URL);
       } else {
         log.info('PROXY_URL or API KEY which are needed to create project could not be retrieved.');
