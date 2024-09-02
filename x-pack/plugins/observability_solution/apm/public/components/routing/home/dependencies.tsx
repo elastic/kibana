@@ -12,33 +12,15 @@ import * as t from 'io-ts';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 import qs from 'query-string';
-import { dynamic } from '@kbn/shared-ux-utility';
 import { page } from './page_template';
 import { offsetRt } from '../../../../common/comparison_rt';
-import { TransactionTab } from '../../app/transaction_details/waterfall_with_summary/transaction_tabs';
+import { DependencyDetailOperations } from '../../app/dependency_detail_operations';
+import { DependencyDetailOverview } from '../../app/dependency_detail_overview';
+import { DependencyDetailView } from '../../app/dependency_detail_view';
+import { DependenciesInventory } from '../../app/dependencies_inventory';
+import { DependencyOperationDetailView } from '../../app/dependency_operation_detail_view';
 import { useApmParams } from '../../../hooks/use_apm_params';
-
-const DependencyDetailOperations = dynamic(() =>
-  import('../../app/dependency_detail_operations').then((mod) => ({
-    default: mod.DependencyDetailOperations,
-  }))
-);
-const DependencyDetailOverview = dynamic(() =>
-  import('../../app/dependency_detail_overview').then((mod) => ({
-    default: mod.DependencyDetailOverview,
-  }))
-);
-const DependencyDetailView = dynamic(() =>
-  import('../../app/dependency_detail_view').then((mod) => ({ default: mod.DependencyDetailView }))
-);
-const DependenciesInventory = dynamic(() =>
-  import('../../app/dependencies_inventory').then((mod) => ({ default: mod.DependenciesInventory }))
-);
-const DependencyOperationDetailView = dynamic(() =>
-  import('../../app/dependency_operation_detail_view').then((mod) => ({
-    default: mod.DependencyOperationDetailView,
-  }))
-);
+import { TransactionTab } from '../../app/transaction_details/waterfall_with_summary/transaction_tabs';
 
 export const DependenciesInventoryTitle = i18n.translate(
   'xpack.apm.views.dependenciesInventory.title',
