@@ -23,7 +23,12 @@ import { buildEsQuery, type Filter } from '@kbn/es-query';
 import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import { getEsQueryConfig } from '../../es_query';
 import { getTime } from '../../query';
-import { ESQL_ASYNC_SEARCH_STRATEGY, ESQL_TABLE_TYPE, KibanaContext } from '..';
+import {
+  ESQL_ASYNC_SEARCH_STRATEGY,
+  ESQL_TABLE_TYPE,
+  isRunningResponse,
+  type KibanaContext,
+} from '..';
 import { UiSettingsCommon } from '../..';
 
 declare global {
@@ -251,7 +256,9 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
               return throwError(() => error);
             }),
             tap({
-              next({ rawResponse, requestParams }) {
+              next(response) {
+                if (isRunningResponse(response)) return;
+                const { rawResponse, requestParams } = response;
                 logInspectorRequest()
                   .stats({
                     hits: {

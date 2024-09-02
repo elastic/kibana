@@ -9,7 +9,6 @@ import type { Observable } from 'rxjs';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import type { HttpStart } from '@kbn/core/public';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 
 import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
@@ -39,9 +38,8 @@ import type {
 import type { DatafeedValidationResponse } from '../../../../common/types/job_validation';
 
 import type { FieldHistogramRequestConfig } from '../../datavisualizer/index_based/common/request';
-import { getHttp } from '../../util/dependency_cache';
 
-import { HttpService } from '../http_service';
+import type { HttpService } from '../http_service';
 
 import { jsonSchemaProvider } from './json_schema';
 import { annotationsApiProvider } from './annotations';
@@ -100,26 +98,6 @@ export interface GetModelSnapshotsResponse {
   count: number;
   model_snapshots: ModelSnapshot[];
 }
-
-/**
- * Temp solution to allow {@link ml} service to use http from
- * the dependency_cache.
- */
-const proxyHttpStart = new Proxy<HttpStart>({} as unknown as HttpStart, {
-  get(obj, prop: keyof HttpStart) {
-    try {
-      return getHttp()[prop];
-    } catch (e) {
-      if (prop === 'getLoadingCount$') {
-        return () => {};
-      }
-      // eslint-disable-next-line no-console
-      console.error(e);
-    }
-  },
-});
-
-export const ml = mlApiServicesProvider(new HttpService(proxyHttpStart));
 
 export function mlApiServicesProvider(httpService: HttpService) {
   return {
