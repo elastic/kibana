@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { LogCategories } from './src/components/log_categories';
+export * from './categorize_logs_service';
