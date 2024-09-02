@@ -25,12 +25,13 @@ import {
 } from '@kbn/rule-data-utils';
 
 import {
-  InlineScript,
+  AggregateName,
+  AggregationsAggregate,
   MappingRuntimeFields,
   QueryDslQueryContainer,
   SortCombinations,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { RuleTypeParams, AlertingServerStart } from '@kbn/alerting-plugin/server';
+} from '@elastic/elasticsearch/lib/api/types';
+import type { RuleTypeParams, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import {
   ReadOperations,
   AlertingAuthorization,
@@ -277,7 +278,7 @@ export class AlertsClient {
   /**
    * Searches alerts by id or query and audits the results
    */
-  private async searchAlerts({
+  private async searchAlerts<TAggregations = Record<AggregateName, AggregationsAggregate>>({
     id,
     query,
     aggs,
@@ -333,7 +334,7 @@ export class AlertsClient {
         };
       }
 
-      const result = await this.esClient.search<ParsedTechnicalFields>({
+      const result = await this.esClient.search<ParsedTechnicalFields, TAggregations>({
         index: index ?? '.alerts-*',
         ignore_unavailable: true,
         body: queryBody,
@@ -820,18 +821,16 @@ export class AlertsClient {
         const result = await this.esClient.updateByQuery({
           index,
           conflicts: 'proceed',
-          body: {
-            script: {
-              source: `if (ctx._source['${ALERT_WORKFLOW_STATUS}'] != null) {
+          script: {
+            source: `if (ctx._source['${ALERT_WORKFLOW_STATUS}'] != null) {
                 ctx._source['${ALERT_WORKFLOW_STATUS}'] = '${status}'
               }
               if (ctx._source.signal != null && ctx._source.signal.status != null) {
                 ctx._source.signal.status = '${status}'
               }`,
-              lang: 'painless',
-            } as InlineScript,
-            query: fetchAndAuditResponse.authorizedQuery as Omit<QueryDslQueryContainer, 'script'>,
+            lang: 'painless',
           },
+          query: fetchAndAuditResponse.authorizedQuery as Omit<QueryDslQueryContainer, 'script'>,
           ignore_unavailable: true,
         });
         return result;
@@ -959,14 +958,12 @@ export class AlertsClient {
       await this.esClient.updateByQuery({
         index,
         conflicts: 'proceed',
-        body: {
-          script: {
-            source: painlessScript,
-            lang: 'painless',
-            params: { caseIds },
-          } as InlineScript,
-          query: esQuery,
+        script: {
+          source: painlessScript,
+          lang: 'painless',
+          params: { caseIds },
         },
+        query: esQuery,
         ignore_unavailable: true,
       });
     } catch (err) {
@@ -975,7 +972,10 @@ export class AlertsClient {
     }
   }
 
-  public async find<Params extends RuleTypeParams = never>({
+  public async find<
+    Params extends RuleTypeParams = never,
+    TAggregations = Record<AggregateName, AggregationsAggregate>
+  >({
     aggs,
     ruleTypeIds,
     index,
@@ -1007,7 +1007,8 @@ export class AlertsClient {
         }
       }
 
-      const alertsSearchResponse = await this.searchAlerts({
+      const alertsSearchResponse = await this.searchAlerts<TAggregations>({
+        ruleTypeIds,
         query,
         aggs,
         _source,
@@ -1036,7 +1037,7 @@ export class AlertsClient {
   /**
    * Performs a `find` query to extract aggregations on alert groups
    */
-  public getGroupAggregations({
+  public async getGroupAggregations({
     ruleTypeIds,
     groupByField,
     aggregations,
@@ -1086,7 +1087,10 @@ export class AlertsClient {
         `The number of documents is too high. Paginating through more than ${MAX_PAGINATED_ALERTS} documents is not possible.`
       );
     }
-    return this.find({
+    const searchResult = await this.find<
+      never,
+      { groupByFields: estypes.AggregationsMultiBucketAggregateBase<{ key: string }> }
+    >({
       ruleTypeIds,
       aggs: {
         groupByFields: {
@@ -1120,7 +1124,7 @@ export class AlertsClient {
           script: {
             source:
               // When size()==0, emits a uniqueValue as the value to represent this group  else join by uniqueValue.
-              "if (doc[params['selectedGroup']].size()==0) { emit(params['uniqueValue']) }" +
+              "if (!doc.containsKey(params['selectedGroup']) || doc[params['selectedGroup']].size()==0) { emit(params['uniqueValue']) }" +
               // Else, join the values with uniqueValue. We cannot simply emit the value like doc[params['selectedGroup']].value,
               // the runtime field will only return the first value in an array.
               // The docs advise that if the field has multiple values, "Scripts can call the emit method multiple times to emit multiple values."
@@ -1139,6 +1143,20 @@ export class AlertsClient {
       size: 0,
       _source: false,
     });
+    // Replace artificial uuid values with '--' in null-value buckets and mark them with `isNullGroup = true`
+    const groupsAggregation = searchResult.aggregations?.groupByFields;
+    if (groupsAggregation) {
+      const buckets = Array.isArray(groupsAggregation?.buckets)
+        ? groupsAggregation.buckets
+        : Object.values(groupsAggregation?.buckets ?? {});
+      buckets.forEach((bucket) => {
+        if (bucket.key === uniqueValue) {
+          bucket.key = '--';
+          (bucket as { isNullGroup?: boolean }).isNullGroup = true;
+        }
+      });
+    }
+    return searchResult;
   }
 
   public async getAuthorizedAlertsIndices(ruleTypeIds?: string[]): Promise<string[] | undefined> {

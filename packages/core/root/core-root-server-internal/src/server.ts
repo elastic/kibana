@@ -450,6 +450,8 @@ export class Server {
       userProfile: userProfileStart,
     };
 
+    this.coreApp.start(this.coreStart);
+
     await this.plugins.start(this.coreStart);
 
     await this.http.start();
@@ -469,6 +471,7 @@ export class Server {
   public async stop() {
     this.log.debug('stopping server');
 
+    this.coreApp.stop();
     await this.analytics.stop();
     await this.http.stop(); // HTTP server has to stop before savedObjects and ES clients are closed to be able to gracefully attempt to resolve any pending requests
     await this.plugins.stop();

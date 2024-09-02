@@ -6,21 +6,23 @@
  * Side Public License, v 1.
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import type { Query, TimeRange } from '@kbn/es-query';
 import type { SuggestionsAbstraction } from '@kbn/unified-search-plugin/public/typeahead/suggestions_component';
 import { AlertConsumers, isSiemRuleType } from '@kbn/rule-data-utils';
 import { NO_INDEX_PATTERNS } from './constants';
 import { SEARCH_BAR_PLACEHOLDER } from './translations';
 import type { AlertsSearchBarProps, QueryLanguageType } from './types';
-import { useLoadRuleTypesQuery, useAlertDataView, useRuleAADFields } from '../common/hooks';
+import { useLoadRuleTypesQuery, useAlertsDataView, useRuleAADFields } from '../common/hooks';
 
 const SA_ALERTS = { type: 'alerts', fields: {} } as SuggestionsAbstraction;
+
+const EMPTY_RULE_TYPE_IDS: string[] = [];
 
 export const AlertsSearchBar = ({
   appName,
   disableQueryLanguageSwitcher = false,
-  ruleTypeIds,
+  ruleTypeIds = EMPTY_RULE_TYPE_IDS,
   ruleTypeId,
   query,
   filters,
@@ -40,7 +42,7 @@ export const AlertsSearchBar = ({
   dataViewsService,
 }: AlertsSearchBarProps) => {
   const [queryLanguage, setQueryLanguage] = useState<QueryLanguageType>('kuery');
-  const { dataViews, loading } = useAlertDataView({
+  const { dataView } = useAlertsDataView({
     ruleTypeIds,
     http,
     toasts,
@@ -52,8 +54,15 @@ export const AlertsSearchBar = ({
     toasts,
   });
 
-  const indexPatterns =
-    ruleTypeId && aadFields?.length ? [{ title: ruleTypeId, fields: aadFields }] : dataViews;
+  const indexPatterns = useMemo(() => {
+    if (ruleTypeId && aadFields?.length) {
+      return [{ title: ruleTypeId, fields: aadFields }];
+    }
+    if (dataView) {
+      return [dataView];
+    }
+    return null;
+  }, [aadFields, dataView, ruleTypeId]);
 
   const ruleType = useLoadRuleTypesQuery({
     filteredRuleTypes: ruleTypeId !== undefined ? [ruleTypeId] : [],
@@ -99,7 +108,7 @@ export const AlertsSearchBar = ({
     appName,
     disableQueryLanguageSwitcher,
     // @ts-expect-error - DataView fields prop and SearchBar indexPatterns props are overly broad
-    indexPatterns: loading || fieldsLoading ? NO_INDEX_PATTERNS : indexPatterns,
+    indexPatterns: !indexPatterns || fieldsLoading ? NO_INDEX_PATTERNS : indexPatterns,
     placeholder,
     query: { query: query ?? '', language: queryLanguage },
     filters,

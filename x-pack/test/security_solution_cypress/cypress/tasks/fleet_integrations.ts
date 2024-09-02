@@ -6,6 +6,7 @@
  */
 
 import {
+  BOOTSTRAP_PREBUILT_RULES_URL,
   GET_ALL_INTEGRATIONS_URL,
   Integration,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
@@ -21,10 +22,10 @@ export const mockFleetIntegrations = (integrations: Integration[] = []) => {
   }).as('integrations');
 };
 
-export const waitForFleetSetup = () => {
-  cy.intercept('POST', '/api/fleet/epm/packages/_bulk?prerelease=true').as('fleetSetup');
+export const waitForRulesBootstrap = () => {
+  cy.intercept('POST', BOOTSTRAP_PREBUILT_RULES_URL).as('rulesBootstrap');
   cy.clearLocalStorage();
   login();
   visitGetStartedPage();
-  cy.wait('@fleetSetup');
+  cy.wait('@rulesBootstrap');
 };

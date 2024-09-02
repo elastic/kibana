@@ -72,7 +72,7 @@ export class CrowdstrikeAgentStatusClient extends AgentStatusClient {
               filter: [
                 {
                   terms: {
-                    'crowdstrike.host.id': agentIds,
+                    'device.id': agentIds,
                   },
                 },
               ],
@@ -91,8 +91,7 @@ export class CrowdstrikeAgentStatusClient extends AgentStatusClient {
             size: DEFAULT_MAX_TABLE_QUERY_SIZE,
             query,
             collapse: {
-              // TODO: check if we should use crowdstrike.cid instead
-              field: 'crowdstrike.host.id',
+              field: 'device.id',
               inner_hits: {
                 name: 'most_recent',
                 size: 1,
@@ -123,10 +122,8 @@ export class CrowdstrikeAgentStatusClient extends AgentStatusClient {
       const mostRecentAgentInfosByAgentId = searchResponse?.hits?.hits?.reduce<
         Record<string, RawCrowdstrikeInfo>
       >((acc, hit) => {
-        // TODO TC: check if we should use crowdstrike.cid instead
-        if (hit.fields?.['crowdstrike.host.id'][0]) {
-          acc[hit.fields?.['crowdstrike.host.id'][0]] =
-            hit.inner_hits?.most_recent.hits.hits[0]._source;
+        if (hit.fields?.['device.id'][0]) {
+          acc[hit.fields?.['device.id'][0]] = hit.inner_hits?.most_recent.hits.hits[0]._source;
         }
 
         return acc;
@@ -135,7 +132,7 @@ export class CrowdstrikeAgentStatusClient extends AgentStatusClient {
       const agentStatuses = await this.getAgentStatusFromConnectorAction(agentIds);
 
       return agentIds.reduce<AgentStatusRecords>((acc, agentId) => {
-        const agentInfo = mostRecentAgentInfosByAgentId[agentId]?.crowdstrike;
+        const { device, crowdstrike } = mostRecentAgentInfosByAgentId[agentId];
 
         const agentStatus = agentStatuses[agentId];
         const pendingActions = allPendingActions.find(
@@ -145,12 +142,11 @@ export class CrowdstrikeAgentStatusClient extends AgentStatusClient {
         acc[agentId] = {
           agentId,
           agentType: this.agentType,
-          // TODO: check if we should use crowdstrike.cid instead
-          found: agentInfo?.host.id === agentId,
+          found: device?.id === agentId,
           isolated:
-            agentInfo?.host.status === CROWDSTRIKE_NETWORK_STATUS.CONTAINED ||
-            agentInfo?.host.status === CROWDSTRIKE_NETWORK_STATUS.LIFT_CONTAINMENT_PENDING,
-          lastSeen: agentInfo?.host.last_seen || '',
+            crowdstrike?.host.status === CROWDSTRIKE_NETWORK_STATUS.CONTAINED ||
+            crowdstrike?.host.status === CROWDSTRIKE_NETWORK_STATUS.LIFT_CONTAINMENT_PENDING,
+          lastSeen: crowdstrike?.host.last_seen || agentStatus?.last_seen || '',
           status:
             agentStatus?.state === CROWDSTRIKE_STATUS_RESPONSE.ONLINE
               ? HostStatus.HEALTHY
@@ -162,6 +158,7 @@ export class CrowdstrikeAgentStatusClient extends AgentStatusClient {
           pendingActions: pendingActions?.pending_actions ?? {},
         };
 
+        // console.log({ acc });
         return acc;
       }, {});
     } catch (err) {

@@ -13,12 +13,14 @@ import { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
 import { TlsTranslations } from '../../../../../common/rules/synthetics/translations';
 import { CERTIFICATES_ROUTE } from '../../../../../common/constants/ui';
 import type { TLSParams } from '../../../../../common/runtime_types/alerts/tls';
-import { AlertTypeInitializer } from '.';
+
+import type { AlertTypeInitializer } from './types';
 
 let validateFunc: (ruleParams: any) => ValidationResult;
 
 const { defaultActionMessage, defaultRecoveryMessage, description } = TlsTranslations;
 const TLSAlert = React.lazy(() => import('./lazy_wrapper/tls_alert'));
+
 export const initTlsAlertType: AlertTypeInitializer = ({
   core,
   plugins,

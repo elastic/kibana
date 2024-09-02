@@ -12,6 +12,8 @@ import {
   LogDataViewReference,
   LogIndexNameReference,
   logIndexNameReferenceRT,
+  LogSourcesKibanaAdvancedSettingReference,
+  logSourcesKibanaAdvancedSettingRT,
 } from '@kbn/logs-shared-plugin/common';
 import { useKibanaIndexPatternService } from '../../../hooks/use_kibana_index_patterns';
 import { useFormElement } from './form_elements';
@@ -22,7 +24,11 @@ import {
   validateStringNoSpaces,
 } from './validation_errors';
 
-export type LogIndicesFormState = LogIndexNameReference | LogDataViewReference | undefined;
+export type LogIndicesFormState =
+  | LogIndexNameReference
+  | LogDataViewReference
+  | LogSourcesKibanaAdvancedSettingReference
+  | undefined;
 
 export const useLogIndicesFormElement = (initialValue: LogIndicesFormState) => {
   const indexPatternService = useKibanaIndexPatternService();
@@ -35,6 +41,8 @@ export const useLogIndicesFormElement = (initialValue: LogIndicesFormState) => {
       () => async (logIndices) => {
         if (logIndices == null) {
           return validateStringNotEmpty('log data view', '');
+        } else if (logSourcesKibanaAdvancedSettingRT.is(logIndices)) {
+          return [];
         } else if (logIndexNameReferenceRT.is(logIndices)) {
           return [
             ...validateStringNotEmpty('log indices', logIndices.indexName),

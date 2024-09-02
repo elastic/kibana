@@ -8,25 +8,18 @@
 
 import moment from 'moment';
 import { USAGE_COUNTERS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import type {
   SavedObject,
   SavedObjectsRepository,
   SavedObjectsServiceSetup,
 } from '@kbn/core/server';
-import { UsageCounters } from '../../common';
+import type { UsageCounters } from '../../common';
 
 /**
  * The attributes stored in the UsageCounters' SavedObjects
  */
-export interface UsageCountersSavedObjectAttributes {
-  /** The domain ID registered in the Usage Counter **/
-  domainId: string;
-  /** The counter name **/
-  counterName: string;
-  /** The counter type **/
-  counterType: string;
-  /** The source of the event that is being counted: 'server' | 'ui' **/
-  source: string;
+export interface UsageCountersSavedObjectAttributes extends UsageCounters.v1.AbstractCounter {
   /** Number of times the event has occurred **/
   count: number;
 }
@@ -77,17 +70,7 @@ export const registerUsageCountersSavedObjectTypes = (
  * Parameters to the `serializeCounterKey` method
  * @internal used in kibana_usage_collectors
  */
-export interface SerializeCounterKeyParams {
-  /** The domain ID registered in the UsageCounter **/
-  domainId: string;
-  /** The counter name **/
-  counterName: string;
-  /** The counter type **/
-  counterType: string;
-  /** The namespace of this counter */
-  namespace?: string;
-  /** The source of the event we are counting */
-  source: string;
+export interface SerializeCounterKeyParams extends UsageCounters.v1.AbstractCounter {
   /** The date to which serialize the key (defaults to 'now') **/
   date?: moment.MomentInput;
 }
@@ -97,19 +80,17 @@ export interface SerializeCounterKeyParams {
  * @internal used in kibana_usage_collectors
  * @param opts {@link SerializeCounterKeyParams}
  */
-export const serializeCounterKey = ({
-  domainId,
-  counterName,
-  counterType,
-  namespace,
-  source,
-  date,
-}: SerializeCounterKeyParams) => {
+export const serializeCounterKey = (params: SerializeCounterKeyParams) => {
+  const { domainId, counterName, counterType, namespace, source, date } = params;
   const dayDate = moment(date).format('YYYYMMDD');
-  // e.g. 'dashboards:viewed:total:ui:20240628'          // namespace-agnostic counters
-  // e.g. 'dashboards:viewed:total:ui:20240628:default'  // namespaced counters
-  const namespaceSuffix = namespace ? `:${namespace}` : '';
-  return `${domainId}:${counterName}:${counterType}:${source}:${dayDate}${namespaceSuffix}`;
+
+  if (namespace && namespace !== DEFAULT_NAMESPACE_STRING) {
+    // e.g. 'someNamespace:dashboards:viewed:total:ui:20240628'
+    return `${namespace}:${domainId}:${counterName}:${counterType}:${source}:${dayDate}`;
+  } else {
+    // e.g. 'dashboards:viewed:total:ui:20240628'
+    return `${domainId}:${counterName}:${counterType}:${source}:${dayDate}`;
+  }
 };
 
 export interface StoreCounterParams {

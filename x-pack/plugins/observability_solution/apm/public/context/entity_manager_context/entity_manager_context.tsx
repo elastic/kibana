@@ -61,7 +61,7 @@ export function EntityManagerEnablementContextProvider({
 
   const isEntityCentricExperienceSettingEnabled = core.uiSettings.get<boolean>(
     entityCentricExperience,
-    false
+    true
   );
 
   const isEntityCentricExperienceViewEnabled =

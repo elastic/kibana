@@ -72,7 +72,8 @@
     "@kbn/alerting-state-types",
     "@kbn/core-security-server",
     "@kbn/security-plugin-types-server",
-    "@kbn/core-http-server"
+    "@kbn/core-http-server",
+    "@kbn/zod"
   ],
   "exclude": [
     "target/**/*"

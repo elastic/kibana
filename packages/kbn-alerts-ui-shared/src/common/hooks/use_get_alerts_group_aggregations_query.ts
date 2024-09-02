@@ -44,6 +44,8 @@ export interface UseGetAlertsGroupAggregationsQueryProps {
  *
  * The provided `aggregations` are applied within `groupByFields`. Here the `groupByField` runtime
  * field can be used to perform grouping-based aggregations.
+ * `groupByField` buckets computed over a field with a null/absent value are marked with the
+ * `isNullGroup` flag set to true and their key is set to the `--` string.
  *
  * Applies alerting RBAC through ruleTypeIds.
  */

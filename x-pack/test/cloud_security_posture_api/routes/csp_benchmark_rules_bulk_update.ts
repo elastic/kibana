@@ -17,7 +17,7 @@ import {
   CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,
   DETECTION_RULE_RULES_API_CURRENT_VERSION,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
-import type { CspBenchmarkRule } from '@kbn/cloud-security-posture-plugin/common/types/latest';
+import type { CspBenchmarkRule } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 // eslint-disable @kbn/imports/no_boundary_crossing
 import { generateBenchmarkRuleTags } from '@kbn/cloud-security-posture-plugin/common/utils/detection_rules';
 import type { FtrProviderContext } from '../ftr_provider_context';
@@ -484,8 +484,8 @@ export default function (providerContext: FtrProviderContext) {
         });
       expect(status).to.be(403);
     });
-    // Blocked by https://github.com/elastic/kibana/issues/188059
-    it.skip('users with read privileges on cloud security should be able to mute', async () => {
+
+    it('users with all privileges on cloud security should be able to mute', async () => {
       const rule1 = await getRandomCspBenchmarkRule();
       const rule2 = await getRandomCspBenchmarkRule();
 
@@ -494,7 +494,7 @@ export default function (providerContext: FtrProviderContext) {
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .set('kbn-xsrf', 'xxxx')
-        .auth('role_security_read_user', cspSecurity.getPasswordForUser('role_security_read_user'))
+        .auth('role_security_all_user', cspSecurity.getPasswordForUser('role_security_all_user'))
         .send({
           action: 'mute',
           rules: [

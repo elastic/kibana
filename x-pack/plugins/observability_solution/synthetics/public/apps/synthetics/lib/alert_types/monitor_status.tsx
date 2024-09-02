@@ -15,7 +15,8 @@ import { getSyntheticsErrorRouteFromMonitorId } from '../../../../../common/util
 import { STATE_ID } from '../../../../../common/field_names';
 import { SyntheticsMonitorStatusTranslations } from '../../../../../common/rules/synthetics/translations';
 import type { StatusRuleParams } from '../../../../../common/rules/status_rule';
-import type { AlertTypeInitializer } from '.';
+import type { AlertTypeInitializer } from './types';
+
 const { defaultActionMessage, defaultRecoveryMessage, description } =
   SyntheticsMonitorStatusTranslations;
 

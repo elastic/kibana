@@ -37,27 +37,27 @@ export const dataStreamStatRt = rt.intersection([
 
 export type DataStreamStat = rt.TypeOf<typeof dataStreamStatRt>;
 
-export const dashboardRT = rt.type({
+export const integrationDashboardRT = rt.type({
   id: rt.string,
   title: rt.string,
 });
 
-export type Dashboard = rt.TypeOf<typeof dashboardRT>;
+export type Dashboard = rt.TypeOf<typeof integrationDashboardRT>;
 
 export const integrationDashboardsRT = rt.type({
-  dashboards: rt.array(dashboardRT),
+  dashboards: rt.array(integrationDashboardRT),
 });
 
 export type IntegrationDashboardsResponse = rt.TypeOf<typeof integrationDashboardsRT>;
 
 export const integrationIconRt = rt.intersection([
   rt.type({
-    path: rt.string,
     src: rt.string,
   }),
   rt.partial({
-    title: rt.string,
+    path: rt.string,
     size: rt.string,
+    title: rt.string,
     type: rt.string,
   }),
 ]);
@@ -116,6 +116,7 @@ export type DegradedFieldResponse = rt.TypeOf<typeof getDataStreamDegradedFields
 export const dataStreamSettingsRt = rt.partial({
   createdOn: rt.union([rt.null, rt.number]), // rt.null is needed because `createdOn` is not available on Serverless
   integration: rt.string,
+  datasetUserPrivileges: datasetUserPrivilegesRt,
 });
 
 export type DataStreamSettings = rt.TypeOf<typeof dataStreamSettingsRt>;

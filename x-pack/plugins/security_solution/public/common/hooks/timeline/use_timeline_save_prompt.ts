@@ -12,7 +12,7 @@ import { useHistory } from 'react-router-dom';
 import { useShowTimelineForGivenPath } from '../../utils/timeline/use_show_timeline_for_path';
 import type { TimelineId } from '../../../../common/types';
 import { TimelineTabs } from '../../../../common/types';
-import { TimelineStatus } from '../../../../common/api/timeline';
+import { TimelineStatusEnum } from '../../../../common/api/timeline';
 import { useKibana } from '../../lib/kibana';
 import { useDeepEqualSelector } from '../use_selector';
 import { APP_ID, APP_PATH } from '../../../../common/constants';
@@ -82,7 +82,7 @@ export const useTimelineSavePrompt = (
 
       if (
         !getIsTimelineVisible(relativePath) &&
-        (changed || (timelineStatus === TimelineStatus.draft && updated != null))
+        (changed || (timelineStatus === TimelineStatusEnum.draft && updated != null))
       ) {
         confirmSaveTimeline();
       } else {
@@ -111,7 +111,7 @@ export const useTimelineSavePrompt = (
       // Confirm when the user has made any changes to a timeline
       if (
         !(nextAppId ?? '').includes(APP_ID) &&
-        (changed || (timelineStatus === TimelineStatus.draft && updated != null))
+        (changed || (timelineStatus === TimelineStatusEnum.draft && updated != null))
       ) {
         return actions.confirm(
           UNSAVED_TIMELINE_SAVE_PROMPT,

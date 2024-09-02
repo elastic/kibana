@@ -39,6 +39,8 @@ import { riskScoreDataClientMock } from '../../../entity_analytics/risk_score/ri
 import { assetCriticalityDataClientMock } from '../../../entity_analytics/asset_criticality/asset_criticality_data_client.mock';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { detectionRulesClientMock } from '../../rule_management/logic/detection_rules_client/__mocks__/detection_rules_client';
+import { packageServiceMock } from '@kbn/fleet-plugin/server/services/epm/package_service.mock';
+import type { EndpointInternalFleetServicesInterface } from '../../../../endpoint/services/fleet';
 
 export const createMockClients = () => {
   const core = coreMock.createRequestHandlerContext();
@@ -70,6 +72,10 @@ export const createMockClients = () => {
     riskEngineDataClient: riskEngineDataClientMock.create(),
     riskScoreDataClient: riskScoreDataClientMock.create(),
     assetCriticalityDataClient: assetCriticalityDataClientMock.create(),
+
+    internalFleetServices: {
+      packages: packageServiceMock.createClient(),
+    },
   };
 };
 
@@ -146,10 +152,9 @@ const createSecuritySolutionRequestContextMock = (
     getDetectionEngineHealthClient: jest.fn(() => clients.detectionEngineHealthClient),
     getRuleExecutionLog: jest.fn(() => clients.ruleExecutionLog),
     getExceptionListClient: jest.fn(() => clients.lists.exceptionListClient),
-    getInternalFleetServices: jest.fn(() => {
-      // TODO: Mock EndpointInternalFleetServicesInterface and return the mocked object.
-      throw new Error('Not implemented');
-    }),
+    getInternalFleetServices: jest.fn(
+      () => clients.internalFleetServices as unknown as EndpointInternalFleetServicesInterface
+    ),
     getRiskEngineDataClient: jest.fn(() => clients.riskEngineDataClient),
     getRiskScoreDataClient: jest.fn(() => clients.riskScoreDataClient),
     getAssetCriticalityDataClient: jest.fn(() => clients.assetCriticalityDataClient),

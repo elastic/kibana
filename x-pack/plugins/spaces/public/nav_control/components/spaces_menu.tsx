@@ -48,7 +48,7 @@ interface Props {
   navigateToApp: ApplicationStart['navigateToApp'];
   navigateToUrl: ApplicationStart['navigateToUrl'];
   readonly activeSpace: Space | null;
-  isSolutionNavEnabled: boolean;
+  allowSolutionVisibility: boolean;
   eventTracker: EventTracker;
 }
 class SpacesMenuUI extends Component<Props> {
@@ -97,7 +97,7 @@ class SpacesMenuUI extends Component<Props> {
           id={this.props.id}
           className={'spcMenu'}
           title={i18n.translate('xpack.spaces.navControl.spacesMenu.changeCurrentSpaceTitle', {
-            defaultMessage: 'Change current space xx',
+            defaultMessage: 'Change current space',
           })}
           {...searchableProps}
           noMatchesMessage={noSpacesMessage}
@@ -140,7 +140,7 @@ class SpacesMenuUI extends Component<Props> {
             <LazySpaceAvatar space={space} size={'s'} announceSpaceName={false} />
           </Suspense>
         ),
-        ...(this.props.isSolutionNavEnabled && {
+        ...(this.props.allowSolutionVisibility && {
           append: <SpaceSolutionBadge solution={space.solution} />,
         }),
         checked: this.props.activeSpace?.id === space.id ? 'on' : undefined,

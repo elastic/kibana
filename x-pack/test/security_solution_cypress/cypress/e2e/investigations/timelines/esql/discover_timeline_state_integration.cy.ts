@@ -58,12 +58,12 @@ const esqlQuery = 'from auditbeat-* | where ecs.version == "8.0.0"';
 
 const handleIntercepts = () => {
   cy.intercept('PATCH', '/api/timeline', (req) => {
-    if (req.body.hasOwnProperty('timeline') && req.body.timeline.savedSearchId === null) {
+    if (Object.hasOwn(req.body, 'timeline') && req.body.timeline.savedSearchId === null) {
       req.alias = TIMELINE_PATCH_REQ;
     }
   });
   cy.intercept('PATCH', '/api/timeline', (req) => {
-    if (req.body.hasOwnProperty('timeline') && req.body.timeline.savedSearchId !== null) {
+    if (Object.hasOwn(req.body, 'timeline') && req.body.timeline.savedSearchId !== null) {
       req.alias = TIMELINE_REQ_WITH_SAVED_SEARCH;
     }
   });

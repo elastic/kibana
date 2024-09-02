@@ -23,6 +23,7 @@ import {
   TableId,
 } from '@kbn/securitysolution-data-table';
 import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
+import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useLicense } from '../../../common/hooks/use_license';
 import { VIEW_SELECTION } from '../../../../common/constants';
@@ -128,7 +129,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
   const {
     browserFields,
     indexPattern: indexPatterns,
-    runtimeMappings,
+    sourcererDataView,
   } = useSourcererDataView(sourcererScope);
   const license = useLicense();
 
@@ -285,7 +286,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       onUpdate: onAlertTableUpdate,
       cellContext,
       onLoaded: onLoad,
-      runtimeMappings,
+      runtimeMappings: sourcererDataView?.runtimeFieldMap as RunTimeMappings,
       toolbarVisibility: {
         showColumnSelector: !isEventRenderedView,
         showSortSelector: !isEventRenderedView,
@@ -302,10 +303,10 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       finalColumns,
       finalBrowserFields,
       onAlertTableUpdate,
-      runtimeMappings,
-      isEventRenderedView,
       cellContext,
       onLoad,
+      sourcererDataView?.runtimeFieldMap,
+      isEventRenderedView,
     ]
   );
 

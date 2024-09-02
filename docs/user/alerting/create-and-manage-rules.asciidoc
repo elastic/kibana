@@ -34,7 +34,7 @@ more information, go to <<alerting-security>>.
 === Create and edit rules
 
 Some rules must be created within the context of a {kib} app like
-<<metrics-app,Metrics>>, <<xpack-apm,APM>>, or <<uptime-app,Uptime>>, but others
+<<metrics-app,Metrics>>, <<apm-app,*APM*>>, or <<uptime-app,Uptime>>, but others
 are generic. Generic rule types can be created in *{rules-ui}* by clicking the
 *Create rule* button. This will launch a flyout that guides you through selecting
 a rule type and configuring its conditions and actions.

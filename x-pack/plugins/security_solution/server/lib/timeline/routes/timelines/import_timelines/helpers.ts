@@ -12,7 +12,10 @@ import { createPromiseFromStreams } from '@kbn/utils';
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import type { ImportTimelineResultSchema } from '../../../../../../common/api/timeline';
-import { importTimelineResultSchema, TimelineStatus } from '../../../../../../common/api/timeline';
+import {
+  importTimelineResultSchema,
+  TimelineStatusEnum,
+} from '../../../../../../common/api/timeline';
 
 import type { BulkError } from '../../../../detection_engine/routes/utils';
 import { createBulkErrorObject } from '../../../../detection_engine/routes/utils';
@@ -70,9 +73,9 @@ export const setTimeline = (
   return {
     ...parsedTimelineObject,
     status:
-      parsedTimeline.status === TimelineStatus.draft
-        ? TimelineStatus.active
-        : parsedTimeline.status ?? TimelineStatus.active,
+      parsedTimeline.status === TimelineStatusEnum.draft
+        ? TimelineStatusEnum.active
+        : parsedTimeline.status ?? TimelineStatusEnum.active,
     templateTimelineVersion: isTemplateTimeline
       ? parsedTimeline.templateTimelineVersion ?? 1
       : null,

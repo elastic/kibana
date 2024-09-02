@@ -23,7 +23,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
 
-  describe('@ess @serverless export_exception_list_route', () => {
+  describe('@ess @serverless @serverlessQA export_exception_list_route', () => {
     describe('exporting exception lists', () => {
       afterEach(async () => {
         await deleteAllExceptions(supertest, log);

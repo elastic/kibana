@@ -6,7 +6,14 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { BehaviorSubject, ReplaySubject, Subject } from 'rxjs';
+import {
+  BehaviorSubject,
+  ReplaySubject,
+  Subject,
+  Observable,
+  map,
+  distinctUntilChanged,
+} from 'rxjs';
 import { pick } from 'lodash';
 import { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -33,6 +40,7 @@ import {
   ServiceStatus,
   SavedObjectsBulkGetObject,
   ServiceStatusLevels,
+  CoreStatus,
 } from '@kbn/core/server';
 import {
   LICENSE_TYPE,
@@ -250,6 +258,8 @@ export class AlertingPlugin {
     this.licenseState = new LicenseState(plugins.licensing.license$);
     this.security = plugins.security;
 
+    const elasticsearchAndSOAvailability$ = getElasticsearchAndSOAvailability(core.status.core$);
+
     const useDataStreamForAlerts = !!plugins.serverless;
     this.dataStreamAdapter = getDataStreamAdapter({ useDataStreamForAlerts });
 
@@ -311,6 +321,7 @@ export class AlertingPlugin {
           elasticsearchClientPromise: core
             .getStartServices()
             .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
+          elasticsearchAndSOAvailability$,
         });
       }
     }
@@ -673,4 +684,17 @@ export class AlertingPlugin {
     this.pluginStop$.next();
     this.pluginStop$.complete();
   }
+}
+
+export function getElasticsearchAndSOAvailability(
+  core$: Observable<CoreStatus>
+): Observable<boolean> {
+  return core$.pipe(
+    map(
+      ({ elasticsearch, savedObjects }) =>
+        elasticsearch.level === ServiceStatusLevels.available &&
+        savedObjects.level === ServiceStatusLevels.available
+    ),
+    distinctUntilChanged()
+  );
 }

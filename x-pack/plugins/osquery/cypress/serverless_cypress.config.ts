@@ -6,43 +6,19 @@
  */
 
 import { defineCypressConfig } from '@kbn/cypress-config';
-import { setupUserDataLoader } from '@kbn/test-suites-serverless/functional/test_suites/security/cypress/support/setup_data_loader_tasks';
-import { getFailedSpecVideos } from './support/filter_videos';
+import { getCypressBaseConfig } from './cypress_base.config';
 
 // eslint-disable-next-line import/no-default-export
-export default defineCypressConfig({
-  reporter: '../../../node_modules/cypress-multi-reporters',
-  reporterOptions: {
-    configFile: './cypress/reporter_config.json',
-  },
+export default defineCypressConfig(
+  getCypressBaseConfig({
+    execTimeout: 60000,
+    pageLoadTimeout: 60000,
+    responseTimeout: 60000,
+    viewportHeight: 946,
+    viewportWidth: 1680,
 
-  defaultCommandTimeout: 60000,
-  execTimeout: 60000,
-  pageLoadTimeout: 60000,
-  responseTimeout: 60000,
-  screenshotsFolder: '../../../target/kibana-osquery/cypress/screenshots',
-  trashAssetsBeforeRuns: false,
-  video: true,
-  videosFolder: '../../../target/kibana-osquery/cypress/videos',
-  videoCompression: 15,
-  viewportHeight: 946,
-  viewportWidth: 1680,
-
-  env: {
-    grepFilterSpecs: true,
-    grepTags: '@serverless --@brokenInServerless',
-    grepOmitFiltered: true,
-  },
-  e2e: {
-    specPattern: './cypress/e2e/**/*.cy.ts',
-    experimentalRunAllSpecs: true,
-    experimentalMemoryManagement: true,
-    numTestsKeptInMemory: 3,
-    setupNodeEvents: (on, config) => {
-      setupUserDataLoader(on, config, { additionalRoleName: 'viewer' });
-      on('after:spec', getFailedSpecVideos);
-
-      return config;
+    env: {
+      grepTags: '@serverless --@brokenInServerless --@skipInServerless',
     },
-  },
-});
+  })
+);

@@ -368,11 +368,11 @@ export const useRenderCellValue = (
       }
 
       function getCellValue(cId: string) {
-        if (tableItems.hasOwnProperty(adjustedRowIndex)) {
+        if (Object.hasOwn(tableItems, adjustedRowIndex)) {
           const item = tableItems[adjustedRowIndex];
 
           // Try if the field name is available as is.
-          if (item.hasOwnProperty(cId)) {
+          if (Object.hasOwn(item, cId)) {
             return item[cId];
           }
 

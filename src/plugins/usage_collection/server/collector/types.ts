@@ -18,6 +18,65 @@ export type {
   PossibleSchemaTypes,
 } from '@elastic/ebt/client';
 
+import type { Collector, UsageCollectorOptions } from '.';
+
+/**
+ * Interface to register and manage Usage Collectors through a CollectorSet
+ */
+export interface ICollectorSet {
+  /**
+   * Creates a usage collector to collect plugin telemetry data.
+   * registerCollector must be called to connect the created collector with the service.
+   */
+  makeUsageCollector: <TFetchReturn, ExtraOptions extends object = {}>(
+    options: UsageCollectorOptions<TFetchReturn, ExtraOptions>
+  ) => Collector<TFetchReturn, ExtraOptions>;
+  /**
+   * Register a usage collector or a stats collector.
+   * Used to connect the created collector to telemetry.
+   */
+  registerCollector: <TFetchReturn, ExtraOptions extends object>(
+    collector: Collector<TFetchReturn, ExtraOptions>
+  ) => void;
+  /**
+   * Returns a usage collector by type
+   */
+  getCollectorByType: <TFetchReturn, ExtraOptions extends object>(
+    type: string
+  ) => Collector<TFetchReturn, ExtraOptions> | undefined;
+  /**
+   * Fetches the collection from all the registered collectors
+   * @internal: telemetry use
+   */
+  bulkFetch: <TFetchReturn, ExtraOptions extends object>(
+    esClient: ElasticsearchClient,
+    soClient: SavedObjectsClientContract,
+    collectors?: Map<string, Collector<TFetchReturn, ExtraOptions>>
+  ) => Promise<Array<{ type: string; result: unknown }>>;
+  /**
+   * Converts an array of fetched stats results into key/object
+   * @internal: telemetry use
+   */
+  toObject: <Result extends Record<string, unknown>, T = unknown>(
+    statsData?: Array<{ type: string; result: T }>
+  ) => Result;
+  /**
+   * Rename fields to use API conventions
+   * @internal: monitoring use
+   */
+  toApiFieldNames: (
+    apiData: Record<string, unknown> | unknown[]
+  ) => Record<string, unknown> | unknown[];
+  /**
+   * Creates a stats collector to collect plugin telemetry data.
+   * registerCollector must be called to connect the created collector with the service.
+   * @internal: telemetry and monitoring use
+   */
+  makeStatsCollector: <TFetchReturn, ExtraOptions extends object = {}>(
+    options: CollectorOptions<TFetchReturn, ExtraOptions>
+  ) => Collector<TFetchReturn, ExtraOptions>;
+}
+
 /**
  * Helper to find out whether to keep recursively looking or if we are on an end value
  */

@@ -10,7 +10,7 @@ import { IRouter } from '@kbn/core/server';
 import { firstValueFrom, Observable } from 'rxjs';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { termsAggSuggestions } from '@kbn/unified-search-plugin/server/autocomplete/terms_agg';
-import type { ConfigSchema } from '@kbn/unified-search-plugin/config';
+import type { ConfigSchema } from '@kbn/unified-search-plugin/server/config';
 import { getKbnServerError, reportServerError } from '@kbn/kibana-utils-plugin/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ALERT_RULE_CONSUMER, ALERT_RULE_TYPE_ID, SPACE_IDS } from '@kbn/rule-data-utils';

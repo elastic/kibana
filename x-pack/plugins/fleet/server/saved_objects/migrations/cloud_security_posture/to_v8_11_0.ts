@@ -22,7 +22,10 @@ export const migrateCspPackagePolicyToV8110: SavedObjectModelDataBackfillFn<
   const gcpPackage = updatedAttributes.inputs.find((input) => input.type === 'cloudbeat/cis_gcp');
 
   if (gcpPackage) {
-    const isGcpAccountTypeExists = gcpPackage.streams[0]?.vars?.hasOwnProperty('gcp.account_type');
+    const isGcpAccountTypeExists = Object.hasOwn(
+      gcpPackage.streams[0]?.vars ?? {},
+      'gcp.account_type'
+    );
 
     if (!isGcpAccountTypeExists) {
       const migratedPolicy = { 'gcp.account_type': { value: 'single-account', type: 'text' } };

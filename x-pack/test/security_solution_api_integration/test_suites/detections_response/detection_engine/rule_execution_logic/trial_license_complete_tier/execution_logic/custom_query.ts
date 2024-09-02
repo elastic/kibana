@@ -69,6 +69,7 @@ import {
   deleteAllRules,
   deleteAllAlerts,
   getRuleForAlertTesting,
+  getLuceneRuleForTesting,
 } from '../../../../../../../common/utils/security_solution';
 
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
@@ -117,7 +118,10 @@ export default ({ getService }: FtrProviderContext) => {
     after(async () => {
       await esArchiver.unload(auditbeatPath);
       await esArchiver.unload('x-pack/test/functional/es_archives/signals/severity_risk_overrides');
-      await deleteAllAlerts(supertest, log, es, ['.preview.alerts-security.alerts-*']);
+      await deleteAllAlerts(supertest, log, es, [
+        '.preview.alerts-security.alerts-*',
+        '.alerts-security.alerts-*',
+      ]);
       await deleteAllRules(supertest, log);
     });
 
@@ -325,7 +329,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('with asset criticality', async () => {
+    describe('with asset criticality', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/asset_criticality');
         await kibanaServer.uiSettings.update({
@@ -534,7 +538,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(previewAlerts.length).toEqual(1);
     });
 
-    describe('with suppression enabled', async () => {
+    describe('with suppression enabled', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/security_solution/suppression');
       });
@@ -825,7 +829,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      describe('with a suppression time window', async () => {
+      describe('with a suppression time window', () => {
         const { indexListOfDocuments, indexGeneratedDocuments } = dataGeneratorFactory({
           es,
           index: 'ecs_compliant',
@@ -1469,7 +1473,7 @@ export default ({ getService }: FtrProviderContext) => {
           }
         });
 
-        describe('with host risk index', async () => {
+        describe('with host risk index', () => {
           before(async () => {
             await esArchiver.load('x-pack/test/functional/es_archives/entity/host_risk');
           });
@@ -1965,7 +1969,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         // following 2 tests created to show the difference in 2 modes, using the same data and using suppression time window
         // rule will be executing 2 times and will create alert during both executions, that will be suppressed according to time window
-        describe('with a suppression time window', async () => {
+        describe('with a suppression time window', () => {
           let id: string;
           const timestamp = '2020-10-28T06:00:00.000Z';
           const laterTimestamp = '2020-10-28T07:00:00.000Z';
@@ -2137,7 +2141,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('with exceptions', async () => {
+    describe('with exceptions', () => {
       afterEach(async () => {
         await deleteAllExceptions(supertest, log);
       });
@@ -2229,7 +2233,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     // https://github.com/elastic/kibana/issues/149920
-    describe('field name wildcard queries', async () => {
+    describe('field name wildcard queries', () => {
       const { indexEnhancedDocuments } = dataGeneratorFactory({
         es,
         index: 'ecs_compliant',
@@ -2748,6 +2752,19 @@ export default ({ getService }: FtrProviderContext) => {
           ...updatedAlerts.hits.hits[0]._source,
           [ALERT_SUPPRESSION_DOCS_COUNT]: 2,
         });
+      });
+    });
+
+    describe('with a Lucene query rule', () => {
+      it('should run successfully and generate an alert that matches the lucene query', async () => {
+        const luceneQueryRule = getLuceneRuleForTesting();
+        const { previewId } = await previewRule({ supertest, rule: luceneQueryRule });
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        expect(previewAlerts.length).toBeGreaterThan(0);
+        expect(previewAlerts[0]?._source?.destination).toEqual(
+          expect.objectContaining({ domain: 'aaa.stage.11111111.hello' })
+        );
+        expect(previewAlerts[0]?._source?.['event.dataset']).toEqual('network_traffic.tls');
       });
     });
   });

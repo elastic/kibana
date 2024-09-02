@@ -7,12 +7,14 @@
 
 import { performance } from 'perf_hooks';
 import { isEmpty } from 'lodash';
-
+import type { Type as RuleType } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { SuppressedAlertService } from '@kbn/rule-registry-plugin/server';
 import type {
   AlertWithCommonFieldsLatest,
   SuppressionFieldsLatest,
 } from '@kbn/rule-registry-plugin/common/schemas';
+
+import { isQueryRule } from '../../../../../common/detection_engine/utils';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { makeFloatString } from './utils';
 import type {
@@ -22,6 +24,7 @@ import type {
 import type { RuleServices } from '../types';
 import { createEnrichEventsFunction } from './enrichments';
 import type { ExperimentalFeatures } from '../../../../../common';
+import { getNumberOfSuppressedAlerts } from './get_number_of_suppressed_alerts';
 
 export interface GenericBulkCreateResponse<T extends BaseFieldsLatest> {
   success: boolean;
@@ -46,6 +49,7 @@ export const bulkCreateWithSuppression = async <
   isSuppressionPerRuleExecution,
   maxAlerts,
   experimentalFeatures,
+  ruleType,
 }: {
   alertWithSuppression: SuppressedAlertService;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
@@ -56,6 +60,7 @@ export const bulkCreateWithSuppression = async <
   isSuppressionPerRuleExecution?: boolean;
   maxAlerts?: number;
   experimentalFeatures: ExperimentalFeatures;
+  ruleType?: RuleType;
 }): Promise<GenericBulkCreateResponse<T>> => {
   if (wrappedDocs.length === 0) {
     return {
@@ -110,6 +115,15 @@ export const bulkCreateWithSuppression = async <
 
   ruleExecutionLogger.debug(`Alerts bulk process took ${makeFloatString(end - start)} ms`);
 
+  // query rule type suppression does not happen in memory, so we can't just count createdAlerts and suppressedAlerts
+  // for this rule type we need to look into alerts suppression properties, extract those values and sum up
+  const suppressedItemsCount = isQueryRule(ruleType)
+    ? getNumberOfSuppressedAlerts(
+        createdAlerts,
+        suppressedAlerts.map(({ _source, _id }) => ({ _id, ..._source }))
+      )
+    : suppressedAlerts.length;
+
   if (!isEmpty(errors)) {
     ruleExecutionLogger.warn(`Alerts bulk process finished with errors: ${JSON.stringify(errors)}`);
     return {
@@ -119,7 +133,7 @@ export const bulkCreateWithSuppression = async <
       bulkCreateDuration: makeFloatString(end - start),
       createdItemsCount: createdAlerts.length,
       createdItems: createdAlerts,
-      suppressedItemsCount: suppressedAlerts.length,
+      suppressedItemsCount,
       alertsWereTruncated,
     };
   } else {
@@ -130,7 +144,7 @@ export const bulkCreateWithSuppression = async <
       enrichmentDuration: makeFloatString(enrichmentsTimeFinish - enrichmentsTimeStart),
       createdItemsCount: createdAlerts.length,
       createdItems: createdAlerts,
-      suppressedItemsCount: suppressedAlerts.length,
+      suppressedItemsCount,
       alertsWereTruncated,
     };
   }

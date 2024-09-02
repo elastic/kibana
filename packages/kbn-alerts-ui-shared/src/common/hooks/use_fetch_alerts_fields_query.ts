@@ -25,7 +25,7 @@ export const useFetchAlertsFieldsQuery = (
   { http, ...params }: UseFetchAlertsFieldsQueryParams,
   options?: Pick<
     QueryOptionsOverrides<typeof fetchAlertsFields>,
-    'context' | 'onError' | 'refetchOnWindowFocus' | 'staleTime' | 'enabled'
+    'placeholderData' | 'context' | 'onError' | 'refetchOnWindowFocus' | 'staleTime' | 'enabled'
   >
 ) => {
   const { ruleTypeIds } = params;
@@ -33,10 +33,12 @@ export const useFetchAlertsFieldsQuery = (
   const validRuleTypeIds = ruleTypeIds.filter((ruleTypeId) => !isSiemRuleType(ruleTypeId));
 
   return useQuery({
-    queryKey: queryKeyPrefix.concat(JSON.stringify(ruleTypeIds)),
+    queryKey: queryKeyPrefix.concat(ruleTypeIds),
     queryFn: () => fetchAlertsFields({ http, ruleTypeIds: validRuleTypeIds }),
-    enabled: validRuleTypeIds.length > 0,
-    initialData: { browserFields: {}, fields: [] },
+    placeholderData: { browserFields: {}, fields: [] },
+    staleTime: 60 * 1000,
+    refetchOnWindowFocus: false,
     ...options,
+    enabled: validRuleTypeIds.length > 0 && (options?.enabled == null || options.enabled),
   });
 };
