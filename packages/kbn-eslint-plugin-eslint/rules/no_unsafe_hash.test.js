@@ -7,8 +7,11 @@
  */
 
 const { RuleTester } = require('eslint');
-const rule = require('./no_unsafe_hash');
+const { allowedAlgorithms, ...rule } = require('./no_unsafe_hash');
+
 const dedent = require('dedent');
+
+const joinedAllowedAlgorithms = `[${allowedAlgorithms.join(', ')}]`;
 
 const ruleTester = new RuleTester({
   parser: require.resolve('@typescript-eslint/parser'),
@@ -60,8 +63,7 @@ ruleTester.run('@kbn/eslint/no_unsafe_hash', rule, {
       errors: [
         {
           line: 3,
-          message:
-            'Usage of createHash with "md5" is not allowed. Only the following algorithms are allowed: [sha256, sha3-256]. If you need to use a different algorithm, please contact the Kibana security team.',
+          message: `Usage of createHash with "md5" is not allowed. Only the following algorithms are allowed: ${joinedAllowedAlgorithms}. If you need to use a different algorithm, please contact the Kibana security team.`,
         },
       ],
     },
@@ -75,8 +77,7 @@ ruleTester.run('@kbn/eslint/no_unsafe_hash', rule, {
       errors: [
         {
           line: 3,
-          message:
-            'Usage of createHash with "md5" is not allowed. Only the following algorithms are allowed: [sha256, sha3-256]. If you need to use a different algorithm, please contact the Kibana security team.',
+          message: `Usage of createHash with "md5" is not allowed. Only the following algorithms are allowed: ${joinedAllowedAlgorithms}. If you need to use a different algorithm, please contact the Kibana security team.`,
         },
       ],
     },
@@ -90,8 +91,7 @@ ruleTester.run('@kbn/eslint/no_unsafe_hash', rule, {
       errors: [
         {
           line: 3,
-          message:
-            'Usage of createHash with "md5" is not allowed. Only the following algorithms are allowed: [sha256, sha3-256]. If you need to use a different algorithm, please contact the Kibana security team.',
+          message: `Usage of createHash with "md5" is not allowed. Only the following algorithms are allowed: ${joinedAllowedAlgorithms}. If you need to use a different algorithm, please contact the Kibana security team.`,
         },
       ],
     },

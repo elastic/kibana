@@ -5,8 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+const allowedAlgorithms = ['sha256', 'sha3-256', 'sha512'];
 
 module.exports = {
+  allowedAlgorithms,
   meta: {
     type: 'problem',
     docs: {
@@ -21,8 +23,6 @@ module.exports = {
     schema: [],
   },
   create(context) {
-    const allowedAlgorithms = ['sha256', 'sha3-256'];
-
     let isCreateHashImported = false;
     let createHashName = 'createHash';
     const sourceCode = context.getSourceCode();

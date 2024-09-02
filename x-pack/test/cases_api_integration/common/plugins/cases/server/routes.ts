@@ -18,7 +18,7 @@ import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/types';
 import type { FixtureStartDeps } from './plugin';
 
 const hashParts = (parts: string[]): string => {
-  const hash = createHash('sha1');
+  const hash = createHash('sha1'); // eslint-disable-line @kbn/eslint/no_unsafe_hash
   const hashFeed = parts.join('-');
   return hash.update(hashFeed).digest('hex');
 };
