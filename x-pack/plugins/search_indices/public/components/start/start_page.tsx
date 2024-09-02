@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 
-import { EuiLoadingLogo, EuiPageTemplate } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingLogo, EuiPageSection, EuiPageTemplate } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 import { useKibana } from '../../hooks/use_kibana';
@@ -30,8 +30,11 @@ export const ElasticsearchStartPage = () => {
       grow={false}
     >
       <KibanaPageTemplate.Section alignment="center" restrictWidth={false} grow>
-        {/* <ConnectionDetails elasticsearchUrl="http://localhost:9200" /> */}
-        <QuickStats />
+        <div css={{ width: "1200px" }}>
+          {/* <ConnectionDetails elasticsearchUrl="http://localhost:9200" /> */}
+
+          <QuickStats />
+        </div>
       </KibanaPageTemplate.Section>
       {embeddableConsole}
     </EuiPageTemplate>
