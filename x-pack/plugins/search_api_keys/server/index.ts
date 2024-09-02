@@ -7,9 +7,9 @@
 
 import { PluginInitializerContext } from '@kbn/core/server';
 
-export { config } from './config';
+// export { config } from './config';
 
 export async function plugin(initializerContext: PluginInitializerContext) {
-  const { ApiKeyPlugin } = await import('./plugin');
-  return new ApiKeyPlugin(initializerContext);
+  const { SearchApiKeysPlugin } = await import('./plugin');
+  return new SearchApiKeysPlugin(initializerContext);
 }

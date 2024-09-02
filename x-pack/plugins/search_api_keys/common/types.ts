@@ -5,6 +5,9 @@
  * 2.0.
  */
 
-export const PLUGIN_ID = 'apiKey';
-export const PLUGIN_NAME = 'ApiKey';
-export const PLUGIN_PATH = '/app/api_key';
+export interface UserStartPrivilegesResponse {
+  privileges: {
+    canCreateApiKeys: boolean;
+    canCreateIndex: boolean;
+  };
+}

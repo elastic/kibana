@@ -756,6 +756,7 @@
     "@kbn/screenshotting-example-plugin": "link:x-pack/examples/screenshotting_example",
     "@kbn/screenshotting-plugin": "link:x-pack/plugins/screenshotting",
     "@kbn/screenshotting-server": "link:packages/kbn-screenshotting-server",
+    "@kbn/search-api-keys": "link:x-pack/plugins/search_api_keys",
     "@kbn/search-api-panels": "link:packages/kbn-search-api-panels",
     "@kbn/search-assistant": "link:x-pack/plugins/search_assistant",
     "@kbn/search-connectors": "link:packages/kbn-search-connectors",

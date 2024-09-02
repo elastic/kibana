@@ -1472,6 +1472,8 @@
       "@kbn/screenshotting-plugin/*": ["x-pack/plugins/screenshotting/*"],
       "@kbn/screenshotting-server": ["packages/kbn-screenshotting-server"],
       "@kbn/screenshotting-server/*": ["packages/kbn-screenshotting-server/*"],
+      "@kbn/search-api-keys": ["x-pack/plugins/search_api_keys"],
+      "@kbn/search-api-keys/*": ["x-pack/plugins/search_api_keys/*"],
       "@kbn/search-api-panels": ["packages/kbn-search-api-panels"],
       "@kbn/search-api-panels/*": ["packages/kbn-search-api-panels/*"],
       "@kbn/search-assistant": ["x-pack/plugins/search_assistant"],
