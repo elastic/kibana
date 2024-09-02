@@ -89,6 +89,9 @@
     "xpack.observabilityLogsExplorer": "plugins/observability_solution/observability_logs_explorer",
     "xpack.observability_onboarding": "plugins/observability_solution/observability_onboarding",
     "xpack.observabilityShared": "plugins/observability_solution/observability_shared",
+    "xpack.observabilityLogsOverview": [
+      "packages/observability/logs_overview/src/components"
+    ],
     "xpack.osquery": ["plugins/osquery"],
     "xpack.painlessLab": "plugins/painless_lab",
     "xpack.profiling": ["plugins/observability_solution/profiling"],
