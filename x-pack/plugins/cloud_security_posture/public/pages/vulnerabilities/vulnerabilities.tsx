@@ -7,6 +7,7 @@
 import React from 'react';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { useCspSetupStatusApi } from '@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api';
+import { VULNERABILITIES_PAGE } from './test_subjects';
 import { CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX } from '../../../common/constants';
 import { NoVulnerabilitiesStates } from '../../components/no_vulnerabilities_states';
 import { CloudPosturePage } from '../../components/cloud_posture_page';
@@ -33,16 +34,18 @@ export const Vulnerabilities = () => {
 
   return (
     <CloudPosturePage query={dataViewQuery}>
-      <Routes>
-        <Route
-          path={findingsNavigation.vulnerabilities.path}
-          render={() => (
-            <DataViewContext.Provider value={dataViewContextValue}>
-              <LatestVulnerabilitiesContainer />
-            </DataViewContext.Provider>
-          )}
-        />
-      </Routes>
+      <div data-test-subj={VULNERABILITIES_PAGE}>
+        <Routes>
+          <Route
+            path={findingsNavigation.vulnerabilities.path}
+            render={() => (
+              <DataViewContext.Provider value={dataViewContextValue}>
+                <LatestVulnerabilitiesContainer />
+              </DataViewContext.Provider>
+            )}
+          />
+        </Routes>
+      </div>
     </CloudPosturePage>
   );
 };
