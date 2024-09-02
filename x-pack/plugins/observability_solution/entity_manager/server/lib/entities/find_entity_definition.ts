@@ -20,7 +20,7 @@ import {
   generateLatestIndexTemplateId,
 } from './helpers/generate_component_id';
 import { BUILT_IN_ID_PREFIX } from './built_in';
-import { EntityDefinitionWithState } from './types';
+import { EntityDefinitionState, EntityDefinitionWithState } from './types';
 import { isBackfillEnabled } from './helpers/is_backfill_enabled';
 
 export async function findEntityDefinitions({
@@ -90,7 +90,7 @@ export async function findEntityDefinitionById({
 async function getEntityDefinitionState(
   esClient: ElasticsearchClient,
   definition: EntityDefinition
-) {
+): Promise<EntityDefinitionState> {
   const [ingestPipelines, transforms, indexTemplates] = await Promise.all([
     getIngestPipelineState({ definition, esClient }),
     getTransformState({ definition, esClient }),
@@ -104,9 +104,11 @@ async function getEntityDefinitionState(
   const running = transforms.every((transform) => transform.running);
 
   return {
-    installed,
-    running,
-    components: { transforms, ingestPipelines, indexTemplates },
+    state: {
+      installed,
+      running,
+      components: { transforms, ingestPipelines, indexTemplates },
+    },
   };
 }
 
@@ -127,7 +129,7 @@ async function getTransformState({
   return transformIds.map((id) => {
     const stats = transformStats.transforms.find((transform) => transform.id === id);
     if (!stats) {
-      return { id, installed: false };
+      return { id, installed: false, running: false };
     }
 
     return {
