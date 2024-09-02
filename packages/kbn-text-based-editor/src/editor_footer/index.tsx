@@ -13,7 +13,7 @@ import { EuiText, EuiFlexGroup, EuiFlexItem, EuiCode } from '@elastic/eui';
 import { Interpolation, Theme, css } from '@emotion/react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
-  LanguageDocumentationPopover,
+  LanguageDocumentationFlyout,
   type LanguageDocumentationSections,
 } from '@kbn/language-documentation-popover';
 import { getLimitFromESQLQuery } from '@kbn/esql-utils';
@@ -289,7 +289,7 @@ export const EditorFooter = memo(function EditorFooter({
               )}
               {documentationSections && !editorIsInline && (
                 <EuiFlexItem grow={false}>
-                  <LanguageDocumentationPopover
+                  <LanguageDocumentationFlyout
                     language="ES|QL"
                     sections={documentationSections}
                     searchInDescription
@@ -326,7 +326,7 @@ export const EditorFooter = memo(function EditorFooter({
                   )}
                   {documentationSections && (
                     <EuiFlexItem grow={false}>
-                      <LanguageDocumentationPopover
+                      <LanguageDocumentationFlyout
                         language="ES|QL"
                         sections={documentationSections}
                         searchInDescription
