@@ -65,8 +65,9 @@ export type ControlGroupApi = PresentationContainer &
     ignoreParentSettings$: PublishingSubject<ParentIgnoreSettings | undefined>;
     allowExpensiveQueries$: PublishingSubject<boolean>;
     untilInitialized: () => Promise<void>;
-    openAddDataControlFlyout: (settings?: {
+    openAddDataControlFlyout: (options?: {
       controlInputTransform?: ControlInputTransform;
+      onSave?: () => void;
     }) => void;
     labelPosition: PublishingSubject<ControlStyle>;
   };
