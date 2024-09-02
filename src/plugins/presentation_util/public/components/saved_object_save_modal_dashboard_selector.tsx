@@ -20,6 +20,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiCheckbox,
+  EuiFormErrorText,
 } from '@elastic/eui';
 
 import DashboardPicker, { DashboardPickerProps } from './dashboard_picker/dashboard_picker';
@@ -86,14 +87,14 @@ export function SaveModalDashboardSelector(props: SaveModalDashboardSelectorProp
                     onChange={onSelectDashboard}
                   />
                   {hasAttemptedSubmit && dashboardOption === 'existing' && !hasSelectedDashboard ? (
-                    <div className="euiFormErrorText euiFormRow__text">
+                    <EuiFormErrorText>
                       {i18n.translate(
                         'presentationUtil.saveModalDashboard.existingDashboardRequiredMessage',
                         {
                           defaultMessage: 'Dashboard is required',
                         }
                       )}
-                    </div>
+                    </EuiFormErrorText>
                   ) : null}
                 </div>
                 <EuiSpacer size="s" />

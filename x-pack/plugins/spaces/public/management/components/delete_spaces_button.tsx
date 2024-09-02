@@ -13,9 +13,9 @@ import type { NotificationsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { ConfirmDeleteModal } from './confirm_delete_modal';
 import type { Space } from '../../../common';
 import type { SpacesManager } from '../../spaces_manager';
-import { ConfirmDeleteModal } from '../components/confirm_delete_modal';
 
 interface Props {
   style?: 'button' | 'icon';
