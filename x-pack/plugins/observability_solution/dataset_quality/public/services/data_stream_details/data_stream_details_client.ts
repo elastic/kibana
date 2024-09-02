@@ -123,11 +123,9 @@ export class DataStreamDetailsClient implements IDataStreamDetailsClient {
   public async getDataStreamIntegration(
     params: GetDataStreamIntegrationParams
   ): Promise<Integration | undefined> {
-    const { type, integrationName } = params;
+    const { integrationName } = params;
     const response = await this.http
-      .get<IntegrationResponse>('/internal/dataset_quality/integrations', {
-        query: { type },
-      })
+      .get<IntegrationResponse>('/internal/dataset_quality/integrations')
       .catch((error) => {
         throw new DatasetQualityError(`Failed to fetch integrations: ${error}`, error);
       });

@@ -8,7 +8,6 @@
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { runPrivilegeTests } from '../../privileges_helpers';
-import { setupFleetAndAgents } from '../agents/services';
 import { testUsers } from '../test_users';
 
 export default function (providerContext: FtrProviderContext) {
@@ -16,10 +15,12 @@ export default function (providerContext: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const supertest = getService('supertest');
+  const fleetAndAgents = getService('fleetAndAgents');
 
   describe('fleet_enrollment_api_keys_privileges', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/fleet/agents');
+      await fleetAndAgents.setup();
     });
 
     after(async () => {
@@ -27,7 +28,6 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     skipIfNoDockerRegistry(providerContext);
-    setupFleetAndAgents(providerContext);
 
     const SCENARIOS = [
       {
@@ -99,7 +99,6 @@ export default function (providerContext: FtrProviderContext) {
         },
       },
     ];
-    before(async () => {});
     runPrivilegeTests(ROUTES, supertestWithoutAuth);
   });
 }

@@ -31,7 +31,7 @@ export const FilterRangeForm: FilterAggConfigRange['aggTypeConfig']['FilterAggFo
   const includeTo = config?.includeTo ?? false;
 
   const updateConfig = useCallback(
-    (update) => {
+    (update: any) => {
       onChange({
         config: {
           ...config,

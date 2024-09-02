@@ -16,6 +16,6 @@ describe('ServiceOverview', () => {
   it('renders', async () => {
     render(<Example />);
 
-    expect(await screen.findByRole('heading', { name: /Latency/ })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Latency' })).toBeInTheDocument();
   });
 });
