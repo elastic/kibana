@@ -99,6 +99,8 @@ type MetricThresholdAlertReporter = (params: {
   thresholds?: Array<number | null>;
 }) => void;
 
+// TODO: Refactor the executor code to have better flow-control with better
+// reasoning of different state/conditions for improved maintainability
 export const createMetricThresholdExecutor =
   (
     libs: InfraBackendLibs,
@@ -204,6 +206,7 @@ export const createMetricThresholdExecutor =
           reason,
           timestamp,
           value: null,
+          // TODO: Check if we need additionalContext here or not?
           viewInAppUrl: getMetricsViewInAppUrlWithSpaceId({
             timestamp,
             groupBy,
@@ -476,6 +479,7 @@ export const createMetricThresholdExecutor =
           groupBy,
           assetDetailsLocator,
           metricsExplorerLocator,
+          additionalContext,
         }),
 
         originalAlertState: translateActionGroupToAlertState(originalActionGroup),
