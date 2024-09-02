@@ -6,13 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
-import { commonFunctionalUIServices } from '@kbn/ftr-common-functional-ui-services';
+import { services as commonServices } from '../../common/services';
 
 import { HealthGatewayService } from './health_gateway';
 
 export const services = {
-  ...commonFunctionalServices,
-  ...commonFunctionalUIServices,
+  ...commonServices,
   healthGateway: HealthGatewayService,
 };

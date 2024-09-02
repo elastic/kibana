@@ -328,4 +328,9 @@ export class InspectorService extends FtrService {
 
     return value === comboBoxOptions;
   }
+
+  public async getRequestTotalTime() {
+    const [ms] = (await this.testSubjects.getVisibleText('inspectorRequestTotalTime')).split('ms');
+    return parseFloat(ms);
+  }
 }

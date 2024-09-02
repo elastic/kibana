@@ -18,6 +18,8 @@
       "console",
       "usageCollection",
     ],
-    "requiredBundles": []
+    "requiredBundles": [
+      "kibanaReact",
+    ]
   }
 }
