@@ -113,7 +113,9 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
     roleMappings: [
       [],
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setRoleMappingsData: (_, { roleMappings }) => roleMappings,
+        // @ts-expect-error upgrade typescript v5.1.6
         setRoleMappings: (_, { roleMappings }) => roleMappings,
         resetState: () => [],
       },
@@ -121,6 +123,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
     singleUserRoleMappings: [
       [],
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setRoleMappingsData: (_, { singleUserRoleMappings }) => singleUserRoleMappings,
         resetState: () => [],
       },
@@ -128,12 +131,14 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
     hasAdvancedRoles: [
       false,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setRoleMappingsData: (_, { hasAdvancedRoles }) => hasAdvancedRoles,
       },
     ],
     availableEngines: [
       [],
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setRoleMappingsData: (_, { availableEngines }) => availableEngines,
         resetState: () => [],
       },
@@ -141,6 +146,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
     attributes: [
       [],
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setRoleMappingsData: (_, { attributes }) => attributes,
         resetState: () => [],
       },
@@ -148,12 +154,14 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
     elasticsearchRoles: [
       [],
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setRoleMappingsData: (_, { elasticsearchRoles }) => elasticsearchRoles,
       },
     ],
     elasticsearchUsers: [
       [],
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setRoleMappingsData: (_, { elasticsearchUsers }) => elasticsearchUsers,
         resetState: () => [],
       },
@@ -161,6 +169,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
     roleMapping: [
       null,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setRoleMapping: (_, { roleMapping }) => roleMapping,
         initializeRoleMappings: () => null,
         resetState: () => null,
@@ -170,15 +179,20 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
     roleType: [
       'owner',
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setRoleMapping: (_, { roleMapping }) => roleMapping.roleType as RoleTypes,
+        // @ts-expect-error upgrade typescript v5.1.6
         handleRoleChange: (_, { roleType }) => roleType,
       },
     ],
     accessAllEngines: [
       true,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setRoleMapping: (_, { roleMapping }) => roleMapping.accessAllEngines,
+        // @ts-expect-error upgrade typescript v5.1.6
         handleRoleChange: (_, { roleType }) => !roleHasScopedEngines(roleType),
+        // @ts-expect-error upgrade typescript v5.1.6
         handleAccessAllEnginesChange: (_, { selected }) => selected,
         closeUsersAndRolesFlyout: () => true,
       },
@@ -186,9 +200,12 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
     attributeValue: [
       '',
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setRoleMapping: (_, { roleMapping }) => getFirstAttributeValue(roleMapping),
+        // @ts-expect-error upgrade typescript v5.1.6
         handleAttributeSelectorChange: (_, { value, firstElasticsearchRole }) =>
           value === 'role' ? firstElasticsearchRole : '',
+        // @ts-expect-error upgrade typescript v5.1.6
         handleAttributeValueChange: (_, { value }) => value,
         resetState: () => '',
         closeUsersAndRolesFlyout: () => '',
@@ -197,24 +214,33 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
     attributeName: [
       'username',
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setRoleMapping: (_, { roleMapping }) => getFirstAttributeName(roleMapping),
+        // @ts-expect-error upgrade typescript v5.1.6
         handleAttributeSelectorChange: (_, { value }) => value,
+        // @ts-expect-error upgrade typescript v5.1.6
         resetState: () => 'username',
+        // @ts-expect-error upgrade typescript v5.1.6
         closeUsersAndRolesFlyout: () => 'username',
       },
     ],
     selectedEngines: [
       new Set(),
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setRoleMapping: (_, { roleMapping }) =>
           new Set(roleMapping.engines.map((engine: Engine) => engine.name)),
+        // @ts-expect-error upgrade typescript v5.1.6
         handleAccessAllEnginesChange: () => new Set(),
+        // @ts-expect-error upgrade typescript v5.1.6
         handleEngineSelectionChange: (_, { engineNames }) => {
           const newSelectedEngineNames = new Set() as Set<string>;
+          // @ts-expect-error upgrade typescript v5.1.6
           engineNames.forEach((engineName) => newSelectedEngineNames.add(engineName));
 
           return newSelectedEngineNames;
         },
+        // @ts-expect-error upgrade typescript v5.1.6
         closeUsersAndRolesFlyout: () => new Set(),
       },
     ],
@@ -238,6 +264,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
     singleUserRoleMapping: [
       null,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setSingleUserRoleMapping: (_, { singleUserRoleMapping }) => singleUserRoleMapping || null,
         closeUsersAndRolesFlyout: () => null,
       },
@@ -245,6 +272,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
     roleMappingErrors: [
       [],
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setRoleMappingErrors: (_, { errors }) => errors,
         handleSaveMapping: () => [],
         closeUsersAndRolesFlyout: () => [],
@@ -253,6 +281,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
     userFormUserIsExisting: [
       true,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setUserExistingRadioValue: (_, { userFormUserIsExisting }) => userFormUserIsExisting,
         closeUsersAndRolesFlyout: () => true,
       },
@@ -260,12 +289,16 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
     elasticsearchUser: [
       emptyUser,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setRoleMappingsData: (_, { elasticsearchUsers }) => elasticsearchUsers[0] || emptyUser,
+        // @ts-expect-error upgrade typescript v5.1.6
         setElasticsearchUser: (_, { elasticsearchUser }) => elasticsearchUser || emptyUser,
+        // @ts-expect-error upgrade typescript v5.1.6
         setElasticsearchUsernameValue: (state, { username }) => ({
           ...state,
           username,
         }),
+        // @ts-expect-error upgrade typescript v5.1.6
         setElasticsearchEmailValue: (state, { email }) => ({
           ...state,
           email,
@@ -283,12 +316,14 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
     userFormIsNewUser: [
       true,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setUserFormIsNewUser: (_, { userFormIsNewUser }) => userFormIsNewUser,
       },
     ],
     smtpSettingsPresent: [
       false,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setRoleMappingsData: (_, { smtpSettingsPresent }) => smtpSettingsPresent,
       },
     ],
