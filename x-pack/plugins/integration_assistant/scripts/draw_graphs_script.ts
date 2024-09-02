@@ -11,6 +11,7 @@ import {
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';
 import { ToolingLog } from '@kbn/tooling-log';
+import { Graph as RunnableGraph } from "@langchain/core/runnables/graph";
 import { FakeLLM } from '@langchain/core/utils/testing';
 import fs from 'fs/promises';
 import path from 'path';
@@ -37,45 +38,21 @@ async function saveFile(filename: string, buffer: Buffer) {
   await fs.writeFile(outputPath, buffer);
 }
 
-async function drawEcsGraph() {
-  const ecsGraph = (await getEcsGraph({ model })).getGraph();
-  const output = await ecsGraph.drawMermaidPng();
+async function drawGraph(compiledGraph: RunnableGraph, graphName: string) {
+  const output = await compiledGraph.drawMermaidPng();
   const buffer = Buffer.from(await output.arrayBuffer());
-  await saveFile('ecs_graph.png', buffer);
-}
-
-async function drawEcsSubGraph() {
-  const ecsGraph = (await getEcsSubGraph({ model })).getGraph();
-  const output = await ecsGraph.drawMermaidPng();
-  const buffer = Buffer.from(await output.arrayBuffer());
-  await saveFile('ecs_subgraph.png', buffer);
-}
-
-async function drawCategorizationGraph() {
-  const categorizationGraph = (await getCategorizationGraph({ client, model })).getGraph();
-  const output = await categorizationGraph.drawMermaidPng();
-  const buffer = Buffer.from(await output.arrayBuffer());
-  await saveFile('categorization_graph.png', buffer);
-}
-
-async function drawLogFormatDetectionGraph() {
-  const categorizationGraph = (await getLogFormatDetectionGraph(model)).getGraph();
-  const output = await categorizationGraph.drawMermaidPng();
-  const buffer = Buffer.from(await output.arrayBuffer());
-  await saveFile('log_detection_graph.png', buffer);
-}
-
-async function drawRelatedGraph() {
-  const relatedGraph = (await getRelatedGraph({ client, model })).getGraph();
-  const output = await relatedGraph.drawMermaidPng();
-  const buffer = Buffer.from(await output.arrayBuffer());
-  await saveFile('related_graph.png', buffer);
+  await saveFile(graphName+'.png', buffer);
 }
 
 export async function drawGraphs() {
-  drawEcsGraph();
-  drawEcsSubGraph();
-  drawCategorizationGraph();
-  drawRelatedGraph();
-  drawLogFormatDetectionGraph();
+  const relatedGraph = (await getRelatedGraph({ client, model })).getGraph();
+  const logFormatDetectionGraph = (await getLogFormatDetectionGraph(model)).getGraph();
+  const categorizationGraph = (await getCategorizationGraph({ client, model })).getGraph();
+  const ecsSubGraph = (await getEcsSubGraph({ model })).getGraph();
+  const ecsGraph = (await getEcsGraph({ model })).getGraph();
+  drawGraph(relatedGraph, 'related_graph');
+  drawGraph(logFormatDetectionGraph, 'log_detection_graph');
+  drawGraph(categorizationGraph, 'categorization_graph');
+  drawGraph(ecsSubGraph, 'ecs_subgraph');
+  drawGraph(ecsGraph, 'ecs_graph');
 }

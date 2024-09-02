@@ -100,7 +100,10 @@ export async function getEcsGraph({ model }: EcsGraphParams) {
     .addEdge('handleInvalidEcs', 'handleValidation')
     .addEdge('handleMergedSubGraphResponse', 'handleValidation')
     .addConditionalEdges('modelInput', (state: EcsMappingState) =>
-      handleCreateMappingChunks({ state })
+      handleCreateMappingChunks({ state }), {
+        modelOutput: 'modelOutput',
+        subGraph: 'subGraph',
+      }
     )
     .addConditionalEdges('handleValidation', (state: EcsMappingState) => chainRouter({ state }), {
       duplicateFields: 'handleDuplicates',
