@@ -41,7 +41,7 @@ describe('Rule response schema', () => {
     const result = RuleResponse.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"type: Invalid discriminator value. Expected 'eql' | 'query' | 'saved_query' | 'threshold' | 'threat_match' | 'machine_learning' | 'new_terms' | 'esql'"`
+      `"type: Invalid discriminator value. Expected 'threshold' | 'eql' | 'query' | 'saved_query' | 'threat_match' | 'machine_learning' | 'new_terms' | 'esql'"`
     );
   });
 
