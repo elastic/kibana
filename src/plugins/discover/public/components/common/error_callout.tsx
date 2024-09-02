@@ -76,20 +76,18 @@ export const ErrorCallout = ({ title, error, isEsqlMode }: Props) => {
         </>
       }
       footer={
-        <>
-          {isEsqlMode && (
-            <EuiButtonEmpty
-              iconType="documentation"
-              href={docLinks.links.query.queryESQL}
-              data-test-subj="discoverErrorCalloutESQLReferenceButton"
-              target="_blank"
-            >
-              {i18n.translate('discover.errorCalloutESQLReferenceButtonLabel', {
-                defaultMessage: 'Open ES|QL reference',
-              })}
-            </EuiButtonEmpty>
-          )}
-        </>
+        isEsqlMode ? (
+          <EuiButtonEmpty
+            iconType="documentation"
+            href={docLinks.links.query.queryESQL}
+            data-test-subj="discoverErrorCalloutESQLReferenceButton"
+            target="_blank"
+          >
+            {i18n.translate('discover.errorCalloutESQLReferenceButtonLabel', {
+              defaultMessage: 'Open ES|QL reference',
+            })}
+          </EuiButtonEmpty>
+        ) : undefined
       }
     />
   );

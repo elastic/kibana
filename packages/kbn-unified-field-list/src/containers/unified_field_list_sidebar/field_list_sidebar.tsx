@@ -370,9 +370,6 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
         alignItems="stretch"
         gutterSize="none"
         responsive={false}
-        css={css`
-          background-color: ${euiTheme.colors.body};
-        `}
       >
         {Boolean(prepend) && (
           <EuiFlexItem
