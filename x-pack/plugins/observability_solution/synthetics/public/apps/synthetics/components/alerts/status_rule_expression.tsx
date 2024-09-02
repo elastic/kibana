@@ -125,7 +125,7 @@ export const StatusRuleExpression: React.FC<Props> = ({ ruleParams, setRuleParam
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="xs" />
-      {!showGroupBy && (
+      {showGroupBy && (
         <GroupByExpression
           groupByLocation={ruleParams.condition?.groupBy === 'locationId'}
           onChange={onGroupByChange}

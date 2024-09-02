@@ -26,6 +26,10 @@ export const NumberOfChecksSchema = schema.object({
   }),
 });
 
+export const numberOfLocationsSchema = schema.object({
+  numberOfLocations: schema.number(),
+});
+
 export const StatusRuleConditionSchema = schema.object({
   groupBy: schema.maybe(
     schema.string({
@@ -34,13 +38,13 @@ export const StatusRuleConditionSchema = schema.object({
   ),
   downThreshold: schema.maybe(schema.number()),
   window: schema.oneOf([
-    schema.object({
-      numberOfLocations: schema.number(),
-    }),
-    schema.object({
-      time: TimeWindowSchema,
-    }),
-    NumberOfChecksSchema,
+    schema.intersection([
+      schema.object({
+        time: TimeWindowSchema,
+      }),
+      numberOfLocationsSchema,
+    ]),
+    schema.intersection([NumberOfChecksSchema, numberOfLocationsSchema]),
   ]),
 });
 

@@ -24,6 +24,7 @@ export const LocationsValueExpression = ({ ruleParams, setRuleParams }: Props) =
       setRuleParams('condition', {
         ...ruleParams.condition,
         window: { ...ruleParams.condition?.window, numberOfLocations: value },
+        groupBy: value === 1 ? ruleParams.condition?.groupBy : 'none',
       });
     },
     [ruleParams.condition, setRuleParams]
