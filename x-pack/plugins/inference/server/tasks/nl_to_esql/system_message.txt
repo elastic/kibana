@@ -36,8 +36,9 @@ Timestamp literal syntax: NOW() - 15 days, 24 hours, 1 week
 ## Source commands
 
 Source commands select a data source. There are three source commands:
-FROM (which selects an index), ROW (which creates data from the command)
-and SHOW (which returns information about the deployment).
+- FROM: selects an index
+- ROW: creates data from the command
+- SHOW: returns information about the deployment
 
 ## Processing commands
 
@@ -59,7 +60,7 @@ pattern.
 Aggregation functions are not supported for EVAL.
 - GROK: extracts structured data out of a string, using a grok pattern
 - KEEP: keeps one or more columns, drop the ones that are not kept
-  only the colums in the KEEP command can be used after a KEEP command
+  only the columns in the KEEP command can be used after a KEEP command
 - LIMIT: returns the first n number of rows. The maximum value for this
 is 10000.
 - MV_EXPAND: expands multi-value columns into a single row per value
@@ -76,6 +77,7 @@ is 10000.
 ## Functions and operators
 
 ### Aggregation functions
+
 AVG
 COUNT
 COUNT_DISTINCT
@@ -119,6 +121,7 @@ TANH
 TAU
 
 ### String functions
+
 CONCAT
 LEFT
 LENGTH
@@ -133,6 +136,7 @@ TO_UPPER
 TRIM
 
 ### Date-time functions
+
 DATE_DIFF
 DATE_EXTRACT
 DATE_FORMAT
@@ -141,6 +145,7 @@ DATE_TRUNC
 NOW
 
 ### Type conversion functions
+
 TO_BOOLEAN
 TO_CARTESIANPOINT
 TO_CARTESIANSHAPE
@@ -159,12 +164,14 @@ TO_VERSION
 
 
 ### Conditional functions and expressions
+
 CASE
 COALESCE
 GREATEST
 LEAST
 
 ### Multivalue functions
+
 MV_AVG
 MV_CONCAT
 MV_COUNT
@@ -177,6 +184,7 @@ MV_MIN
 MV_SUM
 
 ### Operators
+
 Binary operators
 Unary operators
 Logical operators
@@ -187,6 +195,8 @@ IN
 LIKE
 RLIKE
 STARTS_WITH
+
+# Usage examples
 
 Here are some example queries:
 
@@ -217,6 +227,7 @@ FROM employees
   | STATS COUNT(*)
 ```
 
+*Extracting structured data from string field using DISSECT*
 ```esql
 ROW a = "2023-01-23T12:15:00.000Z - some text - 127.0.0.1"
 | DISSECT a "%{date} - %{msg} - %{ip}"
@@ -246,6 +257,7 @@ FROM employees
 | SORT b
 ```
 
+**Creating inline data using ROW**
 ```esql
 ROW a = 1, b = "two", c = null
 ```
@@ -275,7 +287,7 @@ FROM logs-*
 | SORT count DESC
 ```
 
-returns all first names for each first letter
+**Returning all first names for each first letter**
 ```esql
 FROM employees
 | EVAL first_letter = SUBSTRING(first_name, 0, 1)

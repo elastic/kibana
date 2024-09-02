@@ -17,6 +17,7 @@ interface TestCase {
   question: string;
   expected?: string;
   criteria?: string[];
+  only?: boolean;
 }
 
 interface Section {
@@ -67,7 +68,13 @@ async function evaluateEsqlQuery({
       ...(expected
         ? [
             `Returns a ES|QL query that is functionally equivalent to:
-      ${expected}. It's OK if column names are slightly different, as long as the expected end result is the same.`,
+
+            """esql
+            ${expected}
+            """
+
+            It's OK if column names are slightly different, or if the used functions or operators are different,
+            as long as the expected end result is the same.`,
           ]
         : []),
       ...criteria,
@@ -109,7 +116,8 @@ const buildTestDefinitions = (): Section[] => {
           question: `From employees, I want to sort the documents by \`salary\`,
       and then return 10 results per page, and then see the second page`,
           criteria: [
-            'The assistant should clearly mention that pagination is currently not supported in ES|QL. It might provide a workaround.',
+            `The assistant should clearly mention that pagination is currently not supported in ES|QL.
+            It might provide a workaround, even if this should not be considered mandatory for this criteria.`,
           ],
         },
         {
@@ -221,7 +229,7 @@ const generateTestSuite = () => {
   for (const section of testDefinitions) {
     describe(`${section.title}`, () => {
       for (const test of section.tests) {
-        it(`${test.title}`, async () => {
+        (test.only ? it.only : it)(`${test.title}`, async () => {
           await evaluateEsqlQuery({
             question: test.question,
             expected: test.expected,
