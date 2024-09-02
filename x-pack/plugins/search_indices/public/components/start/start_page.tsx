@@ -31,7 +31,7 @@ export const ElasticsearchStartPage = () => {
     >
       <KibanaPageTemplate.Section alignment="center" restrictWidth={false} grow>
         <div css={{ width: "1200px" }}>
-          {/* <ConnectionDetails elasticsearchUrl="http://localhost:9200" /> */}
+          <ConnectionDetails elasticsearchUrl="http://localhost:9200" />
 
           <QuickStats />
         </div>

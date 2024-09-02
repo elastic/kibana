@@ -15,6 +15,7 @@ import {
   EuiFlexItem,
   EuiText,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -25,6 +26,7 @@ interface ConnectionDetailsProps {
 }
 
 export const ConnectionDetails: React.FC<ConnectionDetailsProps> = ({ elasticsearchUrl }) => {
+  const { euiTheme } = useEuiTheme();
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem grow={false}>
@@ -39,7 +41,7 @@ export const ConnectionDetails: React.FC<ConnectionDetailsProps> = ({ elasticsea
       </EuiFlexItem>
       <EuiFlexItem grow={true}>
         <EuiCodeBlock paddingSize="s" language="http">
-          <p>{elasticsearchUrl}</p>
+          <p css={{ color: euiTheme.colors.successText }}>{elasticsearchUrl}</p>
         </EuiCodeBlock>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
