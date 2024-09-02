@@ -108,7 +108,7 @@ Several settings that apply to all controls of a same dashboard are available.
 * *Selection* settings:
 
 ** *Validate user selections* &mdash; When selected, any selected option that results in no data is ignored.
-** *Chain controls* &mdash; When selected, any selected options in one control narrows the available options in the next control.
+** *Chain controls* &mdash; When selected, controls are applied sequentially from left to right, and line by line. Any selected options in one control narrows the available options in the next control. 
 ** **Apply selections automatically** &mdash; The dashboard is updated dynamically when options are selected in controls. When this option is disabled, users first need to **Apply** their control selection before they are applied to the dashboard.
 
 * To remove all controls from the dashboard, click *Delete all*.

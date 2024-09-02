@@ -41,7 +41,7 @@ When you create a dashboard, you are automatically in edit mode and can make cha
 . Organize your dashboard by <<arrange-panels,organizing the various panels>>. 
 [[add-dashboard-settings]]
 . Define the main settings of your dashboard from the *Settings* menu located in the toolbar.
-.. Clear title, description, and <<managing-tags,tags>> allow you to find the dashboard quickly later when browsing your list of dashboard or using the {kib} search bar.
+.. Meaningful title, description, and <<managing-tags,tags>> allow you to find the dashboard quickly later when browsing your list of dashboard or using the {kib} search bar.
 .. Additional display options allow you unify the look and feel of the dashboard's panels:
 
 *** *Store time with dashboard* &mdash; Saves the specified time filter.

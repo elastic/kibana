@@ -36,21 +36,21 @@ The global time range menu is located right next to the query bar, in the dashbo
 image::images/dashboard-global-time-range.png[Time range menu with multiple time range suggestions, width=40%]
 
 [float]
-==== Apply a custom time filter on a panel
+==== Apply a custom time range to a panel
 
-**To apply a panel-level time filter:**
+**To apply a panel-level time range:**
 
-. Open the panel menu, then select *More* > *Settings*.
+. Open the panel menu, then select *Settings*.
 
 . Turn on *Apply a custom time range*.
 
 . Enter the time range you want to view, then *Apply* it.
 
-**To view and edit panel-level filters:**
+**To change the time range on a panel-level filters:**
 
 When a custom filter is active for a single panel, it is indicated in the panel's header.
 
-To edit it, click the filter in the header. You can then adjust and apply the updated **Time range**.
+To edit it, click the filter. You can then adjust and apply the updated **Time range**.
 
 [float]
 === Use available controls
@@ -129,7 +129,7 @@ image::images/dashboard-filter-editor.png[Filter editor with 2 conditions]
 === View the panel data and requests
 //Looks outdated
 
-View the data in visualizations and the requests that collect the data. 
+**View the data in visualizations and the requests that collect the data:**
 
 . Open the panel menu, then select **Inspect**.
 
@@ -153,6 +153,12 @@ When you download visualization panels with multiple layers, each layer produces
 
 .. To view the requests in *Console*, click *Request*, then click *Open in Console*.
 
+
+**View the time range on specific panels:**
+
+When a custom filter is active for a single panel, it is indicated in the panel's header.
+
+You can view it in more details and edit it by clicking the filter.
 
 [float]
 == Full screen mode and maximized panel views
