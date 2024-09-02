@@ -6,16 +6,16 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import type { SearchIndicesPluginSetup, SearchIndicesPluginStart } from './types';
+import type { SearchApiKeysPluginSetup, SearchApiKeysPluginStart } from './types';
 
-export class SearchIndicesPlugin
-  implements Plugin<SearchIndicesPluginSetup, SearchIndicesPluginStart>
+export class SearchApiKeysPlugin
+  implements Plugin<SearchApiKeysPluginSetup, SearchApiKeysPluginStart>
 {
-  public setup(core: CoreSetup): SearchIndicesPluginSetup {
+  public setup(core: CoreSetup): SearchApiKeysPluginSetup {
     return {};
   }
 
-  public start(core: CoreStart): SearchIndicesPluginStart {
+  public start(core: CoreStart): SearchApiKeysPluginStart {
     return {};
   }
 

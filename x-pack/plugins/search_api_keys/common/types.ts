@@ -8,6 +8,5 @@
 export interface UserStartPrivilegesResponse {
   privileges: {
     canCreateApiKeys: boolean;
-    canCreateIndex: boolean;
   };
 }

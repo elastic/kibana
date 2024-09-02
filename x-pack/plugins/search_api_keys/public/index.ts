@@ -7,8 +7,8 @@
 
 import { PluginInitializerContext } from '@kbn/core/public';
 
-import { ApiKeyPlugin } from './plugin';
+import { SearchApiKeysPlugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
-  return new ApiKeyPlugin(initializerContext);
+  return new SearchApiKeysPlugin();
 }

@@ -7,10 +7,15 @@
     "server": true,
     "browser": true,
     "configPath": [
-      "xpack"
+      "xpack",
+      "searchApiKeys"
     ],
     "requiredPlugins": [],
-    "optionalPlugins": [],
+    "optionalPlugins": [
+      "cloud",
+      "console",
+      "usageCollection",
+    ],
     "requiredBundles": []
   }
 }

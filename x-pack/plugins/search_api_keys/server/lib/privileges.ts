@@ -12,23 +12,15 @@ import type { UserStartPrivilegesResponse } from '../../common/types';
 
 export async function fetchUserStartPrivileges(
   client: ElasticsearchClient,
-  logger: Logger,
-  indexName: string = 'test-index-name'
+  logger: Logger
 ): Promise<UserStartPrivilegesResponse> {
   try {
     const securityCheck = await client.security.hasPrivileges({
       cluster: ['manage_api_key'],
-      index: [
-        {
-          names: [indexName],
-          privileges: ['create_index'],
-        },
-      ],
     });
 
     return {
       privileges: {
-        canCreateIndex: securityCheck?.index?.[indexName]?.create_index ?? false,
         canCreateApiKeys: securityCheck?.cluster?.manage_api_key ?? false,
       },
     };
@@ -37,7 +29,6 @@ export async function fetchUserStartPrivileges(
     logger.error(e);
     return {
       privileges: {
-        canCreateIndex: false,
         canCreateApiKeys: false,
       },
     };

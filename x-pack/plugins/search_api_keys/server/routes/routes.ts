@@ -13,7 +13,7 @@ import { fetchUserStartPrivileges } from '../lib/privileges';
 export function registerRoutes(router: IRouter, logger: Logger) {
   router.get(
     {
-      path: '/internal/search_api_keys/start_privileges',
+      path: '/internal/search_api_keys/create',
       validate: {},
       options: {
         access: 'internal',
@@ -24,10 +24,14 @@ export function registerRoutes(router: IRouter, logger: Logger) {
       const client = core.elasticsearch.client.asCurrentUser;
       const body = await fetchUserStartPrivileges(client, logger);
 
-      return response.ok({
-        body,
-        headers: { 'content-type': 'application/json' },
-      });
+      if (body.privileges.canCreateApiKeys) {
+        return response.ok({
+          body: { apiKey: '123456789' },
+          headers: { 'content-type': 'application/json' },
+        });
+      } else {
+        throw new Error('Unauthorized');
+      }
     }
   );
 }
