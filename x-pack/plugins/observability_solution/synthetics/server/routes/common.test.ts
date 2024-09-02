@@ -42,7 +42,6 @@ describe('common utils', () => {
   });
 });
 
-
 describe('getSavedObjectKqlFilter', () => {
   it('returns empty string if no values are provided', () => {
     expect(getSavedObjectKqlFilter({ field: 'tags' })).toBe('');

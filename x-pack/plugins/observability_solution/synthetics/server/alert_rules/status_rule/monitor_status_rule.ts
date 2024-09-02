@@ -81,34 +81,20 @@ export const registerSyntheticsStatusCheckRule = (
 
       const isCustomRule = !isEmpty(params);
 
-      const {
-        isLocationBased,
-        isTimeWindow,
-        isChecksBased,
+      const { isTimeWindow, downThreshold, numberOfLocations, numberOfChecks } = getConditionType(
+        params.condition
+      );
+
+      handleDownMonitorThresholdAlert({
+        groupBy: params?.condition?.groupBy ?? 'locationId',
+        downConfigsById: getConfigsByIds(downConfigs),
+        downConfigs,
         downThreshold,
         numberOfLocations,
-        numberOfChecks,
-      } = getConditionType(params.condition);
-
-      if (isLocationBased) {
-        handleLocationBasedAlert({
-          downConfigsById: getConfigsByIds(downConfigs),
-          locationsThreshold: numberOfLocations,
-          downThreshold,
-          statusRule,
-        });
-      } else {
-        handleDownMonitorThresholdAlert({
-          groupBy: params?.condition?.groupBy ?? 'locationId',
-          downConfigsById: getConfigsByIds(downConfigs),
-          downConfigs,
-          downThreshold,
-          isCustomRule,
-          statusRule,
-          isTimeWindow,
-          isChecksBased,
-        });
-      }
+        isCustomRule,
+        statusRule,
+        isTimeWindow,
+      });
 
       setRecoveredAlertsContext({
         alertsClient,
@@ -143,38 +129,36 @@ const getConfigsByIds = (downConfigs: StatusConfigs): Map<string, AlertStatusMet
   return downConfigsById;
 };
 
-const handleLocationBasedAlert = ({
-  downConfigsById,
+const getDoesMonitorMeetLocationThreshold = ({
+  matchesByLocation,
   locationsThreshold,
   downThreshold,
-  statusRule,
+  useTimeWindow,
 }: {
-  downConfigsById: Map<string, AlertStatusMetaDataCodec[]>;
+  matchesByLocation: AlertStatusMetaDataCodec[];
   locationsThreshold: number;
   downThreshold: number;
-  statusRule: StatusRuleExecutor;
+  useTimeWindow: boolean;
 }) => {
   // for location based we need to make sure, monitor is down for the threshold for all locations
-  // lets build a map of monitors for each location
-  for (const [configId, configs] of downConfigsById) {
-    const matchingLocationsWithDownThreshold = configs.filter(
-      (config) => config.checks.down >= downThreshold
-    );
-    if (matchingLocationsWithDownThreshold.length < locationsThreshold) {
-      continue;
-    }
-    const monitorSummary = statusRule.getLocationBasedDownSummary({
-      statusConfigs: configs,
-      downThreshold,
-    });
-    const alertId = `${configId}_locations_based`;
-    statusRule.scheduleAlert({
-      idWithLocation: `${configId}-${configs[0].locationId}`,
-      alertId,
-      monitorSummary,
-      statusConfig: configs[0],
-      downThreshold,
-    });
+  const getMatchingLocationsWithDownThresholdWithXChecks = (
+    matches: AlertStatusMetaDataCodec[]
+  ) => {
+    return matches.filter((config) => config.checks.downWithinXChecks >= downThreshold);
+  };
+  const getMatchingLocationsWithDownThresholdWithinTimeWindow = (
+    matches: AlertStatusMetaDataCodec[]
+  ) => {
+    return matches.filter((config) => config.checks.down >= downThreshold);
+  };
+  if (useTimeWindow) {
+    const matchingLocationsWithDownThreshold =
+      getMatchingLocationsWithDownThresholdWithinTimeWindow(matchesByLocation);
+    return matchingLocationsWithDownThreshold.length >= locationsThreshold;
+  } else {
+    const matchingLocationsWithDownThreshold =
+      getMatchingLocationsWithDownThresholdWithXChecks(matchesByLocation);
+    return matchingLocationsWithDownThreshold.length >= locationsThreshold;
   }
 };
 
@@ -183,31 +167,35 @@ const handleDownMonitorThresholdAlert = ({
   downConfigs,
   downConfigsById,
   downThreshold,
+  numberOfLocations,
   isCustomRule,
   isTimeWindow,
-  isChecksBased,
   statusRule,
 }: {
   groupBy: string;
   downConfigsById: Map<string, AlertStatusMetaDataCodec[]>;
   downConfigs: StatusConfigs;
   downThreshold: number;
+  numberOfLocations: number;
   isCustomRule: boolean;
   isTimeWindow?: boolean;
-  isChecksBased?: boolean;
   statusRule: StatusRuleExecutor;
 }) => {
   const groupByLocation = groupBy === 'locationId';
   if (groupByLocation) {
     Object.entries(downConfigs).forEach(([idWithLocation, statusConfig]) => {
-      const { checks } = statusConfig;
-      const isTimeWindowConditionMet = isTimeWindow && checks.down >= downThreshold;
-      const isChecksConditionMet = isChecksBased && checks.downWithinXChecks >= downThreshold;
-      if (isTimeWindowConditionMet || isChecksConditionMet) {
+      const doesMonitorMeetLocationThreshold = getDoesMonitorMeetLocationThreshold({
+        matchesByLocation: [statusConfig],
+        locationsThreshold: numberOfLocations,
+        downThreshold,
+        useTimeWindow: isTimeWindow || false,
+      });
+      if (doesMonitorMeetLocationThreshold) {
         const alertId = isCustomRule ? `${idWithLocation}_custom` : idWithLocation;
         const monitorSummary = statusRule.getMonitorDownSummary({
           statusConfig,
           downThreshold,
+          numberOfLocations,
         });
 
         return statusRule.scheduleAlert({
@@ -221,19 +209,19 @@ const handleDownMonitorThresholdAlert = ({
     });
   } else {
     for (const [configId, configs] of downConfigsById) {
-      const totalDownChecks = configs.reduce((acc, { checks }) => acc + checks.down, 0);
-      const totalDownChecksWithinXChecks = configs.reduce(
-        (acc, { checks }) => acc + checks.downWithinXChecks,
-        0
-      );
-      const isTimeWindowConditionMet = isTimeWindow && totalDownChecks >= downThreshold;
-      const isChecksConditionMet = isChecksBased && totalDownChecksWithinXChecks >= downThreshold;
+      const doesMonitorMeetLocationThreshold = getDoesMonitorMeetLocationThreshold({
+        matchesByLocation: configs,
+        locationsThreshold: numberOfLocations,
+        downThreshold,
+        useTimeWindow: isTimeWindow || false,
+      });
 
-      if (isTimeWindowConditionMet || isChecksConditionMet) {
+      if (doesMonitorMeetLocationThreshold) {
         const alertId = configId;
         const monitorSummary = statusRule.getUngroupedDownSummary({
           statusConfigs: configs,
           downThreshold,
+          numberOfLocations,
         });
         return statusRule.scheduleAlert({
           idWithLocation: configId,

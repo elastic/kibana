@@ -52,7 +52,10 @@ export class SyntheticsRuleHelper {
 
   async addMonitor(name: string) {
     const testData = {
-      locations: [{ id: 'dev', isServiceManaged: true, label: 'Dev Service' }],
+      locations: [
+        { id: 'dev', isServiceManaged: true, label: 'Dev Service' },
+        { id: 'dev2', isServiceManaged: true, label: 'Dev Service 2' },
+      ],
       name,
       type: 'http',
       url: 'http://www.google.com',

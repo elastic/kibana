@@ -21,6 +21,7 @@ import { GroupByExpression } from './common/group_by_field';
 import { WindowValueExpression } from './common/condition_window_value';
 import { DEFAULT_CONDITION, ForTheLastExpression } from './common/for_the_last_expression';
 import { StatusRuleParamsProps } from './status_rule_ui';
+import { LocationsValueExpression } from './common/condition_locations_value';
 
 interface Props {
   ruleParams: StatusRuleParamsProps['ruleParams'];
@@ -31,7 +32,10 @@ export const StatusRuleExpression: React.FC<Props> = ({ ruleParams, setRuleParam
   const condition = ruleParams.condition;
   const downThreshold =
     condition && 'downThreshold' in condition ? condition.downThreshold ?? 5 : 5;
-  const locBased = (condition && 'numberOfLocations' in condition.window) ?? false;
+  const showGroupBy =
+    condition &&
+    'numberOfLocations' in condition.window &&
+    condition.window.numberOfLocations === 1;
 
   const onThresholdChange = useCallback(
     (value: number) => {
@@ -39,6 +43,7 @@ export const StatusRuleExpression: React.FC<Props> = ({ ruleParams, setRuleParam
         downThreshold: 5,
         window: {
           numberOfChecks: 5,
+          numberOfLocations: 1,
         },
       };
       setRuleParams('condition', {
@@ -85,24 +90,20 @@ export const StatusRuleExpression: React.FC<Props> = ({ ruleParams, setRuleParam
             value={StatusTranslations.criteriaValue}
           />
         </EuiFlexItem>
-        {!locBased ? (
-          <EuiFlexItem grow={false}>
-            <ValueExpression
-              value={downThreshold}
-              valueLabel={i18n.translate('xpack.synthetics.rules.status.valueLabel', {
-                defaultMessage: '{threshold} times',
-                values: { threshold: downThreshold },
-              })}
-              onChangeSelectedValue={(val) => {
-                onThresholdChange(val);
-              }}
-              description={StatusTranslations.isDownDescription}
-              errors={[]}
-            />
-          </EuiFlexItem>
-        ) : (
-          <EuiExpression description={StatusTranslations.isDownDescription} />
-        )}
+        <EuiFlexItem grow={false}>
+          <ValueExpression
+            value={downThreshold}
+            valueLabel={i18n.translate('xpack.synthetics.rules.status.valueLabel', {
+              defaultMessage: '{threshold} times',
+              values: { threshold: downThreshold },
+            })}
+            onChangeSelectedValue={(val) => {
+              onThresholdChange(val);
+            }}
+            description={StatusTranslations.isDownDescription}
+            errors={[]}
+          />
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <ForTheLastExpression ruleParams={ruleParams} setRuleParams={setRuleParams} />
         </EuiFlexItem>
@@ -111,7 +112,20 @@ export const StatusRuleExpression: React.FC<Props> = ({ ruleParams, setRuleParam
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="xs" />
-      {!locBased && (
+      <EuiFlexGroup gutterSize="m">
+        <EuiFlexItem>
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiExpression description={StatusTranslations.fromLocationsDescription} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <LocationsValueExpression ruleParams={ruleParams} setRuleParams={setRuleParams} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="xs" />
+      {showGroupBy && (
         <GroupByExpression
           groupByLocation={ruleParams.condition?.groupBy === 'locationId'}
           onChange={onGroupByChange}
@@ -138,5 +152,8 @@ export const StatusTranslations = {
   }),
   isDownDescription: i18n.translate('xpack.synthetics.status.expirationExpression.description', {
     defaultMessage: 'is down ',
+  }),
+  fromLocationsDescription: i18n.translate('xpack.synthetics.status.fromLocations.description', {
+    defaultMessage: 'from at least',
   }),
 };
