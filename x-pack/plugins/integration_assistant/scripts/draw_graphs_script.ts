@@ -11,7 +11,7 @@ import {
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';
 import { ToolingLog } from '@kbn/tooling-log';
-import { Graph as RunnableGraph } from "@langchain/core/runnables/graph";
+import { Graph as RunnableGraph } from '@langchain/core/runnables/graph';
 import { FakeLLM } from '@langchain/core/utils/testing';
 import fs from 'fs/promises';
 import path from 'path';
@@ -41,7 +41,7 @@ async function saveFile(filename: string, buffer: Buffer) {
 async function drawGraph(compiledGraph: RunnableGraph, graphName: string) {
   const output = await compiledGraph.drawMermaidPng();
   const buffer = Buffer.from(await output.arrayBuffer());
-  await saveFile(graphName+'.png', buffer);
+  await saveFile(`${graphName}.png`, buffer);
 }
 
 export async function drawGraphs() {

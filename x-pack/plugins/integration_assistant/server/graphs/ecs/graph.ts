@@ -99,8 +99,10 @@ export async function getEcsGraph({ model }: EcsGraphParams) {
     .addEdge('handleMissingKeys', 'handleValidation')
     .addEdge('handleInvalidEcs', 'handleValidation')
     .addEdge('handleMergedSubGraphResponse', 'handleValidation')
-    .addConditionalEdges('modelInput', (state: EcsMappingState) =>
-      handleCreateMappingChunks({ state }), {
+    .addConditionalEdges(
+      'modelInput',
+      (state: EcsMappingState) => handleCreateMappingChunks({ state }),
+      {
         modelOutput: 'modelOutput',
         subGraph: 'subGraph',
       }
