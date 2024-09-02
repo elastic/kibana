@@ -23,7 +23,7 @@ export const TimeIntervalSelector: React.FC<TimeIntervalSelectorProps> = ({
   onTimeIntervalChange,
 }) => {
   const onChange: ToolbarSelectorProps['onChange'] = useCallback(
-    (chosenOption) => {
+    (chosenOption: any) => {
       const selectedOption = chosenOption?.value;
       if (selectedOption) {
         onTimeIntervalChange(selectedOption);

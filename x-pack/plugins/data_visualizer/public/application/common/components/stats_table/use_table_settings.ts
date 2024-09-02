@@ -26,7 +26,7 @@ export function useTableSettings<TypeOfItem extends object>(
   const { pageIndex, pageSize, sortField, sortDirection } = pageState;
 
   const onTableChange: EuiBasicTableProps<TypeOfItem>['onChange'] = useCallback(
-    ({ page, sort }) => {
+    ({ page, sort }: any) => {
       const result = {
         ...pageState,
         pageIndex: page?.index ?? pageState.pageIndex,

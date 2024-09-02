@@ -89,7 +89,7 @@ const AlertsGroupingInternal = <T extends BaseAlertsGroupAggregations>(
   ) as [number[], Dispatch<SetStateAction<number[]>>, () => void];
 
   const onOptionsChange = useCallback(
-    (options) => {
+    (options: any) => {
       // useGrouping > useAlertsGroupingState options sync
       // the available grouping options change when the user selects
       // a new field not in the default ones

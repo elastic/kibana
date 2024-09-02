@@ -38,6 +38,7 @@ import { QueryBarWrapper } from '../query_bar_wrapper';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 import { VisDataContext } from '../../contexts/vis_data_context';
 import { BUCKET_TYPES } from '../../../../common/enums';
+import type { TimeseriesUIRestrictions } from '../../../../common/ui_restrictions';
 import { PanelConfigProps, PANEL_CONFIG_TABS } from './types';
 import { TimeseriesVisParams } from '../../../types';
 import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
@@ -47,6 +48,9 @@ export class TablePanelConfig extends Component<
   { selectedTab: PANEL_CONFIG_TABS }
 > {
   static contextType = VisDataContext;
+
+  declare context: { uiRestrictions?: TimeseriesUIRestrictions };
+
   constructor(props: PanelConfigProps) {
     super(props);
     this.state = { selectedTab: PANEL_CONFIG_TABS.DATA };

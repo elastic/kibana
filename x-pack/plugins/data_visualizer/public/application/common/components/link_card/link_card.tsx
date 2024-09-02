@@ -71,7 +71,8 @@ export const LinkCard: FC<LinkCardProps> = ({
             {typeof icon === 'string' ? (
               <EuiIcon size="m" type={icon} aria-label={iconAreaLabel} />
             ) : (
-              icon
+              // TODO: check this, icon might be a ComponentType
+              (icon as unknown as React.ReactNode)
             )}
           </EuiFlexItem>
           <EuiFlexItem>

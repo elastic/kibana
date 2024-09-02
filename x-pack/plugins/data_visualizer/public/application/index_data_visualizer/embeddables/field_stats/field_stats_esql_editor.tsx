@@ -25,7 +25,7 @@ export const FieldStatsESQLEditor = ({
   const [isVisualizationLoading, setIsVisualizationLoading] = useState(false);
 
   const onTextLangQuerySubmit = useCallback(
-    async (q, abortController) => {
+    async (q: any, abortController: any) => {
       if (q && onQuerySubmit) {
         setIsVisualizationLoading(true);
         await onQuerySubmit(q, abortController);

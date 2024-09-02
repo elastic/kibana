@@ -85,7 +85,7 @@ function NumberIntervalParamEditor({
   }, [isValid, setValidity]);
 
   const onChange: EuiFieldNumberProps['onChange'] = useCallback(
-    ({ target }) => setValue(isNaN(target.valueAsNumber) ? '' : target.valueAsNumber),
+    ({ target }: any) => setValue(isNaN(target.valueAsNumber) ? '' : target.valueAsNumber),
     [setValue]
   );
 
@@ -104,7 +104,7 @@ function NumberIntervalParamEditor({
       label={label}
       fullWidth={true}
       isInvalid={showValidation && !isValid}
-      helpText={get(editorConfig, 'interval.help')}
+      helpText={get(editorConfig, 'interval.help') as string}
     >
       <EuiFlexGroup gutterSize="s" responsive={false} direction={'column'}>
         <EuiFlexItem>

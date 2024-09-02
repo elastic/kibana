@@ -16,7 +16,7 @@ export const getShapeComponent = (svgParams: SvgConfig) =>
     shapeContentAttributes,
     children,
     textAttributes,
-  }: ShapeProps) {
+  }: React.PropsWithChildren<ShapeProps>) {
     const {
       viewBox: initialViewBox,
       shapeProps: defaultShapeContentAttributes,

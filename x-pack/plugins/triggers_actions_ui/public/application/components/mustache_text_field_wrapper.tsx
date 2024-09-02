@@ -40,6 +40,7 @@ export const MustacheTextFieldWrapper = ({ field, euiFieldProps, idAria, ...rest
         describedByIds: idAria ? [idAria] : undefined,
         error: errorMessage,
         fullWidth: true,
+        // @ts-ignore - field.helpText is not callable after upgrade to @types/react@18
         helpText: typeof field.helpText === 'function' ? field.helpText() : field.helpText,
         isInvalid,
         label: field.label,
