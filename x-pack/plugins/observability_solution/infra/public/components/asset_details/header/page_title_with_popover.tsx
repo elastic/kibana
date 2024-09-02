@@ -12,13 +12,7 @@ import { APM_HOST_TROUBLESHOOTING_LINK } from '../constants';
 import { Popover } from '../tabs/common/popover';
 import { useMetadataStateContext } from '../hooks/use_metadata_state';
 
-export const PageTitleWithPopover = ({
-  hasSystemMetrics,
-  name,
-}: {
-  hasSystemMetrics: boolean;
-  name: string;
-}) => {
+export const PageTitleWithPopover = ({ name }: { name: string }) => {
   const { metadata, loading } = useMetadataStateContext();
 
   return (

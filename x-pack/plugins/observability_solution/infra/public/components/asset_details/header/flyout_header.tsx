@@ -23,7 +23,6 @@ import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common/i
 import { PageTitleWithPopover } from './page_title_with_popover';
 
 type Props = Pick<EuiPageHeaderProps, 'tabs' | 'title' | 'rightSideItems'> & {
-  hasSystemIntegration: boolean;
   assetType: InventoryItemType;
   loading: boolean;
 };
@@ -32,7 +31,6 @@ export const FlyoutHeader = ({
   title,
   tabs = [],
   rightSideItems = [],
-  hasSystemIntegration,
   assetType,
   loading,
 }: Props) => {
@@ -57,16 +55,7 @@ export const FlyoutHeader = ({
             {loading ? (
               <EuiLoadingSpinner size="m" />
             ) : (
-              <h4>
-                {assetType === 'host' ? (
-                  <PageTitleWithPopover
-                    hasSystemMetrics={hasSystemIntegration}
-                    name={title ?? ''}
-                  />
-                ) : (
-                  title
-                )}
-              </h4>
+              <h4>{assetType === 'host' ? <PageTitleWithPopover name={title ?? ''} /> : title}</h4>
             )}
           </EuiTitle>
         </EuiFlexItem>
