@@ -217,7 +217,7 @@ describe('When semantic_text is enabled', () => {
       },
     } as any);
     const { find } = setup({
-      errorsInTrainedModelDeployment: { '.elser_model_2': 'Error' },
+      errorsInTrainedModelDeployment: { elser_model_2: 'Error' },
       saveMappings,
       forceSaveMappings,
       setErrorsInTrainedModelDeployment,
@@ -228,7 +228,7 @@ describe('When semantic_text is enabled', () => {
     });
 
     it('should display only the errored deployment', () => {
-      expect(find('trainedModelsDeploymentModal').text()).toContain('.elser_model_2');
+      expect(find('trainedModelsDeploymentModal').text()).toContain('elser_model_2');
       expect(find('trainedModelsDeploymentModal').text()).not.toContain('valid-model');
     });
 

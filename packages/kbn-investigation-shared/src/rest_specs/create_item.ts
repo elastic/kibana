@@ -7,14 +7,14 @@
  */
 
 import * as t from 'io-ts';
-import { investigationItemsSchema } from '../schema';
+import { itemSchema } from '../schema';
 import { investigationItemResponseSchema } from './investigation_item';
 
 const createInvestigationItemParamsSchema = t.type({
   path: t.type({
     investigationId: t.string,
   }),
-  body: investigationItemsSchema,
+  body: itemSchema,
 });
 
 const createInvestigationItemResponseSchema = investigationItemResponseSchema;

@@ -20,7 +20,8 @@
   "tags": [
     {
       "name": "saved objects",
-      "description": "Manage Kibana saved objects, including dashboards, visualizations, and more."
+      "x-displayName": "Saved objects",
+      "description": "Export sets of saved objects that you want to import into {kib}, resolve import errors, and rotate an encryption key for encrypted saved objects with the saved objects APIs.\n\nTo manage a specific type of saved object, use the corresponding APIs.\nFor example, use:\n\n* [Data views](../group/endpoint-data-views)\n* [Spaces](https://www.elastic.co/guide/en/kibana/current/spaces-api.html)\n* [Short URLs](https://www.elastic.co/guide/en/kibana/current/short-urls-api.html)\n\nWarning: Do not write documents directly to the `.kibana` index. When you write directly to the `.kibana` index, the data becomes corrupted and permanently breaks future Kibana versions.\n"
     }
   ],
   "paths": {
