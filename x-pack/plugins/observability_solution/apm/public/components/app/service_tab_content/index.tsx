@@ -17,7 +17,7 @@ import { Tab } from './types';
 import { ServiceTabEmptyState } from '../service_tab_empty_state';
 import { SearchBar } from '../../shared/search_bar/search_bar';
 
-interface ServiceTabContentProps {
+export interface ServiceTabContentProps {
   tabName: Tab;
   children: ReactNode;
 }
