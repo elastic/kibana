@@ -65,6 +65,16 @@ describe('bedrockClaudeAdapter', () => {
           ],
           temperature: 0,
           stopSequences: ['\n\nHuman:'],
+          tools: [
+            {
+              description: 'Do not call this tool, it is strictly forbidden',
+              input_schema: {
+                properties: {},
+                type: 'object',
+              },
+              name: 'do_not_call_this_tool',
+            },
+          ],
         },
       });
     });
