@@ -38,6 +38,7 @@
     "@kbn/core-http-router-server-mocks",
     "@kbn/core-http-server",
     "@kbn/kibana-utils-plugin",
-    "@kbn/utils"
+    "@kbn/utils",
+    "@kbn/zod"
   ]
 }

@@ -28,7 +28,6 @@ import type { Item } from '../types';
 import { MetadataForm } from './metadata_form';
 import { useMetadataForm } from './use_metadata_form';
 import type { CustomValidators } from './use_metadata_form';
-import { ActivityView } from './activity_view';
 
 const getI18nTexts = ({ entityName }: { entityName: string }) => ({
   saveButtonLabel: i18n.translate('contentManagement.contentEditor.saveButtonLabel', {
@@ -56,7 +55,7 @@ export interface Props {
   }) => Promise<void>;
   customValidators?: CustomValidators;
   onCancel: () => void;
-  showActivityView?: boolean;
+  appendRows?: React.ReactNode;
 }
 
 const capitalize = (str: string) => `${str.charAt(0).toLocaleUpperCase()}${str.substring(1)}`;
@@ -70,7 +69,7 @@ export const ContentEditorFlyoutContent: FC<Props> = ({
   onSave,
   onCancel,
   customValidators,
-  showActivityView,
+  appendRows,
 }) => {
   const { euiTheme } = useEuiTheme();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -151,7 +150,7 @@ export const ContentEditorFlyoutContent: FC<Props> = ({
           TagList={TagList}
           TagSelector={TagSelector}
         >
-          {showActivityView && <ActivityView item={item} />}
+          {appendRows}
         </MetadataForm>
       </EuiFlyoutBody>
 

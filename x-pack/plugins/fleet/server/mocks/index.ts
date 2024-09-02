@@ -128,6 +128,7 @@ export const createAppContextStartContractMock = (
           },
         }
       : {}),
+    unenrollInactiveAgentsTask: {} as any,
   };
 };
 

@@ -111,7 +111,7 @@ describe('Agentless Agent service', () => {
         namespace: 'default',
         supports_agentless: true,
       } as AgentPolicy)
-    ).rejects.toThrowError(new AgentlessAgentCreateError('Agentless agent not supported'));
+    ).rejects.toThrowError(new AgentlessAgentCreateError('missing agentless configuration'));
   });
 
   it('should throw AgentlessAgentCreateError if agentless configuration is not found', async () => {

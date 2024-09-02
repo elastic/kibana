@@ -90,7 +90,6 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
           'agentTamperProtectionEnabled',
           'enableStrictKQLValidation',
           'subfeaturePrivileges',
-          'enablePackagesStateMachine',
         ])}`,
         `--xpack.cloud.id='123456789'`,
         `--xpack.fleet.agentless.enabled=true`,

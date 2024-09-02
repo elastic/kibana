@@ -77,9 +77,9 @@ export function PalettePicker({
 }) {
   const palettesToShow: EuiColorPalettePickerPaletteProps[] = palettes
     .getAll()
-    .filter(({ internal, canDynamicColoring }) =>
-      showDynamicColorOnly ? canDynamicColoring : !internal
-    )
+    .filter(({ internal, canDynamicColoring }) => {
+      return showDynamicColorOnly ? canDynamicColoring && !internal : !internal;
+    })
     .map(({ id, title, getCategoricalColors }) => {
       const colors = getCategoricalColors(
         activePalette?.params?.steps || DEFAULT_COLOR_STEPS,

@@ -44,16 +44,24 @@ x-pack/test/<my_own_api_integration_folder>
 │  │  ├─ <api_2>
 │  │  │  ├─ <test_2_1>
 │  │  │  ├─ <test_2_2>
-│  ├─ services
-│  │  ├─ index.ts // only services from 'x-pack/test/api_integration/deployment_agnostic/services'
-│  │  ├─ <deployment_agnostic_service_1>.ts
-│  │  ├─ <deployment_agnostic_service_2>.ts
+│  ├─ configs
+│  │  ├─ stateful
+│  │  │  ├─ <stateful>.index.ts  // e.g., oblt.index.ts
+│  │  │  ├─ <stateful>.config.ts // e.g., oblt.stateful.config.ts
+│  │  ├─ serverless
+│  │     ├─ <serverless_project>.index.ts             // e.g., oblt.index.ts
+│  │     ├─ <serverless_project>.serverless.config.ts // e.g., oblt.serverless.config.ts
 │  ├─ ftr_provider_context.d.ts  // with types of services from './services'
-├─ stateful.index.ts
-├─ stateful.config.ts 
-├─ <serverless_project>.index.ts                // e.g., oblt.index.ts
-├─ <serverless_project>.serverless.config.ts    // e.g., oblt.serverless.config.ts
+│  ├─ services
+│     ├─ index.ts // only services from 'x-pack/test/api_integration/deployment_agnostic/services'
+│     ├─ <deployment_agnostic_service_1>.ts
+│     ├─ <deployment_agnostic_service_2>.ts
 ```
+
+## Loading Your Tests Properly
+When Platform teams add deployment-agnostic tests, it is expected that these tests are loaded in `configs/stateful/platform.index.ts` and at least one of the `<serverless_project>.serverless.config` files under `configs/serverless` folder.
+
+When a Solution team (e.g., one of the Oblt teams) adds deployment-agnostic tests, it is expected that these tests are loaded in both `configs/stateful/oblt.index.ts` and `configs/serverless/oblt.index.ts`.
 
 ## Step-by-Step Guide
 1. Define Deployment-Agnostic Services
@@ -121,26 +129,26 @@ Load all test files in `index.ts` under the same folder.
 
 4. Add Tests Entry File and FTR Config File for **Stateful** Deployment
 
-Create `stateful.index.ts` tests entry file and load tests:
+Create `configs/stateful/plaform.index.ts` tests entry file and load tests:
 
 ```ts
 import { DeploymentAgnosticFtrProviderContext } from './ftr_provider_context';
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
   describe('apis', () => {
-    loadTestFile(require.resolve('./apis/<my_api>'));
+    loadTestFile(require.resolve('./../../apis/<my_api>'));
   });
 }
 ```
 
-Create `stateful.config.ts` and link tests entry file:
+Create `configs/stateful/platform.stateful.config.ts` and link tests entry file:
 
 ```ts
 import { createStatefulTestConfig } from './../../api_integration/deployment_agnostic/default_configs/stateful.config.base';
 import { services } from './services';
 
 export default createStatefulTestConfig({
-  testFiles: [require.resolve('./stateful.index.ts')],
+  testFiles: [require.resolve('./platform.index.ts')],
   services,
   junit: {
     reportName: 'Stateful - Deployment-agnostic API Integration Tests',
@@ -157,7 +165,7 @@ import { DeploymentAgnosticFtrProviderContext } from './ftr_provider_context';
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
   describe('Serverless Observability - Deployment-agnostic api integration tests', () => {
-    loadTestFile(require.resolve('./apis/<my_api>'));
+    loadTestFile(require.resolve('./../../apis/<my_api>'));
   });
 }
 ```

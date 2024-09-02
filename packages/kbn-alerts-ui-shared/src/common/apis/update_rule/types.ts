@@ -17,4 +17,5 @@ export interface UpdateRuleBody<Params extends RuleTypeParams = RuleTypeParams> 
   throttle?: Rule<Params>['throttle'];
   notifyWhen?: Rule<Params>['notifyWhen'];
   alertDelay?: Rule<Params>['alertDelay'];
+  flapping?: Rule<Params>['flapping'];
 }

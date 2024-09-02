@@ -31,12 +31,10 @@ exports[`AddItemPopover calls addItems with multiple items on clicking Add butto
     panelPaddingSize="m"
     repositionToCrossAxis={true}
   >
-    <EuiForm>
+    <EuiForm
+      data-test-subj="mlFilterListAddItemPopoverContent"
+    >
       <EuiFormRow
-        describedByIds={Array []}
-        display="row"
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
         id="filter_list_add_item_input_row"
         label={
           <Memo(MemoizedFormattedMessage)
@@ -44,7 +42,6 @@ exports[`AddItemPopover calls addItems with multiple items on clicking Add butto
             id="xpack.ml.settings.filterLists.addItemPopover.itemsLabel"
           />
         }
-        labelType="label"
       >
         <EuiTextArea
           data-test-subj="mlFilterListAddItemTextArea"
@@ -117,12 +114,10 @@ exports[`AddItemPopover opens the popover onButtonClick 1`] = `
     panelPaddingSize="m"
     repositionToCrossAxis={true}
   >
-    <EuiForm>
+    <EuiForm
+      data-test-subj="mlFilterListAddItemPopoverContent"
+    >
       <EuiFormRow
-        describedByIds={Array []}
-        display="row"
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
         id="filter_list_add_item_input_row"
         label={
           <Memo(MemoizedFormattedMessage)
@@ -130,7 +125,6 @@ exports[`AddItemPopover opens the popover onButtonClick 1`] = `
             id="xpack.ml.settings.filterLists.addItemPopover.itemsLabel"
           />
         }
-        labelType="label"
       >
         <EuiTextArea
           data-test-subj="mlFilterListAddItemTextArea"
@@ -203,12 +197,10 @@ exports[`AddItemPopover renders the popover 1`] = `
     panelPaddingSize="m"
     repositionToCrossAxis={true}
   >
-    <EuiForm>
+    <EuiForm
+      data-test-subj="mlFilterListAddItemPopoverContent"
+    >
       <EuiFormRow
-        describedByIds={Array []}
-        display="row"
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
         id="filter_list_add_item_input_row"
         label={
           <Memo(MemoizedFormattedMessage)
@@ -216,7 +208,6 @@ exports[`AddItemPopover renders the popover 1`] = `
             id="xpack.ml.settings.filterLists.addItemPopover.itemsLabel"
           />
         }
-        labelType="label"
       >
         <EuiTextArea
           data-test-subj="mlFilterListAddItemTextArea"
