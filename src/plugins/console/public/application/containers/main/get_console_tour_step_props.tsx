@@ -22,7 +22,7 @@ export const getConsoleTourStepProps = (
   stateTourStepProps: EuiTourStepProps[],
   actions: EuiTourActions,
   tourState: EuiTourState,
-  selectedTab: string,
+  selectedTab: string
 ): ConsoleTourStepProps[] => {
   return stateTourStepProps.map((step: EuiTourStepProps) => {
     const nextTourStep = () => {

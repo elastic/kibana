@@ -166,11 +166,19 @@ export function Main({ isEmbeddable = false }: MainProps) {
                 {isEmbeddable && (
                   <EuiFlexItem grow={false}>
                     <NavIconButton
-                      iconType={isFullscreenOpen ? 'fullScreenExit' : 'fullScreen' }
+                      iconType={isFullscreenOpen ? 'fullScreenExit' : 'fullScreen'}
                       onClick={() => setIsFullScreen(!isFullscreenOpen)}
-                      ariaLabel={isFullscreenOpen ? MAIN_PANEL_LABELS.closeFullscrenButton : MAIN_PANEL_LABELS.openFullscrenButton}
+                      ariaLabel={
+                        isFullscreenOpen
+                          ? MAIN_PANEL_LABELS.closeFullscrenButton
+                          : MAIN_PANEL_LABELS.openFullscrenButton
+                      }
                       dataTestSubj="consoleToggleFullscreenButton"
-                      toolTipContent={isFullscreenOpen ? MAIN_PANEL_LABELS.closeFullscrenButton : MAIN_PANEL_LABELS.openFullscrenButton}
+                      toolTipContent={
+                        isFullscreenOpen
+                          ? MAIN_PANEL_LABELS.closeFullscrenButton
+                          : MAIN_PANEL_LABELS.openFullscrenButton
+                      }
                     />
                   </EuiFlexItem>
                 )}
