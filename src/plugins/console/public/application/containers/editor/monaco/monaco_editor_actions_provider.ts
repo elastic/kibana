@@ -230,7 +230,6 @@ export class MonacoEditorActionsProvider {
       .map((request) => replaceRequestVariables(request!, variables));
   }
 
-  // TODO: can this be deleted?
   public async getCurl(elasticsearchBaseUrl: string): Promise<string> {
     const requests = await this.getRequests();
     const curlRequests = requests.map((request) => getCurlRequest(request, elasticsearchBaseUrl));
@@ -489,7 +488,6 @@ export class MonacoEditorActionsProvider {
     return this.getSuggestions(model, position, context);
   }
 
-  // TODO: can this be deleted? I think there are some hooks attached to it too
   public async restoreRequestFromHistory(request: string) {
     const model = this.editor.getModel();
     if (!model) {
