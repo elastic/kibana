@@ -39,6 +39,8 @@ export const openAIAdapter: InferenceConnectorAdapter = {
       temperature: 0,
     };
 
+    console.log('*** tool choice without tool', tools, toolChoice);
+
     return from(
       executor.invoke({
         subAction: 'stream',
@@ -129,7 +131,7 @@ function toolChoiceToOpenAI(
         },
         type: 'function' as const,
       }
-    : 'auto';
+    : undefined;
 }
 
 function messagesToOpenAI({
