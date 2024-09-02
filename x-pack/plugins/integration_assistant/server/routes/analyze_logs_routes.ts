@@ -13,7 +13,7 @@ import { ANALYZE_LOGS_PATH, AnalyzeLogsRequestBody, AnalyzeLogsResponse } from '
 import { ROUTE_HANDLER_TIMEOUT } from '../constants';
 import { getLogFormatDetectionGraph } from '../graphs/log_type_detection/graph';
 import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
-import { getLlmClass, getLlmType } from '../util/llm';
+import { getLLMClass, getLLMType } from '../util/llm';
 import { buildRouteValidationWithZod } from '../util/route_validation';
 import { withAvailability } from './with_availability';
 
@@ -50,8 +50,8 @@ export function registerAnalyzeLogsRoutes(
           const abortSignal = getRequestAbortedSignal(req.events.aborted$);
 
           const actionTypeId = connector.actionTypeId;
-          const llmType = getLlmType(actionTypeId);
-          const llmClass = getLlmClass(llmType);
+          const llmType = getLLMType(actionTypeId);
+          const llmClass = getLLMClass(llmType);
 
           const model = new llmClass({
             actionsClient,

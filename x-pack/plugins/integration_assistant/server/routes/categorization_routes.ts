@@ -10,14 +10,14 @@ import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import {
-  CATEGORIZATION_GRAPH_PATH,
-  CategorizationRequestBody,
-  CategorizationResponse,
+    CATEGORIZATION_GRAPH_PATH,
+    CategorizationRequestBody,
+    CategorizationResponse,
 } from '../../common';
 import { ROUTE_HANDLER_TIMEOUT } from '../constants';
 import { getCategorizationGraph } from '../graphs/categorization';
 import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
-import { getLlmClass, getLlmType } from '../util/llm';
+import { getLLMClass, getLLMType } from '../util/llm';
 import { buildRouteValidationWithZod } from '../util/route_validation';
 import { withAvailability } from './with_availability';
 
@@ -59,8 +59,8 @@ export function registerCategorizationRoutes(
             const abortSignal = getRequestAbortedSignal(req.events.aborted$);
 
             const actionTypeId = connector.actionTypeId;
-            const llmType = getLlmType(actionTypeId);
-            const llmClass = getLlmClass(llmType);
+            const llmType = getLLMType(actionTypeId);
+            const llmClass = getLLMClass(llmType);
 
             const model = new llmClass({
               actionsClient,

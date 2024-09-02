@@ -6,12 +6,12 @@
  */
 
 import {
-  ActionsClientChatOpenAI,
-  ActionsClientBedrockChatModel,
-  ActionsClientSimpleChatModel,
-  ActionsClientGeminiChatModel,
+    ActionsClientBedrockChatModel,
+    ActionsClientChatOpenAI,
+    ActionsClientGeminiChatModel,
+    ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server';
-export const getLlmType = (actionTypeId: string): string | undefined => {
+export const getLLMType = (actionTypeId: string): string | undefined => {
   const llmTypeDictionary: Record<string, string> = {
     [`.gen-ai`]: `openai`,
     [`.bedrock`]: `bedrock`,
@@ -20,7 +20,7 @@ export const getLlmType = (actionTypeId: string): string | undefined => {
   return llmTypeDictionary[actionTypeId];
 };
 
-export const getLlmClass = (llmType?: string) =>
+export const getLLMClass = (llmType?: string) =>
   llmType === 'openai'
     ? ActionsClientChatOpenAI
     : llmType === 'bedrock'
