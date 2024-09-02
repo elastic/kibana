@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 
+import semver from 'semver';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { identity } from 'fp-ts/lib/function';
 import { fold } from 'fp-ts/lib/Either';
@@ -37,6 +38,7 @@ const COMMON_HEADERS = {
 };
 
 export default function ({ getService }: FtrProviderContext) {
+  const es = getService('es');
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
@@ -79,6 +81,8 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('highlights built-in message column', async () => {
+          const esInfo = await es.info();
+          const highlightTerms = 'message of document 0';
           const { body } = await supertest
             .post(LOG_ENTRIES_HIGHLIGHTS_PATH)
             .set(COMMON_HEADERS)
@@ -87,7 +91,7 @@ export default function ({ getService }: FtrProviderContext) {
                 logView: { type: 'log-view-reference', logViewId: 'default' },
                 startTimestamp: KEY_BEFORE_START.time,
                 endTimestamp: KEY_AFTER_END.time,
-                highlightTerms: ['message of document 0'],
+                highlightTerms: [highlightTerms],
               })
             )
             .expect(200);
@@ -120,7 +124,10 @@ export default function ({ getService }: FtrProviderContext) {
           entries.forEach((entry) => {
             entry.columns.forEach((column) => {
               if ('message' in column && 'highlights' in column.message[0]) {
-                expect(column.message[0].highlights).to.eql(['message of document 0']);
+                const expectation = semver.gte(esInfo.version.number, '8.10.0')
+                  ? [highlightTerms]
+                  : highlightTerms.split(' ');
+                expect(column.message[0].highlights).to.eql(expectation);
               }
             });
           });
