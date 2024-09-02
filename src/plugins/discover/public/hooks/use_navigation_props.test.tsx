@@ -57,7 +57,7 @@ const render = async () => {
         columns: ['mock-column'],
       }),
     {
-      wrapper: ({ children }) => (
+      wrapper: ({ children }: React.PropsWithChildren) => (
         <MemoryRouter initialEntries={['/']}>
           <KibanaContextProvider services={mockServices}>{children}</KibanaContextProvider>
         </MemoryRouter>

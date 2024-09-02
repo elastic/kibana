@@ -120,7 +120,9 @@ describe('useDiscoverHistogram', () => {
       hideChart,
     };
 
-    const Wrapper: WrapperComponent<UseDiscoverHistogramProps> = ({ children }) => (
+    const Wrapper: WrapperComponent<React.PropsWithChildren<UseDiscoverHistogramProps>> = ({
+      children,
+    }) => (
       <DiscoverMainProvider value={stateContainer}>{children as ReactElement}</DiscoverMainProvider>
     );
 

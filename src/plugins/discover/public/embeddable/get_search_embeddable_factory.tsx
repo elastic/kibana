@@ -243,7 +243,8 @@ export const getSearchEmbeddableFactory = ({
           }, [dataViews]);
 
           const onAddFilter = useCallback(
-            async (field, value, operator) => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            async (field: any, value: any, operator: any) => {
               if (!dataView) return;
 
               let newFilters = generateFilters(

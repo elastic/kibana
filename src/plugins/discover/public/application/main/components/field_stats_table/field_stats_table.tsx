@@ -146,7 +146,8 @@ export const FieldStatisticsTable = React.memo((props: FieldStatisticsTableProps
   );
 
   const updateState = useCallback(
-    (changes) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (changes: any) => {
       if (changes.showDistributions !== undefined && stateContainer) {
         stateContainer.appState.update({ hideAggregatedPreview: !changes.showDistributions }, true);
       }

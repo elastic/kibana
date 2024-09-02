@@ -43,7 +43,8 @@ export function Doc(props: DocProps) {
   }, [profilesManager, core, dataView]);
 
   const onProcessRecord = useCallback(
-    (record) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (record: any) => {
       return profilesManager.resolveDocumentProfile({ record });
     },
     [profilesManager]
