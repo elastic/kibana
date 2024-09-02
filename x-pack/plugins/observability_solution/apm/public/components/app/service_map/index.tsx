@@ -53,6 +53,10 @@ function LoadingSpinner() {
   return <EuiLoadingSpinner size="xl" style={{ position: 'absolute', top: '50%', left: '50%' }} />;
 }
 
+function wrapReturn(content: JSX.Element) {
+  return <ServiceTabContent tabName="service-map">{content}</ServiceTabContent>;
+}
+
 export function ServiceMapHome() {
   const {
     query: { environment, kuery, rangeFrom, rangeTo, serviceGroup },
@@ -179,36 +183,30 @@ export function ServiceMap({
     onPageReady();
   }
 
-  function wrapReturn(content: JSX.Element) {
-    return <ServiceTabContent tabName="service-map">content</ServiceTabContent>;
-  }
-
   return wrapReturn(
     <>
-      <ServiceTabContent tabName="service-map">
-        <SearchBar showTimeComparison />
-        <EuiPanel hasBorder={true} paddingSize="none">
-          <div data-test-subj="serviceMap" style={{ height: heightWithPadding }} ref={ref}>
-            <Cytoscape
-              elements={data.elements}
-              height={heightWithPadding}
-              serviceName={serviceName}
-              style={getCytoscapeDivStyle(theme, status)}
-            >
-              <Controls />
-              {serviceName && <EmptyBanner />}
-              {status === FETCH_STATUS.LOADING && <LoadingSpinner />}
-              <Popover
-                focusedServiceName={serviceName}
-                environment={environment}
-                kuery={kuery}
-                start={start}
-                end={end}
-              />
-            </Cytoscape>
-          </div>
-        </EuiPanel>
-      </ServiceTabContent>
+      <SearchBar showTimeComparison />
+      <EuiPanel hasBorder={true} paddingSize="none">
+        <div data-test-subj="serviceMap" style={{ height: heightWithPadding }} ref={ref}>
+          <Cytoscape
+            elements={data.elements}
+            height={heightWithPadding}
+            serviceName={serviceName}
+            style={getCytoscapeDivStyle(theme, status)}
+          >
+            <Controls />
+            {serviceName && <EmptyBanner />}
+            {status === FETCH_STATUS.LOADING && <LoadingSpinner />}
+            <Popover
+              focusedServiceName={serviceName}
+              environment={environment}
+              kuery={kuery}
+              start={start}
+              end={end}
+            />
+          </Cytoscape>
+        </div>
+      </EuiPanel>
     </>
   );
 }
