@@ -20,6 +20,38 @@ import { z } from '@kbn/zod';
 import * as t from 'io-ts';
 import { RequiredKeys } from 'utility-types';
 
+type PathMaybeOptional<T extends { path: Record<string, any> }> = RequiredKeys<
+  T['path']
+> extends never
+  ? { path?: T['path'] }
+  : { path: T['path'] };
+
+type QueryMaybeOptional<T extends { query: Record<string, any> }> = RequiredKeys<
+  T['query']
+> extends never
+  ? { query?: T['query'] }
+  : { query: T['query'] };
+
+type BodyMaybeOptional<T extends { body: Record<string, any> }> = RequiredKeys<
+  T['body']
+> extends never
+  ? { body?: T['body'] }
+  : { body: T['body'] };
+
+type ParamsMaybeOptional<
+  TPath extends Record<string, any>,
+  TQuery extends Record<string, any>,
+  TBody extends Record<string, any>
+> = PathMaybeOptional<{ path: TPath }> &
+  QueryMaybeOptional<{ query: TQuery }> &
+  BodyMaybeOptional<{ body: TBody }>;
+
+type ZodMaybeOptional<T extends { path: any; query: any; body: any }> = ParamsMaybeOptional<
+  T['path'],
+  T['query'],
+  T['body']
+>;
+
 type MaybeOptional<T extends { params: Record<string, any> }> = RequiredKeys<
   T['params']
 > extends never
@@ -93,7 +125,7 @@ type ClientRequestParamsOfType<TRouteParamsRT extends RouteParamsRT> =
       }>
     : TRouteParamsRT extends z.Schema
     ? MaybeOptional<{
-        params: z.TypeOf<TRouteParamsRT>;
+        params: ZodMaybeOptional<z.input<TRouteParamsRT>>;
       }>
     : {};
 
@@ -104,7 +136,7 @@ type DecodedRequestParamsOfType<TRouteParamsRT extends RouteParamsRT> =
       }>
     : TRouteParamsRT extends z.Schema
     ? MaybeOptional<{
-        params: z.TypeOf<TRouteParamsRT>;
+        params: ZodMaybeOptional<z.output<TRouteParamsRT>>;
       }>
     : {};
 
@@ -162,7 +194,7 @@ type MaybeOptionalArgs<T extends Record<string, any>> = RequiredKeys<T> extends 
 
 export type RouteRepositoryClient<
   TServerRouteRepository extends ServerRouteRepository,
-  TAdditionalClientOptions extends Record<string, any>
+  TAdditionalClientOptions extends Record<string, any> = DefaultClientOptions
 > = <TEndpoint extends Extract<keyof TServerRouteRepository, string>>(
   endpoint: TEndpoint,
   ...args: MaybeOptionalArgs<

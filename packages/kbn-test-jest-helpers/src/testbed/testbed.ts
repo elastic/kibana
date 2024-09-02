@@ -231,11 +231,11 @@ export function registerTestBed<T extends string = string, P extends object = an
       ) => {
         let errorMessagesWrappers: ReactWrapper<HTMLAttributes, any, ReactComponent>;
         if (typeof wrapper === 'string') {
-          errorMessagesWrappers = find(wrapper).find('.euiFormErrorText');
+          errorMessagesWrappers = find(wrapper).find('div.euiFormErrorText');
         } else {
           errorMessagesWrappers = wrapper
-            ? wrapper.find('.euiFormErrorText')
-            : component.find('.euiFormErrorText');
+            ? wrapper.find('div.euiFormErrorText')
+            : component.find('div.euiFormErrorText');
         }
         return errorMessagesWrappers.map((err) => err.text());
       };

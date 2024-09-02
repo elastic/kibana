@@ -7,7 +7,7 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/public';
-import { VisTypeTimeseriesPublicConfig } from '../config';
+import type { VisTypeTimeseriesPublicConfig } from '../server/config';
 import { MetricsPlugin as Plugin } from './plugin';
 
 export function plugin(
