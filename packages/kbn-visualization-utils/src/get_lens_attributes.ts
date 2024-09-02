@@ -37,19 +37,6 @@ export const getLensAttributesFromSuggestion = ({
   };
   title: string;
 } => {
-  let references: Reference[] = [];
-  // need to iterate over the layers to create the references
-  const layerId = Object.keys(suggestion?.datasourceState?.layers ?? {})[0];
-  if (!isOfAggregateQueryType(query) && dataView) {
-    references = [
-      {
-        id: dataView.id ?? '',
-        name: `indexpattern-datasource-layer-${layerId}`,
-        type: 'index-pattern',
-      },
-    ];
-  }
-
   const suggestionDatasourceState = Object.assign({}, suggestion?.datasourceState);
   const suggestionVisualizationState = Object.assign({}, suggestion?.visualizationState);
   const datasourceStates =
@@ -63,6 +50,24 @@ export const getLensAttributesFromSuggestion = ({
           formBased: {},
         };
   const visualization = suggestionVisualizationState;
+
+  let references: Reference[] = [];
+  // need to iterate over the layers to create the references
+  if (
+    suggestion &&
+    'layers' in suggestionDatasourceState &&
+    !isOfAggregateQueryType(query) &&
+    dataView
+  ) {
+    const layerId = Object.keys(suggestionDatasourceState?.layers ?? {})[0];
+    references = [
+      {
+        id: dataView.id ?? '',
+        name: `indexpattern-datasource-layer-${layerId}`,
+        type: 'index-pattern',
+      },
+    ];
+  }
   const attributes = {
     title:
       suggestion?.title ??
