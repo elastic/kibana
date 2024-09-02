@@ -15,11 +15,13 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiSpacer,
+  EuiTab,
+  EuiTabs,
   EuiText,
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import moment from 'moment';
 
 import { getIlmPhase } from '../../../../utils/get_ilm_phase';
@@ -32,7 +34,7 @@ import { useDataQualityContext } from '../../../../data_quality_context';
 import { IndexProperties } from './index_properties';
 import { IndexResultBadge } from '../index_result_badge';
 import { useCurrentWindowWidth } from './hooks/use_current_window_width';
-import { CHECK_NOW } from './translations';
+import { CHECK_NOW, HISTORY, LATEST_CHECK } from './translations';
 
 export interface Props {
   ilmExplain: Record<string, IlmExplainLifecycleLifecycleExplain> | null;
@@ -42,6 +44,18 @@ export interface Props {
   stats: Record<string, MeteringStatsIndex> | null;
   onClose: () => void;
 }
+
+const tabs = [
+  {
+    id: LATEST_CHECK,
+    name: LATEST_CHECK,
+  },
+  {
+    id: HISTORY,
+    name: HISTORY,
+    disabled: true,
+  },
+];
 
 export const IndexCheckFlyoutComponent: React.FC<Props> = ({
   ilmExplain,
@@ -63,6 +77,7 @@ export const IndexCheckFlyoutComponent: React.FC<Props> = ({
   const indexCheckFlyoutTitleId = useGeneratedHtmlId({
     prefix: 'indexCheckFlyoutTitle',
   });
+  const [selectedTabId, setSelectedTabId] = useState(LATEST_CHECK);
   const abortControllerRef = React.useRef(new AbortController());
 
   const handleCheckNow = useCallback(() => {
@@ -82,6 +97,21 @@ export const IndexCheckFlyoutComponent: React.FC<Props> = ({
       abortController.abort();
     };
   }, []);
+
+  const renderTabs = useMemo(
+    () =>
+      tabs.map((tab, index) => (
+        <EuiTab
+          onClick={() => setSelectedTabId(tab.id)}
+          isSelected={tab.id === selectedTabId}
+          key={index}
+          disabled={tab.disabled}
+        >
+          {tab.name}
+        </EuiTab>
+      )),
+    [selectedTabId]
+  );
 
   return (
     <div data-test-subj="indexCheckFlyout">
@@ -110,6 +140,8 @@ export const IndexCheckFlyoutComponent: React.FC<Props> = ({
               </EuiText>
             </>
           )}
+          <EuiSpacer />
+          <EuiTabs style={{ marginBottom: '-25px' }}>{renderTabs}</EuiTabs>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           <IndexProperties
