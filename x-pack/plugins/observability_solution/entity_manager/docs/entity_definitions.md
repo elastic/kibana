@@ -18,7 +18,11 @@ History and summary transforms will output their data to indices where history w
 
 **Entity definition example**:
 
-One can create a definition with a `POST kbn:/internal/entities/definition` request, or through the [entity client](https://github.com/elastic/kibana/blob/main/x-pack/plugins/observability_solution/entity_manager/server/lib/entity_client.ts). Given the `services_from_logs` definition below, the history transform will create one entity document per service per minute (based on `@timestamp` field, granted at least one document exist for a given bucket in the source indices), with the `logRate` metric and `data_stream.type` metadata aggregated over one minute. Note that it is not necessary to add the `identifyFields` as metadata as these will be automatically collected in the output documents, and that it is possible to set `identityFields` as optional.
+One can create a definition with a request to `POST kbn:/internal/entities/definition`, or through the [entity client](https://github.com/elastic/kibana/blob/main/x-pack/plugins/observability_solution/entity_manager/server/lib/entity_client.ts).
+
+Given the `services_from_logs` definition below, the history transform will create one entity document per service per minute (based on `@timestamp` field, granted at least one document exist for a given bucket in the source indices), with the `logRate` metric and `data_stream.type` metadata aggregated over one minute.
+
+Note that it is not necessary to add the `identifyFields` as metadata as these will be automatically collected in the output documents, and that it is possible to set `identityFields` as optional.
 
 __service_from_logs definition__
 ```
