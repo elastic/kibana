@@ -680,6 +680,15 @@ describe('#getQueryParams', () => {
         };
       };
 
+      const getMappings = () => {
+        return {
+          properties: registry.getAllTypes().reduce((acc, type) => {
+            acc[type.name] = { properties: type.mappings.properties };
+            return acc;
+          }, {} as any),
+        };
+      };
+
       beforeEach(() => {
         const nestedTypeSO: SavedObjectsType = {
           name: 'nestedtype',
@@ -687,7 +696,7 @@ describe('#getQueryParams', () => {
           namespaceType: 'multiple-isolated',
           mappings: getNestedMapping({ fieldName: 'title' }),
           management: {
-            defaultSearchField: 'title',
+            defaultSearchField: 'title', // TODO: shouldn't this be user.name?
           },
         };
 
@@ -700,13 +709,7 @@ describe('#getQueryParams', () => {
           search: 'foo',
           searchFields: ['title.value'],
           type: ['nestedtype'],
-          // TODO: do we have to do this manually? Isn't there an internal method that does this?
-          mappings: {
-            properties: registry.getAllTypes().reduce((acc, type) => {
-              acc[type.name] = { properties: type.mappings.properties };
-              return acc;
-            }, {} as any),
-          },
+          mappings: getMappings(),
         });
 
         const shouldClause = result.query.bool.must.bool.should;
@@ -729,13 +732,7 @@ describe('#getQueryParams', () => {
           search: 'foo',
           searchFields: ['title', 'title.value'],
           type: ['nestedtype', 'saved', 'pending'], // all three types have a field called title
-          // TODO: do we have to do this manually? Isn't there an internal method that does this?
-          mappings: {
-            properties: registry.getAllTypes().reduce((acc, type) => {
-              acc[type.name] = { properties: type.mappings.properties };
-              return acc;
-            }, {} as any),
-          },
+          mappings: getMappings(),
         });
 
         const shouldClause = result.query.bool.must.bool.should;
@@ -757,13 +754,7 @@ describe('#getQueryParams', () => {
           registry,
           search: 'foo',
           type: ['nestedtype'],
-          // TODO: do we have to do this manually? Isn't there an internal method that does this?
-          mappings: {
-            properties: registry.getAllTypes().reduce((acc, type) => {
-              acc[type.name] = { properties: type.mappings.properties };
-              return acc;
-            }, {} as any),
-          },
+          mappings: getMappings(),
         });
 
         const shouldClause = result.query.bool.must.bool.should;
@@ -808,13 +799,7 @@ describe('#getQueryParams', () => {
           search: 'foo',
           searchFields: ['title.value', 'title.key'],
           type: ['anothernestedtype'],
-          // TODO: do we have to do this manually? Isn't there an internal method that does this?
-          mappings: {
-            properties: registry.getAllTypes().reduce((acc, type) => {
-              acc[type.name] = { properties: type.mappings.properties };
-              return acc;
-            }, {} as any),
-          },
+          mappings: getMappings(),
         });
 
         const shouldClause = result.query.bool.must.bool.should;
@@ -840,13 +825,7 @@ describe('#getQueryParams', () => {
           search: 'foo',
           searchFields: ['title.value'], // title is not a nested field
           type: ['saved'],
-          // TODO: do we have to do this manually? Isn't there an internal method that does this?
-          mappings: {
-            properties: registry.getAllTypes().reduce((acc, type) => {
-              acc[type.name] = { properties: type.mappings.properties };
-              return acc;
-            }, {} as any),
-          },
+          mappings: getMappings(),
         });
 
         const shouldClause = result.query.bool.must.bool.should;
