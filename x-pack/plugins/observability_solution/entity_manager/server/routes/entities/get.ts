@@ -21,6 +21,12 @@ import { SetupRouteOptions } from '../types';
  *     tags:
  *       - definitions
  *     parameters:
+ *       - in: path
+ *         name: id
+ *         description: The entity definition ID
+ *         schema:
+ *           $ref: '#/components/schemas/deleteEntityDefinitionParamsSchema/properties/id'
+ *         required: false
  *       - in: query
  *         name: page
  *         schema:
@@ -29,6 +35,10 @@ import { SetupRouteOptions } from '../types';
  *         name: perPage
  *         schema:
  *           $ref: '#/components/schemas/getEntityDefinitionQuerySchema/properties/perPage'
+ *       - in: query
+ *         name: includeState
+ *         schema:
+ *           $ref: '#/components/schemas/getEntityDefinitionQuerySchema/properties/includeState'
  *     responses:
  *       200:
  *         description: OK
@@ -42,15 +52,6 @@ import { SetupRouteOptions } from '../types';
  *                   items:
  *                     allOf:
  *                       - $ref: '#/components/schemas/entityDefinitionSchema'
- *                       - type: object
- *                         properties:
- *                           state:
- *                            type: object
- *                            properties:
- *                              installed:
- *                                type: boolean
- *                              running:
- *                                type: boolean
  */
 export function getEntityDefinitionRoute<T extends RequestHandlerContext>({
   router,
