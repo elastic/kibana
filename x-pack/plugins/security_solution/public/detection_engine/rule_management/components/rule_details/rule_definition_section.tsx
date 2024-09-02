@@ -57,6 +57,7 @@ import {
   queryStyles,
   useRequiredFieldsStyles,
 } from './rule_definition_section.styles';
+import { getQueryLanguageLabel } from './helpers';
 
 interface SavedQueryNameProps {
   savedQueryName: string;
@@ -196,12 +197,17 @@ const AnomalyThreshold = ({ anomalyThreshold }: AnomalyThresholdProps) => (
 );
 
 interface MachineLearningJobListProps {
-  jobIds: string | string[];
+  jobIds?: string | string[];
   isInteractive: boolean;
 }
 
 export const MachineLearningJobList = ({ jobIds, isInteractive }: MachineLearningJobListProps) => {
   const { jobs } = useSecurityJobs();
+
+  if (!jobIds) {
+    return null;
+  }
+
   const jobIdsArray = Array.isArray(jobIds) ? jobIds : [jobIds];
 
   if (isInteractive) {
@@ -440,14 +446,28 @@ const prepareDefinitionSectionListItems = (
   }
 
   if (savedQuery) {
-    definitionSectionListItems.push({
-      title: (
-        <span data-test-subj="savedQueryNamePropertyTitle">
-          {descriptionStepI18n.SAVED_QUERY_NAME_LABEL}
-        </span>
-      ),
-      description: <SavedQueryName savedQueryName={savedQuery.attributes.title} />,
-    });
+    definitionSectionListItems.push(
+      {
+        title: (
+          <span data-test-subj="savedQueryNamePropertyTitle">
+            {descriptionStepI18n.SAVED_QUERY_NAME_LABEL}
+          </span>
+        ),
+        description: <SavedQueryName savedQueryName={savedQuery.attributes.title} />,
+      },
+      {
+        title: (
+          <span data-test-subj="savedQueryLanguagePropertyTitle">
+            {descriptionStepI18n.SAVED_QUERY_LANGUAGE_LABEL}
+          </span>
+        ),
+        description: (
+          <span data-test-subj="savedQueryLanguagePropertyValue">
+            {getQueryLanguageLabel(savedQuery.attributes.query.language)}
+          </span>
+        ),
+      }
+    );
 
     if (savedQuery.attributes.filters) {
       definitionSectionListItems.push({
@@ -514,12 +534,26 @@ const prepareDefinitionSectionListItems = (
         description: <Query query={rule.query} data-test-subj="esqlQueryPropertyValue" />,
       });
     } else {
-      definitionSectionListItems.push({
-        title: (
-          <span data-test-subj="customQueryPropertyTitle">{descriptionStepI18n.QUERY_LABEL}</span>
-        ),
-        description: <Query query={rule.query} data-test-subj="customQueryPropertyValue" />,
-      });
+      definitionSectionListItems.push(
+        {
+          title: (
+            <span data-test-subj="customQueryPropertyTitle">{descriptionStepI18n.QUERY_LABEL}</span>
+          ),
+          description: <Query query={rule.query} data-test-subj="customQueryPropertyValue" />,
+        },
+        {
+          title: (
+            <span data-test-subj="customQueryLanguagePropertyTitle">
+              {descriptionStepI18n.QUERY_LANGUAGE_LABEL}
+            </span>
+          ),
+          description: (
+            <span data-test-subj="customQueryLanguagePropertyValue">
+              {getQueryLanguageLabel(rule.language || '')}
+            </span>
+          ),
+        }
+      );
     }
   }
 
@@ -636,6 +670,21 @@ const prepareDefinitionSectionListItems = (
         </span>
       ),
       description: <Query query={rule.threat_query} data-test-subj="threatQueryPropertyValue" />,
+    });
+  }
+
+  if ('threat_language' in rule && rule.threat_language) {
+    definitionSectionListItems.push({
+      title: (
+        <span data-test-subj="threatQueryLanguagePropertyTitle">
+          {descriptionStepI18n.THREAT_QUERY_LANGUAGE_LABEL}
+        </span>
+      ),
+      description: (
+        <span data-test-subj="threatQueryLanguagePropertyValue">
+          {getQueryLanguageLabel(rule.threat_language)}
+        </span>
+      ),
     });
   }
 

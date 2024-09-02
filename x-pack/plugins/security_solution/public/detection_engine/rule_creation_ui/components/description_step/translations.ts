@@ -35,6 +35,13 @@ export const ESQL_QUERY_LABEL = i18n.translate(
   }
 );
 
+export const QUERY_LANGUAGE_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.queryLanguageLabel',
+  {
+    defaultMessage: 'Custom query language',
+  }
+);
+
 export const THREAT_QUERY_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.threatQueryLabel',
   {
@@ -42,10 +49,24 @@ export const THREAT_QUERY_LABEL = i18n.translate(
   }
 );
 
+export const THREAT_QUERY_LANGUAGE_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.threatQueryLanguageLabel',
+  {
+    defaultMessage: 'Indicator index query language',
+  }
+);
+
 export const SAVED_QUERY_NAME_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.savedIdLabel',
   {
     defaultMessage: 'Saved query name',
+  }
+);
+
+export const SAVED_QUERY_LANGUAGE_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.savedQueryLanguageLabel',
+  {
+    defaultMessage: 'Saved query language',
   }
 );
 

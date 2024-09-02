@@ -14,6 +14,7 @@ import {
   SCHEDULE_UPGRADE_FIELD_ORDER,
   SETUP_UPGRADE_FIELD_ORDER,
 } from './constants';
+import * as i18n from './translations';
 
 export const getSectionedFieldDiffs = (fields: FieldsGroupDiff[]) => {
   const aboutFields = [];
@@ -57,3 +58,14 @@ export const filterUnsupportedDiffOutcomes = (
       );
     })
   );
+
+export function getQueryLanguageLabel(language: string) {
+  switch (language) {
+    case 'kuery':
+      return i18n.KUERY_LANGUAGE_LABEL;
+    case 'lucene':
+      return i18n.LUCENE_LANGUAGE_LABEL;
+    default:
+      return language;
+  }
+}

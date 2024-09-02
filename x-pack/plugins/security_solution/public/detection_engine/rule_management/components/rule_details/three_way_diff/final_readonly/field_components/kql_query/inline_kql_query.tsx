@@ -16,22 +16,36 @@ import type {
 } from '../../../../../../../../../common/api/detection_engine';
 import { Query, Filters } from '../../../../rule_definition_section';
 import * as descriptionStepI18n from '../../../../../../../rule_creation_ui/components/description_step/translations';
-import * as i18n from '../translations';
-import { getQueryLanguageLabel } from './utils';
+import { getQueryLanguageLabel } from '../../../../helpers';
+
+const defaultI18nLabels = {
+  query: descriptionStepI18n.QUERY_LABEL,
+  language: descriptionStepI18n.QUERY_LANGUAGE_LABEL,
+  filters: descriptionStepI18n.FILTERS_LABEL,
+};
 
 interface InlineQueryProps {
   kqlQuery: InlineKqlQuery;
   dataSource?: DiffableAllFields['data_source'];
+  i18nLabels?: {
+    query: string;
+    language: string;
+    filters: string;
+  };
 }
 
-export function InlineKqlQueryReadOnly({ kqlQuery, dataSource }: InlineQueryProps) {
+export function InlineKqlQueryReadOnly({
+  kqlQuery,
+  dataSource,
+  i18nLabels = defaultI18nLabels,
+}: InlineQueryProps) {
   const listItems: EuiDescriptionListProps['listItems'] = [
     {
-      title: descriptionStepI18n.QUERY_LABEL,
+      title: i18nLabels.query,
       description: <Query query={kqlQuery.query} />,
     },
     {
-      title: i18n.LANGUAGE_LABEL,
+      title: i18nLabels.language,
       description: getQueryLanguageLabel(kqlQuery.language),
     },
   ];
@@ -44,7 +58,7 @@ export function InlineKqlQueryReadOnly({ kqlQuery, dataSource }: InlineQueryProp
       dataSource.type === DataSourceType.data_view ? dataSource.data_view_id : undefined;
 
     listItems.push({
-      title: descriptionStepI18n.FILTERS_LABEL,
+      title: i18nLabels.filters,
       description: (
         <Filters filters={kqlQuery.filters as Filter[]} index={index} dataViewId={dataViewId} />
       ),

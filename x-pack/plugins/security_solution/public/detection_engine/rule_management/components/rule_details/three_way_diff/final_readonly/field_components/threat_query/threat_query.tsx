@@ -10,7 +10,15 @@ import type {
   DiffableAllFields,
   InlineKqlQuery,
 } from '../../../../../../../../../common/api/detection_engine';
+import * as ruleDetailsI18n from '../../../../translations';
+import * as descriptionStepI18n from '../../../../../../../rule_creation_ui/components/description_step/translations';
 import { InlineKqlQueryReadOnly } from '../kql_query/inline_kql_query';
+
+const i18nLabels = {
+  query: descriptionStepI18n.THREAT_QUERY_LABEL,
+  language: descriptionStepI18n.THREAT_QUERY_LANGUAGE_LABEL,
+  filters: ruleDetailsI18n.THREAT_FILTERS_FIELD_LABEL,
+};
 
 interface ThreatQueryReadOnlyProps {
   threatQuery: InlineKqlQuery;
@@ -18,5 +26,11 @@ interface ThreatQueryReadOnlyProps {
 }
 
 export const ThreatQueryReadOnly = ({ threatQuery, dataSource }: ThreatQueryReadOnlyProps) => {
-  return <InlineKqlQueryReadOnly kqlQuery={threatQuery} dataSource={dataSource} />;
+  return (
+    <InlineKqlQueryReadOnly
+      kqlQuery={threatQuery}
+      dataSource={dataSource}
+      i18nLabels={i18nLabels}
+    />
+  );
 };

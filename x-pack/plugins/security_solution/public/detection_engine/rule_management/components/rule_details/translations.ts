@@ -356,3 +356,17 @@ export const CUSTOMIZED_PREBUILT_RULE_LABEL = i18n.translate(
     defaultMessage: 'Customized Elastic rule',
   }
 );
+
+export const KUERY_LANGUAGE_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.kqlLanguageLabel',
+  {
+    defaultMessage: 'KQL',
+  }
+);
+
+export const LUCENE_LANGUAGE_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.luceneLanguageLabel',
+  {
+    defaultMessage: 'Lucene',
+  }
+);
