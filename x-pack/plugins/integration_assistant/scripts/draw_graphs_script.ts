@@ -46,6 +46,7 @@ async function drawGraph(compiledGraph: RunnableGraph, graphName: string) {
 
 export async function drawGraphs() {
   const relatedGraph = (await getRelatedGraph({ client, model })).getGraph();
+  // @ts-expect-error - error with @types/react-18 ??
   const logFormatDetectionGraph = (await getLogFormatDetectionGraph(model)).getGraph();
   const categorizationGraph = (await getCategorizationGraph({ client, model })).getGraph();
   const ecsSubGraph = (await getEcsSubGraph({ model })).getGraph();

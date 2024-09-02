@@ -77,6 +77,8 @@ describe('useRefreshHelper', () => {
     expect(mockDispatch).not.toHaveBeenCalledWith(refreshAction);
 
     state.transient.inFlight = true;
+
+    // @ts-expect-error - broken with @types/react@18
     rerender(useRefreshHelper);
 
     jest.runAllTimers();

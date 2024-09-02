@@ -28,6 +28,7 @@ export const CanvasRouter: FC<{ history: History }> = ({ history }) => (
   <Router history={history}>
     <Route
       path="/"
+      // @ts-expect-error - broken with @types/react@18
       children={(route: RouteComponentProps) => {
         // If it looks like the hash is a route then we will do a redirect
         if (isHashPath(route.location.hash) && !route.location.pathname) {

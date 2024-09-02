@@ -251,7 +251,7 @@ Read more at https://github.com/elastic/kibana/blob/main/src/plugins/kibana_reac
 
   // Pagination handler
   const handlePagination = useCallback(
-    ({ fromScroll, pagesBeforeStart, pagesAfterEnd }) => {
+    ({ fromScroll, pagesBeforeStart, pagesAfterEnd }: any) => {
       if (!fromScroll) {
         return;
       }
