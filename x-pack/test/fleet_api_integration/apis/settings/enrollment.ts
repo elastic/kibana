@@ -15,7 +15,7 @@ export default function (providerContext: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const fleetAndAgents = getService('fleetAndAgents');
 
-  describe('Enrollment settings - get', async function () {
+  describe('Enrollment settings - get', function () {
     skipIfNoDockerRegistry(providerContext);
 
     before(async () => {
@@ -42,7 +42,7 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('should respond with correct enrollment settings', async function () {
+    describe('should respond with correct enrollment settings', function () {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/fleet/fleet_server');
         // package verification error without force
