@@ -99,7 +99,7 @@ const toolsToBedrock = (tools: ToolOptions['tools'], messages: Message[]) => {
       return {
         ...schemaPart,
         // Claude is prone to ignoring the "array" part of an array type
-        description: schemaPart.description + '. Must be an array.',
+        description: schemaPart.description + '. Must be provided as a JSON array',
         items: walkSchema(schemaPart.items),
       };
     }
