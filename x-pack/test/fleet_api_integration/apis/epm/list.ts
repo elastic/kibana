@@ -22,7 +22,7 @@ export default function (providerContext: FtrProviderContext) {
   // because `this` has to point to the Mocha context
   // see https://mochajs.org/#arrow-functions
 
-  describe('EPM - list', async function () {
+  describe('EPM - list', function () {
     skipIfNoDockerRegistry(providerContext);
     const log = getService('log');
 
@@ -32,12 +32,10 @@ export default function (providerContext: FtrProviderContext) {
     });
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
-    });
-    after(async () => {
       await removeBundledPackages(log);
     });
 
-    describe('list api tests', async () => {
+    describe('list api tests', () => {
       it('lists all packages from the registry', async function () {
         const fetchPackageList = async () => {
           const response = await supertest
