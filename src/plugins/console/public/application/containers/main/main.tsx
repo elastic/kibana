@@ -72,13 +72,17 @@ export function Main({ isEmbeddable = false }: MainProps) {
 
   const { done, error, retry } = useDataInit();
 
-  useEffect(() => {
-    if (isFullscreenOpen) {
+  const toggleFullscreen = () => {
+    const isEnabled = !isFullscreenOpen;
+
+    setIsFullScreen(isEnabled);
+
+    if (isEnabled) {
       document.querySelector('#consoleRoot')?.requestFullscreen();
     } else {
       document.exitFullscreen();
     }
-  }, [isFullscreenOpen]);
+  };
 
   if (error) {
     return (
@@ -167,7 +171,7 @@ export function Main({ isEmbeddable = false }: MainProps) {
                   <EuiFlexItem grow={false}>
                     <NavIconButton
                       iconType={isFullscreenOpen ? 'fullScreenExit' : 'fullScreen'}
-                      onClick={() => setIsFullScreen(!isFullscreenOpen)}
+                      onClick={toggleFullscreen}
                       ariaLabel={
                         isFullscreenOpen
                           ? MAIN_PANEL_LABELS.closeFullscrenButton
