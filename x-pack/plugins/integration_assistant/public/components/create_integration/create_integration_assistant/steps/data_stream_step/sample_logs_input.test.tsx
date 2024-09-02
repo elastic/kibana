@@ -304,5 +304,30 @@ describe('SampleLogsInput', () => {
         });
       });
     });
+
+    describe('when the file is too large', () => {
+      beforeEach(async () => {
+        // Simulate large log content that would cause a RangeError
+        jest.spyOn(JSON, 'parse').mockImplementation(() => {
+          throw new RangeError();
+        });
+
+        await changeFile(input, new File(['...'], 'test.json', { type }));
+      });
+
+      afterEach(() => {
+        jest.clearAllMocks();
+      });
+
+      it('should raise an appropriate error', () => {
+        jest.spyOn(JSON, 'parse').mockImplementation(() => {
+          throw new RangeError();
+        });
+
+        expect(
+          result.queryByText('This logs sample file is too large to parse')
+        ).toBeInTheDocument();
+      });
+    });
   });
 });
