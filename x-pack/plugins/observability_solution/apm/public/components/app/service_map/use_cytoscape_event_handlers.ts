@@ -47,10 +47,9 @@ function getLayoutOptions({
 }): cytoscape.LayoutOptions {
   const animationOptions = getAnimationOptions(theme);
 
-  // @ts-expect-error Some of the dagre-specific layout options don't work with
-  // the types.
   return {
     animationDuration: animationOptions.duration,
+    // @ts-expect-error upgrade typescript v5.1.6
     animationEasing: animationOptions.easing,
     fit,
     name: 'dagre',
