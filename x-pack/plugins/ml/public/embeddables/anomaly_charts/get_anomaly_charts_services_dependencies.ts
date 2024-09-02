@@ -68,6 +68,7 @@ export const getAnomalyChartsServiceDependencies = async (
       mlCapabilities,
       mlFieldFormatService,
       mlResultsService,
+      mlApiServices,
     },
   ];
   return anomalyChartsEmbeddableServices;

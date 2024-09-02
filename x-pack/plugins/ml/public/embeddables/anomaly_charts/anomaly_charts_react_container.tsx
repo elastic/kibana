@@ -38,6 +38,7 @@ import type { MlLocatorParams } from '../../../common/types/locator';
 import { useAnomalyChartsData } from './use_anomaly_charts_data';
 import { useDateFormatTz, loadAnomaliesTableData } from '../../application/explorer/explorer_utils';
 import { mlJobServiceFactory } from '../../application/services/job_service';
+import { toastNotificationServiceProvider } from '../../application/services/toast_notification_service';
 
 const RESIZE_THROTTLE_TIME_MS = 500;
 
@@ -81,13 +82,16 @@ const AnomalyChartsContainer: FC<AnomalyChartsContainerProps> = ({
   );
   const [selectedEntities, setSelectedEntities] = useState<MlEntityField[] | undefined>();
   const [
-    { uiSettings },
+    {
+      uiSettings,
+      notifications: { toasts },
+    },
     { data: dataServices, share, uiActions, charts: chartsService },
     { mlApiServices },
   ] = services;
 
   const mlJobService = useMemo(
-    () => mlJobServiceFactory(undefined, mlApiServices),
+    () => mlJobServiceFactory(toastNotificationServiceProvider(toasts), mlApiServices),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
@@ -161,6 +165,8 @@ const AnomalyChartsContainer: FC<AnomalyChartsContainerProps> = ({
         };
 
         const newTableData = await loadAnomaliesTableData(
+          mlApiServices,
+          mlJobService,
           undefined,
           explorerJobs,
           dateFormatTz,

@@ -45,7 +45,6 @@ import { escapeQuotes } from '@kbn/es-query';
 import { isQuery } from '@kbn/data-plugin/public';
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
 
-import { mlJobServiceFactory } from '../../services/job_service';
 import { PLUGIN_ID } from '../../../../common/constants/app';
 import { findMessageField } from '../../util/index_utils';
 import { getInitialAnomaliesLayers, getInitialSourceIndexFieldLayers } from '../../../maps/util';
@@ -105,18 +104,11 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       data,
       share,
       application,
-      mlServices,
       uiActions,
       uiSettings,
       notifications: { toasts },
     },
   } = kibana;
-
-  const mlJobService = useMemo(
-    () => mlJobServiceFactory(undefined, mlServices.mlApiServices),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
 
   const { getDataViewById, getDataViewIdFromName } = useMlIndexUtils();
   const ml = useMlApiContext();

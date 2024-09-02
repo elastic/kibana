@@ -53,6 +53,7 @@ import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import type { MlResultsService } from '../services/results_service';
 import type { Annotations, AnnotationsTable } from '../../../common/types/annotations';
 import type { MlApiServices } from '../services/ml_api_service';
+import { useMlKibana } from '../contexts/kibana';
 
 export interface ExplorerJob {
   id: string;

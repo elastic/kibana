@@ -235,7 +235,7 @@ export interface AnomalyChartsServices {
   mlCapabilities: MlCapabilitiesService;
   mlFieldFormatService: MlFieldFormatService;
   mlResultsService: MlResultsService;
-  mlApiServices?: MlApiServices;
+  mlApiServices: MlApiServices;
 }
 
 export interface SingleMetricViewerServices {
