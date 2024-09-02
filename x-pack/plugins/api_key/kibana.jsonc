@@ -1,0 +1,19 @@
+{
+  "type": "plugin",
+  "id": "@kbn/api-key",
+  "owner": "@elastic/search-kibana",
+  "plugin": {
+    "id": "apiKey",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack"
+    ],
+    "requiredPlugins": [
+    ],
+    "optionalPlugins": [
+    ],
+    "requiredBundles": [
+    ]
+  }
+}
