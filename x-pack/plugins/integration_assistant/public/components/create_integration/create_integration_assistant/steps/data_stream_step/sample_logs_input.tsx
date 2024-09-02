@@ -69,8 +69,10 @@ interface ParseLogsErrorResult {
 }
 
 interface ParseLogsSuccessResult {
-  logSamples: string[];
+  // Format of the samples, if able to be determined.
   samplesFormat?: SamplesFormat;
+  // The parsed log samples. If samplesFormat is (ND)JSON, these are JSON strings.
+  logSamples: string[];
 }
 
 type ParseLogsResult = ParseLogsErrorResult | ParseLogsSuccessResult;
@@ -84,8 +86,8 @@ type ParseLogsResult = ParseLogsErrorResult | ParseLogsSuccessResult;
  *  - it looks like (ND)JSON format, but the items are not JSON dictionaries.
  *
  * Otherwise it is guaranteed to parse and return (possibly empty) `logSamples` array.
- * If the file content is (ND)JSON, it will additionally:
- *  - fill out the `samplesFormat` field with name 'json' or 'ndjson'.
+ * If the file content is (ND)JSON, it will additionally fill out the `samplesFormat`
+ * field with name 'json' or 'ndjson'; otherwise it will be undefined.
  */
 const parseLogsContent = (fileContent: string): ParseLogsResult => {
   let parsedContent: unknown[];
