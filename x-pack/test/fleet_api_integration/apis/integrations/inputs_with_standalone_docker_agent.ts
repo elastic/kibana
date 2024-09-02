@@ -38,8 +38,7 @@ export default function (providerContext: FtrProviderContext) {
         name: 'test standalone agent',
       });
       apiKey = `${res.id}:${res.api_key}`;
-    });
-    before(async () => {
+
       agentImage = `docker.elastic.co/beats/elastic-agent:${await getLatestVersion()}`;
       log.info(agentImage);
       await execa('docker', ['pull', agentImage]);

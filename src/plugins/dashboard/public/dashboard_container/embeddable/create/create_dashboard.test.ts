@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject, Observable } from 'rxjs';
-
 import {
   ContactCardEmbeddable,
   ContactCardEmbeddableFactory,
@@ -15,11 +13,6 @@ import {
   ContactCardEmbeddableOutput,
   CONTACT_CARD_EMBEDDABLE,
 } from '@kbn/embeddable-plugin/public/lib/test_samples';
-import {
-  ControlGroupInput,
-  ControlGroupContainer,
-  ControlGroupContainerFactory,
-} from '@kbn/controls-plugin/public';
 import { Filter } from '@kbn/es-query';
 import { EmbeddablePackageState, ViewMode } from '@kbn/embeddable-plugin/public';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
@@ -29,6 +22,7 @@ import { getSampleDashboardPanel } from '../../../mocks';
 import { pluginServices } from '../../../services/plugin_services';
 import { DashboardCreationOptions } from '../dashboard_container_factory';
 import { DEFAULT_DASHBOARD_INPUT } from '../../../dashboard_constants';
+import { mockControlGroupApi } from '../../../mocks';
 
 test("doesn't throw error when no data views are available", async () => {
   pluginServices.getServices().data.dataViews.defaultDataViewExists = jest
@@ -416,6 +410,7 @@ test('creates new embeddable with incoming embeddable if id does not match exist
       },
     }),
   });
+  dashboard?.setControlGroupApi(mockControlGroupApi);
 
   // flush promises
   await new Promise((r) => setTimeout(r, 1));
@@ -476,6 +471,7 @@ test('creates new embeddable with specified size if size is provided', async () 
       },
     }),
   });
+  dashboard?.setControlGroupApi(mockControlGroupApi);
 
   // flush promises
   await new Promise((r) => setTimeout(r, 1));
@@ -495,42 +491,6 @@ test('creates new embeddable with specified size if size is provided', async () 
   );
   expect(dashboard!.getState().explicitInput.panels.new_panel.gridData.w).toBe(1);
   expect(dashboard!.getState().explicitInput.panels.new_panel.gridData.h).toBe(1);
-});
-
-test('creates a control group from the control group factory', async () => {
-  const mockControlGroupContainer = {
-    destroy: jest.fn(),
-    render: jest.fn(),
-    updateInput: jest.fn(),
-    getInput: jest.fn().mockReturnValue({}),
-    getInput$: jest.fn().mockReturnValue(new Observable()),
-    getOutput: jest.fn().mockReturnValue({}),
-    getOutput$: jest.fn().mockReturnValue(new Observable()),
-    onFiltersPublished$: new Observable(),
-    unsavedChanges: new BehaviorSubject(undefined),
-  } as unknown as ControlGroupContainer;
-  const mockControlGroupFactory = {
-    create: jest.fn().mockReturnValue(mockControlGroupContainer),
-  } as unknown as ControlGroupContainerFactory;
-  pluginServices.getServices().embeddable.getEmbeddableFactory = jest
-    .fn()
-    .mockReturnValue(mockControlGroupFactory);
-  await createDashboard({
-    useControlGroupIntegration: true,
-    getInitialInput: () => ({
-      controlGroupInput: { controlStyle: 'twoLine' } as unknown as ControlGroupInput,
-    }),
-  });
-  // flush promises
-  await new Promise((r) => setTimeout(r, 1));
-  expect(pluginServices.getServices().embeddable.getEmbeddableFactory).toHaveBeenCalledWith(
-    'control_group'
-  );
-  expect(mockControlGroupFactory.create).toHaveBeenCalledWith(
-    expect.objectContaining({ controlStyle: 'twoLine' }),
-    undefined,
-    { lastSavedInput: expect.objectContaining({ controlStyle: 'oneLine' }) }
-  );
 });
 
 /*
@@ -567,6 +527,7 @@ test('searchSessionId is updated prior to child embeddable parent subscription e
       createSessionRestorationDataProvider: () => {},
     } as unknown as DashboardCreationOptions['searchSessionSettings'],
   });
+  dashboard?.setControlGroupApi(mockControlGroupApi);
   expect(dashboard).toBeDefined();
   const embeddable = await dashboard!.addNewEmbeddable<
     ContactCardEmbeddableInput,
