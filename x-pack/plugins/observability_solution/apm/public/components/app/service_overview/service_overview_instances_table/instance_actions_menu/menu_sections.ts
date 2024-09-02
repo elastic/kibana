@@ -72,6 +72,9 @@ export function getMenuSections({
     time,
   });
 
+  const hasPodLink = !!podId && !!assetDetailsLocator;
+  const hasContainerLink = !!containerId && !!assetDetailsLocator;
+
   const podActions: Action[] = [
     {
       key: 'podLogs',
@@ -86,12 +89,14 @@ export function getMenuSections({
       label: i18n.translate('xpack.apm.serviceOverview.instancesTable.actionMenus.podMetrics', {
         defaultMessage: 'Pod metrics',
       }),
-      href: assetDetailsLocator?.getRedirectUrl({
-        assetId: podId!,
-        assetType: 'pod',
-        assetDetails: { dateRange: infraMetricsQuery },
-      }),
-      condition: !!podId && !!assetDetailsLocator,
+      href: hasPodLink
+        ? assetDetailsLocator.getRedirectUrl({
+            assetId: podId,
+            assetType: 'pod',
+            assetDetails: { dateRange: infraMetricsQuery },
+          })
+        : undefined,
+      condition: hasPodLink,
     },
   ];
 
@@ -110,12 +115,14 @@ export function getMenuSections({
         'xpack.apm.serviceOverview.instancesTable.actionMenus.containerMetrics',
         { defaultMessage: 'Container metrics' }
       ),
-      href: assetDetailsLocator?.getRedirectUrl({
-        assetId: containerId!,
-        assetType: 'container',
-        assetDetails: { dateRange: infraMetricsQuery },
-      }),
-      condition: !!containerId && !!assetDetailsLocator,
+      href: hasContainerLink
+        ? assetDetailsLocator.getRedirectUrl({
+            assetId: containerId,
+            assetType: 'container',
+            assetDetails: { dateRange: infraMetricsQuery },
+          })
+        : undefined,
+      condition: hasContainerLink,
     },
   ];
 
