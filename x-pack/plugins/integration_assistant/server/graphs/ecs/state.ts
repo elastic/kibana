@@ -26,6 +26,10 @@ export const graphState: StateGraphArgs<EcsMappingState>['channels'] = {
     value: (x: string[], y?: string[]) => y ?? x,
     default: () => [],
   },
+  additionalProcessors: {
+    value: (x: object[], y?: object[]) => y ?? x,
+    default: () => [],
+  },
   prefixedSamples: {
     value: (x: string[], y?: string[]) => y ?? x,
     default: () => [],

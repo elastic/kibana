@@ -25,6 +25,7 @@ import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { getLangSmithOptions } from '../../../../../common/lib/lang_smith';
+import type { ESProcessorItem } from '../../../../../../common';
 import {
   type AnalyzeLogsRequestBody,
   type CategorizationRequestBody,
@@ -86,8 +87,12 @@ export const useGeneration = ({
 
     (async () => {
       try {
+        // logSamples may be modified to JSON format if they are in different formats
+        // Keeping originalLogSamples for running pipeline and generating docs
+        let originalLogSamples;
         let logSamples = integrationSettings.logSamples;
         let samplesFormat = integrationSettings.samplesFormat;
+        let additionalProcessors: ESProcessorItem[] | undefined;
 
         if (integrationSettings.samplesFormat === undefined) {
           const analyzeLogsRequest: AnalyzeLogsRequestBody = {
@@ -105,12 +110,14 @@ export const useGeneration = ({
           }
           logSamples = analyzeLogsResult.results.parsedSamples;
           samplesFormat = analyzeLogsResult.results.samplesFormat;
+          additionalProcessors = analyzeLogsResult.additionalProcessors;
         }
 
         const ecsRequest: EcsMappingRequestBody = {
           packageName: integrationSettings.name ?? '',
           dataStreamName: integrationSettings.dataStreamName ?? '',
           rawSamples: logSamples ?? [],
+          additionalProcessors: additionalProcessors ?? [],
           connectorId: connector.id,
           langSmithOptions: getLangSmithOptions(),
         };
@@ -124,6 +131,7 @@ export const useGeneration = ({
         }
         const categorizationRequest: CategorizationRequestBody = {
           ...ecsRequest,
+          originalLogSamples: originalLogSamples ?? [],
           currentPipeline: ecsGraphResult.results.pipeline,
         };
 

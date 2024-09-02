@@ -10,18 +10,18 @@ import type { KVState } from '../../types';
 import type { HandleKVNodeParams } from './types';
 import { KV_HEADER_PROMPT } from './prompts';
 import { KV_HEADER_EXAMPLE_ANSWER } from './constants';
-import {createGrokProcessor} from '../../util/processors'
+import { createGrokProcessor } from '../../util/processors';
 import { testPipeline } from '../../util';
 
 interface GrokResult {
-    [key: string]: unknown;
-    message: string
+  [key: string]: unknown;
+  message: string;
 }
 
 export async function handleHeader({
   state,
   model,
-  client
+  client,
 }: HandleKVNodeParams): Promise<Partial<KVState>> {
   const outputParser = new JsonOutputParser();
   const kvHeaderGraph = KV_HEADER_PROMPT.pipe(model).pipe(outputParser);
@@ -34,12 +34,15 @@ export async function handleHeader({
   const grokProcessor = createGrokProcessor(pattern.grok_pattern);
 
   const pipeline = { processors: grokProcessor };
-  const {pipelineResults , errors} = await testPipeline(state.logSamples, pipeline, client) as {pipelineResults: GrokResult[], errors: object[]};
+  const { pipelineResults, errors } = (await testPipeline(state.logSamples, pipeline, client)) as {
+    pipelineResults: GrokResult[];
+    errors: object[];
+  };
 
-  let additionalProcessors = state.additionalProcessors;
-  additionalProcessors.push(grokProcessor);
+  const additionalProcessors = state.additionalProcessors;
+  additionalProcessors.push(grokProcessor[0]);
 
-  const kvLogMessages: string[] = pipelineResults.map(entry => entry.message);
+  const kvLogMessages: string[] = pipelineResults.map((entry) => entry.message);
 
   return {
     kvLogMessages,

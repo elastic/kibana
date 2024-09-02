@@ -6,6 +6,7 @@
  */
 import { JsonOutputParser } from '@langchain/core/output_parsers';
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import { ESProcessorItem } from '../../../common';
 import type { KVState } from '../../types';
 import { KV_MAIN_PROMPT } from './prompts';
 import { testPipeline } from '../../util/pipeline';
@@ -13,9 +14,12 @@ import { KVProcessor } from '../../processor_types';
 import { HandleKVNodeParams } from './types';
 import { KV_EXAMPLE_ANSWER } from './constants';
 import { createKVProcessor } from '../../util/processors';
-import { ESProcessorItem } from '@kbn/integration-assistant-plugin/common';
 
-export async function handleKV({state, model , client} : HandleKVNodeParams): Promise<Partial<KVState>> {
+export async function handleKV({
+  state,
+  model,
+  client,
+}: HandleKVNodeParams): Promise<Partial<KVState>> {
   const kvMainPrompt = KV_MAIN_PROMPT;
   const outputParser = new JsonOutputParser();
   const kvMainGraph = kvMainPrompt.pipe(model).pipe(outputParser);
@@ -28,28 +32,21 @@ export async function handleKV({state, model , client} : HandleKVNodeParams): Pr
   })) as KVProcessor;
 
   const kvProcessor = createKVProcessor(kvInput);
-  console.log("**************");
-  console.log(kvProcessor);
 
-  const { pipelineResults: kvOutputSamples, errors } = await create_json_input(
+  const { pipelineResults: kvOutputSamples, errors } = await createJSONInput(
     kvProcessor,
     samples,
     client
   );
 
-  console.log(kvOutputSamples);
-
   // Converts JSON Object into a string and parses it as a array of JSON strings
   const jsonSamples = kvOutputSamples.map((log) => JSON.stringify(log));
-
-  console.log(jsonSamples);
-
   const additionalProcessors = state.additionalProcessors;
-  additionalProcessors.push(kvProcessor);
+  additionalProcessors.push(kvProcessor[0]);
 
   return {
     additionalProcessors,
-    jsonSamples: jsonSamples,
+    jsonSamples,
     lastExecutedChain: 'handleKV',
   };
 }
@@ -61,12 +58,11 @@ export async function handleKV({state, model , client} : HandleKVNodeParams): Pr
  * @param client
  * @returns pipelineResults, errors
  */
-async function create_json_input(
+async function createJSONInput(
   kvProcessor: ESProcessorItem,
   formattedSamples: string[],
   client: IScopedClusterClient
 ): Promise<{ pipelineResults: object[]; errors: object[] }> {
-  const fieldName = kvProcessor?.kv?.field;
   // This processor removes the original message field in the JSON output
   const removeProcessor = { remove: { field: 'message', ignore_missing: true } };
   const pipeline = { processors: [kvProcessor[0], removeProcessor] };

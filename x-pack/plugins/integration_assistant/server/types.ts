@@ -12,7 +12,7 @@ import {
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import { SamplesFormat } from '../common';
+import { ESProcessorItem, SamplesFormat } from '../common';
 
 export interface IntegrationAssistantPluginSetup {
   setIsAvailable: (isAvailable: boolean) => void;
@@ -67,6 +67,7 @@ export interface EcsMappingState {
   chunkSize: number;
   lastExecutedChain: string;
   rawSamples: string[];
+  additionalProcessors: object[];
   prefixedSamples: string[];
   combinedSamples: string;
   sampleChunks: string[];
@@ -97,7 +98,7 @@ export interface LogFormatDetectionState {
   header: boolean;
   ecsVersion: string;
   results: object;
-  additionalProcessors: object[]; //# This will be generated in the sub-graphs
+  additionalProcessors: ESProcessorItem[]; // # This will be generated in the sub-graphs
 }
 
 export interface KVState {

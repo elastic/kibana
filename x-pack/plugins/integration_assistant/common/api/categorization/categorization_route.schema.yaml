@@ -30,6 +30,8 @@ paths:
                   $ref: "../model/common_attributes.schema.yaml#/components/schemas/DataStreamName"
                 rawSamples:
                   $ref: "../model/common_attributes.schema.yaml#/components/schemas/RawSamples"
+                originalLogSamples:
+                  $ref: "../model/common_attributes.schema.yaml#/components/schemas/LogSamples"
                 currentPipeline:
                   $ref: "../model/common_attributes.schema.yaml#/components/schemas/Pipeline"
                 connectorId:

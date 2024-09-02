@@ -10,8 +10,7 @@ import { StateGraph, END, START } from '@langchain/langgraph';
 import type { KVState } from '../../types';
 import { handleKV } from './kv';
 import type { KVGraphParams, KVBaseNodeParams } from './types';
-import {handleHeader} from './header';
-
+import { handleHeader } from './header';
 
 const graphState: StateGraphArgs<KVState>['channels'] = {
   lastExecutedChain: {
@@ -40,28 +39,29 @@ const graphState: StateGraphArgs<KVState>['channels'] = {
   },
 };
 
-function modelInput({state}: KVBaseNodeParams): Partial<KVState> {
+function modelInput({ state }: KVBaseNodeParams): Partial<KVState> {
   return {
     finalized: false,
     lastExecutedChain: 'modelInput',
   };
 }
 
-function modelOutput({state}: KVBaseNodeParams): Partial<KVState> {
+function modelOutput({ state }: KVBaseNodeParams): Partial<KVState> {
   return {
     finalized: true,
+    additionalProcessors: state.additionalProcessors,
     lastExecutedChain: 'modelOutput',
   };
 }
 
-export async function getKVGraph({model, client}: KVGraphParams) {
+export async function getKVGraph({ model, client }: KVGraphParams) {
   const workflow = new StateGraph({
     channels: graphState,
   })
     .addNode('modelInput', modelInput)
-    .addNode('modelOutput', modelOutput)
-    .addNode('handleHeader', (state: KVState) => handleHeader({state, model, client}))
-    .addNode('handleKV', (state: KVState) => handleKV({state, model, client}))
+    .addNode('modelOutput', (state: KVState) => modelOutput({ state }))
+    .addNode('handleHeader', (state: KVState) => handleHeader({ state, model, client }))
+    .addNode('handleKV', (state: KVState) => handleKV({ state, model, client }))
     .addEdge(START, 'modelInput')
     .addEdge('modelInput', 'handleHeader')
     .addEdge('handleHeader', 'handleKV')

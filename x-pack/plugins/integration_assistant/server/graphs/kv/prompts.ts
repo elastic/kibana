@@ -23,11 +23,11 @@ export const KV_MAIN_PROMPT = ChatPromptTemplate.fromMessages([
 
  Follow these steps to help improve the KV processor and apply it to each field step by step:
 
- 1. Based on your analysis of the log samples, create a KV processor that can parse log. The processor should correctly handle logs where keys and values are separated by a \`field_split\` and pairs are separated by \`value_split\`.
+ 1. Based on your analysis of the log samples, identify different key-value pairs and the delimeters that separates them, create a KV processor that can parse log. The processor should correctly handle logs where keys and values are separated by a \`field_split\` and pairs are separated by \`value_split\`.
  2. Recognize and properly format different data types such as strings, numbers, and timestamps.
  3. Handle quoted values correctly (e.g., error="Insufficient funds").
- 4. The \`value_split\` is Regex pattern to use for splitting the key from the value within a key-value pair (e.g., ':' or '=' )
- 5. The \`field_split\` is the Regex pattern to use for splitting different key-value pairs in the log (e.g.,' ' or ';'  or '|' )
+ 4. The \`value_split\` is the delimeter regex pattern to use for splitting the key from the value within a key-value pair (e.g., ':' or '=' )
+ 5. The \`field_split\` is the delimeter regex pattern to use for splitting key-value pairs in the log (e.g.,' ' or ';'  or '|' )
  6. Do not use whitespace character in regex for \`field_split\` or \`value_split\`. Instead use the \`trim_key\` and \`trim_value\` fields.
  7. Use \`trim_key\` for string of characters to trim from extracted keys.
  8. Use \`trim_value\` for string of characters to trim from extracted values.

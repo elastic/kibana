@@ -10,9 +10,9 @@ import { END, START, StateGraph } from '@langchain/langgraph';
 import type { LogFormatDetectionState } from '../../types';
 import { EX_ANSWER_LOG_TYPE } from './constants';
 import { handleLogFormatDetection } from './detection';
-import { SamplesFormat } from '../../../common';
+import { ESProcessorItem, SamplesFormat } from '../../../common';
 import { getKVGraph } from '../kv/graph';
-import { LogDetectionGraphParams } from './types';
+import { LogDetectionGraphParams, LogDetectionBaseNodeParams } from './types';
 
 const graphState: StateGraphArgs<LogFormatDetectionState>['channels'] = {
   lastExecutedChain: {
@@ -52,12 +52,12 @@ const graphState: StateGraphArgs<LogFormatDetectionState>['channels'] = {
     default: () => ({}),
   },
   additionalProcessors: {
-    value: (x: object[], y?: object[]) => y ?? x,
+    value: (x: ESProcessorItem[], y?: ESProcessorItem[]) => y ?? x,
     default: () => [],
   },
 };
 
-function modelInput(state: LogFormatDetectionState): Partial<LogFormatDetectionState> {
+function modelInput({ state }: LogDetectionBaseNodeParams): Partial<LogFormatDetectionState> {
   return {
     exAnswer: JSON.stringify(EX_ANSWER_LOG_TYPE, null, 2),
     finalized: false,
@@ -65,19 +65,20 @@ function modelInput(state: LogFormatDetectionState): Partial<LogFormatDetectionS
   };
 }
 
-function modelOutput(state: LogFormatDetectionState): Partial<LogFormatDetectionState> {
+function modelOutput({ state }: LogDetectionBaseNodeParams): Partial<LogFormatDetectionState> {
   return {
     finalized: true,
     lastExecutedChain: 'modelOutput',
     results: {
       samplesFormat: state.samplesFormat,
       parsedSamples: state.jsonSamples,
+      additionalProcessors: state.additionalProcessors,
     },
   };
 }
 
-function logFormatRouter(state: LogFormatDetectionState): string {
-  if (state.samplesFormat.name === "structured") {
+function logFormatRouter({ state }: LogDetectionBaseNodeParams): string {
+  if (state.samplesFormat.name === 'structured') {
     return 'structured';
   }
   // if (state.samplesFormat === LogFormat.UNSTRUCTURED) {
@@ -89,27 +90,32 @@ function logFormatRouter(state: LogFormatDetectionState): string {
   return 'unsupported';
 }
 
-export async function getLogFormatDetectionGraph({model , client}: LogDetectionGraphParams) {
+export async function getLogFormatDetectionGraph({ model, client }: LogDetectionGraphParams) {
   const workflow = new StateGraph({
     channels: graphState,
   })
     .addNode('modelInput', modelInput)
-    .addNode('modelOutput', modelOutput)
-    .addNode('handleLogFormatDetection', (state: LogFormatDetectionState) => handleLogFormatDetection({state, model}))
-    .addNode('handleKVGraph', await getKVGraph({model,client}))
+    .addNode('modelOutput', (state: LogFormatDetectionState) => modelOutput({ state }))
+    .addNode('handleLogFormatDetection', (state: LogFormatDetectionState) =>
+      handleLogFormatDetection({ state, model })
+    )
+    .addNode('handleKVGraph', await getKVGraph({ model, client }))
     // .addNode('handleUnstructuredGraph', (state: LogFormatDetectionState) => getCompiledUnstructuredGraph(state, model))
     // .addNode('handleCsvGraph', (state: LogFormatDetectionState) => getCompiledCsvGraph(state, model))
     .addEdge(START, 'modelInput')
     .addEdge('modelInput', 'handleLogFormatDetection')
     .addEdge('handleKVGraph', 'modelOutput')
     .addEdge('modelOutput', END)
-    .addConditionalEdges('handleLogFormatDetection', logFormatRouter, {
-      // TODO: Add unstructured, csv nodes
-      structured: 'handleKVGraph',
-      // unstructured: 'handleUnstructuredGraph',
-      // csv: 'handleCsvGraph',
-      unsupported: 'modelOutput',
-    });
+    .addConditionalEdges(
+      'handleLogFormatDetection',
+      (state: LogFormatDetectionState) => logFormatRouter({ state }),
+      {
+        structured: 'handleKVGraph',
+        // unstructured: 'handleUnstructuredGraph',
+        // csv: 'handleCsvGraph',
+        unsupported: 'modelOutput',
+      }
+    );
 
   const compiledLogFormatDetectionGraph = workflow.compile();
 
