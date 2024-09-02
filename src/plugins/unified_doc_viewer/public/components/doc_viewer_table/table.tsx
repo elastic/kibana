@@ -23,7 +23,6 @@ import {
   EuiCallOut,
   useResizeObserver,
   EuiSwitch,
-  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -70,6 +69,7 @@ const DEFAULT_PAGE_SIZE = 25;
 const PINNED_FIELDS_KEY = 'discover:pinnedFields';
 const PAGE_SIZE = 'discover:pageSize';
 const HIDE_NULL_VALUES = 'unifiedDocViewer:hideNullValues';
+const SHOW_ONLY_SELECTED_FIELDS = 'unifiedDocViewer:showOnlySelectedFields';
 
 const GRID_COLUMN_FIELD_NAME = 'name';
 const GRID_COLUMN_FIELD_VALUE = 'value';
@@ -141,8 +141,10 @@ export const DocViewerTable = ({
     getPinnedFields(currentDataViewId, storage)
   );
   const [areNullValuesHidden, setAreNullValuesHidden] = useLocalStorage(HIDE_NULL_VALUES, false);
-
-  const { euiTheme } = useEuiTheme();
+  const [showOnlySelectedFields, setShowOnlySelectedFields] = useLocalStorage(
+    SHOW_ONLY_SELECTED_FIELDS,
+    false
+  );
 
   const flattened = hit.flattened;
   const shouldShowFieldHandler = useMemo(
@@ -373,6 +375,13 @@ export const DocViewerTable = ({
     [setAreNullValuesHidden]
   );
 
+  const onShowOnlySelectedFieldsChange = useCallback(
+    (e) => {
+      setShowOnlySelectedFields(e.target.checked);
+    },
+    [setShowOnlySelectedFields]
+  );
+
   const renderCellValue: EuiDataGridProps['renderCellValue'] = useCallback(
     ({ rowIndex, columnId, isDetails }) => {
       return (
@@ -420,6 +429,8 @@ export const DocViewerTable = ({
     ? getTabContentAvailableHeight(containerRef, decreaseAvailableHeightBy ?? DEFAULT_MARGIN_BOTTOM)
     : 0;
 
+  const hasSelectedFields = Boolean(columns?.filter((column) => column !== '_source').length);
+
   return (
     <EuiFlexGroup
       ref={setContainerRef}
@@ -458,25 +469,50 @@ export const DocViewerTable = ({
           <EuiFlexItem grow={false}>
             <EuiSpacer size="s" />
           </EuiFlexItem>
-          {isEsqlMode && (
-            <EuiFlexItem
-              grow={false}
-              css={css`
-                align-self: end;
-                padding-bottom: ${euiTheme.size.s};
-              `}
+
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup
+              responsive={false}
+              wrap={true}
+              direction="row"
+              justifyContent="flexEnd"
+              alignItems="center"
+              gutterSize="m"
             >
-              <EuiSwitch
-                label={i18n.translate('unifiedDocViewer.hideNullValues.switchLabel', {
-                  defaultMessage: 'Hide fields with null values',
-                })}
-                checked={areNullValuesHidden ?? false}
-                onChange={onHideNullValuesChange}
-                compressed
-                data-test-subj="unifiedDocViewerHideNullValuesSwitch"
-              />
-            </EuiFlexItem>
-          )}
+              <EuiFlexItem grow={false}>
+                <EuiSwitch
+                  label={i18n.translate('unifiedDocViewer.showOnlySelectedFields.switchLabel', {
+                    defaultMessage: 'Selected fields only',
+                    description: 'Switch label to show only selected fields in the table',
+                  })}
+                  checked={showOnlySelectedFields ?? false}
+                  disabled={!hasSelectedFields}
+                  onChange={onShowOnlySelectedFieldsChange}
+                  compressed
+                  data-test-subj="unifiedDocViewerShowOnlySelectedFieldsSwitch"
+                />
+              </EuiFlexItem>
+              {isEsqlMode && (
+                <EuiFlexItem grow={false}>
+                  <EuiSwitch
+                    label={i18n.translate('unifiedDocViewer.hideNullValues.switchLabel', {
+                      defaultMessage: 'Hide null',
+                      description: 'Switch label to hide null values in the table',
+                    })}
+                    checked={areNullValuesHidden ?? false}
+                    onChange={onHideNullValuesChange}
+                    compressed
+                    data-test-subj="unifiedDocViewerHideNullValuesSwitch"
+                  />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <EuiSpacer size="s" />
+          </EuiFlexItem>
+
           <EuiFlexItem
             grow={Boolean(containerHeight)}
             css={css`
