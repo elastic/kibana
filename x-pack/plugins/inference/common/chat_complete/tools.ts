@@ -48,9 +48,7 @@ export type ToolCallsOf<TToolOptions extends ToolOptions> = TToolOptions extends
   ? TToolOptions extends { toolChoice: ToolChoiceType.none }
     ? { toolCalls: [] }
     : {
-        toolCalls: ToolResponsesOf<
-          Assert<ToolsOfChoice<TToolOptions>, Record<string, ToolDefinition> | undefined>
-        >;
+        toolCalls: ToolResponsesOf<ToolsOfChoice<TToolOptions>>;
       }
   : { toolCalls: never[] };
 

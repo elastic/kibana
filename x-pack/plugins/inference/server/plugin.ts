@@ -40,7 +40,7 @@ export class InferencePlugin
     registerRoutes({
       router,
       coreSetup,
-      logger: this.logger.get('chatComplete'),
+      logger: this.logger,
     });
 
     return {};

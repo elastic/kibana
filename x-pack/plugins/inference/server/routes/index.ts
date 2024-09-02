@@ -20,6 +20,6 @@ export const registerRoutes = ({
   logger: Logger;
   coreSetup: CoreSetup<InferenceStartDependencies, InferenceServerStart>;
 }) => {
-  registerChatCompleteRoute({ router, coreSetup, logger });
+  registerChatCompleteRoute({ router, coreSetup, logger: logger.get('chatComplete') });
   registerConnectorsRoute({ router, coreSetup });
 };

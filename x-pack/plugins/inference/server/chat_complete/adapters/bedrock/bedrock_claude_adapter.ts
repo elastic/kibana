@@ -19,22 +19,25 @@ import {
 } from './serde_eventstream_into_observable';
 import { processCompletionChunks } from './process_completion_chunks';
 import { addNoToolUsageDirective } from './prompts';
+import { ToolSchemaType } from '../../../../common/chat_complete/tool_schema';
 
 export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
   chatComplete: ({ executor, system, messages, toolChoice, tools }) => {
     const noToolUsage = toolChoice === ToolChoiceType.none;
 
+    const subActionParams = {
+      system: noToolUsage ? addNoToolUsageDirective(system) : system,
+      messages: messagesToBedrock(messages),
+      tools: noToolUsage ? [] : toolsToBedrock(tools, messages),
+      toolChoice: toolChoiceToBedrock(toolChoice),
+      temperature: 0,
+      stopSequences: ['\n\nHuman:'],
+    };
+
     return from(
       executor.invoke({
         subAction: 'invokeStream',
-        subActionParams: {
-          system: noToolUsage ? addNoToolUsageDirective(system) : system,
-          messages: messagesToBedrock(messages),
-          tools: noToolUsage ? [] : toolsToBedrock(tools),
-          toolChoice: toolChoiceToBedrock(toolChoice),
-          temperature: 0,
-          stopSequences: ['\n\nHuman:'],
-        },
+        subActionParams,
       })
     ).pipe(
       switchMap((response) => {
@@ -79,19 +82,64 @@ const toolChoiceToBedrock = (
   return undefined;
 };
 
-const toolsToBedrock = (tools: ToolOptions['tools']) => {
-  return tools
-    ? Object.entries(tools).map(([toolName, toolDef]) => {
-        return {
-          name: toolName,
-          description: toolDef.description,
-          input_schema: toolDef.schema ?? {
+const toolsToBedrock = (tools: ToolOptions['tools'], messages: Message[]) => {
+  function walkSchema<T extends ToolSchemaType>(schemaPart: T): T {
+    if (schemaPart.type === 'object' && schemaPart.properties) {
+      return {
+        ...schemaPart,
+        properties: Object.fromEntries(
+          Object.entries(schemaPart.properties).map(([key, childSchemaPart]) => {
+            return [key, walkSchema(childSchemaPart)];
+          })
+        ),
+      };
+    }
+
+    if (schemaPart.type === 'array') {
+      return {
+        ...schemaPart,
+        // Claude is prone to ignoring the "array" part of an array type
+        description: schemaPart.description + '. Must be an array.',
+        items: walkSchema(schemaPart.items),
+      };
+    }
+
+    return schemaPart;
+  }
+
+  if (tools) {
+    return Object.entries(tools).map(([toolName, toolDef]) => {
+      return {
+        name: toolName,
+        description: toolDef.description,
+        input_schema: walkSchema(
+          toolDef.schema ?? {
             type: 'object' as const,
             properties: {},
-          },
-        };
-      })
-    : undefined;
+          }
+        ),
+      };
+    });
+  }
+
+  const hasToolUse = messages.filter(
+    (message) =>
+      message.role === MessageRole.Tool ||
+      (message.role === MessageRole.Assistant && message.toolCalls?.length)
+  );
+
+  if (hasToolUse) {
+    return [
+      {
+        name: 'do_not_call_this_tool',
+        description: 'Do not call this tool, it is strictly forbidden',
+        input_schema: {
+          type: 'object',
+          properties: {},
+        },
+      },
+    ];
+  }
 };
 
 const messagesToBedrock = (messages: Message[]): BedRockMessage[] => {

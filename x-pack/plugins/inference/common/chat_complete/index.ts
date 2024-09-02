@@ -39,9 +39,8 @@ export type ChatCompletionMessageEvent<TToolOptions extends ToolOptions> =
     content: string;
   } & { toolCalls: ToolCallsOf<TToolOptions>['toolCalls'] };
 
-export type ChatCompletionResponse<TToolOptions extends ToolOptions = ToolOptions> = Observable<
-  ChatCompletionEvent<TToolOptions>
->;
+export type ChatCompletionResponse<TToolOptions extends ToolOptions = ToolOptions> =
+  Observable<TToolOptions>;
 
 export enum ChatCompletionEventType {
   ChatCompletionChunk = 'chatCompletionChunk',
@@ -87,7 +86,7 @@ export type ChatCompletionEvent<TToolOptions extends ToolOptions = ToolOptions> 
  * @param {ToolChoice} [options.toolChoice] Force the LLM to call a (specific) tool, or no tool
  * @param {Record<string, ToolDefinition>} [options.tools] A map of tools that can be called by the LLM
  */
-export type ChatCompleteAPI<TToolOptions extends ToolOptions = ToolOptions> = (
+export type ChatCompleteAPI = <TToolOptions extends ToolOptions>(
   options: {
     connectorId: string;
     system?: string;
