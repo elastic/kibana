@@ -13,3 +13,17 @@ export const CHECK_NOW: string = i18n.translate(
     defaultMessage: 'Check now',
   }
 );
+
+export const HISTORY = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.indexCheckFlyout.historyTab',
+  {
+    defaultMessage: 'History',
+  }
+);
+
+export const LATEST_CHECK = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.indexCheckFlyout.latestCheckTab',
+  {
+    defaultMessage: 'Latest Check',
+  }
+);
