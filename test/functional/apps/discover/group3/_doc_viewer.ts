@@ -232,6 +232,151 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    describe('show only selected fields in ES|QL mode', function () {
+      beforeEach(async () => {
+        await PageObjects.discover.selectTextBaseLang();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+      });
+
+      it('should disable the switch when no fields are selected', async function () {
+        const testQuery = 'from logstash-* | sort @timestamp | limit 10';
+        await monacoEditor.setCodeEditorValue(testQuery);
+        await testSubjects.click('querySubmitButton');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await dataGrid.clickRowToggle();
+        await PageObjects.discover.isShowingDocViewer();
+
+        const showOnlySelectedFieldsSwitch = await testSubjects.find(
+          'unifiedDocViewerShowOnlySelectedFieldsSwitch'
+        );
+        expect(await showOnlySelectedFieldsSwitch.getAttribute('disabled')).to.be('true');
+
+        const fieldNameCells = await find.allByCssSelector('.kbnDocViewer__fieldName');
+        const fieldNames = await Promise.all(fieldNameCells.map((cell) => cell.getVisibleText()));
+
+        expect(
+          fieldNames.join(',').startsWith('@message,@tags,@timestamp,agent,bytes,clientip')
+        ).to.be(true);
+      });
+
+      it('should allow toggling the switch', async function () {
+        const testQuery = 'from logstash-* | sort @timestamp | limit 10';
+        await monacoEditor.setCodeEditorValue(testQuery);
+        await testSubjects.click('querySubmitButton');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+
+        await PageObjects.unifiedFieldList.clickFieldListItemAdd('agent.raw');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.unifiedFieldList.clickFieldListItemAdd('agent');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+
+        await dataGrid.clickRowToggle();
+        await PageObjects.discover.isShowingDocViewer();
+
+        const showOnlySelectedFieldsSwitch = await testSubjects.find(
+          'unifiedDocViewerShowOnlySelectedFieldsSwitch'
+        );
+        expect(await showOnlySelectedFieldsSwitch.getAttribute('disabled')).to.be(null);
+
+        let fieldNameCells = await find.allByCssSelector('.kbnDocViewer__fieldName');
+        let fieldNames = await Promise.all(fieldNameCells.map((cell) => cell.getVisibleText()));
+
+        expect(
+          fieldNames.join(',').startsWith('@message,@tags,@timestamp,agent,bytes,clientip')
+        ).to.be(true);
+
+        await showOnlySelectedFieldsSwitch.click();
+
+        await retry.waitFor('updates after switching to show only selected', async () => {
+          fieldNameCells = await find.allByCssSelector('.kbnDocViewer__fieldName');
+          fieldNames = await Promise.all(fieldNameCells.map((cell) => cell.getVisibleText()));
+          return fieldNames.join(',') === 'agent.raw,agent';
+        });
+
+        await dataGrid.togglePinActionInFlyout('agent');
+
+        await retry.waitFor('updates after pinning the last field', async () => {
+          fieldNameCells = await find.allByCssSelector('.kbnDocViewer__fieldName');
+          fieldNames = await Promise.all(fieldNameCells.map((cell) => cell.getVisibleText()));
+          return fieldNames.join(',') === 'agent,agent.raw';
+        });
+
+        await showOnlySelectedFieldsSwitch.click();
+
+        await retry.waitFor('updates after switching from showing only selected', async () => {
+          fieldNameCells = await find.allByCssSelector('.kbnDocViewer__fieldName');
+          fieldNames = await Promise.all(fieldNameCells.map((cell) => cell.getVisibleText()));
+          return fieldNames.join(',').startsWith('agent,@message,@tags');
+        });
+      });
+    });
+
+    describe('show only selected fields in data view mode', function () {
+      it('should disable the switch when no fields are selected', async function () {
+        await dataGrid.clickRowToggle();
+        await PageObjects.discover.isShowingDocViewer();
+
+        const showOnlySelectedFieldsSwitch = await testSubjects.find(
+          'unifiedDocViewerShowOnlySelectedFieldsSwitch'
+        );
+        expect(await showOnlySelectedFieldsSwitch.getAttribute('disabled')).to.be('true');
+
+        const fieldNameCells = await find.allByCssSelector('.kbnDocViewer__fieldName');
+        const fieldNames = await Promise.all(fieldNameCells.map((cell) => cell.getVisibleText()));
+
+        expect(fieldNames.join(',').startsWith('_id,_ignored,_index,_score,@message')).to.be(true);
+      });
+
+      it('should allow toggling the switch', async function () {
+        await PageObjects.unifiedFieldList.clickFieldListItemAdd('bytes');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.unifiedFieldList.clickFieldListItemAdd('@tags');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+
+        await dataGrid.clickRowToggle();
+        await PageObjects.discover.isShowingDocViewer();
+
+        const showOnlySelectedFieldsSwitch = await testSubjects.find(
+          'unifiedDocViewerShowOnlySelectedFieldsSwitch'
+        );
+        expect(await showOnlySelectedFieldsSwitch.getAttribute('disabled')).to.be(null);
+
+        let fieldNameCells = await find.allByCssSelector('.kbnDocViewer__fieldName');
+        let fieldNames = await Promise.all(fieldNameCells.map((cell) => cell.getVisibleText()));
+
+        expect(fieldNames.join(',').startsWith('_id,_ignored,_index,_score,@message')).to.be(true);
+
+        await showOnlySelectedFieldsSwitch.click();
+
+        await retry.waitFor('updates after switching to show only selected', async () => {
+          fieldNameCells = await find.allByCssSelector('.kbnDocViewer__fieldName');
+          fieldNames = await Promise.all(fieldNameCells.map((cell) => cell.getVisibleText()));
+          return fieldNames.join(',') === '@timestamp,bytes,@tags';
+        });
+
+        await dataGrid.togglePinActionInFlyout('bytes');
+
+        await retry.waitFor('updates after pinning the last field', async () => {
+          fieldNameCells = await find.allByCssSelector('.kbnDocViewer__fieldName');
+          fieldNames = await Promise.all(fieldNameCells.map((cell) => cell.getVisibleText()));
+          return fieldNames.join(',') === 'bytes,@timestamp,@tags';
+        });
+
+        await showOnlySelectedFieldsSwitch.click();
+
+        await retry.waitFor('updates after switching from showing only selected', async () => {
+          fieldNameCells = await find.allByCssSelector('.kbnDocViewer__fieldName');
+          fieldNames = await Promise.all(fieldNameCells.map((cell) => cell.getVisibleText()));
+          return fieldNames.join(',').startsWith('bytes,_id,_ignored,_index,_score,@message');
+        });
+      });
+    });
+
     describe('pinning fields', function () {
       it('should be able to pin and unpin fields', async function () {
         await dataGrid.clickRowToggle();
