@@ -251,6 +251,7 @@ export const ConnectorDetail: React.FC = () => {
           wrap: false,
         },
         rightSideItems: getHeaderActions(index, connector),
+        // @ts-ignore - type broken with @types/react18
         tabs,
       }}
     >

@@ -32,6 +32,7 @@ export const PipelineSelectOptionDisabled: React.FC<{ disabledReason?: string }>
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiTextColor color="warning">
+          {/* @ts-ignore - type broken with @types/react18 */}
           {disabledReason ?? EXISTING_PIPELINE_DISABLED_MISSING_SOURCE_FIELDS}
         </EuiTextColor>
       </EuiFlexItem>

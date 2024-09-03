@@ -53,7 +53,7 @@ export const FormKeyType: React.FC = () => {
         options={tokenOptions}
         value={activeApiToken.type}
         onChange={(e) => setTokenType(e.target.value)}
-        placeholder={i18n.translate(
+        aria-placeholder={i18n.translate(
           'xpack.enterpriseSearch.appSearch.credentials.formType.placeholder',
           { defaultMessage: 'Select a key type' }
         )}
