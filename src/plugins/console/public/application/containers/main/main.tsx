@@ -16,6 +16,7 @@ import {
   EuiButtonEmpty,
   EuiHorizontalRule,
   EuiScreenReaderOnly,
+  useResizeObserver,
 } from '@elastic/eui';
 import { getConsoleTourStepProps } from './get_console_tour_step_props';
 import { useServicesContext } from '../../contexts';
@@ -51,6 +52,9 @@ export function Main({ isEmbeddable = false }: MainProps) {
   const [selectedTab, setSelectedTab] = useState(SHELL_TAB_ID);
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
+
+  const [resizeRef, setResizeRef] = useState();
+  const containerDimensions = useResizeObserver(resizeRef);
 
   const { docLinks } = useServicesContext();
 
@@ -99,7 +103,11 @@ export function Main({ isEmbeddable = false }: MainProps) {
   );
 
   return (
-    <div id="consoleRoot" className={`consoleContainer${isEmbeddable ? '--embeddable' : ''}`}>
+    <div
+      id="consoleRoot"
+      className={`consoleContainer${isEmbeddable ? '--embeddable' : ''}`}
+      ref={setResizeRef}
+    >
       <EuiScreenReaderOnly>
         <h1>{MAIN_PANEL_LABELS.consolePageHeading}</h1>
       </EuiScreenReaderOnly>
@@ -146,7 +154,13 @@ export function Main({ isEmbeddable = false }: MainProps) {
         </EuiSplitPanel.Inner>
         <EuiHorizontalRule margin="none" />
         <EuiSplitPanel.Inner paddingSize="none">
-          {selectedTab === SHELL_TAB_ID && <Editor loading={!done} setEditorInstance={() => {}} />}
+          {selectedTab === SHELL_TAB_ID && (
+            <Editor
+              loading={!done}
+              setEditorInstance={() => {}}
+              containerWidth={containerDimensions.width}
+            />
+          )}
 
           {selectedTab === CONFIG_TAB_ID && <Config editorInstance={null} />}
         </EuiSplitPanel.Inner>

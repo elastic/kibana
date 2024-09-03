@@ -144,6 +144,8 @@
   // The margin ensures that the resizer doesn't cover the top border of the selected request
   // in the output panel, when in vertical layout
   margin-bottom: 1px;
+  // The margin ensures that the resizer doesn't cover the first Monaco editor's ruler
+  margin-inline: 0;
 }
 
 // SASSTODO: This component seems to not be used anymore?

@@ -15,7 +15,6 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiResizableContainer,
-  useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
@@ -39,19 +38,21 @@ import { getResponseWithMostSevereStatusCode } from '../../../lib/utils';
 
 const INITIAL_PANEL_SIZE = 50;
 const PANEL_MIN_SIZE = '20%';
+const MIN_HORIZONTAL_CONTAINER_WIDTH = 1000;
 
 interface Props {
   loading: boolean;
   setEditorInstance: (instance: SenseEditor) => void;
+  containerWidth: number;
 }
 
-export const Editor = memo(({ loading, setEditorInstance }: Props) => {
+export const Editor = memo(({ loading, setEditorInstance, containerWidth }: Props) => {
   const {
     services: { storage },
     config: { isMonacoEnabled } = {},
   } = useServicesContext();
 
-  const isVerticalLayout = useIsWithinMaxBreakpoint('m');
+  const isVerticalLayout = containerWidth < MIN_HORIZONTAL_CONTAINER_WIDTH;
 
   const { currentTextObject } = useEditorReadContext();
   const {
