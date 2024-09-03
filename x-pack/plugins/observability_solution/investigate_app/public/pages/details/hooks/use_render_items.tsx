@@ -46,7 +46,7 @@ export function useRenderItems({ investigation }: Props): UseRenderItemsHook {
     initialItems: investigation.items,
   });
 
-  const { mutateAsync: updateInvestigation, isLoading: isUpdating } = useUpdateInvestigation();
+  const { mutateAsync: updateInvestigation } = useUpdateInvestigation();
   const { mutateAsync: addInvestigationItem, isLoading: isAdding } = useAddInvestigationItem();
   const { mutateAsync: deleteInvestigationItem, isLoading: isDeleting } =
     useDeleteInvestigationItem();
