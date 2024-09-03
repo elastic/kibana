@@ -321,7 +321,7 @@ describe('UnifiedDataTable', () => {
     it('should render the edit field button if onFieldEdited is provided', async () => {
       renderDataTable({ columns: ['message'], onFieldEdited: jest.fn() });
       expect(screen.queryByTestId('dataGridHeaderCellActionGroup-message')).not.toBeInTheDocument();
-      userEvent.click(screen.getByRole('button', { name: 'message' }));
+      userEvent.click(screen.getByTestId('dataGridHeaderCellActionButton-message'));
       expect(screen.getByTestId('dataGridHeaderCellActionGroup-message')).toBeInTheDocument();
       expect(screen.getByTestId('gridEditFieldButton')).toBeInTheDocument();
     });
@@ -329,7 +329,7 @@ describe('UnifiedDataTable', () => {
     it('should not render the edit field button if onFieldEdited is not provided', async () => {
       renderDataTable({ columns: ['message'] });
       expect(screen.queryByTestId('dataGridHeaderCellActionGroup-message')).not.toBeInTheDocument();
-      userEvent.click(screen.getByRole('button', { name: 'message' }));
+      userEvent.click(screen.getByTestId('dataGridHeaderCellActionButton-message'));
       expect(screen.getByTestId('dataGridHeaderCellActionGroup-message')).toBeInTheDocument();
       expect(screen.queryByTestId('gridEditFieldButton')).not.toBeInTheDocument();
     });
@@ -957,6 +957,8 @@ describe('UnifiedDataTable', () => {
     const EUI_DEFAULT_COLUMN_WIDTH = '100px';
     const getColumnHeader = (name: string) => screen.getByRole('columnheader', { name });
     const queryColumnHeader = (name: string) => screen.queryByRole('columnheader', { name });
+    const getColumnActions = (name: string) =>
+      screen.getByTestId(`dataGridHeaderCellActionButton-${name}`);
     const getButton = (name: string) => screen.getByRole('button', { name });
     const queryButton = (name: string) => screen.queryByRole('button', { name });
 
@@ -973,7 +975,7 @@ describe('UnifiedDataTable', () => {
       expect(getColumnHeader('message')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
       expect(getColumnHeader('extension')).toHaveStyle({ width: '50px' });
       expect(getColumnHeader('bytes')).toHaveStyle({ width: '50px' });
-      userEvent.click(getButton('message'));
+      userEvent.click(getColumnActions('message'));
       userEvent.click(getButton('Remove column'), undefined, { skipPointerEventsCheck: true });
       expect(queryColumnHeader('message')).not.toBeInTheDocument();
       expect(getColumnHeader('extension')).toHaveStyle({ width: '50px' });
@@ -992,7 +994,7 @@ describe('UnifiedDataTable', () => {
       expect(getColumnHeader('message')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
       expect(getColumnHeader('extension')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
       expect(getColumnHeader('bytes')).toHaveStyle({ width: '50px' });
-      userEvent.click(getButton('message'));
+      userEvent.click(getColumnActions('message'));
       userEvent.click(getButton('Remove column'), undefined, { skipPointerEventsCheck: true });
       expect(queryColumnHeader('message')).not.toBeInTheDocument();
       expect(getColumnHeader('extension')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
@@ -1010,14 +1012,14 @@ describe('UnifiedDataTable', () => {
         },
       });
       expect(getColumnHeader('@timestamp')).toHaveStyle({ width: '50px' });
-      userEvent.click(getButton('@timestamp'));
+      userEvent.click(getColumnActions('@timestamp'));
       userEvent.click(getButton('Reset width'), undefined, { skipPointerEventsCheck: true });
       expect(getColumnHeader('@timestamp')).toHaveStyle({ width: `${defaultTimeColumnWidth}px` });
       expect(getColumnHeader('message')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
-      userEvent.click(getButton('message'));
+      userEvent.click(getColumnActions('message'));
       expect(queryButton('Reset width')).not.toBeInTheDocument();
       expect(getColumnHeader('extension')).toHaveStyle({ width: '50px' });
-      userEvent.click(getButton('extension'));
+      userEvent.click(getColumnActions('extension'));
       userEvent.click(getButton('Reset width'), undefined, { skipPointerEventsCheck: true });
       expect(getColumnHeader('extension')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
     });
