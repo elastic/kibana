@@ -190,6 +190,30 @@ const buildTestDefinitions = (): Section[] => {
           | STATS volume = COUNT(*) BY BUCKET(@timestamp, 1 day)`,
         },
         {
+          title: 'Generates a query to show employees filtered by name and grouped by hire_date',
+          question: `From the employees index, I want to see how many employees with a "B" in their first name
+      where hired each month over the past 2 years.
+      Assume the following fields:
+      - hire_date
+      - first_name
+      - last_name`,
+          expected: `FROM employees
+      | WHERE first_name LIKE "*B*" AND hire_date >= NOW() - 2 years
+      | STATS COUNT(*) BY BUCKET(hire_date, 1 month)
+      | SORT hire_date`,
+        },
+        {
+          title: 'Generates a query to show employees which have a palindrome as last name',
+          question: `From the employees index, I want to find all employees with a palindrome as last name
+         (which can be read the same backward and forward), and then return their last name and first name
+      - last_name
+      - first_name`,
+          expected: `FROM employees
+      | EVAL reversed_last_name = REVERSE(last_name)
+      | WHERE TO_LOWER(last_name) == TO_LOWER(reversed_last_name)
+      | KEEP last_name, first_name`,
+        },
+        {
           title: 'Generates a query to show the top 10 domains by doc count',
           question: `For standard Elastic ECS compliant packetbeat data view (\`packetbeat-*\`),
       show me the top 10 unique destination.domain with the most docs.
@@ -244,6 +268,20 @@ const buildTestDefinitions = (): Section[] => {
       | LIMIT 10`,
         },
         {
+          title: 'Generates a query to show logs volume with some complex multi-field filter',
+          question: `From the "sample_logs" index, show me the volume of daily logs
+          from source "foo" or "bar", with message longer than 62 chars and not containing "dolly", and with INFO level.
+      Assume the following fields:
+      - source
+      - message
+      - level
+      - @timestamp`,
+          expected: `│ FROM sample_logs
+      | WHERE source IN ("foo", "bar") AND LENGTH(message) > 62 AND message NOT LIKE "*dolly*" AND level == "INFO"
+      | STATS COUNT(*) BY day = BUCKET(@timestamp, 1d)
+      | SORT day ASC`,
+        },
+        {
           title: 'Generates a query to show normalized CPU per host',
           question: `My data is in \`metricbeat*\`. Show me a query to see the percentage
       of CPU time (system.cpu.system.pct) normalized by the number of CPU cores
@@ -258,6 +296,20 @@ const buildTestDefinitions = (): Section[] => {
       | SORT host.name ASC`,
         },
         {
+          title: 'Generates a query to show normalized CPU per host',
+          question: `From the access_logs index, I want to see the 50, 95 and 99 percentile
+          of response_time, break down by month over the past year.
+      Assume the following fields:
+      - @timestamp
+      - response_time
+      - status_code`,
+          expected: ` FROM access_logs
+      | WHERE @timestamp > NOW() - 1 year
+      | STATS p50 = PERCENTILE(response_time, 50), p95 = PERCENTILE(response_time, 95), p99 = PERCENTILE(response_time, 99)
+      BY month = BUCKET(@timestamp, 1 month)
+      | SORT month`,
+        },
+        {
           title: 'Generates a query using DISSECT to parse a postgres log message',
           question: `Show me an example ESQL query to extract the query duration
       from postgres log messages in postgres-logs*, with this format:
@@ -269,6 +321,19 @@ const buildTestDefinitions = (): Section[] => {
       | DISSECT message "%{}:  duration: %{query_duration} ms  %{}"
       | EVAL duration_double = TO_DOUBLE(duration)
       | STATS AVG(duration_double)`,
+        },
+        {
+          title: 'Generates a query using GROK to parse a postgres log message',
+          question: `Consider the postgres-logs index, with the message field having the following format:
+      \`2023-01-23T12:15:00.000Z ip=127.0.0.1 email=some.email@foo.com userid=42 [some message]\`.
+      Using GROK, please count the number of log entries for the email "test@org.com" for each month over last year
+      Assume the following fields:
+      - message`,
+          expected: `FROM postgres-logs
+       | GROK message "%{TIMESTAMP_ISO8601:timestamp} ip=%{IP:ip} email=%{EMAILADDRESS:email} userid=%{NUMBER:userid} [%{GREEDYDATA:log_message}]"
+       | WHERE email == "test@org.com" AND timestamp > NOW() - 1 year
+       | STATS COUNT(*) BY month = BUCKET(@timestamp, 1m)
+       | SORT month`,
         },
       ],
     },
