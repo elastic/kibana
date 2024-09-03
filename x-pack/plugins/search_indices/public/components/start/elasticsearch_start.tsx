@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import type { IndicesStatusResponse, UserStartPrivilegesResponse } from '../../../common';
+
+import { AnalyticsEvents } from '../../analytics/constants';
+import { useUsageTracker } from '../../hooks/use_usage_tracker';
 
 import { CreateIndexForm } from './create_index';
 
@@ -21,6 +24,10 @@ export interface ElasticsearchStartProps {
 }
 
 export const ElasticsearchStart = ({ userPrivileges }: ElasticsearchStartProps) => {
+  const usageTracker = useUsageTracker();
+  useEffect(() => {
+    usageTracker.load(AnalyticsEvents.startPageOpened);
+  }, [usageTracker]);
   return (
     <EuiPanel
       color="subdued"

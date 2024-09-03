@@ -20,8 +20,9 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import type { UserStartPrivilegesResponse } from '../../../common';
-import { isValidIndexName, generateRandomIndexName } from '../../utils/indices';
+import { AnalyticsEvents } from '../../analytics/constants';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
+import { isValidIndexName, generateRandomIndexName } from '../../utils/indices';
 
 import { useCreateIndex } from './hooks/use_create_index';
 
@@ -48,7 +49,7 @@ export const CreateIndexForm = ({ userPrivileges }: CreateIndexFormProps) => {
     if (!isValidIndexName(formState.indexName)) {
       return;
     }
-    usageTracker.click('startCreateIndex');
+    usageTracker.click(AnalyticsEvents.startCreateIndexClick);
     createIndex({ indexName: formState.indexName });
   }, [usageTracker, createIndex, formState.indexName]);
   const onIndexNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
