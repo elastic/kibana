@@ -35,10 +35,10 @@ import {
 import type { SenseEditor } from '../../models';
 import { MonacoEditor, MonacoEditorOutput } from './monaco';
 import { getResponseWithMostSevereStatusCode } from '../../../lib/utils';
+import { MIN_HORIZONTAL_CONTAINER_WIDTH } from '../../../../common/constants';
 
 const INITIAL_PANEL_SIZE = 50;
 const PANEL_MIN_SIZE = '20%';
-const MIN_HORIZONTAL_CONTAINER_WIDTH = 1000;
 
 interface Props {
   loading: boolean;
@@ -51,8 +51,6 @@ export const Editor = memo(({ loading, setEditorInstance, containerWidth }: Prop
     services: { storage },
     config: { isMonacoEnabled } = {},
   } = useServicesContext();
-
-  const isVerticalLayout = containerWidth < MIN_HORIZONTAL_CONTAINER_WIDTH;
 
   const { currentTextObject } = useEditorReadContext();
   const {
@@ -100,7 +98,7 @@ export const Editor = memo(({ loading, setEditorInstance, containerWidth }: Prop
       ) : null}
       <EuiResizableContainer
         style={{ height: '100%' }}
-        direction={isVerticalLayout ? 'vertical' : 'horizontal'}
+        direction={containerWidth < MIN_HORIZONTAL_CONTAINER_WIDTH ? 'vertical' : 'horizontal'}
         onPanelWidthChange={(sizes) => onPanelSizeChange(sizes)}
       >
         {(EuiResizablePanel, EuiResizableButton) => (

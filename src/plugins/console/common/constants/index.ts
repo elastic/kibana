@@ -17,3 +17,7 @@ export {
 } from './autocomplete_definitions';
 export { DEFAULT_INPUT_VALUE } from './editor_input';
 export { DEFAULT_LANGUAGE, AVAILABLE_LANGUAGES } from './copy_as';
+
+// The width of the Main container, at which the layout of Console becomes vertical
+// Used for responsiveness
+export const MIN_HORIZONTAL_CONTAINER_WIDTH = 1000;

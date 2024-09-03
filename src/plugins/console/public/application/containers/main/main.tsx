@@ -162,7 +162,9 @@ export function Main({ isEmbeddable = false }: MainProps) {
             />
           )}
 
-          {selectedTab === CONFIG_TAB_ID && <Config editorInstance={null} />}
+          {selectedTab === CONFIG_TAB_ID && (
+            <Config editorInstance={null} containerWidth={containerDimensions.width} />
+          )}
         </EuiSplitPanel.Inner>
         <EuiHorizontalRule margin="none" className="consoleVariablesBottomBar" />
         <EuiSplitPanel.Inner

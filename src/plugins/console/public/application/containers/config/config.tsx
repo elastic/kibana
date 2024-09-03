@@ -12,12 +12,14 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { Settings } from './settings';
 import { Variables } from './variables';
 import type { SenseEditor } from '../../models';
+import { MIN_HORIZONTAL_CONTAINER_WIDTH } from '../../../../common/constants';
 
 export interface Props {
   editorInstance: SenseEditor | null;
+  containerWidth: number;
 }
 
-export function Config({ editorInstance }: Props) {
+export function Config({ editorInstance, containerWidth }: Props) {
   return (
     <EuiPanel
       color="subdued"
@@ -26,7 +28,12 @@ export function Config({ editorInstance }: Props) {
       borderRadius="none"
       css={{ height: '100%' }}
     >
-      <EuiFlexGroup gutterSize="xl">
+      <EuiFlexGroup
+        gutterSize="xl"
+        direction={containerWidth < MIN_HORIZONTAL_CONTAINER_WIDTH ? 'column' : 'row'}
+        // Turn off default responsiveness
+        responsive={false}
+      >
         <EuiFlexItem>
           <Settings editorInstance={editorInstance} />
         </EuiFlexItem>
