@@ -20,7 +20,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   let objectRemover: ObjectRemover;
   const browser = getService('browser');
 
-  // Failing: See https://github.com/elastic/kibana/issues/187818
   describe('Maintenance windows table', function () {
     before(async () => {
       objectRemover = await createObjectRemover({ getService });
