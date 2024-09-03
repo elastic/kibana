@@ -40,7 +40,7 @@ describe('ReportListing', () => {
 
   it('renders a listing with some items', () => {
     const { find } = testBed;
-    expect(find('reportDownloadLink').length).toBe(mockJobs.length);
+    expect(find('reportJobRow').length).toBe(mockJobs.length);
   });
 
   it('subscribes to license changes, and unsubscribes on dismount', async () => {
