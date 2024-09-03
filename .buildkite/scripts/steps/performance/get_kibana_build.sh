@@ -15,7 +15,8 @@ export KIBANA_BUILD_ID
 .buildkite/scripts/download_build_artifacts.sh
 
 echo "--- Upload Existing Artifacts"
-buildkite-agent artifact upload "./*.tar.gz;./*.zip;./*.deb;./*.rpm"
+cd "$WORKSPACE"
+buildkite-agent artifact upload "./*.tar.gz"
 
 # .buildkite/scripts/build_kibana.sh
 # .buildkite/scripts/build_kibana_plugins.sh
