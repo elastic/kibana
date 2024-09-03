@@ -11,8 +11,14 @@ import { render } from '../../../helpers/test_helper';
 import { SettingsTab } from './settings_tab';
 import { aiAssistantLogsIndexPattern } from '@kbn/observability-ai-assistant-plugin/server';
 import { uiSettings } from '../../../../common/ui_settings';
+import { uiSettings as logsDataAccessUiSettings } from '@kbn/logs-data-access-plugin/common/ui_settings';
 
 jest.mock('../../../hooks/use_app_context');
+
+const testUiSettings = {
+  ...uiSettings,
+  ...logsDataAccessUiSettings,
+};
 
 describe('SettingsTab', () => {
   it('should offer a way to configure Observability AI Assistant visibility in apps', () => {
@@ -61,20 +67,28 @@ describe('SettingsTab', () => {
           settings: {
             client: {
               set: settingsClientSet,
-              getAll: () => uiSettings,
+              getAll: () => testUiSettings,
+              validateValue: () => Promise.resolve({ successfulValidation: true, valid: true }),
             },
           },
         },
       });
 
       await waitFor(() => expect(container.querySelector('.euiLoadingSpinner')).toBeNull());
+      fireEvent.change(
+        getByTestId(`management-settings-editField-${aiAssistantLogsIndexPattern}`),
+        {
+          target: { value: 'observability-ai-assistant-*' },
+        }
+      );
 
-      fireEvent.input(getByTestId(`management-settings-editField-${aiAssistantLogsIndexPattern}`), {
-        target: { value: 'observability-ai-assistant-*' },
-      });
+      await waitFor(() =>
+        expect(
+          getByTestId('observabilityAiAssistantManagementBottomBarActionsButton')
+        ).toBeInTheDocument()
+      );
 
       fireEvent.click(getByTestId('observabilityAiAssistantManagementBottomBarActionsButton'));
-
       await waitFor(() => expect(windowLocationReloadMock).toHaveBeenCalledTimes(1));
     });
 
@@ -83,10 +97,9 @@ describe('SettingsTab', () => {
     });
 
     it('calls the settings client with correct args', async () => {
-      expect(settingsClientSet).toBeCalledWith(
-        aiAssistantLogsIndexPattern,
-        'observability-ai-assistant-*'
-      );
+      expect(settingsClientSet).toBeCalledWith(aiAssistantLogsIndexPattern, [
+        'observability-ai-assistant-*',
+      ]);
     });
   });
 });

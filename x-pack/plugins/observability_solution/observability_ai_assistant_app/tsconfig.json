@@ -72,7 +72,8 @@
     "@kbn/esql-datagrid",
     "@kbn/alerting-comparators",
     "@kbn/core-lifecycle-browser",
-    "@kbn/inference-plugin"
+    "@kbn/inference-plugin",
+    "@kbn/logs-data-access-plugin"
   ],
   "exclude": ["target/**/*"]
 }
