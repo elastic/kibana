@@ -173,10 +173,6 @@ export const getControlGroupEmbeddableFactory = (services: {
           );
         },
         isEditingEnabled: () => true,
-        getTypeDisplayName: () =>
-          i18n.translate('controls.controlGroup.displayName', {
-            defaultMessage: 'Controls',
-          }),
         openAddDataControlFlyout: (settings) => {
           const parentDataViewId = apiPublishesDataViews(parentApi)
             ? parentApi.dataViews.value?.[0]?.id
