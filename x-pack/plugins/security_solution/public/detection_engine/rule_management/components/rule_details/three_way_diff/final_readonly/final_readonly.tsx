@@ -8,20 +8,20 @@
 import React from 'react';
 import { assertUnreachable } from '../../../../../../../common/utility_types';
 import type { DiffableAllFields } from '../../../../../../../common/api/detection_engine';
-import { KqlQueryReadOnly } from './field_components/kql_query';
-import { DataSourceReadOnly } from './field_components/data_source/data_source';
-import { EqlQueryReadOnly } from './field_components/eql_query/eql_query';
-import { EsqlQueryReadOnly } from './field_components/esql_query/esql_query';
-import { MachineLearningJobIdReadOnly } from './field_components/machine_learning_job_id/machine_learning_job_id';
-import { RelatedIntegrationsReadOnly } from './field_components/related_integrations/related_integrations';
-import { RequiredFieldsReadOnly } from './field_components/required_fields/required_fields';
-import { SeverityMappingReadOnly } from './field_components/severity_mapping/severity_mapping';
-import { RiskScoreMappingReadOnly } from './field_components/risk_score_mapping/risk_score_mapping';
-import { ThreatMappingReadOnly } from './field_components/threat_mapping/threat_mapping';
-import { ThreatReadOnly } from './field_components/threat/threat';
-import { ThreatIndexReadOnly } from './field_components/threat_index/threat_index';
-import { ThreatIndicatorPathReadOnly } from './field_components/threat_indicator_path/threat_indicator_path';
-import { ThreatQueryReadOnly } from './field_components/threat_query/threat_query';
+import { KqlQueryReadOnly } from './fields/kql_query';
+import { DataSourceReadOnly } from './fields/data_source/data_source';
+import { EqlQueryReadOnly } from './fields/eql_query/eql_query';
+import { EsqlQueryReadOnly } from './fields/esql_query/esql_query';
+import { MachineLearningJobIdReadOnly } from './fields/machine_learning_job_id/machine_learning_job_id';
+import { RelatedIntegrationsReadOnly } from './fields/related_integrations/related_integrations';
+import { RequiredFieldsReadOnly } from './fields/required_fields/required_fields';
+import { SeverityMappingReadOnly } from './fields/severity_mapping/severity_mapping';
+import { RiskScoreMappingReadOnly } from './fields/risk_score_mapping/risk_score_mapping';
+import { ThreatMappingReadOnly } from './fields/threat_mapping/threat_mapping';
+import { ThreatReadOnly } from './fields/threat/threat';
+import { ThreatIndexReadOnly } from './fields/threat_index/threat_index';
+import { ThreatIndicatorPathReadOnly } from './fields/threat_indicator_path/threat_indicator_path';
+import { ThreatQueryReadOnly } from './fields/threat_query/threat_query';
 
 interface FinalReadonlyProps {
   fieldName: keyof DiffableAllFields;
