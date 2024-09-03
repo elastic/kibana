@@ -467,23 +467,19 @@ export const SpaceAssignedRolesTable = ({
       if (isRoleReserved(role)) {
         return i18n.translate(
           'xpack.spaces.management.spaceDetails.rolesTable.selectableMessage.isReserved',
-          {
-            defaultMessage: 'Can not select a role that is reserved',
-          }
+          { defaultMessage: 'Can not select a role that is reserved' }
         );
       }
       if (isRoleAssignedToAll(role)) {
         return i18n.translate(
           'xpack.spaces.management.spaceDetails.rolesTable.selectableMessage.isRoleAssignedToAll',
-          {
-            defaultMessage: 'Can not select a role that is assigned to all spaces',
-          }
+          { defaultMessage: 'Can not select a role that is assigned to all spaces' }
         );
       }
 
       return i18n.translate(
         'xpack.spaces.management.spaceDetails.rolesTable.selectableMessage.selectRole',
-        { defaultMessage: `Select ${role.name}` }
+        { defaultMessage: `Select {roleName}`, values: { roleName: role.name } }
       );
     },
     onSelectionChange,
