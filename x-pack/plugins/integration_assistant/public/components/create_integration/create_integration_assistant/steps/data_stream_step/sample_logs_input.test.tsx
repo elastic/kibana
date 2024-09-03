@@ -344,4 +344,41 @@ describe('SampleLogsInput', () => {
       });
     });
   });
+
+  describe('when the file reader fails', () => {
+    const mockedMessage = 'Mocked error';
+    let myFileReader: FileReader;
+    let fileReaderSpy: jest.SpyInstance;
+
+    beforeEach(async () => {
+      myFileReader = new FileReader();
+      fileReaderSpy = jest.spyOn(global, 'FileReader').mockImplementation(() => myFileReader);
+
+      // We need to mock the error property
+      Object.defineProperty(myFileReader, 'error', {
+        value: new Error(mockedMessage),
+        writable: false,
+      });
+
+      jest.spyOn(myFileReader, 'readAsText').mockImplementation(() => {
+        const errorEvent = new ProgressEvent('error');
+        myFileReader.dispatchEvent(errorEvent);
+      });
+
+      const file = new File([`...`], 'test.json', { type: 'application/json' });
+      act(() => {
+        fireEvent.change(input, { target: { files: [file] } });
+      });
+    });
+
+    afterEach(() => {
+      fileReaderSpy.mockRestore();
+    });
+
+    it('should set the error message accordingly', () => {
+      expect(
+        result.queryByText(`An error occurred when reading logs sample: ${mockedMessage}`)
+      ).toBeInTheDocument();
+    });
+  });
 });
