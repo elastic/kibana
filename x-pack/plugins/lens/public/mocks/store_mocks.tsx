@@ -8,7 +8,6 @@
 import React, { PropsWithChildren, ReactElement } from 'react';
 import { ReactWrapper, mount } from 'enzyme';
 import { Provider } from 'react-redux';
-import { act } from 'react-dom/test-utils';
 import { PreloadedState } from '@reduxjs/toolkit';
 import { RenderOptions, render } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
