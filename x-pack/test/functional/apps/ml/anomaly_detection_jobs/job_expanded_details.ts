@@ -83,11 +83,13 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.jobExpandedDetails.assertJobRowCalendars(jobId, [calendarId]);
     });
 
-    it('expanded row with forecast should display open forecast button', async () => {
-      await ml.jobExpandedDetails.assertForecastElements(jobId);
+    it('expanded row with forecast should navigate to single metric view after clicking open forecast button', async () => {
+      await ml.jobExpandedDetails.openForecastJob(jobId);
     });
 
     it('expanded row with annotations can be edited', async () => {
+      await ml.navigation.navigateToMl();
+      await ml.navigation.navigateToJobManagement();
       const annotationsFromApi = await ml.api.getAnnotations(jobId);
 
       await ml.jobExpandedDetails.editAnnotation(jobId, 'edited annotation', annotationsFromApi);

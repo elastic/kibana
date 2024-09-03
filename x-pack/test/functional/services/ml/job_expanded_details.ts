@@ -46,12 +46,11 @@ export function MachineLearningJobExpandedDetailsProvider(
       });
     },
 
-    async assertForecastElements(jobId: string): Promise<void> {
+    async openForecastJob(jobId: string): Promise<void> {
       await jobTable.ensureDetailsOpen(jobId);
       await this.openForecastTab(jobId);
-      await testSubjects.existOrFail('mlJobListForecastTabOpenSingleMetricViewButton', {
-        timeout: 5_000,
-      });
+      await testSubjects.click('mlJobListForecastTabOpenSingleMetricViewButton', 5000);
+      await testSubjects.existOrFail('mlSingleMetricViewerChart');
     },
 
     async clearSearchButton() {
