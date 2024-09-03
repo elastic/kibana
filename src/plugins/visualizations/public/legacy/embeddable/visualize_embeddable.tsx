@@ -41,16 +41,16 @@ import type { RenderMode } from '@kbn/expressions-plugin/common';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/public';
 import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
 import { isChartSizeEvent } from '@kbn/chart-expressions-common';
-import { isFallbackDataView } from '../visualize_app/utils';
-import { VisualizationMissedSavedObjectError } from '../components/visualization_missed_saved_object_error';
-import VisualizationError from '../components/visualization_error';
+import { isFallbackDataView } from '../../visualize_app/utils';
+import { VisualizationMissedSavedObjectError } from '../../components/visualization_missed_saved_object_error';
+import VisualizationError from '../../components/visualization_error';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
-import { SerializedVis, Vis } from '../vis';
-import { getApplication, getExecutionContext, getExpressions, getUiActions } from '../services';
+import { SerializedVis, Vis } from '../../vis';
+import { getApplication, getExecutionContext, getExpressions, getUiActions } from '../../services';
 import { VIS_EVENT_TO_TRIGGER } from './events';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
-import { getSavedVisualization } from '../utils/saved_visualize_utils';
-import { VisSavedObject } from '../types';
+import { getSavedVisualization } from '../../utils/saved_visualize_utils';
+import { VisSavedObject } from '../../types';
 import { toExpressionAst } from './to_ast';
 
 export interface VisualizeEmbeddableConfiguration {

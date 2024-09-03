@@ -8,7 +8,7 @@
 
 import { IContainer, ErrorEmbeddable, AttributeService } from '@kbn/embeddable-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { Vis } from '../types';
+import { Vis } from '../../types';
 import type {
   VisualizeInput,
   VisualizeEmbeddable,
@@ -16,8 +16,8 @@ import type {
   VisualizeByReferenceInput,
   VisualizeSavedObjectAttributes,
 } from './visualize_embeddable';
-import { getHttp, getTimeFilter, getCapabilities } from '../services';
-import { urlFor } from '../utils/saved_visualize_utils';
+import { getHttp, getTimeFilter, getCapabilities } from '../../services';
+import { urlFor } from '../../utils/saved_visualize_utils';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { createVisualizeEmbeddableAsync } from './visualize_embeddable_async';
 

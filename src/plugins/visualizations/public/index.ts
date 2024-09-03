@@ -9,7 +9,7 @@
 import { PublicContract } from '@kbn/utility-types';
 import { PluginInitializerContext } from '@kbn/core/public';
 import { VisualizationsPlugin, VisualizationsSetup, VisualizationsStart } from './plugin';
-import type { VisualizeEmbeddableFactory, VisualizeEmbeddable } from './embeddable';
+import type { VisualizeEmbeddableFactory, VisualizeEmbeddable } from './legacy/embeddable';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new VisualizationsPlugin(initializerContext);
@@ -21,7 +21,7 @@ export {
   apiHasVisualizeConfig,
   VIS_EVENT_TO_TRIGGER,
   COMMON_VISUALIZATION_GROUPING,
-} from './embeddable';
+} from './legacy/embeddable';
 export { VisualizationContainer } from './components';
 export { getVisSchemas } from './vis_schemas';
 
@@ -43,7 +43,7 @@ export type VisualizeEmbeddableFactoryContract = PublicContract<VisualizeEmbedda
 export type VisualizeEmbeddableContract = PublicContract<VisualizeEmbeddable>;
 export type { SchemaConfig } from '../common/types';
 export { updateOldState } from './legacy/vis_update_state';
-export type { VisualizeInput, VisualizeEmbeddable, HasVisualizeConfig } from './embeddable';
+export type { VisualizeInput, VisualizeEmbeddable, HasVisualizeConfig } from './legacy/embeddable';
 export type { PersistedState } from './persisted_state';
 export type {
   ISavedVis,

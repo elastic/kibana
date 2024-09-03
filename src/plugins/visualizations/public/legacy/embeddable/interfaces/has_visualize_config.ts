@@ -7,8 +7,8 @@
  */
 
 import { type HasType, apiIsOfType } from '@kbn/presentation-publishing';
-import { VisParams } from '../../types';
-import Vis from '../../vis';
+import { VisParams } from '../../../types';
+import Vis from '../../../vis';
 
 export type HasVisualizeConfig = HasType<'visualization'> & {
   getVis: () => Vis<VisParams>;

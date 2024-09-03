@@ -307,7 +307,7 @@ export class VisualizationsPlugin
          * this should be replaced to use only scoped history after moving legacy apps to browser routing
          */
         const history = createHashHistory();
-        const { createVisEmbeddableFromObject } = await import('./embeddable');
+        const { createVisEmbeddableFromObject } = await import('./legacy/embeddable');
         const services: VisualizeServices = {
           ...coreStart,
           history,

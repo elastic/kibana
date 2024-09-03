@@ -39,7 +39,7 @@ import { get, isEmpty, isEqual, isNil, omitBy } from 'lodash';
 import React, { useEffect, useRef } from 'react';
 import { BehaviorSubject, switchMap } from 'rxjs';
 import { VISUALIZE_APP_NAME, VISUALIZE_EMBEDDABLE_TYPE } from '../../common/constants';
-import { VIS_EVENT_TO_TRIGGER } from '../embeddable';
+import { VIS_EVENT_TO_TRIGGER } from '../legacy/embeddable';
 import { getCapabilities, getInspector, getUiActions, getUsageCollection } from '../services';
 import { ACTION_CONVERT_TO_LENS } from '../triggers';
 import { urlFor } from '../utils/saved_visualize_utils';
