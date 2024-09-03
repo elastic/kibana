@@ -37672,14 +37672,14 @@
     {
       "query": "f",
       "error": [
-        "SyntaxError: mismatched input 'f' expecting {'explain', 'from', 'meta', 'metrics', 'row', 'show'}"
+        "SyntaxError: mismatched input 'f' expecting {'explain', 'from', 'meta', 'row', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "from ",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {UNQUOTED_SOURCE, QUOTED_STRING}"
+        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, UNQUOTED_SOURCE}"
       ],
       "warning": []
     },
@@ -37851,14 +37851,14 @@
     {
       "query": "from index,",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {UNQUOTED_SOURCE, QUOTED_STRING}"
+        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, UNQUOTED_SOURCE}"
       ],
       "warning": []
     },
     {
       "query": "FROM index\n, \tother_index\t,\n \t ",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {UNQUOTED_SOURCE, QUOTED_STRING}"
+        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, UNQUOTED_SOURCE}"
       ],
       "warning": []
     },
