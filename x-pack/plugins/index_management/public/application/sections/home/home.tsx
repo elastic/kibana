@@ -20,7 +20,6 @@ import { EnrichPoliciesList } from './enrich_policies_list';
 import { IndexDetailsPage } from './index_list/details_page';
 import { DataStreamList } from './data_stream_list';
 import { TemplateList } from './template_list';
-import { SearchIndexDetailsPage } from './index_list/search_index/search_index_details_page';
 
 export const homeSections = [
   Section.Indices,
@@ -152,7 +151,6 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
   return (
     <Routes>
       <Route path={`/${Section.Indices}/index_details`} component={IndexDetailsPage} />
-      <Route path={`/${Section.Indices}/search_index_details`} component={SearchIndexDetailsPage} />
       <Route render={() => indexManagementTabs} />
     </Routes>
   );

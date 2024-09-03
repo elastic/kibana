@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { every } from 'lodash';
@@ -25,7 +25,6 @@ import { flattenPanelTree } from '../../../../lib/flatten_panel_tree';
 import { INDEX_OPEN, IndexDetailsSection } from '../../../../../../common/constants';
 import { getIndexDetailsLink } from '../../../../services/routing';
 import { AppContext } from '../../../../app_context';
-import { DeleteIndexModal } from '../../components/index_delete_modal';
 
 export class IndexActionsContextMenu extends Component {
   static contextType = AppContext;
@@ -394,16 +393,63 @@ export class IndexActionsContextMenu extends Component {
     const { deleteIndices, indexNames } = this.props;
     const selectedIndexCount = indexNames.length;
 
+    const standardIndexModalBody = (
+      <Fragment>
+        <p>
+          <FormattedMessage
+            id="xpack.idxMgmt.indexActionsMenu.deleteIndex.deleteDescription"
+            defaultMessage="You are about to delete {selectedIndexCount, plural, one {this index} other {these indices} }:"
+            values={{ selectedIndexCount }}
+          />
+        </p>
+
+        <ul>
+          {indexNames.map((indexName) => (
+            <li key={indexName}>{indexName}</li>
+          ))}
+        </ul>
+
+        <p>
+          <FormattedMessage
+            id="xpack.idxMgmt.indexActionsMenu.deleteIndex.deleteWarningDescription"
+            defaultMessage="You can't recover a deleted index. Make sure you have appropriate backups."
+          />
+        </p>
+      </Fragment>
+    );
+
     return (
-      <DeleteIndexModal
-        selectedIndexCount={selectedIndexCount}
+      <EuiConfirmModal
+        title={i18n.translate(
+          'xpack.idxMgmt.indexActionsMenu.deleteIndex.confirmModal.modalTitle',
+          {
+            defaultMessage: 'Delete {selectedIndexCount, plural, one {index} other {# indices} }',
+            values: { selectedIndexCount },
+          }
+        )}
         onCancel={() => {
           this.confirmAction(false);
           this.closeConfirmModal();
         }}
         onConfirm={() => this.closePopoverAndExecute(deleteIndices)}
-        indexNames={indexNames}
-      />
+        buttonColor="danger"
+        confirmButtonDisabled={false}
+        cancelButtonText={i18n.translate(
+          'xpack.idxMgmt.indexActionsMenu.deleteIndex.confirmModal.cancelButtonText',
+          {
+            defaultMessage: 'Cancel',
+          }
+        )}
+        confirmButtonText={i18n.translate(
+          'xpack.idxMgmt.indexActionsMenu.deleteIndex.confirmModal.confirmButtonText',
+          {
+            defaultMessage: 'Delete {selectedIndexCount, plural, one {index} other {indices} }',
+            values: { selectedIndexCount },
+          }
+        )}
+      >
+        {standardIndexModalBody}
+      </EuiConfirmModal>
     );
   };
 
