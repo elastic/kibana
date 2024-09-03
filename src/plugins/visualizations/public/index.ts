@@ -37,7 +37,7 @@ export type {
   VisualizationClient,
   SerializableAttributes,
 } from './vis_types';
-export type { VisualizeEditorInput } from './react_embeddable/types';
+export type { VisualizeEditorInput } from './embeddable/types';
 export type { Vis, SerializedVis, SerializedVisData, VisData } from './vis';
 export type VisualizeEmbeddableFactoryContract = PublicContract<VisualizeEmbeddableFactory>;
 export type VisualizeEmbeddableContract = PublicContract<VisualizeEmbeddable>;
