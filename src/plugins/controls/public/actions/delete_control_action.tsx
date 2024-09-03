@@ -10,26 +10,26 @@ import React from 'react';
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-
-import { apiIsPresentationContainer, PresentationContainer } from '@kbn/presentation-containers';
+import { i18n } from '@kbn/i18n';
+import { PresentationContainer, apiIsPresentationContainer } from '@kbn/presentation-containers';
 import {
+  EmbeddableApiContext,
+  HasParentApi,
+  HasType,
+  HasUniqueId,
+  PublishesViewMode,
   apiCanAccessViewMode,
   apiHasParentApi,
   apiHasType,
   apiHasUniqueId,
   apiIsOfType,
-  EmbeddableApiContext,
   getInheritedViewMode,
-  HasParentApi,
-  HasType,
-  HasUniqueId,
-  PublishesViewMode,
 } from '@kbn/presentation-publishing';
+import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+
 import { ACTION_DELETE_CONTROL } from '.';
-import { pluginServices } from '../../services';
-import { ControlGroupStrings } from '../control_group_strings';
-import { CONTROL_GROUP_TYPE } from '../types';
+import { CONTROL_GROUP_TYPE } from '..';
+import { pluginServices } from '../services';
 
 export type DeleteControlActionApi = HasType &
   HasUniqueId &
@@ -76,7 +76,9 @@ export class DeleteControlAction implements Action<EmbeddableApiContext> {
 
   public getDisplayName({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
-    return ControlGroupStrings.floatingActions.getRemoveButtonTitle();
+    return i18n.translate('controls.controlGroup.floatingActions.removeTitle', {
+      defaultMessage: 'Delete',
+    });
   }
 
   public getIconType({ embeddable }: EmbeddableApiContext) {
@@ -93,12 +95,23 @@ export class DeleteControlAction implements Action<EmbeddableApiContext> {
   public async execute({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
 
-    this.openConfirm(ControlGroupStrings.management.deleteControls.getSubtitle(), {
-      confirmButtonText: ControlGroupStrings.management.deleteControls.getConfirm(),
-      cancelButtonText: ControlGroupStrings.management.deleteControls.getCancel(),
-      title: ControlGroupStrings.management.deleteControls.getDeleteTitle(),
-      buttonColor: 'danger',
-    }).then((confirmed) => {
+    this.openConfirm(
+      i18n.translate('controls.controlGroup.management.delete.sub', {
+        defaultMessage: 'Controls are not recoverable once removed.',
+      }),
+      {
+        confirmButtonText: i18n.translate('controls.controlGroup.management.delete.confirm', {
+          defaultMessage: 'Delete',
+        }),
+        cancelButtonText: i18n.translate('controls.controlGroup.management.delete.cancel', {
+          defaultMessage: 'Cancel',
+        }),
+        title: i18n.translate('controls.controlGroup.management.delete.deleteTitle', {
+          defaultMessage: 'Delete control?',
+        }),
+        buttonColor: 'danger',
+      }
+    ).then((confirmed) => {
       if (confirmed) {
         embeddable.parentApi.removePanel(embeddable.uuid);
       }

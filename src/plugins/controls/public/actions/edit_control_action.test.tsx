@@ -6,81 +6,130 @@
  * Side Public License, v 1.
  */
 
-import { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
+import { BehaviorSubject } from 'rxjs';
 
+import { coreMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import dateMath from '@kbn/datemath';
+import { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
+import { ViewMode } from '@kbn/presentation-publishing';
+
+import { TimeRange } from '@kbn/es-query';
+import { getOptionsListControlFactory } from '../react_controls/controls/data_controls/options_list_control/get_options_list_control_factory';
+import { OptionsListControlApi } from '../react_controls/controls/data_controls/options_list_control/types';
+import {
+  getMockedBuildApi,
+  getMockedControlGroupApi,
+} from '../react_controls/controls/mocks/control_mocks';
+import { getTimesliderControlFactory } from '../react_controls/controls/timeslider_control/get_timeslider_control_factory';
 import { EditControlAction } from './edit_control_action';
 
-test('Action is incompatible with Error Embeddables', async () => {
-  const editControlAction = new EditControlAction();
-  const errorEmbeddable = new ErrorEmbeddable('Wow what an awful error', { id: ' 404' });
-  expect(await editControlAction.isCompatible({ embeddable: errorEmbeddable as any })).toBe(false);
+const mockDataViews = dataViewPluginMocks.createStartContract();
+const mockCore = coreMock.createStart();
+const dataStartServiceMock = dataPluginMock.createStartContract();
+dataStartServiceMock.query.timefilter.timefilter.calculateBounds = (timeRange: TimeRange) => {
+  const now = new Date();
+  return {
+    min: dateMath.parse(timeRange.from, { forceNow: now }),
+    max: dateMath.parse(timeRange.to, { roundUp: true, forceNow: now }),
+  };
+};
+
+const dashboardApi = {
+  viewMode: new BehaviorSubject<ViewMode>('view'),
+};
+const controlGroupApi = getMockedControlGroupApi(dashboardApi, {
+  removePanel: jest.fn(),
+  replacePanel: jest.fn(),
+  addNewPanel: jest.fn(),
+  children$: new BehaviorSubject({}),
 });
 
-test('Action is incompatible with embeddables that are not editable', async () => {
-  // const mockEmbeddableFactory = new TimeSliderEmbeddableFactory();
-  // const mockGetFactory = jest.fn().mockReturnValue(mockEmbeddableFactory);
-  // pluginServices.getServices().controls.getControlFactory = mockGetFactory;
-  // pluginServices.getServices().embeddable.getEmbeddableFactory = mockGetFactory;
-  // const editControlAction = new EditControlAction();
-  // const emptyContainer = new ControlGroupContainer(mockedReduxEmbeddablePackage, controlGroupInput);
-  // await emptyContainer.untilInitialized();
-  // await emptyContainer.addTimeSliderControl();
-  // expect(
-  //   await editControlAction.isCompatible({
-  //     embeddable: emptyContainer.getChild(emptyContainer.getChildIds()[0]) as any,
-  //   })
-  // ).toBe(false);
+let optionsListApi: OptionsListControlApi;
+beforeAll(async () => {
+  const controlFactory = getOptionsListControlFactory({
+    core: mockCore,
+    data: dataStartServiceMock,
+    dataViews: mockDataViews,
+  });
+
+  const optionsListUuid = 'optionsListControl';
+  const optionsListControl = await controlFactory.buildControl(
+    {
+      dataViewId: 'test-data-view',
+      title: 'test',
+      fieldName: 'test-field',
+      width: 'medium',
+      grow: false,
+    },
+    getMockedBuildApi(optionsListUuid, controlFactory, controlGroupApi),
+    optionsListUuid,
+    controlGroupApi
+  );
+
+  optionsListApi = optionsListControl.api;
 });
 
-test('Action is compatible with embeddables that are editable', async () => {
-  // const mockEmbeddableFactory = new OptionsListEmbeddableFactory();
-  // const mockGetFactory = jest.fn().mockReturnValue(mockEmbeddableFactory);
-  // pluginServices.getServices().controls.getControlFactory = mockGetFactory;
-  // pluginServices.getServices().embeddable.getEmbeddableFactory = mockGetFactory;
-  // const editControlAction = new EditControlAction();
-  // const emptyContainer = new ControlGroupContainer(mockedReduxEmbeddablePackage, controlGroupInput);
-  // await emptyContainer.untilInitialized();
-  // const control = await emptyContainer.addOptionsListControl({
-  //   dataViewId: 'test-data-view',
-  //   title: 'test',
-  //   fieldName: 'test-field',
-  //   width: 'medium',
-  //   grow: false,
-  // });
-  // expect(emptyContainer.getInput().panels[control.getInput().id].type).toBe(OPTIONS_LIST_CONTROL);
-  // expect(
-  //   await editControlAction.isCompatible({
-  //     embeddable: emptyContainer.getChild(emptyContainer.getChildIds()[0]) as any,
-  //   })
-  // ).toBe(true);
+describe('Incompatible embeddables', () => {
+  test('Action is incompatible with Error Embeddables', async () => {
+    const editControlAction = new EditControlAction();
+    const errorEmbeddable = new ErrorEmbeddable('Wow what an awful error', { id: ' 404' });
+    expect(await editControlAction.isCompatible({ embeddable: errorEmbeddable as any })).toBe(
+      false
+    );
+  });
+
+  test('Action is incompatible with embeddables that are not editable', async () => {
+    const timeSliderFactory = getTimesliderControlFactory({
+      core: mockCore,
+      data: dataStartServiceMock,
+    });
+    const timeSliderUuid = 'timeSliderControl';
+    const timeSliderControl = await timeSliderFactory.buildControl(
+      {},
+      getMockedBuildApi(timeSliderUuid, timeSliderFactory, controlGroupApi),
+      timeSliderUuid,
+      controlGroupApi
+    );
+    const editControlAction = new EditControlAction();
+    expect(
+      await editControlAction.isCompatible({
+        embeddable: timeSliderControl,
+      })
+    ).toBe(false);
+  });
+
+  test('Execute throws an error when called with an embeddable not in a parent', async () => {
+    const editControlAction = new EditControlAction();
+    const noParentApi = { ...optionsListApi, parentApi: undefined };
+    await expect(async () => {
+      await editControlAction.execute({ embeddable: noParentApi });
+    }).rejects.toThrow(Error);
+  });
 });
 
-test('Execute throws an error when called with an embeddable not in a parent', async () => {
-  // const editControlAction = new EditControlAction();
-  // const optionsListEmbeddable = new OptionsListEmbeddable(
-  //   mockedReduxEmbeddablePackage,
-  //   {} as OptionsListEmbeddableInput,
-  //   {} as ControlOutput
-  // );
-  // await expect(async () => {
-  //   await editControlAction.execute({ embeddable: optionsListEmbeddable });
-  // }).rejects.toThrow(Error);
-});
+describe('Compatible embeddables', () => {
+  beforeAll(() => {
+    dashboardApi.viewMode.next('edit');
+  });
 
-test('Execute should open a flyout', async () => {
-  // const spyOn = jest.fn().mockResolvedValue(undefined);
-  // pluginServices.getServices().overlays.openFlyout = spyOn;
-  // const emptyContainer = new ControlGroupContainer(mockedReduxEmbeddablePackage, controlGroupInput);
-  // await emptyContainer.untilInitialized();
-  // const control = (await emptyContainer.addOptionsListControl({
-  //   dataViewId: 'test-data-view',
-  //   title: 'test',
-  //   fieldName: 'test-field',
-  //   width: 'medium',
-  //   grow: false,
-  // })) as OptionsListEmbeddable;
-  // expect(emptyContainer.getInput().panels[control.getInput().id].type).toBe(OPTIONS_LIST_CONTROL);
-  // const editControlAction = new EditControlAction(deleteControlAction);
-  // await editControlAction.execute({ embeddable: control });
-  // expect(spyOn).toHaveBeenCalled();
+  test('Action is compatible with embeddables that are editable', async () => {
+    const editControlAction = new EditControlAction();
+    expect(
+      await editControlAction.isCompatible({
+        embeddable: optionsListApi,
+      })
+    ).toBe(true);
+  });
+
+  test('Execute should call `onEdit` provided by embeddable', async () => {
+    const onEditSpy = jest.fn();
+    optionsListApi.onEdit = onEditSpy;
+
+    const editControlAction = new EditControlAction();
+    expect(onEditSpy).not.toHaveBeenCalled();
+    await editControlAction.execute({ embeddable: optionsListApi });
+    expect(onEditSpy).toHaveBeenCalledTimes(1);
+  });
 });

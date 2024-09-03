@@ -7,46 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ReactNode } from 'react';
-
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewField, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import {
-  EmbeddableFactory,
-  EmbeddableOutput,
-  EmbeddableSetup,
-  EmbeddableStart,
-  IEmbeddable,
-} from '@kbn/embeddable-plugin/public';
+import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
 import { ControlInput, ControlWidth, DataControlInput } from '../common/types';
-import { ControlGroupFilterOutput } from './control_group/types';
 import { ControlsServiceType } from './services/controls/types';
-
-export type CommonControlOutput = ControlGroupFilterOutput & {
-  dataViewId?: string;
-};
-
-export type ControlOutput = EmbeddableOutput & CommonControlOutput;
-
-export type ControlFactory<T extends ControlInput = ControlInput> = EmbeddableFactory<
-  ControlInput,
-  ControlOutput,
-  ControlEmbeddable
->;
-
-export interface ControlEmbeddable<
-  TControlEmbeddableInput extends ControlInput = ControlInput,
-  TControlEmbeddableOutput extends ControlOutput = ControlOutput
-> extends IEmbeddable<TControlEmbeddableInput, TControlEmbeddableOutput> {
-  isChained?: () => boolean;
-  renderPrepend?: () => ReactNode | undefined;
-  selectionsToFilters?: (
-    input: Partial<TControlEmbeddableInput>
-  ) => Promise<ControlGroupFilterOutput>;
-}
 
 export interface CanClearSelections {
   clearSelections: () => void;
@@ -59,16 +27,6 @@ export const isClearableControl = (control: unknown): control is CanClearSelecti
 /**
  * Control embeddable editor types
  */
-export interface IEditableControlFactory<T extends ControlInput = ControlInput>
-  extends Pick<EmbeddableFactory, 'type'> {
-  controlEditorOptionsComponent?: (props: ControlEditorProps<T>) => JSX.Element;
-  presaveTransformFunction?: (
-    newState: Partial<T>,
-    embeddable?: ControlEmbeddable<T>
-  ) => Partial<T>;
-  isFieldCompatible?: (field: DataViewField) => boolean;
-}
-
 export interface ControlEditorProps<T extends ControlInput = ControlInput> {
   initialInput?: Partial<T>;
   fieldType: string;
