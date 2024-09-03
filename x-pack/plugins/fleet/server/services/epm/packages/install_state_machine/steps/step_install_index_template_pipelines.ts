@@ -11,6 +11,8 @@ import { installIndexTemplatesAndPipelines } from '../../install_index_template_
 
 import type { InstallContext } from '../_state_machine_package_install';
 import { withPackageSpan } from '../../utils';
+import { deletePrerequisiteAssets, splitESAssets, cleanupComponentTemplate } from '../../remove';
+import { INSTALL_STATES } from '../../../../../../common/types';
 
 export async function stepInstallIndexTemplatePipelines(context: InstallContext) {
   const { esClient, savedObjectsClient, packageInstallContext, logger, installedPkg } = context;
@@ -69,5 +71,36 @@ export async function stepInstallIndexTemplatePipelines(context: InstallContext)
       );
       return { esReferences: templateEsReferences, indexTemplates: installedTemplates };
     }
+  }
+}
+
+export async function cleanupIndexTemplatePipelinesStep(context: InstallContext) {
+  const { logger, esClient, installedPkg, retryFromLastState, force, initialState } = context;
+
+  // In case of retry clean up previous installed assets
+  if (
+    !force &&
+    retryFromLastState &&
+    initialState === INSTALL_STATES.INSTALL_INDEX_TEMPLATE_PIPELINES &&
+    installedPkg?.attributes
+  ) {
+    const { installed_es: installedEs } = installedPkg.attributes;
+    const { indexTemplatesAndPipelines, indexAssets, transformAssets } = splitESAssets(installedEs);
+
+    logger.debug('Retry transition - clean up prerequisite ES assets first');
+    withPackageSpan('Retry transition - clean up prerequisite ES assets first', async () => {
+      await deletePrerequisiteAssets(
+        {
+          indexAssets,
+          transformAssets,
+          indexTemplatesAndPipelines,
+        },
+        esClient
+      );
+    });
+    logger.debug('Retry transition - clean up component template');
+    withPackageSpan('Retry transition - clean up component template', async () => {
+      await cleanupComponentTemplate(installedEs, esClient);
+    });
   }
 }

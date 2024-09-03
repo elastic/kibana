@@ -10,6 +10,8 @@ import { installTransforms } from '../../../elasticsearch/transform/install';
 import { withPackageSpan } from '../../utils';
 
 import type { InstallContext } from '../_state_machine_package_install';
+import { cleanupTransforms } from '../../remove';
+import { INSTALL_STATES } from '../../../../../../common/types';
 
 export async function stepInstallTransforms(context: InstallContext) {
   const {
@@ -34,4 +36,23 @@ export async function stepInstallTransforms(context: InstallContext) {
     })
   ));
   return { esReferences };
+}
+
+export async function cleanupTransformsStep(context: InstallContext) {
+  const { logger, esClient, installedPkg, retryFromLastState, force, initialState } = context;
+
+  // In case of retry clean up previous installed assets
+  if (
+    !force &&
+    retryFromLastState &&
+    initialState === INSTALL_STATES.INSTALL_TRANSFORMS &&
+    installedPkg?.attributes
+  ) {
+    const { installed_es: installedEs } = installedPkg.attributes;
+
+    logger.debug('Retry transition - clean up transforms');
+    withPackageSpan('Retry transition - clean up ilm transforms', async () => {
+      await cleanupTransforms(installedEs, esClient);
+    });
+  }
 }

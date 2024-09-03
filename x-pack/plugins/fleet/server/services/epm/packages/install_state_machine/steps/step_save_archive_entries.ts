@@ -8,11 +8,12 @@
 import { ASSETS_SAVED_OBJECT_TYPE } from '../../../../../constants';
 import type { PackageAssetReference } from '../../../../../types';
 
-import { saveArchiveEntriesFromAssetsMap } from '../../../archive/storage';
+import { removeArchiveEntries, saveArchiveEntriesFromAssetsMap } from '../../../archive/storage';
 
 import { withPackageSpan } from '../../utils';
 
 import type { InstallContext } from '../_state_machine_package_install';
+import { INSTALL_STATES } from '../../../../../../common/types';
 
 export async function stepSaveArchiveEntries(context: InstallContext) {
   const { packageInstallContext, savedObjectsClient, installSource } = context;
@@ -36,4 +37,24 @@ export async function stepSaveArchiveEntries(context: InstallContext) {
   );
 
   return { packageAssetRefs };
+}
+
+export async function cleanupArchiveEntriesStep(context: InstallContext) {
+  const { logger, savedObjectsClient, installedPkg, retryFromLastState, force, initialState } =
+    context;
+
+  // In case of retry clean up previous installed assets
+  if (
+    !force &&
+    retryFromLastState &&
+    initialState === INSTALL_STATES.SAVE_ARCHIVE_ENTRIES &&
+    installedPkg?.attributes
+  ) {
+    const { package_assets: packageAssets } = installedPkg.attributes;
+
+    logger.debug('Retry transition - clean up package archive assets');
+    withPackageSpan('Retry transition - clean up package archive assets', async () => {
+      await removeArchiveEntries({ savedObjectsClient, refs: packageAssets });
+    });
+  }
 }
