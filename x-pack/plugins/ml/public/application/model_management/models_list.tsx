@@ -707,7 +707,7 @@ export const ModelsList: FC<Props> = ({
         );
 
         return (
-          <EuiFlexGroup direction={'column'} gutterSize={'none'} style={{ width: '100%' }}>
+          <EuiFlexGroup direction={'column'} gutterSize={'none'} css={{ width: '100%' }}>
             {isDownloadInProgress ? (
               <EuiFlexItem>
                 <EuiProgress
