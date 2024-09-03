@@ -427,7 +427,8 @@ export class DataGridService extends FtrService {
   public async openColMenuByField(field: string) {
     await this.retry.waitFor('header cell action being displayed', async () => {
       // to prevent flakiness
-      await this.testSubjects.click(`dataGridHeaderCell-${field}`);
+      await this.testSubjects.moveMouseTo(`dataGridHeaderCell-${field}`);
+      await this.testSubjects.click(`dataGridHeaderCellActionButton-${field}`);
       return await this.testSubjects.exists(`dataGridHeaderCellActionGroup-${field}`);
     });
   }
