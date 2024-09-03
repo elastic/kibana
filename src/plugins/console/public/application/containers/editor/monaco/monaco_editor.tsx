@@ -135,12 +135,14 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
 
   useSetupAutosave({ value });
 
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const debouncedUpdateLocalStorageValue = useCallback(
     debounce((textObject: TextObject) => {
       editorDispatch({ type: 'setCurrentTextObject', payload: textObject });
     }, DEBOUNCE_DELAY),
     []
   );
+
   // Always keep the currentTextObject in sync with the value in the editor
   // to avoid losing the text object when the user navigates away from the shell
   useEffect(() => {
@@ -156,7 +158,7 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
 
       debouncedUpdateLocalStorageValue(textObject);
     }
-  }, [value, currentTextObject, editorDispatch]);
+  }, [value, currentTextObject, editorDispatch, debouncedUpdateLocalStorageValue]);
 
   // Restore the request from history if there is one
   const updateEditor = useCallback(async () => {

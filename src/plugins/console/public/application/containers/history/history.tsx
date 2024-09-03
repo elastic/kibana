@@ -226,7 +226,7 @@ export function History() {
               `}
             />
 
-            <EuiResizablePanel initialSize={50} minSize="200px" tabIndex={0} paddingSize="none">
+            <EuiResizablePanel initialSize={50} minSize="15%" tabIndex={0} paddingSize="none">
               <EuiSplitPanel.Outer
                 color="subdued"
                 grow
