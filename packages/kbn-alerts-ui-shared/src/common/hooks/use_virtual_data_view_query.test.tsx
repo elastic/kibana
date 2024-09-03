@@ -19,7 +19,7 @@ const useQuerySpy = jest.spyOn(ReactQuery, 'useQuery');
 
 const queryClient = new QueryClient(testQueryClientConfig);
 
-const wrapper: FunctionComponent = ({ children }) => (
+const wrapper: FunctionComponent<React.PropsWithChildren> = ({ children }) => (
   <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 );
 
@@ -37,7 +37,7 @@ describe('useVirtualDataViewQuery', () => {
 
   it('does not create a data view if indexNames is empty or nullish', () => {
     const { rerender } = renderHook(
-      ({ indexNames }: { indexNames: string[] }) =>
+      ({ indexNames }: React.PropsWithChildren<{ indexNames: string[] }>) =>
         useVirtualDataViewQuery({ dataViewsService: mockDataViewsService, indexNames }),
       {
         wrapper,

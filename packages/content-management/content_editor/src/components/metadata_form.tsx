@@ -35,7 +35,7 @@ interface Props {
 
 const isFormFieldValid = (field: Field) => !Boolean(field.errors?.length);
 
-export const MetadataForm: FC<Props> = ({
+export const MetadataForm: FC<React.PropsWithChildren<Props>> = ({
   form,
   tagsReferences,
   TagList,

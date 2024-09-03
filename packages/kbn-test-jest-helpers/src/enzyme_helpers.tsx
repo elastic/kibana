@@ -21,6 +21,7 @@ import {
   shallow,
   MountRendererProps,
   ShallowRendererProps,
+  ComponentType,
 } from 'enzyme';
 import React, { ReactElement } from 'react';
 import { act as reactAct } from 'react-dom/test-utils';
@@ -57,12 +58,16 @@ function getOptions(context = {}, props = {}) {
  *  @param options properties to pass into shallow wrapper
  *  @return The wrapper instance around the rendered output with intl object in context
  */
-export function shallowWithIntl(node: React.ReactElement, options?: ShallowRendererProps) {
+export function shallowWithIntl(
+  node: React.ReactElement,
+  options?: ShallowRendererProps & { wrappingComponent?: React.ComponentType }
+) {
   const { context, ...props } = options || {};
 
   const optionsWithIntl = getOptions(context, props);
 
   return shallow(nodeWithIntlProp(node), {
+    // @ts-expect-error enzyme types are incorrect with @types/react@18
     wrappingComponent: I18nProvider,
     ...optionsWithIntl,
   });
@@ -81,6 +86,7 @@ export function mountWithIntl(node: React.ReactElement, options?: MountRendererP
   const optionsWithIntl = getOptions(context, props);
 
   return mount(nodeWithIntlProp(node), {
+    // @ts-expect-error enzyme types are incorrect with @types/react@18
     wrappingComponent: I18nProvider,
     ...optionsWithIntl,
   });
@@ -135,7 +141,7 @@ interface ReactHookWrapper<Args, HookValue> {
  */
 export const mountHook = <Args extends {}, HookValue extends any>(
   body: (args: Args) => HookValue,
-  WrapperComponent?: React.ComponentType,
+  WrapperComponent?: React.ComponentType<{ children?: React.ReactNode }>,
   initialArgs: Args = {} as Args
 ): ReactHookWrapper<Args, HookValue> => {
   const hookValueCallback = jest.fn();
@@ -181,16 +187,31 @@ export const mountHook = <Args extends {}, HookValue extends any>(
   };
 };
 
-export function shallowWithI18nProvider<T>(child: ReactElement<T>, options?: ShallowRendererProps) {
-  const wrapped = shallow(<I18nProvider>{child}</I18nProvider>, options);
+export function shallowWithI18nProvider<T>(
+  child: ReactElement<T>,
+  options?: Omit<ShallowRendererProps, 'wrappingComponent'> & {
+    wrappingComponent?: React.ComponentType<React.PropsWithChildren<any>> | ComponentType<any>;
+  }
+) {
+  const wrapped = shallow(<I18nProvider>{child}</I18nProvider>, options as ShallowRendererProps);
   return wrapped.children().dive();
 }
 
-export function mountWithI18nProvider<T>(child: ReactElement<T>, options?: MountRendererProps) {
-  const wrapped = mount(<I18nProvider>{child}</I18nProvider>, options);
+export function mountWithI18nProvider<T>(
+  child: ReactElement<T>,
+  options?: Omit<MountRendererProps, 'wrappingComponent'> & {
+    wrappingComponent?: React.ComponentType<React.PropsWithChildren<any>> | ComponentType<any>;
+  }
+) {
+  const wrapped = mount(<I18nProvider>{child}</I18nProvider>, options as MountRendererProps);
   return wrapped.children().childAt(0);
 }
 
-export function renderWithI18nProvider<T>(child: ReactElement<T>, options?: MountRendererProps) {
+export function renderWithI18nProvider<T>(
+  child: ReactElement<T>,
+  options?: Omit<MountRendererProps, 'wrappingComponent'> & {
+    wrappingComponent?: React.ComponentType<React.PropsWithChildren<any>> | ComponentType<any>;
+  }
+) {
   return render(<I18nProvider>{child}</I18nProvider>, options);
 }

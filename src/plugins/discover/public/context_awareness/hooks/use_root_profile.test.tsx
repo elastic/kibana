@@ -14,7 +14,9 @@ import { useRootProfile } from './use_root_profile';
 
 const render = () => {
   return renderHook((props) => useRootProfile(props), {
-    initialProps: { solutionNavId: 'solutionNavId' },
+    initialProps: { solutionNavId: 'solutionNavId' } as React.PropsWithChildren<{
+      solutionNavId: string;
+    }>,
     wrapper: ({ children }) => (
       <KibanaContextProvider services={discoverServiceMock}>{children}</KibanaContextProvider>
     ),

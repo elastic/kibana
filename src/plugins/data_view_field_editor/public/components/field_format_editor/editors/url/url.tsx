@@ -16,7 +16,8 @@ import {
 } from '@elastic/eui';
 import { UrlFormat } from '@kbn/field-formats-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { context as contextType } from '@kbn/kibana-react-plugin/public';
+import { context as contextType, KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
+import { CoreStart } from '@kbn/core/public';
 import React, { Fragment } from 'react';
 import { FormatEditorSamples } from '../../samples';
 import { DefaultFormatEditor } from '../default/default';
@@ -55,6 +56,9 @@ export class UrlFormatEditor extends DefaultFormatEditor<
 > {
   static contextType = contextType;
   static formatId = formatId;
+
+  declare context: KibanaReactContextValue<Partial<CoreStart>>;
+
   private get sampleIconPath() {
     const sampleIconPath = `/plugins/dataViewFieldEditor/assets/icons/{{value}}.png`;
     return this.context?.services.http
@@ -206,7 +210,7 @@ export class UrlFormatEditor extends DefaultFormatEditor<
           helpText={
             <EuiLink
               target="_blank"
-              href={this.context.services.docLinks.links.indexPatterns.fieldFormattersString}
+              href={this.context.services.docLinks?.links.indexPatterns.fieldFormattersString}
             >
               <FormattedMessage
                 id="indexPatternFieldEditor.url.template.helpLinkText"
@@ -236,7 +240,7 @@ export class UrlFormatEditor extends DefaultFormatEditor<
           helpText={
             <EuiLink
               target="_blank"
-              href={this.context.services.docLinks.links.indexPatterns.fieldFormattersString}
+              href={this.context.services.docLinks?.links.indexPatterns.fieldFormattersString}
             >
               <FormattedMessage
                 id="indexPatternFieldEditor.url.labelTemplateHelpText"

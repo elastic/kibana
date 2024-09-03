@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import { mount } from 'enzyme';
+import { mount, ComponentType } from 'enzyme';
 
 import { I18nProvider } from '@kbn/i18n-react';
 import { waitFor } from '@testing-library/react';
@@ -30,7 +30,9 @@ function mountWith({ props: incomingProps }: { props?: Partial<DashboardUnsavedL
   }> = ({ children }) => {
     return <I18nProvider>{children}</I18nProvider>;
   };
-  const component = mount(<DashboardUnsavedListing {...props} />, { wrappingComponent });
+  const component = mount(<DashboardUnsavedListing {...props} />, {
+    wrappingComponent: wrappingComponent as ComponentType<{}>,
+  });
   return { component, props };
 }
 

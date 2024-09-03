@@ -41,7 +41,7 @@ const defaultOpts: ConnectionDetailsOpts = {
   },
 };
 
-export const StoriesProvider: React.FC<Partial<ConnectionDetailsOpts>> = ({
+export const StoriesProvider: React.FC<React.PropsWithChildren<Partial<ConnectionDetailsOpts>>> = ({
   children,
   ...rest
 }) => {
@@ -52,7 +52,9 @@ export const StoriesProvider: React.FC<Partial<ConnectionDetailsOpts>> = ({
   );
 };
 
-export const StoriesProviderKeyCreationError: React.FC = ({ children }) => {
+export const StoriesProviderKeyCreationError: React.FC<React.PropsWithChildren<{}>> = ({
+  children,
+}) => {
   const opts: ConnectionDetailsOpts = {
     ...defaultOpts,
     apiKeys: {
@@ -67,7 +69,9 @@ export const StoriesProviderKeyCreationError: React.FC = ({ children }) => {
   return <ConnectionDetailsOptsProvider {...opts}>{children}</ConnectionDetailsOptsProvider>;
 };
 
-export const StoriesProviderNoKeyPermissions: React.FC = ({ children }) => {
+export const StoriesProviderNoKeyPermissions: React.FC<React.PropsWithChildren<{}>> = ({
+  children,
+}) => {
   const opts: ConnectionDetailsOpts = {
     ...defaultOpts,
     apiKeys: {

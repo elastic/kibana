@@ -19,7 +19,7 @@ type RouterElementChildren = Array<
       path: string;
       render: Function;
       children: RouterElementChildren;
-      component: Function;
+      component: React.ComponentType;
     },
     string | React.JSXElementConstructor<unknown>
   >
