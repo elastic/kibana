@@ -10,6 +10,6 @@ export default class parser_config extends Parser {
   }
 
   isDevVersion() {
-    return false;
+    return true;
   }
 }

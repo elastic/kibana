@@ -10,6 +10,6 @@ export default class lexer_config extends Lexer {
   }
 
   isDevVersion() {
-    return false;
+    return true;
   }
 }
