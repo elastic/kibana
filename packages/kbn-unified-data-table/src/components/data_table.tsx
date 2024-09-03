@@ -1072,8 +1072,10 @@ export const UnifiedDataTable = ({
 
   const isRenderComplete = loadingState !== DataLoadingState.loading;
 
-  if (!rowCount && loadingState === DataLoadingState.loading) {
-    return (
+  let main: React.ReactNode;
+
+  if ((!rowCount || isPlainRecord) && loadingState === DataLoadingState.loading) {
+    main = (
       <div className="euiDataGrid__loading" data-test-subj="unifiedDataTableLoading">
         <EuiText size="xs" color="subdued">
           <EuiLoadingSpinner />
@@ -1082,10 +1084,8 @@ export const UnifiedDataTable = ({
         </EuiText>
       </div>
     );
-  }
-
-  if (!rowCount) {
-    return (
+  } else if (!rowCount) {
+    main = (
       <div
         className="euiDataGrid__noResults"
         data-render-complete={isRenderComplete}
@@ -1104,112 +1104,118 @@ export const UnifiedDataTable = ({
         </EuiText>
       </div>
     );
+  } else {
+    main = (
+      <UnifiedDataTableContext.Provider value={unifiedDataTableContextValue}>
+        <span className="unifiedDataTable__inner">
+          <div
+            ref={setDataGridWrapper}
+            key={isCompareActive ? 'comparisonTable' : 'docTable'}
+            data-test-subj="discoverDocTable"
+            data-render-complete={isRenderComplete}
+            data-shared-item=""
+            data-rendering-count={1} // TODO: Fix this as part of https://github.com/elastic/kibana/issues/179376
+            data-title={searchTitle}
+            data-description={searchDescription}
+            data-document-number={displayedRows.length}
+            className={classnames(className, 'unifiedDataTable__table')}
+          >
+            {isCompareActive ? (
+              <CompareDocuments
+                id={dataGridId}
+                wrapper={dataGridWrapper}
+                consumer={consumer}
+                ariaDescribedBy={randomId}
+                ariaLabelledBy={ariaLabelledBy}
+                dataView={dataView}
+                isPlainRecord={isPlainRecord}
+                selectedFieldNames={visibleColumns}
+                additionalFieldGroups={additionalFieldGroups}
+                selectedDocIds={docIdsInSelectionOrder}
+                schemaDetectors={schemaDetectors}
+                forceShowAllFields={defaultColumns}
+                showFullScreenButton={showFullScreenButton}
+                fieldFormats={fieldFormats}
+                getDocById={getDocById}
+                replaceSelectedDocs={replaceSelectedDocs}
+                setIsCompareActive={setIsCompareActive}
+              />
+            ) : (
+              <EuiDataGridMemoized
+                // Using this as the `key` is a workaround for https://github.com/elastic/eui/issues/7962. This forces a re-render if the density is changed.
+                key={dataGridDensity}
+                id={dataGridId}
+                aria-describedby={randomId}
+                aria-labelledby={ariaLabelledBy}
+                columns={euiGridColumns}
+                columnVisibility={columnsVisibility}
+                data-test-subj="docTable"
+                leadingControlColumns={leadingControlColumns}
+                onColumnResize={onResize}
+                pagination={paginationObj}
+                renderCellValue={renderCellValue}
+                ref={dataGridRef}
+                rowCount={rowCount}
+                schemaDetectors={schemaDetectors}
+                sorting={sorting as EuiDataGridSorting}
+                toolbarVisibility={toolbarVisibility}
+                rowHeightsOptions={rowHeightsOptions}
+                inMemory={inMemory}
+                gridStyle={gridStyle}
+                renderCustomGridBody={renderCustomGridBody}
+                renderCustomToolbar={renderCustomToolbarFn}
+                trailingControlColumns={trailingControlColumns}
+                cellContext={cellContext}
+                renderCellPopover={renderCustomPopover}
+              />
+            )}
+          </div>
+          {loadingState !== DataLoadingState.loading &&
+            isPaginationEnabled && // we hide the footer for Surrounding Documents page
+            !isFilterActive && // hide footer when showing selected documents
+            !isCompareActive && (
+              <UnifiedDataTableFooter
+                isLoadingMore={loadingState === DataLoadingState.loadingMore}
+                rowCount={rowCount}
+                sampleSize={sampleSizeState}
+                pageCount={pageCount}
+                pageIndex={paginationObj?.pageIndex}
+                totalHits={totalHits}
+                onFetchMoreRecords={onFetchMoreRecords}
+                data={data}
+                fieldFormats={fieldFormats}
+              />
+            )}
+          {searchTitle && (
+            <EuiScreenReaderOnly>
+              <p id={String(randomId)}>
+                {searchDescription ? (
+                  <FormattedMessage
+                    id="unifiedDataTable.searchGenerationWithDescriptionGrid"
+                    defaultMessage="Table generated by search {searchTitle} ({searchDescription})"
+                    values={{ searchTitle, searchDescription }}
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="unifiedDataTable.searchGenerationWithDescription"
+                    defaultMessage="Table generated by search {searchTitle}"
+                    values={{ searchTitle }}
+                  />
+                )}
+              </p>
+            </EuiScreenReaderOnly>
+          )}
+        </span>
+      </UnifiedDataTableContext.Provider>
+    );
   }
 
   return (
-    <UnifiedDataTableContext.Provider value={unifiedDataTableContextValue}>
-      <span className="unifiedDataTable__inner">
-        <div
-          ref={setDataGridWrapper}
-          key={isCompareActive ? 'comparisonTable' : 'docTable'}
-          data-test-subj="discoverDocTable"
-          data-render-complete={isRenderComplete}
-          data-shared-item=""
-          data-rendering-count={1} // TODO: Fix this as part of https://github.com/elastic/kibana/issues/179376
-          data-title={searchTitle}
-          data-description={searchDescription}
-          data-document-number={displayedRows.length}
-          className={classnames(className, 'unifiedDataTable__table')}
-        >
-          {isCompareActive ? (
-            <CompareDocuments
-              id={dataGridId}
-              wrapper={dataGridWrapper}
-              consumer={consumer}
-              ariaDescribedBy={randomId}
-              ariaLabelledBy={ariaLabelledBy}
-              dataView={dataView}
-              isPlainRecord={isPlainRecord}
-              selectedFieldNames={visibleColumns}
-              additionalFieldGroups={additionalFieldGroups}
-              selectedDocIds={docIdsInSelectionOrder}
-              schemaDetectors={schemaDetectors}
-              forceShowAllFields={defaultColumns}
-              showFullScreenButton={showFullScreenButton}
-              fieldFormats={fieldFormats}
-              getDocById={getDocById}
-              replaceSelectedDocs={replaceSelectedDocs}
-              setIsCompareActive={setIsCompareActive}
-            />
-          ) : (
-            <EuiDataGridMemoized
-              // Using this as the `key` is a workaround for https://github.com/elastic/eui/issues/7962. This forces a re-render if the density is changed.
-              key={dataGridDensity}
-              id={dataGridId}
-              aria-describedby={randomId}
-              aria-labelledby={ariaLabelledBy}
-              columns={euiGridColumns}
-              columnVisibility={columnsVisibility}
-              data-test-subj="docTable"
-              leadingControlColumns={leadingControlColumns}
-              onColumnResize={onResize}
-              pagination={paginationObj}
-              renderCellValue={renderCellValue}
-              ref={dataGridRef}
-              rowCount={rowCount}
-              schemaDetectors={schemaDetectors}
-              sorting={sorting as EuiDataGridSorting}
-              toolbarVisibility={toolbarVisibility}
-              rowHeightsOptions={rowHeightsOptions}
-              inMemory={inMemory}
-              gridStyle={gridStyle}
-              renderCustomGridBody={renderCustomGridBody}
-              renderCustomToolbar={renderCustomToolbarFn}
-              trailingControlColumns={trailingControlColumns}
-              cellContext={cellContext}
-              renderCellPopover={renderCustomPopover}
-            />
-          )}
-        </div>
-        {loadingState !== DataLoadingState.loading &&
-          isPaginationEnabled && // we hide the footer for Surrounding Documents page
-          !isFilterActive && // hide footer when showing selected documents
-          !isCompareActive && (
-            <UnifiedDataTableFooter
-              isLoadingMore={loadingState === DataLoadingState.loadingMore}
-              rowCount={rowCount}
-              sampleSize={sampleSizeState}
-              pageCount={pageCount}
-              pageIndex={paginationObj?.pageIndex}
-              totalHits={totalHits}
-              onFetchMoreRecords={onFetchMoreRecords}
-              data={data}
-              fieldFormats={fieldFormats}
-            />
-          )}
-        {searchTitle && (
-          <EuiScreenReaderOnly>
-            <p id={String(randomId)}>
-              {searchDescription ? (
-                <FormattedMessage
-                  id="unifiedDataTable.searchGenerationWithDescriptionGrid"
-                  defaultMessage="Table generated by search {searchTitle} ({searchDescription})"
-                  values={{ searchTitle, searchDescription }}
-                />
-              ) : (
-                <FormattedMessage
-                  id="unifiedDataTable.searchGenerationWithDescription"
-                  defaultMessage="Table generated by search {searchTitle}"
-                  values={{ searchTitle }}
-                />
-              )}
-            </p>
-          </EuiScreenReaderOnly>
-        )}
-        {canSetExpandedDoc &&
-          expandedDoc &&
-          renderDocumentView!(expandedDoc, displayedRows, displayedColumns, columnsMeta)}
-      </span>
-    </UnifiedDataTableContext.Provider>
+    <>
+      {main}
+      {canSetExpandedDoc &&
+        expandedDoc &&
+        renderDocumentView!(expandedDoc, displayedRows, displayedColumns, columnsMeta)}
+    </>
   );
 };
