@@ -18,26 +18,26 @@ steps:
       machineType: c2-standard-16
     key: build
 
-  # - label: '💪 Performance Tests with Playwright config'
-  #   command: .buildkite/scripts/steps/functional/performance_playwright.sh
-  #   env:
-  #     PERFORMANCE_ENABLE_TELEMETRY: true
-  #   agents:
-  #     queue: kb-static-ubuntu
-  #   depends_on: build
-  #   key: tests
-  #   timeout_in_minutes: 90
+  - label: '💪 Performance Tests with Playwright config'
+    command: .buildkite/scripts/steps/functional/performance_playwright.sh
+    env:
+      PERFORMANCE_ENABLE_TELEMETRY: true
+    agents:
+      queue: kb-static-ubuntu
+    depends_on: build
+    key: tests
+    timeout_in_minutes: 90
 
-  # - label: '📈 Report performance metrics to ci-stats'
-  #   command: .buildkite/scripts/steps/functional/report_performance_metrics.sh
-  #   agents:
-  #     image: family/kibana-ubuntu-2004
-  #     imageProject: elastic-images-prod
-  #     provider: gcp
-  #     localSsds: 1
-  #     localSsdInterface: nvme
-  #     machineType: n2-standard-2
-  #   depends_on: tests
+  - label: '📈 Report performance metrics to ci-stats'
+    command: .buildkite/scripts/steps/functional/report_performance_metrics.sh
+    agents:
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      localSsds: 1
+      localSsdInterface: nvme
+      machineType: n2-standard-2
+    depends_on: tests
 
   - wait: ~
     continue_on_failure: true
