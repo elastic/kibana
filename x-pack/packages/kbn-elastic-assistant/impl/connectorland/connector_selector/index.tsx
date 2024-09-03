@@ -115,7 +115,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
             dropdownDisplay: (
               <React.Fragment key={connector.id}>
                 <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" alignItems="center">
-                  <EuiFlexItem grow={false}>
+                  <EuiFlexItem grow={false} data-test-subj={`connector-${connector.name}`}>
                     <strong>{connector.name}</strong>
                     {connectorDetails && (
                       <EuiText size="xs" color="subdued">

@@ -747,7 +747,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(previewAlerts.length).eql(2);
     });
 
-    describe('with host risk index', async () => {
+    describe('with host risk index', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/entity/risks');
       });
@@ -773,7 +773,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('with asset criticality', async () => {
+    describe('with asset criticality', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/asset_criticality');
         await kibanaServer.uiSettings.update({

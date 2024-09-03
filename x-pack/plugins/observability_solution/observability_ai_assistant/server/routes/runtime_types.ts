@@ -14,9 +14,8 @@ import {
   type Message,
   MessageRole,
   type ObservabilityAIAssistantScreenContextRequest,
+  type StarterPrompt,
 } from '../../common/types';
-
-const serializeableRt = t.any;
 
 export const messageRt: t.Type<Message> = t.type({
   '@timestamp': t.string,
@@ -34,6 +33,7 @@ export const messageRt: t.Type<Message> = t.type({
       content: t.string,
       name: t.string,
       event: t.string,
+      data: t.string,
       function_call: t.intersection([
         t.type({
           name: t.string,
@@ -44,8 +44,7 @@ export const messageRt: t.Type<Message> = t.type({
           ]),
         }),
         t.partial({
-          arguments: serializeableRt,
-          data: serializeableRt,
+          arguments: t.string,
         }),
       ]),
     }),
@@ -129,6 +128,12 @@ export const functionRt = t.intersection([
   }),
 ]);
 
+export const starterPromptRt: t.Type<StarterPrompt> = t.type({
+  title: t.string,
+  prompt: t.string,
+  icon: t.any,
+});
+
 export const screenContextRt: t.Type<ObservabilityAIAssistantScreenContextRequest> = t.partial({
   description: t.string,
   data: t.array(
@@ -139,4 +144,6 @@ export const screenContextRt: t.Type<ObservabilityAIAssistantScreenContextReques
     })
   ),
   actions: t.array(functionRt),
+  screenDescription: t.string,
+  starterPrompts: t.array(starterPromptRt),
 });
