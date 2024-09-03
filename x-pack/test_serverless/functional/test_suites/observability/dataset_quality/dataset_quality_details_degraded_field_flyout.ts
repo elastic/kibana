@@ -69,7 +69,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
       });
 
-      it('should open the flyoout when navigating to the page with degradedField in URL State', async () => {
+      it('should open the flyout when navigating to the page with degradedField in URL State', async () => {
         await PageObjects.datasetQuality.navigateToDetails({
           dataStream: degradedDataStreamName,
           expandedDegradedField: 'test_field',
