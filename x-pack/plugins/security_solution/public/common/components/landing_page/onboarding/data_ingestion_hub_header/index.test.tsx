@@ -100,7 +100,7 @@ describe('WelcomeHeaderComponent', () => {
       },
     ]);
 
-    const { getByText, queryByTestId } = render(<DataIngestionHubHeader spaceId={spaceId} />);
+    const { getByText } = render(<DataIngestionHubHeader spaceId={spaceId} />);
 
     const cardElement = getByText('Watch');
     fireEvent.click(cardElement);
