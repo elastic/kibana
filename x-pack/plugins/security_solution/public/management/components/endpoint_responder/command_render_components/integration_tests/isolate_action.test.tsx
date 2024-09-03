@@ -74,7 +74,10 @@ describe('When using isolate action from response actions console', () => {
         />
       );
 
-      consoleManagerMockAccess = getConsoleManagerMockRenderResultQueriesAndActions(renderResult);
+      consoleManagerMockAccess = getConsoleManagerMockRenderResultQueriesAndActions(
+        user,
+        renderResult
+      );
 
       await consoleManagerMockAccess.clickOnRegisterNewConsole();
       await consoleManagerMockAccess.openRunningConsole();
@@ -85,7 +88,7 @@ describe('When using isolate action from response actions console', () => {
 
   it('should show an error if the `isolation` capability is not present in the endpoint', async () => {
     await render([]);
-    enterConsoleCommand(renderResult, user, 'isolate');
+    await enterConsoleCommand(renderResult, user, 'isolate', { submitClick: true });
 
     expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
       UPGRADE_AGENT_FOR_RESPONDER('endpoint', 'isolate')
@@ -94,7 +97,7 @@ describe('When using isolate action from response actions console', () => {
 
   it('should call `isolate` api when command is entered', async () => {
     await render();
-    enterConsoleCommand(renderResult, user, 'isolate');
+    await enterConsoleCommand(renderResult, user, 'isolate', { submitClick: true });
 
     await waitFor(() => {
       expect(apiMocks.responseProvider.isolateHost).toHaveBeenCalledTimes(1);
@@ -103,7 +106,9 @@ describe('When using isolate action from response actions console', () => {
 
   it('should accept an optional `--comment`', async () => {
     await render();
-    enterConsoleCommand(renderResult, user, 'isolate --comment "This is a comment"');
+    await enterConsoleCommand(renderResult, user, 'isolate --comment "This is a comment"', {
+      submitClick: true,
+    });
 
     await waitFor(() => {
       expect(apiMocks.responseProvider.isolateHost).toHaveBeenCalledWith(
@@ -116,7 +121,9 @@ describe('When using isolate action from response actions console', () => {
 
   it('should only accept one `--comment`', async () => {
     await render();
-    enterConsoleCommand(renderResult, user, 'isolate --comment "one" --comment "two"');
+    await enterConsoleCommand(renderResult, user, 'isolate --comment "one" --comment "two"', {
+      submitClick: true,
+    });
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
       'Argument can only be used once: --comment'
@@ -125,7 +132,7 @@ describe('When using isolate action from response actions console', () => {
 
   it('should call the action status api after creating the `isolate` request', async () => {
     await render();
-    enterConsoleCommand(renderResult, user, 'isolate');
+    await enterConsoleCommand(renderResult, user, 'isolate', { submitClick: true });
 
     await waitFor(() => {
       expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalled();
@@ -134,7 +141,7 @@ describe('When using isolate action from response actions console', () => {
 
   it('should show success when `isolate` action completes with no errors', async () => {
     await render();
-    enterConsoleCommand(renderResult, user, 'isolate');
+    await enterConsoleCommand(renderResult, user, 'isolate', { submitClick: true });
 
     await waitFor(() => {
       expect(renderResult.getByTestId('isolate-success')).toBeTruthy();
@@ -157,7 +164,7 @@ describe('When using isolate action from response actions console', () => {
     };
     apiMocks.responseProvider.actionDetails.mockReturnValue(pendingDetailResponse);
     await render();
-    enterConsoleCommand(renderResult, user, 'isolate');
+    await enterConsoleCommand(renderResult, user, 'isolate', { submitClick: true });
 
     await waitFor(() => {
       expect(renderResult.getByTestId('isolate-actionFailure').textContent).toMatch(
@@ -172,7 +179,7 @@ describe('When using isolate action from response actions console', () => {
     await render();
 
     // enter command
-    enterConsoleCommand(renderResult, user, 'isolate');
+    await enterConsoleCommand(renderResult, user, 'isolate', { submitClick: true });
     // hide console
     await consoleManagerMockAccess.hideOpenedConsole();
 
@@ -196,7 +203,7 @@ describe('When using isolate action from response actions console', () => {
 
       render = async () => {
         const response = await _render();
-        enterConsoleCommand(response, user, 'isolate');
+        await enterConsoleCommand(response, user, 'isolate', { submitClick: true });
 
         await waitFor(() => {
           expect(apiMocks.responseProvider.isolateHost).toHaveBeenCalledTimes(1);

@@ -80,7 +80,10 @@ describe('When using execute action from response actions console', () => {
         />
       );
 
-      consoleManagerMockAccess = getConsoleManagerMockRenderResultQueriesAndActions(renderResult);
+      consoleManagerMockAccess = getConsoleManagerMockRenderResultQueriesAndActions(
+        user,
+        renderResult
+      );
 
       await consoleManagerMockAccess.clickOnRegisterNewConsole();
       await consoleManagerMockAccess.openRunningConsole();
@@ -91,7 +94,9 @@ describe('When using execute action from response actions console', () => {
 
   it('should show an error if the `execute` capability is not present in the endpoint', async () => {
     await render([]);
-    enterConsoleCommand(renderResult, user, 'execute --command="ls -al"');
+    await enterConsoleCommand(renderResult, user, 'execute --command="ls -al"', {
+      submitClick: true,
+    });
 
     expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
       UPGRADE_AGENT_FOR_RESPONDER('endpoint', 'execute')
@@ -101,7 +106,9 @@ describe('When using execute action from response actions console', () => {
   it('should show an error if `execute` is not authorized', async () => {
     endpointPrivileges.canWriteExecuteOperations = false;
     await render();
-    enterConsoleCommand(renderResult, user, 'execute --command="ls -al"');
+    await enterConsoleCommand(renderResult, user, 'execute --command="ls -al"', {
+      submitClick: true,
+    });
 
     expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
       INSUFFICIENT_PRIVILEGES_FOR_COMMAND
@@ -110,7 +117,9 @@ describe('When using execute action from response actions console', () => {
 
   it('should show an error if `execute` is entered without `--command` argument', async () => {
     await render();
-    enterConsoleCommand(renderResult, user, 'execute');
+    await enterConsoleCommand(renderResult, user, 'execute', {
+      submitClick: true,
+    });
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
       'Missing required arguments: --command'
@@ -119,7 +128,9 @@ describe('When using execute action from response actions console', () => {
 
   it('should show error if `--command` is empty string', async () => {
     await render();
-    enterConsoleCommand(renderResult, user, 'execute --command=""');
+    await enterConsoleCommand(renderResult, user, 'execute --command=""', {
+      submitClick: true,
+    });
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
       'Argument --command must have a value'
@@ -128,7 +139,9 @@ describe('When using execute action from response actions console', () => {
 
   it('should show error if `--timeout` is empty string', async () => {
     await render();
-    enterConsoleCommand(renderResult, user, 'execute --command="ls -al" --timeout=""');
+    await enterConsoleCommand(renderResult, user, 'execute --command="ls -al" --timeout=""', {
+      submitClick: true,
+    });
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
       'Argument --timeout must have a value'
@@ -137,7 +150,9 @@ describe('When using execute action from response actions console', () => {
 
   it('should show error if `--timeout` does not match required format', async () => {
     await render();
-    enterConsoleCommand(renderResult, user, 'execute --command="ls -al" --timeout="23d"');
+    await enterConsoleCommand(renderResult, user, 'execute --command="ls -al" --timeout="23d"', {
+      submitClick: true,
+    });
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
       'Invalid argument value: --timeout. Argument must be a string with a positive integer value followed by a unit of time (h for hours, m for minutes, s for seconds). Example: 37m.'
@@ -146,7 +161,9 @@ describe('When using execute action from response actions console', () => {
 
   it('should call the `execute` API with the expected payload', async () => {
     await render();
-    enterConsoleCommand(renderResult, user, 'execute --command="ls -al"');
+    await enterConsoleCommand(renderResult, user, 'execute --command="ls -al"', {
+      submitClick: true,
+    });
 
     await waitFor(() => {
       expect(apiMocks.responseProvider.execute).toHaveBeenCalledWith({
@@ -159,10 +176,13 @@ describe('When using execute action from response actions console', () => {
 
   it('should only accept one `--comment`', async () => {
     await render();
-    enterConsoleCommand(
+    await enterConsoleCommand(
       renderResult,
       user,
-      'execute --command="ls -al" --comment "one" --comment "two"'
+      'execute --command="ls -al" --comment "one" --comment "two"',
+      {
+        submitClick: true,
+      }
     );
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
@@ -185,7 +205,9 @@ describe('When using execute action from response actions console', () => {
     apiMocks.responseProvider.actionDetails.mockReturnValue(actionDetailsApiResponseMock);
 
     await render();
-    enterConsoleCommand(renderResult, user, 'execute --command="ls -l"');
+    await enterConsoleCommand(renderResult, user, 'execute --command="ls -l"', {
+      submitClick: true,
+    });
 
     await waitFor(() => {
       expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalled();
@@ -223,7 +245,9 @@ describe('When using execute action from response actions console', () => {
     });
 
     const { getByTestId } = await render();
-    enterConsoleCommand(renderResult, user, 'execute --command="ls -l"');
+    await enterConsoleCommand(renderResult, user, 'execute --command="ls -l"', {
+      submitClick: true,
+    });
 
     await waitFor(() => {
       expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalled();

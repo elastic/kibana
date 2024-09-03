@@ -232,7 +232,7 @@ describe('When using ConsoleManager', () => {
         renderResult = mockedContext.render(<ConsoleManagerTestComponent />);
 
         ({ clickOnRegisterNewConsole, openRunningConsole, hideOpenedConsole } =
-          getConsoleManagerMockRenderResultQueriesAndActions(renderResult));
+          getConsoleManagerMockRenderResultQueriesAndActions(user, renderResult));
 
         await clickOnRegisterNewConsole();
 
@@ -281,8 +281,14 @@ describe('When using ConsoleManager', () => {
 
     it("should persist a console's command output history on hide/show", async () => {
       await render();
-      enterConsoleCommand(renderResult, user, 'help', { dataTestSubj: 'testRunningConsole' });
-      enterConsoleCommand(renderResult, user, 'cmd1', { dataTestSubj: 'testRunningConsole' });
+      await enterConsoleCommand(renderResult, user, 'help', {
+        dataTestSubj: 'testRunningConsole',
+        submitClick: true,
+      });
+      await enterConsoleCommand(renderResult, user, 'cmd1', {
+        dataTestSubj: 'testRunningConsole',
+        submitClick: true,
+      });
 
       await waitFor(() => {
         expect(renderResult.queryAllByTestId('testRunningConsole-historyItem')).toHaveLength(2);
@@ -301,7 +307,10 @@ describe('When using ConsoleManager', () => {
     it('should provide console rendering state between show/hide', async () => {
       const expectedStoreValue = JSON.stringify({ foo: 'bar' }, null, 2);
       await render();
-      enterConsoleCommand(renderResult, user, 'cmd1', { dataTestSubj: 'testRunningConsole' });
+      await enterConsoleCommand(renderResult, user, 'cmd1', {
+        dataTestSubj: 'testRunningConsole',
+        submitClick: true,
+      });
 
       // Command should have `pending` status and no store values
       expect(renderResult.getByTestId('exec-output-statusState').textContent).toEqual(
