@@ -25,7 +25,7 @@ export const getErrorMarks = (errorItems: IWaterfallError[]): ErrorMark[] => {
     type: 'errorMark',
     offset: Math.max(error.offset + error.skew, 0),
     verticalLine: false,
-    id: error.doc.error.id,
+    id: error.doc['error.id']?.[0],
     error: error.doc,
     serviceColor: error.color,
   }));

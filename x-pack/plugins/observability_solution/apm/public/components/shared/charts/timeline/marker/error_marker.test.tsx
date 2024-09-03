@@ -29,16 +29,13 @@ describe('ErrorMarker', () => {
     type: 'errorMark',
     verticalLine: true,
     error: {
-      trace: { id: '123' },
-      transaction: { id: '456' },
-      error: {
-        grouping_key: '123',
-        log: {
-          message:
-            "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
-        },
-      },
-      service: { name: 'bar' },
+      'trace.id': ['123'],
+      'transaction.id': ['456'],
+      'error.grouping_key': ['123'],
+      'error.log.message': [
+        "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
+      ],
+      'service.name': ['bar'],
     },
     serviceColor: '#fff',
   } as unknown as ErrorMark;
@@ -65,7 +62,7 @@ describe('ErrorMarker', () => {
     );
   });
   it('renders link with trace', () => {
-    const { transaction, ...withoutTransaction } = mark.error;
+    const { 'transaction.id': transaction, ...withoutTransaction } = mark.error;
     const newMark = {
       ...mark,
       error: withoutTransaction,
@@ -75,7 +72,7 @@ describe('ErrorMarker', () => {
     expect(getKueryDecoded(errorLink.search)).toEqual('kuery=trace.id : "123"');
   });
   it('renders link with transaction', () => {
-    const { trace, ...withoutTrace } = mark.error;
+    const { 'trace.id': trace, ...withoutTrace } = mark.error;
     const newMark = {
       ...mark,
       error: withoutTrace,
@@ -85,7 +82,11 @@ describe('ErrorMarker', () => {
     expect(getKueryDecoded(errorLink.search)).toEqual('kuery=transaction.id : "456"');
   });
   it('renders link without trance and transaction', () => {
-    const { trace, transaction, ...withoutTraceAndTransaction } = mark.error;
+    const {
+      'trace.id': trace,
+      'transaction.id': transaction,
+      ...withoutTraceAndTransaction
+    } = mark.error;
     const newMark = {
       ...mark,
       error: withoutTraceAndTransaction,
@@ -95,7 +96,11 @@ describe('ErrorMarker', () => {
     expect(getKueryDecoded(errorLink.search)).toEqual('kuery=');
   });
   it('truncates the error message text', () => {
-    const { trace, transaction, ...withoutTraceAndTransaction } = mark.error;
+    const {
+      'trace.id': trace,
+      'transaction.id': transaction,
+      ...withoutTraceAndTransaction
+    } = mark.error;
     const newMark = {
       ...mark,
       error: withoutTraceAndTransaction,
@@ -111,12 +116,8 @@ describe('ErrorMarker', () => {
         ...mark,
         error: {
           ...mark.error,
-          error: {
-            grouping_key: '123',
-            log: {
-              message: 'Blah.',
-            },
-          },
+          'error.grouping_key': ['123'],
+          'error.log.message': ['Blah.'],
         },
       } as unknown as ErrorMark;
       const component = openPopover(newMark);

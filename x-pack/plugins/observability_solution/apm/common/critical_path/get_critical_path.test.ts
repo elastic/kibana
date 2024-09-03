@@ -6,18 +6,29 @@
  */
 import { apm, ApmFields, dedot } from '@kbn/apm-synthtrace-client';
 import { getWaterfall } from '../../public/components/app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
-import { Span } from '../../typings/es_schemas/ui/span';
 import { Transaction } from '../../typings/es_schemas/ui/transaction';
 import { getCriticalPath } from './get_critical_path';
+import { WaterfallSpan, WaterfallTransaction } from '../waterfall/typings';
 
 describe('getCriticalPath', () => {
   function getCriticalPathFromEvents(events: ApmFields[]) {
     events = events.filter((event) => event['processor.event'] !== 'metric');
 
     const entryTransaction = dedot(events[0]!, {}) as Transaction;
+
+    const traceDocs = events.map((event: any) => {
+      Object.keys(event).forEach((key) => {
+        const item = event[key];
+        if (!Array.isArray(item)) {
+          event[key] = [item];
+        }
+      });
+      return event as WaterfallSpan | WaterfallTransaction;
+    });
+
     const waterfall = getWaterfall({
       traceItems: {
-        traceDocs: events.map((event) => dedot(event, {}) as Transaction | Span),
+        traceDocs,
         errorDocs: [],
         exceedsMax: false,
         spanLinksCountById: {},
@@ -72,7 +83,9 @@ describe('getCriticalPath', () => {
         .serialize()
     );
 
-    const longerSpan = waterfall.items.find((item) => (item.doc as Span).span?.name === 'bar');
+    const longerSpan = waterfall.items.find(
+      (item) => ((item.doc as WaterfallSpan)['span.name']?.[0] as string) === 'bar'
+    );
 
     expect(segments).toEqual([
       { self: false, duration: 100000, item: waterfall.items[0], offset: 0 },

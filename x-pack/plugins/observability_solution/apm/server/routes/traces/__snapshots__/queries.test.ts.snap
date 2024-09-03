@@ -11,8 +11,9 @@ Object {
     ],
   },
   "body": Object {
-    "_source": Array [
-      "timestamp.us",
+    "_source": false,
+    "fields": Array [
+      "@timestamp",
       "trace.id",
       "transaction.id",
       "parent.id",

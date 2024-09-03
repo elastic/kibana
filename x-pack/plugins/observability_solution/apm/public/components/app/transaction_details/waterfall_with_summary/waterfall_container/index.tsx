@@ -67,7 +67,7 @@ export function WaterfallContainer({
 
     if (!color) {
       // fall back to service color if there's no span.type, e.g. for transactions
-      color = serviceColors[item.doc.service.name];
+      color = serviceColors[item.doc['service.name']?.[0]];
     }
 
     item.color = color;

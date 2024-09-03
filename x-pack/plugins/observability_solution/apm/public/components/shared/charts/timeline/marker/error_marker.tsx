@@ -73,14 +73,16 @@ export function ErrorMarker({ mark }: Props) {
 
   const query = {
     kuery: [
-      ...(error.trace?.id ? [`${TRACE_ID} : "${error.trace?.id}"`] : []),
-      ...(error.transaction?.id ? [`${TRANSACTION_ID} : "${error.transaction?.id}"`] : []),
+      ...(error['trace.id']?.[0] ? [`${TRACE_ID} : "${error['trace.id']?.[0]}"`] : []),
+      ...(error['transaction.id']?.[0]
+        ? [`${TRANSACTION_ID} : "${error['transaction.id']?.[0]}"`]
+        : []),
     ].join(' and '),
     rangeFrom,
     rangeTo,
   };
 
-  const errorMessage = error.error.log?.message || error.error.exception?.[0]?.message;
+  const errorMessage = error['error.log.message']?.[0] || error['error.exception.message']?.[0];
   const truncatedErrorMessage = truncateMessage(errorMessage);
 
   return (
@@ -99,14 +101,14 @@ export function ErrorMarker({ mark }: Props) {
         <Legend
           key={mark.serviceColor}
           color={mark.serviceColor}
-          text={error.service.name}
+          text={error['service.name']?.[0]}
           indicator={<span />}
         />
         <EuiText size="s">
           <ErrorLink
             data-test-subj="errorLink"
-            serviceName={error.service.name}
-            errorGroupId={error.error.grouping_key}
+            serviceName={error['service.name']?.[0]}
+            errorGroupId={error['error.grouping_key']?.[0]}
             query={query}
             title={errorMessage}
           >

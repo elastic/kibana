@@ -71,21 +71,61 @@ export const Example: Story<any> = () => {
     return doc['processor.event'] === ProcessorEvent.error;
   });
 
-  const errorDocs = events.splice(errorEventId, 1);
+  const flatten = (obj: Record<string, unknown>) => {
+    const _flatten = (o: Record<string, unknown>, path: string[] = []): unknown[] => {
+      return Object.keys(o)
+        .map((k: string) => {
+          if (typeof o[k] === 'object' && o[k] !== null && !Array.isArray(o[k])) {
+            return _flatten(o[k] as Record<string, unknown>, [...path, k]);
+          } else {
+            const key = [...path, k].join('.');
+            return { [key]: o[k] };
+          }
+        })
+        .flat();
+    };
+    return Object.assign({}, ..._flatten(obj));
+  };
+
+  const errorDocs = events.splice(errorEventId, 1).map((event: any) => {
+    if (event['error.exception']) {
+      event['error.exception'] = event['error.exception'][0];
+    }
+
+    event = flatten(event);
+
+    Object.keys(event).forEach((key) => {
+      const item = event[key];
+      if (!Array.isArray(item)) {
+        event[key] = [item];
+      }
+    });
+    return event as WaterfallError;
+  });
+
+  const entryTransaction = dedot(events[0]!, {}) as Transaction;
 
   const traceDocs = events
     .filter((event) => event['processor.event'] !== 'metric')
-    .map((event) => dedot(event, {}) as WaterfallTransaction | WaterfallSpan);
+    .map((event: any) => {
+      Object.keys(event).forEach((key) => {
+        const item = event[key];
+        if (!Array.isArray(item)) {
+          event[key] = [item];
+        }
+      });
+      return event as WaterfallSpan | WaterfallTransaction;
+    });
+
   const traceItems = {
     exceedsMax: false,
     traceDocs,
-    errorDocs: errorDocs.map((error) => dedot(error, {}) as WaterfallError),
+    errorDocs,
     spanLinksCountById: {},
     traceDocsTotal: traceDocs.length,
     maxTraceItems: 5000,
   };
 
-  const entryTransaction = dedot(traceDocs[0]!, {}) as Transaction;
   const waterfall = getWaterfall({ traceItems, entryTransaction });
 
   return (
