@@ -90,7 +90,7 @@ export const ProviderContentWrapper = styled.span`
   }
 `;
 
-type RenderFunctionProp = (
+export type RenderFunctionProp = (
   props: DataProvider,
   provided: DraggableProvided | null,
   state: DraggableStateSnapshot

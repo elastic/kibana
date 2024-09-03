@@ -6,6 +6,7 @@
  */
 
 import { isArray, isEmpty, isString, uniq } from 'lodash/fp';
+import type { ComponentProps } from 'react';
 import React, { useCallback, useMemo, useContext } from 'react';
 import deepEqual from 'fast-deep-equal';
 
@@ -114,9 +115,8 @@ const NonDecoratedIpComponent: React.FC<{
     [value]
   );
 
-  const render = useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (dataProvider: any, _: any, snapshot: any) =>
+  const render: ComponentProps<typeof DraggableWrapper>['render'] = useCallback(
+    (dataProvider: DataProvider, _, snapshot) =>
       snapshot.isDragging ? (
         <DragEffects>
           <Provider dataProvider={dataProvider} />
@@ -240,9 +240,8 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
     ]
   );
 
-  const render = useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (_props: any, _provided: any, snapshot: any) =>
+  const render: ComponentProps<typeof DraggableWrapper>['render'] = useCallback(
+    (_props, _provided, snapshot) =>
       snapshot.isDragging ? (
         <DragEffects>
           <Provider dataProvider={dataProviderProp} />
