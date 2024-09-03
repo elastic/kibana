@@ -87,14 +87,14 @@ export function LogErrorRateChart({ height }: { height: number }) {
             <EuiTitle size="xs">
               <h2>
                 {i18n.translate('xpack.apm.logErrorRate', {
-                  defaultMessage: 'Log error %',
+                  defaultMessage: 'Log error rate',
                 })}{' '}
                 <Popover>
                   <TooltipContent
                     formula={getMetricsFormula(ChartMetricType.LOG_ERROR_RATE)}
                     description={
                       <FormattedMessage
-                        defaultMessage="% of logs where error detected for given {serviceName}."
+                        defaultMessage="Rate of error logs per minute observed for given {serviceName}."
                         id="xpack.apm.multiSignal.servicesTable.logErrorRate.tooltip.description"
                         values={{
                           serviceName: (
