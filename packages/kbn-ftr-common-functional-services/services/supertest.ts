@@ -11,7 +11,7 @@ import { systemIndicesSuperuser } from '@kbn/test';
 import { format as formatUrl } from 'url';
 
 import supertest, { AgentOptions } from 'supertest';
-import { FtrProviderContext } from '../../functional/ftr_provider_context';
+import { FtrProviderContext } from './ftr_provider_context';
 
 export function KibanaSupertestProvider({ getService }: FtrProviderContext): supertest.Agent {
   const config = getService('config');

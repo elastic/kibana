@@ -12,6 +12,7 @@ import { KibanaServerProvider } from './kibana_server';
 import { RetryService } from './retry';
 import { SupertestWithoutAuthProvider } from './supertest_without_auth';
 import { SamlAuthProvider } from './saml_auth';
+import { KibanaSupertestProvider, ElasticsearchSupertestProvider } from './supertest';
 
 export const services = {
   es: EsProvider,
@@ -20,4 +21,6 @@ export const services = {
   retry: RetryService,
   supertestWithoutAuth: SupertestWithoutAuthProvider,
   samlAuth: SamlAuthProvider,
+  supertest: KibanaSupertestProvider,
+  esSupertest: ElasticsearchSupertestProvider,
 };

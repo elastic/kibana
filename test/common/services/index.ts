@@ -17,14 +17,14 @@ import { BsearchService } from './bsearch';
 import { ConsoleProvider } from './console';
 
 // pick only services that work for any FTR config, e.g. 'samlAuth' requires SAML setup in config file
-const { es, esArchiver, kibanaServer, retry, supertestWithoutAuth } = commonFunctionalServices;
+const { es, esArchiver, kibanaServer, retry, supertestWithoutAuth, supertest, esSupertest } =
+  commonFunctionalServices;
 
 export const services = {
   es,
   esArchiver,
   kibanaServer,
   retry,
-  supertestWithoutAuth,
   deployment: DeploymentService,
   randomness: RandomnessService,
   security: SecurityServiceProvider,
@@ -33,4 +33,7 @@ export const services = {
   indexPatterns: IndexPatternsService,
   bsearch: BsearchService,
   console: ConsoleProvider,
+  supertest,
+  esSupertest,
+  supertestWithoutAuth,
 };
