@@ -8,7 +8,7 @@ import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { AggregationOptionsByType, AggregationResultOf } from '@kbn/es-types';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { estypes } from '@elastic/elasticsearch';
-import { getBucketSizeFromTimeRangeAndBucketCount, getLogErrorRate } from '../../utils';
+import { getBucketSizeFromTimeRangeAndBucketCount } from '../../utils';
 import { LOG_LEVEL } from '../../es_fields';
 import { existsQuery, kqlQuery } from '../../utils/es_queries';
 
@@ -119,12 +119,10 @@ export function createGetLogErrorRateTimeseries() {
     return buckets
       ? buckets.reduce<LogsErrorRateTimeseriesReturnType>((acc, bucket) => {
           const timeseries = bucket.timeseries.buckets.map((timeseriesBucket) => {
-            const totalCount = timeseriesBucket.doc_count;
             const logErrorCount = timeseriesBucket.logErrors.buckets[0]?.doc_count;
-
             return {
               x: timeseriesBucket.key,
-              y: logErrorCount ? getLogErrorRate({ logCount: totalCount, logErrorCount }) : null,
+              y: logErrorCount ? logErrorCount : null,
             };
           });
 
