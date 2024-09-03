@@ -81,6 +81,7 @@ const features = [
         },
       },
     },
+    category: { id: 'observability' },
   },
 ] as unknown as KibanaFeature[];
 
@@ -345,6 +346,10 @@ describe('capabilitiesSwitcher', () => {
 
         expectedCapabilities.navLinks.feature2 = false;
         expectedCapabilities.catalogue.feature2Entry = false;
+        expectedCapabilities.navLinks.feature3 = false;
+        expectedCapabilities.catalogue.feature3Entry = false;
+        expectedCapabilities.navLinks.feature3_app = false;
+        expectedCapabilities.management.kibana.indices = false;
         expectedCapabilities.management.kibana.somethingElse = false;
         expectedCapabilities.feature_2.bar = false;
         expectedCapabilities.feature_2.foo = false;
@@ -382,6 +387,7 @@ describe('capabilitiesSwitcher', () => {
 
         expectedCapabilities.navLinks.feature2 = false;
         expectedCapabilities.catalogue.feature2Entry = false;
+        expectedCapabilities.navLinks.feature3 = false;
         expectedCapabilities.management.kibana.somethingElse = false;
         expectedCapabilities.feature_1.bar = false;
         expectedCapabilities.feature_1.foo = false;
