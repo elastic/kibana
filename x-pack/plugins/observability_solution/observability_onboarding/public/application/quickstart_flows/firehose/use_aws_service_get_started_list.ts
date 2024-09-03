@@ -355,7 +355,7 @@ export function useAWSServiceGetStartedList(): AWSServiceGetStartedConfig[] {
         title: 'Uncategorized Firehose Logs',
         logoURL: 'https://epr.elastic.co/package/awsfirehose/1.1.0/img/logo_firehose.svg',
         previewImage: 'waterfall_screen.svg',
-        actionLinks: [generateLogsExplorerActionLink('firehose', 'Firehose')],
+        actionLinks: [generateLogsExplorerActionLink('awsfirehose', 'Firehose')],
       },
     ],
     [
