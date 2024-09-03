@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useState } from 'react';
 import moment from 'moment';
 import {
+  Criteria,
   EuiBasicTable,
   EuiBasicTableColumn,
-  EuiTableFieldDataColumnType,
   EuiLink,
   EuiBadge,
   EuiButtonIcon,
@@ -22,13 +22,18 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { paths } from '../../../../common/paths';
 
 export function InvestigationList() {
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
   const {
     core: {
       http: { basePath },
       uiSettings,
     },
   } = useKibana();
-  const { data, isLoading, isError } = useFetchInvestigationList();
+  const { data, isLoading, isError } = useFetchInvestigationList({
+    page: pageIndex + 1,
+    perPage: pageSize,
+  });
   const dateFormat = uiSettings.get('dateFormat');
   const tz = uiSettings.get('dateFormat:tz');
 
@@ -53,6 +58,7 @@ export function InvestigationList() {
   }
 
   const investigations = data?.results ?? [];
+  const { total } = data ?? {};
 
   const columns: Array<EuiBasicTableColumn<InvestigationResponse>> = [
     {
@@ -127,26 +133,20 @@ export function InvestigationList() {
     },
   ];
 
-  const getRowProps = (user: InvestigationResponse) => {
-    const { id } = user;
-    return {
-      'data-test-subj': `row-${id}`,
-      className: 'customRowClass',
-      onClick: () => {},
-    };
+  const pagination = {
+    pageIndex,
+    pageSize,
+    totalItemCount: total || 0,
+    pageSizeOptions: [10, 50],
+    showPerPageOptions: true,
   };
 
-  const getCellProps = (
-    user: InvestigationResponse,
-    column: EuiTableFieldDataColumnType<InvestigationResponse>
-  ) => {
-    const { id } = user;
-    const { field } = column;
-    return {
-      className: 'customCellClass',
-      'data-test-subj': `cell-${id}-${String(field)}`,
-      textOnly: true,
-    };
+  const onTableChange = ({ page }: Criteria<InvestigationResponse>) => {
+    if (page) {
+      const { index, size } = page;
+      setPageIndex(index);
+      setPageSize(size);
+    }
   };
 
   return (
@@ -155,10 +155,10 @@ export function InvestigationList() {
         defaultMessage: 'Investigations List',
       })}
       items={investigations}
+      pagination={pagination}
       rowHeader="firstName"
       columns={columns}
-      rowProps={getRowProps}
-      cellProps={getCellProps}
+      onChange={onTableChange}
     />
   );
 }
