@@ -623,8 +623,9 @@ describe('UnifiedDataTable', () => {
       <div data-test-subj="test-document-view">{hit.id}</div>
     ));
 
+    const props = getProps();
     const component = await getComponent({
-      ...getProps(),
+      ...props,
       expandedDoc,
       setExpandedDoc: jest.fn(),
       columnsMeta: columnsMetaOverride,
@@ -635,10 +636,13 @@ describe('UnifiedDataTable', () => {
     findTestSubject(component, 'docTableExpandToggleColumn').first().simulate('click');
     expect(findTestSubject(component, 'test-document-view').exists()).toBeTruthy();
     expect(renderDocumentViewMock).toHaveBeenLastCalledWith(
-      expandedDoc,
-      getProps().rows,
-      ['_source'],
-      columnsMetaOverride
+      expect.objectContaining({
+        hit: expandedDoc,
+        displayedRows: props.rows,
+        columns: props.columns,
+        columnsMeta: columnsMetaOverride,
+        displayedColumns: ['@timestamp', '_source'],
+      })
     );
   });
 

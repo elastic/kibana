@@ -105,6 +105,7 @@ describe('Discover flyout', function () {
 
     const props = {
       columns: ['date'],
+      displayedColumns: ['date'],
       dataView: dataView || dataViewMock,
       hit: expandedHit
         ? buildDataTableRecord(expandedHit, dataView || dataViewMock)
