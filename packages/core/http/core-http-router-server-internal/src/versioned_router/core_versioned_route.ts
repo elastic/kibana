@@ -93,6 +93,7 @@ export class CoreVersionedRoute implements VersionedRoute {
       {
         path: this.path,
         validate: passThroughValidation,
+        // @ts-expect-error upgrade typescript v5.1.6
         options: this.getRouteConfigOptions(),
       },
       this.requestHandler,

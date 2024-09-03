@@ -158,6 +158,7 @@ export const CrawlCustomSettingsFlyoutMultiCrawlLogic = kea<
     crawlerConfigActiveTab: [
       0,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onSelectCrawlerConfigActiveTab: (_, { crawlerConfigActiveTab }) => crawlerConfigActiveTab,
         onDeleteCustomCrawler: () => 0,
       },
@@ -165,20 +166,23 @@ export const CrawlCustomSettingsFlyoutMultiCrawlLogic = kea<
     crawlerConfigurations: [
       [defaulCrawlerConfiguration],
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onReceiveCrawlerCustomScheduling: (_, { crawlerConfigurations }) => {
           // Handle case with no custom scheduling returned from server
-          return crawlerConfigurations.length > 0
+          return crawlerConfigurations.length > 0 // @ts-expect-error upgrade typescript v5.1.6
             ? crawlerConfigurations.map((configuration) => ({
                 ...defaulCrawlerConfiguration,
                 ...configuration,
               }))
             : [defaulCrawlerConfiguration];
         },
+        // @ts-expect-error upgrade typescript v5.1.6
         onAddCustomCrawler: (state, { index }) => {
           let newScheduleKey = `crawler_${index}`;
           let suffix = index;
 
           // Check if the newScheduleKey already exists in the array
+          // @ts-expect-error upgrade typescript v5.1.6
           const existingKeys = state.map((crawler) => crawler.scheduleKey);
           if (existingKeys.includes(newScheduleKey)) {
             // Handle the case where a duplicate scheduleKey is found
@@ -196,30 +200,42 @@ export const CrawlCustomSettingsFlyoutMultiCrawlLogic = kea<
             },
           ];
         },
+        // @ts-expect-error upgrade typescript v5.1.6
         onDeleteCustomCrawler: (state, { index }) => {
+          // @ts-expect-error upgrade typescript v5.1.6
           return state.filter((_, i) => i !== index);
         },
+        // @ts-expect-error upgrade typescript v5.1.6
         onSelectMaxCrawlDepth: (state, { index, maxCrawlDepth }) => {
+          // @ts-expect-error upgrade typescript v5.1.6
           return state.map((crawler, i) => (i === index ? { ...crawler, maxCrawlDepth } : crawler));
         },
+        // @ts-expect-error upgrade typescript v5.1.6
         onSelectCustomEntryPointUrls: (state, { index, entryPointUrls }) => {
+          // @ts-expect-error upgrade typescript v5.1.6
           return state.map((crawler, i) =>
             i === index ? { ...crawler, customEntryPointUrls: entryPointUrls } : crawler
           );
         },
+        // @ts-expect-error upgrade typescript v5.1.6
         onSelectCustomSitemapUrls: (state, { index, sitemapUrls }) => {
+          // @ts-expect-error upgrade typescript v5.1.6
           return state.map((crawler, i) =>
             i === index ? { ...crawler, customSitemapUrls: sitemapUrls } : crawler
           );
         },
+        // @ts-expect-error upgrade typescript v5.1.6
         toggleIncludeSitemapsInRobotsTxt: (state, { index }) => {
+          // @ts-expect-error upgrade typescript v5.1.6
           return state.map((crawler, i) =>
             i === index
               ? { ...crawler, includeSitemapsInRobotsTxt: !crawler.includeSitemapsInRobotsTxt }
               : crawler
           );
         },
+        // @ts-expect-error upgrade typescript v5.1.6
         onSelectDomainUrls: (state, { index, domainUrls }) => {
+          // @ts-expect-error upgrade typescript v5.1.6
           return state.map((crawler, i) =>
             i === index
               ? {
@@ -237,42 +253,58 @@ export const CrawlCustomSettingsFlyoutMultiCrawlLogic = kea<
               : crawler
           );
         },
+        // @ts-expect-error upgrade typescript v5.1.6
         onSelectEntryPointUrls: (state, { index, entryPointUrls }) => {
+          // @ts-expect-error upgrade typescript v5.1.6
           return state.map((crawler, i) =>
             i === index ? { ...crawler, selectedEntryPointUrls: entryPointUrls } : crawler
           );
         },
+        // @ts-expect-error upgrade typescript v5.1.6
         onSelectSitemapUrls: (state, { index, sitemapUrls }) => {
+          // @ts-expect-error upgrade typescript v5.1.6
           return state.map((crawler, i) =>
             i === index ? { ...crawler, selectedSitemapUrls: sitemapUrls } : crawler
           );
         },
+        // @ts-expect-error upgrade typescript v5.1.6
         onSetConnectorSchedulingEnabled: (state, { index, enabled }) => {
+          // @ts-expect-error upgrade typescript v5.1.6
           return state.map((crawler, i) => (i === index ? { ...crawler, enabled } : crawler));
         },
+        // @ts-expect-error upgrade typescript v5.1.6
         setConnectorSchedulingInterval: (state, { index, newSchedule }) => {
           const { interval } = newSchedule;
+          // @ts-expect-error upgrade typescript v5.1.6
           return state.map((crawler, i) => (i === index ? { ...crawler, interval } : crawler));
         },
+        // @ts-expect-error upgrade typescript v5.1.6
         onRecieveDomainConfigData: (state, { domainConfigs }) => {
           const domainConfigsMap = domainConfigsToDomainConfigMap(domainConfigs);
+          // @ts-expect-error upgrade typescript v5.1.6
           return state.map((crawler) => {
             const entryPointUrls = crawler.selectedDomainUrls.flatMap(
+              // @ts-expect-error upgrade typescript v5.1.6
               (selectedDomainUrl) => domainConfigsMap[selectedDomainUrl].seedUrls
             );
+            // @ts-expect-error upgrade typescript v5.1.6
             const selectedEntryPointUrls = crawler.customEntryPointUrls.filter((entryPointUrl) =>
               entryPointUrls.includes(entryPointUrl)
             );
             const customEntryPointUrls = crawler.customEntryPointUrls.filter(
+              // @ts-expect-error upgrade typescript v5.1.6
               (entryPointUrl) => !entryPointUrls.includes(entryPointUrl)
             );
             const sitemapUrls = crawler.selectedDomainUrls.flatMap(
+              // @ts-expect-error upgrade typescript v5.1.6
               (selectedDomainUrl) => domainConfigsMap[selectedDomainUrl].sitemapUrls
             );
+            // @ts-expect-error upgrade typescript v5.1.6
             const selectedSitemapUrls = crawler.customSitemapUrls.filter((sitemapUrl) =>
               sitemapUrls.includes(sitemapUrl)
             );
             const customSitemapUrls = crawler.customSitemapUrls.filter(
+              // @ts-expect-error upgrade typescript v5.1.6
               (sitemapUrl) => !sitemapUrls.includes(sitemapUrl)
             );
 

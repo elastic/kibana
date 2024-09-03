@@ -180,6 +180,7 @@ export const MetricExpression = ({
             }
           )}
           value={expressionDisplayValue}
+          // @ts-expect-error upgrade typescript v5.1.6
           isActive={Boolean(popoverOpen || (errors.metric && errors.metric.length > 0))}
           onClick={() => {
             setPopoverOpen(true);
@@ -255,6 +256,7 @@ export const MetricExpression = ({
                     options={fieldOptions}
                     onChange={onFieldChange}
                     isClearable={false}
+                    // @ts-expect-error upgrade typescript v5.1.6
                     isInvalid={errors.metric.length > 0}
                   />
                 </EuiFlexItem>
@@ -292,6 +294,7 @@ export const MetricExpression = ({
                   fullWidth
                   singleSelection={{ asPlainText: true }}
                   data-test-subj="availablefieldsOptionsComboBox"
+                  // @ts-expect-error upgrade typescript v5.1.6
                   isInvalid={errors.metric.length > 0}
                   placeholder={firstFieldOption.text}
                   options={availablefieldsOptions}
