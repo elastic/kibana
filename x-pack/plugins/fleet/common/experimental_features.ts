@@ -27,7 +27,7 @@ const _allowedExperimentalValues = {
   advancedPolicySettings: true,
   useSpaceAwareness: false,
   enableReusableIntegrationPolicies: true,
-  asyncDeployPolicies: false,
+  asyncDeployPolicies: true,
 };
 
 /**
