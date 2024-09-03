@@ -11,11 +11,18 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'timePicker', 'discover', 'unifiedFieldList']);
+  const PageObjects = getPageObjects([
+    'common',
+    'timePicker',
+    'discover',
+    'unifiedFieldList',
+    'header',
+  ]);
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const dataGrid = getService('dataGrid');
   const browser = getService('browser');
+  const dataViews = getService('dataViews');
 
   describe('extension getRowIndicatorProvider', () => {
     before(async () => {
@@ -90,6 +97,55 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'rgba(223, 147, 82, 1)'
       );
       expect(await secondColorIndicator.getAttribute('title')).to.be('Error');
+    });
+
+    it('should render log.level row indicators on Surrounding documents page', async () => {
+      await PageObjects.common.navigateToApp('discover');
+      await dataViews.switchTo('my-example-logs,logstash*');
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await dataGrid.clickRowToggle({ rowIndex: 0 });
+      const [, surroundingActionEl] = await dataGrid.getRowActions();
+      await surroundingActionEl.click();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      let anchorCell = await dataGrid.getCellElement(0, 0);
+      let anchorColorIndicator = await anchorCell.findByTestSubject(
+        'unifiedDataTableRowColorIndicatorCell'
+      );
+      expect(await anchorColorIndicator.getAttribute('title')).to.be('Debug');
+      expect(await anchorColorIndicator.getComputedStyle('background-color')).to.be(
+        'rgba(190, 207, 227, 1)'
+      );
+
+      let nextCell = await dataGrid.getCellElement(1, 0);
+      let nextColorIndicator = await nextCell.findByTestSubject(
+        'unifiedDataTableRowColorIndicatorCell'
+      );
+      expect(await nextColorIndicator.getAttribute('title')).to.be('Error');
+      expect(await nextColorIndicator.getComputedStyle('background-color')).to.be(
+        'rgba(223, 147, 82, 1)'
+      );
+
+      await browser.refresh();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      anchorCell = await dataGrid.getCellElement(0, 0);
+      anchorColorIndicator = await anchorCell.findByTestSubject(
+        'unifiedDataTableRowColorIndicatorCell'
+      );
+      expect(await anchorColorIndicator.getAttribute('title')).to.be('Debug');
+      expect(await anchorColorIndicator.getComputedStyle('background-color')).to.be(
+        'rgba(190, 207, 227, 1)'
+      );
+
+      nextCell = await dataGrid.getCellElement(1, 0);
+      nextColorIndicator = await nextCell.findByTestSubject(
+        'unifiedDataTableRowColorIndicatorCell'
+      );
+      expect(await nextColorIndicator.getAttribute('title')).to.be('Error');
+      expect(await nextColorIndicator.getComputedStyle('background-color')).to.be(
+        'rgba(223, 147, 82, 1)'
+      );
     });
   });
 }
