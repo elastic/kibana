@@ -8,6 +8,7 @@
 import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
+import { InitActionRequestSchema } from '../../../../common/api/endpoint/actions/response_actions/init';
 import { responseActionsWithLegacyActionProperty } from '../../services/actions/constants';
 import { stringify } from '../../utils/stringify';
 import { getResponseActionsClient, NormalizedExternalConnectorClient } from '../../services';
@@ -39,6 +40,7 @@ import {
   EXECUTE_ROUTE,
   GET_FILE_ROUTE,
   GET_PROCESSES_ROUTE,
+  INIT_ROUTE,
   ISOLATE_HOST_ROUTE,
   ISOLATE_HOST_ROUTE_V2,
   KILL_PROCESS_ROUTE,

@@ -41,8 +41,8 @@ import type {
   NormalizedExternalConnectorClient,
   NormalizedExternalConnectorClientExecuteOptions,
 } from '../lib/normalized_external_connector_client';
-import { ExecuteActionRequestBody } from '../../../../../../common/api/endpoint';
-import {
+import type { ExecuteActionRequestBody } from '../../../../../../common/api/endpoint';
+import type {
   ResponseActionExecuteOutputContent,
   ResponseActionsExecuteParameters,
 } from '../../../../../../common/endpoint/types';
@@ -315,6 +315,7 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
     actionResponse: ActionTypeExecutorResult<CrowdstrikeBaseApiResponse> | undefined,
     doc: LogsEndpointAction
   ): Promise<void> {
+    console.log({ actionResponse: JSON.stringify(actionResponse, null, 2) });
     const options = {
       actionId: doc.EndpointActions.action_id,
       agentId: doc.agent.id,
