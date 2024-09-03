@@ -6,17 +6,10 @@
  */
 import React, { useState } from 'react';
 import moment from 'moment';
-import {
-  Criteria,
-  EuiBasicTable,
-  EuiBasicTableColumn,
-  EuiLink,
-  EuiBadge,
-  EuiButtonIcon,
-  EuiToolTip,
-} from '@elastic/eui';
+import { Criteria, EuiBasicTable, EuiBasicTableColumn, EuiLink, EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { InvestigationResponse } from '@kbn/investigation-shared/src/rest_specs/investigation';
+import { InvestigationListActions } from './investigation_list_actions';
 import { useFetchInvestigationList } from '../../../hooks/use_fetch_investigation_list';
 import { useKibana } from '../../../hooks/use_kibana';
 import { paths } from '../../../../common/paths';
@@ -30,7 +23,7 @@ export function InvestigationList() {
       uiSettings,
     },
   } = useKibana();
-  const { data, isLoading, isError } = useFetchInvestigationList({
+  const { data, isLoading, isError, refetch } = useFetchInvestigationList({
     page: pageIndex + 1,
     perPage: pageSize,
   });
@@ -110,25 +103,8 @@ export function InvestigationList() {
     },
     {
       name: 'Actions',
-      render: (investagation: InvestigationResponse) => (
-        <EuiToolTip
-          content={i18n.translate('xpack.investigateApp.investigationList.tableCaption', {
-            defaultMessage: 'Delete',
-          })}
-        >
-          <EuiButtonIcon
-            data-test-subj="investigateAppInvestigationListDeleteButton"
-            aria-label={i18n.translate(
-              'xpack.investigateApp.investigationList.tableCaption.ariaLabel',
-              {
-                defaultMessage: 'Delete investigation "{name}"',
-                values: { name: investagation.title },
-              }
-            )}
-            iconType="trash"
-            onClick={() => {}}
-          />
-        </EuiToolTip>
+      render: (investigation: InvestigationResponse) => (
+        <InvestigationListActions investigation={investigation} onDeleteAction={() => refetch()} />
       ),
     },
   ];
