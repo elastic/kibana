@@ -1102,6 +1102,10 @@ async function getBuiltinFunctionNextArgument(
       } else {
         const finalType = nestedType || nodeArgType || 'any';
         const supportedTypes = getSupportedTypesForBinaryOperators(fnDef, finalType as string);
+
+        if (finalType === 'date') {
+          suggestions.push(...getDateLiterals());
+        }
         suggestions.push(
           ...(await getFieldsOrFunctionsSuggestions(
             // this is a special case with AND/OR
