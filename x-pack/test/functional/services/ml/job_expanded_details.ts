@@ -60,16 +60,36 @@ export function MachineLearningJobExpandedDetailsProvider(
       }
     },
 
+    async assertAnnotationsFromApi(annotationsFromApi: any) {
+      const length = annotationsFromApi.length;
+      expect(length).to.eql(
+        1,
+        `Expect annotations from api to have length of 1, but got [${length}]`
+      );
+    },
+
+    async openAnnotationInSingleMetricViewer(
+      jobId: string,
+      annotationsFromApi: any
+    ): Promise<void> {
+      await this.assertAnnotationsFromApi(annotationsFromApi);
+
+      const { _id: annotationId }: { _id: string } = annotationsFromApi[0];
+
+      await jobTable.ensureDetailsOpen(jobId);
+      await jobTable.openAnnotationsTab(jobId);
+      await this.clearSearchButton();
+      await jobAnnotationsTable.ensureAnnotationsActionsMenuOpen(annotationId);
+      await testSubjects.click('mlAnnotationsActionOpenInSingleMetricViewer');
+      await testSubjects.existOrFail('mlSingleMetricViewerChart');
+    },
+
     async editAnnotation(
       jobId: string,
       newAnnotationText: string,
       annotationsFromApi: any
     ): Promise<void> {
-      const length = annotationsFromApi.length;
-      expect(length).to.eql(
-        1,
-        `Expect annotions from api to have length of 1, but got [${length}]`
-      );
+      await this.assertAnnotationsFromApi(annotationsFromApi);
 
       await jobTable.ensureDetailsOpen(jobId);
       await jobTable.openAnnotationsTab(jobId);
