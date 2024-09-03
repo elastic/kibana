@@ -113,10 +113,15 @@ export function createBulkExecutionEnqueuerFunction({
       inMemoryConnectors,
       connectorIds
     );
+    const validatedActionsToExecute: ExecuteOptions[] = [];
 
-    connectors.forEach((c) => {
+    for (const c of connectors) {
       const { id, connector, isInMemory } = c;
-      validateCanActionBeUsed(connector);
+      try {
+        validateCanActionBeUsed(connector);
+      } catch (e) {
+        continue;
+      }
 
       const { actionTypeId } = connector;
       if (!actionTypeRegistry.isActionExecutable(id, actionTypeId, { notifyUsage: true })) {
@@ -125,9 +130,14 @@ export function createBulkExecutionEnqueuerFunction({
 
       actionTypeIds[id] = actionTypeId;
       connectorIsInMemory[id] = isInMemory;
-    });
 
-    const actions = actionsToExecute.map((actionToExecute) => {
+      const currentAction = actionsToExecute.find((a) => a.id === id);
+      if (currentAction) {
+        validatedActionsToExecute.push(currentAction);
+      }
+    }
+
+    const actions = validatedActionsToExecute.map((actionToExecute) => {
       // Get saved object references from action ID and relatedSavedObjects
       const { references, relatedSavedObjectWithRefs } = extractSavedObjectReferences(
         actionToExecute.id,
@@ -165,6 +175,7 @@ export function createBulkExecutionEnqueuerFunction({
     });
     const actionTaskParamsRecords: SavedObjectsBulkResponse<ActionTaskParams> =
       await unsecuredSavedObjectsClient.bulkCreate(actions, { refresh: false });
+
     const taskInstances = actionTaskParamsRecords.saved_objects.map((so) => {
       const actionId = so.attributes.actionId;
       return {
@@ -177,10 +188,12 @@ export function createBulkExecutionEnqueuerFunction({
         scope: ['actions'],
       };
     });
+
     await taskManager.bulkSchedule(taskInstances);
+
     return {
       errors: actionsOverLimit.length > 0,
-      items: actionsToExecute
+      items: validatedActionsToExecute
         .map((a) => ({
           id: a.id,
           actionTypeId: a.actionTypeId,

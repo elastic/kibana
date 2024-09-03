@@ -768,7 +768,7 @@ describe('bulkExecute()', () => {
     );
   });
 
-  test('throws when isMissingSecrets is true for connector', async () => {
+  test('filter outs the connectors when isMissingSecrets is true', async () => {
     const executeFn = createBulkExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
       isESOCanEncrypt: true,
@@ -788,23 +788,62 @@ describe('bulkExecute()', () => {
           },
           references: [],
         },
+        {
+          id: '234',
+          type: 'action',
+          attributes: {
+            name: 'mock-action-2',
+            isMissingSecrets: false,
+            actionTypeId: 'mock-action-2',
+          },
+          references: [],
+        },
       ],
     });
-    await expect(
-      executeFn(savedObjectsClient, [
+    savedObjectsClient.bulkCreate.mockResolvedValueOnce({
+      saved_objects: [
         {
-          id: '123',
-          params: { baz: false },
-          spaceId: 'default',
-          executionId: '123abc',
-          apiKey: null,
-          source: asHttpRequestExecutionSource(request),
-          actionTypeId: 'mock-action',
+          id: '234',
+          type: 'action_task_params',
+          attributes: {
+            actionId: '123',
+          },
+          references: [],
         },
-      ])
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Unable to execute action because no secrets are defined for the \\"mock-action\\" connector."`
-    );
+      ],
+    });
+
+    const result = await executeFn(savedObjectsClient, [
+      {
+        id: '123',
+        params: { baz: false },
+        spaceId: 'default',
+        executionId: '123abc',
+        apiKey: null,
+        source: asHttpRequestExecutionSource(request),
+        actionTypeId: 'mock-action',
+      },
+      {
+        id: '234',
+        params: { baz: false },
+        spaceId: 'default',
+        executionId: '123abc',
+        apiKey: null,
+        source: asHttpRequestExecutionSource(request),
+        actionTypeId: 'mock-action-2',
+      },
+    ]);
+
+    expect(result).toEqual({
+      errors: false,
+      items: [
+        {
+          actionTypeId: 'mock-action-2',
+          id: '234',
+          response: 'success',
+        },
+      ],
+    });
   });
 
   test('should ensure action type is enabled', async () => {
