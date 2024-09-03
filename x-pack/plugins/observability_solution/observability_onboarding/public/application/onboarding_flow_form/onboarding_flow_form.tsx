@@ -94,7 +94,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
 
   const {
     services: {
-      context: { isServerless, isCloud },
+      context: { isCloud },
     },
   } = useKibana<ObservabilityOnboardingAppServices>();
   const customMargin = useCustomMargin();
