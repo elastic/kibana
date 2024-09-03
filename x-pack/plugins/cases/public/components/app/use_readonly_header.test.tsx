@@ -25,7 +25,9 @@ describe('CaseContainerComponent', () => {
 
   it('does not display the readonly glasses badge when the user has write permissions', () => {
     renderHook(() => useReadonlyHeader(), {
-      wrapper: ({ children }: React.PropsWithChildren<{}>) => <TestProviders>{children}</TestProviders>,
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+        <TestProviders>{children}</TestProviders>
+      ),
     });
 
     expect(mockedSetBadge).not.toBeCalled();
