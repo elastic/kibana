@@ -440,7 +440,7 @@ const formatBedrockBody = ({
   tool_choice: toolChoice,
 });
 
-interface FormattedBedRockMessage {
+interface FormattedBedrockMessage {
   role: string;
   content: string | BedrockMessage['rawContent'];
 }
@@ -455,12 +455,12 @@ const ensureMessageFormat = (
   messages: BedrockMessage[],
   systemPrompt?: string
 ): {
-  messages: FormattedBedRockMessage[];
+  messages: FormattedBedrockMessage[];
   system?: string;
 } => {
   let system = systemPrompt ? systemPrompt : '';
 
-  const newMessages = messages.reduce<FormattedBedRockMessage[]>((acc, m) => {
+  const newMessages = messages.reduce<FormattedBedrockMessage[]>((acc, m) => {
     if (m.role === 'system') {
       system = `${system.length ? `${system}\n` : ''}${m.content}`;
       return acc;
