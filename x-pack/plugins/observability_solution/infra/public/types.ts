@@ -53,7 +53,7 @@ import { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import type { UnwrapPromise } from '../common/utility_types';
 import { InventoryViewsServiceStart } from './services/inventory_views';
 import { MetricsExplorerViewsServiceStart } from './services/metrics_explorer_views';
-import { ITelemetryClient } from './services/telemetry';
+import { TelemetryServiceStart } from './services/telemetry';
 import type { InfraLocators } from '../common/locators';
 
 // Our own setup and start contract values
@@ -64,7 +64,7 @@ export interface InfraClientSetupExports {
 export interface InfraClientStartExports {
   inventoryViews: InventoryViewsServiceStart;
   metricsExplorerViews?: MetricsExplorerViewsServiceStart;
-  telemetry: ITelemetryClient;
+  telemetry: TelemetryServiceStart;
   locators: InfraLocators;
 }
 
@@ -110,7 +110,6 @@ export interface InfraClientStartDeps {
   uiActions: UiActionsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   usageCollection: UsageCollectionStart;
-  telemetry?: ITelemetryClient;
   fieldFormats: FieldFormatsStart;
   licensing: LicensingPluginStart;
   licenseManagement?: LicenseManagementUIPluginSetup;
