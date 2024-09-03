@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EntityAnalyticsRoutesDeps } from '../../types';
+import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { initEntityStoreRoute } from './init';
 
 export const registerEntityStoreRoutes = ({

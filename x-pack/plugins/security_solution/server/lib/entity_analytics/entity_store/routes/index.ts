@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { registerRiskScoreRoutes } from './register_risk_score_routes';
+export { registerEntityStoreRoutes } from './register_entity_store_routes';

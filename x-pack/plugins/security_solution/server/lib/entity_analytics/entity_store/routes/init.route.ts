@@ -16,7 +16,6 @@
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
-
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { InitEntityStoreResponse } from '../../../../../common/api/entity_analytics/entity_store/generated/init.gen';
@@ -26,7 +25,7 @@ import type { EntityAnalyticsRoutesDeps } from '../../types';
 
 export const initEntityStoreRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
-  logger: EntityAnalyticsRoutesDeps['logger'],
+  logger: Logger,
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices']
 ) => {
   router.versioned
@@ -49,21 +48,9 @@ export const initEntityStoreRoute = (
 
       async (context, request, response): Promise<IKibanaResponse<InitEntityStoreResponse>> => {
         const siemResponse = buildSiemResponse(response);
-        const [core] = await getStartServices();
-
-        core.http.put();
-        // HttpSetup
 
         try {
-          const body: InitEntityStoreResponse = { started: true };
-
-          // Create an api call like the following curl
-          // curl -H 'Content-Type: application/json' \
-          // -d '{"id":"ea_user_entity_store","name":"EA User Store","type":"node","indexPatterns":["log*"],"filter":"@timestamp >= now-5m","identityFields":["user.name"],"displayNameTemplate":"{{user.name}}","metadata":["user.domain","user.email","user.full_name","user.hash","user.id","user.name","user.roles"],"history":{"timestampField":"@timestamp","interval":"1m"},"version":"1.0.0"}' \
-          // -X POST \
-          // -H 'kbn-xsrf: true' \
-          //   -H 'elastic-api-version: 1' \
-          // http:///elastic:changeme@localhost:5601/internal/entities/definition
+          const body: InitEntityStoreResponse = undefined;
 
           return response.ok({ body });
         } catch (e) {

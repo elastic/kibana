@@ -366,7 +366,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       core.getStartServices,
       securityRuleTypeOptions,
       previewRuleDataClient,
-      this.telemetryReceiver
+      this.telemetryReceiver,
+      plugins.
     );
 
     registerEndpointRoutes(router, this.endpointContext);
