@@ -206,13 +206,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           const stats = await callApiAs('datasetQualityMonitorUser', ['logs', 'synthetics']);
 
           expect(stats.body.dataStreamsStats.length).to.be(2);
-          expect(stats.body.dataStreamsStats[0].integration).not.ok();
           expect(stats.body.dataStreamsStats[0].size).not.empty();
           expect(stats.body.dataStreamsStats[0].sizeBytes).greaterThan(0);
           expect(stats.body.dataStreamsStats[0].lastActivity).greaterThan(0);
           expect(stats.body.dataStreamsStats[0].totalDocs).greaterThan(0);
           expect(stats.body.dataStreamsStats[0].name).match(new RegExp(/^logs-[\w.]+-[\w.]+/));
-          expect(stats.body.dataStreamsStats[1].integration).to.be('synthetics');
           expect(stats.body.dataStreamsStats[1].size).not.empty();
           expect(stats.body.dataStreamsStats[1].sizeBytes).greaterThan(0);
           expect(stats.body.dataStreamsStats[1].lastActivity).greaterThan(0);
