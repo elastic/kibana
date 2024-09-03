@@ -229,14 +229,6 @@ export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSe
         setIsParsing(false);
       };
 
-      reader.onloadstart = function () {
-        setIsParsing(true);
-      };
-
-      reader.onloadend = function () {
-        setIsParsing(false);
-      };
-
       reader.onload = function (e) {
         const fileContent = e.target?.result as string | undefined; // We can safely cast to string since we call `readAsText` to load the file.
 
