@@ -76,6 +76,7 @@ const configurePluginsUpsellings = (upsellingService: UpsellingService, services
   const { integrationAssistant } = services;
 
   upsellingService.sections$.subscribe((sections) => {
+    // @ts-ignore - error with @types/react18 - ComponentType is not assignable to ReactNode, might be a legit bug
     integrationAssistant?.renderUpselling(sections.get('integration_assistant'));
   });
 };
