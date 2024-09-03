@@ -7,7 +7,7 @@
 
 import type { FC, PropsWithChildren } from 'react';
 import React, { createContext, useContext, useMemo } from 'react';
-import type { ExperimentalFeatures } from '../../common/config';
+import type { ExperimentalFeatures } from '../../server/config';
 
 export interface TransformEnabledFeatures {
   showNodeInfo: boolean;

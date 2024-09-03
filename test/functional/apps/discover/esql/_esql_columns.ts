@@ -36,7 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     defaultIndex: 'logstash-*',
   };
 
-  describe('discover esql columns', async function () {
+  describe('discover esql columns', function () {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);

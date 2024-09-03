@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 export type EnableRiskEngineErrorResponse = z.infer<typeof EnableRiskEngineErrorResponse>;
 export const EnableRiskEngineErrorResponse = z.object({

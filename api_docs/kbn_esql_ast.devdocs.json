@@ -1699,14 +1699,42 @@
           },
           {
             "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.ESQLColumn.quoted",
-            "type": "boolean",
+            "id": "def-common.ESQLColumn.parts",
+            "type": "Array",
             "tags": [],
-            "label": "quoted",
-            "description": [],
+            "label": "parts",
+            "description": [
+              "\nAn identifier can be composed of multiple parts, e.g: part1.part2.`part``3️⃣`.\nThis property contains the parsed unquoted parts of the identifier.\nFor example: `['part1', 'part2', 'part`3️⃣']`."
+            ],
+            "signature": [
+              "string[]"
+            ],
             "path": "packages/kbn-esql-ast/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ESQLColumn.quoted",
+            "type": "boolean",
+            "tags": [
+              "deprecated"
+            ],
+            "label": "quoted",
+            "description": [],
+            "path": "packages/kbn-esql-ast/src/types.ts",
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "@kbn/esql-validation-autocomplete",
+                "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts"
+              },
+              {
+                "plugin": "@kbn/esql-validation-autocomplete",
+                "path": "packages/kbn-esql-validation-autocomplete/src/shared/variables.ts"
+              }
+            ]
           }
         ],
         "initialIsOpen": false
@@ -2184,6 +2212,38 @@
             "description": [],
             "signature": [
               "\"index\" | \"policy\""
+            ],
+            "path": "packages/kbn-esql-ast/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ESQLSource.cluster",
+            "type": "string",
+            "tags": [],
+            "label": "cluster",
+            "description": [
+              "\nRepresents the cluster part of the source identifier. Empty string if not\npresent.\n\n```\nFROM [<cluster>:]<index>\n```"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-esql-ast/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ESQLSource.index",
+            "type": "string",
+            "tags": [],
+            "label": "index",
+            "description": [
+              "\nRepresents the index part of the source identifier. Unescaped and unquoted.\n\n```\nFROM [<cluster>:]<index>\n```"
+            ],
+            "signature": [
+              "string | undefined"
             ],
             "path": "packages/kbn-esql-ast/src/types.ts",
             "deprecated": false,

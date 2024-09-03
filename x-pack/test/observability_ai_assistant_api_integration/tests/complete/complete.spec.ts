@@ -83,12 +83,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             persist: true,
             screenContexts: params.screenContexts || [],
           })
-          .end((err, response) => {
-            if (err) {
-              return reject(err);
-            }
-            return resolve(response);
-          });
+          .then((response) => resolve(response))
+          .catch((err) => reject(err));
       });
 
       const [conversationSimulator, titleSimulator] = await Promise.all([
@@ -222,7 +218,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('when creating a new conversation', async () => {
+    describe('when creating a new conversation', () => {
       let events: StreamingChatResponseEvent[];
 
       before(async () => {
@@ -302,7 +298,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('after executing a screen context action', async () => {
+    describe('after executing a screen context action', () => {
       let events: StreamingChatResponseEvent[];
 
       before(async () => {
@@ -375,12 +371,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('when updating an existing conversation', async () => {
+    describe('when updating an existing conversation', () => {
       let conversationCreatedEvent: ConversationCreateEvent;
       let conversationUpdatedEvent: ConversationUpdateEvent;
 
       before(async () => {
-        proxy
+        void proxy
           .intercept('conversation_title', (body) => isFunctionTitleRequest(body), [
             {
               function_call: {
@@ -391,7 +387,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           ])
           .completeAfterIntercept();
 
-        proxy
+        void proxy
           .intercept('conversation', (body) => !isFunctionTitleRequest(body), 'Good morning, sir!')
           .completeAfterIntercept();
 
@@ -423,7 +419,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           },
         });
 
-        proxy
+        void proxy
           .intercept('conversation', (body) => !isFunctionTitleRequest(body), 'Good night, sir!')
           .completeAfterIntercept();
 

@@ -16,10 +16,22 @@ export function wrapAsMonacoSuggestions(
   suggestions: SuggestionRawDefinitionWithMonacoRange[]
 ): MonacoAutocompleteCommandDefinition[] {
   return suggestions.map<MonacoAutocompleteCommandDefinition>(
-    ({ label, text, asSnippet, kind, detail, documentation, sortText, command, range }) => {
+    ({
+      label,
+      text,
+      asSnippet,
+      kind,
+      detail,
+      documentation,
+      sortText,
+      filterText,
+      command,
+      range,
+    }) => {
       const monacoSuggestion: MonacoAutocompleteCommandDefinition = {
         label,
         insertText: text,
+        filterText,
         kind:
           kind in monaco.languages.CompletionItemKind
             ? monaco.languages.CompletionItemKind[kind]
