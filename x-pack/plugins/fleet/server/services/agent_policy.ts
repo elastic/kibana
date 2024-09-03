@@ -1120,7 +1120,7 @@ class AgentPolicyService {
         );
       } catch (error) {
         logger.error(
-          `[Agentless API] Error deleting agentless deployment for single agent policy id ${id} and agentless agent id ${agentlessAgent?.id}`
+          `[Agentless API] Error deleting agentless deployment for single agent policy id ${id}`
         );
         logger.error(error);
       }
