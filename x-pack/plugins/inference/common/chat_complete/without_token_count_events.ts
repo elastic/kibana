@@ -8,7 +8,7 @@
 import { filter, OperatorFunction } from 'rxjs';
 import { ChatCompletionEvent, ChatCompletionEventType, ChatCompletionTokenCountEvent } from '.';
 
-export function withoutTokenCountEvents<T extends ChatCompletionEvent<any>>(): OperatorFunction<
+export function withoutTokenCountEvents<T extends ChatCompletionEvent>(): OperatorFunction<
   T,
   Exclude<T, ChatCompletionTokenCountEvent>
 > {

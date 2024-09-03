@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { OutputEventType, OutputCompleteEvent, OutputEvent } from '.';
+import { OutputEvent, OutputEventType, OutputUpdateEvent } from '.';
 
-import type { ToolOptions } from '../chat_complete/tools';
-
-export function isOutputCompleteEvent<TId extends string, TToolOptions extends ToolOptions<string>>(
-  event: OutputEvent<TId, TToolOptions>
-): event is OutputCompleteEvent<TId, TToolOptions> {
+export function isOutputCompleteEvent<TOutputEvent extends OutputEvent>(
+  event: TOutputEvent
+): event is Exclude<TOutputEvent, OutputUpdateEvent> {
   return event.type === OutputEventType.OutputComplete;
 }

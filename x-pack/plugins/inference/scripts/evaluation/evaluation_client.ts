@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { lastValueFrom } from 'rxjs';
 import { remove } from 'lodash';
-import type { EvaluationResult } from './types';
-import { withoutOutputUpdateEvents } from '../../common/output/without_output_update_events';
+import { lastValueFrom } from 'rxjs';
 import type { OutputAPI } from '../../common/output';
+import { withoutOutputUpdateEvents } from '../../common/output/without_output_update_events';
+import type { EvaluationResult } from './types';
 
 export interface InferenceEvaluationClient {
   evaluate: (input: string, criteria: string[]) => Promise<EvaluationResult>;
