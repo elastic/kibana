@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`getEntitiesLatestIndexTemplateConfig(definitionId) should generate a valid index template 1`] = `
+exports[`generateEntitiesLatestIndexTemplateConfig(definition) should generate a valid index template 1`] = `
 Object {
   "_meta": Object {
     "description": "Index template for indices managed by the Elastic Entity Model's entity discovery framework for the latest dataset",

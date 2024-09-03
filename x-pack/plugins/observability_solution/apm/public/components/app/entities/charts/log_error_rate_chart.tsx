@@ -22,6 +22,7 @@ import {
   ChartMetricType,
   getMetricsFormula,
 } from '../../../shared/charts/helper/get_metrics_formulas';
+import { ExploreLogsButton } from '../../../shared/explore_logs_button/explore_logs_button';
 
 type LogErrorRateReturnType =
   APIReturnType<'GET /internal/apm/entities/services/{serviceName}/logs_error_rate_timeseries'>;
@@ -34,7 +35,7 @@ export function LogErrorRateChart({ height }: { height: number }) {
   const {
     query: { rangeFrom, rangeTo, environment, kuery },
     path: { serviceName },
-  } = useApmParams('/logs-services/{serviceName}');
+  } = useApmParams('/services/{serviceName}');
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const { data = INITIAL_STATE, status } = useFetcher(
@@ -76,44 +77,56 @@ export function LogErrorRateChart({ height }: { height: number }) {
   return (
     <EuiPanel hasBorder>
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
-            <h2>
-              {i18n.translate('xpack.apm.logErrorRate', {
-                defaultMessage: 'Log error %',
-              })}
-            </h2>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <Popover>
-            <TooltipContent
-              formula={getMetricsFormula(ChartMetricType.LOG_ERROR_RATE)}
-              description={
-                <FormattedMessage
-                  defaultMessage="% of logs where error detected for given {serviceName}."
-                  id="xpack.apm.multiSignal.servicesTable.logErrorRate.tooltip.description"
-                  values={{
-                    serviceName: (
-                      <code
-                        css={css`
-                          word-break: break-word;
-                        `}
-                      >
-                        {i18n.translate(
-                          'xpack.apm.multiSignal.servicesTable.logErrorRate.tooltip.serviceNameLabel',
-                          {
-                            defaultMessage: 'service.name',
-                          }
-                        )}
-                      </code>
-                    ),
-                  }}
-                />
-              }
+        <EuiFlexGroup
+          alignItems="center"
+          justifyContent="spaceBetween"
+          gutterSize="s"
+          responsive={false}
+        >
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xs">
+              <h2>
+                {i18n.translate('xpack.apm.logErrorRate', {
+                  defaultMessage: 'Log error %',
+                })}{' '}
+                <Popover>
+                  <TooltipContent
+                    formula={getMetricsFormula(ChartMetricType.LOG_ERROR_RATE)}
+                    description={
+                      <FormattedMessage
+                        defaultMessage="% of logs where error detected for given {serviceName}."
+                        id="xpack.apm.multiSignal.servicesTable.logErrorRate.tooltip.description"
+                        values={{
+                          serviceName: (
+                            <code
+                              css={css`
+                                word-break: break-word;
+                              `}
+                            >
+                              {i18n.translate(
+                                'xpack.apm.multiSignal.servicesTable.logErrorRate.tooltip.serviceNameLabel',
+                                {
+                                  defaultMessage: 'service.name',
+                                }
+                              )}
+                            </code>
+                          ),
+                        }}
+                      />
+                    }
+                  />
+                </Popover>
+              </h2>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <ExploreLogsButton
+              start={start}
+              end={end}
+              kuery={`(log.level: error OR error.log.level: error) AND service.name: "${serviceName}"`}
             />
-          </Popover>
-        </EuiFlexItem>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexGroup>
 
       <TimeseriesChartWithContext

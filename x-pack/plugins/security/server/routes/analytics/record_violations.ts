@@ -161,7 +161,7 @@ export function defineRecordViolations({ router, analyticsService }: RouteDefini
          * This endpoint is called by the browser in the background so `kbn-xsrf` header is not sent.
          */
         xsrfRequired: false,
-        access: 'internal',
+        access: 'public',
         body: {
           /**
            * Both `application/reports+json` (CSP3 spec) and `application/csp-report` (Safari) are

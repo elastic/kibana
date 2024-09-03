@@ -89,7 +89,7 @@ export const validationFromCommandTestSuite = (setup: helpers.Setup) => {
             ]);
           });
 
-          test.skip('errors on unknown index', async () => {
+          test('errors on unknown index', async () => {
             const { expectErrors } = await setup();
 
             await expectErrors(`FROM index, missingIndex`, ['Unknown index [missingIndex]']);

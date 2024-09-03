@@ -45,6 +45,7 @@ const pickAgentPolicyKeysToSend = (agentPolicy: AgentPolicy) =>
     'name',
     'description',
     'namespace',
+    'space_ids',
     'monitoring_enabled',
     'unenroll_timeout',
     'inactivity_timeout',

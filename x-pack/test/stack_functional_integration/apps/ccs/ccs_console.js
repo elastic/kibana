@@ -30,8 +30,8 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.console.monaco.clearEditorText();
       });
       it('it should be able to access remote data', async () => {
-        await PageObjects.console.enterRequest(
-          '\nGET ftr-remote:makelogs工程-*/_search\n {\n "query": {\n "bool": {\n "must": [\n {"match": {"extension" : "jpg"} \n}\n}\n}\n}\n}'
+        await PageObjects.console.monaco.enterText(
+          '\nGET ftr-remote:makelogs工程-*/_search\n {\n "query": {\n "bool": {\n "must": [\n {"match": {"extension" : "jpg"} \n}\n]\n}\n}\n}'
         );
         await PageObjects.console.clickPlay();
         await retry.try(async () => {

@@ -268,8 +268,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/157642
-      describe.skip('Modal', () => {
+      describe('Modal', () => {
         const createdCases = new Map<string, string>();
 
         const openModal = async () => {

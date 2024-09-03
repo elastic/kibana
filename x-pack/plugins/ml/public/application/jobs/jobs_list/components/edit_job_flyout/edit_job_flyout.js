@@ -10,6 +10,7 @@ import React, { Component } from 'react';
 import { cloneDeep, isEqual, pick } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { withKibana } from '@kbn/kibana-react-plugin/public';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -30,8 +31,6 @@ import { saveJob } from './edit_utils';
 import { loadFullJob } from '../utils';
 import { validateModelMemoryLimit, validateGroupNames } from '../validate_job';
 import { toastNotificationServiceProvider } from '../../../../services/toast_notification_service';
-import { ml } from '../../../../services/ml_api_service';
-import { withKibana } from '@kbn/kibana-react-plugin/public';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import { DATAFEED_STATE, JOB_STATE } from '../../../../../../common/constants/states';
 import { CustomUrlsWrapper, isValidCustomUrls } from '../../../../components/custom_urls';
@@ -43,8 +42,8 @@ const { collapseLiteralStrings } = XJson;
 export class EditJobFlyoutUI extends Component {
   _initialJobFormState = null;
 
-  constructor(props) {
-    super(props);
+  constructor(props, constructorContext) {
+    super(props, constructorContext);
 
     this.state = {
       job: {},
@@ -121,7 +120,7 @@ export class EditJobFlyoutUI extends Component {
 
   showFlyout = (jobLite) => {
     const hasDatafeed = jobLite.hasDatafeed;
-    loadFullJob(jobLite.id)
+    loadFullJob(this.props.kibana.services.mlServices.mlApiServices, jobLite.id)
       .then((job) => {
         this.extractJob(job, hasDatafeed);
         this.setState({
@@ -204,6 +203,8 @@ export class EditJobFlyoutUI extends Component {
       ).message;
     }
 
+    const ml = this.props.kibana.services.mlServices.mlApiServices;
+
     if (jobDetails.jobGroups !== undefined) {
       jobGroupsValidationError = validateGroupNames(jobDetails.jobGroups).message;
       if (jobGroupsValidationError === '') {
@@ -272,10 +273,11 @@ export class EditJobFlyoutUI extends Component {
       customUrls: this.state.jobCustomUrls,
     };
 
+    const mlApiServices = this.props.kibana.services.mlServices.mlApiServices;
     const { toasts } = this.props.kibana.services.notifications;
     const toastNotificationService = toastNotificationServiceProvider(toasts);
 
-    saveJob(this.state.job, newJobData)
+    saveJob(mlApiServices, this.state.job, newJobData)
       .then(() => {
         toasts.addSuccess(
           i18n.translate('xpack.ml.jobsList.editJobFlyout.changesSavedNotificationMessage', {

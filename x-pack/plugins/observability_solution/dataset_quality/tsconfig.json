@@ -58,7 +58,8 @@
     "@kbn/core-lifecycle-browser",
     "@kbn/core-notifications-browser",
     "@kbn/telemetry-plugin",
-    "@kbn/safer-lodash-set"
+    "@kbn/safer-lodash-set",
+    "@kbn/rison"
   ],
   "exclude": [
     "target/**/*"

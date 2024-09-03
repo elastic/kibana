@@ -136,7 +136,7 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
 
       await ml.lensVisualizations.assertNumberOfIncompatibleLensLayers(numberOfIncompatibleLayers);
 
-      ml.lensVisualizations.clickCreateJobFromLayerWithWizard(0);
+      await ml.lensVisualizations.clickCreateJobFromLayerWithWizard(0);
 
       await retrySwitchTab(1, 10);
       tabsCount++;
@@ -161,7 +161,7 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
 
       await ml.lensVisualizations.assertNumberOfIncompatibleLensLayers(numberOfIncompatibleLayers);
 
-      ml.lensVisualizations.clickCreateJobFromLayerWithWizard(0);
+      await ml.lensVisualizations.clickCreateJobFromLayerWithWizard(0);
 
       await retrySwitchTab(1, 10);
       tabsCount++;
@@ -186,7 +186,7 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
 
       await ml.lensVisualizations.assertNumberOfIncompatibleLensLayers(numberOfIncompatibleLayers);
 
-      ml.lensVisualizations.clickCreateJobFromLayerWithWizard(1);
+      await ml.lensVisualizations.clickCreateJobFromLayerWithWizard(1);
 
       await retrySwitchTab(1, 10);
       tabsCount++;
@@ -215,7 +215,7 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
 
       await dashboardPreparation(selectedPanelTitle);
 
-      ml.lensVisualizations.assertMLJobMenuActionDoesNotExist(selectedPanelTitle);
+      await ml.lensVisualizations.assertMLJobMenuActionDoesNotExist(selectedPanelTitle);
     });
   });
 }
