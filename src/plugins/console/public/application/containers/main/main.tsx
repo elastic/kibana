@@ -76,6 +76,7 @@ export function Main({ isEmbeddable = false }: MainProps) {
   const { done, error, retry } = useDataInit();
 
   const { currentTextObject } = useEditorReadContext();
+  const [inputEditorValue, setInputEditorValue] = useState<string>(currentTextObject?.text ?? '');
 
   const toggleFullscreen = () => {
     const isEnabled = !isFullscreenOpen;
@@ -149,7 +150,7 @@ export function Main({ isEmbeddable = false }: MainProps) {
                       iconType="download"
                       onClick={() =>
                         downloadFileAs(EXPORT_FILE_NAME, {
-                          content: currentTextObject?.text,
+                          content: inputEditorValue,
                           type: 'txt',
                         })
                       }
@@ -202,7 +203,12 @@ export function Main({ isEmbeddable = false }: MainProps) {
             <EuiHorizontalRule margin="none" />
             <EuiSplitPanel.Inner paddingSize="none">
               {selectedTab === SHELL_TAB_ID && (
-                <Editor loading={!done} setEditorInstance={() => {}} />
+                <Editor
+                  loading={!done}
+                  setEditorInstance={() => {}}
+                  inputEditorValue={inputEditorValue}
+                  setInputEditorValue={setInputEditorValue}
+                />
               )}
 
               {selectedTab === CONFIG_TAB_ID && <Config editorInstance={null} />}
